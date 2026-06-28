@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{5C59EAFB-3DA4-4372-AF15-F5A6042354EB}</ProjectGuid>
+    <ProjectGuid>{058E978E-72EC-4E31-81B1-86D1CAAFC687}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Hjg.Pngcs</RootNamespace>
     <AssemblyName>Pngcs</AssemblyName>
@@ -84,7 +84,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{5C59EAFB-3DA4-4372-AF15-F5A6042354E9}</Project>
+      <Project>{058E978E-72EC-4E31-81B1-86D1CAAFC685}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
   </ItemGroup>

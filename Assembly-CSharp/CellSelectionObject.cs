@@ -61,7 +61,15 @@ public class CellSelectionObject : KMonoBehaviour
 				bool flag = true;
 				foreach (KeyValuePair<SimViewMode, Func<bool>> keyValuePair in this.overlayFilterMap)
 				{
-					if (OverlayScreen.Instance.GetMode() == keyValuePair.Key)
+					if (keyValuePair.Value == null)
+					{
+						Debug.LogWarning("Filter value is null");
+					}
+					else if (OverlayScreen.Instance == null)
+					{
+						Debug.LogWarning("Overlay screen Instance is null");
+					}
+					else if (OverlayScreen.Instance.GetMode() == keyValuePair.Key)
 					{
 						flag = false;
 						if (base.gameObject.layer != LayerMask.NameToLayer("MaskedOverlay"))

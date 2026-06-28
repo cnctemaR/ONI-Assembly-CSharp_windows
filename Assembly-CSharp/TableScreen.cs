@@ -466,26 +466,29 @@ public class TableScreen : KScreen
 		this.active_cascade_coroutine_count++;
 		for (int i = 0; i < checkBoxToggleColumns.Length; i++)
 		{
-			GameObject widget = checkBoxToggleColumns[i].widgets_by_row[row];
-			if (!(widget == ignore_widget))
+			if (checkBoxToggleColumns[i].widgets_by_row.ContainsKey(row))
 			{
-				bool needsSetting = false;
-				switch ((this.GetWidgetColumn(widget) as CheckboxTableColumn).get_value_action(row.GetMinionIdentity(), widget))
+				GameObject widget = checkBoxToggleColumns[i].widgets_by_row[row];
+				if (!(widget == ignore_widget))
 				{
-				case TableScreen.ResultValues.False:
-					needsSetting = state;
-					break;
-				case TableScreen.ResultValues.Partial:
-					needsSetting = true;
-					break;
-				case TableScreen.ResultValues.True:
-					needsSetting = !state;
-					break;
-				}
-				if (needsSetting)
-				{
-					(this.GetWidgetColumn(widget) as CheckboxTableColumn).on_set_action(widget, state);
-					yield return null;
+					bool needsSetting = false;
+					switch ((this.GetWidgetColumn(widget) as CheckboxTableColumn).get_value_action(row.GetMinionIdentity(), widget))
+					{
+					case TableScreen.ResultValues.False:
+						needsSetting = state;
+						break;
+					case TableScreen.ResultValues.Partial:
+						needsSetting = true;
+						break;
+					case TableScreen.ResultValues.True:
+						needsSetting = !state;
+						break;
+					}
+					if (needsSetting)
+					{
+						(this.GetWidgetColumn(widget) as CheckboxTableColumn).on_set_action(widget, state);
+						yield return null;
+					}
 				}
 			}
 		}

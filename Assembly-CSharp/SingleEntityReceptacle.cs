@@ -126,7 +126,7 @@ public class SingleEntityReceptacle : KMonoBehaviour
 
 	protected void CreateFetchChore(Tag entityTag)
 	{
-		if (this.fetchChore == null && entityTag.IsValid)
+		if (this.fetchChore == null && entityTag.IsValid && entityTag != GameTags.Empty)
 		{
 			Action<Chore> action = new Action<Chore>(this.OnFetchComplete);
 			Action<Chore> action2 = delegate(Chore chore)

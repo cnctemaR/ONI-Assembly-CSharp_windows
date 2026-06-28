@@ -170,7 +170,10 @@ public class JobsTableScreen : TableScreen
 		switch (widgetRow.rowType)
 		{
 		case TableRow.RowType.Minion:
-			tooltip.AddMultiStringTooltip(minion.GetProperName(), null);
+			if (minion != null)
+			{
+				tooltip.AddMultiStringTooltip(minion.GetProperName(), null);
+			}
 			break;
 		}
 	}
@@ -293,36 +296,37 @@ public class JobsTableScreen : TableScreen
 			}
 			break;
 		case TableRow.RowType.Minion:
-		{
-			if (choreGroupTableColumn.get_value_action(minion, widget_go) == TableScreen.ResultValues.True)
+			if (minion != null)
 			{
-				tooltip.AddMultiStringTooltip(string.Format(UI.JOBSSCREEN.JOB_PERMISSION_ON, minion.GetProperName(), choreGroupTableColumn.chore_group.Name), null);
+				if (choreGroupTableColumn.get_value_action(minion, widget_go) == TableScreen.ResultValues.True)
+				{
+					tooltip.AddMultiStringTooltip(string.Format(UI.JOBSSCREEN.JOB_PERMISSION_ON, minion.GetProperName(), choreGroupTableColumn.chore_group.Name), null);
+				}
+				else
+				{
+					tooltip.AddMultiStringTooltip(string.Format(UI.JOBSSCREEN.JOB_PERMISSION_OFF, minion.GetProperName(), choreGroupTableColumn.chore_group.Name), null);
+				}
+				Klei.AI.Attribute attribute = choreGroupTableColumn.chore_group.attribute;
+				AttributeInstance attributeInstance = minion.GetAttributes().Get(attribute);
+				float totalValue = attributeInstance.GetTotalValue();
+				TextStyleSetting textStyleSetting = this.TooltipTextStyle_Ability;
+				if (totalValue > 0f)
+				{
+					textStyleSetting = this.TooltipTextStyle_AbilityPositiveModifier;
+				}
+				else if (totalValue < 0f)
+				{
+					textStyleSetting = this.TooltipTextStyle_AbilityNegativeModifier;
+				}
+				tooltip.AddMultiStringTooltip(string.Concat(new object[]
+				{
+					"\n",
+					attribute.Name,
+					" ",
+					attributeInstance.GetTotalValue()
+				}), textStyleSetting);
 			}
-			else
-			{
-				tooltip.AddMultiStringTooltip(string.Format(UI.JOBSSCREEN.JOB_PERMISSION_OFF, minion.GetProperName(), choreGroupTableColumn.chore_group.Name), null);
-			}
-			Klei.AI.Attribute attribute = choreGroupTableColumn.chore_group.attribute;
-			AttributeInstance attributeInstance = minion.GetAttributes().Get(attribute);
-			float totalValue = attributeInstance.GetTotalValue();
-			TextStyleSetting textStyleSetting = this.TooltipTextStyle_Ability;
-			if (totalValue > 0f)
-			{
-				textStyleSetting = this.TooltipTextStyle_AbilityPositiveModifier;
-			}
-			else if (totalValue < 0f)
-			{
-				textStyleSetting = this.TooltipTextStyle_AbilityNegativeModifier;
-			}
-			tooltip.AddMultiStringTooltip(string.Concat(new object[]
-			{
-				"\n",
-				attribute.Name,
-				" ",
-				attributeInstance.GetTotalValue()
-			}), textStyleSetting);
 			break;
-		}
 		}
 	}
 
@@ -346,7 +350,10 @@ public class JobsTableScreen : TableScreen
 			tooltip.AddMultiStringTooltip(UI.JOBSSCREEN.NEW_MINIONS_TOOLTIP_TOGGLE_ROW, null);
 			break;
 		case TableRow.RowType.Minion:
-			tooltip.AddMultiStringTooltip(string.Format(UI.JOBSSCREEN.TOOLTIP_TOGGLE_ROW, minion.gameObject.GetProperName()), null);
+			if (minion != null)
+			{
+				tooltip.AddMultiStringTooltip(string.Format(UI.JOBSSCREEN.TOOLTIP_TOGGLE_ROW, minion.gameObject.GetProperName()), null);
+			}
 			break;
 		}
 	}

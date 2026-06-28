@@ -113,7 +113,10 @@ public class ConsumablesTableScreen : TableScreen
 		switch (widgetRow.rowType)
 		{
 		case TableRow.RowType.Minion:
-			tooltip.AddMultiStringTooltip(Db.Get().Amounts.Stress.Lookup(minion).GetValueString(), null);
+			if (minion != null)
+			{
+				tooltip.AddMultiStringTooltip(Db.Get().Amounts.Stress.Lookup(minion).GetValueString(), null);
+			}
 			break;
 		}
 	}
@@ -175,7 +178,10 @@ public class ConsumablesTableScreen : TableScreen
 		switch (widgetRow.rowType)
 		{
 		case TableRow.RowType.Minion:
-			tooltip.AddMultiStringTooltip(Db.Get().Attributes.FoodExpectation.Lookup(minion).GetFormattedValue(false), null);
+			if (minion != null)
+			{
+				tooltip.AddMultiStringTooltip(Db.Get().Attributes.FoodExpectation.Lookup(minion).GetFormattedValue(false), null);
+			}
 			break;
 		}
 	}
@@ -361,13 +367,16 @@ public class ConsumablesTableScreen : TableScreen
 			}
 			break;
 		case TableRow.RowType.Minion:
-			if (foodInfoTableColumn.get_value_action(minion, widget_go) == TableScreen.ResultValues.True)
+			if (minion != null)
 			{
-				tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_PERMISSION_ON, minion.GetProperName(), foodInfoTableColumn.food_info.Name), null);
-			}
-			else
-			{
-				tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_PERMISSION_OFF, minion.GetProperName(), foodInfoTableColumn.food_info.Name), null);
+				if (foodInfoTableColumn.get_value_action(minion, widget_go) == TableScreen.ResultValues.True)
+				{
+					tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_PERMISSION_ON, minion.GetProperName(), foodInfoTableColumn.food_info.Name), null);
+				}
+				else
+				{
+					tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_PERMISSION_OFF, minion.GetProperName(), foodInfoTableColumn.food_info.Name), null);
+				}
 			}
 			break;
 		}
@@ -390,7 +399,10 @@ public class ConsumablesTableScreen : TableScreen
 			tooltip.AddMultiStringTooltip(UI.CONSUMABLESSCREEN.NEW_MINIONS_TOOLTIP_TOGGLE_ROW, null);
 			break;
 		case TableRow.RowType.Minion:
-			tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.TOOLTIP_TOGGLE_ROW.text, minion.gameObject.GetProperName()), null);
+			if (minion != null)
+			{
+				tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.TOOLTIP_TOGGLE_ROW.text, minion.gameObject.GetProperName()), null);
+			}
 			break;
 		}
 	}
@@ -526,7 +538,10 @@ public class ConsumablesTableScreen : TableScreen
 		switch (widgetRow.rowType)
 		{
 		case TableRow.RowType.Minion:
-			tooltip.AddMultiStringTooltip(minion.GetProperName(), null);
+			if (minion != null)
+			{
+				tooltip.AddMultiStringTooltip(minion.GetProperName(), null);
+			}
 			break;
 		}
 	}

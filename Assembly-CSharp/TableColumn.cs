@@ -45,7 +45,10 @@ public class TableColumn
 				break;
 			}
 		}
-		this.on_sort_tooltip(tableRow.GetMinionIdentity(), gameObject, sort_tooltip_instance);
+		if (this.on_sort_tooltip != null)
+		{
+			this.on_sort_tooltip(tableRow.GetMinionIdentity(), gameObject, sort_tooltip_instance);
+		}
 		return string.Empty;
 	}
 

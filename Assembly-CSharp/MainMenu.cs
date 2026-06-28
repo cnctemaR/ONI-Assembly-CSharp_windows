@@ -119,7 +119,7 @@ public class MainMenu : KMonoBehaviour
 			{
 				SaveGame.Header header;
 				SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(latestSaveFile, out header);
-				if (header.buildVersion > 217326U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 217529U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}

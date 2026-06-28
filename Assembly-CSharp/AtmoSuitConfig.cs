@@ -40,7 +40,7 @@ public class AtmoSuitConfig : IEquipmentConfig
 		equipmentDef.OnEquipCallBack = delegate(Equippable eq)
 		{
 			eq.assignee.GetSoleOwner().GetComponent<Navigator>().SetFlags(PathFinder.PotentialPath.Flags.HasSuit | PathFinder.PotentialPath.Flags.UnlimitedSubmergedTravel);
-			if (eq.assignee.GetSoleOwner().GetComponent<MinionResume>().CurrentRole == "SuitExpert")
+			if (eq.assignee.GetSoleOwner().GetComponent<MinionResume>().HasPerk(RoleManager.rolePerks.ExosuitExpertise.id))
 			{
 				eq.assignee.GetSoleOwner().GetAttributes().Get(Db.Get().Attributes.Athletics)
 					.Add("SuitExpert", SuitExpert.AthleticsModifier);

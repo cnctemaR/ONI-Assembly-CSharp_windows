@@ -1,12 +1,14 @@
 ﻿using System;
 using Klei.AI;
 using STRINGS;
+using UnityEngine;
 
 public class MaturityDisplayer : AsPercentAmountDisplayer
 {
 	public MaturityDisplayer()
 		: base(GameUtil.TimeSlice.PerCycle)
 	{
+		this.formatter = new MaturityDisplayer.MaturityAttributeFormatter();
 	}
 
 	public override string GetTooltipDescription(Amount master, AmountInstance instance)
@@ -45,5 +47,18 @@ public class MaturityDisplayer : AsPercentAmountDisplayer
 			return string.Format(CREATURES.STATS.MATURITY.AMOUNT_DESC_FMT, master.Name, this.formatter.GetFormattedValue(base.ToPercent(instance.value, instance), GameUtil.TimeSlice.None, null), GameUtil.GetFormattedCycles(component.TimeUntilNextHarvest(), "F1"));
 		}
 		return base.GetDescription(master, instance);
+	}
+
+	public class MaturityAttributeFormatter : StandardAttributeFormatter
+	{
+		public MaturityAttributeFormatter()
+			: base(GameUtil.UnitClass.Percent, GameUtil.TimeSlice.None)
+		{
+		}
+
+		public override string GetFormattedModifier(AttributeModifier modifier, GameObject parent_instance)
+		{
+			return this.GetFormattedValue(modifier.Value * 100f * 600f, base.DeltaTimeSlice, parent_instance);
+		}
 	}
 }

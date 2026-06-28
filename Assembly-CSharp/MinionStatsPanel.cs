@@ -79,6 +79,10 @@ public class MinionStatsPanel : TargetScreen
 		{
 			return;
 		}
+		if (this.selectedTarget == null || this.selectedTarget.GetComponent<MinionIdentity>() == null)
+		{
+			return;
+		}
 		this.RefreshAttributes();
 		this.RefreshTraits();
 		this.RefreshStress();

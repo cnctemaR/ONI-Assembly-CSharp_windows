@@ -112,7 +112,7 @@ public class AssignableSideScreen : SideScreenContent
 	{
 		this.ClearContent();
 		this.currentOwnerText.text = string.Format(UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.UNASSIGNED, new object[0]);
-		if (this.targetAssignable != null)
+		if (this.targetAssignable != null && this.targetAssignable.GetComponent<Equippable>() == null)
 		{
 			Room roomOfBuilding = Game.Instance.roomProber.GetRoomOfBuilding(this.targetAssignable.gameObject);
 			if (roomOfBuilding != null)

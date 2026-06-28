@@ -20,7 +20,7 @@ public class Tinkerable : Workable
 		tinkerable.attributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
 		tinkerable.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 		tinkerable.choreTags = GameTags.ChoreTypes.PowerChores;
-		tinkerable.choreTypeTinker = Db.Get().ChoreTypes.PowerTinker;
+		tinkerable.choreTypeTinker = Db.Get().ChoreTypes.PowerTinker.IdHash;
 		tinkerable.multitoolContext = "powertinker";
 		tinkerable.multitoolHitEffectHash = new HashedString("fx_powertinker_splash");
 		tinkerable.shouldShowRolePerkStatusItem = false;
@@ -46,7 +46,7 @@ public class Tinkerable : Workable
 		tinkerable.SetWorkTime(15f);
 		tinkerable.attributeConverter = Db.Get().AttributeConverters.PlantTendSpeed;
 		tinkerable.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
-		tinkerable.choreTypeTinker = Db.Get().ChoreTypes.CropTend;
+		tinkerable.choreTypeTinker = Db.Get().ChoreTypes.CropTend.IdHash;
 		tinkerable.choreTags = GameTags.ChoreTypes.FarmingChores;
 		tinkerable.multitoolContext = "tend";
 		tinkerable.multitoolHitEffectHash = new HashedString("fx_tend_splash");
@@ -72,7 +72,7 @@ public class Tinkerable : Workable
 		tinkerable.workerStatusItem = Db.Get().DuplicantStatusItems.Tinkering;
 		tinkerable.attributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
 		tinkerable.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
-		tinkerable.choreTypeTinker = Db.Get().ChoreTypes.MachineTinker;
+		tinkerable.choreTypeTinker = Db.Get().ChoreTypes.MachineTinker.IdHash;
 		tinkerable.shouldShowRolePerkStatusItem = false;
 		return tinkerable;
 	}
@@ -128,7 +128,7 @@ public class Tinkerable : Workable
 			base.SetWorkTime(this.workTime);
 			if (this.HasMaterial())
 			{
-				this.chore = new WorkChore<Tinkerable>(this.choreTypeTinker, this, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+				this.chore = new WorkChore<Tinkerable>(Db.Get().ChoreTypes.GetByHash(this.choreTypeTinker), this, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
 				if (component != null)
 				{
 					this.chore.AddPrecondition(ChorePreconditions.instance.IsFunctional, base.gameObject);
@@ -241,7 +241,7 @@ public class Tinkerable : Workable
 
 	public Tag[] choreTags;
 
-	protected ChoreType choreTypeTinker = Db.Get().ChoreTypes.PowerTinker;
+	public HashedString choreTypeTinker = Db.Get().ChoreTypes.PowerTinker.IdHash;
 
 	private bool hasReservedMaterial;
 }

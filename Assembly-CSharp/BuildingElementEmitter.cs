@@ -144,8 +144,8 @@ public class BuildingElementEmitter : KMonoBehaviour, IEffectDescriptor
 	[SerializeField]
 	public float emitRate = 0.3f;
 
-	[SerializeField]
 	[Serialize]
+	[SerializeField]
 	public float temperature = 293f;
 
 	[HashedEnum]

@@ -579,6 +579,10 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 	private bool ShouldShowSelectableInCurrentOverlay(KSelectable selectable)
 	{
 		bool flag = true;
+		if (OverlayScreen.Instance == null)
+		{
+			return flag;
+		}
 		SimViewMode mode = OverlayScreen.Instance.GetMode();
 		if (mode != SimViewMode.GasVentMap)
 		{

@@ -56,8 +56,8 @@ public class WorldGaps
 	[SerializeField]
 	public HashSet<int> voidCells;
 
-	[SerializeField]
 	[Serialize]
+	[SerializeField]
 	public float currentTime;
 
 	[SerializeField]
@@ -66,8 +66,8 @@ public class WorldGaps
 	[SerializeField]
 	public float notifyTimeApproaching;
 
-	[SerializeField]
 	[Serialize]
+	[SerializeField]
 	public int currentCloudIndex = -1;
 
 	public enum State

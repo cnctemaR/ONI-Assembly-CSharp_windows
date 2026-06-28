@@ -92,8 +92,8 @@ public class BatteryRefillSideScreen : SideScreenContent
 	[SerializeField]
 	private LocText currentPercentLabel;
 
-	[Header("Input Field")]
 	[SerializeField]
+	[Header("Input Field")]
 	private KNumberInputField numberInput;
 
 	[SerializeField]

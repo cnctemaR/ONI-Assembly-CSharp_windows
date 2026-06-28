@@ -36,6 +36,7 @@ public class Valve : Workable, ISaveLoadable
 		this.desiredFlow = this.maxFlow;
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
 		this.flowAccumulator = new Accumulator("Flow", this, 3f);
+		this.synchronizeAnims = false;
 	}
 
 	protected override void OnSpawn()

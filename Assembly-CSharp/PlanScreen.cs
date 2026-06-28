@@ -873,10 +873,10 @@ public class PlanScreen : KIconToggleMenu
 		public TextStyleSetting InactiveDeselected;
 	}
 
-	[IgnoreCommentedLines("#")]
+	[DelimitedRecord(",")]
 	[IgnoreEmptyLines]
 	[IgnoreFirst(1)]
-	[DelimitedRecord(",")]
+	[IgnoreCommentedLines("#")]
 	private class FabricatorConfig
 	{
 		public string planCategory;

@@ -27,15 +27,30 @@ public class OpenURLButtons : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		for (int i = 0; i < this.buttons.Length; i++)
+		for (int i = 0; i < this.buttonData.Count; i++)
 		{
-			KeyValuePair<LocString, Action<OpenURLButtons>> button = this.buttons[i];
+			OpenURLButtons.URLButtonData data = this.buttonData[i];
 			GameObject gameObject = Util.KInstantiateUI(this.buttonPrefab, base.gameObject, true);
-			gameObject.GetComponentInChildren<LocText>().SetText(this.buttons[i].Key.text);
-			gameObject.GetComponent<KButton>().onClick += delegate
+			string text = Strings.Get(data.stringKey);
+			gameObject.GetComponentInChildren<LocText>().SetText(text);
+			OpenURLButtons.URLButtonType urlType = data.urlType;
+			if (urlType != OpenURLButtons.URLButtonType.url)
 			{
-				button.Value(this);
-			};
+				if (urlType == OpenURLButtons.URLButtonType.patchNotes)
+				{
+					gameObject.GetComponent<KButton>().onClick += delegate
+					{
+						this.OpenPatchNotes();
+					};
+				}
+			}
+			else
+			{
+				gameObject.GetComponent<KButton>().onClick += delegate
+				{
+					this.OpenURL(data.url);
+				};
+			}
 		}
 	}
 
@@ -51,8 +66,26 @@ public class OpenURLButtons : KMonoBehaviour
 
 	public GameObject buttonPrefab;
 
+	public List<OpenURLButtons.URLButtonData> buttonData;
+
 	private KeyValuePair<LocString, Action<OpenURLButtons>>[] buttons;
 
 	[SerializeField]
 	private GameObject patchNotesScreen;
+
+	public enum URLButtonType
+	{
+		url,
+		patchNotes
+	}
+
+	[Serializable]
+	public class URLButtonData
+	{
+		public string stringKey;
+
+		public OpenURLButtons.URLButtonType urlType;
+
+		public string url;
+	}
 }

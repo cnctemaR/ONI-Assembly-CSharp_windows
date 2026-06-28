@@ -102,8 +102,8 @@ public class ValveSideScreen : SideScreenContent
 
 	private Valve targetValve;
 
-	[Header("Slider")]
 	[SerializeField]
+	[Header("Slider")]
 	private KSlider flowSlider;
 
 	[SerializeField]
@@ -112,8 +112,8 @@ public class ValveSideScreen : SideScreenContent
 	[SerializeField]
 	private LocText maxFlowLabel;
 
-	[SerializeField]
 	[Header("Input Field")]
+	[SerializeField]
 	private KNumberInputField numberInput;
 
 	[SerializeField]

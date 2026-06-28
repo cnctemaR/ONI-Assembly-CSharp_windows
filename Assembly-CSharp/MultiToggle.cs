@@ -90,8 +90,8 @@ public class MultiToggle : KMonoBehaviour, IPointerEnterHandler, IEventSystemHan
 		}
 	}
 
-	[Header("Settings")]
 	[SerializeField]
+	[Header("Settings")]
 	public ToggleState[] states;
 
 	public bool play_sound_on_click = true;

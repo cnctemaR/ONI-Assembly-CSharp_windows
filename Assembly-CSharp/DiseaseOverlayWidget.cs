@@ -10,6 +10,10 @@ public class DiseaseOverlayWidget : KMonoBehaviour
 	public void Refresh(AmountInstance value_src)
 	{
 		GameObject gameObject = value_src.gameObject;
+		if (gameObject == null)
+		{
+			return;
+		}
 		this.transform.position = gameObject.transform.position + this.offset;
 		DiseaseMonitor.Instance smi = gameObject.GetSMI<DiseaseMonitor.Instance>();
 		if (smi != null && smi.IsSick())

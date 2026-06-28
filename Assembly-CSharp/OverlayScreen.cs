@@ -903,8 +903,11 @@ public class OverlayScreen : KMonoBehaviour
 			if (!(gameObject2 == null))
 			{
 				KBatchedAnimController component = gameObject2.GetComponent<KBatchedAnimController>();
-				component.HighlightColour = Color.clear;
-				this.targetViewData.layerTargets.Remove(gameObject2);
+				if (!(component == null))
+				{
+					component.HighlightColour = Color.clear;
+					this.targetViewData.layerTargets.Remove(gameObject2);
+				}
 			}
 		}
 		this.outsideViewObjects.Clear();

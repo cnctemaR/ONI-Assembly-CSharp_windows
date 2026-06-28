@@ -1023,6 +1023,8 @@ namespace STRINGS
 					public static LocString MAILINGLIST = "MAILING LIST";
 
 					public static LocString PATCHNOTES = "PATCH NOTES";
+
+					public static LocString ANIMATION_HEADER = "WATCH THE ANIMATED SHORT!";
 				}
 
 				public class LOADING

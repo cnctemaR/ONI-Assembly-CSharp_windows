@@ -58,7 +58,7 @@ public class ConsumablesTableScreen : TableScreen
 					DividerColumn dividerColumn = new DividerColumn();
 					base.RegisterColumn(text, dividerColumn);
 				}
-				list2.Add(this.AddFoodInfoColumn(list[j].Name, list[j], new Action<MinionIdentity, GameObject>(this.on_load_food_info), new Func<MinionIdentity, GameObject, TableScreen.ResultValues>(this.get_value_food_info), new Action<GameObject>(this.on_click_food_info), new Action<GameObject, bool>(this.set_value_food_info), new Comparison<MinionIdentity>(this.compare_food_info), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_food_info), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_sort_food_info)));
+				list2.Add(this.AddFoodInfoColumn(list[j].Id, list[j], new Action<MinionIdentity, GameObject>(this.on_load_food_info), new Func<MinionIdentity, GameObject, TableScreen.ResultValues>(this.get_value_food_info), new Action<GameObject>(this.on_click_food_info), new Action<GameObject, bool>(this.set_value_food_info), new Comparison<MinionIdentity>(this.compare_food_info), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_food_info), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_sort_food_info)));
 				num = list[j].Quality;
 			}
 		}
@@ -286,25 +286,26 @@ public class ConsumablesTableScreen : TableScreen
 			}
 			break;
 		case TableRow.RowType.Minion:
-		{
-			ConsumableConsumer component = minionIdentity.GetComponent<ConsumableConsumer>();
-			if (component == null)
+			if (minionIdentity != null)
 			{
-				Debug.LogError("Could not find minion identity / row associated with the widget");
-				return;
-			}
-			component.SetPermitted(food_info.Id, new_value);
-			foodInfoTableColumn.on_load_action(widgetRow.GetMinionIdentity(), widget_go);
-			foreach (KeyValuePair<TableRow, GameObject> keyValuePair2 in foodInfoTableColumn.widgets_by_row)
-			{
-				if (keyValuePair2.Key.rowType == TableRow.RowType.Header)
+				ConsumableConsumer component = minionIdentity.GetComponent<ConsumableConsumer>();
+				if (component == null)
 				{
-					foodInfoTableColumn.on_load_action(null, keyValuePair2.Value);
-					break;
+					Debug.LogError("Could not find minion identity / row associated with the widget");
+					return;
+				}
+				component.SetPermitted(food_info.Id, new_value);
+				foodInfoTableColumn.on_load_action(widgetRow.GetMinionIdentity(), widget_go);
+				foreach (KeyValuePair<TableRow, GameObject> keyValuePair2 in foodInfoTableColumn.widgets_by_row)
+				{
+					if (keyValuePair2.Key.rowType == TableRow.RowType.Header)
+					{
+						foodInfoTableColumn.on_load_action(null, keyValuePair2.Value);
+						break;
+					}
 				}
 			}
 			break;
-		}
 		}
 	}
 
@@ -330,17 +331,18 @@ public class ConsumablesTableScreen : TableScreen
 			break;
 		}
 		case TableRow.RowType.Minion:
-		{
-			ConsumableConsumer component = minionIdentity.GetComponent<ConsumableConsumer>();
-			if (component == null)
+			if (minionIdentity != null)
 			{
-				Debug.LogError("Could not find minion identity / row associated with the widget");
-				return;
+				ConsumableConsumer component = minionIdentity.GetComponent<ConsumableConsumer>();
+				if (component == null)
+				{
+					Debug.LogError("Could not find minion identity / row associated with the widget");
+					return;
+				}
+				EdiblesManager.FoodInfo foodInfo = foodInfoTableColumn.food_info;
+				foodInfoTableColumn.on_set_action(widget_go, !component.IsPermitted(foodInfo.Id));
 			}
-			EdiblesManager.FoodInfo foodInfo = foodInfoTableColumn.food_info;
-			foodInfoTableColumn.on_set_action(widget_go, !component.IsPermitted(foodInfo.Id));
 			break;
-		}
 		}
 	}
 
@@ -525,7 +527,14 @@ public class ConsumablesTableScreen : TableScreen
 			resultValues = ((!ConsumerManager.instance.DefaultForbiddenTagsList.Contains(food_info.Id.ToTag())) ? TableScreen.ResultValues.True : TableScreen.ResultValues.False);
 			break;
 		case TableRow.RowType.Minion:
-			resultValues = ((!consumableConsumer.IsPermitted(food_info.Id)) ? TableScreen.ResultValues.False : TableScreen.ResultValues.True);
+			if (minion != null)
+			{
+				resultValues = ((!consumableConsumer.IsPermitted(food_info.Id)) ? TableScreen.ResultValues.False : TableScreen.ResultValues.True);
+			}
+			else
+			{
+				resultValues = TableScreen.ResultValues.True;
+			}
 			break;
 		}
 		return resultValues;

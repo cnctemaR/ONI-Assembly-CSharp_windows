@@ -119,7 +119,7 @@ public class MainMenu : KMonoBehaviour
 			{
 				SaveGame.Header header;
 				SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(latestSaveFile, out header);
-				if (header.buildVersion > 217529U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 217565U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}
@@ -135,12 +135,20 @@ public class MainMenu : KMonoBehaviour
 				this.Button_ResumeGame.GetComponent<ToolTip>().toolTip = fileNameWithoutExtension;
 				SaveLoader.SetActiveSaveFilePath(latestSaveFile);
 			}
-			catch
+			catch (Exception ex)
 			{
+				Debug.LogWarning(ex);
 				flag = false;
 			}
 		}
-		this.Button_ResumeGame.gameObject.SetActive(flag);
+		if (this.Button_ResumeGame != null && this.Button_ResumeGame.gameObject != null)
+		{
+			this.Button_ResumeGame.gameObject.SetActive(flag);
+		}
+		else
+		{
+			Debug.LogWarning("Why is the resume game button null?");
+		}
 	}
 
 	private void Translations()

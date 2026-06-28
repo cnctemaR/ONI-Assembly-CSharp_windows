@@ -107,8 +107,8 @@ public struct Tag : ISerializationCallbackReceiver, IEquatable<Tag>, IComparable
 
 	public static readonly Tag Invalid = default(Tag);
 
-	[Serialize]
 	[SerializeField]
+	[Serialize]
 	private string name;
 
 	[Serialize]

@@ -29,7 +29,10 @@ public class TableColumn
 				break;
 			}
 		}
-		this.on_tooltip(tableRow.GetMinionIdentity(), gameObject, tool_tip_instance);
+		if (this.on_tooltip != null)
+		{
+			this.on_tooltip(tableRow.GetMinionIdentity(), gameObject, tool_tip_instance);
+		}
 		return string.Empty;
 	}
 

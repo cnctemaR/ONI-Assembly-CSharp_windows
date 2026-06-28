@@ -170,10 +170,10 @@ public static class Strings
 		[FieldOptional]
 		public string name;
 
-		[FieldNullValue(typeof(string), "")]
 		[FieldQuoted(QuoteMode.OptionalForRead, MultilineMode.AllowForRead)]
-		[FieldOrder(2)]
 		[FieldOptional]
+		[FieldOrder(2)]
+		[FieldNullValue(typeof(string), "")]
 		public string[] values;
 	}
 }

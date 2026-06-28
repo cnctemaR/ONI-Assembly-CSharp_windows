@@ -131,7 +131,7 @@ public class StateMachineSerializer
 		{
 			return false;
 		}
-		if (Manager.GetDeserializationMapping(smi.GetType()) == null)
+		if (!Manager.HasDeserializationMapping(smi.GetType()))
 		{
 			return false;
 		}

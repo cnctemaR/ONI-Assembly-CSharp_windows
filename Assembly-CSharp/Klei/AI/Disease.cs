@@ -501,11 +501,13 @@ namespace Klei.AI
 
 		public static Disease.ElemGrowthInfo DEFAULT_GROWTH_INFO = new Disease.ElemGrowthInfo
 		{
-			maxCount = int.MaxValue,
 			underPopulationDeathRate = 0f,
+			populationHalfLife = float.PositiveInfinity,
 			overPopulationHalfLife = float.PositiveInfinity,
-			minDiffusionCount = 0,
-			diffusionScale = 1f
+			diffusionScale = 1f,
+			minCount = 0,
+			maxCount = int.MaxValue,
+			minDiffusionCount = 0
 		};
 
 		public struct RangeInfo

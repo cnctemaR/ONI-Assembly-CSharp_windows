@@ -5,7 +5,7 @@ public class LaunchInitializer : MonoBehaviour
 {
 	private void Awake()
 	{
-		global::Debug.Log("Development Build: OU-" + 231825U.ToString(), null);
+		global::Debug.Log("Development Build: OU-" + 232512U.ToString(), null);
 		KPlayerPrefs.instance.Load();
 		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		for (int i = 0; i < this.SpawnPrefabs.Length; i++)

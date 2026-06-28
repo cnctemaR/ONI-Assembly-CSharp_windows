@@ -10,15 +10,8 @@ public class AttachableBuilding : KMonoBehaviour
 		GameObject gameObject = Grid.ObjectLayers[1][num];
 		if (gameObject != null)
 		{
-			BuildingAttachPoint component = gameObject.GetComponent<BuildingAttachPoint>();
-			if (component != null)
-			{
-				this.attachPoint = new Ref<BuildingAttachPoint>(component);
-			}
 		}
 	}
 
 	public Tag attachableTag;
-
-	private Ref<BuildingAttachPoint> attachPoint;
 }

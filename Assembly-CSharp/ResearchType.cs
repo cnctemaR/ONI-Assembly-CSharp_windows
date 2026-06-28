@@ -3,11 +3,12 @@ using UnityEngine;
 
 public class ResearchType
 {
-	public ResearchType(string id, string name, string description, Color color, Recipe.Ingredient[] fabricationIngredients, float fabricationTime, HashedString kAnim_ID, string[] fabricators, string recipeDescription)
+	public ResearchType(string id, string name, string description, Sprite sprite, Color color, Recipe.Ingredient[] fabricationIngredients, float fabricationTime, HashedString kAnim_ID, string[] fabricators, string recipeDescription)
 	{
 		this._id = id;
 		this._name = name;
 		this._description = description;
+		this._sprite = sprite;
 		this._color = color;
 		this.CreatePrefab(fabricationIngredients, fabricationTime, kAnim_ID, fabricators, recipeDescription, color);
 	}
@@ -17,8 +18,10 @@ public class ResearchType
 		GameObject gameObject = EntityTemplates.CreateBasicEntity(this.id, this.name, this.description, 1f, true, Assets.GetAnim(kAnim_ID), "ui", Grid.SceneLayer.BuildingFront, SimHashes.Creature, null, 293f);
 		ResearchPointObject researchPointObject = gameObject.UpdateComponentRequirement<ResearchPointObject>(true);
 		researchPointObject.TypeID = this.id;
+		string id = this.id;
+		float num = 1f;
 		string name = this.name;
-		this._recipe = new Recipe(this.id, 1f, (SimHashes)0, name, recipeDescription, 0);
+		this._recipe = new Recipe(id, num, (SimHashes)0, name, recipeDescription, 0);
 		this._recipe.SetFabricators(fabricators, fabricationTime);
 		this._recipe.SetIcon(Assets.GetSprite("research_type_icon"), color);
 		foreach (Recipe.Ingredient ingredient in fabricationIngredients)
@@ -76,6 +79,14 @@ public class ResearchType
 		}
 	}
 
+	public Sprite sprite
+	{
+		get
+		{
+			return this._sprite;
+		}
+	}
+
 	private string _id;
 
 	private string _name;
@@ -84,7 +95,7 @@ public class ResearchType
 
 	private Recipe _recipe;
 
-	private Sprite _icon;
+	private Sprite _sprite;
 
 	private Color _color;
 }

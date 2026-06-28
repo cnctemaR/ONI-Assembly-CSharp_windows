@@ -7,8 +7,8 @@ public class Snorer : StateMachineComponent<Snorer.StatesInstance>
 {
 	protected override void OnPrefabInit()
 	{
-		this.Subscribe(1623392196, new Action<object>(this.OnDeath));
-		this.Subscribe(-1117766961, new Action<object>(this.OnRevived));
+		base.Subscribe(1623392196, new Action<object>(this.OnDeath));
+		base.Subscribe(-1117766961, new Action<object>(this.OnRevived));
 	}
 
 	protected override void OnSpawn()
@@ -86,13 +86,13 @@ public class Snorer : StateMachineComponent<Snorer.StatesInstance>
 		{
 		}
 
-		private const float BGEmissionRadius = 3f;
-
 		private SchedulerHandle snoreHandle;
 
 		private KBatchedAnimController snoreEffect;
 
 		private KBatchedAnimController snoreBGEffect;
+
+		private const float BGEmissionRadius = 3f;
 	}
 
 	public class States : GameStateMachine<Snorer.States, Snorer.StatesInstance, Snorer>

@@ -25,16 +25,6 @@ namespace Steamworks
 			return this.m_PublishedFileId.GetHashCode();
 		}
 
-		public bool Equals(PublishedFileId_t other)
-		{
-			return this.m_PublishedFileId == other.m_PublishedFileId;
-		}
-
-		public int CompareTo(PublishedFileId_t other)
-		{
-			return this.m_PublishedFileId.CompareTo(other.m_PublishedFileId);
-		}
-
 		public static bool operator ==(PublishedFileId_t x, PublishedFileId_t y)
 		{
 			return x.m_PublishedFileId == y.m_PublishedFileId;
@@ -53,6 +43,16 @@ namespace Steamworks
 		public static explicit operator ulong(PublishedFileId_t that)
 		{
 			return that.m_PublishedFileId;
+		}
+
+		public bool Equals(PublishedFileId_t other)
+		{
+			return this.m_PublishedFileId == other.m_PublishedFileId;
+		}
+
+		public int CompareTo(PublishedFileId_t other)
+		{
+			return this.m_PublishedFileId.CompareTo(other.m_PublishedFileId);
 		}
 
 		public static readonly PublishedFileId_t Invalid = new PublishedFileId_t(0UL);

@@ -4,7 +4,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-public class PlantableSeed : KMonoBehaviour, IGameObjectEffectDescriptor, IHasSortOrder, IReceptacleDirection
+public class PlantableSeed : KMonoBehaviour, IHasSortOrder, IReceptacleDirection, IGameObjectEffectDescriptor
 {
 	public int sortOrder { get; set; }
 
@@ -19,8 +19,8 @@ public class PlantableSeed : KMonoBehaviour, IGameObjectEffectDescriptor, IHasSo
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(-2064133523, new Action<object>(this.OnAbsorb));
-		this.Subscribe(1335436905, new Action<object>(this.OnSplit));
+		base.Subscribe(-2064133523, new Action<object>(this.OnAbsorb));
+		base.Subscribe(1335436905, new Action<object>(this.OnSplit));
 		this.timeUntilSelfPlant = Util.RandomVariance(2400f, 600f);
 	}
 
@@ -69,50 +69,73 @@ public class PlantableSeed : KMonoBehaviour, IGameObjectEffectDescriptor, IHasSo
 
 	private bool TestSuitableGround(int cell, bool ignoreGround = false)
 	{
+		bool flag;
 		if (!Grid.IsValidCell(cell))
 		{
-			return false;
+			flag = false;
 		}
-		GameObject prefab = Assets.GetPrefab(this.PlantID);
-		EntombVulnerable component = prefab.GetComponent<EntombVulnerable>();
-		if (component != null && !component.IsCellSafe(cell))
+		else
 		{
-			return false;
-		}
-		PressureVulnerable component2 = prefab.GetComponent<PressureVulnerable>();
-		if (component2 != null && !component2.IsCellSafe(cell))
-		{
-			return false;
-		}
-		DrowningMonitor component3 = prefab.GetComponent<DrowningMonitor>();
-		if (component3 != null && !component3.IsCellSafe(cell))
-		{
-			return false;
-		}
-		TemperatureVulnerable component4 = prefab.GetComponent<TemperatureVulnerable>();
-		if (component4 != null && !component4.IsCellSafe(cell))
-		{
-			return false;
-		}
-		UprootedMonitor component5 = prefab.GetComponent<UprootedMonitor>();
-		if (component5 != null && !component5.IsCellSafe(cell))
-		{
-			return false;
-		}
-		OccupyArea component6 = prefab.GetComponent<OccupyArea>();
-		if (component6 != null && !component6.CanOccupyArea(cell, ObjectLayer.Building))
-		{
-			return false;
-		}
-		if (!ignoreGround)
-		{
-			int num = Grid.CellBelow(cell);
-			if (Grid.Foundation[num] || (this.replantGroundTag.IsValid && !Grid.Element[num].HasTag(this.replantGroundTag)))
+			GameObject prefab = Assets.GetPrefab(this.PlantID);
+			EntombVulnerable component = prefab.GetComponent<EntombVulnerable>();
+			if (component != null && !component.IsCellSafe(cell))
 			{
-				return false;
+				flag = false;
+			}
+			else
+			{
+				PressureVulnerable component2 = prefab.GetComponent<PressureVulnerable>();
+				if (component2 != null && !component2.IsCellSafe(cell))
+				{
+					flag = false;
+				}
+				else
+				{
+					DrowningMonitor component3 = prefab.GetComponent<DrowningMonitor>();
+					if (component3 != null && !component3.IsCellSafe(cell))
+					{
+						flag = false;
+					}
+					else
+					{
+						TemperatureVulnerable component4 = prefab.GetComponent<TemperatureVulnerable>();
+						if (component4 != null && !component4.IsCellSafe(cell))
+						{
+							flag = false;
+						}
+						else
+						{
+							UprootedMonitor component5 = prefab.GetComponent<UprootedMonitor>();
+							if (component5 != null && !component5.IsCellSafe(cell))
+							{
+								flag = false;
+							}
+							else
+							{
+								OccupyArea component6 = prefab.GetComponent<OccupyArea>();
+								if (component6 != null && !component6.CanOccupyArea(cell, ObjectLayer.Building))
+								{
+									flag = false;
+								}
+								else
+								{
+									if (!ignoreGround)
+									{
+										int num = Grid.CellBelow(cell);
+										if (Grid.Foundation[num] || (this.replantGroundTag.IsValid && !Grid.Element[num].HasTag(this.replantGroundTag)))
+										{
+											return false;
+										}
+									}
+									flag = true;
+								}
+							}
+						}
+					}
+				}
 			}
 		}
-		return true;
+		return flag;
 	}
 
 	public List<Descriptor> GetDescriptors(GameObject go)
@@ -136,11 +159,11 @@ public class PlantableSeed : KMonoBehaviour, IGameObjectEffectDescriptor, IHasSo
 	public Tag PreviewID;
 
 	[Serialize]
-	public float timeUntilSelfPlant;
+	public float timeUntilSelfPlant = 0f;
 
 	public Tag replantGroundTag;
 
 	public string domesticatedDescription;
 
-	public SingleEntityReceptacle.ReceptacleDirection direction;
+	public SingleEntityReceptacle.ReceptacleDirection direction = SingleEntityReceptacle.ReceptacleDirection.Top;
 }

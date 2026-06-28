@@ -4,8 +4,9 @@ using UnityEngine;
 public class FetchChore : Chore<FetchChore.StatesInstance>
 {
 	public FetchChore(Storage destination, float amount, Tag[] tags, Tag[] forbidden_tags = null, ChoreProvider chore_provider = null, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, FetchOrder2.OperationalRequirement operational_requirement = FetchOrder2.OperationalRequirement.Operational, int priority_mod = 0)
-		: base(destination.choreType, destination, chore_provider, run_until_complete, on_complete, on_begin, on_end, int.MaxValue, false, true, priority_mod)
 	{
+		ChoreType choreType = destination.choreType;
+		base..ctor(choreType, destination, chore_provider, run_until_complete, on_complete, on_begin, on_end, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, priority_mod);
 		if (amount <= 0f)
 		{
 			Output.LogError(new object[] { "Requesting an invalid FetchChore amount" });
@@ -37,40 +38,6 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		}
 		this.partitionerEntry = GameScenePartitioner.Instance.Add(destination.name, this, Grid.PosToCell(destination), GameScenePartitioner.Instance.fetchChoreLayer, null);
 		destination.onPriorityChanged = (global::System.Action)Delegate.Combine(destination.onPriorityChanged, new global::System.Action(this.OnPriorityChanged));
-	}
-
-	// Note: this type is marked as 'beforefieldinit'.
-	static FetchChore()
-	{
-		Chore.Precondition precondition = default(Chore.Precondition);
-		precondition.id = "IsFetchTargetAvailable";
-		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
-		{
-			FetchChore fetchChore = (FetchChore)context.chore;
-			Pickupable pickupable = (Pickupable)context.data;
-			bool flag;
-			if (pickupable == null)
-			{
-				pickupable = fetchChore.FindFetchTarget(context.consumer);
-				flag = pickupable != null;
-			}
-			else
-			{
-				flag = FetchManagerUpdater.IsFetchablePickup(pickupable.GetComponent<KPrefabID>(), pickupable.storage, pickupable.UnreservedAmount, pickupable.MinTakeAmount, fetchChore.originalAmount, fetchChore.tags, fetchChore.requiredTags, fetchChore.forbiddenTags, context.consumer.GetComponent<Storage>());
-			}
-			if (flag)
-			{
-				context.data = pickupable;
-				int navigationCost = context.consumer.GetComponent<Navigator>().GetNavigationCost(pickupable);
-				if (navigationCost != PathProber.InvalidCost)
-				{
-					context.cost += navigationCost;
-					return true;
-				}
-			}
-			return false;
-		};
-		FetchChore.IsFetchTargetAvailable = precondition;
 	}
 
 	public float originalAmount
@@ -201,11 +168,16 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 
 	public float AmountWaitingToFetch()
 	{
+		float num;
 		if (this.fetcher == null)
 		{
-			return this.originalAmount;
+			num = this.originalAmount;
 		}
-		return this.amount;
+		else
+		{
+			num = this.amount;
+		}
+		return num;
 	}
 
 	private void OnPriorityChanged()
@@ -220,9 +192,10 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		}
 	}
 
-	private void OnMasterPriorityChanged(int priority)
+	private void OnMasterPriorityChanged(PriorityScreen.PriorityClass priorityClass, int priority_value)
 	{
-		base.masterPriority = this.destination.GetComponent<Prioritizable>().GetMasterPriority();
+		this.masterPriority.priority_class = priorityClass;
+		this.masterPriority.priority_value = priority_value;
 	}
 
 	public override void Cleanup()
@@ -246,7 +219,36 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 
 	private GameScenePartitionerEntry partitionerEntry;
 
-	public static Chore.Precondition IsFetchTargetAvailable;
+	public static Chore.Precondition IsFetchTargetAvailable = new Chore.Precondition
+	{
+		id = "IsFetchTargetAvailable",
+		fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			FetchChore fetchChore = (FetchChore)context.chore;
+			Pickupable pickupable = (Pickupable)context.data;
+			bool flag;
+			if (pickupable == null)
+			{
+				pickupable = fetchChore.FindFetchTarget(context.consumer);
+				flag = pickupable != null;
+			}
+			else
+			{
+				flag = FetchManagerUpdater.IsFetchablePickup(pickupable.GetComponent<KPrefabID>(), pickupable.storage, pickupable.UnreservedAmount, pickupable.MinTakeAmount, fetchChore.originalAmount, fetchChore.tags, fetchChore.requiredTags, fetchChore.forbiddenTags, context.consumer.GetComponent<Storage>());
+			}
+			if (flag)
+			{
+				context.data = pickupable;
+				int navigationCost = context.consumer.GetComponent<Navigator>().GetNavigationCost(pickupable);
+				if (navigationCost != PathProber.InvalidCost)
+				{
+					context.cost += navigationCost;
+					return true;
+				}
+			}
+			return false;
+		}
+	};
 
 	public class StatesInstance : GameStateMachine<FetchChore.States, FetchChore.StatesInstance, FetchChore, object>.GameInstance
 	{

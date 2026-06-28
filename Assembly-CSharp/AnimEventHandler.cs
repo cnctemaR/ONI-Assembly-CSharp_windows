@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using UnityEngine;
 
 public class AnimEventHandler : KMonoBehaviour
 {
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	private event AnimEventHandler.SetPos onWorkTargetSet;
 
 	protected override void OnSpawn()
@@ -13,7 +15,7 @@ public class AnimEventHandler : KMonoBehaviour
 		{
 			if (kbatchedAnimTracker.useTargetPoint)
 			{
-				this.onWorkTargetSet = (AnimEventHandler.SetPos)Delegate.Combine(this.onWorkTargetSet, new AnimEventHandler.SetPos(kbatchedAnimTracker.SetTarget));
+				this.onWorkTargetSet += kbatchedAnimTracker.SetTarget;
 			}
 		}
 		this.controller = base.GetComponent<KBatchedAnimController>();
@@ -57,7 +59,7 @@ public class AnimEventHandler : KMonoBehaviour
 	public void LateUpdate()
 	{
 		Vector3 pivotSymbolPosition = this.controller.GetPivotSymbolPosition();
-		this.animCollider.offset = new Vector2(this.baseOffset.x + pivotSymbolPosition.x - this.transform.position.x, this.baseOffset.y + pivotSymbolPosition.y - this.transform.position.y);
+		this.animCollider.offset = new Vector2(this.baseOffset.x + pivotSymbolPosition.x - base.transform.position.x, this.baseOffset.y + pivotSymbolPosition.y - base.transform.position.y);
 	}
 
 	private KBatchedAnimController controller;

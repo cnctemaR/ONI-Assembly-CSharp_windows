@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine.EventSystems;
 
-public class HoverCallback : KMonoBehaviour, IEventSystemHandler, IPointerEnterHandler, IPointerExitHandler
+public class HoverCallback : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IEventSystemHandler
 {
 	public void OnPointerEnter(PointerEventData data)
 	{

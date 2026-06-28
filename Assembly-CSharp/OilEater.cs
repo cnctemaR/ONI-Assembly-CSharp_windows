@@ -13,17 +13,16 @@ public class OilEater : StateMachineComponent<OilEater.StatesInstance>
 
 	public void Exhaust(float dt)
 	{
-		if (base.smi.master.wiltCondition.IsWilting())
+		if (!base.smi.master.wiltCondition.IsWilting())
 		{
-			return;
-		}
-		this.emittedMass += dt * this.emitRate;
-		if (this.emittedMass >= this.minEmitMass)
-		{
-			int num = Grid.PosToCell(this.transform.position + this.emitOffset);
-			PrimaryElement component = base.GetComponent<PrimaryElement>();
-			SimMessages.AddRemoveSubstance(num, SimHashes.CarbonDioxide, CellEventLogger.Instance.ElementEmitted, this.emittedMass, component.Temperature, byte.MaxValue, 0, -1);
-			this.emittedMass = 0f;
+			this.emittedMass += dt * this.emitRate;
+			if (this.emittedMass >= this.minEmitMass)
+			{
+				int num = Grid.PosToCell(base.transform.position + this.emitOffset);
+				PrimaryElement component = base.GetComponent<PrimaryElement>();
+				SimMessages.AddRemoveSubstance(num, SimHashes.CarbonDioxide, CellEventLogger.Instance.ElementEmitted, this.emittedMass, component.Temperature, byte.MaxValue, 0, -1);
+				this.emittedMass = 0f;
+			}
 		}
 	}
 
@@ -33,7 +32,7 @@ public class OilEater : StateMachineComponent<OilEater.StatesInstance>
 
 	public float emitRate = 1f;
 
-	public float minEmitMass;
+	public float minEmitMass = 0f;
 
 	public Vector3 emitOffset = Vector3.zero;
 
@@ -84,13 +83,13 @@ public class OilEater : StateMachineComponent<OilEater.StatesInstance>
 				{
 					smi.GoTo(this.blocked_from_growing);
 				}
-			}).PlayAnim("grow_seed", KAnim.PlayMode.Once, null).EventTransition(GameHashes.AnimQueueComplete, this.alive, null);
+			}).PlayAnim("grow_seed", KAnim.PlayMode.Once).EventTransition(GameHashes.AnimQueueComplete, this.alive, null);
 			this.alive.InitializeStates(this.masterTarget, this.dead).DefaultState(this.alive.mature).Update(delegate(OilEater.StatesInstance smi)
 			{
 				smi.master.Exhaust(smi.dt);
 			});
-			this.alive.mature.EventTransition(GameHashes.Wilt, this.alive.wilting, (OilEater.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).PlayAnim("idle", KAnim.PlayMode.Loop, null);
-			this.alive.wilting.PlayAnim("wilt1", KAnim.PlayMode.Once, null).EventTransition(GameHashes.WiltRecover, this.alive.mature, (OilEater.StatesInstance smi) => !smi.master.wiltCondition.IsWilting());
+			this.alive.mature.EventTransition(GameHashes.Wilt, this.alive.wilting, (OilEater.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).PlayAnim("idle", KAnim.PlayMode.Loop);
+			this.alive.wilting.PlayAnim("wilt1").EventTransition(GameHashes.WiltRecover, this.alive.mature, (OilEater.StatesInstance smi) => !smi.master.wiltCondition.IsWilting());
 		}
 
 		public GameStateMachine<OilEater.States, OilEater.StatesInstance, OilEater, object>.State grow;

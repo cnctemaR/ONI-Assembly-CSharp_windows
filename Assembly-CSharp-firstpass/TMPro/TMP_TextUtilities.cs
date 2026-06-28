@@ -14,11 +14,16 @@ namespace TMPro
 			Vector3 vector = rectTransform.TransformPoint(tmp_CharacterInfo.bottomLeft);
 			Vector3 vector2 = rectTransform.TransformPoint(tmp_CharacterInfo.topRight);
 			float num2 = (position.x - vector.x) / (vector2.x - vector.x);
+			CaretInfo caretInfo;
 			if (num2 < 0.5f)
 			{
-				return new CaretInfo(num, CaretPosition.Left);
+				caretInfo = new CaretInfo(num, CaretPosition.Left);
 			}
-			return new CaretInfo(num, CaretPosition.Right);
+			else
+			{
+				caretInfo = new CaretInfo(num, CaretPosition.Right);
+			}
+			return caretInfo;
 		}
 
 		public static int GetCursorIndexFromPosition(TMP_Text textComponent, Vector3 position, Camera camera)
@@ -30,11 +35,16 @@ namespace TMPro
 			Vector3 vector = rectTransform.TransformPoint(tmp_CharacterInfo.bottomLeft);
 			Vector3 vector2 = rectTransform.TransformPoint(tmp_CharacterInfo.topRight);
 			float num2 = (position.x - vector.x) / (vector2.x - vector.x);
+			int num3;
 			if (num2 < 0.5f)
 			{
-				return num;
+				num3 = num;
 			}
-			return num + 1;
+			else
+			{
+				num3 = num + 1;
+			}
+			return num3;
 		}
 
 		public static int GetCursorIndexFromPosition(TMP_Text textComponent, Vector3 position, Camera camera, out CaretPosition cursor)
@@ -46,13 +56,18 @@ namespace TMPro
 			Vector3 vector = rectTransform.TransformPoint(tmp_CharacterInfo.bottomLeft);
 			Vector3 vector2 = rectTransform.TransformPoint(tmp_CharacterInfo.topRight);
 			float num2 = (position.x - vector.x) / (vector2.x - vector.x);
+			int num3;
 			if (num2 < 0.5f)
 			{
 				cursor = CaretPosition.Left;
-				return num;
+				num3 = num;
 			}
-			cursor = CaretPosition.Right;
-			return num + 1;
+			else
+			{
+				cursor = CaretPosition.Right;
+				num3 = num + 1;
+			}
+			return num3;
 		}
 
 		public static bool IsIntersectingRectTransform(RectTransform rectTransform, Vector3 position, Camera camera)
@@ -791,12 +806,17 @@ namespace TMPro
 			Ray ray = RectTransformUtility.ScreenPointToRay(cam, screenPoint);
 			Plane plane = new Plane(transform.rotation * Vector3.back, transform.position);
 			float num;
+			bool flag;
 			if (!plane.Raycast(ray, out num))
 			{
-				return false;
+				flag = false;
 			}
-			worldPoint = ray.GetPoint(num);
-			return true;
+			else
+			{
+				worldPoint = ray.GetPoint(num);
+				flag = true;
+			}
+			return flag;
 		}
 
 		private static bool IntersectLinePlane(TMP_TextUtilities.LineSegment line, Vector3 point, Vector3 normal, out Vector3 intersectingPoint)
@@ -806,17 +826,25 @@ namespace TMPro
 			Vector3 vector2 = line.Point1 - point;
 			float num = Vector3.Dot(normal, vector);
 			float num2 = -Vector3.Dot(normal, vector2);
+			bool flag;
 			if (Mathf.Abs(num) < Mathf.Epsilon)
 			{
-				return num2 == 0f;
+				flag = num2 == 0f;
 			}
-			float num3 = num2 / num;
-			if (num3 < 0f || num3 > 1f)
+			else
 			{
-				return false;
+				float num3 = num2 / num;
+				if (num3 < 0f || num3 > 1f)
+				{
+					flag = false;
+				}
+				else
+				{
+					intersectingPoint = line.Point1 + num3 * vector;
+					flag = true;
+				}
 			}
-			intersectingPoint = line.Point1 + num3 * vector;
-			return true;
+			return flag;
 		}
 
 		public static float DistanceToLine(Vector3 a, Vector3 b, Vector3 point)
@@ -824,17 +852,25 @@ namespace TMPro
 			Vector3 vector = b - a;
 			Vector3 vector2 = a - point;
 			float num = Vector3.Dot(vector, vector2);
+			float num2;
 			if (num > 0f)
 			{
-				return Vector3.Dot(vector2, vector2);
+				num2 = Vector3.Dot(vector2, vector2);
 			}
-			Vector3 vector3 = point - b;
-			if (Vector3.Dot(vector, vector3) > 0f)
+			else
 			{
-				return Vector3.Dot(vector3, vector3);
+				Vector3 vector3 = point - b;
+				if (Vector3.Dot(vector, vector3) > 0f)
+				{
+					num2 = Vector3.Dot(vector3, vector3);
+				}
+				else
+				{
+					Vector3 vector4 = vector2 - vector * (num / Vector3.Dot(vector, vector));
+					num2 = Vector3.Dot(vector4, vector4);
+				}
 			}
-			Vector3 vector4 = vector2 - vector * (num / Vector3.Dot(vector, vector));
-			return Vector3.Dot(vector4, vector4);
+			return num2;
 		}
 
 		public static char ToLowerFast(char c)
@@ -867,11 +903,11 @@ namespace TMPro
 			return num;
 		}
 
+		private static Vector3[] m_rectWorldCorners = new Vector3[4];
+
 		private const string k_lookupStringL = "-------------------------------- !-#$%&-()*+,-./0123456789:;<=>?@abcdefghijklmnopqrstuvwxyz[-]^_`abcdefghijklmnopqrstuvwxyz{|}~-";
 
 		private const string k_lookupStringU = "-------------------------------- !-#$%&-()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[-]^_`ABCDEFGHIJKLMNOPQRSTUVWXYZ{|}~-";
-
-		private static Vector3[] m_rectWorldCorners = new Vector3[4];
 
 		private struct LineSegment
 		{

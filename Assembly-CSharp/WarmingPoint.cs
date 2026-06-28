@@ -7,7 +7,7 @@ public class WarmingPoint : Workable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(-1643076535, new Action<object>(this.OnRotated));
+		base.Subscribe(-1643076535, new Action<object>(this.OnRotated));
 		this.actualOffsets = new CellOffset[this.offsets.Length];
 		this.UpdateOffsets();
 		this.workTime = float.PositiveInfinity;
@@ -35,7 +35,7 @@ public class WarmingPoint : Workable
 
 	private void CreateTask()
 	{
-		this.chore = new WorkChore<WarmingPoint>(Db.Get().ChoreTypes.Warmup, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue);
+		this.chore = new WorkChore<WarmingPoint>(Db.Get().ChoreTypes.Warmup, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
 	}
 
 	public override CellOffset[] GetOffsets()

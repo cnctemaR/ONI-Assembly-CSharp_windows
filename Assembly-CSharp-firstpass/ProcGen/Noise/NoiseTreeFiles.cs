@@ -41,6 +41,7 @@ namespace ProcGen.Noise
 
 		public Tree LoadTree(string name, string path)
 		{
+			Tree tree2;
 			if (name != null && name.Length > 0)
 			{
 				if (!this.trees.ContainsKey(name))
@@ -51,18 +52,27 @@ namespace ProcGen.Noise
 						this.trees.Add(name, tree);
 					}
 				}
-				return this.trees[name];
+				tree2 = this.trees[name];
 			}
-			return null;
+			else
+			{
+				tree2 = null;
+			}
+			return tree2;
 		}
 
 		public float GetZoomForTree(string name)
 		{
+			float num;
 			if (!this.trees.ContainsKey(name))
 			{
-				return 1f;
+				num = 1f;
 			}
-			return this.trees[name].settings.zoom;
+			else
+			{
+				num = this.trees[name].settings.zoom;
+			}
+			return num;
 		}
 
 		public bool ShouldNormaliseTree(string name)
@@ -97,20 +107,30 @@ namespace ProcGen.Noise
 
 		public Tree GetTree(string name)
 		{
+			Tree tree;
 			if (!this.trees.ContainsKey(name))
 			{
-				return null;
+				tree = null;
 			}
-			return this.trees[name];
+			else
+			{
+				tree = this.trees[name];
+			}
+			return tree;
 		}
 
 		public IModule3D BuildTree(string name, int globalSeed)
 		{
+			IModule3D module3D;
 			if (!this.trees.ContainsKey(name))
 			{
-				return null;
+				module3D = null;
 			}
-			return this.trees[name].BuildFinalModule(globalSeed);
+			else
+			{
+				module3D = this.trees[name].BuildFinalModule(globalSeed);
+			}
+			return module3D;
 		}
 
 		public static string NOISE_FILE = "noise";

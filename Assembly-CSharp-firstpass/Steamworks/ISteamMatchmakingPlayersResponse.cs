@@ -69,6 +69,21 @@ namespace Steamworks
 
 		private ISteamMatchmakingPlayersResponse.PlayersRefreshComplete m_PlayersRefreshComplete;
 
+		public delegate void AddPlayerToList(string pchName, int nScore, float flTimePlayed);
+
+		public delegate void PlayersFailedToRespond();
+
+		public delegate void PlayersRefreshComplete();
+
+		[UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+		public delegate void InternalAddPlayerToList(IntPtr thisptr, IntPtr pchName, int nScore, float flTimePlayed);
+
+		[UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+		public delegate void InternalPlayersFailedToRespond(IntPtr thisptr);
+
+		[UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+		public delegate void InternalPlayersRefreshComplete(IntPtr thisptr);
+
 		[StructLayout(LayoutKind.Sequential)]
 		private class VTable
 		{
@@ -84,20 +99,5 @@ namespace Steamworks
 			[MarshalAs(UnmanagedType.FunctionPtr)]
 			public ISteamMatchmakingPlayersResponse.InternalPlayersRefreshComplete m_VTPlayersRefreshComplete;
 		}
-
-		public delegate void AddPlayerToList(string pchName, int nScore, float flTimePlayed);
-
-		public delegate void PlayersFailedToRespond();
-
-		public delegate void PlayersRefreshComplete();
-
-		[UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-		public delegate void InternalAddPlayerToList(IntPtr thisptr, IntPtr pchName, int nScore, float flTimePlayed);
-
-		[UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-		public delegate void InternalPlayersFailedToRespond(IntPtr thisptr);
-
-		[UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-		public delegate void InternalPlayersRefreshComplete(IntPtr thisptr);
 	}
 }

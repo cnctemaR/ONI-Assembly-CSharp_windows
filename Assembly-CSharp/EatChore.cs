@@ -6,7 +6,7 @@ using UnityEngine;
 public class EatChore : Chore<EatChore.StatesInstance>
 {
 	public EatChore(IStateMachineTarget master)
-		: base(Db.Get().ChoreTypes.Eat, master, master.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.Eat, master, master.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
 	{
 		this.smi = new EatChore.StatesInstance(this);
 		base.AddPrecondition(ChorePreconditions.IsNotRedAlert, null);
@@ -14,61 +14,59 @@ public class EatChore : Chore<EatChore.StatesInstance>
 		base.AddPrecondition(EatChore.EdibleIsNotNull, null);
 	}
 
-	// Note: this type is marked as 'beforefieldinit'.
-	static EatChore()
-	{
-		Chore.Precondition precondition = default(Chore.Precondition);
-		precondition.id = "EdibleIsNotNull";
-		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
-		{
-			return null != context.consumer.GetSMI<RationMonitor.Instance>().GetEdible();
-		};
-		EatChore.EdibleIsNotNull = precondition;
-	}
-
 	public override void Begin(Chore.Precondition.Context context)
 	{
 		if (context.consumer == null)
 		{
 			global::Debug.LogError("EATCHORE null context.consumer", null);
-			return;
 		}
-		RationMonitor.Instance smi = context.consumer.GetSMI<RationMonitor.Instance>();
-		if (smi == null)
+		else
 		{
-			global::Debug.LogError("EATCHORE null RationMonitor.Instance", null);
-			return;
+			RationMonitor.Instance smi = context.consumer.GetSMI<RationMonitor.Instance>();
+			if (smi == null)
+			{
+				global::Debug.LogError("EATCHORE null RationMonitor.Instance", null);
+			}
+			else
+			{
+				Edible edible = smi.GetEdible();
+				if (edible.gameObject == null)
+				{
+					global::Debug.LogError("EATCHORE null edible.gameObject", null);
+				}
+				else if (this.smi == null)
+				{
+					global::Debug.LogError("EATCHORE null smi", null);
+				}
+				else if (this.smi.sm == null)
+				{
+					global::Debug.LogError("EATCHORE null smi.sm", null);
+				}
+				else if (this.smi.sm.ediblesource == null)
+				{
+					global::Debug.LogError("EATCHORE null smi.sm.ediblesource", null);
+				}
+				else
+				{
+					this.smi.sm.ediblesource.Set(edible.gameObject, this.smi);
+					AmountInstance amountInstance = Db.Get().Amounts.Calories.Lookup(this.gameObject);
+					float num = (amountInstance.GetMax() - amountInstance.value) / edible.FoodInfo.CaloriesPerUnit;
+					this.smi.sm.requestedfoodunits.Set(num, this.smi);
+					this.smi.sm.eater.Set(context.consumer.gameObject, this.smi);
+					base.Begin(context);
+				}
+			}
 		}
-		Edible edible = smi.GetEdible();
-		if (edible.gameObject == null)
-		{
-			global::Debug.LogError("EATCHORE null edible.gameObject", null);
-			return;
-		}
-		if (this.smi == null)
-		{
-			global::Debug.LogError("EATCHORE null smi", null);
-			return;
-		}
-		if (this.smi.sm == null)
-		{
-			global::Debug.LogError("EATCHORE null smi.sm", null);
-			return;
-		}
-		if (this.smi.sm.ediblesource == null)
-		{
-			global::Debug.LogError("EATCHORE null smi.sm.ediblesource", null);
-			return;
-		}
-		this.smi.sm.ediblesource.Set(edible.gameObject, this.smi);
-		AmountInstance amountInstance = Db.Get().Amounts.Calories.Lookup(this.gameObject);
-		float num = (amountInstance.GetMax() - amountInstance.value) / edible.FoodInfo.CaloriesPerUnit;
-		this.smi.sm.requestedfoodunits.Set(num, this.smi);
-		this.smi.sm.eater.Set(context.consumer.gameObject, this.smi);
-		base.Begin(context);
 	}
 
-	public static Chore.Precondition EdibleIsNotNull;
+	public static Chore.Precondition EdibleIsNotNull = new Chore.Precondition
+	{
+		id = "EdibleIsNotNull",
+		fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			return null != context.consumer.GetSMI<RationMonitor.Instance>().GetEdible();
+		}
+	};
 
 	public class StatesInstance : GameStateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.GameInstance
 	{

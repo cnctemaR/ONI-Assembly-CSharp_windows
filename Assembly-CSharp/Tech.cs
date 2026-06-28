@@ -57,7 +57,7 @@ public class Tech : Resource
 
 	public string CostString(ResearchTypes types)
 	{
-		string text = string.Empty;
+		string text = "";
 		foreach (KeyValuePair<string, float> keyValuePair in this.costsByResearchTypeID)
 		{
 			text += string.Format("{0}:{1}", types.GetResearchType(keyValuePair.Key).name.ToString(), keyValuePair.Value.ToString());
@@ -68,12 +68,17 @@ public class Tech : Resource
 
 	public bool IsComplete()
 	{
+		bool flag;
 		if (Research.Instance != null)
 		{
 			TechInstance techInstance = Research.Instance.Get(this);
-			return techInstance != null && techInstance.IsComplete();
+			flag = techInstance != null && techInstance.IsComplete();
 		}
-		return false;
+		else
+		{
+			flag = false;
+		}
+		return flag;
 	}
 
 	public bool ArePrerequisitesComplete()
@@ -92,7 +97,7 @@ public class Tech : Resource
 
 	public List<Tech> unlockedTech = new List<Tech>();
 
-	public List<BuildingDef> unlockedBuildings = new List<BuildingDef>();
+	public List<TechItem> unlockedItems = new List<TechItem>();
 
 	public int tier;
 

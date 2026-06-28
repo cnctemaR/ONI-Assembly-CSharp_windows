@@ -69,6 +69,21 @@ namespace Steamworks
 
 		private ISteamMatchmakingRulesResponse.RulesRefreshComplete m_RulesRefreshComplete;
 
+		public delegate void RulesResponded(string pchRule, string pchValue);
+
+		public delegate void RulesFailedToRespond();
+
+		public delegate void RulesRefreshComplete();
+
+		[UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+		public delegate void InternalRulesResponded(IntPtr thisptr, IntPtr pchRule, IntPtr pchValue);
+
+		[UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+		public delegate void InternalRulesFailedToRespond(IntPtr thisptr);
+
+		[UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+		public delegate void InternalRulesRefreshComplete(IntPtr thisptr);
+
 		[StructLayout(LayoutKind.Sequential)]
 		private class VTable
 		{
@@ -84,20 +99,5 @@ namespace Steamworks
 			[MarshalAs(UnmanagedType.FunctionPtr)]
 			public ISteamMatchmakingRulesResponse.InternalRulesRefreshComplete m_VTRulesRefreshComplete;
 		}
-
-		public delegate void RulesResponded(string pchRule, string pchValue);
-
-		public delegate void RulesFailedToRespond();
-
-		public delegate void RulesRefreshComplete();
-
-		[UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-		public delegate void InternalRulesResponded(IntPtr thisptr, IntPtr pchRule, IntPtr pchValue);
-
-		[UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-		public delegate void InternalRulesFailedToRespond(IntPtr thisptr);
-
-		[UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-		public delegate void InternalRulesRefreshComplete(IntPtr thisptr);
 	}
 }

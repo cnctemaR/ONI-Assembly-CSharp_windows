@@ -13,7 +13,7 @@ public class LiquidPumpingStation : Workable
 		for (int i = 0; i < LiquidPumpingStation.floorOffsets.Length; i++)
 		{
 			int num2 = Grid.OffsetCell(num, LiquidPumpingStation.floorOffsets[i]);
-			Grid.FakeFloor[num2] = true;
+			Grid.LiquidPumpFloor[num2] = true;
 			Pathfinding.Instance.AddDirtyNavGridCell(num2);
 		}
 	}
@@ -28,7 +28,6 @@ public class LiquidPumpingStation : Workable
 		base.SetWorkTime(10f);
 		this.RefreshDepthAvailable();
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Behind, new string[] { "meter_target", "meter_arrow", "meter_scale" });
-		this.meter.SetVisible(false);
 	}
 
 	private void RefreshDepthAvailable()
@@ -56,87 +55,86 @@ public class LiquidPumpingStation : Workable
 
 	private void SimUpdate(float dt)
 	{
-		if (this.session != null)
+		if (this.session == null)
 		{
-			return;
-		}
-		int num = this.infoCount;
-		for (int i = 0; i < this.infoCount; i++)
-		{
-			this.infos[i].amount = 0f;
-		}
-		if (base.GetComponent<Operational>().IsOperational)
-		{
-			int num2 = Grid.PosToCell(this);
-			for (int j = 0; j < LiquidPumpingStation.liquidOffsets.Length; j++)
+			int num = this.infoCount;
+			for (int i = 0; i < this.infoCount; i++)
 			{
-				if (this.depthAvailable >= Math.Abs(LiquidPumpingStation.liquidOffsets[j].y))
+				this.infos[i].amount = 0f;
+			}
+			if (base.GetComponent<Operational>().IsOperational)
+			{
+				int num2 = Grid.PosToCell(this);
+				for (int j = 0; j < LiquidPumpingStation.liquidOffsets.Length; j++)
 				{
-					int num3 = Grid.OffsetCell(num2, LiquidPumpingStation.liquidOffsets[j]);
-					bool flag = false;
-					Element element = Grid.Element[num3];
-					if (element.IsLiquid)
+					if (this.depthAvailable >= Math.Abs(LiquidPumpingStation.liquidOffsets[j].y))
 					{
-						float mass = Grid.Cell[num3].mass;
-						for (int k = 0; k < this.infoCount; k++)
+						int num3 = Grid.OffsetCell(num2, LiquidPumpingStation.liquidOffsets[j]);
+						bool flag = false;
+						Element element = Grid.Element[num3];
+						if (element.IsLiquid)
 						{
-							if (this.infos[k].element == element)
+							float mass = Grid.Cell[num3].mass;
+							for (int k = 0; k < this.infoCount; k++)
 							{
-								LiquidPumpingStation.LiquidInfo[] array = this.infos;
-								int num4 = k;
-								array[num4].amount = array[num4].amount + mass;
-								flag = true;
-								break;
+								if (this.infos[k].element == element)
+								{
+									LiquidPumpingStation.LiquidInfo[] array = this.infos;
+									int num4 = k;
+									array[num4].amount = array[num4].amount + mass;
+									flag = true;
+									break;
+								}
 							}
-						}
-						if (!flag)
-						{
-							this.infos[this.infoCount].amount = mass;
-							this.infos[this.infoCount].element = element;
-							this.infoCount++;
+							if (!flag)
+							{
+								this.infos[this.infoCount].amount = mass;
+								this.infos[this.infoCount].element = element;
+								this.infoCount++;
+							}
 						}
 					}
 				}
 			}
-		}
-		int l = 0;
-		while (l < this.infoCount)
-		{
-			LiquidPumpingStation.LiquidInfo liquidInfo = this.infos[l];
-			if (liquidInfo.amount <= 1f)
+			int l = 0;
+			while (l < this.infoCount)
 			{
-				if (liquidInfo.source != null)
+				LiquidPumpingStation.LiquidInfo liquidInfo = this.infos[l];
+				if (liquidInfo.amount <= 1f)
 				{
-					liquidInfo.source.DeleteObject();
-				}
-				this.infos[l] = this.infos[this.infoCount - 1];
-				this.infoCount--;
-			}
-			else
-			{
-				if (liquidInfo.source == null)
-				{
-					liquidInfo.source = base.GetComponent<Storage>().AddLiquid(liquidInfo.element.id, liquidInfo.amount, liquidInfo.element.defaultValues.temperature, byte.MaxValue, 0, false, true).GetComponent<SubstanceChunk>();
-					Pickupable component = liquidInfo.source.GetComponent<Pickupable>();
-					component.GetComponent<KPrefabID>().AddTag(GameTags.LiquidSource);
-					component.SetOffsets(new CellOffset[]
+					if (liquidInfo.source != null)
 					{
-						new CellOffset(0, 1)
-					});
-					component.targetWorkable = this;
-					Pickupable pickupable = component;
-					pickupable.OnReservationsChanged = (global::System.Action)Delegate.Combine(pickupable.OnReservationsChanged, new global::System.Action(this.OnReservationsChanged));
+						liquidInfo.source.DeleteObject();
+					}
+					this.infos[l] = this.infos[this.infoCount - 1];
+					this.infoCount--;
 				}
-				liquidInfo.source.GetComponent<Pickupable>().TotalAmount = liquidInfo.amount;
-				this.infos[l] = liquidInfo;
-				l++;
+				else
+				{
+					if (liquidInfo.source == null)
+					{
+						liquidInfo.source = base.GetComponent<Storage>().AddLiquid(liquidInfo.element.id, liquidInfo.amount, liquidInfo.element.defaultValues.temperature, byte.MaxValue, 0, false, true).GetComponent<SubstanceChunk>();
+						Pickupable component = liquidInfo.source.GetComponent<Pickupable>();
+						component.GetComponent<KPrefabID>().AddTag(GameTags.LiquidSource);
+						component.SetOffsets(new CellOffset[]
+						{
+							new CellOffset(0, 1)
+						});
+						component.targetWorkable = this;
+						Pickupable pickupable = component;
+						pickupable.OnReservationsChanged = (global::System.Action)Delegate.Combine(pickupable.OnReservationsChanged, new global::System.Action(this.OnReservationsChanged));
+					}
+					liquidInfo.source.GetComponent<Pickupable>().TotalAmount = liquidInfo.amount;
+					this.infos[l] = liquidInfo;
+					l++;
+				}
 			}
+			if (num != this.infoCount)
+			{
+				this.RefreshStatusItem();
+			}
+			this.RefreshDepthAvailable();
 		}
-		if (num != this.infoCount)
-		{
-			this.RefreshStatusItem();
-		}
-		this.RefreshDepthAvailable();
 	}
 
 	private void RefreshStatusItem()
@@ -153,7 +151,7 @@ public class LiquidPumpingStation : Workable
 
 	public string ResolveString(string base_string)
 	{
-		string text = string.Empty;
+		string text = "";
 		for (int i = 0; i < this.infoCount; i++)
 		{
 			if (this.infos[i].source != null)
@@ -179,11 +177,16 @@ public class LiquidPumpingStation : Workable
 
 	public override float GetPercentComplete()
 	{
+		float num;
 		if (this.session != null)
 		{
-			return this.session.GetPercentComplete();
+			num = this.session.GetPercentComplete();
 		}
-		return 0f;
+		else
+		{
+			num = 0f;
+		}
+		return num;
 	}
 
 	protected override void OnStartWork(Worker worker)
@@ -197,7 +200,6 @@ public class LiquidPumpingStation : Workable
 		component.Play(Workable.DefaultWorkAnims, KAnim.PlayMode.Loop);
 		this.meter.SetPositionPercent(0f);
 		this.meter.SetSymbolTint(KBatchedAnimController.SymbolTintIndex.First, new KAnimHashedString("meter_target"), element.substance.colour);
-		this.meter.SetVisible(true);
 	}
 
 	protected override void OnStopWork(Worker worker)
@@ -210,7 +212,6 @@ public class LiquidPumpingStation : Workable
 		}
 		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
 		component.Play("on", KAnim.PlayMode.Once, 1f, 0f);
-		this.meter.SetVisible(false);
 	}
 
 	private void OnReservationsChanged()
@@ -249,7 +250,7 @@ public class LiquidPumpingStation : Workable
 				SubstanceChunk source = this.session.GetSource();
 				SimUtil.DiseaseInfo diseaseInfo = ((this.session == null) ? SimUtil.DiseaseInfo.Invalid : this.session.GetDiseaseInfo());
 				PrimaryElement component2 = source.GetComponent<PrimaryElement>();
-				Pickupable component3 = LiquidSourceManager.Instance.CreateChunk(component2.Element, consumedAmount, this.session.GetTemperature(), diseaseInfo.idx, diseaseInfo.count, this.transform.position).GetComponent<Pickupable>();
+				Pickupable component3 = LiquidSourceManager.Instance.CreateChunk(component2.Element, consumedAmount, this.session.GetTemperature(), diseaseInfo.idx, diseaseInfo.count, base.transform.position).GetComponent<Pickupable>();
 				component3.TotalAmount = consumedAmount;
 				component3.Trigger(1335436905, source.GetComponent<Pickupable>());
 				worker.workCompleteData = component3;
@@ -296,7 +297,7 @@ public class LiquidPumpingStation : Workable
 		for (int j = 0; j < LiquidPumpingStation.floorOffsets.Length; j++)
 		{
 			int num2 = Grid.OffsetCell(num, LiquidPumpingStation.floorOffsets[j]);
-			Grid.FakeFloor[num2] = false;
+			Grid.LiquidPumpFloor[num2] = false;
 			Pathfinding.Instance.AddDirtyNavGridCell(num2);
 		}
 	}
@@ -323,7 +324,7 @@ public class LiquidPumpingStation : Workable
 
 	private LiquidPumpingStation.LiquidInfo[] infos;
 
-	private int infoCount;
+	private int infoCount = 0;
 
 	private int depthAvailable = -1;
 
@@ -408,12 +409,17 @@ public class LiquidPumpingStation : Workable
 
 		public float GetTemperature()
 		{
+			float num;
 			if (this.temperature <= 0f)
 			{
 				global::Debug.LogWarning("TODO(YOG): Fix bad temperature in liquid pumping station.", null);
-				return ElementLoader.FindElementByHash(this.element).defaultValues.temperature;
+				num = ElementLoader.FindElementByHash(this.element).defaultValues.temperature;
 			}
-			return this.temperature;
+			else
+			{
+				num = this.temperature;
+			}
+			return num;
 		}
 
 		public void Cleanup()

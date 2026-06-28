@@ -18,13 +18,16 @@ public class SubstanceChunk : KMonoBehaviour, ISaveLoadable
 	private void OnRefreshUserMenu(object data)
 	{
 		UserMenu userMenu = this.userMenu;
-		string text = UI.USERMENUACTIONS.RELEASEELEMENT.TOOLTIP;
-		userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_deconstruct", UI.USERMENUACTIONS.RELEASEELEMENT.NAME, new global::System.Action(this.OnRelease), global::Action.NumActions, null, null, null, text, true), 1f);
+		string text = "action_deconstruct";
+		string text2 = UI.USERMENUACTIONS.RELEASEELEMENT.NAME;
+		global::System.Action action = new global::System.Action(this.OnRelease);
+		string text3 = UI.USERMENUACTIONS.RELEASEELEMENT.TOOLTIP;
+		userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
 	}
 
 	private void OnRelease()
 	{
-		int num = Grid.PosToCell(this.transform.position);
+		int num = Grid.PosToCell(base.transform.position);
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
 		if (component.Mass > 0f)
 		{

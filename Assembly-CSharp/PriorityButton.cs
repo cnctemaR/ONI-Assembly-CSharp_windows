@@ -8,5 +8,5 @@ public class PriorityButton : KMonoBehaviour
 
 	public ToolTip tooltip;
 
-	public int priority;
+	public PrioritySetting priority;
 }

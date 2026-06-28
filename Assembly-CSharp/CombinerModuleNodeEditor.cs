@@ -41,27 +41,41 @@ public class CombinerModuleNodeEditor : BaseNodeEditor
 
 	public override bool Calculate()
 	{
+		bool flag;
 		if (!base.allInputsReady())
 		{
-			return false;
+			flag = false;
 		}
-		IModule3D value = this.Inputs[0].GetValue<IModule3D>();
-		if (value == null)
+		else
 		{
-			return false;
+			IModule3D value = this.Inputs[0].GetValue<IModule3D>();
+			if (value == null)
+			{
+				flag = false;
+			}
+			else
+			{
+				IModule3D value2 = this.Inputs[1].GetValue<IModule3D>();
+				if (value2 == null)
+				{
+					flag = false;
+				}
+				else
+				{
+					IModule3D module3D = this.target.CreateModule(value, value2);
+					if (module3D == null)
+					{
+						flag = false;
+					}
+					else
+					{
+						this.Outputs[0].SetValue<IModule3D>(module3D);
+						flag = true;
+					}
+				}
+			}
 		}
-		IModule3D value2 = this.Inputs[1].GetValue<IModule3D>();
-		if (value2 == null)
-		{
-			return false;
-		}
-		IModule3D module3D = this.target.CreateModule(value, value2);
-		if (module3D == null)
-		{
-			return false;
-		}
-		this.Outputs[0].SetValue<IModule3D>(module3D);
-		return true;
+		return flag;
 	}
 
 	protected override void NodeGUI()

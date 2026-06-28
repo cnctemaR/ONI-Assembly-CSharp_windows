@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -7,8 +6,19 @@ public class FarmTileConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
+		string text = "FarmTile";
+		int num = 1;
+		int num2 = 1;
+		string text2 = "farmtilerotating_kanim";
+		float num3 = 100f;
+		int num4 = 100;
+		float num5 = 30f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
+		string[] farmable = MATERIALS.FARMABLE;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.Tile;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("FarmTile", 1, 1, "farmtilerotating_kanim", 100f, 100, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER2, MATERIALS.FARMABLE, 1600f, BuildLocationRule.Tile, BUILDINGS.DECOR.NONE, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, farmable, num6, buildLocationRule, BUILDINGS.DECOR.NONE, none);
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
 		buildingDef.Relocatable = false;
@@ -40,7 +50,7 @@ public class FarmTileConfig : IBuildingConfig
 		simCellOccupier.doReplaceElement = true;
 		go.AddOrGet<TileTemperature>();
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
-		storage.defaultStoredItemModifers = FarmTileConfig.StoredItemModifiers;
+		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		PlantablePlot plantablePlot = go.AddOrGet<PlantablePlot>();
 		plantablePlot.occupyingObjectRelativePosition = new Vector3(0f, 1f, 0f);
 		plantablePlot.AddDespoitTag(GameTags.CropSeed);
@@ -82,6 +92,4 @@ public class FarmTileConfig : IBuildingConfig
 	}
 
 	public const string ID = "FarmTile";
-
-	private static readonly List<Storage.StoredItemModifier> StoredItemModifiers = new List<Storage.StoredItemModifier> { Storage.StoredItemModifier.Seal };
 }

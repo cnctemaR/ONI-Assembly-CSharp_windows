@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -90,30 +91,58 @@ public static class Util
 	public static Component RequireComponent(this GameObject go, string name)
 	{
 		Component component = go.GetComponent(name);
+		Component component2;
 		if (component == null)
 		{
 			Output.LogErrorWithObj(go, new object[] { string.Format("{0} '{1}' requires a component of type {2}!", go.GetType().ToString(), go.name, name) });
-			return null;
+			component2 = null;
 		}
-		Util.InitializeComponent(component);
-		return component;
+		else
+		{
+			Util.InitializeComponent(component);
+			component2 = component;
+		}
+		return component2;
 	}
 
 	public static T RequireComponent<T>(this Component cmp) where T : Component
 	{
-		return cmp.gameObject.RequireComponent<T>();
+		T component = cmp.gameObject.GetComponent<T>();
+		T t;
+		if (component == null)
+		{
+			Output.LogErrorWithObj(cmp.gameObject, new object[] { string.Format("{0} '{1}' requires a component of type {2} as requested by {3}!", new object[]
+			{
+				cmp.gameObject.GetType().ToString(),
+				cmp.gameObject.name,
+				typeof(T).ToString(),
+				cmp.GetType().ToString()
+			}) });
+			t = (T)((object)null);
+		}
+		else
+		{
+			Util.InitializeComponent(component);
+			t = component;
+		}
+		return t;
 	}
 
 	public static T RequireComponent<T>(this GameObject gameObject) where T : Component
 	{
 		T component = gameObject.GetComponent<T>();
+		T t;
 		if (component == null)
 		{
 			Output.LogErrorWithObj(gameObject, new object[] { string.Format("{0} '{1}' requires a component of type {2}!", gameObject.GetType().ToString(), gameObject.name, typeof(T).ToString()) });
-			return (T)((object)null);
+			t = (T)((object)null);
 		}
-		Util.InitializeComponent(component);
-		return component;
+		else
+		{
+			Util.InitializeComponent(component);
+			t = component;
+		}
+		return t;
 	}
 
 	public static T GetFirstChildComponent<T>(this Component c) where T : Component
@@ -138,10 +167,23 @@ public static class Util
 	public static void SetLayer(Transform t, int layer)
 	{
 		t.gameObject.layer = layer;
-		foreach (object obj in t)
+		IEnumerator enumerator = t.GetEnumerator();
+		try
 		{
-			Transform transform = (Transform)obj;
-			Util.SetLayer(transform, layer);
+			while (enumerator.MoveNext())
+			{
+				object obj = enumerator.Current;
+				Transform transform = (Transform)obj;
+				Util.SetLayer(transform, layer);
+			}
+		}
+		finally
+		{
+			IDisposable disposable;
+			if ((disposable = enumerator as IDisposable) != null)
+			{
+				disposable.Dispose();
+			}
 		}
 	}
 
@@ -260,53 +302,58 @@ public static class Util
 
 	public static GameObject KInstantiate(GameObject original, Vector3 position, Quaternion rotation, GameObject parent = null, string name = null, bool initialize_id = true, int gameLayer = 0)
 	{
+		GameObject gameObject;
 		if (App.IsExiting)
 		{
-			return null;
-		}
-		GameObject gameObject = null;
-		if (original == null)
-		{
-			Output.LogWarning(new object[] { "Missing prefab" });
-		}
-		if (gameObject == null)
-		{
-			gameObject = global::UnityEngine.Object.Instantiate(original, position, rotation) as GameObject;
-			if (gameLayer != 0)
-			{
-				gameObject.SetLayerRecursively(gameLayer);
-			}
-			if (parent != null)
-			{
-				if (gameObject.GetComponent<RectTransform>() != null)
-				{
-					gameObject.transform.SetParent(parent.transform, true);
-				}
-				else
-				{
-					gameObject.transform.parent = parent.transform;
-				}
-			}
-		}
-		if (name != null)
-		{
-			gameObject.name = name;
+			gameObject = null;
 		}
 		else
 		{
-			gameObject.name = original.name;
-		}
-		KPrefabID component = gameObject.GetComponent<KPrefabID>();
-		if (component != null)
-		{
-			if (initialize_id)
+			GameObject gameObject2 = null;
+			if (original == null)
 			{
-				component.InstanceID = KPrefabID.GetUniqueID();
+				Output.LogWarning(new object[] { "Missing prefab" });
 			}
-			KPrefabIDTracker.Get().Register(component, original.GetComponent<KPrefabID>());
-			KPrefabID component2 = original.GetComponent<KPrefabID>();
-			component.CopyInitFunctions(component2);
-			component.RunInstantiateFn();
+			if (gameObject2 == null)
+			{
+				gameObject2 = global::UnityEngine.Object.Instantiate<GameObject>(original, position, rotation);
+				if (gameLayer != 0)
+				{
+					gameObject2.SetLayerRecursively(gameLayer);
+				}
+				if (parent != null)
+				{
+					if (gameObject2.GetComponent<RectTransform>() != null)
+					{
+						gameObject2.transform.SetParent(parent.transform, true);
+					}
+					else
+					{
+						gameObject2.transform.parent = parent.transform;
+					}
+				}
+			}
+			if (name != null)
+			{
+				gameObject2.name = name;
+			}
+			else
+			{
+				gameObject2.name = original.name;
+			}
+			KPrefabID component = gameObject2.GetComponent<KPrefabID>();
+			if (component != null)
+			{
+				if (initialize_id)
+				{
+					component.InstanceID = KPrefabID.GetUniqueID();
+				}
+				KPrefabIDTracker.Get().Register(component, original.GetComponent<KPrefabID>());
+				KPrefabID component2 = original.GetComponent<KPrefabID>();
+				component.CopyInitFunctions(component2);
+				component.RunInstantiateFn();
+			}
+			gameObject = gameObject2;
 		}
 		return gameObject;
 	}
@@ -319,27 +366,32 @@ public static class Util
 
 	public static GameObject KInstantiateUI(GameObject original, GameObject parent = null, bool force_active = false)
 	{
+		GameObject gameObject;
 		if (App.IsExiting)
 		{
-			return null;
+			gameObject = null;
 		}
-		GameObject gameObject = null;
-		if (original == null)
+		else
 		{
-			Output.LogWarning(new object[] { "Missing prefab" });
-		}
-		if (gameObject == null)
-		{
-			gameObject = global::UnityEngine.Object.Instantiate<GameObject>(original);
-			if (parent != null)
+			GameObject gameObject2 = null;
+			if (original == null)
 			{
-				gameObject.transform.SetParent(parent.transform, false);
+				Output.LogWarning(new object[] { "Missing prefab" });
 			}
-		}
-		gameObject.name = original.name;
-		if (force_active)
-		{
-			gameObject.SetActive(true);
+			if (gameObject2 == null)
+			{
+				gameObject2 = global::UnityEngine.Object.Instantiate<GameObject>(original);
+				if (parent != null)
+				{
+					gameObject2.transform.SetParent(parent.transform, false);
+				}
+			}
+			gameObject2.name = original.name;
+			if (force_active)
+			{
+				gameObject2.SetActive(true);
+			}
+			gameObject = gameObject2;
 		}
 		return gameObject;
 	}
@@ -446,43 +498,66 @@ public static class Util
 
 	public static GameObject FindChildGameObject(this Transform root, string name)
 	{
+		GameObject gameObject;
 		if (root == null)
 		{
-			return null;
+			gameObject = null;
 		}
-		if (root.name == name)
+		else if (root.name == name)
 		{
-			return root.gameObject;
+			gameObject = root.gameObject;
 		}
-		GameObject gameObject = null;
-		foreach (object obj in root)
+		else
 		{
-			Transform transform = (Transform)obj;
-			gameObject = transform.FindChildGameObject(name);
-			if (gameObject != null)
+			GameObject gameObject2 = null;
+			IEnumerator enumerator = root.GetEnumerator();
+			try
 			{
-				break;
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					gameObject2 = transform.FindChildGameObject(name);
+					if (gameObject2 != null)
+					{
+						break;
+					}
+				}
 			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = enumerator as IDisposable) != null)
+				{
+					disposable.Dispose();
+				}
+			}
+			gameObject = gameObject2;
 		}
 		return gameObject;
 	}
 
 	public static bool IsChildOf(this GameObject testChild, GameObject testParent)
 	{
+		bool flag;
 		if (testChild == testParent)
 		{
-			return true;
+			flag = true;
 		}
-		Transform transform = testChild.transform;
-		while (transform.parent != null)
+		else
 		{
-			if (transform.parent.gameObject == testParent)
+			Transform transform = testChild.transform;
+			while (transform.parent != null)
 			{
-				return true;
+				if (transform.parent.gameObject == testParent)
+				{
+					return true;
+				}
+				transform = transform.parent;
 			}
-			transform = transform.parent;
+			flag = false;
 		}
-		return false;
+		return flag;
 	}
 
 	public static bool HasMethod(this object obj, string method)
@@ -523,12 +598,25 @@ public static class Util
 	{
 		if (go != null)
 		{
-			foreach (object obj in go.transform)
+			IEnumerator enumerator = go.transform.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				if (transform.gameObject.name == name)
+				while (enumerator.MoveNext())
 				{
-					return transform.gameObject;
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					if (transform.gameObject.name == name)
+					{
+						return transform.gameObject;
+					}
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = enumerator as IDisposable) != null)
+				{
+					disposable.Dispose();
 				}
 			}
 		}
@@ -605,10 +693,23 @@ public static class Util
 					bounds.Encapsulate(component.bounds);
 				}
 			}
-			foreach (object obj in go.transform)
+			IEnumerator enumerator = go.transform.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				Util.GetBounds(transform.gameObject, ref bounds, ref first);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					Util.GetBounds(transform.gameObject, ref bounds, ref first);
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = enumerator as IDisposable) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 		}
 	}
@@ -719,26 +820,39 @@ public static class Util
 
 	public static string RootFolder()
 	{
+		string text;
 		if (Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsEditor)
 		{
 			string folderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-			return Path.Combine(folderPath, "Klei/OxygenNotIncluded");
+			text = Path.Combine(folderPath, "Klei/OxygenNotIncluded");
 		}
-		return Util.defaultRootFolder;
+		else
+		{
+			text = Util.defaultRootFolder;
+		}
+		return text;
 	}
 
 	public static T GetComponentInChildren<T>(this GameObject go, bool include_inactive) where T : Component
 	{
+		T t;
 		if (!include_inactive)
 		{
-			return go.GetComponentInChildren<T>();
+			t = go.GetComponentInChildren<T>();
 		}
-		T[] componentsInChildren = go.GetComponentsInChildren<T>(true);
-		if (componentsInChildren != null && componentsInChildren.Length > 0)
+		else
 		{
-			return componentsInChildren[0];
+			T[] componentsInChildren = go.GetComponentsInChildren<T>(true);
+			if (componentsInChildren != null && componentsInChildren.Length > 0)
+			{
+				t = componentsInChildren[0];
+			}
+			else
+			{
+				t = (T)((object)null);
+			}
 		}
-		return (T)((object)null);
+		return t;
 	}
 
 	public static T GetComponentInChildren<T>(this Component cmp, bool include_inactive) where T : Component
@@ -748,20 +862,38 @@ public static class Util
 
 	public static Transform FindTransformRecursive(Transform node, string name)
 	{
+		Transform transform;
 		if (node.name == name)
 		{
-			return node;
+			transform = node;
 		}
-		foreach (object obj in node)
+		else
 		{
-			Transform transform = (Transform)obj;
-			Transform transform2 = Util.FindTransformRecursive(transform, name);
-			if (transform2 != null)
+			IEnumerator enumerator = node.GetEnumerator();
+			try
 			{
-				return transform2;
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform transform2 = (Transform)obj;
+					Transform transform3 = Util.FindTransformRecursive(transform2, name);
+					if (transform3 != null)
+					{
+						return transform3;
+					}
+				}
 			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = enumerator as IDisposable) != null)
+				{
+					disposable.Dispose();
+				}
+			}
+			transform = null;
 		}
-		return null;
+		return transform;
 	}
 
 	public static void SkipKleiString(this BinaryReader reader)

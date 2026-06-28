@@ -27,33 +27,29 @@ public class Fishable : Harvestable
 
 	private void PositionProgressBar()
 	{
-		if (this.progressBar == null)
+		if (!(this.progressBar == null))
 		{
-			return;
-		}
-		this.progressBar.transform.SetPosition(new Vector3(this.transform.position.x - 0.5f, this.transform.position.y + 1f, 0f));
-		if (base.worker != null && this.positionToWorker)
-		{
-			this.progressBar.transform.SetPosition(base.worker.transform.position - new Vector3(0.5f, 0f, 0f));
+			this.progressBar.transform.SetPosition(new Vector3(base.transform.position.x - 0.5f, base.transform.position.y + 1f, 0f));
+			if (base.worker != null && this.positionToWorker)
+			{
+				this.progressBar.transform.SetPosition(base.worker.transform.position - new Vector3(0.5f, 0f, 0f));
+			}
 		}
 	}
 
 	public override void OnRefreshUserMenu(object data)
 	{
-		if (this.bodyOfWater == null)
+		if (!(this.bodyOfWater == null))
 		{
-			return;
-		}
-		if (!this.canBeHarvested)
-		{
-			return;
-		}
-		if (this.bodyOfWater.GetCatchables().Length <= 0)
-		{
-			return;
-		}
-		if (this.isMarkedForHarvest)
-		{
+			if (this.canBeHarvested)
+			{
+				if (this.bodyOfWater.GetCatchables().Length > 0)
+				{
+					if (this.isMarkedForHarvest)
+					{
+					}
+				}
+			}
 		}
 	}
 
@@ -69,28 +65,26 @@ public class Fishable : Harvestable
 	public void OnCatchComplete(object param)
 	{
 		Catchable[] catchables = this.bodyOfWater.GetCatchables();
-		if (catchables == null || catchables.Length == 0)
+		if (catchables != null && catchables.Length != 0)
 		{
-			return;
+			GameObject gameObject = this.RollCatch();
+			if (!(gameObject == null))
+			{
+				gameObject.transform.SetPosition(this.CaughtDepositLocation());
+				this.bodyOfWater.RemoveObjectFromBody(gameObject);
+				if (this.bodyOfWater == null || this.bodyOfWater.containedObjects.Count == 0)
+				{
+					PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, "Water Depleted", base.transform, 1.5f, false);
+				}
+				gameObject.GetComponent<Catchable>().Caught();
+				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, "Caught " + gameObject.GetComponent<KPrefabID>().GetProperName(), gameObject.transform, 1.5f, false);
+				if (this.AutoRestartWorkTask)
+				{
+					this.MarkForHarvest();
+				}
+				this.RefreshBodyOfWater(null);
+			}
 		}
-		GameObject gameObject = this.RollCatch();
-		if (gameObject == null)
-		{
-			return;
-		}
-		gameObject.transform.SetPosition(this.CaughtDepositLocation());
-		this.bodyOfWater.RemoveObjectFromBody(gameObject);
-		if (this.bodyOfWater == null || this.bodyOfWater.containedObjects.Count == 0)
-		{
-			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, "Water Depleted", this.transform, 1.5f, false);
-		}
-		gameObject.GetComponent<Catchable>().Caught();
-		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, "Caught " + gameObject.GetComponent<KPrefabID>().GetProperName(), gameObject.transform, 1.5f, false);
-		if (this.AutoRestartWorkTask)
-		{
-			this.MarkForHarvest();
-		}
-		this.RefreshBodyOfWater(null);
 	}
 
 	public virtual Vector3 CaughtDepositLocation()
@@ -102,19 +96,27 @@ public class Fishable : Harvestable
 		}
 		else
 		{
-			vector = this.transform.position + Vector3.up;
+			vector = base.transform.position + Vector3.up;
 		}
-		for (int i = 0; i < 3; i++)
+		int i = 0;
+		while (i < 3)
 		{
 			Vector3 vector2 = new Vector3((float)i, 0f, 0f);
+			Vector3 vector3;
 			if (this.depositLocationPriority(vector, vector2) == 2)
 			{
-				return new Vector3(vector2.x + vector.x, vector2.y + vector.y, -1.5f);
+				vector3 = new Vector3(vector2.x + vector.x, vector2.y + vector.y, -1.5f);
 			}
-			if (this.depositLocationPriority(vector, -vector2) == 2)
+			else
 			{
-				return new Vector3(-vector2.x + vector.x, -vector2.y + vector.y, -1.5f);
+				if (this.depositLocationPriority(vector, -vector2) != 2)
+				{
+					i++;
+					continue;
+				}
+				vector3 = new Vector3(-vector2.x + vector.x, -vector2.y + vector.y, -1.5f);
 			}
+			return vector3;
 		}
 		for (int j = 0; j < 3; j++)
 		{
@@ -134,15 +136,23 @@ public class Fishable : Harvestable
 	private int depositLocationPriority(Vector3 rootLocation, Vector3 offsetLocation)
 	{
 		int num = Grid.PosToCell(rootLocation + offsetLocation);
-		if (Grid.Solid[num] || !Grid.Solid[Grid.CellBelow(num)])
+		int num2;
+		if (!Grid.Solid[num] && Grid.Solid[Grid.CellBelow(num)])
 		{
-			return 0;
+			if (!Grid.Objects[num, 5])
+			{
+				num2 = 2;
+			}
+			else
+			{
+				num2 = 1;
+			}
 		}
-		if (!Grid.Objects[num, 5])
+		else
 		{
-			return 2;
+			num2 = 0;
 		}
-		return 1;
+		return num2;
 	}
 
 	private GameObject RollCatch()
@@ -171,7 +181,7 @@ public class Fishable : Harvestable
 	{
 		if (this.chore == null)
 		{
-			this.chore = new WorkChore<Fishable>(Db.Get().ChoreTypes.Harvest, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue);
+			this.chore = new WorkChore<Fishable>(Db.Get().ChoreTypes.Harvest, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
 		}
 		this.isMarkedForHarvest = true;
 	}
@@ -192,5 +202,5 @@ public class Fishable : Harvestable
 
 	public BodyOfWater bodyOfWater;
 
-	public bool positionToWorker;
+	public bool positionToWorker = false;
 }

@@ -25,16 +25,6 @@ namespace Steamworks
 			return this.m_UGCQueryHandle.GetHashCode();
 		}
 
-		public bool Equals(UGCQueryHandle_t other)
-		{
-			return this.m_UGCQueryHandle == other.m_UGCQueryHandle;
-		}
-
-		public int CompareTo(UGCQueryHandle_t other)
-		{
-			return this.m_UGCQueryHandle.CompareTo(other.m_UGCQueryHandle);
-		}
-
 		public static bool operator ==(UGCQueryHandle_t x, UGCQueryHandle_t y)
 		{
 			return x.m_UGCQueryHandle == y.m_UGCQueryHandle;
@@ -53,6 +43,16 @@ namespace Steamworks
 		public static explicit operator ulong(UGCQueryHandle_t that)
 		{
 			return that.m_UGCQueryHandle;
+		}
+
+		public bool Equals(UGCQueryHandle_t other)
+		{
+			return this.m_UGCQueryHandle == other.m_UGCQueryHandle;
+		}
+
+		public int CompareTo(UGCQueryHandle_t other)
+		{
+			return this.m_UGCQueryHandle.CompareTo(other.m_UGCQueryHandle);
 		}
 
 		public static readonly UGCQueryHandle_t Invalid = new UGCQueryHandle_t(ulong.MaxValue);

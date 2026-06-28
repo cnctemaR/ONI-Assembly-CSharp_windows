@@ -25,16 +25,6 @@ namespace Steamworks
 			return this.m_SteamItemDef.GetHashCode();
 		}
 
-		public bool Equals(SteamItemDef_t other)
-		{
-			return this.m_SteamItemDef == other.m_SteamItemDef;
-		}
-
-		public int CompareTo(SteamItemDef_t other)
-		{
-			return this.m_SteamItemDef.CompareTo(other.m_SteamItemDef);
-		}
-
 		public static bool operator ==(SteamItemDef_t x, SteamItemDef_t y)
 		{
 			return x.m_SteamItemDef == y.m_SteamItemDef;
@@ -53,6 +43,16 @@ namespace Steamworks
 		public static explicit operator int(SteamItemDef_t that)
 		{
 			return that.m_SteamItemDef;
+		}
+
+		public bool Equals(SteamItemDef_t other)
+		{
+			return this.m_SteamItemDef == other.m_SteamItemDef;
+		}
+
+		public int CompareTo(SteamItemDef_t other)
+		{
+			return this.m_SteamItemDef.CompareTo(other.m_SteamItemDef);
 		}
 
 		public int m_SteamItemDef;

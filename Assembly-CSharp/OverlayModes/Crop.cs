@@ -38,20 +38,36 @@ namespace OverlayModes
 			Vector2I vector2I;
 			Vector2I vector2I2;
 			Grid.GetVisibleExtents(out vector2I, out vector2I2);
-			Mode.RemoveOffscreenTargets<Harvestable>(this.layerTargets, vector2I, vector2I2);
+			Mode.RemoveOffscreenTargets<Harvestable>(this.layerTargets, vector2I, vector2I2, null);
 			IEnumerable allIntersecting = this.partition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y));
-			foreach (object obj in allIntersecting)
+			IEnumerator enumerator = allIntersecting.GetEnumerator();
+			try
 			{
-				Harvestable harvestable = (Harvestable)obj;
-				base.AddTargetIfVisible<Harvestable>(harvestable, vector2I, vector2I2, this.layerTargets, this.targetLayer);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Harvestable harvestable = (Harvestable)obj;
+					base.AddTargetIfVisible<Harvestable>(harvestable, vector2I, vector2I2, this.layerTargets, this.targetLayer, null, null);
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = enumerator as IDisposable) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 			foreach (Harvestable harvestable2 in Components.Harvestables)
 			{
 				Vector2I vector2I3 = Grid.PosToXY(harvestable2.transform.position);
-				if (vector2I <= vector2I3 && vector2I3 <= vector2I2 && !this.privateTargets.Contains(harvestable2))
+				if (vector2I <= vector2I3 && vector2I3 <= vector2I2)
 				{
-					this.AddCropUI(harvestable2);
-					this.queuedAdds.Add(harvestable2);
+					if (!this.privateTargets.Contains(harvestable2))
+					{
+						this.AddCropUI(harvestable2);
+						this.queuedAdds.Add(harvestable2);
+					}
 				}
 			}
 			foreach (Harvestable harvestable3 in this.queuedAdds)
@@ -118,7 +134,7 @@ namespace OverlayModes
 
 		private List<Crop.UpdateCropInfo> updateCropInfo = new List<Crop.UpdateCropInfo>();
 
-		private int freeHarvestableNotificationIdx;
+		private int freeHarvestableNotificationIdx = 0;
 
 		private List<GameObject> harvestableNotificationList = new List<GameObject>();
 

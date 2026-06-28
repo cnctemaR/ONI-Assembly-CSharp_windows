@@ -4,29 +4,28 @@ using UnityEngine;
 
 public class KAnimBatchGroup
 {
-	public KAnimBatchGroup(HashedString id, KAnimBatchGroup.MaterialType materialType)
+	public KAnimBatchGroup(HashedString id)
 	{
 		this.buildByteToFloat.bytes = null;
 		this.data = KAnimBatchManager.Instance().GetBatchGroupData(id, false);
+		this.materials = new Material[5];
 		this.batchID = id;
-		this.ResetMaterial(materialType);
 		KAnimGroupFile.Group group = KAnimGroupFile.GetGroup(id);
-		if (group == null)
+		if (group != null)
 		{
-			return;
+			this.maxGroupSize = group.maxGroupSize;
+			this.isMultiInstance = group.isMultiInstance;
+			if (group.isMultiInstance)
+			{
+				this.maxGroupSize = 1;
+			}
+			else if (this.maxGroupSize <= 0)
+			{
+				this.maxGroupSize = 60;
+			}
+			this.SetupMeshData(0);
+			this.InitialiseStaticData();
 		}
-		this.maxGroupSize = group.maxGroupSize;
-		this.isMultiInstance = group.isMultiInstance;
-		if (group.isMultiInstance)
-		{
-			this.maxGroupSize = 1;
-		}
-		else if (this.maxGroupSize <= 0)
-		{
-			this.maxGroupSize = 60;
-		}
-		this.SetupMeshData(0);
-		this.InitialiseStaticData();
 	}
 
 	public static void FinalizeTextureCache()
@@ -34,38 +33,36 @@ public class KAnimBatchGroup
 		KAnimBatchGroup.cache.Finalise();
 	}
 
-	public Material material { get; private set; }
-
 	public int layer { get; private set; }
 
-	public void ResetMaterial()
+	private Material CreateMaterial(KAnimBatchGroup.MaterialType material_type)
 	{
-		this.ResetMaterial(this.materialType);
-	}
-
-	public void ResetMaterial(KAnimBatchGroup.MaterialType matType)
-	{
-		if (this.material != null)
-		{
-			global::UnityEngine.Object.Destroy(this.material);
-			this.material = null;
-		}
-		this.materialType = matType;
-		switch (this.materialType)
+		Material material;
+		switch (material_type)
 		{
 		case KAnimBatchGroup.MaterialType.Simple:
-			this.material = new Material(Shader.Find("Klei/AnimationSimple"));
-			goto IL_00B8;
+			material = new Material(Shader.Find("Klei/AnimationSimple"));
+			goto IL_0076;
 		case KAnimBatchGroup.MaterialType.UI:
-			this.material = new Material(Shader.Find("Klei/BatchedAnimationUI"));
-			goto IL_00B8;
+			material = new Material(Shader.Find("Klei/BatchedAnimationUI"));
+			goto IL_0076;
 		case KAnimBatchGroup.MaterialType.Overlay:
-			this.material = new Material(Shader.Find("Klei/AnimationOverlay"));
-			goto IL_00B8;
+			material = new Material(Shader.Find("Klei/AnimationOverlay"));
+			goto IL_0076;
 		}
-		this.material = new Material(Shader.Find("Klei/BatchedAnimation"));
-		IL_00B8:
-		this.material.name = "Material:" + this.batchID.ToString();
+		material = new Material(Shader.Find("Klei/BatchedAnimation"));
+		IL_0076:
+		material.name = "Material:" + this.batchID.ToString();
+		return material;
+	}
+
+	public Material GetMaterial(KAnimBatchGroup.MaterialType material_type)
+	{
+		if (this.materials[(int)material_type] == null)
+		{
+			this.materials[(int)material_type] = this.CreateMaterial(material_type);
+		}
+		return this.materials[(int)material_type];
 	}
 
 	public int maxGroupSize { get; private set; }
@@ -95,10 +92,13 @@ public class KAnimBatchGroup
 
 	public void FreeResources()
 	{
-		if (this.material != null)
+		for (int i = 0; i < 5; i++)
 		{
-			global::UnityEngine.Object.Destroy(this.material);
-			this.material = null;
+			if (this.materials[i] != null)
+			{
+				global::UnityEngine.Object.Destroy(this.materials[i]);
+				this.materials[i] = null;
+			}
 		}
 		if (this.mesh != null)
 		{
@@ -141,23 +141,38 @@ public class KAnimBatchGroup
 		this.texureSize = this.GetBestTextureSize(num);
 	}
 
-	public BatchGroupInstance GetBatchGroupInstance(KAnimBatch obj)
+	public BatchGroupInstance GetBatchGroupInstance(global::UnityEngine.Object obj)
 	{
+		BatchGroupInstance batchGroupInstance;
 		if (this.instances == null || (obj == null && this.isMultiInstance))
 		{
-			return null;
+			batchGroupInstance = null;
 		}
-		int num = -1;
+		else
+		{
+			int num = -1;
+			if (this.isMultiInstance)
+			{
+				num = obj.GetInstanceID();
+				if (!this.instances.ContainsKey(num))
+				{
+					this.instances.Add(num, new BatchGroupInstance(this));
+					this.InitBuild(this.instances[num]);
+				}
+			}
+			batchGroupInstance = this.instances[num];
+		}
+		return batchGroupInstance;
+	}
+
+	public void FreeBatchGroupInstance(global::UnityEngine.Object obj, BatchGroupInstance batch_group_instance)
+	{
 		if (this.isMultiInstance)
 		{
-			num = obj.GetInstanceID();
-			if (!this.instances.ContainsKey(num))
-			{
-				this.instances.Add(num, new BatchGroupInstance(this));
-				this.InitBuild(this.instances[num]);
-			}
+			int instanceID = obj.GetInstanceID();
+			this.instances.Remove(instanceID);
+			batch_group_instance.FreeResources();
 		}
-		return this.instances[num];
 	}
 
 	public bool isMultiInstance
@@ -212,63 +227,55 @@ public class KAnimBatchGroup
 
 	private void InitAnim()
 	{
-		if (this.dataType == KAnimBatchGroup.DataType.DontRender)
+		if (this.dataType != KAnimBatchGroup.DataType.DontRender)
 		{
-			return;
+			int num = 4;
+			List<KAnim.Anim.Frame> animFrames = this.data.GetAnimFrames();
+			if (animFrames.Count == 0)
+			{
+				num += this.data.symbolFrameInstances.Count * 4;
+				num += this.data.symbolFrameInstances.Count * 16;
+			}
+			else
+			{
+				num += animFrames.Count * 4;
+				List<KAnim.Anim.FrameElement> animFrameElements = this.data.GetAnimFrameElements();
+				num += animFrameElements.Count * 16;
+			}
+			float num2 = (float)num / 4f;
+			int bestTextureSize = this.GetBestTextureSize(num2);
+			this.animDataTex = null;
+			this.animDataTex = KAnimBatchGroup.cache.Get(bestTextureSize);
+			this.animDataTex.name = "AnimData:" + this.batchID.ToString();
+			int num3 = bestTextureSize * bestTextureSize * 4 * 4;
+			KAnimConverter.ByteToFloatConverter byteToFloatConverter = new KAnimConverter.ByteToFloatConverter
+			{
+				bytes = new byte[num3]
+			};
+			this.data.WriteAnimData(byteToFloatConverter.floats);
+			this.animDataTex.LoadRawTextureData(byteToFloatConverter.bytes);
+			this.animDataTex.Apply();
 		}
-		int num = 4;
-		List<KAnim.Anim.Frame> animFrames = this.data.GetAnimFrames();
-		if (animFrames.Count == 0)
-		{
-			num += this.data.symbolFrameInstances.Count * 4;
-			num += this.data.symbolFrameInstances.Count * 16;
-		}
-		else
-		{
-			num += animFrames.Count * 4;
-			List<KAnim.Anim.FrameElement> animFrameElements = this.data.GetAnimFrameElements();
-			num += animFrameElements.Count * 16;
-		}
-		float num2 = (float)num / 4f;
-		int bestTextureSize = this.GetBestTextureSize(num2);
-		this.animDataTex = null;
-		this.animDataTex = KAnimBatchGroup.cache.Get(bestTextureSize);
-		this.animDataTex.name = "AnimData:" + this.batchID.ToString();
-		int num3 = bestTextureSize * bestTextureSize * 4 * 4;
-		KAnimConverter.ByteToFloatConverter byteToFloatConverter = new KAnimConverter.ByteToFloatConverter
-		{
-			bytes = new byte[num3]
-		};
-		this.data.WriteAnimData(byteToFloatConverter.floats);
-		this.animDataTex.LoadRawTextureData(byteToFloatConverter.bytes);
-		this.animDataTex.Apply();
-	}
-
-	public void Rebuild(BatchGroupInstance instance, MaterialPropertyBlock matProperties)
-	{
-		this.InitBuild(instance);
-		matProperties.SetTexture("buildTex", instance.buildTex.texture);
 	}
 
 	public void InitBuild(BatchGroupInstance instance)
 	{
-		if (this.dataType == KAnimBatchGroup.DataType.DontRender)
+		if (this.dataType != KAnimBatchGroup.DataType.DontRender)
 		{
-			return;
+			int num = this.data.GetBuildSymbolFrameCount() * 32;
+			float num2 = (float)num / 4f;
+			int bestTextureSize = this.GetBestTextureSize(num2);
+			if (instance.buildTex == null || bestTextureSize != instance.buildTex.width)
+			{
+				instance.DestroyTex();
+				instance.buildTex = KAnimBatchGroup.cache.Get(bestTextureSize);
+				instance.buildTex.name = "BuildData:" + this.batchID.ToString();
+				this.buildByteToFloat.bytes = instance.buildTex.bytes;
+			}
+			this.data.WriteBuildData(instance, this.buildByteToFloat.floats);
+			instance.buildTex.LoadRawTextureData(this.buildByteToFloat.bytes);
+			instance.buildTex.Apply();
 		}
-		int num = this.data.GetBuildSymbolFrameCount() * 32;
-		float num2 = (float)num / 4f;
-		int bestTextureSize = this.GetBestTextureSize(num2);
-		if (instance.buildTex == null || bestTextureSize != instance.buildTex.width)
-		{
-			instance.DestroyTex();
-			instance.buildTex = KAnimBatchGroup.cache.Get(bestTextureSize);
-			instance.buildTex.name = "BuildData:" + this.batchID.ToString();
-			this.buildByteToFloat.bytes = instance.buildTex.bytes;
-		}
-		this.data.WriteBuildData(instance, this.buildByteToFloat.floats);
-		instance.buildTex.LoadRawTextureData(this.buildByteToFloat.bytes);
-		instance.buildTex.Apply();
 	}
 
 	private Mesh BuildMesh(int numQuads)
@@ -317,12 +324,17 @@ public class KAnimBatchGroup
 
 	public KAnimBatchGroup.KAnimBatchTextureCache.Entry CreateTexture()
 	{
+		KAnimBatchGroup.KAnimBatchTextureCache.Entry entry;
 		if (this.dataType == KAnimBatchGroup.DataType.DontRender)
 		{
-			return null;
+			entry = null;
 		}
-		KAnimBatchGroup.KAnimBatchTextureCache.Entry entry = KAnimBatchGroup.cache.Get(this.texureSize);
-		entry.name = "InstanceData:" + this.batchID.ToString();
+		else
+		{
+			KAnimBatchGroup.KAnimBatchTextureCache.Entry entry2 = KAnimBatchGroup.cache.Get(this.texureSize);
+			entry2.name = "InstanceData:" + this.batchID.ToString();
+			entry = entry2;
+		}
 		return entry;
 	}
 
@@ -359,24 +371,24 @@ public class KAnimBatchGroup
 			Texture2D texture2D2 = instance.textures[j];
 			if (texture2D2 != null)
 			{
-				matProperties.SetTexture("atlas" + this.data.textures.Count + j, texture2D2);
+				matProperties.SetTexture("atlas" + (this.data.textures.Count + j), texture2D2);
 			}
 		}
 	}
 
 	private static KAnimBatchGroup.KAnimBatchTextureCache cache = new KAnimBatchGroup.KAnimBatchTextureCache();
 
-	public KAnimBatchGroup.MaterialType materialType;
+	public int batchCount = 0;
 
-	public int batchCount;
+	private int texureSize = 0;
 
-	private int texureSize;
-
-	private Dictionary<int, BatchGroupInstance> instances;
+	private Dictionary<int, BatchGroupInstance> instances = null;
 
 	private bool _isMultiInstance;
 
 	private KAnimConverter.ByteToFloatConverter buildByteToFloat;
+
+	private Material[] materials;
 
 	public class KAnimBatchTextureCache
 	{
@@ -519,7 +531,8 @@ public class KAnimBatchGroup
 		Simple,
 		Placer,
 		UI,
-		Overlay
+		Overlay,
+		NumMaterials
 	}
 
 	public enum DataType

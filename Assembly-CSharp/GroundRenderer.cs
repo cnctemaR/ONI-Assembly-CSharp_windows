@@ -38,29 +38,28 @@ public class GroundRenderer : KMonoBehaviour
 
 	public void Render(Vector2I vis_min, Vector2I vis_max)
 	{
-		if (!base.enabled)
+		if (base.enabled)
 		{
-			return;
-		}
-		int num = LayerMask.NameToLayer("World");
-		Vector2I vector2I = new Vector2I(vis_min.x / 16, vis_min.y / 16);
-		Vector2I vector2I2 = new Vector2I((vis_max.x + 16 - 1) / 16, (vis_max.y + 16 - 1) / 16);
-		float layerZ = Grid.GetLayerZ(Grid.SceneLayer.Ground);
-		Matrix4x4 matrix4x = Matrix4x4.TRS(new Vector3(0f, 0f, layerZ), Quaternion.identity, Vector3.one);
-		for (int i = vector2I.y; i < vector2I2.y; i++)
-		{
-			for (int j = vector2I.x; j < vector2I2.x; j++)
+			int num = LayerMask.NameToLayer("World");
+			Vector2I vector2I = new Vector2I(vis_min.x / 16, vis_min.y / 16);
+			Vector2I vector2I2 = new Vector2I((vis_max.x + 16 - 1) / 16, (vis_max.y + 16 - 1) / 16);
+			float layerZ = Grid.GetLayerZ(Grid.SceneLayer.Ground);
+			Matrix4x4 matrix4x = Matrix4x4.TRS(new Vector3(0f, 0f, layerZ), Quaternion.identity, Vector3.one);
+			for (int i = vector2I.y; i < vector2I2.y; i++)
 			{
-				GroundRenderer.WorldChunk worldChunk = this.worldChunks[j, i];
-				if (this.dirtyChunks[j, i] || GroundRenderer.forceVisibleRebuild)
+				for (int j = vector2I.x; j < vector2I2.x; j++)
 				{
-					this.dirtyChunks[j, i] = false;
-					worldChunk.Rebuild(this.biomeMasks, this.elementMaterials);
+					GroundRenderer.WorldChunk worldChunk = this.worldChunks[j, i];
+					if (this.dirtyChunks[j, i] || GroundRenderer.forceVisibleRebuild)
+					{
+						this.dirtyChunks[j, i] = false;
+						worldChunk.Rebuild(this.biomeMasks, this.elementMaterials);
+					}
+					worldChunk.Render(num, ref matrix4x);
 				}
-				worldChunk.Render(num, ref matrix4x);
 			}
+			this.RebuildDirtyChunks();
 		}
-		this.RebuildDirtyChunks();
 	}
 
 	private void RebuildDirtyChunks()
@@ -71,7 +70,7 @@ public class GroundRenderer : KMonoBehaviour
 			{
 				if (this.dirtyChunks[j, i])
 				{
-					SystemScheduler.instance.AddTask(SystemScheduler.Priority.Lowest, new SchedulerEntry.Details(Guid.NewGuid(), "GroundRenderer", new Action<object>(this.RebuildDirtyChunk), new Vector2I(j, i), 0f, base.gameObject));
+					SystemScheduler.instance.AddTask(SystemScheduler.Priority.Lowest, new SchedulerEntry.Details("GroundRenderer", new Action<object>(this.RebuildDirtyChunk), new Vector2I(j, i), 0f, base.gameObject));
 				}
 			}
 		}
@@ -155,7 +154,7 @@ public class GroundRenderer : KMonoBehaviour
 	private void InitOpaqueMaterial(Material material, Element element)
 	{
 		material.name = element.id.ToString() + "_opaque";
-		material.renderQueue = 2000 + element.substance.idx;
+		material.renderQueue = RenderQueues.WorldOpaque + element.substance.idx;
 		material.EnableKeyword("OPAQUE");
 		material.DisableKeyword("ALPHA");
 		material.SetInt("_SrcAlpha", 1);
@@ -166,7 +165,7 @@ public class GroundRenderer : KMonoBehaviour
 	private void InitAlphaMaterial(Material material, Element element)
 	{
 		material.name = element.id.ToString() + "_alpha";
-		material.renderQueue = 3500 + element.substance.idx;
+		material.renderQueue = RenderQueues.WorldTransparent + element.substance.idx;
 		material.EnableKeyword("ALPHA");
 		material.DisableKeyword("OPAQUE");
 		material.SetTexture("_AlphaTestMap", this.masks.maskAtlas.texture);
@@ -250,8 +249,6 @@ public class GroundRenderer : KMonoBehaviour
 		this.elementMaterials.Clear();
 	}
 
-	private const int ChunkEdgeSize = 16;
-
 	[SerializeField]
 	private GroundMasks masks;
 
@@ -263,9 +260,11 @@ public class GroundRenderer : KMonoBehaviour
 
 	private GroundRenderer.WorldChunk[,] worldChunks;
 
+	private const int ChunkEdgeSize = 16;
+
 	private Vector2I size;
 
-	private static bool forceVisibleRebuild;
+	private static bool forceVisibleRebuild = false;
 
 	[Serializable]
 	private struct Materials
@@ -498,7 +497,7 @@ public class GroundRenderer : KMonoBehaviour
 							if (idx != num9)
 							{
 								num9 = idx;
-								int num11 = (((GroundRenderer.WorldChunk.substances[2] < idx) ? 0 : 1) << 3) | (((GroundRenderer.WorldChunk.substances[3] < idx) ? 0 : 1) << 2) | (((GroundRenderer.WorldChunk.substances[0] < idx) ? 0 : 1) << 1) | ((GroundRenderer.WorldChunk.substances[1] < idx) ? 0 : 1);
+								int num11 = (((GroundRenderer.WorldChunk.substances[2] < idx) ? 0 : 1) << 3) | (((GroundRenderer.WorldChunk.substances[3] < idx) ? 0 : 1) << 2) | (((GroundRenderer.WorldChunk.substances[0] < idx) ? 0 : 1) << 1) | (((GroundRenderer.WorldChunk.substances[1] < idx) ? 0 : 1) << 0);
 								if (num11 > 0)
 								{
 									GroundMasks.UVData[] variationUVs = biomeMaskData.tiles[num11].variationUVs;
@@ -557,11 +556,17 @@ public class GroundRenderer : KMonoBehaviour
 
 		private static int GetBiomeIdx(int cell)
 		{
+			int num;
 			if (!Grid.IsValidCell(cell))
 			{
-				return 0;
+				num = 0;
 			}
-			return (int)global::World.Instance.zoneRenderData.GetSubWorldZoneType(cell);
+			else
+			{
+				SubWorld.ZoneType subWorldZoneType = global::World.Instance.zoneRenderData.GetSubWorldZoneType(cell);
+				num = (int)subWorldZoneType;
+			}
+			return num;
 		}
 
 		private static float GetStaticRandom(int x, int y)

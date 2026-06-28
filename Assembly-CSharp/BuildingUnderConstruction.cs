@@ -5,9 +5,9 @@ public class BuildingUnderConstruction : Building
 {
 	protected override void OnPrefabInit()
 	{
-		Vector3 position = this.transform.position;
+		Vector3 position = base.transform.position;
 		position.z = Grid.GetLayerZ(this.Def.SceneLayer);
-		this.transform.SetPosition(position);
+		base.transform.SetPosition(position);
 		base.gameObject.SetLayerRecursively(LayerMask.NameToLayer("Construction"));
 		base.OnPrefabInit();
 	}
@@ -29,7 +29,7 @@ public class BuildingUnderConstruction : Building
 		}
 		if (this.Def.IsTilePiece)
 		{
-			int num = Grid.PosToCell(this.transform.position);
+			int num = Grid.PosToCell(base.transform.position);
 			this.Def.RunOnArea(num, base.Orientation, delegate(int c)
 			{
 				TileVisualizer.RefreshCell(c, this.Def.TileLayer);

@@ -1,14 +1,19 @@
 ﻿using System;
+using System.Diagnostics;
 using UnityEngine.EventSystems;
 
-public class KPointerImage : KImage, IEventSystemHandler, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
+public class KPointerImage : KImage, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler, IEventSystemHandler
 {
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onPointerEnter;
 
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onPointerExit;
 
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onPointerDown;
 
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onPointerUp;
 
 	public void OnPointerEnter(PointerEventData eventData)

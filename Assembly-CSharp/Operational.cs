@@ -18,11 +18,16 @@ public class Operational : KMonoBehaviour
 
 	public bool IsOperationalType(Operational.Flag.Type type)
 	{
+		bool flag;
 		if (type == Operational.Flag.Type.Functional)
 		{
-			return this.IsFunctional;
+			flag = this.IsFunctional;
 		}
-		return this.IsOperational;
+		else
+		{
+			flag = this.IsOperational;
+		}
+		return flag;
 	}
 
 	public void SetFlag(Operational.Flag flag, bool value)
@@ -33,13 +38,13 @@ public class Operational : KMonoBehaviour
 			if (flag2 != value)
 			{
 				this.Flags[flag] = value;
-				this.Trigger(187661686, flag);
+				base.Trigger(187661686, flag);
 			}
 		}
 		else
 		{
 			this.Flags[flag] = value;
-			this.Trigger(187661686, flag);
+			base.Trigger(187661686, flag);
 		}
 		if (flag.FlagType == Operational.Flag.Type.Functional && value != this.IsFunctional)
 		{
@@ -70,7 +75,7 @@ public class Operational : KMonoBehaviour
 			}
 		}
 		this.IsFunctional = flag;
-		this.Trigger(-1852328367, this.IsFunctional);
+		base.Trigger(-1852328367, this.IsFunctional);
 	}
 
 	private void UpdateOperational()
@@ -101,7 +106,7 @@ public class Operational : KMonoBehaviour
 			{
 				base.GetComponent<KPrefabID>().RemoveTag(GameTags.Operational);
 			}
-			this.Trigger(-592767678, this.IsOperational);
+			base.Trigger(-592767678, this.IsOperational);
 			Game.Instance.Trigger(-809948329, base.gameObject);
 		}
 	}
@@ -111,7 +116,7 @@ public class Operational : KMonoBehaviour
 		if (this.IsActive != value)
 		{
 			this.IsActive = value;
-			this.Trigger(824508782, this.IsActive);
+			base.Trigger(824508782, this.IsActive);
 			Game.Instance.Trigger(-809948329, base.gameObject);
 		}
 	}

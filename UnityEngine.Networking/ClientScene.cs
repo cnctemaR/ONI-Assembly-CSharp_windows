@@ -6,6 +6,11 @@ namespace UnityEngine.Networking
 {
 	public class ClientScene
 	{
+		private static bool hasMigrationPending()
+		{
+			return ClientScene.s_ReconnectId != -1;
+		}
+
 		public static void SetReconnectId(int newReconnectId, PeerInfoMessage[] peers)
 		{
 			ClientScene.s_ReconnectId = newReconnectId;
@@ -94,24 +99,29 @@ namespace UnityEngine.Networking
 		internal static bool GetPlayerController(short playerControllerId, out PlayerController player)
 		{
 			player = null;
+			bool flag;
 			if ((int)playerControllerId >= ClientScene.localPlayers.Count)
 			{
 				if (LogFilter.logWarn)
 				{
 					Debug.Log("ClientScene::GetPlayer: no local player found for: " + playerControllerId);
 				}
-				return false;
+				flag = false;
 			}
-			if (ClientScene.localPlayers[(int)playerControllerId] == null)
+			else if (ClientScene.localPlayers[(int)playerControllerId] == null)
 			{
 				if (LogFilter.logWarn)
 				{
 					Debug.LogWarning("ClientScene::GetPlayer: local player is null for: " + playerControllerId);
 				}
-				return false;
+				flag = false;
 			}
-			player = ClientScene.localPlayers[(int)playerControllerId];
-			return player.gameObject != null;
+			else
+			{
+				player = ClientScene.localPlayers[(int)playerControllerId];
+				flag = player.gameObject != null;
+			}
+			return flag;
 		}
 
 		internal static void InternalAddPlayer(NetworkIdentity view, short playerControllerId)
@@ -153,78 +163,103 @@ namespace UnityEngine.Networking
 
 		public static bool AddPlayer(NetworkConnection readyConn, short playerControllerId, MessageBase extraMessage)
 		{
+			bool flag;
 			if (playerControllerId < 0)
 			{
 				if (LogFilter.logError)
 				{
 					Debug.LogError("ClientScene::AddPlayer: playerControllerId of " + playerControllerId + " is negative");
 				}
-				return false;
+				flag = false;
 			}
-			if (playerControllerId > 32)
+			else if (playerControllerId > 32)
 			{
 				if (LogFilter.logError)
 				{
 					Debug.LogError(string.Concat(new object[] { "ClientScene::AddPlayer: playerControllerId of ", playerControllerId, " is too high, max is ", 32 }));
 				}
-				return false;
-			}
-			if (playerControllerId > 16 && LogFilter.logWarn)
-			{
-				Debug.LogWarning("ClientScene::AddPlayer: playerControllerId of " + playerControllerId + " is unusually high");
-			}
-			while ((int)playerControllerId >= ClientScene.s_LocalPlayers.Count)
-			{
-				ClientScene.s_LocalPlayers.Add(new PlayerController());
-			}
-			if (readyConn == null)
-			{
-				if (!ClientScene.s_IsReady)
-				{
-					if (LogFilter.logError)
-					{
-						Debug.LogError("Must call AddPlayer() with a connection the first time to become ready.");
-					}
-					return false;
-				}
+				flag = false;
 			}
 			else
 			{
-				ClientScene.s_IsReady = true;
-				ClientScene.s_ReadyConnection = readyConn;
-			}
-			PlayerController playerController;
-			if (ClientScene.s_ReadyConnection.GetPlayerController(playerControllerId, out playerController) && playerController.IsValid && playerController.gameObject != null)
-			{
-				if (LogFilter.logError)
+				if (playerControllerId > 16)
 				{
-					Debug.LogError("ClientScene::AddPlayer: playerControllerId of " + playerControllerId + " already in use.");
+					if (LogFilter.logWarn)
+					{
+						Debug.LogWarning("ClientScene::AddPlayer: playerControllerId of " + playerControllerId + " is unusually high");
+					}
 				}
-				return false;
-			}
-			if (LogFilter.logDebug)
-			{
-				Debug.Log(string.Concat(new object[]
+				while ((int)playerControllerId >= ClientScene.s_LocalPlayers.Count)
 				{
-					"ClientScene::AddPlayer() for ID ",
-					playerControllerId,
-					" called with connection [",
-					ClientScene.s_ReadyConnection,
-					"]"
-				}));
-			}
-			if (ClientScene.s_ReconnectId == -1)
-			{
-				AddPlayerMessage addPlayerMessage = new AddPlayerMessage();
-				addPlayerMessage.playerControllerId = playerControllerId;
-				if (extraMessage != null)
-				{
-					NetworkWriter networkWriter = new NetworkWriter();
-					extraMessage.Serialize(networkWriter);
-					addPlayerMessage.msgData = networkWriter.ToArray();
-					addPlayerMessage.msgSize = (int)networkWriter.Position;
+					ClientScene.s_LocalPlayers.Add(new PlayerController());
 				}
-				ClientScene.s_ReadyConnection.Send(37, addPlayerMessage);
+				if (readyConn == null)
+				{
+					if (!ClientScene.s_IsReady)
+					{
+						if (LogFilter.logError)
+						{
+							Debug.LogError("Must call AddPlayer() with a connection the first time to become ready.");
+						}
+						return false;
+					}
+				}
+				else
+				{
+					ClientScene.s_IsReady = true;
+					ClientScene.s_ReadyConnection = readyConn;
+				}
+				PlayerController playerController;
+				if (ClientScene.s_ReadyConnection.GetPlayerController(playerControllerId, out playerController))
+				{
+					if (playerController.IsValid && playerController.gameObject != null)
+					{
+						if (LogFilter.logError)
+						{
+							Debug.LogError("ClientScene::AddPlayer: playerControllerId of " + playerControllerId + " already in use.");
+						}
+						return false;
+					}
+				}
+				if (LogFilter.logDebug)
+				{
+					Debug.Log(string.Concat(new object[]
+					{
+						"ClientScene::AddPlayer() for ID ",
+						playerControllerId,
+						" called with connection [",
+						ClientScene.s_ReadyConnection,
+						"]"
+					}));
+				}
+				if (!ClientScene.hasMigrationPending())
+				{
+					AddPlayerMessage addPlayerMessage = new AddPlayerMessage();
+					addPlayerMessage.playerControllerId = playerControllerId;
+					if (extraMessage != null)
+					{
+						NetworkWriter networkWriter = new NetworkWriter();
+						extraMessage.Serialize(networkWriter);
+						addPlayerMessage.msgData = networkWriter.ToArray();
+						addPlayerMessage.msgSize = (int)networkWriter.Position;
+					}
+					ClientScene.s_ReadyConnection.Send(37, addPlayerMessage);
+					flag = true;
+				}
+				else
+				{
+					flag = ClientScene.SendReconnectMessage(extraMessage);
+				}
+			}
+			return flag;
+		}
+
+		public static bool SendReconnectMessage(MessageBase extraMessage)
+		{
+			bool flag;
+			if (!ClientScene.hasMigrationPending())
+			{
+				flag = false;
 			}
 			else
 			{
@@ -239,35 +274,40 @@ namespace UnityEngine.Networking
 					{
 						Debug.LogError("ClientScene::AddPlayer: reconnecting, but no peers.");
 					}
-					return false;
+					flag = false;
 				}
-				foreach (PeerInfoMessage peerInfoMessage in ClientScene.s_Peers)
+				else
 				{
-					if (peerInfoMessage.playerIds != null)
+					for (int i = 0; i < ClientScene.s_Peers.Length; i++)
 					{
-						if (peerInfoMessage.connectionId == ClientScene.s_ReconnectId)
+						PeerInfoMessage peerInfoMessage = ClientScene.s_Peers[i];
+						if (peerInfoMessage.playerIds != null)
 						{
-							foreach (PeerInfoPlayer peerInfoPlayer in peerInfoMessage.playerIds)
+							if (peerInfoMessage.connectionId == ClientScene.s_ReconnectId)
 							{
-								ReconnectMessage reconnectMessage = new ReconnectMessage();
-								reconnectMessage.oldConnectionId = ClientScene.s_ReconnectId;
-								reconnectMessage.netId = peerInfoPlayer.netId;
-								reconnectMessage.playerControllerId = peerInfoPlayer.playerControllerId;
-								if (extraMessage != null)
+								for (int j = 0; j < peerInfoMessage.playerIds.Length; j++)
 								{
-									NetworkWriter networkWriter2 = new NetworkWriter();
-									extraMessage.Serialize(networkWriter2);
-									reconnectMessage.msgData = networkWriter2.ToArray();
-									reconnectMessage.msgSize = (int)networkWriter2.Position;
+									ReconnectMessage reconnectMessage = new ReconnectMessage();
+									reconnectMessage.oldConnectionId = ClientScene.s_ReconnectId;
+									reconnectMessage.netId = peerInfoMessage.playerIds[j].netId;
+									reconnectMessage.playerControllerId = peerInfoMessage.playerIds[j].playerControllerId;
+									if (extraMessage != null)
+									{
+										NetworkWriter networkWriter = new NetworkWriter();
+										extraMessage.Serialize(networkWriter);
+										reconnectMessage.msgData = networkWriter.ToArray();
+										reconnectMessage.msgSize = (int)networkWriter.Position;
+									}
+									ClientScene.s_ReadyConnection.Send(47, reconnectMessage);
 								}
-								ClientScene.s_ReadyConnection.Send(47, reconnectMessage);
 							}
 						}
 					}
+					ClientScene.SetReconnectId(-1, null);
+					flag = true;
 				}
-				ClientScene.SetReconnectId(-1, null);
 			}
-			return true;
+			return flag;
 		}
 
 		public static bool RemovePlayer(short playerControllerId)
@@ -284,6 +324,7 @@ namespace UnityEngine.Networking
 				}));
 			}
 			PlayerController playerController;
+			bool flag;
 			if (ClientScene.s_ReadyConnection.GetPlayerController(playerControllerId, out playerController))
 			{
 				RemovePlayerMessage removePlayerMessage = new RemovePlayerMessage();
@@ -292,43 +333,55 @@ namespace UnityEngine.Networking
 				ClientScene.s_ReadyConnection.RemovePlayerController(playerControllerId);
 				ClientScene.s_LocalPlayers[(int)playerControllerId] = new PlayerController();
 				Object.Destroy(playerController.gameObject);
-				return true;
+				flag = true;
 			}
-			if (LogFilter.logError)
+			else
 			{
-				Debug.LogError("Failed to find player ID " + playerControllerId);
+				if (LogFilter.logError)
+				{
+					Debug.LogError("Failed to find player ID " + playerControllerId);
+				}
+				flag = false;
 			}
-			return false;
+			return flag;
 		}
 
 		public static bool Ready(NetworkConnection conn)
 		{
+			bool flag;
 			if (ClientScene.s_IsReady)
 			{
 				if (LogFilter.logError)
 				{
 					Debug.LogError("A connection has already been set as ready. There can only be one.");
 				}
-				return false;
+				flag = false;
 			}
-			if (LogFilter.logDebug)
+			else
 			{
-				Debug.Log("ClientScene::Ready() called with connection [" + conn + "]");
+				if (LogFilter.logDebug)
+				{
+					Debug.Log("ClientScene::Ready() called with connection [" + conn + "]");
+				}
+				if (conn != null)
+				{
+					ReadyMessage readyMessage = new ReadyMessage();
+					conn.Send(35, readyMessage);
+					ClientScene.s_IsReady = true;
+					ClientScene.s_ReadyConnection = conn;
+					ClientScene.s_ReadyConnection.isReady = true;
+					flag = true;
+				}
+				else
+				{
+					if (LogFilter.logError)
+					{
+						Debug.LogError("Ready() called with invalid connection object: conn=null");
+					}
+					flag = false;
+				}
 			}
-			if (conn != null)
-			{
-				ReadyMessage readyMessage = new ReadyMessage();
-				conn.Send(35, readyMessage);
-				ClientScene.s_IsReady = true;
-				ClientScene.s_ReadyConnection = conn;
-				ClientScene.s_ReadyConnection.isReady = true;
-				return true;
-			}
-			if (LogFilter.logError)
-			{
-				Debug.LogError("Ready() called with invalid connection object: conn=null");
-			}
-			return false;
+			return flag;
 		}
 
 		public static NetworkClient ConnectLocalServer()
@@ -385,13 +438,18 @@ namespace UnityEngine.Networking
 
 		internal static NetworkIdentity SpawnSceneObject(NetworkSceneId sceneId)
 		{
+			NetworkIdentity networkIdentity2;
 			if (ClientScene.s_SpawnableObjects.ContainsKey(sceneId))
 			{
 				NetworkIdentity networkIdentity = ClientScene.s_SpawnableObjects[sceneId];
 				ClientScene.s_SpawnableObjects.Remove(sceneId);
-				return networkIdentity;
+				networkIdentity2 = networkIdentity;
 			}
-			return null;
+			else
+			{
+				networkIdentity2 = null;
+			}
+			return networkIdentity2;
 		}
 
 		internal static void RegisterSystemHandlers(NetworkClient client, bool localClient)
@@ -426,16 +484,21 @@ namespace UnityEngine.Networking
 		internal static string GetStringForAssetId(NetworkHash128 assetId)
 		{
 			GameObject gameObject;
+			string text;
+			SpawnDelegate spawnDelegate;
 			if (NetworkScene.GetPrefab(assetId, out gameObject))
 			{
-				return gameObject.name;
+				text = gameObject.name;
 			}
-			SpawnDelegate spawnDelegate;
-			if (NetworkScene.GetSpawnHandler(assetId, out spawnDelegate))
+			else if (NetworkScene.GetSpawnHandler(assetId, out spawnDelegate))
 			{
-				return spawnDelegate.Method.Name;
+				text = spawnDelegate.GetMethodName();
 			}
-			return "unknown";
+			else
+			{
+				text = "unknown";
+			}
+			return text;
 		}
 
 		public static void RegisterPrefab(GameObject prefab, NetworkHash128 newAssetId)
@@ -500,17 +563,16 @@ namespace UnityEngine.Networking
 				NetworkReader networkReader = new NetworkReader(payload);
 				uv.OnUpdateVars(networkReader, true);
 			}
-			if (newGameObject == null)
+			if (!(newGameObject == null))
 			{
-				return;
-			}
-			newGameObject.SetActive(true);
-			uv.SetNetworkInstanceId(netId);
-			ClientScene.SetLocalObject(netId, newGameObject);
-			if (ClientScene.s_IsSpawnFinished)
-			{
-				uv.OnStartClient();
-				ClientScene.CheckForOwner(uv);
+				newGameObject.SetActive(true);
+				uv.SetNetworkInstanceId(netId);
+				ClientScene.SetLocalObject(netId, newGameObject);
+				if (ClientScene.s_IsSpawnFinished)
+				{
+					uv.OnStartClient();
+					ClientScene.CheckForOwner(uv);
+				}
 			}
 		}
 
@@ -523,75 +585,99 @@ namespace UnityEngine.Networking
 				{
 					Debug.LogError("OnObjSpawn netId: " + ClientScene.s_ObjectSpawnMessage.netId + " has invalid asset Id");
 				}
-				return;
 			}
-			if (LogFilter.logDebug)
+			else
 			{
-				Debug.Log(string.Concat(new object[]
+				if (LogFilter.logDebug)
 				{
-					"Client spawn handler instantiating [netId:",
-					ClientScene.s_ObjectSpawnMessage.netId,
-					" asset ID:",
-					ClientScene.s_ObjectSpawnMessage.assetId,
-					" pos:",
-					ClientScene.s_ObjectSpawnMessage.position,
-					"]"
-				}));
-			}
-			NetworkIdentity networkIdentity;
-			if (ClientScene.s_NetworkScene.GetNetworkIdentity(ClientScene.s_ObjectSpawnMessage.netId, out networkIdentity))
-			{
-				ClientScene.ApplySpawnPayload(networkIdentity, ClientScene.s_ObjectSpawnMessage.position, ClientScene.s_ObjectSpawnMessage.payload, ClientScene.s_ObjectSpawnMessage.netId, null);
-				return;
-			}
-			GameObject gameObject;
-			SpawnDelegate spawnDelegate;
-			if (NetworkScene.GetPrefab(ClientScene.s_ObjectSpawnMessage.assetId, out gameObject))
-			{
-				GameObject gameObject2 = (GameObject)Object.Instantiate(gameObject, ClientScene.s_ObjectSpawnMessage.position, Quaternion.identity);
-				networkIdentity = gameObject2.GetComponent<NetworkIdentity>();
-				if (networkIdentity == null)
-				{
-					if (LogFilter.logError)
+					Debug.Log(string.Concat(new object[]
 					{
-						Debug.LogError("Client object spawned for " + ClientScene.s_ObjectSpawnMessage.assetId + " does not have a NetworkIdentity");
-					}
-					return;
+						"Client spawn handler instantiating [netId:",
+						ClientScene.s_ObjectSpawnMessage.netId,
+						" asset ID:",
+						ClientScene.s_ObjectSpawnMessage.assetId,
+						" pos:",
+						ClientScene.s_ObjectSpawnMessage.position,
+						"]"
+					}));
 				}
-				ClientScene.ApplySpawnPayload(networkIdentity, ClientScene.s_ObjectSpawnMessage.position, ClientScene.s_ObjectSpawnMessage.payload, ClientScene.s_ObjectSpawnMessage.netId, gameObject2);
-			}
-			else if (NetworkScene.GetSpawnHandler(ClientScene.s_ObjectSpawnMessage.assetId, out spawnDelegate))
-			{
-				GameObject gameObject3 = spawnDelegate(ClientScene.s_ObjectSpawnMessage.position, ClientScene.s_ObjectSpawnMessage.assetId);
-				if (gameObject3 == null)
+				NetworkIdentity networkIdentity;
+				GameObject gameObject;
+				SpawnDelegate spawnDelegate;
+				if (ClientScene.s_NetworkScene.GetNetworkIdentity(ClientScene.s_ObjectSpawnMessage.netId, out networkIdentity))
 				{
-					if (LogFilter.logWarn)
+					ClientScene.ApplySpawnPayload(networkIdentity, ClientScene.s_ObjectSpawnMessage.position, ClientScene.s_ObjectSpawnMessage.payload, ClientScene.s_ObjectSpawnMessage.netId, null);
+				}
+				else if (NetworkScene.GetPrefab(ClientScene.s_ObjectSpawnMessage.assetId, out gameObject))
+				{
+					GameObject gameObject2 = Object.Instantiate<GameObject>(gameObject, ClientScene.s_ObjectSpawnMessage.position, ClientScene.s_ObjectSpawnMessage.rotation);
+					if (LogFilter.logDebug)
 					{
-						Debug.LogWarning("Client spawn handler for " + ClientScene.s_ObjectSpawnMessage.assetId + " returned null");
+						Debug.Log(string.Concat(new object[]
+						{
+							"Client spawn handler instantiating [netId:",
+							ClientScene.s_ObjectSpawnMessage.netId,
+							" asset ID:",
+							ClientScene.s_ObjectSpawnMessage.assetId,
+							" pos:",
+							ClientScene.s_ObjectSpawnMessage.position,
+							" rotation: ",
+							ClientScene.s_ObjectSpawnMessage.rotation,
+							"]"
+						}));
 					}
-					return;
-				}
-				networkIdentity = gameObject3.GetComponent<NetworkIdentity>();
-				if (networkIdentity == null)
-				{
-					if (LogFilter.logError)
+					networkIdentity = gameObject2.GetComponent<NetworkIdentity>();
+					if (networkIdentity == null)
 					{
-						Debug.LogError("Client object spawned for " + ClientScene.s_ObjectSpawnMessage.assetId + " does not have a network identity");
+						if (LogFilter.logError)
+						{
+							Debug.LogError("Client object spawned for " + ClientScene.s_ObjectSpawnMessage.assetId + " does not have a NetworkIdentity");
+						}
 					}
-					return;
+					else
+					{
+						networkIdentity.Reset();
+						ClientScene.ApplySpawnPayload(networkIdentity, ClientScene.s_ObjectSpawnMessage.position, ClientScene.s_ObjectSpawnMessage.payload, ClientScene.s_ObjectSpawnMessage.netId, gameObject2);
+					}
 				}
-				networkIdentity.SetDynamicAssetId(ClientScene.s_ObjectSpawnMessage.assetId);
-				ClientScene.ApplySpawnPayload(networkIdentity, ClientScene.s_ObjectSpawnMessage.position, ClientScene.s_ObjectSpawnMessage.payload, ClientScene.s_ObjectSpawnMessage.netId, gameObject3);
-			}
-			else if (LogFilter.logError)
-			{
-				Debug.LogError(string.Concat(new object[]
+				else if (NetworkScene.GetSpawnHandler(ClientScene.s_ObjectSpawnMessage.assetId, out spawnDelegate))
 				{
-					"Failed to spawn server object, assetId=",
-					ClientScene.s_ObjectSpawnMessage.assetId,
-					" netId=",
-					ClientScene.s_ObjectSpawnMessage.netId
-				}));
+					GameObject gameObject3 = spawnDelegate(ClientScene.s_ObjectSpawnMessage.position, ClientScene.s_ObjectSpawnMessage.assetId);
+					if (gameObject3 == null)
+					{
+						if (LogFilter.logWarn)
+						{
+							Debug.LogWarning("Client spawn handler for " + ClientScene.s_ObjectSpawnMessage.assetId + " returned null");
+						}
+					}
+					else
+					{
+						networkIdentity = gameObject3.GetComponent<NetworkIdentity>();
+						if (networkIdentity == null)
+						{
+							if (LogFilter.logError)
+							{
+								Debug.LogError("Client object spawned for " + ClientScene.s_ObjectSpawnMessage.assetId + " does not have a network identity");
+							}
+						}
+						else
+						{
+							networkIdentity.Reset();
+							networkIdentity.SetDynamicAssetId(ClientScene.s_ObjectSpawnMessage.assetId);
+							ClientScene.ApplySpawnPayload(networkIdentity, ClientScene.s_ObjectSpawnMessage.position, ClientScene.s_ObjectSpawnMessage.payload, ClientScene.s_ObjectSpawnMessage.netId, gameObject3);
+						}
+					}
+				}
+				else if (LogFilter.logError)
+				{
+					Debug.LogError(string.Concat(new object[]
+					{
+						"Failed to spawn server object, did you forget to add it to the NetworkManager? assetId=",
+						ClientScene.s_ObjectSpawnMessage.assetId,
+						" netId=",
+						ClientScene.s_ObjectSpawnMessage.netId
+					}));
+				}
 			}
 		}
 
@@ -614,30 +700,34 @@ namespace UnityEngine.Networking
 			if (ClientScene.s_NetworkScene.GetNetworkIdentity(ClientScene.s_ObjectSpawnSceneMessage.netId, out networkIdentity))
 			{
 				ClientScene.ApplySpawnPayload(networkIdentity, ClientScene.s_ObjectSpawnSceneMessage.position, ClientScene.s_ObjectSpawnSceneMessage.payload, ClientScene.s_ObjectSpawnSceneMessage.netId, networkIdentity.gameObject);
-				return;
 			}
-			NetworkIdentity networkIdentity2 = ClientScene.SpawnSceneObject(ClientScene.s_ObjectSpawnSceneMessage.sceneId);
-			if (networkIdentity2 == null)
+			else
 			{
-				if (LogFilter.logError)
+				NetworkIdentity networkIdentity2 = ClientScene.SpawnSceneObject(ClientScene.s_ObjectSpawnSceneMessage.sceneId);
+				if (networkIdentity2 == null)
 				{
-					Debug.LogError("Spawn scene object not found for " + ClientScene.s_ObjectSpawnSceneMessage.sceneId);
+					if (LogFilter.logError)
+					{
+						Debug.LogError("Spawn scene object not found for " + ClientScene.s_ObjectSpawnSceneMessage.sceneId);
+					}
 				}
-				return;
-			}
-			if (LogFilter.logDebug)
-			{
-				Debug.Log(string.Concat(new object[]
+				else
 				{
-					"Client spawn for [netId:",
-					ClientScene.s_ObjectSpawnSceneMessage.netId,
-					"] [sceneId:",
-					ClientScene.s_ObjectSpawnSceneMessage.sceneId,
-					"] obj:",
-					networkIdentity2.gameObject.name
-				}));
+					if (LogFilter.logDebug)
+					{
+						Debug.Log(string.Concat(new object[]
+						{
+							"Client spawn for [netId:",
+							ClientScene.s_ObjectSpawnSceneMessage.netId,
+							"] [sceneId:",
+							ClientScene.s_ObjectSpawnSceneMessage.sceneId,
+							"] obj:",
+							networkIdentity2.gameObject.name
+						}));
+					}
+					ClientScene.ApplySpawnPayload(networkIdentity2, ClientScene.s_ObjectSpawnSceneMessage.position, ClientScene.s_ObjectSpawnSceneMessage.payload, ClientScene.s_ObjectSpawnSceneMessage.netId, networkIdentity2.gameObject);
+				}
 			}
-			ClientScene.ApplySpawnPayload(networkIdentity2, ClientScene.s_ObjectSpawnSceneMessage.position, ClientScene.s_ObjectSpawnSceneMessage.payload, ClientScene.s_ObjectSpawnSceneMessage.netId, networkIdentity2.gameObject);
 		}
 
 		private static void OnObjectSpawnFinished(NetworkMessage netMsg)
@@ -651,17 +741,19 @@ namespace UnityEngine.Networking
 			{
 				ClientScene.PrepareToSpawnSceneObjects();
 				ClientScene.s_IsSpawnFinished = false;
-				return;
 			}
-			foreach (NetworkIdentity networkIdentity in ClientScene.objects.Values)
+			else
 			{
-				if (!networkIdentity.isClient)
+				foreach (NetworkIdentity networkIdentity in ClientScene.objects.Values)
 				{
-					networkIdentity.OnStartClient();
-					ClientScene.CheckForOwner(networkIdentity);
+					if (!networkIdentity.isClient)
+					{
+						networkIdentity.OnStartClient();
+						ClientScene.CheckForOwner(networkIdentity);
+					}
 				}
+				ClientScene.s_IsSpawnFinished = true;
 			}
-			ClientScene.s_IsSpawnFinished = true;
 		}
 
 		private static void OnObjectDestroy(NetworkMessage netMsg)
@@ -688,6 +780,7 @@ namespace UnityEngine.Networking
 					}
 				}
 				ClientScene.s_NetworkScene.RemoveLocalObject(ClientScene.s_ObjectDestroyMessage.netId);
+				networkIdentity.MarkForReset();
 			}
 			else if (LogFilter.logDebug)
 			{
@@ -772,7 +865,8 @@ namespace UnityEngine.Networking
 			}
 			else if (LogFilter.logWarn)
 			{
-				Debug.LogWarning("Did not find target for RPC message for " + networkInstanceId);
+				string cmdHashHandlerName = NetworkBehaviour.GetCmdHashHandlerName(num);
+				Debug.LogWarningFormat("Could not find target object with netId:{0} for RPC call {1}", new object[] { networkInstanceId, cmdHashHandlerName });
 			}
 		}
 
@@ -890,7 +984,7 @@ namespace UnityEngine.Networking
 						{
 							Debug.LogError("Owner message received on a local client.");
 						}
-						return;
+						break;
 					}
 					ClientScene.InternalAddPlayer(uv, pendingOwner.playerControllerId);
 					ClientScene.s_PendingOwnerIds.RemoveAt(i);
@@ -902,10 +996,6 @@ namespace UnityEngine.Networking
 				}
 			}
 		}
-
-		public const int ReconnectIdInvalid = -1;
-
-		public const int ReconnectIdHost = 0;
 
 		private static List<PlayerController> s_LocalPlayers = new List<PlayerController>();
 
@@ -930,6 +1020,10 @@ namespace UnityEngine.Networking
 		private static OwnerMessage s_OwnerMessage = new OwnerMessage();
 
 		private static ClientAuthorityMessage s_ClientAuthorityMessage = new ClientAuthorityMessage();
+
+		public const int ReconnectIdInvalid = -1;
+
+		public const int ReconnectIdHost = 0;
 
 		private static int s_ReconnectId = -1;
 

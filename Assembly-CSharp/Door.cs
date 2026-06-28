@@ -35,6 +35,14 @@ public class Door : Workable, ISaveLoadable
 		}
 	}
 
+	public bool isSealed
+	{
+		get
+		{
+			return this.controller.sm.isSealed.Get(this.controller);
+		}
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -60,20 +68,22 @@ public class Door : Workable, ISaveLoadable
 		{
 			this.Seal();
 		}
-		this.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
-		this.Subscribe(824508782, new Action<object>(this.OnOperationalChanged));
+		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		base.Subscribe(824508782, new Action<object>(this.OnOperationalChanged));
+		base.Subscribe(-801688580, new Action<object>(this.OnLogicValueChanged));
 		StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
 		HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
 		structureTemperatures.Disable(handle);
 		this.requestedState = this.CurrentState;
 		this.RefreshControlState();
+		this.SetSimState(this.IsOpen(), this.building.PlacementCells);
 		this.OnOperationalChanged(null);
 		this.collisionCollider = base.GetComponent<BoxCollider2D>();
 		this.selectionCollider = new GameObject("selection")
 		{
 			transform = 
 			{
-				parent = this.transform,
+				parent = base.transform,
 				localPosition = Vector3.zero
 			}
 		}.AddComponent<BoxCollider2D>();
@@ -115,11 +125,7 @@ public class Door : Workable, ISaveLoadable
 				list.Add(Grid.CellLeft(num2));
 				list.Add(Grid.CellRight(num2));
 			}
-			if (Grid.Solid[num2] && Grid.Element[num2].id != SimHashes.SteelDoor)
-			{
-				SimMessages.Dig(num2, -1);
-			}
-			SimMessages.SetCellProperties(num2, 4);
+			SimMessages.SetCellProperties(num2, 12);
 		}
 		List<int> list2 = new List<int>(this.building.PlacementCells);
 		foreach (int num3 in list)
@@ -138,12 +144,11 @@ public class Door : Workable, ISaveLoadable
 
 	protected override void OnCleanUp()
 	{
-		base.OnCleanUp();
 		this.UpdateDoorState(true);
 		List<int> list = new List<int>();
 		foreach (int num in this.building.PlacementCells)
 		{
-			SimMessages.ClearCellProperties(num, 4);
+			SimMessages.ClearCellProperties(num, 12);
 			Grid.RenderedByWorld[num] = Grid.Element[num].substance.renderedByWorld;
 			Grid.FakeFloor[num] = false;
 			SimMessages.ReplaceAndDisplaceElement(num, SimHashes.Vacuum, CellEventLogger.Instance.DoorOpen, 0f, -1f, byte.MaxValue, 0, -1);
@@ -180,14 +185,7 @@ public class Door : Workable, ISaveLoadable
 			Pathfinding.Instance.AddDirtyNavGridCell(num3);
 		}
 		Game.Instance.roomProber.RemoveDoor(this);
-	}
-
-	public bool isSealed
-	{
-		get
-		{
-			return this.controller.sm.isSealed.Get(this.controller);
-		}
+		base.OnCleanUp();
 	}
 
 	public void Seal()
@@ -202,23 +200,30 @@ public class Door : Workable, ISaveLoadable
 
 	private void RefreshControlState()
 	{
-		switch (this.controlState)
+		Door.ControlState controlState = this.controlState;
+		if (controlState != Door.ControlState.Auto)
 		{
-		case Door.ControlState.Auto:
-			this.operational.SetActive(false, true);
-			this.controller.sm.isLocked.Set(false, this.controller);
-			break;
-		case Door.ControlState.Opened:
-			this.operational.SetActive(true, true);
-			this.controller.sm.isLocked.Set(false, this.controller);
-			break;
-		case Door.ControlState.Closed:
-			this.operational.SetActive(false, true);
-			this.controller.sm.isLocked.Set(true, this.controller);
-			break;
+			if (controlState != Door.ControlState.Opened)
+			{
+				if (controlState == Door.ControlState.Closed)
+				{
+					this.operational.SetActive(false, true);
+					this.controller.sm.isLocked.Set(true, this.controller);
+				}
+			}
+			else
+			{
+				this.operational.SetActive(true, true);
+				this.controller.sm.isLocked.Set(false, this.controller);
+			}
 		}
-		this.Trigger(279163026, this.controlState);
-		this.SetWorldState();
+		else
+		{
+			this.operational.SetActive(false, true);
+			this.controller.sm.isLocked.Set(false, this.controller);
+		}
+		base.Trigger(279163026, this.controlState);
+		this.SetForceFieldState(this.IsOpen(), this.building.PlacementCells);
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.CurrentDoorControlState, this);
 	}
 
@@ -247,41 +252,67 @@ public class Door : Workable, ISaveLoadable
 	{
 		int[] placementCells = this.building.PlacementCells;
 		bool flag = this.IsOpen();
-		bool flag2 = flag || this.controlState == Door.ControlState.Auto;
-		bool flag3 = !flag;
-		float num = 0f;
-		foreach (int num2 in placementCells)
+		this.SetForceFieldState(flag, placementCells);
+		this.SetSimState(flag, placementCells);
+	}
+
+	private void SetForceFieldState(bool is_door_open, IList<int> cells)
+	{
+		bool flag = !is_door_open;
+		bool flag2 = is_door_open || this.controlState == Door.ControlState.Auto;
+		for (int i = 0; i < cells.Count; i++)
 		{
-			num += Grid.Temperature[num2];
+			int num = cells[i];
 			switch (this.doorType)
 			{
 			case Door.DoorType.Pressure:
 			case Door.DoorType.ManualPressure:
 			case Door.DoorType.Sealed:
+				Game.Instance.SetForceField(num, flag2, flag);
+				break;
+			case Door.DoorType.Internal:
+				Grid.Impassable[num] = this.controlState != Door.ControlState.Opened;
+				Game.Instance.SetForceField(num, this.controlState != Door.ControlState.Closed, false);
+				Pathfinding.Instance.AddDirtyNavGridCell(num);
+				break;
+			}
+		}
+	}
+
+	private void SetSimState(bool is_door_open, IList<int> cells)
+	{
+		PrimaryElement component = base.GetComponent<PrimaryElement>();
+		for (int i = 0; i < cells.Count; i++)
+		{
+			int num = cells[i];
+			Door.DoorType doorType = this.doorType;
+			if (doorType == Door.DoorType.Pressure || doorType == Door.DoorType.Sealed || doorType == Door.DoorType.ManualPressure)
 			{
-				Game.Instance.SetForceField(num2, flag2, flag3);
-				World.Instance.groundRenderer.MarkDirty(num2);
-				HandleVector<Game.CallbackInfo>.Handle invalidHandle = HandleVector<Game.CallbackInfo>.InvalidHandle;
-				if (flag)
+				World.Instance.groundRenderer.MarkDirty(num);
+				if (is_door_open)
 				{
-					int num3 = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorOpened), false)).index;
-					SimMessages.ReplaceElement(num2, SimHashes.Vacuum, CellEventLogger.Instance.DoorOpen, 0f, -1f, byte.MaxValue, 0, num3);
+					HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorOpened), false));
+					int num2 = num;
+					SimHashes simHashes = SimHashes.Vacuum;
+					CellElementEvent cellElementEvent = CellEventLogger.Instance.DoorOpen;
+					float num3 = 0f;
+					float num4 = -1f;
+					int num5 = handle.index;
+					SimMessages.ReplaceElement(num2, simHashes, cellElementEvent, num3, num4, byte.MaxValue, 0, num5);
 				}
 				else
 				{
-					PrimaryElement component = base.GetComponent<PrimaryElement>();
-					int num3 = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorClosed), false)).index;
-					SimMessages.ReplaceAndDisplaceElement(num2, SimHashes.SteelDoor, CellEventLogger.Instance.DoorClose, 400f, component.Temperature, byte.MaxValue, 0, num3);
+					HandleVector<Game.CallbackInfo>.Handle handle2 = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorClosed), false));
+					int num5 = num;
+					SimHashes simHashes = component.ElementID;
+					CellElementEvent cellElementEvent = CellEventLogger.Instance.DoorClose;
+					float num4 = 400f;
+					float num3 = component.Temperature;
+					int num2 = handle2.index;
+					SimMessages.ReplaceAndDisplaceElement(num5, simHashes, cellElementEvent, num4, num3, byte.MaxValue, 0, num2);
 				}
-				break;
 			}
-			case Door.DoorType.Internal:
-				Grid.Impassable[num2] = this.controlState != Door.ControlState.Opened;
-				Game.Instance.SetForceField(num2, this.controlState != Door.ControlState.Closed, false);
-				Pathfinding.Instance.AddDirtyNavGridCell(num2);
-				break;
-			}
-			Grid.RenderedByWorld[num2] = false;
+			Grid.RenderedByWorld[num] = false;
 		}
 	}
 
@@ -314,14 +345,15 @@ public class Door : Workable, ISaveLoadable
 				this.changeStateChore = null;
 				base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ChangeDoorControlState, false);
 			}
-			return;
 		}
-		if (DebugHandler.InstantBuildMode)
+		else if (DebugHandler.InstantBuildMode)
 		{
 			this.controlState = this.requestedState;
 			this.RefreshControlState();
 			this.OnOperationalChanged(null);
 			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ChangeDoorControlState, false);
+			this.Open();
+			this.Close();
 		}
 		else
 		{
@@ -330,30 +362,28 @@ public class Door : Workable, ISaveLoadable
 				this.changeStateChore.Cancel("Change state");
 			}
 			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.ChangeDoorControlState, this);
-			this.changeStateChore = new WorkChore<Door>(Db.Get().ChoreTypes.Toggle, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, int.MaxValue);
+			this.changeStateChore = new WorkChore<Door>(Db.Get().ChoreTypes.Toggle, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
 		}
 	}
 
 	private void OnSimDoorOpened()
 	{
-		if (this == null)
+		if (!(this == null))
 		{
-			return;
+			StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
+			HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
+			structureTemperatures.Enable(handle);
 		}
-		StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
-		HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
-		structureTemperatures.Enable(handle);
 	}
 
 	private void OnSimDoorClosed()
 	{
-		if (this == null)
+		if (!(this == null))
 		{
-			return;
+			StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
+			HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
+			structureTemperatures.Disable(handle);
 		}
-		StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
-		HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
-		structureTemperatures.Disable(handle);
 	}
 
 	protected override void OnCompleteWork(Worker worker)
@@ -364,7 +394,7 @@ public class Door : Workable, ISaveLoadable
 		this.RefreshControlState();
 		this.OnOperationalChanged(null);
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ChangeDoorControlState, false);
-		this.Trigger(1734268753, this);
+		base.Trigger(1734268753, this);
 		this.Open();
 		this.Close();
 	}
@@ -394,17 +424,21 @@ public class Door : Workable, ISaveLoadable
 		{
 			num3 = ((!this.consumer.IsPowered) ? 0.5f : 1f);
 		}
-		switch (this.controlState)
+		Door.ControlState controlState = this.controlState;
+		if (controlState != Door.ControlState.Auto && controlState != Door.ControlState.Opened)
 		{
-		case Door.ControlState.Auto:
-		case Door.ControlState.Opened:
+			if (controlState != Door.ControlState.Closed)
+			{
+			}
+		}
+		else
+		{
 			this.collisionCollider.enabled = false;
 			this.controller.sm.isOpen.Set(true, this.controller);
 			if (this.operational.IsOperational)
 			{
 				this.operational.SetActive(true, false);
 			}
-			break;
 		}
 		return num3;
 	}
@@ -423,27 +457,65 @@ public class Door : Workable, ISaveLoadable
 				component.Temperature = temperature;
 			}
 		}
-		switch (this.controlState)
+		Door.ControlState controlState = this.controlState;
+		if (controlState != Door.ControlState.Opened)
 		{
-		case Door.ControlState.Auto:
-			if (this.openCount == 0)
+			if (controlState != Door.ControlState.Closed)
+			{
+				if (controlState == Door.ControlState.Auto)
+				{
+					if (this.openCount == 0)
+					{
+						this.collisionCollider.enabled = true;
+						this.operational.SetActive(false, false);
+						this.controller.sm.isOpen.Set(false, this.controller);
+						this.userMenu.Refresh();
+					}
+				}
+			}
+			else
 			{
 				this.collisionCollider.enabled = true;
-				this.operational.SetActive(false, false);
 				this.controller.sm.isOpen.Set(false, this.controller);
-				this.userMenu.Refresh();
 			}
-			break;
-		case Door.ControlState.Closed:
-			this.collisionCollider.enabled = true;
-			this.controller.sm.isOpen.Set(false, this.controller);
-			break;
 		}
 	}
 
 	public bool IsOpen()
 	{
 		return this.controller.IsInsideState(this.controller.sm.open) || this.controller.IsInsideState(this.controller.sm.closedelay) || this.controller.IsInsideState(this.controller.sm.closeblocked);
+	}
+
+	public void OnLogicValueChanged(object data)
+	{
+		LogicValueChanged logicValueChanged = (LogicValueChanged)data;
+		if (!(logicValueChanged.portID != Door.OPEN_CLOSE_PORT_ID))
+		{
+			int newValue = logicValueChanged.newValue;
+			if (this.changeStateChore != null)
+			{
+				this.changeStateChore.Cancel("Change state");
+				this.changeStateChore = null;
+			}
+			bool flag = newValue == 1;
+			Door.ControlState controlState = this.controlState;
+			this.controlState = ((!flag) ? Door.ControlState.Closed : Door.ControlState.Opened);
+			this.requestedState = this.controlState;
+			this.RefreshControlState();
+			this.OnOperationalChanged(null);
+			if (controlState != this.controlState)
+			{
+				if (flag)
+				{
+					this.Open();
+				}
+				else
+				{
+					this.Close();
+				}
+			}
+			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ChangeDoorControlState, false);
+		}
 	}
 
 	[MyCmpReq]
@@ -464,38 +536,40 @@ public class Door : Workable, ISaveLoadable
 	[MyCmpGet]
 	private EnergyConsumer consumer;
 
-	private Door.Controller.Instance controller;
-
-	private LoggerFSS log;
-
 	private BoxCollider2D collisionCollider;
 
 	private BoxCollider2D selectionCollider;
 
 	[SerializeField]
-	public bool hasComplexUserControls;
+	public bool hasComplexUserControls = false;
 
 	[SerializeField]
 	public float unpoweredAnimSpeed = 0.25f;
 
-	[Serialize]
-	private bool hasBeenUnsealed;
+	[SerializeField]
+	public Door.DoorType doorType;
 
 	[Serialize]
-	private Door.ControlState controlState;
+	private bool hasBeenUnsealed = false;
+
+	[Serialize]
+	private Door.ControlState controlState = Door.ControlState.Auto;
+
+	private bool on = true;
+
+	private int openCount = 0;
 
 	private Door.ControlState requestedState;
 
 	private Chore changeStateChore;
 
-	[SerializeField]
-	public Door.DoorType doorType;
+	private Door.Controller.Instance controller;
+
+	private LoggerFSS log;
+
+	public static readonly HashedString OPEN_CLOSE_PORT_ID = new HashedString("DoorOpenClose");
 
 	private static readonly KAnimFile[] OVERRIDE_ANIMS = new KAnimFile[] { Assets.GetAnim("anim_use_remote_kanim") };
-
-	private bool on = true;
-
-	private int openCount;
 
 	public enum DoorType
 	{
@@ -523,23 +597,23 @@ public class Door : Workable, ISaveLoadable
 			{
 				smi.RefreshIsBlocked();
 			}).ParamTransition<bool>(this.isSealed, this.Sealed.closed, (Door.Controller.Instance smi, bool p) => p);
-			this.closeblocked.PlayAnim("open", KAnim.PlayMode.Once, null).ParamTransition<bool>(this.isOpen, this.open, (Door.Controller.Instance smi, bool p) => p).ParamTransition<bool>(this.isBlocked, this.closedelay, (Door.Controller.Instance smi, bool p) => !p);
-			this.closedelay.PlayAnim("open", KAnim.PlayMode.Once, null).ScheduleGoTo(0.5f, this.closing).ParamTransition<bool>(this.isOpen, this.open, (Door.Controller.Instance smi, bool p) => p)
+			this.closeblocked.PlayAnim("open").ParamTransition<bool>(this.isOpen, this.open, (Door.Controller.Instance smi, bool p) => p).ParamTransition<bool>(this.isBlocked, this.closedelay, (Door.Controller.Instance smi, bool p) => !p);
+			this.closedelay.PlayAnim("open").ScheduleGoTo(0.5f, this.closing).ParamTransition<bool>(this.isOpen, this.open, (Door.Controller.Instance smi, bool p) => p)
 				.ParamTransition<bool>(this.isBlocked, this.closeblocked, (Door.Controller.Instance smi, bool p) => p);
-			this.closing.PlayAnim("closing", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.closed).ParamTransition<bool>(this.isBlocked, this.closeblocked, (Door.Controller.Instance smi, bool p) => p);
-			this.open.PlayAnim("open", KAnim.PlayMode.Once, null).ParamTransition<bool>(this.isOpen, this.closeblocked, (Door.Controller.Instance smi, bool p) => !p).Enter("SetWorldStateOpen", delegate(Door.Controller.Instance smi)
+			this.closing.PlayAnim("closing").OnAnimQueueComplete(this.closed).ParamTransition<bool>(this.isBlocked, this.closeblocked, (Door.Controller.Instance smi, bool p) => p);
+			this.open.PlayAnim("open").ParamTransition<bool>(this.isOpen, this.closeblocked, (Door.Controller.Instance smi, bool p) => !p).Enter("SetWorldStateOpen", delegate(Door.Controller.Instance smi)
 			{
 				smi.master.SetWorldState();
 			});
-			this.closed.PlayAnim("closed", KAnim.PlayMode.Once, null).ParamTransition<bool>(this.isOpen, this.opening, (Door.Controller.Instance smi, bool p) => p).ParamTransition<bool>(this.isLocked, this.locking, (Door.Controller.Instance smi, bool p) => p)
+			this.closed.PlayAnim("closed").ParamTransition<bool>(this.isOpen, this.opening, (Door.Controller.Instance smi, bool p) => p).ParamTransition<bool>(this.isLocked, this.locking, (Door.Controller.Instance smi, bool p) => p)
 				.Enter("SetWorldStateClosed", delegate(Door.Controller.Instance smi)
 				{
 					smi.master.SetWorldState();
 				});
-			this.locking.PlayAnim("locked_pre", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.locked);
-			this.locked.PlayAnim("locked", KAnim.PlayMode.Once, null).ParamTransition<bool>(this.isLocked, this.unlocking, (Door.Controller.Instance smi, bool p) => !p);
-			this.unlocking.PlayAnim("locked_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.closed);
-			this.opening.PlayAnim("opening", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.open);
+			this.locking.PlayAnim("locked_pre").OnAnimQueueComplete(this.locked);
+			this.locked.PlayAnim("locked").ParamTransition<bool>(this.isLocked, this.unlocking, (Door.Controller.Instance smi, bool p) => !p);
+			this.unlocking.PlayAnim("locked_pst").OnAnimQueueComplete(this.closed);
+			this.opening.PlayAnim("opening").OnAnimQueueComplete(this.open);
 			this.Sealed.Enter(delegate(Door.Controller.Instance smi)
 			{
 				OccupyArea component = smi.master.GetComponent<OccupyArea>();
@@ -568,7 +642,7 @@ public class Door : Workable, ISaveLoadable
 				smi.sm.isLocked.Set(false, smi);
 				smi.sm.isSealed.Set(false, smi);
 			});
-			this.Sealed.closed.PlayAnim("sealed", KAnim.PlayMode.Once, null);
+			this.Sealed.closed.PlayAnim("sealed", KAnim.PlayMode.Once);
 			this.Sealed.awaiting_unlock.ToggleChore((Door.Controller.Instance smi) => this.CreateUnsealChore(smi, true), this.Sealed.chore_pst);
 			this.Sealed.chore_pst.Enter(delegate(Door.Controller.Instance smi)
 			{
@@ -588,7 +662,7 @@ public class Door : Workable, ISaveLoadable
 
 		private Chore CreateUnsealChore(Door.Controller.Instance smi, bool approach_right)
 		{
-			return new WorkChore<Unsealable>(Db.Get().ChoreTypes.Toggle, smi.master, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue);
+			return new WorkChore<Unsealable>(Db.Get().ChoreTypes.Toggle, smi.master, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
 		}
 
 		public GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.State open;

@@ -7,7 +7,7 @@ using UnityEngine;
 public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 {
 	public RecoverBreathChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.RecoverBreath, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.RecoverBreath, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
 	{
 		this.smi = new RecoverBreathChore.StatesInstance(this, target.gameObject);
 		base.AddPrecondition(ChorePreconditions.IsNotRedAlert, null);
@@ -21,7 +21,7 @@ public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 			base.sm.recoverer.Set(recoverer, base.smi);
 			Klei.AI.Attribute deltaAttribute = Db.Get().Amounts.Breath.deltaAttribute;
 			float num = 3f;
-			this.recoveringbreath = new AttributeModifier(deltaAttribute.Id, num, DUPLICANTS.MODIFIERS.RECOVERINGBREATH.NAME, false, false);
+			this.recoveringbreath = new AttributeModifier(deltaAttribute.Id, num, DUPLICANTS.MODIFIERS.RECOVERINGBREATH.NAME, false, false, true);
 		}
 
 		public void CreateLocator()
@@ -51,16 +51,14 @@ public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 		public void RemoveSuitIfNecessary()
 		{
 			Equipment equipment = base.sm.recoverer.Get<Equipment>(base.smi);
-			if (equipment == null)
+			if (!(equipment == null))
 			{
-				return;
+				Assignable assignable = equipment.GetAssignable(global::TUNING.EQUIPMENT.SUIT_SLOT);
+				if (!(assignable == null))
+				{
+					assignable.Unassign();
+				}
 			}
-			Assignable assignable = equipment.GetAssignable(global::TUNING.EQUIPMENT.SUIT_SLOT);
-			if (assignable == null)
-			{
-				return;
-			}
-			assignable.Unassign();
 		}
 
 		public AttributeModifier recoveringbreath;
@@ -83,13 +81,12 @@ public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 				smi.UpdateLocator();
 			});
 			this.approach.InitializeStates(this.recoverer, this.locator, this.remove_suit, null, null, null);
-			this.remove_suit.Enter("RemoveSuitIfNecessary", delegate(RecoverBreathChore.StatesInstance smi)
-			{
-				smi.RemoveSuitIfNecessary();
-			}).GoTo(this.recover);
-			this.recover.DefaultState(this.recover.pre).ToggleAttributeModifier("Recovering Breath", (RecoverBreathChore.StatesInstance smi) => smi.recoveringbreath, null).ToggleTag(GameTags.RecoveringBreath);
-			this.recover.pre.PlayAnim("breathe_pre", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.recover.loop);
-			this.recover.loop.PlayAnim("breathe_loop", KAnim.PlayMode.Loop, null);
+			this.remove_suit.GoTo(this.recover);
+			this.recover.DefaultState(this.recover.pre).ToggleAttributeModifier("Recovering Breath", (RecoverBreathChore.StatesInstance smi) => smi.recoveringbreath, null).ToggleTag(GameTags.RecoveringBreath)
+				.TriggerOnEnter(GameHashes.BeginBreathRecovery, null)
+				.TriggerOnExit(GameHashes.EndBreathRecovery);
+			this.recover.pre.PlayAnim("breathe_pre").OnAnimQueueComplete(this.recover.loop);
+			this.recover.loop.PlayAnim("breathe_loop", KAnim.PlayMode.Loop);
 			this.recover.pst.QueueAnim("breathe_pst", false, null).OnAnimQueueComplete(null);
 		}
 

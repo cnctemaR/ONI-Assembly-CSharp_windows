@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using UnityEngine;
 
 public abstract class KAnimControllerBase : MonoBehaviour
@@ -14,14 +15,6 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		this.layering = new KAnimLayering(this, this.fgLayer);
 		this.visible = true;
 	}
-
-	public event KAnimControllerBase.KAnimEvent onAnimEnter;
-
-	public event KAnimControllerBase.KAnimEvent onAnimComplete;
-
-	public event Action<Color32> onOverlayColourChanged;
-
-	public event Action<int> onLayerChanged;
 
 	public abstract KAnim.Anim GetAnim(int index);
 
@@ -95,6 +88,18 @@ public abstract class KAnimControllerBase : MonoBehaviour
 			}
 		}
 	}
+
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	public event KAnimControllerBase.KAnimEvent onAnimEnter;
+
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	public event KAnimControllerBase.KAnimEvent onAnimComplete;
+
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	public event Action<Color32> onOverlayColourChanged;
+
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	public event Action<int> onLayerChanged;
 
 	public int previousFrame { get; protected set; }
 
@@ -250,20 +255,30 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public KAnimHashedString GetBuildHash()
 	{
+		KAnimHashedString kanimHashedString;
 		if (this.curBuild == null)
 		{
-			return KAnimBatchManager.NO_BATCH;
+			kanimHashedString = KAnimBatchManager.NO_BATCH;
 		}
-		return this.curBuild.fileHash;
+		else
+		{
+			kanimHashedString = this.curBuild.fileHash;
+		}
+		return kanimHashedString;
 	}
 
 	protected float GetDuration()
 	{
+		float num;
 		if (this.curAnim != null)
 		{
-			return (float)this.curAnim.numFrames / this.curAnim.frameRate;
+			num = (float)this.curAnim.numFrames / this.curAnim.frameRate;
 		}
-		return 0f;
+		else
+		{
+			num = 0f;
+		}
+		return num;
 	}
 
 	protected int GetFrameIdxFromOffset(int offset)
@@ -320,17 +335,30 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public static string GetModeString(KAnim.PlayMode mode)
 	{
-		switch (mode)
+		string text;
+		if (mode != KAnim.PlayMode.Once)
 		{
-		case KAnim.PlayMode.Loop:
-			return "Loop";
-		case KAnim.PlayMode.Once:
-			return "Once";
-		case KAnim.PlayMode.Paused:
-			return "Paused";
-		default:
-			return "Unknown";
+			if (mode != KAnim.PlayMode.Loop)
+			{
+				if (mode != KAnim.PlayMode.Paused)
+				{
+					text = "Unknown";
+				}
+				else
+				{
+					text = "Paused";
+				}
+			}
+			else
+			{
+				text = "Loop";
+			}
 		}
+		else
+		{
+			text = "Once";
+		}
+		return text;
 	}
 
 	public float GetPlaySpeed()
@@ -543,24 +571,26 @@ public abstract class KAnimControllerBase : MonoBehaviour
 				anim_name,
 				"]"
 			}), base.gameObject);
-			return;
 		}
-		Queue<KAnimControllerBase.AnimData> queue = new Queue<KAnimControllerBase.AnimData>();
-		queue.Enqueue(new KAnimControllerBase.AnimData
+		else
 		{
-			anim = anim_name,
-			mode = mode,
-			speed = speed,
-			timeOffset = time_offset
-		});
-		while (this.animQueue.Count > 0)
-		{
-			queue.Enqueue(this.animQueue.Dequeue());
-		}
-		this.animQueue = queue;
-		if (this.animQueue.Count == 1 && this.stopped)
-		{
-			this.StartQueuedAnim();
+			Queue<KAnimControllerBase.AnimData> queue = new Queue<KAnimControllerBase.AnimData>();
+			queue.Enqueue(new KAnimControllerBase.AnimData
+			{
+				anim = anim_name,
+				mode = mode,
+				speed = speed,
+				timeOffset = time_offset
+			});
+			while (this.animQueue.Count > 0)
+			{
+				queue.Enqueue(this.animQueue.Dequeue());
+			}
+			this.animQueue = queue;
+			if (this.animQueue.Count == 1 && this.stopped)
+			{
+				this.StartQueuedAnim();
+			}
 		}
 	}
 
@@ -630,23 +660,21 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public void AddBuildOverride(KAnimFile override_file, bool enable_symbols, bool is_perminent = false)
 	{
-		if (override_file == null)
+		if (!(override_file == null))
 		{
-			return;
+			KAnimFileData data = override_file.GetData();
+			this.AddBuildOverride(data, enable_symbols, is_perminent);
 		}
-		KAnimFileData data = override_file.GetData();
-		this.AddBuildOverride(data, enable_symbols, is_perminent);
 	}
 
 	protected void ReApplyTempBuildOverrides()
 	{
-		if (this.temporaryBuildOverrides == null)
+		if (this.temporaryBuildOverrides != null)
 		{
-			return;
-		}
-		foreach (KAnimFileData kanimFileData in this.temporaryBuildOverrides)
-		{
-			this.ApplyBuildOverride(kanimFileData.build, true, false);
+			foreach (KAnimFileData kanimFileData in this.temporaryBuildOverrides)
+			{
+				this.ApplyBuildOverride(kanimFileData.build, true, false);
+			}
 		}
 	}
 
@@ -677,12 +705,11 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public void ClearBuildOverride(KAnimFile override_file, bool enable_symbols)
 	{
-		if (override_file == null)
+		if (!(override_file == null))
 		{
-			return;
+			KAnimFileData data = override_file.GetData();
+			this.ClearBuildOverride(data, enable_symbols);
 		}
-		KAnimFileData data = override_file.GetData();
-		this.ClearBuildOverride(data, enable_symbols);
 	}
 
 	public void ClearBuildOverride(KAnimFileData kafd, bool enable_symbols)
@@ -727,6 +754,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		{
 			this.baseHiddenSymbols = new List<KAnimHashedString>();
 		}
+		bool flag;
 		if (!this.baseHiddenSymbols.Contains(symbol))
 		{
 			this.baseHiddenSymbols.Add(symbol);
@@ -735,18 +763,23 @@ public abstract class KAnimControllerBase : MonoBehaviour
 			{
 				this.UpdateHidden(true);
 			}
-			return true;
+			flag = true;
 		}
-		return false;
+		else
+		{
+			flag = false;
+		}
+		return flag;
 	}
 
 	public bool StopHidingSymbol(KAnimHashedString symbol, bool update_hidden = true)
 	{
+		bool flag;
 		if (this.baseHiddenSymbols == null)
 		{
-			return false;
+			flag = false;
 		}
-		if (this.baseHiddenSymbols.Contains(symbol))
+		else if (this.baseHiddenSymbols.Contains(symbol))
 		{
 			this.baseHiddenSymbols.Remove(symbol);
 			this.SetDirty();
@@ -754,9 +787,13 @@ public abstract class KAnimControllerBase : MonoBehaviour
 			{
 				this.UpdateHidden(true);
 			}
-			return true;
+			flag = true;
 		}
-		return false;
+		else
+		{
+			flag = false;
+		}
+		return flag;
 	}
 
 	public void ShowSymbol(KAnimHashedString symbol)
@@ -846,16 +883,15 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	private void HideSnapToSymbols(KAnim.Build build)
 	{
-		if (build == null || build.symbols == null)
+		if (build != null && build.symbols != null)
 		{
-			return;
-		}
-		for (int i = 0; i < build.symbols.Length; i++)
-		{
-			KAnim.Build.Symbol symbol = build.symbols[i];
-			if (symbol.HasFlag(KAnim.SymbolFlags.SnapTo))
+			for (int i = 0; i < build.symbols.Length; i++)
 			{
-				this.hiddenSymbols.Add(symbol.hash);
+				KAnim.Build.Symbol symbol = build.symbols[i];
+				if (symbol.HasFlag(KAnim.SymbolFlags.SnapTo))
+				{
+					this.hiddenSymbols.Add(symbol.hash);
+				}
 			}
 		}
 	}
@@ -903,21 +939,26 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		if (animFile == null)
 		{
 			global::Debug.LogError("AddAnims() Null animfile data", null);
-			return;
 		}
-		this.maxSymbols = Mathf.Max(this.maxSymbols, animFile.maxVisSymbolFrames);
-		for (int i = 0; i < animFile.animCount; i++)
+		else
 		{
-			KAnim.Anim anim = animFile.GetAnim(i);
-			this.anims[anim.hash] = new KAnimControllerBase.AnimLookupData
+			this.maxSymbols = Mathf.Max(this.maxSymbols, animFile.maxVisSymbolFrames);
+			for (int i = 0; i < animFile.animCount; i++)
 			{
-				animIndex = anim.index
-			};
-		}
-		if (animFile.buildIndex != -1 && animFile.build.symbols != null && animFile.build.symbols.Length > 0 && this.curBuild == null)
-		{
-			this.curBuild = animFile.build;
-			this.dirtyBuild = true;
+				KAnim.Anim anim = animFile.GetAnim(i);
+				this.anims[anim.hash] = new KAnimControllerBase.AnimLookupData
+				{
+					animIndex = anim.index
+				};
+			}
+			if (animFile.buildIndex != -1 && animFile.build.symbols != null && animFile.build.symbols.Length > 0)
+			{
+				if (this.curBuild == null)
+				{
+					this.curBuild = animFile.build;
+					this.dirtyBuild = true;
+				}
+			}
 		}
 	}
 
@@ -987,17 +1028,16 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public void SetPositionPercent(float percent)
 	{
-		if (this.curAnim == null)
+		if (this.curAnim != null)
 		{
-			return;
-		}
-		this.elapsedTime = (float)this.curAnim.numFrames / this.curAnim.frameRate * percent;
-		int frameIdx = this.curAnim.GetFrameIdx(this.mode, this.elapsedTime);
-		if (this.currentFrame != frameIdx)
-		{
-			this.SetDirty();
-			this.UpdateAnimEventSequenceTime();
-			this.SuspendUpdates(false);
+			this.elapsedTime = (float)this.curAnim.numFrames / this.curAnim.frameRate * percent;
+			int frameIdx = this.curAnim.GetFrameIdx(this.mode, this.elapsedTime);
+			if (this.currentFrame != frameIdx)
+			{
+				this.SetDirty();
+				this.UpdateAnimEventSequenceTime();
+				this.SuspendUpdates(false);
+			}
 		}
 	}
 
@@ -1046,7 +1086,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 	public GameObject showWhenMissing;
 
 	[SerializeField]
-	public KAnimBatchGroup.MaterialType materialType;
+	public KAnimBatchGroup.MaterialType materialType = KAnimBatchGroup.MaterialType.Default;
 
 	[SerializeField]
 	public string initialAnim;
@@ -1073,13 +1113,13 @@ public abstract class KAnimControllerBase : MonoBehaviour
 	public bool destroyOnAnimComplete;
 
 	[SerializeField]
-	public bool inactiveDisable;
+	public bool inactiveDisable = false;
 
 	[SerializeField]
-	protected bool flipX;
+	protected bool flipX = false;
 
 	[SerializeField]
-	protected bool flipY;
+	protected bool flipY = false;
 
 	protected KAnimFileData curAnimFile;
 
@@ -1097,9 +1137,9 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	protected DeepProfiler DeepProfiler = new DeepProfiler(false);
 
-	public bool randomiseLoopedOffset;
+	public bool randomiseLoopedOffset = false;
 
-	protected float elapsedTime;
+	protected float elapsedTime = 0f;
 
 	protected float playSpeed = 1f;
 
@@ -1107,7 +1147,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	protected bool stopped = true;
 
-	protected bool dirtyBuild;
+	protected bool dirtyBuild = false;
 
 	public float animHeight = 1f;
 
@@ -1138,7 +1178,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 	protected Color32 overlayColour = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
 
 	[NonSerialized]
-	public KAnimControllerBase.VisibilityType visibilityType;
+	public KAnimControllerBase.VisibilityType visibilityType = KAnimControllerBase.VisibilityType.Default;
 
 	public Action<GameObject> onDestroySelf;
 
@@ -1154,15 +1194,15 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	protected Queue<KAnimControllerBase.AnimData> animQueue = new Queue<KAnimControllerBase.AnimData>();
 
-	protected int maxSymbols;
+	protected int maxSymbols = 0;
 
 	public Grid.SceneLayer fgLayer = Grid.SceneLayer.NoLayer;
 
-	protected AnimEventManager aem;
+	protected AnimEventManager aem = null;
 
 	private static HashedString snaptoPivot = new HashedString("snapTo_pivot");
 
-	private HashSet<KAnimFileData> temporaryBuildOverrides;
+	private HashSet<KAnimFileData> temporaryBuildOverrides = null;
 
 	public struct OverrideAnimFileData
 	{

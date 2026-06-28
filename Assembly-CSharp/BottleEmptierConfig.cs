@@ -6,8 +6,19 @@ public class BottleEmptierConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
+		string text = "BottleEmptier";
+		int num = 1;
+		int num2 = 3;
+		string text2 = "liquidator_kanim";
+		float num3 = 100f;
+		int num4 = 30;
+		float num5 = 10f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
+		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("BottleEmptier", 1, 3, "liquidator_kanim", 100f, 30, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER1, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_MINERALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER1, none);
 		buildingDef.Floodable = false;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.Overheatable = false;
@@ -17,10 +28,9 @@ public class BottleEmptierConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
+		Prioritizable.AddRef(go);
 		Storage storage = go.AddOrGet<Storage>();
 		storage.storageFilters = STORAGEFILTERS.LIQUIDS;
-		Prioritizable.AddRef(go);
-		storage.disableOnStore = true;
 		storage.showInUI = true;
 		storage.showDescriptor = true;
 		storage.capacityKg = 200f;
@@ -36,9 +46,9 @@ public class BottleEmptierConfig : IBuildingConfig
 		BuildingTemplates.DoPostConfigure(go);
 	}
 
-	public const string ID = "BottleEmptier";
-
 	private static readonly Color NoFilterTint = new Color(0.5019608f, 0.5019608f, 0.5019608f, 1f);
 
 	private static readonly Color FilterTint = new Color(1f, 1f, 1f, 1f);
+
+	public const string ID = "BottleEmptier";
 }

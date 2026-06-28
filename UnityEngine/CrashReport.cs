@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
@@ -17,15 +18,20 @@ namespace UnityEngine
 		{
 			long ticks = c1.time.Ticks;
 			long ticks2 = c2.time.Ticks;
+			int num;
 			if (ticks > ticks2)
 			{
-				return 1;
+				num = 1;
 			}
-			if (ticks < ticks2)
+			else if (ticks < ticks2)
 			{
-				return -1;
+				num = -1;
 			}
-			return 0;
+			else
+			{
+				num = 0;
+			}
+			return num;
 		}
 
 		private static void PopulateReports()
@@ -40,11 +46,10 @@ namespace UnityEngine
 					foreach (string text in reports)
 					{
 						double num;
-						string text2;
-						CrashReport.GetReportData(text, out num, out text2);
+						string reportData = CrashReport.GetReportData(text, out num);
 						DateTime dateTime = new DateTime(1970, 1, 1);
 						DateTime dateTime2 = dateTime.AddSeconds(num);
-						CrashReport.internalReports.Add(new CrashReport(text, dateTime2, text2));
+						CrashReport.internalReports.Add(new CrashReport(text, dateTime2, reportData));
 					}
 					CrashReport.internalReports.Sort(new Comparison<CrashReport>(CrashReport.Compare));
 				}
@@ -103,15 +108,18 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern string[] GetReports();
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetReportData(string id, out double secondsSinceUnixEpoch, out string text);
+		private static extern string GetReportData(string id, out double secondsSinceUnixEpoch);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool RemoveReport(string id);
 

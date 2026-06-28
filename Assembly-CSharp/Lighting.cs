@@ -21,8 +21,8 @@ public class Lighting : MonoBehaviour
 
 	private void Update()
 	{
-		Shader.SetGlobalInt("_LiquidZ", -14);
-		Shader.SetGlobalInt("_SceneLayerMax", 20);
+		Shader.SetGlobalInt("_LiquidZ", -16);
+		Shader.SetGlobalInt("_SceneLayerMax", 22);
 		Shader.SetGlobalColor("_StateTransitionColour", this.Settings.StateTransitionColor);
 		Shader.SetGlobalVector("_DigMapMapParameters", new Vector4(this.Settings.DigMapColour.r, this.Settings.DigMapColour.g, this.Settings.DigMapColour.b, this.Settings.DigMapScale));
 		Shader.SetGlobalTexture("_DigDamageMap", this.Settings.DigDamageMap);
@@ -34,7 +34,6 @@ public class Lighting : MonoBehaviour
 		Shader.SetGlobalVector("_WaterWaveParameters", new Vector4(this.Settings.WaterWaveAmplitude, this.Settings.WaterWaveFrequency, this.Settings.WaterWaveSpeed, 0f));
 		Shader.SetGlobalVector("_WaterWaveParameters2", new Vector4(this.Settings.WaterWaveAmplitude2, this.Settings.WaterWaveFrequency2, this.Settings.WaterWaveSpeed2, 0f));
 		Shader.SetGlobalVector("_WaterDetailParameters", new Vector4(this.Settings.WaterCubeMapScale, this.Settings.WaterDetailTiling, this.Settings.WaterColorScale, this.Settings.WaterDetailTiling2));
-		Shader.SetGlobalTexture("_WaterCubeMap", this.Settings.WaterCubeMap);
 		Shader.SetGlobalVector("_WaterDistortionParameters", new Vector4(this.Settings.WaterDistortionScaleStart, this.Settings.WaterDistortionScaleEnd, this.Settings.WaterDepthColorOpacityStart, this.Settings.WaterDepthColorOpacityEnd));
 		Shader.SetGlobalVector("_BloomParameters", new Vector4(this.Settings.BloomScale, 0f, 0f, 0f));
 		Shader.SetGlobalVector("_LiquidParameters2", new Vector4(this.Settings.LiquidMin, this.Settings.LiquidMax, this.Settings.LiquidCutoff, this.Settings.LiquidTransparency));

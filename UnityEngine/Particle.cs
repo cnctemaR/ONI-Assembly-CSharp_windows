@@ -4,6 +4,7 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	[UsedByNativeCode]
+	[Obsolete("This is part of the legacy particle system, which is deprecated and will be removed in a future release. Use the ParticleSystem component instead.", false)]
 	public struct Particle
 	{
 		public Vector3 position

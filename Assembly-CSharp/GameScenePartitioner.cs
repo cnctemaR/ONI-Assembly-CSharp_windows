@@ -23,14 +23,17 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.attackableEntitiesLayer = this.partitioner.CreateMask(new HashedString("FactionedEntities"));
 		this.fetchChoreLayer = this.partitioner.CreateMask(new HashedString("FetchChores"));
 		this.pickupablesLayer = this.partitioner.CreateMask(new HashedString("Pickupables"));
+		this.pickupablesChangedLayer = this.partitioner.CreateMask(new HashedString("PickupablesChanged"));
 		this.gasConduitsLayer = this.partitioner.CreateMask(new HashedString("GasConduit"));
 		this.liquidConduitsLayer = this.partitioner.CreateMask(new HashedString("LiquidConduit"));
 		this.wiresLayer = this.partitioner.CreateMask(new HashedString("Wire"));
 		this.noisePolluterLayer = this.partitioner.CreateMask(new HashedString("NoisePolluters"));
 		this.validNavCellChangedLayer = this.partitioner.CreateMask(new HashedString("validNavCellChangedLayer"));
 		this.trapsLayer = this.partitioner.CreateMask(new HashedString("trapsLayer"));
-		this.objectLayers = new ScenePartitionerLayer[25];
-		for (int i = 0; i < 25; i++)
+		this.floorSwitchActivatorLayer = this.partitioner.CreateMask(new HashedString("FloorSwitchActivatorLayer"));
+		this.floorSwitchActivatorChangedLayer = this.partitioner.CreateMask(new HashedString("FloorSwitchActivatorChangedLayer"));
+		this.objectLayers = new ScenePartitionerLayer[28];
+		for (int i = 0; i < 28; i++)
 		{
 			ObjectLayer objectLayer = (ObjectLayer)i;
 			this.objectLayers[i] = this.partitioner.CreateMask(new HashedString(objectLayer.ToString()));
@@ -50,12 +53,15 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.attackableEntitiesLayer = null;
 		this.fetchChoreLayer = null;
 		this.pickupablesLayer = null;
+		this.pickupablesChangedLayer = null;
 		this.gasConduitsLayer = null;
 		this.liquidConduitsLayer = null;
 		this.wiresLayer = null;
 		this.noisePolluterLayer = null;
 		this.validNavCellChangedLayer = null;
 		this.trapsLayer = null;
+		this.floorSwitchActivatorLayer = null;
+		this.floorSwitchActivatorChangedLayer = null;
 		this.objectLayers = null;
 	}
 
@@ -146,6 +152,8 @@ public class GameScenePartitioner : KMonoBehaviour
 
 	public ScenePartitionerLayer pickupablesLayer;
 
+	public ScenePartitionerLayer pickupablesChangedLayer;
+
 	public ScenePartitionerLayer gasConduitsLayer;
 
 	public ScenePartitionerLayer liquidConduitsLayer;
@@ -159,6 +167,10 @@ public class GameScenePartitioner : KMonoBehaviour
 	public ScenePartitionerLayer validNavCellChangedLayer;
 
 	public ScenePartitionerLayer trapsLayer;
+
+	public ScenePartitionerLayer floorSwitchActivatorLayer;
+
+	public ScenePartitionerLayer floorSwitchActivatorChangedLayer;
 
 	private ScenePartitioner partitioner;
 

@@ -12,7 +12,19 @@ namespace System
 		{
 			get
 			{
-				return TimeZone.currentTimeZone;
+				long now = DateTime.GetNow();
+				object obj = TimeZone.tz_lock;
+				TimeZone timeZone;
+				lock (obj)
+				{
+					if (TimeZone.currentTimeZone == null || now - TimeZone.timezone_check > 600000000L)
+					{
+						TimeZone.currentTimeZone = new CurrentSystemTimeZone(now);
+						TimeZone.timezone_check = now;
+					}
+					timeZone = TimeZone.currentTimeZone;
+				}
+				return timeZone;
 			}
 		}
 
@@ -130,6 +142,12 @@ namespace System
 			return this.GetUtcOffset(dateTime);
 		}
 
-		private static TimeZone currentTimeZone = new CurrentSystemTimeZone(DateTime.GetNow());
+		private static TimeZone currentTimeZone;
+
+		[NonSerialized]
+		private static object tz_lock = new object();
+
+		[NonSerialized]
+		private static long timezone_check;
 	}
 }

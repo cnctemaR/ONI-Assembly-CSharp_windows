@@ -74,58 +74,58 @@ namespace TMPro
 				this.mesh.vertices = this.vertices;
 				this.mesh.normals = this.normals;
 				this.mesh.tangents = this.tangents;
-				return;
 			}
-			for (int i = num3; i < size; i++)
+			else
 			{
-				int num4 = i * 4;
-				int num5 = i * 6;
-				this.normals[0 + num4] = TMP_MeshInfo.s_DefaultNormal;
-				this.normals[1 + num4] = TMP_MeshInfo.s_DefaultNormal;
-				this.normals[2 + num4] = TMP_MeshInfo.s_DefaultNormal;
-				this.normals[3 + num4] = TMP_MeshInfo.s_DefaultNormal;
-				this.tangents[0 + num4] = TMP_MeshInfo.s_DefaultTangent;
-				this.tangents[1 + num4] = TMP_MeshInfo.s_DefaultTangent;
-				this.tangents[2 + num4] = TMP_MeshInfo.s_DefaultTangent;
-				this.tangents[3 + num4] = TMP_MeshInfo.s_DefaultTangent;
-				this.triangles[0 + num5] = 0 + num4;
-				this.triangles[1 + num5] = 1 + num4;
-				this.triangles[2 + num5] = 2 + num4;
-				this.triangles[3 + num5] = 2 + num4;
-				this.triangles[4 + num5] = 3 + num4;
-				this.triangles[5 + num5] = 0 + num4;
+				for (int i = num3; i < size; i++)
+				{
+					int num4 = i * 4;
+					int num5 = i * 6;
+					this.normals[num4] = TMP_MeshInfo.s_DefaultNormal;
+					this.normals[1 + num4] = TMP_MeshInfo.s_DefaultNormal;
+					this.normals[2 + num4] = TMP_MeshInfo.s_DefaultNormal;
+					this.normals[3 + num4] = TMP_MeshInfo.s_DefaultNormal;
+					this.tangents[num4] = TMP_MeshInfo.s_DefaultTangent;
+					this.tangents[1 + num4] = TMP_MeshInfo.s_DefaultTangent;
+					this.tangents[2 + num4] = TMP_MeshInfo.s_DefaultTangent;
+					this.tangents[3 + num4] = TMP_MeshInfo.s_DefaultTangent;
+					this.triangles[num5] = num4;
+					this.triangles[1 + num5] = 1 + num4;
+					this.triangles[2 + num5] = 2 + num4;
+					this.triangles[3 + num5] = 2 + num4;
+					this.triangles[4 + num5] = 3 + num4;
+					this.triangles[5 + num5] = num4;
+				}
+				this.mesh.vertices = this.vertices;
+				this.mesh.normals = this.normals;
+				this.mesh.tangents = this.tangents;
+				this.mesh.triangles = this.triangles;
 			}
-			this.mesh.vertices = this.vertices;
-			this.mesh.normals = this.normals;
-			this.mesh.tangents = this.tangents;
-			this.mesh.triangles = this.triangles;
 		}
 
 		public void Clear()
 		{
-			if (this.vertices == null)
+			if (this.vertices != null)
 			{
-				return;
-			}
-			Array.Clear(this.vertices, 0, this.vertices.Length);
-			this.vertexCount = 0;
-			if (this.mesh != null)
-			{
-				this.mesh.vertices = this.vertices;
+				Array.Clear(this.vertices, 0, this.vertices.Length);
+				this.vertexCount = 0;
+				if (this.mesh != null)
+				{
+					this.mesh.vertices = this.vertices;
+				}
 			}
 		}
 
 		public void Clear(bool uploadChanges)
 		{
-			if (this.vertices == null)
+			if (this.vertices != null)
 			{
-				return;
-			}
-			Array.Clear(this.vertices, 0, this.vertices.Length);
-			this.vertexCount = 0;
-			if (uploadChanges && this.mesh != null)
-			{
-				this.mesh.vertices = this.vertices;
+				Array.Clear(this.vertices, 0, this.vertices.Length);
+				this.vertexCount = 0;
+				if (uploadChanges && this.mesh != null)
+				{
+					this.mesh.vertices = this.vertices;
+				}
 			}
 		}
 

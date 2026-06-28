@@ -15,7 +15,7 @@ public class KTabMenuHeader : KMonoBehaviour
 		GameObject gameObject = Util.KInstantiateUI(this.prefab.gameObject, null, false);
 		gameObject.SetActive(true);
 		RectTransform component = gameObject.GetComponent<RectTransform>();
-		component.transform.SetParent(this.transform, false);
+		component.transform.SetParent(base.transform, false);
 		component.name = name;
 		Text componentInChildren = component.GetComponentInChildren<Text>();
 		if (componentInChildren != null)
@@ -34,9 +34,9 @@ public class KTabMenuHeader : KMonoBehaviour
 	{
 		GameObject gameObject = Util.KInstantiateUI(this.prefab.gameObject, null, false);
 		RectTransform component = gameObject.GetComponent<RectTransform>();
-		component.transform.SetParent(this.transform, false);
+		component.transform.SetParent(base.transform, false);
 		component.name = name;
-		if (tooltip == string.Empty)
+		if (tooltip == "")
 		{
 			component.GetComponent<ToolTip>().toolTip = name;
 		}
@@ -64,36 +64,38 @@ public class KTabMenuHeader : KMonoBehaviour
 
 	public void Activate(int itemIdx, int previouslyActiveTabIdx)
 	{
-		int childCount = this.transform.childCount;
-		if (itemIdx >= childCount)
+		int childCount = base.transform.childCount;
+		if (itemIdx < childCount)
 		{
-			return;
-		}
-		for (int i = 0; i < childCount; i++)
-		{
-			Transform child = this.transform.GetChild(i);
-			if (child.gameObject.activeSelf)
+			for (int i = 0; i < childCount; i++)
 			{
-				KButton componentInChildren = child.GetComponentInChildren<KButton>();
-				if (componentInChildren != null)
+				Transform child = base.transform.GetChild(i);
+				if (child.gameObject.activeSelf)
 				{
-					Text componentInChildren2 = componentInChildren.GetComponentInChildren<Text>();
-					if (componentInChildren2 != null && i == itemIdx)
+					KButton componentInChildren = child.GetComponentInChildren<KButton>();
+					if (componentInChildren != null)
+					{
+						Text componentInChildren2 = componentInChildren.GetComponentInChildren<Text>();
+						if (componentInChildren2 != null)
+						{
+							if (i == itemIdx)
+							{
+								this.ActivateTabArtwork(itemIdx);
+							}
+						}
+					}
+					KToggle component = child.GetComponent<KToggle>();
+					if (component != null)
 					{
 						this.ActivateTabArtwork(itemIdx);
-					}
-				}
-				KToggle component = child.GetComponent<KToggle>();
-				if (component != null)
-				{
-					this.ActivateTabArtwork(itemIdx);
-					if (i == itemIdx)
-					{
-						component.Select();
-					}
-					else
-					{
-						component.Deselect();
+						if (i == itemIdx)
+						{
+							component.Select();
+						}
+						else
+						{
+							component.Deselect();
+						}
 					}
 				}
 			}
@@ -102,47 +104,46 @@ public class KTabMenuHeader : KMonoBehaviour
 
 	public void SetTabEnabled(int tabIdx, bool enabled)
 	{
-		if (tabIdx < this.transform.childCount)
+		if (tabIdx < base.transform.childCount)
 		{
-			this.transform.GetChild(tabIdx).gameObject.SetActive(enabled);
+			base.transform.GetChild(tabIdx).gameObject.SetActive(enabled);
 		}
 	}
 
 	public virtual void ActivateTabArtwork(int tabIdx)
 	{
-		if (tabIdx >= this.transform.childCount)
+		if (tabIdx < base.transform.childCount)
 		{
-			return;
-		}
-		for (int i = 0; i < this.transform.childCount; i++)
-		{
-			ImageToggleState component = this.transform.GetChild(i).GetComponent<ImageToggleState>();
-			if (component != null)
+			for (int i = 0; i < base.transform.childCount; i++)
 			{
-				if (i == tabIdx)
+				ImageToggleState component = base.transform.GetChild(i).GetComponent<ImageToggleState>();
+				if (component != null)
 				{
-					component.SetActive();
+					if (i == tabIdx)
+					{
+						component.SetActive();
+					}
+					else
+					{
+						component.SetInactive();
+					}
 				}
-				else
+				Canvas componentInChildren = base.transform.GetChild(i).GetComponentInChildren<Canvas>(true);
+				if (componentInChildren != null)
 				{
-					component.SetInactive();
+					componentInChildren.overrideSorting = tabIdx == i;
 				}
-			}
-			Canvas componentInChildren = this.transform.GetChild(i).GetComponentInChildren<Canvas>(true);
-			if (componentInChildren != null)
-			{
-				componentInChildren.overrideSorting = tabIdx == i;
-			}
-			SetTextStyleSetting componentInChildren2 = this.transform.GetChild(i).GetComponentInChildren<SetTextStyleSetting>();
-			if (componentInChildren2 != null && this.TextStyle_Active != null && this.TextStyle_Inactive != null)
-			{
-				if (i == tabIdx)
+				SetTextStyleSetting componentInChildren2 = base.transform.GetChild(i).GetComponentInChildren<SetTextStyleSetting>();
+				if (componentInChildren2 != null && this.TextStyle_Active != null && this.TextStyle_Inactive != null)
 				{
-					componentInChildren2.SetStyle(this.TextStyle_Active);
-				}
-				else
-				{
-					componentInChildren2.SetStyle(this.TextStyle_Inactive);
+					if (i == tabIdx)
+					{
+						componentInChildren2.SetStyle(this.TextStyle_Active);
+					}
+					else
+					{
+						componentInChildren2.SetStyle(this.TextStyle_Inactive);
+					}
 				}
 			}
 		}

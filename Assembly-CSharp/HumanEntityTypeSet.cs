@@ -24,12 +24,12 @@ public class HumanEntityTypeSet : EntityTypeSet
 		entityType.amounts.Add(Db.Get().Amounts.Decor);
 		entityType.amounts.Add(Db.Get().Amounts.ImmuneLevel);
 		Trait trait = GameEntityTypeSet.CreateLivingEntityBaseTrait(id, name, -0.11666667f, -1666.6666f, 0.1f, 0f, 0.16666667f, 8f, modifier_set);
-		trait.Add(new AttributeModifier(Db.Get().Attributes.DecorExpectation.Id, -35f, name, false, false));
-		trait.Add(new AttributeModifier(Db.Get().Attributes.FoodExpectation.Id, -3f, name, false, false));
-		trait.Add(new AttributeModifier(Db.Get().Attributes.ToiletEfficiency.Id, 1f, name, false, false));
-		trait.Add(new AttributeModifier(Db.Get().Attributes.RoomTemperaturePreference.Id, 0f, name, false, false));
-		trait.Add(new AttributeModifier(Db.Get().Attributes.Sneezyness.Id, 0f, name, false, false));
-		trait.Add(new AttributeModifier(Db.Get().Amounts.ImmuneLevel.deltaAttribute.Id, 0.025f, name, false, false));
+		trait.Add(new AttributeModifier(Db.Get().Attributes.DecorExpectation.Id, -35f, name, false, false, true));
+		trait.Add(new AttributeModifier(Db.Get().Attributes.FoodExpectation.Id, -3f, name, false, false, true));
+		trait.Add(new AttributeModifier(Db.Get().Attributes.ToiletEfficiency.Id, 1f, name, false, false, true));
+		trait.Add(new AttributeModifier(Db.Get().Attributes.RoomTemperaturePreference.Id, 0f, name, false, false, true));
+		trait.Add(new AttributeModifier(Db.Get().Attributes.Sneezyness.Id, 0f, name, false, false, true));
+		trait.Add(new AttributeModifier(Db.Get().Amounts.ImmuneLevel.deltaAttribute.Id, 0.025f, name, false, false, true));
 		foreach (Disease disease in Db.Get().Diseases)
 		{
 			entityType.amounts.Add(disease.amount);

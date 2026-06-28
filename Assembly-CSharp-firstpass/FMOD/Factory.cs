@@ -10,12 +10,17 @@ namespace FMOD
 			system = null;
 			IntPtr intPtr = 0;
 			RESULT result = Factory.FMOD5_System_Create(out intPtr);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			system = new FMOD.System(intPtr);
-			return result;
+			else
+			{
+				system = new FMOD.System(intPtr);
+				result2 = result;
+			}
+			return result2;
 		}
 
 		[DllImport("fmodstudio")]

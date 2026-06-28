@@ -62,23 +62,23 @@ public class MedicinalHerb : StateMachineComponent<MedicinalHerb.StatesInstance>
 			});
 			this.alive.seed_grow.QueueAnim("seed_grow", false, null).EventTransition(GameHashes.AnimQueueComplete, this.alive.idle, null).EventTransition(GameHashes.Wilt, this.alive.wilting.wilting_pre, (MedicinalHerb.StatesInstance smi) => smi.master.wiltCondition.IsWilting())
 				.EventTransition(GameHashes.CropReady, this.alive.fruiting.fruiting_pre, null);
-			this.alive.idle.PlayAnim("idle_loop", KAnim.PlayMode.Loop, null).EventTransition(GameHashes.CropDepleted, this.dead, (MedicinalHerb.StatesInstance smi) => !smi.master.crop.CanGrow()).EventTransition(GameHashes.Wilt, this.alive.wilting.wilting_pre, (MedicinalHerb.StatesInstance smi) => smi.master.wiltCondition.IsWilting())
+			this.alive.idle.PlayAnim("idle_loop", KAnim.PlayMode.Loop).EventTransition(GameHashes.CropDepleted, this.dead, (MedicinalHerb.StatesInstance smi) => !smi.master.crop.CanGrow()).EventTransition(GameHashes.Wilt, this.alive.wilting.wilting_pre, (MedicinalHerb.StatesInstance smi) => smi.master.wiltCondition.IsWilting())
 				.EventTransition(GameHashes.CropReady, this.alive.fruiting.fruiting_pre, null);
-			this.alive.wilting.wilting_pre.PlayAnim("wilt_pre", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.alive.wilting.wilting).EventTransition(GameHashes.WiltRecover, this.alive.wilting.wilting_pst, null);
-			this.alive.wilting.wilting.PlayAnim("idle_wilt_loop", KAnim.PlayMode.Loop, null).EventTransition(GameHashes.WiltRecover, this.alive.wilting.wilting_pst, null);
-			this.alive.wilting.wilting_pst.PlayAnim("wilt_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.alive.idle);
+			this.alive.wilting.wilting_pre.PlayAnim("wilt_pre", KAnim.PlayMode.Once).OnAnimQueueComplete(this.alive.wilting.wilting).EventTransition(GameHashes.WiltRecover, this.alive.wilting.wilting_pst, null);
+			this.alive.wilting.wilting.PlayAnim("idle_wilt_loop", KAnim.PlayMode.Loop).EventTransition(GameHashes.WiltRecover, this.alive.wilting.wilting_pst, null);
+			this.alive.wilting.wilting_pst.PlayAnim("wilt_pst", KAnim.PlayMode.Once).OnAnimQueueComplete(this.alive.idle);
 			this.alive.fruiting.EventTransition(GameHashes.Harvest, this.alive.fruiting.fruiting_harvest, null).EventHandler(GameHashes.Wilt, delegate(MedicinalHerb.StatesInstance smi)
 			{
 				smi.master.crop.SpawnFruit(null);
 				smi.master.harvestable.SetCanBeHarvested(false);
 				smi.GoTo(this.alive.wilting.wilting_pre);
 			});
-			this.alive.fruiting.fruiting_pre.PlayAnim("grow", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.alive.fruiting.fruiting_idle);
-			this.alive.fruiting.fruiting_idle.PlayAnim("idle_bloom_loop", KAnim.PlayMode.Loop, null).Enter(delegate(MedicinalHerb.StatesInstance smi)
+			this.alive.fruiting.fruiting_pre.PlayAnim("grow").OnAnimQueueComplete(this.alive.fruiting.fruiting_idle);
+			this.alive.fruiting.fruiting_idle.PlayAnim("idle_bloom_loop", KAnim.PlayMode.Loop).Enter(delegate(MedicinalHerb.StatesInstance smi)
 			{
 				smi.master.harvestable.SetCanBeHarvested(true);
 			});
-			this.alive.fruiting.fruiting_harvest.PlayAnim("harvest", KAnim.PlayMode.Once, null).Enter(delegate(MedicinalHerb.StatesInstance smi)
+			this.alive.fruiting.fruiting_harvest.PlayAnim("harvest").Enter(delegate(MedicinalHerb.StatesInstance smi)
 			{
 				if (GameScheduler.Instance != null && smi.master != null)
 				{

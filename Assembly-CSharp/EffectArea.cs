@@ -12,7 +12,7 @@ public class EffectArea : KMonoBehaviour
 	{
 		int num = 0;
 		int num2 = 0;
-		Grid.PosToXY(this.transform.position, out num, out num2);
+		Grid.PosToXY(base.transform.position, out num, out num2);
 		foreach (MinionIdentity minionIdentity in Components.MinionIdentities)
 		{
 			int num3 = 0;

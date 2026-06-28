@@ -8,8 +8,14 @@ public class PrickleFlowerConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
+		string text = "PrickleFlower";
+		string text2 = global::STRINGS.CREATURES.SPECIES.PRICKLEFLOWER.NAME;
+		string text3 = global::STRINGS.CREATURES.SPECIES.PRICKLEFLOWER.DESC;
+		float num = 1f;
+		KAnimFile kanimFile = Assets.GetAnim("bristleblossom_kanim");
+		string text4 = "idle_empty";
 		EffectorValues tier = DECOR.BONUS.TIER1;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("PrickleFlower", global::STRINGS.CREATURES.SPECIES.PRICKLEFLOWER.NAME, global::STRINGS.CREATURES.SPECIES.PRICKLEFLOWER.DESC, 1f, Assets.GetAnim("bristleblossom_kanim"), "idle_empty", Grid.SceneLayer.BuildingFront, 1, 2, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, kanimFile, text4, Grid.SceneLayer.BuildingFront, 1, 2, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
 		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 15f, 5f, 273.15f, 278.15f, 283.15f, 288.15f, 296.15f, 398.15f, new SimHashes[]
 		{
 			SimHashes.Oxygen,
@@ -27,9 +33,17 @@ public class PrickleFlowerConfig : IEntityConfig
 		gameObject.AddOrGet<StandardCropPlant>();
 		IlluminationVulnerable illuminationVulnerable = gameObject.UpdateComponentRequirement<IlluminationVulnerable>(true);
 		illuminationVulnerable.Configure(false);
-		string text = global::STRINGS.CREATURES.SPECIES.PRICKLEFLOWER.DOMESTICATEDDESC;
-		GameObject gameObject2 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Harvest, "PrickleFlowerSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.PRICKLEFLOWER.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.PRICKLEFLOWER.DESC, Assets.GetAnim("seed_bristleblossom_kanim"), "object", 0, new List<Tag> { GameTags.CropSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 2, text, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, string.Empty);
-		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject2, "PrickleFlower_preview", Assets.GetAnim("bristleblossom_kanim"), "place", 1, 2);
+		GameObject gameObject2 = gameObject;
+		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Harvest;
+		text4 = "PrickleFlowerSeed";
+		text3 = global::STRINGS.CREATURES.SPECIES.SEEDS.PRICKLEFLOWER.NAME;
+		text2 = global::STRINGS.CREATURES.SPECIES.SEEDS.PRICKLEFLOWER.DESC;
+		kanimFile = Assets.GetAnim("seed_bristleblossom_kanim");
+		int num2 = 0;
+		List<Tag> list = new List<Tag> { GameTags.CropSeed };
+		text = global::STRINGS.CREATURES.SPECIES.PRICKLEFLOWER.DOMESTICATEDDESC;
+		GameObject gameObject3 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text3, text2, kanimFile, "object", num2, list, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 2, text, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, "");
+		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject3, "PrickleFlower_preview", Assets.GetAnim("bristleblossom_kanim"), "place", 1, 2);
 		SoundEventVolumeCache.instance.AddVolume("bristleblossom_kanim", "PrickleFlower_harvest", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("bristleblossom_kanim", "PrickleFlower_grow", NOISE_POLLUTION.CREATURES.TIER3);
 		return gameObject;

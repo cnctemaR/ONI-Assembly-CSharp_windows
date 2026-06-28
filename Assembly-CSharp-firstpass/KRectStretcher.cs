@@ -22,109 +22,114 @@ public class KRectStretcher : KMonoBehaviour
 		{
 			this.rect = base.GetComponent<RectTransform>();
 		}
-		if (this.rect == null)
+		if (!(this.rect == null))
 		{
-			return;
-		}
-		if (this.transform.parent == null)
-		{
-			return;
-		}
-		RectTransform rectTransform = this.transform.parent.rectTransform();
-		Vector3 vector = Vector3.zero;
-		if (this.SizeReferenceMethod == KRectStretcher.ParentSizeReferenceValue.SizeDelta)
-		{
-			vector = rectTransform.sizeDelta;
-		}
-		else if (this.SizeReferenceMethod == KRectStretcher.ParentSizeReferenceValue.RectDimensions)
-		{
-			vector = rectTransform.rect.size;
-		}
-		Vector2 zero = Vector2.zero;
-		if (!this.PreserveAspectRatio)
-		{
-			zero = new Vector2((!this.StretchX) ? this.rect.sizeDelta.x : vector.x, (!this.StretchY) ? this.rect.sizeDelta.y : vector.y);
-		}
-		else
-		{
-			switch (this.AspectFitOption)
+			if (!(base.transform.parent == null))
 			{
-			case KRectStretcher.aspectFitOption.WidthDictatesHeight:
-				zero = new Vector2((!this.StretchX) ? this.rect.sizeDelta.x : vector.x, (!this.StretchY) ? this.rect.sizeDelta.y : (vector.x / this.aspectRatioToPreserve));
-				break;
-			case KRectStretcher.aspectFitOption.HeightDictatesWidth:
-				zero = new Vector2((!this.StretchX) ? this.rect.sizeDelta.x : (vector.y * this.aspectRatioToPreserve), (!this.StretchY) ? this.rect.sizeDelta.y : vector.y);
-				break;
-			case KRectStretcher.aspectFitOption.EnvelopeParent:
-				if (rectTransform.sizeDelta.x / rectTransform.sizeDelta.y > this.aspectRatioToPreserve)
+				RectTransform rectTransform = base.transform.parent.rectTransform();
+				Vector3 vector = Vector3.zero;
+				if (this.SizeReferenceMethod == KRectStretcher.ParentSizeReferenceValue.SizeDelta)
 				{
-					zero = new Vector2((!this.StretchX) ? this.rect.sizeDelta.x : vector.x, (!this.StretchY) ? this.rect.sizeDelta.y : (vector.x / this.aspectRatioToPreserve));
+					vector = rectTransform.sizeDelta;
+				}
+				else if (this.SizeReferenceMethod == KRectStretcher.ParentSizeReferenceValue.RectDimensions)
+				{
+					vector = rectTransform.rect.size;
+				}
+				Vector2 zero = Vector2.zero;
+				if (!this.PreserveAspectRatio)
+				{
+					zero = new Vector2((!this.StretchX) ? this.rect.sizeDelta.x : vector.x, (!this.StretchY) ? this.rect.sizeDelta.y : vector.y);
 				}
 				else
 				{
-					zero = new Vector2((!this.StretchX) ? this.rect.sizeDelta.x : (vector.y * this.aspectRatioToPreserve), (!this.StretchY) ? this.rect.sizeDelta.y : vector.y);
+					KRectStretcher.aspectFitOption aspectFitOption = this.AspectFitOption;
+					if (aspectFitOption != KRectStretcher.aspectFitOption.WidthDictatesHeight)
+					{
+						if (aspectFitOption != KRectStretcher.aspectFitOption.HeightDictatesWidth)
+						{
+							if (aspectFitOption == KRectStretcher.aspectFitOption.EnvelopeParent)
+							{
+								if (rectTransform.sizeDelta.x / rectTransform.sizeDelta.y > this.aspectRatioToPreserve)
+								{
+									zero = new Vector2((!this.StretchX) ? this.rect.sizeDelta.x : vector.x, (!this.StretchY) ? this.rect.sizeDelta.y : (vector.x / this.aspectRatioToPreserve));
+								}
+								else
+								{
+									zero = new Vector2((!this.StretchX) ? this.rect.sizeDelta.x : (vector.y * this.aspectRatioToPreserve), (!this.StretchY) ? this.rect.sizeDelta.y : vector.y);
+								}
+							}
+						}
+						else
+						{
+							zero = new Vector2((!this.StretchX) ? this.rect.sizeDelta.x : (vector.y * this.aspectRatioToPreserve), (!this.StretchY) ? this.rect.sizeDelta.y : vector.y);
+						}
+					}
+					else
+					{
+						zero = new Vector2((!this.StretchX) ? this.rect.sizeDelta.x : vector.x, (!this.StretchY) ? this.rect.sizeDelta.y : (vector.x / this.aspectRatioToPreserve));
+					}
 				}
-				break;
-			}
-		}
-		if (this.StretchX)
-		{
-			zero.x *= this.XStretchFactor;
-		}
-		if (this.StretchY)
-		{
-			zero.y *= this.YStretchFactor;
-		}
-		if (this.StretchX)
-		{
-			zero.x += this.Padding.x;
-		}
-		if (this.StretchY)
-		{
-			zero.y += this.Padding.y;
-		}
-		if (this.rect.sizeDelta != zero)
-		{
-			if (this.lerpToSize)
-			{
-				if (this.OverrideLayoutElement != null)
+				if (this.StretchX)
 				{
-					if (this.StretchX)
-					{
-						this.OverrideLayoutElement.minWidth = Mathf.Lerp(this.OverrideLayoutElement.minWidth, zero.x, Time.unscaledDeltaTime * this.lerpTime);
-					}
-					if (this.StretchY)
-					{
-						this.OverrideLayoutElement.minHeight = Mathf.Lerp(this.OverrideLayoutElement.minHeight, zero.y, Time.unscaledDeltaTime * this.lerpTime);
-					}
+					zero.x *= this.XStretchFactor;
 				}
-				else
+				if (this.StretchY)
 				{
-					this.rect.sizeDelta = Vector2.Lerp(this.rect.sizeDelta, zero, this.lerpTime * Time.unscaledDeltaTime);
+					zero.y *= this.YStretchFactor;
 				}
-			}
-			else
-			{
-				if (this.OverrideLayoutElement != null)
+				if (this.StretchX)
 				{
-					if (this.StretchX)
+					zero.x += this.Padding.x;
+				}
+				if (this.StretchY)
+				{
+					zero.y += this.Padding.y;
+				}
+				if (this.rect.sizeDelta != zero)
+				{
+					if (this.lerpToSize)
 					{
-						this.OverrideLayoutElement.minWidth = zero.x;
+						if (this.OverrideLayoutElement != null)
+						{
+							if (this.StretchX)
+							{
+								this.OverrideLayoutElement.minWidth = Mathf.Lerp(this.OverrideLayoutElement.minWidth, zero.x, Time.unscaledDeltaTime * this.lerpTime);
+							}
+							if (this.StretchY)
+							{
+								this.OverrideLayoutElement.minHeight = Mathf.Lerp(this.OverrideLayoutElement.minHeight, zero.y, Time.unscaledDeltaTime * this.lerpTime);
+							}
+						}
+						else
+						{
+							this.rect.sizeDelta = Vector2.Lerp(this.rect.sizeDelta, zero, this.lerpTime * Time.unscaledDeltaTime);
+						}
 					}
-					if (this.StretchY)
+					else
 					{
-						this.OverrideLayoutElement.minHeight = zero.y;
+						if (this.OverrideLayoutElement != null)
+						{
+							if (this.StretchX)
+							{
+								this.OverrideLayoutElement.minWidth = zero.x;
+							}
+							if (this.StretchY)
+							{
+								this.OverrideLayoutElement.minHeight = zero.y;
+							}
+						}
+						this.rect.sizeDelta = zero;
 					}
 				}
-				this.rect.sizeDelta = zero;
-			}
-		}
-		for (int i = 0; i < this.transform.childCount; i++)
-		{
-			KRectStretcher component = this.transform.GetChild(i).GetComponent<KRectStretcher>();
-			if (component)
-			{
-				component.UpdateStretching();
+				for (int i = 0; i < base.transform.childCount; i++)
+				{
+					KRectStretcher component = base.transform.GetChild(i).GetComponent<KRectStretcher>();
+					if (component)
+					{
+						component.UpdateStretching();
+					}
+				}
 			}
 		}
 	}
@@ -139,21 +144,21 @@ public class KRectStretcher : KMonoBehaviour
 
 	public float YStretchFactor = 1f;
 
-	public KRectStretcher.ParentSizeReferenceValue SizeReferenceMethod;
+	public KRectStretcher.ParentSizeReferenceValue SizeReferenceMethod = KRectStretcher.ParentSizeReferenceValue.SizeDelta;
 
 	public Vector2 Padding;
 
-	public bool lerpToSize;
+	public bool lerpToSize = false;
 
 	public float lerpTime = 1f;
 
 	public LayoutElement OverrideLayoutElement;
 
-	public bool PreserveAspectRatio;
+	public bool PreserveAspectRatio = false;
 
 	public float aspectRatioToPreserve = 1f;
 
-	public KRectStretcher.aspectFitOption AspectFitOption;
+	public KRectStretcher.aspectFitOption AspectFitOption = KRectStretcher.aspectFitOption.WidthDictatesHeight;
 
 	public enum ParentSizeReferenceValue
 	{

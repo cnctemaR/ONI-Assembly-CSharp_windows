@@ -17,7 +17,7 @@ public class BuildingEnabledButton : KMonoBehaviour, ISaveLoadable, IToggleHandl
 			this.UserMenu.Refresh();
 			this.buildingEnabled = value;
 			base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.BuildingDisabled, !this.buildingEnabled, null);
-			this.Trigger(1088293757, this.buildingEnabled);
+			base.Trigger(1088293757, this.buildingEnabled);
 		}
 	}
 
@@ -32,7 +32,7 @@ public class BuildingEnabledButton : KMonoBehaviour, ISaveLoadable, IToggleHandl
 	protected override void OnPrefabInit()
 	{
 		this.ToggleIdx = this.Toggleable.SetTarget(this);
-		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 	}
 
 	protected override void OnSpawn()
@@ -77,14 +77,22 @@ public class BuildingEnabledButton : KMonoBehaviour, ISaveLoadable, IToggleHandl
 		if (this.IsEnabled)
 		{
 			UserMenu userMenu = this.UserMenu;
-			string text = UI.USERMENUACTIONS.ENABLEBUILDING.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_building_disabled", UI.USERMENUACTIONS.ENABLEBUILDING.NAME, new global::System.Action(this.OnMenuToggle), global::Action.ToggleEnabled, null, null, null, text, true), 1f);
+			string text = "action_building_disabled";
+			string text2 = UI.USERMENUACTIONS.ENABLEBUILDING.NAME;
+			global::System.Action action = new global::System.Action(this.OnMenuToggle);
+			global::Action action2 = global::Action.ToggleEnabled;
+			string text3 = UI.USERMENUACTIONS.ENABLEBUILDING.TOOLTIP;
+			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, action2, null, null, null, text3, true), 1f);
 		}
 		else
 		{
 			UserMenu userMenu2 = this.UserMenu;
+			string text3 = "action_building_disabled";
+			string text2 = UI.USERMENUACTIONS.ENABLEBUILDING.NAME_OFF;
+			global::System.Action action = new global::System.Action(this.OnMenuToggle);
+			global::Action action2 = global::Action.ToggleEnabled;
 			string text = UI.USERMENUACTIONS.ENABLEBUILDING.TOOLTIP_OFF;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_building_disabled", UI.USERMENUACTIONS.ENABLEBUILDING.NAME_OFF, new global::System.Action(this.OnMenuToggle), global::Action.ToggleEnabled, null, null, null, text, true), 1f);
+			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, action2, null, null, null, text, true), 1f);
 		}
 	}
 

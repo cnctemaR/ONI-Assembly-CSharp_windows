@@ -8,22 +8,30 @@ namespace FMOD
 	{
 		public static implicit operator string(StringWrapper fstring)
 		{
+			string text;
 			if (fstring.nativeUtf8Ptr == IntPtr.Zero)
 			{
-				return string.Empty;
+				text = "";
 			}
-			int num = 0;
-			while (Marshal.ReadByte(fstring.nativeUtf8Ptr, num) != 0)
+			else
 			{
-				num++;
+				int num = 0;
+				while (Marshal.ReadByte(fstring.nativeUtf8Ptr, num) != 0)
+				{
+					num++;
+				}
+				if (num > 0)
+				{
+					byte[] array = new byte[num];
+					Marshal.Copy(fstring.nativeUtf8Ptr, array, 0, num);
+					text = Encoding.UTF8.GetString(array, 0, num);
+				}
+				else
+				{
+					text = "";
+				}
 			}
-			if (num > 0)
-			{
-				byte[] array = new byte[num];
-				Marshal.Copy(fstring.nativeUtf8Ptr, array, 0, num);
-				return Encoding.UTF8.GetString(array, 0, num);
-			}
-			return string.Empty;
+			return text;
 		}
 
 		private IntPtr nativeUtf8Ptr;

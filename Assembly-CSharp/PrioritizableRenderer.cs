@@ -40,12 +40,15 @@ public class PrioritizableRenderer
 					for (int i = 0; i < Components.Prioritizables.Count; i++)
 					{
 						Prioritizable prioritizable = Components.Prioritizables[i];
-						if (prioritizable != null && prioritizable.showIcon && prioritizable.IsPrioritizable())
+						if (prioritizable != null)
 						{
-							int num = Grid.PosToCell(prioritizable);
-							if (Grid.Visible[num] > 0)
+							if (prioritizable.showIcon && prioritizable.IsPrioritizable())
 							{
-								this.prioritizables.Add(prioritizable);
+								int num = Grid.PosToCell(prioritizable);
+								if (Grid.Visible[num] > 0)
+								{
+									this.prioritizables.Add(prioritizable);
+								}
 							}
 						}
 					}
@@ -76,22 +79,24 @@ public class PrioritizableRenderer
 							Vector2 vector2 = new Vector2(0.2f, 0.3f) * prioritizable2.iconScale;
 							float num2 = -5f;
 							int num3 = 4 * j;
-							this.vertices[0 + num3] = new Vector3(vector.x - vector2.x, vector.y - vector2.y, num2);
+							this.vertices[num3] = new Vector3(vector.x - vector2.x, vector.y - vector2.y, num2);
 							this.vertices[1 + num3] = new Vector3(vector.x - vector2.x, vector.y + vector2.y, num2);
 							this.vertices[2 + num3] = new Vector3(vector.x + vector2.x, vector.y - vector2.y, num2);
 							this.vertices[3 + num3] = new Vector3(vector.x + vector2.x, vector.y + vector2.y, num2);
 							float num4 = 0.11111111f;
-							float num5 = (float)(prioritizable2.GetMasterPriority() - 1);
+							PrioritySetting masterPriority = prioritizable2.GetMasterPriority();
+							float num5 = -1f;
+							num5 += (float)masterPriority.priority_value;
 							float num6 = num4 * num5;
 							float num7 = 0f;
 							float num8 = num4;
 							float num9 = 1f;
-							this.uvs[0 + num3] = new Vector2(num6, num7);
+							this.uvs[num3] = new Vector2(num6, num7);
 							this.uvs[1 + num3] = new Vector2(num6, num7 + num9);
 							this.uvs[2 + num3] = new Vector2(num6 + num8, num7);
 							this.uvs[3 + num3] = new Vector2(num6 + num8, num7 + num9);
 							int num10 = 6 * j;
-							this.triangles[0 + num10] = num3;
+							this.triangles[num10] = num3;
 							this.triangles[1 + num10] = num3 + 1;
 							this.triangles[2 + num10] = num3 + 2;
 							this.triangles[3 + num10] = num3 + 2;

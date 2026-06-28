@@ -80,20 +80,23 @@ public class MyCmp
 		{
 			CmpFns cmpFns = fieldData.cmpFns;
 			FieldInfo fieldInfo = fieldData.fieldInfo;
-			if (fieldData.myCmpType == MyCmp.MyCmpType.Add)
+			if (!((Component)fieldInfo.GetValue(c) != null))
 			{
-				Component component = cmpFns.mFindOrAddFn(c);
-				fieldInfo.SetValue(c, component);
-			}
-			else if (fieldData.myCmpType == MyCmp.MyCmpType.Req)
-			{
-				Component component2 = cmpFns.mFindFn(c);
-				fieldInfo.SetValue(c, component2);
-			}
-			else if (fieldData.myCmpType == MyCmp.MyCmpType.Get)
-			{
-				Component component3 = cmpFns.mFindFn(c);
-				fieldInfo.SetValue(c, component3);
+				if (fieldData.myCmpType == MyCmp.MyCmpType.Add)
+				{
+					Component component = cmpFns.mFindOrAddFn(c);
+					fieldInfo.SetValue(c, component);
+				}
+				else if (fieldData.myCmpType == MyCmp.MyCmpType.Req)
+				{
+					Component component2 = cmpFns.mFindFn(c);
+					fieldInfo.SetValue(c, component2);
+				}
+				else if (fieldData.myCmpType == MyCmp.MyCmpType.Get)
+				{
+					Component component3 = cmpFns.mFindFn(c);
+					fieldInfo.SetValue(c, component3);
+				}
 			}
 		}
 	}
@@ -106,23 +109,28 @@ public class MyCmp
 		{
 			CmpFns cmpFns = fieldData.cmpFns;
 			FieldInfo fieldInfo = fieldData.fieldInfo;
-			if (fieldData.myCmpType == MyCmp.MyCmpType.Add)
+			if ((Component)fieldInfo.GetValue(c) != null)
 			{
-				Component component = cmpFns.mFindOrAddFn(c);
+				Component component = fieldInfo.GetValue(c) as Component;
 				Util.SpawnComponent(component);
+			}
+			else if (fieldData.myCmpType == MyCmp.MyCmpType.Add)
+			{
+				Component component2 = cmpFns.mFindOrAddFn(c);
+				Util.SpawnComponent(component2);
 			}
 			else if (fieldData.myCmpType == MyCmp.MyCmpType.Req)
 			{
-				Component component2 = cmpFns.mRequireFn(c);
-				DebugUtil.Assert(component2 != null, "The behaviour " + type.ToString() + " required but couldn't find a " + fieldInfo.FieldType.Name);
-				Util.SpawnComponent(component2);
-				fieldInfo.SetValue(c, component2);
+				Component component3 = cmpFns.mRequireFn(c);
+				DebugUtil.Assert(component3 != null, "The behaviour " + type.ToString() + " required but couldn't find a " + fieldInfo.FieldType.Name);
+				Util.SpawnComponent(component3);
+				fieldInfo.SetValue(c, component3);
 			}
 			else if (fieldData.myCmpType == MyCmp.MyCmpType.Get)
 			{
-				Component component3 = cmpFns.mFindFn(c);
-				Util.SpawnComponent(component3);
-				fieldInfo.SetValue(c, component3);
+				Component component4 = cmpFns.mFindFn(c);
+				Util.SpawnComponent(component4);
+				fieldInfo.SetValue(c, component4);
 			}
 		}
 	}

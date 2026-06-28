@@ -16,8 +16,7 @@ public class CreatureTrapConfig : IBuildingConfig
 	{
 		Storage storage = go.UpdateComponentRequirement<Storage>(true);
 		storage.allowItemRemoval = true;
-		storage.disableOnStore = false;
-		storage.defaultStoredItemModifers = CreatureTrapConfig.StoredItemModifiers;
+		storage.SetDefaultStoredItemModifiers(CreatureTrapConfig.StoredItemModifiers);
 		storage.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_restrain_creature_kanim") };
 		go.UpdateComponentRequirement<Trap>(true);
 	}

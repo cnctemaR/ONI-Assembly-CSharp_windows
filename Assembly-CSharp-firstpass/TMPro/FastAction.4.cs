@@ -7,11 +7,10 @@ namespace TMPro
 	{
 		public void Add(Action<A, B, C> rhs)
 		{
-			if (this.lookup.ContainsKey(rhs))
+			if (!this.lookup.ContainsKey(rhs))
 			{
-				return;
+				this.lookup[rhs] = this.delegates.AddLast(rhs);
 			}
-			this.lookup[rhs] = this.delegates.AddLast(rhs);
 		}
 
 		public void Remove(Action<A, B, C> rhs)

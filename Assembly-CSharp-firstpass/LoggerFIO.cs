@@ -24,9 +24,10 @@ public class LoggerFIO : Logger<LoggerFIO.Entry>
 		public override string ToString()
 		{
 			string text = HashCache.Get().Get(this.evt);
+			string text2;
 			if (this.obj != null)
 			{
-				return string.Concat(new object[]
+				text2 = string.Concat(new object[]
 				{
 					this.frame,
 					"_",
@@ -38,7 +39,11 @@ public class LoggerFIO : Logger<LoggerFIO.Entry>
 					")"
 				});
 			}
-			return string.Concat(new object[] { this.frame, "_", this.idx, ": ", text });
+			else
+			{
+				text2 = string.Concat(new object[] { this.frame, "_", this.idx, ": ", text });
+			}
+			return text2;
 		}
 
 		public uint idx;

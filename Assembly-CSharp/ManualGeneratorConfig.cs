@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -6,8 +7,19 @@ public class ManualGeneratorConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER3;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("ManualGenerator", 2, 2, "generatormanual_kanim", 200f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, tier);
+		string text = "ManualGenerator";
+		int num = 2;
+		int num2 = 2;
+		string text2 = "generatormanual_kanim";
+		float num3 = 200f;
+		int num4 = 30;
+		float num5 = 30f;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
+		string[] all_METALS = MATERIALS.ALL_METALS;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER3;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, tier2);
 		buildingDef.GeneratorWattageRating = 400f;
 		buildingDef.GeneratorBaseCapacity = 10000f;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
@@ -17,11 +29,24 @@ public class ManualGeneratorConfig : IBuildingConfig
 		buildingDef.Breakable = true;
 		buildingDef.ForegroundLayer = Grid.SceneLayer.BuildingFront;
 		buildingDef.OperatingKilowatts = 1f;
+		buildingDef.HotKey = global::Action.BuildMenuKeyG;
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
 	{
+		GeneratedBuildings.RegisterLogicPorts(go, ManualGeneratorConfig.INPUT_PORTS);
+	}
+
+	public override void DoPostConfigureUnderConstruction(GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, ManualGeneratorConfig.INPUT_PORTS);
+	}
+
+	public override void DoPostConfigureComplete(GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, ManualGeneratorConfig.INPUT_PORTS);
+		go.AddOrGet<LogicOperationalController>();
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		go.AddOrGet<LoopingSounds>();
@@ -29,7 +54,7 @@ public class ManualGeneratorConfig : IBuildingConfig
 		Generator generator = go.AddOrGet<Generator>();
 		generator.powerDistributionOrder = 10;
 		ManualGenerator manualGenerator = go.AddOrGet<ManualGenerator>();
-		manualGenerator.SingleSliderPercent = 0.5f;
+		manualGenerator.SetSliderValue(50f, 0);
 		manualGenerator.workLayer = Grid.SceneLayer.BuildingFront;
 		KBatchedAnimController kbatchedAnimController = go.AddOrGet<KBatchedAnimController>();
 		kbatchedAnimController.fgLayer = Grid.SceneLayer.BuildingFront;
@@ -45,12 +70,13 @@ public class ManualGeneratorConfig : IBuildingConfig
 			new Upgradable.UpgradableConfig.UpgradeModifier(Upgradable.Upgrade.Target.Capacity, 2f)
 		};
 		Upgradable.AddToUpgradableConfigs(new Upgradable.UpgradableConfig(prefabID, 1, 1, 120f, "Metal", 200f, array));
-	}
-
-	public override void DoPostConfigureComplete(GameObject go)
-	{
 		BuildingTemplates.DoPostConfigure(go);
 	}
 
 	public const string ID = "ManualGenerator";
+
+	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[]
+	{
+		new LogicPorts.Port(LogicOperationalController.PORT_ID, new CellOffset(0, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false)
+	};
 }

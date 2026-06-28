@@ -37,41 +37,42 @@ public class InspectSaveScreen : KModalScreen
 		{
 			global::Debug.LogError("The directory path provided is empty.", null);
 			base.Show(false);
-			return;
 		}
-		if (!Directory.Exists(path))
+		else if (!Directory.Exists(path))
 		{
 			global::Debug.LogError("The directory provided does not exist.", null);
 			base.Show(false);
-			return;
-		}
-		if (this.buttonPool == null)
-		{
-			this.buttonPool = new UIPool<KButton>(this.backupBtnPrefab);
-		}
-		this.currentPath = path;
-		List<string> list = (from filename in Directory.GetFiles(path)
-			where Path.GetExtension(filename).ToLower() == ".sav"
-			orderby File.GetLastWriteTime(filename) descending
-			select filename).ToList<string>();
-		string text = list[0];
-		if (File.Exists(text))
-		{
-			this.mainSaveBtn.gameObject.SetActive(true);
-			this.AddNewSave(this.mainSaveBtn, text);
 		}
 		else
 		{
-			this.mainSaveBtn.gameObject.SetActive(false);
-		}
-		if (list.Count > 1)
-		{
-			for (int i = 1; i < list.Count; i++)
+			if (this.buttonPool == null)
 			{
-				this.AddNewSave(this.buttonPool.GetFreeElement(this.buttonGroup, true), list[i]);
+				this.buttonPool = new UIPool<KButton>(this.backupBtnPrefab);
 			}
+			this.currentPath = path;
+			List<string> list = (from filename in Directory.GetFiles(path)
+				where Path.GetExtension(filename).ToLower() == ".sav"
+				orderby File.GetLastWriteTime(filename) descending
+				select filename).ToList<string>();
+			string text = list[0];
+			if (File.Exists(text))
+			{
+				this.mainSaveBtn.gameObject.SetActive(true);
+				this.AddNewSave(this.mainSaveBtn, text);
+			}
+			else
+			{
+				this.mainSaveBtn.gameObject.SetActive(false);
+			}
+			if (list.Count > 1)
+			{
+				for (int i = 1; i < list.Count; i++)
+				{
+					this.AddNewSave(this.buttonPool.GetFreeElement(this.buttonGroup, true), list[i]);
+				}
+			}
+			base.Show(true);
 		}
-		base.Show(true);
 	}
 
 	private void ConfirmDoAction(string message, global::System.Action action)
@@ -92,18 +93,20 @@ public class InspectSaveScreen : KModalScreen
 		if (string.IsNullOrEmpty(this.currentPath))
 		{
 			global::Debug.LogError("The path provided is not valid and cannot be deleted.", null);
-			return;
 		}
-		this.ConfirmDoAction(UI.FRONTEND.LOADSCREEN.CONFIRMDELETE, delegate
+		else
 		{
-			string[] files = Directory.GetFiles(this.currentPath);
-			foreach (string text in files)
+			this.ConfirmDoAction(UI.FRONTEND.LOADSCREEN.CONFIRMDELETE, delegate
 			{
-				File.Delete(text);
-			}
-			Directory.Delete(this.currentPath);
-			this.CloseScreen();
-		});
+				string[] files = Directory.GetFiles(this.currentPath);
+				foreach (string text in files)
+				{
+					File.Delete(text);
+				}
+				Directory.Delete(this.currentPath);
+				this.CloseScreen();
+			});
+		}
 	}
 
 	private void AddNewSave(KButton btn, string file)
@@ -162,5 +165,5 @@ public class InspectSaveScreen : KModalScreen
 
 	private ConfirmDialogScreen confirmScreen;
 
-	private string currentPath = string.Empty;
+	private string currentPath = "";
 }

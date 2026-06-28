@@ -21,35 +21,40 @@ namespace MIConvexHull
 			int[] vertices = face.Vertices;
 			double[] normal = face.Normal;
 			this.FindNormalVector(vertices, normal);
+			bool flag;
 			if (double.IsNaN(normal[0]))
 			{
-				return false;
-			}
-			double num = 0.0;
-			double num2 = 0.0;
-			int num3 = vertices[0] * this.Dimension;
-			for (int i = 0; i < this.Dimension; i++)
-			{
-				double num4 = normal[i];
-				num += num4 * this.PositionData[num3 + i];
-				num2 += num4 * center[i];
-			}
-			face.Offset = -num;
-			num2 -= num;
-			if (num2 > 0.0)
-			{
-				for (int j = 0; j < this.Dimension; j++)
-				{
-					normal[j] = -normal[j];
-				}
-				face.Offset = num;
-				face.IsNormalFlipped = true;
+				flag = false;
 			}
 			else
 			{
-				face.IsNormalFlipped = false;
+				double num = 0.0;
+				double num2 = 0.0;
+				int num3 = vertices[0] * this.Dimension;
+				for (int i = 0; i < this.Dimension; i++)
+				{
+					double num4 = normal[i];
+					num += num4 * this.PositionData[num3 + i];
+					num2 += num4 * center[i];
+				}
+				face.Offset = -num;
+				num2 -= num;
+				if (num2 > 0.0)
+				{
+					for (int j = 0; j < this.Dimension; j++)
+					{
+						normal[j] = -normal[j];
+					}
+					face.Offset = num;
+					face.IsNormalFlipped = true;
+				}
+				else
+				{
+					face.IsNormalFlipped = false;
+				}
+				flag = true;
 			}
-			return true;
+			return flag;
 		}
 
 		internal double GetVertexDistance(int v, ConvexFaceInternal f)
@@ -213,33 +218,40 @@ namespace MIConvexHull
 
 		private double DeterminantDestructive(double[] A)
 		{
+			double num;
 			switch (this.Dimension)
 			{
 			case 0:
-				return 0.0;
+				num = 0.0;
+				break;
 			case 1:
-				return A[0];
+				num = A[0];
+				break;
 			case 2:
-				return A[0] * A[3] - A[1] * A[2];
+				num = A[0] * A[3] - A[1] * A[2];
+				break;
 			case 3:
-				return A[0] * A[4] * A[8] + A[1] * A[5] * A[6] + A[2] * A[3] * A[7] - A[0] * A[5] * A[7] - A[1] * A[3] * A[8] - A[2] * A[4] * A[6];
+				num = A[0] * A[4] * A[8] + A[1] * A[5] * A[6] + A[2] * A[3] * A[7] - A[0] * A[5] * A[7] - A[1] * A[3] * A[8] - A[2] * A[4] * A[6];
+				break;
 			default:
 			{
 				int[] array = new int[this.Dimension];
 				double[] array2 = new double[this.Dimension];
 				MathHelper.LUFactor(A, this.Dimension, array, array2);
-				double num = 1.0;
+				double num2 = 1.0;
 				for (int i = 0; i < array.Length; i++)
 				{
-					num *= A[this.Dimension * i + i];
+					num2 *= A[this.Dimension * i + i];
 					if (array[i] != i)
 					{
-						num *= -1.0;
+						num2 *= -1.0;
 					}
 				}
-				return num;
+				num = num2;
+				break;
 			}
 			}
+			return num;
 		}
 
 		private static void LUFactor(double[] data, int order, int[] ipiv, double[] vecLUcolj)

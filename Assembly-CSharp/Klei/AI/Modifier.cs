@@ -13,7 +13,7 @@ namespace Klei.AI
 
 		public void Add(AttributeModifier modifier)
 		{
-			if (modifier.AttributeId != string.Empty)
+			if (modifier.AttributeId != "")
 			{
 				this.SelfModifiers.Add(modifier);
 			}

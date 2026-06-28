@@ -6,13 +6,23 @@ public class LiquidValveConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER1;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("LiquidValve", 1, 2, "valveliquid_kanim", 200f, 30, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.RAW_METALS, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.PENALTY.TIER0, tier);
+		string text = "LiquidValve";
+		int num = 1;
+		int num2 = 2;
+		string text2 = "valveliquid_kanim";
+		float num3 = 200f;
+		int num4 = 30;
+		float num5 = 10f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
+		string[] raw_METALS = MATERIALS.RAW_METALS;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER1;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_METALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, tier2);
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.OutputConduitType = ConduitType.Liquid;
 		buildingDef.Floodable = false;
 		buildingDef.ViewMode = SimViewMode.LiquidVentMap;
-		buildingDef.MaterialCategory = MATERIALS.RAW_METALS;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.PermittedRotations = PermittedRotations.R360;
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
@@ -24,17 +34,16 @@ public class LiquidValveConfig : IBuildingConfig
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		GeneratedBuildings.MakeBuildableAnywhere(go);
-		Valve valve = go.AddOrGet<Valve>();
-		valve.conduitType = ConduitType.Liquid;
-		valve.smallAmount = 1f;
-		valve.largeAmount = 10f;
-		valve.maxFlow = 10f;
-		valve.animFlowRanges = new Valve.AnimRangeInfo[]
+		ValveBase valveBase = go.AddOrGet<ValveBase>();
+		valveBase.conduitType = ConduitType.Liquid;
+		valveBase.maxFlow = 10f;
+		valveBase.animFlowRanges = new ValveBase.AnimRangeInfo[]
 		{
-			new Valve.AnimRangeInfo(3f, "lo"),
-			new Valve.AnimRangeInfo(7f, "med"),
-			new Valve.AnimRangeInfo(10f, "hi")
+			new ValveBase.AnimRangeInfo(3f, "lo"),
+			new ValveBase.AnimRangeInfo(7f, "med"),
+			new ValveBase.AnimRangeInfo(10f, "hi")
 		};
+		go.AddOrGet<Valve>();
 		Workable workable = go.AddOrGet<Workable>();
 		workable.workTime = 5f;
 	}
@@ -46,6 +55,8 @@ public class LiquidValveConfig : IBuildingConfig
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<ConduitDispenser>());
 		BuildingTemplates.DoPostConfigure(go);
 	}
+
+	public const string ID = "LiquidValve";
 
 	private const ConduitType CONDUIT_TYPE = ConduitType.Liquid;
 }

@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -7,8 +7,19 @@ public class WaterPurifierConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER3;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("WaterPurifier", 4, 3, "waterpurifier_kanim", 100f, 100, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.ALL_METALS, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, tier);
+		string text = "WaterPurifier";
+		int num = 4;
+		int num2 = 3;
+		string text2 = "waterpurifier_kanim";
+		float num3 = 100f;
+		int num4 = 100;
+		float num5 = 30f;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
+		string[] all_METALS = MATERIALS.ALL_METALS;
+		float num6 = 800f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER3;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER2, tier2);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 120f;
 		buildingDef.ExhaustKilowattsWhenActive = 0f;
@@ -29,7 +40,7 @@ public class WaterPurifierConfig : IBuildingConfig
 	{
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
-		storage.defaultStoredItemModifers = WaterPurifierConfig.StoredItemModifiers;
+		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		go.AddOrGet<WaterPurifier>();
 		Prioritizable.AddRef(go);
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
@@ -66,9 +77,21 @@ public class WaterPurifierConfig : IBuildingConfig
 		conduitDispenser.elementFilter = new SimHashes[] { SimHashes.DirtyWater };
 	}
 
+	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, WaterPurifierConfig.INPUT_PORTS);
+	}
+
+	public override void DoPostConfigureUnderConstruction(GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, WaterPurifierConfig.INPUT_PORTS);
+	}
+
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		BuildingTemplates.DoPostConfigure(go);
+		GeneratedBuildings.RegisterLogicPorts(go, WaterPurifierConfig.INPUT_PORTS);
+		go.AddOrGet<LogicOperationalController>();
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
 		{
 			PoweredActiveController.Instance instance = new PoweredActiveController.Instance(game_object.GetComponent<KPrefabID>());
@@ -76,9 +99,10 @@ public class WaterPurifierConfig : IBuildingConfig
 		};
 	}
 
-	private static readonly List<Storage.StoredItemModifier> StoredItemModifiers = new List<Storage.StoredItemModifier>
+	public const string ID = "WaterPurifier";
+
+	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[]
 	{
-		Storage.StoredItemModifier.Hide,
-		Storage.StoredItemModifier.Seal
+		new LogicPorts.Port(LogicOperationalController.PORT_ID, new CellOffset(-1, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false)
 	};
 }

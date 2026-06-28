@@ -67,7 +67,6 @@ public class KGlobalAnimParser
 		if (!this.files.TryGetValue(instanceID, out kanimFileData))
 		{
 			kanimFileData = this.GetFile(anim_file);
-			this.Parse(anim_file, kanimFileData);
 		}
 		return kanimFileData;
 	}
@@ -76,115 +75,27 @@ public class KGlobalAnimParser
 	{
 		string fullName = Directory.GetParent(path).FullName;
 		HashedString hashedString = new HashedString(fullName);
+		AnimCommandFile animCommandFile;
 		if (KGlobalAnimParser.Get().commandFiles.ContainsKey(hashedString))
 		{
-			return KGlobalAnimParser.instance.commandFiles[hashedString];
+			animCommandFile = KGlobalAnimParser.instance.commandFiles[hashedString];
 		}
-		string text = Path.Combine(fullName, KGlobalAnimParser.ANIM_COMMAND_FILE);
-		if (File.Exists(text))
+		else
 		{
-			AnimCommandFile animCommandFile = YamlIO<AnimCommandFile>.LoadFile(text);
-			animCommandFile.directory = "Assets/anim/" + Directory.GetParent(path).Name;
-			KGlobalAnimParser.instance.commandFiles[hashedString] = animCommandFile;
-			return animCommandFile;
-		}
-		return null;
-	}
-
-	public static string GetTagGroup(string path)
-	{
-		string text = path + "/mygroup.yaml";
-		KAnimGroupFile.GroupFile groupFile = YamlIO<KAnimGroupFile.GroupFile>.LoadFile(text);
-		return groupFile.groupID;
-	}
-
-	private void Parse(KAnimFile file, KAnimFileData data)
-	{
-		HashedString ignore = KAnimBatchManager.IGNORE;
-		if (file.animFile != null || file.buildFile != null)
-		{
-			if (!string.IsNullOrEmpty(file.homedirectory))
+			string text = Path.Combine(fullName, KGlobalAnimParser.ANIM_COMMAND_FILE);
+			if (File.Exists(text))
 			{
-				ignore = new HashedString(KGlobalAnimParser.GetTagGroup(file.homedirectory));
+				AnimCommandFile animCommandFile2 = YamlIO<AnimCommandFile>.LoadFile(text);
+				animCommandFile2.directory = "Assets/anim/" + Directory.GetParent(path).Name;
+				KGlobalAnimParser.instance.commandFiles[hashedString] = animCommandFile2;
+				animCommandFile = animCommandFile2;
 			}
 			else
 			{
-				global::Debug.LogWarning("No file.path for [" + file.name + "]", null);
-			}
-			if (ignore == KAnimBatchManager.IGNORE)
-			{
-				data.batchTag = ignore;
-			}
-			else
-			{
-				try
-				{
-					this.Parse(ignore, file, data);
-					KGlobalAnimParser.PostParse(KAnimBatchManager.Instance().GetBatchGroupData(ignore, false));
-				}
-				catch (Exception ex)
-				{
-					string message = ex.Message;
-					string stackTrace = ex.StackTrace;
-					Output.LogError(new object[] { "Error importing", file.name, message, stackTrace });
-					throw ex;
-				}
+				animCommandFile = null;
 			}
 		}
-	}
-
-	private KAnimFileData Parse(HashedString batchTag, KAnimFile file, KAnimFileData animFile)
-	{
-		TextAsset animFile2 = file.animFile;
-		TextAsset buildFile = file.buildFile;
-		KAnimGroupFile.Group group = KAnimGroupFile.GetGroup(batchTag);
-		KBatchGroupData kbatchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(group.id, false);
-		animFile.batchTag = kbatchGroupData.groupID;
-		HashedString hashedString = new HashedString(file.name);
-		HashCache.Get().Add(hashedString.HashValue, file.name);
-		try
-		{
-			if (buildFile != null && buildFile.bytes != null && buildFile.bytes.Length > 0)
-			{
-				if (group.renderType == KAnimBatchGroup.RendererType.AnimOnly && group.swapTarget.isValid)
-				{
-					global::Debug.Log(string.Concat(new string[]
-					{
-						"BUILD Anim only [",
-						group.id.ToString(),
-						"] -> swapTarget [",
-						group.swapTarget.ToString(),
-						"]"
-					}), null);
-					kbatchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(group.swapTarget, false);
-				}
-				animFile.batchTag = kbatchGroupData.groupID;
-				animFile.buildIndex = KGlobalAnimParser.ParseBuildData(kbatchGroupData, hashedString, new FastReader(buildFile.bytes), file.textures);
-			}
-			if (animFile2 != null && animFile2.bytes != null && animFile2.bytes.Length > 0)
-			{
-				if (group.renderType == KAnimBatchGroup.RendererType.AnimOnly && group.animTarget.isValid)
-				{
-					global::Debug.Log(string.Concat(new string[]
-					{
-						"ANIM Anim only [",
-						group.id.ToString(),
-						"] -> animTarget [",
-						group.animTarget.ToString(),
-						"]"
-					}), null);
-					kbatchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(group.animTarget, false);
-				}
-				KGlobalAnimParser.ParseAnimData(kbatchGroupData, hashedString, new FastReader(animFile2.bytes), animFile);
-			}
-		}
-		catch (Exception ex)
-		{
-			string stackTrace = ex.StackTrace;
-			string message = ex.Message;
-			Output.LogError(new object[] { string.Concat(new string[] { "Exception while parsing kanim file [", file.name, "]:\n\t", message, "\n", stackTrace }) });
-		}
-		return animFile;
+		return animCommandFile;
 	}
 
 	public static void ParseAnimData(KBatchGroupData data, HashedString fileNameHash, FastReader reader, KAnimFileData animFile)
@@ -495,11 +406,11 @@ public class KGlobalAnimParser
 		}
 	}
 
-	public const float ANIM_SCALE = 0.005f;
-
 	public static KAnimHashedString MISSING_SYMBOL = new KAnimHashedString("MISSING_SYMBOL");
 
 	public static string ANIM_COMMAND_FILE = "batchgroup.yaml";
+
+	public const float ANIM_SCALE = 0.005f;
 
 	private Dictionary<HashedString, AnimCommandFile> commandFiles = new Dictionary<HashedString, AnimCommandFile>();
 

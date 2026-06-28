@@ -22,7 +22,20 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 			this.reactable.Get(smi).End();
 		})
 			.EventTransition(GameHashes.NavigationFailed, this.idle, null)
-			.ToggleTag(GameTags.PreventChoreInterruption)
+			.Enter("Reactable.AddChorePreventionTag", delegate(ReactionMonitor.Instance smi)
+			{
+				if (this.reactable.Get(smi).preventChoreInterruption)
+				{
+					smi.GetComponent<KPrefabID>().AddTag(GameTags.PreventChoreInterruption);
+				}
+			})
+			.Exit("Reactable.RemoveChorePreventionTag", delegate(ReactionMonitor.Instance smi)
+			{
+				if (this.reactable.Get(smi).preventChoreInterruption)
+				{
+					smi.GetComponent<KPrefabID>().RemoveTag(GameTags.PreventChoreInterruption);
+				}
+			})
 			.TagTransition(GameTags.Dying, this.dead, false)
 			.TagTransition(GameTags.Dead, this.dead, false);
 		this.dead.DoNothing();
@@ -45,37 +58,36 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 
 		public void PollForReactables(Navigator.ActiveTransition transition)
 		{
-			if (this.IsReacting())
+			if (!this.IsReacting())
 			{
-				return;
-			}
-			if (this.justReacted)
-			{
-				this.justReacted = false;
-			}
-			else
-			{
-				this.lastReactable = null;
-			}
-			int num = Grid.PosToCell(base.smi.gameObject);
-			List<ScenePartitionerEntry> list = GameScenePartitioner.Instance.ReserveList();
-			GameScenePartitioner.Instance.GatherEntries(Grid.CellToXY(num).x, Grid.CellToXY(num).y, 1, 1, GameScenePartitioner.Instance.objectLayers[0], list);
-			for (int i = 0; i < list.Count; i++)
-			{
-				Reactable reactable = list[i].obj as Reactable;
-				if (reactable != null && reactable != this.lastReactable)
+				if (this.justReacted)
 				{
-					if (reactable.CanBegin(base.gameObject, transition))
+					this.justReacted = false;
+				}
+				else
+				{
+					this.lastReactable = null;
+				}
+				int num = Grid.PosToCell(base.smi.gameObject);
+				List<ScenePartitionerEntry> list = GameScenePartitioner.Instance.ReserveList();
+				GameScenePartitioner.Instance.GatherEntries(Grid.CellToXY(num).x, Grid.CellToXY(num).y, 1, 1, GameScenePartitioner.Instance.objectLayers[0], list);
+				for (int i = 0; i < list.Count; i++)
+				{
+					Reactable reactable = list[i].obj as Reactable;
+					if (reactable != null && reactable != this.lastReactable)
 					{
-						this.justReacted = true;
-						this.lastReactable = reactable;
-						base.sm.reactable.Set(reactable, base.smi);
-						base.smi.GoTo(base.sm.reacting);
-						break;
+						if (reactable.CanBegin(base.gameObject, transition))
+						{
+							this.justReacted = true;
+							this.lastReactable = reactable;
+							base.sm.reactable.Set(reactable, base.smi);
+							base.smi.GoTo(base.sm.reacting);
+							break;
+						}
 					}
 				}
+				GameScenePartitioner.Instance.ReleaseList(list);
 			}
-			GameScenePartitioner.Instance.ReleaseList(list);
 		}
 
 		public void StopReaction()

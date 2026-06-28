@@ -26,7 +26,7 @@ namespace Klei.AI
 				overPopulationHalfLife = new float?(3000f),
 				minDiffusionCount = new int?(1000),
 				diffusionScale = new float?(0.001f),
-				minDiffusionInfestationTickCount = 1
+				minDiffusionInfestationTickCount = new byte?(1)
 			});
 			base.AddGrowthRule(new StateGrowthRule(Element.State.Solid)
 			{
@@ -119,24 +119,23 @@ namespace Klei.AI
 			private void Emit(object data)
 			{
 				GameObject gameObject = (GameObject)data;
-				if (gameObject == null)
+				if (!(gameObject == null))
 				{
-					return;
-				}
-				Components.Cmps<MinionIdentity> liveMinionIdentities = Components.LiveMinionIdentities;
-				Vector2 vector = gameObject.transform.position;
-				for (int i = 0; i < liveMinionIdentities.Count; i++)
-				{
-					MinionIdentity minionIdentity = liveMinionIdentities[i];
-					if (minionIdentity.gameObject != gameObject.gameObject)
+					Components.Cmps<MinionIdentity> liveMinionIdentities = Components.LiveMinionIdentities;
+					Vector2 vector = gameObject.transform.position;
+					for (int i = 0; i < liveMinionIdentities.Count; i++)
 					{
-						Vector2 vector2 = minionIdentity.transform.position;
-						float num = Vector2.SqrMagnitude(vector - vector2);
-						if (num <= 2.25f)
+						MinionIdentity minionIdentity = liveMinionIdentities[i];
+						if (minionIdentity.gameObject != gameObject.gameObject)
 						{
-							minionIdentity.Trigger(508119890, Strings.Get("STRINGS.DUPLICANTS.DISEASES.PUTRIDODOUR.CRINGE_EFFECT").String);
-							minionIdentity.GetComponent<Effects>().Add("SmelledPutridOdour", true);
-							minionIdentity.gameObject.GetSMI<ThoughtGraph.Instance>().AddThought(Db.Get().Thoughts.PutridOdour);
+							Vector2 vector2 = minionIdentity.transform.position;
+							float num = Vector2.SqrMagnitude(vector - vector2);
+							if (num <= 2.25f)
+							{
+								minionIdentity.Trigger(508119890, Strings.Get("STRINGS.DUPLICANTS.DISEASES.PUTRIDODOUR.CRINGE_EFFECT").String);
+								minionIdentity.GetComponent<Effects>().Add("SmelledPutridOdour", true);
+								minionIdentity.gameObject.GetSMI<ThoughtGraph.Instance>().AddThought(Db.Get().Thoughts.PutridOdour);
+							}
 						}
 					}
 				}

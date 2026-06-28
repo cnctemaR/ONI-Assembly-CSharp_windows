@@ -55,8 +55,8 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>
 				smi.master.current_emissionType = smi.master.emission_a;
 				smi.SetEmissionElement(smi.master.current_emissionType);
 			});
-			this.idle.PlayAnim("inactive", KAnim.PlayMode.Loop, null).ScheduleGoTo((Geyser.StatesInstance smi) => smi.master.idleDuration, this.pre_erupt);
-			this.pre_erupt.PlayAnim("shake", KAnim.PlayMode.Loop, null).ToggleMainStatusItem(Db.Get().MiscStatusItems.SpoutPressureBuilding).ScheduleGoTo((Geyser.StatesInstance smi) => smi.master.current_emissionType.duration_pre, this.erupt)
+			this.idle.PlayAnim("inactive", KAnim.PlayMode.Loop).ScheduleGoTo((Geyser.StatesInstance smi) => smi.master.idleDuration, this.pre_erupt);
+			this.pre_erupt.PlayAnim("shake", KAnim.PlayMode.Loop).ToggleMainStatusItem(Db.Get().MiscStatusItems.SpoutPressureBuilding).ScheduleGoTo((Geyser.StatesInstance smi) => smi.master.current_emissionType.duration_pre, this.erupt)
 				.Enter("SetEmissionElement", delegate(Geyser.StatesInstance smi)
 				{
 					smi.SetEmissionElement(smi.master.current_emissionType);
@@ -74,8 +74,8 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>
 			{
 				smi.master.GetComponent<KBatchedAnimController>().Play(smi.master.current_emissionType.animation, KAnim.PlayMode.Loop, 1f, 0f);
 			}).EventTransition(GameHashes.EmitterBlocked, this.erupt.overpressure, null);
-			this.erupt.overpressure.EventTransition(GameHashes.EmitterUnblocked, this.erupt.erupting, (Geyser.StatesInstance smi) => !smi.GetComponent<ElementEmitter>().isEmitterBlocked).ToggleMainStatusItem(Db.Get().MiscStatusItems.SpoutOverPressure).PlayAnim("inactive", KAnim.PlayMode.Loop, null);
-			this.post_erupt.PlayAnim("shake", KAnim.PlayMode.Loop, null).ScheduleGoTo((Geyser.StatesInstance smi) => smi.master.current_emissionType.duration_pst, this.idle);
+			this.erupt.overpressure.EventTransition(GameHashes.EmitterUnblocked, this.erupt.erupting, (Geyser.StatesInstance smi) => !smi.GetComponent<ElementEmitter>().isEmitterBlocked).ToggleMainStatusItem(Db.Get().MiscStatusItems.SpoutOverPressure).PlayAnim("inactive", KAnim.PlayMode.Loop);
+			this.post_erupt.PlayAnim("shake", KAnim.PlayMode.Loop).ScheduleGoTo((Geyser.StatesInstance smi) => smi.master.current_emissionType.duration_pst, this.idle);
 		}
 
 		public StateMachine<Geyser.States, Geyser.StatesInstance, Geyser, object>.ObjectParameter<Geyser.EmissionType> emitType_a;
@@ -109,7 +109,7 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>
 			this.duration_erupt = duration_erupt;
 			this.duration_pst = duration_pst;
 			this.emissionElement = emission_element;
-			if (override_animation != string.Empty)
+			if (override_animation != "")
 			{
 				this.animation = override_animation;
 			}

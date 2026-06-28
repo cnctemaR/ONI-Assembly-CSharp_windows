@@ -20,7 +20,7 @@ namespace Database
 			this.CookingSpeed = this.Create("CookingSpeed", "Cooking Speed", DUPLICANTS.ATTRIBUTES.COOKING.SPEEDMODIFIER, "Cooking", 0.1f, 0f, toPercentAttributeFormatter);
 			this.ArtSpeed = this.Create("ArtSpeed", "Art Speed", DUPLICANTS.ATTRIBUTES.ART.SPEEDMODIFIER, "Art", 0.1f, 0f, toPercentAttributeFormatter);
 			this.CarryAmount = this.Create("CarryAmount", "Carry Amount", DUPLICANTS.ATTRIBUTES.STRENGTH.SPEEDMODIFIER, "Strength", 15f, 0f, null);
-			this.ToiletSpeed = this.Create("ToiletSpeed", "Toilet Speed", string.Empty, "ToiletEfficiency", 1f, -1f, toPercentAttributeFormatter);
+			this.ToiletSpeed = this.Create("ToiletSpeed", "Toilet Speed", "", "ToiletEfficiency", 1f, -1f, toPercentAttributeFormatter);
 			this.ImmuneLevelBoost = this.Create("ImmuneLevelBoost", "Immune Level Boost", DUPLICANTS.ATTRIBUTES.IMMUNITY.BOOST_MODIFIER, "Immunity", 0.0016666667f, 0f, new ToPercentAttributeFormatter(100f, GameUtil.TimeSlice.PerCycle));
 			this.HealingSpeed = this.Create("HealingSpeed", "Healing Speed", DUPLICANTS.ATTRIBUTES.MEDICAL.SPEEDMODIFIER, "Medical", 0.2f, 0f, toPercentAttributeFormatter);
 		}

@@ -25,16 +25,6 @@ namespace Steamworks
 			return this.m_SteamItemInstanceID.GetHashCode();
 		}
 
-		public bool Equals(SteamItemInstanceID_t other)
-		{
-			return this.m_SteamItemInstanceID == other.m_SteamItemInstanceID;
-		}
-
-		public int CompareTo(SteamItemInstanceID_t other)
-		{
-			return this.m_SteamItemInstanceID.CompareTo(other.m_SteamItemInstanceID);
-		}
-
 		public static bool operator ==(SteamItemInstanceID_t x, SteamItemInstanceID_t y)
 		{
 			return x.m_SteamItemInstanceID == y.m_SteamItemInstanceID;
@@ -53,6 +43,16 @@ namespace Steamworks
 		public static explicit operator ulong(SteamItemInstanceID_t that)
 		{
 			return that.m_SteamItemInstanceID;
+		}
+
+		public bool Equals(SteamItemInstanceID_t other)
+		{
+			return this.m_SteamItemInstanceID == other.m_SteamItemInstanceID;
+		}
+
+		public int CompareTo(SteamItemInstanceID_t other)
+		{
+			return this.m_SteamItemInstanceID.CompareTo(other.m_SteamItemInstanceID);
 		}
 
 		public static readonly SteamItemInstanceID_t Invalid = new SteamItemInstanceID_t(ulong.MaxValue);

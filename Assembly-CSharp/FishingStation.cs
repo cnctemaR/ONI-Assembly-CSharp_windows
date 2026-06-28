@@ -8,7 +8,7 @@ public class FishingStation : Harvestable
 		base.OnSpawn();
 		this.showProgressBar = false;
 		base.SetWorkTime(float.PositiveInfinity);
-		int num = Grid.PosToCell(this.transform.position);
+		int num = Grid.PosToCell(base.transform.position);
 		int num2 = Grid.CellLeft(num);
 		int num3 = Grid.CellRight(num);
 		this.faceTargetWhenWorking = false;
@@ -22,8 +22,8 @@ public class FishingStation : Harvestable
 		this.userMenu.Refresh();
 		this.RefreshLure();
 		GameObject gameObject = new GameObject("Line_Renderer");
-		gameObject.transform.SetPosition(this.transform.position);
-		gameObject.transform.parent = this.transform;
+		gameObject.transform.SetPosition(base.transform.position);
+		gameObject.transform.parent = base.transform;
 		this.lineRenderer = gameObject.AddComponent<KBatchedAnimController>();
 		this.lineRenderer.materialType = KAnimBatchGroup.MaterialType.Simple;
 		this.lineRenderer.AddAnims(new KAnimFile[] { this.lineAnimation });
@@ -46,7 +46,7 @@ public class FishingStation : Harvestable
 		{
 			for (int i = 1; i < this.LineRange; i++)
 			{
-				int num2 = Grid.PosToCell(this.transform.position + Vector3.down * (float)i);
+				int num2 = Grid.PosToCell(base.transform.position + Vector3.down * (float)i);
 				num = i;
 				if (Grid.IsLiquid(num2))
 				{
@@ -67,7 +67,7 @@ public class FishingStation : Harvestable
 		{
 			num = 1;
 		}
-		this.lure.moveTarget = this.transform.position + Vector3.down * (float)num;
+		this.lure.moveTarget = base.transform.position + Vector3.down * (float)num;
 	}
 
 	private void StopWork(object param)
@@ -80,11 +80,11 @@ public class FishingStation : Harvestable
 		if (this.lure == null)
 		{
 			GameObject gameObject = new GameObject("Fishing_Lure");
-			gameObject.transform.parent = this.transform;
+			gameObject.transform.parent = base.transform;
 			gameObject.AddComponent<KBatchedAnimController>().AddAnims(new KAnimFile[] { this.lineAnimation });
 			this.lure = gameObject.AddComponent<FishingLure>();
 			this.lure.station = this;
-			gameObject.transform.SetPosition(this.transform.position);
+			gameObject.transform.SetPosition(base.transform.position);
 			this.lure.SetupLine(this, this.lineAnimation);
 			this.lure.ReelIn();
 		}
@@ -123,7 +123,7 @@ public class FishingStation : Harvestable
 		{
 			Util.KDestroyGameObject(this.lure.gameObject);
 		}
-		int num = Grid.PosToCell(this.transform.position);
+		int num = Grid.PosToCell(base.transform.position);
 		int num2 = Grid.CellLeft(num);
 		int num3 = Grid.CellRight(num);
 		SimMessages.ReplaceElement(num2, SimHashes.Vacuum, CellEventLogger.Instance.SimCellOccupierDestroySelf, 0f, 0f, byte.MaxValue, 0, -1);
@@ -133,12 +133,11 @@ public class FishingStation : Harvestable
 
 	public override void OnRefreshUserMenu(object data)
 	{
-		if (!this.canBeHarvested)
+		if (this.canBeHarvested)
 		{
-			return;
-		}
-		if (this.isMarkedForHarvest)
-		{
+			if (this.isMarkedForHarvest)
+			{
+			}
 		}
 	}
 
@@ -146,7 +145,7 @@ public class FishingStation : Harvestable
 	{
 		if (this.chore == null)
 		{
-			this.chore = new WorkChore<FishingStation>(Db.Get().ChoreTypes.Harvest, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue);
+			this.chore = new WorkChore<FishingStation>(Db.Get().ChoreTypes.Harvest, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
 			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.PendingFish, null);
 		}
 		this.isMarkedForHarvest = true;
@@ -173,19 +172,27 @@ public class FishingStation : Harvestable
 	public virtual Vector3 CaughtDepositLocation()
 	{
 		Vector3 vector = new Vector3(0f, 0.5f, -2f);
-		Vector3 vector2 = this.transform.position + Vector3.up;
+		Vector3 vector2 = base.transform.position + Vector3.up;
 		vector2.z = -2f;
-		for (int i = 0; i < 3; i++)
+		int i = 0;
+		while (i < 3)
 		{
 			Vector3 vector3 = new Vector3((float)i, 0f, 0f);
+			Vector3 vector4;
 			if (this.depositLocationPriority(vector2, vector3) == 2)
 			{
-				return new Vector3(vector3.x + vector2.x, vector3.y + vector2.y, 0f) + vector;
+				vector4 = new Vector3(vector3.x + vector2.x, vector3.y + vector2.y, 0f) + vector;
 			}
-			if (this.depositLocationPriority(vector2, -vector3) == 2)
+			else
 			{
-				return new Vector3(-vector3.x + vector2.x, -vector3.y + vector2.y, 0f) + vector;
+				if (this.depositLocationPriority(vector2, -vector3) != 2)
+				{
+					i++;
+					continue;
+				}
+				vector4 = new Vector3(-vector3.x + vector2.x, -vector3.y + vector2.y, 0f) + vector;
 			}
+			return vector4;
 		}
 		for (int j = 0; j < 3; j++)
 		{
@@ -205,15 +212,23 @@ public class FishingStation : Harvestable
 	private int depositLocationPriority(Vector3 rootLocation, Vector3 offsetLocation)
 	{
 		int num = Grid.PosToCell(rootLocation + offsetLocation);
-		if (Grid.Solid[num] || !Grid.Solid[Grid.CellBelow(num)])
+		int num2;
+		if (!Grid.Solid[num] && Grid.Solid[Grid.CellBelow(num)])
 		{
-			return 0;
+			if (!Grid.Objects[num, 5])
+			{
+				num2 = 2;
+			}
+			else
+			{
+				num2 = 1;
+			}
 		}
-		if (!Grid.Objects[num, 5])
+		else
 		{
-			return 2;
+			num2 = 0;
 		}
-		return 1;
+		return num2;
 	}
 
 	private void Update()
@@ -221,8 +236,8 @@ public class FishingStation : Harvestable
 		if (this.lineRenderer != null)
 		{
 			float num = 0f;
-			float num2 = Vector3.Distance(this.transform.position, this.lure.transform.position) - num;
-			this.lineRenderer.GetBatchInstanceData().SetClipRadius(this.transform.position.x, this.transform.position.y, num2 * num2, true);
+			float num2 = Vector3.Distance(base.transform.position, this.lure.transform.position) - num;
+			this.lineRenderer.GetBatchInstanceData().SetClipRadius(base.transform.position.x, base.transform.position.y, num2 * num2, true);
 			this.lineRenderer.SetDirty();
 		}
 	}

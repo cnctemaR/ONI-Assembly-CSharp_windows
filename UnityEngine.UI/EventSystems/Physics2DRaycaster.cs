@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 namespace UnityEngine.EventSystems
 {
-	[RequireComponent(typeof(Camera))]
 	[AddComponentMenu("Event/Physics 2D Raycaster")]
+	[RequireComponent(typeof(Camera))]
 	public class Physics2DRaycaster : PhysicsRaycaster
 	{
 		protected Physics2DRaycaster()
@@ -13,34 +14,37 @@ namespace UnityEngine.EventSystems
 
 		public override void Raycast(PointerEventData eventData, List<RaycastResult> resultAppendList)
 		{
-			if (this.eventCamera == null)
+			if (!(this.eventCamera == null))
 			{
-				return;
-			}
-			Ray ray = this.eventCamera.ScreenPointToRay(eventData.position);
-			float num = this.eventCamera.farClipPlane - this.eventCamera.nearClipPlane;
-			RaycastHit2D[] rayIntersectionAll = Physics2D.GetRayIntersectionAll(ray, num, base.finalEventMask);
-			if (rayIntersectionAll.Length != 0)
-			{
-				int i = 0;
-				int num2 = rayIntersectionAll.Length;
-				while (i < num2)
+				Ray ray;
+				float num;
+				base.ComputeRayAndDistance(eventData, out ray, out num);
+				if (ReflectionMethodsCache.Singleton.getRayIntersectionAll != null)
 				{
-					SpriteRenderer component = rayIntersectionAll[i].collider.gameObject.GetComponent<SpriteRenderer>();
-					RaycastResult raycastResult = new RaycastResult
+					RaycastHit2D[] array = ReflectionMethodsCache.Singleton.getRayIntersectionAll(ray, num, base.finalEventMask);
+					if (array.Length != 0)
 					{
-						gameObject = rayIntersectionAll[i].collider.gameObject,
-						module = this,
-						distance = Vector3.Distance(this.eventCamera.transform.position, rayIntersectionAll[i].transform.position),
-						worldPosition = rayIntersectionAll[i].point,
-						worldNormal = rayIntersectionAll[i].normal,
-						screenPosition = eventData.position,
-						index = (float)resultAppendList.Count,
-						sortingLayer = ((!(component != null)) ? 0 : component.sortingLayerID),
-						sortingOrder = ((!(component != null)) ? 0 : component.sortingOrder)
-					};
-					resultAppendList.Add(raycastResult);
-					i++;
+						int i = 0;
+						int num2 = array.Length;
+						while (i < num2)
+						{
+							SpriteRenderer component = array[i].collider.gameObject.GetComponent<SpriteRenderer>();
+							RaycastResult raycastResult = new RaycastResult
+							{
+								gameObject = array[i].collider.gameObject,
+								module = this,
+								distance = Vector3.Distance(this.eventCamera.transform.position, array[i].point),
+								worldPosition = array[i].point,
+								worldNormal = array[i].normal,
+								screenPosition = eventData.position,
+								index = (float)resultAppendList.Count,
+								sortingLayer = ((!(component != null)) ? 0 : component.sortingLayerID),
+								sortingOrder = ((!(component != null)) ? 0 : component.sortingOrder)
+							};
+							resultAppendList.Add(raycastResult);
+							i++;
+						}
+					}
 				}
 			}
 		}

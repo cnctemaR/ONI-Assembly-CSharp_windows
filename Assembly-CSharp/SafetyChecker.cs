@@ -32,6 +32,7 @@ public class SafetyChecker
 	{
 		public Condition(string id, int condition_mask, SafetyChecker.Condition.Callback condition_callback)
 		{
+			this = default(SafetyChecker.Condition);
 			this.callback = condition_callback;
 			this.mask = condition_mask;
 		}

@@ -15,12 +15,12 @@ public class UprootedMonitor : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.Subscribe(-216549700, delegate(object d)
+		base.Subscribe(-216549700, delegate(object d)
 		{
 			if (!this.uprooted)
 			{
 				this.uprooted = true;
-				this.Trigger(-216549700, null);
+				base.Trigger(-216549700, null);
 			}
 		});
 		this.position = Grid.PosToCell(base.gameObject);
@@ -53,7 +53,7 @@ public class UprootedMonitor : KMonoBehaviour
 		if (!this.CheckTileGrowable())
 		{
 			this.uprooted = true;
-			this.Trigger(-216549700, null);
+			base.Trigger(-216549700, null);
 		}
 	}
 
@@ -71,7 +71,7 @@ public class UprootedMonitor : KMonoBehaviour
 	public bool canBeUprooted = true;
 
 	[Serialize]
-	private bool uprooted;
+	private bool uprooted = false;
 
 	public CellOffset monitorCell = new CellOffset(0, -1);
 

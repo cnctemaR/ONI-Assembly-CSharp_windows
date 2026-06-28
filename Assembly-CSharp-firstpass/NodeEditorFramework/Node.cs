@@ -10,15 +10,14 @@ namespace NodeEditorFramework
 		protected internal void InitBase()
 		{
 			NodeEditor.RecalculateFrom(this);
-			if (NodeEditor.curNodeCanvas == null || NodeEditor.curNodeCanvas.nodes == null)
+			if (!(NodeEditor.curNodeCanvas == null) && NodeEditor.curNodeCanvas.nodes != null)
 			{
-				return;
+				if (!NodeEditor.curNodeCanvas.nodes.Contains(this))
+				{
+					NodeEditor.curNodeCanvas.nodes.Add(this);
+				}
+				NodeEditor.RepaintClients();
 			}
-			if (!NodeEditor.curNodeCanvas.nodes.Contains(this))
-			{
-				NodeEditor.curNodeCanvas.nodes.Add(this);
-			}
-			NodeEditor.RepaintClients();
 		}
 
 		public void Delete()
@@ -186,19 +185,18 @@ namespace NodeEditorFramework
 		protected internal virtual void DrawConnections()
 		{
 			this.CheckNodeKnobMigration();
-			if (Event.current.type != EventType.Repaint)
+			if (Event.current.type == EventType.Repaint)
 			{
-				return;
-			}
-			for (int i = 0; i < this.Outputs.Count; i++)
-			{
-				NodeOutput nodeOutput = this.Outputs[i];
-				Vector2 center = nodeOutput.GetGUIKnob().center;
-				Vector2 direction = nodeOutput.GetDirection();
-				for (int j = 0; j < nodeOutput.connections.Count; j++)
+				for (int i = 0; i < this.Outputs.Count; i++)
 				{
-					NodeInput nodeInput = nodeOutput.connections[j];
-					NodeEditorGUI.DrawConnection(center, direction, nodeInput.GetGUIKnob().center, nodeInput.GetDirection(), nodeOutput.typeData.Color);
+					NodeOutput nodeOutput = this.Outputs[i];
+					Vector2 center = nodeOutput.GetGUIKnob().center;
+					Vector2 direction = nodeOutput.GetDirection();
+					for (int j = 0; j < nodeOutput.connections.Count; j++)
+					{
+						NodeInput nodeInput = nodeOutput.connections[j];
+						NodeEditorGUI.DrawConnection(center, direction, nodeInput.GetGUIKnob().center, nodeInput.GetDirection(), nodeOutput.typeData.Color);
+					}
 				}
 			}
 		}
@@ -331,89 +329,109 @@ namespace NodeEditorFramework
 
 		public bool isChildOf(Node otherNode)
 		{
+			bool flag;
 			if (otherNode == null || otherNode == this)
 			{
-				return false;
+				flag = false;
 			}
-			if (this.BeginRecursiveSearchLoop())
+			else if (this.BeginRecursiveSearchLoop())
 			{
-				return false;
+				flag = false;
 			}
-			for (int i = 0; i < this.Inputs.Count; i++)
+			else
 			{
-				NodeOutput connection = this.Inputs[i].connection;
-				if (connection != null && connection.body != this.startRecursiveSearchNode && (connection.body == otherNode || connection.body.isChildOf(otherNode)))
+				for (int i = 0; i < this.Inputs.Count; i++)
 				{
-					this.StopRecursiveSearchLoop();
-					return true;
+					NodeOutput connection = this.Inputs[i].connection;
+					if (connection != null)
+					{
+						if (connection.body != this.startRecursiveSearchNode)
+						{
+							if (connection.body == otherNode || connection.body.isChildOf(otherNode))
+							{
+								this.StopRecursiveSearchLoop();
+								return true;
+							}
+						}
+					}
 				}
+				this.EndRecursiveSearchLoop();
+				flag = false;
 			}
-			this.EndRecursiveSearchLoop();
-			return false;
+			return flag;
 		}
 
 		internal bool isInLoop()
 		{
+			bool flag;
 			if (this.BeginRecursiveSearchLoop())
 			{
-				return this == this.startRecursiveSearchNode;
+				flag = this == this.startRecursiveSearchNode;
 			}
-			for (int i = 0; i < this.Inputs.Count; i++)
+			else
 			{
-				NodeOutput connection = this.Inputs[i].connection;
-				if (connection != null && connection.body.isInLoop())
+				for (int i = 0; i < this.Inputs.Count; i++)
 				{
-					this.StopRecursiveSearchLoop();
-					return true;
+					NodeOutput connection = this.Inputs[i].connection;
+					if (connection != null && connection.body.isInLoop())
+					{
+						this.StopRecursiveSearchLoop();
+						return true;
+					}
 				}
+				this.EndRecursiveSearchLoop();
+				flag = false;
 			}
-			this.EndRecursiveSearchLoop();
-			return false;
+			return flag;
 		}
 
 		internal bool allowsLoopRecursion(Node otherNode)
 		{
+			bool flag;
 			if (this.AllowRecursion)
 			{
-				return true;
+				flag = true;
 			}
-			if (otherNode == null)
+			else if (otherNode == null)
 			{
-				return false;
+				flag = false;
 			}
-			if (this.BeginRecursiveSearchLoop())
+			else if (this.BeginRecursiveSearchLoop())
 			{
-				return false;
+				flag = false;
 			}
-			for (int i = 0; i < this.Inputs.Count; i++)
+			else
 			{
-				NodeOutput connection = this.Inputs[i].connection;
-				if (connection != null && connection.body.allowsLoopRecursion(otherNode))
+				for (int i = 0; i < this.Inputs.Count; i++)
 				{
-					this.StopRecursiveSearchLoop();
-					return true;
+					NodeOutput connection = this.Inputs[i].connection;
+					if (connection != null && connection.body.allowsLoopRecursion(otherNode))
+					{
+						this.StopRecursiveSearchLoop();
+						return true;
+					}
 				}
+				this.EndRecursiveSearchLoop();
+				flag = false;
 			}
-			this.EndRecursiveSearchLoop();
-			return false;
+			return flag;
 		}
 
 		public void ClearCalculation()
 		{
-			if (this.BeginRecursiveSearchLoop())
+			if (!this.BeginRecursiveSearchLoop())
 			{
-				return;
-			}
-			this.calculated = false;
-			for (int i = 0; i < this.Outputs.Count; i++)
-			{
-				NodeOutput nodeOutput = this.Outputs[i];
-				for (int j = 0; j < nodeOutput.connections.Count; j++)
+				this.calculated = false;
+				for (int i = 0; i < this.Outputs.Count; i++)
 				{
-					nodeOutput.connections[j].body.ClearCalculation();
+					NodeOutput nodeOutput = this.Outputs[i];
+					for (int j = 0; j < nodeOutput.connections.Count; j++)
+					{
+						nodeOutput.connections[j].body.ClearCalculation();
+					}
 				}
+				this.EndRecursiveSearchLoop();
 			}
-			this.EndRecursiveSearchLoop();
 		}
 
 		internal bool BeginRecursiveSearchLoop()
@@ -423,12 +441,17 @@ namespace NodeEditorFramework
 				this.recursiveSearchSurpassed = new List<Node>();
 				this.startRecursiveSearchNode = this;
 			}
+			bool flag;
 			if (this.recursiveSearchSurpassed.Contains(this))
 			{
-				return true;
+				flag = true;
 			}
-			this.recursiveSearchSurpassed.Add(this);
-			return false;
+			else
+			{
+				this.recursiveSearchSurpassed.Add(this);
+				flag = false;
+			}
+			return flag;
 		}
 
 		internal void EndRecursiveSearchLoop()

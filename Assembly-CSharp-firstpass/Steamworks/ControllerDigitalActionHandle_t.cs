@@ -25,16 +25,6 @@ namespace Steamworks
 			return this.m_ControllerDigitalActionHandle.GetHashCode();
 		}
 
-		public bool Equals(ControllerDigitalActionHandle_t other)
-		{
-			return this.m_ControllerDigitalActionHandle == other.m_ControllerDigitalActionHandle;
-		}
-
-		public int CompareTo(ControllerDigitalActionHandle_t other)
-		{
-			return this.m_ControllerDigitalActionHandle.CompareTo(other.m_ControllerDigitalActionHandle);
-		}
-
 		public static bool operator ==(ControllerDigitalActionHandle_t x, ControllerDigitalActionHandle_t y)
 		{
 			return x.m_ControllerDigitalActionHandle == y.m_ControllerDigitalActionHandle;
@@ -53,6 +43,16 @@ namespace Steamworks
 		public static explicit operator ulong(ControllerDigitalActionHandle_t that)
 		{
 			return that.m_ControllerDigitalActionHandle;
+		}
+
+		public bool Equals(ControllerDigitalActionHandle_t other)
+		{
+			return this.m_ControllerDigitalActionHandle == other.m_ControllerDigitalActionHandle;
+		}
+
+		public int CompareTo(ControllerDigitalActionHandle_t other)
+		{
+			return this.m_ControllerDigitalActionHandle.CompareTo(other.m_ControllerDigitalActionHandle);
 		}
 
 		public ulong m_ControllerDigitalActionHandle;

@@ -7,7 +7,7 @@ using UnityEngine;
 public class UglyCryChore : Chore<UglyCryChore.StatesInstance>
 {
 	public UglyCryChore(ChoreType chore_type, IStateMachineTarget target, Action<Chore> on_complete = null)
-		: base(Db.Get().ChoreTypes.UglyCry, target, target.GetComponent<ChoreProvider>(), false, on_complete, null, null, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.UglyCry, target, target.GetComponent<ChoreProvider>(), false, on_complete, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
 	{
 		this.smi = new UglyCryChore.StatesInstance(this, target.gameObject);
 	}
@@ -23,12 +23,11 @@ public class UglyCryChore : Chore<UglyCryChore.StatesInstance>
 
 		public void ProduceTears(float dt)
 		{
-			if (dt <= 0f)
+			if (dt > 0f)
 			{
-				return;
+				int num = Grid.PosToCell(base.smi.master.gameObject);
+				SimMessages.AddRemoveSubstance(num, SimHashes.Water, CellEventLogger.Instance.Tears, 1f * STRESS.TEARS_RATE * dt, this.bodyTemperature.value, byte.MaxValue, 0, -1);
 			}
-			int num = Grid.PosToCell(base.smi.master.gameObject);
-			SimMessages.AddRemoveSubstance(num, SimHashes.Water, CellEventLogger.Instance.Tears, 1f * STRESS.TEARS_RATE * dt, this.bodyTemperature.value, byte.MaxValue, 0, -1);
 		}
 
 		private AmountInstance bodyTemperature;
@@ -41,10 +40,10 @@ public class UglyCryChore : Chore<UglyCryChore.StatesInstance>
 			default_state = this.cry;
 			base.Target(this.crier);
 			this.uglyCryingEffect = new Effect("UglyCrying", DUPLICANTS.MODIFIERS.UGLY_CRYING.NAME, DUPLICANTS.MODIFIERS.UGLY_CRYING.TOOLTIP, 0f, true, false, true);
-			this.uglyCryingEffect.Add(new AttributeModifier(Db.Get().Attributes.Decor.Id, -30f, DUPLICANTS.MODIFIERS.UGLY_CRYING.NAME, false, false));
+			this.uglyCryingEffect.Add(new AttributeModifier(Db.Get().Attributes.Decor.Id, -30f, DUPLICANTS.MODIFIERS.UGLY_CRYING.NAME, false, false, true));
 			Db.Get().effects.Add(this.uglyCryingEffect);
 			this.cry.defaultState = this.cry.cry_pre.RemoveEffect("CryFace").ToggleAnims("anim_cry_kanim", 0f);
-			this.cry.cry_pre.PlayAnim("working_pre", KAnim.PlayMode.Once, null).ScheduleGoTo(2f, this.cry.cry_loop);
+			this.cry.cry_pre.PlayAnim("working_pre").ScheduleGoTo(2f, this.cry.cry_loop);
 			this.cry.cry_loop.ToggleAnims("anim_cry_kanim", 0f).Enter(delegate(UglyCryChore.StatesInstance smi)
 			{
 				smi.Play("working_loop", KAnim.PlayMode.Loop);

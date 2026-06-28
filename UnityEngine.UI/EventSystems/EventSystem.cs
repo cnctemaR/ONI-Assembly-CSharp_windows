@@ -75,6 +75,14 @@ namespace UnityEngine.EventSystems
 			}
 		}
 
+		public bool isFocused
+		{
+			get
+			{
+				return this.m_HasFocus;
+			}
+		}
+
 		public void UpdateModules()
 		{
 			base.GetComponents<BaseInputModule>(this.m_SystemInputModules);
@@ -100,18 +108,22 @@ namespace UnityEngine.EventSystems
 			if (this.m_SelectionGuard)
 			{
 				Debug.LogError("Attempting to select " + selected + "while already selecting an object.");
-				return;
 			}
-			this.m_SelectionGuard = true;
-			if (selected == this.m_CurrentSelected)
+			else
 			{
-				this.m_SelectionGuard = false;
-				return;
+				this.m_SelectionGuard = true;
+				if (selected == this.m_CurrentSelected)
+				{
+					this.m_SelectionGuard = false;
+				}
+				else
+				{
+					ExecuteEvents.Execute<IDeselectHandler>(this.m_CurrentSelected, pointer, ExecuteEvents.deselectHandler);
+					this.m_CurrentSelected = selected;
+					ExecuteEvents.Execute<ISelectHandler>(this.m_CurrentSelected, pointer, ExecuteEvents.selectHandler);
+					this.m_SelectionGuard = false;
+				}
 			}
-			ExecuteEvents.Execute<IDeselectHandler>(this.m_CurrentSelected, pointer, ExecuteEvents.deselectHandler);
-			this.m_CurrentSelected = selected;
-			ExecuteEvents.Execute<ISelectHandler>(this.m_CurrentSelected, pointer, ExecuteEvents.selectHandler);
-			this.m_SelectionGuard = false;
 		}
 
 		private BaseEventData baseEventDataCache
@@ -159,25 +171,30 @@ namespace UnityEngine.EventSystems
 					}
 				}
 			}
+			int num;
 			if (lhs.sortingLayer != rhs.sortingLayer)
 			{
 				int layerValueFromID = SortingLayer.GetLayerValueFromID(rhs.sortingLayer);
 				int layerValueFromID2 = SortingLayer.GetLayerValueFromID(lhs.sortingLayer);
-				return layerValueFromID.CompareTo(layerValueFromID2);
+				num = layerValueFromID.CompareTo(layerValueFromID2);
 			}
-			if (lhs.sortingOrder != rhs.sortingOrder)
+			else if (lhs.sortingOrder != rhs.sortingOrder)
 			{
-				return rhs.sortingOrder.CompareTo(lhs.sortingOrder);
+				num = rhs.sortingOrder.CompareTo(lhs.sortingOrder);
 			}
-			if (lhs.depth != rhs.depth)
+			else if (lhs.depth != rhs.depth)
 			{
-				return rhs.depth.CompareTo(lhs.depth);
+				num = rhs.depth.CompareTo(lhs.depth);
 			}
-			if (lhs.distance != rhs.distance)
+			else if (lhs.distance != rhs.distance)
 			{
-				return lhs.distance.CompareTo(rhs.distance);
+				num = lhs.distance.CompareTo(rhs.distance);
 			}
-			return lhs.index.CompareTo(rhs.index);
+			else
+			{
+				num = lhs.index.CompareTo(rhs.index);
+			}
+			return num;
 		}
 
 		public void RaycastAll(PointerEventData eventData, List<RaycastResult> raycastResults)
@@ -239,61 +256,64 @@ namespace UnityEngine.EventSystems
 			}
 		}
 
+		protected virtual void OnApplicationFocus(bool hasFocus)
+		{
+			this.m_HasFocus = !hasFocus;
+		}
+
 		protected virtual void Update()
 		{
-			if (EventSystem.current != this)
+			if (!(EventSystem.current != this))
 			{
-				return;
-			}
-			this.TickModules();
-			bool flag = false;
-			for (int i = 0; i < this.m_SystemInputModules.Count; i++)
-			{
-				BaseInputModule baseInputModule = this.m_SystemInputModules[i];
-				if (baseInputModule.IsModuleSupported() && baseInputModule.ShouldActivateModule())
+				this.TickModules();
+				bool flag = false;
+				for (int i = 0; i < this.m_SystemInputModules.Count; i++)
 				{
-					if (this.m_CurrentInputModule != baseInputModule)
+					BaseInputModule baseInputModule = this.m_SystemInputModules[i];
+					if (baseInputModule.IsModuleSupported() && baseInputModule.ShouldActivateModule())
 					{
-						this.ChangeEventModule(baseInputModule);
-						flag = true;
-					}
-					break;
-				}
-			}
-			if (this.m_CurrentInputModule == null)
-			{
-				for (int j = 0; j < this.m_SystemInputModules.Count; j++)
-				{
-					BaseInputModule baseInputModule2 = this.m_SystemInputModules[j];
-					if (baseInputModule2.IsModuleSupported())
-					{
-						this.ChangeEventModule(baseInputModule2);
-						flag = true;
+						if (this.m_CurrentInputModule != baseInputModule)
+						{
+							this.ChangeEventModule(baseInputModule);
+							flag = true;
+						}
 						break;
 					}
 				}
-			}
-			if (!flag && this.m_CurrentInputModule != null)
-			{
-				this.m_CurrentInputModule.Process();
+				if (this.m_CurrentInputModule == null)
+				{
+					for (int j = 0; j < this.m_SystemInputModules.Count; j++)
+					{
+						BaseInputModule baseInputModule2 = this.m_SystemInputModules[j];
+						if (baseInputModule2.IsModuleSupported())
+						{
+							this.ChangeEventModule(baseInputModule2);
+							flag = true;
+							break;
+						}
+					}
+				}
+				if (!flag && this.m_CurrentInputModule != null)
+				{
+					this.m_CurrentInputModule.Process();
+				}
 			}
 		}
 
 		private void ChangeEventModule(BaseInputModule module)
 		{
-			if (this.m_CurrentInputModule == module)
+			if (!(this.m_CurrentInputModule == module))
 			{
-				return;
+				if (this.m_CurrentInputModule != null)
+				{
+					this.m_CurrentInputModule.DeactivateModule();
+				}
+				if (module != null)
+				{
+					module.ActivateModule();
+				}
+				this.m_CurrentInputModule = module;
 			}
-			if (this.m_CurrentInputModule != null)
-			{
-				this.m_CurrentInputModule.DeactivateModule();
-			}
-			if (module != null)
-			{
-				module.ActivateModule();
-			}
-			this.m_CurrentInputModule = module;
 		}
 
 		public override string ToString()
@@ -321,6 +341,8 @@ namespace UnityEngine.EventSystems
 		private int m_DragThreshold = 5;
 
 		private GameObject m_CurrentSelected;
+
+		private bool m_HasFocus = false;
 
 		private bool m_SelectionGuard;
 

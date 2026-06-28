@@ -26,8 +26,8 @@ public class KBatchedAnimUpdater
 	public void InitializeGrid()
 	{
 		this.Clear();
-		int num = (Grid.WidthInCells + 16 - 1) / 16;
-		int num2 = (Grid.HeightInCells + 16 - 1) / 16;
+		int num = (Grid.WidthInCells + 32 - 1) / 32;
+		int num2 = (Grid.HeightInCells + 32 - 1) / 32;
 		this.controllerGrid = new List<KBatchedAnimController>[num, num2];
 		for (int i = 0; i < num2; i++)
 		{
@@ -71,26 +71,41 @@ public class KBatchedAnimUpdater
 
 	public void UpdateRegister(KBatchedAnimController controller)
 	{
-		this.queuedRegistrations.Add(new KBatchedAnimUpdater.RegistrationInfo
+		KBatchedAnimUpdater.RegistrationState updateRegistrationState = controller.updateRegistrationState;
+		if (updateRegistrationState != KBatchedAnimUpdater.RegistrationState.Registered)
 		{
-			controller = controller,
-			register = true,
-			update = true
-		});
+			if (updateRegistrationState != KBatchedAnimUpdater.RegistrationState.PendingRemoval)
+			{
+				if (updateRegistrationState == KBatchedAnimUpdater.RegistrationState.Unregistered)
+				{
+					List<KBatchedAnimController> list = ((controller.visibilityType != KAnimControllerBase.VisibilityType.Always) ? this.updateList : this.alwaysUpdateList);
+					list.Add(controller);
+					controller.updateRegistrationState = KBatchedAnimUpdater.RegistrationState.Registered;
+				}
+			}
+			else
+			{
+				controller.updateRegistrationState = KBatchedAnimUpdater.RegistrationState.Registered;
+			}
+		}
 	}
 
 	public void UpdateUnregister(KBatchedAnimController controller)
 	{
-		if (App.IsExiting)
+		KBatchedAnimUpdater.RegistrationState updateRegistrationState = controller.updateRegistrationState;
+		if (updateRegistrationState != KBatchedAnimUpdater.RegistrationState.Registered)
 		{
-			return;
+			if (updateRegistrationState != KBatchedAnimUpdater.RegistrationState.PendingRemoval)
+			{
+				if (updateRegistrationState != KBatchedAnimUpdater.RegistrationState.Unregistered)
+				{
+				}
+			}
 		}
-		this.queuedRegistrations.Add(new KBatchedAnimUpdater.RegistrationInfo
+		else
 		{
-			controller = controller,
-			register = false,
-			update = true
-		});
+			controller.updateRegistrationState = KBatchedAnimUpdater.RegistrationState.PendingRemoval;
+		}
 	}
 
 	public void VisibilityRegister(Vector2I chunk_xy, KBatchedAnimController controller)
@@ -106,26 +121,31 @@ public class KBatchedAnimUpdater
 
 	public void VisibilityUnregister(Vector2I chunk_xy, KBatchedAnimController controller)
 	{
-		if (App.IsExiting)
+		if (!App.IsExiting)
 		{
-			return;
+			this.queuedRegistrations.Add(new KBatchedAnimUpdater.RegistrationInfo
+			{
+				chunkXY = chunk_xy,
+				controller = controller,
+				register = false,
+				update = false
+			});
 		}
-		this.queuedRegistrations.Add(new KBatchedAnimUpdater.RegistrationInfo
-		{
-			chunkXY = chunk_xy,
-			controller = controller,
-			register = false,
-			update = false
-		});
 	}
 
 	private List<KBatchedAnimController> GetControllerList(Vector2I chunk_xy)
 	{
+		List<KBatchedAnimController> list;
 		if (this.controllerGrid == null || chunk_xy.x < 0 || chunk_xy.x >= this.controllerGrid.GetLength(0) || chunk_xy.y < 0 || chunk_xy.y > this.controllerGrid.GetLength(1))
 		{
-			return null;
+			list = null;
 		}
-		return this.controllerGrid[chunk_xy.x, chunk_xy.y];
+		else
+		{
+			List<KBatchedAnimController> list2 = this.controllerGrid[chunk_xy.x, chunk_xy.y];
+			list = list2;
+		}
+		return list;
 	}
 
 	public void LateUpdate()
@@ -134,16 +154,34 @@ public class KBatchedAnimUpdater
 		this.ProcessRegistrations();
 		this.CleanUp();
 		float num = Time.unscaledDeltaTime;
-		for (int i = 0; i < this.alwaysUpdateList.Count; i++)
+		int count = this.alwaysUpdateList.Count;
+		for (int i = 0; i < count; i++)
 		{
-			this.alwaysUpdateList[i].UpdateAnim(num);
+			if (this.alwaysUpdateList[i].updateRegistrationState != KBatchedAnimUpdater.RegistrationState.Registered)
+			{
+				this.alwaysUpdateList[i].updateRegistrationState = KBatchedAnimUpdater.RegistrationState.Unregistered;
+				this.alwaysUpdateList[i] = null;
+			}
+			else
+			{
+				this.alwaysUpdateList[i].UpdateAnim(num);
+			}
 		}
 		if (this.DoGridProcessing())
 		{
 			num = Time.deltaTime;
-			for (int j = 0; j < this.updateList.Count; j++)
+			int count2 = this.updateList.Count;
+			for (int j = 0; j < count2; j++)
 			{
-				this.updateList[j].UpdateAnim(num);
+				if (this.updateList[j].updateRegistrationState != KBatchedAnimUpdater.RegistrationState.Registered)
+				{
+					this.updateList[j].updateRegistrationState = KBatchedAnimUpdater.RegistrationState.Unregistered;
+					this.updateList[j] = null;
+				}
+				else
+				{
+					this.updateList[j].UpdateAnim(num);
+				}
 			}
 		}
 	}
@@ -180,51 +218,50 @@ public class KBatchedAnimUpdater
 
 	private void UpdateVisibility()
 	{
-		if (!this.DoGridProcessing())
+		if (this.DoGridProcessing())
 		{
-			return;
-		}
-		Vector2I vector2I;
-		Vector2I vector2I2;
-		KBatchedAnimUpdater.GetVisibleCellRange(out vector2I, out vector2I2);
-		this.vis_chunk_min = new Vector2I(vector2I.x / 16, vector2I.y / 16);
-		this.vis_chunk_max = new Vector2I(vector2I2.x / 16, vector2I2.y / 16);
-		this.vis_chunk_max.x = Math.Min(this.vis_chunk_max.x, this.controllerGrid.GetLength(0) - 1);
-		this.vis_chunk_max.y = Math.Min(this.vis_chunk_max.y, this.controllerGrid.GetLength(1) - 1);
-		bool[,] array = this.previouslyVisibleChunkGrid;
-		this.previouslyVisibleChunkGrid = this.visibleChunkGrid;
-		this.visibleChunkGrid = array;
-		Array.Clear(this.visibleChunkGrid, 0, this.visibleChunkGrid.Length);
-		List<Vector2I> list = this.previouslyVisibleChunks;
-		this.previouslyVisibleChunks = this.visibleChunks;
-		this.visibleChunks = list;
-		this.visibleChunks.Clear();
-		for (int i = this.vis_chunk_min.y; i <= this.vis_chunk_max.y; i++)
-		{
-			for (int j = this.vis_chunk_min.x; j <= this.vis_chunk_max.x; j++)
+			Vector2I vector2I;
+			Vector2I vector2I2;
+			KBatchedAnimUpdater.GetVisibleCellRange(out vector2I, out vector2I2);
+			this.vis_chunk_min = new Vector2I(vector2I.x / 32, vector2I.y / 32);
+			this.vis_chunk_max = new Vector2I(vector2I2.x / 32, vector2I2.y / 32);
+			this.vis_chunk_max.x = Math.Min(this.vis_chunk_max.x, this.controllerGrid.GetLength(0) - 1);
+			this.vis_chunk_max.y = Math.Min(this.vis_chunk_max.y, this.controllerGrid.GetLength(1) - 1);
+			bool[,] array = this.previouslyVisibleChunkGrid;
+			this.previouslyVisibleChunkGrid = this.visibleChunkGrid;
+			this.visibleChunkGrid = array;
+			Array.Clear(this.visibleChunkGrid, 0, this.visibleChunkGrid.Length);
+			List<Vector2I> list = this.previouslyVisibleChunks;
+			this.previouslyVisibleChunks = this.visibleChunks;
+			this.visibleChunks = list;
+			this.visibleChunks.Clear();
+			for (int i = this.vis_chunk_min.y; i <= this.vis_chunk_max.y; i++)
 			{
-				this.visibleChunkGrid[j, i] = true;
-				this.visibleChunks.Add(new Vector2I(j, i));
-				if (!this.previouslyVisibleChunkGrid[j, i])
+				for (int j = this.vis_chunk_min.x; j <= this.vis_chunk_max.x; j++)
 				{
-					List<KBatchedAnimController> list2 = this.controllerGrid[j, i];
-					for (int k = 0; k < list2.Count; k++)
+					this.visibleChunkGrid[j, i] = true;
+					this.visibleChunks.Add(new Vector2I(j, i));
+					if (!this.previouslyVisibleChunkGrid[j, i])
 					{
-						KBatchedAnimController kbatchedAnimController = list2[k];
-						kbatchedAnimController.OnBecameVisible();
+						List<KBatchedAnimController> list2 = this.controllerGrid[j, i];
+						for (int k = 0; k < list2.Count; k++)
+						{
+							KBatchedAnimController kbatchedAnimController = list2[k];
+							kbatchedAnimController.OnBecameVisible();
+						}
 					}
 				}
 			}
-		}
-		for (int l = 0; l < this.previouslyVisibleChunks.Count; l++)
-		{
-			Vector2I vector2I3 = this.previouslyVisibleChunks[l];
-			if (!this.visibleChunkGrid[vector2I3.x, vector2I3.y])
+			for (int l = 0; l < this.previouslyVisibleChunks.Count; l++)
 			{
-				List<KBatchedAnimController> list3 = this.controllerGrid[vector2I3.x, vector2I3.y];
-				for (int m = 0; m < list3.Count; m++)
+				Vector2I vector2I3 = this.previouslyVisibleChunks[l];
+				if (!this.visibleChunkGrid[vector2I3.x, vector2I3.y])
 				{
-					list3[m].OnBecameInvisible();
+					List<KBatchedAnimController> list3 = this.controllerGrid[vector2I3.x, vector2I3.y];
+					for (int m = 0; m < list3.Count; m++)
+					{
+						list3[m].OnBecameInvisible();
+					}
 				}
 			}
 		}
@@ -279,20 +316,19 @@ public class KBatchedAnimUpdater
 	{
 		this.updateList.RemoveAll((KBatchedAnimController item) => item == null);
 		this.alwaysUpdateList.RemoveAll((KBatchedAnimController item) => item == null);
-		if (!this.DoGridProcessing())
+		if (this.DoGridProcessing())
 		{
-			return;
+			int length = this.controllerGrid.GetLength(0);
+			for (int i = 0; i < 16; i++)
+			{
+				int num = (this.cleanUpChunkIndex + i) % this.controllerGrid.Length;
+				int num2 = num % length;
+				int num3 = num / length;
+				List<KBatchedAnimController> list = this.controllerGrid[num2, num3];
+				list.RemoveAll((KBatchedAnimController item) => item == null);
+			}
+			this.cleanUpChunkIndex = (this.cleanUpChunkIndex + 16) % this.controllerGrid.Length;
 		}
-		int length = this.controllerGrid.GetLength(0);
-		for (int i = 0; i < 16; i++)
-		{
-			int num = (this.cleanUpChunkIndex + i) % this.controllerGrid.Length;
-			int num2 = num % length;
-			int num3 = num / length;
-			List<KBatchedAnimController> list = this.controllerGrid[num2, num3];
-			list.RemoveAll((KBatchedAnimController item) => item == null);
-		}
-		this.cleanUpChunkIndex = (this.cleanUpChunkIndex + 16) % this.controllerGrid.Length;
 	}
 
 	public static void GetVisibleCellRange(out Vector2I min, out Vector2I max)
@@ -315,9 +351,7 @@ public class KBatchedAnimUpdater
 
 	private const int VISIBLE_BORDER = 4;
 
-	private const int CHUNKS_TO_CLEAN_PER_TICK = 16;
-
-	private List<KBatchedAnimController>[,] controllerGrid;
+	private List<KBatchedAnimController>[,] controllerGrid = null;
 
 	private List<KBatchedAnimController> updateList = new List<KBatchedAnimController>();
 
@@ -339,7 +373,16 @@ public class KBatchedAnimUpdater
 
 	private List<KBatchedAnimController> newlyVisible = new List<KBatchedAnimController>();
 
-	private int cleanUpChunkIndex;
+	private const int CHUNKS_TO_CLEAN_PER_TICK = 16;
+
+	private int cleanUpChunkIndex = 0;
+
+	public enum RegistrationState
+	{
+		Registered,
+		PendingRemoval,
+		Unregistered
+	}
 
 	private struct RegistrationInfo
 	{

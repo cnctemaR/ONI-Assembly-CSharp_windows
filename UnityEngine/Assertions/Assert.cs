@@ -37,8 +37,8 @@ namespace UnityEngine.Assertions
 			throw new InvalidOperationException("Assert.Equals should not be used for Assertions");
 		}
 
-		[Obsolete("Assert.ReferenceEquals should not be used for Assertions", true)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+		[Obsolete("Assert.ReferenceEquals should not be used for Assertions", true)]
 		public new static bool ReferenceEquals(object obj1, object obj2)
 		{
 			throw new InvalidOperationException("Assert.ReferenceEquals should not be used for Assertions");
@@ -137,7 +137,20 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreEqual<T>(T expected, T actual, string message, IEqualityComparer<T> comparer)
 		{
-			if (!comparer.Equals(actual, expected))
+			if (typeof(Object).IsAssignableFrom(typeof(T)))
+			{
+				Assert.AreEqual(expected as Object, actual as Object, message);
+			}
+			else if (!comparer.Equals(actual, expected))
+			{
+				Assert.Fail(AssertionMessageUtil.GetEqualityMessage(actual, expected, true), message);
+			}
+		}
+
+		[Conditional("UNITY_ASSERTIONS")]
+		public static void AreEqual(Object expected, Object actual, string message)
+		{
+			if (actual != expected)
 			{
 				Assert.Fail(AssertionMessageUtil.GetEqualityMessage(actual, expected, true), message);
 			}
@@ -158,7 +171,20 @@ namespace UnityEngine.Assertions
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void AreNotEqual<T>(T expected, T actual, string message, IEqualityComparer<T> comparer)
 		{
-			if (comparer.Equals(actual, expected))
+			if (typeof(Object).IsAssignableFrom(typeof(T)))
+			{
+				Assert.AreNotEqual(expected as Object, actual as Object, message);
+			}
+			else if (comparer.Equals(actual, expected))
+			{
+				Assert.Fail(AssertionMessageUtil.GetEqualityMessage(actual, expected, false), message);
+			}
+		}
+
+		[Conditional("UNITY_ASSERTIONS")]
+		public static void AreNotEqual(Object expected, Object actual, string message)
+		{
+			if (actual == expected)
 			{
 				Assert.Fail(AssertionMessageUtil.GetEqualityMessage(actual, expected, false), message);
 			}
@@ -172,6 +198,19 @@ namespace UnityEngine.Assertions
 
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void IsNull<T>(T value, string message) where T : class
+		{
+			if (typeof(Object).IsAssignableFrom(typeof(T)))
+			{
+				Assert.IsNull(value as Object, message);
+			}
+			else if (value != null)
+			{
+				Assert.Fail(AssertionMessageUtil.NullFailureMessage(value, true), message);
+			}
+		}
+
+		[Conditional("UNITY_ASSERTIONS")]
+		public static void IsNull(Object value, string message)
 		{
 			if (value != null)
 			{
@@ -187,6 +226,19 @@ namespace UnityEngine.Assertions
 
 		[Conditional("UNITY_ASSERTIONS")]
 		public static void IsNotNull<T>(T value, string message) where T : class
+		{
+			if (typeof(Object).IsAssignableFrom(typeof(T)))
+			{
+				Assert.IsNotNull(value as Object, message);
+			}
+			else if (value == null)
+			{
+				Assert.Fail(AssertionMessageUtil.NullFailureMessage(value, false), message);
+			}
+		}
+
+		[Conditional("UNITY_ASSERTIONS")]
+		public static void IsNotNull(Object value, string message)
 		{
 			if (value == null)
 			{

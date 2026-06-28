@@ -1,73 +1,117 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.Director
 {
+	[RequiredByNativeCode]
 	public sealed class AnimationClipPlayable : AnimationPlayable
 	{
-		public AnimationClipPlayable(AnimationClip clip)
-			: base(false)
+		public AnimationClip clip
 		{
-			this.m_Ptr = IntPtr.Zero;
-			this.InstantiateEnginePlayable(clip);
+			get
+			{
+				return AnimationClipPlayable.GetAnimationClip(ref this.handle);
+			}
 		}
 
-		[WrapperlessIcall]
+		public float speed
+		{
+			get
+			{
+				return AnimationClipPlayable.GetSpeed(ref this.handle);
+			}
+			set
+			{
+				AnimationClipPlayable.SetSpeed(ref this.handle, value);
+			}
+		}
+
+		public bool applyFootIK
+		{
+			get
+			{
+				return AnimationClipPlayable.GetApplyFootIK(ref this.handle);
+			}
+			set
+			{
+				AnimationClipPlayable.SetApplyFootIK(ref this.handle, value);
+			}
+		}
+
+		internal bool removeStartOffset
+		{
+			get
+			{
+				return AnimationClipPlayable.GetRemoveStartOffset(ref this.handle);
+			}
+			set
+			{
+				AnimationClipPlayable.SetRemoveStartOffset(ref this.handle, value);
+			}
+		}
+
+		private static AnimationClip GetAnimationClip(ref PlayableHandle handle)
+		{
+			return AnimationClipPlayable.INTERNAL_CALL_GetAnimationClip(ref handle);
+		}
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void InstantiateEnginePlayable(AnimationClip clip);
+		private static extern AnimationClip INTERNAL_CALL_GetAnimationClip(ref PlayableHandle handle);
 
-		public extern AnimationClip clip
+		private static float GetSpeed(ref PlayableHandle handle)
 		{
-			[WrapperlessIcall]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			return AnimationClipPlayable.INTERNAL_CALL_GetSpeed(ref handle);
 		}
 
-		public override int AddInput(AnimationPlayable source)
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float INTERNAL_CALL_GetSpeed(ref PlayableHandle handle);
+
+		private static void SetSpeed(ref PlayableHandle handle, float value)
 		{
-			Debug.LogError("AnimationClipPlayable doesn't support adding inputs");
-			return -1;
+			AnimationClipPlayable.INTERNAL_CALL_SetSpeed(ref handle, value);
 		}
 
-		public override bool SetInput(AnimationPlayable source, int index)
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_SetSpeed(ref PlayableHandle handle, float value);
+
+		private static bool GetApplyFootIK(ref PlayableHandle handle)
 		{
-			Debug.LogError("AnimationClipPlayable doesn't support setting inputs");
-			return false;
+			return AnimationClipPlayable.INTERNAL_CALL_GetApplyFootIK(ref handle);
 		}
 
-		public override bool SetInputs(IEnumerable<AnimationPlayable> sources)
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool INTERNAL_CALL_GetApplyFootIK(ref PlayableHandle handle);
+
+		private static void SetApplyFootIK(ref PlayableHandle handle, bool value)
 		{
-			Debug.LogError("AnimationClipPlayable doesn't support setting inputs");
-			return false;
+			AnimationClipPlayable.INTERNAL_CALL_SetApplyFootIK(ref handle, value);
 		}
 
-		public override bool RemoveInput(int index)
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_SetApplyFootIK(ref PlayableHandle handle, bool value);
+
+		private static bool GetRemoveStartOffset(ref PlayableHandle handle)
 		{
-			Debug.LogError("AnimationClipPlayable doesn't support removing inputs");
-			return false;
+			return AnimationClipPlayable.INTERNAL_CALL_GetRemoveStartOffset(ref handle);
 		}
 
-		public override bool RemoveInput(AnimationPlayable playable)
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool INTERNAL_CALL_GetRemoveStartOffset(ref PlayableHandle handle);
+
+		private static void SetRemoveStartOffset(ref PlayableHandle handle, bool value)
 		{
-			Debug.LogError("AnimationClipPlayable doesn't support removing inputs");
-			return false;
+			AnimationClipPlayable.INTERNAL_CALL_SetRemoveStartOffset(ref handle, value);
 		}
 
-		public override bool RemoveAllInputs()
-		{
-			Debug.LogError("AnimationClipPlayable doesn't support removing inputs");
-			return false;
-		}
-
-		public extern float speed
-		{
-			[WrapperlessIcall]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[WrapperlessIcall]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
-		}
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_SetRemoveStartOffset(ref PlayableHandle handle, bool value);
 	}
 }

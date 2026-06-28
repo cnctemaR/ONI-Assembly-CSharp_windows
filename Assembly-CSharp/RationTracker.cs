@@ -48,9 +48,7 @@ public class RationTracker : KMonoBehaviour, ISaveLoadable
 								unitCountByFoodType[component.FoodID] = 0f;
 							}
 							string foodID;
-							string text = (foodID = component.FoodID);
-							float num2 = unitCountByFoodType[foodID];
-							unitCountByFoodType[text] = num2 + component.Units;
+							unitCountByFoodType[foodID = component.FoodID] = unitCountByFoodType[foodID] + component.Units;
 						}
 					}
 				}

@@ -5,14 +5,6 @@ using UnityEngine;
 
 public class DrowningMonitor : KMonoBehaviour, IWiltCause
 {
-	WiltCondition.Condition[] IWiltCause.Conditions
-	{
-		get
-		{
-			return new WiltCondition.Condition[] { WiltCondition.Condition.Drowning };
-		}
-	}
-
 	private OccupyArea occupyArea
 	{
 		get
@@ -46,7 +38,7 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause
 		this.checkDrowningHandle = GameScheduler.Instance.SchedulePeriodic("CheckDrowning", this.staminaUpdateFrequency, new Action<object>(this.CheckDrowning), null, null, 0f, null);
 		this.OnMove(null);
 		this.CheckDrowning(null);
-		this.Subscribe(1088554450, new Action<object>(this.OnMove));
+		base.Subscribe(1088554450, new Action<object>(this.OnMove));
 	}
 
 	private void OnMove(object data = null)
@@ -84,28 +76,27 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause
 
 	private void CheckDrowning(object data = null)
 	{
-		if (this.incapacitated)
+		if (!this.incapacitated)
 		{
-			return;
-		}
-		int num = Grid.PosToCell(base.gameObject.transform.position);
-		if (!this.IsCellSafe(num))
-		{
-			if (!this.drowning)
+			int num = Grid.PosToCell(base.gameObject.transform.position);
+			if (!this.IsCellSafe(num))
 			{
-				this.drowning = true;
-				this.Trigger(1949704522, null);
+				if (!this.drowning)
+				{
+					this.drowning = true;
+					base.Trigger(1949704522, null);
+				}
+				if (this.stamina <= 0f)
+				{
+					base.Trigger(-750750377, null);
+					this.SetIncapacitated(true);
+				}
 			}
-			if (this.stamina <= 0f)
+			else if (this.drowning)
 			{
-				this.Trigger(-750750377, null);
-				this.SetIncapacitated(true);
+				this.drowning = false;
+				base.Trigger(99949694, null);
 			}
-		}
-		else if (this.drowning)
-		{
-			this.drowning = false;
-			this.Trigger(99949694, null);
 		}
 	}
 
@@ -119,15 +110,28 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause
 		});
 	}
 
+	WiltCondition.Condition[] IWiltCause.Conditions
+	{
+		get
+		{
+			return new WiltCondition.Condition[] { WiltCondition.Condition.Drowning };
+		}
+	}
+
 	public string WiltStateString
 	{
 		get
 		{
+			string text;
 			if (this.drowning)
 			{
-				return Db.Get().CreatureStatusItems.Drowning.resolveStringCallback(CREATURES.STATUSITEMS.DROWNING.NAME, this);
+				text = Db.Get().CreatureStatusItems.Drowning.resolveStringCallback(CREATURES.STATUSITEMS.DROWNING.NAME, this);
 			}
-			return string.Empty;
+			else
+			{
+				text = "";
+			}
+			return text;
 		}
 	}
 
@@ -173,7 +177,7 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause
 	[Serialize]
 	private bool incapacitated;
 
-	private bool drowning;
+	private bool drowning = false;
 
 	protected float maxStamina = 10f;
 

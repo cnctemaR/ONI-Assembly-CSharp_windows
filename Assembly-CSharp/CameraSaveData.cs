@@ -12,7 +12,7 @@ public static class CameraSaveData
 		CameraSaveData.valid = true;
 	}
 
-	public static bool valid;
+	public static bool valid = false;
 
 	public static Vector3 position;
 

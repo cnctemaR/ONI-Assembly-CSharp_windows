@@ -7,7 +7,7 @@ public class OilRefinery : StateMachineComponent<OilRefinery.StatesInstance>
 {
 	protected override void OnSpawn()
 	{
-		this.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
+		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		this.meter = new MeterController(component, "meter_target", "meter", Meter.Offset.Infront, Vector3.zero, null);
 		base.smi.StartSM();
@@ -23,7 +23,7 @@ public class OilRefinery : StateMachineComponent<OilRefinery.StatesInstance>
 
 	private bool IsOverPressure()
 	{
-		int num = Grid.PosToCell(this.transform.position);
+		int num = Grid.PosToCell(base.transform.position);
 		num = Grid.CellAbove(num);
 		return GameUtil.FloodFillCheck(new Func<int, bool>(this.IsCellOverPressure), num, 2, true, true);
 	}
@@ -32,8 +32,6 @@ public class OilRefinery : StateMachineComponent<OilRefinery.StatesInstance>
 	{
 		return Grid.Cell[cell].mass > this.overpressureMass;
 	}
-
-	private const bool hasMeter = true;
 
 	[SerializeField]
 	public float overpressureMass = 2.5f;
@@ -48,6 +46,8 @@ public class OilRefinery : StateMachineComponent<OilRefinery.StatesInstance>
 
 	[MyCmpAdd]
 	private OilRefinery.WorkableTarget workable;
+
+	private const bool hasMeter = true;
 
 	private MeterController meter;
 
@@ -67,7 +67,7 @@ public class OilRefinery : StateMachineComponent<OilRefinery.StatesInstance>
 			this.root.EventTransition(GameHashes.OperationalChanged, this.disabled, (OilRefinery.StatesInstance smi) => !smi.master.operational.IsOperational);
 			this.disabled.EventTransition(GameHashes.OperationalChanged, this.needResources, (OilRefinery.StatesInstance smi) => smi.master.operational.IsOperational);
 			this.needResources.EventTransition(GameHashes.OnStorageChange, this.ready, (OilRefinery.StatesInstance smi) => smi.master.GetComponent<ElementConverter>().HasEnoughMassToStartConverting());
-			this.ready.Transition(this.needResources, (OilRefinery.StatesInstance smi) => !smi.master.GetComponent<ElementConverter>().HasEnoughMassToStartConverting()).Transition(this.overpressure, (OilRefinery.StatesInstance smi) => smi.master.IsOverPressure()).ToggleChore((OilRefinery.StatesInstance smi) => new WorkChore<OilRefinery.WorkableTarget>(Db.Get().ChoreTypes.Fabricate, smi.master.workable, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue), this.needResources);
+			this.ready.Transition(this.needResources, (OilRefinery.StatesInstance smi) => !smi.master.GetComponent<ElementConverter>().HasEnoughMassToStartConverting()).Transition(this.overpressure, (OilRefinery.StatesInstance smi) => smi.master.IsOverPressure()).ToggleChore((OilRefinery.StatesInstance smi) => new WorkChore<OilRefinery.WorkableTarget>(Db.Get().ChoreTypes.Fabricate, smi.master.workable, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue), this.needResources);
 			this.overpressure.ToggleStatusItem(Db.Get().BuildingStatusItems.PressureOk, null).Transition(this.ready, (OilRefinery.StatesInstance smi) => !smi.master.IsOverPressure());
 		}
 

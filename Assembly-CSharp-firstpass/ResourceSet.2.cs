@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 
 [Serializable]
-public class ResourceSet<T> : ResourceSet, IEnumerable, IEnumerable<T> where T : Resource
+public class ResourceSet<T> : ResourceSet, IEnumerable<T>, IEnumerable where T : Resource
 {
 	public ResourceSet()
 	{
@@ -13,11 +13,6 @@ public class ResourceSet<T> : ResourceSet, IEnumerable, IEnumerable<T> where T :
 	public ResourceSet(string id, ResourceSet parent)
 		: base(id, parent)
 	{
-	}
-
-	IEnumerator IEnumerable.GetEnumerator()
-	{
-		return this.GetEnumerator1();
 	}
 
 	public IEnumerator<T> GetEnumerator()
@@ -49,6 +44,11 @@ public class ResourceSet<T> : ResourceSet, IEnumerable, IEnumerable<T> where T :
 	private IEnumerator GetEnumerator1()
 	{
 		return this.GetEnumerator();
+	}
+
+	IEnumerator IEnumerable.GetEnumerator()
+	{
+		return this.GetEnumerator1();
 	}
 
 	public override void Initialize()
@@ -110,13 +110,18 @@ public class ResourceSet<T> : ResourceSet, IEnumerable, IEnumerable<T> where T :
 
 	public T Add(T resource)
 	{
+		T t;
 		if (resource == null)
 		{
 			Output.LogError(new object[] { "Tried to add a null to the resource set" });
-			return (T)((object)null);
+			t = (T)((object)null);
 		}
-		this.resources.Add(resource);
-		return resource;
+		else
+		{
+			this.resources.Add(resource);
+			t = resource;
+		}
+		return t;
 	}
 
 	public void ResolveReferences()

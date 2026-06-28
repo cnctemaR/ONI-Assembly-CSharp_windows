@@ -68,10 +68,10 @@ public class KAnimSequencer : KMonoBehaviour, ISaveLoadable
 	public KCompBuilder.BodyData bodyData = default(KCompBuilder.BodyData);
 
 	[Serialize]
-	public bool setBody;
+	public bool setBody = false;
 
 	[Serialize]
-	public bool autoRun;
+	public bool autoRun = false;
 
 	[Serialize]
 	public string[] animFiles = new string[0];
@@ -79,11 +79,11 @@ public class KAnimSequencer : KMonoBehaviour, ISaveLoadable
 	[Serialize]
 	public KAnimSequencer.KAnimSequence[] sequence = new KAnimSequencer.KAnimSequence[0];
 
-	private int currentIndex;
+	private int currentIndex = 0;
 
-	private KBatchedAnimController kbac;
+	private KBatchedAnimController kbac = null;
 
-	private MinionBrain mb;
+	private MinionBrain mb = null;
 
 	[SerializationConfig(MemberSerialization.OptOut)]
 	[Serializable]

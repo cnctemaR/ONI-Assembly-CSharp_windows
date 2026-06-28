@@ -116,7 +116,7 @@ public class EraseRegionTool : DragTool
 			}
 			if (list4.Count == num || list4.Count == 0)
 			{
-				return;
+				break;
 			}
 			Tag[] array = null;
 			TreeFilterable component = region.GetComponent<TreeFilterable>();

@@ -22,24 +22,34 @@ namespace UnityEngine.Internal
 		public override bool Equals(object obj)
 		{
 			DefaultValueAttribute defaultValueAttribute = obj as DefaultValueAttribute;
+			bool flag;
 			if (defaultValueAttribute == null)
 			{
-				return false;
+				flag = false;
 			}
-			if (this.DefaultValue == null)
+			else if (this.DefaultValue == null)
 			{
-				return defaultValueAttribute.Value == null;
+				flag = defaultValueAttribute.Value == null;
 			}
-			return this.DefaultValue.Equals(defaultValueAttribute.Value);
+			else
+			{
+				flag = this.DefaultValue.Equals(defaultValueAttribute.Value);
+			}
+			return flag;
 		}
 
 		public override int GetHashCode()
 		{
+			int num;
 			if (this.DefaultValue == null)
 			{
-				return base.GetHashCode();
+				num = base.GetHashCode();
 			}
-			return this.DefaultValue.GetHashCode();
+			else
+			{
+				num = this.DefaultValue.GetHashCode();
+			}
+			return num;
 		}
 
 		private object DefaultValue;

@@ -82,11 +82,11 @@ public class ExpandRevealUIContent : MonoBehaviour
 		this.Collapsing = false;
 		this.Expanding = true;
 		float xMax = 0f;
-		foreach (Keyframe kf in this.expandAnimation.keys)
+		foreach (Keyframe keyframe in this.expandAnimation.keys)
 		{
-			if (kf.time > xMax)
+			if (keyframe.time > xMax)
 			{
-				xMax = kf.time;
+				xMax = keyframe.time;
 			}
 		}
 		float duration = xMax / this.speedScale;
@@ -158,11 +158,11 @@ public class ExpandRevealUIContent : MonoBehaviour
 		this.Expanding = false;
 		this.Collapsing = true;
 		float xMax = 0f;
-		foreach (Keyframe kf in this.collapseAnimation.keys)
+		foreach (Keyframe keyframe in this.collapseAnimation.keys)
 		{
-			if (kf.time > xMax)
+			if (keyframe.time > xMax)
 			{
-				xMax = kf.time;
+				xMax = keyframe.time;
 			}
 		}
 		float duration = xMax;
@@ -206,7 +206,7 @@ public class ExpandRevealUIContent : MonoBehaviour
 
 	public float speedScale = 1f;
 
-	public bool Collapsing;
+	public bool Collapsing = false;
 
-	public bool Expanding;
+	public bool Expanding = false;
 }

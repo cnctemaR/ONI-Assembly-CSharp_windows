@@ -4,16 +4,8 @@ using STRINGS;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class ReceptacleMonitor : StateMachineComponent<ReceptacleMonitor.StatesInstance>, IWiltCause, IGameObjectEffectDescriptor
+public class ReceptacleMonitor : StateMachineComponent<ReceptacleMonitor.StatesInstance>, IGameObjectEffectDescriptor, IWiltCause
 {
-	WiltCondition.Condition[] IWiltCause.Conditions
-	{
-		get
-		{
-			return new WiltCondition.Condition[] { WiltCondition.Condition.Receptacle };
-		}
-	}
-
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -37,20 +29,30 @@ public class ReceptacleMonitor : StateMachineComponent<ReceptacleMonitor.StatesI
 		if (base.smi.sm.receptacle.Get(base.smi) == null)
 		{
 			base.smi.GoTo(base.smi.sm.wild);
-			return;
-		}
-		Operational component = base.smi.sm.receptacle.Get(base.smi).GetComponent<Operational>();
-		if (component == null)
-		{
-			base.smi.GoTo(base.smi.sm.operational);
-		}
-		else if (component.IsOperational)
-		{
-			base.smi.GoTo(base.smi.sm.operational);
 		}
 		else
 		{
-			base.smi.GoTo(base.smi.sm.inoperational);
+			Operational component = base.smi.sm.receptacle.Get(base.smi).GetComponent<Operational>();
+			if (component == null)
+			{
+				base.smi.GoTo(base.smi.sm.operational);
+			}
+			else if (component.IsOperational)
+			{
+				base.smi.GoTo(base.smi.sm.operational);
+			}
+			else
+			{
+				base.smi.GoTo(base.smi.sm.inoperational);
+			}
+		}
+	}
+
+	WiltCondition.Condition[] IWiltCause.Conditions
+	{
+		get
+		{
+			return new WiltCondition.Condition[] { WiltCondition.Condition.Receptacle };
 		}
 	}
 
@@ -58,7 +60,7 @@ public class ReceptacleMonitor : StateMachineComponent<ReceptacleMonitor.StatesI
 	{
 		get
 		{
-			string text = string.Empty;
+			string text = "";
 			if (base.smi.IsInsideState(base.smi.sm.inoperational))
 			{
 				text += CREATURES.STATUSITEMS.RECEPTACLEINOPERATIONAL.NAME;

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Klei.AI;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,11 +15,10 @@ public class MaterialSelector : KScreen
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (e.Consumed)
+		if (!e.Consumed)
 		{
-			return;
+			base.OnKeyDown(e);
 		}
-		base.OnKeyDown(e);
 	}
 
 	public void ClearMaterialToggles()
@@ -45,7 +43,7 @@ public class MaterialSelector : KScreen
 		List<string> list2 = new List<string>();
 		foreach (Element element in ElementLoader.elements)
 		{
-			if (element.IsSolid && element.id != SimHashes.SteelDoor)
+			if (element.IsSolid)
 			{
 				if (!list.Contains(element))
 				{
@@ -201,12 +199,17 @@ public class MaterialSelector : KScreen
 				ktoggle = keyValuePair2.Key;
 			}
 		}
+		bool flag;
 		if (ktoggle != null)
 		{
 			this.OnSelectMaterial(ktoggle, this.activeRecipe);
-			return true;
+			flag = true;
 		}
-		return false;
+		else
+		{
+			flag = false;
+		}
+		return flag;
 	}
 
 	private void SortElementToggles()
@@ -221,19 +224,8 @@ public class MaterialSelector : KScreen
 		list2 = list2.OrderByDescending<Element, bool>((Element e) => WorldInventory.Instance.IsDiscovered(e.tag)).ToList<Element>();
 		foreach (KeyValuePair<KToggle, Element> keyValuePair2 in this.ElementToggles)
 		{
-			keyValuePair2.Key.name = keyValuePair2.Value.tag.ProperName();
 			ToolTip component = keyValuePair2.Key.gameObject.GetComponent<ToolTip>();
-			string text = keyValuePair2.Value.tag.ProperName();
-			if (keyValuePair2.Value.attributeModifiers.Count > 0)
-			{
-				foreach (AttributeModifier attributeModifier in keyValuePair2.Value.attributeModifiers)
-				{
-					string name = Db.Get().BuildingAttributes.Get(attributeModifier.AttributeId).Name;
-					text = text + "\n    • " + string.Format(DUPLICANTS.MODIFIERS.MODIFIER_FORMAT, name, attributeModifier.GetFormattedString(null));
-				}
-			}
-			text += GameUtil.GetSignificantMaterialPropertyTooltips(keyValuePair2.Value);
-			component.toolTip = text;
+			component.toolTip = GameUtil.GetMaterialTooltips(keyValuePair2.Value);
 		}
 		this.UpdateScrollBar();
 	}
@@ -253,38 +245,37 @@ public class MaterialSelector : KScreen
 
 	private void UpdateHeader()
 	{
-		if (this.activeIngredient == null)
+		if (this.activeIngredient != null)
 		{
-			return;
-		}
-		int num = 0;
-		foreach (KeyValuePair<KToggle, Element> keyValuePair in this.ElementToggles)
-		{
-			KToggle key = keyValuePair.Key;
-			if (key.gameObject.activeSelf)
+			int num = 0;
+			foreach (KeyValuePair<KToggle, Element> keyValuePair in this.ElementToggles)
 			{
-				num++;
+				KToggle key = keyValuePair.Key;
+				if (key.gameObject.activeSelf)
+				{
+					num++;
+				}
 			}
-		}
-		LocText componentInChildren = this.Headerbar.GetComponentInChildren<LocText>();
-		if (num == 0)
-		{
-			componentInChildren.text = string.Format(UI.PRODUCTINFO_MISSINGRESOURCES_TITLE, this.activeIngredient.tag.ProperName(), GameUtil.GetFormattedMass(this.activeIngredient.amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
-			string text = string.Format(UI.PRODUCTINFO_MISSINGRESOURCES_DESC, this.activeIngredient.tag.ProperName());
-			this.NoMaterialDiscovered.text = text;
-			this.NoMaterialDiscovered.gameObject.SetActive(true);
-			this.NoMaterialDiscovered.color = Constants.NEGATIVE_COLOR;
-			this.BadBG.SetActive(true);
-			this.Scrollbar.SetActive(false);
-			this.LayoutContainer.SetActive(false);
-		}
-		else
-		{
-			componentInChildren.text = string.Format(UI.PRODUCTINFO_SELECTMATERIAL, this.activeIngredient.tag.ProperName());
-			this.NoMaterialDiscovered.gameObject.SetActive(false);
-			this.BadBG.SetActive(false);
-			this.LayoutContainer.SetActive(true);
-			this.UpdateScrollBar();
+			LocText componentInChildren = this.Headerbar.GetComponentInChildren<LocText>();
+			if (num == 0)
+			{
+				componentInChildren.text = string.Format(UI.PRODUCTINFO_MISSINGRESOURCES_TITLE, this.activeIngredient.tag.ProperName(), GameUtil.GetFormattedMass(this.activeIngredient.amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+				string text = string.Format(UI.PRODUCTINFO_MISSINGRESOURCES_DESC, this.activeIngredient.tag.ProperName());
+				this.NoMaterialDiscovered.text = text;
+				this.NoMaterialDiscovered.gameObject.SetActive(true);
+				this.NoMaterialDiscovered.color = Constants.NEGATIVE_COLOR;
+				this.BadBG.SetActive(true);
+				this.Scrollbar.SetActive(false);
+				this.LayoutContainer.SetActive(false);
+			}
+			else
+			{
+				componentInChildren.text = string.Format(UI.PRODUCTINFO_SELECTMATERIAL, this.activeIngredient.tag.ProperName());
+				this.NoMaterialDiscovered.gameObject.SetActive(false);
+				this.BadBG.SetActive(false);
+				this.LayoutContainer.SetActive(true);
+				this.UpdateScrollBar();
+			}
 		}
 	}
 
@@ -296,53 +287,32 @@ public class MaterialSelector : KScreen
 	private void SetDescription(Element element)
 	{
 		string text = Strings.Get(new StringKey("STRINGS.ELEMENTS." + element.tag.ToString().ToUpper() + ".BUILD_DESC"));
-		if (text == string.Empty)
+		if (text == "")
 		{
 			this.MaterialDescriptionPane.SetActive(false);
-			return;
 		}
-		this.MaterialDescriptionPane.SetActive(true);
-		this.MaterialDescriptionText.text = text;
+		else
+		{
+			this.MaterialDescriptionPane.SetActive(true);
+			this.MaterialDescriptionText.text = text;
+		}
 	}
 
 	private void SetEffects(Element element)
 	{
-		List<Descriptor> list = new List<Descriptor>();
-		if (element.attributeModifiers.Count > 0)
+		List<Descriptor> materialDescriptors = GameUtil.GetMaterialDescriptors(element);
+		if (materialDescriptors.Count > 0)
 		{
-			foreach (AttributeModifier attributeModifier in element.attributeModifiers)
-			{
-				string modifierString = this.GetModifierString(attributeModifier);
-				string modifierTooltip = this.GetModifierTooltip(attributeModifier);
-				Descriptor descriptor = default(Descriptor);
-				descriptor.SetupDescriptor(modifierString, modifierTooltip, Descriptor.DescriptorType.Effect);
-				descriptor.IncreaseIndent();
-				list.Add(descriptor);
-			}
-		}
-		list.AddRange(GameUtil.GetSignificantMaterialPropertyDescriptors(element));
-		if (list.Count > 0)
-		{
-			Descriptor descriptor2 = default(Descriptor);
-			descriptor2.SetupDescriptor(ELEMENTS.MATERIAL_MODIFIERS.EFFECTS_HEADER, ELEMENTS.MATERIAL_MODIFIERS.TOOLTIP.EFFECTS_HEADER, Descriptor.DescriptorType.Effect);
-			list.Insert(0, descriptor2);
+			Descriptor descriptor = default(Descriptor);
+			descriptor.SetupDescriptor(ELEMENTS.MATERIAL_MODIFIERS.EFFECTS_HEADER, ELEMENTS.MATERIAL_MODIFIERS.TOOLTIP.EFFECTS_HEADER, Descriptor.DescriptorType.Effect);
+			materialDescriptors.Insert(0, descriptor);
 			this.MaterialEffectsPane.gameObject.SetActive(true);
-			this.MaterialEffectsPane.SetDescriptors(list);
+			this.MaterialEffectsPane.SetDescriptors(materialDescriptors);
 		}
 		else
 		{
 			this.MaterialEffectsPane.gameObject.SetActive(false);
 		}
-	}
-
-	private string GetModifierString(AttributeModifier modifier)
-	{
-		return string.Format(Strings.Get(new StringKey("STRINGS.ELEMENTS.MATERIAL_MODIFIERS." + modifier.AttributeId.ToUpper())), modifier.GetFormattedString(null));
-	}
-
-	private string GetModifierTooltip(AttributeModifier modifier)
-	{
-		return string.Format(Strings.Get(new StringKey("STRINGS.ELEMENTS.MATERIAL_MODIFIERS.TOOLTIP." + modifier.AttributeId.ToUpper())), modifier.GetFormattedString(null));
 	}
 
 	public Element CurrentSelectedElement;

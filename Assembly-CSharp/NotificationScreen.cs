@@ -31,17 +31,16 @@ public class NotificationScreen : KScreen
 		this.pendingNotifications.Remove(notification);
 		NotificationScreen.Entry entry = null;
 		this.entriesByMessage.TryGetValue(notification.titleText, out entry);
-		if (entry == null)
+		if (entry != null)
 		{
-			return;
-		}
-		this.notifications.Remove(notification);
-		entry.Remove(notification);
-		if (entry.notifications.Count == 0)
-		{
-			global::UnityEngine.Object.Destroy(entry.label);
-			this.entriesByMessage[notification.titleText] = null;
-			this.entries.Remove(entry);
+			this.notifications.Remove(notification);
+			entry.Remove(notification);
+			if (entry.notifications.Count == 0)
+			{
+				global::UnityEngine.Object.Destroy(entry.label);
+				this.entriesByMessage[notification.titleText] = null;
+				this.entries.Remove(entry);
+			}
 		}
 	}
 
@@ -65,7 +64,7 @@ public class NotificationScreen : KScreen
 	private void OnNewMessage(object data)
 	{
 		Message message = (Message)data;
-		this.notifier.Add(new MessageNotification(message), string.Empty);
+		this.notifier.Add(new MessageNotification(message), "");
 	}
 
 	private void ShowMessage(MessageNotification mn)
@@ -130,7 +129,7 @@ public class NotificationScreen : KScreen
 		{
 			Notification notification = new MessageNotification(message);
 			notification.playSound = false;
-			this.notifier.Add(notification, string.Empty);
+			this.notifier.Add(notification, "");
 		}
 	}
 
@@ -200,28 +199,18 @@ public class NotificationScreen : KScreen
 					ToolTip componentInChildren2 = label.GetComponentInChildren<ToolTip>();
 					componentInChildren2.ClearMultiStringTooltip();
 					componentInChildren2.AddMultiStringTooltip(notification.ToolTip(entry.notifications, notification.tooltipData), this.TooltipTextStyle);
-					return string.Empty;
+					return "";
 				};
 			}
 			entry = new NotificationScreen.Entry(label);
 			this.entriesByMessage[notification.titleText] = entry;
 			this.entries.Add(entry);
 			LocText[] componentsInChildren2 = label.GetComponentsInChildren<LocText>();
-			LocText[] array = componentsInChildren2;
-			int i = 0;
-			while (i < array.Length)
+			foreach (LocText locText in componentsInChildren2)
 			{
-				LocText locText = array[i];
-				switch (notification.Type)
+				NotificationType type = notification.Type;
+				switch (type)
 				{
-				case NotificationType.Bad:
-					locText.color = this.badColor;
-					componentInChildren.sprite = this.icon_bad;
-					break;
-				case NotificationType.Good:
-				case NotificationType.BadMinor:
-				case NotificationType.Neutral:
-					goto IL_0331;
 				case NotificationType.Tutorial:
 					locText.color = this.warningColor;
 					componentInChildren.sprite = this.icon_warning;
@@ -235,11 +224,20 @@ public class NotificationScreen : KScreen
 					componentInChildren.sprite = this.icon_bad;
 					break;
 				default:
-					goto IL_0331;
+					if (type != NotificationType.Bad)
+					{
+						locText.color = this.normalColor;
+						componentInChildren.sprite = this.icon_normal;
+					}
+					else
+					{
+						locText.color = this.badColor;
+						componentInChildren.sprite = this.icon_bad;
+					}
+					break;
 				}
-				IL_034F:
 				componentInChildren.color = locText.color;
-				string text = string.Empty;
+				string text = "";
 				if (KTime.Instance.UnscaledGameTime - this.initTime > 5f && notification.playSound)
 				{
 					this.PlayDingSound(notification, 0);
@@ -252,12 +250,6 @@ public class NotificationScreen : KScreen
 				{
 					global::Debug.Log("Notification(" + notification.titleText + "):" + text, null);
 				}
-				i++;
-				continue;
-				IL_0331:
-				locText.color = this.normalColor;
-				componentInChildren.sprite = this.icon_normal;
-				goto IL_034F;
 			}
 		}
 		entry.Add(notification);
@@ -270,26 +262,31 @@ public class NotificationScreen : KScreen
 	{
 		this.notifications.Sort(delegate(Notification n1, Notification n2)
 		{
+			int num;
 			if (n1.Type == n2.Type)
 			{
 				if (n1.Idx < n2.Idx)
 				{
-					return -1;
+					num = -1;
 				}
-				if (n1.Idx > n2.Idx)
+				else if (n1.Idx > n2.Idx)
 				{
-					return 1;
+					num = 1;
 				}
-				return 0;
+				else
+				{
+					num = 0;
+				}
+			}
+			else if (n1.Type < n2.Type)
+			{
+				num = -1;
 			}
 			else
 			{
-				if (n1.Type < n2.Type)
-				{
-					return -1;
-				}
-				return 1;
+				num = 1;
 			}
+			return num;
 		});
 		foreach (Notification notification in this.notifications)
 		{
@@ -448,7 +445,7 @@ public class NotificationScreen : KScreen
 
 	private float initTime;
 
-	private int notificationIncrement;
+	private int notificationIncrement = 0;
 
 	[MyCmpAdd]
 	private Notifier notifier;
@@ -525,22 +522,24 @@ public class NotificationScreen : KScreen
 
 		public void UpdateMessage(Notification notification, bool playSound = true)
 		{
-			if (Game.IsQuitting())
+			if (!Game.IsQuitting())
 			{
-				return;
-			}
-			this.message = notification.titleText;
-			if (this.notifications.Count > 1)
-			{
-				if (playSound && (notification.Type == NotificationType.Bad || notification.Type == NotificationType.DuplicantThreatening))
+				this.message = notification.titleText;
+				if (this.notifications.Count > 1)
 				{
-					NotificationScreen.Instance.PlayDingSound(notification, this.notifications.Count);
+					if (playSound)
+					{
+						if (notification.Type == NotificationType.Bad || notification.Type == NotificationType.DuplicantThreatening)
+						{
+							NotificationScreen.Instance.PlayDingSound(notification, this.notifications.Count);
+						}
+					}
+					this.message = this.message + " (" + this.notifications.Count.ToString() + ")";
 				}
-				this.message = this.message + " (" + this.notifications.Count.ToString() + ")";
-			}
-			if (this.label.gameObject != null)
-			{
-				this.label.GetComponentInChildren<LocText>().text = this.message;
+				if (this.label.gameObject != null)
+				{
+					this.label.GetComponentInChildren<LocText>().text = this.message;
+				}
 			}
 		}
 

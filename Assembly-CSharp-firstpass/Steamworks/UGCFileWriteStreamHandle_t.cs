@@ -25,16 +25,6 @@ namespace Steamworks
 			return this.m_UGCFileWriteStreamHandle.GetHashCode();
 		}
 
-		public bool Equals(UGCFileWriteStreamHandle_t other)
-		{
-			return this.m_UGCFileWriteStreamHandle == other.m_UGCFileWriteStreamHandle;
-		}
-
-		public int CompareTo(UGCFileWriteStreamHandle_t other)
-		{
-			return this.m_UGCFileWriteStreamHandle.CompareTo(other.m_UGCFileWriteStreamHandle);
-		}
-
 		public static bool operator ==(UGCFileWriteStreamHandle_t x, UGCFileWriteStreamHandle_t y)
 		{
 			return x.m_UGCFileWriteStreamHandle == y.m_UGCFileWriteStreamHandle;
@@ -53,6 +43,16 @@ namespace Steamworks
 		public static explicit operator ulong(UGCFileWriteStreamHandle_t that)
 		{
 			return that.m_UGCFileWriteStreamHandle;
+		}
+
+		public bool Equals(UGCFileWriteStreamHandle_t other)
+		{
+			return this.m_UGCFileWriteStreamHandle == other.m_UGCFileWriteStreamHandle;
+		}
+
+		public int CompareTo(UGCFileWriteStreamHandle_t other)
+		{
+			return this.m_UGCFileWriteStreamHandle.CompareTo(other.m_UGCFileWriteStreamHandle);
 		}
 
 		public static readonly UGCFileWriteStreamHandle_t Invalid = new UGCFileWriteStreamHandle_t(ulong.MaxValue);

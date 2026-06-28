@@ -8,11 +8,6 @@ namespace UnityEngine.Networking
 	[EditorBrowsable(EditorBrowsableState.Never)]
 	public abstract class SyncList<T> : IList<T>, ICollection<T>, IEnumerable<T>, IEnumerable
 	{
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.GetEnumerator();
-		}
-
 		public int Count
 		{
 			get
@@ -59,33 +54,33 @@ namespace UnityEngine.Networking
 				{
 					Debug.LogError("SyncList not initialized");
 				}
-				return;
 			}
-			NetworkIdentity component = this.m_Behaviour.GetComponent<NetworkIdentity>();
-			if (component == null)
+			else
 			{
-				if (LogFilter.logError)
+				NetworkIdentity component = this.m_Behaviour.GetComponent<NetworkIdentity>();
+				if (component == null)
 				{
-					Debug.LogError("SyncList no NetworkIdentity");
+					if (LogFilter.logError)
+					{
+						Debug.LogError("SyncList no NetworkIdentity");
+					}
 				}
-				return;
-			}
-			if (!component.isServer)
-			{
-				return;
-			}
-			NetworkWriter networkWriter = new NetworkWriter();
-			networkWriter.StartMessage(9);
-			networkWriter.Write(component.netId);
-			networkWriter.WritePackedUInt32((uint)this.m_CmdHash);
-			networkWriter.Write((byte)op);
-			networkWriter.WritePackedUInt32((uint)itemIndex);
-			this.SerializeItem(networkWriter, item);
-			networkWriter.FinishMessage();
-			NetworkServer.SendWriterToReady(component.gameObject, networkWriter, this.m_Behaviour.GetNetworkChannel());
-			if (this.m_Behaviour.isServer && this.m_Behaviour.isClient && this.m_Callback != null)
-			{
-				this.m_Callback(op, itemIndex);
+				else if (component.isServer)
+				{
+					NetworkWriter networkWriter = new NetworkWriter();
+					networkWriter.StartMessage(9);
+					networkWriter.Write(component.netId);
+					networkWriter.WritePackedUInt32((uint)this.m_CmdHash);
+					networkWriter.Write((byte)op);
+					networkWriter.WritePackedUInt32((uint)itemIndex);
+					this.SerializeItem(networkWriter, item);
+					networkWriter.FinishMessage();
+					NetworkServer.SendWriterToReady(component.gameObject, networkWriter, this.m_Behaviour.GetNetworkChannel());
+					if (this.m_Behaviour.isServer && this.m_Behaviour.isClient && this.m_Callback != null)
+					{
+						this.m_Callback(op, itemIndex);
+					}
+				}
 			}
 		}
 
@@ -194,8 +189,20 @@ namespace UnityEngine.Networking
 			}
 			set
 			{
-				T t = this.m_Objects[i];
-				bool flag = !t.Equals(value);
+				bool flag;
+				if (this.m_Objects[i] == null)
+				{
+					if (value == null)
+					{
+						return;
+					}
+					flag = true;
+				}
+				else
+				{
+					T t = this.m_Objects[i];
+					flag = !t.Equals(value);
+				}
 				this.m_Objects[i] = value;
 				if (flag)
 				{
@@ -209,6 +216,11 @@ namespace UnityEngine.Networking
 			return this.m_Objects.GetEnumerator();
 		}
 
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return this.GetEnumerator();
+		}
+
 		private List<T> m_Objects = new List<T>();
 
 		private NetworkBehaviour m_Behaviour;
@@ -216,6 +228,8 @@ namespace UnityEngine.Networking
 		private int m_CmdHash;
 
 		private SyncList<T>.SyncListChanged m_Callback;
+
+		public delegate void SyncListChanged(SyncList<T>.Operation op, int itemIndex);
 
 		public enum Operation
 		{
@@ -227,7 +241,5 @@ namespace UnityEngine.Networking
 			OP_SET,
 			OP_DIRTY
 		}
-
-		public delegate void SyncListChanged(SyncList<T>.Operation op, int itemIndex);
 	}
 }

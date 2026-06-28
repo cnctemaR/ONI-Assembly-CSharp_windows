@@ -36,22 +36,24 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 			this.ReportThreat(smi);
 		}).Update(delegate(ThreatMonitor.Instance smi)
 		{
-			if (smi.isMasterNull)
+			if (!smi.isMasterNull)
 			{
-				return;
-			}
-			if (smi.revengeThreat.target != null && smi.revengeThreat.Calm(smi.dt, smi.master.gameObject))
-			{
-				smi.Trigger(-21431934, null);
-				return;
-			}
-			if (!smi.CheckForThreats())
-			{
-				smi.GoTo(this.safe);
-			}
-			else
-			{
-				this.ReportThreat(smi);
+				if (smi.revengeThreat.target != null)
+				{
+					if (smi.revengeThreat.Calm(smi.dt, smi.master.gameObject))
+					{
+						smi.Trigger(-21431934, null);
+						return;
+					}
+				}
+				if (!smi.CheckForThreats())
+				{
+					smi.GoTo(this.safe);
+				}
+				else
+				{
+					this.ReportThreat(smi);
+				}
 			}
 		});
 	}
@@ -113,21 +115,29 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 
 		public bool Calm(float dt, GameObject self)
 		{
+			bool flag;
 			if (this.grudgeTime <= 0f)
 			{
-				return true;
+				flag = true;
 			}
-			this.grudgeTime = Mathf.Max(0f, this.grudgeTime - dt);
-			if (this.grudgeTime == 0f)
+			else
 			{
-				if (FactionManager.Instance.GetDisposition(self.GetComponent<FactionAlignment>().Alignment, this.target.GetComponent<FactionAlignment>().Alignment) != FactionManager.Disposition.Attack)
+				this.grudgeTime = Mathf.Max(0f, this.grudgeTime - dt);
+				if (this.grudgeTime == 0f)
 				{
-					PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, UI.GAMEOBJECTEFFECTS.FORGAVEATTACKER, self.transform, 2f, true);
+					if (FactionManager.Instance.GetDisposition(self.GetComponent<FactionAlignment>().Alignment, this.target.GetComponent<FactionAlignment>().Alignment) != FactionManager.Disposition.Attack)
+					{
+						PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, UI.GAMEOBJECTEFFECTS.FORGAVEATTACKER, self.transform, 2f, true);
+					}
+					this.Clear();
+					flag = true;
 				}
-				this.Clear();
-				return true;
+				else
+				{
+					flag = false;
+				}
 			}
-			return false;
+			return flag;
 		}
 
 		public void Clear()
@@ -171,29 +181,28 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 
 		public void SetMainThreat(GameObject threat)
 		{
-			if (threat == this.mainThreat)
+			if (!(threat == this.mainThreat))
 			{
-				return;
-			}
-			if (this.mainThreat != null)
-			{
-				this.mainThreat.Unsubscribe(1623392196, new Action<object>(this.RefreshThreat));
-				this.mainThreat.Unsubscribe(1969584890, new Action<object>(this.RefreshThreat));
-				if (threat == null)
+				if (this.mainThreat != null)
 				{
-					base.Trigger(2144432245, null);
+					this.mainThreat.Unsubscribe(1623392196, new Action<object>(this.RefreshThreat));
+					this.mainThreat.Unsubscribe(1969584890, new Action<object>(this.RefreshThreat));
+					if (threat == null)
+					{
+						base.Trigger(2144432245, null);
+					}
 				}
-			}
-			if (this.mainThreat != null)
-			{
-				this.mainThreat.Unsubscribe(1623392196, new Action<object>(this.RefreshThreat));
-				this.mainThreat.Unsubscribe(1969584890, new Action<object>(this.RefreshThreat));
-			}
-			this.mainThreat = threat;
-			if (this.mainThreat != null)
-			{
-				this.mainThreat.Subscribe(1623392196, new Action<object>(this.RefreshThreat));
-				this.mainThreat.Subscribe(1969584890, new Action<object>(this.RefreshThreat));
+				if (this.mainThreat != null)
+				{
+					this.mainThreat.Unsubscribe(1623392196, new Action<object>(this.RefreshThreat));
+					this.mainThreat.Unsubscribe(1969584890, new Action<object>(this.RefreshThreat));
+				}
+				this.mainThreat = threat;
+				if (this.mainThreat != null)
+				{
+					this.mainThreat.Subscribe(1623392196, new Action<object>(this.RefreshThreat));
+					this.mainThreat.Subscribe(1969584890, new Action<object>(this.RefreshThreat));
+				}
 			}
 		}
 
@@ -226,7 +235,14 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 
 		public bool WillEngageNonEssentialTargets()
 		{
-			return (!(this.choreConsumer != null) || (this.choreConsumer.IsPermitted(Db.Get().ChoreGroups.Combat) && this.choreConsumer.IsEnabled(Db.Get().ChoreGroups.Combat))) && this.health.State < base.smi.sm.FleeThresholdState;
+			if (this.choreConsumer != null)
+			{
+				if (!this.choreConsumer.IsPermitted(Db.Get().ChoreGroups.Combat) || !this.choreConsumer.IsEnabled(Db.Get().ChoreGroups.Combat))
+				{
+					return false;
+				}
+			}
+			return this.health.State < base.smi.sm.FleeThresholdState;
 		}
 
 		public void OnOffended(FactionAlignment offender)
@@ -298,35 +314,47 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 		public GameObject FindThreat()
 		{
 			this.threats.Clear();
+			GameObject gameObject;
 			if (base.isMasterNull)
 			{
-				return null;
+				gameObject = null;
 			}
-			int num = Grid.OffsetCell(Grid.PosToCell(base.gameObject), new CellOffset(-this.maxThreatDistance / 2, -this.maxThreatDistance / 2));
-			bool flag = this.WillEngageNonEssentialTargets();
-			List<ScenePartitionerEntry> list = GameScenePartitioner.Instance.ReserveList();
-			GameScenePartitioner.Instance.GatherEntries(Grid.CellToXY(num).x, Grid.CellToXY(num).y, this.maxThreatDistance, this.maxThreatDistance, GameScenePartitioner.Instance.attackableEntitiesLayer, list);
-			for (int i = 0; i < list.Count; i++)
+			else
 			{
-				ScenePartitionerEntry scenePartitionerEntry = list[i];
-				FactionAlignment factionAlignment = scenePartitionerEntry.obj as FactionAlignment;
-				if (!this.threats.Contains(factionAlignment))
+				int num = Grid.OffsetCell(Grid.PosToCell(base.gameObject), new CellOffset(-this.maxThreatDistance / 2, -this.maxThreatDistance / 2));
+				bool flag = this.WillEngageNonEssentialTargets();
+				List<ScenePartitionerEntry> list = GameScenePartitioner.Instance.ReserveList();
+				GameScenePartitioner.Instance.GatherEntries(Grid.CellToXY(num).x, Grid.CellToXY(num).y, this.maxThreatDistance, this.maxThreatDistance, GameScenePartitioner.Instance.attackableEntitiesLayer, list);
+				for (int i = 0; i < list.Count; i++)
 				{
-					if (!(factionAlignment.transform == null))
+					ScenePartitionerEntry scenePartitionerEntry = list[i];
+					FactionAlignment factionAlignment = scenePartitionerEntry.obj as FactionAlignment;
+					if (!this.threats.Contains(factionAlignment))
 					{
-						if (!(factionAlignment == this.alignment))
+						if (!(factionAlignment.transform == null))
 						{
-							if (this.navigator.CanReach(factionAlignment.attackable))
+							if (!(factionAlignment == this.alignment))
 							{
-								if (factionAlignment.CheckAlignmentActive)
+								if (this.navigator.CanReach(factionAlignment.attackable))
 								{
-									if (this.alignment.Alignment != FactionManager.FactionID.Duplicant || factionAlignment.targeted)
+									if (factionAlignment.CheckAlignmentActive)
 									{
-										if (flag && this.alignment.Alignment == FactionManager.FactionID.Duplicant && factionAlignment.targeted)
+										if (this.alignment.Alignment == FactionManager.FactionID.Duplicant)
 										{
-											this.threats.Add(factionAlignment);
+											if (!factionAlignment.targeted)
+											{
+												goto IL_01B9;
+											}
 										}
-										else if (FactionManager.Instance.GetDisposition(this.alignment.Alignment, factionAlignment.Alignment) == FactionManager.Disposition.Attack)
+										if (flag)
+										{
+											if (this.alignment.Alignment == FactionManager.FactionID.Duplicant && factionAlignment.targeted)
+											{
+												this.threats.Add(factionAlignment);
+												goto IL_01B9;
+											}
+										}
+										if (FactionManager.Instance.GetDisposition(this.alignment.Alignment, factionAlignment.Alignment) == FactionManager.Disposition.Attack)
 										{
 											this.threats.Add(factionAlignment);
 										}
@@ -335,30 +363,41 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 							}
 						}
 					}
+					IL_01B9:;
 				}
-			}
-			GameScenePartitioner.Instance.ReleaseList(list);
-			if (this.alignment.Alignment == FactionManager.FactionID.Duplicant && flag)
-			{
-				for (int j = 0; j < 6; j++)
+				GameScenePartitioner.Instance.ReleaseList(list);
+				if (this.alignment.Alignment == FactionManager.FactionID.Duplicant)
 				{
-					if (j != 0)
+					if (flag)
 					{
-						foreach (FactionAlignment factionAlignment2 in FactionManager.Instance.GetFaction((FactionManager.FactionID)j).Members)
+						for (int j = 0; j < 6; j++)
 						{
-							if (factionAlignment2.targeted && !this.threats.Contains(factionAlignment2) && this.navigator.CanReach(factionAlignment2.attackable))
+							if (j != 0)
 							{
-								this.threats.Add(factionAlignment2);
+								foreach (FactionAlignment factionAlignment2 in FactionManager.Instance.GetFaction((FactionManager.FactionID)j).Members)
+								{
+									if (factionAlignment2.targeted)
+									{
+										if (!this.threats.Contains(factionAlignment2) && this.navigator.CanReach(factionAlignment2.attackable))
+										{
+											this.threats.Add(factionAlignment2);
+										}
+									}
+								}
 							}
 						}
 					}
 				}
+				if (this.threats.Count == 0)
+				{
+					gameObject = null;
+				}
+				else
+				{
+					gameObject = this.PickBestTarget(this.threats);
+				}
 			}
-			if (this.threats.Count == 0)
-			{
-				return null;
-			}
-			return this.PickBestTarget(this.threats);
+			return gameObject;
 		}
 
 		public GameObject PickBestTarget(List<FactionAlignment> threats)

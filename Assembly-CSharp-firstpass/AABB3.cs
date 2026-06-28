@@ -73,12 +73,17 @@ public struct AABB3
 
 	public override bool Equals(object obj)
 	{
+		bool flag;
 		if (obj == null)
 		{
-			return false;
+			flag = false;
 		}
-		AABB3 aabb = (AABB3)obj;
-		return this.min == aabb.min && this.max == aabb.max;
+		else
+		{
+			AABB3 aabb = (AABB3)obj;
+			flag = this.min == aabb.min && this.max == aabb.max;
+		}
+		return flag;
 	}
 
 	public override int GetHashCode()
@@ -91,12 +96,12 @@ public struct AABB3
 		Vector3* ptr = stackalloc Vector3[checked(8 * sizeof(Vector3))];
 		*ptr = this.min;
 		ptr[1] = new Vector3(this.min.x, this.min.y, this.max.z);
-		ptr[1] = new Vector3(this.min.x, this.max.y, this.min.z);
-		ptr[1] = new Vector3(this.max.x, this.min.y, this.min.z);
-		ptr[1] = new Vector3(this.min.x, this.max.y, this.max.z);
-		ptr[1] = new Vector3(this.max.x, this.min.y, this.max.z);
-		ptr[1] = new Vector3(this.max.x, this.max.y, this.min.z);
-		ptr[1] = this.max;
+		ptr[sizeof(Vector3) * 2 / sizeof(Vector3)] = new Vector3(this.min.x, this.max.y, this.min.z);
+		ptr[sizeof(Vector3) * 3 / sizeof(Vector3)] = new Vector3(this.max.x, this.min.y, this.min.z);
+		ptr[sizeof(Vector3) * 4 / sizeof(Vector3)] = new Vector3(this.min.x, this.max.y, this.max.z);
+		ptr[sizeof(Vector3) * 5 / sizeof(Vector3)] = new Vector3(this.max.x, this.min.y, this.max.z);
+		ptr[sizeof(Vector3) * 6 / sizeof(Vector3)] = new Vector3(this.max.x, this.max.y, this.min.z);
+		ptr[sizeof(Vector3) * 7 / sizeof(Vector3)] = this.max;
 		this.min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
 		this.max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
 		for (int i = 0; i < 8; i++)

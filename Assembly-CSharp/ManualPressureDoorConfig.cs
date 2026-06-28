@@ -17,6 +17,7 @@ public class ManualPressureDoorConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.PermittedRotations = PermittedRotations.R90;
 		buildingDef.SceneLayer = Grid.SceneLayer.TileMain;
+		buildingDef.HotKey = global::Action.BuildMenuKeyA;
 		SoundEventVolumeCache.instance.AddVolume("door_manual_kanim", "ManualPressureDoor_gear_LP", NOISE_POLLUTION.NOISY.TIER1);
 		SoundEventVolumeCache.instance.AddVolume("door_manual_kanim", "ManualPressureDoor_open", NOISE_POLLUTION.NOISY.TIER2);
 		SoundEventVolumeCache.instance.AddVolume("door_manual_kanim", "ManualPressureDoor_close", NOISE_POLLUTION.NOISY.TIER2);
@@ -43,4 +44,6 @@ public class ManualPressureDoorConfig : IBuildingConfig
 		AccessControl component = go.GetComponent<AccessControl>();
 		component.controlEnabled = true;
 	}
+
+	public const string ID = "ManualPressureDoor";
 }

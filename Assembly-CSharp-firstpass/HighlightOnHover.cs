@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine.EventSystems;
 
-public class HighlightOnHover : KMonoBehaviour, IEventSystemHandler, IPointerEnterHandler, IPointerExitHandler
+public class HighlightOnHover : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IEventSystemHandler
 {
 	public void OnPointerEnter(PointerEventData data)
 	{

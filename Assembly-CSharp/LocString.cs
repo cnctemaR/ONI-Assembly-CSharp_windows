@@ -26,6 +26,16 @@ public class LocString
 
 	public StringKey key { get; private set; }
 
+	public static implicit operator LocString(string text)
+	{
+		return new LocString(text);
+	}
+
+	public static implicit operator string(LocString loc_string)
+	{
+		return loc_string.text;
+	}
+
 	public override string ToString()
 	{
 		return Strings.Get(this.key).String;
@@ -47,7 +57,7 @@ public class LocString
 		string text = parent_path;
 		if (text == null)
 		{
-			text = string.Empty;
+			text = "";
 		}
 		text = text + type.Name + ".";
 		foreach (FieldInfo fieldInfo in fields)
@@ -78,15 +88,5 @@ public class LocString
 			list.Add(locString.text);
 		}
 		return list.ToArray();
-	}
-
-	public static implicit operator LocString(string text)
-	{
-		return new LocString(text);
-	}
-
-	public static implicit operator string(LocString loc_string)
-	{
-		return loc_string.text;
 	}
 }

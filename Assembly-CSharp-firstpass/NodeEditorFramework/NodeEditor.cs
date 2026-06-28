@@ -38,16 +38,18 @@ namespace NodeEditorFramework
 			if (!NodeEditorGUI.Init(GUIFunction))
 			{
 				NodeEditor.InitiationError = true;
-				return;
 			}
-			ConnectionTypes.FetchTypes();
-			NodeTypes.FetchNodes();
-			NodeCanvasManager.GetAllCanvasTypes();
-			NodeEditorCallbacks.SetupReceivers();
-			NodeEditorCallbacks.IssueOnEditorStartUp();
-			GUIScaleUtility.CheckInit();
-			NodeEditorInputSystem.SetupInput();
-			NodeEditor.initiated = GUIFunction;
+			else
+			{
+				ConnectionTypes.FetchTypes();
+				NodeTypes.FetchNodes();
+				NodeCanvasManager.GetAllCanvasTypes();
+				NodeEditorCallbacks.SetupReceivers();
+				NodeEditorCallbacks.IssueOnEditorStartUp();
+				GUIScaleUtility.CheckInit();
+				NodeEditorInputSystem.SetupInput();
+				NodeEditor.initiated = GUIFunction;
+			}
 		}
 
 		public static void CheckEditorPath()
@@ -56,78 +58,76 @@ namespace NodeEditorFramework
 
 		public static void DrawCanvas(NodeCanvas nodeCanvas, NodeEditorState editorState)
 		{
-			if (!editorState.drawing)
+			if (editorState.drawing)
 			{
-				return;
+				NodeEditor.checkInit(true);
+				NodeEditor.DrawSubCanvas(nodeCanvas, editorState);
 			}
-			NodeEditor.checkInit(true);
-			NodeEditor.DrawSubCanvas(nodeCanvas, editorState);
 		}
 
 		private static void DrawSubCanvas(NodeCanvas nodeCanvas, NodeEditorState editorState)
 		{
-			if (!editorState.drawing)
+			if (editorState.drawing)
 			{
-				return;
-			}
-			NodeCanvas nodeCanvas2 = NodeEditor.curNodeCanvas;
-			NodeEditorState nodeEditorState = NodeEditor.curEditorState;
-			NodeEditor.curNodeCanvas = nodeCanvas;
-			NodeEditor.curEditorState = editorState;
-			if (Event.current.type == EventType.Repaint)
-			{
-				float num = NodeEditor.curEditorState.zoom / (float)NodeEditorGUI.Background.width;
-				float num2 = NodeEditor.curEditorState.zoom / (float)NodeEditorGUI.Background.height;
-				Vector2 vector = NodeEditor.curEditorState.zoomPos + NodeEditor.curEditorState.panOffset / NodeEditor.curEditorState.zoom;
-				Rect rect = new Rect(-vector.x * num, (vector.y - NodeEditor.curEditorState.canvasRect.height) * num2, NodeEditor.curEditorState.canvasRect.width * num, NodeEditor.curEditorState.canvasRect.height * num2);
-				GUI.DrawTextureWithTexCoords(NodeEditor.curEditorState.canvasRect, NodeEditorGUI.Background, rect);
-			}
-			NodeEditorInputSystem.HandleInputEvents(NodeEditor.curEditorState);
-			if (Event.current.type != EventType.Layout)
-			{
-				NodeEditor.curEditorState.ignoreInput = new List<Rect>();
-			}
-			Rect canvasRect = NodeEditor.curEditorState.canvasRect;
-			NodeEditor.curEditorState.zoomPanAdjust = GUIScaleUtility.BeginScale(ref canvasRect, NodeEditor.curEditorState.zoomPos, NodeEditor.curEditorState.zoom, false);
-			if (NodeEditor.curEditorState.navigate)
-			{
-				Vector2 vector2 = ((!(NodeEditor.curEditorState.selectedNode != null)) ? NodeEditor.curEditorState.panOffset : NodeEditor.curEditorState.selectedNode.rect.center) + NodeEditor.curEditorState.zoomPanAdjust;
-				Vector2 mousePosition = Event.current.mousePosition;
-				RTEditorGUI.DrawLine(vector2, mousePosition, Color.green, null, 3f);
-				NodeEditor.RepaintClients();
-			}
-			if (NodeEditor.curEditorState.connectOutput != null)
-			{
-				NodeOutput connectOutput = NodeEditor.curEditorState.connectOutput;
-				Vector2 center = connectOutput.GetGUIKnob().center;
-				Vector2 direction = connectOutput.GetDirection();
-				Vector2 mousePosition2 = Event.current.mousePosition;
-				Vector2 secondConnectionVector = NodeEditorGUI.GetSecondConnectionVector(center, mousePosition2, direction);
-				NodeEditorGUI.DrawConnection(center, direction, mousePosition2, secondConnectionVector, connectOutput.typeData.Color);
-				NodeEditor.RepaintClients();
-			}
-			if (Event.current.type == EventType.Layout && NodeEditor.curEditorState.selectedNode != null)
-			{
-				NodeEditor.curNodeCanvas.nodes.Remove(NodeEditor.curEditorState.selectedNode);
-				NodeEditor.curNodeCanvas.nodes.Add(NodeEditor.curEditorState.selectedNode);
-			}
-			for (int i = 0; i < NodeEditor.curNodeCanvas.nodes.Count; i++)
-			{
-				NodeEditor.curNodeCanvas.nodes[i].DrawConnections();
-			}
-			for (int j = 0; j < NodeEditor.curNodeCanvas.nodes.Count; j++)
-			{
-				Node node = NodeEditor.curNodeCanvas.nodes[j];
-				node.DrawNode();
+				NodeCanvas nodeCanvas2 = NodeEditor.curNodeCanvas;
+				NodeEditorState nodeEditorState = NodeEditor.curEditorState;
+				NodeEditor.curNodeCanvas = nodeCanvas;
+				NodeEditor.curEditorState = editorState;
 				if (Event.current.type == EventType.Repaint)
 				{
-					node.DrawKnobs();
+					float num = NodeEditor.curEditorState.zoom / (float)NodeEditorGUI.Background.width;
+					float num2 = NodeEditor.curEditorState.zoom / (float)NodeEditorGUI.Background.height;
+					Vector2 vector = NodeEditor.curEditorState.zoomPos + NodeEditor.curEditorState.panOffset / NodeEditor.curEditorState.zoom;
+					Rect rect = new Rect(-vector.x * num, (vector.y - NodeEditor.curEditorState.canvasRect.height) * num2, NodeEditor.curEditorState.canvasRect.width * num, NodeEditor.curEditorState.canvasRect.height * num2);
+					GUI.DrawTextureWithTexCoords(NodeEditor.curEditorState.canvasRect, NodeEditorGUI.Background, rect);
 				}
+				NodeEditorInputSystem.HandleInputEvents(NodeEditor.curEditorState);
+				if (Event.current.type != EventType.Layout)
+				{
+					NodeEditor.curEditorState.ignoreInput = new List<Rect>();
+				}
+				Rect canvasRect = NodeEditor.curEditorState.canvasRect;
+				NodeEditor.curEditorState.zoomPanAdjust = GUIScaleUtility.BeginScale(ref canvasRect, NodeEditor.curEditorState.zoomPos, NodeEditor.curEditorState.zoom, false);
+				if (NodeEditor.curEditorState.navigate)
+				{
+					Vector2 vector2 = ((!(NodeEditor.curEditorState.selectedNode != null)) ? NodeEditor.curEditorState.panOffset : NodeEditor.curEditorState.selectedNode.rect.center) + NodeEditor.curEditorState.zoomPanAdjust;
+					Vector2 mousePosition = Event.current.mousePosition;
+					RTEditorGUI.DrawLine(vector2, mousePosition, Color.green, null, 3f);
+					NodeEditor.RepaintClients();
+				}
+				if (NodeEditor.curEditorState.connectOutput != null)
+				{
+					NodeOutput connectOutput = NodeEditor.curEditorState.connectOutput;
+					Vector2 center = connectOutput.GetGUIKnob().center;
+					Vector2 direction = connectOutput.GetDirection();
+					Vector2 mousePosition2 = Event.current.mousePosition;
+					Vector2 secondConnectionVector = NodeEditorGUI.GetSecondConnectionVector(center, mousePosition2, direction);
+					NodeEditorGUI.DrawConnection(center, direction, mousePosition2, secondConnectionVector, connectOutput.typeData.Color);
+					NodeEditor.RepaintClients();
+				}
+				if (Event.current.type == EventType.Layout && NodeEditor.curEditorState.selectedNode != null)
+				{
+					NodeEditor.curNodeCanvas.nodes.Remove(NodeEditor.curEditorState.selectedNode);
+					NodeEditor.curNodeCanvas.nodes.Add(NodeEditor.curEditorState.selectedNode);
+				}
+				for (int i = 0; i < NodeEditor.curNodeCanvas.nodes.Count; i++)
+				{
+					NodeEditor.curNodeCanvas.nodes[i].DrawConnections();
+				}
+				for (int j = 0; j < NodeEditor.curNodeCanvas.nodes.Count; j++)
+				{
+					Node node = NodeEditor.curNodeCanvas.nodes[j];
+					node.DrawNode();
+					if (Event.current.type == EventType.Repaint)
+					{
+						node.DrawKnobs();
+					}
+				}
+				GUIScaleUtility.EndScale();
+				NodeEditorInputSystem.HandleLateInputEvents(NodeEditor.curEditorState);
+				NodeEditor.curNodeCanvas = nodeCanvas2;
+				NodeEditor.curEditorState = nodeEditorState;
 			}
-			GUIScaleUtility.EndScale();
-			NodeEditorInputSystem.HandleLateInputEvents(NodeEditor.curEditorState);
-			NodeEditor.curNodeCanvas = nodeCanvas2;
-			NodeEditor.curEditorState = nodeEditorState;
 		}
 
 		public static Node NodeAtPosition(Vector2 canvasPos)
@@ -144,28 +144,33 @@ namespace NodeEditorFramework
 		public static Node NodeAtPosition(NodeEditorState editorState, Vector2 canvasPos, out NodeKnob focusedKnob)
 		{
 			focusedKnob = null;
+			Node node;
 			if (NodeEditorInputSystem.shouldIgnoreInput(editorState))
 			{
-				return null;
+				node = null;
 			}
-			NodeCanvas canvas = editorState.canvas;
-			for (int i = canvas.nodes.Count - 1; i >= 0; i--)
+			else
 			{
-				Node node = canvas.nodes[i];
-				if (node.rect.Contains(canvasPos))
+				NodeCanvas canvas = editorState.canvas;
+				for (int i = canvas.nodes.Count - 1; i >= 0; i--)
 				{
-					return node;
-				}
-				for (int j = 0; j < node.nodeKnobs.Count; j++)
-				{
-					if (node.nodeKnobs[j].GetCanvasSpaceKnob().Contains(canvasPos))
+					Node node2 = canvas.nodes[i];
+					if (node2.rect.Contains(canvasPos))
 					{
-						focusedKnob = node.nodeKnobs[j];
-						return node;
+						return node2;
+					}
+					for (int j = 0; j < node2.nodeKnobs.Count; j++)
+					{
+						if (node2.nodeKnobs[j].GetCanvasSpaceKnob().Contains(canvasPos))
+						{
+							focusedKnob = node2.nodeKnobs[j];
+							return node2;
+						}
 					}
 				}
+				node = null;
 			}
-			return null;
+			return node;
 		}
 
 		public static Vector2 ScreenToCanvasSpace(Vector2 screenPos)
@@ -202,38 +207,37 @@ namespace NodeEditorFramework
 		public static void StartCalculation()
 		{
 			NodeEditor.checkInit(false);
-			if (NodeEditor.InitiationError)
+			if (!NodeEditor.InitiationError)
 			{
-				return;
-			}
-			if (NodeEditor.workList == null || NodeEditor.workList.Count == 0)
-			{
-				return;
-			}
-			NodeEditor.calculationCount = 0;
-			bool flag = false;
-			int num = 0;
-			while (!flag)
-			{
-				flag = true;
-				for (int i = 0; i < NodeEditor.workList.Count; i++)
+				if (NodeEditor.workList != null && NodeEditor.workList.Count != 0)
 				{
-					if (NodeEditor.ContinueCalculation(NodeEditor.workList[i]))
+					NodeEditor.calculationCount = 0;
+					bool flag = false;
+					int num = 0;
+					while (!flag)
 					{
-						flag = false;
+						flag = true;
+						for (int i = 0; i < NodeEditor.workList.Count; i++)
+						{
+							if (NodeEditor.ContinueCalculation(NodeEditor.workList[i]))
+							{
+								flag = false;
+							}
+						}
+						num++;
 					}
 				}
-				num++;
 			}
 		}
 
 		private static bool ContinueCalculation(Node node)
 		{
+			bool flag;
 			if (node.calculated)
 			{
-				return false;
+				flag = false;
 			}
-			if ((node.descendantsCalculated() || node.isInLoop()) && node.Calculate())
+			else if ((node.descendantsCalculated() || node.isInLoop()) && node.Calculate())
 			{
 				node.calculated = true;
 				NodeEditor.calculationCount++;
@@ -256,13 +260,17 @@ namespace NodeEditorFramework
 				{
 					global::Debug.LogError("Stopped calculation because of suspected Recursion. Maximum calculation iteration is currently at 1000!", null);
 				}
-				return true;
+				flag = true;
 			}
-			if (!NodeEditor.workList.Contains(node))
+			else
 			{
-				NodeEditor.workList.Add(node);
+				if (!NodeEditor.workList.Contains(node))
+				{
+					NodeEditor.workList.Add(node);
+				}
+				flag = false;
 			}
-			return false;
+			return flag;
 		}
 
 		public static string editorPath = "Assets/Plugins/Node_Editor/";

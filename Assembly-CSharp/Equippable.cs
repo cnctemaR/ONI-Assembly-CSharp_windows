@@ -5,7 +5,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Equippable : Assignable, ISaveLoadable, IQuality, IGameObjectEffectDescriptor
+public class Equippable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor, IQuality
 {
 	protected override Assignables GetAssignables()
 	{
@@ -50,7 +50,7 @@ public class Equippable : Assignable, ISaveLoadable, IQuality, IGameObjectEffect
 	{
 		base.SetWorkTime(1.5f);
 		base.OnAssign += this.RefreshChore;
-		this.Subscribe(1969584890, delegate(object o)
+		base.Subscribe(1969584890, delegate(object o)
 		{
 			this.destroyed = true;
 		});
@@ -70,22 +70,24 @@ public class Equippable : Assignable, ISaveLoadable, IQuality, IGameObjectEffect
 
 	public override void Assign(IAssignableIdentity new_assignee)
 	{
-		if (new_assignee == this.assignee)
+		if (new_assignee != this.assignee)
 		{
-			return;
+			if (new_assignee is MinionIdentity && base.slot != null)
+			{
+				if (new_assignee.GetSoleOwner().GetComponent<Equipment>().GetSlot(base.slot)
+					.assignable != null)
+				{
+					new_assignee.GetSoleOwner().GetComponent<Equipment>().GetSlot(base.slot)
+						.assignable.Unassign();
+				}
+			}
+			base.Assign(new_assignee);
 		}
-		if (new_assignee is MinionIdentity && base.slot != null && new_assignee.GetSoleOwner().GetComponent<Equipment>().GetSlot(base.slot)
-			.assignable != null)
-		{
-			new_assignee.GetSoleOwner().GetComponent<Equipment>().GetSlot(base.slot)
-				.assignable.Unassign();
-		}
-		base.Assign(new_assignee);
 	}
 
 	private void CreateChore()
 	{
-		this.chore = new WorkChore<Equippable>(Db.Get().ChoreTypes.Equip, this, this.assignee.GetSoleOwner().GetComponent<ChoreProvider>(), true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue);
+		this.chore = new WorkChore<Equippable>(Db.Get().ChoreTypes.Equip, this, this.assignee.GetSoleOwner().GetComponent<ChoreProvider>(), true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
 	}
 
 	public override Assignables GetAssignables(GameObject go)
@@ -109,9 +111,12 @@ public class Equippable : Assignable, ISaveLoadable, IQuality, IGameObjectEffect
 			this.chore.Cancel("Equipment Reassigned");
 			this.chore = null;
 		}
-		if (target != null && !target.GetSoleOwner().GetComponent<Equipment>().IsEquipped(this))
+		if (target != null)
 		{
-			this.CreateChore();
+			if (!target.GetSoleOwner().GetComponent<Equipment>().IsEquipped(this))
+			{
+				this.CreateChore();
+			}
 		}
 	}
 
@@ -143,8 +148,8 @@ public class Equippable : Assignable, ISaveLoadable, IQuality, IGameObjectEffect
 		base.GetComponent<KBatchedAnimController>().enabled = false;
 		base.GetComponent<KSelectable>().IsSelectable = false;
 		base.GetComponent<Pickupable>().UnregisterListeners();
-		this.transform.parent = slot.gameObject.transform;
-		this.transform.localPosition = Vector3.zero;
+		base.transform.parent = slot.gameObject.transform;
+		base.transform.localPosition = Vector3.zero;
 		Effects component = slot.gameObject.GetComponent<Effects>();
 		foreach (Effect effect in this.def.EffectImmunites)
 		{
@@ -159,28 +164,28 @@ public class Equippable : Assignable, ISaveLoadable, IQuality, IGameObjectEffect
 	public void OnUnequip()
 	{
 		this.isEquipped = false;
-		if (this.destroyed)
+		if (!this.destroyed)
 		{
-			return;
-		}
-		base.GetComponent<KBatchedAnimController>().enabled = true;
-		base.GetComponent<KSelectable>().IsSelectable = true;
-		base.GetComponent<Pickupable>().RegisterListeners();
-		Effects component = this.assignee.GetSoleOwner().GetComponent<Effects>();
-		foreach (Effect effect in this.def.EffectImmunites)
-		{
-			component.RemoveImmunity(effect);
-		}
-		this.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.Misc).transform;
-		base.gameObject.transform.SetPosition(this.assignee.GetSoleOwner().gameObject.transform.position + Vector3.up / 2f);
-		if (this.def.OnUnequipCallBack != null)
-		{
-			this.def.OnUnequipCallBack(this);
+			base.GetComponent<KBatchedAnimController>().enabled = true;
+			base.GetComponent<KSelectable>().IsSelectable = true;
+			base.GetComponent<Pickupable>().RegisterListeners();
+			Effects component = this.assignee.GetSoleOwner().GetComponent<Effects>();
+			foreach (Effect effect in this.def.EffectImmunites)
+			{
+				component.RemoveImmunity(effect);
+			}
+			base.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.Misc).transform;
+			base.gameObject.transform.SetPosition(this.assignee.GetSoleOwner().gameObject.transform.position + Vector3.up / 2f);
+			if (this.def.OnUnequipCallBack != null)
+			{
+				this.def.OnUnequipCallBack(this);
+			}
 		}
 	}
 
 	public override List<Descriptor> GetDescriptors(GameObject go)
 	{
+		List<Descriptor> list;
 		if (this.def != null)
 		{
 			List<Descriptor> equipmentEffects = GameUtil.GetEquipmentEffects(this.def);
@@ -191,14 +196,18 @@ public class Equippable : Assignable, ISaveLoadable, IQuality, IGameObjectEffect
 					equipmentEffects.Add(descriptor);
 				}
 			}
-			return equipmentEffects;
+			list = equipmentEffects;
 		}
-		return new List<Descriptor>();
+		else
+		{
+			list = new List<Descriptor>();
+		}
+		return list;
 	}
 
 	public EquipmentDef def;
 
-	private bool destroyed;
+	private bool destroyed = false;
 
 	[MyCmpAdd]
 	private UserMenu userMenu;
@@ -211,5 +220,5 @@ public class Equippable : Assignable, ISaveLoadable, IQuality, IGameObjectEffect
 	[Serialize]
 	public bool isEquipped;
 
-	private global::QualityLevel quality;
+	private global::QualityLevel quality = global::QualityLevel.Poor;
 }

@@ -42,5 +42,5 @@ public class FrameDelayedHandleVector<T> : HandleVector<T>
 
 	private List<HandleVector<T>.Handle>[] frameDelayedFreeHandles = new List<HandleVector<T>.Handle>[2];
 
-	private int curFrame;
+	private int curFrame = 0;
 }

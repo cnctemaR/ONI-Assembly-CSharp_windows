@@ -40,21 +40,21 @@ public class GraphBase : KMonoBehaviour
 		int num = 2;
 		GameObject gameObject = Util.KInstantiateUI(this.prefab_guide_y, this.guides_y, true);
 		gameObject.name = "guides_vertical";
-		Vector2[] array = new Vector2[num * (int)(this.axis_x.range / (float)this.axis_x.guide_frequency)];
+		Vector2[] array = new Vector2[num * (int)(this.axis_x.range / this.axis_x.guide_frequency)];
 		for (int i = 0; i < array.Length; i += num)
 		{
-			array[i] = this.GetRelativePosition(new Vector2((float)(i * (this.axis_x.guide_frequency / num)), this.axis_y.min_value));
-			array[i + 1] = this.GetRelativePosition(new Vector2((float)(i * (this.axis_x.guide_frequency / num)), this.axis_y.max_value));
+			array[i] = this.GetRelativePosition(new Vector2((float)i * (this.axis_x.guide_frequency / (float)num), this.axis_y.min_value));
+			array[i + 1] = this.GetRelativePosition(new Vector2((float)i * (this.axis_x.guide_frequency / (float)num), this.axis_y.max_value));
 		}
 		gameObject.GetComponent<UILineRenderer>().Points = array;
 		this.guides.Add(gameObject);
 		GameObject gameObject2 = Util.KInstantiateUI(this.prefab_guide_x, this.guides_x, true);
 		gameObject2.name = "guides_horizontal";
-		Vector2[] array2 = new Vector2[num * (int)(this.axis_y.range / (float)this.axis_y.guide_frequency)];
+		Vector2[] array2 = new Vector2[num * (int)(this.axis_y.range / this.axis_y.guide_frequency)];
 		for (int j = 0; j < array2.Length; j += num)
 		{
-			array2[j] = this.GetRelativePosition(new Vector2(this.axis_x.min_value, (float)(j * (this.axis_y.guide_frequency / num))));
-			array2[j + 1] = this.GetRelativePosition(new Vector2(this.axis_x.max_value, (float)(j * (this.axis_y.guide_frequency / num))));
+			array2[j] = this.GetRelativePosition(new Vector2(this.axis_x.min_value, (float)j * (this.axis_y.guide_frequency / (float)num)));
+			array2[j + 1] = this.GetRelativePosition(new Vector2(this.axis_x.max_value, (float)j * (this.axis_y.guide_frequency / (float)num)));
 		}
 		gameObject2.GetComponent<UILineRenderer>().Points = array2;
 		this.guides.Add(gameObject2);

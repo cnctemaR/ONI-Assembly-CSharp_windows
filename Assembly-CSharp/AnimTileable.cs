@@ -27,7 +27,7 @@ public class AnimTileable : KMonoBehaviour
 			extents = component2.GetExtents();
 		}
 		extents = new Extents(extents.x - 1, extents.y - 1, extents.width + 2, extents.height + 2);
-		this.partitionerEntry = GameScenePartitioner.Instance.Add("AnimTileable.OnSpawn", base.gameObject, extents, GameScenePartitioner.Instance.objectLayers[1], new Action<object>(this.OnNeighbourCellsUpdated));
+		this.partitionerEntry = GameScenePartitioner.Instance.Add("AnimTileable.OnSpawn", base.gameObject, extents, GameScenePartitioner.Instance.objectLayers[(int)this.objectLayer], new Action<object>(this.OnNeighbourCellsUpdated));
 		this.UpdateEndCaps();
 	}
 
@@ -92,7 +92,7 @@ public class AnimTileable : KMonoBehaviour
 	private bool HasTileableNeighbour(int neighbour_cell)
 	{
 		bool flag = false;
-		GameObject gameObject = Grid.Objects[neighbour_cell, 1];
+		GameObject gameObject = Grid.Objects[neighbour_cell, (int)this.objectLayer];
 		if (gameObject != null)
 		{
 			KPrefabID component = gameObject.GetComponent<KPrefabID>();
@@ -117,6 +117,8 @@ public class AnimTileable : KMonoBehaviour
 	}
 
 	private GameScenePartitionerEntry partitionerEntry;
+
+	public ObjectLayer objectLayer = ObjectLayer.Building;
 
 	public Tag[] tags;
 

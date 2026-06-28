@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using Klei;
 using KSerialization;
@@ -14,8 +15,6 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
 		this.showProgressBar = false;
 	}
-
-	public event global::System.Action OnStorageIncreased;
 
 	public GameObject this[int idx]
 	{
@@ -38,31 +37,54 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		}
 	}
 
+	public void SetDefaultStoredItemModifiers(List<Storage.StoredItemModifier> modifiers)
+	{
+		this.defaultStoredItemModifers = modifiers;
+	}
+
+	public bool HasStoredItemModifier(Storage.StoredItemModifier modifier)
+	{
+		return this.defaultStoredItemModifers.Contains(modifier);
+	}
+
 	public override Workable.AnimInfo GetAnim(Worker worker)
 	{
-		Workable.AnimInfo anim = base.GetAnim(worker);
-		anim.smi = new MultitoolController.Instance(this, worker, "build", EffectPrefabs.Instance.BuildEffect);
-		return anim;
+		Workable.AnimInfo animInfo;
+		if (this.useGunForDelivery)
+		{
+			Workable.AnimInfo anim = base.GetAnim(worker);
+			anim.smi = new MultitoolController.Instance(this, worker, "store", EffectPrefabs.Instance.PickupEffect);
+			animInfo = anim;
+		}
+		else
+		{
+			animInfo = base.GetAnim(worker);
+		}
+		return animInfo;
 	}
+
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	public event global::System.Action OnStorageIncreased;
 
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(1623392196, new Action<object>(this.OnDeath));
-		this.Subscribe(1502190696, new Action<object>(this.OnQueueDestroyObject));
-		this.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
+		base.Subscribe(1623392196, new Action<object>(this.OnDeath));
+		base.Subscribe(1502190696, new Action<object>(this.OnQueueDestroyObject));
+		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Storing;
-		this.faceTargetWhenWorking = false;
-		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_equip_kanim") };
+		this.faceTargetWhenWorking = true;
+		this.resetProgressOnStop = true;
 		if (this.choreType == null)
 		{
 			this.choreType = Db.Get().ChoreTypes.Fetch;
 		}
+		this.synchronizeAnims = false;
 	}
 
 	protected override void OnSpawn()
 	{
-		base.SetWorkTime(0.25f);
+		base.SetWorkTime(1.5f);
 		foreach (GameObject gameObject in this.items)
 		{
 			this.ApplyStoredItemModifiers(gameObject, true);
@@ -72,146 +94,167 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 	public GameObject Store(GameObject go, bool hide_popups = false, bool block_events = false, bool do_disease_transfer = true)
 	{
 		GameObject gameObject = go;
+		GameObject gameObject2;
 		if (go == null)
 		{
-			return null;
+			gameObject2 = null;
 		}
-		Pickupable component = go.GetComponent<Pickupable>();
-		if (!hide_popups && PopFXManager.Instance != null)
+		else
 		{
-			LocString locString;
-			Transform transform;
-			if (this.fxPrefix == Storage.FXPrefix.Delivered)
+			Pickupable component = go.GetComponent<Pickupable>();
+			if (!hide_popups && PopFXManager.Instance != null)
 			{
-				locString = UI.DELIVERED;
-				transform = this.transform;
-			}
-			else
-			{
-				locString = UI.PICKEDUP;
-				transform = go.transform;
-			}
-			string text;
-			if (!Assets.IsTagCountable(go.PrefabID()))
-			{
-				text = string.Format(locString, GameUtil.GetFormattedMass(component.TotalAmount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), go.GetProperName());
-			}
-			else
-			{
-				text = string.Format(locString, (int)component.TotalAmount, go.GetProperName());
-			}
-			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, text, transform, 1.5f, false);
-		}
-		go.transform.parent = this.transform;
-		Vector3 vector = Grid.CellToPosCCC(Grid.PosToCell(this), Grid.SceneLayer.Move);
-		vector.z = go.transform.position.z;
-		go.transform.SetPosition(vector);
-		if (!block_events && do_disease_transfer)
-		{
-			this.TransferDiseaseWithObject(go);
-		}
-		foreach (GameObject gameObject2 in this.items)
-		{
-			if (gameObject2 != null && component != null && gameObject2.GetComponent<Pickupable>().TryAbsorb(component, hide_popups))
-			{
-				this.Trigger(-1697596308, go);
-				this.ApplyStoredItemModifiers(go, true);
-				if (this.OnStorageIncreased != null)
+				LocString locString;
+				Transform transform;
+				if (this.fxPrefix == Storage.FXPrefix.Delivered)
 				{
-					this.OnStorageIncreased();
+					locString = UI.DELIVERED;
+					transform = base.transform;
 				}
-				gameObject = gameObject2;
-				go = null;
-				break;
+				else
+				{
+					locString = UI.PICKEDUP;
+					transform = go.transform;
+				}
+				string text;
+				if (!Assets.IsTagCountable(go.PrefabID()))
+				{
+					text = string.Format(locString, GameUtil.GetFormattedMass(component.TotalAmount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), go.GetProperName());
+				}
+				else
+				{
+					text = string.Format(locString, (int)component.TotalAmount, go.GetProperName());
+				}
+				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, text, transform, 1.5f, false);
 			}
-		}
-		if (go != null)
-		{
-			if (this.disableOnStore)
+			go.transform.parent = base.transform;
+			Vector3 vector = Grid.CellToPosCCC(Grid.PosToCell(this), Grid.SceneLayer.Move);
+			vector.z = go.transform.position.z;
+			go.transform.SetPosition(vector);
+			if (!block_events && do_disease_transfer)
 			{
-				go.GetComponent<KAnimControllerBase>().enabled = false;
+				this.TransferDiseaseWithObject(go);
 			}
-			this.items.Add(go);
-			if (!block_events)
+			foreach (GameObject gameObject3 in this.items)
 			{
+				if (gameObject3 != null)
+				{
+					if (component != null && gameObject3.GetComponent<Pickupable>().TryAbsorb(component, hide_popups))
+					{
+						base.Trigger(-1697596308, go);
+						this.ApplyStoredItemModifiers(go, true);
+						if (this.OnStorageIncreased != null)
+						{
+							this.OnStorageIncreased();
+						}
+						gameObject = gameObject3;
+						go = null;
+						break;
+					}
+				}
+			}
+			if (go != null)
+			{
+				this.items.Add(go);
+				this.ApplyStoredItemModifiers(go, true);
 				EventSystem.Trigger(go, 856640610, this);
-				this.Trigger(-1697596308, go);
-				this.ApplyStoredItemModifiers(go, true);
-				if (this.OnStorageIncreased != null)
+				if (!block_events)
 				{
-					this.OnStorageIncreased();
+					base.Trigger(-1697596308, go);
+					if (this.OnStorageIncreased != null)
+					{
+						this.OnStorageIncreased();
+					}
+				}
+				if (this.temperatureAdjuster != null)
+				{
+					SimTemperatureTransfer component2 = go.GetComponent<SimTemperatureTransfer>();
+					this.temperatureAdjuster.Register(component2);
 				}
 			}
-			if (this.temperatureAdjuster != null)
-			{
-				SimTemperatureTransfer component2 = go.GetComponent<SimTemperatureTransfer>();
-				this.temperatureAdjuster.Register(component2);
-			}
+			gameObject2 = gameObject;
 		}
-		return gameObject;
+		return gameObject2;
 	}
 
 	public PrimaryElement AddLiquid(SimHashes element, float mass, float temperature, byte disease_idx, int disease_count, bool keep_zero_mass = false, bool do_disease_transfer = true)
 	{
+		PrimaryElement primaryElement;
 		if (mass <= 0f)
 		{
-			return null;
-		}
-		PrimaryElement primaryElement = this.FindPrimaryElement(element);
-		if (primaryElement != null)
-		{
-			primaryElement.Temperature = GameUtil.GetFinalTemperature(primaryElement.Temperature, primaryElement.Mass, temperature, mass);
-			primaryElement.KeepZeroMassObject = keep_zero_mass;
-			primaryElement.Mass += mass;
-			primaryElement.AddDisease(disease_idx, disease_count, "Storage.AddLiquid");
-			this.Trigger(-1697596308, primaryElement.gameObject);
+			primaryElement = null;
 		}
 		else
 		{
-			SubstanceChunk substanceChunk = LiquidSourceManager.Instance.CreateChunk(element, mass, temperature, disease_idx, disease_count, this.transform.position);
-			primaryElement = substanceChunk.GetComponent<PrimaryElement>();
-			primaryElement.KeepZeroMassObject = keep_zero_mass;
-			this.Store(substanceChunk.gameObject, true, false, do_disease_transfer);
+			PrimaryElement primaryElement2 = this.FindPrimaryElement(element);
+			if (primaryElement2 != null)
+			{
+				float finalTemperature = GameUtil.GetFinalTemperature(primaryElement2.Temperature, primaryElement2.Mass, temperature, mass);
+				primaryElement2.KeepZeroMassObject = keep_zero_mass;
+				primaryElement2.Mass += mass;
+				primaryElement2.Temperature = finalTemperature;
+				primaryElement2.AddDisease(disease_idx, disease_count, "Storage.AddLiquid");
+				base.Trigger(-1697596308, primaryElement2.gameObject);
+			}
+			else
+			{
+				SubstanceChunk substanceChunk = LiquidSourceManager.Instance.CreateChunk(element, mass, temperature, disease_idx, disease_count, base.transform.position);
+				primaryElement2 = substanceChunk.GetComponent<PrimaryElement>();
+				primaryElement2.KeepZeroMassObject = keep_zero_mass;
+				GameObject gameObject = substanceChunk.gameObject;
+				bool flag = true;
+				this.Store(gameObject, flag, false, do_disease_transfer);
+			}
+			primaryElement = primaryElement2;
 		}
 		return primaryElement;
 	}
 
 	public PrimaryElement AddGasChunk(SimHashes element, float mass, float temperature, byte disease_idx, int disease_count, bool keep_zero_mass, bool do_disease_transfer = true)
 	{
+		PrimaryElement primaryElement;
 		if (mass <= 0f)
 		{
-			return null;
-		}
-		PrimaryElement primaryElement = this.FindPrimaryElement(element);
-		if (primaryElement != null)
-		{
-			primaryElement.Temperature = GameUtil.GetFinalTemperature(primaryElement.Temperature, primaryElement.Mass, temperature, mass);
-			primaryElement.KeepZeroMassObject = true;
-			primaryElement.Mass += mass;
-			primaryElement.AddDisease(disease_idx, disease_count, "Storage.AddGasChunk");
-			this.Trigger(-1697596308, primaryElement.gameObject);
+			primaryElement = null;
 		}
 		else
 		{
-			SubstanceChunk substanceChunk = GasSourceManager.Instance.CreateChunk(element, mass, temperature, disease_idx, disease_count, this.transform.position);
-			primaryElement = substanceChunk.GetComponent<PrimaryElement>();
-			primaryElement.KeepZeroMassObject = keep_zero_mass;
-			this.Store(substanceChunk.gameObject, true, false, do_disease_transfer);
+			PrimaryElement primaryElement2 = this.FindPrimaryElement(element);
+			if (primaryElement2 != null)
+			{
+				float mass2 = primaryElement2.Mass;
+				float finalTemperature = GameUtil.GetFinalTemperature(primaryElement2.Temperature, mass2, temperature, mass);
+				primaryElement2.KeepZeroMassObject = keep_zero_mass;
+				primaryElement2.SetMassTemperature(mass2 + mass, finalTemperature);
+				primaryElement2.AddDisease(disease_idx, disease_count, "Storage.AddGasChunk");
+				base.Trigger(-1697596308, primaryElement2.gameObject);
+			}
+			else
+			{
+				SubstanceChunk substanceChunk = GasSourceManager.Instance.CreateChunk(element, mass, temperature, disease_idx, disease_count, base.transform.position);
+				primaryElement2 = substanceChunk.GetComponent<PrimaryElement>();
+				primaryElement2.KeepZeroMassObject = keep_zero_mass;
+				GameObject gameObject = substanceChunk.gameObject;
+				bool flag = true;
+				this.Store(gameObject, flag, false, do_disease_transfer);
+			}
+			primaryElement = primaryElement2;
 		}
 		return primaryElement;
 	}
 
-	public void Transfer(Storage target, bool hide_popups = false)
+	public void Transfer(Storage target, bool block_events = false, bool hide_popups = false)
 	{
 		while (this.items.Count > 0)
 		{
-			this.Transfer(this.items[0], target, hide_popups);
+			this.Transfer(this.items[0], target, block_events, hide_popups);
 		}
 	}
 
 	public float Transfer(Storage dest_storage, Tag tag, float amount, bool block_events = false, bool hide_popups = false)
 	{
 		List<GameObject> list = this.Find(tag);
+		float num;
 		if (list.Count > 0)
 		{
 			GameObject gameObject = list[0];
@@ -221,18 +264,25 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 				Pickupable component2 = gameObject.GetComponent<Pickupable>();
 				Pickupable pickupable = component2.Take(amount);
 				dest_storage.Store(pickupable.gameObject, hide_popups, block_events, true);
-				this.Trigger(-1697596308, component2.gameObject);
+				if (!block_events)
+				{
+					base.Trigger(-1697596308, component2.gameObject);
+				}
 			}
 			else
 			{
-				this.Transfer(gameObject, dest_storage, hide_popups);
+				this.Transfer(gameObject, dest_storage, block_events, hide_popups);
 			}
-			return amount;
+			num = amount;
 		}
-		return 0f;
+		else
+		{
+			num = 0f;
+		}
+		return num;
 	}
 
-	public bool Transfer(GameObject go, Storage target, bool hide_popups = false)
+	public bool Transfer(GameObject go, Storage target, bool block_events = false, bool hide_popups = false)
 	{
 		this.items.RemoveAll((GameObject it) => it == null);
 		int count = this.items.Count;
@@ -241,14 +291,17 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			if (this.items[i] == go)
 			{
 				this.items.RemoveAt(i);
-				this.Trigger(-1697596308, go);
 				this.ApplyStoredItemModifiers(go, false);
 				if (this.temperatureAdjuster != null)
 				{
 					SimTemperatureTransfer component = go.GetComponent<SimTemperatureTransfer>();
 					this.temperatureAdjuster.Unregister(component);
 				}
-				target.Store(go, hide_popups, false, true);
+				target.Store(go, hide_popups, block_events, true);
+				if (!block_events)
+				{
+					base.Trigger(-1697596308, go);
+				}
 				return true;
 			}
 		}
@@ -303,30 +356,28 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 
 	private void TransferDiseaseWithObject(GameObject obj)
 	{
-		if (obj == null || !this.doDiseaseTransfer || this.primaryElement == null)
+		if (!(obj == null) && this.doDiseaseTransfer && !(this.primaryElement == null))
 		{
-			return;
-		}
-		PrimaryElement component = obj.GetComponent<PrimaryElement>();
-		if (component == null)
-		{
-			return;
-		}
-		SimUtil.DiseaseInfo invalid = SimUtil.DiseaseInfo.Invalid;
-		invalid.idx = component.DiseaseIdx;
-		invalid.count = (int)((float)component.DiseaseCount * 0.05f);
-		SimUtil.DiseaseInfo invalid2 = SimUtil.DiseaseInfo.Invalid;
-		invalid2.idx = this.primaryElement.DiseaseIdx;
-		invalid2.count = (int)((float)this.primaryElement.DiseaseCount * 0.05f);
-		component.ModifyDiseaseCount(-invalid.count, "Storage.TransferDiseaseWithObject");
-		this.primaryElement.ModifyDiseaseCount(-invalid2.count, "Storage.TransferDiseaseWithObject");
-		if (invalid.count > 0)
-		{
-			this.primaryElement.AddDisease(invalid.idx, invalid.count, "Storage.TransferDiseaseWithObject");
-		}
-		if (invalid2.count > 0)
-		{
-			component.AddDisease(invalid2.idx, invalid2.count, "Storage.TransferDiseaseWithObject");
+			PrimaryElement component = obj.GetComponent<PrimaryElement>();
+			if (!(component == null))
+			{
+				SimUtil.DiseaseInfo invalid = SimUtil.DiseaseInfo.Invalid;
+				invalid.idx = component.DiseaseIdx;
+				invalid.count = (int)((float)component.DiseaseCount * 0.05f);
+				SimUtil.DiseaseInfo invalid2 = SimUtil.DiseaseInfo.Invalid;
+				invalid2.idx = this.primaryElement.DiseaseIdx;
+				invalid2.count = (int)((float)this.primaryElement.DiseaseCount * 0.05f);
+				component.ModifyDiseaseCount(-invalid.count, "Storage.TransferDiseaseWithObject");
+				this.primaryElement.ModifyDiseaseCount(-invalid2.count, "Storage.TransferDiseaseWithObject");
+				if (invalid.count > 0)
+				{
+					this.primaryElement.AddDisease(invalid.idx, invalid.count, "Storage.TransferDiseaseWithObject");
+				}
+				if (invalid2.count > 0)
+				{
+					component.AddDisease(invalid2.idx, invalid2.count, "Storage.TransferDiseaseWithObject");
+				}
+			}
 		}
 	}
 
@@ -336,7 +387,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		if (folder != null)
 		{
 			go.transform.parent = folder.transform;
-			this.Trigger(-1697596308, go);
+			base.Trigger(-1697596308, go);
 			EventSystem.Trigger(go, 856640610, null);
 			this.ApplyStoredItemModifiers(go, false);
 			if (this.temperatureAdjuster != null)
@@ -347,12 +398,15 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			if (go != null)
 			{
 				PrimaryElement component2 = go.GetComponent<PrimaryElement>();
-				if (component2 != null && component2.KeepZeroMassObject)
+				if (component2 != null)
 				{
-					component2.KeepZeroMassObject = false;
-					if (component2.Mass <= 0f)
+					if (component2.KeepZeroMassObject)
 					{
-						Util.KDestroyGameObject(go);
+						component2.KeepZeroMassObject = false;
+						if (component2.Mass <= 0f)
+						{
+							Util.KDestroyGameObject(go);
+						}
 					}
 				}
 			}
@@ -436,18 +490,23 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 
 	public List<GameObject> Find(IList<Tag> tags)
 	{
+		List<GameObject> list;
 		if (tags == null || tags.Count == 0)
 		{
-			return null;
+			list = null;
 		}
-		List<GameObject> list = new List<GameObject>();
-		for (int i = 0; i < this.items.Count; i++)
+		else
 		{
-			GameObject gameObject = this.items[i];
-			if (gameObject.HasTags(tags))
+			List<GameObject> list2 = new List<GameObject>();
+			for (int i = 0; i < this.items.Count; i++)
 			{
-				list.Add(gameObject);
+				GameObject gameObject = this.items[i];
+				if (gameObject.HasTags(tags))
+				{
+					list2.Add(gameObject);
+				}
 			}
+			list = list2;
 		}
 		return list;
 	}
@@ -495,17 +554,20 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 					disease_info = SimUtil.CalculateFinalDiseaseInfo(disease_info, percentOfDisease);
 					component.Units -= num2;
 					component.ModifyDiseaseCount(-percentOfDisease.count, "Storage.ConsumeAndGetDisease");
-					if (component.Units <= 0f && !component.KeepZeroMassObject)
+					if (component.Units <= 0f)
 					{
-						if (list == null)
+						if (!component.KeepZeroMassObject)
 						{
-							list = new List<GameObject>();
+							if (list == null)
+							{
+								list = new List<GameObject>();
+							}
+							list.Add(gameObject);
 						}
-						list.Add(gameObject);
 					}
 					amount -= num2;
 					num += num2;
-					this.Trigger(-1697596308, gameObject);
+					base.Trigger(-1697596308, gameObject);
 					if (amount <= 0f)
 					{
 						break;
@@ -549,12 +611,12 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			{
 				component.Units = 0f;
 				component.ModifyDiseaseCount(-component.DiseaseCount, "consume item");
-				this.Trigger(-1697596308, item_go);
+				base.Trigger(-1697596308, item_go);
 			}
 			else
 			{
 				this.items.Remove(item_go);
-				this.Trigger(-1697596308, item_go);
+				base.Trigger(-1697596308, item_go);
 				item_go.DeleteObject();
 			}
 		}
@@ -605,28 +667,6 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			}
 		}
 		return num;
-	}
-
-	public PrimaryElement GetAnyChunk()
-	{
-		PrimaryElement primaryElement = null;
-		int count = this.items.Count;
-		if (count > 0)
-		{
-			for (int i = 0; i < count; i++)
-			{
-				GameObject gameObject = this.items[i];
-				if (!(gameObject == null))
-				{
-					primaryElement = gameObject.GetComponent<PrimaryElement>();
-					if (primaryElement != null && primaryElement.Mass > 0f)
-					{
-						break;
-					}
-				}
-			}
-		}
-		return primaryElement;
 	}
 
 	public bool Has(Tag tag)
@@ -732,7 +772,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 	{
 		this.items.Remove(go);
 		this.TransferDiseaseWithObject(go);
-		this.Trigger(-1697596308, go);
+		base.Trigger(-1697596308, go);
 		this.ApplyStoredItemModifiers(go, false);
 	}
 
@@ -818,36 +858,33 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 	private static void MakeItemTemperatureInsulated(GameObject go, bool insulate)
 	{
 		SimTemperatureTransfer component = go.GetComponent<SimTemperatureTransfer>();
-		if (component == null)
+		if (!(component == null))
 		{
-			return;
+			component.enabled = !insulate;
 		}
-		component.enabled = !insulate;
 	}
 
 	private static void MakeItemInvisible(GameObject go, bool invisible)
 	{
 		KAnimControllerBase component = go.GetComponent<KAnimControllerBase>();
-		if (component == null)
+		if (!(component == null))
 		{
-			return;
-		}
-		component.enabled = !invisible;
-		KSelectable component2 = go.GetComponent<KSelectable>();
-		if (component2 != null)
-		{
-			component2.enabled = !invisible;
+			component.enabled = !invisible;
+			KSelectable component2 = go.GetComponent<KSelectable>();
+			if (component2 != null)
+			{
+				component2.enabled = !invisible;
+			}
 		}
 	}
 
 	private static void MakeItemSealed(GameObject go, bool seal)
 	{
 		Sublimates component = go.GetComponent<Sublimates>();
-		if (component == null)
+		if (!(component == null))
 		{
-			return;
+			component.enabled = !seal;
 		}
-		component.enabled = !seal;
 	}
 
 	private static void MakeItemPreserved(GameObject go, bool preserve)
@@ -867,12 +904,8 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 
 	private void ApplyStoredItemModifiers(GameObject go, bool stored)
 	{
-		List<Storage.StoredItemModifier> defaultStoredItemModifiers = this.defaultStoredItemModifers;
-		if (defaultStoredItemModifiers == null)
-		{
-			defaultStoredItemModifiers = Storage.DefaultStoredItemModifiers;
-		}
-		foreach (Storage.StoredItemModifier storedItemModifier in defaultStoredItemModifiers)
+		List<Storage.StoredItemModifier> list = this.defaultStoredItemModifers;
+		foreach (Storage.StoredItemModifier storedItemModifier in list)
 		{
 			foreach (Storage.StoredItemModifierInfo storedItemModifierInfo in Storage.StoredItemModifierHandlers)
 			{
@@ -921,27 +954,26 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			}
 		}
 		writer.Write(num);
-		if (num == 0)
+		if (num != 0)
 		{
-			return;
-		}
-		if (this.items != null && this.items.Count > 0)
-		{
-			for (int j = 0; j < this.items.Count; j++)
+			if (this.items != null && this.items.Count > 0)
 			{
-				GameObject gameObject = this.items[j];
-				if (this.ShouldSaveItem(gameObject))
+				for (int j = 0; j < this.items.Count; j++)
 				{
-					SaveLoadRoot component = gameObject.GetComponent<SaveLoadRoot>();
-					if (component != null)
+					GameObject gameObject = this.items[j];
+					if (this.ShouldSaveItem(gameObject))
 					{
-						string name = gameObject.GetComponent<KPrefabID>().GetSaveLoadTag().Name;
-						writer.WriteKleiString(name);
-						component.Save(writer);
-					}
-					else
-					{
-						Output.LogWithObj(gameObject, new object[] { "Tried to save obj in storage but obj has no SaveLoadRoot" });
+						SaveLoadRoot component = gameObject.GetComponent<SaveLoadRoot>();
+						if (component != null)
+						{
+							string name = gameObject.GetComponent<KPrefabID>().GetSaveLoadTag().Name;
+							writer.WriteKleiString(name);
+							component.Save(writer);
+						}
+						else
+						{
+							Output.LogWithObj(gameObject, new object[] { "Tried to save obj in storage but obj has no SaveLoadRoot" });
+						}
 					}
 				}
 			}
@@ -985,6 +1017,27 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		this.items.Clear();
 	}
 
+	// Note: this type is marked as 'beforefieldinit'.
+	static Storage()
+	{
+		List<Storage.StoredItemModifierInfo> list = new List<Storage.StoredItemModifierInfo>();
+		list.Add(new Storage.StoredItemModifierInfo(Storage.StoredItemModifier.Insulate, new Action<GameObject, bool>(Storage.MakeItemTemperatureInsulated)));
+		list.Add(new Storage.StoredItemModifierInfo(Storage.StoredItemModifier.Hide, new Action<GameObject, bool>(Storage.MakeItemInvisible)));
+		list.Add(new Storage.StoredItemModifierInfo(Storage.StoredItemModifier.Seal, new Action<GameObject, bool>(Storage.MakeItemSealed)));
+		list.Add(new Storage.StoredItemModifierInfo(Storage.StoredItemModifier.Preserve, new Action<GameObject, bool>(Storage.MakeItemPreserved)));
+		Storage.StoredItemModifierHandlers = list;
+		Storage.StandardSealedStorage = new List<Storage.StoredItemModifier>
+		{
+			Storage.StoredItemModifier.Hide,
+			Storage.StoredItemModifier.Seal
+		};
+		Storage.StandardFabricatorStorage = new List<Storage.StoredItemModifier>
+		{
+			Storage.StoredItemModifier.Hide,
+			Storage.StoredItemModifier.Preserve
+		};
+	}
+
 	public bool allowItemRemoval;
 
 	public bool countAsAccessible;
@@ -993,11 +1046,9 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 
 	public float capacityKg = 20000f;
 
-	public bool disableOnStore = true;
-
 	public bool showInUI = true;
 
-	public bool showDescriptor;
+	public bool showDescriptor = false;
 
 	public bool doDiseaseTransfer = true;
 
@@ -1005,7 +1056,9 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 
 	public ChoreType choreType;
 
-	public Storage.FXPrefix fxPrefix;
+	public bool useGunForDelivery = true;
+
+	public Storage.FXPrefix fxPrefix = Storage.FXPrefix.Delivered;
 
 	public List<GameObject> items = new List<GameObject>();
 
@@ -1018,11 +1071,11 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 	[MyCmpGet]
 	protected PrimaryElement primaryElement;
 
-	public bool dropOnLoad;
+	public bool dropOnLoad = false;
 
 	protected float maxKGPerItem = float.MaxValue;
 
-	private bool endOfLife;
+	private bool endOfLife = false;
 
 	[Serialize]
 	private bool onlyFetchMarkedItems;
@@ -1030,18 +1083,14 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 	[NonSerialized]
 	public SimulatedTemperatureAdjuster temperatureAdjuster;
 
-	private static readonly List<Storage.StoredItemModifier> DefaultStoredItemModifiers = new List<Storage.StoredItemModifier> { Storage.StoredItemModifier.Hide };
-
-	private static readonly List<Storage.StoredItemModifierInfo> StoredItemModifierHandlers = new List<Storage.StoredItemModifierInfo>
-	{
-		new Storage.StoredItemModifierInfo(Storage.StoredItemModifier.Insulate, new Action<GameObject, bool>(Storage.MakeItemTemperatureInsulated)),
-		new Storage.StoredItemModifierInfo(Storage.StoredItemModifier.Hide, new Action<GameObject, bool>(Storage.MakeItemInvisible)),
-		new Storage.StoredItemModifierInfo(Storage.StoredItemModifier.Seal, new Action<GameObject, bool>(Storage.MakeItemSealed)),
-		new Storage.StoredItemModifierInfo(Storage.StoredItemModifier.Preserve, new Action<GameObject, bool>(Storage.MakeItemPreserved))
-	};
+	private static readonly List<Storage.StoredItemModifierInfo> StoredItemModifierHandlers;
 
 	[SerializeField]
-	public List<Storage.StoredItemModifier> defaultStoredItemModifers;
+	private List<Storage.StoredItemModifier> defaultStoredItemModifers = new List<Storage.StoredItemModifier> { Storage.StoredItemModifier.Hide };
+
+	public static readonly List<Storage.StoredItemModifier> StandardSealedStorage;
+
+	public static readonly List<Storage.StoredItemModifier> StandardFabricatorStorage;
 
 	public enum StoredItemModifier
 	{

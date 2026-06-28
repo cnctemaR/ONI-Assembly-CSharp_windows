@@ -207,7 +207,7 @@ public static class GarbageProfiler
 
 	private static string ROOT_MEMORY_DUMP_PATH = "./memory/";
 
-	private static string filename_suffix;
+	private static string filename_suffix = null;
 
 	private class InstanceCountComparer : IComparer<MemorySnapshot.TypeData>
 	{

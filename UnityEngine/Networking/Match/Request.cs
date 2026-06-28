@@ -3,8 +3,10 @@ using UnityEngine.Networking.Types;
 
 namespace UnityEngine.Networking.Match
 {
-	public abstract class Request
+	internal abstract class Request
 	{
+		public int version { get; set; }
+
 		public SourceID sourceId { get; set; }
 
 		public string projectId { get; set; }
@@ -17,20 +19,21 @@ namespace UnityEngine.Networking.Match
 
 		public virtual bool IsValid()
 		{
-			return this.appId != AppID.Invalid && this.sourceId != SourceID.Invalid;
+			return this.sourceId != SourceID.Invalid;
 		}
 
 		public override string ToString()
 		{
-			return UnityString.Format("[{0}]-SourceID:0x{1},AppID:0x{2},domain:{3}", new object[]
+			return UnityString.Format("[{0}]-SourceID:0x{1},projectId:{2},accessTokenString.IsEmpty:{3},domain:{4}", new object[]
 			{
 				base.ToString(),
 				this.sourceId.ToString("X"),
-				this.appId.ToString("X"),
+				this.projectId,
+				string.IsNullOrEmpty(this.accessTokenString),
 				this.domain
 			});
 		}
 
-		public int version = 2;
+		public static readonly int currentVersion = 3;
 	}
 }

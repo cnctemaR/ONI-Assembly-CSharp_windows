@@ -6,6 +6,8 @@ namespace UnityEngine.SocialPlatforms
 	{
 		void Authenticate(Action<bool> callback);
 
+		void Authenticate(Action<bool, string> callback);
+
 		void LoadFriends(Action<bool> callback);
 
 		IUserProfile[] friends { get; }

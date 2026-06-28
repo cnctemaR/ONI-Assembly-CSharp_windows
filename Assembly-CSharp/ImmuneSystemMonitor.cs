@@ -72,8 +72,8 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 			AmountInstance amountInstance = this.immuneLevel;
 			amountInstance.OnDelta = (Action<float>)Delegate.Combine(amountInstance.OnDelta, new Action<float>(this.OnImmuneDelta));
 			AttributeConverterInstance attributeConverterInstance = master.GetComponent<Klei.AI.AttributeConverters>().Get(Db.Get().AttributeConverters.ImmuneLevelBoost);
-			this.immuneLevel.deltaAttribute.Add("immunity stat", new AttributeModifier(this.immuneLevel.deltaAttribute.Id, attributeConverterInstance.Evaluate(), DUPLICANTS.ATTRIBUTES.IMMUNITY.BOOST_STAT, false, false));
-			this.immuneSuppress = new AttributeModifier(this.immuneLevel.deltaAttribute.Id, -0.025f, DUPLICANTS.DISEASES.INFECTED_MODIFIER, false, false);
+			this.immuneLevel.deltaAttribute.Add("immunity stat", new AttributeModifier(this.immuneLevel.deltaAttribute.Id, attributeConverterInstance.Evaluate(), DUPLICANTS.ATTRIBUTES.IMMUNITY.BOOST_STAT, false, false, true));
+			this.immuneSuppress = new AttributeModifier(this.immuneLevel.deltaAttribute.Id, -0.025f, DUPLICANTS.DISEASES.INFECTED_MODIFIER, false, false, true);
 			this.activeDiseases = master.GetComponent<MinionModifiers>().diseases;
 			this.primaryElement = master.GetComponent<PrimaryElement>();
 			this.effects = master.GetComponent<Effects>();
@@ -83,8 +83,8 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 			Klei.AI.Attributes attributes = base.gameObject.GetAttributes();
 			foreach (Disease disease in Db.Get().Diseases)
 			{
-				attributes.Add("linear disease loss", new AttributeModifier(disease.amountDeltaAttribute.Id, -0.8333333f, disease.Name, false, false));
-				AttributeModifier attributeModifier = new AttributeModifier(disease.amountDeltaAttribute.Id, -0.00066666666f, disease.Name, false, false);
+				attributes.Add("linear disease loss", new AttributeModifier(disease.amountDeltaAttribute.Id, -0.8333333f, disease.Name, false, false, false));
+				AttributeModifier attributeModifier = new AttributeModifier(disease.amountDeltaAttribute.Id, -0.00066666666f, disease.Name, false, false, false);
 				this.diseaseCountMultModifiers[disease.id] = attributeModifier;
 				attributes.Add("geometric disease loss", attributeModifier);
 			}
@@ -179,7 +179,7 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 							base.gameObject.GetAttributes().Add("immune damage from " + disease.id, attributeModifier);
 							this.activeImmuneModifiers[disease.id] = attributeModifier;
 						}
-						attributeModifier.Value = num4;
+						attributeModifier.SetValue(num4);
 					}
 					else if (this.activeImmuneModifiers.ContainsKey(disease.id))
 					{
@@ -211,37 +211,36 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 
 		private void OnImmuneDelta(float delta)
 		{
-			if (Game.Instance.customSettings.GetCurrentQualitySetting("ImmuneSystem").id == "Invincible")
+			if (!(Game.Instance.customSettings.GetCurrentQualitySetting("ImmuneSystem").id == "Invincible"))
 			{
-				return;
-			}
-			if (this.immuneLevel.value <= 0f && this.lastHighestDisease != null)
-			{
-				ImmuneSystemMonitor.Instance.DiseaseSourceInfo diseaseSourceInfo;
-				string text;
-				if (this.lastDiseaseSources.TryGetValue(this.lastHighestDisease.Id, out diseaseSourceInfo))
+				if (this.immuneLevel.value <= 0f && this.lastHighestDisease != null)
 				{
-					switch (diseaseSourceInfo.vector)
+					ImmuneSystemMonitor.Instance.DiseaseSourceInfo diseaseSourceInfo;
+					string text;
+					if (this.lastDiseaseSources.TryGetValue(this.lastHighestDisease.Id, out diseaseSourceInfo))
 					{
-					case Disease.InfectionVector.Contact:
-						text = DUPLICANTS.DISEASES.INFECTIONSOURCES.SKIN;
-						break;
-					case Disease.InfectionVector.Digestion:
-						text = string.Format(DUPLICANTS.DISEASES.INFECTIONSOURCES.FOOD, diseaseSourceInfo.sourceObject.ProperName());
-						break;
-					case Disease.InfectionVector.Inhalation:
-						text = string.Format(DUPLICANTS.DISEASES.INFECTIONSOURCES.AIR, diseaseSourceInfo.sourceObject.ProperName());
-						break;
-					default:
-						text = DUPLICANTS.DISEASES.INFECTIONSOURCES.UNKNOWN;
-						break;
+						switch (diseaseSourceInfo.vector)
+						{
+						case Disease.InfectionVector.Contact:
+							text = DUPLICANTS.DISEASES.INFECTIONSOURCES.SKIN;
+							break;
+						case Disease.InfectionVector.Digestion:
+							text = string.Format(DUPLICANTS.DISEASES.INFECTIONSOURCES.FOOD, diseaseSourceInfo.sourceObject.ProperName());
+							break;
+						case Disease.InfectionVector.Inhalation:
+							text = string.Format(DUPLICANTS.DISEASES.INFECTIONSOURCES.AIR, diseaseSourceInfo.sourceObject.ProperName());
+							break;
+						default:
+							text = DUPLICANTS.DISEASES.INFECTIONSOURCES.UNKNOWN;
+							break;
+						}
 					}
+					else
+					{
+						text = DUPLICANTS.DISEASES.INFECTIONSOURCES.UNKNOWN;
+					}
+					this.activeDiseases.Infect(new DiseaseExposureInfo(this.lastHighestDisease.Id, text));
 				}
-				else
-				{
-					text = DUPLICANTS.DISEASES.INFECTIONSOURCES.UNKNOWN;
-				}
-				this.activeDiseases.Infect(new DiseaseExposureInfo(this.lastHighestDisease.Id, text));
 			}
 		}
 

@@ -4,13 +4,8 @@ using System.Collections.Generic;
 
 namespace UnityEngine.UI.Collections
 {
-	internal class IndexedSet<T> : IEnumerable, IList<T>, ICollection<T>, IEnumerable<T>
+	internal class IndexedSet<T> : IList<T>, ICollection<T>, IEnumerable<T>, IEnumerable
 	{
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.GetEnumerator();
-		}
-
 		public void Add(T item)
 		{
 			this.m_List.Add(item);
@@ -19,29 +14,44 @@ namespace UnityEngine.UI.Collections
 
 		public bool AddUnique(T item)
 		{
+			bool flag;
 			if (this.m_Dictionary.ContainsKey(item))
 			{
-				return false;
+				flag = false;
 			}
-			this.m_List.Add(item);
-			this.m_Dictionary.Add(item, this.m_List.Count - 1);
-			return true;
+			else
+			{
+				this.m_List.Add(item);
+				this.m_Dictionary.Add(item, this.m_List.Count - 1);
+				flag = true;
+			}
+			return flag;
 		}
 
 		public bool Remove(T item)
 		{
 			int num = -1;
+			bool flag;
 			if (!this.m_Dictionary.TryGetValue(item, out num))
 			{
-				return false;
+				flag = false;
 			}
-			this.RemoveAt(num);
-			return true;
+			else
+			{
+				this.RemoveAt(num);
+				flag = true;
+			}
+			return flag;
 		}
 
 		public IEnumerator<T> GetEnumerator()
 		{
 			throw new NotImplementedException();
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return this.GetEnumerator();
 		}
 
 		public void Clear()

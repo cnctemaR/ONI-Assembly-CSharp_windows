@@ -6,7 +6,7 @@ public class SavedObject : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(856640610, new Action<object>(this.OnStore));
+		base.Subscribe(856640610, new Action<object>(this.OnStore));
 	}
 
 	protected override void OnSpawn()
@@ -45,5 +45,5 @@ public class SavedObject : KMonoBehaviour
 	[Serialize]
 	public bool inStorage;
 
-	private bool registered;
+	private bool registered = false;
 }

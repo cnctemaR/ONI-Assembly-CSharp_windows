@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using Klei.AI;
 using STRINGS;
 using TUNING;
@@ -49,7 +48,7 @@ public class EntityTemplates
 		return gameObject;
 	}
 
-	public static GameObject CreatePlacedEntity(string id, string name, string desc, float mass, KAnimFile anim, string initialAnim, Grid.SceneLayer sceneLayer, int width, int height, EffectorValues decor, [Optional] EffectorValues noise, SimHashes element = SimHashes.Creature, List<Tag> additionalTags = null, float defaultTemperature = 293f)
+	public static GameObject CreatePlacedEntity(string id, string name, string desc, float mass, KAnimFile anim, string initialAnim, Grid.SceneLayer sceneLayer, int width, int height, EffectorValues decor, EffectorValues noise = default(EffectorValues), SimHashes element = SimHashes.Creature, List<Tag> additionalTags = null, float defaultTemperature = 293f)
 	{
 		GameObject gameObject = EntityTemplates.CreateBasicEntity(id, name, desc, mass, true, anim, initialAnim, sceneLayer, element, additionalTags, defaultTemperature);
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
@@ -156,7 +155,7 @@ public class EntityTemplates
 		{
 			template.UpdateComponentRequirement<EntombVulnerable>(true);
 		}
-		if (onDeathDropCount > 0 && onDeathDropID != string.Empty)
+		if (onDeathDropCount > 0 && onDeathDropID != "")
 		{
 			string[] array = new string[onDeathDropCount];
 			for (int i = 0; i < array.Length; i++)
@@ -205,7 +204,7 @@ public class EntityTemplates
 		KPrefabID component = creature.GetComponent<KPrefabID>();
 		PrimaryElement component2 = creature.GetComponent<PrimaryElement>();
 		string baggedCreatureName = EntityTemplates.GetBaggedCreatureName(component.PrefabTag.Name);
-		GameObject gameObject = EntityTemplates.CreateLooseEntity(baggedCreatureName, name, desc, component2.Mass, true, anim, initialAnim, Grid.SceneLayer.Use, EntityTemplates.CollisionShape.CIRCLE, 1f, 1f, true, SimHashes.Creature, null);
+		GameObject gameObject = EntityTemplates.CreateLooseEntity(baggedCreatureName, name, desc, component2.Mass, true, anim, initialAnim, Grid.SceneLayer.Ore, EntityTemplates.CollisionShape.CIRCLE, 1f, 1f, true, SimHashes.Creature, null);
 		KPrefabID component3 = gameObject.GetComponent<KPrefabID>();
 		component3.AddPrefabTag(GameTags.BagableCreature);
 		Assets.AddPrefab(component3);
@@ -419,7 +418,7 @@ public class EntityTemplates
 		return gameObject;
 	}
 
-	public static GameObject CreateAndRegisterSeedForPlant(GameObject plant, SeedProducer.ProductionType productionType, string id, string name, string desc, KAnimFile anim, string initialAnim = "object", int numberOfSeeds = 1, List<Tag> additionalTags = null, SingleEntityReceptacle.ReceptacleDirection planterDirection = SingleEntityReceptacle.ReceptacleDirection.Top, [Optional] Tag replantGroundTag, int sortOrder = 0, string domesticatedDescription = "", EntityTemplates.CollisionShape collisionShape = EntityTemplates.CollisionShape.CIRCLE, float width = 0.25f, float height = 0.25f, Recipe.Ingredient[] recipe_ingredients = null, string recipe_description = "")
+	public static GameObject CreateAndRegisterSeedForPlant(GameObject plant, SeedProducer.ProductionType productionType, string id, string name, string desc, KAnimFile anim, string initialAnim = "object", int numberOfSeeds = 1, List<Tag> additionalTags = null, SingleEntityReceptacle.ReceptacleDirection planterDirection = SingleEntityReceptacle.ReceptacleDirection.Top, Tag replantGroundTag = default(Tag), int sortOrder = 0, string domesticatedDescription = "", EntityTemplates.CollisionShape collisionShape = EntityTemplates.CollisionShape.CIRCLE, float width = 0.25f, float height = 0.25f, Recipe.Ingredient[] recipe_ingredients = null, string recipe_description = "")
 	{
 		GameObject gameObject = EntityTemplates.CreateLooseEntity(id, name, desc, 1f, true, anim, initialAnim, Grid.SceneLayer.Front, collisionShape, width, height, true, SimHashes.Creature, null);
 		gameObject.UpdateComponentRequirement<EntitySplitter>(true);
@@ -461,7 +460,7 @@ public class EntityTemplates
 		OccupyArea occupyArea = gameObject.UpdateComponentRequirement<OccupyArea>(true);
 		occupyArea.objectLayer = objectLayer;
 		occupyArea.ApplyToCells = false;
-		Storage storage = gameObject.UpdateComponentRequirement<Storage>(true);
+		gameObject.UpdateComponentRequirement<Storage>(true);
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
 		Assets.AddPrefab(component);
 		return gameObject;

@@ -79,17 +79,12 @@ public class EntityPreview : KMonoBehaviour
 		}
 		if (valid != this.Valid)
 		{
-			this.Trigger(-1820564715, this.Valid);
+			base.Trigger(-1820564715, this.Valid);
 		}
 	}
 
 	private bool ValidTest(int cell, object data)
 	{
-		bool flag = !Grid.Solid[cell];
-		if (this.objectLayer != ObjectLayer.NumLayers)
-		{
-			bool flag2 = Grid.Objects[cell, (int)this.objectLayer] == base.gameObject || Grid.Objects[cell, (int)this.objectLayer] == null;
-		}
 		return !Grid.Solid[cell] && (this.objectLayer == ObjectLayer.NumLayers || Grid.Objects[cell, (int)this.objectLayer] == base.gameObject || Grid.Objects[cell, (int)this.objectLayer] == null);
 	}
 

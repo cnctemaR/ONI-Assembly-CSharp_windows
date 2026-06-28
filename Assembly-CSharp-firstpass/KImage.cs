@@ -27,16 +27,16 @@ public class KImage : Image
 			switch (this.colorSelector)
 			{
 			case KImage.ColorSelector.Active:
-				base.color = this.colorStyleSetting.activeColor;
+				this.color = this.colorStyleSetting.activeColor;
 				break;
 			case KImage.ColorSelector.Inactive:
-				base.color = this.colorStyleSetting.inactiveColor;
+				this.color = this.colorStyleSetting.inactiveColor;
 				break;
 			case KImage.ColorSelector.Disabled:
-				base.color = this.colorStyleSetting.disabledColor;
+				this.color = this.colorStyleSetting.disabledColor;
 				break;
 			case KImage.ColorSelector.Hover:
-				base.color = this.colorStyleSetting.hoverColor;
+				this.color = this.colorStyleSetting.hoverColor;
 				break;
 			}
 		}

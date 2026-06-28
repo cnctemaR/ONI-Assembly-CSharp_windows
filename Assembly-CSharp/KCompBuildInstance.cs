@@ -59,17 +59,16 @@ public class KCompBuildInstance
 		{
 			target_controller = this.controller;
 		}
-		if (this.buildData.animCount == 0)
+		if (this.buildData.animCount != 0)
 		{
-			return;
-		}
-		try
-		{
-			this.ApplyNeutralAndOverride(target_controller, KCompBuilder.head_comp);
-		}
-		catch (Exception ex)
-		{
-			Debug.LogError("Exception while applying override " + ex.Message + "\n" + ex.StackTrace, null);
+			try
+			{
+				this.ApplyNeutralAndOverride(target_controller, KCompBuilder.head_comp);
+			}
+			catch (Exception ex)
+			{
+				Debug.LogError("Exception while applying override " + ex.Message + "\n" + ex.StackTrace, null);
+			}
 		}
 	}
 

@@ -24,31 +24,30 @@ public class UserMenuScreen : KIconButtonMenu
 
 	public void Refresh(GameObject go)
 	{
-		if (go != this.selected)
+		if (!(go != this.selected))
 		{
-			return;
-		}
-		this.priorityScreen.SetTarget(go);
-		this.buttonInfos.Clear();
-		this.slidersInfos.Clear();
-		UserMenu[] components = go.GetComponents<UserMenu>();
-		if (components != null)
-		{
-			foreach (UserMenu userMenu in components)
+			this.priorityScreen.SetTarget(go);
+			this.buttonInfos.Clear();
+			this.slidersInfos.Clear();
+			UserMenu[] components = go.GetComponents<UserMenu>();
+			if (components != null)
 			{
-				userMenu.AppendToScreen(this);
+				foreach (UserMenu userMenu in components)
+				{
+					userMenu.AppendToScreen(this);
+				}
 			}
-		}
-		base.SetButtons(this.buttonInfos);
-		base.RefreshButtons();
-		this.RefreshSliders();
-		if ((this.sliders == null || this.sliders.Count == 0) && (this.buttonInfos == null || this.buttonInfos.Count == 0))
-		{
-			this.transform.parent.gameObject.SetActive(false);
-		}
-		else
-		{
-			this.transform.parent.gameObject.SetActive(true);
+			base.SetButtons(this.buttonInfos);
+			base.RefreshButtons();
+			this.RefreshSliders();
+			if ((this.sliders == null || this.sliders.Count == 0) && (this.buttonInfos == null || this.buttonInfos.Count == 0))
+			{
+				base.transform.parent.gameObject.SetActive(false);
+			}
+			else
+			{
+				base.transform.parent.gameObject.SetActive(true);
+			}
 		}
 	}
 
@@ -77,40 +76,39 @@ public class UserMenuScreen : KIconButtonMenu
 			}
 			this.sliders = null;
 		}
-		if (this.slidersInfos == null || this.slidersInfos.Count == 0)
+		if (this.slidersInfos != null && this.slidersInfos.Count != 0)
 		{
-			return;
-		}
-		this.sliders = new List<MinMaxSlider>();
-		for (int j = 0; j < this.slidersInfos.Count; j++)
-		{
-			GameObject gameObject = global::UnityEngine.Object.Instantiate(this.sliderPrefab.gameObject, Vector3.zero, Quaternion.identity) as GameObject;
-			this.slidersInfos[j].sliderGO = gameObject;
-			MinMaxSlider component = gameObject.GetComponent<MinMaxSlider>();
-			this.sliders.Add(component);
-			Transform transform = ((!(this.sliderParent != null)) ? this.transform : this.sliderParent.transform);
-			gameObject.transform.SetParent(transform, false);
-			gameObject.SetActive(true);
-			gameObject.name = "Slider";
-			if (component.toolTip)
+			this.sliders = new List<MinMaxSlider>();
+			for (int j = 0; j < this.slidersInfos.Count; j++)
 			{
-				component.toolTip.toolTip = this.slidersInfos[j].toolTip;
+				GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(this.sliderPrefab.gameObject, Vector3.zero, Quaternion.identity);
+				this.slidersInfos[j].sliderGO = gameObject;
+				MinMaxSlider component = gameObject.GetComponent<MinMaxSlider>();
+				this.sliders.Add(component);
+				Transform transform = ((!(this.sliderParent != null)) ? base.transform : this.sliderParent.transform);
+				gameObject.transform.SetParent(transform, false);
+				gameObject.SetActive(true);
+				gameObject.name = "Slider";
+				if (component.toolTip)
+				{
+					component.toolTip.toolTip = this.slidersInfos[j].toolTip;
+				}
+				component.lockType = this.slidersInfos[j].lockType;
+				component.interactable = this.slidersInfos[j].interactable;
+				component.minLimit = this.slidersInfos[j].minLimit;
+				component.maxLimit = this.slidersInfos[j].maxLimit;
+				component.currentMinValue = this.slidersInfos[j].currentMinValue;
+				component.currentMaxValue = this.slidersInfos[j].currentMaxValue;
+				component.onMinChange = this.slidersInfos[j].onMinChange;
+				component.onMaxChange = this.slidersInfos[j].onMaxChange;
+				component.direction = this.slidersInfos[j].direction;
+				component.SetMode(this.slidersInfos[j].mode);
+				component.SetMinMaxValue(this.slidersInfos[j].currentMinValue, this.slidersInfos[j].currentMaxValue, this.slidersInfos[j].minLimit, this.slidersInfos[j].maxLimit);
 			}
-			component.lockType = this.slidersInfos[j].lockType;
-			component.interactable = this.slidersInfos[j].interactable;
-			component.minLimit = this.slidersInfos[j].minLimit;
-			component.maxLimit = this.slidersInfos[j].maxLimit;
-			component.currentMinValue = this.slidersInfos[j].currentMinValue;
-			component.currentMaxValue = this.slidersInfos[j].currentMaxValue;
-			component.onMinChange = this.slidersInfos[j].onMinChange;
-			component.onMaxChange = this.slidersInfos[j].onMaxChange;
-			component.direction = this.slidersInfos[j].direction;
-			component.SetMode(this.slidersInfos[j].mode);
-			component.SetMinMaxValue(this.slidersInfos[j].currentMinValue, this.slidersInfos[j].currentMaxValue, this.slidersInfos[j].minLimit, this.slidersInfos[j].maxLimit);
 		}
 	}
 
-	private GameObject selected;
+	private GameObject selected = null;
 
 	public MinMaxSlider sliderPrefab;
 

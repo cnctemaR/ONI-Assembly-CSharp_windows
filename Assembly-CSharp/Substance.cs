@@ -38,7 +38,7 @@ public class Substance
 		}
 		if (gameObject == null)
 		{
-			gameObject = GameUtil.KInstantiate(Assets.GetPrefab(GameTagExtensions.Create(this.elementID)), Grid.SceneLayer.Use, Folder.Loot, null, 0);
+			gameObject = GameUtil.KInstantiate(Assets.GetPrefab(GameTagExtensions.Create(this.elementID)), Grid.SceneLayer.Ore, Folder.Loot, null, 0);
 			primaryElement = gameObject.GetComponent<PrimaryElement>();
 			primaryElement.Mass = mass;
 		}
@@ -47,7 +47,7 @@ public class Substance
 			primaryElement.Mass += mass;
 		}
 		primaryElement.InternalTemperature = temperature;
-		position.z = Grid.GetLayerZ(Grid.SceneLayer.Use);
+		position.z = Grid.GetLayerZ(Grid.SceneLayer.Ore);
 		gameObject.transform.SetPosition(position);
 		gameObject.SetActive(true);
 		primaryElement.AddDisease(disease_idx, disease_count, "Substances.SpawnResource");
@@ -88,56 +88,86 @@ public class Substance
 
 	public AmbienceType GetAmbience()
 	{
+		AmbienceType ambienceType;
 		if (this.audioConfig == null)
 		{
-			return AmbienceType.None;
+			ambienceType = AmbienceType.None;
 		}
-		return this.audioConfig.ambienceType;
+		else
+		{
+			ambienceType = this.audioConfig.ambienceType;
+		}
+		return ambienceType;
 	}
 
 	public SolidAmbienceType GetSolidAmbience()
 	{
+		SolidAmbienceType solidAmbienceType;
 		if (this.audioConfig == null)
 		{
-			return SolidAmbienceType.None;
+			solidAmbienceType = SolidAmbienceType.None;
 		}
-		return this.audioConfig.solidAmbienceType;
+		else
+		{
+			solidAmbienceType = this.audioConfig.solidAmbienceType;
+		}
+		return solidAmbienceType;
 	}
 
 	public string GetMiningSound()
 	{
+		string text;
 		if (this.audioConfig == null)
 		{
-			return string.Empty;
+			text = "";
 		}
-		return this.audioConfig.miningSound;
+		else
+		{
+			text = this.audioConfig.miningSound;
+		}
+		return text;
 	}
 
 	public string GetMiningBreakSound()
 	{
+		string text;
 		if (this.audioConfig == null)
 		{
-			return string.Empty;
+			text = "";
 		}
-		return this.audioConfig.miningBreakSound;
+		else
+		{
+			text = this.audioConfig.miningBreakSound;
+		}
+		return text;
 	}
 
 	public string GetOreBumpSound()
 	{
+		string text;
 		if (this.audioConfig == null)
 		{
-			return string.Empty;
+			text = "";
 		}
-		return this.audioConfig.oreBumpSound;
+		else
+		{
+			text = this.audioConfig.oreBumpSound;
+		}
+		return text;
 	}
 
 	public string GetFloorEventAudioCategory()
 	{
+		string text;
 		if (this.audioConfig == null)
 		{
-			return string.Empty;
+			text = "";
 		}
-		return this.audioConfig.floorEventAudioCategory;
+		else
+		{
+			text = this.audioConfig.floorEventAudioCategory;
+		}
+		return text;
 	}
 
 	public string name;
@@ -152,12 +182,12 @@ public class Substance
 
 	public GameObject hitEffect;
 
-	[FormerlySerializedAs("fallingStartSoundMigrated")]
 	[EventRef]
+	[FormerlySerializedAs("fallingStartSoundMigrated")]
 	public string fallingStartSound;
 
-	[FormerlySerializedAs("fallingStopSoundMigrated")]
 	[EventRef]
+	[FormerlySerializedAs("fallingStopSoundMigrated")]
 	public string fallingStopSound;
 
 	[NonSerialized]
@@ -175,7 +205,7 @@ public class Substance
 	[NonSerialized]
 	public KAnimFile[] anims;
 
-	public float hue;
+	public float hue = 0f;
 
 	public float saturation = 1f;
 

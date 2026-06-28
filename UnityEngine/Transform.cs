@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Runtime.CompilerServices;
 using UnityEngine.Internal;
+using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
@@ -25,11 +26,11 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_get_position(out Vector3 value);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_set_position(ref Vector3 value);
 
@@ -47,11 +48,11 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_get_localPosition(out Vector3 value);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_set_localPosition(ref Vector3 value);
 
@@ -62,7 +63,7 @@ namespace UnityEngine
 			return vector;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_GetLocalEulerAngles(Transform self, RotationOrder order, out Vector3 value);
 
@@ -71,7 +72,7 @@ namespace UnityEngine
 			Transform.INTERNAL_CALL_SetLocalEulerAngles(this, ref euler, order);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_SetLocalEulerAngles(Transform self, ref Vector3 euler, RotationOrder order);
 
@@ -91,23 +92,13 @@ namespace UnityEngine
 		{
 			get
 			{
-				Vector3 vector;
-				this.INTERNAL_get_localEulerAngles(out vector);
-				return vector;
+				return this.localRotation.eulerAngles;
 			}
 			set
 			{
-				this.INTERNAL_set_localEulerAngles(ref value);
+				this.localRotation = Quaternion.Euler(value);
 			}
 		}
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void INTERNAL_get_localEulerAngles(out Vector3 value);
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void INTERNAL_set_localEulerAngles(ref Vector3 value);
 
 		public Vector3 right
 		{
@@ -159,11 +150,11 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_get_rotation(out Quaternion value);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_set_rotation(ref Quaternion value);
 
@@ -181,11 +172,11 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_get_localRotation(out Quaternion value);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_set_localRotation(ref Quaternion value);
 
@@ -203,11 +194,11 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_get_localScale(out Vector3 value);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_set_localScale(ref Vector3 value);
 
@@ -229,10 +220,10 @@ namespace UnityEngine
 
 		internal extern Transform parentInternal
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
@@ -242,7 +233,7 @@ namespace UnityEngine
 			this.SetParent(parent, true);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetParent(Transform parent, bool worldPositionStays);
 
@@ -256,7 +247,7 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_get_worldToLocalMatrix(out Matrix4x4 value);
 
@@ -270,9 +261,18 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_get_localToWorldMatrix(out Matrix4x4 value);
+
+		public void SetPositionAndRotation(Vector3 position, Quaternion rotation)
+		{
+			Transform.INTERNAL_CALL_SetPositionAndRotation(this, ref position, ref rotation);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_SetPositionAndRotation(Transform self, ref Vector3 position, ref Quaternion rotation);
 
 		[ExcludeFromDocs]
 		public void Translate(Vector3 translation)
@@ -359,7 +359,7 @@ namespace UnityEngine
 			Transform.INTERNAL_CALL_RotateAroundInternal(this, ref axis, angle);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_RotateAroundInternal(Transform self, ref Vector3 axis, float angle);
 
@@ -420,7 +420,7 @@ namespace UnityEngine
 			Transform.INTERNAL_CALL_LookAt(this, ref worldPosition, ref up);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_LookAt(Transform self, ref Vector3 worldPosition, ref Vector3 worldUp);
 
@@ -431,7 +431,7 @@ namespace UnityEngine
 			return vector;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_TransformDirection(Transform self, ref Vector3 direction, out Vector3 value);
 
@@ -447,7 +447,7 @@ namespace UnityEngine
 			return vector;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_InverseTransformDirection(Transform self, ref Vector3 direction, out Vector3 value);
 
@@ -463,7 +463,7 @@ namespace UnityEngine
 			return vector2;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_TransformVector(Transform self, ref Vector3 vector, out Vector3 value);
 
@@ -479,7 +479,7 @@ namespace UnityEngine
 			return vector2;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_InverseTransformVector(Transform self, ref Vector3 vector, out Vector3 value);
 
@@ -495,7 +495,7 @@ namespace UnityEngine
 			return vector;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_TransformPoint(Transform self, ref Vector3 position, out Vector3 value);
 
@@ -511,7 +511,7 @@ namespace UnityEngine
 			return vector;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_InverseTransformPoint(Transform self, ref Vector3 position, out Vector3 value);
 
@@ -522,39 +522,39 @@ namespace UnityEngine
 
 		public extern Transform root
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern int childCount
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void DetachChildren();
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetAsFirstSibling();
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetAsLastSibling();
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetSiblingIndex(int index);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int GetSiblingIndex();
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Transform Find(string name);
 
@@ -568,24 +568,25 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_get_lossyScale(out Vector3 value);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool IsChildOf(Transform parent);
 
 		public extern bool hasChanged
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
+		[Obsolete("FindChild has been deprecated. Use Find instead (UnityUpgradable) -> Find([mscorlib] System.String)", false)]
 		public Transform FindChild(string name)
 		{
 			return this.Find(name);
@@ -602,7 +603,7 @@ namespace UnityEngine
 			Transform.INTERNAL_CALL_RotateAround(this, ref axis, angle);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_RotateAround(Transform self, ref Vector3 axis, float angle);
 
@@ -612,18 +613,35 @@ namespace UnityEngine
 			Transform.INTERNAL_CALL_RotateAroundLocal(this, ref axis, angle);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_RotateAroundLocal(Transform self, ref Vector3 axis, float angle);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Transform GetChild(int index);
 
-		[WrapperlessIcall]
 		[Obsolete("use Transform.childCount instead.")]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int GetChildCount();
+
+		public extern int hierarchyCapacity
+		{
+			[GeneratedByOldBindingsGenerator]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[GeneratedByOldBindingsGenerator]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		public extern int hierarchyCount
+		{
+			[GeneratedByOldBindingsGenerator]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
 
 		private sealed class Enumerator : IEnumerator
 		{

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using FMOD.Studio;
 using FMODUnity;
@@ -61,12 +62,26 @@ public class OverlayScreen : KMonoBehaviour
 		this.RegisterMode(new HeatFlow());
 		this.RegisterMode(new Rooms());
 		this.RegisterMode(new Suit(this.powerLabelParent, this.suitOverlayPrefab));
-		foreach (object obj in Enum.GetValues(typeof(SimViewMode)))
+		this.RegisterMode(new Logic(this.logicModeUIPrefab));
+		IEnumerator enumerator = Enum.GetValues(typeof(SimViewMode)).GetEnumerator();
+		try
 		{
-			SimViewMode simViewMode = (SimViewMode)((int)obj);
-			if (!this.modes.ContainsKey(simViewMode))
+			while (enumerator.MoveNext())
 			{
-				this.modes[simViewMode] = none;
+				object obj = enumerator.Current;
+				SimViewMode simViewMode = (SimViewMode)obj;
+				if (!this.modes.ContainsKey(simViewMode))
+				{
+					this.modes[simViewMode] = none;
+				}
+			}
+		}
+		finally
+		{
+			IDisposable disposable;
+			if ((disposable = enumerator as IDisposable) != null)
+			{
+				disposable.Dispose();
 			}
 		}
 	}
@@ -125,11 +140,10 @@ public class OverlayScreen : KMonoBehaviour
 
 	private void ActivateLegend()
 	{
-		if (OverlayLegend.Instance == null)
+		if (!(OverlayLegend.Instance == null))
 		{
-			return;
+			OverlayLegend.Instance.SetLegend(this.currentMode.ViewMode(), false);
 		}
-		OverlayLegend.Instance.SetLegend(this.currentMode.ViewMode(), false);
 	}
 
 	public void Refresh()
@@ -145,7 +159,7 @@ public class OverlayScreen : KMonoBehaviour
 	private void UpdateOverlaySounds()
 	{
 		string text = this.currentMode.GetSoundName();
-		if (text != string.Empty)
+		if (text != "")
 		{
 			text = GlobalAssets.GetSound(text, false);
 			KMonoBehaviour.PlaySound(text);
@@ -164,8 +178,8 @@ public class OverlayScreen : KMonoBehaviour
 
 	public static HashSet<Tag> SuitIDs = new HashSet<Tag>();
 
-	[SerializeField]
 	[EventRef]
+	[SerializeField]
 	public string techViewSoundPath;
 
 	private EventInstance techViewSound;
@@ -174,8 +188,8 @@ public class OverlayScreen : KMonoBehaviour
 
 	public static OverlayScreen Instance;
 
-	[SerializeField]
 	[Header("Power")]
+	[SerializeField]
 	private Canvas powerLabelParent;
 
 	[SerializeField]
@@ -220,8 +234,8 @@ public class OverlayScreen : KMonoBehaviour
 	[SerializeField]
 	private GameObject diseaseOverlayPrefab;
 
-	[SerializeField]
 	[Header("Suit")]
+	[SerializeField]
 	private GameObject suitOverlayPrefab;
 
 	[Header("ToolTip")]
@@ -230,6 +244,10 @@ public class OverlayScreen : KMonoBehaviour
 
 	[SerializeField]
 	private TextStyleSetting TooltipDescription;
+
+	[Header("Logic")]
+	[SerializeField]
+	private LogicModeUI logicModeUIPrefab;
 
 	public Action<SimViewMode> OnOverlayChanged;
 

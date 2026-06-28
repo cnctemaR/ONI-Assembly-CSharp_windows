@@ -130,7 +130,7 @@ namespace Steamworks
 
 		public void SetAccountID(AccountID_t other)
 		{
-			this.m_SteamID = (this.m_SteamID & 18446744069414584320UL) | ((ulong)(uint)other & (ulong)(-1));
+			this.m_SteamID = (this.m_SteamID & 18446744069414584320UL) | (((ulong)(uint)other & (ulong)(-1)) << 0);
 		}
 
 		public void SetAccountInstance(uint other)
@@ -183,7 +183,41 @@ namespace Steamworks
 
 		public bool IsValid()
 		{
-			return this.GetEAccountType() > EAccountType.k_EAccountTypeInvalid && this.GetEAccountType() < EAccountType.k_EAccountTypeMax && this.GetEUniverse() > EUniverse.k_EUniverseInvalid && this.GetEUniverse() < EUniverse.k_EUniverseMax && (this.GetEAccountType() != EAccountType.k_EAccountTypeIndividual || (!(this.GetAccountID() == new AccountID_t(0U)) && this.GetUnAccountInstance() <= 4U)) && (this.GetEAccountType() != EAccountType.k_EAccountTypeClan || (!(this.GetAccountID() == new AccountID_t(0U)) && this.GetUnAccountInstance() == 0U)) && (this.GetEAccountType() != EAccountType.k_EAccountTypeGameServer || !(this.GetAccountID() == new AccountID_t(0U)));
+			bool flag;
+			if (this.GetEAccountType() <= EAccountType.k_EAccountTypeInvalid || this.GetEAccountType() >= EAccountType.k_EAccountTypeMax)
+			{
+				flag = false;
+			}
+			else if (this.GetEUniverse() <= EUniverse.k_EUniverseInvalid || this.GetEUniverse() >= EUniverse.k_EUniverseMax)
+			{
+				flag = false;
+			}
+			else
+			{
+				if (this.GetEAccountType() == EAccountType.k_EAccountTypeIndividual)
+				{
+					if (this.GetAccountID() == new AccountID_t(0U) || this.GetUnAccountInstance() > 4U)
+					{
+						return false;
+					}
+				}
+				if (this.GetEAccountType() == EAccountType.k_EAccountTypeClan)
+				{
+					if (this.GetAccountID() == new AccountID_t(0U) || this.GetUnAccountInstance() != 0U)
+					{
+						return false;
+					}
+				}
+				if (this.GetEAccountType() == EAccountType.k_EAccountTypeGameServer)
+				{
+					if (this.GetAccountID() == new AccountID_t(0U))
+					{
+						return false;
+					}
+				}
+				flag = true;
+			}
+			return flag;
 		}
 
 		public override string ToString()
@@ -199,16 +233,6 @@ namespace Steamworks
 		public override int GetHashCode()
 		{
 			return this.m_SteamID.GetHashCode();
-		}
-
-		public bool Equals(CSteamID other)
-		{
-			return this.m_SteamID == other.m_SteamID;
-		}
-
-		public int CompareTo(CSteamID other)
-		{
-			return this.m_SteamID.CompareTo(other.m_SteamID);
 		}
 
 		public static bool operator ==(CSteamID x, CSteamID y)
@@ -229,6 +253,16 @@ namespace Steamworks
 		public static explicit operator ulong(CSteamID that)
 		{
 			return that.m_SteamID;
+		}
+
+		public bool Equals(CSteamID other)
+		{
+			return this.m_SteamID == other.m_SteamID;
+		}
+
+		public int CompareTo(CSteamID other)
+		{
+			return this.m_SteamID.CompareTo(other.m_SteamID);
 		}
 
 		public static readonly CSteamID Nil = default(CSteamID);

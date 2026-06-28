@@ -16,6 +16,7 @@ namespace Klei.AI
 			this.isBad = is_bad;
 		}
 
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public event Action<Effects, Effect, bool> OnAddRemove;
 
 		public override void AddTo(Attributes attributes)
@@ -38,7 +39,7 @@ namespace Klei.AI
 
 		public static string CreateTooltip(Effect effect, bool showDuration)
 		{
-			string text = string.Empty;
+			string text = "";
 			foreach (AttributeModifier attributeModifier in effect.SelfModifiers)
 			{
 				if (Db.Get().Attributes.Get(attributeModifier.AttributeId).ShowInUI != Attribute.Display.Never)

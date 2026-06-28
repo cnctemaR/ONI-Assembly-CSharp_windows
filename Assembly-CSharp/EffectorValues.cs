@@ -25,11 +25,16 @@ public struct EffectorValues
 
 	public static bool operator ==(EffectorValues lhs, EffectorValues rhs)
 	{
+		bool flag;
 		if (object.ReferenceEquals(lhs, null))
 		{
-			return object.ReferenceEquals(rhs, null);
+			flag = object.ReferenceEquals(rhs, null);
 		}
-		return lhs.Equals(rhs);
+		else
+		{
+			flag = lhs.Equals(rhs);
+		}
+		return flag;
 	}
 
 	public static bool operator !=(EffectorValues lhs, EffectorValues rhs)

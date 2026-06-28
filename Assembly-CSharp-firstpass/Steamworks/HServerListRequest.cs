@@ -25,11 +25,6 @@ namespace Steamworks
 			return this.m_HServerListRequest.GetHashCode();
 		}
 
-		public bool Equals(HServerListRequest other)
-		{
-			return this.m_HServerListRequest == other.m_HServerListRequest;
-		}
-
 		public static bool operator ==(HServerListRequest x, HServerListRequest y)
 		{
 			return x.m_HServerListRequest == y.m_HServerListRequest;
@@ -48,6 +43,11 @@ namespace Steamworks
 		public static explicit operator IntPtr(HServerListRequest that)
 		{
 			return that.m_HServerListRequest;
+		}
+
+		public bool Equals(HServerListRequest other)
+		{
+			return this.m_HServerListRequest == other.m_HServerListRequest;
 		}
 
 		public static readonly HServerListRequest Invalid = new HServerListRequest(IntPtr.Zero);

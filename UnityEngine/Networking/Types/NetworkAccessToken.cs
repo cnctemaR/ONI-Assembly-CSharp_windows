@@ -16,7 +16,14 @@ namespace UnityEngine.Networking.Types
 
 		public NetworkAccessToken(string strArray)
 		{
-			this.array = Convert.FromBase64String(strArray);
+			try
+			{
+				this.array = Convert.FromBase64String(strArray);
+			}
+			catch (Exception)
+			{
+				this.array = new byte[64];
+			}
 		}
 
 		public string GetByteString()
@@ -26,18 +33,23 @@ namespace UnityEngine.Networking.Types
 
 		public bool IsValid()
 		{
+			bool flag;
 			if (this.array == null || this.array.Length != 64)
 			{
-				return false;
+				flag = false;
 			}
-			bool flag = false;
-			foreach (byte b in this.array)
+			else
 			{
-				if (b != 0)
+				bool flag2 = false;
+				foreach (byte b in this.array)
 				{
-					flag = true;
-					break;
+					if (b != 0)
+					{
+						flag2 = true;
+						break;
+					}
 				}
+				flag = flag2;
 			}
 			return flag;
 		}

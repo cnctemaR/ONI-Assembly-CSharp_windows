@@ -102,11 +102,11 @@ public class SkinInfectionMonitor : GameStateMachine<SkinInfectionMonitor, SkinI
 			return diseaseIdx != byte.MaxValue;
 		}
 
-		private const float INTERACT_INTERVAL = 1f;
-
 		private PrimaryElement primaryElement;
 
 		private ImmuneSystemMonitor.Instance immuneSystemMonitor;
+
+		private const float INTERACT_INTERVAL = 1f;
 
 		private float lastInteractTime = float.NegativeInfinity;
 

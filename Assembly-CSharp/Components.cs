@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Klei.AI;
 
 public class Components
 {
@@ -27,6 +26,8 @@ public class Components
 
 	public static Components.Cmps<Ladder> Ladders = new Components.Cmps<Ladder>();
 
+	public static Components.Cmps<CreatureLure> Lures = new Components.Cmps<CreatureLure>();
+
 	public static Components.Cmps<Light2D> Light2Ds = new Components.Cmps<Light2D>();
 
 	public static Components.Cmps<Edible> Edibles = new Components.Cmps<Edible>();
@@ -38,8 +39,6 @@ public class Components
 	public static Components.Cmps<Harvestable> Harvestables = new Components.Cmps<Harvestable>();
 
 	public static Components.Cmps<Uprootable> Uprootables = new Components.Cmps<Uprootable>();
-
-	public static Components.Cmps<Modifiers> Modifiers = new Components.Cmps<Modifiers>();
 
 	public static Components.Cmps<Health> Health = new Components.Cmps<Health>();
 
@@ -65,16 +64,17 @@ public class Components
 
 	public static Components.Cmps<HandSanitizer> HandSanitizers = new Components.Cmps<HandSanitizer>();
 
-	public class Cmps<T> : IEnumerable, IEnumerable<T>
+	public static Components.Cmps<AutoDisinfectable> AutoDisinfectables = new Components.Cmps<AutoDisinfectable>();
+
+	public static Components.Cmps<WiltCondition> WiltConditions = new Components.Cmps<WiltCondition>();
+
+	public static Components.Cmps<BuildingCellVisualizer> BuildingCellVisualizers = new Components.Cmps<BuildingCellVisualizer>();
+
+	public class Cmps<T> : IEnumerable<T>, IEnumerable
 	{
 		public Cmps()
 		{
 			App.OnPreLoadScene = (global::System.Action)Delegate.Combine(App.OnPreLoadScene, new global::System.Action(this.Clear));
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.GetEnumerator();
 		}
 
 		public int Count
@@ -96,6 +96,11 @@ public class Components
 			{
 				return this.Items[idx];
 			}
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return this.GetEnumerator();
 		}
 
 		private void Clear()
@@ -139,7 +144,7 @@ public class Components
 			this.OnRemove = (Action<T>)Delegate.Remove(this.OnRemove, on_remove);
 		}
 
-		private List<T> Items = new List<T>();
+		public List<T> Items = new List<T>();
 
 		public Action<T> OnAdd;
 

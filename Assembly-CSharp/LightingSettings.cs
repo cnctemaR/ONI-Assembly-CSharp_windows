@@ -64,8 +64,6 @@ public class LightingSettings : ScriptableObject
 
 	public float WaterWaveSpeed2;
 
-	public Texture WaterCubeMap;
-
 	public float WaterCubeMapScale;
 
 	public float WaterColorScale;

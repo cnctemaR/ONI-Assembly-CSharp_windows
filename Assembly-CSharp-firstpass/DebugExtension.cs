@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using UnityEngine;
 
 public static class DebugExtension
@@ -56,7 +55,7 @@ public static class DebugExtension
 		DebugExtension.DebugBounds(bounds, Color.white, duration, depthTest);
 	}
 
-	public static void DebugLocalCube(Transform transform, Vector3 size, Color color, [Optional] Vector3 center, float duration = 0f, bool depthTest = true)
+	public static void DebugLocalCube(Transform transform, Vector3 size, Color color, Vector3 center = default(Vector3), float duration = 0f, bool depthTest = true)
 	{
 		Vector3 vector = transform.TransformPoint(center + -size * 0.5f);
 		Vector3 vector2 = transform.TransformPoint(center + new Vector3(size.x, -size.y, -size.z) * 0.5f);
@@ -68,12 +67,12 @@ public static class DebugExtension
 		Vector3 vector8 = transform.TransformPoint(center + new Vector3(-size.x, size.y, size.z) * 0.5f);
 	}
 
-	public static void DebugLocalCube(Transform transform, Vector3 size, [Optional] Vector3 center, float duration = 0f, bool depthTest = true)
+	public static void DebugLocalCube(Transform transform, Vector3 size, Vector3 center = default(Vector3), float duration = 0f, bool depthTest = true)
 	{
 		DebugExtension.DebugLocalCube(transform, size, Color.white, center, duration, depthTest);
 	}
 
-	public static void DebugLocalCube(Matrix4x4 space, Vector3 size, Color color, [Optional] Vector3 center, float duration = 0f, bool depthTest = true)
+	public static void DebugLocalCube(Matrix4x4 space, Vector3 size, Color color, Vector3 center = default(Vector3), float duration = 0f, bool depthTest = true)
 	{
 		color = ((!(color == default(Color))) ? color : Color.white);
 		Vector3 vector = space.MultiplyPoint3x4(center + -size * 0.5f);
@@ -86,7 +85,7 @@ public static class DebugExtension
 		Vector3 vector8 = space.MultiplyPoint3x4(center + new Vector3(-size.x, size.y, size.z) * 0.5f);
 	}
 
-	public static void DebugLocalCube(Matrix4x4 space, Vector3 size, [Optional] Vector3 center, float duration = 0f, bool depthTest = true)
+	public static void DebugLocalCube(Matrix4x4 space, Vector3 size, Vector3 center = default(Vector3), float duration = 0f, bool depthTest = true)
 	{
 		DebugExtension.DebugLocalCube(space, size, Color.white, center, duration, depthTest);
 	}
@@ -291,7 +290,7 @@ public static class DebugExtension
 		DebugExtension.DrawBounds(bounds, Color.white);
 	}
 
-	public static void DrawLocalCube(Transform transform, Vector3 size, Color color, [Optional] Vector3 center)
+	public static void DrawLocalCube(Transform transform, Vector3 size, Color color, Vector3 center = default(Vector3))
 	{
 		Color color2 = Gizmos.color;
 		Gizmos.color = color;
@@ -318,12 +317,12 @@ public static class DebugExtension
 		Gizmos.color = color2;
 	}
 
-	public static void DrawLocalCube(Transform transform, Vector3 size, [Optional] Vector3 center)
+	public static void DrawLocalCube(Transform transform, Vector3 size, Vector3 center = default(Vector3))
 	{
 		DebugExtension.DrawLocalCube(transform, size, Color.white, center);
 	}
 
-	public static void DrawLocalCube(Matrix4x4 space, Vector3 size, Color color, [Optional] Vector3 center)
+	public static void DrawLocalCube(Matrix4x4 space, Vector3 size, Color color, Vector3 center = default(Vector3))
 	{
 		Color color2 = Gizmos.color;
 		Gizmos.color = color;
@@ -350,7 +349,7 @@ public static class DebugExtension
 		Gizmos.color = color2;
 	}
 
-	public static void DrawLocalCube(Matrix4x4 space, Vector3 size, [Optional] Vector3 center)
+	public static void DrawLocalCube(Matrix4x4 space, Vector3 size, Vector3 center = default(Vector3))
 	{
 		DebugExtension.DrawLocalCube(space, size, Color.white, center);
 	}
@@ -549,7 +548,7 @@ public static class DebugExtension
 
 	public static string MethodsOfObject(object obj, bool includeInfo = false)
 	{
-		string text = string.Empty;
+		string text = "";
 		MethodInfo[] methods = obj.GetType().GetMethods();
 		for (int i = 0; i < methods.Length; i++)
 		{
@@ -567,7 +566,7 @@ public static class DebugExtension
 
 	public static string MethodsOfType(Type type, bool includeInfo = false)
 	{
-		string text = string.Empty;
+		string text = "";
 		MethodInfo[] methods = type.GetMethods();
 		for (int i = 0; i < methods.Length; i++)
 		{

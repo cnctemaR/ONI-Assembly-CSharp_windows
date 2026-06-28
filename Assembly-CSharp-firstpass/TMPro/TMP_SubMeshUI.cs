@@ -5,7 +5,7 @@ using UnityEngine.UI;
 namespace TMPro
 {
 	[ExecuteInEditMode]
-	public class TMP_SubMeshUI : MaskableGraphic, IMaskable, IClippable, IMaterialModifier, ITextElement
+	public class TMP_SubMeshUI : MaskableGraphic, ITextElement, IClippable, IMaskable, IMaterialModifier
 	{
 		public TMP_FontAsset fontAsset
 		{
@@ -35,11 +35,16 @@ namespace TMPro
 		{
 			get
 			{
+				Texture texture;
 				if (this.sharedMaterial != null)
 				{
-					return this.sharedMaterial.mainTexture;
+					texture = this.sharedMaterial.mainTexture;
 				}
-				return null;
+				else
+				{
+					texture = null;
+				}
+				return texture;
 			}
 		}
 
@@ -51,15 +56,14 @@ namespace TMPro
 			}
 			set
 			{
-				if (this.m_sharedMaterial != null && this.m_sharedMaterial.GetInstanceID() == value.GetInstanceID())
+				if (!(this.m_sharedMaterial != null) || this.m_sharedMaterial.GetInstanceID() != value.GetInstanceID())
 				{
-					return;
+					this.m_material = value;
+					this.m_sharedMaterial = value;
+					this.m_padding = this.GetPaddingForMaterial();
+					this.SetVerticesDirty();
+					this.SetMaterialDirty();
 				}
-				this.m_material = value;
-				this.m_sharedMaterial = value;
-				this.m_padding = this.GetPaddingForMaterial();
-				this.SetVerticesDirty();
-				this.SetMaterialDirty();
 			}
 		}
 
@@ -79,11 +83,16 @@ namespace TMPro
 		{
 			get
 			{
+				Material material;
 				if (this.m_sharedMaterial == null)
 				{
-					return null;
+					material = null;
 				}
-				return this.GetModifiedMaterial(this.m_sharedMaterial);
+				else
+				{
+					material = this.GetModifiedMaterial(this.m_sharedMaterial);
+				}
+				return material;
 			}
 		}
 
@@ -209,13 +218,12 @@ namespace TMPro
 
 		protected override void OnTransformParentChanged()
 		{
-			if (!this.IsActive())
+			if (this.IsActive())
 			{
-				return;
+				this.m_ShouldRecalculateStencil = true;
+				this.RecalculateClipping();
+				this.RecalculateMasking();
 			}
-			this.m_ShouldRecalculateStencil = true;
-			this.RecalculateClipping();
-			this.RecalculateMasking();
 		}
 
 		public override Material GetModifiedMaterial(Material baseMaterial)
@@ -259,14 +267,13 @@ namespace TMPro
 
 		public override void SetVerticesDirty()
 		{
-			if (!this.IsActive())
+			if (this.IsActive())
 			{
-				return;
-			}
-			if (this.m_TextComponent != null)
-			{
-				this.m_TextComponent.havePropertiesChanged = true;
-				this.m_TextComponent.SetVerticesDirty();
+				if (this.m_TextComponent != null)
+				{
+					this.m_TextComponent.havePropertiesChanged = true;
+					this.m_TextComponent.SetVerticesDirty();
+				}
 			}
 		}
 
@@ -282,11 +289,10 @@ namespace TMPro
 
 		public void SetPivotDirty()
 		{
-			if (!this.IsActive())
+			if (this.IsActive())
 			{
-				return;
+				base.rectTransform.pivot = this.m_TextComponent.rectTransform.pivot;
 			}
-			base.rectTransform.pivot = this.m_TextComponent.rectTransform.pivot;
 		}
 
 		protected override void UpdateGeometry()
@@ -297,12 +303,11 @@ namespace TMPro
 		{
 			if (update == CanvasUpdate.PreRender)
 			{
-				if (!this.m_materialDirty)
+				if (this.m_materialDirty)
 				{
-					return;
+					this.UpdateMaterial();
+					this.m_materialDirty = false;
 				}
-				this.UpdateMaterial();
-				this.m_materialDirty = false;
 			}
 		}
 
@@ -377,7 +382,7 @@ namespace TMPro
 			this.SetMaterialDirty();
 		}
 
-		virtual int TMPro.ITextElement.GetInstanceID()
+		int ITextElement.GetInstanceID()
 		{
 			return base.GetInstanceID();
 		}

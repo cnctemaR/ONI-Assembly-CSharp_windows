@@ -10,7 +10,7 @@ public class EventBase : Resource
 
 	public virtual string GetDescription(EventInstanceBase ev)
 	{
-		return string.Empty;
+		return "";
 	}
 
 	public int hash;

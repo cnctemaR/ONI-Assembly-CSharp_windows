@@ -13,7 +13,7 @@ public class EquipmentConfigManager : KMonoBehaviour
 	public void RegisterEquipment(IEquipmentConfig config)
 	{
 		EquipmentDef equipmentDef = config.CreateEquipmentDef();
-		GameObject gameObject = EntityTemplates.CreateLooseEntity(equipmentDef.Id, equipmentDef.Name, equipmentDef.RecipeDescription, equipmentDef.Mass, true, equipmentDef.Anim, "object", Grid.SceneLayer.Use, equipmentDef.CollisionShape, equipmentDef.width, equipmentDef.height, true, equipmentDef.OutputElement, null);
+		GameObject gameObject = EntityTemplates.CreateLooseEntity(equipmentDef.Id, equipmentDef.Name, equipmentDef.RecipeDescription, equipmentDef.Mass, true, equipmentDef.Anim, "object", Grid.SceneLayer.Ore, equipmentDef.CollisionShape, equipmentDef.width, equipmentDef.height, true, equipmentDef.OutputElement, null);
 		Equippable equippable = gameObject.AddComponent<Equippable>();
 		equippable.def = equipmentDef;
 		EquipmentSlot equipmentSlot = EquipmentSet.Get().slotSet.Get(equipmentDef.Slot);
@@ -25,8 +25,9 @@ public class EquipmentConfigManager : KMonoBehaviour
 
 	private void LoadRecipe(EquipmentDef def, Equippable equippable)
 	{
+		string id = def.Id;
 		string recipeDescription = def.RecipeDescription;
-		Recipe recipe = new Recipe(def.Id, 1f, (SimHashes)0, null, recipeDescription, 0).SetFabricator(def.FabricatorId, def.FabricationTime);
+		Recipe recipe = new Recipe(id, 1f, (SimHashes)0, null, recipeDescription, 0).SetFabricator(def.FabricatorId, def.FabricationTime);
 		foreach (KeyValuePair<string, float> keyValuePair in def.InputElementMassMap)
 		{
 			recipe.AddIngredient(new Recipe.Ingredient(keyValuePair.Key, keyValuePair.Value));

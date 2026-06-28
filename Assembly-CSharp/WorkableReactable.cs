@@ -12,43 +12,57 @@ public class WorkableReactable : Reactable
 
 	public override bool InternalCanBegin(GameObject new_reactor, Navigator.ActiveTransition transition)
 	{
+		bool flag;
 		if (this.workable == null)
 		{
-			return false;
+			flag = false;
 		}
-		if (this.reactor != null)
+		else if (this.reactor != null)
 		{
-			return false;
+			flag = false;
 		}
-		Brain component = new_reactor.GetComponent<Brain>();
-		if (component == null)
+		else
 		{
-			return false;
+			Brain component = new_reactor.GetComponent<Brain>();
+			if (component == null)
+			{
+				flag = false;
+			}
+			else if (!component.IsRunning())
+			{
+				flag = false;
+			}
+			else
+			{
+				Navigator component2 = new_reactor.GetComponent<Navigator>();
+				if (component2 == null)
+				{
+					flag = false;
+				}
+				else if (!component2.IsMoving())
+				{
+					flag = false;
+				}
+				else if (this.allowedDirection == WorkableReactable.AllowedDirection.Any)
+				{
+					flag = true;
+				}
+				else
+				{
+					Facing component3 = new_reactor.GetComponent<Facing>();
+					if (component3 == null)
+					{
+						flag = false;
+					}
+					else
+					{
+						bool facing = component3.GetFacing();
+						flag = (!facing || this.allowedDirection != WorkableReactable.AllowedDirection.Right) && (facing || this.allowedDirection != WorkableReactable.AllowedDirection.Left);
+					}
+				}
+			}
 		}
-		if (!component.IsRunning())
-		{
-			return false;
-		}
-		Navigator component2 = new_reactor.GetComponent<Navigator>();
-		if (component2 == null)
-		{
-			return false;
-		}
-		if (!component2.IsMoving())
-		{
-			return false;
-		}
-		if (this.allowedDirection == WorkableReactable.AllowedDirection.Any)
-		{
-			return true;
-		}
-		Facing component3 = new_reactor.GetComponent<Facing>();
-		if (component3 == null)
-		{
-			return false;
-		}
-		bool facing = component3.GetFacing();
-		return (!facing || this.allowedDirection != WorkableReactable.AllowedDirection.Right) && (facing || this.allowedDirection != WorkableReactable.AllowedDirection.Left);
+		return flag;
 	}
 
 	protected override void InternalBegin()

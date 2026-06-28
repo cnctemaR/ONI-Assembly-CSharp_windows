@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using FMOD;
 using FMOD.Studio;
 using FMODUnity;
@@ -16,7 +15,7 @@ public class KFMOD : KMonoBehaviour
 		}
 	}
 
-	public static void PlayOneShot(Guid guid, [Optional] Vector3 position)
+	public static void PlayOneShot(Guid guid, Vector3 position = default(Vector3))
 	{
 		Vector3 vector = new Vector3(position.x, position.y, 0f);
 		RuntimeManager.PlayOneShot(guid, vector);
@@ -35,27 +34,35 @@ public class KFMOD : KMonoBehaviour
 
 	public static EventInstance BeginOneShot(string ev, Vector3 position)
 	{
+		EventInstance eventInstance;
 		if (ev == null)
 		{
-			return null;
+			eventInstance = null;
 		}
-		if (App.IsExiting)
+		else if (App.IsExiting)
 		{
-			return null;
+			eventInstance = null;
 		}
-		EventInstance eventInstance = RuntimeManager.CreateInstance(ev);
-		if (eventInstance == null)
+		else
 		{
-			if (KFMODDebugger.instance != null)
+			EventInstance eventInstance2 = RuntimeManager.CreateInstance(ev);
+			if (eventInstance2 == null)
 			{
+				if (KFMODDebugger.instance != null)
+				{
+				}
+				eventInstance = null;
 			}
-			return null;
+			else
+			{
+				Vector3 vector = new Vector3(position.x, position.y, 0f);
+				if (KFMODDebugger.instance != null)
+				{
+				}
+				eventInstance = KFMOD.BeginOneShot(eventInstance2, vector);
+			}
 		}
-		Vector3 vector = new Vector3(position.x, position.y, 0f);
-		if (KFMODDebugger.instance != null)
-		{
-		}
-		return KFMOD.BeginOneShot(eventInstance, vector);
+		return eventInstance;
 	}
 
 	public static EventInstance BeginOneShot(EventInstance instance, Vector3 position)
@@ -69,13 +76,18 @@ public class KFMOD : KMonoBehaviour
 
 	public static bool EndOneShot(EventInstance instance)
 	{
+		bool flag;
 		if (instance != null)
 		{
 			instance.start();
 			instance.release();
-			return true;
+			flag = true;
 		}
-		return false;
+		else
+		{
+			flag = false;
+		}
+		return flag;
 	}
 
 	public static EventInstance CreateInstance(string path)

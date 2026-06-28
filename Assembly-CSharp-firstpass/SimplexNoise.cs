@@ -32,23 +32,28 @@ public class SimplexNoise
 		float num4 = 0.6f - num * num - num2 * num2 - num3 * num3;
 		int num5 = SimplexNoise.shuffle(SimplexNoise.i + SimplexNoise.A[0], SimplexNoise.j + SimplexNoise.A[1], SimplexNoise.k + SimplexNoise.A[2]);
 		SimplexNoise.A[a]++;
+		float num6;
 		if (num4 < 0f)
 		{
-			return 0f;
+			num6 = 0f;
 		}
-		int num6 = (num5 >> 5) & 1;
-		int num7 = (num5 >> 4) & 1;
-		int num8 = (num5 >> 3) & 1;
-		int num9 = (num5 >> 2) & 1;
-		int num10 = num5 & 3;
-		float num11 = ((num10 != 1) ? ((num10 != 2) ? num3 : num2) : num);
-		float num12 = ((num10 != 1) ? ((num10 != 2) ? num : num3) : num2);
-		float num13 = ((num10 != 1) ? ((num10 != 2) ? num2 : num) : num3);
-		num11 = ((num6 != num8) ? num11 : (-num11));
-		num12 = ((num6 != num7) ? num12 : (-num12));
-		num13 = ((num6 == (num7 ^ num8)) ? num13 : (-num13));
-		num4 *= num4;
-		return 8f * num4 * num4 * (num11 + ((num10 != 0) ? ((num9 != 0) ? num13 : num12) : (num12 + num13)));
+		else
+		{
+			int num7 = (num5 >> 5) & 1;
+			int num8 = (num5 >> 4) & 1;
+			int num9 = (num5 >> 3) & 1;
+			int num10 = (num5 >> 2) & 1;
+			int num11 = num5 & 3;
+			float num12 = ((num11 != 1) ? ((num11 != 2) ? num3 : num2) : num);
+			float num13 = ((num11 != 1) ? ((num11 != 2) ? num : num3) : num2);
+			float num14 = ((num11 != 1) ? ((num11 != 2) ? num2 : num) : num3);
+			num12 = ((num7 != num9) ? num12 : (-num12));
+			num13 = ((num7 != num8) ? num13 : (-num13));
+			num14 = ((num7 == (num8 ^ num9)) ? num14 : (-num14));
+			num4 *= num4;
+			num6 = 8f * num4 * num4 * (num12 + ((num11 != 0) ? ((num10 != 0) ? num14 : num13) : (num13 + num14)));
+		}
+		return num6;
 	}
 
 	private static int shuffle(int i, int j, int k)
@@ -66,10 +71,6 @@ public class SimplexNoise
 		return (N >> B) & 1;
 	}
 
-	private const float onethird = 0.33333334f;
-
-	private const float onesixth = 0.16666667f;
-
 	private static int i;
 
 	private static int j;
@@ -85,6 +86,10 @@ public class SimplexNoise
 	private static float w;
 
 	private static float s;
+
+	private const float onethird = 0.33333334f;
+
+	private const float onesixth = 0.16666667f;
 
 	private static int[] T = new int[] { 21, 56, 50, 44, 13, 19, 7, 42 };
 }

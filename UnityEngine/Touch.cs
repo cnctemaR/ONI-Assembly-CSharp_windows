@@ -10,6 +10,10 @@ namespace UnityEngine
 			{
 				return this.m_FingerId;
 			}
+			set
+			{
+				this.m_FingerId = value;
+			}
 		}
 
 		public Vector2 position
@@ -17,6 +21,10 @@ namespace UnityEngine
 			get
 			{
 				return this.m_Position;
+			}
+			set
+			{
+				this.m_Position = value;
 			}
 		}
 
@@ -26,6 +34,10 @@ namespace UnityEngine
 			{
 				return this.m_RawPosition;
 			}
+			set
+			{
+				this.m_RawPosition = value;
+			}
 		}
 
 		public Vector2 deltaPosition
@@ -33,6 +45,10 @@ namespace UnityEngine
 			get
 			{
 				return this.m_PositionDelta;
+			}
+			set
+			{
+				this.m_PositionDelta = value;
 			}
 		}
 
@@ -42,6 +58,10 @@ namespace UnityEngine
 			{
 				return this.m_TimeDelta;
 			}
+			set
+			{
+				this.m_TimeDelta = value;
+			}
 		}
 
 		public int tapCount
@@ -49,6 +69,10 @@ namespace UnityEngine
 			get
 			{
 				return this.m_TapCount;
+			}
+			set
+			{
+				this.m_TapCount = value;
 			}
 		}
 
@@ -58,6 +82,10 @@ namespace UnityEngine
 			{
 				return this.m_Phase;
 			}
+			set
+			{
+				this.m_Phase = value;
+			}
 		}
 
 		public float pressure
@@ -65,6 +93,10 @@ namespace UnityEngine
 			get
 			{
 				return this.m_Pressure;
+			}
+			set
+			{
+				this.m_Pressure = value;
 			}
 		}
 
@@ -74,6 +106,10 @@ namespace UnityEngine
 			{
 				return this.m_maximumPossiblePressure;
 			}
+			set
+			{
+				this.m_maximumPossiblePressure = value;
+			}
 		}
 
 		public TouchType type
@@ -81,6 +117,10 @@ namespace UnityEngine
 			get
 			{
 				return this.m_Type;
+			}
+			set
+			{
+				this.m_Type = value;
 			}
 		}
 
@@ -90,6 +130,10 @@ namespace UnityEngine
 			{
 				return this.m_AltitudeAngle;
 			}
+			set
+			{
+				this.m_AltitudeAngle = value;
+			}
 		}
 
 		public float azimuthAngle
@@ -97,6 +141,10 @@ namespace UnityEngine
 			get
 			{
 				return this.m_AzimuthAngle;
+			}
+			set
+			{
+				this.m_AzimuthAngle = value;
 			}
 		}
 
@@ -106,6 +154,10 @@ namespace UnityEngine
 			{
 				return this.m_Radius;
 			}
+			set
+			{
+				this.m_Radius = value;
+			}
 		}
 
 		public float radiusVariance
@@ -113,6 +165,10 @@ namespace UnityEngine
 			get
 			{
 				return this.m_RadiusVariance;
+			}
+			set
+			{
+				this.m_RadiusVariance = value;
 			}
 		}
 

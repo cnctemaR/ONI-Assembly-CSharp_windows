@@ -23,11 +23,16 @@ namespace Klei.AI
 		public AttributeConverterInstance Lookup(GameObject go)
 		{
 			AttributeConverters component = go.GetComponent<AttributeConverters>();
+			AttributeConverterInstance attributeConverterInstance;
 			if (component != null)
 			{
-				return component.Get(this);
+				attributeConverterInstance = component.Get(this);
 			}
-			return null;
+			else
+			{
+				attributeConverterInstance = null;
+			}
+			return attributeConverterInstance;
 		}
 
 		public string description;

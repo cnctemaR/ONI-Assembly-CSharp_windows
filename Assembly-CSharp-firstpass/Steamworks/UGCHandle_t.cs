@@ -25,16 +25,6 @@ namespace Steamworks
 			return this.m_UGCHandle.GetHashCode();
 		}
 
-		public bool Equals(UGCHandle_t other)
-		{
-			return this.m_UGCHandle == other.m_UGCHandle;
-		}
-
-		public int CompareTo(UGCHandle_t other)
-		{
-			return this.m_UGCHandle.CompareTo(other.m_UGCHandle);
-		}
-
 		public static bool operator ==(UGCHandle_t x, UGCHandle_t y)
 		{
 			return x.m_UGCHandle == y.m_UGCHandle;
@@ -53,6 +43,16 @@ namespace Steamworks
 		public static explicit operator ulong(UGCHandle_t that)
 		{
 			return that.m_UGCHandle;
+		}
+
+		public bool Equals(UGCHandle_t other)
+		{
+			return this.m_UGCHandle == other.m_UGCHandle;
+		}
+
+		public int CompareTo(UGCHandle_t other)
+		{
+			return this.m_UGCHandle.CompareTo(other.m_UGCHandle);
 		}
 
 		public static readonly UGCHandle_t Invalid = new UGCHandle_t(ulong.MaxValue);

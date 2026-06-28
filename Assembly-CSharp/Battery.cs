@@ -5,9 +5,9 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-[DebuggerDisplay("{name}")]
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Battery : KMonoBehaviour, IEnergyConsumer, IEnergyProducer, IEffectDescriptor
+[DebuggerDisplay("{name}")]
+public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEnergyProducer
 {
 	public float WattsUsed { get; private set; }
 
@@ -92,7 +92,7 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEnergyProducer, IEffect
 		Components.Batteries.Add(this);
 		Building component = base.GetComponent<Building>();
 		this.PowerCell = component.GetPowerInputCell();
-		this.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 		this.OnOperationalChanged(null);
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
 		Game.Instance.circuitManager.Connect(this);
@@ -119,7 +119,7 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEnergyProducer, IEffect
 		base.OnCleanUp();
 	}
 
-	private void SimUpdate(float dt)
+	protected void SimUpdate(float dt)
 	{
 		this.dt = dt;
 		this.joulesConsumed = 0f;
@@ -180,7 +180,7 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEnergyProducer, IEffect
 		descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.REQUIRESPOWERGENERATOR, UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESPOWERGENERATOR, Descriptor.DescriptorType.Requirement);
 		list.Add(descriptor);
 		Descriptor descriptor2 = default(Descriptor);
-		string text = string.Format(UI.BUILDINGEFFECTS.BATTERYEFFECT, GameUtil.GetFormattedJoules(this.capacity, string.Empty));
+		string text = string.Format(UI.BUILDINGEFFECTS.BATTERYEFFECT, GameUtil.GetFormattedJoules(this.capacity, ""));
 		descriptor2.SetupDescriptor(text, text, Descriptor.DescriptorType.Effect);
 		list.Add(descriptor2);
 		return list;
@@ -206,5 +206,5 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEnergyProducer, IEffect
 
 	private float dt;
 
-	private float joulesConsumed;
+	private float joulesConsumed = 0f;
 }

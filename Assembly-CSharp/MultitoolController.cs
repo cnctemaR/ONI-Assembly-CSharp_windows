@@ -27,19 +27,7 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 
 	public static string[] GetAnimationStrings(Workable workable, Worker worker, string toolString = "dig")
 	{
-		bool flag = Grid.PosToCell(workable) == Grid.PosToCell(worker);
-		if (flag)
-		{
-			string[] array = new string[] { "build_in_place_pre", "build_in_place_loop" };
-			if (toolString != string.Empty)
-			{
-				for (int i = 0; i < array.Length; i++)
-				{
-					array[i] = array[i].Replace("build", toolString);
-				}
-			}
-		}
-		string[][][] array2 = new string[][][]
+		string[][][] array = new string[][][]
 		{
 			new string[][]
 			{
@@ -71,13 +59,13 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 		{
 			toolString = "dig";
 		}
-		foreach (string[][] array4 in array2)
+		foreach (string[][] array3 in array)
 		{
-			foreach (string[] array6 in array4)
+			foreach (string[] array5 in array3)
 			{
-				for (int l = 0; l < array6.Length; l++)
+				for (int k = 0; k < array5.Length; k++)
 				{
-					array6[l] = array6[l].Replace("{verb}", toolString);
+					array5[k] = array5[k].Replace("{verb}", toolString);
 				}
 			}
 		}
@@ -88,11 +76,12 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 		Vector2 normalized = vector.normalized;
 		float num = Vector2.Angle(new Vector2(0f, -1f), normalized);
 		float num2 = Mathf.Lerp(0f, 1f, num / 180f);
-		int num3 = array2.Length;
+		int num3 = array.Length;
 		int num4 = (int)(num2 * (float)num3);
 		num4 = Math.Min(num4, num3 - 1);
-		int num5 = ((worker.GetComponent<Navigator>().CurrentNavType != NavType.Ladder) ? 0 : 1);
-		return array2[num4][num5];
+		NavType currentNavType = worker.GetComponent<Navigator>().CurrentNavType;
+		int num5 = ((currentNavType != NavType.Ladder && currentNavType != NavType.Pole) ? 0 : 1);
+		return array[num4][num5];
 	}
 
 	private static void GetTargetPoints(Workable workable, Worker worker, out Vector3 source, out Vector3 target)
@@ -138,48 +127,45 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 
 		public void UpdateHitEffectTarget()
 		{
-			if (this.hitEffect == null)
+			if (!(this.hitEffect == null))
 			{
-				return;
+				Workable workable = base.sm.workable.Get<Workable>(base.smi);
+				Worker worker = base.sm.worker.Get<Worker>(base.smi);
+				AnimEventHandler component = worker.GetComponent<AnimEventHandler>();
+				Vector3 targetPoint = workable.GetTargetPoint();
+				worker.GetComponent<Facing>().Face(workable.transform.position);
+				this.anims = MultitoolController.GetAnimationStrings(workable, worker, "dig");
+				this.PlayLoop();
+				component.SetTargetPos(targetPoint);
+				component.UpdateWorkTarget(workable.GetTargetPoint());
+				this.hitEffect.transform.position = targetPoint;
 			}
-			Workable workable = base.sm.workable.Get<Workable>(base.smi);
-			Worker worker = base.sm.worker.Get<Worker>(base.smi);
-			AnimEventHandler component = worker.GetComponent<AnimEventHandler>();
-			Vector3 targetPoint = workable.GetTargetPoint();
-			worker.GetComponent<Facing>().Face(workable.transform.position);
-			this.anims = MultitoolController.GetAnimationStrings(workable, worker, "dig");
-			this.PlayLoop();
-			component.SetTargetPos(targetPoint);
-			component.UpdateWorkTarget(workable.GetTargetPoint());
-			this.hitEffect.transform.position = targetPoint;
 		}
 
 		public void CreateHitEffect()
 		{
 			Worker worker = base.sm.worker.Get<Worker>(base.smi);
 			Workable workable = base.sm.workable.Get<Workable>(base.smi);
-			if (worker == null || workable == null)
+			if (!(worker == null) && !(workable == null))
 			{
-				return;
+				if (Grid.PosToCell(workable) != Grid.PosToCell(worker))
+				{
+					worker.Trigger(-673283254, null);
+				}
+				worker.Trigger(-1762453998, null);
+				if (!(this.hitEffectPrefab == null))
+				{
+					if (this.hitEffect != null)
+					{
+						this.DestroyHitEffect();
+					}
+					AnimEventHandler component = worker.GetComponent<AnimEventHandler>();
+					Vector3 targetPoint = workable.GetTargetPoint();
+					component.SetTargetPos(targetPoint);
+					this.hitEffect = GameUtil.KInstantiate(this.hitEffectPrefab, targetPoint, Grid.SceneLayer.FXFront2, Folder.FX, null, 0);
+					component.UpdateWorkTarget(workable.GetTargetPoint());
+				}
 			}
-			if (Grid.PosToCell(workable) != Grid.PosToCell(worker))
-			{
-				worker.Trigger(-673283254, null);
-			}
-			worker.Trigger(-1762453998, null);
-			if (this.hitEffectPrefab == null)
-			{
-				return;
-			}
-			if (this.hitEffect != null)
-			{
-				this.DestroyHitEffect();
-			}
-			AnimEventHandler component = worker.GetComponent<AnimEventHandler>();
-			Vector3 targetPoint = workable.GetTargetPoint();
-			component.SetTargetPos(targetPoint);
-			this.hitEffect = GameUtil.KInstantiate(this.hitEffectPrefab, targetPoint, Grid.SceneLayer.FXFront2, Folder.FX, null, 0);
-			component.UpdateWorkTarget(workable.GetTargetPoint());
 		}
 
 		public void DestroyHitEffect()
@@ -190,15 +176,13 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 				worker.Trigger(-1559999068, null);
 				worker.Trigger(939543986, null);
 			}
-			if (this.hitEffectPrefab == null)
+			if (!(this.hitEffectPrefab == null))
 			{
-				return;
+				if (!(this.hitEffect == null))
+				{
+					this.hitEffect.DeleteObject();
+				}
 			}
-			if (this.hitEffect == null)
-			{
-				return;
-			}
-			this.hitEffect.DeleteObject();
 		}
 
 		private GameObject hitEffectPrefab;

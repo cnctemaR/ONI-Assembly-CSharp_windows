@@ -112,13 +112,18 @@ namespace VoronoiTree
 		{
 			get
 			{
+				Vector2 vector;
 				if (this.poly != null)
 				{
-					return this.poly.Centroid();
+					vector = this.poly.Centroid();
 				}
-				Vector2? vector = this.centroid;
-				this.centroid = new Vector2?((vector == null) ? this.GetCentroid() : vector.Value);
-				return this.centroid.Value;
+				else
+				{
+					Vector2? vector2 = this.centroid;
+					this.centroid = new Vector2?((vector2 == null) ? this.GetCentroid() : vector2.Value);
+					vector = this.centroid.Value;
+				}
+				return vector;
 			}
 		}
 
@@ -135,10 +140,10 @@ namespace VoronoiTree
 		public Vector2 position;
 
 		[Serialize]
-		public Polygon poly;
+		public Polygon poly = null;
 
 		[Serialize]
-		public List<Site> neighbours;
+		public List<Site> neighbours = null;
 
 		private Vector2? circumCenter;
 

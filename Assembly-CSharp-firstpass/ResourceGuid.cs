@@ -2,7 +2,7 @@
 using KSerialization;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class ResourceGuid : ISaveLoadable, IEquatable<ResourceGuid>
+public class ResourceGuid : IEquatable<ResourceGuid>, ISaveLoadable
 {
 	public ResourceGuid(string id, Resource parent = null)
 	{
@@ -32,11 +32,6 @@ public class ResourceGuid : ISaveLoadable, IEquatable<ResourceGuid>
 		return this.Guid == other.Guid;
 	}
 
-	public override string ToString()
-	{
-		return this.Guid;
-	}
-
 	public static bool operator ==(ResourceGuid a, ResourceGuid b)
 	{
 		return a == b || (a != null && b != null && a.Guid == b.Guid);
@@ -45,6 +40,11 @@ public class ResourceGuid : ISaveLoadable, IEquatable<ResourceGuid>
 	public static bool operator !=(ResourceGuid a, ResourceGuid b)
 	{
 		return a != b && (a == null || b == null || a.Guid != b.Guid);
+	}
+
+	public override string ToString()
+	{
+		return this.Guid;
 	}
 
 	[Serialize]

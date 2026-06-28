@@ -30,22 +30,14 @@ public class FlowUtilityNetwork : UtilityNetwork
 					global::UnityEngine.Debug.Assert(false, "wtf");
 					item.Network = this;
 				}
-				else
+				else if (!this.sinks.Contains(item))
 				{
-					if (this.sinks.Contains(item))
-					{
-						return;
-					}
 					this.sinks.Add(item);
 					item.Network = this;
 				}
 			}
-			else
+			else if (!this.sources.Contains(item))
 			{
-				if (this.sources.Contains(item))
-				{
-					return;
-				}
 				this.sources.Add(item);
 				item.Network = this;
 			}

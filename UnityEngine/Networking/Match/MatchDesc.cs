@@ -4,7 +4,7 @@ using UnityEngine.Networking.Types;
 
 namespace UnityEngine.Networking.Match
 {
-	public class MatchDesc : ResponseBase
+	internal class MatchDesc : ResponseBase
 	{
 		public NetworkID networkId { get; set; }
 
@@ -26,7 +26,7 @@ namespace UnityEngine.Networking.Match
 
 		public override string ToString()
 		{
-			return UnityString.Format("[{0}]-networkId:0x{1},name:{2},averageEloScore:{3},maxSize:{4},currentSize:{5},isPrivate:{6},matchAttributes.Count:{7},directConnectInfos.Count:{8}", new object[]
+			return UnityString.Format("[{0}]-networkId:0x{1},name:{2},averageEloScore:{3},maxSize:{4},currentSize:{5},isPrivate:{6},matchAttributes.Count:{7},hostNodeId:{8},directConnectInfos.Count:{9}", new object[]
 			{
 				base.ToString(),
 				this.networkId.ToString("X"),
@@ -36,6 +36,7 @@ namespace UnityEngine.Networking.Match
 				this.currentSize,
 				this.isPrivate,
 				(this.matchAttributes != null) ? this.matchAttributes.Count : 0,
+				this.hostNodeId,
 				this.directConnectInfos.Count
 			});
 		}
@@ -47,9 +48,11 @@ namespace UnityEngine.Networking.Match
 			{
 				this.networkId = (NetworkID)base.ParseJSONUInt64("networkId", obj, dictionary);
 				this.name = base.ParseJSONString("name", obj, dictionary);
+				this.averageEloScore = base.ParseJSONInt32("averageEloScore", obj, dictionary);
 				this.maxSize = base.ParseJSONInt32("maxSize", obj, dictionary);
 				this.currentSize = base.ParseJSONInt32("currentSize", obj, dictionary);
 				this.isPrivate = base.ParseJSONBool("isPrivate", obj, dictionary);
+				this.hostNodeId = (NodeID)base.ParseJSONUInt16("hostNodeId", obj, dictionary);
 				this.directConnectInfos = base.ParseJSONList<MatchDirectConnectInfo>("directConnectInfos", obj, dictionary);
 				return;
 			}

@@ -11,12 +11,11 @@ public class CellSolidFilterEvent : CellEvent
 	[Conditional("UNITY_EDITOR")]
 	public void Log(int cell, bool solid)
 	{
-		if (!this.enableLogging)
+		if (this.enableLogging)
 		{
-			return;
+			CellEventInstance cellEventInstance = new CellEventInstance(cell, (!solid) ? 0 : 1, 0, this);
+			CellEventLogger.Instance.Add(cellEventInstance);
 		}
-		CellEventInstance cellEventInstance = new CellEventInstance(cell, (!solid) ? 0 : 1, 0, this);
-		CellEventLogger.Instance.Add(cellEventInstance);
 	}
 
 	public override string GetDescription(EventInstanceBase ev)

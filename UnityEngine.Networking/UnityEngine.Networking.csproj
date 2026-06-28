@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{89ABFE56-005D-4990-BBAC-1168CE6EF75D}</ProjectGuid>
+    <ProjectGuid>{3998EC71-0E68-4D4A-9831-1FACB48DCCB5}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.Networking</RootNamespace>
     <AssemblyName>UnityEngine.Networking</AssemblyName>
@@ -23,6 +23,7 @@
     <Compile Include="ClientScene.cs" />
     <Compile Include="CommandAttribute.cs" />
     <Compile Include="ConnectionArray.cs" />
+    <Compile Include="DotNetCompatibility.cs" />
     <Compile Include="FloatConversion.cs" />
     <Compile Include="LocalClient.cs" />
     <Compile Include="LogFilter.cs" />
@@ -100,6 +101,8 @@
     <Compile Include="SyncListStruct.cs" />
     <Compile Include="SyncListUInt.cs" />
     <Compile Include="SyncVarAttribute.cs" />
+    <Compile Include="TargetRpcAttribute.cs" />
+    <Compile Include="UIntDecimal.cs" />
     <Compile Include="UIntFloat.cs" />
     <Compile Include="ULocalConnectionToClient.cs" />
     <Compile Include="ULocalConnectionToServer.cs" />
@@ -108,19 +111,19 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{89ABFE56-005D-4990-BBAC-1168CE6EF74D}</Project>
+      <Project>{3998EC71-0E68-4D4A-9831-1FACB48DCCA5}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{89ABFE56-005D-4990-BBAC-1168CE6EF752}</Project>
+      <Project>{3998EC71-0E68-4D4A-9831-1FACB48DCCAA}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{89ABFE56-005D-4990-BBAC-1168CE6EF754}</Project>
+      <Project>{3998EC71-0E68-4D4A-9831-1FACB48DCCAC}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine\UnityEngine.csproj">
-      <Project>{89ABFE56-005D-4990-BBAC-1168CE6EF75C}</Project>
+      <Project>{3998EC71-0E68-4D4A-9831-1FACB48DCCB4}</Project>
       <Name>UnityEngine</Name>
     </ProjectReference>
   </ItemGroup>

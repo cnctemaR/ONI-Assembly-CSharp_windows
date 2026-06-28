@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Klei;
 using Rendering;
-using Rendering.World;
 using UnityEngine;
 
 public class World : KMonoBehaviour
@@ -39,10 +38,6 @@ public class World : KMonoBehaviour
 			this.regionTileRenderer.FreeResources();
 		}
 		this.regionTileRenderer = null;
-		if (SpaceBorderTileRenderer.Instance != null)
-		{
-			SpaceBorderTileRenderer.Instance.FreeResources();
-		}
 		if (this.groundRenderer != null)
 		{
 			this.groundRenderer.FreeResources();
@@ -59,9 +54,7 @@ public class World : KMonoBehaviour
 		this.changedCells.Clear();
 		for (int i = 0; i < count; i++)
 		{
-			SolidInfo solidInfo2 = solidInfo[i];
-			bool isSolid = solidInfo2.isSolid;
-			int cellIdx = solidInfo2.cellIdx;
+			int cellIdx = solidInfo[i].cellIdx;
 			if (!this.changedCells.Contains(cellIdx))
 			{
 				this.changedCells.Add(cellIdx);
@@ -114,31 +107,30 @@ public class World : KMonoBehaviour
 
 	private void LateUpdate()
 	{
-		if (Game.IsQuitting())
+		if (!Game.IsQuitting())
 		{
-			return;
-		}
-		GridArea visibleArea = GridVisibleArea.GetVisibleArea();
-		this.groundRenderer.Render(visibleArea.Min, visibleArea.Max);
-		Vector2I vector2I;
-		Vector2I vector2I2;
-		KBatchedAnimUpdater.instance.GetVisibleArea(out vector2I, out vector2I2);
-		KAnimBatchManager.Instance().UpdateActiveArea(vector2I, vector2I2);
-		KAnimBatchManager.Instance().UpdateDirty(Time.frameCount);
-		KAnimBatchManager.Instance().Render();
-		if (Camera.main != null)
-		{
-			Vector3 vector = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, -Camera.main.transform.position.z));
-			Shader.SetGlobalVector("_CursorPos", new Vector4(vector.x, vector.y, vector.z, 0f));
-		}
-		FallingWater.instance.UpdateParticles(Time.deltaTime);
-		FallingWater.instance.Render();
-		SpriteSheetAnimManager.instance.UpdateAnims(Time.deltaTime);
-		SpriteSheetAnimManager.instance.Render();
-		if (this.revealedCells.Count > 0)
-		{
-			GameScenePartitioner.Instance.TriggerEvent(this.revealedCells, GameScenePartitioner.Instance.fogOfWarChangedLayer, null);
-			this.revealedCells.Clear();
+			GridArea visibleArea = GridVisibleArea.GetVisibleArea();
+			this.groundRenderer.Render(visibleArea.Min, visibleArea.Max);
+			Vector2I vector2I;
+			Vector2I vector2I2;
+			KBatchedAnimUpdater.instance.GetVisibleArea(out vector2I, out vector2I2);
+			KAnimBatchManager.Instance().UpdateActiveArea(vector2I, vector2I2);
+			KAnimBatchManager.Instance().UpdateDirty(Time.frameCount);
+			KAnimBatchManager.Instance().Render();
+			if (Camera.main != null)
+			{
+				Vector3 vector = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, -Camera.main.transform.position.z));
+				Shader.SetGlobalVector("_CursorPos", new Vector4(vector.x, vector.y, vector.z, 0f));
+			}
+			FallingWater.instance.UpdateParticles(Time.deltaTime);
+			FallingWater.instance.Render();
+			SpriteSheetAnimManager.instance.UpdateAnims(Time.deltaTime);
+			SpriteSheetAnimManager.instance.Render();
+			if (this.revealedCells.Count > 0)
+			{
+				GameScenePartitioner.Instance.TriggerEvent(this.revealedCells, GameScenePartitioner.Instance.fogOfWarChangedLayer, null);
+				this.revealedCells.Clear();
+			}
 		}
 	}
 

@@ -7,8 +7,8 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
-		this.Subscribe(1502190696, new Action<object>(this.OnDestroyObject));
+		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
+		base.Subscribe(1502190696, new Action<object>(this.OnDestroyObject));
 		base.GetComponent<Storage>().choreType = Db.Get().ChoreTypes.FetchCritical;
 		this.epitaphIdx = global::UnityEngine.Random.Range(0, int.MaxValue);
 	}
@@ -34,7 +34,7 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 		if (this.graveName != null && base.smi.IsInsideState(base.smi.sm.full))
 		{
 			GameObject gameObject = Util.KInstantiate(EntityPrefabs.Instance.Bones, Folder.Misc);
-			gameObject.transform.position = this.transform.position;
+			gameObject.transform.position = base.transform.position;
 			gameObject.SetActive(true);
 			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 			component.Temperature = gameObject.GetComponent<PrimaryElement>().Temperature;
@@ -75,7 +75,7 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 		{
 			default_state = this.empty;
 			base.serializable = true;
-			this.empty.PlayAnim("open", KAnim.PlayMode.Once, null).Enter("CreateFetchTask", delegate(Grave.StatesInstance smi)
+			this.empty.PlayAnim("open").Enter("CreateFetchTask", delegate(Grave.StatesInstance smi)
 			{
 				smi.CreateFetchTask();
 			}).Exit("CancelFetchTask", delegate(Grave.StatesInstance smi)
@@ -84,7 +84,7 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 			})
 				.ToggleMainStatusItem(Db.Get().BuildingStatusItems.GraveEmpty)
 				.EventTransition(GameHashes.OnStorageChange, this.full, null);
-			this.full.PlayAnim("closed", KAnim.PlayMode.Once, null).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Grave);
+			this.full.PlayAnim("closed").ToggleMainStatusItem(Db.Get().BuildingStatusItems.Grave);
 		}
 
 		public GameStateMachine<Grave.States, Grave.StatesInstance, Grave, object>.State empty;

@@ -9,7 +9,7 @@ public class Catchable : KMonoBehaviour
 
 	public void Caught()
 	{
-		this.Trigger(1272413801, null);
+		base.Trigger(1272413801, null);
 		if (this.body)
 		{
 			this.body.RemoveObjectFromBody(base.gameObject);

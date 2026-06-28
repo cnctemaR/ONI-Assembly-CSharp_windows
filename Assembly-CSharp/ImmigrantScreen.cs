@@ -40,7 +40,10 @@ public class ImmigrantScreen : CharacterSelectionController
 		else
 		{
 			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MENUNewDuplicantSnapshot, STOP_MODE.ALLOWFADEOUT);
-			MusicManager.instance.StopSong("Music_SelectDuplicant", true, STOP_MODE.ALLOWFADEOUT);
+			if (MusicManager.instance.SongIsPlaying("Music_SelectDuplicant"))
+			{
+				MusicManager.instance.StopSong("Music_SelectDuplicant", true, STOP_MODE.ALLOWFADEOUT);
+			}
 			if (Immigration.Instance.ImmigrantsAvailable && this.hasShown)
 			{
 				AudioMixer.instance.Start(AudioMixerSnapshots.Get().PortalLPDimmedSnapshot);
@@ -133,5 +136,5 @@ public class ImmigrantScreen : CharacterSelectionController
 
 	private Telepad telepad;
 
-	private bool hasShown;
+	private bool hasShown = false;
 }

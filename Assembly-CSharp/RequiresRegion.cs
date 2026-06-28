@@ -1,9 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 
 public class RequiresRegion : KMonoBehaviour
 {
-	public event Action<Region> OnOwnerRegionSet;
-
 	public Region OwnerRegion
 	{
 		get
@@ -11,6 +10,9 @@ public class RequiresRegion : KMonoBehaviour
 			return this.ownerRegion;
 		}
 	}
+
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	public event Action<Region> OnOwnerRegionSet;
 
 	protected override void OnSpawn()
 	{
@@ -75,7 +77,7 @@ public class RequiresRegion : KMonoBehaviour
 	{
 		this.IsContainedByRegion(true);
 		this.CheckOwnerRegion(null);
-		this.Trigger(-1601261024, this.ownerRegion);
+		base.Trigger(-1601261024, this.ownerRegion);
 	}
 
 	[MyCmpGet]
@@ -85,7 +87,7 @@ public class RequiresRegion : KMonoBehaviour
 
 	private Region ownerRegion;
 
-	private bool wasContained;
+	private bool wasContained = false;
 
 	private bool wasRegionValid = true;
 

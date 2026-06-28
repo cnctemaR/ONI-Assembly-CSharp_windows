@@ -4,7 +4,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-public class BuildingElementEmitter : KMonoBehaviour, IElementEmitter, IEffectDescriptor
+public class BuildingElementEmitter : KMonoBehaviour, IEffectDescriptor, IElementEmitter
 {
 	public float AverageEmitRate
 	{
@@ -34,7 +34,7 @@ public class BuildingElementEmitter : KMonoBehaviour, IElementEmitter, IEffectDe
 	{
 		base.OnSpawn();
 		this.accumulator = new Accumulator("Element", this, 3f);
-		this.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
+		base.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
 		this.SimRegister();
 	}
 
@@ -52,43 +52,41 @@ public class BuildingElementEmitter : KMonoBehaviour, IElementEmitter, IEffectDe
 
 	private unsafe void SimUpdate(float dt)
 	{
-		if (!Sim.IsValidHandle(this.simHandle))
+		if (Sim.IsValidHandle(this.simHandle))
 		{
-			return;
-		}
-		this.UpdateSimState();
-		Sim.EmittedMassInfo emittedMassInfo = Game.Instance.simData.emittedMassEntries[this.simHandle];
-		if (emittedMassInfo.mass > 0f)
-		{
-			this.accumulator.Accumulate(emittedMassInfo.mass);
-			if (this.element == SimHashes.Oxygen)
+			this.UpdateSimState();
+			Sim.EmittedMassInfo emittedMassInfo = Game.Instance.simData.emittedMassEntries[this.simHandle];
+			if (emittedMassInfo.mass > 0f)
 			{
-				ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, emittedMassInfo.mass, base.gameObject.GetProperName(), null);
+				this.accumulator.Accumulate(emittedMassInfo.mass);
+				if (this.element == SimHashes.Oxygen)
+				{
+					ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, emittedMassInfo.mass, base.gameObject.GetProperName(), null);
+				}
 			}
 		}
 	}
 
 	private void UpdateSimState()
 	{
-		if (!this.dirty)
+		if (this.dirty)
 		{
-			return;
-		}
-		this.dirty = false;
-		if (this.simActive)
-		{
-			if (this.element != (SimHashes)0 && this.emitRate > 0f)
+			this.dirty = false;
+			if (this.simActive)
 			{
-				Vector3 vector = new Vector3(this.transform.position.x + this.modifierOffset.x, this.transform.position.y + this.modifierOffset.y, 0f);
-				int num = Grid.PosToCell(vector);
-				SimMessages.ModifyElementEmitter(this.simHandle, num, (int)this.emitRange, this.element, 0.25f, this.emitRate * 0.25f, this.temperature);
+				if (this.element != (SimHashes)0 && this.emitRate > 0f)
+				{
+					Vector3 vector = new Vector3(base.transform.position.x + this.modifierOffset.x, base.transform.position.y + this.modifierOffset.y, 0f);
+					int num = Grid.PosToCell(vector);
+					SimMessages.ModifyElementEmitter(this.simHandle, num, (int)this.emitRange, this.element, 0.25f, this.emitRate * 0.25f, this.temperature);
+				}
+				this.statusHandle = base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.EmittingElement, this);
 			}
-			this.statusHandle = base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.EmittingElement, this);
-		}
-		else
-		{
-			SimMessages.ModifyElementEmitter(this.simHandle, 0, 0, SimHashes.Vacuum, 0f, 0f, 0f);
-			this.statusHandle = base.GetComponent<KSelectable>().RemoveStatusItem(this.statusHandle, this);
+			else
+			{
+				SimMessages.ModifyElementEmitter(this.simHandle, 0, 0, SimHashes.Vacuum, 0f, 0f, 0f);
+				this.statusHandle = base.GetComponent<KSelectable>().RemoveStatusItem(this.statusHandle, this);
+			}
 		}
 	}
 
@@ -144,8 +142,8 @@ public class BuildingElementEmitter : KMonoBehaviour, IElementEmitter, IEffectDe
 	[SerializeField]
 	public float emitRate = 0.3f;
 
-	[Serialize]
 	[SerializeField]
+	[Serialize]
 	public float temperature = 293f;
 
 	[SerializeField]
@@ -162,7 +160,7 @@ public class BuildingElementEmitter : KMonoBehaviour, IElementEmitter, IEffectDe
 
 	private int simHandle = -1;
 
-	private bool simActive;
+	private bool simActive = false;
 
 	private bool dirty = true;
 

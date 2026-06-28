@@ -42,7 +42,9 @@ public class RequiresFoundation : KMonoBehaviour
 		if (!this.isBuildingDamaged && (component == null || component.IsReady()))
 		{
 			string text = null;
-			if (this.building.IsValidBuildLocation(this.transform.position, out text))
+			Rotatable component2 = base.GetComponent<Rotatable>();
+			Orientation orientation = ((!(component2 != null)) ? Orientation.Neutral : component2.GetOrientation());
+			if (this.building.IsValidBuildLocation(base.transform.position, out text, orientation))
 			{
 				this.UpdateSolidState(true);
 			}
@@ -75,7 +77,7 @@ public class RequiresFoundation : KMonoBehaviour
 
 	private bool solid = true;
 
-	private bool isBuildingDamaged;
+	private bool isBuildingDamaged = false;
 
 	public static Operational.Flag solidFoundation = new Operational.Flag("solid_foundation", Operational.Flag.Type.Functional);
 }

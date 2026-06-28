@@ -83,8 +83,8 @@ public class InfoDialogScreen : KModalScreen
 	[SerializeField]
 	private InfoScreenLineItem lineItemTemplate;
 
-	[SerializeField]
 	[Space(10f)]
+	[SerializeField]
 	private LocText header;
 
 	[SerializeField]

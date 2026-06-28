@@ -12,7 +12,7 @@ namespace UnityEngine
 			RaycastHit.INTERNAL_CALL_CalculateRaycastTexCoord(out output, col, ref uv, ref point, face, index);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_CalculateRaycastTexCoord(out Vector2 output, Collider col, ref Vector2 uv, ref Vector3 point, int face, int index);
 
@@ -140,15 +140,20 @@ namespace UnityEngine
 			get
 			{
 				Rigidbody rigidbody = this.rigidbody;
+				Transform transform;
 				if (rigidbody != null)
 				{
-					return rigidbody.transform;
+					transform = rigidbody.transform;
 				}
-				if (this.collider != null)
+				else if (this.collider != null)
 				{
-					return this.collider.transform;
+					transform = this.collider.transform;
 				}
-				return null;
+				else
+				{
+					transform = null;
+				}
+				return transform;
 			}
 		}
 

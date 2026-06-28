@@ -3,8 +3,8 @@ using UnityEngine;
 
 public class Chore<StateMachineInstanceType> : Chore, IStateMachineTarget where StateMachineInstanceType : StateMachine.Instance
 {
-	public Chore(ChoreType chore_type, IStateMachineTarget target, ChoreProvider chore_provider, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, int master_priority = 2147483647, bool is_preemptable = false, bool allow_in_context_menu = true, int priority_mod = 0)
-		: base(chore_type, chore_provider, run_until_complete, on_complete, on_begin, on_end, master_priority, is_preemptable, allow_in_context_menu, priority_mod)
+	public Chore(ChoreType chore_type, IStateMachineTarget target, ChoreProvider chore_provider, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, PriorityScreen.PriorityClass master_priority_class = PriorityScreen.PriorityClass.basic, int master_priority_value = 2147483647, bool is_preemptable = false, bool allow_in_context_menu = true, int priority_mod = 0)
+		: base(chore_type, chore_provider, run_until_complete, on_complete, on_begin, on_end, master_priority_class, master_priority_value, is_preemptable, allow_in_context_menu, priority_mod)
 	{
 		this.target = target;
 		target.Subscribe(1969584890, new Action<object>(this.OnTargetDestroyed));

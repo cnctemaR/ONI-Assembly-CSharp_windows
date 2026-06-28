@@ -64,8 +64,9 @@ public class Tutorial : KMonoBehaviour
 		List<Tutorial.Item> list8 = this.warningItems;
 		item = new Tutorial.Item();
 		Tutorial.Item item2 = item;
+		string text = MISC.NOTIFICATIONS.NEEDOXYGENSOURCE.NAME;
 		HashedString invalid = HashedString.Invalid;
-		item2.notification = new Notification(MISC.NOTIFICATIONS.NEEDOXYGENSOURCE.NAME, NotificationType.Tutorial, invalid, new Func<List<Notification>, object, string>(this.OnOxygenTooltip), null, false, 0f, null, null, null);
+		item2.notification = new Notification(text, NotificationType.Tutorial, invalid, new Func<List<Notification>, object, string>(this.OnOxygenTooltip), null, false, 0f, null, null, null);
 		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.SufficientOxygen);
 		item.minTimeToNotify = 80f;
 		item.lastNotifyTime = 0f;
@@ -95,61 +96,60 @@ public class Tutorial : KMonoBehaviour
 
 	public void TutorialMessage(Tutorial.TutorialMessages tm)
 	{
-		if (!this.tutorialMessagesRemaining.Contains(tm))
+		if (this.tutorialMessagesRemaining.Contains(tm))
 		{
-			return;
+			Message message = null;
+			switch (tm)
+			{
+			case Tutorial.TutorialMessages.TM_Basics:
+				message = new GenericMessage(MISC.NOTIFICATIONS.BASICCONTROLS.NAME, MISC.NOTIFICATIONS.BASICCONTROLS.MESSAGEBODY, MISC.NOTIFICATIONS.BASICCONTROLS.TOOLTIP);
+				break;
+			case Tutorial.TutorialMessages.TM_Welcome:
+				message = new GenericMessage(MISC.NOTIFICATIONS.WELCOMEMESSAGE.NAME, MISC.NOTIFICATIONS.WELCOMEMESSAGE.MESSAGEBODY, MISC.NOTIFICATIONS.WELCOMEMESSAGE.TOOLTIP);
+				break;
+			case Tutorial.TutorialMessages.TM_StressManagement:
+				message = new GenericMessage(MISC.NOTIFICATIONS.STRESSMANAGEMENTMESSAGE.NAME, MISC.NOTIFICATIONS.STRESSMANAGEMENTMESSAGE.MESSAGEBODY, MISC.NOTIFICATIONS.STRESSMANAGEMENTMESSAGE.TOOLTIP);
+				break;
+			case Tutorial.TutorialMessages.TM_StorageRegions:
+				message = new GenericMessage(MISC.NOTIFICATIONS.STORAGEREGIONSMESSAGE.NAME, MISC.NOTIFICATIONS.STORAGEREGIONSMESSAGE.MESSAGEBODY, MISC.NOTIFICATIONS.STORAGEREGIONSMESSAGE.TOOLTIP);
+				break;
+			case Tutorial.TutorialMessages.TM_Scheduling:
+				message = new GenericMessage(MISC.NOTIFICATIONS.SCHEDULEMESSAGE.NAME, MISC.NOTIFICATIONS.SCHEDULEMESSAGE.MESSAGEBODY, MISC.NOTIFICATIONS.SCHEDULEMESSAGE.TOOLTIP);
+				break;
+			case Tutorial.TutorialMessages.TM_Mopping:
+				message = new GenericMessage(MISC.NOTIFICATIONS.MOPPINGMESSAGE.NAME, MISC.NOTIFICATIONS.MOPPINGMESSAGE.MESSAGEBODY, MISC.NOTIFICATIONS.MOPPINGMESSAGE.TOOLTIP);
+				break;
+			case Tutorial.TutorialMessages.TM_Locomotion:
+				message = new GenericMessage(MISC.NOTIFICATIONS.LOCOMOTIONMESSAGE.NAME, MISC.NOTIFICATIONS.LOCOMOTIONMESSAGE.MESSAGEBODY, MISC.NOTIFICATIONS.LOCOMOTIONMESSAGE.TOOLTIP);
+				break;
+			case Tutorial.TutorialMessages.TM_Priorities:
+				message = new GenericMessage(MISC.NOTIFICATIONS.PRIORITIESMESSAGE.NAME, MISC.NOTIFICATIONS.PRIORITIESMESSAGE.MESSAGEBODY, MISC.NOTIFICATIONS.PRIORITIESMESSAGE.TOOLTIP);
+				break;
+			case Tutorial.TutorialMessages.TM_FetchingWater:
+				message = new GenericMessage(MISC.NOTIFICATIONS.FETCHINGWATERMESSAGE.NAME, MISC.NOTIFICATIONS.FETCHINGWATERMESSAGE.MESSAGEBODY, MISC.NOTIFICATIONS.FETCHINGWATERMESSAGE.TOOLTIP);
+				break;
+			case Tutorial.TutorialMessages.TM_ThermalComfort:
+				message = new GenericMessage(MISC.NOTIFICATIONS.THERMALCOMFORT.NAME, MISC.NOTIFICATIONS.THERMALCOMFORT.MESSAGEBODY, MISC.NOTIFICATIONS.THERMALCOMFORT.TOOLTIP);
+				break;
+			case Tutorial.TutorialMessages.TM_OverheatingBuildings:
+				message = new GenericMessage(MISC.NOTIFICATIONS.TUTORIAL_OVERHEATING.NAME, MISC.NOTIFICATIONS.TUTORIAL_OVERHEATING.MESSAGEBODY, MISC.NOTIFICATIONS.TUTORIAL_OVERHEATING.TOOLTIP);
+				break;
+			case Tutorial.TutorialMessages.TM_LotsOfGerms:
+				message = new GenericMessage(MISC.NOTIFICATIONS.LOTS_OF_GERMS.NAME, MISC.NOTIFICATIONS.LOTS_OF_GERMS.MESSAGEBODY, MISC.NOTIFICATIONS.LOTS_OF_GERMS.TOOLTIP);
+				break;
+			case Tutorial.TutorialMessages.TM_BeingInfected:
+				message = new GenericMessage(MISC.NOTIFICATIONS.BEING_INFECTED.NAME, MISC.NOTIFICATIONS.BEING_INFECTED.MESSAGEBODY, MISC.NOTIFICATIONS.BEING_INFECTED.TOOLTIP);
+				break;
+			case Tutorial.TutorialMessages.TM_DiseaseCooking:
+				message = new GenericMessage(MISC.NOTIFICATIONS.DISEASE_COOKING.NAME, MISC.NOTIFICATIONS.DISEASE_COOKING.MESSAGEBODY, MISC.NOTIFICATIONS.DISEASE_COOKING.TOOLTIP);
+				break;
+			case Tutorial.TutorialMessages.TM_Suits:
+				message = new GenericMessage(MISC.NOTIFICATIONS.SUITS.NAME, MISC.NOTIFICATIONS.SUITS.MESSAGEBODY, MISC.NOTIFICATIONS.SUITS.TOOLTIP);
+				break;
+			}
+			this.tutorialMessagesRemaining.Remove(tm);
+			Messenger.Instance.QueueMessage(message);
 		}
-		Message message = null;
-		switch (tm)
-		{
-		case Tutorial.TutorialMessages.TM_Basics:
-			message = new GenericMessage(MISC.NOTIFICATIONS.BASICCONTROLS.NAME, MISC.NOTIFICATIONS.BASICCONTROLS.MESSAGEBODY, MISC.NOTIFICATIONS.BASICCONTROLS.TOOLTIP);
-			break;
-		case Tutorial.TutorialMessages.TM_Welcome:
-			message = new GenericMessage(MISC.NOTIFICATIONS.WELCOMEMESSAGE.NAME, MISC.NOTIFICATIONS.WELCOMEMESSAGE.MESSAGEBODY, MISC.NOTIFICATIONS.WELCOMEMESSAGE.TOOLTIP);
-			break;
-		case Tutorial.TutorialMessages.TM_StressManagement:
-			message = new GenericMessage(MISC.NOTIFICATIONS.STRESSMANAGEMENTMESSAGE.NAME, MISC.NOTIFICATIONS.STRESSMANAGEMENTMESSAGE.MESSAGEBODY, MISC.NOTIFICATIONS.STRESSMANAGEMENTMESSAGE.TOOLTIP);
-			break;
-		case Tutorial.TutorialMessages.TM_StorageRegions:
-			message = new GenericMessage(MISC.NOTIFICATIONS.STORAGEREGIONSMESSAGE.NAME, MISC.NOTIFICATIONS.STORAGEREGIONSMESSAGE.MESSAGEBODY, MISC.NOTIFICATIONS.STORAGEREGIONSMESSAGE.TOOLTIP);
-			break;
-		case Tutorial.TutorialMessages.TM_Scheduling:
-			message = new GenericMessage(MISC.NOTIFICATIONS.SCHEDULEMESSAGE.NAME, MISC.NOTIFICATIONS.SCHEDULEMESSAGE.MESSAGEBODY, MISC.NOTIFICATIONS.SCHEDULEMESSAGE.TOOLTIP);
-			break;
-		case Tutorial.TutorialMessages.TM_Mopping:
-			message = new GenericMessage(MISC.NOTIFICATIONS.MOPPINGMESSAGE.NAME, MISC.NOTIFICATIONS.MOPPINGMESSAGE.MESSAGEBODY, MISC.NOTIFICATIONS.MOPPINGMESSAGE.TOOLTIP);
-			break;
-		case Tutorial.TutorialMessages.TM_Locomotion:
-			message = new GenericMessage(MISC.NOTIFICATIONS.LOCOMOTIONMESSAGE.NAME, MISC.NOTIFICATIONS.LOCOMOTIONMESSAGE.MESSAGEBODY, MISC.NOTIFICATIONS.LOCOMOTIONMESSAGE.TOOLTIP);
-			break;
-		case Tutorial.TutorialMessages.TM_Priorities:
-			message = new GenericMessage(MISC.NOTIFICATIONS.PRIORITIESMESSAGE.NAME, MISC.NOTIFICATIONS.PRIORITIESMESSAGE.MESSAGEBODY, MISC.NOTIFICATIONS.PRIORITIESMESSAGE.TOOLTIP);
-			break;
-		case Tutorial.TutorialMessages.TM_FetchingWater:
-			message = new GenericMessage(MISC.NOTIFICATIONS.FETCHINGWATERMESSAGE.NAME, MISC.NOTIFICATIONS.FETCHINGWATERMESSAGE.MESSAGEBODY, MISC.NOTIFICATIONS.FETCHINGWATERMESSAGE.TOOLTIP);
-			break;
-		case Tutorial.TutorialMessages.TM_ThermalComfort:
-			message = new GenericMessage(MISC.NOTIFICATIONS.THERMALCOMFORT.NAME, MISC.NOTIFICATIONS.THERMALCOMFORT.MESSAGEBODY, MISC.NOTIFICATIONS.THERMALCOMFORT.TOOLTIP);
-			break;
-		case Tutorial.TutorialMessages.TM_OverheatingBuildings:
-			message = new GenericMessage(MISC.NOTIFICATIONS.TUTORIAL_OVERHEATING.NAME, MISC.NOTIFICATIONS.TUTORIAL_OVERHEATING.MESSAGEBODY, MISC.NOTIFICATIONS.TUTORIAL_OVERHEATING.TOOLTIP);
-			break;
-		case Tutorial.TutorialMessages.TM_LotsOfGerms:
-			message = new GenericMessage(MISC.NOTIFICATIONS.LOTS_OF_GERMS.NAME, MISC.NOTIFICATIONS.LOTS_OF_GERMS.MESSAGEBODY, MISC.NOTIFICATIONS.LOTS_OF_GERMS.TOOLTIP);
-			break;
-		case Tutorial.TutorialMessages.TM_BeingInfected:
-			message = new GenericMessage(MISC.NOTIFICATIONS.BEING_INFECTED.NAME, MISC.NOTIFICATIONS.BEING_INFECTED.MESSAGEBODY, MISC.NOTIFICATIONS.BEING_INFECTED.TOOLTIP);
-			break;
-		case Tutorial.TutorialMessages.TM_DiseaseCooking:
-			message = new GenericMessage(MISC.NOTIFICATIONS.DISEASE_COOKING.NAME, MISC.NOTIFICATIONS.DISEASE_COOKING.MESSAGEBODY, MISC.NOTIFICATIONS.DISEASE_COOKING.TOOLTIP);
-			break;
-		case Tutorial.TutorialMessages.TM_Suits:
-			message = new GenericMessage(MISC.NOTIFICATIONS.SUITS.NAME, MISC.NOTIFICATIONS.SUITS.MESSAGEBODY, MISC.NOTIFICATIONS.SUITS.TOOLTIP);
-			break;
-		}
-		this.tutorialMessagesRemaining.Remove(tm);
-		Messenger.Instance.QueueMessage(message);
 	}
 
 	private string OnOxygenTooltip(List<Notification> notifications, object data)
@@ -181,8 +181,8 @@ public class Tutorial : KMonoBehaviour
 
 	public void DebugNotification()
 	{
-		string text = string.Empty;
 		NotificationType notificationType;
+		string text;
 		if (this.debugMessageCount % 3 == 0)
 		{
 			notificationType = NotificationType.Tutorial;
@@ -199,7 +199,7 @@ public class Tutorial : KMonoBehaviour
 			text = "Urgent important message. Uses Bad Color BG";
 		}
 		Notification notification = new Notification(string.Format("{0} ({1})", text, this.debugMessageCount++.ToString()), notificationType, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.NEEDTOILET.TOOLTIP.text, null, true, 0f, null, null, null);
-		this.notifier.Add(notification, string.Empty);
+		this.notifier.Add(notification, "");
 	}
 
 	public void DebugNotificationMessage()
@@ -210,59 +210,57 @@ public class Tutorial : KMonoBehaviour
 
 	private void Update()
 	{
-		if (App.isLoading)
+		if (!App.isLoading)
 		{
-			return;
-		}
-		if (Components.LiveMinionIdentities.Count == 0)
-		{
-			return;
-		}
-		if (this.itemTree.Count > 0)
-		{
-			List<Tutorial.Item> list = this.itemTree[0];
-			for (int i = list.Count - 1; i >= 0; i--)
+			if (Components.LiveMinionIdentities.Count != 0)
 			{
-				Tutorial.Item item = list[i];
-				if (item != null)
+				if (this.itemTree.Count > 0)
 				{
-					if (item.requirementSatisfied == null || item.requirementSatisfied())
+					List<Tutorial.Item> list = this.itemTree[0];
+					for (int i = list.Count - 1; i >= 0; i--)
 					{
-						item.notification.Clear();
-						list.RemoveAt(i);
+						Tutorial.Item item = list[i];
+						if (item != null)
+						{
+							if (item.requirementSatisfied == null || item.requirementSatisfied())
+							{
+								item.notification.Clear();
+								list.RemoveAt(i);
+							}
+							else
+							{
+								this.UpdateNotifierPosition();
+								this.notifier.Add(item.notification, "");
+							}
+						}
 					}
-					else
+					if (list.Count == 0)
 					{
-						this.UpdateNotifierPosition();
-						this.notifier.Add(item.notification, string.Empty);
+						this.itemTree.RemoveAt(0);
 					}
 				}
+				foreach (Tutorial.Item item2 in this.warningItems)
+				{
+					if (item2.requirementSatisfied())
+					{
+						item2.notification.Clear();
+						item2.lastNotifyTime = Time.time;
+					}
+					else if (item2.lastNotifyTime == 0f || Time.time - item2.lastNotifyTime > item2.minTimeToNotify)
+					{
+						this.notifier.Add(item2.notification, "");
+						item2.lastNotifyTime = Time.time;
+					}
+				}
+				if (GameClock.Instance.GetDay() > 0 && !this.tutorialMessagesRemaining.Contains(Tutorial.TutorialMessages.TM_Priorities) && !this.queuedPrioritiesMessage)
+				{
+					this.queuedPrioritiesMessage = true;
+					GameScheduler.Instance.Schedule("PrioritiesTutorial", 2f, delegate(object obj)
+					{
+						Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Priorities);
+					}, null, null);
+				}
 			}
-			if (list.Count == 0)
-			{
-				this.itemTree.RemoveAt(0);
-			}
-		}
-		foreach (Tutorial.Item item2 in this.warningItems)
-		{
-			if (item2.requirementSatisfied())
-			{
-				item2.notification.Clear();
-				item2.lastNotifyTime = Time.time;
-			}
-			else if (item2.lastNotifyTime == 0f || Time.time - item2.lastNotifyTime > item2.minTimeToNotify)
-			{
-				this.notifier.Add(item2.notification, string.Empty);
-				item2.lastNotifyTime = Time.time;
-			}
-		}
-		if (GameClock.Instance.GetDay() > 0 && !this.tutorialMessagesRemaining.Contains(Tutorial.TutorialMessages.TM_Priorities) && !this.queuedPrioritiesMessage)
-		{
-			this.queuedPrioritiesMessage = true;
-			GameScheduler.Instance.Schedule("PrioritiesTutorial", 2f, delegate(object obj)
-			{
-				Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Priorities);
-			}, null, null);
 		}
 	}
 
@@ -289,15 +287,18 @@ public class Tutorial : KMonoBehaviour
 			}
 			for (int i = 0; i < pickupables.Count; i++)
 			{
-				if (pickupables[i].storage != null && (pickupables[i].storage.GetComponent<RationBox>() != null || pickupables[i].storage.GetComponent<Refrigerator>() != null) && !Rottable.IsRefrigerated(pickupables[i].gameObject) && Rottable.AtmosphereQuality(pickupables[i].gameObject) != Rottable.RotAtmosphereQuality.Sterilizing)
+				if (pickupables[i].storage != null && (pickupables[i].storage.GetComponent<RationBox>() != null || pickupables[i].storage.GetComponent<Refrigerator>() != null))
 				{
-					Rottable.Instance smi = pickupables[i].GetSMI<Rottable.Instance>();
-					if (smi != null && smi.RotConstitutionPercentage < 0.8f)
+					if (!Rottable.IsRefrigerated(pickupables[i].gameObject) && Rottable.AtmosphereQuality(pickupables[i].gameObject) != Rottable.RotAtmosphereQuality.Sterilizing)
 					{
-						num++;
-						if (foods != null)
+						Rottable.Instance smi = pickupables[i].GetSMI<Rottable.Instance>();
+						if (smi != null && smi.RotConstitutionPercentage < 0.8f)
 						{
-							foods.Add(pickupables[i].GetProperName());
+							num++;
+							if (foods != null)
+							{
+								foods.Add(pickupables[i].GetProperName());
+							}
 						}
 					}
 				}
@@ -360,17 +361,17 @@ public class Tutorial : KMonoBehaviour
 		return Components.Toilets.Count > 0;
 	}
 
-	private const float LOW_RATION_AMOUNT = 1f;
-
 	[MyCmpAdd]
 	private Notifier notifier;
 
 	[Serialize]
 	private SerializedList<Tutorial.TutorialMessages> tutorialMessagesRemaining = new SerializedList<Tutorial.TutorialMessages>();
 
-	private int debugMessageCount;
+	private int debugMessageCount = 0;
 
-	private bool queuedPrioritiesMessage;
+	private bool queuedPrioritiesMessage = false;
+
+	private const float LOW_RATION_AMOUNT = 1f;
 
 	private List<List<Tutorial.Item>> itemTree = new List<List<Tutorial.Item>>();
 
@@ -398,6 +399,8 @@ public class Tutorial : KMonoBehaviour
 		TM_COUNT
 	}
 
+	private delegate bool RequirementSatisfiedDelegate();
+
 	private class Item
 	{
 		public Notification notification;
@@ -408,6 +411,4 @@ public class Tutorial : KMonoBehaviour
 
 		public float lastNotifyTime;
 	}
-
-	private delegate bool RequirementSatisfiedDelegate();
 }

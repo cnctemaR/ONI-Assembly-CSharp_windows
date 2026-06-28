@@ -27,9 +27,12 @@ public abstract class SubstanceSource : KMonoBehaviour
 	public Tag GetElementTag()
 	{
 		Tag tag = Tag.Invalid;
-		if (base.gameObject != null && this.primaryElement != null && this.primaryElement.Element != null)
+		if (base.gameObject != null)
 		{
-			tag = this.primaryElement.Element.tag;
+			if (this.primaryElement != null && this.primaryElement.Element != null)
+			{
+				tag = this.primaryElement.Element.tag;
+			}
 		}
 		return tag;
 	}
@@ -37,9 +40,12 @@ public abstract class SubstanceSource : KMonoBehaviour
 	public Tag GetMaterialCategoryTag()
 	{
 		Tag tag = Tag.Invalid;
-		if (base.gameObject != null && this.primaryElement != null && this.primaryElement.Element != null)
+		if (base.gameObject != null)
 		{
-			tag = this.primaryElement.Element.GetMaterialCategoryTag();
+			if (this.primaryElement != null && this.primaryElement.Element != null)
+			{
+				tag = this.primaryElement.Element.GetMaterialCategoryTag();
+			}
 		}
 		return tag;
 	}

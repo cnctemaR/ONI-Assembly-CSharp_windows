@@ -13,8 +13,8 @@ public class DropAllWorkable : Workable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
-		this.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
+		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Emptying;
 		this.synchronizeAnims = false;
 		base.SetWorkTime(0.1f);
@@ -43,7 +43,7 @@ public class DropAllWorkable : Workable
 		}
 		else if (this.chore == null)
 		{
-			this.chore = new WorkChore<DropAllWorkable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, int.MaxValue);
+			this.chore = new WorkChore<DropAllWorkable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
 		}
 		else
 		{
@@ -74,7 +74,7 @@ public class DropAllWorkable : Workable
 			}
 		}
 		this.chore = null;
-		this.Trigger(-1957399615, null);
+		base.Trigger(-1957399615, null);
 	}
 
 	private void OnRefreshUserMenu(object data)
@@ -84,14 +84,22 @@ public class DropAllWorkable : Workable
 			if (this.chore == null)
 			{
 				UserMenu userMenu = this.userMenu;
-				string text = UI.USERMENUACTIONS.EMPTYSTORAGE.TOOLTIP;
-				userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.EMPTYSTORAGE.NAME, new global::System.Action(this.DropAll), global::Action.BuildingUtility1, null, null, null, text, true), 1f);
+				string text = "action_empty_contents";
+				string text2 = UI.USERMENUACTIONS.EMPTYSTORAGE.NAME;
+				global::System.Action action = new global::System.Action(this.DropAll);
+				global::Action action2 = global::Action.BuildingUtility1;
+				string text3 = UI.USERMENUACTIONS.EMPTYSTORAGE.TOOLTIP;
+				userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, action2, null, null, null, text3, true), 1f);
 			}
 			else
 			{
 				UserMenu userMenu2 = this.userMenu;
+				string text3 = "action_empty_contents";
+				string text2 = UI.USERMENUACTIONS.EMPTYSTORAGE.NAME_OFF;
+				global::System.Action action = new global::System.Action(this.DropAll);
+				global::Action action2 = global::Action.BuildingUtility1;
 				string text = UI.USERMENUACTIONS.EMPTYSTORAGE.TOOLTIP_OFF;
-				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.EMPTYSTORAGE.NAME_OFF, new global::System.Action(this.DropAll), global::Action.BuildingUtility1, null, null, null, text, true), 1f);
+				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, action2, null, null, null, text, true), 1f);
 			}
 		}
 	}

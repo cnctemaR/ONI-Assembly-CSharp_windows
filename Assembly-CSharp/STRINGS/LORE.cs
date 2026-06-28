@@ -10,19 +10,19 @@ namespace STRINGS
 			{
 				public static LocString HEADER = "Casual Friday!";
 
-				public static LocString ENTRY = "The facility is pleased to announced that starting this week, all Fridays will now be Casual Fridays!\n\nPlease enjoy the clinically proven destressing benefits of casual attire by wearing your favorite shirt to the lab.\n\nNOTE: Any personnel found on facility premises without regulation fullbody protection will be put on immediate notice.\n\nThank-you and have fun!\n-Admin";
+				public static LocString ENTRY = "To all employees;\n\nThe facility is pleased to announced that starting this week, all Fridays will now be Casual Fridays!\n\nPlease enjoy the clinically proven destressing benefits of casual attire by wearing your favorite shirt to the lab.\n\nNOTE: Any personnel found on facility premises without regulation fullbody protection will be put on immediate notice.\n\nThank-you and have fun!\n-Admin";
 			}
 
 			public class SET_LOCKER1
 			{
-				public static LocString HEADER = string.Empty;
+				public static LocString HEADER = "";
 
 				public static LocString ENTRY = "FIRST LAW\nEnergy can neither be created or destroyed, only change forms.\n\nSECOND LAW\nEntropy in an isolated system that is not in equilibrium tends to increase over time, approaching the maximum value at equilibrium.\n\nTHIRD LAW\nEntropy in a system approaches a constant minimum as temperature approaches absolute zero.\n\nZEROTH LAW\nIf two thermodynamic systems are in thermal equilibrium with a third, then they are in thermal equilibrium with each other.";
 			}
 
 			public class SET_LOCKER2
 			{
-				public static LocString HEADER = string.Empty;
+				public static LocString HEADER = "";
 
 				public static LocString ENTRY = "A powerful stench emanates from this locker.";
 			}
@@ -36,16 +36,16 @@ namespace STRINGS
 
 			public class SET_DESK2
 			{
-				public static LocString HEADER = string.Empty;
+				public static LocString HEADER = "";
 
-				public static LocString ENTRY = string.Empty;
+				public static LocString ENTRY = "";
 			}
 
 			public class SET_DESK3
 			{
-				public static LocString HEADER = string.Empty;
+				public static LocString HEADER = "";
 
-				public static LocString ENTRY = string.Empty;
+				public static LocString ENTRY = "";
 			}
 
 			public class SET_OBJECT

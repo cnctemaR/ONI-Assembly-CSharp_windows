@@ -22,7 +22,7 @@ namespace UnityEngine.Assertions
 
 		public static string GetEqualityMessage(object actual, object expected, bool expectEqual)
 		{
-			return AssertionMessageUtil.GetMessage(UnityString.Format("Values are {0}equal.", new object[] { (!expectEqual) ? string.Empty : "not " }), UnityString.Format("{0} {2} {1}", new object[]
+			return AssertionMessageUtil.GetMessage(UnityString.Format("Values are {0}equal.", new object[] { (!expectEqual) ? "" : "not " }), UnityString.Format("{0} {2} {1}", new object[]
 			{
 				actual,
 				expected,
@@ -32,7 +32,7 @@ namespace UnityEngine.Assertions
 
 		public static string NullFailureMessage(object value, bool expectNull)
 		{
-			return AssertionMessageUtil.GetMessage(UnityString.Format("Value was {0}Null", new object[] { (!expectNull) ? string.Empty : "not " }), UnityString.Format("Value was {0}Null", new object[] { (!expectNull) ? "not " : string.Empty }));
+			return AssertionMessageUtil.GetMessage(UnityString.Format("Value was {0}Null", new object[] { (!expectNull) ? "" : "not " }), UnityString.Format("Value was {0}Null", new object[] { (!expectNull) ? "not " : "" }));
 		}
 
 		public static string BooleanFailureMessage(bool expected)

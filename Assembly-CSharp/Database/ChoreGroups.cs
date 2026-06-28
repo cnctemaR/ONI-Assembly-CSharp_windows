@@ -21,7 +21,7 @@ namespace Database
 			this.Repair = this.Add("Repair", DUPLICANTS.CHOREGROUPS.REPAIR.NAME, "Machinery");
 			this.Maintenance = this.Add("Maintenance", DUPLICANTS.CHOREGROUPS.MAINTENANCE.NAME, "Machinery");
 			this.Mop = this.Add("Mop", DUPLICANTS.CHOREGROUPS.MOP.NAME, "Digging");
-			this.Harvest = this.Add("Harvest", DUPLICANTS.CHOREGROUPS.HARVEST.NAME, "Digging");
+			this.Harvest = this.Add("Harvest", DUPLICANTS.CHOREGROUPS.HARVEST.NAME, "Botanist");
 			this.Transport = this.Add("Sweep", DUPLICANTS.CHOREGROUPS.SWEEP.NAME, "Athletics");
 			this.Build = this.Add("Build", DUPLICANTS.CHOREGROUPS.BUILD.NAME, "Construction");
 			this.Deliver = this.Add("Deliver", DUPLICANTS.CHOREGROUPS.DELIVER.NAME, "Athletics");

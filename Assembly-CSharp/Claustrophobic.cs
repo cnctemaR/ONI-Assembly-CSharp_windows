@@ -12,17 +12,25 @@ public class Claustrophobic : StateMachineComponent<Claustrophobic.StatesInstanc
 	{
 		int num = 4;
 		int num2 = Grid.PosToCell(base.gameObject);
-		for (int i = 0; i < num - 1; i++)
+		int i = 0;
+		while (i < num - 1)
 		{
 			int num3 = Grid.OffsetCell(num2, 0, i);
+			bool flag;
 			if (Grid.IsValidCell(num3) && Grid.Solid[num3])
 			{
-				return true;
+				flag = true;
 			}
-			if (Grid.IsValidCell(Grid.CellRight(num2)) && Grid.IsValidCell(Grid.CellLeft(num2)) && Grid.Solid[Grid.CellLeft(num2)] && Grid.IsValidCell(Grid.CellRight(num2)))
+			else
 			{
-				return true;
+				if (!Grid.IsValidCell(Grid.CellRight(num2)) || !Grid.IsValidCell(Grid.CellLeft(num2)) || !Grid.Solid[Grid.CellLeft(num2)] || !Grid.IsValidCell(Grid.CellRight(num2)))
+				{
+					i++;
+					continue;
+				}
+				flag = true;
 			}
+			return flag;
 		}
 		return false;
 	}

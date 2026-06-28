@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ScheduleScreenColumnEntry : MonoBehaviour, IPointerEnterHandler, IEventSystemHandler, IPointerDownHandler
+public class ScheduleScreenColumnEntry : MonoBehaviour, IPointerEnterHandler, IPointerDownHandler, IEventSystemHandler
 {
 	public void OnPointerEnter(PointerEventData event_data)
 	{
@@ -12,9 +12,12 @@ public class ScheduleScreenColumnEntry : MonoBehaviour, IPointerEnterHandler, IE
 
 	private void RunCallbacks()
 	{
-		if (Input.GetMouseButton(0) && this.onLeftClick != null)
+		if (Input.GetMouseButton(0))
 		{
-			this.onLeftClick();
+			if (this.onLeftClick != null)
+			{
+				this.onLeftClick();
+			}
 		}
 	}
 

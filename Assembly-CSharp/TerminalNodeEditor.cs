@@ -34,12 +34,17 @@ public class TerminalNodeEditor : BaseNodeEditor
 
 	public override bool Calculate()
 	{
+		bool flag;
 		if (base.allInputsReady())
 		{
 			this.Outputs[0].SetValue<IModule3D>(this.Inputs[0].GetValue<IModule3D>());
-			return true;
+			flag = true;
 		}
-		return false;
+		else
+		{
+			flag = false;
+		}
+		return flag;
 	}
 
 	protected override void NodeGUI()

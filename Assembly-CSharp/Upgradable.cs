@@ -45,40 +45,50 @@ public class Upgradable : Workable, ISaveLoadable
 
 	public bool IsUpgraded(Upgradable.Upgrade.Target type)
 	{
+		bool flag;
 		if (this.upgrades == null || this.upgrades.Count == 0)
 		{
-			return false;
+			flag = false;
 		}
-		if (this.currentUpgrades == null || this.currentUpgrades.Count == 0)
+		else if (this.currentUpgrades == null || this.currentUpgrades.Count == 0)
 		{
-			return false;
+			flag = false;
 		}
-		bool flag = false;
-		foreach (KeyValuePair<int, Upgradable.Upgrade> keyValuePair in this.upgrades)
+		else
 		{
-			if (keyValuePair.Value.type == type)
+			bool flag2 = false;
+			foreach (KeyValuePair<int, Upgradable.Upgrade> keyValuePair in this.upgrades)
 			{
-				flag = this.currentUpgrades.Contains(keyValuePair.Key);
-				break;
+				if (keyValuePair.Value.type == type)
+				{
+					flag2 = this.currentUpgrades.Contains(keyValuePair.Key);
+					break;
+				}
 			}
+			flag = flag2;
 		}
 		return flag;
 	}
 
 	public bool CanUpgrade(Upgradable.Upgrade.Target type)
 	{
+		bool flag;
 		if (this.upgrades == null || this.upgrades.Count == 0)
 		{
-			return false;
+			flag = false;
 		}
-		bool flag = false;
-		foreach (Upgradable.Upgrade upgrade in this.upgrades.Values)
+		else
 		{
-			if (upgrade.type == type)
+			bool flag2 = false;
+			foreach (Upgradable.Upgrade upgrade in this.upgrades.Values)
 			{
-				flag = true;
-				break;
+				if (upgrade.type == type)
+				{
+					flag2 = true;
+					break;
+				}
 			}
+			flag = flag2;
 		}
 		return flag;
 	}
@@ -309,21 +319,18 @@ public class Upgradable : Workable, ISaveLoadable
 
 	private void DoGenerateBuildChores(Upgradable.Upgrade upgrade)
 	{
-		Upgradable.<DoGenerateBuildChores>c__AnonStorey94 <DoGenerateBuildChores>c__AnonStorey = new Upgradable.<DoGenerateBuildChores>c__AnonStorey94();
+		Upgradable.<DoGenerateBuildChores>c__AnonStorey1 <DoGenerateBuildChores>c__AnonStorey = new Upgradable.<DoGenerateBuildChores>c__AnonStorey1();
 		<DoGenerateBuildChores>c__AnonStorey.upgrade = upgrade;
-		<DoGenerateBuildChores>c__AnonStorey.<>f__this = this;
+		<DoGenerateBuildChores>c__AnonStorey.$this = this;
 		<DoGenerateBuildChores>c__AnonStorey.upgrade.buildChoresRemain = <DoGenerateBuildChores>c__AnonStorey.upgrade.builderCount;
 		<DoGenerateBuildChores>c__AnonStorey.upgrade.buildChores = new WorkChore<Upgradable>[<DoGenerateBuildChores>c__AnonStorey.upgrade.buildChoresRemain];
 		int i;
 		for (i = 0; i < <DoGenerateBuildChores>c__AnonStorey.upgrade.buildChoresRemain; i++)
 		{
-			WorkChore<Upgradable>[] buildChores = <DoGenerateBuildChores>c__AnonStorey.upgrade.buildChores;
-			int j = i;
-			Action<Chore> action = delegate
+			<DoGenerateBuildChores>c__AnonStorey.upgrade.buildChores[i] = new WorkChore<Upgradable>(Db.Get().ChoreTypes.Upgrade, this, null, true, delegate
 			{
-				this.DoBuildChoreComplete(<DoGenerateBuildChores>c__AnonStorey.upgrade, i);
-			};
-			buildChores[j] = new WorkChore<Upgradable>(Db.Get().ChoreTypes.Upgrade, this, null, true, action, null, null, true, null, false, default(Tag), null, false, true, true, int.MaxValue);
+				<DoGenerateBuildChores>c__AnonStorey.$this.DoBuildChoreComplete(<DoGenerateBuildChores>c__AnonStorey.upgrade, i);
+			}, null, null, true, null, false, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
 		}
 	}
 
@@ -367,7 +374,7 @@ public class Upgradable : Workable, ISaveLoadable
 		{
 			global::Debug.LogError("Something weird happened while trying to complete the upgrade.", null);
 		}
-		this.Trigger(-235298596, upgrade);
+		base.Trigger(-235298596, upgrade);
 	}
 
 	private static Upgradable.UpgradableConfig[] UpgradablesConfig
@@ -443,11 +450,19 @@ public class Upgradable : Workable, ISaveLoadable
 
 	public static Operational.Flag notUpgradingFlag = new Operational.Flag("not_upgrading", Operational.Flag.Type.Requirement);
 
-	private FetchList2 fetchList;
+	private FetchList2 fetchList = null;
 
 	private Upgradable.Upgrade currentUpgrade;
 
 	private static List<Upgradable.UpgradableConfig> upgradableConfigs = new List<Upgradable.UpgradableConfig>();
+
+	public delegate void FetchedCallback(object value);
+
+	public delegate void StartCallback();
+
+	public delegate void CompleteCallback();
+
+	public delegate void CancelCallBack();
 
 	public class Upgrade
 	{
@@ -517,8 +532,8 @@ public class Upgradable : Workable, ISaveLoadable
 		}
 	}
 
-	[IgnoreFirst(1)]
 	[DelimitedRecord(",")]
+	[IgnoreFirst(1)]
 	[IgnoreEmptyLines]
 	public class UpgradableConfig
 	{
@@ -535,33 +550,48 @@ public class Upgradable : Workable, ISaveLoadable
 
 		public string GetModifierString(int idx)
 		{
+			string text;
 			if (idx < 0 || idx >= this.modifiers.Length)
 			{
-				return string.Empty;
+				text = "";
 			}
-			if (this.modifiers[idx].modifier == Upgradable.Upgrade.Target.None)
+			else if (this.modifiers[idx].modifier == Upgradable.Upgrade.Target.None)
 			{
-				return string.Empty;
+				text = "";
 			}
-			return string.Empty;
+			else
+			{
+				text = "";
+			}
+			return text;
 		}
 
 		public float GetModifierAmount(int idx)
 		{
+			float num;
 			if (idx < 0 || idx > this.modifiers.Length)
 			{
-				return 0f;
+				num = 0f;
 			}
-			return this.modifiers[idx].modifierAmount;
+			else
+			{
+				num = this.modifiers[idx].modifierAmount;
+			}
+			return num;
 		}
 
 		public Upgradable.Upgrade.Target GetModifierTarget(int idx)
 		{
+			Upgradable.Upgrade.Target target;
 			if (idx < 0 || idx > this.modifiers.Length)
 			{
-				return Upgradable.Upgrade.Target.None;
+				target = Upgradable.Upgrade.Target.None;
 			}
-			return this.modifiers[idx].modifier;
+			else
+			{
+				target = this.modifiers[idx].modifier;
+			}
+			return target;
 		}
 
 		public string prefabID;
@@ -593,12 +623,4 @@ public class Upgradable : Workable, ISaveLoadable
 			public float modifierAmount;
 		}
 	}
-
-	public delegate void FetchedCallback(object value);
-
-	public delegate void StartCallback();
-
-	public delegate void CompleteCallback();
-
-	public delegate void CancelCallBack();
 }

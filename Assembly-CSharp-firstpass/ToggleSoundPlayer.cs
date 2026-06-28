@@ -19,10 +19,10 @@ public class ToggleSoundPlayer : WidgetSoundPlayer
 
 	public WidgetSoundPlayer.WidgetSoundEvent[] toggle_widget_sound_events = new WidgetSoundPlayer.WidgetSoundEvent[]
 	{
-		new WidgetSoundPlayer.WidgetSoundEvent(0, "On Use On", string.Empty, true),
-		new WidgetSoundPlayer.WidgetSoundEvent(1, "On Use Off", string.Empty, true),
-		new WidgetSoundPlayer.WidgetSoundEvent(2, "On Pointer Enter", string.Empty, true),
-		new WidgetSoundPlayer.WidgetSoundEvent(3, "On Use Rejected", string.Empty, true)
+		new WidgetSoundPlayer.WidgetSoundEvent(0, "On Use On", "", true),
+		new WidgetSoundPlayer.WidgetSoundEvent(1, "On Use Off", "", true),
+		new WidgetSoundPlayer.WidgetSoundEvent(2, "On Pointer Enter", "", true),
+		new WidgetSoundPlayer.WidgetSoundEvent(3, "On Use Rejected", "", true)
 	};
 
 	public enum SoundEvents

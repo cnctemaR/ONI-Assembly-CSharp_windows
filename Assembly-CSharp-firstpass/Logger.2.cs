@@ -23,17 +23,21 @@ public class Logger<EntryType> : Logger
 	{
 		get
 		{
+			int num;
 			if (this.entries == null)
 			{
-				return 0;
+				num = 0;
 			}
-			return this.entries.Count;
+			else
+			{
+				num = this.entries.Count;
+			}
+			return num;
 		}
 	}
 
 	public void SetMaxEntries(int new_max)
 	{
-		this.maxEntries = new_max;
 	}
 
 	[Conditional("UNITY_EDITOR")]
@@ -44,6 +48,4 @@ public class Logger<EntryType> : Logger
 	private List<EntryType> entries;
 
 	public Action<EntryType> OnLog;
-
-	private int maxEntries = 35;
 }

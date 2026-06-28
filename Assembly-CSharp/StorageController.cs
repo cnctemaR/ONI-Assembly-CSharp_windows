@@ -6,9 +6,9 @@ public class StorageController : GameStateMachine<StorageController, StorageCont
 	{
 		default_state = this.off;
 		this.root.EventTransition(GameHashes.OnStorageChange, this.working, null);
-		this.off.PlayAnim("off", KAnim.PlayMode.Once, null).EventTransition(GameHashes.OperationalChanged, this.on, (StorageController.Instance smi) => smi.GetComponent<Operational>().IsOperational);
-		this.on.PlayAnim("on", KAnim.PlayMode.Once, null).EventTransition(GameHashes.OperationalChanged, this.off, (StorageController.Instance smi) => !smi.GetComponent<Operational>().IsOperational);
-		this.working.PlayAnim("working", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.off);
+		this.off.PlayAnim("off").EventTransition(GameHashes.OperationalChanged, this.on, (StorageController.Instance smi) => smi.GetComponent<Operational>().IsOperational);
+		this.on.PlayAnim("on").EventTransition(GameHashes.OperationalChanged, this.off, (StorageController.Instance smi) => !smi.GetComponent<Operational>().IsOperational);
+		this.working.PlayAnim("working").OnAnimQueueComplete(this.off);
 	}
 
 	public GameStateMachine<StorageController, StorageController.Instance, IStateMachineTarget, object>.State off;

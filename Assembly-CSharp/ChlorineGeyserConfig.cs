@@ -18,7 +18,7 @@ public class ChlorineGeyserConfig : IEntityConfig
 		elementEmitter.maxPressure = 5f;
 		geyser.SetEmitter(elementEmitter);
 		gameObject.UpdateComponentRequirement<LoopingSounds>(true);
-		geyser.emission_a = new Geyser.EmissionType(100f, 60f, 10f, new ElementConverter.OutputElement(0.75f, SimHashes.Chlorine, 423.15f, false, 1f, 1f, false, 1f, byte.MaxValue, 0), string.Empty);
+		geyser.emission_a = new Geyser.EmissionType(100f, 60f, 10f, new ElementConverter.OutputElement(0.75f, SimHashes.Chlorine, 423.15f, false, 1f, 1f, false, 1f, byte.MaxValue, 0), "");
 		geyser.emission_b = geyser.emission_a;
 		SoundEventVolumeCache.instance.AddVolume("geyser_methane_kanim", "GeyserMethane_shake_LP", NOISE_POLLUTION.NOISY.TIER5);
 		SoundEventVolumeCache.instance.AddVolume("geyser_methane_kanim", "GeyserMethane_shake_LP", NOISE_POLLUTION.NOISY.TIER6);

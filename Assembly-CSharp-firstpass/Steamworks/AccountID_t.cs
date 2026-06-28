@@ -25,16 +25,6 @@ namespace Steamworks
 			return this.m_AccountID.GetHashCode();
 		}
 
-		public bool Equals(AccountID_t other)
-		{
-			return this.m_AccountID == other.m_AccountID;
-		}
-
-		public int CompareTo(AccountID_t other)
-		{
-			return this.m_AccountID.CompareTo(other.m_AccountID);
-		}
-
 		public static bool operator ==(AccountID_t x, AccountID_t y)
 		{
 			return x.m_AccountID == y.m_AccountID;
@@ -53,6 +43,16 @@ namespace Steamworks
 		public static explicit operator uint(AccountID_t that)
 		{
 			return that.m_AccountID;
+		}
+
+		public bool Equals(AccountID_t other)
+		{
+			return this.m_AccountID == other.m_AccountID;
+		}
+
+		public int CompareTo(AccountID_t other)
+		{
+			return this.m_AccountID.CompareTo(other.m_AccountID);
 		}
 
 		public uint m_AccountID;

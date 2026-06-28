@@ -25,8 +25,11 @@ public class MoveToLocationMonitor : GameStateMachine<MoveToLocationMonitor, Mov
 		private void OnRefreshUserMenu(object data)
 		{
 			UserMenu component = base.master.GetComponent<UserMenu>();
-			string text = UI.USERMENUACTIONS.MOVETOLOCATION.TOOLTIP;
-			component.AddButton(new KIconButtonMenu.ButtonInfo("action_control", UI.USERMENUACTIONS.MOVETOLOCATION.NAME, new global::System.Action(this.OnClickMoveToLocation), global::Action.NumActions, null, null, null, text, true), 0.2f);
+			string text = "action_control";
+			string text2 = UI.USERMENUACTIONS.MOVETOLOCATION.NAME;
+			global::System.Action action = new global::System.Action(this.OnClickMoveToLocation);
+			string text3 = UI.USERMENUACTIONS.MOVETOLOCATION.TOOLTIP;
+			component.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 0.2f);
 		}
 
 		private void OnClickMoveToLocation()

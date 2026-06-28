@@ -25,16 +25,6 @@ namespace Steamworks
 			return this.m_PublishedFileUpdateHandle.GetHashCode();
 		}
 
-		public bool Equals(PublishedFileUpdateHandle_t other)
-		{
-			return this.m_PublishedFileUpdateHandle == other.m_PublishedFileUpdateHandle;
-		}
-
-		public int CompareTo(PublishedFileUpdateHandle_t other)
-		{
-			return this.m_PublishedFileUpdateHandle.CompareTo(other.m_PublishedFileUpdateHandle);
-		}
-
 		public static bool operator ==(PublishedFileUpdateHandle_t x, PublishedFileUpdateHandle_t y)
 		{
 			return x.m_PublishedFileUpdateHandle == y.m_PublishedFileUpdateHandle;
@@ -53,6 +43,16 @@ namespace Steamworks
 		public static explicit operator ulong(PublishedFileUpdateHandle_t that)
 		{
 			return that.m_PublishedFileUpdateHandle;
+		}
+
+		public bool Equals(PublishedFileUpdateHandle_t other)
+		{
+			return this.m_PublishedFileUpdateHandle == other.m_PublishedFileUpdateHandle;
+		}
+
+		public int CompareTo(PublishedFileUpdateHandle_t other)
+		{
+			return this.m_PublishedFileUpdateHandle.CompareTo(other.m_PublishedFileUpdateHandle);
 		}
 
 		public static readonly PublishedFileUpdateHandle_t Invalid = new PublishedFileUpdateHandle_t(ulong.MaxValue);

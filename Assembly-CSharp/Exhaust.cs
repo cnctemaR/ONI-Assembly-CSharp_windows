@@ -8,8 +8,8 @@ public class Exhaust : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(-592767678, new Action<object>(this.OnConduitStateChanged));
-		this.Subscribe(-111137758, new Action<object>(this.OnConduitStateChanged));
+		base.Subscribe(-592767678, new Action<object>(this.OnConduitStateChanged));
+		base.Subscribe(-111137758, new Action<object>(this.OnConduitStateChanged));
 		base.GetComponent<RequireInputs>().visualizeRequirements = false;
 	}
 
@@ -38,88 +38,90 @@ public class Exhaust : KMonoBehaviour
 			{
 				this.isAnimating = false;
 				this.recentlyExhausted = false;
-				this.Trigger(-793429877, null);
+				base.Trigger(-793429877, null);
 			}
-			return;
 		}
-		int num = Grid.PosToCell(this.transform.position);
-		if (!Grid.Solid[num] && this.consumer.ConsumptionRate != 0f)
+		else
 		{
-			List<GameObject> items = this.storage.items;
-			if (items.Count > 0)
+			int num = Grid.PosToCell(base.transform.position);
+			if (!Grid.Solid[num] && this.consumer.ConsumptionRate != 0f)
 			{
-				ConduitType typeOfConduit = this.consumer.TypeOfConduit;
-				if (typeOfConduit != ConduitType.Gas)
+				List<GameObject> items = this.storage.items;
+				if (items.Count > 0)
 				{
-					if (typeOfConduit == ConduitType.Liquid)
+					ConduitType typeOfConduit = this.consumer.TypeOfConduit;
+					if (typeOfConduit != ConduitType.Liquid)
 					{
-						int num2 = Grid.CellBelow(num);
-						bool flag = Grid.IsValidCell(num2) && !Grid.Solid[num2];
-						for (int i = 0; i < items.Count; i++)
+						if (typeOfConduit == ConduitType.Gas)
 						{
-							PrimaryElement component = items[i].GetComponent<PrimaryElement>();
-							if (component.Mass > 0f && component.Element.IsLiquid)
+							for (int i = 0; i < items.Count; i++)
 							{
-								int num3;
-								int num4;
-								this.CalculateDiseaseTransfer(this.exhaustPE, component, 0.05f, out num3, out num4);
-								component.ModifyDiseaseCount(-num3, "Exhaust transfer");
-								component.AddDisease(this.exhaustPE.DiseaseIdx, num4, "Exhaust transfer");
-								this.exhaustPE.ModifyDiseaseCount(-num4, "Exhaust transfer");
-								this.exhaustPE.AddDisease(component.DiseaseIdx, num3, "Exhaust transfer");
+								PrimaryElement component = items[i].GetComponent<PrimaryElement>();
+								if (component.Mass > 0f && component.Element.IsGas)
+								{
+									int num2;
+									int num3;
+									this.CalculateDiseaseTransfer(this.exhaustPE, component, 0.05f, out num2, out num3);
+									component.ModifyDiseaseCount(-num2, "Exhaust transfer");
+									component.AddDisease(this.exhaustPE.DiseaseIdx, num3, "Exhaust transfer");
+									this.exhaustPE.ModifyDiseaseCount(-num3, "Exhaust transfer");
+									this.exhaustPE.AddDisease(component.DiseaseIdx, num2, "Exhaust transfer");
+									SimMessages.AddRemoveSubstance(num, component.ElementID, CellEventLogger.Instance.ExhaustSimUpdate, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, -1);
+									component.KeepZeroMassObject = true;
+									component.Mass = 0f;
+									component.ModifyDiseaseCount(int.MinValue, "Exhaust.SimUpdate");
+									this.recentlyExhausted = true;
+									break;
+								}
+							}
+						}
+					}
+					else
+					{
+						int num4 = Grid.CellBelow(num);
+						bool flag = Grid.IsValidCell(num4) && !Grid.Solid[num4];
+						for (int j = 0; j < items.Count; j++)
+						{
+							PrimaryElement component2 = items[j].GetComponent<PrimaryElement>();
+							if (component2.Mass > 0f && component2.Element.IsLiquid)
+							{
+								int num5;
+								int num6;
+								this.CalculateDiseaseTransfer(this.exhaustPE, component2, 0.05f, out num5, out num6);
+								component2.ModifyDiseaseCount(-num5, "Exhaust transfer");
+								component2.AddDisease(this.exhaustPE.DiseaseIdx, num6, "Exhaust transfer");
+								this.exhaustPE.ModifyDiseaseCount(-num6, "Exhaust transfer");
+								this.exhaustPE.AddDisease(component2.DiseaseIdx, num5, "Exhaust transfer");
 								if (flag)
 								{
-									byte b = (byte)ElementLoader.elements.IndexOf(component.Element);
-									FallingWater.instance.AddParticle(num, b, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, true, false, true, false);
+									byte b = (byte)ElementLoader.elements.IndexOf(component2.Element);
+									FallingWater.instance.AddParticle(num, b, component2.Mass, component2.Temperature, component2.DiseaseIdx, component2.DiseaseCount, true, false, true, false);
 								}
 								else
 								{
-									SimMessages.AddRemoveSubstance(num, component.ElementID, CellEventLogger.Instance.ExhaustSimUpdate, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, -1);
+									SimMessages.AddRemoveSubstance(num, component2.ElementID, CellEventLogger.Instance.ExhaustSimUpdate, component2.Mass, component2.Temperature, component2.DiseaseIdx, component2.DiseaseCount, -1);
 								}
-								component.KeepZeroMassObject = true;
-								component.Mass = 0f;
-								component.ModifyDiseaseCount(int.MinValue, "Exhaust.SimUpdate");
+								component2.KeepZeroMassObject = true;
+								component2.Mass = 0f;
+								component2.ModifyDiseaseCount(int.MinValue, "Exhaust.SimUpdate");
 								this.recentlyExhausted = true;
 								break;
 							}
 						}
 					}
 				}
-				else
-				{
-					for (int j = 0; j < items.Count; j++)
-					{
-						PrimaryElement component2 = items[j].GetComponent<PrimaryElement>();
-						if (component2.Mass > 0f && component2.Element.IsGas)
-						{
-							int num5;
-							int num6;
-							this.CalculateDiseaseTransfer(this.exhaustPE, component2, 0.05f, out num5, out num6);
-							component2.ModifyDiseaseCount(-num5, "Exhaust transfer");
-							component2.AddDisease(this.exhaustPE.DiseaseIdx, num6, "Exhaust transfer");
-							this.exhaustPE.ModifyDiseaseCount(-num6, "Exhaust transfer");
-							this.exhaustPE.AddDisease(component2.DiseaseIdx, num5, "Exhaust transfer");
-							SimMessages.AddRemoveSubstance(num, component2.ElementID, CellEventLogger.Instance.ExhaustSimUpdate, component2.Mass, component2.Temperature, component2.DiseaseIdx, component2.DiseaseCount, -1);
-							component2.KeepZeroMassObject = true;
-							component2.Mass = 0f;
-							component2.ModifyDiseaseCount(int.MinValue, "Exhaust.SimUpdate");
-							this.recentlyExhausted = true;
-							break;
-						}
-					}
-				}
 			}
-		}
-		this.elapsedSwitchTime -= dt;
-		if (this.elapsedSwitchTime <= 0f)
-		{
-			this.elapsedSwitchTime = 1f;
-			if (this.recentlyExhausted != this.isAnimating)
+			this.elapsedSwitchTime -= dt;
+			if (this.elapsedSwitchTime <= 0f)
 			{
-				this.isAnimating = this.recentlyExhausted;
-				this.Trigger(-793429877, null);
+				this.elapsedSwitchTime = 1f;
+				if (this.recentlyExhausted != this.isAnimating)
+				{
+					this.isAnimating = this.recentlyExhausted;
+					base.Trigger(-793429877, null);
+				}
+				this.recentlyExhausted = false;
 			}
-			this.recentlyExhausted = false;
 		}
 	}
 
@@ -127,8 +129,6 @@ public class Exhaust : KMonoBehaviour
 	{
 		return this.isAnimating;
 	}
-
-	private const float MinSwitchTime = 1f;
 
 	[MyCmpGet]
 	private Vent vent;
@@ -149,7 +149,9 @@ public class Exhaust : KMonoBehaviour
 
 	private bool isAnimating;
 
-	private bool recentlyExhausted;
+	private bool recentlyExhausted = false;
 
-	private float elapsedSwitchTime;
+	private const float MinSwitchTime = 1f;
+
+	private float elapsedSwitchTime = 0f;
 }

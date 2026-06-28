@@ -6,8 +6,8 @@ public class NextUpdateTimer : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.nextReleaseDate = new global::System.DateTime(2017, 11, 16, 17, 0, 0, DateTimeKind.Utc);
-		this.currentReleaseDate = new global::System.DateTime(2017, 10, 5, 17, 0, 0, DateTimeKind.Utc);
+		this.nextReleaseDate = new global::System.DateTime(2017, 12, 14, 17, 0, 0, DateTimeKind.Utc);
+		this.currentReleaseDate = new global::System.DateTime(2017, 11, 16, 17, 0, 0, DateTimeKind.Utc);
 		this.initialAnimScale = this.UpdateAnimController.animScale;
 		ScreenResize instance = ScreenResize.Instance;
 		instance.OnResize = (global::System.Action)Delegate.Combine(instance.OnResize, new global::System.Action(this.RefreshScale));
@@ -26,7 +26,7 @@ public class NextUpdateTimer : KMonoBehaviour
 		TimeSpan timeSpan = this.nextReleaseDate - this.currentReleaseDate;
 		TimeSpan timeSpan2 = this.nextReleaseDate - global::System.DateTime.UtcNow;
 		TimeSpan timeSpan3 = global::System.DateTime.UtcNow - this.currentReleaseDate;
-		string text = string.Empty;
+		string text;
 		string text2;
 		if (timeSpan2.TotalHours < 8.0)
 		{

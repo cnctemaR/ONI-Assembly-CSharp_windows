@@ -20,7 +20,6 @@ public class Polluter : IPolluter
 			if (this._radius == 0)
 			{
 				global::Debug.LogFormat("[{0}] has a 0 radius noise, this will disable it", new object[] { this.GetName() });
-				return;
 			}
 		}
 	}

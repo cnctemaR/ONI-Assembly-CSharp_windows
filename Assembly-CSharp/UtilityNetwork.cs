@@ -6,6 +6,18 @@ public class UtilityNetwork
 	{
 	}
 
+	public virtual void RemoveItem(int cell, object item)
+	{
+	}
+
+	public virtual void ConnectItem(int cell, object item)
+	{
+	}
+
+	public virtual void DisconnectItem(int cell, object item)
+	{
+	}
+
 	public virtual void Reset(UtilityNetworkGridNode[] grid)
 	{
 	}

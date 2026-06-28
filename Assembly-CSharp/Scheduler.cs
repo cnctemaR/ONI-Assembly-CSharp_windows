@@ -38,9 +38,9 @@ public class Scheduler : IScheduler
 		return schedulerHandle;
 	}
 
-	private SchedulerHandle Schedule(string name, float time, float time_interval, Action<object> callback, object callback_data, Guid id, GameObject profiler_obj)
+	private SchedulerHandle Schedule(string name, float time, float time_interval, Action<object> callback, object callback_data, GameObject profiler_obj)
 	{
-		SchedulerEntry schedulerEntry = new SchedulerEntry(id, name, time + this.clock.GetTime(), time_interval, callback, callback_data, profiler_obj);
+		SchedulerEntry schedulerEntry = new SchedulerEntry(name, time + this.clock.GetTime(), time_interval, callback, callback_data, profiler_obj);
 		return this.Schedule(schedulerEntry);
 	}
 
@@ -65,8 +65,7 @@ public class Scheduler : IScheduler
 		{
 			global::Debug.LogError("Scheduler group mismatch!", null);
 		}
-		Guid nextId = this.GetNextId();
-		SchedulerHandle schedulerHandle = this.Schedule(name, interval + time_offset, interval, callback, callback_data, nextId, profiler_obj);
+		SchedulerHandle schedulerHandle = this.Schedule(name, interval + time_offset, interval, callback, callback_data, profiler_obj);
 		if (group != null)
 		{
 			group.Add(schedulerHandle);
@@ -80,18 +79,12 @@ public class Scheduler : IScheduler
 		{
 			global::Debug.LogError("Scheduler group mismatch!", null);
 		}
-		Guid nextId = this.GetNextId();
-		SchedulerHandle schedulerHandle = this.Schedule(name, time, -1f, callback, callback_data, nextId, null);
+		SchedulerHandle schedulerHandle = this.Schedule(name, time, -1f, callback, callback_data, null);
 		if (group != null)
 		{
 			group.Add(schedulerHandle);
 		}
 		return schedulerHandle;
-	}
-
-	public Guid GetNextId()
-	{
-		return Guid.NewGuid();
 	}
 
 	public void Clear(SchedulerHandle handle)
@@ -101,47 +94,46 @@ public class Scheduler : IScheduler
 
 	public void Update()
 	{
-		if (this.entryCount == 0)
+		if (this.entryCount != 0)
 		{
-			return;
-		}
-		if (this.dirty)
-		{
-			this.dirty = false;
-			Array.Sort<SchedulerEntry>(this.entries, 0, this.entryCount, Scheduler.comparer);
-		}
-		int entryCount = this.entryCount;
-		int i = 0;
-		using (new KProfiler.Region("Scheduler.Update", null))
-		{
-			float time = this.clock.GetTime();
-			if (this.previousTime == time)
+			if (this.dirty)
 			{
-				return;
+				this.dirty = false;
+				Array.Sort<SchedulerEntry>(this.entries, 0, this.entryCount, Scheduler.comparer);
 			}
-			this.previousTime = time;
-			while (i < entryCount)
+			int entryCount = this.entryCount;
+			int i = 0;
+			using (new KProfiler.Region("Scheduler.Update", null))
 			{
-				SchedulerEntry schedulerEntry = this.entries[i];
-				if (time < schedulerEntry.time)
+				float time = this.clock.GetTime();
+				if (this.previousTime == time)
 				{
-					break;
+					return;
 				}
-				if (schedulerEntry.callback != null)
+				this.previousTime = time;
+				while (i < entryCount)
 				{
-					SystemScheduler.instance.AddTask(SystemScheduler.Priority.Default, schedulerEntry.details);
-					if (this.entries[i].timeInterval >= 0f)
+					SchedulerEntry schedulerEntry = this.entries[i];
+					if (time < schedulerEntry.time)
 					{
-						SchedulerEntry schedulerEntry2 = this.entries[i];
-						schedulerEntry2.time = this.clock.GetTime() + schedulerEntry2.timeInterval;
-						this.Schedule(schedulerEntry2);
+						break;
 					}
+					if (schedulerEntry.callback != null)
+					{
+						SystemScheduler.instance.AddTask(SystemScheduler.Priority.Default, schedulerEntry.details);
+						if (this.entries[i].timeInterval >= 0f)
+						{
+							SchedulerEntry schedulerEntry2 = this.entries[i];
+							schedulerEntry2.time = this.clock.GetTime() + schedulerEntry2.timeInterval;
+							this.Schedule(schedulerEntry2);
+						}
+					}
+					i++;
 				}
-				i++;
 			}
+			this.entryCount -= i;
+			Array.Copy(this.entries, i, this.entries, 0, this.entryCount);
 		}
-		this.entryCount -= i;
-		Array.Copy(this.entries, i, this.entries, 0, this.entryCount);
 	}
 
 	public global::Logger GetAddRemoveLog()
@@ -164,7 +156,7 @@ public class Scheduler : IScheduler
 
 	private float previousTime = float.NegativeInfinity;
 
-	private bool dirty;
+	private bool dirty = false;
 
 	private static Scheduler.EntryComparer comparer = new Scheduler.EntryComparer();
 
@@ -172,15 +164,20 @@ public class Scheduler : IScheduler
 	{
 		public int Compare(SchedulerEntry a, SchedulerEntry b)
 		{
+			int num;
 			if (a.time < b.time)
 			{
-				return -1;
+				num = -1;
 			}
-			if (a.time > b.time)
+			else if (a.time > b.time)
 			{
-				return 1;
+				num = 1;
 			}
-			return 0;
+			else
+			{
+				num = 0;
+			}
+			return num;
 		}
 	}
 }

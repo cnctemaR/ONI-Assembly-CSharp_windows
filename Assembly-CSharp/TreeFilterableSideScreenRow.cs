@@ -32,19 +32,24 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 				flag2 = true;
 			}
 		}
+		TreeFilterableSideScreenRow.State state;
 		if (flag && !flag2)
 		{
-			return TreeFilterableSideScreenRow.State.On;
+			state = TreeFilterableSideScreenRow.State.On;
 		}
-		if (!flag && flag2)
+		else if (!flag && flag2)
 		{
-			return TreeFilterableSideScreenRow.State.Off;
+			state = TreeFilterableSideScreenRow.State.Off;
 		}
-		if (flag && flag2)
+		else if (flag && flag2)
 		{
-			return TreeFilterableSideScreenRow.State.Mixed;
+			state = TreeFilterableSideScreenRow.State.Mixed;
 		}
-		return TreeFilterableSideScreenRow.State.On;
+		else
+		{
+			state = TreeFilterableSideScreenRow.State.On;
+		}
+		return state;
 	}
 
 	protected override void OnPrefabInit()
@@ -53,15 +58,17 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 		MultiToggle multiToggle = this.checkBoxToggle;
 		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(delegate
 		{
-			switch (this.GetState())
+			TreeFilterableSideScreenRow.State state = this.GetState();
+			if (state != TreeFilterableSideScreenRow.State.On)
 			{
-			case TreeFilterableSideScreenRow.State.Off:
-			case TreeFilterableSideScreenRow.State.Mixed:
-				this.ChangeCheckBoxState(TreeFilterableSideScreenRow.State.On);
-				break;
-			case TreeFilterableSideScreenRow.State.On:
+				if (state == TreeFilterableSideScreenRow.State.Mixed || state == TreeFilterableSideScreenRow.State.Off)
+				{
+					this.ChangeCheckBoxState(TreeFilterableSideScreenRow.State.On);
+				}
+			}
+			else
+			{
 				this.ChangeCheckBoxState(TreeFilterableSideScreenRow.State.Off);
-				break;
 			}
 		}));
 	}
@@ -96,20 +103,25 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 
 	public void ChangeCheckBoxState(TreeFilterableSideScreenRow.State newState)
 	{
-		switch (newState)
+		if (newState != TreeFilterableSideScreenRow.State.Off)
 		{
-		case TreeFilterableSideScreenRow.State.Off:
+			if (newState != TreeFilterableSideScreenRow.State.Mixed)
+			{
+				if (newState == TreeFilterableSideScreenRow.State.On)
+				{
+					this.rowElements.ForEach(delegate(TreeFilterableSideScreenElement re)
+					{
+						re.SetCheckBox(true);
+					});
+				}
+			}
+		}
+		else
+		{
 			this.rowElements.ForEach(delegate(TreeFilterableSideScreenElement re)
 			{
 				re.SetCheckBox(false);
 			});
-			break;
-		case TreeFilterableSideScreenRow.State.On:
-			this.rowElements.ForEach(delegate(TreeFilterableSideScreenElement re)
-			{
-				re.SetCheckBox(true);
-			});
-			break;
 		}
 		this.visualDirty = true;
 	}
@@ -190,7 +202,7 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 		this.UpdateCheckBoxVisualState();
 	}
 
-	public bool visualDirty;
+	public bool visualDirty = false;
 
 	[SerializeField]
 	private LocText elementName;

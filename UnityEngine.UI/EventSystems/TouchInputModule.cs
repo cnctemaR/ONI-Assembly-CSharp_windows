@@ -5,8 +5,8 @@ using UnityEngine.Serialization;
 
 namespace UnityEngine.EventSystems
 {
-	[AddComponentMenu("Event/Touch Input Module")]
 	[Obsolete("TouchInputModule is no longer required as Touch input is now handled in StandaloneInputModule.")]
+	[AddComponentMenu("Event/Touch Input Module")]
 	public class TouchInputModule : PointerInputModule
 	{
 		protected TouchInputModule()
@@ -41,35 +41,41 @@ namespace UnityEngine.EventSystems
 		public override void UpdateModule()
 		{
 			this.m_LastMousePosition = this.m_MousePosition;
-			this.m_MousePosition = Input.mousePosition;
+			this.m_MousePosition = base.input.mousePosition;
 		}
 
 		public override bool IsModuleSupported()
 		{
-			return this.forceModuleActive || Input.touchSupported;
+			return this.forceModuleActive || base.input.touchSupported;
 		}
 
 		public override bool ShouldActivateModule()
 		{
+			bool flag;
 			if (!base.ShouldActivateModule())
 			{
-				return false;
+				flag = false;
 			}
-			if (this.m_ForceModuleActive)
+			else if (this.m_ForceModuleActive)
 			{
-				return true;
+				flag = true;
 			}
-			if (this.UseFakeInput())
+			else if (this.UseFakeInput())
 			{
-				bool mouseButtonDown = Input.GetMouseButtonDown(0);
-				return mouseButtonDown | ((this.m_MousePosition - this.m_LastMousePosition).sqrMagnitude > 0f);
+				bool flag2 = base.input.GetMouseButtonDown(0);
+				flag2 |= (this.m_MousePosition - this.m_LastMousePosition).sqrMagnitude > 0f;
+				flag = flag2;
 			}
-			return Input.touchCount > 0;
+			else
+			{
+				flag = base.input.touchCount > 0;
+			}
+			return flag;
 		}
 
 		private bool UseFakeInput()
 		{
-			return !Input.touchSupported;
+			return !base.input.touchSupported;
 		}
 
 		public override void Process()
@@ -93,7 +99,7 @@ namespace UnityEngine.EventSystems
 				eventData.buttonData.delta = Vector2.zero;
 			}
 			this.ProcessTouchPress(eventData.buttonData, eventData.PressedThisFrame(), eventData.ReleasedThisFrame());
-			if (Input.GetMouseButton(0))
+			if (base.input.GetMouseButton(0))
 			{
 				this.ProcessMove(eventData.buttonData);
 				this.ProcessDrag(eventData.buttonData);
@@ -102,9 +108,9 @@ namespace UnityEngine.EventSystems
 
 		private void ProcessTouchEvents()
 		{
-			for (int i = 0; i < Input.touchCount; i++)
+			for (int i = 0; i < base.input.touchCount; i++)
 			{
-				Touch touch = Input.GetTouch(i);
+				Touch touch = base.input.GetTouch(i);
 				if (touch.type != TouchType.Indirect)
 				{
 					bool flag;
@@ -124,7 +130,7 @@ namespace UnityEngine.EventSystems
 			}
 		}
 
-		private void ProcessTouchPress(PointerEventData pointerEvent, bool pressed, bool released)
+		protected void ProcessTouchPress(PointerEventData pointerEvent, bool pressed, bool released)
 		{
 			GameObject gameObject = pointerEvent.pointerCurrentRaycast.gameObject;
 			if (pressed)
@@ -236,8 +242,8 @@ namespace UnityEngine.EventSystems
 
 		private Vector2 m_MousePosition;
 
-		[FormerlySerializedAs("m_AllowActivationOnStandalone")]
 		[SerializeField]
+		[FormerlySerializedAs("m_AllowActivationOnStandalone")]
 		private bool m_ForceModuleActive;
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using KSerialization;
@@ -7,8 +8,10 @@ using UnityEngine;
 
 public class SaveManager : KMonoBehaviour
 {
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<SaveLoadRoot> onRegister;
 
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<SaveLoadRoot> onUnregister;
 
 	protected override void OnPrefabInit()
@@ -18,11 +21,10 @@ public class SaveManager : KMonoBehaviour
 
 	private void OnAddPrefab(KPrefabID prefab)
 	{
-		if (prefab == null)
+		if (!(prefab == null))
 		{
-			return;
+			this.prefabMap[prefab.GetSaveLoadTag()] = prefab.gameObject;
 		}
-		this.prefabMap[prefab.GetSaveLoadTag()] = prefab.gameObject;
 	}
 
 	public Dictionary<Tag, List<SaveLoadRoot>> GetLists()
@@ -33,6 +35,7 @@ public class SaveManager : KMonoBehaviour
 	private List<SaveLoadRoot> GetSaveLoadRootList(SaveLoadRoot saver)
 	{
 		KPrefabID component = saver.GetComponent<KPrefabID>();
+		List<SaveLoadRoot> list;
 		if (component == null)
 		{
 			Output.LogErrorWithObj(saver.gameObject, new object[]
@@ -41,13 +44,17 @@ public class SaveManager : KMonoBehaviour
 				saver.gameObject.name,
 				"does not have one."
 			});
-			return null;
+			list = null;
 		}
-		List<SaveLoadRoot> list;
-		if (!this.sceneObjects.TryGetValue(component.GetSaveLoadTag(), out list))
+		else
 		{
-			list = new List<SaveLoadRoot>();
-			this.sceneObjects[component.GetSaveLoadTag()] = list;
+			List<SaveLoadRoot> list2;
+			if (!this.sceneObjects.TryGetValue(component.GetSaveLoadTag(), out list2))
+			{
+				list2 = new List<SaveLoadRoot>();
+				this.sceneObjects[component.GetSaveLoadTag()] = list2;
+			}
+			list = list2;
 		}
 		return list;
 	}
@@ -55,14 +62,13 @@ public class SaveManager : KMonoBehaviour
 	public void Register(SaveLoadRoot root)
 	{
 		List<SaveLoadRoot> saveLoadRootList = this.GetSaveLoadRootList(root);
-		if (saveLoadRootList == null)
+		if (saveLoadRootList != null)
 		{
-			return;
-		}
-		saveLoadRootList.Add(root);
-		if (this.onRegister != null)
-		{
-			this.onRegister(root);
+			saveLoadRootList.Add(root);
+			if (this.onRegister != null)
+			{
+				this.onRegister(root);
+			}
 		}
 	}
 
@@ -73,25 +79,29 @@ public class SaveManager : KMonoBehaviour
 			this.onUnregister(root);
 		}
 		List<SaveLoadRoot> saveLoadRootList = this.GetSaveLoadRootList(root);
-		if (saveLoadRootList == null)
+		if (saveLoadRootList != null)
 		{
-			return;
+			saveLoadRootList.Remove(root);
 		}
-		saveLoadRootList.Remove(root);
 	}
 
 	public GameObject GetPrefab(Tag tag)
 	{
+		GameObject gameObject;
 		if (this.prefabMap.ContainsKey(tag))
 		{
-			return this.prefabMap[tag];
+			gameObject = this.prefabMap[tag];
 		}
-		Output.Log(new object[]
+		else
 		{
-			"Item not found in prefabMap",
-			"[" + tag.Name + "]"
-		});
-		return null;
+			Output.Log(new object[]
+			{
+				"Item not found in prefabMap",
+				"[" + tag.Name + "]"
+			});
+			gameObject = null;
+		}
+		return gameObject;
 	}
 
 	public void Save(BinaryWriter writer)
@@ -110,7 +120,9 @@ public class SaveManager : KMonoBehaviour
 		writer.Write(num);
 		this.orderedKeys.Clear();
 		this.orderedKeys.AddRange(this.sceneObjects.Keys);
+		this.orderedKeys.Remove(SaveGame.Instance.PrefabID());
 		this.orderedKeys = this.orderedKeys.OrderBy<Tag, bool>((Tag a) => a.Name.Contains("UnderConstruction")).ToList<Tag>();
+		this.Write(SaveGame.Instance.PrefabID(), new List<SaveLoadRoot>(new SaveLoadRoot[] { SaveGame.Instance.GetComponent<SaveLoadRoot>() }), writer);
 		foreach (Tag tag in this.orderedKeys)
 		{
 			List<SaveLoadRoot> list = this.sceneObjects[tag];
@@ -182,66 +194,74 @@ public class SaveManager : KMonoBehaviour
 	public bool Load(IReader reader)
 	{
 		char[] array = reader.ReadChars(SaveManager.SAVE_HEADER.Length);
+		bool flag;
 		if (array == null || array.Length != SaveManager.SAVE_HEADER.Length)
 		{
-			return false;
+			flag = false;
 		}
-		for (int i = 0; i < SaveManager.SAVE_HEADER.Length; i++)
+		else
 		{
-			if (array[i] != SaveManager.SAVE_HEADER[i])
+			for (int i = 0; i < SaveManager.SAVE_HEADER.Length; i++)
 			{
-				return false;
-			}
-		}
-		int num = reader.ReadInt32();
-		int num2 = reader.ReadInt32();
-		if (num != 7 || num2 > 1)
-		{
-			Output.LogWarning(new object[] { string.Format("SAVE FILE VERSION MISMATCH! Expected {0}.{1} but got {2}.{3}", new object[] { 7, 1, num, num2 }) });
-			return false;
-		}
-		this.ClearScene();
-		try
-		{
-			int num3 = reader.ReadInt32();
-			for (int j = 0; j < num3; j++)
-			{
-				string text = reader.ReadKleiString();
-				int num4 = reader.ReadInt32();
-				int num5 = reader.ReadInt32();
-				Tag tag = TagManager.Create(text, null);
-				GameObject gameObject;
-				if (!this.prefabMap.TryGetValue(tag, out gameObject))
+				if (array[i] != SaveManager.SAVE_HEADER[i])
 				{
-					Output.LogWarning(new object[] { "Could not find prefab '" + text + "'" });
-					reader.SkipBytes(num5);
+					return false;
 				}
-				else
+			}
+			int num = reader.ReadInt32();
+			int num2 = reader.ReadInt32();
+			if (num != 7 || num2 > 1)
+			{
+				Output.LogWarning(new object[] { string.Format("SAVE FILE VERSION MISMATCH! Expected {0}.{1} but got {2}.{3}", new object[] { 7, 1, num, num2 }) });
+				flag = false;
+			}
+			else
+			{
+				this.ClearScene();
+				try
 				{
-					List<SaveLoadRoot> list = new List<SaveLoadRoot>(num4);
-					this.sceneObjects[tag] = list;
-					for (int k = 0; k < num4; k++)
+					int num3 = reader.ReadInt32();
+					for (int j = 0; j < num3; j++)
 					{
-						SaveLoadRoot saveLoadRoot = SaveLoadRoot.Load(gameObject, reader);
-						if (saveLoadRoot == null)
+						string text = reader.ReadKleiString();
+						int num4 = reader.ReadInt32();
+						int num5 = reader.ReadInt32();
+						Tag tag = TagManager.Create(text, null);
+						GameObject gameObject;
+						if (!this.prefabMap.TryGetValue(tag, out gameObject))
 						{
-							Output.LogError(new object[] { "Error loading data [" + text + "]" });
-							return false;
+							Output.LogWarning(new object[] { "Could not find prefab '" + text + "'" });
+							reader.SkipBytes(num5);
+						}
+						else
+						{
+							List<SaveLoadRoot> list = new List<SaveLoadRoot>(num4);
+							this.sceneObjects[tag] = list;
+							for (int k = 0; k < num4; k++)
+							{
+								SaveLoadRoot saveLoadRoot = SaveLoadRoot.Load(gameObject, reader);
+								if (saveLoadRoot == null)
+								{
+									Output.LogError(new object[] { "Error loading data [" + text + "]" });
+									return false;
+								}
+							}
 						}
 					}
 				}
+				catch (Exception ex)
+				{
+					Output.LogError(new object[]
+					{
+						"Error deserializing prefabs\n\n",
+						ex.ToString()
+					});
+					throw ex;
+				}
+				flag = true;
 			}
 		}
-		catch (Exception ex)
-		{
-			Output.LogError(new object[]
-			{
-				"Error deserializing prefabs\n\n",
-				ex.ToString()
-			});
-			throw ex;
-		}
-		return true;
+		return flag;
 	}
 
 	private void ClearScene()

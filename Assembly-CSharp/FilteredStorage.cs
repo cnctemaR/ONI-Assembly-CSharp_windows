@@ -22,7 +22,7 @@ public class FilteredStorage
 		}));
 		if (FilteredStorage.capacityStatusItem == null)
 		{
-			FilteredStorage.capacityStatusItem = new StatusItem("StorageLocker", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.Regions, true, 14334);
+			FilteredStorage.capacityStatusItem = new StatusItem("StorageLocker", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.Regions, true, 30718);
 			FilteredStorage.capacityStatusItem.resolveStringCallback = delegate(string str, object data)
 			{
 				FilteredStorage filteredStorage = (FilteredStorage)data;
@@ -38,7 +38,7 @@ public class FilteredStorage
 				str = str.Replace("{Capacity}", text2);
 				return str;
 			};
-			FilteredStorage.noFilterStatusItem = new StatusItem("NoStorageFilterSet", "BUILDING", "status_item_no_filter_set", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.Regions, true, 14334);
+			FilteredStorage.noFilterStatusItem = new StatusItem("NoStorageFilterSet", "BUILDING", "status_item_no_filter_set", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.Regions, true, 30718);
 		}
 		root.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, FilteredStorage.capacityStatusItem, this);
 	}
@@ -46,7 +46,6 @@ public class FilteredStorage
 	private void CreateMeter()
 	{
 		this.meter = new MeterController(this.root.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, new string[] { "meter_frame", "meter_level" });
-		this.meter.SetFilterByAnim(false);
 	}
 
 	public void CleanUp()
@@ -112,25 +111,24 @@ public class FilteredStorage
 		component.TintColour = ((!flag) ? this.noFilterTint : this.filterTint);
 		if (this.fetchList != null)
 		{
-			this.fetchList.Cancel(string.Empty);
+			this.fetchList.Cancel("");
 			this.fetchList = null;
 		}
 		float maxCapacity = this.GetMaxCapacity();
 		float num = this.storage.MassStored();
 		float num2 = Mathf.Max(0f, maxCapacity - num);
 		int num3 = (int)num2;
-		if (num3 <= 0)
+		if (num3 > 0)
 		{
-			return;
+			if (flag)
+			{
+				this.fetchList = new FetchList2(this.storage);
+				this.fetchList.ShowStatusItem = false;
+				this.fetchList.Add(tags, this.forbiddenTags, (float)num3, FetchOrder2.OperationalRequirement.None);
+				this.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
+			}
+			this.root.GetComponent<KSelectable>().ToggleStatusItem(FilteredStorage.noFilterStatusItem, !flag, this);
 		}
-		if (flag)
-		{
-			this.fetchList = new FetchList2(this.storage);
-			this.fetchList.ShowStatusItem = false;
-			this.fetchList.Add(tags, this.forbiddenTags, (float)num3, FetchOrder2.OperationalRequirement.None);
-			this.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
-		}
-		this.root.GetComponent<KSelectable>().ToggleStatusItem(FilteredStorage.noFilterStatusItem, !flag, this);
 	}
 
 	public void SetEnabled(bool enabled)

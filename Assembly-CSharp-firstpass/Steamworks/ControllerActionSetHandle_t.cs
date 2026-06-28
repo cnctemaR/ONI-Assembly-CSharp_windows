@@ -25,16 +25,6 @@ namespace Steamworks
 			return this.m_ControllerActionSetHandle.GetHashCode();
 		}
 
-		public bool Equals(ControllerActionSetHandle_t other)
-		{
-			return this.m_ControllerActionSetHandle == other.m_ControllerActionSetHandle;
-		}
-
-		public int CompareTo(ControllerActionSetHandle_t other)
-		{
-			return this.m_ControllerActionSetHandle.CompareTo(other.m_ControllerActionSetHandle);
-		}
-
 		public static bool operator ==(ControllerActionSetHandle_t x, ControllerActionSetHandle_t y)
 		{
 			return x.m_ControllerActionSetHandle == y.m_ControllerActionSetHandle;
@@ -53,6 +43,16 @@ namespace Steamworks
 		public static explicit operator ulong(ControllerActionSetHandle_t that)
 		{
 			return that.m_ControllerActionSetHandle;
+		}
+
+		public bool Equals(ControllerActionSetHandle_t other)
+		{
+			return this.m_ControllerActionSetHandle == other.m_ControllerActionSetHandle;
+		}
+
+		public int CompareTo(ControllerActionSetHandle_t other)
+		{
+			return this.m_ControllerActionSetHandle.CompareTo(other.m_ControllerActionSetHandle);
 		}
 
 		public ulong m_ControllerActionSetHandle;

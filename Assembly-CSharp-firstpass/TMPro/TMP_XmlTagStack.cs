@@ -33,12 +33,17 @@ namespace TMPro
 		public T Remove()
 		{
 			this.index--;
+			T t;
 			if (this.index <= 0)
 			{
 				this.index = 0;
-				return this.itemStack[0];
+				t = this.itemStack[0];
 			}
-			return this.itemStack[this.index - 1];
+			else
+			{
+				t = this.itemStack[this.index - 1];
+			}
+			return t;
 		}
 
 		public T CurrentItem()

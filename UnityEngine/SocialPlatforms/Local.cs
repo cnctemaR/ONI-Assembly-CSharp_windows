@@ -6,6 +6,18 @@ namespace UnityEngine.SocialPlatforms
 {
 	public class Local : ISocialPlatform
 	{
+		public ILocalUser localUser
+		{
+			get
+			{
+				if (Local.m_LocalUser == null)
+				{
+					Local.m_LocalUser = new LocalUser();
+				}
+				return Local.m_LocalUser;
+			}
+		}
+
 		void ISocialPlatform.Authenticate(ILocalUser user, Action<bool> callback)
 		{
 			LocalUser localUser = (LocalUser)user;
@@ -22,207 +34,195 @@ namespace UnityEngine.SocialPlatforms
 			}
 		}
 
+		void ISocialPlatform.Authenticate(ILocalUser user, Action<bool, string> callback)
+		{
+			((ISocialPlatform)this).Authenticate(user, delegate(bool success)
+			{
+				callback(success, null);
+			});
+		}
+
 		void ISocialPlatform.LoadFriends(ILocalUser user, Action<bool> callback)
 		{
-			if (!this.VerifyUser())
+			if (this.VerifyUser())
 			{
-				return;
-			}
-			((LocalUser)user).SetFriends(this.m_Friends.ToArray());
-			if (callback != null)
-			{
-				callback(true);
-			}
-		}
-
-		void ISocialPlatform.LoadScores(ILeaderboard board, Action<bool> callback)
-		{
-			if (!this.VerifyUser())
-			{
-				return;
-			}
-			Leaderboard leaderboard = (Leaderboard)board;
-			foreach (Leaderboard leaderboard2 in this.m_Leaderboards)
-			{
-				if (leaderboard2.id == leaderboard.id)
+				((LocalUser)user).SetFriends(this.m_Friends.ToArray());
+				if (callback != null)
 				{
-					leaderboard.SetTitle(leaderboard2.title);
-					leaderboard.SetScores(leaderboard2.scores);
-					leaderboard.SetMaxRange((uint)leaderboard2.scores.Length);
+					callback(true);
 				}
-			}
-			this.SortScores(leaderboard);
-			this.SetLocalPlayerScore(leaderboard);
-			if (callback != null)
-			{
-				callback(true);
-			}
-		}
-
-		bool ISocialPlatform.GetLoading(ILeaderboard board)
-		{
-			return this.VerifyUser() && ((Leaderboard)board).loading;
-		}
-
-		public ILocalUser localUser
-		{
-			get
-			{
-				if (Local.m_LocalUser == null)
-				{
-					Local.m_LocalUser = new LocalUser();
-				}
-				return Local.m_LocalUser;
 			}
 		}
 
 		public void LoadUsers(string[] userIDs, Action<IUserProfile[]> callback)
 		{
 			List<UserProfile> list = new List<UserProfile>();
-			if (!this.VerifyUser())
+			if (this.VerifyUser())
 			{
-				return;
-			}
-			foreach (string text in userIDs)
-			{
-				foreach (UserProfile userProfile in this.m_Users)
+				foreach (string text in userIDs)
 				{
-					if (userProfile.id == text)
+					foreach (UserProfile userProfile in this.m_Users)
 					{
-						list.Add(userProfile);
+						if (userProfile.id == text)
+						{
+							list.Add(userProfile);
+						}
+					}
+					foreach (UserProfile userProfile2 in this.m_Friends)
+					{
+						if (userProfile2.id == text)
+						{
+							list.Add(userProfile2);
+						}
 					}
 				}
-				foreach (UserProfile userProfile2 in this.m_Friends)
-				{
-					if (userProfile2.id == text)
-					{
-						list.Add(userProfile2);
-					}
-				}
+				callback(list.ToArray());
 			}
-			callback(list.ToArray());
 		}
 
 		public void ReportProgress(string id, double progress, Action<bool> callback)
 		{
-			if (!this.VerifyUser())
+			if (this.VerifyUser())
 			{
-				return;
-			}
-			foreach (Achievement achievement in this.m_Achievements)
-			{
-				if (achievement.id == id && achievement.percentCompleted <= progress)
+				foreach (Achievement achievement in this.m_Achievements)
 				{
-					if (progress >= 100.0)
+					if (achievement.id == id && achievement.percentCompleted <= progress)
 					{
-						achievement.SetCompleted(true);
+						if (progress >= 100.0)
+						{
+							achievement.SetCompleted(true);
+						}
+						achievement.SetHidden(false);
+						achievement.SetLastReportedDate(DateTime.Now);
+						achievement.percentCompleted = progress;
+						if (callback != null)
+						{
+							callback(true);
+						}
+						return;
 					}
-					achievement.SetHidden(false);
-					achievement.SetLastReportedDate(DateTime.Now);
-					achievement.percentCompleted = progress;
-					if (callback != null)
-					{
-						callback(true);
-					}
-					return;
 				}
-			}
-			foreach (AchievementDescription achievementDescription in this.m_AchievementDescriptions)
-			{
-				if (achievementDescription.id == id)
+				foreach (AchievementDescription achievementDescription in this.m_AchievementDescriptions)
 				{
-					bool flag = progress >= 100.0;
-					Achievement achievement2 = new Achievement(id, progress, flag, false, DateTime.Now);
-					this.m_Achievements.Add(achievement2);
-					if (callback != null)
+					if (achievementDescription.id == id)
 					{
-						callback(true);
+						bool flag = progress >= 100.0;
+						Achievement achievement2 = new Achievement(id, progress, flag, false, DateTime.Now);
+						this.m_Achievements.Add(achievement2);
+						if (callback != null)
+						{
+							callback(true);
+						}
+						return;
 					}
-					return;
 				}
-			}
-			Debug.LogError("Achievement ID not found");
-			if (callback != null)
-			{
-				callback(false);
+				Debug.LogError("Achievement ID not found");
+				if (callback != null)
+				{
+					callback(false);
+				}
 			}
 		}
 
 		public void LoadAchievementDescriptions(Action<IAchievementDescription[]> callback)
 		{
-			if (!this.VerifyUser())
+			if (this.VerifyUser())
 			{
-				return;
-			}
-			if (callback != null)
-			{
-				callback(this.m_AchievementDescriptions.ToArray());
+				if (callback != null)
+				{
+					callback(this.m_AchievementDescriptions.ToArray());
+				}
 			}
 		}
 
 		public void LoadAchievements(Action<IAchievement[]> callback)
 		{
-			if (!this.VerifyUser())
+			if (this.VerifyUser())
 			{
-				return;
-			}
-			if (callback != null)
-			{
-				callback(this.m_Achievements.ToArray());
+				if (callback != null)
+				{
+					callback(this.m_Achievements.ToArray());
+				}
 			}
 		}
 
 		public void ReportScore(long score, string board, Action<bool> callback)
 		{
-			if (!this.VerifyUser())
+			if (this.VerifyUser())
 			{
-				return;
-			}
-			foreach (Leaderboard leaderboard in this.m_Leaderboards)
-			{
-				if (leaderboard.id == board)
+				foreach (Leaderboard leaderboard in this.m_Leaderboards)
 				{
-					leaderboard.SetScores(new List<Score>((Score[])leaderboard.scores)
+					if (leaderboard.id == board)
 					{
-						new Score(board, score, this.localUser.id, DateTime.Now, score + " points", 0)
-					}.ToArray());
-					if (callback != null)
-					{
-						callback(true);
+						leaderboard.SetScores(new List<Score>((Score[])leaderboard.scores)
+						{
+							new Score(board, score, this.localUser.id, DateTime.Now, score + " points", 0)
+						}.ToArray());
+						if (callback != null)
+						{
+							callback(true);
+						}
+						return;
 					}
-					return;
 				}
-			}
-			Debug.LogError("Leaderboard not found");
-			if (callback != null)
-			{
-				callback(false);
+				Debug.LogError("Leaderboard not found");
+				if (callback != null)
+				{
+					callback(false);
+				}
 			}
 		}
 
 		public void LoadScores(string leaderboardID, Action<IScore[]> callback)
 		{
-			if (!this.VerifyUser())
+			if (this.VerifyUser())
 			{
-				return;
-			}
-			foreach (Leaderboard leaderboard in this.m_Leaderboards)
-			{
-				if (leaderboard.id == leaderboardID)
+				foreach (Leaderboard leaderboard in this.m_Leaderboards)
 				{
-					this.SortScores(leaderboard);
-					if (callback != null)
+					if (leaderboard.id == leaderboardID)
 					{
-						callback(leaderboard.scores);
+						this.SortScores(leaderboard);
+						if (callback != null)
+						{
+							callback(leaderboard.scores);
+						}
+						return;
 					}
-					return;
+				}
+				Debug.LogError("Leaderboard not found");
+				if (callback != null)
+				{
+					callback(new Score[0]);
 				}
 			}
-			Debug.LogError("Leaderboard not found");
-			if (callback != null)
+		}
+
+		void ISocialPlatform.LoadScores(ILeaderboard board, Action<bool> callback)
+		{
+			if (this.VerifyUser())
 			{
-				callback(new Score[0]);
+				Leaderboard leaderboard = (Leaderboard)board;
+				foreach (Leaderboard leaderboard2 in this.m_Leaderboards)
+				{
+					if (leaderboard2.id == leaderboard.id)
+					{
+						leaderboard.SetTitle(leaderboard2.title);
+						leaderboard.SetScores(leaderboard2.scores);
+						leaderboard.SetMaxRange((uint)leaderboard2.scores.Length);
+					}
+				}
+				this.SortScores(leaderboard);
+				this.SetLocalPlayerScore(leaderboard);
+				if (callback != null)
+				{
+					callback(true);
+				}
 			}
+		}
+
+		bool ISocialPlatform.GetLoading(ILeaderboard board)
+		{
+			return this.VerifyUser() && ((Leaderboard)board).loading;
 		}
 
 		private void SortScores(Leaderboard board)
@@ -269,12 +269,17 @@ namespace UnityEngine.SocialPlatforms
 
 		private bool VerifyUser()
 		{
+			bool flag;
 			if (!this.localUser.authenticated)
 			{
 				Debug.LogError("Must authenticate first");
-				return false;
+				flag = false;
 			}
-			return true;
+			else
+			{
+				flag = true;
+			}
+			return flag;
 		}
 
 		private void PopulateStaticData()
@@ -315,7 +320,7 @@ namespace UnityEngine.SocialPlatforms
 			return texture2D;
 		}
 
-		private static LocalUser m_LocalUser;
+		private static LocalUser m_LocalUser = null;
 
 		private List<UserProfile> m_Friends = new List<UserProfile>();
 

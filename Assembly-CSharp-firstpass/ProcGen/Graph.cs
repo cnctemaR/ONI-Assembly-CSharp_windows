@@ -87,6 +87,7 @@ namespace ProcGen
 		public int GetDistanceToTagSetFromNode(Node node, TagSet tagset)
 		{
 			List<Node> nodesWithAtLeastOneTag = this.GetNodesWithAtLeastOneTag(tagset);
+			int num;
 			if (nodesWithAtLeastOneTag.Count > 0)
 			{
 				Dijkstra dijkstra = new Dijkstra(this.baseGraph, (Arc arc) => 1.0, DijkstraMode.Sum);
@@ -95,14 +96,19 @@ namespace ProcGen
 					dijkstra.AddSource(nodesWithAtLeastOneTag[i].node);
 				}
 				dijkstra.RunUntilFixed(node.node);
-				return (int)dijkstra.GetDistance(node.node);
+				num = (int)dijkstra.GetDistance(node.node);
 			}
-			return -1;
+			else
+			{
+				num = -1;
+			}
+			return num;
 		}
 
 		public int GetDistanceToTagFromNode(Node node, Tag tag)
 		{
 			List<Node> nodesWithTag = this.GetNodesWithTag(tag);
+			int num;
 			if (nodesWithTag.Count > 0)
 			{
 				Dijkstra dijkstra = new Dijkstra(this.baseGraph, (Arc arc) => 1.0, DijkstraMode.Sum);
@@ -111,14 +117,19 @@ namespace ProcGen
 					dijkstra.AddSource(nodesWithTag[i].node);
 				}
 				dijkstra.RunUntilFixed(node.node);
-				return (int)dijkstra.GetDistance(node.node);
+				num = (int)dijkstra.GetDistance(node.node);
 			}
-			return -1;
+			else
+			{
+				num = -1;
+			}
+			return num;
 		}
 
 		public Dictionary<uint, int> GetDistanceToTag(Tag tag)
 		{
 			List<Node> nodesWithTag = this.GetNodesWithTag(tag);
+			Dictionary<uint, int> dictionary2;
 			if (nodesWithTag.Count > 0)
 			{
 				Dijkstra dijkstra = new Dijkstra(this.baseGraph, (Arc arc) => 1.0, DijkstraMode.Sum);
@@ -132,9 +143,13 @@ namespace ProcGen
 					dijkstra.RunUntilFixed(this.nodes[j].node);
 					dictionary[(uint)this.nodes[j].node.Id] = (int)dijkstra.GetDistance(this.nodes[j].node);
 				}
-				return dictionary;
+				dictionary2 = dictionary;
 			}
-			return null;
+			else
+			{
+				dictionary2 = null;
+			}
+			return dictionary2;
 		}
 
 		public List<Node> GetNodesWithAtLeastOneTag(TagSet tagset)
@@ -190,11 +205,16 @@ namespace ProcGen
 				num += (particle.X - pointD.X) / num3 * num4;
 				num2 += (particle.Y - pointD.Y) / num3 * num4;
 			}
+			PointD pointD2;
 			if (bounds.Contains(vector))
 			{
-				return new PointD(num, num2);
+				pointD2 = new PointD(num, num2);
 			}
-			return new PointD(-num, -num2);
+			else
+			{
+				pointD2 = new PointD(-num, -num2);
+			}
+			return pointD2;
 		}
 
 		public PointD GetPositionForNode(Node node)
@@ -227,8 +247,9 @@ namespace ProcGen
 			{
 				flag = true;
 				Func<Node, PointD> func = (Node n) => this.GetPositionForNode(n);
+				CustomGraph baseGraph = this.baseGraph;
 				int num2 = num;
-				ForceDirectedLayout forceDirectedLayout = new ForceDirectedLayout(this.baseGraph, func, num2);
+				ForceDirectedLayout forceDirectedLayout = new ForceDirectedLayout(baseGraph, func, num2);
 				forceDirectedLayout.ExternalForce = (PointD point) => Graph.GetForceForBoundry(point, bounds);
 				forceDirectedLayout.Run(0.01);
 				IEnumerator<Node> enumerator = this.baseGraph.Nodes().GetEnumerator();
@@ -270,6 +291,6 @@ namespace ProcGen
 		[Serialize]
 		public List<Arc> arcList;
 
-		private SeededRandom myRandom;
+		private SeededRandom myRandom = null;
 	}
 }

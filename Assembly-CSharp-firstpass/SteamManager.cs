@@ -10,11 +10,16 @@ public class SteamManager : MonoBehaviour
 	{
 		get
 		{
+			SteamManager steamManager;
 			if (SteamManager.s_instance == null)
 			{
-				return new GameObject("SteamManager").AddComponent<SteamManager>();
+				steamManager = new GameObject("SteamManager").AddComponent<SteamManager>();
 			}
-			return SteamManager.s_instance;
+			else
+			{
+				steamManager = SteamManager.s_instance;
+			}
+			return steamManager;
 		}
 	}
 
@@ -36,40 +41,41 @@ public class SteamManager : MonoBehaviour
 		if (SteamManager.s_instance != null)
 		{
 			global::UnityEngine.Object.Destroy(base.gameObject);
-			return;
 		}
-		SteamManager.s_instance = this;
-		if (SteamManager.s_EverInialized)
+		else
 		{
-			throw new Exception("Tried to Initialize the SteamAPI twice in one session!");
-		}
-		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
-		if (!Packsize.Test())
-		{
-			global::Debug.LogError("[Steamworks.NET] Packsize Test returned false, the wrong version of Steamworks.NET is being run in this platform.", this);
-		}
-		if (!DllCheck.Test())
-		{
-			global::Debug.LogError("[Steamworks.NET] DllCheck Test returned false, One or more of the Steamworks binaries seems to be the wrong version.", this);
-		}
-		try
-		{
-			if (SteamAPI.RestartAppIfNecessary(new AppId_t(457140U)))
+			SteamManager.s_instance = this;
+			if (SteamManager.s_EverInialized)
 			{
+				throw new Exception("Tried to Initialize the SteamAPI twice in one session!");
+			}
+			global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
+			if (!Packsize.Test())
+			{
+				global::Debug.LogError("[Steamworks.NET] Packsize Test returned false, the wrong version of Steamworks.NET is being run in this platform.", this);
+			}
+			if (!DllCheck.Test())
+			{
+				global::Debug.LogError("[Steamworks.NET] DllCheck Test returned false, One or more of the Steamworks binaries seems to be the wrong version.", this);
+			}
+			try
+			{
+				if (SteamAPI.RestartAppIfNecessary(new AppId_t(457140U)))
+				{
+					Application.Quit();
+					return;
+				}
+			}
+			catch (DllNotFoundException ex)
+			{
+				global::Debug.LogError("[Steamworks.NET] Could not load [lib]steam_api.dll/so/dylib. It's likely not in the correct location. Refer to the README for more details.\n" + ex, this);
 				Application.Quit();
 				return;
 			}
-		}
-		catch (DllNotFoundException ex)
-		{
-			global::Debug.LogError("[Steamworks.NET] Could not load [lib]steam_api.dll/so/dylib. It's likely not in the correct location. Refer to the README for more details.\n" + ex, this);
-			Application.Quit();
-			return;
-		}
-		this.m_bInitialized = SteamAPI.Init();
-		if (!this.m_bInitialized)
-		{
-			return;
+			this.m_bInitialized = SteamAPI.Init();
+			if (!this.m_bInitialized)
+			{
+			}
 		}
 	}
 
@@ -79,38 +85,34 @@ public class SteamManager : MonoBehaviour
 		{
 			SteamManager.s_instance = this;
 		}
-		if (!this.m_bInitialized)
+		if (this.m_bInitialized)
 		{
-			return;
-		}
-		if (this.m_SteamAPIWarningMessageHook == null)
-		{
-			this.m_SteamAPIWarningMessageHook = new SteamAPIWarningMessageHook_t(SteamManager.SteamAPIDebugTextHook);
-			SteamClient.SetWarningMessageHook(this.m_SteamAPIWarningMessageHook);
+			if (this.m_SteamAPIWarningMessageHook == null)
+			{
+				this.m_SteamAPIWarningMessageHook = new SteamAPIWarningMessageHook_t(SteamManager.SteamAPIDebugTextHook);
+				SteamClient.SetWarningMessageHook(this.m_SteamAPIWarningMessageHook);
+			}
 		}
 	}
 
 	private void OnDestroy()
 	{
-		if (SteamManager.s_instance != this)
+		if (!(SteamManager.s_instance != this))
 		{
-			return;
+			SteamManager.s_instance = null;
+			if (this.m_bInitialized)
+			{
+				SteamAPI.Shutdown();
+			}
 		}
-		SteamManager.s_instance = null;
-		if (!this.m_bInitialized)
-		{
-			return;
-		}
-		SteamAPI.Shutdown();
 	}
 
 	private void Update()
 	{
-		if (!this.m_bInitialized)
+		if (this.m_bInitialized)
 		{
-			return;
+			SteamAPI.RunCallbacks();
 		}
-		SteamAPI.RunCallbacks();
 	}
 
 	public const uint STEAM_APPLICATION_ID = 457140U;

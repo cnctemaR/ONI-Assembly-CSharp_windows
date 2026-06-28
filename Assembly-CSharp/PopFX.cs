@@ -7,7 +7,7 @@ public class PopFX : KMonoBehaviour
 	public void Recycle()
 	{
 		this.icon = null;
-		this.text = string.Empty;
+		this.text = "";
 		this.targetTransform = null;
 		this.lifeElapsed = 0f;
 		this.trackTarget = false;
@@ -48,32 +48,30 @@ public class PopFX : KMonoBehaviour
 
 	private void Update()
 	{
-		if (!this.isLive)
+		if (this.isLive)
 		{
-			return;
+			if (PopFXManager.Instance.Ready())
+			{
+				this.lifeElapsed += Time.unscaledDeltaTime;
+				if (this.lifeElapsed >= this.lifetime)
+				{
+					this.Recycle();
+				}
+				if (this.trackTarget && this.targetTransform != null)
+				{
+					Vector3 vector = PopFXManager.Instance.WorldToScreen(this.targetTransform.position + this.offset + Vector3.up * this.lifeElapsed * (this.Speed * this.lifeElapsed));
+					vector.z = 0f;
+					base.gameObject.rectTransform().anchoredPosition = vector;
+				}
+				else
+				{
+					Vector3 vector2 = PopFXManager.Instance.WorldToScreen(this.startPos + this.offset + Vector3.up * this.lifeElapsed * (this.Speed * (this.lifeElapsed / 2f)));
+					vector2.z = 0f;
+					base.gameObject.rectTransform().anchoredPosition = vector2;
+				}
+				this.canvasGroup.alpha = 1.5f * ((this.lifetime - this.lifeElapsed) / this.lifetime);
+			}
 		}
-		if (!PopFXManager.Instance.Ready())
-		{
-			return;
-		}
-		this.lifeElapsed += Time.unscaledDeltaTime;
-		if (this.lifeElapsed >= this.lifetime)
-		{
-			this.Recycle();
-		}
-		if (this.trackTarget && this.targetTransform != null)
-		{
-			Vector3 vector = PopFXManager.Instance.WorldToScreen(this.targetTransform.position + this.offset + Vector3.up * this.lifeElapsed * (this.Speed * this.lifeElapsed));
-			vector.z = 0f;
-			base.gameObject.rectTransform().anchoredPosition = vector;
-		}
-		else
-		{
-			Vector3 vector2 = PopFXManager.Instance.WorldToScreen(this.startPos + this.offset + Vector3.up * this.lifeElapsed * (this.Speed * (this.lifeElapsed / 2f)));
-			vector2.z = 0f;
-			base.gameObject.rectTransform().anchoredPosition = vector2;
-		}
-		this.canvasGroup.alpha = 1.5f * ((this.lifetime - this.lifeElapsed) / this.lifetime);
 	}
 
 	private float Speed = 2f;
@@ -96,11 +94,11 @@ public class PopFX : KMonoBehaviour
 
 	private float lifetime;
 
-	private float lifeElapsed;
+	private float lifeElapsed = 0f;
 
-	private bool trackTarget;
+	private bool trackTarget = false;
 
 	private Vector3 startPos;
 
-	private bool isLive;
+	private bool isLive = false;
 }

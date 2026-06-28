@@ -6,8 +6,19 @@ public class MeshTileConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
+		string text = "MeshTile";
+		int num = 1;
+		int num2 = 1;
+		string text2 = "floor_mesh_kanim";
+		float num3 = 100f;
+		int num4 = 100;
+		float num5 = 30f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
+		string[] all_METALS = MATERIALS.ALL_METALS;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.Tile;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("MeshTile", 1, 1, "floor_mesh_kanim", 100f, 100, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER2, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.Tile, BUILDINGS.DECOR.PENALTY.TIER0, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none);
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
 		buildingDef.Overheatable = false;
@@ -32,6 +43,7 @@ public class MeshTileConfig : IBuildingConfig
 		buildingDef.BlockTileMaterial = Assets.GetMaterial("tiles_solid");
 		buildingDef.DecorBlockTileInfo = Assets.GetBlockTileDecorInfo("tiles_mesh_tops_decor_info");
 		buildingDef.DecorPlaceBlockTileInfo = Assets.GetBlockTileDecorInfo("tiles_mesh_tops_decor_place_info");
+		buildingDef.HotKey = global::Action.BuildMenuKeyE;
 		return buildingDef;
 	}
 
@@ -60,7 +72,7 @@ public class MeshTileConfig : IBuildingConfig
 		go.AddOrGet<KAnimGridTileVisualizer>();
 	}
 
-	public const string ID = "MeshTile";
-
 	public static readonly int BlockTileConnectorID = Hash.SDBMLower("tiles_mesh_tops");
+
+	public const string ID = "MeshTile";
 }

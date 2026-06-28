@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using UnityEngine.Scripting;
 
 namespace UnityEngine.SceneManagement
 {
@@ -11,6 +12,14 @@ namespace UnityEngine.SceneManagement
 			get
 			{
 				return this.m_Handle;
+			}
+		}
+
+		internal Scene.LoadingState loadingState
+		{
+			get
+			{
+				return Scene.GetLoadingStateInternal(this.handle);
 			}
 		}
 
@@ -32,6 +41,18 @@ namespace UnityEngine.SceneManagement
 			get
 			{
 				return Scene.GetNameInternal(this.handle);
+			}
+			internal set
+			{
+				Scene.SetNameInternal(this.handle, value);
+			}
+		}
+
+		internal string guid
+		{
+			get
+			{
+				return Scene.GetGUIDInternal(this.handle);
 			}
 		}
 
@@ -89,59 +110,11 @@ namespace UnityEngine.SceneManagement
 			{
 				throw new ArgumentException("The scene is not loaded.");
 			}
-			if (this.rootCount == 0)
+			if (this.rootCount != 0)
 			{
-				return;
+				Scene.GetRootGameObjectsInternal(this.handle, rootGameObjects);
 			}
-			Scene.GetRootGameObjectsInternal(this.handle, rootGameObjects);
 		}
-
-		public override int GetHashCode()
-		{
-			return this.m_Handle;
-		}
-
-		public override bool Equals(object other)
-		{
-			if (!(other is Scene))
-			{
-				return false;
-			}
-			Scene scene = (Scene)other;
-			return this.handle == scene.handle;
-		}
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool IsValidInternal(int sceneHandle);
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetPathInternal(int sceneHandle);
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetNameInternal(int sceneHandle);
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool GetIsLoadedInternal(int sceneHandle);
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool GetIsDirtyInternal(int sceneHandle);
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetBuildIndexInternal(int sceneHandle);
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetRootCountInternal(int sceneHandle);
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void GetRootGameObjectsInternal(int sceneHandle, object resultRootList);
 
 		public static bool operator ==(Scene lhs, Scene rhs)
 		{
@@ -153,6 +126,77 @@ namespace UnityEngine.SceneManagement
 			return lhs.handle != rhs.handle;
 		}
 
+		public override int GetHashCode()
+		{
+			return this.m_Handle;
+		}
+
+		public override bool Equals(object other)
+		{
+			bool flag;
+			if (!(other is Scene))
+			{
+				flag = false;
+			}
+			else
+			{
+				Scene scene = (Scene)other;
+				flag = this.handle == scene.handle;
+			}
+			return flag;
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool IsValidInternal(int sceneHandle);
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern string GetPathInternal(int sceneHandle);
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern string GetNameInternal(int sceneHandle);
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void SetNameInternal(int sceneHandle, string name);
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern string GetGUIDInternal(int sceneHandle);
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool GetIsLoadedInternal(int sceneHandle);
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Scene.LoadingState GetLoadingStateInternal(int sceneHandle);
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool GetIsDirtyInternal(int sceneHandle);
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetBuildIndexInternal(int sceneHandle);
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetRootCountInternal(int sceneHandle);
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GetRootGameObjectsInternal(int sceneHandle, object resultRootList);
+
 		private int m_Handle;
+
+		internal enum LoadingState
+		{
+			NotLoaded,
+			Loading,
+			Loaded
+		}
 	}
 }

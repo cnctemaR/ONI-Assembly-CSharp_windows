@@ -62,6 +62,8 @@ public class DistributionPlatform : MonoBehaviour
 		void GetAuthTicket(DistributionPlatform.AuthTicketHandler callback);
 	}
 
+	public delegate void AuthTicketHandler(byte[] ticket);
+
 	public abstract class UserId
 	{
 		public abstract ulong ToInt64();
@@ -73,6 +75,4 @@ public class DistributionPlatform : MonoBehaviour
 
 		public abstract string Name { get; }
 	}
-
-	public delegate void AuthTicketHandler(byte[] ticket);
 }

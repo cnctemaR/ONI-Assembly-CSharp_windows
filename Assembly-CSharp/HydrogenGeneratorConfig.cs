@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -6,8 +7,19 @@ public class HydrogenGeneratorConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER5;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("HydrogenGenerator", 4, 3, "generatormerc_kanim", 400f, 100, 120f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER5, MATERIALS.RAW_METALS, 2400f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, tier);
+		string text = "HydrogenGenerator";
+		int num = 4;
+		int num2 = 3;
+		string text2 = "generatormerc_kanim";
+		float num3 = 400f;
+		int num4 = 100;
+		float num5 = 120f;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER5;
+		string[] raw_METALS = MATERIALS.RAW_METALS;
+		float num6 = 2400f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER5;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_METALS, num6, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER2, tier2);
 		buildingDef.GeneratorWattageRating = 800f;
 		buildingDef.GeneratorBaseCapacity = 1000f;
 		buildingDef.ExhaustKilowattsWhenActive = 2f;
@@ -17,11 +29,24 @@ public class HydrogenGeneratorConfig : IBuildingConfig
 		buildingDef.UtilityInputOffset = new CellOffset(-1, 0);
 		buildingDef.PowerOutputOffset = new CellOffset(1, 0);
 		buildingDef.InputConduitType = ConduitType.Gas;
+		buildingDef.HotKey = global::Action.BuildMenuKeyR;
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
 	{
+		GeneratedBuildings.RegisterLogicPorts(go, HydrogenGeneratorConfig.INPUT_PORTS);
+	}
+
+	public override void DoPostConfigureUnderConstruction(GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, HydrogenGeneratorConfig.INPUT_PORTS);
+	}
+
+	public override void DoPostConfigureComplete(GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, HydrogenGeneratorConfig.INPUT_PORTS);
+		go.AddOrGet<LogicOperationalController>();
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		go.AddOrGet<LoopingSounds>();
 		Storage storage = go.AddOrGet<Storage>();
@@ -38,10 +63,6 @@ public class HydrogenGeneratorConfig : IBuildingConfig
 		energyGenerator.powerDistributionOrder = 8;
 		energyGenerator.ignoreBatteryRefillPercent = true;
 		energyGenerator.meterOffset = Meter.Offset.Behind;
-	}
-
-	public override void DoPostConfigureComplete(GameObject go)
-	{
 		BuildingTemplates.DoPostConfigure(go);
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
 		{
@@ -51,4 +72,9 @@ public class HydrogenGeneratorConfig : IBuildingConfig
 	}
 
 	public const string ID = "HydrogenGenerator";
+
+	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[]
+	{
+		new LogicPorts.Port(LogicOperationalController.PORT_ID, new CellOffset(0, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false)
+	};
 }

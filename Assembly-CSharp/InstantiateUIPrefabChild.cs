@@ -16,21 +16,23 @@ public class InstantiateUIPrefabChild : KMonoBehaviour
 		if (this.alreadyInstantiated)
 		{
 			global::Debug.LogWarning(base.gameObject.name + "trying to instantiate UI prefabs multiple times.", null);
-			return;
 		}
-		this.alreadyInstantiated = true;
-		foreach (GameObject gameObject in this.prefabs)
+		else
 		{
-			if (!(gameObject == null))
+			this.alreadyInstantiated = true;
+			foreach (GameObject gameObject in this.prefabs)
 			{
-				Vector3 vector = gameObject.rectTransform().anchoredPosition;
-				GameObject gameObject2 = global::UnityEngine.Object.Instantiate<GameObject>(gameObject);
-				gameObject2.transform.SetParent(this.transform);
-				gameObject2.rectTransform().anchoredPosition = vector;
-				gameObject2.rectTransform().localScale = Vector3.one;
-				if (this.setAsFirstSibling)
+				if (!(gameObject == null))
 				{
-					gameObject2.transform.SetAsFirstSibling();
+					Vector3 vector = gameObject.rectTransform().anchoredPosition;
+					GameObject gameObject2 = global::UnityEngine.Object.Instantiate<GameObject>(gameObject);
+					gameObject2.transform.SetParent(base.transform);
+					gameObject2.rectTransform().anchoredPosition = vector;
+					gameObject2.rectTransform().localScale = Vector3.one;
+					if (this.setAsFirstSibling)
+					{
+						gameObject2.transform.SetAsFirstSibling();
+					}
 				}
 			}
 		}
@@ -40,7 +42,7 @@ public class InstantiateUIPrefabChild : KMonoBehaviour
 
 	public bool InstantiateOnAwake = true;
 
-	private bool alreadyInstantiated;
+	private bool alreadyInstantiated = false;
 
-	public bool setAsFirstSibling;
+	public bool setAsFirstSibling = false;
 }

@@ -7,7 +7,7 @@ namespace Klei.AI
 	{
 		public DecorEntitlement(float modifierAmount)
 		{
-			this.modifier = new AttributeModifier(Db.Get().Attributes.DecorExpectation.Id, modifierAmount, "<dev> from role", false, false);
+			this.modifier = new AttributeModifier(Db.Get().Attributes.DecorExpectation.Id, modifierAmount, "<dev> from role", false, false, true);
 		}
 
 		public override void Apply(GameObject target)

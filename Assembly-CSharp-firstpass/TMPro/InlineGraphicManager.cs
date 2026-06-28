@@ -100,21 +100,20 @@ namespace TMPro
 
 		public void AddInlineGraphicsChild()
 		{
-			if (this.m_inlineGraphic != null)
+			if (!(this.m_inlineGraphic != null))
 			{
-				return;
+				GameObject gameObject = new GameObject("Inline Graphic");
+				this.m_inlineGraphic = gameObject.AddComponent<InlineGraphic>();
+				this.m_inlineGraphicRectTransform = gameObject.GetComponent<RectTransform>();
+				this.m_inlineGraphicCanvasRenderer = gameObject.GetComponent<CanvasRenderer>();
+				this.m_inlineGraphicRectTransform.SetParent(base.transform, false);
+				this.m_inlineGraphicRectTransform.localPosition = Vector3.zero;
+				this.m_inlineGraphicRectTransform.anchoredPosition3D = Vector3.zero;
+				this.m_inlineGraphicRectTransform.sizeDelta = Vector2.zero;
+				this.m_inlineGraphicRectTransform.anchorMin = Vector2.zero;
+				this.m_inlineGraphicRectTransform.anchorMax = Vector2.one;
+				this.m_textComponent = base.GetComponent<TMP_Text>();
 			}
-			GameObject gameObject = new GameObject("Inline Graphic");
-			this.m_inlineGraphic = gameObject.AddComponent<InlineGraphic>();
-			this.m_inlineGraphicRectTransform = gameObject.GetComponent<RectTransform>();
-			this.m_inlineGraphicCanvasRenderer = gameObject.GetComponent<CanvasRenderer>();
-			this.m_inlineGraphicRectTransform.SetParent(base.transform, false);
-			this.m_inlineGraphicRectTransform.localPosition = Vector3.zero;
-			this.m_inlineGraphicRectTransform.anchoredPosition3D = Vector3.zero;
-			this.m_inlineGraphicRectTransform.sizeDelta = Vector2.zero;
-			this.m_inlineGraphicRectTransform.anchorMin = Vector2.zero;
-			this.m_inlineGraphicRectTransform.anchorMax = Vector2.one;
-			this.m_textComponent = base.GetComponent<TMP_Text>();
 		}
 
 		public void AllocatedVertexBuffers(int size)
@@ -165,37 +164,54 @@ namespace TMPro
 
 		public TMP_Sprite GetSprite(int index)
 		{
+			TMP_Sprite tmp_Sprite;
 			if (this.m_spriteAsset == null)
 			{
 				global::Debug.LogWarning("No Sprite Asset is assigned.", this);
-				return null;
+				tmp_Sprite = null;
 			}
-			if (this.m_spriteAsset.spriteInfoList == null || index > this.m_spriteAsset.spriteInfoList.Count - 1)
+			else if (this.m_spriteAsset.spriteInfoList == null || index > this.m_spriteAsset.spriteInfoList.Count - 1)
 			{
 				global::Debug.LogWarning("Sprite index exceeds the number of sprites in this Sprite Asset.", this);
-				return null;
+				tmp_Sprite = null;
 			}
-			return this.m_spriteAsset.spriteInfoList[index];
+			else
+			{
+				tmp_Sprite = this.m_spriteAsset.spriteInfoList[index];
+			}
+			return tmp_Sprite;
 		}
 
 		public int GetSpriteIndexByHashCode(int hashCode)
 		{
+			int num;
 			if (this.m_spriteAsset == null || this.m_spriteAsset.spriteInfoList == null)
 			{
 				global::Debug.LogWarning("No Sprite Asset is assigned.", this);
-				return -1;
+				num = -1;
 			}
-			return this.m_spriteAsset.spriteInfoList.FindIndex((TMP_Sprite item) => item.hashCode == hashCode);
+			else
+			{
+				int num2 = this.m_spriteAsset.spriteInfoList.FindIndex((TMP_Sprite item) => item.hashCode == hashCode);
+				num = num2;
+			}
+			return num;
 		}
 
 		public int GetSpriteIndexByIndex(int index)
 		{
+			int num;
 			if (this.m_spriteAsset == null || this.m_spriteAsset.spriteInfoList == null)
 			{
 				global::Debug.LogWarning("No Sprite Asset is assigned.", this);
-				return -1;
+				num = -1;
 			}
-			return this.m_spriteAsset.spriteInfoList.FindIndex((TMP_Sprite item) => item.id == index);
+			else
+			{
+				int num2 = this.m_spriteAsset.spriteInfoList.FindIndex((TMP_Sprite item) => item.id == index);
+				num = num2;
+			}
+			return num;
 		}
 
 		public void SetUIVertex(UIVertex[] uiVertex)
@@ -210,8 +226,8 @@ namespace TMPro
 		[HideInInspector]
 		private InlineGraphic m_inlineGraphic;
 
-		[HideInInspector]
 		[SerializeField]
+		[HideInInspector]
 		private CanvasRenderer m_inlineGraphicCanvasRenderer;
 
 		private UIVertex[] m_uiVertex;
@@ -220,6 +236,6 @@ namespace TMPro
 
 		private TMP_Text m_textComponent;
 
-		private bool m_isInitialized;
+		private bool m_isInitialized = false;
 	}
 }

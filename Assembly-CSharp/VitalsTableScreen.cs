@@ -35,7 +35,7 @@ public class VitalsTableScreen : TableScreen
 		}
 		else if (widgetRow.isDefault)
 		{
-			componentInChildren.text = string.Empty;
+			componentInChildren.text = "";
 		}
 		else
 		{
@@ -52,30 +52,40 @@ public class VitalsTableScreen : TableScreen
 	{
 		float value = Db.Get().Amounts.Stress.Lookup(a).value;
 		float value2 = Db.Get().Amounts.Stress.Lookup(b).value;
+		int num;
 		if (value > value2)
 		{
-			return -1;
+			num = -1;
 		}
-		if (value < value2)
+		else if (value < value2)
 		{
-			return 1;
+			num = 1;
 		}
-		return 0;
+		else
+		{
+			num = 0;
+		}
+		return num;
 	}
 
 	protected void on_tooltip_stress(MinionIdentity minion, GameObject widget_go, ToolTip tooltip)
 	{
 		tooltip.ClearMultiStringTooltip();
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
-		switch (widgetRow.rowType)
+		TableRow.RowType rowType = widgetRow.rowType;
+		if (rowType != TableRow.RowType.Default)
 		{
-		case TableRow.RowType.Minion:
-			if (minion != null)
+			if (rowType != TableRow.RowType.Header)
 			{
-				tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.DUPLICANT_PROPERNAME, minion.GetProperName()), null);
-				tooltip.AddMultiStringTooltip(Db.Get().Amounts.Stress.Lookup(minion).GetTooltip(), null);
+				if (rowType == TableRow.RowType.Minion)
+				{
+					if (minion != null)
+					{
+						tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.DUPLICANT_PROPERNAME, minion.GetProperName()), null);
+						tooltip.AddMultiStringTooltip(Db.Get().Amounts.Stress.Lookup(minion).GetTooltip(), null);
+					}
+				}
 			}
-			break;
 		}
 	}
 
@@ -83,11 +93,19 @@ public class VitalsTableScreen : TableScreen
 	{
 		tooltip.ClearMultiStringTooltip();
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
-		switch (widgetRow.rowType)
+		TableRow.RowType rowType = widgetRow.rowType;
+		if (rowType != TableRow.RowType.Default)
 		{
-		case TableRow.RowType.Header:
-			tooltip.AddMultiStringTooltip(UI.TABLESCREENS.COLUMN_SORT_BY_STRESS, null);
-			break;
+			if (rowType != TableRow.RowType.Header)
+			{
+				if (rowType != TableRow.RowType.Minion)
+				{
+				}
+			}
+			else
+			{
+				tooltip.AddMultiStringTooltip(UI.TABLESCREENS.COLUMN_SORT_BY_STRESS, null);
+			}
 		}
 	}
 
@@ -101,7 +119,7 @@ public class VitalsTableScreen : TableScreen
 		}
 		else if (widgetRow.isDefault)
 		{
-			componentInChildren.text = string.Empty;
+			componentInChildren.text = "";
 		}
 		else
 		{
@@ -118,30 +136,40 @@ public class VitalsTableScreen : TableScreen
 	{
 		float value = Db.Get().Amounts.HitPoints.Lookup(a).value;
 		float value2 = Db.Get().Amounts.HitPoints.Lookup(b).value;
+		int num;
 		if (value > value2)
 		{
-			return -1;
+			num = -1;
 		}
-		if (value < value2)
+		else if (value < value2)
 		{
-			return 1;
+			num = 1;
 		}
-		return 0;
+		else
+		{
+			num = 0;
+		}
+		return num;
 	}
 
 	protected void on_tooltip_health(MinionIdentity minion, GameObject widget_go, ToolTip tooltip)
 	{
 		tooltip.ClearMultiStringTooltip();
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
-		switch (widgetRow.rowType)
+		TableRow.RowType rowType = widgetRow.rowType;
+		if (rowType != TableRow.RowType.Default)
 		{
-		case TableRow.RowType.Minion:
-			if (minion != null)
+			if (rowType != TableRow.RowType.Header)
 			{
-				tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.DUPLICANT_PROPERNAME, minion.GetProperName()), null);
-				tooltip.AddMultiStringTooltip(Db.Get().Amounts.HitPoints.Lookup(minion).GetTooltip(), null);
+				if (rowType == TableRow.RowType.Minion)
+				{
+					if (minion != null)
+					{
+						tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.DUPLICANT_PROPERNAME, minion.GetProperName()), null);
+						tooltip.AddMultiStringTooltip(Db.Get().Amounts.HitPoints.Lookup(minion).GetTooltip(), null);
+					}
+				}
 			}
-			break;
 		}
 	}
 
@@ -149,11 +177,19 @@ public class VitalsTableScreen : TableScreen
 	{
 		tooltip.ClearMultiStringTooltip();
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
-		switch (widgetRow.rowType)
+		TableRow.RowType rowType = widgetRow.rowType;
+		if (rowType != TableRow.RowType.Default)
 		{
-		case TableRow.RowType.Header:
-			tooltip.AddMultiStringTooltip(UI.TABLESCREENS.COLUMN_SORT_BY_HITPOINTS, null);
-			break;
+			if (rowType != TableRow.RowType.Header)
+			{
+				if (rowType != TableRow.RowType.Minion)
+				{
+				}
+			}
+			else
+			{
+				tooltip.AddMultiStringTooltip(UI.TABLESCREENS.COLUMN_SORT_BY_HITPOINTS, null);
+			}
 		}
 	}
 
@@ -167,7 +203,7 @@ public class VitalsTableScreen : TableScreen
 		}
 		else if (widgetRow.isDefault)
 		{
-			componentInChildren.text = string.Empty;
+			componentInChildren.text = "";
 		}
 		else
 		{
@@ -178,9 +214,10 @@ public class VitalsTableScreen : TableScreen
 	private string get_value_immunity_label(MinionIdentity minion, GameObject widget_go)
 	{
 		Diseases diseases = minion.GetComponent<MinionModifiers>().diseases;
+		string text2;
 		if (diseases.IsInfected())
 		{
-			string text = string.Empty;
+			string text = "";
 			if (diseases.Count > 1)
 			{
 				float num = 0f;
@@ -201,53 +238,67 @@ public class VitalsTableScreen : TableScreen
 					text += string.Format(UI.VITALSSCREEN.IMMUNITY_DISEASE, diseaseInstance2.modifier.Name, GameUtil.GetFormattedCycles(diseaseInstance2.GetInfectedTimeRemaining(), "F1"));
 				}
 			}
-			return text;
+			text2 = text;
 		}
-		return Db.Get().Amounts.ImmuneLevel.Lookup(minion).GetValueString();
+		else
+		{
+			text2 = Db.Get().Amounts.ImmuneLevel.Lookup(minion).GetValueString();
+		}
+		return text2;
 	}
 
 	private int compare_rows_immunity(MinionIdentity a, MinionIdentity b)
 	{
 		float value = Db.Get().Amounts.ImmuneLevel.Lookup(a).value;
 		float value2 = Db.Get().Amounts.ImmuneLevel.Lookup(b).value;
+		int num;
 		if (value > value2)
 		{
-			return -1;
+			num = -1;
 		}
-		if (value < value2)
+		else if (value < value2)
 		{
-			return 1;
+			num = 1;
 		}
-		return 0;
+		else
+		{
+			num = 0;
+		}
+		return num;
 	}
 
 	protected void on_tooltip_immunity(MinionIdentity minion, GameObject widget_go, ToolTip tooltip)
 	{
 		tooltip.ClearMultiStringTooltip();
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
-		switch (widgetRow.rowType)
+		TableRow.RowType rowType = widgetRow.rowType;
+		if (rowType != TableRow.RowType.Default)
 		{
-		case TableRow.RowType.Minion:
-			if (minion != null)
+			if (rowType != TableRow.RowType.Header)
 			{
-				tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.DUPLICANT_PROPERNAME, minion.GetProperName()), null);
-				Diseases diseases = minion.GetComponent<MinionModifiers>().diseases;
-				if (diseases.IsInfected())
+				if (rowType == TableRow.RowType.Minion)
 				{
-					foreach (DiseaseInstance diseaseInstance in diseases)
+					if (minion != null)
 					{
-						tooltip.AddMultiStringTooltip(UI.HORIZONTAL_RULE, null);
-						tooltip.AddMultiStringTooltip(diseaseInstance.modifier.Name, null);
-						StatusItem statusItem = diseaseInstance.GetStatusItem();
-						tooltip.AddMultiStringTooltip(statusItem.GetTooltip(diseaseInstance.ExposureInfo), null);
+						tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.DUPLICANT_PROPERNAME, minion.GetProperName()), null);
+						Diseases diseases = minion.GetComponent<MinionModifiers>().diseases;
+						if (diseases.IsInfected())
+						{
+							foreach (DiseaseInstance diseaseInstance in diseases)
+							{
+								tooltip.AddMultiStringTooltip(UI.HORIZONTAL_RULE, null);
+								tooltip.AddMultiStringTooltip(diseaseInstance.modifier.Name, null);
+								StatusItem statusItem = diseaseInstance.GetStatusItem();
+								tooltip.AddMultiStringTooltip(statusItem.GetTooltip(diseaseInstance.ExposureInfo), null);
+							}
+						}
+						else
+						{
+							tooltip.AddMultiStringTooltip(Db.Get().Amounts.ImmuneLevel.Lookup(minion).GetTooltip(), null);
+						}
 					}
 				}
-				else
-				{
-					tooltip.AddMultiStringTooltip(Db.Get().Amounts.ImmuneLevel.Lookup(minion).GetTooltip(), null);
-				}
 			}
-			break;
 		}
 	}
 
@@ -255,11 +306,19 @@ public class VitalsTableScreen : TableScreen
 	{
 		tooltip.ClearMultiStringTooltip();
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
-		switch (widgetRow.rowType)
+		TableRow.RowType rowType = widgetRow.rowType;
+		if (rowType != TableRow.RowType.Default)
 		{
-		case TableRow.RowType.Header:
-			tooltip.AddMultiStringTooltip(UI.TABLESCREENS.COLUMN_SORT_BY_IMMUNEPOINTS, null);
-			break;
+			if (rowType != TableRow.RowType.Header)
+			{
+				if (rowType != TableRow.RowType.Minion)
+				{
+				}
+			}
+			else
+			{
+				tooltip.AddMultiStringTooltip(UI.TABLESCREENS.COLUMN_SORT_BY_IMMUNEPOINTS, null);
+			}
 		}
 	}
 
@@ -273,7 +332,7 @@ public class VitalsTableScreen : TableScreen
 		}
 		else if (widgetRow.isDefault)
 		{
-			componentInChildren.text = string.Empty;
+			componentInChildren.text = "";
 		}
 		else
 		{
@@ -290,30 +349,40 @@ public class VitalsTableScreen : TableScreen
 	{
 		float value = Db.Get().Amounts.Calories.Lookup(a).value;
 		float value2 = Db.Get().Amounts.Calories.Lookup(b).value;
+		int num;
 		if (value > value2)
 		{
-			return -1;
+			num = -1;
 		}
-		if (value < value2)
+		else if (value < value2)
 		{
-			return 1;
+			num = 1;
 		}
-		return 0;
+		else
+		{
+			num = 0;
+		}
+		return num;
 	}
 
 	protected void on_tooltip_fullness(MinionIdentity minion, GameObject widget_go, ToolTip tooltip)
 	{
 		tooltip.ClearMultiStringTooltip();
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
-		switch (widgetRow.rowType)
+		TableRow.RowType rowType = widgetRow.rowType;
+		if (rowType != TableRow.RowType.Default)
 		{
-		case TableRow.RowType.Minion:
-			if (minion != null)
+			if (rowType != TableRow.RowType.Header)
 			{
-				tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.DUPLICANT_PROPERNAME, minion.GetProperName()), null);
-				tooltip.AddMultiStringTooltip(Db.Get().Amounts.Calories.Lookup(minion).GetTooltip(), null);
+				if (rowType == TableRow.RowType.Minion)
+				{
+					if (minion != null)
+					{
+						tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.DUPLICANT_PROPERNAME, minion.GetProperName()), null);
+						tooltip.AddMultiStringTooltip(Db.Get().Amounts.Calories.Lookup(minion).GetTooltip(), null);
+					}
+				}
 			}
-			break;
 		}
 	}
 
@@ -321,11 +390,19 @@ public class VitalsTableScreen : TableScreen
 	{
 		tooltip.ClearMultiStringTooltip();
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
-		switch (widgetRow.rowType)
+		TableRow.RowType rowType = widgetRow.rowType;
+		if (rowType != TableRow.RowType.Default)
 		{
-		case TableRow.RowType.Header:
-			tooltip.AddMultiStringTooltip(UI.TABLESCREENS.COLUMN_SORT_BY_FULLNESS, null);
-			break;
+			if (rowType != TableRow.RowType.Header)
+			{
+				if (rowType != TableRow.RowType.Minion)
+				{
+				}
+			}
+			else
+			{
+				tooltip.AddMultiStringTooltip(UI.TABLESCREENS.COLUMN_SORT_BY_FULLNESS, null);
+			}
 		}
 	}
 
@@ -333,14 +410,19 @@ public class VitalsTableScreen : TableScreen
 	{
 		tooltip.ClearMultiStringTooltip();
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
-		switch (widgetRow.rowType)
+		TableRow.RowType rowType = widgetRow.rowType;
+		if (rowType != TableRow.RowType.Default)
 		{
-		case TableRow.RowType.Minion:
-			if (minion != null)
+			if (rowType != TableRow.RowType.Header)
 			{
-				tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.GOTO_DUPLICANT_BUTTON, minion.GetProperName()), null);
+				if (rowType == TableRow.RowType.Minion)
+				{
+					if (minion != null)
+					{
+						tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.GOTO_DUPLICANT_BUTTON, minion.GetProperName()), null);
+					}
+				}
 			}
-			break;
 		}
 	}
 
@@ -354,7 +436,7 @@ public class VitalsTableScreen : TableScreen
 		}
 		else if (widgetRow.isDefault)
 		{
-			componentInChildren.text = string.Empty;
+			componentInChildren.text = "";
 		}
 		else
 		{
@@ -371,30 +453,40 @@ public class VitalsTableScreen : TableScreen
 	{
 		float rationsAteToday = a.GetSMI<RationMonitor.Instance>().GetRationsAteToday();
 		float rationsAteToday2 = b.GetSMI<RationMonitor.Instance>().GetRationsAteToday();
+		int num;
 		if (rationsAteToday > rationsAteToday2)
 		{
-			return -1;
+			num = -1;
 		}
-		if (rationsAteToday < rationsAteToday2)
+		else if (rationsAteToday < rationsAteToday2)
 		{
-			return 1;
+			num = 1;
 		}
-		return 0;
+		else
+		{
+			num = 0;
+		}
+		return num;
 	}
 
 	protected void on_tooltip_eaten_today(MinionIdentity minion, GameObject widget_go, ToolTip tooltip)
 	{
 		tooltip.ClearMultiStringTooltip();
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
-		switch (widgetRow.rowType)
+		TableRow.RowType rowType = widgetRow.rowType;
+		if (rowType != TableRow.RowType.Default)
 		{
-		case TableRow.RowType.Minion:
-			if (minion != null)
+			if (rowType != TableRow.RowType.Header)
 			{
-				tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.DUPLICANT_PROPERNAME, minion.GetProperName()), null);
-				tooltip.AddMultiStringTooltip(string.Format(UI.VITALSSCREEN.EATEN_TODAY_TOOLTIP, GameUtil.GetFormattedCalories(minion.GetSMI<RationMonitor.Instance>().GetRationsAteToday(), GameUtil.TimeSlice.None, true)), null);
+				if (rowType == TableRow.RowType.Minion)
+				{
+					if (minion != null)
+					{
+						tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.DUPLICANT_PROPERNAME, minion.GetProperName()), null);
+						tooltip.AddMultiStringTooltip(string.Format(UI.VITALSSCREEN.EATEN_TODAY_TOOLTIP, GameUtil.GetFormattedCalories(minion.GetSMI<RationMonitor.Instance>().GetRationsAteToday(), GameUtil.TimeSlice.None, true)), null);
+					}
+				}
 			}
-			break;
 		}
 	}
 
@@ -402,11 +494,19 @@ public class VitalsTableScreen : TableScreen
 	{
 		tooltip.ClearMultiStringTooltip();
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
-		switch (widgetRow.rowType)
+		TableRow.RowType rowType = widgetRow.rowType;
+		if (rowType != TableRow.RowType.Default)
 		{
-		case TableRow.RowType.Header:
-			tooltip.AddMultiStringTooltip(UI.TABLESCREENS.COLUMN_SORT_BY_EATEN_TODAY, null);
-			break;
+			if (rowType != TableRow.RowType.Header)
+			{
+				if (rowType != TableRow.RowType.Minion)
+				{
+				}
+			}
+			else
+			{
+				tooltip.AddMultiStringTooltip(UI.TABLESCREENS.COLUMN_SORT_BY_EATEN_TODAY, null);
+			}
 		}
 	}
 }

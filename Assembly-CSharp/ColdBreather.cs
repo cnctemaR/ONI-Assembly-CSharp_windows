@@ -82,7 +82,7 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 		{
 			base.serializable = true;
 			default_state = this.grow;
-			this.statusItemCooling = new StatusItem("cooling", CREATURES.STATUSITEMS.COOLING.NAME, CREATURES.STATUSITEMS.COOLING.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 14334);
+			this.statusItemCooling = new StatusItem("cooling", CREATURES.STATUSITEMS.COOLING.NAME, CREATURES.STATUSITEMS.COOLING.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 30718);
 			this.dead.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Dead).Enter(delegate(ColdBreather.StatesInstance smi)
 			{
 				GameUtil.KInstantiate(EffectPrefabs.Instance.PlantDeath, smi.master.transform.position, Grid.SceneLayer.FXFront, SceneOrganizer.Instance.GetFolder(Folder.FX), null, 0);
@@ -100,12 +100,12 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 				{
 					smi.GoTo(this.blocked_from_growing);
 				}
-			}).PlayAnim("grow_seed", KAnim.PlayMode.Once, null).EventTransition(GameHashes.AnimQueueComplete, this.alive, null);
+			}).PlayAnim("grow_seed", KAnim.PlayMode.Once).EventTransition(GameHashes.AnimQueueComplete, this.alive, null);
 			this.alive.InitializeStates(this.masterTarget, this.dead).DefaultState(this.alive.mature).EventHandler(GameHashes.OnStorageChange, delegate(ColdBreather.StatesInstance smi)
 			{
 				smi.Exhale();
 			});
-			this.alive.mature.EventTransition(GameHashes.Wilt, this.alive.wilting, (ColdBreather.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).PlayAnim("idle", KAnim.PlayMode.Loop, null).ToggleMainStatusItem(this.statusItemCooling)
+			this.alive.mature.EventTransition(GameHashes.Wilt, this.alive.wilting, (ColdBreather.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).PlayAnim("idle", KAnim.PlayMode.Loop).ToggleMainStatusItem(this.statusItemCooling)
 				.Enter(delegate(ColdBreather.StatesInstance smi)
 				{
 					smi.master.elementConsumer.EnableConsumption(true);
@@ -114,7 +114,7 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 				{
 					smi.master.elementConsumer.EnableConsumption(false);
 				});
-			this.alive.wilting.PlayAnim("wilt1", KAnim.PlayMode.Once, null).EventTransition(GameHashes.WiltRecover, this.alive.mature, (ColdBreather.StatesInstance smi) => !smi.master.wiltCondition.IsWilting());
+			this.alive.wilting.PlayAnim("wilt1").EventTransition(GameHashes.WiltRecover, this.alive.mature, (ColdBreather.StatesInstance smi) => !smi.master.wiltCondition.IsWilting());
 		}
 
 		public GameStateMachine<ColdBreather.States, ColdBreather.StatesInstance, ColdBreather, object>.State grow;

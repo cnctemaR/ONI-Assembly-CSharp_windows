@@ -6,54 +6,53 @@ public class GroundMasks : ScriptableObject
 {
 	public void Initialize()
 	{
-		if (this.maskAtlas == null || this.maskAtlas.items == null)
+		if (!(this.maskAtlas == null) && this.maskAtlas.items != null)
 		{
-			return;
-		}
-		this.biomeMasks = new Dictionary<string, GroundMasks.BiomeMaskData>();
-		foreach (TextureAtlas.Item item in this.maskAtlas.items)
-		{
-			string name = item.name;
-			int num = name.IndexOf('/');
-			string text = name.Substring(0, num);
-			string text2 = name.Substring(num + 1, 4);
-			text = text.ToLower();
-			for (int num2 = text.IndexOf('_'); num2 != -1; num2 = text.IndexOf('_'))
+			this.biomeMasks = new Dictionary<string, GroundMasks.BiomeMaskData>();
+			foreach (TextureAtlas.Item item in this.maskAtlas.items)
 			{
-				text = text.Remove(num2, 1);
+				string name = item.name;
+				int num = name.IndexOf('/');
+				string text = name.Substring(0, num);
+				string text2 = name.Substring(num + 1, 4);
+				text = text.ToLower();
+				for (int num2 = text.IndexOf('_'); num2 != -1; num2 = text.IndexOf('_'))
+				{
+					text = text.Remove(num2, 1);
+				}
+				GroundMasks.BiomeMaskData biomeMaskData = null;
+				if (!this.biomeMasks.TryGetValue(text, out biomeMaskData))
+				{
+					biomeMaskData = new GroundMasks.BiomeMaskData(text);
+					this.biomeMasks[text] = biomeMaskData;
+				}
+				int num3 = Convert.ToInt32(text2, 2);
+				GroundMasks.Tile tile = biomeMaskData.tiles[num3];
+				if (tile.variationUVs == null)
+				{
+					tile.isSource = true;
+					tile.variationUVs = new GroundMasks.UVData[1];
+				}
+				else
+				{
+					GroundMasks.UVData[] array = new GroundMasks.UVData[tile.variationUVs.Length + 1];
+					Array.Copy(tile.variationUVs, array, tile.variationUVs.Length);
+					tile.variationUVs = array;
+				}
+				Vector4 vector = new Vector4(item.uvBox.x, item.uvBox.w, item.uvBox.z, item.uvBox.y);
+				Vector2 vector2 = new Vector2(vector.x, vector.y);
+				Vector2 vector3 = new Vector2(vector.z, vector.y);
+				Vector2 vector4 = new Vector2(vector.x, vector.w);
+				Vector2 vector5 = new Vector2(vector.z, vector.w);
+				GroundMasks.UVData uvdata = new GroundMasks.UVData(vector2, vector3, vector4, vector5);
+				tile.variationUVs[tile.variationUVs.Length - 1] = uvdata;
+				biomeMaskData.tiles[num3] = tile;
 			}
-			GroundMasks.BiomeMaskData biomeMaskData = null;
-			if (!this.biomeMasks.TryGetValue(text, out biomeMaskData))
+			foreach (KeyValuePair<string, GroundMasks.BiomeMaskData> keyValuePair in this.biomeMasks)
 			{
-				biomeMaskData = new GroundMasks.BiomeMaskData(text);
-				this.biomeMasks[text] = biomeMaskData;
+				keyValuePair.Value.GenerateRotations();
+				keyValuePair.Value.Validate();
 			}
-			int num3 = Convert.ToInt32(text2, 2);
-			GroundMasks.Tile tile = biomeMaskData.tiles[num3];
-			if (tile.variationUVs == null)
-			{
-				tile.isSource = true;
-				tile.variationUVs = new GroundMasks.UVData[1];
-			}
-			else
-			{
-				GroundMasks.UVData[] array = new GroundMasks.UVData[tile.variationUVs.Length + 1];
-				Array.Copy(tile.variationUVs, array, tile.variationUVs.Length);
-				tile.variationUVs = array;
-			}
-			Vector4 vector = new Vector4(item.uvBox.x, item.uvBox.w, item.uvBox.z, item.uvBox.y);
-			Vector2 vector2 = new Vector2(vector.x, vector.y);
-			Vector2 vector3 = new Vector2(vector.z, vector.y);
-			Vector2 vector4 = new Vector2(vector.x, vector.w);
-			Vector2 vector5 = new Vector2(vector.z, vector.w);
-			GroundMasks.UVData uvdata = new GroundMasks.UVData(vector2, vector3, vector4, vector5);
-			tile.variationUVs[tile.variationUVs.Length - 1] = uvdata;
-			biomeMaskData.tiles[num3] = tile;
-		}
-		foreach (KeyValuePair<string, GroundMasks.BiomeMaskData> keyValuePair in this.biomeMasks)
-		{
-			keyValuePair.Value.GenerateRotations();
-			keyValuePair.Value.Validate();
 		}
 	}
 
@@ -138,11 +137,11 @@ public class GroundMasks : ScriptableObject
 			int num = dest_mask;
 			for (int i = 0; i < 3; i++)
 			{
-				int num2 = num & 1;
+				int num2 = (num & 1) >> 0;
 				int num3 = (num & 2) >> 1;
 				int num4 = (num & 4) >> 2;
 				int num5 = (num & 8) >> 3;
-				int num6 = (num5 << 2) | num4 | (num3 << 3) | (num2 << 1);
+				int num6 = (num5 << 2) | (num4 << 0) | (num3 << 3) | (num2 << 1);
 				if (this.tiles[num6].isSource)
 				{
 					array = new GroundMasks.UVData[this.tiles[num6].variationUVs.Length];

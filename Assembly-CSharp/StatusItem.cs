@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class StatusItem : Resource
 {
-	public StatusItem(string id, string prefix, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, SimViewMode render_overlay, bool showWorldIcon = true, int status_overlays = 14334)
+	public StatusItem(string id, string prefix, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, SimViewMode render_overlay, bool showWorldIcon = true, int status_overlays = 30718)
 		: base(id, Strings.Get(string.Concat(new string[]
 		{
 			"STRINGS.",
@@ -23,14 +23,22 @@ public class StatusItem : Resource
 			id.ToUpper(),
 			".TOOLTIP"
 		}));
-		switch (icon_type)
+		if (icon_type != StatusItem.IconType.Info)
 		{
-		case StatusItem.IconType.Info:
+			if (icon_type != StatusItem.IconType.Exclamation)
+			{
+				if (icon_type != StatusItem.IconType.Custom)
+				{
+				}
+			}
+			else
+			{
+				icon = "status_item_exclamation";
+			}
+		}
+		else
+		{
 			icon = "dash";
-			break;
-		case StatusItem.IconType.Exclamation:
-			icon = "status_item_exclamation";
-			break;
 		}
 		this.iconName = icon;
 		this.notificationType = notification_type;
@@ -47,17 +55,25 @@ public class StatusItem : Resource
 		}
 	}
 
-	public StatusItem(string id, string name, string tooltip, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, SimViewMode render_overlay, int status_overlays = 14334)
+	public StatusItem(string id, string name, string tooltip, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, SimViewMode render_overlay, int status_overlays = 30718)
 		: base(id, name)
 	{
-		switch (icon_type)
+		if (icon_type != StatusItem.IconType.Info)
 		{
-		case StatusItem.IconType.Info:
+			if (icon_type != StatusItem.IconType.Exclamation)
+			{
+				if (icon_type != StatusItem.IconType.Custom)
+				{
+				}
+			}
+			else
+			{
+				icon = "status_item_exclamation";
+			}
+		}
+		else
+		{
 			icon = "dash";
-			break;
-		case StatusItem.IconType.Exclamation:
-			icon = "status_item_exclamation";
-			break;
 		}
 		this.iconName = icon;
 		this.notificationType = notification_type;
@@ -139,11 +155,16 @@ public class StatusItem : Resource
 
 	private string ResolveString(string str, object data)
 	{
+		string text;
 		if (this.resolveStringCallback != null && data != null)
 		{
-			return this.resolveStringCallback(str, data);
+			text = this.resolveStringCallback(str, data);
 		}
-		return str;
+		else
+		{
+			text = str;
+		}
+		return text;
 	}
 
 	private string ResolveTooltip(string str, object data)
@@ -176,12 +197,11 @@ public class StatusItem : Resource
 
 	public void SetIcon(Image image, object data)
 	{
-		if (this.sprite == null)
+		if (this.sprite != null)
 		{
-			return;
+			image.color = this.sprite.color;
+			image.sprite = this.sprite.sprite;
 		}
-		image.color = this.sprite.color;
-		image.sprite = this.sprite.sprite;
 	}
 
 	public bool UseConditionalCallback(SimViewMode overlay, Transform transform)
@@ -198,69 +218,90 @@ public class StatusItem : Resource
 	public static StatusItem.StatusItemOverlays GetStatusItemOverlayBySimViewMode(SimViewMode mode)
 	{
 		StatusItem.StatusItemOverlays statusItemOverlays = StatusItem.StatusItemOverlays.None;
-		if (mode != SimViewMode.GasVentMap)
+		if (mode != SimViewMode.Decor)
 		{
-			if (mode != SimViewMode.Rooms)
+			if (mode != SimViewMode.OxygenMap)
 			{
-				if (mode != SimViewMode.HeatFlow)
+				if (mode != SimViewMode.Crop)
 				{
-					if (mode == SimViewMode.SuitRequiredMap)
+					if (mode != SimViewMode.LiquidVentMap)
 					{
-						return StatusItem.StatusItemOverlays.Suits;
-					}
-					if (mode != SimViewMode.ThermalConductivity)
-					{
-						if (mode == SimViewMode.TemperatureMap)
-						{
-							return StatusItem.StatusItemOverlays.Temperature;
-						}
-						if (mode == SimViewMode.Disease)
-						{
-							return StatusItem.StatusItemOverlays.Pathogens;
-						}
-						if (mode == SimViewMode.Light)
-						{
-							return StatusItem.StatusItemOverlays.Light;
-						}
-						if (mode == SimViewMode.None)
-						{
-							return StatusItem.StatusItemOverlays.None;
-						}
-						if (mode == SimViewMode.Decor)
-						{
-							return StatusItem.StatusItemOverlays.Decor;
-						}
-						if (mode == SimViewMode.Crop)
-						{
-							return StatusItem.StatusItemOverlays.Farming;
-						}
-						if (mode == SimViewMode.LiquidVentMap)
-						{
-							return StatusItem.StatusItemOverlays.LiquidPlumbing;
-						}
 						if (mode != SimViewMode.PowerMap)
 						{
-							global::Debug.LogWarning("ViewMode " + mode + " has no StatusItemOverlay value", null);
-							return statusItemOverlays;
+							if (mode != SimViewMode.GasVentMap)
+							{
+								if (mode != SimViewMode.Rooms)
+								{
+									if (mode != SimViewMode.HeatFlow)
+									{
+										if (mode == SimViewMode.SuitRequiredMap)
+										{
+											return StatusItem.StatusItemOverlays.Suits;
+										}
+										if (mode != SimViewMode.ThermalConductivity)
+										{
+											if (mode == SimViewMode.TemperatureMap)
+											{
+												return StatusItem.StatusItemOverlays.Temperature;
+											}
+											if (mode == SimViewMode.Disease)
+											{
+												return StatusItem.StatusItemOverlays.Pathogens;
+											}
+											if (mode == SimViewMode.Light)
+											{
+												return StatusItem.StatusItemOverlays.Light;
+											}
+											if (mode == SimViewMode.None)
+											{
+												return StatusItem.StatusItemOverlays.None;
+											}
+											if (mode != SimViewMode.Logic)
+											{
+												global::Debug.LogWarning("ViewMode " + mode + " has no StatusItemOverlay value", null);
+												return statusItemOverlays;
+											}
+											return StatusItem.StatusItemOverlays.Logic;
+										}
+									}
+									statusItemOverlays = StatusItem.StatusItemOverlays.ThermalComfort;
+								}
+								else
+								{
+									statusItemOverlays = StatusItem.StatusItemOverlays.Rooms;
+								}
+							}
+							else
+							{
+								statusItemOverlays = StatusItem.StatusItemOverlays.GasPlunbing;
+							}
 						}
-						return StatusItem.StatusItemOverlays.PowerMap;
+						else
+						{
+							statusItemOverlays = StatusItem.StatusItemOverlays.PowerMap;
+						}
+					}
+					else
+					{
+						statusItemOverlays = StatusItem.StatusItemOverlays.LiquidPlumbing;
 					}
 				}
-				statusItemOverlays = StatusItem.StatusItemOverlays.ThermalComfort;
+				else
+				{
+					statusItemOverlays = StatusItem.StatusItemOverlays.Farming;
+				}
 			}
 			else
 			{
-				statusItemOverlays = StatusItem.StatusItemOverlays.Rooms;
+				statusItemOverlays = StatusItem.StatusItemOverlays.None;
 			}
 		}
 		else
 		{
-			statusItemOverlays = StatusItem.StatusItemOverlays.GasPlunbing;
+			statusItemOverlays = StatusItem.StatusItemOverlays.Decor;
 		}
 		return statusItemOverlays;
 	}
-
-	public const int ALL_OVERLAYS = 14334;
 
 	public string tooltipText;
 
@@ -300,6 +341,8 @@ public class StatusItem : Resource
 
 	private bool showShowWorldIcon = true;
 
+	public const int ALL_OVERLAYS = 30718;
+
 	public enum IconType
 	{
 		Info,
@@ -321,6 +364,7 @@ public class StatusItem : Resource
 		Pathogens = 512,
 		Farming = 1024,
 		Rooms = 4096,
-		Suits = 8192
+		Suits = 8192,
+		Logic = 16384
 	}
 }

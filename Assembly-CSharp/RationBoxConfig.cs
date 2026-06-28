@@ -6,11 +6,23 @@ public class RationBoxConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
+		string text = "RationBox";
+		int num = 2;
+		int num2 = 2;
+		string text2 = "rationbox_kanim";
+		float num3 = 100f;
+		int num4 = 10;
+		float num5 = 10f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
+		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("RationBox", 2, 2, "rationbox_kanim", 100f, 10, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER0, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_MINERALS, num6, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER0, none);
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.AudioCategory = "Metal";
+		buildingDef.HotKey = global::Action.BuildMenuKeyR;
 		SoundEventVolumeCache.instance.AddVolume("rationbox_kanim", "RationBox_open", NOISE_POLLUTION.NOISY.TIER1);
 		SoundEventVolumeCache.instance.AddVolume("rationbox_kanim", "RationBox_close", NOISE_POLLUTION.NOISY.TIER1);
 		return buildingDef;
@@ -21,12 +33,11 @@ public class RationBoxConfig : IBuildingConfig
 		Prioritizable.AddRef(go);
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 150f;
-		storage.disableOnStore = true;
 		storage.showInUI = true;
 		storage.showDescriptor = true;
 		storage.storageFilters = STORAGEFILTERS.FOOD;
 		storage.allowItemRemoval = true;
-		TreeFilterable treeFilterable = go.AddOrGet<TreeFilterable>();
+		go.AddOrGet<TreeFilterable>();
 		go.AddOrGet<UserMenu>();
 		RationBox rationBox = go.AddOrGet<RationBox>();
 		rationBox.noFilterTint = new Color(0.5147059f, 0.5147059f, 0.5147059f, 1f);

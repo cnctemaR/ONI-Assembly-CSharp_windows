@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 
 public static class RenderUtil
@@ -12,19 +13,35 @@ public static class RenderUtil
 			{
 				foreach (Material material in component.materials)
 				{
-					if (material != null && material.name.StartsWith(name))
+					if (material != null)
 					{
-						return material;
+						if (material.name.StartsWith(name))
+						{
+							return material;
+						}
 					}
 				}
 			}
-			foreach (object obj in node)
+			IEnumerator enumerator = node.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				Material material2 = RenderUtil.GetMaterial(transform, name);
-				if (material2 != null)
+				while (enumerator.MoveNext())
 				{
-					return material2;
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					Material material2 = RenderUtil.GetMaterial(transform, name);
+					if (material2 != null)
+					{
+						return material2;
+					}
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = enumerator as IDisposable) != null)
+				{
+					disposable.Dispose();
 				}
 			}
 		}
@@ -46,10 +63,23 @@ public static class RenderUtil
 					}
 				}
 			}
-			foreach (object obj in node)
+			IEnumerator enumerator = node.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				RenderUtil.SetShader(transform, shader);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					RenderUtil.SetShader(transform, shader);
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = enumerator as IDisposable) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 		}
 	}
@@ -69,10 +99,23 @@ public static class RenderUtil
 					}
 				}
 			}
-			foreach (object obj in node)
+			IEnumerator enumerator = node.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				RenderUtil.SetColor(transform, color);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					RenderUtil.SetColor(transform, color);
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = enumerator as IDisposable) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 		}
 	}
@@ -86,10 +129,23 @@ public static class RenderUtil
 			{
 				component.sharedMaterial = material;
 			}
-			foreach (object obj in node)
+			IEnumerator enumerator = node.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				RenderUtil.SetMaterial(transform, material);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					RenderUtil.SetMaterial(transform, material);
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = enumerator as IDisposable) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 		}
 	}
@@ -111,10 +167,23 @@ public static class RenderUtil
 				}
 				component.materials = materials;
 			}
-			foreach (object obj in node)
+			IEnumerator enumerator = node.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				RenderUtil.ReplaceMaterial(transform, name, material);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					RenderUtil.ReplaceMaterial(transform, name, material);
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = enumerator as IDisposable) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 		}
 	}
@@ -128,10 +197,23 @@ public static class RenderUtil
 			{
 				component.enabled = is_enabled;
 			}
-			foreach (object obj in node)
+			IEnumerator enumerator = node.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				RenderUtil.EnableRenderer(transform, is_enabled);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					RenderUtil.EnableRenderer(transform, is_enabled);
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = enumerator as IDisposable) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 		}
 	}
@@ -145,10 +227,23 @@ public static class RenderUtil
 			{
 				component.enabled = is_enabled;
 			}
-			foreach (object obj in node)
+			IEnumerator enumerator = node.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				RenderUtil.EnableLights(transform, is_enabled);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					RenderUtil.EnableLights(transform, is_enabled);
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = enumerator as IDisposable) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 		}
 	}
@@ -165,10 +260,23 @@ public static class RenderUtil
 				materialPropertyBlock.SetColor(parameter_name, color);
 				component.SetPropertyBlock(materialPropertyBlock);
 			}
-			foreach (object obj in node)
+			IEnumerator enumerator = node.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				RenderUtil.SetMaterialBlockColor(transform, parameter_name, color);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					RenderUtil.SetMaterialBlockColor(transform, parameter_name, color);
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = enumerator as IDisposable) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 		}
 	}
@@ -185,10 +293,23 @@ public static class RenderUtil
 				materialPropertyBlock.SetTexture(parameter_name, texture);
 				component.SetPropertyBlock(materialPropertyBlock);
 			}
-			foreach (object obj in node)
+			IEnumerator enumerator = node.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				RenderUtil.SetMaterialBlockTexture(transform, parameter_name, texture);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					RenderUtil.SetMaterialBlockTexture(transform, parameter_name, texture);
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = enumerator as IDisposable) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 		}
 	}
@@ -214,10 +335,23 @@ public static class RenderUtil
 			{
 				component.AddShaderVector(parameter, value);
 			}
-			foreach (object obj in node)
+			IEnumerator enumerator = node.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				RenderUtil.AddMaterialBlockVector(transform, parameter, value);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					RenderUtil.AddMaterialBlockVector(transform, parameter, value);
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = enumerator as IDisposable) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 		}
 	}
@@ -246,10 +380,23 @@ public static class RenderUtil
 					renderer.SetPropertyBlock(materialPropertyBlock);
 				}
 			}
-			foreach (object obj in node)
+			IEnumerator enumerator = node.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				RenderUtil.RemoveMaterialBlockVector(transform, parameter);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					RenderUtil.RemoveMaterialBlockVector(transform, parameter);
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = enumerator as IDisposable) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 		}
 	}

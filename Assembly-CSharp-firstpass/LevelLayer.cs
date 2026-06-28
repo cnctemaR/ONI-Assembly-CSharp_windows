@@ -20,13 +20,13 @@ public class LevelLayer : List<LayerGradient>
 	public void ConvertBandSizeToMaxSize()
 	{
 		float num = 0f;
-		for (int i = 0; i < this.Count; i++)
+		for (int i = 0; i < base.Count; i++)
 		{
 			LayerGradient layerGradient = base[i];
 			num += layerGradient.bandSize;
 		}
 		float num2 = 0f;
-		for (int j = 0; j < this.Count; j++)
+		for (int j = 0; j < base.Count; j++)
 		{
 			LayerGradient layerGradient2 = base[j];
 			layerGradient2.maxValue = num2 + layerGradient2.bandSize / num;

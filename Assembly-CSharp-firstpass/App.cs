@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using Klei;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -48,7 +49,7 @@ public class App : MonoBehaviour
 			App.currentSceneName = App.loadingSceneName;
 			App.loadingSceneName = null;
 		}
-		if (!App.hasFocus)
+		if (!App.hasFocus && GenericGameSettings.instance.sleepWhenOutOfFocus)
 		{
 			float num = (Time.realtimeSinceStartup - this.lastSuspendTime) * 1000f;
 			float num2 = 0f;

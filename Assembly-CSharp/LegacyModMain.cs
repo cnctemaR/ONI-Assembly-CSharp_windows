@@ -39,7 +39,7 @@ public class LegacyModMain
 			}
 		}
 		list.Sort((LegacyModMain.Entry x, LegacyModMain.Entry y) => y.count.CompareTo(x.count));
-		string text = string.Empty;
+		string text = "";
 		foreach (LegacyModMain.Entry entry in list)
 		{
 			string text2 = text;
@@ -76,9 +76,12 @@ public class LegacyModMain
 		{
 			foreach (Type type2 in assembly.GetTypes())
 			{
-				if (typeof(MonoBehaviour).IsAssignableFrom(type2) && !hashSet.Contains(type2))
+				if (typeof(MonoBehaviour).IsAssignableFrom(type2))
 				{
-					hashSet2.Add(type2);
+					if (!hashSet.Contains(type2))
+					{
+						hashSet2.Add(type2);
+					}
 				}
 			}
 		}
@@ -152,7 +155,7 @@ public class LegacyModMain
 			new LegacyModMain.ElementInfo
 			{
 				id = SimHashes.Gold,
-				decor = 0.3f,
+				decor = 0.5f,
 				overheatMod = 50f
 			},
 			new LegacyModMain.ElementInfo
@@ -174,11 +177,6 @@ public class LegacyModMain
 			new LegacyModMain.ElementInfo
 			{
 				id = SimHashes.Dirt,
-				overheatMod = -10f
-			},
-			new LegacyModMain.ElementInfo
-			{
-				id = SimHashes.Sand,
 				overheatMod = -10f
 			},
 			new LegacyModMain.ElementInfo
@@ -209,12 +207,14 @@ public class LegacyModMain
 			new LegacyModMain.ElementInfo
 			{
 				id = SimHashes.GoldAmalgam,
-				overheatMod = 50f
+				overheatMod = 50f,
+				decor = 0.1f
 			},
 			new LegacyModMain.ElementInfo
 			{
 				id = SimHashes.Diamond,
-				overheatMod = 2000f
+				overheatMod = 2000f,
+				decor = 1f
 			}
 		};
 		foreach (LegacyModMain.ElementInfo elementInfo in array)
@@ -222,12 +222,12 @@ public class LegacyModMain
 			Element element = ElementLoader.FindElementByHash(elementInfo.id);
 			if (elementInfo.decor != 0f)
 			{
-				AttributeModifier attributeModifier = new AttributeModifier("Decor", elementInfo.decor, element.name, true, false);
+				AttributeModifier attributeModifier = new AttributeModifier("Decor", elementInfo.decor, element.name, true, false, true);
 				element.attributeModifiers.Add(attributeModifier);
 			}
 			if (elementInfo.overheatMod != 0f)
 			{
-				AttributeModifier attributeModifier2 = new AttributeModifier(Db.Get().BuildingAttributes.OverheatTemperature.Id, elementInfo.overheatMod, element.name, false, false);
+				AttributeModifier attributeModifier2 = new AttributeModifier(Db.Get().BuildingAttributes.OverheatTemperature.Id, elementInfo.overheatMod, element.name, false, false, true);
 				element.attributeModifiers.Add(attributeModifier2);
 			}
 		}

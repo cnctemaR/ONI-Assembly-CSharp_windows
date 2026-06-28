@@ -56,6 +56,8 @@ public class KAnimConverter
 
 		KBatchedAnimInstanceData GetBatchInstanceData();
 
+		BatchGroupInstance batchGroupInstance { get; }
+
 		KAnimBatchGroup.MaterialType GetMaterialType();
 	}
 

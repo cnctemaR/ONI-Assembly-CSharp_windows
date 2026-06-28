@@ -6,7 +6,7 @@ public class RiverSource : KMonoBehaviour
 {
 	protected override void OnSpawn()
 	{
-		River riverForCell = River.GetRiverForCell(WorldGen.Rivers, Grid.PosToCell(this.transform.position));
+		River riverForCell = River.GetRiverForCell(WorldGen.Rivers, Grid.PosToCell(base.transform.position));
 		if (riverForCell != null)
 		{
 			this.elementID = ElementLoader.FindElementByName(riverForCell.element).id;
@@ -19,7 +19,7 @@ public class RiverSource : KMonoBehaviour
 
 	private void SimUpdate(float dt)
 	{
-		int num = Grid.PosToCell(this.transform.position);
+		int num = Grid.PosToCell(base.transform.position);
 		Element element = Grid.Element[num];
 		if (element.id == this.elementID || !element.IsSolid)
 		{
@@ -53,5 +53,5 @@ public class RiverSource : KMonoBehaviour
 	[SerializeField]
 	public float temperature;
 
-	private int elementIdx;
+	private int elementIdx = 0;
 }

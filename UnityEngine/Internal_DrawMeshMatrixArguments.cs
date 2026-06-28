@@ -15,5 +15,7 @@ namespace UnityEngine
 		public int receiveShadows;
 
 		public int reflectionProbeAnchorInstanceID;
+
+		public bool useLightProbes;
 	}
 }

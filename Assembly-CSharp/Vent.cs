@@ -82,9 +82,12 @@ public class Vent : KMonoBehaviour, IEffectDescriptor
 	private bool IsValidOutputCell(int output_cell)
 	{
 		bool flag = false;
-		if ((this.structure == null || !this.structure.IsEntombed()) && !Grid.Solid[output_cell])
+		if (this.structure == null || !this.structure.IsEntombed())
 		{
-			flag = Grid.Cell[output_cell].mass < this.overpressureMass;
+			if (!Grid.Solid[output_cell])
+			{
+				flag = Grid.Cell[output_cell].mass < this.overpressureMass;
+			}
 		}
 		return flag;
 	}
@@ -100,7 +103,7 @@ public class Vent : KMonoBehaviour, IEffectDescriptor
 
 	private int cell = -1;
 
-	private int sortKey;
+	private int sortKey = 0;
 
 	private bool connected = true;
 
@@ -110,7 +113,7 @@ public class Vent : KMonoBehaviour, IEffectDescriptor
 	public ConduitType conduitType = ConduitType.Gas;
 
 	[SerializeField]
-	public Endpoint endpointType;
+	public Endpoint endpointType = Endpoint.Source;
 
 	[SerializeField]
 	public float overpressureMass = 1f;

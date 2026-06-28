@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using KSerialization;
-using UnityEngine;
 
 namespace Klei.AI
 {
@@ -37,31 +35,6 @@ namespace Klei.AI
 			}
 		}
 
-		protected override void OnSpawn()
-		{
-			base.OnSpawn();
-			Components.Modifiers.Add(this);
-		}
-
-		public void DoUpdate()
-		{
-			List<AmountInstance> modifierList = this.amounts.ModifierList;
-			float deltaTime = Time.deltaTime;
-			int count = modifierList.Count;
-			for (int i = 0; i < count; i++)
-			{
-				AmountInstance amountInstance = modifierList[i];
-				if (!amountInstance.paused)
-				{
-					float num = amountInstance.GetDelta() * deltaTime;
-					if (num != 0f)
-					{
-						amountInstance.ApplyDelta(num);
-					}
-				}
-			}
-		}
-
 		public void Serialize(BinaryWriter writer)
 		{
 			this.OnSerialize(writer);
@@ -86,7 +59,11 @@ namespace Klei.AI
 
 		protected override void OnCleanUp()
 		{
-			Components.Modifiers.Remove(this);
+			base.OnCleanUp();
+			if (this.amounts != null)
+			{
+				this.amounts.Cleanup();
+			}
 		}
 
 		public ModifierSet modifierSet;

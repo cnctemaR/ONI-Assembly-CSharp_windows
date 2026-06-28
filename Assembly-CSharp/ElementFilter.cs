@@ -124,7 +124,7 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable
 	[MyCmpReq]
 	private Building building;
 
-	public Filterable filterable;
+	public Filterable filterable = null;
 
 	private int inputCell = -1;
 

@@ -64,21 +64,26 @@ namespace ProcGen
 		public static List<Vector2I> StaggerLine(Vector2 p0, Vector2 p1, int numberOfBreaks, SeededRandom rand, float staggerRange = 3f)
 		{
 			List<Vector2I> list = new List<Vector2I>();
+			List<Vector2I> list2;
 			if (numberOfBreaks == 0)
 			{
-				return Util.GetLine(p0, p1);
+				list2 = Util.GetLine(p0, p1);
 			}
-			Vector2 vector = p1 - p0;
-			Vector2 vector2 = p0;
-			Vector2 vector3 = p1;
-			for (int i = 0; i < numberOfBreaks; i++)
+			else
 			{
-				vector3 = p0 + vector * (1f / (float)numberOfBreaks) * (float)i + Vector2.one * rand.RandomRange(-staggerRange, staggerRange);
-				list.AddRange(Util.GetLine(vector2, vector3));
-				vector2 = vector3;
+				Vector2 vector = p1 - p0;
+				Vector2 vector2 = p0;
+				Vector2 vector3 = p1;
+				for (int i = 0; i < numberOfBreaks; i++)
+				{
+					vector3 = p0 + vector * (1f / (float)numberOfBreaks) * (float)i + Vector2.one * rand.RandomRange(-staggerRange, staggerRange);
+					list.AddRange(Util.GetLine(vector2, vector3));
+					vector2 = vector3;
+				}
+				list.AddRange(Util.GetLine(vector3, p1));
+				list2 = list;
 			}
-			list.AddRange(Util.GetLine(vector3, p1));
-			return list;
+			return list2;
 		}
 
 		public static List<Vector2I> GetLine(Vector2 p0, Vector2 p1)
@@ -197,14 +202,19 @@ namespace ProcGen
 
 		public static Vector2 RandomInUnitCircle(global::System.Random rng = null)
 		{
+			Vector2 vector;
 			if (rng == null)
 			{
-				return global::UnityEngine.Random.insideUnitCircle;
+				vector = global::UnityEngine.Random.insideUnitCircle;
 			}
-			double num = rng.NextDouble();
-			double num2 = rng.NextDouble();
-			double num3 = Math.Sqrt(num);
-			return new Vector2((float)(num3 * Math.Cos(num2)), (float)(num3 * Math.Sin(num2)));
+			else
+			{
+				double num = rng.NextDouble();
+				double num2 = rng.NextDouble();
+				double num3 = Math.Sqrt(num);
+				vector = new Vector2((float)(num3 * Math.Cos(num2)), (float)(num3 * Math.Sin(num2)));
+			}
+			return vector;
 		}
 
 		public static List<Vector2I> GetBlob(Vector2 center, float radius, global::System.Random rng)
@@ -213,18 +223,15 @@ namespace ProcGen
 			circle.ShuffleSeeded<Vector2>(rng);
 			for (int i = 0; i < circle.Count; i++)
 			{
-				List<Vector2> list2;
-				List<Vector2> list = (list2 = circle);
-				int num2;
-				int num = (num2 = i);
-				Vector2 vector = list2[num2];
-				list[num] = vector + Util.RandomInUnitCircle(rng) * radius;
+				List<Vector2> list;
+				int num;
+				(list = circle)[num = i] = list[num] + Util.RandomInUnitCircle(rng) * radius;
 			}
 			HashSet<Vector2> pointsOnCatmullRomSpline = Util.GetPointsOnCatmullRomSpline(circle, (int)(2f * radius * radius));
 			HashSet<Vector2I> hashSet = new HashSet<Vector2I>();
-			foreach (Vector2 vector2 in pointsOnCatmullRomSpline)
+			foreach (Vector2 vector in pointsOnCatmullRomSpline)
 			{
-				hashSet.Add(new Vector2I((int)vector2.x, (int)vector2.y));
+				hashSet.Add(new Vector2I((int)vector.x, (int)vector.y));
 			}
 			return new List<Vector2I>(hashSet);
 		}

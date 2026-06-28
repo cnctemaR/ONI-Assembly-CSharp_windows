@@ -16,7 +16,7 @@ namespace Klei.AI
 			this.ConfigureStatusItem();
 			if (effect.showInUI)
 			{
-				KSelectable component = this.gameObject.GetComponent<KSelectable>();
+				KSelectable component = base.gameObject.GetComponent<KSelectable>();
 				if (!component.GetStatusItemGroup().HasStatusItemID(this.statusItem))
 				{
 					component.AddStatusItem(this.statusItem, this);
@@ -36,13 +36,13 @@ namespace Klei.AI
 
 		public void Remove()
 		{
-			this.gameObject.GetComponent<Effects>().Remove(this.effect);
-			this.gameObject.GetComponent<KSelectable>().RemoveStatusItem(this.statusItem, false);
+			base.gameObject.GetComponent<Effects>().Remove(this.effect);
+			base.gameObject.GetComponent<KSelectable>().RemoveStatusItem(this.statusItem, false);
 		}
 
 		private void ConfigureStatusItem()
 		{
-			this.statusItem = new StatusItem(this.effect.Id, this.effect.Name, Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + this.effect.Id.ToUpper() + ".TOOLTIP"), string.Empty, (!this.effect.isBad) ? StatusItem.IconType.Info : StatusItem.IconType.Exclamation, (!this.effect.isBad) ? NotificationType.Neutral : NotificationType.Bad, false, SimViewMode.None, 14334);
+			this.statusItem = new StatusItem(this.effect.Id, this.effect.Name, Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + this.effect.Id.ToUpper() + ".TOOLTIP"), "", (!this.effect.isBad) ? StatusItem.IconType.Info : StatusItem.IconType.Exclamation, (!this.effect.isBad) ? NotificationType.Neutral : NotificationType.Bad, false, SimViewMode.None, 30718);
 			this.statusItem.resolveStringCallback = new Func<string, object, string>(this.ResolveString);
 			this.statusItem.resolveTooltipCallback = new Func<string, object, string>(this.ResolveTooltip);
 		}

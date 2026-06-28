@@ -3,7 +3,7 @@
 public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 {
 	public TakeMedicineChore(MedicinalPill master)
-		: base(Db.Get().ChoreTypes.TakeMedicine, master, null, false, null, null, null, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.TakeMedicine, master, null, false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
 	{
 		this.medicine = master;
 		this.pickupable = this.medicine.GetComponent<Pickupable>();
@@ -11,28 +11,6 @@ public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 		base.AddPrecondition(ChorePreconditions.CanPickup, this.pickupable);
 		base.AddPrecondition(TakeMedicineChore.CanCure, this);
 		base.AddPrecondition(TakeMedicineChore.IsConsumptionPermitted, this);
-	}
-
-	// Note: this type is marked as 'beforefieldinit'.
-	static TakeMedicineChore()
-	{
-		Chore.Precondition precondition = default(Chore.Precondition);
-		precondition.id = "CanCure";
-		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
-		{
-			TakeMedicineChore takeMedicineChore = (TakeMedicineChore)data;
-			return takeMedicineChore.medicine.CanBeTakenBy(context.consumer.gameObject);
-		};
-		TakeMedicineChore.CanCure = precondition;
-		Chore.Precondition precondition2 = default(Chore.Precondition);
-		precondition2.id = "IsConsumptionPermitted";
-		precondition2.fn = delegate(ref Chore.Precondition.Context context, object data)
-		{
-			TakeMedicineChore takeMedicineChore2 = (TakeMedicineChore)data;
-			ConsumableConsumer component = context.consumer.GetComponent<ConsumableConsumer>();
-			return component == null || component.IsPermitted(takeMedicineChore2.medicine.PrefabID().Name);
-		};
-		TakeMedicineChore.IsConsumptionPermitted = precondition2;
 	}
 
 	public override void Begin(Chore.Precondition.Context context)
@@ -47,9 +25,26 @@ public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 
 	private MedicinalPill medicine;
 
-	public static Chore.Precondition CanCure;
+	public static Chore.Precondition CanCure = new Chore.Precondition
+	{
+		id = "CanCure",
+		fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			TakeMedicineChore takeMedicineChore = (TakeMedicineChore)data;
+			return takeMedicineChore.medicine.CanBeTakenBy(context.consumer.gameObject);
+		}
+	};
 
-	public static Chore.Precondition IsConsumptionPermitted;
+	public static Chore.Precondition IsConsumptionPermitted = new Chore.Precondition
+	{
+		id = "IsConsumptionPermitted",
+		fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			TakeMedicineChore takeMedicineChore2 = (TakeMedicineChore)data;
+			ConsumableConsumer component = context.consumer.GetComponent<ConsumableConsumer>();
+			return component == null || component.IsPermitted(takeMedicineChore2.medicine.PrefabID().Name);
+		}
+	};
 
 	public class StatesInstance : GameStateMachine<TakeMedicineChore.States, TakeMedicineChore.StatesInstance, TakeMedicineChore, object>.GameInstance
 	{

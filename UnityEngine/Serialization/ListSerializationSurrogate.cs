@@ -18,20 +18,25 @@ namespace UnityEngine.Serialization
 		{
 			IList list = (IList)Activator.CreateInstance(obj.GetType());
 			int @int = info.GetInt32("_size");
+			object obj2;
 			if (@int == 0)
 			{
-				return list;
+				obj2 = list;
 			}
-			IEnumerator enumerator = ((IEnumerable)info.GetValue("_items", typeof(IEnumerable))).GetEnumerator();
-			for (int i = 0; i < @int; i++)
+			else
 			{
-				if (!enumerator.MoveNext())
+				IEnumerator enumerator = ((IEnumerable)info.GetValue("_items", typeof(IEnumerable))).GetEnumerator();
+				for (int i = 0; i < @int; i++)
 				{
-					throw new InvalidOperationException();
+					if (!enumerator.MoveNext())
+					{
+						throw new InvalidOperationException();
+					}
+					list.Add(enumerator.Current);
 				}
-				list.Add(enumerator.Current);
+				obj2 = list;
 			}
-			return list;
+			return obj2;
 		}
 
 		private static Array ArrayFromGenericList(IList list)

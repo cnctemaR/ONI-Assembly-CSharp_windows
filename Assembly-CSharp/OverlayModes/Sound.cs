@@ -76,12 +76,25 @@ namespace OverlayModes
 			Vector2I vector2I;
 			Vector2I vector2I2;
 			Grid.GetVisibleExtents(out vector2I, out vector2I2);
-			Mode.RemoveOffscreenTargets<NoisePolluter>(this.layerTargets, vector2I, vector2I2);
+			Mode.RemoveOffscreenTargets<NoisePolluter>(this.layerTargets, vector2I, vector2I2, null);
 			IEnumerable allIntersecting = this.partition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y));
-			foreach (object obj in allIntersecting)
+			IEnumerator enumerator = allIntersecting.GetEnumerator();
+			try
 			{
-				NoisePolluter noisePolluter = (NoisePolluter)obj;
-				base.AddTargetIfVisible<NoisePolluter>(noisePolluter, vector2I, vector2I2, this.layerTargets, this.targetLayer);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					NoisePolluter noisePolluter = (NoisePolluter)obj;
+					base.AddTargetIfVisible<NoisePolluter>(noisePolluter, vector2I, vector2I2, this.layerTargets, this.targetLayer, null, null);
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = enumerator as IDisposable) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 			base.UpdateHighlightTypeOverlay<NoisePolluter>(vector2I, vector2I2, this.layerTargets, this.targetIDs, this.highlightConditions, BringToFrontLayerSetting.Conditional, this.targetLayer);
 		}
@@ -98,16 +111,15 @@ namespace OverlayModes
 
 		protected override void OnSaveLoadRootUnregistered(SaveLoadRoot item)
 		{
-			if (item == null || item.gameObject == null)
+			if (!(item == null) && !(item.gameObject == null))
 			{
-				return;
+				NoisePolluter component = item.GetComponent<NoisePolluter>();
+				if (this.layerTargets.Contains(component))
+				{
+					this.layerTargets.Remove(component);
+				}
+				this.partition.Remove(component);
 			}
-			NoisePolluter component = item.GetComponent<NoisePolluter>();
-			if (this.layerTargets.Contains(component))
-			{
-				this.layerTargets.Remove(component);
-			}
-			this.partition.Remove(component);
 		}
 
 		public override void Disable()

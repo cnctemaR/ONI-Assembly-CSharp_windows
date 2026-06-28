@@ -109,20 +109,25 @@ namespace UnityEngine
 
 		public override bool Equals(object other)
 		{
+			bool flag;
 			if (!(other is BoneWeight))
 			{
-				return false;
-			}
-			BoneWeight boneWeight = (BoneWeight)other;
-			bool flag;
-			if (this.boneIndex0.Equals(boneWeight.boneIndex0) && this.boneIndex1.Equals(boneWeight.boneIndex1) && this.boneIndex2.Equals(boneWeight.boneIndex2) && this.boneIndex3.Equals(boneWeight.boneIndex3))
-			{
-				Vector4 vector = new Vector4(this.weight0, this.weight1, this.weight2, this.weight3);
-				flag = vector.Equals(new Vector4(boneWeight.weight0, boneWeight.weight1, boneWeight.weight2, boneWeight.weight3));
+				flag = false;
 			}
 			else
 			{
-				flag = false;
+				BoneWeight boneWeight = (BoneWeight)other;
+				bool flag2;
+				if (this.boneIndex0.Equals(boneWeight.boneIndex0) && this.boneIndex1.Equals(boneWeight.boneIndex1) && this.boneIndex2.Equals(boneWeight.boneIndex2) && this.boneIndex3.Equals(boneWeight.boneIndex3))
+				{
+					Vector4 vector = new Vector4(this.weight0, this.weight1, this.weight2, this.weight3);
+					flag2 = vector.Equals(new Vector4(boneWeight.weight0, boneWeight.weight1, boneWeight.weight2, boneWeight.weight3));
+				}
+				else
+				{
+					flag2 = false;
+				}
+				flag = flag2;
 			}
 			return flag;
 		}

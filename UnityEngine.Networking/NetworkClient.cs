@@ -122,6 +122,26 @@ namespace UnityEngine.Networking
 			}
 		}
 
+		public int hostPort
+		{
+			get
+			{
+				return this.m_HostPort;
+			}
+			set
+			{
+				if (value < 0)
+				{
+					throw new ArgumentException("Port must not be a negative number.");
+				}
+				if (value > 65535)
+				{
+					throw new ArgumentException("Port must not be greater than 65535.");
+				}
+				this.m_HostPort = value;
+			}
+		}
+
 		public bool isConnected
 		{
 			get
@@ -163,52 +183,163 @@ namespace UnityEngine.Networking
 
 		public bool ReconnectToNewHost(string serverIp, int serverPort)
 		{
+			bool flag;
 			if (!NetworkClient.active)
 			{
 				if (LogFilter.logError)
 				{
 					Debug.LogError("Reconnect - NetworkClient must be active");
 				}
-				return false;
+				flag = false;
 			}
-			if (this.m_Connection == null)
+			else if (this.m_Connection == null)
 			{
 				if (LogFilter.logError)
 				{
 					Debug.LogError("Reconnect - no old connection exists");
 				}
-				return false;
-			}
-			if (LogFilter.logInfo)
-			{
-				Debug.Log(string.Concat(new object[] { "NetworkClient Reconnect ", serverIp, ":", serverPort }));
-			}
-			ClientScene.HandleClientDisconnect(this.m_Connection);
-			ClientScene.ClearLocalPlayers();
-			this.m_Connection.Disconnect();
-			this.m_Connection = null;
-			this.m_ClientId = NetworkTransport.AddHost(this.m_HostTopology, 0);
-			this.m_ServerPort = serverPort;
-			if (Application.platform == RuntimePlatform.WebGLPlayer)
-			{
-				this.m_ServerIp = serverIp;
-				this.m_AsyncConnect = NetworkClient.ConnectState.Resolved;
-			}
-			else if (serverIp.Equals("127.0.0.1") || serverIp.Equals("localhost"))
-			{
-				this.m_ServerIp = "127.0.0.1";
-				this.m_AsyncConnect = NetworkClient.ConnectState.Resolved;
+				flag = false;
 			}
 			else
 			{
-				if (LogFilter.logDebug)
+				if (LogFilter.logInfo)
 				{
-					Debug.Log("Async DNS START:" + serverIp);
+					Debug.Log(string.Concat(new object[] { "NetworkClient Reconnect ", serverIp, ":", serverPort }));
 				}
-				this.m_AsyncConnect = NetworkClient.ConnectState.Resolving;
-				Dns.BeginGetHostAddresses(serverIp, new AsyncCallback(NetworkClient.GetHostAddressesCallback), this);
+				ClientScene.HandleClientDisconnect(this.m_Connection);
+				ClientScene.ClearLocalPlayers();
+				this.m_Connection.Disconnect();
+				this.m_Connection = null;
+				this.m_ClientId = NetworkTransport.AddHost(this.m_HostTopology, this.m_HostPort);
+				this.m_ServerPort = serverPort;
+				if (Application.platform == RuntimePlatform.WebGLPlayer)
+				{
+					this.m_ServerIp = serverIp;
+					this.m_AsyncConnect = NetworkClient.ConnectState.Resolved;
+				}
+				else if (serverIp.Equals("127.0.0.1") || serverIp.Equals("localhost"))
+				{
+					this.m_ServerIp = "127.0.0.1";
+					this.m_AsyncConnect = NetworkClient.ConnectState.Resolved;
+				}
+				else
+				{
+					if (LogFilter.logDebug)
+					{
+						Debug.Log("Async DNS START:" + serverIp);
+					}
+					this.m_AsyncConnect = NetworkClient.ConnectState.Resolving;
+					Dns.BeginGetHostAddresses(serverIp, new AsyncCallback(NetworkClient.GetHostAddressesCallback), this);
+				}
+				flag = true;
 			}
-			return true;
+			return flag;
+		}
+
+		public bool ReconnectToNewHost(EndPoint secureTunnelEndPoint)
+		{
+			bool flag;
+			if (!NetworkClient.active)
+			{
+				if (LogFilter.logError)
+				{
+					Debug.LogError("Reconnect - NetworkClient must be active");
+				}
+				flag = false;
+			}
+			else if (this.m_Connection == null)
+			{
+				if (LogFilter.logError)
+				{
+					Debug.LogError("Reconnect - no old connection exists");
+				}
+				flag = false;
+			}
+			else
+			{
+				if (LogFilter.logInfo)
+				{
+					Debug.Log("NetworkClient Reconnect to remoteSockAddr");
+				}
+				ClientScene.HandleClientDisconnect(this.m_Connection);
+				ClientScene.ClearLocalPlayers();
+				this.m_Connection.Disconnect();
+				this.m_Connection = null;
+				this.m_ClientId = NetworkTransport.AddHost(this.m_HostTopology, this.m_HostPort);
+				if (secureTunnelEndPoint == null)
+				{
+					if (LogFilter.logError)
+					{
+						Debug.LogError("Reconnect failed: null endpoint passed in");
+					}
+					this.m_AsyncConnect = NetworkClient.ConnectState.Failed;
+					flag = false;
+				}
+				else if (secureTunnelEndPoint.AddressFamily != AddressFamily.InterNetwork && secureTunnelEndPoint.AddressFamily != AddressFamily.InterNetworkV6)
+				{
+					if (LogFilter.logError)
+					{
+						Debug.LogError("Reconnect failed: Endpoint AddressFamily must be either InterNetwork or InterNetworkV6");
+					}
+					this.m_AsyncConnect = NetworkClient.ConnectState.Failed;
+					flag = false;
+				}
+				else
+				{
+					string fullName = secureTunnelEndPoint.GetType().FullName;
+					if (fullName == "System.Net.IPEndPoint")
+					{
+						IPEndPoint ipendPoint = (IPEndPoint)secureTunnelEndPoint;
+						this.Connect(ipendPoint.Address.ToString(), ipendPoint.Port);
+						flag = this.m_AsyncConnect != NetworkClient.ConnectState.Failed;
+					}
+					else if (fullName != "UnityEngine.XboxOne.XboxOneEndPoint" && fullName != "UnityEngine.PS4.SceEndPoint")
+					{
+						if (LogFilter.logError)
+						{
+							Debug.LogError("Reconnect failed: invalid Endpoint (not IPEndPoint or XboxOneEndPoint or SceEndPoint)");
+						}
+						this.m_AsyncConnect = NetworkClient.ConnectState.Failed;
+						flag = false;
+					}
+					else
+					{
+						byte b = 0;
+						this.m_RemoteEndPoint = secureTunnelEndPoint;
+						this.m_AsyncConnect = NetworkClient.ConnectState.Connecting;
+						try
+						{
+							this.m_ClientConnectionId = NetworkTransport.ConnectEndPoint(this.m_ClientId, this.m_RemoteEndPoint, 0, out b);
+						}
+						catch (Exception ex)
+						{
+							if (LogFilter.logError)
+							{
+								Debug.LogError("Reconnect failed: Exception when trying to connect to EndPoint: " + ex);
+							}
+							this.m_AsyncConnect = NetworkClient.ConnectState.Failed;
+							return false;
+						}
+						if (this.m_ClientConnectionId == 0)
+						{
+							if (LogFilter.logError)
+							{
+								Debug.LogError("Reconnect failed: Unable to connect to EndPoint (" + b + ")");
+							}
+							this.m_AsyncConnect = NetworkClient.ConnectState.Failed;
+							flag = false;
+						}
+						else
+						{
+							this.m_Connection = (NetworkConnection)Activator.CreateInstance(this.m_NetworkConnectionClass);
+							this.m_Connection.SetHandlers(this.m_MessageHandlers);
+							this.m_Connection.Initialize(this.m_ServerIp, this.m_ClientId, this.m_ClientConnectionId, this.m_HostTopology);
+							flag = true;
+						}
+					}
+				}
+			}
+			return flag;
 		}
 
 		public void ConnectWithSimulator(string serverIp, int serverPort, int latency, float packetLoss)
@@ -281,51 +412,65 @@ namespace UnityEngine.Networking
 					Debug.LogError("Connect failed: null endpoint passed in");
 				}
 				this.m_AsyncConnect = NetworkClient.ConnectState.Failed;
-				return;
 			}
-			if (secureTunnelEndPoint.AddressFamily != AddressFamily.InterNetwork && secureTunnelEndPoint.AddressFamily != AddressFamily.InterNetworkV6)
+			else if (secureTunnelEndPoint.AddressFamily != AddressFamily.InterNetwork && secureTunnelEndPoint.AddressFamily != AddressFamily.InterNetworkV6)
 			{
 				if (LogFilter.logError)
 				{
 					Debug.LogError("Connect failed: Endpoint AddressFamily must be either InterNetwork or InterNetworkV6");
 				}
 				this.m_AsyncConnect = NetworkClient.ConnectState.Failed;
-				return;
 			}
-			string fullName = secureTunnelEndPoint.GetType().FullName;
-			if (fullName == "System.Net.IPEndPoint")
+			else
 			{
-				IPEndPoint ipendPoint = (IPEndPoint)secureTunnelEndPoint;
-				this.Connect(ipendPoint.Address.ToString(), ipendPoint.Port);
-				return;
-			}
-			if (fullName != "UnityEngine.XboxOne.XboxOneEndPoint" && fullName != "UnityEngine.PS4.SceEndPoint")
-			{
-				if (LogFilter.logError)
+				string fullName = secureTunnelEndPoint.GetType().FullName;
+				if (fullName == "System.Net.IPEndPoint")
 				{
-					Debug.LogError("Connect failed: invalid Endpoint (not IPEndPoint or XboxOneEndPoint or SceEndPoint)");
+					IPEndPoint ipendPoint = (IPEndPoint)secureTunnelEndPoint;
+					this.Connect(ipendPoint.Address.ToString(), ipendPoint.Port);
 				}
-				this.m_AsyncConnect = NetworkClient.ConnectState.Failed;
-				return;
+				else if (fullName != "UnityEngine.XboxOne.XboxOneEndPoint" && fullName != "UnityEngine.PS4.SceEndPoint" && fullName != "UnityEngine.PSVita.SceEndPoint")
+				{
+					if (LogFilter.logError)
+					{
+						Debug.LogError("Connect failed: invalid Endpoint (not IPEndPoint or XboxOneEndPoint or SceEndPoint)");
+					}
+					this.m_AsyncConnect = NetworkClient.ConnectState.Failed;
+				}
+				else
+				{
+					byte b = 0;
+					this.m_RemoteEndPoint = secureTunnelEndPoint;
+					this.m_AsyncConnect = NetworkClient.ConnectState.Connecting;
+					try
+					{
+						this.m_ClientConnectionId = NetworkTransport.ConnectEndPoint(this.m_ClientId, this.m_RemoteEndPoint, 0, out b);
+					}
+					catch (Exception ex)
+					{
+						if (LogFilter.logError)
+						{
+							Debug.LogError("Connect failed: Exception when trying to connect to EndPoint: " + ex);
+						}
+						this.m_AsyncConnect = NetworkClient.ConnectState.Failed;
+						return;
+					}
+					if (this.m_ClientConnectionId == 0)
+					{
+						if (LogFilter.logError)
+						{
+							Debug.LogError("Connect failed: Unable to connect to EndPoint (" + b + ")");
+						}
+						this.m_AsyncConnect = NetworkClient.ConnectState.Failed;
+					}
+					else
+					{
+						this.m_Connection = (NetworkConnection)Activator.CreateInstance(this.m_NetworkConnectionClass);
+						this.m_Connection.SetHandlers(this.m_MessageHandlers);
+						this.m_Connection.Initialize(this.m_ServerIp, this.m_ClientId, this.m_ClientConnectionId, this.m_HostTopology);
+					}
+				}
 			}
-			byte b = 0;
-			this.m_RemoteEndPoint = secureTunnelEndPoint;
-			this.m_AsyncConnect = NetworkClient.ConnectState.Connecting;
-			try
-			{
-				this.m_ClientConnectionId = NetworkTransport.ConnectEndPoint(this.m_ClientId, this.m_RemoteEndPoint, 0, out b);
-			}
-			catch (Exception ex)
-			{
-				Debug.LogError("Connect failed: Exception when trying to connect to EndPoint: " + ex);
-			}
-			if (this.m_ClientConnectionId == 0 && LogFilter.logError)
-			{
-				Debug.LogError("Connect failed: Unable to connect to EndPoint (" + b + ")");
-			}
-			this.m_Connection = (NetworkConnection)Activator.CreateInstance(this.m_NetworkConnectionClass);
-			this.m_Connection.SetHandlers(this.m_MessageHandlers);
-			this.m_Connection.Initialize(this.m_ServerIp, this.m_ClientId, this.m_ClientConnectionId, this.m_HostTopology);
 		}
 
 		private void PrepareForConnect()
@@ -340,7 +485,7 @@ namespace UnityEngine.Networking
 			if (this.m_HostTopology == null)
 			{
 				ConnectionConfig connectionConfig = new ConnectionConfig();
-				connectionConfig.AddChannel(QosType.Reliable);
+				connectionConfig.AddChannel(QosType.ReliableSequenced);
 				connectionConfig.AddChannel(QosType.Unreliable);
 				connectionConfig.UsePlatformSpecificProtocols = usePlatformSpecificProtocols;
 				this.m_HostTopology = new HostTopology(connectionConfig, 8);
@@ -357,11 +502,11 @@ namespace UnityEngine.Networking
 				{
 					Debug.Log(string.Concat(new object[] { "AddHost Using Simulator ", num, "/", num2 }));
 				}
-				this.m_ClientId = NetworkTransport.AddHostWithSimulator(this.m_HostTopology, num, num2, 0);
+				this.m_ClientId = NetworkTransport.AddHostWithSimulator(this.m_HostTopology, num, num2, this.m_HostPort);
 			}
 			else
 			{
-				this.m_ClientId = NetworkTransport.AddHost(this.m_HostTopology, 0);
+				this.m_ClientId = NetworkTransport.AddHost(this.m_HostTopology, this.m_HostPort);
 			}
 		}
 
@@ -394,7 +539,7 @@ namespace UnityEngine.Networking
 				NetworkClient networkClient2 = (NetworkClient)ar.AsyncState;
 				if (LogFilter.logError)
 				{
-					Debug.LogError("DNS resolution failed: " + ex.ErrorCode);
+					Debug.LogError("DNS resolution failed: " + ex.GetErrorCode());
 				}
 				if (LogFilter.logDebug)
 				{
@@ -461,114 +606,157 @@ namespace UnityEngine.Networking
 				this.m_Connection.Disconnect();
 				this.m_Connection.Dispose();
 				this.m_Connection = null;
-				NetworkTransport.RemoveHost(this.m_ClientId);
-				this.m_ClientId = -1;
+				if (this.m_ClientId != -1)
+				{
+					NetworkTransport.RemoveHost(this.m_ClientId);
+					this.m_ClientId = -1;
+				}
 			}
 		}
 
 		public bool Send(short msgType, MessageBase msg)
 		{
-			if (this.m_Connection == null)
+			bool flag;
+			if (this.m_Connection != null)
+			{
+				if (this.m_AsyncConnect != NetworkClient.ConnectState.Connected)
+				{
+					if (LogFilter.logError)
+					{
+						Debug.LogError("NetworkClient Send when not connected to a server");
+					}
+					flag = false;
+				}
+				else
+				{
+					flag = this.m_Connection.Send(msgType, msg);
+				}
+			}
+			else
 			{
 				if (LogFilter.logError)
 				{
 					Debug.LogError("NetworkClient Send with no connection");
 				}
-				return false;
+				flag = false;
 			}
-			if (this.m_AsyncConnect != NetworkClient.ConnectState.Connected)
-			{
-				if (LogFilter.logError)
-				{
-					Debug.LogError("NetworkClient Send when not connected to a server");
-				}
-				return false;
-			}
-			return this.m_Connection.Send(msgType, msg);
+			return flag;
 		}
 
 		public bool SendWriter(NetworkWriter writer, int channelId)
 		{
-			if (this.m_Connection == null)
+			bool flag;
+			if (this.m_Connection != null)
+			{
+				if (this.m_AsyncConnect != NetworkClient.ConnectState.Connected)
+				{
+					if (LogFilter.logError)
+					{
+						Debug.LogError("NetworkClient SendWriter when not connected to a server");
+					}
+					flag = false;
+				}
+				else
+				{
+					flag = this.m_Connection.SendWriter(writer, channelId);
+				}
+			}
+			else
 			{
 				if (LogFilter.logError)
 				{
 					Debug.LogError("NetworkClient SendWriter with no connection");
 				}
-				return false;
+				flag = false;
 			}
-			if (this.m_AsyncConnect != NetworkClient.ConnectState.Connected)
-			{
-				if (LogFilter.logError)
-				{
-					Debug.LogError("NetworkClient SendWriter when not connected to a server");
-				}
-				return false;
-			}
-			return this.m_Connection.SendWriter(writer, channelId);
+			return flag;
 		}
 
 		public bool SendBytes(byte[] data, int numBytes, int channelId)
 		{
-			if (this.m_Connection == null)
+			bool flag;
+			if (this.m_Connection != null)
+			{
+				if (this.m_AsyncConnect != NetworkClient.ConnectState.Connected)
+				{
+					if (LogFilter.logError)
+					{
+						Debug.LogError("NetworkClient SendBytes when not connected to a server");
+					}
+					flag = false;
+				}
+				else
+				{
+					flag = this.m_Connection.SendBytes(data, numBytes, channelId);
+				}
+			}
+			else
 			{
 				if (LogFilter.logError)
 				{
 					Debug.LogError("NetworkClient SendBytes with no connection");
 				}
-				return false;
+				flag = false;
 			}
-			if (this.m_AsyncConnect != NetworkClient.ConnectState.Connected)
-			{
-				if (LogFilter.logError)
-				{
-					Debug.LogError("NetworkClient SendBytes when not connected to a server");
-				}
-				return false;
-			}
-			return this.m_Connection.SendBytes(data, numBytes, channelId);
+			return flag;
 		}
 
 		public bool SendUnreliable(short msgType, MessageBase msg)
 		{
-			if (this.m_Connection == null)
+			bool flag;
+			if (this.m_Connection != null)
+			{
+				if (this.m_AsyncConnect != NetworkClient.ConnectState.Connected)
+				{
+					if (LogFilter.logError)
+					{
+						Debug.LogError("NetworkClient SendUnreliable when not connected to a server");
+					}
+					flag = false;
+				}
+				else
+				{
+					flag = this.m_Connection.SendUnreliable(msgType, msg);
+				}
+			}
+			else
 			{
 				if (LogFilter.logError)
 				{
 					Debug.LogError("NetworkClient SendUnreliable with no connection");
 				}
-				return false;
+				flag = false;
 			}
-			if (this.m_AsyncConnect != NetworkClient.ConnectState.Connected)
-			{
-				if (LogFilter.logError)
-				{
-					Debug.LogError("NetworkClient SendUnreliable when not connected to a server");
-				}
-				return false;
-			}
-			return this.m_Connection.SendUnreliable(msgType, msg);
+			return flag;
 		}
 
 		public bool SendByChannel(short msgType, MessageBase msg, int channelId)
 		{
-			if (this.m_Connection == null)
+			bool flag;
+			if (this.m_Connection != null)
+			{
+				if (this.m_AsyncConnect != NetworkClient.ConnectState.Connected)
+				{
+					if (LogFilter.logError)
+					{
+						Debug.LogError("NetworkClient SendByChannel when not connected to a server");
+					}
+					flag = false;
+				}
+				else
+				{
+					flag = this.m_Connection.SendByChannel(msgType, msg, channelId);
+				}
+			}
+			else
 			{
 				if (LogFilter.logError)
 				{
 					Debug.LogError("NetworkClient SendByChannel with no connection");
 				}
-				return false;
+				flag = false;
 			}
-			if (this.m_AsyncConnect != NetworkClient.ConnectState.Connected)
-			{
-				if (LogFilter.logError)
-				{
-					Debug.LogError("NetworkClient SendByChannel when not connected to a server");
-				}
-				return false;
-			}
-			return this.m_Connection.SendByChannel(msgType, msg, channelId);
+			return flag;
 		}
 
 		public void SetMaxDelay(float seconds)
@@ -579,9 +767,11 @@ namespace UnityEngine.Networking
 				{
 					Debug.LogWarning("SetMaxDelay failed, not connected.");
 				}
-				return;
 			}
-			this.m_Connection.SetMaxDelay(seconds);
+			else
+			{
+				this.m_Connection.SetMaxDelay(seconds);
+			}
 		}
 
 		public void Shutdown()
@@ -604,118 +794,130 @@ namespace UnityEngine.Networking
 
 		internal virtual void Update()
 		{
-			if (this.m_ClientId == -1)
+			if (this.m_ClientId != -1)
 			{
-				return;
-			}
-			switch (this.m_AsyncConnect)
-			{
-			case NetworkClient.ConnectState.None:
-			case NetworkClient.ConnectState.Resolving:
-			case NetworkClient.ConnectState.Disconnected:
-				return;
-			case NetworkClient.ConnectState.Resolved:
-				this.m_AsyncConnect = NetworkClient.ConnectState.Connecting;
-				this.ContinueConnect();
-				return;
-			case NetworkClient.ConnectState.Failed:
-				this.GenerateConnectError(11);
-				this.m_AsyncConnect = NetworkClient.ConnectState.Disconnected;
-				return;
-			}
-			if (this.m_Connection != null && (int)Time.time != this.m_StatResetTime)
-			{
-				this.m_Connection.ResetStats();
-				this.m_StatResetTime = (int)Time.time;
-			}
-			byte b;
-			for (;;)
-			{
-				int num = 0;
-				int num2;
-				int num3;
-				int num4;
-				NetworkEventType networkEventType = NetworkTransport.ReceiveFromHost(this.m_ClientId, out num2, out num3, this.m_MsgBuffer, (int)((ushort)this.m_MsgBuffer.Length), out num4, out b);
-				if (networkEventType != NetworkEventType.Nothing && LogFilter.logDev)
+				switch (this.m_AsyncConnect)
 				{
-					Debug.Log(string.Concat(new object[] { "Client event: host=", this.m_ClientId, " event=", networkEventType, " error=", b }));
-				}
-				switch (networkEventType)
-				{
-				case NetworkEventType.DataEvent:
-					if (b != 0)
-					{
-						goto Block_10;
-					}
-					this.m_MsgReader.SeekZero();
-					this.m_Connection.TransportRecieve(this.m_MsgBuffer, num4, num3);
-					break;
-				case NetworkEventType.ConnectEvent:
-					if (LogFilter.logDebug)
-					{
-						Debug.Log("Client connected");
-					}
-					if (b != 0)
-					{
-						goto Block_9;
-					}
-					this.m_AsyncConnect = NetworkClient.ConnectState.Connected;
-					this.m_Connection.InvokeHandlerNoData(32);
-					break;
-				case NetworkEventType.DisconnectEvent:
-					if (LogFilter.logDebug)
-					{
-						Debug.Log("Client disconnected");
-					}
+				case NetworkClient.ConnectState.None:
+				case NetworkClient.ConnectState.Resolving:
+				case NetworkClient.ConnectState.Disconnected:
+					return;
+				case NetworkClient.ConnectState.Resolved:
+					this.m_AsyncConnect = NetworkClient.ConnectState.Connecting;
+					this.ContinueConnect();
+					return;
+				case NetworkClient.ConnectState.Failed:
+					this.GenerateConnectError(11);
 					this.m_AsyncConnect = NetworkClient.ConnectState.Disconnected;
-					if (b != 0 && b != 6)
+					return;
+				}
+				if (this.m_Connection != null)
+				{
+					if ((int)Time.time != this.m_StatResetTime)
 					{
-						this.GenerateDisconnectError((int)b);
+						this.m_Connection.ResetStats();
+						this.m_StatResetTime = (int)Time.time;
 					}
-					ClientScene.HandleClientDisconnect(this.m_Connection);
+				}
+				byte b;
+				for (;;)
+				{
+					int num = 0;
+					int num2;
+					int num3;
+					int num4;
+					NetworkEventType networkEventType = NetworkTransport.ReceiveFromHost(this.m_ClientId, out num2, out num3, this.m_MsgBuffer, (int)((ushort)this.m_MsgBuffer.Length), out num4, out b);
 					if (this.m_Connection != null)
 					{
-						this.m_Connection.InvokeHandlerNoData(33);
+						this.m_Connection.lastError = (NetworkError)b;
 					}
-					break;
-				case NetworkEventType.Nothing:
-					break;
-				default:
-					if (LogFilter.logError)
+					if (networkEventType != NetworkEventType.Nothing)
 					{
-						Debug.LogError("Unknown network message type received: " + networkEventType);
+						if (LogFilter.logDev)
+						{
+							Debug.Log(string.Concat(new object[] { "Client event: host=", this.m_ClientId, " event=", networkEventType, " error=", b }));
+						}
 					}
-					break;
+					switch (networkEventType)
+					{
+					case NetworkEventType.DataEvent:
+						if (b != 0)
+						{
+							goto Block_11;
+						}
+						this.m_MsgReader.SeekZero();
+						this.m_Connection.TransportReceive(this.m_MsgBuffer, num4, num3);
+						break;
+					case NetworkEventType.ConnectEvent:
+						if (LogFilter.logDebug)
+						{
+							Debug.Log("Client connected");
+						}
+						if (b != 0)
+						{
+							goto Block_10;
+						}
+						this.m_AsyncConnect = NetworkClient.ConnectState.Connected;
+						this.m_Connection.InvokeHandlerNoData(32);
+						break;
+					case NetworkEventType.DisconnectEvent:
+						if (LogFilter.logDebug)
+						{
+							Debug.Log("Client disconnected");
+						}
+						this.m_AsyncConnect = NetworkClient.ConnectState.Disconnected;
+						if (b != 0)
+						{
+							if (b != 6)
+							{
+								this.GenerateDisconnectError((int)b);
+							}
+						}
+						ClientScene.HandleClientDisconnect(this.m_Connection);
+						if (this.m_Connection != null)
+						{
+							this.m_Connection.InvokeHandlerNoData(33);
+						}
+						break;
+					case NetworkEventType.Nothing:
+						break;
+					default:
+						if (LogFilter.logError)
+						{
+							Debug.LogError("Unknown network message type received: " + networkEventType);
+						}
+						break;
+					}
+					if (num + 1 >= 500)
+					{
+						goto Block_17;
+					}
+					if (this.m_ClientId == -1)
+					{
+						goto Block_19;
+					}
+					if (networkEventType == NetworkEventType.Nothing)
+					{
+						goto IL_02C8;
+					}
 				}
-				if (num + 1 >= 500)
+				Block_10:
+				this.GenerateConnectError((int)b);
+				return;
+				Block_11:
+				this.GenerateDataError((int)b);
+				return;
+				Block_17:
+				if (LogFilter.logDebug)
 				{
-					goto Block_16;
+					Debug.Log("MaxEventsPerFrame hit (" + 500 + ")");
 				}
-				if (this.m_ClientId == -1)
+				Block_19:
+				IL_02C8:
+				if (this.m_Connection != null && this.m_AsyncConnect == NetworkClient.ConnectState.Connected)
 				{
-					goto Block_18;
+					this.m_Connection.FlushChannels();
 				}
-				if (networkEventType == NetworkEventType.Nothing)
-				{
-					goto IL_027E;
-				}
-			}
-			Block_9:
-			this.GenerateConnectError((int)b);
-			return;
-			Block_10:
-			this.GenerateDataError((int)b);
-			return;
-			Block_16:
-			if (LogFilter.logDebug)
-			{
-				Debug.Log("MaxEventsPerFrame hit (" + 500 + ")");
-			}
-			Block_18:
-			IL_027E:
-			if (this.m_Connection != null && this.m_AsyncConnect == NetworkClient.ConnectState.Connected)
-			{
-				this.m_Connection.FlushChannels();
 			}
 		}
 
@@ -795,36 +997,46 @@ namespace UnityEngine.Networking
 
 		public Dictionary<short, NetworkConnection.PacketStat> GetConnectionStats()
 		{
+			Dictionary<short, NetworkConnection.PacketStat> dictionary;
 			if (this.m_Connection == null)
 			{
-				return null;
+				dictionary = null;
 			}
-			return this.m_Connection.packetStats;
+			else
+			{
+				dictionary = this.m_Connection.packetStats;
+			}
+			return dictionary;
 		}
 
 		public void ResetConnectionStats()
 		{
-			if (this.m_Connection == null)
+			if (this.m_Connection != null)
 			{
-				return;
+				this.m_Connection.ResetStats();
 			}
-			this.m_Connection.ResetStats();
 		}
 
 		public int GetRTT()
 		{
+			int num;
 			if (this.m_ClientId == -1)
 			{
-				return 0;
+				num = 0;
 			}
-			byte b;
-			return NetworkTransport.GetCurrentRtt(this.m_ClientId, this.m_ClientConnectionId, out b);
+			else
+			{
+				byte b;
+				num = NetworkTransport.GetCurrentRTT(this.m_ClientId, this.m_ClientConnectionId, out b);
+			}
+			return num;
 		}
 
 		internal void RegisterSystemHandlers(bool localClient)
 		{
 			ClientScene.RegisterSystemHandlers(this, localClient);
 			this.RegisterHandlerSafe(14, new NetworkMessageDelegate(this.OnCRC));
+			this.RegisterHandlerSafe(17, new NetworkMessageDelegate(NetworkConnection.OnFragment));
 		}
 
 		private void OnCRC(NetworkMessage netMsg)
@@ -851,8 +1063,9 @@ namespace UnityEngine.Networking
 		public static Dictionary<short, NetworkConnection.PacketStat> GetTotalConnectionStats()
 		{
 			Dictionary<short, NetworkConnection.PacketStat> dictionary = new Dictionary<short, NetworkConnection.PacketStat>();
-			foreach (NetworkClient networkClient in NetworkClient.s_Clients)
+			for (int i = 0; i < NetworkClient.s_Clients.Count; i++)
 			{
+				NetworkClient networkClient = NetworkClient.s_Clients[i];
 				Dictionary<short, NetworkConnection.PacketStat> connectionStats = networkClient.GetConnectionStats();
 				foreach (short num in connectionStats.Keys)
 				{
@@ -865,7 +1078,7 @@ namespace UnityEngine.Networking
 					}
 					else
 					{
-						dictionary[num] = connectionStats[num];
+						dictionary[num] = new NetworkConnection.PacketStat(connectionStats[num]);
 					}
 				}
 			}
@@ -917,9 +1130,9 @@ namespace UnityEngine.Networking
 			NetworkClient.s_IsActive = state;
 		}
 
-		private const int k_MaxEventsPerFrame = 500;
-
 		private Type m_NetworkConnectionClass = typeof(NetworkConnection);
+
+		private const int k_MaxEventsPerFrame = 500;
 
 		private static List<NetworkClient> s_Clients = new List<NetworkClient>();
 
@@ -927,13 +1140,15 @@ namespace UnityEngine.Networking
 
 		private HostTopology m_HostTopology;
 
+		private int m_HostPort;
+
 		private bool m_UseSimulator;
 
 		private int m_SimulatedLatency;
 
 		private float m_PacketLoss;
 
-		private string m_ServerIp = string.Empty;
+		private string m_ServerIp = "";
 
 		private int m_ServerPort;
 
@@ -955,9 +1170,9 @@ namespace UnityEngine.Networking
 
 		private NetworkReader m_MsgReader;
 
-		protected NetworkClient.ConnectState m_AsyncConnect;
+		protected NetworkClient.ConnectState m_AsyncConnect = NetworkClient.ConnectState.None;
 
-		private string m_RequestedServerHost = string.Empty;
+		private string m_RequestedServerHost = "";
 
 		protected enum ConnectState
 		{

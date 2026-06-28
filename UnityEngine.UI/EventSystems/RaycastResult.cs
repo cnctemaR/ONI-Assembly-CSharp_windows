@@ -40,39 +40,42 @@ namespace UnityEngine.EventSystems
 
 		public override string ToString()
 		{
+			string text;
 			if (!this.isValid)
 			{
-				return string.Empty;
+				text = "";
 			}
-			return string.Concat(new object[]
+			else
 			{
-				"Name: ",
-				this.gameObject,
-				"\nmodule: ",
-				this.module,
-				"\nmodule camera: ",
-				this.module.GetComponent<Camera>(),
-				"\ndistance: ",
-				this.distance,
-				"\nindex: ",
-				this.index,
-				"\ndepth: ",
-				this.depth,
-				"\nworldNormal: ",
-				this.worldNormal,
-				"\nworldPosition: ",
-				this.worldPosition,
-				"\nscreenPosition: ",
-				this.screenPosition,
-				"\nmodule.sortOrderPriority: ",
-				this.module.sortOrderPriority,
-				"\nmodule.renderOrderPriority: ",
-				this.module.renderOrderPriority,
-				"\nsortingLayer: ",
-				this.sortingLayer,
-				"\nsortingOrder: ",
-				this.sortingOrder
-			});
+				text = string.Concat(new object[]
+				{
+					"Name: ",
+					this.gameObject,
+					"\nmodule: ",
+					this.module,
+					"\ndistance: ",
+					this.distance,
+					"\nindex: ",
+					this.index,
+					"\ndepth: ",
+					this.depth,
+					"\nworldNormal: ",
+					this.worldNormal,
+					"\nworldPosition: ",
+					this.worldPosition,
+					"\nscreenPosition: ",
+					this.screenPosition,
+					"\nmodule.sortOrderPriority: ",
+					this.module.sortOrderPriority,
+					"\nmodule.renderOrderPriority: ",
+					this.module.renderOrderPriority,
+					"\nsortingLayer: ",
+					this.sortingLayer,
+					"\nsortingOrder: ",
+					this.sortingOrder
+				});
+			}
+			return text;
 		}
 
 		private GameObject m_GameObject;

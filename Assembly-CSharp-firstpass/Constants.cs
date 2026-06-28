@@ -41,6 +41,18 @@ public static class Constants
 
 	public const string TABBULLETSTRING = "    • ";
 
+	public static readonly Color POSITIVE_COLOR = new Color(0.32156864f, 0.7529412f, 0.4745098f);
+
+	public static readonly string POSITIVE_COLOR_STR = "#" + Constants.POSITIVE_COLOR.ToHexString();
+
+	public static readonly Color NEGATIVE_COLOR = new Color(0.95686275f, 0.2901961f, 0.2784314f);
+
+	public static readonly string NEGATIVE_COLOR_STR = "#" + Constants.NEGATIVE_COLOR.ToHexString();
+
+	public static readonly Color NEUTRAL_COLOR = Color.grey;
+
+	public static readonly string NEUTRAL_COLOR_STR = "#" + Constants.NEUTRAL_COLOR.ToHexString();
+
 	public const float W2KW = 0.001f;
 
 	public const float KW2W = 1000f;
@@ -62,16 +74,4 @@ public static class Constants
 	public const float DefaultEntityThickness = 0.01f;
 
 	public const float DefaultSurfaceArea = 10f;
-
-	public static readonly Color POSITIVE_COLOR = new Color(0.32156864f, 0.7529412f, 0.4745098f);
-
-	public static readonly string POSITIVE_COLOR_STR = "#" + Constants.POSITIVE_COLOR.ToHexString();
-
-	public static readonly Color NEGATIVE_COLOR = new Color(0.95686275f, 0.2901961f, 0.2784314f);
-
-	public static readonly string NEGATIVE_COLOR_STR = "#" + Constants.NEGATIVE_COLOR.ToHexString();
-
-	public static readonly Color NEUTRAL_COLOR = Color.grey;
-
-	public static readonly string NEUTRAL_COLOR_STR = "#" + Constants.NEUTRAL_COLOR.ToHexString();
 }

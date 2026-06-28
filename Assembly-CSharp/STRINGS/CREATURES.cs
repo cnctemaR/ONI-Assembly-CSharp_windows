@@ -846,7 +846,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Growth Progress";
 
-				public static LocString TOOLTIP = "Growth Progress" + UI.HORIZONTAL_BR_RULE + string.Empty;
+				public static LocString TOOLTIP = "Growth Progress" + UI.HORIZONTAL_BR_RULE + "";
 
 				public static LocString TOOLTIP_GROWING = "Predicted Maturation: {0}";
 

@@ -8,9 +8,15 @@ public class SpiceVineConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
+		string text = "SpiceVine";
+		string text2 = global::STRINGS.CREATURES.SPECIES.SPICE_VINE.NAME;
+		string text3 = global::STRINGS.CREATURES.SPECIES.SPICE_VINE.DESC;
+		float num = 2f;
+		KAnimFile kanimFile = Assets.GetAnim("vinespicenut_kanim");
+		string text4 = "idle_empty";
 		EffectorValues tier = DECOR.BONUS.TIER1;
 		List<Tag> list = new List<Tag> { GameTags.Hanging };
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("SpiceVine", global::STRINGS.CREATURES.SPECIES.SPICE_VINE.NAME, global::STRINGS.CREATURES.SPECIES.SPICE_VINE.DESC, 2f, Assets.GetAnim("vinespicenut_kanim"), "idle_empty", Grid.SceneLayer.BuildingFront, 1, 3, tier, default(EffectorValues), SimHashes.Creature, list, 320f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, kanimFile, text4, Grid.SceneLayer.BuildingFront, 1, 3, tier, default(EffectorValues), SimHashes.Creature, list, 320f);
 		EntityTemplates.MakeHangingOffsets(gameObject, 1, 3);
 		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 15f, 5f, 258.15f, 308.15f, 328.15f, 333.15f, 358.15f, 448.15f, null, true, 0f, 0.15f, 1f, SpiceNutConfig.ID, true);
 		Tag tag = ElementLoader.FindElementByHash(SimHashes.DirtyWater).tag;
@@ -33,10 +39,16 @@ public class SpiceVineConfig : IEntityConfig
 		UprootedMonitor component = gameObject.GetComponent<UprootedMonitor>();
 		component.monitorCell = new CellOffset(0, 1);
 		gameObject.UpdateComponentRequirement<StandardCropPlant>(true);
+		GameObject gameObject2 = gameObject;
+		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Harvest;
+		text4 = "SpiceVineSeed";
+		text3 = global::STRINGS.CREATURES.SPECIES.SEEDS.SPICE_VINE.NAME;
+		text2 = global::STRINGS.CREATURES.SPECIES.SEEDS.SPICE_VINE.DESC;
+		kanimFile = Assets.GetAnim("seed_spicenut_kanim");
 		list = new List<Tag> { GameTags.CropSeed };
-		GameObject gameObject2 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Harvest, "SpiceVineSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.SPICE_VINE.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.SPICE_VINE.DESC, Assets.GetAnim("seed_spicenut_kanim"), "object", 1, list, SingleEntityReceptacle.ReceptacleDirection.Bottom, default(Tag), 4, global::STRINGS.CREATURES.SPECIES.SPICE_VINE.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, string.Empty);
-		GameObject gameObject3 = EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject2, "SpiceVine_preview", Assets.GetAnim("vinespicenut_kanim"), "place", 1, 3);
-		EntityTemplates.MakeHangingOffsets(gameObject3, 1, 3);
+		GameObject gameObject3 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text3, text2, kanimFile, "object", 1, list, SingleEntityReceptacle.ReceptacleDirection.Bottom, default(Tag), 4, global::STRINGS.CREATURES.SPECIES.SPICE_VINE.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, "");
+		GameObject gameObject4 = EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject3, "SpiceVine_preview", Assets.GetAnim("vinespicenut_kanim"), "place", 1, 3);
+		EntityTemplates.MakeHangingOffsets(gameObject4, 1, 3);
 		return gameObject;
 	}
 

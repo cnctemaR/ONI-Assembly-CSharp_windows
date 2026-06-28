@@ -29,37 +29,36 @@ public class Weapon : KMonoBehaviour
 		Vector3 vector = centerPoint;
 		Vector3 vector2 = Vector3.zero;
 		this.alignment = base.GetComponent<FactionAlignment>();
-		if (this.alignment == null)
+		if (!(this.alignment == null))
 		{
-			return;
-		}
-		List<GameObject> list = new List<GameObject>();
-		foreach (Health health in Components.Health)
-		{
-			if (!(health.gameObject == base.gameObject))
+			List<GameObject> list = new List<GameObject>();
+			foreach (Health health in Components.Health)
 			{
-				if (!health.IsDefeated())
+				if (!(health.gameObject == base.gameObject))
 				{
-					FactionAlignment component = health.GetComponent<FactionAlignment>();
-					if (!(component == null))
+					if (!health.IsDefeated())
 					{
-						if (component.CheckAlignmentActive)
+						FactionAlignment component = health.GetComponent<FactionAlignment>();
+						if (!(component == null))
 						{
-							if (FactionManager.Instance.GetDisposition(this.alignment.Alignment, component.Alignment) == FactionManager.Disposition.Attack)
+							if (component.CheckAlignmentActive)
 							{
-								vector2 = health.transform.position;
-								vector2.z = vector.z;
-								if (Vector3.Distance(vector, vector2) <= this.properties.aoe_radius)
+								if (FactionManager.Instance.GetDisposition(this.alignment.Alignment, component.Alignment) == FactionManager.Disposition.Attack)
 								{
-									list.Add(health.gameObject);
+									vector2 = health.transform.position;
+									vector2.z = vector.z;
+									if (Vector3.Distance(vector, vector2) <= this.properties.aoe_radius)
+									{
+										list.Add(health.gameObject);
+									}
 								}
 							}
 						}
 					}
 				}
 			}
+			this.AttackTargets(list.ToArray());
 		}
-		this.AttackTargets(list.ToArray());
 	}
 
 	public void AttackTarget(GameObject target)
@@ -72,9 +71,11 @@ public class Weapon : KMonoBehaviour
 		if (this.properties == null)
 		{
 			global::Debug.LogWarning(string.Format("Attack properties not configured. {0} cannot attack with weapon.", base.gameObject.name), null);
-			return;
 		}
-		new Attack(this.properties, targets);
+		else
+		{
+			new Attack(this.properties, targets);
+		}
 	}
 
 	protected override void OnSpawn()

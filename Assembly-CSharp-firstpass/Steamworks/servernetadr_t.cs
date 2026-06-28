@@ -64,26 +64,6 @@ namespace Steamworks
 			});
 		}
 
-		public override bool Equals(object other)
-		{
-			return other is servernetadr_t && this == (servernetadr_t)other;
-		}
-
-		public override int GetHashCode()
-		{
-			return this.m_unIP.GetHashCode() + this.m_usQueryPort.GetHashCode() + this.m_usConnectionPort.GetHashCode();
-		}
-
-		public bool Equals(servernetadr_t other)
-		{
-			return this.m_unIP == other.m_unIP && this.m_usQueryPort == other.m_usQueryPort && this.m_usConnectionPort == other.m_usConnectionPort;
-		}
-
-		public int CompareTo(servernetadr_t other)
-		{
-			return this.m_unIP.CompareTo(other.m_unIP) + this.m_usQueryPort.CompareTo(other.m_usQueryPort) + this.m_usConnectionPort.CompareTo(other.m_usConnectionPort);
-		}
-
 		public static bool operator <(servernetadr_t x, servernetadr_t y)
 		{
 			return x.m_unIP < y.m_unIP || (x.m_unIP == y.m_unIP && x.m_usQueryPort < y.m_usQueryPort);
@@ -94,6 +74,16 @@ namespace Steamworks
 			return x.m_unIP > y.m_unIP || (x.m_unIP == y.m_unIP && x.m_usQueryPort > y.m_usQueryPort);
 		}
 
+		public override bool Equals(object other)
+		{
+			return other is servernetadr_t && this == (servernetadr_t)other;
+		}
+
+		public override int GetHashCode()
+		{
+			return this.m_unIP.GetHashCode() + this.m_usQueryPort.GetHashCode() + this.m_usConnectionPort.GetHashCode();
+		}
+
 		public static bool operator ==(servernetadr_t x, servernetadr_t y)
 		{
 			return x.m_unIP == y.m_unIP && x.m_usQueryPort == y.m_usQueryPort && x.m_usConnectionPort == y.m_usConnectionPort;
@@ -102,6 +92,16 @@ namespace Steamworks
 		public static bool operator !=(servernetadr_t x, servernetadr_t y)
 		{
 			return !(x == y);
+		}
+
+		public bool Equals(servernetadr_t other)
+		{
+			return this.m_unIP == other.m_unIP && this.m_usQueryPort == other.m_usQueryPort && this.m_usConnectionPort == other.m_usConnectionPort;
+		}
+
+		public int CompareTo(servernetadr_t other)
+		{
+			return this.m_unIP.CompareTo(other.m_unIP) + this.m_usQueryPort.CompareTo(other.m_usQueryPort) + this.m_usConnectionPort.CompareTo(other.m_usConnectionPort);
 		}
 
 		private ushort m_usConnectionPort;

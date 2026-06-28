@@ -14,12 +14,11 @@ namespace UnityEngine.UI.Extensions
 			}
 			set
 			{
-				if (this.m_UVRect == value)
+				if (!(this.m_UVRect == value))
 				{
-					return;
+					this.m_UVRect = value;
+					this.SetVerticesDirty();
 				}
-				this.m_UVRect = value;
-				this.SetVerticesDirty();
 			}
 		}
 
@@ -31,171 +30,174 @@ namespace UnityEngine.UI.Extensions
 			}
 			set
 			{
-				if (this.m_points == value)
+				if (this.m_points != value)
 				{
-					return;
+					this.m_points = value;
+					this.SetAllDirty();
 				}
-				this.m_points = value;
-				this.SetAllDirty();
 			}
 		}
 
 		protected override void OnPopulateMesh(VertexHelper vh)
 		{
-			if (this.m_points == null)
+			if (this.m_points != null)
 			{
-				return;
-			}
-			Vector2[] array = this.m_points;
-			if (this.BezierMode != UILineRenderer.BezierType.None && this.m_points.Length > 3)
-			{
-				BezierPath bezierPath = new BezierPath();
-				bezierPath.SetControlPoints(array);
-				bezierPath.SegmentsPerCurve = this.BezierSegmentsPerCurve;
-				UILineRenderer.BezierType bezierMode = this.BezierMode;
-				List<Vector2> list;
-				if (bezierMode != UILineRenderer.BezierType.Basic)
+				Vector2[] array = this.m_points;
+				if (this.BezierMode != UILineRenderer.BezierType.None && this.m_points.Length > 3)
 				{
-					if (bezierMode != UILineRenderer.BezierType.Improved)
+					BezierPath bezierPath = new BezierPath();
+					bezierPath.SetControlPoints(array);
+					bezierPath.SegmentsPerCurve = this.BezierSegmentsPerCurve;
+					UILineRenderer.BezierType bezierMode = this.BezierMode;
+					List<Vector2> list;
+					if (bezierMode != UILineRenderer.BezierType.Basic)
 					{
-						list = bezierPath.GetDrawingPoints2();
+						if (bezierMode != UILineRenderer.BezierType.Improved)
+						{
+							list = bezierPath.GetDrawingPoints2();
+						}
+						else
+						{
+							list = bezierPath.GetDrawingPoints1();
+						}
 					}
 					else
 					{
-						list = bezierPath.GetDrawingPoints1();
+						list = bezierPath.GetDrawingPoints0();
+					}
+					array = list.ToArray();
+				}
+				float num = base.rectTransform.rect.width;
+				float num2 = base.rectTransform.rect.height;
+				float num3 = -base.rectTransform.pivot.x * base.rectTransform.rect.width;
+				float num4 = -base.rectTransform.pivot.y * base.rectTransform.rect.height;
+				if (!this.relativeSize)
+				{
+					num = 1f;
+					num2 = 1f;
+				}
+				if (this.UseMargins)
+				{
+					num -= this.Margin.x;
+					num2 -= this.Margin.y;
+					num3 += this.Margin.x / 2f;
+					num4 += this.Margin.y / 2f;
+				}
+				vh.Clear();
+				List<UIVertex[]> list2 = new List<UIVertex[]>();
+				if (this.LineList)
+				{
+					for (int i = 1; i < array.Length; i += 2)
+					{
+						Vector2 vector = array[i - 1];
+						Vector2 vector2 = array[i];
+						vector = new Vector2(vector.x * num + num3, vector.y * num2 + num4);
+						vector2 = new Vector2(vector2.x * num + num3, vector2.y * num2 + num4);
+						if (this.LineCaps)
+						{
+							list2.Add(this.CreateLineCap(vector, vector2, UILineRenderer.SegmentType.Start));
+						}
+						list2.Add(this.CreateLineSegment(vector, vector2, UILineRenderer.SegmentType.Middle));
+						if (this.LineCaps)
+						{
+							list2.Add(this.CreateLineCap(vector, vector2, UILineRenderer.SegmentType.End));
+						}
 					}
 				}
 				else
 				{
-					list = bezierPath.GetDrawingPoints0();
-				}
-				array = list.ToArray();
-			}
-			float num = base.rectTransform.rect.width;
-			float num2 = base.rectTransform.rect.height;
-			float num3 = -base.rectTransform.pivot.x * base.rectTransform.rect.width;
-			float num4 = -base.rectTransform.pivot.y * base.rectTransform.rect.height;
-			if (!this.relativeSize)
-			{
-				num = 1f;
-				num2 = 1f;
-			}
-			if (this.UseMargins)
-			{
-				num -= this.Margin.x;
-				num2 -= this.Margin.y;
-				num3 += this.Margin.x / 2f;
-				num4 += this.Margin.y / 2f;
-			}
-			vh.Clear();
-			List<UIVertex[]> list2 = new List<UIVertex[]>();
-			if (this.LineList)
-			{
-				for (int i = 1; i < array.Length; i += 2)
-				{
-					Vector2 vector = array[i - 1];
-					Vector2 vector2 = array[i];
-					vector = new Vector2(vector.x * num + num3, vector.y * num2 + num4);
-					vector2 = new Vector2(vector2.x * num + num3, vector2.y * num2 + num4);
-					if (this.LineCaps)
+					for (int j = 1; j < array.Length; j++)
 					{
-						list2.Add(this.CreateLineCap(vector, vector2, UILineRenderer.SegmentType.Start));
-					}
-					list2.Add(this.CreateLineSegment(vector, vector2, UILineRenderer.SegmentType.Middle));
-					if (this.LineCaps)
-					{
-						list2.Add(this.CreateLineCap(vector, vector2, UILineRenderer.SegmentType.End));
-					}
-				}
-			}
-			else
-			{
-				for (int j = 1; j < array.Length; j++)
-				{
-					Vector2 vector3 = array[j - 1];
-					Vector2 vector4 = array[j];
-					vector3 = new Vector2(vector3.x * num + num3, vector3.y * num2 + num4);
-					vector4 = new Vector2(vector4.x * num + num3, vector4.y * num2 + num4);
-					if (this.LineCaps && j == 1)
-					{
-						list2.Add(this.CreateLineCap(vector3, vector4, UILineRenderer.SegmentType.Start));
-					}
-					list2.Add(this.CreateLineSegment(vector3, vector4, UILineRenderer.SegmentType.Middle));
-					if (this.LineCaps && j == array.Length - 1)
-					{
-						list2.Add(this.CreateLineCap(vector3, vector4, UILineRenderer.SegmentType.End));
-					}
-				}
-			}
-			for (int k = 0; k < list2.Count; k++)
-			{
-				if (!this.LineList && k < list2.Count - 1)
-				{
-					Vector3 vector5 = list2[k][1].position - list2[k][2].position;
-					Vector3 vector6 = list2[k + 1][2].position - list2[k + 1][1].position;
-					float num5 = Vector2.Angle(vector5, vector6) * 0.017453292f;
-					float num6 = Mathf.Sign(Vector3.Cross(vector5.normalized, vector6.normalized).z);
-					float num7 = this.LineThickness / (2f * Mathf.Tan(num5 / 2f));
-					Vector3 vector7 = list2[k][2].position - vector5.normalized * num7 * num6;
-					Vector3 vector8 = list2[k][3].position + vector5.normalized * num7 * num6;
-					UILineRenderer.JoinType joinType = this.LineJoins;
-					if (joinType == UILineRenderer.JoinType.Miter)
-					{
-						if (num7 < vector5.magnitude / 2f && num7 < vector6.magnitude / 2f && num5 > 0.2617994f)
+						Vector2 vector3 = array[j - 1];
+						Vector2 vector4 = array[j];
+						vector3 = new Vector2(vector3.x * num + num3, vector3.y * num2 + num4);
+						vector4 = new Vector2(vector4.x * num + num3, vector4.y * num2 + num4);
+						if (this.LineCaps && j == 1)
 						{
-							list2[k][2].position = vector7;
-							list2[k][3].position = vector8;
-							list2[k + 1][0].position = vector8;
-							list2[k + 1][1].position = vector7;
+							list2.Add(this.CreateLineCap(vector3, vector4, UILineRenderer.SegmentType.Start));
 						}
-						else
+						list2.Add(this.CreateLineSegment(vector3, vector4, UILineRenderer.SegmentType.Middle));
+						if (this.LineCaps && j == array.Length - 1)
 						{
-							joinType = UILineRenderer.JoinType.Bevel;
+							list2.Add(this.CreateLineCap(vector3, vector4, UILineRenderer.SegmentType.End));
 						}
 					}
-					if (joinType == UILineRenderer.JoinType.Bevel)
+				}
+				for (int k = 0; k < list2.Count; k++)
+				{
+					if (!this.LineList && k < list2.Count - 1)
 					{
-						if (num7 < vector5.magnitude / 2f && num7 < vector6.magnitude / 2f && num5 > 0.5235988f)
+						Vector3 vector5 = list2[k][1].position - list2[k][2].position;
+						Vector3 vector6 = list2[k + 1][2].position - list2[k + 1][1].position;
+						float num5 = Vector2.Angle(vector5, vector6) * 0.017453292f;
+						float num6 = Mathf.Sign(Vector3.Cross(vector5.normalized, vector6.normalized).z);
+						float num7 = this.LineThickness / (2f * Mathf.Tan(num5 / 2f));
+						Vector3 vector7 = list2[k][2].position - vector5.normalized * num7 * num6;
+						Vector3 vector8 = list2[k][3].position + vector5.normalized * num7 * num6;
+						UILineRenderer.JoinType joinType = this.LineJoins;
+						if (joinType == UILineRenderer.JoinType.Miter)
 						{
-							if (num6 < 0f)
+							if (num7 < vector5.magnitude / 2f && num7 < vector6.magnitude / 2f && num5 > 0.2617994f)
 							{
 								list2[k][2].position = vector7;
+								list2[k][3].position = vector8;
+								list2[k + 1][0].position = vector8;
 								list2[k + 1][1].position = vector7;
 							}
 							else
 							{
-								list2[k][3].position = vector8;
-								list2[k + 1][0].position = vector8;
+								joinType = UILineRenderer.JoinType.Bevel;
 							}
 						}
-						UIVertex[] array2 = new UIVertex[]
+						if (joinType == UILineRenderer.JoinType.Bevel)
 						{
-							list2[k][2],
-							list2[k][3],
-							list2[k + 1][0],
-							list2[k + 1][1]
-						};
-						vh.AddUIVertexQuad(array2);
+							if (num7 < vector5.magnitude / 2f && num7 < vector6.magnitude / 2f && num5 > 0.5235988f)
+							{
+								if (num6 < 0f)
+								{
+									list2[k][2].position = vector7;
+									list2[k + 1][1].position = vector7;
+								}
+								else
+								{
+									list2[k][3].position = vector8;
+									list2[k + 1][0].position = vector8;
+								}
+							}
+							UIVertex[] array2 = new UIVertex[]
+							{
+								list2[k][2],
+								list2[k][3],
+								list2[k + 1][0],
+								list2[k + 1][1]
+							};
+							vh.AddUIVertexQuad(array2);
+						}
 					}
+					vh.AddUIVertexQuad(list2[k]);
 				}
-				vh.AddUIVertexQuad(list2[k]);
 			}
 		}
 
 		private UIVertex[] CreateLineCap(Vector2 start, Vector2 end, UILineRenderer.SegmentType type)
 		{
+			UIVertex[] array;
 			if (type == UILineRenderer.SegmentType.Start)
 			{
 				Vector2 vector = start - (end - start).normalized * this.LineThickness / 2f;
-				return this.CreateLineSegment(vector, start, UILineRenderer.SegmentType.Start);
+				array = this.CreateLineSegment(vector, start, UILineRenderer.SegmentType.Start);
 			}
-			if (type == UILineRenderer.SegmentType.End)
+			else if (type == UILineRenderer.SegmentType.End)
 			{
 				Vector2 vector2 = end + (end - start).normalized * this.LineThickness / 2f;
-				return this.CreateLineSegment(end, vector2, UILineRenderer.SegmentType.End);
+				array = this.CreateLineSegment(end, vector2, UILineRenderer.SegmentType.End);
 			}
-			Debug.LogError("Bad SegmentType passed in to CreateLineCap. Must be SegmentType.Start or SegmentType.End");
-			return null;
+			else
+			{
+				Debug.LogError("Bad SegmentType passed in to CreateLineCap. Must be SegmentType.Start or SegmentType.End");
+				array = null;
+			}
+			return array;
 		}
 
 		private UIVertex[] CreateLineSegment(Vector2 start, Vector2 end, UILineRenderer.SegmentType type)
@@ -272,13 +274,13 @@ namespace UnityEngine.UI.Extensions
 
 		public bool relativeSize;
 
-		public bool LineList;
+		public bool LineList = false;
 
-		public bool LineCaps;
+		public bool LineCaps = false;
 
-		public UILineRenderer.JoinType LineJoins;
+		public UILineRenderer.JoinType LineJoins = UILineRenderer.JoinType.Bevel;
 
-		public UILineRenderer.BezierType BezierMode;
+		public UILineRenderer.BezierType BezierMode = UILineRenderer.BezierType.None;
 
 		public int BezierSegmentsPerCurve = 10;
 

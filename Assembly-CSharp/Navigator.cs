@@ -26,10 +26,10 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 		base.OnSpawn();
 		this.NavGrid = Pathfinding.Instance.GetNavGrid(this.NavGridName);
 		base.GetComponent<PathProber>().SetValidNavTypes(this.NavGrid.ValidNavTypes, this.maxProbingRadius);
-		this.Subscribe(1623392196, new Action<object>(this.OnDefeated));
-		this.Subscribe(-1506500077, new Action<object>(this.OnDefeated));
-		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
-		this.Subscribe(-1503271301, new Action<object>(this.OnSelectObject));
+		base.Subscribe(1623392196, new Action<object>(this.OnDefeated));
+		base.Subscribe(-1506500077, new Action<object>(this.OnDefeated));
+		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(-1503271301, new Action<object>(this.OnSelectObject));
 		this.maxUnderwaterTravelCost = Db.Get().Attributes.MaxUnderwaterTravelCost.Lookup(this);
 		if (this.updateProber)
 		{
@@ -79,7 +79,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 		this.target = target;
 		this.targetOffsets = offsets;
 		this.ClearReservedCell();
-		this.AdvancePath();
+		this.AdvancePath(true);
 		return this.IsMoving();
 	}
 
@@ -88,16 +88,16 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 		this.transitionDriver.EndTransition();
 		base.smi.GoTo(base.smi.sm.moving);
 		Navigator.ActiveTransition activeTransition = new Navigator.ActiveTransition(transition, this.defaultSpeed);
-		this.Trigger(-897197316, activeTransition);
+		base.Trigger(-897197316, activeTransition);
 		this.transitionDriver.BeginTransition(this, activeTransition);
 	}
 
-	public void AdvancePath()
+	public void AdvancePath(bool trigger_advance = true)
 	{
 		int num = Grid.PosToCell(this);
 		if (this.target == null)
 		{
-			this.Trigger(-766531887, null);
+			base.Trigger(-766531887, null);
 			this.Stop(false);
 		}
 		else if (num == this.reservedCell)
@@ -165,7 +165,15 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 				this.Stop(false);
 			}
 		}
-		this.Trigger(1347184327, null);
+		if (trigger_advance)
+		{
+			base.Trigger(1347184327, null);
+		}
+	}
+
+	public NavGrid.Transition GetNextTransition()
+	{
+		return this.NavGrid.transitions[this.path.nodes[1].transitionId];
 	}
 
 	public void Stop(bool arrived_at_destination = false)
@@ -213,18 +221,20 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 	public void UpdateProbe()
 	{
 		int num = Grid.PosToCell(this);
-		if (!Grid.IsValidCell(num))
+		if (Grid.IsValidCell(num))
 		{
-			return;
+			this.PathProber.UpdateProbe(this.NavGrid, num, this.CurrentNavType, this.GetCurrentAbilities(), this.flags, true);
 		}
-		this.PathProber.UpdateProbe(this.NavGrid, num, this.CurrentNavType, this.GetCurrentAbilities(), this.flags, true);
 	}
 
 	private void LateUpdate()
 	{
-		if (this.IsMoving() && this.selectable.IsSelected)
+		if (this.IsMoving())
 		{
-			NavPathDrawer.Instance.DrawPath(base.GetComponent<KAnimControllerBase>().GetPivotSymbolPosition(), this.path);
+			if (this.selectable.IsSelected)
+			{
+				NavPathDrawer.Instance.DrawPath(base.GetComponent<KAnimControllerBase>().GetPivotSymbolPosition(), this.path);
+			}
 		}
 		if (this.DebugDrawPath || this.NavGrid.DebugViewAllPaths)
 		{
@@ -272,37 +282,48 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 
 	private void OnRefreshUserMenu(object data)
 	{
-		if (base.gameObject.HasTag(GameTags.Dead))
+		if (!base.gameObject.HasTag(GameTags.Dead))
 		{
-			return;
+			string text;
+			string text2;
+			global::System.Action action;
+			string text3;
+			if (NavPathDrawer.Instance.GetNavigator() != this)
+			{
+				UserMenu userMenu = this.userMenu;
+				text = "action_navigable_regions";
+				text2 = UI.USERMENUACTIONS.DRAWPATHS.NAME;
+				action = new global::System.Action(this.OnDrawPaths);
+				text3 = UI.USERMENUACTIONS.DRAWPATHS.TOOLTIP;
+				userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 0.1f);
+			}
+			else
+			{
+				UserMenu userMenu2 = this.userMenu;
+				text3 = "action_navigable_regions";
+				text2 = UI.USERMENUACTIONS.DRAWPATHS.NAME_OFF;
+				action = new global::System.Action(this.OnDrawPaths);
+				text = UI.USERMENUACTIONS.DRAWPATHS.TOOLTIP_OFF;
+				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 0.1f);
+			}
+			UserMenu userMenu3 = this.userMenu;
+			text = "action_follow_cam";
+			text2 = UI.USERMENUACTIONS.FOLLOWCAM.NAME;
+			action = new global::System.Action(this.OnFollowCam);
+			text3 = UI.USERMENUACTIONS.FOLLOWCAM.TOOLTIP;
+			userMenu3.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 0.3f);
 		}
-		string text;
-		if (NavPathDrawer.Instance.GetNavigator() != this)
-		{
-			UserMenu userMenu = this.userMenu;
-			text = UI.USERMENUACTIONS.DRAWPATHS.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_navigable_regions", UI.USERMENUACTIONS.DRAWPATHS.NAME, new global::System.Action(this.OnDrawPaths), global::Action.NumActions, null, null, null, text, true), 0.1f);
-		}
-		else
-		{
-			UserMenu userMenu2 = this.userMenu;
-			text = UI.USERMENUACTIONS.DRAWPATHS.TOOLTIP_OFF;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_navigable_regions", UI.USERMENUACTIONS.DRAWPATHS.NAME_OFF, new global::System.Action(this.OnDrawPaths), global::Action.NumActions, null, null, null, text, true), 0.1f);
-		}
-		UserMenu userMenu3 = this.userMenu;
-		text = UI.USERMENUACTIONS.FOLLOWCAM.TOOLTIP;
-		userMenu3.AddButton(new KIconButtonMenu.ButtonInfo("action_follow_cam", UI.USERMENUACTIONS.FOLLOWCAM.NAME, new global::System.Action(this.OnFollowCam), global::Action.NumActions, null, null, null, text, true), 0.3f);
 	}
 
 	private void OnFollowCam()
 	{
-		if (CameraController.Instance.followTarget == this.transform)
+		if (CameraController.Instance.followTarget == base.transform)
 		{
 			CameraController.Instance.ClearFollowTarget();
 		}
 		else
 		{
-			CameraController.Instance.SetFollowTarget(this.transform);
+			CameraController.Instance.SetFollowTarget(base.transform);
 		}
 	}
 
@@ -367,11 +388,16 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 
 	public int GetNavigationCost(int cell)
 	{
+		int num;
 		if (Grid.IsValidCell(cell))
 		{
-			return this.PathProber.GetCost(cell);
+			num = this.PathProber.GetCost(cell);
 		}
-		return PathProber.InvalidCost;
+		else
+		{
+			num = PathProber.InvalidCost;
+		}
+		return num;
 	}
 
 	public int GetNavigationCost(int cell, CellOffset[] offsets)
@@ -493,6 +519,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 			this.preAnim = transition.preAnim;
 			this.anim = transition.anim;
 			this.speed = default_speed;
+			this.navGridTransition = transition;
 		}
 
 		public int x;
@@ -514,6 +541,8 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 		public float animSpeed = 1f;
 
 		public Func<bool> isCompleteCB;
+
+		public NavGrid.Transition navGridTransition;
 	}
 
 	public class StatesInstance : GameStateMachine<Navigator.States, Navigator.StatesInstance, Navigator, object>.GameInstance

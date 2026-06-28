@@ -24,43 +24,52 @@ namespace UnityEngine.UI
 
 		public static void RegisterGraphicForCanvas(Canvas c, Graphic graphic)
 		{
-			if (c == null)
+			if (!(c == null))
 			{
-				return;
+				IndexedSet<Graphic> indexedSet;
+				GraphicRegistry.instance.m_Graphics.TryGetValue(c, out indexedSet);
+				if (indexedSet != null)
+				{
+					indexedSet.AddUnique(graphic);
+				}
+				else
+				{
+					indexedSet = new IndexedSet<Graphic>();
+					indexedSet.Add(graphic);
+					GraphicRegistry.instance.m_Graphics.Add(c, indexedSet);
+				}
 			}
-			IndexedSet<Graphic> indexedSet;
-			GraphicRegistry.instance.m_Graphics.TryGetValue(c, out indexedSet);
-			if (indexedSet != null)
-			{
-				indexedSet.AddUnique(graphic);
-				return;
-			}
-			indexedSet = new IndexedSet<Graphic>();
-			indexedSet.Add(graphic);
-			GraphicRegistry.instance.m_Graphics.Add(c, indexedSet);
 		}
 
 		public static void UnregisterGraphicForCanvas(Canvas c, Graphic graphic)
 		{
-			if (c == null)
+			if (!(c == null))
 			{
-				return;
-			}
-			IndexedSet<Graphic> indexedSet;
-			if (GraphicRegistry.instance.m_Graphics.TryGetValue(c, out indexedSet))
-			{
-				indexedSet.Remove(graphic);
+				IndexedSet<Graphic> indexedSet;
+				if (GraphicRegistry.instance.m_Graphics.TryGetValue(c, out indexedSet))
+				{
+					indexedSet.Remove(graphic);
+					if (indexedSet.Count == 0)
+					{
+						GraphicRegistry.instance.m_Graphics.Remove(c);
+					}
+				}
 			}
 		}
 
 		public static IList<Graphic> GetGraphicsForCanvas(Canvas canvas)
 		{
 			IndexedSet<Graphic> indexedSet;
+			IList<Graphic> list;
 			if (GraphicRegistry.instance.m_Graphics.TryGetValue(canvas, out indexedSet))
 			{
-				return indexedSet;
+				list = indexedSet;
 			}
-			return GraphicRegistry.s_EmptyList;
+			else
+			{
+				list = GraphicRegistry.s_EmptyList;
+			}
+			return list;
 		}
 
 		private static GraphicRegistry s_Instance;

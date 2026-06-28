@@ -24,11 +24,6 @@ public struct Matrix2x3
 		return base.GetHashCode();
 	}
 
-	public Vector3 MultiplyPoint(Vector3 v)
-	{
-		return new Vector3(v.x * this.m00 + v.y * this.m01 + this.m02, v.x * this.m10 + v.y * this.m11 + this.m12, v.z);
-	}
-
 	public static Vector3 operator *(Matrix2x3 m, Vector3 v)
 	{
 		return new Vector3(v.x * m.m00 + v.y * m.m01 + m.m02, v.x * m.m10 + v.y * m.m11 + m.m12, v.z);
@@ -47,6 +42,11 @@ public struct Matrix2x3
 	public static bool operator !=(Matrix2x3 m, Matrix2x3 n)
 	{
 		return !(m == n);
+	}
+
+	public Vector3 MultiplyPoint(Vector3 v)
+	{
+		return new Vector3(v.x * this.m00 + v.y * this.m01 + this.m02, v.x * this.m10 + v.y * this.m11 + this.m12, v.z);
 	}
 
 	public static implicit operator Matrix4x4(Matrix2x3 m)

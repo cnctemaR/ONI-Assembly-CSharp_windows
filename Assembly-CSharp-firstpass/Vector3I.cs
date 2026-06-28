@@ -11,6 +11,16 @@ public struct Vector3I
 		this.z = c;
 	}
 
+	public static bool operator ==(Vector3I v1, Vector3I v2)
+	{
+		return v1.x == v2.x && v1.y == v2.y && v1.z == v2.z;
+	}
+
+	public static bool operator !=(Vector3I v1, Vector3I v2)
+	{
+		return !(v1 == v2);
+	}
+
 	public override bool Equals(object o)
 	{
 		return base.Equals(o);
@@ -24,16 +34,6 @@ public struct Vector3I
 	public override string ToString()
 	{
 		return string.Format("{0}, {1}, {2}", this.x, this.y, this.z);
-	}
-
-	public static bool operator ==(Vector3I v1, Vector3I v2)
-	{
-		return v1.x == v2.x && v1.y == v2.y && v1.z == v2.z;
-	}
-
-	public static bool operator !=(Vector3I v1, Vector3I v2)
-	{
-		return !(v1 == v2);
 	}
 
 	public int x;

@@ -69,6 +69,21 @@ namespace Steamworks
 
 		private ISteamMatchmakingServerListResponse.RefreshComplete m_RefreshComplete;
 
+		public delegate void ServerResponded(HServerListRequest hRequest, int iServer);
+
+		public delegate void ServerFailedToRespond(HServerListRequest hRequest, int iServer);
+
+		public delegate void RefreshComplete(HServerListRequest hRequest, EMatchMakingServerResponse response);
+
+		[UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+		private delegate void InternalServerResponded(IntPtr thisptr, HServerListRequest hRequest, int iServer);
+
+		[UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+		private delegate void InternalServerFailedToRespond(IntPtr thisptr, HServerListRequest hRequest, int iServer);
+
+		[UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+		private delegate void InternalRefreshComplete(IntPtr thisptr, HServerListRequest hRequest, EMatchMakingServerResponse response);
+
 		[StructLayout(LayoutKind.Sequential)]
 		private class VTable
 		{
@@ -84,20 +99,5 @@ namespace Steamworks
 			[MarshalAs(UnmanagedType.FunctionPtr)]
 			public ISteamMatchmakingServerListResponse.InternalRefreshComplete m_VTRefreshComplete;
 		}
-
-		public delegate void ServerResponded(HServerListRequest hRequest, int iServer);
-
-		public delegate void ServerFailedToRespond(HServerListRequest hRequest, int iServer);
-
-		public delegate void RefreshComplete(HServerListRequest hRequest, EMatchMakingServerResponse response);
-
-		[UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-		private delegate void InternalServerResponded(IntPtr thisptr, HServerListRequest hRequest, int iServer);
-
-		[UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-		private delegate void InternalServerFailedToRespond(IntPtr thisptr, HServerListRequest hRequest, int iServer);
-
-		[UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-		private delegate void InternalRefreshComplete(IntPtr thisptr, HServerListRequest hRequest, EMatchMakingServerResponse response);
 	}
 }

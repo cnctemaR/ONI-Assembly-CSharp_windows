@@ -8,7 +8,7 @@ public class NavigationFeatureMask : NavMask
 		this.agent = agent.GetComponent<Navigator>();
 	}
 
-	public override bool IsTraversable(PathFinder.PotentialPath path, int from_cell, int cost, PathFinderAbilities abilities)
+	public override bool IsTraversable(PathFinder.PotentialPath path, int from_cell, int cost, int transition_id, PathFinderAbilities abilities)
 	{
 		Pathfinding.INavigationFeature navigationFeature = Pathfinding.Instance.GetNavigationFeature(from_cell);
 		return navigationFeature == null || navigationFeature.IsTraversable(this.agent, path, from_cell, cost, abilities);

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections;
+using System.Diagnostics;
 using UnityEngine;
 
 public class MultipleRenderTarget : MonoBehaviour
 {
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<Camera> onSetupComplete;
 
 	private void Start()
@@ -43,12 +45,15 @@ public class MultipleRenderTarget : MonoBehaviour
 
 	public void ToggleColouredOverlayView(bool enabled)
 	{
-		this.renderProxy.ToggleColouredOverlayView(enabled);
+		if (this.renderProxy != null)
+		{
+			this.renderProxy.ToggleColouredOverlayView(enabled);
+		}
 	}
 
 	private MultipleRenderTargetProxy renderProxy;
 
 	private FullScreenQuad quad;
 
-	public bool isFrontEnd;
+	public bool isFrontEnd = false;
 }

@@ -39,9 +39,9 @@ public class BasicForagePlantPlanted : StateMachineComponent<BasicForagePlantPla
 		{
 			default_state = this.seed_grow;
 			base.serializable = true;
-			this.seed_grow.PlayAnim("idle", KAnim.PlayMode.Once, null).EventTransition(GameHashes.AnimQueueComplete, this.alive.idle, null);
+			this.seed_grow.PlayAnim("idle", KAnim.PlayMode.Once).EventTransition(GameHashes.AnimQueueComplete, this.alive.idle, null);
 			this.alive.InitializeStates(this.masterTarget, this.dead);
-			this.alive.idle.PlayAnim("idle", KAnim.PlayMode.Once, null).EventTransition(GameHashes.Uprooted, this.alive.harvest, null).EventTransition(GameHashes.Harvest, this.alive.harvest, null)
+			this.alive.idle.PlayAnim("idle").EventTransition(GameHashes.Uprooted, this.alive.harvest, null).EventTransition(GameHashes.Harvest, this.alive.harvest, null)
 				.Enter(delegate(BasicForagePlantPlanted.StatesInstance smi)
 				{
 					smi.master.harvestable.SetCanBeHarvested(true);

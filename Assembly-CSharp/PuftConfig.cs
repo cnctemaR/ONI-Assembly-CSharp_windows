@@ -8,8 +8,14 @@ public class PuftConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
+		string text = "Puft";
+		string text2 = global::STRINGS.CREATURES.SPECIES.PUFT.NAME;
+		string text3 = global::STRINGS.CREATURES.SPECIES.PUFT.DESC;
+		float num = 50f;
+		KAnimFile anim = Assets.GetAnim("puft_kanim");
+		string text4 = "idle_loop";
 		EffectorValues tier = DECOR.BONUS.TIER0;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("Puft", global::STRINGS.CREATURES.SPECIES.PUFT.NAME, global::STRINGS.CREATURES.SPECIES.PUFT.DESC, 50f, Assets.GetAnim("puft_kanim"), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, anim, text4, Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
 		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, 25f, "FlyerNavGrid1x1", NavType.Hover, 2f, "Meat", 1, true, true, 30f, 302f, 318f, 243f, 343f);
 		Puft puft = gameObject.UpdateComponentRequirement<Puft>(true);
 		puft.consumedElement = SimHashes.ContaminatedOxygen;

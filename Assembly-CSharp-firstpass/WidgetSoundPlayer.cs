@@ -5,7 +5,7 @@ public class WidgetSoundPlayer
 {
 	public virtual string GetDefaultPath(int idx)
 	{
-		return string.Empty;
+		return "";
 	}
 
 	public virtual WidgetSoundPlayer.WidgetSoundEvent[] widget_sound_events()
@@ -15,24 +15,22 @@ public class WidgetSoundPlayer
 
 	public void Play(int sound_event_idx)
 	{
-		if (!this.Enabled)
+		if (this.Enabled)
 		{
-			return;
-		}
-		WidgetSoundPlayer.WidgetSoundEvent widgetSoundEvent = default(WidgetSoundPlayer.WidgetSoundEvent);
-		for (int i = 0; i < this.widget_sound_events().Length; i++)
-		{
-			if (sound_event_idx == this.widget_sound_events()[i].idx)
+			WidgetSoundPlayer.WidgetSoundEvent widgetSoundEvent = default(WidgetSoundPlayer.WidgetSoundEvent);
+			for (int i = 0; i < this.widget_sound_events().Length; i++)
 			{
-				widgetSoundEvent = this.widget_sound_events()[sound_event_idx];
-				break;
+				if (sound_event_idx == this.widget_sound_events()[i].idx)
+				{
+					widgetSoundEvent = this.widget_sound_events()[sound_event_idx];
+					break;
+				}
+			}
+			if (KInputManager.isFocused && widgetSoundEvent.PlaySound && widgetSoundEvent.Name != null && widgetSoundEvent.Name.Length >= 0 && !(widgetSoundEvent.Name == ""))
+			{
+				KFMOD.PlayOneShot(WidgetSoundPlayer.getSoundPath((!(widgetSoundEvent.OverrideAssetName == "")) ? widgetSoundEvent.OverrideAssetName : this.GetDefaultPath(widgetSoundEvent.idx)));
 			}
 		}
-		if (!KInputManager.isFocused || !widgetSoundEvent.PlaySound || widgetSoundEvent.Name == null || widgetSoundEvent.Name.Length < 0 || widgetSoundEvent.Name == string.Empty)
-		{
-			return;
-		}
-		KFMOD.PlayOneShot(WidgetSoundPlayer.getSoundPath((!(widgetSoundEvent.OverrideAssetName == string.Empty)) ? widgetSoundEvent.OverrideAssetName : this.GetDefaultPath(widgetSoundEvent.idx)));
 	}
 
 	public bool Enabled = true;

@@ -151,52 +151,71 @@ namespace TMPro
 
 		public static TMP_Settings GetSettings()
 		{
+			TMP_Settings tmp_Settings;
 			if (TMP_Settings.instance == null)
 			{
-				return null;
+				tmp_Settings = null;
 			}
-			return TMP_Settings.instance;
+			else
+			{
+				tmp_Settings = TMP_Settings.instance;
+			}
+			return tmp_Settings;
 		}
 
 		public static TMP_FontAsset GetFontAsset()
 		{
+			TMP_FontAsset tmp_FontAsset;
 			if (TMP_Settings.instance == null)
 			{
-				return null;
+				tmp_FontAsset = null;
 			}
-			return TMP_Settings.instance.m_defaultFontAsset;
+			else
+			{
+				tmp_FontAsset = TMP_Settings.instance.m_defaultFontAsset;
+			}
+			return tmp_FontAsset;
 		}
 
 		public static TMP_SpriteAsset GetSpriteAsset()
 		{
+			TMP_SpriteAsset tmp_SpriteAsset;
 			if (TMP_Settings.instance == null)
 			{
-				return null;
+				tmp_SpriteAsset = null;
 			}
-			return TMP_Settings.instance.m_defaultSpriteAsset;
+			else
+			{
+				tmp_SpriteAsset = TMP_Settings.instance.m_defaultSpriteAsset;
+			}
+			return tmp_SpriteAsset;
 		}
 
 		public static TMP_StyleSheet GetStyleSheet()
 		{
+			TMP_StyleSheet tmp_StyleSheet;
 			if (TMP_Settings.instance == null)
 			{
-				return null;
+				tmp_StyleSheet = null;
 			}
-			return TMP_Settings.instance.m_defaultStyleSheet;
+			else
+			{
+				tmp_StyleSheet = TMP_Settings.instance.m_defaultStyleSheet;
+			}
+			return tmp_StyleSheet;
 		}
 
 		public static void LoadLinebreakingRules()
 		{
-			if (TMP_Settings.instance == null)
+			if (!(TMP_Settings.instance == null))
 			{
-				return;
+				if (TMP_Settings.s_Instance.m_linebreakingRules == null)
+				{
+					TMP_Settings.s_Instance.m_linebreakingRules = new TMP_Settings.LineBreakingTable();
+				}
+				TMP_Settings.s_Instance.m_linebreakingRules.leadingCharacters = TMP_Settings.GetCharacters(TMP_Settings.s_Instance.m_leadingCharacters);
+				TMP_Settings.s_Instance.m_linebreakingRules.followingCharacters = TMP_Settings.GetCharacters(TMP_Settings.s_Instance.m_followingCharacters);
 			}
-			if (TMP_Settings.s_Instance.m_linebreakingRules == null)
-			{
-				TMP_Settings.s_Instance.m_linebreakingRules = new TMP_Settings.LineBreakingTable();
-			}
-			TMP_Settings.s_Instance.m_linebreakingRules.leadingCharacters = TMP_Settings.GetCharacters(TMP_Settings.s_Instance.m_leadingCharacters);
-			TMP_Settings.s_Instance.m_linebreakingRules.followingCharacters = TMP_Settings.GetCharacters(TMP_Settings.s_Instance.m_followingCharacters);
 		}
 
 		private static Dictionary<int, char> GetCharacters(TextAsset file)

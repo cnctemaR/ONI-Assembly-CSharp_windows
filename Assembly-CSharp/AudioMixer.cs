@@ -39,7 +39,7 @@ public class AudioMixer
 			eventInstance = RuntimeManager.CreateInstance(snapshot);
 			this.activeSnapshots[snapshot] = eventInstance;
 			eventInstance.start();
-			eventInstance.setParameterValue("snapshotActive", 1f);
+			eventInstance.setParameterValue(AudioMixer.SNAPSHOT_ACTIVE_ID, 1f);
 		}
 		AudioMixer.instance.Log("Start Snapshot: " + snapshot);
 		return eventInstance;
@@ -51,7 +51,7 @@ public class AudioMixer
 		EventInstance eventInstance = null;
 		if (this.activeSnapshots.TryGetValue(snapshot, out eventInstance))
 		{
-			eventInstance.setParameterValue("snapshotActive", 0f);
+			eventInstance.setParameterValue(AudioMixer.SNAPSHOT_ACTIVE_ID, 0f);
 			eventInstance.stop(stop_mode);
 			this.activeSnapshots.Remove(snapshot);
 			flag = true;
@@ -130,15 +130,15 @@ public class AudioMixer
 		this.SetVisibleDuplicants();
 		if (this.activeSnapshots.TryGetValue(AudioMixerSnapshots.Get().DuplicantCountMovingSnapshot, out this.duplicantCountMovingInst))
 		{
-			this.duplicantCountMovingInst.setParameterValue("duplicantCount", (float)this.visibleDupes["moving"]);
+			this.duplicantCountMovingInst.setParameterValue(AudioMixer.DUPLICANT_COUNT_ID, (float)this.visibleDupes["moving"]);
 		}
 		if (this.activeSnapshots.TryGetValue(AudioMixerSnapshots.Get().DuplicantCountSleepingSnapshot, out this.duplicantCountSleepingInst))
 		{
-			this.duplicantCountSleepingInst.setParameterValue("duplicantCount", (float)this.visibleDupes["sleeping"]);
+			this.duplicantCountSleepingInst.setParameterValue(AudioMixer.DUPLICANT_COUNT_ID, (float)this.visibleDupes["sleeping"]);
 		}
 		if (this.activeSnapshots.TryGetValue(AudioMixerSnapshots.Get().DuplicantCountAttenuatorMigrated, out this.duplicantCountInst))
 		{
-			this.duplicantCountInst.setParameterValue("duplicantCount", (float)this.visibleDupes["visible"]);
+			this.duplicantCountInst.setParameterValue(AudioMixer.DUPLICANT_COUNT_ID, (float)this.visibleDupes["visible"]);
 		}
 		if (this.activeSnapshots.TryGetValue(AudioMixerSnapshots.Get().PulseSnapshot, out this.pulseInst))
 		{
@@ -153,7 +153,7 @@ public class AudioMixer
 				num /= 3f;
 			}
 			float num2 = Mathf.Abs(Mathf.Sin(Time.time * 3.1415927f * num));
-			this.pulseInst.setParameterValue("Pulse", num2);
+			this.pulseInst.setParameterValue(AudioMixer.PULSE_ID, num2);
 		}
 	}
 
@@ -162,7 +162,8 @@ public class AudioMixer
 		int num = 0;
 		int num2 = 0;
 		int num3 = 0;
-		for (int i = 0; i < Components.LiveMinionIdentities.Count; i++)
+		int i = 0;
+		while (i < Components.LiveMinionIdentities.Count)
 		{
 			Vector3 position = Components.LiveMinionIdentities[i].transform.position;
 			if (CameraController.Instance.IsVisiblePos(position))
@@ -183,6 +184,10 @@ public class AudioMixer
 					}
 				}
 			}
+			IL_00AB:
+			i++;
+			continue;
+			goto IL_00AB;
 		}
 		this.visibleDupes["visible"] = num;
 		this.visibleDupes["moving"] = num2;
@@ -224,30 +229,32 @@ public class AudioMixer
 		if (!this.userVolumeSettings.ContainsKey(bus))
 		{
 			global::Debug.LogError("The provided bus doesn't exist. Check yo'self fool!", null);
-			return;
-		}
-		if (value > 1f)
-		{
-			value = 1f;
-		}
-		else if (value < 0f)
-		{
-			value = 0f;
-		}
-		this.userVolumeSettings[bus].busLevel = value;
-		KPlayerPrefs.SetFloat("Volume_" + bus, value);
-		EventInstance eventInstance = null;
-		if (this.activeSnapshots.TryGetValue(AudioMixerSnapshots.Get().UserVolumeSettingsSnapshot, out eventInstance))
-		{
-			eventInstance.setParameterValue(bus, this.userVolumeSettings[bus].busLevel);
 		}
 		else
 		{
-			this.Log(string.Concat(new object[] { "Tried to set [", bus, "] to [", value, "] but UserVolumeSettingsSnapshot is not active." }));
-		}
-		if (bus == "Music")
-		{
-			this.SetSnapshotParameter(AudioMixerSnapshots.Get().DynamicMusicPlayingSnapshot, "userVolume_Music", value, true);
+			if (value > 1f)
+			{
+				value = 1f;
+			}
+			else if (value < 0f)
+			{
+				value = 0f;
+			}
+			this.userVolumeSettings[bus].busLevel = value;
+			KPlayerPrefs.SetFloat("Volume_" + bus, value);
+			EventInstance eventInstance = null;
+			if (this.activeSnapshots.TryGetValue(AudioMixerSnapshots.Get().UserVolumeSettingsSnapshot, out eventInstance))
+			{
+				eventInstance.setParameterValue(bus, this.userVolumeSettings[bus].busLevel);
+			}
+			else
+			{
+				this.Log(string.Concat(new object[] { "Tried to set [", bus, "] to [", value, "] but UserVolumeSettingsSnapshot is not active." }));
+			}
+			if (bus == "Music")
+			{
+				this.SetSnapshotParameter(AudioMixerSnapshots.Get().DynamicMusicPlayingSnapshot, "userVolume_Music", value, true);
+			}
 		}
 	}
 
@@ -257,23 +264,29 @@ public class AudioMixer
 
 	private static AudioMixer _instance = null;
 
+	private static ParameterID DUPLICANT_COUNT_ID = new ParameterID("duplicantCount");
+
+	private static ParameterID PULSE_ID = new ParameterID("Pulse");
+
+	private static ParameterID SNAPSHOT_ACTIVE_ID = new ParameterID("snapshotActive");
+
 	public Dictionary<HashedString, EventInstance> activeSnapshots = new Dictionary<HashedString, EventInstance>();
 
 	public List<HashedString> SnapshotDebugLog = new List<HashedString>();
 
-	public bool activeNIS;
+	public bool activeNIS = false;
 
 	public static float LOW_PRIORITY_CUTOFF_DISTANCE = 10f;
 
 	public static float PULSE_SNAPSHOT_BPM = 120f;
 
-	private EventInstance duplicantCountInst;
+	private EventInstance duplicantCountInst = null;
 
-	private EventInstance pulseInst;
+	private EventInstance pulseInst = null;
 
-	private EventInstance duplicantCountMovingInst;
+	private EventInstance duplicantCountMovingInst = null;
 
-	private EventInstance duplicantCountSleepingInst;
+	private EventInstance duplicantCountSleepingInst = null;
 
 	private static readonly HashedString UserVolumeSettingsHash = new HashedString("event:/Snapshots/Mixing/Snapshot_UserVolumeSettings");
 

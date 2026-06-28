@@ -40,31 +40,30 @@ public class ResourceRemainingDisplayScreen : KScreen
 
 	public void Update()
 	{
-		if (!this.dispayPrefab.activeSelf)
+		if (this.dispayPrefab.activeSelf)
 		{
-			return;
-		}
-		if (base.canvas != null)
-		{
-			if (this.rect == null)
+			if (base.canvas != null)
 			{
-				this.rect = base.GetComponent<RectTransform>();
+				if (this.rect == null)
+				{
+					this.rect = base.GetComponent<RectTransform>();
+				}
+				this.rect.anchoredPosition = base.WorldToScreen(PlayerController.GetCursorPos(Input.mousePosition));
 			}
-			this.rect.anchoredPosition = base.WorldToScreen(PlayerController.GetCursorPos(Input.mousePosition));
-		}
-		if (this.displayedConstructionCostMultiplier == this.numberOfPendingConstructions)
-		{
-			this.label.text = string.Empty;
-		}
-		else
-		{
-			this.displayedConstructionCostMultiplier = this.numberOfPendingConstructions;
+			if (this.displayedConstructionCostMultiplier == this.numberOfPendingConstructions)
+			{
+				this.label.text = "";
+			}
+			else
+			{
+				this.displayedConstructionCostMultiplier = this.numberOfPendingConstructions;
+			}
 		}
 	}
 
 	public string GetString()
 	{
-		string text = string.Empty;
+		string text = "";
 		if (this.selected_elements != null && this.currentRecipe != null)
 		{
 			for (int i = 0; i < this.currentRecipe.Ingredients.Count; i++)
@@ -107,9 +106,9 @@ public class ResourceRemainingDisplayScreen : KScreen
 
 	private List<Element> selected_elements = new List<Element>();
 
-	private int numberOfPendingConstructions;
+	private int numberOfPendingConstructions = 0;
 
-	private int displayedConstructionCostMultiplier;
+	private int displayedConstructionCostMultiplier = 0;
 
 	private RectTransform rect;
 }

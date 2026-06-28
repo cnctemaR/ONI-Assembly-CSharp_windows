@@ -5,7 +5,7 @@ using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
-public class Shower : Workable, IGameObjectEffectDescriptor, IEffectDescriptor
+public class Shower : Workable, IEffectDescriptor, IGameObjectEffectDescriptor
 {
 	protected override void OnSpawn()
 	{
@@ -80,8 +80,8 @@ public class Shower : Workable, IGameObjectEffectDescriptor, IEffectDescriptor
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.unoperational;
-			this.unoperational.EventTransition(GameHashes.OperationalChanged, this.operational, (Shower.ShowerSM.Instance smi) => smi.IsOperational).PlayAnim("off", KAnim.PlayMode.Once, null);
-			this.operational.DefaultState(this.operational.idle).EventTransition(GameHashes.OperationalChanged, this.unoperational, (Shower.ShowerSM.Instance smi) => !smi.IsOperational).ToggleChore((Shower.ShowerSM.Instance smi) => new WorkChore<Shower>(Db.Get().ChoreTypes.Shower, smi.master, null, true, null, null, null, false, null, true, default(Tag), null, false, true, true, int.MaxValue), this.unoperational);
+			this.unoperational.EventTransition(GameHashes.OperationalChanged, this.operational, (Shower.ShowerSM.Instance smi) => smi.IsOperational).PlayAnim("off");
+			this.operational.DefaultState(this.operational.idle).EventTransition(GameHashes.OperationalChanged, this.unoperational, (Shower.ShowerSM.Instance smi) => !smi.IsOperational).ToggleChore((Shower.ShowerSM.Instance smi) => new WorkChore<Shower>(Db.Get().ChoreTypes.Shower, smi.master, null, true, null, null, null, false, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue), this.unoperational);
 			this.operational.idle.WorkableStartTransition((Shower.ShowerSM.Instance smi) => smi.master, this.operational.showering);
 			this.operational.showering.WorkableStopTransition((Shower.ShowerSM.Instance smi) => smi.master, this.operational.exiting).Enter(delegate(Shower.ShowerSM.Instance smi)
 			{
@@ -95,7 +95,7 @@ public class Shower : Workable, IGameObjectEffectDescriptor, IEffectDescriptor
 				{
 					smi.master.GetComponent<Operational>().SetActive(false, false);
 				});
-			this.operational.exiting.PlayAnim("working_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.unoperational);
+			this.operational.exiting.PlayAnim("working_pst").OnAnimQueueComplete(this.unoperational);
 		}
 
 		public GameStateMachine<Shower.ShowerSM, Shower.ShowerSM.Instance, Shower, object>.State unoperational;

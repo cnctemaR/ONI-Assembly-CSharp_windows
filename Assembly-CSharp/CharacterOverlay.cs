@@ -11,13 +11,12 @@ public class CharacterOverlay : KMonoBehaviour
 
 	public void Register()
 	{
-		if (this.registered)
+		if (!this.registered)
 		{
-			return;
+			this.registered = true;
+			NameDisplayScreen.Instance.AddNewEntry(base.gameObject);
 		}
-		this.registered = true;
-		NameDisplayScreen.Instance.AddNewEntry(base.gameObject);
 	}
 
-	private bool registered;
+	private bool registered = false;
 }

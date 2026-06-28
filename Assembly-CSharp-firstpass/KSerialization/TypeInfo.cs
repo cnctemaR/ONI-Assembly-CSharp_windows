@@ -23,36 +23,52 @@ namespace KSerialization
 
 		public override bool Equals(object obj)
 		{
+			bool flag;
 			if (obj != null && obj is TypeInfo)
 			{
 				TypeInfo typeInfo = (TypeInfo)obj;
-				return this.Equals(typeInfo);
+				flag = this.Equals(typeInfo);
 			}
-			return false;
+			else
+			{
+				flag = false;
+			}
+			return flag;
 		}
 
 		public bool Equals(TypeInfo other)
 		{
-			if (this.info != other.info)
+			bool flag;
+			if (this.info == other.info)
 			{
-				return false;
-			}
-			if (this.subTypes == null || other.subTypes == null)
-			{
-				return this.subTypes == null && other.subTypes == null && this.type == other.type;
-			}
-			if (this.subTypes.Length == other.subTypes.Length)
-			{
-				for (int i = 0; i < this.subTypes.Length; i++)
+				if (this.subTypes != null && other.subTypes != null)
 				{
-					if (!this.subTypes[i].Equals(other.subTypes[i]))
+					if (this.subTypes.Length == other.subTypes.Length)
 					{
-						return false;
+						for (int i = 0; i < this.subTypes.Length; i++)
+						{
+							if (!this.subTypes[i].Equals(other.subTypes[i]))
+							{
+								return false;
+							}
+						}
+						flag = true;
+					}
+					else
+					{
+						flag = false;
 					}
 				}
-				return true;
+				else
+				{
+					flag = this.subTypes == null && other.subTypes == null && this.type == other.type;
+				}
 			}
-			return false;
+			else
+			{
+				flag = false;
+			}
+			return flag;
 		}
 
 		public override int GetHashCode()

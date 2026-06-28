@@ -60,14 +60,14 @@ namespace UnityEngine
 			}
 		}
 
-		private const byte kIsVisibleMask = 128;
-
-		private const byte kDistanceMask = 127;
-
 		private int m_Index;
 
 		private byte m_PrevState;
 
 		private byte m_ThisState;
+
+		private const byte kIsVisibleMask = 128;
+
+		private const byte kDistanceMask = 127;
 	}
 }

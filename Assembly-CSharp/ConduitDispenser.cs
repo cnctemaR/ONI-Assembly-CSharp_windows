@@ -30,20 +30,28 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
 	public ConduitFlow GetConduitManager()
 	{
 		ConduitType conduitType = this.conduitType;
-		if (conduitType == ConduitType.Gas)
+		ConduitFlow conduitFlow;
+		if (conduitType != ConduitType.Gas)
 		{
-			return Game.Instance.gasConduitFlow;
+			if (conduitType != ConduitType.Liquid)
+			{
+				conduitFlow = null;
+			}
+			else
+			{
+				conduitFlow = Game.Instance.liquidConduitFlow;
+			}
 		}
-		if (conduitType != ConduitType.Liquid)
+		else
 		{
-			return null;
+			conduitFlow = Game.Instance.gasConduitFlow;
 		}
-		return Game.Instance.liquidConduitFlow;
+		return conduitFlow;
 	}
 
 	private void OnConduitConnectionChanged(object data)
 	{
-		this.Trigger(-2094018600, this.IsConnected);
+		base.Trigger(-2094018600, this.IsConnected);
 	}
 
 	protected override void OnSpawn()
@@ -77,11 +85,14 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
 				primaryElement.KeepZeroMassObject = true;
 				ConduitFlow conduitManager = this.GetConduitManager();
 				float num = conduitManager.AddElement(this.utilityCell, primaryElement.ElementID, primaryElement.Mass, primaryElement.Temperature, primaryElement.DiseaseIdx, primaryElement.DiseaseCount);
-				float num2 = num / primaryElement.Mass;
-				int num3 = (int)(num2 * (float)primaryElement.DiseaseCount);
-				primaryElement.ModifyDiseaseCount(-num3, "ConduitDispenser.ConduitUpdate");
-				primaryElement.Mass -= num;
-				this.Trigger(-1697596308, primaryElement.gameObject);
+				if (num > 0f)
+				{
+					float num2 = num / primaryElement.Mass;
+					int num3 = (int)(num2 * (float)primaryElement.DiseaseCount);
+					primaryElement.ModifyDiseaseCount(-num3, "ConduitDispenser.ConduitUpdate");
+					primaryElement.Mass -= num;
+					base.Trigger(-1697596308, primaryElement.gameObject);
+				}
 			}
 		}
 	}
@@ -118,13 +129,13 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
 	public ConduitType conduitType;
 
 	[SerializeField]
-	public SimHashes[] elementFilter;
+	public SimHashes[] elementFilter = null;
 
 	[SerializeField]
-	public bool invertElementFilter;
+	public bool invertElementFilter = false;
 
 	[SerializeField]
-	public bool alwaysDispense;
+	public bool alwaysDispense = false;
 
 	private static Operational.Flag outputConduitFlag = new Operational.Flag("output_conduit", Operational.Flag.Type.Functional);
 
@@ -132,7 +143,7 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
 	private Operational operational;
 
 	[MyCmpReq]
-	private Storage storage;
+	public Storage storage;
 
 	private GameScenePartitionerEntry partitionerEntry;
 

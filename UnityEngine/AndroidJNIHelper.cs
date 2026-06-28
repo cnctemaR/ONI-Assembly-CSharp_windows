@@ -14,10 +14,10 @@ namespace UnityEngine
 
 		public static extern bool debug
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
@@ -25,8 +25,8 @@ namespace UnityEngine
 		[ExcludeFromDocs]
 		public static IntPtr GetConstructorID(IntPtr javaClass)
 		{
-			string empty = string.Empty;
-			return AndroidJNIHelper.GetConstructorID(javaClass, empty);
+			string text = "";
+			return AndroidJNIHelper.GetConstructorID(javaClass, text);
 		}
 
 		public static IntPtr GetConstructorID(IntPtr javaClass, [DefaultValue("\"\"")] string signature)
@@ -45,8 +45,8 @@ namespace UnityEngine
 		public static IntPtr GetMethodID(IntPtr javaClass, string methodName)
 		{
 			bool flag = false;
-			string empty = string.Empty;
-			return AndroidJNIHelper.GetMethodID(javaClass, methodName, empty, flag);
+			string text = "";
+			return AndroidJNIHelper.GetMethodID(javaClass, methodName, text, flag);
 		}
 
 		public static IntPtr GetMethodID(IntPtr javaClass, string methodName, [DefaultValue("\"\"")] string signature, [DefaultValue("false")] bool isStatic)
@@ -65,8 +65,8 @@ namespace UnityEngine
 		public static IntPtr GetFieldID(IntPtr javaClass, string fieldName)
 		{
 			bool flag = false;
-			string empty = string.Empty;
-			return AndroidJNIHelper.GetFieldID(javaClass, fieldName, empty, flag);
+			string text = "";
+			return AndroidJNIHelper.GetFieldID(javaClass, fieldName, text, flag);
 		}
 
 		public static IntPtr GetFieldID(IntPtr javaClass, string fieldName, [DefaultValue("\"\"")] string signature, [DefaultValue("false")] bool isStatic)
@@ -79,9 +79,17 @@ namespace UnityEngine
 			return _AndroidJNIHelper.CreateJavaRunnable(jrunnable);
 		}
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		public static IntPtr CreateJavaProxy(AndroidJavaProxy proxy)
+		{
+			IntPtr intPtr;
+			AndroidJNIHelper.INTERNAL_CALL_CreateJavaProxy(proxy, out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr CreateJavaProxy(AndroidJavaProxy proxy);
+		private static extern void INTERNAL_CALL_CreateJavaProxy(AndroidJavaProxy proxy, out IntPtr value);
 
 		public static IntPtr ConvertToJNIArray(Array array)
 		{

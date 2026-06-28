@@ -13,8 +13,11 @@ public class PlaceTool : DragTool
 	{
 		this.active = true;
 		base.OnActivateTool();
+		GameObject prefab = Assets.GetPrefab(this.previewTag);
+		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Front;
+		Folder folder = Folder.Placers;
 		int num = LayerMask.NameToLayer("Place");
-		this.visualizer = GameUtil.KInstantiate(Assets.GetPrefab(this.previewTag), Grid.SceneLayer.Front, Folder.Placers, null, num);
+		this.visualizer = GameUtil.KInstantiate(prefab, sceneLayer, folder, null, num);
 		KBatchedAnimController component = this.visualizer.GetComponent<KBatchedAnimController>();
 		if (component != null)
 		{
@@ -68,28 +71,26 @@ public class PlaceTool : DragTool
 
 	protected override void OnDragTool(int cell, int distFromOrigin)
 	{
-		if (this.visualizer == null)
+		if (!(this.visualizer == null))
 		{
-			return;
-		}
-		Vector3 vector = Grid.CellToPosCBC(cell, Grid.SceneLayer.Building);
-		bool flag = false;
-		EntityPreview component = this.visualizer.GetComponent<EntityPreview>();
-		if (component.Valid)
-		{
-			if (DebugHandler.InstantBuildMode)
+			bool flag = false;
+			EntityPreview component = this.visualizer.GetComponent<EntityPreview>();
+			if (component.Valid)
 			{
-				this.source.Place(cell);
+				if (DebugHandler.InstantBuildMode)
+				{
+					this.source.Place(cell);
+				}
+				else
+				{
+					this.source.QueuePlacement(cell);
+				}
+				flag = true;
 			}
-			else
+			if (flag)
 			{
-				this.source.QueuePlacement(cell);
+				this.Deactivate();
 			}
-			flag = true;
-		}
-		if (flag)
-		{
-			this.Deactivate();
 		}
 	}
 
@@ -136,5 +137,5 @@ public class PlaceTool : DragTool
 
 	public static PlaceTool Instance;
 
-	private bool active;
+	private bool active = false;
 }

@@ -16,20 +16,28 @@ public class DebugOverlays : KScreen
 
 	private void OnSelect(string str, int index)
 	{
-		switch (str)
+		if (str != null)
 		{
-		case "None":
-			SimDebugView.Instance.SetMode(SimViewMode.None);
-			return;
-		case "Flow":
-			SimDebugView.Instance.SetMode(SimViewMode.Flow);
-			return;
-		case "Lighting":
-			SimDebugView.Instance.SetMode(SimViewMode.Light);
-			return;
-		case "Rooms":
-			SimDebugView.Instance.SetMode(SimViewMode.Rooms);
-			return;
+			if (str == "None")
+			{
+				SimDebugView.Instance.SetMode(SimViewMode.None);
+				return;
+			}
+			if (str == "Flow")
+			{
+				SimDebugView.Instance.SetMode(SimViewMode.Flow);
+				return;
+			}
+			if (str == "Lighting")
+			{
+				SimDebugView.Instance.SetMode(SimViewMode.Light);
+				return;
+			}
+			if (str == "Rooms")
+			{
+				SimDebugView.Instance.SetMode(SimViewMode.Rooms);
+				return;
+			}
 		}
 		Debug.LogError("Unknown debug view: " + str, null);
 	}

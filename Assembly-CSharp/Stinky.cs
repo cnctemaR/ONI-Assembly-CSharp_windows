@@ -8,8 +8,8 @@ public class Stinky : StateMachineComponent<Stinky.StatesInstance>
 {
 	protected override void OnPrefabInit()
 	{
-		this.Subscribe(1623392196, new Action<object>(this.OnDeath));
-		this.Subscribe(-1117766961, new Action<object>(this.OnRevived));
+		base.Subscribe(1623392196, new Action<object>(this.OnDeath));
+		base.Subscribe(-1117766961, new Action<object>(this.OnRevived));
 	}
 
 	protected override void OnSpawn()
@@ -40,7 +40,7 @@ public class Stinky : StateMachineComponent<Stinky.StatesInstance>
 		int num2 = Grid.PosToCell(gameObject.transform.position);
 		float value = Db.Get().Amounts.Temperature.Lookup(this).value;
 		SimMessages.AddRemoveSubstance(num2, SimHashes.ContaminatedOxygen, CellEventLogger.Instance.ElementConsumerSimUpdate, 0.0025000002f, value, byte.MaxValue, 0, -1);
-		KFMOD.PlayOneShot(GlobalAssets.GetSound("Dupe_Flatulence", false), this.transform.position);
+		KFMOD.PlayOneShot(GlobalAssets.GetSound("Dupe_Flatulence", false), base.transform.position);
 	}
 
 	private void OnDeath(object data)

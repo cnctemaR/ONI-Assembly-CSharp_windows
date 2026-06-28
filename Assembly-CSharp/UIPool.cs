@@ -65,11 +65,13 @@ public class UIPool<T> where T : MonoBehaviour
 		{
 			string text = ((!this.freeElements.Contains(element)) ? "The element provided does not belong to this pool" : "The element provided is already inactive");
 			global::Debug.LogError(text, null);
-			return;
 		}
-		element.gameObject.SetActive(false);
-		this.freeElements.Add(element);
-		this.activeElements.Remove(element);
+		else
+		{
+			element.gameObject.SetActive(false);
+			this.freeElements.Add(element);
+			this.activeElements.Remove(element);
+		}
 	}
 
 	public void ClearAll()

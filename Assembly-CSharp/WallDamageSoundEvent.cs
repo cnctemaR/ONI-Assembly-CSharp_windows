@@ -27,39 +27,44 @@ public class WallDamageSoundEvent : SoundEvent
 	private static int GetAudioCategory(int tile)
 	{
 		Element element = Grid.Element[tile];
+		int num;
 		if (Grid.Foundation[tile])
 		{
-			return 12;
+			num = 12;
 		}
-		if (element.id == SimHashes.Dirt)
+		else if (element.id == SimHashes.Dirt)
 		{
-			return 0;
+			num = 0;
 		}
-		if (element.id == SimHashes.CrushedIce || element.id == SimHashes.Ice || element.id == SimHashes.DirtyIce)
+		else if (element.id == SimHashes.CrushedIce || element.id == SimHashes.Ice || element.id == SimHashes.DirtyIce)
 		{
-			return 1;
+			num = 1;
 		}
-		if (element.id == SimHashes.OxyRock)
+		else if (element.id == SimHashes.OxyRock)
 		{
-			return 3;
+			num = 3;
 		}
-		if (element.HasTag(GameTags.Metal))
+		else if (element.HasTag(GameTags.Metal))
 		{
-			return 5;
+			num = 5;
 		}
-		if (element.HasTag(GameTags.RefinedMetal))
+		else if (element.HasTag(GameTags.RefinedMetal))
 		{
-			return 6;
+			num = 6;
 		}
-		if (element.id == SimHashes.Sand)
+		else if (element.id == SimHashes.Sand)
 		{
-			return 8;
+			num = 8;
 		}
-		if (element.id == SimHashes.Algae)
+		else if (element.id == SimHashes.Algae)
 		{
-			return 10;
+			num = 10;
 		}
-		return 7;
+		else
+		{
+			num = 7;
+		}
+		return num;
 	}
 
 	public int tile;

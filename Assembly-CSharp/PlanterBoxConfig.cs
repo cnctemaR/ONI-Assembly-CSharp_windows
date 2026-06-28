@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -7,8 +6,19 @@ public class PlanterBoxConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
+		string text = "PlanterBox";
+		int num = 1;
+		int num2 = 1;
+		string text2 = "planterbox_kanim";
+		float num3 = 400f;
+		int num4 = 10;
+		float num5 = 3f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
+		string[] farmable = MATERIALS.FARMABLE;
+		float num6 = 800f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("PlanterBox", 1, 1, "planterbox_kanim", 400f, 10, 3f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER2, MATERIALS.FARMABLE, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER1, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, farmable, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER1, none);
 		buildingDef.ForegroundLayer = Grid.SceneLayer.BuildingBack;
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
@@ -25,7 +35,7 @@ public class PlanterBoxConfig : IBuildingConfig
 		plantablePlot.AddDespoitTag(GameTags.CropSeed);
 		plantablePlot.SetFertilizationFlags(true, false);
 		BuildingTemplates.CreateDefaultStorage(go, false);
-		storage.defaultStoredItemModifers = PlanterBoxConfig.StoredItemModifiers;
+		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		go.AddOrGet<DropAllWorkable>();
 		go.AddOrGet<PlanterBox>();
 		go.AddOrGet<AnimTileable>();
@@ -37,5 +47,5 @@ public class PlanterBoxConfig : IBuildingConfig
 		BuildingTemplates.DoPostConfigure(go);
 	}
 
-	private static readonly List<Storage.StoredItemModifier> StoredItemModifiers = new List<Storage.StoredItemModifier> { Storage.StoredItemModifier.Seal };
+	public const string ID = "PlanterBox";
 }

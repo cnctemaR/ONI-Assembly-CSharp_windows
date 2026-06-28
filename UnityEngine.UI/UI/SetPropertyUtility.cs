@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace UnityEngine.UI
 {
@@ -6,42 +7,47 @@ namespace UnityEngine.UI
 	{
 		public static bool SetColor(ref Color currentValue, Color newValue)
 		{
+			bool flag;
 			if (currentValue.r == newValue.r && currentValue.g == newValue.g && currentValue.b == newValue.b && currentValue.a == newValue.a)
 			{
-				return false;
+				flag = false;
 			}
-			currentValue = newValue;
-			return true;
-		}
-
-		public static bool SetEquatableStruct<T>(ref T currentValue, T newValue) where T : IEquatable<T>
-		{
-			if (currentValue.Equals(newValue))
+			else
 			{
-				return false;
+				currentValue = newValue;
+				flag = true;
 			}
-			currentValue = newValue;
-			return true;
+			return flag;
 		}
 
 		public static bool SetStruct<T>(ref T currentValue, T newValue) where T : struct
 		{
-			if (currentValue.Equals(newValue))
+			bool flag;
+			if (EqualityComparer<T>.Default.Equals(currentValue, newValue))
 			{
-				return false;
+				flag = false;
 			}
-			currentValue = newValue;
-			return true;
+			else
+			{
+				currentValue = newValue;
+				flag = true;
+			}
+			return flag;
 		}
 
 		public static bool SetClass<T>(ref T currentValue, T newValue) where T : class
 		{
+			bool flag;
 			if ((currentValue == null && newValue == null) || (currentValue != null && currentValue.Equals(newValue)))
 			{
-				return false;
+				flag = false;
 			}
-			currentValue = newValue;
-			return true;
+			else
+			{
+				currentValue = newValue;
+				flag = true;
+			}
+			return flag;
 		}
 	}
 }

@@ -89,41 +89,43 @@ public class ScenePartitioner
 		if (entry.obj == null)
 		{
 			Debug.LogWarning("Trying to put null go into scene partitioner", null);
-			return;
 		}
-		Extents nodeExtents = this.GetNodeExtents(entry);
-		if (nodeExtents.x + nodeExtents.width > this.nodes.GetLength(2))
+		else
 		{
-			Debug.LogError(string.Concat(new object[]
+			Extents nodeExtents = this.GetNodeExtents(entry);
+			if (nodeExtents.x + nodeExtents.width > this.nodes.GetLength(2))
 			{
-				entry.obj.ToString(),
-				" x/w ",
-				nodeExtents.x,
-				"/",
-				nodeExtents.width,
-				" < ",
-				this.nodes.GetLength(2)
-			}), null);
-		}
-		if (nodeExtents.y + nodeExtents.height > this.nodes.GetLength(1))
-		{
-			Debug.LogError(string.Concat(new object[]
+				Debug.LogError(string.Concat(new object[]
+				{
+					entry.obj.ToString(),
+					" x/w ",
+					nodeExtents.x,
+					"/",
+					nodeExtents.width,
+					" < ",
+					this.nodes.GetLength(2)
+				}), null);
+			}
+			if (nodeExtents.y + nodeExtents.height > this.nodes.GetLength(1))
 			{
-				entry.obj.ToString(),
-				" y/h ",
-				nodeExtents.y,
-				"/",
-				nodeExtents.height,
-				" < ",
-				this.nodes.GetLength(1)
-			}), null);
-		}
-		int layer = entry.layer;
-		for (int i = nodeExtents.y; i < nodeExtents.y + nodeExtents.height; i++)
-		{
-			for (int j = nodeExtents.x; j < nodeExtents.x + nodeExtents.width; j++)
+				Debug.LogError(string.Concat(new object[]
+				{
+					entry.obj.ToString(),
+					" y/h ",
+					nodeExtents.y,
+					"/",
+					nodeExtents.height,
+					" < ",
+					this.nodes.GetLength(1)
+				}), null);
+			}
+			int layer = entry.layer;
+			for (int i = nodeExtents.y; i < nodeExtents.y + nodeExtents.height; i++)
 			{
-				this.nodes[layer, i, j].entries.Add(entry);
+				for (int j = nodeExtents.x; j < nodeExtents.x + nodeExtents.width; j++)
+				{
+					this.nodes[layer, i, j].entries.Add(entry);
+				}
 			}
 		}
 	}
@@ -353,7 +355,7 @@ public class ScenePartitioner
 
 	private List<ScenePartitioner.DirtyNode> dirtyNodes = new List<ScenePartitioner.DirtyNode>();
 
-	private ScenePartitioner.ScenePartitionerNode[,,] nodes;
+	private ScenePartitioner.ScenePartitionerNode[,,] nodes = null;
 
 	private int queryId;
 

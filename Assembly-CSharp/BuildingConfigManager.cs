@@ -20,6 +20,7 @@ public class BuildingConfigManager : KMonoBehaviour
 		this.baseTemplate.AddComponent<Deconstructable>();
 		this.baseTemplate.AddComponent<UserMenu>();
 		this.baseTemplate.AddComponent<SaveLoadRoot>();
+		this.baseTemplate.AddComponent<SavedObject>();
 		this.baseTemplate.AddComponent<OccupyArea>();
 		this.baseTemplate.AddComponent<DecorProvider>();
 		this.baseTemplate.AddComponent<Operational>();
@@ -32,7 +33,7 @@ public class BuildingConfigManager : KMonoBehaviour
 	{
 		BuildingDef buildingDef = config.CreateBuildingDef();
 		GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(this.baseTemplate);
-		gameObject.name = buildingDef.PrefabID;
+		gameObject.name = buildingDef.PrefabID + "Template";
 		gameObject.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.GlobalDoNotDestroy).transform;
 		gameObject.GetComponent<Building>().Def = buildingDef;
 		gameObject.GetComponent<OccupyArea>().OccupiedCellsOffsets = buildingDef.PlacementOffsets;
@@ -51,9 +52,17 @@ public class BuildingConfigManager : KMonoBehaviour
 		if (flag)
 		{
 			buildingDef.BuildingUnderConstruction = BuildingLoader.Instance.CreateBuildingUnderConstruction(buildingDef, false);
+			GameObject buildingUnderConstruction = buildingDef.BuildingUnderConstruction;
+			buildingUnderConstruction.name += "UnderConstruction";
 			buildingDef.BuildingUnderRelocation = BuildingLoader.Instance.CreateBuildingUnderConstruction(buildingDef, true);
+			GameObject buildingUnderRelocation = buildingDef.BuildingUnderRelocation;
+			buildingUnderRelocation.name += "UnderRelocation";
 			buildingDef.BuildingPreview = BuildingLoader.Instance.CreateBuildingPreview(buildingDef);
+			GameObject buildingPreview = buildingDef.BuildingPreview;
+			buildingPreview.name += "Preview";
 			buildingDef.BuildingPackage = BuildingLoader.Instance.CreateBuildingPackage(buildingDef);
+			GameObject buildingPackage = buildingDef.BuildingPackage;
+			buildingPackage.name += "Package";
 		}
 		buildingDef.PostProcess();
 		config.DoPostConfigureComplete(buildingDef.BuildingComplete);

@@ -26,11 +26,16 @@ public class ModifierSet : ScriptableObject
 
 	public static float ConvertValue(float value, Units units)
 	{
+		float num;
 		if (units == Units.PerDay)
 		{
-			return value * 0.0016666667f;
+			num = value * 0.0016666667f;
 		}
-		return value;
+		else
+		{
+			num = value;
+		}
+		return num;
 	}
 
 	private void LoadEffects()
@@ -46,7 +51,7 @@ public class ModifierSet : ScriptableObject
 				{
 					if (modifierInfo2.Id == modifierInfo.Id)
 					{
-						effect.Add(new AttributeModifier(modifierInfo2.Attribute, ModifierSet.ConvertValue(modifierInfo2.Value, modifierInfo2.Units), text, false, false));
+						effect.Add(new AttributeModifier(modifierInfo2.Attribute, ModifierSet.ConvertValue(modifierInfo2.Value, modifierInfo2.Units), text, false, false, true));
 					}
 				}
 				this.effects.Add(effect);
@@ -58,7 +63,7 @@ public class ModifierSet : ScriptableObject
 	{
 		Trait trait = new Trait(id, name, description, 0f, should_save, disabled_chore_groups, positive_trait, is_valid_starter_trait);
 		this.traits.Add(trait);
-		if (group_name == string.Empty || group_name == null)
+		if (group_name == "" || group_name == null)
 		{
 			group_name = "Default";
 		}

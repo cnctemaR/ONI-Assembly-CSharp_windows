@@ -11,6 +11,8 @@ public class Harvestable : Workable
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
 	}
 
+	public Worker completed_by { get; protected set; }
+
 	public bool HarvestWhenReady
 	{
 		get
@@ -29,7 +31,7 @@ public class Harvestable : Workable
 
 	private void OnEnableOverlay(object data)
 	{
-		if ((int)data == 954055328)
+		if ((SimViewMode)data == SimViewMode.HarvestWhenReady)
 		{
 			this.CreateOverlayIcon();
 		}
@@ -50,27 +52,26 @@ public class Harvestable : Workable
 
 	private void CreateOverlayIcon()
 	{
-		if (this.HarvestWhenReadyOverlayIcon != null)
+		if (!(this.HarvestWhenReadyOverlayIcon != null))
 		{
-			return;
-		}
-		if (base.GetComponent<Harvestable>() != null && base.GetComponent<AttackableBase>() == null)
-		{
-			this.HarvestWhenReadyOverlayIcon = Util.KInstantiate(Assets.UIPrefabs.HarvestWhenReadyOverlayIcon, GameScreenManager.Instance.worldSpaceCanvas, null).GetComponent<RectTransform>();
-			OccupyArea component = base.GetComponent<OccupyArea>();
-			Extents extents = component.GetExtents();
-			KPrefabID component2 = base.GetComponent<KPrefabID>();
-			Vector3 vector;
-			if (component2.HasTag(GameTags.Hanging))
+			if (base.GetComponent<Harvestable>() != null && base.GetComponent<AttackableBase>() == null)
 			{
-				vector = new Vector3((float)(extents.x + extents.width / 2) + 0.5f, (float)(extents.y + extents.height));
+				this.HarvestWhenReadyOverlayIcon = Util.KInstantiate(Assets.UIPrefabs.HarvestWhenReadyOverlayIcon, GameScreenManager.Instance.worldSpaceCanvas, null).GetComponent<RectTransform>();
+				OccupyArea component = base.GetComponent<OccupyArea>();
+				Extents extents = component.GetExtents();
+				KPrefabID component2 = base.GetComponent<KPrefabID>();
+				Vector3 vector;
+				if (component2.HasTag(GameTags.Hanging))
+				{
+					vector = new Vector3((float)(extents.x + extents.width / 2) + 0.5f, (float)(extents.y + extents.height));
+				}
+				else
+				{
+					vector = new Vector3((float)(extents.x + extents.width / 2) + 0.5f, (float)extents.y);
+				}
+				this.HarvestWhenReadyOverlayIcon.transform.position = vector;
+				this.RefreshOverlayIcon(null);
 			}
-			else
-			{
-				vector = new Vector3((float)(extents.x + extents.width / 2) + 0.5f, (float)extents.y);
-			}
-			this.HarvestWhenReadyOverlayIcon.transform.position = vector;
-			this.RefreshOverlayIcon(null);
 		}
 	}
 
@@ -128,7 +129,7 @@ public class Harvestable : Workable
 	{
 		base.OnPrefabInit();
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Harvesting;
-		this.Subscribe(1309017699, delegate(object o)
+		base.Subscribe(1309017699, delegate(object o)
 		{
 			this.SetInPlanterBox(true);
 		});
@@ -136,10 +137,10 @@ public class Harvestable : Workable
 
 	protected override void OnSpawn()
 	{
-		this.Subscribe(2127324410, new Action<object>(this.ForceCancelHarvest));
+		base.Subscribe(2127324410, new Action<object>(this.ForceCancelHarvest));
 		base.SetWorkTime(10f);
-		this.Subscribe(2127324410, new Action<object>(this.OnCancel));
-		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(2127324410, new Action<object>(this.OnCancel));
+		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		this.faceTargetWhenWorking = true;
 		Components.Harvestables.Add(this);
 		this.area = base.GetComponent<OccupyArea>();
@@ -157,7 +158,7 @@ public class Harvestable : Workable
 	{
 		this.isMarkedForHarvest = false;
 		this.chore = null;
-		this.Trigger(1272413801, this);
+		base.Trigger(1272413801, this);
 		this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
 		this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.Operating, false);
 		this.userMenu.Refresh();
@@ -206,21 +207,21 @@ public class Harvestable : Workable
 
 	public virtual void MarkForHarvest()
 	{
-		if (!this.canBeHarvested)
+		if (this.canBeHarvested)
 		{
-			return;
+			if (this.chore == null)
+			{
+				this.chore = new WorkChore<Harvestable>(Db.Get().ChoreTypes.Harvest, this, null, true, null, null, null, true, null, true, default(Tag), null, true, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+				this.selectable.AddStatusItem(Db.Get().MiscStatusItems.PendingHarvest, this);
+			}
+			this.isMarkedForHarvest = true;
+			this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.NotMarkedForHarvest, false);
 		}
-		if (this.chore == null)
-		{
-			this.chore = new WorkChore<Harvestable>(Db.Get().ChoreTypes.Harvest, this, null, true, null, null, null, true, null, true, default(Tag), null, true, true, true, int.MaxValue);
-			this.selectable.AddStatusItem(Db.Get().MiscStatusItems.PendingHarvest, this);
-		}
-		this.isMarkedForHarvest = true;
-		this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.NotMarkedForHarvest, false);
 	}
 
 	protected override void OnCompleteWork(Worker worker)
 	{
+		this.completed_by = worker;
 		this.Harvest();
 	}
 
@@ -263,22 +264,28 @@ public class Harvestable : Workable
 		if (this.harvestWhenReady)
 		{
 			UserMenu userMenu = this.userMenu;
-			string text = UI.USERMENUACTIONS.CANCEL_HARVEST_WHEN_READY.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_harvest", UI.USERMENUACTIONS.CANCEL_HARVEST_WHEN_READY.NAME, delegate
+			string text = "action_harvest";
+			string text2 = UI.USERMENUACTIONS.CANCEL_HARVEST_WHEN_READY.NAME;
+			global::System.Action action = delegate
 			{
 				this.OnClickCancelHarvestWhenReady();
-				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, UI.GAMEOBJECTEFFECTS.PLANT_DO_NOT_HARVEST, this.transform, 1.5f, false);
-			}, global::Action.NumActions, null, null, null, text, true), 1f);
+				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, UI.GAMEOBJECTEFFECTS.PLANT_DO_NOT_HARVEST, base.transform, 1.5f, false);
+			};
+			string text3 = UI.USERMENUACTIONS.CANCEL_HARVEST_WHEN_READY.TOOLTIP;
+			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
 		}
 		else
 		{
 			UserMenu userMenu2 = this.userMenu;
-			string text = UI.USERMENUACTIONS.HARVEST_WHEN_READY.TOOLTIP;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_harvest", UI.USERMENUACTIONS.HARVEST_WHEN_READY.NAME, delegate
+			string text3 = "action_harvest";
+			string text2 = UI.USERMENUACTIONS.HARVEST_WHEN_READY.NAME;
+			global::System.Action action = delegate
 			{
 				this.OnClickHarvestWhenReady();
-				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, UI.GAMEOBJECTEFFECTS.PLANT_MARK_FOR_HARVEST, this.transform, 1.5f, false);
-			}, global::Action.NumActions, null, null, null, text, true), 1f);
+				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, UI.GAMEOBJECTEFFECTS.PLANT_MARK_FOR_HARVEST, base.transform, 1.5f, false);
+			};
+			string text = UI.USERMENUACTIONS.HARVEST_WHEN_READY.TOOLTIP;
+			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
 		}
 	}
 
@@ -313,15 +320,15 @@ public class Harvestable : Workable
 	protected bool isMarkedForHarvest;
 
 	[Serialize]
-	protected bool canBeHarvested;
+	protected bool canBeHarvested = false;
 
 	[Serialize]
-	protected bool harvestWhenReady;
+	protected bool harvestWhenReady = false;
 
 	public RectTransform HarvestWhenReadyOverlayIcon;
 
 	[Serialize]
-	private bool isInPlanterBox;
+	private bool isInPlanterBox = false;
 
 	protected Chore chore;
 

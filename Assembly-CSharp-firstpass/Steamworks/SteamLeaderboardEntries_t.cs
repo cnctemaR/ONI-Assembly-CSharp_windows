@@ -25,16 +25,6 @@ namespace Steamworks
 			return this.m_SteamLeaderboardEntries.GetHashCode();
 		}
 
-		public bool Equals(SteamLeaderboardEntries_t other)
-		{
-			return this.m_SteamLeaderboardEntries == other.m_SteamLeaderboardEntries;
-		}
-
-		public int CompareTo(SteamLeaderboardEntries_t other)
-		{
-			return this.m_SteamLeaderboardEntries.CompareTo(other.m_SteamLeaderboardEntries);
-		}
-
 		public static bool operator ==(SteamLeaderboardEntries_t x, SteamLeaderboardEntries_t y)
 		{
 			return x.m_SteamLeaderboardEntries == y.m_SteamLeaderboardEntries;
@@ -53,6 +43,16 @@ namespace Steamworks
 		public static explicit operator ulong(SteamLeaderboardEntries_t that)
 		{
 			return that.m_SteamLeaderboardEntries;
+		}
+
+		public bool Equals(SteamLeaderboardEntries_t other)
+		{
+			return this.m_SteamLeaderboardEntries == other.m_SteamLeaderboardEntries;
+		}
+
+		public int CompareTo(SteamLeaderboardEntries_t other)
+		{
+			return this.m_SteamLeaderboardEntries.CompareTo(other.m_SteamLeaderboardEntries);
 		}
 
 		public ulong m_SteamLeaderboardEntries;

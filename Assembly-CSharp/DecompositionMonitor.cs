@@ -45,11 +45,16 @@ public class DecompositionMonitor : GameStateMachine<DecompositionMonitor, Decom
 
 	private FliesFX.Instance CreateFX(DecompositionMonitor.Instance smi)
 	{
+		FliesFX.Instance instance;
 		if (!smi.isMasterNull)
 		{
-			return new FliesFX.Instance(smi.master, new Vector3(0f, 0f, -0.1f));
+			instance = new FliesFX.Instance(smi.master, new Vector3(0f, 0f, -0.1f));
 		}
-		return null;
+		else
+		{
+			instance = null;
+		}
+		return instance;
 	}
 
 	public StateMachine<DecompositionMonitor, DecompositionMonitor.Instance, IStateMachineTarget, object>.FloatParameter decomposition;
@@ -103,8 +108,8 @@ public class DecompositionMonitor : GameStateMachine<DecompositionMonitor, Decom
 
 		public bool IsExposed()
 		{
-			Pickupable component = base.smi.GetComponent<Pickupable>();
-			return component == null || component.storage == null || !component.storage.disableOnStore;
+			KPrefabID component = base.smi.GetComponent<KPrefabID>();
+			return component == null || !component.HasTag(GameTags.Preserved);
 		}
 
 		public bool IsRotten()
@@ -163,12 +168,12 @@ public class DecompositionMonitor : GameStateMachine<DecompositionMonitor, Decom
 
 		public bool spawnsRotMonsters = true;
 
-		public AttributeModifier satisfiedDecorModifier = new AttributeModifier(Db.Get().BuildingAttributes.Decor.Id, -65f, DUPLICANTS.MODIFIERS.DEAD.NAME, false, false);
+		public AttributeModifier satisfiedDecorModifier = new AttributeModifier(Db.Get().BuildingAttributes.Decor.Id, -65f, DUPLICANTS.MODIFIERS.DEAD.NAME, false, false, true);
 
-		public AttributeModifier satisfiedDecorRadiusModifier = new AttributeModifier(Db.Get().BuildingAttributes.DecorRadius.Id, 4f, DUPLICANTS.MODIFIERS.DEAD.NAME, false, false);
+		public AttributeModifier satisfiedDecorRadiusModifier = new AttributeModifier(Db.Get().BuildingAttributes.DecorRadius.Id, 4f, DUPLICANTS.MODIFIERS.DEAD.NAME, false, false, true);
 
-		public AttributeModifier rottenDecorModifier = new AttributeModifier(Db.Get().BuildingAttributes.Decor.Id, -100f, DUPLICANTS.MODIFIERS.ROTTING.NAME, false, false);
+		public AttributeModifier rottenDecorModifier = new AttributeModifier(Db.Get().BuildingAttributes.Decor.Id, -100f, DUPLICANTS.MODIFIERS.ROTTING.NAME, false, false, true);
 
-		public AttributeModifier rottenDecorRadiusModifier = new AttributeModifier(Db.Get().BuildingAttributes.DecorRadius.Id, 4f, DUPLICANTS.MODIFIERS.ROTTING.NAME, false, false);
+		public AttributeModifier rottenDecorRadiusModifier = new AttributeModifier(Db.Get().BuildingAttributes.DecorRadius.Id, 4f, DUPLICANTS.MODIFIERS.ROTTING.NAME, false, false, true);
 	}
 }

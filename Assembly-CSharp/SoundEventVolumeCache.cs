@@ -27,11 +27,16 @@ public class SoundEventVolumeCache
 	public EffectorValues GetVolume(string animFile, string eventName)
 	{
 		HashedString hashedString = new HashedString(animFile + ":" + eventName);
+		EffectorValues effectorValues;
 		if (!this.volumeCache.ContainsKey(hashedString))
 		{
-			return default(EffectorValues);
+			effectorValues = default(EffectorValues);
 		}
-		return this.volumeCache[hashedString];
+		else
+		{
+			effectorValues = this.volumeCache[hashedString];
+		}
+		return effectorValues;
 	}
 
 	public Dictionary<HashedString, EffectorValues> volumeCache = new Dictionary<HashedString, EffectorValues>();

@@ -53,11 +53,16 @@ namespace VoronoiTree
 
 		public int ChildCount()
 		{
+			int num;
 			if (this.children == null)
 			{
-				return 0;
+				num = 0;
 			}
-			return this.children.Count;
+			else
+			{
+				num = this.children.Count;
+			}
+			return num;
 		}
 
 		public Tree GetChildContainingLeaf(Leaf leaf)
@@ -76,11 +81,16 @@ namespace VoronoiTree
 
 		public Node GetChild(int childIndex)
 		{
+			Node node;
 			if (childIndex < this.children.Count)
 			{
-				return this.children[childIndex];
+				node = this.children[childIndex];
 			}
-			return null;
+			else
+			{
+				node = null;
+			}
+			return node;
 		}
 
 		public void AddChild(Node child)
@@ -110,93 +120,108 @@ namespace VoronoiTree
 
 		public bool ComputeChildrenRecursive(int depth, bool pd = false)
 		{
+			bool flag;
 			if (depth > Node.maxDepth || this.site.poly == null || this.children == null)
 			{
-				return false;
+				flag = false;
 			}
-			List<Diagram.Site> list = new List<Diagram.Site>();
-			for (int i = 0; i < this.children.Count; i++)
+			else
 			{
-				list.Add(this.children[i].site);
-			}
-			base.PlaceSites(list, depth);
-			if (pd)
-			{
-				for (int j = 0; j < list.Count; j++)
+				List<Diagram.Site> list = new List<Diagram.Site>();
+				for (int i = 0; i < this.children.Count; i++)
 				{
+					list.Add(this.children[i].site);
 				}
-				if (base.ComputeNodePD(list, 500, 0.2f))
+				base.PlaceSites(list, depth);
+				if (pd)
 				{
-					for (int k = 0; k < this.children.Count; k++)
+					for (int j = 0; j < list.Count; j++)
 					{
-						if (this.children[k].type == Node.NodeType.Internal)
+					}
+					if (base.ComputeNodePD(list, 500, 0.2f))
+					{
+						for (int k = 0; k < this.children.Count; k++)
 						{
-							Tree tree = this.children[k] as Tree;
-							if (!tree.ComputeChildrenRecursive(depth + 1, pd))
+							if (this.children[k].type == Node.NodeType.Internal)
+							{
+								Tree tree = this.children[k] as Tree;
+								if (!tree.ComputeChildrenRecursive(depth + 1, pd))
+								{
+									return false;
+								}
+							}
+						}
+					}
+				}
+				else if (base.ComputeNode(list))
+				{
+					for (int l = 0; l < this.children.Count; l++)
+					{
+						if (this.children[l].type == Node.NodeType.Internal)
+						{
+							Tree tree2 = this.children[l] as Tree;
+							if (!tree2.ComputeChildrenRecursive(depth + 1, false))
 							{
 								return false;
 							}
 						}
 					}
 				}
+				flag = true;
 			}
-			else if (base.ComputeNode(list))
-			{
-				for (int l = 0; l < this.children.Count; l++)
-				{
-					if (this.children[l].type == Node.NodeType.Internal)
-					{
-						Tree tree2 = this.children[l] as Tree;
-						if (!tree2.ComputeChildrenRecursive(depth + 1, false))
-						{
-							return false;
-						}
-					}
-				}
-			}
-			return true;
+			return flag;
 		}
 
 		public bool ComputeChildren(int seed, bool place = false, bool pd = false)
 		{
+			bool flag;
 			if (this.site.poly == null || this.children == null)
 			{
-				return false;
-			}
-			List<Diagram.Site> list = new List<Diagram.Site>();
-			for (int i = 0; i < this.children.Count; i++)
-			{
-				list.Add(this.children[i].site);
-			}
-			if (place)
-			{
-				base.PlaceSites(list, seed);
-			}
-			if (pd)
-			{
-				base.ComputeNodePD(list, 500, 0.2f);
+				flag = false;
 			}
 			else
 			{
-				base.ComputeNode(list);
+				List<Diagram.Site> list = new List<Diagram.Site>();
+				for (int i = 0; i < this.children.Count; i++)
+				{
+					list.Add(this.children[i].site);
+				}
+				if (place)
+				{
+					base.PlaceSites(list, seed);
+				}
+				if (pd)
+				{
+					base.ComputeNodePD(list, 500, 0.2f);
+				}
+				else
+				{
+					base.ComputeNode(list);
+				}
+				flag = true;
 			}
-			return true;
+			return flag;
 		}
 
 		public int Count()
 		{
+			int num;
 			if (this.children == null || this.children.Count == 0)
 			{
-				return 0;
+				num = 0;
 			}
-			int num = this.children.Count;
-			for (int i = 0; i < this.children.Count; i++)
+			else
 			{
-				if (this.children[i].type == Node.NodeType.Internal)
+				int num2 = this.children.Count;
+				for (int i = 0; i < this.children.Count; i++)
 				{
-					Tree tree = this.children[i] as Tree;
-					num += tree.Count();
+					if (this.children[i].type == Node.NodeType.Internal)
+					{
+						Tree tree = this.children[i] as Tree;
+						num2 += tree.Count();
+					}
 				}
+				num = num2;
 			}
 			return num;
 		}
@@ -219,24 +244,29 @@ namespace VoronoiTree
 
 		public int MaxDepth(int depth = 0)
 		{
+			int num;
 			if (this.children == null || this.children.Count == 0)
 			{
-				return depth;
+				num = depth;
 			}
-			int num = depth + 1;
-			int num2 = num;
-			for (int i = 0; i < this.children.Count; i++)
+			else
 			{
-				int num3 = num2 + 1;
-				if (this.children[i].type == Node.NodeType.Internal)
+				int num2 = depth + 1;
+				int num3 = num2;
+				for (int i = 0; i < this.children.Count; i++)
 				{
-					Tree tree = this.children[i] as Tree;
-					num3 = tree.MaxDepth(num2);
+					int num4 = num3 + 1;
+					if (this.children[i].type == Node.NodeType.Internal)
+					{
+						Tree tree = this.children[i] as Tree;
+						num4 = tree.MaxDepth(num3);
+					}
+					if (num4 > num2)
+					{
+						num2 = num4;
+					}
 				}
-				if (num3 > num)
-				{
-					num = num3;
-				}
+				num = num2;
 			}
 			return num;
 		}
@@ -246,107 +276,117 @@ namespace VoronoiTree
 			if (this.dontRelaxChildren || this.site.poly == null || this.children == null || this.children.Count == 0)
 			{
 				this.visited = Node.VisitedType.MissingData;
-				return;
 			}
-			List<Diagram.Site> list = new List<Diagram.Site>();
-			for (int i = 0; i < this.children.Count; i++)
+			else
 			{
-				list.Add(this.children[i].site);
-			}
-			float num = float.MaxValue;
-			int num2 = 0;
-			while (num2 < iterations && num > minEnergy)
-			{
-				float num3 = 0f;
-				for (int j = 0; j < this.children.Count; j++)
+				List<Diagram.Site> list = new List<Diagram.Site>();
+				for (int i = 0; i < this.children.Count; i++)
 				{
-					num3 += Vector2.Distance(this.children[j].site.position, list[j].poly.Centroid());
-					this.children[j].site.position = list[j].poly.Centroid();
+					list.Add(this.children[i].site);
 				}
-				num = num3;
-				base.PlaceSites(list, depth);
-				if (pd)
+				float num = float.MaxValue;
+				int num2 = 0;
+				while (num2 < iterations && num > minEnergy)
 				{
-					if (!base.ComputeNodePD(list, 500, 0.2f))
+					float num3 = 0f;
+					for (int j = 0; j < this.children.Count; j++)
+					{
+						num3 += Vector2.Distance(this.children[j].site.position, list[j].poly.Centroid());
+						this.children[j].site.position = list[j].poly.Centroid();
+					}
+					num = num3;
+					base.PlaceSites(list, depth);
+					if (pd)
+					{
+						if (!base.ComputeNodePD(list, 500, 0.2f))
+						{
+							this.visited = Node.VisitedType.Error;
+							return;
+						}
+					}
+					else if (!base.ComputeNode(list))
 					{
 						this.visited = Node.VisitedType.Error;
 						return;
 					}
+					num2++;
 				}
-				else if (!base.ComputeNode(list))
+				for (int k = 0; k < this.children.Count; k++)
 				{
-					this.visited = Node.VisitedType.Error;
-					return;
-				}
-				num2++;
-			}
-			for (int k = 0; k < this.children.Count; k++)
-			{
-				if (this.children[k].type == Node.NodeType.Internal)
-				{
-					Tree tree = this.children[k] as Tree;
-					if (tree.ComputeChildren(depth, false, false))
+					if (this.children[k].type == Node.NodeType.Internal)
 					{
-						tree.RelaxRecursive(depth + 1, iterations, minEnergy, false);
+						Tree tree = this.children[k] as Tree;
+						if (tree.ComputeChildren(depth, false, false))
+						{
+							tree.RelaxRecursive(depth + 1, iterations, minEnergy, false);
+						}
 					}
 				}
+				this.visited = Node.VisitedType.VisitedSuccess;
 			}
-			this.visited = Node.VisitedType.VisitedSuccess;
 		}
 
 		public float Relax(int depth, int relaxDepth, bool pd = false)
 		{
+			float num;
 			if (this.dontRelaxChildren || depth > Node.maxDepth || depth > relaxDepth || this.site.poly == null || this.children == null || this.children.Count == 0)
 			{
-				return 0f;
+				num = 0f;
 			}
-			float num = 0f;
-			if (depth < relaxDepth)
+			else
 			{
-				for (int i = 0; i < this.children.Count; i++)
+				float num2 = 0f;
+				if (depth < relaxDepth)
 				{
-					if (this.children[i].type == Node.NodeType.Internal)
+					for (int i = 0; i < this.children.Count; i++)
 					{
-						Tree tree = this.children[i] as Tree;
-						num += tree.Relax(depth + 1, relaxDepth, false);
+						if (this.children[i].type == Node.NodeType.Internal)
+						{
+							Tree tree = this.children[i] as Tree;
+							num2 += tree.Relax(depth + 1, relaxDepth, false);
+						}
 					}
-				}
-				return num;
-			}
-			if (depth == relaxDepth)
-			{
-				List<Diagram.Site> list = new List<Diagram.Site>();
-				for (int j = 0; j < this.children.Count; j++)
-				{
-					list.Add(this.children[j].site);
-				}
-				if (pd)
-				{
-					if (!base.ComputeNodePD(list, 500, 0.2f))
-					{
-						return 0f;
-					}
+					num = num2;
 				}
 				else
 				{
-					base.PlaceSites(list, depth);
-					if (!base.ComputeNode(list))
+					if (depth == relaxDepth)
 					{
-						return 0f;
-					}
-				}
-				for (int k = 0; k < this.children.Count; k++)
-				{
-					num += Vector2.Distance(this.children[k].site.position, list[k].poly.Centroid());
-					this.children[k].site.position = list[k].poly.Centroid();
-					if (this.children[k].type == Node.NodeType.Internal)
-					{
-						Tree tree2 = this.children[k] as Tree;
-						if (!tree2.ComputeChildren(depth, false, false))
+						List<Diagram.Site> list = new List<Diagram.Site>();
+						for (int j = 0; j < this.children.Count; j++)
 						{
-							return 0f;
+							list.Add(this.children[j].site);
+						}
+						if (pd)
+						{
+							if (!base.ComputeNodePD(list, 500, 0.2f))
+							{
+								return 0f;
+							}
+						}
+						else
+						{
+							base.PlaceSites(list, depth);
+							if (!base.ComputeNode(list))
+							{
+								return 0f;
+							}
+						}
+						for (int k = 0; k < this.children.Count; k++)
+						{
+							num2 += Vector2.Distance(this.children[k].site.position, list[k].poly.Centroid());
+							this.children[k].site.position = list[k].poly.Centroid();
+							if (this.children[k].type == Node.NodeType.Internal)
+							{
+								Tree tree2 = this.children[k] as Tree;
+								if (!tree2.ComputeChildren(depth, false, false))
+								{
+									return 0f;
+								}
+							}
 						}
 					}
+					num = num2;
 				}
 			}
 			return num;
@@ -354,97 +394,111 @@ namespace VoronoiTree
 
 		public Node GetNodeForPoint(Vector2 point, bool stopAtFirstChild = false)
 		{
+			Node node;
 			if (this.site.poly == null)
 			{
-				return null;
+				node = null;
 			}
-			if (this.children == null || this.children.Count == 0)
+			else if (this.children == null || this.children.Count == 0)
 			{
-				return this;
+				node = this;
 			}
-			int i = 0;
-			while (i < this.children.Count)
+			else
 			{
-				if (this.children[i].site.poly.Contains(point))
+				int i = 0;
+				while (i < this.children.Count)
 				{
-					if (this.children[i].type != Node.NodeType.Internal)
+					if (this.children[i].site.poly.Contains(point))
 					{
-						return this.children[i];
+						if (this.children[i].type != Node.NodeType.Internal)
+						{
+							return this.children[i];
+						}
+						Tree tree = this.children[i] as Tree;
+						if (stopAtFirstChild)
+						{
+							return this.children[i];
+						}
+						return tree.GetNodeForPoint(point, false);
 					}
-					Tree tree = this.children[i] as Tree;
-					if (stopAtFirstChild)
+					else
 					{
-						return this.children[i];
+						i++;
 					}
-					return tree.GetNodeForPoint(point, false);
+				}
+				if (this.site.poly.Contains(point))
+				{
+					node = this;
 				}
 				else
 				{
-					i++;
+					node = null;
 				}
 			}
-			if (this.site.poly.Contains(point))
-			{
-				return this;
-			}
-			return null;
+			return node;
 		}
 
 		public Node GetNodeForSite(Diagram.Site target)
 		{
+			Node node;
 			if (this.site == target)
 			{
-				return this;
+				node = this;
 			}
-			if (this.site.poly == null || this.children == null || this.children.Count == 0)
+			else if (this.site.poly == null || this.children == null || this.children.Count == 0)
 			{
-				return null;
+				node = null;
 			}
-			int i = 0;
-			while (i < this.children.Count)
+			else
 			{
-				if (this.children[i].site == target)
+				int i = 0;
+				while (i < this.children.Count)
 				{
-					return this.children[i];
-				}
-				if (this.children[i].site.poly.Contains(target.position))
-				{
-					if (this.children[i].type == Node.NodeType.Internal)
+					if (this.children[i].site == target)
 					{
-						Tree tree = this.children[i] as Tree;
-						return tree.GetNodeForSite(target);
+						return this.children[i];
 					}
-					return this.children[i];
+					if (this.children[i].site.poly.Contains(target.position))
+					{
+						if (this.children[i].type == Node.NodeType.Internal)
+						{
+							Tree tree = this.children[i] as Tree;
+							return tree.GetNodeForSite(target);
+						}
+						return this.children[i];
+					}
+					else
+					{
+						i++;
+					}
 				}
-				else
-				{
-					i++;
-				}
+				node = null;
 			}
-			return null;
+			return node;
 		}
 
 		public void GetIntersectingLeafSites(LineSegment edge, List<Diagram.Site> intersectingSites)
 		{
 			LineSegment lineSegment = new LineSegment(null, null);
-			if (!(this.site.poly.Contains(edge.p0.Value) | this.site.poly.Contains(edge.p1.Value)) && !this.site.poly.ClipSegment(edge, ref lineSegment))
+			if ((this.site.poly.Contains(edge.p0.Value) | this.site.poly.Contains(edge.p1.Value)) || this.site.poly.ClipSegment(edge, ref lineSegment))
 			{
-				return;
-			}
-			if (this.children.Count == 0)
-			{
-				intersectingSites.Add(this.site);
-				return;
-			}
-			for (int i = 0; i < this.children.Count; i++)
-			{
-				if (this.children[i].type == Node.NodeType.Internal)
+				if (this.children.Count == 0)
 				{
-					((Tree)this.children[i]).GetIntersectingLeafSites(edge, intersectingSites);
+					intersectingSites.Add(this.site);
 				}
 				else
 				{
-					((Leaf)this.children[i]).GetIntersectingSites(edge, intersectingSites);
+					for (int i = 0; i < this.children.Count; i++)
+					{
+						if (this.children[i].type == Node.NodeType.Internal)
+						{
+							((Tree)this.children[i]).GetIntersectingLeafSites(edge, intersectingSites);
+						}
+						else
+						{
+							((Leaf)this.children[i]).GetIntersectingSites(edge, intersectingSites);
+						}
+					}
 				}
 			}
 		}
@@ -640,24 +694,26 @@ namespace VoronoiTree
 			if (this.children.Count == 0 && this.tags.Contains(tag))
 			{
 				nodes.Add(this);
-				return;
 			}
-			for (int i = 0; i < this.children.Count; i++)
+			else
 			{
-				if (this.children[i].type == Node.NodeType.Internal)
+				for (int i = 0; i < this.children.Count; i++)
 				{
-					((Tree)this.children[i]).GetNodesWithTag(tag, nodes);
-				}
-				else if (this.children[i].tags.Contains(tag))
-				{
-					nodes.Add(this.children[i]);
+					if (this.children[i].type == Node.NodeType.Internal)
+					{
+						((Tree)this.children[i]).GetNodesWithTag(tag, nodes);
+					}
+					else if (this.children[i].tags.Contains(tag))
+					{
+						nodes.Add(this.children[i]);
+					}
 				}
 			}
 		}
 
-		protected List<Node> children;
+		protected List<Node> children = null;
 
-		public bool dontRelaxChildren;
+		public bool dontRelaxChildren = false;
 
 		public delegate bool LeafNodeTest(Node node);
 	}

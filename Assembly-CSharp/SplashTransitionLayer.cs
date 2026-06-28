@@ -43,7 +43,7 @@ public class SplashTransitionLayer : TransitionDriver.OverrideLayer
 		this.RefreshSplashes(navigator);
 	}
 
-	private const float SPLASH_INTERVAL = 1f;
-
 	private float lastSplashTime;
+
+	private const float SPLASH_INTERVAL = 1f;
 }

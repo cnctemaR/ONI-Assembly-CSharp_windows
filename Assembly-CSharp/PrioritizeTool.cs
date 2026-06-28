@@ -14,9 +14,9 @@ public class PrioritizeTool : DragTool
 
 	protected override void OnDragTool(int cell, int distFromOrigin)
 	{
-		int screenPriority = ToolMenuPriorityScreen.Instance.GetScreenPriority();
+		PrioritySetting screenPriority = ToolMenuPriorityScreen.Instance.GetScreenPriority();
 		int num = 0;
-		for (int i = 0; i < 25; i++)
+		for (int i = 0; i < 28; i++)
 		{
 			GameObject gameObject = Grid.Objects[cell, i];
 			if (gameObject != null)
@@ -52,8 +52,10 @@ public class PrioritizeTool : DragTool
 	public override void Update()
 	{
 		base.Update();
-		int num = ToolMenuPriorityScreen.Instance.GetScreenPriority() - 1;
-		Texture2D texture2D = this.cursors[num];
+		PrioritySetting screenPriority = ToolMenuPriorityScreen.Instance.GetScreenPriority();
+		int num = 0;
+		num += screenPriority.priority_value;
+		Texture2D texture2D = this.cursors[num - 1];
 		MeshRenderer componentInChildren = this.visualizer.GetComponentInChildren<MeshRenderer>();
 		if (componentInChildren != null)
 		{

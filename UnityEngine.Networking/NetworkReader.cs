@@ -40,6 +40,14 @@ namespace UnityEngine.Networking
 			}
 		}
 
+		public int Length
+		{
+			get
+			{
+				return this.m_buf.Length;
+			}
+		}
+
 		public void SeekZero()
 		{
 			this.m_buf.SeekZero();
@@ -53,81 +61,121 @@ namespace UnityEngine.Networking
 		public uint ReadPackedUInt32()
 		{
 			byte b = this.ReadByte();
+			uint num;
 			if (b < 241)
 			{
-				return (uint)b;
+				num = (uint)b;
 			}
-			byte b2 = this.ReadByte();
-			if (b >= 241 && b <= 248)
+			else
 			{
-				return 240U + 256U * (uint)(b - 241) + (uint)b2;
+				byte b2 = this.ReadByte();
+				if (b >= 241 && b <= 248)
+				{
+					num = 240U + 256U * (uint)(b - 241) + (uint)b2;
+				}
+				else
+				{
+					byte b3 = this.ReadByte();
+					if (b == 249)
+					{
+						num = 2288U + 256U * (uint)b2 + (uint)b3;
+					}
+					else
+					{
+						byte b4 = this.ReadByte();
+						if (b == 250)
+						{
+							num = (uint)((int)b2 + ((int)b3 << 8) + ((int)b4 << 16));
+						}
+						else
+						{
+							byte b5 = this.ReadByte();
+							if (b < 251)
+							{
+								throw new IndexOutOfRangeException("ReadPackedUInt32() failure: " + b);
+							}
+							num = (uint)((int)b2 + ((int)b3 << 8) + ((int)b4 << 16) + ((int)b5 << 24));
+						}
+					}
+				}
 			}
-			byte b3 = this.ReadByte();
-			if (b == 249)
-			{
-				return 2288U + 256U * (uint)b2 + (uint)b3;
-			}
-			byte b4 = this.ReadByte();
-			if (b == 250)
-			{
-				return (uint)((int)b2 + ((int)b3 << 8) + ((int)b4 << 16));
-			}
-			byte b5 = this.ReadByte();
-			if (b >= 251)
-			{
-				return (uint)((int)b2 + ((int)b3 << 8) + ((int)b4 << 16) + ((int)b5 << 24));
-			}
-			throw new IndexOutOfRangeException("ReadPackedUInt32() failure: " + b);
+			return num;
 		}
 
 		public ulong ReadPackedUInt64()
 		{
 			byte b = this.ReadByte();
+			ulong num;
 			if (b < 241)
 			{
-				return (ulong)b;
+				num = (ulong)b;
 			}
-			byte b2 = this.ReadByte();
-			if (b >= 241 && b <= 248)
+			else
 			{
-				return 240UL + 256UL * ((ulong)b - 241UL) + (ulong)b2;
+				byte b2 = this.ReadByte();
+				if (b >= 241 && b <= 248)
+				{
+					num = 240UL + 256UL * ((ulong)b - 241UL) + (ulong)b2;
+				}
+				else
+				{
+					byte b3 = this.ReadByte();
+					if (b == 249)
+					{
+						num = 2288UL + 256UL * (ulong)b2 + (ulong)b3;
+					}
+					else
+					{
+						byte b4 = this.ReadByte();
+						if (b == 250)
+						{
+							num = (ulong)b2 + ((ulong)b3 << 8) + ((ulong)b4 << 16);
+						}
+						else
+						{
+							byte b5 = this.ReadByte();
+							if (b == 251)
+							{
+								num = (ulong)b2 + ((ulong)b3 << 8) + ((ulong)b4 << 16) + ((ulong)b5 << 24);
+							}
+							else
+							{
+								byte b6 = this.ReadByte();
+								if (b == 252)
+								{
+									num = (ulong)b2 + ((ulong)b3 << 8) + ((ulong)b4 << 16) + ((ulong)b5 << 24) + ((ulong)b6 << 32);
+								}
+								else
+								{
+									byte b7 = this.ReadByte();
+									if (b == 253)
+									{
+										num = (ulong)b2 + ((ulong)b3 << 8) + ((ulong)b4 << 16) + ((ulong)b5 << 24) + ((ulong)b6 << 32) + ((ulong)b7 << 40);
+									}
+									else
+									{
+										byte b8 = this.ReadByte();
+										if (b == 254)
+										{
+											num = (ulong)b2 + ((ulong)b3 << 8) + ((ulong)b4 << 16) + ((ulong)b5 << 24) + ((ulong)b6 << 32) + ((ulong)b7 << 40) + ((ulong)b8 << 48);
+										}
+										else
+										{
+											byte b9 = this.ReadByte();
+											if (b != 255)
+											{
+												throw new IndexOutOfRangeException("ReadPackedUInt64() failure: " + b);
+											}
+											num = (ulong)b2 + ((ulong)b3 << 8) + ((ulong)b4 << 16) + ((ulong)b5 << 24) + ((ulong)b6 << 32) + ((ulong)b7 << 40) + ((ulong)b8 << 48) + ((ulong)b9 << 56);
+										}
+									}
+								}
+							}
+						}
+					}
+				}
 			}
-			byte b3 = this.ReadByte();
-			if (b == 249)
-			{
-				return 2288UL + 256UL * (ulong)b2 + (ulong)b3;
-			}
-			byte b4 = this.ReadByte();
-			if (b == 250)
-			{
-				return (ulong)b2 + ((ulong)b3 << 8) + ((ulong)b4 << 16);
-			}
-			byte b5 = this.ReadByte();
-			if (b == 251)
-			{
-				return (ulong)b2 + ((ulong)b3 << 8) + ((ulong)b4 << 16) + ((ulong)b5 << 24);
-			}
-			byte b6 = this.ReadByte();
-			if (b == 252)
-			{
-				return (ulong)b2 + ((ulong)b3 << 8) + ((ulong)b4 << 16) + ((ulong)b5 << 24) + ((ulong)b6 << 32);
-			}
-			byte b7 = this.ReadByte();
-			if (b == 253)
-			{
-				return (ulong)b2 + ((ulong)b3 << 8) + ((ulong)b4 << 16) + ((ulong)b5 << 24) + ((ulong)b6 << 32) + ((ulong)b7 << 40);
-			}
-			byte b8 = this.ReadByte();
-			if (b == 254)
-			{
-				return (ulong)b2 + ((ulong)b3 << 8) + ((ulong)b4 << 16) + ((ulong)b5 << 24) + ((ulong)b6 << 32) + ((ulong)b7 << 40) + ((ulong)b8 << 48);
-			}
-			byte b9 = this.ReadByte();
-			if (b == 255)
-			{
-				return (ulong)b2 + ((ulong)b3 << 8) + ((ulong)b4 << 16) + ((ulong)b5 << 24) + ((ulong)b6 << 32) + ((ulong)b7 << 40) + ((ulong)b8 << 48) + ((ulong)b9 << 56);
-			}
-			throw new IndexOutOfRangeException("ReadPackedUInt64() failure: " + b);
+			return num;
 		}
 
 		public NetworkInstanceId ReadNetworkId()
@@ -225,6 +273,17 @@ namespace UnityEngine.Networking
 			return num | num2;
 		}
 
+		public decimal ReadDecimal()
+		{
+			return new decimal(new int[]
+			{
+				this.ReadInt32(),
+				this.ReadInt32(),
+				this.ReadInt32(),
+				this.ReadInt32()
+			});
+		}
+
 		public float ReadSingle()
 		{
 			uint num = this.ReadUInt32();
@@ -240,21 +299,26 @@ namespace UnityEngine.Networking
 		public string ReadString()
 		{
 			ushort num = this.ReadUInt16();
+			string text;
 			if (num == 0)
 			{
-				return string.Empty;
+				text = "";
 			}
-			if (num >= 32768)
+			else
 			{
-				throw new IndexOutOfRangeException("ReadString() too long: " + num);
+				if (num >= 32768)
+				{
+					throw new IndexOutOfRangeException("ReadString() too long: " + num);
+				}
+				while ((int)num > NetworkReader.s_StringReaderBuffer.Length)
+				{
+					NetworkReader.s_StringReaderBuffer = new byte[NetworkReader.s_StringReaderBuffer.Length * 2];
+				}
+				this.m_buf.ReadBytes(NetworkReader.s_StringReaderBuffer, (uint)num);
+				char[] chars = NetworkReader.s_Encoding.GetChars(NetworkReader.s_StringReaderBuffer, 0, (int)num);
+				text = new string(chars);
 			}
-			while ((int)num > NetworkReader.s_StringReaderBuffer.Length)
-			{
-				NetworkReader.s_StringReaderBuffer = new byte[NetworkReader.s_StringReaderBuffer.Length * 2];
-			}
-			this.m_buf.ReadBytes(NetworkReader.s_StringReaderBuffer, (uint)num);
-			char[] chars = NetworkReader.s_Encoding.GetChars(NetworkReader.s_StringReaderBuffer, 0, (int)num);
-			return new string(chars);
+			return text;
 		}
 
 		public char ReadChar()
@@ -282,11 +346,16 @@ namespace UnityEngine.Networking
 		public byte[] ReadBytesAndSize()
 		{
 			ushort num = this.ReadUInt16();
+			byte[] array;
 			if (num == 0)
 			{
-				return null;
+				array = null;
 			}
-			return this.ReadBytes((int)num);
+			else
+			{
+				array = this.ReadBytes((int)num);
+			}
+			return array;
 		}
 
 		public Vector2 ReadVector2()
@@ -382,41 +451,57 @@ namespace UnityEngine.Networking
 		public Transform ReadTransform()
 		{
 			NetworkInstanceId networkInstanceId = this.ReadNetworkId();
+			Transform transform;
 			if (networkInstanceId.IsEmpty())
 			{
-				return null;
+				transform = null;
 			}
-			GameObject gameObject = ClientScene.FindLocalObject(networkInstanceId);
-			if (gameObject == null)
+			else
 			{
-				if (LogFilter.logDebug)
+				GameObject gameObject = ClientScene.FindLocalObject(networkInstanceId);
+				if (gameObject == null)
 				{
-					Debug.Log("ReadTransform netId:" + networkInstanceId);
+					if (LogFilter.logDebug)
+					{
+						Debug.Log("ReadTransform netId:" + networkInstanceId);
+					}
+					transform = null;
 				}
-				return null;
+				else
+				{
+					transform = gameObject.transform;
+				}
 			}
-			return gameObject.transform;
+			return transform;
 		}
 
 		public GameObject ReadGameObject()
 		{
 			NetworkInstanceId networkInstanceId = this.ReadNetworkId();
+			GameObject gameObject;
 			if (networkInstanceId.IsEmpty())
 			{
-				return null;
-			}
-			GameObject gameObject;
-			if (NetworkServer.active)
-			{
-				gameObject = NetworkServer.FindLocalObject(networkInstanceId);
+				gameObject = null;
 			}
 			else
 			{
-				gameObject = ClientScene.FindLocalObject(networkInstanceId);
-			}
-			if (gameObject == null && LogFilter.logDebug)
-			{
-				Debug.Log("ReadGameObject netId:" + networkInstanceId + "go: null");
+				GameObject gameObject2;
+				if (NetworkServer.active)
+				{
+					gameObject2 = NetworkServer.FindLocalObject(networkInstanceId);
+				}
+				else
+				{
+					gameObject2 = ClientScene.FindLocalObject(networkInstanceId);
+				}
+				if (gameObject2 == null)
+				{
+					if (LogFilter.logDebug)
+					{
+						Debug.Log("ReadGameObject netId:" + networkInstanceId + "go: null");
+					}
+				}
+				gameObject = gameObject2;
 			}
 			return gameObject;
 		}
@@ -424,28 +509,36 @@ namespace UnityEngine.Networking
 		public NetworkIdentity ReadNetworkIdentity()
 		{
 			NetworkInstanceId networkInstanceId = this.ReadNetworkId();
+			NetworkIdentity networkIdentity;
 			if (networkInstanceId.IsEmpty())
 			{
-				return null;
-			}
-			GameObject gameObject;
-			if (NetworkServer.active)
-			{
-				gameObject = NetworkServer.FindLocalObject(networkInstanceId);
+				networkIdentity = null;
 			}
 			else
 			{
-				gameObject = ClientScene.FindLocalObject(networkInstanceId);
-			}
-			if (gameObject == null)
-			{
-				if (LogFilter.logDebug)
+				GameObject gameObject;
+				if (NetworkServer.active)
 				{
-					Debug.Log("ReadNetworkIdentity netId:" + networkInstanceId + "go: null");
+					gameObject = NetworkServer.FindLocalObject(networkInstanceId);
 				}
-				return null;
+				else
+				{
+					gameObject = ClientScene.FindLocalObject(networkInstanceId);
+				}
+				if (gameObject == null)
+				{
+					if (LogFilter.logDebug)
+					{
+						Debug.Log("ReadNetworkIdentity netId:" + networkInstanceId + "go: null");
+					}
+					networkIdentity = null;
+				}
+				else
+				{
+					networkIdentity = gameObject.GetComponent<NetworkIdentity>();
+				}
 			}
-			return gameObject.GetComponent<NetworkIdentity>();
+			return networkIdentity;
 		}
 
 		public override string ToString()
@@ -460,11 +553,11 @@ namespace UnityEngine.Networking
 			return tmsg;
 		}
 
+		private NetBuffer m_buf;
+
 		private const int k_MaxStringLength = 32768;
 
 		private const int k_InitialStringBufferSize = 1024;
-
-		private NetBuffer m_buf;
 
 		private static byte[] s_StringReaderBuffer;
 

@@ -23,8 +23,8 @@ public class FactionAlignment : KMonoBehaviour
 		this.health = base.GetComponent<Health>();
 		this.attackable = base.GetComponent<AttackableBase>();
 		Components.FactionAlignments.Add(this);
-		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
-		this.Subscribe(2127324410, delegate(object d)
+		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(2127324410, delegate(object d)
 		{
 			this.SetPlayerTargeted(false);
 		});
@@ -32,7 +32,7 @@ public class FactionAlignment : KMonoBehaviour
 		{
 			FactionManager.Instance.GetFaction(this.Alignment).Members.Add(this);
 		}
-		this.Subscribe(1623392196, new Action<object>(this.OnDeath));
+		base.Subscribe(1623392196, new Action<object>(this.OnDeath));
 	}
 
 	private void OnDeath(object data)
@@ -92,32 +92,30 @@ public class FactionAlignment : KMonoBehaviour
 
 	private void OnRefreshUserMenu(object data)
 	{
-		if (this.Alignment == FactionManager.FactionID.Duplicant)
+		if (this.Alignment != FactionManager.FactionID.Duplicant)
 		{
-			return;
-		}
-		if (!this.CheckAlignmentActive)
-		{
-			return;
-		}
-		KIconButtonMenu.ButtonInfo buttonInfo;
-		if (!this.targeted)
-		{
-			buttonInfo = new KIconButtonMenu.ButtonInfo("action_attack", UI.USERMENUACTIONS.ATTACK.NAME, delegate
+			if (this.CheckAlignmentActive)
 			{
-				this.SetPlayerTargeted(true);
-			}, global::Action.NumActions, null, null, null, string.Empty, true);
-		}
-		else
-		{
-			buttonInfo = new KIconButtonMenu.ButtonInfo("action_attack", UI.USERMENUACTIONS.CANCELATTACK.NAME, delegate
-			{
-				this.SetPlayerTargeted(false);
-			}, global::Action.NumActions, null, null, null, string.Empty, true);
-		}
-		if (buttonInfo != null)
-		{
-			this.userMenu.AddButton(buttonInfo, 1f);
+				KIconButtonMenu.ButtonInfo buttonInfo;
+				if (!this.targeted)
+				{
+					buttonInfo = new KIconButtonMenu.ButtonInfo("action_attack", UI.USERMENUACTIONS.ATTACK.NAME, delegate
+					{
+						this.SetPlayerTargeted(true);
+					}, global::Action.NumActions, null, null, null, "", true);
+				}
+				else
+				{
+					buttonInfo = new KIconButtonMenu.ButtonInfo("action_attack", UI.USERMENUACTIONS.CANCELATTACK.NAME, delegate
+					{
+						this.SetPlayerTargeted(false);
+					}, global::Action.NumActions, null, null, null, "", true);
+				}
+				if (buttonInfo != null)
+				{
+					this.userMenu.AddButton(buttonInfo, 1f);
+				}
+			}
 		}
 	}
 
@@ -130,7 +128,7 @@ public class FactionAlignment : KMonoBehaviour
 	public FactionManager.FactionID Alignment;
 
 	[Serialize]
-	public bool targeted;
+	public bool targeted = false;
 
 	[Serialize]
 	public bool targetable = true;

@@ -40,8 +40,6 @@ namespace STRINGS
 
 			public static LocString CAMERAHOME = "CameraHome";
 
-			public static LocString PANCAMERA = "PanCamera";
-
 			public static LocString PLAN1 = "Plan1";
 
 			public static LocString PLAN2 = "Plan2";
@@ -94,6 +92,8 @@ namespace STRINGS
 
 			public static LocString OVERLAY12 = "Overlay12";
 
+			public static LocString OVERLAY13 = "Overlay13";
+
 			public static LocString SPEEDUP = "SpeedUp";
 
 			public static LocString SLOWDOWN = "SlowDown";
@@ -125,6 +125,89 @@ namespace STRINGS
 			public static LocString MANAGERESEARCH = "ManageResearch";
 
 			public static LocString MANAGEREPORT = "ManageReport";
+
+			public static LocString MANAGECODEX = "ManageCodex";
+
+			public static LocString MANAGEROLES = "ManageRoles";
+		}
+
+		public class BASEMENU
+		{
+			public static LocString NAME = "BaseMenu";
+
+			public static LocString BUILDCATEGORYLADDERS = "BuildCategoryLadders";
+
+			public static LocString BUILDCATEGORYTILES = "BuildCategoryTiles";
+
+			public static LocString BUILDCATEGORYDOORS = "BuildCategoryDoors";
+
+			public static LocString BUILDCATEGORYSTORAGE = "BuildCategoryStorage";
+
+			public static LocString BUILDCATEGORYRESEARCH = "BuildCategoryResearch";
+		}
+
+		public class INFRASTRUCTUREMENU
+		{
+			public static LocString NAME = "InfrastructureMenu";
+
+			public static LocString BUILDCATEGORYGENERATORS = "BuildCategoryGenerators";
+
+			public static LocString BUILDCATEGORYWIRES = "BuildCategoryWires";
+
+			public static LocString BUILDCATEGORYPOWERCONTROL = "BuildCategoryPowerControl";
+
+			public static LocString BUILDCATEGORYPLUMBINGSTRUCTURES = "BuildCategoryPlumbingStructures";
+
+			public static LocString BUILDCATEGORYPIPES = "BuildCategoryPipes";
+
+			public static LocString BUILDCATEGORYVENTILATIONSTRUCTURES = "BuildCategoryVentilationStructures";
+
+			public static LocString BUILDCATEGORYTUBES = "BuildCategoryTubes";
+
+			public static LocString BUILDCATEGORYLOGICWIRING = "BuildCategoryLogicWiring";
+
+			public static LocString BUILDCATEGORYLOGICGATES = "BuildCategoryLogicGates";
+
+			public static LocString BUILDCATEGORYLOGICSWITCHES = "BuildCategoryLogicSwitches";
+		}
+
+		public class FOODAGRICULTUREMENU
+		{
+			public static LocString NAME = "FoodAgricultureMenu";
+
+			public static LocString BUILDCATEGORYCOOKING = "BuildCategoryCooking";
+
+			public static LocString BUILDCATEGORYFARMING = "BuildCategoryFarming";
+
+			public static LocString BUILDCATEGORYRANCHING = "BuildCategoryRanching";
+		}
+
+		public class HEALTHHAPPINESSMENU
+		{
+			public static LocString NAME = "HealthHappinessMenu";
+
+			public static LocString BUILDCATEGORYHYGIENE = "BuildCategoryHygiene";
+
+			public static LocString BUILDCATEGORYMEDICAL = "BuildCategoryMedical";
+
+			public static LocString BUILDCATEGORYRECREATION = "BuildCategoryRecreation";
+
+			public static LocString BUILDCATEGORYFURNITURE = "BuildCategoryFurniture";
+
+			public static LocString BUILDCATEGORYDECOR = "BuildCategoryDecor";
+		}
+
+		public class INDUSTRIALMENU
+		{
+			public static LocString NAME = "IndustrialMenu";
+
+			public static LocString BUILDCATEGORYOXYGEN = "BuildCategoryOxygen";
+
+			public static LocString BUILDCATEGORYUTILITIES = "BuildCategoryUtilities";
+
+			public static LocString BUILDCATEGORYREFINING = "BuildCategoryRefining";
+
+			public static LocString BUILDCATEGORYEQUIPMENT = "BuildCategoryEquipment";
 		}
 
 		public class BUILDING
@@ -159,8 +242,6 @@ namespace STRINGS
 			public static LocString DEBUGFORCELIGHTEVERYWHERE = "DebugForceLightEverywhere";
 
 			public static LocString DEBUGVISUALTEST = "DebugVisualTest";
-
-			public static LocString DEBUGGAMEPLAYTEST = "DebugGameplayTest";
 
 			public static LocString DEBUGELEMENTTEST = "DebugElementTest";
 
@@ -225,6 +306,8 @@ namespace STRINGS
 			public static LocString DEBUGDUMPGARBAGEREFERENCES = "DebugDumpGarbageReferences";
 
 			public static LocString DEBUGDUMPEVENTDATA = "DebugDumpEventData";
+
+			public static LocString DEBUGCRASHSIM = "DebugCrashSim";
 
 			public static LocString SREENSHOT1X = "SreenShot1x";
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
@@ -49,20 +50,22 @@ public class HoverTextConfiguration : KMonoBehaviour
 		if (instance.LoadPreConfiguredToolFields(this))
 		{
 			this.isConfigured = true;
-			return;
 		}
-		instance.ToggleIncubating(true);
-		instance.currentConfiguration = this;
-		instance.ClearLabels();
-		instance.NewLine("Spacer", 24);
-		instance.StartShadowBar(0f, 0f, false);
-		if (this.printTitle)
+		else
 		{
-			this.ConfigureTitle(instance);
+			instance.ToggleIncubating(true);
+			instance.currentConfiguration = this;
+			instance.ClearLabels();
+			instance.NewLine("Spacer", 24);
+			instance.StartShadowBar(0f, 0f, false);
+			if (this.printTitle)
+			{
+				this.ConfigureTitle(instance);
+			}
+			this.ConfigureInstructions(instance);
+			instance.EndShadowBar();
+			this.isConfigured = true;
 		}
-		this.ConfigureInstructions(instance);
-		instance.EndShadowBar();
-		this.isConfigured = true;
 	}
 
 	protected override void OnCmpDisable()
@@ -70,7 +73,7 @@ public class HoverTextConfiguration : KMonoBehaviour
 		base.OnCmpDisable();
 	}
 
-	public virtual void UpdateHoverElements(KSelectable[] hoverObjects)
+	public virtual void UpdateHoverElements(List<KSelectable> hover_objects)
 	{
 		if (!this.isConfigured)
 		{
@@ -82,15 +85,15 @@ public class HoverTextConfiguration : KMonoBehaviour
 
 	public TextStyleSetting[] HoverTextStyleSettings;
 
-	public string ToolNameStringKey = string.Empty;
+	public string ToolNameStringKey = "";
 
-	public string ActionStringKey = string.Empty;
-
-	[HideInInspector]
-	public string ActionName = string.Empty;
+	public string ActionStringKey = "";
 
 	[HideInInspector]
-	public string ToolName;
+	public string ActionName = "";
+
+	[HideInInspector]
+	public string ToolName = null;
 
 	protected GameObject TitleLine;
 

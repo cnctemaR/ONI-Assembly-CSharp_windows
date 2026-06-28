@@ -2,7 +2,7 @@
 
 namespace UnityEngine.Networking.Match
 {
-	public class BasicResponse : Response
+	internal class BasicResponse : Response
 	{
 	}
 }

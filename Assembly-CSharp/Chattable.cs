@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 public class Chattable : KMonoBehaviour, IApproachable
 {
@@ -20,5 +21,10 @@ public class Chattable : KMonoBehaviour, IApproachable
 	public bool ShouldPreferUnreservedCell()
 	{
 		return false;
+	}
+
+	Transform IApproachable.get_transform()
+	{
+		return base.transform;
 	}
 }

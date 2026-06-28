@@ -22,25 +22,6 @@ namespace ClipperLib
 			this.Y = pt.Y;
 		}
 
-		public override bool Equals(object obj)
-		{
-			if (obj == null)
-			{
-				return false;
-			}
-			if (obj is IntPoint)
-			{
-				IntPoint intPoint = (IntPoint)obj;
-				return this.X == intPoint.X && this.Y == intPoint.Y;
-			}
-			return false;
-		}
-
-		public override int GetHashCode()
-		{
-			return base.GetHashCode();
-		}
-
 		public static bool operator ==(IntPoint a, IntPoint b)
 		{
 			return a.X == b.X && a.Y == b.Y;
@@ -49,6 +30,30 @@ namespace ClipperLib
 		public static bool operator !=(IntPoint a, IntPoint b)
 		{
 			return a.X != b.X || a.Y != b.Y;
+		}
+
+		public override bool Equals(object obj)
+		{
+			bool flag;
+			if (obj == null)
+			{
+				flag = false;
+			}
+			else if (obj is IntPoint)
+			{
+				IntPoint intPoint = (IntPoint)obj;
+				flag = this.X == intPoint.X && this.Y == intPoint.Y;
+			}
+			else
+			{
+				flag = false;
+			}
+			return flag;
+		}
+
+		public override int GetHashCode()
+		{
+			return base.GetHashCode();
 		}
 
 		public long X;

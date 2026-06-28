@@ -22,17 +22,7 @@ namespace UnityEngine
 			this.z = 0f;
 		}
 
-		public static Vector3 Lerp(Vector3 a, Vector3 b, float t)
-		{
-			t = Mathf.Clamp01(t);
-			return new Vector3(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t);
-		}
-
-		public static Vector3 LerpUnclamped(Vector3 a, Vector3 b, float t)
-		{
-			return new Vector3(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t);
-		}
-
+		[ThreadAndSerializationSafe]
 		public static Vector3 Slerp(Vector3 a, Vector3 b, float t)
 		{
 			Vector3 vector;
@@ -40,7 +30,7 @@ namespace UnityEngine
 			return vector;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_Slerp(ref Vector3 a, ref Vector3 b, float t, out Vector3 value);
 
@@ -51,7 +41,7 @@ namespace UnityEngine
 			return vector;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_SlerpUnclamped(ref Vector3 a, ref Vector3 b, float t, out Vector3 value);
 
@@ -60,7 +50,7 @@ namespace UnityEngine
 			Vector3.INTERNAL_CALL_Internal_OrthoNormalize2(ref a, ref b);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_Internal_OrthoNormalize2(ref Vector3 a, ref Vector3 b);
 
@@ -69,7 +59,7 @@ namespace UnityEngine
 			Vector3.INTERNAL_CALL_Internal_OrthoNormalize3(ref a, ref b, ref c);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_Internal_OrthoNormalize3(ref Vector3 a, ref Vector3 b, ref Vector3 c);
 
@@ -83,17 +73,6 @@ namespace UnityEngine
 			Vector3.Internal_OrthoNormalize3(ref normal, ref tangent, ref binormal);
 		}
 
-		public static Vector3 MoveTowards(Vector3 current, Vector3 target, float maxDistanceDelta)
-		{
-			Vector3 vector = target - current;
-			float magnitude = vector.magnitude;
-			if (magnitude <= maxDistanceDelta || magnitude == 0f)
-			{
-				return target;
-			}
-			return current + vector / magnitude * maxDistanceDelta;
-		}
-
 		public static Vector3 RotateTowards(Vector3 current, Vector3 target, float maxRadiansDelta, float maxMagnitudeDelta)
 		{
 			Vector3 vector;
@@ -101,9 +80,42 @@ namespace UnityEngine
 			return vector;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_RotateTowards(ref Vector3 current, ref Vector3 target, float maxRadiansDelta, float maxMagnitudeDelta, out Vector3 value);
+
+		[Obsolete("Use Vector3.ProjectOnPlane instead.")]
+		public static Vector3 Exclude(Vector3 excludeThis, Vector3 fromThat)
+		{
+			return fromThat - Vector3.Project(fromThat, excludeThis);
+		}
+
+		public static Vector3 Lerp(Vector3 a, Vector3 b, float t)
+		{
+			t = Mathf.Clamp01(t);
+			return new Vector3(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t);
+		}
+
+		public static Vector3 LerpUnclamped(Vector3 a, Vector3 b, float t)
+		{
+			return new Vector3(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t);
+		}
+
+		public static Vector3 MoveTowards(Vector3 current, Vector3 target, float maxDistanceDelta)
+		{
+			Vector3 vector = target - current;
+			float magnitude = vector.magnitude;
+			Vector3 vector2;
+			if (magnitude <= maxDistanceDelta || magnitude == 0f)
+			{
+				vector2 = target;
+			}
+			else
+			{
+				vector2 = current + vector / magnitude * maxDistanceDelta;
+			}
+			return vector2;
+		}
 
 		[ExcludeFromDocs]
 		public static Vector3 SmoothDamp(Vector3 current, Vector3 target, ref Vector3 currentVelocity, float smoothTime, float maxSpeed)
@@ -146,17 +158,22 @@ namespace UnityEngine
 		{
 			get
 			{
+				float num;
 				switch (index)
 				{
 				case 0:
-					return this.x;
+					num = this.x;
+					break;
 				case 1:
-					return this.y;
+					num = this.y;
+					break;
 				case 2:
-					return this.z;
+					num = this.z;
+					break;
 				default:
 					throw new IndexOutOfRangeException("Invalid Vector3 index!");
 				}
+				return num;
 			}
 			set
 			{
@@ -208,12 +225,17 @@ namespace UnityEngine
 
 		public override bool Equals(object other)
 		{
+			bool flag;
 			if (!(other is Vector3))
 			{
-				return false;
+				flag = false;
 			}
-			Vector3 vector = (Vector3)other;
-			return this.x.Equals(vector.x) && this.y.Equals(vector.y) && this.z.Equals(vector.z);
+			else
+			{
+				Vector3 vector = (Vector3)other;
+				flag = this.x.Equals(vector.x) && this.y.Equals(vector.y) && this.z.Equals(vector.z);
+			}
+			return flag;
 		}
 
 		public static Vector3 Reflect(Vector3 inDirection, Vector3 inNormal)
@@ -224,11 +246,16 @@ namespace UnityEngine
 		public static Vector3 Normalize(Vector3 value)
 		{
 			float num = Vector3.Magnitude(value);
+			Vector3 vector;
 			if (num > 1E-05f)
 			{
-				return value / num;
+				vector = value / num;
 			}
-			return Vector3.zero;
+			else
+			{
+				vector = Vector3.zero;
+			}
+			return vector;
 		}
 
 		public void Normalize()
@@ -252,21 +279,6 @@ namespace UnityEngine
 			}
 		}
 
-		public override string ToString()
-		{
-			return UnityString.Format("({0:F1}, {1:F1}, {2:F1})", new object[] { this.x, this.y, this.z });
-		}
-
-		public string ToString(string format)
-		{
-			return UnityString.Format("({0}, {1}, {2})", new object[]
-			{
-				this.x.ToString(format),
-				this.y.ToString(format),
-				this.z.ToString(format)
-			});
-		}
-
 		public static float Dot(Vector3 lhs, Vector3 rhs)
 		{
 			return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
@@ -275,22 +287,21 @@ namespace UnityEngine
 		public static Vector3 Project(Vector3 vector, Vector3 onNormal)
 		{
 			float num = Vector3.Dot(onNormal, onNormal);
+			Vector3 vector2;
 			if (num < Mathf.Epsilon)
 			{
-				return Vector3.zero;
+				vector2 = Vector3.zero;
 			}
-			return onNormal * Vector3.Dot(vector, onNormal) / num;
+			else
+			{
+				vector2 = onNormal * Vector3.Dot(vector, onNormal) / num;
+			}
+			return vector2;
 		}
 
 		public static Vector3 ProjectOnPlane(Vector3 vector, Vector3 planeNormal)
 		{
 			return vector - Vector3.Project(vector, planeNormal);
-		}
-
-		[Obsolete("Use Vector3.ProjectOnPlane instead.")]
-		public static Vector3 Exclude(Vector3 excludeThis, Vector3 fromThat)
-		{
-			return fromThat - Vector3.Project(fromThat, excludeThis);
 		}
 
 		public static float Angle(Vector3 from, Vector3 to)
@@ -306,11 +317,16 @@ namespace UnityEngine
 
 		public static Vector3 ClampMagnitude(Vector3 vector, float maxLength)
 		{
+			Vector3 vector2;
 			if (vector.sqrMagnitude > maxLength * maxLength)
 			{
-				return vector.normalized * maxLength;
+				vector2 = vector.normalized * maxLength;
 			}
-			return vector;
+			else
+			{
+				vector2 = vector;
+			}
+			return vector2;
 		}
 
 		public static float Magnitude(Vector3 a)
@@ -413,21 +429,6 @@ namespace UnityEngine
 			}
 		}
 
-		[Obsolete("Use Vector3.forward instead.")]
-		public static Vector3 fwd
-		{
-			get
-			{
-				return new Vector3(0f, 0f, 1f);
-			}
-		}
-
-		[Obsolete("Use Vector3.Angle instead. AngleBetween uses radians instead of degrees and was deprecated for this reason")]
-		public static float AngleBetween(Vector3 from, Vector3 to)
-		{
-			return Mathf.Acos(Mathf.Clamp(Vector3.Dot(from.normalized, to.normalized), -1f, 1f));
-		}
-
 		public static Vector3 operator +(Vector3 a, Vector3 b)
 		{
 			return new Vector3(a.x + b.x, a.y + b.y, a.z + b.z);
@@ -465,7 +466,37 @@ namespace UnityEngine
 
 		public static bool operator !=(Vector3 lhs, Vector3 rhs)
 		{
-			return Vector3.SqrMagnitude(lhs - rhs) >= 9.9999994E-11f;
+			return !(lhs == rhs);
+		}
+
+		public override string ToString()
+		{
+			return UnityString.Format("({0:F1}, {1:F1}, {2:F1})", new object[] { this.x, this.y, this.z });
+		}
+
+		public string ToString(string format)
+		{
+			return UnityString.Format("({0}, {1}, {2})", new object[]
+			{
+				this.x.ToString(format),
+				this.y.ToString(format),
+				this.z.ToString(format)
+			});
+		}
+
+		[Obsolete("Use Vector3.forward instead.")]
+		public static Vector3 fwd
+		{
+			get
+			{
+				return new Vector3(0f, 0f, 1f);
+			}
+		}
+
+		[Obsolete("Use Vector3.Angle instead. AngleBetween uses radians instead of degrees and was deprecated for this reason")]
+		public static float AngleBetween(Vector3 from, Vector3 to)
+		{
+			return Mathf.Acos(Mathf.Clamp(Vector3.Dot(from.normalized, to.normalized), -1f, 1f));
 		}
 
 		public const float kEpsilon = 1E-05f;

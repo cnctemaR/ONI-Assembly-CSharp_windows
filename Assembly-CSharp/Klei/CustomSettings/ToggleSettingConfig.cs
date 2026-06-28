@@ -17,35 +17,45 @@ namespace Klei.CustomSettings
 
 		public override SettingLevel GetLevel(string level_id)
 		{
+			SettingLevel settingLevel;
 			if (this.on_level.id == level_id)
 			{
-				return this.on_level;
+				settingLevel = this.on_level;
 			}
-			if (this.off_level.id == level_id)
+			else if (this.off_level.id == level_id)
 			{
-				return this.off_level;
+				settingLevel = this.off_level;
 			}
-			if (base.default_level_id == this.on_level.id)
-			{
-				Debug.LogWarning(string.Concat(new string[] { "Unable to find level for setting:", base.id, "(", level_id, ") Using default level." }), null);
-				return this.on_level;
-			}
-			if (base.default_level_id == this.off_level.id)
+			else if (base.default_level_id == this.on_level.id)
 			{
 				Debug.LogWarning(string.Concat(new string[] { "Unable to find level for setting:", base.id, "(", level_id, ") Using default level." }), null);
-				return this.off_level;
+				settingLevel = this.on_level;
 			}
-			Debug.LogError("Unable to find setting level for setting:" + base.id + " level: " + level_id, null);
-			return null;
+			else if (base.default_level_id == this.off_level.id)
+			{
+				Debug.LogWarning(string.Concat(new string[] { "Unable to find level for setting:", base.id, "(", level_id, ") Using default level." }), null);
+				settingLevel = this.off_level;
+			}
+			else
+			{
+				Debug.LogError("Unable to find setting level for setting:" + base.id + " level: " + level_id, null);
+				settingLevel = null;
+			}
+			return settingLevel;
 		}
 
 		public string ToggleSettingLevelID(string current_id)
 		{
+			string text;
 			if (this.on_level.id == current_id)
 			{
-				return this.off_level.id;
+				text = this.off_level.id;
 			}
-			return this.on_level.id;
+			else
+			{
+				text = this.on_level.id;
+			}
+			return text;
 		}
 
 		public bool IsOnLevel(string level_id)

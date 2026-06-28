@@ -6,7 +6,7 @@ using UnityEngine.Serialization;
 namespace UnityEngine.EventSystems
 {
 	[AddComponentMenu("Event/Event Trigger")]
-	public class EventTrigger : MonoBehaviour, IEventSystemHandler, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler, IPointerClickHandler, IBeginDragHandler, IInitializePotentialDragHandler, IDragHandler, IEndDragHandler, IDropHandler, IScrollHandler, IUpdateSelectedHandler, ISelectHandler, IDeselectHandler, IMoveHandler, ISubmitHandler, ICancelHandler
+	public class EventTrigger : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler, IPointerClickHandler, IInitializePotentialDragHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler, IScrollHandler, IUpdateSelectedHandler, ISelectHandler, IDeselectHandler, IMoveHandler, ISubmitHandler, ICancelHandler, IEventSystemHandler
 	{
 		protected EventTrigger()
 		{
@@ -128,8 +128,8 @@ namespace UnityEngine.EventSystems
 			this.Execute(EventTriggerType.Cancel, eventData);
 		}
 
-		[SerializeField]
 		[FormerlySerializedAs("delegates")]
+		[SerializeField]
 		private List<EventTrigger.Entry> m_Delegates;
 
 		[Obsolete("Please use triggers instead (UnityUpgradable) -> triggers", true)]

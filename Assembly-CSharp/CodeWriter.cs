@@ -185,7 +185,7 @@ public class CodeWriter
 
 	private void InternalNamedParameter(string name, string value, bool last_parameter)
 	{
-		string text = string.Empty;
+		string text = "";
 		if (!last_parameter)
 		{
 			text = ",";

@@ -43,6 +43,18 @@ namespace UnityEngine.Networking
 			}
 		}
 
+		public NetworkError lastError
+		{
+			get
+			{
+				return this.error;
+			}
+			internal set
+			{
+				this.error = value;
+			}
+		}
+
 		internal Dictionary<short, NetworkConnection.PacketStat> packetStats
 		{
 			get
@@ -59,7 +71,7 @@ namespace UnityEngine.Networking
 			this.connectionId = networkConnectionId;
 			int channelCount = hostTopology.DefaultConfig.ChannelCount;
 			int packetSize = (int)hostTopology.DefaultConfig.PacketSize;
-			if (hostTopology.DefaultConfig.UsePlatformSpecificProtocols && Application.platform != RuntimePlatform.PS4)
+			if (hostTopology.DefaultConfig.UsePlatformSpecificProtocols && Application.platform != RuntimePlatform.PS4 && Application.platform != RuntimePlatform.PSP2)
 			{
 				throw new ArgumentOutOfRangeException("Platform specific protocols are not supported on this platform");
 			}
@@ -72,7 +84,7 @@ namespace UnityEngine.Networking
 				{
 					num = (int)(hostTopology.DefaultConfig.FragmentSize * 128);
 				}
-				this.m_Channels[i] = new ChannelBuffer(this, num, (byte)i, NetworkConnection.IsReliableQoS(channelQOS.QOS));
+				this.m_Channels[i] = new ChannelBuffer(this, num, (byte)i, NetworkConnection.IsReliableQoS(channelQOS.QOS), NetworkConnection.IsSequencedQoS(channelQOS.QOS));
 			}
 		}
 
@@ -112,6 +124,11 @@ namespace UnityEngine.Networking
 			this.m_Disposed = true;
 		}
 
+		private static bool IsSequencedQoS(QosType qos)
+		{
+			return qos == QosType.ReliableSequenced || qos == QosType.UnreliableSequenced;
+		}
+
 		private static bool IsReliableQoS(QosType qos)
 		{
 			return qos == QosType.Reliable || qos == QosType.ReliableFragmented || qos == QosType.ReliableSequenced || qos == QosType.ReliableStateUpdate;
@@ -124,16 +141,15 @@ namespace UnityEngine.Networking
 
 		public void Disconnect()
 		{
-			this.address = string.Empty;
+			this.address = "";
 			this.isReady = false;
 			ClientScene.HandleClientDisconnect(this);
-			if (this.hostId == -1)
+			if (this.hostId != -1)
 			{
-				return;
+				byte b;
+				NetworkTransport.Disconnect(this.hostId, this.connectionId, out b);
+				this.RemoveObservers();
 			}
-			byte b;
-			NetworkTransport.Disconnect(this.hostId, this.connectionId, out b);
-			this.RemoveObservers();
 		}
 
 		internal void SetHandlers(NetworkMessageHandlers handlers)
@@ -154,36 +170,64 @@ namespace UnityEngine.Networking
 
 		public bool InvokeHandler(short msgType, NetworkReader reader, int channelId)
 		{
-			if (!this.m_MessageHandlersDict.ContainsKey(msgType))
+			bool flag;
+			if (this.m_MessageHandlersDict.ContainsKey(msgType))
 			{
-				return false;
-			}
-			this.m_MessageInfo.msgType = msgType;
-			this.m_MessageInfo.conn = this;
-			this.m_MessageInfo.reader = reader;
-			this.m_MessageInfo.channelId = channelId;
-			NetworkMessageDelegate networkMessageDelegate = this.m_MessageHandlersDict[msgType];
-			if (networkMessageDelegate == null)
-			{
-				if (LogFilter.logError)
+				this.m_MessageInfo.msgType = msgType;
+				this.m_MessageInfo.conn = this;
+				this.m_MessageInfo.reader = reader;
+				this.m_MessageInfo.channelId = channelId;
+				NetworkMessageDelegate networkMessageDelegate = this.m_MessageHandlersDict[msgType];
+				if (networkMessageDelegate == null)
 				{
-					Debug.LogError("NetworkConnection InvokeHandler no handler for " + msgType);
+					if (LogFilter.logError)
+					{
+						Debug.LogError("NetworkConnection InvokeHandler no handler for " + msgType);
+					}
+					flag = false;
 				}
-				return false;
+				else
+				{
+					networkMessageDelegate(this.m_MessageInfo);
+					flag = true;
+				}
 			}
-			networkMessageDelegate(this.m_MessageInfo);
-			return true;
+			else
+			{
+				flag = false;
+			}
+			return flag;
 		}
 
 		public bool InvokeHandler(NetworkMessage netMsg)
 		{
+			bool flag;
 			if (this.m_MessageHandlersDict.ContainsKey(netMsg.msgType))
 			{
 				NetworkMessageDelegate networkMessageDelegate = this.m_MessageHandlersDict[netMsg.msgType];
 				networkMessageDelegate(netMsg);
-				return true;
+				flag = true;
 			}
-			return false;
+			else
+			{
+				flag = false;
+			}
+			return flag;
+		}
+
+		internal void HandleFragment(NetworkReader reader, int channelId)
+		{
+			if (channelId >= 0 && channelId < this.m_Channels.Length)
+			{
+				ChannelBuffer channelBuffer = this.m_Channels[channelId];
+				if (channelBuffer.HandleFragment(reader))
+				{
+					NetworkReader networkReader = new NetworkReader(channelBuffer.fragmentBuffer.AsArraySegment().Array);
+					networkReader.ReadInt16();
+					short num = networkReader.ReadInt16();
+					this.InvokeHandler(num, networkReader, channelId);
+				}
+			}
 		}
 
 		public void RegisterHandler(short msgType, NetworkMessageDelegate handler)
@@ -218,12 +262,14 @@ namespace UnityEngine.Networking
 			if (LogFilter.logError)
 			{
 				Debug.LogError("RemovePlayer player at playerControllerId " + playerControllerId + " not found");
+				return;
 			}
 		}
 
 		internal bool GetPlayerController(short playerControllerId, out PlayerController playerController)
 		{
 			playerController = null;
+			bool flag;
 			if (this.playerControllers.Count > 0)
 			{
 				for (int i = 0; i < this.playerControllers.Count; i++)
@@ -234,32 +280,34 @@ namespace UnityEngine.Networking
 						return true;
 					}
 				}
-				return false;
+				flag = false;
 			}
-			return false;
+			else
+			{
+				flag = false;
+			}
+			return flag;
 		}
 
 		public void FlushChannels()
 		{
-			if (this.m_Channels == null)
+			if (this.m_Channels != null)
 			{
-				return;
-			}
-			foreach (ChannelBuffer channelBuffer in this.m_Channels)
-			{
-				channelBuffer.CheckInternalBuffer();
+				for (int i = 0; i < this.m_Channels.Length; i++)
+				{
+					this.m_Channels[i].CheckInternalBuffer();
+				}
 			}
 		}
 
 		public void SetMaxDelay(float seconds)
 		{
-			if (this.m_Channels == null)
+			if (this.m_Channels != null)
 			{
-				return;
-			}
-			foreach (ChannelBuffer channelBuffer in this.m_Channels)
-			{
-				channelBuffer.maxDelay = seconds;
+				for (int i = 0; i < this.m_Channels.Length; i++)
+				{
+					this.m_Channels[i].maxDelay = seconds;
+				}
 			}
 		}
 
@@ -318,15 +366,16 @@ namespace UnityEngine.Networking
 
 		private bool CheckChannel(int channelId)
 		{
+			bool flag;
 			if (this.m_Channels == null)
 			{
 				if (LogFilter.logWarn)
 				{
 					Debug.LogWarning("Channels not initialized sending on id '" + channelId);
 				}
-				return false;
+				flag = false;
 			}
-			if (channelId < 0 || channelId >= this.m_Channels.Length)
+			else if (channelId < 0 || channelId >= this.m_Channels.Length)
 			{
 				if (LogFilter.logError)
 				{
@@ -338,9 +387,13 @@ namespace UnityEngine.Networking
 						this.m_Channels.Length
 					}));
 				}
-				return false;
+				flag = false;
 			}
-			return true;
+			else
+			{
+				flag = true;
+			}
+			return flag;
 		}
 
 		public void ResetStats()
@@ -402,8 +455,9 @@ namespace UnityEngine.Networking
 			numBufferedMsgs = 0;
 			numBytes = 0;
 			lastBufferedPerSecond = 0;
-			foreach (ChannelBuffer channelBuffer in this.m_Channels)
+			for (int i = 0; i < this.m_Channels.Length; i++)
 			{
+				ChannelBuffer channelBuffer = this.m_Channels[i];
 				numMsgs += channelBuffer.numMsgsOut;
 				numBufferedMsgs += channelBuffer.numBufferedMsgsOut;
 				numBytes += channelBuffer.numBytesOut;
@@ -415,8 +469,9 @@ namespace UnityEngine.Networking
 		{
 			numMsgs = 0;
 			numBytes = 0;
-			foreach (ChannelBuffer channelBuffer in this.m_Channels)
+			for (int i = 0; i < this.m_Channels.Length; i++)
 			{
+				ChannelBuffer channelBuffer = this.m_Channels[i];
 				numMsgs += channelBuffer.numMsgsIn;
 				numBytes += channelBuffer.numBytesIn;
 			}
@@ -457,9 +512,15 @@ namespace UnityEngine.Networking
 			this.m_VisList.Clear();
 		}
 
-		public virtual void TransportRecieve(byte[] bytes, int numBytes, int channelId)
+		public virtual void TransportReceive(byte[] bytes, int numBytes, int channelId)
 		{
 			this.HandleBytes(bytes, numBytes, channelId);
+		}
+
+		[Obsolete("TransportRecieve has been deprecated. Use TransportReceive instead (UnityUpgradable) -> TransportReceive(*)", false)]
+		public virtual void TransportRecieve(byte[] bytes, int numBytes, int channelId)
+		{
+			this.TransportReceive(bytes, numBytes, channelId);
 		}
 
 		public virtual bool TransportSend(byte[] bytes, int numBytes, int channelId, out byte error)
@@ -478,14 +539,16 @@ namespace UnityEngine.Networking
 
 		internal void RemoveOwnedObject(NetworkIdentity obj)
 		{
-			if (this.m_ClientOwnedObjects == null)
+			if (this.m_ClientOwnedObjects != null)
 			{
-				return;
+				this.m_ClientOwnedObjects.Remove(obj.netId);
 			}
-			this.m_ClientOwnedObjects.Remove(obj.netId);
 		}
 
-		private const int k_MaxMessageLogSize = 150;
+		internal static void OnFragment(NetworkMessage netMsg)
+		{
+			netMsg.conn.HandleFragment(netMsg.reader, netMsg.channelId);
+		}
 
 		private ChannelBuffer[] m_Channels;
 
@@ -505,6 +568,10 @@ namespace UnityEngine.Networking
 
 		private NetworkMessage m_MessageInfo = new NetworkMessage();
 
+		private const int k_MaxMessageLogSize = 150;
+
+		private NetworkError error;
+
 		public int hostId = -1;
 
 		public int connectionId = -1;
@@ -515,7 +582,7 @@ namespace UnityEngine.Networking
 
 		public float lastMessageTime;
 
-		public bool logNetworkMessages;
+		public bool logNetworkMessages = false;
 
 		private Dictionary<short, NetworkConnection.PacketStat> m_PacketStats = new Dictionary<short, NetworkConnection.PacketStat>();
 
@@ -523,6 +590,20 @@ namespace UnityEngine.Networking
 
 		public class PacketStat
 		{
+			public PacketStat()
+			{
+				this.msgType = 0;
+				this.count = 0;
+				this.bytes = 0;
+			}
+
+			public PacketStat(NetworkConnection.PacketStat s)
+			{
+				this.msgType = s.msgType;
+				this.count = s.count;
+				this.bytes = s.bytes;
+			}
+
 			public override string ToString()
 			{
 				return string.Concat(new object[]

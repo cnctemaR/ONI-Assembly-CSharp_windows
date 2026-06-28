@@ -15,9 +15,12 @@ public class MaterialsUnavailableForRefillStatusItem : MaterialsStatusItem
 		{
 			float amountInStorage = base.GetAmountInStorage(fetch_list.Destination, keyValuePair.Key);
 			float actualAvailable = this.GetActualAvailable(keyValuePair.Key, keyValuePair.Value);
-			if (amountInStorage + actualAvailable > fetch_list.GetMinimumAmount(keyValuePair.Key) && keyValuePair.Value > actualAvailable)
+			if (amountInStorage + actualAvailable > fetch_list.GetMinimumAmount(keyValuePair.Key))
 			{
-				return true;
+				if (keyValuePair.Value > actualAvailable)
+				{
+					return true;
+				}
 			}
 		}
 		return false;

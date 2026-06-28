@@ -2,18 +2,26 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class KScreen : KMonoBehaviour, IInputHandler, IEventSystemHandler, IPointerEnterHandler, IPointerExitHandler
+public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IPointerExitHandler, IEventSystemHandler
 {
 	public KScreen()
 	{
 		this.screenName = base.GetType().ToString();
-		if (this.displayName == null || this.displayName == string.Empty)
+		if (this.displayName == null || this.displayName == "")
 		{
 			this.displayName = this.screenName;
 		}
 	}
 
 	public KInputHandler inputHandler { get; set; }
+
+	public virtual bool HasFocus
+	{
+		get
+		{
+			return this.hasFocus;
+		}
+	}
 
 	public virtual float GetSortKey()
 	{
@@ -34,6 +42,11 @@ public class KScreen : KMonoBehaviour, IInputHandler, IEventSystemHandler, IPoin
 		{
 			return this.mouseOver;
 		}
+	}
+
+	public virtual void SetHasFocus(bool has_focus)
+	{
+		this.hasFocus = has_focus;
 	}
 
 	protected override void OnPrefabInit()
@@ -70,9 +83,12 @@ public class KScreen : KMonoBehaviour, IInputHandler, IEventSystemHandler, IPoin
 		{
 			this._rectTransform = this._canvas.GetComponentInParent<RectTransform>();
 		}
-		if (this.activateOnSpawn && KScreenManager.Instance != null)
+		if (this.activateOnSpawn)
 		{
-			this.Activate();
+			if (KScreenManager.Instance != null)
+			{
+				this.Activate();
+			}
 		}
 		if (this.ConsumeMouseScroll && !this.activateOnSpawn)
 		{
@@ -82,12 +98,15 @@ public class KScreen : KMonoBehaviour, IInputHandler, IEventSystemHandler, IPoin
 
 	public virtual void OnKeyDown(KButtonEvent e)
 	{
-		if (this.mouseOver && this.ConsumeMouseScroll && !e.Consumed)
+		if (this.mouseOver && this.ConsumeMouseScroll)
 		{
-			if (!e.TryConsume(global::Action.ZoomIn))
+			if (!e.Consumed)
 			{
-				if (e.TryConsume(global::Action.ZoomOut))
+				if (!e.TryConsume(global::Action.ZoomIn))
 				{
+					if (e.TryConsume(global::Action.ZoomOut))
+					{
+					}
 				}
 			}
 		}
@@ -125,17 +144,16 @@ public class KScreen : KMonoBehaviour, IInputHandler, IEventSystemHandler, IPoin
 
 	public virtual void Deactivate()
 	{
-		if (!Application.isPlaying)
+		if (Application.isPlaying)
 		{
-			return;
-		}
-		this.OnDeactivate();
-		this.isActive = false;
-		KScreenManager.Instance.PopScreen(this);
-		if (this != null && base.gameObject != null)
-		{
-			base.gameObject.SetActive(false);
-			global::UnityEngine.Object.Destroy(base.gameObject);
+			this.OnDeactivate();
+			this.isActive = false;
+			KScreenManager.Instance.PopScreen(this);
+			if (this != null && base.gameObject != null)
+			{
+				base.gameObject.SetActive(false);
+				global::UnityEngine.Object.Destroy(base.gameObject);
+			}
 		}
 	}
 
@@ -158,15 +176,20 @@ public class KScreen : KMonoBehaviour, IInputHandler, IEventSystemHandler, IPoin
 
 	public Vector3 WorldToScreen(Vector3 pos)
 	{
+		Vector3 vector;
 		if (this._rectTransform == null)
 		{
 			global::Debug.LogWarning("Hey you are calling this function too early!", null);
-			return Vector3.zero;
+			vector = Vector3.zero;
 		}
-		Camera main = Camera.main;
-		Vector3 vector = main.WorldToViewportPoint(pos);
-		vector.y = vector.y * main.rect.height + main.rect.y;
-		return new Vector2((vector.x - 0.5f) * this._rectTransform.sizeDelta.x, (vector.y - 0.5f) * this._rectTransform.sizeDelta.y);
+		else
+		{
+			Camera main = Camera.main;
+			Vector3 vector2 = main.WorldToViewportPoint(pos);
+			vector2.y = vector2.y * main.rect.height + main.rect.y;
+			vector = new Vector2((vector2.x - 0.5f) * this._rectTransform.sizeDelta.x, (vector2.y - 0.5f) * this._rectTransform.sizeDelta.y);
+		}
+		return vector;
 	}
 
 	protected virtual void OnShow(bool show)
@@ -197,7 +220,7 @@ public class KScreen : KMonoBehaviour, IInputHandler, IEventSystemHandler, IPoin
 	}
 
 	[SerializeField]
-	public bool activateOnSpawn;
+	public bool activateOnSpawn = false;
 
 	private Canvas _canvas;
 
@@ -207,19 +230,21 @@ public class KScreen : KMonoBehaviour, IInputHandler, IEventSystemHandler, IPoin
 
 	private bool isActive;
 
-	protected bool mouseOver;
+	protected bool mouseOver = false;
 
-	protected bool ConsumeMouseScroll;
+	protected bool ConsumeMouseScroll = false;
 
-	public WidgetTransition.TransitionType transitionType;
+	public WidgetTransition.TransitionType transitionType = WidgetTransition.TransitionType.SlideFromRight;
 
-	public bool fadeIn;
+	public bool fadeIn = false;
 
 	public string displayName;
 
 	public KScreen.PointerEnterActions pointerEnterActions;
 
 	public KScreen.PointerExitActions pointerExitActions;
+
+	private bool hasFocus = false;
 
 	public delegate void PointerEnterActions(PointerEventData eventData);
 

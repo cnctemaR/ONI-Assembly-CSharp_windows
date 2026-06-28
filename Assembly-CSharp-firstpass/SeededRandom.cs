@@ -37,5 +37,5 @@ public class SeededRandom
 		return rangeLow + (int)(this.rnd.NextDouble() * (double)num);
 	}
 
-	private Random rnd;
+	private Random rnd = null;
 }

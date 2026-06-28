@@ -1,18 +1,24 @@
 ﻿using System;
 using System.Collections;
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class KBasicToggle : KMonoBehaviour, IPointerClickHandler, IEventSystemHandler, IPointerEnterHandler, IPointerExitHandler
+public class KBasicToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler, IEventSystemHandler
 {
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onClick;
 
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onDoubleClick;
 
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onPointerEnter;
 
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onPointerExit;
 
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<bool> onValueChanged;
 
 	public bool isOn
@@ -56,11 +62,14 @@ public class KBasicToggle : KMonoBehaviour, IPointerClickHandler, IEventSystemHa
 			}
 			yield return null;
 		}
-		if (!this.didDoubleClick && this.onClick != null)
+		if (!this.didDoubleClick)
 		{
-			this.isOn = !this.isOn;
-			this.onClick();
-			this.onValueChanged(this.isOn);
+			if (this.onClick != null)
+			{
+				this.isOn = !this.isOn;
+				this.onClick();
+				this.onValueChanged(this.isOn);
+			}
 		}
 		this.doubleClickCoroutine = null;
 		this.didDoubleClick = false;
@@ -87,7 +96,7 @@ public class KBasicToggle : KMonoBehaviour, IPointerClickHandler, IEventSystemHa
 
 	private bool _isOn;
 
-	private bool didDoubleClick;
+	private bool didDoubleClick = false;
 
 	private IEnumerator doubleClickCoroutine;
 }

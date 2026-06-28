@@ -5,12 +5,12 @@ using UnityEngine.UI;
 
 namespace TMPro
 {
+	[ExecuteInEditMode]
 	[DisallowMultipleComponent]
 	[RequireComponent(typeof(RectTransform))]
 	[RequireComponent(typeof(CanvasRenderer))]
 	[AddComponentMenu("UI/TextMeshPro - Text (UI)", 11)]
 	[SelectionBase]
-	[ExecuteInEditMode]
 	public class TextMeshProUGUI : TMP_Text, ILayoutElement
 	{
 		protected override void Awake()
@@ -53,20 +53,22 @@ namespace TMPro
 			if (this.m_fontAsset == null)
 			{
 				global::Debug.LogWarning("Please assign a Font Asset to this " + base.transform.name + " gameobject.", this);
-				return;
 			}
-			if (this.m_fontSizeMin == 0f)
+			else
 			{
-				this.m_fontSizeMin = this.m_fontSize / 2f;
+				if (this.m_fontSizeMin == 0f)
+				{
+					this.m_fontSizeMin = this.m_fontSize / 2f;
+				}
+				if (this.m_fontSizeMax == 0f)
+				{
+					this.m_fontSizeMax = this.m_fontSize * 2f;
+				}
+				this.m_isInputParsingRequired = true;
+				this.m_havePropertiesChanged = true;
+				this.m_isCalculateSizeRequired = true;
+				this.m_isAwake = true;
 			}
-			if (this.m_fontSizeMax == 0f)
-			{
-				this.m_fontSizeMax = this.m_fontSize * 2f;
-			}
-			this.m_isInputParsingRequired = true;
-			this.m_havePropertiesChanged = true;
-			this.m_isCalculateSizeRequired = true;
-			this.m_isAwake = true;
 		}
 
 		protected override void OnEnable()
@@ -194,13 +196,12 @@ namespace TMPro
 
 		private void UpdateEnvMapMatrix()
 		{
-			if (!this.m_sharedMaterial.HasProperty(ShaderUtilities.ID_EnvMap) || this.m_sharedMaterial.GetTexture(ShaderUtilities.ID_EnvMap) == null)
+			if (this.m_sharedMaterial.HasProperty(ShaderUtilities.ID_EnvMap) && !(this.m_sharedMaterial.GetTexture(ShaderUtilities.ID_EnvMap) == null))
 			{
-				return;
+				Vector3 vector = this.m_sharedMaterial.GetVector(ShaderUtilities.ID_EnvMatrixRotation);
+				this.m_EnvMapMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(vector), Vector3.one);
+				this.m_sharedMaterial.SetMatrix(ShaderUtilities.ID_EnvMatrix, this.m_EnvMapMatrix);
 			}
-			Vector3 vector = this.m_sharedMaterial.GetVector(ShaderUtilities.ID_EnvMatrixRotation);
-			this.m_EnvMapMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(vector), Vector3.one);
-			this.m_sharedMaterial.SetMatrix(ShaderUtilities.ID_EnvMatrix, this.m_EnvMapMatrix);
 		}
 
 		private void EnableMasking()
@@ -340,7 +341,8 @@ namespace TMPro
 			{
 				TMP_TextInfo.Resize<Material>(ref this.m_fontSharedMaterials, materialCount, false);
 			}
-			for (int i = 0; i < materialCount; i++)
+			int i = 0;
+			while (i < materialCount)
 			{
 				if (i == 0)
 				{
@@ -357,6 +359,10 @@ namespace TMPro
 						this.m_subTextObjects[i].sharedMaterial = (this.m_fontSharedMaterials[i] = materials[i]);
 					}
 				}
+				IL_012A:
+				i++;
+				continue;
+				goto IL_012A;
 			}
 		}
 
@@ -402,17 +408,16 @@ namespace TMPro
 
 		protected override void SetShaderDepth()
 		{
-			if (this.m_canvas == null || this.m_sharedMaterial == null)
+			if (!(this.m_canvas == null) && !(this.m_sharedMaterial == null))
 			{
-				return;
-			}
-			if (this.m_canvas.renderMode == RenderMode.ScreenSpaceOverlay || this.m_isOverlay)
-			{
-				this.m_sharedMaterial.SetFloat(ShaderUtilities.ShaderTag_ZTestMode, 0f);
-			}
-			else
-			{
-				this.m_sharedMaterial.SetFloat(ShaderUtilities.ShaderTag_ZTestMode, 4f);
+				if (this.m_canvas.renderMode == RenderMode.ScreenSpaceOverlay || this.m_isOverlay)
+				{
+					this.m_sharedMaterial.SetFloat(ShaderUtilities.ShaderTag_ZTestMode, 0f);
+				}
+				else
+				{
+					this.m_sharedMaterial.SetFloat(ShaderUtilities.ShaderTag_ZTestMode, 4f);
+				}
 			}
 		}
 
@@ -496,12 +501,12 @@ namespace TMPro
 				int num4 = chars[num3];
 				if (!this.m_isRichText || num4 != 60)
 				{
-					goto IL_023B;
+					goto IL_0242;
 				}
 				int currentMaterialIndex = this.m_currentMaterialIndex;
 				if (!base.ValidateHtmlTag(chars, num3 + 1, out num))
 				{
-					goto IL_023B;
+					goto IL_0242;
 				}
 				num3 = num;
 				if ((this.m_style & FontStyles.Bold) == FontStyles.Bold)
@@ -521,10 +526,10 @@ namespace TMPro
 					num2++;
 					this.m_totalCharacterCount++;
 				}
-				IL_08C8:
+				IL_0909:
 				num3++;
 				continue;
-				IL_023B:
+				IL_0242:
 				bool flag = false;
 				bool flag2 = false;
 				TMP_FontAsset currentFontAsset = this.m_currentFontAsset;
@@ -546,9 +551,12 @@ namespace TMPro
 							num4 = (int)char.ToLower((char)num4);
 						}
 					}
-					else if (((this.m_fontStyle & FontStyles.SmallCaps) == FontStyles.SmallCaps || (this.m_style & FontStyles.SmallCaps) == FontStyles.SmallCaps) && char.IsLower((char)num4))
+					else if ((this.m_fontStyle & FontStyles.SmallCaps) == FontStyles.SmallCaps || (this.m_style & FontStyles.SmallCaps) == FontStyles.SmallCaps)
 					{
-						num4 = (int)char.ToUpper((char)num4);
+						if (char.IsLower((char)num4))
+						{
+							num4 = (int)char.ToUpper((char)num4);
+						}
 					}
 				}
 				TMP_FontAsset tmp_FontAsset = base.GetFontAssetForWeight(this.m_fontWeightInternal);
@@ -579,19 +587,22 @@ namespace TMPro
 							}
 						}
 					}
-					if (tmp_Glyph == null && TMP_Settings.fallbackFontAssets != null && TMP_Settings.fallbackFontAssets.Count > 0)
+					if (tmp_Glyph == null)
 					{
-						for (int j = 0; j < TMP_Settings.fallbackFontAssets.Count; j++)
+						if (TMP_Settings.fallbackFontAssets != null && TMP_Settings.fallbackFontAssets.Count > 0)
 						{
-							tmp_FontAsset = TMP_Settings.fallbackFontAssets[j];
-							if (!(tmp_FontAsset == null))
+							for (int j = 0; j < TMP_Settings.fallbackFontAssets.Count; j++)
 							{
-								if (tmp_FontAsset.characterDictionary.TryGetValue(num4, out tmp_Glyph))
+								tmp_FontAsset = TMP_Settings.fallbackFontAssets[j];
+								if (!(tmp_FontAsset == null))
 								{
-									flag = true;
-									this.m_currentFontAsset = tmp_FontAsset;
-									this.m_currentMaterial = TMP_MaterialManager.GetFallbackMaterial(this.m_currentMaterial, this.m_currentFontAsset.material.GetTexture(ShaderUtilities.ID_MainTex));
-									break;
+									if (tmp_FontAsset.characterDictionary.TryGetValue(num4, out tmp_Glyph))
+									{
+										flag = true;
+										this.m_currentFontAsset = tmp_FontAsset;
+										this.m_currentMaterial = TMP_MaterialManager.GetFallbackMaterial(this.m_currentMaterial, this.m_currentFontAsset.material.GetTexture(ShaderUtilities.ID_MainTex));
+										break;
+									}
 								}
 							}
 						}
@@ -605,9 +616,12 @@ namespace TMPro
 								num4 = (chars[num3] = (int)char.ToUpper((char)num4));
 							}
 						}
-						else if (char.IsUpper((char)num4) && this.m_currentFontAsset.characterDictionary.TryGetValue((int)char.ToLower((char)num4), out tmp_Glyph))
+						else if (char.IsUpper((char)num4))
 						{
-							num4 = (chars[num3] = (int)char.ToLower((char)num4));
+							if (this.m_currentFontAsset.characterDictionary.TryGetValue((int)char.ToLower((char)num4), out tmp_Glyph))
+							{
+								num4 = (chars[num3] = (int)char.ToLower((char)num4));
+							}
 						}
 					}
 					if (tmp_Glyph == null)
@@ -695,7 +709,7 @@ namespace TMPro
 					this.m_currentMaterialIndex = currentMaterialIndex3;
 				}
 				this.m_totalCharacterCount++;
-				goto IL_08C8;
+				goto IL_0909;
 			}
 			this.m_textInfo.spriteCount = num2;
 			int num6 = (this.m_textInfo.materialCount = this.m_materialReferenceIndexLookup.Count);
@@ -779,7 +793,7 @@ namespace TMPro
 			}
 			if (!TMP_Settings.warningsDisabled && hashSet.Count > 0)
 			{
-				string text = string.Empty;
+				string text = "";
 				foreach (int num8 in hashSet)
 				{
 					text = text + num8.ToString() + " ";
@@ -816,14 +830,13 @@ namespace TMPro
 
 		protected override void OnRectTransformDimensionsChange()
 		{
-			if (!base.gameObject.activeInHierarchy)
+			if (base.gameObject.activeInHierarchy)
 			{
-				return;
+				this.ComputeMarginSize();
+				this.UpdateSubObjectPivot();
+				this.SetVerticesDirty();
+				this.SetLayoutDirty();
 			}
-			this.ComputeMarginSize();
-			this.UpdateSubObjectPivot();
-			this.SetVerticesDirty();
-			this.SetLayoutDirty();
 		}
 
 		private void LateUpdate()
@@ -842,44 +855,43 @@ namespace TMPro
 
 		private void OnPreRenderCanvas()
 		{
-			if (!this.m_isAwake || (!this.m_ignoreActiveState && !this.IsActive()))
+			if (this.m_isAwake && (this.m_ignoreActiveState || this.IsActive()))
 			{
-				return;
-			}
-			if (this.m_canvas == null)
-			{
-				this.m_canvas = base.canvas;
 				if (this.m_canvas == null)
 				{
-					return;
+					this.m_canvas = base.canvas;
+					if (this.m_canvas == null)
+					{
+						return;
+					}
 				}
-			}
-			this.loopCountA = 0;
-			if (this.m_havePropertiesChanged || this.m_isLayoutDirty)
-			{
-				if (this.checkPaddingRequired)
+				this.loopCountA = 0;
+				if (this.m_havePropertiesChanged || this.m_isLayoutDirty)
 				{
-					this.UpdateMeshPadding();
+					if (this.checkPaddingRequired)
+					{
+						this.UpdateMeshPadding();
+					}
+					if (this.m_isInputParsingRequired || this.m_isTextTruncated)
+					{
+						base.ParseInputText();
+					}
+					if (this.m_enableAutoSizing)
+					{
+						this.m_fontSize = Mathf.Clamp(this.m_fontSize, this.m_fontSizeMin, this.m_fontSizeMax);
+					}
+					this.m_maxFontSize = this.m_fontSizeMax;
+					this.m_minFontSize = this.m_fontSizeMin;
+					this.m_lineSpacingDelta = 0f;
+					this.m_charWidthAdjDelta = 0f;
+					this.m_recursiveCount = 0;
+					this.m_isCharacterWrappingEnabled = false;
+					this.m_isTextTruncated = false;
+					this.m_havePropertiesChanged = false;
+					this.m_isLayoutDirty = false;
+					this.m_ignoreActiveState = false;
+					this.GenerateTextMesh();
 				}
-				if (this.m_isInputParsingRequired || this.m_isTextTruncated)
-				{
-					base.ParseInputText();
-				}
-				if (this.m_enableAutoSizing)
-				{
-					this.m_fontSize = Mathf.Clamp(this.m_fontSize, this.m_fontSizeMin, this.m_fontSizeMax);
-				}
-				this.m_maxFontSize = this.m_fontSizeMax;
-				this.m_minFontSize = this.m_fontSizeMin;
-				this.m_lineSpacingDelta = 0f;
-				this.m_charWidthAdjDelta = 0f;
-				this.m_recursiveCount = 0;
-				this.m_isCharacterWrappingEnabled = false;
-				this.m_isTextTruncated = false;
-				this.m_havePropertiesChanged = false;
-				this.m_isLayoutDirty = false;
-				this.m_ignoreActiveState = false;
-				this.GenerateTextMesh();
 			}
 		}
 
@@ -888,293 +900,403 @@ namespace TMPro
 			if (this.m_fontAsset == null || this.m_fontAsset.characterDictionary == null)
 			{
 				global::Debug.LogWarning("Can't Generate Mesh! No Font Asset has been assigned to Object ID: " + base.GetInstanceID(), null);
-				return;
 			}
-			if (this.m_textInfo != null)
+			else
 			{
-				this.m_textInfo.Clear();
-			}
-			if (this.m_char_buffer == null || this.m_char_buffer.Length == 0 || this.m_char_buffer[0] == 0)
-			{
-				this.ClearMesh();
-				this.m_preferredWidth = 0f;
-				this.m_preferredHeight = 0f;
-				return;
-			}
-			this.m_currentFontAsset = this.m_fontAsset;
-			this.m_currentMaterial = this.m_sharedMaterial;
-			this.m_currentMaterialIndex = 0;
-			this.m_materialReferenceStack.SetDefault(new MaterialReference(0, this.m_currentFontAsset, null, this.m_currentMaterial, this.m_padding));
-			this.m_currentSpriteAsset = this.m_spriteAsset;
-			int totalCharacterCount = this.m_totalCharacterCount;
-			this.m_fontScale = this.m_fontSize / this.m_currentFontAsset.fontInfo.PointSize;
-			float num = this.m_fontSize / this.m_fontAsset.fontInfo.PointSize * this.m_fontAsset.fontInfo.Scale;
-			float num2 = this.m_fontScale;
-			this.m_fontScaleMultiplier = 1f;
-			this.m_currentFontSize = this.m_fontSize;
-			this.m_sizeStack.SetDefault(this.m_currentFontSize);
-			this.m_style = this.m_fontStyle;
-			this.m_fontWeightInternal = (((this.m_style & FontStyles.Bold) != FontStyles.Bold) ? this.m_fontWeight : 700);
-			this.m_fontWeightStack.SetDefault(this.m_fontWeightInternal);
-			this.m_lineJustification = this.m_textAlignment;
-			float num3 = 0f;
-			float num4 = 1f;
-			this.m_baselineOffset = 0f;
-			bool flag = false;
-			Vector3 zero = Vector3.zero;
-			Vector3 zero2 = Vector3.zero;
-			bool flag2 = false;
-			Vector3 zero3 = Vector3.zero;
-			Vector3 zero4 = Vector3.zero;
-			this.m_fontColor32 = this.m_fontColor;
-			this.m_htmlColor = this.m_fontColor32;
-			this.m_colorStack.SetDefault(this.m_htmlColor);
-			this.m_styleStack.Clear();
-			this.m_actionStack.Clear();
-			this.m_lineOffset = 0f;
-			this.m_lineHeight = 0f;
-			float num5 = this.m_currentFontAsset.fontInfo.LineHeight - (this.m_currentFontAsset.fontInfo.Ascender - this.m_currentFontAsset.fontInfo.Descender);
-			this.m_cSpacing = 0f;
-			this.m_monoSpacing = 0f;
-			this.m_xAdvance = 0f;
-			this.tag_LineIndent = 0f;
-			this.tag_Indent = 0f;
-			this.m_indentStack.SetDefault(0f);
-			this.tag_NoParsing = false;
-			this.m_characterCount = 0;
-			this.m_firstCharacterOfLine = 0;
-			this.m_lastCharacterOfLine = 0;
-			this.m_firstVisibleCharacterOfLine = 0;
-			this.m_lastVisibleCharacterOfLine = 0;
-			this.m_maxLineAscender = float.NegativeInfinity;
-			this.m_maxLineDescender = float.PositiveInfinity;
-			this.m_lineNumber = 0;
-			this.m_lineVisibleCharacterCount = 0;
-			bool flag3 = true;
-			this.m_pageNumber = 0;
-			int num6 = Mathf.Clamp(this.m_pageToDisplay - 1, 0, this.m_textInfo.pageInfo.Length - 1);
-			int num7 = 0;
-			Vector4 margin = this.m_margin;
-			float marginWidth = this.m_marginWidth;
-			float marginHeight = this.m_marginHeight;
-			this.m_marginLeft = 0f;
-			this.m_marginRight = 0f;
-			this.m_width = -1f;
-			float num8 = marginWidth + 0.0001f - this.m_marginLeft - this.m_marginRight;
-			this.m_meshExtents.min = TMP_Text.k_InfinityVectorPositive;
-			this.m_meshExtents.max = TMP_Text.k_InfinityVectorNegative;
-			this.m_textInfo.ClearLineInfo();
-			this.m_maxAscender = 0f;
-			this.m_maxDescender = 0f;
-			float num9 = 0f;
-			float num10 = 0f;
-			bool flag4 = false;
-			this.m_isNewPage = false;
-			bool flag5 = true;
-			bool flag6 = false;
-			int num11 = 0;
-			this.loopCountA++;
-			int num12 = 0;
-			int num13 = 0;
-			while (this.m_char_buffer[num13] != 0)
-			{
-				int num14 = this.m_char_buffer[num13];
-				this.m_textElementType = TMP_TextElementType.Character;
-				this.m_currentMaterialIndex = this.m_textInfo.characterInfo[this.m_characterCount].materialReferenceIndex;
-				this.m_currentFontAsset = this.m_materialReferences[this.m_currentMaterialIndex].fontAsset;
-				int currentMaterialIndex = this.m_currentMaterialIndex;
-				if (!this.m_isRichText || num14 != 60)
+				if (this.m_textInfo != null)
 				{
-					goto IL_04B7;
+					this.m_textInfo.Clear();
 				}
-				this.m_isParsingText = true;
-				if (!base.ValidateHtmlTag(this.m_char_buffer, num13 + 1, out num12))
+				if (this.m_char_buffer == null || this.m_char_buffer.Length == 0 || this.m_char_buffer[0] == 0)
 				{
-					goto IL_04B7;
-				}
-				num13 = num12;
-				if (this.m_textElementType != TMP_TextElementType.Character)
-				{
-					goto IL_04B7;
-				}
-				IL_2CAE:
-				num13++;
-				continue;
-				IL_04B7:
-				this.m_isParsingText = false;
-				bool isUsingAlternateTypeface = this.m_textInfo.characterInfo[this.m_characterCount].isUsingAlternateTypeface;
-				float num15 = 1f;
-				if (this.m_textElementType == TMP_TextElementType.Character)
-				{
-					if ((this.m_style & FontStyles.UpperCase) == FontStyles.UpperCase)
-					{
-						if (char.IsLower((char)num14))
-						{
-							num14 = (int)char.ToUpper((char)num14);
-						}
-					}
-					else if ((this.m_style & FontStyles.LowerCase) == FontStyles.LowerCase)
-					{
-						if (char.IsUpper((char)num14))
-						{
-							num14 = (int)char.ToLower((char)num14);
-						}
-					}
-					else if (((this.m_fontStyle & FontStyles.SmallCaps) == FontStyles.SmallCaps || (this.m_style & FontStyles.SmallCaps) == FontStyles.SmallCaps) && char.IsLower((char)num14))
-					{
-						num15 = 0.8f;
-						num14 = (int)char.ToUpper((char)num14);
-					}
-				}
-				if (this.m_textElementType == TMP_TextElementType.Sprite)
-				{
-					TMP_Sprite tmp_Sprite = this.m_currentSpriteAsset.spriteInfoList[this.m_spriteIndex];
-					if (tmp_Sprite == null)
-					{
-						goto IL_2CAE;
-					}
-					num14 = 57344 + this.m_spriteIndex;
-					this.m_currentFontAsset = this.m_fontAsset;
-					float num16 = this.m_currentFontSize / this.m_fontAsset.fontInfo.PointSize * this.m_fontAsset.fontInfo.Scale;
-					num2 = this.m_fontAsset.fontInfo.Ascender / tmp_Sprite.height * tmp_Sprite.scale * num16;
-					this.m_cached_TextElement = tmp_Sprite;
-					this.m_textInfo.characterInfo[this.m_characterCount].elementType = TMP_TextElementType.Sprite;
-					this.m_textInfo.characterInfo[this.m_characterCount].scale = num16;
-					this.m_textInfo.characterInfo[this.m_characterCount].spriteAsset = this.m_currentSpriteAsset;
-					this.m_textInfo.characterInfo[this.m_characterCount].fontAsset = this.m_currentFontAsset;
-					this.m_textInfo.characterInfo[this.m_characterCount].materialReferenceIndex = this.m_currentMaterialIndex;
-					this.m_currentMaterialIndex = currentMaterialIndex;
-					num3 = 0f;
-				}
-				else if (this.m_textElementType == TMP_TextElementType.Character)
-				{
-					this.m_cached_TextElement = this.m_textInfo.characterInfo[this.m_characterCount].textElement;
-					if (this.m_cached_TextElement == null)
-					{
-						goto IL_2CAE;
-					}
-					this.m_currentFontAsset = this.m_textInfo.characterInfo[this.m_characterCount].fontAsset;
-					this.m_currentMaterial = this.m_textInfo.characterInfo[this.m_characterCount].material;
-					this.m_currentMaterialIndex = this.m_textInfo.characterInfo[this.m_characterCount].materialReferenceIndex;
-					this.m_fontScale = this.m_currentFontSize * num15 / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale;
-					num2 = this.m_fontScale * this.m_fontScaleMultiplier;
-					this.m_textInfo.characterInfo[this.m_characterCount].elementType = TMP_TextElementType.Character;
-					this.m_textInfo.characterInfo[this.m_characterCount].scale = num2;
-					num3 = ((this.m_currentMaterialIndex != 0) ? this.m_subTextObjects[this.m_currentMaterialIndex].padding : this.m_padding);
-				}
-				float num17 = num2;
-				if (num14 == 173)
-				{
-					num2 = 0f;
-				}
-				if (this.m_isRightToLeft)
-				{
-					this.m_xAdvance -= ((this.m_cached_TextElement.xAdvance * num4 + this.m_characterSpacing + this.m_currentFontAsset.normalSpacingOffset) * num2 + this.m_cSpacing) * (1f - this.m_charWidthAdjDelta);
-				}
-				this.m_textInfo.characterInfo[this.m_characterCount].character = (char)num14;
-				this.m_textInfo.characterInfo[this.m_characterCount].pointSize = this.m_currentFontSize;
-				this.m_textInfo.characterInfo[this.m_characterCount].color = this.m_htmlColor;
-				this.m_textInfo.characterInfo[this.m_characterCount].style = this.m_style;
-				this.m_textInfo.characterInfo[this.m_characterCount].index = (short)num13;
-				if (this.m_enableKerning && this.m_characterCount >= 1)
-				{
-					int character = (int)this.m_textInfo.characterInfo[this.m_characterCount - 1].character;
-					KerningPairKey kerningPairKey = new KerningPairKey(character, num14);
-					KerningPair kerningPair;
-					this.m_currentFontAsset.kerningDictionary.TryGetValue(kerningPairKey.key, out kerningPair);
-					if (kerningPair != null)
-					{
-						this.m_xAdvance += kerningPair.XadvanceOffset * num2;
-					}
-				}
-				float num18 = 0f;
-				if (this.m_monoSpacing != 0f)
-				{
-					num18 = (this.m_monoSpacing / 2f - (this.m_cached_TextElement.width / 2f + this.m_cached_TextElement.xOffset) * num2) * (1f - this.m_charWidthAdjDelta);
-					this.m_xAdvance += num18;
-				}
-				float num19;
-				if (this.m_textElementType == TMP_TextElementType.Character && !isUsingAlternateTypeface && ((this.m_style & FontStyles.Bold) == FontStyles.Bold || (this.m_fontStyle & FontStyles.Bold) == FontStyles.Bold))
-				{
-					num19 = this.m_currentFontAsset.boldStyle * 2f;
-					num4 = 1f + this.m_currentFontAsset.boldSpacing * 0.01f;
+					this.ClearMesh();
+					this.m_preferredWidth = 0f;
+					this.m_preferredHeight = 0f;
 				}
 				else
 				{
-					num19 = this.m_currentFontAsset.normalStyle * 2f;
-					num4 = 1f;
-				}
-				float baseline = this.m_currentFontAsset.fontInfo.Baseline;
-				Vector3 vector;
-				vector.x = this.m_xAdvance + (this.m_cached_TextElement.xOffset - num3 - num19) * num2 * (1f - this.m_charWidthAdjDelta);
-				vector.y = (baseline + this.m_cached_TextElement.yOffset + num3) * num2 - this.m_lineOffset + this.m_baselineOffset;
-				vector.z = 0f;
-				Vector3 vector2;
-				vector2.x = vector.x;
-				vector2.y = vector.y - (this.m_cached_TextElement.height + num3 * 2f) * num2;
-				vector2.z = 0f;
-				Vector3 vector3;
-				vector3.x = vector2.x + (this.m_cached_TextElement.width + num3 * 2f + num19 * 2f) * num2 * (1f - this.m_charWidthAdjDelta);
-				vector3.y = vector.y;
-				vector3.z = 0f;
-				Vector3 vector4;
-				vector4.x = vector3.x;
-				vector4.y = vector2.y;
-				vector4.z = 0f;
-				if (this.m_textElementType == TMP_TextElementType.Character && !isUsingAlternateTypeface && ((this.m_style & FontStyles.Italic) == FontStyles.Italic || (this.m_fontStyle & FontStyles.Italic) == FontStyles.Italic))
-				{
-					float num20 = (float)this.m_currentFontAsset.italicStyle * 0.01f;
-					Vector3 vector5 = new Vector3(num20 * ((this.m_cached_TextElement.yOffset + num3 + num19) * num2), 0f, 0f);
-					Vector3 vector6 = new Vector3(num20 * ((this.m_cached_TextElement.yOffset - this.m_cached_TextElement.height - num3 - num19) * num2), 0f, 0f);
-					vector += vector5;
-					vector2 += vector6;
-					vector3 += vector5;
-					vector4 += vector6;
-				}
-				this.m_textInfo.characterInfo[this.m_characterCount].bottomLeft = vector2;
-				this.m_textInfo.characterInfo[this.m_characterCount].topLeft = vector;
-				this.m_textInfo.characterInfo[this.m_characterCount].topRight = vector3;
-				this.m_textInfo.characterInfo[this.m_characterCount].bottomRight = vector4;
-				this.m_textInfo.characterInfo[this.m_characterCount].origin = this.m_xAdvance;
-				this.m_textInfo.characterInfo[this.m_characterCount].baseLine = 0f - this.m_lineOffset + this.m_baselineOffset;
-				this.m_textInfo.characterInfo[this.m_characterCount].aspectRatio = (vector3.x - vector2.x) / (vector.y - vector2.y);
-				float num21 = this.m_currentFontAsset.fontInfo.Ascender * ((this.m_textElementType != TMP_TextElementType.Character) ? this.m_textInfo.characterInfo[this.m_characterCount].scale : num2) + this.m_baselineOffset;
-				this.m_textInfo.characterInfo[this.m_characterCount].ascender = num21 - this.m_lineOffset;
-				this.m_maxLineAscender = ((num21 <= this.m_maxLineAscender) ? this.m_maxLineAscender : num21);
-				float num22 = this.m_currentFontAsset.fontInfo.Descender * ((this.m_textElementType != TMP_TextElementType.Character) ? this.m_textInfo.characterInfo[this.m_characterCount].scale : num2) + this.m_baselineOffset;
-				float num23 = (this.m_textInfo.characterInfo[this.m_characterCount].descender = num22 - this.m_lineOffset);
-				this.m_maxLineDescender = ((num22 >= this.m_maxLineDescender) ? this.m_maxLineDescender : num22);
-				if ((this.m_style & FontStyles.Subscript) == FontStyles.Subscript || (this.m_style & FontStyles.Superscript) == FontStyles.Superscript)
-				{
-					float num24 = (num21 - this.m_baselineOffset) / this.m_currentFontAsset.fontInfo.SubSize;
-					num21 = this.m_maxLineAscender;
-					this.m_maxLineAscender = ((num24 <= this.m_maxLineAscender) ? this.m_maxLineAscender : num24);
-					float num25 = (num22 - this.m_baselineOffset) / this.m_currentFontAsset.fontInfo.SubSize;
-					num22 = this.m_maxLineDescender;
-					this.m_maxLineDescender = ((num25 >= this.m_maxLineDescender) ? this.m_maxLineDescender : num25);
-				}
-				if (this.m_lineNumber == 0)
-				{
-					this.m_maxAscender = ((this.m_maxAscender <= num21) ? num21 : this.m_maxAscender);
-				}
-				if (this.m_lineOffset == 0f)
-				{
-					num9 = ((num9 <= num21) ? num21 : num9);
-				}
-				this.m_textInfo.characterInfo[this.m_characterCount].isVisible = false;
-				if (num14 == 9 || !char.IsWhiteSpace((char)num14) || this.m_textElementType == TMP_TextElementType.Sprite)
-				{
-					this.m_textInfo.characterInfo[this.m_characterCount].isVisible = true;
-					num8 = ((this.m_width == -1f) ? (marginWidth + 0.0001f - this.m_marginLeft - this.m_marginRight) : Mathf.Min(marginWidth + 0.0001f - this.m_marginLeft - this.m_marginRight, this.m_width));
-					this.m_textInfo.lineInfo[this.m_lineNumber].marginLeft = this.m_marginLeft;
-					if (Mathf.Abs(this.m_xAdvance) + (this.m_isRightToLeft ? 0f : this.m_cached_TextElement.xAdvance) * (1f - this.m_charWidthAdjDelta) * ((num14 == 173) ? num17 : num2) > num8)
+					this.m_currentFontAsset = this.m_fontAsset;
+					this.m_currentMaterial = this.m_sharedMaterial;
+					this.m_currentMaterialIndex = 0;
+					this.m_materialReferenceStack.SetDefault(new MaterialReference(0, this.m_currentFontAsset, null, this.m_currentMaterial, this.m_padding));
+					this.m_currentSpriteAsset = this.m_spriteAsset;
+					int totalCharacterCount = this.m_totalCharacterCount;
+					this.m_fontScale = this.m_fontSize / this.m_currentFontAsset.fontInfo.PointSize;
+					float num = this.m_fontSize / this.m_fontAsset.fontInfo.PointSize * this.m_fontAsset.fontInfo.Scale;
+					float num2 = this.m_fontScale;
+					this.m_fontScaleMultiplier = 1f;
+					this.m_currentFontSize = this.m_fontSize;
+					this.m_sizeStack.SetDefault(this.m_currentFontSize);
+					this.m_style = this.m_fontStyle;
+					this.m_fontWeightInternal = (((this.m_style & FontStyles.Bold) != FontStyles.Bold) ? this.m_fontWeight : 700);
+					this.m_fontWeightStack.SetDefault(this.m_fontWeightInternal);
+					this.m_lineJustification = this.m_textAlignment;
+					float num3 = 0f;
+					float num4 = 1f;
+					this.m_baselineOffset = 0f;
+					bool flag = false;
+					Vector3 zero = Vector3.zero;
+					Vector3 zero2 = Vector3.zero;
+					bool flag2 = false;
+					Vector3 zero3 = Vector3.zero;
+					Vector3 zero4 = Vector3.zero;
+					this.m_fontColor32 = this.m_fontColor;
+					this.m_htmlColor = this.m_fontColor32;
+					this.m_colorStack.SetDefault(this.m_htmlColor);
+					this.m_styleStack.Clear();
+					this.m_actionStack.Clear();
+					this.m_lineOffset = 0f;
+					this.m_lineHeight = 0f;
+					float num5 = this.m_currentFontAsset.fontInfo.LineHeight - (this.m_currentFontAsset.fontInfo.Ascender - this.m_currentFontAsset.fontInfo.Descender);
+					this.m_cSpacing = 0f;
+					this.m_monoSpacing = 0f;
+					this.m_xAdvance = 0f;
+					this.tag_LineIndent = 0f;
+					this.tag_Indent = 0f;
+					this.m_indentStack.SetDefault(0f);
+					this.tag_NoParsing = false;
+					this.m_characterCount = 0;
+					this.m_firstCharacterOfLine = 0;
+					this.m_lastCharacterOfLine = 0;
+					this.m_firstVisibleCharacterOfLine = 0;
+					this.m_lastVisibleCharacterOfLine = 0;
+					this.m_maxLineAscender = float.NegativeInfinity;
+					this.m_maxLineDescender = float.PositiveInfinity;
+					this.m_lineNumber = 0;
+					this.m_lineVisibleCharacterCount = 0;
+					bool flag3 = true;
+					this.m_pageNumber = 0;
+					int num6 = Mathf.Clamp(this.m_pageToDisplay - 1, 0, this.m_textInfo.pageInfo.Length - 1);
+					int num7 = 0;
+					Vector4 margin = this.m_margin;
+					float marginWidth = this.m_marginWidth;
+					float marginHeight = this.m_marginHeight;
+					this.m_marginLeft = 0f;
+					this.m_marginRight = 0f;
+					this.m_width = -1f;
+					float num8 = marginWidth + 0.0001f - this.m_marginLeft - this.m_marginRight;
+					this.m_meshExtents.min = TMP_Text.k_InfinityVectorPositive;
+					this.m_meshExtents.max = TMP_Text.k_InfinityVectorNegative;
+					this.m_textInfo.ClearLineInfo();
+					this.m_maxAscender = 0f;
+					this.m_maxDescender = 0f;
+					float num9 = 0f;
+					float num10 = 0f;
+					bool flag4 = false;
+					this.m_isNewPage = false;
+					bool flag5 = true;
+					bool flag6 = false;
+					int num11 = 0;
+					this.loopCountA++;
+					int num12 = 0;
+					int num13 = 0;
+					while (this.m_char_buffer[num13] != 0)
 					{
-						num7 = this.m_characterCount - 1;
-						if (base.enableWordWrapping && this.m_characterCount != this.m_firstCharacterOfLine)
+						int num14 = this.m_char_buffer[num13];
+						this.m_textElementType = TMP_TextElementType.Character;
+						this.m_currentMaterialIndex = this.m_textInfo.characterInfo[this.m_characterCount].materialReferenceIndex;
+						this.m_currentFontAsset = this.m_materialReferences[this.m_currentMaterialIndex].fontAsset;
+						int currentMaterialIndex = this.m_currentMaterialIndex;
+						if (this.m_isRichText && num14 == 60)
 						{
-							if (num11 == this.m_SavedWordWrapState.previous_WordBreak || flag5)
+							this.m_isParsingText = true;
+							if (base.ValidateHtmlTag(this.m_char_buffer, num13 + 1, out num12))
 							{
-								if (this.m_enableAutoSizing && this.m_fontSize > this.m_fontSizeMin)
+								num13 = num12;
+								if (this.m_textElementType == TMP_TextElementType.Character)
+								{
+									goto IL_2D57;
+								}
+							}
+							goto IL_04C7;
+						}
+						goto IL_04C7;
+						IL_2D57:
+						num13++;
+						continue;
+						IL_04C7:
+						this.m_isParsingText = false;
+						bool isUsingAlternateTypeface = this.m_textInfo.characterInfo[this.m_characterCount].isUsingAlternateTypeface;
+						float num15 = 1f;
+						if (this.m_textElementType == TMP_TextElementType.Character)
+						{
+							if ((this.m_style & FontStyles.UpperCase) == FontStyles.UpperCase)
+							{
+								if (char.IsLower((char)num14))
+								{
+									num14 = (int)char.ToUpper((char)num14);
+								}
+							}
+							else if ((this.m_style & FontStyles.LowerCase) == FontStyles.LowerCase)
+							{
+								if (char.IsUpper((char)num14))
+								{
+									num14 = (int)char.ToLower((char)num14);
+								}
+							}
+							else if ((this.m_fontStyle & FontStyles.SmallCaps) == FontStyles.SmallCaps || (this.m_style & FontStyles.SmallCaps) == FontStyles.SmallCaps)
+							{
+								if (char.IsLower((char)num14))
+								{
+									num15 = 0.8f;
+									num14 = (int)char.ToUpper((char)num14);
+								}
+							}
+						}
+						if (this.m_textElementType == TMP_TextElementType.Sprite)
+						{
+							TMP_Sprite tmp_Sprite = this.m_currentSpriteAsset.spriteInfoList[this.m_spriteIndex];
+							if (tmp_Sprite == null)
+							{
+								goto IL_2D57;
+							}
+							num14 = 57344 + this.m_spriteIndex;
+							this.m_currentFontAsset = this.m_fontAsset;
+							float num16 = this.m_currentFontSize / this.m_fontAsset.fontInfo.PointSize * this.m_fontAsset.fontInfo.Scale;
+							num2 = this.m_fontAsset.fontInfo.Ascender / tmp_Sprite.height * tmp_Sprite.scale * num16;
+							this.m_cached_TextElement = tmp_Sprite;
+							this.m_textInfo.characterInfo[this.m_characterCount].elementType = TMP_TextElementType.Sprite;
+							this.m_textInfo.characterInfo[this.m_characterCount].scale = num16;
+							this.m_textInfo.characterInfo[this.m_characterCount].spriteAsset = this.m_currentSpriteAsset;
+							this.m_textInfo.characterInfo[this.m_characterCount].fontAsset = this.m_currentFontAsset;
+							this.m_textInfo.characterInfo[this.m_characterCount].materialReferenceIndex = this.m_currentMaterialIndex;
+							this.m_currentMaterialIndex = currentMaterialIndex;
+							num3 = 0f;
+						}
+						else if (this.m_textElementType == TMP_TextElementType.Character)
+						{
+							this.m_cached_TextElement = this.m_textInfo.characterInfo[this.m_characterCount].textElement;
+							if (this.m_cached_TextElement == null)
+							{
+								goto IL_2D57;
+							}
+							this.m_currentFontAsset = this.m_textInfo.characterInfo[this.m_characterCount].fontAsset;
+							this.m_currentMaterial = this.m_textInfo.characterInfo[this.m_characterCount].material;
+							this.m_currentMaterialIndex = this.m_textInfo.characterInfo[this.m_characterCount].materialReferenceIndex;
+							this.m_fontScale = this.m_currentFontSize * num15 / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale;
+							num2 = this.m_fontScale * this.m_fontScaleMultiplier;
+							this.m_textInfo.characterInfo[this.m_characterCount].elementType = TMP_TextElementType.Character;
+							this.m_textInfo.characterInfo[this.m_characterCount].scale = num2;
+							num3 = ((this.m_currentMaterialIndex != 0) ? this.m_subTextObjects[this.m_currentMaterialIndex].padding : this.m_padding);
+						}
+						float num17 = num2;
+						if (num14 == 173)
+						{
+							num2 = 0f;
+						}
+						if (this.m_isRightToLeft)
+						{
+							this.m_xAdvance -= ((this.m_cached_TextElement.xAdvance * num4 + this.m_characterSpacing + this.m_currentFontAsset.normalSpacingOffset) * num2 + this.m_cSpacing) * (1f - this.m_charWidthAdjDelta);
+						}
+						this.m_textInfo.characterInfo[this.m_characterCount].character = (char)num14;
+						this.m_textInfo.characterInfo[this.m_characterCount].pointSize = this.m_currentFontSize;
+						this.m_textInfo.characterInfo[this.m_characterCount].color = this.m_htmlColor;
+						this.m_textInfo.characterInfo[this.m_characterCount].style = this.m_style;
+						this.m_textInfo.characterInfo[this.m_characterCount].index = (short)num13;
+						if (this.m_enableKerning && this.m_characterCount >= 1)
+						{
+							int character = (int)this.m_textInfo.characterInfo[this.m_characterCount - 1].character;
+							KerningPairKey kerningPairKey = new KerningPairKey(character, num14);
+							KerningPair kerningPair;
+							this.m_currentFontAsset.kerningDictionary.TryGetValue(kerningPairKey.key, out kerningPair);
+							if (kerningPair != null)
+							{
+								this.m_xAdvance += kerningPair.XadvanceOffset * num2;
+							}
+						}
+						float num18 = 0f;
+						if (this.m_monoSpacing != 0f)
+						{
+							num18 = (this.m_monoSpacing / 2f - (this.m_cached_TextElement.width / 2f + this.m_cached_TextElement.xOffset) * num2) * (1f - this.m_charWidthAdjDelta);
+							this.m_xAdvance += num18;
+						}
+						float num19;
+						if (this.m_textElementType == TMP_TextElementType.Character && !isUsingAlternateTypeface && ((this.m_style & FontStyles.Bold) == FontStyles.Bold || (this.m_fontStyle & FontStyles.Bold) == FontStyles.Bold))
+						{
+							num19 = this.m_currentFontAsset.boldStyle * 2f;
+							num4 = 1f + this.m_currentFontAsset.boldSpacing * 0.01f;
+						}
+						else
+						{
+							num19 = this.m_currentFontAsset.normalStyle * 2f;
+							num4 = 1f;
+						}
+						float baseline = this.m_currentFontAsset.fontInfo.Baseline;
+						Vector3 vector;
+						vector.x = this.m_xAdvance + (this.m_cached_TextElement.xOffset - num3 - num19) * num2 * (1f - this.m_charWidthAdjDelta);
+						vector.y = (baseline + this.m_cached_TextElement.yOffset + num3) * num2 - this.m_lineOffset + this.m_baselineOffset;
+						vector.z = 0f;
+						Vector3 vector2;
+						vector2.x = vector.x;
+						vector2.y = vector.y - (this.m_cached_TextElement.height + num3 * 2f) * num2;
+						vector2.z = 0f;
+						Vector3 vector3;
+						vector3.x = vector2.x + (this.m_cached_TextElement.width + num3 * 2f + num19 * 2f) * num2 * (1f - this.m_charWidthAdjDelta);
+						vector3.y = vector.y;
+						vector3.z = 0f;
+						Vector3 vector4;
+						vector4.x = vector3.x;
+						vector4.y = vector2.y;
+						vector4.z = 0f;
+						if (this.m_textElementType == TMP_TextElementType.Character && !isUsingAlternateTypeface && ((this.m_style & FontStyles.Italic) == FontStyles.Italic || (this.m_fontStyle & FontStyles.Italic) == FontStyles.Italic))
+						{
+							float num20 = (float)this.m_currentFontAsset.italicStyle * 0.01f;
+							Vector3 vector5 = new Vector3(num20 * ((this.m_cached_TextElement.yOffset + num3 + num19) * num2), 0f, 0f);
+							Vector3 vector6 = new Vector3(num20 * ((this.m_cached_TextElement.yOffset - this.m_cached_TextElement.height - num3 - num19) * num2), 0f, 0f);
+							vector += vector5;
+							vector2 += vector6;
+							vector3 += vector5;
+							vector4 += vector6;
+						}
+						this.m_textInfo.characterInfo[this.m_characterCount].bottomLeft = vector2;
+						this.m_textInfo.characterInfo[this.m_characterCount].topLeft = vector;
+						this.m_textInfo.characterInfo[this.m_characterCount].topRight = vector3;
+						this.m_textInfo.characterInfo[this.m_characterCount].bottomRight = vector4;
+						this.m_textInfo.characterInfo[this.m_characterCount].origin = this.m_xAdvance;
+						this.m_textInfo.characterInfo[this.m_characterCount].baseLine = 0f - this.m_lineOffset + this.m_baselineOffset;
+						this.m_textInfo.characterInfo[this.m_characterCount].aspectRatio = (vector3.x - vector2.x) / (vector.y - vector2.y);
+						float num21 = this.m_currentFontAsset.fontInfo.Ascender * ((this.m_textElementType != TMP_TextElementType.Character) ? this.m_textInfo.characterInfo[this.m_characterCount].scale : num2) + this.m_baselineOffset;
+						this.m_textInfo.characterInfo[this.m_characterCount].ascender = num21 - this.m_lineOffset;
+						this.m_maxLineAscender = ((num21 <= this.m_maxLineAscender) ? this.m_maxLineAscender : num21);
+						float num22 = this.m_currentFontAsset.fontInfo.Descender * ((this.m_textElementType != TMP_TextElementType.Character) ? this.m_textInfo.characterInfo[this.m_characterCount].scale : num2) + this.m_baselineOffset;
+						float num23 = (this.m_textInfo.characterInfo[this.m_characterCount].descender = num22 - this.m_lineOffset);
+						this.m_maxLineDescender = ((num22 >= this.m_maxLineDescender) ? this.m_maxLineDescender : num22);
+						if ((this.m_style & FontStyles.Subscript) == FontStyles.Subscript || (this.m_style & FontStyles.Superscript) == FontStyles.Superscript)
+						{
+							float num24 = (num21 - this.m_baselineOffset) / this.m_currentFontAsset.fontInfo.SubSize;
+							num21 = this.m_maxLineAscender;
+							this.m_maxLineAscender = ((num24 <= this.m_maxLineAscender) ? this.m_maxLineAscender : num24);
+							float num25 = (num22 - this.m_baselineOffset) / this.m_currentFontAsset.fontInfo.SubSize;
+							num22 = this.m_maxLineDescender;
+							this.m_maxLineDescender = ((num25 >= this.m_maxLineDescender) ? this.m_maxLineDescender : num25);
+						}
+						if (this.m_lineNumber == 0)
+						{
+							this.m_maxAscender = ((this.m_maxAscender <= num21) ? num21 : this.m_maxAscender);
+						}
+						if (this.m_lineOffset == 0f)
+						{
+							num9 = ((num9 <= num21) ? num21 : num9);
+						}
+						this.m_textInfo.characterInfo[this.m_characterCount].isVisible = false;
+						if (num14 == 9 || !char.IsWhiteSpace((char)num14) || this.m_textElementType == TMP_TextElementType.Sprite)
+						{
+							this.m_textInfo.characterInfo[this.m_characterCount].isVisible = true;
+							num8 = ((this.m_width == -1f) ? (marginWidth + 0.0001f - this.m_marginLeft - this.m_marginRight) : Mathf.Min(marginWidth + 0.0001f - this.m_marginLeft - this.m_marginRight, this.m_width));
+							this.m_textInfo.lineInfo[this.m_lineNumber].marginLeft = this.m_marginLeft;
+							if (Mathf.Abs(this.m_xAdvance) + (this.m_isRightToLeft ? 0f : this.m_cached_TextElement.xAdvance) * (1f - this.m_charWidthAdjDelta) * ((num14 == 173) ? num17 : num2) > num8)
+							{
+								num7 = this.m_characterCount - 1;
+								if (base.enableWordWrapping && this.m_characterCount != this.m_firstCharacterOfLine)
+								{
+									if (num11 == this.m_SavedWordWrapState.previous_WordBreak || flag5)
+									{
+										if (this.m_enableAutoSizing && this.m_fontSize > this.m_fontSizeMin)
+										{
+											if (this.m_charWidthAdjDelta < this.m_charWidthMaxAdj / 100f)
+											{
+												this.loopCountA = 0;
+												this.m_charWidthAdjDelta += 0.01f;
+												this.GenerateTextMesh();
+												return;
+											}
+											this.m_maxFontSize = this.m_fontSize;
+											this.m_fontSize -= Mathf.Max((this.m_fontSize - this.m_minFontSize) / 2f, 0.05f);
+											this.m_fontSize = (float)((int)(Mathf.Max(this.m_fontSize, this.m_fontSizeMin) * 20f + 0.5f)) / 20f;
+											if (this.loopCountA > 20)
+											{
+												return;
+											}
+											this.GenerateTextMesh();
+											return;
+										}
+										else
+										{
+											if (!this.m_isCharacterWrappingEnabled)
+											{
+												this.m_isCharacterWrappingEnabled = true;
+											}
+											else
+											{
+												flag6 = true;
+											}
+											this.m_recursiveCount++;
+											if (this.m_recursiveCount > 20)
+											{
+												goto IL_2D57;
+											}
+										}
+									}
+									num13 = base.RestoreWordWrappingState(ref this.m_SavedWordWrapState);
+									num11 = num13;
+									if (this.m_char_buffer[num13] == 173)
+									{
+										this.m_isTextTruncated = true;
+										this.m_char_buffer[num13] = 45;
+										this.GenerateTextMesh();
+										return;
+									}
+									if (this.m_lineNumber > 0 && !TMP_Math.Approximately(this.m_maxLineAscender, this.m_startOfLineAscender) && this.m_lineHeight == 0f && !this.m_isNewPage)
+									{
+										float num26 = this.m_maxLineAscender - this.m_startOfLineAscender;
+										this.AdjustLineOffset(this.m_firstCharacterOfLine, this.m_characterCount, num26);
+										this.m_lineOffset += num26;
+										this.m_SavedWordWrapState.lineOffset = this.m_lineOffset;
+										this.m_SavedWordWrapState.previousLineAscender = this.m_maxLineAscender;
+									}
+									this.m_isNewPage = false;
+									float num27 = this.m_maxLineAscender - this.m_lineOffset;
+									float num28 = this.m_maxLineDescender - this.m_lineOffset;
+									this.m_maxDescender = ((this.m_maxDescender >= num28) ? num28 : this.m_maxDescender);
+									if (!flag4)
+									{
+										num10 = this.m_maxDescender;
+									}
+									if (this.m_useMaxVisibleDescender && (this.m_characterCount >= this.m_maxVisibleCharacters || this.m_lineNumber >= this.m_maxVisibleLines))
+									{
+										flag4 = true;
+									}
+									this.m_textInfo.lineInfo[this.m_lineNumber].firstCharacterIndex = this.m_firstCharacterOfLine;
+									this.m_textInfo.lineInfo[this.m_lineNumber].firstVisibleCharacterIndex = (this.m_firstVisibleCharacterOfLine = ((this.m_firstCharacterOfLine <= this.m_firstVisibleCharacterOfLine) ? this.m_firstVisibleCharacterOfLine : this.m_firstCharacterOfLine));
+									this.m_textInfo.lineInfo[this.m_lineNumber].lastCharacterIndex = (this.m_lastCharacterOfLine = ((this.m_characterCount - 1 <= 0) ? 0 : (this.m_characterCount - 1)));
+									this.m_textInfo.lineInfo[this.m_lineNumber].lastVisibleCharacterIndex = (this.m_lastVisibleCharacterOfLine = ((this.m_lastVisibleCharacterOfLine >= this.m_firstVisibleCharacterOfLine) ? this.m_lastVisibleCharacterOfLine : this.m_firstVisibleCharacterOfLine));
+									this.m_textInfo.lineInfo[this.m_lineNumber].characterCount = this.m_textInfo.lineInfo[this.m_lineNumber].lastCharacterIndex - this.m_textInfo.lineInfo[this.m_lineNumber].firstCharacterIndex + 1;
+									this.m_textInfo.lineInfo[this.m_lineNumber].visibleCharacterCount = this.m_lineVisibleCharacterCount;
+									this.m_textInfo.lineInfo[this.m_lineNumber].lineExtents.min = new Vector2(this.m_textInfo.characterInfo[this.m_firstVisibleCharacterOfLine].bottomLeft.x, num28);
+									this.m_textInfo.lineInfo[this.m_lineNumber].lineExtents.max = new Vector2(this.m_textInfo.characterInfo[this.m_lastVisibleCharacterOfLine].topRight.x, num27);
+									this.m_textInfo.lineInfo[this.m_lineNumber].length = this.m_textInfo.lineInfo[this.m_lineNumber].lineExtents.max.x;
+									this.m_textInfo.lineInfo[this.m_lineNumber].width = num8;
+									this.m_textInfo.lineInfo[this.m_lineNumber].maxAdvance = this.m_textInfo.characterInfo[this.m_lastVisibleCharacterOfLine].xAdvance - (this.m_characterSpacing + this.m_currentFontAsset.normalSpacingOffset) * num2 - this.m_cSpacing;
+									this.m_textInfo.lineInfo[this.m_lineNumber].baseline = 0f - this.m_lineOffset;
+									this.m_textInfo.lineInfo[this.m_lineNumber].ascender = num27;
+									this.m_textInfo.lineInfo[this.m_lineNumber].descender = num28;
+									this.m_textInfo.lineInfo[this.m_lineNumber].lineHeight = num27 - num28 + num5 * num;
+									this.m_firstCharacterOfLine = this.m_characterCount;
+									this.m_lineVisibleCharacterCount = 0;
+									base.SaveWordWrappingState(ref this.m_SavedLineState, num13, this.m_characterCount - 1);
+									this.m_lineNumber++;
+									flag3 = true;
+									if (this.m_lineNumber >= this.m_textInfo.lineInfo.Length)
+									{
+										base.ResizeLineExtents(this.m_lineNumber);
+									}
+									if (this.m_lineHeight == 0f)
+									{
+										float num29 = this.m_textInfo.characterInfo[this.m_characterCount].ascender - this.m_textInfo.characterInfo[this.m_characterCount].baseLine;
+										float num30 = 0f - this.m_maxLineDescender + num29 + (num5 + this.m_lineSpacing + this.m_lineSpacingDelta) * num;
+										this.m_lineOffset += num30;
+										this.m_startOfLineAscender = num29;
+									}
+									else
+									{
+										this.m_lineOffset += this.m_lineHeight + this.m_lineSpacing * num;
+									}
+									this.m_maxLineAscender = float.NegativeInfinity;
+									this.m_maxLineDescender = float.PositiveInfinity;
+									this.m_xAdvance = this.tag_Indent;
+									goto IL_2D57;
+								}
+								else if (this.m_enableAutoSizing && this.m_fontSize > this.m_fontSizeMin)
 								{
 									if (this.m_charWidthAdjDelta < this.m_charWidthMaxAdj / 100f)
 									{
@@ -1186,6 +1308,7 @@ namespace TMPro
 									this.m_maxFontSize = this.m_fontSize;
 									this.m_fontSize -= Mathf.Max((this.m_fontSize - this.m_minFontSize) / 2f, 0.05f);
 									this.m_fontSize = (float)((int)(Mathf.Max(this.m_fontSize, this.m_fontSizeMin) * 20f + 0.5f)) / 20f;
+									this.m_recursiveCount = 0;
 									if (this.loopCountA > 20)
 									{
 										return;
@@ -1195,42 +1318,267 @@ namespace TMPro
 								}
 								else
 								{
-									if (!this.m_isCharacterWrappingEnabled)
+									switch (this.m_overflowMode)
 									{
-										this.m_isCharacterWrappingEnabled = true;
-									}
-									else
-									{
-										flag6 = true;
-									}
-									this.m_recursiveCount++;
-									if (this.m_recursiveCount > 20)
-									{
-										goto IL_2CAE;
+									case TextOverflowModes.Overflow:
+										if (this.m_isMaskingEnabled)
+										{
+											this.DisableMasking();
+										}
+										break;
+									case TextOverflowModes.Ellipsis:
+										if (this.m_isMaskingEnabled)
+										{
+											this.DisableMasking();
+										}
+										this.m_isTextTruncated = true;
+										if (this.m_characterCount >= 1)
+										{
+											this.m_char_buffer[num13 - 1] = 8230;
+											this.m_char_buffer[num13] = 0;
+											if (this.m_cached_Ellipsis_GlyphInfo != null)
+											{
+												this.m_textInfo.characterInfo[num7].character = '…';
+												this.m_textInfo.characterInfo[num7].textElement = this.m_cached_Ellipsis_GlyphInfo;
+												this.m_textInfo.characterInfo[num7].fontAsset = this.m_materialReferences[0].fontAsset;
+												this.m_textInfo.characterInfo[num7].material = this.m_materialReferences[0].material;
+												this.m_textInfo.characterInfo[num7].materialReferenceIndex = 0;
+											}
+											else
+											{
+												global::Debug.LogWarning("Unable to use Ellipsis character since it wasn't found in the current Font Asset [" + this.m_fontAsset.name + "]. Consider regenerating this font asset to include the Ellipsis character (u+2026).\nNote: Warnings can be disabled in the TMP Settings file.", this);
+											}
+											this.m_totalCharacterCount = num7 + 1;
+											this.GenerateTextMesh();
+											return;
+										}
+										this.m_textInfo.characterInfo[this.m_characterCount].isVisible = false;
+										break;
+									case TextOverflowModes.Masking:
+										if (!this.m_isMaskingEnabled)
+										{
+											this.EnableMasking();
+										}
+										break;
+									case TextOverflowModes.Truncate:
+										if (this.m_isMaskingEnabled)
+										{
+											this.DisableMasking();
+										}
+										this.m_textInfo.characterInfo[this.m_characterCount].isVisible = false;
+										break;
+									case TextOverflowModes.ScrollRect:
+										if (!this.m_isMaskingEnabled)
+										{
+											this.EnableMasking();
+										}
+										break;
 									}
 								}
 							}
-							num13 = base.RestoreWordWrappingState(ref this.m_SavedWordWrapState);
-							num11 = num13;
-							if (this.m_char_buffer[num13] == 173)
+							if (num14 != 9)
 							{
-								this.m_isTextTruncated = true;
-								this.m_char_buffer[num13] = 45;
+								Color32 color;
+								if (this.m_overrideHtmlColors)
+								{
+									color = this.m_fontColor32;
+								}
+								else
+								{
+									color = this.m_htmlColor;
+								}
+								if (this.m_textElementType == TMP_TextElementType.Character)
+								{
+									this.SaveGlyphVertexInfo(num3, num19, color);
+								}
+								else if (this.m_textElementType == TMP_TextElementType.Sprite)
+								{
+									this.SaveSpriteVertexInfo(color);
+								}
+							}
+							else
+							{
+								this.m_textInfo.characterInfo[this.m_characterCount].isVisible = false;
+								this.m_lastVisibleCharacterOfLine = this.m_characterCount;
+								TMP_LineInfo[] lineInfo = this.m_textInfo.lineInfo;
+								int lineNumber = this.m_lineNumber;
+								lineInfo[lineNumber].spaceCount = lineInfo[lineNumber].spaceCount + 1;
+								this.m_textInfo.spaceCount++;
+							}
+							if (this.m_textInfo.characterInfo[this.m_characterCount].isVisible && num14 != 173)
+							{
+								if (flag3)
+								{
+									flag3 = false;
+									this.m_firstVisibleCharacterOfLine = this.m_characterCount;
+								}
+								this.m_lineVisibleCharacterCount++;
+								this.m_lastVisibleCharacterOfLine = this.m_characterCount;
+							}
+						}
+						else if ((num14 == 10 || char.IsSeparator((char)num14)) && num14 != 173 && num14 != 8203 && num14 != 8288)
+						{
+							TMP_LineInfo[] lineInfo2 = this.m_textInfo.lineInfo;
+							int lineNumber2 = this.m_lineNumber;
+							lineInfo2[lineNumber2].spaceCount = lineInfo2[lineNumber2].spaceCount + 1;
+							this.m_textInfo.spaceCount++;
+						}
+						if (this.m_lineNumber > 0 && !TMP_Math.Approximately(this.m_maxLineAscender, this.m_startOfLineAscender) && this.m_lineHeight == 0f && !this.m_isNewPage)
+						{
+							float num31 = this.m_maxLineAscender - this.m_startOfLineAscender;
+							this.AdjustLineOffset(this.m_firstCharacterOfLine, this.m_characterCount, num31);
+							num23 -= num31;
+							this.m_lineOffset += num31;
+							this.m_startOfLineAscender += num31;
+							this.m_SavedWordWrapState.lineOffset = this.m_lineOffset;
+							this.m_SavedWordWrapState.previousLineAscender = this.m_startOfLineAscender;
+						}
+						this.m_textInfo.characterInfo[this.m_characterCount].lineNumber = (short)this.m_lineNumber;
+						this.m_textInfo.characterInfo[this.m_characterCount].pageNumber = (short)this.m_pageNumber;
+						if ((num14 != 10 && num14 != 13 && num14 != 8230) || this.m_textInfo.lineInfo[this.m_lineNumber].characterCount == 1)
+						{
+							this.m_textInfo.lineInfo[this.m_lineNumber].alignment = this.m_lineJustification;
+						}
+						if (this.m_maxAscender - num23 > marginHeight + 0.0001f)
+						{
+							if (this.m_enableAutoSizing && this.m_lineSpacingDelta > this.m_lineSpacingMax && this.m_lineNumber > 0)
+							{
+								this.m_lineSpacingDelta -= 1f;
 								this.GenerateTextMesh();
 								return;
 							}
+							if (this.m_enableAutoSizing && this.m_fontSize > this.m_fontSizeMin)
+							{
+								this.m_maxFontSize = this.m_fontSize;
+								this.m_fontSize -= Mathf.Max((this.m_fontSize - this.m_minFontSize) / 2f, 0.05f);
+								this.m_fontSize = (float)((int)(Mathf.Max(this.m_fontSize, this.m_fontSizeMin) * 20f + 0.5f)) / 20f;
+								this.m_recursiveCount = 0;
+								if (this.loopCountA > 20)
+								{
+									return;
+								}
+								this.GenerateTextMesh();
+								return;
+							}
+							else
+							{
+								switch (this.m_overflowMode)
+								{
+								case TextOverflowModes.Overflow:
+									if (this.m_isMaskingEnabled)
+									{
+										this.DisableMasking();
+									}
+									break;
+								case TextOverflowModes.Ellipsis:
+									if (this.m_isMaskingEnabled)
+									{
+										this.DisableMasking();
+									}
+									if (this.m_lineNumber > 0)
+									{
+										this.m_char_buffer[(int)this.m_textInfo.characterInfo[num7].index] = 8230;
+										this.m_char_buffer[(int)(this.m_textInfo.characterInfo[num7].index + 1)] = 0;
+										if (this.m_cached_Ellipsis_GlyphInfo != null)
+										{
+											this.m_textInfo.characterInfo[num7].character = '…';
+											this.m_textInfo.characterInfo[num7].textElement = this.m_cached_Ellipsis_GlyphInfo;
+											this.m_textInfo.characterInfo[num7].fontAsset = this.m_materialReferences[0].fontAsset;
+											this.m_textInfo.characterInfo[num7].material = this.m_materialReferences[0].material;
+											this.m_textInfo.characterInfo[num7].materialReferenceIndex = 0;
+										}
+										else
+										{
+											global::Debug.LogWarning("Unable to use Ellipsis character since it wasn't found in the current Font Asset [" + this.m_fontAsset.name + "]. Consider regenerating this font asset to include the Ellipsis character (u+2026).\nNote: Warnings can be disabled in the TMP Settings file.", this);
+										}
+										this.m_totalCharacterCount = num7 + 1;
+										this.GenerateTextMesh();
+										this.m_isTextTruncated = true;
+										return;
+									}
+									this.ClearMesh();
+									return;
+								case TextOverflowModes.Masking:
+									if (!this.m_isMaskingEnabled)
+									{
+										this.EnableMasking();
+									}
+									break;
+								case TextOverflowModes.Truncate:
+									if (this.m_isMaskingEnabled)
+									{
+										this.DisableMasking();
+									}
+									if (this.m_lineNumber > 0)
+									{
+										this.m_char_buffer[(int)(this.m_textInfo.characterInfo[num7].index + 1)] = 0;
+										this.m_totalCharacterCount = num7 + 1;
+										this.GenerateTextMesh();
+										this.m_isTextTruncated = true;
+										return;
+									}
+									this.ClearMesh();
+									return;
+								case TextOverflowModes.ScrollRect:
+									if (!this.m_isMaskingEnabled)
+									{
+										this.EnableMasking();
+									}
+									break;
+								case TextOverflowModes.Page:
+									if (this.m_isMaskingEnabled)
+									{
+										this.DisableMasking();
+									}
+									if (num14 != 13 && num14 != 10)
+									{
+										num13 = base.RestoreWordWrappingState(ref this.m_SavedLineState);
+										if (num13 == 0)
+										{
+											this.ClearMesh();
+											return;
+										}
+										this.m_isNewPage = true;
+										this.m_xAdvance = this.tag_Indent;
+										this.m_lineOffset = 0f;
+										this.m_lineNumber++;
+										this.m_pageNumber++;
+										goto IL_2D57;
+									}
+									break;
+								}
+							}
+						}
+						if (num14 == 9)
+						{
+							this.m_xAdvance += this.m_currentFontAsset.fontInfo.TabWidth * num2;
+						}
+						else if (this.m_monoSpacing != 0f)
+						{
+							this.m_xAdvance += (this.m_monoSpacing - num18 + (this.m_characterSpacing + this.m_currentFontAsset.normalSpacingOffset) * num2 + this.m_cSpacing) * (1f - this.m_charWidthAdjDelta);
+						}
+						else if (!this.m_isRightToLeft)
+						{
+							this.m_xAdvance += ((this.m_cached_TextElement.xAdvance * num4 + this.m_characterSpacing + this.m_currentFontAsset.normalSpacingOffset) * num2 + this.m_cSpacing) * (1f - this.m_charWidthAdjDelta);
+						}
+						this.m_textInfo.characterInfo[this.m_characterCount].xAdvance = this.m_xAdvance;
+						if (num14 == 13)
+						{
+							this.m_xAdvance = this.tag_Indent;
+						}
+						if (num14 == 10 || this.m_characterCount == totalCharacterCount - 1)
+						{
 							if (this.m_lineNumber > 0 && !TMP_Math.Approximately(this.m_maxLineAscender, this.m_startOfLineAscender) && this.m_lineHeight == 0f && !this.m_isNewPage)
 							{
-								float num26 = this.m_maxLineAscender - this.m_startOfLineAscender;
-								this.AdjustLineOffset(this.m_firstCharacterOfLine, this.m_characterCount, num26);
-								this.m_lineOffset += num26;
-								this.m_SavedWordWrapState.lineOffset = this.m_lineOffset;
-								this.m_SavedWordWrapState.previousLineAscender = this.m_maxLineAscender;
+								float num32 = this.m_maxLineAscender - this.m_startOfLineAscender;
+								this.AdjustLineOffset(this.m_firstCharacterOfLine, this.m_characterCount, num32);
+								num23 -= num32;
+								this.m_lineOffset += num32;
 							}
 							this.m_isNewPage = false;
-							float num27 = this.m_maxLineAscender - this.m_lineOffset;
-							float num28 = this.m_maxLineDescender - this.m_lineOffset;
-							this.m_maxDescender = ((this.m_maxDescender >= num28) ? num28 : this.m_maxDescender);
+							float num33 = this.m_maxLineAscender - this.m_lineOffset;
+							float num34 = this.m_maxLineDescender - this.m_lineOffset;
+							this.m_maxDescender = ((this.m_maxDescender >= num34) ? num34 : this.m_maxDescender);
 							if (!flag4)
 							{
 								num10 = this.m_maxDescender;
@@ -1241,1102 +1589,777 @@ namespace TMPro
 							}
 							this.m_textInfo.lineInfo[this.m_lineNumber].firstCharacterIndex = this.m_firstCharacterOfLine;
 							this.m_textInfo.lineInfo[this.m_lineNumber].firstVisibleCharacterIndex = (this.m_firstVisibleCharacterOfLine = ((this.m_firstCharacterOfLine <= this.m_firstVisibleCharacterOfLine) ? this.m_firstVisibleCharacterOfLine : this.m_firstCharacterOfLine));
-							this.m_textInfo.lineInfo[this.m_lineNumber].lastCharacterIndex = (this.m_lastCharacterOfLine = ((this.m_characterCount - 1 <= 0) ? 0 : (this.m_characterCount - 1)));
+							this.m_textInfo.lineInfo[this.m_lineNumber].lastCharacterIndex = (this.m_lastCharacterOfLine = this.m_characterCount);
 							this.m_textInfo.lineInfo[this.m_lineNumber].lastVisibleCharacterIndex = (this.m_lastVisibleCharacterOfLine = ((this.m_lastVisibleCharacterOfLine >= this.m_firstVisibleCharacterOfLine) ? this.m_lastVisibleCharacterOfLine : this.m_firstVisibleCharacterOfLine));
 							this.m_textInfo.lineInfo[this.m_lineNumber].characterCount = this.m_textInfo.lineInfo[this.m_lineNumber].lastCharacterIndex - this.m_textInfo.lineInfo[this.m_lineNumber].firstCharacterIndex + 1;
 							this.m_textInfo.lineInfo[this.m_lineNumber].visibleCharacterCount = this.m_lineVisibleCharacterCount;
-							this.m_textInfo.lineInfo[this.m_lineNumber].lineExtents.min = new Vector2(this.m_textInfo.characterInfo[this.m_firstVisibleCharacterOfLine].bottomLeft.x, num28);
-							this.m_textInfo.lineInfo[this.m_lineNumber].lineExtents.max = new Vector2(this.m_textInfo.characterInfo[this.m_lastVisibleCharacterOfLine].topRight.x, num27);
-							this.m_textInfo.lineInfo[this.m_lineNumber].length = this.m_textInfo.lineInfo[this.m_lineNumber].lineExtents.max.x;
+							this.m_textInfo.lineInfo[this.m_lineNumber].lineExtents.min = new Vector2(this.m_textInfo.characterInfo[this.m_firstVisibleCharacterOfLine].bottomLeft.x, num34);
+							this.m_textInfo.lineInfo[this.m_lineNumber].lineExtents.max = new Vector2(this.m_textInfo.characterInfo[this.m_lastVisibleCharacterOfLine].topRight.x, num33);
+							this.m_textInfo.lineInfo[this.m_lineNumber].length = this.m_textInfo.lineInfo[this.m_lineNumber].lineExtents.max.x - num3 * num2;
 							this.m_textInfo.lineInfo[this.m_lineNumber].width = num8;
-							this.m_textInfo.lineInfo[this.m_lineNumber].maxAdvance = this.m_textInfo.characterInfo[this.m_lastVisibleCharacterOfLine].xAdvance - (this.m_characterSpacing + this.m_currentFontAsset.normalSpacingOffset) * num2 - this.m_cSpacing;
-							this.m_textInfo.lineInfo[this.m_lineNumber].baseline = 0f - this.m_lineOffset;
-							this.m_textInfo.lineInfo[this.m_lineNumber].ascender = num27;
-							this.m_textInfo.lineInfo[this.m_lineNumber].descender = num28;
-							this.m_textInfo.lineInfo[this.m_lineNumber].lineHeight = num27 - num28 + num5 * num;
-							this.m_firstCharacterOfLine = this.m_characterCount;
-							this.m_lineVisibleCharacterCount = 0;
-							base.SaveWordWrappingState(ref this.m_SavedLineState, num13, this.m_characterCount - 1);
-							this.m_lineNumber++;
-							flag3 = true;
-							if (this.m_lineNumber >= this.m_textInfo.lineInfo.Length)
+							if (this.m_textInfo.lineInfo[this.m_lineNumber].characterCount == 1)
 							{
-								base.ResizeLineExtents(this.m_lineNumber);
+								this.m_textInfo.lineInfo[this.m_lineNumber].alignment = this.m_lineJustification;
 							}
-							if (this.m_lineHeight == 0f)
+							if (this.m_textInfo.characterInfo[this.m_lastVisibleCharacterOfLine].isVisible)
 							{
-								float num29 = this.m_textInfo.characterInfo[this.m_characterCount].ascender - this.m_textInfo.characterInfo[this.m_characterCount].baseLine;
-								float num30 = 0f - this.m_maxLineDescender + num29 + (num5 + this.m_lineSpacing + this.m_lineSpacingDelta) * num;
-								this.m_lineOffset += num30;
-								this.m_startOfLineAscender = num29;
+								this.m_textInfo.lineInfo[this.m_lineNumber].maxAdvance = this.m_textInfo.characterInfo[this.m_lastVisibleCharacterOfLine].xAdvance - (this.m_characterSpacing + this.m_currentFontAsset.normalSpacingOffset) * num2 - this.m_cSpacing;
 							}
 							else
 							{
-								this.m_lineOffset += this.m_lineHeight + this.m_lineSpacing * num;
+								this.m_textInfo.lineInfo[this.m_lineNumber].maxAdvance = this.m_textInfo.characterInfo[this.m_lastCharacterOfLine].xAdvance - (this.m_characterSpacing + this.m_currentFontAsset.normalSpacingOffset) * num2 - this.m_cSpacing;
 							}
-							this.m_maxLineAscender = float.NegativeInfinity;
-							this.m_maxLineDescender = float.PositiveInfinity;
-							this.m_xAdvance = 0f + this.tag_Indent;
-							goto IL_2CAE;
+							this.m_textInfo.lineInfo[this.m_lineNumber].baseline = 0f - this.m_lineOffset;
+							this.m_textInfo.lineInfo[this.m_lineNumber].ascender = num33;
+							this.m_textInfo.lineInfo[this.m_lineNumber].descender = num34;
+							this.m_textInfo.lineInfo[this.m_lineNumber].lineHeight = num33 - num34 + num5 * num;
+							this.m_firstCharacterOfLine = this.m_characterCount + 1;
+							this.m_lineVisibleCharacterCount = 0;
+							if (num14 == 10)
+							{
+								base.SaveWordWrappingState(ref this.m_SavedLineState, num13, this.m_characterCount);
+								base.SaveWordWrappingState(ref this.m_SavedWordWrapState, num13, this.m_characterCount);
+								this.m_lineNumber++;
+								flag3 = true;
+								if (this.m_lineNumber >= this.m_textInfo.lineInfo.Length)
+								{
+									base.ResizeLineExtents(this.m_lineNumber);
+								}
+								if (this.m_lineHeight == 0f)
+								{
+									float num30 = 0f - this.m_maxLineDescender + num21 + (num5 + this.m_lineSpacing + this.m_paragraphSpacing + this.m_lineSpacingDelta) * num;
+									this.m_lineOffset += num30;
+								}
+								else
+								{
+									this.m_lineOffset += this.m_lineHeight + (this.m_lineSpacing + this.m_paragraphSpacing) * num;
+								}
+								this.m_maxLineAscender = float.NegativeInfinity;
+								this.m_maxLineDescender = float.PositiveInfinity;
+								this.m_startOfLineAscender = num21;
+								this.m_xAdvance = this.tag_LineIndent + this.tag_Indent;
+								num7 = this.m_characterCount - 1;
+								this.m_characterCount++;
+								goto IL_2D57;
+							}
 						}
-						else if (this.m_enableAutoSizing && this.m_fontSize > this.m_fontSizeMin)
+						if (this.m_textInfo.characterInfo[this.m_characterCount].isVisible)
 						{
-							if (this.m_charWidthAdjDelta < this.m_charWidthMaxAdj / 100f)
+							this.m_meshExtents.min.x = Mathf.Min(this.m_meshExtents.min.x, this.m_textInfo.characterInfo[this.m_characterCount].bottomLeft.x);
+							this.m_meshExtents.min.y = Mathf.Min(this.m_meshExtents.min.y, this.m_textInfo.characterInfo[this.m_characterCount].bottomLeft.y);
+							this.m_meshExtents.max.x = Mathf.Max(this.m_meshExtents.max.x, this.m_textInfo.characterInfo[this.m_characterCount].topRight.x);
+							this.m_meshExtents.max.y = Mathf.Max(this.m_meshExtents.max.y, this.m_textInfo.characterInfo[this.m_characterCount].topRight.y);
+						}
+						if (this.m_overflowMode == TextOverflowModes.Page && num14 != 13 && num14 != 10 && this.m_pageNumber < 16)
+						{
+							this.m_textInfo.pageInfo[this.m_pageNumber].ascender = num9;
+							this.m_textInfo.pageInfo[this.m_pageNumber].descender = ((num22 >= this.m_textInfo.pageInfo[this.m_pageNumber].descender) ? this.m_textInfo.pageInfo[this.m_pageNumber].descender : num22);
+							if (this.m_pageNumber == 0 && this.m_characterCount == 0)
 							{
-								this.loopCountA = 0;
-								this.m_charWidthAdjDelta += 0.01f;
-								this.GenerateTextMesh();
-								return;
+								this.m_textInfo.pageInfo[this.m_pageNumber].firstCharacterIndex = this.m_characterCount;
 							}
-							this.m_maxFontSize = this.m_fontSize;
-							this.m_fontSize -= Mathf.Max((this.m_fontSize - this.m_minFontSize) / 2f, 0.05f);
-							this.m_fontSize = (float)((int)(Mathf.Max(this.m_fontSize, this.m_fontSizeMin) * 20f + 0.5f)) / 20f;
-							this.m_recursiveCount = 0;
-							if (this.loopCountA > 20)
+							else if (this.m_characterCount > 0 && this.m_pageNumber != (int)this.m_textInfo.characterInfo[this.m_characterCount - 1].pageNumber)
 							{
-								return;
+								this.m_textInfo.pageInfo[this.m_pageNumber - 1].lastCharacterIndex = this.m_characterCount - 1;
+								this.m_textInfo.pageInfo[this.m_pageNumber].firstCharacterIndex = this.m_characterCount;
 							}
+							else if (this.m_characterCount == totalCharacterCount - 1)
+							{
+								this.m_textInfo.pageInfo[this.m_pageNumber].lastCharacterIndex = this.m_characterCount;
+							}
+						}
+						if (this.m_enableWordWrapping || this.m_overflowMode == TextOverflowModes.Truncate || this.m_overflowMode == TextOverflowModes.Ellipsis)
+						{
+							if ((char.IsWhiteSpace((char)num14) || num14 == 45 || num14 == 173) && !this.m_isNonBreakingSpace && num14 != 160 && num14 != 8209 && num14 != 8239 && num14 != 8288)
+							{
+								base.SaveWordWrappingState(ref this.m_SavedWordWrapState, num13, this.m_characterCount);
+								this.m_isCharacterWrappingEnabled = false;
+								flag5 = false;
+							}
+							else if (((num14 > 4352 && num14 < 4607) || (num14 > 11904 && num14 < 40959) || (num14 > 43360 && num14 < 43391) || (num14 > 44032 && num14 < 55295) || (num14 > 63744 && num14 < 64255) || (num14 > 65072 && num14 < 65103) || (num14 > 65280 && num14 < 65519)) && !this.m_isNonBreakingSpace)
+							{
+								if (flag5 || flag6 || (!TMP_Settings.linebreakingRules.leadingCharacters.ContainsKey(num14) && this.m_characterCount < totalCharacterCount - 1 && !TMP_Settings.linebreakingRules.followingCharacters.ContainsKey((int)this.m_textInfo.characterInfo[this.m_characterCount + 1].character)))
+								{
+									base.SaveWordWrappingState(ref this.m_SavedWordWrapState, num13, this.m_characterCount);
+									this.m_isCharacterWrappingEnabled = false;
+									flag5 = false;
+								}
+							}
+							else if (flag5 || this.m_isCharacterWrappingEnabled || flag6)
+							{
+								base.SaveWordWrappingState(ref this.m_SavedWordWrapState, num13, this.m_characterCount);
+							}
+						}
+						this.m_characterCount++;
+						goto IL_2D57;
+					}
+					float num35 = this.m_maxFontSize - this.m_minFontSize;
+					if (!this.m_isCharacterWrappingEnabled && this.m_enableAutoSizing && num35 > 0.051f && this.m_fontSize < this.m_fontSizeMax)
+					{
+						this.m_minFontSize = this.m_fontSize;
+						this.m_fontSize += Mathf.Max((this.m_maxFontSize - this.m_fontSize) / 2f, 0.05f);
+						this.m_fontSize = (float)((int)(Mathf.Min(this.m_fontSize, this.m_fontSizeMax) * 20f + 0.5f)) / 20f;
+						if (this.loopCountA <= 20)
+						{
 							this.GenerateTextMesh();
-							return;
+						}
+					}
+					else
+					{
+						this.m_isCharacterWrappingEnabled = false;
+						if (this.m_characterCount == 0)
+						{
+							this.ClearMesh();
 						}
 						else
 						{
-							switch (this.m_overflowMode)
+							int num36 = this.m_materialReferences[0].referenceCount * 4;
+							this.m_textInfo.meshInfo[0].Clear(false);
+							Vector3 vector7 = Vector3.zero;
+							Vector3[] rectTransformCorners = this.m_RectTransformCorners;
+							switch (this.m_textAlignment)
 							{
-							case TextOverflowModes.Overflow:
-								if (this.m_isMaskingEnabled)
+							case TextAlignmentOptions.TopLeft:
+							case TextAlignmentOptions.Top:
+							case TextAlignmentOptions.TopRight:
+							case TextAlignmentOptions.TopJustified:
+								if (this.m_overflowMode != TextOverflowModes.Page)
 								{
-									this.DisableMasking();
+									vector7 = rectTransformCorners[1] + new Vector3(margin.x, 0f - this.m_maxAscender - margin.y, 0f);
+								}
+								else
+								{
+									vector7 = rectTransformCorners[1] + new Vector3(margin.x, 0f - this.m_textInfo.pageInfo[num6].ascender - margin.y, 0f);
 								}
 								break;
-							case TextOverflowModes.Ellipsis:
-								if (this.m_isMaskingEnabled)
+							case TextAlignmentOptions.Left:
+							case TextAlignmentOptions.Center:
+							case TextAlignmentOptions.Right:
+							case TextAlignmentOptions.Justified:
+								if (this.m_overflowMode != TextOverflowModes.Page)
 								{
-									this.DisableMasking();
+									vector7 = (rectTransformCorners[0] + rectTransformCorners[1]) / 2f + new Vector3(margin.x, 0f - (this.m_maxAscender + margin.y + num10 - margin.w) / 2f, 0f);
 								}
-								this.m_isTextTruncated = true;
-								if (this.m_characterCount >= 1)
+								else
 								{
-									this.m_char_buffer[num13 - 1] = 8230;
-									this.m_char_buffer[num13] = 0;
-									if (this.m_cached_Ellipsis_GlyphInfo != null)
+									vector7 = (rectTransformCorners[0] + rectTransformCorners[1]) / 2f + new Vector3(margin.x, 0f - (this.m_textInfo.pageInfo[num6].ascender + margin.y + this.m_textInfo.pageInfo[num6].descender - margin.w) / 2f, 0f);
+								}
+								break;
+							case TextAlignmentOptions.BottomLeft:
+							case TextAlignmentOptions.Bottom:
+							case TextAlignmentOptions.BottomRight:
+							case TextAlignmentOptions.BottomJustified:
+								if (this.m_overflowMode != TextOverflowModes.Page)
+								{
+									vector7 = rectTransformCorners[0] + new Vector3(margin.x, 0f - num10 + margin.w, 0f);
+								}
+								else
+								{
+									vector7 = rectTransformCorners[0] + new Vector3(margin.x, 0f - this.m_textInfo.pageInfo[num6].descender + margin.w, 0f);
+								}
+								break;
+							case TextAlignmentOptions.BaselineLeft:
+							case TextAlignmentOptions.Baseline:
+							case TextAlignmentOptions.BaselineRight:
+							case TextAlignmentOptions.BaselineJustified:
+								vector7 = (rectTransformCorners[0] + rectTransformCorners[1]) / 2f + new Vector3(margin.x, 0f, 0f);
+								break;
+							case TextAlignmentOptions.MidlineLeft:
+							case TextAlignmentOptions.Midline:
+							case TextAlignmentOptions.MidlineRight:
+							case TextAlignmentOptions.MidlineJustified:
+								vector7 = (rectTransformCorners[0] + rectTransformCorners[1]) / 2f + new Vector3(margin.x, 0f - (this.m_meshExtents.max.y + margin.y + this.m_meshExtents.min.y - margin.w) / 2f, 0f);
+								break;
+							}
+							Vector3 vector8 = Vector3.zero;
+							Vector3 vector9 = Vector3.zero;
+							int num37 = 0;
+							int num38 = 0;
+							int num39 = 0;
+							int num40 = 0;
+							int num41 = 0;
+							bool flag7 = false;
+							int num42 = 0;
+							bool flag8 = !(this.m_canvas.worldCamera == null);
+							float num43 = (this.m_previousLossyScaleY = base.transform.lossyScale.y);
+							RenderMode renderMode = this.m_canvas.renderMode;
+							float scaleFactor = this.m_canvas.scaleFactor;
+							Color32 color2 = Color.white;
+							Color32 color3 = Color.white;
+							float num44 = 0f;
+							float num45 = 0f;
+							float num46 = float.PositiveInfinity;
+							int num47 = 0;
+							float num48 = 0f;
+							float num49 = 0f;
+							float num50 = 0f;
+							TMP_CharacterInfo[] characterInfo = this.m_textInfo.characterInfo;
+							for (int i = 0; i < this.m_characterCount; i++)
+							{
+								char character2 = characterInfo[i].character;
+								int lineNumber3 = (int)characterInfo[i].lineNumber;
+								TMP_LineInfo tmp_LineInfo = this.m_textInfo.lineInfo[lineNumber3];
+								num40 = lineNumber3 + 1;
+								switch (tmp_LineInfo.alignment)
+								{
+								case TextAlignmentOptions.TopLeft:
+								case TextAlignmentOptions.Left:
+								case TextAlignmentOptions.BottomLeft:
+								case TextAlignmentOptions.BaselineLeft:
+								case TextAlignmentOptions.MidlineLeft:
+									if (!this.m_isRightToLeft)
 									{
-										this.m_textInfo.characterInfo[num7].character = '…';
-										this.m_textInfo.characterInfo[num7].textElement = this.m_cached_Ellipsis_GlyphInfo;
-										this.m_textInfo.characterInfo[num7].fontAsset = this.m_materialReferences[0].fontAsset;
-										this.m_textInfo.characterInfo[num7].material = this.m_materialReferences[0].material;
-										this.m_textInfo.characterInfo[num7].materialReferenceIndex = 0;
+										vector8 = new Vector3(tmp_LineInfo.marginLeft, 0f, 0f);
 									}
 									else
 									{
-										global::Debug.LogWarning("Unable to use Ellipsis character since it wasn't found in the current Font Asset [" + this.m_fontAsset.name + "]. Consider regenerating this font asset to include the Ellipsis character (u+2026).\nNote: Warnings can be disabled in the TMP Settings file.", this);
+										vector8 = new Vector3(0f - tmp_LineInfo.maxAdvance, 0f, 0f);
 									}
-									this.m_totalCharacterCount = num7 + 1;
-									this.GenerateTextMesh();
-									return;
-								}
-								this.m_textInfo.characterInfo[this.m_characterCount].isVisible = false;
-								break;
-							case TextOverflowModes.Masking:
-								if (!this.m_isMaskingEnabled)
-								{
-									this.EnableMasking();
-								}
-								break;
-							case TextOverflowModes.Truncate:
-								if (this.m_isMaskingEnabled)
-								{
-									this.DisableMasking();
-								}
-								this.m_textInfo.characterInfo[this.m_characterCount].isVisible = false;
-								break;
-							case TextOverflowModes.ScrollRect:
-								if (!this.m_isMaskingEnabled)
-								{
-									this.EnableMasking();
-								}
-								break;
-							}
-						}
-					}
-					if (num14 != 9)
-					{
-						Color32 color;
-						if (this.m_overrideHtmlColors)
-						{
-							color = this.m_fontColor32;
-						}
-						else
-						{
-							color = this.m_htmlColor;
-						}
-						if (this.m_textElementType == TMP_TextElementType.Character)
-						{
-							this.SaveGlyphVertexInfo(num3, num19, color);
-						}
-						else if (this.m_textElementType == TMP_TextElementType.Sprite)
-						{
-							this.SaveSpriteVertexInfo(color);
-						}
-					}
-					else
-					{
-						this.m_textInfo.characterInfo[this.m_characterCount].isVisible = false;
-						this.m_lastVisibleCharacterOfLine = this.m_characterCount;
-						TMP_LineInfo[] lineInfo = this.m_textInfo.lineInfo;
-						int lineNumber = this.m_lineNumber;
-						lineInfo[lineNumber].spaceCount = lineInfo[lineNumber].spaceCount + 1;
-						this.m_textInfo.spaceCount++;
-					}
-					if (this.m_textInfo.characterInfo[this.m_characterCount].isVisible && num14 != 173)
-					{
-						if (flag3)
-						{
-							flag3 = false;
-							this.m_firstVisibleCharacterOfLine = this.m_characterCount;
-						}
-						this.m_lineVisibleCharacterCount++;
-						this.m_lastVisibleCharacterOfLine = this.m_characterCount;
-					}
-				}
-				else if ((num14 == 10 || char.IsSeparator((char)num14)) && num14 != 173 && num14 != 8203 && num14 != 8288)
-				{
-					TMP_LineInfo[] lineInfo2 = this.m_textInfo.lineInfo;
-					int lineNumber2 = this.m_lineNumber;
-					lineInfo2[lineNumber2].spaceCount = lineInfo2[lineNumber2].spaceCount + 1;
-					this.m_textInfo.spaceCount++;
-				}
-				if (this.m_lineNumber > 0 && !TMP_Math.Approximately(this.m_maxLineAscender, this.m_startOfLineAscender) && this.m_lineHeight == 0f && !this.m_isNewPage)
-				{
-					float num31 = this.m_maxLineAscender - this.m_startOfLineAscender;
-					this.AdjustLineOffset(this.m_firstCharacterOfLine, this.m_characterCount, num31);
-					num23 -= num31;
-					this.m_lineOffset += num31;
-					this.m_startOfLineAscender += num31;
-					this.m_SavedWordWrapState.lineOffset = this.m_lineOffset;
-					this.m_SavedWordWrapState.previousLineAscender = this.m_startOfLineAscender;
-				}
-				this.m_textInfo.characterInfo[this.m_characterCount].lineNumber = (short)this.m_lineNumber;
-				this.m_textInfo.characterInfo[this.m_characterCount].pageNumber = (short)this.m_pageNumber;
-				if ((num14 != 10 && num14 != 13 && num14 != 8230) || this.m_textInfo.lineInfo[this.m_lineNumber].characterCount == 1)
-				{
-					this.m_textInfo.lineInfo[this.m_lineNumber].alignment = this.m_lineJustification;
-				}
-				if (this.m_maxAscender - num23 > marginHeight + 0.0001f)
-				{
-					if (this.m_enableAutoSizing && this.m_lineSpacingDelta > this.m_lineSpacingMax && this.m_lineNumber > 0)
-					{
-						this.m_lineSpacingDelta -= 1f;
-						this.GenerateTextMesh();
-						return;
-					}
-					if (this.m_enableAutoSizing && this.m_fontSize > this.m_fontSizeMin)
-					{
-						this.m_maxFontSize = this.m_fontSize;
-						this.m_fontSize -= Mathf.Max((this.m_fontSize - this.m_minFontSize) / 2f, 0.05f);
-						this.m_fontSize = (float)((int)(Mathf.Max(this.m_fontSize, this.m_fontSizeMin) * 20f + 0.5f)) / 20f;
-						this.m_recursiveCount = 0;
-						if (this.loopCountA > 20)
-						{
-							return;
-						}
-						this.GenerateTextMesh();
-						return;
-					}
-					else
-					{
-						switch (this.m_overflowMode)
-						{
-						case TextOverflowModes.Overflow:
-							if (this.m_isMaskingEnabled)
-							{
-								this.DisableMasking();
-							}
-							break;
-						case TextOverflowModes.Ellipsis:
-							if (this.m_isMaskingEnabled)
-							{
-								this.DisableMasking();
-							}
-							if (this.m_lineNumber > 0)
-							{
-								this.m_char_buffer[(int)this.m_textInfo.characterInfo[num7].index] = 8230;
-								this.m_char_buffer[(int)(this.m_textInfo.characterInfo[num7].index + 1)] = 0;
-								if (this.m_cached_Ellipsis_GlyphInfo != null)
-								{
-									this.m_textInfo.characterInfo[num7].character = '…';
-									this.m_textInfo.characterInfo[num7].textElement = this.m_cached_Ellipsis_GlyphInfo;
-									this.m_textInfo.characterInfo[num7].fontAsset = this.m_materialReferences[0].fontAsset;
-									this.m_textInfo.characterInfo[num7].material = this.m_materialReferences[0].material;
-									this.m_textInfo.characterInfo[num7].materialReferenceIndex = 0;
-								}
-								else
-								{
-									global::Debug.LogWarning("Unable to use Ellipsis character since it wasn't found in the current Font Asset [" + this.m_fontAsset.name + "]. Consider regenerating this font asset to include the Ellipsis character (u+2026).\nNote: Warnings can be disabled in the TMP Settings file.", this);
-								}
-								this.m_totalCharacterCount = num7 + 1;
-								this.GenerateTextMesh();
-								this.m_isTextTruncated = true;
-								return;
-							}
-							this.ClearMesh();
-							return;
-						case TextOverflowModes.Masking:
-							if (!this.m_isMaskingEnabled)
-							{
-								this.EnableMasking();
-							}
-							break;
-						case TextOverflowModes.Truncate:
-							if (this.m_isMaskingEnabled)
-							{
-								this.DisableMasking();
-							}
-							if (this.m_lineNumber > 0)
-							{
-								this.m_char_buffer[(int)(this.m_textInfo.characterInfo[num7].index + 1)] = 0;
-								this.m_totalCharacterCount = num7 + 1;
-								this.GenerateTextMesh();
-								this.m_isTextTruncated = true;
-								return;
-							}
-							this.ClearMesh();
-							return;
-						case TextOverflowModes.ScrollRect:
-							if (!this.m_isMaskingEnabled)
-							{
-								this.EnableMasking();
-							}
-							break;
-						case TextOverflowModes.Page:
-							if (this.m_isMaskingEnabled)
-							{
-								this.DisableMasking();
-							}
-							if (num14 != 13 && num14 != 10)
-							{
-								num13 = base.RestoreWordWrappingState(ref this.m_SavedLineState);
-								if (num13 == 0)
-								{
-									this.ClearMesh();
-									return;
-								}
-								this.m_isNewPage = true;
-								this.m_xAdvance = 0f + this.tag_Indent;
-								this.m_lineOffset = 0f;
-								this.m_lineNumber++;
-								this.m_pageNumber++;
-								goto IL_2CAE;
-							}
-							break;
-						}
-					}
-				}
-				if (num14 == 9)
-				{
-					this.m_xAdvance += this.m_currentFontAsset.fontInfo.TabWidth * num2;
-				}
-				else if (this.m_monoSpacing != 0f)
-				{
-					this.m_xAdvance += (this.m_monoSpacing - num18 + (this.m_characterSpacing + this.m_currentFontAsset.normalSpacingOffset) * num2 + this.m_cSpacing) * (1f - this.m_charWidthAdjDelta);
-				}
-				else if (!this.m_isRightToLeft)
-				{
-					this.m_xAdvance += ((this.m_cached_TextElement.xAdvance * num4 + this.m_characterSpacing + this.m_currentFontAsset.normalSpacingOffset) * num2 + this.m_cSpacing) * (1f - this.m_charWidthAdjDelta);
-				}
-				this.m_textInfo.characterInfo[this.m_characterCount].xAdvance = this.m_xAdvance;
-				if (num14 == 13)
-				{
-					this.m_xAdvance = 0f + this.tag_Indent;
-				}
-				if (num14 == 10 || this.m_characterCount == totalCharacterCount - 1)
-				{
-					if (this.m_lineNumber > 0 && !TMP_Math.Approximately(this.m_maxLineAscender, this.m_startOfLineAscender) && this.m_lineHeight == 0f && !this.m_isNewPage)
-					{
-						float num32 = this.m_maxLineAscender - this.m_startOfLineAscender;
-						this.AdjustLineOffset(this.m_firstCharacterOfLine, this.m_characterCount, num32);
-						num23 -= num32;
-						this.m_lineOffset += num32;
-					}
-					this.m_isNewPage = false;
-					float num33 = this.m_maxLineAscender - this.m_lineOffset;
-					float num34 = this.m_maxLineDescender - this.m_lineOffset;
-					this.m_maxDescender = ((this.m_maxDescender >= num34) ? num34 : this.m_maxDescender);
-					if (!flag4)
-					{
-						num10 = this.m_maxDescender;
-					}
-					if (this.m_useMaxVisibleDescender && (this.m_characterCount >= this.m_maxVisibleCharacters || this.m_lineNumber >= this.m_maxVisibleLines))
-					{
-						flag4 = true;
-					}
-					this.m_textInfo.lineInfo[this.m_lineNumber].firstCharacterIndex = this.m_firstCharacterOfLine;
-					this.m_textInfo.lineInfo[this.m_lineNumber].firstVisibleCharacterIndex = (this.m_firstVisibleCharacterOfLine = ((this.m_firstCharacterOfLine <= this.m_firstVisibleCharacterOfLine) ? this.m_firstVisibleCharacterOfLine : this.m_firstCharacterOfLine));
-					this.m_textInfo.lineInfo[this.m_lineNumber].lastCharacterIndex = (this.m_lastCharacterOfLine = this.m_characterCount);
-					this.m_textInfo.lineInfo[this.m_lineNumber].lastVisibleCharacterIndex = (this.m_lastVisibleCharacterOfLine = ((this.m_lastVisibleCharacterOfLine >= this.m_firstVisibleCharacterOfLine) ? this.m_lastVisibleCharacterOfLine : this.m_firstVisibleCharacterOfLine));
-					this.m_textInfo.lineInfo[this.m_lineNumber].characterCount = this.m_textInfo.lineInfo[this.m_lineNumber].lastCharacterIndex - this.m_textInfo.lineInfo[this.m_lineNumber].firstCharacterIndex + 1;
-					this.m_textInfo.lineInfo[this.m_lineNumber].visibleCharacterCount = this.m_lineVisibleCharacterCount;
-					this.m_textInfo.lineInfo[this.m_lineNumber].lineExtents.min = new Vector2(this.m_textInfo.characterInfo[this.m_firstVisibleCharacterOfLine].bottomLeft.x, num34);
-					this.m_textInfo.lineInfo[this.m_lineNumber].lineExtents.max = new Vector2(this.m_textInfo.characterInfo[this.m_lastVisibleCharacterOfLine].topRight.x, num33);
-					this.m_textInfo.lineInfo[this.m_lineNumber].length = this.m_textInfo.lineInfo[this.m_lineNumber].lineExtents.max.x - num3 * num2;
-					this.m_textInfo.lineInfo[this.m_lineNumber].width = num8;
-					if (this.m_textInfo.lineInfo[this.m_lineNumber].characterCount == 1)
-					{
-						this.m_textInfo.lineInfo[this.m_lineNumber].alignment = this.m_lineJustification;
-					}
-					if (this.m_textInfo.characterInfo[this.m_lastVisibleCharacterOfLine].isVisible)
-					{
-						this.m_textInfo.lineInfo[this.m_lineNumber].maxAdvance = this.m_textInfo.characterInfo[this.m_lastVisibleCharacterOfLine].xAdvance - (this.m_characterSpacing + this.m_currentFontAsset.normalSpacingOffset) * num2 - this.m_cSpacing;
-					}
-					else
-					{
-						this.m_textInfo.lineInfo[this.m_lineNumber].maxAdvance = this.m_textInfo.characterInfo[this.m_lastCharacterOfLine].xAdvance - (this.m_characterSpacing + this.m_currentFontAsset.normalSpacingOffset) * num2 - this.m_cSpacing;
-					}
-					this.m_textInfo.lineInfo[this.m_lineNumber].baseline = 0f - this.m_lineOffset;
-					this.m_textInfo.lineInfo[this.m_lineNumber].ascender = num33;
-					this.m_textInfo.lineInfo[this.m_lineNumber].descender = num34;
-					this.m_textInfo.lineInfo[this.m_lineNumber].lineHeight = num33 - num34 + num5 * num;
-					this.m_firstCharacterOfLine = this.m_characterCount + 1;
-					this.m_lineVisibleCharacterCount = 0;
-					if (num14 == 10)
-					{
-						base.SaveWordWrappingState(ref this.m_SavedLineState, num13, this.m_characterCount);
-						base.SaveWordWrappingState(ref this.m_SavedWordWrapState, num13, this.m_characterCount);
-						this.m_lineNumber++;
-						flag3 = true;
-						if (this.m_lineNumber >= this.m_textInfo.lineInfo.Length)
-						{
-							base.ResizeLineExtents(this.m_lineNumber);
-						}
-						if (this.m_lineHeight == 0f)
-						{
-							float num30 = 0f - this.m_maxLineDescender + num21 + (num5 + this.m_lineSpacing + this.m_paragraphSpacing + this.m_lineSpacingDelta) * num;
-							this.m_lineOffset += num30;
-						}
-						else
-						{
-							this.m_lineOffset += this.m_lineHeight + (this.m_lineSpacing + this.m_paragraphSpacing) * num;
-						}
-						this.m_maxLineAscender = float.NegativeInfinity;
-						this.m_maxLineDescender = float.PositiveInfinity;
-						this.m_startOfLineAscender = num21;
-						this.m_xAdvance = 0f + this.tag_LineIndent + this.tag_Indent;
-						num7 = this.m_characterCount - 1;
-						this.m_characterCount++;
-						goto IL_2CAE;
-					}
-				}
-				if (this.m_textInfo.characterInfo[this.m_characterCount].isVisible)
-				{
-					this.m_meshExtents.min.x = Mathf.Min(this.m_meshExtents.min.x, this.m_textInfo.characterInfo[this.m_characterCount].bottomLeft.x);
-					this.m_meshExtents.min.y = Mathf.Min(this.m_meshExtents.min.y, this.m_textInfo.characterInfo[this.m_characterCount].bottomLeft.y);
-					this.m_meshExtents.max.x = Mathf.Max(this.m_meshExtents.max.x, this.m_textInfo.characterInfo[this.m_characterCount].topRight.x);
-					this.m_meshExtents.max.y = Mathf.Max(this.m_meshExtents.max.y, this.m_textInfo.characterInfo[this.m_characterCount].topRight.y);
-				}
-				if (this.m_overflowMode == TextOverflowModes.Page && num14 != 13 && num14 != 10 && this.m_pageNumber < 16)
-				{
-					this.m_textInfo.pageInfo[this.m_pageNumber].ascender = num9;
-					this.m_textInfo.pageInfo[this.m_pageNumber].descender = ((num22 >= this.m_textInfo.pageInfo[this.m_pageNumber].descender) ? this.m_textInfo.pageInfo[this.m_pageNumber].descender : num22);
-					if (this.m_pageNumber == 0 && this.m_characterCount == 0)
-					{
-						this.m_textInfo.pageInfo[this.m_pageNumber].firstCharacterIndex = this.m_characterCount;
-					}
-					else if (this.m_characterCount > 0 && this.m_pageNumber != (int)this.m_textInfo.characterInfo[this.m_characterCount - 1].pageNumber)
-					{
-						this.m_textInfo.pageInfo[this.m_pageNumber - 1].lastCharacterIndex = this.m_characterCount - 1;
-						this.m_textInfo.pageInfo[this.m_pageNumber].firstCharacterIndex = this.m_characterCount;
-					}
-					else if (this.m_characterCount == totalCharacterCount - 1)
-					{
-						this.m_textInfo.pageInfo[this.m_pageNumber].lastCharacterIndex = this.m_characterCount;
-					}
-				}
-				if (this.m_enableWordWrapping || this.m_overflowMode == TextOverflowModes.Truncate || this.m_overflowMode == TextOverflowModes.Ellipsis)
-				{
-					if ((char.IsWhiteSpace((char)num14) || num14 == 45 || num14 == 173) && !this.m_isNonBreakingSpace && num14 != 160 && num14 != 8209 && num14 != 8239 && num14 != 8288)
-					{
-						base.SaveWordWrappingState(ref this.m_SavedWordWrapState, num13, this.m_characterCount);
-						this.m_isCharacterWrappingEnabled = false;
-						flag5 = false;
-					}
-					else if (((num14 > 4352 && num14 < 4607) || (num14 > 11904 && num14 < 40959) || (num14 > 43360 && num14 < 43391) || (num14 > 44032 && num14 < 55295) || (num14 > 63744 && num14 < 64255) || (num14 > 65072 && num14 < 65103) || (num14 > 65280 && num14 < 65519)) && !this.m_isNonBreakingSpace)
-					{
-						if (flag5 || flag6 || (!TMP_Settings.linebreakingRules.leadingCharacters.ContainsKey(num14) && this.m_characterCount < totalCharacterCount - 1 && !TMP_Settings.linebreakingRules.followingCharacters.ContainsKey((int)this.m_textInfo.characterInfo[this.m_characterCount + 1].character)))
-						{
-							base.SaveWordWrappingState(ref this.m_SavedWordWrapState, num13, this.m_characterCount);
-							this.m_isCharacterWrappingEnabled = false;
-							flag5 = false;
-						}
-					}
-					else if (flag5 || this.m_isCharacterWrappingEnabled || flag6)
-					{
-						base.SaveWordWrappingState(ref this.m_SavedWordWrapState, num13, this.m_characterCount);
-					}
-				}
-				this.m_characterCount++;
-				goto IL_2CAE;
-			}
-			float num35 = this.m_maxFontSize - this.m_minFontSize;
-			if (!this.m_isCharacterWrappingEnabled && this.m_enableAutoSizing && num35 > 0.051f && this.m_fontSize < this.m_fontSizeMax)
-			{
-				this.m_minFontSize = this.m_fontSize;
-				this.m_fontSize += Mathf.Max((this.m_maxFontSize - this.m_fontSize) / 2f, 0.05f);
-				this.m_fontSize = (float)((int)(Mathf.Min(this.m_fontSize, this.m_fontSizeMax) * 20f + 0.5f)) / 20f;
-				if (this.loopCountA > 20)
-				{
-					return;
-				}
-				this.GenerateTextMesh();
-				return;
-			}
-			else
-			{
-				this.m_isCharacterWrappingEnabled = false;
-				if (this.m_characterCount == 0)
-				{
-					this.ClearMesh();
-					return;
-				}
-				int num36 = this.m_materialReferences[0].referenceCount * 4;
-				this.m_textInfo.meshInfo[0].Clear(false);
-				Vector3 vector7 = Vector3.zero;
-				Vector3[] rectTransformCorners = this.m_RectTransformCorners;
-				switch (this.m_textAlignment)
-				{
-				case TextAlignmentOptions.TopLeft:
-				case TextAlignmentOptions.Top:
-				case TextAlignmentOptions.TopRight:
-				case TextAlignmentOptions.TopJustified:
-					if (this.m_overflowMode != TextOverflowModes.Page)
-					{
-						vector7 = rectTransformCorners[1] + new Vector3(0f + margin.x, 0f - this.m_maxAscender - margin.y, 0f);
-					}
-					else
-					{
-						vector7 = rectTransformCorners[1] + new Vector3(0f + margin.x, 0f - this.m_textInfo.pageInfo[num6].ascender - margin.y, 0f);
-					}
-					break;
-				case TextAlignmentOptions.Left:
-				case TextAlignmentOptions.Center:
-				case TextAlignmentOptions.Right:
-				case TextAlignmentOptions.Justified:
-					if (this.m_overflowMode != TextOverflowModes.Page)
-					{
-						vector7 = (rectTransformCorners[0] + rectTransformCorners[1]) / 2f + new Vector3(0f + margin.x, 0f - (this.m_maxAscender + margin.y + num10 - margin.w) / 2f, 0f);
-					}
-					else
-					{
-						vector7 = (rectTransformCorners[0] + rectTransformCorners[1]) / 2f + new Vector3(0f + margin.x, 0f - (this.m_textInfo.pageInfo[num6].ascender + margin.y + this.m_textInfo.pageInfo[num6].descender - margin.w) / 2f, 0f);
-					}
-					break;
-				case TextAlignmentOptions.BottomLeft:
-				case TextAlignmentOptions.Bottom:
-				case TextAlignmentOptions.BottomRight:
-				case TextAlignmentOptions.BottomJustified:
-					if (this.m_overflowMode != TextOverflowModes.Page)
-					{
-						vector7 = rectTransformCorners[0] + new Vector3(0f + margin.x, 0f - num10 + margin.w, 0f);
-					}
-					else
-					{
-						vector7 = rectTransformCorners[0] + new Vector3(0f + margin.x, 0f - this.m_textInfo.pageInfo[num6].descender + margin.w, 0f);
-					}
-					break;
-				case TextAlignmentOptions.BaselineLeft:
-				case TextAlignmentOptions.Baseline:
-				case TextAlignmentOptions.BaselineRight:
-				case TextAlignmentOptions.BaselineJustified:
-					vector7 = (rectTransformCorners[0] + rectTransformCorners[1]) / 2f + new Vector3(0f + margin.x, 0f, 0f);
-					break;
-				case TextAlignmentOptions.MidlineLeft:
-				case TextAlignmentOptions.Midline:
-				case TextAlignmentOptions.MidlineRight:
-				case TextAlignmentOptions.MidlineJustified:
-					vector7 = (rectTransformCorners[0] + rectTransformCorners[1]) / 2f + new Vector3(0f + margin.x, 0f - (this.m_meshExtents.max.y + margin.y + this.m_meshExtents.min.y - margin.w) / 2f, 0f);
-					break;
-				}
-				Vector3 vector8 = Vector3.zero;
-				Vector3 vector9 = Vector3.zero;
-				int num37 = 0;
-				int num38 = 0;
-				int num39 = 0;
-				int num40 = 0;
-				int num41 = 0;
-				bool flag7 = false;
-				int num42 = 0;
-				bool flag8 = !(this.m_canvas.worldCamera == null);
-				float num43 = (this.m_previousLossyScaleY = base.transform.lossyScale.y);
-				RenderMode renderMode = this.m_canvas.renderMode;
-				float scaleFactor = this.m_canvas.scaleFactor;
-				Color32 color2 = Color.white;
-				Color32 color3 = Color.white;
-				float num44 = 0f;
-				float num45 = 0f;
-				float num46 = float.PositiveInfinity;
-				int num47 = 0;
-				float num48 = 0f;
-				float num49 = 0f;
-				float num50 = 0f;
-				TMP_CharacterInfo[] characterInfo = this.m_textInfo.characterInfo;
-				for (int i = 0; i < this.m_characterCount; i++)
-				{
-					char character2 = characterInfo[i].character;
-					int lineNumber3 = (int)characterInfo[i].lineNumber;
-					TMP_LineInfo tmp_LineInfo = this.m_textInfo.lineInfo[lineNumber3];
-					num40 = lineNumber3 + 1;
-					switch (tmp_LineInfo.alignment)
-					{
-					case TextAlignmentOptions.TopLeft:
-					case TextAlignmentOptions.Left:
-					case TextAlignmentOptions.BottomLeft:
-					case TextAlignmentOptions.BaselineLeft:
-					case TextAlignmentOptions.MidlineLeft:
-						if (!this.m_isRightToLeft)
-						{
-							vector8 = new Vector3(0f + tmp_LineInfo.marginLeft, 0f, 0f);
-						}
-						else
-						{
-							vector8 = new Vector3(0f - tmp_LineInfo.maxAdvance, 0f, 0f);
-						}
-						break;
-					case TextAlignmentOptions.Top:
-					case TextAlignmentOptions.Center:
-					case TextAlignmentOptions.Bottom:
-					case TextAlignmentOptions.Baseline:
-					case TextAlignmentOptions.Midline:
-						vector8 = new Vector3(tmp_LineInfo.marginLeft + tmp_LineInfo.width / 2f - tmp_LineInfo.maxAdvance / 2f, 0f, 0f);
-						break;
-					case TextAlignmentOptions.TopRight:
-					case TextAlignmentOptions.Right:
-					case TextAlignmentOptions.BottomRight:
-					case TextAlignmentOptions.BaselineRight:
-					case TextAlignmentOptions.MidlineRight:
-						if (!this.m_isRightToLeft)
-						{
-							vector8 = new Vector3(tmp_LineInfo.marginLeft + tmp_LineInfo.width - tmp_LineInfo.maxAdvance, 0f, 0f);
-						}
-						else
-						{
-							vector8 = new Vector3(tmp_LineInfo.marginLeft + tmp_LineInfo.width, 0f, 0f);
-						}
-						break;
-					case TextAlignmentOptions.TopJustified:
-					case TextAlignmentOptions.Justified:
-					case TextAlignmentOptions.BottomJustified:
-					case TextAlignmentOptions.BaselineJustified:
-					case TextAlignmentOptions.MidlineJustified:
-						if (character2 != '\u00ad' && character2 != '\u200b' && character2 != '\u2060')
-						{
-							char character3 = characterInfo[tmp_LineInfo.lastCharacterIndex].character;
-							if (!char.IsControl(character3) && lineNumber3 < this.m_lineNumber)
-							{
-								float num51 = tmp_LineInfo.width - tmp_LineInfo.maxAdvance;
-								float num52 = ((tmp_LineInfo.spaceCount <= 2) ? 1f : this.m_wordWrappingRatios);
-								if (lineNumber3 != num41 || i == 0)
-								{
-									vector8 = new Vector3(tmp_LineInfo.marginLeft, 0f, 0f);
-								}
-								else if (character2 == '\t' || char.IsSeparator(character2))
-								{
-									int num53 = ((!characterInfo[tmp_LineInfo.lastCharacterIndex].isVisible) ? (tmp_LineInfo.spaceCount - 1) : tmp_LineInfo.spaceCount);
-									if (num53 < 1)
+									break;
+								case TextAlignmentOptions.Top:
+								case TextAlignmentOptions.Center:
+								case TextAlignmentOptions.Bottom:
+								case TextAlignmentOptions.Baseline:
+								case TextAlignmentOptions.Midline:
+									vector8 = new Vector3(tmp_LineInfo.marginLeft + tmp_LineInfo.width / 2f - tmp_LineInfo.maxAdvance / 2f, 0f, 0f);
+									break;
+								case TextAlignmentOptions.TopRight:
+								case TextAlignmentOptions.Right:
+								case TextAlignmentOptions.BottomRight:
+								case TextAlignmentOptions.BaselineRight:
+								case TextAlignmentOptions.MidlineRight:
+									if (!this.m_isRightToLeft)
 									{
-										num53 = 1;
+										vector8 = new Vector3(tmp_LineInfo.marginLeft + tmp_LineInfo.width - tmp_LineInfo.maxAdvance, 0f, 0f);
 									}
-									vector8 += new Vector3(num51 * (1f - num52) / (float)num53, 0f, 0f);
-								}
-								else
-								{
-									vector8 += new Vector3(num51 * num52 / (float)(tmp_LineInfo.visibleCharacterCount - 1), 0f, 0f);
-								}
-							}
-							else
-							{
-								vector8 = new Vector3(tmp_LineInfo.marginLeft, 0f, 0f);
-							}
-						}
-						break;
-					}
-					vector9 = vector7 + vector8;
-					bool isVisible = characterInfo[i].isVisible;
-					if (isVisible)
-					{
-						TMP_TextElementType elementType = characterInfo[i].elementType;
-						TMP_TextElementType tmp_TextElementType = elementType;
-						if (tmp_TextElementType != TMP_TextElementType.Character)
-						{
-							if (tmp_TextElementType != TMP_TextElementType.Sprite)
-							{
-							}
-						}
-						else
-						{
-							Extents lineExtents = tmp_LineInfo.lineExtents;
-							float num54 = this.m_uvLineOffset * (float)lineNumber3 % 1f + this.m_uvOffset.x;
-							switch (this.m_horizontalMapping)
-							{
-							case TextureMappingOptions.Character:
-								characterInfo[i].vertex_BL.uv2.x = 0f + this.m_uvOffset.x;
-								characterInfo[i].vertex_TL.uv2.x = 0f + this.m_uvOffset.x;
-								characterInfo[i].vertex_TR.uv2.x = 1f + this.m_uvOffset.x;
-								characterInfo[i].vertex_BR.uv2.x = 1f + this.m_uvOffset.x;
-								break;
-							case TextureMappingOptions.Line:
-								if (this.m_textAlignment != TextAlignmentOptions.Justified)
-								{
-									characterInfo[i].vertex_BL.uv2.x = (characterInfo[i].vertex_BL.position.x - lineExtents.min.x) / (lineExtents.max.x - lineExtents.min.x) + num54;
-									characterInfo[i].vertex_TL.uv2.x = (characterInfo[i].vertex_TL.position.x - lineExtents.min.x) / (lineExtents.max.x - lineExtents.min.x) + num54;
-									characterInfo[i].vertex_TR.uv2.x = (characterInfo[i].vertex_TR.position.x - lineExtents.min.x) / (lineExtents.max.x - lineExtents.min.x) + num54;
-									characterInfo[i].vertex_BR.uv2.x = (characterInfo[i].vertex_BR.position.x - lineExtents.min.x) / (lineExtents.max.x - lineExtents.min.x) + num54;
-								}
-								else
-								{
-									characterInfo[i].vertex_BL.uv2.x = (characterInfo[i].vertex_BL.position.x + vector8.x - this.m_meshExtents.min.x) / (this.m_meshExtents.max.x - this.m_meshExtents.min.x) + num54;
-									characterInfo[i].vertex_TL.uv2.x = (characterInfo[i].vertex_TL.position.x + vector8.x - this.m_meshExtents.min.x) / (this.m_meshExtents.max.x - this.m_meshExtents.min.x) + num54;
-									characterInfo[i].vertex_TR.uv2.x = (characterInfo[i].vertex_TR.position.x + vector8.x - this.m_meshExtents.min.x) / (this.m_meshExtents.max.x - this.m_meshExtents.min.x) + num54;
-									characterInfo[i].vertex_BR.uv2.x = (characterInfo[i].vertex_BR.position.x + vector8.x - this.m_meshExtents.min.x) / (this.m_meshExtents.max.x - this.m_meshExtents.min.x) + num54;
-								}
-								break;
-							case TextureMappingOptions.Paragraph:
-								characterInfo[i].vertex_BL.uv2.x = (characterInfo[i].vertex_BL.position.x + vector8.x - this.m_meshExtents.min.x) / (this.m_meshExtents.max.x - this.m_meshExtents.min.x) + num54;
-								characterInfo[i].vertex_TL.uv2.x = (characterInfo[i].vertex_TL.position.x + vector8.x - this.m_meshExtents.min.x) / (this.m_meshExtents.max.x - this.m_meshExtents.min.x) + num54;
-								characterInfo[i].vertex_TR.uv2.x = (characterInfo[i].vertex_TR.position.x + vector8.x - this.m_meshExtents.min.x) / (this.m_meshExtents.max.x - this.m_meshExtents.min.x) + num54;
-								characterInfo[i].vertex_BR.uv2.x = (characterInfo[i].vertex_BR.position.x + vector8.x - this.m_meshExtents.min.x) / (this.m_meshExtents.max.x - this.m_meshExtents.min.x) + num54;
-								break;
-							case TextureMappingOptions.MatchAspect:
-							{
-								switch (this.m_verticalMapping)
-								{
-								case TextureMappingOptions.Character:
-									characterInfo[i].vertex_BL.uv2.y = 0f + this.m_uvOffset.y;
-									characterInfo[i].vertex_TL.uv2.y = 1f + this.m_uvOffset.y;
-									characterInfo[i].vertex_TR.uv2.y = 0f + this.m_uvOffset.y;
-									characterInfo[i].vertex_BR.uv2.y = 1f + this.m_uvOffset.y;
+									else
+									{
+										vector8 = new Vector3(tmp_LineInfo.marginLeft + tmp_LineInfo.width, 0f, 0f);
+									}
 									break;
-								case TextureMappingOptions.Line:
-									characterInfo[i].vertex_BL.uv2.y = (characterInfo[i].vertex_BL.position.y - lineExtents.min.y) / (lineExtents.max.y - lineExtents.min.y) + num54;
-									characterInfo[i].vertex_TL.uv2.y = (characterInfo[i].vertex_TL.position.y - lineExtents.min.y) / (lineExtents.max.y - lineExtents.min.y) + num54;
-									characterInfo[i].vertex_TR.uv2.y = characterInfo[i].vertex_BL.uv2.y;
-									characterInfo[i].vertex_BR.uv2.y = characterInfo[i].vertex_TL.uv2.y;
-									break;
-								case TextureMappingOptions.Paragraph:
-									characterInfo[i].vertex_BL.uv2.y = (characterInfo[i].vertex_BL.position.y - this.m_meshExtents.min.y) / (this.m_meshExtents.max.y - this.m_meshExtents.min.y) + num54;
-									characterInfo[i].vertex_TL.uv2.y = (characterInfo[i].vertex_TL.position.y - this.m_meshExtents.min.y) / (this.m_meshExtents.max.y - this.m_meshExtents.min.y) + num54;
-									characterInfo[i].vertex_TR.uv2.y = characterInfo[i].vertex_BL.uv2.y;
-									characterInfo[i].vertex_BR.uv2.y = characterInfo[i].vertex_TL.uv2.y;
-									break;
-								case TextureMappingOptions.MatchAspect:
-									global::Debug.Log("ERROR: Cannot Match both Vertical & Horizontal.", null);
+								case TextAlignmentOptions.TopJustified:
+								case TextAlignmentOptions.Justified:
+								case TextAlignmentOptions.BottomJustified:
+								case TextAlignmentOptions.BaselineJustified:
+								case TextAlignmentOptions.MidlineJustified:
+									if (character2 != '\u00ad' && character2 != '\u200b' && character2 != '\u2060')
+									{
+										char character3 = characterInfo[tmp_LineInfo.lastCharacterIndex].character;
+										if (!char.IsControl(character3) && lineNumber3 < this.m_lineNumber)
+										{
+											float num51 = tmp_LineInfo.width - tmp_LineInfo.maxAdvance;
+											float num52 = ((tmp_LineInfo.spaceCount <= 2) ? 1f : this.m_wordWrappingRatios);
+											if (lineNumber3 != num41 || i == 0)
+											{
+												vector8 = new Vector3(tmp_LineInfo.marginLeft, 0f, 0f);
+											}
+											else if (character2 == '\t' || char.IsSeparator(character2))
+											{
+												int num53 = ((!characterInfo[tmp_LineInfo.lastCharacterIndex].isVisible) ? (tmp_LineInfo.spaceCount - 1) : tmp_LineInfo.spaceCount);
+												if (num53 < 1)
+												{
+													num53 = 1;
+												}
+												vector8 += new Vector3(num51 * (1f - num52) / (float)num53, 0f, 0f);
+											}
+											else
+											{
+												vector8 += new Vector3(num51 * num52 / (float)(tmp_LineInfo.visibleCharacterCount - 1), 0f, 0f);
+											}
+										}
+										else
+										{
+											vector8 = new Vector3(tmp_LineInfo.marginLeft, 0f, 0f);
+										}
+									}
 									break;
 								}
-								float num55 = (1f - (characterInfo[i].vertex_BL.uv2.y + characterInfo[i].vertex_TL.uv2.y) * characterInfo[i].aspectRatio) / 2f;
-								characterInfo[i].vertex_BL.uv2.x = characterInfo[i].vertex_BL.uv2.y * characterInfo[i].aspectRatio + num55 + num54;
-								characterInfo[i].vertex_TL.uv2.x = characterInfo[i].vertex_BL.uv2.x;
-								characterInfo[i].vertex_TR.uv2.x = characterInfo[i].vertex_TL.uv2.y * characterInfo[i].aspectRatio + num55 + num54;
-								characterInfo[i].vertex_BR.uv2.x = characterInfo[i].vertex_TR.uv2.x;
-								break;
-							}
-							}
-							switch (this.m_verticalMapping)
-							{
-							case TextureMappingOptions.Character:
-								characterInfo[i].vertex_BL.uv2.y = 0f + this.m_uvOffset.y;
-								characterInfo[i].vertex_TL.uv2.y = 1f + this.m_uvOffset.y;
-								characterInfo[i].vertex_TR.uv2.y = 1f + this.m_uvOffset.y;
-								characterInfo[i].vertex_BR.uv2.y = 0f + this.m_uvOffset.y;
-								break;
-							case TextureMappingOptions.Line:
-								characterInfo[i].vertex_BL.uv2.y = (characterInfo[i].vertex_BL.position.y - tmp_LineInfo.descender) / (tmp_LineInfo.ascender - tmp_LineInfo.descender) + this.m_uvOffset.y;
-								characterInfo[i].vertex_TL.uv2.y = (characterInfo[i].vertex_TL.position.y - tmp_LineInfo.descender) / (tmp_LineInfo.ascender - tmp_LineInfo.descender) + this.m_uvOffset.y;
-								characterInfo[i].vertex_TR.uv2.y = characterInfo[i].vertex_TL.uv2.y;
-								characterInfo[i].vertex_BR.uv2.y = characterInfo[i].vertex_BL.uv2.y;
-								break;
-							case TextureMappingOptions.Paragraph:
-								characterInfo[i].vertex_BL.uv2.y = (characterInfo[i].vertex_BL.position.y - this.m_meshExtents.min.y) / (this.m_meshExtents.max.y - this.m_meshExtents.min.y) + this.m_uvOffset.y;
-								characterInfo[i].vertex_TL.uv2.y = (characterInfo[i].vertex_TL.position.y - this.m_meshExtents.min.y) / (this.m_meshExtents.max.y - this.m_meshExtents.min.y) + this.m_uvOffset.y;
-								characterInfo[i].vertex_TR.uv2.y = characterInfo[i].vertex_TL.uv2.y;
-								characterInfo[i].vertex_BR.uv2.y = characterInfo[i].vertex_BL.uv2.y;
-								break;
-							case TextureMappingOptions.MatchAspect:
-							{
-								float num56 = (1f - (characterInfo[i].vertex_BL.uv2.x + characterInfo[i].vertex_TR.uv2.x) / characterInfo[i].aspectRatio) / 2f;
-								characterInfo[i].vertex_BL.uv2.y = num56 + characterInfo[i].vertex_BL.uv2.x / characterInfo[i].aspectRatio + this.m_uvOffset.y;
-								characterInfo[i].vertex_TL.uv2.y = num56 + characterInfo[i].vertex_TR.uv2.x / characterInfo[i].aspectRatio + this.m_uvOffset.y;
-								characterInfo[i].vertex_BR.uv2.y = characterInfo[i].vertex_BL.uv2.y;
-								characterInfo[i].vertex_TR.uv2.y = characterInfo[i].vertex_TL.uv2.y;
-								break;
-							}
-							}
-							float num57 = characterInfo[i].scale * (1f - this.m_charWidthAdjDelta);
-							if (!characterInfo[i].isUsingAlternateTypeface && (characterInfo[i].style & FontStyles.Bold) == FontStyles.Bold)
-							{
-								num57 *= -1f;
-							}
-							switch (renderMode)
-							{
-							case RenderMode.ScreenSpaceOverlay:
-								num57 *= num43 / scaleFactor;
-								break;
-							case RenderMode.ScreenSpaceCamera:
-								num57 *= ((!flag8) ? 1f : num43);
-								break;
-							case RenderMode.WorldSpace:
-								num57 *= num43;
-								break;
-							}
-							float num58 = characterInfo[i].vertex_BL.uv2.x;
-							float num59 = characterInfo[i].vertex_BL.uv2.y;
-							float num60 = characterInfo[i].vertex_TR.uv2.x;
-							float num61 = characterInfo[i].vertex_TR.uv2.y;
-							float num62 = Mathf.Floor(num58);
-							float num63 = Mathf.Floor(num59);
-							num58 -= num62;
-							num60 -= num62;
-							num59 -= num63;
-							num61 -= num63;
-							characterInfo[i].vertex_BL.uv2.x = base.PackUV(num58, num59);
-							characterInfo[i].vertex_BL.uv2.y = num57;
-							characterInfo[i].vertex_TL.uv2.x = base.PackUV(num58, num61);
-							characterInfo[i].vertex_TL.uv2.y = num57;
-							characterInfo[i].vertex_TR.uv2.x = base.PackUV(num60, num61);
-							characterInfo[i].vertex_TR.uv2.y = num57;
-							characterInfo[i].vertex_BR.uv2.x = base.PackUV(num60, num59);
-							characterInfo[i].vertex_BR.uv2.y = num57;
-						}
-						if (i < this.m_maxVisibleCharacters && lineNumber3 < this.m_maxVisibleLines && this.m_overflowMode != TextOverflowModes.Page)
-						{
-							TMP_CharacterInfo[] array = characterInfo;
-							int num64 = i;
-							array[num64].vertex_BL.position = array[num64].vertex_BL.position + vector9;
-							TMP_CharacterInfo[] array2 = characterInfo;
-							int num65 = i;
-							array2[num65].vertex_TL.position = array2[num65].vertex_TL.position + vector9;
-							TMP_CharacterInfo[] array3 = characterInfo;
-							int num66 = i;
-							array3[num66].vertex_TR.position = array3[num66].vertex_TR.position + vector9;
-							TMP_CharacterInfo[] array4 = characterInfo;
-							int num67 = i;
-							array4[num67].vertex_BR.position = array4[num67].vertex_BR.position + vector9;
-						}
-						else if (i < this.m_maxVisibleCharacters && lineNumber3 < this.m_maxVisibleLines && this.m_overflowMode == TextOverflowModes.Page && (int)characterInfo[i].pageNumber == num6)
-						{
-							TMP_CharacterInfo[] array5 = characterInfo;
-							int num68 = i;
-							array5[num68].vertex_BL.position = array5[num68].vertex_BL.position + vector9;
-							TMP_CharacterInfo[] array6 = characterInfo;
-							int num69 = i;
-							array6[num69].vertex_TL.position = array6[num69].vertex_TL.position + vector9;
-							TMP_CharacterInfo[] array7 = characterInfo;
-							int num70 = i;
-							array7[num70].vertex_TR.position = array7[num70].vertex_TR.position + vector9;
-							TMP_CharacterInfo[] array8 = characterInfo;
-							int num71 = i;
-							array8[num71].vertex_BR.position = array8[num71].vertex_BR.position + vector9;
-						}
-						else
-						{
-							characterInfo[i].vertex_BL.position = Vector3.zero;
-							characterInfo[i].vertex_TL.position = Vector3.zero;
-							characterInfo[i].vertex_TR.position = Vector3.zero;
-							characterInfo[i].vertex_BR.position = Vector3.zero;
-						}
-						if (elementType == TMP_TextElementType.Character)
-						{
-							this.FillCharacterVertexBuffers(i, num37);
-						}
-						else if (elementType == TMP_TextElementType.Sprite)
-						{
-							this.FillSpriteVertexBuffers(i, num38);
-						}
-					}
-					TMP_CharacterInfo[] characterInfo2 = this.m_textInfo.characterInfo;
-					int num72 = i;
-					characterInfo2[num72].bottomLeft = characterInfo2[num72].bottomLeft + vector9;
-					TMP_CharacterInfo[] characterInfo3 = this.m_textInfo.characterInfo;
-					int num73 = i;
-					characterInfo3[num73].topLeft = characterInfo3[num73].topLeft + vector9;
-					TMP_CharacterInfo[] characterInfo4 = this.m_textInfo.characterInfo;
-					int num74 = i;
-					characterInfo4[num74].topRight = characterInfo4[num74].topRight + vector9;
-					TMP_CharacterInfo[] characterInfo5 = this.m_textInfo.characterInfo;
-					int num75 = i;
-					characterInfo5[num75].bottomRight = characterInfo5[num75].bottomRight + vector9;
-					TMP_CharacterInfo[] characterInfo6 = this.m_textInfo.characterInfo;
-					int num76 = i;
-					characterInfo6[num76].origin = characterInfo6[num76].origin + vector9.x;
-					TMP_CharacterInfo[] characterInfo7 = this.m_textInfo.characterInfo;
-					int num77 = i;
-					characterInfo7[num77].xAdvance = characterInfo7[num77].xAdvance + vector9.x;
-					TMP_CharacterInfo[] characterInfo8 = this.m_textInfo.characterInfo;
-					int num78 = i;
-					characterInfo8[num78].ascender = characterInfo8[num78].ascender + vector9.y;
-					TMP_CharacterInfo[] characterInfo9 = this.m_textInfo.characterInfo;
-					int num79 = i;
-					characterInfo9[num79].descender = characterInfo9[num79].descender + vector9.y;
-					TMP_CharacterInfo[] characterInfo10 = this.m_textInfo.characterInfo;
-					int num80 = i;
-					characterInfo10[num80].baseLine = characterInfo10[num80].baseLine + vector9.y;
-					if (isVisible)
-					{
-					}
-					if (lineNumber3 != num41 || i == this.m_characterCount - 1)
-					{
-						if (lineNumber3 != num41)
-						{
-							TMP_LineInfo[] lineInfo3 = this.m_textInfo.lineInfo;
-							int num81 = num41;
-							lineInfo3[num81].baseline = lineInfo3[num81].baseline + vector9.y;
-							TMP_LineInfo[] lineInfo4 = this.m_textInfo.lineInfo;
-							int num82 = num41;
-							lineInfo4[num82].ascender = lineInfo4[num82].ascender + vector9.y;
-							TMP_LineInfo[] lineInfo5 = this.m_textInfo.lineInfo;
-							int num83 = num41;
-							lineInfo5[num83].descender = lineInfo5[num83].descender + vector9.y;
-							this.m_textInfo.lineInfo[num41].lineExtents.min = new Vector2(this.m_textInfo.characterInfo[this.m_textInfo.lineInfo[num41].firstCharacterIndex].bottomLeft.x, this.m_textInfo.lineInfo[num41].descender);
-							this.m_textInfo.lineInfo[num41].lineExtents.max = new Vector2(this.m_textInfo.characterInfo[this.m_textInfo.lineInfo[num41].lastVisibleCharacterIndex].topRight.x, this.m_textInfo.lineInfo[num41].ascender);
-						}
-						if (i == this.m_characterCount - 1)
-						{
-							TMP_LineInfo[] lineInfo6 = this.m_textInfo.lineInfo;
-							int num84 = lineNumber3;
-							lineInfo6[num84].baseline = lineInfo6[num84].baseline + vector9.y;
-							TMP_LineInfo[] lineInfo7 = this.m_textInfo.lineInfo;
-							int num85 = lineNumber3;
-							lineInfo7[num85].ascender = lineInfo7[num85].ascender + vector9.y;
-							TMP_LineInfo[] lineInfo8 = this.m_textInfo.lineInfo;
-							int num86 = lineNumber3;
-							lineInfo8[num86].descender = lineInfo8[num86].descender + vector9.y;
-							this.m_textInfo.lineInfo[lineNumber3].lineExtents.min = new Vector2(this.m_textInfo.characterInfo[this.m_textInfo.lineInfo[lineNumber3].firstCharacterIndex].bottomLeft.x, this.m_textInfo.lineInfo[lineNumber3].descender);
-							this.m_textInfo.lineInfo[lineNumber3].lineExtents.max = new Vector2(this.m_textInfo.characterInfo[this.m_textInfo.lineInfo[lineNumber3].lastVisibleCharacterIndex].topRight.x, this.m_textInfo.lineInfo[lineNumber3].ascender);
-						}
-					}
-					if (char.IsLetterOrDigit(character2) || character2 == '-' || character2 == '\u00ad' || character2 == '‐' || character2 == '‑')
-					{
-						if (!flag7)
-						{
-							flag7 = true;
-							num42 = i;
-						}
-						if (flag7 && i == this.m_characterCount - 1)
-						{
-							int num87 = this.m_textInfo.wordInfo.Length;
-							int wordCount = this.m_textInfo.wordCount;
-							if (this.m_textInfo.wordCount + 1 > num87)
-							{
-								TMP_TextInfo.Resize<TMP_WordInfo>(ref this.m_textInfo.wordInfo, num87 + 1);
-							}
-							int num88 = i;
-							this.m_textInfo.wordInfo[wordCount].firstCharacterIndex = num42;
-							this.m_textInfo.wordInfo[wordCount].lastCharacterIndex = num88;
-							this.m_textInfo.wordInfo[wordCount].characterCount = num88 - num42 + 1;
-							this.m_textInfo.wordInfo[wordCount].textComponent = this;
-							num39++;
-							this.m_textInfo.wordCount++;
-							TMP_LineInfo[] lineInfo9 = this.m_textInfo.lineInfo;
-							int num89 = lineNumber3;
-							lineInfo9[num89].wordCount = lineInfo9[num89].wordCount + 1;
-						}
-					}
-					else if (flag7 || (i == 0 && (!char.IsPunctuation(character2) || char.IsWhiteSpace(character2) || i == this.m_characterCount - 1)))
-					{
-						if (i <= 0 || i >= this.m_characterCount || (character2 != '\'' && character2 != '’') || !char.IsLetterOrDigit(characterInfo[i - 1].character) || !char.IsLetterOrDigit(characterInfo[i + 1].character))
-						{
-							int num88 = ((i != this.m_characterCount - 1 || !char.IsLetterOrDigit(character2)) ? (i - 1) : i);
-							flag7 = false;
-							int num90 = this.m_textInfo.wordInfo.Length;
-							int wordCount2 = this.m_textInfo.wordCount;
-							if (this.m_textInfo.wordCount + 1 > num90)
-							{
-								TMP_TextInfo.Resize<TMP_WordInfo>(ref this.m_textInfo.wordInfo, num90 + 1);
-							}
-							this.m_textInfo.wordInfo[wordCount2].firstCharacterIndex = num42;
-							this.m_textInfo.wordInfo[wordCount2].lastCharacterIndex = num88;
-							this.m_textInfo.wordInfo[wordCount2].characterCount = num88 - num42 + 1;
-							this.m_textInfo.wordInfo[wordCount2].textComponent = this;
-							num39++;
-							this.m_textInfo.wordCount++;
-							TMP_LineInfo[] lineInfo10 = this.m_textInfo.lineInfo;
-							int num91 = lineNumber3;
-							lineInfo10[num91].wordCount = lineInfo10[num91].wordCount + 1;
-						}
-					}
-					bool flag9 = (this.m_textInfo.characterInfo[i].style & FontStyles.Underline) == FontStyles.Underline;
-					if (flag9)
-					{
-						bool flag10 = true;
-						int pageNumber = (int)this.m_textInfo.characterInfo[i].pageNumber;
-						if (i > this.m_maxVisibleCharacters || lineNumber3 > this.m_maxVisibleLines || (this.m_overflowMode == TextOverflowModes.Page && pageNumber + 1 != this.m_pageToDisplay))
-						{
-							flag10 = false;
-						}
-						if (!char.IsWhiteSpace(character2))
-						{
-							num45 = Mathf.Max(num45, this.m_textInfo.characterInfo[i].scale);
-							num46 = Mathf.Min((pageNumber != num47) ? float.PositiveInfinity : num46, this.m_textInfo.characterInfo[i].baseLine + base.font.fontInfo.Underline * num45);
-							num47 = pageNumber;
-						}
-						if (!flag && flag10 && i <= tmp_LineInfo.lastVisibleCharacterIndex && character2 != '\n' && character2 != '\r')
-						{
-							if (i != tmp_LineInfo.lastVisibleCharacterIndex || !char.IsSeparator(character2))
-							{
-								flag = true;
-								num44 = this.m_textInfo.characterInfo[i].scale;
-								if (num45 == 0f)
+								vector9 = vector7 + vector8;
+								bool isVisible = characterInfo[i].isVisible;
+								if (isVisible)
 								{
-									num45 = num44;
+									TMP_TextElementType elementType = characterInfo[i].elementType;
+									if (elementType != TMP_TextElementType.Character)
+									{
+										if (elementType != TMP_TextElementType.Sprite)
+										{
+										}
+									}
+									else
+									{
+										Extents lineExtents = tmp_LineInfo.lineExtents;
+										float num54 = this.m_uvLineOffset * (float)lineNumber3 % 1f + this.m_uvOffset.x;
+										switch (this.m_horizontalMapping)
+										{
+										case TextureMappingOptions.Character:
+											characterInfo[i].vertex_BL.uv2.x = this.m_uvOffset.x;
+											characterInfo[i].vertex_TL.uv2.x = this.m_uvOffset.x;
+											characterInfo[i].vertex_TR.uv2.x = 1f + this.m_uvOffset.x;
+											characterInfo[i].vertex_BR.uv2.x = 1f + this.m_uvOffset.x;
+											break;
+										case TextureMappingOptions.Line:
+											if (this.m_textAlignment != TextAlignmentOptions.Justified)
+											{
+												characterInfo[i].vertex_BL.uv2.x = (characterInfo[i].vertex_BL.position.x - lineExtents.min.x) / (lineExtents.max.x - lineExtents.min.x) + num54;
+												characterInfo[i].vertex_TL.uv2.x = (characterInfo[i].vertex_TL.position.x - lineExtents.min.x) / (lineExtents.max.x - lineExtents.min.x) + num54;
+												characterInfo[i].vertex_TR.uv2.x = (characterInfo[i].vertex_TR.position.x - lineExtents.min.x) / (lineExtents.max.x - lineExtents.min.x) + num54;
+												characterInfo[i].vertex_BR.uv2.x = (characterInfo[i].vertex_BR.position.x - lineExtents.min.x) / (lineExtents.max.x - lineExtents.min.x) + num54;
+											}
+											else
+											{
+												characterInfo[i].vertex_BL.uv2.x = (characterInfo[i].vertex_BL.position.x + vector8.x - this.m_meshExtents.min.x) / (this.m_meshExtents.max.x - this.m_meshExtents.min.x) + num54;
+												characterInfo[i].vertex_TL.uv2.x = (characterInfo[i].vertex_TL.position.x + vector8.x - this.m_meshExtents.min.x) / (this.m_meshExtents.max.x - this.m_meshExtents.min.x) + num54;
+												characterInfo[i].vertex_TR.uv2.x = (characterInfo[i].vertex_TR.position.x + vector8.x - this.m_meshExtents.min.x) / (this.m_meshExtents.max.x - this.m_meshExtents.min.x) + num54;
+												characterInfo[i].vertex_BR.uv2.x = (characterInfo[i].vertex_BR.position.x + vector8.x - this.m_meshExtents.min.x) / (this.m_meshExtents.max.x - this.m_meshExtents.min.x) + num54;
+											}
+											break;
+										case TextureMappingOptions.Paragraph:
+											characterInfo[i].vertex_BL.uv2.x = (characterInfo[i].vertex_BL.position.x + vector8.x - this.m_meshExtents.min.x) / (this.m_meshExtents.max.x - this.m_meshExtents.min.x) + num54;
+											characterInfo[i].vertex_TL.uv2.x = (characterInfo[i].vertex_TL.position.x + vector8.x - this.m_meshExtents.min.x) / (this.m_meshExtents.max.x - this.m_meshExtents.min.x) + num54;
+											characterInfo[i].vertex_TR.uv2.x = (characterInfo[i].vertex_TR.position.x + vector8.x - this.m_meshExtents.min.x) / (this.m_meshExtents.max.x - this.m_meshExtents.min.x) + num54;
+											characterInfo[i].vertex_BR.uv2.x = (characterInfo[i].vertex_BR.position.x + vector8.x - this.m_meshExtents.min.x) / (this.m_meshExtents.max.x - this.m_meshExtents.min.x) + num54;
+											break;
+										case TextureMappingOptions.MatchAspect:
+										{
+											switch (this.m_verticalMapping)
+											{
+											case TextureMappingOptions.Character:
+												characterInfo[i].vertex_BL.uv2.y = this.m_uvOffset.y;
+												characterInfo[i].vertex_TL.uv2.y = 1f + this.m_uvOffset.y;
+												characterInfo[i].vertex_TR.uv2.y = this.m_uvOffset.y;
+												characterInfo[i].vertex_BR.uv2.y = 1f + this.m_uvOffset.y;
+												break;
+											case TextureMappingOptions.Line:
+												characterInfo[i].vertex_BL.uv2.y = (characterInfo[i].vertex_BL.position.y - lineExtents.min.y) / (lineExtents.max.y - lineExtents.min.y) + num54;
+												characterInfo[i].vertex_TL.uv2.y = (characterInfo[i].vertex_TL.position.y - lineExtents.min.y) / (lineExtents.max.y - lineExtents.min.y) + num54;
+												characterInfo[i].vertex_TR.uv2.y = characterInfo[i].vertex_BL.uv2.y;
+												characterInfo[i].vertex_BR.uv2.y = characterInfo[i].vertex_TL.uv2.y;
+												break;
+											case TextureMappingOptions.Paragraph:
+												characterInfo[i].vertex_BL.uv2.y = (characterInfo[i].vertex_BL.position.y - this.m_meshExtents.min.y) / (this.m_meshExtents.max.y - this.m_meshExtents.min.y) + num54;
+												characterInfo[i].vertex_TL.uv2.y = (characterInfo[i].vertex_TL.position.y - this.m_meshExtents.min.y) / (this.m_meshExtents.max.y - this.m_meshExtents.min.y) + num54;
+												characterInfo[i].vertex_TR.uv2.y = characterInfo[i].vertex_BL.uv2.y;
+												characterInfo[i].vertex_BR.uv2.y = characterInfo[i].vertex_TL.uv2.y;
+												break;
+											case TextureMappingOptions.MatchAspect:
+												global::Debug.Log("ERROR: Cannot Match both Vertical & Horizontal.", null);
+												break;
+											}
+											float num55 = (1f - (characterInfo[i].vertex_BL.uv2.y + characterInfo[i].vertex_TL.uv2.y) * characterInfo[i].aspectRatio) / 2f;
+											characterInfo[i].vertex_BL.uv2.x = characterInfo[i].vertex_BL.uv2.y * characterInfo[i].aspectRatio + num55 + num54;
+											characterInfo[i].vertex_TL.uv2.x = characterInfo[i].vertex_BL.uv2.x;
+											characterInfo[i].vertex_TR.uv2.x = characterInfo[i].vertex_TL.uv2.y * characterInfo[i].aspectRatio + num55 + num54;
+											characterInfo[i].vertex_BR.uv2.x = characterInfo[i].vertex_TR.uv2.x;
+											break;
+										}
+										}
+										switch (this.m_verticalMapping)
+										{
+										case TextureMappingOptions.Character:
+											characterInfo[i].vertex_BL.uv2.y = this.m_uvOffset.y;
+											characterInfo[i].vertex_TL.uv2.y = 1f + this.m_uvOffset.y;
+											characterInfo[i].vertex_TR.uv2.y = 1f + this.m_uvOffset.y;
+											characterInfo[i].vertex_BR.uv2.y = this.m_uvOffset.y;
+											break;
+										case TextureMappingOptions.Line:
+											characterInfo[i].vertex_BL.uv2.y = (characterInfo[i].vertex_BL.position.y - tmp_LineInfo.descender) / (tmp_LineInfo.ascender - tmp_LineInfo.descender) + this.m_uvOffset.y;
+											characterInfo[i].vertex_TL.uv2.y = (characterInfo[i].vertex_TL.position.y - tmp_LineInfo.descender) / (tmp_LineInfo.ascender - tmp_LineInfo.descender) + this.m_uvOffset.y;
+											characterInfo[i].vertex_TR.uv2.y = characterInfo[i].vertex_TL.uv2.y;
+											characterInfo[i].vertex_BR.uv2.y = characterInfo[i].vertex_BL.uv2.y;
+											break;
+										case TextureMappingOptions.Paragraph:
+											characterInfo[i].vertex_BL.uv2.y = (characterInfo[i].vertex_BL.position.y - this.m_meshExtents.min.y) / (this.m_meshExtents.max.y - this.m_meshExtents.min.y) + this.m_uvOffset.y;
+											characterInfo[i].vertex_TL.uv2.y = (characterInfo[i].vertex_TL.position.y - this.m_meshExtents.min.y) / (this.m_meshExtents.max.y - this.m_meshExtents.min.y) + this.m_uvOffset.y;
+											characterInfo[i].vertex_TR.uv2.y = characterInfo[i].vertex_TL.uv2.y;
+											characterInfo[i].vertex_BR.uv2.y = characterInfo[i].vertex_BL.uv2.y;
+											break;
+										case TextureMappingOptions.MatchAspect:
+										{
+											float num56 = (1f - (characterInfo[i].vertex_BL.uv2.x + characterInfo[i].vertex_TR.uv2.x) / characterInfo[i].aspectRatio) / 2f;
+											characterInfo[i].vertex_BL.uv2.y = num56 + characterInfo[i].vertex_BL.uv2.x / characterInfo[i].aspectRatio + this.m_uvOffset.y;
+											characterInfo[i].vertex_TL.uv2.y = num56 + characterInfo[i].vertex_TR.uv2.x / characterInfo[i].aspectRatio + this.m_uvOffset.y;
+											characterInfo[i].vertex_BR.uv2.y = characterInfo[i].vertex_BL.uv2.y;
+											characterInfo[i].vertex_TR.uv2.y = characterInfo[i].vertex_TL.uv2.y;
+											break;
+										}
+										}
+										float num57 = characterInfo[i].scale * (1f - this.m_charWidthAdjDelta);
+										if (!characterInfo[i].isUsingAlternateTypeface && (characterInfo[i].style & FontStyles.Bold) == FontStyles.Bold)
+										{
+											num57 *= -1f;
+										}
+										if (renderMode != RenderMode.ScreenSpaceOverlay)
+										{
+											if (renderMode != RenderMode.ScreenSpaceCamera)
+											{
+												if (renderMode == RenderMode.WorldSpace)
+												{
+													num57 *= num43;
+												}
+											}
+											else
+											{
+												num57 *= ((!flag8) ? 1f : num43);
+											}
+										}
+										else
+										{
+											num57 *= num43 / scaleFactor;
+										}
+										float num58 = characterInfo[i].vertex_BL.uv2.x;
+										float num59 = characterInfo[i].vertex_BL.uv2.y;
+										float num60 = characterInfo[i].vertex_TR.uv2.x;
+										float num61 = characterInfo[i].vertex_TR.uv2.y;
+										float num62 = Mathf.Floor(num58);
+										float num63 = Mathf.Floor(num59);
+										num58 -= num62;
+										num60 -= num62;
+										num59 -= num63;
+										num61 -= num63;
+										characterInfo[i].vertex_BL.uv2.x = base.PackUV(num58, num59);
+										characterInfo[i].vertex_BL.uv2.y = num57;
+										characterInfo[i].vertex_TL.uv2.x = base.PackUV(num58, num61);
+										characterInfo[i].vertex_TL.uv2.y = num57;
+										characterInfo[i].vertex_TR.uv2.x = base.PackUV(num60, num61);
+										characterInfo[i].vertex_TR.uv2.y = num57;
+										characterInfo[i].vertex_BR.uv2.x = base.PackUV(num60, num59);
+										characterInfo[i].vertex_BR.uv2.y = num57;
+									}
+									if (i < this.m_maxVisibleCharacters && lineNumber3 < this.m_maxVisibleLines && this.m_overflowMode != TextOverflowModes.Page)
+									{
+										TMP_CharacterInfo[] array = characterInfo;
+										int num64 = i;
+										array[num64].vertex_BL.position = array[num64].vertex_BL.position + vector9;
+										TMP_CharacterInfo[] array2 = characterInfo;
+										int num65 = i;
+										array2[num65].vertex_TL.position = array2[num65].vertex_TL.position + vector9;
+										TMP_CharacterInfo[] array3 = characterInfo;
+										int num66 = i;
+										array3[num66].vertex_TR.position = array3[num66].vertex_TR.position + vector9;
+										TMP_CharacterInfo[] array4 = characterInfo;
+										int num67 = i;
+										array4[num67].vertex_BR.position = array4[num67].vertex_BR.position + vector9;
+									}
+									else if (i < this.m_maxVisibleCharacters && lineNumber3 < this.m_maxVisibleLines && this.m_overflowMode == TextOverflowModes.Page && (int)characterInfo[i].pageNumber == num6)
+									{
+										TMP_CharacterInfo[] array5 = characterInfo;
+										int num68 = i;
+										array5[num68].vertex_BL.position = array5[num68].vertex_BL.position + vector9;
+										TMP_CharacterInfo[] array6 = characterInfo;
+										int num69 = i;
+										array6[num69].vertex_TL.position = array6[num69].vertex_TL.position + vector9;
+										TMP_CharacterInfo[] array7 = characterInfo;
+										int num70 = i;
+										array7[num70].vertex_TR.position = array7[num70].vertex_TR.position + vector9;
+										TMP_CharacterInfo[] array8 = characterInfo;
+										int num71 = i;
+										array8[num71].vertex_BR.position = array8[num71].vertex_BR.position + vector9;
+									}
+									else
+									{
+										characterInfo[i].vertex_BL.position = Vector3.zero;
+										characterInfo[i].vertex_TL.position = Vector3.zero;
+										characterInfo[i].vertex_TR.position = Vector3.zero;
+										characterInfo[i].vertex_BR.position = Vector3.zero;
+									}
+									if (elementType == TMP_TextElementType.Character)
+									{
+										this.FillCharacterVertexBuffers(i, num37);
+									}
+									else if (elementType == TMP_TextElementType.Sprite)
+									{
+										this.FillSpriteVertexBuffers(i, num38);
+									}
 								}
-								zero = new Vector3(this.m_textInfo.characterInfo[i].bottomLeft.x, num46, 0f);
-								color2 = this.m_textInfo.characterInfo[i].color;
+								TMP_CharacterInfo[] characterInfo2 = this.m_textInfo.characterInfo;
+								int num72 = i;
+								characterInfo2[num72].bottomLeft = characterInfo2[num72].bottomLeft + vector9;
+								TMP_CharacterInfo[] characterInfo3 = this.m_textInfo.characterInfo;
+								int num73 = i;
+								characterInfo3[num73].topLeft = characterInfo3[num73].topLeft + vector9;
+								TMP_CharacterInfo[] characterInfo4 = this.m_textInfo.characterInfo;
+								int num74 = i;
+								characterInfo4[num74].topRight = characterInfo4[num74].topRight + vector9;
+								TMP_CharacterInfo[] characterInfo5 = this.m_textInfo.characterInfo;
+								int num75 = i;
+								characterInfo5[num75].bottomRight = characterInfo5[num75].bottomRight + vector9;
+								TMP_CharacterInfo[] characterInfo6 = this.m_textInfo.characterInfo;
+								int num76 = i;
+								characterInfo6[num76].origin = characterInfo6[num76].origin + vector9.x;
+								TMP_CharacterInfo[] characterInfo7 = this.m_textInfo.characterInfo;
+								int num77 = i;
+								characterInfo7[num77].xAdvance = characterInfo7[num77].xAdvance + vector9.x;
+								TMP_CharacterInfo[] characterInfo8 = this.m_textInfo.characterInfo;
+								int num78 = i;
+								characterInfo8[num78].ascender = characterInfo8[num78].ascender + vector9.y;
+								TMP_CharacterInfo[] characterInfo9 = this.m_textInfo.characterInfo;
+								int num79 = i;
+								characterInfo9[num79].descender = characterInfo9[num79].descender + vector9.y;
+								TMP_CharacterInfo[] characterInfo10 = this.m_textInfo.characterInfo;
+								int num80 = i;
+								characterInfo10[num80].baseLine = characterInfo10[num80].baseLine + vector9.y;
+								if (isVisible)
+								{
+								}
+								if (lineNumber3 != num41 || i == this.m_characterCount - 1)
+								{
+									if (lineNumber3 != num41)
+									{
+										TMP_LineInfo[] lineInfo3 = this.m_textInfo.lineInfo;
+										int num81 = num41;
+										lineInfo3[num81].baseline = lineInfo3[num81].baseline + vector9.y;
+										TMP_LineInfo[] lineInfo4 = this.m_textInfo.lineInfo;
+										int num82 = num41;
+										lineInfo4[num82].ascender = lineInfo4[num82].ascender + vector9.y;
+										TMP_LineInfo[] lineInfo5 = this.m_textInfo.lineInfo;
+										int num83 = num41;
+										lineInfo5[num83].descender = lineInfo5[num83].descender + vector9.y;
+										this.m_textInfo.lineInfo[num41].lineExtents.min = new Vector2(this.m_textInfo.characterInfo[this.m_textInfo.lineInfo[num41].firstCharacterIndex].bottomLeft.x, this.m_textInfo.lineInfo[num41].descender);
+										this.m_textInfo.lineInfo[num41].lineExtents.max = new Vector2(this.m_textInfo.characterInfo[this.m_textInfo.lineInfo[num41].lastVisibleCharacterIndex].topRight.x, this.m_textInfo.lineInfo[num41].ascender);
+									}
+									if (i == this.m_characterCount - 1)
+									{
+										TMP_LineInfo[] lineInfo6 = this.m_textInfo.lineInfo;
+										int num84 = lineNumber3;
+										lineInfo6[num84].baseline = lineInfo6[num84].baseline + vector9.y;
+										TMP_LineInfo[] lineInfo7 = this.m_textInfo.lineInfo;
+										int num85 = lineNumber3;
+										lineInfo7[num85].ascender = lineInfo7[num85].ascender + vector9.y;
+										TMP_LineInfo[] lineInfo8 = this.m_textInfo.lineInfo;
+										int num86 = lineNumber3;
+										lineInfo8[num86].descender = lineInfo8[num86].descender + vector9.y;
+										this.m_textInfo.lineInfo[lineNumber3].lineExtents.min = new Vector2(this.m_textInfo.characterInfo[this.m_textInfo.lineInfo[lineNumber3].firstCharacterIndex].bottomLeft.x, this.m_textInfo.lineInfo[lineNumber3].descender);
+										this.m_textInfo.lineInfo[lineNumber3].lineExtents.max = new Vector2(this.m_textInfo.characterInfo[this.m_textInfo.lineInfo[lineNumber3].lastVisibleCharacterIndex].topRight.x, this.m_textInfo.lineInfo[lineNumber3].ascender);
+									}
+								}
+								if (char.IsLetterOrDigit(character2) || character2 == '-' || character2 == '\u00ad' || character2 == '‐' || character2 == '‑')
+								{
+									if (!flag7)
+									{
+										flag7 = true;
+										num42 = i;
+									}
+									if (flag7 && i == this.m_characterCount - 1)
+									{
+										int num87 = this.m_textInfo.wordInfo.Length;
+										int wordCount = this.m_textInfo.wordCount;
+										if (this.m_textInfo.wordCount + 1 > num87)
+										{
+											TMP_TextInfo.Resize<TMP_WordInfo>(ref this.m_textInfo.wordInfo, num87 + 1);
+										}
+										int num88 = i;
+										this.m_textInfo.wordInfo[wordCount].firstCharacterIndex = num42;
+										this.m_textInfo.wordInfo[wordCount].lastCharacterIndex = num88;
+										this.m_textInfo.wordInfo[wordCount].characterCount = num88 - num42 + 1;
+										this.m_textInfo.wordInfo[wordCount].textComponent = this;
+										num39++;
+										this.m_textInfo.wordCount++;
+										TMP_LineInfo[] lineInfo9 = this.m_textInfo.lineInfo;
+										int num89 = lineNumber3;
+										lineInfo9[num89].wordCount = lineInfo9[num89].wordCount + 1;
+									}
+								}
+								else if (flag7 || (i == 0 && (!char.IsPunctuation(character2) || char.IsWhiteSpace(character2) || i == this.m_characterCount - 1)))
+								{
+									if (i <= 0 || i >= this.m_characterCount || (character2 != '\'' && character2 != '’') || !char.IsLetterOrDigit(characterInfo[i - 1].character) || !char.IsLetterOrDigit(characterInfo[i + 1].character))
+									{
+										int num88 = ((i != this.m_characterCount - 1 || !char.IsLetterOrDigit(character2)) ? (i - 1) : i);
+										flag7 = false;
+										int num90 = this.m_textInfo.wordInfo.Length;
+										int wordCount2 = this.m_textInfo.wordCount;
+										if (this.m_textInfo.wordCount + 1 > num90)
+										{
+											TMP_TextInfo.Resize<TMP_WordInfo>(ref this.m_textInfo.wordInfo, num90 + 1);
+										}
+										this.m_textInfo.wordInfo[wordCount2].firstCharacterIndex = num42;
+										this.m_textInfo.wordInfo[wordCount2].lastCharacterIndex = num88;
+										this.m_textInfo.wordInfo[wordCount2].characterCount = num88 - num42 + 1;
+										this.m_textInfo.wordInfo[wordCount2].textComponent = this;
+										num39++;
+										this.m_textInfo.wordCount++;
+										TMP_LineInfo[] lineInfo10 = this.m_textInfo.lineInfo;
+										int num91 = lineNumber3;
+										lineInfo10[num91].wordCount = lineInfo10[num91].wordCount + 1;
+									}
+								}
+								bool flag9 = (this.m_textInfo.characterInfo[i].style & FontStyles.Underline) == FontStyles.Underline;
+								if (flag9)
+								{
+									bool flag10 = true;
+									int pageNumber = (int)this.m_textInfo.characterInfo[i].pageNumber;
+									if (i > this.m_maxVisibleCharacters || lineNumber3 > this.m_maxVisibleLines || (this.m_overflowMode == TextOverflowModes.Page && pageNumber + 1 != this.m_pageToDisplay))
+									{
+										flag10 = false;
+									}
+									if (!char.IsWhiteSpace(character2))
+									{
+										num45 = Mathf.Max(num45, this.m_textInfo.characterInfo[i].scale);
+										num46 = Mathf.Min((pageNumber != num47) ? float.PositiveInfinity : num46, this.m_textInfo.characterInfo[i].baseLine + base.font.fontInfo.Underline * num45);
+										num47 = pageNumber;
+									}
+									if (!flag && flag10 && i <= tmp_LineInfo.lastVisibleCharacterIndex && character2 != '\n' && character2 != '\r')
+									{
+										if (i != tmp_LineInfo.lastVisibleCharacterIndex || !char.IsSeparator(character2))
+										{
+											flag = true;
+											num44 = this.m_textInfo.characterInfo[i].scale;
+											if (num45 == 0f)
+											{
+												num45 = num44;
+											}
+											zero = new Vector3(this.m_textInfo.characterInfo[i].bottomLeft.x, num46, 0f);
+											color2 = this.m_textInfo.characterInfo[i].color;
+										}
+									}
+									if (flag && this.m_characterCount == 1)
+									{
+										flag = false;
+										zero2 = new Vector3(this.m_textInfo.characterInfo[i].topRight.x, num46, 0f);
+										float num92 = this.m_textInfo.characterInfo[i].scale;
+										this.DrawUnderlineMesh(zero, zero2, ref num36, num44, num92, num45, color2);
+										num45 = 0f;
+										num46 = float.PositiveInfinity;
+									}
+									else if (flag && (i == tmp_LineInfo.lastCharacterIndex || i >= tmp_LineInfo.lastVisibleCharacterIndex))
+									{
+										float num92;
+										if (char.IsWhiteSpace(character2))
+										{
+											int lastVisibleCharacterIndex = tmp_LineInfo.lastVisibleCharacterIndex;
+											zero2 = new Vector3(this.m_textInfo.characterInfo[lastVisibleCharacterIndex].topRight.x, num46, 0f);
+											num92 = this.m_textInfo.characterInfo[lastVisibleCharacterIndex].scale;
+										}
+										else
+										{
+											zero2 = new Vector3(this.m_textInfo.characterInfo[i].topRight.x, num46, 0f);
+											num92 = this.m_textInfo.characterInfo[i].scale;
+										}
+										flag = false;
+										this.DrawUnderlineMesh(zero, zero2, ref num36, num44, num92, num45, color2);
+										num45 = 0f;
+										num46 = float.PositiveInfinity;
+									}
+									else if (flag && !flag10)
+									{
+										flag = false;
+										zero2 = new Vector3(this.m_textInfo.characterInfo[i - 1].topRight.x, num46, 0f);
+										float num92 = this.m_textInfo.characterInfo[i - 1].scale;
+										this.DrawUnderlineMesh(zero, zero2, ref num36, num44, num92, num45, color2);
+										num45 = 0f;
+										num46 = float.PositiveInfinity;
+									}
+								}
+								else if (flag)
+								{
+									flag = false;
+									zero2 = new Vector3(this.m_textInfo.characterInfo[i - 1].topRight.x, num46, 0f);
+									float num92 = this.m_textInfo.characterInfo[i - 1].scale;
+									this.DrawUnderlineMesh(zero, zero2, ref num36, num44, num92, num45, color2);
+									num45 = 0f;
+									num46 = float.PositiveInfinity;
+								}
+								bool flag11 = (this.m_textInfo.characterInfo[i].style & FontStyles.Strikethrough) == FontStyles.Strikethrough;
+								if (flag11)
+								{
+									bool flag12 = true;
+									if (i > this.m_maxVisibleCharacters || lineNumber3 > this.m_maxVisibleLines || (this.m_overflowMode == TextOverflowModes.Page && (int)(this.m_textInfo.characterInfo[i].pageNumber + 1) != this.m_pageToDisplay))
+									{
+										flag12 = false;
+									}
+									if (!flag2 && flag12 && i <= tmp_LineInfo.lastVisibleCharacterIndex && character2 != '\n' && character2 != '\r')
+									{
+										if (i != tmp_LineInfo.lastVisibleCharacterIndex || !char.IsSeparator(character2))
+										{
+											flag2 = true;
+											num48 = this.m_textInfo.characterInfo[i].pointSize;
+											num49 = this.m_textInfo.characterInfo[i].scale;
+											zero3 = new Vector3(this.m_textInfo.characterInfo[i].bottomLeft.x, this.m_textInfo.characterInfo[i].baseLine + (base.font.fontInfo.Ascender + base.font.fontInfo.Descender) / 2.75f * num49, 0f);
+											color3 = this.m_textInfo.characterInfo[i].color;
+											num50 = this.m_textInfo.characterInfo[i].baseLine;
+										}
+									}
+									if (flag2 && this.m_characterCount == 1)
+									{
+										flag2 = false;
+										zero4 = new Vector3(this.m_textInfo.characterInfo[i].topRight.x, this.m_textInfo.characterInfo[i].baseLine + (base.font.fontInfo.Ascender + base.font.fontInfo.Descender) / 2f * num49, 0f);
+										this.DrawUnderlineMesh(zero3, zero4, ref num36, num49, num49, num49, color3);
+									}
+									else if (flag2 && i == tmp_LineInfo.lastCharacterIndex)
+									{
+										if (char.IsWhiteSpace(character2))
+										{
+											int lastVisibleCharacterIndex2 = tmp_LineInfo.lastVisibleCharacterIndex;
+											zero4 = new Vector3(this.m_textInfo.characterInfo[lastVisibleCharacterIndex2].topRight.x, this.m_textInfo.characterInfo[lastVisibleCharacterIndex2].baseLine + (base.font.fontInfo.Ascender + base.font.fontInfo.Descender) / 2f * num49, 0f);
+										}
+										else
+										{
+											zero4 = new Vector3(this.m_textInfo.characterInfo[i].topRight.x, this.m_textInfo.characterInfo[i].baseLine + (base.font.fontInfo.Ascender + base.font.fontInfo.Descender) / 2f * num49, 0f);
+										}
+										flag2 = false;
+										this.DrawUnderlineMesh(zero3, zero4, ref num36, num49, num49, num49, color3);
+									}
+									else if (flag2 && i < this.m_characterCount && (this.m_textInfo.characterInfo[i + 1].pointSize != num48 || !TMP_Math.Approximately(this.m_textInfo.characterInfo[i + 1].baseLine + vector9.y, num50)))
+									{
+										flag2 = false;
+										int lastVisibleCharacterIndex3 = tmp_LineInfo.lastVisibleCharacterIndex;
+										if (i > lastVisibleCharacterIndex3)
+										{
+											zero4 = new Vector3(this.m_textInfo.characterInfo[lastVisibleCharacterIndex3].topRight.x, this.m_textInfo.characterInfo[lastVisibleCharacterIndex3].baseLine + (base.font.fontInfo.Ascender + base.font.fontInfo.Descender) / 2f * num49, 0f);
+										}
+										else
+										{
+											zero4 = new Vector3(this.m_textInfo.characterInfo[i].topRight.x, this.m_textInfo.characterInfo[i].baseLine + (base.font.fontInfo.Ascender + base.font.fontInfo.Descender) / 2f * num49, 0f);
+										}
+										this.DrawUnderlineMesh(zero3, zero4, ref num36, num49, num49, num49, color3);
+									}
+									else if (flag2 && !flag12)
+									{
+										flag2 = false;
+										zero4 = new Vector3(this.m_textInfo.characterInfo[i - 1].topRight.x, this.m_textInfo.characterInfo[i - 1].baseLine + (base.font.fontInfo.Ascender + base.font.fontInfo.Descender) / 2f * num49, 0f);
+										this.DrawUnderlineMesh(zero3, zero4, ref num36, num49, num49, num49, color3);
+									}
+								}
+								else if (flag2)
+								{
+									flag2 = false;
+									zero4 = new Vector3(this.m_textInfo.characterInfo[i - 1].topRight.x, this.m_textInfo.characterInfo[i - 1].baseLine + (base.font.fontInfo.Ascender + base.font.fontInfo.Descender) / 2f * this.m_fontScale, 0f);
+									this.DrawUnderlineMesh(zero3, zero4, ref num36, num49, num49, num49, color3);
+								}
+								num41 = lineNumber3;
 							}
-						}
-						if (flag && this.m_characterCount == 1)
-						{
-							flag = false;
-							zero2 = new Vector3(this.m_textInfo.characterInfo[i].topRight.x, num46, 0f);
-							float num92 = this.m_textInfo.characterInfo[i].scale;
-							this.DrawUnderlineMesh(zero, zero2, ref num36, num44, num92, num45, color2);
-							num45 = 0f;
-							num46 = float.PositiveInfinity;
-						}
-						else if (flag && (i == tmp_LineInfo.lastCharacterIndex || i >= tmp_LineInfo.lastVisibleCharacterIndex))
-						{
-							float num92;
-							if (char.IsWhiteSpace(character2))
+							this.m_textInfo.characterCount = (int)((short)this.m_characterCount);
+							this.m_textInfo.spriteCount = this.m_spriteCount;
+							this.m_textInfo.lineCount = (int)((short)num40);
+							this.m_textInfo.wordCount = (int)((num39 == 0 || this.m_characterCount <= 0) ? 1 : ((short)num39));
+							this.m_textInfo.pageCount = this.m_pageNumber + 1;
+							if (this.m_renderMode == TextRenderFlags.Render)
 							{
-								int lastVisibleCharacterIndex = tmp_LineInfo.lastVisibleCharacterIndex;
-								zero2 = new Vector3(this.m_textInfo.characterInfo[lastVisibleCharacterIndex].topRight.x, num46, 0f);
-								num92 = this.m_textInfo.characterInfo[lastVisibleCharacterIndex].scale;
+								this.m_mesh.MarkDynamic();
+								this.m_mesh.vertices = this.m_textInfo.meshInfo[0].vertices;
+								this.m_mesh.uv = this.m_textInfo.meshInfo[0].uvs0;
+								this.m_mesh.uv2 = this.m_textInfo.meshInfo[0].uvs2;
+								this.m_mesh.colors32 = this.m_textInfo.meshInfo[0].colors32;
+								this.m_mesh.RecalculateBounds();
+								this.m_canvasRenderer.SetMesh(this.m_mesh);
+								for (int j = 1; j < this.m_textInfo.materialCount; j++)
+								{
+									this.m_textInfo.meshInfo[j].ClearUnusedVertices();
+									if (!(this.m_subTextObjects[j] == null))
+									{
+										this.m_subTextObjects[j].mesh.MarkDynamic();
+										this.m_subTextObjects[j].mesh.vertices = this.m_textInfo.meshInfo[j].vertices;
+										this.m_subTextObjects[j].mesh.uv = this.m_textInfo.meshInfo[j].uvs0;
+										this.m_subTextObjects[j].mesh.uv2 = this.m_textInfo.meshInfo[j].uvs2;
+										this.m_subTextObjects[j].mesh.colors32 = this.m_textInfo.meshInfo[j].colors32;
+										this.m_subTextObjects[j].mesh.RecalculateBounds();
+										this.m_subTextObjects[j].canvasRenderer.SetMesh(this.m_subTextObjects[j].mesh);
+									}
+								}
 							}
-							else
-							{
-								zero2 = new Vector3(this.m_textInfo.characterInfo[i].topRight.x, num46, 0f);
-								num92 = this.m_textInfo.characterInfo[i].scale;
-							}
-							flag = false;
-							this.DrawUnderlineMesh(zero, zero2, ref num36, num44, num92, num45, color2);
-							num45 = 0f;
-							num46 = float.PositiveInfinity;
-						}
-						else if (flag && !flag10)
-						{
-							flag = false;
-							zero2 = new Vector3(this.m_textInfo.characterInfo[i - 1].topRight.x, num46, 0f);
-							float num92 = this.m_textInfo.characterInfo[i - 1].scale;
-							this.DrawUnderlineMesh(zero, zero2, ref num36, num44, num92, num45, color2);
-							num45 = 0f;
-							num46 = float.PositiveInfinity;
+							TMPro_EventManager.ON_TEXT_CHANGED(this);
 						}
 					}
-					else if (flag)
-					{
-						flag = false;
-						zero2 = new Vector3(this.m_textInfo.characterInfo[i - 1].topRight.x, num46, 0f);
-						float num92 = this.m_textInfo.characterInfo[i - 1].scale;
-						this.DrawUnderlineMesh(zero, zero2, ref num36, num44, num92, num45, color2);
-						num45 = 0f;
-						num46 = float.PositiveInfinity;
-					}
-					bool flag11 = (this.m_textInfo.characterInfo[i].style & FontStyles.Strikethrough) == FontStyles.Strikethrough;
-					if (flag11)
-					{
-						bool flag12 = true;
-						if (i > this.m_maxVisibleCharacters || lineNumber3 > this.m_maxVisibleLines || (this.m_overflowMode == TextOverflowModes.Page && (int)(this.m_textInfo.characterInfo[i].pageNumber + 1) != this.m_pageToDisplay))
-						{
-							flag12 = false;
-						}
-						if (!flag2 && flag12 && i <= tmp_LineInfo.lastVisibleCharacterIndex && character2 != '\n' && character2 != '\r')
-						{
-							if (i != tmp_LineInfo.lastVisibleCharacterIndex || !char.IsSeparator(character2))
-							{
-								flag2 = true;
-								num48 = this.m_textInfo.characterInfo[i].pointSize;
-								num49 = this.m_textInfo.characterInfo[i].scale;
-								zero3 = new Vector3(this.m_textInfo.characterInfo[i].bottomLeft.x, this.m_textInfo.characterInfo[i].baseLine + (base.font.fontInfo.Ascender + base.font.fontInfo.Descender) / 2.75f * num49, 0f);
-								color3 = this.m_textInfo.characterInfo[i].color;
-								num50 = this.m_textInfo.characterInfo[i].baseLine;
-							}
-						}
-						if (flag2 && this.m_characterCount == 1)
-						{
-							flag2 = false;
-							zero4 = new Vector3(this.m_textInfo.characterInfo[i].topRight.x, this.m_textInfo.characterInfo[i].baseLine + (base.font.fontInfo.Ascender + base.font.fontInfo.Descender) / 2f * num49, 0f);
-							this.DrawUnderlineMesh(zero3, zero4, ref num36, num49, num49, num49, color3);
-						}
-						else if (flag2 && i == tmp_LineInfo.lastCharacterIndex)
-						{
-							if (char.IsWhiteSpace(character2))
-							{
-								int lastVisibleCharacterIndex2 = tmp_LineInfo.lastVisibleCharacterIndex;
-								zero4 = new Vector3(this.m_textInfo.characterInfo[lastVisibleCharacterIndex2].topRight.x, this.m_textInfo.characterInfo[lastVisibleCharacterIndex2].baseLine + (base.font.fontInfo.Ascender + base.font.fontInfo.Descender) / 2f * num49, 0f);
-							}
-							else
-							{
-								zero4 = new Vector3(this.m_textInfo.characterInfo[i].topRight.x, this.m_textInfo.characterInfo[i].baseLine + (base.font.fontInfo.Ascender + base.font.fontInfo.Descender) / 2f * num49, 0f);
-							}
-							flag2 = false;
-							this.DrawUnderlineMesh(zero3, zero4, ref num36, num49, num49, num49, color3);
-						}
-						else if (flag2 && i < this.m_characterCount && (this.m_textInfo.characterInfo[i + 1].pointSize != num48 || !TMP_Math.Approximately(this.m_textInfo.characterInfo[i + 1].baseLine + vector9.y, num50)))
-						{
-							flag2 = false;
-							int lastVisibleCharacterIndex3 = tmp_LineInfo.lastVisibleCharacterIndex;
-							if (i > lastVisibleCharacterIndex3)
-							{
-								zero4 = new Vector3(this.m_textInfo.characterInfo[lastVisibleCharacterIndex3].topRight.x, this.m_textInfo.characterInfo[lastVisibleCharacterIndex3].baseLine + (base.font.fontInfo.Ascender + base.font.fontInfo.Descender) / 2f * num49, 0f);
-							}
-							else
-							{
-								zero4 = new Vector3(this.m_textInfo.characterInfo[i].topRight.x, this.m_textInfo.characterInfo[i].baseLine + (base.font.fontInfo.Ascender + base.font.fontInfo.Descender) / 2f * num49, 0f);
-							}
-							this.DrawUnderlineMesh(zero3, zero4, ref num36, num49, num49, num49, color3);
-						}
-						else if (flag2 && !flag12)
-						{
-							flag2 = false;
-							zero4 = new Vector3(this.m_textInfo.characterInfo[i - 1].topRight.x, this.m_textInfo.characterInfo[i - 1].baseLine + (base.font.fontInfo.Ascender + base.font.fontInfo.Descender) / 2f * num49, 0f);
-							this.DrawUnderlineMesh(zero3, zero4, ref num36, num49, num49, num49, color3);
-						}
-					}
-					else if (flag2)
-					{
-						flag2 = false;
-						zero4 = new Vector3(this.m_textInfo.characterInfo[i - 1].topRight.x, this.m_textInfo.characterInfo[i - 1].baseLine + (base.font.fontInfo.Ascender + base.font.fontInfo.Descender) / 2f * this.m_fontScale, 0f);
-						this.DrawUnderlineMesh(zero3, zero4, ref num36, num49, num49, num49, color3);
-					}
-					num41 = lineNumber3;
 				}
-				this.m_textInfo.characterCount = (int)((short)this.m_characterCount);
-				this.m_textInfo.spriteCount = this.m_spriteCount;
-				this.m_textInfo.lineCount = (int)((short)num40);
-				this.m_textInfo.wordCount = (int)((num39 == 0 || this.m_characterCount <= 0) ? 1 : ((short)num39));
-				this.m_textInfo.pageCount = this.m_pageNumber + 1;
-				if (this.m_renderMode == TextRenderFlags.Render)
-				{
-					this.m_mesh.MarkDynamic();
-					this.m_mesh.vertices = this.m_textInfo.meshInfo[0].vertices;
-					this.m_mesh.uv = this.m_textInfo.meshInfo[0].uvs0;
-					this.m_mesh.uv2 = this.m_textInfo.meshInfo[0].uvs2;
-					this.m_mesh.colors32 = this.m_textInfo.meshInfo[0].colors32;
-					this.m_mesh.RecalculateBounds();
-					this.m_canvasRenderer.SetMesh(this.m_mesh);
-					for (int j = 1; j < this.m_textInfo.materialCount; j++)
-					{
-						this.m_textInfo.meshInfo[j].ClearUnusedVertices();
-						if (!(this.m_subTextObjects[j] == null))
-						{
-							this.m_subTextObjects[j].mesh.MarkDynamic();
-							this.m_subTextObjects[j].mesh.vertices = this.m_textInfo.meshInfo[j].vertices;
-							this.m_subTextObjects[j].mesh.uv = this.m_textInfo.meshInfo[j].uvs0;
-							this.m_subTextObjects[j].mesh.uv2 = this.m_textInfo.meshInfo[j].uvs2;
-							this.m_subTextObjects[j].mesh.colors32 = this.m_textInfo.meshInfo[j].colors32;
-							this.m_subTextObjects[j].mesh.RecalculateBounds();
-							this.m_subTextObjects[j].canvasRenderer.SetMesh(this.m_subTextObjects[j].mesh);
-						}
-					}
-				}
-				TMPro_EventManager.ON_TEXT_CHANGED(this);
-				return;
 			}
 		}
 
@@ -2471,11 +2494,16 @@ namespace TMPro
 		{
 			get
 			{
+				Material material;
 				if (this.m_sharedMaterial == null)
 				{
-					return null;
+					material = null;
 				}
-				return this.GetModifiedMaterial(this.m_sharedMaterial);
+				else
+				{
+					material = this.GetModifiedMaterial(this.m_sharedMaterial);
+				}
+				return material;
 			}
 		}
 
@@ -2511,72 +2539,72 @@ namespace TMPro
 		{
 			get
 			{
+				Bounds bounds;
 				if (this.m_mesh != null)
 				{
-					return this.m_mesh.bounds;
+					bounds = this.m_mesh.bounds;
 				}
-				return default(Bounds);
+				else
+				{
+					bounds = default(Bounds);
+				}
+				return bounds;
 			}
 		}
 
 		public void CalculateLayoutInputHorizontal()
 		{
-			if (!base.gameObject.activeInHierarchy)
+			if (base.gameObject.activeInHierarchy)
 			{
-				return;
-			}
-			if (this.m_isCalculateSizeRequired || this.m_rectTransform.hasChanged)
-			{
-				this.m_preferredWidth = base.GetPreferredWidth();
-				this.ComputeMarginSize();
-				this.m_isLayoutDirty = true;
+				if (this.m_isCalculateSizeRequired || this.m_rectTransform.hasChanged)
+				{
+					this.m_preferredWidth = base.GetPreferredWidth();
+					this.ComputeMarginSize();
+					this.m_isLayoutDirty = true;
+				}
 			}
 		}
 
 		public void CalculateLayoutInputVertical()
 		{
-			if (!base.gameObject.activeInHierarchy)
+			if (base.gameObject.activeInHierarchy)
 			{
-				return;
+				if (this.m_isCalculateSizeRequired || this.m_rectTransform.hasChanged)
+				{
+					this.m_preferredHeight = base.GetPreferredHeight();
+					this.ComputeMarginSize();
+					this.m_isLayoutDirty = true;
+				}
+				this.m_isCalculateSizeRequired = false;
 			}
-			if (this.m_isCalculateSizeRequired || this.m_rectTransform.hasChanged)
-			{
-				this.m_preferredHeight = base.GetPreferredHeight();
-				this.ComputeMarginSize();
-				this.m_isLayoutDirty = true;
-			}
-			this.m_isCalculateSizeRequired = false;
 		}
 
 		public override void SetVerticesDirty()
 		{
-			if (this.m_verticesAlreadyDirty || this == null || !this.IsActive())
+			if (!this.m_verticesAlreadyDirty && !(this == null) && this.IsActive())
 			{
-				return;
+				this.m_verticesAlreadyDirty = true;
+				CanvasUpdateRegistry.RegisterCanvasElementForGraphicRebuild(this);
 			}
-			this.m_verticesAlreadyDirty = true;
-			CanvasUpdateRegistry.RegisterCanvasElementForGraphicRebuild(this);
 		}
 
 		public override void SetLayoutDirty()
 		{
-			if (this.m_layoutAlreadyDirty || this == null || !this.IsActive())
+			if (!this.m_layoutAlreadyDirty && !(this == null) && this.IsActive())
 			{
-				return;
+				this.m_layoutAlreadyDirty = true;
+				LayoutRebuilder.MarkLayoutForRebuild(base.rectTransform);
+				this.m_isLayoutDirty = true;
 			}
-			this.m_layoutAlreadyDirty = true;
-			LayoutRebuilder.MarkLayoutForRebuild(base.rectTransform);
-			this.m_isLayoutDirty = true;
 		}
 
 		public override void SetMaterialDirty()
 		{
-			if (!this.IsActive())
+			if (this.IsActive())
 			{
-				return;
+				this.m_isMaterialDirty = true;
+				CanvasUpdateRegistry.RegisterCanvasElementForGraphicRebuild(this);
 			}
-			this.m_isMaterialDirty = true;
-			CanvasUpdateRegistry.RegisterCanvasElementForGraphicRebuild(this);
 		}
 
 		public override void SetAllDirty()
@@ -2588,35 +2616,32 @@ namespace TMPro
 
 		public override void Rebuild(CanvasUpdate update)
 		{
-			if (this == null)
+			if (!(this == null))
 			{
-				return;
-			}
-			if (update == CanvasUpdate.PreRender)
-			{
-				this.OnPreRenderCanvas();
-				this.m_verticesAlreadyDirty = false;
-				this.m_layoutAlreadyDirty = false;
-				if (!this.m_isMaterialDirty)
+				if (update == CanvasUpdate.PreRender)
 				{
-					return;
+					this.OnPreRenderCanvas();
+					this.m_verticesAlreadyDirty = false;
+					this.m_layoutAlreadyDirty = false;
+					if (this.m_isMaterialDirty)
+					{
+						this.UpdateMaterial();
+						this.m_isMaterialDirty = false;
+					}
 				}
-				this.UpdateMaterial();
-				this.m_isMaterialDirty = false;
 			}
 		}
 
 		private void UpdateSubObjectPivot()
 		{
-			if (this.m_textInfo == null)
+			if (this.m_textInfo != null)
 			{
-				return;
-			}
-			int num = 1;
-			while (num < this.m_subTextObjects.Length && this.m_subTextObjects[num] != null)
-			{
-				this.m_subTextObjects[num].SetPivotDirty();
-				num++;
+				int num = 1;
+				while (num < this.m_subTextObjects.Length && this.m_subTextObjects[num] != null)
+				{
+					this.m_subTextObjects[num].SetPivotDirty();
+					num++;
+				}
 			}
 		}
 
@@ -2823,39 +2848,14 @@ namespace TMPro
 			this.LoadFontAsset();
 		}
 
-		virtual float UnityEngine.UI.ILayoutElement.get_minWidth()
-		{
-			return base.minWidth;
-		}
-
-		virtual float UnityEngine.UI.ILayoutElement.get_flexibleWidth()
-		{
-			return base.flexibleWidth;
-		}
-
-		virtual float UnityEngine.UI.ILayoutElement.get_minHeight()
-		{
-			return base.minHeight;
-		}
-
-		virtual float UnityEngine.UI.ILayoutElement.get_flexibleHeight()
-		{
-			return base.flexibleHeight;
-		}
-
-		virtual int UnityEngine.UI.ILayoutElement.get_layoutPriority()
-		{
-			return base.layoutPriority;
-		}
-
 		[SerializeField]
 		private Vector2 m_uvOffset = Vector2.zero;
 
 		[SerializeField]
-		private float m_uvLineOffset;
+		private float m_uvLineOffset = 0f;
 
 		[SerializeField]
-		private bool m_hasFontAssetChanged;
+		private bool m_hasFontAssetChanged = false;
 
 		[SerializeField]
 		protected TMP_SubMeshUI[] m_subTextObjects = new TMP_SubMeshUI[8];
@@ -2883,7 +2883,7 @@ namespace TMPro
 
 		private bool m_isScrollRegionSet;
 
-		private int m_stencilID;
+		private int m_stencilID = 0;
 
 		[SerializeField]
 		private Vector4 m_maskOffset;
@@ -2893,12 +2893,12 @@ namespace TMPro
 		[NonSerialized]
 		private bool m_isRegisteredForEvents;
 
-		private int m_recursiveCount;
+		private int m_recursiveCount = 0;
 
-		private int m_recursiveCountA;
+		private int m_recursiveCountA = 0;
 
-		private int loopCountA;
+		private int loopCountA = 0;
 
-		private bool m_isRebuildingLayout;
+		private bool m_isRebuildingLayout = false;
 	}
 }

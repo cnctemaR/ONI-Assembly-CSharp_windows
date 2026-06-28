@@ -42,26 +42,25 @@ public class DemoTimer : MonoBehaviour
 			this.CountdownActive = !this.CountdownActive;
 			this.UpdateLabel();
 		}
-		if (this.demoOver || !this.CountdownActive)
+		if (!this.demoOver && this.CountdownActive)
 		{
-			return;
+			if (this.beginTime == -1f)
+			{
+				this.beginTime = Time.unscaledTime;
+			}
+			this.elapsed = Mathf.Clamp(0f, Time.unscaledTime - this.beginTime, this.duration);
+			if (this.elapsed + 5f >= this.duration)
+			{
+				float num = (this.duration - this.elapsed) / 5f;
+				this.fadeOutColor.a = Mathf.Min(1f, 1f - Mathf.Sqrt(num));
+				this.fadeOutScreen.GetComponent<Image>().color = this.fadeOutColor;
+			}
+			if (this.elapsed >= this.duration)
+			{
+				this.EndDemo();
+			}
+			this.UpdateLabel();
 		}
-		if (this.beginTime == -1f)
-		{
-			this.beginTime = Time.unscaledTime;
-		}
-		this.elapsed = Mathf.Clamp(0f, Time.unscaledTime - this.beginTime, this.duration);
-		if (this.elapsed + 5f >= this.duration)
-		{
-			float num = (this.duration - this.elapsed) / 5f;
-			this.fadeOutColor.a = Mathf.Min(1f, 1f - Mathf.Sqrt(num));
-			this.fadeOutScreen.GetComponent<Image>().color = this.fadeOutColor;
-		}
-		if (this.elapsed >= this.duration)
-		{
-			this.EndDemo();
-		}
-		this.UpdateLabel();
 	}
 
 	private void UpdateLabel()
@@ -85,13 +84,12 @@ public class DemoTimer : MonoBehaviour
 
 	public void EndDemo()
 	{
-		if (this.demoOver)
+		if (!this.demoOver)
 		{
-			return;
+			this.demoOver = true;
+			GameObject gameObject = Util.KInstantiateUI(this.Prefab_DemoOverScreen, GameScreenManager.Instance.ssOverlayCanvas.gameObject, false);
+			gameObject.GetComponent<DemoOverScreen>().Show(true);
 		}
-		this.demoOver = true;
-		GameObject gameObject = Util.KInstantiateUI(this.Prefab_DemoOverScreen, GameScreenManager.Instance.ssOverlayCanvas.gameObject, false);
-		gameObject.GetComponent<DemoOverScreen>().Show(true);
 	}
 
 	public static DemoTimer Instance;
@@ -106,13 +104,13 @@ public class DemoTimer : MonoBehaviour
 
 	private float duration;
 
-	private float elapsed;
+	private float elapsed = 0f;
 
-	private bool demoOver;
+	private bool demoOver = false;
 
 	private float beginTime = -1f;
 
-	public bool CountdownActive;
+	public bool CountdownActive = false;
 
 	private GameObject fadeOutScreen;
 

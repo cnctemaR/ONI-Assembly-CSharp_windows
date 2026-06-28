@@ -4,26 +4,21 @@ using UnityEngine;
 public class NarcolepsyChore : Chore<NarcolepsyChore.StatesInstance>
 {
 	public NarcolepsyChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.Narcolepsy, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.Narcolepsy, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
 	{
 		this.smi = new NarcolepsyChore.StatesInstance(this, target.gameObject);
 		base.AddPrecondition(NarcolepsyChore.IsNarcolepsing, null);
 	}
 
-	// Note: this type is marked as 'beforefieldinit'.
-	static NarcolepsyChore()
+	public static Chore.Precondition IsNarcolepsing = new Chore.Precondition
 	{
-		Chore.Precondition precondition = default(Chore.Precondition);
-		precondition.id = "IsNarcolepsing";
-		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
+		id = "IsNarcolepsing",
+		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			Narcolepsy component = context.consumer.GetComponent<Narcolepsy>();
 			return component != null && component.IsNarcolepsing();
-		};
-		NarcolepsyChore.IsNarcolepsing = precondition;
-	}
-
-	public static Chore.Precondition IsNarcolepsing;
+		}
+	};
 
 	public class StatesInstance : GameStateMachine<NarcolepsyChore.States, NarcolepsyChore.StatesInstance, NarcolepsyChore, object>.GameInstance
 	{
@@ -43,7 +38,7 @@ public class NarcolepsyChore : Chore<NarcolepsyChore.StatesInstance>
 			Vector3 vector = Grid.CellToPosCBC(num, Grid.SceneLayer.Move);
 			Grid.Reserved[num] = true;
 			GameObject gameObject = ChoreHelpers.CreateLocator("SleepLocator", vector);
-			Sleepable sleepable = gameObject.AddComponent<Sleepable>();
+			gameObject.AddComponent<Sleepable>();
 			base.sm.locator.Set(gameObject, this);
 			this.locatorCell = num;
 		}
@@ -57,7 +52,16 @@ public class NarcolepsyChore : Chore<NarcolepsyChore.StatesInstance>
 
 		private KAnimFile GetAnims()
 		{
-			string text = ((base.sm.sleeper.Get<Navigator>(base.smi).CurrentNavType != NavType.Ladder) ? "anim_sleep_floor_kanim" : "anim_sleep_ladder_kanim");
+			NavType currentNavType = base.sm.sleeper.Get<Navigator>(base.smi).CurrentNavType;
+			string text;
+			if (currentNavType != NavType.Ladder && currentNavType != NavType.Pole)
+			{
+				text = "anim_sleep_floor_kanim";
+			}
+			else
+			{
+				text = "anim_sleep_ladder_kanim";
+			}
 			return Assets.GetAnim(text);
 		}
 
@@ -91,9 +95,9 @@ public class NarcolepsyChore : Chore<NarcolepsyChore.StatesInstance>
 			{
 				smi.ApplyAnims();
 			}).DoSleep(this.sleeper, this.locator, this.pst, null).ToggleEffect("NarcolepticSleep")
-				.PlayAnim("working_pre", KAnim.PlayMode.Once, null)
+				.PlayAnim("working_pre")
 				.QueueAnim("working_loop", true, null);
-			this.pst.PlayAnim("working_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.success);
+			this.pst.PlayAnim("working_pst").OnAnimQueueComplete(this.success);
 			this.success.ReturnSuccess();
 		}
 

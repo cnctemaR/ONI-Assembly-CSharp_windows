@@ -6,6 +6,11 @@ namespace UnityEngine.Rendering
 	{
 		DeferredShading,
 		DeferredReflections,
-		LegacyDeferredLighting
+		LegacyDeferredLighting,
+		ScreenSpaceShadows,
+		DepthNormals,
+		MotionVectors,
+		LightHalo,
+		LensFlare
 	}
 }

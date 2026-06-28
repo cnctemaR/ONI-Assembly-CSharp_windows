@@ -30,6 +30,14 @@ namespace UnityEngine
 			this.m_Height = source.m_Height;
 		}
 
+		public static Rect zero
+		{
+			get
+			{
+				return new Rect(0f, 0f, 0f, 0f);
+			}
+		}
+
 		public static Rect MinMaxRect(float xmin, float ymin, float xmax, float ymax)
 		{
 			return new Rect(xmin, ymin, xmax - xmin, ymax - ymin);
@@ -156,42 +164,6 @@ namespace UnityEngine
 			}
 		}
 
-		[Obsolete("use xMin")]
-		public float left
-		{
-			get
-			{
-				return this.m_XMin;
-			}
-		}
-
-		[Obsolete("use xMax")]
-		public float right
-		{
-			get
-			{
-				return this.m_XMin + this.m_Width;
-			}
-		}
-
-		[Obsolete("use yMin")]
-		public float top
-		{
-			get
-			{
-				return this.m_YMin;
-			}
-		}
-
-		[Obsolete("use yMax")]
-		public float bottom
-		{
-			get
-			{
-				return this.m_YMin + this.m_Height;
-			}
-		}
-
 		public float xMin
 		{
 			get
@@ -244,22 +216,6 @@ namespace UnityEngine
 			}
 		}
 
-		public override string ToString()
-		{
-			return UnityString.Format("(x:{0:F2}, y:{1:F2}, width:{2:F2}, height:{3:F2})", new object[] { this.x, this.y, this.width, this.height });
-		}
-
-		public string ToString(string format)
-		{
-			return UnityString.Format("(x:{0}, y:{1}, width:{2}, height:{3})", new object[]
-			{
-				this.x.ToString(format),
-				this.y.ToString(format),
-				this.width.ToString(format),
-				this.height.ToString(format)
-			});
-		}
-
 		public bool Contains(Vector2 point)
 		{
 			return point.x >= this.xMin && point.x < this.xMax && point.y >= this.yMin && point.y < this.yMax;
@@ -272,16 +228,21 @@ namespace UnityEngine
 
 		public bool Contains(Vector3 point, bool allowInverse)
 		{
+			bool flag;
 			if (!allowInverse)
 			{
-				return this.Contains(point);
+				flag = this.Contains(point);
 			}
-			bool flag = false;
-			if ((this.width < 0f && point.x <= this.xMin && point.x > this.xMax) || (this.width >= 0f && point.x >= this.xMin && point.x < this.xMax))
+			else
 			{
-				flag = true;
+				bool flag2 = false;
+				if ((this.width < 0f && point.x <= this.xMin && point.x > this.xMax) || (this.width >= 0f && point.x >= this.xMin && point.x < this.xMax))
+				{
+					flag2 = true;
+				}
+				flag = flag2 && ((this.height < 0f && point.y <= this.yMin && point.y > this.yMax) || (this.height >= 0f && point.y >= this.yMin && point.y < this.yMax));
 			}
-			return flag && ((this.height < 0f && point.y <= this.yMin && point.y > this.yMax) || (this.height >= 0f && point.y >= this.yMin && point.y < this.yMax));
+			return flag;
 		}
 
 		private static Rect OrderMinMax(Rect rect)
@@ -327,6 +288,16 @@ namespace UnityEngine
 			return new Vector2(Mathf.InverseLerp(rectangle.x, rectangle.xMax, point.x), Mathf.InverseLerp(rectangle.y, rectangle.yMax, point.y));
 		}
 
+		public static bool operator !=(Rect lhs, Rect rhs)
+		{
+			return !(lhs == rhs);
+		}
+
+		public static bool operator ==(Rect lhs, Rect rhs)
+		{
+			return lhs.x == rhs.x && lhs.y == rhs.y && lhs.width == rhs.width && lhs.height == rhs.height;
+		}
+
 		public override int GetHashCode()
 		{
 			return this.x.GetHashCode() ^ (this.width.GetHashCode() << 2) ^ (this.y.GetHashCode() >> 2) ^ (this.height.GetHashCode() >> 1);
@@ -334,22 +305,69 @@ namespace UnityEngine
 
 		public override bool Equals(object other)
 		{
+			bool flag;
 			if (!(other is Rect))
 			{
-				return false;
+				flag = false;
 			}
-			Rect rect = (Rect)other;
-			return this.x.Equals(rect.x) && this.y.Equals(rect.y) && this.width.Equals(rect.width) && this.height.Equals(rect.height);
+			else
+			{
+				Rect rect = (Rect)other;
+				flag = this.x.Equals(rect.x) && this.y.Equals(rect.y) && this.width.Equals(rect.width) && this.height.Equals(rect.height);
+			}
+			return flag;
 		}
 
-		public static bool operator !=(Rect lhs, Rect rhs)
+		public override string ToString()
 		{
-			return lhs.x != rhs.x || lhs.y != rhs.y || lhs.width != rhs.width || lhs.height != rhs.height;
+			return UnityString.Format("(x:{0:F2}, y:{1:F2}, width:{2:F2}, height:{3:F2})", new object[] { this.x, this.y, this.width, this.height });
 		}
 
-		public static bool operator ==(Rect lhs, Rect rhs)
+		public string ToString(string format)
 		{
-			return lhs.x == rhs.x && lhs.y == rhs.y && lhs.width == rhs.width && lhs.height == rhs.height;
+			return UnityString.Format("(x:{0}, y:{1}, width:{2}, height:{3})", new object[]
+			{
+				this.x.ToString(format),
+				this.y.ToString(format),
+				this.width.ToString(format),
+				this.height.ToString(format)
+			});
+		}
+
+		[Obsolete("use xMin")]
+		public float left
+		{
+			get
+			{
+				return this.m_XMin;
+			}
+		}
+
+		[Obsolete("use xMax")]
+		public float right
+		{
+			get
+			{
+				return this.m_XMin + this.m_Width;
+			}
+		}
+
+		[Obsolete("use yMin")]
+		public float top
+		{
+			get
+			{
+				return this.m_YMin;
+			}
+		}
+
+		[Obsolete("use yMax")]
+		public float bottom
+		{
+			get
+			{
+				return this.m_YMin + this.m_Height;
+			}
 		}
 
 		private float m_XMin;

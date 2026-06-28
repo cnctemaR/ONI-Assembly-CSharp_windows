@@ -29,17 +29,11 @@ public class ManualDeliveryKG : KMonoBehaviour
 		}
 	}
 
-	protected override void OnPrefabInit()
-	{
-		base.OnPrefabInit();
-		this.getFetchAmount = new Func<float>(this.GetFetchAmount);
-	}
-
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
-		this.Subscribe(-111137758, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(-111137758, new Action<object>(this.OnRefreshUserMenu));
 		if (this.storage != null)
 		{
 			this.SetStorage(this.storage);
@@ -90,48 +84,49 @@ public class ManualDeliveryKG : KMonoBehaviour
 	[ContextMenu("UpdateDeliveryState")]
 	public void UpdateDeliveryState()
 	{
-		if (!this.requestedItemTag.IsValid)
+		if (this.requestedItemTag.IsValid)
 		{
-			return;
-		}
-		if (this.storage == null)
-		{
-			return;
-		}
-		if (!this.paused)
-		{
-			this.RequestDelivery();
+			if (!(this.storage == null))
+			{
+				if (!this.paused)
+				{
+					this.RequestDelivery();
+				}
+			}
 		}
 	}
 
 	private void RequestDelivery()
 	{
-		float num = this.getFetchAmount();
-		if (num > 0f && (this.fetchList == null || this.fetchList.IsComplete))
+		float fetchAmount = this.GetFetchAmount();
+		if (fetchAmount > 0f)
 		{
-			if (this.fetchList != null)
+			if (this.fetchList == null || this.fetchList.IsComplete)
 			{
-				this.fetchList.Cancel("Request Delivery");
+				if (this.fetchList != null)
+				{
+					this.fetchList.Cancel("Request Delivery");
+				}
+				this.fetchList = new FetchList2(this.storage);
+				this.fetchList.ShowStatusItem = this.ShowStatusItem;
+				this.fetchList.MinimumAmount[this.requestedItemTag] = this.minimumMass;
+				this.fetchList.Add(new Tag[] { this.requestedItemTag }, null, fetchAmount, this.operationalRequirement);
+				this.fetchList.Submit(null, false);
 			}
-			this.fetchList = new FetchList2(this.storage);
-			this.fetchList.ShowStatusItem = this.ShowStatusItem;
-			this.fetchList.MinimumAmount[this.requestedItemTag] = this.minimumMass;
-			this.fetchList.Add(new Tag[] { this.requestedItemTag }, null, num, this.operationalRequirement);
-			this.fetchList.Submit(null, false);
 		}
 	}
 
 	private float GetFetchAmount()
 	{
 		float num = 0f;
-		float stored_mass = 0f;
-		this.filteredStoredItems.ForEach(delegate(PrimaryElement pe)
+		float num2 = 0f;
+		for (int i = 0; i < this.filteredStoredItems.Count; i++)
 		{
-			stored_mass += pe.Mass;
-		});
-		if (stored_mass < this.refillMass)
+			num2 += this.filteredStoredItems[i].Mass;
+		}
+		if (num2 < this.refillMass)
 		{
-			num = Mathf.Max(0f, this.capacity - stored_mass);
+			num = Mathf.Max(0f, this.capacity - num2);
 		}
 		return num;
 	}
@@ -179,21 +174,26 @@ public class ManualDeliveryKG : KMonoBehaviour
 
 	private void OnRefreshUserMenu(object data)
 	{
-		if (!this.allowPause)
+		if (this.allowPause)
 		{
-			return;
-		}
-		if (!this.paused)
-		{
-			UserMenu userMenu = this.userMenu;
-			string text = UI.USERMENUACTIONS.MANUAL_DELIVERY.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_move_to_storage", UI.USERMENUACTIONS.MANUAL_DELIVERY.NAME, new global::System.Action(this.OnPause), global::Action.NumActions, null, null, null, text, true), 1f);
-		}
-		else
-		{
-			UserMenu userMenu2 = this.userMenu;
-			string text = UI.USERMENUACTIONS.MANUAL_DELIVERY.TOOLTIP_OFF;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_move_to_storage", UI.USERMENUACTIONS.MANUAL_DELIVERY.NAME_OFF, new global::System.Action(this.OnResume), global::Action.NumActions, null, null, null, text, true), 1f);
+			if (!this.paused)
+			{
+				UserMenu userMenu = this.userMenu;
+				string text = "action_move_to_storage";
+				string text2 = UI.USERMENUACTIONS.MANUAL_DELIVERY.NAME;
+				global::System.Action action = new global::System.Action(this.OnPause);
+				string text3 = UI.USERMENUACTIONS.MANUAL_DELIVERY.TOOLTIP;
+				userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+			}
+			else
+			{
+				UserMenu userMenu2 = this.userMenu;
+				string text3 = "action_move_to_storage";
+				string text2 = UI.USERMENUACTIONS.MANUAL_DELIVERY.NAME_OFF;
+				global::System.Action action = new global::System.Action(this.OnResume);
+				string text = UI.USERMENUACTIONS.MANUAL_DELIVERY.TOOLTIP_OFF;
+				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
+			}
 		}
 	}
 
@@ -216,13 +216,13 @@ public class ManualDeliveryKG : KMonoBehaviour
 	public float minimumMass = 10f;
 
 	[SerializeField]
-	public FetchOrder2.OperationalRequirement operationalRequirement;
+	public FetchOrder2.OperationalRequirement operationalRequirement = FetchOrder2.OperationalRequirement.Operational;
 
 	[SerializeField]
-	public bool allowPause;
+	public bool allowPause = false;
 
 	[SerializeField]
-	private bool paused;
+	private bool paused = false;
 
 	[NonSerialized]
 	public bool ShowStatusItem = true;
@@ -230,6 +230,4 @@ public class ManualDeliveryKG : KMonoBehaviour
 	private FetchList2 fetchList;
 
 	private List<PrimaryElement> filteredStoredItems = new List<PrimaryElement>();
-
-	public Func<float> getFetchAmount;
 }

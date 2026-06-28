@@ -30,20 +30,19 @@ public class InfectedFoodDiagram : MonoBehaviour
 				}
 			}
 		}
-		if (list.Count == 0)
+		if (list.Count != 0)
 		{
-			return;
+			list.Sort((InfectedFoodDiagram.FoodBit a, InfectedFoodDiagram.FoodBit b) => a.DiseasePerRation.CompareTo(b.DiseasePerRation));
+			InfectedFoodDiagram.FoodBit foodBit = list[0];
+			this.minText.text = "Min: " + foodBit.ToString();
+			InfectedFoodDiagram.FoodBit foodBit2 = list[list.Count - 1];
+			this.maxText.text = "Max: " + foodBit2.ToString();
+			InfectedFoodDiagram.FoodBit foodBit3 = list[list.Count / 2];
+			this.medianText.text = "Median: " + foodBit3.ToString();
+			float num = list.Select<InfectedFoodDiagram.FoodBit, float>((InfectedFoodDiagram.FoodBit b) => b.rations).Sum();
+			int num2 = list.Select<InfectedFoodDiagram.FoodBit, int>((InfectedFoodDiagram.FoodBit b) => b.disease).Sum();
+			this.avgText.text = "Average: " + ((float)num2 / num).ToString();
 		}
-		list.Sort((InfectedFoodDiagram.FoodBit a, InfectedFoodDiagram.FoodBit b) => a.DiseasePerRation.CompareTo(b.DiseasePerRation));
-		InfectedFoodDiagram.FoodBit foodBit = list[0];
-		this.minText.text = "Min: " + foodBit.ToString();
-		InfectedFoodDiagram.FoodBit foodBit2 = list[list.Count - 1];
-		this.maxText.text = "Max: " + foodBit2.ToString();
-		InfectedFoodDiagram.FoodBit foodBit3 = list[list.Count / 2];
-		this.medianText.text = "Median: " + foodBit3.ToString();
-		float num = list.Select<InfectedFoodDiagram.FoodBit, float>((InfectedFoodDiagram.FoodBit b) => b.rations).Sum();
-		int num2 = list.Select<InfectedFoodDiagram.FoodBit, int>((InfectedFoodDiagram.FoodBit b) => b.disease).Sum();
-		this.avgText.text = "Average: " + ((float)num2 / num).ToString();
 	}
 
 	public LocText minText;

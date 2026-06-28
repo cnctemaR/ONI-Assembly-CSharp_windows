@@ -29,24 +29,4 @@ public class RecipeManager
 	private static RecipeManager _Instance;
 
 	public List<Recipe> recipes = new List<Recipe>();
-
-	[Serializable]
-	public class RecipeInfo : Resource
-	{
-		public string SmelterName;
-
-		public string HotKey;
-
-		public string OutputPrefabID;
-
-		public SimHashes OutputElement;
-
-		public int OutputMass;
-
-		public string InputElementTag;
-
-		public string InputMass;
-
-		public float FabricationTime;
-	}
 }

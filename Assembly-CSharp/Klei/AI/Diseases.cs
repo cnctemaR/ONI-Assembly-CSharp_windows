@@ -23,7 +23,7 @@ namespace Klei.AI
 		public override DiseaseInstance CreateInstance(Disease disease)
 		{
 			DiseaseInstance diseaseInstance = new DiseaseInstance(base.gameObject, disease);
-			base.Add(diseaseInstance);
+			this.Add(diseaseInstance);
 			base.Trigger(GameHashes.DiseaseAdded, diseaseInstance);
 			ReportManager.Instance.ReportValue(ReportManager.ReportType.DiseaseAdded, 1f, base.gameObject.GetProperName(), null);
 			return diseaseInstance;
@@ -48,7 +48,7 @@ namespace Klei.AI
 			bool flag = false;
 			if (diseaseInstance != null)
 			{
-				base.Remove(diseaseInstance);
+				this.Remove(diseaseInstance);
 				flag = true;
 				base.Trigger(GameHashes.DiseaseCured, diseaseInstance);
 				ReportManager.Instance.ReportValue(ReportManager.ReportType.DiseaseAdded, -1f, base.gameObject.GetProperName(), null);

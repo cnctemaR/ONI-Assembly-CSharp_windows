@@ -3,46 +3,40 @@ using System.Collections;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class Wire : KMonoBehaviour, IFirstFrameCallback, IDisconnectable, IWattageRating
+public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWattageRating, IWire
 {
-	public void SetFirstFrameCallback(global::System.Action ffCb)
-	{
-		this.firstFrameCallback = ffCb;
-		base.StartCoroutine(this.RunCallback());
-	}
-
-	private IEnumerator RunCallback()
-	{
-		yield return null;
-		if (this.firstFrameCallback != null)
-		{
-			this.firstFrameCallback();
-			this.firstFrameCallback = null;
-		}
-		yield return null;
-		yield break;
-	}
-
 	public static float GetMaxWattageAsFloat(Wire.WattageRating rating)
 	{
+		float num;
 		switch (rating)
 		{
 		case Wire.WattageRating.Max500:
-			return 500f;
+			num = 500f;
+			break;
 		case Wire.WattageRating.Max1000:
-			return 1000f;
+			num = 1000f;
+			break;
+		case Wire.WattageRating.Max2000:
+			num = 2000f;
+			break;
 		case Wire.WattageRating.Max20000:
-			return 20000f;
+			num = 20000f;
+			break;
+		case Wire.WattageRating.Max50000:
+			num = 50000f;
+			break;
 		default:
-			return 0f;
+			num = 0f;
+			break;
 		}
+		return num;
 	}
 
 	public bool IsConnected
 	{
 		get
 		{
-			int num = Grid.PosToCell(this.transform.position);
+			int num = Grid.PosToCell(base.transform.position);
 			ElectricalUtilityNetwork electricalUtilityNetwork = Game.Instance.electricalConduitSystem.GetNetworkForCell(num) as ElectricalUtilityNetwork;
 			return electricalUtilityNetwork != null;
 		}
@@ -52,23 +46,28 @@ public class Wire : KMonoBehaviour, IFirstFrameCallback, IDisconnectable, IWatta
 	{
 		get
 		{
-			int num = Grid.PosToCell(this.transform.position);
+			int num = Grid.PosToCell(base.transform.position);
 			ElectricalUtilityNetwork electricalUtilityNetwork = Game.Instance.electricalConduitSystem.GetNetworkForCell(num) as ElectricalUtilityNetwork;
+			ushort num2;
 			if (electricalUtilityNetwork == null)
 			{
-				return ushort.MaxValue;
+				num2 = ushort.MaxValue;
 			}
-			return (ushort)electricalUtilityNetwork.id;
+			else
+			{
+				num2 = (ushort)electricalUtilityNetwork.id;
+			}
+			return num2;
 		}
 	}
 
 	protected override void OnSpawn()
 	{
-		int num = Grid.PosToCell(this.transform.position);
+		int num = Grid.PosToCell(base.transform.position);
 		Game.Instance.electricalConduitSystem.AddToNetworks(num, this, false);
 		this.InitializeSwitchState();
-		this.Subscribe(774203113, new Action<object>(this.OnBuildingBroken));
-		this.Subscribe(-1735440190, new Action<object>(this.OnBuildingFullyRepaired));
+		base.Subscribe(774203113, new Action<object>(this.OnBuildingBroken));
+		base.Subscribe(-1735440190, new Action<object>(this.OnBuildingFullyRepaired));
 		base.GetComponent<KSelectable>().AddStatusItem(Wire.WireMaxWattageStatus, this);
 		base.GetComponent<KSelectable>().AddStatusItem(Wire.WireCircuitStatus, this);
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
@@ -77,25 +76,20 @@ public class Wire : KMonoBehaviour, IFirstFrameCallback, IDisconnectable, IWatta
 
 	protected override void OnCleanUp()
 	{
-		int num = Grid.PosToCell(this.transform.position);
+		int num = Grid.PosToCell(base.transform.position);
 		BuildingComplete component = base.GetComponent<BuildingComplete>();
 		if (component.Def.ReplacementLayer == ObjectLayer.NumLayers || Grid.Objects[num, (int)component.Def.ReplacementLayer] == null)
 		{
 			Game.Instance.electricalConduitSystem.RemoveFromNetworks(num, this, false);
 		}
-		this.Unsubscribe(774203113, new Action<object>(this.OnBuildingBroken));
-		this.Unsubscribe(-1735440190, new Action<object>(this.OnBuildingFullyRepaired));
+		base.Unsubscribe(774203113, new Action<object>(this.OnBuildingBroken));
+		base.Unsubscribe(-1735440190, new Action<object>(this.OnBuildingFullyRepaired));
 		base.OnCleanUp();
-	}
-
-	public bool IsDisconnected()
-	{
-		return this.disconnected;
 	}
 
 	private void InitializeSwitchState()
 	{
-		int num = Grid.PosToCell(this.transform.position);
+		int num = Grid.PosToCell(base.transform.position);
 		bool flag = false;
 		GameObject gameObject = Grid.Objects[num, 1];
 		if (gameObject != null)
@@ -113,28 +107,9 @@ public class Wire : KMonoBehaviour, IFirstFrameCallback, IDisconnectable, IWatta
 		}
 	}
 
-	public bool Connect()
-	{
-		BuildingHP component = base.GetComponent<BuildingHP>();
-		if (component.HitPoints > 0)
-		{
-			this.disconnected = false;
-			base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.WireConnected, null);
-			Game.Instance.electricalConduitSystem.ForceRebuildNetworks();
-		}
-		return !this.disconnected;
-	}
-
-	public void Disconnect()
-	{
-		this.disconnected = true;
-		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.WireDisconnected, null);
-		Game.Instance.electricalConduitSystem.ForceRebuildNetworks();
-	}
-
 	public UtilityConnections GetWireConnections()
 	{
-		int num = Grid.PosToCell(this.transform.position);
+		int num = Grid.PosToCell(base.transform.position);
 		return Game.Instance.electricalConduitSystem.GetConnections(num, true);
 	}
 
@@ -154,20 +129,12 @@ public class Wire : KMonoBehaviour, IFirstFrameCallback, IDisconnectable, IWatta
 		this.InitializeSwitchState();
 	}
 
-	public bool IsBroken
-	{
-		get
-		{
-			return this.buildingHP.IsBroken;
-		}
-	}
-
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
 		if (Wire.WireCircuitStatus == null)
 		{
-			Wire.WireCircuitStatus = new StatusItem("WireCircuitStatus", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 14334).SetResolveStringCallback(delegate(string str, object data)
+			Wire.WireCircuitStatus = new StatusItem("WireCircuitStatus", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718).SetResolveStringCallback(delegate(string str, object data)
 			{
 				Wire wire = (Wire)data;
 				int num = Grid.PosToCell(wire.transform.position);
@@ -187,7 +154,7 @@ public class Wire : KMonoBehaviour, IFirstFrameCallback, IDisconnectable, IWatta
 		}
 		if (Wire.WireMaxWattageStatus == null)
 		{
-			Wire.WireMaxWattageStatus = new StatusItem("WireMaxWattageStatus", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 14334).SetResolveStringCallback(delegate(string str, object data)
+			Wire.WireMaxWattageStatus = new StatusItem("WireMaxWattageStatus", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718).SetResolveStringCallback(delegate(string str, object data)
 			{
 				Wire wire2 = (Wire)data;
 				GameUtil.WattageFormatterUnit wattageFormatterUnit2 = GameUtil.WattageFormatterUnit.Watts;
@@ -206,31 +173,74 @@ public class Wire : KMonoBehaviour, IFirstFrameCallback, IDisconnectable, IWatta
 		return this.MaxWattageRating;
 	}
 
+	public bool IsDisconnected()
+	{
+		return this.disconnected;
+	}
+
+	public bool Connect()
+	{
+		BuildingHP component = base.GetComponent<BuildingHP>();
+		if (component == null || component.HitPoints > 0)
+		{
+			this.disconnected = false;
+			base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.WireConnected, null);
+			Game.Instance.electricalConduitSystem.ForceRebuildNetworks();
+		}
+		return !this.disconnected;
+	}
+
+	public void Disconnect()
+	{
+		this.disconnected = true;
+		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.WireDisconnected, null);
+		Game.Instance.electricalConduitSystem.ForceRebuildNetworks();
+	}
+
+	public void SetFirstFrameCallback(global::System.Action ffCb)
+	{
+		this.firstFrameCallback = ffCb;
+		base.StartCoroutine(this.RunCallback());
+	}
+
+	private IEnumerator RunCallback()
+	{
+		yield return null;
+		if (this.firstFrameCallback != null)
+		{
+			this.firstFrameCallback();
+			this.firstFrameCallback = null;
+		}
+		yield return null;
+		yield break;
+	}
+
+	public IUtilityNetworkMgr GetNetworkMgr()
+	{
+		return Game.Instance.electricalConduitSystem;
+	}
+
 	[SerializeField]
 	public Wire.WattageRating MaxWattageRating;
 
 	[SerializeField]
 	private bool disconnected = true;
 
-	[MyCmpReq]
-	private KAnimGraphTileVisualizer graphTileDependency;
-
-	[MyCmpReq]
-	private BuildingHP buildingHP;
-
 	public static readonly KAnimHashedString OutlineSymbol = new KAnimHashedString("outline");
-
-	private global::System.Action firstFrameCallback;
 
 	private static StatusItem WireCircuitStatus = null;
 
 	private static StatusItem WireMaxWattageStatus = null;
 
+	private global::System.Action firstFrameCallback = null;
+
 	public enum WattageRating
 	{
 		Max500,
 		Max1000,
+		Max2000,
 		Max20000,
+		Max50000,
 		NumRatings
 	}
 }

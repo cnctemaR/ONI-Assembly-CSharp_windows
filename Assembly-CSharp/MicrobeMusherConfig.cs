@@ -6,8 +6,19 @@ public class MicrobeMusherConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER3;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("MicrobeMusher", 2, 3, "microbemusher_kanim", 1200f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.ALL_METALS, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, tier);
+		string text = "MicrobeMusher";
+		int num = 2;
+		int num2 = 3;
+		string text2 = "microbemusher_kanim";
+		float num3 = 1200f;
+		int num4 = 30;
+		float num5 = 30f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
+		string[] all_METALS = MATERIALS.ALL_METALS;
+		float num6 = 800f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER3;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER2, tier2);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 240f;
 		buildingDef.ExhaustKilowattsWhenActive = 0.5f;
@@ -16,6 +27,7 @@ public class MicrobeMusherConfig : IBuildingConfig
 		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "Glass";
 		buildingDef.AudioSize = "large";
+		buildingDef.HotKey = global::Action.BuildMenuKeyC;
 		return buildingDef;
 	}
 

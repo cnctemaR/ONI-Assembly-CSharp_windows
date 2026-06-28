@@ -104,11 +104,6 @@ namespace UnityEngine.UI
 			return this.normalColor == other.normalColor && this.highlightedColor == other.highlightedColor && this.pressedColor == other.pressedColor && this.disabledColor == other.disabledColor && this.colorMultiplier == other.colorMultiplier && this.fadeDuration == other.fadeDuration;
 		}
 
-		public override int GetHashCode()
-		{
-			return base.GetHashCode();
-		}
-
 		public static bool operator ==(ColorBlock point1, ColorBlock point2)
 		{
 			return point1.Equals(point2);
@@ -119,13 +114,18 @@ namespace UnityEngine.UI
 			return !point1.Equals(point2);
 		}
 
+		public override int GetHashCode()
+		{
+			return base.GetHashCode();
+		}
+
 		[FormerlySerializedAs("normalColor")]
 		[SerializeField]
 		private Color m_NormalColor;
 
+		[FormerlySerializedAs("highlightedColor")]
 		[FormerlySerializedAs("m_SelectedColor")]
 		[SerializeField]
-		[FormerlySerializedAs("highlightedColor")]
 		private Color m_HighlightedColor;
 
 		[FormerlySerializedAs("pressedColor")]
@@ -136,12 +136,12 @@ namespace UnityEngine.UI
 		[SerializeField]
 		private Color m_DisabledColor;
 
-		[SerializeField]
 		[Range(1f, 5f)]
+		[SerializeField]
 		private float m_ColorMultiplier;
 
-		[SerializeField]
 		[FormerlySerializedAs("fadeDuration")]
+		[SerializeField]
 		private float m_FadeDuration;
 	}
 }

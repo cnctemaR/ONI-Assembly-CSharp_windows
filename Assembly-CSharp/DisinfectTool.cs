@@ -18,15 +18,18 @@ public class DisinfectTool : DragTool
 
 	protected override void OnDragTool(int cell, int distFromOrigin)
 	{
-		for (int i = 0; i < 25; i++)
+		for (int i = 0; i < 28; i++)
 		{
 			GameObject gameObject = Grid.Objects[cell, i];
 			if (gameObject != null)
 			{
 				Disinfectable component = gameObject.GetComponent<Disinfectable>();
-				if (component != null && component.GetComponent<PrimaryElement>().DiseaseCount > 0)
+				if (component != null)
 				{
-					component.MarkForDisinfect(false);
+					if (component.GetComponent<PrimaryElement>().DiseaseCount > 0)
+					{
+						component.MarkForDisinfect(false);
+					}
 				}
 			}
 		}

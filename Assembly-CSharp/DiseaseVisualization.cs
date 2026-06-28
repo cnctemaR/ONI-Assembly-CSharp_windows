@@ -16,7 +16,7 @@ public class DiseaseVisualization : ScriptableObject
 		return default(DiseaseVisualization.Info);
 	}
 
-	public Sprite overlaySprite;
+	public Sprite overlaySprite = null;
 
 	public List<DiseaseVisualization.Info> info = new List<DiseaseVisualization.Info>();
 

@@ -30,11 +30,11 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.Subscribe(-1901442097, new Action<object>(this.OnEffectAdded));
-		this.Subscribe(1623392196, new Action<object>(this.OnDeath));
-		this.Subscribe(-1506069671, new Action<object>(this.OnAttachFollowCam));
-		this.Subscribe(-485480405, new Action<object>(this.OnDetachFollowCam));
-		this.Subscribe(-1988963660, new Action<object>(this.OnBeginChore));
+		base.Subscribe(-1901442097, new Action<object>(this.OnEffectAdded));
+		base.Subscribe(1623392196, new Action<object>(this.OnDeath));
+		base.Subscribe(-1506069671, new Action<object>(this.OnAttachFollowCam));
+		base.Subscribe(-485480405, new Action<object>(this.OnDetachFollowCam));
+		base.Subscribe(-1988963660, new Action<object>(this.OnBeginChore));
 		AmountInstance amountInstance = this.GetAmounts().Get("Stress");
 		amountInstance.OnDelta = (Action<float>)Delegate.Combine(amountInstance.OnDelta, new Action<float>(delegate(float delta)
 		{
@@ -42,9 +42,9 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 		}));
 		AmountInstance amountInstance2 = this.GetAmounts().Get("Calories");
 		amountInstance2.OnMaxValueReached = (global::System.Action)Delegate.Combine(amountInstance2.OnMaxValueReached, new global::System.Action(this.OnMaxCaloriesReached));
-		Vector3 position = this.transform.position;
+		Vector3 position = base.transform.position;
 		position.z = Grid.GetLayerZ(Grid.SceneLayer.Move);
-		this.transform.SetPosition(position);
+		base.transform.SetPosition(position);
 		base.gameObject.AddComponent<DecorNeed>();
 		base.gameObject.AddComponent<FoodQualityNeed>();
 		base.gameObject.layer = LayerMask.NameToLayer("Default");
@@ -52,11 +52,10 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 
 	public void OnNewDay()
 	{
-		if (GameClock.Instance.GetDay() < this.nextNeedDay)
+		if (GameClock.Instance.GetDay() >= this.nextNeedDay)
 		{
-			return;
+			this.nextNeedDay = GameClock.Instance.GetDay() + 3;
 		}
-		this.nextNeedDay = GameClock.Instance.GetDay() + 3;
 	}
 
 	private void OnDeath(object data)
@@ -70,9 +69,12 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 	private void OnEffectAdded(object data)
 	{
 		Effect effect = (Effect)data;
-		if (effect.triggerFloatingText && PopFXManager.Instance != null)
+		if (effect.triggerFloatingText)
 		{
-			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, effect.Name, this.transform, 1.5f, false);
+			if (PopFXManager.Instance != null)
+			{
+				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, effect.Name, base.transform, 1.5f, false);
+			}
 		}
 	}
 

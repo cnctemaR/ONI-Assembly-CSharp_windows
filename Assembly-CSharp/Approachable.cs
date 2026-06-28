@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 [SkipSaveFileSerialization]
 public class Approachable : KMonoBehaviour, IApproachable
@@ -23,5 +24,10 @@ public class Approachable : KMonoBehaviour, IApproachable
 		return this.preferUnreservedCell;
 	}
 
-	public bool preferUnreservedCell;
+	Transform IApproachable.get_transform()
+	{
+		return base.transform;
+	}
+
+	public bool preferUnreservedCell = false;
 }

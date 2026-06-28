@@ -55,56 +55,64 @@ public class WaterBodyProbe : KMonoBehaviour
 
 	private void RefreshBody(int cell, List<int> touched_cells, List<int> water_cells, List<int> work_points)
 	{
-		if (!Grid.IsValidCell(cell))
+		if (Grid.IsValidCell(cell))
 		{
-			return;
-		}
-		if (Grid.Solid[cell])
-		{
-			return;
-		}
-		if (water_cells.Count > 100)
-		{
-			return;
-		}
-		if (touched_cells.Contains(cell))
-		{
-			return;
-		}
-		touched_cells.Add(cell);
-		if (WaterBodyProbe.isSubstantialLiquid(cell))
-		{
-			water_cells.Add(cell);
-			this.RefreshBody(Grid.CellLeft(cell), touched_cells, water_cells, work_points);
-			this.RefreshBody(Grid.CellRight(cell), touched_cells, water_cells, work_points);
-			this.RefreshBody(Grid.CellAbove(cell), touched_cells, water_cells, work_points);
-			this.RefreshBody(Grid.CellBelow(cell), touched_cells, water_cells, work_points);
-		}
-		else
-		{
-			int num = 5;
-			for (int i = 1; i < num; i++)
+			if (!Grid.Solid[cell])
 			{
-				bool flag = false;
-				for (int j = 0; j < i; j++)
+				if (water_cells.Count <= 100)
 				{
-					if (Grid.Solid[Grid.OffsetCell(cell, 0, j)])
+					if (!touched_cells.Contains(cell))
 					{
-						flag = true;
-						break;
-					}
-				}
-				if (!flag)
-				{
-					int num2 = Grid.OffsetCell(cell, -1, i);
-					int num3 = Grid.OffsetCell(cell, 1, i);
-					if (Grid.IsValidCell(num3) && !Grid.Solid[num3] && !Grid.IsSubstantialLiquid(num3, 0.35f) && Grid.Solid[Grid.CellBelow(num3)] && !work_points.Contains(num3))
-					{
-						work_points.Add(num3);
-					}
-					if (Grid.IsValidCell(num2) && !Grid.Solid[num2] && !Grid.IsSubstantialLiquid(num2, 0.35f) && Grid.Solid[Grid.CellBelow(num2)] && !work_points.Contains(num2))
-					{
-						work_points.Add(num2);
+						touched_cells.Add(cell);
+						if (WaterBodyProbe.isSubstantialLiquid(cell))
+						{
+							water_cells.Add(cell);
+							this.RefreshBody(Grid.CellLeft(cell), touched_cells, water_cells, work_points);
+							this.RefreshBody(Grid.CellRight(cell), touched_cells, water_cells, work_points);
+							this.RefreshBody(Grid.CellAbove(cell), touched_cells, water_cells, work_points);
+							this.RefreshBody(Grid.CellBelow(cell), touched_cells, water_cells, work_points);
+						}
+						else
+						{
+							int num = 5;
+							for (int i = 1; i < num; i++)
+							{
+								bool flag = false;
+								for (int j = 0; j < i; j++)
+								{
+									if (Grid.Solid[Grid.OffsetCell(cell, 0, j)])
+									{
+										flag = true;
+										break;
+									}
+								}
+								if (!flag)
+								{
+									int num2 = Grid.OffsetCell(cell, -1, i);
+									int num3 = Grid.OffsetCell(cell, 1, i);
+									if (Grid.IsValidCell(num3))
+									{
+										if (!Grid.Solid[num3] && !Grid.IsSubstantialLiquid(num3, 0.35f))
+										{
+											if (Grid.Solid[Grid.CellBelow(num3)] && !work_points.Contains(num3))
+											{
+												work_points.Add(num3);
+											}
+										}
+									}
+									if (Grid.IsValidCell(num2))
+									{
+										if (!Grid.Solid[num2] && !Grid.IsSubstantialLiquid(num2, 0.35f))
+										{
+											if (Grid.Solid[Grid.CellBelow(num2)] && !work_points.Contains(num2))
+											{
+												work_points.Add(num2);
+											}
+										}
+									}
+								}
+							}
+						}
 					}
 				}
 			}
@@ -113,50 +121,51 @@ public class WaterBodyProbe : KMonoBehaviour
 
 	public void RefreshBody(BodyOfWater body)
 	{
-		if (body == null)
+		if (!(body == null))
 		{
-			return;
-		}
-		int num = Grid.InvalidCell;
-		for (int i = body.containedObjects.Count - 1; i >= 0; i--)
-		{
-			if (body.containedObjects[i] != null)
+			int num = Grid.InvalidCell;
+			for (int i = body.containedObjects.Count - 1; i >= 0; i--)
 			{
-				num = Grid.PosToCell(body.containedObjects[i].transform.position);
-				break;
-			}
-		}
-		List<int> waterCells = body.waterCells;
-		List<int> workPoints = body.workPoints;
-		this.touchedCells.Clear();
-		waterCells.Clear();
-		workPoints.Clear();
-		if (num == Grid.InvalidCell)
-		{
-			this.RemoveBody(body);
-			return;
-		}
-		this.RefreshBody(num, this.touchedCells, waterCells, workPoints);
-		body.Setup(waterCells, workPoints);
-		for (int j = 0; j < this.knownBodies.Count; j++)
-		{
-			this.knownBodies[j].waterCells.Sort();
-			for (int k = 0; k < this.knownBodies.Count; k++)
-			{
-				if (j != k)
+				if (body.containedObjects[i] != null)
 				{
-					if (!this.BodiesToDestroy.Contains(this.knownBodies[j]) && !this.BodiesToDestroy.Contains(this.knownBodies[k]))
+					num = Grid.PosToCell(body.containedObjects[i].transform.position);
+					break;
+				}
+			}
+			List<int> waterCells = body.waterCells;
+			List<int> workPoints = body.workPoints;
+			this.touchedCells.Clear();
+			waterCells.Clear();
+			workPoints.Clear();
+			if (num == Grid.InvalidCell)
+			{
+				this.RemoveBody(body);
+			}
+			else
+			{
+				this.RefreshBody(num, this.touchedCells, waterCells, workPoints);
+				body.Setup(waterCells, workPoints);
+				for (int j = 0; j < this.knownBodies.Count; j++)
+				{
+					this.knownBodies[j].waterCells.Sort();
+					for (int k = 0; k < this.knownBodies.Count; k++)
 					{
-						if (this.knownBodies[j].waterCells[0] == this.knownBodies[k].waterCells[0])
+						if (j != k)
 						{
-							foreach (GameObject gameObject in this.knownBodies[k].containedObjects)
+							if (!this.BodiesToDestroy.Contains(this.knownBodies[j]) && !this.BodiesToDestroy.Contains(this.knownBodies[k]))
 							{
-								if (!this.knownBodies[j].containedObjects.Contains(gameObject))
+								if (this.knownBodies[j].waterCells[0] == this.knownBodies[k].waterCells[0])
 								{
-									this.knownBodies[j].AddObjectToBody(gameObject);
+									foreach (GameObject gameObject in this.knownBodies[k].containedObjects)
+									{
+										if (!this.knownBodies[j].containedObjects.Contains(gameObject))
+										{
+											this.knownBodies[j].AddObjectToBody(gameObject);
+										}
+									}
+									this.BodiesToDestroy.Add(this.knownBodies[k]);
 								}
 							}
-							this.BodiesToDestroy.Add(this.knownBodies[k]);
 						}
 					}
 				}
@@ -177,22 +186,27 @@ public class WaterBodyProbe : KMonoBehaviour
 	{
 		int num = Grid.PosToCell(objectInBody);
 		BodyOfWater bodyOfWater = this.GetBodyIfKnown(num);
+		int[] array;
 		if (bodyOfWater != null)
 		{
 			if (!bodyOfWater.containedObjects.Contains(objectInBody))
 			{
 				bodyOfWater.AddObjectToBody(objectInBody);
 			}
-			return bodyOfWater.workPoints.ToArray();
+			array = bodyOfWater.workPoints.ToArray();
 		}
-		bodyOfWater = this.FindBodyOfWater(objectInBody);
-		return bodyOfWater.workPoints.ToArray();
+		else
+		{
+			bodyOfWater = this.FindBodyOfWater(objectInBody);
+			array = bodyOfWater.workPoints.ToArray();
+		}
+		return array;
 	}
 
 	public BodyOfWater FindBodyOfWater(GameObject objectInBody)
 	{
 		GameObject gameObject = new GameObject("body_of_water");
-		gameObject.transform.parent = this.transform;
+		gameObject.transform.parent = base.transform;
 		gameObject.transform.SetPosition(objectInBody.transform.position);
 		gameObject.AddComponent<KPrefabID>();
 		BodyOfWater bodyOfWater = gameObject.AddComponent<BodyOfWater>();
@@ -204,7 +218,23 @@ public class WaterBodyProbe : KMonoBehaviour
 
 	private static bool isSubstantialLiquid(int cell)
 	{
-		return Grid.IsValidCell(cell) && ((Grid.IsValidCell(Grid.CellAbove(cell)) && Grid.IsLiquid(Grid.CellAbove(cell))) || Grid.IsSubstantialLiquid(cell, 0.75f));
+		bool flag;
+		if (!Grid.IsValidCell(cell))
+		{
+			flag = false;
+		}
+		else
+		{
+			if (Grid.IsValidCell(Grid.CellAbove(cell)))
+			{
+				if (Grid.IsLiquid(Grid.CellAbove(cell)))
+				{
+					return true;
+				}
+			}
+			flag = Grid.IsSubstantialLiquid(cell, 0.75f);
+		}
+		return flag;
 	}
 
 	private void SimUpdate(float dt)
@@ -219,7 +249,7 @@ public class WaterBodyProbe : KMonoBehaviour
 				}
 			}
 			this.DirtyBodies.Clear();
-			this.Trigger(-263784810, null);
+			base.Trigger(-263784810, null);
 		}
 		if (this.BodiesToDestroy.Count > 0)
 		{
@@ -228,7 +258,7 @@ public class WaterBodyProbe : KMonoBehaviour
 				this.RemoveBody(this.BodiesToDestroy[i]);
 			}
 			this.BodiesToDestroy.Clear();
-			this.Trigger(-263784810, null);
+			base.Trigger(-263784810, null);
 		}
 	}
 

@@ -5,7 +5,7 @@ using UnityEngine;
 public class FleeChore : Chore<FleeChore.StatesInstance>
 {
 	public FleeChore(IStateMachineTarget target, GameObject enemy)
-		: base(Db.Get().ChoreTypes.Flee, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.Flee, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
 	{
 		this.smi = new FleeChore.StatesInstance(this);
 		this.smi.sm.self.Set(this.gameObject, this.smi);
@@ -98,7 +98,7 @@ public class FleeChore : Chore<FleeChore.StatesInstance>
 				}
 			});
 			this.flee.InitializeStates(this.self, this.fleeToTarget, this.cower, this.cower, null, NavigationTactics.ReduceTravelDistance).ToggleAnims("anim_loco_run_insane_kanim", 2f);
-			this.cower.ToggleAnims("anim_cringe_kanim", 4f).PlayAnim("cringe_pre", KAnim.PlayMode.Once, null).QueueAnim("cringe_loop", false, null)
+			this.cower.ToggleAnims("anim_cringe_kanim", 4f).PlayAnim("cringe_pre").QueueAnim("cringe_loop", false, null)
 				.QueueAnim("cringe_pst", false, null)
 				.OnAnimQueueComplete(this.end);
 			this.end.Enter(delegate(FleeChore.StatesInstance smi)

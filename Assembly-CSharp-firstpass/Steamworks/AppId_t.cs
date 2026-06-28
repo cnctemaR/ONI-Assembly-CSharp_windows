@@ -25,16 +25,6 @@ namespace Steamworks
 			return this.m_AppId.GetHashCode();
 		}
 
-		public bool Equals(AppId_t other)
-		{
-			return this.m_AppId == other.m_AppId;
-		}
-
-		public int CompareTo(AppId_t other)
-		{
-			return this.m_AppId.CompareTo(other.m_AppId);
-		}
-
 		public static bool operator ==(AppId_t x, AppId_t y)
 		{
 			return x.m_AppId == y.m_AppId;
@@ -53,6 +43,16 @@ namespace Steamworks
 		public static explicit operator uint(AppId_t that)
 		{
 			return that.m_AppId;
+		}
+
+		public bool Equals(AppId_t other)
+		{
+			return this.m_AppId == other.m_AppId;
+		}
+
+		public int CompareTo(AppId_t other)
+		{
+			return this.m_AppId.CompareTo(other.m_AppId);
 		}
 
 		public static readonly AppId_t Invalid = new AppId_t(0U);

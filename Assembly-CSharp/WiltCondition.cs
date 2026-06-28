@@ -35,101 +35,101 @@ public class WiltCondition : KMonoBehaviour
 		this.WiltConditions.Add(WiltCondition.Condition.IlluminationComfort, true);
 		this.WiltConditions.Add(WiltCondition.Condition.Receptacle, true);
 		this.WiltConditions.Add(WiltCondition.Condition.Entombed, true);
-		this.Subscribe(-107174716, delegate(object data)
+		base.Subscribe(-107174716, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.Temperature, false);
 		});
-		this.Subscribe(-1234705021, delegate(object data)
+		base.Subscribe(-1234705021, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.Temperature, false);
 		});
-		this.Subscribe(115888613, delegate(object data)
+		base.Subscribe(115888613, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.Temperature, true);
 		});
-		this.Subscribe(-593125877, delegate(object data)
+		base.Subscribe(-593125877, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.Pressure, false);
 		});
-		this.Subscribe(-1175525437, delegate(object data)
+		base.Subscribe(-1175525437, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.Pressure, false);
 		});
-		this.Subscribe(-907106982, delegate(object data)
+		base.Subscribe(-907106982, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.Pressure, true);
 		});
-		this.Subscribe(103243573, delegate(object data)
+		base.Subscribe(103243573, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.Pressure, false);
 		});
-		this.Subscribe(646131325, delegate(object data)
+		base.Subscribe(646131325, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.Pressure, false);
 		});
-		this.Subscribe(221594799, delegate(object data)
+		base.Subscribe(221594799, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.AtmosphereElement, false);
 		});
-		this.Subscribe(777259436, delegate(object data)
+		base.Subscribe(777259436, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.AtmosphereElement, true);
 		});
-		this.Subscribe(1949704522, delegate(object data)
+		base.Subscribe(1949704522, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.Drowning, false);
 		});
-		this.Subscribe(99949694, delegate(object data)
+		base.Subscribe(99949694, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.Drowning, true);
 		});
-		this.Subscribe(-2057657673, delegate(object data)
+		base.Subscribe(-2057657673, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.DryingOut, false);
 		});
-		this.Subscribe(1555379996, delegate(object data)
+		base.Subscribe(1555379996, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.DryingOut, true);
 		});
-		this.Subscribe(-370379773, delegate(object data)
+		base.Subscribe(-370379773, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.Irrigation, false);
 		});
-		this.Subscribe(207387507, delegate(object data)
+		base.Subscribe(207387507, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.Irrigation, true);
 		});
-		this.Subscribe(-1073674739, delegate(object data)
+		base.Subscribe(-1073674739, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.Fertilized, false);
 		});
-		this.Subscribe(-1396791468, delegate(object data)
+		base.Subscribe(-1396791468, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.Fertilized, true);
 		});
-		this.Subscribe(1113102781, delegate(object data)
+		base.Subscribe(1113102781, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.IlluminationComfort, true);
 		});
-		this.Subscribe(1387626797, delegate(object data)
+		base.Subscribe(1387626797, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.IlluminationComfort, false);
 		});
-		this.Subscribe(1628751838, delegate(object data)
+		base.Subscribe(1628751838, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.Receptacle, true);
 		});
-		this.Subscribe(960378201, delegate(object data)
+		base.Subscribe(960378201, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.Receptacle, false);
 		});
-		this.Subscribe(-1089732772, delegate(object data)
+		base.Subscribe(-1089732772, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.Entombed, !(bool)data);
 		});
 	}
 
-	private void Update()
+	public void Tick()
 	{
 		if (this.wilt_condition_dirty)
 		{
@@ -161,6 +161,18 @@ public class WiltCondition : KMonoBehaviour
 		}
 	}
 
+	protected override void OnCmpEnable()
+	{
+		base.OnCmpEnable();
+		Components.WiltConditions.Add(this);
+	}
+
+	protected override void OnCmpDisable()
+	{
+		base.OnCmpDisable();
+		Components.WiltConditions.Remove(this);
+	}
+
 	protected override void OnCleanUp()
 	{
 		this.wiltSchedulerHandler.ClearScheduler();
@@ -170,12 +182,11 @@ public class WiltCondition : KMonoBehaviour
 
 	private void SetCondition(WiltCondition.Condition condition, bool satisfiedState)
 	{
-		if (!this.WiltConditions.ContainsKey(condition))
+		if (this.WiltConditions.ContainsKey(condition))
 		{
-			return;
+			this.WiltConditions[condition] = satisfiedState;
+			this.wilt_condition_dirty = true;
 		}
-		this.WiltConditions[condition] = satisfiedState;
-		this.wilt_condition_dirty = true;
 	}
 
 	private void CheckShouldWilt()
@@ -236,7 +247,7 @@ public class WiltCondition : KMonoBehaviour
 		if (!this.wilting)
 		{
 			this.wilting = true;
-			this.Trigger(-724860998, null);
+			base.Trigger(-724860998, null);
 		}
 		if (this.growing != null)
 		{
@@ -266,7 +277,7 @@ public class WiltCondition : KMonoBehaviour
 
 	public string WiltCausesString()
 	{
-		string text = string.Empty;
+		string text = "";
 		List<IWiltCause> allSMI = this.GetAllSMI<IWiltCause>();
 		allSMI.AddRange(base.GetComponents<IWiltCause>());
 		foreach (IWiltCause wiltCause in allSMI)
@@ -292,7 +303,7 @@ public class WiltCondition : KMonoBehaviour
 		this.recoverSchedulerHandler.ClearScheduler();
 		KSelectable component = base.GetComponent<KSelectable>();
 		this.wilting = false;
-		this.Trigger(712767498, null);
+		base.Trigger(712767498, null);
 		component.RemoveStatusItem(Db.Get().CreatureStatusItems.WiltingDomestic, false);
 		component.RemoveStatusItem(Db.Get().CreatureStatusItems.Wilting, false);
 		component.RemoveStatusItem(Db.Get().CreatureStatusItems.WiltingNonGrowing, false);
@@ -304,12 +315,12 @@ public class WiltCondition : KMonoBehaviour
 	private Growing growing;
 
 	[Serialize]
-	private bool goingToWilt;
+	private bool goingToWilt = false;
 
 	[Serialize]
-	private bool wilting;
+	private bool wilting = false;
 
-	private bool wilt_condition_dirty;
+	private bool wilt_condition_dirty = false;
 
 	private Dictionary<WiltCondition.Condition, bool> WiltConditions = new Dictionary<WiltCondition.Condition, bool>();
 

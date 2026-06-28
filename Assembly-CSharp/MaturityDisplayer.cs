@@ -40,10 +40,15 @@ public class MaturityDisplayer : AsPercentAmountDisplayer
 	public override string GetDescription(Amount master, AmountInstance instance)
 	{
 		Growing component = instance.gameObject.GetComponent<Growing>();
+		string text;
 		if (component != null && component.IsGrowing())
 		{
-			return string.Format(CREATURES.STATS.MATURITY.AMOUNT_DESC_FMT, master.Name, this.formatter.GetFormattedValue(base.ToPercent(instance.value, instance), GameUtil.TimeSlice.None, null), GameUtil.GetFormattedCycles(component.TimeUntilNextHarvest(), "F1"));
+			text = string.Format(CREATURES.STATS.MATURITY.AMOUNT_DESC_FMT, master.Name, this.formatter.GetFormattedValue(base.ToPercent(instance.value, instance), GameUtil.TimeSlice.None, null), GameUtil.GetFormattedCycles(component.TimeUntilNextHarvest(), "F1"));
 		}
-		return base.GetDescription(master, instance);
+		else
+		{
+			text = base.GetDescription(master, instance);
+		}
+		return text;
 	}
 }

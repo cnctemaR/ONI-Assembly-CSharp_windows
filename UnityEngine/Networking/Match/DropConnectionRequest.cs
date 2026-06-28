@@ -3,7 +3,7 @@ using UnityEngine.Networking.Types;
 
 namespace UnityEngine.Networking.Match
 {
-	public class DropConnectionRequest : Request
+	internal class DropConnectionRequest : Request
 	{
 		public NetworkID networkId { get; set; }
 

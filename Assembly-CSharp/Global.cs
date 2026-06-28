@@ -54,11 +54,16 @@ public class Global : MonoBehaviour
 
 	public AnimEventManager GetAnimEventManager()
 	{
+		AnimEventManager animEventManager;
 		if (App.IsExiting)
 		{
-			return null;
+			animEventManager = null;
 		}
-		return this.mAnimEventManager;
+		else
+		{
+			animEventManager = this.mAnimEventManager;
+		}
+		return animEventManager;
 	}
 
 	private void OnApplicationFocus(bool focus)
@@ -93,8 +98,8 @@ public class Global : MonoBehaviour
 
 	private void SetONIStaticSessionVariables()
 	{
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "preview");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 236679U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 242372U);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{
 			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(UnitConfigurationScreen.MassUnitKey, ((GameUtil.MassUnit)KPlayerPrefs.GetInt(UnitConfigurationScreen.MassUnitKey)).ToString());
@@ -153,7 +158,7 @@ public class Global : MonoBehaviour
 
 	private AnimEventManager mAnimEventManager;
 
-	private bool gotKleiUserID;
+	private bool gotKleiUserID = false;
 
 	public static readonly string LanguagePackKey = "LanguagePack";
 

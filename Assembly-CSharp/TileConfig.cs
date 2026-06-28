@@ -6,8 +6,19 @@ public class TileConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
+		string text = "Tile";
+		int num = 1;
+		int num2 = 1;
+		string text2 = "floor_basic_kanim";
+		float num3 = 400f;
+		int num4 = 100;
+		float num5 = 3f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
+		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.Tile;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Tile", 1, 1, "floor_basic_kanim", 400f, 100, 3f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.Tile, BUILDINGS.DECOR.BONUS.TIER0, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_MINERALS, num6, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER0, none);
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
 		buildingDef.Entombable = false;
@@ -32,6 +43,7 @@ public class TileConfig : IBuildingConfig
 			new CellOffset(0, -1)
 		};
 		buildingDef.DragBuild = true;
+		buildingDef.HotKey = global::Action.BuildMenuKeyT;
 		return buildingDef;
 	}
 

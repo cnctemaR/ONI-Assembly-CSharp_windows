@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class BinaryHeap<T> : IEnumerable, IEnumerable<T>
+public class BinaryHeap<T> : IEnumerable<T>, IEnumerable
 {
 	public BinaryHeap()
 		: this(Comparer<T>.Default)
@@ -12,15 +12,6 @@ public class BinaryHeap<T> : IEnumerable, IEnumerable<T>
 	public BinaryHeap(IComparer<T> comp)
 	{
 		this.Comparer = comp;
-	}
-
-	IEnumerator<T> IEnumerable<T>.GetEnumerator()
-	{
-		foreach (T i in this.Items)
-		{
-			yield return i;
-		}
-		yield break;
 	}
 
 	public int Count
@@ -91,6 +82,15 @@ public class BinaryHeap<T> : IEnumerable, IEnumerable<T>
 			this.Items[i] = t2;
 		}
 		return t;
+	}
+
+	IEnumerator<T> IEnumerable<T>.GetEnumerator()
+	{
+		foreach (T i in this.Items)
+		{
+			yield return i;
+		}
+		yield break;
 	}
 
 	public IEnumerator GetEnumerator()

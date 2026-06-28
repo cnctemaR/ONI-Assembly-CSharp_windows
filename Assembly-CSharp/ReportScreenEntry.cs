@@ -54,5 +54,5 @@ public class ReportScreenEntry : KMonoBehaviour
 
 	private List<ReportScreenEntryRow> contextRows = new List<ReportScreenEntryRow>();
 
-	private int currentContextCount;
+	private int currentContextCount = 0;
 }

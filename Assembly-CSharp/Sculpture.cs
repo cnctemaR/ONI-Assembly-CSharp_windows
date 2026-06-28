@@ -18,12 +18,12 @@ public class Sculpture : Artable
 		base.SetStage(stage_id, skip_effect);
 		if (!skip_effect && base.CurrentStage != "Default")
 		{
-			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("sculpture_fx_kanim", this.transform.position, this.transform, false, Grid.SceneLayer.Front, false);
+			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("sculpture_fx_kanim", base.transform.position, base.transform, false, Grid.SceneLayer.Front, false);
 			kbatchedAnimController.destroyOnAnimComplete = true;
 			kbatchedAnimController.transform.localPosition = Vector3.zero;
 			kbatchedAnimController.Play("poof", KAnim.PlayMode.Once, 1f, 0f);
 		}
 	}
 
-	private static KAnimFile[] sculptureOverrides;
+	private static KAnimFile[] sculptureOverrides = null;
 }

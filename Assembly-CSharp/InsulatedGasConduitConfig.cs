@@ -6,8 +6,19 @@ public class InsulatedGasConduitConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
+		string text = "InsulatedGasConduit";
+		int num = 1;
+		int num2 = 1;
+		string text2 = "utilities_gas_insulated_kanim";
+		float num3 = 25f;
+		int num4 = 30;
+		float num5 = 10f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
+		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("InsulatedGasConduit", 1, 1, "utilities_gas_insulated_kanim", 25f, 30, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.PENALTY.TIER0, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_MINERALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none);
 		buildingDef.Insulation = 0.05f;
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
@@ -25,7 +36,6 @@ public class InsulatedGasConduitConfig : IBuildingConfig
 		buildingDef.SceneLayer = Grid.SceneLayer.GasConduits;
 		buildingDef.isKAnimTile = true;
 		buildingDef.isUtility = true;
-		buildingDef.OverlayAnim = Assets.GetAnim("utilities_gas_insulated_kanim");
 		buildingDef.DragBuild = true;
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.GasVentIDs, "InsulatedGasConduit");
 		return buildingDef;

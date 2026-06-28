@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class BuildQueue : KButtonMenu
@@ -24,11 +24,10 @@ public class BuildQueue : KButtonMenu
 	{
 		if (this.fabricator != null)
 		{
-			if (this.fabricator.Orders.Count == 0 || order_idx >= this.fabricator.Orders.Count)
+			if (this.fabricator.NumOrders != 0 && order_idx < this.fabricator.NumOrders)
 			{
-				return;
+				this.fabricator.CancelOrder(order_idx);
 			}
-			this.fabricator.CancelOrder(order_idx);
 		}
 	}
 
@@ -37,11 +36,11 @@ public class BuildQueue : KButtonMenu
 		int i = 0;
 		if (this.fabricator != null)
 		{
-			ReadOnlyCollection<Fabricator.UserOrder> orders = this.fabricator.Orders;
-			foreach (Fabricator.UserOrder userOrder in orders)
+			List<IBuildQueueOrder> orders = this.fabricator.Orders;
+			foreach (IBuildQueueOrder buildQueueOrder in orders)
 			{
 				BuildQueueButton componentInChildren = this.buttonObjects[i].GetComponentInChildren<BuildQueueButton>();
-				componentInChildren.SetOrder(userOrder);
+				componentInChildren.SetOrder(buildQueueOrder);
 				i++;
 				if (i >= 6)
 				{
@@ -73,7 +72,7 @@ public class BuildQueue : KButtonMenu
 		}
 	}
 
-	public void SetFabricator(Fabricator fabricator)
+	public void SetFabricator(IHasBuildQueue fabricator)
 	{
 		this.fabricator = fabricator;
 		if (!base.gameObject.activeInHierarchy)
@@ -95,7 +94,7 @@ public class BuildQueue : KButtonMenu
 		}
 	}
 
-	private Fabricator fabricator;
+	private IHasBuildQueue fabricator;
 
-	private int prevLength;
+	private int prevLength = 0;
 }

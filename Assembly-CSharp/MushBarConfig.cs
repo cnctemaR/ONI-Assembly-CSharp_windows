@@ -9,8 +9,9 @@ public class MushBarConfig : IEntityConfig
 	{
 		GameObject gameObject = EntityTemplates.CreateLooseEntity("MushBar", ITEMS.FOOD.MUSHBAR.NAME, ITEMS.FOOD.MUSHBAR.DESC, 1f, false, Assets.GetAnim("mushbar_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, SimHashes.Creature, null);
 		gameObject = EntityTemplates.ExtendEntityToFood(gameObject, FOOD.FOOD_TYPES.MUSHBAR, true);
-		string text = ITEMS.FOOD.MUSHBAR.RECIPEDESC;
-		Recipe recipe = new Recipe("MushBar", 1f, (SimHashes)0, null, text, 1);
+		string text = "MushBar";
+		string text2 = ITEMS.FOOD.MUSHBAR.RECIPEDESC;
+		Recipe recipe = new Recipe(text, 1f, (SimHashes)0, null, text2, 1);
 		recipe.AddIngredient(new Recipe.Ingredient("Dirt", 75f));
 		recipe.AddIngredient(new Recipe.Ingredient("Water", 75f));
 		recipe.FabricationVisualizer = MushBarConfig.CreateFabricationVisualizer(gameObject);
@@ -30,7 +31,7 @@ public class MushBarConfig : IEntityConfig
 	{
 		KBatchedAnimController component = result.GetComponent<KBatchedAnimController>();
 		GameObject gameObject = new GameObject();
-		gameObject.name = "Visualizer";
+		gameObject.name = result.name + "Visualizer";
 		gameObject.SetActive(false);
 		gameObject.transform.localPosition = Vector3.zero;
 		KBatchedAnimController kbatchedAnimController = gameObject.AddComponent<KBatchedAnimController>();

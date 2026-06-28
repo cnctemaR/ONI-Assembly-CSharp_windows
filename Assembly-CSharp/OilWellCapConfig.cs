@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -6,8 +7,19 @@ public class OilWellCapConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER2;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("OilWellCap", 4, 4, "geyser_oil_cap_kanim", 200f, 100, 120f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, tier);
+		string text = "OilWellCap";
+		int num = 4;
+		int num2 = 4;
+		string text2 = "geyser_oil_cap_kanim";
+		float num3 = 200f;
+		int num4 = 100;
+		float num5 = 120f;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
+		string[] refined_METALS = MATERIALS.REFINED_METALS;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER2;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, refined_METALS, num6, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, tier2);
 		BuildingTemplates.CreateElectricalBuildingDef(buildingDef);
 		buildingDef.SceneLayer = Grid.SceneLayer.BuildingFront;
 		buildingDef.ViewMode = SimViewMode.LiquidVentMap;
@@ -52,9 +64,21 @@ public class OilWellCapConfig : IBuildingConfig
 		oilWellCap.releaseGasRate = 0.44444448f;
 	}
 
+	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, OilWellCapConfig.INPUT_PORTS);
+	}
+
+	public override void DoPostConfigureUnderConstruction(GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, OilWellCapConfig.INPUT_PORTS);
+	}
+
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		BuildingTemplates.DoPostConfigure(go);
+		GeneratedBuildings.RegisterLogicPorts(go, OilWellCapConfig.INPUT_PORTS);
+		go.AddOrGet<LogicOperationalController>();
 	}
 
 	private const float WATER_INTAKE_RATE = 1f;
@@ -72,4 +96,9 @@ public class OilWellCapConfig : IBuildingConfig
 	private const float PRESSURE_RELEASE_RATE = 0.44444448f;
 
 	public const string ID = "OilWellCap";
+
+	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[]
+	{
+		new LogicPorts.Port(LogicOperationalController.PORT_ID, new CellOffset(0, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false)
+	};
 }

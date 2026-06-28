@@ -37,52 +37,65 @@ public class MedicinalPill : Workable, IGameObjectEffectDescriptor, IConsumableU
 	public bool CanBeTakenBy(GameObject consumer)
 	{
 		Effects component = consumer.GetComponent<Effects>();
+		bool flag;
 		if (component.HasEffect(this.info.effect))
 		{
-			return false;
+			flag = false;
 		}
-		if (this.info.medicineType == MedicineInfo.MedicineType.Booster)
+		else if (this.info.medicineType == MedicineInfo.MedicineType.Booster)
 		{
 			AmountInstance amountInstance = Db.Get().Amounts.ImmuneLevel.Lookup(consumer);
-			return amountInstance != null && amountInstance.value < amountInstance.GetMax();
+			flag = amountInstance != null && amountInstance.value < amountInstance.GetMax();
 		}
-		Diseases diseases = consumer.GetDiseases();
-		if (this.info.medicineType == MedicineInfo.MedicineType.CureAny && diseases.Count > 0)
+		else
 		{
-			return true;
-		}
-		foreach (DiseaseInstance diseaseInstance in diseases)
-		{
-			if (this.info.curedDiseases.Contains(diseaseInstance.modifier.Id))
+			Diseases diseases = consumer.GetDiseases();
+			if (this.info.medicineType == MedicineInfo.MedicineType.CureAny && diseases.Count > 0)
 			{
-				return true;
+				flag = true;
+			}
+			else
+			{
+				foreach (DiseaseInstance diseaseInstance in diseases)
+				{
+					if (this.info.curedDiseases.Contains(diseaseInstance.modifier.Id))
+					{
+						return true;
+					}
+				}
+				flag = false;
 			}
 		}
-		return false;
+		return flag;
 	}
 
 	public List<Descriptor> EffectDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		switch (this.info.medicineType)
+		MedicineInfo.MedicineType medicineType = this.info.medicineType;
+		if (medicineType != MedicineInfo.MedicineType.Booster)
 		{
-		case MedicineInfo.MedicineType.Booster:
-			list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.MEDICINE.BOOSTER, new object[0]), string.Format(DUPLICANTS.DISEASES.MEDICINE.BOOSTER_TOOLTIP, new object[0]), Descriptor.DescriptorType.Effect, false));
-			break;
-		case MedicineInfo.MedicineType.CureAny:
-			list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.MEDICINE.CURES_ANY, new object[0]), string.Format(DUPLICANTS.DISEASES.MEDICINE.CURES_ANY_TOOLTIP, new object[0]), Descriptor.DescriptorType.Effect, false));
-			break;
-		case MedicineInfo.MedicineType.CureSpecific:
-		{
-			List<string> list2 = new List<string>();
-			foreach (string text in this.info.curedDiseases)
+			if (medicineType != MedicineInfo.MedicineType.CureAny)
 			{
-				list2.Add(Strings.Get("STRINGS.DUPLICANTS.DISEASES." + text.ToUpper() + ".NAME"));
+				if (medicineType == MedicineInfo.MedicineType.CureSpecific)
+				{
+					List<string> list2 = new List<string>();
+					foreach (string text in this.info.curedDiseases)
+					{
+						list2.Add(Strings.Get("STRINGS.DUPLICANTS.DISEASES." + text.ToUpper() + ".NAME"));
+					}
+					string text2 = string.Join(",", list2.ToArray());
+					list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.MEDICINE.CURES, text2), string.Format(DUPLICANTS.DISEASES.MEDICINE.CURES_TOOLTIP, text2), Descriptor.DescriptorType.Effect, false));
+				}
 			}
-			string text2 = string.Join(",", list2.ToArray());
-			list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.MEDICINE.CURES, text2), string.Format(DUPLICANTS.DISEASES.MEDICINE.CURES_TOOLTIP, text2), Descriptor.DescriptorType.Effect, false));
-			break;
+			else
+			{
+				list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.MEDICINE.CURES_ANY, new object[0]), string.Format(DUPLICANTS.DISEASES.MEDICINE.CURES_ANY_TOOLTIP, new object[0]), Descriptor.DescriptorType.Effect, false));
+			}
 		}
+		else
+		{
+			list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.MEDICINE.BOOSTER, new object[0]), string.Format(DUPLICANTS.DISEASES.MEDICINE.BOOSTER_TOOLTIP, new object[0]), Descriptor.DescriptorType.Effect, false));
 		}
 		Effect effect = Db.Get().effects.Get(this.info.effect);
 		list.Add(new Descriptor(string.Format("Applies the <style=\"disease\">{0}</style> effect", effect.Name), string.Format("{0}\n{1}", effect.description, Effect.CreateTooltip(effect, true)), Descriptor.DescriptorType.Effect, false));

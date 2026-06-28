@@ -18,6 +18,8 @@ public enum GameHashes
 	UIClear = 288942073,
 	UIRefresh = 1980521255,
 	UIRefreshData = -1514841199,
+	BuildToolDeactivated = -1190690038,
+	ActiveToolChanged = 1174281782,
 	OnStorageChange = -1697596308,
 	UpdateStorageInfo = -1197125120,
 	OnStore = 856640610,
@@ -255,5 +257,10 @@ public enum GameHashes
 	ReceptacleInoperational = 960378201,
 	PathAdvanced = 1347184327,
 	UpdateRoom = 144050788,
-	EquipmentChanged = -2146166042
+	EquipmentChanged = -2146166042,
+	LogicEvent = -801688580,
+	BeginBreathRecovery = 961737054,
+	EndBreathRecovery = -2037519664,
+	FabricatorOrdersUpdated = 1721324763,
+	TagsChanged = -1582839653
 }

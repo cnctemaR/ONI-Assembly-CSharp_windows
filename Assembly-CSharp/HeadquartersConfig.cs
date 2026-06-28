@@ -6,8 +6,19 @@ public class HeadquartersConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
+		string text = "Headquarters";
+		int num = 4;
+		int num2 = 4;
+		string text2 = "hqbase_kanim";
+		float num3 = 200f;
+		int num4 = 250;
+		float num5 = 30f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER7;
+		string[] all_METALS = MATERIALS.ALL_METALS;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Headquarters", 4, 4, "hqbase_kanim", 200f, 250, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER7, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER5, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER5, none);
 		buildingDef.Floodable = false;
 		buildingDef.Relocatable = false;
 		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;

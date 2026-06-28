@@ -11,8 +11,19 @@ public class LiquidConduitConfig : IBuildingConfig
 
 	public override BuildingDef CreateBuildingDef()
 	{
+		string text = "LiquidConduit";
+		int num = 1;
+		int num2 = 1;
+		string text2 = "utilities_liquid_kanim";
+		float num3 = 100f;
+		int num4 = 10;
+		float num5 = 3f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
+		string[] plumbable = MATERIALS.PLUMBABLE;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("LiquidConduit", 1, 1, "utilities_liquid_kanim", 100f, 10, 3f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER2, MATERIALS.PLUMBABLE, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.NONE, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, plumbable, num6, buildLocationRule, BUILDINGS.DECOR.NONE, none);
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
 		buildingDef.Entombable = false;
@@ -29,8 +40,8 @@ public class LiquidConduitConfig : IBuildingConfig
 		buildingDef.SceneLayer = Grid.SceneLayer.LiquidConduits;
 		buildingDef.isKAnimTile = true;
 		buildingDef.isUtility = true;
-		buildingDef.OverlayAnim = Assets.GetAnim("utilities_liquid_kanim");
 		buildingDef.DragBuild = true;
+		buildingDef.HotKey = global::Action.BuildMenuKeyE;
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.LiquidVentIDs, "LiquidConduit");
 		return buildingDef;
 	}

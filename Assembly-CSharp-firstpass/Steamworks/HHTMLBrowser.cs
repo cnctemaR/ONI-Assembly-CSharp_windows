@@ -25,16 +25,6 @@ namespace Steamworks
 			return this.m_HHTMLBrowser.GetHashCode();
 		}
 
-		public bool Equals(HHTMLBrowser other)
-		{
-			return this.m_HHTMLBrowser == other.m_HHTMLBrowser;
-		}
-
-		public int CompareTo(HHTMLBrowser other)
-		{
-			return this.m_HHTMLBrowser.CompareTo(other.m_HHTMLBrowser);
-		}
-
 		public static bool operator ==(HHTMLBrowser x, HHTMLBrowser y)
 		{
 			return x.m_HHTMLBrowser == y.m_HHTMLBrowser;
@@ -53,6 +43,16 @@ namespace Steamworks
 		public static explicit operator uint(HHTMLBrowser that)
 		{
 			return that.m_HHTMLBrowser;
+		}
+
+		public bool Equals(HHTMLBrowser other)
+		{
+			return this.m_HHTMLBrowser == other.m_HHTMLBrowser;
+		}
+
+		public int CompareTo(HHTMLBrowser other)
+		{
+			return this.m_HHTMLBrowser.CompareTo(other.m_HHTMLBrowser);
 		}
 
 		public static readonly HHTMLBrowser Invalid = new HHTMLBrowser(0U);

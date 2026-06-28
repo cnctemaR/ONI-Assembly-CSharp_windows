@@ -6,9 +6,19 @@ public class Baggable : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		Pickupable component = base.GetComponent<Pickupable>();
+		component.workAnims = new HashedString[]
+		{
+			new HashedString("capture"),
+			new HashedString("pickup")
+		};
+		component.overrideAnims = new KAnimFile[] { this.animOverride };
+		component.trackOnPickup = false;
+		component.useGunforPickup = false;
+		component.SetOffsets(Grid.DefaultOffset);
 		if (this.animOverride != null)
 		{
-			this.Subscribe(856640610, new Action<object>(this.OnStorageChanged));
+			base.Subscribe(856640610, new Action<object>(this.OnStorageChanged));
 		}
 	}
 
@@ -23,10 +33,14 @@ public class Baggable : KMonoBehaviour
 			gameObject.SetActive(true);
 			Util.KDestroyGameObject(base.gameObject);
 		}
-		else if (storage.GetComponent<MinionIdentity>() != null)
+		else
 		{
-			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-			component.Play("carry", KAnim.PlayMode.Once, 1f, 0f);
+			MinionIdentity component = storage.GetComponent<MinionIdentity>();
+			if (component != null)
+			{
+				KBatchedAnimController component2 = base.GetComponent<KBatchedAnimController>();
+				component2.enabled = false;
+			}
 		}
 	}
 
@@ -35,4 +49,6 @@ public class Baggable : KMonoBehaviour
 
 	[SerializeField]
 	public Tag creatureTag;
+
+	private MinionIdentity minion;
 }

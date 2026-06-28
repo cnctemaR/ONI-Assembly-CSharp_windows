@@ -61,6 +61,16 @@ public struct Tag : ISerializationCallbackReceiver, IEquatable<Tag>, IComparable
 		return this.hash == other.hash;
 	}
 
+	public static bool operator ==(Tag a, Tag b)
+	{
+		return a.hash == b.hash;
+	}
+
+	public static bool operator !=(Tag a, Tag b)
+	{
+		return a.hash != b.hash;
+	}
+
 	public void OnBeforeSerialize()
 	{
 	}
@@ -73,21 +83,26 @@ public struct Tag : ISerializationCallbackReceiver, IEquatable<Tag>, IComparable
 		}
 		else
 		{
-			this.name = string.Empty;
+			this.name = "";
 		}
 	}
 
 	public int CompareTo(Tag other)
 	{
+		int num;
 		if (this.hash < other.hash)
 		{
-			return -1;
+			num = -1;
 		}
-		if (this.hash > other.hash)
+		else if (this.hash > other.hash)
 		{
-			return 1;
+			num = 1;
 		}
-		return 0;
+		else
+		{
+			num = 0;
+		}
+		return num;
 	}
 
 	public override string ToString()
@@ -95,20 +110,10 @@ public struct Tag : ISerializationCallbackReceiver, IEquatable<Tag>, IComparable
 		return (this.name == null) ? this.hash.ToString("X") : this.name;
 	}
 
-	public static bool operator ==(Tag a, Tag b)
-	{
-		return a.hash == b.hash;
-	}
-
-	public static bool operator !=(Tag a, Tag b)
-	{
-		return a.hash != b.hash;
-	}
-
 	public static readonly Tag Invalid = default(Tag);
 
-	[SerializeField]
 	[Serialize]
+	[SerializeField]
 	private string name;
 
 	[Serialize]

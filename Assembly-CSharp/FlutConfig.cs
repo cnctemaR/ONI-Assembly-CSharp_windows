@@ -7,8 +7,14 @@ public class FlutConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
+		string text = "Flut";
+		string text2 = global::STRINGS.CREATURES.SPECIES.FLUT.NAME;
+		string text3 = global::STRINGS.CREATURES.SPECIES.FLUT.DESC;
+		float num = 25f;
+		KAnimFile anim = Assets.GetAnim("flut_single_kanim");
+		string text4 = "idle_loop";
 		EffectorValues tier = DECOR.BONUS.TIER0;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("Flut", global::STRINGS.CREATURES.SPECIES.FLUT.NAME, global::STRINGS.CREATURES.SPECIES.FLUT.DESC, 25f, Assets.GetAnim("flut_single_kanim"), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, anim, text4, Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
 		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, 25f, "SwimmerNavGrid", NavType.Swim, 2f, "Meat", 2, false, true, 30f, 283f, 294f, 243f, 343f);
 		gameObject.UpdateComponentRequirement<Flut>(true);
 		gameObject.UpdateComponentRequirement<Catchable>(true);

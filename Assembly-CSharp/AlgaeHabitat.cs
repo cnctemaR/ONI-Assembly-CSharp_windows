@@ -56,10 +56,10 @@ public class AlgaeHabitat : StateMachineComponent<AlgaeHabitat.SMInstance>
 				smi.master.operational.SetActive(false, false);
 			});
 			this.notoperational.QueueAnim("off", false, null);
-			this.gotAlgae.PlayAnim("on_pre", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.noWater);
-			this.lostAlgae.PlayAnim("on_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.noAlgae);
+			this.gotAlgae.PlayAnim("on_pre").OnAnimQueueComplete(this.noWater);
+			this.lostAlgae.PlayAnim("on_pst").OnAnimQueueComplete(this.noAlgae);
 			this.noWater.QueueAnim("on", false, null).EventTransition(GameHashes.OnStorageChange, this.lostAlgae, (AlgaeHabitat.SMInstance smi) => !smi.HasEnoughMass(GameTags.Algae)).EventTransition(GameHashes.OnStorageChange, this.gotWater, (AlgaeHabitat.SMInstance smi) => smi.HasEnoughMass(GameTags.Algae) && smi.HasEnoughMass(GameTags.Water));
-			this.gotWater.PlayAnim("working_pre", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.generatingOxygen);
+			this.gotWater.PlayAnim("working_pre").OnAnimQueueComplete(this.generatingOxygen);
 			this.generatingOxygen.Enter(delegate(AlgaeHabitat.SMInstance smi)
 			{
 				smi.master.operational.SetActive(true, false);
@@ -73,7 +73,7 @@ public class AlgaeHabitat : StateMachineComponent<AlgaeHabitat.SMInstance>
 			})
 				.QueueAnim("working_loop", true, null)
 				.EventTransition(GameHashes.OnStorageChange, this.stoppedGeneratingOxygen, (AlgaeHabitat.SMInstance smi) => !smi.HasEnoughMass(GameTags.Water) || !smi.HasEnoughMass(GameTags.Algae));
-			this.stoppedGeneratingOxygen.PlayAnim("working_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.stoppedGeneratingOxygenTransition);
+			this.stoppedGeneratingOxygen.PlayAnim("working_pst").OnAnimQueueComplete(this.stoppedGeneratingOxygenTransition);
 			this.stoppedGeneratingOxygenTransition.EventTransition(GameHashes.OnStorageChange, this.noWater, (AlgaeHabitat.SMInstance smi) => !smi.HasEnoughMass(GameTags.Water)).EventTransition(GameHashes.OnStorageChange, this.lostAlgae, (AlgaeHabitat.SMInstance smi) => !smi.HasEnoughMass(GameTags.Algae)).EventTransition(GameHashes.OnStorageChange, this.gotWater, (AlgaeHabitat.SMInstance smi) => smi.HasEnoughMass(GameTags.Water) && smi.HasEnoughMass(GameTags.Algae));
 		}
 

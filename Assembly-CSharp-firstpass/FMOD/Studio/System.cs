@@ -16,12 +16,17 @@ namespace FMOD.Studio
 			studiosystem = null;
 			IntPtr intPtr;
 			RESULT result = FMOD.Studio.System.FMOD_Studio_System_Create(out intPtr, 67606U);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			studiosystem = new FMOD.Studio.System(intPtr);
-			return result;
+			else
+			{
+				studiosystem = new FMOD.Studio.System(intPtr);
+				result2 = result;
+			}
+			return result2;
 		}
 
 		public RESULT setAdvancedSettings(ADVANCEDSETTINGS settings)
@@ -56,12 +61,17 @@ namespace FMOD.Studio
 			system = null;
 			IntPtr intPtr = 0;
 			RESULT result = FMOD.Studio.System.FMOD_Studio_System_GetLowLevelSystem(this.rawPtr, out intPtr);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			system = new FMOD.System(intPtr);
-			return result;
+			else
+			{
+				system = new FMOD.System(intPtr);
+				result2 = result;
+			}
+			return result2;
 		}
 
 		public RESULT getEvent(string path, out EventDescription _event)
@@ -69,12 +79,17 @@ namespace FMOD.Studio
 			_event = null;
 			IntPtr intPtr = 0;
 			RESULT result = FMOD.Studio.System.FMOD_Studio_System_GetEvent(this.rawPtr, Encoding.UTF8.GetBytes(path + '\0'), out intPtr);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			_event = new EventDescription(intPtr);
-			return result;
+			else
+			{
+				_event = new EventDescription(intPtr);
+				result2 = result;
+			}
+			return result2;
 		}
 
 		public RESULT getBus(string path, out Bus bus)
@@ -82,12 +97,17 @@ namespace FMOD.Studio
 			bus = null;
 			IntPtr intPtr = 0;
 			RESULT result = FMOD.Studio.System.FMOD_Studio_System_GetBus(this.rawPtr, Encoding.UTF8.GetBytes(path + '\0'), out intPtr);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			bus = new Bus(intPtr);
-			return result;
+			else
+			{
+				bus = new Bus(intPtr);
+				result2 = result;
+			}
+			return result2;
 		}
 
 		public RESULT getVCA(string path, out VCA vca)
@@ -95,12 +115,17 @@ namespace FMOD.Studio
 			vca = null;
 			IntPtr intPtr = 0;
 			RESULT result = FMOD.Studio.System.FMOD_Studio_System_GetVCA(this.rawPtr, Encoding.UTF8.GetBytes(path + '\0'), out intPtr);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			vca = new VCA(intPtr);
-			return result;
+			else
+			{
+				vca = new VCA(intPtr);
+				result2 = result;
+			}
+			return result2;
 		}
 
 		public RESULT getBank(string path, out Bank bank)
@@ -108,12 +133,17 @@ namespace FMOD.Studio
 			bank = null;
 			IntPtr intPtr = 0;
 			RESULT result = FMOD.Studio.System.FMOD_Studio_System_GetBank(this.rawPtr, Encoding.UTF8.GetBytes(path + '\0'), out intPtr);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			bank = new Bank(intPtr);
-			return result;
+			else
+			{
+				bank = new Bank(intPtr);
+				result2 = result;
+			}
+			return result2;
 		}
 
 		public RESULT getEventByID(Guid guid, out EventDescription _event)
@@ -121,12 +151,17 @@ namespace FMOD.Studio
 			_event = null;
 			IntPtr intPtr = 0;
 			RESULT result = FMOD.Studio.System.FMOD_Studio_System_GetEventByID(this.rawPtr, guid.ToByteArray(), out intPtr);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			_event = new EventDescription(intPtr);
-			return result;
+			else
+			{
+				_event = new EventDescription(intPtr);
+				result2 = result;
+			}
+			return result2;
 		}
 
 		public RESULT getBusByID(Guid guid, out Bus bus)
@@ -134,12 +169,17 @@ namespace FMOD.Studio
 			bus = null;
 			IntPtr intPtr = 0;
 			RESULT result = FMOD.Studio.System.FMOD_Studio_System_GetBusByID(this.rawPtr, guid.ToByteArray(), out intPtr);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			bus = new Bus(intPtr);
-			return result;
+			else
+			{
+				bus = new Bus(intPtr);
+				result2 = result;
+			}
+			return result2;
 		}
 
 		public RESULT getVCAByID(Guid guid, out VCA vca)
@@ -147,12 +187,17 @@ namespace FMOD.Studio
 			vca = null;
 			IntPtr intPtr = 0;
 			RESULT result = FMOD.Studio.System.FMOD_Studio_System_GetVCAByID(this.rawPtr, guid.ToByteArray(), out intPtr);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			vca = new VCA(intPtr);
-			return result;
+			else
+			{
+				vca = new VCA(intPtr);
+				result2 = result;
+			}
+			return result2;
 		}
 
 		public RESULT getBankByID(Guid guid, out Bank bank)
@@ -160,12 +205,17 @@ namespace FMOD.Studio
 			bank = null;
 			IntPtr intPtr = 0;
 			RESULT result = FMOD.Studio.System.FMOD_Studio_System_GetBankByID(this.rawPtr, guid.ToByteArray(), out intPtr);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			bank = new Bank(intPtr);
-			return result;
+			else
+			{
+				bank = new Bank(intPtr);
+				result2 = result;
+			}
+			return result2;
 		}
 
 		public RESULT getSoundInfo(string key, out SOUND_INFO info)
@@ -173,15 +223,20 @@ namespace FMOD.Studio
 			int num = Marshal.SizeOf(typeof(SOUND_INFO_INTERNAL));
 			IntPtr intPtr = Marshal.AllocHGlobal(num);
 			RESULT result = FMOD.Studio.System.FMOD_Studio_System_GetSoundInfo(this.rawPtr, Encoding.UTF8.GetBytes(key + '\0'), intPtr);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
 				Marshal.FreeHGlobal(intPtr);
 				info = new SOUND_INFO();
-				return result;
+				result2 = result;
 			}
-			((SOUND_INFO_INTERNAL)Marshal.PtrToStructure(intPtr, typeof(SOUND_INFO_INTERNAL))).assign(out info);
-			Marshal.FreeHGlobal(intPtr);
-			return result;
+			else
+			{
+				((SOUND_INFO_INTERNAL)Marshal.PtrToStructure(intPtr, typeof(SOUND_INFO_INTERNAL))).assign(out info);
+				Marshal.FreeHGlobal(intPtr);
+				result2 = result;
+			}
+			return result2;
 		}
 
 		public RESULT lookupID(string path, out Guid guid)
@@ -235,12 +290,17 @@ namespace FMOD.Studio
 			bank = null;
 			IntPtr intPtr = 0;
 			RESULT result = FMOD.Studio.System.FMOD_Studio_System_LoadBankFile(this.rawPtr, Encoding.UTF8.GetBytes(name + '\0'), flags, out intPtr);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			bank = new Bank(intPtr);
-			return result;
+			else
+			{
+				bank = new Bank(intPtr);
+				result2 = result;
+			}
+			return result2;
 		}
 
 		public RESULT loadBankMemory(byte[] buffer, LOAD_BANK_FLAGS flags, out Bank bank)
@@ -251,12 +311,17 @@ namespace FMOD.Studio
 			IntPtr intPtr2 = gchandle.AddrOfPinnedObject();
 			RESULT result = FMOD.Studio.System.FMOD_Studio_System_LoadBankMemory(this.rawPtr, intPtr2, buffer.Length, LOAD_MEMORY_MODE.LOAD_MEMORY, flags, out intPtr);
 			gchandle.Free();
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			bank = new Bank(intPtr);
-			return result;
+			else
+			{
+				bank = new Bank(intPtr);
+				result2 = result;
+			}
+			return result2;
 		}
 
 		public RESULT loadBankCustom(BANK_INFO info, LOAD_BANK_FLAGS flags, out Bank bank)
@@ -265,12 +330,17 @@ namespace FMOD.Studio
 			info.size = Marshal.SizeOf(info);
 			IntPtr intPtr = 0;
 			RESULT result = FMOD.Studio.System.FMOD_Studio_System_LoadBankCustom(this.rawPtr, ref info, flags, out intPtr);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			bank = new Bank(intPtr);
-			return result;
+			else
+			{
+				bank = new Bank(intPtr);
+				result2 = result;
+			}
+			return result2;
 		}
 
 		public RESULT unloadAll()
@@ -320,32 +390,40 @@ namespace FMOD.Studio
 			array = null;
 			int num;
 			RESULT result = FMOD.Studio.System.FMOD_Studio_System_GetBankCount(this.rawPtr, out num);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			if (num == 0)
+			else if (num == 0)
 			{
 				array = new Bank[0];
-				return result;
+				result2 = result;
 			}
-			IntPtr[] array2 = new IntPtr[num];
-			int num2;
-			result = FMOD.Studio.System.FMOD_Studio_System_GetBankList(this.rawPtr, array2, num, out num2);
-			if (result != RESULT.OK)
+			else
 			{
-				return result;
+				IntPtr[] array2 = new IntPtr[num];
+				int num2;
+				result = FMOD.Studio.System.FMOD_Studio_System_GetBankList(this.rawPtr, array2, num, out num2);
+				if (result != RESULT.OK)
+				{
+					result2 = result;
+				}
+				else
+				{
+					if (num2 > num)
+					{
+						num2 = num;
+					}
+					array = new Bank[num2];
+					for (int i = 0; i < num2; i++)
+					{
+						array[i] = new Bank(array2[i]);
+					}
+					result2 = RESULT.OK;
+				}
 			}
-			if (num2 > num)
-			{
-				num2 = num;
-			}
-			array = new Bank[num2];
-			for (int i = 0; i < num2; i++)
-			{
-				array[i] = new Bank(array2[i]);
-			}
-			return RESULT.OK;
+			return result2;
 		}
 
 		public RESULT getCPUUsage(out CPU_USAGE usage)

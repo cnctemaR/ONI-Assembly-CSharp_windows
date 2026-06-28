@@ -40,42 +40,52 @@ namespace NodeEditorFramework
 			if (string.IsNullOrEmpty(saveName))
 			{
 				global::Debug.LogError("Cannot save Canvas to scene: No save name specified!", null);
-				return;
 			}
-			nodeCanvas.livesInScene = true;
-			nodeCanvas.name = saveName;
-			NodeCanvasSceneSave nodeCanvasSceneSave = NodeEditorSaveManager.FindSceneSave(saveName);
-			if (nodeCanvasSceneSave == null)
+			else
 			{
-				nodeCanvasSceneSave = NodeEditorSaveManager.sceneSaveHolder.AddComponent<NodeCanvasSceneSave>();
-			}
-			nodeCanvasSceneSave.savedNodeCanvas = nodeCanvas;
-			if (createWorkingCopy)
-			{
-				nodeCanvasSceneSave.savedNodeCanvas = NodeEditorSaveManager.CreateWorkingCopy(nodeCanvasSceneSave.savedNodeCanvas, true);
-				NodeEditorSaveManager.Compress(ref nodeCanvasSceneSave.savedNodeCanvas);
+				nodeCanvas.livesInScene = true;
+				nodeCanvas.name = saveName;
+				NodeCanvasSceneSave nodeCanvasSceneSave = NodeEditorSaveManager.FindSceneSave(saveName);
+				if (nodeCanvasSceneSave == null)
+				{
+					nodeCanvasSceneSave = NodeEditorSaveManager.sceneSaveHolder.AddComponent<NodeCanvasSceneSave>();
+				}
+				nodeCanvasSceneSave.savedNodeCanvas = nodeCanvas;
+				if (createWorkingCopy)
+				{
+					nodeCanvasSceneSave.savedNodeCanvas = NodeEditorSaveManager.CreateWorkingCopy(nodeCanvasSceneSave.savedNodeCanvas, true);
+					NodeEditorSaveManager.Compress(ref nodeCanvasSceneSave.savedNodeCanvas);
+				}
 			}
 		}
 
 		public static NodeCanvas LoadSceneNodeCanvas(string saveName, bool createWorkingCopy)
 		{
+			NodeCanvas nodeCanvas;
 			if (string.IsNullOrEmpty(saveName))
 			{
 				global::Debug.LogError("Cannot load Canvas from scene: No save name specified!", null);
-				return null;
+				nodeCanvas = null;
 			}
-			NodeCanvasSceneSave nodeCanvasSceneSave = NodeEditorSaveManager.FindSceneSave(saveName);
-			if (nodeCanvasSceneSave == null)
+			else
 			{
-				return null;
+				NodeCanvasSceneSave nodeCanvasSceneSave = NodeEditorSaveManager.FindSceneSave(saveName);
+				if (nodeCanvasSceneSave == null)
+				{
+					nodeCanvas = null;
+				}
+				else
+				{
+					NodeCanvas nodeCanvas2 = nodeCanvasSceneSave.savedNodeCanvas;
+					nodeCanvas2.livesInScene = true;
+					if (createWorkingCopy)
+					{
+						nodeCanvas2 = NodeEditorSaveManager.CreateWorkingCopy(nodeCanvas2, true);
+					}
+					NodeEditorSaveManager.Uncompress(ref nodeCanvas2);
+					nodeCanvas = nodeCanvas2;
+				}
 			}
-			NodeCanvas nodeCanvas = nodeCanvasSceneSave.savedNodeCanvas;
-			nodeCanvas.livesInScene = true;
-			if (createWorkingCopy)
-			{
-				nodeCanvas = NodeEditorSaveManager.CreateWorkingCopy(nodeCanvas, true);
-			}
-			NodeEditorSaveManager.Uncompress(ref nodeCanvas);
 			return nodeCanvas;
 		}
 
@@ -205,28 +215,33 @@ namespace NodeEditorFramework
 
 		private static NodeEditorState[] CreateWorkingCopy(NodeEditorState[] editorStates, NodeCanvas associatedNodeCanvas)
 		{
+			NodeEditorState[] array;
 			if (editorStates == null)
 			{
-				return new NodeEditorState[0];
+				array = new NodeEditorState[0];
 			}
-			editorStates = (NodeEditorState[])editorStates.Clone();
-			for (int i = 0; i < editorStates.Length; i++)
+			else
 			{
-				if (!(editorStates[i] == null))
+				editorStates = (NodeEditorState[])editorStates.Clone();
+				for (int i = 0; i < editorStates.Length; i++)
 				{
-					NodeEditorState nodeEditorState = (editorStates[i] = NodeEditorSaveManager.Clone<NodeEditorState>(editorStates[i]));
-					if (nodeEditorState == null)
+					if (!(editorStates[i] == null))
 					{
-						global::Debug.LogError("Failed to create a working copy for an NodeEditorState during the loading process of " + associatedNodeCanvas.name + "!", null);
-					}
-					else
-					{
-						nodeEditorState.canvas = associatedNodeCanvas;
+						NodeEditorState nodeEditorState = (editorStates[i] = NodeEditorSaveManager.Clone<NodeEditorState>(editorStates[i]));
+						if (nodeEditorState == null)
+						{
+							global::Debug.LogError("Failed to create a working copy for an NodeEditorState during the loading process of " + associatedNodeCanvas.name + "!", null);
+						}
+						else
+						{
+							nodeEditorState.canvas = associatedNodeCanvas;
+						}
 					}
 				}
+				associatedNodeCanvas.editorStates = editorStates;
+				array = editorStates;
 			}
-			associatedNodeCanvas.editorStates = editorStates;
-			return editorStates;
+			return array;
 		}
 
 		private static T Clone<T>(T SO) where T : ScriptableObject
@@ -245,28 +260,38 @@ namespace NodeEditorFramework
 
 		private static T AddClonedSO<T>(List<ScriptableObject> scriptableObjects, List<ScriptableObject> clonedScriptableObjects, T initialSO) where T : ScriptableObject
 		{
+			T t;
 			if (initialSO == null)
 			{
-				return (T)((object)null);
+				t = (T)((object)null);
 			}
-			scriptableObjects.Add(initialSO);
-			T t = NodeEditorSaveManager.Clone<T>(initialSO);
-			clonedScriptableObjects.Add(t);
+			else
+			{
+				scriptableObjects.Add(initialSO);
+				T t2 = NodeEditorSaveManager.Clone<T>(initialSO);
+				clonedScriptableObjects.Add(t2);
+				t = t2;
+			}
 			return t;
 		}
 
 		private static T ReplaceSO<T>(List<ScriptableObject> scriptableObjects, List<ScriptableObject> clonedScriptableObjects, T initialSO) where T : ScriptableObject
 		{
+			T t;
 			if (initialSO == null)
 			{
-				return (T)((object)null);
+				t = (T)((object)null);
 			}
-			int num = scriptableObjects.IndexOf(initialSO);
-			if (num == -1)
+			else
 			{
-				global::Debug.LogError("GetWorkingCopy: ScriptableObject " + initialSO.name + " was not copied before! It will be null!", null);
+				int num = scriptableObjects.IndexOf(initialSO);
+				if (num == -1)
+				{
+					global::Debug.LogError("GetWorkingCopy: ScriptableObject " + initialSO.name + " was not copied before! It will be null!", null);
+				}
+				t = ((num != -1) ? ((T)((object)clonedScriptableObjects[num])) : ((T)((object)null)));
 			}
-			return (num != -1) ? ((T)((object)clonedScriptableObjects[num])) : ((T)((object)null));
+			return t;
 		}
 
 		public static NodeEditorState ExtractEditorState(NodeCanvas canvas, string stateName)

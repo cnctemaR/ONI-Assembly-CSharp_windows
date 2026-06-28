@@ -23,34 +23,45 @@ namespace UnityEngine
 			this.Init();
 		}
 
-		void IDisposable.Dispose()
-		{
-			this.Dispose_cpp();
-		}
-
 		~TextGenerator()
 		{
 			((IDisposable)this).Dispose();
 		}
 
+		void IDisposable.Dispose()
+		{
+			this.Dispose_cpp();
+		}
+
 		private TextGenerationSettings ValidatedSettings(TextGenerationSettings settings)
 		{
+			TextGenerationSettings textGenerationSettings;
 			if (settings.font != null && settings.font.dynamic)
 			{
-				return settings;
+				textGenerationSettings = settings;
 			}
-			if (settings.fontSize != 0 || settings.fontStyle != FontStyle.Normal)
+			else
 			{
-				Debug.LogWarning("Font size and style overrides are only supported for dynamic fonts.");
-				settings.fontSize = 0;
-				settings.fontStyle = FontStyle.Normal;
+				if (settings.fontSize != 0 || settings.fontStyle != FontStyle.Normal)
+				{
+					if (settings.font != null)
+					{
+						Debug.LogWarningFormat(settings.font, "Font size and style overrides are only supported for dynamic fonts. Font '{0}' is not dynamic.", new object[] { settings.font.name });
+					}
+					settings.fontSize = 0;
+					settings.fontStyle = FontStyle.Normal;
+				}
+				if (settings.resizeTextForBestFit)
+				{
+					if (settings.font != null)
+					{
+						Debug.LogWarningFormat(settings.font, "BestFit is only supported for dynamic fonts. Font '{0}' is not dynamic.", new object[] { settings.font.name });
+					}
+					settings.resizeTextForBestFit = false;
+				}
+				textGenerationSettings = settings;
 			}
-			if (settings.resizeTextForBestFit)
-			{
-				Debug.LogWarning("BestFit is only supported for dynamic fonts.");
-				settings.resizeTextForBestFit = false;
-			}
-			return settings;
+			return textGenerationSettings;
 		}
 
 		public void Invalidate()
@@ -90,16 +101,51 @@ namespace UnityEngine
 			return this.rectExtents.height;
 		}
 
-		public bool Populate(string str, TextGenerationSettings settings)
+		public bool PopulateWithErrors(string str, TextGenerationSettings settings, GameObject context)
 		{
-			if (this.m_HasGenerated && str == this.m_LastString && settings.Equals(this.m_LastSettings))
+			TextGenerationError textGenerationError = this.PopulateWithError(str, settings);
+			bool flag;
+			if (textGenerationError == TextGenerationError.None)
 			{
-				return this.m_LastValid;
+				flag = true;
 			}
-			return this.PopulateAlways(str, settings);
+			else
+			{
+				if ((textGenerationError & TextGenerationError.CustomSizeOnNonDynamicFont) != TextGenerationError.None)
+				{
+					Debug.LogErrorFormat(context, "Font '{0}' is not dynamic, which is required to override its size", new object[] { settings.font });
+				}
+				if ((textGenerationError & TextGenerationError.CustomStyleOnNonDynamicFont) != TextGenerationError.None)
+				{
+					Debug.LogErrorFormat(context, "Font '{0}' is not dynamic, which is required to override its style", new object[] { settings.font });
+				}
+				flag = false;
+			}
+			return flag;
 		}
 
-		private bool PopulateAlways(string str, TextGenerationSettings settings)
+		public bool Populate(string str, TextGenerationSettings settings)
+		{
+			TextGenerationError textGenerationError = this.PopulateWithError(str, settings);
+			return textGenerationError == TextGenerationError.None;
+		}
+
+		private TextGenerationError PopulateWithError(string str, TextGenerationSettings settings)
+		{
+			TextGenerationError textGenerationError;
+			if (this.m_HasGenerated && str == this.m_LastString && settings.Equals(this.m_LastSettings))
+			{
+				textGenerationError = this.m_LastValid;
+			}
+			else
+			{
+				this.m_LastValid = this.PopulateAlways(str, settings);
+				textGenerationError = this.m_LastValid;
+			}
+			return textGenerationError;
+		}
+
+		private TextGenerationError PopulateAlways(string str, TextGenerationSettings settings)
 		{
 			this.m_LastString = str;
 			this.m_HasGenerated = true;
@@ -108,8 +154,10 @@ namespace UnityEngine
 			this.m_CachedLines = false;
 			this.m_LastSettings = settings;
 			TextGenerationSettings textGenerationSettings = this.ValidatedSettings(settings);
-			this.m_LastValid = this.Populate_Internal(str, textGenerationSettings.font, textGenerationSettings.color, textGenerationSettings.fontSize, textGenerationSettings.scaleFactor, textGenerationSettings.lineSpacing, textGenerationSettings.fontStyle, textGenerationSettings.richText, textGenerationSettings.resizeTextForBestFit, textGenerationSettings.resizeTextMinSize, textGenerationSettings.resizeTextMaxSize, textGenerationSettings.verticalOverflow, textGenerationSettings.horizontalOverflow, textGenerationSettings.updateBounds, textGenerationSettings.textAnchor, textGenerationSettings.generationExtents, textGenerationSettings.pivot, textGenerationSettings.generateOutOfBounds, textGenerationSettings.alignByGeometry);
-			return this.m_LastValid;
+			TextGenerationError textGenerationError;
+			this.Populate_Internal(str, textGenerationSettings.font, textGenerationSettings.color, textGenerationSettings.fontSize, textGenerationSettings.scaleFactor, textGenerationSettings.lineSpacing, textGenerationSettings.fontStyle, textGenerationSettings.richText, textGenerationSettings.resizeTextForBestFit, textGenerationSettings.resizeTextMinSize, textGenerationSettings.resizeTextMaxSize, textGenerationSettings.verticalOverflow, textGenerationSettings.horizontalOverflow, textGenerationSettings.updateBounds, textGenerationSettings.textAnchor, textGenerationSettings.generationExtents, textGenerationSettings.pivot, textGenerationSettings.generateOutOfBounds, textGenerationSettings.alignByGeometry, out textGenerationError);
+			this.m_LastValid = textGenerationError;
+			return textGenerationError;
 		}
 
 		public IList<UIVertex> verts
@@ -151,27 +199,41 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Init();
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Dispose_cpp();
 
-		internal bool Populate_Internal(string str, Font font, Color color, int fontSize, float scaleFactor, float lineSpacing, FontStyle style, bool richText, bool resizeTextForBestFit, int resizeTextMinSize, int resizeTextMaxSize, VerticalWrapMode verticalOverFlow, HorizontalWrapMode horizontalOverflow, bool updateBounds, TextAnchor anchor, Vector2 extents, Vector2 pivot, bool generateOutOfBounds, bool alignByGeometry)
+		internal bool Populate_Internal(string str, Font font, Color color, int fontSize, float scaleFactor, float lineSpacing, FontStyle style, bool richText, bool resizeTextForBestFit, int resizeTextMinSize, int resizeTextMaxSize, VerticalWrapMode verticalOverFlow, HorizontalWrapMode horizontalOverflow, bool updateBounds, TextAnchor anchor, Vector2 extents, Vector2 pivot, bool generateOutOfBounds, bool alignByGeometry, out TextGenerationError error)
 		{
-			return this.Populate_Internal_cpp(str, font, color, fontSize, scaleFactor, lineSpacing, style, richText, resizeTextForBestFit, resizeTextMinSize, resizeTextMaxSize, (int)verticalOverFlow, (int)horizontalOverflow, updateBounds, anchor, extents.x, extents.y, pivot.x, pivot.y, generateOutOfBounds, alignByGeometry);
+			uint num = 0U;
+			bool flag;
+			if (font == null)
+			{
+				error = TextGenerationError.NoFont;
+				flag = false;
+			}
+			else
+			{
+				bool flag2 = this.Populate_Internal_cpp(str, font, color, fontSize, scaleFactor, lineSpacing, style, richText, resizeTextForBestFit, resizeTextMinSize, resizeTextMaxSize, (int)verticalOverFlow, (int)horizontalOverflow, updateBounds, anchor, extents.x, extents.y, pivot.x, pivot.y, generateOutOfBounds, alignByGeometry, out num);
+				error = (TextGenerationError)num;
+				flag = flag2;
+			}
+			return flag;
 		}
 
-		internal bool Populate_Internal_cpp(string str, Font font, Color color, int fontSize, float scaleFactor, float lineSpacing, FontStyle style, bool richText, bool resizeTextForBestFit, int resizeTextMinSize, int resizeTextMaxSize, int verticalOverFlow, int horizontalOverflow, bool updateBounds, TextAnchor anchor, float extentsX, float extentsY, float pivotX, float pivotY, bool generateOutOfBounds, bool alignByGeometry)
+		internal bool Populate_Internal_cpp(string str, Font font, Color color, int fontSize, float scaleFactor, float lineSpacing, FontStyle style, bool richText, bool resizeTextForBestFit, int resizeTextMinSize, int resizeTextMaxSize, int verticalOverFlow, int horizontalOverflow, bool updateBounds, TextAnchor anchor, float extentsX, float extentsY, float pivotX, float pivotY, bool generateOutOfBounds, bool alignByGeometry, out uint error)
 		{
-			return TextGenerator.INTERNAL_CALL_Populate_Internal_cpp(this, str, font, ref color, fontSize, scaleFactor, lineSpacing, style, richText, resizeTextForBestFit, resizeTextMinSize, resizeTextMaxSize, verticalOverFlow, horizontalOverflow, updateBounds, anchor, extentsX, extentsY, pivotX, pivotY, generateOutOfBounds, alignByGeometry);
+			return TextGenerator.INTERNAL_CALL_Populate_Internal_cpp(this, str, font, ref color, fontSize, scaleFactor, lineSpacing, style, richText, resizeTextForBestFit, resizeTextMinSize, resizeTextMaxSize, verticalOverFlow, horizontalOverflow, updateBounds, anchor, extentsX, extentsY, pivotX, pivotY, generateOutOfBounds, alignByGeometry, out error);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool INTERNAL_CALL_Populate_Internal_cpp(TextGenerator self, string str, Font font, ref Color color, int fontSize, float scaleFactor, float lineSpacing, FontStyle style, bool richText, bool resizeTextForBestFit, int resizeTextMinSize, int resizeTextMaxSize, int verticalOverFlow, int horizontalOverflow, bool updateBounds, TextAnchor anchor, float extentsX, float extentsY, float pivotX, float pivotY, bool generateOutOfBounds, bool alignByGeometry);
+		private static extern bool INTERNAL_CALL_Populate_Internal_cpp(TextGenerator self, string str, Font font, ref Color color, int fontSize, float scaleFactor, float lineSpacing, FontStyle style, bool richText, bool resizeTextForBestFit, int resizeTextMinSize, int resizeTextMaxSize, int verticalOverFlow, int horizontalOverflow, bool updateBounds, TextAnchor anchor, float extentsX, float extentsY, float pivotX, float pivotY, bool generateOutOfBounds, bool alignByGeometry, out uint error);
 
 		public Rect rectExtents
 		{
@@ -183,28 +245,28 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_get_rectExtents(out Rect value);
 
 		public extern int vertexCount
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void GetVerticesInternal(object vertices);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern UIVertex[] GetVerticesArray();
 
 		public extern int characterCount
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -213,36 +275,36 @@ namespace UnityEngine
 		{
 			get
 			{
-				return (!string.IsNullOrEmpty(this.m_LastString)) ? Mathf.Min(this.m_LastString.Length, Mathf.Max(0, (this.vertexCount - 4) / 4)) : 0;
+				return this.characterCount - 1;
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void GetCharactersInternal(object characters);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern UICharInfo[] GetCharactersArray();
 
 		public extern int lineCount
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void GetLinesInternal(object lines);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern UILineInfo[] GetLinesArray();
 
 		public extern int fontSizeUsedForBestFit
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -255,7 +317,7 @@ namespace UnityEngine
 
 		private bool m_HasGenerated;
 
-		private bool m_LastValid;
+		private TextGenerationError m_LastValid;
 
 		private readonly List<UIVertex> m_Verts;
 

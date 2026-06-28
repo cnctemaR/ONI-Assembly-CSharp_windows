@@ -190,11 +190,16 @@ public class KInputHandler
 
 	public float GetAxis(Axis axis)
 	{
+		float num;
 		if (this.mController != null)
 		{
-			return this.mController.GetAxis(axis);
+			num = this.mController.GetAxis(axis);
 		}
-		return 0f;
+		else
+		{
+			num = 0f;
+		}
+		return num;
 	}
 
 	public bool IsGamepad()
@@ -210,14 +215,14 @@ public class KInputHandler
 
 	private KInputController mController;
 
+	public delegate void KButtonEventHandler(KButtonEvent e);
+
+	public delegate void KCancelInputHandler();
+
 	private struct HandlerInfo
 	{
 		public int priority;
 
 		public KInputHandler handler;
 	}
-
-	public delegate void KButtonEventHandler(KButtonEvent e);
-
-	public delegate void KCancelInputHandler();
 }

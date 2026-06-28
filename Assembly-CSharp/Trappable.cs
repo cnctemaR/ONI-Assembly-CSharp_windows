@@ -34,23 +34,21 @@ public class Trappable : KMonoBehaviour
 
 	private void Register()
 	{
-		if (this.registered)
+		if (!this.registered)
 		{
-			return;
+			CellChangeMonitor.Instance.Add(this, new Action<int, int>(this.OnCellChange), false);
+			this.registered = true;
 		}
-		CellChangeMonitor.Instance.Add(this, new Action<int, int>(this.OnCellChange), false);
-		this.registered = true;
 	}
 
 	private void Unregister()
 	{
-		if (!this.registered)
+		if (this.registered)
 		{
-			return;
+			CellChangeMonitor.Instance.Remove(this, new Action<int, int>(this.OnCellChange), false);
+			this.registered = false;
 		}
-		CellChangeMonitor.Instance.Remove(this, new Action<int, int>(this.OnCellChange), false);
-		this.registered = false;
 	}
 
-	private bool registered;
+	private bool registered = false;
 }

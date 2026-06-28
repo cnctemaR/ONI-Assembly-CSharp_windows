@@ -20,6 +20,12 @@ namespace UnityEngine
 			this.Apply();
 		}
 
+		internal static void CleanupRoots()
+		{
+			GUISkin.current = null;
+			GUISkin.ms_Error = null;
+		}
+
 		public Font font
 		{
 			get
@@ -479,39 +485,52 @@ namespace UnityEngine
 		public GUIStyle GetStyle(string styleName)
 		{
 			GUIStyle guistyle = this.FindStyle(styleName);
+			GUIStyle guistyle2;
 			if (guistyle != null)
 			{
-				return guistyle;
+				guistyle2 = guistyle;
 			}
-			Debug.LogWarning(string.Concat(new object[]
+			else
 			{
-				"Unable to find style '",
-				styleName,
-				"' in skin '",
-				base.name,
-				"' ",
-				Event.current.type
-			}));
-			return GUISkin.error;
+				Debug.LogWarning(string.Concat(new object[]
+				{
+					"Unable to find style '",
+					styleName,
+					"' in skin '",
+					base.name,
+					"' ",
+					Event.current.type
+				}));
+				guistyle2 = GUISkin.error;
+			}
+			return guistyle2;
 		}
 
 		public GUIStyle FindStyle(string styleName)
 		{
+			GUIStyle guistyle;
 			if (this == null)
 			{
 				Debug.LogError("GUISkin is NULL");
-				return null;
+				guistyle = null;
 			}
-			if (this.m_Styles == null)
+			else
 			{
-				this.BuildStyleCache();
+				if (this.m_Styles == null)
+				{
+					this.BuildStyleCache();
+				}
+				GUIStyle guistyle2;
+				if (this.m_Styles.TryGetValue(styleName, out guistyle2))
+				{
+					guistyle = guistyle2;
+				}
+				else
+				{
+					guistyle = null;
+				}
 			}
-			GUIStyle guistyle;
-			if (this.m_Styles.TryGetValue(styleName, out guistyle))
-			{
-				return guistyle;
-			}
-			return null;
+			return guistyle;
 		}
 
 		internal void MakeCurrent()
@@ -604,7 +623,7 @@ namespace UnityEngine
 
 		internal static GUIStyle ms_Error;
 
-		private Dictionary<string, GUIStyle> m_Styles;
+		private Dictionary<string, GUIStyle> m_Styles = null;
 
 		internal static GUISkin.SkinChangedDelegate m_SkinChanged;
 

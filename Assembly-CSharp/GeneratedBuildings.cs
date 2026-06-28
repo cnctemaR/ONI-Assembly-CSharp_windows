@@ -41,4 +41,25 @@ public class GeneratedBuildings
 		overlay_tags.Add(new Tag(id));
 		overlay_tags.Add(new Tag(id + "UnderConstruction"));
 	}
+
+	public static void RegisterLogicPorts(GameObject go, LogicPorts.Port[] inputs, LogicPorts.Port[] outputs)
+	{
+		LogicPorts logicPorts = go.AddOrGet<LogicPorts>();
+		logicPorts.inputPortInfo = inputs;
+		logicPorts.outputPortInfo = outputs;
+	}
+
+	public static void RegisterLogicPorts(GameObject go, LogicPorts.Port[] inputs)
+	{
+		LogicPorts logicPorts = go.AddOrGet<LogicPorts>();
+		logicPorts.inputPortInfo = inputs;
+		logicPorts.outputPortInfo = null;
+	}
+
+	public static void RegisterLogicPorts(GameObject go, LogicPorts.Port output)
+	{
+		LogicPorts logicPorts = go.AddOrGet<LogicPorts>();
+		logicPorts.inputPortInfo = null;
+		logicPorts.outputPortInfo = new LogicPorts.Port[] { output };
+	}
 }

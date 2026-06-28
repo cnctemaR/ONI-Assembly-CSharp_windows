@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
@@ -30,8 +31,15 @@ namespace UnityEngine
 			});
 		}
 
-		[WrapperlessIcall]
+		public static IntPtr GetGlobalEventQueue()
+		{
+			IntPtr intPtr;
+			UnityEventQueueSystem.INTERNAL_CALL_GetGlobalEventQueue(out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr GetGlobalEventQueue();
+		private static extern void INTERNAL_CALL_GetGlobalEventQueue(out IntPtr value);
 	}
 }

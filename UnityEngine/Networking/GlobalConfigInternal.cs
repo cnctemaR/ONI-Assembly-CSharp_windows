@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using UnityEngine.Scripting;
 
 namespace UnityEngine.Networking
 {
@@ -13,33 +14,68 @@ namespace UnityEngine.Networking
 			this.InitReactorMaximumReceivedMessages(config.ReactorMaximumReceivedMessages);
 			this.InitReactorMaximumSentMessages(config.ReactorMaximumSentMessages);
 			this.InitMaxPacketSize(config.MaxPacketSize);
+			this.InitMaxHosts(config.MaxHosts);
+			if (config.ThreadPoolSize == 0 || config.ThreadPoolSize > 254)
+			{
+				throw new ArgumentOutOfRangeException("Worker thread pool size should be >= 1 && < 254 (for server only)");
+			}
+			this.InitThreadPoolSize(config.ThreadPoolSize);
+			this.InitMinTimerTimeout(config.MinTimerTimeout);
+			this.InitMaxTimerTimeout(config.MaxTimerTimeout);
+			this.InitMinNetSimulatorTimeout(config.MinNetSimulatorTimeout);
+			this.InitMaxNetSimulatorTimeout(config.MaxNetSimulatorTimeout);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void InitWrapper();
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void InitThreadAwakeTimeout(uint ms);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void InitReactorModel(byte model);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void InitReactorMaximumReceivedMessages(ushort size);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void InitReactorMaximumSentMessages(ushort size);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void InitMaxPacketSize(ushort size);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void InitMaxHosts(ushort size);
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void InitThreadPoolSize(byte size);
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void InitMinTimerTimeout(uint ms);
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void InitMaxTimerTimeout(uint ms);
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void InitMinNetSimulatorTimeout(uint ms);
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void InitMaxNetSimulatorTimeout(uint ms);
+
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void Dispose();
 

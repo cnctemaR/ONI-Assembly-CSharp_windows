@@ -2,18 +2,32 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
+using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
 	public sealed class ComputeBuffer : IDisposable
 	{
 		public ComputeBuffer(int count, int stride)
-			: this(count, stride, ComputeBufferType.Default)
+			: this(count, stride, ComputeBufferType.Default, 3)
 		{
 		}
 
 		public ComputeBuffer(int count, int stride, ComputeBufferType type)
+			: this(count, stride, type, 3)
 		{
+		}
+
+		internal ComputeBuffer(int count, int stride, ComputeBufferType type, int stackDepth)
+		{
+			if (count <= 0)
+			{
+				throw new ArgumentException("Attempting to create a zero length compute buffer", "count");
+			}
+			if (stride < 0)
+			{
+				throw new ArgumentException("Attempting to create a compute buffer with a negative stride", "stride");
+			}
 			this.m_Ptr = IntPtr.Zero;
 			ComputeBuffer.InitBuffer(this, count, stride, type);
 		}
@@ -31,15 +45,22 @@ namespace UnityEngine
 
 		private void Dispose(bool disposing)
 		{
-			ComputeBuffer.DestroyBuffer(this);
+			if (disposing)
+			{
+				ComputeBuffer.DestroyBuffer(this);
+			}
+			else if (this.m_Ptr != IntPtr.Zero)
+			{
+				Debug.LogWarning("GarbageCollector disposing of ComputeBuffer. Please use ComputeBuffer.Release() or .Dispose() to manually release the buffer.");
+			}
 			this.m_Ptr = IntPtr.Zero;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void InitBuffer(ComputeBuffer buf, int count, int stride, ComputeBufferType type);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void DestroyBuffer(ComputeBuffer buf);
 
@@ -50,14 +71,14 @@ namespace UnityEngine
 
 		public extern int count
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern int stride
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -68,10 +89,14 @@ namespace UnityEngine
 			this.InternalSetData(data, Marshal.SizeOf(data.GetType().GetElementType()));
 		}
 
-		[WrapperlessIcall]
 		[SecurityCritical]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void InternalSetData(Array data, int elemSize);
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void SetCounterValue(uint counterValue);
 
 		[SecuritySafeCritical]
 		public void GetData(Array data)
@@ -80,13 +105,24 @@ namespace UnityEngine
 		}
 
 		[SecurityCritical]
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void InternalGetData(Array data, int elemSize);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void CopyCount(ComputeBuffer src, ComputeBuffer dst, int dstOffset);
+
+		public IntPtr GetNativeBufferPtr()
+		{
+			IntPtr intPtr;
+			ComputeBuffer.INTERNAL_CALL_GetNativeBufferPtr(this, out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_GetNativeBufferPtr(ComputeBuffer self, out IntPtr value);
 
 		internal IntPtr m_Ptr;
 	}

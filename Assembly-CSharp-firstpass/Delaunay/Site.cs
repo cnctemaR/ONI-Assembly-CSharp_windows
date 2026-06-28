@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Delaunay
 {
-	public sealed class Site : IComparable, ICoord
+	public sealed class Site : ICoord, IComparable
 	{
 		private Site(Vector2 p, uint index, float weight, uint color)
 		{
@@ -61,11 +61,16 @@ namespace Delaunay
 
 		public static Site Create(Vector2 p, uint index, float weight, uint color)
 		{
+			Site site;
 			if (Site._pool.Count > 0)
 			{
-				return Site._pool.Pop().Init(p, index, weight, color);
+				site = Site._pool.Pop().Init(p, index, weight, color);
 			}
-			return new Site(p, index, weight, color);
+			else
+			{
+				site = new Site(p, index, weight, color);
+			}
+			return site;
 		}
 
 		internal static void SortSites(List<Site> sites)
@@ -86,11 +91,14 @@ namespace Delaunay
 					site._siteIndex = num2;
 				}
 			}
-			else if (num == 1 && site._siteIndex > this._siteIndex)
+			else if (num == 1)
 			{
-				uint num2 = site._siteIndex;
-				site._siteIndex = this._siteIndex;
-				this._siteIndex = num2;
+				if (site._siteIndex > this._siteIndex)
+				{
+					uint num2 = site._siteIndex;
+					site._siteIndex = this._siteIndex;
+					this._siteIndex = num2;
+				}
 			}
 			return num;
 		}
@@ -162,70 +170,90 @@ namespace Delaunay
 
 		public List<Site> NeighborSites()
 		{
+			List<Site> list;
 			if (this._edges == null || this._edges.Count == 0)
 			{
-				return new List<Site>();
+				list = new List<Site>();
 			}
-			if (this._edgeOrientations == null)
+			else
 			{
-				this.ReorderEdges();
-			}
-			List<Site> list = new List<Site>();
-			for (int i = 0; i < this._edges.Count; i++)
-			{
-				Edge edge = this._edges[i];
-				list.Add(this.NeighborSite(edge));
+				if (this._edgeOrientations == null)
+				{
+					this.ReorderEdges();
+				}
+				List<Site> list2 = new List<Site>();
+				for (int i = 0; i < this._edges.Count; i++)
+				{
+					Edge edge = this._edges[i];
+					list2.Add(this.NeighborSite(edge));
+				}
+				list = list2;
 			}
 			return list;
 		}
 
 		private Site NeighborSite(Edge edge)
 		{
+			Site site;
 			if (this == edge.leftSite)
 			{
-				return edge.rightSite;
+				site = edge.rightSite;
 			}
-			if (this == edge.rightSite)
+			else if (this == edge.rightSite)
 			{
-				return edge.leftSite;
+				site = edge.leftSite;
 			}
-			return null;
+			else
+			{
+				site = null;
+			}
+			return site;
 		}
 
 		internal List<Vector2> Region(Rect clippingBounds)
 		{
+			List<Vector2> list;
 			if (this._edges == null || this._edges.Count == 0)
 			{
-				return new List<Vector2>();
+				list = new List<Vector2>();
 			}
-			if (this._edgeOrientations == null)
+			else
 			{
-				this.ReorderEdges();
-				this._region = this.ClipToBounds(clippingBounds);
-				if (new Polygon(this._region).Winding() == Winding.CLOCKWISE)
+				if (this._edgeOrientations == null)
 				{
-					this._region.Reverse();
+					this.ReorderEdges();
+					this._region = this.ClipToBounds(clippingBounds);
+					if (new Polygon(this._region).Winding() == Winding.CLOCKWISE)
+					{
+						this._region.Reverse();
+					}
 				}
+				list = this._region;
 			}
-			return this._region;
+			return list;
 		}
 
 		internal List<Vector2> Region(Polygon clippingBounds)
 		{
+			List<Vector2> list;
 			if (this._edges == null || this._edges.Count == 0)
 			{
-				return new List<Vector2>();
+				list = new List<Vector2>();
 			}
-			if (this._edgeOrientations == null)
+			else
 			{
-				this.ReorderEdges();
-				this._region = this.ClipToBounds(clippingBounds);
-				if (new Polygon(this._region).Winding() == Winding.CLOCKWISE)
+				if (this._edgeOrientations == null)
 				{
-					this._region.Reverse();
+					this.ReorderEdges();
+					this._region = this.ClipToBounds(clippingBounds);
+					if (new Polygon(this._region).Winding() == Winding.CLOCKWISE)
+					{
+						this._region.Reverse();
+					}
 				}
+				list = this._region;
 			}
-			return this._region;
+			return list;
 		}
 
 		private void ReorderEdges()
@@ -245,32 +273,37 @@ namespace Delaunay
 			{
 				num++;
 			}
+			List<Vector2> list2;
 			if (num == count)
 			{
-				return new List<Vector2>();
+				list2 = new List<Vector2>();
 			}
-			Edge edge = this._edges[num];
-			Side side = this._edgeOrientations[num];
-			if (edge.clippedEnds[side] == null)
+			else
 			{
-				global::Debug.LogError("XXX: Null detected when there should be a Vector2!", null);
-			}
-			if (edge.clippedEnds[SideHelper.Other(side)] == null)
-			{
-				global::Debug.LogError("XXX: Null detected when there should be a Vector2!", null);
-			}
-			list.Add(edge.clippedEnds[side].Value);
-			list.Add(edge.clippedEnds[SideHelper.Other(side)].Value);
-			for (int i = num + 1; i < count; i++)
-			{
-				edge = this._edges[i];
-				if (edge.visible)
+				Edge edge = this._edges[num];
+				Side side = this._edgeOrientations[num];
+				if (edge.clippedEnds[side] == null)
 				{
-					this.Connect(list, i, bounds, false);
+					global::Debug.LogError("XXX: Null detected when there should be a Vector2!", null);
 				}
+				if (edge.clippedEnds[SideHelper.Other(side)] == null)
+				{
+					global::Debug.LogError("XXX: Null detected when there should be a Vector2!", null);
+				}
+				list.Add(edge.clippedEnds[side].Value);
+				list.Add(edge.clippedEnds[SideHelper.Other(side)].Value);
+				for (int i = num + 1; i < count; i++)
+				{
+					edge = this._edges[i];
+					if (edge.visible)
+					{
+						this.Connect(list, i, bounds, false);
+					}
+				}
+				this.Connect(list, num, bounds, true);
+				list2 = list;
 			}
-			this.Connect(list, num, bounds, true);
-			return list;
+			return list2;
 		}
 
 		private List<Vector2> ClipToBounds(Polygon bounds)

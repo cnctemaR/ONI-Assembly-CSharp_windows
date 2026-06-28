@@ -59,16 +59,15 @@ public class Immigration : KMonoBehaviour, ISaveLoadable
 
 	private void Update()
 	{
-		if (this.stopped || this.bImmigrantAvailable)
+		if (!this.stopped && !this.bImmigrantAvailable)
 		{
-			return;
-		}
-		this.timeBeforeSpawn -= Time.deltaTime;
-		this.timeBeforeSpawn = Math.Max(this.timeBeforeSpawn, 0f);
-		if (this.timeBeforeSpawn <= 0f)
-		{
-			this.bImmigrantAvailable = true;
-			this.availableMinionStats = new MinionStartingStats(false);
+			this.timeBeforeSpawn -= Time.deltaTime;
+			this.timeBeforeSpawn = Math.Max(this.timeBeforeSpawn, 0f);
+			if (this.timeBeforeSpawn <= 0f)
+			{
+				this.bImmigrantAvailable = true;
+				this.availableMinionStats = new MinionStartingStats(false);
+			}
 		}
 	}
 

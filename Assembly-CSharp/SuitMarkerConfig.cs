@@ -6,13 +6,20 @@ public class SuitMarkerConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		string[] array = new string[] { "Metal" };
+		string text = "SuitMarker";
+		int num = 1;
+		int num2 = 3;
+		string text2 = "changingarea_arrow_kanim";
+		float num3 = 50f;
+		int num4 = 30;
+		float num5 = 30f;
+		string[] refined_METALS = MATERIALS.REFINED_METALS;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("SuitMarker", 1, 3, "changingarea_arrow_kanim", 50f, 30, 30f, new float[]
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, new float[]
 		{
 			BUILDINGS.CONSTRUCTION_MASS_KG.TIER2[0],
 			BUILDINGS.CONSTRUCTION_MASS_KG.TIER1[0]
-		}, array, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER1, none);
+		}, refined_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER1, none);
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
 		buildingDef.PreventIdlingInFrontOfBuilding = true;
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.SuitIDs, "SuitMarker");

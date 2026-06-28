@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 public interface IUtilityNetworkMgr
 {
@@ -32,5 +33,9 @@ public interface IUtilityNetworkMgr
 
 	UtilityNetwork GetNetworkForCell(int cell);
 
-	ConduitFlow ConduitFlowManager { get; set; }
+	void AddNetworksRebuiltListener(Action<IList<UtilityNetwork>, ICollection<int>> listener);
+
+	void RemoveNetworksRebuiltListener(Action<IList<UtilityNetwork>, ICollection<int>> listener);
+
+	IList<UtilityNetwork> GetNetworks();
 }

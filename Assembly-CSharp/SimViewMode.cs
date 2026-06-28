@@ -34,8 +34,6 @@ public enum SimViewMode
 	Decor = 347378277,
 	Priorities = 1529952898,
 	Reserved = -779379096,
-	Ignore = -1588157518,
-	InsideBase = -6399571,
 	MinionOccupied = -1457374668,
 	HarvestWhenReady = 954055328,
 	Attack = 1932096648,
@@ -44,5 +42,6 @@ public enum SimViewMode
 	Disease = -812707172,
 	Crop = 917814544,
 	Joules = 453935242,
-	RoomProber = -1249384771
+	RoomProber = -1249384771,
+	Logic = 122547806
 }

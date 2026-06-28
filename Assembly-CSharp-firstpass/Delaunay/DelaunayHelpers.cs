@@ -130,12 +130,17 @@ namespace Delaunay
 
 		private static Node Find(Node node)
 		{
+			Node node2;
 			if (node.parent == node)
 			{
-				return node;
+				node2 = node;
 			}
-			Node node2 = DelaunayHelpers.Find(node.parent);
-			node.parent = node2;
+			else
+			{
+				Node node3 = DelaunayHelpers.Find(node.parent);
+				node.parent = node3;
+				node2 = node3;
+			}
 			return node2;
 		}
 

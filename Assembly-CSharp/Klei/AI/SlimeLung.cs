@@ -16,8 +16,8 @@ namespace Klei.AI
 			base.AddDiseaseComponent(new CommonSickEffectDisease());
 			base.AddDiseaseComponent(new AttributeModifierDisease(new AttributeModifier[]
 			{
-				new AttributeModifier("BreathDelta", -1.1363636f, DUPLICANTS.DISEASES.SLIMELUNG.NAME, false, false),
-				new AttributeModifier("Athletics", -3f, DUPLICANTS.DISEASES.SLIMELUNG.NAME, false, false)
+				new AttributeModifier("BreathDelta", -1.1363636f, DUPLICANTS.DISEASES.SLIMELUNG.NAME, false, false, true),
+				new AttributeModifier("Athletics", -3f, DUPLICANTS.DISEASES.SLIMELUNG.NAME, false, false, true)
 			}));
 			base.AddDiseaseComponent(new SlimeLung.SlimeLungComponent());
 		}
@@ -34,7 +34,7 @@ namespace Klei.AI
 				overPopulationHalfLife = new float?(1200f),
 				minDiffusionCount = new int?(1000),
 				diffusionScale = new float?(0.001f),
-				minDiffusionInfestationTickCount = 1
+				minDiffusionInfestationTickCount = new byte?(1)
 			});
 			base.AddGrowthRule(new StateGrowthRule(Element.State.Solid)
 			{

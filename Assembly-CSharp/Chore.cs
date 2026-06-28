@@ -4,13 +4,13 @@ using UnityEngine;
 
 public abstract class Chore
 {
-	public Chore(ChoreType chore_type, ChoreProvider chore_provider, bool run_until_complete, Action<Chore> on_complete, Action<Chore> on_begin, Action<Chore> on_end, int master_priority, bool is_preemptable, bool allow_in_context_menu, int priority_mod)
+	public Chore(ChoreType chore_type, ChoreProvider chore_provider, bool run_until_complete, Action<Chore> on_complete, Action<Chore> on_begin, Action<Chore> on_end, PriorityScreen.PriorityClass priority_class, int priority_value, bool is_preemptable, bool allow_in_context_menu, int priority_mod)
 	{
-		if (master_priority == 2147483647)
+		if (priority_value == 2147483647)
 		{
-			master_priority = 10;
+			priority_value = 10;
 		}
-		this.masterPriority = master_priority;
+		this.masterPriority = new PrioritySetting(priority_class, priority_value);
 		this.priorityMod = priority_mod;
 		this.id = ++Chore.nextId;
 		if (chore_provider == null)
@@ -51,8 +51,6 @@ public abstract class Chore
 
 	public bool runUntilComplete { get; set; }
 
-	public int masterPriority { get; set; }
-
 	public int priorityMod { get; set; }
 
 	public bool InProgress()
@@ -87,7 +85,7 @@ public abstract class Chore
 		{
 			this.prioritizable = prioritizable;
 			this.masterPriority = prioritizable.GetMasterPriority();
-			prioritizable.onPriorityChanged = (Action<int>)Delegate.Combine(prioritizable.onPriorityChanged, new Action<int>(this.OnMasterPriorityChanged));
+			prioritizable.onPriorityChanged = (Action<PrioritySetting>)Delegate.Combine(prioritizable.onPriorityChanged, new Action<PrioritySetting>(this.OnMasterPriorityChanged));
 		}
 	}
 
@@ -96,11 +94,11 @@ public abstract class Chore
 		if (this.prioritizable != null)
 		{
 			Prioritizable prioritizable = this.prioritizable;
-			prioritizable.onPriorityChanged = (Action<int>)Delegate.Remove(prioritizable.onPriorityChanged, new Action<int>(this.OnMasterPriorityChanged));
+			prioritizable.onPriorityChanged = (Action<PrioritySetting>)Delegate.Remove(prioritizable.onPriorityChanged, new Action<PrioritySetting>(this.OnMasterPriorityChanged));
 		}
 	}
 
-	private void OnMasterPriorityChanged(int priority)
+	private void OnMasterPriorityChanged(PrioritySetting priority)
 	{
 		this.masterPriority = priority;
 	}
@@ -197,36 +195,34 @@ public abstract class Chore
 		StateMachine.Instance instance = smi;
 		instance.OnStop = (Action<string, StateMachine.Status>)Delegate.Remove(instance.OnStop, new Action<string, StateMachine.Status>(this.OnStateMachineStop));
 		smi.StopSM(reason);
-		if (this.driver == null)
+		if (!(this.driver == null))
 		{
-			return;
+			this.lastDriver = this.driver;
+			this.driver = null;
+			if (this.onEnd != null)
+			{
+				this.onEnd(this);
+			}
+			if (this.onExit != null)
+			{
+				this.onExit(this);
+			}
+			this.driver = null;
 		}
-		this.lastDriver = this.driver;
-		this.driver = null;
-		if (this.onEnd != null)
-		{
-			this.onEnd(this);
-		}
-		if (this.onExit != null)
-		{
-			this.onExit(this);
-		}
-		this.driver = null;
 	}
 
 	protected virtual void Succeed(string reason)
 	{
-		if (!this.RemoveFromProvider())
+		if (this.RemoveFromProvider())
 		{
-			return;
+			this.isComplete = true;
+			if (this.onComplete != null)
+			{
+				this.onComplete(this);
+			}
+			this.End(reason);
+			this.Cleanup();
 		}
-		this.isComplete = true;
-		if (this.onComplete != null)
-		{
-			this.onComplete(this);
-		}
-		this.End(reason);
-		this.Cleanup();
 	}
 
 	protected virtual StatusItem GetStatusItem()
@@ -236,30 +232,29 @@ public abstract class Chore
 
 	public virtual void Fail(string reason)
 	{
-		if (this.provider == null)
+		if (!(this.provider == null))
 		{
-			return;
+			if (!(this.driver == null))
+			{
+				if (!this.runUntilComplete)
+				{
+					this.Cancel(reason);
+				}
+				else
+				{
+					this.End(reason);
+				}
+			}
 		}
-		if (this.driver == null)
-		{
-			return;
-		}
-		if (!this.runUntilComplete)
-		{
-			this.Cancel(reason);
-			return;
-		}
-		this.End(reason);
 	}
 
 	public void Cancel(string reason)
 	{
-		if (!this.RemoveFromProvider())
+		if (this.RemoveFromProvider())
 		{
-			return;
+			this.End(reason);
+			this.Cleanup();
 		}
-		this.End(reason);
-		this.Cleanup();
 	}
 
 	protected virtual void OnStateMachineStop(string reason, StateMachine.Status status)
@@ -276,13 +271,18 @@ public abstract class Chore
 
 	private bool RemoveFromProvider()
 	{
+		bool flag;
 		if (this.provider != null)
 		{
 			this.provider.RemoveChore(this);
 			this.provider = null;
-			return true;
+			flag = true;
 		}
-		return false;
+		else
+		{
+			flag = false;
+		}
+		return flag;
 	}
 
 	public virtual bool CanPreempt(Chore.Precondition.Context context)
@@ -294,21 +294,13 @@ public abstract class Chore
 	{
 	}
 
-	public const int MAX_PLAYER_MASTER_PRIORITY = 9;
-
-	public const int MIN_PLAYER_MASTER_PRIORITY = 1;
-
-	public const int DEFAULT_MASTER_PRIORITY = 5;
-
-	public const int MAX_MASTER_PRIORITY = 10;
-
-	public const int MIN_MASTER_PRIORITY = 0;
-
 	private static int nextId;
 
 	public static bool enableChoreDebugging;
 
 	public bool isExpanded;
+
+	public PrioritySetting masterPriority;
 
 	public Action<Chore> onExit;
 
@@ -325,6 +317,18 @@ public abstract class Chore
 	public List<Chore.PreconditionInstance> preconditions = new List<Chore.PreconditionInstance>();
 
 	private Prioritizable prioritizable;
+
+	public const int MAX_PLAYER_BASIC_PRIORITY = 9;
+
+	public const int MIN_PLAYER_BASIC_PRIORITY = 1;
+
+	public const int DEFAULT_BASIC_PRIORITY = 5;
+
+	public const int MAX_BASIC_PRIORITY = 10;
+
+	public const int MIN_BASIC_PRIORITY = 0;
+
+	public delegate bool PreconditionFn(ref Chore.Precondition.Context context, object data);
 
 	public struct PreconditionInstance
 	{
@@ -346,6 +350,7 @@ public abstract class Chore
 			public Context(Chore chore, ChoreConsumer consumer, bool is_attempting_override, object data = null)
 			{
 				this.masterPriority = chore.masterPriority;
+				this.masterPriority.priority_value = chore.masterPriority.priority_value;
 				this.priority = 0;
 				this.priorityMod = chore.priorityMod;
 				this.interruptPriority = 0;
@@ -407,33 +412,53 @@ public abstract class Chore
 			{
 				bool flag = this.failedPreconditionId != -1;
 				bool flag2 = obj.failedPreconditionId != -1;
+				int num2;
 				if (flag == flag2)
 				{
-					int num = this.masterPriority - obj.masterPriority;
+					int num = this.masterPriority.priority_class - obj.masterPriority.priority_class;
 					if (num != 0)
 					{
-						return num;
+						num2 = num;
 					}
-					int num2 = this.priority - obj.priority;
-					if (num2 != 0)
+					else
 					{
-						return num2;
+						int num3 = this.masterPriority.priority_value - obj.masterPriority.priority_value;
+						if (num3 != 0)
+						{
+							num2 = num3;
+						}
+						else
+						{
+							int num4 = this.priority - obj.priority;
+							if (num4 != 0)
+							{
+								num2 = num4;
+							}
+							else
+							{
+								int num5 = this.priorityMod - obj.priorityMod;
+								if (num5 != 0)
+								{
+									num2 = num5;
+								}
+								else
+								{
+									int num6 = obj.cost - this.cost;
+									num2 = num6;
+								}
+							}
+						}
 					}
-					int num3 = this.priorityMod - obj.priorityMod;
-					if (num3 == 0)
-					{
-						return obj.cost - this.cost;
-					}
-					return num3;
+				}
+				else if (flag)
+				{
+					num2 = -1;
 				}
 				else
 				{
-					if (flag)
-					{
-						return -1;
-					}
-					return 1;
+					num2 = 1;
 				}
+				return num2;
 			}
 
 			public override bool Equals(object obj)
@@ -462,7 +487,7 @@ public abstract class Chore
 				return x.CompareTo(y) != 0;
 			}
 
-			public int masterPriority;
+			public PrioritySetting masterPriority;
 
 			public int priority;
 
@@ -483,6 +508,4 @@ public abstract class Chore
 			public object data;
 		}
 	}
-
-	public delegate bool PreconditionFn(ref Chore.Precondition.Context context, object data);
 }

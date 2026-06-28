@@ -42,61 +42,33 @@ public class SelectTool : InterfaceTool
 		this.Select(null, false);
 	}
 
-	protected override void OnActivateTool()
-	{
-		base.OnActivateTool();
-	}
-
 	private void LateUpdate()
 	{
-		bool flag = false;
 		this.cell_new = Grid.PosToCell(Camera.main.ScreenToWorldPoint(Input.mousePosition));
-		if (!Grid.IsValidCell(this.cell_new))
+		if (Grid.IsValidCell(this.cell_new))
 		{
-			return;
-		}
-		if (!HoverTextScreen.Instance.IsVisible)
-		{
-			this.hoverScreenUpdate.Prime();
-		}
-		else if (this.hoverScreenUpdate.tick())
-		{
-			flag = true;
-		}
-		if (!this.hasFocus && this.hoverOverride == null)
-		{
-			this.ClearHover();
-		}
-		else
-		{
-			KSelectable[] selectablesUnderCursor = this.GetSelectablesUnderCursor(this.IncludeRegions);
-			KSelectable objectUnderCursor = this.GetObjectUnderCursor<KSelectable>(false, (KSelectable s) => s.GetComponent<KSelectable>().IsSelectable, null);
-			bool flag2 = false;
-			if (this.cell_old != this.cell_new)
+			if (!HoverTextScreen.Instance.IsVisible)
 			{
-				flag2 = true;
+				this.hoverScreenUpdate.Prime();
 			}
-			if (flag || selectablesUnderCursor != this.selectablesOnCell || flag2)
+			if (!this.hasFocus && this.hoverOverride == null)
 			{
+				this.ClearHover();
+			}
+			else
+			{
+				this.hits.Clear();
+				this.GetSelectablesUnderCursor(this.hits, this.IncludeRegions);
+				KSelectable objectUnderCursor = this.GetObjectUnderCursor<KSelectable>(false, (KSelectable s) => s.GetComponent<KSelectable>().IsSelectable, null);
 				if (this.hoverText == null)
 				{
 					this.hoverText = base.gameObject.GetComponent<HoverTextConfiguration>();
 					this.hoverText.ConfigureHoverScreen();
 				}
-				if (flag2 || selectablesUnderCursor != this.selectablesOnCell)
+				this.hoverText.UpdateHoverElements(this.hits);
+				if (objectUnderCursor != null && objectUnderCursor != this.hover)
 				{
-					this.hoverText.UpdateHoverElements(selectablesUnderCursor);
-				}
-				else
-				{
-					this.hoverText.UpdateHoverElements(selectablesUnderCursor);
-				}
-			}
-			if (objectUnderCursor != null && objectUnderCursor != this.hover)
-			{
-				this.ClearHover();
-				if (selectablesUnderCursor != null && selectablesUnderCursor != this.selectablesOnCell)
-				{
+					this.ClearHover();
 					if (this.hover != objectUnderCursor)
 					{
 						this.hover = objectUnderCursor;
@@ -107,16 +79,11 @@ public class SelectTool : InterfaceTool
 							this.playedSoundThisFrame = true;
 						}
 					}
-					this.selectablesOnCell = selectablesUnderCursor;
 				}
 			}
-			if (selectablesUnderCursor == null)
-			{
-				this.ClearHover();
-			}
+			this.cell_old = this.cell_new;
+			this.playedSoundThisFrame = false;
 		}
-		this.cell_old = this.cell_new;
-		this.playedSoundThisFrame = false;
 	}
 
 	private void GetObjectUnderCursor2D<T>(List<SelectTool.Intersection> intersections, Func<T, bool> condition, int layer_mask) where T : MonoBehaviour
@@ -174,45 +141,43 @@ public class SelectTool : InterfaceTool
 		}
 	}
 
-	public KSelectable[] GetSelectablesUnderCursor(bool includeRegions = false)
+	public void GetSelectablesUnderCursor(List<KSelectable> hits, bool includeRegions = false)
 	{
-		this.hits.Clear();
 		if (this.hoverOverride != null)
 		{
-			this.hits.Add(this.hoverOverride);
+			hits.Add(this.hoverOverride);
 		}
 		Camera main = Camera.main;
 		Vector3 vector = new Vector3(Input.mousePosition.x, Input.mousePosition.y, -main.transform.position.z);
 		Vector3 vector2 = main.ScreenToWorldPoint(vector);
 		Vector2 vector3 = new Vector2(vector2.x, vector2.y);
-		if (Grid.Visible[Grid.PosToCell(vector2)] == 0 && !DebugPaintElementScreen.Instance.gameObject.activeSelf)
+		int num = Grid.PosToCell(vector2);
+		if (Grid.IsValidCell(num) && (Grid.Visible[num] != 0 || DebugPaintElementScreen.Instance.gameObject.activeSelf))
 		{
-			return this.hits.ToArray();
-		}
-		int num = Physics2D.OverlapPointNonAlloc(vector3, this.allSelectableOverlaps);
-		Game.Instance.statusItemRenderer.GetIntersections(vector3, this.hits);
-		for (int i = 0; i < num; i++)
-		{
-			GameObject gameObject = this.allSelectableOverlaps[i].gameObject;
-			KSelectable kselectable = gameObject.GetComponent<KSelectable>();
-			if (kselectable == null)
+			int num2 = Physics2D.OverlapPointNonAlloc(vector3, this.allSelectableOverlaps);
+			Game.Instance.statusItemRenderer.GetIntersections(vector3, hits);
+			for (int i = 0; i < num2; i++)
 			{
-				kselectable = gameObject.GetComponentInParent<KSelectable>();
+				GameObject gameObject = this.allSelectableOverlaps[i].gameObject;
+				KSelectable kselectable = gameObject.GetComponent<KSelectable>();
+				if (kselectable == null)
+				{
+					kselectable = gameObject.GetComponentInParent<KSelectable>();
+				}
+				if (kselectable != null && kselectable.isActiveAndEnabled && !hits.Contains(kselectable) && kselectable.IsSelectable)
+				{
+					hits.Add(kselectable);
+				}
 			}
-			if (kselectable != null && kselectable.isActiveAndEnabled && !this.hits.Contains(kselectable) && kselectable.IsSelectable)
+			if (includeRegions)
 			{
-				this.hits.Add(kselectable);
+				Region region = RegionInterfaceScreen.Instance.RegionUnderCursor();
+				if (region != null)
+				{
+					hits.Add(region.GetComponent<KSelectable>());
+				}
 			}
 		}
-		if (includeRegions)
-		{
-			Region region = RegionInterfaceScreen.Instance.RegionUnderCursor();
-			if (region != null)
-			{
-				this.hits.Add(region.GetComponent<KSelectable>());
-			}
-		}
-		return this.hits.ToArray();
 	}
 
 	private void GetRegionsUnderCursor<T>(List<SelectTool.Intersection> intersections, Func<T, bool> condition, int layer_mask) where T : MonoBehaviour
@@ -223,12 +188,12 @@ public class SelectTool : InterfaceTool
 		Region intersectionRegion = Game.Instance.RegionManager.GetIntersectionRegion(vector2);
 		if (intersectionRegion != null)
 		{
-			T t = (T)((object)intersectionRegion.GetComponent<T>());
-			if (t != null && (condition == null || condition(t)))
+			T component = intersectionRegion.GetComponent<T>();
+			if (component != null && (condition == null || condition(component)))
 			{
 				intersections.Add(new SelectTool.Intersection
 				{
-					component = t,
+					component = component,
 					distance = float.MaxValue
 				});
 			}
@@ -241,37 +206,42 @@ public class SelectTool : InterfaceTool
 		this.GetObjectUnderCursor2D<T>(this.intersections, condition, this.layerMask);
 		this.GetRegionsUnderCursor<T>(this.intersections, condition, this.layerMask);
 		this.intersections.RemoveAll((SelectTool.Intersection intersection) => !intersection.component);
+		T t;
 		if (this.intersections.Count <= 0)
 		{
 			this.prevIntersectionGroup.Clear();
-			return (T)((object)null);
+			t = (T)((object)null);
 		}
-		this.curIntersectionGroup.Clear();
-		foreach (SelectTool.Intersection intersection2 in this.intersections)
+		else
 		{
-			this.curIntersectionGroup.Add(intersection2.component);
-		}
-		if (!this.prevIntersectionGroup.Equals(this.curIntersectionGroup))
-		{
-			this.hitCycleCount = 0;
-			this.prevIntersectionGroup = this.curIntersectionGroup;
-		}
-		this.intersections.Sort((SelectTool.Intersection a, SelectTool.Intersection b) => (a.distance == b.distance) ? a.component.GetInstanceID().CompareTo(b.component.GetInstanceID()) : a.distance.CompareTo(b.distance));
-		int num = 0;
-		if (cycleSelection)
-		{
-			num = this.hitCycleCount % this.intersections.Count;
-			if (this.intersections[num].component != previous_selection || previous_selection == null)
+			this.curIntersectionGroup.Clear();
+			foreach (SelectTool.Intersection intersection2 in this.intersections)
 			{
-				num = 0;
+				this.curIntersectionGroup.Add(intersection2.component);
+			}
+			if (!this.prevIntersectionGroup.Equals(this.curIntersectionGroup))
+			{
 				this.hitCycleCount = 0;
+				this.prevIntersectionGroup = this.curIntersectionGroup;
 			}
-			else
+			this.intersections.Sort((SelectTool.Intersection a, SelectTool.Intersection b) => (a.distance == b.distance) ? a.component.GetInstanceID().CompareTo(b.component.GetInstanceID()) : a.distance.CompareTo(b.distance));
+			int num = 0;
+			if (cycleSelection)
 			{
-				num = ++this.hitCycleCount % this.intersections.Count;
+				num = this.hitCycleCount % this.intersections.Count;
+				if (this.intersections[num].component != previous_selection || previous_selection == null)
+				{
+					num = 0;
+					this.hitCycleCount = 0;
+				}
+				else
+				{
+					num = ++this.hitCycleCount % this.intersections.Count;
+				}
 			}
+			t = this.intersections[num].component as T;
 		}
-		return this.intersections[num].component as T;
+		return t;
 	}
 
 	private void ClearHover()
@@ -329,57 +299,56 @@ public class SelectTool : InterfaceTool
 
 	public void Select(KSelectable new_selected, bool skipSound = false)
 	{
-		if (new_selected == this.previousSelection)
+		if (!(new_selected == this.previousSelection))
 		{
-			return;
-		}
-		this.previousSelection = new_selected;
-		if (this.selected != null)
-		{
-			this.selected.Unselect();
-		}
-		GameObject gameObject = null;
-		if (new_selected != null)
-		{
-			SelectToolHoverTextCard component = base.GetComponent<SelectToolHoverTextCard>();
-			if (component != null)
+			this.previousSelection = new_selected;
+			if (this.selected != null)
 			{
-				int num = component.currentSelectedSelectableIndex;
-				int recentNumberOfDisplayedSelectables = component.recentNumberOfDisplayedSelectables;
-				if (recentNumberOfDisplayedSelectables != 0)
+				this.selected.Unselect();
+			}
+			GameObject gameObject = null;
+			if (new_selected != null)
+			{
+				SelectToolHoverTextCard component = base.GetComponent<SelectToolHoverTextCard>();
+				if (component != null)
 				{
-					num = (num + 1) % recentNumberOfDisplayedSelectables;
-					if (!skipSound)
+					int num = component.currentSelectedSelectableIndex;
+					int recentNumberOfDisplayedSelectables = component.recentNumberOfDisplayedSelectables;
+					if (recentNumberOfDisplayedSelectables != 0)
 					{
-						if (recentNumberOfDisplayedSelectables == 1)
+						num = (num + 1) % recentNumberOfDisplayedSelectables;
+						if (!skipSound)
 						{
-							KFMOD.PlayOneShot(GlobalAssets.GetSound("Select_empty", false));
+							if (recentNumberOfDisplayedSelectables == 1)
+							{
+								KFMOD.PlayOneShot(GlobalAssets.GetSound("Select_empty", false));
+							}
+							else
+							{
+								EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound("Select_full", false), Vector3.zero);
+								eventInstance.setParameterValue("selection", (float)num);
+								SoundEvent.EndOneShot(eventInstance);
+							}
+							this.playedSoundThisFrame = true;
 						}
-						else
-						{
-							EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound("Select_full", false), Vector3.zero);
-							eventInstance.setParameterValue("selection", (float)num);
-							SoundEvent.EndOneShot(eventInstance);
-						}
-						this.playedSoundThisFrame = true;
 					}
 				}
+				if (new_selected == this.hover)
+				{
+					this.ClearHover();
+				}
+				new_selected.Select();
+				gameObject = new_selected.gameObject;
+				this.selectMarker.SetTargetTransform(gameObject.transform);
+				this.selectMarker.gameObject.SetActive(!new_selected.DisableSelectMarker);
 			}
-			if (new_selected == this.hover)
+			else if (this.selectMarker != null)
 			{
-				this.ClearHover();
+				this.selectMarker.gameObject.SetActive(false);
 			}
-			new_selected.Select();
-			gameObject = new_selected.gameObject;
-			this.selectMarker.SetTargetTransform(gameObject.transform);
-			this.selectMarker.gameObject.SetActive(!new_selected.DisableSelectMarker);
+			this.selected = new_selected;
+			Game.Instance.Trigger(-1503271301, gameObject);
 		}
-		else if (this.selectMarker != null)
-		{
-			this.selectMarker.gameObject.SetActive(false);
-		}
-		this.selected = new_selected;
-		Game.Instance.Trigger(-1503271301, gameObject);
 	}
 
 	public override void OnLeftClickDown(Vector3 cursor_pos)
@@ -399,13 +368,9 @@ public class SelectTool : InterfaceTool
 		return this.selectedCell;
 	}
 
-	private const int MAX_OVERLAPS = 16;
-
 	public KSelectable selected;
 
 	public KSelectable hover;
-
-	private KSelectable[] selectablesOnCell;
 
 	protected int cell_new;
 
@@ -425,13 +390,15 @@ public class SelectTool : InterfaceTool
 
 	protected SelectMarker selectMarker;
 
-	private Collider2D[] overlaps = new Collider2D[16];
-
 	private List<KSelectable> hits = new List<KSelectable>();
+
+	private const int MAX_OVERLAPS = 16;
+
+	private Collider2D[] overlaps = new Collider2D[16];
 
 	private Collider2D[] allSelectableOverlaps = new Collider2D[16];
 
-	private int hitCycleCount;
+	private int hitCycleCount = 0;
 
 	private List<SelectTool.Intersection> intersections = new List<SelectTool.Intersection>();
 
@@ -443,9 +410,9 @@ public class SelectTool : InterfaceTool
 
 	private bool delayedSkipSound;
 
-	private KSelectable previousSelection;
+	private KSelectable previousSelection = null;
 
-	private bool playedSoundThisFrame;
+	private bool playedSoundThisFrame = false;
 
 	public struct Intersection
 	{

@@ -58,7 +58,7 @@ public class ProgressBar : KMonoBehaviour
 
 	public virtual void OnOverlayChanged(object data = null)
 	{
-		if ((int)data == 0)
+		if ((SimViewMode)data == SimViewMode.None)
 		{
 			if (!base.gameObject.activeSelf)
 			{

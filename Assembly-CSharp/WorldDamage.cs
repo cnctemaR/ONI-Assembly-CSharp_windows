@@ -28,11 +28,10 @@ public class WorldDamage : KMonoBehaviour
 			bool flag = num > 0.15f;
 			if (flag)
 			{
-				bool flag2 = Grid.Objects[cell, 9] != null;
-				if (flag2)
+				GameObject gameObject = Grid.Objects[cell, 9];
+				if (gameObject != null)
 				{
-					GameObject gameObject = Grid.Objects[cell, 1];
-					if (gameObject != null && gameObject.GetComponent<Constructable>() == null)
+					if (gameObject.GetComponent<BuildingHP>() != null)
 					{
 						gameObject.Trigger(-794517298, new BuildingHP.DamageSourceInfo
 						{
@@ -60,12 +59,15 @@ public class WorldDamage : KMonoBehaviour
 					{
 						int num3 = cell + num2;
 						Element element2 = Grid.Element[num3];
-						if (!element2.IsSolid && (!element2.IsLiquid || (element2.id == element.id && Grid.Cell[num3].mass <= 100f)) && (Grid.Cell[num3].properties & 2) == 0 && !this.spawnTimes.ContainsKey(num3))
+						if (!element2.IsSolid && (!element2.IsLiquid || (element2.id == element.id && Grid.Cell[num3].mass <= 100f)) && (Grid.Cell[num3].properties & 2) == 0)
 						{
-							this.spawnTimes[num3] = Time.realtimeSinceStartup;
-							int elementIndex = ElementLoader.GetElementIndex(element.id);
-							float temperature = Grid.Cell[src_cell].temperature;
-							base.StartCoroutine(this.DelayedSpawnFX(src_cell, num3, num2, element, elementIndex, temperature));
+							if (!this.spawnTimes.ContainsKey(num3))
+							{
+								this.spawnTimes[num3] = Time.realtimeSinceStartup;
+								int elementIndex = ElementLoader.GetElementIndex(element.id);
+								float temperature = Grid.Cell[src_cell].temperature;
+								base.StartCoroutine(this.DelayedSpawnFX(src_cell, num3, num2, element, elementIndex, temperature));
+							}
 						}
 					}
 				}
@@ -93,6 +95,8 @@ public class WorldDamage : KMonoBehaviour
 		{
 			kanim.Play("side", KAnim.PlayMode.Once, 1f, 0f);
 			kanim.FlipX = true;
+			kanim.enabled = false;
+			kanim.enabled = true;
 			fx.transform.position += Vector3.right * 0.5f;
 			FallingWater.instance.AddParticle(dest_cell, (byte)idx, 1f, temperature, byte.MaxValue, 0, true, false, false, false);
 		}
@@ -100,17 +104,23 @@ public class WorldDamage : KMonoBehaviour
 		{
 			fx.transform.position -= Vector3.up * 0.5f;
 			kanim.Play("floor", KAnim.PlayMode.Once, 1f, 0f);
+			kanim.enabled = false;
+			kanim.enabled = true;
 			SimMessages.AddRemoveSubstance(dest_cell, idx, CellEventLogger.Instance.WorldDamageDelayedSpawnFX, 1f, temperature, byte.MaxValue, 0, -1);
 		}
 		else if (offset == -Grid.WidthInCells)
 		{
 			kanim.Play("ceiling", KAnim.PlayMode.Once, 1f, 0f);
+			kanim.enabled = false;
+			kanim.enabled = true;
 			fx.transform.position += Vector3.up * 0.5f;
 			FallingWater.instance.AddParticle(dest_cell, (byte)idx, 1f, temperature, byte.MaxValue, 0, true, false, false, false);
 		}
 		else
 		{
 			kanim.Play("side", KAnim.PlayMode.Once, 1f, 0f);
+			kanim.enabled = false;
+			kanim.enabled = true;
 			fx.transform.position -= Vector3.right * 0.5f;
 			FallingWater.instance.AddParticle(dest_cell, (byte)idx, 1f, temperature, byte.MaxValue, 0, true, false, false, false);
 		}
@@ -169,20 +179,22 @@ public class WorldDamage : KMonoBehaviour
 		if (this.queuedDigCallbackCells.Contains(cell))
 		{
 			this.queuedDigCallbackCells.Remove(cell);
-			Vector3 vector = Grid.CellToPos(cell, CellAlignment.RandomInternal, Grid.SceneLayer.Use);
+			Vector3 vector = Grid.CellToPos(cell, CellAlignment.RandomInternal, Grid.SceneLayer.Ore);
 			Element element = ElementLoader.elements[(int)element_idx];
 			Grid.Damage[cell] = 0f;
 			WorldDamage.Instance.PlaySoundForSubstance(element, vector);
 			float num = mass * 0.5f;
-			if (num <= 0f)
+			if (num > 0f)
 			{
-				return;
-			}
-			GameObject gameObject = element.substance.SpawnResource(vector, num, temperature, disease_idx, disease_count, false, false);
-			Pickupable component = gameObject.GetComponent<Pickupable>();
-			if (component != null && WorldInventory.Instance.IsReachable(gameObject.GetComponent<Pickupable>()))
-			{
-				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, Mathf.RoundToInt(num).ToString() + " " + element.name, gameObject.transform, 1.5f, false);
+				GameObject gameObject = element.substance.SpawnResource(vector, num, temperature, disease_idx, disease_count, false, false);
+				Pickupable component = gameObject.GetComponent<Pickupable>();
+				if (component != null)
+				{
+					if (WorldInventory.Instance.IsReachable(gameObject.GetComponent<Pickupable>()))
+					{
+						PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, Mathf.RoundToInt(num).ToString() + " " + element.name, gameObject.transform, 1.5f, false);
+					}
+				}
 			}
 		}
 	}
@@ -213,8 +225,6 @@ public class WorldDamage : KMonoBehaviour
 		}
 	}
 
-	private const float SPAWN_DELAY = 1f;
-
 	public KBatchedAnimController leakEffect;
 
 	[SerializeField]
@@ -227,6 +237,8 @@ public class WorldDamage : KMonoBehaviour
 	private List<int> queuedDigCallbackCells = new List<int>();
 
 	private float damageAmount = 0.00083333335f;
+
+	private const float SPAWN_DELAY = 1f;
 
 	private Dictionary<int, float> spawnTimes = new Dictionary<int, float>();
 

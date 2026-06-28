@@ -11,11 +11,16 @@ public static class DebugHashes
 
 	public static string GetName(int hash)
 	{
+		string text;
 		if (DebugHashes.hashMap.ContainsKey(hash))
 		{
-			return DebugHashes.hashMap[hash];
+			text = DebugHashes.hashMap[hash];
 		}
-		return "Unknown HASH [0x" + hash.ToString("X") + "]";
+		else
+		{
+			text = "Unknown HASH [0x" + hash.ToString("X") + "]";
+		}
+		return text;
 	}
 
 	private static Dictionary<int, string> hashMap = new Dictionary<int, string>();

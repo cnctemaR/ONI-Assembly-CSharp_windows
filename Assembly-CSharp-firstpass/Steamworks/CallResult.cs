@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace Steamworks
@@ -11,6 +12,7 @@ namespace Steamworks
 			this.BuildCCallbackBase();
 		}
 
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private event CallResult<T>.APIDispatchDelegate m_Func;
 
 		public SteamAPICall_t Handle
@@ -33,21 +35,20 @@ namespace Steamworks
 
 		public void Dispose()
 		{
-			if (this.m_bDisposed)
+			if (!this.m_bDisposed)
 			{
-				return;
+				GC.SuppressFinalize(this);
+				this.Cancel();
+				if (this.m_pVTable != IntPtr.Zero)
+				{
+					Marshal.FreeHGlobal(this.m_pVTable);
+				}
+				if (this.m_pCCallbackBase.IsAllocated)
+				{
+					this.m_pCCallbackBase.Free();
+				}
+				this.m_bDisposed = true;
 			}
-			GC.SuppressFinalize(this);
-			this.Cancel();
-			if (this.m_pVTable != IntPtr.Zero)
-			{
-				Marshal.FreeHGlobal(this.m_pVTable);
-			}
-			if (this.m_pCCallbackBase.IsAllocated)
-			{
-				this.m_pCCallbackBase.Free();
-			}
-			this.m_bDisposed = true;
 		}
 
 		public void Set(SteamAPICall_t hAPICall, CallResult<T>.APIDispatchDelegate func = null)
@@ -157,7 +158,7 @@ namespace Steamworks
 
 		private readonly int m_size = Marshal.SizeOf(typeof(T));
 
-		private bool m_bDisposed;
+		private bool m_bDisposed = false;
 
 		public delegate void APIDispatchDelegate(T param, bool bIOFailure);
 	}

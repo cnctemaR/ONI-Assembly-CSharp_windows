@@ -25,16 +25,6 @@ namespace Steamworks
 			return this.m_ManifestId.GetHashCode();
 		}
 
-		public bool Equals(ManifestId_t other)
-		{
-			return this.m_ManifestId == other.m_ManifestId;
-		}
-
-		public int CompareTo(ManifestId_t other)
-		{
-			return this.m_ManifestId.CompareTo(other.m_ManifestId);
-		}
-
 		public static bool operator ==(ManifestId_t x, ManifestId_t y)
 		{
 			return x.m_ManifestId == y.m_ManifestId;
@@ -53,6 +43,16 @@ namespace Steamworks
 		public static explicit operator ulong(ManifestId_t that)
 		{
 			return that.m_ManifestId;
+		}
+
+		public bool Equals(ManifestId_t other)
+		{
+			return this.m_ManifestId == other.m_ManifestId;
+		}
+
+		public int CompareTo(ManifestId_t other)
+		{
+			return this.m_ManifestId.CompareTo(other.m_ManifestId);
 		}
 
 		public static readonly ManifestId_t Invalid = new ManifestId_t(0UL);

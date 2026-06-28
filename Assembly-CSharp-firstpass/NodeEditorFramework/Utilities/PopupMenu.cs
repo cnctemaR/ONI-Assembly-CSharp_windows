@@ -25,7 +25,7 @@ namespace NodeEditorFramework.Utilities
 		{
 			this.minWidth = MinWidth;
 			this.position = PopupMenu.calculateRect(pos, this.menuItems, this.minWidth);
-			this.selectedPath = string.Empty;
+			this.selectedPath = "";
 			OverlayGUI.currentPopup = this;
 		}
 
@@ -82,6 +82,7 @@ namespace NodeEditorFramework.Utilities
 		private PopupMenu.MenuItem AddHierarchy(ref GUIContent content, out string path)
 		{
 			path = content.text;
+			PopupMenu.MenuItem menuItem3;
 			if (path.Contains("/"))
 			{
 				string[] array = path.Split(new char[] { '/' });
@@ -112,9 +113,13 @@ namespace NodeEditorFramework.Utilities
 				}
 				path = content.text;
 				content = new GUIContent(array[array.Length - 1], content.tooltip);
-				return menuItem;
+				menuItem3 = menuItem;
 			}
-			return null;
+			else
+			{
+				menuItem3 = null;
+			}
+			return menuItem3;
 		}
 
 		public void Draw()
@@ -124,9 +129,12 @@ namespace NodeEditorFramework.Utilities
 			{
 				PopupMenu.MenuItem menuItem = this.groupToDraw;
 				this.groupToDraw = null;
-				if (menuItem.group && this.DrawGroup(menuItem.groupPos, menuItem.subItems))
+				if (menuItem.group)
 				{
-					flag = true;
+					if (this.DrawGroup(menuItem.groupPos, menuItem.subItems))
+					{
+						flag = true;
+					}
 				}
 			}
 			if (!flag || this.close)
@@ -250,6 +258,10 @@ namespace NodeEditorFramework.Utilities
 
 		public float minWidth;
 
+		public delegate void MenuFunction();
+
+		public delegate void MenuFunctionData(object userData);
+
 		public class MenuItem
 		{
 			public MenuItem()
@@ -305,17 +317,13 @@ namespace NodeEditorFramework.Utilities
 
 			public object userData;
 
-			public bool separator;
+			public bool separator = false;
 
-			public bool group;
+			public bool group = false;
 
 			public Rect groupPos;
 
 			public List<PopupMenu.MenuItem> subItems;
 		}
-
-		public delegate void MenuFunction();
-
-		public delegate void MenuFunctionData(object userData);
 	}
 }

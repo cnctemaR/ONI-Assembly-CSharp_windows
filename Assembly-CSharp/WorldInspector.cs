@@ -12,24 +12,23 @@ public class WorldInspector : MonoBehaviour
 
 	private void Refresh()
 	{
-		if (SelectTool.Instance.selected == null)
+		if (!(SelectTool.Instance.selected == null))
 		{
-			return;
-		}
-		CellSelectionObject component = SelectTool.Instance.selected.GetComponent<CellSelectionObject>();
-		if (component != null)
-		{
-			this.UpdateAsSimCell(component);
-		}
-		ElementChunk component2 = SelectTool.Instance.selected.GetComponent<ElementChunk>();
-		if (component2 != null)
-		{
-			this.UpdateAsElementChunk(component2);
-		}
-		Edible component3 = SelectTool.Instance.selected.GetComponent<Edible>();
-		if (component3 != null)
-		{
-			this.UpdateAsEdible(component3);
+			CellSelectionObject component = SelectTool.Instance.selected.GetComponent<CellSelectionObject>();
+			if (component != null)
+			{
+				this.UpdateAsSimCell(component);
+			}
+			ElementChunk component2 = SelectTool.Instance.selected.GetComponent<ElementChunk>();
+			if (component2 != null)
+			{
+				this.UpdateAsElementChunk(component2);
+			}
+			Edible component3 = SelectTool.Instance.selected.GetComponent<Edible>();
+			if (component3 != null)
+			{
+				this.UpdateAsEdible(component3);
+			}
 		}
 	}
 
@@ -59,13 +58,12 @@ public class WorldInspector : MonoBehaviour
 	private void UpdateAsElementChunk(ElementChunk _chunkObject)
 	{
 		PrimaryElement component = _chunkObject.GetComponent<PrimaryElement>();
-		string text = string.Empty;
 		this.PropertyLeftText.text = string.Format("{0:0.00}", component.Mass) + " kg";
 		this.PropertyIcon_Left.sprite = this.propertySprites.Mass;
 		this.PropertyRightText.text = ElementLoader.FindElementByHash(component.ElementID).GetMaterialCategoryTag().ProperName();
 		this.PropertyIcon_Right.sprite = this.propertySprites.Resource;
 		this.TemperatureTextDisplay.text = GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(component.Temperature), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true);
-		text = "Current Temperature: " + GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(component.Temperature), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true);
+		string text = "Current Temperature: " + GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(component.Temperature), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true);
 		this.SetStateColorScheme(0);
 		text += this.SetCurrentTemperatureTooltip(ElementLoader.FindElementByHash(component.ElementID), 0);
 		text = text + "\nMelts at: <color=yellow>" + GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(ElementLoader.FindElementByHash(component.ElementID).highTemp), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true) + "</color>";
@@ -76,14 +74,13 @@ public class WorldInspector : MonoBehaviour
 
 	private void UpdateAsEdible(Edible edibleObject)
 	{
-		string text = string.Empty;
 		this.PropertyLeftText.text = edibleObject.Units.ToString() + " Rations";
 		this.PropertyIcon_Left.sprite = this.propertySprites.Rations;
 		this.PropertyRightText.text = edibleObject.GetQuality().ToString();
 		this.PropertyIcon_Right.sprite = this.propertySprites.Quality;
 		float num = Grid.Temperature[Grid.PosToCell(edibleObject)];
 		this.TemperatureTextDisplay.text = GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(num), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true);
-		text = "Current Temperature: " + GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(num), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true);
+		string text = "Current Temperature: " + GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(num), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true);
 		this.SetStateColorScheme(0);
 		text = text + "\nRots at temperatures above: <color=yellow>" + GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(edibleObject.FoodInfo.RotTemperature), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true) + "</color>";
 		this.Tooltip_CurrentTemperature.toolTip = text;
@@ -111,9 +108,36 @@ public class WorldInspector : MonoBehaviour
 
 	private void SetStateColorScheme(int state)
 	{
-		switch (state)
+		if (state != 0)
 		{
-		case 0:
+			if (state != 1)
+			{
+				if (state == 2)
+				{
+					this.TemperatureBarImage.sprite = this.GasState.TemperatureBarBG;
+					this.TemperatureNotchSymbol.sprite = this.GasState.StateIcon;
+					this.TemperatureNotchBG.color = this.GasState.StateColor;
+					this.TemperatureTextDisplay.color = this.GasState.StateColor;
+					this.TransitionStateIcon_Low.sprite = this.LiquidState.StateIcon;
+					this.TransitionStateIcon_Low.color = this.LiquidState.StateColor;
+					this.TransitionStateIcon_High.sprite = this.GasState.StateIcon;
+					this.TransitionStateIcon_High.color = this.GasState.StateColor;
+				}
+			}
+			else
+			{
+				this.TemperatureBarImage.sprite = this.LiquidState.TemperatureBarBG;
+				this.TemperatureNotchSymbol.sprite = this.LiquidState.StateIcon;
+				this.TemperatureNotchBG.color = this.LiquidState.StateColor;
+				this.TemperatureTextDisplay.color = this.LiquidState.StateColor;
+				this.TransitionStateIcon_Low.sprite = this.SolidState.StateIcon;
+				this.TransitionStateIcon_Low.color = this.SolidState.StateColor;
+				this.TransitionStateIcon_High.sprite = this.GasState.StateIcon;
+				this.TransitionStateIcon_High.color = this.GasState.StateColor;
+			}
+		}
+		else
+		{
 			this.TemperatureBarImage.sprite = this.SolidState.TemperatureBarBG;
 			this.TemperatureNotchSymbol.sprite = this.SolidState.StateIcon;
 			this.TemperatureNotchBG.color = this.SolidState.StateColor;
@@ -122,45 +146,30 @@ public class WorldInspector : MonoBehaviour
 			this.TransitionStateIcon_Low.color = this.SolidState.StateColor;
 			this.TransitionStateIcon_High.sprite = this.LiquidState.StateIcon;
 			this.TransitionStateIcon_High.color = this.LiquidState.StateColor;
-			break;
-		case 1:
-			this.TemperatureBarImage.sprite = this.LiquidState.TemperatureBarBG;
-			this.TemperatureNotchSymbol.sprite = this.LiquidState.StateIcon;
-			this.TemperatureNotchBG.color = this.LiquidState.StateColor;
-			this.TemperatureTextDisplay.color = this.LiquidState.StateColor;
-			this.TransitionStateIcon_Low.sprite = this.SolidState.StateIcon;
-			this.TransitionStateIcon_Low.color = this.SolidState.StateColor;
-			this.TransitionStateIcon_High.sprite = this.GasState.StateIcon;
-			this.TransitionStateIcon_High.color = this.GasState.StateColor;
-			break;
-		case 2:
-			this.TemperatureBarImage.sprite = this.GasState.TemperatureBarBG;
-			this.TemperatureNotchSymbol.sprite = this.GasState.StateIcon;
-			this.TemperatureNotchBG.color = this.GasState.StateColor;
-			this.TemperatureTextDisplay.color = this.GasState.StateColor;
-			this.TransitionStateIcon_Low.sprite = this.LiquidState.StateIcon;
-			this.TransitionStateIcon_Low.color = this.LiquidState.StateColor;
-			this.TransitionStateIcon_High.sprite = this.GasState.StateIcon;
-			this.TransitionStateIcon_High.color = this.GasState.StateColor;
-			break;
 		}
 	}
 
 	private string SetCurrentTemperatureTooltip(Element element, int state)
 	{
-		string text = string.Empty;
-		switch (state)
+		string text = "";
+		if (state != 0)
 		{
-		case 0:
+			if (state != 1)
+			{
+				if (state == 2)
+				{
+					text = text + "\nCondenses at: <color=yellow>" + GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(element.lowTemp), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true) + "</color>";
+				}
+			}
+			else
+			{
+				text = text + "\nFreezes at: <color=cyan>" + GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(element.lowTemp), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true) + "</color>";
+				text = text + "\nEvaporates at: <color=red>" + GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(element.highTemp), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true) + "</color>";
+			}
+		}
+		else
+		{
 			text = text + "\nMelts at: <color=yellow>" + GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(element.highTemp), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true) + "</color>";
-			break;
-		case 1:
-			text = text + "\nFreezes at: <color=cyan>" + GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(element.lowTemp), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true) + "</color>";
-			text = text + "\nEvaporates at: <color=red>" + GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(element.highTemp), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true) + "</color>";
-			break;
-		case 2:
-			text = text + "\nCondenses at: <color=yellow>" + GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(element.lowTemp), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true) + "</color>";
-			break;
 		}
 		return text;
 	}
@@ -169,19 +178,26 @@ public class WorldInspector : MonoBehaviour
 	{
 		float num = 1f;
 		float num2 = 2000f;
-		switch (this.GetState(cellObject))
+		int state = this.GetState(cellObject);
+		if (state != 0)
 		{
-		case 0:
+			if (state != 1)
+			{
+				if (state == 2)
+				{
+					num = cellObject.element.lowTemp;
+					num2 = num + 300f;
+				}
+			}
+			else
+			{
+				num = cellObject.element.lowTemp;
+				num2 = cellObject.element.highTemp;
+			}
+		}
+		else
+		{
 			num2 = cellObject.element.highTemp;
-			break;
-		case 1:
-			num = cellObject.element.lowTemp;
-			num2 = cellObject.element.highTemp;
-			break;
-		case 2:
-			num = cellObject.element.lowTemp;
-			num2 = num + 300f;
-			break;
 		}
 		float num3 = num2 - num;
 		float num4 = this.temperaturePositionWidgetX_Min;
@@ -215,28 +231,23 @@ public class WorldInspector : MonoBehaviour
 
 	public static string[] MassStrings(int cell)
 	{
-		string[] array = new string[]
-		{
-			string.Empty,
-			string.Empty,
-			string.Empty,
-			string.Empty
-		};
+		string[] array = new string[] { "", "", "", "" };
 		if (Grid.IsValidCell(cell))
 		{
+			Element element = Grid.Element[cell];
 			float num = Grid.Cell[cell].mass;
-			array[3] = " " + GameUtil.GetBreathableString(ElementLoader.elements[(int)Grid.Cell[cell].elementIdx], num);
-			if (ElementLoader.elements[(int)Grid.Cell[cell].elementIdx] == ElementLoader.FindElementByHash(SimHashes.Vacuum))
+			array[3] = " " + GameUtil.GetBreathableString(element, num);
+			if (element.id == SimHashes.Vacuum)
 			{
 				array[0] = "N/A";
-				array[1] = string.Empty;
-				array[2] = string.Empty;
+				array[1] = "";
+				array[2] = "";
 			}
-			else if (ElementLoader.elements[(int)Grid.Cell[cell].elementIdx] == ElementLoader.FindElementByHash(SimHashes.Unobtanium))
+			else if (element.id == SimHashes.Unobtanium)
 			{
 				array[0] = UI.NEUTRONIUMMASS;
-				array[1] = string.Empty;
-				array[2] = string.Empty;
+				array[1] = "";
+				array[2] = "";
 			}
 			else
 			{

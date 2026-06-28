@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class KTreeItem : MonoBehaviour
 {
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event KTreeItem.StateChanged onOpenChanged;
 
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event KTreeItem.StateChanged onCheckChanged;
 
 	public string text

@@ -4,7 +4,7 @@ using UnityEngine;
 public class ReactEmoteChore : Chore<ReactEmoteChore.StatesInstance>
 {
 	public ReactEmoteChore(IStateMachineTarget target, ChoreType chore_type, EmoteReactable reactable, HashedString emote_kanim, HashedString[] emote_anims, KAnim.PlayMode play_mode, Func<StatusItem> get_status_item)
-		: base(chore_type, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true, 0)
+		: base(chore_type, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
 	{
 		base.AddPrecondition(ChorePreconditions.IsMoving, null);
 		base.AddPrecondition(ChorePreconditions.IsOffLadder, null);
@@ -20,11 +20,16 @@ public class ReactEmoteChore : Chore<ReactEmoteChore.StatesInstance>
 
 	public override string ToString()
 	{
+		string text;
 		if (this.smi.emoteKAnim.IsValid())
 		{
-			return "ReactEmoteChore<" + this.smi.emoteKAnim + ">";
+			text = "ReactEmoteChore<" + this.smi.emoteKAnim + ">";
 		}
-		return "ReactEmoteChore<" + this.smi.emoteAnims[0] + ">";
+		else
+		{
+			text = "ReactEmoteChore<" + this.smi.emoteAnims[0] + ">";
+		}
+		return text;
 	}
 
 	private Func<StatusItem> getStatusItem;

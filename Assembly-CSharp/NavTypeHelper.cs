@@ -5,29 +5,23 @@ public static class NavTypeHelper
 {
 	public static Vector3 GetNavPos(int cell, NavType nav_type)
 	{
-		Vector3 vector = Vector3.zero;
+		Vector3 zero = Vector3.zero;
 		switch (nav_type)
 		{
 		case NavType.Floor:
-			vector = Grid.CellToPosCBC(cell, Grid.SceneLayer.Move);
-			break;
+			return Grid.CellToPosCBC(cell, Grid.SceneLayer.Move);
 		case NavType.LeftWall:
-			vector = Grid.CellToPosLCC(cell, Grid.SceneLayer.Move);
-			break;
+			return Grid.CellToPosLCC(cell, Grid.SceneLayer.Move);
 		case NavType.RightWall:
-			vector = Grid.CellToPosRCC(cell, Grid.SceneLayer.Move);
-			break;
+			return Grid.CellToPosRCC(cell, Grid.SceneLayer.Move);
 		case NavType.Ceiling:
-			vector = Grid.CellToPosCTC(cell, Grid.SceneLayer.Move);
-			break;
+			return Grid.CellToPosCTC(cell, Grid.SceneLayer.Move);
 		case NavType.Ladder:
-			vector = Grid.CellToPosCCC(cell, Grid.SceneLayer.Move);
-			break;
-		default:
-			vector = Grid.CellToPosCCC(cell, Grid.SceneLayer.Move);
-			break;
+			return Grid.CellToPosCCC(cell, Grid.SceneLayer.Move);
+		case NavType.Pole:
+			return Grid.CellToPosCCC(cell, Grid.SceneLayer.Move);
 		}
-		return vector;
+		return Grid.CellToPosCCC(cell, Grid.SceneLayer.Move);
 	}
 
 	public static int GetAnchorCell(NavType nav_type, int cell)

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public class ClearChore : Chore<ClearChore.StatesInstance>
 {
 	public ClearChore(ChoreType chore_type, Pickupable clearable, ChoreProvider chore_provider = null, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null)
-		: base(chore_type, clearable, chore_provider, run_until_complete, on_complete, on_begin, on_end, int.MaxValue, false, true, 0)
+		: base(chore_type, clearable, chore_provider, run_until_complete, on_complete, on_begin, on_end, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
 	{
 		this.smi = new ClearChore.StatesInstance(this);
 		this.smi.sm.clearable.Set(clearable, this.smi);
@@ -26,7 +26,7 @@ public class ClearChore : Chore<ClearChore.StatesInstance>
 				context.RunPreconditions();
 				if (context.IsSuccess())
 				{
-					context.masterPriority = base.masterPriority;
+					context.masterPriority = this.masterPriority;
 					context.SetPriority(this);
 					contexts.Add(context);
 					break;

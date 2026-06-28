@@ -8,6 +8,7 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 	{
 		base.OnPrefabInit();
 		this.filteredStorage = new FilteredStorage(this, null, this.filterTint, this.noFilterTint, null);
+		base.GetComponent<Storage>().SetOffsets(Grid.DefaultOffset);
 	}
 
 	protected override void OnSpawn()

@@ -20,9 +20,12 @@ public class AntiCluster : KMonoBehaviour
 
 	private void UpdateCell(int previous_cell, int current_cell)
 	{
-		if (previous_cell != Grid.InvalidCell && Grid.Objects[previous_cell, 0] == base.gameObject)
+		if (previous_cell != Grid.InvalidCell && previous_cell != current_cell)
 		{
-			Grid.Objects[previous_cell, 0] = null;
+			if (Grid.Objects[previous_cell, 0] == base.gameObject)
+			{
+				Grid.Objects[previous_cell, 0] = null;
+			}
 		}
 		GameObject gameObject = Grid.Objects[current_cell, 0];
 		if (gameObject == null)

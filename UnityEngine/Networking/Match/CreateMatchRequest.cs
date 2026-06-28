@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace UnityEngine.Networking.Match
 {
-	public class CreateMatchRequest : Request
+	internal class CreateMatchRequest : Request
 	{
 		public string name { get; set; }
 
@@ -23,20 +23,23 @@ namespace UnityEngine.Networking.Match
 
 		public override string ToString()
 		{
-			return UnityString.Format("[{0}]-name:{1},size:{2},advertise:{3},HasPassword:{4},matchAttributes.Count:{5}", new object[]
+			return UnityString.Format("[{0}]-name:{1},size:{2},publicAddress:{3},privateAddress:{4},eloScore:{5},advertise:{6},HasPassword:{7},matchAttributes.Count:{8}", new object[]
 			{
 				base.ToString(),
 				this.name,
 				this.size,
+				this.publicAddress,
+				this.privateAddress,
+				this.eloScore,
 				this.advertise,
-				(!(this.password == string.Empty)) ? "YES" : "NO",
+				(!string.IsNullOrEmpty(this.password)) ? "YES" : "NO",
 				(this.matchAttributes != null) ? this.matchAttributes.Count : 0
 			});
 		}
 
 		public override bool IsValid()
 		{
-			return (base.IsValid() && this.size >= 2U && this.matchAttributes == null) || this.matchAttributes.Count <= 10;
+			return base.IsValid() && this.size >= 2U && (this.matchAttributes == null || this.matchAttributes.Count <= 10);
 		}
 	}
 }

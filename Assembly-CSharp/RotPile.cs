@@ -36,7 +36,7 @@ public class RotPile : StateMachineComponent<RotPile.StatesInstance>
 			{
 				Notification notification = new Notification(MISC.NOTIFICATIONS.FOODROT.NAME, NotificationType.Bad, HashedString.Invalid, new Func<List<Notification>, object, string>(RotPile.StatesInstance.OnRottenTooltip), null, true, 0f, null, null, null);
 				notification.tooltipData = master.gameObject.GetProperName();
-				base.gameObject.AddOrGet<Notifier>().Add(notification, string.Empty);
+				base.gameObject.AddOrGet<Notifier>().Add(notification, "");
 			}
 		}
 

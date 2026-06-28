@@ -40,23 +40,34 @@ public class FilterNodeEditor : BaseNodeEditor
 
 	public override bool Calculate()
 	{
+		bool flag;
 		if (!base.allInputsReady())
 		{
-			return false;
+			flag = false;
 		}
-		IModule3D value = this.Inputs[0].GetValue<IModule3D>();
-		if (value == null)
+		else
 		{
-			return false;
+			IModule3D value = this.Inputs[0].GetValue<IModule3D>();
+			if (value == null)
+			{
+				flag = false;
+			}
+			else
+			{
+				IModule3D module3D = this.target.CreateModule();
+				if (module3D == null)
+				{
+					flag = false;
+				}
+				else
+				{
+					((FilterModule)module3D).Primitive3D = value;
+					this.Outputs[0].SetValue<IModule3D>(module3D);
+					flag = true;
+				}
+			}
 		}
-		IModule3D module3D = this.target.CreateModule();
-		if (module3D == null)
-		{
-			return false;
-		}
-		((FilterModule)module3D).Primitive3D = value;
-		this.Outputs[0].SetValue<IModule3D>(module3D);
-		return true;
+		return flag;
 	}
 
 	protected override void NodeGUI()

@@ -15,11 +15,16 @@ namespace Delaunay
 
 		public static Halfedge Create(Edge edge, Side? lr)
 		{
+			Halfedge halfedge;
 			if (Halfedge._pool.Count > 0)
 			{
-				return Halfedge._pool.Pop().Init(edge, lr);
+				halfedge = Halfedge._pool.Pop().Init(edge, lr);
 			}
-			return new Halfedge(edge, lr);
+			else
+			{
+				halfedge = new Halfedge(edge, lr);
+			}
+			return halfedge;
 		}
 
 		public static Halfedge CreateDummy()
@@ -50,18 +55,16 @@ namespace Delaunay
 
 		public void Dispose()
 		{
-			if (this.edgeListLeftNeighbor != null || this.edgeListRightNeighbor != null)
+			if (this.edgeListLeftNeighbor == null && this.edgeListRightNeighbor == null)
 			{
-				return;
+				if (this.nextInPriorityQueue == null)
+				{
+					this.edge = null;
+					this.leftRight = null;
+					this.vertex = null;
+					Halfedge._pool.Push(this);
+				}
 			}
-			if (this.nextInPriorityQueue != null)
-			{
-				return;
-			}
-			this.edge = null;
-			this.leftRight = null;
-			this.vertex = null;
-			Halfedge._pool.Push(this);
 		}
 
 		public void ReallyDispose()
@@ -79,56 +82,61 @@ namespace Delaunay
 		{
 			Vector2 coord = this.edge.rightSite.Coord;
 			bool flag = p.x > coord.x;
+			bool flag2;
 			if (flag && this.leftRight == Side.LEFT)
 			{
-				return true;
+				flag2 = true;
 			}
-			if (!flag && this.leftRight == Side.RIGHT)
+			else if (!flag && this.leftRight == Side.RIGHT)
 			{
-				return false;
-			}
-			bool flag3;
-			if ((double)this.edge.a == 1.0)
-			{
-				float num = p.y - coord.y;
-				float num2 = p.x - coord.x;
-				bool flag2 = false;
-				if ((!flag && (double)this.edge.b < 0.0) || (flag && (double)this.edge.b >= 0.0))
-				{
-					flag3 = num >= this.edge.b * num2;
-					flag2 = flag3;
-				}
-				else
-				{
-					flag3 = p.x + p.y * this.edge.b > this.edge.c;
-					if ((double)this.edge.b < 0.0)
-					{
-						flag3 = !flag3;
-					}
-					if (!flag3)
-					{
-						flag2 = true;
-					}
-				}
-				if (!flag2)
-				{
-					float num3 = coord.x - this.edge.leftSite.x;
-					flag3 = (double)(this.edge.b * (num2 * num2 - num * num)) < (double)(num3 * num) * (1.0 + 2.0 * (double)num2 / (double)num3 + (double)(this.edge.b * this.edge.b));
-					if ((double)this.edge.b < 0.0)
-					{
-						flag3 = !flag3;
-					}
-				}
+				flag2 = false;
 			}
 			else
 			{
-				float num4 = this.edge.c - this.edge.a * p.x;
-				float num5 = p.y - num4;
-				float num6 = p.x - coord.x;
-				float num7 = num4 - coord.y;
-				flag3 = num5 * num5 > num6 * num6 + num7 * num7;
+				bool flag4;
+				if ((double)this.edge.a == 1.0)
+				{
+					float num = p.y - coord.y;
+					float num2 = p.x - coord.x;
+					bool flag3 = false;
+					if ((!flag && (double)this.edge.b < 0.0) || (flag && (double)this.edge.b >= 0.0))
+					{
+						flag4 = num >= this.edge.b * num2;
+						flag3 = flag4;
+					}
+					else
+					{
+						flag4 = p.x + p.y * this.edge.b > this.edge.c;
+						if ((double)this.edge.b < 0.0)
+						{
+							flag4 = !flag4;
+						}
+						if (!flag4)
+						{
+							flag3 = true;
+						}
+					}
+					if (!flag3)
+					{
+						float num3 = coord.x - this.edge.leftSite.x;
+						flag4 = (double)(this.edge.b * (num2 * num2 - num * num)) < (double)(num3 * num) * (1.0 + 2.0 * (double)num2 / (double)num3 + (double)(this.edge.b * this.edge.b));
+						if ((double)this.edge.b < 0.0)
+						{
+							flag4 = !flag4;
+						}
+					}
+				}
+				else
+				{
+					float num4 = this.edge.c - this.edge.a * p.x;
+					float num5 = p.y - num4;
+					float num6 = p.x - coord.x;
+					float num7 = num4 - coord.y;
+					flag4 = num5 * num5 > num6 * num6 + num7 * num7;
+				}
+				flag2 = ((!(this.leftRight == Side.LEFT)) ? (!flag4) : flag4);
 			}
-			return (!(this.leftRight == Side.LEFT)) ? (!flag3) : flag3;
+			return flag2;
 		}
 
 		private static Stack<Halfedge> _pool = new Stack<Halfedge>();

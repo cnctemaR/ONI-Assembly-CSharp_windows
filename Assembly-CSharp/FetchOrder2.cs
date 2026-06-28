@@ -194,6 +194,7 @@ public class FetchOrder2
 
 	public float AmountWaitingToFetch()
 	{
+		float num2;
 		if (!this.checkStorageContents)
 		{
 			float num = this.UnfetchedAmount;
@@ -201,10 +202,14 @@ public class FetchOrder2
 			{
 				num += this.Chores[i].AmountWaitingToFetch();
 			}
-			return num;
+			num2 = num;
 		}
-		Pickupable pickupable;
-		return this.GetRemaining(out pickupable);
+		else
+		{
+			Pickupable pickupable;
+			num2 = this.GetRemaining(out pickupable);
+		}
+		return num2;
 	}
 
 	public float GetRemaining(out Pickupable out_item)
@@ -221,22 +226,21 @@ public class FetchOrder2
 
 	private void Assert(bool condition, string message)
 	{
-		if (condition)
+		if (!condition)
 		{
-			return;
+			string text = "FetchOrder error: " + message;
+			if (this.Destination == null)
+			{
+				text += "\nDestination: None";
+			}
+			else
+			{
+				text = text + "\nDestination: " + this.Destination.name;
+			}
+			text = text + "\nTotal Amount: " + this.TotalAmount;
+			text = text + "\nUnfetched Amount: " + this._UnfetchedAmount;
+			global::Debug.LogError(text, null);
 		}
-		string text = "FetchOrder error: " + message;
-		if (this.Destination == null)
-		{
-			text += "\nDestination: None";
-		}
-		else
-		{
-			text = text + "\nDestination: " + this.Destination.name;
-		}
-		text = text + "\nTotal Amount: " + this.TotalAmount;
-		text = text + "\nUnfetched Amount: " + this._UnfetchedAmount;
-		global::Debug.LogError(text, null);
 	}
 
 	public Action<FetchOrder2, Pickupable> OnComplete;

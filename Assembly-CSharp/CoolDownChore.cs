@@ -6,7 +6,7 @@ using UnityEngine;
 public class CoolDownChore : Chore<CoolDownChore.StatesInstance>
 {
 	public CoolDownChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.Cooldown, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.Cooldown, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
 	{
 		this.smi = new CoolDownChore.StatesInstance(this, target.gameObject);
 		base.AddPrecondition(ChorePreconditions.IsNotRedAlert, null);
@@ -20,8 +20,7 @@ public class CoolDownChore : Chore<CoolDownChore.StatesInstance>
 			base.sm.recoverer.Set(recoverer, base.smi);
 			this.primaryElement = recoverer.GetComponent<PrimaryElement>();
 			Klei.AI.Attribute deltaAttribute = Db.Get().Amounts.Temperature.deltaAttribute;
-			this.coolingDown = new AttributeModifier(deltaAttribute.Id, 0f, DUPLICANTS.MODIFIERS.COOLINGDOWN.NAME, false, false);
-			this.coolingDown.UIOnly = true;
+			this.coolingDown = new AttributeModifier(deltaAttribute.Id, 0f, DUPLICANTS.MODIFIERS.COOLINGDOWN.NAME, false, true, false);
 			CreatureSimTemperatureTransfer component = base.smi.master.GetComponent<CreatureSimTemperatureTransfer>();
 			component.NonSimTemperatureModifiers.Add(this.coolingDown);
 		}
@@ -97,8 +96,8 @@ public class CoolDownChore : Chore<CoolDownChore.StatesInstance>
 				{
 					smi.coolingDown.SetValue(0f);
 				});
-			this.recover.pre.PlayAnim("idle_pre", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.recover.loop);
-			this.recover.loop.PlayAnim("idle_default", KAnim.PlayMode.Loop, null);
+			this.recover.pre.PlayAnim("idle_pre").OnAnimQueueComplete(this.recover.loop);
+			this.recover.loop.PlayAnim("idle_default", KAnim.PlayMode.Loop);
 			this.recover.pst.QueueAnim("idle_pst", false, null).OnAnimQueueComplete(null);
 		}
 

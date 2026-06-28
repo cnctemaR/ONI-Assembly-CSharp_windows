@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 using STRINGS;
 using UnityEngine;
 
-public class Building : KMonoBehaviour, IUniformGridObject, IEffectDescriptor
+public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject
 {
 	public Orientation Orientation
 	{
@@ -129,12 +129,12 @@ public class Building : KMonoBehaviour, IUniformGridObject, IEffectDescriptor
 			if (component != null)
 			{
 				SimHashes visualizationElementID = this.GetVisualizationElementID(component);
-				World.Instance.blockTileRenderer.AddBlock(base.gameObject.layer, this.Def, visualizationElementID, Grid.PosToCell(this.transform.position));
+				World.Instance.blockTileRenderer.AddBlock(base.gameObject.layer, this.Def, visualizationElementID, Grid.PosToCell(base.transform.position));
 			}
 		}
 	}
 
-	public bool IsValidBuildLocation(Vector3 pos, out string reason)
+	public bool IsValidBuildLocation(Vector3 pos, out string reason, Orientation orientation)
 	{
 		reason = null;
 		int num = Grid.PosToCell(pos);
@@ -143,11 +143,17 @@ public class Building : KMonoBehaviour, IUniformGridObject, IEffectDescriptor
 		{
 			int num2 = -(this.Def.WidthInCells - 1) / 2;
 			int num3 = this.Def.WidthInCells / 2;
+			if (orientation == Orientation.FlipH)
+			{
+				int num4 = num2;
+				num2 = -num3;
+				num3 = -num4;
+			}
+			int num5 = ((this.Def.BuildLocationRule != BuildLocationRule.OnFloor) ? this.Def.HeightInCells : (-1));
 			for (int i = num2; i <= num3; i++)
 			{
-				int num4 = ((this.Def.BuildLocationRule != BuildLocationRule.OnFloor) ? this.Def.HeightInCells : (-1));
-				int num5 = Grid.OffsetCell(num, i, num4);
-				if (!Grid.IsValidCell(num5))
+				int num6 = Grid.OffsetCell(num, i, num5);
+				if (!Grid.IsValidCell(num6))
 				{
 					reason = "Foundation is not too near edge of world";
 					return false;
@@ -157,7 +163,7 @@ public class Building : KMonoBehaviour, IUniformGridObject, IEffectDescriptor
 					reason = "Location occupied by plant";
 					return false;
 				}
-				flag = flag && Grid.Solid[num5];
+				flag = flag && Grid.Solid[num6];
 				if (!flag)
 				{
 					reason = "Foundation is not solid";
@@ -234,7 +240,7 @@ public class Building : KMonoBehaviour, IUniformGridObject, IEffectDescriptor
 
 	private int GetBottomLeftCell()
 	{
-		Vector3 position = this.transform.position;
+		Vector3 position = base.transform.position;
 		return Grid.PosToCell(position);
 	}
 
@@ -276,13 +282,13 @@ public class Building : KMonoBehaviour, IUniformGridObject, IEffectDescriptor
 	{
 		if (this.Def.BlockTileAtlas != null)
 		{
-			int num = Grid.PosToCell(this.transform.position);
+			int num = Grid.PosToCell(base.transform.position);
 			this.Def.UnmarkArea(num, this.Orientation, this.Def.TileLayer, base.gameObject);
 			PrimaryElement component = base.GetComponent<PrimaryElement>();
 			if (component != null)
 			{
 				SimHashes visualizationElementID = this.GetVisualizationElementID(component);
-				World.Instance.blockTileRenderer.RemoveBlock(this.Def, visualizationElementID, Grid.PosToCell(this.transform.position));
+				World.Instance.blockTileRenderer.RemoveBlock(this.Def, visualizationElementID, Grid.PosToCell(base.transform.position));
 			}
 		}
 	}
@@ -409,7 +415,7 @@ public class Building : KMonoBehaviour, IUniformGridObject, IEffectDescriptor
 	[MyCmpAdd]
 	private StateMachineController stateMachineController;
 
-	private int[] placementCells;
+	private int[] placementCells = null;
 
 	private Extents extents;
 }

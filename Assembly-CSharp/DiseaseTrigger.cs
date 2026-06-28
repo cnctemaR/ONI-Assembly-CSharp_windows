@@ -21,7 +21,7 @@ public class DiseaseTrigger : KMonoBehaviour, IGameObjectEffectDescriptor
 		for (int i = 0; i < this.triggers.Count; i++)
 		{
 			DiseaseTrigger.TriggerInfo trigger = this.triggers[i];
-			this.Subscribe((int)trigger.srcEvent, delegate(object data)
+			base.Subscribe((int)trigger.srcEvent, delegate(object data)
 			{
 				GameObject gameObject = (GameObject)data;
 				global::Database.Diseases diseases = Db.Get().Diseases;
@@ -108,6 +108,8 @@ public class DiseaseTrigger : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	public List<DiseaseTrigger.TriggerInfo> triggers = new List<DiseaseTrigger.TriggerInfo>();
 
+	public delegate string SourceCallback(GameObject source, GameObject target);
+
 	[Serializable]
 	public struct TriggerInfo
 	{
@@ -118,6 +120,4 @@ public class DiseaseTrigger : KMonoBehaviour, IGameObjectEffectDescriptor
 
 		public DiseaseTrigger.SourceCallback sourceCallback;
 	}
-
-	public delegate string SourceCallback(GameObject source, GameObject target);
 }

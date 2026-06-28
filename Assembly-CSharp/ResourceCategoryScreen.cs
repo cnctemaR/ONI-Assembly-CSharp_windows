@@ -41,23 +41,25 @@ public class ResourceCategoryScreen : KScreen
 
 	private void Update()
 	{
-		if (WorldInventory.Instance == null)
+		if (!(WorldInventory.Instance == null))
 		{
-			return;
-		}
-		for (int i = 0; i < 1; i++)
-		{
-			Tag tag = this.DisplayedCategories.Keys.ElementAt<Tag>(this.categoryUpdatePacer);
-			if (WorldInventory.Instance.IsDiscovered(tag) && !this.DisplayedCategories[tag].gameObject.activeInHierarchy)
+			for (int i = 0; i < 1; i++)
 			{
-				this.DisplayedCategories[tag].gameObject.SetActive(true);
+				Tag tag = this.DisplayedCategories.Keys.ElementAt<Tag>(this.categoryUpdatePacer);
+				if (WorldInventory.Instance.IsDiscovered(tag))
+				{
+					if (!this.DisplayedCategories[tag].gameObject.activeInHierarchy)
+					{
+						this.DisplayedCategories[tag].gameObject.SetActive(true);
+					}
+				}
+				this.DisplayedCategories[tag].UpdateContents();
+				this.categoryUpdatePacer = (this.categoryUpdatePacer + 1) % this.DisplayedCategories.Keys.Count;
 			}
-			this.DisplayedCategories[tag].UpdateContents();
-			this.categoryUpdatePacer = (this.categoryUpdatePacer + 1) % this.DisplayedCategories.Keys.Count;
-		}
-		if (MeterScreen.Instance != null && !MeterScreen.Instance.StartValuesSet)
-		{
-			MeterScreen.Instance.InitializeValues();
+			if (MeterScreen.Instance != null && !MeterScreen.Instance.StartValuesSet)
+			{
+				MeterScreen.Instance.InitializeValues();
+			}
 		}
 	}
 
@@ -80,5 +82,5 @@ public class ResourceCategoryScreen : KScreen
 
 	public Dictionary<Tag, ResourceCategoryHeader> DisplayedCategories = new Dictionary<Tag, ResourceCategoryHeader>();
 
-	private int categoryUpdatePacer;
+	private int categoryUpdatePacer = 0;
 }

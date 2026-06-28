@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -6,8 +7,19 @@ public class MethaneGeneratorConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER5;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("MethaneGenerator", 4, 3, "generatormethane_kanim", 400f, 100, 120f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER5, MATERIALS.RAW_METALS, 2400f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, tier);
+		string text = "MethaneGenerator";
+		int num = 4;
+		int num2 = 3;
+		string text2 = "generatormethane_kanim";
+		float num3 = 400f;
+		int num4 = 100;
+		float num5 = 120f;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER5;
+		string[] raw_METALS = MATERIALS.RAW_METALS;
+		float num6 = 2400f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER5;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_METALS, num6, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER2, tier2);
 		buildingDef.GeneratorWattageRating = 800f;
 		buildingDef.GeneratorBaseCapacity = 1000f;
 		buildingDef.ExhaustKilowattsWhenActive = 2f;
@@ -19,11 +31,24 @@ public class MethaneGeneratorConfig : IBuildingConfig
 		buildingDef.PowerOutputOffset = new CellOffset(0, 0);
 		buildingDef.InputConduitType = ConduitType.Gas;
 		buildingDef.OutputConduitType = ConduitType.Gas;
+		buildingDef.HotKey = global::Action.BuildMenuKeyA;
 		return buildingDef;
 	}
 
-	public override void ConfigureBuildingTemplate(GameObject go)
+	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
 	{
+		GeneratedBuildings.RegisterLogicPorts(go, MethaneGeneratorConfig.INPUT_PORTS);
+	}
+
+	public override void DoPostConfigureUnderConstruction(GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, MethaneGeneratorConfig.INPUT_PORTS);
+	}
+
+	public override void DoPostConfigureComplete(GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, MethaneGeneratorConfig.INPUT_PORTS);
+		go.AddOrGet<LogicOperationalController>();
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		go.AddOrGet<LoopingSounds>();
 		Storage storage = go.AddOrGet<Storage>();
@@ -61,10 +86,6 @@ public class MethaneGeneratorConfig : IBuildingConfig
 			SimHashes.Methane,
 			SimHashes.Oxygen
 		};
-	}
-
-	public override void DoPostConfigureComplete(GameObject go)
-	{
 		BuildingTemplates.DoPostConfigure(go);
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
 		{
@@ -80,4 +101,9 @@ public class MethaneGeneratorConfig : IBuildingConfig
 	private const int WIDTH = 4;
 
 	private const int HEIGHT = 3;
+
+	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[]
+	{
+		new LogicPorts.Port(LogicOperationalController.PORT_ID, new CellOffset(0, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false)
+	};
 }

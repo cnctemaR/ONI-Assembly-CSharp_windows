@@ -41,17 +41,27 @@ public struct KAnimHashedString : IComparable<KAnimHashedString>, IEquatable<KAn
 		}
 	}
 
+	public static implicit operator KAnimHashedString(HashedString hash)
+	{
+		return new KAnimHashedString(hash.HashValue);
+	}
+
 	public int CompareTo(KAnimHashedString obj)
 	{
+		int num;
 		if (this.hash < obj.hash)
 		{
-			return -1;
+			num = -1;
 		}
-		if (this.hash > obj.hash)
+		else if (this.hash > obj.hash)
 		{
-			return 1;
+			num = 1;
 		}
-		return 0;
+		else
+		{
+			num = 0;
+		}
+		return num;
 	}
 
 	public override bool Equals(object obj)
@@ -68,16 +78,6 @@ public struct KAnimHashedString : IComparable<KAnimHashedString>, IEquatable<KAn
 	public override int GetHashCode()
 	{
 		return this.hash;
-	}
-
-	public override string ToString()
-	{
-		return string.IsNullOrEmpty(this.DebuggerDisplay) ? ("0x" + this.hash.ToString("X")) : this.DebuggerDisplay;
-	}
-
-	public static implicit operator KAnimHashedString(HashedString hash)
-	{
-		return new KAnimHashedString(hash.HashValue);
 	}
 
 	public static bool operator ==(KAnimHashedString x, HashedString y)
@@ -98,6 +98,11 @@ public struct KAnimHashedString : IComparable<KAnimHashedString>, IEquatable<KAn
 	public static bool operator !=(KAnimHashedString x, KAnimHashedString y)
 	{
 		return x.hash != y.hash;
+	}
+
+	public override string ToString()
+	{
+		return string.IsNullOrEmpty(this.DebuggerDisplay) ? ("0x" + this.hash.ToString("X")) : this.DebuggerDisplay;
 	}
 
 	[SerializeField]

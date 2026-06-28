@@ -20,14 +20,17 @@ public class LoreBearer : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.Subscribe(493375141, new Action<object>(this.RefreshUserMenu));
+		base.Subscribe(493375141, new Action<object>(this.RefreshUserMenu));
 	}
 
 	private void RefreshUserMenu(object data = null)
 	{
 		UserMenu userMenu = this.userMenu;
-		string text = UI.USERMENUACTIONS.READLORE.TOOLTIP;
-		userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_follow_cam", UI.USERMENUACTIONS.READLORE.NAME, new global::System.Action(this.OnClickRead), global::Action.NumActions, null, null, null, text, true), 1f);
+		string text = "action_follow_cam";
+		string text2 = UI.USERMENUACTIONS.READLORE.NAME;
+		global::System.Action action = new global::System.Action(this.OnClickRead);
+		string text3 = UI.USERMENUACTIONS.READLORE.TOOLTIP;
+		userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
 	}
 
 	private void OnClickRead()

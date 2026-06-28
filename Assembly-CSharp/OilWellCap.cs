@@ -1,24 +1,12 @@
 ﻿using System;
 using Klei;
 using KSerialization;
+using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class OilWellCap : Workable, IElementEmitter, ISingleSliderControl
+public class OilWellCap : Workable, ISliderControl, IElementEmitter
 {
-	// Note: this type is marked as 'beforefieldinit'.
-	static OilWellCap()
-	{
-		Chore.Precondition precondition = default(Chore.Precondition);
-		precondition.id = "AllowedToDepressurize";
-		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
-		{
-			OilWellCap oilWellCap = (OilWellCap)data;
-			return oilWellCap.NeedsDepressurizing();
-		};
-		OilWellCap.AllowedToDepressurize = precondition;
-	}
-
 	public SimHashes Element
 	{
 		get
@@ -35,18 +23,6 @@ public class OilWellCap : Workable, IElementEmitter, ISingleSliderControl
 		}
 	}
 
-	public float SingleSliderPercent
-	{
-		get
-		{
-			return this.depressurizePercent;
-		}
-		set
-		{
-			this.depressurizePercent = value;
-		}
-	}
-
 	public string SliderTitleKey
 	{
 		get
@@ -55,12 +31,37 @@ public class OilWellCap : Workable, IElementEmitter, ISingleSliderControl
 		}
 	}
 
-	public string SliderTooltipKey
+	public string SliderUnits
 	{
 		get
 		{
-			return "STRINGS.UI.UISIDESCREENS.OIL_WELL_CAP_SIDE_SCREEN.TOOLTIP";
+			return UI.UNITSUFFIXES.PERCENT;
 		}
+	}
+
+	public float GetSliderMin(int index)
+	{
+		return 0f;
+	}
+
+	public float GetSliderMax(int index)
+	{
+		return 100f;
+	}
+
+	public float GetSliderValue(int index)
+	{
+		return this.depressurizePercent * 100f;
+	}
+
+	public void SetSliderValue(float value, int index)
+	{
+		this.depressurizePercent = value / 100f;
+	}
+
+	public string GetSliderTooltipKey(int index)
+	{
+		return "STRINGS.UI.UISIDESCREENS.OIL_WELL_CAP_SIDE_SCREEN.TOOLTIP";
 	}
 
 	protected override void OnSpawn()
@@ -127,7 +128,7 @@ public class OilWellCap : Workable, IElementEmitter, ISingleSliderControl
 
 	private WorkChore<OilWellCap> CreateWorkChore()
 	{
-		WorkChore<OilWellCap> workChore = new WorkChore<OilWellCap>(Db.Get().ChoreTypes.Depressurize, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, int.MaxValue);
+		WorkChore<OilWellCap> workChore = new WorkChore<OilWellCap>(Db.Get().ChoreTypes.Depressurize, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
 		workChore.AddPrecondition(OilWellCap.AllowedToDepressurize, this);
 		return workChore;
 	}
@@ -173,7 +174,15 @@ public class OilWellCap : Workable, IElementEmitter, ISingleSliderControl
 
 	private MeterController pressureMeter;
 
-	private static Chore.Precondition AllowedToDepressurize;
+	private static Chore.Precondition AllowedToDepressurize = new Chore.Precondition
+	{
+		id = "AllowedToDepressurize",
+		fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			OilWellCap oilWellCap = (OilWellCap)data;
+			return oilWellCap.NeedsDepressurizing();
+		}
+	};
 
 	public class StatesInstance : GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.GameInstance
 	{
@@ -194,7 +203,7 @@ public class OilWellCap : Workable, IElementEmitter, ISingleSliderControl
 		{
 			default_state = this.idle;
 			this.root.ToggleRecurringChore((OilWellCap.StatesInstance smi) => smi.master.CreateWorkChore(), null);
-			this.idle.PlayAnim("off", KAnim.PlayMode.Once, null).ToggleStatusItem(Db.Get().BuildingStatusItems.WellPressurizing, null).ParamTransition<float>(this.pressurePercent, this.overpressure, (OilWellCap.StatesInstance smi, float p) => p >= 1f)
+			this.idle.PlayAnim("off").ToggleStatusItem(Db.Get().BuildingStatusItems.WellPressurizing, null).ParamTransition<float>(this.pressurePercent, this.overpressure, (OilWellCap.StatesInstance smi, float p) => p >= 1f)
 				.ParamTransition<bool>(this.working, this.releasing_pressure, (OilWellCap.StatesInstance smi, bool p) => p)
 				.EventTransition(GameHashes.OperationalChanged, this.active, (OilWellCap.StatesInstance smi) => smi.master.operational.IsOperational);
 			this.active.DefaultState(this.active.pre).ToggleStatusItem(Db.Get().BuildingStatusItems.WellPressurizing, null).EventTransition(GameHashes.OperationalChanged, this.idle, (OilWellCap.StatesInstance smi) => !smi.master.operational.IsOperational)
@@ -210,12 +219,12 @@ public class OilWellCap : Workable, IElementEmitter, ISingleSliderControl
 				{
 					smi.master.AddGasPressure(smi.deltatime);
 				});
-			this.active.pre.PlayAnim("working_pre", KAnim.PlayMode.Once, null).ParamTransition<float>(this.pressurePercent, this.overpressure, (OilWellCap.StatesInstance smi, float p) => p >= 1f).ParamTransition<bool>(this.working, this.releasing_pressure, (OilWellCap.StatesInstance smi, bool p) => p)
+			this.active.pre.PlayAnim("working_pre").ParamTransition<float>(this.pressurePercent, this.overpressure, (OilWellCap.StatesInstance smi, float p) => p >= 1f).ParamTransition<bool>(this.working, this.releasing_pressure, (OilWellCap.StatesInstance smi, bool p) => p)
 				.OnAnimQueueComplete(this.active.loop);
-			this.active.loop.PlayAnim("working_loop", KAnim.PlayMode.Loop, null).ParamTransition<float>(this.pressurePercent, this.active.pst, (OilWellCap.StatesInstance smi, float p) => p >= 1f).ParamTransition<bool>(this.working, this.active.pst, (OilWellCap.StatesInstance smi, bool p) => p)
+			this.active.loop.PlayAnim("working_loop", KAnim.PlayMode.Loop).ParamTransition<float>(this.pressurePercent, this.active.pst, (OilWellCap.StatesInstance smi, float p) => p >= 1f).ParamTransition<bool>(this.working, this.active.pst, (OilWellCap.StatesInstance smi, bool p) => p)
 				.EventTransition(GameHashes.OperationalChanged, this.active.pst, (OilWellCap.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational);
-			this.active.pst.PlayAnim("working_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.idle);
-			this.overpressure.PlayAnim("over_pressured_pre", KAnim.PlayMode.Once, null).QueueAnim("over_pressured_loop", true, null).ToggleStatusItem(Db.Get().BuildingStatusItems.WellOverpressure, null)
+			this.active.pst.PlayAnim("working_pst").OnAnimQueueComplete(this.idle);
+			this.overpressure.PlayAnim("over_pressured_pre", KAnim.PlayMode.Once).QueueAnim("over_pressured_loop", true, null).ToggleStatusItem(Db.Get().BuildingStatusItems.WellOverpressure, null)
 				.ParamTransition<float>(this.pressurePercent, this.idle, (OilWellCap.StatesInstance smi, float p) => p <= 0f)
 				.ParamTransition<bool>(this.working, this.releasing_pressure, (OilWellCap.StatesInstance smi, bool p) => p);
 			this.releasing_pressure.DefaultState(this.releasing_pressure.pre).ToggleStatusItem(Db.Get().BuildingStatusItems.EmittingElement, (OilWellCap.StatesInstance smi) => smi.master).ParamTransition<bool>(this.working, this.idle, (OilWellCap.StatesInstance smi, bool p) => !p)
@@ -223,9 +232,9 @@ public class OilWellCap : Workable, IElementEmitter, ISingleSliderControl
 				{
 					smi.master.ReleaseGasPressure(smi.deltatime);
 				});
-			this.releasing_pressure.pre.PlayAnim("steam_out_pre", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.releasing_pressure.loop);
-			this.releasing_pressure.loop.PlayAnim("steam_out_loop", KAnim.PlayMode.Loop, null).EventTransition(GameHashes.OperationalChanged, this.releasing_pressure.pst, (OilWellCap.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational);
-			this.releasing_pressure.pst.PlayAnim("steam_out_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.active);
+			this.releasing_pressure.pre.PlayAnim("steam_out_pre").OnAnimQueueComplete(this.releasing_pressure.loop);
+			this.releasing_pressure.loop.PlayAnim("steam_out_loop", KAnim.PlayMode.Loop).EventTransition(GameHashes.OperationalChanged, this.releasing_pressure.pst, (OilWellCap.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational);
+			this.releasing_pressure.pst.PlayAnim("steam_out_pst").OnAnimQueueComplete(this.active);
 		}
 
 		public StateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.FloatParameter pressurePercent;

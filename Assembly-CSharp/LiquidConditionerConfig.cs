@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -6,8 +7,19 @@ public class LiquidConditionerConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER2;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("LiquidConditioner", 2, 2, "liquidconditioner_kanim", 1200f, 100, 120f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER6, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, tier);
+		string text = "LiquidConditioner";
+		int num = 2;
+		int num2 = 2;
+		string text2 = "liquidconditioner_kanim";
+		float num3 = 1200f;
+		int num4 = 100;
+		float num5 = 120f;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER6;
+		string[] all_METALS = MATERIALS.ALL_METALS;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER2;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, tier2);
 		BuildingTemplates.CreateElectricalBuildingDef(buildingDef);
 		buildingDef.ViewMode = SimViewMode.PowerMap;
 		buildingDef.EnergyConsumptionWhenActive = 1200f;
@@ -28,16 +40,29 @@ public class LiquidConditionerConfig : IBuildingConfig
 		airConditioner.temperatureDelta = -14f;
 		airConditioner.maxEnvironmentDelta = -50f;
 		airConditioner.isLiquidConditioner = true;
-		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
-		storage.showInUI = true;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
 		conduitConsumer.consumptionRate = 10f;
+		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
+		storage.showInUI = true;
+		storage.capacityKg = 2f * conduitConsumer.consumptionRate;
+	}
+
+	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, LiquidConditionerConfig.INPUT_PORTS);
+	}
+
+	public override void DoPostConfigureUnderConstruction(GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, LiquidConditionerConfig.INPUT_PORTS);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		BuildingTemplates.DoPostConfigure(go);
+		GeneratedBuildings.RegisterLogicPorts(go, LiquidConditionerConfig.INPUT_PORTS);
+		go.AddOrGet<LogicOperationalController>();
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
 		{
 			PoweredActiveController.Instance instance = new PoweredActiveController.Instance(game_object.GetComponent<KPrefabID>());
@@ -46,4 +71,9 @@ public class LiquidConditionerConfig : IBuildingConfig
 	}
 
 	public const string ID = "LiquidConditioner";
+
+	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[]
+	{
+		new LogicPorts.Port(LogicOperationalController.PORT_ID, new CellOffset(1, 1), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false)
+	};
 }

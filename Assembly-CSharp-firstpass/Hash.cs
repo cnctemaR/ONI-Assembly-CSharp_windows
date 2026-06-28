@@ -5,25 +5,35 @@ public static class Hash
 {
 	public static int SDBMLower(string s)
 	{
+		int num;
 		if (s == null)
 		{
-			return 0;
+			num = 0;
 		}
-		return Hash.SDBM(s.ToLower());
+		else
+		{
+			num = Hash.SDBM(s.ToLower());
+		}
+		return num;
 	}
 
 	public static int SDBM(string s)
 	{
+		int num;
 		if (s == null)
 		{
-			return 0;
+			num = 0;
 		}
-		uint num = 0U;
-		foreach (char c in s)
+		else
 		{
-			num = (uint)c + (num << 6) + (num << 16) - num;
+			uint num2 = 0U;
+			foreach (char c in s)
+			{
+				num2 = (uint)c + (num2 << 6) + (num2 << 16) - num2;
+			}
+			num = (int)num2;
 		}
-		return (int)num;
+		return num;
 	}
 
 	public static int[] SDBMLower(IList<string> strings)

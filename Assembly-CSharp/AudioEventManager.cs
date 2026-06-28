@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -57,13 +58,26 @@ public class AudioEventManager : KMonoBehaviour
 		AudioEventManager audioEventManager = AudioEventManager.Get();
 		Vector2I vector2I = Grid.CellToXY(cell);
 		Vector2 vector = new Vector2((float)vector2I.x, (float)vector2I.y);
-		foreach (object obj in audioEventManager.spatialSplats.GetAllIntersecting(vector))
+		IEnumerator enumerator = audioEventManager.spatialSplats.GetAllIntersecting(vector).GetEnumerator();
+		try
 		{
-			NoiseSplat noiseSplat = (NoiseSplat)obj;
-			float loudness = noiseSplat.GetLoudness(cell);
-			if (loudness > negativeInfinity)
+			while (enumerator.MoveNext())
 			{
-				text = noiseSplat.GetProvider().GetName();
+				object obj = enumerator.Current;
+				NoiseSplat noiseSplat = (NoiseSplat)obj;
+				float loudness = noiseSplat.GetLoudness(cell);
+				if (loudness > negativeInfinity)
+				{
+					text = noiseSplat.GetProvider().GetName();
+				}
+			}
+		}
+		finally
+		{
+			IDisposable disposable;
+			if ((disposable = enumerator as IDisposable) != null)
+			{
+				disposable.Dispose();
 			}
 		}
 		return text;
@@ -98,17 +112,30 @@ public class AudioEventManager : KMonoBehaviour
 		this.polluters.Clear();
 		Vector2I vector2I = Grid.CellToXY(cell);
 		Vector2 vector = new Vector2((float)vector2I.x, (float)vector2I.y);
-		foreach (object obj in this.spatialSplats.GetAllIntersecting(vector))
+		IEnumerator enumerator = this.spatialSplats.GetAllIntersecting(vector).GetEnumerator();
+		try
 		{
-			NoiseSplat noiseSplat = (NoiseSplat)obj;
-			float loudness = noiseSplat.GetLoudness(cell);
-			if (loudness > 0f)
+			while (enumerator.MoveNext())
 			{
-				AudioEventManager.PolluterDisplay polluterDisplay = default(AudioEventManager.PolluterDisplay);
-				polluterDisplay.name = noiseSplat.GetName();
-				polluterDisplay.value = AudioEventManager.LoudnessToDB(loudness);
-				polluterDisplay.provider = noiseSplat.GetProvider();
-				this.polluters.Add(polluterDisplay);
+				object obj = enumerator.Current;
+				NoiseSplat noiseSplat = (NoiseSplat)obj;
+				float loudness = noiseSplat.GetLoudness(cell);
+				if (loudness > 0f)
+				{
+					AudioEventManager.PolluterDisplay polluterDisplay = default(AudioEventManager.PolluterDisplay);
+					polluterDisplay.name = noiseSplat.GetName();
+					polluterDisplay.value = AudioEventManager.LoudnessToDB(loudness);
+					polluterDisplay.provider = noiseSplat.GetProvider();
+					this.polluters.Add(polluterDisplay);
+				}
+			}
+		}
+		finally
+		{
+			IDisposable disposable;
+			if ((disposable = enumerator as IDisposable) != null)
+			{
+				disposable.Dispose();
 			}
 		}
 		return this.polluters;

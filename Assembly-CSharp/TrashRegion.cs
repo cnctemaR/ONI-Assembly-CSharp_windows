@@ -99,12 +99,17 @@ public class TrashRegion : KMonoBehaviour
 
 	private static bool HasRoom(int cell)
 	{
+		bool flag;
 		if (Grid.Solid[cell])
 		{
-			return false;
+			flag = false;
 		}
-		int num = Grid.CellAbove(cell);
-		return !(Grid.Objects[num, 3] != null);
+		else
+		{
+			int num = Grid.CellAbove(cell);
+			flag = !(Grid.Objects[num, 3] != null);
+		}
+		return flag;
 	}
 
 	public bool IsFull()
@@ -115,10 +120,7 @@ public class TrashRegion : KMonoBehaviour
 	private void CreateFetchChore()
 	{
 		Tag[] tags = this.filterable.GetTags();
-		Action<Chore> action = new Action<Chore>(this.OnFetchComplete);
-		Action<Chore> action2 = new Action<Chore>(this.OnFetchStart);
-		Action<Chore> action3 = new Action<Chore>(this.OnFetchEnd);
-		FetchChore fetchChore = new FetchChore(this.storage, 2.1474836E+09f, tags, null, null, true, action, action2, action3, FetchOrder2.OperationalRequirement.Operational, 0);
+		FetchChore fetchChore = new FetchChore(this.storage, 2.1474836E+09f, tags, null, null, true, new Action<Chore>(this.OnFetchComplete), new Action<Chore>(this.OnFetchStart), new Action<Chore>(this.OnFetchEnd), FetchOrder2.OperationalRequirement.Operational, 0);
 		this.fetchChores.Add(fetchChore);
 	}
 
@@ -160,10 +162,13 @@ public class TrashRegion : KMonoBehaviour
 		foreach (int num5 in this.GetAvailableCells())
 		{
 			int cellDistance = Grid.GetCellDistance(cell, num5);
-			if (TrashRegion.HasRoom(num5) && cellDistance < num4)
+			if (TrashRegion.HasRoom(num5))
 			{
-				num3 = num5;
-				num4 = cellDistance;
+				if (cellDistance < num4)
+				{
+					num3 = num5;
+					num4 = cellDistance;
+				}
 			}
 			if (cellDistance < num2)
 			{
@@ -171,20 +176,24 @@ public class TrashRegion : KMonoBehaviour
 				num2 = cellDistance;
 			}
 		}
+		int num6;
 		if (num3 != Grid.InvalidCell)
 		{
-			return num3;
+			num6 = num3;
 		}
-		return num;
+		else
+		{
+			num6 = num;
+		}
+		return num6;
 	}
 
 	private void MarkAsAvailable()
 	{
-		if (!this.IsFull())
+		if (this.IsFull())
 		{
-			return;
+			this.CreateFetchChore();
 		}
-		this.CreateFetchChore();
 	}
 
 	private void ClearChores()
@@ -198,11 +207,10 @@ public class TrashRegion : KMonoBehaviour
 
 	private void MarkAsFull()
 	{
-		if (this.IsFull())
+		if (!this.IsFull())
 		{
-			return;
+			this.ClearChores();
 		}
-		this.ClearChores();
 	}
 
 	protected override void OnCleanUp()

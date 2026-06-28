@@ -55,7 +55,7 @@ public class SnapOn : KMonoBehaviour
 	{
 		SnapOn.OverrideEntry overrideEntry = null;
 		KAnimFile kanimFile = point.buildFile;
-		string text = string.Empty;
+		string text = "";
 		if (this.overrideMap.TryGetValue(point.pointName, out overrideEntry))
 		{
 			kanimFile = overrideEntry.buildFile;
@@ -110,7 +110,7 @@ public class SnapOn : KMonoBehaviour
 
 		public HashedString context;
 
-		public KAnimFile buildFile;
+		public KAnimFile buildFile = null;
 
 		public HashedString overrideSymbol;
 	}

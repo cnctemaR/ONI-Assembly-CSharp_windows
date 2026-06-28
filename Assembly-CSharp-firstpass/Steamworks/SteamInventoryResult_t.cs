@@ -25,16 +25,6 @@ namespace Steamworks
 			return this.m_SteamInventoryResult.GetHashCode();
 		}
 
-		public bool Equals(SteamInventoryResult_t other)
-		{
-			return this.m_SteamInventoryResult == other.m_SteamInventoryResult;
-		}
-
-		public int CompareTo(SteamInventoryResult_t other)
-		{
-			return this.m_SteamInventoryResult.CompareTo(other.m_SteamInventoryResult);
-		}
-
 		public static bool operator ==(SteamInventoryResult_t x, SteamInventoryResult_t y)
 		{
 			return x.m_SteamInventoryResult == y.m_SteamInventoryResult;
@@ -53,6 +43,16 @@ namespace Steamworks
 		public static explicit operator int(SteamInventoryResult_t that)
 		{
 			return that.m_SteamInventoryResult;
+		}
+
+		public bool Equals(SteamInventoryResult_t other)
+		{
+			return this.m_SteamInventoryResult == other.m_SteamInventoryResult;
+		}
+
+		public int CompareTo(SteamInventoryResult_t other)
+		{
+			return this.m_SteamInventoryResult.CompareTo(other.m_SteamInventoryResult);
 		}
 
 		public static readonly SteamInventoryResult_t Invalid = new SteamInventoryResult_t(-1);

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -7,8 +6,19 @@ public class AirFilterConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER0;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("AirFilter", 1, 1, "co2filter_kanim", 200f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER2, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, tier);
+		string text = "AirFilter";
+		int num = 1;
+		int num2 = 1;
+		string text2 = "co2filter_kanim";
+		float num3 = 200f;
+		int num4 = 30;
+		float num5 = 30f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
+		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER0;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_MINERALS, num6, buildLocationRule, BUILDINGS.DECOR.NONE, tier2);
 		buildingDef.Overheatable = false;
 		buildingDef.ViewMode = SimViewMode.OxygenMap;
 		buildingDef.MaterialCategory = MATERIALS.RAW_MINERALS;
@@ -25,7 +35,7 @@ public class AirFilterConfig : IBuildingConfig
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
 		storage.showInUI = true;
 		storage.capacityKg = 200f;
-		storage.defaultStoredItemModifers = AirFilterConfig.StoredItemModifiers;
+		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		ElementConsumer elementConsumer = go.AddOrGet<ElementConsumer>();
 		elementConsumer.elementToConsume = SimHashes.ContaminatedOxygen;
 		elementConsumer.consumptionRate = 0.1f;
@@ -80,10 +90,4 @@ public class AirFilterConfig : IBuildingConfig
 	private const float SAND_STORAGE_AMOUNT = 80.00001f;
 
 	private const float CLAY_PER_LOAD = 10f;
-
-	private static readonly List<Storage.StoredItemModifier> StoredItemModifiers = new List<Storage.StoredItemModifier>
-	{
-		Storage.StoredItemModifier.Hide,
-		Storage.StoredItemModifier.Seal
-	};
 }

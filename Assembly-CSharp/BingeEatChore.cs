@@ -6,10 +6,10 @@ using UnityEngine;
 public class BingeEatChore : Chore<BingeEatChore.StatesInstance>
 {
 	public BingeEatChore(IStateMachineTarget target, Action<Chore> on_complete = null)
-		: base(Db.Get().ChoreTypes.BingeEat, target, target.GetComponent<ChoreProvider>(), false, on_complete, null, null, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.BingeEat, target, target.GetComponent<ChoreProvider>(), false, on_complete, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
 	{
 		this.smi = new BingeEatChore.StatesInstance(this, target.gameObject);
-		this.Subscribe(1121894420, new Action<object>(this.OnEat));
+		base.Subscribe(1121894420, new Action<object>(this.OnEat));
 	}
 
 	private void OnEat(object data)
@@ -24,7 +24,7 @@ public class BingeEatChore : Chore<BingeEatChore.StatesInstance>
 	public override void Cleanup()
 	{
 		base.Cleanup();
-		this.Unsubscribe(1121894420, new Action<object>(this.OnEat));
+		base.Unsubscribe(1121894420, new Action<object>(this.OnEat));
 	}
 
 	public class StatesInstance : GameStateMachine<BingeEatChore.States, BingeEatChore.StatesInstance, BingeEatChore, object>.GameInstance
@@ -44,41 +44,43 @@ public class BingeEatChore : Chore<BingeEatChore.StatesInstance>
 			if (base.sm.bingeremaining.Get(base.smi) <= 0f)
 			{
 				this.GoTo(base.sm.eat_pst);
-				return;
 			}
-			foreach (Edible edible2 in Components.Edibles)
+			else
 			{
-				if (!(edible2 == null))
+				foreach (Edible edible2 in Components.Edibles)
 				{
-					if (!(edible2 == base.sm.ediblesource.Get<Edible>(base.smi)))
+					if (!(edible2 == null))
 					{
-						if (edible2.GetComponent<Pickupable>().UnreservedAmount > 0f)
+						if (!(edible2 == base.sm.ediblesource.Get<Edible>(base.smi)))
 						{
-							if (edible2.GetComponent<Pickupable>().CouldBePickedUp(base.gameObject))
+							if (edible2.GetComponent<Pickupable>().UnreservedAmount > 0f)
 							{
-								int navigationCost = component.GetNavigationCost(edible2);
-								if (navigationCost != PathProber.InvalidCost)
+								if (edible2.GetComponent<Pickupable>().CouldBePickedUp(base.gameObject))
 								{
-									if (navigationCost < num)
+									int navigationCost = component.GetNavigationCost(edible2);
+									if (navigationCost != PathProber.InvalidCost)
 									{
-										num = navigationCost;
-										edible = edible2;
+										if (navigationCost < num)
+										{
+											num = navigationCost;
+											edible = edible2;
+										}
 									}
 								}
 							}
 						}
 					}
 				}
-			}
-			base.sm.ediblesource.Set(edible, base.smi);
-			base.sm.requestedfoodunits.Set(base.sm.bingeremaining.Get(base.smi), base.smi);
-			if (edible == null)
-			{
-				this.GoTo(base.sm.cantFindFood);
-			}
-			else
-			{
-				this.GoTo(base.sm.fetch);
+				base.sm.ediblesource.Set(edible, base.smi);
+				base.sm.requestedfoodunits.Set(base.sm.bingeremaining.Get(base.smi), base.smi);
+				if (edible == null)
+				{
+					this.GoTo(base.sm.cantFindFood);
+				}
+				else
+				{
+					this.GoTo(base.sm.fetch);
+				}
 			}
 		}
 
@@ -95,12 +97,12 @@ public class BingeEatChore : Chore<BingeEatChore.StatesInstance>
 			default_state = this.findfood;
 			base.Target(this.eater);
 			this.bingeEatingEffect = new Effect("Binge_Eating", DUPLICANTS.MODIFIERS.BINGE_EATING.NAME, DUPLICANTS.MODIFIERS.BINGE_EATING.TOOLTIP, 0f, true, false, true);
-			this.bingeEatingEffect.Add(new AttributeModifier(Db.Get().Attributes.Decor.Id, -30f, DUPLICANTS.MODIFIERS.BINGE_EATING.NAME, false, false));
-			this.bingeEatingEffect.Add(new AttributeModifier("CaloriesDelta", -6666.6665f, DUPLICANTS.MODIFIERS.BINGE_EATING.NAME, false, false));
+			this.bingeEatingEffect.Add(new AttributeModifier(Db.Get().Attributes.Decor.Id, -30f, DUPLICANTS.MODIFIERS.BINGE_EATING.NAME, false, false, true));
+			this.bingeEatingEffect.Add(new AttributeModifier("CaloriesDelta", -6666.6665f, DUPLICANTS.MODIFIERS.BINGE_EATING.NAME, false, false, true));
 			Db.Get().effects.Add(this.bingeEatingEffect);
 			this.root.ToggleEffect((BingeEatChore.StatesInstance smi) => this.bingeEatingEffect);
 			this.noTarget.GoTo(this.finish);
-			this.eat_pst.ToggleAnims("anim_eat_overeat_kanim", 0f).PlayAnim("working_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.finish);
+			this.eat_pst.ToggleAnims("anim_eat_overeat_kanim", 0f).PlayAnim("working_pst").OnAnimQueueComplete(this.finish);
 			this.finish.Enter(delegate(BingeEatChore.StatesInstance smi)
 			{
 				smi.StopSM("complete/no more food");
@@ -119,7 +121,7 @@ public class BingeEatChore : Chore<BingeEatChore.StatesInstance>
 				{
 					this.isBingeEating.Set(false, smi);
 				});
-			this.cantFindFood.ToggleAnims("anim_interrupt_binge_eat_kanim", 0f).PlayAnim("interrupt_binge_eat", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.noTarget);
+			this.cantFindFood.ToggleAnims("anim_interrupt_binge_eat_kanim", 0f).PlayAnim("interrupt_binge_eat").OnAnimQueueComplete(this.noTarget);
 		}
 
 		public StateMachine<BingeEatChore.States, BingeEatChore.StatesInstance, BingeEatChore, object>.TargetParameter eater;

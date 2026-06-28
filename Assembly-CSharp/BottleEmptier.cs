@@ -12,7 +12,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
-		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)
@@ -31,14 +31,20 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 		if (this.allowManualPumpingStationFetching)
 		{
 			UserMenu userMenu = this.userMenu;
-			string text = UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.DENIED.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_bottler_delivery", UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.DENIED.NAME, new global::System.Action(this.OnChangeAllowManualPumpingStationFetching), global::Action.NumActions, null, null, null, text, true), 1f);
+			string text = "action_bottler_delivery";
+			string text2 = UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.DENIED.NAME;
+			global::System.Action action = new global::System.Action(this.OnChangeAllowManualPumpingStationFetching);
+			string text3 = UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.DENIED.TOOLTIP;
+			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
 		}
 		else
 		{
 			UserMenu userMenu2 = this.userMenu;
+			string text3 = "action_bottler_delivery";
+			string text2 = UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.ALLOWED.NAME;
+			global::System.Action action = new global::System.Action(this.OnChangeAllowManualPumpingStationFetching);
 			string text = UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.ALLOWED.TOOLTIP;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_bottler_delivery", UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.ALLOWED.NAME, new global::System.Action(this.OnChangeAllowManualPumpingStationFetching), global::Action.NumActions, null, null, null, text, true), 1f);
+			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
 		}
 	}
 
@@ -74,20 +80,22 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 			if (tags == null || tags.Length == 0)
 			{
 				component.TintColour = base.master.noFilterTint;
-				return;
-			}
-			component.TintColour = base.master.filterTint;
-			Tag[] array;
-			if (!base.master.allowManualPumpingStationFetching)
-			{
-				array = new Tag[] { GameTags.LiquidSource };
 			}
 			else
 			{
-				array = new Tag[0];
+				component.TintColour = base.master.filterTint;
+				Tag[] array;
+				if (!base.master.allowManualPumpingStationFetching)
+				{
+					array = new Tag[] { GameTags.LiquidSource };
+				}
+				else
+				{
+					array = new Tag[0];
+				}
+				Storage component2 = base.GetComponent<Storage>();
+				this.chore = new FetchChore(component2, component2.Capacity(), base.GetComponent<TreeFilterable>().GetTags(), array, null, true, null, null, null, FetchOrder2.OperationalRequirement.Operational, 0);
 			}
-			Storage component2 = base.GetComponent<Storage>();
-			this.chore = new FetchChore(component2, component2.Capacity(), base.GetComponent<TreeFilterable>().GetTags(), array, null, true, null, null, null, FetchOrder2.OperationalRequirement.Operational, 0);
 		}
 
 		public void CancelChore()
@@ -117,20 +125,13 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 
 		public void StartMeter()
 		{
-			this.meter.SetVisible(true);
 			PrimaryElement firstPrimaryElement = this.GetFirstPrimaryElement();
-			if (firstPrimaryElement == null)
+			if (!(firstPrimaryElement == null))
 			{
-				return;
+				this.meter.SetSymbolTint(KBatchedAnimController.SymbolTintIndex.First, new KAnimHashedString("meter_fill"), firstPrimaryElement.Element.substance.colour);
+				this.meter.SetSymbolTint(KBatchedAnimController.SymbolTintIndex.Second, new KAnimHashedString("water1"), firstPrimaryElement.Element.substance.colour);
+				base.GetComponent<KBatchedAnimController>().SetSymbolTint(KBatchedAnimController.SymbolTintIndex.Second, new KAnimHashedString("leak_ceiling"), firstPrimaryElement.Element.substance.colour);
 			}
-			this.meter.SetSymbolTint(KBatchedAnimController.SymbolTintIndex.First, new KAnimHashedString("meter_fill"), firstPrimaryElement.Element.substance.colour);
-			this.meter.SetSymbolTint(KBatchedAnimController.SymbolTintIndex.Second, new KAnimHashedString("water1"), firstPrimaryElement.Element.substance.colour);
-			base.GetComponent<KBatchedAnimController>().SetSymbolTint(KBatchedAnimController.SymbolTintIndex.Second, new KAnimHashedString("leak_ceiling"), firstPrimaryElement.Element.substance.colour);
-		}
-
-		public void StopMeter()
-		{
-			this.meter.SetVisible(false);
 		}
 
 		private PrimaryElement GetFirstPrimaryElement()
@@ -154,32 +155,30 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 		public void DripLiquid(float dt)
 		{
 			PrimaryElement firstPrimaryElement = this.GetFirstPrimaryElement();
-			if (firstPrimaryElement == null)
+			if (!(firstPrimaryElement == null))
 			{
-				return;
+				Storage component = base.GetComponent<Storage>();
+				float mass = firstPrimaryElement.Mass;
+				float num = 2f;
+				float num2 = Mathf.Min(mass, num * dt);
+				if (num2 > 0f)
+				{
+					Tag prefabTag = firstPrimaryElement.GetComponent<KPrefabID>().PrefabTag;
+					SimUtil.DiseaseInfo diseaseInfo;
+					float num3;
+					component.ConsumeAndGetDisease(prefabTag, num2, out diseaseInfo, out num3);
+					Vector3 position = base.transform.position;
+					position.y += 1.8f;
+					bool flag = base.GetComponent<Rotatable>().GetOrientation() == Orientation.FlipH;
+					position.x += ((!flag) ? 0.2f : (-0.2f));
+					int num4 = Grid.PosToCell(position) + ((!flag) ? 1 : (-1));
+					if (Grid.Solid[num4])
+					{
+						num4 += ((!flag) ? (-1) : 1);
+					}
+					FallingWater.instance.AddParticle(num4, (byte)ElementLoader.GetElementIndex(firstPrimaryElement.ElementID), num2, num3, diseaseInfo.idx, diseaseInfo.count, false, false, false, false);
+				}
 			}
-			Storage component = base.GetComponent<Storage>();
-			float mass = firstPrimaryElement.Mass;
-			float num = 2f;
-			float num2 = Mathf.Min(mass, num * dt);
-			if (num2 <= 0f)
-			{
-				return;
-			}
-			Tag prefabTag = firstPrimaryElement.GetComponent<KPrefabID>().PrefabTag;
-			SimUtil.DiseaseInfo diseaseInfo;
-			float num3;
-			component.ConsumeAndGetDisease(prefabTag, num2, out diseaseInfo, out num3);
-			Vector3 position = base.transform.position;
-			position.y += 1.8f;
-			bool flag = base.GetComponent<Rotatable>().GetOrientation() == Orientation.FlipH;
-			position.x += ((!flag) ? 0.2f : (-0.2f));
-			int num4 = Grid.PosToCell(position) + ((!flag) ? 1 : (-1));
-			if (Grid.Solid[num4])
-			{
-				num4 += ((!flag) ? (-1) : 1);
-			}
-			FallingWater.instance.AddParticle(num4, (byte)ElementLoader.GetElementIndex(firstPrimaryElement.ElementID), num2, num3, diseaseInfo.idx, diseaseInfo.count, false, false, false, false);
 		}
 
 		private FetchChore chore;
@@ -190,35 +189,45 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.waitingfordelivery;
-			this.statusItem = new StatusItem("BottleEmptier", string.Empty, string.Empty, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 14334);
+			this.statusItem = new StatusItem("BottleEmptier", "", "", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 30718);
 			this.statusItem.resolveStringCallback = delegate(string str, object data)
 			{
 				BottleEmptier bottleEmptier = (BottleEmptier)data;
+				string text;
 				if (bottleEmptier == null)
 				{
-					return str;
+					text = str;
 				}
-				if (bottleEmptier.allowManualPumpingStationFetching)
+				else if (bottleEmptier.allowManualPumpingStationFetching)
 				{
-					return BUILDING.STATUSITEMS.BOTTLE_EMPTIER.ALLOWED.NAME;
+					text = BUILDING.STATUSITEMS.BOTTLE_EMPTIER.ALLOWED.NAME;
 				}
-				return BUILDING.STATUSITEMS.BOTTLE_EMPTIER.DENIED.NAME;
+				else
+				{
+					text = BUILDING.STATUSITEMS.BOTTLE_EMPTIER.DENIED.NAME;
+				}
+				return text;
 			};
 			this.statusItem.resolveTooltipCallback = delegate(string str, object data)
 			{
 				BottleEmptier bottleEmptier2 = (BottleEmptier)data;
+				string text2;
 				if (bottleEmptier2 == null)
 				{
-					return str;
+					text2 = str;
 				}
-				if (bottleEmptier2.allowManualPumpingStationFetching)
+				else if (bottleEmptier2.allowManualPumpingStationFetching)
 				{
-					return BUILDING.STATUSITEMS.BOTTLE_EMPTIER.ALLOWED.TOOLTIP;
+					text2 = BUILDING.STATUSITEMS.BOTTLE_EMPTIER.ALLOWED.TOOLTIP;
 				}
-				return BUILDING.STATUSITEMS.BOTTLE_EMPTIER.DENIED.TOOLTIP;
+				else
+				{
+					text2 = BUILDING.STATUSITEMS.BOTTLE_EMPTIER.DENIED.TOOLTIP;
+				}
+				return text2;
 			};
 			this.root.ToggleStatusItem(this.statusItem, (BottleEmptier.StatesInstance smi) => smi.master);
-			this.unoperational.TagTransition(GameTags.Operational, this.waitingfordelivery, false).PlayAnim("off", KAnim.PlayMode.Once, null);
+			this.unoperational.TagTransition(GameTags.Operational, this.waitingfordelivery, false).PlayAnim("off");
 			this.waitingfordelivery.TagTransition(GameTags.Operational, this.unoperational, true).EventTransition(GameHashes.OnStorageChange, this.emptying, (BottleEmptier.StatesInstance smi) => !smi.GetComponent<Storage>().IsEmpty()).Enter("CreateChore", delegate(BottleEmptier.StatesInstance smi)
 			{
 				smi.CreateChore();
@@ -227,20 +236,16 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 				{
 					smi.CancelChore();
 				})
-				.PlayAnim("on", KAnim.PlayMode.Once, null);
+				.PlayAnim("on");
 			this.emptying.TagTransition(GameTags.Operational, this.unoperational, true).EventTransition(GameHashes.OnStorageChange, this.waitingfordelivery, (BottleEmptier.StatesInstance smi) => smi.GetComponent<Storage>().IsEmpty()).Enter("StartMeter", delegate(BottleEmptier.StatesInstance smi)
 			{
 				smi.StartMeter();
 			})
-				.Exit("StopMeter", delegate(BottleEmptier.StatesInstance smi)
-				{
-					smi.StopMeter();
-				})
 				.Update("DripLiquid", delegate(BottleEmptier.StatesInstance smi)
 				{
 					smi.DripLiquid(smi.dt);
 				})
-				.PlayAnim("working_loop", KAnim.PlayMode.Loop, null);
+				.PlayAnim("working_loop", KAnim.PlayMode.Loop);
 		}
 
 		private StatusItem statusItem;

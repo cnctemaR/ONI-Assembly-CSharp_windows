@@ -3,16 +3,8 @@ using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
-public class SubmersionMonitor : KMonoBehaviour, IWiltCause, IGameObjectEffectDescriptor
+public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor, IWiltCause
 {
-	WiltCondition.Condition[] IWiltCause.Conditions
-	{
-		get
-		{
-			return new WiltCondition.Condition[] { WiltCondition.Condition.DryingOut };
-		}
-	}
-
 	public bool Dry
 	{
 		get
@@ -32,7 +24,7 @@ public class SubmersionMonitor : KMonoBehaviour, IWiltCause, IGameObjectEffectDe
 		this.checkDrynessHandle = GameScheduler.Instance.SchedulePeriodic("SubmersionMonitor", this.pollFrequency, new Action<object>(this.CheckDry), null, null, 0f, null);
 		this.OnMove(null);
 		this.CheckDry(null);
-		this.Subscribe(1088554450, new Action<object>(this.OnMove));
+		base.Subscribe(1088554450, new Action<object>(this.OnMove));
 	}
 
 	private void OnMove(object data = null)
@@ -44,7 +36,7 @@ public class SubmersionMonitor : KMonoBehaviour, IWiltCause, IGameObjectEffectDe
 		}
 		else
 		{
-			Vector2I vector2I = Grid.PosToXY(this.transform.position);
+			Vector2I vector2I = Grid.PosToXY(base.transform.position);
 			Extents extents = new Extents(vector2I.x, vector2I.y, 1, 2);
 			this.partitionerEntry = GameScenePartitioner.Instance.Add("DrowningMonitor.OnSpawn", base.gameObject, extents, GameScenePartitioner.Instance.liquidChangedLayer, new Action<object>(this.OnLiquidChanged));
 		}
@@ -86,13 +78,13 @@ public class SubmersionMonitor : KMonoBehaviour, IWiltCause, IGameObjectEffectDe
 			if (!this.dry)
 			{
 				this.dry = true;
-				this.Trigger(-2057657673, null);
+				base.Trigger(-2057657673, null);
 			}
 		}
 		else if (this.dry)
 		{
 			this.dry = false;
-			this.Trigger(1555379996, null);
+			base.Trigger(1555379996, null);
 		}
 	}
 
@@ -107,15 +99,28 @@ public class SubmersionMonitor : KMonoBehaviour, IWiltCause, IGameObjectEffectDe
 		this.CheckDry(null);
 	}
 
+	WiltCondition.Condition[] IWiltCause.Conditions
+	{
+		get
+		{
+			return new WiltCondition.Condition[] { WiltCondition.Condition.DryingOut };
+		}
+	}
+
 	public string WiltStateString
 	{
 		get
 		{
+			string text;
 			if (this.Dry)
 			{
-				return Db.Get().CreatureStatusItems.DryingOut.resolveStringCallback(CREATURES.STATUSITEMS.DRYINGOUT.NAME, this);
+				text = Db.Get().CreatureStatusItems.DryingOut.resolveStringCallback(CREATURES.STATUSITEMS.DRYINGOUT.NAME, this);
 			}
-			return string.Empty;
+			else
+			{
+				text = "";
+			}
+			return text;
 		}
 	}
 
@@ -133,7 +138,7 @@ public class SubmersionMonitor : KMonoBehaviour, IWiltCause, IGameObjectEffectDe
 
 	private int position;
 
-	private bool dry;
+	private bool dry = false;
 
 	protected float cellLiquidThreshold = 0.2f;
 

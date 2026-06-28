@@ -18,7 +18,10 @@ public class UpdateManager : MonoBehaviour
 		UpdateManager.UpdateGroups = new SimUpdateGroup[3];
 		for (int i = 0; i < UpdateManager.UpdateGroups.Length; i++)
 		{
-			UpdateManager.UpdateGroups[i] = new SimUpdateGroup(((UpdateManager.ListType)i).ToString());
+			SimUpdateGroup[] updateGroups = UpdateManager.UpdateGroups;
+			int num = i;
+			UpdateManager.ListType listType = (UpdateManager.ListType)i;
+			updateGroups[num] = new SimUpdateGroup(listType.ToString());
 		}
 		UpdateManager.instance.queuedAdded.Clear();
 		UpdateManager.instance.queuedRemoved.Clear();
@@ -40,25 +43,27 @@ public class UpdateManager : MonoBehaviour
 		if (this.skipNextUpdate)
 		{
 			this.skipNextUpdate = this.skipAllUpdates;
-			return;
 		}
-		foreach (UpdateManager.QueuedData queuedData in this.queuedAdded)
+		else
 		{
-			queuedData.typeInfo.Add(queuedData.behaviour);
-		}
-		this.queuedAdded.Clear();
-		foreach (UpdateManager.QueuedData queuedData2 in this.queuedRemoved)
-		{
-			queuedData2.typeInfo.Remove(queuedData2.behaviour);
-		}
-		this.queuedRemoved.Clear();
-		if (!this.skipAllUpdates)
-		{
-			foreach (SimUpdateGroup simUpdateGroup in UpdateManager.UpdateGroups)
+			foreach (UpdateManager.QueuedData queuedData in this.queuedAdded)
 			{
-				simUpdateGroup.Update(dt);
+				queuedData.typeInfo.Add(queuedData.behaviour);
 			}
-			KComponentSpawn.instance.comps.SimUpdate(dt);
+			this.queuedAdded.Clear();
+			foreach (UpdateManager.QueuedData queuedData2 in this.queuedRemoved)
+			{
+				queuedData2.typeInfo.Remove(queuedData2.behaviour);
+			}
+			this.queuedRemoved.Clear();
+			if (!this.skipAllUpdates)
+			{
+				foreach (SimUpdateGroup simUpdateGroup in UpdateManager.UpdateGroups)
+				{
+					simUpdateGroup.Update(dt);
+				}
+				KComponentSpawn.instance.comps.SimUpdate(dt);
+			}
 		}
 	}
 
@@ -103,13 +108,13 @@ public class UpdateManager : MonoBehaviour
 
 	public const float SecondsPerTick = 0.25f;
 
-	private bool skipNextUpdate;
+	private bool skipNextUpdate = false;
 
 	private static Dictionary<Type, SimUpdateTypeInfo> TypeInfos = new Dictionary<Type, SimUpdateTypeInfo>();
 
 	private static SimUpdateGroup[] UpdateGroups = null;
 
-	private bool skipAllUpdates;
+	private bool skipAllUpdates = false;
 
 	private List<UpdateManager.QueuedData> queuedAdded = new List<UpdateManager.QueuedData>();
 

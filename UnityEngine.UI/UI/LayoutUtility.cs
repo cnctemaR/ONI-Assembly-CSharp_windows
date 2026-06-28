@@ -7,29 +7,44 @@ namespace UnityEngine.UI
 	{
 		public static float GetMinSize(RectTransform rect, int axis)
 		{
+			float num;
 			if (axis == 0)
 			{
-				return LayoutUtility.GetMinWidth(rect);
+				num = LayoutUtility.GetMinWidth(rect);
 			}
-			return LayoutUtility.GetMinHeight(rect);
+			else
+			{
+				num = LayoutUtility.GetMinHeight(rect);
+			}
+			return num;
 		}
 
 		public static float GetPreferredSize(RectTransform rect, int axis)
 		{
+			float num;
 			if (axis == 0)
 			{
-				return LayoutUtility.GetPreferredWidth(rect);
+				num = LayoutUtility.GetPreferredWidth(rect);
 			}
-			return LayoutUtility.GetPreferredHeight(rect);
+			else
+			{
+				num = LayoutUtility.GetPreferredHeight(rect);
+			}
+			return num;
 		}
 
 		public static float GetFlexibleSize(RectTransform rect, int axis)
 		{
+			float num;
 			if (axis == 0)
 			{
-				return LayoutUtility.GetFlexibleWidth(rect);
+				num = LayoutUtility.GetFlexibleWidth(rect);
 			}
-			return LayoutUtility.GetFlexibleHeight(rect);
+			else
+			{
+				num = LayoutUtility.GetFlexibleHeight(rect);
+			}
+			return num;
 		}
 
 		public static float GetMinWidth(RectTransform rect)
@@ -71,41 +86,46 @@ namespace UnityEngine.UI
 		public static float GetLayoutProperty(RectTransform rect, Func<ILayoutElement, float> property, float defaultValue, out ILayoutElement source)
 		{
 			source = null;
+			float num;
 			if (rect == null)
 			{
-				return 0f;
+				num = 0f;
 			}
-			float num = defaultValue;
-			int num2 = int.MinValue;
-			List<Component> list = ListPool<Component>.Get();
-			rect.GetComponents(typeof(ILayoutElement), list);
-			for (int i = 0; i < list.Count; i++)
+			else
 			{
-				ILayoutElement layoutElement = list[i] as ILayoutElement;
-				if (!(layoutElement is Behaviour) || ((Behaviour)layoutElement).isActiveAndEnabled)
+				float num2 = defaultValue;
+				int num3 = int.MinValue;
+				List<Component> list = ListPool<Component>.Get();
+				rect.GetComponents(typeof(ILayoutElement), list);
+				for (int i = 0; i < list.Count; i++)
 				{
-					int layoutPriority = layoutElement.layoutPriority;
-					if (layoutPriority >= num2)
+					ILayoutElement layoutElement = list[i] as ILayoutElement;
+					if (!(layoutElement is Behaviour) || ((Behaviour)layoutElement).isActiveAndEnabled)
 					{
-						float num3 = property(layoutElement);
-						if (num3 >= 0f)
+						int layoutPriority = layoutElement.layoutPriority;
+						if (layoutPriority >= num3)
 						{
-							if (layoutPriority > num2)
+							float num4 = property(layoutElement);
+							if (num4 >= 0f)
 							{
-								num = num3;
-								num2 = layoutPriority;
-								source = layoutElement;
-							}
-							else if (num3 > num)
-							{
-								num = num3;
-								source = layoutElement;
+								if (layoutPriority > num3)
+								{
+									num2 = num4;
+									num3 = layoutPriority;
+									source = layoutElement;
+								}
+								else if (num4 > num2)
+								{
+									num2 = num4;
+									source = layoutElement;
+								}
 							}
 						}
 					}
 				}
+				ListPool<Component>.Release(list);
+				num = num2;
 			}
-			ListPool<Component>.Release(list);
 			return num;
 		}
 	}

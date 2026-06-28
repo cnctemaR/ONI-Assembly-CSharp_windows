@@ -29,11 +29,11 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 		{
 			throw new ArgumentException("No consumable elements specified");
 		}
-		this.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
+		base.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
 		if (this.capacityKG != float.PositiveInfinity)
 		{
 			this.hasAvailableCapacity = !this.IsStorageFull();
-			this.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
+			base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
 		}
 	}
 
@@ -46,14 +46,13 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 	{
 		bool flag = this.consumptionEnabled;
 		this.consumptionEnabled = enabled;
-		if (!Sim.IsValidHandle(this.simHandle))
+		if (Sim.IsValidHandle(this.simHandle))
 		{
-			return;
-		}
-		if (enabled != flag)
-		{
-			this.UpdateSimData();
-			this.UpdateStatusItem();
+			if (enabled != flag)
+			{
+				this.UpdateSimData();
+				this.UpdateStatusItem();
+			}
 		}
 	}
 
@@ -65,11 +64,10 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 
 	public void RefreshConsumptionRate()
 	{
-		if (!Sim.IsValidHandle(this.simHandle))
+		if (Sim.IsValidHandle(this.simHandle))
 		{
-			return;
+			this.UpdateSimData();
 		}
-		this.UpdateSimData();
 	}
 
 	private void UpdateSimData()
@@ -80,14 +78,13 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 
 	public static void AddMass(Sim.ConsumedMassInfo consumed_info)
 	{
-		if (!Sim.IsValidHandle(consumed_info.simHandle))
+		if (Sim.IsValidHandle(consumed_info.simHandle))
 		{
-			return;
-		}
-		ElementConsumer elementConsumer;
-		if (ElementConsumer.handleInstanceMap.TryGetValue(consumed_info.simHandle, out elementConsumer))
-		{
-			elementConsumer.AddMassInternal(consumed_info);
+			ElementConsumer elementConsumer;
+			if (ElementConsumer.handleInstanceMap.TryGetValue(consumed_info.simHandle, out elementConsumer))
+			{
+				elementConsumer.AddMassInternal(consumed_info);
+			}
 		}
 	}
 
@@ -123,7 +120,7 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 	{
 		get
 		{
-			int num = Grid.PosToCell(this.transform.position + this.sampleCellOffset);
+			int num = Grid.PosToCell(base.transform.position + this.sampleCellOffset);
 			SimHashes id = Grid.Element[num].id;
 			return this.elementToConsume == id && Grid.Cell[num].mass >= this.minimumMass;
 		}
@@ -156,15 +153,13 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 
 	protected override void OnCmpEnable()
 	{
-		if (!base.isSpawned)
+		if (base.isSpawned)
 		{
-			return;
+			if (this.IsActive())
+			{
+				this.UpdateStatusItem();
+			}
 		}
-		if (!this.IsActive())
-		{
-			return;
-		}
-		this.UpdateStatusItem();
 	}
 
 	protected override void OnCmpDisable()
@@ -266,7 +261,7 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 
 	protected override void OnSimRegister(HandleVector<Game.ComplexCallbackInfo>.Handle cb_handle)
 	{
-		int num = Grid.PosToCell(this.transform.position + this.sampleCellOffset);
+		int num = Grid.PosToCell(base.transform.position + this.sampleCellOffset);
 		SimMessages.AddElementConsumer(num, this.configuration, this.elementToConsume, this.consumptionRadius, cb_handle.index);
 	}
 
@@ -289,8 +284,8 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 		ElementConsumer.handleInstanceMap[this.simHandle] = this;
 	}
 
-	[SerializeField]
 	[HashedEnum]
+	[SerializeField]
 	public SimHashes elementToConsume = SimHashes.Vacuum;
 
 	[SerializeField]
@@ -300,7 +295,7 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 	public byte consumptionRadius = 1;
 
 	[SerializeField]
-	public float minimumMass;
+	public float minimumMass = 0f;
 
 	[SerializeField]
 	public bool showInStatusPanel = true;
@@ -312,18 +307,18 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 	public float capacityKG = float.PositiveInfinity;
 
 	[SerializeField]
-	public ElementConsumer.Configuration configuration;
+	public ElementConsumer.Configuration configuration = ElementConsumer.Configuration.Element;
 
 	[Serialize]
 	[NonSerialized]
-	public float consumedMass;
+	public float consumedMass = 0f;
 
 	[Serialize]
 	[NonSerialized]
-	public float consumedTemperature;
+	public float consumedTemperature = 0f;
 
 	[SerializeField]
-	public bool storeOnConsume;
+	public bool storeOnConsume = false;
 
 	[MyCmpGet]
 	public Storage storage;
@@ -342,7 +337,7 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 
 	public bool isRequired = true;
 
-	private bool consumptionEnabled;
+	private bool consumptionEnabled = false;
 
 	private bool hasAvailableCapacity = true;
 

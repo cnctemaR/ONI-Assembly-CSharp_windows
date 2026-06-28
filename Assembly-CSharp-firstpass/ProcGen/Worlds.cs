@@ -9,11 +9,16 @@ namespace ProcGen
 	{
 		public World GetWorld(string name)
 		{
+			World world;
 			if (this.worldCache.ContainsKey(name))
 			{
-				return this.worldCache[name];
+				world = this.worldCache[name];
 			}
-			return null;
+			else
+			{
+				world = null;
+			}
+			return world;
 		}
 
 		public List<string> GetNames()
@@ -38,7 +43,7 @@ namespace ProcGen
 					World world = YamlIO<World>.LoadFile(files[i]);
 					if (world != null)
 					{
-						text = text.Replace(".yaml", string.Empty);
+						text = text.Replace(".yaml", "");
 						this.worldCache[text] = world;
 					}
 					else

@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class MultiToggle : KMonoBehaviour, IPointerEnterHandler, IEventSystemHandler, IPointerExitHandler, IPointerClickHandler
+public class MultiToggle : KMonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler, IEventSystemHandler
 {
 	public int CurrentState
 	{
@@ -37,7 +37,7 @@ public class MultiToggle : KMonoBehaviour, IPointerEnterHandler, IEventSystemHan
 	{
 		if (this.play_sound_on_click)
 		{
-			if (this.states[this.state].on_click_override_sound_path == string.Empty)
+			if (this.states[this.state].on_click_override_sound_path == "")
 			{
 				KFMOD.PlayOneShot(GlobalAssets.GetSound("HUD_Click", false));
 			}
@@ -54,22 +54,24 @@ public class MultiToggle : KMonoBehaviour, IPointerEnterHandler, IEventSystemHan
 
 	public void OnPointerEnter(PointerEventData eventData)
 	{
-		if (!KInputManager.isFocused)
+		if (KInputManager.isFocused)
 		{
-			return;
-		}
-		KInputManager.SetUserActive();
-		if (this.states[this.state].use_color_on_hover && this.states[this.state].color_on_hover != this.states[this.state].color)
-		{
-			this.toggle_image.color = this.states[this.state].color_on_hover;
-		}
-		foreach (StatePresentationSetting statePresentationSetting in this.states[this.state].additional_display_settings)
-		{
-			if (!(statePresentationSetting.image_target == null))
+			KInputManager.SetUserActive();
+			if (this.states.Length != 0)
 			{
-				if (statePresentationSetting.use_color_on_hover)
+				if (this.states[this.state].use_color_on_hover && this.states[this.state].color_on_hover != this.states[this.state].color)
 				{
-					statePresentationSetting.image_target.color = statePresentationSetting.color_on_hover;
+					this.toggle_image.color = this.states[this.state].color_on_hover;
+				}
+				foreach (StatePresentationSetting statePresentationSetting in this.states[this.state].additional_display_settings)
+				{
+					if (!(statePresentationSetting.image_target == null))
+					{
+						if (statePresentationSetting.use_color_on_hover)
+						{
+							statePresentationSetting.image_target.color = statePresentationSetting.color_on_hover;
+						}
+					}
 				}
 			}
 		}
@@ -77,22 +79,24 @@ public class MultiToggle : KMonoBehaviour, IPointerEnterHandler, IEventSystemHan
 
 	public void OnPointerExit(PointerEventData eventData)
 	{
-		if (!KInputManager.isFocused)
+		if (KInputManager.isFocused)
 		{
-			return;
-		}
-		KInputManager.SetUserActive();
-		if (this.states[this.state].use_color_on_hover && this.states[this.state].color_on_hover != this.states[this.state].color)
-		{
-			this.toggle_image.color = this.states[this.state].color;
-		}
-		foreach (StatePresentationSetting statePresentationSetting in this.states[this.state].additional_display_settings)
-		{
-			if (!(statePresentationSetting.image_target == null))
+			KInputManager.SetUserActive();
+			if (this.states.Length != 0)
 			{
-				if (statePresentationSetting.use_color_on_hover)
+				if (this.states[this.state].use_color_on_hover && this.states[this.state].color_on_hover != this.states[this.state].color)
 				{
-					statePresentationSetting.image_target.color = statePresentationSetting.color;
+					this.toggle_image.color = this.states[this.state].color;
+				}
+				foreach (StatePresentationSetting statePresentationSetting in this.states[this.state].additional_display_settings)
+				{
+					if (!(statePresentationSetting.image_target == null))
+					{
+						if (statePresentationSetting.use_color_on_hover)
+						{
+							statePresentationSetting.image_target.color = statePresentationSetting.color;
+						}
+					}
 				}
 			}
 		}

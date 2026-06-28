@@ -6,9 +6,9 @@ public class Glom : StateMachineComponent<Glom.StatesInstance>
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		Vector3 position = this.transform.position;
+		Vector3 position = base.transform.position;
 		position.z = Grid.GetLayerZ(Grid.SceneLayer.Move);
-		this.transform.SetPosition(position);
+		base.transform.SetPosition(position);
 		this.Heading = Vector2.right;
 		base.smi.StartSM();
 	}
@@ -87,7 +87,7 @@ public class Glom : StateMachineComponent<Glom.StatesInstance>
 				}
 			});
 			this.alive.grounded.flee.InitializeStates(this.mover, this.alive.grounded.idling.idle);
-			this.alive.grounded.idling.idle.PlayAnim("idle", KAnim.PlayMode.Loop, null).Enter(delegate(Glom.StatesInstance smi)
+			this.alive.grounded.idling.idle.PlayAnim("idle", KAnim.PlayMode.Loop).Enter(delegate(Glom.StatesInstance smi)
 			{
 				if (smi.master.CellIsClean(Grid.PosToCell(smi.master)) && global::UnityEngine.Random.Range(0f, 100f) < smi.master.dirtyProbabilityPercent)
 				{

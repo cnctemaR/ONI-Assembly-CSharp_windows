@@ -47,17 +47,17 @@ namespace UnityEngine.UI
 			return this.highlightedSprite == other.highlightedSprite && this.pressedSprite == other.pressedSprite && this.disabledSprite == other.disabledSprite;
 		}
 
-		[SerializeField]
-		[FormerlySerializedAs("m_SelectedSprite")]
 		[FormerlySerializedAs("highlightedSprite")]
+		[FormerlySerializedAs("m_SelectedSprite")]
+		[SerializeField]
 		private Sprite m_HighlightedSprite;
 
-		[SerializeField]
 		[FormerlySerializedAs("pressedSprite")]
+		[SerializeField]
 		private Sprite m_PressedSprite;
 
-		[SerializeField]
 		[FormerlySerializedAs("disabledSprite")]
+		[SerializeField]
 		private Sprite m_DisabledSprite;
 	}
 }

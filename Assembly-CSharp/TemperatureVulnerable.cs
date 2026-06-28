@@ -5,16 +5,8 @@ using STRINGS;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable.StatesInstance>, IWiltCause, IGameObjectEffectDescriptor
+public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable.StatesInstance>, IGameObjectEffectDescriptor, IWiltCause
 {
-	WiltCondition.Condition[] IWiltCause.Conditions
-	{
-		get
-		{
-			return new WiltCondition.Condition[1];
-		}
-	}
-
 	private OccupyArea occupyArea
 	{
 		get
@@ -67,19 +59,32 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 		}
 	}
 
+	WiltCondition.Condition[] IWiltCause.Conditions
+	{
+		get
+		{
+			return new WiltCondition.Condition[1];
+		}
+	}
+
 	public string WiltStateString
 	{
 		get
 		{
+			string text;
 			if (base.smi.IsInsideState(base.smi.sm.warningCold))
 			{
-				return Db.Get().CreatureStatusItems.Cold_Crop.resolveStringCallback(CREATURES.STATUSITEMS.COLD_CROP.NAME, this);
+				text = Db.Get().CreatureStatusItems.Cold_Crop.resolveStringCallback(CREATURES.STATUSITEMS.COLD_CROP.NAME, this);
 			}
-			if (base.smi.IsInsideState(base.smi.sm.warningHot))
+			else if (base.smi.IsInsideState(base.smi.sm.warningHot))
 			{
-				return Db.Get().CreatureStatusItems.Hot_Crop.resolveStringCallback(CREATURES.STATUSITEMS.HOT_CROP.NAME, this);
+				text = Db.Get().CreatureStatusItems.Hot_Crop.resolveStringCallback(CREATURES.STATUSITEMS.HOT_CROP.NAME, this);
 			}
-			return string.Empty;
+			else
+			{
+				text = "";
+			}
+			return text;
 		}
 	}
 
@@ -123,12 +128,11 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 	public void UpdateTemperature(object data)
 	{
 		int num = Grid.PosToCell(base.gameObject);
-		if (!Grid.IsValidCell(num))
+		if (Grid.IsValidCell(num))
 		{
-			return;
+			base.smi.sm.internalTemp.Set(this.InternalTemperature, base.smi);
+			this.displayTemperatureAmount.value = this.InternalTemperature;
 		}
-		base.smi.sm.internalTemp.Set(this.InternalTemperature, base.smi);
-		this.displayTemperatureAmount.value = this.InternalTemperature;
 	}
 
 	private float GetAverageTemperature(int cell)
@@ -144,11 +148,16 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 			}
 			return true;
 		});
+		float num;
 		if (count > 0)
 		{
-			return temperature / (float)count;
+			num = temperature / (float)count;
 		}
-		return -1f;
+		else
+		{
+			num = -1f;
+		}
+		return num;
 	}
 
 	public List<Descriptor> GetDescriptors(GameObject go)
@@ -158,8 +167,6 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 			new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.REQUIRES_TEMPERATURE, GameUtil.GetFormattedTemperature(this.internalTemperatureWarning_Low, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, false), GameUtil.GetFormattedTemperature(this.internalTemperatureWarning_High, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true)), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.REQUIRES_TEMPERATURE, GameUtil.GetFormattedTemperature(this.internalTemperatureWarning_Low, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, false), GameUtil.GetFormattedTemperature(this.internalTemperatureWarning_High, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true)), Descriptor.DescriptorType.Requirement, false)
 		};
 	}
-
-	private const float minimumMassForReading = 0.1f;
 
 	private OccupyArea _occupyArea;
 
@@ -174,6 +181,8 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 	public float internalTemperatureWarning_High;
 
 	public float internalTemperatureLethal_High;
+
+	private const float minimumMassForReading = 0.1f;
 
 	[MyCmpReq]
 	private PrimaryElement primaryElement;
@@ -199,7 +208,7 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 			}
 		}
 
-		public bool hasMaturity;
+		public bool hasMaturity = false;
 	}
 
 	public class States : GameStateMachine<TemperatureVulnerable.States, TemperatureVulnerable.StatesInstance, TemperatureVulnerable>

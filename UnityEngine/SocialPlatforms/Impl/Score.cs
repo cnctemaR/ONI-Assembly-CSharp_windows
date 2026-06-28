@@ -10,7 +10,7 @@ namespace UnityEngine.SocialPlatforms.Impl
 		}
 
 		public Score(string leaderboardID, long value)
-			: this(leaderboardID, value, "0", DateTime.Now, string.Empty, -1)
+			: this(leaderboardID, value, "0", DateTime.Now, "", -1)
 		{
 		}
 

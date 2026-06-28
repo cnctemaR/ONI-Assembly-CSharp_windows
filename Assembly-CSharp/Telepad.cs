@@ -43,24 +43,23 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 
 	public void Update()
 	{
-		if (base.smi.IsColonyLost())
+		if (!base.smi.IsColonyLost())
 		{
-			return;
-		}
-		if (Immigration.Instance.ImmigrantsAvailable)
-		{
-			base.smi.sm.openPortal.Trigger(base.smi);
-			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.NewDuplicantsAvailable, this);
-		}
-		else
-		{
-			base.smi.sm.closePortal.Trigger(base.smi);
-			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.Wattson, this);
-		}
-		if (this.GetTimeRemaining() < -120f)
-		{
-			Messenger.Instance.QueueMessage(new DuplicantsLeftMessage());
-			Immigration.Instance.SpawnMinions();
+			if (Immigration.Instance.ImmigrantsAvailable)
+			{
+				base.smi.sm.openPortal.Trigger(base.smi);
+				this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.NewDuplicantsAvailable, this);
+			}
+			else
+			{
+				base.smi.sm.closePortal.Trigger(base.smi);
+				this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.Wattson, this);
+			}
+			if (this.GetTimeRemaining() < -120f)
+			{
+				Messenger.Instance.QueueMessage(new DuplicantsLeftMessage());
+				Immigration.Instance.SpawnMinions();
+			}
 		}
 	}
 
@@ -82,6 +81,7 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 		{
 			GameObject gameObject = Util.KInstantiate(EntityPrefabs.Instance.MinionPrefab, SceneOrganizer.Instance.GetFolder(Folder.Minions), null);
 			gameObject.transform.localPosition = Grid.CellToPosCBC(num, Grid.SceneLayer.Move);
+			gameObject.SetActive(true);
 			starting_stats.Apply(gameObject);
 			ChoreProvider component = gameObject.GetComponent<ChoreProvider>();
 			new EmoteChore(component, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", Telepad.PortalBirthAnim, null);
@@ -94,14 +94,14 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 		return Immigration.Instance.GetTimeRemaining();
 	}
 
-	private const float MAX_IMMIGRATION_TIME = 120f;
-
-	private const int NUM_METER_NOTCHES = 8;
-
 	[MyCmpReq]
 	private KSelectable selectable;
 
 	private MeterController meter;
+
+	private const float MAX_IMMIGRATION_TIME = 120f;
+
+	private const int NUM_METER_NOTCHES = 8;
 
 	private List<MinionStartingStats> minionStats;
 
@@ -141,9 +141,9 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 			{
 				smi.UpdateMeter();
 			}).EventTransition(GameHashes.OperationalChanged, this.unoperational, (Telepad.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational)
-				.PlayAnim("idle", KAnim.PlayMode.Once, null)
+				.PlayAnim("idle")
 				.OnSignal(this.openPortal, this.opening);
-			this.unoperational.PlayAnim("idle", KAnim.PlayMode.Once, null).Enter("StopImmigration", delegate(Telepad.StatesInstance smi)
+			this.unoperational.PlayAnim("idle").Enter("StopImmigration", delegate(Telepad.StatesInstance smi)
 			{
 				Immigration.Instance.Stop();
 				smi.master.meter.SetPositionPercent(0f);
@@ -155,11 +155,11 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 			this.opening.Enter(delegate(Telepad.StatesInstance smi)
 			{
 				smi.master.meter.SetPositionPercent(1f);
-			}).PlayAnim("working_pre", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.open);
+			}).PlayAnim("working_pre").OnAnimQueueComplete(this.open);
 			this.open.OnSignal(this.closePortal, this.close).Enter(delegate(Telepad.StatesInstance smi)
 			{
 				smi.master.meter.SetPositionPercent(1f);
-			}).PlayAnim("working_loop", KAnim.PlayMode.Loop, null)
+			}).PlayAnim("working_loop", KAnim.PlayMode.Loop)
 				.Transition(this.close, (Telepad.StatesInstance smi) => smi.IsColonyLost())
 				.EventTransition(GameHashes.OperationalChanged, this.close, (Telepad.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational);
 			this.close.Enter(delegate(Telepad.StatesInstance smi)

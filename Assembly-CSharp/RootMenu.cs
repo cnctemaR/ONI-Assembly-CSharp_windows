@@ -5,14 +5,6 @@ using UnityEngine.EventSystems;
 
 public class RootMenu : KScreen
 {
-	private PlanScreen planScreen
-	{
-		get
-		{
-			return UIRegistry.planScreen;
-		}
-	}
-
 	public static RootMenu Instance { get; private set; }
 
 	public override float GetSortKey()
@@ -115,38 +107,41 @@ public class RootMenu : KScreen
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (!e.Consumed && e.TryConsume(global::Action.Escape) && SelectTool.Instance.enabled)
+		if (!e.Consumed)
 		{
-			if (this.AreSubMenusOpen())
+			if (e.TryConsume(global::Action.Escape) && SelectTool.Instance.enabled)
 			{
-				KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Back", false));
-				this.CloseSubMenus();
-				SelectTool.Instance.Select(null, false);
-			}
-			else if (e.IsAction(global::Action.Escape))
-			{
-				if (!SelectTool.Instance.enabled)
+				if (this.AreSubMenusOpen())
 				{
-					KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
+					KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Back", false));
+					this.CloseSubMenus();
+					SelectTool.Instance.Select(null, false);
 				}
-				if (PlayerController.Instance.IsUsingDefaultTool())
+				else if (e.IsAction(global::Action.Escape))
 				{
-					if (SelectTool.Instance.selected != null)
+					if (!SelectTool.Instance.enabled)
 					{
-						SelectTool.Instance.Select(null, false);
+						KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
+					}
+					if (PlayerController.Instance.IsUsingDefaultTool())
+					{
+						if (SelectTool.Instance.selected != null)
+						{
+							SelectTool.Instance.Select(null, false);
+						}
+						else
+						{
+							CameraController.Instance.ForcePanningState(false);
+							this.TogglePauseScreen();
+						}
 					}
 					else
 					{
-						CameraController.Instance.ForcePanningState(false);
-						this.TogglePauseScreen();
+						Game.Instance.Trigger(288942073, null);
 					}
+					ToolMenu.Instance.ClearSelection();
+					SelectTool.Instance.Activate();
 				}
-				else
-				{
-					Game.Instance.Trigger(288942073, null);
-				}
-				ToolMenu.Instance.ClearSelection();
-				SelectTool.Instance.Activate();
 			}
 		}
 		base.OnKeyDown(e);
@@ -155,10 +150,16 @@ public class RootMenu : KScreen
 	public override void OnKeyUp(KButtonEvent e)
 	{
 		base.OnKeyUp(e);
-		if (!e.Consumed && e.TryConsume(global::Action.AlternateView) && this.tileScreenInst != null)
+		if (!e.Consumed)
 		{
-			this.tileScreenInst.Deactivate();
-			this.tileScreenInst = null;
+			if (e.TryConsume(global::Action.AlternateView))
+			{
+				if (this.tileScreenInst != null)
+				{
+					this.tileScreenInst.Deactivate();
+					this.tileScreenInst = null;
+				}
+			}
 		}
 	}
 
@@ -205,10 +206,13 @@ public class RootMenu : KScreen
 		foreach (Pickupable pickupable in Components.Pickupables)
 		{
 			KPrefabID kprefabID = pickupable.KPrefabID;
-			if (kprefabID.HasTag(GameTags.Filler) && hashSet.Add(kprefabID.PrefabTag))
+			if (kprefabID.HasTag(GameTags.Filler))
 			{
-				string text = kprefabID.GetComponent<PrimaryElement>().Element.id.ToString();
-				list.Add(new KToggleMenu.ToggleInfo(text, null, global::Action.NumActions));
+				if (hashSet.Add(kprefabID.PrefabTag))
+				{
+					string text = kprefabID.GetComponent<PrimaryElement>().Element.id.ToString();
+					list.Add(new KToggleMenu.ToggleInfo(text, null, global::Action.NumActions));
+				}
 			}
 		}
 		return list.ToArray();
@@ -230,7 +234,7 @@ public class RootMenu : KScreen
 
 	private List<KScreen> subMenus = new List<KScreen>();
 
-	private TileScreen tileScreenInst;
+	private TileScreen tileScreenInst = null;
 
-	public GameObject selectedGO;
+	public GameObject selectedGO = null;
 }

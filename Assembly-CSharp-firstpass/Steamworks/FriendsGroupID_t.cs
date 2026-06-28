@@ -25,16 +25,6 @@ namespace Steamworks
 			return this.m_FriendsGroupID.GetHashCode();
 		}
 
-		public bool Equals(FriendsGroupID_t other)
-		{
-			return this.m_FriendsGroupID == other.m_FriendsGroupID;
-		}
-
-		public int CompareTo(FriendsGroupID_t other)
-		{
-			return this.m_FriendsGroupID.CompareTo(other.m_FriendsGroupID);
-		}
-
 		public static bool operator ==(FriendsGroupID_t x, FriendsGroupID_t y)
 		{
 			return x.m_FriendsGroupID == y.m_FriendsGroupID;
@@ -53,6 +43,16 @@ namespace Steamworks
 		public static explicit operator short(FriendsGroupID_t that)
 		{
 			return that.m_FriendsGroupID;
+		}
+
+		public bool Equals(FriendsGroupID_t other)
+		{
+			return this.m_FriendsGroupID == other.m_FriendsGroupID;
+		}
+
+		public int CompareTo(FriendsGroupID_t other)
+		{
+			return this.m_FriendsGroupID.CompareTo(other.m_FriendsGroupID);
 		}
 
 		public static readonly FriendsGroupID_t Invalid = new FriendsGroupID_t(-1);

@@ -40,12 +40,17 @@ namespace FMOD.Studio
 		public RESULT unload()
 		{
 			RESULT result = Bank.FMOD_Studio_Bank_Unload(this.rawPtr);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			this.rawPtr = IntPtr.Zero;
-			return RESULT.OK;
+			else
+			{
+				this.rawPtr = IntPtr.Zero;
+				result2 = RESULT.OK;
+			}
+			return result2;
 		}
 
 		public RESULT loadSampleData()
@@ -104,32 +109,40 @@ namespace FMOD.Studio
 			array = null;
 			int num;
 			RESULT result = Bank.FMOD_Studio_Bank_GetEventCount(this.rawPtr, out num);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			if (num == 0)
+			else if (num == 0)
 			{
 				array = new EventDescription[0];
-				return result;
+				result2 = result;
 			}
-			IntPtr[] array2 = new IntPtr[num];
-			int num2;
-			result = Bank.FMOD_Studio_Bank_GetEventList(this.rawPtr, array2, num, out num2);
-			if (result != RESULT.OK)
+			else
 			{
-				return result;
+				IntPtr[] array2 = new IntPtr[num];
+				int num2;
+				result = Bank.FMOD_Studio_Bank_GetEventList(this.rawPtr, array2, num, out num2);
+				if (result != RESULT.OK)
+				{
+					result2 = result;
+				}
+				else
+				{
+					if (num2 > num)
+					{
+						num2 = num;
+					}
+					array = new EventDescription[num2];
+					for (int i = 0; i < num2; i++)
+					{
+						array[i] = new EventDescription(array2[i]);
+					}
+					result2 = RESULT.OK;
+				}
 			}
-			if (num2 > num)
-			{
-				num2 = num;
-			}
-			array = new EventDescription[num2];
-			for (int i = 0; i < num2; i++)
-			{
-				array[i] = new EventDescription(array2[i]);
-			}
-			return RESULT.OK;
+			return result2;
 		}
 
 		public RESULT getBusCount(out int count)
@@ -142,32 +155,40 @@ namespace FMOD.Studio
 			array = null;
 			int num;
 			RESULT result = Bank.FMOD_Studio_Bank_GetBusCount(this.rawPtr, out num);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			if (num == 0)
+			else if (num == 0)
 			{
 				array = new Bus[0];
-				return result;
+				result2 = result;
 			}
-			IntPtr[] array2 = new IntPtr[num];
-			int num2;
-			result = Bank.FMOD_Studio_Bank_GetBusList(this.rawPtr, array2, num, out num2);
-			if (result != RESULT.OK)
+			else
 			{
-				return result;
+				IntPtr[] array2 = new IntPtr[num];
+				int num2;
+				result = Bank.FMOD_Studio_Bank_GetBusList(this.rawPtr, array2, num, out num2);
+				if (result != RESULT.OK)
+				{
+					result2 = result;
+				}
+				else
+				{
+					if (num2 > num)
+					{
+						num2 = num;
+					}
+					array = new Bus[num2];
+					for (int i = 0; i < num2; i++)
+					{
+						array[i] = new Bus(array2[i]);
+					}
+					result2 = RESULT.OK;
+				}
 			}
-			if (num2 > num)
-			{
-				num2 = num;
-			}
-			array = new Bus[num2];
-			for (int i = 0; i < num2; i++)
-			{
-				array[i] = new Bus(array2[i]);
-			}
-			return RESULT.OK;
+			return result2;
 		}
 
 		public RESULT getVCACount(out int count)
@@ -180,32 +201,40 @@ namespace FMOD.Studio
 			array = null;
 			int num;
 			RESULT result = Bank.FMOD_Studio_Bank_GetVCACount(this.rawPtr, out num);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			if (num == 0)
+			else if (num == 0)
 			{
 				array = new VCA[0];
-				return result;
+				result2 = result;
 			}
-			IntPtr[] array2 = new IntPtr[num];
-			int num2;
-			result = Bank.FMOD_Studio_Bank_GetVCAList(this.rawPtr, array2, num, out num2);
-			if (result != RESULT.OK)
+			else
 			{
-				return result;
+				IntPtr[] array2 = new IntPtr[num];
+				int num2;
+				result = Bank.FMOD_Studio_Bank_GetVCAList(this.rawPtr, array2, num, out num2);
+				if (result != RESULT.OK)
+				{
+					result2 = result;
+				}
+				else
+				{
+					if (num2 > num)
+					{
+						num2 = num;
+					}
+					array = new VCA[num2];
+					for (int i = 0; i < num2; i++)
+					{
+						array[i] = new VCA(array2[i]);
+					}
+					result2 = RESULT.OK;
+				}
 			}
-			if (num2 > num)
-			{
-				num2 = num;
-			}
-			array = new VCA[num2];
-			for (int i = 0; i < num2; i++)
-			{
-				array[i] = new VCA(array2[i]);
-			}
-			return RESULT.OK;
+			return result2;
 		}
 
 		public RESULT getUserData(out IntPtr userData)

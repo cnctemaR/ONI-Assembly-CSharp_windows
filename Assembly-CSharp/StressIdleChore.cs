@@ -4,7 +4,7 @@ using UnityEngine;
 public class StressIdleChore : Chore<StressIdleChore.StatesInstance>
 {
 	public StressIdleChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.StressIdle, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.StressIdle, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
 	{
 		this.smi = new StressIdleChore.StatesInstance(this, target.gameObject);
 	}
@@ -24,7 +24,7 @@ public class StressIdleChore : Chore<StressIdleChore.StatesInstance>
 		{
 			default_state = this.idle;
 			base.Target(this.idler);
-			this.idle.PlayAnim("idle_default", KAnim.PlayMode.Loop, null);
+			this.idle.PlayAnim("idle_default", KAnim.PlayMode.Loop);
 		}
 
 		public StateMachine<StressIdleChore.States, StressIdleChore.StatesInstance, StressIdleChore, object>.TargetParameter idler;

@@ -50,15 +50,23 @@ namespace UnityEngine.UI.Extensions
 		{
 			get
 			{
-				if (!(this.overrideSprite == null))
+				Texture texture;
+				if (this.overrideSprite == null)
 				{
-					return this.overrideSprite.texture;
+					if (this.material != null && this.material.mainTexture != null)
+					{
+						texture = this.material.mainTexture;
+					}
+					else
+					{
+						texture = Graphic.s_WhiteTexture;
+					}
 				}
-				if (this.material != null && this.material.mainTexture != null)
+				else
 				{
-					return this.material.mainTexture;
+					texture = this.overrideSprite.texture;
 				}
-				return Graphic.s_WhiteTexture;
+				return texture;
 			}
 		}
 
@@ -86,7 +94,7 @@ namespace UnityEngine.UI.Extensions
 			for (int i = 0; i < vertices.Length; i++)
 			{
 				UIVertex simpleVert = UIVertex.simpleVert;
-				simpleVert.color = base.color;
+				simpleVert.color = this.color;
 				simpleVert.position = vertices[i];
 				simpleVert.uv0 = uvs[i];
 				array[i] = simpleVert;
@@ -114,11 +122,16 @@ namespace UnityEngine.UI.Extensions
 		{
 			get
 			{
+				float num;
 				if (this.overrideSprite == null)
 				{
-					return 0f;
+					num = 0f;
 				}
-				return this.overrideSprite.rect.size.x / this.pixelsPerUnit;
+				else
+				{
+					num = this.overrideSprite.rect.size.x / this.pixelsPerUnit;
+				}
+				return num;
 			}
 		}
 
@@ -142,11 +155,16 @@ namespace UnityEngine.UI.Extensions
 		{
 			get
 			{
+				float num;
 				if (this.overrideSprite == null)
 				{
-					return 0f;
+					num = 0f;
 				}
-				return this.overrideSprite.rect.size.y / this.pixelsPerUnit;
+				else
+				{
+					num = this.overrideSprite.rect.size.y / this.pixelsPerUnit;
+				}
+				return num;
 			}
 		}
 
@@ -168,34 +186,40 @@ namespace UnityEngine.UI.Extensions
 
 		public virtual bool IsRaycastLocationValid(Vector2 screenPoint, Camera eventCamera)
 		{
+			bool flag;
 			if (this.m_EventAlphaThreshold >= 1f)
 			{
-				return true;
-			}
-			Sprite overrideSprite = this.overrideSprite;
-			if (overrideSprite == null)
-			{
-				return true;
-			}
-			Vector2 vector;
-			RectTransformUtility.ScreenPointToLocalPointInRectangle(base.rectTransform, screenPoint, eventCamera, out vector);
-			Rect pixelAdjustedRect = base.GetPixelAdjustedRect();
-			vector.x += base.rectTransform.pivot.x * pixelAdjustedRect.width;
-			vector.y += base.rectTransform.pivot.y * pixelAdjustedRect.height;
-			vector = this.MapCoordinate(vector, pixelAdjustedRect);
-			Rect textureRect = overrideSprite.textureRect;
-			Vector2 vector2 = new Vector2(vector.x / textureRect.width, vector.y / textureRect.height);
-			float num = Mathf.Lerp(textureRect.x, textureRect.xMax, vector2.x) / (float)overrideSprite.texture.width;
-			float num2 = Mathf.Lerp(textureRect.y, textureRect.yMax, vector2.y) / (float)overrideSprite.texture.height;
-			bool flag;
-			try
-			{
-				flag = overrideSprite.texture.GetPixelBilinear(num, num2).a >= this.m_EventAlphaThreshold;
-			}
-			catch (UnityException ex)
-			{
-				Debug.LogError("Using clickAlphaThreshold lower than 1 on Image whose sprite texture cannot be read. " + ex.Message + " Also make sure to disable sprite packing for this sprite.", this);
 				flag = true;
+			}
+			else
+			{
+				Sprite overrideSprite = this.overrideSprite;
+				if (overrideSprite == null)
+				{
+					flag = true;
+				}
+				else
+				{
+					Vector2 vector;
+					RectTransformUtility.ScreenPointToLocalPointInRectangle(base.rectTransform, screenPoint, eventCamera, out vector);
+					Rect pixelAdjustedRect = base.GetPixelAdjustedRect();
+					vector.x += base.rectTransform.pivot.x * pixelAdjustedRect.width;
+					vector.y += base.rectTransform.pivot.y * pixelAdjustedRect.height;
+					vector = this.MapCoordinate(vector, pixelAdjustedRect);
+					Rect textureRect = overrideSprite.textureRect;
+					Vector2 vector2 = new Vector2(vector.x / textureRect.width, vector.y / textureRect.height);
+					float num = Mathf.Lerp(textureRect.x, textureRect.xMax, vector2.x) / (float)overrideSprite.texture.width;
+					float num2 = Mathf.Lerp(textureRect.y, textureRect.yMax, vector2.y) / (float)overrideSprite.texture.height;
+					try
+					{
+						flag = overrideSprite.texture.GetPixelBilinear(num, num2).a >= this.m_EventAlphaThreshold;
+					}
+					catch (UnityException ex)
+					{
+						Debug.LogError("Using clickAlphaThreshold lower than 1 on Image whose sprite texture cannot be read. " + ex.Message + " Also make sure to disable sprite packing for this sprite.", this);
+						flag = true;
+					}
+				}
 			}
 			return flag;
 		}
@@ -215,14 +239,11 @@ namespace UnityEngine.UI.Extensions
 				{
 					float num2 = rect.size[i] / num;
 					ref Vector4 ptr = ref border;
+					int num3;
+					border[num3 = i] = ptr[num3] * num2;
+					ptr = ref border;
 					int num4;
-					int num3 = (num4 = i);
-					float num5 = ptr[num4];
-					border[num3] = num5 * num2;
-					ref Vector4 ptr2 = ref border;
-					int num6 = (num4 = i + 2);
-					num5 = ptr2[num4];
-					border[num6] = num5 * num2;
+					border[num4 = i + 2] = ptr[num4] * num2;
 				}
 			}
 			return border;

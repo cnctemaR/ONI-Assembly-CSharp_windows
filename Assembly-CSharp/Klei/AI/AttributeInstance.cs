@@ -115,20 +115,25 @@ namespace Klei.AI
 
 		public float GetModifierContribution(AttributeModifier testModifier)
 		{
+			float num;
 			if (!testModifier.IsMultiplier)
 			{
-				return testModifier.Value;
+				num = testModifier.Value;
 			}
-			float num = this.Attribute.BaseValue;
-			for (int i = 0; i < this.Modifiers.Count; i++)
+			else
 			{
-				AttributeModifier modifier = this.Modifiers[i].Modifier;
-				if (!modifier.IsMultiplier)
+				float num2 = this.Attribute.BaseValue;
+				for (int i = 0; i < this.Modifiers.Count; i++)
 				{
-					num += modifier.Value;
+					AttributeModifier modifier = this.Modifiers[i].Modifier;
+					if (!modifier.IsMultiplier)
+					{
+						num2 += modifier.Value;
+					}
 				}
+				num = num2 * testModifier.Value;
 			}
-			return num * testModifier.Value;
+			return num;
 		}
 
 		public float GetPercentOfBase()
@@ -179,11 +184,16 @@ namespace Klei.AI
 		public string GetFormattedValue()
 		{
 			IAttributeFormatter formatter = this.Attribute.formatter;
+			string text;
 			if (formatter != null)
 			{
-				return formatter.GetFormattedAttribute(this);
+				text = formatter.GetFormattedAttribute(this);
 			}
-			return GameUtil.GetFormattedSimple(this.GetTotalValue(), GameUtil.TimeSlice.None, null);
+			else
+			{
+				text = GameUtil.GetFormattedSimple(this.GetTotalValue(), GameUtil.TimeSlice.None, null);
+			}
+			return text;
 		}
 
 		public string GetAttributeValueTooltip()
@@ -195,17 +205,17 @@ namespace Klei.AI
 			}
 			foreach (AttributeInstance.AttributeModifierEntry attributeModifierEntry in this.Modifiers)
 			{
-				string formattedString = attributeModifierEntry.Modifier.GetFormattedString(this.gameObject);
+				string formattedString = attributeModifierEntry.Modifier.GetFormattedString(base.gameObject);
 				if (formattedString != null)
 				{
 					text += string.Format(DUPLICANTS.ATTRIBUTES.MODIFIER_ENTRY, attributeModifierEntry.Modifier.Description, formattedString);
 				}
 			}
-			string text2 = string.Empty;
-			AttributeConverters component = this.gameObject.GetComponent<AttributeConverters>();
+			string text2 = "";
+			AttributeConverters component = base.gameObject.GetComponent<AttributeConverters>();
 			if (component != null && this.Attribute.converters.Count > 0)
 			{
-				foreach (AttributeConverterInstance attributeConverterInstance in this.gameObject.GetComponent<AttributeConverters>())
+				foreach (AttributeConverterInstance attributeConverterInstance in base.gameObject.GetComponent<AttributeConverters>())
 				{
 					if (attributeConverterInstance.converter.attribute == this.Attribute)
 					{

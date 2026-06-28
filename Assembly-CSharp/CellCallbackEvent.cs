@@ -11,12 +11,11 @@ public class CellCallbackEvent : CellEvent
 	[Conditional("UNITY_EDITOR")]
 	public void Log(int cell, int callback_id)
 	{
-		if (!this.enableLogging)
+		if (this.enableLogging)
 		{
-			return;
+			CellEventInstance cellEventInstance = new CellEventInstance(cell, callback_id, 0, this);
+			CellEventLogger.Instance.Add(cellEventInstance);
 		}
-		CellEventInstance cellEventInstance = new CellEventInstance(cell, callback_id, 0, this);
-		CellEventLogger.Instance.Add(cellEventInstance);
 	}
 
 	public override string GetDescription(EventInstanceBase ev)

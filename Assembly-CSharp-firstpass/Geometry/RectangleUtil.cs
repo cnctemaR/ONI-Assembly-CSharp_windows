@@ -51,9 +51,12 @@ namespace Geometry
 				{
 					num2 = verticalEvents[j].y;
 				}
-				else if (num == 0 && num3 > 0 && num2 != verticalEvents[j].y && x0 != x1)
+				else if (num == 0 && num3 > 0)
 				{
-					result.Add(new KRect(x0, num2, x1, verticalEvents[j].y));
+					if (num2 != verticalEvents[j].y && x0 != x1)
+					{
+						result.Add(new KRect(x0, num2, x1, verticalEvents[j].y));
+					}
 				}
 			}
 		}

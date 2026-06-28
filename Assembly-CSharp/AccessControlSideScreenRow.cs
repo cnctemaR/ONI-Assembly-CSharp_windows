@@ -34,19 +34,21 @@ public class AccessControlSideScreenRow : AccessControlSideScreenDoor
 		if (identity == null)
 		{
 			global::Debug.LogError("Invalid data received.", null);
-			return;
 		}
-		if (this.portraitInstance == null)
+		else
 		{
-			this.portraitInstance = Util.KInstantiateUI<CrewPortrait>(this.crewPortraitPrefab.gameObject, this.defaultButton.gameObject, false);
-			this.portraitInstance.SetAlpha(1f);
+			if (this.portraitInstance == null)
+			{
+				this.portraitInstance = Util.KInstantiateUI<CrewPortrait>(this.crewPortraitPrefab.gameObject, this.defaultButton.gameObject, false);
+				this.portraitInstance.SetAlpha(1f);
+			}
+			this.targetIdentity = identity;
+			this.portraitInstance.SetIdentityObject(identity, false);
+			this.portraitInstance.SetSubTitle((!isDefault) ? UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.USING_CUSTOM : UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.USING_DEFAULT);
+			this.defaultClickedCallback = null;
+			this.defaultButton.isOn = !isDefault;
+			this.defaultClickedCallback = onDefaultClick;
 		}
-		this.targetIdentity = identity;
-		this.portraitInstance.SetIdentityObject(identity, false);
-		this.portraitInstance.SetSubTitle((!isDefault) ? UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.USING_CUSTOM : UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.USING_DEFAULT);
-		this.defaultClickedCallback = null;
-		this.defaultButton.isOn = !isDefault;
-		this.defaultClickedCallback = onDefaultClick;
 	}
 
 	[SerializeField]

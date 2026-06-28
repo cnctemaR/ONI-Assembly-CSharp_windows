@@ -81,10 +81,6 @@ public class HygieneMonitor : GameStateMachine<HygieneMonitor, HygieneMonitor.In
 			{
 				base.master.GetComponent<Effects>().Add("Unclean", true);
 			}
-			if (element2.id == SimHashes.DirtyWater)
-			{
-				base.master.GetComponent<Effects>().Add("Unclean", true);
-			}
 		}
 
 		private Effects effects;

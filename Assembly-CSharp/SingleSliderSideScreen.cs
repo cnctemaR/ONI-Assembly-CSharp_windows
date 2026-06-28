@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class SingleSliderSideScreen : SideScreenContent
@@ -6,30 +7,10 @@ public class SingleSliderSideScreen : SideScreenContent
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.percentSlider.onReleaseHandle += delegate
+		for (int i = 0; i < this.sliderSets.Count; i++)
 		{
-			this.percentSlider.value = Mathf.Round(this.percentSlider.value * 100f) / 100f;
-			this.SetPercent();
-		};
-		this.percentSlider.onDrag += delegate
-		{
-			this.ReceiveValueFromSlider(this.percentSlider.value);
-		};
-		this.percentSlider.onMove += delegate
-		{
-			this.ReceiveValueFromSlider(this.percentSlider.value);
-		};
-		this.percentSlider.onPointerDown += delegate
-		{
-			this.ReceiveValueFromSlider(this.percentSlider.value);
-		};
-		this.numberInput.minValue = 0f;
-		this.numberInput.maxValue = 100f;
-		this.numberInput.onEndEdit += delegate
-		{
-			this.SetPercent();
-			this.ReceiveValueFromInput(this.numberInput.currentValue);
-		};
+			this.sliderSets[i].SetupSlider(i);
+		}
 	}
 
 	public override void SetTarget(GameObject new_target)
@@ -37,68 +18,127 @@ public class SingleSliderSideScreen : SideScreenContent
 		if (new_target == null)
 		{
 			global::Debug.LogError("Invalid gameObject received", null);
-			return;
 		}
-		this.target = new_target.GetComponent<ISingleSliderControl>();
-		if (this.target == null)
+		else
 		{
-			global::Debug.LogError("The gameObject received does not contain a Manual Generator component", null);
-			return;
+			this.target = new_target.GetComponent<ISliderControl>();
+			if (this.target == null)
+			{
+				global::Debug.LogError("The gameObject received does not contain a Manual Generator component", null);
+			}
+			else
+			{
+				this.titleKey = this.target.SliderTitleKey;
+				for (int i = 0; i < this.sliderSets.Count; i++)
+				{
+					this.sliderSets[i].SetTarget(this.target);
+				}
+			}
 		}
-		this.titleKey = this.target.SliderTitleKey;
-		this.percentSlider.value = this.target.SingleSliderPercent;
-		ToolTip component = this.percentSlider.handleRect.GetComponent<ToolTip>();
-		if (component != null)
+	}
+
+	private ISliderControl target;
+
+	public List<SingleSliderSideScreen.SliderSet> sliderSets;
+
+	[Serializable]
+	public class SliderSet
+	{
+		public void SetupSlider(int index)
 		{
-			component.SetSimpleTooltip(Strings.Get(this.target.SliderTooltipKey));
+			this.index = index;
+			this.valueSlider.onReleaseHandle += delegate
+			{
+				this.valueSlider.value = Mathf.Round(this.valueSlider.value * 10f) / 10f;
+				this.ReceiveValueFromSlider();
+			};
+			this.valueSlider.onDrag += delegate
+			{
+				this.ReceiveValueFromSlider();
+			};
+			this.valueSlider.onMove += delegate
+			{
+				this.ReceiveValueFromSlider();
+			};
+			this.valueSlider.onPointerDown += delegate
+			{
+				this.ReceiveValueFromSlider();
+			};
+			this.numberInput.onEndEdit += delegate
+			{
+				this.ReceiveValueFromInput();
+			};
 		}
-		this.numberInput.Activate();
-		this.UpdatePercentLabel(this.target.SingleSliderPercent);
-	}
 
-	private void ReceiveValueFromSlider(float input)
-	{
-		input = Mathf.Round(input * 100f) / 100f;
-		this.UpdatePercentLabel(input);
-	}
-
-	private void ReceiveValueFromInput(float input)
-	{
-		input = Mathf.Round(input * 10f) / 10f;
-		input /= 100f;
-		this.percentSlider.value = input;
-		this.SetPercent();
-		this.UpdatePercentLabel(input);
-	}
-
-	private void SetPercent()
-	{
-		float num = this.percentSlider.value;
-		if (num > 1f)
+		public void SetTarget(ISliderControl target)
 		{
-			num = 1f;
+			this.target = target;
+			ToolTip component = this.valueSlider.handleRect.GetComponent<ToolTip>();
+			if (component != null)
+			{
+				component.SetSimpleTooltip(Strings.Get(target.GetSliderTooltipKey(this.index)));
+			}
+			this.unitsLabel.text = target.SliderUnits;
+			this.minLabel.text = target.GetSliderMin(this.index) + target.SliderUnits;
+			this.maxLabel.text = target.GetSliderMax(this.index) + target.SliderUnits;
+			this.numberInput.minValue = target.GetSliderMin(this.index);
+			this.numberInput.maxValue = target.GetSliderMax(this.index);
+			this.valueSlider.minValue = target.GetSliderMin(this.index);
+			this.valueSlider.maxValue = target.GetSliderMax(this.index);
+			this.valueSlider.value = target.GetSliderValue(this.index);
+			this.SetValue(target.GetSliderValue(this.index));
+			if (this.index == 0)
+			{
+				this.numberInput.Activate();
+			}
 		}
-		else if (num < 0f)
+
+		private void ReceiveValueFromSlider()
 		{
-			num = 0f;
+			this.SetValue(this.valueSlider.value);
 		}
-		this.target.SingleSliderPercent = num;
+
+		private void ReceiveValueFromInput()
+		{
+			float num = Mathf.Round(this.numberInput.currentValue * 10f) / 10f;
+			this.valueSlider.value = num;
+			this.SetValue(num);
+		}
+
+		private void SetValue(float value)
+		{
+			float num = value;
+			if (num > this.target.GetSliderMax(this.index))
+			{
+				num = this.target.GetSliderMax(this.index);
+			}
+			else if (num < this.target.GetSliderMin(this.index))
+			{
+				num = this.target.GetSliderMin(this.index);
+			}
+			this.UpdateLabel(num);
+			this.target.SetSliderValue(num, this.index);
+		}
+
+		private void UpdateLabel(float value)
+		{
+			float num = Mathf.Round(value * 10f) / 10f;
+			this.numberInput.SetDisplayValue(num.ToString());
+		}
+
+		public KSlider valueSlider;
+
+		public KNumberInputField numberInput;
+
+		public LocText unitsLabel;
+
+		public LocText minLabel;
+
+		public LocText maxLabel;
+
+		[NonSerialized]
+		public int index;
+
+		private ISliderControl target;
 	}
-
-	private void UpdatePercentLabel(float value)
-	{
-		this.numberInput.SetDisplayValue((value * 100f).ToString("F0"));
-	}
-
-	private ISingleSliderControl target;
-
-	[SerializeField]
-	private KSlider percentSlider;
-
-	[Header("Input Field")]
-	[SerializeField]
-	private KNumberInputField numberInput;
-
-	[SerializeField]
-	private LocText unitsLabel;
 }

@@ -1,9 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 
 public abstract class Brain : KMonoBehaviour
 {
-	public event global::System.Action onPreUpdate;
-
 	public bool clearDebugStatus { get; set; }
 
 	protected override void OnPrefabInit()
@@ -17,6 +16,9 @@ public abstract class Brain : KMonoBehaviour
 		this.running = true;
 		Components.Brains.Add(this);
 	}
+
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	public event global::System.Action onPreUpdate;
 
 	public virtual void UpdateBrain()
 	{
@@ -42,14 +44,13 @@ public abstract class Brain : KMonoBehaviour
 
 	private void UpdateChores()
 	{
-		if (base.GetComponent<KPrefabID>().HasTag(GameTags.PreventChoreInterruption))
+		if (!base.GetComponent<KPrefabID>().HasTag(GameTags.PreventChoreInterruption))
 		{
-			return;
-		}
-		Chore.Precondition.Context context = default(Chore.Precondition.Context);
-		if (this.FindBetterChore(ref context))
-		{
-			base.GetComponent<ChoreDriver>().SetChore(context);
+			Chore.Precondition.Context context = default(Chore.Precondition.Context);
+			if (this.FindBetterChore(ref context))
+			{
+				base.GetComponent<ChoreDriver>().SetChore(context);
+			}
 		}
 	}
 

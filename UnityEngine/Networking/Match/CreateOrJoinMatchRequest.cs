@@ -2,7 +2,7 @@
 
 namespace UnityEngine.Networking.Match
 {
-	public class CreateOrJoinMatchRequest : CreateMatchRequest
+	internal class CreateOrJoinMatchRequest : CreateMatchRequest
 	{
 	}
 }

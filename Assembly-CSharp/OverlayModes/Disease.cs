@@ -34,16 +34,14 @@ namespace OverlayModes
 
 		protected override void OnSaveLoadRootRegistered(SaveLoadRoot item)
 		{
-			if (item == null)
+			if (!(item == null))
 			{
-				return;
+				KBatchedAnimController component = item.GetComponent<KBatchedAnimController>();
+				if (!(component == null))
+				{
+					InfraredVisualizerComponents.ClearOverlayColour(component);
+				}
 			}
-			KBatchedAnimController component = item.GetComponent<KBatchedAnimController>();
-			if (component == null)
-			{
-				return;
-			}
-			InfraredVisualizerComponents.ClearOverlayColour(component);
 		}
 
 		protected override void OnSaveLoadRootUnregistered(SaveLoadRoot item)
@@ -124,10 +122,13 @@ namespace OverlayModes
 					if (!(minionIdentity == null))
 					{
 						Vector2I vector2I3 = Grid.PosToXY(minionIdentity.transform.position);
-						if (vector2I <= vector2I3 && vector2I3 <= vector2I2 && !this.privateTargets.Contains(minionIdentity))
+						if (vector2I <= vector2I3 && vector2I3 <= vector2I2)
 						{
-							this.AddDiseaseUI(minionIdentity);
-							this.queuedAdds.Add(minionIdentity);
+							if (!this.privateTargets.Contains(minionIdentity))
+							{
+								this.AddDiseaseUI(minionIdentity);
+								this.queuedAdds.Add(minionIdentity);
+							}
 						}
 					}
 				}
@@ -245,7 +246,7 @@ namespace OverlayModes
 
 		private int cameraLayerMask;
 
-		private int freeDiseaseUI;
+		private int freeDiseaseUI = 0;
 
 		private List<GameObject> diseaseUIList = new List<GameObject>();
 

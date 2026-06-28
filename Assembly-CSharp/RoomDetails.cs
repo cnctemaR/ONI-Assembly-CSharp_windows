@@ -5,7 +5,7 @@ public class RoomDetails
 {
 	public static string RoomDetailString(Room room)
 	{
-		string text = string.Empty;
+		string text = "";
 		text = text + "<b>" + ROOMS.DETAILS.HEADER + "</b>";
 		RoomTypes.RoomType roomType = RoomTypes.GetRoomType(room);
 		foreach (RoomDetails.Detail detail in roomType.display_details)
@@ -18,11 +18,16 @@ public class RoomDetails
 	public static RoomDetails.Detail AVERAGE_TEMPERATURE = new RoomDetails.Detail(delegate(Room room)
 	{
 		float num = 0f;
+		string text;
 		if (num == 0f)
 		{
-			return string.Format(ROOMS.DETAILS.AVERAGE_TEMPERATURE.NAME, UI.OVERLAYS.TEMPERATURE.EXTREMECOLD);
+			text = string.Format(ROOMS.DETAILS.AVERAGE_TEMPERATURE.NAME, UI.OVERLAYS.TEMPERATURE.EXTREMECOLD);
 		}
-		return string.Format(ROOMS.DETAILS.AVERAGE_TEMPERATURE.NAME, GameUtil.GetFormattedTemperature(num, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
+		else
+		{
+			text = string.Format(ROOMS.DETAILS.AVERAGE_TEMPERATURE.NAME, GameUtil.GetFormattedTemperature(num, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
+		}
+		return text;
 	});
 
 	public static RoomDetails.Detail AVERAGE_ATMO_MASS = new RoomDetails.Detail(delegate(Room room)
@@ -42,7 +47,7 @@ public class RoomDetails
 
 	public static RoomDetails.Detail ASSIGNED_TO = new RoomDetails.Detail(delegate(Room room)
 	{
-		string text = string.Empty;
+		string text2 = "";
 		foreach (BuildingComplete buildingComplete in room.GetPrimaryBuildings())
 		{
 			if (!(buildingComplete == null))
@@ -51,20 +56,20 @@ public class RoomDetails
 				IAssignableIdentity assignee = component.assignee;
 				if (assignee == null)
 				{
-					text += ((!(text == string.Empty)) ? ("\n<color=#BCBCBC>    • " + buildingComplete.GetProperName() + ": " + ROOMS.DETAILS.ASSIGNED_TO.UNASSIGNED) : ("<color=#BCBCBC>    • " + buildingComplete.GetProperName() + ": " + ROOMS.DETAILS.ASSIGNED_TO.UNASSIGNED));
-					text += "</color>";
+					text2 += ((!(text2 == "")) ? ("\n<color=#BCBCBC>    • " + buildingComplete.GetProperName() + ": " + ROOMS.DETAILS.ASSIGNED_TO.UNASSIGNED) : ("<color=#BCBCBC>    • " + buildingComplete.GetProperName() + ": " + ROOMS.DETAILS.ASSIGNED_TO.UNASSIGNED));
+					text2 += "</color>";
 				}
 				else
 				{
-					text += ((!(text == string.Empty)) ? ("\n    • " + buildingComplete.GetProperName() + ": " + assignee.GetProperName()) : ("    • " + buildingComplete.GetProperName() + ": " + assignee.GetProperName()));
+					text2 += ((!(text2 == "")) ? ("\n    • " + buildingComplete.GetProperName() + ": " + assignee.GetProperName()) : ("    • " + buildingComplete.GetProperName() + ": " + assignee.GetProperName()));
 				}
 			}
 		}
-		if (text == string.Empty)
+		if (text2 == "")
 		{
-			text = ROOMS.DETAILS.ASSIGNED_TO.UNASSIGNED;
+			text2 = ROOMS.DETAILS.ASSIGNED_TO.UNASSIGNED;
 		}
-		return string.Format(ROOMS.DETAILS.ASSIGNED_TO.NAME, text);
+		return string.Format(ROOMS.DETAILS.ASSIGNED_TO.NAME, text2);
 	});
 
 	public static RoomDetails.Detail SIZE = new RoomDetails.Detail((Room room) => string.Format(ROOMS.DETAILS.SIZE.NAME, room.cavity.numCells));

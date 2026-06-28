@@ -32,13 +32,18 @@ namespace TMPro
 		private bool InternalRegisterCanvasElementForLayoutRebuild(ICanvasElement element)
 		{
 			int instanceID = (element as global::UnityEngine.Object).GetInstanceID();
+			bool flag;
 			if (this.m_LayoutQueueLookup.ContainsKey(instanceID))
 			{
-				return false;
+				flag = false;
 			}
-			this.m_LayoutQueueLookup[instanceID] = instanceID;
-			this.m_LayoutRebuildQueue.Add(element);
-			return true;
+			else
+			{
+				this.m_LayoutQueueLookup[instanceID] = instanceID;
+				this.m_LayoutRebuildQueue.Add(element);
+				flag = true;
+			}
+			return flag;
 		}
 
 		public static void RegisterCanvasElementForGraphicRebuild(ICanvasElement element)
@@ -49,13 +54,18 @@ namespace TMPro
 		private bool InternalRegisterCanvasElementForGraphicRebuild(ICanvasElement element)
 		{
 			int instanceID = (element as global::UnityEngine.Object).GetInstanceID();
+			bool flag;
 			if (this.m_GraphicQueueLookup.ContainsKey(instanceID))
 			{
-				return false;
+				flag = false;
 			}
-			this.m_GraphicQueueLookup[instanceID] = instanceID;
-			this.m_GraphicRebuildQueue.Add(element);
-			return true;
+			else
+			{
+				this.m_GraphicQueueLookup[instanceID] = instanceID;
+				this.m_GraphicRebuildQueue.Add(element);
+				flag = true;
+			}
+			return flag;
 		}
 
 		private void PerformUpdateForCanvasRendererObjects()

@@ -4,7 +4,7 @@ using UnityEngine;
 public class EntombedChore : Chore<EntombedChore.StatesInstance>
 {
 	public EntombedChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.Entombed, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.Entombed, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
 	{
 		this.smi = new EntombedChore.StatesInstance(this, target.gameObject);
 	}
@@ -35,8 +35,8 @@ public class EntombedChore : Chore<EntombedChore.StatesInstance>
 			{
 				smi.UpdateFaceEntombed();
 			}).ToggleStatusItem(Db.Get().DuplicantStatusItems.EntombedChore, null);
-			this.entombedface.PlayAnim("entombed_ceiling", KAnim.PlayMode.Loop, null).ParamTransition<bool>(this.isFaceEntombed, this.entombedbody, (EntombedChore.StatesInstance smi, bool p) => !p);
-			this.entombedbody.PlayAnim("entombed_floor", KAnim.PlayMode.Loop, null).StopMoving().ParamTransition<bool>(this.isFaceEntombed, this.entombedface, (EntombedChore.StatesInstance smi, bool p) => p);
+			this.entombedface.PlayAnim("entombed_ceiling", KAnim.PlayMode.Loop).ParamTransition<bool>(this.isFaceEntombed, this.entombedbody, (EntombedChore.StatesInstance smi, bool p) => !p);
+			this.entombedbody.PlayAnim("entombed_floor", KAnim.PlayMode.Loop).StopMoving().ParamTransition<bool>(this.isFaceEntombed, this.entombedface, (EntombedChore.StatesInstance smi, bool p) => p);
 		}
 
 		public StateMachine<EntombedChore.States, EntombedChore.StatesInstance, EntombedChore, object>.BoolParameter isFaceEntombed;

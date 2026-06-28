@@ -61,7 +61,7 @@ public class SaveScreen : KModalScreen
 			ScreenPrefabs.Instance.ConfirmDoAction(string.Format(UI.FRONTEND.SAVESCREEN.OVERWRITEMESSAGE, Path.GetFileNameWithoutExtension(filename)), delegate
 			{
 				this.DoSave(filename);
-			}, this.transform.parent);
+			}, base.transform.parent);
 		}
 		else
 		{
@@ -81,20 +81,21 @@ public class SaveScreen : KModalScreen
 		{
 			IOException ex2 = ex;
 			IOException e = ex2;
-			ConfirmDialogScreen component = Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, this.transform.parent.gameObject, true).GetComponent<ConfirmDialogScreen>();
+			SaveScreen $this = this;
+			ConfirmDialogScreen component = Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.transform.parent.gameObject, true).GetComponent<ConfirmDialogScreen>();
 			component.PopupConfirmDialog(string.Format(UI.FRONTEND.SAVESCREEN.IO_ERROR, e.ToString()), delegate
 			{
-				this.Deactivate();
+				$this.Deactivate();
 			}, null, UI.FRONTEND.SAVESCREEN.REPORT_BUG, delegate
 			{
-				KCrashReporter.ReportError(e.Message, e.StackTrace.ToString(), null, null, string.Empty);
+				KCrashReporter.ReportError(e.Message, e.StackTrace.ToString(), null, null, "");
 			}, null, null, null);
 		}
 	}
 
 	public void OnClickNewSave()
 	{
-		FileNameDialog fileNameDialog = (FileNameDialog)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.FileNameDialog.gameObject, this.transform.parent.gameObject);
+		FileNameDialog fileNameDialog = (FileNameDialog)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.FileNameDialog.gameObject, base.transform.parent.gameObject);
 		fileNameDialog.onConfirm = delegate(string filename)
 		{
 			filename = Path.Combine(SaveLoader.GetSavePrefix(), filename);

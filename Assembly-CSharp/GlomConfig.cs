@@ -8,9 +8,15 @@ public class GlomConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
+		string text = "Glom";
+		string text2 = global::STRINGS.CREATURES.SPECIES.GLOM.NAME;
+		string text3 = global::STRINGS.CREATURES.SPECIES.GLOM.DESC;
+		float num = 25f;
+		KAnimFile anim = Assets.GetAnim("glom_kanim");
+		string text4 = "idle";
 		EffectorValues tier = DECOR.BONUS.TIER0;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("Glom", global::STRINGS.CREATURES.SPECIES.GLOM.NAME, global::STRINGS.CREATURES.SPECIES.GLOM.DESC, 25f, Assets.GetAnim("glom_kanim"), "idle", Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, 25f, "HatchNavGrid", NavType.Floor, 2f, string.Empty, 0, true, true, 30f, 293.15f, 393.15f, 273.15f, 423.15f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, anim, text4, Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, 25f, "HatchNavGrid", NavType.Floor, 2f, "", 0, true, true, 30f, 293.15f, 393.15f, 273.15f, 423.15f);
 		Glom glom = gameObject.UpdateComponentRequirement<Glom>(true);
 		glom.dirtyEmitElement = SimHashes.ContaminatedOxygen;
 		glom.dirtyProbabilityPercent = 25f;
@@ -20,6 +26,7 @@ public class GlomConfig : IEntityConfig
 		glom.emitDiseaseIdx = Db.Get().Diseases.GetIndex("SlimeLung");
 		glom.emitDiseasePerKg = 1000;
 		gameObject.UpdateComponentRequirement<Trappable>(true);
+		gameObject.UpdateComponentRequirement<FloorSwitchActivator>(true);
 		gameObject.UpdateComponentRequirement<LoopingSounds>(true);
 		LoopingSounds component = gameObject.GetComponent<LoopingSounds>();
 		component.updatePosition = true;
@@ -31,8 +38,8 @@ public class GlomConfig : IEntityConfig
 		SoundEventVolumeCache.instance.AddVolume("glom_kanim", "Morb_jump", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("glom_kanim", "Morb_land", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("glom_kanim", "Morb_expel", NOISE_POLLUTION.CREATURES.TIER4);
-		GameObject gameObject2 = EntityTemplates.CreateAndRegisterPreview("Glom_Preview", Assets.GetAnim("glom_kanim"), "idle", ObjectLayer.NumLayers, 1, 1);
-		GameObject gameObject3 = EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, string.Format(global::STRINGS.CREATURES.BAGGED_NAME_FMT, global::STRINGS.CREATURES.SPECIES.GLOM.NAME), string.Format(global::STRINGS.CREATURES.BAGGED_DESC_FMT, global::STRINGS.CREATURES.SPECIES.GLOM.NAME), Assets.GetAnim("creature_interacts_trap_glom_kanim"), "working_pre", new Tag("Glom_Preview"));
+		EntityTemplates.CreateAndRegisterPreview("Glom_Preview", Assets.GetAnim("glom_kanim"), "idle", ObjectLayer.NumLayers, 1, 1);
+		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, string.Format(global::STRINGS.CREATURES.BAGGED_NAME_FMT, global::STRINGS.CREATURES.SPECIES.GLOM.NAME), string.Format(global::STRINGS.CREATURES.BAGGED_DESC_FMT, global::STRINGS.CREATURES.SPECIES.GLOM.NAME), Assets.GetAnim("creature_interacts_trap_glom_kanim"), "working_pre", new Tag("Glom_Preview"));
 		return gameObject;
 	}
 

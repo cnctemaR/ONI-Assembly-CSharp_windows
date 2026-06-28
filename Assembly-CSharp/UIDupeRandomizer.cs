@@ -23,38 +23,43 @@ public class UIDupeRandomizer : MonoBehaviour
 
 	private void Apply(KBatchedAnimController minon, ref UIDupeRandomizer.AnimChoice anim)
 	{
+		int num = global::UnityEngine.Random.Range(0, Db.Get().Personalities.Count);
+		Personality personality = Db.Get().Personalities[num];
 		if (anim.curHair.IsValid())
 		{
 			minon.RemoveSymbolOverride(anim.curHair);
 		}
-		anim.curHair = this.AddRandomAccessory(minon, this.slots.Hair.accessories);
+		anim.curHair = UIDupeRandomizer.AddAccessory(minon, this.slots.Hair.accessories[personality.hair]);
 		if (anim.curEyes.IsValid())
 		{
 			minon.RemoveSymbolOverride(anim.curEyes);
 		}
-		anim.curEyes = this.AddRandomAccessory(minon, this.slots.Eyes.accessories);
+		anim.curEyes = UIDupeRandomizer.AddAccessory(minon, this.slots.Eyes.accessories[personality.eyes]);
 		if (anim.curHeadShape.IsValid())
 		{
 			minon.RemoveSymbolOverride(anim.curHeadShape);
 		}
-		anim.curHeadShape = this.AddRandomAccessory(minon, this.slots.HeadShape.accessories);
+		anim.curHeadShape = UIDupeRandomizer.AddAccessory(minon, this.slots.HeadShape.accessories[personality.headShape]);
 		if (anim.curMouth.IsValid())
 		{
 			minon.RemoveSymbolOverride(anim.curMouth);
 		}
-		anim.curMouth = this.AddRandomAccessory(minon, this.slots.Mouth.accessories);
+		anim.curMouth = UIDupeRandomizer.AddAccessory(minon, this.slots.Mouth.accessories[personality.mouth]);
 		if (anim.curTorso.IsValid())
 		{
 			minon.RemoveSymbolOverride(anim.curTorso);
 			minon.RemoveSymbolOverride(anim.curArm);
 		}
-		int num = global::UnityEngine.Random.Range(1, this.slots.Body.accessories.Count);
-		anim.curTorso = UIDupeRandomizer.AddAccessory(minon, this.slots.Body.accessories[num]);
-		anim.curArm = UIDupeRandomizer.AddAccessory(minon, this.slots.Arm.accessories[num]);
-		KAnimFile anim2 = Assets.GetAnim("body_oxygen_kanim");
-		minon.AddBuildOverride(anim2, true, false);
-		KAnimFile anim3 = Assets.GetAnim("helm_oxygen_kanim");
-		minon.AddBuildOverride(anim3, true, false);
+		int body = personality.body;
+		anim.curTorso = UIDupeRandomizer.AddAccessory(minon, this.slots.Body.accessories[body]);
+		anim.curArm = UIDupeRandomizer.AddAccessory(minon, this.slots.Arm.accessories[body]);
+		if (global::UnityEngine.Random.value < 0.1f)
+		{
+			KAnimFile anim2 = Assets.GetAnim("body_oxygen_kanim");
+			minon.AddBuildOverride(anim2, true, false);
+			KAnimFile anim3 = Assets.GetAnim("helm_oxygen_kanim");
+			minon.AddBuildOverride(anim3, true, false);
+		}
 		if (!anim.overrideSet)
 		{
 			minon.AddAnimOverrides(anim.target_minion_anim, 0f);
@@ -84,7 +89,7 @@ public class UIDupeRandomizer : MonoBehaviour
 
 	public UIDupeRandomizer.AnimChoice[] anims;
 
-	private AccessorySlots slots;
+	private AccessorySlots slots = null;
 
 	[Serializable]
 	public struct AnimChoice

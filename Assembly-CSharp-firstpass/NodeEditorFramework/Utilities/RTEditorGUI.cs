@@ -17,24 +17,34 @@ namespace NodeEditorFramework.Utilities
 
 		public static Rect PrefixLabel(Rect totalPos, GUIContent label, GUIStyle style)
 		{
+			Rect rect;
 			if (label == GUIContent.none)
 			{
-				return totalPos;
+				rect = totalPos;
 			}
-			Rect rect = new Rect(totalPos.x + RTEditorGUI.indent, totalPos.y, Mathf.Min(RTEditorGUI.getLabelWidth() - RTEditorGUI.indent, totalPos.width / 2f), totalPos.height);
-			GUI.Label(rect, label, style);
-			return new Rect(totalPos.x + RTEditorGUI.getLabelWidth(), totalPos.y, totalPos.width - RTEditorGUI.getLabelWidth(), totalPos.height);
+			else
+			{
+				Rect rect2 = new Rect(totalPos.x + RTEditorGUI.indent, totalPos.y, Mathf.Min(RTEditorGUI.getLabelWidth() - RTEditorGUI.indent, totalPos.width / 2f), totalPos.height);
+				GUI.Label(rect2, label, style);
+				rect = new Rect(totalPos.x + RTEditorGUI.getLabelWidth(), totalPos.y, totalPos.width - RTEditorGUI.getLabelWidth(), totalPos.height);
+			}
+			return rect;
 		}
 
 		public static Rect PrefixLabel(Rect totalPos, float percentage, GUIContent label, GUIStyle style)
 		{
+			Rect rect;
 			if (label == GUIContent.none)
 			{
-				return totalPos;
+				rect = totalPos;
 			}
-			Rect rect = new Rect(totalPos.x + RTEditorGUI.indent, totalPos.y, totalPos.width * percentage, totalPos.height);
-			GUI.Label(rect, label, style);
-			return new Rect(totalPos.x + totalPos.width * percentage, totalPos.y, totalPos.width * (1f - percentage), totalPos.height);
+			else
+			{
+				Rect rect2 = new Rect(totalPos.x + RTEditorGUI.indent, totalPos.y, totalPos.width * percentage, totalPos.height);
+				GUI.Label(rect2, label, style);
+				rect = new Rect(totalPos.x + totalPos.width * percentage, totalPos.y, totalPos.width * (1f - percentage), totalPos.height);
+			}
+			return rect;
 		}
 
 		private static Rect IndentedRect(Rect source)
@@ -44,20 +54,30 @@ namespace NodeEditorFramework.Utilities
 
 		private static float getLabelWidth()
 		{
+			float num;
 			if (RTEditorGUI.labelWidth == 0f)
 			{
-				return 150f;
+				num = 150f;
 			}
-			return RTEditorGUI.labelWidth;
+			else
+			{
+				num = RTEditorGUI.labelWidth;
+			}
+			return num;
 		}
 
 		private static float getFieldWidth()
 		{
+			float num;
 			if (RTEditorGUI.fieldWidth == 0f)
 			{
-				return 50f;
+				num = 50f;
 			}
-			return RTEditorGUI.fieldWidth;
+			else
+			{
+				num = RTEditorGUI.fieldWidth;
+			}
+			return num;
 		}
 
 		private static Rect GetFieldRect(GUIContent label, GUIStyle style, params GUILayoutOption[] options)
@@ -306,91 +326,104 @@ namespace NodeEditorFramework.Utilities
 		public static float FloatField(Rect pos, float value, params GUILayoutOption[] options)
 		{
 			int num = GUIUtility.GetControlID("FloatField".GetHashCode(), FocusType.Keyboard, pos) + 1;
+			float num2;
 			if (num == 0)
 			{
-				return value;
+				num2 = value;
 			}
-			bool flag = RTEditorGUI.activeFloatField == num;
-			bool flag2 = num == GUIUtility.keyboardControl;
-			if (flag2 && flag && RTEditorGUI.activeFloatFieldLastValue != value)
+			else
 			{
-				RTEditorGUI.activeFloatFieldLastValue = value;
-				RTEditorGUI.activeFloatFieldString = value.ToString();
-			}
-			string text = ((!flag) ? value.ToString() : RTEditorGUI.activeFloatFieldString);
-			string text2 = GUI.TextField(pos, text);
-			if (flag)
-			{
-				RTEditorGUI.activeFloatFieldString = text2;
-			}
-			bool flag3 = true;
-			if (text2 == string.Empty)
-			{
-				value = (RTEditorGUI.activeFloatFieldLastValue = 0f);
-			}
-			else if (text2 != value.ToString())
-			{
-				float num2;
-				flag3 = float.TryParse(text2, out num2);
-				if (flag3)
+				bool flag = RTEditorGUI.activeFloatField == num;
+				bool flag2 = num == GUIUtility.keyboardControl;
+				if (flag2 && flag && RTEditorGUI.activeFloatFieldLastValue != value)
 				{
-					value = (RTEditorGUI.activeFloatFieldLastValue = num2);
+					RTEditorGUI.activeFloatFieldLastValue = value;
+					RTEditorGUI.activeFloatFieldString = value.ToString();
 				}
-			}
-			if (flag2 && !flag)
-			{
-				RTEditorGUI.activeFloatField = num;
-				RTEditorGUI.activeFloatFieldString = text2;
-				RTEditorGUI.activeFloatFieldLastValue = value;
-			}
-			else if (!flag2 && flag)
-			{
-				RTEditorGUI.activeFloatField = -1;
-				if (!flag3)
+				string text = ((!flag) ? value.ToString() : RTEditorGUI.activeFloatFieldString);
+				string text2 = GUI.TextField(pos, text);
+				if (flag)
 				{
-					value = text2.ForceParse();
+					RTEditorGUI.activeFloatFieldString = text2;
 				}
+				bool flag3 = true;
+				if (text2 == "")
+				{
+					value = (RTEditorGUI.activeFloatFieldLastValue = 0f);
+				}
+				else if (text2 != value.ToString())
+				{
+					float num3;
+					flag3 = float.TryParse(text2, out num3);
+					if (flag3)
+					{
+						value = (RTEditorGUI.activeFloatFieldLastValue = num3);
+					}
+				}
+				if (flag2 && !flag)
+				{
+					RTEditorGUI.activeFloatField = num;
+					RTEditorGUI.activeFloatFieldString = text2;
+					RTEditorGUI.activeFloatFieldLastValue = value;
+				}
+				else if (!flag2 && flag)
+				{
+					RTEditorGUI.activeFloatField = -1;
+					if (!flag3)
+					{
+						value = text2.ForceParse();
+					}
+				}
+				num2 = value;
 			}
-			return value;
+			return num2;
 		}
 
 		public static float ForceParse(this string str)
 		{
 			float num;
+			float num2;
 			if (float.TryParse(str, out num))
 			{
-				return num;
+				num2 = num;
 			}
-			bool flag = false;
-			List<char> list = new List<char>(str);
-			for (int i = 0; i < list.Count; i++)
+			else
 			{
-				UnicodeCategory unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(str[i]);
-				if (unicodeCategory != UnicodeCategory.DecimalDigitNumber)
+				bool flag = false;
+				List<char> list = new List<char>(str);
+				for (int i = 0; i < list.Count; i++)
 				{
-					list.RemoveRange(i, list.Count - i);
-					break;
-				}
-				if (str[i] == '.')
-				{
-					if (flag)
+					UnicodeCategory unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(str[i]);
+					if (unicodeCategory != UnicodeCategory.DecimalDigitNumber)
 					{
 						list.RemoveRange(i, list.Count - i);
 						break;
 					}
-					flag = true;
+					if (str[i] == '.')
+					{
+						if (flag)
+						{
+							list.RemoveRange(i, list.Count - i);
+							break;
+						}
+						flag = true;
+					}
+				}
+				if (list.Count == 0)
+				{
+					num2 = 0f;
+				}
+				else
+				{
+					str = new string(list.ToArray());
+					if (!float.TryParse(str, out num))
+					{
+						global::Debug.LogError("Could not parse " + str, null);
+					}
+					num2 = num;
 				}
 			}
-			if (list.Count == 0)
-			{
-				return 0f;
-			}
-			str = new string(list.ToArray());
-			if (!float.TryParse(str, out num))
-			{
-				global::Debug.LogError("Could not parse " + str, null);
-			}
-			return num;
+			return num2;
 		}
 
 		public static T ObjectField<T>(T obj, bool allowSceneObjects) where T : global::UnityEngine.Object
@@ -462,7 +495,7 @@ namespace NodeEditorFramework.Utilities
 
 		public static int Popup(int selected, string[] displayedOptions)
 		{
-			return RTEditorGUI.Popup(string.Empty, selected, displayedOptions);
+			return RTEditorGUI.Popup("", selected, displayedOptions);
 		}
 
 		public static void DrawTexture(Texture texture, int texSize, GUIStyle style, params GUILayoutOption[] options)
@@ -508,40 +541,37 @@ namespace NodeEditorFramework.Utilities
 
 		public static void DrawBezier(Vector2 startPos, Vector2 endPos, Vector2 startTan, Vector2 endTan, Color col, Texture2D tex, float width = 1f)
 		{
-			if (Event.current.type != EventType.Repaint)
+			if (Event.current.type == EventType.Repaint)
 			{
-				return;
+				int num = RTEditorGUI.CalculateBezierSegmentCount(startPos, endPos, startTan, endTan);
+				RTEditorGUI.DrawBezier(startPos, endPos, startTan, endTan, col, tex, num, width);
 			}
-			int num = RTEditorGUI.CalculateBezierSegmentCount(startPos, endPos, startTan, endTan);
-			RTEditorGUI.DrawBezier(startPos, endPos, startTan, endTan, col, tex, num, width);
 		}
 
 		public static void DrawBezier(Vector2 startPos, Vector2 endPos, Vector2 startTan, Vector2 endTan, Color col, Texture2D tex, int segmentCount, float width)
 		{
-			if (Event.current.type != EventType.Repaint && Event.current.type != EventType.KeyDown)
+			if (Event.current.type == EventType.Repaint || Event.current.type == EventType.KeyDown)
 			{
-				return;
+				Vector2[] array = new Vector2[segmentCount + 1];
+				for (int i = 0; i <= segmentCount; i++)
+				{
+					array[i] = RTEditorGUI.GetBezierPoint((float)i / (float)segmentCount, startPos, endPos, startTan, endTan);
+				}
+				RTEditorGUI.DrawPolygonLine(array, col, tex, width);
 			}
-			Vector2[] array = new Vector2[segmentCount + 1];
-			for (int i = 0; i <= segmentCount; i++)
-			{
-				array[i] = RTEditorGUI.GetBezierPoint((float)i / (float)segmentCount, startPos, endPos, startTan, endTan);
-			}
-			RTEditorGUI.DrawPolygonLine(array, col, tex, width);
 		}
 
 		public static void DrawBezier(Rect clippingRect, Vector2 startPos, Vector2 endPos, Vector2 startTan, Vector2 endTan, Color col, Texture2D tex, int segmentCount, float width)
 		{
-			if (Event.current.type != EventType.Repaint && Event.current.type != EventType.KeyDown)
+			if (Event.current.type == EventType.Repaint || Event.current.type == EventType.KeyDown)
 			{
-				return;
+				Vector2[] array = new Vector2[segmentCount + 1];
+				for (int i = 0; i <= segmentCount; i++)
+				{
+					array[i] = RTEditorGUI.GetBezierPoint((float)i / (float)segmentCount, startPos, endPos, startTan, endTan);
+				}
+				RTEditorGUI.DrawPolygonLine(clippingRect, array, col, tex, width);
 			}
-			Vector2[] array = new Vector2[segmentCount + 1];
-			for (int i = 0; i <= segmentCount; i++)
-			{
-				array[i] = RTEditorGUI.GetBezierPoint((float)i / (float)segmentCount, startPos, endPos, startTan, endTan);
-			}
-			RTEditorGUI.DrawPolygonLine(clippingRect, array, col, tex, width);
 		}
 
 		public static void DrawPolygonLine(Vector2[] points, Color col, Texture2D tex, float width = 1f)
@@ -551,63 +581,61 @@ namespace NodeEditorFramework.Utilities
 
 		public static void DrawPolygonLine(Rect clippingRect, Vector2[] points, Color col, Texture2D tex, float width = 1f)
 		{
-			if (Event.current.type != EventType.Repaint && Event.current.type != EventType.KeyDown)
+			if (Event.current.type == EventType.Repaint || Event.current.type == EventType.KeyDown)
 			{
-				return;
-			}
-			if (points.Length == 1)
-			{
-				return;
-			}
-			if (points.Length == 2)
-			{
-				RTEditorGUI.DrawLine(points[0], points[1], col, tex, width);
-			}
-			RTEditorGUI.SetupLineMat(tex, col);
-			GL.Begin(5);
-			GL.Color(Color.white);
-			float num = 0f;
-			clippingRect.y = num;
-			clippingRect.x = num;
-			Vector2 vector = points[0];
-			for (int i = 1; i < points.Length; i++)
-			{
-				Vector2 vector2 = points[i];
-				Vector2 vector3 = vector;
-				Vector2 vector4 = vector2;
-				bool flag;
-				bool flag2;
-				if (RTEditorGUI.SegmentRectIntersection(clippingRect, ref vector, ref vector2, out flag, out flag2))
+				if (points.Length != 1)
 				{
-					Vector2 vector5;
-					if (i < points.Length - 1)
+					if (points.Length == 2)
 					{
-						vector5 = RTEditorGUI.CalculatePointPerpendicular(vector3, vector4, points[i + 1]);
+						RTEditorGUI.DrawLine(points[0], points[1], col, tex, width);
 					}
-					else
-					{
-						vector5 = RTEditorGUI.CalculateLinePerpendicular(vector3, vector4);
-					}
-					if (flag)
-					{
-						GL.End();
-						GL.Begin(5);
-						RTEditorGUI.DrawLineSegment(vector, vector5 * width / 2f);
-					}
-					if (i == 1)
-					{
-						RTEditorGUI.DrawLineSegment(vector, RTEditorGUI.CalculateLinePerpendicular(vector, vector2) * width / 2f);
-					}
-					RTEditorGUI.DrawLineSegment(vector2, vector5 * width / 2f);
-				}
-				else if (flag2)
-				{
-					GL.End();
+					RTEditorGUI.SetupLineMat(tex, col);
 					GL.Begin(5);
+					GL.Color(Color.white);
+					float num = 0f;
+					clippingRect.y = num;
+					clippingRect.x = num;
+					Vector2 vector = points[0];
+					for (int i = 1; i < points.Length; i++)
+					{
+						Vector2 vector2 = points[i];
+						Vector2 vector3 = vector;
+						Vector2 vector4 = vector2;
+						bool flag;
+						bool flag2;
+						if (RTEditorGUI.SegmentRectIntersection(clippingRect, ref vector, ref vector2, out flag, out flag2))
+						{
+							Vector2 vector5;
+							if (i < points.Length - 1)
+							{
+								vector5 = RTEditorGUI.CalculatePointPerpendicular(vector3, vector4, points[i + 1]);
+							}
+							else
+							{
+								vector5 = RTEditorGUI.CalculateLinePerpendicular(vector3, vector4);
+							}
+							if (flag)
+							{
+								GL.End();
+								GL.Begin(5);
+								RTEditorGUI.DrawLineSegment(vector, vector5 * width / 2f);
+							}
+							if (i == 1)
+							{
+								RTEditorGUI.DrawLineSegment(vector, RTEditorGUI.CalculateLinePerpendicular(vector, vector2) * width / 2f);
+							}
+							RTEditorGUI.DrawLineSegment(vector2, vector5 * width / 2f);
+						}
+						else if (flag2)
+						{
+							GL.End();
+							GL.Begin(5);
+						}
+						vector = vector4;
+					}
+					GL.End();
 				}
-				vector = vector4;
 			}
-			GL.End();
 		}
 
 		private static int CalculateBezierSegmentCount(Vector2 startPos, Vector2 endPos, Vector2 startTan, Vector2 endTan)
@@ -647,11 +675,10 @@ namespace NodeEditorFramework.Utilities
 
 		public static void DrawLine(Vector2 startPos, Vector2 endPos, Color col, Texture2D tex, float width = 1f)
 		{
-			if (Event.current.type != EventType.Repaint)
+			if (Event.current.type == EventType.Repaint)
 			{
-				return;
+				RTEditorGUI.DrawLine(GUIScaleUtility.getTopRect, startPos, endPos, col, tex, width);
 			}
-			RTEditorGUI.DrawLine(GUIScaleUtility.getTopRect, startPos, endPos, col, tex, width);
 		}
 
 		public static void DrawLine(Rect clippingRect, Vector2 startPos, Vector2 endPos, Color col, Texture2D tex, float width = 1f)
@@ -696,21 +723,30 @@ namespace NodeEditorFramework.Utilities
 			float num2 = 1f;
 			float num3 = p1.x - p0.x;
 			float num4 = p1.y - p0.y;
-			if (RTEditorGUI.ClipTest(-num3, p0.x - bounds.xMin, ref num, ref num2) && RTEditorGUI.ClipTest(num3, bounds.xMax - p0.x, ref num, ref num2) && RTEditorGUI.ClipTest(-num4, p0.y - bounds.yMin, ref num, ref num2) && RTEditorGUI.ClipTest(num4, bounds.yMax - p0.y, ref num, ref num2))
+			if (RTEditorGUI.ClipTest(-num3, p0.x - bounds.xMin, ref num, ref num2))
 			{
-				clippedP0 = num > 0f;
-				clippedP1 = num2 < 1f;
-				if (clippedP1)
+				if (RTEditorGUI.ClipTest(num3, bounds.xMax - p0.x, ref num, ref num2))
 				{
-					p1.x = p0.x + num2 * num3;
-					p1.y = p0.y + num2 * num4;
+					if (RTEditorGUI.ClipTest(-num4, p0.y - bounds.yMin, ref num, ref num2))
+					{
+						if (RTEditorGUI.ClipTest(num4, bounds.yMax - p0.y, ref num, ref num2))
+						{
+							clippedP0 = num > 0f;
+							clippedP1 = num2 < 1f;
+							if (clippedP1)
+							{
+								p1.x = p0.x + num2 * num3;
+								p1.y = p0.y + num2 * num4;
+							}
+							if (clippedP0)
+							{
+								p0.x += num * num3;
+								p0.y += num * num4;
+							}
+							return true;
+						}
+					}
 				}
-				if (clippedP0)
-				{
-					p0.x += num * num3;
-					p0.y += num * num4;
-				}
-				return true;
 			}
 			clippedP1 = (clippedP0 = true);
 			return false;
@@ -779,29 +815,34 @@ namespace NodeEditorFramework.Utilities
 
 		public static Texture2D RotateTextureCCW(Texture2D tex, int quarterSteps)
 		{
+			Texture2D texture2D;
 			if (tex == null)
 			{
-				return null;
+				texture2D = null;
 			}
-			tex = global::UnityEngine.Object.Instantiate<Texture2D>(tex);
-			int width = tex.width;
-			int height = tex.height;
-			Color[] pixels = tex.GetPixels();
-			Color[] array = new Color[width * height];
-			for (int i = 0; i < quarterSteps; i++)
+			else
 			{
-				for (int j = 0; j < width; j++)
+				tex = global::UnityEngine.Object.Instantiate<Texture2D>(tex);
+				int width = tex.width;
+				int height = tex.height;
+				Color[] pixels = tex.GetPixels();
+				Color[] array = new Color[width * height];
+				for (int i = 0; i < quarterSteps; i++)
 				{
-					for (int k = 0; k < height; k++)
+					for (int j = 0; j < width; j++)
 					{
-						array[j * width + k] = pixels[(width - k - 1) * width + j];
+						for (int k = 0; k < height; k++)
+						{
+							array[j * width + k] = pixels[(width - k - 1) * width + j];
+						}
 					}
+					array.CopyTo(pixels, 0);
 				}
-				array.CopyTo(pixels, 0);
+				tex.SetPixels(pixels);
+				tex.Apply();
+				texture2D = tex;
 			}
-			tex.SetPixels(pixels);
-			tex.Apply();
-			return tex;
+			return texture2D;
 		}
 
 		public static float labelWidth = 150f;
@@ -818,7 +859,7 @@ namespace NodeEditorFramework.Utilities
 
 		private static float activeFloatFieldLastValue = 0f;
 
-		private static string activeFloatFieldString = string.Empty;
+		private static string activeFloatFieldString = "";
 
 		private static Material texVizMat;
 

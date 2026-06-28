@@ -87,34 +87,44 @@ namespace UnityEngine
 			get
 			{
 				Rigidbody2D rigidbody = this.rigidbody;
+				Transform transform;
 				if (rigidbody != null)
 				{
-					return rigidbody.transform;
+					transform = rigidbody.transform;
 				}
-				if (this.collider != null)
+				else if (this.collider != null)
 				{
-					return this.collider.transform;
+					transform = this.collider.transform;
 				}
-				return null;
+				else
+				{
+					transform = null;
+				}
+				return transform;
 			}
-		}
-
-		public int CompareTo(RaycastHit2D other)
-		{
-			if (this.collider == null)
-			{
-				return 1;
-			}
-			if (other.collider == null)
-			{
-				return -1;
-			}
-			return this.fraction.CompareTo(other.fraction);
 		}
 
 		public static implicit operator bool(RaycastHit2D hit)
 		{
 			return hit.collider != null;
+		}
+
+		public int CompareTo(RaycastHit2D other)
+		{
+			int num;
+			if (this.collider == null)
+			{
+				num = 1;
+			}
+			else if (other.collider == null)
+			{
+				num = -1;
+			}
+			else
+			{
+				num = this.fraction.CompareTo(other.fraction);
+			}
+			return num;
 		}
 
 		private Vector2 m_Centroid;

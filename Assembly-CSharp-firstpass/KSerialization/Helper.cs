@@ -26,105 +26,110 @@ namespace KSerialization
 
 		public static SerializationTypeInfo EncodeSerializationType(Type type)
 		{
+			SerializationTypeInfo serializationTypeInfo;
 			if (type == typeof(sbyte))
 			{
-				return SerializationTypeInfo.SByte;
+				serializationTypeInfo = SerializationTypeInfo.SByte;
 			}
-			if (type == typeof(byte))
+			else if (type == typeof(byte))
 			{
-				return SerializationTypeInfo.Byte;
+				serializationTypeInfo = SerializationTypeInfo.Byte;
 			}
-			if (type == typeof(bool))
+			else if (type == typeof(bool))
 			{
-				return SerializationTypeInfo.Boolean;
+				serializationTypeInfo = SerializationTypeInfo.Boolean;
 			}
-			if (type == typeof(short))
+			else if (type == typeof(short))
 			{
-				return SerializationTypeInfo.Int16;
+				serializationTypeInfo = SerializationTypeInfo.Int16;
 			}
-			if (type == typeof(ushort))
+			else if (type == typeof(ushort))
 			{
-				return SerializationTypeInfo.UInt16;
+				serializationTypeInfo = SerializationTypeInfo.UInt16;
 			}
-			if (type == typeof(int))
+			else if (type == typeof(int))
 			{
-				return SerializationTypeInfo.Int32;
+				serializationTypeInfo = SerializationTypeInfo.Int32;
 			}
-			if (type == typeof(uint))
+			else if (type == typeof(uint))
 			{
-				return SerializationTypeInfo.UInt32;
+				serializationTypeInfo = SerializationTypeInfo.UInt32;
 			}
-			if (type == typeof(long))
+			else if (type == typeof(long))
 			{
-				return SerializationTypeInfo.Int64;
+				serializationTypeInfo = SerializationTypeInfo.Int64;
 			}
-			if (type == typeof(ulong))
+			else if (type == typeof(ulong))
 			{
-				return SerializationTypeInfo.UInt64;
+				serializationTypeInfo = SerializationTypeInfo.UInt64;
 			}
-			if (type == typeof(float))
+			else if (type == typeof(float))
 			{
-				return SerializationTypeInfo.Single;
+				serializationTypeInfo = SerializationTypeInfo.Single;
 			}
-			if (type == typeof(double))
+			else if (type == typeof(double))
 			{
-				return SerializationTypeInfo.Double;
+				serializationTypeInfo = SerializationTypeInfo.Double;
 			}
-			if (type == typeof(string))
+			else if (type == typeof(string))
 			{
-				return SerializationTypeInfo.String;
+				serializationTypeInfo = SerializationTypeInfo.String;
 			}
-			if (type == typeof(Vector2I))
+			else if (type == typeof(Vector2I))
 			{
-				return SerializationTypeInfo.Vector2I;
+				serializationTypeInfo = SerializationTypeInfo.Vector2I;
 			}
-			if (type == typeof(Vector2))
+			else if (type == typeof(Vector2))
 			{
-				return SerializationTypeInfo.Vector2;
+				serializationTypeInfo = SerializationTypeInfo.Vector2;
 			}
-			if (type == typeof(Vector3))
+			else if (type == typeof(Vector3))
 			{
-				return SerializationTypeInfo.Vector3;
+				serializationTypeInfo = SerializationTypeInfo.Vector3;
 			}
-			if (type == typeof(Color))
+			else if (type == typeof(Color))
 			{
-				return SerializationTypeInfo.Colour;
+				serializationTypeInfo = SerializationTypeInfo.Colour;
 			}
-			if (typeof(Array).IsAssignableFrom(type))
+			else if (typeof(Array).IsAssignableFrom(type))
 			{
-				return SerializationTypeInfo.Array;
+				serializationTypeInfo = SerializationTypeInfo.Array;
 			}
-			if (type.IsEnum)
+			else if (type.IsEnum)
 			{
-				return SerializationTypeInfo.Enumeration;
+				serializationTypeInfo = SerializationTypeInfo.Enumeration;
 			}
-			if (type.IsGenericType)
+			else if (type.IsGenericType)
 			{
-				SerializationTypeInfo serializationTypeInfo = SerializationTypeInfo.IS_GENERIC_TYPE;
+				SerializationTypeInfo serializationTypeInfo2 = SerializationTypeInfo.IS_GENERIC_TYPE;
 				Type genericTypeDefinition = type.GetGenericTypeDefinition();
 				if (genericTypeDefinition == typeof(List<>))
 				{
-					serializationTypeInfo |= SerializationTypeInfo.List;
+					serializationTypeInfo2 |= SerializationTypeInfo.List;
 				}
 				else if (genericTypeDefinition == typeof(Dictionary<, >))
 				{
-					serializationTypeInfo |= SerializationTypeInfo.Dictionary;
+					serializationTypeInfo2 |= SerializationTypeInfo.Dictionary;
 				}
 				else if (genericTypeDefinition == typeof(HashSet<>))
 				{
-					serializationTypeInfo |= SerializationTypeInfo.HashSet;
+					serializationTypeInfo2 |= SerializationTypeInfo.HashSet;
 				}
 				else if (genericTypeDefinition == typeof(KeyValuePair<, >))
 				{
-					serializationTypeInfo |= SerializationTypeInfo.Pair;
+					serializationTypeInfo2 |= SerializationTypeInfo.Pair;
 				}
 				else
 				{
-					serializationTypeInfo |= SerializationTypeInfo.UserDefined;
+					serializationTypeInfo2 |= SerializationTypeInfo.UserDefined;
 				}
-				return serializationTypeInfo;
+				serializationTypeInfo = serializationTypeInfo2;
 			}
-			return SerializationTypeInfo.UserDefined;
+			else
+			{
+				serializationTypeInfo = SerializationTypeInfo.UserDefined;
+			}
+			return serializationTypeInfo;
 		}
 
 		public static void WriteValue(this BinaryWriter writer, TypeInfo type_info, object value)
@@ -281,13 +286,39 @@ namespace KSerialization
 					writer.Write(0);
 					writer.Write(values.Count);
 					long position11 = writer.BaseStream.Position;
-					foreach (object obj in values)
+					IEnumerator enumerator = values.GetEnumerator();
+					try
 					{
-						writer.WriteValue(typeInfo5, obj);
+						while (enumerator.MoveNext())
+						{
+							object obj = enumerator.Current;
+							writer.WriteValue(typeInfo5, obj);
+						}
 					}
-					foreach (object obj2 in keys)
+					finally
 					{
-						writer.WriteValue(typeInfo4, obj2);
+						IDisposable disposable;
+						if ((disposable = enumerator as IDisposable) != null)
+						{
+							disposable.Dispose();
+						}
+					}
+					IEnumerator enumerator2 = keys.GetEnumerator();
+					try
+					{
+						while (enumerator2.MoveNext())
+						{
+							object obj2 = enumerator2.Current;
+							writer.WriteValue(typeInfo4, obj2);
+						}
+					}
+					finally
+					{
+						IDisposable disposable2;
+						if ((disposable2 = enumerator2 as IDisposable) != null)
+						{
+							disposable2.Dispose();
+						}
 					}
 					long position12 = writer.BaseStream.Position;
 					long num4 = position12 - position11;
@@ -310,9 +341,22 @@ namespace KSerialization
 					writer.Write(0);
 					writer.Write(collection.Count);
 					long position14 = writer.BaseStream.Position;
-					foreach (object obj3 in collection)
+					IEnumerator enumerator3 = collection.GetEnumerator();
+					try
 					{
-						writer.WriteValue(typeInfo6, obj3);
+						while (enumerator3.MoveNext())
+						{
+							object obj3 = enumerator3.Current;
+							writer.WriteValue(typeInfo6, obj3);
+						}
+					}
+					finally
+					{
+						IDisposable disposable3;
+						if ((disposable3 = enumerator3 as IDisposable) != null)
+						{
+							disposable3.Dispose();
+						}
 					}
 					long position15 = writer.BaseStream.Position;
 					long num5 = position15 - position14;
@@ -336,9 +380,22 @@ namespace KSerialization
 					writer.Write(0);
 					writer.Write(num6);
 					long position17 = writer.BaseStream.Position;
-					foreach (object obj4 in enumerable)
+					IEnumerator enumerator4 = enumerable.GetEnumerator();
+					try
 					{
-						writer.WriteValue(typeInfo7, obj4);
+						while (enumerator4.MoveNext())
+						{
+							object obj4 = enumerator4.Current;
+							writer.WriteValue(typeInfo7, obj4);
+						}
+					}
+					finally
+					{
+						IDisposable disposable4;
+						if ((disposable4 = enumerator4 as IDisposable) != null)
+						{
+							disposable4.Dispose();
+						}
 					}
 					long position18 = writer.BaseStream.Position;
 					long num7 = position18 - position17;

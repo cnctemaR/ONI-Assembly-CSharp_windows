@@ -37,12 +37,11 @@ public class Pathfinding : KMonoBehaviour
 
 	public void FlushNavGridsOnLoad()
 	{
-		if (this.navGridsHaveBeenFlushedOnLoad)
+		if (!this.navGridsHaveBeenFlushedOnLoad)
 		{
-			return;
+			this.navGridsHaveBeenFlushedOnLoad = true;
+			this.UpdateNavGrids(true);
 		}
-		this.navGridsHaveBeenFlushedOnLoad = true;
-		this.UpdateNavGrids(true);
 	}
 
 	public void UpdateNavGrids(bool update_all = false)

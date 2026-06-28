@@ -30,7 +30,7 @@ public class HealthBar : ProgressBar
 
 	public override void OnOverlayChanged(object data = null)
 	{
-		if ((int)data == 0)
+		if ((SimViewMode)data == SimViewMode.None)
 		{
 			if (!base.gameObject.activeSelf && this.showTimer != 0f)
 			{
@@ -43,7 +43,7 @@ public class HealthBar : ProgressBar
 		}
 	}
 
-	private float showTimer;
+	private float showTimer = 0f;
 
 	private float maxShowTime = 3f;
 }

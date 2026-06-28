@@ -24,12 +24,13 @@ public class GridSettings : KMonoBehaviour
 		Grid.HasDoor = new bool[Grid.CellCount];
 		Grid.HasAccessDoor = new bool[Grid.CellCount];
 		Grid.HasLadder = new bool[Grid.CellCount];
+		Grid.HasPole = new bool[Grid.CellCount];
 		Grid.Decor = new float[Grid.CellCount];
 		Grid.Loudness = new float[Grid.CellCount];
 		Grid.PreventFogOfWarReveal = new bool[Grid.CellCount];
 		Grid.IsTileUnderConstruction = new bool[Grid.CellCount];
 		Grid.PreventIdlingOnCell = new bool[Grid.CellCount];
-		Grid.ObjectLayers = new Dictionary<int, GameObject>[25];
+		Grid.ObjectLayers = new Dictionary<int, GameObject>[28];
 		for (int i = 0; i < Grid.ObjectLayers.Length; i++)
 		{
 			Grid.ObjectLayers[i] = new Dictionary<int, GameObject>();
@@ -55,11 +56,11 @@ public class GridSettings : KMonoBehaviour
 		Grid.OnReveal = null;
 	}
 
-	public const float CellSizeInMeters = 1f;
-
 	public int GridWidthInCells;
 
 	public int GridHeightInCells;
 
 	public int SimChunkEdgeSize = 32;
+
+	public const float CellSizeInMeters = 1f;
 }

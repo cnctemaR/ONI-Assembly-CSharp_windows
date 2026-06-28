@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using KSerialization;
 using TUNING;
-using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 public class ConsumerManager : KMonoBehaviour, ISaveLoadable
 {
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<Tag> OnDiscover;
 
 	public List<Tag> DefaultForbiddenTagsList
@@ -75,37 +76,43 @@ public class ConsumerManager : KMonoBehaviour, ISaveLoadable
 
 	private bool ShouldBeDiscovered(Tag food_id)
 	{
+		bool flag;
 		if (DebugHandler.InstantBuildMode)
 		{
-			return true;
+			flag = true;
 		}
-		if (WorldInventory.Instance.IsDiscovered(food_id))
+		else if (WorldInventory.Instance.IsDiscovered(food_id))
 		{
-			return true;
+			flag = true;
 		}
-		foreach (Recipe recipe in RecipeManager.Get().recipes)
+		else
 		{
-			if (recipe.Result == food_id)
+			foreach (Recipe recipe in RecipeManager.Get().recipes)
 			{
-				foreach (string text in recipe.fabricators)
+				if (recipe.Result == food_id)
 				{
-					GameObject prefab = Assets.GetPrefab(text.ToTag());
-					Tech requiredTech = prefab.GetComponent<Building>().Def.RequiredTech;
-					if (requiredTech == null || requiredTech.IsComplete())
+					foreach (string text in recipe.fabricators)
+					{
+						if (Db.Get().TechItems.IsTechItemComplete(text))
+						{
+							return true;
+						}
+					}
+				}
+			}
+			foreach (Crop crop in Components.Crops)
+			{
+				if (Grid.Visible[Grid.PosToCell(crop.gameObject)] > 0)
+				{
+					if (crop.cropId == food_id.Name)
 					{
 						return true;
 					}
 				}
 			}
+			flag = false;
 		}
-		foreach (Crop crop in Components.Crops)
-		{
-			if (Grid.Visible[Grid.PosToCell(crop.gameObject)] > 0 && crop.cropId == food_id.Name)
-			{
-				return true;
-			}
-		}
-		return false;
+		return flag;
 	}
 
 	public static ConsumerManager instance;

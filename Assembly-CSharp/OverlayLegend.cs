@@ -28,11 +28,11 @@ public class OverlayLegend : KScreen
 		foreach (OverlayLegend.OverlayInfo overlayInfo in this.overlayInfoList)
 		{
 			string text = overlayInfo.name;
-			text = text.Replace("NAME", string.Empty);
+			text = text.Replace("NAME", "");
 			for (int i = 0; i < overlayInfo.infoUnits.Count; i++)
 			{
 				string text2 = overlayInfo.infoUnits[i].description;
-				text2 = text2.Replace(text, string.Empty);
+				text2 = text2.Replace(text, "");
 				text2 = text + "TOOLTIPS." + text2;
 				overlayInfo.infoUnits[i].tooltip = text2;
 			}
@@ -77,9 +77,11 @@ public class OverlayLegend : KScreen
 				}
 			}
 			this.ClearLegend();
-			return;
 		}
-		global::UnityEngine.Object.Destroy(base.gameObject);
+		else
+		{
+			global::UnityEngine.Object.Destroy(base.gameObject);
+		}
 	}
 
 	protected override void OnLoadLevel()
@@ -92,20 +94,18 @@ public class OverlayLegend : KScreen
 
 	private void OnRegionChanged()
 	{
-		if (this.currentMode != SimViewMode.Regions)
+		if (this.currentMode == SimViewMode.Regions)
 		{
-			return;
+			this.SetLegend(SimViewMode.Regions, true);
 		}
-		this.SetLegend(SimViewMode.Regions, true);
 	}
 
 	private void OnChamberChanged()
 	{
-		if (this.currentMode != SimViewMode.Rooms)
+		if (this.currentMode == SimViewMode.Rooms)
 		{
-			return;
+			this.SetLegend(SimViewMode.Rooms, true);
 		}
-		this.SetLegend(SimViewMode.Rooms, true);
 	}
 
 	private void SetLegend(OverlayLegend.OverlayInfo overlayInfo)
@@ -113,77 +113,78 @@ public class OverlayLegend : KScreen
 		if (overlayInfo == null)
 		{
 			this.ClearLegend();
-			return;
 		}
-		if (!overlayInfo.isProgrammaticallyPopulated && (overlayInfo.infoUnits == null || overlayInfo.infoUnits.Count == 0))
+		else if (!overlayInfo.isProgrammaticallyPopulated && (overlayInfo.infoUnits == null || overlayInfo.infoUnits.Count == 0))
 		{
 			this.ClearLegend();
-			return;
 		}
-		base.Show(true);
-		this.title.text = overlayInfo.name;
-		if (overlayInfo.isProgrammaticallyPopulated)
+		else
 		{
-			SimViewMode mode = overlayInfo.mode;
-			if (mode != SimViewMode.NoisePollution)
+			base.Show(true);
+			this.title.text = overlayInfo.name;
+			if (overlayInfo.isProgrammaticallyPopulated)
 			{
-				if (mode != SimViewMode.Rooms)
+				SimViewMode mode = overlayInfo.mode;
+				if (mode != SimViewMode.Disease)
 				{
-					if (mode == SimViewMode.Disease)
+					if (mode != SimViewMode.NoisePollution)
 					{
-						this.PopulateDiseaseLegend(overlayInfo);
+						if (mode == SimViewMode.Rooms)
+						{
+							this.PopulateRoomsLegend(overlayInfo);
+						}
+					}
+					else
+					{
+						this.PopulateNoiseLegend(overlayInfo);
 					}
 				}
 				else
 				{
-					this.PopulateRoomsLegend(overlayInfo);
+					this.PopulateDiseaseLegend(overlayInfo);
 				}
 			}
 			else
 			{
-				this.PopulateNoiseLegend(overlayInfo);
+				this.PopulateOverlayInfoUnits(overlayInfo);
 			}
-		}
-		else
-		{
-			this.PopulateOverlayInfoUnits(overlayInfo);
 		}
 	}
 
 	public void SetLegend(SimViewMode mode, bool refreshing = false)
 	{
-		if (this.currentMode == mode && !refreshing)
+		if (this.currentMode != mode || refreshing)
 		{
-			return;
-		}
-		this.ClearLegend();
-		OverlayLegend.OverlayInfo overlayInfo = this.overlayInfoList.Find((OverlayLegend.OverlayInfo ol) => ol.mode == mode);
-		if (mode == SimViewMode.Regions)
-		{
-			overlayInfo.infoUnits.Clear();
-			List<Region> regionPrefabs = Game.Instance.RegionManager.regionPrefabs;
-			for (int i = 0; i < regionPrefabs.Count; i++)
+			this.ClearLegend();
+			OverlayLegend.OverlayInfo overlayInfo = this.overlayInfoList.Find((OverlayLegend.OverlayInfo ol) => ol.mode == mode);
+			if (mode == SimViewMode.Regions)
 			{
-				overlayInfo.infoUnits.Add(new OverlayLegend.OverlayInfoUnit(this.emptySprite, regionPrefabs[i].RegionName, regionPrefabs[i].OverlayColor, Color.white, null, true));
+				overlayInfo.infoUnits.Clear();
+				List<Region> regionPrefabs = Game.Instance.RegionManager.regionPrefabs;
+				for (int i = 0; i < regionPrefabs.Count; i++)
+				{
+					overlayInfo.infoUnits.Add(new OverlayLegend.OverlayInfoUnit(this.emptySprite, regionPrefabs[i].RegionName, regionPrefabs[i].OverlayColor, Color.white, null, true));
+				}
 			}
-		}
-		else if (mode == SimViewMode.TemperatureMap)
-		{
-			int num = SimDebugView.Instance.temperatureThresholds.Length - 1;
-			for (int j = 0; j < overlayInfo.infoUnits.Count; j++)
+			else if (mode == SimViewMode.TemperatureMap)
 			{
-				overlayInfo.infoUnits[j].color = SimDebugView.Instance.temperatureThresholds[num - j].color;
-				overlayInfo.infoUnits[j].tooltip = UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE;
-				overlayInfo.infoUnits[j].tooltipFormatData = GameUtil.GetFormattedTemperature(SimDebugView.Instance.temperatureThresholds[num - j].value, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true);
+				int num = SimDebugView.Instance.temperatureThresholds.Length - 1;
+				for (int j = 0; j < overlayInfo.infoUnits.Count; j++)
+				{
+					overlayInfo.infoUnits[j].color = SimDebugView.Instance.temperatureThresholds[num - j].color;
+					overlayInfo.infoUnits[j].tooltip = UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE;
+					overlayInfo.infoUnits[j].tooltipFormatData = GameUtil.GetFormattedTemperature(SimDebugView.Instance.temperatureThresholds[num - j].value, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true);
+				}
 			}
+			else if (mode == SimViewMode.HeatFlow)
+			{
+				overlayInfo.infoUnits[0].tooltip = UI.OVERLAYS.HEATFLOW.TOOLTIPS.HEATING;
+				overlayInfo.infoUnits[1].tooltip = UI.OVERLAYS.HEATFLOW.TOOLTIPS.NEUTRAL;
+				overlayInfo.infoUnits[2].tooltip = UI.OVERLAYS.HEATFLOW.TOOLTIPS.COOLING;
+			}
+			this.SetLegend(overlayInfo);
+			this.currentMode = mode;
 		}
-		else if (mode == SimViewMode.HeatFlow)
-		{
-			overlayInfo.infoUnits[0].tooltip = UI.OVERLAYS.HEATFLOW.TOOLTIPS.HEATING;
-			overlayInfo.infoUnits[1].tooltip = UI.OVERLAYS.HEATFLOW.TOOLTIPS.COOLING;
-		}
-		this.SetLegend(overlayInfo);
-		this.currentMode = mode;
 	}
 
 	public GameObject GetFreeUnitObject()
@@ -202,7 +203,7 @@ public class OverlayLegend : KScreen
 	{
 		while (this.activeUnitObjs.Count > 0)
 		{
-			this.activeUnitObjs[0].transform.FindChild("Icon").GetComponent<Image>().enabled = false;
+			this.activeUnitObjs[0].transform.Find("Icon").GetComponent<Image>().enabled = false;
 			this.activeUnitObjs[0].GetComponentInChildren<LocText>().enabled = false;
 			this.activeUnitObjs[0].transform.SetParent(this.inactiveUnitsParent.transform);
 			this.activeUnitObjs[0].SetActive(false);
@@ -242,7 +243,7 @@ public class OverlayLegend : KScreen
 			GameObject freeUnitObject = this.GetFreeUnitObject();
 			if (overlayInfoUnit.icon != null)
 			{
-				Image component = freeUnitObject.transform.FindChild("Icon").GetComponent<Image>();
+				Image component = freeUnitObject.transform.Find("Icon").GetComponent<Image>();
 				component.gameObject.SetActive(true);
 				component.sprite = overlayInfoUnit.icon;
 				component.color = overlayInfoUnit.color;
@@ -251,7 +252,7 @@ public class OverlayLegend : KScreen
 			}
 			else
 			{
-				freeUnitObject.transform.FindChild("Icon").gameObject.SetActive(false);
+				freeUnitObject.transform.Find("Icon").gameObject.SetActive(false);
 			}
 			if (!string.IsNullOrEmpty(overlayInfoUnit.description))
 			{
@@ -330,7 +331,7 @@ public class OverlayLegend : KScreen
 			if (diseaseSortInfo.disease.diseaseType == Disease.DiseaseType.Pathogen)
 			{
 				GameObject freeUnitObject = this.GetFreeUnitObject();
-				Image component = freeUnitObject.transform.FindChild("Icon").GetComponent<Image>();
+				Image component = freeUnitObject.transform.Find("Icon").GetComponent<Image>();
 				component.gameObject.SetActive(true);
 				component.sprite = Assets.instance.LegendColourBox;
 				component.color = diseaseSortInfo.disease.overlayColour;
@@ -407,7 +408,7 @@ public class OverlayLegend : KScreen
 		for (int i = 0; i < names.Length; i++)
 		{
 			GameObject freeUnitObject = this.GetFreeUnitObject();
-			Image component = freeUnitObject.transform.FindChild("Icon").GetComponent<Image>();
+			Image component = freeUnitObject.transform.Find("Icon").GetComponent<Image>();
 			component.gameObject.SetActive(true);
 			component.sprite = Assets.instance.LegendColourBox;
 			component.color = ((i != 0) ? Color.Lerp(dbColours[i * 2], dbColours[Mathf.Min(dbColours.Length - 1, i * 2 + 1)], 0.5f) : new Color(1f, 1f, 1f, 0.7f));
@@ -436,7 +437,7 @@ public class OverlayLegend : KScreen
 			LocText componentInChildren = freeUnitObject.GetComponentInChildren<LocText>();
 			componentInChildren.enabled = true;
 			componentInChildren.text = RoomTypes.types[i].name + "\n" + RoomTypes.types[i].effect;
-			Image component = freeUnitObject.transform.FindChild("Icon").GetComponent<Image>();
+			Image component = freeUnitObject.transform.Find("Icon").GetComponent<Image>();
 			component.gameObject.SetActive(true);
 			component.sprite = Assets.instance.LegendColourBox;
 			component.color = RoomTypes.types[i].category.color;
@@ -478,7 +479,7 @@ public class OverlayLegend : KScreen
 
 	private ToolParameterMenu toolParameterMenu;
 
-	private SimViewMode currentMode;
+	private SimViewMode currentMode = SimViewMode.None;
 
 	private List<GameObject> inactiveUnitObjs;
 

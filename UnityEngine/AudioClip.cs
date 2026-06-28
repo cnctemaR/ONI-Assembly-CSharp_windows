@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using UnityEngine.Scripting;
 
@@ -6,34 +7,30 @@ namespace UnityEngine
 {
 	public sealed class AudioClip : Object
 	{
-		private event AudioClip.PCMReaderCallback m_PCMReaderCallback;
-
-		private event AudioClip.PCMSetPositionCallback m_PCMSetPositionCallback;
-
 		public extern float length
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern int samples
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern int channels
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern int frequency
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -41,52 +38,52 @@ namespace UnityEngine
 		[Obsolete("Use AudioClip.loadState instead to get more detailed information about the loading process.")]
 		public extern bool isReadyToPlay
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern AudioClipLoadType loadType
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool LoadAudioData();
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool UnloadAudioData();
 
 		public extern bool preloadAudioData
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern AudioDataLoadState loadState
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern bool loadInBackground
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool GetData(float[] data, int offsetSamples);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool SetData(float[] data, int offsetSamples);
 
@@ -139,17 +136,21 @@ namespace UnityEngine
 			AudioClip audioClip = AudioClip.Construct_Internal();
 			if (pcmreadercallback != null)
 			{
-				AudioClip audioClip2 = audioClip;
-				audioClip2.m_PCMReaderCallback = (AudioClip.PCMReaderCallback)Delegate.Combine(audioClip2.m_PCMReaderCallback, pcmreadercallback);
+				audioClip.m_PCMReaderCallback += pcmreadercallback;
 			}
 			if (pcmsetpositioncallback != null)
 			{
-				AudioClip audioClip3 = audioClip;
-				audioClip3.m_PCMSetPositionCallback = (AudioClip.PCMSetPositionCallback)Delegate.Combine(audioClip3.m_PCMSetPositionCallback, pcmsetpositioncallback);
+				audioClip.m_PCMSetPositionCallback += pcmsetpositioncallback;
 			}
 			audioClip.Init_Internal(name, lengthSamples, channels, frequency, stream);
 			return audioClip;
 		}
+
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		private event AudioClip.PCMReaderCallback m_PCMReaderCallback = null;
+
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		private event AudioClip.PCMSetPositionCallback m_PCMSetPositionCallback = null;
 
 		[RequiredByNativeCode]
 		private void InvokePCMReaderCallback_Internal(float[] data)
@@ -169,11 +170,11 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern AudioClip Construct_Internal();
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Init_Internal(string name, int lengthSamples, int channels, int frequency, bool stream);
 

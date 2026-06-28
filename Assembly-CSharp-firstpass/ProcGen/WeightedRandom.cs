@@ -7,30 +7,35 @@ namespace ProcGen
 	{
 		public static T Choose<T>(List<T> list, SeededRandom rand) where T : IWeighted
 		{
+			T t;
 			if (list.Count == 0)
 			{
-				return default(T);
+				t = default(T);
 			}
-			float num = 0f;
-			for (int i = 0; i < list.Count; i++)
+			else
 			{
-				float num2 = num;
-				T t = list[i];
-				num = num2 + t.weight;
-			}
-			float num3 = rand.RandomValue() * num;
-			float num4 = 0f;
-			for (int j = 0; j < list.Count; j++)
-			{
-				float num5 = num4;
-				T t2 = list[j];
-				num4 = num5 + t2.weight;
-				if (num4 > num3)
+				float num = 0f;
+				for (int i = 0; i < list.Count; i++)
 				{
-					return list[j];
+					float num2 = num;
+					T t2 = list[i];
+					num = num2 + t2.weight;
 				}
+				float num3 = rand.RandomValue() * num;
+				float num4 = 0f;
+				for (int j = 0; j < list.Count; j++)
+				{
+					float num5 = num4;
+					T t3 = list[j];
+					num4 = num5 + t3.weight;
+					if (num4 > num3)
+					{
+						return list[j];
+					}
+				}
+				t = list[list.Count - 1];
 			}
-			return list[list.Count - 1];
+			return t;
 		}
 	}
 }

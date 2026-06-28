@@ -18,11 +18,11 @@ public class ResearchCenter : Workable, IEffectDescriptor
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.Subscribe(-1503271301, new Action<object>(this.OnSelectObject));
+		base.Subscribe(-1503271301, new Action<object>(this.OnSelectObject));
 		Research.Instance.Subscribe(-1914338957, new Action<object>(this.CheckValidResearchSelected));
 		Research.Instance.Subscribe(-125623018, new Action<object>(this.CheckValidResearchSelected));
-		this.Subscribe(187661686, new Action<object>(this.CheckValidResearchSelected));
-		this.Subscribe(-1697596308, new Action<object>(this.CheckHasMaterial));
+		base.Subscribe(187661686, new Action<object>(this.CheckValidResearchSelected));
+		base.Subscribe(-1697596308, new Action<object>(this.CheckHasMaterial));
 		this.CheckValidResearchSelected(null);
 		Components.ResearchCenters.Add(this);
 		this.CheckValidResearchSelected(null);
@@ -34,9 +34,10 @@ public class ResearchCenter : Workable, IEffectDescriptor
 		int num = Mathf.FloorToInt(mass_consumed / this.mass_per_point);
 		num += Mathf.FloorToInt(this.remainder_mass_points);
 		this.remainder_mass_points -= (float)Mathf.FloorToInt(this.remainder_mass_points);
+		ResearchType researchType = Research.Instance.GetResearchType(this.research_point_type_id);
 		if (num > 0)
 		{
-			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Research, Strings.Get("STRINGS.RESEARCH.TYPES." + this.research_point_type_id.ToUpper() + ".NAME"), this.transform, 1.5f, false);
+			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Research, researchType.name, base.transform, 1.5f, false);
 			for (int i = 0; i < num; i++)
 			{
 				Research.Instance.AddResearchPoints(this.research_point_type_id, 1f);
@@ -48,21 +49,29 @@ public class ResearchCenter : Workable, IEffectDescriptor
 	{
 		if (!this.operational.IsActive)
 		{
-			if (this.operational.IsOperational && this.chore == null && this.HasMaterial())
+			if (this.operational.IsOperational)
 			{
-				this.chore = new WorkChore<ResearchCenter>(Db.Get().ChoreTypes.Research, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue);
-				base.SetWorkTime(float.PositiveInfinity);
+				if (this.chore == null && this.HasMaterial())
+				{
+					this.chore = new WorkChore<ResearchCenter>(Db.Get().ChoreTypes.Research, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+					base.SetWorkTime(float.PositiveInfinity);
+				}
 			}
 		}
 	}
 
 	public override float GetPercentComplete()
 	{
+		float num;
 		if (Research.Instance.GetActiveResearch() == null)
 		{
-			return 0f;
+			num = 0f;
 		}
-		return Research.Instance.GetActiveResearch().progressInventory.PointsByTypeID[this.research_point_type_id] / Research.Instance.GetActiveResearch().tech.costsByResearchTypeID[this.research_point_type_id];
+		else
+		{
+			num = Research.Instance.GetActiveResearch().progressInventory.PointsByTypeID[this.research_point_type_id] / Research.Instance.GetActiveResearch().tech.costsByResearchTypeID[this.research_point_type_id];
+		}
+		return num;
 	}
 
 	protected override void OnStartWork(Worker worker)
@@ -110,9 +119,12 @@ public class ResearchCenter : Workable, IEffectDescriptor
 		if (activeResearch != null)
 		{
 			flag = true;
-			if (activeResearch.tech.costsByResearchTypeID.ContainsKey(this.research_point_type_id) && Research.Instance.Get(activeResearch.tech).progressInventory.PointsByTypeID[this.research_point_type_id] < activeResearch.tech.costsByResearchTypeID[this.research_point_type_id])
+			if (activeResearch.tech.costsByResearchTypeID.ContainsKey(this.research_point_type_id))
 			{
-				flag2 = true;
+				if (Research.Instance.Get(activeResearch.tech).progressInventory.PointsByTypeID[this.research_point_type_id] < activeResearch.tech.costsByResearchTypeID[this.research_point_type_id])
+				{
+					flag2 = true;
+				}
 			}
 		}
 		if (this.operational.GetFlag(EnergyConsumer.PoweredFlag))
@@ -142,9 +154,12 @@ public class ResearchCenter : Workable, IEffectDescriptor
 			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.NoApplicableResearchSelected, false);
 		}
 		this.operational.SetFlag(ResearchCenter.ResearchSelectedFlag, flag && flag2);
-		if ((!flag || !flag2) && base.worker)
+		if (!flag || !flag2)
 		{
-			base.StopWork(base.worker, true);
+			if (base.worker)
+			{
+				base.StopWork(base.worker, true);
+			}
 		}
 	}
 
@@ -177,10 +192,13 @@ public class ResearchCenter : Workable, IEffectDescriptor
 
 	private void CheckHasMaterial(object o = null)
 	{
-		if (!this.HasMaterial() && this.chore != null)
+		if (!this.HasMaterial())
 		{
-			this.chore.Cancel("No material remaining");
-			this.chore = null;
+			if (this.chore != null)
+			{
+				this.chore.Cancel("No material remaining");
+				this.chore = null;
+			}
 		}
 	}
 
@@ -194,14 +212,14 @@ public class ResearchCenter : Workable, IEffectDescriptor
 		base.OnCleanUp();
 		Research.Instance.Unsubscribe(-1914338957, new Action<object>(this.CheckValidResearchSelected));
 		Research.Instance.Unsubscribe(-125623018, new Action<object>(this.CheckValidResearchSelected));
-		this.Unsubscribe(-1852328367, new Action<object>(this.CheckValidResearchSelected));
+		base.Unsubscribe(-1852328367, new Action<object>(this.CheckValidResearchSelected));
 		Components.ResearchCenters.Remove(this);
 		this.ClearResearchScreen();
 	}
 
 	public string GetStatusString()
 	{
-		string text = Strings.Get("STRINGS.RESEARCH.MESSAGING.NORESEARCHSELECTED");
+		string text = RESEARCH.MESSAGING.NORESEARCHSELECTED;
 		if (Research.Instance.GetActiveResearch() != null)
 		{
 			text = "<b>" + Research.Instance.GetActiveResearch().tech.Name + "</b>";

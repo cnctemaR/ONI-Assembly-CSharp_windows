@@ -8,9 +8,9 @@ public class LightBug : StateMachineComponent<LightBug.StatesInstance>, ISaveLoa
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		Vector3 position = this.transform.position;
+		Vector3 position = base.transform.position;
 		position.z = Grid.GetLayerZ(Grid.SceneLayer.Move);
-		this.transform.SetPosition(position);
+		base.transform.SetPosition(position);
 		base.gameObject.SetLayerRecursively(LayerMask.NameToLayer("Default"));
 	}
 
@@ -18,6 +18,33 @@ public class LightBug : StateMachineComponent<LightBug.StatesInstance>, ISaveLoa
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
+	}
+
+	private int FindLure()
+	{
+		int num = -1;
+		int num2 = int.MaxValue;
+		Navigator component = base.GetComponent<Navigator>();
+		foreach (CreatureLure creatureLure in Components.Lures)
+		{
+			if (creatureLure.GetComponent<Operational>().IsOperational)
+			{
+				if (!(creatureLure.activeBaitSetting != GameTags.Phosphorite))
+				{
+					int num3 = global::UnityEngine.Random.Range(0, creatureLure.lurePoints.Length);
+					if (component.CanReach(Grid.OffsetCell(Grid.PosToCell(creatureLure), creatureLure.lurePoints[num3])))
+					{
+						int navigationCost = component.GetNavigationCost(Grid.OffsetCell(Grid.PosToCell(creatureLure), creatureLure.lurePoints[num3]));
+						if (navigationCost < num2 && navigationCost < this.MAX_LURE_RANGE)
+						{
+							num2 = navigationCost;
+							num = Grid.OffsetCell(Grid.PosToCell(creatureLure), creatureLure.lurePoints[num3]);
+						}
+					}
+				}
+			}
+		}
+		return num;
 	}
 
 	[MyCmpAdd]
@@ -28,6 +55,8 @@ public class LightBug : StateMachineComponent<LightBug.StatesInstance>, ISaveLoa
 
 	[NonSerialized]
 	public string wingSound = "ShineBug_wings_LP";
+
+	private int MAX_LURE_RANGE = 50;
 
 	public class StatesInstance : GameStateMachine<LightBug.States, LightBug.StatesInstance, LightBug, object>.GameInstance
 	{
@@ -66,18 +95,32 @@ public class LightBug : StateMachineComponent<LightBug.StatesInstance>, ISaveLoa
 					smi.master.loopingSounds.StopSound(GlobalAssets.GetSound(smi.master.wingSound, false));
 					smi.master.loopingSounds.RemoveLoopingSoundUpdater();
 				});
-			this.alive.distressed.Drowning.PlayAnim("hit", KAnim.PlayMode.Loop, null).EventTransition(GameHashes.EnteredBreathableArea, this.alive.idleStates.move, null);
+			this.alive.distressed.Drowning.PlayAnim("hit", KAnim.PlayMode.Loop).EventTransition(GameHashes.EnteredBreathableArea, this.alive.idleStates.move, null);
 			this.alive.idleStates.idle.Enter(delegate(LightBug.StatesInstance smi)
 			{
 				smi.Play("idle", KAnim.PlayMode.Once);
 			}).EventHandler(GameHashes.AnimQueueComplete, delegate(LightBug.StatesInstance smi)
 			{
-				smi.GoTo(this.alive.idleStates.move);
+				smi.GoTo(this.alive.idleStates.lured);
 			}).EventTransition(GameHashes.TooColdFatal, this.death, null)
 				.EventTransition(GameHashes.TooHotFatal, this.death, null);
+			this.alive.idleStates.lured.Enter(delegate(LightBug.StatesInstance smi)
+			{
+				int num = smi.master.FindLure();
+				if (num == -1)
+				{
+					smi.GoTo(this.alive.idleStates.move);
+				}
+				else
+				{
+					smi.GetComponent<Navigator>().GoTo(num, Grid.DefaultOffset);
+				}
+			}).EventTransition(GameHashes.TooColdFatal, this.death, null).EventTransition(GameHashes.TooHotFatal, this.death, null)
+				.EventTransition(GameHashes.NavigationFailed, this.alive.idleStates.idle, null)
+				.EventTransition(GameHashes.DestinationReached, this.alive.idleStates.idle, null);
 			this.alive.idleStates.move.InitializeStates(this.alive.idleStates.idle);
 			this.alive.idleStates.debug_go_to.InitializeStates(this.alive.idleStates.idle);
-			this.death.ToggleGravity().PlayAnim("death", KAnim.PlayMode.Once, null).EventHandler(GameHashes.AnimQueueComplete, delegate(LightBug.StatesInstance smi)
+			this.death.ToggleGravity().PlayAnim("death").EventHandler(GameHashes.AnimQueueComplete, delegate(LightBug.StatesInstance smi)
 			{
 				Util.KDestroyGameObject(smi.gameObject);
 			})
@@ -113,6 +156,8 @@ public class LightBug : StateMachineComponent<LightBug.StatesInstance>, ISaveLoa
 			public GameStateMachine<LightBug.States, LightBug.StatesInstance, LightBug, object>.State idle;
 
 			public GameStateMachine<LightBug.States, LightBug.StatesInstance, LightBug, object>.IdleMoveSubState move;
+
+			public GameStateMachine<LightBug.States, LightBug.StatesInstance, LightBug, object>.State lured;
 
 			public GameStateMachine<LightBug.States, LightBug.StatesInstance, LightBug, object>.DebugGoToSubState debug_go_to;
 		}

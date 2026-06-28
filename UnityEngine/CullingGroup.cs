@@ -22,7 +22,7 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void Dispose();
 
@@ -40,33 +40,33 @@ namespace UnityEngine
 
 		public extern bool enabled
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public extern Camera targetCamera
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetBoundingSpheres(BoundingSphere[] array);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetBoundingSphereCount(int count);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void EraseSwapBack(int index);
 
@@ -91,19 +91,19 @@ namespace UnityEngine
 			return this.QueryIndices(visible, distanceIndex, CullingQueryOptions.Normal, result, firstIndex);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern int QueryIndices(bool visible, int distanceIndex, CullingQueryOptions options, int[] result, int firstIndex);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool IsVisible(int index);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern int GetDistance(int index);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetBoundingDistances(float[] distances);
 
@@ -112,11 +112,11 @@ namespace UnityEngine
 			CullingGroup.INTERNAL_CALL_SetDistanceReferencePoint(this, ref point);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_SetDistanceReferencePoint(CullingGroup self, ref Vector3 point);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetDistanceReferencePoint(Transform transform);
 
@@ -125,27 +125,27 @@ namespace UnityEngine
 		private unsafe static void SendEvents(CullingGroup cullingGroup, IntPtr eventsPtr, int count)
 		{
 			CullingGroupEvent* ptr = (CullingGroupEvent*)eventsPtr.ToPointer();
-			if (cullingGroup.m_OnStateChanged == null)
+			if (cullingGroup.m_OnStateChanged != null)
 			{
-				return;
-			}
-			for (int i = 0; i < count; i++)
-			{
-				cullingGroup.m_OnStateChanged(ptr[i]);
+				for (int i = 0; i < count; i++)
+				{
+					cullingGroup.m_OnStateChanged(ptr[i]);
+				}
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Init();
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void FinalizerFailure();
 
 		internal IntPtr m_Ptr;
 
-		private CullingGroup.StateChanged m_OnStateChanged;
+		private CullingGroup.StateChanged m_OnStateChanged = null;
 
 		public delegate void StateChanged(CullingGroupEvent sphere);
 	}

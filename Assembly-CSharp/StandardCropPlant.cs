@@ -26,7 +26,7 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 
 	private static string ToolTipResolver(List<Notification> notificationList, object data)
 	{
-		string text = string.Empty;
+		string text = "";
 		for (int i = 0; i < notificationList.Count; i++)
 		{
 			Notification notification = notificationList[i];
@@ -69,15 +69,20 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 		public int WiltStage()
 		{
 			float num = base.master.growing.PercentOfCurrentHarvest();
+			int num2;
 			if (num < 0.75f)
 			{
-				return 1;
+				num2 = 1;
 			}
-			if (num < 1f)
+			else if (num < 1f)
 			{
-				return 2;
+				num2 = 2;
 			}
-			return 3;
+			else
+			{
+				num2 = 3;
+			}
+			return num2;
 		}
 	}
 
@@ -93,7 +98,7 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 				{
 					Notifier component = smi.master.GetComponent<Notifier>();
 					Notification notification = smi.master.CreateDeathNotification();
-					component.Add(notification, string.Empty);
+					component.Add(notification, "");
 				}
 				GameUtil.KInstantiate(EffectPrefabs.Instance.PlantDeath, smi.master.transform.position, Grid.SceneLayer.FXFront, SceneOrganizer.Instance.GetFolder(Folder.FX), null, 0);
 				smi.master.Trigger(1623392196, null);
@@ -102,7 +107,7 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 				smi.Schedule(0.5f, new Action<object>(smi.master.DestroySelf), null);
 			});
 			this.alive.InitializeStates(this.masterTarget, this.dead).DefaultState(this.alive.idle).ToggleComponent<Growing>();
-			this.alive.idle.EventTransition(GameHashes.Wilt, this.alive.wilting, (StandardCropPlant.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).EventTransition(GameHashes.Grow, this.alive.pre_fruiting, (StandardCropPlant.StatesInstance smi) => smi.master.growing.ReachedNextHarvest()).PlayAnim("grow", KAnim.PlayMode.Paused, null)
+			this.alive.idle.EventTransition(GameHashes.Wilt, this.alive.wilting, (StandardCropPlant.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).EventTransition(GameHashes.Grow, this.alive.pre_fruiting, (StandardCropPlant.StatesInstance smi) => smi.master.growing.ReachedNextHarvest()).PlayAnim("grow", KAnim.PlayMode.Paused)
 				.Enter(delegate(StandardCropPlant.StatesInstance smi)
 				{
 					smi.master.animController.SetPositionPercent(smi.master.growing.PercentOfCurrentHarvest());
@@ -111,7 +116,7 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 				{
 					smi.master.animController.SetPositionPercent(smi.master.growing.PercentOfCurrentHarvest());
 				});
-			this.alive.pre_fruiting.PlayAnim("grow_pst", KAnim.PlayMode.Once, null).EventHandler(GameHashes.AnimQueueComplete, delegate(StandardCropPlant.StatesInstance smi)
+			this.alive.pre_fruiting.PlayAnim("grow_pst", KAnim.PlayMode.Once).EventHandler(GameHashes.AnimQueueComplete, delegate(StandardCropPlant.StatesInstance smi)
 			{
 				smi.GoTo(this.alive.fruiting);
 			});
@@ -120,7 +125,7 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 			{
 				smi.GoTo(this.alive.wilting);
 			}).EventTransition(GameHashes.Harvest, this.alive.fruiting.fruiting_harvest, null);
-			this.alive.fruiting.fruiting_idle.PlayAnim("idle_full", KAnim.PlayMode.Loop, null).Enter(delegate(StandardCropPlant.StatesInstance smi)
+			this.alive.fruiting.fruiting_idle.PlayAnim("idle_full", KAnim.PlayMode.Loop).Enter(delegate(StandardCropPlant.StatesInstance smi)
 			{
 				smi.master.harvestable.SetCanBeHarvested(true);
 			}).Transition(this.alive.fruiting.fruiting_old, (StandardCropPlant.StatesInstance smi) => smi.IsOld());
@@ -128,7 +133,7 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 			{
 				smi.master.harvestable.SetCanBeHarvested(true);
 			}).Transition(this.alive.fruiting.fruiting_idle, (StandardCropPlant.StatesInstance smi) => !smi.IsOld());
-			this.alive.fruiting.fruiting_harvest.PlayAnim("harvest", KAnim.PlayMode.Once, null).Enter(delegate(StandardCropPlant.StatesInstance smi)
+			this.alive.fruiting.fruiting_harvest.PlayAnim("harvest", KAnim.PlayMode.Once).Enter(delegate(StandardCropPlant.StatesInstance smi)
 			{
 				if (GameScheduler.Instance != null && smi.master != null)
 				{

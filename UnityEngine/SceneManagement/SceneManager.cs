@@ -1,21 +1,25 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using UnityEngine.Events;
 using UnityEngine.Internal;
+using UnityEngine.Scripting;
 
 namespace UnityEngine.SceneManagement
 {
+	[RequiredByNativeCode]
 	public class SceneManager
 	{
 		public static extern int sceneCount
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern int sceneCountInBuildSettings
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -27,7 +31,7 @@ namespace UnityEngine.SceneManagement
 			return scene;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_GetActiveScene(out Scene value);
 
@@ -36,7 +40,7 @@ namespace UnityEngine.SceneManagement
 			return SceneManager.INTERNAL_CALL_SetActiveScene(ref scene);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool INTERNAL_CALL_SetActiveScene(ref Scene scene);
 
@@ -47,7 +51,7 @@ namespace UnityEngine.SceneManagement
 			return scene;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_GetSceneByPath(string scenePath, out Scene value);
 
@@ -58,9 +62,20 @@ namespace UnityEngine.SceneManagement
 			return scene;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_GetSceneByName(string name, out Scene value);
+
+		public static Scene GetSceneByBuildIndex(int buildIndex)
+		{
+			Scene scene;
+			SceneManager.INTERNAL_CALL_GetSceneByBuildIndex(buildIndex, out scene);
+			return scene;
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_GetSceneByBuildIndex(int buildIndex, out Scene value);
 
 		public static Scene GetSceneAt(int index)
 		{
@@ -69,7 +84,7 @@ namespace UnityEngine.SceneManagement
 			return scene;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_GetSceneAt(int index, out Scene value);
 
@@ -132,7 +147,7 @@ namespace UnityEngine.SceneManagement
 			return SceneManager.LoadSceneAsyncNameIndexInternal(null, sceneBuildIndex, mode == LoadSceneMode.Additive, false);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern AsyncOperation LoadSceneAsyncNameIndexInternal(string sceneName, int sceneBuildIndex, bool isAdditive, bool mustCompleteNextFrame);
 
@@ -143,30 +158,77 @@ namespace UnityEngine.SceneManagement
 			return scene;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_CreateScene(string sceneName, out Scene value);
 
+		[Obsolete("Use SceneManager.UnloadSceneAsync. This function is not safe to use during triggers and under other circumstances. See Scripting reference for more details.")]
+		public static bool UnloadScene(Scene scene)
+		{
+			return SceneManager.UnloadSceneInternal(scene);
+		}
+
+		private static bool UnloadSceneInternal(Scene scene)
+		{
+			return SceneManager.INTERNAL_CALL_UnloadSceneInternal(ref scene);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool INTERNAL_CALL_UnloadSceneInternal(ref Scene scene);
+
+		[Obsolete("Use SceneManager.UnloadSceneAsync. This function is not safe to use during triggers and under other circumstances. See Scripting reference for more details.")]
 		public static bool UnloadScene(int sceneBuildIndex)
 		{
-			return SceneManager.UnloadSceneNameIndexInternal(string.Empty, sceneBuildIndex);
+			bool flag;
+			SceneManager.UnloadSceneNameIndexInternal("", sceneBuildIndex, true, out flag);
+			return flag;
 		}
 
+		[Obsolete("Use SceneManager.UnloadSceneAsync. This function is not safe to use during triggers and under other circumstances. See Scripting reference for more details.")]
 		public static bool UnloadScene(string sceneName)
 		{
-			return SceneManager.UnloadSceneNameIndexInternal(sceneName, -1);
+			bool flag;
+			SceneManager.UnloadSceneNameIndexInternal(sceneName, -1, true, out flag);
+			return flag;
 		}
 
-		[WrapperlessIcall]
+		public static AsyncOperation UnloadSceneAsync(int sceneBuildIndex)
+		{
+			bool flag;
+			return SceneManager.UnloadSceneNameIndexInternal("", sceneBuildIndex, false, out flag);
+		}
+
+		public static AsyncOperation UnloadSceneAsync(string sceneName)
+		{
+			bool flag;
+			return SceneManager.UnloadSceneNameIndexInternal(sceneName, -1, false, out flag);
+		}
+
+		public static AsyncOperation UnloadSceneAsync(Scene scene)
+		{
+			return SceneManager.UnloadSceneAsyncInternal(scene);
+		}
+
+		private static AsyncOperation UnloadSceneAsyncInternal(Scene scene)
+		{
+			return SceneManager.INTERNAL_CALL_UnloadSceneAsyncInternal(ref scene);
+		}
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool UnloadSceneNameIndexInternal(string sceneName, int sceneBuildIndex);
+		private static extern AsyncOperation INTERNAL_CALL_UnloadSceneAsyncInternal(ref Scene scene);
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern AsyncOperation UnloadSceneNameIndexInternal(string sceneName, int sceneBuildIndex, bool immediately, out bool outSuccess);
 
 		public static void MergeScenes(Scene sourceScene, Scene destinationScene)
 		{
 			SceneManager.INTERNAL_CALL_MergeScenes(ref sourceScene, ref destinationScene);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_MergeScenes(ref Scene sourceScene, ref Scene destinationScene);
 
@@ -175,8 +237,44 @@ namespace UnityEngine.SceneManagement
 			SceneManager.INTERNAL_CALL_MoveGameObjectToScene(go, ref scene);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_MoveGameObjectToScene(GameObject go, ref Scene scene);
+
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static event UnityAction<Scene, LoadSceneMode> sceneLoaded;
+
+		[RequiredByNativeCode]
+		private static void Internal_SceneLoaded(Scene scene, LoadSceneMode mode)
+		{
+			if (SceneManager.sceneLoaded != null)
+			{
+				SceneManager.sceneLoaded(scene, mode);
+			}
+		}
+
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static event UnityAction<Scene> sceneUnloaded;
+
+		[RequiredByNativeCode]
+		private static void Internal_SceneUnloaded(Scene scene)
+		{
+			if (SceneManager.sceneUnloaded != null)
+			{
+				SceneManager.sceneUnloaded(scene);
+			}
+		}
+
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static event UnityAction<Scene, Scene> activeSceneChanged;
+
+		[RequiredByNativeCode]
+		private static void Internal_ActiveSceneChanged(Scene previousActiveScene, Scene newActiveScene)
+		{
+			if (SceneManager.activeSceneChanged != null)
+			{
+				SceneManager.activeSceneChanged(previousActiveScene, newActiveScene);
+			}
+		}
 	}
 }

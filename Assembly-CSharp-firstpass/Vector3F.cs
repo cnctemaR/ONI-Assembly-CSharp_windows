@@ -12,26 +12,6 @@ public struct Vector3F
 		this.z = _z;
 	}
 
-	public override bool Equals(object o)
-	{
-		return base.Equals(o);
-	}
-
-	public override int GetHashCode()
-	{
-		return base.GetHashCode();
-	}
-
-	public override string ToString()
-	{
-		return string.Format("{0}, {1}, {2}", this.x, this.y, this.z);
-	}
-
-	public static float Dot(Vector3F v1, Vector3F v2)
-	{
-		return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
-	}
-
 	public static Vector3F operator -(Vector3F v1, Vector3F v2)
 	{
 		return new Vector3F(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
@@ -90,6 +70,26 @@ public struct Vector3F
 	public static bool operator !=(Vector3F v1, Vector3F v2)
 	{
 		return !(v1 == v2);
+	}
+
+	public override bool Equals(object o)
+	{
+		return base.Equals(o);
+	}
+
+	public override int GetHashCode()
+	{
+		return base.GetHashCode();
+	}
+
+	public override string ToString()
+	{
+		return string.Format("{0}, {1}, {2}", this.x, this.y, this.z);
+	}
+
+	public static float Dot(Vector3F v1, Vector3F v2)
+	{
+		return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 	}
 
 	public static implicit operator Vector3(Vector3F v)

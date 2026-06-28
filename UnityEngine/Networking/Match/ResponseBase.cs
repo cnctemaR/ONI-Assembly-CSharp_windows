@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace UnityEngine.Networking.Match
 {
-	public abstract class ResponseBase
+	internal abstract class ResponseBase
 	{
 		public abstract void Parse(object obj);
 
-		internal string ParseJSONString(string name, object obj, IDictionary<string, object> dictJsonObj)
+		public string ParseJSONString(string name, object obj, IDictionary<string, object> dictJsonObj)
 		{
 			if (dictJsonObj.TryGetValue(name, out obj))
 			{
@@ -16,7 +16,7 @@ namespace UnityEngine.Networking.Match
 			throw new FormatException(name + " not found in JSON dictionary");
 		}
 
-		internal short ParseJSONInt16(string name, object obj, IDictionary<string, object> dictJsonObj)
+		public short ParseJSONInt16(string name, object obj, IDictionary<string, object> dictJsonObj)
 		{
 			if (dictJsonObj.TryGetValue(name, out obj))
 			{
@@ -25,7 +25,7 @@ namespace UnityEngine.Networking.Match
 			throw new FormatException(name + " not found in JSON dictionary");
 		}
 
-		internal int ParseJSONInt32(string name, object obj, IDictionary<string, object> dictJsonObj)
+		public int ParseJSONInt32(string name, object obj, IDictionary<string, object> dictJsonObj)
 		{
 			if (dictJsonObj.TryGetValue(name, out obj))
 			{
@@ -34,7 +34,7 @@ namespace UnityEngine.Networking.Match
 			throw new FormatException(name + " not found in JSON dictionary");
 		}
 
-		internal long ParseJSONInt64(string name, object obj, IDictionary<string, object> dictJsonObj)
+		public long ParseJSONInt64(string name, object obj, IDictionary<string, object> dictJsonObj)
 		{
 			if (dictJsonObj.TryGetValue(name, out obj))
 			{
@@ -43,7 +43,7 @@ namespace UnityEngine.Networking.Match
 			throw new FormatException(name + " not found in JSON dictionary");
 		}
 
-		internal ushort ParseJSONUInt16(string name, object obj, IDictionary<string, object> dictJsonObj)
+		public ushort ParseJSONUInt16(string name, object obj, IDictionary<string, object> dictJsonObj)
 		{
 			if (dictJsonObj.TryGetValue(name, out obj))
 			{
@@ -52,7 +52,7 @@ namespace UnityEngine.Networking.Match
 			throw new FormatException(name + " not found in JSON dictionary");
 		}
 
-		internal uint ParseJSONUInt32(string name, object obj, IDictionary<string, object> dictJsonObj)
+		public uint ParseJSONUInt32(string name, object obj, IDictionary<string, object> dictJsonObj)
 		{
 			if (dictJsonObj.TryGetValue(name, out obj))
 			{
@@ -61,7 +61,7 @@ namespace UnityEngine.Networking.Match
 			throw new FormatException(name + " not found in JSON dictionary");
 		}
 
-		internal ulong ParseJSONUInt64(string name, object obj, IDictionary<string, object> dictJsonObj)
+		public ulong ParseJSONUInt64(string name, object obj, IDictionary<string, object> dictJsonObj)
 		{
 			if (dictJsonObj.TryGetValue(name, out obj))
 			{
@@ -70,7 +70,7 @@ namespace UnityEngine.Networking.Match
 			throw new FormatException(name + " not found in JSON dictionary");
 		}
 
-		internal bool ParseJSONBool(string name, object obj, IDictionary<string, object> dictJsonObj)
+		public bool ParseJSONBool(string name, object obj, IDictionary<string, object> dictJsonObj)
 		{
 			if (dictJsonObj.TryGetValue(name, out obj))
 			{
@@ -79,12 +79,12 @@ namespace UnityEngine.Networking.Match
 			throw new FormatException(name + " not found in JSON dictionary");
 		}
 
-		internal DateTime ParseJSONDateTime(string name, object obj, IDictionary<string, object> dictJsonObj)
+		public DateTime ParseJSONDateTime(string name, object obj, IDictionary<string, object> dictJsonObj)
 		{
 			throw new FormatException(name + " DateTime not yet supported");
 		}
 
-		internal List<string> ParseJSONListOfStrings(string name, object obj, IDictionary<string, object> dictJsonObj)
+		public List<string> ParseJSONListOfStrings(string name, object obj, IDictionary<string, object> dictJsonObj)
 		{
 			if (dictJsonObj.TryGetValue(name, out obj))
 			{
@@ -107,7 +107,7 @@ namespace UnityEngine.Networking.Match
 			throw new FormatException(name + " not found in JSON dictionary");
 		}
 
-		internal List<T> ParseJSONList<T>(string name, object obj, IDictionary<string, object> dictJsonObj) where T : ResponseBase, new()
+		public List<T> ParseJSONList<T>(string name, object obj, IDictionary<string, object> dictJsonObj) where T : ResponseBase, new()
 		{
 			if (dictJsonObj.TryGetValue(name, out obj))
 			{

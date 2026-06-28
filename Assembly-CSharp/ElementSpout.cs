@@ -6,7 +6,7 @@ public class ElementSpout : StateMachineComponent<ElementSpout.StatesInstance>
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		int num = Grid.PosToCell(this.transform.position);
+		int num = Grid.PosToCell(base.transform.position);
 		Grid.Objects[num, 2] = base.gameObject;
 		base.smi.StartSM();
 	}

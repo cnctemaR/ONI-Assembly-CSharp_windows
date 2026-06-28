@@ -25,7 +25,7 @@ public class GreedyGreen : StateMachineComponent<GreedyGreen.StatesInstance>
 
 	private void OnDugOut(object param)
 	{
-		if (!Grid.Solid[Grid.PosToCell(this.transform.position)])
+		if (!Grid.Solid[Grid.PosToCell(base.transform.position)])
 		{
 			this.Emit();
 			base.smi.GoTo(base.smi.sm.harvestable.death);
@@ -52,13 +52,13 @@ public class GreedyGreen : StateMachineComponent<GreedyGreen.StatesInstance>
 
 	private int TopOfVineCell()
 	{
-		Vector3 vector = this.transform.position + (float)this.growthState.Maturity * this.GrowDirection;
+		Vector3 vector = base.transform.position + (float)this.growthState.Maturity * this.GrowDirection;
 		return Grid.PosToCell(vector);
 	}
 
 	private int nextGrowCell()
 	{
-		Vector3 vector = this.transform.position + (float)(this.growthState.Maturity + 1) * this.GrowDirection;
+		Vector3 vector = base.transform.position + (float)(this.growthState.Maturity + 1) * this.GrowDirection;
 		return Grid.PosToCell(vector);
 	}
 
@@ -141,39 +141,46 @@ public class GreedyGreen : StateMachineComponent<GreedyGreen.StatesInstance>
 		int num6 = Grid.PosToCell(Grid.CellToPos(num, 0f, this.GrowDirection.y, 0f));
 		if (this.PlantableCell(num))
 		{
-			GameObject gameObject = Scenario.SpawnPrefab(num, 0, 0, "GreedyGreen", Grid.SceneLayer.Use, Folder.Entities);
+			GameObject gameObject = Scenario.SpawnPrefab(num, 0, 0, "GreedyGreen", Grid.SceneLayer.Ore, Folder.Entities);
 			gameObject.SetActive(true);
 		}
 		else if (this.PlantableCell(num4))
 		{
-			GameObject gameObject2 = Scenario.SpawnPrefab(num, 0, (int)(-(int)this.GrowDirection.y), "GreedyGreen", Grid.SceneLayer.Use, Folder.Entities);
+			GameObject gameObject2 = Scenario.SpawnPrefab(num, 0, (int)(-(int)this.GrowDirection.y), "GreedyGreen", Grid.SceneLayer.Ore, Folder.Entities);
 			gameObject2.SetActive(true);
 		}
 		else if (this.PlantableCell(num6))
 		{
-			GameObject gameObject3 = Scenario.SpawnPrefab(num, 0, (int)this.GrowDirection.y, "GreedyGreen", Grid.SceneLayer.Use, Folder.Entities);
+			GameObject gameObject3 = Scenario.SpawnPrefab(num, 0, (int)this.GrowDirection.y, "GreedyGreen", Grid.SceneLayer.Ore, Folder.Entities);
 			gameObject3.SetActive(true);
 		}
 		if (this.PlantableCell(num2))
 		{
-			GameObject gameObject4 = Scenario.SpawnPrefab(num2, 0, 0, "GreedyGreen", Grid.SceneLayer.Use, Folder.Entities);
+			GameObject gameObject4 = Scenario.SpawnPrefab(num2, 0, 0, "GreedyGreen", Grid.SceneLayer.Ore, Folder.Entities);
 			gameObject4.SetActive(true);
 		}
 		else if (this.PlantableCell(num3))
 		{
-			GameObject gameObject5 = Scenario.SpawnPrefab(num2, 0, (int)(-(int)this.GrowDirection.y), "GreedyGreen", Grid.SceneLayer.Use, Folder.Entities);
+			GameObject gameObject5 = Scenario.SpawnPrefab(num2, 0, (int)(-(int)this.GrowDirection.y), "GreedyGreen", Grid.SceneLayer.Ore, Folder.Entities);
 			gameObject5.SetActive(true);
 		}
 		else if (this.PlantableCell(num5))
 		{
-			GameObject gameObject6 = Scenario.SpawnPrefab(num2, 0, (int)this.GrowDirection.y, "GreedyGreen", Grid.SceneLayer.Use, Folder.Entities);
+			GameObject gameObject6 = Scenario.SpawnPrefab(num2, 0, (int)this.GrowDirection.y, "GreedyGreen", Grid.SceneLayer.Ore, Folder.Entities);
 			gameObject6.SetActive(true);
 		}
 	}
 
 	private bool PlantableCell(int cell)
 	{
-		return Grid.Solid[cell] && !Grid.Solid[Grid.CellAbove(cell)] && Grid.Objects[cell, 5] == null && Grid.Objects[cell, 0] == null && Grid.Objects[cell, 1] == null;
+		if (Grid.Solid[cell] && !Grid.Solid[Grid.CellAbove(cell)])
+		{
+			if (Grid.Objects[cell, 5] == null && Grid.Objects[cell, 0] == null && Grid.Objects[cell, 1] == null)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private bool CellIsClear(int cell)

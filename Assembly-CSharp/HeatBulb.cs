@@ -18,7 +18,7 @@ public class HeatBulb : KMonoBehaviour
 		float num3 = num / (float)num2;
 		int num4;
 		int num5;
-		Grid.PosToXY(this.transform.position, out num4, out num5);
+		Grid.PosToXY(base.transform.position, out num4, out num5);
 		for (int i = this.minCheckOffset.y; i <= this.maxCheckOffset.y; i++)
 		{
 			for (int j = this.minCheckOffset.x; j <= this.maxCheckOffset.x; j++)

@@ -1,7 +1,9 @@
 ﻿using System;
+using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[UsedByNativeCode]
 	public sealed class AnimatorControllerParameter
 	{
 		public string name
@@ -79,7 +81,7 @@ namespace UnityEngine
 			return this.name.GetHashCode();
 		}
 
-		internal string m_Name = string.Empty;
+		internal string m_Name = "";
 
 		internal AnimatorControllerParameterType m_Type;
 

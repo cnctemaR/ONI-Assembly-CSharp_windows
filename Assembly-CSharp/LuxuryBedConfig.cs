@@ -6,9 +6,19 @@ public class LuxuryBedConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
+		string id = LuxuryBedConfig.ID;
+		int num = 4;
+		int num2 = 2;
+		string text = "elegantbed_kanim";
+		float num3 = 200f;
+		int num4 = 10;
+		float num5 = 10f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
+		string[] plastics = MATERIALS.PLASTICS;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(LuxuryBedConfig.ID, 4, 2, "elegantbed_kanim", 200f, 10, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.PLASTICS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER2, none);
-		buildingDef.RequiredTech = Db.Get().Techs.Get("Luxury");
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, num5, tier, plastics, num6, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER2, none);
 		buildingDef.Overheatable = false;
 		buildingDef.AudioCategory = "Metal";
 		return buildingDef;
@@ -26,8 +36,10 @@ public class LuxuryBedConfig : IBuildingConfig
 		go.GetComponent<KAnimControllerBase>().initialAnim = "off";
 		Bed bed = go.AddOrGet<Bed>();
 		bed.effects = new string[] { "LuxuryBedStamina" };
+		bed.workLayer = Grid.SceneLayer.BuildingFront;
 		Sleepable sleepable = go.AddOrGet<Sleepable>();
 		sleepable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_sleep_bed_kanim") };
+		sleepable.workLayer = Grid.SceneLayer.BuildingFront;
 	}
 
 	public static string ID = "LuxuryBed";

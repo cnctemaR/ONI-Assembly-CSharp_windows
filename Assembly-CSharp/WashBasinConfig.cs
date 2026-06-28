@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -7,9 +6,18 @@ public class WashBasinConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
+		string text = "WashBasin";
+		int num = 2;
+		int num2 = 3;
+		string text2 = "wash_basin_kanim";
+		float num3 = 50f;
+		int num4 = 30;
+		float num5 = 30f;
 		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER0;
-		return BuildingTemplates.CreateBuildingDef("WashBasin", 2, 3, "wash_basin_kanim", 50f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER1, raw_MINERALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER1, tier);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, BUILDINGS.CONSTRUCTION_MASS_KG.TIER1, raw_MINERALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER1, tier);
+		buildingDef.HotKey = global::Action.BuildMenuKeyB;
+		return buildingDef;
 	}
 
 	public override void ConfigureBuildingTemplate(GameObject go)
@@ -27,7 +35,7 @@ public class WashBasinConfig : IBuildingConfig
 		work.workTime = 5f;
 		work.trackUses = true;
 		Storage storage = go.AddOrGet<Storage>();
-		storage.defaultStoredItemModifers = WashBasinConfig.StoredItemModifiers;
+		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.requestedItemTag = GameTagExtensions.Create(SimHashes.Water);
@@ -51,10 +59,4 @@ public class WashBasinConfig : IBuildingConfig
 	public const int USES_PER_FLUSH = 40;
 
 	public const float WORK_TIME = 5f;
-
-	private static readonly List<Storage.StoredItemModifier> StoredItemModifiers = new List<Storage.StoredItemModifier>
-	{
-		Storage.StoredItemModifier.Hide,
-		Storage.StoredItemModifier.Seal
-	};
 }

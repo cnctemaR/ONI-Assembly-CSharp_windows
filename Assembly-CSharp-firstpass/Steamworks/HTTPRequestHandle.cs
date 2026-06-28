@@ -25,16 +25,6 @@ namespace Steamworks
 			return this.m_HTTPRequestHandle.GetHashCode();
 		}
 
-		public bool Equals(HTTPRequestHandle other)
-		{
-			return this.m_HTTPRequestHandle == other.m_HTTPRequestHandle;
-		}
-
-		public int CompareTo(HTTPRequestHandle other)
-		{
-			return this.m_HTTPRequestHandle.CompareTo(other.m_HTTPRequestHandle);
-		}
-
 		public static bool operator ==(HTTPRequestHandle x, HTTPRequestHandle y)
 		{
 			return x.m_HTTPRequestHandle == y.m_HTTPRequestHandle;
@@ -53,6 +43,16 @@ namespace Steamworks
 		public static explicit operator uint(HTTPRequestHandle that)
 		{
 			return that.m_HTTPRequestHandle;
+		}
+
+		public bool Equals(HTTPRequestHandle other)
+		{
+			return this.m_HTTPRequestHandle == other.m_HTTPRequestHandle;
+		}
+
+		public int CompareTo(HTTPRequestHandle other)
+		{
+			return this.m_HTTPRequestHandle.CompareTo(other.m_HTTPRequestHandle);
 		}
 
 		public static readonly HTTPRequestHandle Invalid = new HTTPRequestHandle(0U);

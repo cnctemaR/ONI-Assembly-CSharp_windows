@@ -127,12 +127,6 @@ public class KBatchedAnimInstanceData
 		data[startIndex++] = this.extra.y;
 	}
 
-	public const int bitsPerSlot = 30;
-
-	public const int bitOffest = 2;
-
-	public const uint bitsMask = 4294967292U;
-
 	private uint[] hidden = new uint[4];
 
 	private Vector4 clipRadius = Vector4.zero;
@@ -163,7 +157,13 @@ public class KBatchedAnimInstanceData
 
 	private float symbolScale;
 
-	private KAnimConverter.IAnimConverter target;
+	private KAnimConverter.IAnimConverter target = null;
+
+	public const int bitsPerSlot = 30;
+
+	public const int bitOffest = 2;
+
+	public const uint bitsMask = 4294967292U;
 
 	private Vector2 extra = Vector2.zero;
 }

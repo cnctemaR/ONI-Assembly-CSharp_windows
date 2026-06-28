@@ -29,17 +29,19 @@ public class Ownable : Assignable, ISaveLoadable, IEffectDescriptor
 
 	public override void Assign(IAssignableIdentity new_assignee)
 	{
-		if (new_assignee == this.assignee)
+		if (new_assignee != this.assignee)
 		{
-			return;
+			if (new_assignee is MinionIdentity && base.slot != null)
+			{
+				if (new_assignee.GetSoleOwner().GetComponent<Ownables>().GetSlot(base.slot)
+					.assignable != null)
+				{
+					new_assignee.GetSoleOwner().GetComponent<Ownables>().GetSlot(base.slot)
+						.assignable.Unassign();
+				}
+			}
+			base.Assign(new_assignee);
 		}
-		if (new_assignee is MinionIdentity && base.slot != null && new_assignee.GetSoleOwner().GetComponent<Ownables>().GetSlot(base.slot)
-			.assignable != null)
-		{
-			new_assignee.GetSoleOwner().GetComponent<Ownables>().GetSlot(base.slot)
-				.assignable.Unassign();
-		}
-		base.Assign(new_assignee);
 	}
 
 	protected override void OnSpawn()
@@ -76,31 +78,30 @@ public class Ownable : Assignable, ISaveLoadable, IEffectDescriptor
 	private void UpdateStatusString()
 	{
 		KSelectable component = base.GetComponent<KSelectable>();
-		if (component == null)
+		if (!(component == null))
 		{
-			return;
-		}
-		StatusItem statusItem;
-		if (this.assignee != null)
-		{
-			if (this.assignee is MinionIdentity)
+			StatusItem statusItem;
+			if (this.assignee != null)
 			{
-				statusItem = Db.Get().BuildingStatusItems.AssignedTo;
-			}
-			else if (this.assignee is Room)
-			{
-				statusItem = Db.Get().BuildingStatusItems.AssignedTo;
+				if (this.assignee is MinionIdentity)
+				{
+					statusItem = Db.Get().BuildingStatusItems.AssignedTo;
+				}
+				else if (this.assignee is Room)
+				{
+					statusItem = Db.Get().BuildingStatusItems.AssignedTo;
+				}
+				else
+				{
+					statusItem = Db.Get().BuildingStatusItems.AssignedTo;
+				}
 			}
 			else
 			{
-				statusItem = Db.Get().BuildingStatusItems.AssignedTo;
+				statusItem = Db.Get().BuildingStatusItems.Unassigned;
 			}
+			component.SetStatusItem(Db.Get().StatusItemCategories.Main, statusItem, this);
 		}
-		else
-		{
-			statusItem = Db.Get().BuildingStatusItems.Unassigned;
-		}
-		component.SetStatusItem(Db.Get().StatusItemCategories.Main, statusItem, this);
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)

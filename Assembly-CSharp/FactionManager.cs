@@ -15,32 +15,46 @@ public class FactionManager : KMonoBehaviour
 
 	public Faction GetFaction(FactionManager.FactionID faction)
 	{
+		Faction faction2;
 		switch (faction)
 		{
 		case FactionManager.FactionID.Duplicant:
-			return this.Duplicant;
+			faction2 = this.Duplicant;
+			break;
 		case FactionManager.FactionID.Friendly:
-			return this.Friendly;
+			faction2 = this.Friendly;
+			break;
 		case FactionManager.FactionID.Hostile:
-			return this.Hostile;
+			faction2 = this.Hostile;
+			break;
 		case FactionManager.FactionID.Prey:
-			return this.Prey;
+			faction2 = this.Prey;
+			break;
 		case FactionManager.FactionID.Predator:
-			return this.Predator;
+			faction2 = this.Predator;
+			break;
 		case FactionManager.FactionID.Pest:
-			return this.Pest;
+			faction2 = this.Pest;
+			break;
 		default:
-			return null;
+			faction2 = null;
+			break;
 		}
+		return faction2;
 	}
 
 	public FactionManager.Disposition GetDisposition(FactionManager.FactionID of_faction, FactionManager.FactionID to_faction)
 	{
+		FactionManager.Disposition disposition;
 		if (FactionManager.Instance.GetFaction(of_faction).Dispositions.ContainsKey(to_faction))
 		{
-			return FactionManager.Instance.GetFaction(of_faction).Dispositions[to_faction];
+			disposition = FactionManager.Instance.GetFaction(of_faction).Dispositions[to_faction];
 		}
-		return FactionManager.Disposition.Neutral;
+		else
+		{
+			disposition = FactionManager.Disposition.Neutral;
+		}
+		return disposition;
 	}
 
 	public static FactionManager Instance;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 
 public class RegionToolHoverTextCard : HoverTextConfiguration
@@ -9,7 +10,7 @@ public class RegionToolHoverTextCard : HoverTextConfiguration
 		this.TitleText = screen.AddText(Game.Instance.RegionManager.selectedRegionPrefab.HoverStr, this.ToolTitleTextStyle, true);
 	}
 
-	public override void UpdateHoverElements(KSelectable[] hoverObjects)
+	public override void UpdateHoverElements(List<KSelectable> hover_objects)
 	{
 		if (RegionTool.Instance.Dragging && RegionInterfaceScreen.Instance != null && RegionInterfaceScreen.Instance.DragHighlightedRegions != null)
 		{
@@ -23,6 +24,6 @@ public class RegionToolHoverTextCard : HoverTextConfiguration
 		{
 			this.ActionText.text = this.ActionName.ToUpper();
 		}
-		base.UpdateHoverElements(hoverObjects);
+		base.UpdateHoverElements(hover_objects);
 	}
 }

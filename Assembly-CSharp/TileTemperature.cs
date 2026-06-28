@@ -18,12 +18,17 @@ public class TileTemperature : KMonoBehaviour
 	private static float OnGetTemperature(PrimaryElement primary_element)
 	{
 		SimCellOccupier component = primary_element.GetComponent<SimCellOccupier>();
+		float num2;
 		if (component != null && component.IsReady())
 		{
 			int num = Grid.PosToCell(primary_element.transform.position);
-			return Grid.Temperature[num];
+			num2 = Grid.Temperature[num];
 		}
-		return primary_element.InternalTemperature;
+		else
+		{
+			num2 = primary_element.InternalTemperature;
+		}
+		return num2;
 	}
 
 	private static void OnSetTemperature(PrimaryElement primary_element, float temperature)

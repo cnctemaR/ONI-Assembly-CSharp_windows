@@ -8,8 +8,8 @@ public class KAnimGridTileVisualizer : KMonoBehaviour, IBlockTileInfo
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.Subscribe(-1503271301, new Action<object>(this.OnSelectionChanged));
-		this.Subscribe(-1201923725, new Action<object>(this.OnHighlightChanged));
+		base.Subscribe(-1503271301, new Action<object>(this.OnSelectionChanged));
+		base.Subscribe(-1201923725, new Action<object>(this.OnHighlightChanged));
 	}
 
 	protected override void OnCleanUp()
@@ -17,7 +17,7 @@ public class KAnimGridTileVisualizer : KMonoBehaviour, IBlockTileInfo
 		Building component = base.GetComponent<Building>();
 		if (component != null)
 		{
-			int num = Grid.PosToCell(this.transform.position);
+			int num = Grid.PosToCell(base.transform.position);
 			ObjectLayer tileLayer = component.Def.TileLayer;
 			if (Grid.Objects[num, (int)tileLayer] == base.gameObject)
 			{
@@ -31,13 +31,13 @@ public class KAnimGridTileVisualizer : KMonoBehaviour, IBlockTileInfo
 	private void OnSelectionChanged(object data)
 	{
 		bool flag = (bool)data;
-		World.Instance.blockTileRenderer.SelectCell(Grid.PosToCell(this.transform.position), flag);
+		World.Instance.blockTileRenderer.SelectCell(Grid.PosToCell(base.transform.position), flag);
 	}
 
 	private void OnHighlightChanged(object data)
 	{
 		bool flag = (bool)data;
-		World.Instance.blockTileRenderer.HighlightCell(Grid.PosToCell(this.transform.position), flag);
+		World.Instance.blockTileRenderer.HighlightCell(Grid.PosToCell(base.transform.position), flag);
 	}
 
 	public int GetBlockTileConnectorID()

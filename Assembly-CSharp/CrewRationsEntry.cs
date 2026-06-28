@@ -15,33 +15,32 @@ public class CrewRationsEntry : CrewListEntry
 	{
 		base.Refresh();
 		this.rationsEatenToday.text = GameUtil.GetFormattedCalories(this.rationMonitor.GetRationsAteToday(), GameUtil.TimeSlice.None, true);
-		if (this.identity == null)
+		if (!(this.identity == null))
 		{
-			return;
-		}
-		Amounts amounts = this.identity.GetAmounts();
-		foreach (AmountInstance amountInstance in amounts)
-		{
-			float min = amountInstance.GetMin();
-			float max = amountInstance.GetMax();
-			float num = max - min;
-			float num2 = (num - (max - amountInstance.value)) / num;
-			string text = Mathf.RoundToInt(num2 * 100f).ToString();
-			if (amountInstance.amount == Db.Get().Amounts.Stress)
+			Amounts amounts = this.identity.GetAmounts();
+			foreach (AmountInstance amountInstance in amounts)
 			{
-				this.currentStressText.text = amountInstance.GetValueString();
-				this.currentStressText.GetComponent<ToolTip>().toolTip = amountInstance.GetTooltip();
-				this.stressTrendImage.SetValue(amountInstance, new Func<AmountInstance, string>(amountInstance.amount.GetTooltip));
-			}
-			else if (amountInstance.amount == Db.Get().Amounts.Calories)
-			{
-				this.currentCaloriesText.text = text + "%";
-				this.currentCaloriesText.GetComponent<ToolTip>().toolTip = amountInstance.GetTooltip();
-			}
-			else if (amountInstance.amount == Db.Get().Amounts.HitPoints)
-			{
-				this.currentHealthText.text = text + "%";
-				this.currentHealthText.GetComponent<ToolTip>().toolTip = amountInstance.GetTooltip();
+				float min = amountInstance.GetMin();
+				float max = amountInstance.GetMax();
+				float num = max - min;
+				float num2 = (num - (max - amountInstance.value)) / num;
+				string text = Mathf.RoundToInt(num2 * 100f).ToString();
+				if (amountInstance.amount == Db.Get().Amounts.Stress)
+				{
+					this.currentStressText.text = amountInstance.GetValueString();
+					this.currentStressText.GetComponent<ToolTip>().toolTip = amountInstance.GetTooltip();
+					this.stressTrendImage.SetValue(amountInstance, new Func<AmountInstance, string>(amountInstance.amount.GetTooltip));
+				}
+				else if (amountInstance.amount == Db.Get().Amounts.Calories)
+				{
+					this.currentCaloriesText.text = text + "%";
+					this.currentCaloriesText.GetComponent<ToolTip>().toolTip = amountInstance.GetTooltip();
+				}
+				else if (amountInstance.amount == Db.Get().Amounts.HitPoints)
+				{
+					this.currentHealthText.text = text + "%";
+					this.currentHealthText.GetComponent<ToolTip>().toolTip = amountInstance.GetTooltip();
+				}
 			}
 		}
 	}

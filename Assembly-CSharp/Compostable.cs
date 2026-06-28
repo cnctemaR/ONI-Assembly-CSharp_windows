@@ -17,8 +17,8 @@ public class Compostable : KMonoBehaviour
 		{
 			this.MarkForCompost(true);
 		}
-		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
-		this.Subscribe(856640610, new Action<object>(this.OnStore));
+		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(856640610, new Action<object>(this.OnStore));
 	}
 
 	private void MarkForCompost(bool force = false)
@@ -109,14 +109,20 @@ public class Compostable : KMonoBehaviour
 		if (!this.isMarkedForCompost)
 		{
 			UserMenu userMenu = this.userMenu;
-			string text = UI.USERMENUACTIONS.COMPOST.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_compost", UI.USERMENUACTIONS.COMPOST.NAME, new global::System.Action(this.OnToggleCompost), global::Action.NumActions, null, null, null, text, true), 1f);
+			string text = "action_compost";
+			string text2 = UI.USERMENUACTIONS.COMPOST.NAME;
+			global::System.Action action = new global::System.Action(this.OnToggleCompost);
+			string text3 = UI.USERMENUACTIONS.COMPOST.TOOLTIP;
+			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
 		}
 		else
 		{
 			UserMenu userMenu2 = this.userMenu;
+			string text3 = "action_compost";
+			string text2 = UI.USERMENUACTIONS.COMPOST.NAME_OFF;
+			global::System.Action action = new global::System.Action(this.OnToggleCompost);
 			string text = UI.USERMENUACTIONS.COMPOST.TOOLTIP_OFF;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_compost", UI.USERMENUACTIONS.COMPOST.NAME_OFF, new global::System.Action(this.OnToggleCompost), global::Action.NumActions, null, null, null, text, true), 1f);
+			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
 		}
 	}
 

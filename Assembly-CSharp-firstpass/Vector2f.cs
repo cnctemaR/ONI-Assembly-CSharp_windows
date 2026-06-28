@@ -48,6 +48,26 @@ public struct Vector2f
 		}
 	}
 
+	public static bool operator ==(Vector2f u, Vector2f v)
+	{
+		return u.x == v.x && u.y == v.y;
+	}
+
+	public static bool operator !=(Vector2f u, Vector2f v)
+	{
+		return u.x != v.x || u.y != v.y;
+	}
+
+	public static implicit operator Vector2(Vector2f v)
+	{
+		return new Vector2(v.x, v.y);
+	}
+
+	public static implicit operator Vector2f(Vector2 v)
+	{
+		return new Vector2f(v.x, v.y);
+	}
+
 	public bool Equals(Vector2 v)
 	{
 		return v.x == this.x && v.y == this.y;
@@ -76,26 +96,6 @@ public struct Vector2f
 	public override string ToString()
 	{
 		return string.Format("{0}, {1}", this.x, this.y);
-	}
-
-	public static bool operator ==(Vector2f u, Vector2f v)
-	{
-		return u.x == v.x && u.y == v.y;
-	}
-
-	public static bool operator !=(Vector2f u, Vector2f v)
-	{
-		return u.x != v.x || u.y != v.y;
-	}
-
-	public static implicit operator Vector2(Vector2f v)
-	{
-		return new Vector2(v.x, v.y);
-	}
-
-	public static implicit operator Vector2f(Vector2 v)
-	{
-		return new Vector2f(v.x, v.y);
 	}
 
 	[Serialize]

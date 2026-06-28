@@ -7,7 +7,7 @@ public class Dumpable : Workable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Emptying;
 	}
 
@@ -16,7 +16,7 @@ public class Dumpable : Workable
 		base.OnSpawn();
 		if (this.isMarkedForDumping)
 		{
-			this.chore = new WorkChore<Dumpable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue);
+			this.chore = new WorkChore<Dumpable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
 		}
 		base.SetWorkTime(0.1f);
 	}
@@ -37,7 +37,7 @@ public class Dumpable : Workable
 		else
 		{
 			this.isMarkedForDumping = true;
-			this.chore = new WorkChore<Dumpable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue);
+			this.chore = new WorkChore<Dumpable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
 		}
 	}
 
@@ -53,21 +53,28 @@ public class Dumpable : Workable
 	private void OnRefreshUserMenu(object data)
 	{
 		Pickupable component = base.GetComponent<Pickupable>();
-		if (component != null && component.storage != null)
+		if (!(component != null) || !(component.storage != null))
 		{
-			return;
-		}
-		if (!this.isMarkedForDumping)
-		{
-			UserMenu userMenu = this.userMenu;
-			string text = UI.USERMENUACTIONS.DUMP.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.DUMP.NAME, new global::System.Action(this.ToggleDumping), global::Action.BuildingUtility1, null, null, null, text, true), 1f);
-		}
-		else
-		{
-			UserMenu userMenu2 = this.userMenu;
-			string text = UI.USERMENUACTIONS.DUMP.TOOLTIP_OFF;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.DUMP.NAME_OFF, new global::System.Action(this.ToggleDumping), global::Action.BuildingUtility1, null, null, null, text, true), 1f);
+			if (!this.isMarkedForDumping)
+			{
+				UserMenu userMenu = this.userMenu;
+				string text = "action_empty_contents";
+				string text2 = UI.USERMENUACTIONS.DUMP.NAME;
+				global::System.Action action = new global::System.Action(this.ToggleDumping);
+				global::Action action2 = global::Action.BuildingUtility1;
+				string text3 = UI.USERMENUACTIONS.DUMP.TOOLTIP;
+				userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, action2, null, null, null, text3, true), 1f);
+			}
+			else
+			{
+				UserMenu userMenu2 = this.userMenu;
+				string text3 = "action_empty_contents";
+				string text2 = UI.USERMENUACTIONS.DUMP.NAME_OFF;
+				global::System.Action action = new global::System.Action(this.ToggleDumping);
+				global::Action action2 = global::Action.BuildingUtility1;
+				string text = UI.USERMENUACTIONS.DUMP.TOOLTIP_OFF;
+				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, action2, null, null, null, text, true), 1f);
+			}
 		}
 	}
 

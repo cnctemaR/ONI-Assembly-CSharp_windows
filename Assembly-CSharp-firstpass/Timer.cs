@@ -24,12 +24,17 @@ public class Timer
 
 	public bool TryStop(float elapsed_time)
 	{
+		bool flag;
 		if (this.isStarted && this.GetElapsed() >= elapsed_time)
 		{
 			this.Stop();
-			return true;
+			flag = true;
 		}
-		return false;
+		else
+		{
+			flag = false;
+		}
+		return flag;
 	}
 
 	private float startTime;

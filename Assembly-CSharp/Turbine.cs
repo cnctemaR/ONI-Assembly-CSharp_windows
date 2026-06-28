@@ -71,9 +71,9 @@ public class Turbine : KMonoBehaviour
 
 	public static void InitializeStatusItems()
 	{
-		Turbine.outputBlockedStatusItem = new StatusItem("TURBINE_BLOCKED_OUTPUT", "BUILDING", "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 14334);
-		Turbine.spinningUpStatusItem = new StatusItem("TURBINE_SPINNING_UP", "BUILDING", "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.Good, false, SimViewMode.None, true, 14334);
-		Turbine.insufficientMassStatusItem = new StatusItem("TURBINE_INSUFFICIENT_MASS", "BUILDING", "status_item_resource_unavailable", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.PowerMap, true, 14334);
+		Turbine.outputBlockedStatusItem = new StatusItem("TURBINE_BLOCKED_OUTPUT", "BUILDING", "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
+		Turbine.spinningUpStatusItem = new StatusItem("TURBINE_SPINNING_UP", "BUILDING", "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.Good, false, SimViewMode.None, true, 30718);
+		Turbine.insufficientMassStatusItem = new StatusItem("TURBINE_INSUFFICIENT_MASS", "BUILDING", "status_item_resource_unavailable", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.PowerMap, true, 30718);
 		Turbine.insufficientMassStatusItem.resolveTooltipCallback = delegate(string str, object data)
 		{
 			Turbine turbine = (Turbine)data;
@@ -107,16 +107,16 @@ public class Turbine : KMonoBehaviour
 	public float pumpKGRate;
 
 	[Serialize]
-	private float storedMass;
+	private float storedMass = 0f;
 
 	[Serialize]
-	private float storedTemperature;
+	private float storedTemperature = 0f;
 
 	[Serialize]
 	private byte diseaseIdx = byte.MaxValue;
 
 	[Serialize]
-	private int diseaseCount;
+	private int diseaseCount = 0;
 
 	[MyCmpGet]
 	private Generator generator;
@@ -197,18 +197,20 @@ public class Turbine : KMonoBehaviour
 			if (this.IsOutputBlocked())
 			{
 				base.smi.GoTo(base.sm.operational.outputBlocked);
-				return;
-			}
-			bool flag;
-			bool flag2;
-			this.GetInputState(out flag, out flag2);
-			if (!flag || !flag2)
-			{
-				base.smi.GoTo(base.sm.operational.insufficientMass);
 			}
 			else
 			{
-				base.smi.GoTo(base.sm.active);
+				bool flag;
+				bool flag2;
+				this.GetInputState(out flag, out flag2);
+				if (!flag || !flag2)
+				{
+					base.smi.GoTo(base.sm.operational.insufficientMass);
+				}
+				else
+				{
+					base.smi.GoTo(base.sm.active);
+				}
 			}
 		}
 

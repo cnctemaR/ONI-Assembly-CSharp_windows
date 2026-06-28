@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections;
+using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Security;
 using System.Text;
 using UnityEngine.Internal;
+using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 using UnityEngine.Scripting;
 
@@ -12,61 +14,44 @@ namespace UnityEngine
 {
 	public sealed class Application
 	{
-		public static event Application.LogCallback logMessageReceived
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static event Application.LowMemoryCallback lowMemory;
+
+		[RequiredByNativeCode]
+		private static void CallLowMemory()
 		{
-			add
+			Application.LowMemoryCallback lowMemoryCallback = Application.lowMemory;
+			if (lowMemoryCallback != null)
 			{
-				Application.s_LogCallbackHandler = (Application.LogCallback)Delegate.Combine(Application.s_LogCallbackHandler, value);
-				Application.SetLogCallbackDefined(true);
-			}
-			remove
-			{
-				Application.s_LogCallbackHandler = (Application.LogCallback)Delegate.Remove(Application.s_LogCallbackHandler, value);
+				lowMemoryCallback();
 			}
 		}
 
-		public static event Application.LogCallback logMessageReceivedThreaded
-		{
-			add
-			{
-				Application.s_LogCallbackHandlerThreaded = (Application.LogCallback)Delegate.Combine(Application.s_LogCallbackHandlerThreaded, value);
-				Application.SetLogCallbackDefined(true);
-			}
-			remove
-			{
-				Application.s_LogCallbackHandlerThreaded = (Application.LogCallback)Delegate.Remove(Application.s_LogCallbackHandlerThreaded, value);
-			}
-		}
-
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void Quit();
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void CancelQuit();
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void Unload();
 
 		[Obsolete("This property is deprecated, please use LoadLevelAsync to detect if a specific scene is currently loading.")]
 		public static extern bool isLoadingLevel
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		[Obsolete("Use SceneManager.sceneCountInBuildSettings")]
-		public static extern int levelCount
-		{
-			[WrapperlessIcall]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-		}
-
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern float GetStreamProgressForLevelByName(string levelName);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern float GetStreamProgressForLevel(int levelIndex);
 
@@ -77,16 +62,16 @@ namespace UnityEngine
 
 		public static extern int streamedBytes
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool CanStreamedLevelBeLoadedByName(string levelName);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool CanStreamedLevelBeLoaded(int levelIndex);
 
@@ -97,28 +82,47 @@ namespace UnityEngine
 
 		public static extern bool isPlaying
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		public static extern bool isFocused
+		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern bool isEditor
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern bool isWebPlayer
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
+		[ThreadAndSerializationSafe]
 		public static extern RuntimePlatform platform
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern string[] GetBuildTags();
+
+		public static extern string buildGUID
+		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -127,19 +131,25 @@ namespace UnityEngine
 		{
 			get
 			{
-				switch (Application.platform)
+				RuntimePlatform platform = Application.platform;
+				switch (platform)
 				{
-				case RuntimePlatform.IPhonePlayer:
-				case RuntimePlatform.Android:
 				case RuntimePlatform.MetroPlayerX86:
 				case RuntimePlatform.MetroPlayerX64:
 				case RuntimePlatform.MetroPlayerARM:
-				case RuntimePlatform.WP8Player:
-				case RuntimePlatform.BlackBerryPlayer:
 				case RuntimePlatform.TizenPlayer:
-					return true;
+					break;
+				default:
+					switch (platform)
+					{
+					case RuntimePlatform.IPhonePlayer:
+					case RuntimePlatform.Android:
+						goto IL_0045;
+					}
+					return false;
 				}
-				return false;
+				IL_0045:
+				return true;
 			}
 		}
 
@@ -148,11 +158,11 @@ namespace UnityEngine
 			get
 			{
 				RuntimePlatform platform = Application.platform;
-				return platform == RuntimePlatform.PS3 || platform == RuntimePlatform.PS4 || platform == RuntimePlatform.XBOX360 || platform == RuntimePlatform.XboxOne;
+				return platform == RuntimePlatform.PS4 || platform == RuntimePlatform.XboxOne;
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void CaptureScreenshot(string filename, [DefaultValue("0")] int superSize);
 
@@ -165,10 +175,10 @@ namespace UnityEngine
 
 		public static extern bool runInBackground
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
@@ -182,58 +192,58 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool HasProLicense();
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool HasAdvancedLicense();
 
 		internal static extern bool isBatchmode
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		internal static extern bool isTestRun
+		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		internal static extern bool isHumanControllingUs
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		internal static extern bool isRunningUnitTests
-		{
-			[WrapperlessIcall]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-		}
-
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern bool HasARGV(string name);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern string GetValueForARGV(string name);
 
-		[WrapperlessIcall]
 		[Obsolete("Use Object.DontDestroyOnLoad instead")]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void DontDestroyOnLoad(Object mono);
 
 		public static extern string dataPath
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern string streamingAssetsPath
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -241,92 +251,97 @@ namespace UnityEngine
 		[SecurityCritical]
 		public static extern string persistentDataPath
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern string temporaryCachePath
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern string srcValue
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern string absoluteURL
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		private static string ObjectToJSString(object o)
 		{
+			string text;
 			if (o == null)
 			{
-				return "null";
+				text = "null";
 			}
-			if (o is string)
+			else if (o is string)
 			{
-				string text = o.ToString().Replace("\\", "\\\\");
-				text = text.Replace("\"", "\\\"");
-				text = text.Replace("\n", "\\n");
-				text = text.Replace("\r", "\\r");
-				text = text.Replace("\0", string.Empty);
-				text = text.Replace("\u2028", string.Empty);
-				text = text.Replace("\u2029", string.Empty);
-				return '"' + text + '"';
+				string text2 = o.ToString().Replace("\\", "\\\\");
+				text2 = text2.Replace("\"", "\\\"");
+				text2 = text2.Replace("\n", "\\n");
+				text2 = text2.Replace("\r", "\\r");
+				text2 = text2.Replace("\0", "");
+				text2 = text2.Replace("\u2028", "");
+				text2 = text2.Replace("\u2029", "");
+				text = '"' + text2 + '"';
 			}
-			if (o is int || o is short || o is uint || o is ushort || o is byte)
+			else if (o is int || o is short || o is uint || o is ushort || o is byte)
 			{
-				return o.ToString();
+				text = o.ToString();
 			}
-			if (o is float)
+			else if (o is float)
 			{
 				NumberFormatInfo numberFormat = CultureInfo.InvariantCulture.NumberFormat;
-				return ((float)o).ToString(numberFormat);
+				text = ((float)o).ToString(numberFormat);
 			}
-			if (o is double)
+			else if (o is double)
 			{
 				NumberFormatInfo numberFormat2 = CultureInfo.InvariantCulture.NumberFormat;
-				return ((double)o).ToString(numberFormat2);
+				text = ((double)o).ToString(numberFormat2);
 			}
-			if (o is char)
+			else if (o is char)
 			{
 				if ((char)o == '"')
 				{
-					return "\"\\\"\"";
+					text = "\"\\\"\"";
 				}
-				return '"' + o.ToString() + '"';
+				else
+				{
+					text = '"' + o.ToString() + '"';
+				}
+			}
+			else if (o is IList)
+			{
+				IList list = (IList)o;
+				StringBuilder stringBuilder = new StringBuilder();
+				stringBuilder.Append("new Array(");
+				int count = list.Count;
+				for (int i = 0; i < count; i++)
+				{
+					if (i != 0)
+					{
+						stringBuilder.Append(", ");
+					}
+					stringBuilder.Append(Application.ObjectToJSString(list[i]));
+				}
+				stringBuilder.Append(")");
+				text = stringBuilder.ToString();
 			}
 			else
 			{
-				if (o is IList)
-				{
-					IList list = (IList)o;
-					StringBuilder stringBuilder = new StringBuilder();
-					stringBuilder.Append("new Array(");
-					int count = list.Count;
-					for (int i = 0; i < count; i++)
-					{
-						if (i != 0)
-						{
-							stringBuilder.Append(", ");
-						}
-						stringBuilder.Append(Application.ObjectToJSString(list[i]));
-					}
-					stringBuilder.Append(")");
-					return stringBuilder.ToString();
-				}
-				return Application.ObjectToJSString(o.ToString());
+				text = Application.ObjectToJSString(o.ToString());
 			}
+			return text;
 		}
 
 		public static void ExternalCall(string functionName, params object[] args)
@@ -362,70 +377,69 @@ namespace UnityEngine
 			Application.Internal_ExternalCall(script);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_ExternalCall(string script);
 
 		public static extern string unityVersion
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern int GetBuildUnityVersion();
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern int GetNumericUnityVersion(string version);
 
 		public static extern string version
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		public static extern string bundleIdentifier
+		public static extern string installerName
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		public static extern string identifier
+		{
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern ApplicationInstallMode installMode
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern ApplicationSandboxType sandboxType
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern string productName
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern string companyName
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern string cloudProjectId
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -438,48 +452,78 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool RequestAdvertisingIdentifierAsync(Application.AdvertisingIdentifierCallback delegateMethod);
 
+		[Obsolete("Application.webSecurityEnabled is no longer supported, since the Unity Web Player is no longer supported by Unity.")]
+		[ThreadAndSerializationSafe]
 		public static extern bool webSecurityEnabled
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
+		[Obsolete("Application.webSecurityHostUrl is no longer supported, since the Unity Web Player is no longer supported by Unity.")]
+		[ThreadAndSerializationSafe]
 		public static extern string webSecurityHostUrl
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void OpenURL(string url);
 
 		[Obsolete("For internal use only")]
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void ForceCrash(int mode);
 
 		public static extern int targetFrameRate
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public static extern SystemLanguage systemLanguage
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
+		}
+
+		public static event Application.LogCallback logMessageReceived
+		{
+			add
+			{
+				Application.s_LogCallbackHandler = (Application.LogCallback)Delegate.Combine(Application.s_LogCallbackHandler, value);
+				Application.SetLogCallbackDefined(true);
+			}
+			remove
+			{
+				Application.s_LogCallbackHandler = (Application.LogCallback)Delegate.Remove(Application.s_LogCallbackHandler, value);
+			}
+		}
+
+		public static event Application.LogCallback logMessageReceivedThreaded
+		{
+			add
+			{
+				Application.s_LogCallbackHandlerThreaded = (Application.LogCallback)Delegate.Combine(Application.s_LogCallbackHandlerThreaded, value);
+				Application.SetLogCallbackDefined(true);
+			}
+			remove
+			{
+				Application.s_LogCallbackHandlerThreaded = (Application.LogCallback)Delegate.Remove(Application.s_LogCallbackHandlerThreaded, value);
+			}
 		}
 
 		[RequiredByNativeCode]
@@ -500,91 +544,82 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetLogCallbackDefined(bool defined);
 
+		[Obsolete("Use SetStackTraceLogType/GetStackTraceLogType instead")]
 		public static extern StackTraceLogType stackTraceLogType
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern StackTraceLogType GetStackTraceLogType(LogType logType);
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void SetStackTraceLogType(LogType logType, StackTraceLogType stackTraceType);
+
 		public static extern ThreadPriority backgroundLoadingPriority
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public static extern NetworkReachability internetReachability
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern bool genuine
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern bool genuineCheckAvailable
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern AsyncOperation RequestUserAuthorization(UserAuthorization mode);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool HasUserAuthorization(UserAuthorization mode);
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern void ReplyToUserAuthorizationRequest(bool reply, [DefaultValue("false")] bool remember);
-
-		[ExcludeFromDocs]
-		internal static void ReplyToUserAuthorizationRequest(bool reply)
-		{
-			bool flag = false;
-			Application.ReplyToUserAuthorizationRequest(reply, flag);
-		}
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int GetUserAuthorizationRequestMode_Internal();
-
-		internal static UserAuthorization GetUserAuthorizationRequestMode()
-		{
-			return (UserAuthorization)Application.GetUserAuthorizationRequestMode_Internal();
-		}
-
 		internal static extern bool submitAnalytics
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		public static extern bool isShowingSplashScreen
+		[Obsolete("This property is deprecated, please use SplashScreen.isFinished instead")]
+		public static bool isShowingSplashScreen
 		{
-			[WrapperlessIcall]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				return !SplashScreen.isFinished;
+			}
 		}
 
 		[Obsolete("Application.RegisterLogCallback is deprecated. Use Application.logMessageReceived instead.")]
@@ -617,6 +652,15 @@ namespace UnityEngine
 				{
 					Application.logMessageReceived += handler;
 				}
+			}
+		}
+
+		[Obsolete("Use SceneManager.sceneCountInBuildSettings")]
+		public static int levelCount
+		{
+			get
+			{
+				return SceneManager.sceneCountInBuildSettings;
 			}
 		}
 
@@ -707,6 +751,8 @@ namespace UnityEngine
 		private static volatile Application.LogCallback s_RegisterLogCallbackDeprecated;
 
 		public delegate void AdvertisingIdentifierCallback(string advertisingId, bool trackingEnabled, string errorMsg);
+
+		public delegate void LowMemoryCallback();
 
 		public delegate void LogCallback(string condition, string stackTrace, LogType type);
 	}

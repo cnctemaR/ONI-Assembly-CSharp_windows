@@ -7,10 +7,10 @@ using UnityEngine.UI.CoroutineTween;
 
 namespace UnityEngine.UI
 {
-	[RequireComponent(typeof(CanvasRenderer))]
 	[DisallowMultipleComponent]
-	[ExecuteInEditMode]
+	[RequireComponent(typeof(CanvasRenderer))]
 	[RequireComponent(typeof(RectTransform))]
+	[ExecuteInEditMode]
 	public abstract class Graphic : UIBehaviour, ICanvasElement
 	{
 		protected Graphic()
@@ -35,7 +35,7 @@ namespace UnityEngine.UI
 			}
 		}
 
-		public Color color
+		public virtual Color color
 		{
 			get
 			{
@@ -50,7 +50,7 @@ namespace UnityEngine.UI
 			}
 		}
 
-		public bool raycastTarget
+		public virtual bool raycastTarget
 		{
 			get
 			{
@@ -73,42 +73,39 @@ namespace UnityEngine.UI
 
 		public virtual void SetLayoutDirty()
 		{
-			if (!this.IsActive())
+			if (this.IsActive())
 			{
-				return;
-			}
-			LayoutRebuilder.MarkLayoutForRebuild(this.rectTransform);
-			if (this.m_OnDirtyLayoutCallback != null)
-			{
-				this.m_OnDirtyLayoutCallback();
+				LayoutRebuilder.MarkLayoutForRebuild(this.rectTransform);
+				if (this.m_OnDirtyLayoutCallback != null)
+				{
+					this.m_OnDirtyLayoutCallback();
+				}
 			}
 		}
 
 		public virtual void SetVerticesDirty()
 		{
-			if (!this.IsActive())
+			if (this.IsActive())
 			{
-				return;
-			}
-			this.m_VertsDirty = true;
-			CanvasUpdateRegistry.RegisterCanvasElementForGraphicRebuild(this);
-			if (this.m_OnDirtyVertsCallback != null)
-			{
-				this.m_OnDirtyVertsCallback();
+				this.m_VertsDirty = true;
+				CanvasUpdateRegistry.RegisterCanvasElementForGraphicRebuild(this);
+				if (this.m_OnDirtyVertsCallback != null)
+				{
+					this.m_OnDirtyVertsCallback();
+				}
 			}
 		}
 
 		public virtual void SetMaterialDirty()
 		{
-			if (!this.IsActive())
+			if (this.IsActive())
 			{
-				return;
-			}
-			this.m_MaterialDirty = true;
-			CanvasUpdateRegistry.RegisterCanvasElementForGraphicRebuild(this);
-			if (this.m_OnDirtyMaterialCallback != null)
-			{
-				this.m_OnDirtyMaterialCallback();
+				this.m_MaterialDirty = true;
+				CanvasUpdateRegistry.RegisterCanvasElementForGraphicRebuild(this);
+				if (this.m_OnDirtyMaterialCallback != null)
+				{
+					this.m_OnDirtyMaterialCallback();
+				}
 			}
 		}
 
@@ -138,13 +135,12 @@ namespace UnityEngine.UI
 		{
 			base.OnTransformParentChanged();
 			this.m_Canvas = null;
-			if (!this.IsActive())
+			if (this.IsActive())
 			{
-				return;
+				this.CacheCanvas();
+				GraphicRegistry.RegisterGraphicForCanvas(this.canvas, this);
+				this.SetAllDirty();
 			}
-			this.CacheCanvas();
-			GraphicRegistry.RegisterGraphicForCanvas(this.canvas, this);
-			this.SetAllDirty();
 		}
 
 		public int depth
@@ -230,12 +226,11 @@ namespace UnityEngine.UI
 			}
 			set
 			{
-				if (this.m_Material == value)
+				if (!(this.m_Material == value))
 				{
-					return;
+					this.m_Material = value;
+					this.SetMaterialDirty();
 				}
-				this.m_Material = value;
-				this.SetMaterialDirty();
 			}
 		}
 
@@ -291,38 +286,36 @@ namespace UnityEngine.UI
 		{
 			Canvas canvas = this.m_Canvas;
 			this.m_Canvas = null;
-			if (!this.IsActive())
+			if (this.IsActive())
 			{
-				return;
-			}
-			this.CacheCanvas();
-			if (canvas != this.m_Canvas)
-			{
-				GraphicRegistry.UnregisterGraphicForCanvas(canvas, this);
-				if (this.IsActive())
+				this.CacheCanvas();
+				if (canvas != this.m_Canvas)
 				{
-					GraphicRegistry.RegisterGraphicForCanvas(this.canvas, this);
+					GraphicRegistry.UnregisterGraphicForCanvas(canvas, this);
+					if (this.IsActive())
+					{
+						GraphicRegistry.RegisterGraphicForCanvas(this.canvas, this);
+					}
 				}
 			}
 		}
 
 		public virtual void Rebuild(CanvasUpdate update)
 		{
-			if (this.canvasRenderer.cull)
+			if (!this.canvasRenderer.cull)
 			{
-				return;
-			}
-			if (update == CanvasUpdate.PreRender)
-			{
-				if (this.m_VertsDirty)
+				if (update == CanvasUpdate.PreRender)
 				{
-					this.UpdateGeometry();
-					this.m_VertsDirty = false;
-				}
-				if (this.m_MaterialDirty)
-				{
-					this.UpdateMaterial();
-					this.m_MaterialDirty = false;
+					if (this.m_VertsDirty)
+					{
+						this.UpdateGeometry();
+						this.m_VertsDirty = false;
+					}
+					if (this.m_MaterialDirty)
+					{
+						this.UpdateMaterial();
+						this.m_MaterialDirty = false;
+					}
 				}
 			}
 		}
@@ -337,13 +330,12 @@ namespace UnityEngine.UI
 
 		protected virtual void UpdateMaterial()
 		{
-			if (!this.IsActive())
+			if (this.IsActive())
 			{
-				return;
+				this.canvasRenderer.materialCount = 1;
+				this.canvasRenderer.SetMaterial(this.materialForRendering, 0);
+				this.canvasRenderer.SetTexture(this.mainTexture);
 			}
-			this.canvasRenderer.materialCount = 1;
-			this.canvasRenderer.SetMaterial(this.materialForRendering, 0);
-			this.canvasRenderer.SetTexture(this.mainTexture);
 		}
 
 		protected virtual void UpdateGeometry()
@@ -450,102 +442,119 @@ namespace UnityEngine.UI
 
 		public virtual bool Raycast(Vector2 sp, Camera eventCamera)
 		{
+			bool flag;
 			if (!base.isActiveAndEnabled)
 			{
-				return false;
+				flag = false;
 			}
-			Transform transform = base.transform;
-			List<Component> list = ListPool<Component>.Get();
-			bool flag = false;
-			bool flag2 = true;
-			while (transform != null)
+			else
 			{
-				transform.GetComponents<Component>(list);
-				for (int i = 0; i < list.Count; i++)
+				Transform transform = base.transform;
+				List<Component> list = ListPool<Component>.Get();
+				bool flag2 = false;
+				bool flag3 = true;
+				while (transform != null)
 				{
-					Canvas canvas = list[i] as Canvas;
-					if (canvas != null && canvas.overrideSorting)
+					transform.GetComponents<Component>(list);
+					for (int i = 0; i < list.Count; i++)
 					{
-						flag2 = false;
-					}
-					ICanvasRaycastFilter canvasRaycastFilter = list[i] as ICanvasRaycastFilter;
-					if (canvasRaycastFilter != null)
-					{
-						bool flag3 = true;
-						CanvasGroup canvasGroup = list[i] as CanvasGroup;
-						if (canvasGroup != null)
+						Canvas canvas = list[i] as Canvas;
+						if (canvas != null && canvas.overrideSorting)
 						{
-							if (!flag && canvasGroup.ignoreParentGroups)
+							flag3 = false;
+						}
+						ICanvasRaycastFilter canvasRaycastFilter = list[i] as ICanvasRaycastFilter;
+						if (canvasRaycastFilter != null)
+						{
+							bool flag4 = true;
+							CanvasGroup canvasGroup = list[i] as CanvasGroup;
+							if (canvasGroup != null)
 							{
-								flag = true;
-								flag3 = canvasRaycastFilter.IsRaycastLocationValid(sp, eventCamera);
+								if (!flag2 && canvasGroup.ignoreParentGroups)
+								{
+									flag2 = true;
+									flag4 = canvasRaycastFilter.IsRaycastLocationValid(sp, eventCamera);
+								}
+								else if (!flag2)
+								{
+									flag4 = canvasRaycastFilter.IsRaycastLocationValid(sp, eventCamera);
+								}
 							}
-							else if (!flag)
+							else
 							{
-								flag3 = canvasRaycastFilter.IsRaycastLocationValid(sp, eventCamera);
+								flag4 = canvasRaycastFilter.IsRaycastLocationValid(sp, eventCamera);
 							}
-						}
-						else
-						{
-							flag3 = canvasRaycastFilter.IsRaycastLocationValid(sp, eventCamera);
-						}
-						if (!flag3)
-						{
-							ListPool<Component>.Release(list);
-							return false;
+							if (!flag4)
+							{
+								ListPool<Component>.Release(list);
+								return false;
+							}
 						}
 					}
+					transform = ((!flag3) ? null : transform.parent);
 				}
-				transform = ((!flag2) ? null : transform.parent);
+				ListPool<Component>.Release(list);
+				flag = true;
 			}
-			ListPool<Component>.Release(list);
-			return true;
+			return flag;
 		}
 
 		public Vector2 PixelAdjustPoint(Vector2 point)
 		{
-			if (!this.canvas || !this.canvas.pixelPerfect)
+			Vector2 vector;
+			if (!this.canvas || this.canvas.renderMode == RenderMode.WorldSpace || this.canvas.scaleFactor == 0f || !this.canvas.pixelPerfect)
 			{
-				return point;
+				vector = point;
 			}
-			return RectTransformUtility.PixelAdjustPoint(point, base.transform, this.canvas);
+			else
+			{
+				vector = RectTransformUtility.PixelAdjustPoint(point, base.transform, this.canvas);
+			}
+			return vector;
 		}
 
 		public Rect GetPixelAdjustedRect()
 		{
-			if (!this.canvas || !this.canvas.pixelPerfect)
+			Rect rect;
+			if (!this.canvas || this.canvas.renderMode == RenderMode.WorldSpace || this.canvas.scaleFactor == 0f || !this.canvas.pixelPerfect)
 			{
-				return this.rectTransform.rect;
+				rect = this.rectTransform.rect;
 			}
-			return RectTransformUtility.PixelAdjustRect(this.rectTransform, this.canvas);
+			else
+			{
+				rect = RectTransformUtility.PixelAdjustRect(this.rectTransform, this.canvas);
+			}
+			return rect;
 		}
 
-		public void CrossFadeColor(Color targetColor, float duration, bool ignoreTimeScale, bool useAlpha)
+		public virtual void CrossFadeColor(Color targetColor, float duration, bool ignoreTimeScale, bool useAlpha)
 		{
 			this.CrossFadeColor(targetColor, duration, ignoreTimeScale, useAlpha, true);
 		}
 
-		private void CrossFadeColor(Color targetColor, float duration, bool ignoreTimeScale, bool useAlpha, bool useRGB)
+		public virtual void CrossFadeColor(Color targetColor, float duration, bool ignoreTimeScale, bool useAlpha, bool useRGB)
 		{
-			if (this.canvasRenderer == null || (!useRGB && !useAlpha))
+			if (!(this.canvasRenderer == null) && (useRGB || useAlpha))
 			{
-				return;
+				if (this.canvasRenderer.GetColor().Equals(targetColor))
+				{
+					this.m_ColorTweenRunner.StopTween();
+				}
+				else
+				{
+					ColorTween.ColorTweenMode colorTweenMode = ((!useRGB || !useAlpha) ? ((!useRGB) ? ColorTween.ColorTweenMode.Alpha : ColorTween.ColorTweenMode.RGB) : ColorTween.ColorTweenMode.All);
+					ColorTween colorTween = new ColorTween
+					{
+						duration = duration,
+						startColor = this.canvasRenderer.GetColor(),
+						targetColor = targetColor
+					};
+					colorTween.AddOnChangedCallback(new UnityAction<Color>(this.canvasRenderer.SetColor));
+					colorTween.ignoreTimeScale = ignoreTimeScale;
+					colorTween.tweenMode = colorTweenMode;
+					this.m_ColorTweenRunner.StartTween(colorTween);
+				}
 			}
-			if (this.canvasRenderer.GetColor().Equals(targetColor))
-			{
-				return;
-			}
-			ColorTween.ColorTweenMode colorTweenMode = ((!useRGB || !useAlpha) ? ((!useRGB) ? ColorTween.ColorTweenMode.Alpha : ColorTween.ColorTweenMode.RGB) : ColorTween.ColorTweenMode.All);
-			ColorTween colorTween = new ColorTween
-			{
-				duration = duration,
-				startColor = this.canvasRenderer.GetColor(),
-				targetColor = targetColor
-			};
-			colorTween.AddOnChangedCallback(new UnityAction<Color>(this.canvasRenderer.SetColor));
-			colorTween.ignoreTimeScale = ignoreTimeScale;
-			colorTween.tweenMode = colorTweenMode;
-			this.m_ColorTweenRunner.StartTween(colorTween);
 		}
 
 		private static Color CreateColorFromAlpha(float alpha)
@@ -555,7 +564,7 @@ namespace UnityEngine.UI
 			return black;
 		}
 
-		public void CrossFadeAlpha(float alpha, float duration, bool ignoreTimeScale)
+		public virtual void CrossFadeAlpha(float alpha, float duration, bool ignoreTimeScale)
 		{
 			this.CrossFadeColor(Graphic.CreateColorFromAlpha(alpha), duration, ignoreTimeScale, true, false);
 		}
@@ -590,12 +599,7 @@ namespace UnityEngine.UI
 			this.m_OnDirtyMaterialCallback = (UnityAction)Delegate.Remove(this.m_OnDirtyMaterialCallback, action);
 		}
 
-		virtual bool UnityEngine.UI.ICanvasElement.IsDestroyed()
-		{
-			return base.IsDestroyed();
-		}
-
-		virtual Transform UnityEngine.UI.ICanvasElement.get_transform()
+		Transform ICanvasElement.get_transform()
 		{
 			return base.transform;
 		}

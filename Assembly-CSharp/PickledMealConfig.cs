@@ -11,8 +11,9 @@ public class PickledMealConfig : IEntityConfig
 		gameObject = EntityTemplates.ExtendEntityToFood(gameObject, FOOD.FOOD_TYPES.PICKLEDMEAL, true);
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
 		component.AddPrefabTag(GameTags.Pickled);
-		string text = ITEMS.FOOD.PICKLEDMEAL.RECIPEDESC;
-		Recipe recipe = new Recipe("PickledMeal", 1f, (SimHashes)0, null, text, 21).SetFabricator("CookingStation", FOOD.RECIPES.SMALL_COOK_TIME);
+		string text = "PickledMeal";
+		string text2 = ITEMS.FOOD.PICKLEDMEAL.RECIPEDESC;
+		Recipe recipe = new Recipe(text, 1f, (SimHashes)0, null, text2, 21).SetFabricator("CookingStation", FOOD.RECIPES.SMALL_COOK_TIME);
 		recipe.AddIngredient(new Recipe.Ingredient("BasicPlantFood", 3f));
 		return gameObject;
 	}

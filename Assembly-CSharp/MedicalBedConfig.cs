@@ -6,8 +6,19 @@ public class MedicalBedConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER1;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("MedicalBed", 2, 3, "bed_medical_kanim", 200f, 100, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER2, tier);
+		string text = "MedicalBed";
+		int num = 2;
+		int num2 = 3;
+		string text2 = "bed_medical_kanim";
+		float num3 = 200f;
+		int num4 = 100;
+		float num5 = 10f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
+		string[] refined_METALS = MATERIALS.REFINED_METALS;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER1;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, refined_METALS, num6, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER2, tier2);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 240f;
 		buildingDef.ExhaustKilowattsWhenActive = 0.25f;
@@ -44,4 +55,6 @@ public class MedicalBedConfig : IBuildingConfig
 		doctorChore.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_med_cot_doctor_kanim") };
 		doctorChore.workTime = 25f;
 	}
+
+	public const string ID = "MedicalBed";
 }

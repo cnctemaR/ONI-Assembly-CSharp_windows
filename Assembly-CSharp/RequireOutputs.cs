@@ -55,16 +55,16 @@ public class RequireOutputs : KMonoBehaviour
 			this.previouslyConnected = this.connected;
 			StatusItem statusItem = null;
 			ConduitType conduitType = this.conduitType;
-			if (conduitType != ConduitType.Gas)
+			if (conduitType != ConduitType.Liquid)
 			{
-				if (conduitType == ConduitType.Liquid)
+				if (conduitType == ConduitType.Gas)
 				{
-					statusItem = Db.Get().BuildingStatusItems.NeedLiquidOut;
+					statusItem = Db.Get().BuildingStatusItems.NeedGasOut;
 				}
 			}
 			else
 			{
-				statusItem = Db.Get().BuildingStatusItems.NeedGasOut;
+				statusItem = Db.Get().BuildingStatusItems.NeedLiquidOut;
 			}
 			this.selectable.ToggleStatusItem(statusItem, !this.connected, this);
 		}
@@ -99,16 +99,16 @@ public class RequireOutputs : KMonoBehaviour
 			this.previouslyHadRoom = flag;
 			StatusItem statusItem = null;
 			ConduitType conduitType = this.conduitType;
-			if (conduitType != ConduitType.Gas)
+			if (conduitType != ConduitType.Liquid)
 			{
-				if (conduitType == ConduitType.Liquid)
+				if (conduitType == ConduitType.Gas)
 				{
-					statusItem = Db.Get().BuildingStatusItems.LiquidPipeObstructed;
+					statusItem = Db.Get().BuildingStatusItems.GasPipeObstructed;
 				}
 			}
 			else
 			{
-				statusItem = Db.Get().BuildingStatusItems.GasPipeObstructed;
+				statusItem = Db.Get().BuildingStatusItems.LiquidPipeObstructed;
 			}
 			this.selectable.ToggleStatusItem(statusItem, !flag, null);
 		}
@@ -117,15 +117,23 @@ public class RequireOutputs : KMonoBehaviour
 	private ConduitFlow GetConduitManager()
 	{
 		ConduitType conduitType = this.conduitType;
-		if (conduitType == ConduitType.Gas)
+		ConduitFlow conduitFlow;
+		if (conduitType != ConduitType.Gas)
 		{
-			return Game.Instance.gasConduitFlow;
+			if (conduitType != ConduitType.Liquid)
+			{
+				conduitFlow = null;
+			}
+			else
+			{
+				conduitFlow = Game.Instance.liquidConduitFlow;
+			}
 		}
-		if (conduitType != ConduitType.Liquid)
+		else
 		{
-			return null;
+			conduitFlow = Game.Instance.gasConduitFlow;
 		}
-		return Game.Instance.liquidConduitFlow;
+		return conduitFlow;
 	}
 
 	private bool IsConnected(int cell)
@@ -152,7 +160,7 @@ public class RequireOutputs : KMonoBehaviour
 
 	private bool previouslyHadRoom = true;
 
-	private bool connected;
+	private bool connected = false;
 
 	private GameScenePartitionerEntry partitionerEntry;
 }

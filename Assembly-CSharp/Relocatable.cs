@@ -26,9 +26,9 @@ public class Relocatable : Workable, ISaveLoadable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
-		this.Subscribe(-111137758, new Action<object>(this.OnRefreshUserMenu));
-		this.Subscribe(2127324410, new Action<object>(this.OnCancel));
+		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(-111137758, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(2127324410, new Action<object>(this.OnCancel));
 		this.faceTargetWhenWorking = true;
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Relocating;
 		this.attributeConverter = Db.Get().AttributeConverters.ConstructionSpeed;
@@ -52,7 +52,7 @@ public class Relocatable : Workable, ISaveLoadable
 		}
 		if (component != null)
 		{
-			int num = Grid.PosToCell(this.transform.position);
+			int num = Grid.PosToCell(base.transform.position);
 			if (Grid.Objects[num, (int)building.Def.TileLayer] == base.gameObject)
 			{
 				Grid.Objects[num, (int)building.Def.ObjectLayer] = null;
@@ -68,10 +68,10 @@ public class Relocatable : Workable, ISaveLoadable
 		}
 		else
 		{
-			this.SpawnPackage(this.transform.position, building.Def, primary_element);
+			this.SpawnPackage(base.transform.position, building.Def, primary_element);
 			base.gameObject.DeleteObject();
 		}
-		this.Trigger(-702296337, this);
+		base.Trigger(-702296337, this);
 	}
 
 	public void QueueRelocation(Constructable target)
@@ -80,7 +80,7 @@ public class Relocatable : Workable, ISaveLoadable
 		{
 			if (this.deconstruct && this.chore == null)
 			{
-				this.chore = new WorkChore<Relocatable>(Db.Get().ChoreTypes.Relocate, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue);
+				this.chore = new WorkChore<Relocatable>(Db.Get().ChoreTypes.Relocate, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
 				base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.PendingDeconstruction, this);
 			}
 			this.Target = target;
@@ -101,7 +101,7 @@ public class Relocatable : Workable, ISaveLoadable
 		int num = Grid.PosToCell(position);
 		CellOffset[] placementOffsets = def.PlacementOffsets;
 		int num2 = Grid.OffsetCell(num, placementOffsets[0]);
-		Vector3 vector = Grid.CellToPosCBC(num2, Grid.SceneLayer.Use);
+		Vector3 vector = Grid.CellToPosCBC(num2, Grid.SceneLayer.Ore);
 		GameObject gameObject = Util.KInstantiate(def.BuildingPackage, vector, Quaternion.identity, SceneOrganizer.Instance.GetFolder(Folder.Loot), null, true, 0);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.ElementID = primaryElement.ElementID;

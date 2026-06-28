@@ -35,7 +35,7 @@ namespace TMPro
 			T t;
 			if (this.m_Stack.Count == 0)
 			{
-				t = ((default(T) == null) ? new T() : default(T));
+				t = new T();
 				this.countAll++;
 			}
 			else

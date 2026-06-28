@@ -174,11 +174,16 @@ public class KBatchGroupData
 
 	public KAnim.Build GetBuild(KAnimHashedString fileHash)
 	{
+		KAnim.Build build;
 		if (this.buildIndex.ContainsKey(fileHash))
 		{
-			return this.builds[this.buildIndex[fileHash]];
+			build = this.builds[this.buildIndex[fileHash]];
 		}
-		return null;
+		else
+		{
+			build = null;
+		}
+		return build;
 	}
 
 	public KAnim.Build GetBuild(int index)
@@ -193,11 +198,16 @@ public class KBatchGroupData
 
 	public KAnim.Build.Symbol GetSymbol(int index)
 	{
+		KAnim.Build.Symbol symbol;
 		if (index >= 0 && index < this.frameElementSymbols.Count)
 		{
-			return this.frameElementSymbols[index];
+			symbol = this.frameElementSymbols[index];
 		}
-		return null;
+		else
+		{
+			symbol = null;
+		}
+		return symbol;
 	}
 
 	public void AddBuildSymbol(KAnim.Build.Symbol symbol)
@@ -218,14 +228,19 @@ public class KBatchGroupData
 
 	public KAnim.Build.SymbolFrameInstance GetSymbolFrameInstance(int index)
 	{
+		KAnim.Build.SymbolFrameInstance symbolFrameInstance;
 		if (index >= 0 && index < this.symbolFrameInstances.Count)
 		{
-			return this.symbolFrameInstances[index];
+			symbolFrameInstance = this.symbolFrameInstances[index];
 		}
-		return new KAnim.Build.SymbolFrameInstance
+		else
 		{
-			symbolIdx = -1
-		};
+			symbolFrameInstance = new KAnim.Build.SymbolFrameInstance
+			{
+				symbolIdx = -1
+			};
+		}
+		return symbolFrameInstance;
 	}
 
 	public void SetColourOveride(int index, Color colour)
@@ -235,20 +250,30 @@ public class KBatchGroupData
 
 	public Texture2D GetTexure(int index)
 	{
+		Texture2D texture2D;
 		if (index < 0 || this.textures == null || index >= this.textures.Count)
 		{
-			return null;
+			texture2D = null;
 		}
-		return this.textures[index];
+		else
+		{
+			texture2D = this.textures[index];
+		}
+		return texture2D;
 	}
 
 	public KAnim.Build.Symbol GetBuildSymbol(int idx)
 	{
+		KAnim.Build.Symbol symbol;
 		if (this.frameElementSymbols == null || idx < 0 || idx >= this.frameElementSymbols.Count)
 		{
-			return null;
+			symbol = null;
 		}
-		return this.frameElementSymbols[idx];
+		else
+		{
+			symbol = this.frameElementSymbols[idx];
+		}
+		return symbol;
 	}
 
 	public KAnim.Build.Symbol GetBuildSymbol(KAnimHashedString symbol)
@@ -282,11 +307,16 @@ public class KBatchGroupData
 
 	public KAnim.Anim.Frame GetFrame(int index)
 	{
+		KAnim.Anim.Frame frame;
 		if (index < 0 || index >= this.animFrames.Count)
 		{
-			return KAnim.Anim.Frame.InvalidFrame;
+			frame = KAnim.Anim.Frame.InvalidFrame;
 		}
-		return this.animFrames[index];
+		else
+		{
+			frame = this.animFrames[index];
+		}
+		return frame;
 	}
 
 	public KAnim.Anim.FrameElement GetFrameElement(int index)
@@ -406,11 +436,16 @@ public class KBatchGroupData
 	{
 		KBatchGroupData.getSymbolIndexSymbolSymbol = symbol;
 		KBatchGroupData.getSymbolIndexFileNameHash = fileNameHash;
+		int num;
 		if (!this.lookupUnderGroupName)
 		{
-			return this.frameElementSymbols.FindIndex(KBatchGroupData.getSymbolIndexPredicateSymbolAndFile);
+			num = this.frameElementSymbols.FindIndex(KBatchGroupData.getSymbolIndexPredicateSymbolAndFile);
 		}
-		return this.frameElementSymbols.FindIndex(KBatchGroupData.getSymbolIndexPredicateSymbol);
+		else
+		{
+			num = this.frameElementSymbols.FindIndex(KBatchGroupData.getSymbolIndexPredicateSymbol);
+		}
+		return num;
 	}
 
 	public void WriteBuildData(BatchGroupInstance instance, float[] data)
@@ -428,7 +463,7 @@ public class KBatchGroupData
 		data[startIndex++] = (float)symbol_frame_instance.symbolIdx;
 		KAnim.Build.SymbolFrame symbolFrame = symbol_frame_instance.symbolFrame;
 		KAnim.Build.Symbol buildSymbol = this.GetBuildSymbol(symbol_frame_instance.symbolIdx);
-		if (buildSymbol == null)
+		if (buildSymbol == null || symbolFrame == null)
 		{
 			data[startIndex++] = 0f;
 			data[startIndex++] = 0f;
@@ -449,32 +484,35 @@ public class KBatchGroupData
 		}
 		data[startIndex++] = 3.1664858E+09f;
 		data[startIndex++] = 3.452817E+09f;
-		data[startIndex++] = symbolFrame.v0[0];
-		data[startIndex++] = symbolFrame.v0[1];
-		data[startIndex++] = symbolFrame.v0[2];
-		data[startIndex++] = symbolFrame.v1[0];
-		data[startIndex++] = symbolFrame.v1[1];
-		data[startIndex++] = symbolFrame.v1[2];
-		data[startIndex++] = symbolFrame.v2[0];
-		data[startIndex++] = symbolFrame.v2[1];
-		data[startIndex++] = symbolFrame.v2[2];
-		data[startIndex++] = symbolFrame.v3[0];
-		data[startIndex++] = symbolFrame.v3[1];
-		data[startIndex++] = symbolFrame.v3[2];
-		data[startIndex++] = symbolFrame.uv0[0];
-		data[startIndex++] = symbolFrame.uv0[1];
-		data[startIndex++] = symbolFrame.uv1[0];
-		data[startIndex++] = symbolFrame.uv1[1];
-		data[startIndex++] = symbolFrame.uv2[0];
-		data[startIndex++] = symbolFrame.uv2[1];
-		data[startIndex++] = symbolFrame.uv3[0];
-		data[startIndex++] = symbolFrame.uv3[1];
-		if (this.symbolColourOveride != null && symbol_frame_instance.symbolIdx >= 0 && symbol_frame_instance.symbolIdx < this.symbolColourOveride.Count)
+		if (symbolFrame != null)
 		{
-			data[startIndex++] = this.symbolColourOveride[symbol_frame_instance.symbolIdx][0];
-			data[startIndex++] = this.symbolColourOveride[symbol_frame_instance.symbolIdx][1];
-			data[startIndex++] = this.symbolColourOveride[symbol_frame_instance.symbolIdx][2];
-			data[startIndex++] = this.symbolColourOveride[symbol_frame_instance.symbolIdx][3];
+			data[startIndex++] = symbolFrame.v0[0];
+			data[startIndex++] = symbolFrame.v0[1];
+			data[startIndex++] = symbolFrame.v0[2];
+			data[startIndex++] = symbolFrame.v1[0];
+			data[startIndex++] = symbolFrame.v1[1];
+			data[startIndex++] = symbolFrame.v1[2];
+			data[startIndex++] = symbolFrame.v2[0];
+			data[startIndex++] = symbolFrame.v2[1];
+			data[startIndex++] = symbolFrame.v2[2];
+			data[startIndex++] = symbolFrame.v3[0];
+			data[startIndex++] = symbolFrame.v3[1];
+			data[startIndex++] = symbolFrame.v3[2];
+			data[startIndex++] = symbolFrame.uv0[0];
+			data[startIndex++] = symbolFrame.uv0[1];
+			data[startIndex++] = symbolFrame.uv1[0];
+			data[startIndex++] = symbolFrame.uv1[1];
+			data[startIndex++] = symbolFrame.uv2[0];
+			data[startIndex++] = symbolFrame.uv2[1];
+			data[startIndex++] = symbolFrame.uv3[0];
+			data[startIndex++] = symbolFrame.uv3[1];
+			if (this.symbolColourOveride != null && symbol_frame_instance.symbolIdx >= 0 && symbol_frame_instance.symbolIdx < this.symbolColourOveride.Count)
+			{
+				data[startIndex++] = this.symbolColourOveride[symbol_frame_instance.symbolIdx][0];
+				data[startIndex++] = this.symbolColourOveride[symbol_frame_instance.symbolIdx][1];
+				data[startIndex++] = this.symbolColourOveride[symbol_frame_instance.symbolIdx][2];
+				data[startIndex++] = this.symbolColourOveride[symbol_frame_instance.symbolIdx][3];
+			}
 		}
 	}
 
@@ -531,8 +569,6 @@ public class KBatchGroupData
 
 	public const int MAX_GROUP_SIZE = 60;
 
-	private const int NULL_DATA_FRAME_ID = -1010;
-
 	public bool lookupUnderGroupName = true;
 
 	private static KAnimHashedString getSymbolIndexSymbolSymbol;
@@ -542,4 +578,6 @@ public class KBatchGroupData
 	private static Predicate<KAnim.Build.Symbol> getSymbolIndexPredicateSymbolAndFile = (KAnim.Build.Symbol fes) => fes.hash == KBatchGroupData.getSymbolIndexSymbolSymbol && fes.build.fileHash == KBatchGroupData.getSymbolIndexFileNameHash;
 
 	private static Predicate<KAnim.Build.Symbol> getSymbolIndexPredicateSymbol = (KAnim.Build.Symbol fes) => fes.hash == KBatchGroupData.getSymbolIndexSymbolSymbol;
+
+	private const int NULL_DATA_FRAME_ID = -1010;
 }

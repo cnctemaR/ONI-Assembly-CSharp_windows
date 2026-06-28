@@ -15,17 +15,24 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 		});
 		this.wounded.ToggleUrge(Db.Get().Urges.Heal).Enter(delegate(WoundMonitor.Instance smi)
 		{
-			switch (smi.health.State)
+			Health.HealthState state = smi.health.State;
+			if (state != Health.HealthState.Critical)
 			{
-			case Health.HealthState.Scuffed:
-				smi.GoTo(this.wounded.light);
-				break;
-			case Health.HealthState.Injured:
-				smi.GoTo(this.wounded.medium);
-				break;
-			case Health.HealthState.Critical:
+				if (state != Health.HealthState.Injured)
+				{
+					if (state == Health.HealthState.Scuffed)
+					{
+						smi.GoTo(this.wounded.light);
+					}
+				}
+				else
+				{
+					smi.GoTo(this.wounded.medium);
+				}
+			}
+			else
+			{
 				smi.GoTo(this.wounded.heavy);
-				break;
 			}
 		}).EventHandler(GameHashes.Healed, delegate(WoundMonitor.Instance smi)
 		{
@@ -123,11 +130,18 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 			}
 			string text = "hit";
 			AttackChore.StatesInstance smi = base.gameObject.GetSMI<AttackChore.StatesInstance>();
-			if (smi != null && smi.GetCurrentState() == smi.sm.attack)
+			if (smi != null)
 			{
-				text = smi.master.GetHitAnim();
+				if (smi.GetCurrentState() == smi.sm.attack)
+				{
+					text = smi.master.GetHitAnim();
+				}
 			}
 			if (this.worker.GetComponent<Navigator>().CurrentNavType == NavType.Ladder)
+			{
+				text = "hit_ladder";
+			}
+			else if (this.worker.GetComponent<Navigator>().CurrentNavType == NavType.Pole)
 			{
 				text = "hit_ladder";
 			}

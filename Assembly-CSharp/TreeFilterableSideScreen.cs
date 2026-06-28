@@ -21,15 +21,17 @@ public class TreeFilterableSideScreen : SideScreenContent
 		MultiToggle multiToggle = this.allCheckBox;
 		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(delegate
 		{
-			switch (this.GetAllCheckboxState())
+			TreeFilterableSideScreenRow.State allCheckboxState = this.GetAllCheckboxState();
+			if (allCheckboxState != TreeFilterableSideScreenRow.State.On)
 			{
-			case TreeFilterableSideScreenRow.State.Off:
-			case TreeFilterableSideScreenRow.State.Mixed:
-				this.SetAllCheckboxState(TreeFilterableSideScreenRow.State.On);
-				break;
-			case TreeFilterableSideScreenRow.State.On:
+				if (allCheckboxState == TreeFilterableSideScreenRow.State.Mixed || allCheckboxState == TreeFilterableSideScreenRow.State.Off)
+				{
+					this.SetAllCheckboxState(TreeFilterableSideScreenRow.State.On);
+				}
+			}
+			else
+			{
 				this.SetAllCheckboxState(TreeFilterableSideScreenRow.State.Off);
-				break;
 			}
 		}));
 		this.onlyAllowTransportItemsImg = this.onlyAllowTransportItemsCheckBox.gameObject.GetComponentInChildrenOnly<KImage>();
@@ -45,17 +47,24 @@ public class TreeFilterableSideScreen : SideScreenContent
 
 	private void UpdateAllCheckBoxVisualState()
 	{
-		switch (this.GetAllCheckboxState())
+		TreeFilterableSideScreenRow.State allCheckboxState = this.GetAllCheckboxState();
+		if (allCheckboxState != TreeFilterableSideScreenRow.State.Off)
 		{
-		case TreeFilterableSideScreenRow.State.Off:
+			if (allCheckboxState != TreeFilterableSideScreenRow.State.Mixed)
+			{
+				if (allCheckboxState == TreeFilterableSideScreenRow.State.On)
+				{
+					this.allCheckBox.ChangeState(2);
+				}
+			}
+			else
+			{
+				this.allCheckBox.ChangeState(1);
+			}
+		}
+		else
+		{
 			this.allCheckBox.ChangeState(0);
-			break;
-		case TreeFilterableSideScreenRow.State.Mixed:
-			this.allCheckBox.ChangeState(1);
-			break;
-		case TreeFilterableSideScreenRow.State.On:
-			this.allCheckBox.ChangeState(2);
-			break;
 		}
 		this.visualDirty = false;
 	}
@@ -88,54 +97,71 @@ public class TreeFilterableSideScreen : SideScreenContent
 		bool flag3 = false;
 		foreach (KeyValuePair<Tag, TreeFilterableSideScreenRow> keyValuePair in this.tagRowMap)
 		{
-			switch (keyValuePair.Value.GetState())
+			TreeFilterableSideScreenRow.State state = keyValuePair.Value.GetState();
+			if (state != TreeFilterableSideScreenRow.State.Mixed)
 			{
-			case TreeFilterableSideScreenRow.State.Off:
-				flag2 = true;
-				break;
-			case TreeFilterableSideScreenRow.State.Mixed:
+				if (state != TreeFilterableSideScreenRow.State.On)
+				{
+					if (state == TreeFilterableSideScreenRow.State.Off)
+					{
+						flag2 = true;
+					}
+				}
+				else
+				{
+					flag = true;
+				}
+			}
+			else
+			{
 				flag3 = true;
-				break;
-			case TreeFilterableSideScreenRow.State.On:
-				flag = true;
-				break;
 			}
 		}
+		TreeFilterableSideScreenRow.State state2;
 		if (flag3)
 		{
-			return TreeFilterableSideScreenRow.State.Mixed;
+			state2 = TreeFilterableSideScreenRow.State.Mixed;
 		}
-		if (flag && !flag2)
+		else if (flag && !flag2)
 		{
-			return TreeFilterableSideScreenRow.State.On;
+			state2 = TreeFilterableSideScreenRow.State.On;
 		}
-		if (!flag && flag2)
+		else if (!flag && flag2)
 		{
-			return TreeFilterableSideScreenRow.State.Off;
+			state2 = TreeFilterableSideScreenRow.State.Off;
 		}
-		if (flag && flag2)
+		else if (flag && flag2)
 		{
-			return TreeFilterableSideScreenRow.State.Mixed;
+			state2 = TreeFilterableSideScreenRow.State.Mixed;
 		}
-		return TreeFilterableSideScreenRow.State.Off;
+		else
+		{
+			state2 = TreeFilterableSideScreenRow.State.Off;
+		}
+		return state2;
 	}
 
 	private void SetAllCheckboxState(TreeFilterableSideScreenRow.State newState)
 	{
-		switch (newState)
+		if (newState != TreeFilterableSideScreenRow.State.Off)
 		{
-		case TreeFilterableSideScreenRow.State.Off:
-			foreach (KeyValuePair<Tag, TreeFilterableSideScreenRow> keyValuePair in this.tagRowMap)
+			if (newState != TreeFilterableSideScreenRow.State.Mixed)
 			{
-				keyValuePair.Value.ChangeCheckBoxState(TreeFilterableSideScreenRow.State.Off);
+				if (newState == TreeFilterableSideScreenRow.State.On)
+				{
+					foreach (KeyValuePair<Tag, TreeFilterableSideScreenRow> keyValuePair in this.tagRowMap)
+					{
+						keyValuePair.Value.ChangeCheckBoxState(TreeFilterableSideScreenRow.State.On);
+					}
+				}
 			}
-			break;
-		case TreeFilterableSideScreenRow.State.On:
+		}
+		else
+		{
 			foreach (KeyValuePair<Tag, TreeFilterableSideScreenRow> keyValuePair2 in this.tagRowMap)
 			{
-				keyValuePair2.Value.ChangeCheckBoxState(TreeFilterableSideScreenRow.State.On);
+				keyValuePair2.Value.ChangeCheckBoxState(TreeFilterableSideScreenRow.State.Off);
 			}
-			break;
 		}
 		this.visualDirty = true;
 	}
@@ -151,29 +177,31 @@ public class TreeFilterableSideScreen : SideScreenContent
 		if (target == null)
 		{
 			global::Debug.LogError("The target object provided was null", null);
-			return;
 		}
-		this.targetFilterable = target.GetComponent<TreeFilterable>();
-		if (this.targetFilterable == null)
+		else
 		{
-			global::Debug.LogError("The target provided does not have a Tree Filterable component", null);
-			return;
+			this.targetFilterable = target.GetComponent<TreeFilterable>();
+			if (this.targetFilterable == null)
+			{
+				global::Debug.LogError("The target provided does not have a Tree Filterable component", null);
+			}
+			else if (!this.targetFilterable.showUserMenu)
+			{
+				DetailsScreen.Instance.DeactivateSideContent();
+			}
+			else if (this.IsStorage && !this.storage.showInUI)
+			{
+				DetailsScreen.Instance.DeactivateSideContent();
+			}
+			else
+			{
+				this.storage = this.targetFilterable.GetComponent<Storage>();
+				Storage storage = this.storage;
+				storage.onPriorityChanged = (global::System.Action)Delegate.Combine(storage.onPriorityChanged, new global::System.Action(this.OnPriorityChanged));
+				this.OnPriorityChanged();
+				this.CreateCategories();
+			}
 		}
-		if (!this.targetFilterable.showUserMenu)
-		{
-			DetailsScreen.Instance.DeactivateSideContent();
-			return;
-		}
-		if (this.IsStorage && !this.storage.showInUI)
-		{
-			DetailsScreen.Instance.DeactivateSideContent();
-			return;
-		}
-		this.storage = this.targetFilterable.GetComponent<Storage>();
-		Storage storage = this.storage;
-		storage.onPriorityChanged = (global::System.Action)Delegate.Combine(storage.onPriorityChanged, new global::System.Action(this.OnPriorityChanged));
-		this.OnPriorityChanged();
-		this.CreateCategories();
 	}
 
 	private void OnPriorityChanged()
@@ -189,20 +217,18 @@ public class TreeFilterableSideScreen : SideScreenContent
 
 	public void AddTag(Tag tag)
 	{
-		if (this.targetFilterable == null)
+		if (!(this.targetFilterable == null))
 		{
-			return;
+			this.targetFilterable.AddTagToFilter(tag);
 		}
-		this.targetFilterable.AddTagToFilter(tag);
 	}
 
 	public void RemoveTag(Tag tag)
 	{
-		if (this.targetFilterable == null)
+		if (!(this.targetFilterable == null))
 		{
-			return;
+			this.targetFilterable.RemoveTagFromFilter(tag);
 		}
-		this.targetFilterable.RemoveTagFromFilter(tag);
 	}
 
 	private TreeFilterableSideScreenRow AddRow(Tag rowTag)
@@ -223,11 +249,16 @@ public class TreeFilterableSideScreen : SideScreenContent
 
 	public float GetAmountInStorage(Tag tag)
 	{
+		float num;
 		if (!this.IsStorage)
 		{
-			return 0f;
+			num = 0f;
 		}
-		return this.storage.GetMassAvailable(tag);
+		else
+		{
+			num = this.storage.GetMassAvailable(tag);
+		}
+		return num;
 	}
 
 	private void CreateCategories()
@@ -281,7 +312,7 @@ public class TreeFilterableSideScreen : SideScreenContent
 
 	private GameObject target;
 
-	private bool visualDirty;
+	private bool visualDirty = false;
 
 	private KImage onlyAllowTransportItemsImg;
 

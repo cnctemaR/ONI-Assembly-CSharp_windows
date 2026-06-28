@@ -20,40 +20,56 @@ namespace ProcGen.Noise
 
 		public IModule3D CreateModule()
 		{
+			IModule3D module3D;
 			switch (this.combineType)
 			{
 			case Combiner.CombinerType.Add:
-				return new Add();
+				module3D = new Add();
+				break;
 			case Combiner.CombinerType.Max:
-				return new Max();
+				module3D = new Max();
+				break;
 			case Combiner.CombinerType.Min:
-				return new Min();
+				module3D = new Min();
+				break;
 			case Combiner.CombinerType.Multiply:
-				return new Multiply();
+				module3D = new Multiply();
+				break;
 			case Combiner.CombinerType.Power:
-				return new Power();
+				module3D = new Power();
+				break;
 			default:
-				return null;
+				module3D = null;
+				break;
 			}
+			return module3D;
 		}
 
 		public IModule3D CreateModule(IModule3D leftModule, IModule3D rightModule)
 		{
+			IModule3D module3D;
 			switch (this.combineType)
 			{
 			case Combiner.CombinerType.Add:
-				return new Add(leftModule, rightModule);
+				module3D = new Add(leftModule, rightModule);
+				break;
 			case Combiner.CombinerType.Max:
-				return new Max(leftModule, rightModule);
+				module3D = new Max(leftModule, rightModule);
+				break;
 			case Combiner.CombinerType.Min:
-				return new Min(leftModule, rightModule);
+				module3D = new Min(leftModule, rightModule);
+				break;
 			case Combiner.CombinerType.Multiply:
-				return new Multiply(leftModule, rightModule);
+				module3D = new Multiply(leftModule, rightModule);
+				break;
 			case Combiner.CombinerType.Power:
-				return new Power(leftModule, rightModule);
+				module3D = new Power(leftModule, rightModule);
+				break;
 			default:
-				return null;
+				module3D = null;
+				break;
 			}
+			return module3D;
 		}
 
 		public void SetSouces(IModule3D target, IModule3D leftModule, IModule3D rightModule)

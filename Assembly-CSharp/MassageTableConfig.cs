@@ -6,8 +6,19 @@ public class MassageTableConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER0;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("MassageTable", 2, 2, "masseur_kanim", 200f, 10, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, tier);
+		string text = "MassageTable";
+		int num = 2;
+		int num2 = 2;
+		string text2 = "masseur_kanim";
+		float num3 = 200f;
+		int num4 = 10;
+		float num5 = 10f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
+		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER0;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_MINERALS, num6, buildLocationRule, BUILDINGS.DECOR.NONE, tier2);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.PowerInputOffset = new CellOffset(0, 0);
 		buildingDef.Overheatable = true;
@@ -15,6 +26,7 @@ public class MassageTableConfig : IBuildingConfig
 		buildingDef.ExhaustKilowattsWhenActive = 0.125f;
 		buildingDef.OperatingKilowatts = 0.5f;
 		buildingDef.AudioCategory = "Metal";
+		buildingDef.HotKey = global::Action.BuildMenuKeyT;
 		return buildingDef;
 	}
 
@@ -34,4 +46,6 @@ public class MassageTableConfig : IBuildingConfig
 		go.GetComponent<KAnimControllerBase>().initialAnim = "off";
 		go.AddOrGet<CopyBuildingSettings>();
 	}
+
+	public const string ID = "MassageTable";
 }

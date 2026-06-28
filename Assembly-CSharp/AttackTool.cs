@@ -17,9 +17,12 @@ public class AttackTool : DragTool
 		foreach (FactionAlignment factionAlignment in Components.FactionAlignments)
 		{
 			Vector2 vector = Grid.PosToXY(factionAlignment.transform.position);
-			if (vector.x >= regularizedPos.x && vector.x < regularizedPos2.x && vector.y >= regularizedPos.y && vector.y < regularizedPos2.y && FactionManager.Instance.GetDisposition(FactionManager.FactionID.Duplicant, factionAlignment.Alignment) != FactionManager.Disposition.Assist)
+			if (vector.x >= regularizedPos.x && vector.x < regularizedPos2.x && vector.y >= regularizedPos.y && vector.y < regularizedPos2.y)
 			{
-				factionAlignment.SetPlayerTargeted(true);
+				if (FactionManager.Instance.GetDisposition(FactionManager.FactionID.Duplicant, factionAlignment.Alignment) != FactionManager.Disposition.Assist)
+				{
+					factionAlignment.SetPlayerTargeted(true);
+				}
 			}
 		}
 	}

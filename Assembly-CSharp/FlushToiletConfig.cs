@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -7,8 +6,19 @@ public class FlushToiletConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
+		string text = "FlushToilet";
+		int num = 2;
+		int num2 = 3;
+		string text2 = "toiletflush_kanim";
+		float num3 = 400f;
+		int num4 = 30;
+		float num5 = 30f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
+		string[] raw_METALS = MATERIALS.RAW_METALS;
+		float num6 = 800f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("FlushToilet", 2, 3, "toiletflush_kanim", 400f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.RAW_METALS, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER1, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_METALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER1, none);
 		buildingDef.Overheatable = false;
 		buildingDef.ExhaustKilowattsWhenActive = 0.25f;
 		buildingDef.OperatingKilowatts = 0f;
@@ -53,9 +63,8 @@ public class FlushToiletConfig : IBuildingConfig
 		conduitDispenser.elementFilter = new SimHashes[] { SimHashes.Water };
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 25f;
-		storage.disableOnStore = true;
 		storage.doDiseaseTransfer = false;
-		storage.defaultStoredItemModifers = FlushToiletConfig.StoredItemModifiers;
+		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -66,10 +75,4 @@ public class FlushToiletConfig : IBuildingConfig
 	private const float WATER_USAGE = 5f;
 
 	public const string ID = "FlushToilet";
-
-	private static readonly List<Storage.StoredItemModifier> StoredItemModifiers = new List<Storage.StoredItemModifier>
-	{
-		Storage.StoredItemModifier.Hide,
-		Storage.StoredItemModifier.Seal
-	};
 }

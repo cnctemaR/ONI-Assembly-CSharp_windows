@@ -14,10 +14,17 @@ public class CreatureDeliveryPointConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
 		Storage storage = go.AddOrGet<Storage>();
-		storage.disableOnStore = true;
 		storage.allowItemRemoval = false;
 		storage.showDescriptor = true;
 		storage.storageFilters = STORAGEFILTERS.BAGABLE_CREATURES;
+		storage.workAnims = new HashedString[]
+		{
+			new HashedString("place"),
+			new HashedString("release")
+		};
+		storage.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_restrain_creature_kanim") };
+		storage.synchronizeAnims = false;
+		storage.useGunForDelivery = false;
 		CreatureDeliveryPoint creatureDeliveryPoint = go.UpdateComponentRequirement<CreatureDeliveryPoint>(true);
 		creatureDeliveryPoint.noFilterTint = new Color(0.5019608f, 0.5019608f, 0.5019608f, 1f);
 		creatureDeliveryPoint.filterTint = new Color(1f, 1f, 1f, 1f);

@@ -19,12 +19,17 @@ public class EmoteReactable : Reactable
 
 	public override bool InternalCanBegin(GameObject new_reactor, Navigator.ActiveTransition transition)
 	{
+		bool flag;
 		if (new_reactor == null)
 		{
-			return false;
+			flag = false;
 		}
-		Navigator component = new_reactor.GetComponent<Navigator>();
-		return !(component == null) && component.IsMoving() && this.reactionSource != new_reactor;
+		else
+		{
+			Navigator component = new_reactor.GetComponent<Navigator>();
+			flag = !(component == null) && component.IsMoving() && this.reactionSource != new_reactor;
+		}
+		return flag;
 	}
 
 	public override void Update(float dt)
@@ -111,7 +116,7 @@ public class EmoteReactable : Reactable
 
 	private int currentStep = -1;
 
-	private float elapsed;
+	private float elapsed = 0f;
 
 	public class EmoteStep
 	{

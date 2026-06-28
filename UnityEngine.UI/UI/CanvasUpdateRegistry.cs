@@ -114,7 +114,7 @@ namespace UnityEngine.UI
 			}
 			for (int n = 0; n < this.m_GraphicRebuildQueue.Count; n++)
 			{
-				this.m_GraphicRebuildQueue[n].LayoutComplete();
+				this.m_GraphicRebuildQueue[n].GraphicUpdateComplete();
 			}
 			CanvasUpdateRegistry.instance.m_GraphicRebuildQueue.Clear();
 			this.m_PerformingGraphicUpdate = false;
@@ -122,16 +122,21 @@ namespace UnityEngine.UI
 
 		private static int ParentCount(Transform child)
 		{
+			int num;
 			if (child == null)
 			{
-				return 0;
+				num = 0;
 			}
-			Transform transform = child.parent;
-			int num = 0;
-			while (transform != null)
+			else
 			{
-				num++;
-				transform = transform.parent;
+				Transform transform = child.parent;
+				int num2 = 0;
+				while (transform != null)
+				{
+					num2++;
+					transform = transform.parent;
+				}
+				num = num2;
 			}
 			return num;
 		}
@@ -170,12 +175,17 @@ namespace UnityEngine.UI
 
 		private bool InternalRegisterCanvasElementForGraphicRebuild(ICanvasElement element)
 		{
+			bool flag;
 			if (this.m_PerformingGraphicUpdate)
 			{
 				Debug.LogError(string.Format("Trying to add {0} for graphic rebuild while we are already inside a graphic rebuild loop. This is not supported.", element));
-				return false;
+				flag = false;
 			}
-			return this.m_GraphicRebuildQueue.AddUnique(element);
+			else
+			{
+				flag = this.m_GraphicRebuildQueue.AddUnique(element);
+			}
+			return flag;
 		}
 
 		public static void UnRegisterCanvasElementForRebuild(ICanvasElement element)
@@ -189,10 +199,12 @@ namespace UnityEngine.UI
 			if (this.m_PerformingLayoutUpdate)
 			{
 				Debug.LogError(string.Format("Trying to remove {0} from rebuild list while we are already inside a rebuild loop. This is not supported.", element));
-				return;
 			}
-			element.LayoutComplete();
-			CanvasUpdateRegistry.instance.m_LayoutRebuildQueue.Remove(element);
+			else
+			{
+				element.LayoutComplete();
+				CanvasUpdateRegistry.instance.m_LayoutRebuildQueue.Remove(element);
+			}
 		}
 
 		private void InternalUnRegisterCanvasElementForGraphicRebuild(ICanvasElement element)
@@ -200,10 +212,12 @@ namespace UnityEngine.UI
 			if (this.m_PerformingGraphicUpdate)
 			{
 				Debug.LogError(string.Format("Trying to remove {0} from rebuild list while we are already inside a rebuild loop. This is not supported.", element));
-				return;
 			}
-			element.GraphicUpdateComplete();
-			CanvasUpdateRegistry.instance.m_GraphicRebuildQueue.Remove(element);
+			else
+			{
+				element.GraphicUpdateComplete();
+				CanvasUpdateRegistry.instance.m_GraphicRebuildQueue.Remove(element);
+			}
 		}
 
 		public static bool IsRebuildingLayout()

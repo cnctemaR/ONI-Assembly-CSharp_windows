@@ -14,11 +14,16 @@ public class EventInstanceBase : ISaveLoadable
 	public override string ToString()
 	{
 		string text = "[" + this.frame.ToString() + "] ";
+		string text2;
 		if (this.ev != null)
 		{
-			return text + this.ev.GetDescription(this);
+			text2 = text + this.ev.GetDescription(this);
 		}
-		return text + "Unknown event";
+		else
+		{
+			text2 = text + "Unknown event";
+		}
+		return text2;
 	}
 
 	[Serialize]

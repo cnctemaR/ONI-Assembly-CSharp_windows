@@ -83,9 +83,8 @@ public class Health : KMonoBehaviour, ISaveLoadable
 			{
 				NameDisplayScreen.Instance.SetHealthDisplay(base.gameObject, new Func<float>(this.percent), false);
 			}
-			return;
 		}
-		if (NameDisplayScreen.Instance != null)
+		else if (NameDisplayScreen.Instance != null)
 		{
 			NameDisplayScreen.Instance.SetHealthDisplay(base.gameObject, new Func<float>(this.percent), true);
 		}
@@ -133,57 +132,56 @@ public class Health : KMonoBehaviour, ISaveLoadable
 		{
 			this.hitPoints = Mathf.Max(0f, this.hitPoints - amount);
 		}
-		this.Trigger(-2121334874, amount);
+		base.Trigger(-2121334874, amount);
 		this.OnHealthChanged(-amount);
 	}
 
 	private void UpdateWoundEffects()
 	{
-		if (!this.effects)
+		if (this.effects)
 		{
-			return;
-		}
-		switch (this.State)
-		{
-		case Health.HealthState.Perfect:
-			this.effects.Remove("LightWounds");
-			this.effects.Remove("ModerateWounds");
-			this.effects.Remove("SevereWounds");
-			break;
-		case Health.HealthState.Scuffed:
-			this.effects.Remove("ModerateWounds");
-			this.effects.Remove("SevereWounds");
-			if (!this.effects.HasEffect("LightWounds"))
+			switch (this.State)
 			{
-				this.effects.Add("LightWounds", true);
+			case Health.HealthState.Perfect:
+				this.effects.Remove("LightWounds");
+				this.effects.Remove("ModerateWounds");
+				this.effects.Remove("SevereWounds");
+				break;
+			case Health.HealthState.Scuffed:
+				this.effects.Remove("ModerateWounds");
+				this.effects.Remove("SevereWounds");
+				if (!this.effects.HasEffect("LightWounds"))
+				{
+					this.effects.Add("LightWounds", true);
+				}
+				break;
+			case Health.HealthState.Injured:
+				this.effects.Remove("LightWounds");
+				this.effects.Remove("SevereWounds");
+				if (!this.effects.HasEffect("ModerateWounds"))
+				{
+					this.effects.Add("ModerateWounds", true);
+				}
+				break;
+			case Health.HealthState.Critical:
+				this.effects.Remove("LightWounds");
+				this.effects.Remove("ModerateWounds");
+				if (!this.effects.HasEffect("SevereWounds"))
+				{
+					this.effects.Add("SevereWounds", true);
+				}
+				break;
+			case Health.HealthState.Incapacitated:
+				this.effects.Remove("LightWounds");
+				this.effects.Remove("ModerateWounds");
+				this.effects.Remove("SevereWounds");
+				break;
+			case Health.HealthState.Dead:
+				this.effects.Remove("LightWounds");
+				this.effects.Remove("ModerateWounds");
+				this.effects.Remove("SevereWounds");
+				break;
 			}
-			break;
-		case Health.HealthState.Injured:
-			this.effects.Remove("LightWounds");
-			this.effects.Remove("SevereWounds");
-			if (!this.effects.HasEffect("ModerateWounds"))
-			{
-				this.effects.Add("ModerateWounds", true);
-			}
-			break;
-		case Health.HealthState.Critical:
-			this.effects.Remove("LightWounds");
-			this.effects.Remove("ModerateWounds");
-			if (!this.effects.HasEffect("SevereWounds"))
-			{
-				this.effects.Add("SevereWounds", true);
-			}
-			break;
-		case Health.HealthState.Incapacitated:
-			this.effects.Remove("LightWounds");
-			this.effects.Remove("ModerateWounds");
-			this.effects.Remove("SevereWounds");
-			break;
-		case Health.HealthState.Dead:
-			this.effects.Remove("LightWounds");
-			this.effects.Remove("ModerateWounds");
-			this.effects.Remove("SevereWounds");
-			break;
 		}
 	}
 
@@ -227,11 +225,11 @@ public class Health : KMonoBehaviour, ISaveLoadable
 			}
 			if (this.State == Health.HealthState.Perfect)
 			{
-				this.Trigger(-1491582671, this);
+				base.Trigger(-1491582671, this);
 			}
 			if (healthState == Health.HealthState.Perfect)
 			{
-				this.Trigger(-1491582671, this);
+				base.Trigger(-1491582671, this);
 			}
 			this.State = healthState;
 			KSelectable component = base.GetComponent<KSelectable>();
@@ -272,7 +270,7 @@ public class Health : KMonoBehaviour, ISaveLoadable
 	}
 
 	[Serialize]
-	public bool CanBeIncapacitated;
+	public bool CanBeIncapacitated = false;
 
 	[Serialize]
 	public float maxHitPoints = 100f;
@@ -280,7 +278,7 @@ public class Health : KMonoBehaviour, ISaveLoadable
 	[Serialize]
 	public Health.HealthState State;
 
-	public HealthBar healthBar;
+	public HealthBar healthBar = null;
 
 	private Effects effects;
 

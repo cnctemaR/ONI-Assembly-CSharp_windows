@@ -9,7 +9,7 @@ public class CircuitSwitch : Switch
 	{
 		base.OnSpawn();
 		base.OnToggle += this.CircuitOnToggle;
-		int num = Grid.PosToCell(this.transform.position);
+		int num = Grid.PosToCell(base.transform.position);
 		GameObject gameObject = Grid.Objects[num, (int)this.objectLayer];
 		Wire wire = ((!(gameObject != null)) ? null : gameObject.GetComponent<Wire>());
 		if (wire == null)
@@ -37,7 +37,7 @@ public class CircuitSwitch : Switch
 
 	public bool IsConnected()
 	{
-		int num = Grid.PosToCell(this.transform.position);
+		int num = Grid.PosToCell(base.transform.position);
 		GameObject gameObject = Grid.Objects[num, (int)this.objectLayer];
 		return gameObject != null && gameObject.GetComponent<IDisconnectable>() != null;
 	}
@@ -49,24 +49,23 @@ public class CircuitSwitch : Switch
 
 	public void AttachWire(Wire wire)
 	{
-		if (wire == this.attachedWire)
+		if (!(wire == this.attachedWire))
 		{
-			return;
-		}
-		if (this.attachedWire != null)
-		{
-			this.UnsubscribeFromWire(this.attachedWire);
-		}
-		this.attachedWire = wire;
-		if (this.attachedWire != null)
-		{
-			this.SubscribeToWire(this.attachedWire);
-			this.UpdateCircuit();
-			this.wireConnectedGUID = base.GetComponent<KSelectable>().RemoveStatusItem(this.wireConnectedGUID, false);
-		}
-		else if (this.wireConnectedGUID == Guid.Empty)
-		{
-			this.wireConnectedGUID = base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.NoWireConnected, null);
+			if (this.attachedWire != null)
+			{
+				this.UnsubscribeFromWire(this.attachedWire);
+			}
+			this.attachedWire = wire;
+			if (this.attachedWire != null)
+			{
+				this.SubscribeToWire(this.attachedWire);
+				this.UpdateCircuit();
+				this.wireConnectedGUID = base.GetComponent<KSelectable>().RemoveStatusItem(this.wireConnectedGUID, false);
+			}
+			else if (this.wireConnectedGUID == Guid.Empty)
+			{
+				this.wireConnectedGUID = base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.NoWireConnected, null);
+			}
 		}
 	}
 
@@ -120,7 +119,10 @@ public class CircuitSwitch : Switch
 		this.wasOn = this.switchedOn;
 	}
 
-	private Wire attachedWire;
+	[SerializeField]
+	public ObjectLayer objectLayer;
+
+	private Wire attachedWire = null;
 
 	private Guid wireConnectedGUID;
 

@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using UnityEngine.Internal;
+using UnityEngine.Scripting;
 using UnityEngineInternal;
 
 namespace UnityEngine
 {
 	public sealed class Network
 	{
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern NetworkConnectionError InitializeServer(int connections, int listenPort, bool useNat);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern NetworkConnectionError Internal_InitializeServerDeprecated(int connections, int listenPort);
 
@@ -23,59 +24,59 @@ namespace UnityEngine
 
 		public static extern string incomingPassword
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public static extern NetworkLogLevel logLevel
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void InitializeSecurity();
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern NetworkConnectionError Internal_ConnectToSingleIP(string IP, int remotePort, int localPort, [DefaultValue("\"\"")] string password);
 
 		[ExcludeFromDocs]
 		private static NetworkConnectionError Internal_ConnectToSingleIP(string IP, int remotePort, int localPort)
 		{
-			string empty = string.Empty;
-			return Network.Internal_ConnectToSingleIP(IP, remotePort, localPort, empty);
+			string text = "";
+			return Network.Internal_ConnectToSingleIP(IP, remotePort, localPort, text);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern NetworkConnectionError Internal_ConnectToGuid(string guid, string password);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern NetworkConnectionError Internal_ConnectToIPs(string[] IP, int remotePort, int localPort, [DefaultValue("\"\"")] string password);
 
 		[ExcludeFromDocs]
 		private static NetworkConnectionError Internal_ConnectToIPs(string[] IP, int remotePort, int localPort)
 		{
-			string empty = string.Empty;
-			return Network.Internal_ConnectToIPs(IP, remotePort, localPort, empty);
+			string text = "";
+			return Network.Internal_ConnectToIPs(IP, remotePort, localPort, text);
 		}
 
 		[ExcludeFromDocs]
 		public static NetworkConnectionError Connect(string IP, int remotePort)
 		{
-			string empty = string.Empty;
-			return Network.Connect(IP, remotePort, empty);
+			string text = "";
+			return Network.Connect(IP, remotePort, text);
 		}
 
 		public static NetworkConnectionError Connect(string IP, int remotePort, [DefaultValue("\"\"")] string password)
@@ -86,8 +87,8 @@ namespace UnityEngine
 		[ExcludeFromDocs]
 		public static NetworkConnectionError Connect(string[] IPs, int remotePort)
 		{
-			string empty = string.Empty;
-			return Network.Connect(IPs, remotePort, empty);
+			string text = "";
+			return Network.Connect(IPs, remotePort, text);
 		}
 
 		public static NetworkConnectionError Connect(string[] IPs, int remotePort, [DefaultValue("\"\"")] string password)
@@ -98,8 +99,8 @@ namespace UnityEngine
 		[ExcludeFromDocs]
 		public static NetworkConnectionError Connect(string GUID)
 		{
-			string empty = string.Empty;
-			return Network.Connect(GUID, empty);
+			string text = "";
+			return Network.Connect(GUID, text);
 		}
 
 		public static NetworkConnectionError Connect(string GUID, [DefaultValue("\"\"")] string password)
@@ -110,8 +111,8 @@ namespace UnityEngine
 		[ExcludeFromDocs]
 		public static NetworkConnectionError Connect(HostData hostData)
 		{
-			string empty = string.Empty;
-			return Network.Connect(hostData, empty);
+			string text = "";
+			return Network.Connect(hostData, text);
 		}
 
 		public static NetworkConnectionError Connect(HostData hostData, [DefaultValue("\"\"")] string password)
@@ -120,14 +121,19 @@ namespace UnityEngine
 			{
 				throw new NullReferenceException();
 			}
+			NetworkConnectionError networkConnectionError;
 			if (hostData.guid.Length > 0 && hostData.useNat)
 			{
-				return Network.Connect(hostData.guid, password);
+				networkConnectionError = Network.Connect(hostData.guid, password);
 			}
-			return Network.Connect(hostData.ip, hostData.port, password);
+			else
+			{
+				networkConnectionError = Network.Connect(hostData.ip, hostData.port, password);
+			}
+			return networkConnectionError;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void Disconnect([DefaultValue("200")] int timeout);
 
@@ -138,18 +144,23 @@ namespace UnityEngine
 			Network.Disconnect(num);
 		}
 
-		[WrapperlessIcall]
+		public static void CloseConnection(NetworkPlayer target, bool sendDisconnectionNotification)
+		{
+			Network.INTERNAL_CALL_CloseConnection(ref target, sendDisconnectionNotification);
+		}
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void CloseConnection(NetworkPlayer target, bool sendDisconnectionNotification);
+		private static extern void INTERNAL_CALL_CloseConnection(ref NetworkPlayer target, bool sendDisconnectionNotification);
 
 		public static extern NetworkPlayer[] connections
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int Internal_GetPlayer();
 
@@ -163,7 +174,7 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_AllocateViewID(out NetworkViewID viewID);
 
@@ -180,7 +191,7 @@ namespace UnityEngine
 			return Network.INTERNAL_CALL_Instantiate(prefab, ref position, ref rotation, group);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern Object INTERNAL_CALL_Instantiate(Object prefab, ref Vector3 position, ref Quaternion rotation, int group);
 
@@ -189,7 +200,7 @@ namespace UnityEngine
 			Network.INTERNAL_CALL_Destroy(ref viewID);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_Destroy(ref NetworkViewID viewID);
 
@@ -209,18 +220,23 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		public static void DestroyPlayerObjects(NetworkPlayer playerID)
+		{
+			Network.INTERNAL_CALL_DestroyPlayerObjects(ref playerID);
+		}
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void DestroyPlayerObjects(NetworkPlayer playerID);
+		private static extern void INTERNAL_CALL_DestroyPlayerObjects(ref NetworkPlayer playerID);
 
 		private static void Internal_RemoveRPCs(NetworkPlayer playerID, NetworkViewID viewID, uint channelMask)
 		{
-			Network.INTERNAL_CALL_Internal_RemoveRPCs(playerID, ref viewID, channelMask);
+			Network.INTERNAL_CALL_Internal_RemoveRPCs(ref playerID, ref viewID, channelMask);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void INTERNAL_CALL_Internal_RemoveRPCs(NetworkPlayer playerID, ref NetworkViewID viewID, uint channelMask);
+		private static extern void INTERNAL_CALL_Internal_RemoveRPCs(ref NetworkPlayer playerID, ref NetworkViewID viewID, uint channelMask);
 
 		public static void RemoveRPCs(NetworkPlayer playerID)
 		{
@@ -244,68 +260,88 @@ namespace UnityEngine
 
 		public static extern bool isClient
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern bool isServer
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern NetworkPeerType peerType
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetLevelPrefix(int prefix);
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetLastPing(NetworkPlayer player);
+		public static int GetLastPing(NetworkPlayer player)
+		{
+			return Network.INTERNAL_CALL_GetLastPing(ref player);
+		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern int GetAveragePing(NetworkPlayer player);
+		private static extern int INTERNAL_CALL_GetLastPing(ref NetworkPlayer player);
+
+		public static int GetAveragePing(NetworkPlayer player)
+		{
+			return Network.INTERNAL_CALL_GetAveragePing(ref player);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int INTERNAL_CALL_GetAveragePing(ref NetworkPlayer player);
 
 		public static extern float sendRate
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public static extern bool isMessageQueueRunning
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern void SetReceivingEnabled(NetworkPlayer player, int group, bool enabled);
+		public static void SetReceivingEnabled(NetworkPlayer player, int group, bool enabled)
+		{
+			Network.INTERNAL_CALL_SetReceivingEnabled(ref player, group, enabled);
+		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_SetReceivingEnabled(ref NetworkPlayer player, int group, bool enabled);
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_SetSendingGlobal(int group, bool enabled);
 
-		[WrapperlessIcall]
+		private static void Internal_SetSendingSpecific(NetworkPlayer player, int group, bool enabled)
+		{
+			Network.INTERNAL_CALL_Internal_SetSendingSpecific(ref player, group, enabled);
+		}
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void Internal_SetSendingSpecific(NetworkPlayer player, int group, bool enabled);
+		private static extern void INTERNAL_CALL_Internal_SetSendingSpecific(ref NetworkPlayer player, int group, bool enabled);
 
 		public static void SetSendingEnabled(int group, bool enabled)
 		{
@@ -317,7 +353,7 @@ namespace UnityEngine
 			Network.Internal_SetSendingSpecific(player, group, enabled);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_GetTime(out double t);
 
@@ -333,10 +369,10 @@ namespace UnityEngine
 
 		public static extern int minimumAllocatableViewIDs
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
@@ -344,35 +380,35 @@ namespace UnityEngine
 		[Obsolete("No longer needed. This is now explicitly set in the InitializeServer function call. It is implicitly set when calling Connect depending on if an IP/port combination is used (useNat=false) or a GUID is used(useNat=true).")]
 		public static extern bool useNat
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public static extern string natFacilitatorIP
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public static extern int natFacilitatorPort
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern ConnectionTesterStatus TestConnection([DefaultValue("false")] bool forceTest);
 
@@ -383,7 +419,7 @@ namespace UnityEngine
 			return Network.TestConnection(flag);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern ConnectionTesterStatus TestConnectionNAT([DefaultValue("false")] bool forceTest);
 
@@ -396,74 +432,74 @@ namespace UnityEngine
 
 		public static extern string connectionTesterIP
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public static extern int connectionTesterPort
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool HavePublicAddress();
 
 		public static extern int maxConnections
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public static extern string proxyIP
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public static extern int proxyPort
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public static extern bool useProxy
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public static extern string proxyPassword
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}

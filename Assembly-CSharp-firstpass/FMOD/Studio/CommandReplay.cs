@@ -37,13 +37,18 @@ namespace FMOD.Studio
 		{
 			COMMAND_INFO_INTERNAL command_INFO_INTERNAL = default(COMMAND_INFO_INTERNAL);
 			RESULT result = CommandReplay.FMOD_Studio_CommandReplay_GetCommandInfo(this.rawPtr, commandIndex, out command_INFO_INTERNAL);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
 				info = default(COMMAND_INFO);
-				return result;
+				result2 = result;
 			}
-			info = command_INFO_INTERNAL.createPublic();
-			return result;
+			else
+			{
+				info = command_INFO_INTERNAL.createPublic();
+				result2 = result;
+			}
+			return result2;
 		}
 
 		public RESULT getCommandString(int commandIndex, out string description)

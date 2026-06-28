@@ -10,11 +10,14 @@ public class StateMachineManager : IScheduler
 		{
 			foreach (Type type in assembly.GetTypes())
 			{
-				if (!type.IsAbstract && !type.IsGenericTypeDefinition && typeof(StateMachine).IsAssignableFrom(type))
+				if (!type.IsAbstract && !type.IsGenericTypeDefinition)
 				{
-					StateMachine stateMachine = (StateMachine)Activator.CreateInstance(type);
-					stateMachine.InitializeStateMachine();
-					this.stateMachines[type] = stateMachine;
+					if (typeof(StateMachine).IsAssignableFrom(type))
+					{
+						StateMachine stateMachine = (StateMachine)Activator.CreateInstance(type);
+						stateMachine.InitializeStateMachine();
+						this.stateMachines[type] = stateMachine;
+					}
 				}
 			}
 		}

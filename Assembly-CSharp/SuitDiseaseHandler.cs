@@ -5,8 +5,8 @@ public class SuitDiseaseHandler : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(-1617557748, new Action<object>(this.OnEquipped));
-		this.Subscribe(-170173755, new Action<object>(this.OnUnequipped));
+		base.Subscribe(-1617557748, new Action<object>(this.OnEquipped));
+		base.Subscribe(-170173755, new Action<object>(this.OnUnequipped));
 	}
 
 	private void OnEquipped(object data)

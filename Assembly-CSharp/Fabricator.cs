@@ -1,43 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Fabricator : Workable, IEffectDescriptor
+public class Fabricator : Workable, IEffectDescriptor, IHasBuildQueue
 {
-	public string FabricationMachine
+	public int NumOrders
 	{
 		get
 		{
-			return base.GetComponent<KPrefabID>().PrefabTag.Name;
+			return this.userOrders.Count;
 		}
 	}
 
-	public ReadOnlyCollection<Fabricator.UserOrder> Orders
+	public List<IBuildQueueOrder> Orders
 	{
 		get
 		{
-			return this.userOrders.AsReadOnly();
+			return this.userOrders.ConvertAll<IBuildQueueOrder>((Fabricator.UserOrder o) => o);
 		}
 	}
 
-	public ReadOnlyCollection<Fabricator.MachineOrder> MachineOrders
+	public bool NeedsWorker
 	{
 		get
 		{
-			return this.machineOrders.AsReadOnly();
+			return this.machineOrders.Count > 0 && this.machineOrders[0].fetchList != null && this.machineOrders[0].fetchList.IsComplete;
 		}
 	}
 
-	public bool IsQueueFull
+	public bool HasWorker
 	{
 		get
 		{
-			return this.userOrders.Count == 6;
+			return base.worker != null;
 		}
 	}
 
@@ -86,45 +85,44 @@ public class Fabricator : Workable, IEffectDescriptor
 	{
 		this.userOrders.Clear();
 		Recipe[] recipes = this.GetRecipes();
-		this.buildStorage.Transfer(this.inStorage, true);
-		if (this.savedOrders == null)
+		this.buildStorage.Transfer(this.inStorage, true, true);
+		if (this.savedOrders != null)
 		{
-			return;
-		}
-		bool flag = true;
-		foreach (Fabricator.OrderSaveData orderSaveData in this.savedOrders)
-		{
-			string[] tagNames = orderSaveData.tagNames;
-			if (tagNames != null)
+			bool flag = true;
+			foreach (Fabricator.OrderSaveData orderSaveData in this.savedOrders)
 			{
-				string recipePrefab = orderSaveData.recipePrefab;
-				bool flag2 = false;
-				for (int i = 0; i < recipes.Length; i++)
+				string[] tagNames = orderSaveData.tagNames;
+				if (tagNames != null)
 				{
-					if (recipes[i].Result.Name == recipePrefab)
+					string recipePrefab = orderSaveData.recipePrefab;
+					bool flag2 = false;
+					for (int i = 0; i < recipes.Length; i++)
 					{
-						List<Tag> list = new List<Tag>();
-						for (int j = 0; j < tagNames.Length; j++)
+						if (recipes[i].Result.Name == recipePrefab)
 						{
-							list.Add(new Tag(tagNames[j]));
+							List<Tag> list = new List<Tag>();
+							for (int j = 0; j < tagNames.Length; j++)
+							{
+								list.Add(new Tag(tagNames[j]));
+							}
+							flag2 = true;
+							this.userOrders.Add(new Fabricator.UserOrder(recipes[i], list, this.OnCreateOrder, orderSaveData.infinite));
+							if (flag)
+							{
+								base.SetWorkTime(recipes[i].FabricationTime);
+								flag = false;
+							}
+							break;
 						}
-						flag2 = true;
-						this.userOrders.Add(new Fabricator.UserOrder(recipes[i], list, this.OnCreateOrder, orderSaveData.infinite));
-						if (flag)
-						{
-							base.SetWorkTime(recipes[i].FabricationTime);
-							flag = false;
-						}
-						break;
+					}
+					if (!flag2)
+					{
+						Output.LogWarning(new object[] { "Order failed, missing recipe [", recipePrefab, "]" });
 					}
 				}
-				if (!flag2)
-				{
-					Output.LogWarning(new object[] { "Order failed, missing recipe [", recipePrefab, "]" });
-				}
 			}
+			this.savedOrders = null;
 		}
-		this.savedOrders = null;
 	}
 
 	protected override void OnPrefabInit()
@@ -132,8 +130,8 @@ public class Fabricator : Workable, IEffectDescriptor
 		base.OnPrefabInit();
 		this.choreType = Db.Get().ChoreTypes.Fabricate;
 		base.GetComponent<Storage>().choreType = Db.Get().ChoreTypes.FabricateFetch;
-		this.Subscribe(-1957399615, new Action<object>(this.OnDroppedAll));
-		this.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		base.Subscribe(-1957399615, new Action<object>(this.OnDroppedAll));
+		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 		Components.Fabricators.Add(this);
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Fabricating;
 		this.attributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
@@ -142,20 +140,19 @@ public class Fabricator : Workable, IEffectDescriptor
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.Subscribe(-235298596, new Action<object>(this.OnBuildingUpgraded));
+		base.Subscribe(-235298596, new Action<object>(this.OnBuildingUpgraded));
 		this.ReloadSavedQueue();
-		this.buildStorage.Transfer(this.inStorage, true);
+		this.buildStorage.Transfer(this.inStorage, true, true);
 		this.UpdateOrderQueue(true);
 	}
 
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
-		if (!this.operational.IsOperational)
+		if (this.operational.IsOperational)
 		{
-			return;
+			this.operational.SetActive(true, false);
 		}
-		this.operational.SetActive(true, false);
 	}
 
 	protected override void OnStopWork(Worker worker)
@@ -175,7 +172,7 @@ public class Fabricator : Workable, IEffectDescriptor
 				this.machineOrders.RemoveAt(i);
 				if (machineOrder.chore != null)
 				{
-					this.buildStorage.Transfer(this.inStorage, true);
+					this.buildStorage.Transfer(this.inStorage, true, true);
 				}
 			}
 		}
@@ -195,31 +192,32 @@ public class Fabricator : Workable, IEffectDescriptor
 	protected virtual GameObject CompleteOrder(Fabricator.UserOrder completed_order)
 	{
 		GameObject gameObject = completed_order.recipe.Craft(this.buildStorage, completed_order.orderTags);
-		gameObject.transform.localPosition = this.transform.localPosition;
+		gameObject.transform.localPosition = base.transform.localPosition;
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-		switch (this.resultState)
+		Fabricator.ResultState resultState = this.resultState;
+		if (resultState != Fabricator.ResultState.Normal)
 		{
-		case Fabricator.ResultState.Normal:
-		{
-			int num = Grid.PosToCell(this);
-			gameObject.transform.SetPosition(Grid.CellToPosCCC(num, Grid.SceneLayer.Use));
-			break;
+			if (resultState != Fabricator.ResultState.Hot)
+			{
+				if (resultState == Fabricator.ResultState.Melted)
+				{
+					int outputCell = this.outputPoint.GetOutputCell();
+					PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
+					SimMessages.AddRemoveSubstance(outputCell, component.Element.highTempTransition.id, CellEventLogger.Instance.FabricatorProduceMelted, component2.Mass, component.Element.highTempTransition.defaultValues.temperature + 10f, byte.MaxValue, 0, -1);
+					component.gameObject.DeleteObject();
+				}
+			}
+			else
+			{
+				int num = Grid.PosToCell(this);
+				component.gameObject.transform.SetPosition(Grid.CellToPosCCC(num, Grid.SceneLayer.Ore));
+				component.Temperature = component.Element.highTemp - 10f;
+			}
 		}
-		case Fabricator.ResultState.Hot:
+		else
 		{
 			int num2 = Grid.PosToCell(this);
-			component.gameObject.transform.SetPosition(Grid.CellToPosCCC(num2, Grid.SceneLayer.Use));
-			component.Temperature = component.Element.highTemp - 10f;
-			break;
-		}
-		case Fabricator.ResultState.Melted:
-		{
-			int outputCell = this.outputPoint.GetOutputCell();
-			PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
-			SimMessages.AddRemoveSubstance(outputCell, component.Element.highTempTransition.id, CellEventLogger.Instance.FabricatorProduceMelted, component2.Mass, component.Element.highTempTransition.defaultValues.temperature + 10f, byte.MaxValue, 0, -1);
-			component.gameObject.DeleteObject();
-			break;
-		}
+			gameObject.transform.SetPosition(Grid.CellToPosCCC(num2, Grid.SceneLayer.Ore));
 		}
 		if (!completed_order.infinite)
 		{
@@ -230,13 +228,18 @@ public class Fabricator : Workable, IEffectDescriptor
 
 	public override float GetWorkTime()
 	{
+		float num;
 		if (this.machineOrders.Count > 0)
 		{
 			Fabricator.MachineOrder machineOrder = this.machineOrders[0];
 			this.workTime = machineOrder.parentOrder.recipe.FabricationTime;
-			return this.workTime;
+			num = this.workTime;
 		}
-		return -1f;
+		else
+		{
+			num = -1f;
+		}
+		return num;
 	}
 
 	public void CreateOrder(Recipe recipe, List<Tag> tags, bool isInfinite, string soundPath)
@@ -246,7 +249,7 @@ public class Fabricator : Workable, IEffectDescriptor
 			Fabricator.UserOrder userOrder = new Fabricator.UserOrder(recipe, tags, this.OnCreateOrder, false);
 			this.CompleteOrder(userOrder);
 		}
-		else if (!this.IsQueueFull)
+		else if (this.userOrders.Count < 6)
 		{
 			KFMOD.PlayOneShot(soundPath);
 			Fabricator.UserOrder userOrder2 = new Fabricator.UserOrder(recipe, tags, this.OnCreateOrder, isInfinite);
@@ -261,113 +264,109 @@ public class Fabricator : Workable, IEffectDescriptor
 
 	private void UpdateOrderQueue(bool force_update = false)
 	{
-		if (!force_update && !this.operational.IsOperational)
+		if (force_update || this.operational.IsOperational)
 		{
-			return;
-		}
-		int num = 0;
-		while (num < this.userOrders.Count && this.machineOrders.Count < 3)
-		{
-			Fabricator.UserOrder userOrder = this.userOrders[num];
-			if (!this.AlreadyMachineQueued(userOrder) || userOrder.infinite)
+			int num = 0;
+			while (num < this.userOrders.Count && this.machineOrders.Count < 3)
 			{
-				Fabricator.MachineOrder machineOrder = new Fabricator.MachineOrder();
-				machineOrder.parentOrder = userOrder;
-				this.machineOrders.Add(machineOrder);
-			}
-			if (!userOrder.infinite)
-			{
-				num++;
-			}
-		}
-		if (this.machineOrders.Count > 0)
-		{
-			Fabricator.MachineOrder machineOrder2 = this.machineOrders[0];
-			if (machineOrder2.chore == null)
-			{
-				Recipe.Ingredient[] allIngredients = machineOrder2.parentOrder.recipe.GetAllIngredients(machineOrder2.parentOrder.orderTags);
-				bool flag = true;
-				foreach (Recipe.Ingredient ingredient in allIngredients)
+				Fabricator.UserOrder userOrder = this.userOrders[num];
+				if (!this.AlreadyMachineQueued(userOrder) || userOrder.infinite)
 				{
-					if (this.inStorage.GetMassAvailable(ingredient.tag) < ingredient.amount)
-					{
-						flag = false;
-						break;
-					}
+					Fabricator.MachineOrder machineOrder = new Fabricator.MachineOrder();
+					machineOrder.parentOrder = userOrder;
+					this.machineOrders.Add(machineOrder);
 				}
-				if (flag)
+				if (!userOrder.infinite)
 				{
-					machineOrder2.chore = new WorkChore<Fabricator>(this.choreType, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue);
-					if (this.workTimeRemaining <= 0f)
-					{
-						this.workTimeRemaining = this.GetWorkTime();
-					}
-					foreach (Recipe.Ingredient ingredient2 in allIngredients)
-					{
-						this.inStorage.Transfer(this.buildStorage, ingredient2.tag, ingredient2.amount, false, true);
-					}
-					this.OnBuildQueued(machineOrder2);
+					num++;
 				}
 			}
-			Dictionary<Tag, float> dictionary = new Dictionary<Tag, float>();
-			for (int k = 0; k < this.machineOrders.Count; k++)
+			if (this.machineOrders.Count > 0)
 			{
-				Fabricator.MachineOrder machineOrder3 = this.machineOrders[k];
-				if (machineOrder3.chore == null)
+				Fabricator.MachineOrder machineOrder2 = this.machineOrders[0];
+				if (machineOrder2.chore == null)
 				{
-					Fabricator.UserOrder parentOrder = machineOrder3.parentOrder;
-					Recipe.Ingredient[] allIngredients2 = parentOrder.recipe.GetAllIngredients(parentOrder.orderTags);
-					foreach (Recipe.Ingredient ingredient3 in allIngredients2)
+					Recipe.Ingredient[] allIngredients = machineOrder2.parentOrder.recipe.GetAllIngredients(machineOrder2.parentOrder.orderTags);
+					bool flag = true;
+					foreach (Recipe.Ingredient ingredient in allIngredients)
 					{
-						dictionary[ingredient3.tag] = this.inStorage.GetMassAvailable(ingredient3.tag);
-					}
-				}
-			}
-			for (int m = 0; m < this.machineOrders.Count; m++)
-			{
-				Fabricator.MachineOrder machineOrder4 = this.machineOrders[m];
-				if (machineOrder4.chore == null)
-				{
-					Fabricator.UserOrder parentOrder2 = machineOrder4.parentOrder;
-					Recipe.Ingredient[] allIngredients3 = parentOrder2.recipe.GetAllIngredients(parentOrder2.orderTags);
-					bool flag2 = true;
-					foreach (Recipe.Ingredient ingredient4 in allIngredients3)
-					{
-						if (dictionary[ingredient4.tag] < ingredient4.amount)
+						if (this.inStorage.GetMassAvailable(ingredient.tag) < ingredient.amount)
 						{
-							ingredient4.amount -= dictionary[ingredient4.tag];
-							dictionary[ingredient4.tag] = 0f;
-							flag2 = false;
-						}
-						else
-						{
-							Dictionary<Tag, float> dictionary3;
-							Dictionary<Tag, float> dictionary2 = (dictionary3 = dictionary);
-							Tag tag2;
-							Tag tag = (tag2 = ingredient4.tag);
-							float num2 = dictionary3[tag2];
-							dictionary2[tag] = num2 - ingredient4.amount;
-							ingredient4.amount = 0f;
+							flag = false;
+							break;
 						}
 					}
-					int num3 = -m;
-					if (machineOrder4.fetchList == null && !flag2)
+					if (flag)
 					{
-						machineOrder4.fetchList = new FetchList2(this.inStorage);
-						machineOrder4.fetchList.ShowStatusItem = false;
-						machineOrder4.fetchList.SetPriorityMod(num3);
-						this.AddIngredientsToFetchList(allIngredients3, machineOrder4.fetchList);
-						machineOrder4.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
-					}
-					else if (machineOrder4.fetchList != null)
-					{
-						machineOrder4.fetchList.SetPriorityMod(num3);
+						machineOrder2.chore = new WorkChore<Fabricator>(this.choreType, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+						if (this.workTimeRemaining <= 0f)
+						{
+							this.workTimeRemaining = this.GetWorkTime();
+						}
+						foreach (Recipe.Ingredient ingredient2 in allIngredients)
+						{
+							this.inStorage.Transfer(this.buildStorage, ingredient2.tag, ingredient2.amount, false, true);
+						}
+						this.OnBuildQueued(machineOrder2);
 					}
 				}
-			}
-			if (machineOrder2.chore == null)
-			{
-				machineOrder2.fetchList.ShowStatusItem = true;
+				Dictionary<Tag, float> dictionary = new Dictionary<Tag, float>();
+				for (int k = 0; k < this.machineOrders.Count; k++)
+				{
+					Fabricator.MachineOrder machineOrder3 = this.machineOrders[k];
+					if (machineOrder3.chore == null)
+					{
+						Fabricator.UserOrder parentOrder = machineOrder3.parentOrder;
+						Recipe.Ingredient[] allIngredients2 = parentOrder.recipe.GetAllIngredients(parentOrder.orderTags);
+						foreach (Recipe.Ingredient ingredient3 in allIngredients2)
+						{
+							dictionary[ingredient3.tag] = this.inStorage.GetMassAvailable(ingredient3.tag);
+						}
+					}
+				}
+				for (int m = 0; m < this.machineOrders.Count; m++)
+				{
+					Fabricator.MachineOrder machineOrder4 = this.machineOrders[m];
+					if (machineOrder4.chore == null)
+					{
+						Fabricator.UserOrder parentOrder2 = machineOrder4.parentOrder;
+						Recipe.Ingredient[] allIngredients3 = parentOrder2.recipe.GetAllIngredients(parentOrder2.orderTags);
+						bool flag2 = true;
+						foreach (Recipe.Ingredient ingredient4 in allIngredients3)
+						{
+							if (dictionary[ingredient4.tag] < ingredient4.amount)
+							{
+								ingredient4.amount -= dictionary[ingredient4.tag];
+								dictionary[ingredient4.tag] = 0f;
+								flag2 = false;
+							}
+							else
+							{
+								Dictionary<Tag, float> dictionary2;
+								Tag tag;
+								(dictionary2 = dictionary)[tag = ingredient4.tag] = dictionary2[tag] - ingredient4.amount;
+								ingredient4.amount = 0f;
+							}
+						}
+						int num2 = -m;
+						if (machineOrder4.fetchList == null && !flag2)
+						{
+							machineOrder4.fetchList = new FetchList2(this.inStorage);
+							machineOrder4.fetchList.ShowStatusItem = false;
+							machineOrder4.fetchList.SetPriorityMod(num2);
+							this.AddIngredientsToFetchList(allIngredients3, machineOrder4.fetchList);
+							machineOrder4.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
+						}
+						else if (machineOrder4.fetchList != null)
+						{
+							machineOrder4.fetchList.SetPriorityMod(num2);
+						}
+					}
+				}
+				if (machineOrder2.chore == null)
+				{
+					machineOrder2.fetchList.ShowStatusItem = true;
+				}
 			}
 		}
 	}
@@ -396,13 +395,15 @@ public class Fabricator : Workable, IEffectDescriptor
 		if (fetchList == null || ingredients == null || ingredients.Length == 0)
 		{
 			global::Debug.LogError("Invalid parameters received for the fetch list.", null);
-			return;
 		}
-		foreach (Recipe.Ingredient ingredient in ingredients)
+		else
 		{
-			if (ingredient.amount > 0f)
+			foreach (Recipe.Ingredient ingredient in ingredients)
 			{
-				fetchList.Add(ingredient.tag, null, ingredient.amount, FetchOrder2.OperationalRequirement.None);
+				if (ingredient.amount > 0f)
+				{
+					fetchList.Add(ingredient.tag, null, ingredient.amount, FetchOrder2.OperationalRequirement.None);
+				}
 			}
 		}
 	}
@@ -430,17 +431,27 @@ public class Fabricator : Workable, IEffectDescriptor
 	private bool CanFabricate(Fabricator.UserOrder order, Storage storage)
 	{
 		Recipe.Ingredient[] allIngredients = order.recipe.GetAllIngredients(order.orderTags);
-		foreach (Recipe.Ingredient ingredient in allIngredients)
+		Recipe.Ingredient[] array = allIngredients;
+		int i = 0;
+		while (i < array.Length)
 		{
+			Recipe.Ingredient ingredient = array[i];
 			float num = 0f;
-			if (!storage.IsMaterialOnStorage(ingredient.tag, ref num))
+			bool flag;
+			if (storage.IsMaterialOnStorage(ingredient.tag, ref num))
 			{
-				return false;
+				if (num >= ingredient.amount)
+				{
+					i++;
+					continue;
+				}
+				flag = false;
 			}
-			if (num < ingredient.amount)
+			else
 			{
-				return false;
+				flag = false;
 			}
+			return flag;
 		}
 		return true;
 	}
@@ -478,19 +489,21 @@ public class Fabricator : Workable, IEffectDescriptor
 		if (this.machineOrders.Count <= 0)
 		{
 			global::Debug.LogWarning("Somehow we tried to complete an order when there was no orders to complete. Need more info on how to reproduce this for a proper fix.", null);
-			return;
 		}
-		Fabricator.MachineOrder machineOrder = this.machineOrders[0];
-		machineOrder.Complete();
-		if (!machineOrder.parentOrder.infinite)
+		else
 		{
-			this.userOrders.RemoveAt(0);
+			Fabricator.MachineOrder machineOrder = this.machineOrders[0];
+			machineOrder.Complete();
+			if (!machineOrder.parentOrder.infinite)
+			{
+				this.userOrders.RemoveAt(0);
+			}
+			this.machineOrders.RemoveAt(0);
+			this.operational.SetActive(false, false);
+			this.CompleteOrder(machineOrder.parentOrder);
+			this.buildStorage.Transfer(this.outStorage, true, true);
+			this.UpdateOrderQueue(false);
 		}
-		this.machineOrders.RemoveAt(0);
-		this.operational.SetActive(false, false);
-		this.CompleteOrder(machineOrder.parentOrder);
-		this.buildStorage.Transfer(this.outStorage, true);
-		this.UpdateOrderQueue(false);
 	}
 
 	private void OnDroppedAll(object data)
@@ -522,7 +535,7 @@ public class Fabricator : Workable, IEffectDescriptor
 
 	private void CancelAll()
 	{
-		this.buildStorage.Transfer(this.inStorage, true);
+		this.buildStorage.Transfer(this.inStorage, true, true);
 		while (this.machineOrders.Count > 0)
 		{
 			Fabricator.MachineOrder machineOrder = this.machineOrders[0];
@@ -539,9 +552,7 @@ public class Fabricator : Workable, IEffectDescriptor
 	{
 	}
 
-	public const int MaxNumOrders = 6;
-
-	private const int MaxPrefetchCount = 3;
+	public const int MAX_NUM_ORDERS = 6;
 
 	public Action<Fabricator.UserOrder> OnCreateOrder;
 
@@ -568,12 +579,14 @@ public class Fabricator : Workable, IEffectDescriptor
 	[SerializeField]
 	public Storage outStorage;
 
-	private List<Fabricator.UserOrder> userOrders = new List<Fabricator.UserOrder>();
+	protected List<Fabricator.UserOrder> userOrders = new List<Fabricator.UserOrder>();
 
-	private List<Fabricator.MachineOrder> machineOrders = new List<Fabricator.MachineOrder>();
+	protected List<Fabricator.MachineOrder> machineOrders = new List<Fabricator.MachineOrder>();
+
+	private const int MaxPrefetchCount = 3;
 
 	[SerializeField]
-	public Fabricator.ResultState resultState;
+	public Fabricator.ResultState resultState = Fabricator.ResultState.Normal;
 
 	[Serialize]
 	private List<Fabricator.OrderSaveData> savedOrders;
@@ -581,7 +594,7 @@ public class Fabricator : Workable, IEffectDescriptor
 	protected ChoreType choreType;
 
 	[Serializable]
-	public class UserOrder
+	public class UserOrder : IBuildQueueOrder
 	{
 		public UserOrder(Recipe recipe, List<Tag> orderTags, Action<Fabricator.UserOrder> on_create_order, bool infinite = false)
 		{
@@ -594,6 +607,51 @@ public class Fabricator : Workable, IEffectDescriptor
 		public void Cleanup(Action<Fabricator.UserOrder> on_order_cancelled_or_complete)
 		{
 			on_order_cancelled_or_complete(this);
+		}
+
+		public Tag Result
+		{
+			get
+			{
+				return this.recipe.Result;
+			}
+		}
+
+		public Sprite Icon
+		{
+			get
+			{
+				return this.recipe.GetUIIcon();
+			}
+		}
+
+		public Color IconColor
+		{
+			get
+			{
+				return this.recipe.GetUIColor();
+			}
+		}
+
+		public bool Infinite
+		{
+			get
+			{
+				return this.infinite;
+			}
+		}
+
+		public Dictionary<Tag, float> CheckMaterialRequirements()
+		{
+			Dictionary<Tag, float> dictionary = new Dictionary<Tag, float>();
+			for (int i = 0; i < this.recipe.Ingredients.Count; i++)
+			{
+				Recipe.Ingredient ingredient = this.recipe.Ingredients[i];
+				float amount = ingredient.amount;
+				float amount2 = WorldInventory.Instance.GetAmount(ingredient.tag);
+				dictionary[ingredient.tag] = amount - amount2;
+			}
+			return dictionary;
 		}
 
 		public Recipe recipe;

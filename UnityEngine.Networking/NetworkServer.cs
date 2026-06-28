@@ -217,12 +217,17 @@ namespace UnityEngine.Networking
 
 		public static bool Listen(MatchInfo matchInfo, int listenPort)
 		{
+			bool flag;
 			if (!matchInfo.usingRelay)
 			{
-				return NetworkServer.instance.InternalListen(null, listenPort);
+				flag = NetworkServer.instance.InternalListen(null, listenPort);
 			}
-			NetworkServer.instance.InternalListenRelay(matchInfo.address, matchInfo.port, matchInfo.networkId, Utility.GetSourceID(), matchInfo.nodeId);
-			return true;
+			else
+			{
+				NetworkServer.instance.InternalListenRelay(matchInfo.address, matchInfo.port, matchInfo.networkId, Utility.GetSourceID(), matchInfo.nodeId);
+				flag = true;
+			}
+			return flag;
 		}
 
 		internal void RegisterMessageHandlers()
@@ -235,6 +240,7 @@ namespace UnityEngine.Networking
 			this.m_SimpleServerSimple.RegisterHandlerSafe(40, new NetworkMessageDelegate(NetworkAnimator.OnAnimationServerMessage));
 			this.m_SimpleServerSimple.RegisterHandlerSafe(41, new NetworkMessageDelegate(NetworkAnimator.OnAnimationParametersServerMessage));
 			this.m_SimpleServerSimple.RegisterHandlerSafe(42, new NetworkMessageDelegate(NetworkAnimator.OnAnimationTriggerServerMessage));
+			this.m_SimpleServerSimple.RegisterHandlerSafe(17, new NetworkMessageDelegate(NetworkConnection.OnFragment));
 			NetworkServer.maxPacketSize = NetworkServer.hostTopology.DefaultConfig.PacketSize;
 		}
 
@@ -283,72 +289,80 @@ namespace UnityEngine.Networking
 
 		internal NetworkClient BecomeHostInternal(NetworkClient oldClient, int port, MatchInfo matchInfo, int oldConnectionId, PeerInfoMessage[] peers)
 		{
+			NetworkClient networkClient;
 			if (NetworkServer.s_Active)
 			{
 				if (LogFilter.logError)
 				{
 					Debug.LogError("BecomeHost already a server.");
 				}
-				return null;
+				networkClient = null;
 			}
-			if (!NetworkClient.active)
+			else if (!NetworkClient.active)
 			{
 				if (LogFilter.logError)
 				{
 					Debug.LogError("BecomeHost NetworkClient not active.");
 				}
-				return null;
-			}
-			NetworkServer.Configure(NetworkServer.hostTopology);
-			if (matchInfo == null)
-			{
-				if (LogFilter.logDev)
-				{
-					Debug.Log("BecomeHost Listen on " + port);
-				}
-				if (!NetworkServer.Listen(port))
-				{
-					if (LogFilter.logError)
-					{
-						Debug.LogError("BecomeHost bind failed.");
-					}
-					return null;
-				}
+				networkClient = null;
 			}
 			else
 			{
+				NetworkServer.Configure(NetworkServer.hostTopology);
+				if (matchInfo == null)
+				{
+					if (LogFilter.logDev)
+					{
+						Debug.Log("BecomeHost Listen on " + port);
+					}
+					if (!NetworkServer.Listen(port))
+					{
+						if (LogFilter.logError)
+						{
+							Debug.LogError("BecomeHost bind failed.");
+						}
+						return null;
+					}
+				}
+				else
+				{
+					if (LogFilter.logDev)
+					{
+						Debug.Log("BecomeHost match:" + matchInfo.networkId);
+					}
+					NetworkServer.ListenRelay(matchInfo.address, matchInfo.port, matchInfo.networkId, Utility.GetSourceID(), matchInfo.nodeId);
+				}
+				foreach (NetworkIdentity networkIdentity in ClientScene.objects.Values)
+				{
+					if (!(networkIdentity == null) && !(networkIdentity.gameObject == null))
+					{
+						NetworkIdentity.AddNetworkId(networkIdentity.netId.Value);
+						this.m_NetworkScene.SetLocalObject(networkIdentity.netId, networkIdentity.gameObject, false, false);
+						networkIdentity.OnStartServer(true);
+					}
+				}
 				if (LogFilter.logDev)
 				{
-					Debug.Log("BecomeHost match:" + matchInfo.networkId);
+					Debug.Log("NetworkServer BecomeHost done. oldConnectionId:" + oldConnectionId);
 				}
-				NetworkServer.ListenRelay(matchInfo.address, matchInfo.port, matchInfo.networkId, Utility.GetSourceID(), matchInfo.nodeId);
-			}
-			foreach (NetworkIdentity networkIdentity in ClientScene.objects.Values)
-			{
-				if (!(networkIdentity == null) && !(networkIdentity.gameObject == null))
+				this.RegisterMessageHandlers();
+				if (!NetworkClient.RemoveClient(oldClient))
 				{
-					NetworkIdentity.AddNetworkId(networkIdentity.netId.Value);
-					this.m_NetworkScene.SetLocalObject(networkIdentity.netId, networkIdentity.gameObject, false, false);
-					networkIdentity.OnStartServer(true);
+					if (LogFilter.logError)
+					{
+						Debug.LogError("BecomeHost failed to remove client");
+					}
 				}
+				if (LogFilter.logDev)
+				{
+					Debug.Log("BecomeHost localClient ready");
+				}
+				NetworkClient networkClient2 = ClientScene.ReconnectLocalServer();
+				ClientScene.Ready(networkClient2.connection);
+				ClientScene.SetReconnectId(oldConnectionId, peers);
+				ClientScene.AddPlayer(ClientScene.readyConnection, 0);
+				networkClient = networkClient2;
 			}
-			if (LogFilter.logDev)
-			{
-				Debug.Log("NetworkServer BecomeHost done. oldConnectionId:" + oldConnectionId);
-			}
-			this.RegisterMessageHandlers();
-			if (!NetworkClient.RemoveClient(oldClient) && LogFilter.logError)
-			{
-				Debug.LogError("BecomeHost failed to remove client");
-			}
-			if (LogFilter.logDev)
-			{
-				Debug.Log("BecomeHost localClient ready");
-			}
-			NetworkClient networkClient = ClientScene.ReconnectLocalServer();
-			ClientScene.Ready(networkClient.connection);
-			ClientScene.SetReconnectId(oldConnectionId, peers);
-			ClientScene.AddPlayer(ClientScene.readyConnection, 0);
 			return networkClient;
 		}
 
@@ -367,17 +381,22 @@ namespace UnityEngine.Networking
 
 		internal int AddLocalClient(LocalClient localClient)
 		{
+			int num;
 			if (this.m_LocalConnectionsFakeList.Count != 0)
 			{
 				Debug.LogError("Local Connection already exists");
-				return -1;
+				num = -1;
 			}
-			this.m_LocalConnection = new ULocalConnectionToClient(localClient);
-			this.m_LocalConnection.connectionId = 0;
-			this.m_SimpleServerSimple.SetConnectionAtIndex(this.m_LocalConnection);
-			this.m_LocalConnectionsFakeList.Add(this.m_LocalConnection);
-			this.m_LocalConnection.InvokeHandlerNoData(32);
-			return 0;
+			else
+			{
+				this.m_LocalConnection = new ULocalConnectionToClient(localClient);
+				this.m_LocalConnection.connectionId = 0;
+				this.m_SimpleServerSimple.SetConnectionAtIndex(this.m_LocalConnection);
+				this.m_LocalConnectionsFakeList.Add(this.m_LocalConnection);
+				this.m_LocalConnection.InvokeHandlerNoData(32);
+				num = 0;
+			}
+			return num;
 		}
 
 		internal void RemoveLocalClient(NetworkConnection localClientConnection)
@@ -411,21 +430,20 @@ namespace UnityEngine.Networking
 
 		internal void ActivateLocalClientScene()
 		{
-			if (this.m_LocalClientActive)
+			if (!this.m_LocalClientActive)
 			{
-				return;
-			}
-			this.m_LocalClientActive = true;
-			foreach (NetworkIdentity networkIdentity in NetworkServer.objects.Values)
-			{
-				if (!networkIdentity.isClient)
+				this.m_LocalClientActive = true;
+				foreach (NetworkIdentity networkIdentity in NetworkServer.objects.Values)
 				{
-					if (LogFilter.logDev)
+					if (!networkIdentity.isClient)
 					{
-						Debug.Log(string.Concat(new object[] { "ActivateClientScene ", networkIdentity.netId, " ", networkIdentity.gameObject }));
+						if (LogFilter.logDev)
+						{
+							Debug.Log(string.Concat(new object[] { "ActivateClientScene ", networkIdentity.netId, " ", networkIdentity.gameObject }));
+						}
+						ClientScene.SetLocalObject(networkIdentity.netId, networkIdentity.gameObject);
+						networkIdentity.OnStartClient();
 					}
-					ClientScene.SetLocalObject(networkIdentity.netId, networkIdentity.gameObject);
-					networkIdentity.OnStartClient();
 				}
 			}
 		}
@@ -456,17 +474,22 @@ namespace UnityEngine.Networking
 			}
 			bool flag = true;
 			NetworkIdentity component = contextObj.GetComponent<NetworkIdentity>();
+			bool flag2;
 			if (component == null || component.observers == null)
 			{
-				return false;
+				flag2 = false;
 			}
-			int count = component.observers.Count;
-			for (int i = 0; i < count; i++)
+			else
 			{
-				NetworkConnection networkConnection = component.observers[i];
-				flag &= networkConnection.Send(msgType, msg);
+				int count = component.observers.Count;
+				for (int i = 0; i < count; i++)
+				{
+					NetworkConnection networkConnection = component.observers[i];
+					flag &= networkConnection.Send(msgType, msg);
+				}
+				flag2 = flag;
 			}
-			return flag;
+			return flag2;
 		}
 
 		public static bool SendToReady(GameObject contextObj, short msgType, MessageBase msg)
@@ -475,6 +498,7 @@ namespace UnityEngine.Networking
 			{
 				Debug.Log("Server.SendToReady id:" + msgType);
 			}
+			bool flag;
 			if (contextObj == null)
 			{
 				for (int i = 0; i < NetworkServer.connections.Count; i++)
@@ -485,21 +509,28 @@ namespace UnityEngine.Networking
 						networkConnection.Send(msgType, msg);
 					}
 				}
-				return true;
+				flag = true;
 			}
-			bool flag = true;
-			NetworkIdentity component = contextObj.GetComponent<NetworkIdentity>();
-			if (component == null || component.observers == null)
+			else
 			{
-				return false;
-			}
-			int count = component.observers.Count;
-			for (int j = 0; j < count; j++)
-			{
-				NetworkConnection networkConnection2 = component.observers[j];
-				if (networkConnection2.isReady)
+				bool flag2 = true;
+				NetworkIdentity component = contextObj.GetComponent<NetworkIdentity>();
+				if (component == null || component.observers == null)
 				{
-					flag &= networkConnection2.Send(msgType, msg);
+					flag = false;
+				}
+				else
+				{
+					int count = component.observers.Count;
+					for (int j = 0; j < count; j++)
+					{
+						NetworkConnection networkConnection2 = component.observers[j];
+						if (networkConnection2.isReady)
+						{
+							flag2 &= networkConnection2.Send(msgType, msg);
+						}
+					}
+					flag = flag2;
 				}
 			}
 			return flag;
@@ -522,43 +553,54 @@ namespace UnityEngine.Networking
 				for (int i = 0; i < NetworkServer.connections.Count; i++)
 				{
 					NetworkConnection networkConnection = NetworkServer.connections[i];
-					if (networkConnection != null && networkConnection.isReady && !networkConnection.SendBytes(buffer, numBytes, channelId))
+					if (networkConnection != null && networkConnection.isReady)
 					{
-						flag = false;
-					}
-				}
-				if (!flag && LogFilter.logWarn)
-				{
-					Debug.LogWarning("SendBytesToReady failed");
-				}
-				return;
-			}
-			NetworkIdentity component = contextObj.GetComponent<NetworkIdentity>();
-			try
-			{
-				bool flag2 = true;
-				int count = component.observers.Count;
-				for (int j = 0; j < count; j++)
-				{
-					NetworkConnection networkConnection2 = component.observers[j];
-					if (networkConnection2.isReady)
-					{
-						if (!networkConnection2.SendBytes(buffer, numBytes, channelId))
+						if (!networkConnection.SendBytes(buffer, numBytes, channelId))
 						{
-							flag2 = false;
+							flag = false;
 						}
 					}
 				}
-				if (!flag2 && LogFilter.logWarn)
+				if (!flag)
 				{
-					Debug.LogWarning("SendBytesToReady failed for " + contextObj);
+					if (LogFilter.logWarn)
+					{
+						Debug.LogWarning("SendBytesToReady failed");
+					}
 				}
 			}
-			catch (NullReferenceException)
+			else
 			{
-				if (LogFilter.logWarn)
+				NetworkIdentity component = contextObj.GetComponent<NetworkIdentity>();
+				try
 				{
-					Debug.LogWarning("SendBytesToReady object " + contextObj + " has not been spawned");
+					bool flag2 = true;
+					int count = component.observers.Count;
+					for (int j = 0; j < count; j++)
+					{
+						NetworkConnection networkConnection2 = component.observers[j];
+						if (networkConnection2.isReady)
+						{
+							if (!networkConnection2.SendBytes(buffer, numBytes, channelId))
+							{
+								flag2 = false;
+							}
+						}
+					}
+					if (!flag2)
+					{
+						if (LogFilter.logWarn)
+						{
+							Debug.LogWarning("SendBytesToReady failed for " + contextObj);
+						}
+					}
+				}
+				catch (NullReferenceException)
+				{
+					if (LogFilter.logWarn)
+					{
+						Debug.LogWarning("SendBytesToReady object " + contextObj + " has not been spawned");
+					}
 				}
 			}
 		}
@@ -606,6 +648,7 @@ namespace UnityEngine.Networking
 			{
 				Debug.Log("Server.SendUnreliableToReady id:" + msgType);
 			}
+			bool flag;
 			if (contextObj == null)
 			{
 				for (int i = 0; i < NetworkServer.connections.Count; i++)
@@ -616,18 +659,22 @@ namespace UnityEngine.Networking
 						networkConnection.SendUnreliable(msgType, msg);
 					}
 				}
-				return true;
+				flag = true;
 			}
-			bool flag = true;
-			NetworkIdentity component = contextObj.GetComponent<NetworkIdentity>();
-			int count = component.observers.Count;
-			for (int j = 0; j < count; j++)
+			else
 			{
-				NetworkConnection networkConnection2 = component.observers[j];
-				if (networkConnection2.isReady)
+				bool flag2 = true;
+				NetworkIdentity component = contextObj.GetComponent<NetworkIdentity>();
+				int count = component.observers.Count;
+				for (int j = 0; j < count; j++)
 				{
-					flag &= networkConnection2.SendUnreliable(msgType, msg);
+					NetworkConnection networkConnection2 = component.observers[j];
+					if (networkConnection2.isReady)
+					{
+						flag2 &= networkConnection2.SendUnreliable(msgType, msg);
+					}
 				}
+				flag = flag2;
 			}
 			return flag;
 		}
@@ -656,6 +703,7 @@ namespace UnityEngine.Networking
 			{
 				Debug.Log("Server.SendByChannelToReady msgType:" + msgType);
 			}
+			bool flag;
 			if (contextObj == null)
 			{
 				for (int i = 0; i < NetworkServer.connections.Count; i++)
@@ -666,18 +714,22 @@ namespace UnityEngine.Networking
 						networkConnection.SendByChannel(msgType, msg, channelId);
 					}
 				}
-				return true;
+				flag = true;
 			}
-			bool flag = true;
-			NetworkIdentity component = contextObj.GetComponent<NetworkIdentity>();
-			int count = component.observers.Count;
-			for (int j = 0; j < count; j++)
+			else
 			{
-				NetworkConnection networkConnection2 = component.observers[j];
-				if (networkConnection2.isReady)
+				bool flag2 = true;
+				NetworkIdentity component = contextObj.GetComponent<NetworkIdentity>();
+				int count = component.observers.Count;
+				for (int j = 0; j < count; j++)
 				{
-					flag &= networkConnection2.SendByChannel(msgType, msg, channelId);
+					NetworkConnection networkConnection2 = component.observers[j];
+					if (networkConnection2.isReady)
+					{
+						flag2 &= networkConnection2.SendByChannel(msgType, msg, channelId);
+					}
 				}
+				flag = flag2;
 			}
 			return flag;
 		}
@@ -775,9 +827,12 @@ namespace UnityEngine.Networking
 			conn.InvokeHandlerNoData(33);
 			for (int i = 0; i < conn.playerControllers.Count; i++)
 			{
-				if (conn.playerControllers[i].gameObject != null && LogFilter.logWarn)
+				if (conn.playerControllers[i].gameObject != null)
 				{
-					Debug.LogWarning("Player not destroyed when connection disconnected.");
+					if (LogFilter.logWarn)
+					{
+						Debug.LogWarning("Player not destroyed when connection disconnected.");
+					}
 				}
 			}
 			if (LogFilter.logDebug)
@@ -790,7 +845,7 @@ namespace UnityEngine.Networking
 
 		private void OnData(NetworkConnection conn, int receivedSize, int channelId)
 		{
-			conn.TransportRecieve(this.m_SimpleServerSimple.messageBuffer, receivedSize, channelId);
+			conn.TransportReceive(this.m_SimpleServerSimple.messageBuffer, receivedSize, channelId);
 		}
 
 		private void GenerateConnectError(int error)
@@ -923,6 +978,7 @@ namespace UnityEngine.Networking
 			if (LogFilter.logError)
 			{
 				Debug.LogError("Failed to send message to player object '" + player.name + ", not found in connection list");
+				return;
 			}
 		}
 
@@ -976,81 +1032,104 @@ namespace UnityEngine.Networking
 		internal bool InternalAddPlayerForConnection(NetworkConnection conn, GameObject playerGameObject, short playerControllerId)
 		{
 			NetworkIdentity networkIdentity;
+			bool flag;
 			if (!NetworkServer.GetNetworkIdentity(playerGameObject, out networkIdentity))
 			{
 				if (LogFilter.logError)
 				{
 					Debug.Log("AddPlayer: playerGameObject has no NetworkIdentity. Please add a NetworkIdentity to " + playerGameObject);
 				}
-				return false;
+				flag = false;
 			}
-			if (!NetworkServer.CheckPlayerControllerIdForConnection(conn, playerControllerId))
+			else
 			{
-				return false;
-			}
-			PlayerController playerController = null;
-			GameObject gameObject = null;
-			if (conn.GetPlayerController(playerControllerId, out playerController))
-			{
-				gameObject = playerController.gameObject;
-			}
-			if (gameObject != null)
-			{
-				if (LogFilter.logError)
+				networkIdentity.Reset();
+				if (!NetworkServer.CheckPlayerControllerIdForConnection(conn, playerControllerId))
 				{
-					Debug.Log("AddPlayer: player object already exists for playerControllerId of " + playerControllerId);
+					flag = false;
 				}
-				return false;
-			}
-			PlayerController playerController2 = new PlayerController(playerGameObject, playerControllerId);
-			conn.SetPlayerController(playerController2);
-			networkIdentity.SetConnectionToClient(conn, playerController2.playerControllerId);
-			NetworkServer.SetClientReady(conn);
-			if (this.SetupLocalPlayerForConnection(conn, networkIdentity, playerController2))
-			{
-				return true;
-			}
-			if (LogFilter.logDebug)
-			{
-				Debug.Log(string.Concat(new object[]
+				else
 				{
-					"Adding new playerGameObject object netId: ",
-					playerGameObject.GetComponent<NetworkIdentity>().netId,
-					" asset ID ",
-					playerGameObject.GetComponent<NetworkIdentity>().assetId
-				}));
+					PlayerController playerController = null;
+					GameObject gameObject = null;
+					if (conn.GetPlayerController(playerControllerId, out playerController))
+					{
+						gameObject = playerController.gameObject;
+					}
+					if (gameObject != null)
+					{
+						if (LogFilter.logError)
+						{
+							Debug.Log("AddPlayer: player object already exists for playerControllerId of " + playerControllerId);
+						}
+						flag = false;
+					}
+					else
+					{
+						PlayerController playerController2 = new PlayerController(playerGameObject, playerControllerId);
+						conn.SetPlayerController(playerController2);
+						networkIdentity.SetConnectionToClient(conn, playerController2.playerControllerId);
+						NetworkServer.SetClientReady(conn);
+						if (this.SetupLocalPlayerForConnection(conn, networkIdentity, playerController2))
+						{
+							flag = true;
+						}
+						else
+						{
+							if (LogFilter.logDebug)
+							{
+								Debug.Log(string.Concat(new object[]
+								{
+									"Adding new playerGameObject object netId: ",
+									playerGameObject.GetComponent<NetworkIdentity>().netId,
+									" asset ID ",
+									playerGameObject.GetComponent<NetworkIdentity>().assetId
+								}));
+							}
+							NetworkServer.FinishPlayerForConnection(conn, networkIdentity, playerGameObject);
+							if (networkIdentity.localPlayerAuthority)
+							{
+								networkIdentity.SetClientOwner(conn);
+							}
+							flag = true;
+						}
+					}
+				}
 			}
-			NetworkServer.FinishPlayerForConnection(conn, networkIdentity, playerGameObject);
-			if (networkIdentity.localPlayerAuthority)
-			{
-				networkIdentity.SetClientOwner(conn);
-			}
-			return true;
+			return flag;
 		}
 
 		private static bool CheckPlayerControllerIdForConnection(NetworkConnection conn, short playerControllerId)
 		{
+			bool flag;
 			if (playerControllerId < 0)
 			{
 				if (LogFilter.logError)
 				{
 					Debug.LogError("AddPlayer: playerControllerId of " + playerControllerId + " is negative");
 				}
-				return false;
+				flag = false;
 			}
-			if (playerControllerId > 32)
+			else if (playerControllerId > 32)
 			{
 				if (LogFilter.logError)
 				{
 					Debug.Log(string.Concat(new object[] { "AddPlayer: playerControllerId of ", playerControllerId, " is too high. max is ", 32 }));
 				}
-				return false;
+				flag = false;
 			}
-			if (playerControllerId > 16 && LogFilter.logWarn)
+			else
 			{
-				Debug.LogWarning("AddPlayer: playerControllerId of " + playerControllerId + " is unusually high");
+				if (playerControllerId > 16)
+				{
+					if (LogFilter.logWarn)
+					{
+						Debug.LogWarning("AddPlayer: playerControllerId of " + playerControllerId + " is unusually high");
+					}
+				}
+				flag = true;
 			}
-			return true;
+			return flag;
 		}
 
 		private bool SetupLocalPlayerForConnection(NetworkConnection conn, NetworkIdentity uv, PlayerController newPlayerController)
@@ -1060,6 +1139,7 @@ namespace UnityEngine.Networking
 				Debug.Log("NetworkServer SetupLocalPlayerForConnection netID:" + uv.netId);
 			}
 			ULocalConnectionToClient ulocalConnectionToClient = conn as ULocalConnectionToClient;
+			bool flag;
 			if (ulocalConnectionToClient != null)
 			{
 				if (LogFilter.logDev)
@@ -1076,9 +1156,13 @@ namespace UnityEngine.Networking
 				uv.SetClientOwner(conn);
 				uv.ForceAuthority(true);
 				uv.SetLocalPlayer(newPlayerController.playerControllerId);
-				return true;
+				flag = true;
 			}
-			return false;
+			else
+			{
+				flag = false;
+			}
+			return flag;
 		}
 
 		private static void FinishPlayerForConnection(NetworkConnection conn, NetworkIdentity uv, GameObject playerGameObject)
@@ -1097,68 +1181,82 @@ namespace UnityEngine.Networking
 		internal bool InternalReplacePlayerForConnection(NetworkConnection conn, GameObject playerGameObject, short playerControllerId)
 		{
 			NetworkIdentity networkIdentity;
+			bool flag;
 			if (!NetworkServer.GetNetworkIdentity(playerGameObject, out networkIdentity))
 			{
 				if (LogFilter.logError)
 				{
 					Debug.LogError("ReplacePlayer: playerGameObject has no NetworkIdentity. Please add a NetworkIdentity to " + playerGameObject);
 				}
-				return false;
+				flag = false;
 			}
-			if (!NetworkServer.CheckPlayerControllerIdForConnection(conn, playerControllerId))
+			else if (!NetworkServer.CheckPlayerControllerIdForConnection(conn, playerControllerId))
 			{
-				return false;
+				flag = false;
 			}
-			if (LogFilter.logDev)
+			else
 			{
-				Debug.Log("NetworkServer ReplacePlayer");
-			}
-			PlayerController playerController;
-			if (conn.GetPlayerController(playerControllerId, out playerController))
-			{
-				playerController.unetView.SetNotLocalPlayer();
-			}
-			PlayerController playerController2 = new PlayerController(playerGameObject, playerControllerId);
-			conn.SetPlayerController(playerController2);
-			networkIdentity.SetConnectionToClient(conn, playerController2.playerControllerId);
-			if (LogFilter.logDev)
-			{
-				Debug.Log("NetworkServer ReplacePlayer setup local");
-			}
-			if (this.SetupLocalPlayerForConnection(conn, networkIdentity, playerController2))
-			{
-				return true;
-			}
-			if (LogFilter.logDebug)
-			{
-				Debug.Log(string.Concat(new object[]
+				if (LogFilter.logDev)
 				{
-					"Replacing playerGameObject object netId: ",
-					playerGameObject.GetComponent<NetworkIdentity>().netId,
-					" asset ID ",
-					playerGameObject.GetComponent<NetworkIdentity>().assetId
-				}));
+					Debug.Log("NetworkServer ReplacePlayer");
+				}
+				PlayerController playerController;
+				if (conn.GetPlayerController(playerControllerId, out playerController))
+				{
+					playerController.unetView.SetNotLocalPlayer();
+					playerController.unetView.ClearClientOwner();
+				}
+				PlayerController playerController2 = new PlayerController(playerGameObject, playerControllerId);
+				conn.SetPlayerController(playerController2);
+				networkIdentity.SetConnectionToClient(conn, playerController2.playerControllerId);
+				if (LogFilter.logDev)
+				{
+					Debug.Log("NetworkServer ReplacePlayer setup local");
+				}
+				if (this.SetupLocalPlayerForConnection(conn, networkIdentity, playerController2))
+				{
+					flag = true;
+				}
+				else
+				{
+					if (LogFilter.logDebug)
+					{
+						Debug.Log(string.Concat(new object[]
+						{
+							"Replacing playerGameObject object netId: ",
+							playerGameObject.GetComponent<NetworkIdentity>().netId,
+							" asset ID ",
+							playerGameObject.GetComponent<NetworkIdentity>().assetId
+						}));
+					}
+					NetworkServer.FinishPlayerForConnection(conn, networkIdentity, playerGameObject);
+					if (networkIdentity.localPlayerAuthority)
+					{
+						networkIdentity.SetClientOwner(conn);
+					}
+					flag = true;
+				}
 			}
-			NetworkServer.FinishPlayerForConnection(conn, networkIdentity, playerGameObject);
-			if (networkIdentity.localPlayerAuthority)
-			{
-				networkIdentity.SetClientOwner(conn);
-			}
-			return true;
+			return flag;
 		}
 
 		private static bool GetNetworkIdentity(GameObject go, out NetworkIdentity view)
 		{
 			view = go.GetComponent<NetworkIdentity>();
+			bool flag;
 			if (view == null)
 			{
 				if (LogFilter.logError)
 				{
 					Debug.LogError("UNET failure. GameObject doesn't have NetworkIdentity.");
 				}
-				return false;
+				flag = false;
 			}
-			return true;
+			else
+			{
+				flag = true;
+			}
+			return flag;
 		}
 
 		public static void SetClientReady(NetworkConnection conn)
@@ -1178,84 +1276,91 @@ namespace UnityEngine.Networking
 				{
 					Debug.Log("SetClientReady conn " + conn.connectionId + " already ready");
 				}
-				return;
 			}
-			if (conn.playerControllers.Count == 0 && LogFilter.logDebug)
+			else
 			{
-				Debug.LogWarning("Ready with no player object");
-			}
-			conn.isReady = true;
-			ULocalConnectionToClient ulocalConnectionToClient = conn as ULocalConnectionToClient;
-			if (ulocalConnectionToClient != null)
-			{
-				if (LogFilter.logDev)
+				if (conn.playerControllers.Count == 0)
 				{
-					Debug.Log("NetworkServer Ready handling ULocalConnectionToClient");
-				}
-				foreach (NetworkIdentity networkIdentity in NetworkServer.objects.Values)
-				{
-					if (networkIdentity != null && networkIdentity.gameObject != null)
+					if (LogFilter.logDebug)
 					{
-						bool flag = networkIdentity.OnCheckObserver(conn);
-						if (flag)
+						Debug.LogWarning("Ready with no player object");
+					}
+				}
+				conn.isReady = true;
+				ULocalConnectionToClient ulocalConnectionToClient = conn as ULocalConnectionToClient;
+				if (ulocalConnectionToClient != null)
+				{
+					if (LogFilter.logDev)
+					{
+						Debug.Log("NetworkServer Ready handling ULocalConnectionToClient");
+					}
+					foreach (NetworkIdentity networkIdentity in NetworkServer.objects.Values)
+					{
+						if (networkIdentity != null && networkIdentity.gameObject != null)
 						{
-							networkIdentity.AddObserver(conn);
-						}
-						if (!networkIdentity.isClient)
-						{
-							if (LogFilter.logDev)
+							bool flag = networkIdentity.OnCheckObserver(conn);
+							if (flag)
 							{
-								Debug.Log("LocalClient.SetSpawnObject calling OnStartClient");
+								networkIdentity.AddObserver(conn);
 							}
-							networkIdentity.OnStartClient();
+							if (!networkIdentity.isClient)
+							{
+								if (LogFilter.logDev)
+								{
+									Debug.Log("LocalClient.SetSpawnObject calling OnStartClient");
+								}
+								networkIdentity.OnStartClient();
+							}
 						}
 					}
 				}
-				return;
-			}
-			if (LogFilter.logDebug)
-			{
-				Debug.Log(string.Concat(new object[]
-				{
-					"Spawning ",
-					NetworkServer.objects.Count,
-					" objects for conn ",
-					conn.connectionId
-				}));
-			}
-			ObjectSpawnFinishedMessage objectSpawnFinishedMessage = new ObjectSpawnFinishedMessage();
-			objectSpawnFinishedMessage.state = 0U;
-			conn.Send(12, objectSpawnFinishedMessage);
-			foreach (NetworkIdentity networkIdentity2 in NetworkServer.objects.Values)
-			{
-				if (networkIdentity2 == null)
-				{
-					if (LogFilter.logWarn)
-					{
-						Debug.LogWarning("Invalid object found in server local object list (null NetworkIdentity).");
-					}
-				}
-				else if (networkIdentity2.gameObject.activeSelf)
+				else
 				{
 					if (LogFilter.logDebug)
 					{
 						Debug.Log(string.Concat(new object[]
 						{
-							"Sending spawn message for current server objects name='",
-							networkIdentity2.gameObject.name,
-							"' netId=",
-							networkIdentity2.netId
+							"Spawning ",
+							NetworkServer.objects.Count,
+							" objects for conn ",
+							conn.connectionId
 						}));
 					}
-					bool flag2 = networkIdentity2.OnCheckObserver(conn);
-					if (flag2)
+					ObjectSpawnFinishedMessage objectSpawnFinishedMessage = new ObjectSpawnFinishedMessage();
+					objectSpawnFinishedMessage.state = 0U;
+					conn.Send(12, objectSpawnFinishedMessage);
+					foreach (NetworkIdentity networkIdentity2 in NetworkServer.objects.Values)
 					{
-						networkIdentity2.AddObserver(conn);
+						if (networkIdentity2 == null)
+						{
+							if (LogFilter.logWarn)
+							{
+								Debug.LogWarning("Invalid object found in server local object list (null NetworkIdentity).");
+							}
+						}
+						else if (networkIdentity2.gameObject.activeSelf)
+						{
+							if (LogFilter.logDebug)
+							{
+								Debug.Log(string.Concat(new object[]
+								{
+									"Sending spawn message for current server objects name='",
+									networkIdentity2.gameObject.name,
+									"' netId=",
+									networkIdentity2.netId
+								}));
+							}
+							bool flag2 = networkIdentity2.OnCheckObserver(conn);
+							if (flag2)
+							{
+								networkIdentity2.AddObserver(conn);
+							}
+						}
 					}
+					objectSpawnFinishedMessage.state = 1U;
+					conn.Send(12, objectSpawnFinishedMessage);
 				}
 			}
-			objectSpawnFinishedMessage.state = 1U;
-			conn.Send(12, objectSpawnFinishedMessage);
 		}
 
 		internal static void ShowForConnection(NetworkIdentity uv, NetworkConnection conn)
@@ -1342,114 +1447,124 @@ namespace UnityEngine.Networking
 				{
 					Debug.LogWarning("Instance not found when handling Command message [netId=" + networkInstanceId + "]");
 				}
-				return;
 			}
-			NetworkIdentity component = gameObject.GetComponent<NetworkIdentity>();
-			if (component == null)
+			else
 			{
-				if (LogFilter.logWarn)
+				NetworkIdentity component = gameObject.GetComponent<NetworkIdentity>();
+				if (component == null)
 				{
-					Debug.LogWarning("NetworkIdentity deleted when handling Command message [netId=" + networkInstanceId + "]");
+					if (LogFilter.logWarn)
+					{
+						Debug.LogWarning("NetworkIdentity deleted when handling Command message [netId=" + networkInstanceId + "]");
+					}
 				}
-				return;
-			}
-			bool flag = false;
-			foreach (PlayerController playerController in netMsg.conn.playerControllers)
-			{
-				if (playerController.gameObject != null && playerController.gameObject.GetComponent<NetworkIdentity>().netId == component.netId)
+				else
 				{
-					flag = true;
-					break;
+					bool flag = false;
+					for (int i = 0; i < netMsg.conn.playerControllers.Count; i++)
+					{
+						PlayerController playerController = netMsg.conn.playerControllers[i];
+						if (playerController.gameObject != null && playerController.gameObject.GetComponent<NetworkIdentity>().netId == component.netId)
+						{
+							flag = true;
+							break;
+						}
+					}
+					if (!flag)
+					{
+						if (component.clientAuthorityOwner != netMsg.conn)
+						{
+							if (LogFilter.logWarn)
+							{
+								Debug.LogWarning("Command for object without authority [netId=" + networkInstanceId + "]");
+							}
+							return;
+						}
+					}
+					if (LogFilter.logDev)
+					{
+						Debug.Log(string.Concat(new object[] { "OnCommandMessage for netId=", networkInstanceId, " conn=", netMsg.conn }));
+					}
+					component.HandleCommand(num, netMsg.reader);
 				}
 			}
-			if (!flag && component.clientAuthorityOwner != netMsg.conn)
-			{
-				if (LogFilter.logWarn)
-				{
-					Debug.LogWarning("Command for object without authority [netId=" + networkInstanceId + "]");
-				}
-				return;
-			}
-			if (LogFilter.logDev)
-			{
-				Debug.Log(string.Concat(new object[] { "OnCommandMessage for netId=", networkInstanceId, " conn=", netMsg.conn }));
-			}
-			component.HandleCommand(num, netMsg.reader);
 		}
 
 		internal void SpawnObject(GameObject obj)
 		{
+			NetworkIdentity networkIdentity;
 			if (!NetworkServer.active)
 			{
 				if (LogFilter.logError)
 				{
 					Debug.LogError("SpawnObject for " + obj + ", NetworkServer is not active. Cannot spawn objects without an active server.");
 				}
-				return;
 			}
-			NetworkIdentity networkIdentity;
-			if (!NetworkServer.GetNetworkIdentity(obj, out networkIdentity))
+			else if (!NetworkServer.GetNetworkIdentity(obj, out networkIdentity))
 			{
 				if (LogFilter.logError)
 				{
 					Debug.LogError(string.Concat(new object[] { "SpawnObject ", obj, " has no NetworkIdentity. Please add a NetworkIdentity to ", obj }));
 				}
-				return;
 			}
-			networkIdentity.OnStartServer(false);
-			if (LogFilter.logDebug)
+			else
 			{
-				Debug.Log(string.Concat(new object[] { "SpawnObject instance ID ", networkIdentity.netId, " asset ID ", networkIdentity.assetId }));
+				networkIdentity.Reset();
+				networkIdentity.OnStartServer(false);
+				if (LogFilter.logDebug)
+				{
+					Debug.Log(string.Concat(new object[] { "SpawnObject instance ID ", networkIdentity.netId, " asset ID ", networkIdentity.assetId }));
+				}
+				networkIdentity.RebuildObservers(true);
 			}
-			networkIdentity.RebuildObservers(true);
 		}
 
 		internal void SendSpawnMessage(NetworkIdentity uv, NetworkConnection conn)
 		{
-			if (uv.serverOnly)
+			if (!uv.serverOnly)
 			{
-				return;
-			}
-			if (uv.sceneId.IsEmpty())
-			{
-				ObjectSpawnMessage objectSpawnMessage = new ObjectSpawnMessage();
-				objectSpawnMessage.netId = uv.netId;
-				objectSpawnMessage.assetId = uv.assetId;
-				objectSpawnMessage.position = uv.transform.position;
-				NetworkWriter networkWriter = new NetworkWriter();
-				uv.UNetSerializeAllVars(networkWriter);
-				if (networkWriter.Position > 0)
+				if (uv.sceneId.IsEmpty())
 				{
-					objectSpawnMessage.payload = networkWriter.ToArray();
-				}
-				if (conn != null)
-				{
-					conn.Send(3, objectSpawnMessage);
+					ObjectSpawnMessage objectSpawnMessage = new ObjectSpawnMessage();
+					objectSpawnMessage.netId = uv.netId;
+					objectSpawnMessage.assetId = uv.assetId;
+					objectSpawnMessage.position = uv.transform.position;
+					objectSpawnMessage.rotation = uv.transform.rotation;
+					NetworkWriter networkWriter = new NetworkWriter();
+					uv.UNetSerializeAllVars(networkWriter);
+					if (networkWriter.Position > 0)
+					{
+						objectSpawnMessage.payload = networkWriter.ToArray();
+					}
+					if (conn != null)
+					{
+						conn.Send(3, objectSpawnMessage);
+					}
+					else
+					{
+						NetworkServer.SendToReady(uv.gameObject, 3, objectSpawnMessage);
+					}
 				}
 				else
 				{
-					NetworkServer.SendToReady(uv.gameObject, 3, objectSpawnMessage);
-				}
-			}
-			else
-			{
-				ObjectSpawnSceneMessage objectSpawnSceneMessage = new ObjectSpawnSceneMessage();
-				objectSpawnSceneMessage.netId = uv.netId;
-				objectSpawnSceneMessage.sceneId = uv.sceneId;
-				objectSpawnSceneMessage.position = uv.transform.position;
-				NetworkWriter networkWriter2 = new NetworkWriter();
-				uv.UNetSerializeAllVars(networkWriter2);
-				if (networkWriter2.Position > 0)
-				{
-					objectSpawnSceneMessage.payload = networkWriter2.ToArray();
-				}
-				if (conn != null)
-				{
-					conn.Send(10, objectSpawnSceneMessage);
-				}
-				else
-				{
-					NetworkServer.SendToReady(uv.gameObject, 3, objectSpawnSceneMessage);
+					ObjectSpawnSceneMessage objectSpawnSceneMessage = new ObjectSpawnSceneMessage();
+					objectSpawnSceneMessage.netId = uv.netId;
+					objectSpawnSceneMessage.sceneId = uv.sceneId;
+					objectSpawnSceneMessage.position = uv.transform.position;
+					NetworkWriter networkWriter2 = new NetworkWriter();
+					uv.UNetSerializeAllVars(networkWriter2);
+					if (networkWriter2.Position > 0)
+					{
+						objectSpawnSceneMessage.payload = networkWriter2.ToArray();
+					}
+					if (conn != null)
+					{
+						conn.Send(10, objectSpawnSceneMessage);
+					}
+					else
+					{
+						NetworkServer.SendToReady(uv.gameObject, 3, objectSpawnSceneMessage);
+					}
 				}
 			}
 		}
@@ -1462,50 +1577,51 @@ namespace UnityEngine.Networking
 				{
 					Debug.LogWarning("Empty player list given to NetworkServer.Destroy(), nothing to do.");
 				}
-				return;
 			}
-			if (conn.clientOwnedObjects != null)
+			else
 			{
-				HashSet<NetworkInstanceId> hashSet = new HashSet<NetworkInstanceId>(conn.clientOwnedObjects);
-				foreach (NetworkInstanceId networkInstanceId in hashSet)
+				if (conn.clientOwnedObjects != null)
 				{
-					GameObject gameObject = NetworkServer.FindLocalObject(networkInstanceId);
-					if (gameObject != null)
+					HashSet<NetworkInstanceId> hashSet = new HashSet<NetworkInstanceId>(conn.clientOwnedObjects);
+					foreach (NetworkInstanceId networkInstanceId in hashSet)
 					{
-						NetworkServer.DestroyObject(gameObject);
+						GameObject gameObject = NetworkServer.FindLocalObject(networkInstanceId);
+						if (gameObject != null)
+						{
+							NetworkServer.DestroyObject(gameObject);
+						}
 					}
 				}
-			}
-			foreach (PlayerController playerController in conn.playerControllers)
-			{
-				if (playerController.IsValid)
+				for (int i = 0; i < conn.playerControllers.Count; i++)
 				{
-					if (!(playerController.unetView == null))
+					PlayerController playerController = conn.playerControllers[i];
+					if (playerController.IsValid)
 					{
-						NetworkServer.DestroyObject(playerController.unetView, true);
+						if (!(playerController.unetView == null))
+						{
+							NetworkServer.DestroyObject(playerController.unetView, true);
+						}
+						playerController.gameObject = null;
 					}
-					playerController.gameObject = null;
 				}
+				conn.playerControllers.Clear();
 			}
-			conn.playerControllers.Clear();
 		}
 
 		private static void UnSpawnObject(GameObject obj)
 		{
+			NetworkIdentity networkIdentity;
 			if (obj == null)
 			{
 				if (LogFilter.logDev)
 				{
 					Debug.Log("NetworkServer UnspawnObject is null");
 				}
-				return;
 			}
-			NetworkIdentity networkIdentity;
-			if (!NetworkServer.GetNetworkIdentity(obj, out networkIdentity))
+			else if (NetworkServer.GetNetworkIdentity(obj, out networkIdentity))
 			{
-				return;
+				NetworkServer.UnSpawnObject(networkIdentity);
 			}
-			NetworkServer.UnSpawnObject(networkIdentity);
 		}
 
 		private static void UnSpawnObject(NetworkIdentity uv)
@@ -1515,20 +1631,18 @@ namespace UnityEngine.Networking
 
 		private static void DestroyObject(GameObject obj)
 		{
+			NetworkIdentity networkIdentity;
 			if (obj == null)
 			{
 				if (LogFilter.logDev)
 				{
 					Debug.Log("NetworkServer DestroyObject is null");
 				}
-				return;
 			}
-			NetworkIdentity networkIdentity;
-			if (!NetworkServer.GetNetworkIdentity(obj, out networkIdentity))
+			else if (NetworkServer.GetNetworkIdentity(obj, out networkIdentity))
 			{
-				return;
+				NetworkServer.DestroyObject(networkIdentity, true);
 			}
-			NetworkServer.DestroyObject(networkIdentity, true);
 		}
 
 		private static void DestroyObject(NetworkIdentity uv, bool destroyServerObject)
@@ -1558,7 +1672,7 @@ namespace UnityEngine.Networking
 			{
 				Object.Destroy(uv.gameObject);
 			}
-			uv.SetNoServer();
+			uv.MarkForReset();
 		}
 
 		public static void ClearLocalObjects()
@@ -1568,30 +1682,68 @@ namespace UnityEngine.Networking
 
 		public static void Spawn(GameObject obj)
 		{
-			NetworkServer.instance.SpawnObject(obj);
+			if (NetworkServer.VerifyCanSpawn(obj))
+			{
+				NetworkServer.instance.SpawnObject(obj);
+			}
+		}
+
+		private static bool CheckForPrefab(GameObject obj)
+		{
+			return false;
+		}
+
+		private static bool VerifyCanSpawn(GameObject obj)
+		{
+			bool flag;
+			if (NetworkServer.CheckForPrefab(obj))
+			{
+				Debug.LogErrorFormat("GameObject {0} is a prefab, it can't be spawned. This will cause errors in builds.", new object[] { obj.name });
+				flag = false;
+			}
+			else
+			{
+				flag = true;
+			}
+			return flag;
 		}
 
 		public static bool SpawnWithClientAuthority(GameObject obj, GameObject player)
 		{
 			NetworkIdentity component = player.GetComponent<NetworkIdentity>();
+			bool flag;
 			if (component == null)
 			{
 				Debug.LogError("SpawnWithClientAuthority player object has no NetworkIdentity");
-				return false;
+				flag = false;
 			}
-			if (component.connectionToClient == null)
+			else if (component.connectionToClient == null)
 			{
 				Debug.LogError("SpawnWithClientAuthority player object is not a player.");
-				return false;
+				flag = false;
 			}
-			return NetworkServer.SpawnWithClientAuthority(obj, component.connectionToClient);
+			else
+			{
+				flag = NetworkServer.SpawnWithClientAuthority(obj, component.connectionToClient);
+			}
+			return flag;
 		}
 
 		public static bool SpawnWithClientAuthority(GameObject obj, NetworkConnection conn)
 		{
-			NetworkServer.Spawn(obj);
-			NetworkIdentity component = obj.GetComponent<NetworkIdentity>();
-			return !(component == null) && component.isServer && component.AssignClientAuthority(conn);
+			bool flag;
+			if (!conn.isReady)
+			{
+				Debug.LogError("SpawnWithClientAuthority NetworkConnection is not ready!");
+				flag = false;
+			}
+			else
+			{
+				NetworkServer.Spawn(obj);
+				NetworkIdentity component = obj.GetComponent<NetworkIdentity>();
+				flag = !(component == null) && component.isServer && component.AssignClientAuthority(conn);
+			}
+			return flag;
 		}
 
 		public static bool SpawnWithClientAuthority(GameObject obj, NetworkHash128 assetId, NetworkConnection conn)
@@ -1603,12 +1755,15 @@ namespace UnityEngine.Networking
 
 		public static void Spawn(GameObject obj, NetworkHash128 assetId)
 		{
-			NetworkIdentity networkIdentity;
-			if (NetworkServer.GetNetworkIdentity(obj, out networkIdentity))
+			if (NetworkServer.VerifyCanSpawn(obj))
 			{
-				networkIdentity.SetDynamicAssetId(assetId);
+				NetworkIdentity networkIdentity;
+				if (NetworkServer.GetNetworkIdentity(obj, out networkIdentity))
+				{
+					networkIdentity.SetDynamicAssetId(assetId);
+				}
+				NetworkServer.instance.SpawnObject(obj);
 			}
-			NetworkServer.instance.SpawnObject(obj);
 		}
 
 		public static void Destroy(GameObject obj)
@@ -1626,29 +1781,39 @@ namespace UnityEngine.Networking
 			NetworkReader networkReader = new NetworkReader(buffer);
 			networkReader.ReadInt16();
 			short num = networkReader.ReadInt16();
+			bool flag;
 			if (NetworkServer.handlers.ContainsKey(num) && this.m_LocalConnection != null)
 			{
 				this.m_LocalConnection.InvokeHandler(num, networkReader, channelId);
-				return true;
+				flag = true;
 			}
-			return false;
+			else
+			{
+				flag = false;
+			}
+			return flag;
 		}
 
 		internal bool InvokeHandlerOnServer(ULocalConnectionToServer conn, short msgType, MessageBase msg, int channelId)
 		{
+			bool flag;
 			if (NetworkServer.handlers.ContainsKey(msgType) && this.m_LocalConnection != null)
 			{
 				NetworkWriter networkWriter = new NetworkWriter();
 				msg.Serialize(networkWriter);
 				NetworkReader networkReader = new NetworkReader(networkWriter);
 				this.m_LocalConnection.InvokeHandler(msgType, networkReader, channelId);
-				return true;
+				flag = true;
 			}
-			if (LogFilter.logError)
+			else
 			{
-				Debug.LogError(string.Concat(new object[] { "Local invoke: Failed to find local connection to invoke handler on [connectionId=", conn.connectionId, "] for MsgId:", msgType }));
+				if (LogFilter.logError)
+				{
+					Debug.LogError(string.Concat(new object[] { "Local invoke: Failed to find local connection to invoke handler on [connectionId=", conn.connectionId, "] for MsgId:", msgType }));
+				}
+				flag = false;
 			}
-			return false;
+			return flag;
 		}
 
 		public static GameObject FindLocalObject(NetworkInstanceId netId)
@@ -1675,7 +1840,7 @@ namespace UnityEngine.Networking
 						}
 						else
 						{
-							dictionary[num] = networkConnection.packetStats[num];
+							dictionary[num] = new NetworkConnection.PacketStat(networkConnection.packetStats[num]);
 						}
 					}
 				}
@@ -1702,26 +1867,31 @@ namespace UnityEngine.Networking
 
 		private bool AddExternalConnectionInternal(NetworkConnection conn)
 		{
+			bool flag;
 			if (conn.connectionId < 0)
 			{
-				return false;
+				flag = false;
 			}
-			if (conn.connectionId < NetworkServer.connections.Count && NetworkServer.connections[conn.connectionId] != null)
+			else if (conn.connectionId < NetworkServer.connections.Count && NetworkServer.connections[conn.connectionId] != null)
 			{
 				if (LogFilter.logError)
 				{
 					Debug.LogError("AddExternalConnection failed, already connection for id:" + conn.connectionId);
 				}
-				return false;
+				flag = false;
 			}
-			if (LogFilter.logDebug)
+			else
 			{
-				Debug.Log("AddExternalConnection external connection " + conn.connectionId);
+				if (LogFilter.logDebug)
+				{
+					Debug.Log("AddExternalConnection external connection " + conn.connectionId);
+				}
+				this.m_SimpleServerSimple.SetConnectionAtIndex(conn);
+				this.m_ExternalConnections.Add(conn.connectionId);
+				conn.InvokeHandlerNoData(32);
+				flag = true;
 			}
-			this.m_SimpleServerSimple.SetConnectionAtIndex(conn);
-			this.m_ExternalConnections.Add(conn.connectionId);
-			conn.InvokeHandlerNoData(32);
-			return true;
+			return flag;
 		}
 
 		public static void RemoveExternalConnection(int connectionId)
@@ -1731,33 +1901,37 @@ namespace UnityEngine.Networking
 
 		private bool RemoveExternalConnectionInternal(int connectionId)
 		{
+			bool flag;
 			if (!this.m_ExternalConnections.Contains(connectionId))
 			{
 				if (LogFilter.logError)
 				{
 					Debug.LogError("RemoveExternalConnection failed, no connection for id:" + connectionId);
 				}
-				return false;
+				flag = false;
 			}
-			if (LogFilter.logDebug)
+			else
 			{
-				Debug.Log("RemoveExternalConnection external connection " + connectionId);
+				if (LogFilter.logDebug)
+				{
+					Debug.Log("RemoveExternalConnection external connection " + connectionId);
+				}
+				NetworkConnection networkConnection = this.m_SimpleServerSimple.FindConnection(connectionId);
+				if (networkConnection != null)
+				{
+					networkConnection.RemoveObservers();
+				}
+				this.m_SimpleServerSimple.RemoveConnectionAtIndex(connectionId);
+				flag = true;
 			}
-			NetworkConnection networkConnection = this.m_SimpleServerSimple.FindConnection(connectionId);
-			if (networkConnection != null)
-			{
-				networkConnection.RemoveObservers();
-			}
-			this.m_SimpleServerSimple.RemoveConnectionAtIndex(connectionId);
-			return true;
+			return flag;
 		}
 
 		public static bool SpawnObjects()
 		{
 			if (NetworkServer.active)
 			{
-				NetworkIdentity[] array = Resources.FindObjectsOfTypeAll<NetworkIdentity>();
-				foreach (NetworkIdentity networkIdentity in array)
+				foreach (NetworkIdentity networkIdentity in Resources.FindObjectsOfTypeAll<NetworkIdentity>())
 				{
 					if (networkIdentity.gameObject.hideFlags != HideFlags.NotEditable && networkIdentity.gameObject.hideFlags != HideFlags.HideAndDontSave)
 					{
@@ -1777,6 +1951,7 @@ namespace UnityEngine.Networking
 						}
 					}
 				}
+				NetworkIdentity[] array;
 				foreach (NetworkIdentity networkIdentity2 in array)
 				{
 					if (networkIdentity2.gameObject.hideFlags != HideFlags.NotEditable && networkIdentity2.gameObject.hideFlags != HideFlags.HideAndDontSave)
@@ -1800,34 +1975,30 @@ namespace UnityEngine.Networking
 
 		private static void SendCrc(NetworkConnection targetConnection)
 		{
-			if (NetworkCRC.singleton == null)
+			if (NetworkCRC.singleton != null)
 			{
-				return;
-			}
-			if (!NetworkCRC.scriptCRCCheck)
-			{
-				return;
-			}
-			CRCMessage crcmessage = new CRCMessage();
-			List<CRCMessageEntry> list = new List<CRCMessageEntry>();
-			foreach (string text in NetworkCRC.singleton.scripts.Keys)
-			{
-				list.Add(new CRCMessageEntry
+				if (NetworkCRC.scriptCRCCheck)
 				{
-					name = text,
-					channel = (byte)NetworkCRC.singleton.scripts[text]
-				});
+					CRCMessage crcmessage = new CRCMessage();
+					List<CRCMessageEntry> list = new List<CRCMessageEntry>();
+					foreach (string text in NetworkCRC.singleton.scripts.Keys)
+					{
+						list.Add(new CRCMessageEntry
+						{
+							name = text,
+							channel = (byte)NetworkCRC.singleton.scripts[text]
+						});
+					}
+					crcmessage.scripts = list.ToArray();
+					targetConnection.Send(14, crcmessage);
+				}
 			}
-			crcmessage.scripts = list.ToArray();
-			targetConnection.Send(14, crcmessage);
 		}
 
 		[Obsolete("moved to NetworkMigrationManager")]
 		public void SendNetworkInfo(NetworkConnection targetConnection)
 		{
 		}
-
-		private const int k_RemoveListInterval = 100;
 
 		private static bool s_Active;
 
@@ -1841,7 +2012,7 @@ namespace UnityEngine.Networking
 
 		private List<NetworkConnection> m_LocalConnectionsFakeList = new List<NetworkConnection>();
 
-		private ULocalConnectionToClient m_LocalConnection;
+		private ULocalConnectionToClient m_LocalConnection = null;
 
 		private NetworkScene m_NetworkScene;
 
@@ -1854,6 +2025,8 @@ namespace UnityEngine.Networking
 		private HashSet<NetworkInstanceId> m_RemoveList;
 
 		private int m_RemoveListCount;
+
+		private const int k_RemoveListInterval = 100;
 
 		internal static ushort maxPacketSize;
 
@@ -1874,6 +2047,11 @@ namespace UnityEngine.Networking
 			public override void OnDataError(NetworkConnection conn, byte error)
 			{
 				this.m_Server.GenerateDataError(conn, (int)error);
+			}
+
+			public override void OnDisconnectError(NetworkConnection conn, byte error)
+			{
+				this.m_Server.GenerateDisconnectError(conn, (int)error);
 			}
 
 			public override void OnConnected(NetworkConnection conn)

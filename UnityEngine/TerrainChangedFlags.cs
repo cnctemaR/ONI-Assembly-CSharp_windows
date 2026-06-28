@@ -3,9 +3,8 @@
 namespace UnityEngine
 {
 	[Flags]
-	internal enum TerrainChangedFlags
+	public enum TerrainChangedFlags
 	{
-		NoChange = 0,
 		Heightmap = 1,
 		TreeInstances = 2,
 		DelayedHeightmapUpdate = 4,

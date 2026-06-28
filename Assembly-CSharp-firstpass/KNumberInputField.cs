@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections;
+using System.Diagnostics;
 using TMPro;
 using UnityEngine;
 
 public class KNumberInputField : KScreen
 {
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onEndEdit;
 
 	protected override void OnSpawn()
@@ -58,7 +60,7 @@ public class KNumberInputField : KScreen
 
 	private void ProcessInput(string input)
 	{
-		input = ((!(input == string.Empty)) ? input : this.minValue.ToString());
+		input = ((!(input == "")) ? input : this.minValue.ToString());
 		float num = float.Parse(input);
 		num = Mathf.Clamp(num, this.minValue, this.maxValue);
 		if (this.decimalPlaces != -1)
@@ -88,11 +90,16 @@ public class KNumberInputField : KScreen
 
 	public override float GetSortKey()
 	{
+		float num;
 		if (this.isEditing)
 		{
-			return 10f;
+			num = 10f;
 		}
-		return base.GetSortKey();
+		else
+		{
+			num = base.GetSortKey();
+		}
+		return num;
 	}
 
 	public int decimalPlaces = -1;

@@ -36,72 +36,85 @@ public class SaveLoadRoot : KMonoBehaviour
 
 	public void Save(BinaryWriter writer)
 	{
-		Transform transform = this.transform;
+		Transform transform = base.transform;
 		writer.Write(transform.position);
 		writer.Write(transform.rotation);
 		writer.Write(transform.localScale);
 		writer.Write((byte)this.folder);
 		KMonoBehaviour[] components = base.GetComponents<KMonoBehaviour>();
-		if (components == null)
+		if (components != null)
 		{
-			return;
-		}
-		int num = 0;
-		foreach (KMonoBehaviour kmonoBehaviour in components)
-		{
-			if (kmonoBehaviour is ISaveLoadableDetails || kmonoBehaviour is ISaveLoadable)
+			int num = 0;
+			KMonoBehaviour[] array = components;
+			int i = 0;
+			while (i < array.Length)
 			{
-				if (!kmonoBehaviour.GetType().IsDefined(typeof(SkipSaveFileSerialization), false))
+				KMonoBehaviour kmonoBehaviour = array[i];
+				if (kmonoBehaviour is ISaveLoadableDetails || kmonoBehaviour != null)
+				{
+					if (!kmonoBehaviour.GetType().IsDefined(typeof(SkipSaveFileSerialization), false))
+					{
+						num++;
+					}
+				}
+				IL_0098:
+				i++;
+				continue;
+				goto IL_0098;
+			}
+			foreach (KeyValuePair<string, ISerializableComponentManager> keyValuePair in SaveLoadRoot.serializableComponentManagers)
+			{
+				ISerializableComponentManager value = keyValuePair.Value;
+				if (value.Has(base.gameObject))
 				{
 					num++;
 				}
 			}
-		}
-		foreach (KeyValuePair<string, ISerializableComponentManager> keyValuePair in SaveLoadRoot.serializableComponentManagers)
-		{
-			ISerializableComponentManager value = keyValuePair.Value;
-			if (value.Has(base.gameObject))
+			writer.Write(num);
+			KMonoBehaviour[] array2 = components;
+			int j = 0;
+			while (j < array2.Length)
 			{
-				num++;
-			}
-		}
-		writer.Write(num);
-		foreach (KMonoBehaviour kmonoBehaviour2 in components)
-		{
-			if (kmonoBehaviour2 is ISaveLoadableDetails || kmonoBehaviour2 is ISaveLoadable)
-			{
-				if (!kmonoBehaviour2.GetType().IsDefined(typeof(SkipSaveFileSerialization), false))
+				KMonoBehaviour kmonoBehaviour2 = array2[j];
+				if (kmonoBehaviour2 is ISaveLoadableDetails || kmonoBehaviour2 != null)
 				{
-					writer.WriteKleiString(kmonoBehaviour2.GetType().ToString());
-					long position = writer.BaseStream.Position;
-					writer.Write(0);
-					long position2 = writer.BaseStream.Position;
-					if (kmonoBehaviour2 is ISaveLoadableDetails)
+					if (!kmonoBehaviour2.GetType().IsDefined(typeof(SkipSaveFileSerialization), false))
 					{
-						ISaveLoadableDetails saveLoadableDetails = (ISaveLoadableDetails)kmonoBehaviour2;
-						Serializer.SerializeTypeless(kmonoBehaviour2, writer);
-						saveLoadableDetails.Serialize(writer);
+						writer.WriteKleiString(kmonoBehaviour2.GetType().ToString());
+						long position = writer.BaseStream.Position;
+						writer.Write(0);
+						long position2 = writer.BaseStream.Position;
+						if (kmonoBehaviour2 is ISaveLoadableDetails)
+						{
+							ISaveLoadableDetails saveLoadableDetails = (ISaveLoadableDetails)kmonoBehaviour2;
+							Serializer.SerializeTypeless(kmonoBehaviour2, writer);
+							saveLoadableDetails.Serialize(writer);
+						}
+						else if (kmonoBehaviour2 != null)
+						{
+							Serializer.SerializeTypeless(kmonoBehaviour2, writer);
+						}
+						long position3 = writer.BaseStream.Position;
+						long num2 = position3 - position2;
+						writer.BaseStream.Position = position;
+						writer.Write((int)num2);
+						writer.BaseStream.Position = position3;
 					}
-					else if (kmonoBehaviour2 is ISaveLoadable)
-					{
-						Serializer.SerializeTypeless(kmonoBehaviour2, writer);
-					}
-					long position3 = writer.BaseStream.Position;
-					long num2 = position3 - position2;
-					writer.BaseStream.Position = position;
-					writer.Write((int)num2);
-					writer.BaseStream.Position = position3;
 				}
+				IL_01FF:
+				j++;
+				continue;
+				goto IL_01FF;
 			}
-		}
-		foreach (KeyValuePair<string, ISerializableComponentManager> keyValuePair2 in SaveLoadRoot.serializableComponentManagers)
-		{
-			ISerializableComponentManager value2 = keyValuePair2.Value;
-			if (value2.Has(base.gameObject))
+			foreach (KeyValuePair<string, ISerializableComponentManager> keyValuePair2 in SaveLoadRoot.serializableComponentManagers)
 			{
-				string key = keyValuePair2.Key;
-				writer.WriteKleiString(key);
-				value2.Serialize(base.gameObject, writer);
+				ISerializableComponentManager value2 = keyValuePair2.Value;
+				if (value2.Has(base.gameObject))
+				{
+					string key = keyValuePair2.Key;
+					writer.WriteKleiString(key);
+					value2.Serialize(base.gameObject, writer);
+				}
 			}
 		}
 	}
@@ -159,7 +172,8 @@ public class SaveLoadRoot : KMonoBehaviour
 		Dictionary<string, int> dictionary = new Dictionary<string, int>();
 		KMonoBehaviour[] array = ((!(gameObject != null)) ? null : gameObject.GetComponents<KMonoBehaviour>());
 		int num = reader.ReadInt32();
-		for (int i = 0; i < num; i++)
+		int i = 0;
+		while (i < num)
 		{
 			string text = reader.ReadKleiString();
 			int num2 = reader.ReadInt32();
@@ -194,7 +208,7 @@ public class SaveLoadRoot : KMonoBehaviour
 				{
 					reader.SkipBytes(num2);
 				}
-				else if (!(kmonoBehaviour is ISaveLoadable) && !(kmonoBehaviour is ISaveLoadableDetails))
+				else if (kmonoBehaviour == null && !(kmonoBehaviour is ISaveLoadableDetails))
 				{
 					Output.LogError(new object[] { "Component", text, "is not ISaveLoadable" });
 					reader.SkipBytes(num2);
@@ -226,6 +240,10 @@ public class SaveLoadRoot : KMonoBehaviour
 					}
 				}
 			}
+			IL_01DE:
+			i++;
+			continue;
+			goto IL_01DE;
 		}
 	}
 

@@ -15,16 +15,11 @@ public class MinionBrain : Brain
 	{
 		base.OnPrefabInit();
 		Storage component = base.GetComponent<Storage>();
-		component.defaultStoredItemModifers = MinionBrain.MinionStoredItemModifiers;
-		this.accessControlNavMask = new AccessControlNavMask(base.gameObject, int.MaxValue);
+		component.SetDefaultStoredItemModifiers(MinionBrain.MinionStoredItemModifiers);
+		this.accessControlNavMask = new AccessControlNavMask(base.gameObject);
 		this.Navigator.AddMask(this.accessControlNavMask);
 		this.Navigator.AddMask(new NavigationFeatureMask(base.gameObject));
-		this.Subscribe(-1697596308, new Action<object>(this.AnimTrackStoredItem));
-	}
-
-	public void SetMaxNavCost(int max_path_cost)
-	{
-		this.accessControlNavMask.SetMaxPathCost(max_path_cost);
+		base.Subscribe(-1697596308, new Action<object>(this.AnimTrackStoredItem));
 	}
 
 	protected override void OnSpawn()
@@ -51,18 +46,16 @@ public class MinionBrain : Brain
 	private void AddAnimTracker(GameObject go)
 	{
 		KAnimControllerBase component = go.GetComponent<KAnimControllerBase>();
-		if (component == null)
+		if (!(component == null))
 		{
-			return;
-		}
-		if (component.AnimFiles != null && component.AnimFiles.Count > 0 && component.AnimFiles[0] != null)
-		{
-			KBatchedAnimTracker kbatchedAnimTracker = go.AddComponent<KBatchedAnimTracker>();
-			kbatchedAnimTracker.useTargetPoint = false;
-			kbatchedAnimTracker.filterByAnim = false;
-			kbatchedAnimTracker.fadeOut = false;
-			kbatchedAnimTracker.symbol = new HashedString("snapTo_chest");
-			kbatchedAnimTracker.forceAlwaysVisible = true;
+			if (component.AnimFiles != null && component.AnimFiles.Count > 0 && component.AnimFiles[0] != null && component.GetComponent<Pickupable>().trackOnPickup)
+			{
+				KBatchedAnimTracker kbatchedAnimTracker = go.AddComponent<KBatchedAnimTracker>();
+				kbatchedAnimTracker.useTargetPoint = false;
+				kbatchedAnimTracker.fadeOut = false;
+				kbatchedAnimTracker.symbol = new HashedString("snapTo_chest");
+				kbatchedAnimTracker.forceAlwaysVisible = true;
+			}
 		}
 	}
 

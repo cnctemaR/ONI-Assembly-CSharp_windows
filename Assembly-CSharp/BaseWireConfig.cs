@@ -10,7 +10,14 @@ public abstract class BaseWireConfig : IBuildingConfig
 
 	public BuildingDef CreateBuildingDef(string id, string anim, float mass, float construction_time, float[] construction_mass, float insulation, EffectorValues decor, EffectorValues noise)
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, 1, 1, anim, 800f, 10, construction_time, construction_mass, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.Anywhere, decor, noise);
+		int num = 1;
+		int num2 = 1;
+		float num3 = 800f;
+		int num4 = 10;
+		string[] all_METALS = MATERIALS.ALL_METALS;
+		float num5 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, anim, num3, num4, construction_time, construction_mass, all_METALS, num5, buildLocationRule, decor, noise);
 		buildingDef.Insulation = insulation;
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
@@ -27,7 +34,6 @@ public abstract class BaseWireConfig : IBuildingConfig
 		buildingDef.SceneLayer = Grid.SceneLayer.Wires;
 		buildingDef.isKAnimTile = true;
 		buildingDef.isUtility = true;
-		buildingDef.OverlayAnim = Assets.GetAnim(anim);
 		buildingDef.DragBuild = true;
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.WireIDs, id);
 		return buildingDef;

@@ -28,6 +28,6 @@ public class Schedulable : KMonoBehaviour
 
 	private void OnScheduleChanged()
 	{
-		this.Trigger(467134493, null);
+		base.Trigger(467134493, null);
 	}
 }

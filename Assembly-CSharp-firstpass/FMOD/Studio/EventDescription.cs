@@ -47,12 +47,17 @@ namespace FMOD.Studio
 			parameter = default(PARAMETER_DESCRIPTION);
 			PARAMETER_DESCRIPTION_INTERNAL parameter_DESCRIPTION_INTERNAL;
 			RESULT result = EventDescription.FMOD_Studio_EventDescription_GetParameterByIndex(this.rawPtr, index, out parameter_DESCRIPTION_INTERNAL);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			parameter_DESCRIPTION_INTERNAL.assign(out parameter);
-			return result;
+			else
+			{
+				parameter_DESCRIPTION_INTERNAL.assign(out parameter);
+				result2 = result;
+			}
+			return result2;
 		}
 
 		public RESULT getParameter(string name, out PARAMETER_DESCRIPTION parameter)
@@ -60,12 +65,17 @@ namespace FMOD.Studio
 			parameter = default(PARAMETER_DESCRIPTION);
 			PARAMETER_DESCRIPTION_INTERNAL parameter_DESCRIPTION_INTERNAL;
 			RESULT result = EventDescription.FMOD_Studio_EventDescription_GetParameter(this.rawPtr, Encoding.UTF8.GetBytes(name + '\0'), out parameter_DESCRIPTION_INTERNAL);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			parameter_DESCRIPTION_INTERNAL.assign(out parameter);
-			return result;
+			else
+			{
+				parameter_DESCRIPTION_INTERNAL.assign(out parameter);
+				result2 = result;
+			}
+			return result2;
 		}
 
 		public RESULT getUserPropertyCount(out int count)
@@ -77,26 +87,36 @@ namespace FMOD.Studio
 		{
 			USER_PROPERTY_INTERNAL user_PROPERTY_INTERNAL;
 			RESULT result = EventDescription.FMOD_Studio_EventDescription_GetUserPropertyByIndex(this.rawPtr, index, out user_PROPERTY_INTERNAL);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
 				property = default(USER_PROPERTY);
-				return result;
+				result2 = result;
 			}
-			property = user_PROPERTY_INTERNAL.createPublic();
-			return RESULT.OK;
+			else
+			{
+				property = user_PROPERTY_INTERNAL.createPublic();
+				result2 = RESULT.OK;
+			}
+			return result2;
 		}
 
 		public RESULT getUserProperty(string name, out USER_PROPERTY property)
 		{
 			USER_PROPERTY_INTERNAL user_PROPERTY_INTERNAL;
 			RESULT result = EventDescription.FMOD_Studio_EventDescription_GetUserProperty(this.rawPtr, Encoding.UTF8.GetBytes(name + '\0'), out user_PROPERTY_INTERNAL);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
 				property = default(USER_PROPERTY);
-				return result;
+				result2 = result;
 			}
-			property = user_PROPERTY_INTERNAL.createPublic();
-			return RESULT.OK;
+			else
+			{
+				property = user_PROPERTY_INTERNAL.createPublic();
+				result2 = RESULT.OK;
+			}
+			return result2;
 		}
 
 		public RESULT getLength(out int length)
@@ -149,12 +169,17 @@ namespace FMOD.Studio
 			instance = null;
 			IntPtr intPtr = 0;
 			RESULT result = EventDescription.FMOD_Studio_EventDescription_CreateInstance(this.rawPtr, out intPtr);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			instance = new EventInstance(intPtr);
-			return result;
+			else
+			{
+				instance = new EventInstance(intPtr);
+				result2 = result;
+			}
+			return result2;
 		}
 
 		public RESULT getInstanceCount(out int count)
@@ -167,32 +192,40 @@ namespace FMOD.Studio
 			array = null;
 			int num;
 			RESULT result = EventDescription.FMOD_Studio_EventDescription_GetInstanceCount(this.rawPtr, out num);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			if (num == 0)
+			else if (num == 0)
 			{
 				array = new EventInstance[0];
-				return result;
+				result2 = result;
 			}
-			IntPtr[] array2 = new IntPtr[num];
-			int num2;
-			result = EventDescription.FMOD_Studio_EventDescription_GetInstanceList(this.rawPtr, array2, num, out num2);
-			if (result != RESULT.OK)
+			else
 			{
-				return result;
+				IntPtr[] array2 = new IntPtr[num];
+				int num2;
+				result = EventDescription.FMOD_Studio_EventDescription_GetInstanceList(this.rawPtr, array2, num, out num2);
+				if (result != RESULT.OK)
+				{
+					result2 = result;
+				}
+				else
+				{
+					if (num2 > num)
+					{
+						num2 = num;
+					}
+					array = new EventInstance[num2];
+					for (int i = 0; i < num2; i++)
+					{
+						array[i] = new EventInstance(array2[i]);
+					}
+					result2 = RESULT.OK;
+				}
 			}
-			if (num2 > num)
-			{
-				num2 = num;
-			}
-			array = new EventInstance[num2];
-			for (int i = 0; i < num2; i++)
-			{
-				array[i] = new EventInstance(array2[i]);
-			}
-			return RESULT.OK;
+			return result2;
 		}
 
 		public RESULT loadSampleData()

@@ -62,8 +62,8 @@ public class StateMachineController : KMonoBehaviour, ISaveLoadableDetails, ISta
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(1969584890, new Action<object>(this.OnTargetDestroyed));
-		this.Subscribe(1502190696, new Action<object>(this.OnTargetDestroyed));
+		base.Subscribe(1969584890, new Action<object>(this.OnTargetDestroyed));
+		base.Subscribe(1502190696, new Action<object>(this.OnTargetDestroyed));
 	}
 
 	private void OnTargetDestroyed(object data)

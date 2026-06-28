@@ -59,11 +59,11 @@ public class SizePulse : MonoBehaviour
 
 	public float speed = 1f;
 
-	public bool updateWhenPaused;
+	public bool updateWhenPaused = false;
 
 	private Vector2 cur;
 
-	private SizePulse.State state;
+	private SizePulse.State state = SizePulse.State.Up;
 
 	private enum State
 	{

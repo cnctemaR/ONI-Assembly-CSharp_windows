@@ -31,24 +31,24 @@ public class UniformPoissonDiskSampler
 
 	private List<Vector2> Sample(Vector2 topLeft, Vector2 lowerRight, float? rejectionDistance, float minimumDistance, int pointsPerIteration)
 	{
-		UniformPoissonDiskSampler.Settings settings = default(UniformPoissonDiskSampler.Settings);
-		UniformPoissonDiskSampler.Settings settings2 = settings;
-		settings2.TopLeft = topLeft;
-		settings2.LowerRight = lowerRight;
-		settings2.Dimensions = lowerRight - topLeft;
-		settings2.Center = (topLeft + lowerRight) / 2f;
-		settings2.CellSize = minimumDistance / UniformPoissonDiskSampler.SquareRootTwo;
-		settings2.MinimumDistance = minimumDistance;
-		settings2.RejectionSqDistance = ((rejectionDistance != null) ? ((rejectionDistance == null) ? null : new float?(rejectionDistance.Value * rejectionDistance.Value)) : null);
-		settings = settings2;
+		UniformPoissonDiskSampler.Settings settings = new UniformPoissonDiskSampler.Settings
+		{
+			TopLeft = topLeft,
+			LowerRight = lowerRight,
+			Dimensions = lowerRight - topLeft,
+			Center = (topLeft + lowerRight) / 2f,
+			CellSize = minimumDistance / UniformPoissonDiskSampler.SquareRootTwo,
+			MinimumDistance = minimumDistance,
+			RejectionSqDistance = ((rejectionDistance != null) ? ((rejectionDistance == null) ? null : new float?(rejectionDistance.GetValueOrDefault() * rejectionDistance.GetValueOrDefault())) : null)
+		};
 		settings.GridWidth = (int)(settings.Dimensions.x / settings.CellSize) + 1;
 		settings.GridHeight = (int)(settings.Dimensions.y / settings.CellSize) + 1;
-		UniformPoissonDiskSampler.State state = default(UniformPoissonDiskSampler.State);
-		UniformPoissonDiskSampler.State state2 = state;
-		state2.Grid = new Vector2?[settings.GridWidth, settings.GridHeight];
-		state2.ActivePoints = new List<Vector2>();
-		state2.Points = new List<Vector2>();
-		state = state2;
+		UniformPoissonDiskSampler.State state = new UniformPoissonDiskSampler.State
+		{
+			Grid = new Vector2?[settings.GridWidth, settings.GridHeight],
+			ActivePoints = new List<Vector2>(),
+			Points = new List<Vector2>()
+		};
 		this.AddFirstPoint(ref settings, ref state);
 		while (state.ActivePoints.Count != 0)
 		{
@@ -81,7 +81,7 @@ public class UniformPoissonDiskSampler
 			if (rejectionSqDistance != null)
 			{
 				float? rejectionSqDistance2 = settings.RejectionSqDistance;
-				if (rejectionSqDistance2 != null && Vector2.SqrMagnitude(settings.Center - vector) > rejectionSqDistance2.Value)
+				if (Vector2.SqrMagnitude(settings.Center - vector) > rejectionSqDistance2)
 				{
 					continue;
 				}
@@ -104,7 +104,7 @@ public class UniformPoissonDiskSampler
 			if (rejectionSqDistance != null)
 			{
 				float? rejectionSqDistance2 = settings.RejectionSqDistance;
-				if (rejectionSqDistance2 == null || Vector2.SqrMagnitude(settings.Center - vector) > rejectionSqDistance2.Value)
+				if (!(Vector2.SqrMagnitude(settings.Center - vector) <= rejectionSqDistance2))
 				{
 					return flag;
 				}
@@ -156,7 +156,7 @@ public class UniformPoissonDiskSampler
 
 	private static readonly float SquareRootTwo = (float)Math.Sqrt(2.0);
 
-	private SeededRandom myRandom;
+	private SeededRandom myRandom = null;
 
 	private struct Settings
 	{

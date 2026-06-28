@@ -5,7 +5,7 @@ public class LightColorMenu : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
 	{
-		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		this.SetColor(0);
 	}
 
@@ -22,7 +22,7 @@ public class LightColorMenu : KMonoBehaviour
 					this.userMenu.AddButton(new KIconButtonMenu.ButtonInfo(this.lightColors[i].name, this.lightColors[i].name, delegate
 					{
 						this.SetColor(new_color);
-					}, global::Action.NumActions, null, null, null, string.Empty, true), 1f);
+					}, global::Action.NumActions, null, null, null, "", true), 1f);
 				}
 			}
 		}
@@ -30,19 +30,22 @@ public class LightColorMenu : KMonoBehaviour
 
 	private void SetColor(int color_index)
 	{
-		if (this.lightColors.Length > 0 && color_index < this.lightColors.Length)
+		if (this.lightColors.Length > 0)
 		{
-			foreach (Light2D light2D in base.GetComponentsInChildren<Light2D>(true))
+			if (color_index < this.lightColors.Length)
 			{
-				light2D.Color = this.lightColors[color_index].color;
-			}
-			foreach (MeshRenderer meshRenderer in base.GetComponentsInChildren<MeshRenderer>(true))
-			{
-				foreach (Material material in meshRenderer.materials)
+				foreach (Light2D light2D in base.GetComponentsInChildren<Light2D>(true))
 				{
-					if (material.name.StartsWith("matScriptedGlow01"))
+					light2D.Color = this.lightColors[color_index].color;
+				}
+				foreach (MeshRenderer meshRenderer in base.GetComponentsInChildren<MeshRenderer>(true))
+				{
+					foreach (Material material in meshRenderer.materials)
 					{
-						material.color = this.lightColors[color_index].color;
+						if (material.name.StartsWith("matScriptedGlow01"))
+						{
+							material.color = this.lightColors[color_index].color;
+						}
 					}
 				}
 			}

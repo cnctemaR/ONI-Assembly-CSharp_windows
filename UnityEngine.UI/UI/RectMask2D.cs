@@ -4,11 +4,11 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
 {
-	[RequireComponent(typeof(RectTransform))]
+	[AddComponentMenu("UI/Rect Mask 2D", 13)]
 	[ExecuteInEditMode]
 	[DisallowMultipleComponent]
-	[AddComponentMenu("UI/2D Rect Mask", 13)]
-	public class RectMask2D : UIBehaviour, ICanvasRaycastFilter, IClipper
+	[RequireComponent(typeof(RectTransform))]
+	public class RectMask2D : UIBehaviour, IClipper, ICanvasRaycastFilter
 	{
 		protected RectMask2D()
 		{
@@ -74,43 +74,48 @@ namespace UnityEngine.UI
 			}
 			bool flag = true;
 			Rect rect = Clipping.FindCullAndClipWorldRect(this.m_Clippers, out flag);
-			if (rect != this.m_LastClipRectCanvasSpace || this.m_ForceClip)
+			bool flag2 = rect != this.m_LastClipRectCanvasSpace;
+			if (flag2 || this.m_ForceClip)
 			{
-				for (int i = 0; i < this.m_ClipTargets.Count; i++)
+				foreach (IClippable clippable in this.m_ClipTargets)
 				{
-					this.m_ClipTargets[i].SetClipRect(rect, flag);
+					clippable.SetClipRect(rect, flag);
 				}
 				this.m_LastClipRectCanvasSpace = rect;
 				this.m_LastValidClipRect = flag;
 			}
-			for (int j = 0; j < this.m_ClipTargets.Count; j++)
+			foreach (IClippable clippable2 in this.m_ClipTargets)
 			{
-				this.m_ClipTargets[j].Cull(this.m_LastClipRectCanvasSpace, this.m_LastValidClipRect);
+				MaskableGraphic maskableGraphic = clippable2 as MaskableGraphic;
+				if (!(maskableGraphic != null) || maskableGraphic.canvasRenderer.hasMoved || flag2)
+				{
+					clippable2.Cull(this.m_LastClipRectCanvasSpace, this.m_LastValidClipRect);
+				}
 			}
 		}
 
 		public void AddClippable(IClippable clippable)
 		{
-			if (clippable == null)
+			if (clippable != null)
 			{
-				return;
+				this.m_ShouldRecalculateClipRects = true;
+				if (!this.m_ClipTargets.Contains(clippable))
+				{
+					this.m_ClipTargets.Add(clippable);
+				}
+				this.m_ForceClip = true;
 			}
-			if (!this.m_ClipTargets.Contains(clippable))
-			{
-				this.m_ClipTargets.Add(clippable);
-			}
-			this.m_ForceClip = true;
 		}
 
 		public void RemoveClippable(IClippable clippable)
 		{
-			if (clippable == null)
+			if (clippable != null)
 			{
-				return;
+				this.m_ShouldRecalculateClipRects = true;
+				clippable.SetClipRect(default(Rect), false);
+				this.m_ClipTargets.Remove(clippable);
+				this.m_ForceClip = true;
 			}
-			clippable.SetClipRect(default(Rect), false);
-			this.m_ClipTargets.Remove(clippable);
-			this.m_ForceClip = true;
 		}
 
 		protected override void OnTransformParentChanged()
@@ -132,7 +137,7 @@ namespace UnityEngine.UI
 		private RectTransform m_RectTransform;
 
 		[NonSerialized]
-		private List<IClippable> m_ClipTargets = new List<IClippable>();
+		private HashSet<IClippable> m_ClipTargets = new HashSet<IClippable>();
 
 		[NonSerialized]
 		private bool m_ShouldRecalculateClipRects;

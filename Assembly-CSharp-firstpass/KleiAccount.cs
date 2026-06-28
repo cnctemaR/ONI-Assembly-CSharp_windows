@@ -21,31 +21,33 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 		{
 			KleiAccount.KleiUserID = null;
 			this.gotUserID();
-			return;
-		}
-		Stream responseStream = response.GetResponseStream();
-		StreamReader streamReader = new StreamReader(responseStream);
-		string text = streamReader.ReadToEnd();
-		streamReader.Close();
-		responseStream.Close();
-		KleiAccount.AccountReply accountReply = JsonConvert.DeserializeObject<KleiAccount.AccountReply>(text);
-		if (!accountReply.Error)
-		{
-			Debug.Log("[Account] Got login for user " + accountReply.UserID, null);
-			KleiAccount.KleiUserID = ((!(accountReply.UserID == string.Empty)) ? accountReply.UserID : null);
-			this.gotUserID();
 		}
 		else
 		{
-			Debug.Log("[Account] Error logging in: " + text, null);
-			this.gotUserID();
+			Stream responseStream = response.GetResponseStream();
+			StreamReader streamReader = new StreamReader(responseStream);
+			string text = streamReader.ReadToEnd();
+			streamReader.Close();
+			responseStream.Close();
+			KleiAccount.AccountReply accountReply = JsonConvert.DeserializeObject<KleiAccount.AccountReply>(text);
+			if (!accountReply.Error)
+			{
+				Debug.Log("[Account] Got login for user " + accountReply.UserID, null);
+				KleiAccount.KleiUserID = ((!(accountReply.UserID == "")) ? accountReply.UserID : null);
+				this.gotUserID();
+			}
+			else
+			{
+				Debug.Log("[Account] Error logging in: " + text, null);
+				this.gotUserID();
+			}
+			base.End();
 		}
-		base.End();
 	}
 
 	private string EncodeToAsciiHEX(byte[] data)
 	{
-		string text = string.Empty;
+		string text = "";
 		for (int i = 0; i < data.Length; i++)
 		{
 			text += data[i].ToString("X2");
@@ -141,15 +143,15 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 
 	private const string UserIDFieldName = "UserID";
 
+	public static string KleiUserID = null;
+
+	private KleiAccount.GetUserIDdelegate gotUserID = null;
+
 	private const string AuthTicketKey = "AUTH_TICKET";
 
+	private byte[] authTicket = null;
+
 	private const string TicketFieldName = "SteamTicket";
-
-	public static string KleiUserID;
-
-	private KleiAccount.GetUserIDdelegate gotUserID;
-
-	private byte[] authTicket;
 
 	private struct AccountReply
 	{

@@ -29,7 +29,7 @@ public static class PointGenerator
 					list.Add(boundingArea.Centroid() + new Vector2(num10, num9));
 				}
 			}
-			goto IL_03B9;
+			goto IL_03D0;
 		}
 		case PointGenerator.SampleBehaviour.UniformHex:
 		{
@@ -40,7 +40,7 @@ public static class PointGenerator
 					list.Add(boundingArea.Centroid() + new Vector2(-num3 + (0.5f + num11) / num6 * num, -num4 + (0.25f + 0.5f * (num11 % 2U) + num12) / num6 * num2));
 				}
 			}
-			goto IL_03B9;
+			goto IL_03D0;
 		}
 		case PointGenerator.SampleBehaviour.UniformSpiral:
 		{
@@ -53,7 +53,7 @@ public static class PointGenerator
 				double num18 = Math.Cos(num15) * num16;
 				list.Add(boundingArea.bounds.center + new Vector2((float)num17 * boundingArea.bounds.width, (float)num18 * boundingArea.bounds.height));
 			}
-			goto IL_03B9;
+			goto IL_03D0;
 		}
 		case PointGenerator.SampleBehaviour.UniformCircle:
 		{
@@ -67,11 +67,11 @@ public static class PointGenerator
 				double num25 = Math.Sin((double)num23) * (double)avoidRadius;
 				list.Add(boundingArea.bounds.center + new Vector2((float)num24, (float)num25));
 			}
-			goto IL_03B9;
+			goto IL_03D0;
 		}
 		case PointGenerator.SampleBehaviour.PoissonDisk:
 			list = new UniformPoissonDiskSampler(rnd).SampleRectangle(min, max, density, num7);
-			goto IL_03B9;
+			goto IL_03D0;
 		}
 		for (float num26 = -num4 + avoidRadius * 0.3f + rnd.RandomValue() * 2f; num26 < num4 - (avoidRadius * 0.3f + rnd.RandomValue() * 2f); num26 += density + rnd.RandomValue())
 		{
@@ -80,7 +80,7 @@ public static class PointGenerator
 				list.Add(boundingArea.Centroid() + new Vector2(num27, num26 + rnd.RandomValue() - 0.5f));
 			}
 		}
-		IL_03B9:
+		IL_03D0:
 		List<Vector2> list2 = new List<Vector2>();
 		for (int i = 0; i < list.Count; i++)
 		{
@@ -151,7 +151,7 @@ public static class PointGenerator
 		bool flag = num3 - index < num;
 		int num4 = 2 * (num2 ^ ((!flag) ? 0 : 1)) - 1;
 		Vector2I vector2I = new Vector2I(-num4, 2 * num2 - 1);
-		Vector2I vector2I2 = new Vector2I(0 - ((num2 != 0 || !flag) ? 0 : 1), 0) + vector2I * (num / 2);
+		Vector2I vector2I2 = new Vector2I(-((num2 != 0 || !flag) ? 0 : 1), 0) + vector2I * (num / 2);
 		Vector2I vector2I3 = new Vector2I((!flag) ? 1 : 0, (!flag) ? 0 : 1) * num4;
 		int num5 = index - num3 + 2 * num - ((!flag) ? 0 : 1) * num;
 		return vector2I2 + vector2I3 * num5;
@@ -201,51 +201,5 @@ public static class PointGenerator
 		UniformCircle,
 		PoissonDisk,
 		StdRand
-	}
-
-	private class LeftHandSpiralOut
-	{
-		public Vector2I next()
-		{
-			switch (this.index)
-			{
-			case 0U:
-				this.pos.x = this.pos.x + 1;
-				if ((long)this.pos.x == (long)((ulong)this.layer))
-				{
-					this.index += 1U;
-				}
-				break;
-			case 1U:
-				this.pos.y = this.pos.y + 1;
-				if ((long)this.pos.y == (long)((ulong)this.layer))
-				{
-					this.index += 1U;
-				}
-				break;
-			case 2U:
-				this.pos.x = this.pos.x - 1;
-				if ((long)(-(long)this.pos.x) == (long)((ulong)this.layer))
-				{
-					this.index += 1U;
-				}
-				break;
-			case 3U:
-				this.pos.y = this.pos.y - 1;
-				if ((long)(-(long)this.pos.y) == (long)((ulong)this.layer))
-				{
-					this.index = 0U;
-					this.layer += 1U;
-				}
-				break;
-			}
-			return this.pos;
-		}
-
-		private uint layer = 1U;
-
-		private uint index;
-
-		private Vector2I pos;
 	}
 }

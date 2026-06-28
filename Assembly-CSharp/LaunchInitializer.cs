@@ -10,7 +10,7 @@ public class LaunchInitializer : MonoBehaviour
 
 	private void Awake()
 	{
-		global::Debug.Log("Development Build: OI-" + 236679U.ToString(), null);
+		global::Debug.Log("Development Build: AT-" + 242372U.ToString(), null);
 		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		this.CheckForSavePathIssue();
 		if (LaunchInitializer.savePathState == LaunchInitializer.SavePathIssue.Ok)
@@ -114,7 +114,7 @@ public class LaunchInitializer : MonoBehaviour
 		}
 	}
 
-	public const string BUILD_PREFIX = "OI";
+	public const string BUILD_PREFIX = "AT";
 
 	private static readonly string testFile = "testfile";
 

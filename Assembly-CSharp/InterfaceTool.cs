@@ -17,6 +17,7 @@ public class InterfaceTool : KMonoBehaviour
 	{
 		this.OnActivateTool();
 		this.OnMouseMove(PlayerController.GetCursorPos(Input.mousePosition));
+		Game.Instance.Trigger(1174281782, this);
 	}
 
 	public virtual bool ShowHoverUI()
@@ -30,55 +31,34 @@ public class InterfaceTool : KMonoBehaviour
 		return this.castResults.Count == 0;
 	}
 
-	private void OnOverlayChanged(object data)
+	protected virtual void OnActivateTool()
 	{
-		if (this.viewMode == SimViewMode.None)
+		if (OverlayScreen.Instance != null)
 		{
-			return;
+			if (this.viewMode != SimViewMode.None && OverlayScreen.Instance.mode == SimViewMode.None)
+			{
+				OverlayScreen.Instance.ToggleOverlay(this.viewMode);
+				InterfaceTool.toolActivatedViewMode = this.viewMode;
+			}
 		}
-		if ((int)data == (int)this.viewMode || PlayerController.Instance.ActiveTool == this)
-		{
-		}
+		this.SetCursor(this.cursor, this.cursorOffset, CursorMode.Auto);
 	}
 
 	public void DeactivateTool(InterfaceTool new_tool = null)
 	{
 		this.OnDeactivateTool(new_tool);
-	}
-
-	protected virtual void OnActivateTool()
-	{
-		if (OverlayScreen.Instance != null && this.viewMode != OverlayScreen.Instance.GetMode() && this.viewMode != SimViewMode.Ignore)
+		if (new_tool == null || new_tool == SelectTool.Instance)
 		{
-			OverlayScreen.Instance.ToggleOverlay(this.viewMode);
+			if (InterfaceTool.toolActivatedViewMode != SimViewMode.None)
+			{
+				OverlayScreen.Instance.ToggleOverlay(SimViewMode.None);
+				InterfaceTool.toolActivatedViewMode = SimViewMode.None;
+			}
 		}
-		this.SetCursor(this.cursor, this.cursorOffset, CursorMode.Auto);
-		Game.Instance.Subscribe(1798162660, new Action<object>(this.OnOverlayChanged));
 	}
 
 	protected virtual void OnDeactivateTool(InterfaceTool new_tool)
 	{
-		Game.Instance.Unsubscribe(1798162660, new Action<object>(this.OnOverlayChanged));
-		if (new_tool == null)
-		{
-			return;
-		}
-		if (new_tool == SelectTool.Instance)
-		{
-			if (this.ViewMode != SimViewMode.None && OverlayScreen.Instance.GetMode() == this.ViewMode)
-			{
-				OverlayScreen.Instance.ToggleOverlay(SimViewMode.None);
-			}
-			return;
-		}
-		if (this.viewMode == SimViewMode.None && new_tool.viewMode == SimViewMode.Ignore)
-		{
-			return;
-		}
-		if (OverlayScreen.Instance != null && this.viewMode != SimViewMode.Ignore && new_tool.viewMode != SimViewMode.Ignore && this.viewMode != new_tool.viewMode)
-		{
-			OverlayScreen.Instance.ToggleOverlay(SimViewMode.None);
-		}
 	}
 
 	private void OnApplicationFocus(bool focusStatus)
@@ -93,14 +73,13 @@ public class InterfaceTool : KMonoBehaviour
 
 	public virtual void OnMouseMove(Vector3 cursor_pos)
 	{
-		if (this.visualizer == null || !this.isAppFocused)
+		if (!(this.visualizer == null) && this.isAppFocused)
 		{
-			return;
+			int num = Grid.PosToCell(cursor_pos);
+			cursor_pos = Grid.CellToPosCBC(num, this.visualizerLayer);
+			cursor_pos.z += InterfaceTool.DepthBias;
+			this.visualizer.transform.localPosition = cursor_pos;
 		}
-		int num = Grid.PosToCell(cursor_pos);
-		cursor_pos = Grid.CellToPosCBC(num, this.visualizerLayer);
-		cursor_pos.z += InterfaceTool.DepthBias;
-		this.visualizer.transform.localPosition = cursor_pos;
 	}
 
 	public virtual void OnKeyDown(KButtonEvent e)
@@ -173,9 +152,11 @@ public class InterfaceTool : KMonoBehaviour
 
 	protected HoverTextConfiguration hoverText;
 
-	private static Texture2D activeCursor;
+	private static Texture2D activeCursor = null;
 
-	protected SimViewMode viewMode = SimViewMode.Ignore;
+	private static SimViewMode toolActivatedViewMode = SimViewMode.None;
+
+	protected SimViewMode viewMode = SimViewMode.None;
 
 	private List<RaycastResult> castResults = new List<RaycastResult>();
 

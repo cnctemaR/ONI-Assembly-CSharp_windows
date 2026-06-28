@@ -21,8 +21,17 @@ public class Rotatable : KMonoBehaviour, ISaveLoadable
 	{
 		this.width = width;
 		this.height = height;
-		this.pivot = new Vector3((float)((width + 1) % 2) * 0.5f, 0.5f, 0f);
-		this.visualizerOffset = new Vector3((float)((width + 1) % 2) * 0.5f, 0f, 0f);
+		bool flag = width % 2 == 0;
+		if (flag)
+		{
+			this.pivot = new Vector3(-0.5f, 0.5f, 0f);
+			this.visualizerOffset = new Vector3(0.5f, 0f, 0f);
+		}
+		else
+		{
+			this.pivot = new Vector3(0f, 0.5f, 0f);
+			this.visualizerOffset = Vector3.zero;
+		}
 	}
 
 	public Orientation Rotate()
@@ -66,11 +75,16 @@ public class Rotatable : KMonoBehaviour, ISaveLoadable
 	public float GetVisualizerRotation()
 	{
 		PermittedRotations permittedRotations = this.permittedRotations;
-		if (permittedRotations != PermittedRotations.R90 && permittedRotations != PermittedRotations.R360)
+		float num;
+		if (permittedRotations != PermittedRotations.R360 && permittedRotations != PermittedRotations.R90)
 		{
-			return 0f;
+			num = 0f;
 		}
-		return -90f * (float)this.orientation;
+		else
+		{
+			num = -90f * (float)this.orientation;
+		}
+		return num;
 	}
 
 	public bool GetVisualizerFlipX()
@@ -100,56 +114,72 @@ public class Rotatable : KMonoBehaviour, ISaveLoadable
 		return vector;
 	}
 
-	public Vector3 GetVisualizerOffset()
+	private Vector3 GetVisualizerOffset()
 	{
-		return this.visualizerOffset;
+		Orientation orientation = this.orientation;
+		Vector3 vector;
+		if (orientation != Orientation.FlipH)
+		{
+			if (orientation != Orientation.FlipV)
+			{
+				vector = this.visualizerOffset;
+			}
+			else
+			{
+				vector = new Vector3(this.visualizerOffset.x, 1f, this.visualizerOffset.z);
+			}
+		}
+		else
+		{
+			vector = new Vector3(-this.visualizerOffset.x, this.visualizerOffset.y, this.visualizerOffset.z);
+		}
+		return vector;
 	}
 
 	private void OrientVisualizer(Orientation orientation)
 	{
 		float visualizerRotation = this.GetVisualizerRotation();
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		component.Offset = this.GetVisualizerOffset();
+		component.Pivot = this.GetVisualizerPivot();
 		component.Rotation = visualizerRotation;
+		component.Offset = this.GetVisualizerOffset();
 		component.FlipX = this.GetVisualizerFlipX();
 		component.FlipY = this.GetVisualizerFlipY();
-		component.Pivot = this.GetVisualizerPivot();
-		this.Trigger(-1643076535, this);
+		base.Trigger(-1643076535, this);
 	}
 
 	private void OrientCollider(Orientation orientation)
 	{
 		BoxCollider2D component = base.GetComponent<BoxCollider2D>();
-		if (component == null)
+		if (!(component == null))
 		{
-			return;
-		}
-		switch (orientation)
-		{
-		default:
-			component.offset = new Vector2(0f, 0.5f * (float)this.height);
-			component.size = new Vector2((float)this.width, (float)this.height);
-			break;
-		case Orientation.R90:
-			component.offset = new Vector2(0.5f * (float)(this.height - 1), 0.5f);
-			component.size = new Vector2((float)this.height, (float)this.width);
-			break;
-		case Orientation.R180:
-			component.offset = new Vector2(0f, -0.5f * (float)(this.height - 2));
-			component.size = new Vector2((float)this.width, (float)this.height);
-			break;
-		case Orientation.R270:
-			component.offset = new Vector2(-0.5f * (float)(this.height - 1), 0.5f);
-			component.size = new Vector2((float)this.height, (float)this.width);
-			break;
-		case Orientation.FlipH:
-			component.offset = new Vector2(0f, 0.5f * (float)this.height);
-			component.size = new Vector2((float)this.width, (float)this.height);
-			break;
-		case Orientation.FlipV:
-			component.offset = new Vector2(0f, -0.5f * (float)(this.height - 2));
-			component.size = new Vector2((float)this.width, (float)this.height);
-			break;
+			switch (orientation)
+			{
+			default:
+				component.offset = new Vector2(0f, 0.5f * (float)this.height);
+				component.size = new Vector2((float)this.width, (float)this.height);
+				break;
+			case Orientation.R90:
+				component.offset = new Vector2(0.5f * (float)(this.height - 1), 0.5f);
+				component.size = new Vector2((float)this.height, (float)this.width);
+				break;
+			case Orientation.R180:
+				component.offset = new Vector2(0f, -0.5f * (float)(this.height - 2));
+				component.size = new Vector2((float)this.width, (float)this.height);
+				break;
+			case Orientation.R270:
+				component.offset = new Vector2(-0.5f * (float)(this.height - 1), 0.5f);
+				component.size = new Vector2((float)this.height, (float)this.width);
+				break;
+			case Orientation.FlipH:
+				component.offset = new Vector2(0f, 0.5f * (float)this.height);
+				component.size = new Vector2((float)this.width, (float)this.height);
+				break;
+			case Orientation.FlipV:
+				component.offset = new Vector2(0f, -0.5f * (float)(this.height - 2));
+				component.size = new Vector2((float)this.width, (float)this.height);
+				break;
+			}
 		}
 	}
 
@@ -160,21 +190,29 @@ public class Rotatable : KMonoBehaviour, ISaveLoadable
 
 	public static CellOffset GetRotatedCellOffset(CellOffset offset, Orientation orientation)
 	{
+		CellOffset cellOffset;
 		switch (orientation)
 		{
 		default:
-			return offset;
+			cellOffset = offset;
+			break;
 		case Orientation.R90:
-			return new CellOffset(offset.y, -offset.x);
+			cellOffset = new CellOffset(offset.y, -offset.x);
+			break;
 		case Orientation.R180:
-			return new CellOffset(-offset.x, -offset.y);
+			cellOffset = new CellOffset(-offset.x, -offset.y);
+			break;
 		case Orientation.R270:
-			return new CellOffset(-offset.y, offset.x);
+			cellOffset = new CellOffset(-offset.y, offset.x);
+			break;
 		case Orientation.FlipH:
-			return new CellOffset(-offset.x, offset.y);
+			cellOffset = new CellOffset(-offset.x, offset.y);
+			break;
 		case Orientation.FlipV:
-			return new CellOffset(offset.x, -offset.y);
+			cellOffset = new CellOffset(offset.x, -offset.y);
+			break;
 		}
+		return cellOffset;
 	}
 
 	public Vector3 GetRotatedOffset(Vector3 offset)
@@ -184,21 +222,29 @@ public class Rotatable : KMonoBehaviour, ISaveLoadable
 
 	public static Vector3 GetRotatedOffset(Vector3 offset, Orientation orientation)
 	{
+		Vector3 vector;
 		switch (orientation)
 		{
 		default:
-			return offset;
+			vector = offset;
+			break;
 		case Orientation.R90:
-			return new Vector3(offset.y, -offset.x);
+			vector = new Vector3(offset.y, -offset.x);
+			break;
 		case Orientation.R180:
-			return new Vector3(-offset.x, -offset.y);
+			vector = new Vector3(-offset.x, -offset.y);
+			break;
 		case Orientation.R270:
-			return new Vector3(-offset.y, offset.x);
+			vector = new Vector3(-offset.y, offset.x);
+			break;
 		case Orientation.FlipH:
-			return new Vector3(-offset.x, offset.y);
+			vector = new Vector3(-offset.x, offset.y);
+			break;
 		case Orientation.FlipV:
-			return new Vector3(offset.x, -offset.y);
+			vector = new Vector3(offset.x, -offset.y);
+			break;
 		}
+		return vector;
 	}
 
 	public Orientation GetOrientation()
@@ -221,7 +267,7 @@ public class Rotatable : KMonoBehaviour, ISaveLoadable
 	private Building building;
 
 	[Serialize]
-	private Orientation orientation;
+	private Orientation orientation = Orientation.Neutral;
 
 	[SerializeField]
 	private Vector3 pivot = Vector3.zero;
@@ -229,7 +275,7 @@ public class Rotatable : KMonoBehaviour, ISaveLoadable
 	[SerializeField]
 	private Vector3 visualizerOffset = Vector3.zero;
 
-	public PermittedRotations permittedRotations;
+	public PermittedRotations permittedRotations = PermittedRotations.Unrotatable;
 
 	[SerializeField]
 	private int width;

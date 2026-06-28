@@ -57,7 +57,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		}
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		header = default(SaveGame.Header);
-		header.buildVersion = 236679U;
+		header.buildVersion = 242372U;
 		header.headerSize = bytes.Length;
 		header.headerVersion = 1U;
 		header.compression = ((!isCompressed) ? 0 : 1);
@@ -101,9 +101,11 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		if (string.IsNullOrEmpty(newBaseName))
 		{
 			global::UnityEngine.Debug.LogWarning("Cannot give the base an empty name");
-			return;
 		}
-		this.baseName = newBaseName;
+		else
+		{
+			this.baseName = newBaseName;
+		}
 	}
 
 	protected override void OnSpawn()
@@ -166,7 +168,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 			this.numberOfDuplicants = numberOfDuplicants;
 			this.baseName = baseName;
 			this.isAutoSave = false;
-			this.originalSaveName = string.Empty;
+			this.originalSaveName = "";
 			this.saveMajorVersion = 7;
 			this.saveMinorVersion = 1;
 		}

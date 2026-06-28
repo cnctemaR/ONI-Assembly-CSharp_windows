@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Text;
 using FMOD;
 using FMOD.Studio;
@@ -26,13 +25,16 @@ namespace FMODUnity
 				if (RuntimeManager.instance == null)
 				{
 					RuntimeManager runtimeManager = global::UnityEngine.Object.FindObjectOfType(typeof(RuntimeManager)) as RuntimeManager;
-					if (runtimeManager != null && runtimeManager.cachedPointers[0] != 0L)
+					if (runtimeManager != null)
 					{
-						RuntimeManager.instance = runtimeManager;
-						RuntimeManager.instance.studioSystem = new global::FMOD.Studio.System((IntPtr)RuntimeManager.instance.cachedPointers[0]);
-						RuntimeManager.instance.lowlevelSystem = new global::FMOD.System((IntPtr)RuntimeManager.instance.cachedPointers[1]);
-						RuntimeManager.instance.mixerHead = new DSP((IntPtr)RuntimeManager.instance.cachedPointers[2]);
-						return RuntimeManager.instance;
+						if (runtimeManager.cachedPointers[0] != 0L)
+						{
+							RuntimeManager.instance = runtimeManager;
+							RuntimeManager.instance.studioSystem = new global::FMOD.Studio.System((IntPtr)RuntimeManager.instance.cachedPointers[0]);
+							RuntimeManager.instance.lowlevelSystem = new global::FMOD.System((IntPtr)RuntimeManager.instance.cachedPointers[1]);
+							RuntimeManager.instance.mixerHead = new DSP((IntPtr)RuntimeManager.instance.cachedPointers[2]);
+							return RuntimeManager.instance;
+						}
 					}
 					GameObject gameObject = new GameObject("FMOD.UnityItegration.RuntimeManager");
 					RuntimeManager.instance = gameObject.AddComponent<RuntimeManager>();
@@ -267,7 +269,7 @@ namespace FMODUnity
 				if (runtimeManager.attachedInstances[i].instance == instance)
 				{
 					runtimeManager.attachedInstances.RemoveAt(i);
-					return;
+					break;
 				}
 			}
 		}
@@ -505,7 +507,7 @@ namespace FMODUnity
 			return eventInstance;
 		}
 
-		public static void PlayOneShot(string path, [Optional] Vector3 position)
+		public static void PlayOneShot(string path, Vector3 position = default(Vector3))
 		{
 			try
 			{
@@ -517,7 +519,7 @@ namespace FMODUnity
 			}
 		}
 
-		public static void PlayOneShot(Guid guid, [Optional] Vector3 position)
+		public static void PlayOneShot(Guid guid, Vector3 position = default(Vector3))
 		{
 			EventInstance eventInstance = RuntimeManager.CreateInstance(guid);
 			eventInstance.set3DAttributes(position.To3DAttributes());
@@ -706,13 +708,13 @@ namespace FMODUnity
 
 		private List<RuntimeManager.AttachedInstance> attachedInstances = new List<RuntimeManager.AttachedInstance>(128);
 
-		private bool listenerWarningIssued;
+		private bool listenerWarningIssued = false;
 
 		private Rect windowRect = new Rect(10f, 10f, 300f, 100f);
 
 		private string lastDebugText;
 
-		private float lastDebugUpdate;
+		private float lastDebugUpdate = 0f;
 
 		public static bool[] HasListener = new bool[8];
 

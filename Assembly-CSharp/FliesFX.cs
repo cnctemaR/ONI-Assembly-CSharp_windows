@@ -7,7 +7,7 @@ public class FliesFX : GameStateMachine<FliesFX, FliesFX.Instance>
 	{
 		default_state = this.root;
 		base.Target(this.fx);
-		this.root.PlayAnim("swarm_pre", KAnim.PlayMode.Once, null).QueueAnim("swarm_loop", true, null).Exit("DestroyFX", delegate(FliesFX.Instance smi)
+		this.root.PlayAnim("swarm_pre").QueueAnim("swarm_loop", true, null).Exit("DestroyFX", delegate(FliesFX.Instance smi)
 		{
 			smi.DestroyFX();
 		});

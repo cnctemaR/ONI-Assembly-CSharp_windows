@@ -3,10 +3,11 @@ using System.Collections.Generic;
 
 namespace UnityEngine.Networking.Match
 {
-	public class ListMatchResponse : BasicResponse
+	internal class ListMatchResponse : BasicResponse
 	{
 		public ListMatchResponse()
 		{
+			this.matches = new List<MatchDesc>();
 		}
 
 		public ListMatchResponse(List<MatchDesc> otherMatches)
@@ -21,7 +22,7 @@ namespace UnityEngine.Networking.Match
 			return UnityString.Format("[{0}]-matches.Count:{1}", new object[]
 			{
 				base.ToString(),
-				this.matches.Count
+				(this.matches != null) ? this.matches.Count : 0
 			});
 		}
 

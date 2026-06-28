@@ -26,10 +26,10 @@ public class ElementInteractions
 
 	private TextAsset asset;
 
-	[IgnoreCommentedLines("//")]
 	[DelimitedRecord(",")]
-	[IgnoreEmptyLines]
 	[IgnoreFirst(1)]
+	[IgnoreEmptyLines]
+	[IgnoreCommentedLines("//")]
 	private class InteractionDef
 	{
 		public SimMessages.ElementInteraction Transform()
@@ -48,25 +48,25 @@ public class ElementInteractions
 			};
 		}
 
-		public ElementInteractionHashes interactionType;
+		public ElementInteractionHashes interactionType = (ElementInteractionHashes)0;
 
 		[FieldNullValue(1f)]
 		public float interactionProbability = 1f;
 
 		[FieldNullValue(0f)]
-		public float minMass;
+		public float minMass = 0f;
 
-		public SimHashes elemHash1;
+		public SimHashes elemHash1 = (SimHashes)0;
 
 		[FieldNullValue(1f)]
 		public float elem1MassDestructionPercent = 1f;
 
-		public SimHashes elemHash2;
+		public SimHashes elemHash2 = (SimHashes)0;
 
 		[FieldNullValue(1f)]
 		public float elem2MassRequiredMultiplier = 1f;
 
-		public SimHashes elemResultHash;
+		public SimHashes elemResultHash = (SimHashes)0;
 
 		[FieldNullValue(1f)]
 		public float elemResultMassCreationMultiplier = 1f;

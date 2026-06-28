@@ -26,6 +26,9 @@ public static class Sim
 	[DllImport("SimDLL")]
 	private static extern void SIM_EndSave();
 
+	[DllImport("SimDLL")]
+	public static extern void SIM_DebugCrash();
+
 	public unsafe static IntPtr HandleMessage(SimMessageHashes sim_msg_id, int msg_length, byte[] msg)
 	{
 		IntPtr intPtr;
@@ -56,18 +59,23 @@ public static class Sim
 		{
 			intPtr = Sim.SIM_HandleMessage(-672538170, num, ptr);
 		}
+		int num2;
 		if (intPtr == IntPtr.Zero)
 		{
-			return -1;
+			num2 = -1;
 		}
-		Sim.GameDataUpdate* ptr2 = (Sim.GameDataUpdate*)(void*)intPtr;
-		Grid.CellValues = ptr2->cells;
-		Grid.DiseaseCellValues = ptr2->disease;
-		Grid.AccumulatedFlowValues = ptr2->accumulatedFlow;
-		PropertyTextures.externalFlowTex = ptr2->propertyTextureFlow;
-		PropertyTextures.externalLiquidTex = ptr2->propertyTextureLiquid;
-		Grid.InitializeCells(ptr2->cells);
-		return 0;
+		else
+		{
+			Sim.GameDataUpdate* ptr2 = (Sim.GameDataUpdate*)(void*)intPtr;
+			Grid.CellValues = ptr2->cells;
+			Grid.DiseaseCellValues = ptr2->disease;
+			Grid.AccumulatedFlowValues = ptr2->accumulatedFlow;
+			PropertyTextures.externalFlowTex = ptr2->propertyTextureFlow;
+			PropertyTextures.externalLiquidTex = ptr2->propertyTextureLiquid;
+			Grid.InitializeCells(ptr2->cells);
+			num2 = 0;
+		}
+		return num2;
 	}
 
 	public static void Shutdown()
@@ -118,6 +126,8 @@ public static class Sim
 	private const int LifeUpdateInterval = 1;
 
 	public const int PACKING_ALIGNMENT = 4;
+
+	public delegate int GAME_MessageHandler(int message_id, IntPtr data);
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
 	public struct PhysicsData
@@ -178,7 +188,8 @@ public static class Sim
 		{
 			GasImpermeable = 1,
 			LiquidImpermeable,
-			SolidImpermeable = 4
+			SolidImpermeable = 4,
+			Unbreakable = 8
 		}
 	}
 
@@ -349,6 +360,8 @@ public static class Sim
 			elementCount = 0
 		};
 	}
+
+	public delegate void GAME_Callback();
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
 	public struct SolidInfo
@@ -755,8 +768,4 @@ public static class Sim
 
 		public int count;
 	}
-
-	public delegate int GAME_MessageHandler(int message_id, IntPtr data);
-
-	public delegate void GAME_Callback();
 }

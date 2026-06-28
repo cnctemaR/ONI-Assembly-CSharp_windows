@@ -15,12 +15,17 @@ namespace FMOD.Studio
 			description = default(PARAMETER_DESCRIPTION);
 			PARAMETER_DESCRIPTION_INTERNAL parameter_DESCRIPTION_INTERNAL;
 			RESULT result = ParameterInstance.FMOD_Studio_ParameterInstance_GetDescription(this.rawPtr, out parameter_DESCRIPTION_INTERNAL);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			parameter_DESCRIPTION_INTERNAL.assign(out description);
-			return result;
+			else
+			{
+				parameter_DESCRIPTION_INTERNAL.assign(out description);
+				result2 = result;
+			}
+			return result2;
 		}
 
 		public RESULT getValue(out float value)

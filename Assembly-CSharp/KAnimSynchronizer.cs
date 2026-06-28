@@ -36,31 +36,29 @@ public class KAnimSynchronizer
 
 	private void Sync(KAnimControllerBase controller)
 	{
-		if (this.masterController == null)
+		if (!(this.masterController == null))
 		{
-			return;
-		}
-		if (controller == null)
-		{
-			return;
-		}
-		KAnim.Anim currentAnim = this.masterController.GetCurrentAnim();
-		if (currentAnim == null)
-		{
-			return;
-		}
-		KAnim.PlayMode mode = this.masterController.GetMode();
-		float playSpeed = this.masterController.GetPlaySpeed();
-		float elapsedTime = this.masterController.GetElapsedTime();
-		controller.Play(currentAnim.name, mode, playSpeed, elapsedTime);
-		Facing component = controller.GetComponent<Facing>();
-		if (component != null)
-		{
-			component.Face(component.transform.position.x + 1f);
-		}
-		else
-		{
-			controller.FlipX = false;
+			if (!(controller == null))
+			{
+				KAnim.Anim currentAnim = this.masterController.GetCurrentAnim();
+				if (currentAnim != null)
+				{
+					KAnim.PlayMode mode = this.masterController.GetMode();
+					float playSpeed = this.masterController.GetPlaySpeed();
+					float elapsedTime = this.masterController.GetElapsedTime();
+					controller.Play(currentAnim.name, mode, playSpeed, elapsedTime);
+					Facing component = controller.GetComponent<Facing>();
+					if (component != null)
+					{
+						component.Face(component.transform.position.x + 1f);
+					}
+					else
+					{
+						controller.FlipX = this.masterController.FlipX;
+						controller.FlipY = this.masterController.FlipY;
+					}
+				}
+			}
 		}
 	}
 

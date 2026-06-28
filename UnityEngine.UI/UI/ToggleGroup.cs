@@ -5,8 +5,8 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
 {
-	[DisallowMultipleComponent]
 	[AddComponentMenu("UI/Toggle Group", 32)]
+	[DisallowMultipleComponent]
 	public class ToggleGroup : UIBehaviour
 	{
 		protected ToggleGroup()
@@ -83,7 +83,7 @@ namespace UnityEngine.UI
 		}
 
 		[SerializeField]
-		private bool m_AllowSwitchOff;
+		private bool m_AllowSwitchOff = false;
 
 		private List<Toggle> m_Toggles = new List<Toggle>();
 	}

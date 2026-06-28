@@ -40,7 +40,7 @@ public class ToxicantMonitor : GameStateMachine<ToxicantMonitor, ToxicantMonitor
 			: base(master)
 		{
 			this.sensor = master.GetComponent<Sensors>().GetSensor<ToxicantSensor>();
-			this.modifier = new AttributeModifier(Db.Get().Amounts.Toxicity.deltaAttribute.Id, 0f, DUPLICANTS.MODIFIERS.TOXICENVIRONMENT.NAME, false, false);
+			this.modifier = new AttributeModifier(Db.Get().Amounts.Toxicity.deltaAttribute.Id, 0f, DUPLICANTS.MODIFIERS.TOXICENVIRONMENT.NAME, false, false, false);
 		}
 
 		public void AddToxicityModifier()
@@ -85,7 +85,7 @@ public class ToxicantMonitor : GameStateMachine<ToxicantMonitor, ToxicantMonitor
 		{
 			float toxicity = this.sensor.GetToxicity();
 			float num = toxicity * 20f;
-			this.modifier.Value = num;
+			this.modifier.SetValue(num);
 		}
 
 		private ToxicantSensor sensor;

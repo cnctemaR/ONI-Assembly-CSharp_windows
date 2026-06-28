@@ -11,7 +11,7 @@ namespace TUNING
 
 		public const float PLANTERPLOT_GROWTH_PENTALY = -0.5f;
 
-		public const float BONUS_SEED_PROBABILITY = 0.33f;
+		public const float BASE_BONUS_SEED_PROBABILITY = 0.33f;
 
 		public const float YIELD_DISPLAY_TOTAL = 100f;
 

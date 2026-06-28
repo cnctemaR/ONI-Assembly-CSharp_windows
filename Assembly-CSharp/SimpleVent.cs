@@ -4,8 +4,8 @@ public class SimpleVent : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
 	{
-		this.Subscribe(-592767678, new Action<object>(this.OnChanged));
-		this.Subscribe(-111137758, new Action<object>(this.OnChanged));
+		base.Subscribe(-592767678, new Action<object>(this.OnChanged));
+		base.Subscribe(-111137758, new Action<object>(this.OnChanged));
 	}
 
 	protected override void OnSpawn()

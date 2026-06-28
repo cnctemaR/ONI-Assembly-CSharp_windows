@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ScalerMask : KMonoBehaviour, IPointerEnterHandler, IEventSystemHandler, IPointerExitHandler
+public class ScalerMask : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IEventSystemHandler
 {
 	private RectTransform ThisTransform
 	{
@@ -33,19 +33,25 @@ public class ScalerMask : KMonoBehaviour, IPointerEnterHandler, IEventSystemHand
 	{
 		base.OnSpawn();
 		DetailsScreen componentInParent = base.GetComponentInParent<DetailsScreen>();
-		DetailsScreen detailsScreen = componentInParent;
-		detailsScreen.pointerEnterActions = (KScreen.PointerEnterActions)Delegate.Combine(detailsScreen.pointerEnterActions, new KScreen.PointerEnterActions(this.OnPointerEnterGrandparent));
-		DetailsScreen detailsScreen2 = componentInParent;
-		detailsScreen2.pointerExitActions = (KScreen.PointerExitActions)Delegate.Combine(detailsScreen2.pointerExitActions, new KScreen.PointerExitActions(this.OnPointerExitGrandparent));
+		if (componentInParent)
+		{
+			DetailsScreen detailsScreen = componentInParent;
+			detailsScreen.pointerEnterActions = (KScreen.PointerEnterActions)Delegate.Combine(detailsScreen.pointerEnterActions, new KScreen.PointerEnterActions(this.OnPointerEnterGrandparent));
+			DetailsScreen detailsScreen2 = componentInParent;
+			detailsScreen2.pointerExitActions = (KScreen.PointerExitActions)Delegate.Combine(detailsScreen2.pointerExitActions, new KScreen.PointerExitActions(this.OnPointerExitGrandparent));
+		}
 	}
 
 	protected override void OnCleanUp()
 	{
 		DetailsScreen componentInParent = base.GetComponentInParent<DetailsScreen>();
-		DetailsScreen detailsScreen = componentInParent;
-		detailsScreen.pointerEnterActions = (KScreen.PointerEnterActions)Delegate.Remove(detailsScreen.pointerEnterActions, new KScreen.PointerEnterActions(this.OnPointerEnterGrandparent));
-		DetailsScreen detailsScreen2 = componentInParent;
-		detailsScreen2.pointerExitActions = (KScreen.PointerExitActions)Delegate.Remove(detailsScreen2.pointerExitActions, new KScreen.PointerExitActions(this.OnPointerExitGrandparent));
+		if (componentInParent)
+		{
+			DetailsScreen detailsScreen = componentInParent;
+			detailsScreen.pointerEnterActions = (KScreen.PointerEnterActions)Delegate.Remove(detailsScreen.pointerEnterActions, new KScreen.PointerEnterActions(this.OnPointerEnterGrandparent));
+			DetailsScreen detailsScreen2 = componentInParent;
+			detailsScreen2.pointerExitActions = (KScreen.PointerExitActions)Delegate.Remove(detailsScreen2.pointerExitActions, new KScreen.PointerExitActions(this.OnPointerExitGrandparent));
+		}
 		base.OnCleanUp();
 	}
 
@@ -108,15 +114,15 @@ public class ScalerMask : KMonoBehaviour, IPointerEnterHandler, IEventSystemHand
 
 	public GameObject hoverIndicator;
 
-	public bool hoverLock;
+	public bool hoverLock = false;
 
-	private bool grandparentIsHovered;
+	private bool grandparentIsHovered = false;
 
-	private bool isHovered;
+	private bool isHovered = false;
 
 	private bool queuedSizeUpdate = true;
 
-	public float topPadding;
+	public float topPadding = 0f;
 
-	public float bottomPadding;
+	public float bottomPadding = 0f;
 }

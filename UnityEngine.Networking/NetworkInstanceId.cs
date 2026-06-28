@@ -25,6 +25,16 @@ namespace UnityEngine.Networking
 			return obj is NetworkInstanceId && this == (NetworkInstanceId)obj;
 		}
 
+		public static bool operator ==(NetworkInstanceId c1, NetworkInstanceId c2)
+		{
+			return c1.m_Value == c2.m_Value;
+		}
+
+		public static bool operator !=(NetworkInstanceId c1, NetworkInstanceId c2)
+		{
+			return c1.m_Value != c2.m_Value;
+		}
+
 		public override string ToString()
 		{
 			return this.m_Value.ToString();
@@ -36,16 +46,6 @@ namespace UnityEngine.Networking
 			{
 				return this.m_Value;
 			}
-		}
-
-		public static bool operator ==(NetworkInstanceId c1, NetworkInstanceId c2)
-		{
-			return c1.m_Value == c2.m_Value;
-		}
-
-		public static bool operator !=(NetworkInstanceId c1, NetworkInstanceId c2)
-		{
-			return c1.m_Value != c2.m_Value;
 		}
 
 		[SerializeField]

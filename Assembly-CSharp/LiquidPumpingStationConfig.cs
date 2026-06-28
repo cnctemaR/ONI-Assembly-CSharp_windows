@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -7,8 +6,19 @@ public class LiquidPumpingStationConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
+		string text = "LiquidPumpingStation";
+		int num = 2;
+		int num2 = 4;
+		string text2 = "waterpump_kanim";
+		float num3 = 200f;
+		int num4 = 100;
+		float num5 = 10f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
+		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.Tile;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("LiquidPumpingStation", 2, 4, "waterpump_kanim", 200f, 100, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.Tile, BUILDINGS.DECOR.NONE, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_MINERALS, num6, buildLocationRule, BUILDINGS.DECOR.NONE, none);
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = true;
 		buildingDef.AudioCategory = "Metal";
@@ -27,11 +37,10 @@ public class LiquidPumpingStationConfig : IBuildingConfig
 		LiquidPumpingStation liquidPumpingStation = go.AddOrGet<LiquidPumpingStation>();
 		liquidPumpingStation.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_waterpump_kanim") };
 		Storage storage = go.AddOrGet<Storage>();
-		storage.disableOnStore = true;
 		storage.showInUI = false;
 		storage.allowItemRemoval = true;
 		storage.showDescriptor = true;
-		storage.defaultStoredItemModifers = LiquidPumpingStationConfig.StoredItemModifiers;
+		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 	}
 
 	private static void AddGuide(GameObject go, bool occupy_tiles)
@@ -58,10 +67,4 @@ public class LiquidPumpingStationConfig : IBuildingConfig
 	}
 
 	public const string ID = "LiquidPumpingStation";
-
-	private static readonly List<Storage.StoredItemModifier> StoredItemModifiers = new List<Storage.StoredItemModifier>
-	{
-		Storage.StoredItemModifier.Hide,
-		Storage.StoredItemModifier.Seal
-	};
 }

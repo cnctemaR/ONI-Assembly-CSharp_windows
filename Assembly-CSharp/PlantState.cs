@@ -8,7 +8,7 @@ public class PlantState : KMonoBehaviour, ISaveLoadable
 	protected override void OnSpawn()
 	{
 		this.Refresh();
-		this.Subscribe(1272413801, new Action<object>(this.OnHarvest));
+		base.Subscribe(1272413801, new Action<object>(this.OnHarvest));
 	}
 
 	private void Refresh()
@@ -30,7 +30,7 @@ public class PlantState : KMonoBehaviour, ISaveLoadable
 		{
 			GameObject gameObject = Util.KInstantiate(this.seedPrefab, null, null);
 			gameObject.SetActive(true);
-			gameObject.transform.SetPosition(this.transform.position);
+			gameObject.transform.SetPosition(base.transform.position);
 		}
 		this.DeleteObject();
 	}

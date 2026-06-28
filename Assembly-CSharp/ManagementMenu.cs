@@ -17,11 +17,11 @@ public class ManagementMenu : KIconToggleMenu
 		this.vitalsScreen = this.instantiator.GetComponentInChildren<VitalsTableScreen>();
 		this.vitalsScreen.gameObject.SetActive(false);
 		base.Subscribe(Game.Instance.gameObject, 288942073, new Action<object>(this.OnUIClear));
-		this.jobsInfo = new KIconToggleMenu.ToggleInfo(UI.JOBS, "OverviewUI_jobs_icon", null, global::Action.ManagePeople, UI.TOOLTIPS.MANAGEMENTMENU_JOBS, string.Empty);
-		this.consumablesInfo = new KIconToggleMenu.ToggleInfo(UI.CONSUMABLES, "OverviewUI_consumables_icon", null, global::Action.ManageConsumables, UI.TOOLTIPS.MANAGEMENTMENU_CONSUMABLES, string.Empty);
-		this.vitalsInfo = new KIconToggleMenu.ToggleInfo(UI.VITALS, "OverviewUI_vitals_icon", null, global::Action.ManageVitals, UI.TOOLTIPS.MANAGEMENTMENU_VITALS, string.Empty);
-		this.reportsInfo = new KIconToggleMenu.ToggleInfo(UI.REPORT, "OverviewUI_reports_icon", null, global::Action.ManageReport, UI.TOOLTIPS.MANAGEMENTMENU_DAILYREPORT, string.Empty);
-		this.ResearchInfo = new KIconToggleMenu.ToggleInfo(UI.RESEARCH, "OverviewUI_research_nav_icon", null, global::Action.ManageResearch, UI.TOOLTIPS.MANAGEMENTMENU_RESEARCH, string.Empty);
+		this.jobsInfo = new KIconToggleMenu.ToggleInfo(UI.JOBS, "OverviewUI_jobs_icon", null, global::Action.ManagePeople, UI.TOOLTIPS.MANAGEMENTMENU_JOBS, "");
+		this.consumablesInfo = new KIconToggleMenu.ToggleInfo(UI.CONSUMABLES, "OverviewUI_consumables_icon", null, global::Action.ManageConsumables, UI.TOOLTIPS.MANAGEMENTMENU_CONSUMABLES, "");
+		this.vitalsInfo = new KIconToggleMenu.ToggleInfo(UI.VITALS, "OverviewUI_vitals_icon", null, global::Action.ManageVitals, UI.TOOLTIPS.MANAGEMENTMENU_VITALS, "");
+		this.reportsInfo = new KIconToggleMenu.ToggleInfo(UI.REPORT, "OverviewUI_reports_icon", null, global::Action.ManageReport, UI.TOOLTIPS.MANAGEMENTMENU_DAILYREPORT, "");
+		this.ResearchInfo = new KIconToggleMenu.ToggleInfo(UI.RESEARCH, "OverviewUI_research_nav_icon", null, global::Action.ManageResearch, UI.TOOLTIPS.MANAGEMENTMENU_RESEARCH, "");
 		this.ScreenInfoMatch.Add(this.jobsInfo, new ManagementMenu.ScreenData
 		{
 			screen = this.jobsScreen,
@@ -73,54 +73,55 @@ public class ManagementMenu : KIconToggleMenu
 
 	public void AddResearchScreen(ResearchScreen researchScreen)
 	{
-		if (this.ResearchScreen != null)
+		if (!(this.ResearchScreen != null))
 		{
-			return;
+			this.ResearchScreen = researchScreen;
+			this.ResearchScreen.gameObject.SetActive(false);
+			this.ScreenInfoMatch.Add(this.ResearchInfo, new ManagementMenu.ScreenData
+			{
+				screen = this.ResearchScreen,
+				tabIdx = 0,
+				toggleInfo = this.ResearchInfo
+			});
+			this.ResearchScreen.Show(false);
 		}
-		this.ResearchScreen = researchScreen;
-		this.ResearchScreen.gameObject.SetActive(false);
-		this.ScreenInfoMatch.Add(this.ResearchInfo, new ManagementMenu.ScreenData
-		{
-			screen = this.ResearchScreen,
-			tabIdx = 0,
-			toggleInfo = this.ResearchInfo
-		});
-		this.ResearchScreen.Show(false);
 	}
 
 	public void CheckResearch(object o)
 	{
-		if (this.ResearchInfo.toggle == null)
+		if (!(this.ResearchInfo.toggle == null))
 		{
-			return;
-		}
-		if (Components.ResearchCenters.Count <= 0 && !DebugHandler.InstantBuildMode)
-		{
-			this.ResearchInfo.toggle.gameObject.GetComponentInChildren<ImageToggleState>().SetDisabled();
-			ToolTip component = this.ResearchInfo.toggle.gameObject.GetComponent<ToolTip>();
-			component.ClearMultiStringTooltip();
-			component.AddMultiStringTooltip(UI.TOOLTIPS.MANAGEMENTMENU_REQUIRES_RESEARCH, this.ToggleToolTipTextStyleSetting);
-		}
-		else
-		{
-			if (this.activeScreen != null && this.activeScreen.toggleInfo == this.ResearchInfo)
+			if (Components.ResearchCenters.Count <= 0 && !DebugHandler.InstantBuildMode)
 			{
-				this.ResearchInfo.toggle.gameObject.GetComponentInChildren<ImageToggleState>().SetActive();
+				this.ResearchInfo.toggle.gameObject.GetComponentInChildren<ImageToggleState>().SetDisabled();
+				ToolTip component = this.ResearchInfo.toggle.gameObject.GetComponent<ToolTip>();
+				component.ClearMultiStringTooltip();
+				component.AddMultiStringTooltip(UI.TOOLTIPS.MANAGEMENTMENU_REQUIRES_RESEARCH, this.ToggleToolTipTextStyleSetting);
 			}
 			else
 			{
-				this.ResearchInfo.toggle.gameObject.GetComponentInChildren<ImageToggleState>().SetInactive();
+				if (this.activeScreen != null && this.activeScreen.toggleInfo == this.ResearchInfo)
+				{
+					this.ResearchInfo.toggle.gameObject.GetComponentInChildren<ImageToggleState>().SetActive();
+				}
+				else
+				{
+					this.ResearchInfo.toggle.gameObject.GetComponentInChildren<ImageToggleState>().SetInactive();
+				}
+				this.ResearchInfo.toggle.gameObject.GetComponent<ToolTip>().ClearMultiStringTooltip();
+				this.ResearchInfo.toggle.gameObject.GetComponent<ToolTip>().AddMultiStringTooltip(UI.TOOLTIPS.MANAGEMENTMENU_RESEARCH + " " + GameUtil.GetHotkeyString(global::Action.ManageResearch), this.ToggleToolTipTextStyleSetting);
 			}
-			this.ResearchInfo.toggle.gameObject.GetComponent<ToolTip>().ClearMultiStringTooltip();
-			this.ResearchInfo.toggle.gameObject.GetComponent<ToolTip>().AddMultiStringTooltip(UI.TOOLTIPS.MANAGEMENTMENU_RESEARCH + " " + GameUtil.GetHotkeyString(global::Action.ManageResearch), this.ToggleToolTipTextStyleSetting);
 		}
 	}
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (this.activeScreen != null && e.TryConsume(global::Action.Escape))
+		if (this.activeScreen != null)
 		{
-			this.ToggleScreen(this.activeScreen);
+			if (e.TryConsume(global::Action.Escape))
+			{
+				this.ToggleScreen(this.activeScreen);
+			}
 		}
 		if (!e.Consumed)
 		{
@@ -130,9 +131,12 @@ public class ManagementMenu : KIconToggleMenu
 
 	public override void OnKeyUp(KButtonEvent e)
 	{
-		if (this.activeScreen != null && PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight))
+		if (this.activeScreen != null)
 		{
-			this.ToggleScreen(this.activeScreen);
+			if (PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight))
+			{
+				this.ToggleScreen(this.activeScreen);
+			}
 		}
 		if (!e.Consumed)
 		{
@@ -147,16 +151,15 @@ public class ManagementMenu : KIconToggleMenu
 
 	public void CloseAll()
 	{
-		if (this.activeScreen == null)
+		if (this.activeScreen != null)
 		{
-			return;
+			if (this.activeScreen.toggleInfo != null)
+			{
+				this.ToggleScreen(this.activeScreen);
+			}
+			this.CloseActive();
+			this.ClearSelection();
 		}
-		if (this.activeScreen.toggleInfo != null)
-		{
-			this.ToggleScreen(this.activeScreen);
-		}
-		this.CloseActive();
-		this.ClearSelection();
 	}
 
 	private void OnUIClear(object data)
@@ -170,40 +173,38 @@ public class ManagementMenu : KIconToggleMenu
 		{
 			this.CheckResearch(null);
 			this.CloseActive();
-			return;
 		}
-		if (screenData.toggleInfo.toggle.gameObject.GetComponentInChildren<ImageToggleState>().IsDisabled)
+		else if (!screenData.toggleInfo.toggle.gameObject.GetComponentInChildren<ImageToggleState>().IsDisabled)
 		{
-			return;
-		}
-		if (this.activeScreen != null)
-		{
-			this.activeScreen.toggleInfo.toggle.isOn = false;
-			this.activeScreen.toggleInfo.toggle.gameObject.GetComponentInChildren<ImageToggleState>().SetInactive();
-		}
-		if (this.activeScreen != screenData)
-		{
-			OverlayScreen.Instance.ToggleOverlay(SimViewMode.None);
 			if (this.activeScreen != null)
 			{
-				this.activeScreen.toggleInfo.toggle.ActivateFlourish(false);
+				this.activeScreen.toggleInfo.toggle.isOn = false;
+				this.activeScreen.toggleInfo.toggle.gameObject.GetComponentInChildren<ImageToggleState>().SetInactive();
 			}
-			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Open", false));
-			AudioMixer.instance.Start(AudioMixerSnapshots.Get().MenuOpenMigrated);
-			screenData.toggleInfo.toggle.ActivateFlourish(true);
-			screenData.toggleInfo.toggle.gameObject.GetComponentInChildren<ImageToggleState>().SetActive();
-			this.CloseActive();
-			this.activeScreen = screenData;
-			this.activeScreen.screen.Show(true);
-		}
-		else
-		{
-			this.activeScreen.screen.Show(false);
-			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MenuOpenMigrated, STOP_MODE.ALLOWFADEOUT);
-			this.activeScreen.toggleInfo.toggle.ActivateFlourish(false);
-			this.activeScreen = null;
-			screenData.toggleInfo.toggle.gameObject.GetComponentInChildren<ImageToggleState>().SetInactive();
+			if (this.activeScreen != screenData)
+			{
+				OverlayScreen.Instance.ToggleOverlay(SimViewMode.None);
+				if (this.activeScreen != null)
+				{
+					this.activeScreen.toggleInfo.toggle.ActivateFlourish(false);
+				}
+				KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Open", false));
+				AudioMixer.instance.Start(AudioMixerSnapshots.Get().MenuOpenMigrated);
+				screenData.toggleInfo.toggle.ActivateFlourish(true);
+				screenData.toggleInfo.toggle.gameObject.GetComponentInChildren<ImageToggleState>().SetActive();
+				this.CloseActive();
+				this.activeScreen = screenData;
+				this.activeScreen.screen.Show(true);
+			}
+			else
+			{
+				this.activeScreen.screen.Show(false);
+				KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
+				AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MenuOpenMigrated, STOP_MODE.ALLOWFADEOUT);
+				this.activeScreen.toggleInfo.toggle.ActivateFlourish(false);
+				this.activeScreen = null;
+				screenData.toggleInfo.toggle.gameObject.GetComponentInChildren<ImageToggleState>().SetInactive();
+			}
 		}
 	}
 
@@ -224,9 +225,12 @@ public class ManagementMenu : KIconToggleMenu
 
 	public void ToggleResearch()
 	{
-		if ((this.ResearchAvailable() || this.activeScreen == this.ScreenInfoMatch[ManagementMenu.Instance.ResearchInfo]) && this.ResearchInfo != null)
+		if (this.ResearchAvailable() || this.activeScreen == this.ScreenInfoMatch[ManagementMenu.Instance.ResearchInfo])
 		{
-			this.ToggleScreen(this.ScreenInfoMatch[ManagementMenu.Instance.ResearchInfo]);
+			if (this.ResearchInfo != null)
+			{
+				this.ToggleScreen(this.ScreenInfoMatch[ManagementMenu.Instance.ResearchInfo]);
+			}
 		}
 	}
 

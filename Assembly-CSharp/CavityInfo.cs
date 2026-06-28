@@ -23,28 +23,32 @@ public class CavityInfo
 	public void AddBuilding(BuildingComplete bc)
 	{
 		this.buildings.Add(bc);
+		this.dirty = true;
 	}
 
 	public void RemoveBuilding(BuildingComplete bc)
 	{
 		this.buildings.Remove(bc);
+		this.dirty = true;
 	}
 
 	public void ReleaseResources()
 	{
-		if (this.room == null)
+		if (this.room != null)
 		{
-			return;
-		}
-		foreach (BuildingComplete buildingComplete in this.room.buildings)
-		{
-			if (!(buildingComplete == null))
+			foreach (BuildingComplete buildingComplete in this.room.buildings)
 			{
-				Assignable assignable = buildingComplete.assignable;
-				if (assignable != null && assignable.assignee == this.room)
+				if (!(buildingComplete == null))
 				{
-					assignable.Unassign();
-					assignable.Trigger(2070884250, null);
+					Assignable assignable = buildingComplete.assignable;
+					if (assignable != null)
+					{
+						if (assignable.assignee == this.room)
+						{
+							assignable.Unassign();
+							assignable.Trigger(2070884250, null);
+						}
+					}
 				}
 			}
 		}
@@ -52,9 +56,9 @@ public class CavityInfo
 
 	public HandleVector<int>.Handle handle;
 
-	public bool hasDoor;
+	public bool hasDoor = false;
 
-	public bool dirty;
+	public bool dirty = false;
 
 	public int numCells;
 

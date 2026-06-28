@@ -8,16 +8,15 @@ public class ClothingWearer : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.temperatureTransferer = base.GetComponent<CreatureSimTemperatureTransfer>();
 		this.decorProvider = base.GetComponent<DecorProvider>();
 		if (this.decorModifier == null)
 		{
-			this.decorModifier = new AttributeModifier("Decor", 0f, DUPLICANTS.MODIFIERS.CLOTHING.NAME, false, false);
+			this.decorModifier = new AttributeModifier("Decor", 0f, DUPLICANTS.MODIFIERS.CLOTHING.NAME, false, false, false);
 		}
 		if (this.conductivityModifier == null)
 		{
 			AttributeInstance attributeInstance = base.gameObject.GetAttributes().Get("ThermalConductivityBarrier");
-			this.conductivityModifier = new AttributeModifier("ThermalConductivityBarrier", ClothingWearer.ClothingInfo.BASIC_CLOTHING.conductivityMod, DUPLICANTS.MODIFIERS.CLOTHING.NAME, false, false);
+			this.conductivityModifier = new AttributeModifier("ThermalConductivityBarrier", ClothingWearer.ClothingInfo.BASIC_CLOTHING.conductivityMod, DUPLICANTS.MODIFIERS.CLOTHING.NAME, false, false, false);
 			attributeInstance.Add(DUPLICANTS.MODIFIERS.CLOTHING.NAME, this.conductivityModifier);
 		}
 	}
@@ -26,7 +25,7 @@ public class ClothingWearer : KMonoBehaviour
 	{
 		base.OnSpawn();
 		this.decorProvider.decor.Add("Clothing", this.decorModifier);
-		this.decorProvider.decorRadius.Add("radius", new AttributeModifier(Db.Get().BuildingAttributes.DecorRadius.Id, 3f, null, false, false));
+		this.decorProvider.decorRadius.Add("radius", new AttributeModifier(Db.Get().BuildingAttributes.DecorRadius.Id, 3f, null, false, false, true));
 		this.decorProvider.overrideName = string.Format(UI.OVERLAYS.DECOR.CLOTHING, base.gameObject.GetProperName());
 		if (this.currentClothing == null)
 		{
@@ -52,8 +51,6 @@ public class ClothingWearer : KMonoBehaviour
 		this.ChangeClothes(new ClothingWearer.ClothingInfo(ClothingWearer.ClothingInfo.BASIC_CLOTHING.name, ClothingWearer.ClothingInfo.BASIC_CLOTHING.decorMod, ClothingWearer.ClothingInfo.BASIC_CLOTHING.conductivityMod, ClothingWearer.ClothingInfo.BASIC_CLOTHING.homeostasisEfficiencyMultiplier));
 	}
 
-	private CreatureSimTemperatureTransfer temperatureTransferer;
-
 	private DecorProvider decorProvider;
 
 	private AttributeModifier decorModifier;
@@ -74,7 +71,7 @@ public class ClothingWearer : KMonoBehaviour
 		}
 
 		[Serialize]
-		public string name = string.Empty;
+		public string name = "";
 
 		[Serialize]
 		public int decorMod;

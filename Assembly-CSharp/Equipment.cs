@@ -15,13 +15,13 @@ public class Equipment : Assignables
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
-		this.Subscribe(1502190696, delegate(object o)
+		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(1502190696, delegate(object o)
 		{
 			this.destroyed = true;
 			Debug.Log("QueueDestroyed", null);
 		});
-		this.Subscribe(1969584890, delegate(object o)
+		base.Subscribe(1969584890, delegate(object o)
 		{
 			this.destroyed = true;
 			Debug.Log("Destroyed", null);
@@ -38,7 +38,7 @@ public class Equipment : Assignables
 	{
 		EquipmentSlotInstance equipmentSlotInstance = base.GetSlot(equippable.slot) as EquipmentSlotInstance;
 		equipmentSlotInstance.Assign(equippable);
-		this.Trigger(-448952673, equippable.GetComponent<KPrefabID>());
+		base.Trigger(-448952673, equippable.GetComponent<KPrefabID>());
 		equippable.Trigger(-1617557748, this);
 		KBatchedAnimController component = equipmentSlotInstance.gameObject.GetComponent<KBatchedAnimController>();
 		Attributes attributes = base.gameObject.GetAttributes();
@@ -83,7 +83,7 @@ public class Equipment : Assignables
 		equippable.GetComponent<KBatchedAnimController>().enabled = true;
 		AssignableSlotInstance slot = base.GetSlot(equippable.slot);
 		slot.Unassign();
-		this.Trigger(-1285462312, equippable.GetComponent<KPrefabID>());
+		base.Trigger(-1285462312, equippable.GetComponent<KPrefabID>());
 		equippable.Trigger(-170173755, this);
 		KBatchedAnimController component = slot.gameObject.GetComponent<KBatchedAnimController>();
 		if (!this.destroyed)
@@ -123,7 +123,7 @@ public class Equipment : Assignables
 
 	public bool IsEquipped(Equippable equippable)
 	{
-		return equippable.assignee == this && equippable.isEquipped;
+		return equippable.assignee is Equipment && (Equipment)equippable.assignee == this && equippable.isEquipped;
 	}
 
 	public bool IsSlotOccupied(AssignableSlot slot)
@@ -144,7 +144,7 @@ public class Equipment : Assignables
 				this.userMenu.AddButton(new KIconButtonMenu.ButtonInfo("iconDown", text, delegate
 				{
 					((Equippable)slot_iter.assignable).Unassign();
-				}, global::Action.NumActions, null, null, null, string.Empty, true), 2f);
+				}, global::Action.NumActions, null, null, null, "", true), 2f);
 			}
 		}
 	}
@@ -165,5 +165,5 @@ public class Equipment : Assignables
 
 	private SchedulerHandle refreshHandle;
 
-	private bool destroyed;
+	private bool destroyed = false;
 }

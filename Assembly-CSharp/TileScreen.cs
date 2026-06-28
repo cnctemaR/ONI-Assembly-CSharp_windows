@@ -7,15 +7,20 @@ public class TileScreen : KScreen
 {
 	private bool SetSliderColour(float temperature, float transition_temperature)
 	{
+		bool flag;
 		if (Mathf.Abs(temperature - transition_temperature) < 5f)
 		{
 			this.temperatureSliderText.color = this.temperatureTransitionColour;
 			this.temperatureSliderIcon.color = this.temperatureTransitionColour;
-			return true;
+			flag = true;
 		}
-		this.temperatureSliderText.color = this.temperatureDefaultColour;
-		this.temperatureSliderIcon.color = this.temperatureDefaultColour;
-		return false;
+		else
+		{
+			this.temperatureSliderText.color = this.temperatureDefaultColour;
+			this.temperatureSliderIcon.color = this.temperatureDefaultColour;
+			flag = false;
+		}
+		return flag;
 	}
 
 	private void DisplayTileInfo()
@@ -55,7 +60,7 @@ public class TileScreen : KScreen
 				this.gasIcon.gameObject.transform.parent.gameObject.SetActive(false);
 				this.massIcon.sprite = this.solidIcon.sprite;
 				this.solidText.text = ((int)element.highTemp).ToString();
-				this.gasText.text = string.Empty;
+				this.gasText.text = "";
 				this.liquidIcon.rectTransform.SetParent(this.solidIcon.transform.parent, true);
 				this.liquidIcon.rectTransform.localPosition = new Vector3(0f, 64f);
 				this.SetSliderColour(num3, element.highTemp);
@@ -78,7 +83,7 @@ public class TileScreen : KScreen
 			}
 			else if (element.IsGas)
 			{
-				this.solidText.text = string.Empty;
+				this.solidText.text = "";
 				this.gasText.text = ((int)element.lowTemp).ToString();
 				this.solidIcon.gameObject.transform.parent.gameObject.SetActive(false);
 				this.gasIcon.gameObject.transform.parent.gameObject.SetActive(true);
@@ -112,14 +117,14 @@ public class TileScreen : KScreen
 	{
 		SimViewMode mode = OverlayScreen.Instance.GetMode();
 		UtilityNetworkManager<FlowUtilityNetwork, Vent> utilityNetworkManager = ((mode != SimViewMode.GasVentMap) ? Game.Instance.liquidConduitSystem : Game.Instance.gasConduitSystem);
-		ConduitFlow conduitFlowManager = utilityNetworkManager.ConduitFlowManager;
+		ConduitFlow conduitFlow = ((mode != SimViewMode.GasVentMap) ? Game.Instance.liquidConduitFlow : Game.Instance.gasConduitFlow);
 		Vector3 mousePosition = Input.mousePosition;
 		mousePosition.z = -Camera.main.transform.position.z - Grid.CellSizeInMeters;
 		Vector3 vector = Camera.main.ScreenToWorldPoint(mousePosition);
 		int num = Grid.PosToCell(vector);
 		if (Grid.IsValidCell(num) && utilityNetworkManager.GetConnections(num, true) != (UtilityConnections)0)
 		{
-			ConduitFlow.ConduitContents contents = conduitFlowManager.GetContents(num);
+			ConduitFlow.ConduitContents contents = conduitFlow.GetContents(num);
 			SimHashes element = contents.element;
 			Element element2 = ElementLoader.FindElementByHash(element);
 			float num2 = contents.mass;
@@ -150,7 +155,7 @@ public class TileScreen : KScreen
 			}
 			else if (element2.IsGas)
 			{
-				this.solidText.text = string.Empty;
+				this.solidText.text = "";
 				this.gasText.text = ((int)element2.lowTemp).ToString();
 				this.solidIcon.gameObject.transform.parent.gameObject.SetActive(false);
 				this.gasIcon.gameObject.transform.parent.gameObject.SetActive(true);
@@ -166,18 +171,17 @@ public class TileScreen : KScreen
 		else
 		{
 			this.nameLabel.text = "No Conduit";
-			this.symbolLabel.text = string.Empty;
-			this.massAmtLabel.text = string.Empty;
-			this.massTitleLabel.text = string.Empty;
+			this.symbolLabel.text = "";
+			this.massAmtLabel.text = "";
+			this.massTitleLabel.text = "";
 		}
 	}
 
 	private void Update()
 	{
-		this.transform.SetPosition(Input.mousePosition);
+		base.transform.SetPosition(Input.mousePosition);
 		SimViewMode mode = OverlayScreen.Instance.GetMode();
-		SimViewMode simViewMode = mode;
-		if (simViewMode != SimViewMode.LiquidVentMap && simViewMode != SimViewMode.GasVentMap)
+		if (mode != SimViewMode.GasVentMap && mode != SimViewMode.LiquidVentMap)
 		{
 			this.DisplayTileInfo();
 		}

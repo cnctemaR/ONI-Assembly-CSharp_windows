@@ -36,12 +36,12 @@ public class GameEntityTypeSet : EntityTypeSet
 	public static Trait CreateLivingEntityBaseTrait(string id, string name, float stamina_per_second, float calories_per_second, float air_per_second, float toxicity_recovery_per_second, float bladder_increase_per_second, float max_underwater_travel_cost, Db modifier_set)
 	{
 		Trait trait = Db.Get().CreateTrait(id + "BaseTrait", name, name, null, false, null, true, true);
-		trait.Add(new AttributeModifier(Db.Get().Amounts.Stamina.deltaAttribute.Id, stamina_per_second, name, false, false));
-		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, calories_per_second, name, false, false));
-		trait.Add(new AttributeModifier(Db.Get().Amounts.Toxicity.deltaAttribute.Id, toxicity_recovery_per_second, name, false, false));
-		trait.Add(new AttributeModifier(Db.Get().Attributes.AirConsumptionRate.Id, air_per_second, name, false, false));
-		trait.Add(new AttributeModifier(Db.Get().Amounts.Bladder.deltaAttribute.Id, bladder_increase_per_second, name, false, false));
-		trait.Add(new AttributeModifier(Db.Get().Attributes.MaxUnderwaterTravelCost.Id, max_underwater_travel_cost, name, false, false));
+		trait.Add(new AttributeModifier(Db.Get().Amounts.Stamina.deltaAttribute.Id, stamina_per_second, name, false, false, true));
+		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, calories_per_second, name, false, false, true));
+		trait.Add(new AttributeModifier(Db.Get().Amounts.Toxicity.deltaAttribute.Id, toxicity_recovery_per_second, name, false, false, true));
+		trait.Add(new AttributeModifier(Db.Get().Attributes.AirConsumptionRate.Id, air_per_second, name, false, false, true));
+		trait.Add(new AttributeModifier(Db.Get().Amounts.Bladder.deltaAttribute.Id, bladder_increase_per_second, name, false, false, true));
+		trait.Add(new AttributeModifier(Db.Get().Attributes.MaxUnderwaterTravelCost.Id, max_underwater_travel_cost, name, false, false, true));
 		return trait;
 	}
 

@@ -172,7 +172,7 @@ public class NewGameSettingsScreen : KModalScreen
 		{
 			Output.LogWarning(new object[] { ex.ToString() });
 		}
-		global::Util.KInstantiateUI(ScreenPrefabs.Instance.WorldGenScreen.gameObject, this.transform.parent.gameObject, true);
+		global::Util.KInstantiateUI(ScreenPrefabs.Instance.WorldGenScreen.gameObject, base.transform.parent.gameObject, true);
 		global::UnityEngine.Object.FindObjectOfType<FrontEndBackground>().gameObject.SetActive(false);
 		this.Deactivate();
 	}
@@ -189,8 +189,8 @@ public class NewGameSettingsScreen : KModalScreen
 		}
 	}
 
-	[SerializeField]
 	[Header("Static UI Refs")]
+	[SerializeField]
 	private MultiToggle toggle_standard_game;
 
 	[SerializeField]
@@ -211,8 +211,8 @@ public class NewGameSettingsScreen : KModalScreen
 	[SerializeField]
 	private Transform content;
 
-	[SerializeField]
 	[Header("Prefab UI Refs")]
+	[SerializeField]
 	private GameObject prefab_cycle_setting;
 
 	[SerializeField]

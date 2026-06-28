@@ -23,26 +23,28 @@ public class KBatchedAnimTracker : MonoBehaviour
 		{
 			global::Debug.Log("Controller Null for tracker on " + base.gameObject.name, base.gameObject);
 			base.enabled = false;
-			return;
 		}
-		this.controller.onAnimEnter += this.OnAnimStart;
-		this.controller.onAnimComplete += this.OnAnimStop;
-		this.controller.onLayerChanged += this.OnLayerChanged;
-		this.forceUpdate = true;
-		this.myAnim = base.GetComponent<KBatchedAnimController>();
-		List<KAnimControllerBase> list = new List<KAnimControllerBase>(base.GetComponentsInChildren<KAnimControllerBase>(true));
-		if (!this.skipInitialDisable)
+		else
 		{
-			for (int i = 0; i < base.transform.childCount; i++)
+			this.controller.onAnimEnter += this.OnAnimStart;
+			this.controller.onAnimComplete += this.OnAnimStop;
+			this.controller.onLayerChanged += this.OnLayerChanged;
+			this.forceUpdate = true;
+			this.myAnim = base.GetComponent<KBatchedAnimController>();
+			List<KAnimControllerBase> list = new List<KAnimControllerBase>(base.GetComponentsInChildren<KAnimControllerBase>(true));
+			if (!this.skipInitialDisable)
 			{
-				base.transform.GetChild(i).gameObject.SetActive(false);
+				for (int i = 0; i < base.transform.childCount; i++)
+				{
+					base.transform.GetChild(i).gameObject.SetActive(false);
+				}
 			}
-		}
-		for (int j = list.Count - 1; j >= 0; j--)
-		{
-			if (list[j].gameObject == base.gameObject)
+			for (int j = list.Count - 1; j >= 0; j--)
 			{
-				list.RemoveAt(j);
+				if (list[j].gameObject == base.gameObject)
+				{
+					list.RemoveAt(j);
+				}
 			}
 		}
 	}
@@ -57,11 +59,6 @@ public class KBatchedAnimTracker : MonoBehaviour
 			this.controller = null;
 		}
 		this.myAnim = null;
-	}
-
-	private void OnDisable()
-	{
-		this.wasVisible = false;
 	}
 
 	private void LateUpdate()
@@ -118,11 +115,9 @@ public class KBatchedAnimTracker : MonoBehaviour
 				base.transform.SetPosition(new Vector3(base.transform.position.x, base.transform.position.y, z));
 				this.myAnim.MarkDirty();
 			}
-			flag = flag && (!this.filterByAnim || currentAnim.name == this.anim);
 		}
-		if (flag != this.wasVisible)
+		if (this.myAnim != null && flag != this.myAnim.enabled)
 		{
-			this.wasVisible = flag;
 			this.myAnim.enabled = flag;
 		}
 	}
@@ -162,29 +157,23 @@ public class KBatchedAnimTracker : MonoBehaviour
 
 	public HashedString symbol;
 
-	public string anim;
-
-	public bool filterByAnim = true;
-
 	public Vector3 targetPoint = Vector3.zero;
 
-	public bool useTargetPoint;
+	public bool useTargetPoint = false;
 
 	public bool fadeOut = true;
 
-	public bool skipInitialDisable;
+	public bool skipInitialDisable = false;
 
-	public bool forceAlwaysVisible;
-
-	private bool wasVisible;
+	public bool forceAlwaysVisible = false;
 
 	private bool alive = true;
 
-	private bool forceUpdate;
+	private bool forceUpdate = false;
 
 	private Matrix2x3 previousMatrix;
 
 	private Vector3 previousPosition;
 
-	private KBatchedAnimController myAnim;
+	private KBatchedAnimController myAnim = null;
 }

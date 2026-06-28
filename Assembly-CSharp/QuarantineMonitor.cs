@@ -111,8 +111,11 @@ public class QuarantineMonitor : GameStateMachine<QuarantineMonitor, QuarantineM
 			}
 			UserMenu component = base.GetComponent<UserMenu>();
 			UserMenu userMenu = component;
-			string text3 = text2;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_quarantine", text, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+			string text3 = "action_quarantine";
+			string text4 = text;
+			global::System.Action action2 = action;
+			string text5 = text2;
+			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text3, text4, action2, global::Action.NumActions, null, null, null, text5, true), 1f);
 		}
 
 		private bool HasBedRoom()

@@ -25,16 +25,6 @@ namespace Steamworks
 			return this.m_ClientUnifiedMessageHandle.GetHashCode();
 		}
 
-		public bool Equals(ClientUnifiedMessageHandle other)
-		{
-			return this.m_ClientUnifiedMessageHandle == other.m_ClientUnifiedMessageHandle;
-		}
-
-		public int CompareTo(ClientUnifiedMessageHandle other)
-		{
-			return this.m_ClientUnifiedMessageHandle.CompareTo(other.m_ClientUnifiedMessageHandle);
-		}
-
 		public static bool operator ==(ClientUnifiedMessageHandle x, ClientUnifiedMessageHandle y)
 		{
 			return x.m_ClientUnifiedMessageHandle == y.m_ClientUnifiedMessageHandle;
@@ -53,6 +43,16 @@ namespace Steamworks
 		public static explicit operator ulong(ClientUnifiedMessageHandle that)
 		{
 			return that.m_ClientUnifiedMessageHandle;
+		}
+
+		public bool Equals(ClientUnifiedMessageHandle other)
+		{
+			return this.m_ClientUnifiedMessageHandle == other.m_ClientUnifiedMessageHandle;
+		}
+
+		public int CompareTo(ClientUnifiedMessageHandle other)
+		{
+			return this.m_ClientUnifiedMessageHandle.CompareTo(other.m_ClientUnifiedMessageHandle);
 		}
 
 		public static readonly ClientUnifiedMessageHandle Invalid = new ClientUnifiedMessageHandle(0UL);

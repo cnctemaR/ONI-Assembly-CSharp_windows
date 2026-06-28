@@ -695,6 +695,8 @@ namespace STRINGS
 					public static LocString CROMULUS = "Cromulus";
 
 					public static LocString BLUMP = "Blump";
+
+					public static LocString SELDEMER = "Seldemer";
 				}
 			}
 		}

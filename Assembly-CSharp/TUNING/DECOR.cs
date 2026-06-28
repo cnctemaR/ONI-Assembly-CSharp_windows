@@ -6,6 +6,12 @@ namespace TUNING
 	{
 		public static int LIT_BONUS = 15;
 
+		public static EffectorValues NONE = new EffectorValues
+		{
+			amount = 0,
+			radius = 0
+		};
+
 		public class BONUS
 		{
 			public static EffectorValues TIER0 = new EffectorValues

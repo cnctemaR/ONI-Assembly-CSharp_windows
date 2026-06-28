@@ -28,67 +28,59 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	protected override void OnPrefabInit()
 	{
-		global::Util.Reset(this.transform);
-		this.transform.localPosition = new Vector3(Grid.WidthInMeters / 2f, Grid.HeightInMeters / 2f, this.defaultDepth);
+		global::Util.Reset(base.transform);
+		base.transform.localPosition = new Vector3(Grid.WidthInMeters / 2f, Grid.HeightInMeters / 2f, this.defaultDepth);
 		this.targetOrthographicSize = this.maxOrthographicSize;
 		CameraController.Instance = this;
 		this.DisableUserCameraControl = false;
 		this.baseCamera = this.CopyCamera(Camera.main, "baseCamera");
 		this.mrt = this.baseCamera.gameObject.AddComponent<MultipleRenderTarget>();
 		this.mrt.onSetupComplete += this.OnMRTSetupComplete;
-		this.baseCamera.gameObject.AddComponent<GasEffect>().Material = this.GasMaterial;
 		this.baseCamera.gameObject.AddComponent<LightBufferCompositor>();
 		this.baseCamera.transparencySortMode = TransparencySortMode.Orthographic;
-		this.baseCamera.transform.parent = this.transform;
+		this.baseCamera.transform.parent = base.transform;
 		global::Util.Reset(this.baseCamera.transform);
 		int mask = LayerMask.GetMask(new string[] { "PlaceWithDepth", "Overlay" });
-		int mask2 = LayerMask.GetMask(new string[] { "Water" });
-		int mask3 = LayerMask.GetMask(new string[] { "Construction" });
+		int mask2 = LayerMask.GetMask(new string[] { "Construction" });
 		this.cameras.Add(this.baseCamera);
 		this.baseCamera.cullingMask &= ~mask;
-		this.baseCamera.cullingMask &= ~mask2;
-		this.baseCamera.cullingMask |= mask3;
+		this.baseCamera.cullingMask |= mask2;
 		this.baseCamera.tag = "Untagged";
 		this.baseCamera.gameObject.AddComponent<CameraRenderTexture>().TextureName = "_LitTex";
 		this.infraredCamera = this.CopyCamera(this.baseCamera, "Infrared");
 		this.infraredCamera.cullingMask = 0;
 		this.infraredCamera.clearFlags = CameraClearFlags.Color;
 		this.infraredCamera.depth = this.baseCamera.depth - 1f;
-		this.infraredCamera.transform.parent = this.transform;
+		this.infraredCamera.transform.parent = base.transform;
 		this.infraredCamera.gameObject.AddComponent<Infrared>();
 		this.simOverlayCamera = this.CopyCamera(this.baseCamera, "SimOverlayCamera");
 		this.simOverlayCamera.cullingMask = LayerMask.GetMask(new string[] { "SimDebugView" });
 		this.simOverlayCamera.clearFlags = CameraClearFlags.Color;
 		this.simOverlayCamera.depth = this.baseCamera.depth + 1f;
-		this.simOverlayCamera.transform.parent = this.transform;
+		this.simOverlayCamera.transform.parent = base.transform;
 		this.simOverlayCamera.gameObject.AddComponent<CameraRenderTexture>().TextureName = "_SimDebugViewTex";
-		this.waterCamera = this.CopyCamera(this.baseCamera, "Water");
-		this.waterCamera.cullingMask = mask2;
-		this.waterCamera.clearFlags = CameraClearFlags.Depth;
-		this.waterCamera.depth = this.baseCamera.depth + 2f;
-		this.waterCamera.transform.parent = this.transform;
-		CameraReferenceTexture cameraReferenceTexture = this.waterCamera.gameObject.AddComponent<CameraReferenceTexture>();
-		cameraReferenceTexture.referenceCamera = this.baseCamera;
 		this.overlayCamera = Camera.main;
 		this.overlayCamera.name = "Overlay";
-		this.overlayCamera.cullingMask = mask | mask3;
+		this.overlayCamera.cullingMask = mask | mask2;
 		this.overlayCamera.clearFlags = CameraClearFlags.Nothing;
-		this.overlayCamera.transform.parent = this.transform;
+		this.overlayCamera.transform.parent = base.transform;
 		this.overlayCamera.depth = this.baseCamera.depth + 3f;
 		this.overlayCamera.transform.localPosition = Vector3.zero;
 		this.overlayCamera.transform.localRotation = Quaternion.identity;
 		this.overlayCamera.renderingPath = RenderingPath.Forward;
-		this.overlayCamera.hdr = false;
+		this.overlayCamera.allowHDR = false;
 		this.overlayCamera.tag = "Untagged";
+		CameraReferenceTexture cameraReferenceTexture = this.overlayCamera.gameObject.AddComponent<CameraReferenceTexture>();
+		cameraReferenceTexture.referenceCamera = this.baseCamera;
 		ColorCorrectionLookup component = this.overlayCamera.GetComponent<ColorCorrectionLookup>();
-		component.Convert(this.dayColourCube, string.Empty);
-		component.Convert2(this.nightColourCube, string.Empty);
+		component.Convert(this.dayColourCube, "");
+		component.Convert2(this.nightColourCube, "");
 		this.cameras.Add(this.overlayCamera);
 		this.lightBufferCamera = this.CopyCamera(this.overlayCamera, "Light Buffer");
 		this.lightBufferCamera.clearFlags = CameraClearFlags.Color;
 		this.lightBufferCamera.cullingMask = LayerMask.GetMask(new string[] { "Lights" });
 		this.lightBufferCamera.depth = this.baseCamera.depth - 1f;
-		this.lightBufferCamera.transform.parent = this.transform;
+		this.lightBufferCamera.transform.parent = base.transform;
 		this.lightBufferCamera.transform.localPosition = Vector3.zero;
 		this.lightBufferCamera.rect = new Rect(0f, 0f, 1f, 1f);
 		LightBuffer lightBuffer = this.lightBufferCamera.gameObject.AddComponent<LightBuffer>();
@@ -96,11 +88,11 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		lightBuffer.CircleMaterial = this.LightCircleOverlay;
 		lightBuffer.ConeMaterial = this.LightConeOverlay;
 		this.overlayNoDepthCamera = this.CopyCamera(this.overlayCamera, "overlayNoDepth");
-		int mask4 = LayerMask.GetMask(new string[] { "Overlay", "Place" });
-		this.baseCamera.cullingMask &= ~mask4;
+		int mask3 = LayerMask.GetMask(new string[] { "Overlay", "Place" });
+		this.baseCamera.cullingMask &= ~mask3;
 		this.overlayNoDepthCamera.clearFlags = CameraClearFlags.Depth;
-		this.overlayNoDepthCamera.cullingMask = mask4;
-		this.overlayNoDepthCamera.transform.parent = this.transform;
+		this.overlayNoDepthCamera.cullingMask = mask3;
+		this.overlayNoDepthCamera.transform.parent = base.transform;
 		this.overlayNoDepthCamera.transform.localPosition = Vector3.zero;
 		this.overlayNoDepthCamera.depth = this.baseCamera.depth + 4f;
 		this.overlayNoDepthCamera.tag = "MainCamera";
@@ -108,7 +100,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		this.uiCamera = this.CopyCamera(this.overlayCamera, "uiCamera");
 		this.uiCamera.clearFlags = CameraClearFlags.Depth;
 		this.uiCamera.cullingMask = LayerMask.GetMask(new string[] { "UI" });
-		this.uiCamera.transform.parent = this.transform;
+		this.uiCamera.transform.parent = base.transform;
 		this.uiCamera.transform.localPosition = Vector3.zero;
 		this.uiCamera.depth = this.baseCamera.depth + 5f;
 		GameScreenManager.Instance.SetCamera(GameScreenManager.UIRenderTarget.ScreenSpaceCamera, this.uiCamera);
@@ -140,46 +132,75 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	public void OnKeyDown(KButtonEvent e)
 	{
-		if (e.Consumed)
+		if (!e.Consumed)
 		{
-			return;
-		}
-		if (this.DisableUserCameraControl)
-		{
-			return;
-		}
-		if (e.TryConsume(global::Action.ZoomIn))
-		{
-			float num = this.targetOrthographicSize - this.zoomFactor * this.targetOrthographicSize;
-			this.targetOrthographicSize = Mathf.Max(num, this.minOrthographicSize);
-			this.overrideZoomSpeed = 0f;
-		}
-		else if (e.TryConsume(global::Action.ZoomOut))
-		{
-			float num2 = this.targetOrthographicSize + this.zoomFactor * this.targetOrthographicSize;
-			this.targetOrthographicSize = Mathf.Min(num2, (!DebugHandler.FreeCameraMode) ? this.maxOrthographicSize : this.maxOrthographicSizeDebug);
-			this.overrideZoomSpeed = 0f;
-		}
-		else if (e.TryConsume(global::Action.MouseMiddle) || e.IsAction(global::Action.MouseRight))
-		{
-			this.panning = true;
-			this.overrideZoomSpeed = 0f;
+			if (!this.DisableUserCameraControl)
+			{
+				if (e.TryConsume(global::Action.ZoomIn))
+				{
+					float num = this.targetOrthographicSize - this.zoomFactor * this.targetOrthographicSize;
+					this.targetOrthographicSize = Mathf.Max(num, this.minOrthographicSize);
+					this.overrideZoomSpeed = 0f;
+				}
+				else if (e.TryConsume(global::Action.ZoomOut))
+				{
+					float num2 = this.targetOrthographicSize + this.zoomFactor * this.targetOrthographicSize;
+					this.targetOrthographicSize = Mathf.Min(num2, (!DebugHandler.FreeCameraMode) ? this.maxOrthographicSize : this.maxOrthographicSizeDebug);
+					this.overrideZoomSpeed = 0f;
+				}
+				else if (e.TryConsume(global::Action.MouseMiddle) || e.IsAction(global::Action.MouseRight))
+				{
+					this.panning = true;
+					this.overrideZoomSpeed = 0f;
+				}
+				else if (e.TryConsume(global::Action.PanLeft))
+				{
+					this.panLeft = true;
+				}
+				else if (e.TryConsume(global::Action.PanRight))
+				{
+					this.panRight = true;
+				}
+				else if (e.TryConsume(global::Action.PanUp))
+				{
+					this.panUp = true;
+				}
+				else if (e.TryConsume(global::Action.PanDown))
+				{
+					this.panDown = true;
+				}
+			}
 		}
 	}
 
 	public void OnKeyUp(KButtonEvent e)
 	{
-		if (this.DisableUserCameraControl)
+		if (!this.DisableUserCameraControl)
 		{
-			return;
-		}
-		if (e.TryConsume(global::Action.MouseMiddle) || e.IsAction(global::Action.MouseRight))
-		{
-			this.panning = false;
-		}
-		else if (e.TryConsume(global::Action.CameraHome))
-		{
-			this.CameraGoHome(2f);
+			if (e.TryConsume(global::Action.MouseMiddle) || e.IsAction(global::Action.MouseRight))
+			{
+				this.panning = false;
+			}
+			else if (e.TryConsume(global::Action.CameraHome))
+			{
+				this.CameraGoHome(2f);
+			}
+			else if (e.TryConsume(global::Action.PanLeft))
+			{
+				this.panLeft = false;
+			}
+			else if (e.TryConsume(global::Action.PanRight))
+			{
+				this.panRight = false;
+			}
+			else if (e.TryConsume(global::Action.PanUp))
+			{
+				this.panUp = false;
+			}
+			else if (e.TryConsume(global::Action.PanDown))
+			{
+				this.panDown = false;
+			}
 		}
 	}
 
@@ -193,7 +214,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		GameObject telepad = GameUtil.GetTelepad();
 		if (telepad != null)
 		{
-			Vector3 vector = new Vector3(telepad.transform.position.x, telepad.transform.position.y + 1f, this.transform.position.z);
+			Vector3 vector = new Vector3(telepad.transform.position.x, telepad.transform.position.y + 1f, base.transform.position.z);
 			this.SetTargetPos(vector, 10f, true);
 			this.SetOverrideZoomSpeed(speed);
 		}
@@ -201,7 +222,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	public void CameraGoTo(Vector3 pos, float speed = 2f, bool playSound = true)
 	{
-		pos.z = this.transform.position.z;
+		pos.z = base.transform.position.z;
 		this.SetTargetPos(pos, 10f, playSound);
 		this.SetOverrideZoomSpeed(speed);
 	}
@@ -209,7 +230,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 	public void SnapTo(Vector3 pos)
 	{
 		this.ClearFollowTarget();
-		this.transform.SetPosition(pos);
+		base.transform.SetPosition(pos);
 		this.keyPanDelta = Vector3.zero;
 		this.SetOrthographicsSize(this.targetOrthographicSize);
 	}
@@ -260,9 +281,9 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		Vector3 vector = ((this.overrideZoomSpeed <= 0f) ? Input.mousePosition : new Vector3((float)Screen.width / 2f, (float)Screen.height / 2f, 0f));
 		Vector3 vector2 = this.PointUnderCursor(vector, main);
 		Vector3 vector3 = main.ScreenToViewportPoint(vector);
-		Vector3 localPosition = this.transform.localPosition;
+		Vector3 localPosition = base.transform.localPosition;
 		this.SetOrthographicsSize(Mathf.Lerp(main.orthographicSize, this.targetOrthographicSize, num * unscaledDeltaTime));
-		this.transform.localPosition = localPosition;
+		base.transform.localPosition = localPosition;
 		Vector3 vector4 = main.WorldToViewportPoint(vector2);
 		vector3.z = vector4.z;
 		Vector3 vector5 = main.ViewportToWorldPoint(vector4) - main.ViewportToWorldPoint(vector3);
@@ -296,28 +317,28 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		}
 		else if (!this.DisableUserCameraControl)
 		{
-			if (this.inputHandler.IsActive(global::Action.PanLeft))
+			if (this.panLeft)
 			{
 				this.ClearFollowTarget();
 				this.keyPanDelta.x = this.keyPanDelta.x - this.zoomScaledKeyPanningSpeed;
 				this.isTargetPosSet = false;
 				this.overrideZoomSpeed = 0f;
 			}
-			if (this.inputHandler.IsActive(global::Action.PanRight))
+			if (this.panRight)
 			{
 				this.ClearFollowTarget();
 				this.keyPanDelta.x = this.keyPanDelta.x + this.zoomScaledKeyPanningSpeed;
 				this.isTargetPosSet = false;
 				this.overrideZoomSpeed = 0f;
 			}
-			if (this.inputHandler.IsActive(global::Action.PanUp))
+			if (this.panUp)
 			{
 				this.ClearFollowTarget();
 				this.keyPanDelta.y = this.keyPanDelta.y + this.zoomScaledKeyPanningSpeed;
 				this.isTargetPosSet = false;
 				this.overrideZoomSpeed = 0f;
 			}
-			if (this.inputHandler.IsActive(global::Action.PanDown))
+			if (this.panDown)
 			{
 				this.ClearFollowTarget();
 				this.keyPanDelta.y = this.keyPanDelta.y - this.zoomScaledKeyPanningSpeed;
@@ -334,17 +355,18 @@ public class CameraController : KMonoBehaviour, IInputHandler
 			vector7.x = this.followTargetPos.x;
 			vector7.y = this.followTargetPos.y;
 		}
-		if ((double)(vector7 - this.transform.localPosition).magnitude > 0.001)
+		if ((double)(vector7 - base.transform.localPosition).magnitude > 0.001)
 		{
-			this.transform.localPosition = vector7;
+			base.transform.localPosition = vector7;
 		}
 		this.ConstrainToWorld();
-		Shader.SetGlobalVector("_WorldCameraPos", new Vector4(this.transform.position.x, this.transform.position.y, this.transform.position.z, main.orthographicSize));
+		Shader.SetGlobalVector("_WorldCameraPos", new Vector4(base.transform.position.x, base.transform.position.y, base.transform.position.z, main.orthographicSize));
 		this.VisibleArea.Update();
 	}
 
 	private Vector3 GetFollowPos()
 	{
+		Vector3 vector2;
 		if (this.followTarget != null)
 		{
 			Vector3 vector = this.followTarget.transform.position;
@@ -353,66 +375,71 @@ public class CameraController : KMonoBehaviour, IInputHandler
 			{
 				vector = component.GetWorldPivot();
 			}
-			return vector;
+			vector2 = vector;
 		}
-		return Vector3.zero;
+		else
+		{
+			vector2 = Vector3.zero;
+		}
+		return vector2;
 	}
 
 	private void ConstrainToWorld()
 	{
-		if (Game.Instance.IsLoading())
+		if (!Game.Instance.IsLoading())
 		{
-			return;
+			if (!DebugHandler.FreeCameraMode)
+			{
+				Camera main = Camera.main;
+				Ray ray = main.ViewportPointToRay(Vector3.zero);
+				Ray ray2 = main.ViewportPointToRay(Vector3.one);
+				float num = Mathf.Abs(ray.origin.z / ray.direction.z);
+				float num2 = Mathf.Abs(ray2.origin.z / ray2.direction.z);
+				Vector3 point = ray.GetPoint(num);
+				Vector3 point2 = ray2.GetPoint(num2);
+				if (point2.x - point.x <= Grid.WidthInMeters && point2.y - point.y <= Grid.HeightInMeters)
+				{
+					Vector3 vector = base.transform.position - ray.origin;
+					Vector3 vector2 = point;
+					vector2.x = Mathf.Max(0f, vector2.x);
+					vector2.y = Mathf.Max(0f, vector2.y);
+					ray.origin = vector2;
+					ray.direction = -ray.direction;
+					vector2 = ray.GetPoint(num);
+					base.transform.SetPosition(vector2 + vector);
+					vector = base.transform.position - ray2.origin;
+					vector2 = point2;
+					vector2.x = Mathf.Min(Grid.WidthInMeters, vector2.x);
+					vector2.y = Mathf.Min(Grid.HeightInMeters, vector2.y);
+					ray2.origin = vector2;
+					ray2.direction = -ray2.direction;
+					vector2 = ray2.GetPoint(num2);
+					base.transform.SetPosition(vector2 + vector);
+				}
+			}
 		}
-		Camera main = Camera.main;
-		Ray ray = main.ViewportPointToRay(Vector3.zero);
-		Ray ray2 = main.ViewportPointToRay(Vector3.one);
-		float num = Mathf.Abs(ray.origin.z / ray.direction.z);
-		float num2 = Mathf.Abs(ray2.origin.z / ray2.direction.z);
-		Vector3 point = ray.GetPoint(num);
-		Vector3 point2 = ray2.GetPoint(num2);
-		if (point2.x - point.x > Grid.WidthInMeters || point2.y - point.y > Grid.HeightInMeters)
-		{
-			return;
-		}
-		Vector3 vector = this.transform.position - ray.origin;
-		Vector3 vector2 = point;
-		vector2.x = Mathf.Max(0f, vector2.x);
-		vector2.y = Mathf.Max(0f, vector2.y);
-		ray.origin = vector2;
-		ray.direction = -ray.direction;
-		vector2 = ray.GetPoint(num);
-		this.transform.SetPosition(vector2 + vector);
-		vector = this.transform.position - ray2.origin;
-		vector2 = point2;
-		vector2.x = Mathf.Min(Grid.WidthInMeters, vector2.x);
-		vector2.y = Mathf.Min(Grid.HeightInMeters, vector2.y);
-		ray2.origin = vector2;
-		ray2.direction = -ray2.direction;
-		vector2 = ray2.GetPoint(num2);
-		this.transform.SetPosition(vector2 + vector);
 	}
 
 	public void Save(BinaryWriter writer)
 	{
-		writer.Write(this.transform.position);
-		writer.Write(this.transform.localScale);
-		writer.Write(this.transform.rotation);
+		writer.Write(base.transform.position);
+		writer.Write(base.transform.localScale);
+		writer.Write(base.transform.rotation);
 		writer.Write(this.targetOrthographicSize);
-		CameraSaveData.position = this.transform.position;
-		CameraSaveData.localScale = this.transform.localScale;
-		CameraSaveData.rotation = this.transform.rotation;
+		CameraSaveData.position = base.transform.position;
+		CameraSaveData.localScale = base.transform.localScale;
+		CameraSaveData.rotation = base.transform.rotation;
 	}
 
 	private void Restore()
 	{
 		if (CameraSaveData.valid)
 		{
-			this.transform.SetPosition(CameraSaveData.position);
-			this.transform.localScale = CameraSaveData.localScale;
-			this.transform.rotation = CameraSaveData.rotation;
+			base.transform.SetPosition(CameraSaveData.position);
+			base.transform.localScale = CameraSaveData.localScale;
+			base.transform.rotation = CameraSaveData.rotation;
 			this.targetOrthographicSize = Mathf.Clamp(CameraSaveData.orthographicsSize, this.minOrthographicSize, (!DebugHandler.FreeCameraMode) ? this.maxOrthographicSize : this.maxOrthographicSizeDebug);
-			this.SnapTo(this.transform.position);
+			this.SnapTo(base.transform.position);
 		}
 	}
 
@@ -452,7 +479,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 					float num;
 					soundEventDescription.getMaximumDistance(out num);
 					num *= this.maxAudibleDistanceScale;
-					float num2 = (pos.x - this.transform.position.x) * (pos.x - this.transform.position.x) + (pos.y - this.transform.position.y) * (pos.y - this.transform.position.y);
+					float num2 = (pos.x - base.transform.position.x) * (pos.x - base.transform.position.x) + (pos.y - base.transform.position.y) * (pos.y - base.transform.position.y);
 					flag = num2 < num * num;
 				}
 			}
@@ -524,27 +551,25 @@ public class CameraController : KMonoBehaviour, IInputHandler
 	public void SetFollowTarget(Transform follow_target)
 	{
 		this.ClearFollowTarget();
-		if (follow_target == null)
+		if (!(follow_target == null))
 		{
-			return;
+			this.followTarget = follow_target;
+			this.SetOrthographicsSize(6f);
+			this.targetOrthographicSize = 6f;
+			Vector3 followPos = this.GetFollowPos();
+			this.followTargetPos = new Vector3(followPos.x, followPos.y, base.transform.position.z);
+			base.transform.position = this.followTargetPos;
+			this.followTarget.GetComponent<KMonoBehaviour>().Trigger(-1506069671, null);
 		}
-		this.followTarget = follow_target;
-		this.SetOrthographicsSize(6f);
-		this.targetOrthographicSize = 6f;
-		Vector3 followPos = this.GetFollowPos();
-		this.followTargetPos = new Vector3(followPos.x, followPos.y, this.transform.position.z);
-		this.transform.position = this.followTargetPos;
-		this.followTarget.GetComponent<KMonoBehaviour>().Trigger(-1506069671, null);
 	}
 
 	public void ClearFollowTarget()
 	{
-		if (this.followTarget == null)
+		if (!(this.followTarget == null))
 		{
-			return;
+			this.followTarget.GetComponent<KMonoBehaviour>().Trigger(-485480405, null);
+			this.followTarget = null;
 		}
-		this.followTarget.GetComponent<KMonoBehaviour>().Trigger(-485480405, null);
-		this.followTarget = null;
 	}
 
 	public void UpdateFollowTarget()
@@ -552,9 +577,9 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		if (this.followTarget != null)
 		{
 			Vector3 followPos = this.GetFollowPos();
-			Vector2 vector = new Vector2(this.transform.localPosition.x, this.transform.localPosition.y);
+			Vector2 vector = new Vector2(base.transform.localPosition.x, base.transform.localPosition.y);
 			Vector2 vector2 = Vector2.Lerp(vector, followPos, Time.unscaledDeltaTime * 25f);
-			this.followTargetPos = new Vector3(vector2.x, vector2.y, this.transform.localPosition.z);
+			this.followTargetPos = new Vector3(vector2.x, vector2.y, base.transform.localPosition.z);
 		}
 	}
 
@@ -601,7 +626,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	private float overrideZoomSpeed;
 
-	private bool panning;
+	private bool panning = false;
 
 	private Vector3 keyPanDelta;
 
@@ -609,11 +634,16 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	private Vector3 targetPos;
 
-	[NonSerialized]
-	public Camera baseCamera;
+	private bool panLeft = false;
+
+	private bool panRight = false;
+
+	private bool panUp = false;
+
+	private bool panDown = false;
 
 	[NonSerialized]
-	public Camera waterCamera;
+	public Camera baseCamera;
 
 	[NonSerialized]
 	public Camera overlayCamera;

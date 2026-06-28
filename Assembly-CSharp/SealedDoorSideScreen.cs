@@ -19,10 +19,12 @@ public class SealedDoorSideScreen : SideScreenContent
 		if (component == null)
 		{
 			global::Debug.LogError("Target doesn't have a Door associated with it.", null);
-			return;
 		}
-		this.target = component;
-		this.Refresh();
+		else
+		{
+			this.target = component;
+			this.Refresh();
+		}
 	}
 
 	private void Refresh()

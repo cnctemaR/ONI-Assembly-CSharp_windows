@@ -23,16 +23,20 @@ public class ObjectLayerListItem
 
 	public bool Refresh(int new_cell)
 	{
+		bool flag;
 		if (this.cell != new_cell)
 		{
-			if (this.cell != Grid.InvalidCell && Grid.Objects[this.cell, (int)this.layer] == this.gameObject)
+			if (this.cell != Grid.InvalidCell)
 			{
-				GameObject gameObject = null;
-				if (this.nextItem != null && this.nextItem.gameObject != null)
+				if (Grid.Objects[this.cell, (int)this.layer] == this.gameObject)
 				{
-					gameObject = this.nextItem.gameObject;
+					GameObject gameObject = null;
+					if (this.nextItem != null && this.nextItem.gameObject != null)
+					{
+						gameObject = this.nextItem.gameObject;
+					}
+					Grid.Objects[this.cell, (int)this.layer] = gameObject;
 				}
-				Grid.Objects[this.cell, (int)this.layer] = gameObject;
 			}
 			if (this.previousItem != null)
 			{
@@ -56,9 +60,13 @@ public class ObjectLayerListItem
 				}
 				Grid.Objects[this.cell, (int)this.layer] = this.gameObject;
 			}
-			return true;
+			flag = true;
 		}
-		return false;
+		else
+		{
+			flag = false;
+		}
+		return flag;
 	}
 
 	public bool Update(int cell)

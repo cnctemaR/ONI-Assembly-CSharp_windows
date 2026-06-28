@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
 	internal sealed class DebugLogHandler : ILogHandler
 	{
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void Internal_Log(LogType level, string msg, [Writable] Object obj);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void Internal_LogException(Exception exception, [Writable] Object obj);
 

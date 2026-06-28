@@ -21,14 +21,17 @@ public class SafetyQuery : PathFinderQuery
 	{
 		bool flag = false;
 		int safetyConditions = this.checker.GetSafetyConditions(cell, cost, this.context, out flag);
-		if (safetyConditions != 0 && (safetyConditions > this.targetConditions || (safetyConditions == this.targetConditions && cost < this.targetCost)))
+		if (safetyConditions != 0)
 		{
-			this.targetCell = cell;
-			this.targetConditions = safetyConditions;
-			this.targetCost = cost;
-			if (flag)
+			if (safetyConditions > this.targetConditions || (safetyConditions == this.targetConditions && cost < this.targetCost))
 			{
-				return true;
+				this.targetCell = cell;
+				this.targetConditions = safetyConditions;
+				this.targetCost = cost;
+				if (flag)
+				{
+					return true;
+				}
 			}
 		}
 		return cost >= this.maxCost;

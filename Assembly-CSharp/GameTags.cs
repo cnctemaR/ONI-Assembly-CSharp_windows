@@ -45,6 +45,8 @@ public class GameTags
 
 	public static readonly Tag Plastic = TagManager.Create("Plastic", null);
 
+	public static readonly Tag BuildableAny = TagManager.Create("BuildableAny", null);
+
 	public static readonly Tag Incapacitated = TagManager.Create("Incapacitated", null);
 
 	public static readonly Tag CaloriesDepleted = TagManager.Create("CaloriesDepleted", null);
@@ -144,6 +146,8 @@ public class GameTags
 	public static readonly Tag Unbreathable = TagManager.Create("Unbreathable", null);
 
 	public static readonly Tag Gas = TagManager.Create("Gas", null);
+
+	public static readonly Tag Crushable = TagManager.Create("Crushable", null);
 
 	public static readonly Tag Minion = TagManager.Create("Minion", null);
 

@@ -18,30 +18,29 @@ public class ScheduledUIInstantiation : KMonoBehaviour
 
 	public void InstantiateElements(object data)
 	{
-		if (this.completed)
+		if (!this.completed)
 		{
-			return;
-		}
-		this.completed = true;
-		foreach (ScheduledUIInstantiation.Instantiation instantiation in this.UIElements)
-		{
-			foreach (GameObject gameObject in instantiation.prefabs)
+			this.completed = true;
+			foreach (ScheduledUIInstantiation.Instantiation instantiation in this.UIElements)
 			{
-				Vector3 vector = gameObject.rectTransform().anchoredPosition;
-				GameObject gameObject2 = Util.KInstantiateUI(gameObject, instantiation.parent.gameObject, false);
-				gameObject2.rectTransform().anchoredPosition = vector;
-				gameObject2.rectTransform().localScale = Vector3.one;
+				foreach (GameObject gameObject in instantiation.prefabs)
+				{
+					Vector3 vector = gameObject.rectTransform().anchoredPosition;
+					GameObject gameObject2 = Util.KInstantiateUI(gameObject, instantiation.parent.gameObject, false);
+					gameObject2.rectTransform().anchoredPosition = vector;
+					gameObject2.rectTransform().localScale = Vector3.one;
+				}
 			}
-		}
-		if (!this.InstantiateOnAwake)
-		{
-			this.Unsubscribe((int)this.InstantiationEvent, new Action<object>(this.InstantiateElements));
+			if (!this.InstantiateOnAwake)
+			{
+				base.Unsubscribe((int)this.InstantiationEvent, new Action<object>(this.InstantiateElements));
+			}
 		}
 	}
 
 	public ScheduledUIInstantiation.Instantiation[] UIElements;
 
-	public bool InstantiateOnAwake;
+	public bool InstantiateOnAwake = false;
 
 	public GameHashes InstantiationEvent = GameHashes.StartGameUser;
 

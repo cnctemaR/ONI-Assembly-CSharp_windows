@@ -37,43 +37,45 @@ public class StampTool : InterfaceTool
 
 	private void Stamp(Vector2 pos)
 	{
-		if (!this.ready)
+		if (this.ready)
 		{
-			return;
-		}
-		this.ready = false;
-		bool pauseOnComplete = SpeedControlScreen.Instance.IsPaused;
-		if (SpeedControlScreen.Instance.IsPaused)
-		{
-			SpeedControlScreen.Instance.Unpause(true);
-		}
-		List<GameObject> objects_to_destroy = new List<GameObject>();
-		for (int i = 0; i < this.stampTemplate.cells.Count; i++)
-		{
-			for (int j = 0; j < 20; j++)
+			this.ready = false;
+			bool pauseOnComplete = SpeedControlScreen.Instance.IsPaused;
+			if (SpeedControlScreen.Instance.IsPaused)
 			{
-				GameObject gameObject = Grid.Objects[Grid.XYToCell((int)(pos.x + (float)this.stampTemplate.cells[i].location_x), (int)(pos.y + (float)this.stampTemplate.cells[i].location_y)), j];
-				if (gameObject != null && !objects_to_destroy.Contains(gameObject))
+				SpeedControlScreen.Instance.Unpause(true);
+			}
+			List<GameObject> objects_to_destroy = new List<GameObject>();
+			for (int i = 0; i < this.stampTemplate.cells.Count; i++)
+			{
+				for (int j = 0; j < 22; j++)
 				{
-					objects_to_destroy.Add(gameObject);
+					GameObject gameObject = Grid.Objects[Grid.XYToCell((int)(pos.x + (float)this.stampTemplate.cells[i].location_x), (int)(pos.y + (float)this.stampTemplate.cells[i].location_y)), j];
+					if (gameObject != null)
+					{
+						if (!objects_to_destroy.Contains(gameObject))
+						{
+							objects_to_destroy.Add(gameObject);
+						}
+					}
 				}
 			}
-		}
-		TemplateLoader.Stamp(this.stampTemplate, pos, delegate
-		{
-			this.CompleteStamp(pauseOnComplete, objects_to_destroy);
-		});
-		if (this.selectAffected)
-		{
-			DebugBaseTemplateButton.Instance.ClearSelection();
-			for (int k = 0; k < this.stampTemplate.cells.Count; k++)
+			TemplateLoader.Stamp(this.stampTemplate, pos, delegate
 			{
-				DebugBaseTemplateButton.Instance.AddToSelection(Grid.XYToCell((int)(pos.x + (float)this.stampTemplate.cells[k].location_x), (int)(pos.y + (float)this.stampTemplate.cells[k].location_y)));
+				this.CompleteStamp(pauseOnComplete, objects_to_destroy);
+			});
+			if (this.selectAffected)
+			{
+				DebugBaseTemplateButton.Instance.ClearSelection();
+				for (int k = 0; k < this.stampTemplate.cells.Count; k++)
+				{
+					DebugBaseTemplateButton.Instance.AddToSelection(Grid.XYToCell((int)(pos.x + (float)this.stampTemplate.cells[k].location_x), (int)(pos.y + (float)this.stampTemplate.cells[k].location_y)));
+				}
 			}
-		}
-		if (this.deactivateOnStamp)
-		{
-			base.DeactivateTool(null);
+			if (this.deactivateOnStamp)
+			{
+				base.DeactivateTool(null);
+			}
 		}
 	}
 
@@ -132,14 +134,17 @@ public class StampTool : InterfaceTool
 		}
 		foreach (int num2 in list2)
 		{
-			if (!list.Contains(num2) && Grid.Objects[num2, 6] == null)
+			if (!list.Contains(num2))
 			{
-				GameObject gameObject2 = Util.KInstantiate(this.PlacerPrefab, SceneOrganizer.Instance.GetFolder(Folder.Placers), null);
-				Grid.Objects[num2, 6] = gameObject2;
-				Vector3 vector = Grid.CellToPosCBC(num2, this.visualizerLayer);
-				float depthBias = InterfaceTool.DepthBias;
-				vector.z += depthBias;
-				gameObject2.transform.SetPosition(vector);
+				if (Grid.Objects[num2, 6] == null)
+				{
+					GameObject gameObject2 = Util.KInstantiate(this.PlacerPrefab, SceneOrganizer.Instance.GetFolder(Folder.Placers), null);
+					Grid.Objects[num2, 6] = gameObject2;
+					Vector3 vector = Grid.CellToPosCBC(num2, this.visualizerLayer);
+					float depthBias = InterfaceTool.DepthBias;
+					vector.z += depthBias;
+					gameObject2.transform.SetPosition(vector);
+				}
 			}
 		}
 	}
@@ -154,7 +159,7 @@ public class StampTool : InterfaceTool
 
 	private int placementCell = Grid.InvalidCell;
 
-	private bool selectAffected;
+	private bool selectAffected = false;
 
-	private bool deactivateOnStamp;
+	private bool deactivateOnStamp = false;
 }

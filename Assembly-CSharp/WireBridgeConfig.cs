@@ -4,10 +4,26 @@ using UnityEngine;
 
 public class WireBridgeConfig : IBuildingConfig
 {
+	protected virtual string GetID()
+	{
+		return "WireBridge";
+	}
+
 	public override BuildingDef CreateBuildingDef()
 	{
+		string id = this.GetID();
+		int num = 3;
+		int num2 = 1;
+		string text = "utilityelectricbridge_kanim";
+		float num3 = 100f;
+		int num4 = 30;
+		float num5 = 3f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER0;
+		string[] all_METALS = MATERIALS.ALL_METALS;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("WireBridge", 3, 1, "utilityelectricbridge_kanim", 100f, 30, 3f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER0, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.PENALTY.TIER0, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none);
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
@@ -21,6 +37,7 @@ public class WireBridgeConfig : IBuildingConfig
 		buildingDef.PermittedRotations = PermittedRotations.R360;
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 2);
+		buildingDef.HotKey = global::Action.BuildMenuKeyB;
 		return buildingDef;
 	}
 
@@ -53,7 +70,7 @@ public class WireBridgeConfig : IBuildingConfig
 		BuildingTemplates.DoPostConfigure(go);
 	}
 
-	private WireUtilityNetworkLink AddNetworkLink(GameObject go)
+	protected virtual WireUtilityNetworkLink AddNetworkLink(GameObject go)
 	{
 		WireUtilityNetworkLink wireUtilityNetworkLink = go.AddOrGet<WireUtilityNetworkLink>();
 		wireUtilityNetworkLink.maxWattageRating = Wire.WattageRating.Max1000;

@@ -1,26 +1,15 @@
 ﻿using System;
 using Klei.AI;
 using KSerialization;
+using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class ManualGenerator : Workable, ISingleSliderControl
+public class ManualGenerator : Workable, ISliderControl
 {
 	private ManualGenerator()
 	{
 		this.showProgressBar = false;
-	}
-
-	public float SingleSliderPercent
-	{
-		get
-		{
-			return this.batteryRefillPercent;
-		}
-		set
-		{
-			this.batteryRefillPercent = value;
-		}
 	}
 
 	public string SliderTitleKey
@@ -31,12 +20,37 @@ public class ManualGenerator : Workable, ISingleSliderControl
 		}
 	}
 
-	public string SliderTooltipKey
+	public string SliderUnits
 	{
 		get
 		{
-			return "STRINGS.UI.UISIDESCREENS.MANUALGENERATORSIDESCREEN.TOOLTIP";
+			return UI.UNITSUFFIXES.PERCENT;
 		}
+	}
+
+	public float GetSliderMin(int index)
+	{
+		return 0f;
+	}
+
+	public float GetSliderMax(int index)
+	{
+		return 100f;
+	}
+
+	public float GetSliderValue(int index)
+	{
+		return this.batteryRefillPercent * 100f;
+	}
+
+	public void SetSliderValue(float value, int index)
+	{
+		this.batteryRefillPercent = value / 100f;
+	}
+
+	public string GetSliderTooltipKey(int index)
+	{
+		return "STRINGS.UI.UISIDESCREENS.MANUALGENERATORSIDESCREEN.TOOLTIP";
 	}
 
 	public bool IsPowered
@@ -50,8 +64,8 @@ public class ManualGenerator : Workable, ISingleSliderControl
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
-		this.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
+		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		base.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.GeneratingPower;
 		this.attributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
 		EnergyGenerator.EnsureStatusItemAvailable();
@@ -99,26 +113,25 @@ public class ManualGenerator : Workable, ISingleSliderControl
 			if (this.operational.IsOperational)
 			{
 				CircuitManager circuitManager = Game.Instance.circuitManager;
-				if (circuitManager == null)
+				if (circuitManager != null)
 				{
-					return;
-				}
-				ushort circuitID = circuitManager.GetCircuitID(this.powerCell);
-				bool flag = circuitManager.HasBatteries(circuitID);
-				bool flag2 = (flag && circuitManager.GetMinBatteryPercentFullOnCircuit(circuitID) < this.batteryRefillPercent) || (!flag && circuitManager.HasConsumers(circuitID));
-				if (flag2)
-				{
-					if (this.chore == null && this.smi.GetCurrentState() == this.smi.sm.on)
+					ushort circuitID = circuitManager.GetCircuitID(this.powerCell);
+					bool flag = circuitManager.HasBatteries(circuitID);
+					bool flag2 = (flag && circuitManager.GetMinBatteryPercentFullOnCircuit(circuitID) < this.batteryRefillPercent) || (!flag && circuitManager.HasConsumers(circuitID));
+					if (flag2)
 					{
-						this.chore = new WorkChore<ManualGenerator>(Db.Get().ChoreTypes.GeneratePower, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue);
+						if (this.chore == null && this.smi.GetCurrentState() == this.smi.sm.on)
+						{
+							this.chore = new WorkChore<ManualGenerator>(Db.Get().ChoreTypes.GeneratePower, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+						}
 					}
+					else if (this.chore != null)
+					{
+						this.chore.Cancel("No refill needed");
+						this.chore = null;
+					}
+					this.selectable.ToggleStatusItem(EnergyGenerator.BatteriesSufficientlyFull, !flag2, null);
 				}
-				else if (this.chore != null)
-				{
-					this.chore.Cancel("No refill needed");
-					this.chore = null;
-				}
-				this.selectable.ToggleStatusItem(EnergyGenerator.BatteriesSufficientlyFull, !flag2, null);
 			}
 		}
 	}
@@ -172,11 +185,11 @@ public class ManualGenerator : Workable, ISingleSliderControl
 		}
 	}
 
-	private const float batteryStopRunningPercent = 1f;
-
 	[Serialize]
 	[SerializeField]
 	private float batteryRefillPercent = 0.5f;
+
+	private const float batteryStopRunningPercent = 1f;
 
 	[MyCmpReq]
 	private Generator generator;
@@ -187,7 +200,7 @@ public class ManualGenerator : Workable, ISingleSliderControl
 	[MyCmpGet]
 	private BuildingEnabledButton buildingEnabledButton;
 
-	private Chore chore;
+	private Chore chore = null;
 
 	private int powerCell;
 
@@ -212,9 +225,9 @@ public class ManualGenerator : Workable, ISingleSliderControl
 			this.off.EventTransition(GameHashes.OperationalChanged, this.on, (ManualGenerator.GeneratePowerSM.Instance smi) => smi.master.GetComponent<Operational>().IsOperational);
 			this.on.EventTransition(GameHashes.OperationalChanged, this.off, (ManualGenerator.GeneratePowerSM.Instance smi) => !smi.master.GetComponent<Operational>().IsOperational).EventTransition(GameHashes.ActiveChanged, this.working.pre, (ManualGenerator.GeneratePowerSM.Instance smi) => smi.master.GetComponent<Operational>().IsActive);
 			this.working.DefaultState(this.working.pre);
-			this.working.pre.PlayAnim("working_pre", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.working.loop);
-			this.working.loop.PlayAnim("working_loop", KAnim.PlayMode.Loop, null).EventTransition(GameHashes.ActiveChanged, this.working.pst, (ManualGenerator.GeneratePowerSM.Instance smi) => this.masterTarget.Get(smi) != null && !smi.master.GetComponent<Operational>().IsActive);
-			this.working.pst.PlayAnim("working_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.off);
+			this.working.pre.PlayAnim("working_pre").OnAnimQueueComplete(this.working.loop);
+			this.working.loop.PlayAnim("working_loop", KAnim.PlayMode.Loop).EventTransition(GameHashes.ActiveChanged, this.working.pst, (ManualGenerator.GeneratePowerSM.Instance smi) => this.masterTarget.Get(smi) != null && !smi.master.GetComponent<Operational>().IsActive);
+			this.working.pst.PlayAnim("working_pst").OnAnimQueueComplete(this.off);
 		}
 
 		public GameStateMachine<ManualGenerator.GeneratePowerSM, ManualGenerator.GeneratePowerSM.Instance, IStateMachineTarget, object>.State off;

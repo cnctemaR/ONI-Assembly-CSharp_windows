@@ -131,59 +131,64 @@ public class MinionStartingStats
 		}
 		Func<List<DUPLICANTSTATS.TraitVal>, bool> func = delegate(List<DUPLICANTSTATS.TraitVal> traitPossibilities)
 		{
+			bool flag2;
 			if (this.Traits.Count > DUPLICANTSTATS.MAX_TRAITS)
 			{
-				return false;
+				flag2 = false;
 			}
-			float num2 = Util.GaussianRandom(0f, 1f);
-			List<DUPLICANTSTATS.TraitVal> list = new List<DUPLICANTSTATS.TraitVal>(traitPossibilities);
-			list.ShuffleSeeded<DUPLICANTSTATS.TraitVal>(randSeed);
-			list.Sort((DUPLICANTSTATS.TraitVal t1, DUPLICANTSTATS.TraitVal t2) => -t1.probability.CompareTo(t2.probability));
-			foreach (DUPLICANTSTATS.TraitVal traitVal in list)
+			else
 			{
-				if (!selectedTraits.Contains(traitVal.id))
+				float num2 = Util.GaussianRandom(0f, 1f);
+				List<DUPLICANTSTATS.TraitVal> list = new List<DUPLICANTSTATS.TraitVal>(traitPossibilities);
+				list.ShuffleSeeded<DUPLICANTSTATS.TraitVal>(randSeed);
+				list.Sort((DUPLICANTSTATS.TraitVal t1, DUPLICANTSTATS.TraitVal t2) => -t1.probability.CompareTo(t2.probability));
+				foreach (DUPLICANTSTATS.TraitVal traitVal in list)
 				{
-					if (traitVal.mutuallyExclusiveTraits != null)
+					if (!selectedTraits.Contains(traitVal.id))
 					{
-						bool flag2 = false;
-						foreach (string text in selectedTraits)
+						if (traitVal.mutuallyExclusiveTraits != null)
 						{
-							flag2 = traitVal.mutuallyExclusiveTraits.Contains(text);
-							if (flag2)
+							bool flag3 = false;
+							foreach (string text in selectedTraits)
 							{
-								break;
-							}
-						}
-						if (flag2)
-						{
-							continue;
-						}
-					}
-					if (num2 > traitVal.probability)
-					{
-						Trait trait3 = Db.Get().traits.TryGet(traitVal.id);
-						if (trait3 == null)
-						{
-							global::Debug.LogWarning("Trying to add nonexistent trait: " + traitVal.id, null);
-						}
-						else if (!is_starter_minion || trait3.ValidStarterTrait)
-						{
-							selectedTraits.Add(traitVal.id);
-							statDelta += traitVal.statBonus;
-							this.Traits.Add(trait3);
-							if (trait3.disabledChoreGroups != null)
-							{
-								for (int k = 0; k < trait3.disabledChoreGroups.Length; k++)
+								flag3 = traitVal.mutuallyExclusiveTraits.Contains(text);
+								if (flag3)
 								{
-									disabled_chore_groups.Add(trait3.disabledChoreGroups[k]);
+									break;
 								}
 							}
-							return true;
+							if (flag3)
+							{
+								continue;
+							}
+						}
+						if (num2 > traitVal.probability)
+						{
+							Trait trait3 = Db.Get().traits.TryGet(traitVal.id);
+							if (trait3 == null)
+							{
+								global::Debug.LogWarning("Trying to add nonexistent trait: " + traitVal.id, null);
+							}
+							else if (!is_starter_minion || trait3.ValidStarterTrait)
+							{
+								selectedTraits.Add(traitVal.id);
+								statDelta += traitVal.statBonus;
+								this.Traits.Add(trait3);
+								if (trait3.disabledChoreGroups != null)
+								{
+									for (int k = 0; k < trait3.disabledChoreGroups.Length; k++)
+									{
+										disabled_chore_groups.Add(trait3.disabledChoreGroups[k]);
+									}
+								}
+								return true;
+							}
 						}
 					}
 				}
+				flag2 = false;
 			}
-			return false;
+			return flag2;
 		};
 		int num = ((!is_starter_minion) ? 3 : 1);
 		bool flag = false;
@@ -228,52 +233,49 @@ public class MinionStartingStats
 					this.StartingLevels[text] = 0;
 				}
 				Dictionary<string, int> startingLevels;
-				Dictionary<string, int> dictionary = (startingLevels = this.StartingLevels);
-				string text3;
-				string text2 = (text3 = text);
-				int num4 = startingLevels[text3];
-				dictionary[text2] = num4 + num3;
+				string text2;
+				(startingLevels = this.StartingLevels)[text2 = text] = startingLevels[text2] + num3;
 				i -= num3;
 			}
 		}
 		if (disabled_chore_groups.Count > 0)
 		{
+			int num4 = 0;
 			int num5 = 0;
-			int num6 = 0;
 			foreach (KeyValuePair<string, int> keyValuePair in this.StartingLevels)
 			{
-				if (keyValuePair.Value > num5)
+				if (keyValuePair.Value > num4)
 				{
-					num5 = keyValuePair.Value;
+					num4 = keyValuePair.Value;
 				}
 				if (keyValuePair.Key == disabled_chore_groups[0].attribute.Id)
 				{
-					num6 = keyValuePair.Value;
+					num5 = keyValuePair.Value;
 				}
 			}
-			if (num5 == num6)
+			if (num4 == num5)
 			{
-				foreach (string text4 in list)
+				foreach (string text3 in list)
 				{
-					if (text4 != disabled_chore_groups[0].attribute.Id)
+					if (text3 != disabled_chore_groups[0].attribute.Id)
 					{
+						int num6 = 0;
+						this.StartingLevels.TryGetValue(text3, out num6);
 						int num7 = 0;
-						this.StartingLevels.TryGetValue(text4, out num7);
-						int num8 = 0;
-						if (num7 > 0)
+						if (num6 > 0)
 						{
-							num8 = 1;
+							num7 = 1;
 						}
-						this.StartingLevels[disabled_chore_groups[0].attribute.Id] = num7 - num8;
-						this.StartingLevels[text4] = num5 + num8;
+						this.StartingLevels[disabled_chore_groups[0].attribute.Id] = num6 - num7;
+						this.StartingLevels[text3] = num4 + num7;
 						break;
 					}
 				}
 			}
 		}
-		foreach (string text5 in DUPLICANTSTATS.ROLLED_ATTRIBUTES)
+		foreach (string text4 in DUPLICANTSTATS.ROLLED_ATTRIBUTES)
 		{
-			this.StartingLevels[text5] = Mathf.RoundToInt(Mathf.Pow(global::UnityEngine.Random.value, 4f) * 10f);
+			this.StartingLevels[text4] = Mathf.RoundToInt(Mathf.Pow(global::UnityEngine.Random.value, 4f) * 10f);
 		}
 	}
 

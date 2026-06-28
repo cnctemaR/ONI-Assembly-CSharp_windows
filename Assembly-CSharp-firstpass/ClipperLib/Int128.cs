@@ -34,19 +34,113 @@ namespace ClipperLib
 			return this.hi < 0L;
 		}
 
+		public static bool operator ==(Int128 val1, Int128 val2)
+		{
+			return val1 == val2 || (val1 != null && val2 != null && val1.hi == val2.hi && val1.lo == val2.lo);
+		}
+
+		public static bool operator !=(Int128 val1, Int128 val2)
+		{
+			return !(val1 == val2);
+		}
+
 		public override bool Equals(object obj)
 		{
+			bool flag;
 			if (obj == null || !(obj is Int128))
 			{
-				return false;
+				flag = false;
 			}
-			Int128 @int = (Int128)obj;
-			return @int.hi == this.hi && @int.lo == this.lo;
+			else
+			{
+				Int128 @int = (Int128)obj;
+				flag = @int.hi == this.hi && @int.lo == this.lo;
+			}
+			return flag;
 		}
 
 		public override int GetHashCode()
 		{
 			return this.hi.GetHashCode() ^ this.lo.GetHashCode();
+		}
+
+		public static bool operator >(Int128 val1, Int128 val2)
+		{
+			bool flag;
+			if (val1.hi != val2.hi)
+			{
+				flag = val1.hi > val2.hi;
+			}
+			else
+			{
+				flag = val1.lo > val2.lo;
+			}
+			return flag;
+		}
+
+		public static bool operator <(Int128 val1, Int128 val2)
+		{
+			bool flag;
+			if (val1.hi != val2.hi)
+			{
+				flag = val1.hi < val2.hi;
+			}
+			else
+			{
+				flag = val1.lo < val2.lo;
+			}
+			return flag;
+		}
+
+		public static Int128 operator +(Int128 lhs, Int128 rhs)
+		{
+			lhs.hi += rhs.hi;
+			lhs.lo += rhs.lo;
+			if (lhs.lo < rhs.lo)
+			{
+				lhs.hi += 1L;
+			}
+			return lhs;
+		}
+
+		public static Int128 operator -(Int128 lhs, Int128 rhs)
+		{
+			return lhs + -rhs;
+		}
+
+		public static Int128 operator -(Int128 val)
+		{
+			Int128 @int;
+			if (val.lo == 0UL)
+			{
+				@int = new Int128(-val.hi, 0UL);
+			}
+			else
+			{
+				@int = new Int128(~val.hi, ~val.lo + 1UL);
+			}
+			return @int;
+		}
+
+		public static explicit operator double(Int128 val)
+		{
+			double num;
+			if (val.hi < 0L)
+			{
+				if (val.lo == 0UL)
+				{
+					num = (double)val.hi * 1.8446744073709552E+19;
+				}
+				else
+				{
+					num = -(~val.lo + (double)(~(double)val.hi) * 1.8446744073709552E+19);
+				}
+			}
+			else
+			{
+				num = val.lo + (double)val.hi * 1.8446744073709552E+19;
+			}
+			return num;
 		}
 
 		public static Int128 Int128Mul(long lhs, long rhs)
@@ -75,72 +169,6 @@ namespace ClipperLib
 			}
 			Int128 @int = new Int128(num8, num9);
 			return (!flag) ? @int : (-@int);
-		}
-
-		public static bool operator ==(Int128 val1, Int128 val2)
-		{
-			return val1 == val2 || (val1 != null && val2 != null && val1.hi == val2.hi && val1.lo == val2.lo);
-		}
-
-		public static bool operator !=(Int128 val1, Int128 val2)
-		{
-			return !(val1 == val2);
-		}
-
-		public static bool operator >(Int128 val1, Int128 val2)
-		{
-			if (val1.hi != val2.hi)
-			{
-				return val1.hi > val2.hi;
-			}
-			return val1.lo > val2.lo;
-		}
-
-		public static bool operator <(Int128 val1, Int128 val2)
-		{
-			if (val1.hi != val2.hi)
-			{
-				return val1.hi < val2.hi;
-			}
-			return val1.lo < val2.lo;
-		}
-
-		public static Int128 operator +(Int128 lhs, Int128 rhs)
-		{
-			lhs.hi += rhs.hi;
-			lhs.lo += rhs.lo;
-			if (lhs.lo < rhs.lo)
-			{
-				lhs.hi += 1L;
-			}
-			return lhs;
-		}
-
-		public static Int128 operator -(Int128 lhs, Int128 rhs)
-		{
-			return lhs + -rhs;
-		}
-
-		public static Int128 operator -(Int128 val)
-		{
-			if (val.lo == 0UL)
-			{
-				return new Int128(-val.hi, 0UL);
-			}
-			return new Int128(~val.hi, ~val.lo + 1UL);
-		}
-
-		public static explicit operator double(Int128 val)
-		{
-			if (val.hi >= 0L)
-			{
-				return val.lo + (double)val.hi * 1.8446744073709552E+19;
-			}
-			if (val.lo == 0UL)
-			{
-				return (double)val.hi * 1.8446744073709552E+19;
-			}
-			return -(~val.lo + (double)(~(double)val.hi) * 1.8446744073709552E+19);
 		}
 
 		private long hi;

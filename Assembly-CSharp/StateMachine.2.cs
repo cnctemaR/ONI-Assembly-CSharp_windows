@@ -222,26 +222,24 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 		public override void Update()
 		{
-			if (App.IsExiting)
+			if (!App.IsExiting)
 			{
-				return;
-			}
-			if (StateMachine.Instance.error)
-			{
-				return;
-			}
-			int num = this.gotoId;
-			int num2 = 0;
-			while (num2 < this.stackSize && num == this.gotoId)
-			{
-				this.currentSchedulerGroup = this.stateStack[num2].schedulerGroup;
-				if (this.stateStack[num2].state.updateActions != null)
+				if (!StateMachine.Instance.error)
 				{
-					this.ExecuteActions((StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State)this.stateStack[num2].state, this.stateStack[num2].state.updateActions, false);
+					int num = this.gotoId;
+					int num2 = 0;
+					while (num2 < this.stackSize && num == this.gotoId)
+					{
+						this.currentSchedulerGroup = this.stateStack[num2].schedulerGroup;
+						if (this.stateStack[num2].state.updateActions != null)
+						{
+							this.ExecuteActions((StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State)this.stateStack[num2].state, this.stateStack[num2].state.updateActions, false);
+						}
+						num2++;
+					}
+					this.lastUpdateTime = Time.time;
 				}
-				num2++;
 			}
-			this.lastUpdateTime = Time.time;
 		}
 
 		public override IStateMachineTarget GetMaster()
@@ -317,74 +315,72 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			this.stateStack[this.stackSize++].state = state;
 			this.currentSchedulerGroup = this.stateStack[this.stackSize - 1].schedulerGroup;
 			this.ExecuteActions((StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State)state, state.enterActions, true);
-			if (num != this.gotoId)
+			if (num == this.gotoId)
 			{
-				return;
-			}
-			if (state.transitions != null)
-			{
-				foreach (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition transition2 in state.transitions)
+				if (state.transitions != null)
 				{
-					if (num != this.gotoId)
+					foreach (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition transition2 in state.transitions)
 					{
-						return;
+						if (num != this.gotoId)
+						{
+							return;
+						}
+						transition2.Evaluate(this.smi);
 					}
-					transition2.Evaluate(this.smi);
 				}
-			}
-			if (state.parameterTransitions != null)
-			{
-				foreach (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ParameterTransition parameterTransition2 in state.parameterTransitions)
+				if (state.parameterTransitions != null)
 				{
-					if (num != this.gotoId)
+					foreach (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ParameterTransition parameterTransition2 in state.parameterTransitions)
 					{
-						return;
+						if (num != this.gotoId)
+						{
+							break;
+						}
+						parameterTransition2.Evaluate(this.smi);
 					}
-					parameterTransition2.Evaluate(this.smi);
 				}
 			}
 		}
 
 		private void ExecuteActions(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state, StateMachine.Action[] actions, bool should_log)
 		{
-			if (actions == null)
+			if (actions != null)
 			{
-				return;
-			}
-			int num = this.gotoId;
-			for (int i = 0; i < actions.Length; i++)
-			{
-				if (num != this.gotoId)
+				int num = this.gotoId;
+				for (int i = 0; i < actions.Length; i++)
 				{
-					break;
-				}
-				StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State.Callback callback = (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State.Callback)actions[i].callback;
-				try
-				{
-					callback(this.smi);
-				}
-				catch (Exception ex)
-				{
-					if (!StateMachine.Instance.error)
+					if (num != this.gotoId)
 					{
-						base.Error();
-						string text = "(NULL).";
-						IStateMachineTarget master = this.GetMaster();
-						if (!master.isNull)
+						break;
+					}
+					StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State.Callback callback = (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State.Callback)actions[i].callback;
+					try
+					{
+						callback(this.smi);
+					}
+					catch (Exception ex)
+					{
+						if (!StateMachine.Instance.error)
 						{
-							text = "(" + base.gameObject.name + ").";
+							base.Error();
+							string text = "(NULL).";
+							IStateMachineTarget master = this.GetMaster();
+							if (!master.isNull)
+							{
+								text = "(" + base.gameObject.name + ").";
+							}
+							string text2 = string.Concat(new string[]
+							{
+								"Exception in: ",
+								text,
+								this.stateMachine.ToString(),
+								".",
+								state.name,
+								".",
+								actions[i].name
+							});
+							Output.LogErrorWithObj(this.controller, new object[] { text2 + "\n" + ex.ToString() });
 						}
-						string text2 = string.Concat(new string[]
-						{
-							"Exception in: ",
-							text,
-							this.stateMachine.ToString(),
-							".",
-							state.name,
-							".",
-							actions[i].name
-						});
-						Output.LogErrorWithObj(this.controller, new object[] { text2 + "\n" + ex.ToString() });
 					}
 				}
 			}
@@ -444,154 +440,157 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 		public override void StopSM(string reason)
 		{
-			if (StateMachine.Instance.error)
+			if (!StateMachine.Instance.error)
 			{
-				return;
-			}
-			if (this.controller != null)
-			{
-				this.controller.RemoveStateMachineInstance(this);
-			}
-			if (!base.IsRunning())
-			{
-				return;
-			}
-			this.gotoId++;
-			while (this.stackSize > 0)
-			{
-				this.PopState();
-			}
-			if (this.master != null && this.controller != null)
-			{
-				this.controller.RemoveStateMachineInstance(this);
-			}
-			if (this.status == StateMachine.Status.Running)
-			{
-				base.SetStatus(StateMachine.Status.Failed);
-			}
-			if (this.OnStop != null)
-			{
-				this.OnStop(reason, this.status);
-			}
-			for (int i = 0; i < this.parameterContexts.Length; i++)
-			{
-				this.parameterContexts[i].Cleanup();
+				if (this.controller != null)
+				{
+					this.controller.RemoveStateMachineInstance(this);
+				}
+				if (base.IsRunning())
+				{
+					this.gotoId++;
+					while (this.stackSize > 0)
+					{
+						this.PopState();
+					}
+					if (this.master != null)
+					{
+						if (this.controller != null)
+						{
+							this.controller.RemoveStateMachineInstance(this);
+						}
+					}
+					if (this.status == StateMachine.Status.Running)
+					{
+						base.SetStatus(StateMachine.Status.Failed);
+					}
+					if (this.OnStop != null)
+					{
+						this.OnStop(reason, this.status);
+					}
+					for (int i = 0; i < this.parameterContexts.Length; i++)
+					{
+						this.parameterContexts[i].Cleanup();
+					}
+				}
 			}
 		}
 
 		public override void GoTo(StateMachine.BaseState base_state)
 		{
-			if (App.IsExiting)
-			{
-				return;
-			}
-			if (StateMachine.Instance.error)
-			{
-				return;
-			}
-			if (this.isMasterNull)
-			{
-				return;
-			}
-			try
-			{
-				if (base.IsBreakOnGoToEnabled())
-				{
-					Debugger.Break();
-				}
-				if (base_state != null)
-				{
-					while (base_state.defaultState != null)
-					{
-						base_state = base_state.defaultState;
-					}
-				}
-				if (this.GetCurrentState() == null)
-				{
-					base.SetStatus(StateMachine.Status.Running);
-				}
-				if (this.gotoStack.Count > 100)
-				{
-					string text = "Potential infinite transition loop detected in state machine: " + this.ToString() + "\nGoto stack:\n";
-					foreach (StateMachine.BaseState baseState in this.gotoStack)
-					{
-						text = text + "\n" + baseState.name;
-					}
-					Output.LogError(new object[] { text });
-					base.Error();
-				}
-				else
-				{
-					this.gotoStack.Push(base_state);
-					if (base_state == null)
-					{
-						this.StopSM("StateMachine.GoTo(null)");
-						this.gotoStack.Pop();
-					}
-					else
-					{
-						int num = ++this.gotoId;
-						StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state = base_state as StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State;
-						StateMachine.BaseState[] branch = state.branch;
-						int i;
-						for (i = 0; i < this.stackSize; i++)
-						{
-							if (i >= branch.Length || this.stateStack[i].state != branch[i])
-							{
-								break;
-							}
-						}
-						while (this.stackSize > i && num == this.gotoId)
-						{
-							this.PopState();
-						}
-						int num2 = i;
-						while (num2 < branch.Length && num == this.gotoId)
-						{
-							this.PushState(branch[num2]);
-							num2++;
-						}
-						this.gotoStack.Pop();
-					}
-				}
-			}
-			catch (Exception ex)
+			if (!App.IsExiting)
 			{
 				if (!StateMachine.Instance.error)
 				{
-					base.Error();
-					string text2 = "(Stop)";
-					if (base_state != null)
+					if (!this.isMasterNull)
 					{
-						text2 = base_state.name;
+						try
+						{
+							if (base.IsBreakOnGoToEnabled())
+							{
+								Debugger.Break();
+							}
+							if (base_state != null)
+							{
+								while (base_state.defaultState != null)
+								{
+									base_state = base_state.defaultState;
+								}
+							}
+							if (this.GetCurrentState() == null)
+							{
+								base.SetStatus(StateMachine.Status.Running);
+							}
+							if (this.gotoStack.Count > 100)
+							{
+								string text = "Potential infinite transition loop detected in state machine: " + this.ToString() + "\nGoto stack:\n";
+								foreach (StateMachine.BaseState baseState in this.gotoStack)
+								{
+									text = text + "\n" + baseState.name;
+								}
+								Output.LogError(new object[] { text });
+								base.Error();
+							}
+							else
+							{
+								this.gotoStack.Push(base_state);
+								if (base_state == null)
+								{
+									this.StopSM("StateMachine.GoTo(null)");
+									this.gotoStack.Pop();
+								}
+								else
+								{
+									int num = ++this.gotoId;
+									StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state = base_state as StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State;
+									StateMachine.BaseState[] branch = state.branch;
+									int i;
+									for (i = 0; i < this.stackSize; i++)
+									{
+										if (i >= branch.Length || this.stateStack[i].state != branch[i])
+										{
+											break;
+										}
+									}
+									while (this.stackSize > i && num == this.gotoId)
+									{
+										this.PopState();
+									}
+									int num2 = i;
+									while (num2 < branch.Length && num == this.gotoId)
+									{
+										this.PushState(branch[num2]);
+										num2++;
+									}
+									this.gotoStack.Pop();
+								}
+							}
+						}
+						catch (Exception ex)
+						{
+							if (!StateMachine.Instance.error)
+							{
+								base.Error();
+								string text2 = "(Stop)";
+								if (base_state != null)
+								{
+									text2 = base_state.name;
+								}
+								string text3 = "(NULL).";
+								IStateMachineTarget master = this.GetMaster();
+								if (!master.isNull)
+								{
+									text3 = "(" + base.gameObject.name + ").";
+								}
+								string text4 = string.Concat(new string[]
+								{
+									"Exception in: ",
+									text3,
+									this.stateMachine.ToString(),
+									".GoTo(",
+									text2,
+									")"
+								});
+								Output.LogErrorWithObj(this.controller, new object[] { text4 + "\n" + ex.ToString() });
+							}
+						}
 					}
-					string text3 = "(NULL).";
-					IStateMachineTarget master = this.GetMaster();
-					if (!master.isNull)
-					{
-						text3 = "(" + base.gameObject.name + ").";
-					}
-					string text4 = string.Concat(new string[]
-					{
-						"Exception in: ",
-						text3,
-						this.stateMachine.ToString(),
-						".GoTo(",
-						text2,
-						")"
-					});
-					Output.LogErrorWithObj(this.controller, new object[] { text4 + "\n" + ex.ToString() });
 				}
 			}
 		}
 
 		public override StateMachine.BaseState GetCurrentState()
 		{
+			StateMachine.BaseState baseState;
 			if (this.stackSize > 0)
 			{
-				return this.stateStack[this.stackSize - 1].state;
+				baseState = this.stateStack[this.stackSize - 1].state;
 			}
-			return null;
+			else
+			{
+				baseState = null;
+			}
+			return baseState;
 		}
 
 		private float stateEnterTime;
@@ -665,6 +664,8 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 		public int idx;
 
+		public delegate bool ConditionCallback(StateMachineInstanceType smi);
+
 		public struct Context
 		{
 			public Context(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition transition)
@@ -677,8 +678,6 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 			public int handlerId;
 		}
-
-		public delegate bool ConditionCallback(StateMachineInstanceType smi);
 	}
 
 	public abstract class Parameter<ParameterType> : StateMachine.Parameter
@@ -709,6 +708,8 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 		public bool isSignal;
 
+		public delegate bool Callback(StateMachineInstanceType smi, ParameterType p);
+
 		public class Transition : StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.ParameterTransition
 		{
 			public Transition(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType> parameter, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State state, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Callback callback)
@@ -720,15 +721,14 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 			public override void Evaluate(StateMachineInstanceType smi)
 			{
-				if (this.parameter.isSignal && this.callback == null)
+				if (!this.parameter.isSignal || this.callback != null)
 				{
-					return;
-				}
-				StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Context context = (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Context)smi.GetParameterContext(this.parameter);
-				bool flag = this.callback(smi, context.value);
-				if (flag)
-				{
-					smi.GoTo(this.state);
+					StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Context context = (StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType>.Context)smi.GetParameterContext(this.parameter);
+					bool flag = this.callback(smi, context.value);
+					if (flag)
+					{
+						smi.GoTo(this.state);
+					}
 				}
 			}
 
@@ -769,11 +769,16 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 			public override string ToString()
 			{
+				string text;
 				if (this.state != null)
 				{
-					return this.parameter.name + "->" + this.state.name;
+					text = this.parameter.name + "->" + this.state.name;
 				}
-				return this.parameter.name + "->(Stop)";
+				else
+				{
+					text = this.parameter.name + "->(Stop)";
+				}
+				return text;
 			}
 
 			private StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<ParameterType> parameter;
@@ -807,8 +812,6 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 			public Action<StateMachineInstanceType> onDirty;
 		}
-
-		public delegate bool Callback(StateMachineInstanceType smi, ParameterType p);
 	}
 
 	public class BoolParameter : StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Parameter<bool>
@@ -1043,7 +1046,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 			public override void Serialize(BinaryWriter writer)
 			{
-				string text = string.Empty;
+				string text = "";
 				if (this.value != null)
 				{
 					if (this.value.Guid == null)
@@ -1061,7 +1064,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			public override void Deserialize(IReader reader)
 			{
 				string text = reader.ReadKleiString();
-				if (text != string.Empty)
+				if (text != "")
 				{
 					ResourceGuid resourceGuid = new ResourceGuid(text, null);
 					this.value = Db.Get().GetResource<ResourceType>(resourceGuid);
@@ -1114,19 +1117,19 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 		{
 		}
 
-		public StateMachineType GetSMI<StateMachineType>(StateMachineInstanceType smi) where StateMachineType : StateMachine.Instance
+		public SMT GetSMI<SMT>(StateMachineInstanceType smi) where SMT : StateMachine.Instance
 		{
 			GameObject gameObject = base.Get(smi);
 			if (gameObject != null)
 			{
-				StateMachineType smi2 = gameObject.GetSMI<StateMachineType>();
+				SMT smi2 = gameObject.GetSMI<SMT>();
 				if (smi2 != null)
 				{
 					return smi2;
 				}
 				global::Debug.LogError(gameObject.name + " does not have state machine " + typeof(StateMachineType).Name, null);
 			}
-			return (StateMachineType)((object)null);
+			return (SMT)((object)null);
 		}
 
 		public bool IsNull(StateMachineInstanceType smi)

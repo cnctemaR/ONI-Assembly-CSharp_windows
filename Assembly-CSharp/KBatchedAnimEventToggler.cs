@@ -30,16 +30,15 @@ public class KBatchedAnimEventToggler : KMonoBehaviour
 	{
 		this.StopAll();
 		HashedString context = this.animEventHandler.GetContext();
-		if (!context.isValid)
+		if (context.isValid)
 		{
-			return;
-		}
-		foreach (KBatchedAnimEventToggler.Entry entry in this.entries)
-		{
-			if (entry.context == context)
+			foreach (KBatchedAnimEventToggler.Entry entry in this.entries)
 			{
-				entry.controller.gameObject.SetActive(true);
-				entry.controller.Play(entry.anim, KAnim.PlayMode.Loop, 1f, 0f);
+				if (entry.context == context)
+				{
+					entry.controller.gameObject.SetActive(true);
+					entry.controller.Play(entry.anim, KAnim.PlayMode.Loop, 1f, 0f);
+				}
 			}
 		}
 	}

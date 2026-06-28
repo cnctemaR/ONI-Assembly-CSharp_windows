@@ -6,14 +6,19 @@ namespace UnityEngine.Networking
 	{
 		public static string MsgTypeToString(short value)
 		{
+			string text;
 			if (value < 0 || value > 47)
 			{
-				return string.Empty;
+				text = string.Empty;
 			}
-			string text = MsgType.msgLabels[(int)value];
-			if (string.IsNullOrEmpty(text))
+			else
 			{
-				text = "[" + value + "]";
+				string text2 = MsgType.msgLabels[(int)value];
+				if (string.IsNullOrEmpty(text2))
+				{
+					text2 = "[" + value + "]";
+				}
+				text = text2;
 			}
 			return text;
 		}
@@ -50,7 +55,9 @@ namespace UnityEngine.Networking
 
 		public const short LocalChildTransform = 16;
 
-		public const short PeerClientAuthority = 17;
+		public const short Fragment = 17;
+
+		public const short PeerClientAuthority = 18;
 
 		internal const short UserMessage = 0;
 
@@ -100,54 +107,11 @@ namespace UnityEngine.Networking
 
 		internal static string[] msgLabels = new string[]
 		{
-			"none",
-			"ObjectDestroy",
-			"Rpc",
-			"ObjectSpawn",
-			"Owner",
-			"Command",
-			"LocalPlayerTransform",
-			"SyncEvent",
-			"UpdateVars",
-			"SyncList",
-			"ObjectSpawnScene",
-			"NetworkInfo",
-			"SpawnFinished",
-			"ObjectHide",
-			"CRC",
-			"LocalClientAuthority",
-			"LocalChildTransform",
-			"PeerClientAuthority",
-			string.Empty,
-			string.Empty,
-			string.Empty,
-			string.Empty,
-			string.Empty,
-			string.Empty,
-			string.Empty,
-			string.Empty,
-			string.Empty,
-			string.Empty,
-			string.Empty,
-			string.Empty,
-			string.Empty,
-			string.Empty,
-			"Connect",
-			"Disconnect",
-			"Error",
-			"Ready",
-			"NotReady",
-			"AddPlayer",
-			"RemovePlayer",
-			"Scene",
-			"Animation",
-			"AnimationParams",
-			"AnimationTrigger",
-			"LobbyReadyToBegin",
-			"LobbySceneLoaded",
-			"LobbyAddPlayerFailed",
-			"LobbyReturnToLobby",
-			"ReconnectPlayer"
+			"none", "ObjectDestroy", "Rpc", "ObjectSpawn", "Owner", "Command", "LocalPlayerTransform", "SyncEvent", "UpdateVars", "SyncList",
+			"ObjectSpawnScene", "NetworkInfo", "SpawnFinished", "ObjectHide", "CRC", "LocalClientAuthority", "LocalChildTransform", "Fragment", "PeerClientAuthority", "",
+			"", "", "", "", "", "", "", "", "", "",
+			"", "", "Connect", "Disconnect", "Error", "Ready", "NotReady", "AddPlayer", "RemovePlayer", "Scene",
+			"Animation", "AnimationParams", "AnimationTrigger", "LobbyReadyToBegin", "LobbySceneLoaded", "LobbyAddPlayerFailed", "LobbyReturnToLobby", "ReconnectPlayer"
 		};
 	}
 }

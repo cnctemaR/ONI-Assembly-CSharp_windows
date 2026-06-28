@@ -76,13 +76,13 @@ public class MinionSelectScreen : CharacterSelectionController
 		}
 	}
 
-	public const string WattsonGameObjName = "WattsonMessage";
-
 	[SerializeField]
 	private NewBaseScreen newBasePrefab;
 
 	[SerializeField]
 	private WattsonMessage wattsonMessagePrefab;
+
+	public const string WattsonGameObjName = "WattsonMessage";
 
 	public KButton backButton;
 }

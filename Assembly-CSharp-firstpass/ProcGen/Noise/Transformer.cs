@@ -45,15 +45,20 @@ namespace ProcGen.Noise
 
 		public IModule3D CreateModule(IModule3D sourceModule, IModule3D xModule, IModule3D yModule, IModule3D zModule)
 		{
+			IModule3D module3D;
 			if (this.transformerType == Transformer.TransformerType.Turbulence)
 			{
-				return new Turbulence(sourceModule, xModule, yModule, zModule, this.power);
+				module3D = new Turbulence(sourceModule, xModule, yModule, zModule, this.power);
 			}
-			if (this.transformerType == Transformer.TransformerType.RotatePoint)
+			else if (this.transformerType == Transformer.TransformerType.RotatePoint)
 			{
-				return new RotatePoint(sourceModule, this.rotation.x, this.rotation.y, 0f);
+				module3D = new RotatePoint(sourceModule, this.rotation.x, this.rotation.y, 0f);
 			}
-			return new Displace(sourceModule, xModule, yModule, zModule);
+			else
+			{
+				module3D = new Displace(sourceModule, xModule, yModule, zModule);
+			}
+			return module3D;
 		}
 
 		public void SetSouces(IModule3D target, IModule3D sourceModule, IModule3D xModule, IModule3D yModule, IModule3D zModule)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Reflection;
 using UnityEngineInternal;
 
@@ -9,14 +10,15 @@ namespace UnityEngine.Events
 		public InvokableCall(object target, MethodInfo theFunction)
 			: base(target, theFunction)
 		{
-			this.Delegate = (UnityAction<T1>)global::System.Delegate.Combine(this.Delegate, (UnityAction<T1>)theFunction.CreateDelegate(typeof(UnityAction<T1>), target));
+			this.Delegate += (UnityAction<T1>)theFunction.CreateDelegate(typeof(UnityAction<T1>), target);
 		}
 
 		public InvokableCall(UnityAction<T1> action)
 		{
-			this.Delegate = (UnityAction<T1>)global::System.Delegate.Combine(this.Delegate, action);
+			this.Delegate += action;
 		}
 
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		protected event UnityAction<T1> Delegate;
 
 		public override void Invoke(object[] args)
@@ -34,7 +36,7 @@ namespace UnityEngine.Events
 
 		public override bool Find(object targetObj, MethodInfo method)
 		{
-			return this.Delegate.Target == targetObj && this.Delegate.GetMethodInfo() == method;
+			return this.Delegate.Target == targetObj && this.Delegate.GetMethodInfo().Equals(method);
 		}
 	}
 }

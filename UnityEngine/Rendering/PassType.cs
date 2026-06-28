@@ -14,6 +14,7 @@ namespace UnityEngine.Rendering
 		LightPrePassFinal,
 		ShadowCaster,
 		Deferred = 10,
-		Meta
+		Meta,
+		MotionVectors
 	}
 }

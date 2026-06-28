@@ -12,45 +12,42 @@ namespace UnityEngine
 		}
 
 		public GUIContent(string text)
+			: this(text, null, string.Empty)
 		{
-			this.m_Text = text;
 		}
 
 		public GUIContent(Texture image)
+			: this(string.Empty, image, string.Empty)
 		{
-			this.m_Image = image;
 		}
 
 		public GUIContent(string text, Texture image)
+			: this(text, image, string.Empty)
 		{
-			this.m_Text = text;
-			this.m_Image = image;
 		}
 
 		public GUIContent(string text, string tooltip)
+			: this(text, null, tooltip)
 		{
-			this.m_Text = text;
-			this.m_Tooltip = tooltip;
 		}
 
 		public GUIContent(Texture image, string tooltip)
+			: this(string.Empty, image, tooltip)
 		{
-			this.m_Image = image;
-			this.m_Tooltip = tooltip;
 		}
 
 		public GUIContent(string text, Texture image, string tooltip)
 		{
-			this.m_Text = text;
-			this.m_Image = image;
-			this.m_Tooltip = tooltip;
+			this.text = text;
+			this.image = image;
+			this.tooltip = tooltip;
 		}
 
 		public GUIContent(GUIContent src)
 		{
-			this.m_Text = src.m_Text;
-			this.m_Image = src.m_Image;
-			this.m_Tooltip = src.m_Tooltip;
+			this.text = src.m_Text;
+			this.image = src.m_Image;
+			this.tooltip = src.m_Tooltip;
 		}
 
 		public string text
@@ -182,6 +179,6 @@ namespace UnityEngine
 
 		private static readonly GUIContent s_TextImage = new GUIContent();
 
-		public static GUIContent none = new GUIContent(string.Empty);
+		public static GUIContent none = new GUIContent("");
 	}
 }

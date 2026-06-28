@@ -6,10 +6,10 @@ public class OperationalController : GameStateMachine<OperationalController, Ope
 	{
 		default_state = this.off;
 		this.root.EventTransition(GameHashes.OperationalChanged, this.off, (OperationalController.Instance smi) => !smi.GetComponent<Operational>().IsOperational);
-		this.off.PlayAnim("off", KAnim.PlayMode.Once, null).EventTransition(GameHashes.OperationalChanged, this.working_pre, (OperationalController.Instance smi) => smi.GetComponent<Operational>().IsOperational);
-		this.working_pre.PlayAnim("working_pre", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.working_loop);
-		this.working_loop.PlayAnim("working_loop", KAnim.PlayMode.Loop, null).EventTransition(GameHashes.OperationalChanged, this.working_pst, (OperationalController.Instance smi) => !smi.GetComponent<Operational>().IsOperational);
-		this.working_pst.PlayAnim("working_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.off);
+		this.off.PlayAnim("off").EventTransition(GameHashes.OperationalChanged, this.working_pre, (OperationalController.Instance smi) => smi.GetComponent<Operational>().IsOperational);
+		this.working_pre.PlayAnim("working_pre").OnAnimQueueComplete(this.working_loop);
+		this.working_loop.PlayAnim("working_loop", KAnim.PlayMode.Loop).EventTransition(GameHashes.OperationalChanged, this.working_pst, (OperationalController.Instance smi) => !smi.GetComponent<Operational>().IsOperational);
+		this.working_pst.PlayAnim("working_pst").OnAnimQueueComplete(this.off);
 	}
 
 	public GameStateMachine<OperationalController, OperationalController.Instance, IStateMachineTarget, object>.State off;

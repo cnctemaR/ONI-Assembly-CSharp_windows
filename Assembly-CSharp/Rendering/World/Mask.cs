@@ -7,6 +7,7 @@ namespace Rendering.World
 	{
 		public Mask(TextureAtlas atlas, int texture_idx, bool transpose, bool flip_x, bool flip_y, bool is_opaque)
 		{
+			this = default(Mask);
 			this.atlas = atlas;
 			this.texture_idx = texture_idx;
 			this.transpose = transpose;
@@ -101,8 +102,6 @@ namespace Rendering.World
 			this.UV3 = zero4;
 		}
 
-		private const int TILES_PER_SET = 4;
-
 		private TextureAtlas atlas;
 
 		private int texture_idx;
@@ -114,5 +113,7 @@ namespace Rendering.World
 		private bool flip_y;
 
 		private int atlas_offset;
+
+		private const int TILES_PER_SET = 4;
 	}
 }

@@ -48,8 +48,8 @@ public class SuitSuffocationMonitor : GameStateMachine<SuitSuffocationMonitor, S
 			this.breath = Db.Get().Amounts.Breath.Lookup(master.gameObject);
 			Klei.AI.Attribute deltaAttribute = Db.Get().Amounts.Breath.deltaAttribute;
 			float num = 0.90909094f;
-			this.breathing = new AttributeModifier(deltaAttribute.Id, num, DUPLICANTS.MODIFIERS.BREATHING.NAME, false, false);
-			this.holdingbreath = new AttributeModifier(deltaAttribute.Id, -num, DUPLICANTS.MODIFIERS.HOLDINGBREATH.NAME, false, false);
+			this.breathing = new AttributeModifier(deltaAttribute.Id, num, DUPLICANTS.MODIFIERS.BREATHING.NAME, false, false, true);
+			this.holdingbreath = new AttributeModifier(deltaAttribute.Id, -num, DUPLICANTS.MODIFIERS.HOLDINGBREATH.NAME, false, false, true);
 			this.suitTank = suit_tank;
 		}
 
@@ -67,7 +67,7 @@ public class SuitSuffocationMonitor : GameStateMachine<SuitSuffocationMonitor, S
 
 		public bool IsSuffocating()
 		{
-			return this.breath.value <= 45.454548f;
+			return this.breath.value <= 45.454544f;
 		}
 
 		public void Kill()

@@ -4,7 +4,7 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequiredByNativeCode]
+	[RequiredByNativeCode(Optional = true)]
 	public struct NetworkMessageInfo
 	{
 		public double timestamp
@@ -27,16 +27,21 @@ namespace UnityEngine
 		{
 			get
 			{
+				NetworkView networkView;
 				if (this.m_ViewID == NetworkViewID.unassigned)
 				{
 					Debug.LogError("No NetworkView is assigned to this NetworkMessageInfo object. Note that this is expected in OnNetworkInstantiate().");
-					return this.NullNetworkView();
+					networkView = this.NullNetworkView();
 				}
-				return NetworkView.Find(this.m_ViewID);
+				else
+				{
+					networkView = NetworkView.Find(this.m_ViewID);
+				}
+				return networkView;
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern NetworkView NullNetworkView();
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using UnityEngine.Scripting;
 
@@ -16,14 +17,6 @@ namespace UnityEngine
 		{
 			this.nativeDisplay = nativeDisplay;
 		}
-
-		// Note: this type is marked as 'beforefieldinit'.
-		static Display()
-		{
-			Display.onDisplaysUpdated = null;
-		}
-
-		public static event Display.DisplaysUpdatedDelegate onDisplaysUpdated;
 
 		public int renderingWidth
 		{
@@ -88,6 +81,14 @@ namespace UnityEngine
 				RenderBuffer renderBuffer2;
 				Display.GetRenderingBuffersImpl(this.nativeDisplay, out renderBuffer, out renderBuffer2);
 				return renderBuffer2;
+			}
+		}
+
+		public bool active
+		{
+			get
+			{
+				return Display.GetActiveImp(this.nativeDisplay);
 			}
 		}
 
@@ -158,33 +159,46 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static event Display.DisplaysUpdatedDelegate onDisplaysUpdated;
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetSystemExtImpl(IntPtr nativeDisplay, out int w, out int h);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetRenderingExtImpl(IntPtr nativeDisplay, out int w, out int h);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetRenderingBuffersImpl(IntPtr nativeDisplay, out RenderBuffer color, out RenderBuffer depth);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetRenderingResolutionImpl(IntPtr nativeDisplay, int w, int h);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void ActivateDisplayImpl(IntPtr nativeDisplay, int width, int height, int refreshRate);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void SetParamsImpl(IntPtr nativeDisplay, int width, int height, int x, int y);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int RelativeMouseAtImpl(int x, int y, out int rx, out int ry);
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool GetActiveImp(IntPtr nativeDisplay);
+
+		// Note: this type is marked as 'beforefieldinit'.
+		static Display()
+		{
+			Display.onDisplaysUpdated = null;
+		}
 
 		internal IntPtr nativeDisplay;
 

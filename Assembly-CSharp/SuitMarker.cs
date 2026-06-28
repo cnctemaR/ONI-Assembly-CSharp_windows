@@ -10,7 +10,7 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		this.CreateNewReactable();
 		Pathfinding.Instance.AddNavigationFeature(Grid.PosToCell(this), this);
 		base.GetComponent<KAnimControllerBase>().Play("no_suit", KAnim.PlayMode.Once, 1f, 0f);
@@ -100,18 +100,39 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 	{
 		int fullyChargedSuitCount = this.GetFullyChargedSuitCount();
 		int count = this.equipReservations.Count;
-		return count < fullyChargedSuitCount || (count == fullyChargedSuitCount && this.equipReservations.Contains(suit_wearer));
+		bool flag;
+		if (count < fullyChargedSuitCount)
+		{
+			flag = true;
+		}
+		else
+		{
+			if (count == fullyChargedSuitCount)
+			{
+				if (this.equipReservations.Contains(suit_wearer))
+				{
+					return true;
+				}
+			}
+			flag = false;
+		}
+		return flag;
 	}
 
 	public bool IsSuitAvailableForReactable(SuitWearer.Instance suit_wearer)
 	{
+		bool flag;
 		if (this.equipReservations.Contains(suit_wearer))
 		{
-			return true;
+			flag = true;
 		}
-		int count = this.equipReservations.Count;
-		int fullyChargedSuitCount = this.GetFullyChargedSuitCount();
-		return fullyChargedSuitCount > count;
+		else
+		{
+			int count = this.equipReservations.Count;
+			int fullyChargedSuitCount = this.GetFullyChargedSuitCount();
+			flag = fullyChargedSuitCount > count;
+		}
+		return flag;
 	}
 
 	public bool IsUnequipAvailableForSuitWearer(SuitWearer.Instance suit_wearer)
@@ -130,44 +151,49 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 
 	public bool IsTraversable(Navigator agent, PathFinder.PotentialPath path, int from_cell, int cost, PathFinderAbilities abilities)
 	{
+		bool flag;
 		if (!base.GetComponent<Operational>().IsOperational)
 		{
-			return true;
+			flag = true;
 		}
-		if (!path.HasFlag(PathFinder.PotentialPath.Flags.PerformSuitChecks))
+		else if (!path.HasFlag(PathFinder.PotentialPath.Flags.PerformSuitChecks))
 		{
-			return true;
+			flag = true;
 		}
-		SuitWearer.Instance smi = agent.GetSMI<SuitWearer.Instance>();
-		bool flag = this.DoesTraversalDirectionRequireSuit(from_cell, path.cell);
-		bool flag2 = path.HasFlag(PathFinder.PotentialPath.Flags.HasSuit);
-		if (flag)
+		else
 		{
-			bool flag3 = this.IsSuitAvailableForTraversal(smi);
-			return flag2 || flag3;
+			SuitWearer.Instance smi = agent.GetSMI<SuitWearer.Instance>();
+			bool flag2 = this.DoesTraversalDirectionRequireSuit(from_cell, path.cell);
+			bool flag3 = path.HasFlag(PathFinder.PotentialPath.Flags.HasSuit);
+			if (flag2)
+			{
+				bool flag4 = this.IsSuitAvailableForTraversal(smi);
+				flag = flag3 || flag4;
+			}
+			else
+			{
+				flag = !flag3 || !this.onlyTraverseIfUnequipAvailable || this.IsUnequipAvailableForSuitWearer(smi);
+			}
 		}
-		return !flag2 || !this.onlyTraverseIfUnequipAvailable || this.IsUnequipAvailableForSuitWearer(smi);
+		return flag;
 	}
 
 	public void ApplyTraversalToPath(Navigator agent, ref PathFinder.PotentialPath path, int from_cell)
 	{
-		if (!path.HasFlag(PathFinder.PotentialPath.Flags.PerformSuitChecks))
+		if (path.HasFlag(PathFinder.PotentialPath.Flags.PerformSuitChecks))
 		{
-			return;
-		}
-		if (!base.GetComponent<Operational>().IsOperational)
-		{
-			return;
-		}
-		SuitWearer.Instance smi = agent.GetSMI<SuitWearer.Instance>();
-		bool flag = this.DoesTraversalDirectionRequireSuit(from_cell, path.cell);
-		if (flag)
-		{
-			path.SetFlags(PathFinder.PotentialPath.Flags.HasSuit);
-		}
-		else
-		{
-			path.ClearFlags(PathFinder.PotentialPath.Flags.HasSuit);
+			if (base.GetComponent<Operational>().IsOperational)
+			{
+				bool flag = this.DoesTraversalDirectionRequireSuit(from_cell, path.cell);
+				if (flag)
+				{
+					path.SetFlags(PathFinder.PotentialPath.Flags.HasSuit);
+				}
+				else
+				{
+					path.ClearFlags(PathFinder.PotentialPath.Flags.HasSuit);
+				}
+			}
 		}
 	}
 
@@ -243,14 +269,20 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 		if (!this.onlyTraverseIfUnequipAvailable)
 		{
 			UserMenu userMenu = this.userMenu;
-			string text = UI.USERMENUACTIONS.SUIT_MARKER_TRAVERSAL.ONLY_WHEN_ROOM_AVAILABLE.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_clearance", UI.USERMENUACTIONS.SUIT_MARKER_TRAVERSAL.ONLY_WHEN_ROOM_AVAILABLE.NAME, new global::System.Action(this.OnEnableTraverseIfUnequipAvailable), global::Action.NumActions, null, null, null, text, true), 1f);
+			string text = "action_clearance";
+			string text2 = UI.USERMENUACTIONS.SUIT_MARKER_TRAVERSAL.ONLY_WHEN_ROOM_AVAILABLE.NAME;
+			global::System.Action action = new global::System.Action(this.OnEnableTraverseIfUnequipAvailable);
+			string text3 = UI.USERMENUACTIONS.SUIT_MARKER_TRAVERSAL.ONLY_WHEN_ROOM_AVAILABLE.TOOLTIP;
+			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
 		}
 		else
 		{
 			UserMenu userMenu2 = this.userMenu;
+			string text3 = "action_clearance";
+			string text2 = UI.USERMENUACTIONS.SUIT_MARKER_TRAVERSAL.ALWAYS.NAME;
+			global::System.Action action = new global::System.Action(this.OnDisableTraverseIfUnequipAvailable);
 			string text = UI.USERMENUACTIONS.SUIT_MARKER_TRAVERSAL.ALWAYS.TOOLTIP;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_clearance", UI.USERMENUACTIONS.SUIT_MARKER_TRAVERSAL.ALWAYS.NAME, new global::System.Action(this.OnDisableTraverseIfUnequipAvailable), global::Action.NumActions, null, null, null, text, true), 1f);
+			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
 		}
 	}
 
@@ -298,26 +330,34 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 
 		public override bool InternalCanBegin(GameObject new_reactor, Navigator.ActiveTransition transition)
 		{
+			bool flag;
 			if (this.reactor != null)
 			{
-				return false;
+				flag = false;
 			}
-			if (this.suitMarker == null)
+			else if (this.suitMarker == null)
 			{
 				base.Cleanup();
-				return false;
+				flag = false;
 			}
-			if (!this.suitMarker.GetComponent<Operational>().IsOperational)
+			else if (!this.suitMarker.GetComponent<Operational>().IsOperational)
 			{
-				return false;
+				flag = false;
 			}
-			Rotatable component = this.gameObject.GetComponent<Rotatable>();
-			SuitWearer.Instance smi = new_reactor.GetSMI<SuitWearer.Instance>();
-			if (new_reactor.GetComponent<Equipment>().IsSlotOccupied(global::TUNING.EQUIPMENT.SUIT_SLOT))
+			else
 			{
-				return (transition.x >= 0 || !component.IsRotated) && (transition.x <= 0 || component.IsRotated);
+				Rotatable component = this.gameObject.GetComponent<Rotatable>();
+				SuitWearer.Instance smi = new_reactor.GetSMI<SuitWearer.Instance>();
+				if (new_reactor.GetComponent<Equipment>().IsSlotOccupied(global::TUNING.EQUIPMENT.SUIT_SLOT))
+				{
+					flag = (transition.x >= 0 || !component.IsRotated) && (transition.x <= 0 || component.IsRotated);
+				}
+				else
+				{
+					flag = (transition.x <= 0 || !component.IsRotated) && (transition.x >= 0 || component.IsRotated) && this.suitMarker.IsSuitAvailableForReactable(smi);
+				}
 			}
-			return (transition.x <= 0 || !component.IsRotated) && (transition.x >= 0 || component.IsRotated) && this.suitMarker.IsSuitAvailableForReactable(smi);
+			return flag;
 		}
 
 		protected override void InternalBegin()
@@ -371,7 +411,7 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 						Assignable assignable = reactor.GetComponent<Equipment>().GetAssignable(global::TUNING.EQUIPMENT.SUIT_SLOT);
 						assignable.Unassign();
 						Notification notification = new Notification(MISC.NOTIFICATIONS.SUIT_DROPPED.NAME, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.SUIT_DROPPED.TOOLTIP, null, true, 0f, null, null, null);
-						assignable.GetComponent<Notifier>().Add(notification, string.Empty);
+						assignable.GetComponent<Notifier>().Add(notification, "");
 					}
 				}
 			}

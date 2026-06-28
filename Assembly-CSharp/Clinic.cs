@@ -56,12 +56,17 @@ public class Clinic : Ownable, IEffectDescriptor
 	protected override bool OnWorkTick(Worker worker, float dt)
 	{
 		KAnimFile[] appropriateOverrideAnims = this.GetAppropriateOverrideAnims(worker);
+		bool flag;
 		if (appropriateOverrideAnims == null || appropriateOverrideAnims != this.overrideAnims)
 		{
-			return true;
+			flag = true;
 		}
-		base.OnWorkTick(worker, dt);
-		return false;
+		else
+		{
+			base.OnWorkTick(worker, dt);
+			flag = false;
+		}
+		return flag;
 	}
 
 	protected override void OnStopWork(Worker worker)
@@ -91,12 +96,17 @@ public class Clinic : Ownable, IEffectDescriptor
 	private bool IsInMedicalRegion()
 	{
 		RequiresRegion component = base.GetComponent<RequiresRegion>();
+		bool flag;
 		if (component == null)
 		{
-			return true;
+			flag = true;
 		}
-		Region ownerRegion = component.OwnerRegion;
-		return ownerRegion != null && ownerRegion.RegionTag == global::TUNING.REGIONS.MedicalRegionTag;
+		else
+		{
+			Region ownerRegion = component.OwnerRegion;
+			flag = ownerRegion != null && ownerRegion.RegionTag == global::TUNING.REGIONS.MedicalRegionTag;
+		}
+		return flag;
 	}
 
 	public override bool CanAutoAssignTo(KMonoBehaviour worker)
@@ -121,7 +131,7 @@ public class Clinic : Ownable, IEffectDescriptor
 
 	private bool IsValidEffect(string effect)
 	{
-		return effect != null && effect != string.Empty;
+		return effect != null && effect != "";
 	}
 
 	private bool AllowDoctoring()
@@ -134,7 +144,7 @@ public class Clinic : Ownable, IEffectDescriptor
 		Effect effect = Db.Get().effects.Get(effect_id);
 		foreach (AttributeModifier attributeModifier in effect.SelfModifiers)
 		{
-			Descriptor descriptor = new Descriptor(Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + attributeModifier.AttributeId.ToUpper() + ".NAME") + ": " + attributeModifier.GetFormattedString(base.gameObject), string.Empty, Descriptor.DescriptorType.Effect, false);
+			Descriptor descriptor = new Descriptor(Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + attributeModifier.AttributeId.ToUpper() + ".NAME") + ": " + attributeModifier.GetFormattedString(base.gameObject), "", Descriptor.DescriptorType.Effect, false);
 			if (increase_indent)
 			{
 				descriptor.IncreaseIndent();
@@ -171,11 +181,11 @@ public class Clinic : Ownable, IEffectDescriptor
 		return descriptors;
 	}
 
+	private static readonly string[] EffectsRemoved = new string[] { "SoreBack" };
+
 	private const int MAX_RANGE = 10;
 
 	private const float CHECK_RANGE_INTERVAL = 10f;
-
-	private static readonly string[] EffectsRemoved = new string[] { "SoreBack" };
 
 	public float doctorVisitInterval = 300f;
 
@@ -217,23 +227,31 @@ public class Clinic : Ownable, IEffectDescriptor
 			this.operational.DefaultState(this.operational.idle).EventTransition(GameHashes.OperationalChanged, this.unoperational, (Clinic.ClinicSM.Instance smi) => !smi.master.GetComponent<Operational>().IsOperational).EventTransition(GameHashes.AssigneeChanged, this.unoperational, null)
 				.ToggleRecurringChore(delegate(Clinic.ClinicSM.Instance smi)
 				{
+					ChoreType heal = Db.Get().ChoreTypes.Heal;
+					Clinic master = smi.master;
 					Tag medicalRegionTag = global::TUNING.REGIONS.MedicalRegionTag;
-					return new WorkChore<Clinic>(Db.Get().ChoreTypes.Heal, smi.master, null, true, null, null, null, true, null, true, medicalRegionTag, null, false, true, true, int.MaxValue);
+					return new WorkChore<Clinic>(heal, master, null, true, null, null, null, true, null, true, medicalRegionTag, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
 				}, (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.healthEffect))
 				.ToggleRecurringChore(delegate(Clinic.ClinicSM.Instance smi)
 				{
+					ChoreType healCritical = Db.Get().ChoreTypes.HealCritical;
+					Clinic master2 = smi.master;
 					Tag medicalRegionTag2 = global::TUNING.REGIONS.MedicalRegionTag;
-					return new WorkChore<Clinic>(Db.Get().ChoreTypes.HealCritical, smi.master, null, true, null, null, null, true, null, true, medicalRegionTag2, null, false, true, true, int.MaxValue);
+					return new WorkChore<Clinic>(healCritical, master2, null, true, null, null, null, true, null, true, medicalRegionTag2, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
 				}, (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.healthEffect))
 				.ToggleRecurringChore(delegate(Clinic.ClinicSM.Instance smi)
 				{
+					ChoreType restDueToDisease = Db.Get().ChoreTypes.RestDueToDisease;
+					Clinic master3 = smi.master;
 					Tag medicalRegionTag3 = global::TUNING.REGIONS.MedicalRegionTag;
-					return new WorkChore<Clinic>(Db.Get().ChoreTypes.RestDueToDisease, smi.master, null, true, null, null, null, true, null, true, medicalRegionTag3, null, false, true, true, int.MaxValue);
+					return new WorkChore<Clinic>(restDueToDisease, master3, null, true, null, null, null, true, null, true, medicalRegionTag3, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
 				}, (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.diseaseEffect))
 				.ToggleRecurringChore(delegate(Clinic.ClinicSM.Instance smi)
 				{
+					ChoreType sleepDueToDisease = Db.Get().ChoreTypes.SleepDueToDisease;
+					Clinic master4 = smi.master;
 					Tag medicalRegionTag4 = global::TUNING.REGIONS.MedicalRegionTag;
-					return new WorkChore<Clinic>(Db.Get().ChoreTypes.SleepDueToDisease, smi.master, null, true, null, null, null, true, null, true, medicalRegionTag4, null, false, true, false, int.MaxValue);
+					return new WorkChore<Clinic>(sleepDueToDisease, master4, null, true, null, null, null, true, null, true, medicalRegionTag4, null, false, true, false, PriorityScreen.PriorityClass.basic, int.MaxValue);
 				}, (Clinic.ClinicSM.Instance smi) => !string.IsNullOrEmpty(smi.master.diseaseEffect));
 			this.operational.idle.WorkableStartTransition((Clinic.ClinicSM.Instance smi) => smi.master, this.operational.healing);
 			this.operational.healing.DefaultState(this.operational.healing.undoctored).WorkableStopTransition((Clinic.ClinicSM.Instance smi) => smi.GetComponent<Clinic>(), this.operational.idle).Enter(delegate(Clinic.ClinicSM.Instance smi)
@@ -362,7 +380,7 @@ public class Clinic : Ownable, IEffectDescriptor
 			{
 				if (base.master.IsValidEffect(base.master.doctoredHealthEffect) || base.master.IsValidEffect(base.master.doctoredDiseaseEffect))
 				{
-					this.doctorChore = new WorkChore<DoctorChore>(Db.Get().ChoreTypes.Doctor, base.smi.master, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue);
+					this.doctorChore = new WorkChore<DoctorChore>(Db.Get().ChoreTypes.Doctor, base.smi.master, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
 					WorkChore<DoctorChore> workChore = this.doctorChore;
 					workChore.onComplete = (Action<Chore>)Delegate.Combine(workChore.onComplete, new Action<Chore>(delegate(Chore chore)
 					{

@@ -18,9 +18,12 @@ public class DoorTransitionLayer : TransitionDriver.OverrideLayer
 	{
 		foreach (Door door in this.doors)
 		{
-			if (door != null && !door.IsOpen())
+			if (door != null)
 			{
-				return false;
+				if (!door.IsOpen())
+				{
+					return false;
+				}
 			}
 		}
 		return true;
@@ -33,6 +36,11 @@ public class DoorTransitionLayer : TransitionDriver.OverrideLayer
 		int num2 = Grid.OffsetCell(num, transition.x, transition.y);
 		this.AddDoor(num2);
 		this.AddDoor(Grid.CellAbove(num2));
+		for (int i = 0; i < transition.navGridTransition.voidOffsets.Length; i++)
+		{
+			int num3 = Grid.OffsetCell(num, transition.navGridTransition.voidOffsets[i]);
+			this.AddDoor(num3);
+		}
 		if (this.doors.Count > 0 && !this.AreAllDoorsOpen())
 		{
 			transition.anim = navigator.NavGrid.GetIdleAnim(navigator.CurrentNavType);
@@ -44,8 +52,6 @@ public class DoorTransitionLayer : TransitionDriver.OverrideLayer
 			transition.y = 0;
 			transition.isCompleteCB = () => this.AreAllDoorsOpen();
 		}
-		this.AddDoor(num);
-		this.AddDoor(Grid.CellAbove(num));
 		foreach (Door door in this.doors)
 		{
 			door.Open();
@@ -73,7 +79,7 @@ public class DoorTransitionLayer : TransitionDriver.OverrideLayer
 	private void AddDoor(int cell)
 	{
 		Door door = this.GetDoor(cell);
-		if (door != null)
+		if (door != null && !this.doors.Contains(door))
 		{
 			this.doors.Add(door);
 		}
@@ -81,20 +87,25 @@ public class DoorTransitionLayer : TransitionDriver.OverrideLayer
 
 	private Door GetDoor(int cell)
 	{
+		Door door;
 		if (!Grid.HasDoor[cell])
 		{
-			return null;
+			door = null;
 		}
-		GameObject gameObject = Grid.Objects[cell, 1];
-		if (gameObject != null)
+		else
 		{
-			Door component = gameObject.GetComponent<Door>();
-			if (component != null && component.isSpawned)
+			GameObject gameObject = Grid.Objects[cell, 1];
+			if (gameObject != null)
 			{
-				return component;
+				Door component = gameObject.GetComponent<Door>();
+				if (component != null && component.isSpawned)
+				{
+					return component;
+				}
 			}
+			door = null;
 		}
-		return null;
+		return door;
 	}
 
 	private List<Door> doors = new List<Door>();

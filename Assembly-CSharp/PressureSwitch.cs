@@ -14,20 +14,22 @@ public class PressureSwitch : CircuitSwitch, ISaveLoadable, IThresholdSwitch
 			float num2 = ((!Grid.Element[num].IsState(this.desiredState)) ? 0f : Grid.Cell[num].mass);
 			this.samples[this.sampleIdx] = num2;
 			this.sampleIdx++;
-			return;
 		}
-		this.sampleIdx = 0;
-		float currentValue = this.CurrentValue;
-		if (this.activateAboveThreshold)
+		else
 		{
-			if ((currentValue > this.threshold && !base.IsSwitchedOn) || (currentValue < this.threshold && base.IsSwitchedOn))
+			this.sampleIdx = 0;
+			float currentValue = this.CurrentValue;
+			if (this.activateAboveThreshold)
+			{
+				if ((currentValue > this.threshold && !base.IsSwitchedOn) || (currentValue <= this.threshold && base.IsSwitchedOn))
+				{
+					this.Toggle();
+				}
+			}
+			else if ((currentValue > this.threshold && base.IsSwitchedOn) || (currentValue <= this.threshold && !base.IsSwitchedOn))
 			{
 				this.Toggle();
 			}
-		}
-		else if ((currentValue > this.threshold && base.IsSwitchedOn) || (currentValue < this.threshold && !base.IsSwitchedOn))
-		{
-			this.Toggle();
 		}
 	}
 
@@ -176,28 +178,23 @@ public class PressureSwitch : CircuitSwitch, ISaveLoadable, IThresholdSwitch
 		return locString;
 	}
 
-	virtual bool IThresholdSwitch.IsConnected()
-	{
-		return base.IsConnected();
-	}
-
-	private const int WINDOW_SIZE = 8;
-
 	[SerializeField]
 	[Serialize]
-	private float threshold;
+	private float threshold = 0f;
 
 	[SerializeField]
 	[Serialize]
 	private bool activateAboveThreshold = true;
 
-	public float rangeMin;
+	public float rangeMin = 0f;
 
 	public float rangeMax = 1f;
 
 	public Element.State desiredState = Element.State.Gas;
 
+	private const int WINDOW_SIZE = 8;
+
 	private float[] samples = new float[8];
 
-	private int sampleIdx;
+	private int sampleIdx = 0;
 }

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class CrewListEntry : KMonoBehaviour, IPointerEnterHandler, IEventSystemHandler, IPointerExitHandler, IPointerClickHandler
+public class CrewListEntry : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler, IEventSystemHandler
 {
 	public MinionIdentity Identity
 	{
@@ -88,7 +88,7 @@ public class CrewListEntry : KMonoBehaviour, IPointerEnterHandler, IEventSystemH
 
 	public GameObject crewPortraitParent;
 
-	protected bool mouseOver;
+	protected bool mouseOver = false;
 
 	public Image BorderHighlight;
 

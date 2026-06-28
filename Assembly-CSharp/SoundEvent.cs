@@ -17,7 +17,7 @@ public class SoundEvent : AnimEvent
 		{
 			this.sound = GlobalAssets.GetSound(sound_name, false);
 			this.soundHash = new HashedString(this.sound);
-			if (this.sound == null || this.sound == string.Empty)
+			if (this.sound == null || this.sound == "")
 			{
 			}
 		}
@@ -42,31 +42,39 @@ public class SoundEvent : AnimEvent
 	public bool ShouldPlaySound(AnimEventManager.EventPlayerData behaviour, bool isDynamic = false)
 	{
 		CameraController instance = CameraController.Instance;
+		bool flag;
 		if (instance == null)
 		{
-			return true;
+			flag = true;
 		}
-		SpeedControlScreen instance2 = SpeedControlScreen.Instance;
-		if (isDynamic)
+		else
 		{
-			return (!(instance2 != null) || !instance2.IsPaused) && instance.IsAudibleSound(behaviour.position, 0f);
-		}
-		if (this.sound == null || this.IsLowPrioritySound(this.sound))
-		{
-			return false;
-		}
-		if (!instance.IsAudibleSound(behaviour.position, this.sound))
-		{
-			if (!this.looping && !GlobalAssets.IsHighPriority(this.sound))
+			SpeedControlScreen instance2 = SpeedControlScreen.Instance;
+			if (isDynamic)
 			{
-				return false;
+				flag = (!(instance2 != null) || !instance2.IsPaused) && instance.IsAudibleSound(behaviour.position, 0f);
+			}
+			else if (this.sound == null || this.IsLowPrioritySound(this.sound))
+			{
+				flag = false;
+			}
+			else
+			{
+				if (!instance.IsAudibleSound(behaviour.position, this.sound))
+				{
+					if (!this.looping && !GlobalAssets.IsHighPriority(this.sound))
+					{
+						return false;
+					}
+				}
+				else if (instance2 != null && instance2.IsPaused)
+				{
+					return false;
+				}
+				flag = true;
 			}
 		}
-		else if (instance2 != null && instance2.IsPaused)
-		{
-			return false;
-		}
-		return true;
+		return flag;
 	}
 
 	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
@@ -184,7 +192,17 @@ public class SoundEvent : AnimEvent
 
 	protected bool IsLowPrioritySound(string sound)
 	{
-		return sound != null && Camera.main.orthographicSize > AudioMixer.LOW_PRIORITY_CUTOFF_DISTANCE && !AudioMixer.instance.activeNIS && GlobalAssets.IsLowPriority(sound);
+		if (sound != null)
+		{
+			if (Camera.main.orthographicSize > AudioMixer.LOW_PRIORITY_CUTOFF_DISTANCE && !AudioMixer.instance.activeNIS)
+			{
+				if (GlobalAssets.IsLowPriority(sound))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	protected void PrintSoundDebug(string anim_name, string sound, string sound_name, Vector3 sound_pos)
@@ -201,5 +219,5 @@ public class SoundEvent : AnimEvent
 
 	public static int IGNORE_INTERVAL = -1;
 
-	private bool isDynamic;
+	private bool isDynamic = false;
 }

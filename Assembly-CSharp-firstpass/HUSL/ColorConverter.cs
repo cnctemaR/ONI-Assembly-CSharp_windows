@@ -105,20 +105,30 @@ namespace HUSL
 
 		protected static double FromLinear(double c)
 		{
+			double num;
 			if (c <= 0.0031308)
 			{
-				return 12.92 * c;
+				num = 12.92 * c;
 			}
-			return 1.055 * Math.Pow(c, 0.4166666666666667) - 0.055;
+			else
+			{
+				num = 1.055 * Math.Pow(c, 0.4166666666666667) - 0.055;
+			}
+			return num;
 		}
 
 		protected static double ToLinear(double c)
 		{
+			double num;
 			if (c > 0.04045)
 			{
-				return Math.Pow((c + 0.055) / 1.055, 2.4);
+				num = Math.Pow((c + 0.055) / 1.055, 2.4);
 			}
-			return c / 12.92;
+			else
+			{
+				num = c / 12.92;
+			}
+			return num;
 		}
 
 		protected static IList<int> RGBPrepare(IList<double> tuple)
@@ -145,20 +155,30 @@ namespace HUSL
 
 		protected static double YToL(double Y)
 		{
+			double num;
 			if (Y <= ColorConverter.Epsilon)
 			{
-				return Y / ColorConverter.RefY * ColorConverter.Kappa;
+				num = Y / ColorConverter.RefY * ColorConverter.Kappa;
 			}
-			return 116.0 * Math.Pow(Y / ColorConverter.RefY, 0.3333333333333333) - 16.0;
+			else
+			{
+				num = 116.0 * Math.Pow(Y / ColorConverter.RefY, 0.3333333333333333) - 16.0;
+			}
+			return num;
 		}
 
 		protected static double LToY(double L)
 		{
+			double num;
 			if (L <= 8.0)
 			{
-				return ColorConverter.RefY * L / ColorConverter.Kappa;
+				num = ColorConverter.RefY * L / ColorConverter.Kappa;
 			}
-			return ColorConverter.RefY * Math.Pow((L + 16.0) / 116.0, 3.0);
+			else
+			{
+				num = ColorConverter.RefY * Math.Pow((L + 16.0) / 116.0, 3.0);
+			}
+			return num;
 		}
 
 		public static IList<double> XYZToRGB(IList<double> tuple)
@@ -195,13 +215,18 @@ namespace HUSL
 			double num4 = 4.0 * num / (num + 15.0 * num2 + 3.0 * num3);
 			double num5 = 9.0 * num2 / (num + 15.0 * num2 + 3.0 * num3);
 			double num6 = ColorConverter.YToL(num2);
+			IList<double> list;
 			if (num6 == 0.0)
 			{
-				return new double[3];
+				list = new double[3];
 			}
-			double num7 = 13.0 * num6 * (num4 - ColorConverter.RefU);
-			double num8 = 13.0 * num6 * (num5 - ColorConverter.RefV);
-			return new double[] { num6, num7, num8 };
+			else
+			{
+				double num7 = 13.0 * num6 * (num4 - ColorConverter.RefU);
+				double num8 = 13.0 * num6 * (num5 - ColorConverter.RefV);
+				list = new double[] { num6, num7, num8 };
+			}
+			return list;
 		}
 
 		public static IList<double> LUVToXYZ(IList<double> tuple)
@@ -209,16 +234,21 @@ namespace HUSL
 			double num = tuple[0];
 			double num2 = tuple[1];
 			double num3 = tuple[2];
+			IList<double> list;
 			if (num == 0.0)
 			{
-				return new double[3];
+				list = new double[3];
 			}
-			double num4 = num2 / (13.0 * num) + ColorConverter.RefU;
-			double num5 = num3 / (13.0 * num) + ColorConverter.RefV;
-			double num6 = ColorConverter.LToY(num);
-			double num7 = 0.0 - 9.0 * num6 * num4 / ((num4 - 4.0) * num5 - num4 * num5);
-			double num8 = (9.0 * num6 - 15.0 * num5 * num6 - num5 * num7) / (3.0 * num5);
-			return new double[] { num7, num6, num8 };
+			else
+			{
+				double num4 = num2 / (13.0 * num) + ColorConverter.RefU;
+				double num5 = num3 / (13.0 * num) + ColorConverter.RefV;
+				double num6 = ColorConverter.LToY(num);
+				double num7 = 0.0 - 9.0 * num6 * num4 / ((num4 - 4.0) * num5 - num4 * num5);
+				double num8 = (9.0 * num6 - 15.0 * num5 * num6 - num5 * num7) / (3.0 * num5);
+				list = new double[] { num7, num6, num8 };
+			}
+			return list;
 		}
 
 		public static IList<double> LUVToLCH(IList<double> tuple)
@@ -252,17 +282,22 @@ namespace HUSL
 			double num = tuple[0];
 			double num2 = tuple[1];
 			double num3 = tuple[2];
+			IList<double> list;
 			if (num3 > 99.9999999)
 			{
-				return new double[] { 100.0, 0.0, num };
+				list = new double[] { 100.0, 0.0, num };
 			}
-			if (num3 < 1E-08)
+			else if (num3 < 1E-08)
 			{
-				return new double[] { 0.0, 0.0, num };
+				list = new double[] { 0.0, 0.0, num };
 			}
-			double num4 = ColorConverter.MaxChromaForLH(num3, num);
-			double num5 = num4 / 100.0 * num2;
-			return new double[] { num3, num5, num };
+			else
+			{
+				double num4 = ColorConverter.MaxChromaForLH(num3, num);
+				double num5 = num4 / 100.0 * num2;
+				list = new double[] { num3, num5, num };
+			}
+			return list;
 		}
 
 		public static IList<double> LCHToHUSL(IList<double> tuple)
@@ -270,19 +305,24 @@ namespace HUSL
 			double num = tuple[0];
 			double num2 = tuple[1];
 			double num3 = tuple[2];
+			IList<double> list;
 			if (num > 99.9999999)
 			{
-				return new double[] { num3, 0.0, 100.0 };
+				list = new double[] { num3, 0.0, 100.0 };
 			}
-			if (num < 1E-08)
+			else if (num < 1E-08)
 			{
 				double[] array = new double[3];
 				array[0] = num3;
-				return array;
+				list = array;
 			}
-			double num4 = ColorConverter.MaxChromaForLH(num, num3);
-			double num5 = num2 / num4 * 100.0;
-			return new double[] { num3, num5, num };
+			else
+			{
+				double num4 = ColorConverter.MaxChromaForLH(num, num3);
+				double num5 = num2 / num4 * 100.0;
+				list = new double[] { num3, num5, num };
+			}
+			return list;
 		}
 
 		public static IList<double> HUSLPToLCH(IList<double> tuple)
@@ -290,17 +330,22 @@ namespace HUSL
 			double num = tuple[0];
 			double num2 = tuple[1];
 			double num3 = tuple[2];
+			IList<double> list;
 			if (num3 > 99.9999999)
 			{
-				return new double[] { 100.0, 0.0, num };
+				list = new double[] { 100.0, 0.0, num };
 			}
-			if (num3 < 1E-08)
+			else if (num3 < 1E-08)
 			{
-				return new double[] { 0.0, 0.0, num };
+				list = new double[] { 0.0, 0.0, num };
 			}
-			double num4 = ColorConverter.MaxSafeChromaForL(num3);
-			double num5 = num4 / 100.0 * num2;
-			return new double[] { num3, num5, num };
+			else
+			{
+				double num4 = ColorConverter.MaxSafeChromaForL(num3);
+				double num5 = num4 / 100.0 * num2;
+				list = new double[] { num3, num5, num };
+			}
+			return list;
 		}
 
 		public static IList<double> LCHToHUSLP(IList<double> tuple)
@@ -308,19 +353,24 @@ namespace HUSL
 			double num = tuple[0];
 			double num2 = tuple[1];
 			double num3 = tuple[2];
+			IList<double> list;
 			if (num > 99.9999999)
 			{
-				return new double[] { num3, 0.0, 100.0 };
+				list = new double[] { num3, 0.0, 100.0 };
 			}
-			if (num < 1E-08)
+			else if (num < 1E-08)
 			{
 				double[] array = new double[3];
 				array[0] = num3;
-				return array;
+				list = array;
 			}
-			double num4 = ColorConverter.MaxSafeChromaForL(num);
-			double num5 = num2 / num4 * 100.0;
-			return new double[] { num3, num5, num };
+			else
+			{
+				double num4 = ColorConverter.MaxSafeChromaForL(num);
+				double num5 = num2 / num4 * 100.0;
+				list = new double[] { num3, num5, num };
+			}
+			return list;
 		}
 
 		public static string RGBToHex(IList<double> tuple)

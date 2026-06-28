@@ -61,19 +61,26 @@ namespace Steamworks
 
 		public bool IsValid()
 		{
+			bool flag;
 			switch (this.Type())
 			{
 			case CGameID.EGameIDType.k_EGameIDTypeApp:
-				return this.AppID() != AppId_t.Invalid;
+				flag = this.AppID() != AppId_t.Invalid;
+				break;
 			case CGameID.EGameIDType.k_EGameIDTypeGameMod:
-				return this.AppID() != AppId_t.Invalid && (this.ModID() & 2147483648U) != 0U;
+				flag = this.AppID() != AppId_t.Invalid && (this.ModID() & 2147483648U) != 0U;
+				break;
 			case CGameID.EGameIDType.k_EGameIDTypeShortcut:
-				return (this.ModID() & 2147483648U) != 0U;
+				flag = (this.ModID() & 2147483648U) != 0U;
+				break;
 			case CGameID.EGameIDType.k_EGameIDTypeP2P:
-				return this.AppID() == AppId_t.Invalid && (this.ModID() & 2147483648U) != 0U;
+				flag = this.AppID() == AppId_t.Invalid && (this.ModID() & 2147483648U) != 0U;
+				break;
 			default:
-				return false;
+				flag = false;
+				break;
 			}
+			return flag;
 		}
 
 		public void Reset()
@@ -88,7 +95,7 @@ namespace Steamworks
 
 		private void SetAppID(AppId_t other)
 		{
-			this.m_GameID = (this.m_GameID & 18446744073692774400UL) | ((ulong)(uint)other & 16777215UL);
+			this.m_GameID = (this.m_GameID & 18446744073692774400UL) | (((ulong)(uint)other & 16777215UL) << 0);
 		}
 
 		private void SetType(CGameID.EGameIDType other)
@@ -116,16 +123,6 @@ namespace Steamworks
 			return this.m_GameID.GetHashCode();
 		}
 
-		public bool Equals(CGameID other)
-		{
-			return this.m_GameID == other.m_GameID;
-		}
-
-		public int CompareTo(CGameID other)
-		{
-			return this.m_GameID.CompareTo(other.m_GameID);
-		}
-
 		public static bool operator ==(CGameID x, CGameID y)
 		{
 			return x.m_GameID == y.m_GameID;
@@ -144,6 +141,16 @@ namespace Steamworks
 		public static explicit operator ulong(CGameID that)
 		{
 			return that.m_GameID;
+		}
+
+		public bool Equals(CGameID other)
+		{
+			return this.m_GameID == other.m_GameID;
+		}
+
+		public int CompareTo(CGameID other)
+		{
+			return this.m_GameID.CompareTo(other.m_GameID);
 		}
 
 		public ulong m_GameID;

@@ -3,9 +3,9 @@ using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI
 {
+	[AddComponentMenu("Layout/Layout Element", 140)]
 	[RequireComponent(typeof(RectTransform))]
 	[ExecuteInEditMode]
-	[AddComponentMenu("Layout/Layout Element", 140)]
 	public class LayoutElement : UIBehaviour, ILayoutElement, ILayoutIgnorer
 	{
 		protected LayoutElement()
@@ -162,15 +162,14 @@ namespace UnityEngine.UI
 
 		protected void SetDirty()
 		{
-			if (!this.IsActive())
+			if (this.IsActive())
 			{
-				return;
+				LayoutRebuilder.MarkLayoutForRebuild(base.transform as RectTransform);
 			}
-			LayoutRebuilder.MarkLayoutForRebuild(base.transform as RectTransform);
 		}
 
 		[SerializeField]
-		private bool m_IgnoreLayout;
+		private bool m_IgnoreLayout = false;
 
 		[SerializeField]
 		private float m_MinWidth = -1f;

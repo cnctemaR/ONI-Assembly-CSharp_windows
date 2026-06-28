@@ -34,9 +34,9 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 		base.OnPrefabInit();
 		if (AccessControl.accessControlActive == null)
 		{
-			AccessControl.accessControlActive = new StatusItem("accessControlActive", BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.NAME, BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 14334);
+			AccessControl.accessControlActive = new StatusItem("accessControlActive", BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.NAME, BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 30718);
 		}
-		this.Subscribe(279163026, new Action<object>(this.OnControlStateChanged));
+		base.Subscribe(279163026, new Action<object>(this.OnControlStateChanged));
 	}
 
 	[OnDeserialized]
@@ -74,7 +74,7 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 
 	private void OnControlStateChanged(object data)
 	{
-		this.overrideAccess = (Door.ControlState)((int)data);
+		this.overrideAccess = (Door.ControlState)data;
 	}
 
 	public void SetPermission(GameObject key, AccessControl.Permission permission)
@@ -86,15 +86,23 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 	public AccessControl.Permission GetPermission(GameObject key)
 	{
 		Door.ControlState controlState = this.overrideAccess;
-		if (controlState == Door.ControlState.Opened)
-		{
-			return AccessControl.Permission.Both;
-		}
+		AccessControl.Permission permission;
 		if (controlState != Door.ControlState.Closed)
 		{
-			return this.GetSetPermission(key);
+			if (controlState != Door.ControlState.Opened)
+			{
+				permission = this.GetSetPermission(key);
+			}
+			else
+			{
+				permission = AccessControl.Permission.Both;
+			}
 		}
-		return AccessControl.Permission.Neither;
+		else
+		{
+			permission = AccessControl.Permission.Neither;
+		}
+		return permission;
 	}
 
 	public AccessControl.Permission GetSetPermission(GameObject key)
@@ -142,12 +150,12 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 	private List<KeyValuePair<Ref<KPrefabID>, AccessControl.Permission>> savedPermissions;
 
 	[Serialize]
-	private AccessControl.Permission _defaultPermission;
+	private AccessControl.Permission _defaultPermission = AccessControl.Permission.Both;
 
 	[Serialize]
 	public bool controlEnabled;
 
-	public Door.ControlState overrideAccess;
+	public Door.ControlState overrideAccess = Door.ControlState.Auto;
 
 	private static StatusItem accessControlActive;
 

@@ -15,52 +15,57 @@ public class GameAudioSheets : AudioSheets
 
 	protected override AnimEvent CreateSoundOfType(string type, string file_name, string sound_name, int frame, float min_interval)
 	{
+		AnimEvent animEvent;
 		if (type == "FloorSoundEvent")
 		{
-			return new FloorSoundEvent(file_name, sound_name, frame);
+			animEvent = new FloorSoundEvent(file_name, sound_name, frame);
 		}
-		if (type == "SoundEvent" || type == "LoopingSoundEvent")
+		else if (type == "SoundEvent" || type == "LoopingSoundEvent")
 		{
 			bool flag = type == "LoopingSoundEvent";
-			return new SoundEvent(file_name, sound_name, frame, true, flag, min_interval, false);
+			animEvent = new SoundEvent(file_name, sound_name, frame, true, flag, min_interval, false);
 		}
-		if (type == "LadderSoundEvent")
+		else if (type == "LadderSoundEvent")
 		{
-			return new LadderSoundEvent(file_name, sound_name, frame);
+			animEvent = new LadderSoundEvent(file_name, sound_name, frame);
 		}
-		if (type == "LaserSoundEvent")
+		else if (type == "LaserSoundEvent")
 		{
-			return new LaserSoundEvent(file_name, sound_name, frame, min_interval);
+			animEvent = new LaserSoundEvent(file_name, sound_name, frame, min_interval);
 		}
-		if (type == "HatchDrillSoundEvent")
+		else if (type == "HatchDrillSoundEvent")
 		{
-			return new HatchDrillSoundEvent(file_name, sound_name, frame, min_interval);
+			animEvent = new HatchDrillSoundEvent(file_name, sound_name, frame, min_interval);
 		}
-		if (type == "HatchChewSoundEvent")
+		else if (type == "HatchChewSoundEvent")
 		{
-			return new HatchChewSoundEvent(file_name, sound_name, frame, min_interval);
+			animEvent = new HatchChewSoundEvent(file_name, sound_name, frame, min_interval);
 		}
-		if (type == "BuildingDamageSoundEvent")
+		else if (type == "BuildingDamageSoundEvent")
 		{
-			return new BuildingDamageSoundEvent(file_name, sound_name, frame);
+			animEvent = new BuildingDamageSoundEvent(file_name, sound_name, frame);
 		}
-		if (type == "WallDamageSoundEvent")
+		else if (type == "WallDamageSoundEvent")
 		{
-			return new WallDamageSoundEvent(file_name, sound_name, frame, min_interval);
+			animEvent = new WallDamageSoundEvent(file_name, sound_name, frame, min_interval);
 		}
-		if (type == "RemoteSoundEvent")
+		else if (type == "RemoteSoundEvent")
 		{
-			return new RemoteSoundEvent(file_name, sound_name, frame, min_interval);
+			animEvent = new RemoteSoundEvent(file_name, sound_name, frame, min_interval);
 		}
-		if (type == "VoiceSoundEvent" || type == "LoopingVoiceSoundEvent")
+		else if (type == "VoiceSoundEvent" || type == "LoopingVoiceSoundEvent")
 		{
-			return new VoiceSoundEvent(file_name, sound_name, frame, type == "LoopingVoiceSoundEvent");
+			animEvent = new VoiceSoundEvent(file_name, sound_name, frame, type == "LoopingVoiceSoundEvent");
 		}
-		if (type == "MainMenuSoundEvent")
+		else if (type == "MainMenuSoundEvent")
 		{
-			return new MainMenuSoundEvent(file_name, sound_name, frame);
+			animEvent = new MainMenuSoundEvent(file_name, sound_name, frame);
 		}
-		return null;
+		else
+		{
+			animEvent = null;
+		}
+		return animEvent;
 	}
 
 	private static GameAudioSheets _Instance;

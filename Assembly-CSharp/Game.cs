@@ -29,6 +29,12 @@ public class Game : KMonoBehaviour
 
 	protected override void OnPrefabInit()
 	{
+		Output.Log(new object[]
+		{
+			Time.realtimeSinceStartup,
+			"Level Loaded....",
+			SceneManager.GetActiveScene().name
+		});
 		SimTemperatureTransfer.ClearInstanceMap();
 		StructureTemperatureComponents.ClearInstanceMap();
 		App.OnPreLoadScene = (global::System.Action)Delegate.Combine(App.OnPreLoadScene, new global::System.Action(this.StopBE));
@@ -52,9 +58,11 @@ public class Game : KMonoBehaviour
 		this.circuitManager = new CircuitManager();
 		this.RegionManager = new RegionManager(Grid.CellCount, REGIONS.REGIONS_TYPES);
 		this.elementInteractions = new ElementInteractions(this.elementInteractionsData);
-		this.gasConduitSystem = new UtilityNetworkManager<FlowUtilityNetwork, Vent>(Grid.WidthInCells, Grid.HeightInCells, 13, 1, false);
-		this.liquidConduitSystem = new UtilityNetworkManager<FlowUtilityNetwork, Vent>(Grid.WidthInCells, Grid.HeightInCells, 17, 1, false);
-		this.electricalConduitSystem = new UtilityNetworkManager<ElectricalUtilityNetwork, Wire>(Grid.WidthInCells, Grid.HeightInCells, 21, 20, true);
+		this.gasConduitSystem = new UtilityNetworkManager<FlowUtilityNetwork, Vent>(Grid.WidthInCells, Grid.HeightInCells, 13);
+		this.liquidConduitSystem = new UtilityNetworkManager<FlowUtilityNetwork, Vent>(Grid.WidthInCells, Grid.HeightInCells, 17);
+		this.electricalConduitSystem = new UtilityNetworkManager<ElectricalUtilityNetwork, Wire>(Grid.WidthInCells, Grid.HeightInCells, 21);
+		this.logicCircuitSystem = new UtilityNetworkManager<LogicCircuitNetwork, LogicWire>(Grid.WidthInCells, Grid.HeightInCells, 26);
+		this.logicCircuitManager = new LogicCircuitManager(this.logicCircuitSystem);
 		this.conduitTemperatureManager = new ConduitTemperatureManager(1f);
 		this.conduitDiseaseManager = new ConduitDiseaseManager(this.conduitTemperatureManager);
 		this.gasConduitFlow = new ConduitFlow(ConduitType.Gas, Grid.CellCount, this.gasConduitSystem, 1f);
@@ -93,7 +101,7 @@ public class Game : KMonoBehaviour
 
 	protected override void OnLoadLevel()
 	{
-		this.Unsubscribe(1798162660, new Action<object>(this.MarkStatusItemRendererDirty));
+		base.Unsubscribe(1798162660, new Action<object>(this.MarkStatusItemRendererDirty));
 		UpdateManager.Init();
 		base.OnLoadLevel();
 	}
@@ -146,8 +154,8 @@ public class Game : KMonoBehaviour
 		if (SaveLoader.Instance.loadedFromSave)
 		{
 			this.baseAlreadyCreated = true;
-			this.Trigger(-1992507039, null);
-			this.Trigger(-838649377, null);
+			base.Trigger(-1992507039, null);
+			base.Trigger(-838649377, null);
 		}
 		else
 		{
@@ -159,7 +167,7 @@ public class Game : KMonoBehaviour
 		{
 			meshRenderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
 		}
-		this.Subscribe(1798162660, new Action<object>(this.MarkStatusItemRendererDirty));
+		base.Subscribe(1798162660, new Action<object>(this.MarkStatusItemRendererDirty));
 		UIScheduler.Instance.SchedulePeriodic("RoomProberUpdate", 1f, delegate(object o)
 		{
 			this.roomProber.Update();
@@ -217,6 +225,10 @@ public class Game : KMonoBehaviour
 		if (this.circuitManager != null)
 		{
 			this.circuitManager.Update();
+		}
+		if (this.logicCircuitManager != null)
+		{
+			this.logicCircuitManager.Update();
 		}
 	}
 
@@ -308,7 +320,7 @@ public class Game : KMonoBehaviour
 				for (int n = 0; n < numSpawnOreInfo; n++)
 				{
 					Sim.SpawnOreInfo spawnOreInfo2 = ptr2->spawnOreInfo[n];
-					Vector3 vector = Grid.CellToPosCCC(spawnOreInfo2.cellIdx, Grid.SceneLayer.Use);
+					Vector3 vector = Grid.CellToPosCCC(spawnOreInfo2.cellIdx, Grid.SceneLayer.Ore);
 					Element element2 = ElementLoader.elements[(int)spawnOreInfo2.elemIdx];
 					if (spawnOreInfo2.temperature <= 0f && spawnOreInfo2.mass > 0f)
 					{
@@ -328,8 +340,7 @@ public class Game : KMonoBehaviour
 				{
 					Sim.UnstableCellInfo unstableCellInfo = ptr2->unstableCellInfo[num2];
 					Sim.UnstableCellInfo.FallingInfo fallingInfo = (Sim.UnstableCellInfo.FallingInfo)unstableCellInfo.fallingInfo;
-					Sim.UnstableCellInfo.FallingInfo fallingInfo2 = fallingInfo;
-					if (fallingInfo2 == Sim.UnstableCellInfo.FallingInfo.StartedFalling)
+					if (fallingInfo == Sim.UnstableCellInfo.FallingInfo.StartedFalling)
 					{
 						component2.Spawn(unstableCellInfo.cellIdx, ElementLoader.elements[(int)unstableCellInfo.elemIdx], unstableCellInfo.mass, unstableCellInfo.temperature, unstableCellInfo.diseaseIdx, unstableCellInfo.diseaseCount);
 					}
@@ -471,38 +482,39 @@ public class Game : KMonoBehaviour
 
 	private void Update()
 	{
-		if (this.isLoading)
+		if (!this.isLoading)
 		{
-			return;
-		}
-		using (new KProfiler.Region("Game.Update", null))
-		{
-			if (global::Debug.developerConsoleVisible)
+			using (new KProfiler.Region("Game.Update", null))
 			{
-				global::Debug.developerConsoleVisible = false;
-			}
-			if (DebugHandler.DebugCellInfo)
-			{
-				this.ShowDebugCellInfo();
-			}
-			this.gasConduitSystem.Update();
-			this.liquidConduitSystem.Update();
-			this.circuitManager.Update();
-			if (this.forceActiveArea)
-			{
-				this.simActiveRegionMin = new Vector2I((int)Mathf.Max(0f, this.minForcedActiveArea.x), (int)Mathf.Max(0f, this.minForcedActiveArea.y));
-				this.simActiveRegionMax = new Vector2I((int)Mathf.Min((float)(Grid.WidthInCells - 1), this.maxForcedActiveArea.x), (int)Mathf.Min((float)(Grid.HeightInCells - 1), this.maxForcedActiveArea.y));
-			}
-			this.simActiveRegionMin = new Vector2I(0, 0);
-			this.simActiveRegionMax = new Vector2I(Grid.WidthInCells, Grid.HeightInCells);
-			LightGridManager.SetActiveWindow(this.simActiveRegionMin, this.simActiveRegionMax);
-			Pathfinding.Instance.DebugUpdate();
-			CellChangeMonitor.Instance.Update();
-			if (this.forceSimStep || Mathf.CeilToInt(Time.timeScale) != 0)
-			{
-				this.UpdateModifiers();
-				this.UnsafeUpdate();
-				this.forceSimStep = false;
+				if (global::Debug.developerConsoleVisible)
+				{
+					global::Debug.developerConsoleVisible = false;
+				}
+				if (DebugHandler.DebugCellInfo)
+				{
+					this.ShowDebugCellInfo();
+				}
+				this.gasConduitSystem.Update();
+				this.liquidConduitSystem.Update();
+				this.circuitManager.Update();
+				this.logicCircuitManager.Update();
+				if (this.forceActiveArea)
+				{
+					this.simActiveRegionMin = new Vector2I((int)Mathf.Max(0f, this.minForcedActiveArea.x), (int)Mathf.Max(0f, this.minForcedActiveArea.y));
+					this.simActiveRegionMax = new Vector2I((int)Mathf.Min((float)(Grid.WidthInCells - 1), this.maxForcedActiveArea.x), (int)Mathf.Min((float)(Grid.HeightInCells - 1), this.maxForcedActiveArea.y));
+				}
+				this.simActiveRegionMin = new Vector2I(0, 0);
+				this.simActiveRegionMax = new Vector2I(Grid.WidthInCells, Grid.HeightInCells);
+				LightGridManager.SetActiveWindow(this.simActiveRegionMin, this.simActiveRegionMax);
+				Pathfinding.Instance.DebugUpdate();
+				CellChangeMonitor.Instance.Update();
+				this.UpdateComponents();
+				if (this.forceSimStep || Mathf.CeilToInt(Time.timeScale) != 0)
+				{
+					this.UpdateAmounts();
+					this.UnsafeUpdate();
+					this.forceSimStep = false;
+				}
 			}
 		}
 	}
@@ -515,7 +527,7 @@ public class Game : KMonoBehaviour
 			Sim.GameDataUpdate* ptr = this.StepTheSim();
 			if (ptr == null)
 			{
-				return;
+				break;
 			}
 			this.callbackManager.NextFrame();
 			this.complexCallbackManager.NextFrame();
@@ -529,11 +541,48 @@ public class Game : KMonoBehaviour
 		}
 	}
 
-	private void UpdateModifiers()
+	private void UpdateComponents()
 	{
-		foreach (Modifiers modifiers in Components.Modifiers)
+		foreach (AutoDisinfectable autoDisinfectable in Components.AutoDisinfectables)
 		{
-			modifiers.DoUpdate();
+			autoDisinfectable.RefreshChore();
+		}
+		foreach (WiltCondition wiltCondition in Components.WiltConditions)
+		{
+			wiltCondition.Tick();
+		}
+	}
+
+	private void LateUpdateComponents()
+	{
+		foreach (BuildingCellVisualizer buildingCellVisualizer in Components.BuildingCellVisualizers)
+		{
+			buildingCellVisualizer.Tick();
+		}
+	}
+
+	private void UpdateAmounts()
+	{
+		float deltaTime = Time.deltaTime;
+		if (deltaTime != 0f)
+		{
+			this.amounts.RemoveAll((AmountInstance x) => !x.isActive);
+			int count = this.amounts.Count;
+			for (int i = 0; i < count; i++)
+			{
+				AmountInstance amountInstance = this.amounts[i];
+				if (amountInstance.isActive)
+				{
+					if (!amountInstance.paused)
+					{
+						float delta = amountInstance.GetDelta();
+						if (delta != 0f)
+						{
+							amountInstance.ApplyDelta(delta * deltaTime);
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -547,12 +596,12 @@ public class Game : KMonoBehaviour
 		if (Time.timeScale == 0f && !this.IsPaused)
 		{
 			this.IsPaused = true;
-			this.Trigger(-1788536802, this.IsPaused);
+			base.Trigger(-1788536802, this.IsPaused);
 		}
 		else if (Time.timeScale != 0f && this.IsPaused)
 		{
 			this.IsPaused = false;
-			this.Trigger(-1788536802, this.IsPaused);
+			base.Trigger(-1788536802, this.IsPaused);
 		}
 		if (Input.GetMouseButton(0))
 		{
@@ -572,10 +621,9 @@ public class Game : KMonoBehaviour
 		if (mode != this.previousOverlayMode)
 		{
 			this.previousOverlayMode = mode;
-			SimViewMode simViewMode = mode;
-			if (simViewMode != SimViewMode.LiquidVentMap)
+			if (mode != SimViewMode.LiquidVentMap)
 			{
-				if (simViewMode != SimViewMode.GasVentMap)
+				if (mode != SimViewMode.GasVentMap)
 				{
 					this.liquidFlowVisualizer.ColourizePipeContents(false, false);
 					this.gasFlowVisualizer.ColourizePipeContents(false, false);
@@ -604,6 +652,7 @@ public class Game : KMonoBehaviour
 			this.statusItemRenderer.Render();
 			this.prioritizableRenderer.Render();
 		}
+		this.LateUpdateComponents();
 	}
 
 	public void Reset(GameSpawnData gsd)
@@ -621,16 +670,6 @@ public class Game : KMonoBehaviour
 				}
 			}
 		}
-	}
-
-	private void OnLevelWasLoaded()
-	{
-		Output.Log(new object[]
-		{
-			Time.realtimeSinceStartup,
-			"Level Loaded....",
-			SceneManager.GetActiveScene().name
-		});
 	}
 
 	private void OnApplicationQuit()
@@ -718,13 +757,13 @@ public class Game : KMonoBehaviour
 				GameScheduler.Instance.Schedule("SpawnFX", 0f, delegate(object obj)
 				{
 					int num3 = Grid.PosToCell(pos);
-					if ((this.activeFX[num3] & fx_mask) == 0)
+					if ((<InitializeFXSpawners>c__AnonStorey.activeFX[num3] & fx_mask) == 0)
 					{
-						ushort[] array2 = this.activeFX;
+						ushort[] array2 = <InitializeFXSpawners>c__AnonStorey.activeFX;
 						int num4 = num3;
 						array2[num4] |= fx_mask;
 						GameObject instance = pool.GetInstance();
-						Game.SpawnPoolData spawnPoolData = this.fxSpawnData[fx_idx];
+						Game.SpawnPoolData spawnPoolData = <InitializeFXSpawners>c__AnonStorey.fxSpawnData[fx_idx];
 						Quaternion quaternion = Quaternion.identity;
 						bool flag = false;
 						string text = spawnPoolData.initialAnim;
@@ -923,20 +962,59 @@ public class Game : KMonoBehaviour
 
 	private void LoadEventHashes()
 	{
-		foreach (object obj in Enum.GetValues(typeof(GameHashes)))
+		IEnumerator enumerator = Enum.GetValues(typeof(GameHashes)).GetEnumerator();
+		try
 		{
-			GameHashes gameHashes = (GameHashes)((int)obj);
-			HashCache.Get().Add((int)gameHashes, gameHashes.ToString());
+			while (enumerator.MoveNext())
+			{
+				object obj = enumerator.Current;
+				GameHashes gameHashes = (GameHashes)obj;
+				HashCache.Get().Add((int)gameHashes, gameHashes.ToString());
+			}
 		}
-		foreach (object obj2 in Enum.GetValues(typeof(UtilHashes)))
+		finally
 		{
-			UtilHashes utilHashes = (UtilHashes)((int)obj2);
-			HashCache.Get().Add((int)utilHashes, utilHashes.ToString());
+			IDisposable disposable;
+			if ((disposable = enumerator as IDisposable) != null)
+			{
+				disposable.Dispose();
+			}
 		}
-		foreach (object obj3 in Enum.GetValues(typeof(UIHashes)))
+		IEnumerator enumerator2 = Enum.GetValues(typeof(UtilHashes)).GetEnumerator();
+		try
 		{
-			UIHashes uihashes = (UIHashes)((int)obj3);
-			HashCache.Get().Add((int)uihashes, uihashes.ToString());
+			while (enumerator2.MoveNext())
+			{
+				object obj2 = enumerator2.Current;
+				UtilHashes utilHashes = (UtilHashes)obj2;
+				HashCache.Get().Add((int)utilHashes, utilHashes.ToString());
+			}
+		}
+		finally
+		{
+			IDisposable disposable2;
+			if ((disposable2 = enumerator2 as IDisposable) != null)
+			{
+				disposable2.Dispose();
+			}
+		}
+		IEnumerator enumerator3 = Enum.GetValues(typeof(UIHashes)).GetEnumerator();
+		try
+		{
+			while (enumerator3.MoveNext())
+			{
+				object obj3 = enumerator3.Current;
+				UIHashes uihashes = (UIHashes)obj3;
+				HashCache.Get().Add((int)uihashes, uihashes.ToString());
+			}
+		}
+		finally
+		{
+			IDisposable disposable3;
+			if ((disposable3 = enumerator3 as IDisposable) != null)
+			{
+				disposable3.Dispose();
+			}
 		}
 	}
 
@@ -957,9 +1035,12 @@ public class Game : KMonoBehaviour
 	public void StartBE()
 	{
 		Resources.UnloadUnusedAssets();
-		if (TimeOfDay.Instance != null && !MusicManager.instance.SongIsPlaying("Underscore_Night_LP") && TimeOfDay.Instance.GetCurrentTimeRegion() == TimeOfDay.TimeRegion.Night)
+		if (TimeOfDay.Instance != null)
 		{
-			MusicManager.instance.PlaySong("Underscore_Night_LP", false);
+			if (!MusicManager.instance.SongIsPlaying("Underscore_Night_LP") && TimeOfDay.Instance.GetCurrentTimeRegion() == TimeOfDay.TimeRegion.Night)
+			{
+				MusicManager.instance.PlaySong("Underscore_Night_LP", false);
+			}
 		}
 		AudioMixer.instance.Reset();
 		AudioMixer.instance.StartPersistentSnapshots();
@@ -1054,9 +1135,9 @@ public class Game : KMonoBehaviour
 	public Action<Game.GameSaveData> OnLoad;
 
 	[NonSerialized]
-	public bool baseAlreadyCreated;
+	public bool baseAlreadyCreated = false;
 
-	public static bool quitting;
+	public static bool quitting = false;
 
 	public AssignmentManager assignmentManager;
 
@@ -1121,6 +1202,9 @@ public class Game : KMonoBehaviour
 	[NonSerialized]
 	public RegionManager RegionManager;
 
+	[NonSerialized]
+	public LogicCircuitManager logicCircuitManager;
+
 	private GameScreenManager screenMgr;
 
 	public UtilityNetworkManager<FlowUtilityNetwork, Vent> gasConduitSystem;
@@ -1128,6 +1212,8 @@ public class Game : KMonoBehaviour
 	public UtilityNetworkManager<FlowUtilityNetwork, Vent> liquidConduitSystem;
 
 	public UtilityNetworkManager<ElectricalUtilityNetwork, Wire> electricalConduitSystem;
+
+	public UtilityNetworkManager<LogicCircuitNetwork, LogicWire> logicCircuitSystem;
 
 	public ConduitFlow gasConduitFlow;
 
@@ -1174,7 +1260,7 @@ public class Game : KMonoBehaviour
 
 	private List<SolidInfo> gameSolidInfo = new List<SolidInfo>();
 
-	private bool IsPaused;
+	private bool IsPaused = false;
 
 	private EventInstance music;
 
@@ -1193,11 +1279,13 @@ public class Game : KMonoBehaviour
 
 	public SafetyConditions safetyConditions = new SafetyConditions();
 
+	public List<AmountInstance> amounts = new List<AmountInstance>();
+
 	public SimData simData = new SimData();
 
-	private bool gameStarted;
+	private bool gameStarted = false;
 
-	private float simDT;
+	private float simDT = 0f;
 
 	private HashSet<int> activeGasTransitions = new HashSet<int>();
 
@@ -1207,10 +1295,10 @@ public class Game : KMonoBehaviour
 
 	private Vector2I simActiveRegionMax;
 
-	public bool debugWasUsed;
+	public bool debugWasUsed = false;
 
 	[SerializeField]
-	private bool forceActiveArea;
+	private bool forceActiveArea = false;
 
 	[SerializeField]
 	private Vector2 minForcedActiveArea = new Vector2(0f, 0f);
@@ -1218,11 +1306,11 @@ public class Game : KMonoBehaviour
 	[SerializeField]
 	private Vector2 maxForcedActiveArea = new Vector2(128f, 128f);
 
-	private bool isLoading;
+	private bool isLoading = false;
 
-	private bool forceSimStep;
+	private bool forceSimStep = false;
 
-	private SimViewMode previousOverlayMode;
+	private SimViewMode previousOverlayMode = SimViewMode.None;
 
 	private float previousGasConduitFlowDiscreteLerpPercent = -1f;
 
@@ -1235,11 +1323,11 @@ public class Game : KMonoBehaviour
 
 	private Dictionary<SpawnFXHashes, ObjectPool> fxPools = new Dictionary<SpawnFXHashes, ObjectPool>();
 
-	private Game.SavingPreCB activatePreCB;
+	private Game.SavingPreCB activatePreCB = null;
 
-	private Game.SavingActiveCB activateActiveCB;
+	private Game.SavingActiveCB activateActiveCB = null;
 
-	private Game.SavingPostCB activatePostCB;
+	private Game.SavingPostCB activatePostCB = null;
 
 	[SerializeField]
 	public Game.UIColours uiColours = new Game.UIColours();
@@ -1368,6 +1456,14 @@ public class Game : KMonoBehaviour
 		public bool debugWasUsed;
 	}
 
+	public delegate void CansaveCB();
+
+	public delegate void SavingPreCB(Game.CansaveCB cb);
+
+	public delegate void SavingActiveCB();
+
+	public delegate void SavingPostCB();
+
 	[Serializable]
 	public struct LocationColours
 	{
@@ -1376,6 +1472,10 @@ public class Game : KMonoBehaviour
 		public Color invalidLocation;
 
 		public Color validLocation;
+
+		public Color requiresRole;
+
+		public Color unreachable_requiresRole;
 	}
 
 	[Serializable]
@@ -1403,12 +1503,4 @@ public class Game : KMonoBehaviour
 		[SerializeField]
 		private Game.LocationColours buildColours;
 	}
-
-	public delegate void CansaveCB();
-
-	public delegate void SavingPreCB(Game.CansaveCB cb);
-
-	public delegate void SavingActiveCB();
-
-	public delegate void SavingPostCB();
 }

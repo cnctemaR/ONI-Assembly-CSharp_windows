@@ -25,16 +25,6 @@ namespace Steamworks
 			return this.m_HSteamPipe.GetHashCode();
 		}
 
-		public bool Equals(HSteamPipe other)
-		{
-			return this.m_HSteamPipe == other.m_HSteamPipe;
-		}
-
-		public int CompareTo(HSteamPipe other)
-		{
-			return this.m_HSteamPipe.CompareTo(other.m_HSteamPipe);
-		}
-
 		public static bool operator ==(HSteamPipe x, HSteamPipe y)
 		{
 			return x.m_HSteamPipe == y.m_HSteamPipe;
@@ -53,6 +43,16 @@ namespace Steamworks
 		public static explicit operator int(HSteamPipe that)
 		{
 			return that.m_HSteamPipe;
+		}
+
+		public bool Equals(HSteamPipe other)
+		{
+			return this.m_HSteamPipe == other.m_HSteamPipe;
+		}
+
+		public int CompareTo(HSteamPipe other)
+		{
+			return this.m_HSteamPipe.CompareTo(other.m_HSteamPipe);
 		}
 
 		public int m_HSteamPipe;

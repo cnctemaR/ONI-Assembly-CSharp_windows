@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using KSerialization.Converters;
 
 namespace ProcGen
 {
+	[StructLayout(LayoutKind.Sequential, Size = 1)]
 	public struct ChangeFloats
 	{
 		[StringEnumConverter]

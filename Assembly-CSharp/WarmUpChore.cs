@@ -6,7 +6,7 @@ using UnityEngine;
 public class WarmUpChore : Chore<WarmUpChore.StatesInstance>
 {
 	public WarmUpChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.Warmup, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.Warmup, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
 	{
 		this.smi = new WarmUpChore.StatesInstance(this, target.gameObject);
 		base.AddPrecondition(ChorePreconditions.IsNotRedAlert, null);
@@ -20,8 +20,7 @@ public class WarmUpChore : Chore<WarmUpChore.StatesInstance>
 			base.sm.recoverer.Set(recoverer, base.smi);
 			this.primaryElement = recoverer.GetComponent<PrimaryElement>();
 			Klei.AI.Attribute deltaAttribute = Db.Get().Amounts.Temperature.deltaAttribute;
-			this.warmingUp = new AttributeModifier(deltaAttribute.Id, 0f, DUPLICANTS.MODIFIERS.WARMINGUP.NAME, false, false);
-			this.warmingUp.UIOnly = true;
+			this.warmingUp = new AttributeModifier(deltaAttribute.Id, 0f, DUPLICANTS.MODIFIERS.WARMINGUP.NAME, false, true, false);
 			CreatureSimTemperatureTransfer component = base.smi.master.GetComponent<CreatureSimTemperatureTransfer>();
 			component.NonSimTemperatureModifiers.Add(this.warmingUp);
 		}
@@ -97,8 +96,8 @@ public class WarmUpChore : Chore<WarmUpChore.StatesInstance>
 				{
 					smi.warmingUp.SetValue(0f);
 				});
-			this.recover.pre.PlayAnim("idle_pre", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.recover.loop);
-			this.recover.loop.PlayAnim("idle_default", KAnim.PlayMode.Loop, null);
+			this.recover.pre.PlayAnim("idle_pre").OnAnimQueueComplete(this.recover.loop);
+			this.recover.loop.PlayAnim("idle_default", KAnim.PlayMode.Loop);
 			this.recover.pst.QueueAnim("idle_pst", false, null).OnAnimQueueComplete(null);
 		}
 

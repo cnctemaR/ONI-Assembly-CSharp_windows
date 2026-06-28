@@ -20,15 +20,18 @@ public struct PathFinderAbilities
 		}
 	}
 
-	public bool CanTraverse(PathFinder.PotentialPath path, int from_cell, int cost, int underwater_cost)
+	public bool CanTraverse(PathFinder.PotentialPath path, int from_cell, int cost, int transition_id, int underwater_cost)
 	{
-		if (this.masks != null && !this.ignoreNavigationMasks)
+		if (this.masks != null)
 		{
-			for (int i = 0; i < this.masks.Count; i++)
+			if (!this.ignoreNavigationMasks)
 			{
-				if (!this.masks[i].IsTraversable(path, from_cell, cost, this))
+				for (int i = 0; i < this.masks.Count; i++)
 				{
-					return false;
+					if (!this.masks[i].IsTraversable(path, from_cell, cost, transition_id, this))
+					{
+						return false;
+					}
 				}
 			}
 		}
@@ -37,11 +40,14 @@ public struct PathFinderAbilities
 
 	public void ApplyTraversalToPath(ref PathFinder.PotentialPath path, int from_cell)
 	{
-		if (this.masks != null && !this.ignoreNavigationMasks)
+		if (this.masks != null)
 		{
-			for (int i = 0; i < this.masks.Count; i++)
+			if (!this.ignoreNavigationMasks)
 			{
-				this.masks[i].ApplyTraversalToPath(ref path, from_cell);
+				for (int i = 0; i < this.masks.Count; i++)
+				{
+					this.masks[i].ApplyTraversalToPath(ref path, from_cell);
+				}
 			}
 		}
 	}

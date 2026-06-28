@@ -19,14 +19,14 @@ namespace Database
 				Tech tech = base.TryGet(resourceTreeNode.Id);
 				if (tech == null)
 				{
-					tech = new Tech(resourceTreeNode.Id, this, Strings.Get("STRINGS.RESEARCH." + resourceTreeNode.Id.ToUpper() + ".NAME"), Strings.Get("STRINGS.RESEARCH." + resourceTreeNode.Id.ToUpper() + ".DESC"), resourceTreeNode);
+					tech = new Tech(resourceTreeNode.Id, this, Strings.Get("STRINGS.RESEARCH.TECHS." + resourceTreeNode.Id.ToUpper() + ".NAME"), Strings.Get("STRINGS.RESEARCH.TECHS." + resourceTreeNode.Id.ToUpper() + ".DESC"), resourceTreeNode);
 				}
 				foreach (ResourceTreeNode resourceTreeNode2 in resourceTreeNode.references)
 				{
 					Tech tech2 = base.TryGet(resourceTreeNode2.Id);
 					if (tech2 == null)
 					{
-						tech2 = new Tech(resourceTreeNode2.Id, this, Strings.Get("STRINGS.RESEARCH." + resourceTreeNode2.Id.ToUpper() + ".NAME"), Strings.Get("STRINGS.RESEARCH." + resourceTreeNode2.Id.ToUpper() + ".DESC"), resourceTreeNode2);
+						tech2 = new Tech(resourceTreeNode2.Id, this, Strings.Get("STRINGS.RESEARCH.TECHS." + resourceTreeNode2.Id.ToUpper() + ".NAME"), Strings.Get("STRINGS.RESEARCH.TECHS." + resourceTreeNode2.Id.ToUpper() + ".DESC"), resourceTreeNode2);
 					}
 					tech2.requiredTech.Add(tech);
 					tech.unlockedTech.Add(tech2);
@@ -47,16 +47,21 @@ namespace Database
 
 		private int GetTier(Tech tech)
 		{
+			int num;
 			if (tech.requiredTech.Count == 0)
 			{
-				return 0;
+				num = 0;
 			}
-			int num = 0;
-			foreach (Tech tech2 in tech.requiredTech)
+			else
 			{
-				num = Math.Max(num, this.GetTier(tech2));
+				int num2 = 0;
+				foreach (Tech tech2 in tech.requiredTech)
+				{
+					num2 = Math.Max(num2, this.GetTier(tech2));
+				}
+				num = num2 + 1;
 			}
-			return num + 1;
+			return num;
 		}
 
 		private void AddPrerequisite(Tech tech, string prerequisite_name)
@@ -69,7 +74,225 @@ namespace Database
 			}
 		}
 
+		public bool IsTechItemComplete(string id)
+		{
+			foreach (Tech tech in this)
+			{
+				foreach (TechItem techItem in tech.unlockedItems)
+				{
+					if (techItem.Id == id)
+					{
+						return tech.IsComplete();
+					}
+				}
+			}
+			return true;
+		}
+
 		public int tierCount;
+
+		public static Dictionary<string, string[]> TECH_GROUPING = new Dictionary<string, string[]>
+		{
+			{
+				"FarmingTech",
+				new string[] { "AlgaeHabitat", "PlanterBox", "RationBox", "Compost" }
+			},
+			{
+				"FineDining",
+				new string[] { "DiningTable", "FarmTile", "CookingStation" }
+			},
+			{
+				"Agriculture",
+				new string[] { "FertilizerMaker", "HydroponicFarm", "Refrigerator" }
+			},
+			{
+				"AnimalControl",
+				new string[] { "CreatureTrap", "AirborneCreatureLure", "CreatureDeliveryPoint", "AirborneCreatureLure" }
+			},
+			{
+				"ImprovedOxygen",
+				new string[] { "CO2Scrubber", "Electrolyzer" }
+			},
+			{
+				"GasPiping",
+				new string[] { "GasConduit", "GasPump", "GasVent", "GasConduitBridge" }
+			},
+			{
+				"ImprovedGasPiping",
+				new string[]
+				{
+					"InsulatedGasConduit",
+					LogicPressureSensorGasConfig.ID,
+					"GasVentHighPressure",
+					"GasLogicValve"
+				}
+			},
+			{
+				"Clothing",
+				new string[] { "ClothingFabricator" }
+			},
+			{
+				"PressureManagement",
+				new string[] { "LiquidValve", "GasValve", "ManualPressureDoor", "GasPermeableMembrane" }
+			},
+			{
+				"DirectedAirStreams",
+				new string[] { "PressureDoor", "OreScrubber", "AirFilter" }
+			},
+			{
+				"LiquidPiping",
+				new string[] { "LiquidConduit", "LiquidPump", "LiquidVent", "LiquidConduitBridge" }
+			},
+			{
+				"Luxury",
+				new string[]
+				{
+					LuxuryBedConfig.ID,
+					"LadderFast",
+					"PlasticTile"
+				}
+			},
+			{
+				"ImprovedLiquidPiping",
+				new string[]
+				{
+					"InsulatedLiquidConduit",
+					LogicPressureSensorLiquidConfig.ID,
+					"LiquidLogicValve"
+				}
+			},
+			{
+				"SanitationSciences",
+				new string[]
+				{
+					"WashSink",
+					"FlushToilet",
+					ShowerConfig.ID,
+					"MeshTile"
+				}
+			},
+			{
+				"Medbay",
+				new string[] { "HandSanitizer", "MedicalBed" }
+			},
+			{
+				"AdvancedFiltration",
+				new string[] { "GasFilter", "LiquidFilter" }
+			},
+			{
+				"Distillation",
+				new string[] { "WaterPurifier", "AlgaeDistillery" }
+			},
+			{
+				"PowerRegulation",
+				new string[]
+				{
+					SwitchConfig.ID,
+					"BatteryMedium",
+					"WireBridge"
+				}
+			},
+			{
+				"AdvancedPowerRegulation",
+				new string[] { "HighWattageWire", "WireBridgeHighWattage", "PowerTransformer" }
+			},
+			{
+				"PrettyGoodConductors",
+				new string[] { "WireRefined", "WireRefinedBridge", "WireRefinedHighWattage", "WireRefinedBridgeHighWattage" }
+			},
+			{
+				"Combustion",
+				new string[] { "Generator", "HydrogenGenerator" }
+			},
+			{
+				"ImprovedCombustion",
+				new string[] { "MethaneGenerator", "OilRefinery", "PetroleumGenerator" }
+			},
+			{
+				"InteriorDecor",
+				new string[] { "FlowerVase", "FloorLamp", "CeilingLight" }
+			},
+			{
+				"Artistry",
+				new string[] { "Canvas", "Sculpture" }
+			},
+			{
+				"Plastics",
+				new string[] { "Polymerizer", "OilWellCap" }
+			},
+			{
+				"ValveMiniaturization",
+				new string[] { "LiquidMiniPump", "GasMiniPump" }
+			},
+			{
+				"Suits",
+				new string[] { "SuitMarker", "SuitLocker", "SuitFabricator", "SuitsOverlay" }
+			},
+			{
+				"AdvancedResearch",
+				new string[] { "AdvancedResearchCenter", "BetaResearchPoint" }
+			},
+			{
+				"BasicRefinement",
+				new string[] { "RockCrusher" }
+			},
+			{
+				"MedicalResearch",
+				new string[] { "Apothecary" }
+			},
+			{
+				"RefinedObjects",
+				new string[] { "ThermalBlock", "FirePole" }
+			},
+			{
+				"Smelting",
+				new string[] { "MetalRefinery", "MetalTile" }
+			},
+			{
+				"TemperatureModulation",
+				new string[] { "LiquidCooledFan", "SpaceHeater", "InsulationTile" }
+			},
+			{
+				"HVAC",
+				new string[]
+				{
+					"AirConditioner",
+					LogicTemperatureSensorConfig.ID
+				}
+			},
+			{
+				"LiquidTemperature",
+				new string[] { "LiquidHeater", "LiquidConditioner" }
+			},
+			{
+				"LogicControl",
+				new string[]
+				{
+					"AutomationOverlay",
+					"LogicWire",
+					"LogicWireBridge",
+					LogicSwitchConfig.ID,
+					LogicPowerRelayConfig.ID,
+					"BatterySmart"
+				}
+			},
+			{
+				"GenericSensors",
+				new string[]
+				{
+					LogicTimeOfDaySensorConfig.ID,
+					"FloorSwitch"
+				}
+			},
+			{
+				"LogicCircuits",
+				new string[] { "LogicGateAND", "LogicGateOR", "LogicGateXOR", "LogicGateNOT", "LogicGateBUFFER", "LogicGateFILTER", "BatterySmart" }
+			},
+			{
+				"DupeTrafficControl",
+				new string[] { "Checkpoint" }
+			}
+		};
 
 		private readonly List<List<Tuple<string, float>>> TECH_TIERS = new List<List<Tuple<string, float>>>
 		{
@@ -91,6 +314,11 @@ namespace Database
 			{
 				new Tuple<string, float>(ResearchTypes.ID.ALPHA, 35f),
 				new Tuple<string, float>(ResearchTypes.ID.BETA, 30f)
+			},
+			new List<Tuple<string, float>>
+			{
+				new Tuple<string, float>(ResearchTypes.ID.ALPHA, 40f),
+				new Tuple<string, float>(ResearchTypes.ID.BETA, 50f)
 			}
 		};
 	}

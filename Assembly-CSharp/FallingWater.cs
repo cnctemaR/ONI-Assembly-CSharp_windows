@@ -54,71 +54,73 @@ public class FallingWater : KMonoBehaviour
 		if (!Grid.IsValidCell(num))
 		{
 			KCrashReporter.Assert(false, "Trying to add falling water outside of the scene");
-			return;
 		}
-		if (temperature <= 0f || base_mass <= 0f)
+		else
 		{
-			Output.LogError(new object[] { string.Format("Unexpected water mass/temperature values added to the falling water manager T({0}) M({1})", temperature, base_mass) });
-		}
-		float time = this.GetTime();
-		if (!skip_sound)
-		{
-			FallingWater.SoundInfo soundInfo;
-			if (!this.topSounds.TryGetValue(num, out soundInfo))
+			if (temperature <= 0f || base_mass <= 0f)
 			{
-				soundInfo = default(FallingWater.SoundInfo);
-				soundInfo.eventInstance = LoopingSoundManager.StartSound(this.liquid_top_loop, root_pos, true);
+				Output.LogError(new object[] { string.Format("Unexpected water mass/temperature values added to the falling water manager T({0}) M({1})", temperature, base_mass) });
 			}
-			soundInfo.startTime = time;
-			soundInfo.eventInstance.setParameterValue("liquidVolume", SoundUtil.GetLiquidVolume(base_mass));
-			this.topSounds[num] = soundInfo;
-		}
-		while (base_mass > 0f)
-		{
-			float num2 = global::UnityEngine.Random.value * 2f * this.particleMassVariation - this.particleMassVariation;
-			float num3 = Mathf.Max(0f, Mathf.Min(base_mass, this.particleMassToSplit + num2));
-			float num4 = num3 / base_mass;
-			base_mass -= num3;
-			int num5 = (int)(num4 * (float)base_disease_count);
-			int num6 = global::UnityEngine.Random.Range(0, this.numFrames);
-			Vector2 vector = ((!disable_randomness) ? new Vector2(this.jitterStep * Mathf.Sin(this.offset), this.jitterStep * Mathf.Sin(this.offset + 17f)) : Vector2.zero);
-			Vector2 vector2 = ((!disable_randomness) ? new Vector2(global::UnityEngine.Random.Range(-this.multipleOffsetRange.x, this.multipleOffsetRange.x), global::UnityEngine.Random.Range(-this.multipleOffsetRange.y, this.multipleOffsetRange.y)) : Vector2.zero);
-			Element element = ElementLoader.elements[(int)elementIdx];
-			Vector2 vector3 = root_pos;
-			bool flag = !skip_decor && this.SpawnLiquidTopDecor(time, Grid.CellLeft(num), false, element);
-			bool flag2 = !skip_decor && this.SpawnLiquidTopDecor(time, Grid.CellRight(num), true, element);
-			Vector2 vector4 = Vector2.ClampMagnitude(this.initialOffset + vector + vector2, 1f);
-			if (flag || flag2)
+			float time = this.GetTime();
+			if (!skip_sound)
 			{
-				if (flag && flag2)
+				FallingWater.SoundInfo soundInfo;
+				if (!this.topSounds.TryGetValue(num, out soundInfo))
+				{
+					soundInfo = default(FallingWater.SoundInfo);
+					soundInfo.eventInstance = LoopingSoundManager.StartSound(this.liquid_top_loop, root_pos, true);
+				}
+				soundInfo.startTime = time;
+				soundInfo.eventInstance.setParameterValue("liquidVolume", SoundUtil.GetLiquidVolume(base_mass));
+				this.topSounds[num] = soundInfo;
+			}
+			while (base_mass > 0f)
+			{
+				float num2 = global::UnityEngine.Random.value * 2f * this.particleMassVariation - this.particleMassVariation;
+				float num3 = Mathf.Max(0f, Mathf.Min(base_mass, this.particleMassToSplit + num2));
+				float num4 = num3 / base_mass;
+				base_mass -= num3;
+				int num5 = (int)(num4 * (float)base_disease_count);
+				int num6 = global::UnityEngine.Random.Range(0, this.numFrames);
+				Vector2 vector = ((!disable_randomness) ? new Vector2(this.jitterStep * Mathf.Sin(this.offset), this.jitterStep * Mathf.Sin(this.offset + 17f)) : Vector2.zero);
+				Vector2 vector2 = ((!disable_randomness) ? new Vector2(global::UnityEngine.Random.Range(-this.multipleOffsetRange.x, this.multipleOffsetRange.x), global::UnityEngine.Random.Range(-this.multipleOffsetRange.y, this.multipleOffsetRange.y)) : Vector2.zero);
+				Element element = ElementLoader.elements[(int)elementIdx];
+				Vector2 vector3 = root_pos;
+				bool flag = !skip_decor && this.SpawnLiquidTopDecor(time, Grid.CellLeft(num), false, element);
+				bool flag2 = !skip_decor && this.SpawnLiquidTopDecor(time, Grid.CellRight(num), true, element);
+				Vector2 vector4 = Vector2.ClampMagnitude(this.initialOffset + vector + vector2, 1f);
+				if (flag || flag2)
+				{
+					if (flag && flag2)
+					{
+						vector3 += vector4;
+						vector3.x += 0.5f;
+					}
+					else if (flag)
+					{
+						vector3 += vector4;
+					}
+					else
+					{
+						vector3.x += 1f - vector4.x;
+						vector3.y += vector4.y;
+					}
+				}
+				else
 				{
 					vector3 += vector4;
 					vector3.x += 0.5f;
 				}
-				else if (flag)
+				int num7 = Grid.PosToCell(vector3);
+				Element element2 = Grid.Element[num7];
+				Element.State state = element2.state & Element.State.Solid;
+				if (state == Element.State.Solid || (Grid.Cell[num7].properties & 2) != 0)
 				{
-					vector3 += vector4;
+					vector3.y = Mathf.Floor(vector3.y + 1f);
 				}
-				else
-				{
-					vector3.x += 1f - vector4.x;
-					vector3.y += vector4.y;
-				}
+				this.physics.Add(new FallingWater.ParticlePhysics(vector3, Vector2.zero, num6, elementIdx));
+				this.properties.Add(new FallingWater.ParticleProperties(elementIdx, num3, temperature, disease_idx, num5, debug_track));
 			}
-			else
-			{
-				vector3 += vector4;
-				vector3.x += 0.5f;
-			}
-			int num7 = Grid.PosToCell(vector3);
-			Element element2 = Grid.Element[num7];
-			Element.State state = element2.state & Element.State.Solid;
-			if (state == Element.State.Solid || (Grid.Cell[num7].properties & 2) != 0)
-			{
-				vector3.y = Mathf.Floor(vector3.y + 1f);
-			}
-			this.physics.Add(new FallingWater.ParticlePhysics(vector3, Vector2.zero, num6, elementIdx));
-			this.properties.Add(new FallingWater.ParticleProperties(elementIdx, num3, temperature, disease_idx, num5, debug_track));
 		}
 	}
 
@@ -165,111 +167,111 @@ public class FallingWater : KMonoBehaviour
 
 	public void UpdateParticles(float dt)
 	{
-		if (dt <= 0f || this.simUpdateDelay >= 0)
+		if (dt > 0f && this.simUpdateDelay < 0)
 		{
-			return;
-		}
-		this.offset = (this.offset + dt) % 360f;
-		int count = this.physics.Count;
-		Vector2 vector = Physics.gravity * dt * this.gravityScale;
-		for (int i = 0; i < count; i++)
-		{
-			FallingWater.ParticlePhysics particlePhysics = this.physics[i];
-			Vector3 vector2 = particlePhysics.position;
-			int num;
-			int num2;
-			Grid.PosToXY(vector2, out num, out num2);
-			particlePhysics.velocity += vector;
-			Vector3 vector3 = particlePhysics.velocity * dt;
-			Vector3 vector4 = vector2 + vector3;
-			particlePhysics.position = vector4;
-			this.physics[i] = particlePhysics;
-			int num3;
-			int num4;
-			Grid.PosToXY(particlePhysics.position, out num3, out num4);
-			int num5 = ((num2 <= num4) ? num4 : num2);
-			int num6 = ((num2 <= num4) ? num2 : num4);
-			for (int j = num5; j >= num6; j--)
+			this.offset = (this.offset + dt) % 360f;
+			int count = this.physics.Count;
+			Vector2 vector = Physics.gravity * dt * this.gravityScale;
+			for (int i = 0; i < count; i++)
 			{
-				int num7 = j * Grid.WidthInCells + num;
-				int num8 = (j + 1) * Grid.WidthInCells + num;
-				if (!Grid.IsValidCell(num7))
+				FallingWater.ParticlePhysics particlePhysics = this.physics[i];
+				Vector3 vector2 = particlePhysics.position;
+				int num;
+				int num2;
+				Grid.PosToXY(vector2, out num, out num2);
+				particlePhysics.velocity += vector;
+				Vector3 vector3 = particlePhysics.velocity * dt;
+				Vector3 vector4 = vector2 + vector3;
+				particlePhysics.position = vector4;
+				this.physics[i] = particlePhysics;
+				int num3;
+				int num4;
+				Grid.PosToXY(particlePhysics.position, out num3, out num4);
+				int num5 = ((num2 <= num4) ? num4 : num2);
+				int num6 = ((num2 <= num4) ? num2 : num4);
+				for (int j = num5; j >= num6; j--)
 				{
-					if (Grid.IsValidCell(num8))
+					int num7 = j * Grid.WidthInCells + num;
+					int num8 = (j + 1) * Grid.WidthInCells + num;
+					if (!Grid.IsValidCell(num7))
 					{
-						FallingWater.ParticleProperties particleProperties = this.properties[i];
-						this.SpawnLiquidSplash(particlePhysics.position.x, num8, particleProperties.elementIdx, false);
-						this.AddToSim(num8, i, ref count);
-					}
-					else
-					{
-						this.RemoveParticle(i, ref count);
-						Output.LogError(new object[] { "WTF" });
-					}
-					break;
-				}
-				Element element = Grid.Element[num7];
-				Element.State state = element.state & Element.State.Solid;
-				bool flag = false;
-				if (state == Element.State.Solid || (Grid.Cell[num7].properties & 2) != 0)
-				{
-					this.AddToSim(num8, i, ref count);
-				}
-				else
-				{
-					switch (state)
-					{
-					case Element.State.Vacuum:
-						if (element.id == SimHashes.Vacuum)
+						if (Grid.IsValidCell(num8))
 						{
-							flag = true;
+							FallingWater.ParticleProperties particleProperties = this.properties[i];
+							this.SpawnLiquidSplash(particlePhysics.position.x, num8, particleProperties.elementIdx, false);
+							this.AddToSim(num8, i, ref count);
 						}
 						else
 						{
 							this.RemoveParticle(i, ref count);
+							Output.LogError(new object[] { "WTF" });
 						}
 						break;
-					case Element.State.Gas:
-						flag = true;
-						break;
-					case Element.State.Liquid:
+					}
+					Element element = Grid.Element[num7];
+					Element.State state = element.state & Element.State.Solid;
+					bool flag = false;
+					if (state == Element.State.Solid || (Grid.Cell[num7].properties & 2) != 0)
 					{
-						FallingWater.ParticleProperties particleProperties2 = this.properties[i];
-						Element element2 = ElementLoader.elements[(int)particleProperties2.elementIdx];
-						if (element2.id == element.id)
+						this.AddToSim(num8, i, ref count);
+					}
+					else if (state != Element.State.Gas)
+					{
+						if (state != Element.State.Liquid)
 						{
-							if (Grid.Cell[num7].mass <= element.defaultValues.mass)
+							if (state == Element.State.Vacuum)
+							{
+								if (element.id == SimHashes.Vacuum)
+								{
+									flag = true;
+								}
+								else
+								{
+									this.RemoveParticle(i, ref count);
+								}
+							}
+						}
+						else
+						{
+							FallingWater.ParticleProperties particleProperties2 = this.properties[i];
+							Element element2 = ElementLoader.elements[(int)particleProperties2.elementIdx];
+							if (element2.id == element.id)
+							{
+								if (Grid.Cell[num7].mass <= element.defaultValues.mass)
+								{
+									flag = true;
+								}
+								else
+								{
+									this.SpawnLiquidSplash(particlePhysics.position.x, num8, particleProperties2.elementIdx, false);
+									this.AddToSim(num7, i, ref count);
+								}
+							}
+							else if (element2.molarMass > element.molarMass)
 							{
 								flag = true;
 							}
 							else
 							{
 								this.SpawnLiquidSplash(particlePhysics.position.x, num8, particleProperties2.elementIdx, false);
-								this.AddToSim(num7, i, ref count);
+								this.AddToSim(num8, i, ref count);
 							}
 						}
-						else if (element2.molarMass > element.molarMass)
-						{
-							flag = true;
-						}
-						else
-						{
-							this.SpawnLiquidSplash(particlePhysics.position.x, num8, particleProperties2.elementIdx, false);
-							this.AddToSim(num8, i, ref count);
-						}
+					}
+					else
+					{
+						flag = true;
+					}
+					if (!flag)
+					{
 						break;
 					}
-					}
-				}
-				if (!flag)
-				{
-					break;
 				}
 			}
+			float time = this.GetTime();
+			this.UpdateSounds(time);
+			this.UpdateMistFX(Time.time);
 		}
-		float time = this.GetTime();
-		this.UpdateSounds(time);
-		this.UpdateMistFX(Time.time);
 	}
 
 	private void UpdateMistFX(float t)
@@ -555,16 +557,16 @@ public class FallingWater : KMonoBehaviour
 	[SerializeField]
 	private FallingWater.DecorInfo liquid_splash;
 
-	[EventRef]
 	[SerializeField]
+	[EventRef]
 	private string liquid_top_loop;
 
-	[EventRef]
 	[SerializeField]
+	[EventRef]
 	private string liquid_splash_initial;
 
-	[EventRef]
 	[SerializeField]
+	[EventRef]
 	private string liquid_splash_loop;
 
 	[SerializeField]
@@ -590,7 +592,7 @@ public class FallingWater : KMonoBehaviour
 
 	private Mesh mesh;
 
-	private float offset;
+	private float offset = 0f;
 
 	private float[] lastSpawnTime;
 

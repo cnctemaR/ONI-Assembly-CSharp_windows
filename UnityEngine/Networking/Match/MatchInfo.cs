@@ -5,20 +5,26 @@ namespace UnityEngine.Networking.Match
 {
 	public class MatchInfo
 	{
-		public MatchInfo(CreateMatchResponse matchResponse)
+		public MatchInfo()
+		{
+		}
+
+		internal MatchInfo(CreateMatchResponse matchResponse)
 		{
 			this.address = matchResponse.address;
 			this.port = matchResponse.port;
+			this.domain = matchResponse.domain;
 			this.networkId = matchResponse.networkId;
 			this.accessToken = new NetworkAccessToken(matchResponse.accessTokenString);
 			this.nodeId = matchResponse.nodeId;
 			this.usingRelay = matchResponse.usingRelay;
 		}
 
-		public MatchInfo(JoinMatchResponse matchResponse)
+		internal MatchInfo(JoinMatchResponse matchResponse)
 		{
 			this.address = matchResponse.address;
 			this.port = matchResponse.port;
+			this.domain = matchResponse.domain;
 			this.networkId = matchResponse.networkId;
 			this.accessToken = new NetworkAccessToken(matchResponse.accessTokenString);
 			this.nodeId = matchResponse.nodeId;
@@ -28,6 +34,8 @@ namespace UnityEngine.Networking.Match
 		public string address { get; private set; }
 
 		public int port { get; private set; }
+
+		public int domain { get; private set; }
 
 		public NetworkID networkId { get; private set; }
 

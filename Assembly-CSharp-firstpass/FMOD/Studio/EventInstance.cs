@@ -16,12 +16,17 @@ namespace FMOD.Studio
 			description = null;
 			IntPtr intPtr;
 			RESULT result = EventInstance.FMOD_Studio_EventInstance_GetDescription(this.rawPtr, out intPtr);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			description = new EventDescription(intPtr);
-			return result;
+			else
+			{
+				description = new EventDescription(intPtr);
+				result2 = result;
+			}
+			return result2;
 		}
 
 		public RESULT getVolume(out float volume)
@@ -114,12 +119,17 @@ namespace FMOD.Studio
 			group = null;
 			IntPtr intPtr = 0;
 			RESULT result = EventInstance.FMOD_Studio_EventInstance_GetChannelGroup(this.rawPtr, out intPtr);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			group = new ChannelGroup(intPtr);
-			return result;
+			else
+			{
+				group = new ChannelGroup(intPtr);
+				result2 = result;
+			}
+			return result2;
 		}
 
 		public RESULT release()
@@ -137,12 +147,17 @@ namespace FMOD.Studio
 			instance = null;
 			IntPtr intPtr = 0;
 			RESULT result = EventInstance.FMOD_Studio_EventInstance_GetParameter(this.rawPtr, Encoding.UTF8.GetBytes(name + '\0'), out intPtr);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			instance = new ParameterInstance(intPtr);
-			return result;
+			else
+			{
+				instance = new ParameterInstance(intPtr);
+				result2 = result;
+			}
+			return result2;
 		}
 
 		public RESULT getParameterCount(out int count)
@@ -155,12 +170,17 @@ namespace FMOD.Studio
 			instance = null;
 			IntPtr intPtr = 0;
 			RESULT result = EventInstance.FMOD_Studio_EventInstance_GetParameterByIndex(this.rawPtr, index, out intPtr);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			instance = new ParameterInstance(intPtr);
-			return result;
+			else
+			{
+				instance = new ParameterInstance(intPtr);
+				result2 = result;
+			}
+			return result2;
 		}
 
 		public RESULT getParameterValue(string name, out float value)
@@ -171,6 +191,11 @@ namespace FMOD.Studio
 		public RESULT setParameterValue(string name, float value)
 		{
 			return EventInstance.FMOD_Studio_EventInstance_SetParameterValue(this.rawPtr, Encoding.UTF8.GetBytes(name + '\0'), value);
+		}
+
+		public RESULT setParameterValue(ParameterID id, float value)
+		{
+			return EventInstance.FMOD_Studio_EventInstance_SetParameterValue(this.rawPtr, id.bytes, value);
 		}
 
 		public RESULT getParameterValueByIndex(int index, out float value)

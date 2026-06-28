@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ResourceEntry : MonoBehaviour, IPointerEnterHandler, IEventSystemHandler, IPointerExitHandler
+public class ResourceEntry : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IEventSystemHandler
 {
 	private void Awake()
 	{
@@ -21,38 +21,37 @@ public class ResourceEntry : MonoBehaviour, IPointerEnterHandler, IEventSystemHa
 	private void OnClick()
 	{
 		List<Pickupable> pickupables = WorldInventory.Instance.GetPickupables(this.Resource);
-		if (pickupables == null)
+		if (pickupables != null)
 		{
-			return;
-		}
-		Pickupable pickupable = null;
-		for (int i = 0; i < pickupables.Count; i++)
-		{
-			this.selectionIdx++;
-			int num = this.selectionIdx % pickupables.Count;
-			pickupable = pickupables[num];
+			Pickupable pickupable = null;
+			for (int i = 0; i < pickupables.Count; i++)
+			{
+				this.selectionIdx++;
+				int num = this.selectionIdx % pickupables.Count;
+				pickupable = pickupables[num];
+				if (pickupable != null)
+				{
+					break;
+				}
+			}
 			if (pickupable != null)
 			{
-				break;
-			}
-		}
-		if (pickupable != null)
-		{
-			Transform transform = pickupable.transform;
-			if (pickupable.storage != null)
-			{
-				transform = pickupable.storage.transform;
-			}
-			SelectTool.Instance.SelectAndFocus(transform.transform.position, transform.GetComponent<KSelectable>(), Vector3.zero);
-			for (int j = 0; j < pickupables.Count; j++)
-			{
-				Pickupable pickupable2 = pickupables[j];
-				if (pickupable2 != null)
+				Transform transform = pickupable.transform;
+				if (pickupable.storage != null)
 				{
-					KAnimControllerBase component = pickupable2.GetComponent<KAnimControllerBase>();
-					if (component != null)
+					transform = pickupable.storage.transform;
+				}
+				SelectTool.Instance.SelectAndFocus(transform.transform.position, transform.GetComponent<KSelectable>(), Vector3.zero);
+				for (int j = 0; j < pickupables.Count; j++)
+				{
+					Pickupable pickupable2 = pickupables[j];
+					if (pickupable2 != null)
 					{
-						component.HighlightColour = this.HighlightColor;
+						KAnimControllerBase component = pickupable2.GetComponent<KAnimControllerBase>();
+						if (component != null)
+						{
+							component.HighlightColour = this.HighlightColor;
+						}
 					}
 				}
 			}
@@ -72,22 +71,34 @@ public class ResourceEntry : MonoBehaviour, IPointerEnterHandler, IEventSystemHa
 		{
 			num = WorldInventory.Instance.GetAmount(this.Resource);
 		}
-		string text = string.Empty;
-		switch (measure)
+		if (this.quantityText == null || this.currentQuantity != num)
 		{
-		case ResourceCategoryHeader.MeasureUnit.mass:
-			text = GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
-			break;
-		case ResourceCategoryHeader.MeasureUnit.kcal:
-			text = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
-			break;
-		case ResourceCategoryHeader.MeasureUnit.quantity:
-			text = num.ToString();
-			break;
-		}
-		if (this.QuantityLabel.text != text)
-		{
-			this.QuantityLabel.text = text;
+			if (measure != ResourceCategoryHeader.MeasureUnit.mass)
+			{
+				if (measure != ResourceCategoryHeader.MeasureUnit.quantity)
+				{
+					if (measure == ResourceCategoryHeader.MeasureUnit.kcal)
+					{
+						this.quantityText = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
+					}
+				}
+				else
+				{
+					this.quantityText = num.ToString();
+				}
+			}
+			else
+			{
+				this.quantityText = GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
+			}
+			this.QuantityLabel.text = this.quantityText;
+			this.currentQuantity = num;
+			if (this.tooltip != null)
+			{
+				this.tooltip.ClearMultiStringTooltip();
+				this.tooltip.AddMultiStringTooltip(this.NameLabel.text, this.tooltipStyle_Header);
+				this.tooltip.AddMultiStringTooltip(string.Format(UI.RESOURCESCREEN.AVAILABLE_TOOLTIP, this.QuantityLabel.text), this.tooltipStyle_body);
+			}
 		}
 		Color color = this.AvailableColor;
 		if (num == 0f)
@@ -101,12 +112,6 @@ public class ResourceEntry : MonoBehaviour, IPointerEnterHandler, IEventSystemHa
 		if (this.NameLabel.color != color)
 		{
 			this.NameLabel.color = color;
-		}
-		if (this.tooltip != null)
-		{
-			this.tooltip.ClearMultiStringTooltip();
-			this.tooltip.AddMultiStringTooltip(this.NameLabel.text, this.tooltipStyle_Header);
-			this.tooltip.AddMultiStringTooltip(string.Format(UI.RESOURCESCREEN.AVAILABLE_TOOLTIP, this.QuantityLabel.text), this.tooltipStyle_body);
 		}
 	}
 
@@ -122,33 +127,35 @@ public class ResourceEntry : MonoBehaviour, IPointerEnterHandler, IEventSystemHa
 
 	private void Hover(bool is_hovering)
 	{
-		if (is_hovering)
+		if (!(WorldInventory.Instance == null))
 		{
-			this.Background.color = this.BackgroundHoverColor;
-		}
-		else
-		{
-			this.Background.color = new Color(0f, 0f, 0f, 0f);
-		}
-		List<Pickupable> pickupables = WorldInventory.Instance.GetPickupables(this.Resource);
-		if (pickupables == null)
-		{
-			return;
-		}
-		for (int i = 0; i < pickupables.Count; i++)
-		{
-			if (!(pickupables[i] == null))
+			if (is_hovering)
 			{
-				KAnimControllerBase component = pickupables[i].GetComponent<KAnimControllerBase>();
-				if (!(component == null))
+				this.Background.color = this.BackgroundHoverColor;
+			}
+			else
+			{
+				this.Background.color = new Color(0f, 0f, 0f, 0f);
+			}
+			List<Pickupable> pickupables = WorldInventory.Instance.GetPickupables(this.Resource);
+			if (pickupables != null)
+			{
+				for (int i = 0; i < pickupables.Count; i++)
 				{
-					if (is_hovering)
+					if (!(pickupables[i] == null))
 					{
-						component.HighlightColour = this.HighlightColor;
-					}
-					else
-					{
-						component.HighlightColour = Color.black;
+						KAnimControllerBase component = pickupables[i].GetComponent<KAnimControllerBase>();
+						if (!(component == null))
+						{
+							if (is_hovering)
+							{
+								component.HighlightColour = this.HighlightColor;
+							}
+							else
+							{
+								component.HighlightColour = Color.black;
+							}
+						}
 					}
 				}
 			}
@@ -208,9 +215,13 @@ public class ResourceEntry : MonoBehaviour, IPointerEnterHandler, IEventSystemHa
 
 	private ToolTip tooltip;
 
-	private TextStyleSetting tooltipStyle_Header;
+	private TextStyleSetting tooltipStyle_Header = null;
 
-	private TextStyleSetting tooltipStyle_body;
+	private TextStyleSetting tooltipStyle_body = null;
 
 	private int selectionIdx;
+
+	private string quantityText = null;
+
+	private float currentQuantity = 0f;
 }

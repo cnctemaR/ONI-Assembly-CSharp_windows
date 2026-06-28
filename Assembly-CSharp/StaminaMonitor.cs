@@ -18,11 +18,11 @@ public class StaminaMonitor : GameStateMachine<StaminaMonitor, StaminaMonitor.In
 		this.sleepy.sleeping.Transition(this.satisfied, (StaminaMonitor.Instance smi) => !smi.IsSleeping());
 	}
 
-	private const float OUTSIDE_SCHEDULE_STAMINA_THRESHOLD = 0f;
-
 	public GameStateMachine<StaminaMonitor, StaminaMonitor.Instance, IStateMachineTarget, object>.State satisfied;
 
 	public StaminaMonitor.SleepyState sleepy;
+
+	private const float OUTSIDE_SCHEDULE_STAMINA_THRESHOLD = 0f;
 
 	public class SleepyState : GameStateMachine<StaminaMonitor, StaminaMonitor.Instance, IStateMachineTarget, object>.State
 	{
@@ -81,12 +81,17 @@ public class StaminaMonitor : GameStateMachine<StaminaMonitor, StaminaMonitor.In
 
 		public bool ShouldExitSleep()
 		{
+			bool flag;
 			if (this.schedulable.IsAllowed(Db.Get().ScheduleBlockTypes.Sleep))
 			{
-				return false;
+				flag = false;
 			}
-			Narcolepsy component = base.GetComponent<Narcolepsy>();
-			return (!(component != null) || !component.IsNarcolepsing()) && this.stamina.value >= this.stamina.GetMax() && TimeOfDay.Instance.GetCurrentTimeRegion() != TimeOfDay.TimeRegion.Night;
+			else
+			{
+				Narcolepsy component = base.GetComponent<Narcolepsy>();
+				flag = (!(component != null) || !component.IsNarcolepsing()) && this.stamina.value >= this.stamina.GetMax() && TimeOfDay.Instance.GetCurrentTimeRegion() != TimeOfDay.TimeRegion.Night;
+			}
+			return flag;
 		}
 
 		private ChoreDriver choreDriver;

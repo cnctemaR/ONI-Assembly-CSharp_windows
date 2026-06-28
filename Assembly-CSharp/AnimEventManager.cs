@@ -46,18 +46,16 @@ public class AnimEventManager
 
 	public void StopAnim(HandleVector<int>.Handle handle)
 	{
-		if (!handle.IsValid())
+		if (handle.IsValid())
 		{
-			return;
+			AnimEventManager.IndirectionData data = this.indirectionData.GetData(handle);
+			KCompactedVector<AnimEventManager.AnimData> kcompactedVector = ((!data.isUIData) ? this.animData : this.uiAnimData);
+			KCompactedVector<AnimEventManager.EventPlayerData> kcompactedVector2 = ((!data.isUIData) ? this.eventData : this.uiEventData);
+			AnimEventManager.EventPlayerData data2 = kcompactedVector2.GetData(data.eventDataHandle);
+			this.StopEvents(data2);
+			kcompactedVector.Free(data.animDataHandle);
+			kcompactedVector2.Free(data.eventDataHandle);
 		}
-		AnimEventManager.IndirectionData data = this.indirectionData.GetData(handle);
-		KCompactedVector<AnimEventManager.AnimData> kcompactedVector = ((!data.isUIData) ? this.animData : this.uiAnimData);
-		KCompactedVector<AnimEventManager.EventPlayerData> kcompactedVector2 = ((!data.isUIData) ? this.eventData : this.uiEventData);
-		AnimEventManager.AnimData data2 = kcompactedVector.GetData(data.animDataHandle);
-		AnimEventManager.EventPlayerData data3 = kcompactedVector2.GetData(data.eventDataHandle);
-		this.StopEvents(data3);
-		kcompactedVector.Free(data.animDataHandle);
-		kcompactedVector2.Free(data.eventDataHandle);
 	}
 
 	public float GetElapsedTime(HandleVector<int>.Handle handle)
@@ -91,36 +89,35 @@ public class AnimEventManager
 
 	private void Update(float dt, List<AnimEventManager.AnimData> anim_data, List<AnimEventManager.EventPlayerData> event_data)
 	{
-		if (dt <= 0f)
+		if (dt > 0f)
 		{
-			return;
-		}
-		for (int i = 0; i < event_data.Count; i++)
-		{
-			AnimEventManager.EventPlayerData eventPlayerData = event_data[i];
-			if (!(eventPlayerData.controller == null))
+			for (int i = 0; i < event_data.Count; i++)
 			{
-				eventPlayerData.currentFrame = eventPlayerData.controller.GetFrameIdx(eventPlayerData.elapsedTime, false);
-				event_data[i] = eventPlayerData;
-				this.PlayEvents(eventPlayerData);
-				eventPlayerData.previousFrame = eventPlayerData.currentFrame;
-				eventPlayerData.elapsedTime += dt * eventPlayerData.controller.GetPlaySpeed();
-				event_data[i] = eventPlayerData;
-				if (eventPlayerData.mode != KAnim.PlayMode.Paused)
+				AnimEventManager.EventPlayerData eventPlayerData = event_data[i];
+				if (!(eventPlayerData.controller == null))
 				{
-					if (eventPlayerData.updatingEvents != null)
-					{
-						for (int j = 0; j < eventPlayerData.updatingEvents.Count; j++)
-						{
-							AnimEvent animEvent = eventPlayerData.updatingEvents[j];
-							animEvent.OnUpdate(eventPlayerData);
-						}
-					}
+					eventPlayerData.currentFrame = eventPlayerData.controller.GetFrameIdx(eventPlayerData.elapsedTime, false);
 					event_data[i] = eventPlayerData;
-					if (eventPlayerData.mode != KAnim.PlayMode.Loop && eventPlayerData.currentFrame >= anim_data[i].numFrames - 1)
+					this.PlayEvents(eventPlayerData);
+					eventPlayerData.previousFrame = eventPlayerData.currentFrame;
+					eventPlayerData.elapsedTime += dt * eventPlayerData.controller.GetPlaySpeed();
+					event_data[i] = eventPlayerData;
+					if (eventPlayerData.mode != KAnim.PlayMode.Paused)
 					{
-						this.StopEvents(eventPlayerData);
-						this.finishedCalls.Add(eventPlayerData.controller);
+						if (eventPlayerData.updatingEvents != null)
+						{
+							for (int j = 0; j < eventPlayerData.updatingEvents.Count; j++)
+							{
+								AnimEvent animEvent = eventPlayerData.updatingEvents[j];
+								animEvent.OnUpdate(eventPlayerData);
+							}
+						}
+						event_data[i] = eventPlayerData;
+						if (eventPlayerData.mode != KAnim.PlayMode.Loop && eventPlayerData.currentFrame >= anim_data[i].numFrames - 1)
+						{
+							this.StopEvents(eventPlayerData);
+							this.finishedCalls.Add(eventPlayerData.controller);
+						}
 					}
 				}
 			}
@@ -149,9 +146,9 @@ public class AnimEventManager
 		}
 	}
 
-	private const int INITIAL_VECTOR_SIZE = 256;
-
 	private static readonly List<AnimEvent> emptyEventList = new List<AnimEvent>();
+
+	private const int INITIAL_VECTOR_SIZE = 256;
 
 	private KCompactedVector<AnimEventManager.AnimData> animData = new KCompactedVector<AnimEventManager.AnimData>(256);
 

@@ -27,7 +27,7 @@ public class ProgressBarsConfig : ScriptableObject
 
 	public string GetBarDescription(string barName)
 	{
-		string text = string.Empty;
+		string text = "";
 		if (this.IsBarNameValid(barName))
 		{
 			text = Strings.Get(this.barColorMap[barName].barDescriptionKey);
@@ -47,17 +47,22 @@ public class ProgressBarsConfig : ScriptableObject
 
 	public bool IsBarNameValid(string barName)
 	{
+		bool flag;
 		if (string.IsNullOrEmpty(barName))
 		{
 			global::Debug.LogError("The barName provided was null or empty. Don't do that.", null);
-			return false;
+			flag = false;
 		}
-		if (!this.barColorMap.ContainsKey(barName))
+		else if (!this.barColorMap.ContainsKey(barName))
 		{
 			global::Debug.LogError(string.Format("No BarData found for the entry [ {0} ]", barName), null);
-			return false;
+			flag = false;
 		}
-		return true;
+		else
+		{
+			flag = true;
+		}
+		return flag;
 	}
 
 	public GameObject progressBarPrefab;

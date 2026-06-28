@@ -45,47 +45,61 @@ public class ModifierModuleNodeEditor : BaseNodeEditor
 	public override bool Calculate()
 	{
 		IModule3D value = this.Inputs[0].GetValue<IModule3D>();
+		bool flag;
 		if (value == null)
 		{
-			return false;
+			flag = false;
 		}
-		ControlPointList value2 = this.Inputs[1].GetValue<ControlPointList>();
-		if (this.target.modifyType == ProcGen.Noise.Modifier.ModifyType.Curve && (value2 == null || value2.points.Count == 0))
+		else
 		{
-			return false;
-		}
-		FloatList value3 = this.Inputs[2].GetValue<FloatList>();
-		if (this.target.modifyType == ProcGen.Noise.Modifier.ModifyType.Terrace && (value3 == null || value3.points.Count == 0))
-		{
-			return false;
-		}
-		IModule3D module3D = this.target.CreateModule(value);
-		if (module3D == null)
-		{
-			return false;
-		}
-		if (this.target.modifyType == ProcGen.Noise.Modifier.ModifyType.Curve)
-		{
-			Curve curve = module3D as Curve;
-			curve.ClearControlPoints();
-			List<ControlPoint> controls = value2.GetControls();
-			foreach (ControlPoint controlPoint in controls)
+			ControlPointList value2 = this.Inputs[1].GetValue<ControlPointList>();
+			if (this.target.modifyType == ProcGen.Noise.Modifier.ModifyType.Curve && (value2 == null || value2.points.Count == 0))
 			{
-				curve.AddControlPoint(controlPoint);
+				flag = false;
+			}
+			else
+			{
+				FloatList value3 = this.Inputs[2].GetValue<FloatList>();
+				if (this.target.modifyType == ProcGen.Noise.Modifier.ModifyType.Terrace && (value3 == null || value3.points.Count == 0))
+				{
+					flag = false;
+				}
+				else
+				{
+					IModule3D module3D = this.target.CreateModule(value);
+					if (module3D == null)
+					{
+						flag = false;
+					}
+					else
+					{
+						if (this.target.modifyType == ProcGen.Noise.Modifier.ModifyType.Curve)
+						{
+							Curve curve = module3D as Curve;
+							curve.ClearControlPoints();
+							List<ControlPoint> controls = value2.GetControls();
+							foreach (ControlPoint controlPoint in controls)
+							{
+								curve.AddControlPoint(controlPoint);
+							}
+						}
+						else if (this.target.modifyType == ProcGen.Noise.Modifier.ModifyType.Terrace)
+						{
+							Terrace terrace = module3D as Terrace;
+							terrace.ClearControlPoints();
+							foreach (float num in value3.points)
+							{
+								float num2 = num;
+								terrace.AddControlPoint(num2);
+							}
+						}
+						this.Outputs[0].SetValue<IModule3D>(module3D);
+						flag = true;
+					}
+				}
 			}
 		}
-		else if (this.target.modifyType == ProcGen.Noise.Modifier.ModifyType.Terrace)
-		{
-			Terrace terrace = module3D as Terrace;
-			terrace.ClearControlPoints();
-			foreach (float num in value3.points)
-			{
-				float num2 = num;
-				terrace.AddControlPoint(num2);
-			}
-		}
-		this.Outputs[0].SetValue<IModule3D>(module3D);
-		return true;
+		return flag;
 	}
 
 	protected override void NodeGUI()

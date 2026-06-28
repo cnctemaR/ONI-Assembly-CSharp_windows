@@ -16,25 +16,27 @@ public class BuildingDamageSoundEvent : SoundEvent
 		if (component == null)
 		{
 			SoundEvent.PlayOneShot(GlobalAssets.GetSound("Building_Dmg_Metal", false), position);
-			return;
 		}
-		Workable workable = component.workable;
-		if (workable != null)
+		else
 		{
-			Building component2 = workable.GetComponent<Building>();
-			if (component2 != null)
+			Workable workable = component.workable;
+			if (workable != null)
 			{
-				BuildingDef def = component2.Def;
-				string text = base.name + "_" + def.AudioCategory;
-				string text2 = GlobalAssets.GetSound(text, false);
-				if (text2 == null)
+				Building component2 = workable.GetComponent<Building>();
+				if (component2 != null)
 				{
-					text = "Building_Dmg_Metal";
-					text2 = GlobalAssets.GetSound(text, false);
-				}
-				if (text2 != null)
-				{
-					SoundEvent.PlayOneShot(text2, position);
+					BuildingDef def = component2.Def;
+					string text = base.name + "_" + def.AudioCategory;
+					string text2 = GlobalAssets.GetSound(text, false);
+					if (text2 == null)
+					{
+						text = "Building_Dmg_Metal";
+						text2 = GlobalAssets.GetSound(text, false);
+					}
+					if (text2 != null)
+					{
+						SoundEvent.PlayOneShot(text2, position);
+					}
 				}
 			}
 		}

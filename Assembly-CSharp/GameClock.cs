@@ -33,7 +33,7 @@ public class GameClock : KMonoBehaviour, ISaveLoadable
 		if (!this.isNight && this.IsNighttime())
 		{
 			this.isNight = true;
-			this.Trigger(-722330267, null);
+			base.Trigger(-722330267, null);
 		}
 		if (this.isNight && !this.IsNighttime())
 		{
@@ -43,7 +43,7 @@ public class GameClock : KMonoBehaviour, ISaveLoadable
 		{
 			for (int i = 0; i < num; i++)
 			{
-				this.Trigger(631075836, null);
+				base.Trigger(631075836, null);
 			}
 			if (day2 != 0 && day2 % 1 == 0)
 			{
@@ -104,7 +104,7 @@ public class GameClock : KMonoBehaviour, ISaveLoadable
 		{
 			text = SaveLoader.GetAutosaveFilePath();
 		}
-		text = text.Replace(".sav", string.Empty);
+		text = text.Replace(".sav", "");
 		text = text + " Cycle " + day.ToString();
 		text = SaveScreen.GetValidSaveFilename(text);
 		string autoSavePrefix = SaveLoader.GetAutoSavePrefix();
@@ -113,7 +113,7 @@ public class GameClock : KMonoBehaviour, ISaveLoadable
 		int num = 1;
 		while (File.Exists(text))
 		{
-			text = text2.Replace(".sav", string.Empty);
+			text = text2.Replace(".sav", "");
 			text = SaveScreen.GetValidSaveFilename(string.Concat(new object[] { text2, " (", num, ")" }));
 			num++;
 		}
@@ -131,7 +131,7 @@ public class GameClock : KMonoBehaviour, ISaveLoadable
 	[Serialize]
 	private float timePlayed;
 
-	private bool isNight;
+	private bool isNight = false;
 
 	public static readonly string NewCycleKey = "NewCycle";
 

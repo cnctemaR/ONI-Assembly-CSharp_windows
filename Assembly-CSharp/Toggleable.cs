@@ -27,11 +27,16 @@ public class Toggleable : Workable
 	public IToggleHandler GetToggleHandlerForWorker(Worker worker)
 	{
 		int targetForWorker = this.GetTargetForWorker(worker);
+		IToggleHandler toggleHandler;
 		if (targetForWorker != -1)
 		{
-			return this.targets[targetForWorker].Key;
+			toggleHandler = this.targets[targetForWorker].Key;
 		}
-		return null;
+		else
+		{
+			toggleHandler = null;
+		}
+		return toggleHandler;
 	}
 
 	private int GetTargetForWorker(Worker worker)
@@ -67,7 +72,7 @@ public class Toggleable : Workable
 			}
 			else
 			{
-				this.targets[targetIdx] = new KeyValuePair<IToggleHandler, Chore>(this.targets[targetIdx].Key, new WorkChore<Toggleable>(Db.Get().ChoreTypes.Toggle, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, int.MaxValue));
+				this.targets[targetIdx] = new KeyValuePair<IToggleHandler, Chore>(this.targets[targetIdx].Key, new WorkChore<Toggleable>(Db.Get().ChoreTypes.Toggle, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue));
 				base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.PendingSwitchToggle, null);
 			}
 		}
@@ -75,17 +80,16 @@ public class Toggleable : Workable
 
 	public void Toggle(int targetIdx)
 	{
-		if (targetIdx >= this.targets.Count)
+		if (targetIdx < this.targets.Count)
 		{
-			return;
-		}
-		if (this.targets[targetIdx].Value == null)
-		{
-			this.QueueToggle(targetIdx);
-		}
-		else
-		{
-			this.CancelToggle(targetIdx);
+			if (this.targets[targetIdx].Value == null)
+			{
+				this.QueueToggle(targetIdx);
+			}
+			else
+			{
+				this.CancelToggle(targetIdx);
+			}
 		}
 	}
 

@@ -79,119 +79,129 @@ namespace UnityEngine.UI
 
 		private void PerformLayoutControl(RectTransform rect, UnityAction<Component> action)
 		{
-			if (rect == null)
+			if (!(rect == null))
 			{
-				return;
-			}
-			List<Component> list = ListPool<Component>.Get();
-			rect.GetComponents(typeof(ILayoutController), list);
-			LayoutRebuilder.StripDisabledBehavioursFromList(list);
-			if (list.Count > 0)
-			{
-				for (int i = 0; i < list.Count; i++)
+				List<Component> list = ListPool<Component>.Get();
+				rect.GetComponents(typeof(ILayoutController), list);
+				LayoutRebuilder.StripDisabledBehavioursFromList(list);
+				if (list.Count > 0)
 				{
-					if (list[i] is ILayoutSelfController)
+					for (int i = 0; i < list.Count; i++)
 					{
-						action(list[i]);
+						if (list[i] is ILayoutSelfController)
+						{
+							action(list[i]);
+						}
+					}
+					for (int j = 0; j < list.Count; j++)
+					{
+						if (!(list[j] is ILayoutSelfController))
+						{
+							action(list[j]);
+						}
+					}
+					for (int k = 0; k < rect.childCount; k++)
+					{
+						this.PerformLayoutControl(rect.GetChild(k) as RectTransform, action);
 					}
 				}
-				for (int j = 0; j < list.Count; j++)
-				{
-					if (!(list[j] is ILayoutSelfController))
-					{
-						action(list[j]);
-					}
-				}
-				for (int k = 0; k < rect.childCount; k++)
-				{
-					this.PerformLayoutControl(rect.GetChild(k) as RectTransform, action);
-				}
+				ListPool<Component>.Release(list);
 			}
-			ListPool<Component>.Release(list);
 		}
 
 		private void PerformLayoutCalculation(RectTransform rect, UnityAction<Component> action)
 		{
-			if (rect == null)
+			if (!(rect == null))
 			{
-				return;
-			}
-			List<Component> list = ListPool<Component>.Get();
-			rect.GetComponents(typeof(ILayoutElement), list);
-			LayoutRebuilder.StripDisabledBehavioursFromList(list);
-			if (list.Count > 0)
-			{
-				for (int i = 0; i < rect.childCount; i++)
+				List<Component> list = ListPool<Component>.Get();
+				rect.GetComponents(typeof(ILayoutElement), list);
+				LayoutRebuilder.StripDisabledBehavioursFromList(list);
+				if (list.Count > 0 || rect.GetComponent(typeof(ILayoutGroup)))
 				{
-					this.PerformLayoutCalculation(rect.GetChild(i) as RectTransform, action);
+					for (int i = 0; i < rect.childCount; i++)
+					{
+						this.PerformLayoutCalculation(rect.GetChild(i) as RectTransform, action);
+					}
+					for (int j = 0; j < list.Count; j++)
+					{
+						action(list[j]);
+					}
 				}
-				for (int j = 0; j < list.Count; j++)
-				{
-					action(list[j]);
-				}
+				ListPool<Component>.Release(list);
 			}
-			ListPool<Component>.Release(list);
 		}
 
 		public static void MarkLayoutForRebuild(RectTransform rect)
 		{
-			if (rect == null)
+			if (!(rect == null))
 			{
-				return;
-			}
-			List<Component> list = ListPool<Component>.Get();
-			RectTransform rectTransform = rect;
-			for (;;)
-			{
-				RectTransform rectTransform2 = rectTransform.parent as RectTransform;
-				if (!LayoutRebuilder.ValidLayoutGroup(rectTransform2, list))
+				List<Component> list = ListPool<Component>.Get();
+				RectTransform rectTransform = rect;
+				for (;;)
 				{
-					break;
+					RectTransform rectTransform2 = rectTransform.parent as RectTransform;
+					if (!LayoutRebuilder.ValidLayoutGroup(rectTransform2, list))
+					{
+						break;
+					}
+					rectTransform = rectTransform2;
 				}
-				rectTransform = rectTransform2;
+				if (rectTransform == rect && !LayoutRebuilder.ValidController(rectTransform, list))
+				{
+					ListPool<Component>.Release(list);
+				}
+				else
+				{
+					LayoutRebuilder.MarkLayoutRootForRebuild(rectTransform);
+					ListPool<Component>.Release(list);
+				}
 			}
-			if (rectTransform == rect && !LayoutRebuilder.ValidController(rectTransform, list))
-			{
-				ListPool<Component>.Release(list);
-				return;
-			}
-			LayoutRebuilder.MarkLayoutRootForRebuild(rectTransform);
-			ListPool<Component>.Release(list);
 		}
 
 		private static bool ValidLayoutGroup(RectTransform parent, List<Component> comps)
 		{
+			bool flag;
 			if (parent == null)
 			{
-				return false;
+				flag = false;
 			}
-			parent.GetComponents(typeof(ILayoutGroup), comps);
-			LayoutRebuilder.StripDisabledBehavioursFromList(comps);
-			return comps.Count > 0;
+			else
+			{
+				parent.GetComponents(typeof(ILayoutGroup), comps);
+				LayoutRebuilder.StripDisabledBehavioursFromList(comps);
+				bool flag2 = comps.Count > 0;
+				flag = flag2;
+			}
+			return flag;
 		}
 
 		private static bool ValidController(RectTransform layoutRoot, List<Component> comps)
 		{
+			bool flag;
 			if (layoutRoot == null)
 			{
-				return false;
+				flag = false;
 			}
-			layoutRoot.GetComponents(typeof(ILayoutController), comps);
-			LayoutRebuilder.StripDisabledBehavioursFromList(comps);
-			return comps.Count > 0;
+			else
+			{
+				layoutRoot.GetComponents(typeof(ILayoutController), comps);
+				LayoutRebuilder.StripDisabledBehavioursFromList(comps);
+				bool flag2 = comps.Count > 0;
+				flag = flag2;
+			}
+			return flag;
 		}
 
 		private static void MarkLayoutRootForRebuild(RectTransform controller)
 		{
-			if (controller == null)
+			if (!(controller == null))
 			{
-				return;
-			}
-			LayoutRebuilder layoutRebuilder = LayoutRebuilder.s_Rebuilders.Get();
-			layoutRebuilder.Initialize(controller);
-			if (!CanvasUpdateRegistry.TryRegisterCanvasElementForLayoutRebuild(layoutRebuilder))
-			{
-				LayoutRebuilder.s_Rebuilders.Release(layoutRebuilder);
+				LayoutRebuilder layoutRebuilder = LayoutRebuilder.s_Rebuilders.Get();
+				layoutRebuilder.Initialize(controller);
+				if (!CanvasUpdateRegistry.TryRegisterCanvasElementForLayoutRebuild(layoutRebuilder))
+				{
+					LayoutRebuilder.s_Rebuilders.Release(layoutRebuilder);
+				}
 			}
 		}
 

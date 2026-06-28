@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class KButton : KMonoBehaviour, IPointerClickHandler, IEventSystemHandler, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
+public class KButton : KMonoBehaviour, IPointerEnterHandler, IPointerClickHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler, IEventSystemHandler
 {
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onClick;
 
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action onDoubleClick;
 
 	public bool isInteractable
@@ -49,87 +52,98 @@ public class KButton : KMonoBehaviour, IPointerClickHandler, IEventSystemHandler
 
 	public void OnPointerUp(PointerEventData eventData)
 	{
-		if (!KInputManager.isFocused)
+		if (KInputManager.isFocused)
 		{
-			return;
+			KInputManager.SetUserActive();
+			this.UpdateColor(this.interactable, false, false);
 		}
-		KInputManager.SetUserActive();
-		this.UpdateColor(this.interactable, false, false);
 	}
 
 	public void OnPointerDown(PointerEventData eventData)
 	{
-		if (!KInputManager.isFocused)
+		if (KInputManager.isFocused)
 		{
-			return;
+			KInputManager.SetUserActive();
+			this.UpdateColor(this.interactable, true, true);
+			this.PlayPointerDownSound();
 		}
-		KInputManager.SetUserActive();
-		this.UpdateColor(this.interactable, true, true);
-		this.PlayPointerDownSound();
+	}
+
+	public void SignalClick()
+	{
+		if (this.interactable)
+		{
+			this.onClick();
+		}
+	}
+
+	public void SignalDoubleClick()
+	{
+		if (this.interactable)
+		{
+			this.onDoubleClick();
+		}
 	}
 
 	public void OnPointerClick(PointerEventData eventData)
 	{
-		if (!KInputManager.isFocused)
+		if (KInputManager.isFocused)
 		{
-			return;
-		}
-		KInputManager.SetUserActive();
-		if (this.interactable)
-		{
-			if ((eventData.clickCount == 1 || this.onDoubleClick == null) && this.onClick != null)
+			KInputManager.SetUserActive();
+			if (this.interactable)
 			{
-				this.onClick();
-			}
-			else if (eventData.clickCount == 2 && this.onDoubleClick != null)
-			{
-				this.onDoubleClick();
+				if ((eventData.clickCount == 1 || this.onDoubleClick == null) && this.onClick != null)
+				{
+					this.SignalClick();
+				}
+				else if (eventData.clickCount == 2 && this.onDoubleClick != null)
+				{
+					this.SignalDoubleClick();
+				}
 			}
 		}
 	}
 
 	public void OnPointerEnter(PointerEventData eventData)
 	{
-		if (!KInputManager.isFocused)
+		if (KInputManager.isFocused)
 		{
-			return;
-		}
-		KInputManager.SetUserActive();
-		ImageToggleState[] components = base.GetComponents<ImageToggleState>();
-		if (components != null && components.Length > 0)
-		{
-			foreach (ImageToggleState imageToggleState in components)
+			KInputManager.SetUserActive();
+			ImageToggleState[] components = base.GetComponents<ImageToggleState>();
+			if (components != null && components.Length > 0)
 			{
-				imageToggleState.OnHoverIn();
+				foreach (ImageToggleState imageToggleState in components)
+				{
+					imageToggleState.OnHoverIn();
+				}
 			}
-		}
-		this.UpdateColor(this.interactable, true, false);
-		this.soundPlayer.Play(1);
-		this.mouseOver = true;
-		if (this.onPointerEnter != null)
-		{
-			this.onPointerEnter();
+			this.UpdateColor(this.interactable, true, false);
+			this.soundPlayer.Play(1);
+			this.mouseOver = true;
+			if (this.onPointerEnter != null)
+			{
+				this.onPointerEnter();
+			}
 		}
 	}
 
 	public void OnPointerExit(PointerEventData eventData)
 	{
-		if (!KInputManager.isFocused)
+		if (KInputManager.isFocused)
 		{
-			return;
-		}
-		KInputManager.SetUserActive();
-		ImageToggleState[] components = base.GetComponents<ImageToggleState>();
-		if (components != null && components.Length > 0)
-		{
-			foreach (ImageToggleState imageToggleState in components)
+			KInputManager.SetUserActive();
+			ImageToggleState[] components = base.GetComponents<ImageToggleState>();
+			if (components != null && components.Length > 0)
 			{
-				imageToggleState.OnHoverOut();
+				foreach (ImageToggleState imageToggleState in components)
+				{
+					imageToggleState.OnHoverOut();
+				}
 			}
+			this.UpdateColor(this.interactable, false, false);
+			this.mouseOver = false;
+			this.onPointerExit.Signal();
 		}
-		this.UpdateColor(this.interactable, false, false);
-		this.mouseOver = false;
-		this.onPointerExit.Signal();
 	}
 
 	private void UpdateColor(bool interactable, bool hover, bool press)
@@ -137,8 +151,8 @@ public class KButton : KMonoBehaviour, IPointerClickHandler, IEventSystemHandler
 		if (this.bgImage == null)
 		{
 			this.bgImage = base.GetComponent<KImage>();
-			string text = string.Empty;
-			Transform transform = this.transform;
+			string text = "";
+			Transform transform = base.transform;
 			for (int i = 0; i < 5; i++)
 			{
 				if (!(transform.parent != null))
@@ -183,7 +197,7 @@ public class KButton : KMonoBehaviour, IPointerClickHandler, IEventSystemHandler
 		}
 	}
 
-	private void PlayPointerDownSound()
+	public void PlayPointerDownSound()
 	{
 		if (!this.interactable || (this.soundPlayer.AcceptClickCondition != null && !this.soundPlayer.AcceptClickCondition()))
 		{
@@ -212,5 +226,5 @@ public class KButton : KMonoBehaviour, IPointerClickHandler, IEventSystemHandler
 
 	private bool interactable = true;
 
-	private bool mouseOver;
+	private bool mouseOver = false;
 }

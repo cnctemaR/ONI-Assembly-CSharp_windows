@@ -15,7 +15,7 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
-		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 	}
 
 	public void DropContents()
@@ -31,14 +31,20 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 			if (this.chore != null)
 			{
 				UserMenu userMenu = this.userMenu;
-				string text = UI.USERMENUACTIONS.OPENPOI.TOOLTIP_OFF;
-				userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_harvest", UI.USERMENUACTIONS.OPENPOI.NAME_OFF, new global::System.Action(this.OnClickCancel), global::Action.NumActions, null, null, null, text, true), 1f);
+				string text = "action_harvest";
+				string text2 = UI.USERMENUACTIONS.OPENPOI.NAME_OFF;
+				global::System.Action action = new global::System.Action(this.OnClickCancel);
+				string text3 = UI.USERMENUACTIONS.OPENPOI.TOOLTIP_OFF;
+				userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
 			}
 			else
 			{
 				UserMenu userMenu2 = this.userMenu;
+				string text3 = "action_harvest";
+				string text2 = UI.USERMENUACTIONS.OPENPOI.NAME;
+				global::System.Action action = new global::System.Action(this.OnClickOpen);
 				string text = UI.USERMENUACTIONS.OPENPOI.TOOLTIP;
-				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_harvest", UI.USERMENUACTIONS.OPENPOI.NAME, new global::System.Action(this.OnClickOpen), global::Action.NumActions, null, null, null, text, true), 1f);
+				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
 			}
 		}
 	}
@@ -55,28 +61,26 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 
 	public void ActivateChore(object param = null)
 	{
-		if (this.chore != null)
+		if (this.chore == null)
 		{
-			return;
+			base.GetComponent<Workable>().SetWorkTime(1.5f);
+			ChoreType emptyStorage = Db.Get().ChoreTypes.EmptyStorage;
+			KAnimFile anim = Assets.GetAnim("anim_interacts_clothingfactory_kanim");
+			this.chore = new WorkChore<Workable>(emptyStorage, this, null, true, delegate(Chore o)
+			{
+				this.CompleteChore();
+			}, null, null, true, null, true, default(Tag), anim, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+			this.OnRefreshUserMenu(null);
 		}
-		base.GetComponent<Workable>().SetWorkTime(1.5f);
-		Action<Chore> action = delegate(Chore o)
-		{
-			this.CompleteChore();
-		};
-		KAnimFile anim = Assets.GetAnim("anim_interacts_clothingfactory_kanim");
-		this.chore = new WorkChore<Workable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, action, null, null, true, null, true, default(Tag), anim, false, true, true, int.MaxValue);
-		this.OnRefreshUserMenu(null);
 	}
 
 	public void CancelChore(object param = null)
 	{
-		if (this.chore == null)
+		if (this.chore != null)
 		{
-			return;
+			this.chore.Cancel("User cancelled");
+			this.chore = null;
 		}
-		this.chore.Cancel("User cancelled");
-		this.chore = null;
 	}
 
 	private void CompleteChore()
@@ -90,12 +94,12 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 	}
 
 	[Serialize]
-	private string contents = string.Empty;
+	private string contents = "";
 
 	private string[] possible_contents_ids = new string[] { "Warm_Vest", "Cool_Vest", "Funky_Vest" };
 
 	[Serialize]
-	private bool used;
+	private bool used = false;
 
 	private Chore chore;
 
@@ -115,8 +119,8 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.closed;
-			this.closed.PlayAnim("on", KAnim.PlayMode.Once, null);
-			this.open.PlayAnim("working", KAnim.PlayMode.Once, null);
+			this.closed.PlayAnim("on");
+			this.open.PlayAnim("working");
 		}
 
 		public GameStateMachine<SetLocker.States, SetLocker.StatesInstance, SetLocker, object>.State closed;

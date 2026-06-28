@@ -6,13 +6,23 @@ public class GasValveConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER1;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("GasValve", 1, 2, "valvegas_kanim", 50f, 30, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER1, MATERIALS.RAW_METALS, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.PENALTY.TIER0, tier);
+		string text = "GasValve";
+		int num = 1;
+		int num2 = 2;
+		string text2 = "valvegas_kanim";
+		float num3 = 50f;
+		int num4 = 30;
+		float num5 = 10f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER1;
+		string[] raw_METALS = MATERIALS.RAW_METALS;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER1;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_METALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, tier2);
 		buildingDef.InputConduitType = ConduitType.Gas;
 		buildingDef.OutputConduitType = ConduitType.Gas;
 		buildingDef.Floodable = false;
 		buildingDef.ViewMode = SimViewMode.GasVentMap;
-		buildingDef.MaterialCategory = MATERIALS.RAW_METALS;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.PermittedRotations = PermittedRotations.R360;
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
@@ -24,17 +34,16 @@ public class GasValveConfig : IBuildingConfig
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		GeneratedBuildings.MakeBuildableAnywhere(go);
-		Valve valve = go.AddOrGet<Valve>();
-		valve.conduitType = ConduitType.Gas;
-		valve.smallAmount = 0.1f;
-		valve.largeAmount = 1f;
-		valve.maxFlow = 1f;
-		valve.animFlowRanges = new Valve.AnimRangeInfo[]
+		ValveBase valveBase = go.AddOrGet<ValveBase>();
+		valveBase.conduitType = ConduitType.Gas;
+		valveBase.maxFlow = 1f;
+		valveBase.animFlowRanges = new ValveBase.AnimRangeInfo[]
 		{
-			new Valve.AnimRangeInfo(0.25f, "lo"),
-			new Valve.AnimRangeInfo(0.5f, "med"),
-			new Valve.AnimRangeInfo(0.75f, "hi")
+			new ValveBase.AnimRangeInfo(0.25f, "lo"),
+			new ValveBase.AnimRangeInfo(0.5f, "med"),
+			new ValveBase.AnimRangeInfo(0.75f, "hi")
 		};
+		go.AddOrGet<Valve>();
 		Workable workable = go.AddOrGet<Workable>();
 		workable.workTime = 5f;
 	}
@@ -46,6 +55,8 @@ public class GasValveConfig : IBuildingConfig
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<ConduitDispenser>());
 		BuildingTemplates.DoPostConfigure(go);
 	}
+
+	public const string ID = "GasValve";
 
 	private const ConduitType CONDUIT_TYPE = ConduitType.Gas;
 }

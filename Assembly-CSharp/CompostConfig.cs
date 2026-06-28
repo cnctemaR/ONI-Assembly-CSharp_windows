@@ -6,8 +6,19 @@ public class CompostConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
+		string text = "Compost";
+		int num = 2;
+		int num2 = 2;
+		string text2 = "compost_kanim";
+		float num3 = 400f;
+		int num4 = 30;
+		float num5 = 30f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER5;
+		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
+		float num6 = 800f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Compost", 2, 2, "compost_kanim", 400f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER5, MATERIALS.RAW_MINERALS, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER3, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_MINERALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER3, none);
 		buildingDef.ExhaustKilowattsWhenActive = 0.125f;
 		buildingDef.OperatingKilowatts = 1f;
 		buildingDef.Overheatable = false;
@@ -24,7 +35,6 @@ public class CompostConfig : IBuildingConfig
 	{
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 2000f;
-		storage.disableOnStore = true;
 		Compost compost = go.AddOrGet<Compost>();
 		compost.emitHash = SimHashes.Fertilizer;
 		compost.emitMassThreshold = 10f;

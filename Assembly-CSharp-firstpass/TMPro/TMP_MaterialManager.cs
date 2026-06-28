@@ -10,32 +10,37 @@ namespace TMPro
 	{
 		public static Material GetStencilMaterial(Material baseMaterial, int stencilID)
 		{
+			Material material;
 			if (!baseMaterial.HasProperty(ShaderUtilities.ID_StencilID))
 			{
 				global::Debug.LogWarning("Selected Shader does not support Stencil Masking. Please select the Distance Field or Mobile Distance Field Shader.", null);
-				return baseMaterial;
+				material = baseMaterial;
 			}
-			int instanceID = baseMaterial.GetInstanceID();
-			for (int i = 0; i < TMP_MaterialManager.m_materialList.Count; i++)
+			else
 			{
-				if (TMP_MaterialManager.m_materialList[i].baseMaterial.GetInstanceID() == instanceID && TMP_MaterialManager.m_materialList[i].stencilID == stencilID)
+				int instanceID = baseMaterial.GetInstanceID();
+				for (int i = 0; i < TMP_MaterialManager.m_materialList.Count; i++)
 				{
-					TMP_MaterialManager.m_materialList[i].count++;
-					return TMP_MaterialManager.m_materialList[i].stencilMaterial;
+					if (TMP_MaterialManager.m_materialList[i].baseMaterial.GetInstanceID() == instanceID && TMP_MaterialManager.m_materialList[i].stencilID == stencilID)
+					{
+						TMP_MaterialManager.m_materialList[i].count++;
+						return TMP_MaterialManager.m_materialList[i].stencilMaterial;
+					}
 				}
+				Material material2 = new Material(baseMaterial);
+				material2.hideFlags = HideFlags.HideAndDontSave;
+				material2.shaderKeywords = baseMaterial.shaderKeywords;
+				ShaderUtilities.GetShaderPropertyIDs();
+				material2.SetFloat(ShaderUtilities.ID_StencilID, (float)stencilID);
+				material2.SetFloat(ShaderUtilities.ID_StencilComp, 4f);
+				TMP_MaterialManager.MaskingMaterial maskingMaterial = new TMP_MaterialManager.MaskingMaterial();
+				maskingMaterial.baseMaterial = baseMaterial;
+				maskingMaterial.stencilMaterial = material2;
+				maskingMaterial.stencilID = stencilID;
+				maskingMaterial.count = 1;
+				TMP_MaterialManager.m_materialList.Add(maskingMaterial);
+				material = material2;
 			}
-			Material material = new Material(baseMaterial);
-			material.hideFlags = HideFlags.HideAndDontSave;
-			material.shaderKeywords = baseMaterial.shaderKeywords;
-			ShaderUtilities.GetShaderPropertyIDs();
-			material.SetFloat(ShaderUtilities.ID_StencilID, (float)stencilID);
-			material.SetFloat(ShaderUtilities.ID_StencilComp, 4f);
-			TMP_MaterialManager.MaskingMaterial maskingMaterial = new TMP_MaterialManager.MaskingMaterial();
-			maskingMaterial.baseMaterial = baseMaterial;
-			maskingMaterial.stencilMaterial = material;
-			maskingMaterial.stencilID = stencilID;
-			maskingMaterial.count = 1;
-			TMP_MaterialManager.m_materialList.Add(maskingMaterial);
 			return material;
 		}
 
@@ -64,11 +69,16 @@ namespace TMPro
 		public static Material GetBaseMaterial(Material stencilMaterial)
 		{
 			int num = TMP_MaterialManager.m_materialList.FindIndex((TMP_MaterialManager.MaskingMaterial item) => item.stencilMaterial == stencilMaterial);
+			Material material;
 			if (num == -1)
 			{
-				return null;
+				material = null;
 			}
-			return TMP_MaterialManager.m_materialList[num].baseMaterial;
+			else
+			{
+				material = TMP_MaterialManager.m_materialList[num].baseMaterial;
+			}
+			return material;
 		}
 
 		public static Material SetStencil(Material material, int stencilID)
@@ -151,13 +161,15 @@ namespace TMPro
 			if (TMP_MaterialManager.m_materialList.Count<TMP_MaterialManager.MaskingMaterial>() == 0)
 			{
 				global::Debug.Log("Material List has already been cleared.", null);
-				return;
 			}
-			for (int i = 0; i < TMP_MaterialManager.m_materialList.Count<TMP_MaterialManager.MaskingMaterial>(); i++)
+			else
 			{
-				Material stencilMaterial = TMP_MaterialManager.m_materialList[i].stencilMaterial;
-				global::UnityEngine.Object.DestroyImmediate(stencilMaterial);
-				TMP_MaterialManager.m_materialList.RemoveAt(i);
+				for (int i = 0; i < TMP_MaterialManager.m_materialList.Count<TMP_MaterialManager.MaskingMaterial>(); i++)
+				{
+					Material stencilMaterial = TMP_MaterialManager.m_materialList[i].stencilMaterial;
+					global::UnityEngine.Object.DestroyImmediate(stencilMaterial);
+					TMP_MaterialManager.m_materialList.RemoveAt(i);
+				}
 			}
 		}
 
@@ -168,7 +180,7 @@ namespace TMPro
 			obj.GetComponentsInParent<Mask>(false, list);
 			for (int i = 0; i < list.Count; i++)
 			{
-				if (list[i].IsActive())
+				if (list[i].MaskEnabled())
 				{
 					num++;
 				}
@@ -183,53 +195,62 @@ namespace TMPro
 			int instanceID2 = sourceAtlasTexture.GetInstanceID();
 			long num = (long)instanceID << 32 + instanceID2;
 			TMP_MaterialManager.FallbackMaterial fallbackMaterial;
+			Material material;
 			if (TMP_MaterialManager.m_fallbackMaterials.TryGetValue(num, out fallbackMaterial))
 			{
-				return fallbackMaterial.fallbackMaterial;
+				material = fallbackMaterial.fallbackMaterial;
 			}
-			Material material = new Material(sourceMaterial);
-			material.hideFlags = HideFlags.HideAndDontSave;
-			material.SetTexture(ShaderUtilities.ID_MainTex, sourceAtlasTexture);
-			fallbackMaterial = new TMP_MaterialManager.FallbackMaterial();
-			fallbackMaterial.baseID = instanceID;
-			fallbackMaterial.baseMaterial = sourceMaterial;
-			fallbackMaterial.fallbackMaterial = material;
-			fallbackMaterial.count = 0;
-			TMP_MaterialManager.m_fallbackMaterials.Add(num, fallbackMaterial);
-			TMP_MaterialManager.m_fallbackMaterialLookup.Add(material.GetInstanceID(), num);
+			else
+			{
+				Material material2 = new Material(sourceMaterial);
+				material2.hideFlags = HideFlags.HideAndDontSave;
+				material2.SetTexture(ShaderUtilities.ID_MainTex, sourceAtlasTexture);
+				fallbackMaterial = new TMP_MaterialManager.FallbackMaterial();
+				fallbackMaterial.baseID = instanceID;
+				fallbackMaterial.baseMaterial = sourceMaterial;
+				fallbackMaterial.fallbackMaterial = material2;
+				fallbackMaterial.count = 0;
+				TMP_MaterialManager.m_fallbackMaterials.Add(num, fallbackMaterial);
+				TMP_MaterialManager.m_fallbackMaterialLookup.Add(material2.GetInstanceID(), num);
+				material = material2;
+			}
 			return material;
 		}
 
 		public static void AddFallbackMaterialReference(Material targetMaterial)
 		{
-			if (targetMaterial == null)
+			if (!(targetMaterial == null))
 			{
-				return;
-			}
-			int instanceID = targetMaterial.GetInstanceID();
-			long num;
-			TMP_MaterialManager.FallbackMaterial fallbackMaterial;
-			if (TMP_MaterialManager.m_fallbackMaterialLookup.TryGetValue(instanceID, out num) && TMP_MaterialManager.m_fallbackMaterials.TryGetValue(num, out fallbackMaterial))
-			{
-				fallbackMaterial.count++;
+				int instanceID = targetMaterial.GetInstanceID();
+				long num;
+				if (TMP_MaterialManager.m_fallbackMaterialLookup.TryGetValue(instanceID, out num))
+				{
+					TMP_MaterialManager.FallbackMaterial fallbackMaterial;
+					if (TMP_MaterialManager.m_fallbackMaterials.TryGetValue(num, out fallbackMaterial))
+					{
+						fallbackMaterial.count++;
+					}
+				}
 			}
 		}
 
 		public static void RemoveFallbackMaterialReference(Material targetMaterial)
 		{
-			if (targetMaterial == null)
+			if (!(targetMaterial == null))
 			{
-				return;
-			}
-			int instanceID = targetMaterial.GetInstanceID();
-			long num;
-			TMP_MaterialManager.FallbackMaterial fallbackMaterial;
-			if (TMP_MaterialManager.m_fallbackMaterialLookup.TryGetValue(instanceID, out num) && TMP_MaterialManager.m_fallbackMaterials.TryGetValue(num, out fallbackMaterial))
-			{
-				fallbackMaterial.count--;
-				if (fallbackMaterial.count < 1)
+				int instanceID = targetMaterial.GetInstanceID();
+				long num;
+				if (TMP_MaterialManager.m_fallbackMaterialLookup.TryGetValue(instanceID, out num))
 				{
-					TMP_MaterialManager.m_fallbackCleanupList.Add(num);
+					TMP_MaterialManager.FallbackMaterial fallbackMaterial;
+					if (TMP_MaterialManager.m_fallbackMaterials.TryGetValue(num, out fallbackMaterial))
+					{
+						fallbackMaterial.count--;
+						if (fallbackMaterial.count < 1)
+						{
+							TMP_MaterialManager.m_fallbackCleanupList.Add(num);
+						}
+					}
 				}
 			}
 		}
@@ -240,37 +261,42 @@ namespace TMPro
 			{
 				long num = TMP_MaterialManager.m_fallbackCleanupList[i];
 				TMP_MaterialManager.FallbackMaterial fallbackMaterial;
-				if (TMP_MaterialManager.m_fallbackMaterials.TryGetValue(num, out fallbackMaterial) && fallbackMaterial.count < 1)
+				if (TMP_MaterialManager.m_fallbackMaterials.TryGetValue(num, out fallbackMaterial))
 				{
-					Material fallbackMaterial2 = fallbackMaterial.fallbackMaterial;
-					global::UnityEngine.Object.DestroyImmediate(fallbackMaterial2);
-					TMP_MaterialManager.m_fallbackMaterials.Remove(num);
-					TMP_MaterialManager.m_fallbackMaterialLookup.Remove(fallbackMaterial2.GetInstanceID());
+					if (fallbackMaterial.count < 1)
+					{
+						Material fallbackMaterial2 = fallbackMaterial.fallbackMaterial;
+						global::UnityEngine.Object.DestroyImmediate(fallbackMaterial2);
+						TMP_MaterialManager.m_fallbackMaterials.Remove(num);
+						TMP_MaterialManager.m_fallbackMaterialLookup.Remove(fallbackMaterial2.GetInstanceID());
+					}
 				}
 			}
 		}
 
 		public static void ReleaseFallbackMaterial(Material fallackMaterial)
 		{
-			if (fallackMaterial == null)
+			if (!(fallackMaterial == null))
 			{
-				return;
-			}
-			int instanceID = fallackMaterial.GetInstanceID();
-			long num;
-			TMP_MaterialManager.FallbackMaterial fallbackMaterial;
-			if (TMP_MaterialManager.m_fallbackMaterialLookup.TryGetValue(instanceID, out num) && TMP_MaterialManager.m_fallbackMaterials.TryGetValue(num, out fallbackMaterial))
-			{
-				if (fallbackMaterial.count > 1)
+				int instanceID = fallackMaterial.GetInstanceID();
+				long num;
+				if (TMP_MaterialManager.m_fallbackMaterialLookup.TryGetValue(instanceID, out num))
 				{
-					fallbackMaterial.count--;
-				}
-				else
-				{
-					global::UnityEngine.Object.DestroyImmediate(fallbackMaterial.fallbackMaterial);
-					TMP_MaterialManager.m_fallbackMaterials.Remove(num);
-					TMP_MaterialManager.m_fallbackMaterialLookup.Remove(instanceID);
-					fallackMaterial = null;
+					TMP_MaterialManager.FallbackMaterial fallbackMaterial;
+					if (TMP_MaterialManager.m_fallbackMaterials.TryGetValue(num, out fallbackMaterial))
+					{
+						if (fallbackMaterial.count > 1)
+						{
+							fallbackMaterial.count--;
+						}
+						else
+						{
+							global::UnityEngine.Object.DestroyImmediate(fallbackMaterial.fallbackMaterial);
+							TMP_MaterialManager.m_fallbackMaterials.Remove(num);
+							TMP_MaterialManager.m_fallbackMaterialLookup.Remove(instanceID);
+							fallackMaterial = null;
+						}
+					}
 				}
 			}
 		}

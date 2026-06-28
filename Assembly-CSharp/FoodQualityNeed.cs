@@ -12,27 +12,27 @@ public class FoodQualityNeed : Need
 		Attributes attributes = base.gameObject.GetAttributes();
 		attributes.Add(Db.Get().Attributes.FoodExpectation);
 		base.Name = DUPLICANTS.NEEDS.FOOD_QUALITY.NAME;
-		this.expectationModifier = new AttributeModifier(Db.Get().Attributes.FoodExpectation.Id, 0f, attributes.GetProfessionString(true), false, false);
-		this.foodQualitStressBonus = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, -0.033333335f, DUPLICANTS.NEEDS.FOOD_QUALITY.GOOD_FOOD_MOD, false, false);
-		this.foodQualityStressNeutral = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0f, DUPLICANTS.NEEDS.FOOD_QUALITY.NORMAL_FOOD_MOD, false, false);
-		this.foodQualityStressPenalty = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0.016666668f, DUPLICANTS.NEEDS.FOOD_QUALITY.BAD_FOOD_MOD, false, false);
+		this.expectationModifier = new AttributeModifier(Db.Get().Attributes.FoodExpectation.Id, 0f, attributes.GetProfessionString(true), false, false, false);
+		this.foodQualitStressBonus = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, -0.033333335f, DUPLICANTS.NEEDS.FOOD_QUALITY.GOOD_FOOD_MOD, false, false, true);
+		this.foodQualityStressNeutral = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0f, DUPLICANTS.NEEDS.FOOD_QUALITY.NORMAL_FOOD_MOD, false, false, true);
+		this.foodQualityStressPenalty = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0.016666668f, DUPLICANTS.NEEDS.FOOD_QUALITY.BAD_FOOD_MOD, false, false, true);
 		attributes.Add("Profession", this.expectationModifier);
+		this.expectationAttribute = Db.Get().Attributes.FoodExpectation.Lookup(this);
 		this.RefreshExpectations();
 		base.ExpectationTooltip = string.Format(DUPLICANTS.NEEDS.FOOD_QUALITY.EXPECTATION_TOOLTIP, Db.Get().Attributes.FoodExpectation.Lookup(this).GetTotalValue());
-		this.Subscribe(-110704193, delegate(object data)
+		base.Subscribe(-110704193, delegate(object data)
 		{
 			this.RefreshExpectations();
 		});
-		this.Subscribe(1406130139, new Action<object>(this.OnEatStart));
-		this.Subscribe(1121894420, new Action<object>(this.OnEatComplete));
+		base.Subscribe(1406130139, new Action<object>(this.OnEatStart));
+		base.Subscribe(1121894420, new Action<object>(this.OnEatComplete));
 	}
 
 	private void RefreshExpectations()
 	{
 		Attributes attributes = base.gameObject.GetAttributes();
 		AttributeInstance profession = attributes.GetProfession();
-		this.expectationModifier.Value = Math.Min(Mathf.Floor(profession.GetTotalValue() / 5f), 3f);
-		this.expectationAttribute = Db.Get().Attributes.FoodExpectation.Lookup(this);
+		this.expectationModifier.SetValue(Math.Min(Mathf.Floor(profession.GetTotalValue() / 5f), 3f));
 	}
 
 	public override Klei.AI.Attribute GetExpectationAttribute()

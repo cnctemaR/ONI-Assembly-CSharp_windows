@@ -8,8 +8,8 @@ public class OilFloater : StateMachineComponent<OilFloater.StatesInstance>
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		Vector3 position = this.transform.position;
-		this.transform.SetPosition(position);
+		Vector3 position = base.transform.position;
+		base.transform.SetPosition(position);
 		base.gameObject.SetLayerRecursively(LayerMask.NameToLayer("Default"));
 	}
 
@@ -58,7 +58,14 @@ public class OilFloater : StateMachineComponent<OilFloater.StatesInstance>
 
 	private bool isTargetElement(int cell)
 	{
-		return Grid.Element[cell].id == this.consumedElement && Grid.Cell[cell].mass > this.minimumApproachMass && this.nav.CanReach(cell);
+		if (Grid.Element[cell].id == this.consumedElement)
+		{
+			if (Grid.Cell[cell].mass > this.minimumApproachMass)
+			{
+				return this.nav.CanReach(cell);
+			}
+		}
+		return false;
 	}
 
 	private int FindAbovewaterCell()
@@ -106,22 +113,21 @@ public class OilFloater : StateMachineComponent<OilFloater.StatesInstance>
 
 	private void OnMassConsumed(object data)
 	{
-		if (this == null)
+		if (!(this == null))
 		{
-			return;
-		}
-		Sim.MassConsumptionCallback massConsumptionCallback = (Sim.MassConsumptionCallback)data;
-		if (massConsumptionCallback.mass > 0f)
-		{
-			this.storage.AddGasChunk(ElementLoader.elements[(int)massConsumptionCallback.removedElemIdx].id, massConsumptionCallback.mass, massConsumptionCallback.temperature, massConsumptionCallback.diseaseIdx, massConsumptionCallback.diseaseCount, true, true);
-			if (this.HasConsumedEnough())
+			Sim.MassConsumptionCallback massConsumptionCallback = (Sim.MassConsumptionCallback)data;
+			if (massConsumptionCallback.mass > 0f)
+			{
+				this.storage.AddGasChunk(ElementLoader.elements[(int)massConsumptionCallback.removedElemIdx].id, massConsumptionCallback.mass, massConsumptionCallback.temperature, massConsumptionCallback.diseaseIdx, massConsumptionCallback.diseaseCount, true, true);
+				if (this.HasConsumedEnough())
+				{
+					base.smi.sm.noFood.Trigger(base.smi);
+				}
+			}
+			else
 			{
 				base.smi.sm.noFood.Trigger(base.smi);
 			}
-		}
-		else
-		{
-			base.smi.sm.noFood.Trigger(base.smi);
 		}
 	}
 
@@ -147,7 +153,7 @@ public class OilFloater : StateMachineComponent<OilFloater.StatesInstance>
 			if (component != null)
 			{
 				component.AddLoopingSoundUpdater();
-				component.StartSound(this.moveSound, this.transform.position);
+				component.StartSound(this.moveSound, base.transform.position);
 				this.playingMoveSound = true;
 			}
 		}
@@ -175,7 +181,7 @@ public class OilFloater : StateMachineComponent<OilFloater.StatesInstance>
 			if (component != null)
 			{
 				component.AddLoopingSoundUpdater();
-				component.StartSound(this.inhaleSound, this.transform.position);
+				component.StartSound(this.inhaleSound, base.transform.position);
 				this.playingInhaleSound = true;
 			}
 		}
@@ -207,13 +213,13 @@ public class OilFloater : StateMachineComponent<OilFloater.StatesInstance>
 		}
 	}
 
-	public const float EATS_BEFORE_POOP = 5f;
-
 	[NonSerialized]
 	public string moveSound = "OilFloater_move_LP";
 
 	[NonSerialized]
 	public string inhaleSound = "OilFloater_intake_air";
+
+	public const float EATS_BEFORE_POOP = 5f;
 
 	[MyCmpReq]
 	private ElementEmitter emitter;
@@ -242,9 +248,9 @@ public class OilFloater : StateMachineComponent<OilFloater.StatesInstance>
 
 	public int emitDiseasePerKg;
 
-	private bool playingMoveSound;
+	private bool playingMoveSound = false;
 
-	private bool playingInhaleSound;
+	private bool playingInhaleSound = false;
 
 	public class StatesInstance : GameStateMachine<OilFloater.States, OilFloater.StatesInstance, OilFloater, object>.GameInstance
 	{
@@ -278,7 +284,7 @@ public class OilFloater : StateMachineComponent<OilFloater.StatesInstance>
 				});
 			this.alive.flee.InitializeStates(this.mover, this.alive.idle);
 			this.alive.idle.DefaultState(this.alive.idle.idle);
-			this.alive.idle.idle.PlayAnim("idle_loop", KAnim.PlayMode.Loop, null).Enter(delegate(OilFloater.StatesInstance smi)
+			this.alive.idle.idle.PlayAnim("idle_loop", KAnim.PlayMode.Loop).Enter(delegate(OilFloater.StatesInstance smi)
 			{
 				if (smi.master.HasConsumedEnough())
 				{
@@ -308,7 +314,7 @@ public class OilFloater : StateMachineComponent<OilFloater.StatesInstance>
 			{
 				smi.master.StopMoveSound();
 			});
-			this.alive.idle.post_move.PlayAnim("idle_loop", KAnim.PlayMode.Loop, null).Enter(delegate(OilFloater.StatesInstance smi)
+			this.alive.idle.post_move.PlayAnim("idle_loop", KAnim.PlayMode.Loop).Enter(delegate(OilFloater.StatesInstance smi)
 			{
 				if (smi.master.StandingOnFood())
 				{
@@ -327,7 +333,7 @@ public class OilFloater : StateMachineComponent<OilFloater.StatesInstance>
 				smi.master.StopMoveSound();
 			});
 			this.alive.full.DefaultState(this.alive.full.full);
-			this.alive.full.full.PlayAnim("idle_loop_full", KAnim.PlayMode.Loop, null).MoveTo((OilFloater.StatesInstance smi) => smi.master.GetLastPoopCell(), this.alive.full.poop, this.alive.full.poop, false).Enter(delegate(OilFloater.StatesInstance smi)
+			this.alive.full.full.PlayAnim("idle_loop_full", KAnim.PlayMode.Loop).MoveTo((OilFloater.StatesInstance smi) => smi.master.GetLastPoopCell(), this.alive.full.poop, this.alive.full.poop, false).Enter(delegate(OilFloater.StatesInstance smi)
 			{
 				smi.master.StartMoveSound();
 			})
@@ -335,7 +341,7 @@ public class OilFloater : StateMachineComponent<OilFloater.StatesInstance>
 				{
 					smi.master.StopMoveSound();
 				});
-			this.alive.full.poop.PlayAnim("poop", KAnim.PlayMode.Once, null).Enter(delegate(OilFloater.StatesInstance smi)
+			this.alive.full.poop.PlayAnim("poop").Enter(delegate(OilFloater.StatesInstance smi)
 			{
 				smi.Schedule(1f, delegate(object obj)
 				{
@@ -354,22 +360,22 @@ public class OilFloater : StateMachineComponent<OilFloater.StatesInstance>
 				{
 					smi.master.UpdateInhaleSound();
 				});
-			this.alive.inhale.pre.PlayAnim("eat_pre", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.alive.inhale.loop);
-			this.alive.inhale.loop.PlayAnim("eat_loop", KAnim.PlayMode.Loop, null).ScheduleGoTo(5f, this.alive.inhale.pst).OnSignal(this.noFood, this.alive.inhale.pst)
+			this.alive.inhale.pre.PlayAnim("eat_pre", KAnim.PlayMode.Once).OnAnimQueueComplete(this.alive.inhale.loop);
+			this.alive.inhale.loop.PlayAnim("eat_loop", KAnim.PlayMode.Loop).ScheduleGoTo(5f, this.alive.inhale.pst).OnSignal(this.noFood, this.alive.inhale.pst)
 				.Exit(delegate(OilFloater.StatesInstance smi)
 				{
 					smi.master.StopInhaleSound();
 				});
-			this.alive.inhale.pst.PlayAnim("eat_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.alive.idle.move);
+			this.alive.inhale.pst.PlayAnim("eat_pst", KAnim.PlayMode.Once).OnAnimQueueComplete(this.alive.idle.move);
 			this.underwater.DefaultState(this.underwater.move).Enter(delegate(OilFloater.StatesInstance smi)
 			{
 				Navigator component = smi.GetComponent<Navigator>();
 				component.SetCurrentNavType(NavType.Swim);
 			});
-			this.underwater.idle.PlayAnim("idle_loop", KAnim.PlayMode.Loop, null).ScheduleGoTo(1f, this.underwater.move);
+			this.underwater.idle.PlayAnim("idle_loop", KAnim.PlayMode.Loop).ScheduleGoTo(1f, this.underwater.move);
 			this.underwater.move.MoveTo((OilFloater.StatesInstance smi) => smi.master.FindAbovewaterCell(), this.alive.idle, this.underwater.idle, false);
 			this.trapped.InitializeStates(this.masterTarget, this.alive.idle);
-			this.death.ToggleGravity().PlayAnim("death", KAnim.PlayMode.Once, null).EventHandler(GameHashes.AnimQueueComplete, delegate(OilFloater.StatesInstance smi)
+			this.death.ToggleGravity().PlayAnim("death").EventHandler(GameHashes.AnimQueueComplete, delegate(OilFloater.StatesInstance smi)
 			{
 				Util.KDestroyGameObject(smi.gameObject);
 			})

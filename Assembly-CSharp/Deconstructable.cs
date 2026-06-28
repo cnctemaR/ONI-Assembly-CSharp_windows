@@ -22,10 +22,10 @@ public class Deconstructable : Workable
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
-		this.Subscribe(-111137758, new Action<object>(this.OnRefreshUserMenu));
-		this.Subscribe(2127324410, new Action<object>(this.OnCancel));
-		this.Subscribe(-790448070, new Action<object>(this.OnDeconstruct));
+		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(-111137758, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(2127324410, new Action<object>(this.OnCancel));
+		base.Subscribe(-790448070, new Action<object>(this.OnDeconstruct));
 		if (this.isMarkedForDeconstruction)
 		{
 			this.QueueDeconstruction();
@@ -61,7 +61,7 @@ public class Deconstructable : Workable
 		{
 			if (building.Def.TileLayer != ObjectLayer.NumLayers)
 			{
-				int num = Grid.PosToCell(this.transform.position);
+				int num = Grid.PosToCell(base.transform.position);
 				if (Grid.Objects[num, (int)building.Def.TileLayer] == base.gameObject)
 				{
 					Grid.Objects[num, (int)building.Def.ObjectLayer] = null;
@@ -84,37 +84,36 @@ public class Deconstructable : Workable
 		{
 			KMonoBehaviour.PlaySound3DAtLocation(sound, base.gameObject.transform.position);
 		}
-		this.Trigger(-702296337, this);
+		base.Trigger(-702296337, this);
 	}
 
 	private void TriggerDestroy(Building building, SimHashes element, float mass, float temperature, byte disease_idx, int disease_count)
 	{
-		if (this == null || this.destroyed)
+		if (!(this == null) && !this.destroyed)
 		{
-			return;
+			GameObject gameObject = Deconstructable.SpawnItem(base.transform.position, building.Def, element, mass, temperature, disease_idx, disease_count);
+			gameObject.transform.position += Vector3.up * 0.5f;
+			int num = Grid.PosToCell(gameObject.transform.position);
+			int num2 = Grid.CellAbove(num);
+			Vector2 vector;
+			if ((Grid.IsValidCell(num) && Grid.Solid[num]) || (Grid.IsValidCell(num2) && Grid.Solid[num2]))
+			{
+				vector = Vector2.zero;
+			}
+			else
+			{
+				Vector3 vector2;
+				gameObject.transform.position.x = vector2.x + (global::UnityEngine.Random.value - 0.5f) * Deconstructable.scale.x;
+				vector = Vector2.up * Deconstructable.scale.y;
+			}
+			if (GameComps.Fallers.Has(gameObject))
+			{
+				GameComps.Fallers.Remove(gameObject);
+			}
+			GameComps.Fallers.Add(gameObject, vector);
+			this.destroyed = true;
+			base.gameObject.DeleteObject();
 		}
-		GameObject gameObject = Deconstructable.SpawnItem(this.transform.position, building.Def, element, mass, temperature, disease_idx, disease_count);
-		gameObject.transform.position += Vector3.up * 0.5f;
-		int num = Grid.PosToCell(gameObject.transform.position);
-		int num2 = Grid.CellAbove(num);
-		Vector2 vector;
-		if ((Grid.IsValidCell(num) && Grid.Solid[num]) || (Grid.IsValidCell(num2) && Grid.Solid[num2]))
-		{
-			vector = Vector2.zero;
-		}
-		else
-		{
-			Vector3 vector2;
-			gameObject.transform.position.x = vector2.x + (global::UnityEngine.Random.value - 0.5f) * Deconstructable.scale.x;
-			vector = Vector2.up * Deconstructable.scale.y;
-		}
-		if (GameComps.Fallers.Has(gameObject))
-		{
-			GameComps.Fallers.Remove(gameObject);
-		}
-		GameComps.Fallers.Add(gameObject, vector);
-		this.destroyed = true;
-		base.gameObject.DeleteObject();
 	}
 
 	private void QueueDeconstruction()
@@ -127,7 +126,7 @@ public class Deconstructable : Workable
 			}
 			else
 			{
-				this.chore = new WorkChore<Deconstructable>(Db.Get().ChoreTypes.Deconstruct, this, null, true, null, null, null, true, null, false, default(Tag), null, true, true, true, int.MaxValue);
+				this.chore = new WorkChore<Deconstructable>(Db.Get().ChoreTypes.Deconstruct, this, null, true, null, null, null, true, null, false, default(Tag), null, true, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
 				base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.PendingDeconstruction, this);
 				this.isMarkedForDeconstruction = true;
 				Prioritizable.AddRef(base.gameObject);
@@ -170,7 +169,7 @@ public class Deconstructable : Workable
 				num6 = 400f;
 				num2 -= 400f;
 			}
-			gameObject = element.substance.SpawnResource(Grid.CellToPosCBC(num5, Grid.SceneLayer.Use), num6, src_temperature, disease_idx, disease_count, false, false);
+			gameObject = element.substance.SpawnResource(Grid.CellToPosCBC(num5, Grid.SceneLayer.Ore), num6, src_temperature, disease_idx, disease_count, false, false);
 			num3++;
 		}
 		return gameObject;
@@ -178,21 +177,26 @@ public class Deconstructable : Workable
 
 	private void OnRefreshUserMenu(object data)
 	{
-		if (!this.allowDeconstruction)
+		if (this.allowDeconstruction)
 		{
-			return;
-		}
-		if (this.chore == null)
-		{
-			UserMenu userMenu = this.userMenu;
-			string text = UI.USERMENUACTIONS.DEMOLISH.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_deconstruct", UI.USERMENUACTIONS.DEMOLISH.NAME, new global::System.Action(this.OnDeconstruct), global::Action.NumActions, null, null, null, text, true), 1f);
-		}
-		else
-		{
-			UserMenu userMenu2 = this.userMenu;
-			string text = UI.USERMENUACTIONS.DEMOLISH.TOOLTIP_OFF;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_deconstruct", UI.USERMENUACTIONS.DEMOLISH.NAME_OFF, new global::System.Action(this.OnDeconstruct), global::Action.NumActions, null, null, null, text, true), 1f);
+			if (this.chore == null)
+			{
+				UserMenu userMenu = this.userMenu;
+				string text = "action_deconstruct";
+				string text2 = UI.USERMENUACTIONS.DEMOLISH.NAME;
+				global::System.Action action = new global::System.Action(this.OnDeconstruct);
+				string text3 = UI.USERMENUACTIONS.DEMOLISH.TOOLTIP;
+				userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+			}
+			else
+			{
+				UserMenu userMenu2 = this.userMenu;
+				string text3 = "action_deconstruct";
+				string text2 = UI.USERMENUACTIONS.DEMOLISH.NAME_OFF;
+				global::System.Action action = new global::System.Action(this.OnDeconstruct);
+				string text = UI.USERMENUACTIONS.DEMOLISH.TOOLTIP_OFF;
+				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
+			}
 		}
 	}
 
@@ -232,7 +236,7 @@ public class Deconstructable : Workable
 	[MyCmpAdd]
 	private UserMenu userMenu;
 
-	private Chore chore;
+	private Chore chore = null;
 
 	public bool allowDeconstruction = true;
 
@@ -241,5 +245,5 @@ public class Deconstructable : Workable
 
 	private static Vector2 scale = new Vector2(0.5f, 4f);
 
-	private bool destroyed;
+	private bool destroyed = false;
 }

@@ -43,26 +43,30 @@ namespace NodeEditorFramework.Utilities
 			if (type == null || property == null || method == null || method2 == null)
 			{
 				global::Debug.LogWarning("GUIScaleUtility cannot run on this system! Compability mode enabled. For you that means you're not able to use the Node Editor inside more than one group:( Please PM me (Seneral @UnityForums) so I can figure out what causes this! Thanks!", null);
-				global::Debug.LogWarning(((type != null) ? string.Empty : "GUIClipType is Null, ") + ((property != null) ? string.Empty : "topmostRect is Null, ") + ((method != null) ? string.Empty : "GetTopRect is Null, ") + ((method2 != null) ? string.Empty : "ClipRect is Null, "), null);
+				global::Debug.LogWarning(((type != null) ? "" : "GUIClipType is Null, ") + ((property != null) ? "" : "topmostRect is Null, ") + ((method != null) ? "" : "GetTopRect is Null, ") + ((method2 != null) ? "" : "ClipRect is Null, "), null);
 				GUIScaleUtility.compabilityMode = true;
 				GUIScaleUtility.initiated = true;
-				return;
 			}
-			GUIScaleUtility.GetTopRectDelegate = (Func<Rect>)Delegate.CreateDelegate(typeof(Func<Rect>), method);
-			GUIScaleUtility.topmostRectDelegate = (Func<Rect>)Delegate.CreateDelegate(typeof(Func<Rect>), property.GetGetMethod());
-			if (GUIScaleUtility.GetTopRectDelegate == null || GUIScaleUtility.topmostRectDelegate == null)
+			else
 			{
-				global::Debug.LogWarning("GUIScaleUtility cannot run on this system! Compability mode enabled. For you that means you're not able to use the Node Editor inside more than one group:( Please PM me (Seneral @UnityForums) so I can figure out what causes this! Thanks!", null);
-				global::Debug.LogWarning(((type != null) ? string.Empty : "GUIClipType is Null, ") + ((property != null) ? string.Empty : "topmostRect is Null, ") + ((method != null) ? string.Empty : "GetTopRect is Null, ") + ((method2 != null) ? string.Empty : "ClipRect is Null, "), null);
-				GUIScaleUtility.compabilityMode = true;
-				GUIScaleUtility.initiated = true;
-				return;
+				GUIScaleUtility.GetTopRectDelegate = (Func<Rect>)Delegate.CreateDelegate(typeof(Func<Rect>), method);
+				GUIScaleUtility.topmostRectDelegate = (Func<Rect>)Delegate.CreateDelegate(typeof(Func<Rect>), property.GetGetMethod());
+				if (GUIScaleUtility.GetTopRectDelegate == null || GUIScaleUtility.topmostRectDelegate == null)
+				{
+					global::Debug.LogWarning("GUIScaleUtility cannot run on this system! Compability mode enabled. For you that means you're not able to use the Node Editor inside more than one group:( Please PM me (Seneral @UnityForums) so I can figure out what causes this! Thanks!", null);
+					global::Debug.LogWarning(((type != null) ? "" : "GUIClipType is Null, ") + ((property != null) ? "" : "topmostRect is Null, ") + ((method != null) ? "" : "GetTopRect is Null, ") + ((method2 != null) ? "" : "ClipRect is Null, "), null);
+					GUIScaleUtility.compabilityMode = true;
+					GUIScaleUtility.initiated = true;
+				}
+				else
+				{
+					GUIScaleUtility.currentRectStack = new List<Rect>();
+					GUIScaleUtility.rectStackGroups = new List<List<Rect>>();
+					GUIScaleUtility.GUIMatrices = new List<Matrix4x4>();
+					GUIScaleUtility.adjustedGUILayout = new List<bool>();
+					GUIScaleUtility.initiated = true;
+				}
 			}
-			GUIScaleUtility.currentRectStack = new List<Rect>();
-			GUIScaleUtility.rectStackGroups = new List<List<Rect>>();
-			GUIScaleUtility.GUIMatrices = new List<Matrix4x4>();
-			GUIScaleUtility.adjustedGUILayout = new List<bool>();
-			GUIScaleUtility.initiated = true;
 		}
 
 		public static Vector2 getCurrentScale
@@ -171,31 +175,32 @@ namespace NodeEditorFramework.Utilities
 			if (GUIScaleUtility.rectStackGroups.Count == 0)
 			{
 				global::Debug.LogError("GUIClipHierarchy: BeginNoClip/MoveClipsUp - RestoreClips count not balanced!", null);
-				return;
 			}
-			List<Rect> list = GUIScaleUtility.rectStackGroups[GUIScaleUtility.rectStackGroups.Count - 1];
-			for (int i = 0; i < list.Count; i++)
+			else
 			{
-				GUI.BeginClip(list[i]);
-				GUIScaleUtility.currentRectStack.RemoveAt(GUIScaleUtility.currentRectStack.Count - 1);
+				List<Rect> list = GUIScaleUtility.rectStackGroups[GUIScaleUtility.rectStackGroups.Count - 1];
+				for (int i = 0; i < list.Count; i++)
+				{
+					GUI.BeginClip(list[i]);
+					GUIScaleUtility.currentRectStack.RemoveAt(GUIScaleUtility.currentRectStack.Count - 1);
+				}
+				GUIScaleUtility.rectStackGroups.RemoveAt(GUIScaleUtility.rectStackGroups.Count - 1);
 			}
-			GUIScaleUtility.rectStackGroups.RemoveAt(GUIScaleUtility.rectStackGroups.Count - 1);
 		}
 
 		public static void BeginNewLayout()
 		{
-			if (GUIScaleUtility.compabilityMode)
+			if (!GUIScaleUtility.compabilityMode)
 			{
-				return;
-			}
-			Rect getTopRect = GUIScaleUtility.getTopRect;
-			if (getTopRect != new Rect(-10000f, -10000f, 40000f, 40000f))
-			{
-				GUILayout.BeginArea(new Rect(0f, 0f, getTopRect.width, getTopRect.height));
-			}
-			else
-			{
-				GUILayout.BeginArea(new Rect(0f, 0f, (float)Screen.width, (float)Screen.height));
+				Rect getTopRect = GUIScaleUtility.getTopRect;
+				if (getTopRect != new Rect(-10000f, -10000f, 40000f, 40000f))
+				{
+					GUILayout.BeginArea(new Rect(0f, 0f, getTopRect.width, getTopRect.height));
+				}
+				else
+				{
+					GUILayout.BeginArea(new Rect(0f, 0f, (float)Screen.width, (float)Screen.height));
+				}
 			}
 		}
 
@@ -237,50 +242,70 @@ namespace NodeEditorFramework.Utilities
 
 		public static Vector2 ScaledToGUISpace(Vector2 scaledPosition)
 		{
+			Vector2 vector;
 			if (GUIScaleUtility.rectStackGroups == null || GUIScaleUtility.rectStackGroups.Count == 0)
 			{
-				return scaledPosition;
+				vector = scaledPosition;
 			}
-			List<Rect> list = GUIScaleUtility.rectStackGroups[GUIScaleUtility.rectStackGroups.Count - 1];
-			for (int i = 0; i < list.Count; i++)
+			else
 			{
-				scaledPosition -= list[i].position;
+				List<Rect> list = GUIScaleUtility.rectStackGroups[GUIScaleUtility.rectStackGroups.Count - 1];
+				for (int i = 0; i < list.Count; i++)
+				{
+					scaledPosition -= list[i].position;
+				}
+				vector = scaledPosition;
 			}
-			return scaledPosition;
+			return vector;
 		}
 
 		public static Rect ScaledToGUISpace(Rect scaledRect)
 		{
+			Rect rect;
 			if (GUIScaleUtility.rectStackGroups == null || GUIScaleUtility.rectStackGroups.Count == 0)
 			{
-				return scaledRect;
+				rect = scaledRect;
 			}
-			scaledRect.position = GUIScaleUtility.ScaledToGUISpace(scaledRect.position);
-			return scaledRect;
+			else
+			{
+				scaledRect.position = GUIScaleUtility.ScaledToGUISpace(scaledRect.position);
+				rect = scaledRect;
+			}
+			return rect;
 		}
 
 		public static Vector2 GUIToScaledSpace(Vector2 guiPosition)
 		{
+			Vector2 vector;
 			if (GUIScaleUtility.rectStackGroups == null || GUIScaleUtility.rectStackGroups.Count == 0)
 			{
-				return guiPosition;
+				vector = guiPosition;
 			}
-			List<Rect> list = GUIScaleUtility.rectStackGroups[GUIScaleUtility.rectStackGroups.Count - 1];
-			for (int i = 0; i < list.Count; i++)
+			else
 			{
-				guiPosition += list[i].position;
+				List<Rect> list = GUIScaleUtility.rectStackGroups[GUIScaleUtility.rectStackGroups.Count - 1];
+				for (int i = 0; i < list.Count; i++)
+				{
+					guiPosition += list[i].position;
+				}
+				vector = guiPosition;
 			}
-			return guiPosition;
+			return vector;
 		}
 
 		public static Rect GUIToScaledSpace(Rect guiRect)
 		{
+			Rect rect;
 			if (GUIScaleUtility.rectStackGroups == null || GUIScaleUtility.rectStackGroups.Count == 0)
 			{
-				return guiRect;
+				rect = guiRect;
 			}
-			guiRect.position = GUIScaleUtility.GUIToScaledSpace(guiRect.position);
-			return guiRect;
+			else
+			{
+				guiRect.position = GUIScaleUtility.GUIToScaledSpace(guiRect.position);
+				rect = guiRect;
+			}
+			return rect;
 		}
 
 		public static Vector2 GUIToScreenSpace(Vector2 guiPosition)

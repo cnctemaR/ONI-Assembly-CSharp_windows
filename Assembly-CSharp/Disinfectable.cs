@@ -10,13 +10,13 @@ public class Disinfectable : Workable
 		this.faceTargetWhenWorking = true;
 		this.synchronizeAnims = false;
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Disinfecting;
-		this.Subscribe(2127324410, new Action<object>(this.OnCancel));
+		base.Subscribe(2127324410, new Action<object>(this.OnCancel));
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		if (this.isMarkedForDisinfect)
 		{
 			this.MarkForDisinfect(true);
@@ -83,7 +83,7 @@ public class Disinfectable : Workable
 		{
 			this.isMarkedForDisinfect = true;
 			Prioritizable.AddRef(base.gameObject);
-			this.chore = new WorkChore<Disinfectable>(Db.Get().ChoreTypes.Disinfect, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, int.MaxValue);
+			this.chore = new WorkChore<Disinfectable>(Db.Get().ChoreTypes.Disinfect, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
 			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.MarkedForDisinfection, this);
 		}
 	}
@@ -105,8 +105,6 @@ public class Disinfectable : Workable
 		this.CancelDisinfection();
 	}
 
-	private const float MAX_WORK_TIME = 10f;
-
 	[MyCmpGet]
 	private UserMenu userMenu;
 
@@ -114,6 +112,8 @@ public class Disinfectable : Workable
 
 	[Serialize]
 	private bool isMarkedForDisinfect;
+
+	private const float MAX_WORK_TIME = 10f;
 
 	private float diseasePerSecond;
 }

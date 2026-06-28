@@ -5,20 +5,8 @@ using STRINGS;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerable.StatesInstance>, IWiltCause, IGameObjectEffectDescriptor
+public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerable.StatesInstance>, IGameObjectEffectDescriptor, IWiltCause
 {
-	WiltCondition.Condition[] IWiltCause.Conditions
-	{
-		get
-		{
-			return new WiltCondition.Condition[]
-			{
-				WiltCondition.Condition.Darkness,
-				WiltCondition.Condition.IlluminationComfort
-			};
-		}
-	}
-
 	private OccupyArea occupyArea
 	{
 		get
@@ -56,26 +44,48 @@ public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerab
 
 	public bool IsCellSafe(int cell)
 	{
+		bool flag;
 		if (this.prefersDarkness)
 		{
-			return Grid.LightCount[cell] == 0;
+			flag = Grid.LightCount[cell] == 0;
 		}
-		return Grid.LightCount[cell] > 0;
+		else
+		{
+			flag = Grid.LightCount[cell] > 0;
+		}
+		return flag;
+	}
+
+	WiltCondition.Condition[] IWiltCause.Conditions
+	{
+		get
+		{
+			return new WiltCondition.Condition[]
+			{
+				WiltCondition.Condition.Darkness,
+				WiltCondition.Condition.IlluminationComfort
+			};
+		}
 	}
 
 	public string WiltStateString
 	{
 		get
 		{
+			string text;
 			if (base.smi.IsInsideState(base.smi.sm.too_bright))
 			{
-				return Db.Get().CreatureStatusItems.Crop_Too_Bright.resolveStringCallback(CREATURES.STATUSITEMS.CROP_TOO_BRIGHT.NAME, this);
+				text = Db.Get().CreatureStatusItems.Crop_Too_Bright.resolveStringCallback(CREATURES.STATUSITEMS.CROP_TOO_BRIGHT.NAME, this);
 			}
-			if (base.smi.IsInsideState(base.smi.sm.too_dark))
+			else if (base.smi.IsInsideState(base.smi.sm.too_dark))
 			{
-				return Db.Get().CreatureStatusItems.Crop_Too_Dark.resolveStringCallback(CREATURES.STATUSITEMS.CROP_TOO_DARK.NAME, this);
+				text = Db.Get().CreatureStatusItems.Crop_Too_Dark.resolveStringCallback(CREATURES.STATUSITEMS.CROP_TOO_DARK.NAME, this);
 			}
-			return string.Empty;
+			else
+			{
+				text = "";
+			}
+			return text;
 		}
 	}
 
@@ -86,24 +96,29 @@ public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerab
 
 	public List<Descriptor> GetDescriptors(GameObject go)
 	{
+		List<Descriptor> list;
 		if (this.prefersDarkness)
 		{
-			return new List<Descriptor>
+			list = new List<Descriptor>
 			{
 				new Descriptor(UI.GAMEOBJECTEFFECTS.REQUIRES_DARKNESS, UI.GAMEOBJECTEFFECTS.TOOLTIPS.REQUIRES_DARKNESS, Descriptor.DescriptorType.Requirement, false)
 			};
 		}
-		return new List<Descriptor>
+		else
 		{
-			new Descriptor(UI.GAMEOBJECTEFFECTS.REQUIRES_LIGHT, UI.GAMEOBJECTEFFECTS.TOOLTIPS.REQUIRES_LIGHT, Descriptor.DescriptorType.Requirement, false)
-		};
+			list = new List<Descriptor>
+			{
+				new Descriptor(UI.GAMEOBJECTEFFECTS.REQUIRES_LIGHT, UI.GAMEOBJECTEFFECTS.TOOLTIPS.REQUIRES_LIGHT, Descriptor.DescriptorType.Requirement, false)
+			};
+		}
+		return list;
 	}
 
 	private OccupyArea _occupyArea;
 
 	private SchedulerHandle handle;
 
-	public bool prefersDarkness;
+	public bool prefersDarkness = false;
 
 	public class StatesInstance : GameStateMachine<IlluminationVulnerable.States, IlluminationVulnerable.StatesInstance, IlluminationVulnerable, object>.GameInstance
 	{
@@ -112,7 +127,7 @@ public class IlluminationVulnerable : StateMachineComponent<IlluminationVulnerab
 		{
 		}
 
-		public bool hasMaturity;
+		public bool hasMaturity = false;
 	}
 
 	public class States : GameStateMachine<IlluminationVulnerable.States, IlluminationVulnerable.StatesInstance, IlluminationVulnerable>

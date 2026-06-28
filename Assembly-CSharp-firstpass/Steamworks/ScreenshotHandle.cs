@@ -25,16 +25,6 @@ namespace Steamworks
 			return this.m_ScreenshotHandle.GetHashCode();
 		}
 
-		public bool Equals(ScreenshotHandle other)
-		{
-			return this.m_ScreenshotHandle == other.m_ScreenshotHandle;
-		}
-
-		public int CompareTo(ScreenshotHandle other)
-		{
-			return this.m_ScreenshotHandle.CompareTo(other.m_ScreenshotHandle);
-		}
-
 		public static bool operator ==(ScreenshotHandle x, ScreenshotHandle y)
 		{
 			return x.m_ScreenshotHandle == y.m_ScreenshotHandle;
@@ -53,6 +43,16 @@ namespace Steamworks
 		public static explicit operator uint(ScreenshotHandle that)
 		{
 			return that.m_ScreenshotHandle;
+		}
+
+		public bool Equals(ScreenshotHandle other)
+		{
+			return this.m_ScreenshotHandle == other.m_ScreenshotHandle;
+		}
+
+		public int CompareTo(ScreenshotHandle other)
+		{
+			return this.m_ScreenshotHandle.CompareTo(other.m_ScreenshotHandle);
 		}
 
 		public static readonly ScreenshotHandle Invalid = new ScreenshotHandle(0U);

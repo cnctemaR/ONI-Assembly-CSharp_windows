@@ -17,19 +17,27 @@ namespace Klei
 		public static float CalculateEnergyFlow(int cell, float dest_temp, float dest_specific_heat_capacity, float dest_thermal_conductivity, float surface_area = 1f, float thickness = 1f)
 		{
 			float mass = Grid.Cell[cell].mass;
+			float num;
 			if (mass <= 0f)
 			{
-				return 0f;
+				num = 0f;
 			}
-			Element element = Grid.Element[cell];
-			if (element.IsVacuum)
+			else
 			{
-				return 0f;
+				Element element = Grid.Element[cell];
+				if (element.IsVacuum)
+				{
+					num = 0f;
+				}
+				else
+				{
+					float num2 = Grid.Temperature[cell];
+					float thermalConductivity = element.thermalConductivity;
+					float num3 = SimUtil.CalculateEnergyFlow(num2, thermalConductivity, dest_temp, dest_thermal_conductivity, surface_area, thickness);
+					num = num3 * 0.001f;
+				}
 			}
-			float num = Grid.Temperature[cell];
-			float thermalConductivity = element.thermalConductivity;
-			float num2 = SimUtil.CalculateEnergyFlow(num, thermalConductivity, dest_temp, dest_thermal_conductivity, surface_area, thickness);
-			return num2 * 0.001f;
+			return num;
 		}
 
 		public static float ClampEnergyTransfer(float dt, float source_temp, float source_mass, float source_specific_heat_capacity, float dest_temp, float dest_mass, float dest_specific_heat_capacity, float max_watts_transferred)
@@ -71,11 +79,16 @@ namespace Klei
 
 		public static float EnergyFlowToTemperatureDelta(float kilojoules, float specific_heat_capacity, float mass)
 		{
+			float num;
 			if (kilojoules * specific_heat_capacity * mass == 0f)
 			{
-				return 0f;
+				num = 0f;
 			}
-			return kilojoules / (specific_heat_capacity * mass);
+			else
+			{
+				num = kilojoules / (specific_heat_capacity * mass);
+			}
+			return num;
 		}
 
 		public static float CalculateFinalTemperature(float mass1, float temp1, float mass2, float temp2)

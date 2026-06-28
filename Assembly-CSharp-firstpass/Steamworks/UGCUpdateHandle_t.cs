@@ -25,16 +25,6 @@ namespace Steamworks
 			return this.m_UGCUpdateHandle.GetHashCode();
 		}
 
-		public bool Equals(UGCUpdateHandle_t other)
-		{
-			return this.m_UGCUpdateHandle == other.m_UGCUpdateHandle;
-		}
-
-		public int CompareTo(UGCUpdateHandle_t other)
-		{
-			return this.m_UGCUpdateHandle.CompareTo(other.m_UGCUpdateHandle);
-		}
-
 		public static bool operator ==(UGCUpdateHandle_t x, UGCUpdateHandle_t y)
 		{
 			return x.m_UGCUpdateHandle == y.m_UGCUpdateHandle;
@@ -53,6 +43,16 @@ namespace Steamworks
 		public static explicit operator ulong(UGCUpdateHandle_t that)
 		{
 			return that.m_UGCUpdateHandle;
+		}
+
+		public bool Equals(UGCUpdateHandle_t other)
+		{
+			return this.m_UGCUpdateHandle == other.m_UGCUpdateHandle;
+		}
+
+		public int CompareTo(UGCUpdateHandle_t other)
+		{
+			return this.m_UGCUpdateHandle.CompareTo(other.m_UGCUpdateHandle);
 		}
 
 		public static readonly UGCUpdateHandle_t Invalid = new UGCUpdateHandle_t(ulong.MaxValue);

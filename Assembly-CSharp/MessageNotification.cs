@@ -5,11 +5,14 @@ public class MessageNotification : Notification
 {
 	public MessageNotification(Message m)
 	{
+		string title = m.GetTitle();
+		NotificationType notificationType = NotificationType.Messages;
+		HashedString invalid = HashedString.Invalid;
 		string sound = m.GetSound();
-		base..ctor(m.GetTitle(), NotificationType.Messages, HashedString.Invalid, null, null, false, 0f, null, null, sound);
-		MessageNotification <>f__this = this;
+		base..ctor(title, notificationType, invalid, null, null, false, 0f, null, null, sound);
+		MessageNotification $this = this;
 		this.message = m;
-		base.ToolTip = (List<Notification> notifications, object data) => <>f__this.OnToolTip(notifications, m.GetTooltip());
+		base.ToolTip = (List<Notification> notifications, object data) => $this.OnToolTip(notifications, m.GetTooltip());
 		this.hasLocation = false;
 	}
 

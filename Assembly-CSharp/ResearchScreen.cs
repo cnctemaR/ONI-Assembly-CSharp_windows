@@ -28,7 +28,7 @@ public class ResearchScreen : KModalScreen
 			this.pointDisplayMap[researchType.id] = Util.KInstantiateUI(this.pointDisplayCountPrefab, this.pointDisplayContainer, true).GetComponentInChildren<LocText>();
 			this.pointDisplayMap[researchType.id].text = Research.Instance.globalPointInventory.PointsByTypeID[researchType.id].ToString();
 			this.pointDisplayMap[researchType.id].transform.parent.GetComponent<ToolTip>().SetSimpleTooltip(researchType.description);
-			this.pointDisplayMap[researchType.id].transform.parent.GetComponentInChildren<Image>().color = researchType.color;
+			this.pointDisplayMap[researchType.id].transform.parent.GetComponentInChildren<Image>().sprite = researchType.sprite;
 		}
 		this.pointDisplayContainer.transform.parent.gameObject.SetActive(Research.Instance.UseGlobalPointInventory);
 		this.entryMap = new Dictionary<Tech, ResearchEntry>();
@@ -74,12 +74,19 @@ public class ResearchScreen : KModalScreen
 							}
 							list2.Add(edge.path[edge.path.Count - 1]);
 							list2.Add(edge.SrcTarget[1]);
-							goto IL_039D;
+							break;
 						}
+						case ResourceTreeNode.Edge.EdgeType.ArcEdge:
+						case ResourceTreeNode.Edge.EdgeType.SplineEdge:
+							goto IL_03A6;
+						default:
+							goto IL_03A6;
 						}
+						goto IL_03BA;
+						IL_03A6:
 						list2.AddRange(edge.path);
 					}
-					IL_039D:;
+					IL_03BA:;
 				}
 			}
 		}
@@ -116,26 +123,36 @@ public class ResearchScreen : KModalScreen
 
 	public Vector3 GetEntryPosition(Tech tech)
 	{
+		Vector3 vector;
 		if (!this.entryMap.ContainsKey(tech))
 		{
 			global::Debug.LogError("The Tech provided was not present in the dictionary", null);
-			return Vector3.zero;
+			vector = Vector3.zero;
 		}
-		return this.entryMap[tech].transform.position;
+		else
+		{
+			vector = this.entryMap[tech].transform.position;
+		}
+		return vector;
 	}
 
 	public ResearchEntry GetEntry(Tech tech)
 	{
+		ResearchEntry researchEntry;
 		if (this.entryMap == null)
 		{
-			return null;
+			researchEntry = null;
 		}
-		if (!this.entryMap.ContainsKey(tech))
+		else if (!this.entryMap.ContainsKey(tech))
 		{
 			global::Debug.LogError("The Tech provided was not present in the dictionary", null);
-			return null;
+			researchEntry = null;
 		}
-		return this.entryMap[tech];
+		else
+		{
+			researchEntry = this.entryMap[tech];
+		}
+		return researchEntry;
 	}
 
 	public void SetEntryPercentage(Tech tech, float percent)
@@ -239,9 +256,12 @@ public class ResearchScreen : KModalScreen
 
 	private void SetActiveResearch(Tech newResearch)
 	{
-		if (newResearch != this.currentResearch && this.currentResearch != null)
+		if (newResearch != this.currentResearch)
 		{
-			this.SelectAllEntries(this.currentResearch, false);
+			if (this.currentResearch != null)
+			{
+				this.SelectAllEntries(this.currentResearch, false);
+			}
 		}
 		this.currentResearch = newResearch;
 		if (this.currentResearch != null)
@@ -259,10 +279,13 @@ public class ResearchScreen : KModalScreen
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (!e.Consumed && (e.TryConsume(global::Action.MouseRight) || e.TryConsume(global::Action.Escape)))
+		if (!e.Consumed)
 		{
-			ManagementMenu.Instance.CloseAll();
-			return;
+			if (e.TryConsume(global::Action.MouseRight) || e.TryConsume(global::Action.Escape))
+			{
+				ManagementMenu.Instance.CloseAll();
+				return;
+			}
 		}
 		base.OnKeyDown(e);
 	}

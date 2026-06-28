@@ -9,23 +9,24 @@ namespace UnityEngine
 	[RequiredByNativeCode]
 	public class MonoBehaviour : Behaviour
 	{
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern MonoBehaviour();
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void Internal_CancelInvokeAll();
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern bool Internal_IsInvokingAll();
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void Invoke(string methodName, float time);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void InvokeRepeating(string methodName, float time, float repeatRate);
 
@@ -34,11 +35,11 @@ namespace UnityEngine
 			this.Internal_CancelInvokeAll();
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void CancelInvoke(string methodName);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool IsInvoking(string methodName);
 
@@ -49,14 +50,20 @@ namespace UnityEngine
 
 		public Coroutine StartCoroutine(IEnumerator routine)
 		{
-			return this.StartCoroutine_Auto(routine);
+			return this.StartCoroutine_Auto_Internal(routine);
 		}
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Coroutine StartCoroutine_Auto(IEnumerator routine);
+		[Obsolete("StartCoroutine_Auto has been deprecated. Use StartCoroutine instead (UnityUpgradable) -> StartCoroutine([mscorlib] System.Collections.IEnumerator)", false)]
+		public Coroutine StartCoroutine_Auto(IEnumerator routine)
+		{
+			return this.StartCoroutine(routine);
+		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern Coroutine StartCoroutine_Auto_Internal(IEnumerator routine);
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Coroutine StartCoroutine(string methodName, [DefaultValue("null")] object value);
 
@@ -67,7 +74,7 @@ namespace UnityEngine
 			return this.StartCoroutine(methodName, obj);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void StopCoroutine(string methodName);
 
@@ -81,15 +88,15 @@ namespace UnityEngine
 			this.StopCoroutine_Auto(routine);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void StopCoroutineViaEnumerator_Auto(IEnumerator routine);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern void StopCoroutine_Auto(Coroutine routine);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void StopAllCoroutines();
 
@@ -100,10 +107,10 @@ namespace UnityEngine
 
 		public extern bool useGUILayout
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}

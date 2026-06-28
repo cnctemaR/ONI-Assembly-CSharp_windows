@@ -14,9 +14,9 @@ namespace Klei.AI
 			base.AddDiseaseComponent(new CommonSickEffectDisease());
 			base.AddDiseaseComponent(new AttributeModifierDisease(new AttributeModifier[]
 			{
-				new AttributeModifier("BladderDelta", 1.25f, DUPLICANTS.DISEASES.FOODPOISONING.NAME, false, false),
-				new AttributeModifier("ToiletEfficiency", -0.4f, DUPLICANTS.DISEASES.FOODPOISONING.NAME, false, false),
-				new AttributeModifier("StaminaDelta", -2.5f, DUPLICANTS.DISEASES.FOODPOISONING.NAME, false, false)
+				new AttributeModifier("BladderDelta", 1.25f, DUPLICANTS.DISEASES.FOODPOISONING.NAME, false, false, true),
+				new AttributeModifier("ToiletEfficiency", -0.4f, DUPLICANTS.DISEASES.FOODPOISONING.NAME, false, false, true),
+				new AttributeModifier("StaminaDelta", -2.5f, DUPLICANTS.DISEASES.FOODPOISONING.NAME, false, false, true)
 			}));
 			base.AddDiseaseComponent(new FoodPoisoning.FoodPoisoningComponent());
 		}
@@ -33,7 +33,7 @@ namespace Klei.AI
 				overPopulationHalfLife = new float?(3000f),
 				minDiffusionCount = new int?(1000),
 				diffusionScale = new float?(0.001f),
-				minDiffusionInfestationTickCount = 1
+				minDiffusionInfestationTickCount = new byte?(1)
 			});
 			base.AddGrowthRule(new StateGrowthRule(Element.State.Solid)
 			{
@@ -168,20 +168,19 @@ namespace Klei.AI
 					ChoreProvider chore_provider = this.go.GetComponent<ChoreProvider>();
 					this.vomitHandle = GameScheduler.Instance.Schedule("Vomit", 200f, delegate(object data)
 					{
-						if (chore_provider == null)
+						if (!(chore_provider == null))
 						{
-							return;
-						}
-						if (!this.diseaseInstance.IsDoctored)
-						{
-							this.chore = new VomitChore(Db.Get().ChoreTypes.Vomit, chore_provider, Db.Get().DuplicantStatusItems.Vomiting, this.vomiting, delegate(Chore unused)
+							if (!this.diseaseInstance.IsDoctored)
+							{
+								this.chore = new VomitChore(Db.Get().ChoreTypes.Vomit, chore_provider, Db.Get().DuplicantStatusItems.Vomiting, this.vomiting, delegate(Chore unused)
+								{
+									this.StartChore();
+								});
+							}
+							else
 							{
 								this.StartChore();
-							});
-						}
-						else
-						{
-							this.StartChore();
+							}
 						}
 					}, null, null);
 				}

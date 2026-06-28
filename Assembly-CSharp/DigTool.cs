@@ -12,23 +12,22 @@ public class DigTool : DragTool
 	public override void Update()
 	{
 		this.cell_new = Grid.PosToCell(Camera.main.ScreenToWorldPoint(Input.mousePosition));
-		if (!Grid.IsValidCell(this.cell_new))
+		if (Grid.IsValidCell(this.cell_new))
 		{
-			return;
-		}
-		if (!HoverTextScreen.Instance.IsVisible)
-		{
-			this.hoverScreenUpdate.Prime();
-		}
-		else if (this.hoverScreenUpdate.tick() || this.cell_old != this.cell_new)
-		{
-			if (this.hoverText == null)
+			if (!HoverTextScreen.Instance.IsVisible)
 			{
-				this.hoverText = base.gameObject.GetComponent<HoverTextConfiguration>();
+				this.hoverScreenUpdate.Prime();
 			}
-			this.hoverText.UpdateHoverElements(null);
+			else if (this.hoverScreenUpdate.tick() || this.cell_old != this.cell_new)
+			{
+				if (this.hoverText == null)
+				{
+					this.hoverText = base.gameObject.GetComponent<HoverTextConfiguration>();
+				}
+				this.hoverText.UpdateHoverElements(null);
+			}
+			this.cell_old = this.cell_new;
 		}
-		this.cell_old = this.cell_new;
 	}
 
 	protected override void OnDragTool(int cell, int distFromOrigin)
@@ -43,9 +42,12 @@ public class DigTool : DragTool
 					break;
 				}
 				OccupyArea area = uprootable.area;
-				if (area != null && area.CheckIsOccupying(cell))
+				if (area != null)
 				{
-					uprootable.MarkForUproot();
+					if (area.CheckIsOccupying(cell))
+					{
+						uprootable.MarkForUproot();
+					}
 				}
 			}
 		}
@@ -72,9 +74,10 @@ public class DigTool : DragTool
 
 	public static GameObject PlaceDig(int cell, int animationDelay = 0)
 	{
+		GameObject gameObject2;
 		if (Grid.Solid[cell] && !Grid.Foundation[cell] && Grid.Objects[cell, 7] == null)
 		{
-			for (int i = 0; i < 25; i++)
+			for (int i = 0; i < 28; i++)
 			{
 				if (Grid.Objects[cell, i] != null && Grid.Objects[cell, i].GetComponent<Constructable>() != null)
 				{
@@ -88,13 +91,17 @@ public class DigTool : DragTool
 			vector.z += depthBias;
 			gameObject.transform.SetPosition(vector);
 			gameObject.GetComponentInChildren<EasingAnimations>().PlayAnimation("ScaleUp", Mathf.Max(0f, (float)animationDelay * 0.02f));
-			return gameObject;
+			gameObject2 = gameObject;
 		}
-		if (Grid.Objects[cell, 7] != null)
+		else if (Grid.Objects[cell, 7] != null)
 		{
-			return Grid.Objects[cell, 7];
+			gameObject2 = Grid.Objects[cell, 7];
 		}
-		return null;
+		else
+		{
+			gameObject2 = null;
+		}
+		return gameObject2;
 	}
 
 	protected override void OnActivateTool()

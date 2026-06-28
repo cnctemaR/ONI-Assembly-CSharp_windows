@@ -26,6 +26,9 @@ public enum ObjectLayer
 	WireTile,
 	ReplacementWire,
 	WireConnectors,
+	LogicGates,
+	LogicWires,
+	LogicWiresTiling,
 	AttachableBuilding,
 	NumLayers
 }

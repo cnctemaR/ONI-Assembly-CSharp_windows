@@ -4,7 +4,7 @@ using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 [Serializable]
-public struct HashedString : ISerializationCallbackReceiver, IComparable<HashedString>, IEquatable<HashedString>
+public struct HashedString : IComparable<HashedString>, IEquatable<HashedString>, ISerializationCallbackReceiver
 {
 	public HashedString(string name)
 	{
@@ -14,6 +14,11 @@ public struct HashedString : ISerializationCallbackReceiver, IComparable<HashedS
 	public HashedString(int initial_hash)
 	{
 		this.hash = initial_hash;
+	}
+
+	public static implicit operator HashedString(string s)
+	{
+		return new HashedString(s);
 	}
 
 	public bool isValid
@@ -43,15 +48,20 @@ public struct HashedString : ISerializationCallbackReceiver, IComparable<HashedS
 
 	public int CompareTo(HashedString obj)
 	{
+		int num;
 		if (this.hash < obj.hash)
 		{
-			return -1;
+			num = -1;
 		}
-		if (this.hash > obj.hash)
+		else if (this.hash > obj.hash)
 		{
-			return 1;
+			num = 1;
 		}
-		return 0;
+		else
+		{
+			num = 0;
+		}
+		return num;
 	}
 
 	public override bool Equals(object obj)
@@ -68,6 +78,16 @@ public struct HashedString : ISerializationCallbackReceiver, IComparable<HashedS
 	public override int GetHashCode()
 	{
 		return this.hash;
+	}
+
+	public static bool operator ==(HashedString x, HashedString y)
+	{
+		return x.hash == y.hash;
+	}
+
+	public static bool operator !=(HashedString x, HashedString y)
+	{
+		return x.hash != y.hash;
 	}
 
 	public override string ToString()
@@ -88,24 +108,9 @@ public struct HashedString : ISerializationCallbackReceiver, IComparable<HashedS
 		return this.hash != 0;
 	}
 
-	public static implicit operator HashedString(string s)
-	{
-		return new HashedString(s);
-	}
-
-	public static bool operator ==(HashedString x, HashedString y)
-	{
-		return x.hash == y.hash;
-	}
-
-	public static bool operator !=(HashedString x, HashedString y)
-	{
-		return x.hash != y.hash;
-	}
-
 	public static HashedString Invalid = default(HashedString);
 
-	[Serialize]
 	[SerializeField]
+	[Serialize]
 	private int hash;
 }

@@ -21,13 +21,12 @@ public class CopySettingsTool : DragTool
 
 	protected override void OnDragTool(int cell, int distFromOrigin)
 	{
-		if (this.sourceGameObject == null)
+		if (!(this.sourceGameObject == null))
 		{
-			return;
-		}
-		if (Grid.IsValidCell(cell))
-		{
-			CopyBuildingSettings.ApplyCopy(cell, this.sourceGameObject);
+			if (Grid.IsValidCell(cell))
+			{
+				CopyBuildingSettings.ApplyCopy(cell, this.sourceGameObject);
+			}
 		}
 	}
 

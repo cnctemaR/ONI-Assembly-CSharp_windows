@@ -41,7 +41,7 @@ namespace UnityEngine
 
 		public IntPtr GetNativeRenderBufferPtr()
 		{
-			return this.m_BufferPtr;
+			return RenderBufferHelper.GetNativeRenderBufferPtr(this.m_BufferPtr);
 		}
 
 		internal int m_RenderTextureInstanceID;

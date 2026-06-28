@@ -11,12 +11,17 @@ public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentMana
 
 	public bool Has(object go)
 	{
+		bool flag;
 		if (this.cleanupList.Exists((KComponentManager<T>.CleanupInfo x) => x.instance == go))
 		{
-			return false;
+			flag = false;
 		}
-		HandleVector<int>.Handle handle = this.GetHandle(go);
-		return !(handle == HandleVector<int>.InvalidHandle);
+		else
+		{
+			HandleVector<int>.Handle handle = this.GetHandle(go);
+			flag = !(handle == HandleVector<int>.InvalidHandle);
+		}
+		return flag;
 	}
 
 	protected HandleVector<int>.Handle InternalAddComponent(object instance, T cmp_values)
@@ -156,7 +161,7 @@ public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentMana
 	{
 	}
 
-	virtual int IComponentManager.get_Count()
+	int IComponentManager.get_Count()
 	{
 		return base.Count;
 	}

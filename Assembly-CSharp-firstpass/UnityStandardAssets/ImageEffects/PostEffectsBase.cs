@@ -9,17 +9,18 @@ namespace UnityStandardAssets.ImageEffects
 	{
 		protected Material CheckShaderAndCreateMaterial(Shader s, Material m2Create)
 		{
+			Material material;
 			if (!s)
 			{
 				global::Debug.Log("Missing shader in " + this.ToString(), null);
 				base.enabled = false;
-				return null;
+				material = null;
 			}
-			if (s.isSupported && m2Create && m2Create.shader == s)
+			else if (s.isSupported && m2Create && m2Create.shader == s)
 			{
-				return m2Create;
+				material = m2Create;
 			}
-			if (!s.isSupported)
+			else if (!s.isSupported)
 			{
 				this.NotSupported();
 				global::Debug.Log(string.Concat(new string[]
@@ -30,39 +31,54 @@ namespace UnityStandardAssets.ImageEffects
 					this.ToString(),
 					" is not supported on this platform!"
 				}), null);
-				return null;
+				material = null;
 			}
-			m2Create = new Material(s);
-			m2Create.hideFlags = HideFlags.DontSave;
-			if (m2Create)
+			else
 			{
-				return m2Create;
+				m2Create = new Material(s);
+				m2Create.hideFlags = HideFlags.DontSave;
+				if (m2Create)
+				{
+					material = m2Create;
+				}
+				else
+				{
+					material = null;
+				}
 			}
-			return null;
+			return material;
 		}
 
 		protected Material CreateMaterial(Shader s, Material m2Create)
 		{
+			Material material;
 			if (!s)
 			{
 				global::Debug.Log("Missing shader in " + this.ToString(), null);
-				return null;
+				material = null;
 			}
-			if (m2Create && m2Create.shader == s && s.isSupported)
+			else if (m2Create && m2Create.shader == s && s.isSupported)
 			{
-				return m2Create;
+				material = m2Create;
 			}
-			if (!s.isSupported)
+			else if (!s.isSupported)
 			{
-				return null;
+				material = null;
 			}
-			m2Create = new Material(s);
-			m2Create.hideFlags = HideFlags.DontSave;
-			if (m2Create)
+			else
 			{
-				return m2Create;
+				m2Create = new Material(s);
+				m2Create.hideFlags = HideFlags.DontSave;
+				if (m2Create)
+				{
+					material = m2Create;
+				}
+				else
+				{
+					material = null;
+				}
 			}
-			return null;
+			return material;
 		}
 
 		private void OnEnable()
@@ -91,35 +107,45 @@ namespace UnityStandardAssets.ImageEffects
 			this.isSupported = true;
 			this.supportHDRTextures = SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGBHalf);
 			this.supportDX11 = SystemInfo.graphicsShaderLevel >= 50 && SystemInfo.supportsComputeShaders;
-			if (!SystemInfo.supportsImageEffects || !SystemInfo.supportsRenderTextures)
+			bool flag;
+			if (!SystemInfo.supportsImageEffects)
 			{
 				this.NotSupported();
-				return false;
+				flag = false;
 			}
-			if (needDepth && !SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.Depth))
+			else if (needDepth && !SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.Depth))
 			{
 				this.NotSupported();
-				return false;
+				flag = false;
 			}
-			if (needDepth)
+			else
 			{
-				base.GetComponent<Camera>().depthTextureMode |= DepthTextureMode.Depth;
+				if (needDepth)
+				{
+					base.GetComponent<Camera>().depthTextureMode |= DepthTextureMode.Depth;
+				}
+				flag = true;
 			}
-			return true;
+			return flag;
 		}
 
 		protected bool CheckSupport(bool needDepth, bool needHdr)
 		{
+			bool flag;
 			if (!this.CheckSupport(needDepth))
 			{
-				return false;
+				flag = false;
 			}
-			if (needHdr && !this.supportHDRTextures)
+			else if (needHdr && !this.supportHDRTextures)
 			{
 				this.NotSupported();
-				return false;
+				flag = false;
 			}
-			return true;
+			else
+			{
+				flag = true;
+			}
+			return flag;
 		}
 
 		public bool Dx11Support()
@@ -142,12 +168,17 @@ namespace UnityStandardAssets.ImageEffects
 				this.ToString(),
 				" is not part of the Unity 3.2+ effects suite anymore. For best performance and quality, please ensure you are using the latest Standard Assets Image Effects (Pro only) package."
 			}), null);
+			bool flag;
 			if (!s.isSupported)
 			{
 				this.NotSupported();
-				return false;
+				flag = false;
 			}
-			return false;
+			else
+			{
+				flag = false;
+			}
+			return flag;
 		}
 
 		protected void NotSupported()
@@ -178,7 +209,7 @@ namespace UnityStandardAssets.ImageEffects
 					num2 = 1f;
 				}
 				float num3 = 0f;
-				float num4 = 0f + 1f / ((float)dest.width * 1f);
+				float num4 = 1f / ((float)dest.width * 1f);
 				float num5 = 0f;
 				float num6 = 1f;
 				GL.Begin(7);
@@ -205,7 +236,7 @@ namespace UnityStandardAssets.ImageEffects
 				num3 = 0f;
 				num4 = 1f;
 				num5 = 0f;
-				num6 = 0f + 1f / ((float)dest.height * 1f);
+				num6 = 1f / ((float)dest.height * 1f);
 				GL.TexCoord2(0f, num);
 				GL.Vertex3(num3, num5, 0.1f);
 				GL.TexCoord2(1f, num);
@@ -233,7 +264,7 @@ namespace UnityStandardAssets.ImageEffects
 
 		protected bool supportHDRTextures = true;
 
-		protected bool supportDX11;
+		protected bool supportDX11 = false;
 
 		protected bool isSupported = true;
 	}

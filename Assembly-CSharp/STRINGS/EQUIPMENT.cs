@@ -45,22 +45,22 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Prospectolator";
 
-				public static LocString DESC = string.Empty;
+				public static LocString DESC = "";
 
-				public static LocString EFFECT = string.Empty;
+				public static LocString EFFECT = "";
 
-				public static LocString RECIPE_DESC = string.Empty;
+				public static LocString RECIPE_DESC = "";
 			}
 
 			public class QUARRYING_GUN
 			{
 				public static LocString NAME = "Quarrying Gun";
 
-				public static LocString DESC = string.Empty;
+				public static LocString DESC = "";
 
-				public static LocString EFFECT = string.Empty;
+				public static LocString EFFECT = "";
 
-				public static LocString RECIPE_DESC = string.Empty;
+				public static LocString RECIPE_DESC = "";
 			}
 
 			public class COOL_VEST
@@ -108,7 +108,7 @@ namespace STRINGS
 
 				public static LocString GENERICNAME = "Equipment";
 
-				public static LocString DESC = string.Empty;
+				public static LocString DESC = "";
 
 				public static LocString EFFECT = "Allows Duplicants to breathe in hazardous environments.\n\nDoes not work when submerged in <style=\"liquid\">Liquid</style>.";
 
@@ -121,7 +121,7 @@ namespace STRINGS
 
 				public static LocString GENERICNAME = "Equipment";
 
-				public static LocString DESC = string.Empty;
+				public static LocString DESC = "";
 
 				public static LocString EFFECT = "Allows Duplicants to breathe while submerged in <style=\"liquid\">Liquid</style>.\n\nDoes not work outside of liquid.";
 

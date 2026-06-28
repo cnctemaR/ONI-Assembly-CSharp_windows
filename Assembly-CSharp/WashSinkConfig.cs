@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -7,8 +6,19 @@ public class WashSinkConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER0;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("WashSink", 2, 3, "wash_sink_kanim", 50f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.RAW_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER1, tier);
+		string text = "WashSink";
+		int num = 2;
+		int num2 = 3;
+		string text2 = "wash_sink_kanim";
+		float num3 = 50f;
+		int num4 = 30;
+		float num5 = 30f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
+		string[] raw_METALS = MATERIALS.RAW_METALS;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER0;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_METALS, num6, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER1, tier2);
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.OutputConduitType = ConduitType.Liquid;
 		buildingDef.ViewMode = SimViewMode.LiquidVentMap;
@@ -44,9 +54,8 @@ public class WashSinkConfig : IBuildingConfig
 		conduitDispenser.elementFilter = new SimHashes[] { SimHashes.Water };
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 25f;
-		storage.disableOnStore = true;
 		storage.doDiseaseTransfer = false;
-		storage.defaultStoredItemModifers = WashSinkConfig.StoredItemModifiers;
+		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		go.UpdateComponentRequirement<LoopingSounds>(true);
 	}
 
@@ -64,10 +73,4 @@ public class WashSinkConfig : IBuildingConfig
 	public const int USES_PER_FLUSH = 40;
 
 	public const float WORK_TIME = 5f;
-
-	private static readonly List<Storage.StoredItemModifier> StoredItemModifiers = new List<Storage.StoredItemModifier>
-	{
-		Storage.StoredItemModifier.Hide,
-		Storage.StoredItemModifier.Seal
-	};
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
@@ -15,38 +16,42 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.Subscribe(-216549700, new Action<object>(this.DropSeed));
-		this.Subscribe(1623392196, new Action<object>(this.DropSeed));
-		this.Subscribe(-1072826864, new Action<object>(this.CropPicked));
+		base.Subscribe(-216549700, new Action<object>(this.DropSeed));
+		base.Subscribe(1623392196, new Action<object>(this.DropSeed));
+		base.Subscribe(-1072826864, new Action<object>(this.CropPicked));
 	}
 
 	public GameObject ProduceSeed(string seedId, int units = 1)
 	{
+		GameObject gameObject2;
 		if (seedId != null && units > 0)
 		{
 			Vector3 vector = base.gameObject.transform.position + new Vector3(0f, 0.5f, 0f);
-			GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(new Tag(seedId)), vector, Grid.SceneLayer.Use, SceneOrganizer.Instance.GetFolder(Folder.Entities), null, 0);
+			GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(new Tag(seedId)), vector, Grid.SceneLayer.Ore, SceneOrganizer.Instance.GetFolder(Folder.Entities), null, 0);
 			PrimaryElement component = base.gameObject.GetComponent<PrimaryElement>();
 			PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
 			component2.Temperature = component.Temperature;
 			component2.Units = (float)units;
-			this.Trigger(472291861, gameObject.GetComponent<PlantableSeed>());
+			base.Trigger(472291861, gameObject.GetComponent<PlantableSeed>());
 			gameObject.SetActive(true);
 			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, gameObject.GetProperName(), gameObject.transform, 1.5f, false);
-			return gameObject;
+			gameObject2 = gameObject;
 		}
-		return null;
+		else
+		{
+			gameObject2 = null;
+		}
+		return gameObject2;
 	}
 
 	public void DropSeed(object data = null)
 	{
-		if (this.droppedSeedAlready)
+		if (!this.droppedSeedAlready)
 		{
-			return;
+			GameObject gameObject = this.ProduceSeed(this.seedInfo.seedId, 1);
+			base.Trigger(-1736624145, gameObject.GetComponent<PlantableSeed>());
+			this.droppedSeedAlready = true;
 		}
-		GameObject gameObject = this.ProduceSeed(this.seedInfo.seedId, 1);
-		this.Trigger(-1736624145, gameObject.GetComponent<PlantableSeed>());
-		this.droppedSeedAlready = true;
 	}
 
 	public void CropDepleted(object data)
@@ -58,8 +63,14 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 	{
 		if (this.seedInfo.productionType == SeedProducer.ProductionType.Harvest)
 		{
-			int num = (((float)global::UnityEngine.Random.Range(0, 100) > 33f) ? 0 : 1);
-			this.ProduceSeed(this.seedInfo.seedId, num);
+			Worker completed_by = base.GetComponent<Harvestable>().completed_by;
+			float num = 33f;
+			if (completed_by != null)
+			{
+				num += completed_by.GetAttributes().Get(Db.Get().Attributes.Botanist).GetTotalValue() * 10f;
+			}
+			int num2 = (((float)global::UnityEngine.Random.Range(0, 100) > num) ? 0 : 1);
+			this.ProduceSeed(this.seedInfo.seedId, num2);
 		}
 	}
 
@@ -88,7 +99,7 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	public SeedProducer.SeedInfo seedInfo;
 
-	private bool droppedSeedAlready;
+	private bool droppedSeedAlready = false;
 
 	[Serializable]
 	public struct SeedInfo

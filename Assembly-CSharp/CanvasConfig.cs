@@ -7,14 +7,25 @@ public class CanvasConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
+		string text = "Canvas";
+		int num = 2;
+		int num2 = 2;
+		string text2 = "painting_kanim";
+		float num3 = 100f;
+		int num4 = 30;
+		float num5 = 120f;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
+		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Canvas", 2, 2, "painting_kanim", 100f, 30, 120f, global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.Anywhere, new EffectorValues
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_MINERALS, num6, buildLocationRule, new EffectorValues
 		{
 			amount = 5,
 			radius = 6
 		}, none);
 		buildingDef.Floodable = false;
-		buildingDef.SceneLayer = Grid.SceneLayer.BuildingBack;
+		buildingDef.SceneLayer = Grid.SceneLayer.Paintings;
 		buildingDef.Overheatable = false;
 		buildingDef.MaterialCategory = MATERIALS.RAW_MINERALS;
 		buildingDef.AudioCategory = "Metal";
@@ -40,4 +51,6 @@ public class CanvasConfig : IBuildingConfig
 		artable.stages.Add(new Artable.Stage("Good2", global::STRINGS.BUILDINGS.PREFABS.CANVAS.EXCELLENTQUALITYNAME, "art_d", 4, 15, true, Artable.Status.Great));
 		artable.stages.Add(new Artable.Stage("Good3", global::STRINGS.BUILDINGS.PREFABS.CANVAS.EXCELLENTQUALITYNAME, "art_e", 4, 15, true, Artable.Status.Great));
 	}
+
+	public const string ID = "Canvas";
 }

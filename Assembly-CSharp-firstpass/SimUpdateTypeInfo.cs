@@ -11,7 +11,10 @@ public class SimUpdateTypeInfo
 			SimUpdateTypeInfo.MethodNames = new string[num];
 			for (int i = 0; i < num; i++)
 			{
-				SimUpdateTypeInfo.MethodNames[i] = ((UpdateManager.ListType)i).ToString();
+				string[] methodNames = SimUpdateTypeInfo.MethodNames;
+				int num2 = i;
+				UpdateManager.ListType listType = (UpdateManager.ListType)i;
+				methodNames[num2] = listType.ToString();
 			}
 		}
 		this.UpdateArrays = new SimUpdateArray[num];
@@ -57,7 +60,7 @@ public class SimUpdateTypeInfo
 
 	private static string[] MethodNames;
 
-	public bool IsValid;
+	public bool IsValid = false;
 
 	public int SortKey = 1000;
 

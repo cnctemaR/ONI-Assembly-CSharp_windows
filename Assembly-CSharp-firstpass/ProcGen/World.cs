@@ -33,11 +33,16 @@ namespace ProcGen
 
 		public SubWorld GetSubWorld(string name)
 		{
+			SubWorld subWorld;
 			if (this.Zones.ContainsKey(name))
 			{
-				return this.Zones[name];
+				subWorld = this.Zones[name];
 			}
-			return null;
+			else
+			{
+				subWorld = null;
+			}
+			return subWorld;
 		}
 
 		public void LoadZones(NoiseTreeFiles noise, string path)

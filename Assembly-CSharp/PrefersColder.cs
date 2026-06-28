@@ -26,6 +26,6 @@ public class PrefersColder : StateMachineComponent<PrefersColder.StatesInstance>
 			this.root.ToggleAttributeModifier(DUPLICANTS.TRAITS.NEEDS.PREFERSCOOLER.NAME, (PrefersColder.StatesInstance smi) => this.modifier, null);
 		}
 
-		private AttributeModifier modifier = new AttributeModifier("ThermalConductivityBarrier", 0.005f, DUPLICANTS.TRAITS.NEEDS.PREFERSCOOLER.NAME, false, false);
+		private AttributeModifier modifier = new AttributeModifier("ThermalConductivityBarrier", 0.005f, DUPLICANTS.TRAITS.NEEDS.PREFERSCOOLER.NAME, false, false, true);
 	}
 }

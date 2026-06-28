@@ -21,14 +21,14 @@ public class ResearchCompleteMessage : Message
 	public override string GetMessageBody()
 	{
 		Tech tech = this.tech.Get();
-		string text = string.Empty;
-		for (int i = 0; i < tech.unlockedBuildings.Count; i++)
+		string text = "";
+		for (int i = 0; i < tech.unlockedItems.Count; i++)
 		{
 			if (i != 0)
 			{
 				text += ", ";
 			}
-			text += tech.unlockedBuildings[i].Name;
+			text += tech.unlockedItems[i].Name;
 		}
 		return string.Format(MISC.NOTIFICATIONS.RESEARCHCOMPLETE.MESSAGEBODY, tech.Name, text);
 	}

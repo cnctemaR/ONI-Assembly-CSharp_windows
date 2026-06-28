@@ -66,34 +66,42 @@ namespace Klei.AI
 
 		public EffectInstance Add(Effect effect, bool should_save)
 		{
+			EffectInstance effectInstance;
 			if (this.effectImmunites.Contains(effect))
 			{
-				return null;
+				effectInstance = null;
 			}
-			bool flag = true;
-			foreach (Trait trait in base.GetComponent<Traits>())
+			else
 			{
-				if (trait.ignoredEffects != null && Array.IndexOf<string>(trait.ignoredEffects, effect.Id) != -1)
+				bool flag = true;
+				foreach (Trait trait in base.GetComponent<Traits>())
 				{
-					flag = false;
-					break;
+					if (trait.ignoredEffects != null && Array.IndexOf<string>(trait.ignoredEffects, effect.Id) != -1)
+					{
+						flag = false;
+						break;
+					}
+				}
+				if (flag)
+				{
+					Attributes attributes = this.GetAttributes();
+					EffectInstance effectInstance2 = this.Get(effect);
+					if (effectInstance2 == null)
+					{
+						effectInstance2 = new EffectInstance(base.gameObject, effect, should_save);
+						effect.AddTo(attributes);
+						this.effects.Add(effectInstance2);
+						base.Trigger(-1901442097, effect);
+					}
+					effectInstance2.startTime = Time.time;
+					effectInstance = effectInstance2;
+				}
+				else
+				{
+					effectInstance = null;
 				}
 			}
-			if (flag)
-			{
-				Attributes attributes = this.GetAttributes();
-				EffectInstance effectInstance = this.Get(effect);
-				if (effectInstance == null)
-				{
-					effectInstance = new EffectInstance(base.gameObject, effect, should_save);
-					effect.AddTo(attributes);
-					this.effects.Add(effectInstance);
-					this.Trigger(-1901442097, effect);
-				}
-				effectInstance.startTime = Time.time;
-				return effectInstance;
-			}
-			return null;
+			return effectInstance;
 		}
 
 		public void Remove(Effect effect)
@@ -107,7 +115,7 @@ namespace Klei.AI
 					effect.RemoveFrom(attributes);
 					this.effects.RemoveAt(i);
 					effectInstance.Remove();
-					this.Trigger(-1157678353, effect);
+					base.Trigger(-1157678353, effect);
 				}
 			}
 		}
@@ -123,7 +131,7 @@ namespace Klei.AI
 					effectInstance.effect.RemoveFrom(attributes);
 					this.effects.RemoveAt(i);
 					effectInstance.Remove();
-					this.Trigger(-1157678353, effectInstance.effect);
+					base.Trigger(-1157678353, effectInstance.effect);
 				}
 			}
 		}

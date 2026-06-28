@@ -1,7 +1,9 @@
 ﻿using System;
+using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[UsedByNativeCode]
 	public struct Plane
 	{
 		public Plane(Vector3 inNormal, Vector3 inPoint)
@@ -79,13 +81,18 @@ namespace UnityEngine
 		{
 			float num = Vector3.Dot(ray.direction, this.normal);
 			float num2 = -Vector3.Dot(ray.origin, this.normal) - this.distance;
+			bool flag;
 			if (Mathf.Approximately(num, 0f))
 			{
 				enter = 0f;
-				return false;
+				flag = false;
 			}
-			enter = num2 / num;
-			return enter > 0f;
+			else
+			{
+				enter = num2 / num;
+				flag = enter > 0f;
+			}
+			return flag;
 		}
 
 		private Vector3 m_Normal;

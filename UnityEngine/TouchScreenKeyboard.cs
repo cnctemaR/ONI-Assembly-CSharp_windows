@@ -8,58 +8,58 @@ namespace UnityEngine
 		[ExcludeFromDocs]
 		public static TouchScreenKeyboard Open(string text, TouchScreenKeyboardType keyboardType, bool autocorrection, bool multiline, bool secure, bool alert)
 		{
-			string empty = string.Empty;
-			return TouchScreenKeyboard.Open(text, keyboardType, autocorrection, multiline, secure, alert, empty);
+			string text2 = "";
+			return TouchScreenKeyboard.Open(text, keyboardType, autocorrection, multiline, secure, alert, text2);
 		}
 
 		[ExcludeFromDocs]
 		public static TouchScreenKeyboard Open(string text, TouchScreenKeyboardType keyboardType, bool autocorrection, bool multiline, bool secure)
 		{
-			string empty = string.Empty;
+			string text2 = "";
 			bool flag = false;
-			return TouchScreenKeyboard.Open(text, keyboardType, autocorrection, multiline, secure, flag, empty);
+			return TouchScreenKeyboard.Open(text, keyboardType, autocorrection, multiline, secure, flag, text2);
 		}
 
 		[ExcludeFromDocs]
 		public static TouchScreenKeyboard Open(string text, TouchScreenKeyboardType keyboardType, bool autocorrection, bool multiline)
 		{
-			string empty = string.Empty;
+			string text2 = "";
 			bool flag = false;
 			bool flag2 = false;
-			return TouchScreenKeyboard.Open(text, keyboardType, autocorrection, multiline, flag2, flag, empty);
+			return TouchScreenKeyboard.Open(text, keyboardType, autocorrection, multiline, flag2, flag, text2);
 		}
 
 		[ExcludeFromDocs]
 		public static TouchScreenKeyboard Open(string text, TouchScreenKeyboardType keyboardType, bool autocorrection)
 		{
-			string empty = string.Empty;
+			string text2 = "";
 			bool flag = false;
 			bool flag2 = false;
 			bool flag3 = false;
-			return TouchScreenKeyboard.Open(text, keyboardType, autocorrection, flag3, flag2, flag, empty);
+			return TouchScreenKeyboard.Open(text, keyboardType, autocorrection, flag3, flag2, flag, text2);
 		}
 
 		[ExcludeFromDocs]
 		public static TouchScreenKeyboard Open(string text, TouchScreenKeyboardType keyboardType)
 		{
-			string empty = string.Empty;
+			string text2 = "";
 			bool flag = false;
 			bool flag2 = false;
 			bool flag3 = false;
 			bool flag4 = true;
-			return TouchScreenKeyboard.Open(text, keyboardType, flag4, flag3, flag2, flag, empty);
+			return TouchScreenKeyboard.Open(text, keyboardType, flag4, flag3, flag2, flag, text2);
 		}
 
 		[ExcludeFromDocs]
 		public static TouchScreenKeyboard Open(string text)
 		{
-			string empty = string.Empty;
+			string text2 = "";
 			bool flag = false;
 			bool flag2 = false;
 			bool flag3 = false;
 			bool flag4 = true;
 			TouchScreenKeyboardType touchScreenKeyboardType = TouchScreenKeyboardType.Default;
-			return TouchScreenKeyboard.Open(text, touchScreenKeyboardType, flag4, flag3, flag2, flag, empty);
+			return TouchScreenKeyboard.Open(text, touchScreenKeyboardType, flag4, flag3, flag2, flag, text2);
 		}
 
 		public static TouchScreenKeyboard Open(string text, [DefaultValue("TouchScreenKeyboardType.Default")] TouchScreenKeyboardType keyboardType, [DefaultValue("true")] bool autocorrection, [DefaultValue("false")] bool multiline, [DefaultValue("false")] bool secure, [DefaultValue("false")] bool alert, [DefaultValue("\"\"")] string textPlaceholder)
@@ -137,6 +137,22 @@ namespace UnityEngine
 			get
 			{
 				return false;
+			}
+		}
+
+		public bool canGetSelection
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		public RangeInt selection
+		{
+			get
+			{
+				return new RangeInt(0, 0);
 			}
 		}
 	}

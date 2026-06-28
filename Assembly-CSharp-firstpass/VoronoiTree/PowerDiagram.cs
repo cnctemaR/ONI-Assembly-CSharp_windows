@@ -112,8 +112,11 @@ namespace VoronoiTree
 			{
 				Vector2 circumcenter = site.Circumcenter;
 				Cell cell = this.mg.GetCell(circumcenter);
-				foreach (PowerDiagram.DualSite2d dualSite2d in site.Vertices)
+				PowerDiagram.DualSite2d[] vertices = site.Vertices;
+				int i = 0;
+				while (i < vertices.Length)
 				{
+					PowerDiagram.DualSite2d dualSite2d = vertices[i];
 					if (!dualSite2d.visited)
 					{
 						dualSite2d.visited = true;
@@ -147,6 +150,10 @@ namespace VoronoiTree
 							}
 						}
 					}
+					IL_01B5:
+					i++;
+					continue;
+					goto IL_01B5;
 				}
 			}
 			this.ClipNeighbors();
@@ -178,18 +185,23 @@ namespace VoronoiTree
 
 		private bool ContainsVert(Site face, PowerDiagram.DualSite2d target)
 		{
+			bool flag;
 			if (face == null || face.Vertices == null)
 			{
-				return false;
+				flag = false;
 			}
-			for (int i = 0; i < face.Vertices.Length; i++)
+			else
 			{
-				if (face.Vertices[i] == target)
+				for (int i = 0; i < face.Vertices.Length; i++)
 				{
-					return true;
+					if (face.Vertices[i] == target)
+					{
+						return true;
+					}
 				}
+				flag = false;
 			}
-			return false;
+			return flag;
 		}
 
 		private void AddSite(Site site)
@@ -712,21 +724,11 @@ namespace VoronoiTree
 				}
 			}
 
-			public Vector2 Centroid
-			{
-				get
-				{
-					return this.centroid.Value;
-				}
-			}
-
 			private Site site;
 
 			private Vector2 dualPoint;
 
 			private Vector2? circumCenter;
-
-			private Vector2? centroid;
 		}
 
 		public class TriangulationCellExt<TVertex> : TriangulationCell<TVertex, PowerDiagram.TriangulationCellExt<TVertex>> where TVertex : IVertex

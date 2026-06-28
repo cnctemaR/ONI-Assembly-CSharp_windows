@@ -31,7 +31,7 @@ public class CringeMonitor : GameStateMachine<CringeMonitor, CringeMonitor.Insta
 		public void SetCringeSourceData(object data)
 		{
 			string text = (string)data;
-			this.statusItem = new StatusItem("CringeSource", text, null, string.Empty, StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, SimViewMode.None, 14334);
+			this.statusItem = new StatusItem("CringeSource", text, null, "", StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, SimViewMode.None, 30718);
 		}
 
 		public StatusItem GetStatusItem()

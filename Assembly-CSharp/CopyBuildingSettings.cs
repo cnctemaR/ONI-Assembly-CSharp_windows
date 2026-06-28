@@ -7,14 +7,18 @@ public class CopyBuildingSettings : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 	}
 
 	private void OnRefreshUserMenu(object data)
 	{
 		UserMenu userMenu = this.userMenu;
-		string text = UI.USERMENUACTIONS.COPY_BUILDING_SETTINGS.TOOLTIP;
-		userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_mirror", UI.USERMENUACTIONS.COPY_BUILDING_SETTINGS.NAME, new global::System.Action(this.ActivateCopyTool), global::Action.BuildingUtility1, null, null, null, text, true), 1f);
+		string text = "action_mirror";
+		string text2 = UI.USERMENUACTIONS.COPY_BUILDING_SETTINGS.NAME;
+		global::System.Action action = new global::System.Action(this.ActivateCopyTool);
+		global::Action action2 = global::Action.BuildingUtility1;
+		string text3 = UI.USERMENUACTIONS.COPY_BUILDING_SETTINGS.TOOLTIP;
+		userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, action2, null, null, null, text3, true), 1f);
 	}
 
 	private void ActivateCopyTool()
@@ -43,7 +47,7 @@ public class CopyBuildingSettings : KMonoBehaviour
 
 	private void DoCopyLeft(object obj)
 	{
-		int num = Grid.PosToCell(this.transform.position);
+		int num = Grid.PosToCell(base.transform.position);
 		if (this.ApplyCopy(num, this.leftOffset))
 		{
 			this.leftOffset--;
@@ -56,7 +60,7 @@ public class CopyBuildingSettings : KMonoBehaviour
 
 	private void DoCopyRight(object obj)
 	{
-		int num = Grid.PosToCell(this.transform.position);
+		int num = Grid.PosToCell(base.transform.position);
 		if (this.ApplyCopy(num, this.rightOffset))
 		{
 			this.rightOffset++;
@@ -71,48 +75,67 @@ public class CopyBuildingSettings : KMonoBehaviour
 	{
 		int num = Grid.OffsetCell(posCell, offset, 0);
 		GameObject gameObject = Grid.Objects[num, 1];
+		bool flag;
 		if (gameObject == null)
 		{
-			return false;
+			flag = false;
 		}
-		KPrefabID component = gameObject.GetComponent<KPrefabID>();
-		if (component == null)
+		else
 		{
-			return false;
+			KPrefabID component = gameObject.GetComponent<KPrefabID>();
+			if (component == null)
+			{
+				flag = false;
+			}
+			else if (component.PrefabID() != this.id.PrefabID())
+			{
+				flag = false;
+			}
+			else
+			{
+				component.Trigger(-905833192, base.gameObject);
+				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, UI.COPIED_SETTINGS, gameObject.transform, new Vector3(0f, 0.5f, 0f), 1.5f, false, false);
+				flag = true;
+			}
 		}
-		if (component.PrefabID() != this.id.PrefabID())
-		{
-			return false;
-		}
-		component.Trigger(-905833192, base.gameObject);
-		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, UI.COPIED_SETTINGS, gameObject.transform, new Vector3(0f, 0.5f, 0f), 1.5f, false, false);
-		return true;
+		return flag;
 	}
 
 	public static bool ApplyCopy(int targetCell, GameObject sourceGameObject)
 	{
 		GameObject gameObject = Grid.Objects[targetCell, 1];
+		bool flag;
 		if (gameObject == null)
 		{
-			return false;
+			flag = false;
 		}
-		KPrefabID component = sourceGameObject.GetComponent<KPrefabID>();
-		if (component == null)
+		else
 		{
-			return false;
+			KPrefabID component = sourceGameObject.GetComponent<KPrefabID>();
+			if (component == null)
+			{
+				flag = false;
+			}
+			else
+			{
+				KPrefabID component2 = gameObject.GetComponent<KPrefabID>();
+				if (component2 == null)
+				{
+					flag = false;
+				}
+				else if (component2.PrefabID() != component.PrefabID())
+				{
+					flag = false;
+				}
+				else
+				{
+					component2.Trigger(-905833192, sourceGameObject);
+					PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, UI.COPIED_SETTINGS, gameObject.transform, new Vector3(0f, 0.5f, 0f), 1.5f, false, false);
+					flag = true;
+				}
+			}
 		}
-		KPrefabID component2 = gameObject.GetComponent<KPrefabID>();
-		if (component2 == null)
-		{
-			return false;
-		}
-		if (component2.PrefabID() != component.PrefabID())
-		{
-			return false;
-		}
-		component2.Trigger(-905833192, sourceGameObject);
-		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, UI.COPIED_SETTINGS, gameObject.transform, new Vector3(0f, 0.5f, 0f), 1.5f, false, false);
-		return true;
+		return flag;
 	}
 
 	[MyCmpAdd]

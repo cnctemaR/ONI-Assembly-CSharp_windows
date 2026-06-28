@@ -41,15 +41,17 @@ public class SystemScheduler
 		for (int i = 0; i < 3; i++)
 		{
 			List<SystemScheduler.Entry> list = this.prioritizedEntries[i];
-			if (list.Count > 0)
+			int count = list.Count;
+			if (count > 0)
 			{
 				int j;
-				for (j = 0; j < list.Count; j++)
+				for (j = 0; j < count; j++)
 				{
-					SystemScheduler.Entry entry = list[j];
-					if (entry.details.callback != null)
+					SchedulerEntry.Details details = list[j].details;
+					Action<object> callback = details.callback;
+					if (callback != null)
 					{
-						entry.details.callback(entry.details.callbackData);
+						callback(details.callbackData);
 					}
 					if (this.timer.ElapsedMilliseconds >= num)
 					{
@@ -66,14 +68,13 @@ public class SystemScheduler
 		this.timer.Reset();
 	}
 
-	public Guid AddTask(SystemScheduler.Priority priority, SchedulerEntry.Details details)
+	public void AddTask(SystemScheduler.Priority priority, SchedulerEntry.Details details)
 	{
 		List<SystemScheduler.Entry> list = this.prioritizedEntries[(int)priority];
 		list.Add(new SystemScheduler.Entry
 		{
 			details = details
 		});
-		return details.id;
 	}
 
 	public void Clear()

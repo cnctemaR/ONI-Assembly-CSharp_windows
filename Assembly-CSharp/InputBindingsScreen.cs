@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
@@ -18,13 +19,26 @@ public class InputBindingsScreen : KModalScreen
 
 	private string GetModifierString(Modifier modifiers)
 	{
-		string text = string.Empty;
-		foreach (object obj in Enum.GetValues(typeof(Modifier)))
+		string text = "";
+		IEnumerator enumerator = Enum.GetValues(typeof(Modifier)).GetEnumerator();
+		try
 		{
-			Modifier modifier = (Modifier)((int)obj);
-			if ((modifiers & modifier) != Modifier.None)
+			while (enumerator.MoveNext())
 			{
-				text = text + " + " + modifier.ToString();
+				object obj = enumerator.Current;
+				Modifier modifier = (Modifier)obj;
+				if ((modifiers & modifier) != Modifier.None)
+				{
+					text = text + " + " + modifier.ToString();
+				}
+			}
+		}
+		finally
+		{
+			IDisposable disposable;
+			if ((disposable = enumerator as IDisposable) != null)
+			{
+				disposable.Dispose();
 			}
 		}
 		return text;
@@ -53,7 +67,8 @@ public class InputBindingsScreen : KModalScreen
 	private void CollectScreens()
 	{
 		this.screens.Clear();
-		for (int i = 0; i < GameInputMapping.KeyBindings.Length; i++)
+		int i = 0;
+		while (i < GameInputMapping.KeyBindings.Length)
 		{
 			BindingEntry bindingEntry = GameInputMapping.KeyBindings[i];
 			if (bindingEntry.mGroup != null && bindingEntry.mRebindable && !this.screens.Contains(bindingEntry.mGroup))
@@ -62,8 +77,15 @@ public class InputBindingsScreen : KModalScreen
 				{
 					this.activeScreen = this.screens.Count;
 				}
-				this.screens.Add(bindingEntry.mGroup);
+				if (!bindingEntry.mIgnoreRootConflics)
+				{
+					this.screens.Add(bindingEntry.mGroup);
+				}
 			}
+			IL_00A4:
+			i++;
+			continue;
+			goto IL_00A4;
 		}
 	}
 
@@ -189,9 +211,8 @@ public class InputBindingsScreen : KModalScreen
 		if (this.waitingForKeyPress)
 		{
 			e.Consumed = true;
-			return;
 		}
-		if (e.TryConsume(global::Action.Escape) || e.TryConsume(global::Action.MouseRight))
+		else if (e.TryConsume(global::Action.Escape) || e.TryConsume(global::Action.MouseRight))
 		{
 			this.Deactivate();
 		}
@@ -225,7 +246,7 @@ public class InputBindingsScreen : KModalScreen
 			{
 				text = UI.FRONTEND.INPUT_BINDINGS_SCREEN.MULTIPLE_UNBOUND_ACTIONS;
 			}
-			this.confirmDialog = Util.KInstantiateUI(this.confirmPrefab.gameObject, this.transform.gameObject, false).GetComponent<ConfirmDialogScreen>();
+			this.confirmDialog = Util.KInstantiateUI(this.confirmPrefab.gameObject, base.transform.gameObject, false).GetComponent<ConfirmDialogScreen>();
 			this.confirmDialog.PopupConfirmDialog(text, delegate
 			{
 				this.Deactivate();
@@ -240,13 +261,21 @@ public class InputBindingsScreen : KModalScreen
 	private int NumUnboundActions()
 	{
 		int num = 0;
-		for (int i = 0; i < GameInputMapping.KeyBindings.Length; i++)
+		int i = 0;
+		while (i < GameInputMapping.KeyBindings.Length)
 		{
 			BindingEntry bindingEntry = GameInputMapping.KeyBindings[i];
 			if (bindingEntry.mKeyCode == KKeyCode.None)
 			{
-				num++;
+				if (!bindingEntry.mIgnoreRootConflics)
+				{
+					num++;
+				}
 			}
+			IL_0041:
+			i++;
+			continue;
+			goto IL_0041;
 		}
 		return num;
 	}
@@ -301,7 +330,7 @@ public class InputBindingsScreen : KModalScreen
 
 	private void Bind(KKeyCode kkey_code, Modifier modifier)
 	{
-		BindingEntry bindingEntry = new BindingEntry(this.screens[this.activeScreen], GamepadButton.NumButtons, kkey_code, modifier, this.actionToRebind, true);
+		BindingEntry bindingEntry = new BindingEntry(this.screens[this.activeScreen], GamepadButton.NumButtons, kkey_code, modifier, this.actionToRebind, true, false);
 		for (int i = 0; i < GameInputMapping.KeyBindings.Length; i++)
 		{
 			BindingEntry bindingEntry2 = GameInputMapping.KeyBindings[i];
@@ -313,7 +342,7 @@ public class InputBindingsScreen : KModalScreen
 				componentInChildren.text = this.GetBindingText(bindingEntry);
 				if (duplicatedBinding.mAction != global::Action.Invalid && duplicatedBinding.mAction != this.actionToRebind)
 				{
-					this.confirmDialog = Util.KInstantiateUI(this.confirmPrefab.gameObject, this.transform.gameObject, false).GetComponent<ConfirmDialogScreen>();
+					this.confirmDialog = Util.KInstantiateUI(this.confirmPrefab.gameObject, base.transform.gameObject, false).GetComponent<ConfirmDialogScreen>();
 					string text = "STRINGS.INPUT_BINDINGS." + duplicatedBinding.mGroup.ToUpper() + "." + duplicatedBinding.mAction.ToString().ToUpper();
 					string text2 = Strings.Get(text);
 					string bindingText = this.GetBindingText(duplicatedBinding);
@@ -364,11 +393,11 @@ public class InputBindingsScreen : KModalScreen
 
 	public KButton nextScreenButton;
 
-	private bool waitingForKeyPress;
+	private bool waitingForKeyPress = false;
 
 	private global::Action actionToRebind = global::Action.NumActions;
 
-	private KButton activeButton;
+	private KButton activeButton = null;
 
 	[SerializeField]
 	private LocText screenTitle;

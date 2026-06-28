@@ -25,16 +25,6 @@ namespace Steamworks
 			return this.m_SNetSocket.GetHashCode();
 		}
 
-		public bool Equals(SNetSocket_t other)
-		{
-			return this.m_SNetSocket == other.m_SNetSocket;
-		}
-
-		public int CompareTo(SNetSocket_t other)
-		{
-			return this.m_SNetSocket.CompareTo(other.m_SNetSocket);
-		}
-
 		public static bool operator ==(SNetSocket_t x, SNetSocket_t y)
 		{
 			return x.m_SNetSocket == y.m_SNetSocket;
@@ -53,6 +43,16 @@ namespace Steamworks
 		public static explicit operator uint(SNetSocket_t that)
 		{
 			return that.m_SNetSocket;
+		}
+
+		public bool Equals(SNetSocket_t other)
+		{
+			return this.m_SNetSocket == other.m_SNetSocket;
+		}
+
+		public int CompareTo(SNetSocket_t other)
+		{
+			return this.m_SNetSocket.CompareTo(other.m_SNetSocket);
 		}
 
 		public uint m_SNetSocket;

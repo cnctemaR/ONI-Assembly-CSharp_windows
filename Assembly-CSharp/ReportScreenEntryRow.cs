@@ -28,7 +28,7 @@ public class ReportScreenEntryRow : KMonoBehaviour
 			this.spacer.minWidth = this.contextSpacerWidth;
 			this.name.text = entry.context;
 		}
-		string text = string.Empty;
+		string text = "";
 		foreach (KeyValuePair<string, float> keyValuePair in entry.posNotes)
 		{
 			text = string.Format(UI.ENDOFDAYREPORT.NOTES.NOTE_ENTRY_LINE_ITEM, text, keyValuePair.Key, reportGroup.formatfn(keyValuePair.Value));
@@ -36,7 +36,7 @@ public class ReportScreenEntryRow : KMonoBehaviour
 		this.added.text = reportGroup.formatfn(entry.Positive);
 		string text2 = string.Format(reportGroup.positiveTooltip + "\n" + text, reportGroup.formatfn(entry.Positive));
 		this.added.GetComponent<ToolTip>().toolTip = text2;
-		string text3 = string.Empty;
+		string text3 = "";
 		foreach (KeyValuePair<string, float> keyValuePair2 in entry.negNotes)
 		{
 			text3 = string.Format(UI.ENDOFDAYREPORT.NOTES.NOTE_ENTRY_LINE_ITEM, text3, keyValuePair2.Key, reportGroup.formatfn(keyValuePair2.Value));

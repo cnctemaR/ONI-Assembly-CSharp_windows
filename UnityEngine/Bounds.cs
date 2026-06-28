@@ -13,6 +13,71 @@ namespace UnityEngine
 			this.m_Extents = size * 0.5f;
 		}
 
+		[ThreadAndSerializationSafe]
+		private static bool Internal_Contains(Bounds m, Vector3 point)
+		{
+			return Bounds.INTERNAL_CALL_Internal_Contains(ref m, ref point);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool INTERNAL_CALL_Internal_Contains(ref Bounds m, ref Vector3 point);
+
+		public bool Contains(Vector3 point)
+		{
+			return Bounds.Internal_Contains(this, point);
+		}
+
+		private static float Internal_SqrDistance(Bounds m, Vector3 point)
+		{
+			return Bounds.INTERNAL_CALL_Internal_SqrDistance(ref m, ref point);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float INTERNAL_CALL_Internal_SqrDistance(ref Bounds m, ref Vector3 point);
+
+		public float SqrDistance(Vector3 point)
+		{
+			return Bounds.Internal_SqrDistance(this, point);
+		}
+
+		private static bool Internal_IntersectRay(ref Ray ray, ref Bounds bounds, out float distance)
+		{
+			return Bounds.INTERNAL_CALL_Internal_IntersectRay(ref ray, ref bounds, out distance);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool INTERNAL_CALL_Internal_IntersectRay(ref Ray ray, ref Bounds bounds, out float distance);
+
+		public bool IntersectRay(Ray ray)
+		{
+			float num;
+			return Bounds.Internal_IntersectRay(ref ray, ref this, out num);
+		}
+
+		public bool IntersectRay(Ray ray, out float distance)
+		{
+			return Bounds.Internal_IntersectRay(ref ray, ref this, out distance);
+		}
+
+		private static Vector3 Internal_GetClosestPoint(ref Bounds bounds, ref Vector3 point)
+		{
+			Vector3 vector;
+			Bounds.INTERNAL_CALL_Internal_GetClosestPoint(ref bounds, ref point, out vector);
+			return vector;
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_Internal_GetClosestPoint(ref Bounds bounds, ref Vector3 point, out Vector3 value);
+
+		public Vector3 ClosestPoint(Vector3 point)
+		{
+			return Bounds.Internal_GetClosestPoint(ref this, ref point);
+		}
+
 		public override int GetHashCode()
 		{
 			return this.center.GetHashCode() ^ (this.extents.GetHashCode() << 2);
@@ -20,12 +85,17 @@ namespace UnityEngine
 
 		public override bool Equals(object other)
 		{
+			bool flag;
 			if (!(other is Bounds))
 			{
-				return false;
+				flag = false;
 			}
-			Bounds bounds = (Bounds)other;
-			return this.center.Equals(bounds.center) && this.extents.Equals(bounds.extents);
+			else
+			{
+				Bounds bounds = (Bounds)other;
+				flag = this.center.Equals(bounds.center) && this.extents.Equals(bounds.extents);
+			}
+			return flag;
 		}
 
 		public Vector3 center
@@ -88,6 +158,16 @@ namespace UnityEngine
 			}
 		}
 
+		public static bool operator ==(Bounds lhs, Bounds rhs)
+		{
+			return lhs.center == rhs.center && lhs.extents == rhs.extents;
+		}
+
+		public static bool operator !=(Bounds lhs, Bounds rhs)
+		{
+			return !(lhs == rhs);
+		}
+
 		public void SetMinMax(Vector3 min, Vector3 max)
 		{
 			this.extents = (max - min) * 0.5f;
@@ -121,70 +201,6 @@ namespace UnityEngine
 			return this.min.x <= bounds.max.x && this.max.x >= bounds.min.x && this.min.y <= bounds.max.y && this.max.y >= bounds.min.y && this.min.z <= bounds.max.z && this.max.z >= bounds.min.z;
 		}
 
-		private static bool Internal_Contains(Bounds m, Vector3 point)
-		{
-			return Bounds.INTERNAL_CALL_Internal_Contains(ref m, ref point);
-		}
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool INTERNAL_CALL_Internal_Contains(ref Bounds m, ref Vector3 point);
-
-		public bool Contains(Vector3 point)
-		{
-			return Bounds.Internal_Contains(this, point);
-		}
-
-		private static float Internal_SqrDistance(Bounds m, Vector3 point)
-		{
-			return Bounds.INTERNAL_CALL_Internal_SqrDistance(ref m, ref point);
-		}
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern float INTERNAL_CALL_Internal_SqrDistance(ref Bounds m, ref Vector3 point);
-
-		public float SqrDistance(Vector3 point)
-		{
-			return Bounds.Internal_SqrDistance(this, point);
-		}
-
-		private static bool Internal_IntersectRay(ref Ray ray, ref Bounds bounds, out float distance)
-		{
-			return Bounds.INTERNAL_CALL_Internal_IntersectRay(ref ray, ref bounds, out distance);
-		}
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool INTERNAL_CALL_Internal_IntersectRay(ref Ray ray, ref Bounds bounds, out float distance);
-
-		public bool IntersectRay(Ray ray)
-		{
-			float num;
-			return Bounds.Internal_IntersectRay(ref ray, ref this, out num);
-		}
-
-		public bool IntersectRay(Ray ray, out float distance)
-		{
-			return Bounds.Internal_IntersectRay(ref ray, ref this, out distance);
-		}
-
-		private static Vector3 Internal_GetClosestPoint(ref Bounds bounds, ref Vector3 point)
-		{
-			Vector3 vector;
-			Bounds.INTERNAL_CALL_Internal_GetClosestPoint(ref bounds, ref point, out vector);
-			return vector;
-		}
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void INTERNAL_CALL_Internal_GetClosestPoint(ref Bounds bounds, ref Vector3 point, out Vector3 value);
-
-		public Vector3 ClosestPoint(Vector3 point)
-		{
-			return Bounds.Internal_GetClosestPoint(ref this, ref point);
-		}
-
 		public override string ToString()
 		{
 			return UnityString.Format("Center: {0}, Extents: {1}", new object[] { this.m_Center, this.m_Extents });
@@ -197,16 +213,6 @@ namespace UnityEngine
 				this.m_Center.ToString(format),
 				this.m_Extents.ToString(format)
 			});
-		}
-
-		public static bool operator ==(Bounds lhs, Bounds rhs)
-		{
-			return lhs.center == rhs.center && lhs.extents == rhs.extents;
-		}
-
-		public static bool operator !=(Bounds lhs, Bounds rhs)
-		{
-			return !(lhs == rhs);
 		}
 
 		private Vector3 m_Center;

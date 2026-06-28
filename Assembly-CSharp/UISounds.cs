@@ -35,7 +35,7 @@ public class UISounds : KMonoBehaviour
 	}
 
 	[SerializeField]
-	private bool logSounds;
+	private bool logSounds = false;
 
 	[SerializeField]
 	private UISounds.SoundData[] soundData;

@@ -1,6 +1,5 @@
 ﻿using System;
 using Klei.AI;
-using TUNING;
 
 public class Sleepable : Workable
 {
@@ -13,6 +12,7 @@ public class Sleepable : Workable
 	{
 		base.OnPrefabInit();
 		this.workerStatusItem = null;
+		this.synchronizeAnims = false;
 	}
 
 	protected override void OnSpawn()
@@ -30,28 +30,11 @@ public class Sleepable : Workable
 		}
 		worker.Trigger(-1283701846, this);
 		worker.GetComponent<Effects>().Add("Sleep", false);
-		this.newDayEventHandle = GameClock.Instance.Subscribe(631075836, delegate(object o)
-		{
-			if (worker.GetAmounts().Get(Db.Get().Amounts.Stamina).value == worker.GetAmounts().Get(Db.Get().Amounts.Stamina).GetMax())
-			{
-				this.OnCompleteWork(worker);
-			}
-			else
-			{
-				this.OnAbortWork(worker);
-			}
-		});
 	}
 
 	protected override bool OnWorkTick(Worker worker, float dt)
 	{
 		return worker.GetSMI<StaminaMonitor.Instance>().ShouldExitSleep();
-	}
-
-	protected override void OnAbortWork(Worker worker)
-	{
-		base.OnAbortWork(worker);
-		worker.Trigger(1338475637, this);
 	}
 
 	protected override void OnStopWork(Worker worker)
@@ -61,10 +44,13 @@ public class Sleepable : Workable
 		{
 			this.operational.SetActive(false, false);
 		}
-		worker.GetComponent<Effects>().Remove("Sleep");
-		if (this.newDayEventHandle != -1)
+		if (worker != null)
 		{
-			GameClock.Instance.Unsubscribe(this.newDayEventHandle);
+			worker.GetComponent<Effects>().Remove("Sleep");
+			if (worker.GetAmounts().Get(Db.Get().Amounts.Stamina).value < worker.GetAmounts().Get(Db.Get().Amounts.Stamina).GetMax())
+			{
+				worker.Trigger(1338475637, this);
+			}
 		}
 	}
 
@@ -74,13 +60,6 @@ public class Sleepable : Workable
 		Components.Sleepables.Remove(this);
 	}
 
-	private void OnRegionChanged(Region new_region)
-	{
-		GameUtil.UpdateRegion(new_region, this, Db.Get().OwnableSlots.Bed, REGIONS.RoomRegionTag);
-	}
-
 	[MyCmpGet]
 	private Operational operational;
-
-	private int newDayEventHandle = -1;
 }

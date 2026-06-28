@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Delaunay.Geo;
@@ -90,7 +91,7 @@ namespace ProcGen
 			PointGenerator.SampleBehaviour sampleBehaviour = PointGenerator.SampleBehaviour.PoissonDisk;
 			if (obj != null)
 			{
-				sampleBehaviour = (PointGenerator.SampleBehaviour)((int)obj);
+				sampleBehaviour = (PointGenerator.SampleBehaviour)obj;
 			}
 			ProcGen.Node node = this.overworldGraph.AddNode(WorldGenTags.StartWorld.Name);
 			node.SetPosition(new Vector2((float)(this.mapWidth / 2), (float)(this.mapHeight / 2)));
@@ -281,15 +282,20 @@ namespace ProcGen
 
 		private char ConvertSignToCmp(int val)
 		{
+			char c;
 			if (val > 0)
 			{
-				return '>';
+				c = '>';
 			}
-			if (val < 0)
+			else if (val < 0)
 			{
-				return '<';
+				c = '<';
 			}
-			return '=';
+			else
+			{
+				c = '=';
+			}
+			return c;
 		}
 
 		private HashSet<SubWorld> GetDistanceFilterSet(global::VoronoiTree.Node vn, Dictionary<string, TagSet> tagsets, World.AllowedCellsFilter filter, List<SubWorld> subworlds)
@@ -535,18 +541,40 @@ namespace ProcGen
 			List<SubWorld> subWorldList = WorldGen.Settings.GetSubWorldList();
 			subWorldList.Remove(WorldGen.Settings.GetSubWorld(WorldGenTags.StartWorld.Name));
 			Dictionary<string, List<SubWorld>> dictionary = new Dictionary<string, List<SubWorld>>();
-			Temperature.Range range;
-			foreach (object obj in Enum.GetValues(typeof(Temperature.Range)))
+			IEnumerator enumerator = Enum.GetValues(typeof(Temperature.Range)).GetEnumerator();
+			try
 			{
-				range = (Temperature.Range)((int)obj);
-				dictionary.Add(range.ToString(), subWorldList.FindAll((SubWorld sw) => sw.temperatureRange == range));
+				while (enumerator.MoveNext())
+				{
+					Temperature.Range range = (Temperature.Range)enumerator.Current;
+					dictionary.Add(range.ToString(), subWorldList.FindAll((SubWorld sw) => sw.temperatureRange == range));
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = enumerator as IDisposable) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 			Dictionary<string, List<SubWorld>> dictionary2 = new Dictionary<string, List<SubWorld>>();
-			SubWorld.ZoneType zt;
-			foreach (object obj2 in Enum.GetValues(typeof(SubWorld.ZoneType)))
+			IEnumerator enumerator2 = Enum.GetValues(typeof(SubWorld.ZoneType)).GetEnumerator();
+			try
 			{
-				zt = (SubWorld.ZoneType)((int)obj2);
-				dictionary2.Add(zt.ToString(), subWorldList.FindAll((SubWorld sw) => sw.zoneType == zt));
+				while (enumerator2.MoveNext())
+				{
+					SubWorld.ZoneType zt = (SubWorld.ZoneType)enumerator2.Current;
+					dictionary2.Add(zt.ToString(), subWorldList.FindAll((SubWorld sw) => sw.zoneType == zt));
+				}
+			}
+			finally
+			{
+				IDisposable disposable2;
+				if ((disposable2 = enumerator2 as IDisposable) != null)
+				{
+					disposable2.Dispose();
+				}
 			}
 			Dictionary<string, TagSet> dictionary3 = new Dictionary<string, TagSet>();
 			World world = WorldGen.Settings.GetWorld();
@@ -879,7 +907,7 @@ namespace ProcGen
 			}
 			if (points.Count < num)
 			{
-				string text = string.Empty;
+				string text = "";
 				for (int l = 0; l < node.site.poly.Vertices.Count; l++)
 				{
 					text = text + node.site.poly.Vertices[l] + ", ";
@@ -887,116 +915,118 @@ namespace ProcGen
 				if (WorldGen.isRunningDebugGen)
 				{
 				}
-				return;
 			}
-			int m = 0;
-			for (int n = 0; n < sw.features.Count; n++)
+			else
 			{
-				Feature feature = sw.features[n];
-				TerrainFeature terrainFeature = null;
-				TagSet tagSet5 = new TagSet(feature.tags.ToArray());
-				if (WorldGen.Settings.features.TerrainFeatures.ContainsKey(feature.type) && WorldGen.Settings.features.TerrainFeatures[feature.type] != null)
+				int m = 0;
+				for (int n = 0; n < sw.features.Count; n++)
 				{
-					terrainFeature = WorldGen.Settings.features.TerrainFeatures[feature.type];
-					if (terrainFeature.tags != null)
+					Feature feature = sw.features[n];
+					TerrainFeature terrainFeature = null;
+					TagSet tagSet5 = new TagSet(feature.tags.ToArray());
+					if (WorldGen.Settings.features.TerrainFeatures.ContainsKey(feature.type) && WorldGen.Settings.features.TerrainFeatures[feature.type] != null)
 					{
-						tagSet5.Union(new TagSet(terrainFeature.tags.ToArray()));
-					}
-				}
-				if (feature.excludesTags != null && feature.excludesTags.Count > 0)
-				{
-					tagSet5.Remove(new TagSet(feature.excludesTags.ToArray()));
-				}
-				tagSet5.Add(new Tag(feature.type));
-				tagSet5.Add(WorldGenTags.Feature);
-				TagSet tagSet6 = new TagSet();
-				if (terrainFeature != null)
-				{
-					Feature defaultBiome = terrainFeature.defaultBiome;
-					if (defaultBiome.tags != null)
-					{
-						TagSet tagSet7 = new TagSet(defaultBiome.tags);
-						tagSet6.Union(tagSet7);
-						tagSet5.Union(tagSet7);
-					}
-					foreach (WeightedBiome weightedBiome2 in sw.biomes)
-					{
-						if (weightedBiome2.name == defaultBiome.type)
+						terrainFeature = WorldGen.Settings.features.TerrainFeatures[feature.type];
+						if (terrainFeature.tags != null)
 						{
-							tagSet5.Add(new Tag(defaultBiome.type));
-							if (weightedBiome2.tags != null)
-							{
-								TagSet tagSet8 = new TagSet(weightedBiome2.tags);
-								tagSet6.Union(tagSet8);
-								tagSet5.Union(tagSet8);
-							}
-							break;
+							tagSet5.Union(new TagSet(terrainFeature.tags.ToArray()));
 						}
 					}
-				}
-				if (feature.type.Contains(WorldGenTags.River.Name) && m + 2 < points.Count)
-				{
-					ProcGen.Node node3 = graph.AddNode(feature.type);
-					node3.biomeSpecificTags = new TagSet(tagSet6);
-					global::VoronoiTree.Node node4 = node.AddSite(new Diagram.Site((uint)node3.node.Id, node3.position, 1f), global::VoronoiTree.Node.NodeType.Internal);
-					node4.tags = new TagSet(tagSet5);
-					node3.SetPosition(points[m++]);
-					ProcGen.Node node5 = graph.AddNode(feature.type);
-					node5.biomeSpecificTags = new TagSet(tagSet6);
-					global::VoronoiTree.Node node6 = node.AddSite(new Diagram.Site((uint)node5.node.Id, node5.position, 1f), global::VoronoiTree.Node.NodeType.Internal);
-					node6.tags = new TagSet(tagSet5);
-					node5.SetPosition(points[m++]);
-					graph.AddArc(node3, node5, feature.type);
-				}
-				else if (m < points.Count)
-				{
-					ProcGen.Node node7 = graph.AddNode(feature.type);
-					node7.biomeSpecificTags = new TagSet(tagSet6);
-					node7.SetPosition((!(feature.type == WorldGenTags.StartLocation.Name)) ? points[m++] : node.site.poly.Centroid());
-					global::VoronoiTree.Node node8 = node.AddSite(new Diagram.Site((uint)node7.node.Id, node7.position, 1f), global::VoronoiTree.Node.NodeType.Internal);
-					node8.tags = new TagSet(tagSet5);
-				}
-			}
-			if (sw.features.Count > points.Count)
-			{
-			}
-			while (m < points.Count)
-			{
-				TagSet tagSet9 = null;
-				string text2;
-				if (sw.biomes.Count > 0)
-				{
-					WeightedBiome weightedBiome3 = WeightedRandom.Choose<WeightedBiome>(sw.biomes, seededRandom);
-					text2 = weightedBiome3.name;
-					if (weightedBiome3.tags != null && weightedBiome3.tags.Count > 0)
+					if (feature.excludesTags != null && feature.excludesTags.Count > 0)
 					{
-						tagSet9 = new TagSet(weightedBiome3.tags);
+						tagSet5.Remove(new TagSet(feature.excludesTags.ToArray()));
+					}
+					tagSet5.Add(new Tag(feature.type));
+					tagSet5.Add(WorldGenTags.Feature);
+					TagSet tagSet6 = new TagSet();
+					if (terrainFeature != null)
+					{
+						Feature defaultBiome = terrainFeature.defaultBiome;
+						if (defaultBiome.tags != null)
+						{
+							TagSet tagSet7 = new TagSet(defaultBiome.tags);
+							tagSet6.Union(tagSet7);
+							tagSet5.Union(tagSet7);
+						}
+						foreach (WeightedBiome weightedBiome2 in sw.biomes)
+						{
+							if (weightedBiome2.name == defaultBiome.type)
+							{
+								tagSet5.Add(new Tag(defaultBiome.type));
+								if (weightedBiome2.tags != null)
+								{
+									TagSet tagSet8 = new TagSet(weightedBiome2.tags);
+									tagSet6.Union(tagSet8);
+									tagSet5.Union(tagSet8);
+								}
+								break;
+							}
+						}
+					}
+					if (feature.type.Contains(WorldGenTags.River.Name) && m + 2 < points.Count)
+					{
+						ProcGen.Node node3 = graph.AddNode(feature.type);
+						node3.biomeSpecificTags = new TagSet(tagSet6);
+						global::VoronoiTree.Node node4 = node.AddSite(new Diagram.Site((uint)node3.node.Id, node3.position, 1f), global::VoronoiTree.Node.NodeType.Internal);
+						node4.tags = new TagSet(tagSet5);
+						node3.SetPosition(points[m++]);
+						ProcGen.Node node5 = graph.AddNode(feature.type);
+						node5.biomeSpecificTags = new TagSet(tagSet6);
+						global::VoronoiTree.Node node6 = node.AddSite(new Diagram.Site((uint)node5.node.Id, node5.position, 1f), global::VoronoiTree.Node.NodeType.Internal);
+						node6.tags = new TagSet(tagSet5);
+						node5.SetPosition(points[m++]);
+						graph.AddArc(node3, node5, feature.type);
+					}
+					else if (m < points.Count)
+					{
+						ProcGen.Node node7 = graph.AddNode(feature.type);
+						node7.biomeSpecificTags = new TagSet(tagSet6);
+						node7.SetPosition((!(feature.type == WorldGenTags.StartLocation.Name)) ? points[m++] : node.site.poly.Centroid());
+						global::VoronoiTree.Node node8 = node.AddSite(new Diagram.Site((uint)node7.node.Id, node7.position, 1f), global::VoronoiTree.Node.NodeType.Internal);
+						node8.tags = new TagSet(tagSet5);
 					}
 				}
-				else
+				if (sw.features.Count > points.Count)
 				{
-					text2 = WorldLayout.GetNodeTypeFromLayers(points[m], worldHeight, seededRandom);
 				}
-				ProcGen.Node node9 = graph.AddNode(text2);
-				node9.biomeSpecificTags = tagSet9;
-				node9.SetPosition(points[m]);
-				global::VoronoiTree.Node node10 = node.AddSite(new Diagram.Site((uint)node9.node.Id, node9.position, 1f), global::VoronoiTree.Node.NodeType.Internal);
-				node10.tags = new TagSet(tagSet3);
-				if (tagSet9 != null)
+				while (m < points.Count)
 				{
-					node10.tags.Union(tagSet9);
+					TagSet tagSet9 = null;
+					string text2;
+					if (sw.biomes.Count > 0)
+					{
+						WeightedBiome weightedBiome3 = WeightedRandom.Choose<WeightedBiome>(sw.biomes, seededRandom);
+						text2 = weightedBiome3.name;
+						if (weightedBiome3.tags != null && weightedBiome3.tags.Count > 0)
+						{
+							tagSet9 = new TagSet(weightedBiome3.tags);
+						}
+					}
+					else
+					{
+						text2 = WorldLayout.GetNodeTypeFromLayers(points[m], worldHeight, seededRandom);
+					}
+					ProcGen.Node node9 = graph.AddNode(text2);
+					node9.biomeSpecificTags = tagSet9;
+					node9.SetPosition(points[m]);
+					global::VoronoiTree.Node node10 = node.AddSite(new Diagram.Site((uint)node9.node.Id, node9.position, 1f), global::VoronoiTree.Node.NodeType.Internal);
+					node10.tags = new TagSet(tagSet3);
+					if (tagSet9 != null)
+					{
+						node10.tags.Union(tagSet9);
+					}
+					node10.AddTag(new Tag(text2));
+					m++;
 				}
-				node10.AddTag(new Tag(text2));
-				m++;
-			}
-			node.ComputeChildren(seededRandom.seed + 1, false, false);
-			if (node.ChildCount() > 0)
-			{
-				for (int num2 = 0; num2 < tagSet2.Count; num2++)
+				node.ComputeChildren(seededRandom.seed + 1, false, false);
+				if (node.ChildCount() > 0)
 				{
-					global::Debug.Log(string.Format("Applying Moved Tag {0} to {1}", tagSet2[num2].Name, node.site.id), null);
-					global::VoronoiTree.Node child = node.GetChild(seededRandom.RandomSource().Next(node.ChildCount()));
-					child.AddTag(tagSet2[num2]);
+					for (int num2 = 0; num2 < tagSet2.Count; num2++)
+					{
+						global::Debug.Log(string.Format("Applying Moved Tag {0} to {1}", tagSet2[num2].Name, node.site.id), null);
+						global::VoronoiTree.Node child = node.GetChild(seededRandom.RandomSource().Next(node.ChildCount()));
+						child.AddTag(tagSet2[num2]);
+					}
 				}
 			}
 		}
@@ -1207,10 +1237,22 @@ namespace ProcGen
 			this.voronoiTree.GetIntersectingLeafNodes(this.topEdge, list);
 			this.voronoiTree.GetIntersectingLeafNodes(this.bottomEdge, list2);
 			TagSet tagSet = new TagSet();
-			foreach (object obj in Enum.GetValues(typeof(Temperature.Range)))
+			IEnumerator enumerator = Enum.GetValues(typeof(Temperature.Range)).GetEnumerator();
+			try
 			{
-				Temperature.Range range = (Temperature.Range)((int)obj);
-				tagSet.Add(new Tag(range.ToString()));
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					tagSet.Add(new Tag(((Temperature.Range)obj).ToString()));
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = enumerator as IDisposable) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 			Tag tag = new Tag(Temperature.Range.VeryCold.ToString());
 			for (int i = 0; i < list.Count; i++)
@@ -1233,12 +1275,17 @@ namespace ProcGen
 		private bool StartAreaTooLarge(global::VoronoiTree.Node node)
 		{
 			bool flag = node.tags.Contains(WorldGenTags.StartWorld);
+			bool flag2;
 			if (flag)
 			{
 				float num = node.site.poly.Area();
-				return num > 2000f;
+				flag2 = num > 2000f;
 			}
-			return false;
+			else
+			{
+				flag2 = false;
+			}
+			return flag2;
 		}
 
 		private void SplitLargeStartingSites()
@@ -1325,12 +1372,17 @@ namespace ProcGen
 				node2 = this.localGraph.FindNode((ProcGen.Node node) => (uint)node.node.Id == nodes[0].site.id);
 				node2.tags.Add(WorldGenTags.StartLocation);
 			}
+			Vector2I vector2I;
 			if (node2 == null)
 			{
 				global::Debug.LogWarning("Couldnt find start node", null);
-				return new Vector2I(this.mapWidth / 2, this.mapHeight / 2);
+				vector2I = new Vector2I(this.mapWidth / 2, this.mapHeight / 2);
 			}
-			return new Vector2I((int)node2.position.x, (int)node2.position.y);
+			else
+			{
+				vector2I = new Vector2I((int)node2.position.x, (int)node2.position.y);
+			}
+			return vector2I;
 		}
 
 		public List<River> GetRivers()
@@ -1447,14 +1499,16 @@ namespace ProcGen
 					this.voronoiTree.GetInternalNodes(this.extra.internals);
 					List<global::VoronoiTree.Node> list = new List<global::VoronoiTree.Node>();
 					this.voronoiTree.GetLeafNodes(list, null);
-					Leaf ln;
-					foreach (global::VoronoiTree.Node node in list)
+					using (List<global::VoronoiTree.Node>.Enumerator enumerator = list.GetEnumerator())
 					{
-						ln = (Leaf)node;
-						if (ln != null)
+						while (enumerator.MoveNext())
 						{
-							this.extra.leafInternalParent.Add(new KeyValuePair<int, int>(this.extra.leafs.Count, this.extra.internals.FindIndex(0, (global::VoronoiTree.Tree n) => n == ln.parent)));
-							this.extra.leafs.Add(ln);
+							Leaf ln = (Leaf)enumerator.Current;
+							if (ln != null)
+							{
+								this.extra.leafInternalParent.Add(new KeyValuePair<int, int>(this.extra.leafs.Count, this.extra.internals.FindIndex(0, (global::VoronoiTree.Tree n) => n == ln.parent)));
+								this.extra.leafs.Add(ln);
+							}
 						}
 					}
 					for (int i = 0; i < this.extra.internals.Count; i++)
@@ -1523,7 +1577,7 @@ namespace ProcGen
 			this.extra = null;
 		}
 
-		private global::VoronoiTree.Tree voronoiTree;
+		private global::VoronoiTree.Tree voronoiTree = null;
 
 		[Serialize]
 		public MapGraph localGraph;
@@ -1542,10 +1596,10 @@ namespace ProcGen
 
 		private LineSegment rightEdge;
 
-		private SeededRandom myRandom;
+		private SeededRandom myRandom = null;
 
 		[Serialize]
-		private WorldLayout.ExtraIO extra;
+		private WorldLayout.ExtraIO extra = null;
 
 		[Flags]
 		public enum DebugFlags

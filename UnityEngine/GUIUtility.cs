@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using UnityEngine.Scripting;
 
@@ -49,6 +50,8 @@ namespace UnityEngine
 			return GUIStateObjects.QueryStateObject(t, controlID);
 		}
 
+		internal static bool guiIsExiting { get; set; }
+
 		public static int hotControl
 		{
 			get
@@ -61,8 +64,21 @@ namespace UnityEngine
 			}
 		}
 
+		public static int keyboardControl
+		{
+			get
+			{
+				return GUIUtility.Internal_GetKeyboardControl();
+			}
+			set
+			{
+				GUIUtility.Internal_SetKeyboardControl(value);
+			}
+		}
+
 		public static void ExitGUI()
 		{
+			GUIUtility.guiIsExiting = true;
 			throw new ExitGUIException();
 		}
 
@@ -77,14 +93,24 @@ namespace UnityEngine
 		}
 
 		[RequiredByNativeCode]
+		internal static bool ProcessEvent(int instanceID, IntPtr nativeEventPtr)
+		{
+			return false;
+		}
+
+		internal static void CleanupRoots()
+		{
+		}
+
+		[RequiredByNativeCode]
 		internal static void BeginGUI(int skinMode, int instanceID, int useGUILayout)
 		{
 			GUIUtility.s_SkinMode = skinMode;
 			GUIUtility.s_OriginalID = instanceID;
 			GUI.skin = null;
+			GUIUtility.guiIsExiting = false;
 			if (useGUILayout != 0)
 			{
-				GUILayoutUtility.SelectIDList(instanceID, false);
 				GUILayoutUtility.Begin(instanceID);
 			}
 			GUI.changed = false;
@@ -97,14 +123,19 @@ namespace UnityEngine
 			{
 				if (Event.current.type == EventType.Layout)
 				{
-					switch (layoutType)
+					if (layoutType != 0)
 					{
-					case 1:
-						GUILayoutUtility.Layout();
-						break;
-					case 2:
-						GUILayoutUtility.LayoutFromEditorWindow();
-						break;
+						if (layoutType != 1)
+						{
+							if (layoutType == 2)
+							{
+								GUILayoutUtility.LayoutFromEditorWindow();
+							}
+						}
+						else
+						{
+							GUILayoutUtility.Layout();
+						}
 					}
 				}
 				GUILayoutUtility.SelectIDList(GUIUtility.s_OriginalID, false);
@@ -119,16 +150,23 @@ namespace UnityEngine
 		[RequiredByNativeCode]
 		internal static bool EndGUIFromException(Exception exception)
 		{
-			if (exception == null)
-			{
-				return false;
-			}
-			if (!(exception is ExitGUIException) && !(exception.InnerException is ExitGUIException))
-			{
-				return false;
-			}
 			GUIUtility.Internal_ExitGUI();
-			return true;
+			return GUIUtility.ShouldRethrowException(exception);
+		}
+
+		[RequiredByNativeCode]
+		internal static bool EndContainerGUIFromException(Exception exception)
+		{
+			return GUIUtility.ShouldRethrowException(exception);
+		}
+
+		internal static bool ShouldRethrowException(Exception exception)
+		{
+			while (exception is TargetInvocationException && exception.InnerException != null)
+			{
+				exception = exception.InnerException;
+			}
+			return exception is ExitGUIException;
 		}
 
 		internal static void CheckOnGUI()
@@ -182,11 +220,11 @@ namespace UnityEngine
 			GUI.matrix = matrix4x * matrix;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern float Internal_GetPixelsPerPoint();
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int GetControlID(int hint, FocusType focus);
 
@@ -195,99 +233,111 @@ namespace UnityEngine
 			return GUIUtility.INTERNAL_CALL_Internal_GetNextControlID2(hint, focusType, ref rect);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int INTERNAL_CALL_Internal_GetNextControlID2(int hint, FocusType focusType, ref Rect rect);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern int GetPermanentControlID();
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int Internal_GetHotControl();
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_SetHotControl(int value);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void UpdateUndoName();
 
-		public static extern int keyboardControl
-		{
-			[WrapperlessIcall]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[WrapperlessIcall]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
-		}
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern bool GetChanged();
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void SetChanged(bool changed);
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int Internal_GetKeyboardControl();
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_SetKeyboardControl(int value);
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void SetDidGUIWindowsEatLastEvent(bool value);
 
 		public static extern string systemCopyBuffer
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern GUISkin Internal_GetDefaultSkin(int skinMode);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern Object Internal_GetBuiltinSkin(int skin);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_ExitGUI();
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern int Internal_GetGUIDepth();
 
 		internal static extern bool mouseUsed
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		public static extern bool hasModalWindow
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		internal static extern bool textFieldInput
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_BeginContainer(int instanceID);
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void Internal_EndContainer();
 
 		internal static int s_SkinMode;
 
 		internal static int s_OriginalID;
 
 		internal static Vector2 s_EditorScreenPointOffset = Vector2.zero;
-
-		internal static bool s_HasKeyboardFocus = false;
 	}
 }

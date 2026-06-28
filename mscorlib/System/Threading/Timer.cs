@@ -169,7 +169,7 @@ namespace System.Threading
 				long num = timer.next_run - timer2.next_run;
 				if (num == 0L)
 				{
-					return (x != y) ? (-1) : 0;
+					return 0;
 				}
 				return (num <= 0L) ? (-1) : 1;
 			}

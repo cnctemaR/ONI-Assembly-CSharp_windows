@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
@@ -16,37 +17,39 @@ public class BuildToolHoverTextCard : HoverTextConfiguration
 		if (instance.LoadPreConfiguredToolFields(this))
 		{
 			this.isConfigured = true;
-			return;
 		}
-		instance.ToggleIncubating(true);
-		instance.currentConfiguration = this;
-		instance.ClearLabels();
-		instance.NewLine("Spacer", 24);
-		instance.StartShadowBar(0f, 0f, false);
-		if (this.printTitle)
+		else
 		{
-			this.ConfigureTitle(instance);
+			instance.ToggleIncubating(true);
+			instance.currentConfiguration = this;
+			instance.ClearLabels();
+			instance.NewLine("Spacer", 24);
+			instance.StartShadowBar(0f, 0f, false);
+			if (this.printTitle)
+			{
+				this.ConfigureTitle(instance);
+			}
+			this.ConfigureInstructions(instance);
+			instance.NewLine("BuildWarning", num);
+			instance.AddIndent(8f, 18f);
+			this.BuildWarningText = instance.AddText("", this.HoverTextStyleSettings[1], false);
+			this.RotateLine = instance.NewLine("RotateLine", num);
+			instance.AddIndent(8f, 18f);
+			instance.AddText(UI.TOOLTIPS.HELP_ROTATE_KEY, this.Styles_Instruction.Standard, false);
+			base.SetLineActive(this.BuildWarningText.transform.parent.gameObject, false);
+			base.SetLineActive(this.RotateLine, false);
+			instance.NewLine("Power", num);
+			instance.AddIndent(8f, 18f);
+			this.PowerText = instance.AddText("", this.Styles_BodyText.Standard, false);
+			instance.NewLine("MaterialsRemaining", num);
+			instance.AddIndent(8f, 18f);
+			this.MaterialsRemainingText = instance.AddText("", this.Styles_BodyText.Standard, false);
+			instance.EndShadowBar();
+			this.isConfigured = true;
 		}
-		this.ConfigureInstructions(instance);
-		instance.NewLine("BuildWarning", num);
-		instance.AddIndent(8f, 18f);
-		this.BuildWarningText = instance.AddText(string.Empty, this.HoverTextStyleSettings[1], false);
-		this.RotateLine = instance.NewLine("RotateLine", num);
-		instance.AddIndent(8f, 18f);
-		instance.AddText(UI.TOOLTIPS.HELP_ROTATE_KEY, this.Styles_Instruction.Standard, false);
-		base.SetLineActive(this.BuildWarningText.transform.parent.gameObject, false);
-		base.SetLineActive(this.RotateLine, false);
-		instance.NewLine("Power", num);
-		instance.AddIndent(8f, 18f);
-		this.PowerText = instance.AddText(string.Empty, this.Styles_BodyText.Standard, false);
-		instance.NewLine("MaterialsRemaining", num);
-		instance.AddIndent(8f, 18f);
-		this.MaterialsRemainingText = instance.AddText(string.Empty, this.Styles_BodyText.Standard, false);
-		instance.EndShadowBar();
-		this.isConfigured = true;
 	}
 
-	public override void UpdateHoverElements(KSelectable[] hoverObjects_dont_use_this_is_null)
+	public override void UpdateHoverElements(List<KSelectable> hoverObjects_dont_use_this_is_null)
 	{
 		base.UpdateHoverElements(hoverObjects_dont_use_this_is_null);
 		if (!this.isConfigured || this.RotateLine == null)

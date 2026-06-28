@@ -31,13 +31,19 @@ public class StandardAmountDisplayer : IAmountDisplayer, IAttributeFormatter
 
 	public virtual string GetValueString(Amount master, AmountInstance instance)
 	{
+		string text;
 		if (!master.showMax)
 		{
 			StandardAttributeFormatter standardAttributeFormatter = this.formatter;
+			float value = instance.value;
 			GameObject gameObject = instance.gameObject;
-			return standardAttributeFormatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None, gameObject);
+			text = standardAttributeFormatter.GetFormattedValue(value, GameUtil.TimeSlice.None, gameObject);
 		}
-		return string.Format("{0} / {1}", this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None, null), this.formatter.GetFormattedValue(instance.GetMax(), GameUtil.TimeSlice.None, null));
+		else
+		{
+			text = string.Format("{0} / {1}", this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None, null), this.formatter.GetFormattedValue(instance.GetMax(), GameUtil.TimeSlice.None, null));
+		}
+		return text;
 	}
 
 	public virtual string GetDescription(Amount master, AmountInstance instance)

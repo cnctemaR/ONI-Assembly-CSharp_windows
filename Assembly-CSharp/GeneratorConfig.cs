@@ -6,8 +6,19 @@ public class GeneratorConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER5;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Generator", 3, 3, "generatorphos_kanim", 400f, 100, 120f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER5, MATERIALS.ALL_METALS, 2400f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, tier);
+		string text = "Generator";
+		int num = 3;
+		int num2 = 3;
+		string text2 = "generatorphos_kanim";
+		float num3 = 400f;
+		int num4 = 100;
+		float num5 = 120f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER5;
+		string[] all_METALS = MATERIALS.ALL_METALS;
+		float num6 = 2400f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER5;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER2, tier2);
 		buildingDef.GeneratorWattageRating = 600f;
 		buildingDef.GeneratorBaseCapacity = 20000f;
 		buildingDef.ExhaustKilowattsWhenActive = 8f;
@@ -17,6 +28,7 @@ public class GeneratorConfig : IBuildingConfig
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.AudioSize = "large";
 		buildingDef.Upgradeable = false;
+		buildingDef.HotKey = global::Action.BuildMenuKeyC;
 		return buildingDef;
 	}
 
@@ -26,11 +38,10 @@ public class GeneratorConfig : IBuildingConfig
 		EnergyGenerator energyGenerator = go.AddOrGet<EnergyGenerator>();
 		energyGenerator.formula = EnergyGenerator.CreateSimpleFormula(SimHashes.Carbon, 1f, 500f, SimHashes.Void, 0f, true);
 		energyGenerator.meterOffset = Meter.Offset.Behind;
-		energyGenerator.SingleSliderPercent = 0.5f;
+		energyGenerator.SetSliderValue(50f, 0);
 		energyGenerator.powerDistributionOrder = 9;
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 500f;
-		storage.disableOnStore = true;
 		go.AddOrGet<LoopingSounds>();
 		Prioritizable.AddRef(go);
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();

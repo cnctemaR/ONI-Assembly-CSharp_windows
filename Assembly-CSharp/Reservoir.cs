@@ -23,7 +23,7 @@ public class Reservoir : KMonoBehaviour
 		{
 			this.OnFilterChanged(this.filterable.GetTags());
 		}));
-		this.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
+		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
 		this.OnStorageChange(null);
 	}
 
@@ -48,24 +48,22 @@ public class Reservoir : KMonoBehaviour
 			this.fetchList = null;
 		}
 		BuildingEnabledButton component2 = base.GetComponent<BuildingEnabledButton>();
-		if (component2 != null && !component2.IsEnabled)
+		if (!(component2 != null) || component2.IsEnabled)
 		{
-			return;
+			Storage component3 = base.GetComponent<Storage>();
+			int num = (int)component3.RemainingCapacity();
+			if (num > 0)
+			{
+				if (flag)
+				{
+					this.fetchList = new FetchList2(component3);
+					this.fetchList.ShowStatusItem = false;
+					this.fetchList.Add(tags, null, (float)num, FetchOrder2.OperationalRequirement.None);
+					this.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
+				}
+				base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.NoStorageFilterSet, !flag, this);
+			}
 		}
-		Storage component3 = base.GetComponent<Storage>();
-		int num = (int)component3.RemainingCapacity();
-		if (num <= 0)
-		{
-			return;
-		}
-		if (flag)
-		{
-			this.fetchList = new FetchList2(component3);
-			this.fetchList.ShowStatusItem = false;
-			this.fetchList.Add(tags, null, (float)num, FetchOrder2.OperationalRequirement.None);
-			this.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
-		}
-		base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.NoStorageFilterSet, !flag, this);
 	}
 
 	private void OnFetchComplete()

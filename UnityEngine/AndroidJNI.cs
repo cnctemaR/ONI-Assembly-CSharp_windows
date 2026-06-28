@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
@@ -9,580 +10,1010 @@ namespace UnityEngine
 		{
 		}
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int AttachCurrentThread();
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int DetachCurrentThread();
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int GetVersion();
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr FindClass(string name);
+		[ThreadAndSerializationSafe]
+		public static IntPtr FindClass(string name)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_FindClass(name, out intPtr);
+			return intPtr;
+		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr FromReflectedMethod(IntPtr refMethod);
+		private static extern void INTERNAL_CALL_FindClass(string name, out IntPtr value);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		public static IntPtr FromReflectedMethod(IntPtr refMethod)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_FromReflectedMethod(refMethod, out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr FromReflectedField(IntPtr refField);
+		private static extern void INTERNAL_CALL_FromReflectedMethod(IntPtr refMethod, out IntPtr value);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		public static IntPtr FromReflectedField(IntPtr refField)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_FromReflectedField(refField, out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr ToReflectedMethod(IntPtr clazz, IntPtr methodID, bool isStatic);
+		private static extern void INTERNAL_CALL_FromReflectedField(IntPtr refField, out IntPtr value);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		public static IntPtr ToReflectedMethod(IntPtr clazz, IntPtr methodID, bool isStatic)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_ToReflectedMethod(clazz, methodID, isStatic, out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr ToReflectedField(IntPtr clazz, IntPtr fieldID, bool isStatic);
+		private static extern void INTERNAL_CALL_ToReflectedMethod(IntPtr clazz, IntPtr methodID, bool isStatic, out IntPtr value);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		public static IntPtr ToReflectedField(IntPtr clazz, IntPtr fieldID, bool isStatic)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_ToReflectedField(clazz, fieldID, isStatic, out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr GetSuperclass(IntPtr clazz);
+		private static extern void INTERNAL_CALL_ToReflectedField(IntPtr clazz, IntPtr fieldID, bool isStatic, out IntPtr value);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		public static IntPtr GetSuperclass(IntPtr clazz)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_GetSuperclass(clazz, out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_GetSuperclass(IntPtr clazz, out IntPtr value);
+
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool IsAssignableFrom(IntPtr clazz1, IntPtr clazz2);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int Throw(IntPtr obj);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int ThrowNew(IntPtr clazz, string message);
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr ExceptionOccurred();
+		[ThreadAndSerializationSafe]
+		public static IntPtr ExceptionOccurred()
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_ExceptionOccurred(out intPtr);
+			return intPtr;
+		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_ExceptionOccurred(out IntPtr value);
+
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void ExceptionDescribe();
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void ExceptionClear();
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void FatalError(string message);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int PushLocalFrame(int capacity);
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr PopLocalFrame(IntPtr result);
+		[ThreadAndSerializationSafe]
+		public static IntPtr PopLocalFrame(IntPtr ptr)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_PopLocalFrame(ptr, out intPtr);
+			return intPtr;
+		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr NewGlobalRef(IntPtr obj);
+		private static extern void INTERNAL_CALL_PopLocalFrame(IntPtr ptr, out IntPtr value);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		public static IntPtr NewGlobalRef(IntPtr obj)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_NewGlobalRef(obj, out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_NewGlobalRef(IntPtr obj, out IntPtr value);
+
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void DeleteGlobalRef(IntPtr obj);
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr NewLocalRef(IntPtr obj);
+		[ThreadAndSerializationSafe]
+		public static IntPtr NewLocalRef(IntPtr obj)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_NewLocalRef(obj, out intPtr);
+			return intPtr;
+		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_NewLocalRef(IntPtr obj, out IntPtr value);
+
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void DeleteLocalRef(IntPtr obj);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool IsSameObject(IntPtr obj1, IntPtr obj2);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int EnsureLocalCapacity(int capacity);
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr AllocObject(IntPtr clazz);
+		[ThreadAndSerializationSafe]
+		public static IntPtr AllocObject(IntPtr clazz)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_AllocObject(clazz, out intPtr);
+			return intPtr;
+		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr NewObject(IntPtr clazz, IntPtr methodID, jvalue[] args);
+		private static extern void INTERNAL_CALL_AllocObject(IntPtr clazz, out IntPtr value);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		public static IntPtr NewObject(IntPtr clazz, IntPtr methodID, jvalue[] args)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_NewObject(clazz, methodID, args, out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr GetObjectClass(IntPtr obj);
+		private static extern void INTERNAL_CALL_NewObject(IntPtr clazz, IntPtr methodID, jvalue[] args, out IntPtr value);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		public static IntPtr GetObjectClass(IntPtr obj)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_GetObjectClass(obj, out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_GetObjectClass(IntPtr obj, out IntPtr value);
+
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool IsInstanceOf(IntPtr obj, IntPtr clazz);
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr GetMethodID(IntPtr clazz, string name, string sig);
+		[ThreadAndSerializationSafe]
+		public static IntPtr GetMethodID(IntPtr clazz, string name, string sig)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_GetMethodID(clazz, name, sig, out intPtr);
+			return intPtr;
+		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr GetFieldID(IntPtr clazz, string name, string sig);
+		private static extern void INTERNAL_CALL_GetMethodID(IntPtr clazz, string name, string sig, out IntPtr value);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		public static IntPtr GetFieldID(IntPtr clazz, string name, string sig)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_GetFieldID(clazz, name, sig, out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr GetStaticMethodID(IntPtr clazz, string name, string sig);
+		private static extern void INTERNAL_CALL_GetFieldID(IntPtr clazz, string name, string sig, out IntPtr value);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		public static IntPtr GetStaticMethodID(IntPtr clazz, string name, string sig)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_GetStaticMethodID(clazz, name, sig, out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr GetStaticFieldID(IntPtr clazz, string name, string sig);
+		private static extern void INTERNAL_CALL_GetStaticMethodID(IntPtr clazz, string name, string sig, out IntPtr value);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		public static IntPtr GetStaticFieldID(IntPtr clazz, string name, string sig)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_GetStaticFieldID(clazz, name, sig, out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr NewStringUTF(string bytes);
+		private static extern void INTERNAL_CALL_GetStaticFieldID(IntPtr clazz, string name, string sig, out IntPtr value);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		public static IntPtr NewStringUTF(string bytes)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_NewStringUTF(bytes, out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_NewStringUTF(string bytes, out IntPtr value);
+
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int GetStringUTFLength(IntPtr str);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern string GetStringUTFChars(IntPtr str);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern string CallStringMethod(IntPtr obj, IntPtr methodID, jvalue[] args);
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr CallObjectMethod(IntPtr obj, IntPtr methodID, jvalue[] args);
+		[ThreadAndSerializationSafe]
+		public static IntPtr CallObjectMethod(IntPtr obj, IntPtr methodID, jvalue[] args)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_CallObjectMethod(obj, methodID, args, out intPtr);
+			return intPtr;
+		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_CallObjectMethod(IntPtr obj, IntPtr methodID, jvalue[] args, out IntPtr value);
+
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int CallIntMethod(IntPtr obj, IntPtr methodID, jvalue[] args);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool CallBooleanMethod(IntPtr obj, IntPtr methodID, jvalue[] args);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern short CallShortMethod(IntPtr obj, IntPtr methodID, jvalue[] args);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern byte CallByteMethod(IntPtr obj, IntPtr methodID, jvalue[] args);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern char CallCharMethod(IntPtr obj, IntPtr methodID, jvalue[] args);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern float CallFloatMethod(IntPtr obj, IntPtr methodID, jvalue[] args);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern double CallDoubleMethod(IntPtr obj, IntPtr methodID, jvalue[] args);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern long CallLongMethod(IntPtr obj, IntPtr methodID, jvalue[] args);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void CallVoidMethod(IntPtr obj, IntPtr methodID, jvalue[] args);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern string GetStringField(IntPtr obj, IntPtr fieldID);
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr GetObjectField(IntPtr obj, IntPtr fieldID);
+		[ThreadAndSerializationSafe]
+		public static IntPtr GetObjectField(IntPtr obj, IntPtr fieldID)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_GetObjectField(obj, fieldID, out intPtr);
+			return intPtr;
+		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_GetObjectField(IntPtr obj, IntPtr fieldID, out IntPtr value);
+
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool GetBooleanField(IntPtr obj, IntPtr fieldID);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern byte GetByteField(IntPtr obj, IntPtr fieldID);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern char GetCharField(IntPtr obj, IntPtr fieldID);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern short GetShortField(IntPtr obj, IntPtr fieldID);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int GetIntField(IntPtr obj, IntPtr fieldID);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern long GetLongField(IntPtr obj, IntPtr fieldID);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern float GetFloatField(IntPtr obj, IntPtr fieldID);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern double GetDoubleField(IntPtr obj, IntPtr fieldID);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetStringField(IntPtr obj, IntPtr fieldID, string val);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetObjectField(IntPtr obj, IntPtr fieldID, IntPtr val);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetBooleanField(IntPtr obj, IntPtr fieldID, bool val);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetByteField(IntPtr obj, IntPtr fieldID, byte val);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetCharField(IntPtr obj, IntPtr fieldID, char val);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetShortField(IntPtr obj, IntPtr fieldID, short val);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetIntField(IntPtr obj, IntPtr fieldID, int val);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetLongField(IntPtr obj, IntPtr fieldID, long val);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetFloatField(IntPtr obj, IntPtr fieldID, float val);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetDoubleField(IntPtr obj, IntPtr fieldID, double val);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern string CallStaticStringMethod(IntPtr clazz, IntPtr methodID, jvalue[] args);
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr CallStaticObjectMethod(IntPtr clazz, IntPtr methodID, jvalue[] args);
+		[ThreadAndSerializationSafe]
+		public static IntPtr CallStaticObjectMethod(IntPtr clazz, IntPtr methodID, jvalue[] args)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_CallStaticObjectMethod(clazz, methodID, args, out intPtr);
+			return intPtr;
+		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_CallStaticObjectMethod(IntPtr clazz, IntPtr methodID, jvalue[] args, out IntPtr value);
+
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int CallStaticIntMethod(IntPtr clazz, IntPtr methodID, jvalue[] args);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool CallStaticBooleanMethod(IntPtr clazz, IntPtr methodID, jvalue[] args);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern short CallStaticShortMethod(IntPtr clazz, IntPtr methodID, jvalue[] args);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern byte CallStaticByteMethod(IntPtr clazz, IntPtr methodID, jvalue[] args);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern char CallStaticCharMethod(IntPtr clazz, IntPtr methodID, jvalue[] args);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern float CallStaticFloatMethod(IntPtr clazz, IntPtr methodID, jvalue[] args);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern double CallStaticDoubleMethod(IntPtr clazz, IntPtr methodID, jvalue[] args);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern long CallStaticLongMethod(IntPtr clazz, IntPtr methodID, jvalue[] args);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void CallStaticVoidMethod(IntPtr clazz, IntPtr methodID, jvalue[] args);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern string GetStaticStringField(IntPtr clazz, IntPtr fieldID);
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr GetStaticObjectField(IntPtr clazz, IntPtr fieldID);
+		[ThreadAndSerializationSafe]
+		public static IntPtr GetStaticObjectField(IntPtr clazz, IntPtr fieldID)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_GetStaticObjectField(clazz, fieldID, out intPtr);
+			return intPtr;
+		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_GetStaticObjectField(IntPtr clazz, IntPtr fieldID, out IntPtr value);
+
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool GetStaticBooleanField(IntPtr clazz, IntPtr fieldID);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern byte GetStaticByteField(IntPtr clazz, IntPtr fieldID);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern char GetStaticCharField(IntPtr clazz, IntPtr fieldID);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern short GetStaticShortField(IntPtr clazz, IntPtr fieldID);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int GetStaticIntField(IntPtr clazz, IntPtr fieldID);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern long GetStaticLongField(IntPtr clazz, IntPtr fieldID);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern float GetStaticFloatField(IntPtr clazz, IntPtr fieldID);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern double GetStaticDoubleField(IntPtr clazz, IntPtr fieldID);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetStaticStringField(IntPtr clazz, IntPtr fieldID, string val);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetStaticObjectField(IntPtr clazz, IntPtr fieldID, IntPtr val);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetStaticBooleanField(IntPtr clazz, IntPtr fieldID, bool val);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetStaticByteField(IntPtr clazz, IntPtr fieldID, byte val);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetStaticCharField(IntPtr clazz, IntPtr fieldID, char val);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetStaticShortField(IntPtr clazz, IntPtr fieldID, short val);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetStaticIntField(IntPtr clazz, IntPtr fieldID, int val);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetStaticLongField(IntPtr clazz, IntPtr fieldID, long val);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetStaticFloatField(IntPtr clazz, IntPtr fieldID, float val);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetStaticDoubleField(IntPtr clazz, IntPtr fieldID, double val);
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr ToBooleanArray(bool[] array);
+		[ThreadAndSerializationSafe]
+		public static IntPtr ToBooleanArray(bool[] array)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_ToBooleanArray(array, out intPtr);
+			return intPtr;
+		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr ToByteArray(byte[] array);
+		private static extern void INTERNAL_CALL_ToBooleanArray(bool[] array, out IntPtr value);
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr ToCharArray(char[] array);
+		[ThreadAndSerializationSafe]
+		public static IntPtr ToByteArray(byte[] array)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_ToByteArray(array, out intPtr);
+			return intPtr;
+		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr ToShortArray(short[] array);
+		private static extern void INTERNAL_CALL_ToByteArray(byte[] array, out IntPtr value);
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr ToIntArray(int[] array);
+		[ThreadAndSerializationSafe]
+		public static IntPtr ToCharArray(char[] array)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_ToCharArray(array, out intPtr);
+			return intPtr;
+		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr ToLongArray(long[] array);
+		private static extern void INTERNAL_CALL_ToCharArray(char[] array, out IntPtr value);
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr ToFloatArray(float[] array);
+		[ThreadAndSerializationSafe]
+		public static IntPtr ToShortArray(short[] array)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_ToShortArray(array, out intPtr);
+			return intPtr;
+		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr ToDoubleArray(double[] array);
+		private static extern void INTERNAL_CALL_ToShortArray(short[] array, out IntPtr value);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		public static IntPtr ToIntArray(int[] array)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_ToIntArray(array, out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr ToObjectArray(IntPtr[] array, IntPtr arrayClass);
+		private static extern void INTERNAL_CALL_ToIntArray(int[] array, out IntPtr value);
+
+		[ThreadAndSerializationSafe]
+		public static IntPtr ToLongArray(long[] array)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_ToLongArray(array, out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_ToLongArray(long[] array, out IntPtr value);
+
+		[ThreadAndSerializationSafe]
+		public static IntPtr ToFloatArray(float[] array)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_ToFloatArray(array, out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_ToFloatArray(float[] array, out IntPtr value);
+
+		[ThreadAndSerializationSafe]
+		public static IntPtr ToDoubleArray(double[] array)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_ToDoubleArray(array, out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_ToDoubleArray(double[] array, out IntPtr value);
+
+		[ThreadAndSerializationSafe]
+		public static IntPtr ToObjectArray(IntPtr[] array, IntPtr arrayClass)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_ToObjectArray(array, arrayClass, out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_ToObjectArray(IntPtr[] array, IntPtr arrayClass, out IntPtr value);
 
 		public static IntPtr ToObjectArray(IntPtr[] array)
 		{
 			return AndroidJNI.ToObjectArray(array, IntPtr.Zero);
 		}
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool[] FromBooleanArray(IntPtr array);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern byte[] FromByteArray(IntPtr array);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern char[] FromCharArray(IntPtr array);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern short[] FromShortArray(IntPtr array);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int[] FromIntArray(IntPtr array);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern long[] FromLongArray(IntPtr array);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern float[] FromFloatArray(IntPtr array);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern double[] FromDoubleArray(IntPtr array);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern IntPtr[] FromObjectArray(IntPtr array);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int GetArrayLength(IntPtr array);
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr NewBooleanArray(int size);
+		[ThreadAndSerializationSafe]
+		public static IntPtr NewBooleanArray(int size)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_NewBooleanArray(size, out intPtr);
+			return intPtr;
+		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr NewByteArray(int size);
+		private static extern void INTERNAL_CALL_NewBooleanArray(int size, out IntPtr value);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		public static IntPtr NewByteArray(int size)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_NewByteArray(size, out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr NewCharArray(int size);
+		private static extern void INTERNAL_CALL_NewByteArray(int size, out IntPtr value);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		public static IntPtr NewCharArray(int size)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_NewCharArray(size, out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr NewShortArray(int size);
+		private static extern void INTERNAL_CALL_NewCharArray(int size, out IntPtr value);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		public static IntPtr NewShortArray(int size)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_NewShortArray(size, out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr NewIntArray(int size);
+		private static extern void INTERNAL_CALL_NewShortArray(int size, out IntPtr value);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		public static IntPtr NewIntArray(int size)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_NewIntArray(size, out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr NewLongArray(int size);
+		private static extern void INTERNAL_CALL_NewIntArray(int size, out IntPtr value);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		public static IntPtr NewLongArray(int size)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_NewLongArray(size, out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr NewFloatArray(int size);
+		private static extern void INTERNAL_CALL_NewLongArray(int size, out IntPtr value);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		public static IntPtr NewFloatArray(int size)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_NewFloatArray(size, out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr NewDoubleArray(int size);
+		private static extern void INTERNAL_CALL_NewFloatArray(int size, out IntPtr value);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		public static IntPtr NewDoubleArray(int size)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_NewDoubleArray(size, out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr NewObjectArray(int size, IntPtr clazz, IntPtr obj);
+		private static extern void INTERNAL_CALL_NewDoubleArray(int size, out IntPtr value);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		public static IntPtr NewObjectArray(int size, IntPtr clazz, IntPtr obj)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_NewObjectArray(size, clazz, obj, out intPtr);
+			return intPtr;
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_NewObjectArray(int size, IntPtr clazz, IntPtr obj, out IntPtr value);
+
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool GetBooleanArrayElement(IntPtr array, int index);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern byte GetByteArrayElement(IntPtr array, int index);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern char GetCharArrayElement(IntPtr array, int index);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern short GetShortArrayElement(IntPtr array, int index);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int GetIntArrayElement(IntPtr array, int index);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern long GetLongArrayElement(IntPtr array, int index);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern float GetFloatArrayElement(IntPtr array, int index);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern double GetDoubleArrayElement(IntPtr array, int index);
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern IntPtr GetObjectArrayElement(IntPtr array, int index);
+		[ThreadAndSerializationSafe]
+		public static IntPtr GetObjectArrayElement(IntPtr array, int index)
+		{
+			IntPtr intPtr;
+			AndroidJNI.INTERNAL_CALL_GetObjectArrayElement(array, index, out intPtr);
+			return intPtr;
+		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_GetObjectArrayElement(IntPtr array, int index, out IntPtr value);
+
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetBooleanArrayElement(IntPtr array, int index, byte val);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetByteArrayElement(IntPtr array, int index, sbyte val);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetCharArrayElement(IntPtr array, int index, char val);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetShortArrayElement(IntPtr array, int index, short val);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetIntArrayElement(IntPtr array, int index, int val);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetLongArrayElement(IntPtr array, int index, long val);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetFloatArrayElement(IntPtr array, int index, float val);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetDoubleArrayElement(IntPtr array, int index, double val);
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void SetObjectArrayElement(IntPtr array, int index, IntPtr obj);
 	}

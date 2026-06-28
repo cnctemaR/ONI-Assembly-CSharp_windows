@@ -20,20 +20,30 @@ public class MessageTarget : ISaveLoadable
 
 	public Vector3 GetPosition()
 	{
+		Vector3 vector;
 		if (this.prefabId.Get() != null)
 		{
-			return this.prefabId.Get().transform.position;
+			vector = this.prefabId.Get().transform.position;
 		}
-		return this.position;
+		else
+		{
+			vector = this.position;
+		}
+		return vector;
 	}
 
 	public KSelectable GetSelectable()
 	{
+		KSelectable kselectable;
 		if (this.prefabId.Get() != null)
 		{
-			return this.prefabId.Get().transform.GetComponent<KSelectable>();
+			kselectable = this.prefabId.Get().transform.GetComponent<KSelectable>();
 		}
-		return null;
+		else
+		{
+			kselectable = null;
+		}
+		return kselectable;
 	}
 
 	public string GetName()

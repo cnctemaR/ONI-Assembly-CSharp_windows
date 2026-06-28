@@ -165,16 +165,20 @@ namespace Rendering
 			}
 		}
 
-		public Color GetCellColor(int cell)
+		public Color GetCellColour(int cell, SimHashes element)
 		{
 			Color white;
 			if (cell == this.selectedCell)
 			{
-				white = new Color(1.5f, 1.5f, 1.5f, 1f);
+				white = this.selectColour;
+			}
+			else if (cell == this.invalidPlaceCell && element == SimHashes.Void)
+			{
+				white = this.invalidPlaceColour;
 			}
 			else if (cell == this.highlightCell)
 			{
-				white = new Color(1.25f, 1.25f, 1.25f, 1f);
+				white = this.highlightColour;
 			}
 			else
 			{
@@ -195,8 +199,7 @@ namespace Rendering
 			BlockTileRenderer.RenderInfo renderInfo;
 			if (!this.renderInfo.TryGetValue(keyValuePair, out renderInfo))
 			{
-				float num = ((element != SimHashes.Void) ? 1f : 0f);
-				renderInfo = new BlockTileRenderer.RenderInfo(this, (int)def.TileLayer, renderLayer, def, element, num);
+				renderInfo = new BlockTileRenderer.RenderInfo(this, (int)def.TileLayer, renderLayer, def, element);
 				this.renderInfo[keyValuePair] = renderInfo;
 			}
 			renderInfo.AddCell(cell);
@@ -225,79 +228,70 @@ namespace Rendering
 
 		public void SelectCell(int cell, bool enabled)
 		{
-			if (enabled)
-			{
-				if (cell != this.selectedCell)
-				{
-					if (this.selectedCell != -1)
-					{
-						foreach (KeyValuePair<KeyValuePair<BuildingDef, bool>, BlockTileRenderer.RenderInfo> keyValuePair in this.renderInfo)
-						{
-							keyValuePair.Value.MarkDirty(this.selectedCell);
-						}
-					}
-					this.selectedCell = cell;
-					foreach (KeyValuePair<KeyValuePair<BuildingDef, bool>, BlockTileRenderer.RenderInfo> keyValuePair2 in this.renderInfo)
-					{
-						keyValuePair2.Value.MarkDirtyIfOccupied(this.selectedCell);
-					}
-				}
-			}
-			else
-			{
-				if (this.selectedCell == cell)
-				{
-					foreach (KeyValuePair<KeyValuePair<BuildingDef, bool>, BlockTileRenderer.RenderInfo> keyValuePair3 in this.renderInfo)
-					{
-						keyValuePair3.Value.MarkDirtyIfOccupied(this.selectedCell);
-					}
-				}
-				this.selectedCell = -1;
-			}
+			this.UpdateCellStatus(ref this.selectedCell, cell, enabled);
 		}
 
 		public void HighlightCell(int cell, bool enabled)
 		{
+			this.UpdateCellStatus(ref this.highlightCell, cell, enabled);
+		}
+
+		public void SetInvalidPlaceCell(int cell, bool enabled)
+		{
+			this.UpdateCellStatus(ref this.invalidPlaceCell, cell, enabled);
+		}
+
+		private void UpdateCellStatus(ref int cell_status, int cell, bool enabled)
+		{
 			if (enabled)
 			{
-				if (cell != this.highlightCell)
+				if (cell != cell_status)
 				{
-					if (this.highlightCell != -1)
+					if (cell_status != -1)
 					{
 						foreach (KeyValuePair<KeyValuePair<BuildingDef, bool>, BlockTileRenderer.RenderInfo> keyValuePair in this.renderInfo)
 						{
-							keyValuePair.Value.MarkDirtyIfOccupied(this.highlightCell);
+							keyValuePair.Value.MarkDirtyIfOccupied(cell_status);
 						}
 					}
-					this.highlightCell = cell;
+					cell_status = cell;
 					foreach (KeyValuePair<KeyValuePair<BuildingDef, bool>, BlockTileRenderer.RenderInfo> keyValuePair2 in this.renderInfo)
 					{
-						keyValuePair2.Value.MarkDirtyIfOccupied(this.highlightCell);
+						keyValuePair2.Value.MarkDirtyIfOccupied(cell_status);
 					}
 				}
 			}
-			else if (this.highlightCell == cell)
+			else if (cell_status == cell)
 			{
 				foreach (KeyValuePair<KeyValuePair<BuildingDef, bool>, BlockTileRenderer.RenderInfo> keyValuePair3 in this.renderInfo)
 				{
-					keyValuePair3.Value.MarkDirty(this.highlightCell);
+					keyValuePair3.Value.MarkDirty(cell_status);
 				}
-				this.highlightCell = -1;
+				cell_status = -1;
 			}
 		}
 
-		private const int chunkEdgeSize = 16;
-
-		public const int RenderQueue = 3700;
+		[SerializeField]
+		private bool forceRebuild = false;
 
 		[SerializeField]
-		private bool forceRebuild;
+		private Color highlightColour = new Color(1.25f, 1.25f, 1.25f, 1f);
+
+		[SerializeField]
+		private Color selectColour = new Color(1.5f, 1.5f, 1.5f, 1f);
+
+		[SerializeField]
+		private Color invalidPlaceColour = Color.red;
+
+		private const int chunkEdgeSize = 16;
 
 		protected Dictionary<KeyValuePair<BuildingDef, bool>, BlockTileRenderer.RenderInfo> renderInfo = new Dictionary<KeyValuePair<BuildingDef, bool>, BlockTileRenderer.RenderInfo>();
 
 		private int selectedCell = -1;
 
 		private int highlightCell = -1;
+
+		private int invalidPlaceCell = -1;
 
 		[Flags]
 		public enum Bits
@@ -314,15 +308,16 @@ namespace Rendering
 
 		protected class RenderInfo
 		{
-			public RenderInfo(BlockTileRenderer renderer, int queryLayer, int renderLayer, BuildingDef def, SimHashes element, float tint_scale)
+			public RenderInfo(BlockTileRenderer renderer, int queryLayer, int renderLayer, BuildingDef def, SimHashes element)
 			{
 				this.queryLayer = queryLayer;
 				this.renderLayer = renderLayer;
 				this.rootPosition = new Vector3(0f, 0f, Grid.GetLayerZ(def.SceneLayer));
+				this.element = element;
 				this.material = new Material(def.BlockTileMaterial);
 				if (def.SceneLayer == Grid.SceneLayer.TileMain)
 				{
-					this.material.renderQueue = 3700;
+					this.material.renderQueue = RenderQueues.BlockTiles;
 				}
 				this.material.DisableKeyword("ENABLE_SHINE");
 				if (element != SimHashes.Void)
@@ -340,7 +335,6 @@ namespace Rendering
 					this.material.SetTexture("_MainTex", def.BlockTilePlaceAtlas.texture);
 					this.material.name = def.BlockTilePlaceAtlas.name + "Mat";
 				}
-				this.material.SetFloat("_DarkenTintScale", tint_scale);
 				int num = Grid.WidthInCells / 16;
 				int num2 = Grid.HeightInCells / 16;
 				this.meshChunks = new Mesh[num, num2];
@@ -355,7 +349,7 @@ namespace Rendering
 				BlockTileDecorInfo blockTileDecorInfo = ((element != SimHashes.Void) ? def.DecorBlockTileInfo : def.DecorPlaceBlockTileInfo);
 				if (blockTileDecorInfo)
 				{
-					this.decorRenderInfo = new BlockTileRenderer.DecorRenderInfo(num, num2, queryLayer, def, blockTileDecorInfo, tint_scale);
+					this.decorRenderInfo = new BlockTileRenderer.DecorRenderInfo(num, num2, queryLayer, def, blockTileDecorInfo);
 				}
 				string name = def.BlockTileAtlas.items[0].name;
 				int length = name.Length;
@@ -451,59 +445,58 @@ namespace Rendering
 
 			public void Rebuild(BlockTileRenderer renderer, int chunk_x, int chunk_y, List<Vector3> vertices, List<Vector2> uvs, List<int> indices, List<Color> colours)
 			{
-				if (!this.dirtyChunks[chunk_x, chunk_y] && !renderer.ForceRebuild)
+				if (this.dirtyChunks[chunk_x, chunk_y] || renderer.ForceRebuild)
 				{
-					return;
-				}
-				this.dirtyChunks[chunk_x, chunk_y] = false;
-				vertices.Clear();
-				uvs.Clear();
-				indices.Clear();
-				colours.Clear();
-				for (int i = chunk_y * 16; i < chunk_y * 16 + 16; i++)
-				{
-					for (int j = chunk_x * 16; j < chunk_x * 16 + 16; j++)
+					this.dirtyChunks[chunk_x, chunk_y] = false;
+					vertices.Clear();
+					uvs.Clear();
+					indices.Clear();
+					colours.Clear();
+					for (int i = chunk_y * 16; i < chunk_y * 16 + 16; i++)
 					{
-						int num = i * Grid.WidthInCells + j;
-						if (this.occupiedCells.ContainsKey(num))
+						for (int j = chunk_x * 16; j < chunk_x * 16 + 16; j++)
 						{
-							BlockTileRenderer.Bits connectionBits = renderer.GetConnectionBits(j, i, this.queryLayer);
-							for (int k = 0; k < this.atlasInfo.Length; k++)
+							int num = i * Grid.WidthInCells + j;
+							if (this.occupiedCells.ContainsKey(num))
 							{
-								bool flag = (this.atlasInfo[k].requiredConnections & connectionBits) == this.atlasInfo[k].requiredConnections;
-								bool flag2 = (this.atlasInfo[k].forbiddenConnections & connectionBits) != (BlockTileRenderer.Bits)0;
-								if (flag && !flag2)
+								BlockTileRenderer.Bits connectionBits = renderer.GetConnectionBits(j, i, this.queryLayer);
+								for (int k = 0; k < this.atlasInfo.Length; k++)
 								{
-									Color cellColor = renderer.GetCellColor(num);
-									this.AddVertexInfo(this.atlasInfo[k], this.trimUVSize, j, i, connectionBits, cellColor, vertices, uvs, indices, colours);
-									break;
+									bool flag = (this.atlasInfo[k].requiredConnections & connectionBits) == this.atlasInfo[k].requiredConnections;
+									bool flag2 = (this.atlasInfo[k].forbiddenConnections & connectionBits) != (BlockTileRenderer.Bits)0;
+									if (flag && !flag2)
+									{
+										Color cellColour = renderer.GetCellColour(num, this.element);
+										this.AddVertexInfo(this.atlasInfo[k], this.trimUVSize, j, i, connectionBits, cellColour, vertices, uvs, indices, colours);
+										break;
+									}
 								}
 							}
 						}
 					}
-				}
-				Mesh mesh = this.meshChunks[chunk_x, chunk_y];
-				if (vertices.Count > 0)
-				{
-					if (mesh == null)
+					Mesh mesh = this.meshChunks[chunk_x, chunk_y];
+					if (vertices.Count > 0)
 					{
-						mesh = new Mesh();
-						mesh.name = "BlockTile";
-						this.meshChunks[chunk_x, chunk_y] = mesh;
+						if (mesh == null)
+						{
+							mesh = new Mesh();
+							mesh.name = "BlockTile";
+							this.meshChunks[chunk_x, chunk_y] = mesh;
+						}
+						mesh.Clear();
+						mesh.SetVertices(vertices);
+						mesh.SetUVs(0, uvs);
+						mesh.SetColors(colours);
+						mesh.SetTriangles(indices, 0);
 					}
-					mesh.Clear();
-					mesh.SetVertices(vertices);
-					mesh.SetUVs(0, uvs);
-					mesh.SetColors(colours);
-					mesh.SetTriangles(indices, 0);
-				}
-				else if (mesh != null)
-				{
-					this.meshChunks[chunk_x, chunk_y] = null;
-				}
-				if (this.decorRenderInfo != null)
-				{
-					this.decorRenderInfo.Rebuild(renderer, this.occupiedCells, chunk_x, chunk_y, 16, vertices, uvs, colours, indices);
+					else if (mesh != null)
+					{
+						this.meshChunks[chunk_x, chunk_y] = null;
+					}
+					if (this.decorRenderInfo != null)
+					{
+						this.decorRenderInfo.Rebuild(renderer, this.occupiedCells, chunk_x, chunk_y, 16, vertices, uvs, colours, indices, this.element);
+					}
 				}
 			}
 
@@ -566,15 +559,7 @@ namespace Rendering
 				colours.Add(color);
 			}
 
-			private const float core_size = 256f;
-
-			private const float trim_size = 64f;
-
-			private const float cell_size = 1f;
-
-			private const float world_trim_size = 0.25f;
-
-			private BlockTileRenderer.RenderInfo.AtlasInfo[] atlasInfo;
+			private BlockTileRenderer.RenderInfo.AtlasInfo[] atlasInfo = null;
 
 			private bool[,] dirtyChunks;
 
@@ -594,6 +579,16 @@ namespace Rendering
 
 			private Dictionary<int, int> occupiedCells = new Dictionary<int, int>();
 
+			private SimHashes element;
+
+			private const float core_size = 256f;
+
+			private const float trim_size = 64f;
+
+			private const float cell_size = 1f;
+
+			private const float world_trim_size = 0.25f;
+
 			private struct AtlasInfo
 			{
 				public BlockTileRenderer.Bits requiredConnections;
@@ -608,17 +603,16 @@ namespace Rendering
 
 		private class DecorRenderInfo
 		{
-			public DecorRenderInfo(int num_x_chunks, int num_y_chunks, int query_layer, BuildingDef def, BlockTileDecorInfo decorInfo, float tint_scale)
+			public DecorRenderInfo(int num_x_chunks, int num_y_chunks, int query_layer, BuildingDef def, BlockTileDecorInfo decorInfo)
 			{
 				this.decorInfo = decorInfo;
 				this.queryLayer = query_layer;
 				this.material = new Material(def.BlockTileMaterial);
 				if (def.SceneLayer == Grid.SceneLayer.TileMain)
 				{
-					this.material.renderQueue = 3700;
+					this.material.renderQueue = RenderQueues.BlockTiles;
 				}
 				this.material.SetTexture("_MainTex", decorInfo.atlas.texture);
-				this.material.SetFloat("_DarkenTintScale", tint_scale);
 				if (decorInfo.atlasSpec != null)
 				{
 					this.material.SetTexture("_SpecularTex", decorInfo.atlasSpec.texture);
@@ -659,7 +653,7 @@ namespace Rendering
 				}
 			}
 
-			public void Rebuild(BlockTileRenderer renderer, Dictionary<int, int> occupiedCells, int chunk_x, int chunk_y, int chunkEdgeSize, List<Vector3> vertices, List<Vector2> uvs, List<Color> colours, List<int> indices)
+			public void Rebuild(BlockTileRenderer renderer, Dictionary<int, int> occupiedCells, int chunk_x, int chunk_y, int chunkEdgeSize, List<Vector3> vertices, List<Vector2> uvs, List<Color> colours, List<int> indices, SimHashes element)
 			{
 				vertices.Clear();
 				uvs.Clear();
@@ -673,9 +667,9 @@ namespace Rendering
 						int num = i * Grid.WidthInCells + j;
 						if (occupiedCells.ContainsKey(num))
 						{
-							Color cellColor = renderer.GetCellColor(num);
+							Color cellColour = renderer.GetCellColour(num, element);
 							BlockTileRenderer.Bits decorConnectionBits = renderer.GetDecorConnectionBits(j, i, this.queryLayer);
-							this.AddDecor(j, i, decorConnectionBits, cellColor, vertices, uvs, this.triangles, colours);
+							this.AddDecor(j, i, decorConnectionBits, cellColour, vertices, uvs, this.triangles, colours);
 						}
 					}
 				}

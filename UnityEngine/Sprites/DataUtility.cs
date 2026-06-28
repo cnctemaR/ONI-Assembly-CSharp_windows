@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using UnityEngine.Scripting;
 
 namespace UnityEngine.Sprites
 {
@@ -12,7 +13,7 @@ namespace UnityEngine.Sprites
 			return vector;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_GetInnerUV(Sprite sprite, out Vector4 value);
 
@@ -23,7 +24,7 @@ namespace UnityEngine.Sprites
 			return vector;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_GetOuterUV(Sprite sprite, out Vector4 value);
 
@@ -34,7 +35,7 @@ namespace UnityEngine.Sprites
 			return vector;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_GetPadding(Sprite sprite, out Vector4 value);
 
@@ -45,7 +46,7 @@ namespace UnityEngine.Sprites
 			return vector;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_GetMinSize(Sprite sprite, out Vector2 output);
 	}

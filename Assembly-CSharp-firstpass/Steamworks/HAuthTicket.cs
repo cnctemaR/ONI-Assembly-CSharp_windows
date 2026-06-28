@@ -25,16 +25,6 @@ namespace Steamworks
 			return this.m_HAuthTicket.GetHashCode();
 		}
 
-		public bool Equals(HAuthTicket other)
-		{
-			return this.m_HAuthTicket == other.m_HAuthTicket;
-		}
-
-		public int CompareTo(HAuthTicket other)
-		{
-			return this.m_HAuthTicket.CompareTo(other.m_HAuthTicket);
-		}
-
 		public static bool operator ==(HAuthTicket x, HAuthTicket y)
 		{
 			return x.m_HAuthTicket == y.m_HAuthTicket;
@@ -53,6 +43,16 @@ namespace Steamworks
 		public static explicit operator uint(HAuthTicket that)
 		{
 			return that.m_HAuthTicket;
+		}
+
+		public bool Equals(HAuthTicket other)
+		{
+			return this.m_HAuthTicket == other.m_HAuthTicket;
+		}
+
+		public int CompareTo(HAuthTicket other)
+		{
+			return this.m_HAuthTicket.CompareTo(other.m_HAuthTicket);
 		}
 
 		public static readonly HAuthTicket Invalid = new HAuthTicket(0U);

@@ -7,32 +7,31 @@ public class UpgradeMenuDetails : SideTargetScreen
 {
 	public override void SetTarget(object obj)
 	{
-		if (obj == null)
+		if (obj != null)
 		{
-			return;
+			if (this.iconMap == null)
+			{
+				this.InitIconMap();
+			}
+			KeyValuePair<Upgradable.Upgrade, Upgradable> keyValuePair = (KeyValuePair<Upgradable.Upgrade, Upgradable>)obj;
+			this.upgrade = keyValuePair.Key;
+			this.upgradable = keyValuePair.Value;
+			this.def = this.upgradable.GetBuildingDef;
+			this.VerifyUpgradeType(this.upgrade.type);
+			this.image.sprite = this.def.GetUISprite("ui");
+			this.image.GetComponent<ToolTip>().toolTip = this.def.Flavor;
+			if (this.upgrade.type != Upgradable.Upgrade.Target.None && this.iconMap.ContainsKey(this.upgrade.type))
+			{
+				this.upgradeIcon.sprite = this.iconMap[this.upgrade.type].icon;
+				this.upgradeIcon.GetComponent<ToolTip>().toolTip = this.iconMap[this.upgrade.type].description;
+			}
+			if (this.matSelectionPanel == null)
+			{
+				this.matSelectionPanel = Util.KInstantiateUI<MaterialSelectionPanel>(this.matSelectionPanelPrefab.gameObject, base.gameObject, false);
+			}
+			this.SetBottomContent();
+			SideDetailsScreen.Instance.SetTitle("Upgrade " + this.upgradable.GetBuildingDef.Name);
 		}
-		if (this.iconMap == null)
-		{
-			this.InitIconMap();
-		}
-		KeyValuePair<Upgradable.Upgrade, Upgradable> keyValuePair = (KeyValuePair<Upgradable.Upgrade, Upgradable>)obj;
-		this.upgrade = keyValuePair.Key;
-		this.upgradable = keyValuePair.Value;
-		this.def = this.upgradable.GetBuildingDef;
-		this.VerifyUpgradeType(this.upgrade.type);
-		this.image.sprite = this.def.GetUISprite("ui");
-		this.image.GetComponent<ToolTip>().toolTip = this.def.Flavor;
-		if (this.upgrade.type != Upgradable.Upgrade.Target.None && this.iconMap.ContainsKey(this.upgrade.type))
-		{
-			this.upgradeIcon.sprite = this.iconMap[this.upgrade.type].icon;
-			this.upgradeIcon.GetComponent<ToolTip>().toolTip = this.iconMap[this.upgrade.type].description;
-		}
-		if (this.matSelectionPanel == null)
-		{
-			this.matSelectionPanel = Util.KInstantiateUI<MaterialSelectionPanel>(this.matSelectionPanelPrefab.gameObject, base.gameObject, false);
-		}
-		this.SetBottomContent();
-		SideDetailsScreen.Instance.SetTitle("Upgrade " + this.upgradable.GetBuildingDef.Name);
 	}
 
 	private void SetBottomContent()
@@ -146,8 +145,6 @@ public class UpgradeMenuDetails : SideTargetScreen
 		});
 	}
 
-	private const string strFormat = "0.0";
-
 	[SerializeField]
 	private List<UpgradeMenuDetails.IconTypes> icons;
 
@@ -181,6 +178,8 @@ public class UpgradeMenuDetails : SideTargetScreen
 	private Upgradable.Upgrade upgrade;
 
 	private BuildingDef def;
+
+	private const string strFormat = "0.0";
 
 	[Serializable]
 	public struct IconTypes

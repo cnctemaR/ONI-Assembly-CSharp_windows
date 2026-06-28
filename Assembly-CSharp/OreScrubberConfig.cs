@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -7,10 +6,18 @@ public class OreScrubberConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
+		string text = "OreScrubber";
+		int num = 3;
+		int num2 = 3;
+		string text2 = "orescrubber_kanim";
+		float num3 = 50f;
+		int num4 = 30;
+		float num5 = 30f;
 		string[] array = new string[] { "Metal" };
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("OreScrubber", 3, 3, "orescrubber_kanim", 50f, 30, 30f, new float[] { BUILDINGS.CONSTRUCTION_MASS_KG.TIER3[0] }, array, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER1, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, new float[] { BUILDINGS.CONSTRUCTION_MASS_KG.TIER3[0] }, array, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER1, none);
 		buildingDef.UtilityInputOffset = new CellOffset(1, 1);
+		buildingDef.ForegroundLayer = Grid.SceneLayer.BuildingFront;
 		buildingDef.InputConduitType = ConduitType.Gas;
 		return buildingDef;
 	}
@@ -31,10 +38,11 @@ public class OreScrubberConfig : IBuildingConfig
 		go.AddOrGet<DirectionControl>();
 		OreScrubber.Work work = go.AddOrGet<OreScrubber.Work>();
 		work.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_ore_scrubber_kanim") };
-		work.workTime = 10.200001f;
+		work.workTime = 10.2f;
 		work.trackUses = true;
+		work.workLayer = Grid.SceneLayer.BuildingUse;
 		Storage storage = go.AddOrGet<Storage>();
-		storage.defaultStoredItemModifers = OreScrubberConfig.StoredItemModifiers;
+		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -49,10 +57,4 @@ public class OreScrubberConfig : IBuildingConfig
 	private const int DISEASE_REMOVAL_COUNT = 480000;
 
 	private const SimHashes CONSUMED_ELEMENT = SimHashes.ChlorineGas;
-
-	private static readonly List<Storage.StoredItemModifier> StoredItemModifiers = new List<Storage.StoredItemModifier>
-	{
-		Storage.StoredItemModifier.Hide,
-		Storage.StoredItemModifier.Seal
-	};
 }

@@ -7,11 +7,11 @@ public class User : KMonoBehaviour
 		bool flag = status == StateMachine.Status.Success;
 		if (flag)
 		{
-			this.Trigger(58624316, null);
+			base.Trigger(58624316, null);
 		}
 		else
 		{
-			this.Trigger(1572098533, null);
+			base.Trigger(1572098533, null);
 		}
 	}
 }

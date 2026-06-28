@@ -17,11 +17,16 @@ public class SingleEntityReceptacle : KMonoBehaviour
 	{
 		get
 		{
+			GameObject gameObject;
 			if (this.occupyObjectRef.Get() != null)
 			{
-				return this.occupyObjectRef.Get().gameObject;
+				gameObject = this.occupyObjectRef.Get().gameObject;
 			}
-			return null;
+			else
+			{
+				gameObject = null;
+			}
+			return gameObject;
 		}
 		set
 		{
@@ -99,9 +104,8 @@ public class SingleEntityReceptacle : KMonoBehaviour
 		if (this.Occupant != null)
 		{
 			component.SetStatusItem(Db.Get().StatusItemCategories.EntityReceptacle, null, null);
-			return;
 		}
-		if (this.fetchChore != null)
+		else if (this.fetchChore != null)
 		{
 			bool flag = false;
 			foreach (Tag tag in this.fetchChore.tags)
@@ -128,16 +132,13 @@ public class SingleEntityReceptacle : KMonoBehaviour
 	{
 		if (this.fetchChore == null && entityTag.IsValid && entityTag != GameTags.Empty)
 		{
-			Action<Chore> action = new Action<Chore>(this.OnFetchComplete);
-			Action<Chore> action2 = delegate(Chore chore)
+			this.fetchChore = new FetchChore(this.storage, 1f, new Tag[] { entityTag }, null, null, true, new Action<Chore>(this.OnFetchComplete), delegate(Chore chore)
 			{
 				this.UpdateStatusItem(this);
-			};
-			Action<Chore> action3 = delegate(Chore chore)
+			}, delegate(Chore chore)
 			{
 				this.UpdateStatusItem(this);
-			};
-			this.fetchChore = new FetchChore(this.storage, 1f, new Tag[] { entityTag }, null, null, true, action, action2, action3, FetchOrder2.OperationalRequirement.Functional, 0);
+			}, FetchOrder2.OperationalRequirement.Functional, 0);
 			MaterialNeeds.Instance.UpdateNeed(this.requestedEntityTag, 1f);
 			this.updateStatusItemsHandle = UIScheduler.Instance.SchedulePeriodic("SingleEntityReceptacle.StatusUpdate", 1f, new Action<object>(this.UpdateStatusItem), this, null);
 			this.UpdateStatusItem(this);
@@ -158,7 +159,7 @@ public class SingleEntityReceptacle : KMonoBehaviour
 		this.occupyingObject = null;
 		this.SetOperation();
 		this.UpdateStatusItem(this);
-		this.Trigger(-731304873, this.occupyingObject);
+		base.Trigger(-731304873, this.occupyingObject);
 	}
 
 	public void CancelActiveRequest()
@@ -224,7 +225,7 @@ public class SingleEntityReceptacle : KMonoBehaviour
 		this.updateStatusItemsHandle.ClearScheduler();
 		this.SetOperation();
 		this.UpdateStatusItem(this);
-		this.Subscribe(-592767678, delegate
+		base.Subscribe(-592767678, delegate
 		{
 			this.SetOperation();
 		});
@@ -232,7 +233,7 @@ public class SingleEntityReceptacle : KMonoBehaviour
 		{
 			Util.KDestroyGameObject(fetchTarget.gameObject);
 		}
-		this.Trigger(-731304873, this.occupyingObject);
+		base.Trigger(-731304873, this.occupyingObject);
 	}
 
 	public virtual GameObject SpawnOccupyingObject(GameObject depositedEntity)
@@ -257,18 +258,17 @@ public class SingleEntityReceptacle : KMonoBehaviour
 
 	private void SetOperation()
 	{
-		if (this.Equals(null) || this == null || base.gameObject.Equals(null) || base.gameObject == null)
+		if (!this.Equals(null) && !(this == null) && !base.gameObject.Equals(null) && !(base.gameObject == null))
 		{
-			return;
-		}
-		Operational component = base.GetComponent<Operational>();
-		if (component.IsOperational && this.occupyingObject != null)
-		{
-			component.SetActive(true, false);
-		}
-		else
-		{
-			component.SetActive(false, false);
+			Operational component = base.GetComponent<Operational>();
+			if (component.IsOperational && this.occupyingObject != null)
+			{
+				component.SetActive(true, false);
+			}
+			else
+			{
+				component.SetActive(false, false);
+			}
 		}
 	}
 
@@ -305,7 +305,7 @@ public class SingleEntityReceptacle : KMonoBehaviour
 	private List<Tag> possibleDepositTagsList = new List<Tag>();
 
 	[SerializeField]
-	protected bool destroyEntityOnDeposit;
+	protected bool destroyEntityOnDeposit = false;
 
 	[SerializeField]
 	protected SingleEntityReceptacle.ReceptacleDirection direction;

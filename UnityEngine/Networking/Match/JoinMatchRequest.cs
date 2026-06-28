@@ -3,7 +3,7 @@ using UnityEngine.Networking.Types;
 
 namespace UnityEngine.Networking.Match
 {
-	public class JoinMatchRequest : Request
+	internal class JoinMatchRequest : Request
 	{
 		public NetworkID networkId { get; set; }
 
@@ -17,11 +17,14 @@ namespace UnityEngine.Networking.Match
 
 		public override string ToString()
 		{
-			return UnityString.Format("[{0}]-networkId:0x{1},HasPassword:{2}", new object[]
+			return UnityString.Format("[{0}]-networkId:0x{1},publicAddress:{2},privateAddress:{3},eloScore:{4},HasPassword:{5}", new object[]
 			{
 				base.ToString(),
 				this.networkId.ToString("X"),
-				(!(this.password == string.Empty)) ? "YES" : "NO"
+				this.publicAddress,
+				this.privateAddress,
+				this.eloScore,
+				(!string.IsNullOrEmpty(this.password)) ? "YES" : "NO"
 			});
 		}
 

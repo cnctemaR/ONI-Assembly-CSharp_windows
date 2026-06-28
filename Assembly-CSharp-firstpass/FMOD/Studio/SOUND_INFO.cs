@@ -10,16 +10,24 @@ namespace FMOD.Studio
 		{
 			get
 			{
-				if ((this.mode & (MODE.OPENMEMORY | MODE.OPENMEMORY_POINT)) != MODE.DEFAULT || this.name_or_data == null)
+				string text;
+				if ((this.mode & (MODE.OPENMEMORY | MODE.OPENMEMORY_POINT)) == MODE.DEFAULT && this.name_or_data != null)
 				{
-					return null;
+					int num = Array.IndexOf<byte>(this.name_or_data, 0);
+					if (num > 0)
+					{
+						text = Encoding.UTF8.GetString(this.name_or_data, 0, num);
+					}
+					else
+					{
+						text = null;
+					}
 				}
-				int num = Array.IndexOf<byte>(this.name_or_data, 0);
-				if (num > 0)
+				else
 				{
-					return Encoding.UTF8.GetString(this.name_or_data, 0, num);
+					text = null;
 				}
-				return null;
+				return text;
 			}
 		}
 

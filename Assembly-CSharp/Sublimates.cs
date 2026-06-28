@@ -17,8 +17,8 @@ public class Sublimates : KMonoBehaviour
 	{
 		base.OnPrefabInit();
 		this.flowAccumulator = new Accumulator("EmittedMass", this, 3f);
-		this.Subscribe(-2064133523, new Action<object>(this.OnAbsorb));
-		this.Subscribe(1335436905, new Action<object>(this.OnSplitFromChunk));
+		base.Subscribe(-2064133523, new Action<object>(this.OnAbsorb));
+		base.Subscribe(1335436905, new Action<object>(this.OnSplitFromChunk));
 	}
 
 	protected override void OnSpawn()
@@ -52,76 +52,74 @@ public class Sublimates : KMonoBehaviour
 		Pickupable pickupable = data as Pickupable;
 		PrimaryElement component = pickupable.GetComponent<PrimaryElement>();
 		Sublimates component2 = pickupable.GetComponent<Sublimates>();
-		if (component2 == null)
+		if (!(component2 == null))
 		{
-			return;
+			float mass = this.primaryElement.Mass;
+			float mass2 = component.Mass;
+			float num = mass / (mass2 + mass);
+			this.sublimatedMass = component2.sublimatedMass * num;
+			float num2 = 1f - num;
+			component2.sublimatedMass *= num2;
 		}
-		float mass = this.primaryElement.Mass;
-		float mass2 = component.Mass;
-		float num = mass / (mass2 + mass);
-		this.sublimatedMass = component2.sublimatedMass * num;
-		float num2 = 1f - num;
-		component2.sublimatedMass *= num2;
 	}
 
 	private void SimUpdate(float dt)
 	{
-		int num = Grid.PosToCell(this.transform.position);
-		if (!Grid.IsValidCell(num))
+		int num = Grid.PosToCell(base.transform.position);
+		if (Grid.IsValidCell(num))
 		{
-			return;
-		}
-		float mass = Grid.Cell[num].mass;
-		if (mass < this.info.maxDestinationMass)
-		{
-			float num2 = this.primaryElement.Mass;
-			if (num2 > 0f)
+			float mass = Grid.Cell[num].mass;
+			if (mass < this.info.maxDestinationMass)
 			{
-				float num3 = Mathf.Pow(num2, this.info.massPower);
-				float num4 = Mathf.Max(this.info.sublimationRate, this.info.sublimationRate * num3);
-				num4 *= dt;
-				num4 = Mathf.Min(num4, num2);
-				this.sublimatedMass += num4;
-				num2 -= num4;
-				if (this.sublimatedMass > this.info.minSublimationAmount)
+				float num2 = this.primaryElement.Mass;
+				if (num2 > 0f)
 				{
-					float num5 = this.sublimatedMass / this.primaryElement.Mass;
-					byte b;
-					int num6;
-					if (this.info.diseaseIdx == 255)
+					float num3 = Mathf.Pow(num2, this.info.massPower);
+					float num4 = Mathf.Max(this.info.sublimationRate, this.info.sublimationRate * num3);
+					num4 *= dt;
+					num4 = Mathf.Min(num4, num2);
+					this.sublimatedMass += num4;
+					num2 -= num4;
+					if (this.sublimatedMass > this.info.minSublimationAmount)
 					{
-						b = this.primaryElement.DiseaseIdx;
-						num6 = (int)((float)this.primaryElement.DiseaseCount * num5);
-						this.primaryElement.ModifyDiseaseCount(-num6, "Sublimates.SimUpdate");
-					}
-					else
-					{
-						float num7 = this.sublimatedMass / this.info.sublimationRate;
-						b = this.info.diseaseIdx;
-						num6 = (int)((float)this.info.diseaseCount * num7);
-					}
-					float num8 = Mathf.Min(this.sublimatedMass, this.info.maxDestinationMass - mass);
-					if (num8 > 0f)
-					{
-						this.Emit(num, num8, this.primaryElement.Temperature, b, num6);
-						this.sublimatedMass = Mathf.Max(0f, this.sublimatedMass - num8);
-						this.primaryElement.Mass = Mathf.Max(0f, this.primaryElement.Mass - num8);
+						float num5 = this.sublimatedMass / this.primaryElement.Mass;
+						byte b;
+						int num6;
+						if (this.info.diseaseIdx == 255)
+						{
+							b = this.primaryElement.DiseaseIdx;
+							num6 = (int)((float)this.primaryElement.DiseaseCount * num5);
+							this.primaryElement.ModifyDiseaseCount(-num6, "Sublimates.SimUpdate");
+						}
+						else
+						{
+							float num7 = this.sublimatedMass / this.info.sublimationRate;
+							b = this.info.diseaseIdx;
+							num6 = (int)((float)this.info.diseaseCount * num7);
+						}
+						float num8 = Mathf.Min(this.sublimatedMass, this.info.maxDestinationMass - mass);
+						if (num8 > 0f)
+						{
+							this.Emit(num, num8, this.primaryElement.Temperature, b, num6);
+							this.sublimatedMass = Mathf.Max(0f, this.sublimatedMass - num8);
+							this.primaryElement.Mass = Mathf.Max(0f, this.primaryElement.Mass - num8);
+						}
 					}
 				}
-			}
-			else if (this.sublimatedMass > 0f)
-			{
-				float num9 = Mathf.Min(this.sublimatedMass, this.info.maxDestinationMass - mass);
-				if (num9 > 0f)
+				else if (this.sublimatedMass > 0f)
 				{
-					this.Emit(num, num9, this.primaryElement.Temperature, this.primaryElement.DiseaseIdx, this.primaryElement.DiseaseCount);
-					this.sublimatedMass = Mathf.Max(0f, this.sublimatedMass - num9);
-					this.primaryElement.Mass = Mathf.Max(0f, this.primaryElement.Mass - num9);
+					float num9 = Mathf.Min(this.sublimatedMass, this.info.maxDestinationMass - mass);
+					if (num9 > 0f)
+					{
+						this.Emit(num, num9, this.primaryElement.Temperature, this.primaryElement.DiseaseIdx, this.primaryElement.DiseaseCount);
+						this.sublimatedMass = Mathf.Max(0f, this.sublimatedMass - num9);
+						this.primaryElement.Mass = Mathf.Max(0f, this.primaryElement.Mass - num9);
+					}
 				}
-			}
-			else
-			{
-				Util.KDestroyGameObject(base.gameObject);
+				else if (!this.primaryElement.KeepZeroMassObject)
+				{
+					Util.KDestroyGameObject(base.gameObject);
+				}
 			}
 		}
 	}
@@ -130,14 +128,10 @@ public class Sublimates : KMonoBehaviour
 	{
 		SimMessages.AddRemoveSubstance(cell, this.info.sublimatedElement, CellEventLogger.Instance.SublimatesEmit, mass, temperature, disease_idx, disease_count, -1);
 		this.flowAccumulator.Accumulate(mass);
-		if (this.info.sublimatedElement == SimHashes.ContaminatedOxygen && BaseArea.Instance.IsInsideBase(cell))
-		{
-			ReportManager.Instance.ReportValue(ReportManager.ReportType.ContaminatedOxygenSublimation, mass, this.GetProperName(), null);
-		}
 		if (this.spawnFXHash != SpawnFXHashes.None)
 		{
-			this.transform.position.z = Grid.GetLayerZ(Grid.SceneLayer.Front);
-			Game.Instance.SpawnFX(this.spawnFXHash, this.transform.position, 0f);
+			base.transform.position.z = Grid.GetLayerZ(Grid.SceneLayer.Front);
+			Game.Instance.SpawnFX(this.spawnFXHash, base.transform.position, 0f);
 		}
 	}
 
@@ -153,7 +147,7 @@ public class Sublimates : KMonoBehaviour
 	private KSelectable selectable;
 
 	[SerializeField]
-	public SpawnFXHashes spawnFXHash;
+	public SpawnFXHashes spawnFXHash = SpawnFXHashes.None;
 
 	[SerializeField]
 	public Sublimates.Info info;

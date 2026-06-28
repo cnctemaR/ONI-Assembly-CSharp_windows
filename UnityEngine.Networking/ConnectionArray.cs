@@ -45,54 +45,69 @@ namespace UnityEngine.Networking
 
 		public int Add(int connId, NetworkConnection conn)
 		{
+			int num;
 			if (connId < 0)
 			{
 				if (LogFilter.logWarn)
 				{
 					Debug.LogWarning("ConnectionArray Add bad id " + connId);
 				}
-				return -1;
+				num = -1;
 			}
-			if (connId < this.m_Connections.Count && this.m_Connections[connId] != null)
+			else if (connId < this.m_Connections.Count && this.m_Connections[connId] != null)
 			{
 				if (LogFilter.logWarn)
 				{
 					Debug.LogWarning("ConnectionArray Add dupe at " + connId);
 				}
-				return -1;
+				num = -1;
 			}
-			while (connId > this.m_Connections.Count - 1)
+			else
 			{
-				this.m_Connections.Add(null);
+				while (connId > this.m_Connections.Count - 1)
+				{
+					this.m_Connections.Add(null);
+				}
+				this.m_Connections[connId] = conn;
+				num = connId;
 			}
-			this.m_Connections[connId] = conn;
-			return connId;
+			return num;
 		}
 
 		public NetworkConnection Get(int connId)
 		{
+			NetworkConnection networkConnection;
 			if (connId < 0)
 			{
-				return this.m_LocalConnections[Mathf.Abs(connId) - 1];
+				networkConnection = this.m_LocalConnections[Mathf.Abs(connId) - 1];
 			}
-			if (connId < 0 || connId > this.m_Connections.Count)
+			else if (connId < 0 || connId > this.m_Connections.Count)
 			{
 				if (LogFilter.logWarn)
 				{
 					Debug.LogWarning("ConnectionArray Get invalid index " + connId);
 				}
-				return null;
+				networkConnection = null;
 			}
-			return this.m_Connections[connId];
+			else
+			{
+				networkConnection = this.m_Connections[connId];
+			}
+			return networkConnection;
 		}
 
 		public NetworkConnection GetUnsafe(int connId)
 		{
+			NetworkConnection networkConnection;
 			if (connId < 0 || connId > this.m_Connections.Count)
 			{
-				return null;
+				networkConnection = null;
 			}
-			return this.m_Connections[connId];
+			else
+			{
+				networkConnection = this.m_Connections[connId];
+			}
+			return networkConnection;
 		}
 
 		public void Remove(int connId)
@@ -100,17 +115,18 @@ namespace UnityEngine.Networking
 			if (connId < 0)
 			{
 				this.m_LocalConnections[Mathf.Abs(connId) - 1] = null;
-				return;
 			}
-			if (connId < 0 || connId > this.m_Connections.Count)
+			else if (connId < 0 || connId > this.m_Connections.Count)
 			{
 				if (LogFilter.logWarn)
 				{
 					Debug.LogWarning("ConnectionArray Remove invalid index " + connId);
 				}
-				return;
 			}
-			this.m_Connections[connId] = null;
+			else
+			{
+				this.m_Connections[connId] = null;
+			}
 		}
 
 		public int AddLocal(NetworkConnection conn)
@@ -124,25 +140,30 @@ namespace UnityEngine.Networking
 		public bool ContainsPlayer(GameObject player, out NetworkConnection conn)
 		{
 			conn = null;
+			bool flag;
 			if (player == null)
 			{
-				return false;
+				flag = false;
 			}
-			for (int i = this.LocalIndex; i < this.m_Connections.Count; i++)
+			else
 			{
-				conn = this.Get(i);
-				if (conn != null)
+				for (int i = this.LocalIndex; i < this.m_Connections.Count; i++)
 				{
-					for (int j = 0; j < conn.playerControllers.Count; j++)
+					conn = this.Get(i);
+					if (conn != null)
 					{
-						if (conn.playerControllers[j].IsValid && conn.playerControllers[j].gameObject == player)
+						for (int j = 0; j < conn.playerControllers.Count; j++)
 						{
-							return true;
+							if (conn.playerControllers[j].IsValid && conn.playerControllers[j].gameObject == player)
+							{
+								return true;
+							}
 						}
 					}
 				}
+				flag = false;
 			}
-			return false;
+			return flag;
 		}
 
 		private List<NetworkConnection> m_LocalConnections;

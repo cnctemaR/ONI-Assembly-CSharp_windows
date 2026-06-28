@@ -18,15 +18,15 @@ public class SneezeMonitor : GameStateMachine<SneezeMonitor, SneezeMonitor.Insta
 		});
 	}
 
-	public const float SNEEZE_INTERVAL_MIN = 45f;
-
-	public const float SNEEZE_INTERVAL_MAX = 90f;
-
 	private static readonly HashedString[] SneezeAnims = new HashedString[] { "sneeze" };
 
 	public GameStateMachine<SneezeMonitor, SneezeMonitor.Instance, IStateMachineTarget, object>.State idle;
 
 	public SneezeMonitor.SneezyStates Sneezy;
+
+	public const float SNEEZE_INTERVAL_MIN = 45f;
+
+	public const float SNEEZE_INTERVAL_MAX = 90f;
 
 	public class SneezyStates : GameStateMachine<SneezeMonitor, SneezeMonitor.Instance, IStateMachineTarget, object>.State
 	{

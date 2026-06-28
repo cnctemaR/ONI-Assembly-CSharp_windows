@@ -21,7 +21,7 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 	public Effect CreateEffect()
 	{
 		Effect effect = new Effect("StressReduction", DUPLICANTS.RELAXATION.RELAXATION_EFFECT.NAME, DUPLICANTS.RELAXATION.RELAXATION_EFFECT.DESCRIPTION, 0f, true, false, false);
-		AttributeModifier attributeModifier = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, this.stressModificationValue / 600f, DUPLICANTS.RELAXATION.RELAXATION_EFFECT.NAME, false, false);
+		AttributeModifier attributeModifier = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, this.stressModificationValue / 600f, DUPLICANTS.RELAXATION.RELAXATION_EFFECT.NAME, false, false, true);
 		effect.Add(attributeModifier);
 		return effect;
 	}
@@ -43,12 +43,17 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 	protected override bool OnWorkTick(Worker worker, float dt)
 	{
 		AmountInstance amountInstance = Db.Get().Amounts.Stress.Lookup(worker.gameObject);
+		bool flag;
 		if (amountInstance.value <= this.stopStressingValue)
 		{
-			return true;
+			flag = true;
 		}
-		base.OnWorkTick(worker, dt);
-		return false;
+		else
+		{
+			base.OnWorkTick(worker, dt);
+			flag = false;
+		}
+		return flag;
 	}
 
 	protected override void OnStopWork(Worker worker)
@@ -64,7 +69,7 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 
 	protected virtual WorkChore<RelaxationPoint> CreateWorkChore()
 	{
-		return new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, false, null, null, null, false, null, true, default(Tag), null, false, true, true, int.MaxValue);
+		return new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, false, null, null, null, false, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)
@@ -77,9 +82,9 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 	}
 
 	[Serialize]
-	protected float stopStressingValue;
+	protected float stopStressingValue = 0f;
 
-	public float stressModificationValue;
+	public float stressModificationValue = 0f;
 
 	private RelaxationPoint.RelaxationPointSM.Instance smi;
 
@@ -90,7 +95,7 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.unoperational;
-			this.unoperational.EventTransition(GameHashes.OperationalChanged, this.operational, (RelaxationPoint.RelaxationPointSM.Instance smi) => smi.GetComponent<Operational>().IsOperational).PlayAnim("off", KAnim.PlayMode.Once, null);
+			this.unoperational.EventTransition(GameHashes.OperationalChanged, this.operational, (RelaxationPoint.RelaxationPointSM.Instance smi) => smi.GetComponent<Operational>().IsOperational).PlayAnim("off");
 			this.operational.DefaultState(this.operational.idle).ToggleChore((RelaxationPoint.RelaxationPointSM.Instance smi) => smi.master.CreateWorkChore(), this.unoperational);
 			this.operational.idle.WorkableStartTransition((RelaxationPoint.RelaxationPointSM.Instance smi) => smi.master, this.operational.healing);
 			this.operational.healing.WorkableStopTransition((RelaxationPoint.RelaxationPointSM.Instance smi) => smi.master, this.operational.exiting).EventTransition(GameHashes.OperationalChanged, this.operational.exiting, (RelaxationPoint.RelaxationPointSM.Instance smi) => !smi.GetComponent<Operational>().IsOperational).Enter(delegate(RelaxationPoint.RelaxationPointSM.Instance smi)
@@ -107,7 +112,7 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 					smi.master.GetComponent<Operational>().SetActive(true, false);
 				}
 			});
-			this.operational.exiting.PlayAnim("working_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.unoperational).Enter(delegate(RelaxationPoint.RelaxationPointSM.Instance smi)
+			this.operational.exiting.PlayAnim("working_pst").OnAnimQueueComplete(this.unoperational).Enter(delegate(RelaxationPoint.RelaxationPointSM.Instance smi)
 			{
 				smi.master.gameObject.GetComponent<Operational>().SetActive(false, false);
 			});

@@ -66,6 +66,7 @@ public class Notification
 		DebugUtil.Assert(text != null, "Assert!");
 		int num = text.IndexOf('{');
 		int num2 = text.IndexOf('}');
+		string text4;
 		if (0 <= num && num < num2)
 		{
 			StringBuilder stringBuilder = new StringBuilder();
@@ -86,9 +87,13 @@ public class Notification
 				num = text.IndexOf('{', num2);
 			}
 			stringBuilder.Append(text.Substring(num3, text.Length - num3));
-			return stringBuilder.ToString();
+			text4 = stringBuilder.ToString();
 		}
-		return text;
+		else
+		{
+			text4 = text;
+		}
+		return text4;
 	}
 
 	private string GetTagDescription(string tag)

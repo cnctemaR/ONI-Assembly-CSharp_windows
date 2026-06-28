@@ -69,34 +69,36 @@ public class BatchSet
 				this.group.batchID,
 				"]"
 			}), null);
-			return;
 		}
-		int layer = controller.GetLayer();
-		if (layer != this.key.layer)
+		else
 		{
-			global::Debug.LogError("Registering with wrong batch set (layer) " + controller.GetName(), null);
-		}
-		HashedString batchGroupID = controller.GetBatchGroupID(false);
-		if (!(batchGroupID == this.key.groupID))
-		{
-			global::Debug.LogError("Registering with wrong batch set (groupID) " + controller.GetName(), null);
-		}
-		KAnimBatchGroup.MaterialType materialType = controller.GetMaterialType();
-		for (int i = 0; i < this.batches.Count; i++)
-		{
-			if (this.batches[i].size < this.group.maxGroupSize && this.batches[i].materialType == materialType)
+			int layer = controller.GetLayer();
+			if (layer != this.key.layer)
 			{
-				if (this.batches[i].Register(controller))
-				{
-					this.SetDirty();
-				}
-				return;
+				global::Debug.LogError("Registering with wrong batch set (layer) " + controller.GetName(), null);
 			}
+			HashedString batchGroupID = controller.GetBatchGroupID(false);
+			if (!(batchGroupID == this.key.groupID))
+			{
+				global::Debug.LogError("Registering with wrong batch set (groupID) " + controller.GetName(), null);
+			}
+			KAnimBatchGroup.MaterialType materialType = controller.GetMaterialType();
+			for (int i = 0; i < this.batches.Count; i++)
+			{
+				if (this.batches[i].size < this.group.maxGroupSize && this.batches[i].materialType == materialType)
+				{
+					if (this.batches[i].Register(controller))
+					{
+						this.SetDirty();
+					}
+					return;
+				}
+			}
+			KAnimBatch kanimBatch = new KAnimBatch(this.group, layer, controller.GetZ(), materialType);
+			kanimBatch.Init(controller.batchGroupInstance);
+			this.AddBatch(kanimBatch);
+			kanimBatch.Register(controller);
 		}
-		KAnimBatch kanimBatch = new KAnimBatch(this.group, layer, controller.GetZ(), materialType);
-		kanimBatch.Init();
-		this.AddBatch(kanimBatch);
-		kanimBatch.Register(controller);
 	}
 
 	public void RemoveBatch(KAnimBatch batch)
@@ -172,14 +174,7 @@ public class BatchSet
 		{
 			for (int i = 0; i < this.batches.Count; i++)
 			{
-				try
-				{
-					this.dirtyBatchLastFrame += this.batches[i].UpdateDirty(frame);
-				}
-				catch (Exception ex)
-				{
-					global::Debug.LogError("BatchSet.UpdateDirty: " + ex.Message + "\n" + ex.StackTrace, null);
-				}
+				this.dirtyBatchLastFrame += this.batches[i].UpdateDirty(frame);
 			}
 			this.lastDirtyFrame = frame;
 			this.dirty = false;

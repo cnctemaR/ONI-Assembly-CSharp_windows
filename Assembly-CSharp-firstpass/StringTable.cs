@@ -7,22 +7,32 @@ public class StringTable
 	{
 		int hash = key0.Hash;
 		StringTable stringTable = null;
+		StringEntry stringEntry;
 		if (this.SubTables.TryGetValue(hash, out stringTable))
 		{
-			return stringTable.Get(key1, key2);
+			stringEntry = stringTable.Get(key1, key2);
 		}
-		return null;
+		else
+		{
+			stringEntry = null;
+		}
+		return stringEntry;
 	}
 
 	public StringEntry Get(StringKey key0, StringKey key1)
 	{
 		int hash = key0.Hash;
 		StringTable stringTable = null;
+		StringEntry stringEntry;
 		if (this.SubTables.TryGetValue(hash, out stringTable))
 		{
-			return stringTable.Get(key1);
+			stringEntry = stringTable.Get(key1);
 		}
-		return null;
+		else
+		{
+			stringEntry = null;
+		}
+		return stringEntry;
 	}
 
 	public StringEntry Get(StringKey key0)
@@ -35,32 +45,48 @@ public class StringTable
 
 	public StringEntry Get(int idx, StringKey key, StringKey[] keys)
 	{
+		StringEntry stringEntry;
 		if (idx == keys.Length)
 		{
-			return this.Get(key);
+			stringEntry = this.Get(key);
 		}
-		int hash = key.Hash;
-		StringTable stringTable = null;
-		if (this.SubTables.TryGetValue(hash, out stringTable))
+		else
 		{
-			return stringTable.Get(idx, keys);
+			int hash = key.Hash;
+			StringTable stringTable = null;
+			if (this.SubTables.TryGetValue(hash, out stringTable))
+			{
+				stringEntry = stringTable.Get(idx, keys);
+			}
+			else
+			{
+				stringEntry = null;
+			}
 		}
-		return null;
+		return stringEntry;
 	}
 
 	public StringEntry Get(int idx, StringKey[] keys)
 	{
+		StringEntry stringEntry;
 		if (idx == keys.Length - 1)
 		{
-			return this.Get(keys[idx]);
+			stringEntry = this.Get(keys[idx]);
 		}
-		int hash = keys[idx].Hash;
-		StringTable stringTable = null;
-		if (this.SubTables.TryGetValue(hash, out stringTable))
+		else
 		{
-			return stringTable.Get(++idx, keys);
+			int hash = keys[idx].Hash;
+			StringTable stringTable = null;
+			if (this.SubTables.TryGetValue(hash, out stringTable))
+			{
+				stringEntry = stringTable.Get(++idx, keys);
+			}
+			else
+			{
+				stringEntry = null;
+			}
 		}
-		return null;
+		return stringEntry;
 	}
 
 	public List<string> GetKeyNames()
@@ -77,11 +103,16 @@ public class StringTable
 	{
 		int hash = key.Hash;
 		StringTable stringTable = null;
+		StringTable stringTable2;
 		if (this.SubTables.TryGetValue(hash, out stringTable))
 		{
-			return stringTable;
+			stringTable2 = stringTable;
 		}
-		return null;
+		else
+		{
+			stringTable2 = null;
+		}
+		return stringTable2;
 	}
 
 	public void Add(int idx, string[] value)
@@ -120,7 +151,7 @@ public class StringTable
 			}), null);
 		}
 		string text = parent_path;
-		if (text != string.Empty)
+		if (text != "")
 		{
 			text += ".";
 		}

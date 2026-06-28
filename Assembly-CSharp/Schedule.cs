@@ -29,9 +29,12 @@ public class Schedule : ISaveLoadable
 
 	public void Remove(int idx, ScheduleBlockType type)
 	{
-		if (this.blocks[idx].Remove(type) && this.onChanged != null)
+		if (this.blocks[idx].Remove(type))
 		{
-			this.onChanged();
+			if (this.onChanged != null)
+			{
+				this.onChanged();
+			}
 		}
 	}
 

@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections;
+using System.Diagnostics;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class EditableTitleBar : TitleBar
 {
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<string> OnNameChanged;
 
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event global::System.Action OnStartedEditing;
 
 	protected override void OnSpawn()
@@ -31,22 +34,21 @@ public class EditableTitleBar : TitleBar
 	{
 		finalStr = Localization.FilterDirtyWords(finalStr);
 		this.SetEditingState(false);
-		if (string.IsNullOrEmpty(finalStr))
+		if (!string.IsNullOrEmpty(finalStr))
 		{
-			return;
-		}
-		if (this.OnNameChanged != null)
-		{
-			this.OnNameChanged(finalStr);
-		}
-		this.titleText.text = finalStr;
-		if (this.postEndEdit != null)
-		{
-			base.StopCoroutine(this.postEndEdit);
-		}
-		if (base.gameObject.activeInHierarchy && base.enabled)
-		{
-			this.postEndEdit = base.StartCoroutine(this.PostOnEndEdit());
+			if (this.OnNameChanged != null)
+			{
+				this.OnNameChanged(finalStr);
+			}
+			this.titleText.text = finalStr;
+			if (this.postEndEdit != null)
+			{
+				base.StopCoroutine(this.postEndEdit);
+			}
+			if (base.gameObject.activeInHierarchy && base.enabled)
+			{
+				this.postEndEdit = base.StartCoroutine(this.PostOnEndEdit());
+			}
 		}
 	}
 
@@ -99,24 +101,23 @@ public class EditableTitleBar : TitleBar
 		{
 			CameraController.Instance.DisableUserCameraControl = state;
 		}
-		if (this.inputField == null)
+		if (!(this.inputField == null))
 		{
-			return;
-		}
-		this.inputField.gameObject.SetActive(state);
-		if (state)
-		{
-			this.inputField.text = this.titleText.text;
-			this.inputField.Select();
-			this.inputField.ActivateInputField();
-			if (this.OnStartedEditing != null)
+			this.inputField.gameObject.SetActive(state);
+			if (state)
 			{
-				this.OnStartedEditing();
+				this.inputField.text = this.titleText.text;
+				this.inputField.Select();
+				this.inputField.ActivateInputField();
+				if (this.OnStartedEditing != null)
+				{
+					this.OnStartedEditing();
+				}
 			}
-		}
-		else
-		{
-			this.inputField.DeactivateInputField();
+			else
+			{
+				this.inputField.DeactivateInputField();
+			}
 		}
 	}
 

@@ -472,7 +472,6 @@ namespace UnityEngine
 
 		public static void EndHorizontal()
 		{
-			GUILayoutUtility.EndGroup("GUILayout.EndHorizontal");
 			GUILayoutUtility.EndLayoutGroup();
 		}
 
@@ -500,7 +499,7 @@ namespace UnityEngine
 		{
 			GUILayoutGroup guilayoutGroup = GUILayoutUtility.BeginLayoutGroup(style, options, typeof(GUILayoutGroup));
 			guilayoutGroup.isVertical = true;
-			if (style != GUIStyle.none)
+			if (style != GUIStyle.none || content != GUIContent.none)
 			{
 				GUI.Box(guilayoutGroup.rect, content, style);
 			}
@@ -508,7 +507,6 @@ namespace UnityEngine
 
 		public static void EndVertical()
 		{
-			GUILayoutUtility.EndGroup("GUILayout.EndVertical");
 			GUILayoutUtility.EndLayoutGroup();
 		}
 
@@ -529,7 +527,7 @@ namespace UnityEngine
 
 		public static void BeginArea(Rect screenRect, GUIContent content)
 		{
-			GUILayout.BeginArea(screenRect, GUIContent.none, GUIStyle.none);
+			GUILayout.BeginArea(screenRect, content, GUIStyle.none);
 		}
 
 		public static void BeginArea(Rect screenRect, GUIStyle style)
@@ -564,13 +562,12 @@ namespace UnityEngine
 		public static void EndArea()
 		{
 			GUIUtility.CheckOnGUI();
-			if (Event.current.type == EventType.Used)
+			if (Event.current.type != EventType.Used)
 			{
-				return;
+				GUILayoutUtility.current.layoutGroups.Pop();
+				GUILayoutUtility.current.topLevel = (GUILayoutGroup)GUILayoutUtility.current.layoutGroups.Peek();
+				GUI.EndGroup();
 			}
-			GUILayoutUtility.current.layoutGroups.Pop();
-			GUILayoutUtility.current.topLevel = (GUILayoutGroup)GUILayoutUtility.current.layoutGroups.Peek();
-			GUI.EndGroup();
 		}
 
 		public static Vector2 BeginScrollView(Vector2 scrollPosition, params GUILayoutOption[] options)
@@ -642,7 +639,6 @@ namespace UnityEngine
 
 		internal static void EndScrollView(bool handleScrollWheel)
 		{
-			GUILayoutUtility.EndGroup("GUILayout.EndScrollView");
 			GUILayoutUtility.EndLayoutGroup();
 			GUI.EndScrollView(handleScrollWheel);
 		}

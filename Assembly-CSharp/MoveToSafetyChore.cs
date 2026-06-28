@@ -4,7 +4,7 @@ using UnityEngine;
 public class MoveToSafetyChore : Chore<MoveToSafetyChore.StatesInstance>
 {
 	public MoveToSafetyChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.MoveToSafety, target, target.GetComponent<ChoreProvider>(), false, null, null, null, 0, false, true, 0)
+		: base(Db.Get().ChoreTypes.MoveToSafety, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, -1, false, true, 0)
 	{
 		this.smi = new MoveToSafetyChore.StatesInstance(this, target.gameObject);
 	}
@@ -35,7 +35,10 @@ public class MoveToSafetyChore : Chore<MoveToSafetyChore.StatesInstance>
 		{
 			default_state = this.move;
 			base.Target(this.mover);
-			this.move.Update("UpdateLocatorPosition", delegate(MoveToSafetyChore.StatesInstance smi)
+			this.move.Enter("UpdateLocatorPosition", delegate(MoveToSafetyChore.StatesInstance smi)
+			{
+				smi.UpdateTargetCell();
+			}).Update("UpdateLocatorPosition", delegate(MoveToSafetyChore.StatesInstance smi)
 			{
 				smi.UpdateTargetCell();
 			}).MoveTo((MoveToSafetyChore.StatesInstance smi) => smi.targetCell, null, null, true);

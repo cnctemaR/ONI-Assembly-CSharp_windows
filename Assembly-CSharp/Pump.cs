@@ -65,7 +65,7 @@ public class Pump : KMonoBehaviour
 
 	private bool IsPumpable(Element.State expected_state, int radius)
 	{
-		int num = Grid.PosToCell(this.transform.position);
+		int num = Grid.PosToCell(base.transform.position);
 		for (int i = 0; i < (int)this.consumer.consumptionRadius; i++)
 		{
 			for (int j = 0; j < (int)this.consumer.consumptionRadius; j++)
@@ -87,8 +87,6 @@ public class Pump : KMonoBehaviour
 		this.selectable.ToggleStatusItem(Db.Get().BuildingStatusItems.ConduitBlocked, flag, null);
 	}
 
-	private const float OperationalUpdateInterval = 1f;
-
 	public static Operational.Flag PumpableFlag = new Operational.Flag("vent", Operational.Flag.Type.Requirement);
 
 	[MyCmpReq]
@@ -106,7 +104,9 @@ public class Pump : KMonoBehaviour
 	[MyCmpGet]
 	private Storage storage;
 
-	private float elapsedTime;
+	private const float OperationalUpdateInterval = 1f;
 
-	private bool pumpable;
+	private float elapsedTime = 0f;
+
+	private bool pumpable = false;
 }

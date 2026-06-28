@@ -87,7 +87,7 @@ public static class TemplateCache
 		return list;
 	}
 
-	private static string baseTemplatePath;
+	private static string baseTemplatePath = null;
 
-	private static Dictionary<string, TemplateContainer> templates;
+	private static Dictionary<string, TemplateContainer> templates = null;
 }

@@ -8,11 +8,16 @@ public class ReceptacleSideScreen : SideScreenContent
 {
 	public override string GetTitle()
 	{
+		string text;
 		if (this.targetReceptacle == null)
 		{
-			return Strings.Get(this.titleKey).ToString().Replace("{0}", string.Empty);
+			text = Strings.Get(this.titleKey).ToString().Replace("{0}", "");
 		}
-		return string.Format(Strings.Get(this.titleKey), this.targetReceptacle.GetProperName());
+		else
+		{
+			text = string.Format(Strings.Get(this.titleKey), this.targetReceptacle.GetProperName());
+		}
+		return text;
 	}
 
 	public void Initialize(SingleEntityReceptacle target)
@@ -20,177 +25,178 @@ public class ReceptacleSideScreen : SideScreenContent
 		if (target == null)
 		{
 			global::Debug.LogError("SingleObjectReceptacle provided was null.", null);
-			return;
 		}
-		this.targetReceptacle = target;
-		base.gameObject.SetActive(true);
-		this.depositObjectMap = new Dictionary<ReceptacleToggle, ReceptacleSideScreen.SelectableEntity>();
-		this.entityToggles.ForEach(delegate(ReceptacleToggle rbi)
+		else
 		{
-			global::UnityEngine.Object.Destroy(rbi.gameObject);
-		});
-		this.entityToggles.Clear();
-		foreach (Tag tag in target.possibleDepositObjectTags)
-		{
-			List<GameObject> prefabsWithTag = Assets.GetPrefabsWithTag(tag);
-			if (this.targetReceptacle.rotatable == null)
+			this.targetReceptacle = target;
+			base.gameObject.SetActive(true);
+			this.depositObjectMap = new Dictionary<ReceptacleToggle, ReceptacleSideScreen.SelectableEntity>();
+			this.entityToggles.ForEach(delegate(ReceptacleToggle rbi)
 			{
-				prefabsWithTag.RemoveAll(delegate(GameObject go)
-				{
-					IReceptacleDirection component3 = go.GetComponent<IReceptacleDirection>();
-					return component3 != null && component3.Direction != this.targetReceptacle.Direction;
-				});
-			}
-			List<IHasSortOrder> list = new List<IHasSortOrder>();
-			foreach (GameObject gameObject in prefabsWithTag)
+				global::UnityEngine.Object.Destroy(rbi.gameObject);
+			});
+			this.entityToggles.Clear();
+			foreach (Tag tag in target.possibleDepositObjectTags)
 			{
-				IHasSortOrder component = gameObject.GetComponent<IHasSortOrder>();
-				if (component != null)
+				List<GameObject> prefabsWithTag = Assets.GetPrefabsWithTag(tag);
+				if (this.targetReceptacle.rotatable == null)
 				{
-					list.Add(component);
+					prefabsWithTag.RemoveAll(delegate(GameObject go)
+					{
+						IReceptacleDirection component3 = go.GetComponent<IReceptacleDirection>();
+						return component3 != null && component3.Direction != this.targetReceptacle.Direction;
+					});
+				}
+				List<IHasSortOrder> list = new List<IHasSortOrder>();
+				foreach (GameObject gameObject in prefabsWithTag)
+				{
+					IHasSortOrder component = gameObject.GetComponent<IHasSortOrder>();
+					if (component != null)
+					{
+						list.Add(component);
+					}
+				}
+				list.Sort((IHasSortOrder a, IHasSortOrder b) => a.sortOrder - b.sortOrder);
+				foreach (IHasSortOrder hasSortOrder in list)
+				{
+					GameObject gameObject2 = (hasSortOrder as MonoBehaviour).gameObject;
+					GameObject gameObject3 = Util.KInstantiateUI(this.entityToggle, this.requestObjectList, false);
+					gameObject3.SetActive(true);
+					ReceptacleToggle newToggle = gameObject3.GetComponent<ReceptacleToggle>();
+					IReceptacleDirection component2 = gameObject2.GetComponent<IReceptacleDirection>();
+					string properName = gameObject2.GetProperName();
+					newToggle.title.text = properName;
+					Sprite entityIcon = this.GetEntityIcon(gameObject2.PrefabID());
+					if (entityIcon == null)
+					{
+						entityIcon = this.elementPlaceholderSpr;
+					}
+					newToggle.image.sprite = entityIcon;
+					newToggle.toggle.onClick += delegate
+					{
+						this.ToggleClicked(newToggle);
+					};
+					newToggle.toggle.onPointerEnter += delegate
+					{
+						this.CheckAmountsAndUpdate(null);
+					};
+					this.depositObjectMap.Add(newToggle, new ReceptacleSideScreen.SelectableEntity
+					{
+						tag = gameObject2.PrefabID(),
+						direction = ((component2 == null) ? SingleEntityReceptacle.ReceptacleDirection.Top : component2.Direction),
+						asset = gameObject2
+					});
+					this.entityToggles.Add(newToggle);
 				}
 			}
-			list.Sort((IHasSortOrder a, IHasSortOrder b) => a.sortOrder - b.sortOrder);
-			foreach (IHasSortOrder hasSortOrder in list)
+			this.selectedEntityToggle = null;
+			if (this.entityToggles.Count > 0)
 			{
-				GameObject gameObject2 = (hasSortOrder as MonoBehaviour).gameObject;
-				GameObject gameObject3 = Util.KInstantiateUI(this.entityToggle, this.requestObjectList, false);
-				gameObject3.SetActive(true);
-				ReceptacleToggle newToggle = gameObject3.GetComponent<ReceptacleToggle>();
-				IReceptacleDirection component2 = gameObject2.GetComponent<IReceptacleDirection>();
-				string properName = gameObject2.GetProperName();
-				newToggle.title.text = properName;
-				Sprite entityIcon = this.GetEntityIcon(gameObject2.PrefabID());
-				if (entityIcon == null)
+				if (this.entityPreviousSelectionMap.ContainsKey(this.targetReceptacle))
 				{
-					entityIcon = this.elementPlaceholderSpr;
+					int num = this.entityPreviousSelectionMap[this.targetReceptacle];
+					this.ToggleClicked(this.entityToggles[num]);
 				}
-				newToggle.image.sprite = entityIcon;
-				newToggle.toggle.onClick += delegate
+				else
 				{
-					this.ToggleClicked(newToggle);
-				};
-				newToggle.toggle.onPointerEnter += delegate
-				{
-					this.CheckAmountsAndUpdate(null);
-				};
-				this.depositObjectMap.Add(newToggle, new ReceptacleSideScreen.SelectableEntity
-				{
-					tag = gameObject2.PrefabID(),
-					direction = ((component2 == null) ? SingleEntityReceptacle.ReceptacleDirection.Top : component2.Direction),
-					asset = gameObject2
-				});
-				this.entityToggles.Add(newToggle);
+					this.subtitleLabel.SetText(UI.UISIDESCREENS.PLANTERSIDESCREEN.SELECTSEED_TITLE);
+					this.requestSelectedEntityBtn.isInteractable = false;
+					this.descriptionLabel.SetText(UI.UISIDESCREENS.PLANTERSIDESCREEN.SELECTSEED_DESC);
+					this.HideAllDescriptorPanels();
+				}
 			}
+			this.onStorageChangedHandle = this.targetReceptacle.gameObject.Subscribe(-1697596308, new Action<object>(this.CheckAmountsAndUpdate));
+			this.onOccupantValidChangedHandle = this.targetReceptacle.gameObject.Subscribe(-1820564715, new Action<object>(this.OnOccupantValidChanged));
+			this.UpdateState(null);
+			this.handle = GameScheduler.Instance.SchedulePeriodic("CheckAmountsUpdate", 1f, new Action<object>(this.CheckAmountsAndUpdate), null, null, 0f, null);
 		}
-		this.selectedEntityToggle = null;
-		if (this.entityToggles.Count > 0)
-		{
-			if (this.entityPreviousSelectionMap.ContainsKey(this.targetReceptacle))
-			{
-				int num = this.entityPreviousSelectionMap[this.targetReceptacle];
-				this.ToggleClicked(this.entityToggles[num]);
-			}
-			else
-			{
-				this.subtitleLabel.SetText(UI.UISIDESCREENS.PLANTERSIDESCREEN.SELECTSEED_TITLE);
-				this.requestSelectedEntityBtn.isInteractable = false;
-				this.descriptionLabel.SetText(UI.UISIDESCREENS.PLANTERSIDESCREEN.SELECTSEED_DESC);
-				this.HideAllDescriptorPanels();
-			}
-		}
-		this.onStorageChangedHandle = this.targetReceptacle.gameObject.Subscribe(-1697596308, new Action<object>(this.CheckAmountsAndUpdate));
-		this.onOccupantValidChangedHandle = this.targetReceptacle.gameObject.Subscribe(-1820564715, new Action<object>(this.OnOccupantValidChanged));
-		this.UpdateState(null);
-		this.handle = GameScheduler.Instance.SchedulePeriodic("CheckAmountsUpdate", 1f, new Action<object>(this.CheckAmountsAndUpdate), null, null, 0f, null);
 	}
 
 	private void UpdateState(object data)
 	{
 		this.requestSelectedEntityBtn.ClearOnClick();
-		if (this.targetReceptacle == null)
+		if (!(this.targetReceptacle == null))
 		{
-			return;
-		}
-		if (this.CheckReceptacleOccupied())
-		{
-			Uprootable uprootable = this.targetReceptacle.Occupant.GetComponent<Uprootable>();
-			if (uprootable != null && uprootable.IsMarkedForUproot)
+			if (this.CheckReceptacleOccupied())
+			{
+				Uprootable uprootable = this.targetReceptacle.Occupant.GetComponent<Uprootable>();
+				if (uprootable != null && uprootable.IsMarkedForUproot)
+				{
+					this.requestSelectedEntityBtn.onClick += delegate
+					{
+						uprootable.ForceCancelUproot(null);
+						this.UpdateState(null);
+					};
+					this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = UI.CANCELREMOVALFROMRECEPTACLE;
+					this.requestSelectedEntityBtn.isInteractable = true;
+					this.subtitleLabel.SetText(string.Format(Strings.Get(this.subtitleStringAwaitingRemoval).ToString(), this.targetReceptacle.Occupant.GetProperName()));
+				}
+				else
+				{
+					this.requestSelectedEntityBtn.onClick += delegate
+					{
+						this.targetReceptacle.OrderRemoveOccupant();
+						this.UpdateState(null);
+					};
+					this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = UI.USERMENUACTIONS.UPROOT.NAME;
+					this.requestSelectedEntityBtn.isInteractable = true;
+					this.subtitleLabel.SetText(string.Format(Strings.Get(this.subtitleStringEntityDeposited).ToString(), this.targetReceptacle.Occupant.GetProperName()));
+				}
+				this.ToggleSeedSelector(false);
+				Tag tag = this.targetReceptacle.Occupant.GetComponent<KSelectable>().PrefabID();
+				this.ConfigureActiveEntity(tag);
+				this.SetResultDescriptions(this.targetReceptacle.Occupant);
+			}
+			else if (this.targetReceptacle.GetActiveRequest != null)
 			{
 				this.requestSelectedEntityBtn.onClick += delegate
 				{
-					uprootable.ForceCancelUproot(null);
+					this.targetReceptacle.CancelActiveRequest();
+					this.ClearSelection();
+					this.UpdateAvailableAmounts(null);
 					this.UpdateState(null);
 				};
-				this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = UI.CANCELREMOVALFROMRECEPTACLE;
+				this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = UI.CANCELPLACEINRECEPTACLE;
 				this.requestSelectedEntityBtn.isInteractable = true;
-				this.subtitleLabel.SetText(string.Format(Strings.Get(this.subtitleStringAwaitingRemoval).ToString(), this.targetReceptacle.Occupant.GetProperName()));
+				this.ToggleSeedSelector(false);
+				this.ConfigureActiveEntity(this.targetReceptacle.GetActiveRequest.tags[0]);
+				GameObject prefab = Assets.GetPrefab(this.targetReceptacle.GetActiveRequest.tags[0]);
+				if (prefab != null)
+				{
+					this.subtitleLabel.SetText(string.Format(Strings.Get(this.subtitleStringAwaitingDelivery).ToString(), prefab.GetProperName()));
+					this.SetResultDescriptions(prefab);
+				}
+			}
+			else if (this.selectedEntityToggle != null)
+			{
+				this.requestSelectedEntityBtn.onClick += delegate
+				{
+					this.targetReceptacle.CreateOrder(this.selectedDepositObjectTag);
+					this.UpdateAvailableAmounts(null);
+					this.UpdateState(null);
+				};
+				this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = UI.PLACEINRECEPTACLE;
+				this.targetReceptacle.SetPreview(this.depositObjectMap[this.selectedEntityToggle].tag, false);
+				bool flag = this.ValidRotationForDeposit(this.depositObjectMap[this.selectedEntityToggle].direction) && this.GetAvailableAmount(this.depositObjectMap[this.selectedEntityToggle].tag) > 0f && this.AdditionalCanDepositTest();
+				this.requestSelectedEntityBtn.isInteractable = flag;
+				this.SetImageToggleState(this.selectedEntityToggle.toggle, (!flag) ? ImageToggleState.State.DisabledActive : ImageToggleState.State.Active);
+				this.ToggleSeedSelector(true);
+				GameObject prefab2 = Assets.GetPrefab(this.selectedDepositObjectTag);
+				if (prefab2 != null)
+				{
+					this.subtitleLabel.SetText(string.Format(Strings.Get(this.subtitleStringAwaitingSelection).ToString(), prefab2.GetProperName()));
+					this.SetResultDescriptions(prefab2);
+				}
 			}
 			else
 			{
-				this.requestSelectedEntityBtn.onClick += delegate
-				{
-					this.targetReceptacle.OrderRemoveOccupant();
-					this.UpdateState(null);
-				};
-				this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = UI.USERMENUACTIONS.UPROOT.NAME;
-				this.requestSelectedEntityBtn.isInteractable = true;
-				this.subtitleLabel.SetText(string.Format(Strings.Get(this.subtitleStringEntityDeposited).ToString(), this.targetReceptacle.Occupant.GetProperName()));
+				this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = UI.PLACEINRECEPTACLE;
+				this.requestSelectedEntityBtn.isInteractable = false;
+				this.ToggleSeedSelector(true);
 			}
-			this.ToggleSeedSelector(false);
-			Tag tag = this.targetReceptacle.Occupant.GetComponent<KSelectable>().PrefabID();
-			this.ConfigureActiveEntity(tag);
-			this.SetResultDescriptions(this.targetReceptacle.Occupant);
+			this.UpdateAvailableAmounts(null);
+			this.UpdateListeners();
 		}
-		else if (this.targetReceptacle.GetActiveRequest != null)
-		{
-			this.requestSelectedEntityBtn.onClick += delegate
-			{
-				this.targetReceptacle.CancelActiveRequest();
-				this.ClearSelection();
-				this.UpdateAvailableAmounts(null);
-				this.UpdateState(null);
-			};
-			this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = UI.CANCELPLACEINRECEPTACLE;
-			this.requestSelectedEntityBtn.isInteractable = true;
-			this.ToggleSeedSelector(false);
-			this.ConfigureActiveEntity(this.targetReceptacle.GetActiveRequest.tags[0]);
-			GameObject prefab = Assets.GetPrefab(this.targetReceptacle.GetActiveRequest.tags[0]);
-			if (prefab != null)
-			{
-				this.subtitleLabel.SetText(string.Format(Strings.Get(this.subtitleStringAwaitingDelivery).ToString(), prefab.GetProperName()));
-				this.SetResultDescriptions(prefab);
-			}
-		}
-		else if (this.selectedEntityToggle != null)
-		{
-			this.requestSelectedEntityBtn.onClick += delegate
-			{
-				this.targetReceptacle.CreateOrder(this.selectedDepositObjectTag);
-				this.UpdateAvailableAmounts(null);
-				this.UpdateState(null);
-			};
-			this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = UI.PLACEINRECEPTACLE;
-			this.targetReceptacle.SetPreview(this.depositObjectMap[this.selectedEntityToggle].tag, false);
-			bool flag = this.ValidRotationForDeposit(this.depositObjectMap[this.selectedEntityToggle].direction) && this.GetAvailableAmount(this.depositObjectMap[this.selectedEntityToggle].tag) > 0f && this.AdditionalCanDepositTest();
-			this.requestSelectedEntityBtn.isInteractable = flag;
-			this.SetImageToggleState(this.selectedEntityToggle.toggle, (!flag) ? ImageToggleState.State.DisabledActive : ImageToggleState.State.Active);
-			this.ToggleSeedSelector(true);
-			GameObject prefab2 = Assets.GetPrefab(this.selectedDepositObjectTag);
-			if (prefab2 != null)
-			{
-				this.subtitleLabel.SetText(string.Format(Strings.Get(this.subtitleStringAwaitingSelection).ToString(), prefab2.GetProperName()));
-				this.SetResultDescriptions(prefab2);
-			}
-		}
-		else
-		{
-			this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = UI.PLACEINRECEPTACLE;
-			this.requestSelectedEntityBtn.isInteractable = false;
-			this.ToggleSeedSelector(true);
-		}
-		this.UpdateAvailableAmounts(null);
-		this.UpdateListeners();
 	}
 
 	private void UpdateListeners()
@@ -213,16 +219,18 @@ public class ReceptacleSideScreen : SideScreenContent
 
 	private void OnOccupantValidChanged(object obj)
 	{
-		if (this.targetReceptacle == null)
+		if (!(this.targetReceptacle == null))
 		{
-			return;
-		}
-		if (!this.CheckReceptacleOccupied() && this.targetReceptacle.GetActiveRequest != null && (!this.ValidRotationForDeposit(this.depositObjectMap[this.selectedEntityToggle].direction) || this.GetAvailableAmount(this.depositObjectMap[this.selectedEntityToggle].tag) <= 0f || !this.AdditionalCanDepositTest()))
-		{
-			this.targetReceptacle.CancelActiveRequest();
-			this.ClearSelection();
-			this.UpdateState(null);
-			this.UpdateAvailableAmounts(null);
+			if (!this.CheckReceptacleOccupied() && this.targetReceptacle.GetActiveRequest != null)
+			{
+				if (!this.ValidRotationForDeposit(this.depositObjectMap[this.selectedEntityToggle].direction) || this.GetAvailableAmount(this.depositObjectMap[this.selectedEntityToggle].tag) <= 0f || !this.AdditionalCanDepositTest())
+				{
+					this.targetReceptacle.CancelActiveRequest();
+					this.ClearSelection();
+					this.UpdateState(null);
+					this.UpdateAvailableAmounts(null);
+				}
+			}
 		}
 	}
 
@@ -274,10 +282,12 @@ public class ReceptacleSideScreen : SideScreenContent
 		if (component == null)
 		{
 			global::Debug.LogError("The object selected doesn't have a SingleObjectReceptacle!", null);
-			return;
 		}
-		this.Initialize(component);
-		this.UpdateState(null);
+		else
+		{
+			this.Initialize(component);
+			this.UpdateState(null);
+		}
 	}
 
 	public override void ClearTarget()
@@ -388,19 +398,21 @@ public class ReceptacleSideScreen : SideScreenContent
 		if (!this.depositObjectMap.ContainsKey(toggle))
 		{
 			global::Debug.LogError("Recipe not found on recipe list.", null);
-			return;
 		}
-		if (this.selectedEntityToggle != null)
+		else
 		{
-			bool flag = this.ValidRotationForDeposit(this.depositObjectMap[this.selectedEntityToggle].direction) && this.GetAvailableAmount(this.depositObjectMap[this.selectedEntityToggle].tag) > 0f && this.AdditionalCanDepositTest();
-			this.requestSelectedEntityBtn.isInteractable = flag;
-			this.SetImageToggleState(this.selectedEntityToggle.toggle, (!flag) ? ImageToggleState.State.Disabled : ImageToggleState.State.Inactive);
+			if (this.selectedEntityToggle != null)
+			{
+				bool flag = this.ValidRotationForDeposit(this.depositObjectMap[this.selectedEntityToggle].direction) && this.GetAvailableAmount(this.depositObjectMap[this.selectedEntityToggle].tag) > 0f && this.AdditionalCanDepositTest();
+				this.requestSelectedEntityBtn.isInteractable = flag;
+				this.SetImageToggleState(this.selectedEntityToggle.toggle, (!flag) ? ImageToggleState.State.Disabled : ImageToggleState.State.Inactive);
+			}
+			this.selectedEntityToggle = toggle;
+			this.entityPreviousSelectionMap[this.targetReceptacle] = this.entityToggles.IndexOf(toggle);
+			this.selectedDepositObjectTag = this.depositObjectMap[toggle].tag;
+			this.UpdateAvailableAmounts(null);
+			this.UpdateState(null);
 		}
-		this.selectedEntityToggle = toggle;
-		this.entityPreviousSelectionMap[this.targetReceptacle] = this.entityToggles.IndexOf(toggle);
-		this.selectedDepositObjectTag = this.depositObjectMap[toggle].tag;
-		this.UpdateAvailableAmounts(null);
-		this.UpdateState(null);
 	}
 
 	private void CreateOrder(bool isInfinite)

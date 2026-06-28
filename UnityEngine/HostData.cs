@@ -4,7 +4,7 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequiredByNativeCode]
+	[RequiredByNativeCode(Optional = true)]
 	[StructLayout(LayoutKind.Sequential)]
 	public sealed class HostData
 	{

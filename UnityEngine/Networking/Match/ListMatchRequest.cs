@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace UnityEngine.Networking.Match
 {
-	public class ListMatchRequest : Request
+	internal class ListMatchRequest : Request
 	{
 		public int pageSize { get; set; }
 
@@ -11,7 +11,7 @@ namespace UnityEngine.Networking.Match
 
 		public string nameFilter { get; set; }
 
-		public bool includePasswordMatches { get; set; }
+		public bool filterOutPrivateMatches { get; set; }
 
 		public int eloScore { get; set; }
 
@@ -23,13 +23,16 @@ namespace UnityEngine.Networking.Match
 
 		public override string ToString()
 		{
-			return UnityString.Format("[{0}]-pageSize:{1},pageNum:{2},nameFilter:{3},matchAttributeFilterLessThan.Count:{4}, matchAttributeFilterGreaterThan.Count:{5}", new object[]
+			return UnityString.Format("[{0}]-pageSize:{1},pageNum:{2},nameFilter:{3}, filterOutPrivateMatches:{4}, eloScore:{5}, matchAttributeFilterLessThan.Count:{6}, matchAttributeFilterEqualTo.Count:{7}, matchAttributeFilterGreaterThan.Count:{8}", new object[]
 			{
 				base.ToString(),
 				this.pageSize,
 				this.pageNum,
 				this.nameFilter,
+				this.filterOutPrivateMatches,
+				this.eloScore,
 				(this.matchAttributeFilterLessThan != null) ? this.matchAttributeFilterLessThan.Count : 0,
+				(this.matchAttributeFilterEqualTo != null) ? this.matchAttributeFilterEqualTo.Count : 0,
 				(this.matchAttributeFilterGreaterThan != null) ? this.matchAttributeFilterGreaterThan.Count : 0
 			});
 		}
@@ -41,5 +44,8 @@ namespace UnityEngine.Networking.Match
 			num += ((this.matchAttributeFilterGreaterThan != null) ? this.matchAttributeFilterGreaterThan.Count : 0);
 			return base.IsValid() && (this.pageSize >= 1 || this.pageSize <= 1000) && num <= 10;
 		}
+
+		[Obsolete("This bool is deprecated in favor of filterOutPrivateMatches")]
+		public bool includePasswordMatches;
 	}
 }

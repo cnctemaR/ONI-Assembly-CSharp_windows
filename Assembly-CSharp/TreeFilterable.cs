@@ -66,7 +66,7 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
+		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
 	}
 
 	protected override void OnSpawn()
@@ -107,7 +107,6 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 		}
 		foreach (Tag tag3 in list)
 		{
-			global::Debug.Log("Removing tag: " + tag3.ToString() + " from TreeFilterable", null);
 			this.RemoveTagFromFilter(tag3);
 		}
 	}
@@ -145,22 +144,20 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 
 	public void AddTagToFilter(Tag t)
 	{
-		if (this.ContainsTag(t))
+		if (!this.ContainsTag(t))
 		{
-			return;
+			this.UpdateFilters(new List<Tag>(this.acceptedTags) { t });
 		}
-		this.UpdateFilters(new List<Tag>(this.acceptedTags) { t });
 	}
 
 	public void RemoveTagFromFilter(Tag t)
 	{
-		if (!this.ContainsTag(t))
+		if (this.ContainsTag(t))
 		{
-			return;
+			List<Tag> list = new List<Tag>(this.acceptedTags);
+			list.Remove(t);
+			this.UpdateFilters(list);
 		}
-		List<Tag> list = new List<Tag>(this.acceptedTags);
-		list.Remove(t);
-		this.UpdateFilters(list);
 	}
 
 	public void UpdateFilters(IList<Tag> filters)

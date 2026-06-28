@@ -25,7 +25,7 @@ public class GrowthState : KMonoBehaviour
 
 	private void SyncTemp()
 	{
-		int num = Grid.PosToCell(this.transform.position);
+		int num = Grid.PosToCell(base.transform.position);
 		float num2 = 0f;
 		num2 += Grid.Temperature[Grid.CellDownLeft(num)] * (Grid.Cell[Grid.CellDownLeft(num)].mass / 280f);
 		num2 += Grid.Temperature[Grid.CellDownRight(num)] * (Grid.Cell[Grid.CellDownRight(num)].mass / 280f);
@@ -76,11 +76,11 @@ public class GrowthState : KMonoBehaviour
 
 	public int maxMaturity = 10;
 
-	private int maturity;
+	private int maturity = 0;
 
 	private bool isDead;
 
-	private float timeInMaturityState;
+	private float timeInMaturityState = 0f;
 
 	public float maturityStateDuration = 10f;
 }

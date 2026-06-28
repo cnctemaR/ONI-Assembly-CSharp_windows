@@ -65,23 +65,22 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
-		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
-		this.Subscribe(2127324410, new Action<object>(this.OnRefreshUserMenu));
-		this.Subscribe(229718515, new Action<object>(this.OnThreatned));
-		this.Subscribe(-21431934, new Action<object>(this.ClearThreat));
+		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(2127324410, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(229718515, new Action<object>(this.OnThreatned));
+		base.Subscribe(-21431934, new Action<object>(this.ClearThreat));
 	}
 
 	private void FindAndMoveToFood()
 	{
-		if (!this.isHungry(base.smi))
+		if (this.isHungry(base.smi))
 		{
-			return;
-		}
-		Pickupable eatTarget = base.smi.master.GetEatTarget();
-		if (eatTarget != null)
-		{
-			base.smi.sm.eatMoveTarget.Set(eatTarget.gameObject, base.smi);
-			base.smi.GoTo(base.smi.sm.alive.grounded.eatStates.moveToFood);
+			Pickupable eatTarget = base.smi.master.GetEatTarget();
+			if (eatTarget != null)
+			{
+				base.smi.sm.eatMoveTarget.Set(eatTarget.gameObject, base.smi);
+				base.smi.GoTo(base.smi.sm.alive.grounded.eatStates.moveToFood);
+			}
 		}
 	}
 
@@ -129,10 +128,16 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 					{
 						int num5 = Grid.PosToCell(pickupable2);
 						int navigationCost = component.GetNavigationCost(num5);
-						if (navigationCost != PathProber.InvalidCost && navigationCost < num && pickupable2.GetComponent<PrimaryElement>().ElementID != this.emitter.outputElement.elementHash)
+						if (navigationCost != PathProber.InvalidCost)
 						{
-							num = navigationCost;
-							pickupable = pickupable2;
+							if (navigationCost < num)
+							{
+								if (pickupable2.GetComponent<PrimaryElement>().ElementID != this.emitter.outputElement.elementHash)
+								{
+									num = navigationCost;
+									pickupable = pickupable2;
+								}
+							}
 						}
 					}
 				}
@@ -160,12 +165,17 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 	private bool EmergeIsClear()
 	{
 		int num = Grid.PosToCell(base.gameObject);
+		bool flag;
 		if (!Grid.IsValidCell(num) || !Grid.IsValidCell(Grid.CellAbove(num)))
 		{
-			return false;
+			flag = false;
 		}
-		int num2 = Grid.CellAbove(num);
-		return !Grid.Solid[num2] && !Grid.IsSubstantialLiquid(Grid.CellAbove(num), 0.9f);
+		else
+		{
+			int num2 = Grid.CellAbove(num);
+			flag = !Grid.Solid[num2] && !Grid.IsSubstantialLiquid(Grid.CellAbove(num), 0.9f);
+		}
+		return flag;
 	}
 
 	private bool ShouldBurrow()
@@ -180,20 +190,31 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 
 	private GameObject EdibleOnCell(int cell)
 	{
+		GameObject gameObject;
 		if (base.smi.sm.eatMoveTarget.Get(base.smi) != null && Grid.PosToCell(base.smi.sm.eatMoveTarget.Get(base.smi)) == cell)
 		{
-			return base.smi.sm.eatMoveTarget.Get(base.smi);
+			gameObject = base.smi.sm.eatMoveTarget.Get(base.smi);
 		}
-		GameObject gameObject = Grid.Objects[cell, 3];
-		if (gameObject != null && gameObject.GetComponent<Pickupable>().storage == null && (gameObject.HasTag(GameTags.Ore) || gameObject.HasTag(GameTags.Edible) || gameObject.HasTag(GameTags.BuildableRaw) || gameObject.HasTag(GameTags.Solid)))
+		else
 		{
-			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-			if (component != null && component.ElementID != this.emitter.outputElement.elementHash)
+			GameObject gameObject2 = Grid.Objects[cell, 3];
+			if (gameObject2 != null && gameObject2.GetComponent<Pickupable>().storage == null)
 			{
-				return gameObject;
+				if (gameObject2.HasTag(GameTags.Ore) || gameObject2.HasTag(GameTags.Edible) || gameObject2.HasTag(GameTags.BuildableRaw) || gameObject2.HasTag(GameTags.Solid))
+				{
+					PrimaryElement component = gameObject2.GetComponent<PrimaryElement>();
+					if (component != null)
+					{
+						if (component.ElementID != this.emitter.outputElement.elementHash)
+						{
+							return gameObject2;
+						}
+					}
+				}
 			}
+			gameObject = null;
 		}
-		return null;
+		return gameObject;
 	}
 
 	private void RemoveMassFromEdible(GameObject edibleObject)
@@ -239,14 +260,20 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 			if (base.smi.sm.DigPlacer.Get(base.smi) == null)
 			{
 				UserMenu userMenu = this.userMenu;
-				string text = UI.USERMENUACTIONS.DIG.TOOLTIP;
-				userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_uproot", UI.USERMENUACTIONS.DIG.NAME, new global::System.Action(this.OnPressDig), global::Action.NumActions, null, null, null, text, true), 1f);
+				string text = "action_uproot";
+				string text2 = UI.USERMENUACTIONS.DIG.NAME;
+				global::System.Action action = new global::System.Action(this.OnPressDig);
+				string text3 = UI.USERMENUACTIONS.DIG.TOOLTIP;
+				userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
 			}
 			else
 			{
 				UserMenu userMenu2 = this.userMenu;
+				string text3 = "action_uproot";
+				string text2 = UI.USERMENUACTIONS.CANCELDIG.NAME;
+				global::System.Action action = new global::System.Action(this.OnPressCancelDig);
 				string text = UI.USERMENUACTIONS.DIG.TOOLTIP_OFF;
-				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_uproot", UI.USERMENUACTIONS.CANCELDIG.NAME, new global::System.Action(this.OnPressCancelDig), global::Action.NumActions, null, null, null, text, true), 1f);
+				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
 			}
 		}
 	}
@@ -254,15 +281,20 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 	private GameObject FindExistingDigPlacer()
 	{
 		GameObject gameObject = Grid.Objects[Grid.PosToCell(base.gameObject), 7];
+		GameObject gameObject2;
 		if (gameObject == null)
 		{
-			return null;
+			gameObject2 = null;
 		}
-		if (this.prevDigPlacer == gameObject)
+		else if (this.prevDigPlacer == gameObject)
 		{
-			return null;
+			gameObject2 = null;
 		}
-		return gameObject;
+		else
+		{
+			gameObject2 = gameObject;
+		}
+		return gameObject2;
 	}
 
 	private void OnPressDig()
@@ -271,9 +303,11 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 		if (gameObject != null)
 		{
 			global::Debug.LogWarning("User menu trying to create dig placer on hatch while it already has one. This should not be possible", null);
-			return;
 		}
-		DigTool.PlaceDig(Grid.PosToCell(base.gameObject), 0);
+		else
+		{
+			DigTool.PlaceDig(Grid.PosToCell(base.gameObject), 0);
+		}
 	}
 
 	private void OnPressCancelDig()
@@ -287,19 +321,18 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 
 	private void OnDuplicantDigBurrow(object dupeObject)
 	{
-		if (base.gameObject == null)
+		if (!(base.gameObject == null))
 		{
-			return;
-		}
-		FactionAlignment component = ((GameObject)dupeObject).GetComponent<FactionAlignment>();
-		ThreatMonitor.Instance smi = base.gameObject.GetSMI<ThreatMonitor.Instance>();
-		if (smi != null)
-		{
-			smi.OnOffended(component);
-		}
-		if (base.smi.sm.DigPlacer.Get(base.smi) != null)
-		{
-			base.smi.master.ForgetDigPlacer();
+			FactionAlignment component = ((GameObject)dupeObject).GetComponent<FactionAlignment>();
+			ThreatMonitor.Instance smi = base.gameObject.GetSMI<ThreatMonitor.Instance>();
+			if (smi != null)
+			{
+				smi.OnOffended(component);
+			}
+			if (base.smi.sm.DigPlacer.Get(base.smi) != null)
+			{
+				base.smi.master.ForgetDigPlacer();
+			}
 		}
 	}
 
@@ -350,9 +383,12 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 				this.SetDigPlacer(gameObject);
 			}
 		}
-		else if (data == null && base.smi.sm.DigPlacer.Get(base.smi) != null)
+		else if (data == null)
 		{
-			this.ForgetDigPlacer();
+			if (base.smi.sm.DigPlacer.Get(base.smi) != null)
+			{
+				this.ForgetDigPlacer();
+			}
 		}
 		this.userMenu.Refresh();
 	}
@@ -396,7 +432,7 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 
 	public Element latestMealElement;
 
-	public string latestMealName = string.Empty;
+	public string latestMealName = "";
 
 	public float minimumTimeBetweenMeals = 30f;
 
@@ -490,8 +526,8 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 					}
 				});
 			this.alive.grounded.caged.DefaultState(this.alive.grounded.caged.idle).TagTransition(GameTags.Trapped, this.alive.grounded, true);
-			this.alive.grounded.caged.idle.PlayAnim("idle_loop", KAnim.PlayMode.Loop, null).ScheduleGoTo(3f, this.alive.grounded.caged.funny_idle);
-			this.alive.grounded.caged.funny_idle.PlayAnim("harvest", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.alive.grounded.caged.idle);
+			this.alive.grounded.caged.idle.PlayAnim("idle_loop", KAnim.PlayMode.Loop).ScheduleGoTo(3f, this.alive.grounded.caged.funny_idle);
+			this.alive.grounded.caged.funny_idle.PlayAnim("harvest", KAnim.PlayMode.Once).OnAnimQueueComplete(this.alive.grounded.caged.idle);
 			this.alive.grounded.idle.DefaultState(this.alive.grounded.idle.idle).ToggleMainStatusItem(Db.Get().CreatureStatusItems.Idle).ToggleSchedulePeriodic("HatchLooksForFood", 1f, delegate(Hatch.StatesInstance smi)
 			{
 				smi.master.FindAndMoveToFood();
@@ -504,7 +540,7 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 						smi.GoTo(this.alive.hide);
 					}
 				});
-			this.alive.grounded.idle.idle.PlayAnim("idle_loop", KAnim.PlayMode.Loop, null).ScheduleGoTo(3f, this.alive.grounded.idle.move).Enter(delegate(Hatch.StatesInstance smi)
+			this.alive.grounded.idle.idle.PlayAnim("idle_loop", KAnim.PlayMode.Loop).ScheduleGoTo(3f, this.alive.grounded.idle.move).Enter(delegate(Hatch.StatesInstance smi)
 			{
 				if (smi.master.isHungry(smi) && smi.master.EdibleOnCell(Grid.PosToCell(smi.transform.position)) != null)
 				{
@@ -519,7 +555,7 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 					smi.GoTo(this.alive.grounded.eatStates);
 				}
 			});
-			this.alive.grounded.idle.poop.PlayAnim("harvest", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.alive.grounded.idle).Enter(delegate(Hatch.StatesInstance smi)
+			this.alive.grounded.idle.poop.PlayAnim("harvest").OnAnimQueueComplete(this.alive.grounded.idle).Enter(delegate(Hatch.StatesInstance smi)
 			{
 				smi.master.Poop();
 			});
@@ -537,7 +573,7 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 				{
 					smi.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().CreatureStatusItems.Emerging, false);
 				});
-			this.alive.grounded.distressed.Drowning.PlayAnim("harvest", KAnim.PlayMode.Loop, null).Enter(delegate(Hatch.StatesInstance smi)
+			this.alive.grounded.distressed.Drowning.PlayAnim("harvest", KAnim.PlayMode.Loop).Enter(delegate(Hatch.StatesInstance smi)
 			{
 				smi.master.nav.Stop(false);
 				DrowningMonitor component = smi.master.GetComponent<DrowningMonitor>();
@@ -555,9 +591,12 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 				smi.Schedule(0.5f, delegate(object d)
 				{
 					GameObject gameObject = smi.master.EdibleOnCell(Grid.PosToCell(smi.master));
-					if (gameObject == null && this.eatMoveTarget.Get(smi) != null && Grid.PosToCell(smi.master.gameObject) == Grid.PosToCell(this.eatMoveTarget.Get(smi).gameObject))
+					if (gameObject == null)
 					{
-						gameObject = this.eatMoveTarget.Get(smi);
+						if (this.eatMoveTarget.Get(smi) != null && Grid.PosToCell(smi.master.gameObject) == Grid.PosToCell(this.eatMoveTarget.Get(smi).gameObject))
+						{
+							gameObject = this.eatMoveTarget.Get(smi);
+						}
 					}
 					if (gameObject != null)
 					{
@@ -644,7 +683,7 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 					smi.master.solidCellMonitor.Release();
 					smi.master.GetComponent<FactionAlignment>().ToggleAlignmentActive(true);
 				});
-			this.alive.hide.pre.PlayAnim("hide", KAnim.PlayMode.Once, null).EventTransition(GameHashes.AnimQueueComplete, this.alive.hide.loop, null).ToggleMainStatusItem(Db.Get().CreatureStatusItems.Burrowing)
+			this.alive.hide.pre.PlayAnim("hide").EventTransition(GameHashes.AnimQueueComplete, this.alive.hide.loop, null).ToggleMainStatusItem(Db.Get().CreatureStatusItems.Burrowing)
 				.Enter(delegate(Hatch.StatesInstance smi)
 				{
 					smi.master.userMenu.Refresh();
@@ -654,7 +693,7 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 				{
 					smi.master.mover.TeleportToTarget(Grid.CellToPos(Grid.CellBelow(Grid.PosToCell(smi.master.transform.position)), 0.5f, 0f, 0f), 0f);
 				});
-			this.alive.hide.loop.PlayAnim("idle_mound", KAnim.PlayMode.Loop, null).ToggleMainStatusItem(Db.Get().CreatureStatusItems.Burrowed).Enter(delegate(Hatch.StatesInstance smi)
+			this.alive.hide.loop.PlayAnim("idle_mound", KAnim.PlayMode.Loop).ToggleMainStatusItem(Db.Get().CreatureStatusItems.Burrowed).Enter(delegate(Hatch.StatesInstance smi)
 			{
 				smi.master.InheritExistingDigPlacer();
 				smi.master.ListenForDigPlacerChanged();
@@ -685,13 +724,13 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 					smi.GoTo(this.alive.fall);
 				}
 			});
-			this.alive.dormant.pre.PlayAnim("dormant_pre", KAnim.PlayMode.Once, null).EventTransition(GameHashes.Nighttime, (Hatch.StatesInstance smi) => GameClock.Instance, this.alive.dormant.pst, null).OnAnimQueueComplete(this.alive.dormant.pst)
+			this.alive.dormant.pre.PlayAnim("dormant_pre").EventTransition(GameHashes.Nighttime, (Hatch.StatesInstance smi) => GameClock.Instance, this.alive.dormant.pst, null).OnAnimQueueComplete(this.alive.dormant.pst)
 				.Enter(delegate(Hatch.StatesInstance smi)
 				{
 					smi.master.userMenu.Refresh();
 				});
-			this.alive.dormant.pst.PlayAnim("dormant_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.alive.grounded.attackStates);
-			this.alive.fall.PlayAnim("fall", KAnim.PlayMode.Loop, null).ToggleGravity(this.alive.grounded.idle);
+			this.alive.dormant.pst.PlayAnim("dormant_pst").OnAnimQueueComplete(this.alive.grounded.attackStates);
+			this.alive.fall.PlayAnim("fall", KAnim.PlayMode.Loop).ToggleGravity(this.alive.grounded.idle);
 			this.death.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Dead).Enter(delegate(Hatch.StatesInstance smi)
 			{
 				smi.master.alive = false;

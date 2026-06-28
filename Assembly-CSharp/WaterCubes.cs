@@ -17,17 +17,19 @@ public class WaterCubes : KMonoBehaviour
 		GameObject gameObject = new GameObject();
 		gameObject.name = "WaterCubesMesh";
 		gameObject.transform.parent = this.cubes.transform;
+		this.material.renderQueue = RenderQueues.Liquid;
 		MeshFilter meshFilter = gameObject.AddComponent<MeshFilter>();
 		MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
 		meshRenderer.sharedMaterial = this.material;
 		meshRenderer.shadowCastingMode = ShadowCastingMode.Off;
 		meshRenderer.receiveShadows = false;
-		meshRenderer.useLightProbes = false;
+		meshRenderer.lightProbeUsage = LightProbeUsage.Off;
 		meshRenderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
 		meshRenderer.sharedMaterial.SetTexture("_MainTex2", this.waveTexture);
 		meshFilter.sharedMesh = this.CreateNewMesh();
-		meshRenderer.gameObject.layer = LayerMask.NameToLayer("Water");
-		meshRenderer.gameObject.transform.parent = this.transform;
+		meshRenderer.gameObject.layer = 0;
+		meshRenderer.gameObject.transform.parent = base.transform;
+		meshRenderer.gameObject.transform.position = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.Liquid));
 	}
 
 	private Mesh CreateNewMesh()

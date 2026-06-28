@@ -12,10 +12,10 @@ namespace Klei.AI
 			base.AddDiseaseComponent(new CommonSickEffectDisease());
 			base.AddDiseaseComponent(new AttributeModifierDisease(new AttributeModifier[]
 			{
-				new AttributeModifier("Learning", -5f, DUPLICANTS.DISEASES.HEATRASH.NAME, false, false),
-				new AttributeModifier("Machinery", -5f, DUPLICANTS.DISEASES.HEATRASH.NAME, false, false),
-				new AttributeModifier("Construction", -5f, DUPLICANTS.DISEASES.HEATRASH.NAME, false, false),
-				new AttributeModifier("Cooking", -5f, DUPLICANTS.DISEASES.HEATRASH.NAME, false, false)
+				new AttributeModifier("Learning", -5f, DUPLICANTS.DISEASES.HEATRASH.NAME, false, false, true),
+				new AttributeModifier("Machinery", -5f, DUPLICANTS.DISEASES.HEATRASH.NAME, false, false, true),
+				new AttributeModifier("Construction", -5f, DUPLICANTS.DISEASES.HEATRASH.NAME, false, false, true),
+				new AttributeModifier("Cooking", -5f, DUPLICANTS.DISEASES.HEATRASH.NAME, false, false, true)
 			}));
 			base.AddDiseaseComponent(new AnimatedDisease(new HashedString[] { "anim_idle_hot_kanim" }, "Hot"));
 		}

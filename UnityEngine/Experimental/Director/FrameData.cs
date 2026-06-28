@@ -4,27 +4,11 @@ namespace UnityEngine.Experimental.Director
 {
 	public struct FrameData
 	{
-		public int updateId
+		public ulong frameId
 		{
 			get
 			{
-				return this.m_UpdateId;
-			}
-		}
-
-		public float time
-		{
-			get
-			{
-				return (float)this.m_Time;
-			}
-		}
-
-		public float lastTime
-		{
-			get
-			{
-				return (float)this.m_LastTime;
+				return this.m_FrameID;
 			}
 		}
 
@@ -32,56 +16,73 @@ namespace UnityEngine.Experimental.Director
 		{
 			get
 			{
-				return (float)this.m_Time - (float)this.m_LastTime;
+				return (float)this.m_DeltaTime;
 			}
 		}
 
-		public float timeScale
+		public float weight
 		{
 			get
 			{
-				return (float)this.m_TimeScale;
+				return this.m_Weight;
 			}
 		}
 
-		public double dTime
+		public float effectiveWeight
 		{
 			get
 			{
-				return this.m_Time;
+				return this.m_EffectiveWeight;
 			}
 		}
 
-		public double dLastTime
+		public float effectiveSpeed
 		{
 			get
 			{
-				return this.m_LastTime;
+				return this.m_EffectiveSpeed;
 			}
 		}
 
-		public double dDeltaTime
+		public FrameData.EvaluationType evaluationType
 		{
 			get
 			{
-				return this.m_Time - this.m_LastTime;
+				return ((this.m_Flags & FrameData.Flags.Evaluate) == (FrameData.Flags)0) ? FrameData.EvaluationType.Playback : FrameData.EvaluationType.Evaluate;
 			}
 		}
 
-		public double dtimeScale
+		public bool seekOccurred
 		{
 			get
 			{
-				return this.m_TimeScale;
+				return (this.m_Flags & FrameData.Flags.SeekOccured) != (FrameData.Flags)0;
 			}
 		}
 
-		internal int m_UpdateId;
+		internal ulong m_FrameID;
 
-		internal double m_Time;
+		internal double m_DeltaTime;
 
-		internal double m_LastTime;
+		internal float m_Weight;
 
-		internal double m_TimeScale;
+		internal float m_EffectiveWeight;
+
+		internal float m_EffectiveSpeed;
+
+		internal FrameData.Flags m_Flags;
+
+		[Flags]
+		internal enum Flags
+		{
+			Evaluate = 1,
+			SeekOccured = 2
+		}
+
+		public enum EvaluationType
+		{
+			Evaluate,
+			Playback
+		}
 	}
 }

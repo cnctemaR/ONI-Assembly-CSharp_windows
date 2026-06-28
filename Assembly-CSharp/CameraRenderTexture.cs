@@ -23,7 +23,9 @@ public class CameraRenderTexture : MonoBehaviour
 		}
 		this.resultTexture = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.ARGB32);
 		this.resultTexture.name = base.name;
-		if (this.TextureName != string.Empty)
+		this.resultTexture.filterMode = FilterMode.Point;
+		this.resultTexture.autoGenerateMips = false;
+		if (this.TextureName != "")
 		{
 			Shader.SetGlobalTexture(this.TextureName, this.resultTexture);
 		}
@@ -34,9 +36,19 @@ public class CameraRenderTexture : MonoBehaviour
 		Graphics.Blit(source, this.resultTexture, this.material);
 	}
 
+	public RenderTexture GetTexture()
+	{
+		return this.resultTexture;
+	}
+
+	public bool ShouldFlip()
+	{
+		return false;
+	}
+
 	public string TextureName;
 
-	public RenderTexture resultTexture;
+	private RenderTexture resultTexture;
 
 	private Material material;
 }

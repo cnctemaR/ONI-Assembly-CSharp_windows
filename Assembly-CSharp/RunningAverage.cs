@@ -20,19 +20,18 @@ public class RunningAverage
 
 	public void AddSample(float value)
 	{
-		if (value < this.min || value > this.max || (this.ignoreZero && value == 0f))
+		if (value >= this.min && value <= this.max && (!this.ignoreZero || value != 0f))
 		{
-			return;
+			if (this.validValues < this.samples.Length)
+			{
+				this.validValues++;
+			}
+			for (int i = 0; i < this.samples.Length - 1; i++)
+			{
+				this.samples[i] = this.samples[i + 1];
+			}
+			this.samples[this.samples.Length - 1] = value;
 		}
-		if (this.validValues < this.samples.Length)
-		{
-			this.validValues++;
-		}
-		for (int i = 0; i < this.samples.Length - 1; i++)
-		{
-			this.samples[i] = this.samples[i + 1];
-		}
-		this.samples[this.samples.Length - 1] = value;
 	}
 
 	private float GetAverage()
@@ -51,7 +50,7 @@ public class RunningAverage
 
 	private float max;
 
-	private bool ignoreZero;
+	private bool ignoreZero = false;
 
-	private int validValues;
+	private int validValues = 0;
 }

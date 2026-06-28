@@ -7,8 +7,19 @@ public class SculptureConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
+		string text = "Sculpture";
+		int num = 1;
+		int num2 = 3;
+		string text2 = "sculpture_kanim";
+		float num3 = 100f;
+		int num4 = 30;
+		float num5 = 120f;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
+		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Sculpture", 1, 3, "sculpture_kanim", 100f, 30, 120f, global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.OnFloor, new EffectorValues
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_MINERALS, num6, buildLocationRule, new EffectorValues
 		{
 			amount = 5,
 			radius = 8
@@ -36,4 +47,6 @@ public class SculptureConfig : IBuildingConfig
 		artable.stages.Add(new Artable.Stage("Bad", global::STRINGS.BUILDINGS.PREFABS.SCULPTURE.POORQUALITYNAME, "crap", 0, 5, false, Artable.Status.Ugly));
 		artable.stages.Add(new Artable.Stage("Average", global::STRINGS.BUILDINGS.PREFABS.SCULPTURE.AVERAGEQUALITYNAME, "idle", 2, 15, true, Artable.Status.Okay));
 	}
+
+	public const string ID = "Sculpture";
 }

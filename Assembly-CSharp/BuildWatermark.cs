@@ -13,15 +13,15 @@ public class BuildWatermark : KScreen
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		string text = ((!Application.isEditor) ? ("OI-" + 236679U.ToString()) : "<EDITOR>");
+		string text = ((!Application.isEditor) ? ("AT-" + 242372U.ToString()) : "<EDITOR>");
 		this.textDisplay.SetText(string.Format(UI.DEVELOPMENTBUILDS.WATERMARK, text));
 	}
 
 	private void Update()
 	{
-		if (this.transform.GetSiblingIndex() != this.transform.parent.childCount - 1)
+		if (base.transform.GetSiblingIndex() != base.transform.parent.childCount - 1)
 		{
-			this.transform.SetAsLastSibling();
+			base.transform.SetAsLastSibling();
 		}
 	}
 

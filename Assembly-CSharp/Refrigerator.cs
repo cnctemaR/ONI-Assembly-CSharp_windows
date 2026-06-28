@@ -4,13 +4,13 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IGameObjectEffectDescriptor, IEffectDescriptor
+public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IEffectDescriptor, IGameObjectEffectDescriptor
 {
 	protected override void OnPrefabInit()
 	{
 		this.filteredStorage = new FilteredStorage(this, new Tag[] { GameTags.MarkedForCompost }, this.filterTint, this.noFilterTint, this);
-		this.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
-		this.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
+		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
 	}
 
 	protected override void OnSpawn()
@@ -41,16 +41,14 @@ public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IGameObject
 	private void OnCopySettings(object data)
 	{
 		GameObject gameObject = (GameObject)data;
-		if (gameObject == null)
+		if (!(gameObject == null))
 		{
-			return;
+			Refrigerator component = gameObject.GetComponent<Refrigerator>();
+			if (!(component == null))
+			{
+				this.UserMaxCapacity = component.UserMaxCapacity;
+			}
 		}
-		Refrigerator component = gameObject.GetComponent<Refrigerator>();
-		if (component == null)
-		{
-			return;
-		}
-		this.UserMaxCapacity = component.UserMaxCapacity;
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)
@@ -97,14 +95,19 @@ public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IGameObject
 		get
 		{
 			GameUtil.MassUnit massUnit = GameUtil.massUnit;
-			if (massUnit != GameUtil.MassUnit.Kilograms)
+			LocString locString;
+			if (massUnit != GameUtil.MassUnit.Pounds)
 			{
-				if (massUnit == GameUtil.MassUnit.Pounds)
+				if (massUnit != GameUtil.MassUnit.Kilograms)
 				{
-					return UI.UNITSUFFIXES.MASS.POUND;
 				}
+				locString = UI.UNITSUFFIXES.MASS.KILOGRAM;
 			}
-			return UI.UNITSUFFIXES.MASS.KILOGRAM;
+			else
+			{
+				locString = UI.UNITSUFFIXES.MASS.POUND;
+			}
+			return locString;
 		}
 	}
 

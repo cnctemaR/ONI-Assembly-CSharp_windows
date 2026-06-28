@@ -4,15 +4,20 @@ public static class UnitsUtil
 {
 	public static bool IsTimeUnit(Units unit)
 	{
-		return unit == Units.PerDay || unit == Units.PerSecond;
+		return unit == Units.PerSecond || unit == Units.PerDay;
 	}
 
 	public static string GetUnitSuffix(Units unit)
 	{
+		string text;
 		if (unit != Units.Kelvin)
 		{
-			return string.Empty;
+			text = "";
 		}
-		return "K";
+		else
+		{
+			text = "K";
+		}
+		return text;
 	}
 }

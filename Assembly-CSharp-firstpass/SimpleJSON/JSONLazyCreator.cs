@@ -63,6 +63,16 @@ namespace SimpleJSON
 			this.Set(new JSONClass { { aKey, aItem } });
 		}
 
+		public static bool operator ==(JSONLazyCreator a, object b)
+		{
+			return b == null || object.ReferenceEquals(a, b);
+		}
+
+		public static bool operator !=(JSONLazyCreator a, object b)
+		{
+			return !(a == b);
+		}
+
 		public override bool Equals(object obj)
 		{
 			return obj == null || object.ReferenceEquals(this, obj);
@@ -75,12 +85,12 @@ namespace SimpleJSON
 
 		public override string ToString()
 		{
-			return string.Empty;
+			return "";
 		}
 
 		public override string ToString(string aPrefix)
 		{
-			return string.Empty;
+			return "";
 		}
 
 		public override int AsInt
@@ -163,18 +173,8 @@ namespace SimpleJSON
 			}
 		}
 
-		public static bool operator ==(JSONLazyCreator a, object b)
-		{
-			return b == null || object.ReferenceEquals(a, b);
-		}
+		private JSONNode m_Node = null;
 
-		public static bool operator !=(JSONLazyCreator a, object b)
-		{
-			return !(a == b);
-		}
-
-		private JSONNode m_Node;
-
-		private string m_Key;
+		private string m_Key = null;
 	}
 }

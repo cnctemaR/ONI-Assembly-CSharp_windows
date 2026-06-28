@@ -4,7 +4,7 @@ using UnityEngine;
 public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
 {
 	public AggressiveChore(IStateMachineTarget target, Action<Chore> on_complete = null)
-		: base(Db.Get().ChoreTypes.StressActingOut, target, target.GetComponent<ChoreProvider>(), false, on_complete, null, null, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.StressActingOut, target, target.GetComponent<ChoreProvider>(), false, on_complete, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
 	{
 		this.smi = new AggressiveChore.StatesInstance(this, target.gameObject);
 	}
@@ -120,7 +120,7 @@ public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
 				smi.sm.masterTarget.Get<KAnimControllerBase>(smi).RemoveAnimOverrides(Assets.GetAnim("anim_out_of_reach_destructive_high_kanim"));
 				smi.sm.masterTarget.Get<KAnimControllerBase>(smi).RemoveAnimOverrides(Assets.GetAnim("anim_out_of_reach_destructive_low_kanim"));
 			});
-			this.breaking_wall.Pre.PlayAnim("working_pre", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.breaking_wall.Loop);
+			this.breaking_wall.Pre.PlayAnim("working_pre").OnAnimQueueComplete(this.breaking_wall.Loop);
 			this.breaking_wall.Loop.ScheduleGoTo(26f, this.breaking_wall.Pst).ToggleSchedulePeriodic("PunchWallDamage", 0.7f, delegate(AggressiveChore.StatesInstance smi)
 			{
 				smi.master.PunchWallDamage();
@@ -136,7 +136,7 @@ public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
 					}
 				});
 			this.breaking_wall.Pst.QueueAnim("working_pst", false, null).OnAnimQueueComplete(this.noTarget);
-			this.breaking.ToggleWork<Breakable>(this.breakable, null, null);
+			this.breaking.ToggleWork<Breakable>(this.breakable, null, null, null);
 		}
 
 		public StateMachine<AggressiveChore.States, AggressiveChore.StatesInstance, AggressiveChore, object>.TargetParameter breaker;

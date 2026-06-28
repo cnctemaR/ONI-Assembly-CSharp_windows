@@ -8,8 +8,8 @@ public class RationBox : KMonoBehaviour, IUserControlledCapacity
 	protected override void OnPrefabInit()
 	{
 		this.filteredStorage = new FilteredStorage(this, new Tag[] { GameTags.MarkedForCompost }, this.filterTint, this.noFilterTint, this);
-		this.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
-		this.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
+		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
 		WorldInventory.Instance.Discover("FieldRation".ToTag(), GameTags.Edible);
 	}
 
@@ -36,16 +36,14 @@ public class RationBox : KMonoBehaviour, IUserControlledCapacity
 	private void OnCopySettings(object data)
 	{
 		GameObject gameObject = (GameObject)data;
-		if (gameObject == null)
+		if (!(gameObject == null))
 		{
-			return;
+			RationBox component = gameObject.GetComponent<RationBox>();
+			if (!(component == null))
+			{
+				this.UserMaxCapacity = component.UserMaxCapacity;
+			}
 		}
-		RationBox component = gameObject.GetComponent<RationBox>();
-		if (component == null)
-		{
-			return;
-		}
-		this.UserMaxCapacity = component.UserMaxCapacity;
 	}
 
 	private void UpdatePreservationStatusItems(object data)
@@ -87,14 +85,19 @@ public class RationBox : KMonoBehaviour, IUserControlledCapacity
 		get
 		{
 			GameUtil.MassUnit massUnit = GameUtil.massUnit;
-			if (massUnit != GameUtil.MassUnit.Kilograms)
+			LocString locString;
+			if (massUnit != GameUtil.MassUnit.Pounds)
 			{
-				if (massUnit == GameUtil.MassUnit.Pounds)
+				if (massUnit != GameUtil.MassUnit.Kilograms)
 				{
-					return UI.UNITSUFFIXES.MASS.POUND;
 				}
+				locString = UI.UNITSUFFIXES.MASS.KILOGRAM;
 			}
-			return UI.UNITSUFFIXES.MASS.KILOGRAM;
+			else
+			{
+				locString = UI.UNITSUFFIXES.MASS.POUND;
+			}
+			return locString;
 		}
 	}
 

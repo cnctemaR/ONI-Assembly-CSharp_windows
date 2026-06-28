@@ -5,6 +5,19 @@ using UnityEngine;
 
 public class TemplateSelectionInfoPanel : KMonoBehaviour
 {
+	public TemplateSelectionInfoPanel()
+	{
+		Func<List<int>, string>[] array = new Func<List<int>, string>[6];
+		array[0] = new Func<List<int>, string>(TemplateSelectionInfoPanel.TotalMass);
+		array[1] = new Func<List<int>, string>(TemplateSelectionInfoPanel.AverageMass);
+		array[2] = new Func<List<int>, string>(TemplateSelectionInfoPanel.AverageTemperature);
+		array[3] = new Func<List<int>, string>(TemplateSelectionInfoPanel.TotalJoules);
+		array[4] = new Func<List<int>, string>(TemplateSelectionInfoPanel.JoulesPerKilogram);
+		array[5] = new Func<List<int>, string>(TemplateSelectionInfoPanel.MassPerElement);
+		this.details = array;
+		base..ctor();
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -19,7 +32,7 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour
 
 	public void SaveCurrentDetails()
 	{
-		string text = string.Empty;
+		string text = "";
 		for (int i = 0; i < this.details.Length; i++)
 		{
 			text = text + this.details[i](DebugBaseTemplateButton.Instance.SelectedCells) + "\n";
@@ -114,17 +127,22 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour
 		}
 		TemplateSelectionInfoPanel.mass_per_element.Sort(delegate(Tuple<Element, float> a, Tuple<Element, float> b)
 		{
+			int num2;
 			if (a.second > b.second)
 			{
-				return -1;
+				num2 = -1;
 			}
-			if (b.second > a.second)
+			else if (b.second > a.second)
 			{
-				return 1;
+				num2 = 1;
 			}
-			return 0;
+			else
+			{
+				num2 = 0;
+			}
+			return num2;
 		});
-		string text = string.Empty;
+		string text = "";
 		foreach (Tuple<Element, float> tuple in TemplateSelectionInfoPanel.mass_per_element)
 		{
 			string text2 = text;
@@ -152,15 +170,7 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour
 	[SerializeField]
 	private KButton save_button;
 
-	private Func<List<int>, string>[] details = new Func<List<int>, string>[]
-	{
-		new Func<List<int>, string>(TemplateSelectionInfoPanel.TotalMass),
-		new Func<List<int>, string>(TemplateSelectionInfoPanel.AverageMass),
-		new Func<List<int>, string>(TemplateSelectionInfoPanel.AverageTemperature),
-		new Func<List<int>, string>(TemplateSelectionInfoPanel.TotalJoules),
-		new Func<List<int>, string>(TemplateSelectionInfoPanel.JoulesPerKilogram),
-		new Func<List<int>, string>(TemplateSelectionInfoPanel.MassPerElement)
-	};
+	private Func<List<int>, string>[] details;
 
 	private static List<Tuple<Element, float>> mass_per_element = new List<Tuple<Element, float>>();
 }

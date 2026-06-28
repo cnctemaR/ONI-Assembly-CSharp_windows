@@ -18,8 +18,11 @@ public class RelocateTool : DragTool
 		this.viewMode = this.def.ViewMode;
 		base.OnActivateTool();
 		this.buildingOrientation = Orientation.Neutral;
+		GameObject buildingPreview = this.def.BuildingPreview;
+		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Ore;
+		Folder folder = Folder.Placers;
 		int num = LayerMask.NameToLayer("Place");
-		this.visualizer = GameUtil.KInstantiate(this.def.BuildingPreview, Grid.SceneLayer.Use, Folder.Placers, null, num);
+		this.visualizer = GameUtil.KInstantiate(buildingPreview, sceneLayer, folder, null, num);
 		KBatchedAnimController component = this.visualizer.GetComponent<KBatchedAnimController>();
 		if (component != null)
 		{
@@ -131,7 +134,7 @@ public class RelocateTool : DragTool
 			Vector3 position = this.visualizer.transform.position;
 			position.z = Grid.CellToPosCCC(0, this.def.SceneLayer).z;
 			this.visualizer.transform.SetPosition(position);
-			this.transform.SetPosition(position - Vector3.up * 0.5f);
+			base.transform.SetPosition(position - Vector3.up * 0.5f);
 			int num = Grid.PosToCell(cursorPos);
 			if (this.def.IsTilePiece)
 			{
@@ -210,71 +213,73 @@ public class RelocateTool : DragTool
 
 	protected override void OnDragTool(int cell, int distFromOrigin)
 	{
-		if (this.visualizer == null)
+		if (!(this.visualizer == null))
 		{
-			return;
-		}
-		this.ClearTilePreview();
-		Vector3 vector = Grid.CellToPosCBC(cell, Grid.SceneLayer.Building);
-		GameObject gameObject = null;
-		if (DebugHandler.InstantBuildMode)
-		{
-			if (this.def.IsValidBuildLocation(this.visualizer, vector, this.buildingOrientation) && this.def.IsValidPlaceLocation(this.visualizer, vector, this.buildingOrientation))
+			this.ClearTilePreview();
+			Vector3 vector = Grid.CellToPosCBC(cell, Grid.SceneLayer.Building);
+			GameObject gameObject = null;
+			if (DebugHandler.InstantBuildMode)
 			{
-				gameObject = this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, 293.15f, true, true);
-				this.source.DeleteObject();
-			}
-		}
-		else
-		{
-			gameObject = this.def.TryPlace(vector, this.buildingOrientation, this.selectedElements, 0, true);
-			if (gameObject == null && this.def.ReplacementLayer != ObjectLayer.NumLayers)
-			{
-				if (!Grid.ObjectLayers[(int)this.def.TileLayer].ContainsKey(cell))
+				if (this.def.IsValidBuildLocation(this.visualizer, vector, this.buildingOrientation) && this.def.IsValidPlaceLocation(this.visualizer, vector, this.buildingOrientation))
 				{
-					return;
+					gameObject = this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, 293.15f, true, true);
+					this.source.DeleteObject();
 				}
-				GameObject gameObject2 = Grid.ObjectLayers[(int)this.def.TileLayer][cell];
-				if (gameObject2 != null && Grid.Objects[cell, (int)this.def.ReplacementLayer] == null)
+			}
+			else
+			{
+				gameObject = this.def.TryPlace(vector, this.buildingOrientation, this.selectedElements, 0, true);
+				if (gameObject == null && this.def.ReplacementLayer != ObjectLayer.NumLayers)
 				{
-					BuildingComplete component = gameObject2.GetComponent<BuildingComplete>();
-					if (component != null && component.Def.IsFoundation && component.Def.isKAnimTile && (component.Def != this.def || this.selectedElements[0] != gameObject2.GetComponent<PrimaryElement>().Element))
+					if (!Grid.ObjectLayers[(int)this.def.TileLayer].ContainsKey(cell))
 					{
-						Constructable component2 = this.def.BuildingUnderConstruction.GetComponent<Constructable>();
-						component2.IsReplacementTile = true;
-						gameObject = this.def.Instantiate(vector, this.buildingOrientation, this.selectedElements, 0, false);
-						component2.IsReplacementTile = false;
-						Grid.Objects[cell, (int)this.def.ReplacementLayer] = gameObject;
+						return;
 					}
+					GameObject gameObject2 = Grid.ObjectLayers[(int)this.def.TileLayer][cell];
+					if (gameObject2 != null && Grid.Objects[cell, (int)this.def.ReplacementLayer] == null)
+					{
+						BuildingComplete component = gameObject2.GetComponent<BuildingComplete>();
+						if (component != null && component.Def.IsFoundation && component.Def.isKAnimTile)
+						{
+							if (component.Def != this.def || this.selectedElements[0] != gameObject2.GetComponent<PrimaryElement>().Element)
+							{
+								Constructable component2 = this.def.BuildingUnderConstruction.GetComponent<Constructable>();
+								component2.IsReplacementTile = true;
+								gameObject = this.def.Instantiate(vector, this.buildingOrientation, this.selectedElements, 0, false);
+								component2.IsReplacementTile = false;
+								Grid.Objects[cell, (int)this.def.ReplacementLayer] = gameObject;
+							}
+						}
+					}
+				}
+				if (gameObject != null)
+				{
+					Constructable component3 = gameObject.GetComponent<Constructable>();
+					this.source.QueueRelocation(component3);
+				}
+			}
+			BuildToolHoverTextCard component4 = base.GetComponent<BuildToolHoverTextCard>();
+			component4.UpdateHoverElements(null);
+			this.placeSound = GlobalAssets.GetSound("Place_Building_" + this.def.AudioSize, false);
+			if (gameObject != null && this.placeSound != null)
+			{
+				this.buildingCount = this.buildingCount % 14 + 1;
+				EventInstance eventInstance = SoundEvent.BeginOneShot(this.placeSound, vector);
+				if (this.def.AudioSize == "small")
+				{
+					eventInstance.setParameterValue("tileCount", (float)this.buildingCount);
+				}
+				SoundEvent.EndOneShot(eventInstance);
+				Rotatable component5 = gameObject.GetComponent<Rotatable>();
+				if (component5 != null)
+				{
+					component5.SetOrientation(this.buildingOrientation);
 				}
 			}
 			if (gameObject != null)
 			{
-				Constructable component3 = gameObject.GetComponent<Constructable>();
-				this.source.QueueRelocation(component3);
+				this.Deactivate();
 			}
-		}
-		BuildToolHoverTextCard component4 = base.GetComponent<BuildToolHoverTextCard>();
-		component4.UpdateHoverElements(null);
-		this.placeSound = GlobalAssets.GetSound("Place_Building_" + this.def.AudioSize, false);
-		if (gameObject != null && this.placeSound != null)
-		{
-			this.buildingCount = this.buildingCount % 14 + 1;
-			EventInstance eventInstance = SoundEvent.BeginOneShot(this.placeSound, vector);
-			if (this.def.AudioSize == "small")
-			{
-				eventInstance.setParameterValue("tileCount", (float)this.buildingCount);
-			}
-			SoundEvent.EndOneShot(eventInstance);
-			Rotatable component5 = gameObject.GetComponent<Rotatable>();
-			if (component5 != null)
-			{
-				component5.SetOrientation(this.buildingOrientation);
-			}
-		}
-		if (gameObject != null)
-		{
-			this.Deactivate();
 		}
 	}
 
@@ -340,13 +345,13 @@ public class RelocateTool : DragTool
 
 	private Relocatable source;
 
-	private Orientation buildingOrientation;
+	private Orientation buildingOrientation = Orientation.Neutral;
 
 	private ToolTip tooltip;
 
 	public static RelocateTool Instance;
 
-	private bool active;
+	private bool active = false;
 
 	private int buildingCount;
 }

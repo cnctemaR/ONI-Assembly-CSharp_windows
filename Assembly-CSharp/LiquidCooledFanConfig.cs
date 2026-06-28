@@ -6,8 +6,19 @@ public class LiquidCooledFanConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER2;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("LiquidCooledFan", 2, 2, "fanliquid_kanim", 100f, 30, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER2, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, tier);
+		string text = "LiquidCooledFan";
+		int num = 2;
+		int num2 = 2;
+		string text2 = "fanliquid_kanim";
+		float num3 = 100f;
+		int num4 = 30;
+		float num5 = 10f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
+		string[] all_METALS = MATERIALS.ALL_METALS;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER2;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, BUILDINGS.DECOR.NONE, tier2);
 		buildingDef.ExhaustKilowattsWhenActive = 0f;
 		buildingDef.OperatingKilowatts = 0f;
 		buildingDef.Overheatable = false;
@@ -64,4 +75,6 @@ public class LiquidCooledFanConfig : IBuildingConfig
 			instance.StartSM();
 		};
 	}
+
+	public const string ID = "LiquidCooledFan";
 }

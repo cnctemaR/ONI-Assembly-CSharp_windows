@@ -80,20 +80,18 @@ public class StatusItemRenderer
 	{
 		int instanceID = transform.GetInstanceID();
 		int num = 0;
-		if (!this.handleTable.TryGetValue(instanceID, out num))
+		if (this.handleTable.TryGetValue(instanceID, out num))
 		{
-			return;
-		}
-		StatusItemRenderer.Entry entry = this.entries[num];
-		if (entry.statusItems.Count == 0)
-		{
-			return;
-		}
-		entry.Remove(status_item);
-		this.entries[num] = entry;
-		if (entry.statusItems.Count == 0)
-		{
-			this.ClearIdx(num);
+			StatusItemRenderer.Entry entry = this.entries[num];
+			if (entry.statusItems.Count != 0)
+			{
+				entry.Remove(status_item);
+				this.entries[num] = entry;
+				if (entry.statusItems.Count == 0)
+				{
+					this.ClearIdx(num);
+				}
+			}
 		}
 	}
 
@@ -115,11 +113,16 @@ public class StatusItemRenderer
 
 	private SimViewMode GetMode()
 	{
+		SimViewMode simViewMode;
 		if (OverlayScreen.Instance != null)
 		{
-			return OverlayScreen.Instance.mode;
+			simViewMode = OverlayScreen.Instance.mode;
 		}
-		return SimViewMode.None;
+		else
+		{
+			simViewMode = SimViewMode.None;
+		}
+		return simViewMode;
 	}
 
 	public void MarkAllDirty()
@@ -248,73 +251,76 @@ public class StatusItemRenderer
 		public void Render(StatusItemRenderer renderer, Vector3 camera_bl, Vector3 camera_tr, SimViewMode overlay)
 		{
 			Vector3 vector = Vector3.zero;
-			if (!(this.transform != null))
+			if (this.transform != null)
+			{
+				vector = this.transform.position;
+				if (vector.x >= camera_bl.x && vector.x <= camera_tr.x && vector.y >= camera_bl.y && vector.y <= camera_tr.y)
+				{
+					int num = Grid.PosToCell(vector);
+					if (!Grid.IsValidCell(num) || Grid.Visible[num] != 0)
+					{
+						if (this.dirty)
+						{
+							int num2 = 0;
+							foreach (StatusItem statusItem in this.statusItems)
+							{
+								if (statusItem.UseConditionalCallback(overlay, this.transform) || overlay == SimViewMode.None || statusItem.render_overlay == overlay)
+								{
+									num2++;
+								}
+							}
+							this.hasVisibleStatusItems = num2 != 0;
+							StatusItemRenderer.Entry.MeshBuilder meshBuilder = new StatusItemRenderer.Entry.MeshBuilder(num2 + 6, this.material);
+							float num3 = 0.25f;
+							float num4 = -5f;
+							Vector2 vector2 = new Vector2(0.05f, -0.05f);
+							float num5 = 0.02f;
+							Color32 color = new Color32(0, 0, 0, byte.MaxValue);
+							Color32 color2 = new Color32(0, 0, 0, 75);
+							Color32 color3 = renderer.backgroundColor;
+							if (renderer.selectedHandle == this.handle || renderer.highlightHandle == this.handle)
+							{
+								color3 = renderer.selectedColor;
+							}
+							meshBuilder.AddQuad(new Vector2(0f, 0.29f) + vector2, new Vector2(0.05f, 0.05f), num4, renderer.arrowSprite, color2);
+							meshBuilder.AddQuad(new Vector2(0f, 0f) + vector2, new Vector2(num3 * (float)num2, num3), num4, renderer.backgroundSprite, color2);
+							meshBuilder.AddQuad(new Vector2(0f, 0f), new Vector2(num3 * (float)num2 + num5, num3 + num5), num4, renderer.backgroundSprite, color);
+							meshBuilder.AddQuad(new Vector2(0f, 0f), new Vector2(num3 * (float)num2, num3), num4, renderer.backgroundSprite, color3);
+							int num6 = 0;
+							for (int i = 0; i < this.statusItems.Count; i++)
+							{
+								StatusItem statusItem2 = this.statusItems[i];
+								if (statusItem2.UseConditionalCallback(overlay, this.transform) || overlay == SimViewMode.None || statusItem2.render_overlay == overlay)
+								{
+									float num7 = (float)num6 * num3 * 2f - num3 * (float)(num2 - 1);
+									Sprite sprite = this.statusItems[i].sprite.sprite;
+									meshBuilder.AddQuad(new Vector2(num7, 0f), new Vector2(num3, num3), num4, sprite, color);
+									num6++;
+								}
+							}
+							meshBuilder.AddQuad(new Vector2(0f, 0.29f + num5), new Vector2(0.05f + num5, 0.05f + num5), num4, renderer.arrowSprite, color);
+							meshBuilder.AddQuad(new Vector2(0f, 0.29f), new Vector2(0.05f, 0.05f), num4, renderer.arrowSprite, color3);
+							meshBuilder.End(this.mesh);
+							this.dirty = false;
+						}
+						if (this.hasVisibleStatusItems)
+						{
+							if (GameScreenManager.Instance != null)
+							{
+								Graphics.DrawMesh(this.mesh, vector + this.offset, Quaternion.identity, this.material, renderer.layer, GameScreenManager.Instance.worldSpaceCanvas.GetComponent<Canvas>().worldCamera, 0, null, false, false);
+							}
+						}
+					}
+				}
+			}
+			else
 			{
 				string text = "Error cleaning up status items:";
-				foreach (StatusItem statusItem in this.statusItems)
+				foreach (StatusItem statusItem3 in this.statusItems)
 				{
-					text += statusItem.Id;
+					text += statusItem3.Id;
 				}
 				global::Debug.LogWarning(text, null);
-				return;
-			}
-			vector = this.transform.position;
-			if (vector.x < camera_bl.x || vector.x > camera_tr.x || vector.y < camera_bl.y || vector.y > camera_tr.y)
-			{
-				return;
-			}
-			int num = Grid.PosToCell(vector);
-			if (Grid.IsValidCell(num) && Grid.Visible[num] == 0)
-			{
-				return;
-			}
-			if (this.dirty)
-			{
-				int num2 = 0;
-				foreach (StatusItem statusItem2 in this.statusItems)
-				{
-					if (statusItem2.UseConditionalCallback(overlay, this.transform) || overlay == SimViewMode.None || statusItem2.render_overlay == overlay)
-					{
-						num2++;
-					}
-				}
-				this.hasVisibleStatusItems = num2 != 0;
-				StatusItemRenderer.Entry.MeshBuilder meshBuilder = new StatusItemRenderer.Entry.MeshBuilder(num2 + 6, this.material);
-				float num3 = 0.25f;
-				float num4 = -5f;
-				Vector2 vector2 = new Vector2(0.05f, -0.05f);
-				float num5 = 0.02f;
-				Color32 color = new Color32(0, 0, 0, byte.MaxValue);
-				Color32 color2 = new Color32(0, 0, 0, 75);
-				Color32 color3 = renderer.backgroundColor;
-				if (renderer.selectedHandle == this.handle || renderer.highlightHandle == this.handle)
-				{
-					color3 = renderer.selectedColor;
-				}
-				meshBuilder.AddQuad(new Vector2(0f, 0.29f) + vector2, new Vector2(0.05f, 0.05f), num4, renderer.arrowSprite, color2);
-				meshBuilder.AddQuad(new Vector2(0f, 0f) + vector2, new Vector2(num3 * (float)num2, num3), num4, renderer.backgroundSprite, color2);
-				meshBuilder.AddQuad(new Vector2(0f, 0f), new Vector2(num3 * (float)num2 + num5, num3 + num5), num4, renderer.backgroundSprite, color);
-				meshBuilder.AddQuad(new Vector2(0f, 0f), new Vector2(num3 * (float)num2, num3), num4, renderer.backgroundSprite, color3);
-				int num6 = 0;
-				for (int i = 0; i < this.statusItems.Count; i++)
-				{
-					StatusItem statusItem3 = this.statusItems[i];
-					if (statusItem3.UseConditionalCallback(overlay, this.transform) || overlay == SimViewMode.None || statusItem3.render_overlay == overlay)
-					{
-						float num7 = (float)num6 * num3 * 2f - num3 * (float)(num2 - 1);
-						Sprite sprite = this.statusItems[i].sprite.sprite;
-						meshBuilder.AddQuad(new Vector2(num7, 0f), new Vector2(num3, num3), num4, sprite, color);
-						num6++;
-					}
-				}
-				meshBuilder.AddQuad(new Vector2(0f, 0.29f + num5), new Vector2(0.05f + num5, 0.05f + num5), num4, renderer.arrowSprite, color);
-				meshBuilder.AddQuad(new Vector2(0f, 0.29f), new Vector2(0.05f, 0.05f), num4, renderer.arrowSprite, color3);
-				meshBuilder.End(this.mesh);
-				this.dirty = false;
-			}
-			if (this.hasVisibleStatusItems && GameScreenManager.Instance != null)
-			{
-				Graphics.DrawMesh(this.mesh, vector + this.offset, Quaternion.identity, this.material, renderer.layer, GameScreenManager.Instance.worldSpaceCanvas.GetComponent<Canvas>().worldCamera, 0, null, false, false);
 			}
 		}
 
@@ -342,17 +348,22 @@ public class StatusItemRenderer
 
 		private bool Intersects(Vector2 pos, float scale, SimViewMode overlay)
 		{
+			bool flag;
 			if (this.transform == null)
 			{
-				return false;
+				flag = false;
 			}
-			Vector3 vector = this.transform.position + this.offset;
-			Bounds bounds = this.mesh.bounds;
-			bounds.size *= scale;
-			bounds.center += vector;
-			Vector3 min = bounds.min;
-			Vector3 max = bounds.max;
-			return pos.x >= min.x && pos.x <= max.x && pos.y >= min.y && pos.y <= max.y;
+			else
+			{
+				Vector3 vector = this.transform.position + this.offset;
+				Bounds bounds = this.mesh.bounds;
+				bounds.size *= scale;
+				bounds.center += vector;
+				Vector3 min = bounds.min;
+				Vector3 max = bounds.max;
+				flag = pos.x >= min.x && pos.x <= max.x && pos.y >= min.y && pos.y <= max.y;
+			}
+			return flag;
 		}
 
 		public void GetIntersection(Vector2 pos, List<SelectTool.Intersection> intersections, float scale, SimViewMode overlay)
@@ -437,45 +448,44 @@ public class StatusItemRenderer
 
 			public void AddQuad(Vector2 center, Vector2 half_size, float z, Sprite sprite, Color color)
 			{
-				if (this.quadIdx == StatusItemRenderer.Entry.MeshBuilder.textureIds.Length)
+				if (this.quadIdx != StatusItemRenderer.Entry.MeshBuilder.textureIds.Length)
 				{
-					return;
+					Rect rect = sprite.rect;
+					Rect textureRect = sprite.textureRect;
+					float num = textureRect.width / rect.width;
+					float num2 = textureRect.height / rect.height;
+					int num3 = 4 * this.quadIdx;
+					this.vertices[num3] = new Vector3((center.x - half_size.x) * num, (center.y - half_size.y) * num2, z);
+					this.vertices[1 + num3] = new Vector3((center.x - half_size.x) * num, (center.y + half_size.y) * num2, z);
+					this.vertices[2 + num3] = new Vector3((center.x + half_size.x) * num, (center.y - half_size.y) * num2, z);
+					this.vertices[3 + num3] = new Vector3((center.x + half_size.x) * num, (center.y + half_size.y) * num2, z);
+					float num4 = textureRect.x / (float)sprite.texture.width;
+					float num5 = textureRect.y / (float)sprite.texture.height;
+					float num6 = textureRect.width / (float)sprite.texture.width;
+					float num7 = textureRect.height / (float)sprite.texture.height;
+					this.uvs[num3] = new Vector2(num4, num5);
+					this.uvs[1 + num3] = new Vector2(num4, num5 + num7);
+					this.uvs[2 + num3] = new Vector2(num4 + num6, num5);
+					this.uvs[3 + num3] = new Vector2(num4 + num6, num5 + num7);
+					this.colors[num3] = color;
+					this.colors[1 + num3] = color;
+					this.colors[2 + num3] = color;
+					this.colors[3 + num3] = color;
+					float num8 = (float)this.quadIdx + 0.5f;
+					this.uv2s[num3] = new Vector2(num8, 0f);
+					this.uv2s[1 + num3] = new Vector2(num8, 0f);
+					this.uv2s[2 + num3] = new Vector2(num8, 0f);
+					this.uv2s[3 + num3] = new Vector2(num8, 0f);
+					int num9 = 6 * this.quadIdx;
+					this.triangles[num9] = num3;
+					this.triangles[1 + num9] = num3 + 1;
+					this.triangles[2 + num9] = num3 + 2;
+					this.triangles[3 + num9] = num3 + 2;
+					this.triangles[4 + num9] = num3 + 1;
+					this.triangles[5 + num9] = num3 + 3;
+					this.material.SetTexture(StatusItemRenderer.Entry.MeshBuilder.textureIds[this.quadIdx], sprite.texture);
+					this.quadIdx++;
 				}
-				Rect rect = sprite.rect;
-				Rect textureRect = sprite.textureRect;
-				float num = textureRect.width / rect.width;
-				float num2 = textureRect.height / rect.height;
-				int num3 = 4 * this.quadIdx;
-				this.vertices[0 + num3] = new Vector3((center.x - half_size.x) * num, (center.y - half_size.y) * num2, z);
-				this.vertices[1 + num3] = new Vector3((center.x - half_size.x) * num, (center.y + half_size.y) * num2, z);
-				this.vertices[2 + num3] = new Vector3((center.x + half_size.x) * num, (center.y - half_size.y) * num2, z);
-				this.vertices[3 + num3] = new Vector3((center.x + half_size.x) * num, (center.y + half_size.y) * num2, z);
-				float num4 = textureRect.x / (float)sprite.texture.width;
-				float num5 = textureRect.y / (float)sprite.texture.height;
-				float num6 = textureRect.width / (float)sprite.texture.width;
-				float num7 = textureRect.height / (float)sprite.texture.height;
-				this.uvs[0 + num3] = new Vector2(num4, num5);
-				this.uvs[1 + num3] = new Vector2(num4, num5 + num7);
-				this.uvs[2 + num3] = new Vector2(num4 + num6, num5);
-				this.uvs[3 + num3] = new Vector2(num4 + num6, num5 + num7);
-				this.colors[0 + num3] = color;
-				this.colors[1 + num3] = color;
-				this.colors[2 + num3] = color;
-				this.colors[3 + num3] = color;
-				float num8 = (float)this.quadIdx + 0.5f;
-				this.uv2s[0 + num3] = new Vector2(num8, 0f);
-				this.uv2s[1 + num3] = new Vector2(num8, 0f);
-				this.uv2s[2 + num3] = new Vector2(num8, 0f);
-				this.uv2s[3 + num3] = new Vector2(num8, 0f);
-				int num9 = 6 * this.quadIdx;
-				this.triangles[0 + num9] = num3;
-				this.triangles[1 + num9] = num3 + 1;
-				this.triangles[2 + num9] = num3 + 2;
-				this.triangles[3 + num9] = num3 + 2;
-				this.triangles[4 + num9] = num3 + 1;
-				this.triangles[5 + num9] = num3 + 3;
-				this.material.SetTexture(StatusItemRenderer.Entry.MeshBuilder.textureIds[this.quadIdx], sprite.texture);
-				this.quadIdx++;
 			}
 
 			public void End(Mesh mesh)

@@ -75,81 +75,86 @@ namespace Delaunay
 				coord4 = edge.rightSite;
 			}
 			ICoord coord5 = coord4;
+			List<Edge> list2;
 			if (coord3 == Vertex.VERTEX_AT_INFINITY || coord5 == Vertex.VERTEX_AT_INFINITY)
 			{
-				return new List<Edge>();
+				list2 = new List<Edge>();
 			}
-			array[k] = true;
-			i++;
-			while (i < count)
+			else
 			{
-				for (k = 1; k < count; k++)
+				array[k] = true;
+				i++;
+				while (i < count)
 				{
-					if (!array[k])
+					for (k = 1; k < count; k++)
 					{
-						edge = origEdges[k];
-						ICoord coord6;
-						if (criterion == VertexOrSite.VERTEX)
+						if (!array[k])
 						{
-							ICoord coord = edge.leftVertex;
-							coord6 = coord;
-						}
-						else
-						{
-							coord6 = edge.leftSite;
-						}
-						ICoord coord7 = coord6;
-						ICoord coord8;
-						if (criterion == VertexOrSite.VERTEX)
-						{
-							ICoord coord = edge.rightVertex;
-							coord8 = coord;
-						}
-						else
-						{
-							coord8 = edge.rightSite;
-						}
-						ICoord coord9 = coord8;
-						if (coord7 == Vertex.VERTEX_AT_INFINITY || coord9 == Vertex.VERTEX_AT_INFINITY)
-						{
-							return new List<Edge>();
-						}
-						if (coord7 == coord5)
-						{
-							coord5 = coord9;
-							this._edgeOrientations.Add(Side.LEFT);
-							list.Add(edge);
-							array[k] = true;
-						}
-						else if (coord9 == coord3)
-						{
-							coord3 = coord7;
-							this._edgeOrientations.Insert(0, Side.LEFT);
-							list.Insert(0, edge);
-							array[k] = true;
-						}
-						else if (coord7 == coord3)
-						{
-							coord3 = coord9;
-							this._edgeOrientations.Insert(0, Side.RIGHT);
-							list.Insert(0, edge);
-							array[k] = true;
-						}
-						else if (coord9 == coord5)
-						{
-							coord5 = coord7;
-							this._edgeOrientations.Add(Side.RIGHT);
-							list.Add(edge);
-							array[k] = true;
-						}
-						if (array[k])
-						{
-							i++;
+							edge = origEdges[k];
+							ICoord coord6;
+							if (criterion == VertexOrSite.VERTEX)
+							{
+								ICoord coord = edge.leftVertex;
+								coord6 = coord;
+							}
+							else
+							{
+								coord6 = edge.leftSite;
+							}
+							ICoord coord7 = coord6;
+							ICoord coord8;
+							if (criterion == VertexOrSite.VERTEX)
+							{
+								ICoord coord = edge.rightVertex;
+								coord8 = coord;
+							}
+							else
+							{
+								coord8 = edge.rightSite;
+							}
+							ICoord coord9 = coord8;
+							if (coord7 == Vertex.VERTEX_AT_INFINITY || coord9 == Vertex.VERTEX_AT_INFINITY)
+							{
+								return new List<Edge>();
+							}
+							if (coord7 == coord5)
+							{
+								coord5 = coord9;
+								this._edgeOrientations.Add(Side.LEFT);
+								list.Add(edge);
+								array[k] = true;
+							}
+							else if (coord9 == coord3)
+							{
+								coord3 = coord7;
+								this._edgeOrientations.Insert(0, Side.LEFT);
+								list.Insert(0, edge);
+								array[k] = true;
+							}
+							else if (coord7 == coord3)
+							{
+								coord3 = coord9;
+								this._edgeOrientations.Insert(0, Side.RIGHT);
+								list.Insert(0, edge);
+								array[k] = true;
+							}
+							else if (coord9 == coord5)
+							{
+								coord5 = coord7;
+								this._edgeOrientations.Add(Side.RIGHT);
+								list.Add(edge);
+								array[k] = true;
+							}
+							if (array[k])
+							{
+								i++;
+							}
 						}
 					}
 				}
+				list2 = list;
 			}
-			return list;
+			return list2;
 		}
 
 		private List<Edge> _edges;

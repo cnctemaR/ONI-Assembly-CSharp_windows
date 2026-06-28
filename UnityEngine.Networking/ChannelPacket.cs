@@ -55,7 +55,15 @@ namespace UnityEngine.Networking
 				}
 				if (LogFilter.logError)
 				{
-					Debug.LogError(string.Concat(new object[] { "Send Error: ", b, " channel:", channelId, " bytesToSend:", this.m_Position }));
+					Debug.LogError(string.Concat(new object[]
+					{
+						"Send Error: ",
+						(NetworkError)b,
+						" channel:",
+						channelId,
+						" bytesToSend:",
+						this.m_Position
+					}));
 				}
 				flag = false;
 			}

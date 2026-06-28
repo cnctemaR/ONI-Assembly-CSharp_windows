@@ -22,6 +22,11 @@ namespace UnityEngine
 		RGFloat,
 		RGBAFloat,
 		YUY2,
+		RGB9e5Float,
+		BC4 = 26,
+		BC5,
+		BC6H = 24,
+		BC7,
 		DXT1Crunched = 28,
 		DXT5Crunched,
 		PVRTC_RGB2,
@@ -51,6 +56,8 @@ namespace UnityEngine
 		ASTC_RGBA_10x10,
 		ASTC_RGBA_12x12,
 		ETC_RGB4_3DS,
-		ETC_RGBA8_3DS
+		ETC_RGBA8_3DS,
+		RG16,
+		R8
 	}
 }

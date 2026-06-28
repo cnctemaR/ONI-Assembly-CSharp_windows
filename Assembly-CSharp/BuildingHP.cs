@@ -47,7 +47,7 @@ public class BuildingHP : Workable
 		{
 			damage = Math.Max(0, damage);
 			this.hitpoints = Math.Max(0, this.hitpoints - damage);
-			this.Trigger(-1964935036, this);
+			base.Trigger(-1964935036, this);
 		}
 	}
 
@@ -61,10 +61,10 @@ public class BuildingHP : Workable
 		{
 			this.hitpoints = Math.Min(this.hitpoints + repair_amount, this.building.Def.HitPoints);
 		}
-		this.Trigger(-1699355994, null);
+		base.Trigger(-1699355994, null);
 		if (this.hitpoints >= this.building.Def.HitPoints)
 		{
-			this.Trigger(-1735440190, this);
+			base.Trigger(-1735440190, this);
 		}
 	}
 
@@ -79,14 +79,14 @@ public class BuildingHP : Workable
 		base.OnSpawn();
 		this.smi = new BuildingHP.SMInstance(this);
 		this.smi.StartSM();
-		this.Subscribe(-794517298, new Action<object>(this.OnDoBuildingDamage));
+		base.Subscribe(-794517298, new Action<object>(this.OnDoBuildingDamage));
 		if (this.destroyOnDamaged)
 		{
-			this.Subscribe(774203113, new Action<object>(this.DestroyOnDamaged));
+			base.Subscribe(774203113, new Action<object>(this.DestroyOnDamaged));
 		}
 		if (this.hitpoints <= 0)
 		{
-			this.Trigger(774203113, this);
+			base.Trigger(774203113, this);
 		}
 	}
 
@@ -151,9 +151,9 @@ public class BuildingHP : Workable
 
 	public static List<Meter> kbacQueryList = new List<Meter>();
 
-	public bool destroyOnDamaged;
+	public bool destroyOnDamaged = false;
 
-	public bool invincible;
+	public bool invincible = false;
 
 	[MyCmpGet]
 	private Building building;
@@ -162,7 +162,7 @@ public class BuildingHP : Workable
 
 	private float minDamagePopInterval = 4f;
 
-	private float lastPopTime;
+	private float lastPopTime = 0f;
 
 	public struct DamageSourceInfo
 	{
@@ -219,30 +219,29 @@ public class BuildingHP : Workable
 
 		private void CreateProgressBar()
 		{
-			if (this.progressBar != null)
+			if (!(this.progressBar != null))
 			{
-				return;
+				this.progressBar = Util.KInstantiateUI<ProgressBar>(ProgressBarsConfig.Instance.progressBarPrefab, null, false);
+				this.progressBar.transform.SetParent(GameScreenManager.Instance.worldSpaceCanvas.transform);
+				this.progressBar.name = base.smi.master.name + "." + base.smi.master.GetType().Name + " ProgressBar";
+				this.progressBar.transform.Find("Bar").GetComponent<Image>().color = ProgressBarsConfig.Instance.GetBarColor("ProgressBar");
+				this.progressBar.SetUpdateFunc(new Func<float>(this.HealthPercent));
+				this.progressBar.barColor = ProgressBarsConfig.Instance.GetBarColor("HealthBar");
+				CanvasGroup component = this.progressBar.GetComponent<CanvasGroup>();
+				component.interactable = false;
+				component.blocksRaycasts = false;
+				this.progressBar.Update();
+				float num = 0.15f;
+				Vector3 vector = base.gameObject.transform.position + Vector3.down * num;
+				vector.z += 0.05f;
+				vector -= Vector3.right * 0.5f * (float)(base.smi.master.building.Def.WidthInCells % 2);
+				this.progressBar.transform.SetPosition(vector);
 			}
-			this.progressBar = Util.KInstantiateUI<ProgressBar>(ProgressBarsConfig.Instance.progressBarPrefab, null, false);
-			this.progressBar.transform.SetParent(GameScreenManager.Instance.worldSpaceCanvas.transform);
-			this.progressBar.name = base.smi.master.name + "." + base.smi.master.GetType().Name + " ProgressBar";
-			this.progressBar.transform.FindChild("Bar").GetComponent<Image>().color = ProgressBarsConfig.Instance.GetBarColor("ProgressBar");
-			this.progressBar.SetUpdateFunc(new Func<float>(this.HealthPercent));
-			this.progressBar.barColor = ProgressBarsConfig.Instance.GetBarColor("HealthBar");
-			CanvasGroup component = this.progressBar.GetComponent<CanvasGroup>();
-			component.interactable = false;
-			component.blocksRaycasts = false;
-			this.progressBar.Update();
-			float num = 0.15f;
-			Vector3 vector = base.gameObject.transform.position + Vector3.down * num;
-			vector.z += 0.05f;
-			vector -= Vector3.right * 0.5f * (float)(base.smi.master.building.Def.WidthInCells % 2);
-			this.progressBar.transform.SetPosition(vector);
 		}
 
 		private static string ToolTipResolver(List<Notification> notificationList, object data)
 		{
-			string text = string.Empty;
+			string text = "";
 			for (int i = 0; i < notificationList.Count; i++)
 			{
 				Notification notification = notificationList[i];
@@ -276,22 +275,21 @@ public class BuildingHP : Workable
 		public void SetCrackOverlayValue(float value)
 		{
 			KBatchedAnimController component = base.master.GetComponent<KBatchedAnimController>();
-			if (component == null)
+			if (!(component == null))
 			{
-				return;
-			}
-			component.SetBlendValue(value);
-			BuildingHP.kbacQueryList.Clear();
-			base.master.GetComponentsInChildren<Meter>(BuildingHP.kbacQueryList);
-			for (int i = 0; i < BuildingHP.kbacQueryList.Count; i++)
-			{
-				Meter meter = BuildingHP.kbacQueryList[i];
-				KBatchedAnimController component2 = meter.GetComponent<KBatchedAnimController>();
-				component2.SetBlendValue(value);
+				component.SetBlendValue(value);
+				BuildingHP.kbacQueryList.Clear();
+				base.master.GetComponentsInChildren<Meter>(BuildingHP.kbacQueryList);
+				for (int i = 0; i < BuildingHP.kbacQueryList.Count; i++)
+				{
+					Meter meter = BuildingHP.kbacQueryList[i];
+					KBatchedAnimController component2 = meter.GetComponent<KBatchedAnimController>();
+					component2.SetBlendValue(value);
+				}
 			}
 		}
 
-		private ProgressBar progressBar;
+		private ProgressBar progressBar = null;
 	}
 
 	public class States : GameStateMachine<BuildingHP.States, BuildingHP.SMInstance, BuildingHP>
@@ -346,7 +344,7 @@ public class BuildingHP : Workable
 
 		private Chore CreateRepairChore(BuildingHP.SMInstance smi)
 		{
-			return new WorkChore<BuildingHP>(Db.Get().ChoreTypes.Repair, smi.master, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, int.MaxValue);
+			return new WorkChore<BuildingHP>(Db.Get().ChoreTypes.Repair, smi.master, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
 		}
 
 		private static Operational.Flag healthyFlag = new Operational.Flag("healthy", Operational.Flag.Type.Functional);

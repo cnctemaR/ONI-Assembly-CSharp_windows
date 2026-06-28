@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -32,11 +33,11 @@ public static class Localization
 	public static void Initialize(bool dontCheckSteam = false)
 	{
 		global::Debug.Log("Localization.Initialize!", null);
-		Localization.SelectedLanguageType selectedLanguageType = (Localization.SelectedLanguageType)((int)Enum.Parse(typeof(Localization.SelectedLanguageType), KPlayerPrefs.GetString(Localization.SELECTED_LANGUAGE_TYPE_KEY, Localization.SelectedLanguageType.None.ToString()), true));
+		Localization.SelectedLanguageType selectedLanguageType = (Localization.SelectedLanguageType)Enum.Parse(typeof(Localization.SelectedLanguageType), KPlayerPrefs.GetString(Localization.SELECTED_LANGUAGE_TYPE_KEY, Localization.SelectedLanguageType.None.ToString()), true);
 		if (selectedLanguageType == Localization.SelectedLanguageType.Preinstalled)
 		{
 			global::Debug.Log("Initialize... Preinstalled localization", null);
-			string @string = KPlayerPrefs.GetString(Localization.SELECTED_LANGUAGE_CODE_KEY, string.Empty);
+			string @string = KPlayerPrefs.GetString(Localization.SELECTED_LANGUAGE_CODE_KEY, "");
 			Localization.LoadPreinstalledTranslation(@string);
 		}
 		else if (selectedLanguageType == Localization.SelectedLanguageType.UGC && !dontCheckSteam && SteamManager.Initialized && SteamUGCService.HasInstalledLanguage())
@@ -71,6 +72,7 @@ public static class Localization
 
 	public static bool LoadLocalTranslationFile(Localization.SelectedLanguageType source, string path)
 	{
+		bool flag2;
 		if (File.Exists(path))
 		{
 			string[] array = File.ReadAllLines(path, Encoding.UTF8);
@@ -83,9 +85,13 @@ public static class Localization
 			{
 				Localization.ClearLanguage();
 			}
-			return flag;
+			flag2 = flag;
 		}
-		return false;
+		else
+		{
+			flag2 = false;
+		}
+		return flag2;
 	}
 
 	private static bool LoadTranslationFromLines(string[] lines)
@@ -135,52 +141,15 @@ public static class Localization
 			}
 			else
 			{
-				string text3 = Localization.GetParameter("msgctxt", text2);
+				string text3 = Localization.GetParameter("msgctxt", i, lines);
 				if (text3 != null)
 				{
-					if (text3 == string.Empty)
-					{
-						string text4 = lines[i + 1];
-						if (text4.StartsWith("\""))
-						{
-							text3 = text4.Substring(1, text4.Length - 2);
-							i++;
-						}
-					}
 					entry.msgctxt = text3;
 				}
-				text3 = Localization.GetParameter(text, text2);
+				text3 = Localization.GetParameter(text, i, lines);
 				if (text3 != null)
 				{
 					entry.msgstr = text3;
-				}
-				if (text2.StartsWith(text))
-				{
-					for (int j = i + 1; j < lines.Length; j++)
-					{
-						string text5 = lines[j];
-						if (!text5.StartsWith("\""))
-						{
-							break;
-						}
-						text5 = Localization.FixupString(text5);
-						if (text5 != null && text5.Length > 2)
-						{
-							if (text3 == null)
-							{
-								text3 = text5.Substring(1, text5.Length - 2);
-							}
-							else
-							{
-								text3 += text5.Substring(1, text5.Length - 2);
-							}
-						}
-						i++;
-					}
-					if (text3 != null)
-					{
-						entry.msgstr = text3.Replace("<color=^p", "<color=#");
-					}
 				}
 			}
 			if (entry.IsPopulated)
@@ -198,28 +167,45 @@ public static class Localization
 		result = result.Replace("\\\"", "\"");
 		result = result.Replace("<style=“", "<style=\"");
 		result = result.Replace("”>", "\">");
+		result = result.Replace("<color=^p", "<color=#");
 		return result;
 	}
 
-	private static string GetParameter(string key, string line)
+	private static string GetParameter(string key, int idx, string[] all_lines)
 	{
-		string text = null;
-		if (line.EndsWith("\r"))
+		string text;
+		if (!all_lines[idx].StartsWith(key))
 		{
-			line = line.Substring(0, line.Length - 1);
+			text = null;
 		}
-		if (line.StartsWith(key))
+		else
 		{
-			text = line.Substring(key.Length + 1);
-			if (text[0] != '"' || text[text.Length - 1] != '"')
+			List<string> list = new List<string>();
+			string text2 = all_lines[idx];
+			text2 = text2.Substring(key.Length + 1, text2.Length - key.Length - 1);
+			list.Add(text2);
+			for (int i = idx + 1; i < all_lines.Length; i++)
 			{
-				text = null;
+				string text3 = all_lines[i];
+				if (!text3.StartsWith("\""))
+				{
+					break;
+				}
+				list.Add(text3);
 			}
-			else
+			string text4 = "";
+			foreach (string text5 in list)
 			{
-				text = text.Substring(1, text.Length - 2);
-				text = Localization.FixupString(text);
+				string text6 = text5;
+				if (text6.EndsWith("\r"))
+				{
+					text6 = text6.Substring(0, text6.Length - 1);
+				}
+				text6 = text6.Substring(1, text6.Length - 2);
+				text6 = Localization.FixupString(text6);
+				text4 += text6;
 			}
+			text = text4;
 		}
 		return text;
 	}
@@ -230,16 +216,16 @@ public static class Localization
 		IEnumerable<Type> enumerable = from t in assembly.GetTypes()
 			where t.IsClass && t.Namespace == "STRINGS" && !t.IsNested
 			select t;
-		string empty = string.Empty;
+		string text = "";
 		List<Type> list = enumerable.ToList<Type>();
 		foreach (Type type in list)
 		{
-			string text = "STRINGS." + type.Name;
-			Localization.OverloadStrings(translated_strings, text, type, ref empty);
+			string text2 = "STRINGS." + type.Name;
+			Localization.OverloadStrings(translated_strings, text2, type, ref text);
 		}
-		if (empty != string.Empty)
+		if (text != "")
 		{
-			global::Debug.Log("TRANSLATION ERROR! The following have missing or mismatched parameters:\n" + empty, null);
+			global::Debug.Log("TRANSLATION ERROR! The following have missing or mismatched parameters:\n" + text, null);
 		}
 	}
 
@@ -299,14 +285,19 @@ public static class Localization
 	public static Texture2D GetPreinstalledLocalizationImage(string code)
 	{
 		string text = Path.Combine(Application.streamingAssetsPath, "Mods/preinstalled_icon_" + code + ".png");
+		Texture2D texture2D2;
 		if (File.Exists(text))
 		{
 			byte[] array = File.ReadAllBytes(text);
 			Texture2D texture2D = new Texture2D(2, 2);
 			texture2D.LoadImage(array);
-			return texture2D;
+			texture2D2 = texture2D;
 		}
-		return null;
+		else
+		{
+			texture2D2 = null;
+		}
+		return texture2D2;
 	}
 
 	public static void SetLocale(Localization.Locale locale)
@@ -320,8 +311,8 @@ public static class Localization
 		if (line.StartsWith("\"Font:"))
 		{
 			text = line.Substring("\"Font:".Length).Trim();
-			text = text.Replace("\\n", string.Empty);
-			text = text.Replace("\"", string.Empty);
+			text = text.Replace("\\n", "");
+			text = text.Replace("\"", "");
 		}
 		return text;
 	}
@@ -332,8 +323,8 @@ public static class Localization
 		if (line.StartsWith("\"Language:"))
 		{
 			text = line.Substring("\"Language:".Length).Trim();
-			text = text.Replace("\\n", string.Empty);
-			text = text.Replace("\"", string.Empty);
+			text = text.Replace("\\n", "");
+			text = text.Replace("\"", "");
 		}
 		return text;
 	}
@@ -378,7 +369,7 @@ public static class Localization
 		{
 			locale = Localization.GetDefaultLocale();
 		}
-		if (text != null && locale.Code == string.Empty)
+		if (text != null && locale.Code == "")
 		{
 			locale.SetCode(text);
 		}
@@ -518,26 +509,55 @@ public static class Localization
 		{
 			flag = true;
 		}
-		else if (matchCollection != null && matchCollection2 != null && matchCollection.Count == matchCollection2.Count)
+		else if (matchCollection != null && matchCollection2 != null)
 		{
-			flag = true;
-			foreach (object obj in matchCollection)
+			if (matchCollection.Count == matchCollection2.Count)
 			{
-				string text = obj.ToString();
-				bool flag2 = false;
-				foreach (object obj2 in matchCollection2)
+				flag = true;
+				IEnumerator enumerator = matchCollection.GetEnumerator();
+				try
 				{
-					string text2 = obj2.ToString();
-					if (text == text2)
+					while (enumerator.MoveNext())
 					{
-						flag2 = true;
-						break;
+						object obj = enumerator.Current;
+						string text = obj.ToString();
+						bool flag2 = false;
+						IEnumerator enumerator2 = matchCollection2.GetEnumerator();
+						try
+						{
+							while (enumerator2.MoveNext())
+							{
+								object obj2 = enumerator2.Current;
+								string text2 = obj2.ToString();
+								if (text == text2)
+								{
+									flag2 = true;
+									break;
+								}
+							}
+						}
+						finally
+						{
+							IDisposable disposable;
+							if ((disposable = enumerator2 as IDisposable) != null)
+							{
+								disposable.Dispose();
+							}
+						}
+						if (!flag2)
+						{
+							flag = false;
+							break;
+						}
 					}
 				}
-				if (!flag2)
+				finally
 				{
-					flag = false;
-					break;
+					IDisposable disposable2;
+					if ((disposable2 = enumerator as IDisposable) != null)
+					{
+						disposable2.Dispose();
+					}
 				}
 			}
 		}
@@ -570,7 +590,7 @@ public static class Localization
 		Localization.sFontAsset = null;
 		Localization.sLocale = null;
 		KPlayerPrefs.SetString(Localization.SELECTED_LANGUAGE_TYPE_KEY, Localization.SelectedLanguageType.None.ToString());
-		KPlayerPrefs.SetString(Localization.SELECTED_LANGUAGE_CODE_KEY, string.Empty);
+		KPlayerPrefs.SetString(Localization.SELECTED_LANGUAGE_CODE_KEY, "");
 		Localization.SwapToLocalizedFont(Localization.GetDefaultLocale().FontName);
 		string defaultLocalizationFilePath = Localization.GetDefaultLocalizationFilePath();
 		if (File.Exists(defaultLocalizationFilePath))
@@ -585,7 +605,7 @@ public static class Localization
 	{
 		char[] array = new char[] { '\n' };
 		string[] array2 = source.Split(array);
-		string text = string.Empty;
+		string text = "";
 		int num = 0;
 		foreach (string text2 in array2)
 		{
@@ -606,11 +626,16 @@ public static class Localization
 
 	public static string Fixup(string text)
 	{
-		if (Localization.sLocale != null && text != null && text != string.Empty && Localization.sLocale.Lang == Localization.Language.Arabic)
+		string text2;
+		if (Localization.sLocale != null && text != null && text != "" && Localization.sLocale.Lang == Localization.Language.Arabic)
 		{
-			return Localization.ReverseText(ArabicFixer.Fix(text));
+			text2 = Localization.ReverseText(ArabicFixer.Fix(text));
 		}
-		return text;
+		else
+		{
+			text2 = text;
+		}
+		return text2;
 	}
 
 	private static TMP_FontAsset sFontAsset = null;
@@ -624,7 +649,7 @@ public static class Localization
 		new Localization.Locale(Localization.Language.Thai, Localization.Direction.LeftToRight, "th", "NotoSansThai-Regular"),
 		new Localization.Locale(Localization.Language.Arabic, Localization.Direction.RightToLeft, "ar", "NotoNaskhArabic-Regular"),
 		new Localization.Locale(Localization.Language.Hebrew, Localization.Direction.RightToLeft, "he", "NotoSansHebrew-Regular"),
-		new Localization.Locale(Localization.Language.Unspecified, Localization.Direction.LeftToRight, string.Empty, "RobotoCondensed-Regular")
+		new Localization.Locale(Localization.Language.Unspecified, Localization.Direction.LeftToRight, "", "RobotoCondensed-Regular")
 	};
 
 	private static Localization.Locale sLocale = null;

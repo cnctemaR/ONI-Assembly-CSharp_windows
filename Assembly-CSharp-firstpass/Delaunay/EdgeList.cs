@@ -123,15 +123,23 @@ namespace Delaunay
 
 		private Halfedge GetHash(int b)
 		{
+			Halfedge halfedge;
 			if (b < 0 || b >= this._hashsize)
 			{
-				return null;
+				halfedge = null;
 			}
-			Halfedge halfedge = this._hash[b];
-			if (halfedge != null && halfedge.edge == Edge.DELETED)
+			else
 			{
-				this._hash[b] = null;
-				return null;
+				Halfedge halfedge2 = this._hash[b];
+				if (halfedge2 != null && halfedge2.edge == Edge.DELETED)
+				{
+					this._hash[b] = null;
+					halfedge = null;
+				}
+				else
+				{
+					halfedge = halfedge2;
+				}
 			}
 			return halfedge;
 		}

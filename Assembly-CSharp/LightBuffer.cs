@@ -89,8 +89,6 @@ public class LightBuffer : MonoBehaviour
 		LightBuffer.Instance = null;
 	}
 
-	private const RenderTextureFormat RTFormat = RenderTextureFormat.ARGBHalf;
-
 	private Mesh Mesh;
 
 	private Camera Camera;
@@ -119,4 +117,6 @@ public class LightBuffer : MonoBehaviour
 	public Texture WorldLight;
 
 	public static LightBuffer Instance;
+
+	private const RenderTextureFormat RTFormat = RenderTextureFormat.ARGBHalf;
 }

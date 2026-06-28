@@ -65,11 +65,16 @@ public class SubworldZoneRenderData : KMonoBehaviour
 
 	public SubWorld.ZoneType GetSubWorldZoneType(int cell)
 	{
+		SubWorld.ZoneType zoneType;
 		if (cell >= 0 && cell < this.worldZoneTypes.Length)
 		{
-			return this.worldZoneTypes[cell];
+			zoneType = this.worldZoneTypes[cell];
 		}
-		return SubWorld.ZoneType.Sandstone;
+		else
+		{
+			zoneType = SubWorld.ZoneType.Sandstone;
+		}
+		return zoneType;
 	}
 
 	private SubWorld.ZoneType GetSubWorldZoneType(Vector2I pos)
@@ -98,7 +103,7 @@ public class SubworldZoneRenderData : KMonoBehaviour
 
 	private const string shaderPropertyName = "_WorldZoneTex";
 
-	private Texture2D regionTex;
+	private Texture2D regionTex = null;
 
 	[HideInInspector]
 	public SubWorld.ZoneType[] worldZoneTypes;

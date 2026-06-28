@@ -19,5 +19,5 @@ public struct GraphAxis
 
 	private LocText name_label;
 
-	public int guide_frequency;
+	public float guide_frequency;
 }

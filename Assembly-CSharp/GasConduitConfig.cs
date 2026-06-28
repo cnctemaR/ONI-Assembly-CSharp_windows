@@ -6,8 +6,19 @@ public class GasConduitConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
+		string text = "GasConduit";
+		int num = 1;
+		int num2 = 1;
+		string text2 = "utilities_gas_kanim";
+		float num3 = 50f;
+		int num4 = 10;
+		float num5 = 3f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER0;
+		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("GasConduit", 1, 1, "utilities_gas_kanim", 50f, 10, 3f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER0, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.NONE, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_MINERALS, num6, buildLocationRule, BUILDINGS.DECOR.NONE, none);
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
 		buildingDef.Entombable = false;
@@ -24,8 +35,8 @@ public class GasConduitConfig : IBuildingConfig
 		buildingDef.SceneLayer = Grid.SceneLayer.GasConduits;
 		buildingDef.isKAnimTile = true;
 		buildingDef.isUtility = true;
-		buildingDef.OverlayAnim = Assets.GetAnim("utilities_gas_kanim");
 		buildingDef.DragBuild = true;
+		buildingDef.HotKey = global::Action.BuildMenuKeyE;
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.GasVentIDs, buildingDef.PrefabID);
 		return buildingDef;
 	}

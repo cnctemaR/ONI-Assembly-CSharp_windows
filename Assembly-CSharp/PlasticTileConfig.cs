@@ -6,8 +6,19 @@ public class PlasticTileConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
+		string text = "PlasticTile";
+		int num = 1;
+		int num2 = 1;
+		string text2 = "floor_plastic_kanim";
+		float num3 = 100f;
+		int num4 = 100;
+		float num5 = 30f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
+		string[] plastics = MATERIALS.PLASTICS;
+		float num6 = 800f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.Tile;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("PlasticTile", 1, 1, "floor_plastic_kanim", 100f, 100, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER2, MATERIALS.PLASTICS, 800f, BuildLocationRule.Tile, BUILDINGS.DECOR.BONUS.TIER0, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, plastics, num6, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER0, none);
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
 		buildingDef.Overheatable = false;
@@ -31,6 +42,7 @@ public class PlasticTileConfig : IBuildingConfig
 		{
 			new CellOffset(0, -1)
 		};
+		buildingDef.HotKey = global::Action.BuildMenuKeyC;
 		return buildingDef;
 	}
 

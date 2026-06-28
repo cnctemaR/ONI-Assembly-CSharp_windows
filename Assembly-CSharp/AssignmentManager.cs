@@ -21,11 +21,10 @@ public class AssignmentManager : KMonoBehaviour
 
 	public void AddAssignmentGroup(string id, IAssignableIdentity[] members, string name)
 	{
-		if (this.assignment_groups.ContainsKey(id))
+		if (!this.assignment_groups.ContainsKey(id))
 		{
-			return;
+			this.assignment_groups.Add(id, new AssignmentGroup(id, members, name));
 		}
-		this.assignment_groups.Add(id, new AssignmentGroup(id, members, name));
 	}
 
 	public void AddToAssignmentGroup(string group_id, IAssignableIdentity member)

@@ -138,12 +138,12 @@ public class Grid
 
 	public static int OffsetCell(int cell, CellOffset offset)
 	{
-		return cell + offset.x * 1 + offset.y * Grid.WidthInCells;
+		return cell + offset.x + offset.y * Grid.WidthInCells;
 	}
 
 	public static int OffsetCell(int cell, int x, int y)
 	{
-		return cell + x * 1 + y * Grid.WidthInCells;
+		return cell + x + y * Grid.WidthInCells;
 	}
 
 	public static int PosToCell(GameObject go)
@@ -274,9 +274,12 @@ public class Grid
 		{
 			Grid.Visible[cell] = Math.Max(visibility, Grid.Visible[cell]);
 		}
-		if (flag && Grid.OnReveal != null)
+		if (flag)
 		{
-			Grid.OnReveal(cell);
+			if (Grid.OnReveal != null)
+			{
+				Grid.OnReveal(cell);
+			}
 		}
 	}
 
@@ -338,15 +341,26 @@ public class Grid
 
 	public static void SetSolid(int cell, bool solid, CellSolidEvent ev)
 	{
-		Grid.BitFields[cell] = (ushort)((byte)((int)Grid.BitFields[cell] & -33));
+		Grid.BitFields[cell] = (ushort)((byte)(Grid.BitFields[cell] & 65503));
 		ushort[] bitFields = Grid.BitFields;
 		bitFields[cell] |= (ushort)((!solid) ? 0 : 32);
 	}
 
 	public static bool IsSubstantialLiquid(int cell, float threshold = 0.35f)
 	{
-		Element element = ElementLoader.elements[(int)Grid.Cell[cell].elementIdx];
-		return element.IsLiquid && Grid.Cell[cell].mass >= element.defaultValues.mass * threshold;
+		if (Grid.IsValidCell(cell))
+		{
+			byte elementIdx = Grid.Cell[cell].elementIdx;
+			if ((int)elementIdx < ElementLoader.elements.Count)
+			{
+				Element element = ElementLoader.elements[(int)Grid.Cell[cell].elementIdx];
+				if (element.IsLiquid && Grid.Cell[cell].mass >= element.defaultValues.mass * threshold)
+				{
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	public static bool IsLiquid(int cell)
@@ -390,7 +404,7 @@ public class Grid
 				Element element = elements[(int)elementIdx];
 				Grid.Element[num] = element;
 				int num2 = (int)Grid.BitFields[num];
-				num2 &= -233;
+				num2 &= 65303;
 				num2 |= ((!element.IsSolid) ? 0 : 96);
 				num2 |= ((element.substance == null || !element.substance.renderedByWorld || !(Grid.Objects[num, 9] == null)) ? 0 : 128);
 				Grid.BitFields[num] = (ushort)((byte)num2);
@@ -526,6 +540,8 @@ public class Grid
 
 	public static bool[] HasLadder;
 
+	public static bool[] HasPole;
+
 	public static bool[] IsTileUnderConstruction;
 
 	public static bool[] PreventFogOfWarReveal;
@@ -553,6 +569,8 @@ public class Grid
 	public static Grid.RenderedByWorldIndexer RenderedByWorld;
 
 	public static Grid.FakeFloorIndexer FakeFloor;
+
+	public static Grid.LiquidPumpFloorIndexer LiquidPumpFloor;
 
 	public static Grid.ForceFieldIndexer ForceField;
 
@@ -583,7 +601,8 @@ public class Grid
 		Solid = 32,
 		PreviousSolid = 64,
 		RenderedByWorld = 128,
-		Impassable = 256
+		Impassable = 256,
+		LiquidPumpFloor = 512
 	}
 
 	public enum SceneLayer
@@ -596,10 +615,12 @@ public class Grid
 		LiquidConduitBridges,
 		Wires,
 		WireBridges,
+		Paintings,
 		BuildingBack,
 		Building,
+		BuildingUse,
 		BuildingFront,
-		Use,
+		Ore,
 		Creatures,
 		Move,
 		Front,
@@ -665,7 +686,6 @@ public class Grid
 		{
 			get
 			{
-				Element element = ElementLoader.elements[(int)Grid.Cell[i].elementIdx];
 				return Grid.Cell[i].mass * 101.3f;
 			}
 		}
@@ -703,7 +723,7 @@ public class Grid
 			}
 			set
 			{
-				Grid.BitFields[i] = (ushort)((byte)((int)Grid.BitFields[i] & -17));
+				Grid.BitFields[i] = (ushort)((byte)(Grid.BitFields[i] & 65519));
 				ushort[] bitFields = Grid.BitFields;
 				bitFields[i] |= (ushort)((!value) ? 0 : 16);
 			}
@@ -731,7 +751,7 @@ public class Grid
 			}
 			set
 			{
-				Grid.BitFields[i] = (ushort)((int)Grid.BitFields[i] & -65);
+				Grid.BitFields[i] = Grid.BitFields[i] & 65471;
 				ushort[] bitFields = Grid.BitFields;
 				bitFields[i] |= ((!value) ? 0 : 64);
 			}
@@ -748,7 +768,7 @@ public class Grid
 			}
 			set
 			{
-				Grid.BitFields[i] = (ushort)((int)Grid.BitFields[i] & -129);
+				Grid.BitFields[i] = Grid.BitFields[i] & 65407;
 				ushort[] bitFields = Grid.BitFields;
 				bitFields[i] |= ((!value) ? 0 : 128);
 			}
@@ -765,9 +785,26 @@ public class Grid
 			}
 			set
 			{
-				Grid.BitFields[i] = (ushort)((int)Grid.BitFields[i] & -3);
+				Grid.BitFields[i] = Grid.BitFields[i] & 65533;
 				ushort[] bitFields = Grid.BitFields;
 				bitFields[i] |= ((!value) ? 0 : 2);
+			}
+		}
+	}
+
+	public struct LiquidPumpFloorIndexer
+	{
+		public bool this[int i]
+		{
+			get
+			{
+				return (Grid.BitFields[i] & 2) != 0;
+			}
+			set
+			{
+				Grid.BitFields[i] = Grid.BitFields[i] & 65023;
+				ushort[] bitFields = Grid.BitFields;
+				bitFields[i] |= ((!value) ? 0 : 512);
 			}
 		}
 	}
@@ -782,7 +819,7 @@ public class Grid
 			}
 			set
 			{
-				Grid.BitFields[i] = (ushort)((int)Grid.BitFields[i] & -5);
+				Grid.BitFields[i] = Grid.BitFields[i] & 65531;
 				ushort[] bitFields = Grid.BitFields;
 				bitFields[i] |= ((!value) ? 0 : 4);
 			}
@@ -799,7 +836,7 @@ public class Grid
 			}
 			set
 			{
-				Grid.BitFields[i] = (ushort)((int)Grid.BitFields[i] & -257);
+				Grid.BitFields[i] = Grid.BitFields[i] & 65279;
 				ushort[] bitFields = Grid.BitFields;
 				bitFields[i] |= ((!value) ? 0 : 256);
 			}

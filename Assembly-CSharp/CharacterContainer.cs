@@ -231,40 +231,40 @@ public class CharacterContainer : KScreen
 		attributes = attributes.OrderBy<AttributeInstance, string>((AttributeInstance at) => at.Name).ToList<AttributeInstance>();
 		for (int i = 0; i < attributes.Count; i++)
 		{
-			GameObject newIconGroup = Util.KInstantiateUI(this.iconGroup.gameObject, this.iconGroup.transform.parent.gameObject, false);
-			LocText label = newIconGroup.GetComponentInChildren<LocText>();
-			newIconGroup.SetActive(true);
+			GameObject gameObject = Util.KInstantiateUI(this.iconGroup.gameObject, this.iconGroup.transform.parent.gameObject, false);
+			LocText componentInChildren = gameObject.GetComponentInChildren<LocText>();
+			gameObject.SetActive(true);
 			float totalValue = attributes[i].GetTotalValue();
 			if (totalValue > 0f)
 			{
-				label.color = Constants.POSITIVE_COLOR;
+				componentInChildren.color = Constants.POSITIVE_COLOR;
 			}
 			else if (totalValue == 0f)
 			{
-				label.color = Constants.NEUTRAL_COLOR;
+				componentInChildren.color = Constants.NEUTRAL_COLOR;
 			}
 			else
 			{
-				label.color = Constants.NEGATIVE_COLOR;
+				componentInChildren.color = Constants.NEGATIVE_COLOR;
 			}
-			label.text = string.Format(UI.CHARACTERCONTAINER_SKILL_VALUE, GameUtil.AddPositiveSign(totalValue.ToString(), totalValue > 0f), attributes[i].Name);
-			AttributeInstance attribute = attributes[i];
-			string tooltip = attribute.Description;
-			if (attribute.Attribute.converters.Count > 0)
+			componentInChildren.text = string.Format(UI.CHARACTERCONTAINER_SKILL_VALUE, GameUtil.AddPositiveSign(totalValue.ToString(), totalValue > 0f), attributes[i].Name);
+			AttributeInstance attributeInstance = attributes[i];
+			string text = attributeInstance.Description;
+			if (attributeInstance.Attribute.converters.Count > 0)
 			{
-				tooltip += "\n";
-				foreach (AttributeConverter converter in attribute.Attribute.converters)
+				text += "\n";
+				foreach (AttributeConverter attributeConverter in attributeInstance.Attribute.converters)
 				{
-					AttributeConverterInstance converter_instance = this.animController.gameObject.GetComponent<AttributeConverters>().GetConverter(converter.Id);
-					string instance_details = converter_instance.ToString();
-					if (instance_details != null)
+					AttributeConverterInstance converter = this.animController.gameObject.GetComponent<AttributeConverters>().GetConverter(attributeConverter.Id);
+					string text2 = converter.ToString();
+					if (text2 != null)
 					{
-						tooltip = tooltip + "\n" + instance_details;
+						text = text + "\n" + text2;
 					}
 				}
 			}
-			newIconGroup.GetComponent<ToolTip>().SetSimpleTooltip(tooltip);
-			this.iconGroups.Add(newIconGroup);
+			gameObject.GetComponent<ToolTip>().SetSimpleTooltip(text);
+			this.iconGroups.Add(gameObject);
 		}
 		yield break;
 	}
@@ -328,18 +328,17 @@ public class CharacterContainer : KScreen
 
 	private void OnCharacterSelectionLimitReached()
 	{
-		if (this.controller != null && this.controller.IsSelected(this.stats))
+		if (!(this.controller != null) || !this.controller.IsSelected(this.stats))
 		{
-			return;
-		}
-		this.selectButton.ClearOnClick();
-		if (this.controller.AllowsReplacing)
-		{
-			this.selectButton.onClick += this.ReplaceCharacterSelection;
-		}
-		else
-		{
-			this.selectButton.onClick += this.CantSelectCharacter;
+			this.selectButton.ClearOnClick();
+			if (this.controller.AllowsReplacing)
+			{
+				this.selectButton.onClick += this.ReplaceCharacterSelection;
+			}
+			else
+			{
+				this.selectButton.onClick += this.CantSelectCharacter;
+			}
 		}
 	}
 
@@ -350,25 +349,23 @@ public class CharacterContainer : KScreen
 
 	private void ReplaceCharacterSelection()
 	{
-		if (this.controller == null)
+		if (!(this.controller == null))
 		{
-			return;
+			this.controller.RemoveLast();
+			this.SelectCharacter();
 		}
-		this.controller.RemoveLast();
-		this.SelectCharacter();
 	}
 
 	private void OnCharacterSelectionLimitUnReached()
 	{
-		if (this.controller != null && this.controller.IsSelected(this.stats))
+		if (!(this.controller != null) || !this.controller.IsSelected(this.stats))
 		{
-			return;
+			this.selectButton.ClearOnClick();
+			this.selectButton.onClick += delegate
+			{
+				this.SelectCharacter();
+			};
 		}
-		this.selectButton.ClearOnClick();
-		this.selectButton.onClick += delegate
-		{
-			this.SelectCharacter();
-		};
 	}
 
 	public void SetReshufflingState(bool enable)
@@ -387,19 +384,18 @@ public class CharacterContainer : KScreen
 
 	public void SetController(CharacterSelectionController csc)
 	{
-		if (csc == this.controller)
+		if (!(csc == this.controller))
 		{
-			return;
+			this.controller = csc;
+			CharacterSelectionController characterSelectionController = this.controller;
+			characterSelectionController.OnLimitReachedEvent = (global::System.Action)Delegate.Combine(characterSelectionController.OnLimitReachedEvent, new global::System.Action(this.OnCharacterSelectionLimitReached));
+			CharacterSelectionController characterSelectionController2 = this.controller;
+			characterSelectionController2.OnLimitUnreachedEvent = (global::System.Action)Delegate.Combine(characterSelectionController2.OnLimitUnreachedEvent, new global::System.Action(this.OnCharacterSelectionLimitUnReached));
+			CharacterSelectionController characterSelectionController3 = this.controller;
+			characterSelectionController3.OnReshuffleEvent = (Action<bool>)Delegate.Combine(characterSelectionController3.OnReshuffleEvent, new Action<bool>(this.Reshuffle));
+			CharacterSelectionController characterSelectionController4 = this.controller;
+			characterSelectionController4.OnReplacedEvent = (Action<MinionStartingStats>)Delegate.Combine(characterSelectionController4.OnReplacedEvent, new Action<MinionStartingStats>(this.OnReplacedEvent));
 		}
-		this.controller = csc;
-		CharacterSelectionController characterSelectionController = this.controller;
-		characterSelectionController.OnLimitReachedEvent = (global::System.Action)Delegate.Combine(characterSelectionController.OnLimitReachedEvent, new global::System.Action(this.OnCharacterSelectionLimitReached));
-		CharacterSelectionController characterSelectionController2 = this.controller;
-		characterSelectionController2.OnLimitUnreachedEvent = (global::System.Action)Delegate.Combine(characterSelectionController2.OnLimitUnreachedEvent, new global::System.Action(this.OnCharacterSelectionLimitUnReached));
-		CharacterSelectionController characterSelectionController3 = this.controller;
-		characterSelectionController3.OnReshuffleEvent = (Action<bool>)Delegate.Combine(characterSelectionController3.OnReshuffleEvent, new Action<bool>(this.Reshuffle));
-		CharacterSelectionController characterSelectionController4 = this.controller;
-		characterSelectionController4.OnReplacedEvent = (Action<MinionStartingStats>)Delegate.Combine(characterSelectionController4.OnReplacedEvent, new Action<MinionStartingStats>(this.OnReplacedEvent));
 	}
 
 	public void DisableSelectButton()
@@ -432,11 +428,10 @@ public class CharacterContainer : KScreen
 	protected override void OnCmpEnable()
 	{
 		base.OnActivate();
-		if (this.stats == null)
+		if (this.stats != null)
 		{
-			return;
+			this.SetAnimator();
 		}
-		this.SetAnimator();
 	}
 
 	[SerializeField]

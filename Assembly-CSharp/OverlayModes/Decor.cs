@@ -77,12 +77,12 @@ namespace OverlayModes
 			Vector2I vector2I;
 			Vector2I vector2I2;
 			Grid.GetVisibleExtents(out vector2I, out vector2I2);
-			Mode.RemoveOffscreenTargets<DecorProvider>(this.layerTargets, vector2I, vector2I2);
+			Mode.RemoveOffscreenTargets<DecorProvider>(this.layerTargets, vector2I, vector2I2, null);
 			this.partition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y), this.workingTargets);
 			for (int i = 0; i < this.workingTargets.Count; i++)
 			{
 				DecorProvider decorProvider = this.workingTargets[i];
-				base.AddTargetIfVisible<DecorProvider>(decorProvider, vector2I, vector2I2, this.layerTargets, this.targetLayer);
+				base.AddTargetIfVisible<DecorProvider>(decorProvider, vector2I, vector2I2, this.layerTargets, this.targetLayer, null, null);
 			}
 			base.UpdateHighlightTypeOverlay<DecorProvider>(vector2I, vector2I2, this.layerTargets, this.targetIDs, this.highlightConditions, BringToFrontLayerSetting.Conditional, this.targetLayer);
 			this.workingTargets.Clear();
@@ -103,18 +103,17 @@ namespace OverlayModes
 
 		protected override void OnSaveLoadRootUnregistered(SaveLoadRoot item)
 		{
-			if (item == null || item.gameObject == null)
+			if (!(item == null) && !(item.gameObject == null))
 			{
-				return;
-			}
-			DecorProvider component = item.GetComponent<DecorProvider>();
-			if (component != null)
-			{
-				if (this.layerTargets.Contains(component))
+				DecorProvider component = item.GetComponent<DecorProvider>();
+				if (component != null)
 				{
-					this.layerTargets.Remove(component);
+					if (this.layerTargets.Contains(component))
+					{
+						this.layerTargets.Remove(component);
+					}
+					this.partition.Remove(component);
 				}
-				this.partition.Remove(component);
 			}
 		}
 

@@ -180,7 +180,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 	{
 		GraphicsOptionsScreen.Settings current_settings = this.CaptureSettings();
 		this.ApplySettings(new_settings);
-		this.confirmDialog = Util.KInstantiateUI(this.confirmPrefab.gameObject, this.transform.gameObject, false).GetComponent<ConfirmDialogScreen>();
+		this.confirmDialog = Util.KInstantiateUI(this.confirmPrefab.gameObject, base.transform.gameObject, false).GetComponent<ConfirmDialogScreen>();
 		global::System.Action action = delegate
 		{
 			this.ApplySettings(current_settings);

@@ -4,24 +4,11 @@ using UnityEngine;
 public class AttackChore : Chore<AttackChore.StatesInstance>
 {
 	public AttackChore(IStateMachineTarget target, GameObject enemy)
-		: base(Db.Get().ChoreTypes.Attack, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.Attack, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
 	{
 		this.smi = new AttackChore.StatesInstance(this);
 		this.smi.sm.attackTarget.Set(enemy, this.smi);
 		base.AddPrecondition(AttackChore.IsTargetable, enemy);
-	}
-
-	// Note: this type is marked as 'beforefieldinit'.
-	static AttackChore()
-	{
-		Chore.Precondition precondition = default(Chore.Precondition);
-		precondition.id = "IsTargetable";
-		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
-		{
-			GameObject gameObject = (GameObject)data;
-			return gameObject != null && gameObject.GetComponent<FactionAlignment>().targetable;
-		};
-		AttackChore.IsTargetable = precondition;
 	}
 
 	protected override void OnStateMachineStop(string reason, StateMachine.Status status)
@@ -33,17 +20,25 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 	public string GetHitAnim()
 	{
 		Workable component = this.smi.sm.attackTarget.Get(this.smi).gameObject.GetComponent<Workable>();
-		if (!component)
+		string text2;
+		if (component)
 		{
-			return "hit";
+			string text = MultitoolController.GetAnimationStrings(component, this.gameObject.GetComponent<Worker>(), "hit")[1];
+			text = text.Replace("_loop", "");
+			if (text.Contains("{verb}"))
+			{
+				text2 = "hit";
+			}
+			else
+			{
+				text2 = text;
+			}
 		}
-		string text = MultitoolController.GetAnimationStrings(component, this.gameObject.GetComponent<Worker>(), "hit")[1];
-		text = text.Replace("_loop", string.Empty);
-		if (text.Contains("{verb}"))
+		else
 		{
-			return "hit";
+			text2 = "hit";
 		}
-		return text;
+		return text2;
 	}
 
 	public void OnTargetMoved(object data)
@@ -52,32 +47,34 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 		if (this.smi.sm.attackTarget.Get(this.smi) == null)
 		{
 			this.CleanUpMultitool();
-			return;
 		}
-		if (this.smi.GetCurrentState() == this.smi.sm.attack)
+		else
 		{
-			int num2 = Grid.PosToCell(this.smi.sm.attackTarget.Get(this.smi).gameObject);
-			IApproachable component = this.smi.sm.attackTarget.Get(this.smi).gameObject.GetComponent<IApproachable>();
-			if (component != null)
+			if (this.smi.GetCurrentState() == this.smi.sm.attack)
 			{
-				CellOffset[] offsets = component.GetOffsets();
-				if (num == num2 || !Grid.IsCellOffsetOf(num, num2, offsets))
+				int num2 = Grid.PosToCell(this.smi.sm.attackTarget.Get(this.smi).gameObject);
+				IApproachable component = this.smi.sm.attackTarget.Get(this.smi).gameObject.GetComponent<IApproachable>();
+				if (component != null)
 				{
-					if (this.multiTool != null)
+					CellOffset[] offsets = component.GetOffsets();
+					if (num == num2 || !Grid.IsCellOffsetOf(num, num2, offsets))
 					{
-						this.CleanUpMultitool();
+						if (this.multiTool != null)
+						{
+							this.CleanUpMultitool();
+						}
+						this.smi.GoTo(this.smi.sm.approachtarget);
 					}
-					this.smi.GoTo(this.smi.sm.approachtarget);
+				}
+				else
+				{
+					global::Debug.Log("has no approachable", null);
 				}
 			}
-			else
+			if (this.multiTool != null)
 			{
-				global::Debug.Log("has no approachable", null);
+				this.multiTool.UpdateHitEffectTarget();
 			}
-		}
-		if (this.multiTool != null)
-		{
-			this.multiTool.UpdateHitEffectTarget();
 		}
 	}
 
@@ -108,7 +105,15 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 		}
 	}
 
-	public static Chore.Precondition IsTargetable;
+	public static Chore.Precondition IsTargetable = new Chore.Precondition
+	{
+		id = "IsTargetable",
+		fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			GameObject gameObject = (GameObject)data;
+			return gameObject != null && gameObject.GetComponent<FactionAlignment>().targetable;
+		}
+	};
 
 	private MultitoolController.Instance multiTool;
 

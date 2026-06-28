@@ -7,6 +7,18 @@ namespace UnityEngine
 	[UsedByNativeCode]
 	public struct LayerMask
 	{
+		public static implicit operator int(LayerMask mask)
+		{
+			return mask.m_Mask;
+		}
+
+		public static implicit operator LayerMask(int intVal)
+		{
+			LayerMask layerMask;
+			layerMask.m_Mask = intVal;
+			return layerMask;
+		}
+
 		public int value
 		{
 			get
@@ -19,11 +31,11 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern string LayerToName(int layer);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int NameToLayer(string layerName);
 
@@ -43,18 +55,6 @@ namespace UnityEngine
 				}
 			}
 			return num;
-		}
-
-		public static implicit operator int(LayerMask mask)
-		{
-			return mask.m_Mask;
-		}
-
-		public static implicit operator LayerMask(int intVal)
-		{
-			LayerMask layerMask;
-			layerMask.m_Mask = intVal;
-			return layerMask;
 		}
 
 		private int m_Mask;

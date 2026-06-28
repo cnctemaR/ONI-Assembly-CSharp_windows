@@ -4,7 +4,7 @@ using UnityEngine;
 public class IdleChore : Chore<IdleChore.StatesInstance>
 {
 	public IdleChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.Idle, target, target.GetComponent<ChoreProvider>(), false, null, null, null, -1, false, true, 0)
+		: base(Db.Get().ChoreTypes.Idle, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, -1, false, true, 0)
 	{
 		this.smi = new IdleChore.StatesInstance(this, target.gameObject);
 	}
@@ -20,7 +20,8 @@ public class IdleChore : Chore<IdleChore.StatesInstance>
 
 		public void UpdateIsOnLadder()
 		{
-			base.sm.isOnLadder.Set(base.GetComponent<Navigator>().CurrentNavType == NavType.Ladder, this);
+			NavType currentNavType = base.GetComponent<Navigator>().CurrentNavType;
+			base.sm.isOnLadder.Set(currentNavType == NavType.Ladder || currentNavType == NavType.Pole, this);
 		}
 
 		public int GetIdleCell()
@@ -54,14 +55,14 @@ public class IdleChore : Chore<IdleChore.StatesInstance>
 					ReportManager.Instance.ReportValue(ReportManager.ReportType.IdleTime, 1f, this.idler.Get(smi).GetProperName(), null);
 				})
 				.ToggleStateMachine((IdleChore.StatesInstance smi) => new TaskAvailabilityMonitor.Instance(smi.master));
-			this.idle.onfloor.PlayAnim("idle_default", KAnim.PlayMode.Loop, null).ParamTransition<bool>(this.isOnLadder, this.idle.onladder, (IdleChore.StatesInstance smi, bool p) => p).ToggleSchedulePeriodic("IdleMove", (IdleChore.StatesInstance smi) => (float)global::UnityEngine.Random.Range(5, 15), delegate(IdleChore.StatesInstance smi)
+			this.idle.onfloor.PlayAnim("idle_default", KAnim.PlayMode.Loop).ParamTransition<bool>(this.isOnLadder, this.idle.onladder, (IdleChore.StatesInstance smi, bool p) => p).ToggleSchedulePeriodic("IdleMove", (IdleChore.StatesInstance smi) => (float)global::UnityEngine.Random.Range(5, 15), delegate(IdleChore.StatesInstance smi)
 			{
 				if (smi.HasIdleCell())
 				{
 					smi.GoTo(this.idle.move);
 				}
 			}, null);
-			this.idle.onladder.PlayAnim("ladder_idle", KAnim.PlayMode.Loop, null).ParamTransition<bool>(this.isOnLadder, this.idle.onfloor, (IdleChore.StatesInstance smi, bool p) => !p).ToggleSchedulePeriodic("IdleMove", (IdleChore.StatesInstance smi) => (float)global::UnityEngine.Random.Range(5, 15), delegate(IdleChore.StatesInstance smi)
+			this.idle.onladder.PlayAnim("ladder_idle", KAnim.PlayMode.Loop).ParamTransition<bool>(this.isOnLadder, this.idle.onfloor, (IdleChore.StatesInstance smi, bool p) => !p).ToggleSchedulePeriodic("IdleMove", (IdleChore.StatesInstance smi) => (float)global::UnityEngine.Random.Range(5, 15), delegate(IdleChore.StatesInstance smi)
 			{
 				if (smi.HasIdleCell())
 				{

@@ -7,8 +7,14 @@ public class BasicForagePlantPlantedConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
+		string text = "BasicForagePlantPlanted";
+		string text2 = global::STRINGS.CREATURES.SPECIES.BASICFORAGEPLANTPLANTED.NAME;
+		string text3 = global::STRINGS.CREATURES.SPECIES.BASICFORAGEPLANTPLANTED.DESC;
+		float num = 100f;
+		KAnimFile anim = Assets.GetAnim("muckroot_kanim");
+		string text4 = "idle";
 		EffectorValues tier = DECOR.BONUS.TIER1;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("BasicForagePlantPlanted", global::STRINGS.CREATURES.SPECIES.BASICFORAGEPLANTPLANTED.NAME, global::STRINGS.CREATURES.SPECIES.BASICFORAGEPLANTPLANTED.DESC, 100f, Assets.GetAnim("muckroot_kanim"), "idle", Grid.SceneLayer.BuildingBack, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, anim, text4, Grid.SceneLayer.BuildingBack, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
 		gameObject.UpdateComponentRequirement<SimTemperatureTransfer>(true);
 		OccupyArea occupyArea = gameObject.UpdateComponentRequirement<OccupyArea>(true);
 		occupyArea.objectLayer = ObjectLayer.Building;

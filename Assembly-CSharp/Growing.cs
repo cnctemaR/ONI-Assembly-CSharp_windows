@@ -31,13 +31,13 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 	{
 		Amounts amounts = base.gameObject.GetAmounts();
 		this.maturity = amounts.Add(new AmountInstance(Db.Get().Amounts.Maturity, base.gameObject));
-		this.baseMaturityMax = new AttributeModifier(this.maturity.maxAttribute.Id, this.growthTime / 600f, null, false, false);
+		this.baseMaturityMax = new AttributeModifier(this.maturity.maxAttribute.Id, this.growthTime / 600f, null, false, false, true);
 		this.maturity.maxAttribute.Add("Base", this.baseMaturityMax);
 		this.oldAge = amounts.Add(new AmountInstance(Db.Get().Amounts.OldAge, base.gameObject));
 		base.OnPrefabInit();
-		this.Subscribe(1119167081, new Action<object>(this.OnNewGameSpawn));
-		this.Subscribe(1309017699, new Action<object>(this.OnReplant));
-		this.Subscribe(1272413801, new Action<object>(this.ResetGrowth));
+		base.Subscribe(1119167081, new Action<object>(this.OnNewGameSpawn));
+		base.Subscribe(1309017699, new Action<object>(this.OnReplant));
+		base.Subscribe(1272413801, new Action<object>(this.ResetGrowth));
 	}
 
 	protected override void OnSpawn()
@@ -126,7 +126,7 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 	{
 		return new List<Descriptor>
 		{
-			new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.GROWTHTIME_SIMPLE, GameUtil.GetFormattedCycles(this.growthTime, string.Empty)), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.GROWTHTIME_SIMPLE, GameUtil.GetFormattedCycles(this.growthTime, string.Empty)), Descriptor.DescriptorType.Requirement, false)
+			new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.GROWTHTIME_SIMPLE, GameUtil.GetFormattedCycles(this.growthTime, "")), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.GROWTHTIME_SIMPLE, GameUtil.GetFormattedCycles(this.growthTime, "")), Descriptor.DescriptorType.Requirement, false)
 		};
 	}
 
@@ -139,7 +139,7 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 	private AttributeModifier baseMaturityMax;
 
 	[Serialize]
-	private bool replanted;
+	private bool replanted = false;
 
 	[MyCmpGet]
 	private WiltCondition wiltCondition;
@@ -157,9 +157,9 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 		public StatesInstance(Growing master)
 			: base(master)
 		{
-			this.baseGrowingRate = new AttributeModifier(master.maturity.deltaAttribute.Id, 0.0016666667f, CREATURES.STATS.MATURITY.GROWING, false, false);
-			this.wildGrowingRate = new AttributeModifier(master.maturity.deltaAttribute.Id, 0.00041666668f, CREATURES.STATS.MATURITY.GROWINGWILD, false, false);
-			this.getOldRate = new AttributeModifier(master.oldAge.deltaAttribute.Id, 1f, null, false, false);
+			this.baseGrowingRate = new AttributeModifier(master.maturity.deltaAttribute.Id, 0.0016666667f, CREATURES.STATS.MATURITY.GROWING, false, false, true);
+			this.wildGrowingRate = new AttributeModifier(master.maturity.deltaAttribute.Id, 0.00041666668f, CREATURES.STATS.MATURITY.GROWINGWILD, false, false, true);
+			this.getOldRate = new AttributeModifier(master.oldAge.deltaAttribute.Id, 1f, null, false, false, true);
 		}
 
 		public bool IsGrown()

@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ResourceCategoryHeader : MonoBehaviour, IPointerEnterHandler, IEventSystemHandler, IPointerExitHandler
+public class ResourceCategoryHeader : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IEventSystemHandler
 {
 	private void Awake()
 	{
@@ -94,9 +94,8 @@ public class ResourceCategoryHeader : MonoBehaviour, IPointerEnterHandler, IEven
 			{
 				KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Negative", false));
 			}
-			return;
 		}
-		if (!this.IsOpen)
+		else if (!this.IsOpen)
 		{
 			if (play_sound)
 			{
@@ -133,24 +132,23 @@ public class ResourceCategoryHeader : MonoBehaviour, IPointerEnterHandler, IEven
 		{
 			list = WorldInventory.Instance.GetPickupables(this.ResourceCategoryTag);
 		}
-		if (list == null)
+		if (list != null)
 		{
-			return;
-		}
-		for (int i = 0; i < list.Count; i++)
-		{
-			if (!(list[i] == null))
+			for (int i = 0; i < list.Count; i++)
 			{
-				KAnimControllerBase component = list[i].GetComponent<KAnimControllerBase>();
-				if (!(component == null))
+				if (!(list[i] == null))
 				{
-					if (is_hovering)
+					KAnimControllerBase component = list[i].GetComponent<KAnimControllerBase>();
+					if (!(component == null))
 					{
-						component.HighlightColour = this.highlightColour;
-					}
-					else
-					{
-						component.HighlightColour = Color.black;
+						if (is_hovering)
+						{
+							component.HighlightColour = this.highlightColour;
+						}
+						else
+						{
+							component.HighlightColour = Color.black;
+						}
 					}
 				}
 			}
@@ -211,20 +209,30 @@ public class ResourceCategoryHeader : MonoBehaviour, IPointerEnterHandler, IEven
 			keyValuePair.Value.UpdateValue(this.measure);
 		}
 		this.SetActiveColor(num > 0f);
-		string text = string.Empty;
-		switch (this.measure)
+		if (this.quantityString == null || this.currentQuantity != num)
 		{
-		case ResourceCategoryHeader.MeasureUnit.mass:
-			text = GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
-			break;
-		case ResourceCategoryHeader.MeasureUnit.kcal:
-			text = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
-			break;
-		case ResourceCategoryHeader.MeasureUnit.quantity:
-			text = num.ToString();
-			break;
+			ResourceCategoryHeader.MeasureUnit measureUnit = this.measure;
+			if (measureUnit != ResourceCategoryHeader.MeasureUnit.mass)
+			{
+				if (measureUnit != ResourceCategoryHeader.MeasureUnit.quantity)
+				{
+					if (measureUnit == ResourceCategoryHeader.MeasureUnit.kcal)
+					{
+						this.quantityString = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
+					}
+				}
+				else
+				{
+					this.quantityString = num.ToString();
+				}
+			}
+			else
+			{
+				this.quantityString = GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
+			}
+			this.elements.QuantityText.text = this.quantityString;
+			this.currentQuantity = num;
 		}
-		this.elements.QuantityText.text = text;
 		if (!this.anyDiscovered)
 		{
 			this.SetInteractable(false);
@@ -249,7 +257,7 @@ public class ResourceCategoryHeader : MonoBehaviour, IPointerEnterHandler, IEven
 
 	public Tag ResourceCategoryTag;
 
-	public bool IsOpen;
+	public bool IsOpen = false;
 
 	public ImageToggleState expandArrow;
 
@@ -262,6 +270,10 @@ public class ResourceCategoryHeader : MonoBehaviour, IPointerEnterHandler, IEven
 	public Color TextColor_Interactable;
 
 	public Color TextColor_NonInteractable;
+
+	private string quantityString = null;
+
+	private float currentQuantity = 0f;
 
 	private ToolTip tooltip;
 
@@ -282,7 +294,7 @@ public class ResourceCategoryHeader : MonoBehaviour, IPointerEnterHandler, IEven
 
 	public ResourceCategoryHeader.MeasureUnit measure;
 
-	private bool anyDiscovered;
+	private bool anyDiscovered = false;
 
 	public enum MeasureUnit
 	{

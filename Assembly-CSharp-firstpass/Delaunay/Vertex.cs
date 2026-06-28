@@ -14,15 +14,20 @@ namespace Delaunay
 
 		private static Vertex Create(float x, float y)
 		{
+			Vertex vertex;
 			if (float.IsNaN(x) || float.IsNaN(y))
 			{
-				return Vertex.VERTEX_AT_INFINITY;
+				vertex = Vertex.VERTEX_AT_INFINITY;
 			}
-			if (Vertex._pool.Count > 0)
+			else if (Vertex._pool.Count > 0)
 			{
-				return Vertex._pool.Pop().Init(x, y);
+				vertex = Vertex._pool.Pop().Init(x, y);
 			}
-			return new Vertex(x, y);
+			else
+			{
+				vertex = new Vertex(x, y);
+			}
+			return vertex;
 		}
 
 		public Vector2 Coord
@@ -66,39 +71,50 @@ namespace Delaunay
 		{
 			Edge edge = halfedge0.edge;
 			Edge edge2 = halfedge1.edge;
+			Vertex vertex;
 			if (edge == null || edge2 == null)
 			{
-				return null;
+				vertex = null;
 			}
-			if (edge.rightSite == edge2.rightSite)
+			else if (edge.rightSite == edge2.rightSite)
 			{
-				return null;
-			}
-			float num = edge.a * edge2.b - edge.b * edge2.a;
-			if (-1E-10 < (double)num && (double)num < 1E-10)
-			{
-				return null;
-			}
-			float num2 = (edge.c * edge2.b - edge2.c * edge.b) / num;
-			float num3 = (edge2.c * edge.a - edge.c * edge2.a) / num;
-			Halfedge halfedge2;
-			Edge edge3;
-			if (Voronoi.CompareByYThenX(edge.rightSite, edge2.rightSite) < 0)
-			{
-				halfedge2 = halfedge0;
-				edge3 = edge;
+				vertex = null;
 			}
 			else
 			{
-				halfedge2 = halfedge1;
-				edge3 = edge2;
+				float num = edge.a * edge2.b - edge.b * edge2.a;
+				if (-1E-10 < (double)num && (double)num < 1E-10)
+				{
+					vertex = null;
+				}
+				else
+				{
+					float num2 = (edge.c * edge2.b - edge2.c * edge.b) / num;
+					float num3 = (edge2.c * edge.a - edge.c * edge2.a) / num;
+					Halfedge halfedge2;
+					Edge edge3;
+					if (Voronoi.CompareByYThenX(edge.rightSite, edge2.rightSite) < 0)
+					{
+						halfedge2 = halfedge0;
+						edge3 = edge;
+					}
+					else
+					{
+						halfedge2 = halfedge1;
+						edge3 = edge2;
+					}
+					bool flag = num2 >= edge3.rightSite.x;
+					if ((flag && halfedge2.leftRight == Side.LEFT) || (!flag && halfedge2.leftRight == Side.RIGHT))
+					{
+						vertex = null;
+					}
+					else
+					{
+						vertex = Vertex.Create(num2, num3);
+					}
+				}
 			}
-			bool flag = num2 >= edge3.rightSite.x;
-			if ((flag && halfedge2.leftRight == Side.LEFT) || (!flag && halfedge2.leftRight == Side.RIGHT))
-			{
-				return null;
-			}
-			return Vertex.Create(num2, num3);
+			return vertex;
 		}
 
 		public float x

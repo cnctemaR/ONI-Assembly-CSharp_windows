@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class AttackToolHoverTextCard : HoverTextConfiguration
@@ -13,25 +14,27 @@ public class AttackToolHoverTextCard : HoverTextConfiguration
 		if (instance.LoadPreConfiguredToolFields(this))
 		{
 			this.isConfigured = true;
-			return;
 		}
-		instance.ToggleIncubating(true);
-		instance.currentConfiguration = this;
-		instance.ClearLabels();
-		instance.NewLine("Spacer", 24);
-		instance.StartShadowBar(0f, 0f, false);
-		if (this.printTitle)
+		else
 		{
-			this.ConfigureTitle(instance);
+			instance.ToggleIncubating(true);
+			instance.currentConfiguration = this;
+			instance.ClearLabels();
+			instance.NewLine("Spacer", 24);
+			instance.StartShadowBar(0f, 0f, false);
+			if (this.printTitle)
+			{
+				this.ConfigureTitle(instance);
+			}
+			this.ConfigureInstructions(instance);
+			instance.EndShadowBar();
+			instance.NewLine("Spacer", 24);
+			this.hoverScreenElements.ShadowBar = instance.StartShadowBar(0f, 0f, false);
+			instance.NewLine("SelectableName", 24);
+			this.hoverScreenElements.SelectableName = instance.AddText("", this.Styles_Title.Standard, true);
+			instance.EndShadowBar();
+			this.isConfigured = true;
 		}
-		this.ConfigureInstructions(instance);
-		instance.EndShadowBar();
-		instance.NewLine("Spacer", 24);
-		this.hoverScreenElements.ShadowBar = instance.StartShadowBar(0f, 0f, false);
-		instance.NewLine("SelectableName", 24);
-		this.hoverScreenElements.SelectableName = instance.AddText(string.Empty, this.Styles_Title.Standard, true);
-		instance.EndShadowBar();
-		this.isConfigured = true;
 	}
 
 	public override void SetNotConfigured()
@@ -39,7 +42,7 @@ public class AttackToolHoverTextCard : HoverTextConfiguration
 		base.SetNotConfigured();
 	}
 
-	public override void UpdateHoverElements(KSelectable[] hoverObjects)
+	public override void UpdateHoverElements(List<KSelectable> hover_objects)
 	{
 		if (!this.isConfigured)
 		{
@@ -48,10 +51,10 @@ public class AttackToolHoverTextCard : HoverTextConfiguration
 		else
 		{
 			bool flag = false;
-			this.hoverScreenElements.SelectableName.text = string.Empty;
-			if (hoverObjects != null)
+			this.hoverScreenElements.SelectableName.text = "";
+			if (hover_objects != null)
 			{
-				foreach (KSelectable kselectable in hoverObjects)
+				foreach (KSelectable kselectable in hover_objects)
 				{
 					if (kselectable.GetComponent<Harvestable>() != null)
 					{

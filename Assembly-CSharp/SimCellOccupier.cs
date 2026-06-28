@@ -89,8 +89,14 @@ public class SimCellOccupier : KMonoBehaviour, IEffectDescriptor
 				}
 				if (onComplete != null)
 				{
-					int index = Game.Instance.callbackManager.Add(new Game.CallbackInfo(onComplete, false)).index;
-					SimMessages.ReplaceElement(num, SimHashes.Vacuum, CellEventLogger.Instance.SimCellOccupierDestroySelf, 0f, -1f, byte.MaxValue, 0, index);
+					HandleVector<Game.CallbackInfo>.Handle handle2 = Game.Instance.callbackManager.Add(new Game.CallbackInfo(onComplete, false));
+					int num2 = num;
+					SimHashes simHashes = SimHashes.Vacuum;
+					CellElementEvent simCellOccupierDestroySelf = CellEventLogger.Instance.SimCellOccupierDestroySelf;
+					float num3 = 0f;
+					float num4 = -1f;
+					int index = handle2.index;
+					SimMessages.ReplaceElement(num2, simHashes, simCellOccupierDestroySelf, num3, num4, byte.MaxValue, 0, index);
 				}
 				else
 				{
@@ -115,12 +121,11 @@ public class SimCellOccupier : KMonoBehaviour, IEffectDescriptor
 
 	private void OnModifyComplete()
 	{
-		if (this == null || base.gameObject == null)
+		if (!(this == null) && !(base.gameObject == null))
 		{
-			return;
+			this.isReady = true;
+			base.GetComponent<PrimaryElement>().SetUseSimDiseaseInfo(true);
 		}
-		this.isReady = true;
-		base.GetComponent<PrimaryElement>().SetUseSimDiseaseInfo(true);
 	}
 
 	private void ForceSetGameCellData(int cell)
@@ -156,10 +161,10 @@ public class SimCellOccupier : KMonoBehaviour, IEffectDescriptor
 	public bool doReplaceElement = true;
 
 	[SerializeField]
-	public bool setGasImpermeable;
+	public bool setGasImpermeable = false;
 
 	[SerializeField]
-	public bool setLiquidImpermeable;
+	public bool setLiquidImpermeable = false;
 
 	[SerializeField]
 	public float strengthMultiplier = 1f;

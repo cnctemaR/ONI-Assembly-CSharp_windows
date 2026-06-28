@@ -34,8 +34,8 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.Subscribe(1272413801, new Action<object>(this.OnHarvest));
-		this.Subscribe(-1736624145, new Action<object>(this.OnSeedDropped));
+		base.Subscribe(1272413801, new Action<object>(this.OnHarvest));
+		base.Subscribe(-1736624145, new Action<object>(this.OnSeedDropped));
 	}
 
 	public void Configure(Crop.CropVal cropval)
@@ -53,7 +53,7 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 		Crop.CropVal cropVal = this.cropVal;
 		if (!string.IsNullOrEmpty(cropVal.cropId))
 		{
-			GameObject gameObject = Scenario.SpawnPrefab(Grid.PosToCell(base.gameObject), 0, 0, cropVal.cropId, Grid.SceneLayer.Use, Folder.Entities);
+			GameObject gameObject = Scenario.SpawnPrefab(Grid.PosToCell(base.gameObject), 0, 0, cropVal.cropId, Grid.SceneLayer.Ore, Folder.Entities);
 			if (gameObject != null)
 			{
 				float num = 0.75f;
@@ -71,7 +71,7 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 			{
 				Output.LogErrorWithObj(base.gameObject, new object[] { "tried to spawn an invalid crop prefab:", cropVal.cropId });
 			}
-			this.Trigger(-1072826864, null);
+			base.Trigger(-1072826864, null);
 		}
 	}
 
@@ -109,7 +109,7 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 			global::Debug.Log("!", null);
 		}
 		float num = 0f;
-		string text = string.Empty;
+		string text = "";
 		if (edible != null)
 		{
 			num = edible.FoodInfo.CaloriesPerUnit;
@@ -160,7 +160,7 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	public Crop.CropVal cropVal;
 
-	public string domesticatedDesc = string.Empty;
+	public string domesticatedDesc = "";
 
 	private Storage planterStorage;
 

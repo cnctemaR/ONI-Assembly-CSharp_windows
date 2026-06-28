@@ -25,7 +25,7 @@ public class ToolTipScreen : KScreen
 	public void SetToolTip(ToolTip tool_tip)
 	{
 		this.tooltipSetting = tool_tip;
-		this.multiTooltipContainer = this.toolTipWidget.transform.FindChild("MultitooltipContainer").gameObject;
+		this.multiTooltipContainer = this.toolTipWidget.transform.Find("MultitooltipContainer").gameObject;
 		this.ConfigureTooltip();
 	}
 
@@ -51,7 +51,7 @@ public class ToolTipScreen : KScreen
 			else
 			{
 				this.label.gameObject.SetActive(false);
-				this.label.text = string.Empty;
+				this.label.text = "";
 				if (this.prevTooltip != this.tooltipSetting || !this.multiTooltipContainer.activeInHierarchy)
 				{
 					this.prepareMultiStringTooltip(this.tooltipSetting);
@@ -59,7 +59,7 @@ public class ToolTipScreen : KScreen
 				}
 			}
 			bool flag = true;
-			if (this.label.text == string.Empty && this.multiTooltipContainer.transform.childCount == 0)
+			if (this.label.text == "" && this.multiTooltipContainer.transform.childCount == 0)
 			{
 				flag = false;
 			}
@@ -90,10 +90,10 @@ public class ToolTipScreen : KScreen
 				this.anchorRoot.anchoredPosition += Vector2.right * (rectTransform.sizeDelta.x * this.tooltipSetting.parentPositionAnchor.x);
 				this.anchorRoot.anchoredPosition += Vector2.up * (rectTransform.sizeDelta.y * this.tooltipSetting.parentPositionAnchor.y);
 				float num = 1f;
-				CanvasScaler canvasScaler = this.transform.parent.GetComponent<CanvasScaler>();
+				CanvasScaler canvasScaler = base.transform.parent.GetComponent<CanvasScaler>();
 				if (canvasScaler == null)
 				{
-					canvasScaler = this.transform.parent.parent.GetComponent<CanvasScaler>();
+					canvasScaler = base.transform.parent.parent.GetComponent<CanvasScaler>();
 				}
 				if (canvasScaler != null)
 				{
@@ -108,9 +108,9 @@ public class ToolTipScreen : KScreen
 				component.anchoredPosition = this.tooltipSetting.tooltipPositionOffset * num;
 				if (!this.tooltipSetting.worldSpace)
 				{
-					Rect rect = ((RectTransform)this.transform).rect;
-					Vector2 vector2 = new Vector2(this.transform.position.x, this.transform.position.y) + this.ScreenEdgePadding;
-					Vector2 vector3 = new Vector2(this.transform.position.x, this.transform.position.y) + rect.width * Vector2.right + rect.height * Vector2.up - this.ScreenEdgePadding * Mathf.Max(1f, num);
+					Rect rect = ((RectTransform)base.transform).rect;
+					Vector2 vector2 = new Vector2(base.transform.position.x, base.transform.position.y) + this.ScreenEdgePadding;
+					Vector2 vector3 = new Vector2(base.transform.position.x, base.transform.position.y) + rect.width * Vector2.right + rect.height * Vector2.up - this.ScreenEdgePadding * Mathf.Max(1f, num);
 					vector3.x *= num;
 					vector3.y *= num;
 					Vector2 vector4;
@@ -141,9 +141,9 @@ public class ToolTipScreen : KScreen
 				}
 			}
 		}
-		if (((RectTransform)this.transform).GetSiblingIndex() != this.transform.parent.childCount - 1)
+		if (((RectTransform)base.transform).GetSiblingIndex() != base.transform.parent.childCount - 1)
 		{
-			((RectTransform)this.transform).SetAsLastSibling();
+			((RectTransform)base.transform).SetAsLastSibling();
 		}
 	}
 
@@ -208,47 +208,46 @@ public class ToolTipScreen : KScreen
 
 	private void Update()
 	{
-		if (this.multiTooltipContainer == null || this.anchorRoot == null)
+		if (!(this.multiTooltipContainer == null) && !(this.anchorRoot == null))
 		{
-			return;
-		}
-		if (this.dirtyHoverTooltip != null)
-		{
-			ToolTip toolTip = this.dirtyHoverTooltip;
-			this.MakeDirtyTooltipClean(toolTip);
-			this.ClearToolTip(toolTip);
-		}
-		if (this.tooltipIncubating)
-		{
-			this.tooltipIncubating = false;
-			Image componentInChildren = this.anchorRoot.GetComponentInChildren<Image>();
-			if (componentInChildren != null)
+			if (this.dirtyHoverTooltip != null)
 			{
-				this.anchorRoot.GetComponentInChildren<Image>(true).enabled = false;
+				ToolTip toolTip = this.dirtyHoverTooltip;
+				this.MakeDirtyTooltipClean(toolTip);
+				this.ClearToolTip(toolTip);
 			}
-			this.multiTooltipContainer.transform.localScale = Vector3.zero;
-			for (int i = 0; i < this.multiTooltipContainer.transform.childCount; i++)
+			if (this.tooltipIncubating)
 			{
-				if (this.multiTooltipContainer.transform.GetChild(i).transform.localScale != Vector3.one)
+				this.tooltipIncubating = false;
+				Image componentInChildren = this.anchorRoot.GetComponentInChildren<Image>();
+				if (componentInChildren != null)
 				{
-					this.multiTooltipContainer.transform.GetChild(i).transform.localScale = Vector3.one;
+					this.anchorRoot.GetComponentInChildren<Image>(true).enabled = false;
 				}
-				LayoutElement component = this.multiTooltipContainer.transform.GetChild(i).GetComponent<LayoutElement>();
-				TextMeshProUGUI component2 = component.GetComponent<TextMeshProUGUI>();
-				if (component.minHeight != component2.preferredHeight)
+				this.multiTooltipContainer.transform.localScale = Vector3.zero;
+				for (int i = 0; i < this.multiTooltipContainer.transform.childCount; i++)
 				{
-					component.minHeight = component2.preferredHeight;
+					if (this.multiTooltipContainer.transform.GetChild(i).transform.localScale != Vector3.one)
+					{
+						this.multiTooltipContainer.transform.GetChild(i).transform.localScale = Vector3.one;
+					}
+					LayoutElement component = this.multiTooltipContainer.transform.GetChild(i).GetComponent<LayoutElement>();
+					TextMeshProUGUI component2 = component.GetComponent<TextMeshProUGUI>();
+					if (component.minHeight != component2.preferredHeight)
+					{
+						component.minHeight = component2.preferredHeight;
+					}
 				}
 			}
-		}
-		else if (this.multiTooltipContainer.transform.localScale != Vector3.one)
-		{
-			Image componentInChildren2 = this.anchorRoot.GetComponentInChildren<Image>();
-			if (componentInChildren2 != null)
+			else if (this.multiTooltipContainer.transform.localScale != Vector3.one)
 			{
-				this.anchorRoot.GetComponentInChildren<Image>(true).enabled = true;
+				Image componentInChildren2 = this.anchorRoot.GetComponentInChildren<Image>();
+				if (componentInChildren2 != null)
+				{
+					this.anchorRoot.GetComponentInChildren<Image>(true).enabled = true;
+				}
+				this.multiTooltipContainer.transform.localScale = Vector3.one;
 			}
-			this.multiTooltipContainer.transform.localScale = Vector3.one;
 		}
 	}
 
@@ -319,7 +318,7 @@ public class ToolTipScreen : KScreen
 
 	private Vector2 ScreenEdgePadding = new Vector2(8f, 8f);
 
-	private ToolTip dirtyHoverTooltip;
+	private ToolTip dirtyHoverTooltip = null;
 
 	private bool tooltipIncubating = true;
 }

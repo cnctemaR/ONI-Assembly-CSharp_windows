@@ -87,16 +87,14 @@ public class DiseaseMonitor : GameStateMachine<DiseaseMonitor, DiseaseMonitor.In
 			Ownables component = base.sm.masterTarget.Get(base.smi).GetComponent<Ownables>();
 			OwnableSlot clinic = Db.Get().OwnableSlots.Clinic;
 			AssignableSlotInstance slot = component.GetSlot(clinic);
-			if (slot == null)
+			if (slot != null)
 			{
-				return;
+				if (!(slot.assignable != null))
+				{
+					Navigator component2 = component.GetComponent<Navigator>();
+					component.AutoAssignSlot(component2, clinic);
+				}
 			}
-			if (slot.assignable != null)
-			{
-				return;
-			}
-			Navigator component2 = component.GetComponent<Navigator>();
-			component.AutoAssignSlot(component2, clinic);
 		}
 
 		public void UnassignClinic()

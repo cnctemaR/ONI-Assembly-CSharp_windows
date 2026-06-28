@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -7,8 +6,19 @@ public class HydroponicFarmConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
+		string text = "HydroponicFarm";
+		int num = 1;
+		int num2 = 1;
+		string text2 = "farmtilehydroponicrotating_kanim";
+		float num3 = 100f;
+		int num4 = 100;
+		float num5 = 30f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
+		string[] all_METALS = MATERIALS.ALL_METALS;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.Tile;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("HydroponicFarm", 1, 1, "farmtilehydroponicrotating_kanim", 100f, 100, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER2, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.Tile, BUILDINGS.DECOR.PENALTY.TIER0, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none);
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
 		buildingDef.Overheatable = false;
@@ -51,7 +61,7 @@ public class HydroponicFarmConfig : IBuildingConfig
 		plantablePlot.occupyingObjectRelativePosition.y = 1f;
 		plantablePlot.SetFertilizationFlags(true, true);
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
-		storage.defaultStoredItemModifers = HydroponicFarmConfig.StoredItemModifiers;
+		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		go.AddOrGet<PlanterBox>();
 		go.AddOrGet<AnimTileable>();
 		go.AddOrGet<DropAllWorkable>();
@@ -66,6 +76,4 @@ public class HydroponicFarmConfig : IBuildingConfig
 	}
 
 	public const string ID = "HydroponicFarm";
-
-	private static readonly List<Storage.StoredItemModifier> StoredItemModifiers = new List<Storage.StoredItemModifier> { Storage.StoredItemModifier.Seal };
 }

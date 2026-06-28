@@ -23,17 +23,22 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 	{
 		base.OnPrefabInit();
 		this.amount = this.capacity;
-		this.Subscribe(-1617557748, new Action<object>(this.OnEquipped));
-		this.Subscribe(-170173755, new Action<object>(this.OnUnequipped));
+		base.Subscribe(-1617557748, new Action<object>(this.OnEquipped));
+		base.Subscribe(-170173755, new Action<object>(this.OnUnequipped));
 	}
 
 	public float PercentFull()
 	{
+		float num;
 		if (this.amount == 0f)
 		{
-			return 0f;
+			num = 0f;
 		}
-		return this.amount / this.capacity;
+		else
+		{
+			num = this.amount / this.capacity;
+		}
+		return num;
 	}
 
 	public bool IsElement(string elementComparisson)
@@ -100,15 +105,20 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 
 	public bool ConsumeGas(OxygenBreather oxygen_breather, float gas_consumed)
 	{
+		bool flag;
 		if (this.IsEmpty())
 		{
-			return false;
+			flag = false;
 		}
-		gas_consumed = Mathf.Min(gas_consumed, this.amount);
-		this.amount -= gas_consumed;
-		oxygen_breather.o2Accumulator.Accumulate(gas_consumed);
-		ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, -gas_consumed, oxygen_breather.GetProperName(), null);
-		return true;
+		else
+		{
+			gas_consumed = Mathf.Min(gas_consumed, this.amount);
+			this.amount -= gas_consumed;
+			oxygen_breather.o2Accumulator.Accumulate(gas_consumed);
+			ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, -gas_consumed, oxygen_breather.GetProperName(), null);
+			flag = true;
+		}
+		return flag;
 	}
 
 	public bool ShouldEmitCO2()
@@ -128,8 +138,6 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 		this.amount = 0f;
 	}
 
-	public const float REFILL_PERCENT = 0.25f;
-
 	[Serialize]
 	public string element;
 
@@ -141,7 +149,9 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 
 	public float capacity;
 
-	public bool underwaterSupport;
+	public const float REFILL_PERCENT = 0.25f;
+
+	public bool underwaterSupport = false;
 
 	private SuitSuffocationMonitor.Instance suitSuffocationMonitor;
 }

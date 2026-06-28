@@ -21,13 +21,13 @@ public class ElementBandConfiguration : List<ElementGradient>
 	{
 		List<float> list = new List<float>();
 		float num = 0f;
-		for (int i = 0; i < this.Count; i++)
+		for (int i = 0; i < base.Count; i++)
 		{
 			ElementGradient elementGradient = base[i];
 			num += elementGradient.bandSize;
 		}
 		float num2 = 0f;
-		for (int j = 0; j < this.Count; j++)
+		for (int j = 0; j < base.Count; j++)
 		{
 			ElementGradient elementGradient2 = base[j];
 			elementGradient2.maxValue = num2 + elementGradient2.bandSize / num;

@@ -14,10 +14,9 @@ namespace KSerialization
 			this.typeInfo = Manager.GetTypeInfo(type);
 			type.GetSerializationMethods(typeof(OnSerializingAttribute), typeof(OnSerializedAttribute), out this.onSerializing, out this.onSerialized);
 			MemberSerialization serializationConfig = this.GetSerializationConfig(type);
-			MemberSerialization memberSerialization = serializationConfig;
-			if (memberSerialization != MemberSerialization.OptOut)
+			if (serializationConfig != MemberSerialization.OptOut)
 			{
-				if (memberSerialization == MemberSerialization.OptIn)
+				if (serializationConfig == MemberSerialization.OptIn)
 				{
 					while (type != typeof(object))
 					{

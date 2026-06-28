@@ -58,13 +58,12 @@ public class WorldGenSpawner : KMonoBehaviour
 			this.PlaceTemplates();
 			this.hasPlacedTemplates = true;
 		}
-		if (this.spawnInfos == null)
+		if (this.spawnInfos != null)
 		{
-			return;
-		}
-		for (int i = 0; i < this.spawnInfos.Length; i++)
-		{
-			this.AddSpawnable(this.spawnInfos[i]);
+			for (int i = 0; i < this.spawnInfos.Length; i++)
+			{
+				this.AddSpawnable(this.spawnInfos[i]);
+			}
 		}
 	}
 
@@ -224,45 +223,46 @@ public class WorldGenSpawner : KMonoBehaviour
 
 		public void TrySpawn()
 		{
-			if (this.isSpawned)
+			if (!this.isSpawned)
 			{
-				return;
-			}
-			if (this.solidChangedPartitionerEntry != null)
-			{
-				return;
-			}
-			if (this.fogOfWarPartitionerEntry != null)
-			{
-				this.fogOfWarPartitionerEntry.Release();
-				this.fogOfWarPartitionerEntry = null;
-			}
-			GameObject prefab = Assets.GetPrefab(this.GetPrefabTag());
-			if (prefab != null)
-			{
-				Pickupable component = prefab.GetComponent<Pickupable>();
-				if (component != null && Grid.Solid[this.cell])
+				if (this.solidChangedPartitionerEntry == null)
 				{
-					this.solidChangedPartitionerEntry = GameScenePartitioner.Instance.Add("WorldGenSpawner.OnSolidChanged", this, this.cell, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
-					Game.Instance.GetComponent<EntombedItemVisualizer>().AddItem(this.cell);
+					if (this.fogOfWarPartitionerEntry != null)
+					{
+						this.fogOfWarPartitionerEntry.Release();
+						this.fogOfWarPartitionerEntry = null;
+					}
+					GameObject prefab = Assets.GetPrefab(this.GetPrefabTag());
+					if (prefab != null)
+					{
+						Pickupable component = prefab.GetComponent<Pickupable>();
+						if (component != null && Grid.Solid[this.cell])
+						{
+							this.solidChangedPartitionerEntry = GameScenePartitioner.Instance.Add("WorldGenSpawner.OnSolidChanged", this, this.cell, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
+							Game.Instance.GetComponent<EntombedItemVisualizer>().AddItem(this.cell);
+						}
+						else
+						{
+							this.Spawn();
+						}
+					}
+					else
+					{
+						this.Spawn();
+					}
 				}
-				else
-				{
-					this.Spawn();
-				}
-			}
-			else
-			{
-				this.Spawn();
 			}
 		}
 
 		private Tag GetPrefabTag()
 		{
 			Mob mob = WorldGen.Settings.mobs.GetMob(this.spawnInfo.id);
-			if (mob != null && mob.prefabName != null)
+			if (mob != null)
 			{
-				return new Tag(mob.prefabName);
+				if (mob.prefabName != null)
+				{
+					return new Tag(mob.prefabName);
+				}
 			}
 			return new Tag(this.spawnInfo.id);
 		}
@@ -271,29 +271,39 @@ public class WorldGenSpawner : KMonoBehaviour
 		{
 			this.isSpawned = true;
 			GameObject gameObject = WorldGenSpawner.Spawnable.GetSpawnableCallback(this.spawnInfo.type)(this.spawnInfo, 0);
-			if (gameObject != null && gameObject)
+			if (gameObject != null)
 			{
-				gameObject.SetActive(true);
-				gameObject.Trigger(1119167081, null);
+				if (gameObject)
+				{
+					gameObject.SetActive(true);
+					gameObject.Trigger(1119167081, null);
+				}
 			}
 			this.FreeResources();
 		}
 
 		public static WorldGenSpawner.Spawnable.PlaceEntityFn GetSpawnableCallback(Prefab.Type type)
 		{
+			WorldGenSpawner.Spawnable.PlaceEntityFn placeEntityFn;
 			switch (type)
 			{
 			case Prefab.Type.Building:
-				return new WorldGenSpawner.Spawnable.PlaceEntityFn(TemplateLoader.PlaceBuiling);
+				placeEntityFn = new WorldGenSpawner.Spawnable.PlaceEntityFn(TemplateLoader.PlaceBuilding);
+				break;
 			case Prefab.Type.Ore:
-				return new WorldGenSpawner.Spawnable.PlaceEntityFn(TemplateLoader.PlaceElementalOres);
+				placeEntityFn = new WorldGenSpawner.Spawnable.PlaceEntityFn(TemplateLoader.PlaceElementalOres);
+				break;
 			case Prefab.Type.Pickupable:
-				return new WorldGenSpawner.Spawnable.PlaceEntityFn(TemplateLoader.PlacePickupables);
+				placeEntityFn = new WorldGenSpawner.Spawnable.PlaceEntityFn(TemplateLoader.PlacePickupables);
+				break;
 			case Prefab.Type.Other:
-				return new WorldGenSpawner.Spawnable.PlaceEntityFn(TemplateLoader.PlaceOtherEntities);
+				placeEntityFn = new WorldGenSpawner.Spawnable.PlaceEntityFn(TemplateLoader.PlaceOtherEntities);
+				break;
 			default:
-				return new WorldGenSpawner.Spawnable.PlaceEntityFn(TemplateLoader.PlaceOtherEntities);
+				placeEntityFn = new WorldGenSpawner.Spawnable.PlaceEntityFn(TemplateLoader.PlaceOtherEntities);
+				break;
 			}
+			return placeEntityFn;
 		}
 
 		private GameScenePartitionerEntry fogOfWarPartitionerEntry;

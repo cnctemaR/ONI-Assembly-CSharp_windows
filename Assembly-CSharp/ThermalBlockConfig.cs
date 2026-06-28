@@ -1,0 +1,61 @@
+﻿using System;
+using TUNING;
+using UnityEngine;
+
+public class ThermalBlockConfig : IBuildingConfig
+{
+	public override BuildingDef CreateBuildingDef()
+	{
+		string text = "ThermalBlock";
+		int num = 1;
+		int num2 = 1;
+		string text2 = "thermalblock_kanim";
+		float num3 = 800f;
+		int num4 = 30;
+		float num5 = 120f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER5;
+		string[] any_BUILDABLE = MATERIALS.ANY_BUILDABLE;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.NotInTiles;
+		EffectorValues none = NOISE_POLLUTION.NONE;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, any_BUILDABLE, num6, buildLocationRule, DECOR.NONE, none);
+		buildingDef.Floodable = false;
+		buildingDef.Overheatable = false;
+		buildingDef.AudioCategory = "Metal";
+		buildingDef.BaseTimeUntilRepair = -1f;
+		buildingDef.ViewMode = SimViewMode.TemperatureMap;
+		buildingDef.DefaultAnimState = "off";
+		buildingDef.ObjectLayer = ObjectLayer.Backwall;
+		buildingDef.SceneLayer = Grid.SceneLayer.Background;
+		return buildingDef;
+	}
+
+	public override void ConfigureBuildingTemplate(GameObject go)
+	{
+		AnimTileable animTileable = go.AddOrGet<AnimTileable>();
+		animTileable.objectLayer = ObjectLayer.Backwall;
+	}
+
+	public override void DoPostConfigureComplete(GameObject go)
+	{
+		BuildingTemplates.DoPostConfigure(go);
+		go.GetComponent<KPrefabID>().prefabSpawnFn += delegate(GameObject game_object)
+		{
+			HandleVector<int>.Handle handle = GameComps.StructureTemperatures.GetHandle(game_object);
+			StructureTemperatureData data = GameComps.StructureTemperatures.GetData(handle);
+			int num = Grid.PosToCell(game_object);
+			data.OverrideExtents(new Extents(num, ThermalBlockConfig.overrideOffsets));
+			GameComps.StructureTemperatures.SetData(handle, data);
+		};
+	}
+
+	public const string ID = "ThermalBlock";
+
+	private static readonly CellOffset[] overrideOffsets = new CellOffset[]
+	{
+		new CellOffset(-1, -1),
+		new CellOffset(1, -1),
+		new CellOffset(-1, 1),
+		new CellOffset(1, 1)
+	};
+}

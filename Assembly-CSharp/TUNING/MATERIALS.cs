@@ -6,6 +6,8 @@ namespace TUNING
 	{
 		public const string METAL = "Metal";
 
+		public const string REFINED_METAL = "RefinedMetal";
+
 		public const string PLASTIC = "Plastic";
 
 		public static string[] ALL_METALS = new string[] { "Metal" };
@@ -27,5 +29,7 @@ namespace TUNING
 		public static string[] PLUMBABLE = new string[] { "Plumbable" };
 
 		public static string[] PLASTICS = new string[] { "Plastic" };
+
+		public static string[] ANY_BUILDABLE = new string[] { "BuildableAny" };
 	}
 }

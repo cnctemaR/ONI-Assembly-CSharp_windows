@@ -25,16 +25,6 @@ namespace Steamworks
 			return this.m_SteamAPICall.GetHashCode();
 		}
 
-		public bool Equals(SteamAPICall_t other)
-		{
-			return this.m_SteamAPICall == other.m_SteamAPICall;
-		}
-
-		public int CompareTo(SteamAPICall_t other)
-		{
-			return this.m_SteamAPICall.CompareTo(other.m_SteamAPICall);
-		}
-
 		public static bool operator ==(SteamAPICall_t x, SteamAPICall_t y)
 		{
 			return x.m_SteamAPICall == y.m_SteamAPICall;
@@ -53,6 +43,16 @@ namespace Steamworks
 		public static explicit operator ulong(SteamAPICall_t that)
 		{
 			return that.m_SteamAPICall;
+		}
+
+		public bool Equals(SteamAPICall_t other)
+		{
+			return this.m_SteamAPICall == other.m_SteamAPICall;
+		}
+
+		public int CompareTo(SteamAPICall_t other)
+		{
+			return this.m_SteamAPICall.CompareTo(other.m_SteamAPICall);
 		}
 
 		public static readonly SteamAPICall_t Invalid = new SteamAPICall_t(0UL);

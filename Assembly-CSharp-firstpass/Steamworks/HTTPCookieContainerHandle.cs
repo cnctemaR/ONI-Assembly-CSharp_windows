@@ -25,16 +25,6 @@ namespace Steamworks
 			return this.m_HTTPCookieContainerHandle.GetHashCode();
 		}
 
-		public bool Equals(HTTPCookieContainerHandle other)
-		{
-			return this.m_HTTPCookieContainerHandle == other.m_HTTPCookieContainerHandle;
-		}
-
-		public int CompareTo(HTTPCookieContainerHandle other)
-		{
-			return this.m_HTTPCookieContainerHandle.CompareTo(other.m_HTTPCookieContainerHandle);
-		}
-
 		public static bool operator ==(HTTPCookieContainerHandle x, HTTPCookieContainerHandle y)
 		{
 			return x.m_HTTPCookieContainerHandle == y.m_HTTPCookieContainerHandle;
@@ -53,6 +43,16 @@ namespace Steamworks
 		public static explicit operator uint(HTTPCookieContainerHandle that)
 		{
 			return that.m_HTTPCookieContainerHandle;
+		}
+
+		public bool Equals(HTTPCookieContainerHandle other)
+		{
+			return this.m_HTTPCookieContainerHandle == other.m_HTTPCookieContainerHandle;
+		}
+
+		public int CompareTo(HTTPCookieContainerHandle other)
+		{
+			return this.m_HTTPCookieContainerHandle.CompareTo(other.m_HTTPCookieContainerHandle);
 		}
 
 		public static readonly HTTPCookieContainerHandle Invalid = new HTTPCookieContainerHandle(0U);

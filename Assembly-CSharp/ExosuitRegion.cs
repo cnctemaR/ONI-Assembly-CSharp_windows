@@ -26,9 +26,6 @@ public class ExosuitRegion : KMonoBehaviour
 
 	private void SetCellState(bool state)
 	{
-		foreach (int num in this.cells)
-		{
-		}
 	}
 
 	[MyCmpGet]

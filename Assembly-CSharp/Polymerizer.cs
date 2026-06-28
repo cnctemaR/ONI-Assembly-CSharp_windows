@@ -19,7 +19,7 @@ public class Polymerizer : StateMachineComponent<Polymerizer.StatesInstance>
 		}
 		this.oilMeter.SetPositionPercent(num);
 		base.smi.StartSM();
-		this.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
+		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
 	}
 
 	private void TryEmit()
@@ -67,15 +67,14 @@ public class Polymerizer : StateMachineComponent<Polymerizer.StatesInstance>
 	private void OnStorageChanged(object data)
 	{
 		GameObject gameObject = (GameObject)data;
-		if (gameObject == null)
+		if (!(gameObject == null))
 		{
-			return;
-		}
-		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-		if (component.ElementID == SimHashes.Petroleum)
-		{
-			float num = Mathf.Clamp01(component.Mass / this.consumer.capacityKG);
-			this.oilMeter.SetPositionPercent(num);
+			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+			if (component.ElementID == SimHashes.Petroleum)
+			{
+				float num = Mathf.Clamp01(component.Mass / this.consumer.capacityKG);
+				this.oilMeter.SetPositionPercent(num);
+			}
 		}
 	}
 

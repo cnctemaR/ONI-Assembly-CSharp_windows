@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class MoveToLocationToolHoverTextCard : HoverTextConfiguration
@@ -13,43 +14,44 @@ public class MoveToLocationToolHoverTextCard : HoverTextConfiguration
 		if (instance.LoadPreConfiguredToolFields(this))
 		{
 			this.isConfigured = true;
-			return;
 		}
-		instance.ToggleIncubating(true);
-		instance.ClearLabels();
-		instance.StartShadowBar(0f, 0f, false);
-		if (this.printTitle)
+		else
 		{
-			this.ConfigureTitle(instance);
+			instance.ToggleIncubating(true);
+			instance.ClearLabels();
+			instance.StartShadowBar(0f, 0f, false);
+			if (this.printTitle)
+			{
+				this.ConfigureTitle(instance);
+			}
+			this.ConfigureInstructions(instance);
+			instance.NewLine("Unreachable Line", 24);
+			this.unreachableLine = instance.AddText("Unreachable", this.Styles_Title.Standard, true);
+			instance.EndShadowBar();
+			this.isConfigured = true;
 		}
-		this.ConfigureInstructions(instance);
-		instance.NewLine("Unreachable Line", 24);
-		this.unreachableLine = instance.AddText("Unreachable", this.Styles_Title.Standard, true);
-		instance.EndShadowBar();
-		this.isConfigured = true;
 	}
 
-	public override void UpdateHoverElements(KSelectable[] selected)
+	public override void UpdateHoverElements(List<KSelectable> selected)
 	{
 		int num = Grid.PosToCell(Camera.main.ScreenToWorldPoint(Input.mousePosition));
-		if (!Grid.IsValidCell(num))
+		if (Grid.IsValidCell(num))
 		{
-			return;
-		}
-		if (!this.isConfigured)
-		{
-			this.ConfigureHoverScreen();
-		}
-		bool flag = true;
-		if (selected != null && selected.Length > 0 && selected[0] != null)
-		{
-			Navigator component = selected[0].GetComponent<Navigator>();
-			if (component != null && component.CanReach(num))
+			if (!this.isConfigured)
 			{
-				flag = false;
+				this.ConfigureHoverScreen();
 			}
+			bool flag = true;
+			if (selected != null && selected.Count > 0 && selected[0] != null)
+			{
+				Navigator component = selected[0].GetComponent<Navigator>();
+				if (component != null && component.CanReach(num))
+				{
+					flag = false;
+				}
+			}
+			base.SetLineActive(this.unreachableLine.gameObject, flag);
 		}
-		base.SetLineActive(this.unreachableLine.gameObject, flag);
 	}
 
 	private LocText unreachableLine;

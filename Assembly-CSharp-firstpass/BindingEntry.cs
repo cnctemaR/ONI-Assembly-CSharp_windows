@@ -4,7 +4,7 @@ using Newtonsoft.Json.Converters;
 
 public struct BindingEntry
 {
-	public BindingEntry(string group, GamepadButton button, KKeyCode key_code, Modifier modifier, global::Action action, bool rebindable = true)
+	public BindingEntry(string group, GamepadButton button, KKeyCode key_code, Modifier modifier, global::Action action, bool rebindable = true, bool ignore_root_conflicts = false)
 	{
 		this.mGroup = group;
 		this.mButton = button;
@@ -12,44 +12,32 @@ public struct BindingEntry
 		this.mAction = action;
 		this.mModifier = modifier;
 		this.mRebindable = rebindable;
+		this.mIgnoreRootConflics = ignore_root_conflicts;
 	}
 
 	public static KKeyCode GetGamepadKeyCode(int gamepad_number, GamepadButton button)
 	{
+		KKeyCode kkeyCode;
 		switch (gamepad_number)
 		{
 		case 0:
-			return (KKeyCode)(button + 350);
+			kkeyCode = (KKeyCode)(button + 350);
+			break;
 		case 1:
-			return (KKeyCode)(button + 370);
+			kkeyCode = (KKeyCode)(button + 370);
+			break;
 		case 2:
-			return (KKeyCode)(button + 390);
+			kkeyCode = (KKeyCode)(button + 390);
+			break;
 		case 3:
-			return (KKeyCode)(button + 410);
+			kkeyCode = (KKeyCode)(button + 410);
+			break;
 		default:
 			DebugUtil.Assert(false, "Assert!");
-			return KKeyCode.None;
+			kkeyCode = KKeyCode.None;
+			break;
 		}
-	}
-
-	public bool IsBindingEqual(BindingEntry other)
-	{
-		return this.mButton == other.mButton && this.mKeyCode == other.mKeyCode && this.mModifier == other.mModifier;
-	}
-
-	public override bool Equals(object o)
-	{
-		if (!(o is BindingEntry))
-		{
-			return false;
-		}
-		BindingEntry bindingEntry = (BindingEntry)o;
-		return this == bindingEntry;
-	}
-
-	public override int GetHashCode()
-	{
-		return (int)(this.mButton ^ (GamepadButton)this.mKeyCode ^ (GamepadButton)this.mAction);
+		return kkeyCode;
 	}
 
 	public static bool operator ==(BindingEntry a, BindingEntry b)
@@ -57,9 +45,34 @@ public struct BindingEntry
 		return a.mGroup == b.mGroup && a.mButton == b.mButton && a.mKeyCode == b.mKeyCode && a.mAction == b.mAction && a.mModifier == b.mModifier && a.mRebindable == b.mRebindable;
 	}
 
+	public bool IsBindingEqual(BindingEntry other)
+	{
+		return this.mButton == other.mButton && this.mKeyCode == other.mKeyCode && this.mModifier == other.mModifier;
+	}
+
 	public static bool operator !=(BindingEntry a, BindingEntry b)
 	{
 		return !(a == b);
+	}
+
+	public override bool Equals(object o)
+	{
+		bool flag;
+		if (!(o is BindingEntry))
+		{
+			flag = false;
+		}
+		else
+		{
+			BindingEntry bindingEntry = (BindingEntry)o;
+			flag = this == bindingEntry;
+		}
+		return flag;
+	}
+
+	public override int GetHashCode()
+	{
+		return (int)(this.mButton ^ (GamepadButton)this.mKeyCode ^ (GamepadButton)this.mAction);
 	}
 
 	[JsonIgnore]
@@ -67,6 +80,9 @@ public struct BindingEntry
 
 	[JsonIgnore]
 	public bool mRebindable;
+
+	[JsonIgnore]
+	public bool mIgnoreRootConflics;
 
 	[JsonConverter(typeof(StringEnumConverter))]
 	public GamepadButton mButton;

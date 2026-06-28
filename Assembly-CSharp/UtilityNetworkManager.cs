@@ -4,14 +4,12 @@ using UnityEngine;
 
 public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr where NetworkType : UtilityNetwork, new() where ItemType : MonoBehaviour
 {
-	public UtilityNetworkManager(int game_width, int game_height, int tile_layer, int item_layer, bool allow_joins)
+	public UtilityNetworkManager(int game_width, int game_height, int tile_layer)
 	{
 		this.tileLayer = tile_layer;
-		this.networks = new List<NetworkType>();
+		this.networks = new List<UtilityNetwork>();
 		this.Initialize(game_width, game_height);
 	}
-
-	public ConduitFlow ConduitFlowManager { get; set; }
 
 	public bool IsDirty
 	{
@@ -52,12 +50,15 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 			this.dirty = false;
 			for (int i = 0; i < this.networks.Count; i++)
 			{
-				NetworkType networkType = this.networks[i];
-				networkType.Reset(this.physicalGrid);
+				this.networks[i].Reset(this.physicalGrid);
 			}
 			this.networks.Clear();
 			this.RebuildNetworks(this.tileLayer, false);
 			this.RebuildNetworks(this.tileLayer, true);
+			if (this.onNetworksRebuilt != null)
+			{
+				this.onNetworksRebuilt(this.networks, this.GetNodes(true));
+			}
 		}
 	}
 
@@ -73,48 +74,46 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 
 	public void ClearCell(int cell, bool is_physical_building)
 	{
-		if (Game.IsQuitting())
+		if (!Game.IsQuitting())
 		{
-			return;
-		}
-		UtilityNetworkGridNode[] grid = this.GetGrid(is_physical_building);
-		HashSet<int> nodes = this.GetNodes(is_physical_building);
-		UtilityConnections connections = grid[cell].connections;
-		grid[cell].connections = (UtilityConnections)0;
-		grid[cell].networkIdx = -1;
-		int num = Grid.CellAbove(cell);
-		int num2 = Grid.CellBelow(cell);
-		int num3 = Grid.CellLeft(cell);
-		int num4 = Grid.CellRight(cell);
-		if (Grid.IsValidCell(num) && (connections & UtilityConnections.Up) != (UtilityConnections)0)
-		{
-			UtilityNetworkGridNode[] array = grid;
-			int num5 = num;
-			array[num5].connections = array[num5].connections & ~UtilityConnections.Down;
-		}
-		if (Grid.IsValidCell(num2) && (connections & UtilityConnections.Down) != (UtilityConnections)0)
-		{
-			UtilityNetworkGridNode[] array2 = grid;
-			int num6 = num2;
-			array2[num6].connections = array2[num6].connections & ~UtilityConnections.Up;
-		}
-		if (Grid.IsValidCell(num3) && (connections & UtilityConnections.Left) != (UtilityConnections)0)
-		{
-			UtilityNetworkGridNode[] array3 = grid;
-			int num7 = num3;
-			array3[num7].connections = array3[num7].connections & ~UtilityConnections.Right;
-		}
-		if (Grid.IsValidCell(num4) && (connections & UtilityConnections.Right) != (UtilityConnections)0)
-		{
-			UtilityNetworkGridNode[] array4 = grid;
-			int num8 = num4;
-			array4[num8].connections = array4[num8].connections & ~UtilityConnections.Left;
-		}
-		nodes.Remove(cell);
-		if (is_physical_building)
-		{
-			this.dirty = true;
-			this.ClearCell(cell, false);
+			UtilityNetworkGridNode[] grid = this.GetGrid(is_physical_building);
+			HashSet<int> nodes = this.GetNodes(is_physical_building);
+			UtilityConnections connections = grid[cell].connections;
+			grid[cell].connections = (UtilityConnections)0;
+			int num = Grid.CellAbove(cell);
+			int num2 = Grid.CellBelow(cell);
+			int num3 = Grid.CellLeft(cell);
+			int num4 = Grid.CellRight(cell);
+			if (Grid.IsValidCell(num) && (connections & UtilityConnections.Up) != (UtilityConnections)0)
+			{
+				UtilityNetworkGridNode[] array = grid;
+				int num5 = num;
+				array[num5].connections = array[num5].connections & ~UtilityConnections.Down;
+			}
+			if (Grid.IsValidCell(num2) && (connections & UtilityConnections.Down) != (UtilityConnections)0)
+			{
+				UtilityNetworkGridNode[] array2 = grid;
+				int num6 = num2;
+				array2[num6].connections = array2[num6].connections & ~UtilityConnections.Up;
+			}
+			if (Grid.IsValidCell(num3) && (connections & UtilityConnections.Left) != (UtilityConnections)0)
+			{
+				UtilityNetworkGridNode[] array3 = grid;
+				int num7 = num3;
+				array3[num7].connections = array3[num7].connections & ~UtilityConnections.Right;
+			}
+			if (Grid.IsValidCell(num4) && (connections & UtilityConnections.Right) != (UtilityConnections)0)
+			{
+				UtilityNetworkGridNode[] array4 = grid;
+				int num8 = num4;
+				array4[num8].connections = array4[num8].connections & ~UtilityConnections.Left;
+			}
+			nodes.Remove(cell);
+			if (is_physical_building)
+			{
+				this.dirty = true;
+				this.ClearCell(cell, false);
+			}
 		}
 	}
 
@@ -136,23 +135,20 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 
 	private void QueueCellForVisit(UtilityNetworkGridNode[] grid, int dest_cell, UtilityConnections direction)
 	{
-		if (!Grid.IsValidCell(dest_cell))
+		if (Grid.IsValidCell(dest_cell))
 		{
-			return;
-		}
-		if (this.visitedCells.Contains(dest_cell))
-		{
-			return;
-		}
-		if (direction != (UtilityConnections)0 && (grid[dest_cell].connections & this.InverseDirection(direction)) == (UtilityConnections)0)
-		{
-			return;
-		}
-		GameObject gameObject = Grid.Objects[dest_cell, this.tileLayer];
-		if (gameObject != null)
-		{
-			this.visitedCells.Add(dest_cell);
-			this.queued.Enqueue(dest_cell);
+			if (!this.visitedCells.Contains(dest_cell))
+			{
+				if (direction == (UtilityConnections)0 || (grid[dest_cell].connections & this.InverseDirection(direction)) != (UtilityConnections)0)
+				{
+					GameObject gameObject = Grid.Objects[dest_cell, this.tileLayer];
+					if (gameObject != null)
+					{
+						this.visitedCells.Add(dest_cell);
+						this.queued.Enqueue(dest_cell);
+					}
+				}
+			}
 		}
 	}
 
@@ -218,11 +214,14 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 						array2[num3].connections = array2[num3].connections | utilityConnections2;
 					}
 				}
-				else if ((connections2 & utilityConnections) != (UtilityConnections)0 && (this.physicalNodes.Contains(num) || this.visualNodes.Contains(num)))
+				else if ((connections2 & utilityConnections) != (UtilityConnections)0)
 				{
-					UtilityNetworkGridNode[] array3 = this.visualGrid;
-					int num4 = num;
-					array3[num4].connections = array3[num4].connections | utilityConnections2;
+					if (this.physicalNodes.Contains(num) || this.visualNodes.Contains(num))
+					{
+						UtilityNetworkGridNode[] array3 = this.visualGrid;
+						int num4 = num;
+						array3[num4].connections = array3[num4].connections | utilityConnections2;
+					}
 				}
 			}
 		}
@@ -236,13 +235,27 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 			if (is_endpoint)
 			{
 				this.endpoints.Remove(cell);
+				int networkIdx = this.physicalGrid[cell].networkIdx;
+				if (networkIdx != -1)
+				{
+					this.networks[networkIdx].RemoveItem(cell, item);
+				}
 			}
 			else
 			{
-				this.items.Remove(cell);
+				int networkIdx2 = this.physicalGrid[cell].networkIdx;
 				this.physicalGrid[cell].connections = (UtilityConnections)0;
 				this.physicalGrid[cell].networkIdx = -1;
+				this.items.Remove(cell);
 				this.Disconnect(cell);
+				object obj;
+				if (this.endpoints.TryGetValue(cell, out obj))
+				{
+					if (networkIdx2 != -1)
+					{
+						this.networks[networkIdx2].DisconnectItem(cell, obj);
+					}
+				}
 			}
 		}
 	}
@@ -292,10 +305,10 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 					int num5 = Grid.CellAbove(num2);
 					int num6 = Grid.CellBelow(num2);
 					utilityNetworkGridNode = grid[num2];
+					object obj = null;
+					object obj2 = null;
 					if (is_physical)
 					{
-						bool flag = false;
-						object obj;
 						if (this.items.TryGetValue(num2, out obj))
 						{
 							if (obj is IDisconnectable)
@@ -308,16 +321,22 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 							}
 							if (obj != null)
 							{
-								flag = true;
 								networkType.AddItem(num2, obj);
 							}
 						}
-						if (!flag && this.endpoints.TryGetValue(num2, out obj) && obj != null)
+						if (this.endpoints.TryGetValue(num2, out obj2))
 						{
-							networkType.AddItem(num2, obj);
+							if (obj2 != null)
+							{
+								networkType.AddItem(num2, obj2);
+							}
 						}
 					}
 					grid[num2].networkIdx = networkType.id;
+					if (obj != null && obj2 != null)
+					{
+						networkType.ConnectItem(num2, obj2);
+					}
 					if ((utilityNetworkGridNode.connections & UtilityConnections.Left) != (UtilityConnections)0)
 					{
 						this.QueueCellForVisit(grid, num3, UtilityConnections.Left);
@@ -341,15 +360,6 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 					}
 				}
 			}
-		}
-		if (is_physical && this.ConduitFlowManager != null)
-		{
-			this.ConduitFlowManager.RebuildConnections(nodes);
-			foreach (NetworkType networkType2 in this.networks)
-			{
-				this.ConduitFlowManager.ScanNetworkSources(networkType2 as FlowUtilityNetwork);
-			}
-			this.ConduitFlowManager.RefreshPaths();
 		}
 	}
 
@@ -376,16 +386,21 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 	public UtilityNetwork GetNetworkForDirection(int cell, Direction direction)
 	{
 		cell = Grid.GetCellInDirection(cell, direction);
+		UtilityNetwork utilityNetwork;
 		if (!Grid.IsValidCell(cell))
 		{
-			return null;
+			utilityNetwork = null;
 		}
-		UtilityNetworkGridNode[] grid = this.GetGrid(true);
-		UtilityNetworkGridNode utilityNetworkGridNode = grid[cell];
-		UtilityNetwork utilityNetwork = null;
-		if (utilityNetworkGridNode.networkIdx != -1 && utilityNetworkGridNode.networkIdx < this.networks.Count)
+		else
 		{
-			utilityNetwork = this.networks[utilityNetworkGridNode.networkIdx];
+			UtilityNetworkGridNode[] grid = this.GetGrid(true);
+			UtilityNetworkGridNode utilityNetworkGridNode = grid[cell];
+			UtilityNetwork utilityNetwork2 = null;
+			if (utilityNetworkGridNode.networkIdx != -1 && utilityNetworkGridNode.networkIdx < this.networks.Count)
+			{
+				utilityNetwork2 = this.networks[utilityNetworkGridNode.networkIdx];
+			}
+			utilityNetwork = utilityNetwork2;
 		}
 		return utilityNetwork;
 	}
@@ -480,7 +495,7 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 
 	public string GetVisualizerString(UtilityConnections connections)
 	{
-		string text = string.Empty;
+		string text = "";
 		if ((connections & UtilityConnections.Left) != (UtilityConnections)0)
 		{
 			text += "L";
@@ -497,7 +512,7 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 		{
 			text += "D";
 		}
-		if (text == string.Empty)
+		if (text == "")
 		{
 			text = "None";
 		}
@@ -525,29 +540,46 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 		this.dirty = true;
 	}
 
+	public void AddNetworksRebuiltListener(Action<IList<UtilityNetwork>, ICollection<int>> listener)
+	{
+		this.onNetworksRebuilt = (Action<IList<UtilityNetwork>, ICollection<int>>)Delegate.Combine(this.onNetworksRebuilt, listener);
+	}
+
+	public void RemoveNetworksRebuiltListener(Action<IList<UtilityNetwork>, ICollection<int>> listener)
+	{
+		this.onNetworksRebuilt = (Action<IList<UtilityNetwork>, ICollection<int>>)Delegate.Remove(this.onNetworksRebuilt, listener);
+	}
+
+	public IList<UtilityNetwork> GetNetworks()
+	{
+		return this.networks;
+	}
+
 	private Dictionary<int, object> items = new Dictionary<int, object>();
 
 	private Dictionary<int, object> endpoints = new Dictionary<int, object>();
 
 	private Dictionary<int, int> links = new Dictionary<int, int>();
 
-	public List<NetworkType> networks;
+	private List<UtilityNetwork> networks;
 
 	private HashSet<int> visitedCells;
 
+	private Action<IList<UtilityNetwork>, ICollection<int>> onNetworksRebuilt;
+
 	private Queue<int> queued = new Queue<int>();
 
-	private UtilityNetworkGridNode[] visualGrid;
+	private UtilityNetworkGridNode[] visualGrid = null;
 
-	private UtilityNetworkGridNode[] stashedVisualGrid;
+	private UtilityNetworkGridNode[] stashedVisualGrid = null;
 
-	private UtilityNetworkGridNode[] physicalGrid;
+	private UtilityNetworkGridNode[] physicalGrid = null;
 
-	private HashSet<int> physicalNodes;
+	private HashSet<int> physicalNodes = null;
 
-	private HashSet<int> visualNodes;
+	private HashSet<int> visualNodes = null;
 
-	private bool dirty;
+	private bool dirty = false;
 
 	private int tileLayer = -1;
 }

@@ -41,7 +41,7 @@ public class DiseaseEmitter : SimComponent
 	{
 		if (this.diseaseIdx != 255 && this.emitCount > 0 && this.emitInterval > 0f)
 		{
-			int num = Grid.PosToCell(this.transform.position);
+			int num = Grid.PosToCell(base.transform.position);
 			SimMessages.ModifyDiseaseEmitter(this.simHandle, num, this.emitRange, this.diseaseIdx, this.emitInterval, this.emitCount);
 		}
 	}

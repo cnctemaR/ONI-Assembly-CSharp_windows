@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -7,8 +6,19 @@ public class ShowerConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER3;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(ShowerConfig.ID, 2, 4, "shower_kanim", 400f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.RAW_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER1, tier);
+		string id = ShowerConfig.ID;
+		int num = 2;
+		int num2 = 4;
+		string text = "shower_kanim";
+		float num3 = 400f;
+		int num4 = 30;
+		float num5 = 30f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
+		string[] raw_METALS = MATERIALS.RAW_METALS;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER3;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, num5, tier, raw_METALS, num6, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER1, tier2);
 		buildingDef.Overheatable = false;
 		buildingDef.ExhaustKilowattsWhenActive = 0.25f;
 		buildingDef.InputConduitType = ConduitType.Liquid;
@@ -53,8 +63,7 @@ public class ShowerConfig : IBuildingConfig
 		elementConverter.conversionInterval = 1f;
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 5f;
-		storage.disableOnStore = true;
-		storage.defaultStoredItemModifers = ShowerConfig.StoredItemModifiers;
+		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -63,10 +72,4 @@ public class ShowerConfig : IBuildingConfig
 	}
 
 	public static string ID = "Shower";
-
-	private static readonly List<Storage.StoredItemModifier> StoredItemModifiers = new List<Storage.StoredItemModifier>
-	{
-		Storage.StoredItemModifier.Hide,
-		Storage.StoredItemModifier.Seal
-	};
 }

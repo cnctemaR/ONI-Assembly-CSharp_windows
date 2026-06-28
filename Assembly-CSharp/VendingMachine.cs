@@ -9,7 +9,7 @@ public class VendingMachine : StateMachineComponent<VendingMachine.StatesInstanc
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
-		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 	}
 
 	public void DropContents()
@@ -26,14 +26,20 @@ public class VendingMachine : StateMachineComponent<VendingMachine.StatesInstanc
 			if (this.chore != null)
 			{
 				UserMenu userMenu = this.userMenu;
-				string text = UI.USERMENUACTIONS.OPENPOI.TOOLTIP_OFF;
-				userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_harvest", UI.USERMENUACTIONS.OPENPOI.NAME_OFF, new global::System.Action(this.OnClickCancel), global::Action.NumActions, null, null, null, text, true), 1f);
+				string text = "action_harvest";
+				string text2 = UI.USERMENUACTIONS.OPENPOI.NAME_OFF;
+				global::System.Action action = new global::System.Action(this.OnClickCancel);
+				string text3 = UI.USERMENUACTIONS.OPENPOI.TOOLTIP_OFF;
+				userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
 			}
 			else
 			{
 				UserMenu userMenu2 = this.userMenu;
+				string text3 = "action_harvest";
+				string text2 = UI.USERMENUACTIONS.OPENPOI.NAME;
+				global::System.Action action = new global::System.Action(this.OnClickOpen);
 				string text = UI.USERMENUACTIONS.OPENPOI.TOOLTIP;
-				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_harvest", UI.USERMENUACTIONS.OPENPOI.NAME, new global::System.Action(this.OnClickOpen), global::Action.NumActions, null, null, null, text, true), 1f);
+				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
 			}
 		}
 	}
@@ -50,28 +56,26 @@ public class VendingMachine : StateMachineComponent<VendingMachine.StatesInstanc
 
 	public void ActivateChore(object param = null)
 	{
-		if (this.chore != null)
+		if (this.chore == null)
 		{
-			return;
+			base.GetComponent<Workable>().SetWorkTime(2f);
+			ChoreType emptyStorage = Db.Get().ChoreTypes.EmptyStorage;
+			KAnimFile anim = Assets.GetAnim("anim_break_kanim");
+			this.chore = new WorkChore<Workable>(emptyStorage, this, null, true, delegate(Chore o)
+			{
+				this.CompleteChore();
+			}, null, null, true, null, true, default(Tag), anim, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+			this.OnRefreshUserMenu(null);
 		}
-		base.GetComponent<Workable>().SetWorkTime(2f);
-		Action<Chore> action = delegate(Chore o)
-		{
-			this.CompleteChore();
-		};
-		KAnimFile anim = Assets.GetAnim("anim_break_kanim");
-		this.chore = new WorkChore<Workable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, action, null, null, true, null, true, default(Tag), anim, false, true, true, int.MaxValue);
-		this.OnRefreshUserMenu(null);
 	}
 
 	public void CancelChore(object param = null)
 	{
-		if (this.chore == null)
+		if (this.chore != null)
 		{
-			return;
+			this.chore.Cancel("User cancelled");
+			this.chore = null;
 		}
-		this.chore.Cancel("User cancelled");
-		this.chore = null;
 	}
 
 	private void CompleteChore()
@@ -89,7 +93,7 @@ public class VendingMachine : StateMachineComponent<VendingMachine.StatesInstanc
 	private string[] contents_ids = new string[] { "FieldRation" };
 
 	[Serialize]
-	private bool used;
+	private bool used = false;
 
 	private Chore chore;
 
@@ -109,7 +113,7 @@ public class VendingMachine : StateMachineComponent<VendingMachine.StatesInstanc
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.closed;
-			this.closed.PlayAnim("on", KAnim.PlayMode.Once, null).Enter(delegate(VendingMachine.StatesInstance smi)
+			this.closed.PlayAnim("on").Enter(delegate(VendingMachine.StatesInstance smi)
 			{
 				LoopingSounds component = smi.master.GetComponent<LoopingSounds>();
 				if (component != null)
@@ -117,11 +121,11 @@ public class VendingMachine : StateMachineComponent<VendingMachine.StatesInstanc
 					component.StartSound(GlobalAssets.GetSound(smi.master.machineSound, false), smi.master.transform.position);
 				}
 			});
-			this.open.PlayAnim("working", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.off).Exit(delegate(VendingMachine.StatesInstance smi)
+			this.open.PlayAnim("working").OnAnimQueueComplete(this.off).Exit(delegate(VendingMachine.StatesInstance smi)
 			{
 				smi.master.DropContents();
 			});
-			this.off.PlayAnim("off", KAnim.PlayMode.Once, null).Enter(delegate(VendingMachine.StatesInstance smi)
+			this.off.PlayAnim("off").Enter(delegate(VendingMachine.StatesInstance smi)
 			{
 				LoopingSounds component2 = smi.master.GetComponent<LoopingSounds>();
 				if (component2 != null)

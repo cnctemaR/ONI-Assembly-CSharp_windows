@@ -4,7 +4,7 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequiredByNativeCode]
+	[RequiredByNativeCode(Optional = true)]
 	public struct NetworkViewID
 	{
 		public static NetworkViewID unassigned
@@ -17,7 +17,7 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_get_unassigned(out NetworkViewID value);
 
@@ -26,7 +26,7 @@ namespace UnityEngine
 			return NetworkViewID.INTERNAL_CALL_Internal_IsMine(ref value);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool INTERNAL_CALL_Internal_IsMine(ref NetworkViewID value);
 
@@ -35,7 +35,7 @@ namespace UnityEngine
 			NetworkViewID.INTERNAL_CALL_Internal_GetOwner(ref value, out player);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_Internal_GetOwner(ref NetworkViewID value, out NetworkPlayer player);
 
@@ -44,7 +44,7 @@ namespace UnityEngine
 			return NetworkViewID.INTERNAL_CALL_Internal_GetString(ref value);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern string INTERNAL_CALL_Internal_GetString(ref NetworkViewID value);
 
@@ -53,9 +53,19 @@ namespace UnityEngine
 			return NetworkViewID.INTERNAL_CALL_Internal_Compare(ref lhs, ref rhs);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool INTERNAL_CALL_Internal_Compare(ref NetworkViewID lhs, ref NetworkViewID rhs);
+
+		public static bool operator ==(NetworkViewID lhs, NetworkViewID rhs)
+		{
+			return NetworkViewID.Internal_Compare(lhs, rhs);
+		}
+
+		public static bool operator !=(NetworkViewID lhs, NetworkViewID rhs)
+		{
+			return !NetworkViewID.Internal_Compare(lhs, rhs);
+		}
 
 		public override int GetHashCode()
 		{
@@ -64,12 +74,17 @@ namespace UnityEngine
 
 		public override bool Equals(object other)
 		{
+			bool flag;
 			if (!(other is NetworkViewID))
 			{
-				return false;
+				flag = false;
 			}
-			NetworkViewID networkViewID = (NetworkViewID)other;
-			return NetworkViewID.Internal_Compare(this, networkViewID);
+			else
+			{
+				NetworkViewID networkViewID = (NetworkViewID)other;
+				flag = NetworkViewID.Internal_Compare(this, networkViewID);
+			}
+			return flag;
 		}
 
 		public bool isMine
@@ -93,16 +108,6 @@ namespace UnityEngine
 		public override string ToString()
 		{
 			return NetworkViewID.Internal_GetString(this);
-		}
-
-		public static bool operator ==(NetworkViewID lhs, NetworkViewID rhs)
-		{
-			return NetworkViewID.Internal_Compare(lhs, rhs);
-		}
-
-		public static bool operator !=(NetworkViewID lhs, NetworkViewID rhs)
-		{
-			return !NetworkViewID.Internal_Compare(lhs, rhs);
 		}
 
 		private int a;

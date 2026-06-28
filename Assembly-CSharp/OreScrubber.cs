@@ -30,7 +30,7 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IEffec
 		base.smi.StartSM();
 		this.cleanMeter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_clean_target", "meter_clean", Meter.Offset.Infront, new string[] { "meter_clean_target" });
 		this.RefreshMeters();
-		this.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
+		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
 		DirectionControl component = base.GetComponent<DirectionControl>();
 		component.onDirectionChanged = (Action<WorkableReactable.AllowedDirection>)Delegate.Combine(component.onDirectionChanged, new Action<WorkableReactable.AllowedDirection>(this.OnDirectionChanged));
 		this.OnDirectionChanged(base.GetComponent<DirectionControl>().allowedDirection);
@@ -105,7 +105,7 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IEffec
 	private MeterController cleanMeter;
 
 	[Serialize]
-	public int maxPossiblyRemoved;
+	public int maxPossiblyRemoved = 0;
 
 	private class ScrubOreReactable : WorkableReactable
 	{
@@ -119,9 +119,12 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IEffec
 			if (base.InternalCanBegin(new_reactor, transition))
 			{
 				Storage component = new_reactor.GetComponent<Storage>();
-				if (component != null && OreScrubber.GetFirstInfected(component) != null)
+				if (component != null)
 				{
-					return true;
+					if (OreScrubber.GetFirstInfected(component) != null)
+					{
+						return true;
+					}
 				}
 			}
 			return false;
@@ -166,12 +169,12 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IEffec
 		{
 			default_state = this.notready;
 			base.serializable = true;
-			this.notoperational.PlayAnim("off", KAnim.PlayMode.Once, null).TagTransition(GameTags.Operational, this.notready, false);
-			this.notready.PlayAnim("off", KAnim.PlayMode.Once, null).EventTransition(GameHashes.OnStorageChange, this.ready, (OreScrubber.SMInstance smi) => smi.HasSufficientMass()).TagTransition(GameTags.Operational, this.notoperational, true);
+			this.notoperational.PlayAnim("off").TagTransition(GameTags.Operational, this.notready, false);
+			this.notready.PlayAnim("off").EventTransition(GameHashes.OnStorageChange, this.ready, (OreScrubber.SMInstance smi) => smi.HasSufficientMass()).TagTransition(GameTags.Operational, this.notoperational, true);
 			this.ready.DefaultState(this.ready.free).ToggleReactable((OreScrubber.SMInstance smi) => smi.master.reactable = new OreScrubber.ScrubOreReactable(smi.master.GetComponent<OreScrubber.Work>(), Db.Get().ChoreTypes.ScrubOre, smi.master.GetComponent<DirectionControl>().allowedDirection)).EventTransition(GameHashes.OnStorageChange, this.notready, (OreScrubber.SMInstance smi) => !smi.HasSufficientMass())
 				.TagTransition(GameTags.Operational, this.notoperational, true);
-			this.ready.free.PlayAnim("on", KAnim.PlayMode.Once, null).WorkableStartTransition((OreScrubber.SMInstance smi) => smi.GetComponent<OreScrubber.Work>(), this.ready.occupied);
-			this.ready.occupied.PlayAnim("working_pre", KAnim.PlayMode.Once, null).QueueAnim("working_loop", true, null).WorkableStopTransition((OreScrubber.SMInstance smi) => smi.GetComponent<OreScrubber.Work>(), this.ready);
+			this.ready.free.PlayAnim("on").WorkableStartTransition((OreScrubber.SMInstance smi) => smi.GetComponent<OreScrubber.Work>(), this.ready.occupied);
+			this.ready.occupied.PlayAnim("working_pre").QueueAnim("working_loop", true, null).WorkableStopTransition((OreScrubber.SMInstance smi) => smi.GetComponent<OreScrubber.Work>(), this.ready);
 		}
 
 		public GameStateMachine<OreScrubber.States, OreScrubber.SMInstance, OreScrubber, object>.State notready;
@@ -241,6 +244,6 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IEffec
 			base.OnCompleteWork(worker);
 		}
 
-		private int diseaseRemoved;
+		private int diseaseRemoved = 0;
 	}
 }

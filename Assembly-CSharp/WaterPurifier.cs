@@ -15,7 +15,7 @@ public class WaterPurifier : StateMachineComponent<WaterPurifier.StatesInstance>
 		base.OnSpawn();
 		this.deliveryComponents = base.GetComponents<ManualDeliveryKG>();
 		this.OnConduitConnectionChanged(base.GetComponent<ConduitConsumer>().IsConnected);
-		this.Subscribe(-2094018600, new Action<object>(this.OnConduitConnectionChanged));
+		base.Subscribe(-2094018600, new Action<object>(this.OnConduitConnectionChanged));
 		base.smi.StartSM();
 	}
 
@@ -50,10 +50,10 @@ public class WaterPurifier : StateMachineComponent<WaterPurifier.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.off;
-			this.off.PlayAnim("off", KAnim.PlayMode.Once, null).EventTransition(GameHashes.OperationalChanged, this.on, (WaterPurifier.StatesInstance smi) => smi.master.operational.IsOperational);
-			this.on.PlayAnim("on", KAnim.PlayMode.Once, null).EventTransition(GameHashes.OperationalChanged, this.off, (WaterPurifier.StatesInstance smi) => !smi.master.operational.IsOperational).DefaultState(this.on.waiting);
+			this.off.PlayAnim("off").EventTransition(GameHashes.OperationalChanged, this.on, (WaterPurifier.StatesInstance smi) => smi.master.operational.IsOperational);
+			this.on.PlayAnim("on").EventTransition(GameHashes.OperationalChanged, this.off, (WaterPurifier.StatesInstance smi) => !smi.master.operational.IsOperational).DefaultState(this.on.waiting);
 			this.on.waiting.EventTransition(GameHashes.OnStorageChange, this.on.working_pre, (WaterPurifier.StatesInstance smi) => smi.master.GetComponent<ElementConverter>().HasEnoughMassToStartConverting());
-			this.on.working_pre.PlayAnim("working_pre", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.on.working);
+			this.on.working_pre.PlayAnim("working_pre").OnAnimQueueComplete(this.on.working);
 			this.on.working.Enter(delegate(WaterPurifier.StatesInstance smi)
 			{
 				smi.master.operational.SetActive(true, false);
@@ -62,7 +62,7 @@ public class WaterPurifier : StateMachineComponent<WaterPurifier.StatesInstance>
 				{
 					smi.master.operational.SetActive(false, false);
 				});
-			this.on.working_pst.PlayAnim("working_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.on.waiting);
+			this.on.working_pst.PlayAnim("working_pst").OnAnimQueueComplete(this.on.waiting);
 		}
 
 		public GameStateMachine<WaterPurifier.States, WaterPurifier.StatesInstance, WaterPurifier, object>.State off;

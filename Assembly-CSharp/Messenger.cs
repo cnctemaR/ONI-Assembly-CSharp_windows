@@ -44,13 +44,13 @@ public class Messenger : KMonoBehaviour
 				this.messages.RemoveAt(i);
 			}
 		}
-		this.Trigger(-599791736, null);
+		base.Trigger(-599791736, null);
 	}
 
 	public void QueueMessage(Message message)
 	{
 		this.messages.Add(message);
-		this.Trigger(1558809273, message);
+		base.Trigger(1558809273, message);
 	}
 
 	public Message DequeueMessage()
@@ -75,7 +75,7 @@ public class Messenger : KMonoBehaviour
 	public void RemoveMessage(Message m)
 	{
 		this.messages.Remove(m);
-		this.Trigger(-599791736, null);
+		base.Trigger(-599791736, null);
 	}
 
 	[Serialize]

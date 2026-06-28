@@ -6,8 +6,19 @@ public class PowerTransformerConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER5;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("PowerTransformer", 3, 2, "transformer_kanim", 100f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.ALL_METALS, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER1, tier);
+		string text = "PowerTransformer";
+		int num = 3;
+		int num2 = 2;
+		string text2 = "transformer_kanim";
+		float num3 = 100f;
+		int num4 = 30;
+		float num5 = 30f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
+		string[] all_METALS = MATERIALS.ALL_METALS;
+		float num6 = 800f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER5;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER1, tier2);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.UseWhitePowerOutputConnectorColour = true;
 		buildingDef.PowerInputOffset = new CellOffset(-1, 1);
@@ -24,6 +35,7 @@ public class PowerTransformerConfig : IBuildingConfig
 		buildingDef.GeneratorWattageRating = 1000f;
 		buildingDef.GeneratorBaseCapacity = 1000f;
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
+		buildingDef.HotKey = global::Action.BuildMenuKeyT;
 		return buildingDef;
 	}
 
@@ -31,9 +43,10 @@ public class PowerTransformerConfig : IBuildingConfig
 	{
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		go.AddComponent<RequireInputs>();
+		BuildingDef def = go.GetComponent<Building>().Def;
 		Battery battery = go.AddOrGet<Battery>();
 		battery.powerSortOrder = 1000;
-		battery.capacity = 1000f;
+		battery.capacity = def.GeneratorWattageRating;
 		PowerTransformer powerTransformer = go.AddComponent<PowerTransformer>();
 		powerTransformer.powerDistributionOrder = 9;
 	}

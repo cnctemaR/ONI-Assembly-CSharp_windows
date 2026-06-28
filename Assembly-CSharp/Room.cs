@@ -59,9 +59,12 @@ public class Room : IAssignableIdentity
 		{
 			foreach (BuildingComplete buildingComplete in this.buildings)
 			{
-				if (buildingComplete != null && RoomTypes.GetRoomType(this).primary_constraint.building_criteria(buildingComplete))
+				if (buildingComplete != null)
 				{
-					this.primary_buildings.Add(buildingComplete);
+					if (RoomTypes.GetRoomType(this).primary_constraint.building_criteria(buildingComplete))
+					{
+						this.primary_buildings.Add(buildingComplete);
+					}
 				}
 			}
 		}

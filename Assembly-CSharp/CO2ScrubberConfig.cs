@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -7,8 +7,19 @@ public class CO2ScrubberConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER3;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("CO2Scrubber", 2, 2, "co2scrubber_kanim", 200f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER2, MATERIALS.RAW_METALS, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER1, tier);
+		string text = "CO2Scrubber";
+		int num = 2;
+		int num2 = 2;
+		string text2 = "co2scrubber_kanim";
+		float num3 = 200f;
+		int num4 = 30;
+		float num5 = 30f;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
+		string[] raw_METALS = MATERIALS.RAW_METALS;
+		float num6 = 800f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER3;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_METALS, num6, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER1, tier2);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 120f;
 		buildingDef.OperatingKilowatts = 1f;
@@ -31,7 +42,7 @@ public class CO2ScrubberConfig : IBuildingConfig
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
 		storage.showInUI = true;
 		storage.capacityKg = 30000f;
-		storage.defaultStoredItemModifers = CO2ScrubberConfig.StoredItemModifiers;
+		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		AirFilter airFilter = go.AddOrGet<AirFilter>();
 		airFilter.filterTag = GameTagExtensions.Create(SimHashes.Water);
 		ElementConsumer elementConsumer = go.AddOrGet<PassiveElementConsumer>();
@@ -68,9 +79,21 @@ public class CO2ScrubberConfig : IBuildingConfig
 		conduitDispenser.elementFilter = new SimHashes[] { SimHashes.Water };
 	}
 
+	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, CO2ScrubberConfig.INPUT_PORTS);
+	}
+
+	public override void DoPostConfigureUnderConstruction(GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, CO2ScrubberConfig.INPUT_PORTS);
+	}
+
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		BuildingTemplates.DoPostConfigure(go);
+		GeneratedBuildings.RegisterLogicPorts(go, CO2ScrubberConfig.INPUT_PORTS);
+		go.AddOrGet<LogicOperationalController>();
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
 		{
 			PoweredActiveController.Instance instance = new PoweredActiveController.Instance(game_object.GetComponent<KPrefabID>());
@@ -78,11 +101,12 @@ public class CO2ScrubberConfig : IBuildingConfig
 		};
 	}
 
+	public const string ID = "CO2Scrubber";
+
 	private const float CO2_CONSUMPTION_RATE = 0.3f;
 
-	private static readonly List<Storage.StoredItemModifier> StoredItemModifiers = new List<Storage.StoredItemModifier>
+	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[]
 	{
-		Storage.StoredItemModifier.Hide,
-		Storage.StoredItemModifier.Seal
+		new LogicPorts.Port(LogicOperationalController.PORT_ID, new CellOffset(1, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false)
 	};
 }

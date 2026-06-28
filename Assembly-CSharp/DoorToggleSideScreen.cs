@@ -34,9 +34,18 @@ public class DoorToggleSideScreen : SideScreenContent
 			currentString = UI.UISIDESCREENS.DOOR_TOGGLE_SIDE_SCREEN.CLOSE,
 			pendingString = UI.UISIDESCREENS.DOOR_TOGGLE_SIDE_SCREEN.CLOSE_PENDING
 		});
-		foreach (DoorToggleSideScreen.DoorButtonInfo doorButtonInfo in this.buttonList)
+		using (List<DoorToggleSideScreen.DoorButtonInfo>.Enumerator enumerator = this.buttonList.GetEnumerator())
 		{
-			doorButtonInfo.button.onClick += this.CreateCallback(doorButtonInfo.state);
+			while (enumerator.MoveNext())
+			{
+				DoorToggleSideScreen.DoorButtonInfo info = enumerator.Current;
+				DoorToggleSideScreen $this = this;
+				info.button.onClick += delegate
+				{
+					$this.target.QueueStateChange(info.state);
+					$this.Refresh();
+				};
+			}
 		}
 	}
 
@@ -49,14 +58,13 @@ public class DoorToggleSideScreen : SideScreenContent
 		base.SetTarget(target);
 		this.target = target.GetComponent<Door>();
 		this.accessTarget = target.GetComponent<AccessControl>();
-		if (this.target == null)
+		if (!(this.target == null))
 		{
-			return;
+			target.Subscribe(1734268753, new Action<object>(this.OnDoorStateChanged));
+			target.Subscribe(-1525636549, new Action<object>(this.OnAccessControlChanged));
+			this.Refresh();
+			base.gameObject.SetActive(true);
 		}
-		target.Subscribe(1734268753, new Action<object>(this.OnDoorStateChanged));
-		target.Subscribe(-1525636549, new Action<object>(this.OnAccessControlChanged));
-		this.Refresh();
-		base.gameObject.SetActive(true);
 	}
 
 	public override void ClearTarget()
@@ -128,17 +136,24 @@ public class DoorToggleSideScreen : SideScreenContent
 		{
 			text3 = string.Format(UI.UISIDESCREENS.DOOR_TOGGLE_SIDE_SCREEN.ACCESS_FORMAT, text3, UI.UISIDESCREENS.DOOR_TOGGLE_SIDE_SCREEN.ACCESS_OFFLINE);
 		}
-		this.description.SetText(text3);
-		this.ContentContainer.SetActive(!this.target.isSealed);
-	}
-
-	private global::System.Action CreateCallback(Door.ControlState state)
-	{
-		return delegate
+		if (this.target.building.Def.PrefabID == POIDoorInternalConfig.ID)
 		{
-			this.target.QueueStateChange(state);
-			this.Refresh();
-		};
+			text3 = UI.UISIDESCREENS.DOOR_TOGGLE_SIDE_SCREEN.POI_INTERNAL;
+			foreach (DoorToggleSideScreen.DoorButtonInfo doorButtonInfo2 in this.buttonList)
+			{
+				doorButtonInfo2.button.gameObject.SetActive(false);
+			}
+		}
+		else
+		{
+			foreach (DoorToggleSideScreen.DoorButtonInfo doorButtonInfo3 in this.buttonList)
+			{
+				doorButtonInfo3.button.gameObject.SetActive(true);
+			}
+		}
+		this.description.text = text3;
+		this.description.gameObject.SetActive(!string.IsNullOrEmpty(text3));
+		this.ContentContainer.SetActive(!this.target.isSealed);
 	}
 
 	private void OnDoorStateChanged(object data)

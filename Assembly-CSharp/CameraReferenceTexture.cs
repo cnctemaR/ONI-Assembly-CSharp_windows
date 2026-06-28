@@ -7,11 +7,11 @@ public class CameraReferenceTexture : MonoBehaviour
 	{
 		if (this.quad == null)
 		{
-			this.quad = new FullScreenQuad("CameraReferenceTexture", base.GetComponent<Camera>(), false);
+			this.quad = new FullScreenQuad("CameraReferenceTexture", base.GetComponent<Camera>(), this.referenceCamera.GetComponent<CameraRenderTexture>().ShouldFlip());
 		}
 		if (this.referenceCamera != null)
 		{
-			this.quad.Draw(this.referenceCamera.GetComponent<CameraRenderTexture>().resultTexture);
+			this.quad.Draw(this.referenceCamera.GetComponent<CameraRenderTexture>().GetTexture());
 		}
 	}
 

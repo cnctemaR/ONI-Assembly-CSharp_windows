@@ -321,7 +321,7 @@ public class Scenario : KMonoBehaviour
 	public void SetupClimbTest(int left, int bot)
 	{
 		this.DigHole(left, bot, 13, 5);
-		this.SpawnPrefab(left + 1, bot + 1, "Minion", Grid.SceneLayer.Use, Folder.Entities);
+		this.SpawnPrefab(left + 1, bot + 1, "Minion", Grid.SceneLayer.Ore, Folder.Entities);
 		int num = left + 2;
 		this.Clear(num++, bot - 1);
 		num++;
@@ -565,18 +565,18 @@ public class Scenario : KMonoBehaviour
 		this.RunAfterNextUpdate(delegate
 		{
 			int num = Grid.OffsetCell(this.RootCell, x, y);
-			Vector3 vector = Grid.CellToPosCCC(num, Grid.SceneLayer.Use);
+			Vector3 vector = Grid.CellToPosCCC(num, Grid.SceneLayer.Ore);
 			vector.x += global::UnityEngine.Random.Range(-0.1f, 0.1f);
 			ElementLoader.FindElementByHash(element).substance.SpawnResource(vector, 4000f, 293f, byte.MaxValue, 0, false, false);
 		});
 	}
 
-	public GameObject SpawnPrefab(int x, int y, string name, Grid.SceneLayer scene_layer = Grid.SceneLayer.Use, Folder folder = Folder.Entities)
+	public GameObject SpawnPrefab(int x, int y, string name, Grid.SceneLayer scene_layer = Grid.SceneLayer.Ore, Folder folder = Folder.Entities)
 	{
 		return Scenario.SpawnPrefab(this.RootCell, x, y, name, scene_layer, folder);
 	}
 
-	public void SpawnPrefabLate(int x, int y, string name, Grid.SceneLayer scene_layer = Grid.SceneLayer.Use, Folder folder = Folder.Entities)
+	public void SpawnPrefabLate(int x, int y, string name, Grid.SceneLayer scene_layer = Grid.SceneLayer.Ore, Folder folder = Folder.Entities)
 	{
 		this.RunAfterNextUpdate(delegate
 		{
@@ -584,16 +584,22 @@ public class Scenario : KMonoBehaviour
 		});
 	}
 
-	public static GameObject SpawnPrefab(int RootCell, int x, int y, string name, Grid.SceneLayer scene_layer = Grid.SceneLayer.Use, Folder folder = Folder.Entities)
+	public static GameObject SpawnPrefab(int RootCell, int x, int y, string name, Grid.SceneLayer scene_layer = Grid.SceneLayer.Ore, Folder folder = Folder.Entities)
 	{
 		int num = Grid.OffsetCell(RootCell, x, y);
 		Tag tag = TagManager.Create(name, null);
 		GameObject prefab = Assets.GetPrefab(tag);
+		GameObject gameObject;
 		if (prefab == null)
 		{
-			return null;
+			gameObject = null;
 		}
-		return GameUtil.KInstantiate(prefab, Grid.CellToPosCBC(num, scene_layer), scene_layer, SceneOrganizer.Instance.GetFolder(folder), null, 0);
+		else
+		{
+			GameObject gameObject2 = GameUtil.KInstantiate(prefab, Grid.CellToPosCBC(num, scene_layer), scene_layer, SceneOrganizer.Instance.GetFolder(folder), null, 0);
+			gameObject = gameObject2;
+		}
+		return gameObject;
 	}
 
 	public void SetupElementTest()
@@ -987,7 +993,7 @@ public class Scenario : KMonoBehaviour
 			int bot = this.Bot;
 			this.Scenario.RunAfterNextUpdate(delegate
 			{
-				GameObject gameObject = this.Scenario.SpawnPrefab(left, bot, prefab_id, Grid.SceneLayer.Use, Folder.Entities);
+				GameObject gameObject = this.Scenario.SpawnPrefab(left, bot, prefab_id, Grid.SceneLayer.Ore, Folder.Entities);
 				if (on_spawn != null)
 				{
 					on_spawn(gameObject);

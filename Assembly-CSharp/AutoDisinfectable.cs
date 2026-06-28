@@ -17,40 +17,49 @@ public class AutoDisinfectable : Workable
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		base.SetWorkTime(10f);
 		this.shouldTransferDiseaseWithWorker = false;
 	}
 
-	private void Update()
+	protected override void OnCmpEnable()
 	{
-		if (KMonoBehaviour.isLoadingScene)
-		{
-			return;
-		}
-		this.RefreshChore();
+		base.OnCmpEnable();
+		Components.AutoDisinfectables.Add(this);
 	}
 
-	private void RefreshChore()
+	protected override void OnCmpDisable()
 	{
-		if (!this.enableAutoDisinfect || !SaveGame.Instance.enableAutoDisinfect)
+		base.OnCmpDisable();
+		Components.AutoDisinfectables.Remove(this);
+	}
+
+	public void RefreshChore()
+	{
+		if (!KMonoBehaviour.isLoadingScene)
 		{
-			if (this.chore != null)
+			if (!this.enableAutoDisinfect || !SaveGame.Instance.enableAutoDisinfect)
 			{
-				this.chore.Cancel("Autodisinfect Disabled");
-				this.chore = null;
+				if (this.chore != null)
+				{
+					this.chore.Cancel("Autodisinfect Disabled");
+					this.chore = null;
+				}
 			}
-		}
-		else if (this.chore == null || !(this.chore.driver != null))
-		{
-			if (this.chore == null && this.primaryElement.DiseaseCount > SaveGame.Instance.minGermCountForDisinfect)
+			else if (this.chore == null || !(this.chore.driver != null))
 			{
-				this.chore = new WorkChore<AutoDisinfectable>(Db.Get().ChoreTypes.Disinfect, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, int.MaxValue);
-			}
-			else if (this.primaryElement.DiseaseCount < SaveGame.Instance.minGermCountForDisinfect && this.chore != null)
-			{
-				this.chore.Cancel("AutoDisinfectable.Update");
-				this.chore = null;
+				if (this.chore == null && this.primaryElement.DiseaseCount > SaveGame.Instance.minGermCountForDisinfect)
+				{
+					this.chore = new WorkChore<AutoDisinfectable>(Db.Get().ChoreTypes.Disinfect, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+				}
+				else if (this.primaryElement.DiseaseCount < SaveGame.Instance.minGermCountForDisinfect)
+				{
+					if (this.chore != null)
+					{
+						this.chore.Cancel("AutoDisinfectable.Update");
+						this.chore = null;
+					}
+				}
 			}
 		}
 	}
@@ -104,23 +113,29 @@ public class AutoDisinfectable : Workable
 		if (!this.enableAutoDisinfect)
 		{
 			UserMenu userMenu = this.userMenu;
-			string text = BUILDINGS.AUTODISINFECTABLE.ENABLE_AUTODISINFECT.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_disinfect", BUILDINGS.AUTODISINFECTABLE.ENABLE_AUTODISINFECT.NAME, new global::System.Action(this.EnableAutoDisinfect), global::Action.NumActions, null, null, null, text, true), 10f);
+			string text = "action_disinfect";
+			string text2 = BUILDINGS.AUTODISINFECTABLE.ENABLE_AUTODISINFECT.NAME;
+			global::System.Action action = new global::System.Action(this.EnableAutoDisinfect);
+			string text3 = BUILDINGS.AUTODISINFECTABLE.ENABLE_AUTODISINFECT.TOOLTIP;
+			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 10f);
 		}
 		else
 		{
 			UserMenu userMenu2 = this.userMenu;
+			string text3 = "action_disinfect";
+			string text2 = BUILDINGS.AUTODISINFECTABLE.DISABLE_AUTODISINFECT.NAME;
+			global::System.Action action = new global::System.Action(this.DisableAutoDisinfect);
 			string text = BUILDINGS.AUTODISINFECTABLE.DISABLE_AUTODISINFECT.TOOLTIP;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_disinfect", BUILDINGS.AUTODISINFECTABLE.DISABLE_AUTODISINFECT.NAME, new global::System.Action(this.DisableAutoDisinfect), global::Action.NumActions, null, null, null, text, true), 10f);
+			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 10f);
 		}
 	}
-
-	private const float MAX_WORK_TIME = 10f;
 
 	[MyCmpGet]
 	private UserMenu userMenu;
 
 	private Chore chore;
+
+	private const float MAX_WORK_TIME = 10f;
 
 	private float diseasePerSecond;
 

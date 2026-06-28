@@ -4,7 +4,7 @@ using UnityEngine.Rendering;
 
 namespace UnityEngine.UI
 {
-	public abstract class MaskableGraphic : Graphic, IMaskable, IClippable, IMaterialModifier
+	public abstract class MaskableGraphic : Graphic, IClippable, IMaskable, IMaterialModifier
 	{
 		public MaskableGraphic.CullStateChangedEvent onCullStateChanged
 		{
@@ -26,13 +26,12 @@ namespace UnityEngine.UI
 			}
 			set
 			{
-				if (value == this.m_Maskable)
+				if (value != this.m_Maskable)
 				{
-					return;
+					this.m_Maskable = value;
+					this.m_ShouldRecalculateStencil = true;
+					this.SetMaterialDirty();
 				}
-				this.m_Maskable = value;
-				this.m_ShouldRecalculateStencil = true;
-				this.SetMaterialDirty();
 			}
 		}
 
@@ -45,7 +44,8 @@ namespace UnityEngine.UI
 				this.m_StencilValue = ((!this.maskable) ? 0 : MaskUtilities.GetStencilDepth(base.transform, transform));
 				this.m_ShouldRecalculateStencil = false;
 			}
-			if (this.m_StencilValue > 0 && base.GetComponent<Mask>() == null)
+			Mask component = base.GetComponent<Mask>();
+			if (this.m_StencilValue > 0 && (component == null || !component.IsActive()))
 			{
 				Material material2 = StencilMaterial.Add(material, (1 << this.m_StencilValue) - 1, StencilOp.Keep, CompareFunction.Equal, ColorWriteMask.All, (1 << this.m_StencilValue) - 1, 0);
 				StencilMaterial.Remove(this.m_MaskMaterial);
@@ -57,10 +57,6 @@ namespace UnityEngine.UI
 
 		public virtual void Cull(Rect clipRect, bool validRect)
 		{
-			if (!base.canvasRenderer.hasMoved)
-			{
-				return;
-			}
 			bool flag = !validRect || !clipRect.Overlaps(this.rootCanvasRect, true);
 			this.UpdateCull(flag);
 		}
@@ -117,13 +113,12 @@ namespace UnityEngine.UI
 		protected override void OnTransformParentChanged()
 		{
 			base.OnTransformParentChanged();
-			if (!base.isActiveAndEnabled)
+			if (base.isActiveAndEnabled)
 			{
-				return;
+				this.m_ShouldRecalculateStencil = true;
+				this.UpdateClipParent();
+				this.SetMaterialDirty();
 			}
-			this.m_ShouldRecalculateStencil = true;
-			this.UpdateClipParent();
-			this.SetMaterialDirty();
 		}
 
 		[Obsolete("Not used anymore.", true)]
@@ -134,13 +129,12 @@ namespace UnityEngine.UI
 		protected override void OnCanvasHierarchyChanged()
 		{
 			base.OnCanvasHierarchyChanged();
-			if (!base.isActiveAndEnabled)
+			if (base.isActiveAndEnabled)
 			{
-				return;
+				this.m_ShouldRecalculateStencil = true;
+				this.UpdateClipParent();
+				this.SetMaterialDirty();
 			}
-			this.m_ShouldRecalculateStencil = true;
-			this.UpdateClipParent();
-			this.SetMaterialDirty();
 		}
 
 		private Rect rootCanvasRect
@@ -163,12 +157,12 @@ namespace UnityEngine.UI
 		private void UpdateClipParent()
 		{
 			RectMask2D rectMask2D = ((!this.maskable || !this.IsActive()) ? null : MaskUtilities.GetRectMaskForClippable(this));
-			if (rectMask2D != this.m_ParentMask && this.m_ParentMask != null)
+			if (this.m_ParentMask != null && (rectMask2D != this.m_ParentMask || !rectMask2D.IsActive()))
 			{
 				this.m_ParentMask.RemoveClippable(this);
 				this.UpdateCull(false);
 			}
-			if (rectMask2D != null)
+			if (rectMask2D != null && rectMask2D.IsActive())
 			{
 				rectMask2D.AddClippable(this);
 			}
@@ -186,9 +180,9 @@ namespace UnityEngine.UI
 			this.SetMaterialDirty();
 		}
 
-		virtual RectTransform UnityEngine.UI.IClippable.get_rectTransform()
+		GameObject IClippable.get_gameObject()
 		{
-			return base.rectTransform;
+			return base.gameObject;
 		}
 
 		[NonSerialized]
@@ -205,7 +199,7 @@ namespace UnityEngine.UI
 
 		[Obsolete("Not used anymore.", true)]
 		[NonSerialized]
-		protected bool m_IncludeForMasking;
+		protected bool m_IncludeForMasking = false;
 
 		[SerializeField]
 		private MaskableGraphic.CullStateChangedEvent m_OnCullStateChanged = new MaskableGraphic.CullStateChangedEvent();

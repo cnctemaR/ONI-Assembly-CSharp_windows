@@ -78,26 +78,33 @@ public class SpeedControlScreen : KScreen
 	public void SetSpeed(int Speed)
 	{
 		this.speed = Speed % 3;
-		switch (this.speed)
+		int num = this.speed;
+		if (num != 0)
 		{
-		case 0:
+			if (num != 1)
+			{
+				if (num == 2)
+				{
+					this.fastButton.Select();
+					this.slowButton.isOn = false;
+					this.mediumButton.isOn = false;
+					this.fastButton.isOn = true;
+				}
+			}
+			else
+			{
+				this.mediumButton.Select();
+				this.slowButton.isOn = false;
+				this.mediumButton.isOn = true;
+				this.fastButton.isOn = false;
+			}
+		}
+		else
+		{
 			this.slowButton.Select();
 			this.slowButton.isOn = true;
 			this.mediumButton.isOn = false;
 			this.fastButton.isOn = false;
-			break;
-		case 1:
-			this.mediumButton.Select();
-			this.slowButton.isOn = false;
-			this.mediumButton.isOn = true;
-			this.fastButton.isOn = false;
-			break;
-		case 2:
-			this.fastButton.Select();
-			this.slowButton.isOn = false;
-			this.mediumButton.isOn = false;
-			this.fastButton.isOn = true;
-			break;
 		}
 		this.OnSpeedChange();
 	}
@@ -185,11 +192,10 @@ public class SpeedControlScreen : KScreen
 
 	public void OnSpeedChange()
 	{
-		if (Game.IsQuitting())
+		if (!Game.IsQuitting())
 		{
-			return;
+			this.OnChanged();
 		}
-		this.OnChanged();
 	}
 
 	private void OnChanged()
@@ -304,5 +310,5 @@ public class SpeedControlScreen : KScreen
 
 	private int speed;
 
-	private int pauseCount;
+	private int pauseCount = 0;
 }

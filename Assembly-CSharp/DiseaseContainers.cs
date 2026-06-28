@@ -21,7 +21,6 @@ public class DiseaseContainers : KGameObjectComponentManager<DiseaseContainer>
 	protected override void OnCleanUp(HandleVector<int>.Handle h)
 	{
 		base.OnCleanUp(h);
-		DiseaseContainer data = base.GetData(h);
 	}
 
 	public override void SimUpdate(float dt)

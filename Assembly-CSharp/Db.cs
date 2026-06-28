@@ -34,6 +34,7 @@ public class Db : EntityModifierSet
 		this.StatusItemCategories = new StatusItemCategories(this.Root);
 		this.Techs = new Techs(this.Root);
 		this.Techs.Load(this.researchTreeFile);
+		this.TechItems = new TechItems(this.Root);
 		this.Accessories = new Accessories(this.Root);
 		this.AccessorySlots = new AccessorySlots(this.Root, null, null, null);
 		this.ScheduleBlockTypes = new ScheduleBlockTypes(this.Root);
@@ -43,7 +44,7 @@ public class Db : EntityModifierSet
 		this.BuildingStatusItems = new BuildingStatusItems(this.Root);
 		this.ChoreTypes = new ChoreTypes(this.Root);
 		Effect effect = new Effect("CenterOfAttention", DUPLICANTS.MODIFIERS.CENTEROFATTENTION.NAME, DUPLICANTS.MODIFIERS.CENTEROFATTENTION.TOOLTIP, 0f, true, true, false);
-		effect.Add(new AttributeModifier("StressDelta", -0.008333334f, DUPLICANTS.MODIFIERS.CENTEROFATTENTION.NAME, false, false));
+		effect.Add(new AttributeModifier("StressDelta", -0.008333334f, DUPLICANTS.MODIFIERS.CENTEROFATTENTION.NAME, false, false, true));
 		this.effects.Add(effect);
 		this.CollectResources(this.Root, this.ResourceTable);
 	}
@@ -67,24 +68,32 @@ public class Db : EntityModifierSet
 	public ResourceType GetResource<ResourceType>(ResourceGuid guid) where ResourceType : Resource
 	{
 		Resource resource = this.ResourceTable.FirstOrDefault<Resource>((Resource s) => s.Guid == guid);
+		ResourceType resourceType;
 		if (resource == null)
 		{
 			global::Debug.LogWarning("Could not find resource: " + guid, null);
-			return (ResourceType)((object)null);
+			resourceType = (ResourceType)((object)null);
 		}
-		ResourceType resourceType = (ResourceType)((object)resource);
-		if (resourceType == null)
+		else
 		{
-			global::Debug.LogError(string.Concat(new string[]
+			ResourceType resourceType2 = (ResourceType)((object)resource);
+			if (resourceType2 == null)
 			{
-				"Resource type mismatch for resource: ",
-				resource.Id,
-				"\nExpecting Type: ",
-				typeof(ResourceType).Name,
-				"\nGot Type: ",
-				resource.GetType().Name
-			}), null);
-			return (ResourceType)((object)null);
+				global::Debug.LogError(string.Concat(new string[]
+				{
+					"Resource type mismatch for resource: ",
+					resource.Id,
+					"\nExpecting Type: ",
+					typeof(ResourceType).Name,
+					"\nGot Type: ",
+					resource.GetType().Name
+				}), null);
+				resourceType = (ResourceType)((object)null);
+			}
+			else
+			{
+				resourceType = resourceType2;
+			}
 		}
 		return resourceType;
 	}
@@ -126,6 +135,8 @@ public class Db : EntityModifierSet
 	public ChoreTypes ChoreTypes;
 
 	public Techs Techs;
+
+	public TechItems TechItems;
 
 	public AccessorySlots AccessorySlots;
 

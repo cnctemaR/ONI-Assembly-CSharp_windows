@@ -18,63 +18,68 @@ public class ThreadedHttps<T> where T : class, new()
 
 	public bool RemoteCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
 	{
+		bool flag;
 		if (this.certFail)
 		{
-			return false;
-		}
-		this.certFail = true;
-		string text = string.Empty;
-		if (sslPolicyErrors == SslPolicyErrors.None)
-		{
-			this.certFail = false;
-		}
-		else if (sslPolicyErrors == SslPolicyErrors.RemoteCertificateChainErrors)
-		{
-			this.certFail = false;
-			for (int i = 0; i < chain.ChainStatus.Length; i++)
-			{
-				string text2 = text;
-				text = string.Concat(new object[]
-				{
-					text2,
-					"[",
-					i,
-					"] ",
-					chain.ChainStatus[i].Status.ToString(),
-					"\n"
-				});
-				if (chain.ChainStatus[i].Status != X509ChainStatusFlags.RevocationStatusUnknown)
-				{
-					chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
-					chain.ChainPolicy.RevocationMode = X509RevocationMode.Online;
-					chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 1, 0);
-					chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllFlags;
-					if (!chain.Build((X509Certificate2)certificate))
-					{
-						this.certFail = true;
-					}
-				}
-			}
+			flag = false;
 		}
 		else
 		{
 			this.certFail = true;
-		}
-		if (this.certFail)
-		{
-			X509Certificate2 x509Certificate = new X509Certificate2(certificate);
-			Debug.LogWarning(string.Concat(new string[]
+			string text = "";
+			if (sslPolicyErrors == SslPolicyErrors.None)
 			{
-				this.serviceName,
-				": ",
-				sslPolicyErrors.ToString(),
-				"\n",
-				text,
-				"\n",
-				x509Certificate.ToString()
-			}), null);
+				this.certFail = false;
+			}
+			else if (sslPolicyErrors == SslPolicyErrors.RemoteCertificateChainErrors)
+			{
+				this.certFail = false;
+				for (int i = 0; i < chain.ChainStatus.Length; i++)
+				{
+					string text2 = text;
+					text = string.Concat(new object[]
+					{
+						text2,
+						"[",
+						i,
+						"] ",
+						chain.ChainStatus[i].Status.ToString(),
+						"\n"
+					});
+					if (chain.ChainStatus[i].Status != X509ChainStatusFlags.RevocationStatusUnknown)
+					{
+						chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
+						chain.ChainPolicy.RevocationMode = X509RevocationMode.Online;
+						chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 1, 0);
+						chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllFlags;
+						if (!chain.Build((X509Certificate2)certificate))
+						{
+							this.certFail = true;
+						}
+					}
+				}
+			}
+			else
+			{
+				this.certFail = true;
+			}
+			if (this.certFail)
+			{
+				X509Certificate2 x509Certificate = new X509Certificate2(certificate);
+				Debug.LogWarning(string.Concat(new string[]
+				{
+					this.serviceName,
+					": ",
+					sslPolicyErrors.ToString(),
+					"\n",
+					text,
+					"\n",
+					x509Certificate.ToString()
+				}), null);
+			}
+			flag = !this.certFail;
 		}
-		return !this.certFail;
+		return flag;
 	}
 
 	public void Start()
@@ -83,14 +88,13 @@ public class ThreadedHttps<T> where T : class, new()
 		{
 			this.End();
 		}
-		if (this.certFail)
+		if (!this.certFail)
 		{
-			return;
+			this.packets = new List<byte[]>();
+			this.shouldQuit = false;
+			this.updateThread = new Thread(new ThreadStart(this.SendData));
+			this.updateThread.Start();
 		}
-		this.packets = new List<byte[]>();
-		this.shouldQuit = false;
-		this.updateThread = new Thread(new ThreadStart(this.SendData));
-		this.updateThread.Start();
 	}
 
 	public void End()
@@ -110,7 +114,7 @@ public class ThreadedHttps<T> where T : class, new()
 	protected string Send(byte[] byteArray, bool isForce = false)
 	{
 		ServicePointManager.ServerCertificateValidationCallback = (RemoteCertificateValidationCallback)Delegate.Combine(ServicePointManager.ServerCertificateValidationCallback, new RemoteCertificateValidationCallback(this.RemoteCertificateValidationCallback));
-		string text = string.Empty;
+		string text = "";
 		int num = 0;
 		for (;;)
 		{
@@ -201,15 +205,7 @@ public class ThreadedHttps<T> where T : class, new()
 					string text3 = streamReader2.ReadToEnd();
 					streamReader2.Close();
 					stream.Close();
-					text = string.Concat(new string[]
-					{
-						string.Empty,
-						this.serviceName,
-						": Server Responded with Status: [",
-						text,
-						"] Response: ",
-						text3
-					});
+					text = string.Concat(new string[] { "", this.serviceName, ": Server Responded with Status: [", text, "] Response: ", text3 });
 				}
 				else
 				{
@@ -322,8 +318,8 @@ public class ThreadedHttps<T> where T : class, new()
 	protected byte[] GetPacket()
 	{
 		byte[] array = null;
-		List<byte[]> list = this.packets;
-		lock (list)
+		object obj = this.packets;
+		lock (obj)
 		{
 			if (this.packets.Count > 0)
 			{
@@ -336,8 +332,8 @@ public class ThreadedHttps<T> where T : class, new()
 
 	protected void PutPacket(byte[] packet, bool infront = false)
 	{
-		List<byte[]> list = this.packets;
-		lock (list)
+		object obj = this.packets;
+		lock (obj)
 		{
 			if (infront)
 			{
@@ -358,7 +354,7 @@ public class ThreadedHttps<T> where T : class, new()
 			if (this.Send(array, true) != "OK")
 			{
 				this.PutPacket(array, true);
-				return;
+				break;
 			}
 		}
 	}
@@ -381,20 +377,20 @@ public class ThreadedHttps<T> where T : class, new()
 			}
 			if (this.singleSend)
 			{
-				return;
+				break;
 			}
 		}
 	}
 
+	protected string serviceName = null;
+
+	protected string CLIENT_KEY = null;
+
+	protected string LIVE_ENDPOINT = null;
+
+	private bool certFail = false;
+
 	private const int retryCount = 3;
-
-	protected string serviceName;
-
-	protected string CLIENT_KEY;
-
-	protected string LIVE_ENDPOINT;
-
-	private bool certFail;
 
 	protected Thread updateThread;
 
@@ -402,13 +398,13 @@ public class ThreadedHttps<T> where T : class, new()
 
 	private EventWaitHandle _waitHandle = new AutoResetEvent(false);
 
-	protected bool shouldQuit;
+	protected bool shouldQuit = false;
 
-	protected bool quitOnError;
+	protected bool quitOnError = false;
 
 	private object _quitLock = new object();
 
-	protected bool singleSend;
+	protected bool singleSend = false;
 
 	private class Singleton
 	{

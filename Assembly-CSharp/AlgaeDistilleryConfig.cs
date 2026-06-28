@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -7,8 +7,19 @@ public class AlgaeDistilleryConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER5;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("AlgaeDistillery", 3, 4, "algae_distillery_kanim", 100f, 100, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.ALL_METALS, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER1, tier);
+		string text = "AlgaeDistillery";
+		int num = 3;
+		int num2 = 4;
+		string text2 = "algae_distillery_kanim";
+		float num3 = 100f;
+		int num4 = 100;
+		float num5 = 30f;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
+		string[] all_METALS = MATERIALS.ALL_METALS;
+		float num6 = 800f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER5;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER1, tier2);
 		buildingDef.Overheatable = false;
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.PowerInputOffset = new CellOffset(1, 0);
@@ -36,8 +47,7 @@ public class AlgaeDistilleryConfig : IBuildingConfig
 		conduitDispenser.elementFilter = new SimHashes[] { SimHashes.DirtyWater };
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 1000f;
-		storage.disableOnStore = true;
-		storage.defaultStoredItemModifers = AlgaeDistilleryConfig.AlgaeDistilleryStoredItemModifiers;
+		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		storage.showInUI = true;
 		Tag tag = new Tag("SlimeMold");
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
@@ -59,15 +69,29 @@ public class AlgaeDistilleryConfig : IBuildingConfig
 		Prioritizable.AddRef(go);
 	}
 
+	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, AlgaeDistilleryConfig.INPUT_PORTS);
+	}
+
+	public override void DoPostConfigureUnderConstruction(GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, AlgaeDistilleryConfig.INPUT_PORTS);
+	}
+
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		BuildingTemplates.DoPostConfigure(go);
+		GeneratedBuildings.RegisterLogicPorts(go, AlgaeDistilleryConfig.INPUT_PORTS);
+		go.AddOrGet<LogicOperationalController>();
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
 		{
 			PoweredActiveController.Instance instance = new PoweredActiveController.Instance(game_object.GetComponent<KPrefabID>());
 			instance.StartSM();
 		};
 	}
+
+	public const string ID = "AlgaeDistillery";
 
 	public const float INPUT_SLIME_PER_SECOND = 0.6f;
 
@@ -77,9 +101,8 @@ public class AlgaeDistilleryConfig : IBuildingConfig
 
 	public const float OUTPUT_TEMP = 303.15f;
 
-	private static readonly List<Storage.StoredItemModifier> AlgaeDistilleryStoredItemModifiers = new List<Storage.StoredItemModifier>
+	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[]
 	{
-		Storage.StoredItemModifier.Hide,
-		Storage.StoredItemModifier.Seal
+		new LogicPorts.Port(LogicOperationalController.PORT_ID, new CellOffset(0, 1), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false)
 	};
 }

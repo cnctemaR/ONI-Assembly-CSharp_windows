@@ -69,15 +69,14 @@ namespace OverlayModes
 
 		protected override void OnSaveLoadRootUnregistered(SaveLoadRoot item)
 		{
-			if (item == null || item.gameObject == null)
+			if (!(item == null) && !(item.gameObject == null))
 			{
-				return;
+				if (this.layerTargets.Contains(item))
+				{
+					this.layerTargets.Remove(item);
+				}
+				this.partition.Remove(item);
 			}
-			if (this.layerTargets.Contains(item))
-			{
-				this.layerTargets.Remove(item);
-			}
-			this.partition.Remove(item);
 		}
 
 		private GameObject GetFreeUI()
@@ -105,12 +104,25 @@ namespace OverlayModes
 			Vector2I vector2I;
 			Vector2I vector2I2;
 			Grid.GetVisibleExtents(out vector2I, out vector2I2);
-			Mode.RemoveOffscreenTargets<SaveLoadRoot>(this.layerTargets, vector2I, vector2I2);
+			Mode.RemoveOffscreenTargets<SaveLoadRoot>(this.layerTargets, vector2I, vector2I2, null);
 			IEnumerable allIntersecting = this.partition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y));
-			foreach (object obj in allIntersecting)
+			IEnumerator enumerator = allIntersecting.GetEnumerator();
+			try
 			{
-				SaveLoadRoot saveLoadRoot = (SaveLoadRoot)obj;
-				base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot, vector2I, vector2I2, this.layerTargets, this.targetLayer);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					SaveLoadRoot saveLoadRoot = (SaveLoadRoot)obj;
+					base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot, vector2I, vector2I2, this.layerTargets, this.targetLayer, null, null);
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = enumerator as IDisposable) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 			foreach (SaveLoadRoot saveLoadRoot2 in this.layerTargets)
 			{

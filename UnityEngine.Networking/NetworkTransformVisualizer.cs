@@ -3,10 +3,10 @@ using System.ComponentModel;
 
 namespace UnityEngine.Networking
 {
-	[RequireComponent(typeof(NetworkTransform))]
 	[DisallowMultipleComponent]
-	[EditorBrowsable(EditorBrowsableState.Never)]
 	[AddComponentMenu("Network/NetworkTransformVisualizer")]
+	[RequireComponent(typeof(NetworkTransform))]
+	[EditorBrowsable(EditorBrowsableState.Never)]
 	public class NetworkTransformVisualizer : NetworkBehaviour
 	{
 		public GameObject visualizerPrefab
@@ -27,19 +27,18 @@ namespace UnityEngine.Networking
 			{
 				this.m_NetworkTransform = base.GetComponent<NetworkTransform>();
 				NetworkTransformVisualizer.CreateLineMaterial();
-				this.m_Visualizer = (GameObject)Object.Instantiate(this.m_VisualizerPrefab, base.transform.position, Quaternion.identity);
+				this.m_Visualizer = Object.Instantiate<GameObject>(this.m_VisualizerPrefab, base.transform.position, Quaternion.identity);
 			}
 		}
 
 		public override void OnStartLocalPlayer()
 		{
-			if (this.m_Visualizer == null)
+			if (!(this.m_Visualizer == null))
 			{
-				return;
-			}
-			if (this.m_NetworkTransform.localPlayerAuthority || base.isServer)
-			{
-				Object.Destroy(this.m_Visualizer);
+				if (this.m_NetworkTransform.localPlayerAuthority || base.isServer)
+				{
+					Object.Destroy(this.m_Visualizer);
+				}
 			}
 		}
 
@@ -54,64 +53,57 @@ namespace UnityEngine.Networking
 		[ClientCallback]
 		private void FixedUpdate()
 		{
-			if (this.m_Visualizer == null)
+			if (!(this.m_Visualizer == null))
 			{
-				return;
+				if (NetworkServer.active || NetworkClient.active)
+				{
+					if (base.isServer || base.isClient)
+					{
+						if (!base.hasAuthority || !this.m_NetworkTransform.localPlayerAuthority)
+						{
+							this.m_Visualizer.transform.position = this.m_NetworkTransform.targetSyncPosition;
+							if (this.m_NetworkTransform.rigidbody3D != null && this.m_Visualizer.GetComponent<Rigidbody>() != null)
+							{
+								this.m_Visualizer.GetComponent<Rigidbody>().velocity = this.m_NetworkTransform.targetSyncVelocity;
+							}
+							if (this.m_NetworkTransform.rigidbody2D != null && this.m_Visualizer.GetComponent<Rigidbody2D>() != null)
+							{
+								this.m_Visualizer.GetComponent<Rigidbody2D>().velocity = this.m_NetworkTransform.targetSyncVelocity;
+							}
+							Quaternion quaternion = Quaternion.identity;
+							if (this.m_NetworkTransform.rigidbody3D != null)
+							{
+								quaternion = this.m_NetworkTransform.targetSyncRotation3D;
+							}
+							if (this.m_NetworkTransform.rigidbody2D != null)
+							{
+								quaternion = Quaternion.Euler(0f, 0f, this.m_NetworkTransform.targetSyncRotation2D);
+							}
+							this.m_Visualizer.transform.rotation = quaternion;
+						}
+					}
+				}
 			}
-			if (!NetworkServer.active && !NetworkClient.active)
-			{
-				return;
-			}
-			if (!base.isServer && !base.isClient)
-			{
-				return;
-			}
-			if (base.hasAuthority && this.m_NetworkTransform.localPlayerAuthority)
-			{
-				return;
-			}
-			this.m_Visualizer.transform.position = this.m_NetworkTransform.targetSyncPosition;
-			if (this.m_NetworkTransform.rigidbody3D != null && this.m_Visualizer.GetComponent<Rigidbody>() != null)
-			{
-				this.m_Visualizer.GetComponent<Rigidbody>().velocity = this.m_NetworkTransform.targetSyncVelocity;
-			}
-			if (this.m_NetworkTransform.rigidbody2D != null && this.m_Visualizer.GetComponent<Rigidbody2D>() != null)
-			{
-				this.m_Visualizer.GetComponent<Rigidbody2D>().velocity = this.m_NetworkTransform.targetSyncVelocity;
-			}
-			Quaternion quaternion = Quaternion.identity;
-			if (this.m_NetworkTransform.rigidbody3D != null)
-			{
-				quaternion = this.m_NetworkTransform.targetSyncRotation3D;
-			}
-			if (this.m_NetworkTransform.rigidbody2D != null)
-			{
-				quaternion = Quaternion.Euler(0f, 0f, this.m_NetworkTransform.targetSyncRotation2D);
-			}
-			this.m_Visualizer.transform.rotation = quaternion;
 		}
 
 		private void OnRenderObject()
 		{
-			if (this.m_Visualizer == null)
+			if (!(this.m_Visualizer == null))
 			{
-				return;
+				if (!this.m_NetworkTransform.localPlayerAuthority || !base.hasAuthority)
+				{
+					if (this.m_NetworkTransform.lastSyncTime != 0f)
+					{
+						NetworkTransformVisualizer.s_LineMaterial.SetPass(0);
+						GL.Begin(1);
+						GL.Color(Color.white);
+						GL.Vertex3(base.transform.position.x, base.transform.position.y, base.transform.position.z);
+						GL.Vertex3(this.m_NetworkTransform.targetSyncPosition.x, this.m_NetworkTransform.targetSyncPosition.y, this.m_NetworkTransform.targetSyncPosition.z);
+						GL.End();
+						this.DrawRotationInterpolation();
+					}
+				}
 			}
-			if (this.m_NetworkTransform.localPlayerAuthority && base.hasAuthority)
-			{
-				return;
-			}
-			if (this.m_NetworkTransform.lastSyncTime == 0f)
-			{
-				return;
-			}
-			NetworkTransformVisualizer.s_LineMaterial.SetPass(0);
-			GL.Begin(1);
-			GL.Color(Color.white);
-			GL.Vertex3(base.transform.position.x, base.transform.position.y, base.transform.position.z);
-			GL.Vertex3(this.m_NetworkTransform.targetSyncPosition.x, this.m_NetworkTransform.targetSyncPosition.y, this.m_NetworkTransform.targetSyncPosition.z);
-			GL.End();
-			this.DrawRotationInterpolation();
 		}
 
 		private void DrawRotationInterpolation()
@@ -125,40 +117,40 @@ namespace UnityEngine.Networking
 			{
 				quaternion = Quaternion.Euler(0f, 0f, this.m_NetworkTransform.targetSyncRotation2D);
 			}
-			if (quaternion == Quaternion.identity)
+			if (!(quaternion == Quaternion.identity))
 			{
-				return;
+				GL.Begin(1);
+				GL.Color(Color.yellow);
+				GL.Vertex3(base.transform.position.x, base.transform.position.y, base.transform.position.z);
+				Vector3 vector = base.transform.position + base.transform.right;
+				GL.Vertex3(vector.x, vector.y, vector.z);
+				GL.End();
+				GL.Begin(1);
+				GL.Color(Color.green);
+				GL.Vertex3(base.transform.position.x, base.transform.position.y, base.transform.position.z);
+				Vector3 vector2 = quaternion * Vector3.right;
+				Vector3 vector3 = base.transform.position + vector2;
+				GL.Vertex3(vector3.x, vector3.y, vector3.z);
+				GL.End();
 			}
-			GL.Begin(1);
-			GL.Color(Color.yellow);
-			GL.Vertex3(base.transform.position.x, base.transform.position.y, base.transform.position.z);
-			Vector3 vector = base.transform.position + base.transform.right;
-			GL.Vertex3(vector.x, vector.y, vector.z);
-			GL.End();
-			GL.Begin(1);
-			GL.Color(Color.green);
-			GL.Vertex3(base.transform.position.x, base.transform.position.y, base.transform.position.z);
-			Vector3 vector2 = quaternion * Vector3.right;
-			Vector3 vector3 = base.transform.position + vector2;
-			GL.Vertex3(vector3.x, vector3.y, vector3.z);
-			GL.End();
 		}
 
 		private static void CreateLineMaterial()
 		{
-			if (NetworkTransformVisualizer.s_LineMaterial)
+			if (!NetworkTransformVisualizer.s_LineMaterial)
 			{
-				return;
+				Shader shader = Shader.Find("Hidden/Internal-Colored");
+				if (!shader)
+				{
+					Debug.LogWarning("Could not find Colored builtin shader");
+				}
+				else
+				{
+					NetworkTransformVisualizer.s_LineMaterial = new Material(shader);
+					NetworkTransformVisualizer.s_LineMaterial.hideFlags = HideFlags.HideAndDontSave;
+					NetworkTransformVisualizer.s_LineMaterial.SetInt("_ZWrite", 0);
+				}
 			}
-			Shader shader = Shader.Find("Hidden/Internal-Colored");
-			if (!shader)
-			{
-				Debug.LogWarning("Could not find Colored builtin shader");
-				return;
-			}
-			NetworkTransformVisualizer.s_LineMaterial = new Material(shader);
-			NetworkTransformVisualizer.s_LineMaterial.hideFlags = HideFlags.HideAndDontSave;
-			NetworkTransformVisualizer.s_LineMaterial.SetInt("_ZWrite", 0);
 		}
 
 		[SerializeField]

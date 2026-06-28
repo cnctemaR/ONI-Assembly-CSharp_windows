@@ -51,7 +51,7 @@ public class MarkovNameGenerator
 	{
 		get
 		{
-			string text = string.Empty;
+			string text;
 			do
 			{
 				int num = this._rnd.Next(this._samples.Count);
@@ -70,10 +70,10 @@ public class MarkovNameGenerator
 				if (text.Contains(" "))
 				{
 					string[] array = text.Split(new char[] { ' ' });
-					text = string.Empty;
+					text = "";
 					for (int i = 0; i < array.Length; i++)
 					{
-						if (!(array[i] == string.Empty))
+						if (!(array[i] == ""))
 						{
 							if (array[i].Length == 1)
 							{
@@ -83,7 +83,7 @@ public class MarkovNameGenerator
 							{
 								array[i] = array[i].Substring(0, 1) + array[i].Substring(1).ToLower();
 							}
-							if (text != string.Empty)
+							if (text != "")
 							{
 								text += " ";
 							}
@@ -109,13 +109,18 @@ public class MarkovNameGenerator
 
 	private char GetLetter(string token)
 	{
+		char c;
 		if (!this._chains.ContainsKey(token))
 		{
-			return '?';
+			c = '?';
 		}
-		List<char> list = this._chains[token];
-		int num = this._rnd.Next(list.Count);
-		return list[num];
+		else
+		{
+			List<char> list = this._chains[token];
+			int num = this._rnd.Next(list.Count);
+			c = list[num];
+		}
+		return c;
 	}
 
 	private Dictionary<string, List<char>> _chains = new Dictionary<string, List<char>>();

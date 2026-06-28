@@ -9,16 +9,21 @@ public class PlanterSideScreen : ReceptacleSideScreen
 	{
 		GameObject prefab = Assets.GetPrefab(prefabTag);
 		PlantableSeed component = prefab.GetComponent<PlantableSeed>();
+		Sprite sprite;
 		if (component != null)
 		{
-			return base.GetEntityIcon(new Tag(component.PlantID));
+			sprite = base.GetEntityIcon(new Tag(component.PlantID));
 		}
-		return base.GetEntityIcon(prefabTag);
+		else
+		{
+			sprite = base.GetEntityIcon(prefabTag);
+		}
+		return sprite;
 	}
 
 	protected override void SetResultDescriptions(GameObject seed_or_plant)
 	{
-		string text = string.Empty;
+		string text = "";
 		GameObject gameObject = seed_or_plant;
 		PlantableSeed component = seed_or_plant.GetComponent<PlantableSeed>();
 		List<Descriptor> list = new List<Descriptor>();

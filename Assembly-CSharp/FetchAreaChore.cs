@@ -6,7 +6,7 @@ using UnityEngine;
 public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 {
 	public FetchAreaChore(Chore.Precondition.Context context)
-		: base(context.chore.choreType, context.consumer, context.consumer.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true, 0)
+		: base(context.chore.choreType, context.consumer, context.consumer.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
 	{
 		this.smi = new FetchAreaChore.StatesInstance(this, context);
 	}
@@ -78,7 +78,6 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			List<ScenePartitionerEntry> list4 = GameScenePartitioner.Instance.ReserveList();
 			GameScenePartitioner.Instance.GatherEntries(num6, num7, num8, num8, GameScenePartitioner.Instance.pickupablesLayer, list4);
 			Tag prefabTag = pickupable.GetComponent<KPrefabID>().PrefabTag;
-			this.rootTag = prefabTag;
 			for (int j = 0; j < list4.Count; j++)
 			{
 				ScenePartitionerEntry scenePartitionerEntry2 = list4[j];
@@ -117,28 +116,31 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				}
 				Chore.Precondition.Context context2 = list2[k];
 				FetchChore fetchChore = context2.chore as FetchChore;
-				if (fetchChore != this.rootChore && context2.IsSuccess() && fetchChore.overrideTarget == null && fetchChore.driver == null && fetchChore.tags.Length == this.rootChore.tags.Length)
+				if (fetchChore != this.rootChore && context2.IsSuccess() && fetchChore.overrideTarget == null && fetchChore.driver == null)
 				{
-					bool flag = true;
-					for (int l = 0; l < fetchChore.tags.Length; l++)
+					if (fetchChore.tags.Length == this.rootChore.tags.Length)
 					{
-						Tag tag = fetchChore.tags[l];
-						if (Array.IndexOf<Tag>(this.rootChore.tags, tag) < 0)
+						bool flag = true;
+						for (int l = 0; l < fetchChore.tags.Length; l++)
 						{
-							flag = false;
-							break;
+							Tag tag = fetchChore.tags[l];
+							if (Array.IndexOf<Tag>(this.rootChore.tags, tag) < 0)
+							{
+								flag = false;
+								break;
+							}
 						}
-					}
-					if (flag)
-					{
-						num9 = Mathf.Min(fetchChore.originalAmount, num5 - num10);
-						if (minTakeAmount > 0f)
+						if (flag)
 						{
-							num9 -= num9 % minTakeAmount;
+							num9 = Mathf.Min(fetchChore.originalAmount, num5 - num10);
+							if (minTakeAmount > 0f)
+							{
+								num9 -= num9 % minTakeAmount;
+							}
+							this.chores.Add(fetchChore);
+							this.deliveries.Add(new FetchAreaChore.StatesInstance.Delivery(context2, num9, new Action<FetchChore>(this.OnFetchChoreCancelled)));
+							num10 += num9;
 						}
-						this.chores.Add(fetchChore);
-						this.deliveries.Add(new FetchAreaChore.StatesInstance.Delivery(context2, num9, new Action<FetchChore>(this.OnFetchChoreCancelled)));
-						num10 += num9;
 					}
 				}
 			}
@@ -332,8 +334,6 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 
 		private FetchChore rootChore;
 
-		private Tag rootTag;
-
 		private Chore.Precondition.Context rootContext;
 
 		private float fetchAmountRequested;
@@ -342,6 +342,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 		{
 			public Delivery(Chore.Precondition.Context context, float amount_to_be_fetched, Action<FetchChore> on_cancelled)
 			{
+				this = default(FetchAreaChore.StatesInstance.Delivery);
 				this.chore = context.chore as FetchChore;
 				this.amount = this.chore.originalAmount;
 				this.destination = this.chore.destination;
@@ -386,9 +387,12 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 								}
 							}
 						}
-						if (pickupable != null && this.chore.overrideTarget != null)
+						if (pickupable != null)
 						{
-							this.chore.FetchAreaEnd(this.chore.overrideTarget.GetComponent<ChoreDriver>(), pickupable, true);
+							if (this.chore.overrideTarget != null)
+							{
+								this.chore.FetchAreaEnd(this.chore.overrideTarget.GetComponent<ChoreDriver>(), pickupable, true);
+							}
 						}
 						this.chore = null;
 					}
@@ -422,6 +426,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 		{
 			public Reservation(ChoreConsumer consumer, Pickupable pickupable, float reservation_amount)
 			{
+				this = default(FetchAreaChore.StatesInstance.Reservation);
 				if (reservation_amount <= 0f)
 				{
 					global::Debug.LogError("Invalid amount: " + reservation_amount, null);
@@ -465,8 +470,12 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				smi.SetupFetch();
 			});
 			GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.ApproachSubState<Pickupable> movetopickupable = this.fetching.movetopickupable;
+			StateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.TargetParameter targetParameter = this.fetcher;
+			StateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.TargetParameter targetParameter2 = this.fetchTarget;
+			GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.State state = this.fetching.pickup;
+			GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.State state2 = this.fetching.fetchfail;
 			NavTactic navTactic = NavigationTactics.ReduceTravelDistance;
-			movetopickupable.InitializeStates(this.fetcher, this.fetchTarget, this.fetching.pickup, this.fetching.fetchfail, null, navTactic);
+			movetopickupable.InitializeStates(targetParameter, targetParameter2, state, state2, null, navTactic);
 			this.fetching.pickup.DoPickup(this.fetchTarget, this.fetchResultTarget, this.fetchAmount, this.fetching.fetchcomplete, this.fetching.fetchfail);
 			this.fetching.fetchcomplete.Enter(delegate(FetchAreaChore.StatesInstance smi)
 			{
@@ -485,25 +494,22 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				smi.SetupDelivery();
 			});
 			GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.ApproachSubState<Storage> movetostorage = this.delivering.movetostorage;
+			targetParameter2 = this.fetcher;
+			targetParameter = this.deliveryDestination;
+			state2 = this.delivering.storing;
+			state = this.delivering.deliverfail;
 			navTactic = NavigationTactics.ReduceTravelDistance;
-			movetostorage.InitializeStates(this.fetcher, this.deliveryDestination, this.delivering.storing, this.delivering.deliverfail, null, navTactic).Enter(delegate(FetchAreaChore.StatesInstance smi)
+			movetostorage.InitializeStates(targetParameter2, targetParameter, state2, state, null, navTactic).Enter(delegate(FetchAreaChore.StatesInstance smi)
 			{
 				if (this.deliveryObject.Get(smi) != null && this.deliveryObject.Get(smi).GetComponent<MinionIdentity>() != null)
 				{
-					KAnimFile anim = Assets.GetAnim("anim_incapacitated_carrier_kanim");
-					smi.master.GetComponent<KAnimControllerBase>().RemoveAnimOverrides(anim);
-					smi.master.GetComponent<KAnimControllerBase>().AddAnimOverrides(anim, 0f);
 					this.deliveryObject.Get(smi).transform.SetLocalPosition(Vector3.zero);
 					KBatchedAnimTracker component = this.deliveryObject.Get(smi).GetComponent<KBatchedAnimTracker>();
 					component.symbol = new HashedString("snapTo_pivot");
 					component.offset = new Vector3(0f, 0f, 1f);
 				}
-			}).Exit(delegate(FetchAreaChore.StatesInstance smi)
-			{
-				KAnimFile anim2 = Assets.GetAnim("anim_incapacitated_carrier_kanim");
-				smi.master.GetComponent<KAnimControllerBase>().RemoveAnimOverrides(anim2);
 			});
-			this.delivering.storing.ToggleStateMachine((FetchAreaChore.StatesInstance smi) => new MultitoolController.Instance(this.deliveryDestination.Get<Storage>(smi), this.fetcher.Get<Worker>(smi), "store", EffectPrefabs.Instance.PickupEffect)).ScheduleGoTo(1.5f, this.delivering.delivercomplete);
+			this.delivering.storing.DoDelivery(this.fetcher, this.deliveryDestination, this.delivering.delivercomplete, this.delivering.deliverfail);
 			this.delivering.deliverfail.Enter(delegate(FetchAreaChore.StatesInstance smi)
 			{
 				smi.DeliverFail();

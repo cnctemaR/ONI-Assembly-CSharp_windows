@@ -1,10 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 using UnityEngine;
 
 public class TreeFilterableSideScreenElement : KMonoBehaviour
 {
-	public event Action<Tag, bool> OnSelectionChanged;
-
 	public Tag GetElementTag()
 	{
 		return this.elementTag;
@@ -17,6 +16,9 @@ public class TreeFilterableSideScreenElement : KMonoBehaviour
 			return this.checkBox.isOn;
 		}
 	}
+
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	public event Action<Tag, bool> OnSelectionChanged;
 
 	public KToggle GetCheckboxToggle()
 	{
@@ -37,13 +39,12 @@ public class TreeFilterableSideScreenElement : KMonoBehaviour
 
 	private void Initialize()
 	{
-		if (this.initialized)
+		if (!this.initialized)
 		{
-			return;
+			this.checkBoxImg = this.checkBox.gameObject.GetComponentInChildrenOnly<KImage>();
+			this.checkBox.onClick += this.CheckBoxClicked;
+			this.initialized = true;
 		}
-		this.checkBoxImg = this.checkBox.gameObject.GetComponentInChildrenOnly<KImage>();
-		this.checkBox.onClick += this.CheckBoxClicked;
-		this.initialized = true;
 	}
 
 	protected override void OnSpawn()
@@ -118,5 +119,5 @@ public class TreeFilterableSideScreenElement : KMonoBehaviour
 
 	private TreeFilterableSideScreen parent;
 
-	private bool initialized;
+	private bool initialized = false;
 }

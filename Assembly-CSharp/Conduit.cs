@@ -25,9 +25,9 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback
 
 	protected override void OnPrefabInit()
 	{
-		this.Subscribe(-1201923725, new Action<object>(this.OnHighlighted));
-		this.Subscribe(-700727624, new Action<object>(this.OnConduitFrozen));
-		this.Subscribe(-1152799878, new Action<object>(this.OnConduitBoiling));
+		base.Subscribe(-1201923725, new Action<object>(this.OnHighlighted));
+		base.Subscribe(-700727624, new Action<object>(this.OnConduitFrozen));
+		base.Subscribe(-1152799878, new Action<object>(this.OnConduitBoiling));
 	}
 
 	protected override void OnSpawn()
@@ -36,7 +36,7 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback
 		if (this.IsInsulated)
 		{
 			ConduitFlowVisualizer flowVisualizer = this.GetFlowVisualizer();
-			flowVisualizer.SetInsulated(Grid.PosToCell(this.transform.position), true);
+			flowVisualizer.SetInsulated(Grid.PosToCell(base.transform.position), true);
 		}
 	}
 
@@ -45,15 +45,14 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback
 		if (this.IsInsulated)
 		{
 			ConduitFlowVisualizer flowVisualizer = this.GetFlowVisualizer();
-			flowVisualizer.SetInsulated(Grid.PosToCell(this.transform.position), false);
+			flowVisualizer.SetInsulated(Grid.PosToCell(base.transform.position), false);
 		}
-		int num = Grid.PosToCell(this.transform.position);
+		int num = Grid.PosToCell(base.transform.position);
 		BuildingComplete component = base.GetComponent<BuildingComplete>();
 		if (component.Def.ReplacementLayer == ObjectLayer.NumLayers || Grid.Objects[num, (int)component.Def.ReplacementLayer] == null)
 		{
-			IUtilityNetworkMgr networkManager = this.GetNetworkManager();
-			networkManager.RemoveFromNetworks(num, this, false);
-			networkManager.ConduitFlowManager.EmptyConduit(Grid.PosToCell(this.transform.position));
+			this.GetNetworkManager().RemoveFromNetworks(num, this, false);
+			this.GetFlowManager().EmptyConduit(Grid.PosToCell(base.transform.position));
 		}
 		base.OnCleanUp();
 	}
@@ -94,31 +93,31 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback
 	private void OnHighlighted(object data)
 	{
 		bool flag = (bool)data;
-		int num = ((!flag) ? (-1) : Grid.PosToCell(this.transform.position));
+		int num = ((!flag) ? (-1) : Grid.PosToCell(base.transform.position));
 		ConduitFlowVisualizer flowVisualizer = this.GetFlowVisualizer();
 		flowVisualizer.SetHighlightedCell(num);
 	}
 
 	private void OnConduitFrozen(object data)
 	{
-		this.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+		base.Trigger(-794517298, new BuildingHP.DamageSourceInfo
 		{
 			damage = int.MaxValue,
 			source = BUILDINGS.DAMAGESOURCES.CONDUIT_CONTENTS_FROZE,
 			popString = UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.CONDUIT_CONTENTS_FROZE
 		});
-		this.GetFlowManager().EmptyConduit(Grid.PosToCell(this.transform.position));
+		this.GetFlowManager().EmptyConduit(Grid.PosToCell(base.transform.position));
 	}
 
 	private void OnConduitBoiling(object data)
 	{
-		this.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+		base.Trigger(-794517298, new BuildingHP.DamageSourceInfo
 		{
 			damage = int.MaxValue,
 			source = BUILDINGS.DAMAGESOURCES.CONDUIT_CONTENTS_BOILED,
 			popString = UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.CONDUIT_CONTENTS_BOILED
 		});
-		this.GetFlowManager().EmptyConduit(Grid.PosToCell(this.transform.position));
+		this.GetFlowManager().EmptyConduit(Grid.PosToCell(base.transform.position));
 	}
 
 	[MyCmpReq]
@@ -126,5 +125,5 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback
 
 	public ConduitType type;
 
-	private global::System.Action firstFrameCallback;
+	private global::System.Action firstFrameCallback = null;
 }

@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using UnityEngine.Internal;
+using UnityEngine.Scripting;
 using UnityEngineInternal;
 
 namespace UnityEngine
 {
 	public sealed class AssetBundle : Object
 	{
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern AssetBundleCreateRequest LoadFromFileAsync(string path, [DefaultValue("0")] uint crc, [DefaultValue("0")] ulong offset);
 
@@ -26,7 +27,7 @@ namespace UnityEngine
 			return AssetBundle.LoadFromFileAsync(path, num2, num);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern AssetBundle LoadFromFile(string path, [DefaultValue("0")] uint crc, [DefaultValue("0")] ulong offset);
 
@@ -45,7 +46,7 @@ namespace UnityEngine
 			return AssetBundle.LoadFromFile(path, num2, num);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern AssetBundleCreateRequest LoadFromMemoryAsync(byte[] binary, [DefaultValue("0")] uint crc);
 
@@ -56,7 +57,7 @@ namespace UnityEngine
 			return AssetBundle.LoadFromMemoryAsync(binary, num);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern AssetBundle LoadFromMemory(byte[] binary, [DefaultValue("0")] uint crc);
 
@@ -69,19 +70,19 @@ namespace UnityEngine
 
 		public extern Object mainAsset
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern bool isStreamedSceneAssetBundle
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool Contains(string name);
 
@@ -97,19 +98,19 @@ namespace UnityEngine
 			return (T)((object)null);
 		}
 
-		[Obsolete("Method Load has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAsset instead and check the documentation for details.", true)]
-		[WrapperlessIcall]
 		[TypeInferenceRule(TypeInferenceRules.TypeReferencedBySecondArgument)]
+		[Obsolete("Method Load has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAsset instead and check the documentation for details.", true)]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Object Load(string name, Type type);
 
-		[WrapperlessIcall]
 		[Obsolete("Method LoadAsync has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAssetAsync instead and check the documentation for details.", true)]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern AssetBundleRequest LoadAsync(string name, Type type);
 
-		[WrapperlessIcall]
 		[Obsolete("Method LoadAll has been deprecated. Script updater cannot update it as the loading behaviour has changed. Please use LoadAllAssets instead and check the documentation for details.", true)]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Object[] LoadAll(Type type);
 
@@ -153,8 +154,8 @@ namespace UnityEngine
 			return this.LoadAsset_Internal(name, type);
 		}
 
-		[WrapperlessIcall]
 		[TypeInferenceRule(TypeInferenceRules.TypeReferencedBySecondArgument)]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern Object LoadAsset_Internal(string name, Type type);
 
@@ -185,7 +186,7 @@ namespace UnityEngine
 			return this.LoadAssetAsync_Internal(name, type);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern AssetBundleRequest LoadAssetAsync_Internal(string name, Type type);
 
@@ -216,7 +217,7 @@ namespace UnityEngine
 			return this.LoadAssetWithSubAssets_Internal(name, type);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern Object[] LoadAssetWithSubAssets_Internal(string name, Type type);
 
@@ -247,7 +248,7 @@ namespace UnityEngine
 			return this.LoadAssetWithSubAssetsAsync_Internal(name, type);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern AssetBundleRequest LoadAssetWithSubAssetsAsync_Internal(string name, Type type);
 
@@ -267,7 +268,7 @@ namespace UnityEngine
 			{
 				throw new NullReferenceException("The input type cannot be null.");
 			}
-			return this.LoadAssetWithSubAssets_Internal(string.Empty, type);
+			return this.LoadAssetWithSubAssets_Internal("", type);
 		}
 
 		public AssetBundleRequest LoadAllAssetsAsync()
@@ -286,10 +287,10 @@ namespace UnityEngine
 			{
 				throw new NullReferenceException("The input type cannot be null.");
 			}
-			return this.LoadAssetWithSubAssetsAsync_Internal(string.Empty, type);
+			return this.LoadAssetWithSubAssetsAsync_Internal("", type);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void Unload(bool unloadAllLoadedObjects);
 
@@ -299,11 +300,11 @@ namespace UnityEngine
 			return this.GetAllAssetNames();
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern string[] GetAllAssetNames();
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern string[] GetAllScenePaths();
 	}

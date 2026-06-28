@@ -4,7 +4,7 @@ using UnityEngine;
 public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesInstance>
 {
 	public RescueIncapacitatedChore(IStateMachineTarget master, GameObject incapacitatedDuplicant)
-		: base(Db.Get().ChoreTypes.RescueIncapacitated, master, null, false, null, null, null, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.RescueIncapacitated, master, null, false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
 	{
 		this.smi = new RescueIncapacitatedChore.StatesInstance(this);
 		base.runUntilComplete = true;
@@ -69,7 +69,7 @@ public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesIns
 				KAnimFile anim2 = Assets.GetAnim("anim_incapacitated_carrier_kanim");
 				smi.master.GetComponent<KAnimControllerBase>().RemoveAnimOverrides(anim2);
 			});
-			this.holding.pickup.Target(this.rescuer).PlayAnim("pickup", KAnim.PlayMode.Once, null).Enter(delegate(RescueIncapacitatedChore.StatesInstance smi)
+			this.holding.pickup.Target(this.rescuer).PlayAnim("pickup").Enter(delegate(RescueIncapacitatedChore.StatesInstance smi)
 			{
 				this.rescueTarget.Get(smi).gameObject.GetComponent<KBatchedAnimController>().Play("pickup", KAnim.PlayMode.Once, 1f, 0f);
 			})
@@ -96,13 +96,13 @@ public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesIns
 					smi.GoTo(this.holding.ditch);
 				}
 			});
-			this.holding.deposit.PlayAnim("place", KAnim.PlayMode.Once, null).EventHandler(GameHashes.AnimQueueComplete, delegate(RescueIncapacitatedChore.StatesInstance smi)
+			this.holding.deposit.PlayAnim("place").EventHandler(GameHashes.AnimQueueComplete, delegate(RescueIncapacitatedChore.StatesInstance smi)
 			{
 				smi.master.DropIncapacitatedDuplicant();
 				smi.SetStatus(StateMachine.Status.Success);
 				smi.StopSM("complete");
 			});
-			this.holding.ditch.PlayAnim("place", KAnim.PlayMode.Once, null).ScheduleGoTo(0.5f, this.failure).Exit(delegate(RescueIncapacitatedChore.StatesInstance smi)
+			this.holding.ditch.PlayAnim("place").ScheduleGoTo(0.5f, this.failure).Exit(delegate(RescueIncapacitatedChore.StatesInstance smi)
 			{
 				smi.master.DropIncapacitatedDuplicant();
 			});

@@ -23,7 +23,14 @@ public class WattsonMessage : KScreen
 		base.OnSpawn();
 		this.hideScreensWhileActive.Add(NotificationScreen.Instance);
 		this.hideScreensWhileActive.Add(OverlayMenu.Instance);
-		this.hideScreensWhileActive.Add(PlanScreen.Instance);
+		if (PlanScreen.Instance != null)
+		{
+			this.hideScreensWhileActive.Add(PlanScreen.Instance);
+		}
+		if (BuildMenu.Instance != null)
+		{
+			this.hideScreensWhileActive.Add(BuildMenu.Instance);
+		}
 		this.hideScreensWhileActive.Add(ManagementMenu.Instance);
 		this.hideScreensWhileActive.Add(ToolMenu.Instance);
 		this.hideScreensWhileActive.Add(ToolMenuPriorityScreen.Instance);
@@ -39,17 +46,16 @@ public class WattsonMessage : KScreen
 
 	public void Update()
 	{
-		if (!this.startFade)
+		if (this.startFade)
 		{
-			return;
+			Color color = this.bg.color;
+			color.a -= 0.01f;
+			if (color.a <= 0f)
+			{
+				color.a = 0f;
+			}
+			this.bg.color = color;
 		}
-		Color color = this.bg.color;
-		color.a -= 0.01f;
-		if (color.a <= 0f)
-		{
-			color.a = 0f;
-		}
-		this.bg.color = color;
 	}
 
 	protected override void OnActivate()
@@ -183,7 +189,7 @@ public class WattsonMessage : KScreen
 
 	private List<KScreen> hideScreensWhileActive = new List<KScreen>();
 
-	private bool startFade;
+	private bool startFade = false;
 
 	private List<SchedulerHandle> scheduleHandles = new List<SchedulerHandle>();
 

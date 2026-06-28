@@ -42,7 +42,7 @@ public class DirectionControl : KMonoBehaviour
 	{
 		base.OnSpawn();
 		this.SetAllowedDirection(this.allowedDirection);
-		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 	}
 
 	private void SetAllowedDirection(WorkableReactable.AllowedDirection new_direction)
@@ -96,8 +96,11 @@ public class DirectionControl : KMonoBehaviour
 		int num = (int)((WorkableReactable.AllowedDirection.Left + (int)this.allowedDirection) % (WorkableReactable.AllowedDirection)this.directionInfos.Length);
 		DirectionControl.DirectionInfo directionInfo = this.directionInfos[num];
 		UserMenu userMenu = this.userMenu;
+		string iconName = directionInfo.iconName;
+		string name = directionInfo.name;
+		global::System.Action action = new global::System.Action(this.OnChangeWorkableDirection);
 		string tooltip = directionInfo.tooltip;
-		userMenu.AddButton(new KIconButtonMenu.ButtonInfo(directionInfo.iconName, directionInfo.name, new global::System.Action(this.OnChangeWorkableDirection), global::Action.NumActions, null, null, null, tooltip, true), 0f);
+		userMenu.AddButton(new KIconButtonMenu.ButtonInfo(iconName, name, action, global::Action.NumActions, null, null, null, tooltip, true), 0f);
 	}
 
 	[Serialize]

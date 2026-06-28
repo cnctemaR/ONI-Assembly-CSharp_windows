@@ -8,7 +8,14 @@ public class Ladder : KMonoBehaviour, IEffectDescriptor
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		Grid.HasLadder[Grid.PosToCell(this)] = true;
+		if (this.isPole)
+		{
+			Grid.HasPole[Grid.PosToCell(this)] = true;
+		}
+		else
+		{
+			Grid.HasLadder[Grid.PosToCell(this)] = true;
+		}
 		Components.Ladders.Add(this);
 	}
 
@@ -21,22 +28,33 @@ public class Ladder : KMonoBehaviour, IEffectDescriptor
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
-		Grid.HasLadder[Grid.PosToCell(this)] = false;
+		if (this.isPole)
+		{
+			Grid.HasPole[Grid.PosToCell(this)] = false;
+		}
+		else
+		{
+			Grid.HasLadder[Grid.PosToCell(this)] = false;
+		}
 		Components.Ladders.Remove(this);
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = null;
-		if (this.movementSpeedMultiplier != 1f)
+		if (this.upwardsMovementSpeedMultiplier != 1f)
 		{
 			list = new List<Descriptor>();
 			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.DUPLICANTMOVEMENTBOOST, GameUtil.GetFormattedPercent(this.movementSpeedMultiplier * 100f - 100f, GameUtil.TimeSlice.None)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.DUPLICANTMOVEMENTBOOST, GameUtil.GetFormattedPercent(this.movementSpeedMultiplier * 100f - 100f, GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Effect);
+			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.DUPLICANTMOVEMENTBOOST, GameUtil.GetFormattedPercent(this.upwardsMovementSpeedMultiplier * 100f - 100f, GameUtil.TimeSlice.None)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.DUPLICANTMOVEMENTBOOST, GameUtil.GetFormattedPercent(this.upwardsMovementSpeedMultiplier * 100f - 100f, GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Effect);
 			list.Add(descriptor);
 		}
 		return list;
 	}
 
-	public float movementSpeedMultiplier = 1f;
+	public float upwardsMovementSpeedMultiplier = 1f;
+
+	public float downwardsMovementSpeedMultiplier = 1f;
+
+	public bool isPole = false;
 }

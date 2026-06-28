@@ -110,13 +110,13 @@ namespace VoronoiTree
 			float num9 = 1f;
 			for (int l = 0; l < sites.Count; l++)
 			{
-				Diagram.<UpdateWeights>c__AnonStorey2D <UpdateWeights>c__AnonStorey2D = new Diagram.<UpdateWeights>c__AnonStorey2D();
+				Diagram.<UpdateWeights>c__AnonStorey0 <UpdateWeights>c__AnonStorey = new Diagram.<UpdateWeights>c__AnonStorey0();
 				Diagram.Site site4 = sites[l];
-				<UpdateWeights>c__AnonStorey2D.neighbours = this.diagram.ListNeighborSitesIDsForSite(this.points[l]);
+				<UpdateWeights>c__AnonStorey.neighbours = this.diagram.ListNeighborSitesIDsForSite(this.points[l]);
 				int nIndex;
-				for (nIndex = 0; nIndex < <UpdateWeights>c__AnonStorey2D.neighbours.Count; nIndex++)
+				for (nIndex = 0; nIndex < <UpdateWeights>c__AnonStorey.neighbours.Count; nIndex++)
 				{
-					Diagram.Site site5 = sites.Find((Diagram.Site s) => s.id == <UpdateWeights>c__AnonStorey2D.neighbours[nIndex]);
+					Diagram.Site site5 = sites.Find((Diagram.Site s) => s.id == <UpdateWeights>c__AnonStorey.neighbours[nIndex]);
 					float num10 = (site4.position - site5.position).sqrMagnitude / (Mathf.Abs(site4.currentWeight - site5.currentWeight) + 1f);
 					if (num10 < num9)
 					{
@@ -189,26 +189,34 @@ namespace VoronoiTree
 
 		public bool IsTopEdgeCell(int cell)
 		{
+			bool flag;
 			if (cell < 0 || cell >= this.points.Count)
 			{
-				return false;
+				flag = false;
 			}
-			List<Vector2> list = this.diagram.Region(this.points[cell]);
-			if (list.Count == 0)
+			else
 			{
-				return false;
-			}
-			Vector2 vector = list[0];
-			for (int i = 1; i < list.Count; i++)
-			{
-				Vector2 vector2 = list[i];
-				if (vector.y == vector2.y && vector2.y == this.bounds.height)
+				List<Vector2> list = this.diagram.Region(this.points[cell]);
+				if (list.Count == 0)
 				{
-					return true;
+					flag = false;
 				}
-				vector = vector2;
+				else
+				{
+					Vector2 vector = list[0];
+					for (int i = 1; i < list.Count; i++)
+					{
+						Vector2 vector2 = list[i];
+						if (vector.y == vector2.y && vector2.y == this.bounds.height)
+						{
+							return true;
+						}
+						vector = vector2;
+					}
+					flag = vector.y == list[0].y && list[0].y == this.bounds.height;
+				}
 			}
-			return vector.y == list[0].y && list[0].y == this.bounds.height;
+			return flag;
 		}
 
 		public static int maxPowerIterations;
@@ -225,7 +233,7 @@ namespace VoronoiTree
 
 		private List<uint> ids = new List<uint>();
 
-		public int siteIndex;
+		public int siteIndex = 0;
 
 		[SerializationConfig(MemberSerialization.OptIn)]
 		public class Site
@@ -264,10 +272,10 @@ namespace VoronoiTree
 			public Vector2 position;
 
 			[Serialize]
-			public Polygon poly;
+			public Polygon poly = null;
 
 			[Serialize]
-			public HashSet<KeyValuePair<uint, int>> neighbours;
+			public HashSet<KeyValuePair<uint, int>> neighbours = null;
 		}
 	}
 }

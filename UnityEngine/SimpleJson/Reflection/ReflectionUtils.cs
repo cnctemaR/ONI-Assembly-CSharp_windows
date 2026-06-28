@@ -12,20 +12,30 @@ namespace SimpleJson.Reflection
 	{
 		public static Attribute GetAttribute(MemberInfo info, Type type)
 		{
+			Attribute attribute;
 			if (info == null || type == null || !Attribute.IsDefined(info, type))
 			{
-				return null;
+				attribute = null;
 			}
-			return Attribute.GetCustomAttribute(info, type);
+			else
+			{
+				attribute = Attribute.GetCustomAttribute(info, type);
+			}
+			return attribute;
 		}
 
 		public static Attribute GetAttribute(Type objectType, Type attributeType)
 		{
+			Attribute attribute;
 			if (objectType == null || attributeType == null || !Attribute.IsDefined(objectType, attributeType))
 			{
-				return null;
+				attribute = null;
 			}
-			return Attribute.GetCustomAttribute(objectType, attributeType);
+			else
+			{
+				attribute = Attribute.GetCustomAttribute(objectType, attributeType);
+			}
+			return attribute;
 		}
 
 		public static Type[] GetGenericTypeArguments(Type type)
@@ -35,12 +45,17 @@ namespace SimpleJson.Reflection
 
 		public static bool IsTypeGenericeCollectionInterface(Type type)
 		{
+			bool flag;
 			if (!type.IsGenericType)
 			{
-				return false;
+				flag = false;
 			}
-			Type genericTypeDefinition = type.GetGenericTypeDefinition();
-			return genericTypeDefinition == typeof(IList<>) || genericTypeDefinition == typeof(ICollection<>) || genericTypeDefinition == typeof(IEnumerable<>);
+			else
+			{
+				Type genericTypeDefinition = type.GetGenericTypeDefinition();
+				flag = genericTypeDefinition == typeof(IList<>) || genericTypeDefinition == typeof(ICollection<>) || genericTypeDefinition == typeof(IEnumerable<>);
+			}
+			return flag;
 		}
 
 		public static bool IsAssignableFrom(Type type1, Type type2)
@@ -50,16 +65,21 @@ namespace SimpleJson.Reflection
 
 		public static bool IsTypeDictionary(Type type)
 		{
+			bool flag;
 			if (typeof(IDictionary).IsAssignableFrom(type))
 			{
-				return true;
+				flag = true;
 			}
-			if (!type.IsGenericType)
+			else if (!type.IsGenericType)
 			{
-				return false;
+				flag = false;
 			}
-			Type genericTypeDefinition = type.GetGenericTypeDefinition();
-			return genericTypeDefinition == typeof(IDictionary<, >);
+			else
+			{
+				Type genericTypeDefinition = type.GetGenericTypeDefinition();
+				flag = genericTypeDefinition == typeof(IDictionary<, >);
+			}
+			return flag;
 		}
 
 		public static bool IsNullableType(Type type)
@@ -200,28 +220,36 @@ namespace SimpleJson.Reflection
 
 		private static readonly object[] EmptyObjects = new object[0];
 
-		public sealed class ThreadSafeDictionary<TKey, TValue> : IEnumerable, IDictionary<TKey, TValue>, ICollection<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>>
+		public delegate object GetDelegate(object source);
+
+		public delegate void SetDelegate(object source, object value);
+
+		public delegate object ConstructorDelegate(params object[] args);
+
+		public delegate TValue ThreadSafeDictionaryValueFactory<TKey, TValue>(TKey key);
+
+		public sealed class ThreadSafeDictionary<TKey, TValue> : IDictionary<TKey, TValue>, ICollection<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>>, IEnumerable
 		{
 			public ThreadSafeDictionary(ReflectionUtils.ThreadSafeDictionaryValueFactory<TKey, TValue> valueFactory)
 			{
 				this._valueFactory = valueFactory;
 			}
 
-			IEnumerator IEnumerable.GetEnumerator()
-			{
-				return this._dictionary.GetEnumerator();
-			}
-
 			private TValue Get(TKey key)
 			{
+				TValue tvalue;
+				TValue tvalue2;
 				if (this._dictionary == null)
 				{
-					return this.AddValue(key);
+					tvalue = this.AddValue(key);
 				}
-				TValue tvalue;
-				if (!this._dictionary.TryGetValue(key, out tvalue))
+				else if (!this._dictionary.TryGetValue(key, out tvalue2))
 				{
-					return this.AddValue(key);
+					tvalue = this.AddValue(key);
+				}
+				else
+				{
+					tvalue = tvalue2;
 				}
 				return tvalue;
 			}
@@ -347,19 +375,16 @@ namespace SimpleJson.Reflection
 				return this._dictionary.GetEnumerator();
 			}
 
+			IEnumerator IEnumerable.GetEnumerator()
+			{
+				return this._dictionary.GetEnumerator();
+			}
+
 			private readonly object _lock = new object();
 
 			private readonly ReflectionUtils.ThreadSafeDictionaryValueFactory<TKey, TValue> _valueFactory;
 
 			private Dictionary<TKey, TValue> _dictionary;
 		}
-
-		public delegate object GetDelegate(object source);
-
-		public delegate void SetDelegate(object source, object value);
-
-		public delegate object ConstructorDelegate(params object[] args);
-
-		public delegate TValue ThreadSafeDictionaryValueFactory<TKey, TValue>(TKey key);
 	}
 }

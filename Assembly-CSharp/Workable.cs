@@ -61,7 +61,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	public virtual HashedString[] GetWorkAnims(Worker worker)
 	{
-		return Workable.DefaultWorkAnims;
+		return this.workAnims;
 	}
 
 	public virtual Vector3 GetWorkOffset()
@@ -129,21 +129,31 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	public virtual float GetEfficiencyMultiplier(Worker worker)
 	{
+		float num;
 		if (this.attributeConverter != null)
 		{
 			AttributeConverterInstance converter = worker.GetComponent<AttributeConverters>().GetConverter(this.attributeConverter.Id);
-			return Mathf.Max(1f + converter.Evaluate(), 0.1f);
+			num = Mathf.Max(1f + converter.Evaluate(), 0.1f);
 		}
-		return 1f;
+		else
+		{
+			num = 1f;
+		}
+		return num;
 	}
 
 	public virtual global::Klei.AI.Attribute GetWorkAttribute()
 	{
+		global::Klei.AI.Attribute attribute;
 		if (this.attributeConverter != null)
 		{
-			return this.attributeConverter.attribute;
+			attribute = this.attributeConverter.attribute;
 		}
-		return null;
+		else
+		{
+			attribute = null;
+		}
+		return attribute;
 	}
 
 	public void SetAttributeConverter(AttributeConverter attributeConverter)
@@ -260,31 +270,29 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	protected virtual void CreateProgressBar()
 	{
-		if (this.progressBar != null)
+		if (!(this.progressBar != null))
 		{
-			return;
+			if (this.showProgressBar)
+			{
+				this.progressBar = Util.KInstantiateUI<ProgressBar>(ProgressBarsConfig.Instance.progressBarPrefab, null, false);
+				this.progressBar.SetUpdateFunc(new Func<float>(this.GetPercentComplete));
+				this.progressBar.transform.SetParent(GameScreenManager.Instance.worldSpaceCanvas.transform);
+				this.progressBar.name = base.name + "." + base.GetType().Name + " ProgressBar";
+				this.progressBar.transform.Find("Bar").GetComponent<Image>().color = ProgressBarsConfig.Instance.GetBarColor("ProgressBar");
+				this.progressBar.Update();
+				Building component = base.GetComponent<Building>();
+				Vector3 vector = base.gameObject.transform.position + Vector3.down * this.progressbar_y_offset;
+				if (component != null)
+				{
+					vector = vector - Vector3.right * 0.5f * (float)(component.Def.WidthInCells % 2) + component.Def.placementPivot;
+				}
+				else
+				{
+					vector -= Vector3.right * 0.5f;
+				}
+				this.progressBar.transform.SetPosition(vector);
+			}
 		}
-		if (!this.showProgressBar)
-		{
-			return;
-		}
-		this.progressBar = Util.KInstantiateUI<ProgressBar>(ProgressBarsConfig.Instance.progressBarPrefab, null, false);
-		this.progressBar.SetUpdateFunc(new Func<float>(this.GetPercentComplete));
-		this.progressBar.transform.SetParent(GameScreenManager.Instance.worldSpaceCanvas.transform);
-		this.progressBar.name = base.name + "." + base.GetType().Name + " ProgressBar";
-		this.progressBar.transform.FindChild("Bar").GetComponent<Image>().color = ProgressBarsConfig.Instance.GetBarColor("ProgressBar");
-		this.progressBar.Update();
-		Building component = base.GetComponent<Building>();
-		Vector3 vector = base.gameObject.transform.position + Vector3.down * this.progressbar_y_offset;
-		if (component != null)
-		{
-			vector = vector - Vector3.right * 0.5f * (float)(component.Def.WidthInCells % 2) + component.Def.placementPivot;
-		}
-		else
-		{
-			vector -= Vector3.right * 0.5f;
-		}
-		this.progressBar.transform.SetPosition(vector);
 	}
 
 	public void ShowProgressBar(bool show)
@@ -312,7 +320,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	public virtual Vector3 GetTargetPoint()
 	{
-		Vector3 vector = this.transform.position;
+		Vector3 vector = base.transform.position;
 		float num = vector.y + 0.65f;
 		BoxCollider2D component = base.GetComponent<BoxCollider2D>();
 		if (component != null)
@@ -334,9 +342,12 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 			if (Grid.IsValidCell(num3))
 			{
 				int navigationCost = navigator.GetNavigationCost(num3);
-				if (navigationCost != PathProber.InvalidCost && (num == PathProber.InvalidCost || navigationCost < num))
+				if (navigationCost != PathProber.InvalidCost)
 				{
-					num = navigationCost;
+					if (num == PathProber.InvalidCost || navigationCost < num)
+					{
+						num = navigationCost;
+					}
 				}
 			}
 		}
@@ -345,35 +356,32 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	private void TransferDiseaseWithWorker(Worker worker)
 	{
-		if (this == null || worker == null)
+		if (!(this == null) && !(worker == null))
 		{
-			return;
-		}
-		PrimaryElement component = base.GetComponent<PrimaryElement>();
-		if (component == null)
-		{
-			return;
-		}
-		PrimaryElement component2 = worker.GetComponent<PrimaryElement>();
-		if (component2 == null)
-		{
-			return;
-		}
-		SimUtil.DiseaseInfo invalid = SimUtil.DiseaseInfo.Invalid;
-		invalid.idx = component2.DiseaseIdx;
-		invalid.count = (int)((float)component2.DiseaseCount * 0.33f);
-		SimUtil.DiseaseInfo invalid2 = SimUtil.DiseaseInfo.Invalid;
-		invalid2.idx = component.DiseaseIdx;
-		invalid2.count = (int)((float)component.DiseaseCount * 0.33f);
-		component2.ModifyDiseaseCount(-invalid.count, "Workable.TransferDiseaseWithWorker");
-		component.ModifyDiseaseCount(-invalid2.count, "Workable.TransferDiseaseWithWorker");
-		if (invalid.count > 0)
-		{
-			component.AddDisease(invalid.idx, invalid.count, "Workable.TransferDiseaseWithWorker");
-		}
-		if (invalid2.count > 0)
-		{
-			component2.AddDisease(invalid2.idx, invalid2.count, "Workable.TransferDiseaseWithWorker");
+			PrimaryElement component = base.GetComponent<PrimaryElement>();
+			if (!(component == null))
+			{
+				PrimaryElement component2 = worker.GetComponent<PrimaryElement>();
+				if (!(component2 == null))
+				{
+					SimUtil.DiseaseInfo invalid = SimUtil.DiseaseInfo.Invalid;
+					invalid.idx = component2.DiseaseIdx;
+					invalid.count = (int)((float)component2.DiseaseCount * 0.33f);
+					SimUtil.DiseaseInfo invalid2 = SimUtil.DiseaseInfo.Invalid;
+					invalid2.idx = component.DiseaseIdx;
+					invalid2.count = (int)((float)component.DiseaseCount * 0.33f);
+					component2.ModifyDiseaseCount(-invalid.count, "Workable.TransferDiseaseWithWorker");
+					component.ModifyDiseaseCount(-invalid2.count, "Workable.TransferDiseaseWithWorker");
+					if (invalid.count > 0)
+					{
+						component.AddDisease(invalid.idx, invalid.count, "Workable.TransferDiseaseWithWorker");
+					}
+					if (invalid2.count > 0)
+					{
+						component2.AddDisease(invalid2.idx, invalid2.count, "Workable.TransferDiseaseWithWorker");
+					}
+				}
+			}
 		}
 	}
 
@@ -397,6 +405,11 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		}
 	}
 
+	Transform IApproachable.get_transform()
+	{
+		return base.transform;
+	}
+
 	public float workTime;
 
 	public Vector3 AnimOffset = Vector3.zero;
@@ -409,7 +422,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	protected StatusItem workingStatusItem;
 
-	protected object statusItemData;
+	protected object statusItemData = null;
 
 	protected OffsetTracker offsetTracker;
 
@@ -438,7 +451,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	[SerializeField]
 	[Tooltip("Whether to display number of uses in the details panel")]
-	public bool trackUses;
+	public bool trackUses = false;
 
 	[Serialize]
 	protected int numberOfUses;
@@ -454,13 +467,15 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	public global::System.Action OnWorkStoppedCB;
 
-	protected bool faceTargetWhenWorking;
+	public HashedString[] workAnims = new HashedString[] { "working_pre", "working_loop" };
+
+	protected bool faceTargetWhenWorking = false;
 
 	public global::System.Action onPriorityChanged;
 
 	protected static readonly HashedString[] DefaultWorkAnims = new HashedString[] { "working_pre", "working_loop" };
 
-	protected ProgressBar progressBar;
+	protected ProgressBar progressBar = null;
 
 	public struct AnimInfo
 	{

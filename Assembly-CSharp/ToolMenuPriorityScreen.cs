@@ -1,12 +1,11 @@
 ﻿using System;
-using STRINGS;
 
 public class ToolMenuPriorityScreen : PriorityScreen
 {
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.buttons = base.InstantiateButtons(new Action<int>(this.OnClick), UI.PRIORITYSCREEN.TOOLPRIORITYTOOLTIP, false);
+		base.InstantiateButtons(new Action<PriorityScreen.PriorityClass, int>(this.OnClick), "STRINGS.UI.PRIORITYSCREEN.TOOLPRIORITYTOOLTIP", false);
 		ToolMenuPriorityScreen.Instance = this;
 	}
 
@@ -19,12 +18,12 @@ public class ToolMenuPriorityScreen : PriorityScreen
 	protected override void OnCmpEnable()
 	{
 		base.OnCmpEnable();
-		base.SetScreenPriority(5, false);
+		base.SetScreenPriority(PriorityScreen.PriorityClass.basic, 5, false);
 	}
 
-	private void OnClick(int priority)
+	private void OnClick(PriorityScreen.PriorityClass priorityClass, int priority)
 	{
-		base.SetScreenPriority(priority, false);
+		base.SetScreenPriority(priorityClass, priority, false);
 	}
 
 	public static ToolMenuPriorityScreen Instance;

@@ -36,15 +36,15 @@ public class Uprootable : Workable
 		base.OnPrefabInit();
 		this.pendingStatusItem = Db.Get().MiscStatusItems.PendingUproot;
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Uprooting;
-		this.Subscribe(1309017699, new Action<object>(this.OnPlanterStorage));
+		base.Subscribe(1309017699, new Action<object>(this.OnPlanterStorage));
 	}
 
 	protected override void OnSpawn()
 	{
-		this.Subscribe(2127324410, new Action<object>(this.ForceCancelUproot));
+		base.Subscribe(2127324410, new Action<object>(this.ForceCancelUproot));
 		base.SetWorkTime(12.5f);
-		this.Subscribe(2127324410, new Action<object>(this.OnCancel));
-		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(2127324410, new Action<object>(this.OnCancel));
+		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		this.faceTargetWhenWorking = true;
 		Components.Uprootables.Add(this);
 		this.area = base.GetComponent<OccupyArea>();
@@ -75,7 +75,7 @@ public class Uprootable : Workable
 		this.isMarkedForUproot = false;
 		this.chore = null;
 		this.uprootComplete = true;
-		this.Trigger(-216549700, this);
+		base.Trigger(-216549700, this);
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingUproot, false);
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.Operating, false);
 		this.userMenu.Refresh();
@@ -98,20 +98,19 @@ public class Uprootable : Workable
 
 	public void MarkForUproot()
 	{
-		if (!this.canBeUprooted)
+		if (this.canBeUprooted)
 		{
-			return;
+			if (DebugHandler.InstantBuildMode)
+			{
+				this.Uproot();
+			}
+			else if (this.chore == null)
+			{
+				this.chore = new WorkChore<Uprootable>(Db.Get().ChoreTypes.Uproot, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+				base.GetComponent<KSelectable>().AddStatusItem(this.pendingStatusItem, this);
+			}
+			this.isMarkedForUproot = true;
 		}
-		if (DebugHandler.InstantBuildMode)
-		{
-			this.Uproot();
-		}
-		else if (this.chore == null)
-		{
-			this.chore = new WorkChore<Uprootable>(Db.Get().ChoreTypes.Uproot, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue);
-			base.GetComponent<KSelectable>().AddStatusItem(this.pendingStatusItem, this);
-		}
-		this.isMarkedForUproot = true;
 	}
 
 	protected override void OnCompleteWork(Worker worker)
@@ -163,23 +162,27 @@ public class Uprootable : Workable
 					SelectTool.Instance.Select(null, false);
 				}
 			}
-			return;
 		}
-		if (!this.canBeUprooted)
+		else if (this.canBeUprooted)
 		{
-			return;
-		}
-		if (this.chore != null)
-		{
-			UserMenu userMenu = this.userMenu;
-			string text = this.cancelButtonTooltip;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_uproot", this.cancelButtonLabel, new global::System.Action(this.OnClickCancelUproot), global::Action.NumActions, null, null, null, text, true), 1f);
-		}
-		else
-		{
-			UserMenu userMenu2 = this.userMenu;
-			string text = this.buttonTooltip;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_uproot", this.buttonLabel, new global::System.Action(this.OnClickUproot), global::Action.NumActions, null, null, null, text, true), 1f);
+			if (this.chore != null)
+			{
+				UserMenu userMenu = this.userMenu;
+				string text = "action_uproot";
+				string text2 = this.cancelButtonLabel;
+				global::System.Action action = new global::System.Action(this.OnClickCancelUproot);
+				string text3 = this.cancelButtonTooltip;
+				userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+			}
+			else
+			{
+				UserMenu userMenu2 = this.userMenu;
+				string text3 = "action_uproot";
+				string text2 = this.buttonLabel;
+				global::System.Action action = new global::System.Action(this.OnClickUproot);
+				string text = this.buttonTooltip;
+				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
+			}
 		}
 	}
 
@@ -208,7 +211,7 @@ public class Uprootable : Workable
 	[Serialize]
 	protected bool isMarkedForUproot;
 
-	protected bool uprootComplete;
+	protected bool uprootComplete = false;
 
 	[MyCmpAdd]
 	private Prioritizable prioritizable;

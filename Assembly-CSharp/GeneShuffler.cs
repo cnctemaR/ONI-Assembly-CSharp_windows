@@ -66,9 +66,12 @@ public class GeneShuffler : Ownable
 	public override void Assign(IAssignableIdentity new_assignee)
 	{
 		base.Assign(new_assignee);
-		if (this.geneShufflerSMI != null && !this.geneShufflerSMI.IsInsideState(this.geneShufflerSMI.sm.consumed))
+		if (this.geneShufflerSMI != null)
 		{
-			this.ActivateChore(null);
+			if (!this.geneShufflerSMI.IsInsideState(this.geneShufflerSMI.sm.consumed))
+			{
+				this.ActivateChore(null);
+			}
 		}
 	}
 
@@ -85,7 +88,7 @@ public class GeneShuffler : Ownable
 	{
 		base.OnStartWork(worker);
 		this.notification = new Notification(MISC.NOTIFICATIONS.GENESHUFFLER.NAME, NotificationType.Good, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.GENESHUFFLER.TOOLTIP + notificationList.ReduceMessages(false), null, false, 0f, null, null, null);
-		this.notifier.Add(this.notification, string.Empty);
+		this.notifier.Add(this.notification, "");
 		if (base.GetComponent<KSelectable>().IsSelected)
 		{
 			SelectTool.Instance.Select(null, true);
@@ -121,7 +124,7 @@ public class GeneShuffler : Ownable
 	protected override void OnCompleteWork(Worker worker)
 	{
 		base.OnCompleteWork(worker);
-		CameraController.Instance.CameraGoTo(this.transform.position, 1f, false);
+		CameraController.Instance.CameraGoTo(base.transform.position, 1f, false);
 		this.ApplyRandomTrait(worker);
 		this.assignable.Unassign();
 		if (base.GetComponent<KSelectable>().IsSelected)
@@ -166,24 +169,23 @@ public class GeneShuffler : Ownable
 			this.CancelChore(null);
 		}
 		base.GetComponent<Workable>().SetWorkTime(float.PositiveInfinity);
-		Action<Chore> action = delegate(Chore o)
+		ChoreType geneShuffle = Db.Get().ChoreTypes.GeneShuffle;
+		KAnimFile anim = Assets.GetAnim("anim_interacts_neuralvacillator_kanim");
+		this.chore = new WorkChore<Workable>(geneShuffle, this, null, true, delegate(Chore o)
 		{
 			this.CompleteChore();
-		};
-		KAnimFile anim = Assets.GetAnim("anim_interacts_neuralvacillator_kanim");
-		this.chore = new WorkChore<Workable>(Db.Get().ChoreTypes.GeneShuffle, this, null, true, action, null, null, true, null, true, default(Tag), anim, false, true, true, int.MaxValue);
+		}, null, null, true, null, true, default(Tag), anim, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
 		this.chore.AddPrecondition(ChorePreconditions.IsAssignedtoMe, this.assignable);
 		this.chore.AddPrecondition(ChorePreconditions.IsOperational, this.assignable.gameObject);
 	}
 
 	public void CancelChore(object param = null)
 	{
-		if (this.chore == null)
+		if (this.chore != null)
 		{
-			return;
+			this.chore.Cancel("User cancelled");
+			this.chore = null;
 		}
-		this.chore.Cancel("User cancelled");
-		this.chore = null;
 	}
 
 	private void CompleteChore()
@@ -213,9 +215,9 @@ public class GeneShuffler : Ownable
 		{
 			base.serializable = false;
 			default_state = this.idle;
-			this.idle.PlayAnim("idle", KAnim.PlayMode.Once, null).WorkableStartTransition((GeneShuffler.GeneShufflerSM.Instance smi) => smi.master, this.working.pre);
-			this.working.pre.PlayAnim("working_pre", KAnim.PlayMode.Once, null).EventTransition(GameHashes.AnimQueueComplete, this.working.loop, null);
-			this.working.loop.PlayAnim("working_loop", KAnim.PlayMode.Loop, null).ScheduleGoTo(5f, this.working.complete);
+			this.idle.PlayAnim("idle").WorkableStartTransition((GeneShuffler.GeneShufflerSM.Instance smi) => smi.master, this.working.pre);
+			this.working.pre.PlayAnim("working_pre").EventTransition(GameHashes.AnimQueueComplete, this.working.loop, null);
+			this.working.loop.PlayAnim("working_loop", KAnim.PlayMode.Loop).ScheduleGoTo(5f, this.working.complete);
 			this.working.complete.ToggleStatusItem(Db.Get().BuildingStatusItems.GeneShuffleCompleted, null).Enter(delegate(GeneShuffler.GeneShufflerSM.Instance smi)
 			{
 				if (smi.master.selectable.IsSelected)
@@ -224,7 +226,7 @@ public class GeneShuffler : Ownable
 				}
 			}).WorkableStopTransition((GeneShuffler.GeneShufflerSM.Instance smi) => smi.master, this.working.pst);
 			this.working.pst.EventTransition(GameHashes.AnimQueueComplete, this.consumed, null);
-			this.consumed.PlayAnim("off", KAnim.PlayMode.Once, null).Enter(delegate(GeneShuffler.GeneShufflerSM.Instance smi)
+			this.consumed.PlayAnim("off", KAnim.PlayMode.Once).Enter(delegate(GeneShuffler.GeneShufflerSM.Instance smi)
 			{
 				smi.master.IsConsumed = true;
 			});

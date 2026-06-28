@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Threading;
 using UnityEngine;
 
@@ -127,20 +126,20 @@ public static class Debug
 	}
 
 	[Conditional("UNITY_EDITOR")]
-	public static void DrawLine(Vector3 start, Vector3 end, [Optional] Color color, float duration = 0f, bool depthTest = true)
+	public static void DrawLine(Vector3 start, Vector3 end, Color color = default(Color), float duration = 0f, bool depthTest = true)
 	{
 		global::UnityEngine.Debug.DrawLine(start, end, color, duration, depthTest);
 	}
 
 	[Conditional("UNITY_EDITOR")]
-	public static void DrawRay(Vector3 start, Vector3 dir, [Optional] Color color, float duration = 0f, bool depthTest = true)
+	public static void DrawRay(Vector3 start, Vector3 dir, Color color = default(Color), float duration = 0f, bool depthTest = true)
 	{
 		global::UnityEngine.Debug.DrawRay(start, dir, color, duration, depthTest);
 	}
 
 	public static string BuildString(object[] objs)
 	{
-		string text = string.Empty;
+		string text = "";
 		if (objs.Length > 0)
 		{
 			text = ((objs[0] == null) ? "null" : objs[0].ToString());

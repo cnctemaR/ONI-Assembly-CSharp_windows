@@ -9,7 +9,7 @@ public class Placeable : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 	}
 
 	protected override void OnSpawn()
@@ -48,11 +48,10 @@ public class Placeable : KMonoBehaviour
 		{
 			this.chore.Cancel("new target");
 		}
-		Action<Chore> action = new Action<Chore>(this.OnChoreComplete);
 		this.chore = new FetchChore(this.preview.GetComponent<Storage>(), 1f, new Tag[]
 		{
 			new Tag(this.prefabId.InstanceID.ToString())
-		}, null, null, true, action, null, null, FetchOrder2.OperationalRequirement.None, 0);
+		}, null, null, true, new Action<Chore>(this.OnChoreComplete), null, null, FetchOrder2.OperationalRequirement.None, 0);
 	}
 
 	private void OnChoreComplete(Chore completed_chore)
@@ -70,7 +69,6 @@ public class Placeable : KMonoBehaviour
 
 	private void OpenPlaceTool()
 	{
-		PrimaryElement component = base.GetComponent<PrimaryElement>();
 		PlaceTool.Instance.Activate(this, this.previewTag);
 	}
 
@@ -79,14 +77,20 @@ public class Placeable : KMonoBehaviour
 		if (this.targetCell == -1)
 		{
 			UserMenu userMenu = this.userMenu;
-			string text = UI.USERMENUACTIONS.RELOCATE.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_deconstruct", UI.USERMENUACTIONS.RELOCATE.NAME, new global::System.Action(this.OpenPlaceTool), global::Action.NumActions, null, null, null, text, true), 1f);
+			string text = "action_deconstruct";
+			string text2 = UI.USERMENUACTIONS.RELOCATE.NAME;
+			global::System.Action action = new global::System.Action(this.OpenPlaceTool);
+			string text3 = UI.USERMENUACTIONS.RELOCATE.TOOLTIP;
+			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
 		}
 		else
 		{
 			UserMenu userMenu2 = this.userMenu;
+			string text3 = "action_deconstruct";
+			string text2 = UI.USERMENUACTIONS.RELOCATE.NAME_OFF;
+			global::System.Action action = new global::System.Action(this.CancelRelocation);
 			string text = UI.USERMENUACTIONS.RELOCATE.TOOLTIP_OFF;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_deconstruct", UI.USERMENUACTIONS.RELOCATE.NAME_OFF, new global::System.Action(this.CancelRelocation), global::Action.NumActions, null, null, null, text, true), 1f);
+			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
 		}
 	}
 

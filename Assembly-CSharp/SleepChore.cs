@@ -4,7 +4,7 @@ using UnityEngine;
 public class SleepChore : Chore<SleepChore.StatesInstance>
 {
 	public SleepChore(IStateMachineTarget target, GameObject bed)
-		: base(Db.Get().ChoreTypes.Sleep, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.Sleep, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
 	{
 		this.smi = new SleepChore.StatesInstance(this, target.gameObject, bed);
 		base.AddPrecondition(ChorePreconditions.IsNotRedAlert, null);
@@ -15,12 +15,10 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 		}
 	}
 
-	// Note: this type is marked as 'beforefieldinit'.
-	static SleepChore()
+	public static Chore.Precondition IsOkayTimeToSleep = new Chore.Precondition
 	{
-		Chore.Precondition precondition = default(Chore.Precondition);
-		precondition.id = "IsOkayTimeToSleep";
-		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
+		id = "IsOkayTimeToSleep",
+		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			Narcolepsy component = context.consumer.GetComponent<Narcolepsy>();
 			bool flag = component != null && component.IsNarcolepsing();
@@ -28,11 +26,8 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 			bool flag2 = smi != null && smi.NeedsToSleep();
 			bool flag3 = ChorePreconditions.IsScheduledTime.fn(ref context, Db.Get().ScheduleBlockTypes.Sleep);
 			return flag || flag3 || flag2;
-		};
-		SleepChore.IsOkayTimeToSleep = precondition;
-	}
-
-	public static Chore.Precondition IsOkayTimeToSleep;
+		}
+	};
 
 	public class StatesInstance : GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.GameInstance
 	{
@@ -74,18 +69,27 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 			Sleepable sleepable = base.sm.bed.Get<Sleepable>(base.smi);
 			if (sleepable.GetComponent<Building>() == null)
 			{
-				string text = ((base.sm.sleeper.Get<Navigator>(base.smi).CurrentNavType != NavType.Ladder) ? "anim_sleep_floor_kanim" : "anim_sleep_ladder_kanim");
+				NavType currentNavType = base.sm.sleeper.Get<Navigator>(base.smi).CurrentNavType;
+				string text;
+				if (currentNavType != NavType.Ladder && currentNavType != NavType.Pole)
+				{
+					text = "anim_sleep_floor_kanim";
+				}
+				else
+				{
+					text = "anim_sleep_ladder_kanim";
+				}
 				sleepable.overrideAnims = new KAnimFile[] { Assets.GetAnim(text) };
 			}
 		}
 
-		public bool hadPeacefulSleep;
+		public bool hadPeacefulSleep = false;
 
-		public bool hadNormalSleep;
+		public bool hadNormalSleep = false;
 
-		public bool hadBadSleep;
+		public bool hadBadSleep = false;
 
-		public bool hadTerribleSleep;
+		public bool hadTerribleSleep = false;
 
 		public int lastEvaluatedDay = -1;
 
@@ -95,7 +99,7 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 
 		private int locatorCell;
 
-		private GameObject locator;
+		private GameObject locator = null;
 	}
 
 	public class States : GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore>

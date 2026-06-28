@@ -86,26 +86,29 @@ public class ChoreConsumer : KMonoBehaviour
 			for (int j = this.contexts.Count - 1; j >= 0; j--)
 			{
 				Chore.Precondition.Context context = this.contexts[j];
-				if (context.IsSuccess() && (currentChore == null || context.interruptPriority > currentChore.choreType.interruptPriority))
+				if (context.IsSuccess())
 				{
-					bool flag2 = false;
-					if (currentChore != null)
+					if (currentChore == null || context.interruptPriority > currentChore.choreType.interruptPriority)
 					{
-						for (int k = 0; k < currentChore.choreType.interruptExclusion.Count; k++)
+						bool flag2 = false;
+						if (currentChore != null)
 						{
-							if (context.chore.choreType.tags.Contains(currentChore.choreType.interruptExclusion[k]))
+							for (int k = 0; k < currentChore.choreType.interruptExclusion.Count; k++)
 							{
-								flag2 = true;
-								break;
+								if (context.chore.choreType.tags.Contains(currentChore.choreType.interruptExclusion[k]))
+								{
+									flag2 = true;
+									break;
+								}
 							}
 						}
-					}
-					if (!flag2)
-					{
-						context.chore.PrepareChore(ref context);
-						out_context = context;
-						flag = true;
-						break;
+						if (!flag2)
+						{
+							context.chore.PrepareChore(ref context);
+							out_context = context;
+							flag = true;
+							break;
+						}
 					}
 				}
 			}
@@ -129,14 +132,14 @@ public class ChoreConsumer : KMonoBehaviour
 		this.Log("(AddUrge)", urge.ToString());
 		DebugUtil.Assert(urge != null, "Assert!");
 		this.urges.Add(urge);
-		this.Trigger(-736698276, urge);
+		base.Trigger(-736698276, urge);
 	}
 
 	public void RemoveUrge(Urge urge)
 	{
 		this.Log("(RemoveUrge)", urge.ToString());
 		this.urges.Remove(urge);
-		this.Trigger(231622047, urge);
+		base.Trigger(231622047, urge);
 	}
 
 	public bool HasUrge(Urge urge)
@@ -155,19 +158,24 @@ public class ChoreConsumer : KMonoBehaviour
 
 	public bool IsPermittedOrEnabled(Chore chore)
 	{
+		bool flag;
 		if (chore.choreType.groups.Length == 0)
 		{
-			return true;
+			flag = true;
 		}
-		for (int i = 0; i < chore.choreType.groups.Length; i++)
+		else
 		{
-			ChoreGroup choreGroup = chore.choreType.groups[i];
-			if (this.IsPermitted(choreGroup) && this.IsEnabled(choreGroup))
+			for (int i = 0; i < chore.choreType.groups.Length; i++)
 			{
-				return true;
+				ChoreGroup choreGroup = chore.choreType.groups[i];
+				if (this.IsPermitted(choreGroup) && this.IsEnabled(choreGroup))
+				{
+					return true;
+				}
 			}
+			flag = false;
 		}
-		return false;
+		return flag;
 	}
 
 	[MyCmpAdd]
@@ -175,6 +183,9 @@ public class ChoreConsumer : KMonoBehaviour
 
 	[MyCmpReq]
 	public Navigator navigator;
+
+	[MyCmpReq]
+	public MinionResume resume;
 
 	[MyCmpAdd]
 	private User user;

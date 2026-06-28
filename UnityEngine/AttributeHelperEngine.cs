@@ -83,5 +83,37 @@ namespace UnityEngine
 			}
 			return false;
 		}
+
+		[RequiredByNativeCode]
+		private static int GetDefaultExecutionOrderFor(Type klass)
+		{
+			DefaultExecutionOrder customAttributeOfType = AttributeHelperEngine.GetCustomAttributeOfType<DefaultExecutionOrder>(klass);
+			int num;
+			if (customAttributeOfType == null)
+			{
+				num = 0;
+			}
+			else
+			{
+				num = customAttributeOfType.order;
+			}
+			return num;
+		}
+
+		private static T GetCustomAttributeOfType<T>(Type klass) where T : Attribute
+		{
+			Type typeFromHandle = typeof(T);
+			object[] customAttributes = klass.GetCustomAttributes(typeFromHandle, true);
+			T t;
+			if (customAttributes != null && customAttributes.Length != 0)
+			{
+				t = (T)((object)customAttributes[0]);
+			}
+			else
+			{
+				t = (T)((object)null);
+			}
+			return t;
+		}
 	}
 }

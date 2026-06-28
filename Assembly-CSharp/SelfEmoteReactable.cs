@@ -10,11 +10,16 @@ public class SelfEmoteReactable : EmoteReactable
 
 	public override bool InternalCanBegin(GameObject reactor, Navigator.ActiveTransition transition)
 	{
+		bool flag;
 		if (reactor == null)
 		{
-			return false;
+			flag = false;
 		}
-		Navigator component = reactor.GetComponent<Navigator>();
-		return !(component == null) && component.IsMoving() && this.reactionSource == reactor;
+		else
+		{
+			Navigator component = reactor.GetComponent<Navigator>();
+			flag = !(component == null) && component.IsMoving() && this.reactionSource == reactor;
+		}
+		return flag;
 	}
 }

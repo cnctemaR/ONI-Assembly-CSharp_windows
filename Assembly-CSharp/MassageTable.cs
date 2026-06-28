@@ -7,21 +7,6 @@ using UnityEngine;
 
 public class MassageTable : RelaxationPoint, IEffectDescriptor, IActivationRangeTarget
 {
-	// Note: this type is marked as 'beforefieldinit'.
-	static MassageTable()
-	{
-		Chore.Precondition precondition = default(Chore.Precondition);
-		precondition.id = "IsStressAboveActivationRange";
-		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
-		{
-			IActivationRangeTarget activationRangeTarget = (IActivationRangeTarget)data;
-			AmountInstance amountInstance = Db.Get().Amounts.Stress.Lookup(context.consumer.gameObject);
-			float value = amountInstance.value;
-			return value >= activationRangeTarget.ActivateValue;
-		};
-		MassageTable.IsStressAboveActivationRange = precondition;
-	}
-
 	public string ActivateTooltip
 	{
 		get
@@ -41,7 +26,7 @@ public class MassageTable : RelaxationPoint, IEffectDescriptor, IActivationRange
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
+		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
 	}
 
 	private void OnCopySettings(object data)
@@ -99,7 +84,7 @@ public class MassageTable : RelaxationPoint, IEffectDescriptor, IActivationRange
 
 	protected override WorkChore<RelaxationPoint> CreateWorkChore()
 	{
-		WorkChore<RelaxationPoint> workChore = new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, true, null, null, null, false, null, true, default(Tag), null, false, true, true, int.MaxValue);
+		WorkChore<RelaxationPoint> workChore = new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, true, null, null, null, false, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
 		workChore.AddPrecondition(MassageTable.IsStressAboveActivationRange, this);
 		return workChore;
 	}
@@ -157,5 +142,15 @@ public class MassageTable : RelaxationPoint, IEffectDescriptor, IActivationRange
 
 	private static readonly string[] EffectsRemoved = new string[] { "SoreBack" };
 
-	private static Chore.Precondition IsStressAboveActivationRange;
+	private static Chore.Precondition IsStressAboveActivationRange = new Chore.Precondition
+	{
+		id = "IsStressAboveActivationRange",
+		fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			IActivationRangeTarget activationRangeTarget = (IActivationRangeTarget)data;
+			AmountInstance amountInstance = Db.Get().Amounts.Stress.Lookup(context.consumer.gameObject);
+			float value = amountInstance.value;
+			return value >= activationRangeTarget.ActivateValue;
+		}
+	};
 }

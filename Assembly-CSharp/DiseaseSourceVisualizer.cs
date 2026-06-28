@@ -22,16 +22,14 @@ public class DiseaseSourceVisualizer : KMonoBehaviour
 
 	private void CreateVisualizer()
 	{
-		if (this.visualizer != null)
+		if (!(this.visualizer != null))
 		{
-			return;
+			if (!(GameScreenManager.Instance.worldSpaceCanvas == null))
+			{
+				this.visualizer = Util.KInstantiate(Assets.UIPrefabs.ResourceVisualizer, GameScreenManager.Instance.worldSpaceCanvas, null);
+				this.visualizer.SetActive(false);
+			}
 		}
-		if (GameScreenManager.Instance.worldSpaceCanvas == null)
-		{
-			return;
-		}
-		this.visualizer = Util.KInstantiate(Assets.UIPrefabs.ResourceVisualizer, GameScreenManager.Instance.worldSpaceCanvas, null);
-		this.visualizer.SetActive(false);
 	}
 
 	public void UpdateVisibility()
@@ -76,11 +74,10 @@ public class DiseaseSourceVisualizer : KMonoBehaviour
 
 	private void Update()
 	{
-		if (this.visualizer == null)
+		if (!(this.visualizer == null))
 		{
-			return;
+			this.visualizer.transform.position = base.transform.position + this.offset;
 		}
-		this.visualizer.transform.position = this.transform.position + this.offset;
 	}
 
 	private void OnViewModeChanged(SimViewMode mode)
@@ -102,7 +99,7 @@ public class DiseaseSourceVisualizer : KMonoBehaviour
 
 	private GameObject visualizer;
 
-	private bool visible;
+	private bool visible = false;
 
-	public string alwaysShowDisease;
+	public string alwaysShowDisease = null;
 }

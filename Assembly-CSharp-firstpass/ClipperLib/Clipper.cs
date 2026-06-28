@@ -71,75 +71,84 @@ namespace ClipperLib
 				{
 					scanbeam = scanbeam.Next;
 				}
-				if (Y == scanbeam.Y)
+				if (Y != scanbeam.Y)
 				{
-					return;
+					scanbeam.Next = new Scanbeam
+					{
+						Y = Y,
+						Next = scanbeam.Next
+					};
 				}
-				scanbeam.Next = new Scanbeam
-				{
-					Y = Y,
-					Next = scanbeam.Next
-				};
 			}
 		}
 
 		public bool Execute(ClipType clipType, List<List<IntPoint>> solution, PolyFillType subjFillType, PolyFillType clipFillType)
 		{
+			bool flag;
 			if (this.m_ExecuteLocked)
 			{
-				return false;
+				flag = false;
 			}
-			if (this.m_HasOpenPaths)
+			else
 			{
-				throw new ClipperException("Error: PolyTree struct is need for open path clipping.");
-			}
-			this.m_ExecuteLocked = true;
-			solution.Clear();
-			this.m_SubjFillType = subjFillType;
-			this.m_ClipFillType = clipFillType;
-			this.m_ClipType = clipType;
-			this.m_UsingPolyTree = false;
-			bool flag;
-			try
-			{
-				flag = this.ExecuteInternal();
-				if (flag)
+				if (this.m_HasOpenPaths)
 				{
-					this.BuildResult(solution);
+					throw new ClipperException("Error: PolyTree struct is need for open path clipping.");
 				}
-			}
-			finally
-			{
-				this.DisposeAllPolyPts();
-				this.m_ExecuteLocked = false;
+				this.m_ExecuteLocked = true;
+				solution.Clear();
+				this.m_SubjFillType = subjFillType;
+				this.m_ClipFillType = clipFillType;
+				this.m_ClipType = clipType;
+				this.m_UsingPolyTree = false;
+				bool flag2;
+				try
+				{
+					flag2 = this.ExecuteInternal();
+					if (flag2)
+					{
+						this.BuildResult(solution);
+					}
+				}
+				finally
+				{
+					this.DisposeAllPolyPts();
+					this.m_ExecuteLocked = false;
+				}
+				flag = flag2;
 			}
 			return flag;
 		}
 
 		public bool Execute(ClipType clipType, PolyTree polytree, PolyFillType subjFillType, PolyFillType clipFillType)
 		{
+			bool flag;
 			if (this.m_ExecuteLocked)
 			{
-				return false;
+				flag = false;
 			}
-			this.m_ExecuteLocked = true;
-			this.m_SubjFillType = subjFillType;
-			this.m_ClipFillType = clipFillType;
-			this.m_ClipType = clipType;
-			this.m_UsingPolyTree = true;
-			bool flag;
-			try
+			else
 			{
-				flag = this.ExecuteInternal();
-				if (flag)
+				this.m_ExecuteLocked = true;
+				this.m_SubjFillType = subjFillType;
+				this.m_ClipFillType = clipFillType;
+				this.m_ClipType = clipType;
+				this.m_UsingPolyTree = true;
+				bool flag2;
+				try
 				{
-					this.BuildResult2(polytree);
+					flag2 = this.ExecuteInternal();
+					if (flag2)
+					{
+						this.BuildResult2(polytree);
+					}
 				}
-			}
-			finally
-			{
-				this.DisposeAllPolyPts();
-				this.m_ExecuteLocked = false;
+				finally
+				{
+					this.DisposeAllPolyPts();
+					this.m_ExecuteLocked = false;
+				}
+				flag = flag2;
 			}
 			return flag;
 		}
@@ -156,16 +165,15 @@ namespace ClipperLib
 
 		internal void FixHoleLinkage(OutRec outRec)
 		{
-			if (outRec.FirstLeft == null || (outRec.IsHole != outRec.FirstLeft.IsHole && outRec.FirstLeft.Pts != null))
+			if (outRec.FirstLeft != null && (outRec.IsHole == outRec.FirstLeft.IsHole || outRec.FirstLeft.Pts == null))
 			{
-				return;
+				OutRec outRec2 = outRec.FirstLeft;
+				while (outRec2 != null && (outRec2.IsHole == outRec.IsHole || outRec2.Pts == null))
+				{
+					outRec2 = outRec2.FirstLeft;
+				}
+				outRec.FirstLeft = outRec2;
 			}
-			OutRec outRec2 = outRec.FirstLeft;
-			while (outRec2 != null && (outRec2.IsHole == outRec.IsHole || outRec2.Pts == null))
-			{
-				outRec2 = outRec2.FirstLeft;
-			}
-			outRec.FirstLeft = outRec2;
 		}
 
 		private bool ExecuteInternal()
@@ -199,10 +207,10 @@ namespace ClipperLib
 						num = num2;
 					}
 					while (this.m_Scanbeam != null || this.m_CurrentLM != null);
-					goto IL_0083;
+					goto IL_0085;
 					Block_4:
 					return false;
-					IL_0083:
+					IL_0085:
 					for (int i = 0; i < this.m_PolyOuts.Count; i++)
 					{
 						OutRec outRec = this.m_PolyOuts[i];
@@ -405,33 +413,51 @@ namespace ClipperLib
 
 		private bool E2InsertsBeforeE1(TEdge e1, TEdge e2)
 		{
-			if (e2.Curr.X != e1.Curr.X)
+			bool flag;
+			if (e2.Curr.X == e1.Curr.X)
 			{
-				return e2.Curr.X < e1.Curr.X;
+				if (e2.Top.Y > e1.Top.Y)
+				{
+					flag = e2.Top.X < Clipper.TopX(e1, e2.Top.Y);
+				}
+				else
+				{
+					flag = e1.Top.X > Clipper.TopX(e2, e1.Top.Y);
+				}
 			}
-			if (e2.Top.Y > e1.Top.Y)
+			else
 			{
-				return e2.Top.X < Clipper.TopX(e1, e2.Top.Y);
+				flag = e2.Curr.X < e1.Curr.X;
 			}
-			return e1.Top.X > Clipper.TopX(e2, e1.Top.Y);
+			return flag;
 		}
 
 		private bool IsEvenOddFillType(TEdge edge)
 		{
+			bool flag;
 			if (edge.PolyTyp == PolyType.ptSubject)
 			{
-				return this.m_SubjFillType == PolyFillType.pftEvenOdd;
+				flag = this.m_SubjFillType == PolyFillType.pftEvenOdd;
 			}
-			return this.m_ClipFillType == PolyFillType.pftEvenOdd;
+			else
+			{
+				flag = this.m_ClipFillType == PolyFillType.pftEvenOdd;
+			}
+			return flag;
 		}
 
 		private bool IsEvenOddAltFillType(TEdge edge)
 		{
+			bool flag;
 			if (edge.PolyTyp == PolyType.ptSubject)
 			{
-				return this.m_ClipFillType == PolyFillType.pftEvenOdd;
+				flag = this.m_ClipFillType == PolyFillType.pftEvenOdd;
 			}
-			return this.m_SubjFillType == PolyFillType.pftEvenOdd;
+			else
+			{
+				flag = this.m_SubjFillType == PolyFillType.pftEvenOdd;
+			}
+			return flag;
 		}
 
 		private bool IsContributing(TEdge edge)
@@ -475,6 +501,7 @@ namespace ClipperLib
 				}
 				break;
 			}
+			bool flag;
 			switch (this.m_ClipType)
 			{
 			case ClipType.ctIntersection:
@@ -482,11 +509,14 @@ namespace ClipperLib
 				{
 				case PolyFillType.pftEvenOdd:
 				case PolyFillType.pftNonZero:
-					return edge.WindCnt2 != 0;
+					flag = edge.WindCnt2 != 0;
+					break;
 				case PolyFillType.pftPositive:
-					return edge.WindCnt2 > 0;
+					flag = edge.WindCnt2 > 0;
+					break;
 				default:
-					return edge.WindCnt2 < 0;
+					flag = edge.WindCnt2 < 0;
+					break;
 				}
 				break;
 			case ClipType.ctUnion:
@@ -494,11 +524,14 @@ namespace ClipperLib
 				{
 				case PolyFillType.pftEvenOdd:
 				case PolyFillType.pftNonZero:
-					return edge.WindCnt2 == 0;
+					flag = edge.WindCnt2 == 0;
+					break;
 				case PolyFillType.pftPositive:
-					return edge.WindCnt2 <= 0;
+					flag = edge.WindCnt2 <= 0;
+					break;
 				default:
-					return edge.WindCnt2 >= 0;
+					flag = edge.WindCnt2 >= 0;
+					break;
 				}
 				break;
 			case ClipType.ctDifference:
@@ -508,11 +541,14 @@ namespace ClipperLib
 					{
 					case PolyFillType.pftEvenOdd:
 					case PolyFillType.pftNonZero:
-						return edge.WindCnt2 == 0;
+						flag = edge.WindCnt2 == 0;
+						break;
 					case PolyFillType.pftPositive:
-						return edge.WindCnt2 <= 0;
+						flag = edge.WindCnt2 <= 0;
+						break;
 					default:
-						return edge.WindCnt2 >= 0;
+						flag = edge.WindCnt2 >= 0;
+						break;
 					}
 				}
 				else
@@ -521,33 +557,44 @@ namespace ClipperLib
 					{
 					case PolyFillType.pftEvenOdd:
 					case PolyFillType.pftNonZero:
-						return edge.WindCnt2 != 0;
+						flag = edge.WindCnt2 != 0;
+						break;
 					case PolyFillType.pftPositive:
-						return edge.WindCnt2 > 0;
+						flag = edge.WindCnt2 > 0;
+						break;
 					default:
-						return edge.WindCnt2 < 0;
+						flag = edge.WindCnt2 < 0;
+						break;
 					}
 				}
 				break;
 			case ClipType.ctXor:
-				if (edge.WindDelta != 0)
+				if (edge.WindDelta == 0)
 				{
-					return true;
+					switch (polyFillType2)
+					{
+					case PolyFillType.pftEvenOdd:
+					case PolyFillType.pftNonZero:
+						flag = edge.WindCnt2 == 0;
+						break;
+					case PolyFillType.pftPositive:
+						flag = edge.WindCnt2 <= 0;
+						break;
+					default:
+						flag = edge.WindCnt2 >= 0;
+						break;
+					}
 				}
-				switch (polyFillType2)
+				else
 				{
-				case PolyFillType.pftEvenOdd:
-				case PolyFillType.pftNonZero:
-					return edge.WindCnt2 == 0;
-				case PolyFillType.pftPositive:
-					return edge.WindCnt2 <= 0;
-				default:
-					return edge.WindCnt2 >= 0;
+					flag = true;
 				}
 				break;
 			default:
-				return true;
+				flag = true;
+				break;
 			}
+			return flag;
 		}
 
 		private void SetWindingCount(TEdge edge)
@@ -677,155 +724,152 @@ namespace ClipperLib
 
 		private void SwapPositionsInAEL(TEdge edge1, TEdge edge2)
 		{
-			if (edge1.NextInAEL == edge1.PrevInAEL || edge2.NextInAEL == edge2.PrevInAEL)
+			if (edge1.NextInAEL != edge1.PrevInAEL && edge2.NextInAEL != edge2.PrevInAEL)
 			{
-				return;
-			}
-			if (edge1.NextInAEL == edge2)
-			{
-				TEdge nextInAEL = edge2.NextInAEL;
-				if (nextInAEL != null)
+				if (edge1.NextInAEL == edge2)
 				{
-					nextInAEL.PrevInAEL = edge1;
+					TEdge nextInAEL = edge2.NextInAEL;
+					if (nextInAEL != null)
+					{
+						nextInAEL.PrevInAEL = edge1;
+					}
+					TEdge prevInAEL = edge1.PrevInAEL;
+					if (prevInAEL != null)
+					{
+						prevInAEL.NextInAEL = edge2;
+					}
+					edge2.PrevInAEL = prevInAEL;
+					edge2.NextInAEL = edge1;
+					edge1.PrevInAEL = edge2;
+					edge1.NextInAEL = nextInAEL;
 				}
-				TEdge prevInAEL = edge1.PrevInAEL;
-				if (prevInAEL != null)
+				else if (edge2.NextInAEL == edge1)
 				{
-					prevInAEL.NextInAEL = edge2;
+					TEdge nextInAEL2 = edge1.NextInAEL;
+					if (nextInAEL2 != null)
+					{
+						nextInAEL2.PrevInAEL = edge2;
+					}
+					TEdge prevInAEL2 = edge2.PrevInAEL;
+					if (prevInAEL2 != null)
+					{
+						prevInAEL2.NextInAEL = edge1;
+					}
+					edge1.PrevInAEL = prevInAEL2;
+					edge1.NextInAEL = edge2;
+					edge2.PrevInAEL = edge1;
+					edge2.NextInAEL = nextInAEL2;
 				}
-				edge2.PrevInAEL = prevInAEL;
-				edge2.NextInAEL = edge1;
-				edge1.PrevInAEL = edge2;
-				edge1.NextInAEL = nextInAEL;
-			}
-			else if (edge2.NextInAEL == edge1)
-			{
-				TEdge nextInAEL2 = edge1.NextInAEL;
-				if (nextInAEL2 != null)
+				else
 				{
-					nextInAEL2.PrevInAEL = edge2;
+					TEdge nextInAEL3 = edge1.NextInAEL;
+					TEdge prevInAEL3 = edge1.PrevInAEL;
+					edge1.NextInAEL = edge2.NextInAEL;
+					if (edge1.NextInAEL != null)
+					{
+						edge1.NextInAEL.PrevInAEL = edge1;
+					}
+					edge1.PrevInAEL = edge2.PrevInAEL;
+					if (edge1.PrevInAEL != null)
+					{
+						edge1.PrevInAEL.NextInAEL = edge1;
+					}
+					edge2.NextInAEL = nextInAEL3;
+					if (edge2.NextInAEL != null)
+					{
+						edge2.NextInAEL.PrevInAEL = edge2;
+					}
+					edge2.PrevInAEL = prevInAEL3;
+					if (edge2.PrevInAEL != null)
+					{
+						edge2.PrevInAEL.NextInAEL = edge2;
+					}
 				}
-				TEdge prevInAEL2 = edge2.PrevInAEL;
-				if (prevInAEL2 != null)
+				if (edge1.PrevInAEL == null)
 				{
-					prevInAEL2.NextInAEL = edge1;
+					this.m_ActiveEdges = edge1;
 				}
-				edge1.PrevInAEL = prevInAEL2;
-				edge1.NextInAEL = edge2;
-				edge2.PrevInAEL = edge1;
-				edge2.NextInAEL = nextInAEL2;
-			}
-			else
-			{
-				TEdge nextInAEL3 = edge1.NextInAEL;
-				TEdge prevInAEL3 = edge1.PrevInAEL;
-				edge1.NextInAEL = edge2.NextInAEL;
-				if (edge1.NextInAEL != null)
+				else if (edge2.PrevInAEL == null)
 				{
-					edge1.NextInAEL.PrevInAEL = edge1;
+					this.m_ActiveEdges = edge2;
 				}
-				edge1.PrevInAEL = edge2.PrevInAEL;
-				if (edge1.PrevInAEL != null)
-				{
-					edge1.PrevInAEL.NextInAEL = edge1;
-				}
-				edge2.NextInAEL = nextInAEL3;
-				if (edge2.NextInAEL != null)
-				{
-					edge2.NextInAEL.PrevInAEL = edge2;
-				}
-				edge2.PrevInAEL = prevInAEL3;
-				if (edge2.PrevInAEL != null)
-				{
-					edge2.PrevInAEL.NextInAEL = edge2;
-				}
-			}
-			if (edge1.PrevInAEL == null)
-			{
-				this.m_ActiveEdges = edge1;
-			}
-			else if (edge2.PrevInAEL == null)
-			{
-				this.m_ActiveEdges = edge2;
 			}
 		}
 
 		private void SwapPositionsInSEL(TEdge edge1, TEdge edge2)
 		{
-			if (edge1.NextInSEL == null && edge1.PrevInSEL == null)
+			if (edge1.NextInSEL != null || edge1.PrevInSEL != null)
 			{
-				return;
-			}
-			if (edge2.NextInSEL == null && edge2.PrevInSEL == null)
-			{
-				return;
-			}
-			if (edge1.NextInSEL == edge2)
-			{
-				TEdge nextInSEL = edge2.NextInSEL;
-				if (nextInSEL != null)
+				if (edge2.NextInSEL != null || edge2.PrevInSEL != null)
 				{
-					nextInSEL.PrevInSEL = edge1;
+					if (edge1.NextInSEL == edge2)
+					{
+						TEdge nextInSEL = edge2.NextInSEL;
+						if (nextInSEL != null)
+						{
+							nextInSEL.PrevInSEL = edge1;
+						}
+						TEdge prevInSEL = edge1.PrevInSEL;
+						if (prevInSEL != null)
+						{
+							prevInSEL.NextInSEL = edge2;
+						}
+						edge2.PrevInSEL = prevInSEL;
+						edge2.NextInSEL = edge1;
+						edge1.PrevInSEL = edge2;
+						edge1.NextInSEL = nextInSEL;
+					}
+					else if (edge2.NextInSEL == edge1)
+					{
+						TEdge nextInSEL2 = edge1.NextInSEL;
+						if (nextInSEL2 != null)
+						{
+							nextInSEL2.PrevInSEL = edge2;
+						}
+						TEdge prevInSEL2 = edge2.PrevInSEL;
+						if (prevInSEL2 != null)
+						{
+							prevInSEL2.NextInSEL = edge1;
+						}
+						edge1.PrevInSEL = prevInSEL2;
+						edge1.NextInSEL = edge2;
+						edge2.PrevInSEL = edge1;
+						edge2.NextInSEL = nextInSEL2;
+					}
+					else
+					{
+						TEdge nextInSEL3 = edge1.NextInSEL;
+						TEdge prevInSEL3 = edge1.PrevInSEL;
+						edge1.NextInSEL = edge2.NextInSEL;
+						if (edge1.NextInSEL != null)
+						{
+							edge1.NextInSEL.PrevInSEL = edge1;
+						}
+						edge1.PrevInSEL = edge2.PrevInSEL;
+						if (edge1.PrevInSEL != null)
+						{
+							edge1.PrevInSEL.NextInSEL = edge1;
+						}
+						edge2.NextInSEL = nextInSEL3;
+						if (edge2.NextInSEL != null)
+						{
+							edge2.NextInSEL.PrevInSEL = edge2;
+						}
+						edge2.PrevInSEL = prevInSEL3;
+						if (edge2.PrevInSEL != null)
+						{
+							edge2.PrevInSEL.NextInSEL = edge2;
+						}
+					}
+					if (edge1.PrevInSEL == null)
+					{
+						this.m_SortedEdges = edge1;
+					}
+					else if (edge2.PrevInSEL == null)
+					{
+						this.m_SortedEdges = edge2;
+					}
 				}
-				TEdge prevInSEL = edge1.PrevInSEL;
-				if (prevInSEL != null)
-				{
-					prevInSEL.NextInSEL = edge2;
-				}
-				edge2.PrevInSEL = prevInSEL;
-				edge2.NextInSEL = edge1;
-				edge1.PrevInSEL = edge2;
-				edge1.NextInSEL = nextInSEL;
-			}
-			else if (edge2.NextInSEL == edge1)
-			{
-				TEdge nextInSEL2 = edge1.NextInSEL;
-				if (nextInSEL2 != null)
-				{
-					nextInSEL2.PrevInSEL = edge2;
-				}
-				TEdge prevInSEL2 = edge2.PrevInSEL;
-				if (prevInSEL2 != null)
-				{
-					prevInSEL2.NextInSEL = edge1;
-				}
-				edge1.PrevInSEL = prevInSEL2;
-				edge1.NextInSEL = edge2;
-				edge2.PrevInSEL = edge1;
-				edge2.NextInSEL = nextInSEL2;
-			}
-			else
-			{
-				TEdge nextInSEL3 = edge1.NextInSEL;
-				TEdge prevInSEL3 = edge1.PrevInSEL;
-				edge1.NextInSEL = edge2.NextInSEL;
-				if (edge1.NextInSEL != null)
-				{
-					edge1.NextInSEL.PrevInSEL = edge1;
-				}
-				edge1.PrevInSEL = edge2.PrevInSEL;
-				if (edge1.PrevInSEL != null)
-				{
-					edge1.PrevInSEL.NextInSEL = edge1;
-				}
-				edge2.NextInSEL = nextInSEL3;
-				if (edge2.NextInSEL != null)
-				{
-					edge2.NextInSEL.PrevInSEL = edge2;
-				}
-				edge2.PrevInSEL = prevInSEL3;
-				if (edge2.PrevInSEL != null)
-				{
-					edge2.PrevInSEL.NextInSEL = edge2;
-				}
-			}
-			if (edge1.PrevInSEL == null)
-			{
-				this.m_SortedEdges = edge1;
-			}
-			else if (edge2.PrevInSEL == null)
-			{
-				this.m_SortedEdges = edge2;
 			}
 		}
 
@@ -914,6 +958,7 @@ namespace ClipperLib
 		private OutPt AddOutPt(TEdge e, IntPoint pt)
 		{
 			bool flag = e.Side == EdgeSide.esLeft;
+			OutPt outPt2;
 			if (e.OutIdx < 0)
 			{
 				OutRec outRec = this.CreateOutRec();
@@ -929,28 +974,35 @@ namespace ClipperLib
 					this.SetHoleState(e, outRec);
 				}
 				e.OutIdx = outRec.Idx;
-				return outPt;
+				outPt2 = outPt;
 			}
-			OutRec outRec2 = this.m_PolyOuts[e.OutIdx];
-			OutPt pts = outRec2.Pts;
-			if (flag && pt == pts.Pt)
+			else
 			{
-				return pts;
-			}
-			if (!flag && pt == pts.Prev.Pt)
-			{
-				return pts.Prev;
-			}
-			OutPt outPt2 = new OutPt();
-			outPt2.Idx = outRec2.Idx;
-			outPt2.Pt = pt;
-			outPt2.Next = pts;
-			outPt2.Prev = pts.Prev;
-			outPt2.Prev.Next = outPt2;
-			pts.Prev = outPt2;
-			if (flag)
-			{
-				outRec2.Pts = outPt2;
+				OutRec outRec2 = this.m_PolyOuts[e.OutIdx];
+				OutPt pts = outRec2.Pts;
+				if (flag && pt == pts.Pt)
+				{
+					outPt2 = pts;
+				}
+				else if (!flag && pt == pts.Prev.Pt)
+				{
+					outPt2 = pts.Prev;
+				}
+				else
+				{
+					OutPt outPt3 = new OutPt();
+					outPt3.Idx = outRec2.Idx;
+					outPt3.Pt = pt;
+					outPt3.Next = pts;
+					outPt3.Prev = pts.Prev;
+					outPt3.Prev.Next = outPt3;
+					pts.Prev = outPt3;
+					if (flag)
+					{
+						outRec2.Pts = outPt3;
+					}
+					outPt2 = outPt3;
+				}
 			}
 			return outPt2;
 		}
@@ -997,11 +1049,16 @@ namespace ClipperLib
 
 		private double GetDx(IntPoint pt1, IntPoint pt2)
 		{
+			double num;
 			if (pt1.Y == pt2.Y)
 			{
-				return -3.4E+38;
+				num = -3.4E+38;
 			}
-			return (double)(pt2.X - pt1.X) / (double)(pt2.Y - pt1.Y);
+			else
+			{
+				num = (double)(pt2.X - pt1.X) / (double)(pt2.Y - pt1.Y);
+			}
+			return num;
 		}
 
 		private bool FirstIsBottomPt(OutPt btmPt1, OutPt btmPt2)
@@ -1087,35 +1144,40 @@ namespace ClipperLib
 			}
 			OutPt bottomPt = outRec1.BottomPt;
 			OutPt bottomPt2 = outRec2.BottomPt;
+			OutRec outRec3;
 			if (bottomPt.Pt.Y > bottomPt2.Pt.Y)
 			{
-				return outRec1;
+				outRec3 = outRec1;
 			}
-			if (bottomPt.Pt.Y < bottomPt2.Pt.Y)
+			else if (bottomPt.Pt.Y < bottomPt2.Pt.Y)
 			{
-				return outRec2;
+				outRec3 = outRec2;
 			}
-			if (bottomPt.Pt.X < bottomPt2.Pt.X)
+			else if (bottomPt.Pt.X < bottomPt2.Pt.X)
 			{
-				return outRec1;
+				outRec3 = outRec1;
 			}
-			if (bottomPt.Pt.X > bottomPt2.Pt.X)
+			else if (bottomPt.Pt.X > bottomPt2.Pt.X)
 			{
-				return outRec2;
+				outRec3 = outRec2;
 			}
-			if (bottomPt.Next == bottomPt)
+			else if (bottomPt.Next == bottomPt)
 			{
-				return outRec2;
+				outRec3 = outRec2;
 			}
-			if (bottomPt2.Next == bottomPt2)
+			else if (bottomPt2.Next == bottomPt2)
 			{
-				return outRec1;
+				outRec3 = outRec1;
 			}
-			if (this.FirstIsBottomPt(bottomPt, bottomPt2))
+			else if (this.FirstIsBottomPt(bottomPt, bottomPt2))
 			{
-				return outRec1;
+				outRec3 = outRec1;
 			}
-			return outRec2;
+			else
+			{
+				outRec3 = outRec2;
+			}
+			return outRec3;
 		}
 
 		private bool Param1RightOfParam2(OutRec outRec1, OutRec outRec2)
@@ -1129,10 +1191,12 @@ namespace ClipperLib
 				}
 				if (outRec1 == null)
 				{
-					return false;
+					goto Block_1;
 				}
 			}
 			return true;
+			Block_1:
+			return false;
 		}
 
 		private OutRec GetOutRec(int idx)
@@ -1236,19 +1300,18 @@ namespace ClipperLib
 
 		private void ReversePolyPtLinks(OutPt pp)
 		{
-			if (pp == null)
+			if (pp != null)
 			{
-				return;
+				OutPt outPt = pp;
+				do
+				{
+					OutPt next = outPt.Next;
+					outPt.Next = outPt.Prev;
+					outPt.Prev = next;
+					outPt = next;
+				}
+				while (outPt != pp);
 			}
-			OutPt outPt = pp;
-			do
-			{
-				OutPt next = outPt.Next;
-				outPt.Next = outPt.Prev;
-				outPt.Prev = next;
-				outPt = next;
-			}
-			while (outPt != pp);
 		}
 
 		private static void SwapSides(TEdge edge1, TEdge edge2)
@@ -1340,11 +1403,10 @@ namespace ClipperLib
 				polyFillType3 = this.m_ClipFillType;
 				polyFillType4 = this.m_SubjFillType;
 			}
-			PolyFillType polyFillType5 = polyFillType;
 			int num;
-			if (polyFillType5 != PolyFillType.pftPositive)
+			if (polyFillType != PolyFillType.pftPositive)
 			{
-				if (polyFillType5 != PolyFillType.pftNegative)
+				if (polyFillType != PolyFillType.pftNegative)
 				{
 					num = Math.Abs(e1.WindCnt);
 				}
@@ -1357,11 +1419,10 @@ namespace ClipperLib
 			{
 				num = e1.WindCnt;
 			}
-			polyFillType5 = polyFillType3;
 			int num2;
-			if (polyFillType5 != PolyFillType.pftPositive)
+			if (polyFillType3 != PolyFillType.pftPositive)
 			{
-				if (polyFillType5 != PolyFillType.pftNegative)
+				if (polyFillType3 != PolyFillType.pftNegative)
 				{
 					num2 = Math.Abs(e2.WindCnt);
 				}
@@ -1408,11 +1469,10 @@ namespace ClipperLib
 			}
 			else if ((num == 0 || num == 1) && (num2 == 0 || num2 == 1))
 			{
-				polyFillType5 = polyFillType2;
 				long num3;
-				if (polyFillType5 != PolyFillType.pftPositive)
+				if (polyFillType2 != PolyFillType.pftPositive)
 				{
-					if (polyFillType5 != PolyFillType.pftNegative)
+					if (polyFillType2 != PolyFillType.pftNegative)
 					{
 						num3 = (long)Math.Abs(e1.WindCnt2);
 					}
@@ -1425,11 +1485,10 @@ namespace ClipperLib
 				{
 					num3 = (long)e1.WindCnt2;
 				}
-				polyFillType5 = polyFillType4;
 				long num4;
-				if (polyFillType5 != PolyFillType.pftPositive)
+				if (polyFillType4 != PolyFillType.pftPositive)
 				{
-					if (polyFillType5 != PolyFillType.pftNegative)
+					if (polyFillType4 != PolyFillType.pftNegative)
 					{
 						num4 = (long)Math.Abs(e2.WindCnt2);
 					}
@@ -1484,48 +1543,46 @@ namespace ClipperLib
 		{
 			TEdge prevInAEL = e.PrevInAEL;
 			TEdge nextInAEL = e.NextInAEL;
-			if (prevInAEL == null && nextInAEL == null && e != this.m_ActiveEdges)
+			if (prevInAEL != null || nextInAEL != null || e == this.m_ActiveEdges)
 			{
-				return;
+				if (prevInAEL != null)
+				{
+					prevInAEL.NextInAEL = nextInAEL;
+				}
+				else
+				{
+					this.m_ActiveEdges = nextInAEL;
+				}
+				if (nextInAEL != null)
+				{
+					nextInAEL.PrevInAEL = prevInAEL;
+				}
+				e.NextInAEL = null;
+				e.PrevInAEL = null;
 			}
-			if (prevInAEL != null)
-			{
-				prevInAEL.NextInAEL = nextInAEL;
-			}
-			else
-			{
-				this.m_ActiveEdges = nextInAEL;
-			}
-			if (nextInAEL != null)
-			{
-				nextInAEL.PrevInAEL = prevInAEL;
-			}
-			e.NextInAEL = null;
-			e.PrevInAEL = null;
 		}
 
 		private void DeleteFromSEL(TEdge e)
 		{
 			TEdge prevInSEL = e.PrevInSEL;
 			TEdge nextInSEL = e.NextInSEL;
-			if (prevInSEL == null && nextInSEL == null && e != this.m_SortedEdges)
+			if (prevInSEL != null || nextInSEL != null || e == this.m_SortedEdges)
 			{
-				return;
+				if (prevInSEL != null)
+				{
+					prevInSEL.NextInSEL = nextInSEL;
+				}
+				else
+				{
+					this.m_SortedEdges = nextInSEL;
+				}
+				if (nextInSEL != null)
+				{
+					nextInSEL.PrevInSEL = prevInSEL;
+				}
+				e.NextInSEL = null;
+				e.PrevInSEL = null;
 			}
-			if (prevInSEL != null)
-			{
-				prevInSEL.NextInSEL = nextInSEL;
-			}
-			else
-			{
-				this.m_SortedEdges = nextInSEL;
-			}
-			if (nextInSEL != null)
-			{
-				nextInSEL.PrevInSEL = prevInSEL;
-			}
-			e.NextInSEL = null;
-			e.PrevInSEL = null;
 		}
 
 		private void UpdateEdgeIntoAEL(ref TEdge e)
@@ -1640,7 +1697,7 @@ namespace ClipperLib
 				}
 				if (horzEdge.NextInLML == null || !ClipperBase.IsHorizontal(horzEdge.NextInLML))
 				{
-					goto IL_02BF;
+					goto IL_02D6;
 				}
 				this.UpdateEdgeIntoAEL(ref horzEdge);
 				if (horzEdge.OutIdx >= 0)
@@ -1667,7 +1724,7 @@ namespace ClipperLib
 			this.DeleteFromAEL(horzEdge);
 			this.DeleteFromAEL(tedge2);
 			return;
-			IL_02BF:
+			IL_02D6:
 			if (horzEdge.NextInLML != null)
 			{
 				if (horzEdge.OutIdx >= 0)
@@ -1678,21 +1735,20 @@ namespace ClipperLib
 						this.AddGhostJoin(outPt3, horzEdge.Bot);
 					}
 					this.UpdateEdgeIntoAEL(ref horzEdge);
-					if (horzEdge.WindDelta == 0)
+					if (horzEdge.WindDelta != 0)
 					{
-						return;
-					}
-					TEdge prevInAEL = horzEdge.PrevInAEL;
-					TEdge nextInAEL2 = horzEdge.NextInAEL;
-					if (prevInAEL != null && prevInAEL.Curr.X == horzEdge.Bot.X && prevInAEL.Curr.Y == horzEdge.Bot.Y && prevInAEL.WindDelta != 0 && prevInAEL.OutIdx >= 0 && prevInAEL.Curr.Y > prevInAEL.Top.Y && ClipperBase.SlopesEqual(horzEdge, prevInAEL, this.m_UseFullRange))
-					{
-						OutPt outPt4 = this.AddOutPt(prevInAEL, horzEdge.Bot);
-						this.AddJoin(outPt3, outPt4, horzEdge.Top);
-					}
-					else if (nextInAEL2 != null && nextInAEL2.Curr.X == horzEdge.Bot.X && nextInAEL2.Curr.Y == horzEdge.Bot.Y && nextInAEL2.WindDelta != 0 && nextInAEL2.OutIdx >= 0 && nextInAEL2.Curr.Y > nextInAEL2.Top.Y && ClipperBase.SlopesEqual(horzEdge, nextInAEL2, this.m_UseFullRange))
-					{
-						OutPt outPt5 = this.AddOutPt(nextInAEL2, horzEdge.Bot);
-						this.AddJoin(outPt3, outPt5, horzEdge.Top);
+						TEdge prevInAEL = horzEdge.PrevInAEL;
+						TEdge nextInAEL2 = horzEdge.NextInAEL;
+						if (prevInAEL != null && prevInAEL.Curr.X == horzEdge.Bot.X && prevInAEL.Curr.Y == horzEdge.Bot.Y && prevInAEL.WindDelta != 0 && prevInAEL.OutIdx >= 0 && prevInAEL.Curr.Y > prevInAEL.Top.Y && ClipperBase.SlopesEqual(horzEdge, prevInAEL, this.m_UseFullRange))
+						{
+							OutPt outPt4 = this.AddOutPt(prevInAEL, horzEdge.Bot);
+							this.AddJoin(outPt3, outPt4, horzEdge.Top);
+						}
+						else if (nextInAEL2 != null && nextInAEL2.Curr.X == horzEdge.Bot.X && nextInAEL2.Curr.Y == horzEdge.Bot.Y && nextInAEL2.WindDelta != 0 && nextInAEL2.OutIdx >= 0 && nextInAEL2.Curr.Y > nextInAEL2.Top.Y && ClipperBase.SlopesEqual(horzEdge, nextInAEL2, this.m_UseFullRange))
+						{
+							OutPt outPt5 = this.AddOutPt(nextInAEL2, horzEdge.Bot);
+							this.AddJoin(outPt3, outPt5, horzEdge.Top);
+						}
 					}
 				}
 				else
@@ -1741,89 +1797,98 @@ namespace ClipperLib
 			{
 				tedge = e.Prev;
 			}
+			TEdge tedge2;
 			if (tedge != null && (tedge.OutIdx == -2 || (tedge.NextInAEL == tedge.PrevInAEL && !ClipperBase.IsHorizontal(tedge))))
 			{
-				return null;
+				tedge2 = null;
 			}
-			return tedge;
+			else
+			{
+				tedge2 = tedge;
+			}
+			return tedge2;
 		}
 
 		private bool ProcessIntersections(long topY)
 		{
+			bool flag;
 			if (this.m_ActiveEdges == null)
 			{
-				return true;
+				flag = true;
 			}
-			try
+			else
 			{
-				this.BuildIntersectList(topY);
-				if (this.m_IntersectList.Count == 0)
+				try
 				{
-					return true;
+					this.BuildIntersectList(topY);
+					if (this.m_IntersectList.Count == 0)
+					{
+						return true;
+					}
+					if (this.m_IntersectList.Count != 1 && !this.FixupIntersectionOrder())
+					{
+						return false;
+					}
+					this.ProcessIntersectList();
 				}
-				if (this.m_IntersectList.Count != 1 && !this.FixupIntersectionOrder())
+				catch
 				{
-					return false;
+					this.m_SortedEdges = null;
+					this.m_IntersectList.Clear();
+					throw new ClipperException("ProcessIntersections error");
 				}
-				this.ProcessIntersectList();
-			}
-			catch
-			{
 				this.m_SortedEdges = null;
-				this.m_IntersectList.Clear();
-				throw new ClipperException("ProcessIntersections error");
+				flag = true;
 			}
-			this.m_SortedEdges = null;
-			return true;
+			return flag;
 		}
 
 		private void BuildIntersectList(long topY)
 		{
-			if (this.m_ActiveEdges == null)
+			if (this.m_ActiveEdges != null)
 			{
-				return;
-			}
-			TEdge tedge = this.m_ActiveEdges;
-			this.m_SortedEdges = tedge;
-			while (tedge != null)
-			{
-				tedge.PrevInSEL = tedge.PrevInAEL;
-				tedge.NextInSEL = tedge.NextInAEL;
-				tedge.Curr.X = Clipper.TopX(tedge, topY);
-				tedge = tedge.NextInAEL;
-			}
-			bool flag = true;
-			while (flag && this.m_SortedEdges != null)
-			{
-				flag = false;
-				tedge = this.m_SortedEdges;
-				while (tedge.NextInSEL != null)
+				TEdge tedge = this.m_ActiveEdges;
+				this.m_SortedEdges = tedge;
+				while (tedge != null)
 				{
-					TEdge nextInSEL = tedge.NextInSEL;
-					if (tedge.Curr.X > nextInSEL.Curr.X)
-					{
-						IntPoint intPoint;
-						this.IntersectPoint(tedge, nextInSEL, out intPoint);
-						IntersectNode intersectNode = new IntersectNode();
-						intersectNode.Edge1 = tedge;
-						intersectNode.Edge2 = nextInSEL;
-						intersectNode.Pt = intPoint;
-						this.m_IntersectList.Add(intersectNode);
-						this.SwapPositionsInSEL(tedge, nextInSEL);
-						flag = true;
-					}
-					else
-					{
-						tedge = nextInSEL;
-					}
+					tedge.PrevInSEL = tedge.PrevInAEL;
+					tedge.NextInSEL = tedge.NextInAEL;
+					tedge.Curr.X = Clipper.TopX(tedge, topY);
+					tedge = tedge.NextInAEL;
 				}
-				if (tedge.PrevInSEL == null)
+				bool flag = true;
+				while (flag && this.m_SortedEdges != null)
 				{
-					break;
+					flag = false;
+					tedge = this.m_SortedEdges;
+					while (tedge.NextInSEL != null)
+					{
+						TEdge nextInSEL = tedge.NextInSEL;
+						if (tedge.Curr.X > nextInSEL.Curr.X)
+						{
+							IntPoint intPoint;
+							this.IntersectPoint(tedge, nextInSEL, out intPoint);
+							IntersectNode intersectNode = new IntersectNode();
+							intersectNode.Edge1 = tedge;
+							intersectNode.Edge2 = nextInSEL;
+							intersectNode.Pt = intPoint;
+							this.m_IntersectList.Add(intersectNode);
+							this.SwapPositionsInSEL(tedge, nextInSEL);
+							flag = true;
+						}
+						else
+						{
+							tedge = nextInSEL;
+						}
+					}
+					if (tedge.PrevInSEL == null)
+					{
+						break;
+					}
+					tedge.PrevInSEL.NextInSEL = null;
 				}
-				tedge.PrevInSEL.NextInSEL = null;
+				this.m_SortedEdges = null;
 			}
-			this.m_SortedEdges = null;
 		}
 
 		private bool EdgesAdjacent(IntersectNode inode)
@@ -1881,11 +1946,16 @@ namespace ClipperLib
 
 		private static long TopX(TEdge edge, long currentY)
 		{
+			long num;
 			if (currentY == edge.Top.Y)
 			{
-				return edge.Top.X;
+				num = edge.Top.X;
 			}
-			return edge.Bot.X + Clipper.Round(edge.Dx * (double)(currentY - edge.Bot.Y));
+			else
+			{
+				num = edge.Bot.X + Clipper.Round(edge.Dx * (double)(currentY - edge.Bot.Y));
+			}
+			return num;
 		}
 
 		private void IntersectPoint(TEdge edge1, TEdge edge2, out IntPoint ip)
@@ -1895,78 +1965,80 @@ namespace ClipperLib
 			{
 				ip.Y = edge1.Curr.Y;
 				ip.X = Clipper.TopX(edge1, ip.Y);
-				return;
-			}
-			if (edge1.Delta.X == 0L)
-			{
-				ip.X = edge1.Bot.X;
-				if (ClipperBase.IsHorizontal(edge2))
-				{
-					ip.Y = edge2.Bot.Y;
-				}
-				else
-				{
-					double num = (double)edge2.Bot.Y - (double)edge2.Bot.X / edge2.Dx;
-					ip.Y = Clipper.Round((double)ip.X / edge2.Dx + num);
-				}
-			}
-			else if (edge2.Delta.X == 0L)
-			{
-				ip.X = edge2.Bot.X;
-				if (ClipperBase.IsHorizontal(edge1))
-				{
-					ip.Y = edge1.Bot.Y;
-				}
-				else
-				{
-					double num2 = (double)edge1.Bot.Y - (double)edge1.Bot.X / edge1.Dx;
-					ip.Y = Clipper.Round((double)ip.X / edge1.Dx + num2);
-				}
 			}
 			else
 			{
-				double num2 = (double)edge1.Bot.X - (double)edge1.Bot.Y * edge1.Dx;
-				double num = (double)edge2.Bot.X - (double)edge2.Bot.Y * edge2.Dx;
-				double num3 = (num - num2) / (edge1.Dx - edge2.Dx);
-				ip.Y = Clipper.Round(num3);
-				if (Math.Abs(edge1.Dx) < Math.Abs(edge2.Dx))
+				if (edge1.Delta.X == 0L)
 				{
-					ip.X = Clipper.Round(edge1.Dx * num3 + num2);
+					ip.X = edge1.Bot.X;
+					if (ClipperBase.IsHorizontal(edge2))
+					{
+						ip.Y = edge2.Bot.Y;
+					}
+					else
+					{
+						double num = (double)edge2.Bot.Y - (double)edge2.Bot.X / edge2.Dx;
+						ip.Y = Clipper.Round((double)ip.X / edge2.Dx + num);
+					}
+				}
+				else if (edge2.Delta.X == 0L)
+				{
+					ip.X = edge2.Bot.X;
+					if (ClipperBase.IsHorizontal(edge1))
+					{
+						ip.Y = edge1.Bot.Y;
+					}
+					else
+					{
+						double num2 = (double)edge1.Bot.Y - (double)edge1.Bot.X / edge1.Dx;
+						ip.Y = Clipper.Round((double)ip.X / edge1.Dx + num2);
+					}
 				}
 				else
 				{
-					ip.X = Clipper.Round(edge2.Dx * num3 + num);
+					double num2 = (double)edge1.Bot.X - (double)edge1.Bot.Y * edge1.Dx;
+					double num = (double)edge2.Bot.X - (double)edge2.Bot.Y * edge2.Dx;
+					double num3 = (num - num2) / (edge1.Dx - edge2.Dx);
+					ip.Y = Clipper.Round(num3);
+					if (Math.Abs(edge1.Dx) < Math.Abs(edge2.Dx))
+					{
+						ip.X = Clipper.Round(edge1.Dx * num3 + num2);
+					}
+					else
+					{
+						ip.X = Clipper.Round(edge2.Dx * num3 + num);
+					}
 				}
-			}
-			if (ip.Y < edge1.Top.Y || ip.Y < edge2.Top.Y)
-			{
-				if (edge1.Top.Y > edge2.Top.Y)
+				if (ip.Y < edge1.Top.Y || ip.Y < edge2.Top.Y)
 				{
-					ip.Y = edge1.Top.Y;
+					if (edge1.Top.Y > edge2.Top.Y)
+					{
+						ip.Y = edge1.Top.Y;
+					}
+					else
+					{
+						ip.Y = edge2.Top.Y;
+					}
+					if (Math.Abs(edge1.Dx) < Math.Abs(edge2.Dx))
+					{
+						ip.X = Clipper.TopX(edge1, ip.Y);
+					}
+					else
+					{
+						ip.X = Clipper.TopX(edge2, ip.Y);
+					}
 				}
-				else
+				if (ip.Y > edge1.Curr.Y)
 				{
-					ip.Y = edge2.Top.Y;
-				}
-				if (Math.Abs(edge1.Dx) < Math.Abs(edge2.Dx))
-				{
-					ip.X = Clipper.TopX(edge1, ip.Y);
-				}
-				else
-				{
-					ip.X = Clipper.TopX(edge2, ip.Y);
-				}
-			}
-			if (ip.Y > edge1.Curr.Y)
-			{
-				ip.Y = edge1.Curr.Y;
-				if (Math.Abs(edge1.Dx) > Math.Abs(edge2.Dx))
-				{
-					ip.X = Clipper.TopX(edge2, ip.Y);
-				}
-				else
-				{
-					ip.X = Clipper.TopX(edge1, ip.Y);
+					ip.Y = edge1.Curr.Y;
+					if (Math.Abs(edge1.Dx) > Math.Abs(edge2.Dx))
+					{
+						ip.X = Clipper.TopX(edge2, ip.Y);
+					}
+					else
+					{
+						ip.X = Clipper.TopX(edge1, ip.Y);
+					}
 				}
 			}
 		}
@@ -2062,32 +2134,34 @@ namespace ClipperLib
 					this.AddOutPt(e, e.Top);
 				}
 				this.DeleteFromAEL(e);
-				return;
-			}
-			TEdge tedge = e.NextInAEL;
-			while (tedge != null && tedge != maximaPair)
-			{
-				this.IntersectEdges(e, tedge, e.Top);
-				this.SwapPositionsInAEL(e, tedge);
-				tedge = e.NextInAEL;
-			}
-			if (e.OutIdx == -1 && maximaPair.OutIdx == -1)
-			{
-				this.DeleteFromAEL(e);
-				this.DeleteFromAEL(maximaPair);
 			}
 			else
 			{
-				if (e.OutIdx < 0 || maximaPair.OutIdx < 0)
+				TEdge tedge = e.NextInAEL;
+				while (tedge != null && tedge != maximaPair)
 				{
-					throw new ClipperException("DoMaxima error");
+					this.IntersectEdges(e, tedge, e.Top);
+					this.SwapPositionsInAEL(e, tedge);
+					tedge = e.NextInAEL;
 				}
-				if (e.OutIdx >= 0)
+				if (e.OutIdx == -1 && maximaPair.OutIdx == -1)
 				{
-					this.AddLocalMaxPoly(e, maximaPair, e.Top);
+					this.DeleteFromAEL(e);
+					this.DeleteFromAEL(maximaPair);
 				}
-				this.DeleteFromAEL(e);
-				this.DeleteFromAEL(maximaPair);
+				else
+				{
+					if (e.OutIdx < 0 || maximaPair.OutIdx < 0)
+					{
+						throw new ClipperException("DoMaxima error");
+					}
+					if (e.OutIdx >= 0)
+					{
+						this.AddLocalMaxPoly(e, maximaPair, e.Top);
+					}
+					this.DeleteFromAEL(e);
+					this.DeleteFromAEL(maximaPair);
+				}
 			}
 		}
 
@@ -2106,18 +2180,23 @@ namespace ClipperLib
 
 		private int PointCount(OutPt pts)
 		{
+			int num;
 			if (pts == null)
 			{
-				return 0;
+				num = 0;
 			}
-			int num = 0;
-			OutPt outPt = pts;
-			do
+			else
 			{
-				num++;
-				outPt = outPt.Next;
+				int num2 = 0;
+				OutPt outPt = pts;
+				do
+				{
+					num2++;
+					outPt = outPt.Next;
+				}
+				while (outPt != pts);
+				num = num2;
 			}
-			while (outPt != pts);
 			return num;
 		}
 
@@ -2277,97 +2356,102 @@ namespace ClipperLib
 		{
 			Direction direction = ((op1.Pt.X <= op1b.Pt.X) ? Direction.dLeftToRight : Direction.dRightToLeft);
 			Direction direction2 = ((op2.Pt.X <= op2b.Pt.X) ? Direction.dLeftToRight : Direction.dRightToLeft);
+			bool flag;
 			if (direction == direction2)
 			{
-				return false;
+				flag = false;
 			}
-			if (direction == Direction.dLeftToRight)
+			else
 			{
-				while (op1.Next.Pt.X <= Pt.X && op1.Next.Pt.X >= op1.Pt.X && op1.Next.Pt.Y == Pt.Y)
+				if (direction == Direction.dLeftToRight)
 				{
-					op1 = op1.Next;
-				}
-				if (DiscardLeft && op1.Pt.X != Pt.X)
-				{
-					op1 = op1.Next;
-				}
-				op1b = this.DupOutPt(op1, !DiscardLeft);
-				if (op1b.Pt != Pt)
-				{
-					op1 = op1b;
-					op1.Pt = Pt;
+					while (op1.Next.Pt.X <= Pt.X && op1.Next.Pt.X >= op1.Pt.X && op1.Next.Pt.Y == Pt.Y)
+					{
+						op1 = op1.Next;
+					}
+					if (DiscardLeft && op1.Pt.X != Pt.X)
+					{
+						op1 = op1.Next;
+					}
 					op1b = this.DupOutPt(op1, !DiscardLeft);
+					if (op1b.Pt != Pt)
+					{
+						op1 = op1b;
+						op1.Pt = Pt;
+						op1b = this.DupOutPt(op1, !DiscardLeft);
+					}
 				}
-			}
-			else
-			{
-				while (op1.Next.Pt.X >= Pt.X && op1.Next.Pt.X <= op1.Pt.X && op1.Next.Pt.Y == Pt.Y)
+				else
 				{
-					op1 = op1.Next;
-				}
-				if (!DiscardLeft && op1.Pt.X != Pt.X)
-				{
-					op1 = op1.Next;
-				}
-				op1b = this.DupOutPt(op1, DiscardLeft);
-				if (op1b.Pt != Pt)
-				{
-					op1 = op1b;
-					op1.Pt = Pt;
+					while (op1.Next.Pt.X >= Pt.X && op1.Next.Pt.X <= op1.Pt.X && op1.Next.Pt.Y == Pt.Y)
+					{
+						op1 = op1.Next;
+					}
+					if (!DiscardLeft && op1.Pt.X != Pt.X)
+					{
+						op1 = op1.Next;
+					}
 					op1b = this.DupOutPt(op1, DiscardLeft);
+					if (op1b.Pt != Pt)
+					{
+						op1 = op1b;
+						op1.Pt = Pt;
+						op1b = this.DupOutPt(op1, DiscardLeft);
+					}
 				}
-			}
-			if (direction2 == Direction.dLeftToRight)
-			{
-				while (op2.Next.Pt.X <= Pt.X && op2.Next.Pt.X >= op2.Pt.X && op2.Next.Pt.Y == Pt.Y)
+				if (direction2 == Direction.dLeftToRight)
 				{
-					op2 = op2.Next;
-				}
-				if (DiscardLeft && op2.Pt.X != Pt.X)
-				{
-					op2 = op2.Next;
-				}
-				op2b = this.DupOutPt(op2, !DiscardLeft);
-				if (op2b.Pt != Pt)
-				{
-					op2 = op2b;
-					op2.Pt = Pt;
+					while (op2.Next.Pt.X <= Pt.X && op2.Next.Pt.X >= op2.Pt.X && op2.Next.Pt.Y == Pt.Y)
+					{
+						op2 = op2.Next;
+					}
+					if (DiscardLeft && op2.Pt.X != Pt.X)
+					{
+						op2 = op2.Next;
+					}
 					op2b = this.DupOutPt(op2, !DiscardLeft);
+					if (op2b.Pt != Pt)
+					{
+						op2 = op2b;
+						op2.Pt = Pt;
+						op2b = this.DupOutPt(op2, !DiscardLeft);
+					}
 				}
-			}
-			else
-			{
-				while (op2.Next.Pt.X >= Pt.X && op2.Next.Pt.X <= op2.Pt.X && op2.Next.Pt.Y == Pt.Y)
+				else
 				{
-					op2 = op2.Next;
-				}
-				if (!DiscardLeft && op2.Pt.X != Pt.X)
-				{
-					op2 = op2.Next;
-				}
-				op2b = this.DupOutPt(op2, DiscardLeft);
-				if (op2b.Pt != Pt)
-				{
-					op2 = op2b;
-					op2.Pt = Pt;
+					while (op2.Next.Pt.X >= Pt.X && op2.Next.Pt.X <= op2.Pt.X && op2.Next.Pt.Y == Pt.Y)
+					{
+						op2 = op2.Next;
+					}
+					if (!DiscardLeft && op2.Pt.X != Pt.X)
+					{
+						op2 = op2.Next;
+					}
 					op2b = this.DupOutPt(op2, DiscardLeft);
+					if (op2b.Pt != Pt)
+					{
+						op2 = op2b;
+						op2.Pt = Pt;
+						op2b = this.DupOutPt(op2, DiscardLeft);
+					}
 				}
+				if (direction == Direction.dLeftToRight == DiscardLeft)
+				{
+					op1.Prev = op2;
+					op2.Next = op1;
+					op1b.Next = op2b;
+					op2b.Prev = op1b;
+				}
+				else
+				{
+					op1.Next = op2;
+					op2.Prev = op1;
+					op1b.Prev = op2b;
+					op2b.Next = op1b;
+				}
+				flag = true;
 			}
-			if (direction == Direction.dLeftToRight == DiscardLeft)
-			{
-				op1.Prev = op2;
-				op2.Next = op1;
-				op1b.Next = op2b;
-				op2b.Prev = op1b;
-			}
-			else
-			{
-				op1.Next = op2;
-				op2.Prev = op1;
-				op1b.Prev = op2b;
-				op2b.Next = op1b;
-			}
-			return true;
+			return flag;
 		}
 
 		private bool JoinPoints(Join j, OutRec outRec1, OutRec outRec2)
@@ -2375,49 +2459,56 @@ namespace ClipperLib
 			OutPt outPt = j.OutPt1;
 			OutPt outPt2 = j.OutPt2;
 			bool flag = j.OutPt1.Pt.Y == j.OffPt.Y;
+			bool flag2;
 			if (flag && j.OffPt == j.OutPt1.Pt && j.OffPt == j.OutPt2.Pt)
 			{
 				if (outRec1 != outRec2)
 				{
-					return false;
+					flag2 = false;
 				}
-				OutPt outPt3 = j.OutPt1.Next;
-				while (outPt3 != outPt && outPt3.Pt == j.OffPt)
+				else
 				{
-					outPt3 = outPt3.Next;
+					OutPt outPt3 = j.OutPt1.Next;
+					while (outPt3 != outPt && outPt3.Pt == j.OffPt)
+					{
+						outPt3 = outPt3.Next;
+					}
+					bool flag3 = outPt3.Pt.Y > j.OffPt.Y;
+					OutPt outPt4 = j.OutPt2.Next;
+					while (outPt4 != outPt2 && outPt4.Pt == j.OffPt)
+					{
+						outPt4 = outPt4.Next;
+					}
+					bool flag4 = outPt4.Pt.Y > j.OffPt.Y;
+					if (flag3 == flag4)
+					{
+						flag2 = false;
+					}
+					else if (flag3)
+					{
+						outPt3 = this.DupOutPt(outPt, false);
+						outPt4 = this.DupOutPt(outPt2, true);
+						outPt.Prev = outPt2;
+						outPt2.Next = outPt;
+						outPt3.Next = outPt4;
+						outPt4.Prev = outPt3;
+						j.OutPt1 = outPt;
+						j.OutPt2 = outPt3;
+						flag2 = true;
+					}
+					else
+					{
+						outPt3 = this.DupOutPt(outPt, true);
+						outPt4 = this.DupOutPt(outPt2, false);
+						outPt.Next = outPt2;
+						outPt2.Prev = outPt;
+						outPt3.Prev = outPt4;
+						outPt4.Next = outPt3;
+						j.OutPt1 = outPt;
+						j.OutPt2 = outPt3;
+						flag2 = true;
+					}
 				}
-				bool flag2 = outPt3.Pt.Y > j.OffPt.Y;
-				OutPt outPt4 = j.OutPt2.Next;
-				while (outPt4 != outPt2 && outPt4.Pt == j.OffPt)
-				{
-					outPt4 = outPt4.Next;
-				}
-				bool flag3 = outPt4.Pt.Y > j.OffPt.Y;
-				if (flag2 == flag3)
-				{
-					return false;
-				}
-				if (flag2)
-				{
-					outPt3 = this.DupOutPt(outPt, false);
-					outPt4 = this.DupOutPt(outPt2, true);
-					outPt.Prev = outPt2;
-					outPt2.Next = outPt;
-					outPt3.Next = outPt4;
-					outPt4.Prev = outPt3;
-					j.OutPt1 = outPt;
-					j.OutPt2 = outPt3;
-					return true;
-				}
-				outPt3 = this.DupOutPt(outPt, true);
-				outPt4 = this.DupOutPt(outPt2, false);
-				outPt.Next = outPt2;
-				outPt2.Prev = outPt;
-				outPt3.Prev = outPt4;
-				outPt4.Next = outPt3;
-				j.OutPt1 = outPt;
-				j.OutPt2 = outPt3;
-				return true;
 			}
 			else if (flag)
 			{
@@ -2432,52 +2523,58 @@ namespace ClipperLib
 				}
 				if (outPt3.Next == outPt || outPt3.Next == outPt2)
 				{
-					return false;
-				}
-				OutPt outPt4 = outPt2;
-				while (outPt2.Prev.Pt.Y == outPt2.Pt.Y && outPt2.Prev != outPt4 && outPt2.Prev != outPt3)
-				{
-					outPt2 = outPt2.Prev;
-				}
-				while (outPt4.Next.Pt.Y == outPt4.Pt.Y && outPt4.Next != outPt2 && outPt4.Next != outPt)
-				{
-					outPt4 = outPt4.Next;
-				}
-				if (outPt4.Next == outPt2 || outPt4.Next == outPt)
-				{
-					return false;
-				}
-				long num;
-				long num2;
-				if (!this.GetOverlap(outPt.Pt.X, outPt3.Pt.X, outPt2.Pt.X, outPt4.Pt.X, out num, out num2))
-				{
-					return false;
-				}
-				IntPoint intPoint;
-				bool flag4;
-				if (outPt.Pt.X >= num && outPt.Pt.X <= num2)
-				{
-					intPoint = outPt.Pt;
-					flag4 = outPt.Pt.X > outPt3.Pt.X;
-				}
-				else if (outPt2.Pt.X >= num && outPt2.Pt.X <= num2)
-				{
-					intPoint = outPt2.Pt;
-					flag4 = outPt2.Pt.X > outPt4.Pt.X;
-				}
-				else if (outPt3.Pt.X >= num && outPt3.Pt.X <= num2)
-				{
-					intPoint = outPt3.Pt;
-					flag4 = outPt3.Pt.X > outPt.Pt.X;
+					flag2 = false;
 				}
 				else
 				{
-					intPoint = outPt4.Pt;
-					flag4 = outPt4.Pt.X > outPt2.Pt.X;
+					OutPt outPt4 = outPt2;
+					while (outPt2.Prev.Pt.Y == outPt2.Pt.Y && outPt2.Prev != outPt4 && outPt2.Prev != outPt3)
+					{
+						outPt2 = outPt2.Prev;
+					}
+					while (outPt4.Next.Pt.Y == outPt4.Pt.Y && outPt4.Next != outPt2 && outPt4.Next != outPt)
+					{
+						outPt4 = outPt4.Next;
+					}
+					long num;
+					long num2;
+					if (outPt4.Next == outPt2 || outPt4.Next == outPt)
+					{
+						flag2 = false;
+					}
+					else if (!this.GetOverlap(outPt.Pt.X, outPt3.Pt.X, outPt2.Pt.X, outPt4.Pt.X, out num, out num2))
+					{
+						flag2 = false;
+					}
+					else
+					{
+						IntPoint intPoint;
+						bool flag5;
+						if (outPt.Pt.X >= num && outPt.Pt.X <= num2)
+						{
+							intPoint = outPt.Pt;
+							flag5 = outPt.Pt.X > outPt3.Pt.X;
+						}
+						else if (outPt2.Pt.X >= num && outPt2.Pt.X <= num2)
+						{
+							intPoint = outPt2.Pt;
+							flag5 = outPt2.Pt.X > outPt4.Pt.X;
+						}
+						else if (outPt3.Pt.X >= num && outPt3.Pt.X <= num2)
+						{
+							intPoint = outPt3.Pt;
+							flag5 = outPt3.Pt.X > outPt.Pt.X;
+						}
+						else
+						{
+							intPoint = outPt4.Pt;
+							flag5 = outPt4.Pt.X > outPt2.Pt.X;
+						}
+						j.OutPt1 = outPt;
+						j.OutPt2 = outPt2;
+						flag2 = this.JoinHorz(outPt, outPt3, outPt2, outPt4, intPoint, flag5);
+					}
 				}
-				j.OutPt1 = outPt;
-				j.OutPt2 = outPt2;
-				return this.JoinHorz(outPt, outPt3, outPt2, outPt4, intPoint, flag4);
 			}
 			else
 			{
@@ -2486,8 +2583,8 @@ namespace ClipperLib
 				{
 					outPt3 = outPt3.Next;
 				}
-				bool flag5 = outPt3.Pt.Y > outPt.Pt.Y || !ClipperBase.SlopesEqual(outPt.Pt, outPt3.Pt, j.OffPt, this.m_UseFullRange);
-				if (flag5)
+				bool flag6 = outPt3.Pt.Y > outPt.Pt.Y || !ClipperBase.SlopesEqual(outPt.Pt, outPt3.Pt, j.OffPt, this.m_UseFullRange);
+				if (flag6)
 				{
 					outPt3 = outPt.Prev;
 					while (outPt3.Pt == outPt.Pt && outPt3 != outPt)
@@ -2504,8 +2601,8 @@ namespace ClipperLib
 				{
 					outPt4 = outPt4.Next;
 				}
-				bool flag6 = outPt4.Pt.Y > outPt2.Pt.Y || !ClipperBase.SlopesEqual(outPt2.Pt, outPt4.Pt, j.OffPt, this.m_UseFullRange);
-				if (flag6)
+				bool flag7 = outPt4.Pt.Y > outPt2.Pt.Y || !ClipperBase.SlopesEqual(outPt2.Pt, outPt4.Pt, j.OffPt, this.m_UseFullRange);
+				if (flag7)
 				{
 					outPt4 = outPt2.Prev;
 					while (outPt4.Pt == outPt2.Pt && outPt4 != outPt2)
@@ -2517,11 +2614,11 @@ namespace ClipperLib
 						return false;
 					}
 				}
-				if (outPt3 == outPt || outPt4 == outPt2 || outPt3 == outPt4 || (outRec1 == outRec2 && flag5 == flag6))
+				if (outPt3 == outPt || outPt4 == outPt2 || outPt3 == outPt4 || (outRec1 == outRec2 && flag6 == flag7))
 				{
-					return false;
+					flag2 = false;
 				}
-				if (flag5)
+				else if (flag6)
 				{
 					outPt3 = this.DupOutPt(outPt, false);
 					outPt4 = this.DupOutPt(outPt2, true);
@@ -2531,73 +2628,85 @@ namespace ClipperLib
 					outPt4.Prev = outPt3;
 					j.OutPt1 = outPt;
 					j.OutPt2 = outPt3;
-					return true;
+					flag2 = true;
 				}
-				outPt3 = this.DupOutPt(outPt, true);
-				outPt4 = this.DupOutPt(outPt2, false);
-				outPt.Next = outPt2;
-				outPt2.Prev = outPt;
-				outPt3.Prev = outPt4;
-				outPt4.Next = outPt3;
-				j.OutPt1 = outPt;
-				j.OutPt2 = outPt3;
-				return true;
+				else
+				{
+					outPt3 = this.DupOutPt(outPt, true);
+					outPt4 = this.DupOutPt(outPt2, false);
+					outPt.Next = outPt2;
+					outPt2.Prev = outPt;
+					outPt3.Prev = outPt4;
+					outPt4.Next = outPt3;
+					j.OutPt1 = outPt;
+					j.OutPt2 = outPt3;
+					flag2 = true;
+				}
 			}
+			return flag2;
 		}
 
 		public static int PointInPolygon(IntPoint pt, List<IntPoint> path)
 		{
 			int num = 0;
 			int count = path.Count;
+			int num2;
 			if (count < 3)
 			{
-				return 0;
+				num2 = 0;
 			}
-			IntPoint intPoint = path[0];
-			for (int i = 1; i <= count; i++)
+			else
 			{
-				IntPoint intPoint2 = ((i != count) ? path[i] : path[0]);
-				if (intPoint2.Y == pt.Y && (intPoint2.X == pt.X || (intPoint.Y == pt.Y && intPoint2.X > pt.X == intPoint.X < pt.X)))
+				IntPoint intPoint = path[0];
+				for (int i = 1; i <= count; i++)
 				{
-					return -1;
-				}
-				if (intPoint.Y < pt.Y != intPoint2.Y < pt.Y)
-				{
-					if (intPoint.X >= pt.X)
+					IntPoint intPoint2 = ((i != count) ? path[i] : path[0]);
+					if (intPoint2.Y == pt.Y)
 					{
-						if (intPoint2.X > pt.X)
+						if (intPoint2.X == pt.X || (intPoint.Y == pt.Y && intPoint2.X > pt.X == intPoint.X < pt.X))
 						{
-							num = 1 - num;
+							return -1;
 						}
-						else
+					}
+					if (intPoint.Y < pt.Y != intPoint2.Y < pt.Y)
+					{
+						if (intPoint.X >= pt.X)
 						{
-							double num2 = (double)(intPoint.X - pt.X) * (double)(intPoint2.Y - pt.Y) - (double)(intPoint2.X - pt.X) * (double)(intPoint.Y - pt.Y);
-							if (num2 == 0.0)
+							if (intPoint2.X > pt.X)
+							{
+								num = 1 - num;
+							}
+							else
+							{
+								double num3 = (double)(intPoint.X - pt.X) * (double)(intPoint2.Y - pt.Y) - (double)(intPoint2.X - pt.X) * (double)(intPoint.Y - pt.Y);
+								if (num3 == 0.0)
+								{
+									return -1;
+								}
+								if (num3 > 0.0 == intPoint2.Y > intPoint.Y)
+								{
+									num = 1 - num;
+								}
+							}
+						}
+						else if (intPoint2.X > pt.X)
+						{
+							double num4 = (double)(intPoint.X - pt.X) * (double)(intPoint2.Y - pt.Y) - (double)(intPoint2.X - pt.X) * (double)(intPoint.Y - pt.Y);
+							if (num4 == 0.0)
 							{
 								return -1;
 							}
-							if (num2 > 0.0 == intPoint2.Y > intPoint.Y)
+							if (num4 > 0.0 == intPoint2.Y > intPoint.Y)
 							{
 								num = 1 - num;
 							}
 						}
 					}
-					else if (intPoint2.X > pt.X)
-					{
-						double num3 = (double)(intPoint.X - pt.X) * (double)(intPoint2.Y - pt.Y) - (double)(intPoint2.X - pt.X) * (double)(intPoint.Y - pt.Y);
-						if (num3 == 0.0)
-						{
-							return -1;
-						}
-						if (num3 > 0.0 == intPoint2.Y > intPoint.Y)
-						{
-							num = 1 - num;
-						}
-					}
+					intPoint = intPoint2;
 				}
-				intPoint = intPoint2;
+				num2 = num;
 			}
-			return num;
+			return num2;
 		}
 
 		private static int PointInPolygon(IntPoint pt, OutPt op)
@@ -2613,9 +2722,12 @@ namespace ClipperLib
 				op = op.Next;
 				long x2 = op.Pt.X;
 				long y2 = op.Pt.Y;
-				if (y2 == y && (x2 == x || (num3 == y && x2 > x == num2 < x)))
+				if (y2 == y)
 				{
-					break;
+					if (x2 == x || (num3 == y && x2 > x == num2 < x))
+					{
+						break;
+					}
 				}
 				if (num3 < y != y2 < y)
 				{
@@ -2630,7 +2742,7 @@ namespace ClipperLib
 							double num4 = (double)(num2 - x) * (double)(y2 - y) - (double)(x2 - x) * (double)(num3 - y);
 							if (num4 == 0.0)
 							{
-								return -1;
+								goto Block_7;
 							}
 							if (num4 > 0.0 == y2 > num3)
 							{
@@ -2643,7 +2755,7 @@ namespace ClipperLib
 						double num5 = (double)(num2 - x) * (double)(y2 - y) - (double)(x2 - x) * (double)(num3 - y);
 						if (num5 == 0.0)
 						{
-							return -1;
+							goto Block_10;
 						}
 						if (num5 > 0.0 == y2 > num3)
 						{
@@ -2655,10 +2767,16 @@ namespace ClipperLib
 				num3 = y2;
 				if (outPt == op)
 				{
-					return num;
+					goto Block_12;
 				}
 			}
 			return -1;
+			Block_7:
+			return -1;
+			Block_10:
+			return -1;
+			Block_12:
+			return num;
 		}
 
 		private static bool Poly2ContainsPoly1(OutPt outPt1, OutPt outPt2)
@@ -2675,10 +2793,12 @@ namespace ClipperLib
 				outPt3 = outPt3.Next;
 				if (outPt3 == outPt1)
 				{
-					return true;
+					goto Block_2;
 				}
 			}
 			return num > 0;
+			Block_2:
+			return true;
 		}
 
 		private void FixupFirstLefts1(OutRec OldOutRec, OutRec NewOutRec)
@@ -2689,9 +2809,12 @@ namespace ClipperLib
 				if (outRec.Pts != null && outRec.FirstLeft != null)
 				{
 					OutRec outRec2 = Clipper.ParseFirstLeft(outRec.FirstLeft);
-					if (outRec2 == OldOutRec && Clipper.Poly2ContainsPoly1(outRec.Pts, NewOutRec.Pts))
+					if (outRec2 == OldOutRec)
 					{
-						outRec.FirstLeft = NewOutRec;
+						if (Clipper.Poly2ContainsPoly1(outRec.Pts, NewOutRec.Pts))
+						{
+							outRec.FirstLeft = NewOutRec;
+						}
 					}
 				}
 			}
@@ -2903,37 +3026,47 @@ namespace ClipperLib
 		public static double Area(List<IntPoint> poly)
 		{
 			int count = poly.Count;
+			double num;
 			if (count < 3)
 			{
-				return 0.0;
+				num = 0.0;
 			}
-			double num = 0.0;
-			int i = 0;
-			int num2 = count - 1;
-			while (i < count)
+			else
 			{
-				num += ((double)poly[num2].X + (double)poly[i].X) * ((double)poly[num2].Y - (double)poly[i].Y);
-				num2 = i;
-				i++;
+				double num2 = 0.0;
+				int i = 0;
+				int num3 = count - 1;
+				while (i < count)
+				{
+					num2 += ((double)poly[num3].X + (double)poly[i].X) * ((double)poly[num3].Y - (double)poly[i].Y);
+					num3 = i;
+					i++;
+				}
+				num = -num2 * 0.5;
 			}
-			return -num * 0.5;
+			return num;
 		}
 
 		private double Area(OutRec outRec)
 		{
 			OutPt outPt = outRec.Pts;
+			double num;
 			if (outPt == null)
 			{
-				return 0.0;
+				num = 0.0;
 			}
-			double num = 0.0;
-			do
+			else
 			{
-				num += (double)(outPt.Prev.Pt.X + outPt.Pt.X) * (double)(outPt.Prev.Pt.Y - outPt.Pt.Y);
-				outPt = outPt.Next;
+				double num2 = 0.0;
+				do
+				{
+					num2 += (double)(outPt.Prev.Pt.X + outPt.Pt.X) * (double)(outPt.Prev.Pt.Y - outPt.Pt.Y);
+					outPt = outPt.Next;
+				}
+				while (outPt != outRec.Pts);
+				num = num2 * 0.5;
 			}
-			while (outPt != outRec.Pts);
-			return num * 0.5;
+			return num;
 		}
 
 		public static List<List<IntPoint>> SimplifyPolygon(List<IntPoint> poly, PolyFillType fillType = PolyFillType.pftEvenOdd)
@@ -2974,30 +3107,35 @@ namespace ClipperLib
 
 		private static bool SlopesNearCollinear(IntPoint pt1, IntPoint pt2, IntPoint pt3, double distSqrd)
 		{
+			bool flag;
 			if (Math.Abs(pt1.X - pt2.X) > Math.Abs(pt1.Y - pt2.Y))
 			{
 				if (pt1.X > pt2.X == pt1.X < pt3.X)
 				{
-					return Clipper.DistanceFromLineSqrd(pt1, pt2, pt3) < distSqrd;
+					flag = Clipper.DistanceFromLineSqrd(pt1, pt2, pt3) < distSqrd;
 				}
-				if (pt2.X > pt1.X == pt2.X < pt3.X)
+				else if (pt2.X > pt1.X == pt2.X < pt3.X)
 				{
-					return Clipper.DistanceFromLineSqrd(pt2, pt1, pt3) < distSqrd;
+					flag = Clipper.DistanceFromLineSqrd(pt2, pt1, pt3) < distSqrd;
 				}
-				return Clipper.DistanceFromLineSqrd(pt3, pt1, pt2) < distSqrd;
+				else
+				{
+					flag = Clipper.DistanceFromLineSqrd(pt3, pt1, pt2) < distSqrd;
+				}
+			}
+			else if (pt1.Y > pt2.Y == pt1.Y < pt3.Y)
+			{
+				flag = Clipper.DistanceFromLineSqrd(pt1, pt2, pt3) < distSqrd;
+			}
+			else if (pt2.Y > pt1.Y == pt2.Y < pt3.Y)
+			{
+				flag = Clipper.DistanceFromLineSqrd(pt2, pt1, pt3) < distSqrd;
 			}
 			else
 			{
-				if (pt1.Y > pt2.Y == pt1.Y < pt3.Y)
-				{
-					return Clipper.DistanceFromLineSqrd(pt1, pt2, pt3) < distSqrd;
-				}
-				if (pt2.Y > pt1.Y == pt2.Y < pt3.Y)
-				{
-					return Clipper.DistanceFromLineSqrd(pt2, pt1, pt3) < distSqrd;
-				}
-				return Clipper.DistanceFromLineSqrd(pt3, pt1, pt2) < distSqrd;
+				flag = Clipper.DistanceFromLineSqrd(pt3, pt1, pt2) < distSqrd;
 			}
+			return flag;
 		}
 
 		private static bool PointsAreClose(IntPoint pt1, IntPoint pt2, double distSqrd)
@@ -3019,57 +3157,62 @@ namespace ClipperLib
 		public static List<IntPoint> CleanPolygon(List<IntPoint> path, double distance = 1.415)
 		{
 			int num = path.Count;
+			List<IntPoint> list;
 			if (num == 0)
 			{
-				return new List<IntPoint>();
+				list = new List<IntPoint>();
 			}
-			OutPt[] array = new OutPt[num];
-			for (int i = 0; i < num; i++)
+			else
 			{
-				array[i] = new OutPt();
-			}
-			for (int j = 0; j < num; j++)
-			{
-				array[j].Pt = path[j];
-				array[j].Next = array[(j + 1) % num];
-				array[j].Next.Prev = array[j];
-				array[j].Idx = 0;
-			}
-			double num2 = distance * distance;
-			OutPt outPt = array[0];
-			while (outPt.Idx == 0 && outPt.Next != outPt.Prev)
-			{
-				if (Clipper.PointsAreClose(outPt.Pt, outPt.Prev.Pt, num2))
+				OutPt[] array = new OutPt[num];
+				for (int i = 0; i < num; i++)
 				{
-					outPt = Clipper.ExcludeOp(outPt);
-					num--;
+					array[i] = new OutPt();
 				}
-				else if (Clipper.PointsAreClose(outPt.Prev.Pt, outPt.Next.Pt, num2))
+				for (int j = 0; j < num; j++)
 				{
-					Clipper.ExcludeOp(outPt.Next);
-					outPt = Clipper.ExcludeOp(outPt);
-					num -= 2;
+					array[j].Pt = path[j];
+					array[j].Next = array[(j + 1) % num];
+					array[j].Next.Prev = array[j];
+					array[j].Idx = 0;
 				}
-				else if (Clipper.SlopesNearCollinear(outPt.Prev.Pt, outPt.Pt, outPt.Next.Pt, num2))
+				double num2 = distance * distance;
+				OutPt outPt = array[0];
+				while (outPt.Idx == 0 && outPt.Next != outPt.Prev)
 				{
-					outPt = Clipper.ExcludeOp(outPt);
-					num--;
+					if (Clipper.PointsAreClose(outPt.Pt, outPt.Prev.Pt, num2))
+					{
+						outPt = Clipper.ExcludeOp(outPt);
+						num--;
+					}
+					else if (Clipper.PointsAreClose(outPt.Prev.Pt, outPt.Next.Pt, num2))
+					{
+						Clipper.ExcludeOp(outPt.Next);
+						outPt = Clipper.ExcludeOp(outPt);
+						num -= 2;
+					}
+					else if (Clipper.SlopesNearCollinear(outPt.Prev.Pt, outPt.Pt, outPt.Next.Pt, num2))
+					{
+						outPt = Clipper.ExcludeOp(outPt);
+						num--;
+					}
+					else
+					{
+						outPt.Idx = 1;
+						outPt = outPt.Next;
+					}
 				}
-				else
+				if (num < 3)
 				{
-					outPt.Idx = 1;
+					num = 0;
+				}
+				List<IntPoint> list2 = new List<IntPoint>(num);
+				for (int k = 0; k < num; k++)
+				{
+					list2.Add(outPt.Pt);
 					outPt = outPt.Next;
 				}
-			}
-			if (num < 3)
-			{
-				num = 0;
-			}
-			List<IntPoint> list = new List<IntPoint>(num);
-			for (int k = 0; k < num; k++)
-			{
-				list.Add(outPt.Pt);
-				outPt = outPt.Next;
+				list = list2;
 			}
 			return list;
 		}
@@ -3205,7 +3348,6 @@ namespace ClipperLib
 				{
 					Clipper.AddPolyNodeToPaths(polyNode, nt, paths);
 				}
-				return;
 			}
 		}
 

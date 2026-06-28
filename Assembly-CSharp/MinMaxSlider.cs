@@ -9,7 +9,7 @@ public class MinMaxSlider : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		ToolTip component = this.transform.parent.gameObject.GetComponent<ToolTip>();
+		ToolTip component = base.transform.parent.gameObject.GetComponent<ToolTip>();
 		if (component != null)
 		{
 			global::UnityEngine.Object.DestroyImmediate(this.toolTip);
@@ -60,7 +60,7 @@ public class MinMaxSlider : KMonoBehaviour
 	public void SetIcon(Image newIcon)
 	{
 		this.icon = newIcon;
-		this.icon.gameObject.transform.SetParent(this.transform);
+		this.icon.gameObject.transform.SetParent(base.transform);
 		this.icon.gameObject.transform.SetAsFirstSibling();
 		this.icon.rectTransform().anchoredPosition = Vector2.zero;
 	}
@@ -68,10 +68,13 @@ public class MinMaxSlider : KMonoBehaviour
 	public void SetMode(MinMaxSlider.Mode mode)
 	{
 		this.mode = mode;
-		if (mode == MinMaxSlider.Mode.Single && this.extraSlider != null)
+		if (mode == MinMaxSlider.Mode.Single)
 		{
-			this.extraSlider.gameObject.SetActive(false);
-			this.extraSlider.handleRect.gameObject.SetActive(false);
+			if (this.extraSlider != null)
+			{
+				this.extraSlider.gameObject.SetActive(false);
+				this.extraSlider.handleRect.gameObject.SetActive(false);
+			}
 		}
 	}
 
@@ -103,7 +106,7 @@ public class MinMaxSlider : KMonoBehaviour
 	public void SetExtraValue(float current)
 	{
 		this.extraSlider.value = current;
-		this.toolTip.toolTip = this.transform.parent.name + ": " + current.ToString("F2");
+		this.toolTip.toolTip = base.transform.parent.name + ": " + current.ToString("F2");
 	}
 
 	public void SetMaxValue(float current, float max)
@@ -118,7 +121,7 @@ public class MinMaxSlider : KMonoBehaviour
 		{
 			this.toolTip.toolTip = string.Concat(new string[]
 			{
-				this.transform.parent.name,
+				base.transform.parent.name,
 				": ",
 				current.ToString("F2"),
 				"/",
@@ -129,122 +132,116 @@ public class MinMaxSlider : KMonoBehaviour
 
 	private void Update()
 	{
-		if (!this.interactable)
+		if (this.interactable)
 		{
-			return;
-		}
-		this.minSlider.value = Mathf.Clamp(this.currentMinValue, this.minLimit, this.currentMinValue);
-		this.maxSlider.value = Mathf.Max(this.minSlider.value, Mathf.Clamp(this.currentMaxValue, Mathf.Max(this.minSlider.value, this.minLimit), this.maxLimit));
-		if (this.direction == Slider.Direction.LeftToRight || this.direction == Slider.Direction.RightToLeft)
-		{
-			this.minRect.anchorMax = new Vector2(this.minSlider.value / this.maxLimit, this.minRect.anchorMax.y);
-			this.maxRect.anchorMax = new Vector2(this.maxSlider.value / this.maxLimit, this.maxRect.anchorMax.y);
-			this.maxRect.anchorMin = new Vector2(this.minSlider.value / this.maxLimit, this.maxRect.anchorMin.y);
-		}
-		else
-		{
-			this.minRect.anchorMax = new Vector2(this.minRect.anchorMin.x, this.minSlider.value / this.maxLimit);
-			this.maxRect.anchorMin = new Vector2(this.maxRect.anchorMin.x, this.minSlider.value / this.maxLimit);
+			this.minSlider.value = Mathf.Clamp(this.currentMinValue, this.minLimit, this.currentMinValue);
+			this.maxSlider.value = Mathf.Max(this.minSlider.value, Mathf.Clamp(this.currentMaxValue, Mathf.Max(this.minSlider.value, this.minLimit), this.maxLimit));
+			if (this.direction == Slider.Direction.LeftToRight || this.direction == Slider.Direction.RightToLeft)
+			{
+				this.minRect.anchorMax = new Vector2(this.minSlider.value / this.maxLimit, this.minRect.anchorMax.y);
+				this.maxRect.anchorMax = new Vector2(this.maxSlider.value / this.maxLimit, this.maxRect.anchorMax.y);
+				this.maxRect.anchorMin = new Vector2(this.minSlider.value / this.maxLimit, this.maxRect.anchorMin.y);
+			}
+			else
+			{
+				this.minRect.anchorMax = new Vector2(this.minRect.anchorMin.x, this.minSlider.value / this.maxLimit);
+				this.maxRect.anchorMin = new Vector2(this.maxRect.anchorMin.x, this.minSlider.value / this.maxLimit);
+			}
 		}
 	}
 
 	public void OnMinValueChanged(float ignoreThis)
 	{
-		if (!this.interactable)
+		if (this.interactable)
 		{
-			return;
-		}
-		if (this.lockRange)
-		{
-			this.currentMaxValue = Mathf.Min(Mathf.Max(this.minLimit, this.minSlider.value) + this.range, this.maxLimit);
-			this.currentMinValue = Mathf.Max(this.minLimit, Mathf.Min(this.maxSlider.value, this.currentMaxValue - this.range));
-		}
-		else
-		{
-			this.currentMinValue = Mathf.Clamp(this.minSlider.value, this.minLimit, Mathf.Min(this.maxSlider.value, this.currentMaxValue));
-		}
-		if (this.onMinChange != null)
-		{
-			this.onMinChange(this);
+			if (this.lockRange)
+			{
+				this.currentMaxValue = Mathf.Min(Mathf.Max(this.minLimit, this.minSlider.value) + this.range, this.maxLimit);
+				this.currentMinValue = Mathf.Max(this.minLimit, Mathf.Min(this.maxSlider.value, this.currentMaxValue - this.range));
+			}
+			else
+			{
+				this.currentMinValue = Mathf.Clamp(this.minSlider.value, this.minLimit, Mathf.Min(this.maxSlider.value, this.currentMaxValue));
+			}
+			if (this.onMinChange != null)
+			{
+				this.onMinChange(this);
+			}
 		}
 	}
 
 	public void OnMaxValueChanged(float ignoreThis)
 	{
-		if (!this.interactable)
+		if (this.interactable)
 		{
-			return;
-		}
-		if (this.lockRange)
-		{
-			this.currentMinValue = Mathf.Max(this.maxSlider.value - this.range, this.minLimit);
-			this.currentMaxValue = Mathf.Max(this.minSlider.value, Mathf.Clamp(this.maxSlider.value, Mathf.Max(this.currentMinValue + this.range, this.minLimit), this.maxLimit));
-		}
-		else
-		{
-			this.currentMaxValue = Mathf.Max(this.minSlider.value, Mathf.Clamp(this.maxSlider.value, Mathf.Max(this.minSlider.value, this.minLimit), this.maxLimit));
-		}
-		if (this.onMaxChange != null)
-		{
-			this.onMaxChange(this);
+			if (this.lockRange)
+			{
+				this.currentMinValue = Mathf.Max(this.maxSlider.value - this.range, this.minLimit);
+				this.currentMaxValue = Mathf.Max(this.minSlider.value, Mathf.Clamp(this.maxSlider.value, Mathf.Max(this.currentMinValue + this.range, this.minLimit), this.maxLimit));
+			}
+			else
+			{
+				this.currentMaxValue = Mathf.Max(this.minSlider.value, Mathf.Clamp(this.maxSlider.value, Mathf.Max(this.minSlider.value, this.minLimit), this.maxLimit));
+			}
+			if (this.onMaxChange != null)
+			{
+				this.onMaxChange(this);
+			}
 		}
 	}
 
 	public void Lock(bool shouldLock)
 	{
-		if (!this.interactable)
+		if (this.interactable)
 		{
-			return;
-		}
-		if (this.lockType == MinMaxSlider.LockingType.Drag)
-		{
-			this.lockRange = shouldLock;
-			this.range = this.maxSlider.value - this.minSlider.value;
-			this.mousePos = Input.mousePosition;
+			if (this.lockType == MinMaxSlider.LockingType.Drag)
+			{
+				this.lockRange = shouldLock;
+				this.range = this.maxSlider.value - this.minSlider.value;
+				this.mousePos = Input.mousePosition;
+			}
 		}
 	}
 
 	public void ToggleLock()
 	{
-		if (!this.interactable)
+		if (this.interactable)
 		{
-			return;
-		}
-		if (this.lockType == MinMaxSlider.LockingType.Toggle)
-		{
-			this.lockRange = !this.lockRange;
-			if (this.lockRange)
+			if (this.lockType == MinMaxSlider.LockingType.Toggle)
 			{
-				this.range = this.maxSlider.value - this.minSlider.value;
+				this.lockRange = !this.lockRange;
+				if (this.lockRange)
+				{
+					this.range = this.maxSlider.value - this.minSlider.value;
+				}
 			}
 		}
 	}
 
 	public void OnDrag()
 	{
-		if (!this.interactable)
+		if (this.interactable)
 		{
-			return;
-		}
-		if (this.lockRange && this.lockType == MinMaxSlider.LockingType.Drag)
-		{
-			float num = Input.mousePosition.x - this.mousePos.x;
-			if (this.direction == Slider.Direction.TopToBottom || this.direction == Slider.Direction.BottomToTop)
+			if (this.lockRange && this.lockType == MinMaxSlider.LockingType.Drag)
 			{
-				num = Input.mousePosition.y - this.mousePos.y;
+				float num = Input.mousePosition.x - this.mousePos.x;
+				if (this.direction == Slider.Direction.TopToBottom || this.direction == Slider.Direction.BottomToTop)
+				{
+					num = Input.mousePosition.y - this.mousePos.y;
+				}
+				this.currentMinValue = Mathf.Max(this.currentMinValue + num, this.minLimit);
+				this.mousePos = Input.mousePosition;
 			}
-			this.currentMinValue = Mathf.Max(this.currentMinValue + num, this.minLimit);
-			this.mousePos = Input.mousePosition;
 		}
 	}
 
 	public MinMaxSlider.LockingType lockType = MinMaxSlider.LockingType.Drag;
 
-	public bool lockRange;
+	public bool lockRange = false;
 
 	public bool interactable = true;
 
-	public float minLimit;
+	public float minLimit = 0f;
 
 	public float maxLimit = 100f;
 
@@ -260,7 +257,7 @@ public class MinMaxSlider : KMonoBehaviour
 
 	public float currentExtraValue = 50f;
 
-	public Slider.Direction direction;
+	public Slider.Direction direction = Slider.Direction.LeftToRight;
 
 	public bool wholeNumbers = true;
 

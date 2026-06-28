@@ -13,7 +13,8 @@ namespace UnityEngine
 		{
 		}
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void ReleaseCoroutine();
 

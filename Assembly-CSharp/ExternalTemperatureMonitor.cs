@@ -7,20 +7,32 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 {
 	public static float GetExternalColdThreshold(Attributes affected_attributes)
 	{
+		float num;
 		if (affected_attributes == null)
 		{
-			return -0.36261335f;
+			num = -0.36261335f;
 		}
-		return -(0.36261335f - affected_attributes.GetValue(Db.Get().Attributes.RoomTemperaturePreference.Id));
+		else
+		{
+			float num2 = -(0.36261335f - affected_attributes.GetValue(Db.Get().Attributes.RoomTemperaturePreference.Id));
+			num = num2;
+		}
+		return num;
 	}
 
 	public static float GetExternalWarmThreshold(Attributes affected_attributes)
 	{
+		float num;
 		if (affected_attributes == null)
 		{
-			return 0.19525334f;
+			num = 0.19525334f;
 		}
-		return -(-0.19525334f - affected_attributes.GetValue(Db.Get().Attributes.RoomTemperaturePreference.Id));
+		else
+		{
+			float num2 = -(-0.19525334f - affected_attributes.GetValue(Db.Get().Attributes.RoomTemperaturePreference.Id));
+			num = num2;
+		}
+		return num;
 	}
 
 	public override void InitializeStates(out StateMachine.BaseState default_state)
@@ -61,6 +73,20 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 			});
 	}
 
+	public GameStateMachine<ExternalTemperatureMonitor, ExternalTemperatureMonitor.Instance, IStateMachineTarget, object>.State comfortable;
+
+	public GameStateMachine<ExternalTemperatureMonitor, ExternalTemperatureMonitor.Instance, IStateMachineTarget, object>.State transitionToTooWarm;
+
+	public GameStateMachine<ExternalTemperatureMonitor, ExternalTemperatureMonitor.Instance, IStateMachineTarget, object>.State tooWarm;
+
+	public GameStateMachine<ExternalTemperatureMonitor, ExternalTemperatureMonitor.Instance, IStateMachineTarget, object>.State transitionToTooCool;
+
+	public GameStateMachine<ExternalTemperatureMonitor, ExternalTemperatureMonitor.Instance, IStateMachineTarget, object>.State tooCool;
+
+	public GameStateMachine<ExternalTemperatureMonitor, ExternalTemperatureMonitor.Instance, IStateMachineTarget, object>.State transitionToScalding;
+
+	public GameStateMachine<ExternalTemperatureMonitor, ExternalTemperatureMonitor.Instance, IStateMachineTarget, object>.State scalding;
+
 	private const float SCALD_DAMAGE_INTERVAL = 2f;
 
 	private const float SCALDING_DAMAGE_AMOUNT = 10f;
@@ -78,20 +104,6 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 	private const float TRANSITION_OUT_DELAY = 6f;
 
 	private const float TEMPERATURE_AVERAGING_RANGE = 6f;
-
-	public GameStateMachine<ExternalTemperatureMonitor, ExternalTemperatureMonitor.Instance, IStateMachineTarget, object>.State comfortable;
-
-	public GameStateMachine<ExternalTemperatureMonitor, ExternalTemperatureMonitor.Instance, IStateMachineTarget, object>.State transitionToTooWarm;
-
-	public GameStateMachine<ExternalTemperatureMonitor, ExternalTemperatureMonitor.Instance, IStateMachineTarget, object>.State tooWarm;
-
-	public GameStateMachine<ExternalTemperatureMonitor, ExternalTemperatureMonitor.Instance, IStateMachineTarget, object>.State transitionToTooCool;
-
-	public GameStateMachine<ExternalTemperatureMonitor, ExternalTemperatureMonitor.Instance, IStateMachineTarget, object>.State tooCool;
-
-	public GameStateMachine<ExternalTemperatureMonitor, ExternalTemperatureMonitor.Instance, IStateMachineTarget, object>.State transitionToScalding;
-
-	public GameStateMachine<ExternalTemperatureMonitor, ExternalTemperatureMonitor.Instance, IStateMachineTarget, object>.State scalding;
 
 	public new class Instance : GameStateMachine<ExternalTemperatureMonitor, ExternalTemperatureMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
@@ -112,6 +124,7 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 			get
 			{
 				int num = Grid.PosToCell(base.gameObject);
+				float num3;
 				if (this.occupyArea != null)
 				{
 					float num2 = 0f;
@@ -119,9 +132,14 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 					{
 						num2 += Grid.Temperature[Grid.OffsetCell(num, this.occupyArea.OccupiedCellsOffsets[i])];
 					}
-					return num2 / (float)this.occupyArea.OccupiedCellsOffsets.Length;
+					num2 /= (float)this.occupyArea.OccupiedCellsOffsets.Length;
+					num3 = num2;
 				}
-				return Grid.Temperature[num];
+				else
+				{
+					num3 = Grid.Temperature[num];
+				}
+				return num3;
 			}
 		}
 
@@ -135,11 +153,16 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 		{
 			get
 			{
+				float num;
 				if (this.internalTemperatureMonitor.IdealTemperatureDelta() > 0.5f)
 				{
-					return 0f;
+					num = 0f;
 				}
-				return CreatureSimTemperatureTransfer.PotentialEnergyFlowToCreature(Grid.PosToCell(base.gameObject), this.primaryElement, this.temperatureTransferer, 1f);
+				else
+				{
+					num = CreatureSimTemperatureTransfer.PotentialEnergyFlowToCreature(Grid.PosToCell(base.gameObject), this.primaryElement, this.temperatureTransferer, 1f);
+				}
+				return num;
 			}
 		}
 
@@ -190,7 +213,7 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 
 		public float HotThreshold = 306.15f;
 
-		private AttributeModifier baseScalindingThreshold = new AttributeModifier("ScaldingThreshold", 345f, DUPLICANTS.STATS.SKIN_DURABILITY.NAME, false, false);
+		private AttributeModifier baseScalindingThreshold = new AttributeModifier("ScaldingThreshold", 345f, DUPLICANTS.STATS.SKIN_DURABILITY.NAME, false, false, true);
 
 		public Attributes attributes;
 

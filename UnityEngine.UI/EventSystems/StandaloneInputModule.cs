@@ -118,46 +118,57 @@ namespace UnityEngine.EventSystems
 
 		public override void UpdateModule()
 		{
-			this.m_LastMousePosition = this.m_MousePosition;
-			this.m_MousePosition = Input.mousePosition;
+			if (!base.eventSystem.isFocused || (SystemInfo.operatingSystemFamily != OperatingSystemFamily.Windows && SystemInfo.operatingSystemFamily != OperatingSystemFamily.Linux && SystemInfo.operatingSystemFamily != OperatingSystemFamily.MacOSX))
+			{
+				this.m_LastMousePosition = this.m_MousePosition;
+				this.m_MousePosition = base.input.mousePosition;
+			}
 		}
 
 		public override bool IsModuleSupported()
 		{
-			return this.m_ForceModuleActive || Input.mousePresent || Input.touchSupported;
+			return this.m_ForceModuleActive || base.input.mousePresent || base.input.touchSupported;
 		}
 
 		public override bool ShouldActivateModule()
 		{
+			bool flag;
 			if (!base.ShouldActivateModule())
 			{
-				return false;
+				flag = false;
 			}
-			bool flag = this.m_ForceModuleActive;
-			flag |= Input.GetButtonDown(this.m_SubmitButton);
-			flag |= Input.GetButtonDown(this.m_CancelButton);
-			flag |= !Mathf.Approximately(Input.GetAxisRaw(this.m_HorizontalAxis), 0f);
-			flag |= !Mathf.Approximately(Input.GetAxisRaw(this.m_VerticalAxis), 0f);
-			flag |= (this.m_MousePosition - this.m_LastMousePosition).sqrMagnitude > 0f;
-			flag |= Input.GetMouseButtonDown(0);
-			if (Input.touchCount > 0)
+			else
 			{
-				flag = true;
+				bool flag2 = this.m_ForceModuleActive;
+				flag2 |= base.input.GetButtonDown(this.m_SubmitButton);
+				flag2 |= base.input.GetButtonDown(this.m_CancelButton);
+				flag2 |= !Mathf.Approximately(base.input.GetAxisRaw(this.m_HorizontalAxis), 0f);
+				flag2 |= !Mathf.Approximately(base.input.GetAxisRaw(this.m_VerticalAxis), 0f);
+				flag2 |= (this.m_MousePosition - this.m_LastMousePosition).sqrMagnitude > 0f;
+				flag2 |= base.input.GetMouseButtonDown(0);
+				if (base.input.touchCount > 0)
+				{
+					flag2 = true;
+				}
+				flag = flag2;
 			}
 			return flag;
 		}
 
 		public override void ActivateModule()
 		{
-			base.ActivateModule();
-			this.m_MousePosition = Input.mousePosition;
-			this.m_LastMousePosition = Input.mousePosition;
-			GameObject gameObject = base.eventSystem.currentSelectedGameObject;
-			if (gameObject == null)
+			if (!base.eventSystem.isFocused || (SystemInfo.operatingSystemFamily != OperatingSystemFamily.Windows && SystemInfo.operatingSystemFamily != OperatingSystemFamily.Linux && SystemInfo.operatingSystemFamily != OperatingSystemFamily.MacOSX))
 			{
-				gameObject = base.eventSystem.firstSelectedGameObject;
+				base.ActivateModule();
+				this.m_MousePosition = base.input.mousePosition;
+				this.m_LastMousePosition = base.input.mousePosition;
+				GameObject gameObject = base.eventSystem.currentSelectedGameObject;
+				if (gameObject == null)
+				{
+					gameObject = base.eventSystem.firstSelectedGameObject;
+				}
+				base.eventSystem.SetSelectedGameObject(gameObject, this.GetBaseEventData());
 			}
-			base.eventSystem.SetSelectedGameObject(gameObject, this.GetBaseEventData());
 		}
 
 		public override void DeactivateModule()
@@ -168,29 +179,32 @@ namespace UnityEngine.EventSystems
 
 		public override void Process()
 		{
-			bool flag = this.SendUpdateEventToSelectedObject();
-			if (base.eventSystem.sendNavigationEvents)
+			if (!base.eventSystem.isFocused || (SystemInfo.operatingSystemFamily != OperatingSystemFamily.Windows && SystemInfo.operatingSystemFamily != OperatingSystemFamily.Linux && SystemInfo.operatingSystemFamily != OperatingSystemFamily.MacOSX))
 			{
-				if (!flag)
+				bool flag = this.SendUpdateEventToSelectedObject();
+				if (base.eventSystem.sendNavigationEvents)
 				{
-					flag |= this.SendMoveEventToSelectedObject();
+					if (!flag)
+					{
+						flag |= this.SendMoveEventToSelectedObject();
+					}
+					if (!flag)
+					{
+						this.SendSubmitEventToSelectedObject();
+					}
 				}
-				if (!flag)
+				if (!this.ProcessTouchEvents() && base.input.mousePresent)
 				{
-					this.SendSubmitEventToSelectedObject();
+					this.ProcessMouseEvent();
 				}
-			}
-			if (!this.ProcessTouchEvents())
-			{
-				this.ProcessMouseEvent();
 			}
 		}
 
 		private bool ProcessTouchEvents()
 		{
-			for (int i = 0; i < Input.touchCount; i++)
+			for (int i = 0; i < base.input.touchCount; i++)
 			{
-				Touch touch = Input.GetTouch(i);
+				Touch touch = base.input.GetTouch(i);
 				if (touch.type != TouchType.Indirect)
 				{
 					bool flag;
@@ -208,10 +222,10 @@ namespace UnityEngine.EventSystems
 					}
 				}
 			}
-			return Input.touchCount > 0;
+			return base.input.touchCount > 0;
 		}
 
-		private void ProcessTouchPress(PointerEventData pointerEvent, bool pressed, bool released)
+		protected void ProcessTouchPress(PointerEventData pointerEvent, bool pressed, bool released)
 		{
 			GameObject gameObject = pointerEvent.pointerCurrentRaycast.gameObject;
 			if (pressed)
@@ -293,28 +307,33 @@ namespace UnityEngine.EventSystems
 
 		protected bool SendSubmitEventToSelectedObject()
 		{
+			bool flag;
 			if (base.eventSystem.currentSelectedGameObject == null)
 			{
-				return false;
+				flag = false;
 			}
-			BaseEventData baseEventData = this.GetBaseEventData();
-			if (Input.GetButtonDown(this.m_SubmitButton))
+			else
 			{
-				ExecuteEvents.Execute<ISubmitHandler>(base.eventSystem.currentSelectedGameObject, baseEventData, ExecuteEvents.submitHandler);
+				BaseEventData baseEventData = this.GetBaseEventData();
+				if (base.input.GetButtonDown(this.m_SubmitButton))
+				{
+					ExecuteEvents.Execute<ISubmitHandler>(base.eventSystem.currentSelectedGameObject, baseEventData, ExecuteEvents.submitHandler);
+				}
+				if (base.input.GetButtonDown(this.m_CancelButton))
+				{
+					ExecuteEvents.Execute<ICancelHandler>(base.eventSystem.currentSelectedGameObject, baseEventData, ExecuteEvents.cancelHandler);
+				}
+				flag = baseEventData.used;
 			}
-			if (Input.GetButtonDown(this.m_CancelButton))
-			{
-				ExecuteEvents.Execute<ICancelHandler>(base.eventSystem.currentSelectedGameObject, baseEventData, ExecuteEvents.cancelHandler);
-			}
-			return baseEventData.used;
+			return flag;
 		}
 
 		private Vector2 GetRawMoveVector()
 		{
 			Vector2 zero = Vector2.zero;
-			zero.x = Input.GetAxisRaw(this.m_HorizontalAxis);
-			zero.y = Input.GetAxisRaw(this.m_VerticalAxis);
-			if (Input.GetButtonDown(this.m_HorizontalAxis))
+			zero.x = base.input.GetAxisRaw(this.m_HorizontalAxis);
+			zero.y = base.input.GetAxisRaw(this.m_VerticalAxis);
+			if (base.input.GetButtonDown(this.m_HorizontalAxis))
 			{
 				if (zero.x < 0f)
 				{
@@ -325,7 +344,7 @@ namespace UnityEngine.EventSystems
 					zero.x = 1f;
 				}
 			}
-			if (Input.GetButtonDown(this.m_VerticalAxis))
+			if (base.input.GetButtonDown(this.m_VerticalAxis))
 			{
 				if (zero.y < 0f)
 				{
@@ -343,45 +362,53 @@ namespace UnityEngine.EventSystems
 		{
 			float unscaledTime = Time.unscaledTime;
 			Vector2 rawMoveVector = this.GetRawMoveVector();
+			bool flag;
 			if (Mathf.Approximately(rawMoveVector.x, 0f) && Mathf.Approximately(rawMoveVector.y, 0f))
 			{
 				this.m_ConsecutiveMoveCount = 0;
-				return false;
-			}
-			bool flag = Input.GetButtonDown(this.m_HorizontalAxis) || Input.GetButtonDown(this.m_VerticalAxis);
-			bool flag2 = Vector2.Dot(rawMoveVector, this.m_LastMoveVector) > 0f;
-			if (!flag)
-			{
-				if (flag2 && this.m_ConsecutiveMoveCount == 1)
-				{
-					flag = unscaledTime > this.m_PrevActionTime + this.m_RepeatDelay;
-				}
-				else
-				{
-					flag = unscaledTime > this.m_PrevActionTime + 1f / this.m_InputActionsPerSecond;
-				}
-			}
-			if (!flag)
-			{
-				return false;
-			}
-			AxisEventData axisEventData = this.GetAxisEventData(rawMoveVector.x, rawMoveVector.y, 0.6f);
-			if (axisEventData.moveDir != MoveDirection.None)
-			{
-				ExecuteEvents.Execute<IMoveHandler>(base.eventSystem.currentSelectedGameObject, axisEventData, ExecuteEvents.moveHandler);
-				if (!flag2)
-				{
-					this.m_ConsecutiveMoveCount = 0;
-				}
-				this.m_ConsecutiveMoveCount++;
-				this.m_PrevActionTime = unscaledTime;
-				this.m_LastMoveVector = rawMoveVector;
+				flag = false;
 			}
 			else
 			{
-				this.m_ConsecutiveMoveCount = 0;
+				bool flag2 = base.input.GetButtonDown(this.m_HorizontalAxis) || base.input.GetButtonDown(this.m_VerticalAxis);
+				bool flag3 = Vector2.Dot(rawMoveVector, this.m_LastMoveVector) > 0f;
+				if (!flag2)
+				{
+					if (flag3 && this.m_ConsecutiveMoveCount == 1)
+					{
+						flag2 = unscaledTime > this.m_PrevActionTime + this.m_RepeatDelay;
+					}
+					else
+					{
+						flag2 = unscaledTime > this.m_PrevActionTime + 1f / this.m_InputActionsPerSecond;
+					}
+				}
+				if (!flag2)
+				{
+					flag = false;
+				}
+				else
+				{
+					AxisEventData axisEventData = this.GetAxisEventData(rawMoveVector.x, rawMoveVector.y, 0.6f);
+					if (axisEventData.moveDir != MoveDirection.None)
+					{
+						ExecuteEvents.Execute<IMoveHandler>(base.eventSystem.currentSelectedGameObject, axisEventData, ExecuteEvents.moveHandler);
+						if (!flag3)
+						{
+							this.m_ConsecutiveMoveCount = 0;
+						}
+						this.m_ConsecutiveMoveCount++;
+						this.m_PrevActionTime = unscaledTime;
+						this.m_LastMoveVector = rawMoveVector;
+					}
+					else
+					{
+						this.m_ConsecutiveMoveCount = 0;
+					}
+					flag = axisEventData.used;
+				}
 			}
-			return axisEventData.used;
+			return flag;
 		}
 
 		protected void ProcessMouseEvent()
@@ -389,10 +416,17 @@ namespace UnityEngine.EventSystems
 			this.ProcessMouseEvent(0);
 		}
 
+		[Obsolete("This method is no longer checked, overriding it with return true does nothing!")]
+		protected virtual bool ForceAutoSelect()
+		{
+			return false;
+		}
+
 		protected void ProcessMouseEvent(int id)
 		{
 			PointerInputModule.MouseState mousePointerEventData = this.GetMousePointerEventData(id);
 			PointerInputModule.MouseButtonEventData eventData = mousePointerEventData.GetButtonState(PointerEventData.InputButton.Left).eventData;
+			this.m_CurrentFocusedGameObject = eventData.buttonData.pointerCurrentRaycast.gameObject;
 			this.ProcessMousePress(eventData);
 			this.ProcessMove(eventData.buttonData);
 			this.ProcessDrag(eventData.buttonData);
@@ -409,13 +443,18 @@ namespace UnityEngine.EventSystems
 
 		protected bool SendUpdateEventToSelectedObject()
 		{
+			bool flag;
 			if (base.eventSystem.currentSelectedGameObject == null)
 			{
-				return false;
+				flag = false;
 			}
-			BaseEventData baseEventData = this.GetBaseEventData();
-			ExecuteEvents.Execute<IUpdateSelectedHandler>(base.eventSystem.currentSelectedGameObject, baseEventData, ExecuteEvents.updateSelectedHandler);
-			return baseEventData.used;
+			else
+			{
+				BaseEventData baseEventData = this.GetBaseEventData();
+				ExecuteEvents.Execute<IUpdateSelectedHandler>(base.eventSystem.currentSelectedGameObject, baseEventData, ExecuteEvents.updateSelectedHandler);
+				flag = baseEventData.used;
+			}
+			return flag;
 		}
 
 		protected void ProcessMousePress(PointerInputModule.MouseButtonEventData data)
@@ -492,15 +531,22 @@ namespace UnityEngine.EventSystems
 			}
 		}
 
+		protected GameObject GetCurrentFocusedGameObject()
+		{
+			return this.m_CurrentFocusedGameObject;
+		}
+
 		private float m_PrevActionTime;
 
 		private Vector2 m_LastMoveVector;
 
-		private int m_ConsecutiveMoveCount;
+		private int m_ConsecutiveMoveCount = 0;
 
 		private Vector2 m_LastMousePosition;
 
 		private Vector2 m_MousePosition;
+
+		private GameObject m_CurrentFocusedGameObject;
 
 		[SerializeField]
 		private string m_HorizontalAxis = "Horizontal";
@@ -520,8 +566,8 @@ namespace UnityEngine.EventSystems
 		[SerializeField]
 		private float m_RepeatDelay = 0.5f;
 
-		[FormerlySerializedAs("m_AllowActivationOnMobileDevice")]
 		[SerializeField]
+		[FormerlySerializedAs("m_AllowActivationOnMobileDevice")]
 		private bool m_ForceModuleActive;
 
 		[Obsolete("Mode is no longer needed on input module as it handles both mouse and keyboard simultaneously.", false)]

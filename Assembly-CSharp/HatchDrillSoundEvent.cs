@@ -22,63 +22,71 @@ public class HatchDrillSoundEvent : SoundEvent
 
 	private static int GetAudioCategory(int cell)
 	{
+		int num;
 		if (!Grid.IsValidCell(cell))
 		{
-			return 7;
+			num = 7;
 		}
-		Element element = Grid.Element[cell];
-		if (element.id == SimHashes.Dirt)
+		else
 		{
-			return 0;
+			Element element = Grid.Element[cell];
+			if (element.id == SimHashes.Dirt)
+			{
+				num = 0;
+			}
+			else if (element.HasTag(GameTags.IceOre))
+			{
+				num = 1;
+			}
+			else if (element.id == SimHashes.CrushedIce)
+			{
+				num = 12;
+			}
+			else if (element.id == SimHashes.DirtyIce)
+			{
+				num = 13;
+			}
+			else if (Grid.Foundation[cell])
+			{
+				num = 2;
+			}
+			else if (element.id == SimHashes.OxyRock)
+			{
+				num = 3;
+			}
+			else if (element.id == SimHashes.PhosphateNodules || element.id == SimHashes.Phosphorus || element.id == SimHashes.Phosphorite)
+			{
+				num = 4;
+			}
+			else if (element.HasTag(GameTags.Metal))
+			{
+				num = 5;
+			}
+			else if (element.HasTag(GameTags.RefinedMetal))
+			{
+				num = 6;
+			}
+			else if (element.id == SimHashes.Sand)
+			{
+				num = 8;
+			}
+			else if (element.id == SimHashes.Clay)
+			{
+				num = 9;
+			}
+			else if (element.id == SimHashes.Algae)
+			{
+				num = 10;
+			}
+			else if (element.id == SimHashes.SlimeMold)
+			{
+				num = 11;
+			}
+			else
+			{
+				num = 7;
+			}
 		}
-		if (element.HasTag(GameTags.IceOre))
-		{
-			return 1;
-		}
-		if (element.id == SimHashes.CrushedIce)
-		{
-			return 12;
-		}
-		if (element.id == SimHashes.DirtyIce)
-		{
-			return 13;
-		}
-		if (Grid.Foundation[cell])
-		{
-			return 2;
-		}
-		if (element.id == SimHashes.OxyRock)
-		{
-			return 3;
-		}
-		if (element.id == SimHashes.PhosphateNodules || element.id == SimHashes.Phosphorus || element.id == SimHashes.Phosphorite)
-		{
-			return 4;
-		}
-		if (element.HasTag(GameTags.Metal))
-		{
-			return 5;
-		}
-		if (element.HasTag(GameTags.RefinedMetal))
-		{
-			return 6;
-		}
-		if (element.id == SimHashes.Sand)
-		{
-			return 8;
-		}
-		if (element.id == SimHashes.Clay)
-		{
-			return 9;
-		}
-		if (element.id == SimHashes.Algae)
-		{
-			return 10;
-		}
-		if (element.id == SimHashes.SlimeMold)
-		{
-			return 11;
-		}
-		return 7;
+		return num;
 	}
 }

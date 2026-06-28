@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using UnityEngine.Internal;
+using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
@@ -44,7 +46,7 @@ namespace UnityEngine
 			Debug.INTERNAL_CALL_DrawLine(ref start, ref end, ref white, num, flag);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_DrawLine(ref Vector3 start, ref Vector3 end, ref Color color, float duration, bool depthTest);
 
@@ -77,11 +79,11 @@ namespace UnityEngine
 			Debug.DrawLine(start, start + dir, color, duration, depthTest);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void Break();
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void DebugBreak();
 
@@ -125,16 +127,16 @@ namespace UnityEngine
 			Debug.logger.LogFormat(LogType.Error, context, format, args);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void ClearDeveloperConsole();
 
 		public static extern bool developerConsoleVisible
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
@@ -267,14 +269,22 @@ namespace UnityEngine
 
 		public static extern bool isDebugBuild
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void OpenConsoleFile();
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void GetDiagnosticSwitches(List<DiagnosticSwitch> results);
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern void SetDiagnosticSwitch(string name, object value, bool setPersistent);
 
 		[Obsolete("Assert(bool, string, params object[]) is obsolete. Use AssertFormat(bool, string, params object[]) (UnityUpgradable) -> AssertFormat(*)", true)]
 		[Conditional("UNITY_ASSERTIONS")]
@@ -286,6 +296,6 @@ namespace UnityEngine
 			}
 		}
 
-		internal static Logger s_Logger = new Logger(new DebugLogHandler());
+		internal static ILogger s_Logger = new Logger(new DebugLogHandler());
 	}
 }

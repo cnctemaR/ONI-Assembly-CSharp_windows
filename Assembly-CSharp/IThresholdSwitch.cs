@@ -26,8 +26,6 @@ public interface IThresholdSwitch
 
 	string BelowToolTip { get; }
 
-	bool IsConnected();
-
 	float ProcessedSliderValue(float input);
 
 	float ProcessedInputValue(float input);

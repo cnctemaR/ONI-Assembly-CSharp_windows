@@ -87,12 +87,17 @@ namespace FMOD.Studio
 			group = null;
 			IntPtr intPtr = 0;
 			RESULT result = Bus.FMOD_Studio_Bus_GetChannelGroup(this.rawPtr, out intPtr);
+			RESULT result2;
 			if (result != RESULT.OK)
 			{
-				return result;
+				result2 = result;
 			}
-			group = new ChannelGroup(intPtr);
-			return result;
+			else
+			{
+				group = new ChannelGroup(intPtr);
+				result2 = result;
+			}
+			return result2;
 		}
 
 		[DllImport("fmodstudio")]

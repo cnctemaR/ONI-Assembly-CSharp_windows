@@ -77,11 +77,16 @@ public class RegionManager
 
 	public Region GetRegionByID(ushort ID)
 	{
+		Region region;
 		if (this.regions.ContainsKey(ID))
 		{
-			return this.regions[ID];
+			region = this.regions[ID];
 		}
-		return null;
+		else
+		{
+			region = null;
+		}
+		return region;
 	}
 
 	public void RemoveRegion(Region region, bool fire_region_changed = true)
@@ -103,22 +108,32 @@ public class RegionManager
 	public Region GetIntersectionRegion(Vector2 pt)
 	{
 		int num = Grid.PosToCell(pt);
+		Region region;
 		if (Grid.IsValidCell(num))
 		{
-			return this.GetIntersectionRegion(num);
+			region = this.GetIntersectionRegion(num);
 		}
-		return null;
+		else
+		{
+			region = null;
+		}
+		return region;
 	}
 
 	public Region GetIntersectionRegion(int cell)
 	{
 		DebugUtil.Assert(cell >= 0 && cell < this.idGrid.Length, "Assert!");
 		ushort num = this.idGrid[cell];
+		Region region;
 		if (num == 65535)
 		{
-			return null;
+			region = null;
 		}
-		return this.regions[num];
+		else
+		{
+			region = this.regions[num];
+		}
+		return region;
 	}
 
 	public void SetCellOwner(ushort region_id, int cell)
@@ -126,8 +141,6 @@ public class RegionManager
 		DebugUtil.Assert(cell >= 0 && cell < this.idGrid.Length, "Assert!");
 		this.idGrid[cell] = region_id;
 	}
-
-	public const ushort INVALID_ID = 65535;
 
 	public List<Region> regionPrefabs = new List<Region>();
 
@@ -138,6 +151,8 @@ public class RegionManager
 	private ushort free_id;
 
 	private ushort[] idGrid;
+
+	public const ushort INVALID_ID = 65535;
 
 	public Region selectedRegionPrefab;
 

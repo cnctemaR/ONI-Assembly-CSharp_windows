@@ -32,7 +32,7 @@ namespace MIConvexHull
 			ConvexFaceInternal[] array = new ConvexFaceInternal[2 * this.FacePoolCapacity];
 			bool[] array2 = new bool[2 * this.FacePoolCapacity];
 			Array.Copy(this.FacePool, array, this.FacePoolCapacity);
-			Buffer.BlockCopy(this.Hull.AffectedFaceFlags, 0, array2, 0, this.FacePoolCapacity * 1);
+			Buffer.BlockCopy(this.Hull.AffectedFaceFlags, 0, array2, 0, this.FacePoolCapacity);
 			this.FacePoolCapacity = 2 * this.FacePoolCapacity;
 			this.Hull.FacePool = array;
 			this.FacePool = array;
@@ -54,11 +54,16 @@ namespace MIConvexHull
 
 		public int GetFace()
 		{
+			int num;
 			if (this.FreeFaceIndices.Count > 0)
 			{
-				return this.FreeFaceIndices.Pop();
+				num = this.FreeFaceIndices.Pop();
 			}
-			return this.CreateFace();
+			else
+			{
+				num = this.CreateFace();
+			}
+			return num;
 		}
 
 		public void DepositConnector(FaceConnector connector)
@@ -77,14 +82,19 @@ namespace MIConvexHull
 
 		public FaceConnector GetConnector()
 		{
+			FaceConnector faceConnector;
 			if (this.ConnectorStack == null)
 			{
-				return new FaceConnector(this.Dimension);
+				faceConnector = new FaceConnector(this.Dimension);
 			}
-			FaceConnector connectorStack = this.ConnectorStack;
-			this.ConnectorStack = this.ConnectorStack.Next;
-			connectorStack.Next = null;
-			return connectorStack;
+			else
+			{
+				FaceConnector connectorStack = this.ConnectorStack;
+				this.ConnectorStack = this.ConnectorStack.Next;
+				connectorStack.Next = null;
+				faceConnector = connectorStack;
+			}
+			return faceConnector;
 		}
 
 		public void DepositVertexBuffer(IndexBuffer buffer)

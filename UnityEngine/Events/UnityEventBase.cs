@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Reflection;
+using UnityEngine.Scripting;
 using UnityEngine.Serialization;
 
 namespace UnityEngine.Events
 {
+	[UsedByNativeCode]
 	[Serializable]
 	public abstract class UnityEventBase : ISerializationCallbackReceiver
 	{
@@ -40,25 +42,35 @@ namespace UnityEngine.Events
 
 		internal MethodInfo FindMethod(string name, object listener, PersistentListenerMode mode, Type argumentType)
 		{
+			MethodInfo methodInfo;
 			switch (mode)
 			{
 			case PersistentListenerMode.EventDefined:
-				return this.FindMethod_Impl(name, listener);
+				methodInfo = this.FindMethod_Impl(name, listener);
+				break;
 			case PersistentListenerMode.Void:
-				return UnityEventBase.GetValidMethodInfo(listener, name, new Type[0]);
+				methodInfo = UnityEventBase.GetValidMethodInfo(listener, name, new Type[0]);
+				break;
 			case PersistentListenerMode.Object:
-				return UnityEventBase.GetValidMethodInfo(listener, name, new Type[] { argumentType ?? typeof(Object) });
+				methodInfo = UnityEventBase.GetValidMethodInfo(listener, name, new Type[] { argumentType ?? typeof(Object) });
+				break;
 			case PersistentListenerMode.Int:
-				return UnityEventBase.GetValidMethodInfo(listener, name, new Type[] { typeof(int) });
+				methodInfo = UnityEventBase.GetValidMethodInfo(listener, name, new Type[] { typeof(int) });
+				break;
 			case PersistentListenerMode.Float:
-				return UnityEventBase.GetValidMethodInfo(listener, name, new Type[] { typeof(float) });
+				methodInfo = UnityEventBase.GetValidMethodInfo(listener, name, new Type[] { typeof(float) });
+				break;
 			case PersistentListenerMode.String:
-				return UnityEventBase.GetValidMethodInfo(listener, name, new Type[] { typeof(string) });
+				methodInfo = UnityEventBase.GetValidMethodInfo(listener, name, new Type[] { typeof(string) });
+				break;
 			case PersistentListenerMode.Bool:
-				return UnityEventBase.GetValidMethodInfo(listener, name, new Type[] { typeof(bool) });
+				methodInfo = UnityEventBase.GetValidMethodInfo(listener, name, new Type[] { typeof(bool) });
+				break;
 			default:
-				return null;
+				methodInfo = null;
+				break;
 			}
+			return methodInfo;
 		}
 
 		public int GetPersistentEventCount()
@@ -168,8 +180,8 @@ namespace UnityEngine.Events
 
 		private InvokableCallList m_Calls;
 
-		[SerializeField]
 		[FormerlySerializedAs("m_PersistentListeners")]
+		[SerializeField]
 		private PersistentCallGroup m_PersistentCalls;
 
 		[SerializeField]

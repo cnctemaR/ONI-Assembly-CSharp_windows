@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
@@ -29,30 +30,30 @@ public class BuildQueueButton : KMonoBehaviour
 	{
 		if (this.order != null)
 		{
-			string empty = string.Empty;
-			bool flag = this.CheckMaterialAvailability(this.order, out empty);
+			string text = "";
+			bool flag = this.CheckMaterialAvailability(this.order, out text);
 			if (this.materialsAvailable != flag)
 			{
-				this.SetAvailability(this.order.recipe.Name, flag, empty);
+				this.SetAvailability(this.order.Result.ProperName(), flag, text);
 			}
 		}
 	}
 
 	private void SetAvailability(string recipeName, bool currentAvailability, string str)
 	{
-		str = recipeName + "\n" + str;
-		this.texture.color = ((!currentAvailability) ? this.unavailableSpriteColor : this.order.recipe.IconColor);
-		this.texture.GetComponent<Image>().material = ((!currentAvailability) ? GlobalResources.Instance().AnimMaterialUIDesaturated : null);
-		this.BG.color = ((!currentAvailability) ? this.unavailableBGColor : Color.white);
-		this.materialsAvailable = currentAvailability;
-		if (!currentAvailability)
+		if (string.IsNullOrEmpty(str))
 		{
-			str += UI.UISIDESCREENS.FABRICATORSIDESCREEN.CANCEL;
+			str = recipeName + "\n";
 		}
 		else
 		{
-			str = UI.UISIDESCREENS.FABRICATORSIDESCREEN.CANCEL;
+			str = recipeName + "\n" + str;
 		}
+		this.texture.color = ((!currentAvailability) ? this.unavailableSpriteColor : this.order.IconColor);
+		this.texture.GetComponent<Image>().material = ((!currentAvailability) ? GlobalResources.Instance().AnimMaterialUIDesaturated : null);
+		this.BG.color = ((!currentAvailability) ? this.unavailableBGColor : Color.white);
+		this.materialsAvailable = currentAvailability;
+		str = str + "\n" + UI.UISIDESCREENS.FABRICATORSIDESCREEN.CANCEL;
 		this.toolTip.toolTip = str;
 	}
 
@@ -89,49 +90,47 @@ public class BuildQueueButton : KMonoBehaviour
 		}
 	}
 
-	private bool CheckMaterialAvailability(Fabricator.UserOrder order, out string newTooltip)
+	private bool CheckMaterialAvailability(IBuildQueueOrder order, out string newTooltip)
 	{
-		newTooltip = string.Empty;
-		Recipe recipe = order.recipe;
+		newTooltip = "";
+		Dictionary<Tag, float> dictionary = order.CheckMaterialRequirements();
 		bool flag = true;
-		for (int i = 0; i < recipe.Ingredients.Count; i++)
+		foreach (KeyValuePair<Tag, float> keyValuePair in dictionary)
 		{
-			Recipe.Ingredient ingredient = recipe.Ingredients[i];
-			float amount = ingredient.amount;
-			float num = WorldInventory.Instance.GetAmount(ingredient.tag);
-			if (num < amount && GameTags.LiquidElements.Contains(ingredient.tag))
+			bool flag2 = keyValuePair.Value <= 0f;
+			if (!flag2 && GameTags.LiquidElements.Contains(keyValuePair.Key))
 			{
-				Element element = ElementLoader.GetElement(ingredient.tag);
+				Element element = ElementLoader.GetElement(keyValuePair.Key);
 				if (element != null && LiquidPumpingStation.IsLiquidAccessible(element))
 				{
-					num = amount + 1f;
+					flag2 = true;
 				}
 			}
-			if (amount > num)
+			if (!flag2)
 			{
 				string text;
-				if (GameTags.DisplayAsCalories.Contains(ingredient.tag))
+				if (GameTags.DisplayAsCalories.Contains(keyValuePair.Key))
 				{
-					EdiblesManager.FoodInfo foodInfo = EdiblesManager.instance.GetFoodInfo(ingredient.tag.Name);
-					float num2 = foodInfo.CaloriesPerUnit * (amount - num);
-					text = string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.CALS, GameUtil.GetFormattedCalories(num2, GameUtil.TimeSlice.None, true));
+					EdiblesManager.FoodInfo foodInfo = EdiblesManager.instance.GetFoodInfo(keyValuePair.Key.Name);
+					float num = foodInfo.CaloriesPerUnit * keyValuePair.Value;
+					text = string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.CALS, GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true));
 				}
-				else if (GameTags.DisplayAsUnits.Contains(ingredient.tag))
+				else if (GameTags.DisplayAsUnits.Contains(keyValuePair.Key))
 				{
-					text = GameUtil.GetFormattedUnits(amount - num, GameUtil.TimeSlice.None, true);
+					text = GameUtil.GetFormattedUnits(keyValuePair.Value, GameUtil.TimeSlice.None, true);
 				}
 				else
 				{
-					text = GameUtil.GetFormattedMass(amount - num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
+					text = GameUtil.GetFormattedMass(keyValuePair.Value, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
 				}
-				newTooltip += string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.QUEUED_MISSING_INGREDIENTS_TOOLTIP, text, ingredient.tag.ProperName());
+				newTooltip += string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.QUEUED_MISSING_INGREDIENTS_TOOLTIP, text, keyValuePair.Key.ProperName());
 			}
-			flag = flag && num >= amount;
+			flag = flag && flag2;
 		}
 		return flag;
 	}
 
-	public void SetOrder(Fabricator.UserOrder order)
+	public void SetOrder(IBuildQueueOrder order)
 	{
 		if (this.order != order)
 		{
@@ -144,44 +143,15 @@ public class BuildQueueButton : KMonoBehaviour
 			this.texture.enabled = false;
 			if (order != null)
 			{
-				GameObject prefab = Assets.GetPrefab(order.recipe.Result);
-				KBatchedAnimController component = prefab.GetComponent<KBatchedAnimController>();
-				if (component != null)
-				{
-					this.texture.enabled = true;
-					this.texture.preserveAspect = true;
-					this.texture.sprite = ((!(order.recipe.Icon == null)) ? order.recipe.Icon : Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], component.initialAnim));
-					if (order.recipe.Icon != null)
-					{
-						this.texture.color = order.recipe.IconColor;
-					}
-					else
-					{
-						this.texture.color = Color.white;
-					}
-					this.BG.sprite = this.filledBG;
-				}
-				else
-				{
-					this.texture.enabled = order.recipe.Icon != null;
-					this.texture.sprite = order.recipe.Icon;
-					this.texture.color = order.recipe.IconColor;
-				}
+				this.texture.enabled = true;
+				this.texture.sprite = order.Icon;
+				this.texture.color = order.IconColor;
+				this.BG.sprite = this.filledBG;
 				this.order = order;
-				if (this.toolTip != null)
-				{
-					string text = "Cancel ";
-					if (order.infinite)
-					{
-						text += "repeating ";
-					}
-					text += order.recipe.Name;
-					this.toolTip.toolTip = text;
-				}
-				this.infiniteImg.SetActive(order.infinite);
-				string empty = string.Empty;
-				bool flag = this.CheckMaterialAvailability(order, out empty);
-				this.SetAvailability(order.recipe.Name, flag, empty);
+				this.infiniteImg.SetActive(order.Infinite);
+				string text = "";
+				bool flag = this.CheckMaterialAvailability(order, out text);
+				this.SetAvailability(order.Result.ProperName(), flag, text);
 			}
 			else
 			{
@@ -219,7 +189,7 @@ public class BuildQueueButton : KMonoBehaviour
 
 	public ToolTip toolTip;
 
-	private Fabricator.UserOrder order;
+	private IBuildQueueOrder order;
 
 	private GameObject visualizer;
 

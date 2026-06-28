@@ -2,12 +2,14 @@
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
+using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
 	internal sealed class UnityLogWriter : TextWriter
 	{
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void WriteStringToUnityLog(string s);
 

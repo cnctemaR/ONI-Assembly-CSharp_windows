@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace UnityEngine.Networking.Match
 {
-	public abstract class Response : ResponseBase, IResponse
+	internal abstract class Response : ResponseBase, IResponse
 	{
 		public bool success { get; private set; }
 
@@ -12,13 +12,13 @@ namespace UnityEngine.Networking.Match
 		public void SetSuccess()
 		{
 			this.success = true;
-			this.extendedInfo = string.Empty;
+			this.extendedInfo = "";
 		}
 
 		public void SetFailure(string info)
 		{
 			this.success = false;
-			this.extendedInfo = info;
+			this.extendedInfo += info;
 		}
 
 		public override string ToString()

@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine.Internal;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
@@ -17,15 +16,20 @@ namespace UnityEngine
 		{
 			get
 			{
-				if (index == 0)
+				float num;
+				if (index != 0)
 				{
-					return this.x;
+					if (index != 1)
+					{
+						throw new IndexOutOfRangeException("Invalid Vector2 index!");
+					}
+					num = this.y;
 				}
-				if (index != 1)
+				else
 				{
-					throw new IndexOutOfRangeException("Invalid Vector2 index!");
+					num = this.x;
 				}
-				return this.y;
+				return num;
 			}
 			set
 			{
@@ -44,10 +48,10 @@ namespace UnityEngine
 			}
 		}
 
-		public void Set(float new_x, float new_y)
+		public void Set(float newX, float newY)
 		{
-			this.x = new_x;
-			this.y = new_y;
+			this.x = newX;
+			this.y = newY;
 		}
 
 		public static Vector2 Lerp(Vector2 a, Vector2 b, float t)
@@ -65,11 +69,16 @@ namespace UnityEngine
 		{
 			Vector2 vector = target - current;
 			float magnitude = vector.magnitude;
+			Vector2 vector2;
 			if (magnitude <= maxDistanceDelta || magnitude == 0f)
 			{
-				return target;
+				vector2 = target;
 			}
-			return current + vector / magnitude * maxDistanceDelta;
+			else
+			{
+				vector2 = current + vector / magnitude * maxDistanceDelta;
+			}
+			return vector2;
 		}
 
 		public static Vector2 Scale(Vector2 a, Vector2 b)
@@ -127,12 +136,17 @@ namespace UnityEngine
 
 		public override bool Equals(object other)
 		{
+			bool flag;
 			if (!(other is Vector2))
 			{
-				return false;
+				flag = false;
 			}
-			Vector2 vector = (Vector2)other;
-			return this.x.Equals(vector.x) && this.y.Equals(vector.y);
+			else
+			{
+				Vector2 vector = (Vector2)other;
+				flag = this.x.Equals(vector.x) && this.y.Equals(vector.y);
+			}
+			return flag;
 		}
 
 		public static Vector2 Reflect(Vector2 inDirection, Vector2 inNormal)
@@ -173,11 +187,16 @@ namespace UnityEngine
 
 		public static Vector2 ClampMagnitude(Vector2 vector, float maxLength)
 		{
+			Vector2 vector2;
 			if (vector.sqrMagnitude > maxLength * maxLength)
 			{
-				return vector.normalized * maxLength;
+				vector2 = vector.normalized * maxLength;
 			}
-			return vector;
+			else
+			{
+				vector2 = vector;
+			}
+			return vector2;
 		}
 
 		public static float SqrMagnitude(Vector2 a)
@@ -200,22 +219,7 @@ namespace UnityEngine
 			return new Vector2(Mathf.Max(lhs.x, rhs.x), Mathf.Max(lhs.y, rhs.y));
 		}
 
-		[ExcludeFromDocs]
-		public static Vector2 SmoothDamp(Vector2 current, Vector2 target, ref Vector2 currentVelocity, float smoothTime, float maxSpeed)
-		{
-			float deltaTime = Time.deltaTime;
-			return Vector2.SmoothDamp(current, target, ref currentVelocity, smoothTime, maxSpeed, deltaTime);
-		}
-
-		[ExcludeFromDocs]
-		public static Vector2 SmoothDamp(Vector2 current, Vector2 target, ref Vector2 currentVelocity, float smoothTime)
-		{
-			float deltaTime = Time.deltaTime;
-			float positiveInfinity = float.PositiveInfinity;
-			return Vector2.SmoothDamp(current, target, ref currentVelocity, smoothTime, positiveInfinity, deltaTime);
-		}
-
-		public static Vector2 SmoothDamp(Vector2 current, Vector2 target, ref Vector2 currentVelocity, float smoothTime, [DefaultValue("Mathf.Infinity")] float maxSpeed, [DefaultValue("Time.deltaTime")] float deltaTime)
+		public static Vector2 SmoothDamp(Vector2 current, Vector2 target, ref Vector2 currentVelocity, float smoothTime, float maxSpeed, float deltaTime)
 		{
 			smoothTime = Mathf.Max(0.0001f, smoothTime);
 			float num = 2f / smoothTime;
@@ -235,6 +239,56 @@ namespace UnityEngine
 				currentVelocity = (vector4 - vector2) / deltaTime;
 			}
 			return vector4;
+		}
+
+		public static Vector2 operator +(Vector2 a, Vector2 b)
+		{
+			return new Vector2(a.x + b.x, a.y + b.y);
+		}
+
+		public static Vector2 operator -(Vector2 a, Vector2 b)
+		{
+			return new Vector2(a.x - b.x, a.y - b.y);
+		}
+
+		public static Vector2 operator -(Vector2 a)
+		{
+			return new Vector2(-a.x, -a.y);
+		}
+
+		public static Vector2 operator *(Vector2 a, float d)
+		{
+			return new Vector2(a.x * d, a.y * d);
+		}
+
+		public static Vector2 operator *(float d, Vector2 a)
+		{
+			return new Vector2(a.x * d, a.y * d);
+		}
+
+		public static Vector2 operator /(Vector2 a, float d)
+		{
+			return new Vector2(a.x / d, a.y / d);
+		}
+
+		public static bool operator ==(Vector2 lhs, Vector2 rhs)
+		{
+			return (lhs - rhs).sqrMagnitude < 9.9999994E-11f;
+		}
+
+		public static bool operator !=(Vector2 lhs, Vector2 rhs)
+		{
+			return !(lhs == rhs);
+		}
+
+		public static implicit operator Vector2(Vector3 v)
+		{
+			return new Vector2(v.x, v.y);
+		}
+
+		public static implicit operator Vector3(Vector2 v)
+		{
+			return new Vector3(v.x, v.y, 0f);
 		}
 
 		public static Vector2 zero
@@ -285,60 +339,10 @@ namespace UnityEngine
 			}
 		}
 
-		public static Vector2 operator +(Vector2 a, Vector2 b)
-		{
-			return new Vector2(a.x + b.x, a.y + b.y);
-		}
-
-		public static Vector2 operator -(Vector2 a, Vector2 b)
-		{
-			return new Vector2(a.x - b.x, a.y - b.y);
-		}
-
-		public static Vector2 operator -(Vector2 a)
-		{
-			return new Vector2(-a.x, -a.y);
-		}
-
-		public static Vector2 operator *(Vector2 a, float d)
-		{
-			return new Vector2(a.x * d, a.y * d);
-		}
-
-		public static Vector2 operator *(float d, Vector2 a)
-		{
-			return new Vector2(a.x * d, a.y * d);
-		}
-
-		public static Vector2 operator /(Vector2 a, float d)
-		{
-			return new Vector2(a.x / d, a.y / d);
-		}
-
-		public static bool operator ==(Vector2 lhs, Vector2 rhs)
-		{
-			return Vector2.SqrMagnitude(lhs - rhs) < 9.9999994E-11f;
-		}
-
-		public static bool operator !=(Vector2 lhs, Vector2 rhs)
-		{
-			return Vector2.SqrMagnitude(lhs - rhs) >= 9.9999994E-11f;
-		}
-
-		public static implicit operator Vector2(Vector3 v)
-		{
-			return new Vector2(v.x, v.y);
-		}
-
-		public static implicit operator Vector3(Vector2 v)
-		{
-			return new Vector3(v.x, v.y, 0f);
-		}
-
-		public const float kEpsilon = 1E-05f;
-
 		public float x;
 
 		public float y;
+
+		public const float kEpsilon = 1E-05f;
 	}
 }

@@ -58,7 +58,7 @@ namespace Rendering.World
 				int num3 = 0;
 				for (int i = 0; i < count; i++)
 				{
-					this.mesh.AddTriangle(0 + num3);
+					this.mesh.AddTriangle(num3);
 					this.mesh.AddTriangle(2 + num3);
 					this.mesh.AddTriangle(1 + num3);
 					this.mesh.AddTriangle(1 + num3);

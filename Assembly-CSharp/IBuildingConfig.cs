@@ -5,7 +5,9 @@ public abstract class IBuildingConfig
 {
 	public abstract BuildingDef CreateBuildingDef();
 
-	public abstract void ConfigureBuildingTemplate(GameObject go);
+	public virtual void ConfigureBuildingTemplate(GameObject go)
+	{
+	}
 
 	public abstract void DoPostConfigureComplete(GameObject go);
 

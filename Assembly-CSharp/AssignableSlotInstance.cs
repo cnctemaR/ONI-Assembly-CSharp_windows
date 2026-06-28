@@ -34,16 +34,11 @@ public abstract class AssignableSlotInstance
 
 	public void Assign(Assignable assignable)
 	{
-		if (this.assignable == assignable)
+		if (!(this.assignable == assignable))
 		{
-			if (assignable != null)
-			{
-				global::Debug.Log("Assign() Already assigned " + assignable.name, null);
-			}
-			return;
+			this.Unassign();
+			this.assignable = assignable;
 		}
-		this.Unassign();
-		this.assignable = assignable;
 	}
 
 	public virtual void Unassign()

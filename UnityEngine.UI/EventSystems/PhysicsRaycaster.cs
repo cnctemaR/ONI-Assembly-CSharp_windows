@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 namespace UnityEngine.EventSystems
 {
-	[RequireComponent(typeof(Camera))]
 	[AddComponentMenu("Event/Physics Raycaster")]
+	[RequireComponent(typeof(Camera))]
 	public class PhysicsRaycaster : BaseRaycaster
 	{
 		protected PhysicsRaycaster()
@@ -51,39 +52,49 @@ namespace UnityEngine.EventSystems
 			}
 		}
 
+		protected void ComputeRayAndDistance(PointerEventData eventData, out Ray ray, out float distanceToClipPlane)
+		{
+			ray = this.eventCamera.ScreenPointToRay(eventData.position);
+			float z = ray.direction.z;
+			distanceToClipPlane = ((!Mathf.Approximately(0f, z)) ? Mathf.Abs((this.eventCamera.farClipPlane - this.eventCamera.nearClipPlane) / z) : float.PositiveInfinity);
+		}
+
 		public override void Raycast(PointerEventData eventData, List<RaycastResult> resultAppendList)
 		{
-			if (this.eventCamera == null)
+			if (!(this.eventCamera == null))
 			{
-				return;
-			}
-			Ray ray = this.eventCamera.ScreenPointToRay(eventData.position);
-			float num = this.eventCamera.farClipPlane - this.eventCamera.nearClipPlane;
-			RaycastHit[] array = Physics.RaycastAll(ray, num, this.finalEventMask);
-			if (array.Length > 1)
-			{
-				Array.Sort<RaycastHit>(array, (RaycastHit r1, RaycastHit r2) => r1.distance.CompareTo(r2.distance));
-			}
-			if (array.Length != 0)
-			{
-				int i = 0;
-				int num2 = array.Length;
-				while (i < num2)
+				Ray ray;
+				float num;
+				this.ComputeRayAndDistance(eventData, out ray, out num);
+				if (ReflectionMethodsCache.Singleton.raycast3DAll != null)
 				{
-					RaycastResult raycastResult = new RaycastResult
+					RaycastHit[] array = ReflectionMethodsCache.Singleton.raycast3DAll(ray, num, this.finalEventMask);
+					if (array.Length > 1)
 					{
-						gameObject = array[i].collider.gameObject,
-						module = this,
-						distance = array[i].distance,
-						worldPosition = array[i].point,
-						worldNormal = array[i].normal,
-						screenPosition = eventData.position,
-						index = (float)resultAppendList.Count,
-						sortingLayer = 0,
-						sortingOrder = 0
-					};
-					resultAppendList.Add(raycastResult);
-					i++;
+						Array.Sort<RaycastHit>(array, (RaycastHit r1, RaycastHit r2) => r1.distance.CompareTo(r2.distance));
+					}
+					if (array.Length != 0)
+					{
+						int i = 0;
+						int num2 = array.Length;
+						while (i < num2)
+						{
+							RaycastResult raycastResult = new RaycastResult
+							{
+								gameObject = array[i].collider.gameObject,
+								module = this,
+								distance = array[i].distance,
+								worldPosition = array[i].point,
+								worldNormal = array[i].normal,
+								screenPosition = eventData.position,
+								index = (float)resultAppendList.Count,
+								sortingLayer = 0,
+								sortingOrder = 0
+							};
+							resultAppendList.Add(raycastResult);
+							i++;
+						}
+					}
 				}
 			}
 		}

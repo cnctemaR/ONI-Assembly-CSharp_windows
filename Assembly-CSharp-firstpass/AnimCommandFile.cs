@@ -10,7 +10,7 @@ public class AnimCommandFile : YamlIO<AnimCommandFile>
 	{
 		this.MaxGroupSize = 60;
 		this.DefaultBuilds = new Dictionary<string, List<string>>();
-		this.TagGroup = AnimCommandFile.GroupBy.Folder;
+		this.TagGroup = AnimCommandFile.GroupBy.DontGroup;
 	}
 
 	[StringEnumConverter]
@@ -20,13 +20,7 @@ public class AnimCommandFile : YamlIO<AnimCommandFile>
 	public AnimCommandFile.GroupBy TagGroup { get; private set; }
 
 	[StringEnumConverter]
-	public AnimCommandFile.ParseOrder Order { get; private set; }
-
-	[StringEnumConverter]
 	public KAnimBatchGroup.RendererType RendererType { get; private set; }
-
-	[StringEnumConverter]
-	public KAnimBatchGroup.MaterialType MaterialType { get; private set; }
 
 	public string TargetBuild { get; private set; }
 
@@ -44,19 +38,24 @@ public class AnimCommandFile : YamlIO<AnimCommandFile>
 
 	public bool IsSwap(KAnimFile file)
 	{
+		bool flag;
 		if (this.TagGroup != AnimCommandFile.GroupBy.NamedGroup)
 		{
-			return false;
+			flag = false;
 		}
-		string fileName = Path.GetFileName(file.homedirectory);
-		foreach (KeyValuePair<string, List<string>> keyValuePair in this.DefaultBuilds)
+		else
 		{
-			if (keyValuePair.Value.Contains(fileName))
+			string fileName = Path.GetFileName(file.homedirectory);
+			foreach (KeyValuePair<string, List<string>> keyValuePair in this.DefaultBuilds)
 			{
-				return false;
+				if (keyValuePair.Value.Contains(fileName))
+				{
+					return false;
+				}
 			}
+			flag = true;
 		}
-		return true;
+		return flag;
 	}
 
 	public void AddGroupFile(KAnimGroupFile.GroupFile gf)
@@ -69,12 +68,18 @@ public class AnimCommandFile : YamlIO<AnimCommandFile>
 
 	public string GetGroupName(KAnimFile kaf)
 	{
+		string text;
 		switch (this.TagGroup)
 		{
 		case AnimCommandFile.GroupBy.__IGNORE__:
-			return null;
+			text = null;
+			break;
+		case AnimCommandFile.GroupBy.DontGroup:
+			text = kaf.name;
+			break;
 		case AnimCommandFile.GroupBy.Folder:
-			return Path.GetFileName(this.directory) + (this.groupFiles.Count / 10).ToString();
+			text = Path.GetFileName(this.directory) + (this.groupFiles.Count / 10).ToString();
+			break;
 		case AnimCommandFile.GroupBy.NamedGroup:
 		{
 			string fileName = Path.GetFileName(kaf.homedirectory);
@@ -85,16 +90,21 @@ public class AnimCommandFile : YamlIO<AnimCommandFile>
 					return keyValuePair.Key;
 				}
 			}
-			return this.TargetBuild;
+			text = this.TargetBuild;
+			break;
 		}
 		case AnimCommandFile.GroupBy.NamedGroupNoSplit:
-			return this.TargetBuild;
+			text = this.TargetBuild;
+			break;
+		default:
+			text = null;
+			break;
 		}
-		return null;
+		return text;
 	}
 
 	[NonSerialized]
-	public string directory = string.Empty;
+	public string directory = "";
 
 	[NonSerialized]
 	private List<KAnimGroupFile.GroupFile> groupFiles = new List<KAnimGroupFile.GroupFile>();
@@ -110,15 +120,7 @@ public class AnimCommandFile : YamlIO<AnimCommandFile>
 		__IGNORE__,
 		DontGroup,
 		Folder,
-		ParentFolder,
-		ParentConfig,
 		NamedGroup,
 		NamedGroupNoSplit
-	}
-
-	public enum ParseOrder
-	{
-		Default,
-		ParseDefaultBuildThenAnimsThenSwaps
 	}
 }

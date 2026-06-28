@@ -6,8 +6,19 @@ public class FlowerVaseConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
+		string text = "FlowerVase";
+		int num = 1;
+		int num2 = 1;
+		string text2 = "flowervase_kanim";
+		float num3 = 50f;
+		int num4 = 10;
+		float num5 = 10f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER1;
+		string[] farmable = MATERIALS.FARMABLE;
+		float num6 = 800f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("FlowerVase", 1, 1, "flowervase_kanim", 50f, 10, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER1, MATERIALS.FARMABLE, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, farmable, num6, buildLocationRule, BUILDINGS.DECOR.NONE, none);
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
 		buildingDef.ViewMode = SimViewMode.Decor;
@@ -31,4 +42,6 @@ public class FlowerVaseConfig : IBuildingConfig
 	{
 		BuildingTemplates.DoPostConfigure(go);
 	}
+
+	public const string ID = "FlowerVase";
 }

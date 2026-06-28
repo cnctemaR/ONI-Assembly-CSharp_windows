@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{89ABFE56-005D-4990-BBAC-1168CE6EF741}</ProjectGuid>
+    <ProjectGuid>{3998EC71-0E68-4D4A-9831-1FACB48DCC99}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp-firstpass</RootNamespace>
     <AssemblyName>Assembly-CSharp-firstpass</AssemblyName>
@@ -324,6 +324,7 @@
     <Compile Include="FMOD\Studio\LOAD_BANK_FLAGS.cs" />
     <Compile Include="FMOD\Studio\LOAD_MEMORY_MODE.cs" />
     <Compile Include="FMOD\Studio\MarshallingHelper.cs" />
+    <Compile Include="FMOD\Studio\ParameterID.cs" />
     <Compile Include="FMOD\Studio\ParameterInstance.cs" />
     <Compile Include="FMOD\Studio\PARAMETER_DESCRIPTION.cs" />
     <Compile Include="FMOD\Studio\PARAMETER_DESCRIPTION_INTERNAL.cs" />
@@ -443,6 +444,7 @@
     <Compile Include="KleiAccount.cs" />
     <Compile Include="KleiMetrics.cs" />
     <Compile Include="Klei\CSVReader.cs" />
+    <Compile Include="Klei\GenericGameSettings.cs" />
     <Compile Include="Klei\MeshCreator.cs" />
     <Compile Include="Klei\YamlIO.cs" />
     <Compile Include="KMonoBehaviour.cs" />
@@ -1170,51 +1172,51 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ArabicSupport\ArabicSupport.csproj">
-      <Project>{89ABFE56-005D-4990-BBAC-1168CE6EF740}</Project>
+      <Project>{3998EC71-0E68-4D4A-9831-1FACB48DCC98}</Project>
       <Name>ArabicSupport</Name>
     </ProjectReference>
     <ProjectReference Include="..\FileHelpers\FileHelpers.csproj">
-      <Project>{89ABFE56-005D-4990-BBAC-1168CE6EF744}</Project>
+      <Project>{3998EC71-0E68-4D4A-9831-1FACB48DCC9C}</Project>
       <Name>FileHelpers</Name>
     </ProjectReference>
     <ProjectReference Include="..\libnoise\libnoise.csproj">
-      <Project>{89ABFE56-005D-4990-BBAC-1168CE6EF749}</Project>
+      <Project>{3998EC71-0E68-4D4A-9831-1FACB48DCCA1}</Project>
       <Name>libnoise</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{89ABFE56-005D-4990-BBAC-1168CE6EF74D}</Project>
+      <Project>{3998EC71-0E68-4D4A-9831-1FACB48DCCA5}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\Newtonsoft.Json\Newtonsoft.Json.csproj">
-      <Project>{89ABFE56-005D-4990-BBAC-1168CE6EF74E}</Project>
+      <Project>{3998EC71-0E68-4D4A-9831-1FACB48DCCA6}</Project>
       <Name>Newtonsoft.Json</Name>
     </ProjectReference>
     <ProjectReference Include="..\Satsuma\Satsuma.csproj">
-      <Project>{89ABFE56-005D-4990-BBAC-1168CE6EF750}</Project>
+      <Project>{3998EC71-0E68-4D4A-9831-1FACB48DCCA8}</Project>
       <Name>Satsuma</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{89ABFE56-005D-4990-BBAC-1168CE6EF752}</Project>
+      <Project>{3998EC71-0E68-4D4A-9831-1FACB48DCCAA}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{89ABFE56-005D-4990-BBAC-1168CE6EF75A}</Project>
+      <Project>{3998EC71-0E68-4D4A-9831-1FACB48DCCB2}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{89ABFE56-005D-4990-BBAC-1168CE6EF754}</Project>
+      <Project>{3998EC71-0E68-4D4A-9831-1FACB48DCCAC}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{89ABFE56-005D-4990-BBAC-1168CE6EF75E}</Project>
+      <Project>{3998EC71-0E68-4D4A-9831-1FACB48DCCB6}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine\UnityEngine.csproj">
-      <Project>{89ABFE56-005D-4990-BBAC-1168CE6EF75C}</Project>
+      <Project>{3998EC71-0E68-4D4A-9831-1FACB48DCCB4}</Project>
       <Name>UnityEngine</Name>
     </ProjectReference>
     <ProjectReference Include="..\YamlDotNet\YamlDotNet.csproj">
-      <Project>{89ABFE56-005D-4990-BBAC-1168CE6EF75F}</Project>
+      <Project>{3998EC71-0E68-4D4A-9831-1FACB48DCCB7}</Project>
       <Name>YamlDotNet</Name>
     </ProjectReference>
   </ItemGroup>

@@ -16,7 +16,7 @@ public class KModalButtonMenu : KButtonMenu
 		base.OnCmpDisable();
 		if (this.childDialog == null)
 		{
-			this.Trigger(476357528, null);
+			base.Trigger(476357528, null);
 		}
 	}
 
@@ -71,7 +71,7 @@ public class KModalButtonMenu : KButtonMenu
 
 	protected void ActivateChildScreen(GameObject screenPrefab)
 	{
-		GameObject gameObject = Util.KInstantiateUI(screenPrefab, this.transform.parent.gameObject, false);
+		GameObject gameObject = Util.KInstantiateUI(screenPrefab, base.transform.parent.gameObject, false);
 		this.childDialog = gameObject;
 		gameObject.Subscribe(476357528, new Action<object>(this.Unhide));
 		this.Hide();
@@ -89,7 +89,7 @@ public class KModalButtonMenu : KButtonMenu
 		this.childDialog = null;
 	}
 
-	private bool shown;
+	private bool shown = false;
 
 	[SerializeField]
 	private GameObject panelRoot;

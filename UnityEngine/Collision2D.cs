@@ -8,11 +8,19 @@ namespace UnityEngine
 	[StructLayout(LayoutKind.Sequential)]
 	public class Collision2D
 	{
-		public bool enabled
+		public Collider2D collider
 		{
 			get
 			{
-				return this.m_Enabled;
+				return Physics2D.GetColliderFromInstanceID(this.m_Collider);
+			}
+		}
+
+		public Collider2D otherCollider
+		{
+			get
+			{
+				return Physics2D.GetColliderFromInstanceID(this.m_OtherCollider);
 			}
 		}
 
@@ -20,15 +28,15 @@ namespace UnityEngine
 		{
 			get
 			{
-				return this.m_Rigidbody;
+				return Physics2D.GetRigidbodyFromInstanceID(this.m_Rigidbody);
 			}
 		}
 
-		public Collider2D collider
+		public Rigidbody2D otherRigidbody
 		{
 			get
 			{
-				return this.m_Collider;
+				return Physics2D.GetRigidbodyFromInstanceID(this.m_OtherRigidbody);
 			}
 		}
 
@@ -44,7 +52,7 @@ namespace UnityEngine
 		{
 			get
 			{
-				return (!(this.m_Rigidbody != null)) ? this.m_Collider.gameObject : this.m_Rigidbody.gameObject;
+				return (!(this.rigidbody != null)) ? this.collider.gameObject : this.rigidbody.gameObject;
 			}
 		}
 
@@ -64,14 +72,26 @@ namespace UnityEngine
 			}
 		}
 
-		internal Rigidbody2D m_Rigidbody;
+		public bool enabled
+		{
+			get
+			{
+				return this.m_Enabled == 1;
+			}
+		}
 
-		internal Collider2D m_Collider;
+		internal int m_Collider;
+
+		internal int m_OtherCollider;
+
+		internal int m_Rigidbody;
+
+		internal int m_OtherRigidbody;
 
 		internal ContactPoint2D[] m_Contacts;
 
 		internal Vector2 m_RelativeVelocity;
 
-		internal bool m_Enabled;
+		internal int m_Enabled;
 	}
 }

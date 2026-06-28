@@ -10,15 +10,15 @@ public class ElementChunk : KMonoBehaviour
 		base.OnPrefabInit();
 		GameComps.OreSizeVisualizers.Add(base.gameObject);
 		GameComps.ElementSplitters.Add(base.gameObject);
-		this.Subscribe(-2064133523, new Action<object>(this.OnAbsorb));
+		base.Subscribe(-2064133523, new Action<object>(this.OnAbsorb));
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		Vector3 position = this.transform.position;
-		position.z = Grid.GetLayerZ(Grid.SceneLayer.Use);
-		this.transform.SetPosition(position);
+		Vector3 position = base.transform.position;
+		position.z = Grid.GetLayerZ(Grid.SceneLayer.Ore);
+		base.transform.SetPosition(position);
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
 		Element element = component.Element;
 		KSelectable component2 = base.GetComponent<KSelectable>();
@@ -44,15 +44,18 @@ public class ElementChunk : KMonoBehaviour
 			PrimaryElement primaryElement = pickupable.PrimaryElement;
 			if (primaryElement != null)
 			{
-				if (component.Mass > 0f && primaryElement.Mass > 0f)
+				float num = 0f;
+				float mass = component.Mass;
+				float mass2 = primaryElement.Mass;
+				if (mass > 0f && mass2 > 0f)
 				{
-					float num = SimUtil.CalculateFinalTemperature(component.Mass, component.Temperature, primaryElement.Mass, primaryElement.Temperature);
-					component.Temperature = num;
+					num = SimUtil.CalculateFinalTemperature(mass, component.Temperature, mass2, primaryElement.Temperature);
 				}
 				else if (primaryElement.Mass > 0f)
 				{
-					component.Temperature = primaryElement.Temperature;
+					num = primaryElement.Temperature;
 				}
+				component.SetMassTemperature(mass + mass2, num);
 				global::UnityEngine.Debug.Assert(component.Temperature > 0f || component.Mass == 0f, "OnAbsorb resulted in a temperature of 0", base.gameObject);
 				if (CameraController.Instance != null)
 				{

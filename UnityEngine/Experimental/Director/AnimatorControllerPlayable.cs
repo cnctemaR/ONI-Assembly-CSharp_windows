@@ -6,229 +6,368 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Experimental.Director
 {
-	[UsedByNativeCode]
-	public sealed class AnimatorControllerPlayable : AnimationPlayable, IAnimatorControllerPlayable
+	[RequiredByNativeCode]
+	public class AnimatorControllerPlayable : AnimationPlayable
 	{
-		public AnimatorControllerPlayable(RuntimeAnimatorController controller)
-			: base(false)
+		public static implicit operator PlayableHandle(AnimatorControllerPlayable b)
 		{
-			this.m_Ptr = IntPtr.Zero;
-			this.InstantiateEnginePlayable(controller);
+			return b.handle;
 		}
 
-		[WrapperlessIcall]
+		private static RuntimeAnimatorController GetAnimatorControllerInternal(ref PlayableHandle handle)
+		{
+			return AnimatorControllerPlayable.INTERNAL_CALL_GetAnimatorControllerInternal(ref handle);
+		}
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void InstantiateEnginePlayable(RuntimeAnimatorController controller);
-
-		public extern RuntimeAnimatorController animatorController
-		{
-			[WrapperlessIcall]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-		}
-
-		public override int AddInput(AnimationPlayable source)
-		{
-			Debug.LogError("AnimationClipPlayable doesn't support adding inputs");
-			return -1;
-		}
-
-		public override bool SetInput(AnimationPlayable source, int index)
-		{
-			Debug.LogError("AnimationClipPlayable doesn't support setting inputs");
-			return false;
-		}
-
-		public override bool SetInputs(IEnumerable<AnimationPlayable> sources)
-		{
-			Debug.LogError("AnimationClipPlayable doesn't support setting inputs");
-			return false;
-		}
-
-		public override bool RemoveInput(int index)
-		{
-			Debug.LogError("AnimationClipPlayable doesn't support removing inputs");
-			return false;
-		}
-
-		public override bool RemoveInput(AnimationPlayable playable)
-		{
-			Debug.LogError("AnimationClipPlayable doesn't support removing inputs");
-			return false;
-		}
-
-		public override bool RemoveAllInputs()
-		{
-			Debug.LogError("AnimationClipPlayable doesn't support removing inputs");
-			return false;
-		}
+		private static extern RuntimeAnimatorController INTERNAL_CALL_GetAnimatorControllerInternal(ref PlayableHandle handle);
 
 		public float GetFloat(string name)
 		{
-			return this.GetFloatString(name);
+			return AnimatorControllerPlayable.GetFloatString(ref this.handle, name);
 		}
 
 		public float GetFloat(int id)
 		{
-			return this.GetFloatID(id);
+			return AnimatorControllerPlayable.GetFloatID(ref this.handle, id);
 		}
 
 		public void SetFloat(string name, float value)
 		{
-			this.SetFloatString(name, value);
+			AnimatorControllerPlayable.SetFloatString(ref this.handle, name, value);
 		}
 
 		public void SetFloat(int id, float value)
 		{
-			this.SetFloatID(id, value);
+			AnimatorControllerPlayable.SetFloatID(ref this.handle, id, value);
 		}
 
 		public bool GetBool(string name)
 		{
-			return this.GetBoolString(name);
+			return AnimatorControllerPlayable.GetBoolString(ref this.handle, name);
 		}
 
 		public bool GetBool(int id)
 		{
-			return this.GetBoolID(id);
+			return AnimatorControllerPlayable.GetBoolID(ref this.handle, id);
 		}
 
 		public void SetBool(string name, bool value)
 		{
-			this.SetBoolString(name, value);
+			AnimatorControllerPlayable.SetBoolString(ref this.handle, name, value);
 		}
 
 		public void SetBool(int id, bool value)
 		{
-			this.SetBoolID(id, value);
+			AnimatorControllerPlayable.SetBoolID(ref this.handle, id, value);
 		}
 
 		public int GetInteger(string name)
 		{
-			return this.GetIntegerString(name);
+			return AnimatorControllerPlayable.GetIntegerString(ref this.handle, name);
 		}
 
 		public int GetInteger(int id)
 		{
-			return this.GetIntegerID(id);
+			return AnimatorControllerPlayable.GetIntegerID(ref this.handle, id);
 		}
 
 		public void SetInteger(string name, int value)
 		{
-			this.SetIntegerString(name, value);
+			AnimatorControllerPlayable.SetIntegerString(ref this.handle, name, value);
 		}
 
 		public void SetInteger(int id, int value)
 		{
-			this.SetIntegerID(id, value);
+			AnimatorControllerPlayable.SetIntegerID(ref this.handle, id, value);
 		}
 
 		public void SetTrigger(string name)
 		{
-			this.SetTriggerString(name);
+			AnimatorControllerPlayable.SetTriggerString(ref this.handle, name);
 		}
 
 		public void SetTrigger(int id)
 		{
-			this.SetTriggerID(id);
+			AnimatorControllerPlayable.SetTriggerID(ref this.handle, id);
 		}
 
 		public void ResetTrigger(string name)
 		{
-			this.ResetTriggerString(name);
+			AnimatorControllerPlayable.ResetTriggerString(ref this.handle, name);
 		}
 
 		public void ResetTrigger(int id)
 		{
-			this.ResetTriggerID(id);
+			AnimatorControllerPlayable.ResetTriggerID(ref this.handle, id);
 		}
 
 		public bool IsParameterControlledByCurve(string name)
 		{
-			return this.IsParameterControlledByCurveString(name);
+			return AnimatorControllerPlayable.IsParameterControlledByCurveString(ref this.handle, name);
 		}
 
 		public bool IsParameterControlledByCurve(int id)
 		{
-			return this.IsParameterControlledByCurveID(id);
+			return AnimatorControllerPlayable.IsParameterControlledByCurveID(ref this.handle, id);
 		}
 
-		public extern int layerCount
+		public int layerCount
 		{
-			[WrapperlessIcall]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				return AnimatorControllerPlayable.GetLayerCountInternal(ref this.handle);
+			}
 		}
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern string GetLayerName(int layerIndex);
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int GetLayerIndex(string layerName);
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern float GetLayerWeight(int layerIndex);
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetLayerWeight(int layerIndex, float weight);
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern AnimatorStateInfo GetCurrentAnimatorStateInfo(int layerIndex);
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern AnimatorStateInfo GetNextAnimatorStateInfo(int layerIndex);
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern AnimatorTransitionInfo GetAnimatorTransitionInfo(int layerIndex);
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern AnimatorClipInfo[] GetCurrentAnimatorClipInfo(int layerIndex);
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern AnimatorClipInfo[] GetNextAnimatorClipInfo(int layerIndex);
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern string ResolveHash(int hash);
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool IsInTransition(int layerIndex);
-
-		public extern int parameterCount
+		private static int GetLayerCountInternal(ref PlayableHandle handle)
 		{
-			[WrapperlessIcall]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			return AnimatorControllerPlayable.INTERNAL_CALL_GetLayerCountInternal(ref handle);
 		}
 
-		private extern AnimatorControllerParameter[] parameters
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int INTERNAL_CALL_GetLayerCountInternal(ref PlayableHandle handle);
+
+		private static string GetLayerNameInternal(ref PlayableHandle handle, int layerIndex)
 		{
-			[WrapperlessIcall]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			return AnimatorControllerPlayable.INTERNAL_CALL_GetLayerNameInternal(ref handle, layerIndex);
 		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern string INTERNAL_CALL_GetLayerNameInternal(ref PlayableHandle handle, int layerIndex);
+
+		public string GetLayerName(int layerIndex)
+		{
+			return AnimatorControllerPlayable.GetLayerNameInternal(ref this.handle, layerIndex);
+		}
+
+		private static int GetLayerIndexInternal(ref PlayableHandle handle, string layerName)
+		{
+			return AnimatorControllerPlayable.INTERNAL_CALL_GetLayerIndexInternal(ref handle, layerName);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int INTERNAL_CALL_GetLayerIndexInternal(ref PlayableHandle handle, string layerName);
+
+		public int GetLayerIndex(string layerName)
+		{
+			return AnimatorControllerPlayable.GetLayerIndexInternal(ref this.handle, layerName);
+		}
+
+		private static float GetLayerWeightInternal(ref PlayableHandle handle, int layerIndex)
+		{
+			return AnimatorControllerPlayable.INTERNAL_CALL_GetLayerWeightInternal(ref handle, layerIndex);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern float INTERNAL_CALL_GetLayerWeightInternal(ref PlayableHandle handle, int layerIndex);
+
+		public float GetLayerWeight(int layerIndex)
+		{
+			return AnimatorControllerPlayable.GetLayerWeightInternal(ref this.handle, layerIndex);
+		}
+
+		private static void SetLayerWeightInternal(ref PlayableHandle handle, int layerIndex, float weight)
+		{
+			AnimatorControllerPlayable.INTERNAL_CALL_SetLayerWeightInternal(ref handle, layerIndex, weight);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_SetLayerWeightInternal(ref PlayableHandle handle, int layerIndex, float weight);
+
+		public void SetLayerWeight(int layerIndex, float weight)
+		{
+			AnimatorControllerPlayable.SetLayerWeightInternal(ref this.handle, layerIndex, weight);
+		}
+
+		private static AnimatorStateInfo GetCurrentAnimatorStateInfoInternal(ref PlayableHandle handle, int layerIndex)
+		{
+			return AnimatorControllerPlayable.INTERNAL_CALL_GetCurrentAnimatorStateInfoInternal(ref handle, layerIndex);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern AnimatorStateInfo INTERNAL_CALL_GetCurrentAnimatorStateInfoInternal(ref PlayableHandle handle, int layerIndex);
+
+		public AnimatorStateInfo GetCurrentAnimatorStateInfo(int layerIndex)
+		{
+			return AnimatorControllerPlayable.GetCurrentAnimatorStateInfoInternal(ref this.handle, layerIndex);
+		}
+
+		private static AnimatorStateInfo GetNextAnimatorStateInfoInternal(ref PlayableHandle handle, int layerIndex)
+		{
+			return AnimatorControllerPlayable.INTERNAL_CALL_GetNextAnimatorStateInfoInternal(ref handle, layerIndex);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern AnimatorStateInfo INTERNAL_CALL_GetNextAnimatorStateInfoInternal(ref PlayableHandle handle, int layerIndex);
+
+		public AnimatorStateInfo GetNextAnimatorStateInfo(int layerIndex)
+		{
+			return AnimatorControllerPlayable.GetNextAnimatorStateInfoInternal(ref this.handle, layerIndex);
+		}
+
+		private static AnimatorTransitionInfo GetAnimatorTransitionInfoInternal(ref PlayableHandle handle, int layerIndex)
+		{
+			return AnimatorControllerPlayable.INTERNAL_CALL_GetAnimatorTransitionInfoInternal(ref handle, layerIndex);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern AnimatorTransitionInfo INTERNAL_CALL_GetAnimatorTransitionInfoInternal(ref PlayableHandle handle, int layerIndex);
+
+		public AnimatorTransitionInfo GetAnimatorTransitionInfo(int layerIndex)
+		{
+			return AnimatorControllerPlayable.GetAnimatorTransitionInfoInternal(ref this.handle, layerIndex);
+		}
+
+		private static AnimatorClipInfo[] GetCurrentAnimatorClipInfoInternal(ref PlayableHandle handle, int layerIndex)
+		{
+			return AnimatorControllerPlayable.INTERNAL_CALL_GetCurrentAnimatorClipInfoInternal(ref handle, layerIndex);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern AnimatorClipInfo[] INTERNAL_CALL_GetCurrentAnimatorClipInfoInternal(ref PlayableHandle handle, int layerIndex);
+
+		public AnimatorClipInfo[] GetCurrentAnimatorClipInfo(int layerIndex)
+		{
+			return AnimatorControllerPlayable.GetCurrentAnimatorClipInfoInternal(ref this.handle, layerIndex);
+		}
+
+		public void GetCurrentAnimatorClipInfo(int layerIndex, List<AnimatorClipInfo> clips)
+		{
+			if (clips == null)
+			{
+				throw new ArgumentNullException("clips");
+			}
+			this.GetAnimatorClipInfoInternal(ref this.handle, layerIndex, true, clips);
+		}
+
+		public void GetNextAnimatorClipInfo(int layerIndex, List<AnimatorClipInfo> clips)
+		{
+			if (clips == null)
+			{
+				throw new ArgumentNullException("clips");
+			}
+			this.GetAnimatorClipInfoInternal(ref this.handle, layerIndex, false, clips);
+		}
+
+		private void GetAnimatorClipInfoInternal(ref PlayableHandle handle, int layerIndex, bool isCurrent, object clips)
+		{
+			AnimatorControllerPlayable.INTERNAL_CALL_GetAnimatorClipInfoInternal(this, ref handle, layerIndex, isCurrent, clips);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_GetAnimatorClipInfoInternal(AnimatorControllerPlayable self, ref PlayableHandle handle, int layerIndex, bool isCurrent, object clips);
+
+		private static int GetAnimatorClipInfoCountInternal(ref PlayableHandle handle, int layerIndex, bool current)
+		{
+			return AnimatorControllerPlayable.INTERNAL_CALL_GetAnimatorClipInfoCountInternal(ref handle, layerIndex, current);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int INTERNAL_CALL_GetAnimatorClipInfoCountInternal(ref PlayableHandle handle, int layerIndex, bool current);
+
+		public int GetCurrentAnimatorClipInfoCount(int layerIndex)
+		{
+			return AnimatorControllerPlayable.GetAnimatorClipInfoCountInternal(ref this.handle, layerIndex, true);
+		}
+
+		public int GetNextAnimatorClipInfoCount(int layerIndex)
+		{
+			return AnimatorControllerPlayable.GetAnimatorClipInfoCountInternal(ref this.handle, layerIndex, false);
+		}
+
+		private static AnimatorClipInfo[] GetNextAnimatorClipInfoInternal(ref PlayableHandle handle, int layerIndex)
+		{
+			return AnimatorControllerPlayable.INTERNAL_CALL_GetNextAnimatorClipInfoInternal(ref handle, layerIndex);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern AnimatorClipInfo[] INTERNAL_CALL_GetNextAnimatorClipInfoInternal(ref PlayableHandle handle, int layerIndex);
+
+		public AnimatorClipInfo[] GetNextAnimatorClipInfo(int layerIndex)
+		{
+			return AnimatorControllerPlayable.GetNextAnimatorClipInfoInternal(ref this.handle, layerIndex);
+		}
+
+		internal string ResolveHash(int hash)
+		{
+			return AnimatorControllerPlayable.ResolveHashInternal(ref this.handle, hash);
+		}
+
+		private static string ResolveHashInternal(ref PlayableHandle handle, int hash)
+		{
+			return AnimatorControllerPlayable.INTERNAL_CALL_ResolveHashInternal(ref handle, hash);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern string INTERNAL_CALL_ResolveHashInternal(ref PlayableHandle handle, int hash);
+
+		private static bool IsInTransitionInternal(ref PlayableHandle handle, int layerIndex)
+		{
+			return AnimatorControllerPlayable.INTERNAL_CALL_IsInTransitionInternal(ref handle, layerIndex);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool INTERNAL_CALL_IsInTransitionInternal(ref PlayableHandle handle, int layerIndex);
+
+		public bool IsInTransition(int layerIndex)
+		{
+			return AnimatorControllerPlayable.IsInTransitionInternal(ref this.handle, layerIndex);
+		}
+
+		private static int GetParameterCountInternal(ref PlayableHandle handle)
+		{
+			return AnimatorControllerPlayable.INTERNAL_CALL_GetParameterCountInternal(ref handle);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int INTERNAL_CALL_GetParameterCountInternal(ref PlayableHandle handle);
+
+		public int parameterCount
+		{
+			get
+			{
+				return AnimatorControllerPlayable.GetParameterCountInternal(ref this.handle);
+			}
+		}
+
+		private static AnimatorControllerParameter[] GetParametersArrayInternal(ref PlayableHandle handle)
+		{
+			return AnimatorControllerPlayable.INTERNAL_CALL_GetParametersArrayInternal(ref handle);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern AnimatorControllerParameter[] INTERNAL_CALL_GetParametersArrayInternal(ref PlayableHandle handle);
 
 		public AnimatorControllerParameter GetParameter(int index)
 		{
-			AnimatorControllerParameter[] parameters = this.parameters;
-			if (index < 0 && index >= this.parameters.Length)
+			AnimatorControllerParameter[] parametersArrayInternal = AnimatorControllerPlayable.GetParametersArrayInternal(ref this.handle);
+			if (index < 0 && index >= parametersArrayInternal.Length)
 			{
 				throw new IndexOutOfRangeException("index");
 			}
-			return parameters[index];
+			return parametersArrayInternal[index];
 		}
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int StringToHash(string name);
 
@@ -249,12 +388,8 @@ namespace UnityEngine.Experimental.Director
 
 		public void CrossFadeInFixedTime(string stateName, float transitionDuration, [DefaultValue("-1")] int layer, [DefaultValue("0.0f")] float fixedTime)
 		{
-			this.CrossFadeInFixedTime(AnimatorControllerPlayable.StringToHash(stateName), transitionDuration, layer, fixedTime);
+			AnimatorControllerPlayable.CrossFadeInFixedTimeInternal(ref this.handle, AnimatorControllerPlayable.StringToHash(stateName), transitionDuration, layer, fixedTime);
 		}
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void CrossFadeInFixedTime(int stateNameHash, float transitionDuration, [DefaultValue("-1")] int layer, [DefaultValue("0.0f")] float fixedTime);
 
 		[ExcludeFromDocs]
 		public void CrossFadeInFixedTime(int stateNameHash, float transitionDuration, int layer)
@@ -270,6 +405,35 @@ namespace UnityEngine.Experimental.Director
 			int num2 = -1;
 			this.CrossFadeInFixedTime(stateNameHash, transitionDuration, num2, num);
 		}
+
+		public void CrossFadeInFixedTime(int stateNameHash, float transitionDuration, [DefaultValue("-1")] int layer, [DefaultValue("0.0f")] float fixedTime)
+		{
+			AnimatorControllerPlayable.CrossFadeInFixedTimeInternal(ref this.handle, stateNameHash, transitionDuration, layer, fixedTime);
+		}
+
+		private static void CrossFadeInFixedTimeInternal(ref PlayableHandle handle, int stateNameHash, float transitionDuration, [DefaultValue("-1")] int layer, [DefaultValue("0.0f")] float fixedTime)
+		{
+			AnimatorControllerPlayable.INTERNAL_CALL_CrossFadeInFixedTimeInternal(ref handle, stateNameHash, transitionDuration, layer, fixedTime);
+		}
+
+		[ExcludeFromDocs]
+		private static void CrossFadeInFixedTimeInternal(ref PlayableHandle handle, int stateNameHash, float transitionDuration, int layer)
+		{
+			float num = 0f;
+			AnimatorControllerPlayable.INTERNAL_CALL_CrossFadeInFixedTimeInternal(ref handle, stateNameHash, transitionDuration, layer, num);
+		}
+
+		[ExcludeFromDocs]
+		private static void CrossFadeInFixedTimeInternal(ref PlayableHandle handle, int stateNameHash, float transitionDuration)
+		{
+			float num = 0f;
+			int num2 = -1;
+			AnimatorControllerPlayable.INTERNAL_CALL_CrossFadeInFixedTimeInternal(ref handle, stateNameHash, transitionDuration, num2, num);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_CrossFadeInFixedTimeInternal(ref PlayableHandle handle, int stateNameHash, float transitionDuration, int layer, float fixedTime);
 
 		[ExcludeFromDocs]
 		public void CrossFade(string stateName, float transitionDuration, int layer)
@@ -288,12 +452,8 @@ namespace UnityEngine.Experimental.Director
 
 		public void CrossFade(string stateName, float transitionDuration, [DefaultValue("-1")] int layer, [DefaultValue("float.NegativeInfinity")] float normalizedTime)
 		{
-			this.CrossFade(AnimatorControllerPlayable.StringToHash(stateName), transitionDuration, layer, normalizedTime);
+			AnimatorControllerPlayable.CrossFadeInternal(ref this.handle, AnimatorControllerPlayable.StringToHash(stateName), transitionDuration, layer, normalizedTime);
 		}
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void CrossFade(int stateNameHash, float transitionDuration, [DefaultValue("-1")] int layer, [DefaultValue("float.NegativeInfinity")] float normalizedTime);
 
 		[ExcludeFromDocs]
 		public void CrossFade(int stateNameHash, float transitionDuration, int layer)
@@ -309,6 +469,35 @@ namespace UnityEngine.Experimental.Director
 			int num = -1;
 			this.CrossFade(stateNameHash, transitionDuration, num, negativeInfinity);
 		}
+
+		public void CrossFade(int stateNameHash, float transitionDuration, [DefaultValue("-1")] int layer, [DefaultValue("float.NegativeInfinity")] float normalizedTime)
+		{
+			AnimatorControllerPlayable.CrossFadeInternal(ref this.handle, stateNameHash, transitionDuration, layer, normalizedTime);
+		}
+
+		private static void CrossFadeInternal(ref PlayableHandle handle, int stateNameHash, float transitionDuration, [DefaultValue("-1")] int layer, [DefaultValue("float.NegativeInfinity")] float normalizedTime)
+		{
+			AnimatorControllerPlayable.INTERNAL_CALL_CrossFadeInternal(ref handle, stateNameHash, transitionDuration, layer, normalizedTime);
+		}
+
+		[ExcludeFromDocs]
+		private static void CrossFadeInternal(ref PlayableHandle handle, int stateNameHash, float transitionDuration, int layer)
+		{
+			float negativeInfinity = float.NegativeInfinity;
+			AnimatorControllerPlayable.INTERNAL_CALL_CrossFadeInternal(ref handle, stateNameHash, transitionDuration, layer, negativeInfinity);
+		}
+
+		[ExcludeFromDocs]
+		private static void CrossFadeInternal(ref PlayableHandle handle, int stateNameHash, float transitionDuration)
+		{
+			float negativeInfinity = float.NegativeInfinity;
+			int num = -1;
+			AnimatorControllerPlayable.INTERNAL_CALL_CrossFadeInternal(ref handle, stateNameHash, transitionDuration, num, negativeInfinity);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_CrossFadeInternal(ref PlayableHandle handle, int stateNameHash, float transitionDuration, int layer, float normalizedTime);
 
 		[ExcludeFromDocs]
 		public void PlayInFixedTime(string stateName, int layer)
@@ -327,12 +516,8 @@ namespace UnityEngine.Experimental.Director
 
 		public void PlayInFixedTime(string stateName, [DefaultValue("-1")] int layer, [DefaultValue("float.NegativeInfinity")] float fixedTime)
 		{
-			this.PlayInFixedTime(AnimatorControllerPlayable.StringToHash(stateName), layer, fixedTime);
+			AnimatorControllerPlayable.PlayInFixedTimeInternal(ref this.handle, AnimatorControllerPlayable.StringToHash(stateName), layer, fixedTime);
 		}
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void PlayInFixedTime(int stateNameHash, [DefaultValue("-1")] int layer, [DefaultValue("float.NegativeInfinity")] float fixedTime);
 
 		[ExcludeFromDocs]
 		public void PlayInFixedTime(int stateNameHash, int layer)
@@ -348,6 +533,35 @@ namespace UnityEngine.Experimental.Director
 			int num = -1;
 			this.PlayInFixedTime(stateNameHash, num, negativeInfinity);
 		}
+
+		public void PlayInFixedTime(int stateNameHash, [DefaultValue("-1")] int layer, [DefaultValue("float.NegativeInfinity")] float fixedTime)
+		{
+			AnimatorControllerPlayable.PlayInFixedTimeInternal(ref this.handle, stateNameHash, layer, fixedTime);
+		}
+
+		private static void PlayInFixedTimeInternal(ref PlayableHandle handle, int stateNameHash, [DefaultValue("-1")] int layer, [DefaultValue("float.NegativeInfinity")] float fixedTime)
+		{
+			AnimatorControllerPlayable.INTERNAL_CALL_PlayInFixedTimeInternal(ref handle, stateNameHash, layer, fixedTime);
+		}
+
+		[ExcludeFromDocs]
+		private static void PlayInFixedTimeInternal(ref PlayableHandle handle, int stateNameHash, int layer)
+		{
+			float negativeInfinity = float.NegativeInfinity;
+			AnimatorControllerPlayable.INTERNAL_CALL_PlayInFixedTimeInternal(ref handle, stateNameHash, layer, negativeInfinity);
+		}
+
+		[ExcludeFromDocs]
+		private static void PlayInFixedTimeInternal(ref PlayableHandle handle, int stateNameHash)
+		{
+			float negativeInfinity = float.NegativeInfinity;
+			int num = -1;
+			AnimatorControllerPlayable.INTERNAL_CALL_PlayInFixedTimeInternal(ref handle, stateNameHash, num, negativeInfinity);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_PlayInFixedTimeInternal(ref PlayableHandle handle, int stateNameHash, int layer, float fixedTime);
 
 		[ExcludeFromDocs]
 		public void Play(string stateName, int layer)
@@ -366,12 +580,8 @@ namespace UnityEngine.Experimental.Director
 
 		public void Play(string stateName, [DefaultValue("-1")] int layer, [DefaultValue("float.NegativeInfinity")] float normalizedTime)
 		{
-			this.Play(AnimatorControllerPlayable.StringToHash(stateName), layer, normalizedTime);
+			AnimatorControllerPlayable.PlayInternal(ref this.handle, AnimatorControllerPlayable.StringToHash(stateName), layer, normalizedTime);
 		}
-
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void Play(int stateNameHash, [DefaultValue("-1")] int layer, [DefaultValue("float.NegativeInfinity")] float normalizedTime);
 
 		[ExcludeFromDocs]
 		public void Play(int stateNameHash, int layer)
@@ -388,80 +598,209 @@ namespace UnityEngine.Experimental.Director
 			this.Play(stateNameHash, num, negativeInfinity);
 		}
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool HasState(int layerIndex, int stateID);
+		public void Play(int stateNameHash, [DefaultValue("-1")] int layer, [DefaultValue("float.NegativeInfinity")] float normalizedTime)
+		{
+			AnimatorControllerPlayable.PlayInternal(ref this.handle, stateNameHash, layer, normalizedTime);
+		}
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetFloatString(string name, float value);
+		private static void PlayInternal(ref PlayableHandle handle, int stateNameHash, [DefaultValue("-1")] int layer, [DefaultValue("float.NegativeInfinity")] float normalizedTime)
+		{
+			AnimatorControllerPlayable.INTERNAL_CALL_PlayInternal(ref handle, stateNameHash, layer, normalizedTime);
+		}
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetFloatID(int id, float value);
+		[ExcludeFromDocs]
+		private static void PlayInternal(ref PlayableHandle handle, int stateNameHash, int layer)
+		{
+			float negativeInfinity = float.NegativeInfinity;
+			AnimatorControllerPlayable.INTERNAL_CALL_PlayInternal(ref handle, stateNameHash, layer, negativeInfinity);
+		}
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern float GetFloatString(string name);
+		[ExcludeFromDocs]
+		private static void PlayInternal(ref PlayableHandle handle, int stateNameHash)
+		{
+			float negativeInfinity = float.NegativeInfinity;
+			int num = -1;
+			AnimatorControllerPlayable.INTERNAL_CALL_PlayInternal(ref handle, stateNameHash, num, negativeInfinity);
+		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern float GetFloatID(int id);
+		private static extern void INTERNAL_CALL_PlayInternal(ref PlayableHandle handle, int stateNameHash, int layer, float normalizedTime);
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetBoolString(string name, bool value);
+		public bool HasState(int layerIndex, int stateID)
+		{
+			return AnimatorControllerPlayable.HasStateInternal(ref this.handle, layerIndex, stateID);
+		}
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetBoolID(int id, bool value);
+		private static bool HasStateInternal(ref PlayableHandle handle, int layerIndex, int stateID)
+		{
+			return AnimatorControllerPlayable.INTERNAL_CALL_HasStateInternal(ref handle, layerIndex, stateID);
+		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool GetBoolString(string name);
+		private static extern bool INTERNAL_CALL_HasStateInternal(ref PlayableHandle handle, int layerIndex, int stateID);
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool GetBoolID(int id);
+		private static void SetFloatString(ref PlayableHandle handle, string name, float value)
+		{
+			AnimatorControllerPlayable.INTERNAL_CALL_SetFloatString(ref handle, name, value);
+		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetIntegerString(string name, int value);
+		private static extern void INTERNAL_CALL_SetFloatString(ref PlayableHandle handle, string name, float value);
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetIntegerID(int id, int value);
+		private static void SetFloatID(ref PlayableHandle handle, int id, float value)
+		{
+			AnimatorControllerPlayable.INTERNAL_CALL_SetFloatID(ref handle, id, value);
+		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetIntegerString(string name);
+		private static extern void INTERNAL_CALL_SetFloatID(ref PlayableHandle handle, int id, float value);
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern int GetIntegerID(int id);
+		private static float GetFloatString(ref PlayableHandle handle, string name)
+		{
+			return AnimatorControllerPlayable.INTERNAL_CALL_GetFloatString(ref handle, name);
+		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetTriggerString(string name);
+		private static extern float INTERNAL_CALL_GetFloatString(ref PlayableHandle handle, string name);
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void SetTriggerID(int id);
+		private static float GetFloatID(ref PlayableHandle handle, int id)
+		{
+			return AnimatorControllerPlayable.INTERNAL_CALL_GetFloatID(ref handle, id);
+		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ResetTriggerString(string name);
+		private static extern float INTERNAL_CALL_GetFloatID(ref PlayableHandle handle, int id);
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ResetTriggerID(int id);
+		private static void SetBoolString(ref PlayableHandle handle, string name, bool value)
+		{
+			AnimatorControllerPlayable.INTERNAL_CALL_SetBoolString(ref handle, name, value);
+		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool IsParameterControlledByCurveString(string name);
+		private static extern void INTERNAL_CALL_SetBoolString(ref PlayableHandle handle, string name, bool value);
 
-		[WrapperlessIcall]
+		private static void SetBoolID(ref PlayableHandle handle, int id, bool value)
+		{
+			AnimatorControllerPlayable.INTERNAL_CALL_SetBoolID(ref handle, id, value);
+		}
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern bool IsParameterControlledByCurveID(int id);
+		private static extern void INTERNAL_CALL_SetBoolID(ref PlayableHandle handle, int id, bool value);
+
+		private static bool GetBoolString(ref PlayableHandle handle, string name)
+		{
+			return AnimatorControllerPlayable.INTERNAL_CALL_GetBoolString(ref handle, name);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool INTERNAL_CALL_GetBoolString(ref PlayableHandle handle, string name);
+
+		private static bool GetBoolID(ref PlayableHandle handle, int id)
+		{
+			return AnimatorControllerPlayable.INTERNAL_CALL_GetBoolID(ref handle, id);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool INTERNAL_CALL_GetBoolID(ref PlayableHandle handle, int id);
+
+		private static void SetIntegerString(ref PlayableHandle handle, string name, int value)
+		{
+			AnimatorControllerPlayable.INTERNAL_CALL_SetIntegerString(ref handle, name, value);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_SetIntegerString(ref PlayableHandle handle, string name, int value);
+
+		private static void SetIntegerID(ref PlayableHandle handle, int id, int value)
+		{
+			AnimatorControllerPlayable.INTERNAL_CALL_SetIntegerID(ref handle, id, value);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_SetIntegerID(ref PlayableHandle handle, int id, int value);
+
+		private static int GetIntegerString(ref PlayableHandle handle, string name)
+		{
+			return AnimatorControllerPlayable.INTERNAL_CALL_GetIntegerString(ref handle, name);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int INTERNAL_CALL_GetIntegerString(ref PlayableHandle handle, string name);
+
+		private static int GetIntegerID(ref PlayableHandle handle, int id)
+		{
+			return AnimatorControllerPlayable.INTERNAL_CALL_GetIntegerID(ref handle, id);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int INTERNAL_CALL_GetIntegerID(ref PlayableHandle handle, int id);
+
+		private static void SetTriggerString(ref PlayableHandle handle, string name)
+		{
+			AnimatorControllerPlayable.INTERNAL_CALL_SetTriggerString(ref handle, name);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_SetTriggerString(ref PlayableHandle handle, string name);
+
+		private static void SetTriggerID(ref PlayableHandle handle, int id)
+		{
+			AnimatorControllerPlayable.INTERNAL_CALL_SetTriggerID(ref handle, id);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_SetTriggerID(ref PlayableHandle handle, int id);
+
+		private static void ResetTriggerString(ref PlayableHandle handle, string name)
+		{
+			AnimatorControllerPlayable.INTERNAL_CALL_ResetTriggerString(ref handle, name);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_ResetTriggerString(ref PlayableHandle handle, string name);
+
+		private static void ResetTriggerID(ref PlayableHandle handle, int id)
+		{
+			AnimatorControllerPlayable.INTERNAL_CALL_ResetTriggerID(ref handle, id);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_CALL_ResetTriggerID(ref PlayableHandle handle, int id);
+
+		private static bool IsParameterControlledByCurveString(ref PlayableHandle handle, string name)
+		{
+			return AnimatorControllerPlayable.INTERNAL_CALL_IsParameterControlledByCurveString(ref handle, name);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool INTERNAL_CALL_IsParameterControlledByCurveString(ref PlayableHandle handle, string name);
+
+		private static bool IsParameterControlledByCurveID(ref PlayableHandle handle, int id)
+		{
+			return AnimatorControllerPlayable.INTERNAL_CALL_IsParameterControlledByCurveID(ref handle, id);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool INTERNAL_CALL_IsParameterControlledByCurveID(ref PlayableHandle handle, int id);
 	}
 }

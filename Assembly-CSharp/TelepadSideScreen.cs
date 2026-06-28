@@ -10,8 +10,7 @@ public class TelepadSideScreen : SideScreenContent
 		this.viewImmigrantsBtn.onClick += delegate
 		{
 			ImmigrantScreen.InitializeImmigrantScreen(this.targetTelepad);
-			PlanScreen.Instance.ExternalClose();
-			SelectTool.Instance.Select(null, true);
+			Game.Instance.Trigger(288942073, null);
 		};
 	}
 
@@ -21,16 +20,18 @@ public class TelepadSideScreen : SideScreenContent
 		if (component == null)
 		{
 			global::Debug.LogError("Target doesn't have a telepad associated with it.", null);
-			return;
-		}
-		this.targetTelepad = component;
-		if (this.targetTelepad != null)
-		{
-			base.gameObject.SetActive(false);
 		}
 		else
 		{
-			base.gameObject.SetActive(true);
+			this.targetTelepad = component;
+			if (this.targetTelepad != null)
+			{
+				base.gameObject.SetActive(false);
+			}
+			else
+			{
+				base.gameObject.SetActive(true);
+			}
 		}
 	}
 

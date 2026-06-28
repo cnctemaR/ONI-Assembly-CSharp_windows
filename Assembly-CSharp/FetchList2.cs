@@ -33,18 +33,23 @@ public class FetchList2 : IFetchList
 	{
 		get
 		{
+			bool flag;
 			if (this.FetchOrders.Count < 0)
 			{
-				return false;
+				flag = false;
 			}
-			bool flag = false;
-			foreach (FetchOrder2 fetchOrder in this.FetchOrders)
+			else
 			{
-				if (fetchOrder.InProgress)
+				bool flag2 = false;
+				foreach (FetchOrder2 fetchOrder in this.FetchOrders)
 				{
-					flag = true;
-					break;
+					if (fetchOrder.InProgress)
+					{
+						flag2 = true;
+						break;
+					}
 				}
+				flag = flag2;
 			}
 			return flag;
 		}

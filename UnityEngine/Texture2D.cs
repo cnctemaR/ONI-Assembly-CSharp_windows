@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine.Internal;
+using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
@@ -8,7 +10,7 @@ namespace UnityEngine
 	{
 		public Texture2D(int width, int height)
 		{
-			Texture2D.Internal_Create(this, width, height, TextureFormat.ARGB32, true, false, IntPtr.Zero);
+			Texture2D.Internal_Create(this, width, height, TextureFormat.RGBA32, true, false, IntPtr.Zero);
 		}
 
 		public Texture2D(int width, int height, TextureFormat format, bool mipmap)
@@ -28,12 +30,12 @@ namespace UnityEngine
 
 		public extern int mipmapCount
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_Create([Writable] Texture2D mono, int width, int height, TextureFormat format, bool mipmap, bool linear, IntPtr nativeTex);
 
@@ -42,27 +44,27 @@ namespace UnityEngine
 			return new Texture2D(width, height, format, mipmap, linear, nativeTex);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void UpdateExternalTexture(IntPtr nativeTex);
 
 		public extern TextureFormat format
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern Texture2D whiteTexture
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public static extern Texture2D blackTexture
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -72,7 +74,7 @@ namespace UnityEngine
 			Texture2D.INTERNAL_CALL_SetPixel(this, x, y, ref color);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_SetPixel(Texture2D self, int x, int y, ref Color color);
 
@@ -83,7 +85,7 @@ namespace UnityEngine
 			return color;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_GetPixel(Texture2D self, int x, int y, out Color value);
 
@@ -94,7 +96,7 @@ namespace UnityEngine
 			return color;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_GetPixelBilinear(Texture2D self, float u, float v, out Color value);
 
@@ -120,7 +122,7 @@ namespace UnityEngine
 			this.SetPixels(0, 0, num, num2, colors, miplevel);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetPixels(int x, int y, int blockWidth, int blockHeight, Color[] colors, [DefaultValue("0")] int miplevel);
 
@@ -131,11 +133,11 @@ namespace UnityEngine
 			this.SetPixels(x, y, blockWidth, blockHeight, colors, num);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetAllPixels32(Color32[] colors, int miplevel);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void SetBlockOfPixels32(int x, int y, int blockWidth, int blockHeight, Color32[] colors, int miplevel);
 
@@ -163,7 +165,7 @@ namespace UnityEngine
 			this.SetBlockOfPixels32(x, y, blockWidth, blockHeight, colors, miplevel);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool LoadImage(byte[] data, [DefaultValue("false")] bool markNonReadable);
 
@@ -174,11 +176,11 @@ namespace UnityEngine
 			return this.LoadImage(data, flag);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void LoadRawTextureData_ImplArray(byte[] data);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void LoadRawTextureData_ImplPointer(IntPtr data, int size);
 
@@ -192,7 +194,7 @@ namespace UnityEngine
 			this.LoadRawTextureData_ImplPointer(data, size);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern byte[] GetRawTextureData();
 
@@ -218,7 +220,7 @@ namespace UnityEngine
 			return this.GetPixels(0, 0, num, num2, miplevel);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Color[] GetPixels(int x, int y, int blockWidth, int blockHeight, [DefaultValue("0")] int miplevel);
 
@@ -229,7 +231,7 @@ namespace UnityEngine
 			return this.GetPixels(x, y, blockWidth, blockHeight, num);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Color32[] GetPixels32([DefaultValue("0")] int miplevel);
 
@@ -240,7 +242,7 @@ namespace UnityEngine
 			return this.GetPixels32(num);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void Apply([DefaultValue("true")] bool updateMipmaps, [DefaultValue("false")] bool makeNoLongerReadable);
 
@@ -259,7 +261,7 @@ namespace UnityEngine
 			this.Apply(flag2, flag);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern bool Resize(int width, int height, TextureFormat format, bool hasMipMap);
 
@@ -268,7 +270,7 @@ namespace UnityEngine
 			return this.Internal_ResizeWH(width, height);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern bool Internal_ResizeWH(int width, int height);
 
@@ -277,11 +279,11 @@ namespace UnityEngine
 			Texture2D.INTERNAL_CALL_Compress(this, highQuality);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_Compress(Texture2D self, bool highQuality);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern Rect[] PackTextures(Texture2D[] textures, int padding, [DefaultValue("2048")] int maximumAtlasSize, [DefaultValue("false")] bool makeNoLongerReadable);
 
@@ -300,6 +302,42 @@ namespace UnityEngine
 			return this.PackTextures(textures, padding, num, flag);
 		}
 
+		public static bool GenerateAtlas(Vector2[] sizes, int padding, int atlasSize, List<Rect> results)
+		{
+			if (sizes == null)
+			{
+				throw new ArgumentException("sizes array can not be null");
+			}
+			if (results == null)
+			{
+				throw new ArgumentException("results list cannot be null");
+			}
+			if (padding < 0)
+			{
+				throw new ArgumentException("padding can not be negative");
+			}
+			if (atlasSize <= 0)
+			{
+				throw new ArgumentException("atlas size must be positive");
+			}
+			results.Clear();
+			bool flag;
+			if (sizes.Length == 0)
+			{
+				flag = true;
+			}
+			else
+			{
+				Texture2D.GenerateAtlasInternal(sizes, padding, atlasSize, results);
+				flag = results.Count != 0;
+			}
+			return flag;
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void GenerateAtlasInternal(Vector2[] sizes, int padding, int atlasSize, object resultList);
+
 		public void ReadPixels(Rect source, int destX, int destY, [DefaultValue("true")] bool recalculateMipMaps)
 		{
 			Texture2D.INTERNAL_CALL_ReadPixels(this, ref source, destX, destY, recalculateMipMaps);
@@ -312,21 +350,42 @@ namespace UnityEngine
 			Texture2D.INTERNAL_CALL_ReadPixels(this, ref source, destX, destY, flag);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_ReadPixels(Texture2D self, ref Rect source, int destX, int destY, bool recalculateMipMaps);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern byte[] EncodeToPNG();
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern byte[] EncodeToJPG(int quality);
 
 		public byte[] EncodeToJPG()
 		{
 			return this.EncodeToJPG(75);
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern byte[] EncodeToEXR([DefaultValue("EXRFlags.None")] Texture2D.EXRFlags flags);
+
+		[ExcludeFromDocs]
+		public byte[] EncodeToEXR()
+		{
+			Texture2D.EXRFlags exrflags = Texture2D.EXRFlags.None;
+			return this.EncodeToEXR(exrflags);
+		}
+
+		[Flags]
+		public enum EXRFlags
+		{
+			None = 0,
+			OutputAsFloat = 1,
+			CompressZIP = 2,
+			CompressRLE = 4,
+			CompressPIZ = 8
 		}
 	}
 }

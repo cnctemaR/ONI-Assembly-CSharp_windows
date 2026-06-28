@@ -17,7 +17,6 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 		if (this.radius == 0)
 		{
 			global::Debug.LogFormat("[{0}] has a 0 radius noise, this will disable it", new object[] { this.GetName() });
-			return;
 		}
 	}
 
@@ -58,7 +57,7 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 
 	public Vector2 GetPosition()
 	{
-		return this.transform.position;
+		return base.transform.position;
 	}
 
 	public string sourceName { get; private set; }
@@ -67,10 +66,13 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 
 	public void SetActive(bool active = true)
 	{
-		if (!active && this.splat != null)
+		if (!active)
 		{
-			AudioEventManager.Get().ClearNoiseSplat(this.splat);
-			this.splat.Clear();
+			if (this.splat != null)
+			{
+				AudioEventManager.Get().ClearNoiseSplat(this.splat);
+				this.splat.Clear();
+			}
 		}
 		this.active = active;
 	}
@@ -120,57 +122,59 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 				"]"
 			}), null);
 			global::UnityEngine.Object.Destroy(this);
-			return;
-		}
-		this.ResetCells();
-		Operational component = base.GetComponent<Operational>();
-		if (component != null)
-		{
-			this.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
-		}
-		this.refreshCallback = new global::System.Action(this.Refresh);
-		this.refreshPartionerCallback = delegate(object data)
-		{
-			this.Refresh();
-		};
-		this.onCollectNoisePollutersCallback = new Action<object>(this.OnCollectNoisePolluters);
-		Attributes attributes = this.GetAttributes();
-		Db db = Db.Get();
-		this.dB = attributes.Add(db.BuildingAttributes.NoisePollution);
-		this.dBRadius = attributes.Add(db.BuildingAttributes.NoisePollutionRadius);
-		if (this.noise != 0 && this.radius != 0)
-		{
-			AttributeModifier attributeModifier = new AttributeModifier(db.BuildingAttributes.NoisePollution.Id, (float)this.noise, UI.TOOLTIPS.BASE_VALUE, false, false);
-			AttributeModifier attributeModifier2 = new AttributeModifier(db.BuildingAttributes.NoisePollutionRadius.Id, (float)this.radius, UI.TOOLTIPS.BASE_VALUE, false, false);
-			attributes.Add("Base", attributeModifier);
-			attributes.Add("Base", attributeModifier2);
 		}
 		else
 		{
-			global::Debug.LogWarning(string.Concat(new object[]
+			this.ResetCells();
+			Operational component = base.GetComponent<Operational>();
+			if (component != null)
 			{
-				"Noisepollutor::OnSpawn [",
-				this.GetName(),
-				"] radius: [",
-				this.radius,
-				"] noise: [",
-				this.noise,
-				"]"
-			}), null);
-		}
-		KBatchedAnimController component2 = base.GetComponent<KBatchedAnimController>();
-		this.isMovable = component2 != null && component2.isMovable;
-		if (this.isMovable)
-		{
-			CellChangeMonitor.Instance.Add(this, new Action<int, int>(this.OnCellChange), false);
-		}
-		AttributeInstance attributeInstance = this.dB;
-		attributeInstance.OnDirty = (global::System.Action)Delegate.Combine(attributeInstance.OnDirty, this.refreshCallback);
-		AttributeInstance attributeInstance2 = this.dBRadius;
-		attributeInstance2.OnDirty = (global::System.Action)Delegate.Combine(attributeInstance2.OnDirty, this.refreshCallback);
-		if (component != null)
-		{
-			this.OnActiveChanged(component.IsActive);
+				base.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
+			}
+			this.refreshCallback = new global::System.Action(this.Refresh);
+			this.refreshPartionerCallback = delegate(object data)
+			{
+				this.Refresh();
+			};
+			this.onCollectNoisePollutersCallback = new Action<object>(this.OnCollectNoisePolluters);
+			Attributes attributes = this.GetAttributes();
+			Db db = Db.Get();
+			this.dB = attributes.Add(db.BuildingAttributes.NoisePollution);
+			this.dBRadius = attributes.Add(db.BuildingAttributes.NoisePollutionRadius);
+			if (this.noise != 0 && this.radius != 0)
+			{
+				AttributeModifier attributeModifier = new AttributeModifier(db.BuildingAttributes.NoisePollution.Id, (float)this.noise, UI.TOOLTIPS.BASE_VALUE, false, false, true);
+				AttributeModifier attributeModifier2 = new AttributeModifier(db.BuildingAttributes.NoisePollutionRadius.Id, (float)this.radius, UI.TOOLTIPS.BASE_VALUE, false, false, true);
+				attributes.Add("Base", attributeModifier);
+				attributes.Add("Base", attributeModifier2);
+			}
+			else
+			{
+				global::Debug.LogWarning(string.Concat(new object[]
+				{
+					"Noisepollutor::OnSpawn [",
+					this.GetName(),
+					"] radius: [",
+					this.radius,
+					"] noise: [",
+					this.noise,
+					"]"
+				}), null);
+			}
+			KBatchedAnimController component2 = base.GetComponent<KBatchedAnimController>();
+			this.isMovable = component2 != null && component2.isMovable;
+			if (this.isMovable)
+			{
+				CellChangeMonitor.Instance.Add(this, new Action<int, int>(this.OnCellChange), false);
+			}
+			AttributeInstance attributeInstance = this.dB;
+			attributeInstance.OnDirty = (global::System.Action)Delegate.Combine(attributeInstance.OnDirty, this.refreshCallback);
+			AttributeInstance attributeInstance2 = this.dBRadius;
+			attributeInstance2.OnDirty = (global::System.Action)Delegate.Combine(attributeInstance2.OnDirty, this.refreshCallback);
+			if (component != null)
+			{
+				this.OnActiveChanged(component.IsActive);
+			}
 		}
 	}
 

@@ -7,7 +7,7 @@ using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 [Serializable]
-public class TagSet : IEnumerable, ICollection<Tag>, IEnumerable<Tag>
+public class TagSet : ICollection<Tag>, IEnumerable<Tag>, IEnumerable
 {
 	public TagSet()
 	{
@@ -49,11 +49,6 @@ public class TagSet : IEnumerable, ICollection<Tag>, IEnumerable<Tag>
 		{
 			this.tags.Add(new Tag(others[i]));
 		}
-	}
-
-	IEnumerator IEnumerable.GetEnumerator()
-	{
-		return this.GetEnumerator();
 	}
 
 	public int Count
@@ -151,6 +146,11 @@ public class TagSet : IEnumerable, ICollection<Tag>, IEnumerable<Tag>
 		return this.tags.GetEnumerator();
 	}
 
+	IEnumerator IEnumerable.GetEnumerator()
+	{
+		return this.GetEnumerator();
+	}
+
 	public Tag this[int i]
 	{
 		get
@@ -161,6 +161,7 @@ public class TagSet : IEnumerable, ICollection<Tag>, IEnumerable<Tag>
 
 	public override string ToString()
 	{
+		string text;
 		if (this.tags.Count > 0)
 		{
 			StringBuilder stringBuilder = new StringBuilder();
@@ -170,13 +171,18 @@ public class TagSet : IEnumerable, ICollection<Tag>, IEnumerable<Tag>
 				stringBuilder.Append(", ");
 				stringBuilder.Append(this.tags[i].Name);
 			}
-			return stringBuilder.ToString();
+			text = stringBuilder.ToString();
 		}
-		return string.Empty;
+		else
+		{
+			text = "";
+		}
+		return text;
 	}
 
 	public string GetTagDescription()
 	{
+		string text;
 		if (this.tags.Count > 0)
 		{
 			StringBuilder stringBuilder = new StringBuilder();
@@ -186,9 +192,13 @@ public class TagSet : IEnumerable, ICollection<Tag>, IEnumerable<Tag>
 				stringBuilder.Append(", ");
 				stringBuilder.Append(TagDescriptions.GetDescription(this.tags[i].ToString()));
 			}
-			return stringBuilder.ToString();
+			text = stringBuilder.ToString();
 		}
-		return string.Empty;
+		else
+		{
+			text = "";
+		}
+		return text;
 	}
 
 	[Serialize]

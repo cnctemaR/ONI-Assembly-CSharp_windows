@@ -48,25 +48,27 @@ public class TimedSwitchSideScreen : SideScreenContent
 		if (string.IsNullOrEmpty(str))
 		{
 			this.UpdateInputFields();
-			return;
 		}
-		float num = 0f;
-		if (float.TryParse(str, out num))
+		else
 		{
-			if (num < 0f)
+			float num = 0f;
+			if (float.TryParse(str, out num))
 			{
-				num = 0f;
+				if (num < 0f)
+				{
+					num = 0f;
+				}
+				if (inputField == this.onTimeInputField)
+				{
+					this.targetTimedSwitch.onTime = num;
+				}
+				else
+				{
+					this.targetTimedSwitch.offTime = num;
+				}
 			}
-			if (inputField == this.onTimeInputField)
-			{
-				this.targetTimedSwitch.onTime = num;
-			}
-			else
-			{
-				this.targetTimedSwitch.offTime = num;
-			}
+			this.UpdateInputFields();
 		}
-		this.UpdateInputFields();
 	}
 
 	private void SetValidContentState(bool valid)
@@ -83,17 +85,18 @@ public class TimedSwitchSideScreen : SideScreenContent
 
 	private void SimUpdate(float dt)
 	{
-		if (this.targetTimedSwitch == null)
+		if (!(this.targetTimedSwitch == null))
 		{
-			return;
+			if (!this.targetTimedSwitch.IsConnected())
+			{
+				this.SetValidContentState(false);
+			}
+			else
+			{
+				this.SetValidContentState(true);
+				this.UpdateLabels();
+			}
 		}
-		if (!this.targetTimedSwitch.IsConnected())
-		{
-			this.SetValidContentState(false);
-			return;
-		}
-		this.SetValidContentState(true);
-		this.UpdateLabels();
 	}
 
 	public override void SetTarget(GameObject target)
@@ -101,25 +104,29 @@ public class TimedSwitchSideScreen : SideScreenContent
 		if (target == null)
 		{
 			global::Debug.LogError("Invalid gameObject received", null);
-			return;
-		}
-		this.targetTimedSwitch = target.GetComponent<TimedSwitch>();
-		if (this.targetTimedSwitch == null)
-		{
-			global::Debug.LogError("The gameObject received does not contain a TimedSwitch component", null);
-			return;
-		}
-		if (!this.targetTimedSwitch.IsConnected())
-		{
-			this.SetValidContentState(false);
 		}
 		else
 		{
-			this.SetValidContentState(true);
-			this.OnToggle(this.targetTimedSwitch.IsSwitchedOn);
-			this.UpdateLabels();
+			this.targetTimedSwitch = target.GetComponent<TimedSwitch>();
+			if (this.targetTimedSwitch == null)
+			{
+				global::Debug.LogError("The gameObject received does not contain a TimedSwitch component", null);
+			}
+			else
+			{
+				if (!this.targetTimedSwitch.IsConnected())
+				{
+					this.SetValidContentState(false);
+				}
+				else
+				{
+					this.SetValidContentState(true);
+					this.OnToggle(this.targetTimedSwitch.IsSwitchedOn);
+					this.UpdateLabels();
+				}
+				this.UpdateInputFields();
+			}
 		}
-		this.UpdateInputFields();
 	}
 
 	private void UpdateInputFields()
@@ -212,8 +219,8 @@ public class TimedSwitchSideScreen : SideScreenContent
 	[SerializeField]
 	private KButton offButton;
 
-	[SerializeField]
 	[Header("On Time")]
+	[SerializeField]
 	private KButton onTimeIncreaseButton;
 
 	[SerializeField]

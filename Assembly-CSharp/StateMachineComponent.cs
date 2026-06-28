@@ -2,7 +2,7 @@
 using KSerialization;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public abstract class StateMachineComponent : KMonoBehaviour, IStateMachineTarget, ISaveLoadable
+public abstract class StateMachineComponent : KMonoBehaviour, ISaveLoadable, IStateMachineTarget
 {
 	public abstract StateMachine.Instance GetSMI();
 

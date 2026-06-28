@@ -55,15 +55,16 @@ namespace UnityEngine
 			this.DestroyWWW(false);
 		}
 
-		[WrapperlessIcall]
+		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void DestroyWWW(bool cancel);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void InitWWW(string url, byte[] postData, string[] iHeaders);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern bool enforceWebSecurityRestrictions();
 
@@ -76,19 +77,24 @@ namespace UnityEngine
 
 		public static string EscapeURL(string s, [DefaultValue("System.Text.Encoding.UTF8")] Encoding e)
 		{
+			string text;
 			if (s == null)
 			{
-				return null;
+				text = null;
 			}
-			if (s == string.Empty)
+			else if (s == "")
 			{
-				return string.Empty;
+				text = "";
 			}
-			if (e == null)
+			else if (e == null)
 			{
-				return null;
+				text = null;
 			}
-			return WWWTranscoder.URLEncode(s, e);
+			else
+			{
+				text = WWWTranscoder.URLEncode(s, e);
+			}
+			return text;
 		}
 
 		[ExcludeFromDocs]
@@ -100,15 +106,20 @@ namespace UnityEngine
 
 		public static string UnEscapeURL(string s, [DefaultValue("System.Text.Encoding.UTF8")] Encoding e)
 		{
+			string text;
 			if (s == null)
 			{
-				return null;
+				text = null;
 			}
-			if (s.IndexOf('%') == -1 && s.IndexOf('+') == -1)
+			else if (s.IndexOf('%') == -1 && s.IndexOf('+') == -1)
 			{
-				return s;
+				text = s;
 			}
-			return WWWTranscoder.URLDecode(s, e);
+			else
+			{
+				text = WWWTranscoder.URLDecode(s, e);
+			}
+			return text;
 		}
 
 		public Dictionary<string, string> responseHeaders
@@ -125,7 +136,7 @@ namespace UnityEngine
 
 		private extern string responseHeadersString
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -194,26 +205,26 @@ namespace UnityEngine
 
 		public extern byte[] bytes
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern int size
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern string error
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern Texture2D GetTexture(bool markNonReadable);
 
@@ -233,68 +244,45 @@ namespace UnityEngine
 			}
 		}
 
-		public AudioClip audioClip
+		[Obsolete("Obsolete msg (UnityUpgradable) -> * UnityEngine.WWWAudioExtensions.GetAudioClip(UnityEngine.WWW)", true)]
+		public Object audioClip
 		{
 			get
 			{
-				return this.GetAudioClip(true);
+				return null;
 			}
 		}
 
-		public AudioClip GetAudioClip(bool threeD)
-		{
-			return this.GetAudioClip(threeD, false);
-		}
-
-		public AudioClip GetAudioClip(bool threeD, bool stream)
-		{
-			return this.GetAudioClip(threeD, stream, AudioType.UNKNOWN);
-		}
-
-		public AudioClip GetAudioClip(bool threeD, bool stream, AudioType audioType)
-		{
-			return this.GetAudioClipInternal(threeD, stream, false, audioType);
-		}
-
-		public AudioClip GetAudioClipCompressed()
-		{
-			return this.GetAudioClipCompressed(true);
-		}
-
-		public AudioClip GetAudioClipCompressed(bool threeD)
-		{
-			return this.GetAudioClipCompressed(threeD, AudioType.UNKNOWN);
-		}
-
-		public AudioClip GetAudioClipCompressed(bool threeD, AudioType audioType)
-		{
-			return this.GetAudioClipInternal(threeD, false, true, audioType);
-		}
-
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern AudioClip GetAudioClipInternal(bool threeD, bool stream, bool compressed, AudioType audioType);
+		internal extern Object GetAudioClipInternal(bool threeD, bool stream, bool compressed, AudioType audioType);
 
-		public extern MovieTexture movie
+		[Obsolete("Obsolete msg (UnityUpgradable) -> * UnityEngine.WWWAudioExtensions.GetMovieTexture(UnityEngine.WWW)", true)]
+		public Object movie
 		{
-			[WrapperlessIcall]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
+			get
+			{
+				return null;
+			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern Object GetMovieTextureInternal();
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void LoadImageIntoTexture(Texture2D tex);
 
 		public extern bool isDone
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		[WrapperlessIcall]
 		[Obsolete("All blocking WWW functions have been deprecated, please use one of the asynchronous functions instead.", true)]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern string GetURL(string url);
 
@@ -306,27 +294,26 @@ namespace UnityEngine
 
 		public extern float progress
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern float uploadProgress
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern int bytesDownloaded
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		[Obsolete("Property WWW.oggVorbis has been deprecated. Use WWW.audioClip instead (UnityUpgradable).", true)]
-		public AudioClip oggVorbis
+		public Object oggVorbis
 		{
 			get
 			{
@@ -341,29 +328,29 @@ namespace UnityEngine
 
 		public extern string url
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern AssetBundle assetBundle
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern ThreadPriority threadPriority
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_CALL_WWW(WWW self, string url, ref Hash128 hash, uint crc);
 
@@ -394,16 +381,21 @@ namespace UnityEngine
 
 		private static string[] FlattenedHeadersFrom(Dictionary<string, string> headers)
 		{
+			string[] array;
 			if (headers == null)
 			{
-				return null;
+				array = null;
 			}
-			string[] array = new string[headers.Count * 2];
-			int num = 0;
-			foreach (KeyValuePair<string, string> keyValuePair in headers)
+			else
 			{
-				array[num++] = keyValuePair.Key.ToString();
-				array[num++] = keyValuePair.Value.ToString();
+				string[] array2 = new string[headers.Count * 2];
+				int num = 0;
+				foreach (KeyValuePair<string, string> keyValuePair in headers)
+				{
+					array2[num++] = keyValuePair.Key.ToString();
+					array2[num++] = keyValuePair.Value.ToString();
+				}
+				array = array2;
 			}
 			return array;
 		}
@@ -435,6 +427,11 @@ namespace UnityEngine
 					{
 						string text2 = text.Substring(0, num2).ToUpper();
 						string text3 = text.Substring(num2 + 2);
+						string text4;
+						if (dictionary.TryGetValue(text2, out text4))
+						{
+							text3 = text4 + "," + text3;
+						}
 						dictionary[text2] = text3;
 					}
 				}
@@ -442,6 +439,7 @@ namespace UnityEngine
 			return dictionary;
 		}
 
+		[RequiredByNativeCode]
 		internal IntPtr m_Ptr;
 	}
 }

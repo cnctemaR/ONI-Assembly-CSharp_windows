@@ -6,8 +6,20 @@ public class PressureSwitchGasConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
+		string id = PressureSwitchGasConfig.ID;
+		int num = 1;
+		int num2 = 1;
+		string text = "switchgaspressure_kanim";
+		float num3 = 50f;
+		int num4 = 30;
+		float num5 = 30f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
+		string[] all_METALS = MATERIALS.ALL_METALS;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(PressureSwitchGasConfig.ID, 1, 1, "switchgaspressure_kanim", 50f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.PENALTY.TIER0, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none);
+		buildingDef.Deprecated = true;
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = true;
 		buildingDef.ViewMode = SimViewMode.PowerMap;

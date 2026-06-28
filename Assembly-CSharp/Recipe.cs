@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using Klei;
 using STRINGS;
 using UnityEngine;
@@ -150,7 +149,7 @@ public class Recipe : IHasSortOrder
 		GameObject gameObject2 = null;
 		if (prefab != null)
 		{
-			gameObject2 = GameUtil.KInstantiate(prefab, Grid.SceneLayer.Use, Folder.Loot, null, 0);
+			gameObject2 = GameUtil.KInstantiate(prefab, Grid.SceneLayer.Ore, Folder.Loot, null, 0);
 			PrimaryElement component2 = gameObject2.GetComponent<PrimaryElement>();
 			gameObject2.GetComponent<KSelectable>().entityName = this.Name;
 			if (component2 != null)
@@ -218,11 +217,40 @@ public class Recipe : IHasSortOrder
 	{
 		GameObject prefab = Assets.GetPrefab(this.Result);
 		BuildingComplete component = prefab.GetComponent<BuildingComplete>();
+		BuildingDef buildingDef;
 		if (component != null)
 		{
-			return component.Def;
+			buildingDef = component.Def;
 		}
-		return null;
+		else
+		{
+			buildingDef = null;
+		}
+		return buildingDef;
+	}
+
+	public Sprite GetUIIcon()
+	{
+		Sprite sprite = null;
+		if (this.Icon != null)
+		{
+			sprite = this.Icon;
+		}
+		else
+		{
+			GameObject prefab = Assets.GetPrefab(this.Result);
+			KBatchedAnimController component = prefab.GetComponent<KBatchedAnimController>();
+			if (component != null)
+			{
+				sprite = Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], component.initialAnim);
+			}
+		}
+		return sprite;
+	}
+
+	public Color GetUIColor()
+	{
+		return (!(this.Icon != null)) ? Color.white : this.IconColor;
 	}
 
 	private string nameOverride;
@@ -235,13 +263,11 @@ public class Recipe : IHasSortOrder
 
 	public string recipeDescription;
 
-	public List<Descriptor> EffectDescription = new List<Descriptor>();
-
 	public Tag Result;
 
 	public GameObject FabricationVisualizer;
 
-	public SimHashes ResultElementOverride;
+	public SimHashes ResultElementOverride = (SimHashes)0;
 
 	public Sprite Icon;
 
@@ -269,14 +295,6 @@ public class Recipe : IHasSortOrder
 			this.amount = amount;
 		}
 
-		public string Name
-		{
-			get
-			{
-				return Recipe.Ingredient.TextInfo.ToTitleCase(this.tag.Name);
-			}
-		}
-
 		public List<Element> GetElementOptions()
 		{
 			List<Element> list = new List<Element>(ElementLoader.elements);
@@ -289,7 +307,5 @@ public class Recipe : IHasSortOrder
 		public Tag tag;
 
 		public float amount;
-
-		private static TextInfo TextInfo = new CultureInfo("en-US", false).TextInfo;
 	}
 }

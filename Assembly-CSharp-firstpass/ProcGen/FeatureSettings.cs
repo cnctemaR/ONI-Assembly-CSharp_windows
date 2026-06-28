@@ -35,12 +35,17 @@ namespace ProcGen
 
 		public WeightedSimHash GetOneWeightedSimHash(string item, SeededRandom rnd)
 		{
+			WeightedSimHash weightedSimHash;
 			if (this.ElementChoiceGroups.ContainsKey(item))
 			{
-				return WeightedRandom.Choose<WeightedSimHash>(this.ElementChoiceGroups[item].choices, rnd);
+				weightedSimHash = WeightedRandom.Choose<WeightedSimHash>(this.ElementChoiceGroups[item].choices, rnd);
 			}
-			Debug.LogError("Couldnt get SimHash [" + item + "]", null);
-			return null;
+			else
+			{
+				Debug.LogError("Couldnt get SimHash [" + item + "]", null);
+				weightedSimHash = null;
+			}
+			return weightedSimHash;
 		}
 	}
 }

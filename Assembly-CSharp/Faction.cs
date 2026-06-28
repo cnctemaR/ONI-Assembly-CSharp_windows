@@ -81,5 +81,18 @@ public class Faction
 
 	public FactionManager.FactionID ID;
 
-	public Dictionary<FactionManager.FactionID, FactionManager.Disposition> Dispositions = new Dictionary<FactionManager.FactionID, FactionManager.Disposition>();
+	public Dictionary<FactionManager.FactionID, FactionManager.Disposition> Dispositions = new Dictionary<FactionManager.FactionID, FactionManager.Disposition>(default(Faction.FactionIDComparer));
+
+	public struct FactionIDComparer : IEqualityComparer<FactionManager.FactionID>
+	{
+		public bool Equals(FactionManager.FactionID x, FactionManager.FactionID y)
+		{
+			return x == y;
+		}
+
+		public int GetHashCode(FactionManager.FactionID obj)
+		{
+			return (int)obj;
+		}
+	}
 }

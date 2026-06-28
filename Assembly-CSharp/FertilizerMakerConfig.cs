@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -7,8 +7,19 @@ public class FertilizerMakerConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER5;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("FertilizerMaker", 4, 3, "fertilizer_maker_kanim", 100f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.ALL_METALS, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, tier);
+		string text = "FertilizerMaker";
+		int num = 4;
+		int num2 = 3;
+		string text2 = "fertilizer_maker_kanim";
+		float num3 = 100f;
+		int num4 = 30;
+		float num5 = 30f;
+		float[] tier = global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
+		string[] all_METALS = MATERIALS.ALL_METALS;
+		float num6 = 800f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
+		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER5;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER2, tier2);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 120f;
 		buildingDef.ExhaustKilowattsWhenActive = 0.25f;
@@ -26,27 +37,27 @@ public class FertilizerMakerConfig : IBuildingConfig
 	{
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
-		storage.defaultStoredItemModifers = FertilizerMakerConfig.StoredItemModifiers;
+		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		go.AddOrGet<WaterPurifier>();
 		ElementDropper elementDropper = go.AddComponent<ElementDropper>();
-		elementDropper.emitMass = FertilizerMakerConfig.FERTILIZER_PER_LOAD;
+		elementDropper.emitMass = 4f;
 		elementDropper.emitTag = new Tag("Fertilizer");
 		elementDropper.emitOffset = new Vector3(0f, 1f, 0f);
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.conversionInterval = 1f;
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
-			new ElementConverter.ConsumedElement(new Tag("DirtyWater"), FertilizerMakerConfig.WATER_PER_CYCLE / 600f)
+			new ElementConverter.ConsumedElement(new Tag("DirtyWater"), 0.15f)
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(FertilizerMakerConfig.FERTILIZER_PER_CYCLE / 600f, SimHashes.Fertilizer, 323.15f, true, 0f, 0.5f, false, 1f, byte.MaxValue, 0)
+			new ElementConverter.OutputElement(0.12f, SimHashes.Fertilizer, 323.15f, true, 0f, 0.5f, false, 1f, byte.MaxValue, 0)
 		};
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
 		conduitConsumer.consumptionRate = 10f;
 		conduitConsumer.capacityTag = ElementLoader.FindElementByHash(SimHashes.DirtyWater).tag;
-		conduitConsumer.capacityKG = FertilizerMakerConfig.WATER_PER_CYCLE * 5f;
+		conduitConsumer.capacityKG = 0.75f;
 		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Dump;
 		conduitConsumer.forceAlwaysSatisfied = true;
 		BuildingElementEmitter buildingElementEmitter = go.AddOrGet<BuildingElementEmitter>();
@@ -57,9 +68,21 @@ public class FertilizerMakerConfig : IBuildingConfig
 		Prioritizable.AddRef(go);
 	}
 
+	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, FertilizerMakerConfig.INPUT_PORTS);
+	}
+
+	public override void DoPostConfigureUnderConstruction(GameObject go)
+	{
+		GeneratedBuildings.RegisterLogicPorts(go, FertilizerMakerConfig.INPUT_PORTS);
+	}
+
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		BuildingTemplates.DoPostConfigure(go);
+		GeneratedBuildings.RegisterLogicPorts(go, FertilizerMakerConfig.INPUT_PORTS);
+		go.AddOrGet<LogicOperationalController>();
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
 		{
 			PoweredActiveController.Instance instance = new PoweredActiveController.Instance(game_object.GetComponent<KPrefabID>());
@@ -67,23 +90,24 @@ public class FertilizerMakerConfig : IBuildingConfig
 		};
 	}
 
+	public const string ID = "FertilizerMaker";
+
 	public const float METHANE_EMIT_RATE = 0.02f;
 
-	private static float _NUM_PLANTS_PER_DUPE = (float)Math.Ceiling(2.880000114440918);
+	private const float _NUM_PLANTS_PER_DUPE = 3f;
 
-	private static float _NUM_DUPES = 6f;
+	private const float _NUM_DUPES = 6f;
 
-	private static float _PLANTS_FED = FertilizerMakerConfig._NUM_DUPES * FertilizerMakerConfig._NUM_PLANTS_PER_DUPE;
+	private const float _PLANTS_FED = 18f;
 
-	private static float FERTILIZER_PER_LOAD = 4f;
+	private const float FERTILIZER_PER_LOAD = 4f;
 
-	private static float FERTILIZER_PER_CYCLE = FertilizerMakerConfig._PLANTS_FED * FertilizerMakerConfig.FERTILIZER_PER_LOAD;
+	private const float FERTILIZER_PER_CYCLE = 72f;
 
-	private static float WATER_PER_CYCLE = FertilizerMakerConfig.FERTILIZER_PER_CYCLE / 0.8f;
+	private const float WATER_PER_CYCLE = 90f;
 
-	private static readonly List<Storage.StoredItemModifier> StoredItemModifiers = new List<Storage.StoredItemModifier>
+	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[]
 	{
-		Storage.StoredItemModifier.Hide,
-		Storage.StoredItemModifier.Seal
+		new LogicPorts.Port(LogicOperationalController.PORT_ID, new CellOffset(-1, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false)
 	};
 }

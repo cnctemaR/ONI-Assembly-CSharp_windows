@@ -53,13 +53,13 @@ namespace Klei.AI
 			return (InstanceType)((object)null);
 		}
 
-		public InstanceType Add(InstanceType instance)
+		public virtual InstanceType Add(InstanceType instance)
 		{
 			this.ModifierList.Add(instance);
 			return instance;
 		}
 
-		public void Remove(InstanceType instance)
+		public virtual void Remove(InstanceType instance)
 		{
 			for (int i = 0; i < this.ModifierList.Count; i++)
 			{
@@ -68,20 +68,6 @@ namespace Klei.AI
 				{
 					this.ModifierList.RemoveAt(i);
 					instance.OnCleanUp();
-					break;
-				}
-			}
-		}
-
-		public void Remove(ModifierType modifier)
-		{
-			for (int i = 0; i < this.ModifierList.Count; i++)
-			{
-				InstanceType instanceType = this.ModifierList[i];
-				if (instanceType.modifier == modifier)
-				{
-					this.ModifierList.RemoveAt(i);
-					instanceType.OnCleanUp();
 					break;
 				}
 			}
@@ -143,12 +129,15 @@ namespace Klei.AI
 				int num2 = reader.ReadInt32();
 				int position = reader.Position;
 				InstanceType instanceType = this.Get(text);
-				if (instanceType == null && this.resources != null)
+				if (instanceType == null)
 				{
-					ModifierType modifierType = this.resources.TryGet(text);
-					if (modifierType != null)
+					if (this.resources != null)
 					{
-						instanceType = this.CreateInstance(modifierType);
+						ModifierType modifierType = this.resources.TryGet(text);
+						if (modifierType != null)
+						{
+							instanceType = this.CreateInstance(modifierType);
+						}
 					}
 				}
 				if (instanceType == null)

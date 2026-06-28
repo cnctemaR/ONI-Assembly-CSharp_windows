@@ -16,9 +16,9 @@ public class ShadowBar
 
 	public Vector2 SizeBleed = new Vector2(16f, 8f);
 
-	public float leftIndent;
+	public float leftIndent = 0f;
 
-	public float rightIndent;
+	public float rightIndent = 0f;
 
 	public GameObject selectionBorder;
 }

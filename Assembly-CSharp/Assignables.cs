@@ -27,7 +27,7 @@ public class Assignables : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.Subscribe(1623392196, new Action<object>(this.OnDeath));
+		base.Subscribe(1623392196, new Action<object>(this.OnDeath));
 	}
 
 	private void OnDeath(object data)
@@ -51,18 +51,23 @@ public class Assignables : KMonoBehaviour
 
 	public AssignableSlotInstance GetSlot(AssignableSlot slot)
 	{
+		AssignableSlotInstance assignableSlotInstance;
 		if (slot == null)
 		{
-			return null;
+			assignableSlotInstance = null;
 		}
-		foreach (AssignableSlotInstance assignableSlotInstance in this)
+		else
 		{
-			if (assignableSlotInstance.slot == slot)
+			foreach (AssignableSlotInstance assignableSlotInstance2 in this)
 			{
-				return assignableSlotInstance;
+				if (assignableSlotInstance2.slot == slot)
+				{
+					return assignableSlotInstance2;
+				}
 			}
+			assignableSlotInstance = null;
 		}
-		return null;
+		return assignableSlotInstance;
 	}
 
 	public bool IsAssigned(AssignableSlot slot)
@@ -126,37 +131,42 @@ public class Assignables : KMonoBehaviour
 	public Assignable AutoAssignSlot(Navigator navigator, AssignableSlot slot)
 	{
 		Assignable assignable = this.GetAssignable(slot);
+		Assignable assignable2;
 		if (assignable != null)
 		{
-			return assignable;
+			assignable2 = assignable;
 		}
-		int num = int.MaxValue;
-		foreach (Assignable assignable2 in Game.Instance.assignmentManager)
+		else
 		{
-			if (!(assignable2 == null))
+			int num = int.MaxValue;
+			foreach (Assignable assignable3 in Game.Instance.assignmentManager)
 			{
-				if (!assignable2.IsAssigned())
+				if (!(assignable3 == null))
 				{
-					if (assignable2.slot == slot)
+					if (!assignable3.IsAssigned())
 					{
-						if (assignable2.CanAutoAssignTo(navigator))
+						if (assignable3.slot == slot)
 						{
-							int navigationCost = assignable2.GetNavigationCost(navigator);
-							if (navigationCost != PathProber.InvalidCost && navigationCost < num)
+							if (assignable3.CanAutoAssignTo(navigator))
 							{
-								num = navigationCost;
-								assignable = assignable2;
+								int navigationCost = assignable3.GetNavigationCost(navigator);
+								if (navigationCost != PathProber.InvalidCost && navigationCost < num)
+								{
+									num = navigationCost;
+									assignable = assignable3;
+								}
 							}
 						}
 					}
 				}
 			}
+			if (assignable != null)
+			{
+				assignable.Assign(base.GetComponent<IAssignableIdentity>());
+			}
+			assignable2 = assignable;
 		}
-		if (assignable != null)
-		{
-			assignable.Assign(base.GetComponent<IAssignableIdentity>());
-		}
-		return assignable;
+		return assignable2;
 	}
 
 	protected override void OnCleanUp()

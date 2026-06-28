@@ -62,9 +62,10 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 			this.foodInfo = EdiblesManager.instance.GetFoodInfo(this.FoodID);
 		}
 		base.GetComponent<KPrefabID>().AddTag(GameTags.Edible);
-		this.Subscribe(748399584, new Action<object>(this.OnCraft));
-		this.Subscribe(1272413801, new Action<object>(this.OnCraft));
+		base.Subscribe(748399584, new Action<object>(this.OnCraft));
+		base.Subscribe(1272413801, new Action<object>(this.OnCraft));
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Eating;
+		this.synchronizeAnims = false;
 		Components.Edibles.Add(this);
 	}
 
@@ -125,7 +126,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 		}
 		ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, -this.caloriesConsumed, string.Format(UI.ENDOFDAYREPORT.NOTES.EATEN, this.GetProperName()), worker.GetProperName());
 		worker.Trigger(1121894420, this);
-		this.Trigger(-10536414, worker.gameObject);
+		base.Trigger(-10536414, worker.gameObject);
 		this.unitsConsumed = float.NaN;
 		this.caloriesConsumed = float.NaN;
 		this.consumptionStartTime = float.NaN;
@@ -168,7 +169,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 
 	public float caloriesConsumed = float.NaN;
 
-	private AttributeModifier caloriesModifier = new AttributeModifier("CaloriesDelta", 50000f, DUPLICANTS.MODIFIERS.EATINGCALORIES.NAME, false, false);
+	private AttributeModifier caloriesModifier = new AttributeModifier("CaloriesDelta", 50000f, DUPLICANTS.MODIFIERS.EATINGCALORIES.NAME, false, false, true);
 
 	public enum Quality
 	{

@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class KTabMenu : KScreen
 {
-	public event KTabMenu.TabActivated onTabActivated;
-
 	public int PreviousActiveTab
 	{
 		get
@@ -14,6 +13,9 @@ public class KTabMenu : KScreen
 			return this.previouslyActiveTab;
 		}
 	}
+
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	public event KTabMenu.TabActivated onTabActivated;
 
 	public int AddTab(string tabName, KScreen contents)
 	{

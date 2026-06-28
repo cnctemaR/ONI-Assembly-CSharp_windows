@@ -60,6 +60,16 @@ namespace Steamworks
 
 		private ISteamMatchmakingPingResponse.ServerFailedToRespond m_ServerFailedToRespond;
 
+		public delegate void ServerResponded(gameserveritem_t server);
+
+		public delegate void ServerFailedToRespond();
+
+		[UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+		private delegate void InternalServerResponded(IntPtr thisptr, gameserveritem_t server);
+
+		[UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+		private delegate void InternalServerFailedToRespond(IntPtr thisptr);
+
 		[StructLayout(LayoutKind.Sequential)]
 		private class VTable
 		{
@@ -71,15 +81,5 @@ namespace Steamworks
 			[MarshalAs(UnmanagedType.FunctionPtr)]
 			public ISteamMatchmakingPingResponse.InternalServerFailedToRespond m_VTServerFailedToRespond;
 		}
-
-		public delegate void ServerResponded(gameserveritem_t server);
-
-		public delegate void ServerFailedToRespond();
-
-		[UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-		private delegate void InternalServerResponded(IntPtr thisptr, gameserveritem_t server);
-
-		[UnmanagedFunctionPointer(CallingConvention.ThisCall)]
-		private delegate void InternalServerFailedToRespond(IntPtr thisptr);
 	}
 }

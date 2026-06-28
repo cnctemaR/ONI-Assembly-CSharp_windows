@@ -26,25 +26,27 @@ public class TemperatureControlledSwitch : CircuitSwitch, ISaveLoadable, IThresh
 		{
 			this.temperatures[this.simUpdateCounter] = Grid.Temperature[Grid.PosToCell(this)];
 			this.simUpdateCounter++;
-			return;
 		}
-		this.simUpdateCounter = 0;
-		this.averageTemp = 0f;
-		for (int i = 0; i < 8; i++)
+		else
 		{
-			this.averageTemp += this.temperatures[i];
-		}
-		this.averageTemp /= 8f;
-		if (this.activateOnWarmerThan)
-		{
-			if ((this.averageTemp > this.thresholdTemperature && !base.IsSwitchedOn) || (this.averageTemp < this.thresholdTemperature && base.IsSwitchedOn))
+			this.simUpdateCounter = 0;
+			this.averageTemp = 0f;
+			for (int i = 0; i < 8; i++)
+			{
+				this.averageTemp += this.temperatures[i];
+			}
+			this.averageTemp /= 8f;
+			if (this.activateOnWarmerThan)
+			{
+				if ((this.averageTemp > this.thresholdTemperature && !base.IsSwitchedOn) || (this.averageTemp < this.thresholdTemperature && base.IsSwitchedOn))
+				{
+					this.Toggle();
+				}
+			}
+			else if ((this.averageTemp > this.thresholdTemperature && base.IsSwitchedOn) || (this.averageTemp < this.thresholdTemperature && !base.IsSwitchedOn))
 			{
 				this.Toggle();
 			}
-		}
-		else if ((this.averageTemp > this.thresholdTemperature && base.IsSwitchedOn) || (this.averageTemp < this.thresholdTemperature && !base.IsSwitchedOn))
-		{
-			this.Toggle();
 		}
 	}
 
@@ -153,31 +155,31 @@ public class TemperatureControlledSwitch : CircuitSwitch, ISaveLoadable, IThresh
 	public LocString ThresholdValueUnits()
 	{
 		LocString locString = null;
-		switch (GameUtil.temperatureUnit)
+		GameUtil.TemperatureUnit temperatureUnit = GameUtil.temperatureUnit;
+		if (temperatureUnit != GameUtil.TemperatureUnit.Celsius)
 		{
-		case GameUtil.TemperatureUnit.Celsius:
+			if (temperatureUnit != GameUtil.TemperatureUnit.Fahrenheit)
+			{
+				if (temperatureUnit == GameUtil.TemperatureUnit.Kelvin)
+				{
+					locString = UI.UNITSUFFIXES.TEMPERATURE.KELVIN;
+				}
+			}
+			else
+			{
+				locString = UI.UNITSUFFIXES.TEMPERATURE.FAHRENHEIT;
+			}
+		}
+		else
+		{
 			locString = UI.UNITSUFFIXES.TEMPERATURE.CELSIUS;
-			break;
-		case GameUtil.TemperatureUnit.Fahrenheit:
-			locString = UI.UNITSUFFIXES.TEMPERATURE.FAHRENHEIT;
-			break;
-		case GameUtil.TemperatureUnit.Kelvin:
-			locString = UI.UNITSUFFIXES.TEMPERATURE.KELVIN;
-			break;
 		}
 		return locString;
 	}
 
-	virtual bool IThresholdSwitch.IsConnected()
-	{
-		return base.IsConnected();
-	}
-
-	private const int NumFrameDelay = 8;
-
 	private HandleVector<int>.Handle structureTemperature;
 
-	private int simUpdateCounter;
+	private int simUpdateCounter = 0;
 
 	[Serialize]
 	public float thresholdTemperature = 280f;
@@ -185,9 +187,11 @@ public class TemperatureControlledSwitch : CircuitSwitch, ISaveLoadable, IThresh
 	[Serialize]
 	public bool activateOnWarmerThan;
 
-	public float minTemp;
+	public float minTemp = 0f;
 
 	public float maxTemp = 373.15f;
+
+	private const int NumFrameDelay = 8;
 
 	private float[] temperatures = new float[8];
 

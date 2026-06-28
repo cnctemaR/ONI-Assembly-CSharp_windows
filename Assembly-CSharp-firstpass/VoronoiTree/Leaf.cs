@@ -25,20 +25,17 @@ namespace VoronoiTree
 
 		public void GetIntersectingSites(LineSegment edge, List<Diagram.Site> intersectingSites)
 		{
-			if (this.site == null)
+			if (this.site != null)
 			{
-				return;
+				if (this.site.poly != null)
+				{
+					LineSegment lineSegment = new LineSegment(null, null);
+					if (this.site.poly.ClipSegment(edge, ref lineSegment))
+					{
+						intersectingSites.Add(this.site);
+					}
+				}
 			}
-			if (this.site.poly == null)
-			{
-				return;
-			}
-			LineSegment lineSegment = new LineSegment(null, null);
-			if (!this.site.poly.ClipSegment(edge, ref lineSegment))
-			{
-				return;
-			}
-			intersectingSites.Add(this.site);
 		}
 	}
 }

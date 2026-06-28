@@ -83,7 +83,7 @@ public class DefLoader : KMonoBehaviour
 
 	public static bool IsValidRow(string[,] grid, int row)
 	{
-		return grid[0, row] != null && grid[0, row] != string.Empty;
+		return grid[0, row] != null && grid[0, row] != "";
 	}
 
 	public TextAsset file;

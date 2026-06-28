@@ -1,0 +1,99 @@
+﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+
+[SkipSaveFileSerialization]
+public class MoveableLogicGateVisualizer : LogicGateBase
+{
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		this.cell = -1;
+		OverlayScreen instance = OverlayScreen.Instance;
+		instance.OnOverlayChanged = (Action<SimViewMode>)Delegate.Combine(instance.OnOverlayChanged, new Action<SimViewMode>(this.OnOverlayChanged));
+		this.OnOverlayChanged(OverlayScreen.Instance.mode);
+		base.Subscribe(-1643076535, new Action<object>(this.OnRotated));
+	}
+
+	protected override void OnCleanUp()
+	{
+		OverlayScreen instance = OverlayScreen.Instance;
+		instance.OnOverlayChanged = (Action<SimViewMode>)Delegate.Remove(instance.OnOverlayChanged, new Action<SimViewMode>(this.OnOverlayChanged));
+		this.Unregister();
+		base.OnCleanUp();
+	}
+
+	private void OnOverlayChanged(SimViewMode mode)
+	{
+		if (mode == SimViewMode.Logic)
+		{
+			this.Register();
+		}
+		else
+		{
+			this.Unregister();
+		}
+	}
+
+	private void OnRotated(object data)
+	{
+		this.Unregister();
+		this.OnOverlayChanged(OverlayScreen.Instance.mode);
+	}
+
+	private void Update()
+	{
+		if (this.visChildren.Count > 0)
+		{
+			int num = Grid.PosToCell(base.transform.position);
+			if (num != this.cell)
+			{
+				this.cell = num;
+				this.Unregister();
+				this.Register();
+			}
+		}
+	}
+
+	private GameObject CreateUIElem(int cell, bool is_input)
+	{
+		GameObject gameObject = Util.KInstantiate(LogicGateBase.uiSrcData.prefab, Grid.CellToPosCCC(cell, Grid.SceneLayer.Front), Quaternion.identity, GameScreenManager.Instance.worldSpaceCanvas, null, true, 0);
+		Image component = gameObject.GetComponent<Image>();
+		component.sprite = ((!is_input) ? LogicGateBase.uiSrcData.outputSprite : LogicGateBase.uiSrcData.inputSprite);
+		component.raycastTarget = false;
+		return gameObject;
+	}
+
+	private void Register()
+	{
+		if (this.visChildren.Count <= 0)
+		{
+			base.enabled = true;
+			this.visChildren.Add(this.CreateUIElem(base.OutputCell, false));
+			this.visChildren.Add(this.CreateUIElem(base.InputCellOne, true));
+			if (base.RequiresTwoInputs)
+			{
+				this.visChildren.Add(this.CreateUIElem(base.InputCellTwo, true));
+			}
+		}
+	}
+
+	private void Unregister()
+	{
+		if (this.visChildren.Count > 0)
+		{
+			base.enabled = false;
+			this.cell = -1;
+			foreach (GameObject gameObject in this.visChildren)
+			{
+				Util.KDestroyGameObject(gameObject);
+			}
+			this.visChildren.Clear();
+		}
+	}
+
+	private int cell;
+
+	protected List<GameObject> visChildren = new List<GameObject>();
+}

@@ -8,15 +8,20 @@ namespace ClipperLib
 		public int Compare(IntersectNode node1, IntersectNode node2)
 		{
 			long num = node2.Pt.Y - node1.Pt.Y;
+			int num2;
 			if (num > 0L)
 			{
-				return 1;
+				num2 = 1;
 			}
-			if (num < 0L)
+			else if (num < 0L)
 			{
-				return -1;
+				num2 = -1;
 			}
-			return 0;
+			else
+			{
+				num2 = 0;
+			}
+			return num2;
 		}
 	}
 }

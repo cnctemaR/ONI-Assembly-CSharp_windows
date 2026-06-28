@@ -39,9 +39,9 @@ namespace UnityEngine.Networking
 		public static void WriteInstance(NetworkWriter writer, SyncListBool items)
 		{
 			writer.Write((ushort)items.Count);
-			foreach (bool flag in items)
+			for (int i = 0; i < items.Count; i++)
 			{
-				writer.Write(flag);
+				writer.Write(items[i]);
 			}
 		}
 	}

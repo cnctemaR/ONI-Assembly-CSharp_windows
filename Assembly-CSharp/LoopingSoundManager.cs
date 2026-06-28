@@ -81,49 +81,65 @@ public class LoopingSoundManager : KMonoBehaviour
 
 	public static EventInstance PrepareSound(string path, Vector3 pos, bool pauseOnGamePause = true)
 	{
+		EventInstance eventInstance;
 		if (path == null)
 		{
 			global::Debug.LogWarning("Missing sound", null);
-			return null;
+			eventInstance = null;
 		}
-		EventInstance eventInstance = KFMOD.CreateInstance(path);
-		if (eventInstance == null)
+		else
 		{
-			Output.LogError(new object[] { "StartSound() Couldnt Get FMOD event for asset [" + path + "]" });
-			return null;
-		}
-		LoopingSoundManager.Get().Add(path, eventInstance, pauseOnGamePause);
-		Vector3 vector = new Vector3(pos.x, pos.y, 0f);
-		eventInstance.set3DAttributes(SoundEvent.GetCameraScaledPosition(vector).To3DAttributes());
-		LoopingSoundManager.UpdateSpeed(eventInstance);
-		if (Time.timeScale == 0f)
-		{
-			eventInstance.setPaused(true);
+			EventInstance eventInstance2 = KFMOD.CreateInstance(path);
+			if (eventInstance2 == null)
+			{
+				Output.LogError(new object[] { "StartSound() Couldnt Get FMOD event for asset [" + path + "]" });
+				eventInstance = null;
+			}
+			else
+			{
+				LoopingSoundManager.Get().Add(path, eventInstance2, pauseOnGamePause);
+				Vector3 vector = new Vector3(pos.x, pos.y, 0f);
+				eventInstance2.set3DAttributes(SoundEvent.GetCameraScaledPosition(vector).To3DAttributes());
+				LoopingSoundManager.UpdateSpeed(eventInstance2);
+				if (Time.timeScale == 0f)
+				{
+					eventInstance2.setPaused(true);
+				}
+				eventInstance = eventInstance2;
+			}
 		}
 		return eventInstance;
 	}
 
 	public static EventInstance StartSound(string path, Vector3 pos, bool pauseOnGamePause = true)
 	{
+		EventInstance eventInstance;
 		if (path == null)
 		{
 			global::Debug.LogWarning("Missing sound", null);
-			return null;
+			eventInstance = null;
 		}
-		EventInstance eventInstance = KFMOD.CreateInstance(path);
-		if (eventInstance == null)
+		else
 		{
-			Output.LogError(new object[] { "StartSound() Couldnt Get FMOD event for asset [" + path + "]" });
-			return null;
-		}
-		LoopingSoundManager.Get().Add(path, eventInstance, pauseOnGamePause);
-		Vector3 vector = new Vector3(pos.x, pos.y, 0f);
-		eventInstance.set3DAttributes(SoundEvent.GetCameraScaledPosition(vector).To3DAttributes());
-		LoopingSoundManager.UpdateSpeed(eventInstance);
-		eventInstance.start();
-		if (Time.timeScale == 0f && pauseOnGamePause)
-		{
-			eventInstance.setPaused(true);
+			EventInstance eventInstance2 = KFMOD.CreateInstance(path);
+			if (eventInstance2 == null)
+			{
+				Output.LogError(new object[] { "StartSound() Couldnt Get FMOD event for asset [" + path + "]" });
+				eventInstance = null;
+			}
+			else
+			{
+				LoopingSoundManager.Get().Add(path, eventInstance2, pauseOnGamePause);
+				Vector3 vector = new Vector3(pos.x, pos.y, 0f);
+				eventInstance2.set3DAttributes(SoundEvent.GetCameraScaledPosition(vector).To3DAttributes());
+				LoopingSoundManager.UpdateSpeed(eventInstance2);
+				eventInstance2.start();
+				if (Time.timeScale == 0f && pauseOnGamePause)
+				{
+					eventInstance2.setPaused(true);
+				}
+				eventInstance = eventInstance2;
+			}
 		}
 		return eventInstance;
 	}
@@ -149,7 +165,7 @@ public class LoopingSoundManager : KMonoBehaviour
 	{
 		if (ev != null)
 		{
-			ev.setParameterValue("Speed", Time.timeScale * 1f);
+			ev.setParameterValue(LoopingSoundManager.SPEED_ID, Time.timeScale * 1f);
 		}
 	}
 
@@ -168,6 +184,10 @@ public class LoopingSoundManager : KMonoBehaviour
 	private static LoopingSoundManager instance;
 
 	private Dictionary<HashedString, LoopingSoundManager.Entry> entries = new Dictionary<HashedString, LoopingSoundManager.Entry>();
+
+	private static ParameterID OBJECT_COUNT_ID = new ParameterID("objectCount");
+
+	private static ParameterID SPEED_ID = new ParameterID("Speed");
 
 	private class Entry
 	{
@@ -201,7 +221,7 @@ public class LoopingSoundManager : KMonoBehaviour
 			}
 			else
 			{
-				this.curveType = string.Empty;
+				this.curveType = "";
 			}
 		}
 
@@ -243,7 +263,7 @@ public class LoopingSoundManager : KMonoBehaviour
 				}
 				foreach (EventInstance eventInstance2 in this.events)
 				{
-					eventInstance2.setParameterValue("objectCount", num2);
+					eventInstance2.setParameterValue(LoopingSoundManager.OBJECT_COUNT_ID, num2);
 				}
 			}
 		}
@@ -254,7 +274,7 @@ public class LoopingSoundManager : KMonoBehaviour
 			{
 				if (eventInstance != null)
 				{
-					eventInstance.setParameterValue("Speed", speed);
+					eventInstance.setParameterValue(LoopingSoundManager.SPEED_ID, speed);
 				}
 			}
 		}

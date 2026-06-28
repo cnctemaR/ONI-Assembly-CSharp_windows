@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.Serialization;
 using KSerialization;
 using STRINGS;
 
@@ -8,10 +7,10 @@ public class Clearable : Workable, ISaveLoadable
 {
 	protected override void OnPrefabInit()
 	{
-		this.Subscribe(2127324410, new Action<object>(this.OnCancel));
-		this.Subscribe(856640610, new Action<object>(this.OnStore));
-		this.Subscribe(-2064133523, new Action<object>(this.OnAbsorb));
-		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(2127324410, new Action<object>(this.OnCancel));
+		base.Subscribe(856640610, new Action<object>(this.OnStore));
+		base.Subscribe(-2064133523, new Action<object>(this.OnAbsorb));
+		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Clearing;
 	}
 
@@ -23,11 +22,6 @@ public class Clearable : Workable, ISaveLoadable
 		{
 			component.showIcon = false;
 		}
-	}
-
-	[OnDeserialized]
-	private void OnDeserialized()
-	{
 		if (this.isMarkedForClear)
 		{
 			if (base.GetComponent<Pickupable>().storage != null)
@@ -75,17 +69,19 @@ public class Clearable : Workable, ISaveLoadable
 
 	public void MarkForClear(bool force = false)
 	{
-		if (!this.isClearable)
+		if (this.isClearable)
 		{
-			return;
-		}
-		if ((!this.isMarkedForClear || force) && !this.pickupable.IsEntombed && this.chore == null && this.pickupable.storage == null)
-		{
-			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.PendingClear, this);
-			Prioritizable.AddRef(base.gameObject);
-			this.chore = new ClearChore(Db.Get().ChoreTypes.Transport, base.GetComponent<Pickupable>(), null, true, null, null, null);
-			base.GetComponent<KPrefabID>().AddTag(GameTags.Garbage);
-			this.isMarkedForClear = true;
+			if ((!this.isMarkedForClear || force) && !this.pickupable.IsEntombed && this.chore == null)
+			{
+				if (this.pickupable.storage == null)
+				{
+					base.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.PendingClear, this);
+					Prioritizable.AddRef(base.gameObject);
+					this.chore = new ClearChore(Db.Get().ChoreTypes.Transport, base.GetComponent<Pickupable>(), null, true, null, null, null);
+					base.GetComponent<KPrefabID>().AddTag(GameTags.Garbage);
+					this.isMarkedForClear = true;
+				}
+			}
 		}
 	}
 
@@ -101,21 +97,26 @@ public class Clearable : Workable, ISaveLoadable
 
 	private void OnRefreshUserMenu(object data)
 	{
-		if (!this.isClearable || base.GetComponent<Health>() != null || (base.GetComponent<Pickupable>() != null && base.GetComponent<Pickupable>().storage != null))
+		if (this.isClearable && !(base.GetComponent<Health>() != null) && (!(base.GetComponent<Pickupable>() != null) || !(base.GetComponent<Pickupable>().storage != null)))
 		{
-			return;
-		}
-		if (!this.isMarkedForClear)
-		{
-			UserMenu userMenu = this.userMenu;
-			string text = UI.USERMENUACTIONS.CLEAR.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_move_to_storage", UI.USERMENUACTIONS.CLEAR.NAME, new global::System.Action(this.OnClickClear), global::Action.NumActions, null, null, null, text, true), 1f);
-		}
-		else
-		{
-			UserMenu userMenu2 = this.userMenu;
-			string text = UI.USERMENUACTIONS.CLEAR.TOOLTIP_OFF;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_move_to_storage", UI.USERMENUACTIONS.CLEAR.NAME_OFF, new global::System.Action(this.OnClickCancel), global::Action.NumActions, null, null, null, text, true), 1f);
+			if (!this.isMarkedForClear)
+			{
+				UserMenu userMenu = this.userMenu;
+				string text = "action_move_to_storage";
+				string text2 = UI.USERMENUACTIONS.CLEAR.NAME;
+				global::System.Action action = new global::System.Action(this.OnClickClear);
+				string text3 = UI.USERMENUACTIONS.CLEAR.TOOLTIP;
+				userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+			}
+			else
+			{
+				UserMenu userMenu2 = this.userMenu;
+				string text3 = "action_move_to_storage";
+				string text2 = UI.USERMENUACTIONS.CLEAR.NAME_OFF;
+				global::System.Action action = new global::System.Action(this.OnClickCancel);
+				string text = UI.USERMENUACTIONS.CLEAR.TOOLTIP_OFF;
+				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
+			}
 		}
 	}
 
@@ -125,9 +126,12 @@ public class Clearable : Workable, ISaveLoadable
 		if (pickupable != null)
 		{
 			Clearable component = pickupable.GetComponent<Clearable>();
-			if (component != null && component.isMarkedForClear)
+			if (component != null)
 			{
-				this.MarkForClear(false);
+				if (component.isMarkedForClear)
+				{
+					this.MarkForClear(false);
+				}
 			}
 		}
 	}

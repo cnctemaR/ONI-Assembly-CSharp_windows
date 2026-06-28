@@ -156,7 +156,7 @@ public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, Ferti
 		{
 			get
 			{
-				string text = string.Empty;
+				string text = "";
 				if (base.smi.IsInsideState(base.smi.sm.replanted.fertilized.decaying.wrongFert))
 				{
 					text = this.GetIncorrectFertStatusItemMajor().resolveStringCallback(CREATURES.STATUSITEMS.WRONGFERTILIZERMAJOR.NAME, this);
@@ -179,8 +179,8 @@ public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, Ferti
 
 		protected virtual void MakeModifiers()
 		{
-			this.consumptionRate = new AttributeModifier(Db.Get().Amounts.Fertilization.deltaAttribute.Id, -0.16666667f, CREATURES.STATS.FERTILIZATION.CONSUME_MODIFIER, false, false);
-			this.absorptionRate = new AttributeModifier(Db.Get().Amounts.Fertilization.deltaAttribute.Id, 1.6666666f, CREATURES.STATS.FERTILIZATION.ABSORBING_MODIFIER, false, false);
+			this.consumptionRate = new AttributeModifier(Db.Get().Amounts.Fertilization.deltaAttribute.Id, -0.16666667f, CREATURES.STATS.FERTILIZATION.CONSUME_MODIFIER, false, false, true);
+			this.absorptionRate = new AttributeModifier(Db.Get().Amounts.Fertilization.deltaAttribute.Id, 1.6666666f, CREATURES.STATS.FERTILIZATION.ABSORBING_MODIFIER, false, false, true);
 		}
 
 		public void SetStorage(object obj)
@@ -219,43 +219,41 @@ public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, Ferti
 
 		public void UpdateFertilization(float dt)
 		{
-			if (base.def.consumedElements == null)
+			if (base.def.consumedElements != null)
 			{
-				return;
-			}
-			Storage storage = base.sm.fertilizerStorage.Get<Storage>(base.smi);
-			if (storage == null)
-			{
-				return;
-			}
-			bool flag = true;
-			bool flag2 = false;
-			List<GameObject> items = storage.items;
-			for (int i = 0; i < base.def.consumedElements.Length; i++)
-			{
-				FertilizationMonitor.FertilizerInfo fertilizerInfo = base.def.consumedElements[i];
-				float num = 0f;
-				for (int j = 0; j < items.Count; j++)
+				Storage storage = base.sm.fertilizerStorage.Get<Storage>(base.smi);
+				if (!(storage == null))
 				{
-					GameObject gameObject = items[j];
-					if (gameObject.HasTag(fertilizerInfo.tag))
+					bool flag = true;
+					bool flag2 = false;
+					List<GameObject> items = storage.items;
+					for (int i = 0; i < base.def.consumedElements.Length; i++)
 					{
-						num += gameObject.GetComponent<PrimaryElement>().Mass;
+						FertilizationMonitor.FertilizerInfo fertilizerInfo = base.def.consumedElements[i];
+						float num = 0f;
+						for (int j = 0; j < items.Count; j++)
+						{
+							GameObject gameObject = items[j];
+							if (gameObject.HasTag(fertilizerInfo.tag))
+							{
+								num += gameObject.GetComponent<PrimaryElement>().Mass;
+							}
+							else if (gameObject.HasTag(base.def.wrongFertilizerTestTag))
+							{
+								flag2 = true;
+							}
+						}
+						this.total_available_mass = num;
+						if (num < fertilizerInfo.massConsumptionRate * dt)
+						{
+							flag = false;
+							break;
+						}
 					}
-					else if (gameObject.HasTag(base.def.wrongFertilizerTestTag))
-					{
-						flag2 = true;
-					}
-				}
-				this.total_available_mass = num;
-				if (num < fertilizerInfo.massConsumptionRate * dt)
-				{
-					flag = false;
-					break;
+					base.sm.hasCorrectFertilizer.Set(flag, base.smi);
+					base.sm.hasIncorrectFertilizer.Set(flag2, base.smi);
 				}
 			}
-			base.sm.hasCorrectFertilizer.Set(flag, base.smi);
-			base.sm.hasIncorrectFertilizer.Set(flag2, base.smi);
 		}
 
 		public void AbsorbFertilizer(float dt)
@@ -307,6 +305,7 @@ public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, Ferti
 		{
 			public List<Descriptor> GetDescriptors(GameObject obj)
 			{
+				List<Descriptor> list2;
 				if (this.consumedElements.Length > 0)
 				{
 					List<Descriptor> list = new List<Descriptor>();
@@ -314,9 +313,13 @@ public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, Ferti
 					{
 						list.Add(new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.IDEAL_FERTILIZER, fertilizerInfo.tag.ProperName(), GameUtil.GetFormattedMass(-fertilizerInfo.massConsumptionRate, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.IDEAL_FERTILIZER, fertilizerInfo.tag.ProperName(), GameUtil.GetFormattedMass(fertilizerInfo.massConsumptionRate, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Requirement, false));
 					}
-					return list;
+					list2 = list;
 				}
-				return null;
+				else
+				{
+					list2 = null;
+				}
+				return list2;
 			}
 
 			public Tag wrongFertilizerTestTag;

@@ -5,7 +5,7 @@ using STRINGS;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, IGameObjectEffectDescriptor, IEffectDescriptor
+public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, IEffectDescriptor, IGameObjectEffectDescriptor
 {
 	public void ResetTemperature()
 	{
@@ -23,8 +23,8 @@ public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		AttributeModifier attributeModifier = new AttributeModifier(this.overheatTemp.Id, this.baseOverheatTemp, UI.TOOLTIPS.BASE_VALUE, false, false);
-		AttributeModifier attributeModifier2 = new AttributeModifier(this.fatalTemp.Id, this.baseFatalTemp, UI.TOOLTIPS.BASE_VALUE, false, false);
+		AttributeModifier attributeModifier = new AttributeModifier(this.overheatTemp.Id, this.baseOverheatTemp, UI.TOOLTIPS.BASE_VALUE, false, false, true);
+		AttributeModifier attributeModifier2 = new AttributeModifier(this.fatalTemp.Id, this.baseFatalTemp, UI.TOOLTIPS.BASE_VALUE, false, false, true);
 		this.GetAttributes().Add("Base", attributeModifier);
 		this.GetAttributes().Add("Base", attributeModifier2);
 		HandleVector<int>.Handle handle = GameComps.StructureTemperatures.GetHandle(base.gameObject);
@@ -56,7 +56,7 @@ public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, 
 
 	private static string ToolTipResolver(List<Notification> notificationList, object data)
 	{
-		string text = string.Empty;
+		string text = "";
 		for (int i = 0; i < notificationList.Count; i++)
 		{
 			Notification notification = notificationList[i];

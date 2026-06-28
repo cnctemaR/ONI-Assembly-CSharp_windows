@@ -10,12 +10,12 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 		base.OnPrefabInit();
 		this.log = new LoggerFS("StorageLocker");
 		this.filteredStorage = new FilteredStorage(this, null, this.filterTint, this.noFilterTint, this);
-		this.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
+		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
 	}
 
 	protected override void OnSpawn()
 	{
-		this.Subscribe(1088293757, new Action<object>(this.OnToggleClosed));
+		base.Subscribe(1088293757, new Action<object>(this.OnToggleClosed));
 		this.filteredStorage.FilterChanged();
 	}
 
@@ -35,16 +35,14 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 	private void OnCopySettings(object data)
 	{
 		GameObject gameObject = (GameObject)data;
-		if (gameObject == null)
+		if (!(gameObject == null))
 		{
-			return;
+			StorageLocker component = gameObject.GetComponent<StorageLocker>();
+			if (!(component == null))
+			{
+				this.UserMaxCapacity = component.UserMaxCapacity;
+			}
 		}
-		StorageLocker component = gameObject.GetComponent<StorageLocker>();
-		if (component == null)
-		{
-			return;
-		}
-		this.UserMaxCapacity = component.UserMaxCapacity;
 	}
 
 	public float UserMaxCapacity
@@ -81,14 +79,19 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 		get
 		{
 			GameUtil.MassUnit massUnit = GameUtil.massUnit;
-			if (massUnit != GameUtil.MassUnit.Kilograms)
+			LocString locString;
+			if (massUnit != GameUtil.MassUnit.Pounds)
 			{
-				if (massUnit == GameUtil.MassUnit.Pounds)
+				if (massUnit != GameUtil.MassUnit.Kilograms)
 				{
-					return UI.UNITSUFFIXES.MASS.POUND;
 				}
+				locString = UI.UNITSUFFIXES.MASS.KILOGRAM;
 			}
-			return UI.UNITSUFFIXES.MASS.KILOGRAM;
+			else
+			{
+				locString = UI.UNITSUFFIXES.MASS.POUND;
+			}
+			return locString;
 		}
 	}
 

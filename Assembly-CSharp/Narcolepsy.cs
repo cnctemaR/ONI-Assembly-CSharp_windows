@@ -8,8 +8,8 @@ public class Narcolepsy : StateMachineComponent<Narcolepsy.StatesInstance>
 {
 	protected override void OnPrefabInit()
 	{
-		this.Subscribe(1623392196, new Action<object>(this.OnDeath));
-		this.Subscribe(-1117766961, new Action<object>(this.OnRevived));
+		base.Subscribe(1623392196, new Action<object>(this.OnDeath));
+		base.Subscribe(-1117766961, new Action<object>(this.OnRevived));
 	}
 
 	protected override void OnSpawn()

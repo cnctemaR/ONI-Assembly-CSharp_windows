@@ -72,7 +72,7 @@ namespace Rendering
 			BlockTileRenderer.RenderInfo renderInfo;
 			if (!this.renderInfo.TryGetValue(keyValuePair, out renderInfo))
 			{
-				renderInfo = new BlockTileRenderer.RenderInfo(this, queryLayer, renderLayer, def, SimHashes.Vacuum, 0f);
+				renderInfo = new BlockTileRenderer.RenderInfo(this, queryLayer, renderLayer, def, SimHashes.Vacuum);
 				this.renderInfo[keyValuePair] = renderInfo;
 			}
 			renderInfo.AddCell(cell);

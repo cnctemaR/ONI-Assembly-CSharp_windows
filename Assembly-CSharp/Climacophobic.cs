@@ -13,6 +13,7 @@ public class Climacophobic : StateMachineComponent<Climacophobic.StatesInstance>
 	{
 		int num = 5;
 		int num2 = Grid.PosToCell(base.gameObject);
+		bool flag3;
 		if (this.isCellLadder(num2))
 		{
 			int num3 = 1;
@@ -39,19 +40,28 @@ public class Climacophobic : StateMachineComponent<Climacophobic.StatesInstance>
 					flag2 = false;
 				}
 			}
-			return num3 >= num;
+			flag3 = num3 >= num;
 		}
-		return false;
+		else
+		{
+			flag3 = false;
+		}
+		return flag3;
 	}
 
 	private bool isCellLadder(int cell)
 	{
+		bool flag;
 		if (!Grid.IsValidCell(cell))
 		{
-			return false;
+			flag = false;
 		}
-		GameObject gameObject = Grid.Objects[cell, 1];
-		return !(gameObject == null) && !(gameObject.GetComponent<Ladder>() == null);
+		else
+		{
+			GameObject gameObject = Grid.Objects[cell, 1];
+			flag = !(gameObject == null) && !(gameObject.GetComponent<Ladder>() == null);
+		}
+		return flag;
 	}
 
 	public class StatesInstance : GameStateMachine<Climacophobic.States, Climacophobic.StatesInstance, Climacophobic, object>.GameInstance

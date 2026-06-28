@@ -2,7 +2,7 @@
 
 namespace UnityEngine.Networking.Match
 {
-	public interface IResponse
+	internal interface IResponse
 	{
 		void SetSuccess();
 

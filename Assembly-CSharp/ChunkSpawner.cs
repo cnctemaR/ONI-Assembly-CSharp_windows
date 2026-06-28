@@ -23,8 +23,8 @@ public class ChunkSpawner : KMonoBehaviour
 		{
 			for (int j = 0; j < num; j++)
 			{
-				int num2 = Grid.PosToCell(this.transform.position + Vector3.up * (float)i + Vector3.right * (float)j);
-				int num3 = Grid.PosToCell(this.transform.position + Vector3.down * (float)i + Vector3.left * (float)j);
+				int num2 = Grid.PosToCell(base.transform.position + Vector3.up * (float)i + Vector3.right * (float)j);
+				int num3 = Grid.PosToCell(base.transform.position + Vector3.down * (float)i + Vector3.left * (float)j);
 				if (!Grid.Solid[num2])
 				{
 					list.Add(num2);
@@ -35,21 +35,20 @@ public class ChunkSpawner : KMonoBehaviour
 				}
 			}
 		}
-		if (list.Count == 0)
+		if (list.Count != 0)
 		{
-			return;
-		}
-		foreach (ChunkSpawner.ElementSpawn elementSpawn in this.Spawns)
-		{
-			float num4 = global::UnityEngine.Random.Range(elementSpawn.totalMass_min, elementSpawn.totalMass_max);
-			int num5 = global::UnityEngine.Random.Range(elementSpawn.chunks_min, elementSpawn.chunks_max + 1);
-			float num6 = num4 / (float)num5;
-			for (int l = 0; l < num5; l++)
+			foreach (ChunkSpawner.ElementSpawn elementSpawn in this.Spawns)
 			{
-				int num7 = global::UnityEngine.Random.Range(0, list.Count);
-				Vector3 vector = Grid.CellToPos(list[num7]);
-				vector.z = -2.5f;
-				ElementLoader.FindElementByHash(elementSpawn.element).substance.SpawnResource(vector, num6, ElementLoader.FindElementByHash(elementSpawn.element).defaultValues.temperature, byte.MaxValue, 0, false, false);
+				float num4 = global::UnityEngine.Random.Range(elementSpawn.totalMass_min, elementSpawn.totalMass_max);
+				int num5 = global::UnityEngine.Random.Range(elementSpawn.chunks_min, elementSpawn.chunks_max + 1);
+				float num6 = num4 / (float)num5;
+				for (int l = 0; l < num5; l++)
+				{
+					int num7 = global::UnityEngine.Random.Range(0, list.Count);
+					Vector3 vector = Grid.CellToPos(list[num7]);
+					vector.z = -2.5f;
+					ElementLoader.FindElementByHash(elementSpawn.element).substance.SpawnResource(vector, num6, ElementLoader.FindElementByHash(elementSpawn.element).defaultValues.temperature, byte.MaxValue, 0, false, false);
+				}
 			}
 		}
 	}

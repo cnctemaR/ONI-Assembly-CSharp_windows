@@ -14,6 +14,7 @@ public class HoverTextScreen : KScreen
 			this.currentConfiguration.SetNotConfigured();
 			this.ToggleIncubating(true);
 		}
+		bool flag;
 		if (this.CachedToolFields != null && this.CachedToolFields.ContainsKey(config))
 		{
 			this.ClearLabels();
@@ -21,24 +22,27 @@ public class HoverTextScreen : KScreen
 			this.ShadowBars = this.CachedToolFields[config].ShadowBars;
 			this.currentConfiguration = config;
 			this.ActivateLabels();
-			return true;
+			flag = true;
 		}
-		return false;
+		else
+		{
+			flag = false;
+		}
+		return flag;
 	}
 
 	public void SaveCurrentFieldsAs(HoverTextConfiguration config)
 	{
-		if (config == null)
+		if (!(config == null))
 		{
-			return;
-		}
-		if (this.CachedToolFields.ContainsKey(config))
-		{
-			this.CachedToolFields[config] = this.CurrentFields();
-		}
-		else
-		{
-			this.CachedToolFields.Add(config, this.CurrentFields());
+			if (this.CachedToolFields.ContainsKey(config))
+			{
+				this.CachedToolFields[config] = this.CurrentFields();
+			}
+			else
+			{
+				this.CachedToolFields.Add(config, this.CurrentFields());
+			}
 		}
 	}
 
@@ -56,9 +60,12 @@ public class HoverTextScreen : KScreen
 
 	private void Update()
 	{
-		if (!this.incubating && this.transform.rectTransform().localScale != Vector3.one)
+		if (!this.incubating)
 		{
-			this.transform.rectTransform().localScale = Vector3.one;
+			if (base.transform.rectTransform().localScale != Vector3.one)
+			{
+				base.transform.rectTransform().localScale = Vector3.one;
+			}
 		}
 		this.ToggleIncubating(false);
 		if (this.Container.activeSelf)
@@ -89,7 +96,7 @@ public class HoverTextScreen : KScreen
 		}
 		RectTransform component = this.Container.GetComponent<RectTransform>();
 		component.anchoredPosition = new Vector3(Input.mousePosition.x + this.offset.x, Input.mousePosition.y + this.offset.y, 0f);
-		float canvasScale = this.transform.parent.GetComponent<KCanvasScaler>().GetCanvasScale();
+		float canvasScale = base.transform.parent.GetComponent<KCanvasScaler>().GetCanvasScale();
 		component.anchoredPosition = new Vector2(component.anchoredPosition.x / canvasScale, component.anchoredPosition.y / canvasScale);
 	}
 
@@ -97,9 +104,12 @@ public class HoverTextScreen : KScreen
 	{
 		foreach (Sprite sprite in this.HoverIcons)
 		{
-			if (sprite != null && sprite.name == byName)
+			if (sprite != null)
 			{
-				return sprite;
+				if (sprite.name == byName)
+				{
+					return sprite;
+				}
 			}
 		}
 		global::Debug.LogWarning("No icon named " + byName + " was found on HoverTextScreen.prefab", null);
@@ -140,7 +150,7 @@ public class HoverTextScreen : KScreen
 		global::Debug.Log("Clearing configuration for: " + config.ActionName, null);
 		if (this.CachedToolFields.ContainsKey(config))
 		{
-			string text = string.Empty;
+			string text = "";
 			for (int i = this.CachedToolFields[config].MultiLabelDisplays.Count - 1; i >= 0; i--)
 			{
 				text = text + "\n" + this.CachedToolFields[config].MultiLabelDisplays[i].name;
@@ -173,7 +183,7 @@ public class HoverTextScreen : KScreen
 		if (incubating)
 		{
 			incubating = true;
-			this.transform.rectTransform().localScale = Vector3.zero;
+			base.transform.rectTransform().localScale = Vector3.zero;
 		}
 		else
 		{
@@ -202,9 +212,9 @@ public class HoverTextScreen : KScreen
 		shadowBar.leftIndent = leftIndet;
 		shadowBar.rightIndent = rightIndent;
 		shadowBar.gameObject = Util.KInstantiateUI(this.ShadowBarPrefab, this.Container, true);
-		shadowBar.selectionBorder = shadowBar.gameObject.transform.FindChild("SelectBorder").gameObject;
+		shadowBar.selectionBorder = shadowBar.gameObject.transform.Find("SelectBorder").gameObject;
 		shadowBar.startLineIndex = this.MultiLabelDisplays.Count;
-		shadowBar.gameObject.transform.FindChild("SelectBorder").gameObject.SetActive(selectedBorder);
+		shadowBar.gameObject.transform.Find("SelectBorder").gameObject.SetActive(selectedBorder);
 		this.ShadowBars.Add(shadowBar);
 		return shadowBar;
 	}
@@ -217,49 +227,48 @@ public class HoverTextScreen : KScreen
 
 	private void PositionShadowBars()
 	{
-		if (this.ShadowBars == null || this.ShadowBars.Count == 0)
+		if (this.ShadowBars != null && this.ShadowBars.Count != 0)
 		{
-			return;
-		}
-		foreach (ShadowBar shadowBar in this.ShadowBars)
-		{
-			float num = 0f;
-			float num2 = 0f;
-			shadowBar.gameObject.rectTransform().anchoredPosition = this.MultiLabelDisplays[shadowBar.startLineIndex].rectTransform().anchoredPosition + new Vector2(-shadowBar.SizeBleed.x, shadowBar.SizeBleed.y) + Vector2.right * shadowBar.leftIndent;
-			int num3 = 0;
-			VerticalLayoutGroup component = this.Container.GetComponent<VerticalLayoutGroup>();
-			for (int i = shadowBar.startLineIndex; i < shadowBar.endLineIndex; i++)
+			foreach (ShadowBar shadowBar in this.ShadowBars)
 			{
-				if (this.MultiLabelDisplays[i].gameObject.activeSelf)
+				float num = 0f;
+				float num2 = 0f;
+				shadowBar.gameObject.rectTransform().anchoredPosition = this.MultiLabelDisplays[shadowBar.startLineIndex].rectTransform().anchoredPosition + new Vector2(-shadowBar.SizeBleed.x, shadowBar.SizeBleed.y) + Vector2.right * shadowBar.leftIndent;
+				int num3 = 0;
+				VerticalLayoutGroup component = this.Container.GetComponent<VerticalLayoutGroup>();
+				for (int i = shadowBar.startLineIndex; i < shadowBar.endLineIndex; i++)
 				{
-					num3++;
-					num2 += this.MultiLabelDisplays[i].rectTransform().sizeDelta.y;
-					if (component)
+					if (this.MultiLabelDisplays[i].gameObject.activeSelf)
 					{
-						num2 += component.spacing;
-					}
-					if (this.MultiLabelDisplays[i].rectTransform().sizeDelta.x > num)
-					{
-						num = this.MultiLabelDisplays[i].rectTransform().sizeDelta.x;
+						num3++;
+						num2 += this.MultiLabelDisplays[i].rectTransform().sizeDelta.y;
+						if (component)
+						{
+							num2 += component.spacing;
+						}
+						if (this.MultiLabelDisplays[i].rectTransform().sizeDelta.x > num)
+						{
+							num = this.MultiLabelDisplays[i].rectTransform().sizeDelta.x;
+						}
 					}
 				}
-			}
-			if (num3 == 0 && shadowBar.gameObject.activeSelf)
-			{
-				shadowBar.gameObject.SetActive(false);
-			}
-			else if (!shadowBar.gameObject.activeSelf && num3 > 0)
-			{
-				shadowBar.gameObject.SetActive(true);
-			}
-			num -= shadowBar.leftIndent;
-			if (num > 0f && num2 > 0f)
-			{
-				shadowBar.gameObject.rectTransform().sizeDelta = new Vector2(num, num2) + shadowBar.SizeBleed * 2f;
-			}
-			else
-			{
-				shadowBar.gameObject.rectTransform().sizeDelta = Vector2.zero;
+				if (num3 == 0 && shadowBar.gameObject.activeSelf)
+				{
+					shadowBar.gameObject.SetActive(false);
+				}
+				else if (!shadowBar.gameObject.activeSelf && num3 > 0)
+				{
+					shadowBar.gameObject.SetActive(true);
+				}
+				num -= shadowBar.leftIndent;
+				if (num > 0f && num2 > 0f)
+				{
+					shadowBar.gameObject.rectTransform().sizeDelta = new Vector2(num, num2) + shadowBar.SizeBleed * 2f;
+				}
+				else
+				{
+					shadowBar.gameObject.rectTransform().sizeDelta = Vector2.zero;
+				}
 			}
 		}
 	}
@@ -355,14 +364,14 @@ public class HoverTextScreen : KScreen
 		LayoutElement component = this.MultiLabelDisplays[this.MultiLabelDisplays.Count - 1].GetComponent<LayoutElement>();
 		GameObject gameObject = Util.KInstantiateUI(this.UnboundedIconPrefab, component.gameObject, true);
 		LayoutElement component2 = gameObject.GetComponent<LayoutElement>();
-		RectTransform component3 = gameObject.transform.FindChild("Image").GetComponent<RectTransform>();
+		RectTransform component3 = gameObject.transform.Find("Image").GetComponent<RectTransform>();
 		LayoutElement layoutElement = component2;
 		component2.preferredWidth = layoutElementWidth;
 		layoutElement.minWidth = layoutElementWidth;
 		LayoutElement layoutElement2 = component2;
 		component2.preferredHeight = layoutElementHeight;
 		layoutElement2.minHeight = layoutElementHeight;
-		Image component4 = gameObject.transform.FindChild("Image").GetComponent<Image>();
+		Image component4 = gameObject.transform.Find("Image").GetComponent<Image>();
 		component4.sprite = icon;
 		gameObject.name = icon.name;
 		component4.color = color;
@@ -374,7 +383,7 @@ public class HoverTextScreen : KScreen
 		LayoutElement layoutElement4 = component5;
 		component5.preferredHeight = imageHeight;
 		layoutElement4.minHeight = imageHeight;
-		return gameObject.transform.FindChild("Image").GetComponent<Image>();
+		return gameObject.transform.Find("Image").GetComponent<Image>();
 	}
 
 	[SerializeField]
@@ -398,7 +407,7 @@ public class HoverTextScreen : KScreen
 	[SerializeField]
 	private GameObject ShadowBarPrefab;
 
-	private bool incubating;
+	private bool incubating = false;
 
 	public Sprite[] HoverIcons;
 
@@ -416,21 +425,26 @@ public class HoverTextScreen : KScreen
 
 	public static HoverTextScreen Instance;
 
-	public bool IsVisible;
+	public bool IsVisible = false;
 
-	public bool JustBecameVisible;
+	public bool JustBecameVisible = false;
 
 	public struct HoverTextUpdateTimer
 	{
 		public bool tick()
 		{
 			this.timeElapsed += Time.unscaledDeltaTime;
+			bool flag;
 			if (this.timeElapsed >= this.tickInterval)
 			{
 				this.timeElapsed = 0f;
-				return true;
+				flag = true;
 			}
-			return false;
+			else
+			{
+				flag = false;
+			}
+			return flag;
 		}
 
 		public void Prime()

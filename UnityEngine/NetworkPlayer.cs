@@ -4,7 +4,7 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
-	[RequiredByNativeCode]
+	[RequiredByNativeCode(Optional = true)]
 	public struct NetworkPlayer
 	{
 		public NetworkPlayer(string ip, int port)
@@ -13,41 +13,51 @@ namespace UnityEngine
 			this.index = 0;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern string Internal_GetIPAddress(int index);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int Internal_GetPort(int index);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern string Internal_GetExternalIP();
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int Internal_GetExternalPort();
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern string Internal_GetLocalIP();
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int Internal_GetLocalPort();
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int Internal_GetPlayerIndex();
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern string Internal_GetGUID(int index);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern string Internal_GetLocalGUID();
+
+		public static bool operator ==(NetworkPlayer lhs, NetworkPlayer rhs)
+		{
+			return lhs.index == rhs.index;
+		}
+
+		public static bool operator !=(NetworkPlayer lhs, NetworkPlayer rhs)
+		{
+			return lhs.index != rhs.index;
+		}
 
 		public override int GetHashCode()
 		{
@@ -63,11 +73,16 @@ namespace UnityEngine
 		{
 			get
 			{
+				string text;
 				if (this.index == NetworkPlayer.Internal_GetPlayerIndex())
 				{
-					return NetworkPlayer.Internal_GetLocalIP();
+					text = NetworkPlayer.Internal_GetLocalIP();
 				}
-				return NetworkPlayer.Internal_GetIPAddress(this.index);
+				else
+				{
+					text = NetworkPlayer.Internal_GetIPAddress(this.index);
+				}
+				return text;
 			}
 		}
 
@@ -75,11 +90,16 @@ namespace UnityEngine
 		{
 			get
 			{
+				int num;
 				if (this.index == NetworkPlayer.Internal_GetPlayerIndex())
 				{
-					return NetworkPlayer.Internal_GetLocalPort();
+					num = NetworkPlayer.Internal_GetLocalPort();
 				}
-				return NetworkPlayer.Internal_GetPort(this.index);
+				else
+				{
+					num = NetworkPlayer.Internal_GetPort(this.index);
+				}
+				return num;
 			}
 		}
 
@@ -87,11 +107,16 @@ namespace UnityEngine
 		{
 			get
 			{
+				string text;
 				if (this.index == NetworkPlayer.Internal_GetPlayerIndex())
 				{
-					return NetworkPlayer.Internal_GetLocalGUID();
+					text = NetworkPlayer.Internal_GetLocalGUID();
 				}
-				return NetworkPlayer.Internal_GetGUID(this.index);
+				else
+				{
+					text = NetworkPlayer.Internal_GetGUID(this.index);
+				}
+				return text;
 			}
 		}
 
@@ -124,16 +149,6 @@ namespace UnityEngine
 				networkPlayer.index = -1;
 				return networkPlayer;
 			}
-		}
-
-		public static bool operator ==(NetworkPlayer lhs, NetworkPlayer rhs)
-		{
-			return lhs.index == rhs.index;
-		}
-
-		public static bool operator !=(NetworkPlayer lhs, NetworkPlayer rhs)
-		{
-			return lhs.index != rhs.index;
 		}
 
 		internal int index;

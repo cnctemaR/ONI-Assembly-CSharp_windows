@@ -6,9 +6,9 @@ using System.ComponentModel;
 
 namespace SimpleJson
 {
-	[EditorBrowsable(EditorBrowsableState.Never)]
 	[GeneratedCode("simple-json", "1.0.0")]
-	internal class JsonObject : IEnumerable, IDictionary<string, object>, IEnumerable<KeyValuePair<string, object>>, ICollection<KeyValuePair<string, object>>
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	internal class JsonObject : IDictionary<string, object>, ICollection<KeyValuePair<string, object>>, IEnumerable<KeyValuePair<string, object>>, IEnumerable
 	{
 		public JsonObject()
 		{
@@ -18,11 +18,6 @@ namespace SimpleJson
 		public JsonObject(IEqualityComparer<string> comparer)
 		{
 			this._members = new Dictionary<string, object>(comparer);
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this._members.GetEnumerator();
 		}
 
 		public object this[int index]
@@ -156,6 +151,11 @@ namespace SimpleJson
 		}
 
 		public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
+		{
+			return this._members.GetEnumerator();
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return this._members.GetEnumerator();
 		}

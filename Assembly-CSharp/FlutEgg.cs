@@ -24,7 +24,7 @@ public class FlutEgg : StateMachineComponent<FlutEgg.StatesInstance>, ISaveLoada
 			num2++;
 		}
 		float num3 = (float)global::UnityEngine.Random.Range(0, num);
-		string text = string.Empty;
+		string text = "";
 		float num4 = 0f;
 		foreach (KeyValuePair<string, int> keyValuePair2 in this.HatchPossibilities)
 		{
@@ -35,13 +35,13 @@ public class FlutEgg : StateMachineComponent<FlutEgg.StatesInstance>, ISaveLoada
 			}
 			num4 += (float)keyValuePair2.Value;
 		}
-		int num5 = Grid.PosToCell(this.transform.position);
-		GameObject gameObject = Scenario.SpawnPrefab(num5, 0, 0, text, Grid.SceneLayer.Use, Folder.Entities);
+		int num5 = Grid.PosToCell(base.transform.position);
+		GameObject gameObject = Scenario.SpawnPrefab(num5, 0, 0, text, Grid.SceneLayer.Ore, Folder.Entities);
 		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, gameObject.GetProperName(), gameObject.transform, 1.5f, false);
 		gameObject.SetActive(true);
-		if (this.transform.parent != null)
+		if (base.transform.parent != null)
 		{
-			EggIncubator component = this.transform.parent.GetComponent<EggIncubator>();
+			EggIncubator component = base.transform.parent.GetComponent<EggIncubator>();
 			if (component)
 			{
 				component.RemoveHatchedEgg(base.gameObject);
@@ -57,7 +57,7 @@ public class FlutEgg : StateMachineComponent<FlutEgg.StatesInstance>, ISaveLoada
 
 	public bool alive = true;
 
-	private float maturity;
+	private float maturity = 0f;
 
 	private Dictionary<string, int> HatchPossibilities = new Dictionary<string, int>();
 
@@ -75,7 +75,7 @@ public class FlutEgg : StateMachineComponent<FlutEgg.StatesInstance>, ISaveLoada
 		{
 			default_state = this.grounded.idle;
 			base.serializable = true;
-			this.lay.PlayAnim("lay", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.grounded.idle);
+			this.lay.PlayAnim("lay").OnAnimQueueComplete(this.grounded.idle);
 			this.grounded.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Incubating).Update(delegate(FlutEgg.StatesInstance smi)
 			{
 				if (!Grid.Solid[Grid.PosToCell(smi.transform.position)])
@@ -89,7 +89,7 @@ public class FlutEgg : StateMachineComponent<FlutEgg.StatesInstance>, ISaveLoada
 				}
 			}).EventTransition(GameHashes.TooHotFatal, this.dead, (FlutEgg.StatesInstance smi) => smi.master.alive && smi.timeinstate > 0f)
 				.EventTransition(GameHashes.TooColdFatal, this.dead, (FlutEgg.StatesInstance smi) => smi.master.alive && smi.timeinstate > 0f);
-			this.grounded.idle.PlayAnim("idle", KAnim.PlayMode.Once, null).Enter(delegate(FlutEgg.StatesInstance smi)
+			this.grounded.idle.PlayAnim("idle").Enter(delegate(FlutEgg.StatesInstance smi)
 			{
 				if (smi.master.maturity > 100f)
 				{
@@ -109,7 +109,7 @@ public class FlutEgg : StateMachineComponent<FlutEgg.StatesInstance>, ISaveLoada
 			{
 				smi.GoTo(this.grounded.idle);
 			});
-			this.grounded.wiggle_hatch.PlayAnim("hatch", KAnim.PlayMode.Once, null).Enter(delegate(FlutEgg.StatesInstance smi)
+			this.grounded.wiggle_hatch.PlayAnim("hatch").Enter(delegate(FlutEgg.StatesInstance smi)
 			{
 				smi.Schedule(3.4f, delegate(object d)
 				{
@@ -119,14 +119,14 @@ public class FlutEgg : StateMachineComponent<FlutEgg.StatesInstance>, ISaveLoada
 			{
 				Util.KDestroyGameObject(smi.gameObject);
 			});
-			this.dead.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Dead).PlayAnim("dead", KAnim.PlayMode.Once, null).Enter(delegate(FlutEgg.StatesInstance smi)
+			this.dead.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Dead).PlayAnim("dead").Enter(delegate(FlutEgg.StatesInstance smi)
 			{
 				smi.Schedule(5f, delegate(object d)
 				{
 					Util.KDestroyGameObject(smi.gameObject);
 				}, null);
 			});
-			this.fall.PlayAnim("idle", KAnim.PlayMode.Loop, null).ToggleGravity(this.grounded.idle);
+			this.fall.PlayAnim("idle", KAnim.PlayMode.Loop).ToggleGravity(this.grounded.idle);
 		}
 
 		public FlutEgg.States.GroundedState grounded;

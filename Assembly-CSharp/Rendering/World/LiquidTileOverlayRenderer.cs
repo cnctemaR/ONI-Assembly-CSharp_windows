@@ -64,7 +64,7 @@ namespace Rendering.World
 		private void InitAlphaMaterial(Material alpha_material, Element element)
 		{
 			alpha_material.name = element.name;
-			alpha_material.renderQueue = 3700 + element.substance.idx;
+			alpha_material.renderQueue = RenderQueues.BlockTiles + element.substance.idx;
 			alpha_material.EnableKeyword("ALPHA");
 			alpha_material.DisableKeyword("OPAQUE");
 			alpha_material.SetTexture("_AlphaTestMap", this.Atlas.texture);
@@ -95,9 +95,11 @@ namespace Rendering.World
 				Brush brush = brush_array[substance_idx * tile.MaskCount + connections - LiquidTileOverlayRenderer.LiquidConnections.Left];
 				brush.Add(tile.Idx);
 				brush_grid[tile.Idx * 4 + i] = brush.Id;
-				return;
 			}
-			brush_grid[tile.Idx * 4 + i] = -1;
+			else
+			{
+				brush_grid[tile.Idx * 4 + i] = -1;
+			}
 		}
 
 		public override void MarkDirty(ref Tile tile, Brush[] brush_array, int[] brush_grid)

@@ -4,11 +4,13 @@ using UnityEngine.Networking.Types;
 
 namespace UnityEngine.Networking.Match
 {
-	public class CreateMatchResponse : BasicResponse
+	internal class CreateMatchResponse : BasicResponse
 	{
 		public string address { get; set; }
 
 		public int port { get; set; }
+
+		public int domain { get; set; }
 
 		public NetworkID networkId { get; set; }
 
@@ -20,12 +22,13 @@ namespace UnityEngine.Networking.Match
 
 		public override string ToString()
 		{
-			return UnityString.Format("[{0}]-address:{1},port:{2},networkId:0x{3},nodeId:0x{4},usingRelay:{5}", new object[]
+			return UnityString.Format("[{0}]-address:{1},port:{2},networkId:0x{3},accessTokenString.IsEmpty:{4},nodeId:0x{5},usingRelay:{6}", new object[]
 			{
 				base.ToString(),
 				this.address,
 				this.port,
 				this.networkId.ToString("X"),
+				string.IsNullOrEmpty(this.accessTokenString),
 				this.nodeId.ToString("X"),
 				this.usingRelay
 			});

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
 public class AssignableRegionCharacterSelection : KMonoBehaviour
 {
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<MinionIdentity> OnDuplicantSelected;
 
 	protected override void OnSpawn()

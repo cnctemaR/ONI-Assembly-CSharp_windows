@@ -15,8 +15,10 @@ public class FetchableMonitor : GameStateMachine<FetchableMonitor, FetchableMoni
 		}).EventTransition(GameHashes.ReachableChanged, this.unfetchable, (FetchableMonitor.Instance smi) => !smi.IsFetchable())
 			.EventTransition(GameHashes.AssigneeChanged, this.unfetchable, (FetchableMonitor.Instance smi) => !smi.IsFetchable())
 			.EventTransition(GameHashes.EntombedChanged, this.unfetchable, (FetchableMonitor.Instance smi) => !smi.IsFetchable())
+			.EventTransition(GameHashes.TagsChanged, this.unfetchable, (FetchableMonitor.Instance smi) => !smi.IsFetchable())
 			.ParamTransition<bool>(this.forceUnfetchable, this.unfetchable, (FetchableMonitor.Instance smi, bool p) => !smi.IsFetchable());
 		this.unfetchable.EventTransition(GameHashes.ReachableChanged, this.fetchable, (FetchableMonitor.Instance smi) => smi.IsFetchable()).EventTransition(GameHashes.AssigneeChanged, this.fetchable, (FetchableMonitor.Instance smi) => smi.IsFetchable()).EventTransition(GameHashes.EntombedChanged, this.fetchable, (FetchableMonitor.Instance smi) => smi.IsFetchable())
+			.EventTransition(GameHashes.TagsChanged, this.fetchable, (FetchableMonitor.Instance smi) => smi.IsFetchable())
 			.ParamTransition<bool>(this.forceUnfetchable, this.fetchable, (FetchableMonitor.Instance smi, bool p) => smi.IsFetchable());
 	}
 

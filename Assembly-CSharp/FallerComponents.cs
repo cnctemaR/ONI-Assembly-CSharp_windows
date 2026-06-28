@@ -70,10 +70,13 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 			data.partitionerEntry = null;
 			base.SetData(h, data);
 		}
-		if (data.solidChangedCB != null && data.transform != null)
+		if (data.solidChangedCB != null)
 		{
-			data.transform.gameObject.Unsubscribe(1088554450, data.solidChangedCB);
-			data.solidChangedCB = null;
+			if (data.transform != null)
+			{
+				data.transform.gameObject.Unsubscribe(1088554450, data.solidChangedCB);
+				data.solidChangedCB = null;
+			}
 		}
 		if (GameComps.Gravities.Has(data.transform.gameObject))
 		{
@@ -134,21 +137,20 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 		Vector3 position = data.transform.position;
 		position.y = position.y - data.offset - 0.1f;
 		int num = Grid.PosToCell(position);
-		if (!Grid.IsValidCell(num))
+		if (Grid.IsValidCell(num))
 		{
-			return;
-		}
-		bool flag = !Grid.Solid[num];
-		if (flag != data.isFalling)
-		{
-			data.isFalling = flag;
-			if (flag)
+			bool flag = !Grid.Solid[num];
+			if (flag != data.isFalling)
 			{
-				FallerComponents.AddGravity(data.transform, Vector2.zero);
-			}
-			else
-			{
-				FallerComponents.RemoveGravity(data.transform);
+				data.isFalling = flag;
+				if (flag)
+				{
+					FallerComponents.AddGravity(data.transform, Vector2.zero);
+				}
+				else
+				{
+					FallerComponents.RemoveGravity(data.transform);
+				}
 			}
 		}
 	}

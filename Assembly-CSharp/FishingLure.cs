@@ -23,7 +23,7 @@ public class FishingLure : KMonoBehaviour
 	{
 		base.OnSpawn();
 		this.anim.Play("hook", KAnim.PlayMode.Loop, 1f, 0f);
-		this.moveTarget = this.transform.position;
+		this.moveTarget = base.transform.position;
 	}
 
 	public void SetupLine(FishingStation fishingStation, KAnimFile animFile)
@@ -43,85 +43,82 @@ public class FishingLure : KMonoBehaviour
 
 	public void CheckForCatchableFish(BodyOfWater body)
 	{
-		if (body == null)
+		if (!(body == null))
 		{
-			return;
-		}
-		if (!this.isBeingWorked())
-		{
-			return;
-		}
-		Catchable[] catchables = body.GetCatchables();
-		foreach (Catchable catchable in catchables)
-		{
-			if (Grid.PosToCell(catchable.gameObject) == Grid.PosToCell(base.gameObject))
+			if (this.isBeingWorked())
 			{
-				this.TryCatch(catchable);
+				Catchable[] catchables = body.GetCatchables();
+				foreach (Catchable catchable in catchables)
+				{
+					if (Grid.PosToCell(catchable.gameObject) == Grid.PosToCell(base.gameObject))
+					{
+						this.TryCatch(catchable);
+					}
+				}
+				if (catchables.Length == 0 && this.station.GetWorker() != null)
+				{
+					this.station.EmptyWater();
+				}
 			}
-		}
-		if (catchables.Length == 0 && this.station.GetWorker() != null)
-		{
-			this.station.EmptyWater();
 		}
 	}
 
 	private void Splash()
 	{
-		BodyOfWater.MakeSplash(this.transform.position);
+		BodyOfWater.MakeSplash(base.transform.position);
 	}
 
 	private void Update()
 	{
-		if (!this.setup)
+		if (this.setup)
 		{
-			return;
-		}
-		this.timeSinceBodyTransition += Time.deltaTime;
-		if (this.body == null)
-		{
-			this.body = WaterBodyProbe.Instance.GetBodyIfKnown(Grid.PosToCell(base.gameObject));
+			this.timeSinceBodyTransition += Time.deltaTime;
 			if (this.body == null)
 			{
-				this.body = WaterBodyProbe.Instance.GetBodyIfKnown(Grid.CellBelow(Grid.PosToCell(base.gameObject)));
+				this.body = WaterBodyProbe.Instance.GetBodyIfKnown(Grid.PosToCell(base.gameObject));
+				if (this.body == null)
+				{
+					this.body = WaterBodyProbe.Instance.GetBodyIfKnown(Grid.CellBelow(Grid.PosToCell(base.gameObject)));
+				}
+				if (this.body != null)
+				{
+					if (this.timeSinceBodyTransition > 0.25f)
+					{
+						this.Splash();
+					}
+					this.timeSinceBodyTransition = 0f;
+					if (!this.body.containedObjects.Contains(base.gameObject))
+					{
+						this.body.AddObjectToBody(base.gameObject);
+					}
+				}
 			}
-			if (this.body != null)
+			else if (!this.body.waterCells.Contains(Grid.PosToCell(base.transform.position)))
 			{
+				this.body.RemoveObjectFromBody(base.gameObject);
 				if (this.timeSinceBodyTransition > 0.25f)
 				{
 					this.Splash();
 				}
 				this.timeSinceBodyTransition = 0f;
-				if (!this.body.containedObjects.Contains(base.gameObject))
-				{
-					this.body.AddObjectToBody(base.gameObject);
-				}
+				this.body = null;
 			}
-		}
-		else if (!this.body.waterCells.Contains(Grid.PosToCell(this.transform.position)))
-		{
-			this.body.RemoveObjectFromBody(base.gameObject);
-			if (this.timeSinceBodyTransition > 0.25f)
+			if (this.body != null && this.hookedObject == null && this.station != null)
 			{
-				this.Splash();
+				this.CheckForCatchableFish(this.body);
 			}
-			this.timeSinceBodyTransition = 0f;
-			this.body = null;
-		}
-		if (this.body != null && this.hookedObject == null && this.station != null)
-		{
-			this.CheckForCatchableFish(this.body);
-		}
-		float num = Vector3.Distance(this.moveTarget, this.transform.position);
-		this.transform.position += Vector3.Normalize(this.moveTarget - this.transform.position) * Mathf.Clamp(Time.deltaTime * this.moveSpeed, 0f, num);
-		if (this.hookedObject != null)
-		{
-			this.hookedObject.transform.SetPosition(this.transform.position);
-		}
-		if (this.hookedObject != null && Vector3.Distance(this.transform.position, this.station.transform.position) < 1.5f)
-		{
-			this.moveTarget = this.transform.position;
-			this.station.RemoveFromHook(this.hookedObject.gameObject);
-			this.hookedObject = null;
+			float num = Vector3.Distance(this.moveTarget, base.transform.position);
+			base.transform.position += Vector3.Normalize(this.moveTarget - base.transform.position) * Mathf.Clamp(Time.deltaTime * this.moveSpeed, 0f, num);
+			if (this.hookedObject != null)
+			{
+				this.hookedObject.transform.SetPosition(base.transform.position);
+			}
+			if (this.hookedObject != null && Vector3.Distance(base.transform.position, this.station.transform.position) < 1.5f)
+			{
+				this.moveTarget = base.transform.position;
+				this.station.RemoveFromHook(this.hookedObject.gameObject);
+				this.hookedObject = null;
+			}
 		}
 	}
 
@@ -132,7 +129,14 @@ public class FishingLure : KMonoBehaviour
 
 	public bool isBeingWorked()
 	{
-		return this.station && this.station.GetWorker() != null;
+		if (this.station)
+		{
+			if (this.station.GetWorker() != null)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public FishingStation station;
@@ -149,7 +153,7 @@ public class FishingLure : KMonoBehaviour
 
 	private float HookChance = 10f;
 
-	private bool setup;
+	private bool setup = false;
 
 	private Catchable hookedObject;
 

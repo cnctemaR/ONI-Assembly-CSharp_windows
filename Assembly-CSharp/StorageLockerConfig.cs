@@ -6,20 +6,31 @@ public class StorageLockerConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
+		string text = "StorageLocker";
+		int num = 1;
+		int num2 = 2;
+		string text2 = "storagelocker_kanim";
+		float num3 = 100f;
+		int num4 = 30;
+		float num5 = 10f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
+		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("StorageLocker", 1, 2, "storagelocker_kanim", 100f, 30, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER1, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_MINERALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER1, none);
 		buildingDef.Floodable = false;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.Overheatable = false;
+		buildingDef.HotKey = global::Action.BuildMenuKeyS;
 		return buildingDef;
 	}
 
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
 		SoundEventVolumeCache.instance.AddVolume("storagelocker_kanim", "StorageLocker_Hit_metallic_low", NOISE_POLLUTION.NOISY.TIER1);
-		Storage storage = go.AddOrGet<Storage>();
 		Prioritizable.AddRef(go);
-		storage.disableOnStore = true;
+		Storage storage = go.AddOrGet<Storage>();
 		storage.showInUI = true;
 		storage.allowItemRemoval = true;
 		storage.showDescriptor = true;

@@ -24,29 +24,34 @@ public class Moppable : Workable
 		if (!this.IsThereLiquid())
 		{
 			base.gameObject.DeleteObject();
-			return;
 		}
-		Grid.Objects[Grid.PosToCell(base.gameObject), 8] = base.gameObject;
-		new WorkChore<Moppable>(Db.Get().ChoreTypes.Mop, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue);
-		base.SetWorkTime(float.PositiveInfinity);
-		this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().MiscStatusItems.WaitingForMop, null);
-		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
-		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_mop_dirtywater_kanim") };
-		this.partitionerEntry = GameScenePartitioner.Instance.Add("Moppable.OnSpawn", base.gameObject, new Extents(Grid.PosToCell(this), new CellOffset[]
+		else
 		{
-			new CellOffset(0, 0)
-		}), GameScenePartitioner.Instance.liquidChangedLayer, new Action<object>(this.OnLiquidChanged));
-		this.Refresh();
-		this.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
-		ReachabilityMonitor.Instance instance = new ReachabilityMonitor.Instance(this);
-		instance.StartSM();
+			Grid.Objects[Grid.PosToCell(base.gameObject), 8] = base.gameObject;
+			new WorkChore<Moppable>(Db.Get().ChoreTypes.Mop, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
+			base.SetWorkTime(float.PositiveInfinity);
+			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().MiscStatusItems.WaitingForMop, null);
+			base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+			this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_mop_dirtywater_kanim") };
+			this.partitionerEntry = GameScenePartitioner.Instance.Add("Moppable.OnSpawn", base.gameObject, new Extents(Grid.PosToCell(this), new CellOffset[]
+			{
+				new CellOffset(0, 0)
+			}), GameScenePartitioner.Instance.liquidChangedLayer, new Action<object>(this.OnLiquidChanged));
+			this.Refresh();
+			base.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
+			ReachabilityMonitor.Instance instance = new ReachabilityMonitor.Instance(this);
+			instance.StartSM();
+		}
 	}
 
 	private void OnRefreshUserMenu(object data)
 	{
 		UserMenu userMenu = this.userMenu;
-		string text = UI.USERMENUACTIONS.CANCELMOP.TOOLTIP;
-		userMenu.AddButton(new KIconButtonMenu.ButtonInfo("icon_cancel", UI.USERMENUACTIONS.CANCELMOP.NAME, new global::System.Action(this.OnCancel), global::Action.NumActions, null, null, null, text, true), 1f);
+		string text = "icon_cancel";
+		string text2 = UI.USERMENUACTIONS.CANCELMOP.NAME;
+		global::System.Action action = new global::System.Action(this.OnCancel);
+		string text3 = UI.USERMENUACTIONS.CANCELMOP.TOOLTIP;
+		userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
 	}
 
 	private void OnCancel()
@@ -76,7 +81,7 @@ public class Moppable : Workable
 	{
 		if (this.amountMopped > 0f)
 		{
-			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, GameUtil.GetFormattedMass(-this.amountMopped, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), this.transform, 1.5f, false);
+			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, GameUtil.GetFormattedMass(-this.amountMopped, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), base.transform, 1.5f, false);
 			this.amountMopped = 0f;
 		}
 	}
@@ -92,17 +97,16 @@ public class Moppable : Workable
 
 	private void OnCellMopped(object data)
 	{
-		if (this == null)
+		if (!(this == null))
 		{
-			return;
-		}
-		Sim.MassConsumptionCallback massConsumptionCallback = (Sim.MassConsumptionCallback)data;
-		if (massConsumptionCallback.mass > 0f)
-		{
-			this.amountMopped += massConsumptionCallback.mass;
-			int num = Grid.PosToCell(this);
-			SubstanceChunk substanceChunk = LiquidSourceManager.Instance.CreateChunk(ElementLoader.elements[(int)massConsumptionCallback.removedElemIdx], massConsumptionCallback.mass, massConsumptionCallback.temperature, massConsumptionCallback.diseaseIdx, massConsumptionCallback.diseaseCount, Grid.CellToPosCCC(num, Grid.SceneLayer.Use));
-			substanceChunk.transform.Translate((global::UnityEngine.Random.value - 0.5f) * 0.5f, 0f, 0f);
+			Sim.MassConsumptionCallback massConsumptionCallback = (Sim.MassConsumptionCallback)data;
+			if (massConsumptionCallback.mass > 0f)
+			{
+				this.amountMopped += massConsumptionCallback.mass;
+				int num = Grid.PosToCell(this);
+				SubstanceChunk substanceChunk = LiquidSourceManager.Instance.CreateChunk(ElementLoader.elements[(int)massConsumptionCallback.removedElemIdx], massConsumptionCallback.mass, massConsumptionCallback.temperature, massConsumptionCallback.diseaseIdx, massConsumptionCallback.diseaseCount, Grid.CellToPosCCC(num, Grid.SceneLayer.Ore));
+				substanceChunk.transform.Translate((global::UnityEngine.Random.value - 0.5f) * 0.5f, 0f, 0f);
+			}
 		}
 	}
 
@@ -194,23 +198,22 @@ public class Moppable : Workable
 		{
 			Material material = this.childRenderer.material;
 			bool flag = (bool)data;
-			if (material.color == Game.Instance.uiColours.Dig.invalidLocation)
+			if (!(material.color == Game.Instance.uiColours.Dig.invalidLocation))
 			{
-				return;
-			}
-			if (flag)
-			{
-				material.color = Game.Instance.uiColours.Dig.validLocation;
-				this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.MopUnreachable, false);
-			}
-			else
-			{
-				this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.MopUnreachable, this);
-				GameScheduler.Instance.Schedule("Locomotion Tutorial", 2f, delegate(object obj)
+				if (flag)
 				{
-					Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Locomotion);
-				}, null, null);
-				material.color = Game.Instance.uiColours.Dig.unreachable;
+					material.color = Game.Instance.uiColours.Dig.validLocation;
+					this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.MopUnreachable, false);
+				}
+				else
+				{
+					this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.MopUnreachable, this);
+					GameScheduler.Instance.Schedule("Locomotion Tutorial", 2f, delegate(object obj)
+					{
+						Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Locomotion);
+					}, null, null);
+					material.color = Game.Instance.uiColours.Dig.unreachable;
+				}
 			}
 		}
 	}

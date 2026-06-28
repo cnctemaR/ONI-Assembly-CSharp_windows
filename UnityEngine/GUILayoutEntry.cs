@@ -77,73 +77,72 @@ namespace UnityEngine
 
 		public virtual void ApplyOptions(GUILayoutOption[] options)
 		{
-			if (options == null)
+			if (options != null)
 			{
-				return;
-			}
-			foreach (GUILayoutOption guilayoutOption in options)
-			{
-				switch (guilayoutOption.type)
+				foreach (GUILayoutOption guilayoutOption in options)
 				{
-				case GUILayoutOption.Type.fixedWidth:
-					this.minWidth = (this.maxWidth = (float)guilayoutOption.value);
-					this.stretchWidth = 0;
-					break;
-				case GUILayoutOption.Type.fixedHeight:
-					this.minHeight = (this.maxHeight = (float)guilayoutOption.value);
-					this.stretchHeight = 0;
-					break;
-				case GUILayoutOption.Type.minWidth:
-					this.minWidth = (float)guilayoutOption.value;
-					if (this.maxWidth < this.minWidth)
+					switch (guilayoutOption.type)
 					{
-						this.maxWidth = this.minWidth;
+					case GUILayoutOption.Type.fixedWidth:
+						this.minWidth = (this.maxWidth = (float)guilayoutOption.value);
+						this.stretchWidth = 0;
+						break;
+					case GUILayoutOption.Type.fixedHeight:
+						this.minHeight = (this.maxHeight = (float)guilayoutOption.value);
+						this.stretchHeight = 0;
+						break;
+					case GUILayoutOption.Type.minWidth:
+						this.minWidth = (float)guilayoutOption.value;
+						if (this.maxWidth < this.minWidth)
+						{
+							this.maxWidth = this.minWidth;
+						}
+						break;
+					case GUILayoutOption.Type.maxWidth:
+						this.maxWidth = (float)guilayoutOption.value;
+						if (this.minWidth > this.maxWidth)
+						{
+							this.minWidth = this.maxWidth;
+						}
+						this.stretchWidth = 0;
+						break;
+					case GUILayoutOption.Type.minHeight:
+						this.minHeight = (float)guilayoutOption.value;
+						if (this.maxHeight < this.minHeight)
+						{
+							this.maxHeight = this.minHeight;
+						}
+						break;
+					case GUILayoutOption.Type.maxHeight:
+						this.maxHeight = (float)guilayoutOption.value;
+						if (this.minHeight > this.maxHeight)
+						{
+							this.minHeight = this.maxHeight;
+						}
+						this.stretchHeight = 0;
+						break;
+					case GUILayoutOption.Type.stretchWidth:
+						this.stretchWidth = (int)guilayoutOption.value;
+						break;
+					case GUILayoutOption.Type.stretchHeight:
+						this.stretchHeight = (int)guilayoutOption.value;
+						break;
 					}
-					break;
-				case GUILayoutOption.Type.maxWidth:
-					this.maxWidth = (float)guilayoutOption.value;
-					if (this.minWidth > this.maxWidth)
-					{
-						this.minWidth = this.maxWidth;
-					}
-					this.stretchWidth = 0;
-					break;
-				case GUILayoutOption.Type.minHeight:
-					this.minHeight = (float)guilayoutOption.value;
-					if (this.maxHeight < this.minHeight)
-					{
-						this.maxHeight = this.minHeight;
-					}
-					break;
-				case GUILayoutOption.Type.maxHeight:
-					this.maxHeight = (float)guilayoutOption.value;
-					if (this.minHeight > this.maxHeight)
-					{
-						this.minHeight = this.maxHeight;
-					}
-					this.stretchHeight = 0;
-					break;
-				case GUILayoutOption.Type.stretchWidth:
-					this.stretchWidth = (int)guilayoutOption.value;
-					break;
-				case GUILayoutOption.Type.stretchHeight:
-					this.stretchHeight = (int)guilayoutOption.value;
-					break;
 				}
-			}
-			if (this.maxWidth != 0f && this.maxWidth < this.minWidth)
-			{
-				this.maxWidth = this.minWidth;
-			}
-			if (this.maxHeight != 0f && this.maxHeight < this.minHeight)
-			{
-				this.maxHeight = this.minHeight;
+				if (this.maxWidth != 0f && this.maxWidth < this.minWidth)
+				{
+					this.maxWidth = this.minWidth;
+				}
+				if (this.maxHeight != 0f && this.maxHeight < this.minHeight)
+				{
+					this.maxHeight = this.minHeight;
+				}
 			}
 		}
 
 		public override string ToString()
 		{
-			string text = string.Empty;
+			string text = "";
 			for (int i = 0; i < GUILayoutEntry.indent; i++)
 			{
 				text += " ";
@@ -164,12 +163,12 @@ namespace UnityEngine
 				this.minWidth,
 				"-",
 				this.maxWidth,
-				(this.stretchWidth == 0) ? string.Empty : "+",
+				(this.stretchWidth == 0) ? "" : "+",
 				", H: ",
 				this.minHeight,
 				"-",
 				this.maxHeight,
-				(this.stretchHeight == 0) ? string.Empty : "+"
+				(this.stretchHeight == 0) ? "" : "+"
 			});
 		}
 

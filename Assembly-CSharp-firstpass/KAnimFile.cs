@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using Klei;
 using UnityEngine;
 
 public class KAnimFile : ScriptableObject
@@ -10,25 +8,21 @@ public class KAnimFile : ScriptableObject
 	{
 		get
 		{
+			HashedString hashedString;
 			if (this._batchTag.isValid)
 			{
-				return this._batchTag;
+				hashedString = this._batchTag;
 			}
-			if (this.homedirectory == null || this.homedirectory == string.Empty)
+			else if (this.homedirectory == null || this.homedirectory == "")
 			{
-				return KAnimBatchManager.NO_BATCH;
-			}
-			string text = this.homedirectory + "/mygroup.yaml";
-			if (File.Exists(text))
-			{
-				KAnimGroupFile.GroupFile groupFile = YamlIO<KAnimGroupFile.GroupFile>.LoadFile(text);
-				this._batchTag = new HashedString(groupFile.groupID);
+				hashedString = KAnimBatchManager.NO_BATCH;
 			}
 			else
 			{
 				this._batchTag = KAnimGroupFile.GetGroupFile().GetGroupForHomeDirectory(new HashedString(this.homedirectory));
+				hashedString = this._batchTag;
 			}
-			return this._batchTag;
+			return hashedString;
 		}
 	}
 
@@ -53,5 +47,5 @@ public class KAnimFile : ScriptableObject
 
 	private HashedString _batchTag;
 
-	public string homedirectory = string.Empty;
+	public string homedirectory = "";
 }

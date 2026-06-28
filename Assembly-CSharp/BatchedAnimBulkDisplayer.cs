@@ -262,33 +262,33 @@ public class BatchedAnimBulkDisplayer : MonoBehaviour
 
 	public Vector2 globalOffset = Vector2.left * 20f;
 
-	public int offsetx;
+	public int offsetx = 0;
 
-	public int offsety;
+	public int offsety = 0;
 
 	public int maxx = 2000;
 
-	public int itemCount;
+	public int itemCount = 0;
 
-	private List<KAnimGroupFile.Group> groups;
+	private List<KAnimGroupFile.Group> groups = null;
 
-	private string[] leftToGenerate;
+	private string[] leftToGenerate = null;
 
-	private AccessorySlots slots;
+	private AccessorySlots slots = null;
 
 	private List<KBatchedAnimController> minions = new List<KBatchedAnimController>();
 
 	private List<KCompBuildInstance> faces = new List<KCompBuildInstance>();
 
-	private bool minonsVisible;
+	private bool minonsVisible = false;
 
-	private bool hideGuides;
+	private bool hideGuides = false;
 
 	private KCompBuilder.BodyData bodyData = default(KCompBuilder.BodyData);
 
-	private int faceAnimIdx;
+	private int faceAnimIdx = 0;
 
-	private bool didGenerate;
+	private bool didGenerate = false;
 
 	private List<HashedString> emotes = new List<HashedString>();
 

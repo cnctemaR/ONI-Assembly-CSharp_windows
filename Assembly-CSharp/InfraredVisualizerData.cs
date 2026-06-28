@@ -42,12 +42,11 @@ public struct InfraredVisualizerData
 		{
 			num = this.temperatureVulnerable.InternalTemperature;
 		}
-		if (num < 0f)
+		if (num >= 0f)
 		{
-			return;
+			Color32 color = SimDebugView.Instance.NormalizedTemperature(num);
+			this.controller.OverlayColour = color;
 		}
-		Color32 color = SimDebugView.Instance.NormalizedTemperature(num);
-		this.controller.OverlayColour = color;
 	}
 
 	public KAnimControllerBase controller;

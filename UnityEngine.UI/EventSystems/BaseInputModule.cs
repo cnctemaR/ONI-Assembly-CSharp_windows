@@ -6,6 +6,39 @@ namespace UnityEngine.EventSystems
 	[RequireComponent(typeof(EventSystem))]
 	public abstract class BaseInputModule : UIBehaviour
 	{
+		public BaseInput input
+		{
+			get
+			{
+				BaseInput baseInput;
+				if (this.m_InputOverride != null)
+				{
+					baseInput = this.m_InputOverride;
+				}
+				else
+				{
+					if (this.m_DefaultInput == null)
+					{
+						BaseInput[] components = base.GetComponents<BaseInput>();
+						foreach (BaseInput baseInput2 in components)
+						{
+							if (baseInput2 != null && baseInput2.GetType() == typeof(BaseInput))
+							{
+								this.m_DefaultInput = baseInput2;
+								break;
+							}
+						}
+						if (this.m_DefaultInput == null)
+						{
+							this.m_DefaultInput = base.gameObject.AddComponent<BaseInput>();
+						}
+					}
+					baseInput = this.m_DefaultInput;
+				}
+				return baseInput;
+			}
+		}
+
 		protected EventSystem eventSystem
 		{
 			get
@@ -49,49 +82,59 @@ namespace UnityEngine.EventSystems
 		protected static MoveDirection DetermineMoveDirection(float x, float y, float deadZone)
 		{
 			Vector2 vector = new Vector2(x, y);
+			MoveDirection moveDirection;
 			if (vector.sqrMagnitude < deadZone * deadZone)
 			{
-				return MoveDirection.None;
+				moveDirection = MoveDirection.None;
 			}
-			if (Mathf.Abs(x) > Mathf.Abs(y))
+			else if (Mathf.Abs(x) > Mathf.Abs(y))
 			{
 				if (x > 0f)
 				{
-					return MoveDirection.Right;
+					moveDirection = MoveDirection.Right;
 				}
-				return MoveDirection.Left;
+				else
+				{
+					moveDirection = MoveDirection.Left;
+				}
+			}
+			else if (y > 0f)
+			{
+				moveDirection = MoveDirection.Up;
 			}
 			else
 			{
-				if (y > 0f)
-				{
-					return MoveDirection.Up;
-				}
-				return MoveDirection.Down;
+				moveDirection = MoveDirection.Down;
 			}
+			return moveDirection;
 		}
 
 		protected static GameObject FindCommonRoot(GameObject g1, GameObject g2)
 		{
+			GameObject gameObject;
 			if (g1 == null || g2 == null)
 			{
-				return null;
+				gameObject = null;
 			}
-			Transform transform = g1.transform;
-			while (transform != null)
+			else
 			{
-				Transform transform2 = g2.transform;
-				while (transform2 != null)
+				Transform transform = g1.transform;
+				while (transform != null)
 				{
-					if (transform == transform2)
+					Transform transform2 = g2.transform;
+					while (transform2 != null)
 					{
-						return transform.gameObject;
+						if (transform == transform2)
+						{
+							return transform.gameObject;
+						}
+						transform2 = transform2.parent;
 					}
-					transform2 = transform2.parent;
+					transform = transform.parent;
 				}
-				transform = transform.parent;
+				gameObject = null;
 			}
-			return null;
+			return gameObject;
 		}
 
 		protected void HandlePointerExitAndEnter(PointerEventData currentPointerData, GameObject newEnterTarget)
@@ -109,34 +152,33 @@ namespace UnityEngine.EventSystems
 					return;
 				}
 			}
-			if (currentPointerData.pointerEnter == newEnterTarget && newEnterTarget)
+			if (!(currentPointerData.pointerEnter == newEnterTarget) || !newEnterTarget)
 			{
-				return;
-			}
-			GameObject gameObject = BaseInputModule.FindCommonRoot(currentPointerData.pointerEnter, newEnterTarget);
-			if (currentPointerData.pointerEnter != null)
-			{
-				Transform transform = currentPointerData.pointerEnter.transform;
-				while (transform != null)
+				GameObject gameObject = BaseInputModule.FindCommonRoot(currentPointerData.pointerEnter, newEnterTarget);
+				if (currentPointerData.pointerEnter != null)
 				{
-					if (gameObject != null && gameObject.transform == transform)
+					Transform transform = currentPointerData.pointerEnter.transform;
+					while (transform != null)
 					{
-						break;
+						if (gameObject != null && gameObject.transform == transform)
+						{
+							break;
+						}
+						ExecuteEvents.Execute<IPointerExitHandler>(transform.gameObject, currentPointerData, ExecuteEvents.pointerExitHandler);
+						currentPointerData.hovered.Remove(transform.gameObject);
+						transform = transform.parent;
 					}
-					ExecuteEvents.Execute<IPointerExitHandler>(transform.gameObject, currentPointerData, ExecuteEvents.pointerExitHandler);
-					currentPointerData.hovered.Remove(transform.gameObject);
-					transform = transform.parent;
 				}
-			}
-			currentPointerData.pointerEnter = newEnterTarget;
-			if (newEnterTarget != null)
-			{
-				Transform transform2 = newEnterTarget.transform;
-				while (transform2 != null && transform2.gameObject != gameObject)
+				currentPointerData.pointerEnter = newEnterTarget;
+				if (newEnterTarget != null)
 				{
-					ExecuteEvents.Execute<IPointerEnterHandler>(transform2.gameObject, currentPointerData, ExecuteEvents.pointerEnterHandler);
-					currentPointerData.hovered.Add(transform2.gameObject);
-					transform2 = transform2.parent;
+					Transform transform2 = newEnterTarget.transform;
+					while (transform2 != null && transform2.gameObject != gameObject)
+					{
+						ExecuteEvents.Execute<IPointerEnterHandler>(transform2.gameObject, currentPointerData, ExecuteEvents.pointerEnterHandler);
+						currentPointerData.hovered.Add(transform2.gameObject);
+						transform2 = transform2.parent;
+					}
 				}
 			}
 		}
@@ -198,5 +240,9 @@ namespace UnityEngine.EventSystems
 		private EventSystem m_EventSystem;
 
 		private BaseEventData m_BaseEventData;
+
+		protected BaseInput m_InputOverride;
+
+		private BaseInput m_DefaultInput;
 	}
 }

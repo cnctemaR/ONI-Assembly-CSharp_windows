@@ -9,17 +9,18 @@ public class ResearchPointObject : KMonoBehaviour, IGameObjectEffectDescriptor
 	{
 		base.OnSpawn();
 		Research.Instance.AddResearchPoints(this.TypeID, 1f);
-		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Research, Strings.Get("STRINGS.RESEARCH.TYPES." + this.TypeID.ToUpper() + ".NAME"), this.transform, 1.5f, false);
+		ResearchType researchType = Research.Instance.GetResearchType(this.TypeID);
+		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Research, researchType.name, base.transform, 1.5f, false);
 		Util.KDestroyGameObject(base.gameObject);
 	}
 
 	public List<Descriptor> GetDescriptors(GameObject go)
 	{
-		return new List<Descriptor>
-		{
-			new Descriptor(string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.EFFECTS.RESEARCHPOINT, Strings.Get("STRINGS.RESEARCH.TYPES." + this.TypeID.ToUpper() + ".NAME")), string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.EFFECTS.RESEARCHPOINT, Strings.Get("STRINGS.RESEARCH.TYPES." + this.TypeID.ToUpper() + ".NAME")), Descriptor.DescriptorType.Effect, false)
-		};
+		List<Descriptor> list = new List<Descriptor>();
+		ResearchType researchType = Research.Instance.GetResearchType(this.TypeID);
+		list.Add(new Descriptor(string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.EFFECTS.RESEARCHPOINT, researchType.name), string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.EFFECTS.RESEARCHPOINT, researchType.description), Descriptor.DescriptorType.Effect, false));
+		return list;
 	}
 
-	public string TypeID = string.Empty;
+	public string TypeID = "";
 }

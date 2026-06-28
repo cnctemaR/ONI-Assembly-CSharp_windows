@@ -47,7 +47,7 @@ public class TextureLerper
 		this.textureCam.transform.SetPosition(new Vector3((float)TextureLerper.offsetCounter + 0.5f, 0.5f, 0f));
 		this.textureCam.clearFlags = CameraClearFlags.Nothing;
 		this.textureCam.depth = -100f;
-		this.textureCam.hdr = false;
+		this.textureCam.allowHDR = false;
 		this.textureCam.orthographic = true;
 		this.textureCam.orthographicSize = 0.5f;
 		this.textureCam.cullingMask = mask;
@@ -65,7 +65,7 @@ public class TextureLerper
 		MeshRenderer meshRenderer = this.meshGO.AddComponent<MeshRenderer>();
 		meshRenderer.receiveShadows = false;
 		meshRenderer.shadowCastingMode = ShadowCastingMode.Off;
-		meshRenderer.useLightProbes = false;
+		meshRenderer.lightProbeUsage = LightProbeUsage.Off;
 		meshRenderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
 		MeshFilter meshFilter = this.meshGO.AddComponent<MeshFilter>();
 		meshFilter.mesh = this.mesh;
@@ -123,7 +123,7 @@ public class TextureLerper
 		return new Vector4((float)num4, (float)num5, (float)num6, (float)num7);
 	}
 
-	private static int offsetCounter;
+	private static int offsetCounter = 0;
 
 	public string name;
 

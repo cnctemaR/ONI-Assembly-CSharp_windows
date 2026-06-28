@@ -39,7 +39,15 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		public float separation
+		{
+			get
+			{
+				return this.m_Separation;
+			}
+		}
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern Collider ColliderFromInstanceId(int instanceID);
 
@@ -50,5 +58,7 @@ namespace UnityEngine
 		internal int m_ThisColliderInstanceID;
 
 		internal int m_OtherColliderInstanceID;
+
+		internal float m_Separation;
 	}
 }

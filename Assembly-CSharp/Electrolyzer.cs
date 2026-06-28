@@ -34,7 +34,7 @@ public class Electrolyzer : StateMachineComponent<Electrolyzer.StatesInstance>
 	{
 		get
 		{
-			int num = Grid.PosToCell(this.transform.position);
+			int num = Grid.PosToCell(base.transform.position);
 			num = Grid.CellAbove(num);
 			return !GameUtil.FloodFillCheck(new Func<int, bool>(this.OverPressure), num, 3, true, true);
 		}

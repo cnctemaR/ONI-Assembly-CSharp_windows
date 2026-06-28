@@ -97,33 +97,34 @@ public class MaterialSelectionPanel : KScreen
 
 	public void RefreshSelectors()
 	{
-		if (this.activeRecipe == null)
+		if (this.activeRecipe != null)
 		{
-			return;
-		}
-		this.MaterialSelectors.ForEach(delegate(MaterialSelector selector)
-		{
-			selector.gameObject.SetActive(false);
-		});
-		if (!DebugHandler.InstantBuildMode && this.activeRecipe.GetBuildingDef().RequiredTech != null && !this.activeRecipe.GetBuildingDef().RequiredTech.IsComplete())
-		{
-			this.ResearchRequired.SetActive(true);
-			LocText[] componentsInChildren = this.ResearchRequired.GetComponentsInChildren<LocText>();
-			componentsInChildren[0].text = UI.PRODUCTINFO_RESEARCHREQUIRED;
-			componentsInChildren[1].text = string.Format(UI.PRODUCTINFO_REQUIRESRESEARCHDESC, this.activeRecipe.GetBuildingDef().RequiredTech.Name);
-			componentsInChildren[1].color = Constants.NEGATIVE_COLOR;
-			this.priorityScreen.gameObject.SetActive(false);
-		}
-		else
-		{
-			this.ResearchRequired.SetActive(false);
-			for (int i = 0; i < this.activeRecipe.Ingredients.Count; i++)
+			this.MaterialSelectors.ForEach(delegate(MaterialSelector selector)
 			{
-				this.MaterialSelectors[i].gameObject.SetActive(true);
-				this.MaterialSelectors[i].ConfigureScreen(this.activeRecipe.Ingredients[i], this.activeRecipe);
+				selector.gameObject.SetActive(false);
+			});
+			TechItem techItem = Db.Get().TechItems.TryGet(this.activeRecipe.GetBuildingDef().PrefabID);
+			bool flag = !DebugHandler.InstantBuildMode && techItem != null && !techItem.IsComplete();
+			if (flag)
+			{
+				this.ResearchRequired.SetActive(true);
+				LocText[] componentsInChildren = this.ResearchRequired.GetComponentsInChildren<LocText>();
+				componentsInChildren[0].text = UI.PRODUCTINFO_RESEARCHREQUIRED;
+				componentsInChildren[1].text = string.Format(UI.PRODUCTINFO_REQUIRESRESEARCHDESC, techItem.parentTech.Name);
+				componentsInChildren[1].color = Constants.NEGATIVE_COLOR;
+				this.priorityScreen.gameObject.SetActive(false);
 			}
-			this.priorityScreen.gameObject.SetActive(true);
-			this.priorityScreen.gameObject.transform.SetAsLastSibling();
+			else
+			{
+				this.ResearchRequired.SetActive(false);
+				for (int i = 0; i < this.activeRecipe.Ingredients.Count; i++)
+				{
+					this.MaterialSelectors[i].gameObject.SetActive(true);
+					this.MaterialSelectors[i].ConfigureScreen(this.activeRecipe.Ingredients[i], this.activeRecipe);
+				}
+				this.priorityScreen.gameObject.SetActive(true);
+				this.priorityScreen.gameObject.transform.SetAsLastSibling();
+			}
 		}
 	}
 
@@ -150,15 +151,18 @@ public class MaterialSelectionPanel : KScreen
 	{
 		foreach (MaterialSelector materialSelector in this.MaterialSelectors)
 		{
-			if (materialSelector.gameObject.activeSelf && materialSelector.CurrentSelectedElement == null)
+			if (materialSelector.gameObject.activeSelf)
 			{
-				return false;
+				if (materialSelector.CurrentSelectedElement == null)
+				{
+					return false;
+				}
 			}
 		}
 		return true;
 	}
 
-	public static MaterialSelectionPanel.SelectedElemInfo Filter(Tag materialCategoryTag, MaterialSelectionPanel.SelectElement callback)
+	public static MaterialSelectionPanel.SelectedElemInfo Filter(Tag materialCategoryTag, float recipe_amount, MaterialSelectionPanel.SelectElement callback)
 	{
 		MaterialSelectionPanel.SelectedElemInfo selectedElemInfo = default(MaterialSelectionPanel.SelectedElemInfo);
 		selectedElemInfo.element = null;
@@ -166,9 +170,12 @@ public class MaterialSelectionPanel : KScreen
 		foreach (Element element in ElementLoader.elements)
 		{
 			bool flag = element.tag == materialCategoryTag;
-			if (!flag && element.HasTag(materialCategoryTag))
+			if (!flag)
 			{
-				flag = true;
+				if (element.HasTag(materialCategoryTag))
+				{
+					flag = true;
+				}
 			}
 			if (flag)
 			{
@@ -177,7 +184,7 @@ public class MaterialSelectionPanel : KScreen
 					float amount = WorldInventory.Instance.GetAmount(element.tag);
 					if (callback != null)
 					{
-						callback(element, amount);
+						callback(element, amount, recipe_amount);
 					}
 					if (amount > selectedElemInfo.kgAvailable || element.IsLiquid || selectedElemInfo.element == null)
 					{
@@ -216,12 +223,12 @@ public class MaterialSelectionPanel : KScreen
 
 	private Recipe activeRecipe;
 
+	public delegate void SelectElement(Element element, float kgAvailable, float recipe_amount);
+
 	public struct SelectedElemInfo
 	{
 		public Element element;
 
 		public float kgAvailable;
 	}
-
-	public delegate void SelectElement(Element element, float kgAvailable);
 }

@@ -36,7 +36,7 @@ public class ToiletWorkableClean : Workable
 	}
 
 	[Serialize]
-	public int timesCleaned;
+	public int timesCleaned = 0;
 
 	private static readonly HashedString[] CleanAnims = new HashedString[] { "unclog_pre", "unclog_loop" };
 }

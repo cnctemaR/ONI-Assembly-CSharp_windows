@@ -258,9 +258,12 @@ public class BuildingLoader : DefLoader
 				gameObject.AddComponent<LoopingSounds>();
 			}
 			BuildingLoader.UpdateComponentRequirement<Upgradable>(gameObject, def.Upgradeable);
-			DecorProvider decorProvider = BuildingLoader.UpdateComponentRequirement<DecorProvider>(gameObject, true);
-			decorProvider.baseDecor = def.BaseDecor;
-			decorProvider.baseRadius = def.BaseDecorRadius;
+			if (def.BaseDecor != 0f)
+			{
+				DecorProvider decorProvider = BuildingLoader.UpdateComponentRequirement<DecorProvider>(gameObject, true);
+				decorProvider.baseDecor = def.BaseDecor;
+				decorProvider.baseRadius = def.BaseDecorRadius;
+			}
 			if (def.AttachableBuildingType != Tag.Invalid)
 			{
 				AttachableBuilding attachableBuilding = BuildingLoader.UpdateComponentRequirement<AttachableBuilding>(gameObject, true);

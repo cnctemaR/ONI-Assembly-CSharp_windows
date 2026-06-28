@@ -25,11 +25,11 @@ namespace UnityEngine.Rendering
 			this.m_InstanceID = 0;
 		}
 
-		public RenderTargetIdentifier(RenderTexture rt)
+		public RenderTargetIdentifier(Texture tex)
 		{
-			this.m_Type = BuiltinRenderTextureType.None;
+			this.m_Type = ((!(tex == null) && !(tex is RenderTexture)) ? BuiltinRenderTextureType.BindableTexture : BuiltinRenderTextureType.None);
 			this.m_NameID = -1;
-			this.m_InstanceID = ((!rt) ? 0 : rt.GetInstanceID());
+			this.m_InstanceID = ((!tex) ? 0 : tex.GetInstanceID());
 		}
 
 		public static implicit operator RenderTargetIdentifier(BuiltinRenderTextureType type)
@@ -47,9 +47,49 @@ namespace UnityEngine.Rendering
 			return new RenderTargetIdentifier(nameID);
 		}
 
-		public static implicit operator RenderTargetIdentifier(RenderTexture rt)
+		public static implicit operator RenderTargetIdentifier(Texture tex)
 		{
-			return new RenderTargetIdentifier(rt);
+			return new RenderTargetIdentifier(tex);
+		}
+
+		public override string ToString()
+		{
+			return UnityString.Format("Type {0} NameID {1} InstanceID {2}", new object[] { this.m_Type, this.m_NameID, this.m_InstanceID });
+		}
+
+		public override int GetHashCode()
+		{
+			return (this.m_Type.GetHashCode() * 23 + this.m_NameID.GetHashCode()) * 23 + this.m_InstanceID.GetHashCode();
+		}
+
+		public override bool Equals(object obj)
+		{
+			bool flag;
+			if (!(obj is RenderTargetIdentifier))
+			{
+				flag = false;
+			}
+			else
+			{
+				RenderTargetIdentifier renderTargetIdentifier = (RenderTargetIdentifier)obj;
+				flag = this.m_Type == renderTargetIdentifier.m_Type && this.m_NameID == renderTargetIdentifier.m_NameID && this.m_InstanceID == renderTargetIdentifier.m_InstanceID;
+			}
+			return flag;
+		}
+
+		public bool Equals(RenderTargetIdentifier rhs)
+		{
+			return this.m_Type == rhs.m_Type && this.m_NameID == rhs.m_NameID && this.m_InstanceID == rhs.m_InstanceID;
+		}
+
+		public static bool operator ==(RenderTargetIdentifier lhs, RenderTargetIdentifier rhs)
+		{
+			return lhs.m_Type == rhs.m_Type && lhs.m_NameID == rhs.m_NameID && lhs.m_InstanceID == rhs.m_InstanceID;
+		}
+
+		public static bool operator !=(RenderTargetIdentifier lhs, RenderTargetIdentifier rhs)
+		{
+			return lhs.m_Type != rhs.m_Type || lhs.m_NameID != rhs.m_NameID || lhs.m_InstanceID != rhs.m_InstanceID;
 		}
 
 		private BuiltinRenderTextureType m_Type;

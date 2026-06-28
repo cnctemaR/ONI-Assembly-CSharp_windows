@@ -166,39 +166,37 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public static void AddRegionPrefab(KPrefabID prefab)
 	{
-		if (prefab == null)
+		if (!(prefab == null))
 		{
-			return;
+			Assets.RegionPrefabs.Add(prefab.gameObject);
+			Assets.AddPrefab(prefab);
 		}
-		Assets.RegionPrefabs.Add(prefab.gameObject);
-		Assets.AddPrefab(prefab);
 	}
 
 	public static void AddPrefab(KPrefabID prefab)
 	{
-		if (prefab == null)
+		if (!(prefab == null))
 		{
-			return;
-		}
-		prefab.UpdateSaveLoadTag();
-		if (Assets.PrefabsByTag.ContainsKey(prefab.PrefabTag))
-		{
-			global::Debug.LogWarning("Tried loading prefab with duplicate tag, ignoring: " + prefab.PrefabTag, null);
-		}
-		Assets.PrefabsByTag[prefab.PrefabTag] = prefab;
-		for (int i = 0; i < prefab.Tags.Length; i++)
-		{
-			if (!Assets.PrefabsByAdditionalTags.ContainsKey(prefab.Tags[i]))
+			prefab.UpdateSaveLoadTag();
+			if (Assets.PrefabsByTag.ContainsKey(prefab.PrefabTag))
 			{
-				Assets.PrefabsByAdditionalTags[prefab.Tags[i]] = new List<KPrefabID>();
+				global::Debug.LogWarning("Tried loading prefab with duplicate tag, ignoring: " + prefab.PrefabTag, null);
 			}
-			Assets.PrefabsByAdditionalTags[prefab.Tags[i]].Add(prefab);
-		}
-		Assets.Prefabs.Add(prefab);
-		Assets.TryAddCountableTag(prefab);
-		if (Assets.OnAddPrefab != null)
-		{
-			Assets.OnAddPrefab(prefab);
+			Assets.PrefabsByTag[prefab.PrefabTag] = prefab;
+			for (int i = 0; i < prefab.Tags.Length; i++)
+			{
+				if (!Assets.PrefabsByAdditionalTags.ContainsKey(prefab.Tags[i]))
+				{
+					Assets.PrefabsByAdditionalTags[prefab.Tags[i]] = new List<KPrefabID>();
+				}
+				Assets.PrefabsByAdditionalTags[prefab.Tags[i]].Add(prefab);
+			}
+			Assets.Prefabs.Add(prefab);
+			Assets.TryAddCountableTag(prefab);
+			if (Assets.OnAddPrefab != null)
+			{
+				Assets.OnAddPrefab(prefab);
+			}
 		}
 	}
 
@@ -264,11 +262,16 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 	public static Assets GetInstanceEditorOnly()
 	{
 		Assets[] array = (Assets[])Resources.FindObjectsOfTypeAll(typeof(Assets));
+		Assets assets;
 		if (array == null || array.Length == 0)
 		{
-			return array[0];
+			assets = array[0];
 		}
-		return array[0];
+		else
+		{
+			assets = array[0];
+		}
+		return assets;
 	}
 
 	public static TextureAtlas GetTextureAtlas(string name)
@@ -322,16 +325,21 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public static KAnimFile GetAnim(HashedString name)
 	{
+		KAnimFile kanimFile;
 		if (!name.IsValid())
 		{
 			global::Debug.LogWarning("Invalid hash name", null);
-			return null;
+			kanimFile = null;
 		}
-		KAnimFile kanimFile = null;
-		Assets.AnimTable.TryGetValue(name, out kanimFile);
-		if (kanimFile == null)
+		else
 		{
-			global::Debug.LogWarning("Missing Anim: [" + name.ToString() + "]. You may have to run Collect Anim on the Assets prefab", null);
+			KAnimFile kanimFile2 = null;
+			Assets.AnimTable.TryGetValue(name, out kanimFile2);
+			if (kanimFile2 == null)
+			{
+				global::Debug.LogWarning("Missing Anim: [" + name.ToString() + "]. You may have to run Collect Anim on the Assets prefab", null);
+			}
+			kanimFile = kanimFile2;
 		}
 		return kanimFile;
 	}
@@ -445,6 +453,8 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 
 	[SerializeField]
 	private TextAsset elementAudio;
+
+	public LogicModeUI logicModeUIData;
 
 	public static Assets instance;
 

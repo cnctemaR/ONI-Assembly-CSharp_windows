@@ -54,7 +54,7 @@ public class AmbienceManager : KMonoBehaviour
 		this.quadrants[3].Update(new Vector2I(vector2I3.x, vector2I3.y), new Vector2I(vector2I2.x, vector2I2.y), new Vector3(vector3.x + vector6.x, vector3.y + vector6.y, this.emitterZPosition));
 	}
 
-	private float emitterZPosition;
+	private float emitterZPosition = 0f;
 
 	public AmbienceManager.QuadrantDef[] quadrantDefs;
 
@@ -90,8 +90,8 @@ public class AmbienceManager : KMonoBehaviour
 			{
 				Vector3 vector = new Vector3(emitter_position.x, emitter_position.y, 0f);
 				this.soundEvent.set3DAttributes(vector.To3DAttributes());
-				this.soundEvent.setParameterValue("tilePercentage", this.tilePercentage);
-				this.soundEvent.setParameterValue("averageTemperature", this.averageTemperature);
+				this.soundEvent.setParameterValue(AmbienceManager.Layer.TILE_PERCENTAGE_ID, this.tilePercentage);
+				this.soundEvent.setParameterValue(AmbienceManager.Layer.AVERAGE_TEMPERATURE_ID, this.averageTemperature);
 			}
 		}
 
@@ -123,14 +123,16 @@ public class AmbienceManager : KMonoBehaviour
 					if (eventInstance == null)
 					{
 						global::Debug.LogWarning("Could not find event: " + this.oneShotSound, null);
-						return;
 					}
-					Vector3 vector = new Vector3(emitter_position.x, emitter_position.y, 0f);
-					ATTRIBUTES_3D attributes_3D = vector.To3DAttributes();
-					eventInstance.set3DAttributes(attributes_3D);
-					eventInstance.setVolume(this.tilePercentage * 2f);
-					eventInstance.start();
-					eventInstance.release();
+					else
+					{
+						Vector3 vector = new Vector3(emitter_position.x, emitter_position.y, 0f);
+						ATTRIBUTES_3D attributes_3D = vector.To3DAttributes();
+						eventInstance.set3DAttributes(attributes_3D);
+						eventInstance.setVolume(this.tilePercentage * 2f);
+						eventInstance.start();
+						eventInstance.release();
+					}
 				}
 				else
 				{
@@ -143,6 +145,10 @@ public class AmbienceManager : KMonoBehaviour
 				}
 			}
 		}
+
+		private static ParameterID TILE_PERCENTAGE_ID = new ParameterID("tilePercentage");
+
+		private static ParameterID AVERAGE_TEMPERATURE_ID = new ParameterID("averageTemperature");
 
 		public string sound;
 
@@ -200,7 +206,9 @@ public class AmbienceManager : KMonoBehaviour
 			{
 				if (j >= def.solidSounds.Length)
 				{
-					global::Debug.LogError("Missing solid layer: " + ((SolidAmbienceType)j).ToString(), null);
+					string text = "Missing solid layer: ";
+					SolidAmbienceType solidAmbienceType = (SolidAmbienceType)j;
+					global::Debug.LogError(text + solidAmbienceType.ToString(), null);
 				}
 				this.solidLayers[j] = new AmbienceManager.Layer(null, def.solidSounds[j]);
 				this.allLayers.Add(this.solidLayers[j]);
@@ -235,37 +243,40 @@ public class AmbienceManager : KMonoBehaviour
 								if (Grid.Visible[num] > 0)
 								{
 									Element element = Grid.Element[num];
-									if (element.IsLiquid && Grid.IsSubstantialLiquid(num, 0.35f))
+									if (element != null)
 									{
-										AmbienceType ambience = element.substance.GetAmbience();
-										if (ambience != AmbienceType.None)
+										if (element.IsLiquid && Grid.IsSubstantialLiquid(num, 0.35f))
 										{
-											this.liquidLayers[(int)ambience].tileCount++;
-											this.liquidLayers[(int)ambience].averageTemperature += Grid.Temperature[num];
-										}
-									}
-									else if (element.IsGas)
-									{
-										AmbienceType ambience2 = element.substance.GetAmbience();
-										if (ambience2 != AmbienceType.None)
-										{
-											this.gasLayers[(int)ambience2].tileCount++;
-											this.gasLayers[(int)ambience2].averageTemperature += Grid.Temperature[num];
-										}
-									}
-									else if (element.IsSolid)
-									{
-										if (Grid.Foundation[num])
-										{
-											SolidAmbienceType solidAmbienceType = SolidAmbienceType.Tile;
-											this.solidLayers[(int)solidAmbienceType].tileCount += 4;
-										}
-										else
-										{
-											SolidAmbienceType solidAmbience = element.substance.GetSolidAmbience();
-											if (solidAmbience != SolidAmbienceType.None)
+											AmbienceType ambience = element.substance.GetAmbience();
+											if (ambience != AmbienceType.None)
 											{
-												this.solidLayers[(int)solidAmbience].tileCount++;
+												this.liquidLayers[(int)ambience].tileCount++;
+												this.liquidLayers[(int)ambience].averageTemperature += Grid.Temperature[num];
+											}
+										}
+										else if (element.IsGas)
+										{
+											AmbienceType ambience2 = element.substance.GetAmbience();
+											if (ambience2 != AmbienceType.None)
+											{
+												this.gasLayers[(int)ambience2].tileCount++;
+												this.gasLayers[(int)ambience2].averageTemperature += Grid.Temperature[num];
+											}
+										}
+										else if (element.IsSolid)
+										{
+											if (Grid.Foundation[num])
+											{
+												SolidAmbienceType solidAmbienceType = SolidAmbienceType.Tile;
+												this.solidLayers[(int)solidAmbienceType].tileCount += 4;
+											}
+											else
+											{
+												SolidAmbienceType solidAmbience = element.substance.GetSolidAmbience();
+												if (solidAmbience != SolidAmbienceType.None)
+												{
+													this.solidLayers[(int)solidAmbience].tileCount++;
+												}
 											}
 										}
 									}
@@ -306,9 +317,12 @@ public class AmbienceManager : KMonoBehaviour
 			this.oneShotLayers.Sort();
 			for (int n = 0; n < AmbienceManager.Quadrant.activeSolidLayerCount; n++)
 			{
-				if (this.solidTimers[n].ShouldPlay() && this.oneShotLayers[n].tilePercentage > 0f)
+				if (this.solidTimers[n].ShouldPlay())
 				{
-					this.oneShotLayers[n].Start(emitter_position);
+					if (this.oneShotLayers[n].tilePercentage > 0f)
+					{
+						this.oneShotLayers[n].Start(emitter_position);
+					}
 				}
 			}
 		}
@@ -346,12 +360,17 @@ public class AmbienceManager : KMonoBehaviour
 
 			public bool ShouldPlay()
 			{
+				bool flag;
 				if (Time.unscaledTime > this.solidTargetTime)
 				{
 					this.solidTargetTime = Time.unscaledTime + AmbienceManager.Quadrant.SolidTimer.solidMinTime + global::UnityEngine.Random.value * (AmbienceManager.Quadrant.SolidTimer.solidMaxTime - AmbienceManager.Quadrant.SolidTimer.solidMinTime);
-					return true;
+					flag = true;
 				}
-				return false;
+				else
+				{
+					flag = false;
+				}
+				return flag;
 			}
 
 			public static float solidMinTime = 9f;

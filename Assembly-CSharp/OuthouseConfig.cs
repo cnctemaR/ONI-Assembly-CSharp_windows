@@ -6,13 +6,25 @@ public class OuthouseConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
+		string text = "Outhouse";
+		int num = 2;
+		int num2 = 3;
+		string text2 = "outhouse_kanim";
+		float num3 = 200f;
+		int num4 = 30;
+		float num5 = 30f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
+		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
+		float num6 = 800f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Outhouse", 2, 3, "outhouse_kanim", 200f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.RAW_MINERALS, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER4, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, tier, raw_MINERALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER4, none);
 		buildingDef.Overheatable = false;
 		buildingDef.ExhaustKilowattsWhenActive = 0.25f;
 		buildingDef.DiseaseCellVisName = "FoodPoisoning";
 		buildingDef.MaterialCategory = MATERIALS.RAW_MINERALS;
 		buildingDef.AudioCategory = "Metal";
+		buildingDef.HotKey = global::Action.BuildMenuKeyT;
 		SoundEventVolumeCache.instance.AddVolume("outhouse_kanim", "Latrine_door_open", NOISE_POLLUTION.NOISY.TIER1);
 		SoundEventVolumeCache.instance.AddVolume("outhouse_kanim", "Latrine_door_close", NOISE_POLLUTION.NOISY.TIER1);
 		return buildingDef;
@@ -38,11 +50,9 @@ public class OuthouseConfig : IBuildingConfig
 		toiletWorkableClean.workTime = 90f;
 		toiletWorkableClean.overrideAnims = array;
 		Storage storage = go.AddOrGet<Storage>();
-		storage.disableOnStore = true;
 		storage.showInUI = true;
 		Storage storage2 = go.AddComponent<Storage>();
 		storage2.capacityKg = 20000f;
-		storage2.disableOnStore = true;
 		storage2.showInUI = true;
 		storage2.allowItemRemoval = true;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();

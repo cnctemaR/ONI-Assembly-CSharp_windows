@@ -2,7 +2,6 @@
 using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
 using SimpleJson.Reflection;
@@ -82,7 +81,6 @@ namespace SimpleJson
 			return this.TrySerializeKnownTypes(input, out output) || this.TrySerializeUnknownTypes(input, out output);
 		}
 
-		[SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
 		public virtual object DeserializeObject(object value, Type type)
 		{
 			if (type == null)
@@ -90,135 +88,146 @@ namespace SimpleJson
 				throw new ArgumentNullException("type");
 			}
 			string text = value as string;
+			object obj;
 			if (type == typeof(Guid) && string.IsNullOrEmpty(text))
 			{
-				return default(Guid);
+				obj = default(Guid);
 			}
-			if (value == null)
+			else if (value == null)
 			{
-				return null;
+				obj = null;
 			}
-			object obj = null;
-			if (text != null)
+			else
 			{
-				if (text.Length != 0)
+				object obj2 = null;
+				if (text != null)
 				{
-					if (type == typeof(DateTime) || (ReflectionUtils.IsNullableType(type) && Nullable.GetUnderlyingType(type) == typeof(DateTime)))
+					if (text.Length != 0)
 					{
-						return DateTime.ParseExact(text, PocoJsonSerializerStrategy.Iso8601Format, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
-					}
-					if (type == typeof(DateTimeOffset) || (ReflectionUtils.IsNullableType(type) && Nullable.GetUnderlyingType(type) == typeof(DateTimeOffset)))
-					{
-						return DateTimeOffset.ParseExact(text, PocoJsonSerializerStrategy.Iso8601Format, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
-					}
-					if (type == typeof(Guid) || (ReflectionUtils.IsNullableType(type) && Nullable.GetUnderlyingType(type) == typeof(Guid)))
-					{
-						return new Guid(text);
-					}
-					return text;
-				}
-				else
-				{
-					if (type == typeof(Guid))
-					{
-						obj = default(Guid);
-					}
-					else if (ReflectionUtils.IsNullableType(type) && Nullable.GetUnderlyingType(type) == typeof(Guid))
-					{
-						obj = null;
-					}
-					else
-					{
-						obj = text;
-					}
-					if (!ReflectionUtils.IsNullableType(type) && Nullable.GetUnderlyingType(type) == typeof(Guid))
-					{
+						if (type == typeof(DateTime) || (ReflectionUtils.IsNullableType(type) && Nullable.GetUnderlyingType(type) == typeof(DateTime)))
+						{
+							return DateTime.ParseExact(text, PocoJsonSerializerStrategy.Iso8601Format, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
+						}
+						if (type == typeof(DateTimeOffset) || (ReflectionUtils.IsNullableType(type) && Nullable.GetUnderlyingType(type) == typeof(DateTimeOffset)))
+						{
+							return DateTimeOffset.ParseExact(text, PocoJsonSerializerStrategy.Iso8601Format, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
+						}
+						if (type == typeof(Guid) || (ReflectionUtils.IsNullableType(type) && Nullable.GetUnderlyingType(type) == typeof(Guid)))
+						{
+							return new Guid(text);
+						}
 						return text;
 					}
-				}
-			}
-			else if (value is bool)
-			{
-				return value;
-			}
-			bool flag = value is long;
-			bool flag2 = value is double;
-			if ((flag && type == typeof(long)) || (flag2 && type == typeof(double)))
-			{
-				return value;
-			}
-			if ((!flag2 || type == typeof(double)) && (!flag || type == typeof(long)))
-			{
-				IDictionary<string, object> dictionary = value as IDictionary<string, object>;
-				if (dictionary != null)
-				{
-					IDictionary<string, object> dictionary2 = dictionary;
-					if (ReflectionUtils.IsTypeDictionary(type))
+					else
 					{
-						Type[] genericTypeArguments = ReflectionUtils.GetGenericTypeArguments(type);
-						Type type2 = genericTypeArguments[0];
-						Type type3 = genericTypeArguments[1];
-						Type type4 = typeof(Dictionary<, >).MakeGenericType(new Type[] { type2, type3 });
-						IDictionary dictionary3 = (IDictionary)this.ConstructorCache[type4](null);
-						foreach (KeyValuePair<string, object> keyValuePair in dictionary2)
+						if (type == typeof(Guid))
 						{
-							dictionary3.Add(keyValuePair.Key, this.DeserializeObject(keyValuePair.Value, type3));
+							obj2 = default(Guid);
 						}
-						obj = dictionary3;
+						else if (ReflectionUtils.IsNullableType(type) && Nullable.GetUnderlyingType(type) == typeof(Guid))
+						{
+							obj2 = null;
+						}
+						else
+						{
+							obj2 = text;
+						}
+						if (!ReflectionUtils.IsNullableType(type) && Nullable.GetUnderlyingType(type) == typeof(Guid))
+						{
+							return text;
+						}
 					}
-					else if (type == typeof(object))
+				}
+				else if (value is bool)
+				{
+					return value;
+				}
+				bool flag = value is long;
+				bool flag2 = value is double;
+				if ((flag && type == typeof(long)) || (flag2 && type == typeof(double)))
+				{
+					obj = value;
+				}
+				else if ((flag2 && type != typeof(double)) || (flag && type != typeof(long)))
+				{
+					obj2 = ((!typeof(IConvertible).IsAssignableFrom(type)) ? value : Convert.ChangeType(value, type, CultureInfo.InvariantCulture));
+					if (ReflectionUtils.IsNullableType(type))
 					{
-						obj = value;
+						obj = ReflectionUtils.ToNullableType(obj2, type);
 					}
 					else
 					{
-						obj = this.ConstructorCache[type](null);
-						foreach (KeyValuePair<string, KeyValuePair<Type, ReflectionUtils.SetDelegate>> keyValuePair2 in this.SetCache[type])
-						{
-							object obj2;
-							if (dictionary2.TryGetValue(keyValuePair2.Key, out obj2))
-							{
-								obj2 = this.DeserializeObject(obj2, keyValuePair2.Value.Key);
-								keyValuePair2.Value.Value(obj, obj2);
-							}
-						}
+						obj = obj2;
 					}
 				}
 				else
 				{
-					IList<object> list = value as IList<object>;
-					if (list != null)
+					IDictionary<string, object> dictionary = value as IDictionary<string, object>;
+					if (dictionary != null)
 					{
-						IList<object> list2 = list;
-						IList list3 = null;
-						if (type.IsArray)
+						IDictionary<string, object> dictionary2 = dictionary;
+						if (ReflectionUtils.IsTypeDictionary(type))
 						{
-							list3 = (IList)this.ConstructorCache[type](new object[] { list2.Count });
-							int num = 0;
-							foreach (object obj3 in list2)
+							Type[] genericTypeArguments = ReflectionUtils.GetGenericTypeArguments(type);
+							Type type2 = genericTypeArguments[0];
+							Type type3 = genericTypeArguments[1];
+							Type type4 = typeof(Dictionary<, >).MakeGenericType(new Type[] { type2, type3 });
+							IDictionary dictionary3 = (IDictionary)this.ConstructorCache[type4](null);
+							foreach (KeyValuePair<string, object> keyValuePair in dictionary2)
 							{
-								list3[num++] = this.DeserializeObject(obj3, type.GetElementType());
+								dictionary3.Add(keyValuePair.Key, this.DeserializeObject(keyValuePair.Value, type3));
+							}
+							obj2 = dictionary3;
+						}
+						else if (type == typeof(object))
+						{
+							obj2 = value;
+						}
+						else
+						{
+							obj2 = this.ConstructorCache[type](null);
+							foreach (KeyValuePair<string, KeyValuePair<Type, ReflectionUtils.SetDelegate>> keyValuePair2 in this.SetCache[type])
+							{
+								object obj3;
+								if (dictionary2.TryGetValue(keyValuePair2.Key, out obj3))
+								{
+									obj3 = this.DeserializeObject(obj3, keyValuePair2.Value.Key);
+									keyValuePair2.Value.Value(obj2, obj3);
+								}
 							}
 						}
-						else if (ReflectionUtils.IsTypeGenericeCollectionInterface(type) || ReflectionUtils.IsAssignableFrom(typeof(IList), type))
-						{
-							Type type5 = ReflectionUtils.GetGenericTypeArguments(type)[0];
-							Type type6 = typeof(List<>).MakeGenericType(new Type[] { type5 });
-							list3 = (IList)this.ConstructorCache[type6](new object[] { list2.Count });
-							foreach (object obj4 in list2)
-							{
-								list3.Add(this.DeserializeObject(obj4, type5));
-							}
-						}
-						obj = list3;
 					}
+					else
+					{
+						IList<object> list = value as IList<object>;
+						if (list != null)
+						{
+							IList<object> list2 = list;
+							IList list3 = null;
+							if (type.IsArray)
+							{
+								list3 = (IList)this.ConstructorCache[type](new object[] { list2.Count });
+								int num = 0;
+								foreach (object obj4 in list2)
+								{
+									list3[num++] = this.DeserializeObject(obj4, type.GetElementType());
+								}
+							}
+							else if (ReflectionUtils.IsTypeGenericeCollectionInterface(type) || ReflectionUtils.IsAssignableFrom(typeof(IList), type))
+							{
+								Type type5 = ReflectionUtils.GetGenericTypeArguments(type)[0];
+								Type type6 = typeof(List<>).MakeGenericType(new Type[] { type5 });
+								list3 = (IList)this.ConstructorCache[type6](new object[] { list2.Count });
+								foreach (object obj5 in list2)
+								{
+									list3.Add(this.DeserializeObject(obj5, type5));
+								}
+							}
+							obj2 = list3;
+						}
+					}
+					obj = obj2;
 				}
-				return obj;
-			}
-			obj = ((!typeof(IConvertible).IsAssignableFrom(type)) ? value : Convert.ChangeType(value, type, CultureInfo.InvariantCulture));
-			if (ReflectionUtils.IsNullableType(type))
-			{
-				return ReflectionUtils.ToNullableType(obj, type);
 			}
 			return obj;
 		}
@@ -228,7 +237,6 @@ namespace SimpleJson
 			return Convert.ToDouble(p, CultureInfo.InvariantCulture);
 		}
 
-		[SuppressMessage("Microsoft.Design", "CA1007:UseGenericsWhereAppropriate", Justification = "Need to support .NET 2")]
 		protected virtual bool TrySerializeKnownTypes(object input, out object output)
 		{
 			bool flag = true;
@@ -264,7 +272,6 @@ namespace SimpleJson
 			return flag;
 		}
 
-		[SuppressMessage("Microsoft.Design", "CA1007:UseGenericsWhereAppropriate", Justification = "Need to support .NET 2")]
 		protected virtual bool TrySerializeUnknownTypes(object input, out object output)
 		{
 			if (input == null)
@@ -273,21 +280,26 @@ namespace SimpleJson
 			}
 			output = null;
 			Type type = input.GetType();
+			bool flag;
 			if (type.FullName == null)
 			{
-				return false;
+				flag = false;
 			}
-			IDictionary<string, object> dictionary = new JsonObject();
-			IDictionary<string, ReflectionUtils.GetDelegate> dictionary2 = this.GetCache[type];
-			foreach (KeyValuePair<string, ReflectionUtils.GetDelegate> keyValuePair in dictionary2)
+			else
 			{
-				if (keyValuePair.Value != null)
+				IDictionary<string, object> dictionary = new JsonObject();
+				IDictionary<string, ReflectionUtils.GetDelegate> dictionary2 = this.GetCache[type];
+				foreach (KeyValuePair<string, ReflectionUtils.GetDelegate> keyValuePair in dictionary2)
 				{
-					dictionary.Add(this.MapClrMemberNameToJsonFieldName(keyValuePair.Key), keyValuePair.Value(input));
+					if (keyValuePair.Value != null)
+					{
+						dictionary.Add(this.MapClrMemberNameToJsonFieldName(keyValuePair.Key), keyValuePair.Value(input));
+					}
 				}
+				output = dictionary;
+				flag = true;
 			}
-			output = dictionary;
-			return true;
+			return flag;
 		}
 
 		internal IDictionary<Type, ReflectionUtils.ConstructorDelegate> ConstructorCache;

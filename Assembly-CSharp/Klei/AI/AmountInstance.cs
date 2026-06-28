@@ -5,8 +5,8 @@ using UnityEngine;
 
 namespace Klei.AI
 {
-	[DebuggerDisplay("{amount.Name} {value} ({deltaAttribute.value}/{minAttribute.value}/{maxAttribute.value})")]
 	[SerializationConfig(MemberSerialization.OptIn)]
+	[DebuggerDisplay("{amount.Name} {value} ({deltaAttribute.value}/{minAttribute.value}/{maxAttribute.value})")]
 	public class AmountInstance : ModifierInstance<Amount>, ISaveLoadable
 	{
 		public AmountInstance(Amount amount, GameObject game_object)
@@ -57,9 +57,12 @@ namespace Klei.AI
 			{
 				this.OnDelta(delta);
 			}
-			if (num < this.GetMax() && this.value >= this.GetMax() && this.OnMaxValueReached != null)
+			if (this.OnMaxValueReached != null)
 			{
-				this.OnMaxValueReached();
+				if (num < this.GetMax() && this.value >= this.GetMax())
+				{
+					this.OnMaxValueReached();
+				}
 			}
 			return this.value;
 		}
@@ -88,10 +91,12 @@ namespace Klei.AI
 
 		public AttributeInstance deltaAttribute;
 
-		public Action<float> OnDelta;
+		public Action<float> OnDelta = null;
 
 		public global::System.Action OnMaxValueReached;
 
-		public bool paused;
+		public bool paused = false;
+
+		public bool isActive;
 	}
 }

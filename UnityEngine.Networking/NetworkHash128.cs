@@ -32,19 +32,24 @@ namespace UnityEngine.Networking
 
 		private static int HexToNumber(char c)
 		{
+			int num;
 			if (c >= '0' && c <= '9')
 			{
-				return (int)(c - '0');
+				num = (int)(c - '0');
 			}
-			if (c >= 'a' && c <= 'f')
+			else if (c >= 'a' && c <= 'f')
 			{
-				return (int)(c - 'a' + '\n');
+				num = (int)(c - 'a' + '\n');
 			}
-			if (c >= 'A' && c <= 'F')
+			else if (c >= 'A' && c <= 'F')
 			{
-				return (int)(c - 'A' + '\n');
+				num = (int)(c - 'A' + '\n');
 			}
-			return 0;
+			else
+			{
+				num = 0;
+			}
+			return num;
 		}
 
 		public static NetworkHash128 Parse(string text)
@@ -52,7 +57,7 @@ namespace UnityEngine.Networking
 			int length = text.Length;
 			if (length < 32)
 			{
-				string text2 = string.Empty;
+				string text2 = "";
 				for (int i = 0; i < 32 - length; i++)
 				{
 					text2 += "0";

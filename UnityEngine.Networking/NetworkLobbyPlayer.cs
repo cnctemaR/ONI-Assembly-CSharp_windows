@@ -37,6 +37,16 @@ namespace UnityEngine.Networking
 			Object.DontDestroyOnLoad(base.gameObject);
 		}
 
+		private void OnEnable()
+		{
+			SceneManager.sceneLoaded += this.OnSceneLoaded;
+		}
+
+		private void OnDisable()
+		{
+			SceneManager.sceneLoaded -= this.OnSceneLoaded;
+		}
+
 		public override void OnStartClient()
 		{
 			NetworkLobbyManager networkLobbyManager = NetworkManager.singleton as NetworkLobbyManager;
@@ -98,12 +108,12 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		private void OnLevelWasLoaded()
+		private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
 		{
 			NetworkLobbyManager networkLobbyManager = NetworkManager.singleton as NetworkLobbyManager;
 			if (networkLobbyManager)
 			{
-				string name = SceneManager.GetSceneAt(0).name;
+				string name = scene.name;
 				if (name == networkLobbyManager.lobbyScene)
 				{
 					return;
@@ -149,73 +159,71 @@ namespace UnityEngine.Networking
 
 		public override void OnDeserialize(NetworkReader reader, bool initialState)
 		{
-			if (reader.ReadPackedUInt32() == 0U)
+			if (reader.ReadPackedUInt32() != 0U)
 			{
-				return;
+				this.m_Slot = reader.ReadByte();
+				this.m_ReadyToBegin = reader.ReadBoolean();
 			}
-			this.m_Slot = reader.ReadByte();
-			this.m_ReadyToBegin = reader.ReadBoolean();
 		}
 
 		private void OnGUI()
 		{
-			if (!this.ShowLobbyGUI)
+			if (this.ShowLobbyGUI)
 			{
-				return;
-			}
-			NetworkLobbyManager networkLobbyManager = NetworkManager.singleton as NetworkLobbyManager;
-			if (networkLobbyManager)
-			{
-				if (!networkLobbyManager.showLobbyGUI)
+				NetworkLobbyManager networkLobbyManager = NetworkManager.singleton as NetworkLobbyManager;
+				if (networkLobbyManager)
 				{
-					return;
-				}
-				string name = SceneManager.GetSceneAt(0).name;
-				if (name != networkLobbyManager.lobbyScene)
-				{
-					return;
-				}
-			}
-			Rect rect = new Rect((float)(100 + this.m_Slot * 100), 200f, 90f, 20f);
-			if (base.isLocalPlayer)
-			{
-				string text;
-				if (this.m_ReadyToBegin)
-				{
-					text = "(Ready)";
-				}
-				else
-				{
-					text = "(Not Ready)";
-				}
-				GUI.Label(rect, text);
-				if (this.m_ReadyToBegin)
-				{
-					rect.y += 25f;
-					if (GUI.Button(rect, "STOP"))
+					if (!networkLobbyManager.showLobbyGUI)
 					{
-						this.SendNotReadyToBeginMessage();
+						return;
+					}
+					string name = SceneManager.GetSceneAt(0).name;
+					if (name != networkLobbyManager.lobbyScene)
+					{
+						return;
+					}
+				}
+				Rect rect = new Rect((float)(100 + this.m_Slot * 100), 200f, 90f, 20f);
+				if (base.isLocalPlayer)
+				{
+					string text;
+					if (this.m_ReadyToBegin)
+					{
+						text = "(Ready)";
+					}
+					else
+					{
+						text = "(Not Ready)";
+					}
+					GUI.Label(rect, text);
+					if (this.m_ReadyToBegin)
+					{
+						rect.y += 25f;
+						if (GUI.Button(rect, "STOP"))
+						{
+							this.SendNotReadyToBeginMessage();
+						}
+					}
+					else
+					{
+						rect.y += 25f;
+						if (GUI.Button(rect, "START"))
+						{
+							this.SendReadyToBeginMessage();
+						}
+						rect.y += 25f;
+						if (GUI.Button(rect, "Remove"))
+						{
+							ClientScene.RemovePlayer(base.GetComponent<NetworkIdentity>().playerControllerId);
+						}
 					}
 				}
 				else
 				{
+					GUI.Label(rect, "Player [" + base.netId + "]");
 					rect.y += 25f;
-					if (GUI.Button(rect, "START"))
-					{
-						this.SendReadyToBeginMessage();
-					}
-					rect.y += 25f;
-					if (GUI.Button(rect, "Remove"))
-					{
-						ClientScene.RemovePlayer(base.GetComponent<NetworkIdentity>().playerControllerId);
-					}
+					GUI.Label(rect, "Ready [" + this.m_ReadyToBegin + "]");
 				}
-			}
-			else
-			{
-				GUI.Label(rect, "Player [" + base.netId + "]");
-				rect.y += 25f;
-				GUI.Label(rect, "Ready [" + this.m_ReadyToBegin + "]");
 			}
 		}
 

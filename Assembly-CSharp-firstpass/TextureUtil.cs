@@ -5,51 +5,71 @@ public static class TextureUtil
 {
 	public static int GetBytesPerPixel(TextureFormat format)
 	{
+		int num;
 		switch (format)
 		{
 		case TextureFormat.Alpha8:
-			return 1;
+			num = 1;
+			break;
 		default:
-			if (format == TextureFormat.RGFloat)
+			if (format != TextureFormat.RGFloat)
 			{
-				return 8;
+				if (format != TextureFormat.RGBAFloat)
+				{
+					throw new ArgumentOutOfRangeException();
+				}
+				num = 16;
 			}
-			if (format != TextureFormat.RGBAFloat)
+			else
 			{
-				throw new ArgumentOutOfRangeException();
+				num = 8;
 			}
-			return 16;
+			break;
 		case TextureFormat.RGB24:
-			return 3;
+			num = 3;
+			break;
 		case TextureFormat.RGBA32:
-			return 4;
+			num = 4;
+			break;
 		case TextureFormat.ARGB32:
-			return 4;
+			num = 4;
+			break;
 		}
+		return num;
 	}
 
 	public static RenderTextureFormat GetRenderTextureFormat(TextureFormat format)
 	{
+		RenderTextureFormat renderTextureFormat;
 		switch (format)
 		{
 		case TextureFormat.Alpha8:
-			return RenderTextureFormat.ARGB32;
+			renderTextureFormat = RenderTextureFormat.ARGB32;
+			break;
 		default:
-			if (format == TextureFormat.RGFloat)
+			if (format != TextureFormat.RGFloat)
 			{
-				return RenderTextureFormat.RGFloat;
+				if (format != TextureFormat.RGBAFloat)
+				{
+					throw new ArgumentOutOfRangeException();
+				}
+				renderTextureFormat = RenderTextureFormat.ARGBHalf;
 			}
-			if (format != TextureFormat.RGBAFloat)
+			else
 			{
-				throw new ArgumentOutOfRangeException();
+				renderTextureFormat = RenderTextureFormat.RGFloat;
 			}
-			return RenderTextureFormat.ARGBHalf;
+			break;
 		case TextureFormat.RGB24:
-			return RenderTextureFormat.ARGB32;
+			renderTextureFormat = RenderTextureFormat.ARGB32;
+			break;
 		case TextureFormat.RGBA32:
-			return RenderTextureFormat.ARGB32;
+			renderTextureFormat = RenderTextureFormat.ARGB32;
+			break;
 		case TextureFormat.ARGB32:
-			return RenderTextureFormat.ARGB32;
+			renderTextureFormat = RenderTextureFormat.ARGB32;
+			break;
 		}
+		return renderTextureFormat;
 	}
 }

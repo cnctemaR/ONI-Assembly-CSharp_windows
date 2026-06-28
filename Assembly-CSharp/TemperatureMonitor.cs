@@ -43,8 +43,6 @@ public class TemperatureMonitor : GameStateMachine<TemperatureMonitor, Temperatu
 		}).TriggerOnEnter(GameHashes.TooHotFatal, null);
 	}
 
-	private const float TEMPERATURE_AVERAGING_RANGE = 4f;
-
 	public GameStateMachine<TemperatureMonitor, TemperatureMonitor.Instance, IStateMachineTarget, object>.State homeostatic;
 
 	public GameStateMachine<TemperatureMonitor, TemperatureMonitor.Instance, IStateMachineTarget, object>.State hyperthermic;
@@ -58,6 +56,8 @@ public class TemperatureMonitor : GameStateMachine<TemperatureMonitor, Temperatu
 	public GameStateMachine<TemperatureMonitor, TemperatureMonitor.Instance, IStateMachineTarget, object>.State deathcold;
 
 	public GameStateMachine<TemperatureMonitor, TemperatureMonitor.Instance, IStateMachineTarget, object>.State deathhot;
+
+	private const float TEMPERATURE_AVERAGING_RANGE = 4f;
 
 	public StateMachine<TemperatureMonitor, TemperatureMonitor.Instance, IStateMachineTarget, object>.IntParameter warmUpCell;
 
@@ -114,15 +114,20 @@ public class TemperatureMonitor : GameStateMachine<TemperatureMonitor, Temperatu
 
 		public float ExtremeTemperatureDelta()
 		{
+			float num;
 			if (this.temperature.value > this.HyperthermiaThreshold)
 			{
-				return this.temperature.value - this.HyperthermiaThreshold;
+				num = this.temperature.value - this.HyperthermiaThreshold;
 			}
-			if (this.temperature.value < this.HypothermiaThreshold)
+			else if (this.temperature.value < this.HypothermiaThreshold)
 			{
-				return this.temperature.value - this.HypothermiaThreshold;
+				num = this.temperature.value - this.HypothermiaThreshold;
 			}
-			return 0f;
+			else
+			{
+				num = 0f;
+			}
+			return num;
 		}
 
 		public float IdealTemperatureDelta()

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace LibNoiseDotNet.Graphics.Tools.Noise.Modifier
 {
-	public class Scale2d : ModifierModule, IModule, IModule3D
+	public class Scale2d : ModifierModule, IModule3D, IModule
 	{
 		public Scale2d()
 		{

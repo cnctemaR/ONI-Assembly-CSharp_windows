@@ -1,13 +1,13 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[NativeClass("UI::RectTransform")]
 	public sealed class RectTransform : Transform
 	{
-		public static event RectTransform.ReapplyDrivenProperties reapplyDrivenProperties;
-
 		public Rect rect
 		{
 			get
@@ -18,7 +18,7 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_get_rect(out Rect value);
 
@@ -36,11 +36,11 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_get_anchorMin(out Vector2 value);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_set_anchorMin(ref Vector2 value);
 
@@ -58,11 +58,11 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_get_anchorMax(out Vector2 value);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_set_anchorMax(ref Vector2 value);
 
@@ -96,11 +96,11 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_get_anchoredPosition(out Vector2 value);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_set_anchoredPosition(ref Vector2 value);
 
@@ -118,11 +118,11 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_get_sizeDelta(out Vector2 value);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_set_sizeDelta(ref Vector2 value);
 
@@ -140,33 +140,36 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_get_pivot(out Vector2 value);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern void INTERNAL_set_pivot(ref Vector2 value);
 
 		internal extern Object drivenByObject
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
 		internal extern DrivenTransformProperties drivenProperties
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
+
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static event RectTransform.ReapplyDrivenProperties reapplyDrivenProperties;
 
 		[RequiredByNativeCode]
 		internal static void SendReapplyDrivenProperties(RectTransform driven)
@@ -182,17 +185,19 @@ namespace UnityEngine
 			if (fourCornersArray == null || fourCornersArray.Length < 4)
 			{
 				Debug.LogError("Calling GetLocalCorners with an array that is null or has less than 4 elements.");
-				return;
 			}
-			Rect rect = this.rect;
-			float x = rect.x;
-			float y = rect.y;
-			float xMax = rect.xMax;
-			float yMax = rect.yMax;
-			fourCornersArray[0] = new Vector3(x, y, 0f);
-			fourCornersArray[1] = new Vector3(x, yMax, 0f);
-			fourCornersArray[2] = new Vector3(xMax, yMax, 0f);
-			fourCornersArray[3] = new Vector3(xMax, y, 0f);
+			else
+			{
+				Rect rect = this.rect;
+				float x = rect.x;
+				float y = rect.y;
+				float xMax = rect.xMax;
+				float yMax = rect.yMax;
+				fourCornersArray[0] = new Vector3(x, y, 0f);
+				fourCornersArray[1] = new Vector3(x, yMax, 0f);
+				fourCornersArray[2] = new Vector3(xMax, yMax, 0f);
+				fourCornersArray[3] = new Vector3(xMax, y, 0f);
+			}
 		}
 
 		public void GetWorldCorners(Vector3[] fourCornersArray)
@@ -200,13 +205,15 @@ namespace UnityEngine
 			if (fourCornersArray == null || fourCornersArray.Length < 4)
 			{
 				Debug.LogError("Calling GetWorldCorners with an array that is null or has less than 4 elements.");
-				return;
 			}
-			this.GetLocalCorners(fourCornersArray);
-			Transform transform = base.transform;
-			for (int i = 0; i < 4; i++)
+			else
 			{
-				fourCornersArray[i] = transform.TransformPoint(fourCornersArray[i]);
+				this.GetLocalCorners(fourCornersArray);
+				Transform transform = base.transform;
+				for (int i = 0; i < 4; i++)
+				{
+					fourCornersArray[i] = transform.TransformPoint(fourCornersArray[i]);
+				}
 			}
 		}
 
@@ -285,12 +292,19 @@ namespace UnityEngine
 		private Vector2 GetParentSize()
 		{
 			RectTransform rectTransform = base.parent as RectTransform;
+			Vector2 vector;
 			if (!rectTransform)
 			{
-				return Vector2.zero;
+				vector = Vector2.zero;
 			}
-			return rectTransform.rect.size;
+			else
+			{
+				vector = rectTransform.rect.size;
+			}
+			return vector;
 		}
+
+		public delegate void ReapplyDrivenProperties(RectTransform driven);
 
 		public enum Edge
 		{
@@ -305,7 +319,5 @@ namespace UnityEngine
 			Horizontal,
 			Vertical
 		}
-
-		public delegate void ReapplyDrivenProperties(RectTransform driven);
 	}
 }

@@ -143,8 +143,11 @@ public class DebugPaintElementScreen : KScreen
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (!this.blockInput || e.TryConsume(global::Action.Plan1) || e.TryConsume(global::Action.Plan2) || e.TryConsume(global::Action.Plan3) || e.TryConsume(global::Action.Plan4) || e.TryConsume(global::Action.Plan5) || e.TryConsume(global::Action.Plan6) || e.TryConsume(global::Action.Plan7) || e.TryConsume(global::Action.Plan8) || e.TryConsume(global::Action.Plan9) || e.TryConsume(global::Action.Plan10) || e.TryConsume(global::Action.DebugToggle))
+		if (this.blockInput)
 		{
+			if (e.TryConsume(global::Action.Plan1) || e.TryConsume(global::Action.Plan2) || e.TryConsume(global::Action.Plan3) || e.TryConsume(global::Action.Plan4) || e.TryConsume(global::Action.Plan5) || e.TryConsume(global::Action.Plan6) || e.TryConsume(global::Action.Plan7) || e.TryConsume(global::Action.Plan8) || e.TryConsume(global::Action.Plan9) || e.TryConsume(global::Action.Plan10) || e.TryConsume(global::Action.DebugToggle))
+			{
+			}
 		}
 		base.OnKeyDown(e);
 	}
@@ -174,7 +177,7 @@ public class DebugPaintElementScreen : KScreen
 
 	private void OnSelectElement(string str, int index)
 	{
-		this.element = (SimHashes)((int)Enum.Parse(typeof(SimHashes), this.options_list[index]));
+		this.element = (SimHashes)Enum.Parse(typeof(SimHashes), this.options_list[index]);
 		this.elementButton.GetComponentInChildren<LocText>().text = str;
 	}
 
@@ -270,17 +273,17 @@ public class DebugPaintElementScreen : KScreen
 	public float temperature = -1f;
 
 	[NonSerialized]
-	public bool set_prevent_fow_reveal;
+	public bool set_prevent_fow_reveal = false;
 
 	[NonSerialized]
-	public bool set_allow_fow_reveal;
+	public bool set_allow_fow_reveal = false;
 
 	public byte diseaseIdx;
 
 	[NonSerialized]
-	public int diseaseCount;
+	public int diseaseCount = 0;
 
-	private bool blockInput;
+	private bool blockInput = false;
 
 	[Header("Popup Buttons")]
 	[SerializeField]
@@ -289,15 +292,15 @@ public class DebugPaintElementScreen : KScreen
 	[SerializeField]
 	private KButton diseaseButton;
 
-	[SerializeField]
 	[Header("Popup Menus")]
+	[SerializeField]
 	private KPopupMenu elementPopup;
 
 	[SerializeField]
 	private KPopupMenu diseasePopup;
 
-	[SerializeField]
 	[Header("Value Inputs")]
+	[SerializeField]
 	private InputField massPressureInput;
 
 	[SerializeField]

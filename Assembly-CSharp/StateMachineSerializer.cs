@@ -19,12 +19,11 @@ public class StateMachineSerializer
 
 	public void Deserialize(IReader reader)
 	{
-		if (!this.ReadHeader(reader))
+		if (this.ReadHeader(reader))
 		{
-			return;
+			this.entries = this.ReadEntries(reader);
+			this.entryData = this.ReadEntryData(reader);
 		}
-		this.entries = this.ReadEntries(reader);
-		this.entryData = this.ReadEntryData(reader);
 	}
 
 	private List<StateMachineSerializer.Entry> CreateEntries(List<StateMachine.Instance> state_machines, BinaryWriter entry_writer)
@@ -76,6 +75,7 @@ public class StateMachineSerializer
 	{
 		int num = reader.ReadInt32();
 		int num2 = reader.ReadInt32();
+		bool flag;
 		if (num != StateMachineSerializer.serializerVersion)
 		{
 			Debug.LogWarning(string.Concat(new object[]
@@ -87,9 +87,13 @@ public class StateMachineSerializer
 				"\nDiscarding data."
 			}), null);
 			reader.SkipBytes(num2);
-			return false;
+			flag = false;
 		}
-		return true;
+		else
+		{
+			flag = true;
+		}
+		return flag;
 	}
 
 	private void WriteEntries(List<StateMachineSerializer.Entry> serialized_entries, BinaryWriter writer)
@@ -118,63 +122,82 @@ public class StateMachineSerializer
 
 	private bool Restore(StateMachineSerializer.Entry entry, StateMachine.Instance smi)
 	{
+		bool flag;
 		if (entry.version != smi.GetStateMachine().version)
 		{
-			return false;
+			flag = false;
 		}
-		this.entryData.Position = entry.dataPos;
-		if (Manager.HasDeserializationMapping(smi.GetType()))
+		else
 		{
-			Deserializer.DeserializeTypeless(smi, this.entryData);
-		}
-		if (!smi.GetStateMachine().serializable)
-		{
-			return false;
-		}
-		StateMachine.BaseState state = smi.GetStateMachine().GetState(entry.currentState);
-		if (state == null)
-		{
-			return false;
-		}
-		StateMachine.Parameter.Context[] parameterContexts = smi.GetParameterContexts();
-		int num = this.entryData.ReadInt32();
-		for (int i = 0; i < num; i++)
-		{
-			int num2 = this.entryData.ReadInt32();
-			int position = this.entryData.Position;
-			string text = this.entryData.ReadKleiString();
-			string text2 = this.entryData.ReadKleiString();
-			foreach (StateMachine.Parameter.Context context in parameterContexts)
+			this.entryData.Position = entry.dataPos;
+			if (Manager.HasDeserializationMapping(smi.GetType()))
 			{
-				if (context.parameter.name == text2 && context.GetType().FullName == text)
+				Deserializer.DeserializeTypeless(smi, this.entryData);
+			}
+			if (!smi.GetStateMachine().serializable)
+			{
+				flag = false;
+			}
+			else
+			{
+				StateMachine.BaseState state = smi.GetStateMachine().GetState(entry.currentState);
+				if (state == null)
 				{
-					context.Deserialize(this.entryData);
-					break;
+					flag = false;
+				}
+				else
+				{
+					StateMachine.Parameter.Context[] parameterContexts = smi.GetParameterContexts();
+					int num = this.entryData.ReadInt32();
+					for (int i = 0; i < num; i++)
+					{
+						int num2 = this.entryData.ReadInt32();
+						int position = this.entryData.Position;
+						string text = this.entryData.ReadKleiString();
+						string text2 = this.entryData.ReadKleiString();
+						foreach (StateMachine.Parameter.Context context in parameterContexts)
+						{
+							if (context.parameter.name == text2)
+							{
+								if (context.GetType().FullName == text)
+								{
+									context.Deserialize(this.entryData);
+									break;
+								}
+							}
+						}
+						this.entryData.SkipBytes(num2 - (this.entryData.Position - position));
+					}
+					smi.GoTo(state);
+					flag = true;
 				}
 			}
-			this.entryData.SkipBytes(num2 - (this.entryData.Position - position));
 		}
-		smi.GoTo(state);
-		return true;
+		return flag;
 	}
 
 	public bool Restore(StateMachine.Instance instance)
 	{
+		bool flag;
 		if (this.entryData == null)
 		{
-			return false;
+			flag = false;
 		}
-		Type type = instance.GetType();
-		for (int i = 0; i < this.entries.Count; i++)
+		else
 		{
-			StateMachineSerializer.Entry entry = this.entries[i];
-			if (entry.type == type)
+			Type type = instance.GetType();
+			for (int i = 0; i < this.entries.Count; i++)
 			{
-				this.entries.RemoveAt(i);
-				return this.Restore(entry, instance);
+				StateMachineSerializer.Entry entry = this.entries[i];
+				if (entry.type == type)
+				{
+					this.entries.RemoveAt(i);
+					return this.Restore(entry, instance);
+				}
 			}
+			flag = false;
 		}
-		return false;
+		return flag;
 	}
 
 	private static int serializerVersion = 10;
@@ -233,11 +256,17 @@ public class StateMachineSerializer
 			string text = reader.ReadKleiString();
 			string text2 = reader.ReadKleiString();
 			Type type = Type.GetType(text);
+			StateMachineSerializer.Entry entry;
 			if (type == null)
 			{
-				return null;
+				entry = null;
 			}
-			return new StateMachineSerializer.Entry(num, num2, type, text2);
+			else
+			{
+				StateMachineSerializer.Entry entry2 = new StateMachineSerializer.Entry(num, num2, type, text2);
+				entry = entry2;
+			}
+			return entry;
 		}
 
 		public int version;

@@ -7,12 +7,26 @@ public class LightBugConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
+		string text = "LightBug";
+		string text2 = global::STRINGS.CREATURES.SPECIES.LIGHTBUG.NAME;
+		string text3 = global::STRINGS.CREATURES.SPECIES.LIGHTBUG.DESC;
+		float num = 50f;
+		KAnimFile anim = Assets.GetAnim("lightbug_kanim");
+		string text4 = "idle";
 		EffectorValues tier = DECOR.BONUS.TIER0;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("LightBug", global::STRINGS.CREATURES.SPECIES.LIGHTBUG.NAME, global::STRINGS.CREATURES.SPECIES.LIGHTBUG.DESC, 50f, Assets.GetAnim("lightbug_kanim"), "idle", Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, anim, text4, Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
+		GameObject gameObject2 = gameObject;
+		FactionManager.FactionID factionID = FactionManager.FactionID.Prey;
+		num = 5f;
+		text4 = "FlyerNavGrid1x1";
+		NavType navType = NavType.Hover;
+		float num2 = 2f;
+		text3 = "Meat";
+		int num3 = 0;
 		float freezing_ = TemperatureTuning.Freezing_2;
 		float freezing_2 = TemperatureTuning.Freezing_1;
 		float hot_ = TemperatureTuning.Hot_1;
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, 5f, "FlyerNavGrid1x1", NavType.Hover, 2f, "Meat", 0, true, true, 30f, freezing_2, hot_, freezing_, TemperatureTuning.Hot_2);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject2, factionID, num, text4, navType, num2, text3, num3, true, true, 30f, freezing_2, hot_, freezing_, TemperatureTuning.Hot_2);
 		gameObject.UpdateComponentRequirement<LightBug>(true);
 		gameObject.UpdateComponentRequirement<LoopingSounds>(true);
 		Light2D light2D = gameObject.AddOrGet<Light2D>();

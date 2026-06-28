@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -7,9 +6,16 @@ public class HandSanitizerConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
+		string text = "HandSanitizer";
+		int num = 2;
+		int num2 = 3;
+		string text2 = "handsanitizer_kanim";
+		float num3 = 50f;
+		int num4 = 30;
+		float num5 = 30f;
 		string[] array = new string[] { "Metal", "BleachStone" };
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("HandSanitizer", 2, 3, "handsanitizer_kanim", 50f, 30, 30f, new float[]
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, new float[]
 		{
 			BUILDINGS.CONSTRUCTION_MASS_KG.TIER2[0],
 			BUILDINGS.CONSTRUCTION_MASS_KG.TIER1[0]
@@ -32,7 +38,7 @@ public class HandSanitizerConfig : IBuildingConfig
 		work.workTime = 3.5f;
 		work.trackUses = true;
 		Storage storage = go.AddOrGet<Storage>();
-		storage.defaultStoredItemModifers = HandSanitizerConfig.StoredItemModifiers;
+		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		go.AddOrGet<DirectionControl>();
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
@@ -57,10 +63,4 @@ public class HandSanitizerConfig : IBuildingConfig
 	private const float WORK_TIME = 3.5f;
 
 	private const SimHashes CONSUMED_ELEMENT = SimHashes.BleachStone;
-
-	private static readonly List<Storage.StoredItemModifier> StoredItemModifiers = new List<Storage.StoredItemModifier>
-	{
-		Storage.StoredItemModifier.Hide,
-		Storage.StoredItemModifier.Seal
-	};
 }

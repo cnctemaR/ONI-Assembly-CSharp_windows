@@ -7,12 +7,6 @@ using UnityEngine.EventSystems;
 
 public class ProductInfoScreen : KScreen
 {
-	public void ForceClose(bool playSound = true)
-	{
-		this.ClearProduct(true);
-		PlanScreen.Instance.CloseRecipe(playSound);
-	}
-
 	private void RefreshScreen()
 	{
 		if (this.currentDef != null)
@@ -50,14 +44,27 @@ public class ProductInfoScreen : KScreen
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		BuildingGroupScreen instance = BuildingGroupScreen.Instance;
-		instance.pointerEnterActions = (KScreen.PointerEnterActions)Delegate.Combine(instance.pointerEnterActions, new KScreen.PointerEnterActions(this.CheckMouseOver));
-		BuildingGroupScreen instance2 = BuildingGroupScreen.Instance;
-		instance2.pointerExitActions = (KScreen.PointerExitActions)Delegate.Combine(instance2.pointerExitActions, new KScreen.PointerExitActions(this.CheckMouseOver));
-		PlanScreen instance3 = PlanScreen.Instance;
-		instance3.pointerEnterActions = (KScreen.PointerEnterActions)Delegate.Combine(instance3.pointerEnterActions, new KScreen.PointerEnterActions(this.CheckMouseOver));
-		PlanScreen instance4 = PlanScreen.Instance;
-		instance4.pointerExitActions = (KScreen.PointerExitActions)Delegate.Combine(instance4.pointerExitActions, new KScreen.PointerExitActions(this.CheckMouseOver));
+		if (BuildingGroupScreen.Instance != null)
+		{
+			BuildingGroupScreen instance = BuildingGroupScreen.Instance;
+			instance.pointerEnterActions = (KScreen.PointerEnterActions)Delegate.Combine(instance.pointerEnterActions, new KScreen.PointerEnterActions(this.CheckMouseOver));
+			BuildingGroupScreen instance2 = BuildingGroupScreen.Instance;
+			instance2.pointerExitActions = (KScreen.PointerExitActions)Delegate.Combine(instance2.pointerExitActions, new KScreen.PointerExitActions(this.CheckMouseOver));
+		}
+		if (PlanScreen.Instance != null)
+		{
+			PlanScreen instance3 = PlanScreen.Instance;
+			instance3.pointerEnterActions = (KScreen.PointerEnterActions)Delegate.Combine(instance3.pointerEnterActions, new KScreen.PointerEnterActions(this.CheckMouseOver));
+			PlanScreen instance4 = PlanScreen.Instance;
+			instance4.pointerExitActions = (KScreen.PointerExitActions)Delegate.Combine(instance4.pointerExitActions, new KScreen.PointerExitActions(this.CheckMouseOver));
+		}
+		if (BuildMenu.Instance != null)
+		{
+			BuildMenu instance5 = BuildMenu.Instance;
+			instance5.pointerEnterActions = (KScreen.PointerEnterActions)Delegate.Combine(instance5.pointerEnterActions, new KScreen.PointerEnterActions(this.CheckMouseOver));
+			BuildMenu instance6 = BuildMenu.Instance;
+			instance6.pointerExitActions = (KScreen.PointerExitActions)Delegate.Combine(instance6.pointerExitActions, new KScreen.PointerExitActions(this.CheckMouseOver));
+		}
 		this.pointerEnterActions = (KScreen.PointerEnterActions)Delegate.Combine(this.pointerEnterActions, new KScreen.PointerEnterActions(this.CheckMouseOver));
 		this.pointerExitActions = (KScreen.PointerExitActions)Delegate.Combine(this.pointerExitActions, new KScreen.PointerExitActions(this.CheckMouseOver));
 	}
@@ -90,31 +97,11 @@ public class ProductInfoScreen : KScreen
 		}
 		if (this.ProductRequirementsPane != null)
 		{
-			if (this.expandedInfo)
-			{
-				if (this.ProductRequirementsPane.labels.Count > 0)
-				{
-					this.ProductRequirementsPane.gameObject.SetActive(true);
-				}
-			}
-			else
-			{
-				this.ProductRequirementsPane.gameObject.SetActive(false);
-			}
+			this.ProductRequirementsPane.gameObject.SetActive(this.expandedInfo && this.ProductRequirementsPane.labels.Count > 0);
 		}
 		if (this.ProductEffectsPane != null)
 		{
-			if (this.expandedInfo)
-			{
-				if (this.ProductEffectsPane.labels.Count > 0)
-				{
-					this.ProductEffectsPane.gameObject.SetActive(true);
-				}
-			}
-			else
-			{
-				this.ProductEffectsPane.gameObject.SetActive(false);
-			}
+			this.ProductEffectsPane.gameObject.SetActive(this.expandedInfo && this.ProductEffectsPane.labels.Count > 0);
 		}
 		if (this.ProductFlavourPane != null)
 		{
@@ -128,38 +115,28 @@ public class ProductInfoScreen : KScreen
 
 	private void CheckMouseOver(PointerEventData data)
 	{
-		if (!base.GetMouseOver && !PlanScreen.Instance.GetMouseOver && !BuildingGroupScreen.Instance.GetMouseOver)
-		{
-			this.ToggleExpandedInfo(false);
-		}
-		else
-		{
-			this.ToggleExpandedInfo(true);
-		}
+		bool flag = base.GetMouseOver || (PlanScreen.Instance != null && ((PlanScreen.Instance.isActiveAndEnabled && PlanScreen.Instance.GetMouseOver) || BuildingGroupScreen.Instance.GetMouseOver)) || (BuildMenu.Instance != null && BuildMenu.Instance.isActiveAndEnabled && BuildMenu.Instance.GetMouseOver);
+		this.ToggleExpandedInfo(flag);
 	}
 
 	private void Update()
 	{
-		if (PlayerController.Instance.ActiveTool != PrebuildTool.Instance && PlayerController.Instance.ActiveTool != BuildTool.Instance && PlayerController.Instance.ActiveTool != UtilityBuildTool.Instance && PlayerController.Instance.ActiveTool != WireBuildTool.Instance)
+		if (!DebugHandler.InstantBuildMode)
 		{
-			bool flag = false;
-			if (PlayerController.Instance.ActiveTool == SelectTool.Instance)
+			if (this.currentDef != null && this.materialSelectionPanel.CurrentSelectedElement != null)
 			{
-				flag = true;
+				if (this.currentDef.Mass[0] > WorldInventory.Instance.GetAmount(this.materialSelectionPanel.CurrentSelectedElement.tag))
+				{
+					this.materialSelectionPanel.AutoSelectAvailableMaterial();
+				}
 			}
-			this.ForceClose(flag);
-			return;
-		}
-		if (!DebugHandler.InstantBuildMode && this.currentDef != null && this.materialSelectionPanel.CurrentSelectedElement != null && this.currentDef.Mass[0] > WorldInventory.Instance.GetAmount(this.materialSelectionPanel.CurrentSelectedElement.tag))
-		{
-			this.materialSelectionPanel.AutoSelectAvailableMaterial();
 		}
 	}
 
 	private void SetTitle(BuildingDef def)
 	{
 		this.titleBar.SetTitle(def.Name);
-		bool flag = PlanScreen.Instance.BuildableState(this.currentDef) == PlanScreen.RequirementsState.Complete;
+		bool flag = (PlanScreen.Instance != null && PlanScreen.Instance.isActiveAndEnabled && PlanScreen.Instance.BuildableState(this.currentDef) == PlanScreen.RequirementsState.Complete) || (BuildMenu.Instance != null && BuildMenu.Instance.isActiveAndEnabled && BuildMenu.Instance.BuildableState(this.currentDef) == PlanScreen.RequirementsState.Complete);
 		this.titleBar.GetComponentInChildren<KImage>().ColorState = ((!flag) ? KImage.ColorSelector.Disabled : KImage.ColorSelector.Active);
 	}
 
@@ -204,7 +181,7 @@ public class ProductInfoScreen : KScreen
 					float num3 = 0f;
 					dictionary.TryGetValue(keyValuePair.Key, out num3);
 					float num4 = 0f;
-					string text2 = string.Empty;
+					string text2 = "";
 					if (dictionary2.TryGetValue(keyValuePair.Key, out num4))
 					{
 						num4 = Mathf.Abs(num3 * num4);
@@ -292,61 +269,82 @@ public class ProductInfoScreen : KScreen
 
 	private bool BuildRequirementsMet(BuildingDef def)
 	{
+		bool flag;
 		if (DebugHandler.InstantBuildMode)
 		{
-			return true;
+			flag = true;
 		}
-		Recipe craftRecipe = def.CraftRecipe;
-		return this.materialSelectionPanel.CanBuild(craftRecipe) && (def.RequiredTech == null || def.RequiredTech.IsComplete());
+		else
+		{
+			Recipe craftRecipe = def.CraftRecipe;
+			flag = this.materialSelectionPanel.CanBuild(craftRecipe) && Db.Get().TechItems.IsTechItemComplete(def.PrefabID);
+		}
+		return flag;
 	}
 
 	private void onMenuMaterialChanged()
 	{
-		if (this.currentDef == null)
+		if (!(this.currentDef == null))
 		{
-			return;
+			if (this.materialSelectionPanel.AllSelectorsSelected() && this.BuildRequirementsMet(this.currentDef))
+			{
+				this.onElementsFullySelected.Signal();
+			}
+			else
+			{
+				BuildTool.Instance.Deactivate();
+				if (PlanScreen.Instance != null)
+				{
+					PrebuildTool.Instance.Activate(this.currentDef, PlanScreen.Instance.BuildableState(this.currentDef));
+				}
+				if (BuildMenu.Instance != null)
+				{
+					PrebuildTool.Instance.Activate(this.currentDef, BuildMenu.Instance.BuildableState(this.currentDef));
+				}
+			}
+			this.SetDescription(this.currentDef);
 		}
-		if (this.materialSelectionPanel.AllSelectorsSelected() && this.BuildRequirementsMet(this.currentDef))
-		{
-			this.onElementsFullySelected.Signal();
-		}
-		else
-		{
-			BuildTool.Instance.Deactivate();
-			PrebuildTool.Instance.Activate(this.currentDef, PlanScreen.Instance.BuildableState(this.currentDef));
-		}
-		this.SetDescription(this.currentDef);
 	}
 
 	public static bool MaterialsMet(Recipe recipe)
 	{
+		bool flag;
 		if (recipe == null)
 		{
 			global::Debug.LogError("Trying to verify the materials on a null recipe!", null);
-			return false;
+			flag = false;
 		}
-		if (recipe.Ingredients == null || recipe.Ingredients.Count == 0)
+		else if (recipe.Ingredients == null || recipe.Ingredients.Count == 0)
 		{
 			global::Debug.LogError("Trying to verify the materials on a recipe with no MaterialCategoryTags!", null);
-			return false;
+			flag = false;
 		}
-		int i;
-		for (i = 0; i < recipe.Ingredients.Count; i++)
+		else
 		{
-			bool available = false;
-			MaterialSelectionPanel.Filter(recipe.Ingredients[i].tag, delegate(Element element, float kgAvailable)
+			for (int i = 0; i < recipe.Ingredients.Count; i++)
 			{
-				if (kgAvailable >= recipe.Ingredients[i].amount)
+				bool available = false;
+				MaterialSelectionPanel.Filter(recipe.Ingredients[i].tag, recipe.Ingredients[i].amount, delegate(Element element, float kgAvailable, float recipe_amount)
 				{
-					available = true;
+					if (kgAvailable >= recipe_amount)
+					{
+						available = true;
+					}
+				});
+				if (!available)
+				{
+					return false;
 				}
-			});
-			if (!available)
-			{
-				return false;
 			}
+			flag = true;
 		}
-		return true;
+		return flag;
+	}
+
+	public void Close()
+	{
+		this.ClearProduct(true);
+		base.Show(false);
 	}
 
 	public TitleBar titleBar;

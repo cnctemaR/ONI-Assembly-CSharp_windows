@@ -10,12 +10,17 @@ public class CellVisibility
 	public bool IsVisible(int cell)
 	{
 		int num = Grid.CellColumn(cell);
+		bool flag;
 		if (num < this.MinX || num > this.MaxX)
 		{
-			return false;
+			flag = false;
 		}
-		int num2 = Grid.CellRow(cell);
-		return num2 >= this.MinY && num2 <= this.MaxY;
+		else
+		{
+			int num2 = Grid.CellRow(cell);
+			flag = num2 >= this.MinY && num2 <= this.MaxY;
+		}
+		return flag;
 	}
 
 	private int MinX;

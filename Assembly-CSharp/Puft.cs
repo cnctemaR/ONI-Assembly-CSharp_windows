@@ -7,8 +7,8 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		Vector3 position = this.transform.position;
-		this.transform.SetPosition(position);
+		Vector3 position = base.transform.position;
+		base.transform.SetPosition(position);
 		base.gameObject.SetLayerRecursively(LayerMask.NameToLayer("Default"));
 	}
 
@@ -29,6 +29,32 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 		return this.storage.MassStored() > 1f;
 	}
 
+	private int FindLure()
+	{
+		int num = -1;
+		int num2 = int.MaxValue;
+		foreach (CreatureLure creatureLure in Components.Lures)
+		{
+			if (creatureLure.GetComponent<Operational>().IsOperational)
+			{
+				if (!(creatureLure.activeBaitSetting != GameTags.SlimeMold))
+				{
+					int num3 = global::UnityEngine.Random.Range(0, creatureLure.lurePoints.Length);
+					if (this.nav.CanReach(Grid.OffsetCell(Grid.PosToCell(creatureLure), creatureLure.lurePoints[num3])))
+					{
+						int navigationCost = this.nav.GetNavigationCost(Grid.OffsetCell(Grid.PosToCell(creatureLure), creatureLure.lurePoints[num3]));
+						if (navigationCost < num2 && navigationCost < this.MAX_LURE_RANGE)
+						{
+							num2 = navigationCost;
+							num = Grid.OffsetCell(Grid.PosToCell(creatureLure), creatureLure.lurePoints[num3]);
+						}
+					}
+				}
+			}
+		}
+		return num;
+	}
+
 	private int FindTargetGasCell()
 	{
 		return GameUtil.FloodFillFind(new Func<int, bool>(this.isTargetElement), Grid.PosToCell(base.gameObject), 8, true, true);
@@ -42,7 +68,14 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 
 	private bool isTargetElement(int cell)
 	{
-		return ElementLoader.elements[(int)Grid.Cell[cell].elementIdx] == ElementLoader.FindElementByHash(this.consumedElement) && Grid.Cell[cell].mass > this.minimumApproachMass && !Grid.Solid[Grid.CellAbove(cell)] && this.nav.CanReach(cell);
+		if (ElementLoader.elements[(int)Grid.Cell[cell].elementIdx] == ElementLoader.FindElementByHash(this.consumedElement))
+		{
+			if (Grid.Cell[cell].mass > this.minimumApproachMass && !Grid.Solid[Grid.CellAbove(cell)])
+			{
+				return this.nav.CanReach(cell);
+			}
+		}
+		return false;
 	}
 
 	public void OnAttacked(object data)
@@ -98,7 +131,7 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 			if (component != null)
 			{
 				component.AddLoopingSoundUpdater();
-				component.StartSound(this.inhaleSound, this.transform.position);
+				component.StartSound(this.inhaleSound, base.transform.position);
 				this.playingInhaleSound = true;
 			}
 		}
@@ -157,7 +190,9 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 
 	public int emitDiseasePerKg;
 
-	private bool playingInhaleSound;
+	private int MAX_LURE_RANGE = 50;
+
+	private bool playingInhaleSound = false;
 
 	public class StatesInstance : GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.GameInstance
 	{
@@ -187,7 +222,7 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 					smi.Subscribe(-787691065, new Action<object>(smi.master.OnAttacked));
 				});
 			this.alive.flee.InitializeStates(this.mover, this.alive.idle.idle);
-			this.alive.distressed.Drowning.PlayAnim("harvest", KAnim.PlayMode.Loop, null).EventTransition(GameHashes.EnteredBreathableArea, this.alive.idle.move, null);
+			this.alive.distressed.Drowning.PlayAnim("harvest", KAnim.PlayMode.Loop).EventTransition(GameHashes.EnteredBreathableArea, this.alive.idle.move, null);
 			this.alive.idle.idle.Enter(delegate(Puft.StatesInstance smi)
 			{
 				smi.Play("idle_loop", KAnim.PlayMode.Loop);
@@ -199,7 +234,11 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 				{
 					smi.Schedule(2f, delegate(object d)
 					{
-						int num = smi.master.FindTargetGasCell();
+						int num = smi.master.FindLure();
+						if (num == -1)
+						{
+							num = smi.master.FindTargetGasCell();
+						}
 						if (num != -1)
 						{
 							smi.master.breathTargetCell = num;
@@ -214,9 +253,9 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 			});
 			this.alive.idle.move.InitializeStates(this.alive.idle.idle);
 			this.alive.moveToBreathable.MoveTo((Puft.StatesInstance smi) => smi.master.GetBreathMoveTarget(), this.alive.idle.idle, this.alive.idle.idle, false);
-			this.alive.full.alt.GoTo(this.alive.full.full).PlayAnim("idle_loop_full", KAnim.PlayMode.Loop, null);
-			this.alive.full.full.MoveTo((Puft.StatesInstance smi) => Grid.CellAbove(Grid.PosToCell(smi.master.gameObject)), this.alive.full.alt, this.alive.full.fart, false).PlayAnim("idle_loop_full", KAnim.PlayMode.Loop, null);
-			this.alive.full.fart.PlayAnim("fart", KAnim.PlayMode.Once, null).Enter(delegate(Puft.StatesInstance smi)
+			this.alive.full.alt.GoTo(this.alive.full.full).PlayAnim("idle_loop_full", KAnim.PlayMode.Loop);
+			this.alive.full.full.MoveTo((Puft.StatesInstance smi) => Grid.CellAbove(Grid.PosToCell(smi.master.gameObject)), this.alive.full.alt, this.alive.full.fart, false).PlayAnim("idle_loop_full", KAnim.PlayMode.Loop);
+			this.alive.full.fart.PlayAnim("fart").Enter(delegate(Puft.StatesInstance smi)
 			{
 				smi.Schedule(1f, delegate(object obj)
 				{
@@ -227,8 +266,8 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 			{
 				smi.master.ConsumeFood(smi.deltatime);
 			});
-			this.alive.inhale.pre.PlayAnim("inhale_pre", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.alive.inhale.loop);
-			this.alive.inhale.loop.PlayAnim("inhale_loop", KAnim.PlayMode.Loop, null).Enter(delegate(Puft.StatesInstance smi)
+			this.alive.inhale.pre.PlayAnim("inhale_pre", KAnim.PlayMode.Once).OnAnimQueueComplete(this.alive.inhale.loop);
+			this.alive.inhale.loop.PlayAnim("inhale_loop", KAnim.PlayMode.Loop).Enter(delegate(Puft.StatesInstance smi)
 			{
 				smi.master.StartInhaleSound();
 			}).Update(delegate(Puft.StatesInstance smi)
@@ -252,8 +291,8 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 					smi.GoTo(this.alive.idle.move);
 				}
 			});
-			this.alive.inhale.pst_full.PlayAnim("inhale_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.alive.full.alt);
-			this.death.ToggleGravity().PlayAnim("death", KAnim.PlayMode.Once, null).EventHandler(GameHashes.AnimQueueComplete, delegate(Puft.StatesInstance smi)
+			this.alive.inhale.pst_full.PlayAnim("inhale_pst", KAnim.PlayMode.Once).OnAnimQueueComplete(this.alive.full.alt);
+			this.death.ToggleGravity().PlayAnim("death").EventHandler(GameHashes.AnimQueueComplete, delegate(Puft.StatesInstance smi)
 			{
 				Util.KDestroyGameObject(smi.gameObject);
 			})

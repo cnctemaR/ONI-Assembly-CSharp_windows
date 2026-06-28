@@ -23,22 +23,28 @@ namespace Klei.AI
 			string text;
 			if (this.converter.formatter != null)
 			{
-				text = this.converter.formatter.GetFormattedValue(num, this.converter.formatter.DeltaTimeSlice, this.gameObject);
+				text = this.converter.formatter.GetFormattedValue(num, this.converter.formatter.DeltaTimeSlice, base.gameObject);
 			}
 			else if (this.attributeInstance.Attribute.formatter != null)
 			{
-				text = this.attributeInstance.Attribute.formatter.GetFormattedValue(num, this.attributeInstance.Attribute.formatter.DeltaTimeSlice, this.gameObject);
+				text = this.attributeInstance.Attribute.formatter.GetFormattedValue(num, this.attributeInstance.Attribute.formatter.DeltaTimeSlice, base.gameObject);
 			}
 			else
 			{
 				text = GameUtil.GetFormattedSimple(num, GameUtil.TimeSlice.None, null);
 			}
+			string text3;
 			if (text != null)
 			{
 				text = GameUtil.AddPositiveSign(text, num > 0f);
-				return string.Format(this.converter.description, text);
+				string text2 = string.Format(this.converter.description, text);
+				text3 = text2;
 			}
-			return null;
+			else
+			{
+				text3 = null;
+			}
+			return text3;
 		}
 
 		public AttributeConverter converter;

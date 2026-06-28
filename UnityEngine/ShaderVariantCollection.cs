@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using UnityEngine.Rendering;
+using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
@@ -11,20 +12,20 @@ namespace UnityEngine
 			ShaderVariantCollection.Internal_Create(this);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_Create([Writable] ShaderVariantCollection mono);
 
 		public extern int shaderCount
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
 		public extern int variantCount
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -34,7 +35,7 @@ namespace UnityEngine
 			return this.AddInternal(variant.shader, variant.passType, variant.keywords);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern bool AddInternal(Shader shader, PassType passType, string[] keywords);
 
@@ -43,7 +44,7 @@ namespace UnityEngine
 			return this.RemoveInternal(variant.shader, variant.passType, variant.keywords);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern bool RemoveInternal(Shader shader, PassType passType, string[] keywords);
 
@@ -52,22 +53,22 @@ namespace UnityEngine
 			return this.ContainsInternal(variant.shader, variant.passType, variant.keywords);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private extern bool ContainsInternal(Shader shader, PassType passType, string[] keywords);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void Clear();
 
 		public extern bool isWarmedUp
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void WarmUp();
 
@@ -81,7 +82,7 @@ namespace UnityEngine
 				ShaderVariantCollection.ShaderVariant.Internal_CheckVariant(shader, passType, keywords);
 			}
 
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			private static extern void Internal_CheckVariant(Shader shader, PassType passType, string[] keywords);
 

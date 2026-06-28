@@ -10,11 +10,16 @@ namespace TMPro
 		{
 			get
 			{
+				Texture s_WhiteTexture;
 				if (this.texture == null)
 				{
-					return Graphic.s_WhiteTexture;
+					s_WhiteTexture = Graphic.s_WhiteTexture;
 				}
-				return this.texture;
+				else
+				{
+					s_WhiteTexture = this.texture;
+				}
+				return s_WhiteTexture;
 			}
 		}
 

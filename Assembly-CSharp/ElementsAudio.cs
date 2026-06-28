@@ -36,21 +36,21 @@ public class ElementsAudio
 		return null;
 	}
 
-	private static ElementsAudio _instance;
+	private static ElementsAudio _instance = null;
 
-	private ElementsAudio.ElementAudioConfig[] elementAudioConfigs;
+	private ElementsAudio.ElementAudioConfig[] elementAudioConfigs = null;
 
 	[DelimitedRecord(",")]
-	[IgnoreEmptyLines]
 	[IgnoreFirst(1)]
+	[IgnoreEmptyLines]
 	public class ElementAudioConfig
 	{
 		[FieldOrder(1)]
 		public SimHashes elementID;
 
+		[FieldOrder(2)]
 		[FieldOptional]
 		[FieldNullValue(AmbienceType.None)]
-		[FieldOrder(2)]
 		public AmbienceType ambienceType;
 
 		[FieldOrder(3)]
@@ -58,19 +58,19 @@ public class ElementsAudio
 		[FieldNullValue(SolidAmbienceType.None)]
 		public SolidAmbienceType solidAmbienceType;
 
+		[FieldOrder(4)]
 		[FieldOptional]
 		[FieldNullValue("")]
-		[FieldOrder(4)]
 		public string miningSound;
 
-		[FieldNullValue("")]
-		[FieldOptional]
 		[FieldOrder(5)]
+		[FieldOptional]
+		[FieldNullValue("")]
 		public string miningBreakSound;
 
-		[FieldNullValue("")]
 		[FieldOrder(6)]
 		[FieldOptional]
+		[FieldNullValue("")]
 		public string oreBumpSound;
 
 		[FieldOrder(7)]

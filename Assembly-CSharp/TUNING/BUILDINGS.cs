@@ -35,12 +35,6 @@ namespace TUNING
 
 		public const float PHARMACY_GENERIC_SINGLE = 1f;
 
-		public const float ROCKCRUSHER_FABRICATIONTIME = 80f;
-
-		public const float ROCKCRUSHER_INPUTKG = 100f;
-
-		public const float ROCKCRUSHER_OUTPUTKG = 20f;
-
 		public const float MASS_BURN_RATE_COALGENERATOR = 1f;
 
 		public const float MASS_BURN_RATE_HYDROGENGENERATOR = 0.1f;
@@ -59,226 +53,80 @@ namespace TUNING
 
 		public const int REPAIR_EFFECTIVENESS_BASE = 10;
 
-		public static Dictionary<PlanCategory, string[]> PLANORDER = new Dictionary<PlanCategory, string[]>
+		public static PlanScreen.PlanInfo[] PLANORDER = new PlanScreen.PlanInfo[]
 		{
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Base, new string[]
 			{
-				PlanCategory.Base,
-				new string[]
-				{
-					"Ladder", "LadderFast", "Tile", "GasPermeableMembrane", "MeshTile", "InsulationTile", "PlasticTile", "Door", "ManualPressureDoor", "PressureDoor",
-					"StorageLocker"
-				}
-			},
+				"Ladder", "FirePole", "LadderFast", "Tile", "GasPermeableMembrane", "MeshTile", "InsulationTile", "PlasticTile", "MetalTile", "Door",
+				"ManualPressureDoor", "PressureDoor", "StorageLocker"
+			}),
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Oxygen, new string[] { "MineralDeoxidizer", "AlgaeHabitat", "AirFilter", "CO2Scrubber", "Electrolyzer" }),
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Power, new string[]
 			{
-				PlanCategory.Oxygen,
-				new string[] { "MineralDeoxidizer", "AlgaeHabitat", "AirFilter", "CO2Scrubber", "Electrolyzer" }
-			},
+				"ManualGenerator",
+				"Generator",
+				"HydrogenGenerator",
+				"MethaneGenerator",
+				"PetroleumGenerator",
+				"Wire",
+				"WireBridge",
+				"HighWattageWire",
+				"WireBridgeHighWattage",
+				"WireRefined",
+				"WireRefinedBridge",
+				"WireRefinedHighWattage",
+				"WireRefinedBridgeHighWattage",
+				"Battery",
+				"BatteryMedium",
+				"BatterySmart",
+				"PowerTransformer",
+				SwitchConfig.ID,
+				LogicPowerRelayConfig.ID,
+				TemperatureControlledSwitchConfig.ID,
+				PressureSwitchLiquidConfig.ID,
+				PressureSwitchGasConfig.ID
+			}),
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Food, new string[] { "MicrobeMusher", "CookingStation", "PlanterBox", "FarmTile", "HydroponicFarm", "RationBox", "Refrigerator", "CreatureTrap", "AirborneCreatureLure", "CreatureDeliveryPoint" }),
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Plumbing, new string[]
 			{
-				PlanCategory.Power,
-				new string[]
-				{
-					"ManualGenerator",
-					"Generator",
-					"HydrogenGenerator",
-					"MethaneGenerator",
-					"PetroleumGenerator",
-					"Wire",
-					"WireBridge",
-					"HighWattageWire",
-					"WireBridgeHighWattage",
-					"Battery",
-					"BatteryMedium",
-					"PowerTransformer",
-					SwitchConfig.ID,
-					TemperatureControlledSwitchConfig.ID,
-					PressureSwitchLiquidConfig.ID,
-					PressureSwitchGasConfig.ID
-				}
-			},
+				"Outhouse", "FlushToilet", "Shower", "LiquidPumpingStation", "BottleEmptier", "LiquidConduit", "InsulatedLiquidConduit", "LiquidConduitBridge", "LiquidPump", "LiquidMiniPump",
+				"LiquidVent", "LiquidFilter", "LiquidValve", "LiquidLogicValve"
+			}),
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.HVAC, new string[] { "GasConduit", "InsulatedGasConduit", "GasConduitBridge", "GasPump", "GasMiniPump", "GasVent", "GasVentHighPressure", "GasFilter", "GasValve", "GasLogicValve" }),
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Utilities, new string[] { "SpaceHeater", "LiquidHeater", "LiquidCooledFan", "AirConditioner", "LiquidConditioner", "OreScrubber", "OilWellCap", "ThermalBlock" }),
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Refining, new string[] { "Compost", "WaterPurifier", "FertilizerMaker", "AlgaeDistillery", "RockCrusher", "MetalRefinery", "OilRefinery", "Polymerizer" }),
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Medical, new string[] { "WashBasin", "WashSink", "HandSanitizer", "Apothecary", "MedicalCot", "MedicalBed", "Grave" }),
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Furniture, new string[]
 			{
-				PlanCategory.Food,
-				new string[] { "MicrobeMusher", "CookingStation", "PlanterBox", "FarmTile", "HydroponicFarm", "RationBox", "Refrigerator", "CreatureTrap", "CreatureDeliveryPoint" }
-			},
+				BedConfig.ID,
+				LuxuryBedConfig.ID,
+				"MassageTable",
+				"DiningTable",
+				"FlowerVase",
+				"Canvas",
+				"Sculpture",
+				"FloorLamp",
+				"CeilingLight"
+			}),
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Equipment, new string[] { "ResearchCenter", "AdvancedResearchCenter", "GenericFabricator", "ClothingFabricator", "SuitFabricator", "SuitMarker", "SuitLocker" }),
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Automation, new string[]
 			{
-				PlanCategory.Plumbing,
-				new string[]
-				{
-					"Outhouse", "FlushToilet", "Shower", "LiquidPumpingStation", "BottleEmptier", "LiquidConduit", "InsulatedLiquidConduit", "LiquidConduitBridge", "LiquidPump", "LiquidValve",
-					"LiquidVent", "LiquidFilter"
-				}
-			},
-			{
-				PlanCategory.HVAC,
-				new string[] { "GasConduit", "InsulatedGasConduit", "GasConduitBridge", "GasPump", "GasValve", "GasVent", "GasVentHighPressure", "GasFilter" }
-			},
-			{
-				PlanCategory.Utilities,
-				new string[] { "SpaceHeater", "LiquidHeater", "LiquidCooledFan", "AirConditioner", "LiquidConditioner", "OreScrubber", "OilWellCap" }
-			},
-			{
-				PlanCategory.Refining,
-				new string[] { "Compost", "FertilizerMaker", "WaterPurifier", "AlgaeDistillery", "OilRefinery", "Polymerizer" }
-			},
-			{
-				PlanCategory.Medical,
-				new string[] { "WashBasin", "WashSink", "HandSanitizer", "Apothecary", "MedicalCot", "MedicalBed", "Grave" }
-			},
-			{
-				PlanCategory.Furniture,
-				new string[]
-				{
-					BedConfig.ID,
-					LuxuryBedConfig.ID,
-					"MassageTable",
-					"DiningTable"
-				}
-			},
-			{
-				PlanCategory.Equipment,
-				new string[] { "ResearchCenter", "AdvancedResearchCenter", "GenericFabricator", "ClothingFabricator", "SuitFabricator", "SuitMarker", "SuitLocker" }
-			},
-			{
-				PlanCategory.Misc,
-				new string[] { "FlowerVase", "Canvas", "Sculpture", "FloorLamp", "CeilingLight" }
-			}
-		};
-
-		public static Dictionary<string, string[]> RESEARCH = new Dictionary<string, string[]>
-		{
-			{
-				"FarmingTech",
-				new string[] { "AlgaeHabitat", "PlanterBox", "RationBox", "Compost" }
-			},
-			{
-				"FineDining",
-				new string[] { "DiningTable", "FarmTile", "CookingStation" }
-			},
-			{
-				"Agriculture",
-				new string[] { "FertilizerMaker", "HydroponicFarm", "Refrigerator" }
-			},
-			{
-				"AnimalControl",
-				new string[] { "CreatureTrap", "CreatureDeliveryPoint" }
-			},
-			{
-				"ImprovedOxygen",
-				new string[] { "CO2Scrubber", "Electrolyzer" }
-			},
-			{
-				"GasPiping",
-				new string[] { "GasConduit", "GasPump", "GasVent", "GasConduitBridge" }
-			},
-			{
-				"ImprovedGasPiping",
-				new string[]
-				{
-					"InsulatedGasConduit",
-					PressureSwitchGasConfig.ID,
-					"GasVentHighPressure"
-				}
-			},
-			{
-				"Clothing",
-				new string[] { "ClothingFabricator" }
-			},
-			{
-				"PressureManagement",
-				new string[] { "LiquidValve", "GasValve", "ManualPressureDoor", "GasPermeableMembrane" }
-			},
-			{
-				"DirectedAirStreams",
-				new string[] { "PressureDoor", "OreScrubber", "AirFilter" }
-			},
-			{
-				"LiquidPiping",
-				new string[] { "LiquidConduit", "LiquidPump", "LiquidVent", "LiquidConduitBridge" }
-			},
-			{
-				"Luxury",
-				new string[]
-				{
-					LuxuryBedConfig.ID,
-					"LadderFast",
-					"PlasticTile"
-				}
-			},
-			{
-				"ImprovedLiquidPiping",
-				new string[]
-				{
-					"InsulatedLiquidConduit",
-					PressureSwitchLiquidConfig.ID
-				}
-			},
-			{
-				"SanitationSciences",
-				new string[] { "WashSink", "FlushToilet", "Shower", "MeshTile" }
-			},
-			{
-				"Medbay",
-				new string[] { "HandSanitizer", "MedicalBed" }
-			},
-			{
-				"AdvancedFiltration",
-				new string[] { "GasFilter", "LiquidFilter" }
-			},
-			{
-				"Distillation",
-				new string[] { "WaterPurifier", "AlgaeDistillery" }
-			},
-			{
-				"PowerRegulation",
-				new string[] { "Switch", "BatteryMedium", "WireBridge" }
-			},
-			{
-				"AdvancedPowerRegulation",
-				new string[] { "HighWattageWire", "WireBridgeHighWattage", "PowerTransformer" }
-			},
-			{
-				"Combustion",
-				new string[] { "Generator", "HydrogenGenerator" }
-			},
-			{
-				"ImprovedCombustion",
-				new string[] { "MethaneGenerator", "OilRefinery", "PetroleumGenerator" }
-			},
-			{
-				"InteriorDecor",
-				new string[] { "FlowerVase", "FloorLamp", "CeilingLight" }
-			},
-			{
-				"Artistry",
-				new string[] { "Canvas", "Sculpture" }
-			},
-			{
-				"Plastics",
-				new string[] { "Polymerizer", "OilWellCap" }
-			},
-			{
-				"Suits",
-				new string[] { "SuitMarker", "SuitLocker", "SuitFabricator" }
-			},
-			{
-				"AdvancedResearch",
-				new string[] { "AdvancedResearchCenter" }
-			},
-			{
-				"MedicalResearch",
-				new string[] { "Apothecary" }
-			},
-			{
-				"TemperatureModulation",
-				new string[] { "LiquidCooledFan", "SpaceHeater", "InsulationTile" }
-			},
-			{
-				"HVAC",
-				new string[] { "AirConditioner", "TemperatureControlledSwitch" }
-			},
-			{
-				"LiquidTemperature",
-				new string[] { "LiquidHeater", "LiquidConditioner" }
-			}
+				"LogicWire",
+				"LogicWireBridge",
+				"LogicGateAND",
+				"LogicGateOR",
+				"LogicGateXOR",
+				"LogicGateNOT",
+				"LogicGateBUFFER",
+				"LogicGateFILTER",
+				LogicSwitchConfig.ID,
+				LogicPressureSensorGasConfig.ID,
+				LogicPressureSensorLiquidConfig.ID,
+				LogicTemperatureSensorConfig.ID,
+				LogicTimeOfDaySensorConfig.ID,
+				"FloorSwitch",
+				"Checkpoint"
+			})
 		};
 
 		public static List<string> COMPONENT_DESCRIPTION_ORDER = new List<string>
@@ -344,6 +192,8 @@ namespace TUNING
 			"Refrigerator",
 			BedConfig.ID,
 			"OreScrubber",
+			"Refinery",
+			"LiquidCooledRefinery",
 			"Edible",
 			"PlantableSeed",
 			"FriedMushBar",
@@ -359,7 +209,12 @@ namespace TUNING
 			"ToiletWorkableUse",
 			"ReceptacleMonitor",
 			"Light2D",
-			"DecorProvider"
+			"Ladder",
+			"SimCellOccupier",
+			"Vent",
+			"TilePOI",
+			"DecorProvider",
+			"LogicPorts"
 		};
 
 		public class OVERPRESSURE
@@ -401,8 +256,23 @@ namespace TUNING
 			public const float HIGH_3 = 2000f;
 		}
 
+		public class DECOR_MATERIAL_MOD
+		{
+			public const float NORMAL = 0f;
+
+			public const float HIGH_1 = 0.1f;
+
+			public const float HIGH_2 = 0.2f;
+
+			public const float HIGH_3 = 0.5f;
+
+			public const float HIGH_4 = 1f;
+		}
+
 		public class CONSTRUCTION_MASS_KG
 		{
+			public static float[] TIER_TINY = new float[] { 5f };
+
 			public static float[] TIER0 = new float[] { 25f };
 
 			public static float[] TIER1 = new float[] { 50f };
@@ -576,7 +446,9 @@ namespace TUNING
 
 		public class FABRICATION_TIME_SECONDS
 		{
-			public const float STANDARD = 40f;
+			public const float SHORT = 40f;
+
+			public const float MODERATE = 80f;
 
 			public const float LONG = 250f;
 		}

@@ -41,75 +41,77 @@ public class HarvestableOverlayWidget : KMonoBehaviour
 		{
 			this.bar.SetActive(false);
 			this.vertical_container.SetActive(false);
-			return;
-		}
-		Image image = this.bar.GetComponent<HierarchyReferences>().GetReference("Fill") as Image;
-		if (target_harvestable.GetAmounts().Has(Db.Get().Amounts.Maturity))
-		{
-			this.bar.SetActive(true);
-			float num = target_harvestable.gameObject.GetAmounts().Get(Db.Get().Amounts.Maturity).value / target_harvestable.gameObject.GetAmounts().Get(Db.Get().Amounts.Maturity).GetMax();
-			image.rectTransform.offsetMin = new Vector2(image.rectTransform.offsetMin.x, 3f);
-			this.bar.SetActive(!target_harvestable.CanBeHavested);
-			float num2 = ((!target_harvestable.CanBeHavested) ? (19f - 19f * num + 3f) : 3f);
-			image.rectTransform.offsetMax = new Vector2(image.rectTransform.offsetMax.x, -num2);
 		}
 		else
 		{
-			this.bar.SetActive(false);
-		}
-		WiltCondition component = target_harvestable.GetComponent<WiltCondition>();
-		if (component != null)
-		{
-			for (int i = 0; i < this.horizontal_containers.Length; i++)
+			Image image = this.bar.GetComponent<HierarchyReferences>().GetReference("Fill") as Image;
+			if (target_harvestable.GetAmounts().Has(Db.Get().Amounts.Maturity))
 			{
-				this.horizontal_containers[i].SetActive(false);
+				this.bar.SetActive(true);
+				float num = target_harvestable.gameObject.GetAmounts().Get(Db.Get().Amounts.Maturity).value / target_harvestable.gameObject.GetAmounts().Get(Db.Get().Amounts.Maturity).GetMax();
+				image.rectTransform.offsetMin = new Vector2(image.rectTransform.offsetMin.x, 3f);
+				this.bar.SetActive(!target_harvestable.CanBeHavested);
+				float num2 = ((!target_harvestable.CanBeHavested) ? (19f - 19f * num + 3f) : 3f);
+				image.rectTransform.offsetMax = new Vector2(image.rectTransform.offsetMax.x, -num2);
 			}
-			foreach (KeyValuePair<WiltCondition.Condition, GameObject> keyValuePair in this.condition_icons)
+			else
 			{
-				keyValuePair.Value.SetActive(false);
+				this.bar.SetActive(false);
 			}
-			if (component.IsWilting())
+			WiltCondition component = target_harvestable.GetComponent<WiltCondition>();
+			if (component != null)
 			{
-				this.vertical_container.SetActive(true);
-				image.color = HarvestableOverlayWidget.wilting_color;
-				List<WiltCondition.Condition> list = component.CurrentWiltSources();
-				if (list.Count > 0)
+				for (int i = 0; i < this.horizontal_containers.Length; i++)
 				{
-					for (int j = 0; j < list.Count; j++)
+					this.horizontal_containers[i].SetActive(false);
+				}
+				foreach (KeyValuePair<WiltCondition.Condition, GameObject> keyValuePair in this.condition_icons)
+				{
+					keyValuePair.Value.SetActive(false);
+				}
+				if (component.IsWilting())
+				{
+					this.vertical_container.SetActive(true);
+					image.color = HarvestableOverlayWidget.wilting_color;
+					List<WiltCondition.Condition> list = component.CurrentWiltSources();
+					if (list.Count > 0)
 					{
-						if (this.condition_icons.ContainsKey(list[j]))
+						for (int j = 0; j < list.Count; j++)
 						{
-							this.condition_icons[list[j]].SetActive(true);
-							this.horizontal_containers[j / 2].SetActive(true);
-							this.condition_icons[list[j]].transform.SetParent(this.horizontal_containers[j / 2].transform);
+							if (this.condition_icons.ContainsKey(list[j]))
+							{
+								this.condition_icons[list[j]].SetActive(true);
+								this.horizontal_containers[j / 2].SetActive(true);
+								this.condition_icons[list[j]].transform.SetParent(this.horizontal_containers[j / 2].transform);
+							}
 						}
 					}
+				}
+				else
+				{
+					this.vertical_container.SetActive(false);
+					image.color = HarvestableOverlayWidget.growing_color;
 				}
 			}
 			else
 			{
-				this.vertical_container.SetActive(false);
 				image.color = HarvestableOverlayWidget.growing_color;
+				this.vertical_container.SetActive(false);
 			}
 		}
-		else
-		{
-			image.color = HarvestableOverlayWidget.growing_color;
-			this.vertical_container.SetActive(false);
-		}
 	}
-
-	private const int icons_per_row = 2;
-
-	private const float bar_fill_range = 19f;
-
-	private const float bar_fill_offset = 3f;
 
 	[SerializeField]
 	private GameObject vertical_container;
 
 	[SerializeField]
 	private GameObject bar;
+
+	private const int icons_per_row = 2;
+
+	private const float bar_fill_range = 19f;
+
+	private const float bar_fill_offset = 3f;
 
 	private static Color growing_color = new Color(0.9843137f, 0.6901961f, 0.23137255f, 1f);
 

@@ -15,13 +15,13 @@ public class StressMonitor : GameStateMachine<StressMonitor, StressMonitor.Insta
 		this.stressed.tier2.TriggerOnEnter(GameHashes.StressedHadEnough, null).Transition(this.stressed.tier1, (StressMonitor.Instance smi) => !smi.HasHadEnough());
 	}
 
-	private const float StressThreshold_One = 60f;
-
-	private const float StressThreshold_Two = 100f;
-
 	public GameStateMachine<StressMonitor, StressMonitor.Instance, IStateMachineTarget, object>.State satisfied;
 
 	public StressMonitor.Stressed stressed;
+
+	private const float StressThreshold_One = 60f;
+
+	private const float StressThreshold_Two = 100f;
 
 	public class Stressed : GameStateMachine<StressMonitor, StressMonitor.Instance, IStateMachineTarget, object>.State
 	{

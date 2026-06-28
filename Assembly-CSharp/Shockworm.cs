@@ -8,9 +8,9 @@ public class Shockworm : StateMachineComponent<Shockworm.StatesInstance>, ISaveL
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		Vector3 position = this.transform.position;
+		Vector3 position = base.transform.position;
 		position.z = Grid.GetLayerZ(Grid.SceneLayer.Move);
-		this.transform.SetPosition(position);
+		base.transform.SetPosition(position);
 		base.gameObject.SetLayerRecursively(LayerMask.NameToLayer("Default"));
 	}
 
@@ -18,8 +18,8 @@ public class Shockworm : StateMachineComponent<Shockworm.StatesInstance>, ISaveL
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
-		this.Subscribe(229718515, new Action<object>(this.OnThreatned));
-		this.Subscribe(-21431934, new Action<object>(this.ClearThreat));
+		base.Subscribe(229718515, new Action<object>(this.OnThreatned));
+		base.Subscribe(-21431934, new Action<object>(this.ClearThreat));
 	}
 
 	private void OnThreatned(object threat)
@@ -82,7 +82,7 @@ public class Shockworm : StateMachineComponent<Shockworm.StatesInstance>, ISaveL
 				});
 			this.alive.idleStates.EventTransition(GameHashes.Threatned, this.alive.attackStates.plan_attack, null);
 			this.alive.attackStates.EventTransition(GameHashes.SafeFromThreats, this.alive.idleStates.idle, null);
-			this.alive.distressed.Drowning.PlayAnim("hit", KAnim.PlayMode.Loop, null).EventTransition(GameHashes.EnteredBreathableArea, this.alive.idleStates.move, null);
+			this.alive.distressed.Drowning.PlayAnim("hit", KAnim.PlayMode.Loop).EventTransition(GameHashes.EnteredBreathableArea, this.alive.idleStates.move, null);
 			this.alive.idleStates.idle.Enter(delegate(Shockworm.StatesInstance smi)
 			{
 				smi.Play("idle", KAnim.PlayMode.Once);
@@ -99,7 +99,7 @@ public class Shockworm : StateMachineComponent<Shockworm.StatesInstance>, ISaveL
 			this.alive.idleStates.move.InitializeStates(this.alive.idleStates.idle);
 			this.alive.idleStates.debug_go_to.InitializeStates(this.alive.idleStates.idle);
 			this.alive.attackStates.approachtarget.InitializeStates(this.mover, this.threatMoveTarget, this.alive.attackStates.regular, this.alive.idleStates.idle, OffsetGroups.Standard, NavigationTactics.Range_2_AvoidOverlaps);
-			this.alive.attackStates.regular.PlayAnim("atk_pre", KAnim.PlayMode.Once, null).QueueAnim("atk_loop", false, null).QueueAnim("atk_pst", false, null)
+			this.alive.attackStates.regular.PlayAnim("atk_pre").QueueAnim("atk_loop", false, null).QueueAnim("atk_pst", false, null)
 				.OnAnimQueueComplete(this.alive.attackStates.plan_attack)
 				.Enter(delegate(Shockworm.StatesInstance smi)
 				{
@@ -108,7 +108,7 @@ public class Shockworm : StateMachineComponent<Shockworm.StatesInstance>, ISaveL
 						smi.master.weapon.AttackArea(smi.master.transform.position);
 					}, null);
 				});
-			this.death.ToggleGravity().PlayAnim("death", KAnim.PlayMode.Once, null).EventHandler(GameHashes.AnimQueueComplete, delegate(Shockworm.StatesInstance smi)
+			this.death.ToggleGravity().PlayAnim("death").EventHandler(GameHashes.AnimQueueComplete, delegate(Shockworm.StatesInstance smi)
 			{
 				Util.KDestroyGameObject(smi.gameObject);
 			})

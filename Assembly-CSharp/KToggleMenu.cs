@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class KToggleMenu : KScreen
 {
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event KToggleMenu.OnSelect onSelect;
 
 	public void Setup(IList<KToggleMenu.ToggleInfo> toggleInfo)
@@ -28,33 +30,32 @@ public class KToggleMenu : KScreen
 			}
 		}
 		this.toggles.Clear();
-		if (this.toggleInfo == null)
+		if (this.toggleInfo != null)
 		{
-			return;
-		}
-		Transform transform = ((!(this.toggleParent != null)) ? this.transform : this.toggleParent);
-		for (int i = 0; i < this.toggleInfo.Count; i++)
-		{
-			int idx = i;
-			KToggleMenu.ToggleInfo toggleInfo = this.toggleInfo[i];
-			if (toggleInfo == null)
+			Transform transform = ((!(this.toggleParent != null)) ? base.transform : this.toggleParent);
+			for (int i = 0; i < this.toggleInfo.Count; i++)
 			{
-				this.toggles.Add(null);
-			}
-			else
-			{
-				KToggle ktoggle2 = global::UnityEngine.Object.Instantiate(this.prefab, Vector3.zero, Quaternion.identity) as KToggle;
-				ktoggle2.gameObject.name = "Toggle:" + toggleInfo.text;
-				ktoggle2.transform.SetParent(transform, false);
-				ktoggle2.group = this.group;
-				ktoggle2.onClick += delegate
+				int idx = i;
+				KToggleMenu.ToggleInfo toggleInfo = this.toggleInfo[i];
+				if (toggleInfo == null)
 				{
-					this.OnClick(idx);
-				};
-				Text text = ktoggle2.GetComponentsInChildren<Text>(true)[0];
-				text.text = toggleInfo.text;
-				toggleInfo.toggle = ktoggle2;
-				this.toggles.Add(ktoggle2);
+					this.toggles.Add(null);
+				}
+				else
+				{
+					KToggle ktoggle2 = global::UnityEngine.Object.Instantiate<KToggle>(this.prefab, Vector3.zero, Quaternion.identity);
+					ktoggle2.gameObject.name = "Toggle:" + toggleInfo.text;
+					ktoggle2.transform.SetParent(transform, false);
+					ktoggle2.group = this.group;
+					ktoggle2.onClick += delegate
+					{
+						this.OnClick(idx);
+					};
+					Text text = ktoggle2.GetComponentsInChildren<Text>(true)[0];
+					text.text = toggleInfo.text;
+					toggleInfo.toggle = ktoggle2;
+					this.toggles.Add(ktoggle2);
+				}
 			}
 		}
 	}
@@ -67,26 +68,24 @@ public class KToggleMenu : KScreen
 	private void OnClick(int i)
 	{
 		UISounds.PlaySound(UISounds.Sound.ClickObject);
-		if (this.onSelect == null)
+		if (this.onSelect != null)
 		{
-			return;
+			this.onSelect(this.toggleInfo[i]);
 		}
-		this.onSelect(this.toggleInfo[i]);
 	}
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (this.toggles == null)
+		if (this.toggles != null)
 		{
-			return;
-		}
-		for (int i = 0; i < this.toggleInfo.Count; i++)
-		{
-			global::Action hotKey = this.toggleInfo[i].hotKey;
-			if (hotKey != global::Action.NumActions && e.TryConsume(hotKey))
+			for (int i = 0; i < this.toggleInfo.Count; i++)
 			{
-				this.toggles[i].Click();
-				break;
+				global::Action hotKey = this.toggleInfo[i].hotKey;
+				if (hotKey != global::Action.NumActions && e.TryConsume(hotKey))
+				{
+					this.toggles[i].Click();
+					break;
+				}
 			}
 		}
 	}
@@ -106,6 +105,8 @@ public class KToggleMenu : KScreen
 
 	private static int selected = -1;
 
+	public delegate void OnSelect(KToggleMenu.ToggleInfo toggleInfo);
+
 	public class ToggleInfo
 	{
 		public ToggleInfo(string text, object user_data = null, global::Action hotKey = global::Action.NumActions)
@@ -123,6 +124,4 @@ public class KToggleMenu : KScreen
 
 		public global::Action hotKey;
 	}
-
-	public delegate void OnSelect(KToggleMenu.ToggleInfo toggleInfo);
 }

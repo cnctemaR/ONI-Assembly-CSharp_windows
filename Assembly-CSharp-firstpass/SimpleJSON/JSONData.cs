@@ -54,37 +54,45 @@ namespace SimpleJSON
 
 		public override void Serialize(BinaryWriter aWriter)
 		{
-			JSONData jsondata = new JSONData(string.Empty);
+			JSONData jsondata = new JSONData("");
 			jsondata.AsInt = this.AsInt;
 			if (jsondata.m_Data == this.m_Data)
 			{
 				aWriter.Write(4);
 				aWriter.Write(this.AsInt);
-				return;
 			}
-			jsondata.AsFloat = this.AsFloat;
-			if (jsondata.m_Data == this.m_Data)
+			else
 			{
-				aWriter.Write(7);
-				aWriter.Write(this.AsFloat);
-				return;
+				jsondata.AsFloat = this.AsFloat;
+				if (jsondata.m_Data == this.m_Data)
+				{
+					aWriter.Write(7);
+					aWriter.Write(this.AsFloat);
+				}
+				else
+				{
+					jsondata.AsDouble = this.AsDouble;
+					if (jsondata.m_Data == this.m_Data)
+					{
+						aWriter.Write(5);
+						aWriter.Write(this.AsDouble);
+					}
+					else
+					{
+						jsondata.AsBool = this.AsBool;
+						if (jsondata.m_Data == this.m_Data)
+						{
+							aWriter.Write(6);
+							aWriter.Write(this.AsBool);
+						}
+						else
+						{
+							aWriter.Write(3);
+							aWriter.Write(this.m_Data);
+						}
+					}
+				}
 			}
-			jsondata.AsDouble = this.AsDouble;
-			if (jsondata.m_Data == this.m_Data)
-			{
-				aWriter.Write(5);
-				aWriter.Write(this.AsDouble);
-				return;
-			}
-			jsondata.AsBool = this.AsBool;
-			if (jsondata.m_Data == this.m_Data)
-			{
-				aWriter.Write(6);
-				aWriter.Write(this.AsBool);
-				return;
-			}
-			aWriter.Write(3);
-			aWriter.Write(this.m_Data);
 		}
 
 		private string m_Data;

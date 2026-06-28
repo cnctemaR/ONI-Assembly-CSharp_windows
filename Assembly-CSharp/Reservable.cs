@@ -21,12 +21,17 @@ public class Reservable : KMonoBehaviour
 
 	public bool Reserve(GameObject reserver)
 	{
+		bool flag;
 		if (this.reservedBy == null)
 		{
 			this.reservedBy = reserver;
-			return true;
+			flag = true;
 		}
-		return false;
+		else
+		{
+			flag = false;
+		}
+		return flag;
 	}
 
 	public void ClearReservation(GameObject reserver)

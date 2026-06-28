@@ -3,7 +3,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class KMonoBehaviour : MonoBehaviour, ISaveLoadable, IStateMachineTarget, IUniformGridObject
+public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable, IUniformGridObject
 {
 	public bool isSpawned { get; private set; }
 
@@ -25,73 +25,69 @@ public class KMonoBehaviour : MonoBehaviour, ISaveLoadable, IStateMachineTarget,
 
 	public void Awake()
 	{
-		if (App.IsExiting)
+		if (!App.IsExiting)
 		{
-			return;
+			this.InitializeComponent();
 		}
-		this.InitializeComponent();
 	}
 
 	public void InitializeComponent()
 	{
-		if (this.isInitialized)
+		if (!this.isInitialized)
 		{
-			return;
-		}
-		if (Application.isPlaying && KMonoBehaviour.lastGameObject != base.gameObject)
-		{
-			KMonoBehaviour.lastGameObject = base.gameObject;
-			KMonoBehaviour.lastObj = KObjectManager.Instance.GetOrCreateObject(base.gameObject);
-		}
-		this.obj = KMonoBehaviour.lastObj;
-		this.isInitialized = true;
-		MyCmp.OnAwake(this);
-		if (!KMonoBehaviour.isPoolPreInit)
-		{
-			try
+			if (Application.isPlaying && KMonoBehaviour.lastGameObject != base.gameObject)
 			{
-				this.OnPrefabInit();
+				KMonoBehaviour.lastGameObject = base.gameObject;
+				KMonoBehaviour.lastObj = KObjectManager.Instance.GetOrCreateObject(base.gameObject);
 			}
-			catch (Exception ex)
+			this.obj = KMonoBehaviour.lastObj;
+			this.isInitialized = true;
+			MyCmp.OnAwake(this);
+			if (!KMonoBehaviour.isPoolPreInit)
 			{
-				Output.LogError(new object[] { string.Concat(new string[]
+				try
 				{
-					"Error in: ",
-					base.name,
-					".",
-					base.GetType().Name,
-					".OnPrefabInit\n",
-					ex.ToString()
-				}) });
+					this.OnPrefabInit();
+				}
+				catch (Exception ex)
+				{
+					Output.LogError(new object[] { string.Concat(new string[]
+					{
+						"Error in: ",
+						base.name,
+						".",
+						base.GetType().Name,
+						".OnPrefabInit\n",
+						ex.ToString()
+					}) });
+				}
 			}
 		}
 	}
 
 	private void OnEnable()
 	{
-		if (App.IsExiting)
+		if (!App.IsExiting)
 		{
-			return;
-		}
-		this.OnCmpEnable();
-		if (UpdateManager.instance != null && !this.simUpdateRegistered && this.isSpawned)
-		{
-			this.simUpdateRegistered = true;
-			UpdateManager.AddSimUpdater(this);
+			this.OnCmpEnable();
+			if (UpdateManager.instance != null && !this.simUpdateRegistered && this.isSpawned)
+			{
+				this.simUpdateRegistered = true;
+				UpdateManager.AddSimUpdater(this);
+			}
 		}
 	}
 
 	private void OnDisable()
 	{
-		if (App.IsExiting || KMonoBehaviour.isLoadingScene)
+		if (!App.IsExiting && !KMonoBehaviour.isLoadingScene)
 		{
-			return;
-		}
-		this.OnCmpDisable();
-		if (this.simUpdateRegistered)
-		{
-			this.simUpdateRegistered = false;
-			UpdateManager.RemoveSimUpdater(this);
+			this.OnCmpDisable();
+			if (this.simUpdateRegistered)
+			{
+				this.simUpdateRegistered = false;
+				UpdateManager.RemoveSimUpdater(this);
+			}
 		}
 	}
 
@@ -103,77 +99,78 @@ public class KMonoBehaviour : MonoBehaviour, ISaveLoadable, IStateMachineTarget,
 	public void OnDestroy()
 	{
 		this.OnForcedCleanUp();
-		if (App.IsExiting)
+		if (!App.IsExiting)
 		{
-			return;
+			if (KMonoBehaviour.isLoadingScene)
+			{
+				this.OnLoadLevel();
+			}
+			else
+			{
+				if (KObjectManager.Instance != null)
+				{
+					KObjectManager.Instance.QueueDestroy(this.obj);
+				}
+				this.OnCleanUp();
+			}
 		}
-		if (KMonoBehaviour.isLoadingScene)
-		{
-			this.OnLoadLevel();
-			return;
-		}
-		if (KObjectManager.Instance != null)
-		{
-			KObjectManager.Instance.QueueDestroy(this.obj);
-		}
-		this.OnCleanUp();
 	}
 
 	public void Start()
 	{
-		if (App.IsExiting)
+		if (!App.IsExiting)
 		{
-			return;
+			this.Spawn();
 		}
-		this.Spawn();
 	}
 
 	public void Spawn()
 	{
-		if (this.isSpawned)
+		if (!this.isSpawned)
 		{
-			return;
-		}
-		string text = base.GetType().Name;
-		if (text == "LoopingSounds")
-		{
-			text = "LS";
-		}
-		if (text == "Sequenceable")
-		{
-			text = "S";
-		}
-		if (text == "StructureTemperature")
-		{
-			text = "ST";
-		}
-		if (!this.isInitialized)
-		{
-			global::Debug.LogError(base.name + "." + text + " is not initialized.", null);
-			return;
-		}
-		this.isSpawned = true;
-		MyCmp.OnStart(this);
-		try
-		{
-			this.OnSpawn();
-		}
-		catch (Exception ex)
-		{
-			Output.LogError(new object[] { string.Concat(new string[]
+			string text = base.GetType().Name;
+			if (text == "LoopingSounds")
 			{
-				"Error in: ",
-				base.name,
-				".",
-				text,
-				".OnSpawn\n",
-				ex.ToString()
-			}) });
-		}
-		if (UpdateManager.instance != null && !this.simUpdateRegistered && base.enabled)
-		{
-			this.simUpdateRegistered = true;
-			UpdateManager.AddSimUpdater(this);
+				text = "LS";
+			}
+			if (text == "Sequenceable")
+			{
+				text = "S";
+			}
+			if (text == "StructureTemperature")
+			{
+				text = "ST";
+			}
+			if (!this.isInitialized)
+			{
+				global::Debug.LogError(base.name + "." + text + " is not initialized.", null);
+			}
+			else
+			{
+				this.isSpawned = true;
+				MyCmp.OnStart(this);
+				try
+				{
+					this.OnSpawn();
+				}
+				catch (Exception ex)
+				{
+					Output.LogError(new object[] { string.Concat(new string[]
+					{
+						"Error in: ",
+						base.name,
+						".",
+						text,
+						".OnSpawn\n",
+						ex.ToString()
+					}) });
+				}
+				if (UpdateManager.instance != null && !this.simUpdateRegistered && base.enabled)
+				{
+					this.simUpdateRegistered = true;
+					UpdateManager.AddSimUpdater(this);
+				}
+			}
 		}
 	}
 
@@ -237,7 +234,10 @@ public class KMonoBehaviour : MonoBehaviour, ISaveLoadable, IStateMachineTarget,
 
 	public void Unsubscribe(int hash, Action<object> handler)
 	{
-		this.obj.GetEventSystem().Unsubscribe(hash, handler);
+		if (this.obj != null)
+		{
+			this.obj.GetEventSystem().Unsubscribe(hash, handler);
+		}
 	}
 
 	public void Unsubscribe(int id)
@@ -317,17 +317,17 @@ public class KMonoBehaviour : MonoBehaviour, ISaveLoadable, IStateMachineTarget,
 		return this.transform.position;
 	}
 
-	virtual ComponentType IStateMachineTarget.GetComponent<ComponentType>()
+	ComponentType IStateMachineTarget.GetComponent<ComponentType>()
 	{
 		return base.GetComponent<ComponentType>();
 	}
 
-	virtual GameObject IStateMachineTarget.get_gameObject()
+	GameObject IStateMachineTarget.get_gameObject()
 	{
 		return base.gameObject;
 	}
 
-	virtual string IStateMachineTarget.get_name()
+	string IStateMachineTarget.get_name()
 	{
 		return base.name;
 	}
@@ -342,7 +342,7 @@ public class KMonoBehaviour : MonoBehaviour, ISaveLoadable, IStateMachineTarget,
 
 	private KObject obj;
 
-	private bool isInitialized;
+	private bool isInitialized = false;
 
-	private bool simUpdateRegistered;
+	private bool simUpdateRegistered = false;
 }

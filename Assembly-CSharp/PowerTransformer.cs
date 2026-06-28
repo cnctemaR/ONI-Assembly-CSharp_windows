@@ -8,7 +8,7 @@ public class PowerTransformer : Generator
 	{
 		base.OnSpawn();
 		this.battery = base.GetComponent<Battery>();
-		this.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 	}
 
 	public override void ApplyDeltaJoules(float joules_delta, bool can_over_power = false)

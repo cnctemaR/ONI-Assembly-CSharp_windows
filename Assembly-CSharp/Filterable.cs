@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using KSerialization;
 
 public class Filterable : KMonoBehaviour
 {
-	public event Action<Tag> onFilterChanged;
-
 	public Tag SelectedTag
 	{
 		get
@@ -19,14 +19,30 @@ public class Filterable : KMonoBehaviour
 		}
 	}
 
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	public event Action<Tag> onFilterChanged;
+
 	protected virtual IList<Tag> GetTagOptions()
 	{
 		List<Tag> list = new List<Tag>();
-		foreach (object obj in Enum.GetValues(typeof(SimHashes)))
+		IEnumerator enumerator = Enum.GetValues(typeof(SimHashes)).GetEnumerator();
+		try
 		{
-			SimHashes simHashes = (SimHashes)((int)obj);
-			Tag tag = GameTagExtensions.Create(simHashes);
-			list.Add(tag);
+			while (enumerator.MoveNext())
+			{
+				object obj = enumerator.Current;
+				SimHashes simHashes = (SimHashes)obj;
+				Tag tag = GameTagExtensions.Create(simHashes);
+				list.Add(tag);
+			}
+		}
+		finally
+		{
+			IDisposable disposable;
+			if ((disposable = enumerator as IDisposable) != null)
+			{
+				disposable.Dispose();
+			}
 		}
 		return list;
 	}

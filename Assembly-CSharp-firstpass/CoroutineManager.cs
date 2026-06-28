@@ -20,23 +20,23 @@ public class CoroutineManager : MonoBehaviour
 		for (;;)
 		{
 			yield return new WaitForEndOfFrame();
-			foreach (CoroutineManager.GreedyCoroutine coroutine in this.mGreedyCoroutines)
+			foreach (CoroutineManager.GreedyCoroutine greedyCoroutine in this.mGreedyCoroutines)
 			{
-				coroutine.Advance();
+				greedyCoroutine.Advance();
 			}
 			bool is_work_remaining = true;
 			while (is_work_remaining)
 			{
 				is_work_remaining = false;
-				foreach (CoroutineManager.GreedyCoroutine coroutine2 in this.mGreedyCoroutines)
+				foreach (CoroutineManager.GreedyCoroutine greedyCoroutine2 in this.mGreedyCoroutines)
 				{
-					if (!coroutine2.IsWorkComplete())
+					if (!greedyCoroutine2.IsWorkComplete())
 					{
-						float d = Time.realtimeSinceStartup - Time.unscaledTime;
-						if (d <= this.mTimeout)
+						float num = Time.realtimeSinceStartup - Time.unscaledTime;
+						if (num <= this.mTimeout)
 						{
 							is_work_remaining = true;
-							coroutine2.Advance();
+							greedyCoroutine2.Advance();
 						}
 					}
 				}

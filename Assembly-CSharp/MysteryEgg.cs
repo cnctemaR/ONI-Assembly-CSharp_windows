@@ -19,8 +19,13 @@ public class MysteryEgg : StateMachineComponent<MysteryEgg.StatesInstance>
 				base.smi.StartSM();
 				base.smi.master.initialized = true;
 			}, false));
+			int num = Grid.PosToCell(base.gameObject);
+			SimHashes simHashes = SimHashes.Dirt;
+			CellElementEvent objectSetSimOnSpawn = CellEventLogger.Instance.ObjectSetSimOnSpawn;
+			float num2 = global::UnityEngine.Random.Range(1000f, 3000f);
+			float num3 = -1f;
 			int index = handle.index;
-			SimMessages.ReplaceElement(Grid.PosToCell(base.gameObject), SimHashes.Dirt, CellEventLogger.Instance.ObjectSetSimOnSpawn, global::UnityEngine.Random.Range(1000f, 3000f), -1f, byte.MaxValue, 0, index);
+			SimMessages.ReplaceElement(num, simHashes, objectSetSimOnSpawn, num2, num3, byte.MaxValue, 0, index);
 			handle.index = -1;
 		}
 		else
@@ -39,7 +44,7 @@ public class MysteryEgg : StateMachineComponent<MysteryEgg.StatesInstance>
 			num2++;
 		}
 		float num3 = (float)global::UnityEngine.Random.Range(0, num);
-		string text = string.Empty;
+		string text = "";
 		float num4 = 0f;
 		foreach (KeyValuePair<string, int> keyValuePair2 in this.HatchPossibilities)
 		{
@@ -50,11 +55,11 @@ public class MysteryEgg : StateMachineComponent<MysteryEgg.StatesInstance>
 			}
 			num4 += (float)keyValuePair2.Value;
 		}
-		int num5 = Grid.PosToCell(this.transform.position);
-		GameObject gameObject = Scenario.SpawnPrefab(num5, 0, 1, text, Grid.SceneLayer.Use, Folder.Entities);
+		int num5 = Grid.PosToCell(base.transform.position);
+		GameObject gameObject = Scenario.SpawnPrefab(num5, 0, 1, text, Grid.SceneLayer.Ore, Folder.Entities);
 		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, gameObject.GetProperName(), gameObject.transform, 1.5f, false);
 		gameObject.SetActive(true);
-		EggIncubator component = this.transform.parent.GetComponent<EggIncubator>();
+		EggIncubator component = base.transform.parent.GetComponent<EggIncubator>();
 		if (component)
 		{
 			component.RemoveHatchedEgg(base.gameObject);
@@ -69,14 +74,14 @@ public class MysteryEgg : StateMachineComponent<MysteryEgg.StatesInstance>
 
 	public bool alive = true;
 
-	private float maturity;
+	private float maturity = 0f;
 
 	private float matureRate = 1f;
 
 	private EggIncubator incubator;
 
 	[Serialize]
-	private bool initialized;
+	private bool initialized = false;
 
 	private Dictionary<string, int> HatchPossibilities = new Dictionary<string, int>();
 
@@ -103,7 +108,7 @@ public class MysteryEgg : StateMachineComponent<MysteryEgg.StatesInstance>
 						smi.GoTo(this.fall);
 					}
 				});
-			this.grounded.idle.PlayAnim("idle", KAnim.PlayMode.Once, null).Enter(delegate(MysteryEgg.StatesInstance smi)
+			this.grounded.idle.PlayAnim("idle").Enter(delegate(MysteryEgg.StatesInstance smi)
 			{
 				int num2 = Grid.PosToCell(smi.transform.position + Vector3.down);
 				if (Grid.IsValidCell(num2) && !Grid.Solid[num2])
@@ -116,10 +121,10 @@ public class MysteryEgg : StateMachineComponent<MysteryEgg.StatesInstance>
 			{
 				smi.GoTo(this.grounded.idle);
 			});
-			this.incubating.wiggle_small.PlayAnim("wiggle_small", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.grounded.idle);
-			this.incubating.wiggle_large.PlayAnim("wiggle_large", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.grounded.idle);
-			this.incubating.wiggle_hatch.PlayAnim("hatch", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.hatch_pst);
-			this.incubating.idle.PlayAnim("idle", KAnim.PlayMode.Once, null).Enter(delegate(MysteryEgg.StatesInstance smi)
+			this.incubating.wiggle_small.PlayAnim("wiggle_small").OnAnimQueueComplete(this.grounded.idle);
+			this.incubating.wiggle_large.PlayAnim("wiggle_large").OnAnimQueueComplete(this.grounded.idle);
+			this.incubating.wiggle_hatch.PlayAnim("hatch").OnAnimQueueComplete(this.hatch_pst);
+			this.incubating.idle.PlayAnim("idle").Enter(delegate(MysteryEgg.StatesInstance smi)
 			{
 				smi.master.incubator = smi.master.transform.parent.GetComponent<EggIncubator>();
 				if (smi.master.maturity > 1200f)
@@ -145,7 +150,7 @@ public class MysteryEgg : StateMachineComponent<MysteryEgg.StatesInstance>
 					smi.master.maturity += smi.deltatime * smi.master.matureRate;
 				}
 			});
-			this.hatch_pst.PlayAnim("hatch_pst", KAnim.PlayMode.Once, null).Enter(delegate(MysteryEgg.StatesInstance smi)
+			this.hatch_pst.PlayAnim("hatch_pst").Enter(delegate(MysteryEgg.StatesInstance smi)
 			{
 				smi.master.HatchCreature();
 				smi.Schedule(2f, delegate(object d)
@@ -153,14 +158,14 @@ public class MysteryEgg : StateMachineComponent<MysteryEgg.StatesInstance>
 					Util.KDestroyGameObject(smi.gameObject);
 				}, null);
 			});
-			this.dead.PlayAnim("dead", KAnim.PlayMode.Once, null).Enter(delegate(MysteryEgg.StatesInstance smi)
+			this.dead.PlayAnim("dead").Enter(delegate(MysteryEgg.StatesInstance smi)
 			{
 				smi.Schedule(5f, delegate(object d)
 				{
 					Util.KDestroyGameObject(smi.gameObject);
 				}, null);
 			});
-			this.fall.ToggleGravity(this.grounded.idle).PlayAnim("idle", KAnim.PlayMode.Loop, null);
+			this.fall.ToggleGravity(this.grounded.idle).PlayAnim("idle", KAnim.PlayMode.Loop);
 		}
 
 		public MysteryEgg.States.GroundedState grounded;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -56,10 +57,23 @@ public class Portrait : KMonoBehaviour
 		};
 		this.portraitObjects.Add(portraitObject);
 		go.layer = this.portraitLayer;
-		foreach (object obj in go.transform)
+		IEnumerator enumerator = go.transform.GetEnumerator();
+		try
 		{
-			Transform transform = (Transform)obj;
-			this.SetLayer(transform.gameObject);
+			while (enumerator.MoveNext())
+			{
+				object obj = enumerator.Current;
+				Transform transform = (Transform)obj;
+				this.SetLayer(transform.gameObject);
+			}
+		}
+		finally
+		{
+			IDisposable disposable;
+			if ((disposable = enumerator as IDisposable) != null)
+			{
+				disposable.Dispose();
+			}
 		}
 	}
 
@@ -124,9 +138,12 @@ public class Portrait : KMonoBehaviour
 
 	protected override void OnCleanUp()
 	{
-		if (this.destroyTargetOnCleanup && this.go != null)
+		if (this.destroyTargetOnCleanup)
 		{
-			global::UnityEngine.Object.Destroy(this.go);
+			if (this.go != null)
+			{
+				global::UnityEngine.Object.Destroy(this.go);
+			}
 		}
 	}
 

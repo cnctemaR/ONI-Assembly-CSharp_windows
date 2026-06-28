@@ -9,5 +9,6 @@ public enum NavType : byte
 	Ladder,
 	Hover,
 	Swim,
+	Pole,
 	NumNavTypes
 }

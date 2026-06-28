@@ -5,20 +5,8 @@ using STRINGS;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class PressureVulnerable : StateMachineComponent<PressureVulnerable.StatesInstance>, IWiltCause, IGameObjectEffectDescriptor
+public class PressureVulnerable : StateMachineComponent<PressureVulnerable.StatesInstance>, IGameObjectEffectDescriptor, IWiltCause
 {
-	WiltCondition.Condition[] IWiltCause.Conditions
-	{
-		get
-		{
-			return new WiltCondition.Condition[]
-			{
-				WiltCondition.Condition.Pressure,
-				WiltCondition.Condition.AtmosphereElement
-			};
-		}
-	}
-
 	private OccupyArea occupyArea
 	{
 		get
@@ -139,11 +127,23 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 		}
 	}
 
+	WiltCondition.Condition[] IWiltCause.Conditions
+	{
+		get
+		{
+			return new WiltCondition.Condition[]
+			{
+				WiltCondition.Condition.Pressure,
+				WiltCondition.Condition.AtmosphereElement
+			};
+		}
+	}
+
 	public string WiltStateString
 	{
 		get
 		{
-			string text = string.Empty;
+			string text = "";
 			if (base.smi.IsInsideState(base.smi.sm.warningLow) || base.smi.IsInsideState(base.smi.sm.lethalLow))
 			{
 				text += Db.Get().CreatureStatusItems.AtmosphericPressureTooLow.resolveStringCallback(CREATURES.STATUSITEMS.ATMOSPHERICPRESSURETOOLOW.NAME, this);
@@ -203,7 +203,7 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 		}
 		if (this.safe_atmospheres != null && this.safe_atmospheres.Count > 0)
 		{
-			string text = string.Empty;
+			string text = "";
 			foreach (Element element in this.safe_atmospheres)
 			{
 				text = text + "\n        • " + element.name;
@@ -263,7 +263,7 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 			}
 		}
 
-		public bool hasMaturity;
+		public bool hasMaturity = false;
 	}
 
 	public class States : GameStateMachine<PressureVulnerable.States, PressureVulnerable.StatesInstance, PressureVulnerable>

@@ -9,7 +9,7 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	protected override void OnPrefabInit()
 	{
-		this.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 		this.IntensityAnimation = 1f;
 	}
 
@@ -78,38 +78,37 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 	{
 		this.UnregisterLight();
 		Operational component = base.GetComponent<Operational>();
-		if ((component != null && !component.IsOperational) || !base.isActiveAndEnabled)
+		if ((!(component != null) || component.IsOperational) && base.isActiveAndEnabled)
 		{
-			return;
-		}
-		Vector3 position = this.transform.position;
-		position = new Vector3(position.x + this.Offset.x, position.y + this.Offset.y, position.z);
-		int num = Grid.PosToCell(position);
-		if (Grid.IsValidCell(num))
-		{
-			Vector2I vector2I = Grid.CellToXY(num);
-			int num2 = (int)this.Range;
-			int num3 = num2 / 2;
-			if (this.shape == LightShape.Circle)
+			Vector3 position = base.transform.position;
+			position = new Vector3(position.x + this.Offset.x, position.y + this.Offset.y, position.z);
+			int num = Grid.PosToCell(position);
+			if (Grid.IsValidCell(num))
 			{
-				Vector2I vector2I2 = new Vector2I(vector2I.x - num3, vector2I.y - num3);
-				this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Light2D", base.gameObject, vector2I2.x, vector2I2.y, num2, num2, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.TriggerRefresh));
-				this.liquidPartitionerEntry = GameScenePartitioner.Instance.Add("Light2D", base.gameObject, vector2I2.x, vector2I2.y, num2, num2, GameScenePartitioner.Instance.liquidChangedLayer, new Action<object>(this.TriggerRefresh));
+				Vector2I vector2I = Grid.CellToXY(num);
+				int num2 = (int)this.Range;
+				int num3 = num2 / 2;
+				if (this.shape == LightShape.Circle)
+				{
+					Vector2I vector2I2 = new Vector2I(vector2I.x - num3, vector2I.y - num3);
+					this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Light2D", base.gameObject, vector2I2.x, vector2I2.y, num2, num2, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.TriggerRefresh));
+					this.liquidPartitionerEntry = GameScenePartitioner.Instance.Add("Light2D", base.gameObject, vector2I2.x, vector2I2.y, num2, num2, GameScenePartitioner.Instance.liquidChangedLayer, new Action<object>(this.TriggerRefresh));
+				}
+				else if (this.shape == LightShape.Cone)
+				{
+					Vector2I vector2I3 = new Vector2I(vector2I.x - num2, vector2I.y - num2);
+					this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Light2D", base.gameObject, vector2I3.x, vector2I3.y, 2 * num2, num2, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.TriggerRefresh));
+					this.liquidPartitionerEntry = GameScenePartitioner.Instance.Add("Light2D", base.gameObject, vector2I3.x, vector2I3.y, 2 * num2, num2, GameScenePartitioner.Instance.liquidChangedLayer, new Action<object>(this.TriggerRefresh));
+				}
+				else
+				{
+					global::UnityEngine.Debug.Assert(false);
+				}
+				this.cell = num;
+				this.emitter = new LightGridManager.LightGridEmitter(this.cell, 1, this.Range, this.Color, this.shape);
+				this.emitter.Add();
+				this.isRegistered = true;
 			}
-			else if (this.shape == LightShape.Cone)
-			{
-				Vector2I vector2I3 = new Vector2I(vector2I.x - num2, vector2I.y - num2);
-				this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Light2D", base.gameObject, vector2I3.x, vector2I3.y, 2 * num2, num2, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.TriggerRefresh));
-				this.liquidPartitionerEntry = GameScenePartitioner.Instance.Add("Light2D", base.gameObject, vector2I3.x, vector2I3.y, 2 * num2, num2, GameScenePartitioner.Instance.liquidChangedLayer, new Action<object>(this.TriggerRefresh));
-			}
-			else
-			{
-				global::UnityEngine.Debug.Assert(false);
-			}
-			this.cell = num;
-			this.emitter = new LightGridManager.LightGridEmitter(this.cell, 1, this.Range, this.Color, this.shape);
-			this.emitter.Add();
-			this.isRegistered = true;
 		}
 	}
 

@@ -12,7 +12,7 @@ public class Facing : KMonoBehaviour
 
 	public void Face(float target_x)
 	{
-		float x = this.transform.localPosition.x;
+		float x = base.transform.localPosition.x;
 		if (target_x < x)
 		{
 			this.facingLeft = true;
@@ -27,7 +27,7 @@ public class Facing : KMonoBehaviour
 
 	public void Face(Vector3 target_pos)
 	{
-		int num = Grid.CellColumn(Grid.PosToCell(this.transform.localPosition));
+		int num = Grid.CellColumn(Grid.PosToCell(base.transform.localPosition));
 		int num2 = Grid.CellColumn(Grid.PosToCell(target_pos));
 		if (num > num2)
 		{
@@ -67,11 +67,16 @@ public class Facing : KMonoBehaviour
 	public int GetFrontCell()
 	{
 		int num = Grid.PosToCell(this);
+		int num2;
 		if (this.GetFacing())
 		{
-			return Grid.CellLeft(num);
+			num2 = Grid.CellLeft(num);
 		}
-		return Grid.CellRight(num);
+		else
+		{
+			num2 = Grid.CellRight(num);
+		}
+		return num2;
 	}
 
 	[MyCmpGet]

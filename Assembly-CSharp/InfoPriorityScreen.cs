@@ -1,5 +1,4 @@
 ﻿using System;
-using STRINGS;
 using UnityEngine;
 
 public class InfoPriorityScreen : PriorityScreen
@@ -7,7 +6,7 @@ public class InfoPriorityScreen : PriorityScreen
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.buttons = base.InstantiateButtons(new Action<int>(this.OnClick), UI.PRIORITYSCREEN.USERMENUPRIORITYTOOLTIP, true);
+		base.InstantiateButtons(new Action<PriorityScreen.PriorityClass, int>(this.OnClick), "STRINGS.UI.PRIORITYSCREEN.USERMENUPRIORITYTOOLTIP", true);
 	}
 
 	public void SetTarget(GameObject target)
@@ -15,7 +14,7 @@ public class InfoPriorityScreen : PriorityScreen
 		if (this.prioritizable != null)
 		{
 			Prioritizable prioritizable = this.prioritizable;
-			prioritizable.onPriorityChanged = (Action<int>)Delegate.Remove(prioritizable.onPriorityChanged, new Action<int>(this.OnPriorityChanged));
+			prioritizable.onPriorityChanged = (Action<PrioritySetting>)Delegate.Remove(prioritizable.onPriorityChanged, new Action<PrioritySetting>(this.OnPriorityChanged));
 		}
 		if (target == null)
 		{
@@ -27,9 +26,9 @@ public class InfoPriorityScreen : PriorityScreen
 			if (this.prioritizable != null && this.prioritizable.IsPrioritizable())
 			{
 				Prioritizable prioritizable2 = this.prioritizable;
-				prioritizable2.onPriorityChanged = (Action<int>)Delegate.Combine(prioritizable2.onPriorityChanged, new Action<int>(this.OnPriorityChanged));
+				prioritizable2.onPriorityChanged = (Action<PrioritySetting>)Delegate.Combine(prioritizable2.onPriorityChanged, new Action<PrioritySetting>(this.OnPriorityChanged));
 				base.gameObject.SetActive(true);
-				base.SetScreenPriority(this.prioritizable.GetMasterPriority(), false);
+				base.SetScreenPriority(this.prioritizable.GetMasterPriority().priority_class, this.prioritizable.GetMasterPriority().priority_value, false);
 			}
 			else
 			{
@@ -38,21 +37,21 @@ public class InfoPriorityScreen : PriorityScreen
 		}
 	}
 
-	private void OnClick(int priority)
+	private void OnClick(PriorityScreen.PriorityClass priorityClass, int priority)
 	{
 		if (this.prioritizable != null)
 		{
-			this.prioritizable.SetMasterPriority(priority);
+			this.prioritizable.SetMasterPriority(new PrioritySetting(priorityClass, priority));
 		}
-		foreach (PriorityButton priorityButton in this.buttons)
+		foreach (PriorityButton priorityButton in this.buttons_basic)
 		{
-			priorityButton.toggle.isOn = priorityButton.priority == this.prioritizable.GetMasterPriority();
+			priorityButton.toggle.isOn = priorityButton.priority.Equals(this.prioritizable.GetMasterPriority());
 		}
 	}
 
-	private void OnPriorityChanged(int priority)
+	private void OnPriorityChanged(PrioritySetting priority)
 	{
-		base.SetScreenPriority(priority, false);
+		base.SetScreenPriority(priority.priority_class, priority.priority_value, false);
 	}
 
 	private Prioritizable prioritizable;

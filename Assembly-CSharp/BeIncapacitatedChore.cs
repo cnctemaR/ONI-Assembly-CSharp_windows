@@ -4,7 +4,7 @@ using UnityEngine;
 public class BeIncapacitatedChore : Chore<BeIncapacitatedChore.StatesInstance>
 {
 	public BeIncapacitatedChore(IStateMachineTarget master)
-		: base(Db.Get().ChoreTypes.BeIncapacitated, master, master.GetComponent<ChoreProvider>(), true, null, null, null, int.MaxValue, false, true, 0)
+		: base(Db.Get().ChoreTypes.BeIncapacitated, master, master.GetComponent<ChoreProvider>(), true, null, null, null, PriorityScreen.PriorityClass.basic, int.MaxValue, false, true, 0)
 	{
 		this.smi = new BeIncapacitatedChore.StatesInstance(this);
 	}
@@ -12,15 +12,14 @@ public class BeIncapacitatedChore : Chore<BeIncapacitatedChore.StatesInstance>
 	public void FindAvailableMedicalBed(Navigator navigator)
 	{
 		AssignableSlotInstance slot = this.gameObject.GetComponent<Ownables>().GetSlot(Db.Get().OwnableSlots.Clinic);
-		if (slot.assignable == null)
+		if (!(slot.assignable == null))
 		{
-			return;
-		}
-		Clinic component = slot.assignable.GetComponent<Clinic>();
-		if (navigator.CanReach(component))
-		{
-			this.smi.sm.clinic.Set(component.gameObject, this.smi);
-			this.smi.GoTo(this.smi.sm.incapacitation_root.rescue.waitingForPickup);
+			Clinic component = slot.assignable.GetComponent<Clinic>();
+			if (navigator.CanReach(component))
+			{
+				this.smi.sm.clinic.Set(component.gameObject, this.smi);
+				this.smi.GoTo(this.smi.sm.incapacitation_root.rescue.waitingForPickup);
+			}
 		}
 	}
 
@@ -122,7 +121,7 @@ public class BeIncapacitatedChore : Chore<BeIncapacitatedChore.StatesInstance>
 			{
 				smi.Play(BeIncapacitatedChore.IncapacitatedDuplicantAnim_place, KAnim.PlayMode.Once);
 			});
-			this.incapacitation_root.death.PlayAnim(BeIncapacitatedChore.IncapacitatedDuplicantAnim_death, KAnim.PlayMode.Once, null).Enter(delegate(BeIncapacitatedChore.StatesInstance smi)
+			this.incapacitation_root.death.PlayAnim(BeIncapacitatedChore.IncapacitatedDuplicantAnim_death).Enter(delegate(BeIncapacitatedChore.StatesInstance smi)
 			{
 				smi.SetStatus(StateMachine.Status.Failed);
 				smi.StopSM("died");

@@ -142,9 +142,12 @@ public class KAnimRenderer : MonoBehaviour
 				this.ReserveDrawBuffers();
 				num = this.GetAtlasIndex(atlas);
 			}
-			if (atlas != this.atlases[this.drawIdx] && this.ActiveDraw[this.drawIdx])
+			if (atlas != this.atlases[this.drawIdx])
 			{
-				this.IncrementDrawIdx();
+				if (this.ActiveDraw[this.drawIdx])
+				{
+					this.IncrementDrawIdx();
+				}
 			}
 		}
 		this.ActiveDraw[this.drawIdx] = true;
@@ -252,14 +255,13 @@ public class KAnimRenderer : MonoBehaviour
 
 	public virtual void RemoveShaderVector(int property_id)
 	{
-		if (this.shaderVectors == null)
+		if (this.shaderVectors != null)
 		{
-			return;
-		}
-		if (this.shaderVectors.ContainsKey(property_id))
-		{
-			this.shaderVectors.Remove(property_id);
-			this.BuildPropertyBlock();
+			if (this.shaderVectors.ContainsKey(property_id))
+			{
+				this.shaderVectors.Remove(property_id);
+				this.BuildPropertyBlock();
+			}
 		}
 	}
 
@@ -316,23 +318,22 @@ public class KAnimRenderer : MonoBehaviour
 
 	public void WriteFrameCapture(string name, StreamWriter file)
 	{
-		if (!base.enabled)
+		if (base.enabled)
 		{
-			return;
-		}
-		int num = this.drawIdx;
-		if (this.atlases != null)
-		{
-			num = this.atlases.Length;
-		}
-		int num2 = 0;
-		if (this.vertices != null)
-		{
-			num2 = this.vertices.Count / 4;
-		}
-		if (num > 0)
-		{
-			file.WriteLine(string.Concat(new object[] { "\"", name, "\",", num, ",", num2 }));
+			int num = this.drawIdx;
+			if (this.atlases != null)
+			{
+				num = this.atlases.Length;
+			}
+			int num2 = 0;
+			if (this.vertices != null)
+			{
+				num2 = this.vertices.Count / 4;
+			}
+			if (num > 0)
+			{
+				file.WriteLine(string.Concat(new object[] { "\"", name, "\",", num, ",", num2 }));
+			}
 		}
 	}
 
@@ -348,13 +349,13 @@ public class KAnimRenderer : MonoBehaviour
 
 	protected bool[] ActiveDraw = new bool[0];
 
-	public MaterialPropertyBlock materialPropertyBlock;
+	public MaterialPropertyBlock materialPropertyBlock = null;
 
 	private int quadIdx;
 
 	private Vector3 Offset;
 
-	public static int UVS_UV;
+	public static int UVS_UV = 0;
 
 	public static int MESH_PARAMS_UV = 1;
 

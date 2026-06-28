@@ -3,10 +3,10 @@ using UnityEngine;
 
 public struct SchedulerEntry
 {
-	public SchedulerEntry(Guid id, string name, float time, float time_interval, Action<object> callback, object callback_data, GameObject profiler_obj)
+	public SchedulerEntry(string name, float time, float time_interval, Action<object> callback, object callback_data, GameObject profiler_obj)
 	{
 		this.time = time;
-		this.details = new SchedulerEntry.Details(id, name, callback, callback_data, time_interval, profiler_obj);
+		this.details = new SchedulerEntry.Details(name, callback, callback_data, time_interval, profiler_obj);
 	}
 
 	public SchedulerEntry.Details details { get; private set; }
@@ -14,18 +14,6 @@ public struct SchedulerEntry
 	public void FreeResources()
 	{
 		this.details = null;
-	}
-
-	public Guid id
-	{
-		get
-		{
-			return this.details.id;
-		}
-		set
-		{
-			this.details.id = value;
-		}
 	}
 
 	public Action<object> callback
@@ -54,7 +42,7 @@ public struct SchedulerEntry
 
 	public override string ToString()
 	{
-		return this.time + ": id = " + this.details.id.ToString();
+		return this.time.ToString();
 	}
 
 	public void Clear()
@@ -66,15 +54,12 @@ public struct SchedulerEntry
 
 	public class Details
 	{
-		public Details(Guid id, string name, Action<object> callback, object callback_data, float time_interval, GameObject profiler_obj)
+		public Details(string name, Action<object> callback, object callback_data, float time_interval, GameObject profiler_obj)
 		{
-			this.id = id;
 			this.timeInterval = time_interval;
 			this.callback = callback;
 			this.callbackData = callback_data;
 		}
-
-		public Guid id;
 
 		public Action<object> callback;
 

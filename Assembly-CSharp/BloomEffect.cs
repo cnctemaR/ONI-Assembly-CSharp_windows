@@ -29,15 +29,16 @@ public class BloomEffect : MonoBehaviour
 		if (!SystemInfo.supportsImageEffects)
 		{
 			base.enabled = false;
-			return;
 		}
-		if (!this.blurShader || !this.material.shader.isSupported)
+		else if (!this.blurShader || !this.material.shader.isSupported)
 		{
 			base.enabled = false;
-			return;
 		}
-		this.BloomMaskMaterial = new Material(Shader.Find("Klei/PostFX/BloomMask"));
-		this.BloomCompositeMaterial = new Material(Shader.Find("Klei/PostFX/BloomComposite"));
+		else
+		{
+			this.BloomMaskMaterial = new Material(Shader.Find("Klei/PostFX/BloomMask"));
+			this.BloomCompositeMaterial = new Material(Shader.Find("Klei/PostFX/BloomComposite"));
+		}
 	}
 
 	public void FourTapCone(RenderTexture source, RenderTexture dest, int iteration)
@@ -96,7 +97,7 @@ public class BloomEffect : MonoBehaviour
 
 	public float blurSpread = 0.6f;
 
-	public Shader blurShader;
+	public Shader blurShader = null;
 
-	private static Material m_Material;
+	private static Material m_Material = null;
 }

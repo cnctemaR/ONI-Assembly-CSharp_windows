@@ -12,11 +12,16 @@ public struct SchedulerHandle
 	{
 		get
 		{
+			float num;
 			if (!this.IsValid)
 			{
-				return -1f;
+				num = -1f;
 			}
-			return this.entry.time - this.scheduler.GetTime();
+			else
+			{
+				num = this.entry.time - this.scheduler.GetTime();
+			}
+			return num;
 		}
 	}
 
@@ -28,12 +33,11 @@ public struct SchedulerHandle
 
 	public void ClearScheduler()
 	{
-		if (this.scheduler == null)
+		if (this.scheduler != null)
 		{
-			return;
+			this.scheduler.Clear(this);
+			this.scheduler = null;
 		}
-		this.scheduler.Clear(this);
-		this.scheduler = null;
 	}
 
 	public bool IsValid

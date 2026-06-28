@@ -9,12 +9,11 @@ public class CellAddRemoveSubstanceEvent : CellEvent
 
 	public void Log(int cell, SimHashes element, float amount, int callback_id)
 	{
-		if (!this.enableLogging)
+		if (this.enableLogging)
 		{
-			return;
+			CellEventInstance cellEventInstance = new CellEventInstance(cell, (int)element, (int)(amount * 1000f), this);
+			CellEventLogger.Instance.Add(cellEventInstance);
 		}
-		CellEventInstance cellEventInstance = new CellEventInstance(cell, (int)element, (int)(amount * 1000f), this);
-		CellEventLogger.Instance.Add(cellEventInstance);
 	}
 
 	public override string GetDescription(EventInstanceBase ev)

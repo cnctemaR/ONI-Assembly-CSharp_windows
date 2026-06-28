@@ -136,21 +136,21 @@ public class OfflineWorldGen : KMonoBehaviour
 				global::VoronoiTree.Tree tree = this.startNodes[i] as global::VoronoiTree.Tree;
 				if (tree != null)
 				{
-					goto IL_00BA;
+					goto IL_00C2;
 				}
 				tree = WorldGen.GetOverworldForNode(this.startNodes[i] as Leaf);
 				if (tree != null)
 				{
-					goto IL_00BA;
+					goto IL_00C2;
 				}
-				IL_01DB:
+				IL_01EB:
 				i++;
 				continue;
-				IL_00BA:
+				IL_00C2:
 				SubWorld subWorldForNode = WorldGen.GetSubWorldForNode(tree);
 				if (subWorldForNode == null || list.Contains(subWorldForNode))
 				{
-					goto IL_01DB;
+					goto IL_01EB;
 				}
 				list.Add(subWorldForNode);
 				GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(this.locationButtonPrefab);
@@ -181,7 +181,7 @@ public class OfflineWorldGen : KMonoBehaviour
 				});
 				Button component2 = gameObject.GetComponent<Button>();
 				component2.onClick = buttonClickedEvent;
-				goto IL_01DB;
+				goto IL_01EB;
 			}
 		}
 	}
@@ -238,69 +238,65 @@ public class OfflineWorldGen : KMonoBehaviour
 
 	private void Update()
 	{
-		if (this.loadTriggered)
+		if (!this.loadTriggered)
 		{
-			return;
-		}
-		if (this.currentConvertedCurrentStage.String == null)
-		{
-			return;
-		}
-		this.errorMutex.WaitOne();
-		int count = this.errors.Count;
-		this.errorMutex.ReleaseMutex();
-		if (count > 0)
-		{
-			this.DoExitFlow();
-			return;
-		}
-		this.updateText.text = Strings.Get(this.currentConvertedCurrentStage.String);
-		if (!this.debug && this.currentConvertedCurrentStage.Hash == UI.WORLDGEN.COMPLETE.key.Hash && this.currentPercent >= 100f)
-		{
-			if (KCrashReporter.terminateOnError && ReportErrorDialog.hasCrash)
+			if (this.currentConvertedCurrentStage.String != null)
 			{
-				return;
-			}
-			this.percentText.text = string.Empty;
-			this.loadTriggered = true;
-			App.LoadScene(this.mainGameLevel);
-			return;
-		}
-		else
-		{
-			if (this.currentPercent < 0f)
-			{
-				this.DoExitFlow();
-				return;
-			}
-			if (this.currentPercent > 0f && !this.percentText.gameObject.activeSelf)
-			{
-				this.percentText.gameObject.SetActive(true);
-			}
-			this.percentText.text = this.currentPercent.ToString("N1");
-			if (this.firstPassGeneration)
-			{
-				this.generateThreadComplete = this.world.IsGenerateComplete();
-				if (!this.generateThreadComplete)
+				this.errorMutex.WaitOne();
+				int count = this.errors.Count;
+				this.errorMutex.ReleaseMutex();
+				if (count > 0)
 				{
-					this.renderThreadComplete = false;
+					this.DoExitFlow();
+				}
+				else
+				{
+					this.updateText.text = Strings.Get(this.currentConvertedCurrentStage.String);
+					if (!this.debug && this.currentConvertedCurrentStage.Hash == UI.WORLDGEN.COMPLETE.key.Hash && this.currentPercent >= 100f)
+					{
+						if (!KCrashReporter.terminateOnError || !ReportErrorDialog.hasCrash)
+						{
+							this.percentText.text = "";
+							this.loadTriggered = true;
+							App.LoadScene(this.mainGameLevel);
+						}
+					}
+					else if (this.currentPercent < 0f)
+					{
+						this.DoExitFlow();
+					}
+					else
+					{
+						if (this.currentPercent > 0f && !this.percentText.gameObject.activeSelf)
+						{
+							this.percentText.gameObject.SetActive(true);
+						}
+						this.percentText.text = this.currentPercent.ToString("N1");
+						if (this.firstPassGeneration)
+						{
+							this.generateThreadComplete = this.world.IsGenerateComplete();
+							if (!this.generateThreadComplete)
+							{
+								this.renderThreadComplete = false;
+							}
+						}
+						if (this.secondPassGeneration)
+						{
+							this.renderThreadComplete = this.world.IsRenderComplete();
+						}
+						if (!this.shownStartingLocations && this.firstPassGeneration && this.generateThreadComplete)
+						{
+							this.shownStartingLocations = true;
+							this.ShowStartingLocationChoices();
+						}
+						if (this.renderThreadComplete)
+						{
+							int num = 0;
+							num++;
+						}
+					}
 				}
 			}
-			if (this.secondPassGeneration)
-			{
-				this.renderThreadComplete = this.world.IsRenderComplete();
-			}
-			if (!this.shownStartingLocations && this.firstPassGeneration && this.generateThreadComplete)
-			{
-				this.shownStartingLocations = true;
-				this.ShowStartingLocationChoices();
-			}
-			if (this.renderThreadComplete)
-			{
-				int num = 0;
-				num++;
-			}
-			return;
 		}
 	}
 
@@ -320,15 +316,14 @@ public class OfflineWorldGen : KMonoBehaviour
 
 	private void DoExitFlow()
 	{
-		if (this.startedExitFlow)
+		if (!this.startedExitFlow)
 		{
-			return;
+			this.startedExitFlow = true;
+			this.percentText.text = UI.WORLDGEN.RESTARTING.ToString();
+			this.loadTriggered = true;
+			Sim.Shutdown();
+			this.DisplayErrors();
 		}
-		this.startedExitFlow = true;
-		this.percentText.text = UI.WORLDGEN.RESTARTING.ToString();
-		this.loadTriggered = true;
-		Sim.Shutdown();
-		this.DisplayErrors();
 	}
 
 	private void OnConfirmExit()
@@ -451,19 +446,19 @@ public class OfflineWorldGen : KMonoBehaviour
 
 	public string mainGameLevel = "backend";
 
-	private bool shouldStop;
+	private bool shouldStop = false;
 
 	private StringKey currentConvertedCurrentStage;
 
-	private float currentPercent;
+	private float currentPercent = 0f;
 
-	public bool debug;
+	public bool debug = false;
 
 	public GameObject mainText;
 
 	private bool trackProgress = true;
 
-	private bool doWorldGen;
+	private bool doWorldGen = false;
 
 	private LocText updateText;
 
@@ -474,7 +469,7 @@ public class OfflineWorldGen : KMonoBehaviour
 
 	private WorldGen world = new WorldGen();
 
-	private List<global::VoronoiTree.Node> startNodes;
+	private List<global::VoronoiTree.Node> startNodes = null;
 
 	private StringKey currentStringKeyRoot;
 
@@ -492,21 +487,21 @@ public class OfflineWorldGen : KMonoBehaviour
 
 	private List<LocString> convertList = new List<LocString>(OfflineWorldGen.convertableLocs);
 
-	private WorldGenProgressStages.Stages currentStage;
+	private WorldGenProgressStages.Stages currentStage = WorldGenProgressStages.Stages.Failure;
 
-	private bool loadTriggered;
+	private bool loadTriggered = false;
 
-	private bool shownStartingLocations;
+	private bool shownStartingLocations = false;
 
-	private bool startedExitFlow;
+	private bool startedExitFlow = false;
 
-	private bool generateThreadComplete;
+	private bool generateThreadComplete = false;
 
-	private bool renderThreadComplete;
+	private bool renderThreadComplete = false;
 
-	private bool firstPassGeneration;
+	private bool firstPassGeneration = false;
 
-	private bool secondPassGeneration;
+	private bool secondPassGeneration = false;
 
 	public static string USE_WORLD_SEED_KEY = "UseWorldSeedKey";
 

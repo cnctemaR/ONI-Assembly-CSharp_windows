@@ -31,126 +31,130 @@ public class KIconButtonMenu : KScreen
 			}
 			this.buttonObjects = null;
 		}
-		if (this.buttons == null || this.buttons.Count == 0)
+		if (this.buttons != null && this.buttons.Count != 0)
 		{
-			return;
-		}
-		this.buttonObjects = new GameObject[this.buttons.Count];
-		for (int j = 0; j < this.buttons.Count; j++)
-		{
-			KIconButtonMenu.ButtonInfo buttonInfo = this.buttons[j];
-			if (buttonInfo != null)
+			this.buttonObjects = new GameObject[this.buttons.Count];
+			for (int j = 0; j < this.buttons.Count; j++)
 			{
-				GameObject binstance = global::UnityEngine.Object.Instantiate(this.buttonPrefab, Vector3.zero, Quaternion.identity) as GameObject;
-				buttonInfo.buttonGo = binstance;
-				this.buttonObjects[j] = binstance;
-				Transform transform = ((!(this.buttonParent != null)) ? this.transform : this.buttonParent);
-				binstance.transform.SetParent(transform, false);
-				binstance.SetActive(true);
-				binstance.name = buttonInfo.text + "Button";
-				KButton component = binstance.GetComponent<KButton>();
-				if (component != null && buttonInfo.onClick != null)
+				KIconButtonMenu.ButtonInfo buttonInfo = this.buttons[j];
+				if (buttonInfo != null)
 				{
-					component.onClick += buttonInfo.onClick;
-				}
-				Image image = null;
-				if (component)
-				{
-					image = component.fgImage;
-				}
-				if (image != null)
-				{
-					image.gameObject.SetActive(false);
-					foreach (Sprite sprite in this.icons)
+					GameObject binstance = global::UnityEngine.Object.Instantiate<GameObject>(this.buttonPrefab, Vector3.zero, Quaternion.identity);
+					buttonInfo.buttonGo = binstance;
+					this.buttonObjects[j] = binstance;
+					Transform transform = ((!(this.buttonParent != null)) ? base.transform : this.buttonParent);
+					binstance.transform.SetParent(transform, false);
+					binstance.SetActive(true);
+					binstance.name = buttonInfo.text + "Button";
+					KButton component = binstance.GetComponent<KButton>();
+					if (component != null && buttonInfo.onClick != null)
 					{
-						if (sprite != null && sprite.name == buttonInfo.iconName)
+						component.onClick += buttonInfo.onClick;
+					}
+					Image image = null;
+					if (component)
+					{
+						image = component.fgImage;
+					}
+					if (image != null)
+					{
+						image.gameObject.SetActive(false);
+						foreach (Sprite sprite in this.icons)
 						{
-							image.sprite = sprite;
-							image.gameObject.SetActive(true);
-							break;
+							if (sprite != null)
+							{
+								if (sprite.name == buttonInfo.iconName)
+								{
+									image.sprite = sprite;
+									image.gameObject.SetActive(true);
+									break;
+								}
+							}
 						}
 					}
-				}
-				if (buttonInfo.texture != null)
-				{
-					RawImage componentInChildren = binstance.GetComponentInChildren<RawImage>();
-					if (componentInChildren != null)
+					if (buttonInfo.texture != null)
 					{
-						componentInChildren.gameObject.SetActive(true);
-						componentInChildren.texture = buttonInfo.texture;
-					}
-				}
-				ToolTip componentInChildren2 = binstance.GetComponentInChildren<ToolTip>();
-				if (buttonInfo.text != null && buttonInfo.text != string.Empty && componentInChildren2 != null)
-				{
-					componentInChildren2.toolTip = buttonInfo.GetTooltipText();
-					LocText componentInChildren3 = binstance.GetComponentInChildren<LocText>();
-					if (componentInChildren3 != null)
-					{
-						componentInChildren3.text = buttonInfo.text;
-					}
-				}
-				if (buttonInfo.onToolTip != null)
-				{
-					componentInChildren2.OnToolTip = buttonInfo.onToolTip;
-				}
-				KIconButtonMenu screen = this;
-				global::System.Action onClick = buttonInfo.onClick;
-				global::System.Action action = delegate
-				{
-					onClick.Signal();
-					if (!this.keepMenuOpen && screen != null)
-					{
-						screen.Deactivate();
-					}
-					if (binstance != null)
-					{
-						KToggle component3 = binstance.GetComponent<KToggle>();
-						if (component3 != null)
+						RawImage componentInChildren = binstance.GetComponentInChildren<RawImage>();
+						if (componentInChildren != null)
 						{
-							this.SelectToggle(component3);
+							componentInChildren.gameObject.SetActive(true);
+							componentInChildren.texture = buttonInfo.texture;
 						}
 					}
-				};
-				buttonInfo.onClick = action;
-				KToggle componentInChildren4 = binstance.GetComponentInChildren<KToggle>();
-				if (componentInChildren4 != null)
-				{
-					componentInChildren4.onRefresh += buttonInfo.onRefresh;
-					ToggleGroup component2 = base.GetComponent<ToggleGroup>();
-					if (component2 == null)
+					ToolTip componentInChildren2 = binstance.GetComponentInChildren<ToolTip>();
+					if (buttonInfo.text != null && buttonInfo.text != "" && componentInChildren2 != null)
 					{
-						component2 = this.externalToggleGroup;
+						componentInChildren2.toolTip = buttonInfo.GetTooltipText();
+						LocText componentInChildren3 = binstance.GetComponentInChildren<LocText>();
+						if (componentInChildren3 != null)
+						{
+							componentInChildren3.text = buttonInfo.text;
+						}
 					}
-					componentInChildren4.group = component2;
-					componentInChildren4.onClick += action;
-					Navigation navigation = componentInChildren4.navigation;
-					navigation.mode = ((!this.automaticNavigation) ? Navigation.Mode.None : Navigation.Mode.Automatic);
-					componentInChildren4.navigation = navigation;
-				}
-				else
-				{
-					KBasicToggle componentInChildren5 = binstance.GetComponentInChildren<KBasicToggle>();
-					if (componentInChildren5 != null)
+					if (buttonInfo.onToolTip != null)
 					{
-						componentInChildren5.onClick += action;
+						componentInChildren2.OnToolTip = buttonInfo.onToolTip;
 					}
+					KIconButtonMenu screen = this;
+					global::System.Action onClick = buttonInfo.onClick;
+					global::System.Action action = delegate
+					{
+						onClick.Signal();
+						if (!this.keepMenuOpen)
+						{
+							if (screen != null)
+							{
+								screen.Deactivate();
+							}
+						}
+						if (binstance != null)
+						{
+							KToggle component3 = binstance.GetComponent<KToggle>();
+							if (component3 != null)
+							{
+								this.SelectToggle(component3);
+							}
+						}
+					};
+					KToggle componentInChildren4 = binstance.GetComponentInChildren<KToggle>();
+					if (componentInChildren4 != null)
+					{
+						componentInChildren4.onRefresh += buttonInfo.onRefresh;
+						ToggleGroup component2 = base.GetComponent<ToggleGroup>();
+						if (component2 == null)
+						{
+							component2 = this.externalToggleGroup;
+						}
+						componentInChildren4.group = component2;
+						componentInChildren4.onClick += action;
+						Navigation navigation = componentInChildren4.navigation;
+						navigation.mode = ((!this.automaticNavigation) ? Navigation.Mode.None : Navigation.Mode.Automatic);
+						componentInChildren4.navigation = navigation;
+					}
+					else
+					{
+						KBasicToggle componentInChildren5 = binstance.GetComponentInChildren<KBasicToggle>();
+						if (componentInChildren5 != null)
+						{
+							componentInChildren5.onClick += action;
+						}
+					}
+					if (component != null)
+					{
+						component.isInteractable = buttonInfo.isInteractable;
+					}
+					buttonInfo.onCreate.Signal(buttonInfo);
 				}
-				if (component != null)
-				{
-					component.isInteractable = buttonInfo.isInteractable;
-				}
-				buttonInfo.onCreate.Signal(buttonInfo);
 			}
-		}
-		this.Update();
-		for (int l = 0; l < this.buttons.Count - 1; l++)
-		{
-			for (int m = l + 1; m < this.buttons.Count; m++)
+			this.Update();
+			for (int l = 0; l < this.buttons.Count - 1; l++)
 			{
-				if (this.buttons[l].shortcutKey != global::Action.NumActions && this.buttons[l].shortcutKey == this.buttons[m].shortcutKey)
+				for (int m = l + 1; m < this.buttons.Count; m++)
 				{
-					Output.LogWarning(new object[] { this.buttons[l].text + " has the same shortcut key as " + this.buttons[m].text });
+					if (this.buttons[l].shortcutKey != global::Action.NumActions && this.buttons[l].shortcutKey == this.buttons[m].shortcutKey)
+					{
+						Output.LogWarning(new object[] { this.buttons[l].text + " has the same shortcut key as " + this.buttons[m].text });
+					}
 				}
 			}
 		}
@@ -158,27 +162,28 @@ public class KIconButtonMenu : KScreen
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (this.buttons == null)
+		if (this.buttons != null)
 		{
-			return;
-		}
-		if (!base.gameObject.activeSelf || !base.enabled)
-		{
-			return;
-		}
-		foreach (KIconButtonMenu.ButtonInfo buttonInfo in this.buttons)
-		{
-			if (e.TryConsume(buttonInfo.shortcutKey))
+			if (base.gameObject.activeSelf && base.enabled)
 			{
-				buttonInfo.onClick();
-				break;
+				for (int i = 0; i < this.buttons.Count; i++)
+				{
+					KIconButtonMenu.ButtonInfo buttonInfo = this.buttons[i];
+					if (e.TryConsume(buttonInfo.shortcutKey))
+					{
+						this.buttonObjects[i].GetComponent<KButton>().PlayPointerDownSound();
+						this.buttonObjects[i].GetComponent<KButton>().SignalClick();
+						break;
+					}
+				}
+				base.OnKeyDown(e);
 			}
 		}
 	}
 
 	protected override void OnPrefabInit()
 	{
-		this.Subscribe(315865555, new Action<object>(this.OnSetActivator));
+		base.Subscribe(315865555, new Action<object>(this.OnSetActivator));
 	}
 
 	private void OnSetActivator(object data)
@@ -189,47 +194,45 @@ public class KIconButtonMenu : KScreen
 
 	private void Update()
 	{
-		if (!this.followGameObject || this.go == null || base.canvas == null)
+		if (this.followGameObject && !(this.go == null) && !(base.canvas == null))
 		{
-			return;
-		}
-		Vector3 vector = Camera.main.WorldToViewportPoint(this.go.transform.position);
-		RectTransform component = base.GetComponent<RectTransform>();
-		RectTransform component2 = base.canvas.GetComponent<RectTransform>();
-		if (component != null)
-		{
-			component.anchoredPosition = new Vector2(vector.x * component2.sizeDelta.x - component2.sizeDelta.x * 0.5f, vector.y * component2.sizeDelta.y - component2.sizeDelta.y * 0.5f);
+			Vector3 vector = Camera.main.WorldToViewportPoint(this.go.transform.position);
+			RectTransform component = base.GetComponent<RectTransform>();
+			RectTransform component2 = base.canvas.GetComponent<RectTransform>();
+			if (component != null)
+			{
+				component.anchoredPosition = new Vector2(vector.x * component2.sizeDelta.x - component2.sizeDelta.x * 0.5f, vector.y * component2.sizeDelta.y - component2.sizeDelta.y * 0.5f);
+			}
 		}
 	}
 
 	protected void SelectToggle(KToggle selectedToggle)
 	{
-		if (global::UnityEngine.EventSystems.EventSystem.current == null || !global::UnityEngine.EventSystems.EventSystem.current.enabled)
+		if (!(global::UnityEngine.EventSystems.EventSystem.current == null) && global::UnityEngine.EventSystems.EventSystem.current.enabled)
 		{
-			return;
-		}
-		if (this.currentlySelectedToggle == selectedToggle)
-		{
-			this.currentlySelectedToggle = null;
-		}
-		else
-		{
-			this.currentlySelectedToggle = selectedToggle;
-		}
-		foreach (GameObject gameObject in this.buttonObjects)
-		{
-			KToggle component = gameObject.GetComponent<KToggle>();
-			if (component != null)
+			if (this.currentlySelectedToggle == selectedToggle)
 			{
-				if (component == this.currentlySelectedToggle)
+				this.currentlySelectedToggle = null;
+			}
+			else
+			{
+				this.currentlySelectedToggle = selectedToggle;
+			}
+			foreach (GameObject gameObject in this.buttonObjects)
+			{
+				KToggle component = gameObject.GetComponent<KToggle>();
+				if (component != null)
 				{
-					component.Select();
-					component.isOn = true;
-				}
-				else
-				{
-					component.Deselect();
-					component.isOn = false;
+					if (component == this.currentlySelectedToggle)
+					{
+						component.Select();
+						component.isOn = true;
+					}
+					else
+					{
+						component.Deselect();
+						component.isOn = false;
+					}
 				}
 			}
 		}
@@ -320,7 +323,7 @@ public class KIconButtonMenu : KScreen
 
 		public string GetTooltipText()
 		{
-			string text = ((!(this.tooltipText == string.Empty)) ? this.tooltipText : this.text);
+			string text = ((!(this.tooltipText == "")) ? this.tooltipText : this.text);
 			if (this.shortcutKey != global::Action.NumActions)
 			{
 				text = text + " " + GameUtil.GetHotkeyString(this.shortcutKey);

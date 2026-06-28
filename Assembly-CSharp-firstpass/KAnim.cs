@@ -44,25 +44,30 @@ public class KAnim
 
 		public int GetFrameIdx(KAnim.PlayMode mode, float t)
 		{
+			int num;
 			if (this.numFrames <= 0)
 			{
-				return -1;
-			}
-			int num = 0;
-			if (mode != KAnim.PlayMode.Loop)
-			{
-				if (mode != KAnim.PlayMode.Once)
-				{
-				}
+				num = -1;
 			}
 			else
 			{
-				t %= this.totalTime;
-			}
-			if (t > 0f)
-			{
-				float num2 = t * this.frameRate + 0.49999997f;
-				num = Math.Min(this.numFrames - 1, (int)num2);
+				int num2 = 0;
+				if (mode != KAnim.PlayMode.Loop)
+				{
+					if (mode != KAnim.PlayMode.Once)
+					{
+					}
+				}
+				else
+				{
+					t %= this.totalTime;
+				}
+				if (t > 0f)
+				{
+					float num3 = t * this.frameRate + 0.49999997f;
+					num2 = Math.Min(this.numFrames - 1, (int)num3);
+				}
+				num = num2;
 			}
 			return num;
 		}
@@ -144,6 +149,16 @@ public class KAnim
 				return this.idx != -1;
 			}
 
+			public static bool operator ==(KAnim.Anim.Frame a, KAnim.Anim.Frame b)
+			{
+				return a.idx == b.idx;
+			}
+
+			public static bool operator !=(KAnim.Anim.Frame a, KAnim.Anim.Frame b)
+			{
+				return a.idx != b.idx;
+			}
+
 			public override bool Equals(object obj)
 			{
 				KAnim.Anim.Frame frame = (KAnim.Anim.Frame)obj;
@@ -153,16 +168,6 @@ public class KAnim
 			public override int GetHashCode()
 			{
 				return this.idx;
-			}
-
-			public static bool operator ==(KAnim.Anim.Frame a, KAnim.Anim.Frame b)
-			{
-				return a.idx == b.idx;
-			}
-
-			public static bool operator !=(KAnim.Anim.Frame a, KAnim.Anim.Frame b)
-			{
-				return a.idx != b.idx;
 			}
 
 			public AABB3 bbox;
@@ -223,11 +228,16 @@ public class KAnim
 
 		public KAnim.Build.Symbol GetSymbolByIndex(uint index)
 		{
+			KAnim.Build.Symbol symbol;
 			if ((ulong)index >= (ulong)((long)this.symbols.Length))
 			{
-				return null;
+				symbol = null;
 			}
-			return this.symbols[(int)((UIntPtr)index)];
+			else
+			{
+				symbol = this.symbols[(int)((UIntPtr)index)];
+			}
+			return symbol;
 		}
 
 		public Texture2D GetTexture(int index)
@@ -330,12 +340,17 @@ public class KAnim
 		{
 			public int GetFrameIdx(int frame)
 			{
+				int num;
 				if (this.frameLookup.Length == 0 || frame >= this.frameLookup.Length)
 				{
-					return -1;
+					num = -1;
 				}
-				frame = Math.Min(frame, this.frameLookup.Length - 1);
-				return this.frameLookup[frame];
+				else
+				{
+					frame = Math.Min(frame, this.frameLookup.Length - 1);
+					num = this.frameLookup[frame];
+				}
+				return num;
 			}
 
 			public bool HasFrame(int frame)
@@ -353,17 +368,22 @@ public class KAnim
 
 			public int CompareTo(object obj)
 			{
+				int num;
 				if (obj == null)
 				{
-					return 1;
+					num = 1;
 				}
-				if (obj.GetType() == typeof(HashedString))
+				else if (obj.GetType() == typeof(HashedString))
 				{
 					HashedString hashedString = (HashedString)obj;
-					return this.hash.HashValue.CompareTo(hashedString.HashValue);
+					num = this.hash.HashValue.CompareTo(hashedString.HashValue);
 				}
-				KAnim.Build.Symbol symbol = (KAnim.Build.Symbol)obj;
-				return this.hash.HashValue.CompareTo(symbol.hash.HashValue);
+				else
+				{
+					KAnim.Build.Symbol symbol = (KAnim.Build.Symbol)obj;
+					num = this.hash.HashValue.CompareTo(symbol.hash.HashValue);
+				}
+				return num;
 			}
 
 			public bool HasFlag(KAnim.SymbolFlags flag)

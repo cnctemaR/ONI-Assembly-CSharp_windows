@@ -7,20 +7,8 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderControl
+public class EnergyGenerator : Generator, IEffectDescriptor, ISliderControl
 {
-	public float SingleSliderPercent
-	{
-		get
-		{
-			return this.batteryRefillPercent;
-		}
-		set
-		{
-			this.batteryRefillPercent = value;
-		}
-	}
-
 	public string SliderTitleKey
 	{
 		get
@@ -29,19 +17,44 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 		}
 	}
 
-	public string SliderTooltipKey
+	public string SliderUnits
 	{
 		get
 		{
-			return "STRINGS.UI.UISIDESCREENS.MANUALGENERATORSIDESCREEN.TOOLTIP";
+			return UI.UNITSUFFIXES.PERCENT;
 		}
+	}
+
+	public float GetSliderMin(int index)
+	{
+		return 0f;
+	}
+
+	public float GetSliderMax(int index)
+	{
+		return 100f;
+	}
+
+	public float GetSliderValue(int index)
+	{
+		return this.batteryRefillPercent * 100f;
+	}
+
+	public void SetSliderValue(float value, int index)
+	{
+		this.batteryRefillPercent = value / 100f;
+	}
+
+	public string GetSliderTooltipKey(int index)
+	{
+		return "STRINGS.UI.UISIDESCREENS.MANUALGENERATORSIDESCREEN.TOOLTIP";
 	}
 
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
 		EnergyGenerator.EnsureStatusItemAvailable();
-		this.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
+		base.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
 	}
 
 	protected void OnActiveChanged(object data)
@@ -156,42 +169,52 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 
 	public List<Descriptor> RequirementDescriptors(BuildingDef def)
 	{
+		List<Descriptor> list = new List<Descriptor>();
+		List<Descriptor> list2;
 		if (this.formula.inputs == null || this.formula.inputs.Length == 0)
 		{
-			return null;
+			list2 = list;
 		}
-		List<Descriptor> list = new List<Descriptor>();
-		for (int i = 0; i < this.formula.inputs.Length; i++)
+		else
 		{
-			EnergyGenerator.InputItem inputItem = this.formula.inputs[i];
-			Element element = ElementLoader.GetElement(inputItem.tag);
-			string text = element.tag.ProperName();
-			string keywordStyle = GameUtil.GetKeywordStyle(element);
-			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMED, keywordStyle, text, GameUtil.GetFormattedMass(inputItem.consumptionRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMED, keywordStyle, text, GameUtil.GetFormattedMass(inputItem.consumptionRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Requirement);
-			list.Add(descriptor);
+			for (int i = 0; i < this.formula.inputs.Length; i++)
+			{
+				EnergyGenerator.InputItem inputItem = this.formula.inputs[i];
+				Element element = ElementLoader.GetElement(inputItem.tag);
+				string text = element.tag.ProperName();
+				string keywordStyle = GameUtil.GetKeywordStyle(element);
+				Descriptor descriptor = default(Descriptor);
+				descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMED, keywordStyle, text, GameUtil.GetFormattedMass(inputItem.consumptionRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMED, keywordStyle, text, GameUtil.GetFormattedMass(inputItem.consumptionRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Requirement);
+				list.Add(descriptor);
+			}
+			list2 = list;
 		}
-		return list;
+		return list2;
 	}
 
 	public List<Descriptor> EffectDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
+		List<Descriptor> list2;
 		if (this.formula.outputs == null || this.formula.outputs.Length == 0)
 		{
-			return list;
+			list2 = list;
 		}
-		for (int i = 0; i < this.formula.outputs.Length; i++)
+		else
 		{
-			EnergyGenerator.OutputItem outputItem = this.formula.outputs[i];
-			Element element = ElementLoader.FindElementByHash(outputItem.element);
-			string text = element.tag.ProperName();
-			string keywordStyle = GameUtil.GetKeywordStyle(element);
-			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTED, keywordStyle, text, GameUtil.GetFormattedMass(outputItem.creationRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTED, keywordStyle, text, GameUtil.GetFormattedMass(outputItem.creationRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Effect);
-			list.Add(descriptor);
+			for (int i = 0; i < this.formula.outputs.Length; i++)
+			{
+				EnergyGenerator.OutputItem outputItem = this.formula.outputs[i];
+				Element element = ElementLoader.FindElementByHash(outputItem.element);
+				string text = element.tag.ProperName();
+				string keywordStyle = GameUtil.GetKeywordStyle(element);
+				Descriptor descriptor = default(Descriptor);
+				descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTED, keywordStyle, text, GameUtil.GetFormattedMass(outputItem.creationRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTED, keywordStyle, text, GameUtil.GetFormattedMass(outputItem.creationRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Effect);
+				list.Add(descriptor);
+			}
+			list2 = list;
 		}
-		return list;
+		return list2;
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)
@@ -220,11 +243,11 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 	{
 		if (EnergyGenerator.batteriesSufficientlyFull == null)
 		{
-			EnergyGenerator.batteriesSufficientlyFull = new StatusItem("BatteriesSufficientlyFull", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 14334);
+			EnergyGenerator.batteriesSufficientlyFull = new StatusItem("BatteriesSufficientlyFull", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
 		}
 		if (EnergyGenerator.insufficientConversionMass == null)
 		{
-			EnergyGenerator.insufficientConversionMass = new StatusItem("INSUFFICIENT_CONVERSION_MASS", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 14334);
+			EnergyGenerator.insufficientConversionMass = new StatusItem("INSUFFICIENT_CONVERSION_MASS", "BUILDING", "", StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
 		}
 	}
 
@@ -265,13 +288,13 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 			}
 			else
 			{
-				GameObject gameObject = element.substance.SpawnResource(this.transform.position, num, root_pe.Temperature, byte.MaxValue, 0, false, false);
+				GameObject gameObject = element.substance.SpawnResource(base.transform.position, num, root_pe.Temperature, byte.MaxValue, 0, false, false);
 				this.storage.Store(gameObject, true, false, true);
 			}
 		}
 		else
 		{
-			int num2 = Grid.PosToCell(this.transform.position);
+			int num2 = Grid.PosToCell(base.transform.position);
 			int num3 = Grid.OffsetCell(num2, output.emitOffset);
 			if (element.IsGas)
 			{
@@ -295,11 +318,11 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 	[MyCmpGet]
 	private ManualDeliveryKG delivery;
 
-	[Serialize]
 	[SerializeField]
+	[Serialize]
 	private float batteryRefillPercent = 0.5f;
 
-	public bool ignoreBatteryRefillPercent;
+	public bool ignoreBatteryRefillPercent = false;
 
 	public bool hasMeter = true;
 
@@ -307,7 +330,7 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 
 	private static StatusItem insufficientConversionMass;
 
-	public Meter.Offset meterOffset;
+	public Meter.Offset meterOffset = Meter.Offset.Infront;
 
 	[SerializeField]
 	public EnergyGenerator.Formula formula;

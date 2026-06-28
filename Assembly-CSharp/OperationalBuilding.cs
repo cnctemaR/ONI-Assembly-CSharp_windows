@@ -4,7 +4,7 @@ public class OperationalBuilding : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
 	{
-		this.Subscribe(824508782, new Action<object>(this.InternalOnActiveChanged));
+		base.Subscribe(824508782, new Action<object>(this.InternalOnActiveChanged));
 	}
 
 	protected void SimUpdate(float dt)

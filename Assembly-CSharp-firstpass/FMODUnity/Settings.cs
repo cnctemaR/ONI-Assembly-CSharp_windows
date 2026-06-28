@@ -32,7 +32,7 @@ namespace FMODUnity
 			this.ImportType = ImportType.StreamingAssets;
 			this.AutomaticEventLoading = true;
 			this.AutomaticSampleLoading = false;
-			this.TargetAssetPath = string.Empty;
+			this.TargetAssetPath = "";
 		}
 
 		public static Settings Instance
@@ -90,16 +90,24 @@ namespace FMODUnity
 		public static U GetSetting<T, U>(List<T> list, FMODPlatform platform, U def) where T : PlatformSetting<U>
 		{
 			T t = list.Find((T x) => x.Platform == platform);
-			if (t != null)
+			U u;
+			if (t == null)
 			{
-				return t.Value;
+				FMODPlatform parent = Settings.GetParent(platform);
+				if (parent != FMODPlatform.None)
+				{
+					u = Settings.GetSetting<T, U>(list, parent, def);
+				}
+				else
+				{
+					u = def;
+				}
 			}
-			FMODPlatform parent = Settings.GetParent(platform);
-			if (parent != FMODPlatform.None)
+			else
 			{
-				return Settings.GetSetting<T, U>(list, parent, def);
+				u = t.Value;
 			}
-			return def;
+			return u;
 		}
 
 		public static void SetSetting<T, U>(List<T> list, FMODPlatform platform, U value) where T : PlatformSetting<U>, new()
@@ -151,16 +159,21 @@ namespace FMODUnity
 
 		public string GetBankPlatform(FMODPlatform platform)
 		{
+			string text;
 			if (!this.HasPlatforms)
 			{
-				return string.Empty;
+				text = "";
 			}
-			return Settings.GetSetting<PlatformStringSetting, string>(this.BankDirectorySettings, platform, "Desktop");
+			else
+			{
+				text = Settings.GetSetting<PlatformStringSetting, string>(this.BankDirectorySettings, platform, "Desktop");
+			}
+			return text;
 		}
 
 		private const string SettingsAssetName = "FMODStudioSettings";
 
-		private static Settings instance;
+		private static Settings instance = null;
 
 		[SerializeField]
 		public bool HasSourceProject = true;

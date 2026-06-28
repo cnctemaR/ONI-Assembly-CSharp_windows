@@ -56,18 +56,23 @@ public class ConsumablesTableScreen : TableScreen
 					ConsumableInfoTableColumn[] quality_group_columns = list4.ToArray();
 					DividerColumn dividerColumn = new DividerColumn(delegate
 					{
+						bool flag;
 						if (quality_group_columns == null || quality_group_columns.Length == 0)
 						{
-							return true;
+							flag = true;
 						}
-						foreach (ConsumableInfoTableColumn consumableInfoTableColumn2 in quality_group_columns)
+						else
 						{
-							if (consumableInfoTableColumn2.isRevealed)
+							foreach (ConsumableInfoTableColumn consumableInfoTableColumn2 in quality_group_columns)
 							{
-								return true;
+								if (consumableInfoTableColumn2.isRevealed)
+								{
+									return true;
+								}
 							}
+							flag = false;
 						}
-						return false;
+						return flag;
 					});
 					list3.Add(dividerColumn);
 					base.RegisterColumn(text, dividerColumn);
@@ -92,7 +97,7 @@ public class ConsumablesTableScreen : TableScreen
 		}
 		else if (widgetRow.isDefault)
 		{
-			componentInChildren.text = string.Empty;
+			componentInChildren.text = "";
 		}
 		else
 		{
@@ -109,30 +114,40 @@ public class ConsumablesTableScreen : TableScreen
 	{
 		float value = Db.Get().Amounts.Stress.Lookup(a).value;
 		float value2 = Db.Get().Amounts.Stress.Lookup(b).value;
+		int num;
 		if (value > value2)
 		{
-			return -1;
+			num = -1;
 		}
-		if (value < value2)
+		else if (value < value2)
 		{
-			return 1;
+			num = 1;
 		}
-		return 0;
+		else
+		{
+			num = 0;
+		}
+		return num;
 	}
 
 	protected void on_tooltip_stress(MinionIdentity minion, GameObject widget_go, ToolTip tooltip)
 	{
 		tooltip.ClearMultiStringTooltip();
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
-		switch (widgetRow.rowType)
+		TableRow.RowType rowType = widgetRow.rowType;
+		if (rowType != TableRow.RowType.Default)
 		{
-		case TableRow.RowType.Minion:
-			if (minion != null)
+			if (rowType != TableRow.RowType.Header)
 			{
-				tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.DUPLICANT_PROPERNAME, minion.GetProperName()), null);
-				tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.STRESS_TOOLTIP, Db.Get().Amounts.Stress.Lookup(minion).GetValueString()), null);
+				if (rowType == TableRow.RowType.Minion)
+				{
+					if (minion != null)
+					{
+						tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.DUPLICANT_PROPERNAME, minion.GetProperName()), null);
+						tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.STRESS_TOOLTIP, Db.Get().Amounts.Stress.Lookup(minion).GetValueString()), null);
+					}
+				}
 			}
-			break;
 		}
 	}
 
@@ -140,11 +155,19 @@ public class ConsumablesTableScreen : TableScreen
 	{
 		tooltip.ClearMultiStringTooltip();
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
-		switch (widgetRow.rowType)
+		TableRow.RowType rowType = widgetRow.rowType;
+		if (rowType != TableRow.RowType.Default)
 		{
-		case TableRow.RowType.Header:
-			tooltip.AddMultiStringTooltip(UI.TABLESCREENS.COLUMN_SORT_BY_STRESS, null);
-			break;
+			if (rowType != TableRow.RowType.Header)
+			{
+				if (rowType != TableRow.RowType.Minion)
+				{
+				}
+			}
+			else
+			{
+				tooltip.AddMultiStringTooltip(UI.TABLESCREENS.COLUMN_SORT_BY_STRESS, null);
+			}
 		}
 	}
 
@@ -158,7 +181,7 @@ public class ConsumablesTableScreen : TableScreen
 		}
 		else if (widgetRow.isDefault)
 		{
-			componentInChildren.text = string.Empty;
+			componentInChildren.text = "";
 		}
 		else
 		{
@@ -182,15 +205,20 @@ public class ConsumablesTableScreen : TableScreen
 	{
 		tooltip.ClearMultiStringTooltip();
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
-		switch (widgetRow.rowType)
+		TableRow.RowType rowType = widgetRow.rowType;
+		if (rowType != TableRow.RowType.Default)
 		{
-		case TableRow.RowType.Minion:
-			if (minion != null)
+			if (rowType != TableRow.RowType.Header)
 			{
-				tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.DUPLICANT_PROPERNAME, minion.GetProperName()), null);
-				tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_EXPECTATIONS_TOOLTIP, Db.Get().Attributes.FoodExpectation.Lookup(minion).GetFormattedValue()), null);
+				if (rowType == TableRow.RowType.Minion)
+				{
+					if (minion != null)
+					{
+						tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.DUPLICANT_PROPERNAME, minion.GetProperName()), null);
+						tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_EXPECTATIONS_TOOLTIP, Db.Get().Attributes.FoodExpectation.Lookup(minion).GetFormattedValue()), null);
+					}
+				}
 			}
-			break;
 		}
 	}
 
@@ -198,11 +226,19 @@ public class ConsumablesTableScreen : TableScreen
 	{
 		tooltip.ClearMultiStringTooltip();
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
-		switch (widgetRow.rowType)
+		TableRow.RowType rowType = widgetRow.rowType;
+		if (rowType != TableRow.RowType.Default)
 		{
-		case TableRow.RowType.Header:
-			tooltip.AddMultiStringTooltip(UI.TABLESCREENS.COLUMN_SORT_BY_EXPECTATIONS, null);
-			break;
+			if (rowType != TableRow.RowType.Header)
+			{
+				if (rowType != TableRow.RowType.Minion)
+				{
+				}
+			}
+			else
+			{
+				tooltip.AddMultiStringTooltip(UI.TABLESCREENS.COLUMN_SORT_BY_EXPECTATIONS, null);
+			}
 		}
 	}
 
@@ -216,45 +252,57 @@ public class ConsumablesTableScreen : TableScreen
 		bool flag4 = false;
 		foreach (CheckboxTableColumn checkboxTableColumn in superCheckboxTableColumn.columns_affected)
 		{
-			switch (checkboxTableColumn.get_value_action(widgetRow.GetMinionIdentity(), widgetRow.GetWidget(checkboxTableColumn)))
+			TableScreen.ResultValues resultValues = checkboxTableColumn.get_value_action(widgetRow.GetMinionIdentity(), widgetRow.GetWidget(checkboxTableColumn));
+			if (resultValues != TableScreen.ResultValues.False)
 			{
-			case TableScreen.ResultValues.False:
+				if (resultValues != TableScreen.ResultValues.Partial)
+				{
+					if (resultValues == TableScreen.ResultValues.True)
+					{
+						flag = false;
+						if (!flag2)
+						{
+							flag4 = true;
+						}
+					}
+				}
+				else
+				{
+					flag3 = true;
+					flag4 = true;
+				}
+			}
+			else
+			{
 				flag2 = false;
 				if (!flag)
 				{
 					flag4 = true;
 				}
-				break;
-			case TableScreen.ResultValues.Partial:
-				flag3 = true;
-				flag4 = true;
-				break;
-			case TableScreen.ResultValues.True:
-				flag = false;
-				if (!flag2)
-				{
-					flag4 = true;
-				}
-				break;
 			}
 			if (flag4)
 			{
 				break;
 			}
 		}
+		TableScreen.ResultValues resultValues2;
 		if (flag3)
 		{
-			return TableScreen.ResultValues.Partial;
+			resultValues2 = TableScreen.ResultValues.Partial;
 		}
-		if (flag2)
+		else if (flag2)
 		{
-			return TableScreen.ResultValues.True;
+			resultValues2 = TableScreen.ResultValues.True;
 		}
-		if (flag)
+		else if (flag)
 		{
-			return TableScreen.ResultValues.False;
+			resultValues2 = TableScreen.ResultValues.False;
 		}
-		return TableScreen.ResultValues.Partial;
+		else
+		{
+			resultValues2 = TableScreen.ResultValues.Partial;
+		}
+		return resultValues2;
 	}
 
 	private void set_value_consumable_info(GameObject widget_go, bool new_value)
@@ -263,57 +311,68 @@ public class ConsumablesTableScreen : TableScreen
 		if (widgetRow == null)
 		{
 			global::Debug.LogWarning("Row is null", null);
-			return;
 		}
-		ConsumableInfoTableColumn consumableInfoTableColumn = base.GetWidgetColumn(widget_go) as ConsumableInfoTableColumn;
-		MinionIdentity minionIdentity = widgetRow.GetMinionIdentity();
-		IConsumableUIItem consumable_info = consumableInfoTableColumn.consumable_info;
-		switch (widgetRow.rowType)
+		else
 		{
-		case TableRow.RowType.Header:
-			this.set_value_consumable_info(this.default_row.GetComponent<TableRow>().GetWidget(consumableInfoTableColumn), new_value);
-			base.StartCoroutine(base.CascadeSetColumnCheckBoxes(this.sortable_rows, consumableInfoTableColumn, new_value, widget_go));
-			break;
-		case TableRow.RowType.Default:
-			if (new_value)
+			ConsumableInfoTableColumn consumableInfoTableColumn = base.GetWidgetColumn(widget_go) as ConsumableInfoTableColumn;
+			MinionIdentity minionIdentity = widgetRow.GetMinionIdentity();
+			IConsumableUIItem consumable_info = consumableInfoTableColumn.consumable_info;
+			TableRow.RowType rowType = widgetRow.rowType;
+			if (rowType != TableRow.RowType.Header)
 			{
-				ConsumerManager.instance.DefaultForbiddenTagsList.Remove(consumable_info.ConsumableId.ToTag());
-			}
-			else
-			{
-				ConsumerManager.instance.DefaultForbiddenTagsList.Add(consumable_info.ConsumableId.ToTag());
-			}
-			consumableInfoTableColumn.on_load_action(minionIdentity, widget_go);
-			foreach (KeyValuePair<TableRow, GameObject> keyValuePair in consumableInfoTableColumn.widgets_by_row)
-			{
-				if (keyValuePair.Key.rowType == TableRow.RowType.Header)
+				if (rowType != TableRow.RowType.Default)
 				{
-					consumableInfoTableColumn.on_load_action(null, keyValuePair.Value);
-					break;
-				}
-			}
-			break;
-		case TableRow.RowType.Minion:
-			if (minionIdentity != null)
-			{
-				ConsumableConsumer component = minionIdentity.GetComponent<ConsumableConsumer>();
-				if (component == null)
-				{
-					global::Debug.LogError("Could not find minion identity / row associated with the widget", null);
-					return;
-				}
-				component.SetPermitted(consumable_info.ConsumableId, new_value);
-				consumableInfoTableColumn.on_load_action(widgetRow.GetMinionIdentity(), widget_go);
-				foreach (KeyValuePair<TableRow, GameObject> keyValuePair2 in consumableInfoTableColumn.widgets_by_row)
-				{
-					if (keyValuePair2.Key.rowType == TableRow.RowType.Header)
+					if (rowType == TableRow.RowType.Minion)
 					{
-						consumableInfoTableColumn.on_load_action(null, keyValuePair2.Value);
-						break;
+						if (minionIdentity != null)
+						{
+							ConsumableConsumer component = minionIdentity.GetComponent<ConsumableConsumer>();
+							if (component == null)
+							{
+								global::Debug.LogError("Could not find minion identity / row associated with the widget", null);
+							}
+							else
+							{
+								component.SetPermitted(consumable_info.ConsumableId, new_value);
+								consumableInfoTableColumn.on_load_action(widgetRow.GetMinionIdentity(), widget_go);
+								foreach (KeyValuePair<TableRow, GameObject> keyValuePair in consumableInfoTableColumn.widgets_by_row)
+								{
+									if (keyValuePair.Key.rowType == TableRow.RowType.Header)
+									{
+										consumableInfoTableColumn.on_load_action(null, keyValuePair.Value);
+										break;
+									}
+								}
+							}
+						}
+					}
+				}
+				else
+				{
+					if (new_value)
+					{
+						ConsumerManager.instance.DefaultForbiddenTagsList.Remove(consumable_info.ConsumableId.ToTag());
+					}
+					else
+					{
+						ConsumerManager.instance.DefaultForbiddenTagsList.Add(consumable_info.ConsumableId.ToTag());
+					}
+					consumableInfoTableColumn.on_load_action(minionIdentity, widget_go);
+					foreach (KeyValuePair<TableRow, GameObject> keyValuePair2 in consumableInfoTableColumn.widgets_by_row)
+					{
+						if (keyValuePair2.Key.rowType == TableRow.RowType.Header)
+						{
+							consumableInfoTableColumn.on_load_action(null, keyValuePair2.Value);
+							break;
+						}
 					}
 				}
 			}
-			break;
+			else
+			{
+				this.set_value_consumable_info(this.default_row.GetComponent<TableRow>().GetWidget(consumableInfoTableColumn), new_value);
+				base.StartCoroutine(base.CascadeSetColumnCheckBoxes(this.sortable_rows, consumableInfoTableColumn, new_value, widget_go));
+			}
 		}
 	}
 
@@ -322,35 +381,40 @@ public class ConsumablesTableScreen : TableScreen
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
 		MinionIdentity minionIdentity = widgetRow.GetMinionIdentity();
 		ConsumableInfoTableColumn consumableInfoTableColumn = base.GetWidgetColumn(widget_go) as ConsumableInfoTableColumn;
-		switch (widgetRow.rowType)
+		TableRow.RowType rowType = widgetRow.rowType;
+		if (rowType != TableRow.RowType.Header)
 		{
-		case TableRow.RowType.Header:
-		{
-			bool flag = this.get_value_consumable_info(null, widget_go) == TableScreen.ResultValues.True;
-			consumableInfoTableColumn.on_set_action(widget_go, !flag);
-			consumableInfoTableColumn.on_load_action(null, widget_go);
-			break;
-		}
-		case TableRow.RowType.Default:
-		{
-			IConsumableUIItem consumableUIItem = consumableInfoTableColumn.consumable_info;
-			bool flag2 = !ConsumerManager.instance.DefaultForbiddenTagsList.Contains(consumableUIItem.ConsumableId.ToTag());
-			consumableInfoTableColumn.on_set_action(widget_go, !flag2);
-			break;
-		}
-		case TableRow.RowType.Minion:
-			if (minionIdentity != null)
+			if (rowType != TableRow.RowType.Default)
 			{
-				ConsumableConsumer component = minionIdentity.GetComponent<ConsumableConsumer>();
-				if (component == null)
+				if (rowType == TableRow.RowType.Minion)
 				{
-					global::Debug.LogError("Could not find minion identity / row associated with the widget", null);
-					return;
+					if (minionIdentity != null)
+					{
+						ConsumableConsumer component = minionIdentity.GetComponent<ConsumableConsumer>();
+						if (component == null)
+						{
+							global::Debug.LogError("Could not find minion identity / row associated with the widget", null);
+						}
+						else
+						{
+							IConsumableUIItem consumableUIItem = consumableInfoTableColumn.consumable_info;
+							consumableInfoTableColumn.on_set_action(widget_go, !component.IsPermitted(consumableUIItem.ConsumableId));
+						}
+					}
 				}
-				IConsumableUIItem consumableUIItem = consumableInfoTableColumn.consumable_info;
-				consumableInfoTableColumn.on_set_action(widget_go, !component.IsPermitted(consumableUIItem.ConsumableId));
 			}
-			break;
+			else
+			{
+				IConsumableUIItem consumableUIItem = consumableInfoTableColumn.consumable_info;
+				bool flag = !ConsumerManager.instance.DefaultForbiddenTagsList.Contains(consumableUIItem.ConsumableId.ToTag());
+				consumableInfoTableColumn.on_set_action(widget_go, !flag);
+			}
+		}
+		else
+		{
+			bool flag2 = this.get_value_consumable_info(null, widget_go) == TableScreen.ResultValues.True;
+			consumableInfoTableColumn.on_set_action(widget_go, !flag2);
+			consumableInfoTableColumn.on_load_action(null, widget_go);
 		}
 	}
 
@@ -360,9 +424,60 @@ public class ConsumablesTableScreen : TableScreen
 		ConsumableInfoTableColumn consumableInfoTableColumn = base.GetWidgetColumn(widget_go) as ConsumableInfoTableColumn;
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
 		EdiblesManager.FoodInfo foodInfo = consumableInfoTableColumn.consumable_info as EdiblesManager.FoodInfo;
-		switch (widgetRow.rowType)
+		TableRow.RowType rowType = widgetRow.rowType;
+		if (rowType != TableRow.RowType.Header)
 		{
-		case TableRow.RowType.Header:
+			if (rowType != TableRow.RowType.Default)
+			{
+				if (rowType == TableRow.RowType.Minion)
+				{
+					if (minion != null)
+					{
+						if (consumableInfoTableColumn.get_value_action(minion, widget_go) == TableScreen.ResultValues.True)
+						{
+							tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_PERMISSION_ON, minion.GetProperName(), consumableInfoTableColumn.consumable_info.ConsumableName), null);
+						}
+						else
+						{
+							tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_PERMISSION_OFF, minion.GetProperName(), consumableInfoTableColumn.consumable_info.ConsumableName), null);
+						}
+						if (foodInfo != null)
+						{
+							if (minion.GetAttributes().Get(Db.Get().Attributes.FoodExpectation).GetTotalValue() > (float)foodInfo.Quality)
+							{
+								tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_QUALITY_VS_EXPECTATION, new object[]
+								{
+									UI.CONSUMABLESSCREEN.EXPECTATIONS_BELOW,
+									minion.GetProperName(),
+									foodInfo.Quality,
+									minion.GetAttributes().Get(Db.Get().Attributes.FoodExpectation).GetTotalValue()
+								}), null);
+							}
+							else
+							{
+								tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_QUALITY_VS_EXPECTATION, new object[]
+								{
+									UI.CONSUMABLESSCREEN.EXPECTATIONS_ABOVE,
+									minion.GetProperName(),
+									foodInfo.Quality,
+									minion.GetAttributes().Get(Db.Get().Attributes.FoodExpectation).GetTotalValue()
+								}), null);
+							}
+						}
+					}
+				}
+			}
+			else if (consumableInfoTableColumn.get_value_action(minion, widget_go) == TableScreen.ResultValues.True)
+			{
+				tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.NEW_MINIONS_FOOD_PERMISSION_ON, consumableInfoTableColumn.consumable_info.ConsumableName), null);
+			}
+			else
+			{
+				tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.NEW_MINIONS_FOOD_PERMISSION_OFF, consumableInfoTableColumn.consumable_info.ConsumableName), null);
+			}
+		}
+		else
+		{
 			tooltip.AddMultiStringTooltip(consumableInfoTableColumn.consumable_info.ConsumableName, null);
 			if (foodInfo != null)
 			{
@@ -373,53 +488,6 @@ public class ConsumablesTableScreen : TableScreen
 			{
 				tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_AVAILABLE, GameUtil.GetFormattedUnits(WorldInventory.Instance.GetAmount(consumableInfoTableColumn.consumable_info.ConsumableId.ToTag()), GameUtil.TimeSlice.None, true)), null);
 			}
-			break;
-		case TableRow.RowType.Default:
-			if (consumableInfoTableColumn.get_value_action(minion, widget_go) == TableScreen.ResultValues.True)
-			{
-				tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.NEW_MINIONS_FOOD_PERMISSION_ON, consumableInfoTableColumn.consumable_info.ConsumableName), null);
-			}
-			else
-			{
-				tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.NEW_MINIONS_FOOD_PERMISSION_OFF, consumableInfoTableColumn.consumable_info.ConsumableName), null);
-			}
-			break;
-		case TableRow.RowType.Minion:
-			if (minion != null)
-			{
-				if (consumableInfoTableColumn.get_value_action(minion, widget_go) == TableScreen.ResultValues.True)
-				{
-					tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_PERMISSION_ON, minion.GetProperName(), consumableInfoTableColumn.consumable_info.ConsumableName), null);
-				}
-				else
-				{
-					tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_PERMISSION_OFF, minion.GetProperName(), consumableInfoTableColumn.consumable_info.ConsumableName), null);
-				}
-				if (foodInfo != null)
-				{
-					if (minion.GetAttributes().Get(Db.Get().Attributes.FoodExpectation).GetTotalValue() > (float)foodInfo.Quality)
-					{
-						tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_QUALITY_VS_EXPECTATION, new object[]
-						{
-							UI.CONSUMABLESSCREEN.EXPECTATIONS_BELOW,
-							minion.GetProperName(),
-							foodInfo.Quality,
-							minion.GetAttributes().Get(Db.Get().Attributes.FoodExpectation).GetTotalValue()
-						}), null);
-					}
-					else
-					{
-						tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_QUALITY_VS_EXPECTATION, new object[]
-						{
-							UI.CONSUMABLESSCREEN.EXPECTATIONS_ABOVE,
-							minion.GetProperName(),
-							foodInfo.Quality,
-							minion.GetAttributes().Get(Db.Get().Attributes.FoodExpectation).GetTotalValue()
-						}), null);
-					}
-				}
-			}
-			break;
 		}
 	}
 
@@ -431,20 +499,27 @@ public class ConsumablesTableScreen : TableScreen
 	{
 		tooltip.ClearMultiStringTooltip();
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
-		switch (widgetRow.rowType)
+		TableRow.RowType rowType = widgetRow.rowType;
+		if (rowType != TableRow.RowType.Header)
 		{
-		case TableRow.RowType.Header:
-			tooltip.AddMultiStringTooltip(UI.CONSUMABLESSCREEN.TOOLTIP_TOGGLE_ALL.text, null);
-			break;
-		case TableRow.RowType.Default:
-			tooltip.AddMultiStringTooltip(UI.CONSUMABLESSCREEN.NEW_MINIONS_TOOLTIP_TOGGLE_ROW, null);
-			break;
-		case TableRow.RowType.Minion:
-			if (minion != null)
+			if (rowType != TableRow.RowType.Default)
 			{
-				tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.TOOLTIP_TOGGLE_ROW.text, minion.gameObject.GetProperName()), null);
+				if (rowType == TableRow.RowType.Minion)
+				{
+					if (minion != null)
+					{
+						tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.TOOLTIP_TOGGLE_ROW.text, minion.gameObject.GetProperName()), null);
+					}
+				}
 			}
-			break;
+			else
+			{
+				tooltip.AddMultiStringTooltip(UI.CONSUMABLESSCREEN.NEW_MINIONS_TOOLTIP_TOGGLE_ROW, null);
+			}
+		}
+		else
+		{
+			tooltip.AddMultiStringTooltip(UI.CONSUMABLESSCREEN.TOOLTIP_TOGGLE_ALL.text, null);
 		}
 	}
 
@@ -458,41 +533,47 @@ public class ConsumablesTableScreen : TableScreen
 		if (!widgetColumn.isRevealed)
 		{
 			widget_go.SetActive(false);
-			return;
 		}
-		if (!widget_go.activeSelf)
+		else
 		{
-			widget_go.SetActive(true);
-		}
-		switch (widgetRow.rowType)
-		{
-		case TableRow.RowType.Header:
-		{
-			GameObject prefab = Assets.GetPrefab(consumable_info.ConsumableId.ToTag());
-			if (prefab == null)
+			if (!widget_go.activeSelf)
 			{
-				return;
+				widget_go.SetActive(true);
 			}
-			KBatchedAnimController component2 = prefab.GetComponent<KBatchedAnimController>();
-			Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component2.AnimFiles[0], "ui");
-			Image image = widget_go.GetComponent<HierarchyReferences>().GetReference("PortraitImage") as Image;
-			image.sprite = uispriteFromMultiObjectAnim;
-			image.color = Color.white;
-			image.material = ((WorldInventory.Instance.GetAmount(consumable_info.ConsumableId.ToTag()) <= 0f) ? Assets.UIPrefabs.TableScreenWidgets.DesaturatedUIMaterial : Assets.UIPrefabs.TableScreenWidgets.DefaultUIMaterial);
-			break;
-		}
-		case TableRow.RowType.Default:
-			component.isOn = this.get_value_consumable_info(minion, widget_go) == TableScreen.ResultValues.True;
-			break;
-		case TableRow.RowType.Minion:
-			component.isOn = this.get_value_consumable_info(minion, widget_go) == TableScreen.ResultValues.True;
-			if (foodInfo != null)
+			TableRow.RowType rowType = widgetRow.rowType;
+			if (rowType != TableRow.RowType.Header)
 			{
-				Image image2 = widget_go.GetComponent<HierarchyReferences>().GetReference("BGImage") as Image;
-				Color color = new Color(0.72156864f, 0.44313726f, 0.5803922f, Mathf.Max((float)foodInfo.Quality - Db.Get().Attributes.FoodExpectation.Lookup(minion).GetTotalValue() + 1f, 0f) * 0.25f);
-				image2.color = color;
+				if (rowType != TableRow.RowType.Default)
+				{
+					if (rowType == TableRow.RowType.Minion)
+					{
+						component.isOn = this.get_value_consumable_info(minion, widget_go) == TableScreen.ResultValues.True;
+						if (foodInfo != null)
+						{
+							Image image = widget_go.GetComponent<HierarchyReferences>().GetReference("BGImage") as Image;
+							Color color = new Color(0.72156864f, 0.44313726f, 0.5803922f, Mathf.Max((float)foodInfo.Quality - Db.Get().Attributes.FoodExpectation.Lookup(minion).GetTotalValue() + 1f, 0f) * 0.25f);
+							image.color = color;
+						}
+					}
+				}
+				else
+				{
+					component.isOn = this.get_value_consumable_info(minion, widget_go) == TableScreen.ResultValues.True;
+				}
 			}
-			break;
+			else
+			{
+				GameObject prefab = Assets.GetPrefab(consumable_info.ConsumableId.ToTag());
+				if (!(prefab == null))
+				{
+					KBatchedAnimController component2 = prefab.GetComponent<KBatchedAnimController>();
+					Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component2.AnimFiles[0], "ui");
+					Image image2 = widget_go.GetComponent<HierarchyReferences>().GetReference("PortraitImage") as Image;
+					image2.sprite = uispriteFromMultiObjectAnim;
+					image2.color = Color.white;
+					image2.material = ((WorldInventory.Instance.GetAmount(consumable_info.ConsumableId.ToTag()) <= 0f) ? Assets.UIPrefabs.TableScreenWidgets.DesaturatedUIMaterial : Assets.UIPrefabs.TableScreenWidgets.DefaultUIMaterial);
+				}
+			}
 		}
 	}
 
@@ -512,9 +593,29 @@ public class ConsumablesTableScreen : TableScreen
 		IConsumableUIItem consumable_info = consumableInfoTableColumn.consumable_info;
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
 		TableScreen.ResultValues resultValues = TableScreen.ResultValues.Partial;
-		switch (widgetRow.rowType)
+		TableRow.RowType rowType = widgetRow.rowType;
+		if (rowType != TableRow.RowType.Header)
 		{
-		case TableRow.RowType.Header:
+			if (rowType != TableRow.RowType.Default)
+			{
+				if (rowType == TableRow.RowType.Minion)
+				{
+					if (minion != null)
+					{
+						resultValues = ((!consumableConsumer.IsPermitted(consumable_info.ConsumableId)) ? TableScreen.ResultValues.False : TableScreen.ResultValues.True);
+					}
+					else
+					{
+						resultValues = TableScreen.ResultValues.True;
+					}
+				}
+			}
+			else
+			{
+				resultValues = ((!ConsumerManager.instance.DefaultForbiddenTagsList.Contains(consumable_info.ConsumableId.ToTag())) ? TableScreen.ResultValues.True : TableScreen.ResultValues.False);
+			}
+		}
+		else
 		{
 			bool flag = true;
 			bool flag2 = true;
@@ -527,26 +628,33 @@ public class ConsumablesTableScreen : TableScreen
 				{
 					if (!(value == null))
 					{
-						switch (consumableInfoTableColumn.get_value_action(keyValuePair.Key.GetMinionIdentity(), value))
+						TableScreen.ResultValues resultValues2 = consumableInfoTableColumn.get_value_action(keyValuePair.Key.GetMinionIdentity(), value);
+						if (resultValues2 != TableScreen.ResultValues.False)
 						{
-						case TableScreen.ResultValues.False:
+							if (resultValues2 != TableScreen.ResultValues.Partial)
+							{
+								if (resultValues2 == TableScreen.ResultValues.True)
+								{
+									flag = false;
+									if (!flag2)
+									{
+										flag4 = true;
+									}
+								}
+							}
+							else
+							{
+								flag3 = true;
+								flag4 = true;
+							}
+						}
+						else
+						{
 							flag2 = false;
 							if (!flag)
 							{
 								flag4 = true;
 							}
-							break;
-						case TableScreen.ResultValues.Partial:
-							flag3 = true;
-							flag4 = true;
-							break;
-						case TableScreen.ResultValues.True:
-							flag = false;
-							if (!flag2)
-							{
-								flag4 = true;
-							}
-							break;
 						}
 						if (flag4)
 						{
@@ -571,21 +679,6 @@ public class ConsumablesTableScreen : TableScreen
 			{
 				resultValues = TableScreen.ResultValues.Partial;
 			}
-			break;
-		}
-		case TableRow.RowType.Default:
-			resultValues = ((!ConsumerManager.instance.DefaultForbiddenTagsList.Contains(consumable_info.ConsumableId.ToTag())) ? TableScreen.ResultValues.True : TableScreen.ResultValues.False);
-			break;
-		case TableRow.RowType.Minion:
-			if (minion != null)
-			{
-				resultValues = ((!consumableConsumer.IsPermitted(consumable_info.ConsumableId)) ? TableScreen.ResultValues.False : TableScreen.ResultValues.True);
-			}
-			else
-			{
-				resultValues = TableScreen.ResultValues.True;
-			}
-			break;
 		}
 		return resultValues;
 	}
@@ -594,25 +687,35 @@ public class ConsumablesTableScreen : TableScreen
 	{
 		tooltip.ClearMultiStringTooltip();
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
-		switch (widgetRow.rowType)
+		TableRow.RowType rowType = widgetRow.rowType;
+		if (rowType != TableRow.RowType.Default)
 		{
-		case TableRow.RowType.Minion:
-			if (minion != null)
+			if (rowType != TableRow.RowType.Header)
 			{
-				tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.GOTO_DUPLICANT_BUTTON, minion.GetProperName()), null);
+				if (rowType == TableRow.RowType.Minion)
+				{
+					if (minion != null)
+					{
+						tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.GOTO_DUPLICANT_BUTTON, minion.GetProperName()), null);
+					}
+				}
 			}
-			break;
 		}
 	}
 
 	protected ConsumableInfoTableColumn AddConsumableInfoColumn(string id, IConsumableUIItem consumable_info, Action<MinionIdentity, GameObject> load_value_action, Func<MinionIdentity, GameObject, TableScreen.ResultValues> get_value_action, Action<GameObject> on_press_action, Action<GameObject, bool> set_value_action, Comparison<MinionIdentity> sort_comparison, Action<MinionIdentity, GameObject, ToolTip> on_tooltip, Action<MinionIdentity, GameObject, ToolTip> on_sort_tooltip)
 	{
-		ConsumableInfoTableColumn consumableInfoTableColumn = new ConsumableInfoTableColumn(consumable_info, load_value_action, get_value_action, on_press_action, set_value_action, sort_comparison, on_tooltip, on_sort_tooltip, (GameObject widget_go) => string.Empty);
+		ConsumableInfoTableColumn consumableInfoTableColumn = new ConsumableInfoTableColumn(consumable_info, load_value_action, get_value_action, on_press_action, set_value_action, sort_comparison, on_tooltip, on_sort_tooltip, (GameObject widget_go) => "");
+		ConsumableInfoTableColumn consumableInfoTableColumn2;
 		if (base.RegisterColumn(id, consumableInfoTableColumn))
 		{
-			return consumableInfoTableColumn;
+			consumableInfoTableColumn2 = consumableInfoTableColumn;
 		}
-		return null;
+		else
+		{
+			consumableInfoTableColumn2 = null;
+		}
+		return consumableInfoTableColumn2;
 	}
 
 	private void OnConsumableDiscovered(Tag tag)

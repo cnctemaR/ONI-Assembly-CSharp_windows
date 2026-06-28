@@ -5,11 +5,16 @@ public class NavigationReservations : KMonoBehaviour
 {
 	public int GetOccupancyCount(int cell)
 	{
+		int num;
 		if (this.cellOccupancyDensity.ContainsKey(cell))
 		{
-			return this.cellOccupancyDensity[cell];
+			num = this.cellOccupancyDensity[cell];
 		}
-		return 0;
+		else
+		{
+			num = 0;
+		}
+		return num;
 	}
 
 	public bool isReserved(int cell)
@@ -25,10 +30,8 @@ public class NavigationReservations : KMonoBehaviour
 		}
 		else
 		{
-			Dictionary<int, int> dictionary2;
-			Dictionary<int, int> dictionary = (dictionary2 = this.cellOccupancyDensity);
-			int num = dictionary2[cell];
-			dictionary[cell] = num + 1;
+			Dictionary<int, int> dictionary;
+			(dictionary = this.cellOccupancyDensity)[cell] = dictionary[cell] + 1;
 		}
 	}
 
@@ -36,10 +39,8 @@ public class NavigationReservations : KMonoBehaviour
 	{
 		if (this.cellOccupancyDensity.ContainsKey(cell))
 		{
-			Dictionary<int, int> dictionary2;
-			Dictionary<int, int> dictionary = (dictionary2 = this.cellOccupancyDensity);
-			int num = dictionary2[cell];
-			dictionary[cell] = num - 1;
+			Dictionary<int, int> dictionary;
+			(dictionary = this.cellOccupancyDensity)[cell] = dictionary[cell] - 1;
 		}
 	}
 

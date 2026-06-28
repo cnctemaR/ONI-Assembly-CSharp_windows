@@ -54,10 +54,10 @@ public class LanguageOptionsScreen : KModalScreen
 				GameObject gameObject = Util.KInstantiateUI(this.languageButtonPrefab, this.preinstalledLanguagesContainer, false);
 				gameObject.name = text + "_button";
 				HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
-				TMP_FontAsset fontForLocale = Localization.GetFontForLocale(text);
 				LocText reference = component.GetReference<LocText>("Title");
-				reference.SetText(Localization.GetPreinstalledLocalizationTitle(text));
-				reference.font = fontForLocale;
+				reference.text = Localization.GetPreinstalledLocalizationTitle(text);
+				reference.enabled = false;
+				reference.enabled = true;
 				Texture2D preinstalledLocalizationImage = Localization.GetPreinstalledLocalizationImage(text);
 				if (preinstalledLocalizationImage != null)
 				{
@@ -154,7 +154,7 @@ public class LanguageOptionsScreen : KModalScreen
 
 	private ConfirmDialogScreen GetConfirmDialog()
 	{
-		GameObject gameObject = KScreenManager.AddChild(this.transform.parent.gameObject, ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject);
+		GameObject gameObject = KScreenManager.AddChild(base.transform.parent.gameObject, ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject);
 		KScreen component = gameObject.GetComponent<KScreen>();
 		component.Activate();
 		return component.GetComponent<ConfirmDialogScreen>();

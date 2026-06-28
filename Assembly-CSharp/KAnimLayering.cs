@@ -62,7 +62,8 @@ public class KAnimLayering
 				if (data.build != null)
 				{
 					KAnim.Build.Symbol[] symbols = data.build.symbols;
-					for (int j = 0; j < symbols.Length; j++)
+					int j = 0;
+					while (j < symbols.Length)
 					{
 						bool flag = (symbols[j].flags & 8) != 0;
 						if (flag != this.isForeground)
@@ -72,6 +73,10 @@ public class KAnimLayering
 								this.controller.HideSymbol(symbols[j].hash, true);
 							}
 						}
+						IL_00B1:
+						j++;
+						continue;
+						goto IL_00B1;
 					}
 				}
 			}
@@ -80,55 +85,52 @@ public class KAnimLayering
 
 	public void HideSymbols()
 	{
-		if (EntityPrefabs.Instance == null)
+		if (!(EntityPrefabs.Instance == null))
 		{
-			return;
-		}
-		if (this.isForeground)
-		{
-			return;
-		}
-		KAnimFile[] anims = this.controller.GetAnims();
-		bool flag = KAnimLayering.IsAnimLayered(anims);
-		if (flag && this.foregroundController == null && this.layer != Grid.SceneLayer.NoLayer)
-		{
-			GameObject gameObject = Util.KInstantiate(EntityPrefabs.Instance.ForegroundLayer, this.controller.gameObject, null);
-			gameObject.name = this.controller.name + "_fg";
-			this.foregroundController = gameObject.GetComponent<KAnimControllerBase>();
-			this.foregroundController.GetLayering().SetIsForeground(true);
-			this.foregroundController.SetAnims(anims, true);
-			this.foregroundController.initialAnim = this.controller.initialAnim;
-			this.link = new KAnimLink(this.controller, this.foregroundController);
-			this.Dirty();
-			this.controller.GetSynchronizer().Add(this.foregroundController);
-			Vector3 vector = new Vector3(0f, 0f, Grid.GetLayerZ(this.layer) - this.controller.gameObject.transform.position.z - 0.1f);
-			gameObject.transform.SetLocalPosition(vector);
-			gameObject.SetActive(true);
-		}
-		else if (!flag && this.foregroundController != null)
-		{
-			this.controller.GetSynchronizer().Remove(this.foregroundController);
-			this.foregroundController.gameObject.DeleteObject();
-			this.link = null;
-		}
-		if (this.foregroundController != null)
-		{
-			this.HideSymbolsInternal();
-			KAnimLayering layering = this.foregroundController.GetLayering();
-			if (layering != null)
+			if (!this.isForeground)
 			{
-				layering.HideSymbolsInternal();
+				KAnimFile[] anims = this.controller.GetAnims();
+				bool flag = KAnimLayering.IsAnimLayered(anims);
+				if (flag && this.foregroundController == null && this.layer != Grid.SceneLayer.NoLayer)
+				{
+					GameObject gameObject = Util.KInstantiate(EntityPrefabs.Instance.ForegroundLayer, this.controller.gameObject, null);
+					gameObject.name = this.controller.name + "_fg";
+					this.foregroundController = gameObject.GetComponent<KAnimControllerBase>();
+					this.foregroundController.GetLayering().SetIsForeground(true);
+					this.foregroundController.SetAnims(anims, true);
+					this.foregroundController.initialAnim = this.controller.initialAnim;
+					this.link = new KAnimLink(this.controller, this.foregroundController);
+					this.Dirty();
+					this.controller.GetSynchronizer().Add(this.foregroundController);
+					Vector3 vector = new Vector3(0f, 0f, Grid.GetLayerZ(this.layer) - this.controller.gameObject.transform.position.z - 0.1f);
+					gameObject.transform.SetLocalPosition(vector);
+					gameObject.SetActive(true);
+				}
+				else if (!flag && this.foregroundController != null)
+				{
+					this.controller.GetSynchronizer().Remove(this.foregroundController);
+					this.foregroundController.gameObject.DeleteObject();
+					this.link = null;
+				}
+				if (this.foregroundController != null)
+				{
+					this.HideSymbolsInternal();
+					KAnimLayering layering = this.foregroundController.GetLayering();
+					if (layering != null)
+					{
+						layering.HideSymbolsInternal();
+					}
+				}
 			}
 		}
 	}
 
 	public void Dirty()
 	{
-		if (this.foregroundController == null)
+		if (!(this.foregroundController == null))
 		{
-			return;
+			this.foregroundController.Offset = this.controller.Offset;
 		}
-		this.foregroundController.Offset = this.controller.Offset;
 	}
 
 	private bool isForeground;

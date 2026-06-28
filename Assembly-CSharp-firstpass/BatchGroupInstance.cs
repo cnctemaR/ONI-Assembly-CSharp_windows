@@ -81,18 +81,17 @@ public class BatchGroupInstance
 
 	public void RemoveOverride(KAnimHashedString target)
 	{
-		if (!this.overriddenSymbols.ContainsKey(target))
+		if (this.overriddenSymbols.ContainsKey(target))
 		{
-			return;
+			KAnim.Build.Symbol buildSymbol = this.group.data.GetBuildSymbol(target);
+			for (int i = 0; i < this.overriddenSymbols[target].Count; i++)
+			{
+				this.symbolFrameInstances[buildSymbol.firstFrameIdx + i] = this.overriddenSymbols[target][i];
+			}
+			this.RemoveOverrideTarget(target);
+			this.overrideSourceFile.Remove(target);
+			this.requiresRebuild = true;
 		}
-		KAnim.Build.Symbol buildSymbol = this.group.data.GetBuildSymbol(target);
-		for (int i = 0; i < this.overriddenSymbols[target].Count; i++)
-		{
-			this.symbolFrameInstances[buildSymbol.firstFrameIdx + i] = this.overriddenSymbols[target][i];
-		}
-		this.RemoveOverrideTarget(target);
-		this.overrideSourceFile.Remove(target);
-		this.requiresRebuild = true;
 	}
 
 	public bool AddOverride(KAnimHashedString target, HashedString source, List<KAnim.Build.SymbolFrameInstance> substituteFrames, List<int> textureIndexList, KAnimHashedString srcPath, bool is_perminent)
@@ -140,28 +139,36 @@ public class BatchGroupInstance
 	public bool AddOverrideTexture(Texture2D atlas, ref int index)
 	{
 		index = this.group.data.textures.FindIndex((Texture2D a) => a == atlas);
+		bool flag;
 		if (index != -1)
 		{
-			return false;
+			flag = false;
 		}
-		index = this.textures.FindIndex((Texture2D a) => a == atlas);
-		if (index == -1)
+		else
 		{
-			index = this.textures.FindIndex((Texture2D a) => a == null);
-			if (index != -1)
+			index = this.textures.FindIndex((Texture2D a) => a == atlas);
+			if (index == -1)
 			{
-				this.textures[index] = atlas;
-				index += this.group.data.textures.Count;
+				index = this.textures.FindIndex((Texture2D a) => a == null);
+				if (index != -1)
+				{
+					this.textures[index] = atlas;
+					index += this.group.data.textures.Count;
+				}
+				else
+				{
+					index = this.textures.Count + this.group.data.textures.Count;
+					this.textures.Add(atlas);
+				}
+				flag = true;
 			}
 			else
 			{
-				index = this.textures.Count + this.group.data.textures.Count;
-				this.textures.Add(atlas);
+				index += this.group.data.textures.Count;
+				flag = false;
 			}
-			return true;
 		}
-		index += this.group.data.textures.Count;
-		return false;
+		return flag;
 	}
 
 	private void RemoveOverrideTarget(KAnimHashedString target)
@@ -187,10 +194,8 @@ public class BatchGroupInstance
 		bool flag = false;
 		for (int i = 0; i < textureIndexList.Count; i++)
 		{
-			int num2;
-			int num = (num2 = i);
-			num2 = textureIndexList[num2];
-			textureIndexList[num] = num2 - this.group.data.textures.Count;
+			int num;
+			textureIndexList[num = i] = textureIndexList[num] - this.group.data.textures.Count;
 			if (textureIndexList[i] >= 0)
 			{
 				if (!this.texUse.ContainsKey(textureIndexList[i]))
@@ -237,23 +242,22 @@ public class BatchGroupInstance
 
 	public void SwapSymbolFrameInstance(KAnimHashedString target, int target_frame_idx, int override_frame_idx)
 	{
-		if (target_frame_idx == override_frame_idx)
+		if (target_frame_idx != override_frame_idx)
 		{
-			return;
+			KAnim.Build.Symbol buildSymbol = this.group.data.GetBuildSymbol(target);
+			int num = this.swaps.FindIndex((BatchGroupInstance.SingleFrameSwap sfs) => sfs.symbol_name == target);
+			if (num != -1)
+			{
+				this.SwapSymbolFrameInstance(buildSymbol, this.swaps[num].override_frame, this.swaps[num].target_frame);
+				this.swaps.RemoveAt(num);
+			}
+			this.SwapSymbolFrameInstance(buildSymbol, target_frame_idx, override_frame_idx);
+			BatchGroupInstance.SingleFrameSwap singleFrameSwap = default(BatchGroupInstance.SingleFrameSwap);
+			singleFrameSwap.symbol_name = target;
+			singleFrameSwap.target_frame = target_frame_idx;
+			singleFrameSwap.override_frame = override_frame_idx;
+			this.swaps.Add(singleFrameSwap);
 		}
-		KAnim.Build.Symbol buildSymbol = this.group.data.GetBuildSymbol(target);
-		int num = this.swaps.FindIndex((BatchGroupInstance.SingleFrameSwap sfs) => sfs.symbol_name == target);
-		if (num != -1)
-		{
-			this.SwapSymbolFrameInstance(buildSymbol, this.swaps[num].override_frame, this.swaps[num].target_frame);
-			this.swaps.RemoveAt(num);
-		}
-		this.SwapSymbolFrameInstance(buildSymbol, target_frame_idx, override_frame_idx);
-		BatchGroupInstance.SingleFrameSwap singleFrameSwap = default(BatchGroupInstance.SingleFrameSwap);
-		singleFrameSwap.symbol_name = target;
-		singleFrameSwap.target_frame = target_frame_idx;
-		singleFrameSwap.override_frame = override_frame_idx;
-		this.swaps.Add(singleFrameSwap);
 	}
 
 	public KAnimBatchGroup.KAnimBatchTextureCache.Entry buildTex;

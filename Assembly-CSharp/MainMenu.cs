@@ -77,16 +77,14 @@ public class MainMenu : KMonoBehaviour
 		if (SteamManager.Initialized)
 		{
 			string steamUILanguage = SteamUtils.GetSteamUILanguage();
-			if (steamUILanguage != "schinese")
+			if (!(steamUILanguage != "schinese"))
 			{
-				return;
+				if (KPlayerPrefs.GetInt("LanguageConfirmationVersion") < MainMenu.LANGUAGE_CONFIRMATION_VERSION)
+				{
+					KPlayerPrefs.SetInt("LanguageConfirmationVersion", MainMenu.LANGUAGE_CONFIRMATION_VERSION);
+					this.Translations();
+				}
 			}
-			if (KPlayerPrefs.GetInt("LanguageConfirmationVersion") >= MainMenu.LANGUAGE_CONFIRMATION_VERSION)
-			{
-				return;
-			}
-			KPlayerPrefs.SetInt("LanguageConfirmationVersion", MainMenu.LANGUAGE_CONFIRMATION_VERSION);
-			this.Translations();
 		}
 	}
 
@@ -145,7 +143,7 @@ public class MainMenu : KMonoBehaviour
 				}
 				SaveGame.Header header;
 				SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(latestSaveFile, out header);
-				if (header.buildVersion > 236679U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 242372U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}
@@ -177,7 +175,8 @@ public class MainMenu : KMonoBehaviour
 
 	private void Translations()
 	{
-		Util.KInstantiateUI(ScreenPrefabs.Instance.languageOptionsScreen.gameObject, this.transform.parent.gameObject, false);
+		LanguageOptionsScreen languageOptionsScreen = Util.KInstantiateUI<LanguageOptionsScreen>(ScreenPrefabs.Instance.languageOptionsScreen.gameObject, base.transform.parent.gameObject, false);
+		languageOptionsScreen.SetBackgroundActive(true);
 	}
 
 	private void Options()
@@ -221,7 +220,7 @@ public class MainMenu : KMonoBehaviour
 
 	private void CheckDoubleBoundKeys()
 	{
-		string text = string.Empty;
+		string text = "";
 		List<BindingEntry> list = new List<BindingEntry>();
 		for (int i = 0; i < GameInputMapping.KeyBindings.Length; i++)
 		{
@@ -237,30 +236,26 @@ public class MainMenu : KMonoBehaviour
 							BindingEntry bindingEntry2 = GameInputMapping.KeyBindings[j];
 							if (bindingEntry.mKeyCode != KKeyCode.None && bindingEntry.mKeyCode == bindingEntry2.mKeyCode && bindingEntry.mModifier == bindingEntry2.mModifier && bindingEntry.mRebindable && bindingEntry2.mRebindable)
 							{
-								if (!(GameInputMapping.KeyBindings[i].mGroup != GameInputMapping.KeyBindings[j].mGroup) || GameInputMapping.KeyBindings[i].mGroup == "Root" || GameInputMapping.KeyBindings[j].mGroup == "Root")
+								string mGroup = GameInputMapping.KeyBindings[i].mGroup;
+								string mGroup2 = GameInputMapping.KeyBindings[j].mGroup;
+								if (mGroup == "Root" || mGroup2 == "Root" || mGroup == mGroup2)
 								{
-									string text2 = text;
-									text = string.Concat(new object[]
+									if (!(mGroup == "Root") || !bindingEntry2.mIgnoreRootConflics)
 									{
-										text2,
-										"\n\n",
-										GameInputMapping.KeyBindings[i].mAction,
-										": <b>",
-										GameInputMapping.KeyBindings[i].mKeyCode,
-										"</b>\n",
-										GameInputMapping.KeyBindings[j].mAction,
-										": <b>",
-										GameInputMapping.KeyBindings[j].mKeyCode,
-										"</b>"
-									});
-									BindingEntry bindingEntry3 = GameInputMapping.KeyBindings[i];
-									bindingEntry3.mKeyCode = KKeyCode.None;
-									bindingEntry3.mModifier = Modifier.None;
-									GameInputMapping.KeyBindings[i] = bindingEntry3;
-									bindingEntry3 = GameInputMapping.KeyBindings[j];
-									bindingEntry3.mKeyCode = KKeyCode.None;
-									bindingEntry3.mModifier = Modifier.None;
-									GameInputMapping.KeyBindings[j] = bindingEntry3;
+										if (!(mGroup2 == "Root") || !bindingEntry.mIgnoreRootConflics)
+										{
+											string text2 = text;
+											text = string.Concat(new object[] { text2, "\n\n", bindingEntry.mAction, ": <b>", bindingEntry.mKeyCode, "</b>\n", bindingEntry2.mAction, ": <b>", bindingEntry2.mKeyCode, "</b>" });
+											BindingEntry bindingEntry3 = bindingEntry;
+											bindingEntry3.mKeyCode = KKeyCode.None;
+											bindingEntry3.mModifier = Modifier.None;
+											GameInputMapping.KeyBindings[i] = bindingEntry3;
+											bindingEntry3 = bindingEntry2;
+											bindingEntry3.mKeyCode = KKeyCode.None;
+											bindingEntry3.mModifier = Modifier.None;
+											GameInputMapping.KeyBindings[j] = bindingEntry3;
+										}
+									}
 								}
 							}
 						}
@@ -269,7 +264,7 @@ public class MainMenu : KMonoBehaviour
 				list.Add(GameInputMapping.KeyBindings[i]);
 			}
 		}
-		if (text != string.Empty)
+		if (text != "")
 		{
 			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
 			confirmDialogScreen.imageGO.GetComponent<Image>().sprite = GlobalResources.Instance().sadDupe;

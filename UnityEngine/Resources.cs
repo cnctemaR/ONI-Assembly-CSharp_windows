@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using UnityEngine.Scripting;
 using UnityEngineInternal;
 
 namespace UnityEngine
@@ -8,20 +9,25 @@ namespace UnityEngine
 	{
 		internal static T[] ConvertObjects<T>(Object[] rawObjects) where T : Object
 		{
+			T[] array;
 			if (rawObjects == null)
 			{
-				return null;
+				array = null;
 			}
-			T[] array = new T[rawObjects.Length];
-			for (int i = 0; i < array.Length; i++)
+			else
 			{
-				array[i] = (T)((object)rawObjects[i]);
+				T[] array2 = new T[rawObjects.Length];
+				for (int i = 0; i < array2.Length; i++)
+				{
+					array2[i] = (T)((object)rawObjects[i]);
+				}
+				array = array2;
 			}
 			return array;
 		}
 
 		[TypeInferenceRule(TypeInferenceRules.ArrayOfTypeReferencedByFirstArgument)]
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern Object[] FindObjectsOfTypeAll(Type type);
 
@@ -40,8 +46,8 @@ namespace UnityEngine
 			return (T)((object)Resources.Load(path, typeof(T)));
 		}
 
-		[WrapperlessIcall]
 		[TypeInferenceRule(TypeInferenceRules.TypeReferencedBySecondArgument)]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern Object Load(string path, Type systemTypeInstance);
 
@@ -55,11 +61,11 @@ namespace UnityEngine
 			return Resources.LoadAsync(path, typeof(T));
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern ResourceRequest LoadAsync(string path, Type type);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern Object[] LoadAll(string path, Type systemTypeInstance);
 
@@ -73,8 +79,8 @@ namespace UnityEngine
 			return Resources.ConvertObjects<T>(Resources.LoadAll(path, typeof(T)));
 		}
 
-		[WrapperlessIcall]
 		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern Object GetBuiltinResource(Type type, string path);
 
@@ -83,11 +89,11 @@ namespace UnityEngine
 			return (T)((object)Resources.GetBuiltinResource(typeof(T), path));
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void UnloadAsset(Object assetToUnload);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern AsyncOperation UnloadUnusedAssets();
 	}

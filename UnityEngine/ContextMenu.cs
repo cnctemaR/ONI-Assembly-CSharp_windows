@@ -1,22 +1,33 @@
 ﻿using System;
+using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+	[RequiredByNativeCode]
 	public sealed class ContextMenu : Attribute
 	{
-		public ContextMenu(string name)
+		public ContextMenu(string itemName)
+			: this(itemName, false)
 		{
-			this.m_ItemName = name;
 		}
 
-		public string menuItem
+		public ContextMenu(string itemName, bool isValidateFunction)
+			: this(itemName, isValidateFunction, 1000000)
 		{
-			get
-			{
-				return this.m_ItemName;
-			}
 		}
 
-		private string m_ItemName;
+		public ContextMenu(string itemName, bool isValidateFunction, int priority)
+		{
+			this.menuItem = itemName;
+			this.validate = isValidateFunction;
+			this.priority = priority;
+		}
+
+		public readonly string menuItem;
+
+		public readonly bool validate;
+
+		public readonly int priority;
 	}
 }

@@ -6,17 +6,6 @@ namespace UnityEngine.UI
 	[Serializable]
 	public class FontData : ISerializationCallbackReceiver
 	{
-		void ISerializationCallbackReceiver.OnBeforeSerialize()
-		{
-		}
-
-		void ISerializationCallbackReceiver.OnAfterDeserialize()
-		{
-			this.m_FontSize = Mathf.Clamp(this.m_FontSize, 0, 300);
-			this.m_MinSize = Mathf.Clamp(this.m_MinSize, 0, this.m_FontSize);
-			this.m_MaxSize = Mathf.Clamp(this.m_MaxSize, this.m_FontSize, 300);
-		}
-
 		public static FontData defaultFontData
 		{
 			get
@@ -182,6 +171,17 @@ namespace UnityEngine.UI
 			}
 		}
 
+		void ISerializationCallbackReceiver.OnBeforeSerialize()
+		{
+		}
+
+		void ISerializationCallbackReceiver.OnAfterDeserialize()
+		{
+			this.m_FontSize = Mathf.Clamp(this.m_FontSize, 0, 300);
+			this.m_MinSize = Mathf.Clamp(this.m_MinSize, 0, this.m_FontSize);
+			this.m_MaxSize = Mathf.Clamp(this.m_MaxSize, this.m_FontSize, 300);
+		}
+
 		[SerializeField]
 		[FormerlySerializedAs("font")]
 		private Font m_Font;
@@ -203,8 +203,8 @@ namespace UnityEngine.UI
 		[SerializeField]
 		private int m_MaxSize;
 
-		[FormerlySerializedAs("alignment")]
 		[SerializeField]
+		[FormerlySerializedAs("alignment")]
 		private TextAnchor m_Alignment;
 
 		[SerializeField]

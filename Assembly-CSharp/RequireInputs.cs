@@ -106,17 +106,17 @@ public class RequireInputs : KMonoBehaviour
 			{
 				this.previouslyConnected = flag3;
 				StatusItem statusItem = null;
-				ConduitType conduitType = this.conduitConsumer.TypeOfConduit;
-				if (conduitType != ConduitType.Gas)
+				ConduitType typeOfConduit = this.conduitConsumer.TypeOfConduit;
+				if (typeOfConduit != ConduitType.Liquid)
 				{
-					if (conduitType == ConduitType.Liquid)
+					if (typeOfConduit == ConduitType.Gas)
 					{
-						statusItem = Db.Get().BuildingStatusItems.NeedLiquidIn;
+						statusItem = Db.Get().BuildingStatusItems.NeedGasIn;
 					}
 				}
 				else
 				{
-					statusItem = Db.Get().BuildingStatusItems.NeedGasIn;
+					statusItem = Db.Get().BuildingStatusItems.NeedLiquidIn;
 				}
 				if (statusItem != null)
 				{
@@ -129,17 +129,17 @@ public class RequireInputs : KMonoBehaviour
 			{
 				this.previouslySatisfied = flag4;
 				StatusItem statusItem2 = null;
-				ConduitType conduitType = this.conduitConsumer.TypeOfConduit;
-				if (conduitType != ConduitType.Gas)
+				ConduitType typeOfConduit2 = this.conduitConsumer.TypeOfConduit;
+				if (typeOfConduit2 != ConduitType.Liquid)
 				{
-					if (conduitType == ConduitType.Liquid)
+					if (typeOfConduit2 == ConduitType.Gas)
 					{
-						statusItem2 = Db.Get().BuildingStatusItems.LiquidPipeEmpty;
+						statusItem2 = Db.Get().BuildingStatusItems.GasPipeEmpty;
 					}
 				}
 				else
 				{
-					statusItem2 = Db.Get().BuildingStatusItems.GasPipeEmpty;
+					statusItem2 = Db.Get().BuildingStatusItems.LiquidPipeEmpty;
 				}
 				if (this.requireConduitHasMass)
 				{
@@ -158,9 +158,9 @@ public class RequireInputs : KMonoBehaviour
 	private bool requirePower = true;
 
 	[SerializeField]
-	private bool requireConduit;
+	private bool requireConduit = false;
 
-	private bool wasConnected;
+	private bool wasConnected = false;
 
 	public bool requireConduitHasMass = true;
 
@@ -173,7 +173,7 @@ public class RequireInputs : KMonoBehaviour
 
 	private Guid wireConnectedStatusItem;
 
-	private bool requirementsMet;
+	private bool requirementsMet = false;
 
 	private BuildingEnabledButton button;
 

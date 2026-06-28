@@ -214,6 +214,6 @@ namespace UnityEngine
 
 		private byte[] boundary;
 
-		private bool containsFiles;
+		private bool containsFiles = false;
 	}
 }

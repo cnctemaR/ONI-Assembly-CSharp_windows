@@ -7,7 +7,7 @@ public class UpgradeFX : GameStateMachine<UpgradeFX, UpgradeFX.Instance>
 	{
 		default_state = this.root;
 		base.Target(this.fx);
-		this.root.PlayAnim("upgrade", KAnim.PlayMode.Once, null).OnAnimQueueComplete(null).Exit("DestroyFX", delegate(UpgradeFX.Instance smi)
+		this.root.PlayAnim("upgrade").OnAnimQueueComplete(null).Exit("DestroyFX", delegate(UpgradeFX.Instance smi)
 		{
 			smi.DestroyFX();
 		});

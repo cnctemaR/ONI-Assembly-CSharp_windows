@@ -1,21 +1,49 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
 	public sealed class Random
 	{
+		[Obsolete("Deprecated. Use InitState() function or Random.state property instead.")]
 		public static extern int seed
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern void InitState(int seed);
+
+		public static Random.State state
+		{
+			get
+			{
+				Random.State state;
+				Random.INTERNAL_get_state(out state);
+				return state;
+			}
+			set
+			{
+				Random.INTERNAL_set_state(ref value);
+			}
+		}
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_get_state(out Random.State value);
+
+		[GeneratedByOldBindingsGenerator]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void INTERNAL_set_state(ref Random.State value);
+
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern float Range(float min, float max);
 
@@ -24,13 +52,13 @@ namespace UnityEngine
 			return Random.RandomRangeInt(min, max);
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int RandomRangeInt(int min, int max);
 
 		public static extern float value
 		{
-			[WrapperlessIcall]
+			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -45,11 +73,11 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_get_insideUnitSphere(out Vector3 value);
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void GetRandomUnitCircle(out Vector2 output);
 
@@ -73,7 +101,7 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_get_onUnitSphere(out Vector3 value);
 
@@ -87,7 +115,7 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_get_rotation(out Quaternion value);
 
@@ -101,7 +129,7 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void INTERNAL_get_rotationUniform(out Quaternion value);
 
@@ -145,6 +173,22 @@ namespace UnityEngine
 			Color color = Color.HSVToRGB(num, num2, num3, true);
 			color.a = Mathf.Lerp(alphaMin, alphaMax, Random.value);
 			return color;
+		}
+
+		[Serializable]
+		public struct State
+		{
+			[SerializeField]
+			private int s0;
+
+			[SerializeField]
+			private int s1;
+
+			[SerializeField]
+			private int s2;
+
+			[SerializeField]
+			private int s3;
 		}
 	}
 }

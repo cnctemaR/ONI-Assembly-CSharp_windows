@@ -6,7 +6,7 @@ public class RiverTerminus : KMonoBehaviour
 {
 	protected override void OnSpawn()
 	{
-		River riverForCell = River.GetRiverForCell(WorldGen.Rivers, Grid.PosToCell(this.transform.position));
+		River riverForCell = River.GetRiverForCell(WorldGen.Rivers, Grid.PosToCell(base.transform.position));
 		if (riverForCell != null)
 		{
 			this.flowRate = riverForCell.flowOut;
@@ -15,7 +15,7 @@ public class RiverTerminus : KMonoBehaviour
 
 	private void SimUpdate(float dt)
 	{
-		int num = Grid.PosToCell(this.transform.position);
+		int num = Grid.PosToCell(base.transform.position);
 		Element element = Grid.Element[num];
 		if (element.IsLiquid)
 		{

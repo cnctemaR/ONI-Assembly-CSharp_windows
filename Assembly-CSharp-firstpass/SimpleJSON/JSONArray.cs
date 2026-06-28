@@ -11,11 +11,16 @@ namespace SimpleJSON
 		{
 			get
 			{
+				JSONNode jsonnode;
 				if (aIndex < 0 || aIndex >= this.m_List.Count)
 				{
-					return new JSONLazyCreator(this);
+					jsonnode = new JSONLazyCreator(this);
 				}
-				return this.m_List[aIndex];
+				else
+				{
+					jsonnode = this.m_List[aIndex];
+				}
+				return jsonnode;
 			}
 			set
 			{
@@ -57,12 +62,17 @@ namespace SimpleJSON
 
 		public override JSONNode Remove(int aIndex)
 		{
+			JSONNode jsonnode;
 			if (aIndex < 0 || aIndex >= this.m_List.Count)
 			{
-				return null;
+				jsonnode = null;
 			}
-			JSONNode jsonnode = this.m_List[aIndex];
-			this.m_List.RemoveAt(aIndex);
+			else
+			{
+				JSONNode jsonnode2 = this.m_List[aIndex];
+				this.m_List.RemoveAt(aIndex);
+				jsonnode = jsonnode2;
+			}
 			return jsonnode;
 		}
 

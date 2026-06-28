@@ -20,23 +20,22 @@ public class FogOfWarPostFX : MonoBehaviour
 
 	private void SetupUVs()
 	{
-		if (Camera.main == null)
+		if (!(Camera.main == null))
 		{
-			return;
+			Camera main = Camera.main;
+			Ray ray = main.ViewportPointToRay(Vector3.zero);
+			float num = Mathf.Abs(ray.origin.z / ray.direction.z);
+			Vector3 vector = ray.GetPoint(num);
+			Vector4 vector2;
+			vector2.x = vector.x / Grid.WidthInMeters;
+			vector2.y = vector.y / Grid.HeightInMeters;
+			ray = main.ViewportPointToRay(Vector3.one);
+			num = Mathf.Abs(ray.origin.z / ray.direction.z);
+			vector = ray.GetPoint(num);
+			vector2.z = vector.x / Grid.WidthInMeters - vector2.x;
+			vector2.w = vector.y / Grid.HeightInMeters - vector2.y;
+			this.material.SetVector("_UVOffsetScale", vector2);
 		}
-		Camera main = Camera.main;
-		Ray ray = main.ViewportPointToRay(Vector3.zero);
-		float num = Mathf.Abs(ray.origin.z / ray.direction.z);
-		Vector3 vector = ray.GetPoint(num);
-		Vector4 vector2;
-		vector2.x = vector.x / Grid.WidthInMeters;
-		vector2.y = vector.y / Grid.HeightInMeters;
-		ray = main.ViewportPointToRay(Vector3.one);
-		num = Mathf.Abs(ray.origin.z / ray.direction.z);
-		vector = ray.GetPoint(num);
-		vector2.z = vector.x / Grid.WidthInMeters - vector2.x;
-		vector2.w = vector.y / Grid.HeightInMeters - vector2.y;
-		this.material.SetVector("_UVOffsetScale", vector2);
 	}
 
 	[SerializeField]

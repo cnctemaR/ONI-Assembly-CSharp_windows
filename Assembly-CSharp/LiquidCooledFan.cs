@@ -16,7 +16,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 			global::Debug.LogWarning("Liquid Cooled fan Gas storage contains water - A duplicant probably delivered to the wrong stroage - moving it to liquid storage.", null);
 			foreach (GameObject gameObject in list)
 			{
-				base.smi.master.gasStorage.Transfer(gameObject, base.smi.master.liquidStorage, false);
+				base.smi.master.gasStorage.Transfer(gameObject, base.smi.master.liquidStorage, false, false);
 			}
 		}
 		this.UpdateMeter();
@@ -76,68 +76,66 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 
 	private void EmitContents()
 	{
-		if (this.gasStorage.items.Count == 0)
+		if (this.gasStorage.items.Count != 0)
 		{
-			return;
-		}
-		float num = 0.1f;
-		float num2 = num;
-		PrimaryElement primaryElement = null;
-		for (int i = 0; i < this.gasStorage.items.Count; i++)
-		{
-			PrimaryElement component = this.gasStorage.items[i].GetComponent<PrimaryElement>();
-			if (component.Mass > num2 && component.Element.IsGas)
+			float num = 0.1f;
+			float num2 = num;
+			PrimaryElement primaryElement = null;
+			for (int i = 0; i < this.gasStorage.items.Count; i++)
 			{
-				primaryElement = component;
-				num2 = primaryElement.Mass;
+				PrimaryElement component = this.gasStorage.items[i].GetComponent<PrimaryElement>();
+				if (component.Mass > num2 && component.Element.IsGas)
+				{
+					primaryElement = component;
+					num2 = primaryElement.Mass;
+				}
 			}
-		}
-		if (primaryElement != null)
-		{
-			SimMessages.AddRemoveSubstance(Grid.CellRight(Grid.CellAbove(Grid.PosToCell(base.gameObject))), ElementLoader.GetElementIndex(primaryElement.ElementID), CellEventLogger.Instance.ExhaustSimUpdate, primaryElement.Mass, primaryElement.Temperature, primaryElement.DiseaseIdx, primaryElement.DiseaseCount, -1);
-			this.gasStorage.ConsumeIgnoringDisease(primaryElement.gameObject);
+			if (primaryElement != null)
+			{
+				SimMessages.AddRemoveSubstance(Grid.CellRight(Grid.CellAbove(Grid.PosToCell(base.gameObject))), ElementLoader.GetElementIndex(primaryElement.ElementID), CellEventLogger.Instance.ExhaustSimUpdate, primaryElement.Mass, primaryElement.Temperature, primaryElement.DiseaseIdx, primaryElement.DiseaseCount, -1);
+				this.gasStorage.ConsumeIgnoringDisease(primaryElement.gameObject);
+			}
 		}
 	}
 
 	private void CoolContents(float dt)
 	{
-		if (this.gasStorage.items.Count == 0)
+		if (this.gasStorage.items.Count != 0)
 		{
-			return;
-		}
-		float num = float.PositiveInfinity;
-		float num2 = 0f;
-		foreach (GameObject gameObject in this.gasStorage)
-		{
-			PrimaryElement primaryElement = gameObject.GetComponent<PrimaryElement>();
-			if (!(primaryElement == null) && primaryElement.Mass >= 0.1f && primaryElement.Temperature >= this.minCooledTemperature)
+			float num = float.PositiveInfinity;
+			float num2 = 0f;
+			foreach (GameObject gameObject in this.gasStorage)
 			{
-				float thermalEnergy = GameUtil.GetThermalEnergy(primaryElement);
-				if (num > thermalEnergy)
+				PrimaryElement primaryElement = gameObject.GetComponent<PrimaryElement>();
+				if (!(primaryElement == null) && primaryElement.Mass >= 0.1f && primaryElement.Temperature >= this.minCooledTemperature)
 				{
-					num = thermalEnergy;
+					float thermalEnergy = GameUtil.GetThermalEnergy(primaryElement);
+					if (num > thermalEnergy)
+					{
+						num = thermalEnergy;
+					}
 				}
 			}
-		}
-		foreach (GameObject gameObject2 in this.gasStorage)
-		{
-			PrimaryElement primaryElement = gameObject2.GetComponent<PrimaryElement>();
-			if (!(primaryElement == null) && primaryElement.Mass >= 0.1f && primaryElement.Temperature >= this.minCooledTemperature)
+			foreach (GameObject gameObject2 in this.gasStorage)
 			{
-				float num3 = Mathf.Min(num, 10f);
-				GameUtil.DeltaThermalEnergy(primaryElement, -num3);
-				num2 += num3;
+				PrimaryElement primaryElement = gameObject2.GetComponent<PrimaryElement>();
+				if (!(primaryElement == null) && primaryElement.Mass >= 0.1f && primaryElement.Temperature >= this.minCooledTemperature)
+				{
+					float num3 = Mathf.Min(num, 10f);
+					GameUtil.DeltaThermalEnergy(primaryElement, -num3);
+					num2 += num3;
+				}
 			}
-		}
-		float num4 = Mathf.Abs(num2 * this.waterKGConsumedPerKJ);
-		base.smi.master.waterConsumptionAccumulator.Accumulate(num4);
-		if (num4 != 0f)
-		{
-			SimUtil.DiseaseInfo diseaseInfo;
-			float num5;
-			this.liquidStorage.ConsumeAndGetDisease(GameTags.Water, num4, out diseaseInfo, out num5);
-			SimMessages.ModifyDiseaseOnCell(Grid.PosToCell(base.gameObject), diseaseInfo.idx, diseaseInfo.count);
-			this.UpdateMeter();
+			float num4 = Mathf.Abs(num2 * this.waterKGConsumedPerKJ);
+			base.smi.master.waterConsumptionAccumulator.Accumulate(num4);
+			if (num4 != 0f)
+			{
+				SimUtil.DiseaseInfo diseaseInfo;
+				float num5;
+				this.liquidStorage.ConsumeAndGetDisease(GameTags.Water, num4, out diseaseInfo, out num5);
+				SimMessages.ModifyDiseaseOnCell(Grid.PosToCell(base.gameObject), diseaseInfo.idx, diseaseInfo.count);
+				this.UpdateMeter();
+			}
 		}
 	}
 
@@ -313,7 +311,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 
 		private Chore CreateUseChore(LiquidCooledFan.StatesInstance smi)
 		{
-			return new WorkChore<LiquidCooledFanWorkable>(Db.Get().ChoreTypes.LiquidCooledFan, smi.master.workable, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue);
+			return new WorkChore<LiquidCooledFanWorkable>(Db.Get().ChoreTypes.LiquidCooledFan, smi.master.workable, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
 		}
 
 		public LiquidCooledFan.States.Workable workable;

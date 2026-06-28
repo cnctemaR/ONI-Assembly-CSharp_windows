@@ -29,6 +29,7 @@ public class EntombedItemVisualizer : KMonoBehaviour
 				instance.transform.position = Grid.CellToPosCCC(cell, Grid.SceneLayer.FXFront);
 				instance.transform.rotation = Quaternion.Euler(0f, 0f, global::UnityEngine.Random.value * 360f);
 				KBatchedAnimController component = instance.GetComponent<KBatchedAnimController>();
+				component.renderQueueOverride = RenderQueues.BuriedObjects;
 				int num = global::UnityEngine.Random.Range(0, EntombedItemVisualizer.EntombedVisualizerAnims.Length);
 				string text = EntombedItemVisualizer.EntombedVisualizerAnims[num];
 				component.initialAnim = text;

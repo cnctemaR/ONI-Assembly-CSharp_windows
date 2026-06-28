@@ -14,13 +14,13 @@ public class SimpleMover : KMonoBehaviour
 
 	public Vector3 CurrentNavigationPosition()
 	{
-		return this.transform.position + this.cellPositionOffset;
+		return base.transform.position + this.cellPositionOffset;
 	}
 
 	protected override void OnSpawn()
 	{
-		this.previousTransformPosition = this.transform.position;
-		this.targetTransformPosition = this.transform.position;
+		this.previousTransformPosition = base.transform.position;
+		this.targetTransformPosition = base.transform.position;
 	}
 
 	private void Update()
@@ -30,25 +30,25 @@ public class SimpleMover : KMonoBehaviour
 			this.moveTimeRemaining = Mathf.Clamp(this.moveTimeRemaining - Time.deltaTime, 0f, this.moveTimeRemaining);
 			if (this.moveTimeRemaining == 0f)
 			{
-				this.Trigger(1027377649, GameHashes.ObjectMovementSleep);
-				this.Trigger(-1436222551, null);
+				base.Trigger(1027377649, GameHashes.ObjectMovementSleep);
+				base.Trigger(-1436222551, null);
 			}
 		}
-		if (this.transform.position != this.targetTransformPosition && this.moveTimeRemaining != 0f)
+		if (base.transform.position != this.targetTransformPosition && this.moveTimeRemaining != 0f)
 		{
 			float num = (this.moveDuration - this.moveTimeRemaining) / this.moveDuration;
 			if (this.smoothStep)
 			{
 				num = num * num * num * (num * (6f * num - 15f) + 10f);
 			}
-			this.transform.SetPosition(Vector3.Lerp(this.previousTransformPosition, this.targetTransformPosition, num));
+			base.transform.SetPosition(Vector3.Lerp(this.previousTransformPosition, this.targetTransformPosition, num));
 		}
 		if (this.teleportDelay > 0f)
 		{
 			this.teleportDelay -= Time.deltaTime;
 			if (this.teleportDelay <= 0f)
 			{
-				this.transform.SetPosition(this.targetTransformPosition);
+				base.transform.SetPosition(this.targetTransformPosition);
 			}
 		}
 	}
@@ -56,11 +56,11 @@ public class SimpleMover : KMonoBehaviour
 	private void OnDrawGizmosSelected()
 	{
 		Gizmos.color = Color.grey;
-		Gizmos.DrawCube(CreatureHelpers.CenterPositionOfCell(Grid.PosToCell(this.transform.position)), Vector3.one * 0.2f);
-		Gizmos.DrawCube(CreatureHelpers.CenterPositionOfCell(Grid.PosToCell(this.transform.position + Vector3.right)), Vector3.one * 0.2f);
-		Gizmos.DrawCube(CreatureHelpers.CenterPositionOfCell(Grid.PosToCell(this.transform.position + Vector3.left)), Vector3.one * 0.2f);
-		Gizmos.DrawCube(CreatureHelpers.CenterPositionOfCell(Grid.PosToCell(this.transform.position + Vector3.up)), Vector3.one * 0.2f);
-		Gizmos.DrawCube(CreatureHelpers.CenterPositionOfCell(Grid.PosToCell(this.transform.position + Vector3.down)), Vector3.one * 0.2f);
+		Gizmos.DrawCube(CreatureHelpers.CenterPositionOfCell(Grid.PosToCell(base.transform.position)), Vector3.one * 0.2f);
+		Gizmos.DrawCube(CreatureHelpers.CenterPositionOfCell(Grid.PosToCell(base.transform.position + Vector3.right)), Vector3.one * 0.2f);
+		Gizmos.DrawCube(CreatureHelpers.CenterPositionOfCell(Grid.PosToCell(base.transform.position + Vector3.left)), Vector3.one * 0.2f);
+		Gizmos.DrawCube(CreatureHelpers.CenterPositionOfCell(Grid.PosToCell(base.transform.position + Vector3.up)), Vector3.one * 0.2f);
+		Gizmos.DrawCube(CreatureHelpers.CenterPositionOfCell(Grid.PosToCell(base.transform.position + Vector3.down)), Vector3.one * 0.2f);
 		Gizmos.color = Color.green;
 		Gizmos.DrawCube(this.CurrentNavigationPosition(), Vector3.one * 0.2f);
 		Gizmos.color = Color.red;
@@ -70,8 +70,8 @@ public class SimpleMover : KMonoBehaviour
 	public void StopMovement()
 	{
 		this.moveTimeRemaining = 0f;
-		this.targetTransformPosition = this.transform.position;
-		this.Trigger(1027377649, GameHashes.ObjectMovementSleep);
+		this.targetTransformPosition = base.transform.position;
+		base.Trigger(1027377649, GameHashes.ObjectMovementSleep);
 	}
 
 	public void Land(Vector3 landPosition)
@@ -83,12 +83,12 @@ public class SimpleMover : KMonoBehaviour
 
 	public void MoveToTarget(Vector3 target, float moveOverTime)
 	{
-		this.previousTransformPosition = this.transform.position;
+		this.previousTransformPosition = base.transform.position;
 		this.targetTransformPosition = target;
 		this.targetTransformPosition.z = this.zPosition;
 		this.moveTimeRemaining = moveOverTime;
 		this.moveDuration = this.moveTimeRemaining;
-		this.Trigger(1027377649, GameHashes.ObjectMovementWakeUp);
+		base.Trigger(1027377649, GameHashes.ObjectMovementWakeUp);
 	}
 
 	public void TeleportToTarget(Vector3 target, float afterDelay = 0f)
@@ -98,16 +98,16 @@ public class SimpleMover : KMonoBehaviour
 		{
 			this.teleportDelay = afterDelay;
 			this.targetTransformPosition = target;
-			this.previousTransformPosition = this.transform.position;
+			this.previousTransformPosition = base.transform.position;
 			this.moveTimeRemaining = 0f;
 			this.moveDuration = 0f;
 		}
 		else
 		{
-			this.previousTransformPosition = this.transform.position;
-			this.transform.SetPosition(target);
+			this.previousTransformPosition = base.transform.position;
+			base.transform.SetPosition(target);
 			this.teleportDelay = 0f;
-			this.targetTransformPosition = this.transform.position;
+			this.targetTransformPosition = base.transform.position;
 			this.moveTimeRemaining = 0f;
 			this.moveDuration = 0f;
 		}
@@ -120,15 +120,15 @@ public class SimpleMover : KMonoBehaviour
 	private Vector3 targetTransformPosition;
 
 	[Serialize]
-	private float moveTimeRemaining;
+	private float moveTimeRemaining = 0f;
 
 	private float zPosition = -2f;
 
-	private float moveDuration;
+	private float moveDuration = 0f;
 
-	private float teleportDelay;
+	private float teleportDelay = 0f;
 
-	public bool smoothStep;
+	public bool smoothStep = false;
 
 	public Vector3 cellPositionOffset = Vector3.zero;
 }

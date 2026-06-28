@@ -55,34 +55,33 @@ namespace UnityEngine.Networking
 			if (value <= 240U)
 			{
 				this.Write((byte)value);
-				return;
 			}
-			if (value <= 2287U)
+			else if (value <= 2287U)
 			{
 				this.Write((byte)((value - 240U) / 256U + 241U));
 				this.Write((byte)((value - 240U) % 256U));
-				return;
 			}
-			if (value <= 67823U)
+			else if (value <= 67823U)
 			{
 				this.Write(249);
 				this.Write((byte)((value - 2288U) / 256U));
 				this.Write((byte)((value - 2288U) % 256U));
-				return;
 			}
-			if (value <= 16777215U)
+			else if (value <= 16777215U)
 			{
 				this.Write(250);
 				this.Write((byte)(value & 255U));
 				this.Write((byte)((value >> 8) & 255U));
 				this.Write((byte)((value >> 16) & 255U));
-				return;
 			}
-			this.Write(251);
-			this.Write((byte)(value & 255U));
-			this.Write((byte)((value >> 8) & 255U));
-			this.Write((byte)((value >> 16) & 255U));
-			this.Write((byte)((value >> 24) & 255U));
+			else
+			{
+				this.Write(251);
+				this.Write((byte)(value & 255U));
+				this.Write((byte)((value >> 8) & 255U));
+				this.Write((byte)((value >> 16) & 255U));
+				this.Write((byte)((value >> 24) & 255U));
+			}
 		}
 
 		public void WritePackedUInt64(ulong value)
@@ -90,39 +89,34 @@ namespace UnityEngine.Networking
 			if (value <= 240UL)
 			{
 				this.Write((byte)value);
-				return;
 			}
-			if (value <= 2287UL)
+			else if (value <= 2287UL)
 			{
 				this.Write((byte)((value - 240UL) / 256UL + 241UL));
 				this.Write((byte)((value - 240UL) % 256UL));
-				return;
 			}
-			if (value <= 67823UL)
+			else if (value <= 67823UL)
 			{
 				this.Write(249);
 				this.Write((byte)((value - 2288UL) / 256UL));
 				this.Write((byte)((value - 2288UL) % 256UL));
-				return;
 			}
-			if (value <= 16777215UL)
+			else if (value <= 16777215UL)
 			{
 				this.Write(250);
 				this.Write((byte)(value & 255UL));
 				this.Write((byte)((value >> 8) & 255UL));
 				this.Write((byte)((value >> 16) & 255UL));
-				return;
 			}
-			if (value <= (ulong)(-1))
+			else if (value <= (ulong)(-1))
 			{
 				this.Write(251);
 				this.Write((byte)(value & 255UL));
 				this.Write((byte)((value >> 8) & 255UL));
 				this.Write((byte)((value >> 16) & 255UL));
 				this.Write((byte)((value >> 24) & 255UL));
-				return;
 			}
-			if (value <= 1099511627775UL)
+			else if (value <= 1099511627775UL)
 			{
 				this.Write(252);
 				this.Write((byte)(value & 255UL));
@@ -130,9 +124,8 @@ namespace UnityEngine.Networking
 				this.Write((byte)((value >> 16) & 255UL));
 				this.Write((byte)((value >> 24) & 255UL));
 				this.Write((byte)((value >> 32) & 255UL));
-				return;
 			}
-			if (value <= 281474976710655UL)
+			else if (value <= 281474976710655UL)
 			{
 				this.Write(253);
 				this.Write((byte)(value & 255UL));
@@ -141,9 +134,8 @@ namespace UnityEngine.Networking
 				this.Write((byte)((value >> 24) & 255UL));
 				this.Write((byte)((value >> 32) & 255UL));
 				this.Write((byte)((value >> 40) & 255UL));
-				return;
 			}
-			if (value <= 72057594037927935UL)
+			else if (value <= 72057594037927935UL)
 			{
 				this.Write(254);
 				this.Write((byte)(value & 255UL));
@@ -153,17 +145,19 @@ namespace UnityEngine.Networking
 				this.Write((byte)((value >> 32) & 255UL));
 				this.Write((byte)((value >> 40) & 255UL));
 				this.Write((byte)((value >> 48) & 255UL));
-				return;
 			}
-			this.Write(byte.MaxValue);
-			this.Write((byte)(value & 255UL));
-			this.Write((byte)((value >> 8) & 255UL));
-			this.Write((byte)((value >> 16) & 255UL));
-			this.Write((byte)((value >> 24) & 255UL));
-			this.Write((byte)((value >> 32) & 255UL));
-			this.Write((byte)((value >> 40) & 255UL));
-			this.Write((byte)((value >> 48) & 255UL));
-			this.Write((byte)((value >> 56) & 255UL));
+			else
+			{
+				this.Write(byte.MaxValue);
+				this.Write((byte)(value & 255UL));
+				this.Write((byte)((value >> 8) & 255UL));
+				this.Write((byte)((value >> 16) & 255UL));
+				this.Write((byte)((value >> 24) & 255UL));
+				this.Write((byte)((value >> 32) & 255UL));
+				this.Write((byte)((value >> 40) & 255UL));
+				this.Write((byte)((value >> 48) & 255UL));
+				this.Write((byte)((value >> 56) & 255UL));
+			}
 		}
 
 		public void Write(NetworkInstanceId value)
@@ -233,21 +227,32 @@ namespace UnityEngine.Networking
 			this.Write(NetworkWriter.s_FloatConverter.longValue);
 		}
 
+		public void Write(decimal value)
+		{
+			int[] bits = decimal.GetBits(value);
+			this.Write(bits[0]);
+			this.Write(bits[1]);
+			this.Write(bits[2]);
+			this.Write(bits[3]);
+		}
+
 		public void Write(string value)
 		{
 			if (value == null)
 			{
 				this.m_Buffer.WriteByte2(0, 0);
-				return;
 			}
-			int byteCount = NetworkWriter.s_Encoding.GetByteCount(value);
-			if (byteCount >= 32768)
+			else
 			{
-				throw new IndexOutOfRangeException("Serialize(string) too long: " + value.Length);
+				int byteCount = NetworkWriter.s_Encoding.GetByteCount(value);
+				if (byteCount >= 32768)
+				{
+					throw new IndexOutOfRangeException("Serialize(string) too long: " + value.Length);
+				}
+				this.Write((ushort)byteCount);
+				int bytes = NetworkWriter.s_Encoding.GetBytes(value, 0, value.Length, NetworkWriter.s_StringWriteBuffer, 0);
+				this.m_Buffer.WriteBytes(NetworkWriter.s_StringWriteBuffer, (ushort)bytes);
 			}
-			this.Write((ushort)byteCount);
-			int bytes = NetworkWriter.s_Encoding.GetBytes(value, 0, value.Length, NetworkWriter.s_StringWriteBuffer, 0);
-			this.m_Buffer.WriteBytes(NetworkWriter.s_StringWriteBuffer, (ushort)bytes);
 		}
 
 		public void Write(bool value)
@@ -270,9 +275,11 @@ namespace UnityEngine.Networking
 				{
 					Debug.LogError("NetworkWriter Write: buffer is too large (" + count + ") bytes. The maximum buffer size is 64K bytes.");
 				}
-				return;
 			}
-			this.m_Buffer.WriteBytes(buffer, (ushort)count);
+			else
+			{
+				this.m_Buffer.WriteBytes(buffer, (ushort)count);
+			}
 		}
 
 		public void Write(byte[] buffer, int offset, int count)
@@ -283,9 +290,11 @@ namespace UnityEngine.Networking
 				{
 					Debug.LogError("NetworkWriter Write: buffer is too large (" + count + ") bytes. The maximum buffer size is 64K bytes.");
 				}
-				return;
 			}
-			this.m_Buffer.WriteBytesAtOffset(buffer, (ushort)offset, (ushort)count);
+			else
+			{
+				this.m_Buffer.WriteBytesAtOffset(buffer, (ushort)offset, (ushort)count);
+			}
 		}
 
 		public void WriteBytesAndSize(byte[] buffer, int count)
@@ -293,18 +302,19 @@ namespace UnityEngine.Networking
 			if (buffer == null || count == 0)
 			{
 				this.Write(0);
-				return;
 			}
-			if (count > 65535)
+			else if (count > 65535)
 			{
 				if (LogFilter.logError)
 				{
 					Debug.LogError("NetworkWriter WriteBytesAndSize: buffer is too large (" + count + ") bytes. The maximum buffer size is 64K bytes.");
 				}
-				return;
 			}
-			this.Write((ushort)count);
-			this.m_Buffer.WriteBytes(buffer, (ushort)count);
+			else
+			{
+				this.Write((ushort)count);
+				this.m_Buffer.WriteBytes(buffer, (ushort)count);
+			}
 		}
 
 		public void WriteBytesFull(byte[] buffer)
@@ -312,18 +322,19 @@ namespace UnityEngine.Networking
 			if (buffer == null)
 			{
 				this.Write(0);
-				return;
 			}
-			if (buffer.Length > 65535)
+			else if (buffer.Length > 65535)
 			{
 				if (LogFilter.logError)
 				{
 					Debug.LogError("NetworkWriter WriteBytes: buffer is too large (" + buffer.Length + ") bytes. The maximum buffer size is 64K bytes.");
 				}
-				return;
 			}
-			this.Write((ushort)buffer.Length);
-			this.m_Buffer.WriteBytes(buffer, (ushort)buffer.Length);
+			else
+			{
+				this.Write((ushort)buffer.Length);
+				this.m_Buffer.WriteBytes(buffer, (ushort)buffer.Length);
+			}
 		}
 
 		public void Write(Vector2 value)
@@ -436,9 +447,11 @@ namespace UnityEngine.Networking
 			if (value == null)
 			{
 				this.WritePackedUInt32(0U);
-				return;
 			}
-			this.Write(value.netId);
+			else
+			{
+				this.Write(value.netId);
+			}
 		}
 
 		public void Write(Transform value)
@@ -446,20 +459,22 @@ namespace UnityEngine.Networking
 			if (value == null || value.gameObject == null)
 			{
 				this.WritePackedUInt32(0U);
-				return;
-			}
-			NetworkIdentity component = value.gameObject.GetComponent<NetworkIdentity>();
-			if (component != null)
-			{
-				this.Write(component.netId);
 			}
 			else
 			{
-				if (LogFilter.logWarn)
+				NetworkIdentity component = value.gameObject.GetComponent<NetworkIdentity>();
+				if (component != null)
 				{
-					Debug.LogWarning("NetworkWriter " + value + " has no NetworkIdentity");
+					this.Write(component.netId);
 				}
-				this.WritePackedUInt32(0U);
+				else
+				{
+					if (LogFilter.logWarn)
+					{
+						Debug.LogWarning("NetworkWriter " + value + " has no NetworkIdentity");
+					}
+					this.WritePackedUInt32(0U);
+				}
 			}
 		}
 
@@ -468,20 +483,22 @@ namespace UnityEngine.Networking
 			if (value == null)
 			{
 				this.WritePackedUInt32(0U);
-				return;
-			}
-			NetworkIdentity component = value.GetComponent<NetworkIdentity>();
-			if (component != null)
-			{
-				this.Write(component.netId);
 			}
 			else
 			{
-				if (LogFilter.logWarn)
+				NetworkIdentity component = value.GetComponent<NetworkIdentity>();
+				if (component != null)
 				{
-					Debug.LogWarning("NetworkWriter " + value + " has no NetworkIdentity");
+					this.Write(component.netId);
 				}
-				this.WritePackedUInt32(0U);
+				else
+				{
+					if (LogFilter.logWarn)
+					{
+						Debug.LogWarning("NetworkWriter " + value + " has no NetworkIdentity");
+					}
+					this.WritePackedUInt32(0U);
+				}
 			}
 		}
 

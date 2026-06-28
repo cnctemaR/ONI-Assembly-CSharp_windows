@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using KSerialization;
 using UnityEngine;
 
@@ -7,7 +8,7 @@ public class Prioritizable : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
+		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
 	}
 
 	private void OnCopySettings(object data)
@@ -20,28 +21,38 @@ public class Prioritizable : KMonoBehaviour
 		}
 	}
 
+	[OnDeserialized]
+	private void OnDeserialized()
+	{
+		if (this.masterPriority != -2147483648)
+		{
+			this.masterPrioritySetting = new PrioritySetting(PriorityScreen.PriorityClass.basic, this.masterPriority);
+			this.masterPriority = int.MinValue;
+		}
+	}
+
 	protected override void OnSpawn()
 	{
 		if (this.onPriorityChanged != null)
 		{
-			this.onPriorityChanged(this.masterPriority);
+			this.onPriorityChanged(this.masterPrioritySetting);
 		}
 		Components.Prioritizables.Add(this);
 	}
 
-	public int GetMasterPriority()
+	public PrioritySetting GetMasterPriority()
 	{
-		return this.masterPriority;
+		return this.masterPrioritySetting;
 	}
 
-	public void SetMasterPriority(int priority)
+	public void SetMasterPriority(PrioritySetting priority)
 	{
-		if (priority != this.masterPriority)
+		if (!priority.Equals(this.masterPrioritySetting))
 		{
-			this.masterPriority = priority;
+			this.masterPrioritySetting = priority;
 			if (this.onPriorityChanged != null)
 			{
-				this.onPriorityChanged(this.masterPriority);
+				this.onPriorityChanged(this.masterPrioritySetting);
 			}
 		}
 	}
@@ -87,9 +98,13 @@ public class Prioritizable : KMonoBehaviour
 
 	[SerializeField]
 	[Serialize]
-	private int masterPriority = 5;
+	private int masterPriority = int.MinValue;
 
-	public Action<int> onPriorityChanged;
+	[SerializeField]
+	[Serialize]
+	private PrioritySetting masterPrioritySetting = new PrioritySetting(PriorityScreen.PriorityClass.basic, 5);
+
+	public Action<PrioritySetting> onPriorityChanged;
 
 	public bool showIcon = true;
 

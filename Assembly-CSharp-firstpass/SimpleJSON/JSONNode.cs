@@ -37,7 +37,7 @@ namespace SimpleJSON
 		{
 			get
 			{
-				return string.Empty;
+				return "";
 			}
 			set
 			{
@@ -54,7 +54,7 @@ namespace SimpleJSON
 
 		public virtual void Add(JSONNode aItem)
 		{
-			this.Add(string.Empty, aItem);
+			this.Add("", aItem);
 		}
 
 		public virtual JSONNode Remove(string aKey)
@@ -110,11 +110,16 @@ namespace SimpleJSON
 			get
 			{
 				int num = 0;
+				int num2;
 				if (int.TryParse(this.Value, out num))
 				{
-					return num;
+					num2 = num;
 				}
-				return 0;
+				else
+				{
+					num2 = 0;
+				}
+				return num2;
 			}
 			set
 			{
@@ -127,11 +132,16 @@ namespace SimpleJSON
 			get
 			{
 				float num = 0f;
+				float num2;
 				if (float.TryParse(this.Value, out num))
 				{
-					return num;
+					num2 = num;
 				}
-				return 0f;
+				else
+				{
+					num2 = 0f;
+				}
+				return num2;
 			}
 			set
 			{
@@ -144,11 +154,16 @@ namespace SimpleJSON
 			get
 			{
 				double num = 0.0;
+				double num2;
 				if (double.TryParse(this.Value, out num))
 				{
-					return num;
+					num2 = num;
 				}
-				return 0.0;
+				else
+				{
+					num2 = 0.0;
+				}
+				return num2;
 			}
 			set
 			{
@@ -161,11 +176,16 @@ namespace SimpleJSON
 			get
 			{
 				bool flag = false;
+				bool flag2;
 				if (bool.TryParse(this.Value, out flag))
 				{
-					return flag;
+					flag2 = flag;
 				}
-				return !string.IsNullOrEmpty(this.Value);
+				else
+				{
+					flag2 = !string.IsNullOrEmpty(this.Value);
+				}
+				return flag2;
 			}
 			set
 			{
@@ -189,6 +209,26 @@ namespace SimpleJSON
 			}
 		}
 
+		public static implicit operator JSONNode(string s)
+		{
+			return new JSONData(s);
+		}
+
+		public static implicit operator string(JSONNode d)
+		{
+			return (!(d == null)) ? d.Value : null;
+		}
+
+		public static bool operator ==(JSONNode a, object b)
+		{
+			return (b == null && a is JSONLazyCreator) || object.ReferenceEquals(a, b);
+		}
+
+		public static bool operator !=(JSONNode a, object b)
+		{
+			return !(a == b);
+		}
+
 		public override bool Equals(object obj)
 		{
 			return object.ReferenceEquals(this, obj);
@@ -201,11 +241,10 @@ namespace SimpleJSON
 
 		internal static string Escape(string aText)
 		{
-			string text = string.Empty;
+			string text = "";
 			foreach (char c in aText)
 			{
-				char c2 = c;
-				switch (c2)
+				switch (c)
 				{
 				case '\b':
 					text += "\\b";
@@ -217,9 +256,9 @@ namespace SimpleJSON
 					text += "\\n";
 					break;
 				default:
-					if (c2 != '"')
+					if (c != '"')
 					{
-						if (c2 != '\\')
+						if (c != '\\')
 						{
 							text += c;
 						}
@@ -249,8 +288,8 @@ namespace SimpleJSON
 			Stack<JSONNode> stack = new Stack<JSONNode>();
 			JSONNode jsonnode = null;
 			int i = 0;
-			string text = string.Empty;
-			string text2 = string.Empty;
+			string text = "";
+			string text2 = "";
 			bool flag = false;
 			while (i < aJSON.Length)
 			{
@@ -258,87 +297,90 @@ namespace SimpleJSON
 				switch (c)
 				{
 				case '\t':
-					goto IL_0333;
+					goto IL_0342;
 				case '\n':
 				case '\r':
 					break;
 				default:
 					switch (c)
 					{
-					case ' ':
-						goto IL_0333;
-					default:
-						switch (c)
+					case '[':
+						if (flag)
 						{
-						case '[':
-							if (flag)
+							text += aJSON[i];
+							goto IL_046E;
+						}
+						stack.Push(new JSONArray());
+						if (jsonnode != null)
+						{
+							text2 = text2.Trim();
+							if (jsonnode is JSONArray)
 							{
-								text += aJSON[i];
-								goto IL_0467;
+								jsonnode.Add(stack.Peek());
 							}
-							stack.Push(new JSONArray());
-							if (jsonnode != null)
+							else if (text2 != "")
 							{
-								text2 = text2.Trim();
-								if (jsonnode is JSONArray)
-								{
-									jsonnode.Add(stack.Peek());
-								}
-								else if (text2 != string.Empty)
-								{
-									jsonnode.Add(text2, stack.Peek());
-								}
+								jsonnode.Add(text2, stack.Peek());
 							}
-							text2 = string.Empty;
-							text = string.Empty;
-							jsonnode = stack.Peek();
-							goto IL_0467;
-						case '\\':
-							i++;
-							if (flag)
+						}
+						text2 = "";
+						text = "";
+						jsonnode = stack.Peek();
+						goto IL_046E;
+					case '\\':
+						i++;
+						if (flag)
+						{
+							char c2 = aJSON[i];
+							switch (c2)
 							{
-								char c2 = aJSON[i];
-								char c3 = c2;
-								switch (c3)
+							case 'r':
+								text += '\r';
+								break;
+							default:
+								if (c2 != 'b')
 								{
-								case 'n':
-									text += '\n';
-									break;
-								default:
-									if (c3 != 'b')
+									if (c2 != 'f')
 									{
-										if (c3 != 'f')
+										if (c2 != 'n')
 										{
 											text += c2;
 										}
 										else
 										{
-											text += '\f';
+											text += '\n';
 										}
 									}
 									else
 									{
-										text += '\b';
+										text += '\f';
 									}
-									break;
-								case 'r':
-									text += '\r';
-									break;
-								case 't':
-									text += '\t';
-									break;
-								case 'u':
+								}
+								else
 								{
-									string text3 = aJSON.Substring(i + 1, 4);
-									text += (char)int.Parse(text3, NumberStyles.AllowHexSpecifier);
-									i += 4;
-									break;
+									text += '\b';
 								}
-								}
+								break;
+							case 't':
+								text += '\t';
+								break;
+							case 'u':
+							{
+								string text3 = aJSON.Substring(i + 1, 4);
+								text += (char)int.Parse(text3, NumberStyles.AllowHexSpecifier);
+								i += 4;
+								break;
 							}
-							goto IL_0467;
-						case ']':
-							break;
+							}
+						}
+						goto IL_046E;
+					case ']':
+						break;
+					default:
+						switch (c)
+						{
+						case ' ':
+							goto IL_0342;
 						default:
 							switch (c)
 							{
@@ -346,7 +388,7 @@ namespace SimpleJSON
 								if (flag)
 								{
 									text += aJSON[i];
-									goto IL_0467;
+									goto IL_046E;
 								}
 								stack.Push(new JSONClass());
 								if (jsonnode != null)
@@ -356,106 +398,106 @@ namespace SimpleJSON
 									{
 										jsonnode.Add(stack.Peek());
 									}
-									else if (text2 != string.Empty)
+									else if (text2 != "")
 									{
 										jsonnode.Add(text2, stack.Peek());
 									}
 								}
-								text2 = string.Empty;
-								text = string.Empty;
+								text2 = "";
+								text = "";
 								jsonnode = stack.Peek();
-								goto IL_0467;
+								goto IL_046E;
 							default:
 								if (c != ',')
 								{
 									if (c != ':')
 									{
 										text += aJSON[i];
-										goto IL_0467;
+										goto IL_046E;
 									}
 									if (flag)
 									{
 										text += aJSON[i];
-										goto IL_0467;
+										goto IL_046E;
 									}
 									text2 = text;
-									text = string.Empty;
-									goto IL_0467;
+									text = "";
+									goto IL_046E;
 								}
 								else
 								{
 									if (flag)
 									{
 										text += aJSON[i];
-										goto IL_0467;
+										goto IL_046E;
 									}
-									if (text != string.Empty)
+									if (text != "")
 									{
 										if (jsonnode is JSONArray)
 										{
 											jsonnode.Add(text);
 										}
-										else if (text2 != string.Empty)
+										else if (text2 != "")
 										{
 											jsonnode.Add(text2, text);
 										}
 									}
-									text2 = string.Empty;
-									text = string.Empty;
-									goto IL_0467;
+									text2 = "";
+									text = "";
+									goto IL_046E;
 								}
 								break;
 							case '}':
 								break;
 							}
 							break;
-						}
-						if (flag)
-						{
-							text += aJSON[i];
-						}
-						else
-						{
-							if (stack.Count == 0)
-							{
-								throw new Exception("JSON Parse: Too many closing brackets");
-							}
-							stack.Pop();
-							if (text != string.Empty)
-							{
-								text2 = text2.Trim();
-								if (jsonnode is JSONArray)
-								{
-									jsonnode.Add(text);
-								}
-								else if (text2 != string.Empty)
-								{
-									jsonnode.Add(text2, text);
-								}
-							}
-							text2 = string.Empty;
-							text = string.Empty;
-							if (stack.Count > 0)
-							{
-								jsonnode = stack.Peek();
-							}
+						case '"':
+							flag ^= true;
+							goto IL_046E;
 						}
 						break;
-					case '"':
-						flag ^= true;
-						break;
+					}
+					if (flag)
+					{
+						text += aJSON[i];
+					}
+					else
+					{
+						if (stack.Count == 0)
+						{
+							throw new Exception("JSON Parse: Too many closing brackets");
+						}
+						stack.Pop();
+						if (text != "")
+						{
+							text2 = text2.Trim();
+							if (jsonnode is JSONArray)
+							{
+								jsonnode.Add(text);
+							}
+							else if (text2 != "")
+							{
+								jsonnode.Add(text2, text);
+							}
+						}
+						text2 = "";
+						text = "";
+						if (stack.Count > 0)
+						{
+							jsonnode = stack.Peek();
+						}
 					}
 					break;
 				}
-				IL_0467:
+				IL_046E:
 				i++;
 				continue;
-				IL_0333:
+				IL_0342:
 				if (flag)
 				{
 					text += aJSON[i];
 				}
-				goto IL_0467;
+				goto IL_046E;
 			}
 			if (flag)
 			{
@@ -513,6 +555,7 @@ namespace SimpleJSON
 		public static JSONNode Deserialize(BinaryReader aReader)
 		{
 			JSONBinaryTag jsonbinaryTag = (JSONBinaryTag)aReader.ReadByte();
+			JSONNode jsonnode;
 			switch (jsonbinaryTag)
 			{
 			case JSONBinaryTag.Array:
@@ -523,7 +566,8 @@ namespace SimpleJSON
 				{
 					jsonarray.Add(JSONNode.Deserialize(aReader));
 				}
-				return jsonarray;
+				jsonnode = jsonarray;
+				break;
 			}
 			case JSONBinaryTag.Class:
 			{
@@ -532,24 +576,31 @@ namespace SimpleJSON
 				for (int j = 0; j < num2; j++)
 				{
 					string text = aReader.ReadString();
-					JSONNode jsonnode = JSONNode.Deserialize(aReader);
-					jsonclass.Add(text, jsonnode);
+					JSONNode jsonnode2 = JSONNode.Deserialize(aReader);
+					jsonclass.Add(text, jsonnode2);
 				}
-				return jsonclass;
+				jsonnode = jsonclass;
+				break;
 			}
 			case JSONBinaryTag.Value:
-				return new JSONData(aReader.ReadString());
+				jsonnode = new JSONData(aReader.ReadString());
+				break;
 			case JSONBinaryTag.IntValue:
-				return new JSONData(aReader.ReadInt32());
+				jsonnode = new JSONData(aReader.ReadInt32());
+				break;
 			case JSONBinaryTag.DoubleValue:
-				return new JSONData(aReader.ReadDouble());
+				jsonnode = new JSONData(aReader.ReadDouble());
+				break;
 			case JSONBinaryTag.BoolValue:
-				return new JSONData(aReader.ReadBoolean());
+				jsonnode = new JSONData(aReader.ReadBoolean());
+				break;
 			case JSONBinaryTag.FloatValue:
-				return new JSONData(aReader.ReadSingle());
+				jsonnode = new JSONData(aReader.ReadSingle());
+				break;
 			default:
 				throw new Exception("Error deserializing JSON. Unknown tag: " + jsonbinaryTag);
 			}
+			return jsonnode;
 		}
 
 		public static JSONNode LoadFromCompressedFile(string aFileName)
@@ -594,26 +645,6 @@ namespace SimpleJSON
 			{
 				Position = 0L
 			});
-		}
-
-		public static implicit operator JSONNode(string s)
-		{
-			return new JSONData(s);
-		}
-
-		public static implicit operator string(JSONNode d)
-		{
-			return (!(d == null)) ? d.Value : null;
-		}
-
-		public static bool operator ==(JSONNode a, object b)
-		{
-			return (b == null && a is JSONLazyCreator) || object.ReferenceEquals(a, b);
-		}
-
-		public static bool operator !=(JSONNode a, object b)
-		{
-			return !(a == b);
 		}
 	}
 }

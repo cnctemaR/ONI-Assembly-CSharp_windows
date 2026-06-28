@@ -30,11 +30,19 @@ namespace TUNING
 
 		public const float HEAT_GENERATION_EFFICIENCY = 0.012f;
 
-		public const float DUPLICANT_BASE_GENERATION_KILOWATTS = 0.08368001f;
+		public const float DUPLICANT_BASE_GENERATION_KILOWATTS = 0.083680004f;
 
 		public const float STANDARD_STRESS_PENALTY = 0.016666668f;
 
 		public const float STANDARD_STRESS_BONUS = -0.033333335f;
+
+		public const float STRESS_BELOW_EXPECTATIONS_FOOD = 0.25f;
+
+		public const float STRESS_ABOVE_EXPECTATIONS_FOOD = -0.5f;
+
+		public const float STANDARD_STRESS_PENALTY_SECOND = 0.25f;
+
+		public const float STANDARD_STRESS_BONUS_SECOND = -0.5f;
 
 		public const float RECOVER_BREATH_DELTA = 3f;
 
@@ -477,7 +485,7 @@ namespace TUNING
 
 			public const float RETREAT_AMOUNT = 72.72727f;
 
-			public const float SUFFOCATE_AMOUNT = 45.454548f;
+			public const float SUFFOCATE_AMOUNT = 45.454544f;
 
 			public const float BREATH_RATE = 0.90909094f;
 		}

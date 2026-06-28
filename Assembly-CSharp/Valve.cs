@@ -5,14 +5,6 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class Valve : Workable, ISaveLoadable
 {
-	public float MaxFlow
-	{
-		get
-		{
-			return this.maxFlow;
-		}
-	}
-
 	public float QueuedMaxFlow
 	{
 		get
@@ -29,86 +21,54 @@ public class Valve : Workable, ISaveLoadable
 		}
 	}
 
+	public float MaxFlow
+	{
+		get
+		{
+			return this.valveBase.MaxFlow;
+		}
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.currentFlow = this.maxFlow;
-		this.desiredFlow = this.maxFlow;
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
-		this.flowAccumulator = new Accumulator("Flow", this, 3f);
 		this.synchronizeAnims = false;
+		this.valveBase.CurrentFlow = this.valveBase.MaxFlow;
+		this.desiredFlow = this.valveBase.MaxFlow;
 	}
 
 	protected override void OnSpawn()
 	{
-		base.OnSpawn();
-		Building component = base.GetComponent<Building>();
-		this.inputCell = component.GetUtilityInputCell();
-		this.outputCell = component.GetUtilityOutputCell();
-		Conduit.GetFlowManager(this.conduitType).AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlow.Priority.Default);
 		this.ChangeFlow(this.desiredFlow);
-		this.UpdateAnim();
-		this.OnCmpEnable();
-	}
-
-	protected override void OnCleanUp()
-	{
-		Conduit.GetFlowManager(this.conduitType).RemoveConduitUpdater(new Action<float>(this.ConduitUpdate));
-		base.OnCleanUp();
-	}
-
-	private void ConduitUpdate(float dt)
-	{
-		ConduitFlow flowManager = Conduit.GetFlowManager(this.conduitType);
-		ConduitFlow.Conduit conduit = flowManager.GetConduit(this.inputCell);
-		ConduitFlow.Conduit conduit2 = flowManager.GetConduit(this.outputCell);
-		if (conduit == null || conduit2 == null)
-		{
-			this.UpdateAnim();
-			return;
-		}
-		ConduitFlow.ConduitContents contents = conduit.GetContents();
-		float num = Mathf.Min(contents.mass, this.currentFlow * dt);
-		if (num > 0f)
-		{
-			float num2 = num / contents.mass;
-			int num3 = (int)(num2 * (float)contents.diseaseCount);
-			float num4 = flowManager.AddElement(this.outputCell, contents.element, num, contents.temperature, contents.diseaseIdx, num3);
-			this.flowAccumulator.Accumulate(num4);
-			if (num4 > 0f)
-			{
-				flowManager.RemoveElement(this.inputCell, num4);
-			}
-		}
-		this.UpdateAnim();
+		base.OnSpawn();
 	}
 
 	public void ChangeFlow(float amount)
 	{
-		this.desiredFlow = Mathf.Clamp(amount, 0f, this.maxFlow);
+		this.desiredFlow = Mathf.Clamp(amount, 0f, this.valveBase.MaxFlow);
 		KSelectable component = base.GetComponent<KSelectable>();
-		component.ToggleStatusItem(Db.Get().BuildingStatusItems.PumpingLiquidOrGas, this.desiredFlow >= 0f, this.flowAccumulator);
+		component.ToggleStatusItem(Db.Get().BuildingStatusItems.PumpingLiquidOrGas, this.desiredFlow >= 0f, this.valveBase.Accumulator);
 		if (DebugHandler.InstantBuildMode)
 		{
 			this.UpdateFlow();
 		}
-		else
+		else if (this.desiredFlow != this.valveBase.CurrentFlow)
 		{
-			if (this.desiredFlow == this.currentFlow)
-			{
-				if (this.chore != null)
-				{
-					this.chore.Cancel("desiredFlow == currentFlow");
-					this.chore = null;
-				}
-				component.RemoveStatusItem(Db.Get().BuildingStatusItems.ValveRequest, false);
-				return;
-			}
 			if (this.chore == null)
 			{
 				component.AddStatusItem(Db.Get().BuildingStatusItems.ValveRequest, this);
-				this.chore = new WorkChore<Valve>(Db.Get().ChoreTypes.Toggle, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, int.MaxValue);
+				this.chore = new WorkChore<Valve>(Db.Get().ChoreTypes.Toggle, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
 			}
+		}
+		else
+		{
+			if (this.chore != null)
+			{
+				this.chore.Cancel("desiredFlow == currentFlow");
+				this.chore = null;
+			}
+			component.RemoveStatusItem(Db.Get().BuildingStatusItems.ValveRequest, false);
 		}
 	}
 
@@ -120,8 +80,8 @@ public class Valve : Workable, ISaveLoadable
 
 	public void UpdateFlow()
 	{
-		this.currentFlow = this.desiredFlow;
-		this.UpdateAnim();
+		this.valveBase.CurrentFlow = this.desiredFlow;
+		this.valveBase.UpdateAnim();
 		if (this.chore != null)
 		{
 			this.chore.Cancel("forced complete");
@@ -130,78 +90,11 @@ public class Valve : Workable, ISaveLoadable
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ValveRequest, false);
 	}
 
-	private void UpdateAnim()
-	{
-		float avgRate = this.flowAccumulator.AvgRate;
-		if (avgRate > 0f)
-		{
-			for (int i = 0; i < this.animFlowRanges.Length; i++)
-			{
-				if (avgRate <= this.animFlowRanges[i].minFlow)
-				{
-					if (this.curFlowIdx != i)
-					{
-						this.curFlowIdx = i;
-						this.controller.Play(this.animFlowRanges[i].animName, (avgRate > 0f) ? KAnim.PlayMode.Loop : KAnim.PlayMode.Once, 1f, 0f);
-					}
-					break;
-				}
-			}
-		}
-		else
-		{
-			this.controller.Play("off", KAnim.PlayMode.Once, 1f, 0f);
-		}
-	}
-
-	[SerializeField]
-	public ConduitType conduitType;
-
-	[SerializeField]
-	public float smallAmount;
-
-	[SerializeField]
-	public float largeAmount;
-
-	[SerializeField]
-	public float maxFlow = 0.5f;
-
-	[MyCmpAdd]
-	protected UserMenu userMenu;
-
-	[MyCmpGet]
-	private KBatchedAnimController controller;
-
-	private Accumulator flowAccumulator;
-
-	private int curFlowIdx = -1;
-
-	private int inputCell;
-
-	private int outputCell;
-
-	[SerializeField]
-	public Valve.AnimRangeInfo[] animFlowRanges;
-
-	[Serialize]
-	private float currentFlow;
+	[MyCmpReq]
+	private ValveBase valveBase;
 
 	[Serialize]
 	private float desiredFlow = 0.5f;
 
-	private Chore chore;
-
-	[Serializable]
-	public struct AnimRangeInfo
-	{
-		public AnimRangeInfo(float min_flow, string anim_name)
-		{
-			this.minFlow = min_flow;
-			this.animName = anim_name;
-		}
-
-		public float minFlow;
-
-		public string animName;
-	}
+	private Chore chore = null;
 }

@@ -42,7 +42,7 @@ public static class KProfiler
 		return KProfiler.counter;
 	}
 
-	public static int counter;
+	public static int counter = 0;
 
 	public struct Region : IDisposable
 	{

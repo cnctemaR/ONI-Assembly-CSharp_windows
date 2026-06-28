@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 public class WorldInventory : KMonoBehaviour, ISaveLoadable
 {
-	public event Action<Tag> OnDiscover;
-
 	public static WorldInventory Instance { get; private set; }
+
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	public event Action<Tag> OnDiscover;
 
 	protected override void OnPrefabInit()
 	{
@@ -30,15 +32,15 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 		{
 			yield return null;
 		}
-		for (int t = 0; t < Components.Pickupables.Count; t++)
+		for (int j = 0; j < Components.Pickupables.Count; j++)
 		{
-			Pickupable pickupable = Components.Pickupables[t];
+			Pickupable pickupable = Components.Pickupables[j];
 			if (pickupable != null)
 			{
-				ReachabilityMonitor.Instance reachability_monitor = pickupable.GetSMI<ReachabilityMonitor.Instance>();
-				if (reachability_monitor != null)
+				ReachabilityMonitor.Instance smi = pickupable.GetSMI<ReachabilityMonitor.Instance>();
+				if (smi != null)
 				{
-					reachability_monitor.UpdateReachability();
+					smi.UpdateReachability();
 				}
 			}
 		}
@@ -89,9 +91,12 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 	{
 		bool flag = this.Discovered.Add(tag);
 		this.DiscoverCategory(categoryTag, tag);
-		if (flag && this.OnDiscover != null)
+		if (flag)
 		{
-			this.OnDiscover(tag);
+			if (this.OnDiscover != null)
+			{
+				this.OnDiscover(tag);
+			}
 		}
 	}
 
@@ -140,11 +145,16 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 	public HashSet<Tag> GetDiscoveredResourcesFromTag(Tag tag)
 	{
 		HashSet<Tag> hashSet;
+		HashSet<Tag> hashSet2;
 		if (this.DiscoveredCategories.TryGetValue(tag, out hashSet))
 		{
-			return hashSet;
+			hashSet2 = hashSet;
 		}
-		return new HashSet<Tag>();
+		else
+		{
+			hashSet2 = new HashSet<Tag>();
+		}
+		return hashSet2;
 	}
 
 	private void Update()
@@ -183,40 +193,39 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 	private void OnAddedFetchable(object data)
 	{
 		GameObject gameObject = (GameObject)data;
-		if (gameObject.GetComponent<Health>() != null)
+		if (!(gameObject.GetComponent<Health>() != null))
 		{
-			return;
-		}
-		Pickupable component = gameObject.GetComponent<Pickupable>();
-		KPrefabID component2 = component.GetComponent<KPrefabID>();
-		Tag tag = component2.PrefabID();
-		if (!this.Inventory.ContainsKey(tag))
-		{
-			Tag tag2 = Tag.Invalid;
-			for (int i = 0; i < component2.Tags.Length; i++)
+			Pickupable component = gameObject.GetComponent<Pickupable>();
+			KPrefabID component2 = component.GetComponent<KPrefabID>();
+			Tag tag = component2.PrefabID();
+			if (!this.Inventory.ContainsKey(tag))
 			{
-				if (GameTags.AllCategories.Contains(component2.Tags[i]))
+				Tag tag2 = Tag.Invalid;
+				for (int i = 0; i < component2.Tags.Length; i++)
 				{
-					tag2 = component2.Tags[i];
-					break;
+					if (GameTags.AllCategories.Contains(component2.Tags[i]))
+					{
+						tag2 = component2.Tags[i];
+						break;
+					}
 				}
+				if (!tag2.IsValid)
+				{
+					DebugUtil.SoftAssert(false, component.name + " was found by worldinventory but doesn't have a category! Add it to the element definition.");
+				}
+				this.Discover(tag, tag2);
 			}
-			if (!tag2.IsValid)
+			for (int j = 0; j < component2.Tags.Length; j++)
 			{
-				DebugUtil.SoftAssert(false, component.name + " was found by worldinventory but doesn't have a category! Add it to the element definition.");
+				Tag tag3 = component2.Tags[j];
+				List<Pickupable> list;
+				if (!this.Inventory.TryGetValue(tag3, out list))
+				{
+					list = new List<Pickupable>();
+					this.Inventory[tag3] = list;
+				}
+				list.Add(component);
 			}
-			this.Discover(tag, tag2);
-		}
-		for (int j = 0; j < component2.Tags.Length; j++)
-		{
-			Tag tag3 = component2.Tags[j];
-			List<Pickupable> list;
-			if (!this.Inventory.TryGetValue(tag3, out list))
-			{
-				list = new List<Pickupable>();
-				this.Inventory[tag3] = list;
-			}
-			list.Add(component);
 		}
 	}
 
@@ -246,7 +255,7 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 
 	private Dictionary<Tag, float> accessibleAmounts = new Dictionary<Tag, float>();
 
-	private int accessibleUpdateIndex;
+	private int accessibleUpdateIndex = 0;
 
 	private bool firstUpdate = true;
 }

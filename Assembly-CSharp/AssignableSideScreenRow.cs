@@ -19,7 +19,7 @@ public class AssignableSideScreenRow : KMonoBehaviour
 
 	public void Refresh(object data = null)
 	{
-		string text = string.Empty;
+		string text = "";
 		if (this.sideScreen.targetAssignable.slot != null)
 		{
 			Assignables assignables = null;
@@ -34,15 +34,18 @@ public class AssignableSideScreenRow : KMonoBehaviour
 					assignables = (this.targetIdentity as MinionIdentity).GetComponent<Equipment>();
 				}
 			}
-			if (assignables != null && assignables.GetSlot(this.sideScreen.targetAssignable.slot) != null && assignables.GetSlot(this.sideScreen.targetAssignable.slot).IsAssigned())
+			if (assignables != null)
 			{
-				if (assignables.GetSlot(this.sideScreen.targetAssignable.slot).assignable == this.sideScreen.targetAssignable)
+				if (assignables.GetSlot(this.sideScreen.targetAssignable.slot) != null && assignables.GetSlot(this.sideScreen.targetAssignable.slot).IsAssigned())
 				{
-					text = UI.DETAILTABS.POSSESSIONS.NAME;
-				}
-				else
-				{
-					text = assignables.GetSlot(this.sideScreen.targetAssignable.slot).assignable.GetProperName();
+					if (assignables.GetSlot(this.sideScreen.targetAssignable.slot).assignable == this.sideScreen.targetAssignable)
+					{
+						text = UI.DETAILTABS.POSSESSIONS.NAME;
+					}
+					else
+					{
+						text = assignables.GetSlot(this.sideScreen.targetAssignable.slot).assignable.GetProperName();
+					}
 				}
 			}
 		}
@@ -112,7 +115,7 @@ public class AssignableSideScreenRow : KMonoBehaviour
 				component.AddMultiStringTooltip(string.Format(UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.UNASSIGN_TOOLTIP, this.targetIdentity.GetProperName()), null);
 			}
 		}
-		return string.Empty;
+		return "";
 	}
 
 	[SerializeField]

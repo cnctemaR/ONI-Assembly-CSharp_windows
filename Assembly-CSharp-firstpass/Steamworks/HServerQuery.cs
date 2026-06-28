@@ -25,16 +25,6 @@ namespace Steamworks
 			return this.m_HServerQuery.GetHashCode();
 		}
 
-		public bool Equals(HServerQuery other)
-		{
-			return this.m_HServerQuery == other.m_HServerQuery;
-		}
-
-		public int CompareTo(HServerQuery other)
-		{
-			return this.m_HServerQuery.CompareTo(other.m_HServerQuery);
-		}
-
 		public static bool operator ==(HServerQuery x, HServerQuery y)
 		{
 			return x.m_HServerQuery == y.m_HServerQuery;
@@ -53,6 +43,16 @@ namespace Steamworks
 		public static explicit operator int(HServerQuery that)
 		{
 			return that.m_HServerQuery;
+		}
+
+		public bool Equals(HServerQuery other)
+		{
+			return this.m_HServerQuery == other.m_HServerQuery;
+		}
+
+		public int CompareTo(HServerQuery other)
+		{
+			return this.m_HServerQuery.CompareTo(other.m_HServerQuery);
 		}
 
 		public static readonly HServerQuery Invalid = new HServerQuery(-1);

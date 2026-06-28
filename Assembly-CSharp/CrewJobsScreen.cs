@@ -58,26 +58,25 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 
 	private void SortByPreviousSelected()
 	{
-		if (this.sortToggleGroup == null || this.lastSortToggle == null)
+		if (!(this.sortToggleGroup == null) && !(this.lastSortToggle == null))
 		{
-			return;
-		}
-		int childCount = this.ColumnTitlesContainer.childCount;
-		for (int i = 0; i < childCount; i++)
-		{
-			if (i < this.choreGroups.Count)
+			int childCount = this.ColumnTitlesContainer.childCount;
+			for (int i = 0; i < childCount; i++)
 			{
-				Toggle componentInChildren = this.ColumnTitlesContainer.GetChild(i).FindChild("Title").GetComponentInChildren<Toggle>();
-				if (componentInChildren == this.lastSortToggle)
+				if (i < this.choreGroups.Count)
 				{
-					this.SortByEffectiveness(this.choreGroups[i], this.lastSortReversed, false);
-					return;
+					Toggle componentInChildren = this.ColumnTitlesContainer.GetChild(i).Find("Title").GetComponentInChildren<Toggle>();
+					if (componentInChildren == this.lastSortToggle)
+					{
+						this.SortByEffectiveness(this.choreGroups[i], this.lastSortReversed, false);
+						return;
+					}
 				}
 			}
-		}
-		if (this.SortEveryoneToggle == this.lastSortToggle)
-		{
-			base.SortByName(this.lastSortReversed);
+			if (this.SortEveryoneToggle == this.lastSortToggle)
+			{
+				base.SortByName(this.lastSortReversed);
+			}
 		}
 	}
 
@@ -89,7 +88,7 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 		{
 			if (i < this.choreGroups.Count)
 			{
-				Toggle sortToggle = this.ColumnTitlesContainer.GetChild(i).FindChild("Title").GetComponentInChildren<Toggle>();
+				Toggle sortToggle = this.ColumnTitlesContainer.GetChild(i).Find("Title").GetComponentInChildren<Toggle>();
 				this.ColumnTitlesContainer.GetChild(i).rectTransform().localScale = Vector3.one;
 				ChoreGroup chore_group2 = this.choreGroups[i];
 				ImageToggleState toggleImage = sortToggle.GetComponentInChildren<ImageToggleState>(true);
@@ -131,7 +130,7 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 			});
 		}
 		Button key = this.EveryoneToggles.ElementAt<KeyValuePair<Button, CrewJobsScreen.everyoneToggleState>>(this.EveryoneToggles.Count - 1).Key;
-		key.transform.parent.FindChild("Title").gameObject.GetComponentInChildren<Toggle>().gameObject.SetActive(false);
+		key.transform.parent.Find("Title").gameObject.GetComponentInChildren<Toggle>().gameObject.SetActive(false);
 		key.onClick.AddListener(delegate
 		{
 			this.ToggleAllTasksEveryone();
@@ -153,7 +152,7 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 			component.AddMultiStringTooltip(UI.TOOLTIPS.JOBSSCREEN_ATTRIBUTES, this.TextStyle_JobTooltip_Description);
 			component.AddMultiStringTooltip("•  " + choreGroup.attribute.Name, this.TextStyle_JobTooltip_RelevantAttributes);
 		}
-		return string.Empty;
+		return "";
 	}
 
 	private void ToggleAllTasksEveryone()
@@ -217,7 +216,7 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 	{
 		for (int i = 0; i < this.ColumnTitlesContainer.childCount; i++)
 		{
-			Toggle componentInChildren = this.ColumnTitlesContainer.GetChild(i).FindChild("Title").GetComponentInChildren<Toggle>();
+			Toggle componentInChildren = this.ColumnTitlesContainer.GetChild(i).Find("Title").GetComponentInChildren<Toggle>();
 			if (!(componentInChildren == null))
 			{
 				ImageToggleState componentInChildren2 = componentInChildren.GetComponentInChildren<ImageToggleState>(true);
@@ -279,17 +278,24 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 					}
 					Button componentInChildren = this.ColumnTitlesContainer.GetChild(i).GetComponentInChildren<Button>();
 					ImageToggleState component = componentInChildren.GetComponentsInChildren<Image>(true)[1].GetComponent<ImageToggleState>();
-					switch (this.EveryoneToggles[componentInChildren])
+					CrewJobsScreen.everyoneToggleState everyoneToggleState = this.EveryoneToggles[componentInChildren];
+					if (everyoneToggleState != CrewJobsScreen.everyoneToggleState.off)
 					{
-					case CrewJobsScreen.everyoneToggleState.off:
+						if (everyoneToggleState != CrewJobsScreen.everyoneToggleState.mixed)
+						{
+							if (everyoneToggleState == CrewJobsScreen.everyoneToggleState.on)
+							{
+								component.SetActive();
+							}
+						}
+						else
+						{
+							component.SetInactive();
+						}
+					}
+					else
+					{
 						component.SetDisabled();
-						break;
-					case CrewJobsScreen.everyoneToggleState.mixed:
-						component.SetInactive();
-						break;
-					case CrewJobsScreen.everyoneToggleState.on:
-						component.SetActive();
-						break;
 					}
 				}
 			}
@@ -306,17 +312,24 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 				this.EveryoneAllTaskToggle = new KeyValuePair<Button, CrewJobsScreen.everyoneToggleState>(this.EveryoneAllTaskToggle.Key, CrewJobsScreen.everyoneToggleState.off);
 			}
 			ImageToggleState component2 = this.EveryoneAllTaskToggle.Key.GetComponentsInChildren<Image>(true)[1].GetComponent<ImageToggleState>();
-			switch (this.EveryoneAllTaskToggle.Value)
+			CrewJobsScreen.everyoneToggleState value = this.EveryoneAllTaskToggle.Value;
+			if (value != CrewJobsScreen.everyoneToggleState.off)
 			{
-			case CrewJobsScreen.everyoneToggleState.off:
+				if (value != CrewJobsScreen.everyoneToggleState.mixed)
+				{
+					if (value == CrewJobsScreen.everyoneToggleState.on)
+					{
+						component2.SetActive();
+					}
+				}
+				else
+				{
+					component2.SetInactive();
+				}
+			}
+			else
+			{
 				component2.SetDisabled();
-				break;
-			case CrewJobsScreen.everyoneToggleState.mixed:
-				component2.SetInactive();
-				break;
-			case CrewJobsScreen.everyoneToggleState.on:
-				component2.SetActive();
-				break;
 			}
 			this.screenWidth = this.EntriesPanelTransform.rectTransform().sizeDelta.x;
 			this.ScrollRectTransform.GetComponent<LayoutElement>().minWidth = this.screenWidth;
@@ -354,7 +367,7 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 
 	private bool dirty;
 
-	private float screenWidth;
+	private float screenWidth = 0f;
 
 	public enum everyoneToggleState
 	{

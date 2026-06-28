@@ -3,8 +3,8 @@ using System.Diagnostics;
 using KSerialization;
 using UnityEngine;
 
-[DebuggerDisplay("{name}")]
 [SerializationConfig(MemberSerialization.OptIn)]
+[DebuggerDisplay("{name}")]
 public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 {
 	public int PowerDistributionOrder
@@ -67,11 +67,16 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 	{
 		get
 		{
+			float num;
 			if (this.Capacity == 0f)
 			{
-				return 1f;
+				num = 1f;
 			}
-			return this.joulesAvailable / this.Capacity;
+			else
+			{
+				num = this.joulesAvailable / this.Capacity;
+			}
+			return num;
 		}
 	}
 
@@ -105,7 +110,7 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 	{
 		base.OnSpawn();
 		Components.Generators.Add(this);
-		this.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 		this.capacity = Generator.CalculateCapacity(this.building.Def, null);
 		this.PowerCell = this.building.GetPowerOutputCell();
 		this.CheckConnectionStatus();
@@ -119,9 +124,12 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 
 	private void SetStatusItem(StatusItem status_item)
 	{
-		if (status_item != this.currentStatusItem && this.currentStatusItem != null)
+		if (status_item != this.currentStatusItem)
 		{
-			this.statusItemID = this.selectable.RemoveStatusItem(this.statusItemID, false);
+			if (this.currentStatusItem != null)
+			{
+				this.statusItemID = this.selectable.RemoveStatusItem(this.statusItemID, false);
+			}
 		}
 		if (status_item != null && this.statusItemID == Guid.Empty)
 		{
@@ -154,29 +162,44 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 
 	private float GetUpgradeEfficiencyMultiplier()
 	{
+		float num;
 		if (this.upgradable != null)
 		{
-			return this.upgradable.GetEnergyGenerationMultiplier();
+			num = this.upgradable.GetEnergyGenerationMultiplier();
 		}
-		return 1f;
+		else
+		{
+			num = 1f;
+		}
+		return num;
 	}
 
 	private float GetUpgradeCapacityMultiplier()
 	{
+		float num;
 		if (this.upgradable != null)
 		{
-			return this.upgradable.GetCapacityUpgradeMultiplier();
+			num = this.upgradable.GetCapacityUpgradeMultiplier();
 		}
-		return 1f;
+		else
+		{
+			num = 1f;
+		}
+		return num;
 	}
 
 	protected float GetUpgradeTemperatureMultiplier()
 	{
+		float num;
 		if (this.upgradable != null)
 		{
-			return this.upgradable.GetTemperatureUpgradeMultiplier();
+			num = this.upgradable.GetTemperatureUpgradeMultiplier();
 		}
-		return 1f;
+		else
+		{
+			num = 1f;
+		}
+		return num;
 	}
 
 	protected override void OnCleanUp()
@@ -188,11 +211,16 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 
 	public static float CalculateCapacity(BuildingDef def, Element element)
 	{
+		float num;
 		if (element == null)
 		{
-			return def.GeneratorBaseCapacity;
+			num = def.GeneratorBaseCapacity;
 		}
-		return def.GeneratorBaseCapacity * (1f + ((!element.HasTag(GameTags.RefinedMetal)) ? 0f : 1f));
+		else
+		{
+			num = def.GeneratorBaseCapacity * (1f + ((!element.HasTag(GameTags.RefinedMetal)) ? 0f : 1f));
+		}
+		return num;
 	}
 
 	public void ResetJoules()
@@ -238,7 +266,7 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 	protected KSelectable selectable;
 
 	[Serialize]
-	private float joulesAvailable;
+	private float joulesAvailable = 0f;
 
 	[SerializeField]
 	public int powerDistributionOrder;

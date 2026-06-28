@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Compost : StateMachineComponent<Compost.StatesInstance>, IGameObjectEffectDescriptor, IEffectDescriptor
+public class Compost : StateMachineComponent<Compost.StatesInstance>, IEffectDescriptor, IGameObjectEffectDescriptor
 {
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
+		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
 		base.GetComponent<Storage>().choreType = Db.Get().ChoreTypes.FetchCritical;
 	}
 
@@ -30,7 +30,6 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>, IGameObjec
 		GameObject gameObject = (GameObject)data;
 		if (gameObject == null)
 		{
-			return;
 		}
 	}
 
@@ -121,14 +120,14 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>, IGameObjec
 				smi.ResetWorkable();
 			}).EventTransition(GameHashes.OnStorageChange, this.insufficientMass, (Compost.StatesInstance smi) => !smi.IsEmpty()).EventTransition(GameHashes.OperationalChanged, this.disabledEmpty, (Compost.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational)
 				.ToggleStatusItem(Db.Get().BuildingStatusItems.AwaitingWaste, null)
-				.PlayAnim("off", KAnim.PlayMode.Once, null);
+				.PlayAnim("off");
 			this.insufficientMass.Enter("empty", delegate(Compost.StatesInstance smi)
 			{
 				smi.ResetWorkable();
 			}).EventTransition(GameHashes.OnStorageChange, this.empty, (Compost.StatesInstance smi) => smi.IsEmpty()).EventTransition(GameHashes.OnStorageChange, this.inert, (Compost.StatesInstance smi) => smi.CanStartConverting())
 				.ToggleStatusItem(Db.Get().BuildingStatusItems.AwaitingWaste, null)
-				.PlayAnim("idle_half", KAnim.PlayMode.Once, null);
-			this.inert.EventTransition(GameHashes.OperationalChanged, this.disabled, (Compost.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational).PlayAnim("on", KAnim.PlayMode.Once, null).ToggleStatusItem(Db.Get().BuildingStatusItems.AwaitingCompostFlip, null)
+				.PlayAnim("idle_half");
+			this.inert.EventTransition(GameHashes.OperationalChanged, this.disabled, (Compost.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational).PlayAnim("on").ToggleStatusItem(Db.Get().BuildingStatusItems.AwaitingCompostFlip, null)
 				.ToggleChore(new Func<Compost.StatesInstance, Chore>(this.CreateFlipChore), this.composting);
 			this.composting.Enter("Composting", delegate(Compost.StatesInstance smi)
 			{
@@ -144,20 +143,20 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>, IGameObjec
 				{
 					smi.master.operational.SetActive(false, false);
 				});
-			this.compostingPst.PlayAnim("composting_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.empty);
+			this.compostingPst.PlayAnim("composting_pst").OnAnimQueueComplete(this.empty);
 			this.disabled.Enter("disabledEmpty", delegate(Compost.StatesInstance smi)
 			{
 				smi.ResetWorkable();
-			}).PlayAnim("on", KAnim.PlayMode.Once, null).EventTransition(GameHashes.OperationalChanged, this.inert, (Compost.StatesInstance smi) => smi.GetComponent<Operational>().IsOperational);
+			}).PlayAnim("on").EventTransition(GameHashes.OperationalChanged, this.inert, (Compost.StatesInstance smi) => smi.GetComponent<Operational>().IsOperational);
 			this.disabledEmpty.Enter("disabledEmpty", delegate(Compost.StatesInstance smi)
 			{
 				smi.ResetWorkable();
-			}).PlayAnim("off", KAnim.PlayMode.Once, null).EventTransition(GameHashes.OperationalChanged, this.empty, (Compost.StatesInstance smi) => smi.GetComponent<Operational>().IsOperational);
+			}).PlayAnim("off").EventTransition(GameHashes.OperationalChanged, this.empty, (Compost.StatesInstance smi) => smi.GetComponent<Operational>().IsOperational);
 		}
 
 		private Chore CreateFlipChore(Compost.StatesInstance smi)
 		{
-			return new WorkChore<CompostWorkable>(Db.Get().ChoreTypes.FlipCompost, smi.master, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue);
+			return new WorkChore<CompostWorkable>(Db.Get().ChoreTypes.FlipCompost, smi.master, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
 		}
 
 		public GameStateMachine<Compost.States, Compost.StatesInstance, Compost, object>.State empty;

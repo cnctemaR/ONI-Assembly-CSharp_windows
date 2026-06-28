@@ -33,34 +33,36 @@ namespace NodeEditorFramework.Standard
 				if (NodeEditor.InitiationError)
 				{
 					GUILayout.Label("Initiation failed! Check console for more information!", new GUILayoutOption[0]);
-					return;
 				}
-				try
+				else
 				{
-					if (!this.screenSize && this.specifiedRootRect.max != this.specifiedRootRect.min)
+					try
 					{
-						GUI.BeginGroup(this.specifiedRootRect, NodeEditorGUI.nodeSkin.box);
+						if (!this.screenSize && this.specifiedRootRect.max != this.specifiedRootRect.min)
+						{
+							GUI.BeginGroup(this.specifiedRootRect, NodeEditorGUI.nodeSkin.box);
+						}
+						NodeEditorGUI.StartNodeGUI();
+						this.canvasRect = ((!this.screenSize) ? this.specifiedCanvasRect : new Rect(0f, 0f, (float)Screen.width, (float)Screen.height));
+						this.canvasRect.width = this.canvasRect.width - 200f;
+						this.state.canvasRect = this.canvasRect;
+						NodeEditor.DrawCanvas(this.canvas, this.state);
+						GUILayout.BeginArea(new Rect(this.canvasRect.x + this.state.canvasRect.width, this.state.canvasRect.y, 200f, this.state.canvasRect.height), NodeEditorGUI.nodeSkin.box);
+						this.SideGUI();
+						GUILayout.EndArea();
+						NodeEditorGUI.EndNodeGUI();
+						if (!this.screenSize && this.specifiedRootRect.max != this.specifiedRootRect.min)
+						{
+							GUI.EndGroup();
+						}
 					}
-					NodeEditorGUI.StartNodeGUI();
-					this.canvasRect = ((!this.screenSize) ? this.specifiedCanvasRect : new Rect(0f, 0f, (float)Screen.width, (float)Screen.height));
-					this.canvasRect.width = this.canvasRect.width - 200f;
-					this.state.canvasRect = this.canvasRect;
-					NodeEditor.DrawCanvas(this.canvas, this.state);
-					GUILayout.BeginArea(new Rect(this.canvasRect.x + this.state.canvasRect.width, this.state.canvasRect.y, 200f, this.state.canvasRect.height), NodeEditorGUI.nodeSkin.box);
-					this.SideGUI();
-					GUILayout.EndArea();
-					NodeEditorGUI.EndNodeGUI();
-					if (!this.screenSize && this.specifiedRootRect.max != this.specifiedRootRect.min)
+					catch (UnityException ex)
 					{
-						GUI.EndGroup();
+						this.NewNodeCanvas();
+						NodeEditor.ReInit(true);
+						global::Debug.LogError("Unloaded Canvas due to exception in Draw!", null);
+						global::Debug.LogException(ex);
 					}
-				}
-				catch (UnityException ex)
-				{
-					this.NewNodeCanvas();
-					NodeEditor.ReInit(true);
-					global::Debug.LogError("Unloaded Canvas due to exception in Draw!", null);
-					global::Debug.LogException(ex);
 				}
 			}
 		}
@@ -126,10 +128,12 @@ namespace NodeEditorFramework.Standard
 			if ((this.canvas = NodeEditorSaveManager.LoadSceneNodeCanvas(path, true)) == null)
 			{
 				this.NewNodeCanvas();
-				return;
 			}
-			this.state = NodeEditorSaveManager.ExtractEditorState(this.canvas, "MainEditorState");
-			NodeEditor.RecalculateAll(this.canvas);
+			else
+			{
+				this.state = NodeEditorSaveManager.ExtractEditorState(this.canvas, "MainEditorState");
+				NodeEditor.RecalculateAll(this.canvas);
+			}
 		}
 
 		public void LoadNodeCanvas(string path)
@@ -137,10 +141,12 @@ namespace NodeEditorFramework.Standard
 			if (!File.Exists(path) || (this.canvas = NodeEditorSaveManager.LoadNodeCanvas(path, true)) == null)
 			{
 				this.NewNodeCanvas();
-				return;
 			}
-			this.state = NodeEditorSaveManager.ExtractEditorState(this.canvas, "MainEditorState");
-			NodeEditor.RecalculateAll(this.canvas);
+			else
+			{
+				this.state = NodeEditorSaveManager.ExtractEditorState(this.canvas, "MainEditorState");
+				NodeEditor.RecalculateAll(this.canvas);
+			}
 		}
 
 		public void NewNodeCanvas()
@@ -164,7 +170,7 @@ namespace NodeEditorFramework.Standard
 
 		private NodeEditorState state;
 
-		public bool screenSize;
+		public bool screenSize = false;
 
 		private Rect canvasRect;
 
@@ -172,7 +178,7 @@ namespace NodeEditorFramework.Standard
 
 		public Rect specifiedCanvasRect;
 
-		private string sceneCanvasName = string.Empty;
+		private string sceneCanvasName = "";
 
 		private Vector2 loadScenePos;
 	}

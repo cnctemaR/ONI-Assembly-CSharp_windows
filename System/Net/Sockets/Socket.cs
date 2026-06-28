@@ -135,7 +135,7 @@ namespace System.Net.Sockets
 					{
 						socket.connected = true;
 					}
-					if (num4 < list.Count)
+					if (list != null && num4 < list.Count)
 					{
 						while ((Socket)list[num4] != socket)
 						{

@@ -92,7 +92,7 @@ public class GlobalChoreProvider : ChoreProvider
 	{
 		public bool IsBetterThan(GlobalChoreProvider.Fetch fetch)
 		{
-			bool flag = this.priority >= fetch.priority;
+			bool flag = this.priority.priority_class > fetch.priority.priority_class || (this.priority.priority_class == fetch.priority.priority_class && this.priority.priority_value > fetch.priority.priority_value);
 			bool flag2 = this.cost <= fetch.cost;
 			bool flag3 = true;
 			if (this.tags.Length == fetch.tags.Length)
@@ -129,19 +129,32 @@ public class GlobalChoreProvider : ChoreProvider
 
 		public int cost;
 
-		public int priority;
+		public PrioritySetting priority;
 	}
 
 	private class FetchComparer : IComparer<GlobalChoreProvider.Fetch>
 	{
 		public int Compare(GlobalChoreProvider.Fetch a, GlobalChoreProvider.Fetch b)
 		{
-			int num = b.priority - a.priority;
-			if (num == 0)
+			int num = b.priority.priority_class - a.priority.priority_class;
+			int num2;
+			if (num != 0)
 			{
-				return a.cost - b.cost;
+				num2 = num;
 			}
-			return num;
+			else
+			{
+				int num3 = b.priority.priority_value - a.priority.priority_value;
+				if (num3 != 0)
+				{
+					num2 = num3;
+				}
+				else
+				{
+					num2 = a.cost - b.cost;
+				}
+			}
+			return num2;
 		}
 	}
 }

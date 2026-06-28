@@ -26,7 +26,7 @@ namespace Klei.AI
 				attributes.Remove(this.modifier);
 				this.modifier = null;
 			}
-			this.modifier = new AttributeModifier(this.attribute.Id, (float)this.GetLevel(), DUPLICANTS.MODIFIERS.SKILLLEVEL.NAME, false, false);
+			this.modifier = new AttributeModifier(this.attribute.Id, (float)this.GetLevel(), DUPLICANTS.MODIFIERS.SKILLLEVEL.NAME, false, false, true);
 			attributes.Add("Skill Level", this.modifier);
 		}
 
@@ -69,18 +69,26 @@ namespace Klei.AI
 
 		public bool AddExperience(AttributeLevels levels, float experience)
 		{
+			bool flag;
 			if (this.level > 25)
 			{
-				return false;
+				flag = false;
 			}
-			this.experience += experience;
-			this.experience = Mathf.Max(0f, this.experience);
-			if (this.experience >= this.GetExperienceForNextLevel())
+			else
 			{
-				this.LevelUp(levels);
-				return true;
+				this.experience += experience;
+				this.experience = Mathf.Max(0f, this.experience);
+				if (this.experience >= this.GetExperienceForNextLevel())
+				{
+					this.LevelUp(levels);
+					flag = true;
+				}
+				else
+				{
+					flag = false;
+				}
 			}
-			return false;
+			return flag;
 		}
 
 		private static string OnLevelUpTooltip(List<Notification> notifications, object data)

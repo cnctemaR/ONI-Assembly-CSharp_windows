@@ -6,8 +6,20 @@ public class TemperatureControlledSwitchConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
+		string id = TemperatureControlledSwitchConfig.ID;
+		int num = 1;
+		int num2 = 1;
+		string text = "switchthermal_kanim";
+		float num3 = 5f;
+		int num4 = 30;
+		float num5 = 30f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER3;
+		string[] all_METALS = MATERIALS.ALL_METALS;
+		float num6 = 1600f;
+		BuildLocationRule buildLocationRule = BuildLocationRule.Anywhere;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(TemperatureControlledSwitchConfig.ID, 1, 1, "switchthermal_kanim", 5f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.PENALTY.TIER0, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, num, num2, text, num3, num4, num5, tier, all_METALS, num6, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none);
+		buildingDef.Deprecated = true;
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.ViewMode = SimViewMode.PowerMap;

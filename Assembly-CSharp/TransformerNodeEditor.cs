@@ -44,35 +44,43 @@ public class TransformerNodeEditor : BaseNodeEditor
 	public override bool Calculate()
 	{
 		IModule3D value = this.Inputs[0].GetValue<IModule3D>();
+		bool flag;
 		if (value == null)
 		{
-			return false;
+			flag = false;
 		}
-		IModule3D value2 = this.Inputs[1].GetValue<IModule3D>();
-		IModule3D value3 = this.Inputs[2].GetValue<IModule3D>();
-		IModule3D value4 = this.Inputs[3].GetValue<IModule3D>();
-		if (this.target.transformerType != Transformer.TransformerType.RotatePoint)
+		else
 		{
-			if (value2 == null)
+			IModule3D value2 = this.Inputs[1].GetValue<IModule3D>();
+			IModule3D value3 = this.Inputs[2].GetValue<IModule3D>();
+			IModule3D value4 = this.Inputs[3].GetValue<IModule3D>();
+			if (this.target.transformerType != Transformer.TransformerType.RotatePoint)
 			{
-				return false;
+				if (value2 == null)
+				{
+					return false;
+				}
+				if (value3 == null)
+				{
+					return false;
+				}
+				if (value4 == null)
+				{
+					return false;
+				}
 			}
-			if (value3 == null)
+			IModule3D module3D = this.target.CreateModule(value, value2, value3, value4);
+			if (module3D == null)
 			{
-				return false;
+				flag = false;
 			}
-			if (value4 == null)
+			else
 			{
-				return false;
+				this.Outputs[0].SetValue<IModule3D>(module3D);
+				flag = true;
 			}
 		}
-		IModule3D module3D = this.target.CreateModule(value, value2, value3, value4);
-		if (module3D == null)
-		{
-			return false;
-		}
-		this.Outputs[0].SetValue<IModule3D>(module3D);
-		return true;
+		return flag;
 	}
 
 	protected override void NodeGUI()

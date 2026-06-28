@@ -44,27 +44,6 @@ public struct CellOffset : IEquatable<CellOffset>
 		return Math.Abs(this.x) + Math.Abs(this.y);
 	}
 
-	public override bool Equals(object obj)
-	{
-		CellOffset cellOffset = (CellOffset)obj;
-		return this.x == cellOffset.x && this.y == cellOffset.y;
-	}
-
-	public bool Equals(CellOffset offset)
-	{
-		return this.x == offset.x && this.y == offset.y;
-	}
-
-	public override int GetHashCode()
-	{
-		return this.x + this.y * 8192;
-	}
-
-	public override string ToString()
-	{
-		return string.Concat(new object[] { "(", this.x, ",", this.y, ")" });
-	}
-
 	public static CellOffset operator +(CellOffset a, CellOffset b)
 	{
 		return new CellOffset(a.x + b.x, a.y + b.y);
@@ -85,6 +64,22 @@ public struct CellOffset : IEquatable<CellOffset>
 		return new CellOffset(offset.x * value, offset.y * value);
 	}
 
+	public override bool Equals(object obj)
+	{
+		CellOffset cellOffset = (CellOffset)obj;
+		return this.x == cellOffset.x && this.y == cellOffset.y;
+	}
+
+	public bool Equals(CellOffset offset)
+	{
+		return this.x == offset.x && this.y == offset.y;
+	}
+
+	public override int GetHashCode()
+	{
+		return this.x + this.y * 8192;
+	}
+
 	public static bool operator ==(CellOffset a, CellOffset b)
 	{
 		return a.x == b.x && a.y == b.y;
@@ -93,6 +88,11 @@ public struct CellOffset : IEquatable<CellOffset>
 	public static bool operator !=(CellOffset a, CellOffset b)
 	{
 		return a.x != b.x || a.y != b.y;
+	}
+
+	public override string ToString()
+	{
+		return string.Concat(new object[] { "(", this.x, ",", this.y, ")" });
 	}
 
 	public int x;

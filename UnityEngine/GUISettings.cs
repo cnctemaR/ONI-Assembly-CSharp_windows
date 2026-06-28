@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
@@ -46,11 +47,16 @@ namespace UnityEngine
 		{
 			get
 			{
+				float num;
 				if (this.m_CursorFlashSpeed >= 0f)
 				{
-					return this.m_CursorFlashSpeed;
+					num = this.m_CursorFlashSpeed;
 				}
-				return GUISettings.Internal_GetCursorFlashSpeed();
+				else
+				{
+					num = GUISettings.Internal_GetCursorFlashSpeed();
+				}
+				return num;
 			}
 			set
 			{
@@ -70,7 +76,7 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern float Internal_GetCursorFlashSpeed();
 

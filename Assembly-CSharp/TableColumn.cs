@@ -32,9 +32,12 @@ public class TableColumn
 	{
 		GameObject gameObject = tool_tip_instance.gameObject;
 		HierarchyReferences component = tool_tip_instance.GetComponent<HierarchyReferences>();
-		if (component != null && component.HasReference("Widget"))
+		if (component != null)
 		{
-			gameObject = component.GetReference("Widget").gameObject;
+			if (component.HasReference("Widget"))
+			{
+				gameObject = component.GetReference("Widget").gameObject;
+			}
 		}
 		TableRow tableRow = null;
 		foreach (KeyValuePair<TableRow, GameObject> keyValuePair in this.widgets_by_row)
@@ -49,7 +52,7 @@ public class TableColumn
 		{
 			this.on_tooltip(tableRow.GetMinionIdentity(), gameObject, tool_tip_instance);
 		}
-		return string.Empty;
+		return "";
 	}
 
 	protected string GetSortTooltip(ToolTip sort_tooltip_instance)
@@ -68,7 +71,7 @@ public class TableColumn
 		{
 			this.on_sort_tooltip(tableRow.GetMinionIdentity(), gameObject, sort_tooltip_instance);
 		}
-		return string.Empty;
+		return "";
 	}
 
 	public bool isDirty
@@ -128,5 +131,5 @@ public class TableColumn
 
 	private Func<bool> revealed;
 
-	protected bool dirty;
+	protected bool dirty = false;
 }

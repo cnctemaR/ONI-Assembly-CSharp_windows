@@ -20,34 +20,36 @@ public class BodyOfWater : KMonoBehaviour
 		if (this.containedObjects == null || this.waterCells.Count == 0 || this.containedObjects[0] == null)
 		{
 			WaterBodyProbe.Instance.BodiesToDestroy.Add(this);
-			return;
 		}
-		float num = this.containedObjects[0].transform.position.x;
-		float num2 = this.containedObjects[0].transform.position.x;
-		float num3 = this.containedObjects[0].transform.position.y;
-		float num4 = this.containedObjects[0].transform.position.y;
-		foreach (int num5 in this.waterCells)
+		else
 		{
-			Vector3 vector = Grid.CellToPos(num5);
-			if (vector.x < num)
+			float num = this.containedObjects[0].transform.position.x;
+			float num2 = this.containedObjects[0].transform.position.x;
+			float num3 = this.containedObjects[0].transform.position.y;
+			float num4 = this.containedObjects[0].transform.position.y;
+			foreach (int num5 in this.waterCells)
 			{
-				num = vector.x;
+				Vector3 vector = Grid.CellToPos(num5);
+				if (vector.x < num)
+				{
+					num = vector.x;
+				}
+				if (vector.x > num2)
+				{
+					num2 = vector.x;
+				}
+				if (vector.y < num3)
+				{
+					num3 = vector.y;
+				}
+				if (vector.y > num4)
+				{
+					num4 = vector.y;
+				}
 			}
-			if (vector.x > num2)
-			{
-				num2 = vector.x;
-			}
-			if (vector.y < num3)
-			{
-				num3 = vector.y;
-			}
-			if (vector.y > num4)
-			{
-				num4 = vector.y;
-			}
+			this.extents = new Extents((int)num - 1, (int)num3 - 1, (int)(num2 - num) + 1, (int)(num4 - num3) + 1);
+			this.partitionerEntry = GameScenePartitioner.Instance.Add("BodyOfWater.Setup", base.gameObject, this.extents, GameScenePartitioner.Instance.liquidChangedLayer, new Action<object>(this.ReevaluateBody));
 		}
-		this.extents = new Extents((int)num - 1, (int)num3 - 1, (int)(num2 - num) + 1, (int)(num4 - num3) + 1);
-		this.partitionerEntry = GameScenePartitioner.Instance.Add("BodyOfWater.Setup", base.gameObject, this.extents, GameScenePartitioner.Instance.liquidChangedLayer, new Action<object>(this.ReevaluateBody));
 	}
 
 	public void ToggleFishingTask()
@@ -73,19 +75,18 @@ public class BodyOfWater : KMonoBehaviour
 
 	public void AddObjectToBody(GameObject go)
 	{
-		if (go == null)
+		if (!(go == null))
 		{
-			return;
-		}
-		if (!this.containedObjects.Contains(go))
-		{
-			this.containedObjects.Add(go);
-			if (go.GetComponent<Catchable>())
+			if (!this.containedObjects.Contains(go))
 			{
-				go.GetComponent<Catchable>().body = this;
+				this.containedObjects.Add(go);
+				if (go.GetComponent<Catchable>())
+				{
+					go.GetComponent<Catchable>().body = this;
+				}
 			}
+			WaterBodyProbe.Instance.RefreshBody(this);
 		}
-		WaterBodyProbe.Instance.RefreshBody(this);
 	}
 
 	public void RemoveObjectFromBody(GameObject go)
@@ -138,7 +139,7 @@ public class BodyOfWater : KMonoBehaviour
 
 	public Extents extents;
 
-	public bool DebugDraw;
+	public bool DebugDraw = false;
 
 	private GameScenePartitionerEntry partitionerEntry;
 

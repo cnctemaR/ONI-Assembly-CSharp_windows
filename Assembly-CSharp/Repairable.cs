@@ -21,7 +21,7 @@ public class Repairable : Workable
 	{
 		base.OnPrefabInit();
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTableWithCorners);
-		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		this.showProgressBar = false;
 		this.faceTargetWhenWorking = true;
 	}
@@ -37,7 +37,7 @@ public class Repairable : Workable
 
 	private void OnProxyStorageChanged(object data)
 	{
-		this.Trigger(-1697596308, data);
+		base.Trigger(-1697596308, data);
 	}
 
 	protected override void OnLoadLevel()
@@ -63,14 +63,20 @@ public class Repairable : Workable
 			if (currentState == this.smi.sm.forbidden)
 			{
 				UserMenu userMenu = this.userMenu;
-				string text = BUILDINGS.REPAIRABLE.ENABLE_AUTOREPAIR.TOOLTIP;
-				userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_repair", BUILDINGS.REPAIRABLE.ENABLE_AUTOREPAIR.NAME, new global::System.Action(this.AllowRepair), global::Action.NumActions, null, null, null, text, true), 1f);
+				string text = "action_repair";
+				string text2 = BUILDINGS.REPAIRABLE.ENABLE_AUTOREPAIR.NAME;
+				global::System.Action action = new global::System.Action(this.AllowRepair);
+				string text3 = BUILDINGS.REPAIRABLE.ENABLE_AUTOREPAIR.TOOLTIP;
+				userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
 			}
 			else
 			{
 				UserMenu userMenu2 = this.userMenu;
+				string text3 = "action_repair";
+				string text2 = BUILDINGS.REPAIRABLE.DISABLE_AUTOREPAIR.NAME;
+				global::System.Action action = new global::System.Action(this.CancelRepair);
 				string text = BUILDINGS.REPAIRABLE.DISABLE_AUTOREPAIR.TOOLTIP;
-				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_repair", BUILDINGS.REPAIRABLE.DISABLE_AUTOREPAIR.NAME, new global::System.Action(this.CancelRepair), global::Action.NumActions, null, null, null, text, true), 1f);
+				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
 			}
 		}
 	}
@@ -158,8 +164,10 @@ public class Repairable : Workable
 			GameObject gameObject = new GameObject();
 			gameObject.SetActive(false);
 			gameObject.name = "RepairableStorageProxy";
-			gameObject.transform.parent = this.transform;
+			gameObject.transform.parent = base.transform;
 			gameObject.transform.localPosition = Vector3.zero;
+			KPrefabID kprefabID = gameObject.AddComponent<KPrefabID>();
+			kprefabID.PrefabTag = new Tag("RepairableStorageProxy");
 			this.storageProxy = gameObject.AddComponent<Storage>();
 			gameObject.SetActive(true);
 		}
@@ -213,7 +221,7 @@ public class Repairable : Workable
 	[Serialize]
 	private byte[] storedData;
 
-	private float timeSpentRepairing;
+	private float timeSpentRepairing = 0f;
 
 	private static Operational.Flag repairedFlag = new Operational.Flag("repaired", Operational.Flag.Type.Functional);
 
@@ -268,24 +276,6 @@ public class Repairable : Workable
 
 	public class States : GameStateMachine<Repairable.States, Repairable.SMInstance, Repairable>
 	{
-		// Note: this type is marked as 'beforefieldinit'.
-		static States()
-		{
-			Chore.Precondition precondition = default(Chore.Precondition);
-			precondition.id = "IsNotBeingAttacked";
-			precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
-			{
-				bool flag = true;
-				if (data != null)
-				{
-					Breakable breakable = (Breakable)data;
-					flag = breakable.worker == null;
-				}
-				return flag;
-			};
-			Repairable.States.IsNotBeingAttacked = precondition;
-		}
-
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.repaired;
@@ -321,7 +311,7 @@ public class Repairable : Workable
 
 		private Chore CreateRepairChore(Repairable.SMInstance smi)
 		{
-			WorkChore<Repairable> workChore = new WorkChore<Repairable>(Db.Get().ChoreTypes.Repair, smi.master, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, int.MaxValue);
+			WorkChore<Repairable> workChore = new WorkChore<Repairable>(Db.Get().ChoreTypes.Repair, smi.master, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue);
 			workChore.AddPrecondition(Repairable.States.IsNotBeingAttacked, smi.master.GetComponent<Breakable>());
 			return workChore;
 		}
@@ -336,7 +326,20 @@ public class Repairable : Workable
 
 		public GameStateMachine<Repairable.States, Repairable.SMInstance, Repairable, object>.State repaired;
 
-		public static Chore.Precondition IsNotBeingAttacked;
+		public static Chore.Precondition IsNotBeingAttacked = new Chore.Precondition
+		{
+			id = "IsNotBeingAttacked",
+			fn = delegate(ref Chore.Precondition.Context context, object data)
+			{
+				bool flag = true;
+				if (data != null)
+				{
+					Breakable breakable = (Breakable)data;
+					flag = breakable.worker == null;
+				}
+				return flag;
+			}
+		};
 
 		public class AllowedState : GameStateMachine<Repairable.States, Repairable.SMInstance, Repairable, object>.State
 		{

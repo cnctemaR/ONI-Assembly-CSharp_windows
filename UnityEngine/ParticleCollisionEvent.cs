@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[RequiredByNativeCode(Optional = true)]
 	public struct ParticleCollisionEvent
 	{
 		public Vector3 intersection
@@ -29,12 +31,12 @@ namespace UnityEngine
 			}
 		}
 
-		[Obsolete("collider property is deprecated. Use colliderComponent instead, which supports Collider and Collider2D components.")]
-		public Collider collider
+		[Obsolete("collider property is deprecated. Use colliderComponent instead, which supports Collider and Collider2D components.", true)]
+		public Component collider
 		{
 			get
 			{
-				return ParticleCollisionEvent.InstanceIDToCollider(this.m_ColliderInstanceID);
+				return null;
 			}
 		}
 
@@ -46,11 +48,7 @@ namespace UnityEngine
 			}
 		}
 
-		[WrapperlessIcall]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern Collider InstanceIDToCollider(int instanceID);
-
-		[WrapperlessIcall]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern Component InstanceIDToColliderComponent(int instanceID);
 

@@ -30,4 +30,6 @@ public struct UtilityNetworkGridNode : IEquatable<UtilityNetworkGridNode>
 	public UtilityConnections connections;
 
 	public int networkIdx;
+
+	public const int InvalidNetworkIdx = -1;
 }

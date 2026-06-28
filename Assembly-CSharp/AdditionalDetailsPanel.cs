@@ -66,7 +66,6 @@ public class AdditionalDetailsPanel : TargetScreen
 		if (component != null)
 		{
 			num2 = component.Mass;
-			float units = component.Units;
 			num3 = component.Temperature;
 			element = component.Element;
 			b = component.DiseaseIdx;

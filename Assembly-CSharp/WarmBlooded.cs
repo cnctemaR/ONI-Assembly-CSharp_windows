@@ -41,10 +41,6 @@ public class WarmBlooded : StateMachineComponent<WarmBlooded.StatesInstance>
 		this.temperature.value = t;
 	}
 
-	public const float TRANSITION_DELAY_HOT = 3f;
-
-	public const float TRANSITION_DELAY_COLD = 3f;
-
 	public float temperatureDeltaJoules;
 
 	public GameObject frozenPrefab;
@@ -58,6 +54,10 @@ public class WarmBlooded : StateMachineComponent<WarmBlooded.StatesInstance>
 
 	private PrimaryElement primaryElement;
 
+	public const float TRANSITION_DELAY_HOT = 3f;
+
+	public const float TRANSITION_DELAY_COLD = 3f;
+
 	private TemperatureMonitor.Instance monitorInstance;
 
 	public class StatesInstance : GameStateMachine<WarmBlooded.States, WarmBlooded.StatesInstance, WarmBlooded, object>.GameInstance
@@ -65,11 +65,9 @@ public class WarmBlooded : StateMachineComponent<WarmBlooded.StatesInstance>
 		public StatesInstance(WarmBlooded smi)
 			: base(smi)
 		{
-			this.baseTemperatureModification = new AttributeModifier("TemperatureDelta", 0f, DUPLICANTS.MODIFIERS.BASEDUPLICANT.NAME, false, false);
-			this.bodyRegulator = new AttributeModifier("TemperatureDelta", 0f, DUPLICANTS.MODIFIERS.HOMEOSTASIS.NAME, false, false);
-			this.bodyRegulator.UIOnly = true;
-			this.baseTemperatureModification.UIOnly = true;
-			this.burningCalories = new AttributeModifier("CaloriesDelta", 0f, DUPLICANTS.MODIFIERS.BURNINGCALORIES.NAME, false, false);
+			this.baseTemperatureModification = new AttributeModifier("TemperatureDelta", 0f, DUPLICANTS.MODIFIERS.BASEDUPLICANT.NAME, false, true, false);
+			this.bodyRegulator = new AttributeModifier("TemperatureDelta", 0f, DUPLICANTS.MODIFIERS.HOMEOSTASIS.NAME, false, true, false);
+			this.burningCalories = new AttributeModifier("CaloriesDelta", 0f, DUPLICANTS.MODIFIERS.BURNINGCALORIES.NAME, false, false, false);
 			base.master.GetAttributes().Add(DUPLICANTS.MODIFIERS.HOMEOSTASIS.NAME, this.bodyRegulator);
 			base.master.GetAttributes().Add(DUPLICANTS.MODIFIERS.BURNINGCALORIES.NAME, this.burningCalories);
 			base.master.GetAttributes().Add(DUPLICANTS.MODIFIERS.BASEDUPLICANT.NAME, this.baseTemperatureModification);
@@ -121,7 +119,7 @@ public class WarmBlooded : StateMachineComponent<WarmBlooded.StatesInstance>
 			this.root.EventTransition(GameHashes.Died, this.dead, null).Enter(delegate(WarmBlooded.StatesInstance smi)
 			{
 				PrimaryElement component = smi.master.GetComponent<PrimaryElement>();
-				float num = SimUtil.EnergyFlowToTemperatureDelta(0.08368001f, component.Element.specificHeatCapacity, component.Mass);
+				float num = SimUtil.EnergyFlowToTemperatureDelta(0.083680004f, component.Element.specificHeatCapacity, component.Mass);
 				smi.baseTemperatureModification.SetValue(num);
 				CreatureSimTemperatureTransfer component2 = smi.master.GetComponent<CreatureSimTemperatureTransfer>();
 				component2.NonSimTemperatureModifiers.Add(smi.baseTemperatureModification);
@@ -132,7 +130,7 @@ public class WarmBlooded : StateMachineComponent<WarmBlooded.StatesInstance>
 			this.alive.cold.regulating.Transition(this.alive.normal, (WarmBlooded.StatesInstance smi) => !smi.IsCold()).Update(delegate(WarmBlooded.StatesInstance smi)
 			{
 				PrimaryElement component3 = smi.master.GetComponent<PrimaryElement>();
-				float num2 = SimUtil.EnergyFlowToTemperatureDelta(0.08368001f, component3.Element.specificHeatCapacity, component3.Mass);
+				float num2 = SimUtil.EnergyFlowToTemperatureDelta(0.083680004f, component3.Element.specificHeatCapacity, component3.Mass);
 				float num3 = SimUtil.EnergyFlowToTemperatureDelta(0.5578667f, component3.Element.specificHeatCapacity, component3.Mass);
 				float num4 = 310.15f - smi.BodyTemperature;
 				float num5 = 1f;

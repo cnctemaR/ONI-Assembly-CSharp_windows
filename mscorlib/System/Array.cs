@@ -1299,7 +1299,7 @@ namespace System
 					Array.combsort(keys as double[], index, length, swapper);
 					return;
 				}
-				if (keys is int[])
+				if (!(keys is uint[]) && keys is int[])
 				{
 					Array.combsort(keys as int[], index, length, swapper);
 					return;

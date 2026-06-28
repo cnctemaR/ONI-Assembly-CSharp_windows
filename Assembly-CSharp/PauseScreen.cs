@@ -25,8 +25,6 @@ public class PauseScreen : KModalButtonMenu
 	protected override void OnPrefabInit()
 	{
 		this.keepMenuOpen = true;
-		this.versionText.text = UI.FRONTEND.GAME_VERSION + 236679U;
-		this.versionText.transform.parent.gameObject.SetActive(false);
 		base.OnPrefabInit();
 		if (!GenericGameSettings.instance.demoMode)
 		{
@@ -58,6 +56,8 @@ public class PauseScreen : KModalButtonMenu
 	{
 		base.OnSpawn();
 		this.title.SetText(UI.FRONTEND.PAUSE_SCREEN.TITLE);
+		this.worldSeed.SetText(string.Format(UI.FRONTEND.PAUSE_SCREEN.WORLD_SEED, SaveLoader.Instance.worldDetailSave.globalWorldSeed));
+		this.worldSeed.transform.SetAsLastSibling();
 	}
 
 	private void OnResume()
@@ -85,7 +85,7 @@ public class PauseScreen : KModalButtonMenu
 		if (!string.IsNullOrEmpty(filename) && File.Exists(filename))
 		{
 			base.gameObject.SetActive(false);
-			ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, this.transform.parent.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
+			ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.transform.parent.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
 			confirmDialogScreen.PopupConfirmDialog(string.Format(UI.FRONTEND.SAVESCREEN.OVERWRITEMESSAGE, Path.GetFileNameWithoutExtension(filename)), delegate
 			{
 				this.DoSave(filename);
@@ -109,13 +109,14 @@ public class PauseScreen : KModalButtonMenu
 		{
 			IOException ex2 = ex;
 			IOException e = ex2;
-			ConfirmDialogScreen component = global::Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, this.transform.parent.gameObject, true).GetComponent<ConfirmDialogScreen>();
+			PauseScreen $this = this;
+			ConfirmDialogScreen component = global::Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.transform.parent.gameObject, true).GetComponent<ConfirmDialogScreen>();
 			component.PopupConfirmDialog(string.Format(UI.FRONTEND.SAVESCREEN.IO_ERROR, e.ToString()), delegate
 			{
-				this.Deactivate();
+				$this.Deactivate();
 			}, null, UI.FRONTEND.SAVESCREEN.REPORT_BUG, delegate
 			{
-				KCrashReporter.ReportError(e.Message, e.StackTrace.ToString(), null, null, string.Empty);
+				KCrashReporter.ReportError(e.Message, e.StackTrace.ToString(), null, null, "");
 			}, null, null, null);
 		}
 	}
@@ -123,7 +124,7 @@ public class PauseScreen : KModalButtonMenu
 	private void ConfirmDecision(string text, global::System.Action onConfirm)
 	{
 		base.gameObject.SetActive(false);
-		ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, this.transform.parent.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
+		ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.transform.parent.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
 		confirmDialogScreen.PopupConfirmDialog(text, onConfirm, new global::System.Action(this.OnCancelPopup), null, null, null, null, null);
 	}
 
@@ -195,13 +196,13 @@ public class PauseScreen : KModalButtonMenu
 	private LoadScreen loadScreenPrefab;
 
 	[SerializeField]
-	private LocText versionText;
-
-	[SerializeField]
 	private KButton closeButton;
 
 	[SerializeField]
 	private LocText title;
+
+	[SerializeField]
+	private LocText worldSeed;
 
 	private float originalTimeScale;
 

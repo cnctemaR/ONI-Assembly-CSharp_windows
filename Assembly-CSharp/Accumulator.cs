@@ -76,11 +76,11 @@ public class Accumulator
 		});
 	}
 
-	private float timeWindow;
+	private float timeWindow = 0f;
 
-	private float avgRate;
+	private float avgRate = 0f;
 
-	private float accumulated;
+	private float accumulated = 0f;
 
 	private SchedulerHandle handle;
 

@@ -6,9 +6,16 @@ public class SteamTurbineConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
+		string text = "SteamTurbine";
+		int num = 3;
+		int num2 = 1;
+		string text2 = "steamturbine_kanim";
+		float num3 = 25f;
+		int num4 = 30;
+		float num5 = 60f;
 		string[] array = new string[] { "Plastic", "Metal" };
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("SteamTurbine", 3, 1, "steamturbine_kanim", 25f, 30, 60f, new float[]
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, num5, new float[]
 		{
 			BUILDINGS.CONSTRUCTION_MASS_KG.TIER1[0],
 			BUILDINGS.CONSTRUCTION_MASS_KG.TIER5[0]

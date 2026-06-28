@@ -1,0 +1,36 @@
+﻿using System;
+
+namespace System.Data
+{
+	public enum SqlDbType
+	{
+		BigInt,
+		Binary,
+		Bit,
+		Char,
+		DateTime,
+		Decimal,
+		Float,
+		Image,
+		Int,
+		Money,
+		NChar,
+		NText,
+		NVarChar,
+		Real,
+		UniqueIdentifier,
+		SmallDateTime,
+		SmallInt,
+		SmallMoney,
+		Text,
+		Timestamp,
+		TinyInt,
+		VarBinary,
+		VarChar,
+		Variant,
+		Xml = 25,
+		Udt = 29,
+		Date = 31,
+		Time
+	}
+}

@@ -1,0 +1,82 @@
+﻿using System;
+using UnityEngine;
+
+public class ScreenPrefabs : KMonoBehaviour
+{
+	public static ScreenPrefabs Instance { get; private set; }
+
+	protected override void OnPrefabInit()
+	{
+		ScreenPrefabs.Instance = this;
+	}
+
+	public void ConfirmDoAction(string message, global::System.Action action, Transform parent)
+	{
+		ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, parent.gameObject);
+		confirmDialogScreen.PopupConfirmDialog(message, action, delegate
+		{
+		}, null, null);
+	}
+
+	public ControlsScreen ControlsScreen;
+
+	public Hud HudScreen;
+
+	public StatusScreen StatusScreen;
+
+	public HoverTextScreen HoverTextScreen;
+
+	public OverlayScreen OverlayScreen;
+
+	public TileScreen TileScreen;
+
+	public SpeedControlScreen SpeedControlScreen;
+
+	public OverviewScreen ManagementScreen;
+
+	public ManagementMenu ManagementMenu;
+
+	public ContextMenuScreen ContextMenuScreen;
+
+	public ToolTipScreen ToolTipScreen;
+
+	public DebugPaintElementScreen DebugPaintElementScreen;
+
+	public UserMenuScreen UserMenuScreen;
+
+	public KButtonMenu OwnerScreen;
+
+	public EnergyInfoScreen EnergyInfoScreen;
+
+	public KButtonMenu ButtonGrid;
+
+	public NameDisplayScreen NameDisplayScreen;
+
+	public ConfirmDialogScreen ConfirmDialogScreen;
+
+	public FileNameDialog FileNameDialog;
+
+	public TagFilterScreen TagFilterScreen;
+
+	public ResearchScreen ResearchScreen;
+
+	public MessageDialogFrame MessageDialogFrame;
+
+	public ResourceCategoryScreen ResourceCategoryScreen;
+
+	public GameObject GameOverScreen;
+
+	public GameObject StatusItemIndicatorScreen;
+
+	public GameObject CollapsableContentPanel;
+
+	public GameObject DescriptionLabel;
+
+	public LoadScreen LoadScreen;
+
+	public InspectSaveScreen InspectSaveScreen;
+
+	public OptionsMenuScreen OptionsScreen;
+
+	public WorldGenScreen WorldGenScreen;
+}

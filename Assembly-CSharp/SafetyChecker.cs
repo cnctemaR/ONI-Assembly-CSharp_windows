@@ -1,0 +1,61 @@
+﻿using System;
+using System.Runtime.InteropServices;
+
+public class SafetyChecker
+{
+	public SafetyChecker(SafetyChecker.Condition[] conditions)
+	{
+		this.conditions = conditions;
+	}
+
+	public SafetyChecker.Condition[] conditions { get; private set; }
+
+	public int GetSafetyConditions(int cell, KMonoBehaviour cmp)
+	{
+		SafetyChecker.Context context = new SafetyChecker.Context(cmp);
+		int num = 0;
+		foreach (SafetyChecker.Condition condition in this.conditions)
+		{
+			if (condition.callback(cell, context))
+			{
+				num |= condition.mask;
+			}
+		}
+		return num;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Size = 1)]
+	public struct Condition
+	{
+		public Condition(string id, int condition_mask, SafetyChecker.Condition.Callback condition_callback)
+		{
+			this.callback = condition_callback;
+			this.mask = condition_mask;
+		}
+
+		public SafetyChecker.Condition.Callback callback { get; private set; }
+
+		public int mask { get; private set; }
+
+		public delegate bool Callback(int cell, SafetyChecker.Context context);
+	}
+
+	public struct Context
+	{
+		public Context(KMonoBehaviour cmp)
+		{
+			this.cell = Grid.PosToCell(cmp);
+			this.navigator = cmp.GetComponent<Navigator>();
+			this.oxygenBreather = cmp.GetComponent<OxygenBreather>();
+			this.minionBrain = cmp.GetComponent<MinionBrain>();
+		}
+
+		public Navigator navigator;
+
+		public OxygenBreather oxygenBreather;
+
+		public MinionBrain minionBrain;
+
+		public int cell;
+	}
+}

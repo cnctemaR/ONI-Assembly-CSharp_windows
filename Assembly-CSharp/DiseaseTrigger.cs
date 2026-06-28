@@ -1,0 +1,142 @@
+﻿using System;
+using System.Collections.Generic;
+using Database;
+using Klei.AI;
+using STRINGS;
+using UnityEngine;
+
+public class DiseaseTrigger : KMonoBehaviour, IGameObjectEffectDescriptor
+{
+	public void AddTrigger(GameHashes src_event, string[] disease_ids)
+	{
+		this.triggers.Add(new DiseaseTrigger.TriggerInfo
+		{
+			srcEvent = src_event,
+			diseaseIDs = disease_ids
+		});
+	}
+
+	protected override void OnSpawn()
+	{
+		for (int i = 0; i < this.triggers.Count; i++)
+		{
+			DiseaseTrigger.TriggerInfo trigger = this.triggers[i];
+			this.Subscribe((int)trigger.srcEvent, delegate(object data)
+			{
+				GameObject gameObject = (GameObject)data;
+				global::Database.Diseases diseases = Db.Get().Diseases;
+				int num = global::UnityEngine.Random.Range(0, trigger.diseaseIDs.Length);
+				Disease disease = null;
+				for (int j = 0; j < diseases.Count; j++)
+				{
+					if (diseases[j].Id == trigger.diseaseIDs[num])
+					{
+						disease = diseases[j];
+						break;
+					}
+				}
+				if (disease != null)
+				{
+					string infectionSourceInfo = this.GetInfectionSourceInfo();
+					DiseaseExposureInfo diseaseExposureInfo = new DiseaseExposureInfo(disease.Id, 1f, infectionSourceInfo);
+					bool flag = true;
+					Edible component = this.gameObject.GetComponent<Edible>();
+					if (component != null)
+					{
+						Traits component2 = gameObject.GetComponent<Traits>();
+						if (!component2.HasTrait("IronGut"))
+						{
+							flag = false;
+						}
+						diseaseExposureInfo.exposureCount = component.rationsConsumed;
+					}
+					if (flag)
+					{
+						gameObject.Trigger(-283306403, diseaseExposureInfo);
+					}
+				}
+				else
+				{
+					Output.LogErrorWithObj(this.gameObject, new object[] { "couldn't find disease with id [" + trigger.diseaseIDs[num] + "]" });
+				}
+			});
+		}
+	}
+
+	private string GetInfectionSourceInfo()
+	{
+		string properName = base.GetComponent<KSelectable>().GetProperName();
+		return string.Format(DUPLICANTS.DISEASES.INFECTIONSOURCES.FOOD, properName);
+	}
+
+	public int DescriptionOrder { get; set; }
+
+	public List<Descriptor> GetRequirementDescriptions(GameObject go)
+	{
+		return null;
+	}
+
+	public List<string> GetEffectDescriptions(GameObject go)
+	{
+		Dictionary<GameHashes, HashSet<string>> dictionary = new Dictionary<GameHashes, HashSet<string>>();
+		foreach (DiseaseTrigger.TriggerInfo triggerInfo in this.triggers)
+		{
+			HashSet<string> hashSet = null;
+			if (!dictionary.TryGetValue(triggerInfo.srcEvent, out hashSet))
+			{
+				hashSet = new HashSet<string>();
+				dictionary[triggerInfo.srcEvent] = hashSet;
+			}
+			foreach (string text in triggerInfo.diseaseIDs)
+			{
+				hashSet.Add(text);
+			}
+		}
+		List<string> list = new List<string>();
+		List<string> list2 = new List<string>();
+		global::Database.Diseases diseases = Db.Get().Diseases;
+		string properName = base.GetComponent<KSelectable>().GetProperName();
+		foreach (KeyValuePair<GameHashes, HashSet<string>> keyValuePair in dictionary)
+		{
+			HashSet<string> value = keyValuePair.Value;
+			list2.Clear();
+			foreach (string text2 in value)
+			{
+				foreach (Disease disease in diseases)
+				{
+					if (text2 == disease.Id)
+					{
+						list2.Add(disease.Name);
+						break;
+					}
+				}
+			}
+			string text3 = string.Join(", ", list2.ToArray());
+			string rootString = this.GetRootString(keyValuePair.Key);
+			string text4 = rootString.Replace("{ItemName}", properName);
+			text4 = text4.Replace("{Diseases}", text3);
+			list.Add(text4);
+		}
+		return list;
+	}
+
+	private string GetRootString(GameHashes trigger_hash)
+	{
+		if (trigger_hash != GameHashes.EatCompleteEdible)
+		{
+			throw new ArgumentOutOfRangeException();
+		}
+		return DUPLICANTS.DISEASES.DISEASE_TRIGGER_EAT;
+	}
+
+	public List<DiseaseTrigger.TriggerInfo> triggers = new List<DiseaseTrigger.TriggerInfo>();
+
+	[Serializable]
+	public struct TriggerInfo
+	{
+		[HashedEnum]
+		public GameHashes srcEvent;
+
+		public string[] diseaseIDs;
+	}
+}

@@ -1,0 +1,30 @@
+﻿using System;
+using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
+
+namespace System.Runtime.Remoting
+{
+	[ComVisible(true)]
+	[Serializable]
+	public class ServerException : SystemException
+	{
+		public ServerException()
+		{
+		}
+
+		public ServerException(string message)
+			: base(message)
+		{
+		}
+
+		public ServerException(string message, Exception InnerException)
+			: base(message, InnerException)
+		{
+		}
+
+		internal ServerException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
+		{
+		}
+	}
+}

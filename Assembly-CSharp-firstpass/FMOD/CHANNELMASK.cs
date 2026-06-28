@@ -1,0 +1,27 @@
+﻿using System;
+
+namespace FMOD
+{
+	[Flags]
+	public enum CHANNELMASK : uint
+	{
+		FRONT_LEFT = 1U,
+		FRONT_RIGHT = 2U,
+		FRONT_CENTER = 4U,
+		LOW_FREQUENCY = 8U,
+		SURROUND_LEFT = 16U,
+		SURROUND_RIGHT = 32U,
+		BACK_LEFT = 64U,
+		BACK_RIGHT = 128U,
+		BACK_CENTER = 256U,
+		MONO = 1U,
+		STEREO = 3U,
+		LRC = 7U,
+		QUAD = 51U,
+		SURROUND = 55U,
+		_5POINT1 = 63U,
+		_5POINT1_REARS = 207U,
+		_7POINT0 = 247U,
+		_7POINT1 = 255U
+	}
+}

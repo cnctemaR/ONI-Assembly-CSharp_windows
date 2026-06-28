@@ -1,0 +1,12 @@
+﻿using System;
+
+public class GeneratedEquipment
+{
+	public static void LoadGeneratedEquipment()
+	{
+		EquipmentConfigManager.Instance.RegisterEquipment(new AtmoSuitConfig());
+		EquipmentConfigManager.Instance.RegisterEquipment(new AquaSuitConfig());
+		EquipmentConfigManager.Instance.RegisterEquipment(new BoringMachineConfig());
+		EquipmentConfigManager.Instance.RegisterEquipment(new QuarryingGunConfig());
+	}
+}

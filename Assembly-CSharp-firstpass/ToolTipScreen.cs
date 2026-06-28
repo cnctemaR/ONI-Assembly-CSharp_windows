@@ -1,0 +1,297 @@
+﻿using System;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class ToolTipScreen : KScreen
+{
+	public static ToolTipScreen Instance { get; private set; }
+
+	protected override void OnActivate()
+	{
+		ToolTipScreen.Instance = this;
+		this.toolTipWidget = Util.KInstantiate(this.ToolTipPrefab, base.gameObject, null);
+		this.toolTipWidget.transform.SetParent(base.gameObject.transform, false);
+		Util.Reset(this.toolTipWidget.transform);
+		this.label = this.toolTipWidget.GetComponentInChildren<TextMeshProUGUI>();
+		this.toolTipWidget.SetActive(false);
+	}
+
+	protected override void OnCleanUp()
+	{
+		ToolTipScreen.Instance = null;
+	}
+
+	public void SetToolTip(ToolTip tool_tip)
+	{
+		this.tooltipSetting = tool_tip;
+		this.multiTooltipContainer = this.toolTipWidget.transform.FindChild("MultitooltipContainer").gameObject;
+		this.ConfigureTooltip();
+	}
+
+	private void ConfigureTooltip()
+	{
+		if (this.tooltipSetting == null)
+		{
+			this.prevTooltip = null;
+		}
+		if (this.tooltipSetting != null && this.dirtyHoverTooltip != null && this.tooltipSetting == this.dirtyHoverTooltip)
+		{
+			this.ClearToolTip(this.dirtyHoverTooltip);
+		}
+		if (this.tooltipSetting != null)
+		{
+			string toolTip = this.tooltipSetting.GetToolTip();
+			if (this.tooltipSetting.multiStringCount == 0)
+			{
+				this.label.gameObject.SetActive(true);
+				this.label.text = toolTip;
+				this.clearMultiStringTooltip();
+			}
+			else
+			{
+				this.label.gameObject.SetActive(false);
+				this.label.text = string.Empty;
+				if (this.prevTooltip != this.tooltipSetting || !this.multiTooltipContainer.activeInHierarchy)
+				{
+					this.prepareMultiStringTooltip(this.tooltipSetting);
+					this.prevTooltip = this.tooltipSetting;
+				}
+			}
+			bool flag = true;
+			if (this.label.text == string.Empty && this.multiTooltipContainer.transform.childCount == 0)
+			{
+				flag = false;
+			}
+			this.toolTipWidget.SetActive(flag);
+			if (flag)
+			{
+				RectTransform rectTransform;
+				if (this.tooltipSetting.overrideParentObject == null)
+				{
+					rectTransform = this.tooltipSetting.GetComponent<RectTransform>();
+				}
+				else
+				{
+					rectTransform = this.tooltipSetting.overrideParentObject;
+				}
+				RectTransform component = this.toolTipWidget.GetComponent<RectTransform>();
+				component.transform.SetParent(this.anchorRoot.transform);
+				if (!this.tooltipSetting.worldSpace)
+				{
+					this.anchorRoot.anchoredPosition = rectTransform.transform.position;
+				}
+				else
+				{
+					this.anchorRoot.anchoredPosition = base.WorldToScreen(rectTransform.transform.position) + new Vector3((float)(Screen.width / 2), (float)(Screen.height / 2), 0f);
+				}
+				this.anchorRoot.anchoredPosition -= Vector2.up * (rectTransform.rectTransform().pivot.y * rectTransform.rectTransform().sizeDelta.y);
+				this.anchorRoot.anchoredPosition -= Vector2.right * (rectTransform.rectTransform().pivot.x * rectTransform.rectTransform().sizeDelta.x);
+				this.anchorRoot.anchoredPosition += Vector2.right * (rectTransform.sizeDelta.x * this.tooltipSetting.parentPositionAnchor.x);
+				this.anchorRoot.anchoredPosition += Vector2.up * (rectTransform.sizeDelta.y * this.tooltipSetting.parentPositionAnchor.y);
+				float scaleFactor = this.transform.parent.GetComponent<CanvasScaler>().scaleFactor;
+				this.anchorRoot.anchoredPosition = new Vector2(this.anchorRoot.anchoredPosition.x / scaleFactor, this.anchorRoot.anchoredPosition.y / scaleFactor);
+				component.pivot = this.tooltipSetting.tooltipPivot;
+				RectTransform rectTransform2 = component;
+				Vector2 vector = new Vector2(0f, 0f);
+				component.anchorMax = vector;
+				rectTransform2.anchorMin = vector;
+				component.anchoredPosition = this.tooltipSetting.tooltipPositionOffset * scaleFactor;
+				if (!this.tooltipSetting.worldSpace)
+				{
+					Rect rect = ((RectTransform)this.transform).rect;
+					Vector2 vector2 = new Vector2(this.transform.position.x, this.transform.position.y) + this.ScreenEdgePadding;
+					Vector2 vector3 = new Vector2(this.transform.position.x, this.transform.position.y) + rect.width * Vector2.right + rect.height * Vector2.up - this.ScreenEdgePadding * Mathf.Max(1f, scaleFactor);
+					vector3.x *= scaleFactor;
+					vector3.y *= scaleFactor;
+					Vector2 vector4;
+					vector4.x = component.position.x - component.pivot.x * (component.sizeDelta.x * scaleFactor);
+					vector4.y = component.position.y - component.pivot.y * (component.sizeDelta.y * scaleFactor);
+					Vector2 vector5;
+					vector5.x = component.position.x + (1f - component.pivot.x) * (component.sizeDelta.x * scaleFactor);
+					vector5.y = component.position.y + (1f - component.pivot.y) * (component.sizeDelta.y * scaleFactor);
+					Vector2 vector6 = Vector2.zero;
+					if (vector4.x < vector2.x)
+					{
+						vector6.x = vector2.x - vector4.x;
+					}
+					if (vector5.x > vector3.x)
+					{
+						vector6.x = vector3.x - vector5.x;
+					}
+					if (vector4.y < vector2.y)
+					{
+						vector6.y = vector2.y - vector4.y;
+					}
+					if (vector5.y > vector3.y)
+					{
+						vector6.y = vector3.y - vector5.y;
+					}
+					vector6 /= scaleFactor;
+					component.anchoredPosition += vector6;
+				}
+			}
+		}
+		if (((RectTransform)this.transform).GetSiblingIndex() != this.transform.parent.childCount - 1)
+		{
+			((RectTransform)this.transform).SetAsLastSibling();
+		}
+	}
+
+	private void prepareMultiStringTooltip(ToolTip setting)
+	{
+		int multiStringCount = this.tooltipSetting.multiStringCount;
+		this.clearMultiStringTooltip();
+		for (int i = 0; i < multiStringCount; i++)
+		{
+			GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(this.labelPrefab);
+			gameObject.transform.SetParent(this.multiTooltipContainer.transform);
+		}
+		for (int j = 0; j < this.tooltipSetting.multiStringCount; j++)
+		{
+			Transform child = this.multiTooltipContainer.transform.GetChild(j);
+			LayoutElement component = child.GetComponent<LayoutElement>();
+			TextMeshProUGUI component2 = child.GetComponent<TextMeshProUGUI>();
+			component2.text = this.tooltipSetting.GetMultiString(j);
+			SetTextStyleSetting component3 = child.GetComponent<SetTextStyleSetting>();
+			component3.SetStyle((TextStyleSetting)this.tooltipSetting.GetStyleSetting(j));
+			if (setting.SizingSetting == ToolTip.ToolTipSizeSetting.MaxWidthWrapContent)
+			{
+				LayoutElement layoutElement = component;
+				float num = setting.WrapWidth;
+				component.preferredWidth = num;
+				layoutElement.minWidth = num;
+				component.rectTransform().sizeDelta = new Vector2(setting.WrapWidth, 1000f);
+				LayoutElement layoutElement2 = component;
+				num = component2.preferredHeight;
+				component.preferredHeight = num;
+				layoutElement2.minHeight = num;
+				LayoutElement layoutElement3 = component;
+				num = component2.preferredHeight;
+				component.preferredHeight = num;
+				layoutElement3.minHeight = num;
+				component.rectTransform().sizeDelta = new Vector2(setting.WrapWidth, component.minHeight);
+				this.multiTooltipContainer.GetComponent<KChildFitter>().fitWidth = false;
+				this.multiTooltipContainer.GetComponent<LayoutElement>().minWidth = setting.WrapWidth;
+			}
+			else if (setting.SizingSetting == ToolTip.ToolTipSizeSetting.DynamicWidthNoWrap)
+			{
+				this.multiTooltipContainer.GetComponent<KChildFitter>().fitWidth = true;
+				Vector2 preferredValues = component2.GetPreferredValues();
+				LayoutElement layoutElement4 = component;
+				float num = preferredValues.x;
+				component.preferredWidth = num;
+				layoutElement4.minWidth = num;
+				LayoutElement layoutElement5 = component;
+				num = preferredValues.y;
+				component.preferredHeight = num;
+				layoutElement5.minHeight = num;
+				this.multiTooltipContainer.GetComponent<KChildFitter>().FitSize();
+				this.multiTooltipContainer.rectTransform().sizeDelta = new Vector2(component.minWidth, component.minHeight);
+				this.multiTooltipContainer.transform.parent.rectTransform().sizeDelta = this.multiTooltipContainer.rectTransform().sizeDelta;
+			}
+		}
+		this.tooltipIncubating = true;
+	}
+
+	private void Update()
+	{
+		if (this.multiTooltipContainer == null || this.anchorRoot == null)
+		{
+			return;
+		}
+		if (this.tooltipIncubating)
+		{
+			this.tooltipIncubating = false;
+			Image componentInChildren = this.anchorRoot.GetComponentInChildren<Image>();
+			if (componentInChildren != null)
+			{
+				this.anchorRoot.GetComponentInChildren<Image>(true).enabled = false;
+			}
+			this.multiTooltipContainer.transform.localScale = Vector3.zero;
+			for (int i = 0; i < this.multiTooltipContainer.transform.childCount; i++)
+			{
+				if (this.multiTooltipContainer.transform.GetChild(i).transform.localScale != Vector3.one)
+				{
+					this.multiTooltipContainer.transform.GetChild(i).transform.localScale = Vector3.one;
+				}
+				LayoutElement component = this.multiTooltipContainer.transform.GetChild(i).GetComponent<LayoutElement>();
+				TextMeshProUGUI component2 = component.GetComponent<TextMeshProUGUI>();
+				if (component.minHeight != component2.preferredHeight)
+				{
+					component.minHeight = component2.preferredHeight;
+				}
+			}
+		}
+		else if (this.multiTooltipContainer.transform.localScale != Vector3.one)
+		{
+			Image componentInChildren2 = this.anchorRoot.GetComponentInChildren<Image>();
+			if (componentInChildren2 != null)
+			{
+				this.anchorRoot.GetComponentInChildren<Image>(true).enabled = true;
+			}
+			this.multiTooltipContainer.transform.localScale = Vector3.one;
+		}
+	}
+
+	private void clearMultiStringTooltip()
+	{
+		for (int i = this.multiTooltipContainer.transform.childCount - 1; i >= 0; i--)
+		{
+			global::UnityEngine.Object.DestroyImmediate(this.multiTooltipContainer.transform.GetChild(i).gameObject);
+		}
+	}
+
+	public void ClearToolTip(ToolTip tt)
+	{
+		if (tt == this.tooltipSetting)
+		{
+			this.tooltipSetting = null;
+			if (this.toolTipWidget != null)
+			{
+				this.clearMultiStringTooltip();
+				this.toolTipWidget.SetActive(false);
+			}
+		}
+	}
+
+	public void MarkTooltipDirty(ToolTip tt)
+	{
+		if (tt == this.tooltipSetting)
+		{
+			this.dirtyHoverTooltip = tt;
+		}
+	}
+
+	public void MakeDirtyTooltipClean(ToolTip tt)
+	{
+		if (tt == this.dirtyHoverTooltip)
+		{
+			this.dirtyHoverTooltip = null;
+		}
+	}
+
+	public TextStyleSetting defaultTextStyleSetting;
+
+	public GameObject ToolTipPrefab;
+
+	public RectTransform anchorRoot;
+
+	private GameObject toolTipWidget;
+
+	private TextMeshProUGUI label;
+
+	private ToolTip prevTooltip;
+
+	private ToolTip tooltipSetting;
+
+	public GameObject labelPrefab;
+
+	private GameObject multiTooltipContainer;
+
+	private Vector2 ScreenEdgePadding = new Vector2(8f, 8f);
+
+	private ToolTip dirtyHoverTooltip;
+
+	private bool tooltipIncubating = true;
+}

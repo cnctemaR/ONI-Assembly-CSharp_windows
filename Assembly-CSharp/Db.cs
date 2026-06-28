@@ -1,0 +1,142 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Database;
+using Klei.AI;
+using STRINGS;
+using UnityEngine;
+
+public class Db : EntityModifierSet
+{
+	public static Db Get()
+	{
+		if (Db._Instance == null)
+		{
+			Db._Instance = Resources.Load<Db>("Db");
+			Db._Instance.Initialize();
+		}
+		return Db._Instance;
+	}
+
+	public override void Initialize()
+	{
+		base.Initialize();
+		this.Diseases = new global::Database.Diseases();
+		this.Urges = new Urges();
+		this.OwnableSlots = new OwnableSlots();
+		this.StateMachineCategories = new StateMachineCategories();
+		this.Personalities = new Personalities(this.personalitiesFile);
+		this.Faces = new Faces();
+		this.Expressions = new Expressions(this.Root);
+		this.Thoughts = new Thoughts(this.Root);
+		this.Deaths = new Deaths(this.Root);
+		this.StatusItemCategories = new StatusItemCategories(this.Root);
+		this.Techs = new Techs(this.Root);
+		this.Techs.Load(this.researchTreeFile);
+		this.Accessories = new Accessories(this.Root);
+		this.AccessorySlots = new AccessorySlots(this.Root, null, null);
+		this.ScheduleBlockTypes = new ScheduleBlockTypes(this.Root);
+		this.MiscStatusItems = new MiscStatusItems(this.Root);
+		this.CreatureStatusItems = new CreatureStatusItems(this.Root);
+		this.BuildingStatusItems = new BuildingStatusItems(this.Root);
+		this.ChoreTypes = new ChoreTypes(this.Root);
+		this.mentalBreakEffect = this.effects.Get("MentalBreak");
+		this.interruptedSleep = new Effect("InterruptedSleep", DUPLICANTS.MODIFIERS.INTERRUPTEDSLEEP.NAME, DUPLICANTS.MODIFIERS.INTERRUPTEDSLEEP.TOOLTIP, 0f, true, true, true);
+		this.interruptedSleep.Add(new AttributeModifier("StressDelta", 0.033333335f, DUPLICANTS.MODIFIERS.INTERRUPTEDSLEEP.NAME, false));
+		this.interruptedSleep.Add(new AttributeModifier("Athletics", -2f, DUPLICANTS.MODIFIERS.INTERRUPTEDSLEEP.NAME, false));
+		this.effects.Add(this.interruptedSleep);
+		this.CollectResources(this.Root, this.ResourceTable);
+	}
+
+	private void CollectResources(Resource resource, List<Resource> resource_table)
+	{
+		if (resource.Guid != null)
+		{
+			resource_table.Add(resource);
+		}
+		ResourceSet resourceSet = resource as ResourceSet;
+		if (resourceSet != null)
+		{
+			for (int i = 0; i < resourceSet.Count; i++)
+			{
+				this.CollectResources(resourceSet.GetResource(i), resource_table);
+			}
+		}
+	}
+
+	public ResourceType GetResource<ResourceType>(ResourceGuid guid) where ResourceType : Resource
+	{
+		Resource resource = this.ResourceTable.FirstOrDefault<Resource>((Resource s) => s.Guid == guid);
+		if (resource == null)
+		{
+			Debug.LogWarning("Could not find resource: " + guid);
+			return (ResourceType)((object)null);
+		}
+		ResourceType resourceType = (ResourceType)((object)resource);
+		if (resourceType == null)
+		{
+			Debug.LogError(string.Concat(new string[]
+			{
+				"Resource type mismatch for resource: ",
+				resource.Id,
+				"\nExpecting Type: ",
+				typeof(ResourceType).Name,
+				"\nGot Type: ",
+				resource.GetType().Name
+			}));
+			return (ResourceType)((object)null);
+		}
+		return resourceType;
+	}
+
+	private static Db _Instance;
+
+	public TextAsset personalitiesFile;
+
+	public TextAsset researchTreeFile;
+
+	public Effect mentalBreakEffect;
+
+	public Effect interruptedSleep;
+
+	public global::Database.Diseases Diseases;
+
+	public Urges Urges;
+
+	public OwnableSlots OwnableSlots;
+
+	public StateMachineCategories StateMachineCategories;
+
+	public Personalities Personalities;
+
+	public Faces Faces;
+
+	public Expressions Expressions;
+
+	public Thoughts Thoughts;
+
+	public BuildingStatusItems BuildingStatusItems;
+
+	public MiscStatusItems MiscStatusItems;
+
+	public CreatureStatusItems CreatureStatusItems;
+
+	public StatusItemCategories StatusItemCategories;
+
+	public Deaths Deaths;
+
+	public ChoreTypes ChoreTypes;
+
+	public Techs Techs;
+
+	public AccessorySlots AccessorySlots;
+
+	public Accessories Accessories;
+
+	public ScheduleBlockTypes ScheduleBlockTypes;
+
+	[Serializable]
+	public class SlotInfo : Resource
+	{
+	}
+}

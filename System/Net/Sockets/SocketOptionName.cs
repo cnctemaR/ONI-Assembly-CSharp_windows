@@ -1,0 +1,51 @@
+﻿using System;
+
+namespace System.Net.Sockets
+{
+	public enum SocketOptionName
+	{
+		Debug = 1,
+		AcceptConnection,
+		ReuseAddress = 4,
+		KeepAlive = 8,
+		DontRoute = 16,
+		Broadcast = 32,
+		UseLoopback = 64,
+		Linger = 128,
+		OutOfBandInline = 256,
+		DontLinger = -129,
+		ExclusiveAddressUse = -5,
+		SendBuffer = 4097,
+		ReceiveBuffer,
+		SendLowWater,
+		ReceiveLowWater,
+		SendTimeout,
+		ReceiveTimeout,
+		Error,
+		Type,
+		MaxConnections = 2147483647,
+		IPOptions = 1,
+		HeaderIncluded,
+		TypeOfService,
+		IpTimeToLive,
+		MulticastInterface = 9,
+		MulticastTimeToLive,
+		MulticastLoopback,
+		AddMembership,
+		DropMembership,
+		DontFragment,
+		AddSourceMembership,
+		DropSourceMembership,
+		BlockSource,
+		UnblockSource,
+		PacketInformation,
+		NoDelay = 1,
+		BsdUrgent,
+		Expedited = 2,
+		NoChecksum = 1,
+		ChecksumCoverage = 20,
+		HopLimit,
+		UpdateAcceptContext = 28683,
+		UpdateConnectContext = 28688
+	}
+}

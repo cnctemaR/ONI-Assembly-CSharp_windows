@@ -1,0 +1,62 @@
+﻿using System;
+using System.Runtime.CompilerServices;
+
+namespace UnityEngine
+{
+	public class AnchoredJoint2D : Joint2D
+	{
+		public Vector2 anchor
+		{
+			get
+			{
+				Vector2 vector;
+				this.INTERNAL_get_anchor(out vector);
+				return vector;
+			}
+			set
+			{
+				this.INTERNAL_set_anchor(ref value);
+			}
+		}
+
+		[WrapperlessIcall]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void INTERNAL_get_anchor(out Vector2 value);
+
+		[WrapperlessIcall]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void INTERNAL_set_anchor(ref Vector2 value);
+
+		public Vector2 connectedAnchor
+		{
+			get
+			{
+				Vector2 vector;
+				this.INTERNAL_get_connectedAnchor(out vector);
+				return vector;
+			}
+			set
+			{
+				this.INTERNAL_set_connectedAnchor(ref value);
+			}
+		}
+
+		[WrapperlessIcall]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void INTERNAL_get_connectedAnchor(out Vector2 value);
+
+		[WrapperlessIcall]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void INTERNAL_set_connectedAnchor(ref Vector2 value);
+
+		public extern bool autoConfigureConnectedAnchor
+		{
+			[WrapperlessIcall]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[WrapperlessIcall]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+	}
+}

@@ -1,0 +1,86 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using LibNoiseDotNet.Graphics.Tools.Noise;
+using UnityEngine;
+
+namespace Klei.Noise
+{
+	public class NoiseTreeFiles : YamlIO<NoiseTreeFiles>
+	{
+		public NoiseTreeFiles()
+		{
+			this.trees = new Dictionary<string, Tree>();
+			this.tree_files = new List<string>();
+		}
+
+		public static string GetPath()
+		{
+			return Path.Combine(Application.streamingAssetsPath, "worldgen/" + WorldGenSettings.NOISE_FILE + ".yaml");
+		}
+
+		public static string GetTreeFilePath(string filename)
+		{
+			return Path.Combine(Application.streamingAssetsPath, "worldgen/noise/" + filename + ".yaml");
+		}
+
+		public List<string> tree_files { get; set; }
+
+		public void LoadAllTrees()
+		{
+			for (int i = 0; i < this.tree_files.Count; i++)
+			{
+				Tree tree = YamlIO<Tree>.LoadFile(NoiseTreeFiles.GetTreeFilePath(this.tree_files[i]));
+				if (tree != null)
+				{
+					this.trees.Add(this.tree_files[i], tree);
+				}
+			}
+		}
+
+		public float GetZoomForTree(string name)
+		{
+			if (!this.trees.ContainsKey(name))
+			{
+				return 1f;
+			}
+			return this.trees[name].settings.zoom;
+		}
+
+		public bool ShouldNormaliseTree(string name)
+		{
+			return this.trees.ContainsKey(name) && this.trees[name].settings.normalise;
+		}
+
+		public string[] GetTreeNames()
+		{
+			string[] array = new string[this.trees.Keys.Count];
+			int num = 0;
+			foreach (KeyValuePair<string, Tree> keyValuePair in this.trees)
+			{
+				array[num++] = keyValuePair.Key;
+			}
+			return array;
+		}
+
+		public Tree GetTree(string name)
+		{
+			if (!this.trees.ContainsKey(name))
+			{
+				return null;
+			}
+			return this.trees[name];
+		}
+
+		public IModule3D BuildTree(string name)
+		{
+			if (!this.trees.ContainsKey(name))
+			{
+				return null;
+			}
+			return this.trees[name].BuildFinalModule();
+		}
+
+		private Dictionary<string, Tree> trees;
+	}
+}

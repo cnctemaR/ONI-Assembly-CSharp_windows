@@ -1,0 +1,39 @@
+﻿using System;
+using System.Security.Principal;
+
+namespace System.Security.AccessControl
+{
+	public sealed class FileSystemAuditRule : AuditRule
+	{
+		public FileSystemAuditRule(IdentityReference identity, FileSystemRights fileSystemRights, AuditFlags flags)
+			: this(identity, fileSystemRights, InheritanceFlags.None, PropagationFlags.None, flags)
+		{
+		}
+
+		public FileSystemAuditRule(string identity, FileSystemRights fileSystemRights, AuditFlags flags)
+			: this(new SecurityIdentifier(identity), fileSystemRights, flags)
+		{
+		}
+
+		public FileSystemAuditRule(IdentityReference identity, FileSystemRights fileSystemRights, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AuditFlags flags)
+			: base(identity, 0, false, inheritanceFlags, propagationFlags, flags)
+		{
+			this.rights = fileSystemRights;
+		}
+
+		public FileSystemAuditRule(string identity, FileSystemRights fileSystemRights, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AuditFlags flags)
+			: this(new SecurityIdentifier(identity), fileSystemRights, inheritanceFlags, propagationFlags, flags)
+		{
+		}
+
+		public FileSystemRights FileSystemRights
+		{
+			get
+			{
+				return this.rights;
+			}
+		}
+
+		private FileSystemRights rights;
+	}
+}

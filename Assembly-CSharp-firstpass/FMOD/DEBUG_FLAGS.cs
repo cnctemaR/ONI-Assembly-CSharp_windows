@@ -1,0 +1,20 @@
+﻿using System;
+
+namespace FMOD
+{
+	[Flags]
+	public enum DEBUG_FLAGS : uint
+	{
+		NONE = 0U,
+		ERROR = 1U,
+		WARNING = 2U,
+		LOG = 4U,
+		TYPE_MEMORY = 256U,
+		TYPE_FILE = 512U,
+		TYPE_CODEC = 1024U,
+		TYPE_TRACE = 2048U,
+		DISPLAY_TIMESTAMPS = 65536U,
+		DISPLAY_LINENUMBERS = 131072U,
+		DISPLAY_THREAD = 262144U
+	}
+}

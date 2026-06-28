@@ -1,0 +1,38 @@
+﻿using System;
+
+public enum Folder
+{
+	Minions,
+	Creatures,
+	Buildings,
+	FX,
+	UI,
+	Misc,
+	Entities,
+	Loot,
+	Cameras,
+	Placers,
+	Portraits,
+	MoveTarget,
+	SubstanceGeo,
+	NavGrids,
+	Regions,
+	DetailPools,
+	BuildingPreviews,
+	BuildingUnderConstructions,
+	BuildingCompletes,
+	BuildingTemplates,
+	EquipmentTemplates,
+	LiquidSources,
+	LiquidSourcePrefabs,
+	LiquidChunkPrefabs,
+	LiquidChunks,
+	GasSources,
+	GasSourcePrefabs,
+	GasChunks,
+	GasChunkPrefabs,
+	EntityPrefabs,
+	StatusItems,
+	Lerpers,
+	NumFolders
+}

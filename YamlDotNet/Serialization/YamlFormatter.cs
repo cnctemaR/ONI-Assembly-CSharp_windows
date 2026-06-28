@@ -1,0 +1,45 @@
+﻿using System;
+using System.Globalization;
+
+namespace YamlDotNet.Serialization
+{
+	internal static class YamlFormatter
+	{
+		public static string FormatNumber(object number)
+		{
+			return Convert.ToString(number, YamlFormatter.numberFormat);
+		}
+
+		public static string FormatBoolean(object boolean)
+		{
+			if (!boolean.Equals(true))
+			{
+				return "false";
+			}
+			return "true";
+		}
+
+		public static string FormatDateTime(object dateTime)
+		{
+			return ((DateTime)dateTime).ToString("o", CultureInfo.InvariantCulture);
+		}
+
+		public static string FormatTimeSpan(object timeSpan)
+		{
+			return ((TimeSpan)timeSpan).ToString();
+		}
+
+		private static readonly NumberFormatInfo numberFormat = new NumberFormatInfo
+		{
+			CurrencyDecimalSeparator = ".",
+			CurrencyGroupSeparator = "_",
+			CurrencyGroupSizes = new int[] { 3 },
+			CurrencySymbol = string.Empty,
+			CurrencyDecimalDigits = 99,
+			NumberDecimalSeparator = ".",
+			NumberGroupSeparator = "_",
+			NumberGroupSizes = new int[] { 3 },
+			NumberDecimalDigits = 99
+		};
+	}
+}

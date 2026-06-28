@@ -1,0 +1,49 @@
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Text;
+
+namespace System.Net.Mail
+{
+	public class MailAddressCollection : Collection<MailAddress>
+	{
+		public void Add(string addresses)
+		{
+			foreach (string text in addresses.Split(new char[] { ',' }))
+			{
+				this.Add(new MailAddress(text));
+			}
+		}
+
+		protected override void InsertItem(int index, MailAddress item)
+		{
+			if (item == null)
+			{
+				throw new ArgumentNullException();
+			}
+			base.InsertItem(index, item);
+		}
+
+		protected override void SetItem(int index, MailAddress item)
+		{
+			if (item == null)
+			{
+				throw new ArgumentNullException();
+			}
+			base.SetItem(index, item);
+		}
+
+		public override string ToString()
+		{
+			StringBuilder stringBuilder = new StringBuilder();
+			for (int i = 0; i < this.Count; i++)
+			{
+				if (i > 0)
+				{
+					stringBuilder.Append(", ");
+				}
+				stringBuilder.Append(this[i].ToString());
+			}
+			return stringBuilder.ToString();
+		}
+	}
+}

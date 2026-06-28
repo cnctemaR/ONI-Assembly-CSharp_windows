@@ -1,0 +1,155 @@
+﻿using System;
+using KSerialization;
+using UnityEngine;
+
+[SerializationConfig(MemberSerialization.OptIn)]
+public class SimCellOccupier : KMonoBehaviour, ISaveLoadableJson
+{
+	public bool IsVisuallySolid
+	{
+		get
+		{
+			return this.doReplaceElement;
+		}
+	}
+
+	protected override void OnPrefabInit()
+	{
+		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.Normal, null);
+	}
+
+	protected override void OnSpawn()
+	{
+		this.callbackHandle = Game.Instance.callbackManager.Add(new global::System.Action(this.OnModifyComplete), "SimCellOccupier");
+		int num = this.building.Def.PlacementOffsets.Length;
+		float mass_per_cell = this.primaryElement.Mass / (float)num;
+		this.building.RunOnArea(delegate(int offset_cell)
+		{
+			if (this.doReplaceElement)
+			{
+				SimMessages.ReplaceElement(offset_cell, this.primaryElement.ElementID, CellEventLogger.Instance.SimCellOccupierOnSpawn, mass_per_cell, this.primaryElement.Temperature, this.callbackHandle.index);
+				SimMessages.SetStrength(offset_cell, 0, 1f);
+				Game.Instance.RemoveSolidChangedFilter(offset_cell);
+			}
+			else
+			{
+				this.ForceSetGameCellData(offset_cell);
+				Game.Instance.AddSolidChangedFilter(offset_cell);
+			}
+			Sim.Cell.Properties simCellProperties = this.GetSimCellProperties();
+			SimMessages.SetCellProperties(offset_cell, (byte)simCellProperties);
+			Grid.RenderedByWorld[offset_cell] = false;
+			Grid.SuitRequired[offset_cell] = false;
+			Game.Instance.GetComponent<EntombedItemVisualizer>().ForceClear(offset_cell);
+		});
+	}
+
+	protected override void OnCleanUp()
+	{
+		if (this.callDestroy)
+		{
+			this.DestroySelf(null, false);
+		}
+	}
+
+	private Sim.Cell.Properties GetSimCellProperties()
+	{
+		Sim.Cell.Properties properties = Sim.Cell.Properties.SolidImpermeable;
+		if (this.setGasImpermeable)
+		{
+			properties |= Sim.Cell.Properties.GasImpermeable;
+		}
+		if (this.setLiquidImpermeable)
+		{
+			properties |= Sim.Cell.Properties.LiquidImpermeable;
+		}
+		return properties;
+	}
+
+	public void DestroySelf(global::System.Action onComplete, bool is_replacement)
+	{
+		this.callDestroy = false;
+		for (int i = 0; i < this.building.PlacementCells.Length; i++)
+		{
+			int num = this.building.PlacementCells[i];
+			Sim.Cell.Properties simCellProperties = this.GetSimCellProperties();
+			SimMessages.ClearCellProperties(num, (byte)simCellProperties);
+			if (this.doReplaceElement)
+			{
+				if (Grid.Element[num].id == this.primaryElement.ElementID)
+				{
+					if (onComplete != null)
+					{
+						HandleVector<global::System.Action>.Handle handle = Game.Instance.callbackManager.Add(onComplete, "SimCellOccupier");
+						SimMessages.ReplaceElement(num, SimHashes.Vacuum, CellEventLogger.Instance.SimCellOccupierDestroySelf, 0f, -1f, handle.index);
+					}
+					else
+					{
+						SimMessages.ReplaceElement(num, SimHashes.Vacuum, CellEventLogger.Instance.SimCellOccupierDestroySelf, 0f, -1f, -1);
+					}
+				}
+				SimMessages.SetStrength(num, 1, 1f);
+			}
+			else
+			{
+				Grid.SetSolid(num, false, CellEventLogger.Instance.SimCellOccupierDestroy);
+				onComplete.Signal();
+				World.Instance.OnSolidChanged(num);
+				GameScenePartitioner.Instance.TriggerEvent(num, GameScenePartitioner.Instance.solidChangedMask.mask, null);
+			}
+			if (is_replacement)
+			{
+				Game.Instance.AddSolidChangedFilter(num);
+			}
+			else
+			{
+				Game.Instance.RemoveSolidChangedFilter(num);
+			}
+		}
+	}
+
+	public bool IsReady()
+	{
+		return this.isReady;
+	}
+
+	private void OnModifyComplete()
+	{
+		this.isReady = true;
+	}
+
+	private void ForceSetGameCellData(int cell)
+	{
+		Grid.PreviousSolid[cell] = Grid.Solid[cell];
+		bool flag = !Grid.ForceField[cell];
+		Grid.SetSolid(cell, flag, CellEventLogger.Instance.SimCellOccupierForceSolid);
+		Pathfinding.Instance.AddDirtyNavGridCell(cell);
+		GameScenePartitioner.Instance.TriggerEvent(cell, GameScenePartitioner.Instance.solidChangedMask.mask, null);
+		Grid.Damage[cell] = 0f;
+		Grid.SuitRequired[cell] = false;
+	}
+
+	[MyCmpAdd]
+	private StructuralDamage structuralDamage;
+
+	[MyCmpReq]
+	private Building building;
+
+	[MyCmpReq]
+	private PrimaryElement primaryElement;
+
+	private bool isReady;
+
+	private HandleVector<global::System.Action>.Handle callbackHandle;
+
+	[SerializeField]
+	public bool doReplaceElement = true;
+
+	[SerializeField]
+	public bool setGasImpermeable;
+
+	[SerializeField]
+	public bool setLiquidImpermeable;
+
+	private bool callDestroy = true;
+}

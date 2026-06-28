@@ -1,0 +1,22 @@
+﻿using System;
+
+public class CharacterOverlay : KMonoBehaviour
+{
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		this.Register();
+	}
+
+	public void Register()
+	{
+		if (this.registered)
+		{
+			return;
+		}
+		this.registered = true;
+		NameDisplayScreen.Instance.AddNewEntry(base.gameObject);
+	}
+
+	private bool registered;
+}

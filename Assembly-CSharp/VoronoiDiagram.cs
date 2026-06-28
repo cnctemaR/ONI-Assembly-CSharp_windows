@@ -1,0 +1,158 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
+using Delaunay;
+using Delaunay.Geo;
+using Klei;
+using KSerialization;
+using UnityEngine;
+
+public class VoronoiDiagram
+{
+	public VoronoiDiagram()
+	{
+		this.diagram = null;
+	}
+
+	public VoronoiDiagram(Rect bounds, HashSet<VoronoiDiagram.Site> sites)
+	{
+		this.bounds = bounds;
+		this.ids = new List<uint>();
+		this.points = new List<Vector2>();
+		this.weights = new List<float>();
+		HashSet<VoronoiDiagram.Site>.Enumerator enumerator = sites.GetEnumerator();
+		int num = 0;
+		while (enumerator.MoveNext())
+		{
+			VoronoiDiagram.Site site = enumerator.Current;
+			this.ids.Add(site.id);
+			this.points.Add(site.position);
+			this.weights.Add(site.weight);
+			num++;
+		}
+		this.MakeVD();
+	}
+
+	public Voronoi diagram { get; private set; }
+
+	private void MakeVD()
+	{
+		this.diagram = new Voronoi(this.points, this.ids, this.weights, this.bounds);
+	}
+
+	public int GetIdxForNode(global::Klei.Node node)
+	{
+		for (int i = 0; i < this.points.Count; i++)
+		{
+			if (this.ids[i] == (uint)node.node.Id)
+			{
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	public List<uint> GetNodeIdsForTopEdgeCells()
+	{
+		List<uint> list = new List<uint>();
+		for (int i = 0; i < this.points.Count; i++)
+		{
+			if (this.IsTopEdgeCell(i))
+			{
+				list.Add(this.ids[i]);
+			}
+		}
+		return list;
+	}
+
+	public bool IsTopEdgeCell(int cell)
+	{
+		if (cell < 0 || cell >= this.points.Count)
+		{
+			return false;
+		}
+		List<Vector2> list = this.diagram.Region(this.points[cell]);
+		if (list.Count == 0)
+		{
+			return false;
+		}
+		Vector2 vector = list[0];
+		for (int i = 1; i < list.Count; i++)
+		{
+			Vector2 vector2 = list[i];
+			if (vector.y == vector2.y && vector2.y == this.bounds.height)
+			{
+				return true;
+			}
+			vector = vector2;
+		}
+		return vector.y == list[0].y && list[0].y == this.bounds.height;
+	}
+
+	public void OnDrawGizmos()
+	{
+	}
+
+	private List<Vector2> points;
+
+	private List<float> weights;
+
+	private Rect bounds;
+
+	private List<uint> ids = new List<uint>();
+
+	public int siteIndex;
+
+	[EnumFlags]
+	public static VoronoiDiagram.DebugFlags drawOptions;
+
+	[SerializationConfig(MemberSerialization.OptIn)]
+	public class Site
+	{
+		public Site()
+		{
+			this.neighbours = new HashSet<KeyValuePair<uint, int>>();
+		}
+
+		public Site(uint id, Vector2 pos, float weight = 1f)
+		{
+			this.id = id;
+			this.position = pos;
+			this.weight = weight;
+		}
+
+		[OnDeserializing]
+		internal void OnDeserializingMethod()
+		{
+			this.neighbours = new HashSet<KeyValuePair<uint, int>>();
+		}
+
+		[Serialize]
+		public uint id;
+
+		[Serialize]
+		public float weight;
+
+		[Serialize]
+		public Vector2 position;
+
+		[Serialize]
+		public Polygon poly;
+
+		[Serialize]
+		public HashSet<KeyValuePair<uint, int>> neighbours;
+	}
+
+	[Flags]
+	public enum DebugFlags
+	{
+		Points = 1,
+		Edges = 2,
+		DelaunayTriangulation = 4,
+		SpanningTree = 8,
+		Border = 16,
+		Site = 32,
+		TopEdge = 64,
+		BottomEdge = 128
+	}
+}

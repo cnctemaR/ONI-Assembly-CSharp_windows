@@ -1,0 +1,52 @@
+﻿using System;
+using UnityEngine;
+
+public class RangedAttackable : AttackableBase
+{
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+	}
+
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		base.preferUnreservedCell = true;
+		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
+		CellChangeMonitor.Instance.Add(this, new Action<int, int>(this.OnMovedCell), false);
+	}
+
+	protected override void OnCleanUp()
+	{
+		base.OnCleanUp();
+		CellChangeMonitor.Instance.Remove(this, new Action<int, int>(this.OnMovedCell), false);
+	}
+
+	private void OnMovedCell(int oldCell, int newCell)
+	{
+	}
+
+	public new int GetCell()
+	{
+		return Grid.PosToCell(this);
+	}
+
+	public new bool ShouldPreferUnreservedCell()
+	{
+		return true;
+	}
+
+	public new bool ShouldPreferPrimaryCell()
+	{
+		return false;
+	}
+
+	private void OnDrawGizmosSelected()
+	{
+		Gizmos.color = new Color(0f, 0.5f, 0.5f, 0.15f);
+		foreach (CellOffset cellOffset in this.GetOffsets())
+		{
+			Gizmos.DrawCube(new Vector3(0.5f, 0.5f, 0f) + Grid.CellToPos(Grid.OffsetCell(Grid.PosToCell(base.gameObject), cellOffset)), Vector3.one);
+		}
+	}
+}

@@ -1,0 +1,45 @@
+﻿using System;
+using UnityEngine;
+
+public class TargetScreen : KScreen
+{
+	public void SetTarget(GameObject target)
+	{
+		if (this.selectedTarget != target)
+		{
+			if (this.selectedTarget != null)
+			{
+				this.OnDeselectTarget(this.selectedTarget);
+			}
+			this.selectedTarget = target;
+			if (this.selectedTarget != null)
+			{
+				this.OnSelectTarget(this.selectedTarget);
+			}
+		}
+	}
+
+	protected override void OnDeactivate()
+	{
+		base.OnDeactivate();
+		this.SetTarget(null);
+	}
+
+	public virtual void OnSelectTarget(GameObject target)
+	{
+		target.Subscribe(1502190696, new EventSystem.EventHandler(this.OnTargetDestroyed));
+	}
+
+	public virtual void OnDeselectTarget(GameObject target)
+	{
+		target.Unsubscribe(1502190696, new EventSystem.EventHandler(this.OnTargetDestroyed));
+	}
+
+	private void OnTargetDestroyed(object data)
+	{
+		DetailsScreen.Instance.Show(false);
+		this.SetTarget(null);
+	}
+
+	protected GameObject selectedTarget;
+}

@@ -1,0 +1,38 @@
+﻿using System;
+
+public enum SimViewMode
+{
+	None,
+	TemperatureMap = -872593752,
+	TemperatureMapOld = 1583680319,
+	DangerMap = -328708039,
+	TriplePointMap = 450629706,
+	PressureMap = -1918293641,
+	MassMap = 920947528,
+	TileType = 867624424,
+	StateMap = 194043435,
+	SolidLiquidMap = -607487851,
+	PowerMap = 1028949111,
+	PipeMap = 329505102,
+	GasVentMap = -1986173170,
+	LiquidVentMap = 978235147,
+	ChunkState = -241898332,
+	Flow = -1084960178,
+	StateChange = -729741663,
+	GameGrid = -262945672,
+	OxygenMap = 517435132,
+	SuitRequiredMap = -1247406096,
+	SimCheckErrorMap = 808759237,
+	Regions = -1088602241,
+	ThermalConductivity = -938791660,
+	Rooms = -1563646600,
+	Light = -266073674,
+	PathProber = -940323225,
+	MinionGroupProber = 574162731,
+	Reachability = -1194209097,
+	LiquidSource = -822796105,
+	Decor = 347378277,
+	Priorities = 1529952898,
+	Reserved = -779379096,
+	Ignore = -1588157518
+}

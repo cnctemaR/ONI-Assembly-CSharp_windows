@@ -1,0 +1,178 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+
+public class FetchManagerUpdater
+{
+	public static void UpdatePickups(PathProber path_prober, List<Pickupable> pickupables, Worker worker)
+	{
+		if (pickupables.Count > FetchManagerUpdater.Pickups.Length)
+		{
+			FetchManagerUpdater.Pickups = new FetchManagerUpdater.Pickup[pickupables.Count];
+		}
+		FetchManagerUpdater.PickupCount = 0;
+		Navigator component = worker.GetComponent<Navigator>();
+		pickupables.RemoveAll((Pickupable x) => x == null);
+		for (int i = 0; i < pickupables.Count; i++)
+		{
+			Pickupable pickupable = pickupables[i];
+			if (pickupable.CouldBePickedUp(component.gameObject))
+			{
+				int navigationCost = pickupable.GetNavigationCost(component);
+				if (navigationCost != PathProber.InvalidCost)
+				{
+					FetchManagerUpdater.Pickup pickup = default(FetchManagerUpdater.Pickup);
+					pickup.Pickupable = pickupable;
+					pickup.PrefabID = pickupable.KPrefabID;
+					pickup.PathCost = (ushort)navigationCost;
+					pickup.masterPriority = 0;
+					if (pickupable.storage != null)
+					{
+						Prioritizable component2 = pickupable.storage.GetComponent<Prioritizable>();
+						if (component2 != null)
+						{
+							pickup.masterPriority = component2.GetMasterPriority();
+						}
+					}
+					FetchManagerUpdater.Pickups[FetchManagerUpdater.PickupCount++] = pickup;
+				}
+			}
+		}
+		Array.Sort<FetchManagerUpdater.Pickup>(FetchManagerUpdater.Pickups, 0, FetchManagerUpdater.PickupCount, FetchManagerUpdater.Comparer);
+		int num = FetchManagerUpdater.PickupCount;
+		int num2 = 0;
+		for (int j = 1; j < FetchManagerUpdater.PickupCount; j++)
+		{
+			if (FetchManagerUpdater.IsBetter(ref FetchManagerUpdater.Pickups[num2], ref FetchManagerUpdater.Pickups[j]))
+			{
+				num--;
+			}
+			else
+			{
+				num2++;
+				if (j > num2)
+				{
+					FetchManagerUpdater.Pickups[num2] = FetchManagerUpdater.Pickups[j];
+				}
+			}
+		}
+		FetchManagerUpdater.PickupCount = num;
+	}
+
+	private static bool IsBetter(ref FetchManagerUpdater.Pickup a, ref FetchManagerUpdater.Pickup b)
+	{
+		bool flag = a.PathCost <= b.PathCost;
+		bool flag2 = a.PrefabID.HasSameTags(b.PrefabID);
+		bool flag3 = a.masterPriority == b.masterPriority;
+		return flag && flag2 && flag3;
+	}
+
+	public static bool IsFetchablePickup(KPrefabID pickup_id, Storage source, float pickup_unreserved_amount, float pickup_min_unit, float maximum_requested, Tag[] tags, Tag[] required_tags, Storage destination)
+	{
+		if (pickup_id == null)
+		{
+			return false;
+		}
+		if (pickup_min_unit > maximum_requested)
+		{
+			return false;
+		}
+		if (required_tags != null)
+		{
+			foreach (Tag tag in required_tags)
+			{
+				if (!pickup_id.HasTag(tag))
+				{
+					return false;
+				}
+			}
+		}
+		if (source != null && destination.allowItemRemoval)
+		{
+			int num = 10;
+			if (destination.prioritizable != null)
+			{
+				num = destination.prioritizable.GetMasterPriority();
+			}
+			int num2 = 10;
+			if (source.prioritizable != null)
+			{
+				num2 = source.prioritizable.GetMasterPriority();
+			}
+			if (num <= num2)
+			{
+				return false;
+			}
+		}
+		return pickup_id.HasAnyTags(tags) && pickup_unreserved_amount > 0f;
+	}
+
+	public static PathFinderFlags FindFetchTarget(Worker worker, Storage destination, List<Pickupable> pickupables, Tag[] tags, Tag[] required_tags, float required_amount, ref Pickupable workable)
+	{
+		workable = null;
+		int num = int.MaxValue;
+		PathFinderFlags pathFinderFlags = PathFinderFlags.None;
+		for (int i = 0; i < FetchManagerUpdater.PickupCount; i++)
+		{
+			FetchManagerUpdater.Pickup pickup = FetchManagerUpdater.Pickups[i];
+			bool flag = FetchManagerUpdater.IsFetchablePickup(pickup.PrefabID, pickup.Pickupable.storage, pickup.Pickupable.UnreservedAmount, pickup.Pickupable.MinTakeAmount, required_amount, tags, required_tags, destination);
+			if (flag && (int)pickup.PathCost < num)
+			{
+				workable = pickup.Pickupable;
+				num = (int)pickup.PathCost;
+			}
+		}
+		return pathFinderFlags;
+	}
+
+	public static int InvalidIdx = -1;
+
+	public static int InvalidCell = -1;
+
+	private static FetchManagerUpdater.Pickup[] Pickups = new FetchManagerUpdater.Pickup[128];
+
+	private static int PickupCount;
+
+	private static FetchManagerUpdater.PickupComparer Comparer = new FetchManagerUpdater.PickupComparer();
+
+	[DebuggerDisplay("{Pickupable.gameObject.name}")]
+	private struct Pickup
+	{
+		public Pickupable Pickupable;
+
+		public KPrefabID PrefabID;
+
+		public ushort PathCost;
+
+		public int masterPriority;
+	}
+
+	private class PickupComparer : IComparer<FetchManagerUpdater.Pickup>
+	{
+		public int Compare(FetchManagerUpdater.Pickup a, FetchManagerUpdater.Pickup b)
+		{
+			int num = a.PrefabID.PrefabTag.CompareTo(b.PrefabID.PrefabTag);
+			if (num != 0)
+			{
+				return num;
+			}
+			if (a.masterPriority < b.masterPriority)
+			{
+				return -1;
+			}
+			if (a.masterPriority > b.masterPriority)
+			{
+				return 1;
+			}
+			if (a.PathCost < b.PathCost)
+			{
+				return -1;
+			}
+			if (a.PathCost > b.PathCost)
+			{
+				return 1;
+			}
+			return 0;
+		}
+	}
+}

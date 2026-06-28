@@ -1,0 +1,38 @@
+﻿using System;
+
+namespace Hjg.Pngcs.Chunks
+{
+	internal class PngChunkSkipped : PngChunk
+	{
+		internal PngChunkSkipped(string id, ImageInfo imgInfo, int clen)
+			: base(id, imgInfo)
+		{
+			base.Length = clen;
+		}
+
+		public sealed override bool AllowsMultiple()
+		{
+			return true;
+		}
+
+		public sealed override ChunkRaw CreateRawChunk()
+		{
+			throw new PngjException("Non supported for a skipped chunk");
+		}
+
+		public sealed override void ParseFromRaw(ChunkRaw c)
+		{
+			throw new PngjException("Non supported for a skipped chunk");
+		}
+
+		public sealed override void CloneDataFromRead(PngChunk other)
+		{
+			throw new PngjException("Non supported for a skipped chunk");
+		}
+
+		public override PngChunk.ChunkOrderingConstraint GetOrderingConstraint()
+		{
+			return PngChunk.ChunkOrderingConstraint.NONE;
+		}
+	}
+}

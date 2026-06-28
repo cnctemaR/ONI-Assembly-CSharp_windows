@@ -1,0 +1,49 @@
+﻿using System;
+
+namespace System.Net
+{
+	public class IPHostEntry
+	{
+		public IPAddress[] AddressList
+		{
+			get
+			{
+				return this.addressList;
+			}
+			set
+			{
+				this.addressList = value;
+			}
+		}
+
+		public string[] Aliases
+		{
+			get
+			{
+				return this.aliases;
+			}
+			set
+			{
+				this.aliases = value;
+			}
+		}
+
+		public string HostName
+		{
+			get
+			{
+				return this.hostName;
+			}
+			set
+			{
+				this.hostName = value;
+			}
+		}
+
+		private IPAddress[] addressList;
+
+		private string[] aliases;
+
+		private string hostName;
+	}
+}

@@ -1,0 +1,188 @@
+﻿using System;
+using KSerialization;
+using UnityEngine;
+
+[SerializationConfig(MemberSerialization.OptIn)]
+public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadableJson, IUtilityItem
+{
+	public UtilityConnections Connections
+	{
+		get
+		{
+			return this._connections;
+		}
+		set
+		{
+			this._connections = value;
+		}
+	}
+
+	public IUtilityNetworkMgr ConnectionManager
+	{
+		get
+		{
+			switch (this.connectionSource)
+			{
+			case KAnimGraphTileVisualizer.ConnectionSource.Gas:
+				return Game.Instance.gasConduitSystem;
+			case KAnimGraphTileVisualizer.ConnectionSource.Liquid:
+				return Game.Instance.liquidConduitSystem;
+			case KAnimGraphTileVisualizer.ConnectionSource.Electrical:
+				return Game.Instance.electricalConduitSystem;
+			default:
+				return null;
+			}
+		}
+	}
+
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		this.connectionManager = this.ConnectionManager;
+		int num = Grid.PosToCell(this.transform.position);
+		this.connectionManager.SetConnections(this.Connections, num, this.isPhysicalBuilding);
+		Building component = base.GetComponent<Building>();
+		TileVisualizer.RefreshCell(num, component.Def.TileLayer);
+	}
+
+	protected override void OnCleanUp()
+	{
+		if (this.connectionManager != null && !this.skipCleanup)
+		{
+			int num = Grid.PosToCell(this.transform.position);
+			this.connectionManager.ClearCell(num, this.isPhysicalBuilding);
+			Building component = base.GetComponent<Building>();
+			TileVisualizer.RefreshCell(num, component.Def.TileLayer);
+			this.Refresh();
+		}
+	}
+
+	[ContextMenu("Refresh")]
+	public void Refresh()
+	{
+		if (this.connectionManager == null)
+		{
+			return;
+		}
+		int num = Grid.PosToCell(this.transform.position);
+		this.Connections = this.connectionManager.GetConnections(num, this.isPhysicalBuilding);
+		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+		if (component != null)
+		{
+			string text = this.connectionManager.GetVisualizerString(num);
+			BuildingUnderConstruction component2 = base.GetComponent<BuildingUnderConstruction>();
+			if (component2 != null && component.HasAnimation(text + "_place"))
+			{
+				text += "_place";
+			}
+			if (text != null && text != string.Empty)
+			{
+				component.Play(text, KAnim.PlayMode.Once, 1f, 0f);
+			}
+		}
+	}
+
+	public int GetNetworkID()
+	{
+		UtilityNetwork network = this.GetNetwork();
+		return (network == null) ? (-1) : network.id;
+	}
+
+	private UtilityNetwork GetNetwork()
+	{
+		int num = Grid.PosToCell(this.transform.position);
+		return this.connectionManager.GetNetworkForOrientation(num, Orientation.None);
+	}
+
+	public UtilityNetwork GetNetworkForOrientation(Orientation o)
+	{
+		int num = Grid.PosToCell(this.transform.position);
+		return this.connectionManager.GetNetworkForOrientation(num, o);
+	}
+
+	public void UpdateConnections(UtilityConnections new_connections)
+	{
+		this._connections = new_connections;
+		int num = Grid.PosToCell(this.transform.position);
+		this.connectionManager.SetConnections(new_connections, num, this.isPhysicalBuilding);
+		this.Trigger(-1041684577, new_connections);
+	}
+
+	public KAnimGraphTileVisualizer GetNeighbour(Orientation o)
+	{
+		KAnimGraphTileVisualizer kanimGraphTileVisualizer = null;
+		Vector2I vector2I;
+		Grid.PosToXY(this.transform.position, out vector2I);
+		int num = -1;
+		switch (o)
+		{
+		case Orientation.Up:
+			if (vector2I.y < Grid.HeightInCells - 1)
+			{
+				num = Grid.XYToCell(vector2I.x, vector2I.y + 1);
+			}
+			break;
+		case Orientation.Right:
+			if (vector2I.x < Grid.WidthInCells - 1)
+			{
+				num = Grid.XYToCell(vector2I.x + 1, vector2I.y);
+			}
+			break;
+		case Orientation.Down:
+			if (vector2I.y > 0)
+			{
+				num = Grid.XYToCell(vector2I.x, vector2I.y - 1);
+			}
+			break;
+		case Orientation.Left:
+			if (vector2I.x > 0)
+			{
+				num = Grid.XYToCell(vector2I.x - 1, vector2I.y);
+			}
+			break;
+		}
+		if (num != -1)
+		{
+			ObjectLayer objectLayer;
+			switch (this.connectionSource)
+			{
+			case KAnimGraphTileVisualizer.ConnectionSource.Gas:
+				objectLayer = ObjectLayer.GasConduitTile;
+				break;
+			case KAnimGraphTileVisualizer.ConnectionSource.Liquid:
+				objectLayer = ObjectLayer.LiquidConduitTile;
+				break;
+			case KAnimGraphTileVisualizer.ConnectionSource.Electrical:
+				objectLayer = ObjectLayer.WireTile;
+				break;
+			default:
+				throw new ArgumentNullException("wtf");
+			}
+			GameObject gameObject = Grid.Objects[num, (int)objectLayer];
+			if (gameObject != null)
+			{
+				kanimGraphTileVisualizer = gameObject.GetComponent<KAnimGraphTileVisualizer>();
+			}
+		}
+		return kanimGraphTileVisualizer;
+	}
+
+	[Serialize]
+	private UtilityConnections _connections;
+
+	public bool isPhysicalBuilding;
+
+	public bool skipCleanup;
+
+	public KAnimGraphTileVisualizer.ConnectionSource connectionSource;
+
+	[NonSerialized]
+	public IUtilityNetworkMgr connectionManager;
+
+	public enum ConnectionSource
+	{
+		Gas,
+		Liquid,
+		Electrical
+	}
+}

@@ -1,0 +1,23 @@
+﻿using System;
+using STRINGS;
+using TUNING;
+using UnityEngine;
+
+public class MeatConfig : IEntityConfig
+{
+	public GameObject CreatePrefab()
+	{
+		GameObject gameObject = EntityTemplates.CreateLooseEntity("Meat", ITEMS.FOOD.MEAT.NAME, ITEMS.FOOD.MEAT.DESC, 1f, "creaturemeat_kanim", "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true);
+		EntityTemplates.ExtendEntityToFood(gameObject, FOOD.FOOD_TYPES.MEAT);
+		EntityTemplates.SetDescriptionOrder(gameObject);
+		return gameObject;
+	}
+
+	public void OnPrefabInit(GameObject inst)
+	{
+	}
+
+	public void OnSpawn(GameObject inst)
+	{
+	}
+}

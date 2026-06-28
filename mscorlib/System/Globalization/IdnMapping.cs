@@ -1,0 +1,316 @@
+﻿using System;
+using System.Text;
+
+namespace System.Globalization
+{
+	public sealed class IdnMapping
+	{
+		public bool AllowUnassigned
+		{
+			get
+			{
+				return this.allow_unassigned;
+			}
+			set
+			{
+				this.allow_unassigned = value;
+			}
+		}
+
+		public bool UseStd3AsciiRules
+		{
+			get
+			{
+				return this.use_std3;
+			}
+			set
+			{
+				this.use_std3 = value;
+			}
+		}
+
+		public override bool Equals(object obj)
+		{
+			IdnMapping idnMapping = obj as IdnMapping;
+			return idnMapping != null && this.allow_unassigned == idnMapping.allow_unassigned && this.use_std3 == idnMapping.use_std3;
+		}
+
+		public override int GetHashCode()
+		{
+			return ((!this.allow_unassigned) ? 0 : 2) + ((!this.use_std3) ? 0 : 1);
+		}
+
+		public string GetAscii(string unicode)
+		{
+			if (unicode == null)
+			{
+				throw new ArgumentNullException("unicode");
+			}
+			return this.GetAscii(unicode, 0, unicode.Length);
+		}
+
+		public string GetAscii(string unicode, int index)
+		{
+			if (unicode == null)
+			{
+				throw new ArgumentNullException("unicode");
+			}
+			return this.GetAscii(unicode, index, unicode.Length - index);
+		}
+
+		public string GetAscii(string unicode, int index, int count)
+		{
+			if (unicode == null)
+			{
+				throw new ArgumentNullException("unicode");
+			}
+			if (index < 0)
+			{
+				throw new ArgumentOutOfRangeException("index must be non-negative value");
+			}
+			if (count < 0 || index + count > unicode.Length)
+			{
+				throw new ArgumentOutOfRangeException("index + count must point inside the argument unicode string");
+			}
+			return this.Convert(unicode, index, count, true);
+		}
+
+		private string Convert(string input, int index, int count, bool toAscii)
+		{
+			string text = input.Substring(index, count);
+			for (int i = 0; i < text.Length; i++)
+			{
+				if (text[i] >= '\u0080')
+				{
+					text = text.ToLower(CultureInfo.InvariantCulture);
+					break;
+				}
+			}
+			string[] array = text.Split(new char[] { '.', '。', '．', '｡' });
+			int num = 0;
+			for (int j = 0; j < array.Length; j++)
+			{
+				if (array[j].Length != 0 || j + 1 != array.Length)
+				{
+					if (toAscii)
+					{
+						array[j] = this.ToAscii(array[j], num);
+					}
+					else
+					{
+						array[j] = this.ToUnicode(array[j], num);
+					}
+				}
+				num += array[j].Length;
+			}
+			return string.Join(".", array);
+		}
+
+		private string ToAscii(string s, int offset)
+		{
+			for (int i = 0; i < s.Length; i++)
+			{
+				if (s[i] < ' ' || s[i] == '\u007f')
+				{
+					throw new ArgumentException(string.Format("Not allowed character was found, at {0}", offset + i));
+				}
+				if (s[i] >= '\u0080')
+				{
+					s = this.NamePrep(s, offset);
+					break;
+				}
+			}
+			if (this.use_std3)
+			{
+				this.VerifyStd3AsciiRules(s, offset);
+			}
+			int j = 0;
+			while (j < s.Length)
+			{
+				if (s[j] >= '\u0080')
+				{
+					if (s.StartsWith("xn--", StringComparison.OrdinalIgnoreCase))
+					{
+						throw new ArgumentException(string.Format("The input string must not start with ACE (xn--), at {0}", offset + j));
+					}
+					s = this.puny.Encode(s, offset);
+					s = "xn--" + s;
+					break;
+				}
+				else
+				{
+					j++;
+				}
+			}
+			this.VerifyLength(s, offset);
+			return s;
+		}
+
+		private void VerifyLength(string s, int offset)
+		{
+			if (s.Length == 0)
+			{
+				throw new ArgumentException(string.Format("A label in the input string resulted in an invalid zero-length string, at {0}", offset));
+			}
+			if (s.Length > 63)
+			{
+				throw new ArgumentException(string.Format("A label in the input string exceeded the length in ASCII representation, at {0}", offset));
+			}
+		}
+
+		private string NamePrep(string s, int offset)
+		{
+			s = s.Normalize(NormalizationForm.FormKC);
+			this.VerifyProhibitedCharacters(s, offset);
+			if (!this.allow_unassigned)
+			{
+				for (int i = 0; i < s.Length; i++)
+				{
+					if (char.GetUnicodeCategory(s, i) == UnicodeCategory.OtherNotAssigned)
+					{
+						throw new ArgumentException(string.Format("Use of unassigned Unicode characer is prohibited in this IdnMapping, at {0}", offset + i));
+					}
+				}
+			}
+			return s;
+		}
+
+		private void VerifyProhibitedCharacters(string s, int offset)
+		{
+			int i = 0;
+			while (i < s.Length)
+			{
+				switch (char.GetUnicodeCategory(s, i))
+				{
+				case UnicodeCategory.SpaceSeparator:
+					if (s[i] >= '\u0080')
+					{
+						goto IL_0164;
+					}
+					break;
+				case UnicodeCategory.LineSeparator:
+				case UnicodeCategory.ParagraphSeparator:
+				case UnicodeCategory.Format:
+					goto IL_0080;
+				case UnicodeCategory.Control:
+					if (s[i] == '\0' || s[i] >= '\u0080')
+					{
+						goto IL_0164;
+					}
+					break;
+				case UnicodeCategory.Surrogate:
+				case UnicodeCategory.PrivateUse:
+					goto IL_0164;
+				default:
+					goto IL_0080;
+				}
+				IL_017C:
+				i++;
+				continue;
+				IL_0080:
+				char c = s[i];
+				if (('\ufddf' > c || c > '\ufdef') && ((c & '\uffff') != '\ufffe' && ('\ufff9' > c || c > '\ufffd')) && ('⿰' > c || c > '⿻') && ('\u202a' > c || c > '\u202e') && ('\u206a' > c || c > '\u206f'))
+				{
+					char c2 = c;
+					if (c2 != '\u0340' && c2 != '\u0341' && c2 != '\u200e' && c2 != '\u200f' && c2 != '\u2028' && c2 != '\u2029')
+					{
+						goto IL_017C;
+					}
+				}
+				IL_0164:
+				throw new ArgumentException(string.Format("Not allowed character was in the input string, at {0}", offset + i));
+			}
+		}
+
+		private void VerifyStd3AsciiRules(string s, int offset)
+		{
+			if (s.Length > 0 && s[0] == '-')
+			{
+				throw new ArgumentException(string.Format("'-' is not allowed at head of a sequence in STD3 mode, found at {0}", offset));
+			}
+			if (s.Length > 0 && s[s.Length - 1] == '-')
+			{
+				throw new ArgumentException(string.Format("'-' is not allowed at tail of a sequence in STD3 mode, found at {0}", offset + s.Length - 1));
+			}
+			for (int i = 0; i < s.Length; i++)
+			{
+				char c = s[i];
+				if (c != '-')
+				{
+					if (c <= '/' || (':' <= c && c <= '@') || ('[' <= c && c <= '`') || ('{' <= c && c <= '\u007f'))
+					{
+						throw new ArgumentException(string.Format("Not allowed character in STD3 mode, found at {0}", offset + i));
+					}
+				}
+			}
+		}
+
+		public string GetUnicode(string ascii)
+		{
+			if (ascii == null)
+			{
+				throw new ArgumentNullException("ascii");
+			}
+			return this.GetUnicode(ascii, 0, ascii.Length);
+		}
+
+		public string GetUnicode(string ascii, int index)
+		{
+			if (ascii == null)
+			{
+				throw new ArgumentNullException("ascii");
+			}
+			return this.GetUnicode(ascii, index, ascii.Length - index);
+		}
+
+		public string GetUnicode(string ascii, int index, int count)
+		{
+			if (ascii == null)
+			{
+				throw new ArgumentNullException("ascii");
+			}
+			if (index < 0)
+			{
+				throw new ArgumentOutOfRangeException("index must be non-negative value");
+			}
+			if (count < 0 || index + count > ascii.Length)
+			{
+				throw new ArgumentOutOfRangeException("index + count must point inside the argument ascii string");
+			}
+			return this.Convert(ascii, index, count, false);
+		}
+
+		private string ToUnicode(string s, int offset)
+		{
+			for (int i = 0; i < s.Length; i++)
+			{
+				if (s[i] >= '\u0080')
+				{
+					s = this.NamePrep(s, offset);
+					break;
+				}
+			}
+			if (!s.StartsWith("xn--", StringComparison.OrdinalIgnoreCase))
+			{
+				return s;
+			}
+			s = s.ToLower(CultureInfo.InvariantCulture);
+			string text = s;
+			s = s.Substring(4);
+			s = this.puny.Decode(s, offset);
+			string text2 = s;
+			s = this.ToAscii(s, offset);
+			if (string.Compare(text, s, StringComparison.OrdinalIgnoreCase) != 0)
+			{
+				throw new ArgumentException(string.Format("ToUnicode() failed at verifying the result, at label part from {0}", offset));
+			}
+			return text2;
+		}
+
+		private bool allow_unassigned;
+
+		private bool use_std3;
+
+		private Punycode puny = new Punycode();
+	}
+}

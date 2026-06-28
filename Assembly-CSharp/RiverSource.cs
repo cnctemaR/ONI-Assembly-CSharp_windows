@@ -1,0 +1,58 @@
+﻿using System;
+using Generated;
+using Klei;
+using UnityEngine;
+
+public class RiverSource : KMonoBehaviour
+{
+	protected override void OnSpawn()
+	{
+		River riverForCell = WorldGen.GetRiverForCell(Grid.PosToCell(this.transform.position));
+		if (riverForCell != null)
+		{
+			this.elementID = riverForCell.element;
+			this.maxMass = riverForCell.maxMass;
+			this.flowRate = riverForCell.flowIn;
+			this.temperature = riverForCell.temperature;
+		}
+		this.elementIdx = SimMessages.GetElementIndex(this.elementID);
+	}
+
+	private void SimUpdate(float dt)
+	{
+		int num = Grid.PosToCell(this.transform.position);
+		Element element = Grid.Element[num];
+		if (element.id == this.elementID || !element.IsSolid)
+		{
+			float mass = Grid.Cell[num].mass;
+			if (mass < this.maxMass)
+			{
+				float num2 = Mathf.Min(this.flowRate * dt, this.maxMass - mass);
+				SimMessages.ModifyMass(num, num2, CellEventLogger.Instance.RiverSourceSimUpdate, this.temperature, this.elementID);
+			}
+			if ((double)(this.maxMass - mass) < 5.0 && Grid.Temperature[num] < this.temperature)
+			{
+				SimMessages.ModifyCell(num, this.elementIdx, this.temperature, this.maxMass, true, -1);
+			}
+		}
+		else
+		{
+			SimMessages.ModifyCell(num, this.elementIdx, this.temperature, this.maxMass, true, -1);
+		}
+	}
+
+	[HashedEnum]
+	[SerializeField]
+	public SimHashes elementID;
+
+	[SerializeField]
+	public float maxMass;
+
+	[SerializeField]
+	public float flowRate;
+
+	[SerializeField]
+	public float temperature;
+
+	private int elementIdx;
+}

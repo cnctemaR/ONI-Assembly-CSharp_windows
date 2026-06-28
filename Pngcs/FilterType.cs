@@ -1,0 +1,18 @@
+﻿using System;
+
+namespace Hjg.Pngcs
+{
+	public enum FilterType
+	{
+		FILTER_NONE,
+		FILTER_SUB,
+		FILTER_UP,
+		FILTER_AVERAGE,
+		FILTER_PAETH,
+		FILTER_DEFAULT = -1,
+		FILTER_AGGRESSIVE = -2,
+		FILTER_VERYAGGRESSIVE = -3,
+		FILTER_CYCLIC = -50,
+		FILTER_UNKNOWN = -100
+	}
+}

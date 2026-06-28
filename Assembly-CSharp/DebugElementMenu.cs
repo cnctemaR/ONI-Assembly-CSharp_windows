@@ -1,0 +1,21 @@
+﻿using System;
+using UnityEngine;
+
+public class DebugElementMenu : KButtonMenu
+{
+	protected override void OnPrefabInit()
+	{
+		DebugElementMenu.Instance = this;
+		base.OnPrefabInit();
+		this.ConsumeMouseScroll = true;
+	}
+
+	public void Turnoff()
+	{
+		this.root.gameObject.SetActive(false);
+	}
+
+	public static DebugElementMenu Instance;
+
+	public GameObject root;
+}

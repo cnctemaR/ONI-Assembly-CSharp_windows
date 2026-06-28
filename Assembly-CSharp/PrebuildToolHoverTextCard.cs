@@ -1,0 +1,41 @@
+﻿using System;
+using STRINGS;
+using UnityEngine;
+
+public class PrebuildToolHoverTextCard : HoverTextConfiguration
+{
+	public override void ConfigureHoverScreen()
+	{
+		HoverTextScreen instance = HoverTextScreen.Instance;
+		int num = 16;
+		int num2 = 46;
+		instance.ClearLabels();
+		instance.StartShadowBar((float)num2, 0f, false);
+		instance.NewLine("Line_NoSelection", num);
+		instance.AddUnBoundedIcon(instance.GetSprite("inspectorUI_cannot_build"), new Color(0.95686275f, 0.2901961f, 0.2784314f), 27f, 27f, 36f, 18f);
+		switch (this.currentReqState)
+		{
+		case PlanScreen.RequirementsState.Tech:
+			instance.AddText(string.Format(UI.PRODUCTINFO_RESEARCHREQUIRED, this.currentDef.RequiredTechName), this.HoverTextStyleSettings[0], true);
+			break;
+		case PlanScreen.RequirementsState.Materials:
+		case PlanScreen.RequirementsState.Complete:
+			instance.AddText(UI.TOOLTIPS.NOMATERIAL, this.HoverTextStyleSettings[0], true);
+			instance.NewLine("warningLine", num + 6);
+			instance.AddIndent(36f, 18f);
+			instance.AddText(UI.TOOLTIPS.SELECTAMATERIAL, this.HoverTextStyleSettings[1], false);
+			break;
+		}
+		instance.EndShadowBar();
+		instance.StartShadowBar((float)num2, 360f, false);
+		instance.NewLine("NewLine", 24);
+		instance.AddIndent(34f, 18f);
+		instance.AddIcon(instance.GetSprite("icon_mouse_right"), 17f, 17f, Color.white);
+		instance.AddText("Back", this.Styles_Instruction.Standard, false);
+		instance.EndShadowBar();
+	}
+
+	public PlanScreen.RequirementsState currentReqState;
+
+	public BuildingDef currentDef;
+}

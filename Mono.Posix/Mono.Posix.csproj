@@ -1,0 +1,158 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{83FC4951-282C-4D85-AE87-9CE89EFCF18E}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Mono</RootNamespace>
+    <AssemblyName>Mono.Posix</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net20</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="Consts.cs" />
+    <Compile Include="Locale.cs" />
+    <Compile Include="MapAttribute.cs" />
+    <Compile Include="Posix\AccessMode.cs" />
+    <Compile Include="Posix\Catalog.cs" />
+    <Compile Include="Posix\FileMode.cs" />
+    <Compile Include="Posix\OpenFlags.cs" />
+    <Compile Include="Posix\PeerCred.cs" />
+    <Compile Include="Posix\PeerCredData.cs" />
+    <Compile Include="Posix\Signals.cs" />
+    <Compile Include="Posix\Stat.cs" />
+    <Compile Include="Posix\StatMode.cs" />
+    <Compile Include="Posix\StatModeMasks.cs" />
+    <Compile Include="Posix\Syscall.cs" />
+    <Compile Include="Posix\UnixEndPoint.cs" />
+    <Compile Include="Posix\WaitOptions.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Remoting\Channels\Unix\ClientConnection.cs" />
+    <Compile Include="Remoting\Channels\Unix\HostConnectionPool.cs" />
+    <Compile Include="Remoting\Channels\Unix\MessageStatus.cs" />
+    <Compile Include="Remoting\Channels\Unix\MethodCallHeaderHandler.cs" />
+    <Compile Include="Remoting\Channels\Unix\ReusableUnixClient.cs" />
+    <Compile Include="Remoting\Channels\Unix\SimpleBinder.cs" />
+    <Compile Include="Remoting\Channels\Unix\UnixBinaryClientFormatterSink.cs" />
+    <Compile Include="Remoting\Channels\Unix\UnixBinaryClientFormatterSinkProvider.cs" />
+    <Compile Include="Remoting\Channels\Unix\UnixBinaryCore.cs" />
+    <Compile Include="Remoting\Channels\Unix\UnixBinaryServerFormatterSink.cs" />
+    <Compile Include="Remoting\Channels\Unix\UnixBinaryServerFormatterSinkProvider.cs" />
+    <Compile Include="Remoting\Channels\Unix\UnixChannel.cs" />
+    <Compile Include="Remoting\Channels\Unix\UnixClientChannel.cs" />
+    <Compile Include="Remoting\Channels\Unix\UnixClientTransportSink.cs" />
+    <Compile Include="Remoting\Channels\Unix\UnixClientTransportSinkProvider.cs" />
+    <Compile Include="Remoting\Channels\Unix\UnixConnection.cs" />
+    <Compile Include="Remoting\Channels\Unix\UnixConnectionPool.cs" />
+    <Compile Include="Remoting\Channels\Unix\UnixMessageIO.cs" />
+    <Compile Include="Remoting\Channels\Unix\UnixServerChannel.cs" />
+    <Compile Include="Remoting\Channels\Unix\UnixServerTransportSink.cs" />
+    <Compile Include="Unix\AbstractUnixEndPoint.cs" />
+    <Compile Include="Unix\Catalog.cs" />
+    <Compile Include="Unix\ErrorMarshal.cs" />
+    <Compile Include="Unix\FileAccessPattern.cs" />
+    <Compile Include="Unix\FileAccessPermissions.cs" />
+    <Compile Include="Unix\FileHandleOperations.cs" />
+    <Compile Include="Unix\FileSpecialAttributes.cs" />
+    <Compile Include="Unix\FileTypes.cs" />
+    <Compile Include="Unix\Native\AccessModes.cs" />
+    <Compile Include="Unix\Native\blkcnt_tAttribute.cs" />
+    <Compile Include="Unix\Native\blksize_tAttribute.cs" />
+    <Compile Include="Unix\Native\CdeclFunction.cs" />
+    <Compile Include="Unix\Native\ConfstrName.cs" />
+    <Compile Include="Unix\Native\dev_tAttribute.cs" />
+    <Compile Include="Unix\Native\DirectoryNotifyFlags.cs" />
+    <Compile Include="Unix\Native\Dirent.cs" />
+    <Compile Include="Unix\Native\Errno.cs" />
+    <Compile Include="Unix\Native\FcntlCommand.cs" />
+    <Compile Include="Unix\Native\FileNameMarshaler.cs" />
+    <Compile Include="Unix\Native\FilePermissions.cs" />
+    <Compile Include="Unix\Native\FilePosition.cs" />
+    <Compile Include="Unix\Native\Flock.cs" />
+    <Compile Include="Unix\Native\fsblkcnt_tAttribute.cs" />
+    <Compile Include="Unix\Native\fsfilcnt_tAttribute.cs" />
+    <Compile Include="Unix\Native\Fstab.cs" />
+    <Compile Include="Unix\Native\gid_tAttribute.cs" />
+    <Compile Include="Unix\Native\Group.cs" />
+    <Compile Include="Unix\Native\ino_tAttribute.cs" />
+    <Compile Include="Unix\Native\LockfCommand.cs" />
+    <Compile Include="Unix\Native\LockType.cs" />
+    <Compile Include="Unix\Native\MlockallFlags.cs" />
+    <Compile Include="Unix\Native\MmapFlags.cs" />
+    <Compile Include="Unix\Native\MmapProts.cs" />
+    <Compile Include="Unix\Native\MountFlags.cs" />
+    <Compile Include="Unix\Native\MremapFlags.cs" />
+    <Compile Include="Unix\Native\MsyncFlags.cs" />
+    <Compile Include="Unix\Native\NativeConvert.cs" />
+    <Compile Include="Unix\Native\nlink_tAttribute.cs" />
+    <Compile Include="Unix\Native\off_tAttribute.cs" />
+    <Compile Include="Unix\Native\OpenFlags.cs" />
+    <Compile Include="Unix\Native\Passwd.cs" />
+    <Compile Include="Unix\Native\PathconfName.cs" />
+    <Compile Include="Unix\Native\pid_tAttribute.cs" />
+    <Compile Include="Unix\Native\PollEvents.cs" />
+    <Compile Include="Unix\Native\Pollfd.cs" />
+    <Compile Include="Unix\Native\PosixFadviseAdvice.cs" />
+    <Compile Include="Unix\Native\PosixMadviseAdvice.cs" />
+    <Compile Include="Unix\Native\RealTimeSignum.cs" />
+    <Compile Include="Unix\Native\SeekFlags.cs" />
+    <Compile Include="Unix\Native\SignalAction.cs" />
+    <Compile Include="Unix\Native\SignalHandler.cs" />
+    <Compile Include="Unix\Native\Signum.cs" />
+    <Compile Include="Unix\Native\Stat.cs" />
+    <Compile Include="Unix\Native\Statvfs.cs" />
+    <Compile Include="Unix\Native\Stdlib.cs" />
+    <Compile Include="Unix\Native\suseconds_tAttribute.cs" />
+    <Compile Include="Unix\Native\Syscall.cs" />
+    <Compile Include="Unix\Native\SysconfName.cs" />
+    <Compile Include="Unix\Native\SyslogFacility.cs" />
+    <Compile Include="Unix\Native\SyslogLevel.cs" />
+    <Compile Include="Unix\Native\SyslogOptions.cs" />
+    <Compile Include="Unix\Native\Timespec.cs" />
+    <Compile Include="Unix\Native\Timeval.cs" />
+    <Compile Include="Unix\Native\Timezone.cs" />
+    <Compile Include="Unix\Native\time_tAttribute.cs" />
+    <Compile Include="Unix\Native\uid_tAttribute.cs" />
+    <Compile Include="Unix\Native\Utimbuf.cs" />
+    <Compile Include="Unix\Native\Utsname.cs" />
+    <Compile Include="Unix\Native\WaitOptions.cs" />
+    <Compile Include="Unix\Native\XattrFlags.cs" />
+    <Compile Include="Unix\Native\XPrintfFunctions.cs" />
+    <Compile Include="Unix\PeerCred.cs" />
+    <Compile Include="Unix\StdioFileStream.cs" />
+    <Compile Include="Unix\UnixClient.cs" />
+    <Compile Include="Unix\UnixDirectoryInfo.cs" />
+    <Compile Include="Unix\UnixDriveInfo.cs" />
+    <Compile Include="Unix\UnixDriveType.cs" />
+    <Compile Include="Unix\UnixEncoding.cs" />
+    <Compile Include="Unix\UnixEndPoint.cs" />
+    <Compile Include="Unix\UnixEnvironment.cs" />
+    <Compile Include="Unix\UnixFileInfo.cs" />
+    <Compile Include="Unix\UnixFileSystemInfo.cs" />
+    <Compile Include="Unix\UnixGroupInfo.cs" />
+    <Compile Include="Unix\UnixIOException.cs" />
+    <Compile Include="Unix\UnixListener.cs" />
+    <Compile Include="Unix\UnixMarshal.cs" />
+    <Compile Include="Unix\UnixPath.cs" />
+    <Compile Include="Unix\UnixPipes.cs" />
+    <Compile Include="Unix\UnixProcess.cs" />
+    <Compile Include="Unix\UnixSignal.cs" />
+    <Compile Include="Unix\UnixStream.cs" />
+    <Compile Include="Unix\UnixSymbolicLinkInfo.cs" />
+    <Compile Include="Unix\UnixUserInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\mscorlib\mscorlib.csproj">
+      <Project>{83FC4951-282C-4D85-AE87-9CE89EFCF190}</Project>
+      <Name>mscorlib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System\System.csproj">
+      <Project>{83FC4951-282C-4D85-AE87-9CE89EFCF197}</Project>
+      <Name>System</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

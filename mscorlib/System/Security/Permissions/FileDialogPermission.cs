@@ -1,0 +1,147 @@
+﻿using System;
+using System.Runtime.InteropServices;
+
+namespace System.Security.Permissions
+{
+	[ComVisible(true)]
+	[Serializable]
+	public sealed class FileDialogPermission : CodeAccessPermission, IBuiltInPermission, IUnrestrictedPermission
+	{
+		public FileDialogPermission(PermissionState state)
+		{
+			if (CodeAccessPermission.CheckPermissionState(state, true) == PermissionState.Unrestricted)
+			{
+				this._access = FileDialogPermissionAccess.OpenSave;
+			}
+			else
+			{
+				this._access = FileDialogPermissionAccess.None;
+			}
+		}
+
+		public FileDialogPermission(FileDialogPermissionAccess access)
+		{
+			this.Access = access;
+		}
+
+		int IBuiltInPermission.GetTokenIndex()
+		{
+			return 1;
+		}
+
+		public FileDialogPermissionAccess Access
+		{
+			get
+			{
+				return this._access;
+			}
+			set
+			{
+				if (!Enum.IsDefined(typeof(FileDialogPermissionAccess), value))
+				{
+					string text = string.Format(Locale.GetText("Invalid enum {0}"), value);
+					throw new ArgumentException(text, "FileDialogPermissionAccess");
+				}
+				this._access = value;
+			}
+		}
+
+		public override IPermission Copy()
+		{
+			return new FileDialogPermission(this._access);
+		}
+
+		public override void FromXml(SecurityElement esd)
+		{
+			CodeAccessPermission.CheckSecurityElement(esd, "esd", 1, 1);
+			if (CodeAccessPermission.IsUnrestricted(esd))
+			{
+				this._access = FileDialogPermissionAccess.OpenSave;
+			}
+			else
+			{
+				string text = esd.Attribute("Access");
+				if (text == null)
+				{
+					this._access = FileDialogPermissionAccess.None;
+				}
+				else
+				{
+					this._access = (FileDialogPermissionAccess)((int)Enum.Parse(typeof(FileDialogPermissionAccess), text));
+				}
+			}
+		}
+
+		public override IPermission Intersect(IPermission target)
+		{
+			FileDialogPermission fileDialogPermission = this.Cast(target);
+			if (fileDialogPermission == null)
+			{
+				return null;
+			}
+			FileDialogPermissionAccess fileDialogPermissionAccess = this._access & fileDialogPermission._access;
+			return (fileDialogPermissionAccess != FileDialogPermissionAccess.None) ? new FileDialogPermission(fileDialogPermissionAccess) : null;
+		}
+
+		public override bool IsSubsetOf(IPermission target)
+		{
+			FileDialogPermission fileDialogPermission = this.Cast(target);
+			return fileDialogPermission != null && (this._access & fileDialogPermission._access) == this._access;
+		}
+
+		public bool IsUnrestricted()
+		{
+			return this._access == FileDialogPermissionAccess.OpenSave;
+		}
+
+		public override SecurityElement ToXml()
+		{
+			SecurityElement securityElement = base.Element(1);
+			switch (this._access)
+			{
+			case FileDialogPermissionAccess.Open:
+				securityElement.AddAttribute("Access", "Open");
+				break;
+			case FileDialogPermissionAccess.Save:
+				securityElement.AddAttribute("Access", "Save");
+				break;
+			case FileDialogPermissionAccess.OpenSave:
+				securityElement.AddAttribute("Unrestricted", "true");
+				break;
+			}
+			return securityElement;
+		}
+
+		public override IPermission Union(IPermission target)
+		{
+			FileDialogPermission fileDialogPermission = this.Cast(target);
+			if (fileDialogPermission == null)
+			{
+				return this.Copy();
+			}
+			if (this.IsUnrestricted() || fileDialogPermission.IsUnrestricted())
+			{
+				return new FileDialogPermission(PermissionState.Unrestricted);
+			}
+			return new FileDialogPermission(this._access | fileDialogPermission._access);
+		}
+
+		private FileDialogPermission Cast(IPermission target)
+		{
+			if (target == null)
+			{
+				return null;
+			}
+			FileDialogPermission fileDialogPermission = target as FileDialogPermission;
+			if (fileDialogPermission == null)
+			{
+				CodeAccessPermission.ThrowInvalidPermission(target, typeof(FileDialogPermission));
+			}
+			return fileDialogPermission;
+		}
+
+		private const int version = 1;
+
+		private FileDialogPermissionAccess _access;
+	}
+}

@@ -1,0 +1,85 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{83FC4951-282C-4D85-AE87-9CE89EFCF19F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>TiledSharp</RootNamespace>
+    <AssemblyName>TiledSharp</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net35</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="Ionic\Crc\CRC32.cs" />
+    <Compile Include="Ionic\Crc\CrcCalculatorStream.cs" />
+    <Compile Include="Ionic\Zlib\Adler.cs" />
+    <Compile Include="Ionic\Zlib\BlockState.cs" />
+    <Compile Include="Ionic\Zlib\CompressionLevel.cs" />
+    <Compile Include="Ionic\Zlib\CompressionMode.cs" />
+    <Compile Include="Ionic\Zlib\CompressionStrategy.cs" />
+    <Compile Include="Ionic\Zlib\DeflateFlavor.cs" />
+    <Compile Include="Ionic\Zlib\DeflateManager.cs" />
+    <Compile Include="Ionic\Zlib\DeflateStream.cs" />
+    <Compile Include="Ionic\Zlib\FlushType.cs" />
+    <Compile Include="Ionic\Zlib\GZipStream.cs" />
+    <Compile Include="Ionic\Zlib\InflateBlocks.cs" />
+    <Compile Include="Ionic\Zlib\InflateCodes.cs" />
+    <Compile Include="Ionic\Zlib\InflateManager.cs" />
+    <Compile Include="Ionic\Zlib\InfTree.cs" />
+    <Compile Include="Ionic\Zlib\InternalConstants.cs" />
+    <Compile Include="Ionic\Zlib\InternalInflateConstants.cs" />
+    <Compile Include="Ionic\Zlib\ParallelDeflateOutputStream.cs" />
+    <Compile Include="Ionic\Zlib\SharedUtils.cs" />
+    <Compile Include="Ionic\Zlib\StaticTree.cs" />
+    <Compile Include="Ionic\Zlib\Tree.cs" />
+    <Compile Include="Ionic\Zlib\WorkItem.cs" />
+    <Compile Include="Ionic\Zlib\ZlibBaseStream.cs" />
+    <Compile Include="Ionic\Zlib\ZlibCodec.cs" />
+    <Compile Include="Ionic\Zlib\ZlibConstants.cs" />
+    <Compile Include="Ionic\Zlib\ZlibException.cs" />
+    <Compile Include="Ionic\Zlib\ZlibStream.cs" />
+    <Compile Include="Ionic\Zlib\ZlibStreamFlavor.cs" />
+    <Compile Include="ITmxElement.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PropertyDict.cs" />
+    <Compile Include="TmxAnimationFrame.cs" />
+    <Compile Include="TmxBase64Data.cs" />
+    <Compile Include="TmxColor.cs" />
+    <Compile Include="TmxDocument.cs" />
+    <Compile Include="TmxImage.cs" />
+    <Compile Include="TmxImageLayer.cs" />
+    <Compile Include="TmxLayer.cs" />
+    <Compile Include="TmxLayerTile.cs" />
+    <Compile Include="TmxList.cs" />
+    <Compile Include="TmxMap.cs" />
+    <Compile Include="TmxObjectGroup.cs" />
+    <Compile Include="TmxTerrain.cs" />
+    <Compile Include="TmxTileOffset.cs" />
+    <Compile Include="TmxTileset.cs" />
+    <Compile Include="TmxTilesetTile.cs" />
+    <Compile Include="Tuple.2.cs" />
+    <Compile Include="Tuple.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\mscorlib\mscorlib.csproj">
+      <Project>{83FC4951-282C-4D85-AE87-9CE89EFCF190}</Project>
+      <Name>mscorlib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Core\System.Core.csproj">
+      <Project>{83FC4951-282C-4D85-AE87-9CE89EFCF195}</Project>
+      <Name>System.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Xml.Linq\System.Xml.Linq.csproj">
+      <Project>{83FC4951-282C-4D85-AE87-9CE89EFCF19E}</Project>
+      <Name>System.Xml.Linq</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System\System.csproj">
+      <Project>{83FC4951-282C-4D85-AE87-9CE89EFCF197}</Project>
+      <Name>System</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

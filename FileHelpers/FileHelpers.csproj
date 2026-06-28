@@ -1,0 +1,196 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{83FC4951-282C-4D85-AE87-9CE89EFCF18A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>FileHelpers</RootNamespace>
+    <AssemblyName>FileHelpers</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>4096</FileAlignment>
+    <TargetFramework>net20</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="AlignMode.cs" />
+    <Compile Include="AssignDelegate.cs" />
+    <Compile Include="Attributes.cs" />
+    <Compile Include="BadUsageException.cs" />
+    <Compile Include="BigFileSorter.2.cs" />
+    <Compile Include="BigFileSorter.cs" />
+    <Compile Include="CommonEngine.cs" />
+    <Compile Include="ConditionalRecordAttribute.cs" />
+    <Compile Include="ConditionHelper.cs" />
+    <Compile Include="ConverterBase.cs" />
+    <Compile Include="ConverterKind.cs" />
+    <Compile Include="ConvertException.cs" />
+    <Compile Include="ConvertHelpers.cs" />
+    <Compile Include="CreateAndAssignDelegate.cs" />
+    <Compile Include="CreateObjectDelegate.cs" />
+    <Compile Include="CsvEngine.cs" />
+    <Compile Include="DataBaseHelper.cs" />
+    <Compile Include="DataLink\AccessStorage.cs" />
+    <Compile Include="DataLink\DatabaseStorage.cs" />
+    <Compile Include="DataLink\DataStorage.cs" />
+    <Compile Include="DataLink\ExcelReadStopBehavior.cs" />
+    <Compile Include="DataLink\ExcelStorageBase.cs" />
+    <Compile Include="DataLink\ExcelUpdateLinksMode.cs" />
+    <Compile Include="DataLink\FileDataLink.cs" />
+    <Compile Include="DataLink\FileStorage.cs" />
+    <Compile Include="DataLink\FillRecordHandler.cs" />
+    <Compile Include="DataLink\GenericDatabaseStorage.cs" />
+    <Compile Include="DataLink\GenericDataLink.cs" />
+    <Compile Include="DataLink\InsertSqlHandler.cs" />
+    <Compile Include="DataLink\OleDbStorage.cs" />
+    <Compile Include="DataLink\SqlServerStorage.cs" />
+    <Compile Include="DataLink\TransactionMode.cs" />
+    <Compile Include="DelimitedField.cs" />
+    <Compile Include="DelimitedFileEngine.2.cs" />
+    <Compile Include="DelimitedFileEngine.cs" />
+    <Compile Include="DelimitedRecordAttribute.cs" />
+    <Compile Include="Detection\DelimiterInfo.cs" />
+    <Compile Include="Detection\FormatHint.cs" />
+    <Compile Include="Detection\QuoteHelper.cs" />
+    <Compile Include="Detection\RecordFormatInfo.cs" />
+    <Compile Include="Detection\SmartFormatDetector.cs" />
+    <Compile Include="Dynamic\AttributesBuilder.cs" />
+    <Compile Include="Dynamic\ClassBuilder.cs" />
+    <Compile Include="Dynamic\ConverterBuilder.cs" />
+    <Compile Include="Dynamic\CsvClassBuilder.cs" />
+    <Compile Include="Dynamic\DelimitedClassBuilder.cs" />
+    <Compile Include="Dynamic\DelimitedFieldBuilder.cs" />
+    <Compile Include="Dynamic\FieldBuilder.cs" />
+    <Compile Include="Dynamic\FixedFieldBuilder.cs" />
+    <Compile Include="Dynamic\FixedLengthClassBuilder.cs" />
+    <Compile Include="Dynamic\RunTimeCompilationException.cs" />
+    <Compile Include="Dynamic\XmlHelper.cs" />
+    <Compile Include="EngineBase.cs" />
+    <Compile Include="EnumConverter.cs" />
+    <Compile Include="ErrorInfo.cs" />
+    <Compile Include="ErrorManager.cs" />
+    <Compile Include="ErrorMode.cs" />
+    <Compile Include="EventEngineBase.cs" />
+    <Compile Include="Events\AfterReadEventArgs.cs" />
+    <Compile Include="Events\AfterReadHandler.cs" />
+    <Compile Include="Events\AfterWriteEventArgs.cs" />
+    <Compile Include="Events\AfterWriteHandler.cs" />
+    <Compile Include="Events\BeforeReadEventArgs.cs" />
+    <Compile Include="Events\BeforeReadHandler.cs" />
+    <Compile Include="Events\BeforeWriteEventArgs.cs" />
+    <Compile Include="Events\BeforeWriteHandler.cs" />
+    <Compile Include="Events\FileHelpersEventArgs.cs" />
+    <Compile Include="Events\INotifyRead.cs" />
+    <Compile Include="Events\INotifyWrite.cs" />
+    <Compile Include="Events\ProgressEventArgs.cs" />
+    <Compile Include="Events\ReadEventArgs.cs" />
+    <Compile Include="Events\WriteEventArgs.cs" />
+    <Compile Include="ExHelper.cs" />
+    <Compile Include="ExtractedInfo.cs" />
+    <Compile Include="FieldAlignAttribute.cs" />
+    <Compile Include="FieldArrayLengthAttribute.cs" />
+    <Compile Include="FieldAttribute.cs" />
+    <Compile Include="FieldBase.cs" />
+    <Compile Include="FieldConverterAttribute.cs" />
+    <Compile Include="FieldDelimiterAttribute.cs" />
+    <Compile Include="FieldFixedLengthAttribute.cs" />
+    <Compile Include="FieldIgnoredAttribute.cs" />
+    <Compile Include="FieldInfoCacheManipulator.cs" />
+    <Compile Include="FieldInNewLineAttribute.cs" />
+    <Compile Include="FieldNotEmptyAttribute.cs" />
+    <Compile Include="FieldNotInFileAttribute.cs" />
+    <Compile Include="FieldNullValueAttribute.cs" />
+    <Compile Include="FieldOptionalAttribute.cs" />
+    <Compile Include="FieldOrderAttribute.cs" />
+    <Compile Include="FieldQuotedAttribute.cs" />
+    <Compile Include="FieldTrimAttribute.cs" />
+    <Compile Include="FieldValueDiscardedAttribute.cs" />
+    <Compile Include="FileDiffEngine.cs" />
+    <Compile Include="FileHelperAsyncEngine.2.cs" />
+    <Compile Include="FileHelperAsyncEngine.cs" />
+    <Compile Include="FileHelperEngine.2.cs" />
+    <Compile Include="FileHelperEngine.cs" />
+    <Compile Include="FileHelpersException.cs" />
+    <Compile Include="FileTransformEngine.cs" />
+    <Compile Include="FixedFileEngine.2.cs" />
+    <Compile Include="FixedFileEngine.cs" />
+    <Compile Include="FixedLengthField.cs" />
+    <Compile Include="FixedLengthRecordAttribute.cs" />
+    <Compile Include="FixedMode.cs" />
+    <Compile Include="ForwardReader.cs" />
+    <Compile Include="GetFieldValueCallback.cs" />
+    <Compile Include="IComparableRecord.cs" />
+    <Compile Include="IFileHelperAsyncEngine.cs" />
+    <Compile Include="IFileHelperEngine.cs" />
+    <Compile Include="IgnoreCommentedLinesAttribute.cs" />
+    <Compile Include="IgnoreEmptyLinesAttribute.cs" />
+    <Compile Include="IgnoreFirstAttribute.cs" />
+    <Compile Include="IgnoreInheritedClassAttribute.cs" />
+    <Compile Include="IgnoreLastAttribute.cs" />
+    <Compile Include="InternalStreamReader.cs" />
+    <Compile Include="InternalStringReader.cs" />
+    <Compile Include="IRecordInfo.cs" />
+    <Compile Include="IRecordReader.cs" />
+    <Compile Include="ITransformable.cs" />
+    <Compile Include="LengthIndicatorType.cs" />
+    <Compile Include="LineEnd.cs" />
+    <Compile Include="LineInfo.cs" />
+    <Compile Include="MasterDetail\CommonSelector.cs" />
+    <Compile Include="MasterDetail\MasterDetailEngine.2.cs" />
+    <Compile Include="MasterDetail\MasterDetailEngine.cs" />
+    <Compile Include="MasterDetail\MasterDetails.2.cs" />
+    <Compile Include="MasterDetail\MasterDetails.cs" />
+    <Compile Include="MasterDetail\MasterDetailSelector.cs" />
+    <Compile Include="MasterDetail\RecordAction.cs" />
+    <Compile Include="MessageBase.cs" />
+    <Compile Include="Messages.cs" />
+    <Compile Include="MultilineMode.cs" />
+    <Compile Include="MultiRecordEngine.cs" />
+    <Compile Include="NetLanguage.cs" />
+    <Compile Include="NetVisibility.cs" />
+    <Compile Include="NewLineDelimitedRecordReader.cs" />
+    <Compile Include="NullValueNotFoundException.cs" />
+    <Compile Include="ObjectToValuesDelegate.cs" />
+    <Compile Include="Options\CsvOptions.cs" />
+    <Compile Include="Options\DelimitedRecordOptions.cs" />
+    <Compile Include="Options\FieldBaseCollection.cs" />
+    <Compile Include="Options\FixedRecordOptions.cs" />
+    <Compile Include="Options\RecordOptions.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QuoteMode.cs" />
+    <Compile Include="RecordCondition.cs" />
+    <Compile Include="RecordIndexer.cs" />
+    <Compile Include="RecordInfo.cs" />
+    <Compile Include="RecordOperations.cs" />
+    <Compile Include="RecordTypeSelector.cs" />
+    <Compile Include="ReflectionHelper.cs" />
+    <Compile Include="SortQueue.cs" />
+    <Compile Include="StreamHelper.cs" />
+    <Compile Include="StreamInfoProvider.cs" />
+    <Compile Include="StringHelper.cs" />
+    <Compile Include="TrimMode.cs" />
+    <Compile Include="TypedRecordAttribute.cs" />
+    <Compile Include="TypeHelper.cs" />
+    <Compile Include="TypesOfMessages.cs" />
+    <Compile Include="ValidIdentifierValidator.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\mscorlib\mscorlib.csproj">
+      <Project>{83FC4951-282C-4D85-AE87-9CE89EFCF190}</Project>
+      <Name>mscorlib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Data\System.Data.csproj">
+      <Project>{83FC4951-282C-4D85-AE87-9CE89EFCF196}</Project>
+      <Name>System.Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Xml\System.Xml.csproj">
+      <Project>{83FC4951-282C-4D85-AE87-9CE89EFCF19D}</Project>
+      <Name>System.Xml</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System\System.csproj">
+      <Project>{83FC4951-282C-4D85-AE87-9CE89EFCF197}</Project>
+      <Name>System</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

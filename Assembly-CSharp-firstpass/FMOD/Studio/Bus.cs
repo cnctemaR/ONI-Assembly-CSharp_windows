@@ -1,0 +1,142 @@
+﻿using System;
+using System.Runtime.InteropServices;
+using System.Text;
+
+namespace FMOD.Studio
+{
+	public class Bus : HandleBase
+	{
+		public Bus(IntPtr raw)
+			: base(raw)
+		{
+		}
+
+		public RESULT getID(out Guid id)
+		{
+			byte[] array = new byte[16];
+			RESULT result = Bus.FMOD_Studio_Bus_GetID(this.rawPtr, array);
+			id = new Guid(array);
+			return result;
+		}
+
+		public RESULT getPath(out string path)
+		{
+			path = null;
+			byte[] array = new byte[256];
+			int num = 0;
+			RESULT result = Bus.FMOD_Studio_Bus_GetPath(this.rawPtr, array, array.Length, out num);
+			if (result == RESULT.ERR_TRUNCATED)
+			{
+				array = new byte[num];
+				result = Bus.FMOD_Studio_Bus_GetPath(this.rawPtr, array, array.Length, out num);
+			}
+			if (result == RESULT.OK)
+			{
+				path = Encoding.UTF8.GetString(array, 0, num - 1);
+			}
+			return result;
+		}
+
+		public RESULT getFaderLevel(out float volume)
+		{
+			return Bus.FMOD_Studio_Bus_GetFaderLevel(this.rawPtr, out volume);
+		}
+
+		public RESULT setFaderLevel(float volume)
+		{
+			return Bus.FMOD_Studio_Bus_SetFaderLevel(this.rawPtr, volume);
+		}
+
+		public RESULT getPaused(out bool paused)
+		{
+			return Bus.FMOD_Studio_Bus_GetPaused(this.rawPtr, out paused);
+		}
+
+		public RESULT setPaused(bool paused)
+		{
+			return Bus.FMOD_Studio_Bus_SetPaused(this.rawPtr, paused);
+		}
+
+		public RESULT getMute(out bool mute)
+		{
+			return Bus.FMOD_Studio_Bus_GetMute(this.rawPtr, out mute);
+		}
+
+		public RESULT setMute(bool mute)
+		{
+			return Bus.FMOD_Studio_Bus_SetMute(this.rawPtr, mute);
+		}
+
+		public RESULT stopAllEvents(STOP_MODE mode)
+		{
+			return Bus.FMOD_Studio_Bus_StopAllEvents(this.rawPtr, mode);
+		}
+
+		public RESULT lockChannelGroup()
+		{
+			return Bus.FMOD_Studio_Bus_LockChannelGroup(this.rawPtr);
+		}
+
+		public RESULT unlockChannelGroup()
+		{
+			return Bus.FMOD_Studio_Bus_UnlockChannelGroup(this.rawPtr);
+		}
+
+		public RESULT getChannelGroup(out ChannelGroup group)
+		{
+			group = null;
+			IntPtr intPtr = 0;
+			RESULT result = Bus.FMOD_Studio_Bus_GetChannelGroup(this.rawPtr, out intPtr);
+			if (result != RESULT.OK)
+			{
+				return result;
+			}
+			group = new ChannelGroup(intPtr);
+			return result;
+		}
+
+		[DllImport("fmodstudiol")]
+		private static extern bool FMOD_Studio_Bus_IsValid(IntPtr bus);
+
+		[DllImport("fmodstudiol")]
+		private static extern RESULT FMOD_Studio_Bus_GetID(IntPtr bus, [Out] byte[] id);
+
+		[DllImport("fmodstudiol")]
+		private static extern RESULT FMOD_Studio_Bus_GetPath(IntPtr bus, [Out] byte[] path, int size, out int retrieved);
+
+		[DllImport("fmodstudiol")]
+		private static extern RESULT FMOD_Studio_Bus_GetFaderLevel(IntPtr bus, out float value);
+
+		[DllImport("fmodstudiol")]
+		private static extern RESULT FMOD_Studio_Bus_SetFaderLevel(IntPtr bus, float value);
+
+		[DllImport("fmodstudiol")]
+		private static extern RESULT FMOD_Studio_Bus_GetPaused(IntPtr bus, out bool paused);
+
+		[DllImport("fmodstudiol")]
+		private static extern RESULT FMOD_Studio_Bus_SetPaused(IntPtr bus, bool paused);
+
+		[DllImport("fmodstudiol")]
+		private static extern RESULT FMOD_Studio_Bus_GetMute(IntPtr bus, out bool mute);
+
+		[DllImport("fmodstudiol")]
+		private static extern RESULT FMOD_Studio_Bus_SetMute(IntPtr bus, bool mute);
+
+		[DllImport("fmodstudiol")]
+		private static extern RESULT FMOD_Studio_Bus_StopAllEvents(IntPtr bus, STOP_MODE mode);
+
+		[DllImport("fmodstudiol")]
+		private static extern RESULT FMOD_Studio_Bus_LockChannelGroup(IntPtr bus);
+
+		[DllImport("fmodstudiol")]
+		private static extern RESULT FMOD_Studio_Bus_UnlockChannelGroup(IntPtr bus);
+
+		[DllImport("fmodstudiol")]
+		private static extern RESULT FMOD_Studio_Bus_GetChannelGroup(IntPtr bus, out IntPtr group);
+
+		protected override bool isValidInternal()
+		{
+			return Bus.FMOD_Studio_Bus_IsValid(this.rawPtr);
+		}
+	}
+}

@@ -1,0 +1,54 @@
+﻿using System;
+using UnityEngine;
+
+public class FrontEndManager : KMonoBehaviour
+{
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		FrontEndManager.Instance = this;
+		if (this.SpawnOnLoadScreens != null && this.SpawnOnLoadScreens.Length != 0)
+		{
+			foreach (GameObject gameObject in this.SpawnOnLoadScreens)
+			{
+				if (gameObject != null)
+				{
+					Util.KInstantiateUI(gameObject, base.gameObject, true);
+				}
+			}
+		}
+		if (FrontEndManager.firstInit)
+		{
+			FrontEndManager.firstInit = false;
+			if (this.SpawnOnLaunchScreens != null && this.SpawnOnLoadScreens.Length != 0)
+			{
+				foreach (GameObject gameObject2 in this.SpawnOnLaunchScreens)
+				{
+					if (gameObject2 != null)
+					{
+						Util.KInstantiateUI(gameObject2, base.gameObject, true);
+					}
+				}
+			}
+		}
+	}
+
+	private void LateUpdate()
+	{
+		if (Debug.developerConsoleVisible)
+		{
+			Debug.developerConsoleVisible = false;
+		}
+		KAnimBatchManager.Instance().UpdateActiveArea(new Vector2I(0, 0), new Vector2I(9999, 9999));
+		KAnimBatchManager.Instance().UpdateDirty();
+		KAnimBatchManager.Instance().Render();
+	}
+
+	public static FrontEndManager Instance;
+
+	public static bool firstInit = true;
+
+	public GameObject[] SpawnOnLoadScreens;
+
+	public GameObject[] SpawnOnLaunchScreens;
+}

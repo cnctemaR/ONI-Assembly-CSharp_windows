@@ -1,0 +1,130 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{83FC4951-282C-4D85-AE87-9CE89EFCF193}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Satsuma</RootNamespace>
+    <AssemblyName>Satsuma</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net35</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Satsuma.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Arc.cs" />
+    <Compile Include="ArcFilter.cs" />
+    <Compile Include="ArcLookupExtensions.cs" />
+    <Compile Include="AStar.cs" />
+    <Compile Include="BellmanFord.cs" />
+    <Compile Include="Bfs.cs" />
+    <Compile Include="BiEdgeConnectedComponents.cs" />
+    <Compile Include="BiNodeConnectedComponents.cs" />
+    <Compile Include="Bipartition.cs" />
+    <Compile Include="BridgeDfs.cs" />
+    <Compile Include="CheapestLinkTsp.cs" />
+    <Compile Include="CompleteBipartiteGraph.cs" />
+    <Compile Include="CompleteGraph.cs" />
+    <Compile Include="ConnectedComponents.cs" />
+    <Compile Include="ContractedGraph.cs" />
+    <Compile Include="CustomGraph.cs" />
+    <Compile Include="Dfs.cs" />
+    <Compile Include="Dijkstra.cs" />
+    <Compile Include="DijkstraMode.cs" />
+    <Compile Include="Directedness.cs" />
+    <Compile Include="DisjointSet.cs" />
+    <Compile Include="DisjointSetSet.cs" />
+    <Compile Include="Drawing\ForceDirectedLayout.cs" />
+    <Compile Include="Drawing\GraphDrawer.cs" />
+    <Compile Include="Drawing\INodeShape.cs" />
+    <Compile Include="Drawing\NodeShape.cs" />
+    <Compile Include="Drawing\NodeShapeKind.cs" />
+    <Compile Include="Drawing\NodeStyle.cs" />
+    <Compile Include="Drawing\PointD.cs" />
+    <Compile Include="FindPathExtensions.cs" />
+    <Compile Include="HamiltonianCycle.cs" />
+    <Compile Include="IArcLookup.cs" />
+    <Compile Include="IBuildableGraph.cs" />
+    <Compile Include="IClearable.cs" />
+    <Compile Include="IdAllocator.cs" />
+    <Compile Include="IDestroyableGraph.cs" />
+    <Compile Include="IDisjointSet.cs" />
+    <Compile Include="IFlow.cs" />
+    <Compile Include="IGraph.cs" />
+    <Compile Include="IMatching.cs" />
+    <Compile Include="InsertionTsp.cs" />
+    <Compile Include="IntegerPreflow.cs" />
+    <Compile Include="IO\GraphML\DictionaryProperty.cs" />
+    <Compile Include="IO\GraphML\GraphMLFormat.cs" />
+    <Compile Include="IO\GraphML\GraphMLProperty.cs" />
+    <Compile Include="IO\GraphML\NodeGraphics.cs" />
+    <Compile Include="IO\GraphML\NodeGraphicsProperty.cs" />
+    <Compile Include="IO\GraphML\NodeShape.cs" />
+    <Compile Include="IO\GraphML\PropertyDomain.cs" />
+    <Compile Include="IO\GraphML\StandardProperty.cs" />
+    <Compile Include="IO\GraphML\StandardType.cs" />
+    <Compile Include="IO\LemonGraphFormat.cs" />
+    <Compile Include="IO\SimpleGraphFormat.cs" />
+    <Compile Include="IPath.cs" />
+    <Compile Include="IPriorityQueue.cs" />
+    <Compile Include="IReadOnlyDisjointSet.cs" />
+    <Compile Include="IReadOnlyPriorityQueue.cs" />
+    <Compile Include="ITsp.cs" />
+    <Compile Include="Kruskal.cs" />
+    <Compile Include="LowpointDfs.cs" />
+    <Compile Include="Matching.cs" />
+    <Compile Include="MaximumMatching.cs" />
+    <Compile Include="MinimumCostMatching.cs" />
+    <Compile Include="NetworkSimplex.cs" />
+    <Compile Include="Node.cs" />
+    <Compile Include="Opt2Tsp.cs" />
+    <Compile Include="Path.cs" />
+    <Compile Include="PathExtensions.cs" />
+    <Compile Include="PathGraph.cs" />
+    <Compile Include="Preflow.cs" />
+    <Compile Include="Prim.cs" />
+    <Compile Include="PriorityQueue.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RedirectedGraph.cs" />
+    <Compile Include="ReverseGraph.cs" />
+    <Compile Include="SimplexState.cs" />
+    <Compile Include="StrongComponents.cs" />
+    <Compile Include="Subgraph.cs" />
+    <Compile Include="Supergraph.cs" />
+    <Compile Include="TopologicalOrder.cs" />
+    <Compile Include="TspSelectionRule.cs" />
+    <Compile Include="TspUtils.cs" />
+    <Compile Include="UndirectedGraph.cs" />
+    <Compile Include="Utils.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\mscorlib\mscorlib.csproj">
+      <Project>{83FC4951-282C-4D85-AE87-9CE89EFCF190}</Project>
+      <Name>mscorlib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Core\System.Core.csproj">
+      <Project>{83FC4951-282C-4D85-AE87-9CE89EFCF195}</Project>
+      <Name>System.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Drawing\System.Drawing.csproj">
+      <Project>{83FC4951-282C-4D85-AE87-9CE89EFCF198}</Project>
+      <Name>System.Drawing</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Xml.Linq\System.Xml.Linq.csproj">
+      <Project>{83FC4951-282C-4D85-AE87-9CE89EFCF19E}</Project>
+      <Name>System.Xml.Linq</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Xml\System.Xml.csproj">
+      <Project>{83FC4951-282C-4D85-AE87-9CE89EFCF19D}</Project>
+      <Name>System.Xml</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System\System.csproj">
+      <Project>{83FC4951-282C-4D85-AE87-9CE89EFCF197}</Project>
+      <Name>System</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

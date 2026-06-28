@@ -1,0 +1,256 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using KSerialization;
+using UnityEngine;
+
+public class SaveManager : KMonoBehaviour
+{
+	protected override void OnPrefabInit()
+	{
+		Assets.RegisterOnAddPrefab(new Action<KPrefabID>(this.OnAddPrefab));
+	}
+
+	private void OnAddPrefab(KPrefabID prefab)
+	{
+		if (prefab == null)
+		{
+			return;
+		}
+		this.prefabMap[prefab.GetSaveLoadTag()] = prefab.gameObject;
+	}
+
+	public Dictionary<Tag, List<SaveLoadRoot>> GetLists()
+	{
+		return this.sceneObjects;
+	}
+
+	private List<SaveLoadRoot> GetSaveLoadRootList(SaveLoadRoot saver)
+	{
+		KPrefabID component = saver.GetComponent<KPrefabID>();
+		if (component == null)
+		{
+			Output.LogErrorWithObj(saver.gameObject, new object[]
+			{
+				"All savers must also have a KPrefabID on them but",
+				saver.gameObject.name,
+				"does not have one."
+			});
+			return null;
+		}
+		List<SaveLoadRoot> list;
+		if (!this.sceneObjects.TryGetValue(component.GetSaveLoadTag(), out list))
+		{
+			list = new List<SaveLoadRoot>();
+			this.sceneObjects[component.GetSaveLoadTag()] = list;
+		}
+		return list;
+	}
+
+	public void Register(SaveLoadRoot root)
+	{
+		List<SaveLoadRoot> saveLoadRootList = this.GetSaveLoadRootList(root);
+		if (saveLoadRootList == null)
+		{
+			return;
+		}
+		saveLoadRootList.Add(root);
+	}
+
+	public void Unregister(SaveLoadRoot root)
+	{
+		List<SaveLoadRoot> saveLoadRootList = this.GetSaveLoadRootList(root);
+		if (saveLoadRootList == null)
+		{
+			return;
+		}
+		saveLoadRootList.Remove(root);
+	}
+
+	public GameObject GetPrefab(Tag tag)
+	{
+		if (this.prefabMap.ContainsKey(tag))
+		{
+			return this.prefabMap[tag];
+		}
+		Output.Log(new object[]
+		{
+			"Item not found in prefabMap",
+			"[" + tag.Name + "]"
+		});
+		return null;
+	}
+
+	public void Save(BinaryWriter writer)
+	{
+		writer.Write(SaveManager.SAVE_HEADER);
+		writer.Write(6);
+		writer.Write(0);
+		int num = 0;
+		foreach (KeyValuePair<Tag, List<SaveLoadRoot>> keyValuePair in this.sceneObjects)
+		{
+			if (keyValuePair.Value.Count > 0)
+			{
+				num++;
+			}
+		}
+		writer.Write(num);
+		foreach (KeyValuePair<Tag, List<SaveLoadRoot>> keyValuePair2 in this.sceneObjects)
+		{
+			int count = keyValuePair2.Value.Count;
+			if (count > 0)
+			{
+				foreach (SaveLoadRoot saveLoadRoot in keyValuePair2.Value)
+				{
+					if (!(saveLoadRoot == null))
+					{
+						if (saveLoadRoot.GetComponent<SimCellOccupier>() != null)
+						{
+							this.Write(keyValuePair2, writer);
+							break;
+						}
+					}
+				}
+			}
+		}
+		foreach (KeyValuePair<Tag, List<SaveLoadRoot>> keyValuePair3 in this.sceneObjects)
+		{
+			int count2 = keyValuePair3.Value.Count;
+			if (count2 > 0)
+			{
+				foreach (SaveLoadRoot saveLoadRoot2 in keyValuePair3.Value)
+				{
+					if (!(saveLoadRoot2 == null))
+					{
+						if (saveLoadRoot2.GetComponent<SimCellOccupier>() == null)
+						{
+							this.Write(keyValuePair3, writer);
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private void Write(KeyValuePair<Tag, List<SaveLoadRoot>> kvp, BinaryWriter writer)
+	{
+		int count = kvp.Value.Count;
+		writer.WriteKleiString(kvp.Key.Name);
+		writer.Write(count);
+		long position = writer.BaseStream.Position;
+		int num = -1;
+		writer.Write(num);
+		long position2 = writer.BaseStream.Position;
+		foreach (SaveLoadRoot saveLoadRoot in kvp.Value)
+		{
+			if (saveLoadRoot != null)
+			{
+				saveLoadRoot.Save(writer);
+			}
+			else
+			{
+				Output.LogWarning(new object[] { "Null game object when saving" });
+			}
+		}
+		long position3 = writer.BaseStream.Position;
+		long num2 = position3 - position2;
+		writer.BaseStream.Position = position;
+		writer.Write((int)num2);
+		writer.BaseStream.Position = position3;
+	}
+
+	public bool Load(IReader reader)
+	{
+		char[] array = reader.ReadChars(SaveManager.SAVE_HEADER.Length);
+		if (array == null || array.Length != SaveManager.SAVE_HEADER.Length)
+		{
+			return false;
+		}
+		for (int i = 0; i < SaveManager.SAVE_HEADER.Length; i++)
+		{
+			if (array[i] != SaveManager.SAVE_HEADER[i])
+			{
+				return false;
+			}
+		}
+		int num = reader.ReadInt32();
+		int num2 = reader.ReadInt32();
+		if (num != 6 || num2 > 0)
+		{
+			Output.LogWarning(new object[] { string.Format("SAVE FILE VERSION MISMATCH! Expected {0}.{1} but got {2}.{3}", new object[] { 6, 0, num, num2 }) });
+			return false;
+		}
+		this.ClearScene();
+		try
+		{
+			int num3 = reader.ReadInt32();
+			for (int j = 0; j < num3; j++)
+			{
+				string text = reader.ReadKleiString();
+				int num4 = reader.ReadInt32();
+				int num5 = reader.ReadInt32();
+				Tag tag = TagManager.Create(text, null);
+				GameObject gameObject;
+				if (!this.prefabMap.TryGetValue(tag, out gameObject))
+				{
+					Output.LogWarning(new object[] { "Could not find prefab '" + text + "'" });
+					reader.SkipBytes(num5);
+				}
+				else
+				{
+					List<SaveLoadRoot> list = new List<SaveLoadRoot>(num4);
+					this.sceneObjects[tag] = list;
+					for (int k = 0; k < num4; k++)
+					{
+						SaveLoadRoot saveLoadRoot = SaveLoadRoot.Load(gameObject, reader);
+						if (saveLoadRoot == null)
+						{
+							Output.LogError(new object[] { "Error loading data [" + text + "]" });
+							return false;
+						}
+					}
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			Output.LogError(new object[]
+			{
+				"Error deserializing prefabs\n\n",
+				ex.ToString()
+			});
+			throw ex;
+		}
+		return true;
+	}
+
+	private void ClearScene()
+	{
+		foreach (KeyValuePair<Tag, List<SaveLoadRoot>> keyValuePair in this.sceneObjects)
+		{
+			foreach (SaveLoadRoot saveLoadRoot in keyValuePair.Value)
+			{
+				global::UnityEngine.Object.Destroy(saveLoadRoot.gameObject);
+			}
+		}
+		this.sceneObjects.Clear();
+	}
+
+	public const int SAVE_MAJOR_VERSION = 6;
+
+	public const int SAVE_MINOR_VERSION = 0;
+
+	private Dictionary<Tag, GameObject> prefabMap = new Dictionary<Tag, GameObject>();
+
+	private Dictionary<Tag, List<SaveLoadRoot>> sceneObjects = new Dictionary<Tag, List<SaveLoadRoot>>();
+
+	private static readonly char[] SAVE_HEADER = new char[] { 'K', 'S', 'A', 'V' };
+
+	private enum BoundaryTag : uint
+	{
+		Component = 3735928559U,
+		Prefab = 3131961357U,
+		Complete = 3735929054U
+	}
+}

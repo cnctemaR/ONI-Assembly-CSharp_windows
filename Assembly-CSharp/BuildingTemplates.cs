@@ -1,0 +1,151 @@
+﻿using System;
+using System.Collections.Generic;
+using Klei.AI;
+using TUNING;
+using UnityEngine;
+
+public class BuildingTemplates
+{
+	public static BuildingDef CreateBuildingDef(string id, int width, int height, string anim, float mass, float construction_time, float[] construction_mass, string[] construction_materials, float melting_point, BuildLocationRule build_location_rule, DecorValues decor, AttributeInfo[] attribute_infos = null)
+	{
+		BuildingDef buildingDef = ScriptableObject.CreateInstance<BuildingDef>();
+		buildingDef.PrefabID = id;
+		buildingDef.InitDef();
+		buildingDef.name = id;
+		buildingDef.Mass = construction_mass;
+		buildingDef.WidthInCells = width;
+		buildingDef.HeightInCells = height;
+		buildingDef.ConstructionTime = construction_time;
+		buildingDef.SceneLayer = Grid.SceneLayer.Building;
+		buildingDef.MaterialCategory = construction_materials;
+		buildingDef.MassForTemperatureModification = mass;
+		buildingDef.BaseMeltingPoint = melting_point;
+		switch (build_location_rule)
+		{
+		case BuildLocationRule.Anywhere:
+		case BuildLocationRule.Tile:
+			buildingDef.ContinuouslyCheckFoundation = false;
+			goto IL_008D;
+		}
+		buildingDef.ContinuouslyCheckFoundation = true;
+		IL_008D:
+		buildingDef.BuildLocationRule = build_location_rule;
+		BuildingTemplates.GetPlanCategory(id, out buildingDef.PlanCategory, out buildingDef.PlanOrder);
+		BuildingTemplates.GetResearchRequirement(id, out buildingDef.RequiredTechName);
+		buildingDef.ObjectLayer = ObjectLayer.Building;
+		buildingDef.AnimFiles = new KAnimFile[] { Assets.GetAnim(anim) };
+		buildingDef.GenerateOffsets();
+		buildingDef.BaseDecor = (float)decor.decor;
+		buildingDef.BaseDecorRadius = (float)decor.radius;
+		if (attribute_infos != null)
+		{
+			foreach (AttributeInfo attributeInfo in attribute_infos)
+			{
+				AttributeModifier attributeModifier = new AttributeModifier(attributeInfo.id, attributeInfo.value, null, false);
+				buildingDef.attributeModifiers.Add(attributeModifier);
+			}
+		}
+		return buildingDef;
+	}
+
+	public static void GetPlanCategory(string id, out string planCategory, out float planOrder)
+	{
+		foreach (KeyValuePair<PlanCategory, string[]> keyValuePair in BUILDINGS.PLANORDER)
+		{
+			string[] value = keyValuePair.Value;
+			for (int i = 0; i < value.Length; i++)
+			{
+				if (value[i] == id)
+				{
+					planCategory = keyValuePair.Key.ToString();
+					planOrder = (float)i;
+					return;
+				}
+			}
+		}
+		Debug.LogWarning("Unassigned planorder for: " + id);
+		planCategory = PlanCategory.Base.ToString();
+		planOrder = 0f;
+	}
+
+	public static void GetResearchRequirement(string id, out string researchName)
+	{
+		foreach (KeyValuePair<string, string[]> keyValuePair in BUILDINGS.RESEARCH)
+		{
+			string[] value = keyValuePair.Value;
+			for (int i = 0; i < value.Length; i++)
+			{
+				if (value[i] == id)
+				{
+					researchName = keyValuePair.Key;
+					return;
+				}
+			}
+		}
+		researchName = string.Empty;
+	}
+
+	public static void CreateStandardBuildingDef(BuildingDef def)
+	{
+		def.Breakable = true;
+		def.ExplosionSize = Overheatable.ExplosionSize.None;
+	}
+
+	public static void CreateElectricalBuildingDef(BuildingDef def)
+	{
+		BuildingTemplates.CreateStandardBuildingDef(def);
+		def.RequiresPower = true;
+		def.ViewMode = SimViewMode.PowerMap;
+		def.MaterialCategory = MATERIALS.ALL_METALS;
+		def.AudioCategory = "HollowMetal";
+	}
+
+	public static Storage CreateDefaultStorage(GameObject go, bool forceCreate = false)
+	{
+		Storage storage = ((!forceCreate) ? go.AddOrGet<Storage>() : go.AddComponent<Storage>());
+		storage.capacityKg = 2000f;
+		storage.disableOnStore = true;
+		return storage;
+	}
+
+	public static void CreateFabricatorStorage(GameObject go, Fabricator fabricator)
+	{
+		fabricator.inStorage = go.AddComponent<Storage>();
+		fabricator.inStorage.capacityKg = 500f;
+		fabricator.inStorage.disableOnStore = true;
+		fabricator.inStorage.showInUI = true;
+		fabricator.buildStorage = go.AddComponent<Storage>();
+		fabricator.buildStorage.capacityKg = 500f;
+		fabricator.buildStorage.disableOnStore = true;
+		fabricator.buildStorage.showInUI = true;
+		fabricator.outStorage = go.AddComponent<Storage>();
+		fabricator.outStorage.capacityKg = 500f;
+		fabricator.outStorage.disableOnStore = true;
+		fabricator.outStorage.showInUI = true;
+		fabricator.outStorage.allowItemRemoval = true;
+	}
+
+	public static void DoPostConfigure(GameObject go)
+	{
+		IEffectDescriptor[] components = go.GetComponents<IEffectDescriptor>();
+		foreach (IEffectDescriptor effectDescriptor in components)
+		{
+			int num = 9999;
+			effectDescriptor.DescriptionOrder = num;
+			KMonoBehaviour kmonoBehaviour = (KMonoBehaviour)effectDescriptor;
+			string name = kmonoBehaviour.GetType().Name;
+			for (int j = 0; j < BUILDINGS.COMPONENT_DESCRIPTION_ORDER.Length; j++)
+			{
+				if (BUILDINGS.COMPONENT_DESCRIPTION_ORDER[j] == name)
+				{
+					effectDescriptor.DescriptionOrder = j;
+					break;
+				}
+			}
+			if (effectDescriptor.DescriptionOrder == num)
+			{
+				Debug.LogWarning("Missing Effect Descriptor Order: " + name);
+			}
+		}
+	}
+}

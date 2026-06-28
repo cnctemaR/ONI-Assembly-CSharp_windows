@@ -1,0 +1,131 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{83FC4951-282C-4D85-AE87-9CE89EFCF18C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>LibNoiseDotNet.Graphics.Tools.Noise</RootNamespace>
+    <AssemblyName>libnoise</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net20</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="Builder\FilterLevel.cs" />
+    <Compile Include="Builder\IBuilderFilter.cs" />
+    <Compile Include="Builder\NoiseMap.cs" />
+    <Compile Include="Builder\NoiseMapBuilder.cs" />
+    <Compile Include="Builder\NoiseMapBuilderCallback.cs" />
+    <Compile Include="Builder\NoiseMapBuilderCylinder.cs" />
+    <Compile Include="Builder\NoiseMapBuilderPlane.cs" />
+    <Compile Include="Builder\NoiseMapBuilderSphere.cs" />
+    <Compile Include="Builder\ShapeFilter.cs" />
+    <Compile Include="CombinerModule.cs" />
+    <Compile Include="Combiner\Add.cs" />
+    <Compile Include="Combiner\Max.cs" />
+    <Compile Include="Combiner\Min.cs" />
+    <Compile Include="Combiner\Multiply.cs" />
+    <Compile Include="Combiner\Power.cs" />
+    <Compile Include="Combiner\Substract.cs" />
+    <Compile Include="FilterModule.cs" />
+    <Compile Include="Filter\Billow.cs" />
+    <Compile Include="Filter\HeterogeneousMultiFractal.cs" />
+    <Compile Include="Filter\HybridMultiFractal.cs" />
+    <Compile Include="Filter\MultiFractal.cs" />
+    <Compile Include="Filter\Pipe.cs" />
+    <Compile Include="Filter\RidgedMultiFractal.cs" />
+    <Compile Include="Filter\SinFractal.cs" />
+    <Compile Include="Filter\SumFractal.cs" />
+    <Compile Include="Filter\Voronoi.cs" />
+    <Compile Include="IMap2D.cs" />
+    <Compile Include="IModule.cs" />
+    <Compile Include="IModule1D.cs" />
+    <Compile Include="IModule2D.cs" />
+    <Compile Include="IModule3D.cs" />
+    <Compile Include="IModule4D.cs" />
+    <Compile Include="Libnoise.cs" />
+    <Compile Include="Model\AbstractModel.cs" />
+    <Compile Include="Model\Cylinder.cs" />
+    <Compile Include="Model\Line.cs" />
+    <Compile Include="Model\Plane.cs" />
+    <Compile Include="Model\Sphere.cs" />
+    <Compile Include="ModifierModule.cs" />
+    <Compile Include="Modifier\Abs.cs" />
+    <Compile Include="Modifier\Blend.cs" />
+    <Compile Include="Modifier\Cache.cs" />
+    <Compile Include="Modifier\Clamp.cs" />
+    <Compile Include="Modifier\ControlPoint.cs" />
+    <Compile Include="Modifier\Curve.cs" />
+    <Compile Include="Modifier\Exponent.cs" />
+    <Compile Include="Modifier\Invert.cs" />
+    <Compile Include="Modifier\ScaleBias.cs" />
+    <Compile Include="Modifier\Select.cs" />
+    <Compile Include="Modifier\Terrace.cs" />
+    <Compile Include="NoiseFilter.cs" />
+    <Compile Include="NoisePrimitive.cs" />
+    <Compile Include="NoiseQuality.cs" />
+    <Compile Include="PrimitiveModule.cs" />
+    <Compile Include="Primitive\BevinsGradient.cs" />
+    <Compile Include="Primitive\BevinsValue.cs" />
+    <Compile Include="Primitive\Checkerboard.cs" />
+    <Compile Include="Primitive\Constant.cs" />
+    <Compile Include="Primitive\Cylinders.cs" />
+    <Compile Include="Primitive\ImprovedPerlin.cs" />
+    <Compile Include="Primitive\SimplexPerlin.cs" />
+    <Compile Include="Primitive\Spheres.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <DependentUpon>Settings.settings</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="Renderer\AbstractHeightmapRenderer.cs" />
+    <Compile Include="Renderer\AbstractImageRenderer.cs" />
+    <Compile Include="Renderer\AbstractRenderer.cs" />
+    <Compile Include="Renderer\Color.cs" />
+    <Compile Include="Renderer\GradientColor.cs" />
+    <Compile Include="Renderer\GradientPoint.cs" />
+    <Compile Include="Renderer\Heightmap16.cs" />
+    <Compile Include="Renderer\Heightmap16Renderer.cs" />
+    <Compile Include="Renderer\Heightmap32.cs" />
+    <Compile Include="Renderer\Heightmap32Renderer.cs" />
+    <Compile Include="Renderer\Heightmap8.cs" />
+    <Compile Include="Renderer\Heightmap8Renderer.cs" />
+    <Compile Include="Renderer\IColor.cs" />
+    <Compile Include="Renderer\Image.cs" />
+    <Compile Include="Renderer\ImageRenderer.cs" />
+    <Compile Include="Renderer\NormalMapRenderer.cs" />
+    <Compile Include="Renderer\RendererCallback.cs" />
+    <Compile Include="SelectorModule.cs" />
+    <Compile Include="Tranformer\Displace.cs" />
+    <Compile Include="Tranformer\RotatePoint.cs" />
+    <Compile Include="Tranformer\ScalePoint.cs" />
+    <Compile Include="Tranformer\TranslatePoint.cs" />
+    <Compile Include="Tranformer\Turbulence.cs" />
+    <Compile Include="TransformerModule.cs" />
+    <Compile Include="Utils\DataMap.cs" />
+    <Compile Include="Writer\AbstractWriter.cs" />
+    <Compile Include="Writer\BMPWriter.cs" />
+    <Compile Include="Writer\Heightmap16RawWriter.cs" />
+    <Compile Include="Writer\Heightmap32RawWriter.cs" />
+    <Compile Include="Writer\Heightmap8RawWriter.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\mscorlib\mscorlib.csproj">
+      <Project>{83FC4951-282C-4D85-AE87-9CE89EFCF190}</Project>
+      <Name>mscorlib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System\System.csproj">
+      <Project>{83FC4951-282C-4D85-AE87-9CE89EFCF197}</Project>
+      <Name>System</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+</Project>

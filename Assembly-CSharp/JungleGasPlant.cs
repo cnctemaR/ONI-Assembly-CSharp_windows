@@ -1,0 +1,117 @@
+﻿using System;
+using UnityEngine;
+
+public class JungleGasPlant : StateMachineComponent<JungleGasPlant.StatesInstance>
+{
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		base.smi.animController.randomiseLoopedOffset = true;
+		base.smi.StartSM();
+	}
+
+	protected void DestroySelf(object callbackParam)
+	{
+		CreatureHelpers.DeselectCreature(base.gameObject);
+		Util.KDestroyGameObject(base.gameObject);
+	}
+
+	[MyCmpReq]
+	private Growing growing;
+
+	[MyCmpReq]
+	private WiltCondition wiltCondition;
+
+	[MyCmpReq]
+	private ElementEmitter elementEmitter;
+
+	public class StatesInstance : GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.GameInstance
+	{
+		public StatesInstance(JungleGasPlant master)
+			: base(master)
+		{
+		}
+	}
+
+	public class States : GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>
+	{
+		public override void InitializeStates(out StateMachine.BaseState default_state)
+		{
+			default_state = this.alive.seed_grow;
+			base.serializable = true;
+			this.root.Enter(delegate(JungleGasPlant.StatesInstance smi)
+			{
+				if (smi.master.growing.Replanted && !this.alive.ForceUpdateStatus(smi.master.gameObject))
+				{
+					smi.GoTo(this.blocked_from_growing);
+				}
+				else
+				{
+					smi.GoTo(this.alive.seed_grow);
+				}
+			});
+			this.dead.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Dead).Enter(delegate(JungleGasPlant.StatesInstance smi)
+			{
+				GameUtil.KInstantiate(EffectPrefabs.Instance.PlantDeath, smi.master.transform.position, Grid.SceneLayer.FXFront, SceneOrganizer.Instance.GetFolder(Folder.FX), null, 0);
+				smi.master.Trigger(1623392196, null);
+				smi.master.GetComponent<KBatchedAnimController>().StopAndClear();
+				global::UnityEngine.Object.Destroy(smi.master.GetComponent<KBatchedAnimController>());
+				smi.Schedule(0.5f, new Action<object>(smi.master.DestroySelf), null);
+			});
+			this.blocked_from_growing.ToggleStatusItem(Db.Get().MiscStatusItems.RegionIsBlocked, null).EventTransition(GameHashes.EntombedChanged, this.alive.seed_grow, (JungleGasPlant.StatesInstance smi) => !smi.master.GetComponent<EntombVulnerable>().GetEntombed).EventTransition(GameHashes.TooColdWarning, this.alive.seed_grow, null)
+				.EventTransition(GameHashes.TooHotWarning, this.alive.seed_grow, null);
+			this.alive.InitializeStates(this.masterTarget, this.dead);
+			this.alive.seed_grow.QueueAnim("seed_grow", false, null).EventTransition(GameHashes.AnimQueueComplete, this.alive.idle, null).EventTransition(GameHashes.Wilt, this.alive.wilting, (JungleGasPlant.StatesInstance smi) => smi.master.wiltCondition.IsWilting());
+			this.alive.idle.EventTransition(GameHashes.Wilt, this.alive.wilting, (JungleGasPlant.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).EventTransition(GameHashes.Grow, this.alive.grown, (JungleGasPlant.StatesInstance smi) => smi.master.growing.IsGrown()).PlayAnim("idle_loop", KAnim.PlayMode.Loop, null);
+			this.alive.grown.defaultState = this.alive.grown.pre;
+			this.alive.grown.EventTransition(GameHashes.Wilt, this.alive.wilting, (JungleGasPlant.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).Enter(delegate(JungleGasPlant.StatesInstance smi)
+			{
+				smi.master.elementEmitter.SetEmitting(true);
+			}).Exit(delegate(JungleGasPlant.StatesInstance smi)
+			{
+				smi.master.elementEmitter.SetEmitting(false);
+			});
+			this.alive.grown.pre.QueueAnim("grow", false, null).OnAnimQueueComplete(this.alive.grown.idle);
+			this.alive.grown.idle.PlayAnim("idle_bloom_loop", KAnim.PlayMode.Loop, null);
+			this.alive.wilting.defaultState = this.alive.wilting.pre;
+			this.alive.wilting.pre.QueueAnim("wilt_pre", false, null).OnAnimQueueComplete(this.alive.wilting.idle).EventTransition(GameHashes.WiltRecover, this.alive.wilting.pst, (JungleGasPlant.StatesInstance smi) => !smi.master.wiltCondition.IsWilting());
+			this.alive.wilting.idle.PlayAnim("idle_wilt_loop", KAnim.PlayMode.Loop, null).EventTransition(GameHashes.WiltRecover, this.alive.wilting.pst, (JungleGasPlant.StatesInstance smi) => !smi.master.wiltCondition.IsWilting());
+			this.alive.wilting.pst.PlayAnim("wilt_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.alive.idle);
+		}
+
+		public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.State blocked_from_growing;
+
+		public JungleGasPlant.States.AliveStates alive;
+
+		public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.State dead;
+
+		public class AliveStates : GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.PlantAliveSubState
+		{
+			public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.State seed_grow;
+
+			public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.State idle;
+
+			public JungleGasPlant.States.WiltingState wilting;
+
+			public JungleGasPlant.States.GrownState grown;
+
+			public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.State destroy;
+		}
+
+		public class GrownState : GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.State
+		{
+			public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.State pre;
+
+			public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.State idle;
+		}
+
+		public class WiltingState : GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.State
+		{
+			public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.State pre;
+
+			public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.State idle;
+
+			public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.State pst;
+		}
+	}
+}

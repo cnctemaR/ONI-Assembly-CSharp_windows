@@ -1,0 +1,23 @@
+﻿using System;
+using System.Runtime.CompilerServices;
+
+namespace UnityEngine.Networking
+{
+	public sealed class ConnectionSimulatorConfig : IDisposable
+	{
+		[WrapperlessIcall]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern ConnectionSimulatorConfig(int outMinDelay, int outAvgDelay, int inMinDelay, int inAvgDelay, float packetLossPercentage);
+
+		[WrapperlessIcall]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern void Dispose();
+
+		~ConnectionSimulatorConfig()
+		{
+			this.Dispose();
+		}
+
+		internal IntPtr m_Ptr;
+	}
+}

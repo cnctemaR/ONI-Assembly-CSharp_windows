@@ -1,0 +1,40 @@
+﻿using System;
+using STRINGS;
+
+public class PrioritizeToolHoverTextCard : HoverTextConfiguration
+{
+	public override void ConfigureHoverScreen()
+	{
+		HoverTextScreen instance = HoverTextScreen.Instance;
+		if (!string.IsNullOrEmpty(this.ActionStringKey))
+		{
+			this.ActionName = Strings.Get(this.ActionStringKey);
+		}
+		instance.ClearLabels();
+		instance.NewLine("spacer", 24);
+		instance.StartShadowBar(0f, 0f, false);
+		if (this.printTitle)
+		{
+			this.ConfigureTitle(instance);
+		}
+		this.ConfigureInstructions(instance);
+		instance.NewLine("PriorityText", 24);
+		this.priorityLine = instance.AddText(string.Empty, this.Styles_Title.Standard, true);
+		instance.EndShadowBar();
+	}
+
+	public override void UpdateHoverElements(KSelectable[] selected)
+	{
+		if (ToolMenuPriorityScreen.Instance == null)
+		{
+			return;
+		}
+		if (this.priorityLine == null)
+		{
+			this.ConfigureHoverScreen();
+		}
+		this.priorityLine.text = string.Format(UI.TOOLS.PRIORITIZE.SPECIFIC_PRIORITY, ToolMenuPriorityScreen.Instance.GetScreenPriority().ToString());
+	}
+
+	private LocText priorityLine;
+}

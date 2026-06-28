@@ -1,0 +1,179 @@
+﻿using System;
+using System.Collections.Generic;
+using Klei.AI;
+using UnityEngine;
+
+public class BuildingComplete : Building
+{
+	public event global::System.Action onCleanUp;
+
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		Vector3 position = this.transform.position;
+		position.z = Grid.GetLayerZ(this.Def.SceneLayer);
+		this.transform.SetPosition(position);
+		base.gameObject.SetLayerRecursively(LayerMask.NameToLayer("Default"));
+		Attributes attributes = this.GetAttributes();
+		foreach (Klei.AI.Attribute attribute in this.Def.attributes)
+		{
+			attributes.Add(attribute);
+		}
+		foreach (AttributeModifier attributeModifier in this.Def.attributeModifiers)
+		{
+			Klei.AI.Attribute attribute2 = Db.Get().BuildingAttributes.Get(attributeModifier.AttributeId);
+			if (attributes.Get(attribute2) == null)
+			{
+				attributes.Add(attribute2);
+			}
+			attributes.Add("Base", attributeModifier);
+		}
+		foreach (AttributeInstance attributeInstance in attributes)
+		{
+			AttributeModifier attributeModifier2 = new AttributeModifier(attributeInstance.Id, attributeInstance.GetTotalValue(), null, false);
+			this.regionModifiers.Add(attributeModifier2);
+		}
+		this.Subscribe(-1503271301, new EventSystem.EventHandler(this.OnSelectObject));
+	}
+
+	private void OnSelectObject(object data)
+	{
+		if (this.Def.SelectMode != SimViewMode.None)
+		{
+			bool flag = (bool)data;
+			GameHashes gameHashes = ((!flag) ? GameHashes.DisableOverlay : GameHashes.EnableOverlay);
+			EventSystem.Trigger(Game.Instance.gameObject, (int)gameHashes, this.Def.SelectMode);
+		}
+	}
+
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+		if (component != null)
+		{
+			component.Offset = this.Def.GetVisualizerOffset();
+			Rotatable component2 = base.GetComponent<Rotatable>();
+			if (component2 != null)
+			{
+				component.Rotation = component2.GetVisualizerRotation();
+				component.Pivot = component2.GetVisualizerPivot();
+			}
+			BoxCollider2D component3 = base.GetComponent<BoxCollider2D>();
+			component3.offset += new Vector2(component.Offset.x, component.Offset.y);
+		}
+		int num = Grid.PosToCell(this.transform.position);
+		if (this.Def.IsFoundation)
+		{
+			foreach (int num2 in base.PlacementCells)
+			{
+				Game.Instance.roomProber.AddFoundationCell(num2);
+				Grid.Foundation[num2] = true;
+			}
+			if (this.Def.PlacementOffsets.Length > 0)
+			{
+				Game.Instance.roomProber.BuildRooms();
+			}
+		}
+		Vector3 vector = Grid.CellToPosCBC(num, this.Def.SceneLayer);
+		this.transform.SetPosition(vector);
+		PrimaryElement component4 = base.GetComponent<PrimaryElement>();
+		if (component4 != null && component4.Mass == 0f)
+		{
+			component4.Mass = this.Def.Mass[0];
+		}
+		this.Def.MarkArea(num, base.Orientation, this.Def.ObjectLayer, base.gameObject);
+		if (this.Def.IsTilePiece)
+		{
+			this.Def.MarkArea(num, base.Orientation, this.Def.TileLayer, base.gameObject);
+			this.Def.RunOnArea(num, base.Orientation, delegate(int c)
+			{
+				TileVisualizer.RefreshCell(c, this.Def.TileLayer);
+			});
+		}
+		SaveLoadRoot component5 = base.GetComponent<SaveLoadRoot>();
+		if (component5 != null)
+		{
+			component5.folder = Folder.Entities;
+		}
+		if (!this.Def.IsTilePiece)
+		{
+		}
+		Texture buildingTexture = component4.Element.substance.buildingTexture;
+		if (buildingTexture != null)
+		{
+			RenderUtil.SetMaterialBlockTexture(this.transform, "_FillTex", buildingTexture);
+		}
+		base.RegisterBlockTileRenderer();
+		for (int j = 0; j < base.PlacementCells.Length; j++)
+		{
+			Region intersectionRegion = Game.Instance.RegionManager.GetIntersectionRegion(base.PlacementCells[j]);
+			if (intersectionRegion != null)
+			{
+				intersectionRegion.AddBuilding(this, true);
+				break;
+			}
+		}
+		Components.BuildingCompletes.Add(this);
+	}
+
+	private string GetInspectSound()
+	{
+		string text = "AI_Inspect_" + base.GetComponent<KPrefabID>().PrefabTag.Name;
+		return GlobalAssets.GetSound(text, false);
+	}
+
+	protected override void OnCleanUp()
+	{
+		if (Game.quitting)
+		{
+			return;
+		}
+		base.OnCleanUp();
+		int num = Grid.PosToCell(this);
+		this.Def.UnmarkArea(num, base.Orientation, this.Def.ObjectLayer, base.gameObject);
+		if (this.Def.IsFoundation)
+		{
+			foreach (CellOffset cellOffset in this.Def.PlacementOffsets)
+			{
+				int num2 = Grid.OffsetCell(num, cellOffset);
+				Game.Instance.roomProber.RemoveFoundationCell(num2);
+				Grid.Foundation[num2] = false;
+			}
+			if (this.Def.PlacementOffsets.Length > 0)
+			{
+				Game.Instance.roomProber.BuildRooms();
+			}
+		}
+		for (int j = 0; j < base.PlacementCells.Length; j++)
+		{
+			Region intersectionRegion = Game.Instance.RegionManager.GetIntersectionRegion(base.PlacementCells[j]);
+			if (intersectionRegion != null)
+			{
+				intersectionRegion.RemoveBuilding(this, true);
+				break;
+			}
+		}
+		Components.BuildingCompletes.Remove(this);
+		base.UnregisterBlockTileRenderer();
+		if (this.onCleanUp != null)
+		{
+			this.onCleanUp();
+		}
+	}
+
+	[MyCmpGet]
+	private Operational operational;
+
+	[MyCmpAdd]
+	private UserMenu userMenu;
+
+	[MyCmpReq]
+	private Modifiers modifiers;
+
+	private bool quitting;
+
+	public bool isManuallyOperated;
+
+	public List<AttributeModifier> regionModifiers = new List<AttributeModifier>();
+}

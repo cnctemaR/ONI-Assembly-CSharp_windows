@@ -1,0 +1,34 @@
+﻿using System;
+
+namespace UnityEngine.EventSystems
+{
+	public class BaseEventData : AbstractEventData
+	{
+		public BaseEventData(EventSystem eventSystem)
+		{
+			this.m_EventSystem = eventSystem;
+		}
+
+		public BaseInputModule currentInputModule
+		{
+			get
+			{
+				return this.m_EventSystem.currentInputModule;
+			}
+		}
+
+		public GameObject selectedObject
+		{
+			get
+			{
+				return this.m_EventSystem.currentSelectedGameObject;
+			}
+			set
+			{
+				this.m_EventSystem.SetSelectedGameObject(value, this);
+			}
+		}
+
+		private readonly EventSystem m_EventSystem;
+	}
+}

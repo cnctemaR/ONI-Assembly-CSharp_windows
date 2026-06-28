@@ -27,7 +27,7 @@ public class ConfirmDialogScreen : KModalScreen
 		}
 	}
 
-	public void PopupConfirmDialog(string text, global::System.Action on_confirm, global::System.Action on_cancel, string configurable_text = null, global::System.Action on_configurable_clicked = null)
+	public void PopupConfirmDialog(string text, global::System.Action on_confirm, global::System.Action on_cancel, string configurable_text = null, global::System.Action on_configurable_clicked = null, string confirm_text = null, string cancel_text = null)
 	{
 		this.confirmAction = on_confirm;
 		this.cancelAction = on_cancel;
@@ -44,6 +44,14 @@ public class ConfirmDialogScreen : KModalScreen
 		if (this.configurableAction != null)
 		{
 			num++;
+		}
+		if (confirm_text != null)
+		{
+			this.confirmButton.GetComponentInChildren<LocText>().text = confirm_text;
+		}
+		if (cancel_text != null)
+		{
+			this.cancelButton.GetComponentInChildren<LocText>().text = cancel_text;
 		}
 		this.confirmButton.GetComponent<KButton>().onClick += this.OnSelect_OK;
 		this.cancelButton.GetComponent<KButton>().onClick += this.OnSelect_CANCEL;

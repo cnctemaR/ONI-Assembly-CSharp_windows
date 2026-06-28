@@ -2,7 +2,9 @@
 using System.IO;
 using FMODUnity;
 using Klei;
+using Steamworks;
 using STRINGS;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -67,6 +69,33 @@ public class MainMenu : KMonoBehaviour
 	{
 		base.OnSpawn();
 		Canvas.ForceUpdateCanvases();
+		this.ShowLanguageConfirmation();
+	}
+
+	private void ShowLanguageConfirmation()
+	{
+		string steamUILanguage = SteamUtils.GetSteamUILanguage();
+		if (steamUILanguage != "schinese")
+		{
+			return;
+		}
+		if (KPlayerPrefs.GetInt("LanguageConfirmationVersion") >= MainMenu.LANGUAGE_CONFIRMATION_VERSION)
+		{
+			return;
+		}
+		KPlayerPrefs.SetInt("LanguageConfirmationVersion", MainMenu.LANGUAGE_CONFIRMATION_VERSION);
+		ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
+		TMP_FontAsset tmp_FontAsset = Resources.Load<TMP_FontAsset>("NotoSansCJKsc-Regular");
+		foreach (LocText locText in confirmDialogScreen.GetComponentsInChildren<LocText>())
+		{
+			locText.font = tmp_FontAsset;
+		}
+		confirmDialogScreen.PopupConfirmDialog("您的 Steam 界面语言设为简体中文。 Klei 10月份将要推出缺氧的中文翻译。您想暂时查看用于您的语言的翻译 Mod 吗？", delegate
+		{
+			Application.OpenURL("http://steamcommunity.com/workshop/filedetails/?id=1142206368");
+		}, delegate
+		{
+		}, null, null, "是", "否");
 	}
 
 	private void ResumeGame()
@@ -130,7 +159,7 @@ public class MainMenu : KMonoBehaviour
 				}
 				SaveGame.Header header;
 				SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(latestSaveFile, out header);
-				if (header.buildVersion > 232512U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 234130U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}
@@ -169,7 +198,7 @@ public class MainMenu : KMonoBehaviour
 		else
 		{
 			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
-			confirmDialogScreen.PopupConfirmDialog(UI.FRONTEND.TRANSLATIONS_SCREEN.NO_STEAM, null, null, null, null);
+			confirmDialogScreen.PopupConfirmDialog(UI.FRONTEND.TRANSLATIONS_SCREEN.NO_STEAM, null, null, null, null, null, null);
 		}
 	}
 
@@ -213,7 +242,7 @@ public class MainMenu : KMonoBehaviour
 		{
 			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
 			confirmDialogScreen.imageGO.GetComponent<Image>().sprite = GlobalResources.Instance().sadDupeAudio;
-			confirmDialogScreen.PopupConfirmDialog(UI.FRONTEND.SUPPORTWARNINGS.AUDIO_DRIVERS, null, null, null, null);
+			confirmDialogScreen.PopupConfirmDialog(UI.FRONTEND.SUPPORTWARNINGS.AUDIO_DRIVERS, null, null, null, null, null, null);
 		}
 	}
 
@@ -234,7 +263,7 @@ public class MainMenu : KMonoBehaviour
 		{
 			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
 			confirmDialogScreen.imageGO.GetComponent<Image>().sprite = GlobalResources.Instance().sadDupe;
-			confirmDialogScreen.PopupConfirmDialog(string.Format(UI.FRONTEND.SUPPORTWARNINGS.SAVE_DIRECTORY_READ_ONLY, savePrefix), null, null, null, null);
+			confirmDialogScreen.PopupConfirmDialog(string.Format(UI.FRONTEND.SUPPORTWARNINGS.SAVE_DIRECTORY_READ_ONLY, savePrefix), null, null, null, null, null, null);
 			flag = true;
 		}
 		if (!flag)
@@ -251,7 +280,7 @@ public class MainMenu : KMonoBehaviour
 				fileStream2.Close();
 				ConfirmDialogScreen confirmDialogScreen2 = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
 				confirmDialogScreen2.imageGO.GetComponent<Image>().sprite = GlobalResources.Instance().sadDupe;
-				confirmDialogScreen2.PopupConfirmDialog(string.Format(UI.FRONTEND.SUPPORTWARNINGS.SAVE_DIRECTORY_INSUFFICIENT_SPACE, savePrefix), null, null, null, null);
+				confirmDialogScreen2.PopupConfirmDialog(string.Format(UI.FRONTEND.SUPPORTWARNINGS.SAVE_DIRECTORY_INSUFFICIENT_SPACE, savePrefix), null, null, null, null, null, null);
 			}
 		}
 		if (File.Exists(savePrefix + text))
@@ -285,4 +314,6 @@ public class MainMenu : KMonoBehaviour
 	private float lastUpdateTime;
 
 	private GameObject GameSettingsScreen;
+
+	private static int LANGUAGE_CONFIRMATION_VERSION = 1;
 }

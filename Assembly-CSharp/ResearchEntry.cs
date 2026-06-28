@@ -333,19 +333,19 @@ public class ResearchEntry : KMonoBehaviour
 		}
 	}
 
-	[Header("Labels")]
 	[SerializeField]
+	[Header("Labels")]
 	private LocText researchName;
 
-	[SerializeField]
 	[Header("Transforms")]
+	[SerializeField]
 	private Transform progressBarContainer;
 
 	[SerializeField]
 	private Transform lineContainer;
 
-	[SerializeField]
 	[Header("Prefabs")]
+	[SerializeField]
 	private GameObject iconPanel;
 
 	[SerializeField]

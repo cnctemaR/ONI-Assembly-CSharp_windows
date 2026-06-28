@@ -282,15 +282,15 @@ public class DebugPaintElementScreen : KScreen
 
 	private bool blockInput;
 
-	[SerializeField]
 	[Header("Popup Buttons")]
+	[SerializeField]
 	private KButton elementButton;
 
 	[SerializeField]
 	private KButton diseaseButton;
 
-	[SerializeField]
 	[Header("Popup Menus")]
+	[SerializeField]
 	private KPopupMenu elementPopup;
 
 	[SerializeField]
@@ -306,8 +306,8 @@ public class DebugPaintElementScreen : KScreen
 	[SerializeField]
 	private InputField diseaseCountInput;
 
-	[SerializeField]
 	[Header("Tool Buttons")]
+	[SerializeField]
 	private KButton paintButton;
 
 	[SerializeField]

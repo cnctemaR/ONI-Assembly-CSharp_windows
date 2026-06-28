@@ -338,7 +338,7 @@ public class KCrashReporter : MonoBehaviour
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
 			error.fullstack = "UNITY_OUTPUT:\n" + msg;
-			error.build = 232512;
+			error.build = 234130;
 			error.log = KCrashReporter.GetLogContents();
 			error.summaryline = text4;
 			error.user_message = userMessage;
@@ -365,7 +365,7 @@ public class KCrashReporter : MonoBehaviour
 			if (confirm_prefab != null)
 			{
 				ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)KScreenManager.Instance.StartScreen(confirm_prefab.gameObject, null);
-				confirmDialogScreen.PopupConfirmDialog("Reported Error", null, null, null, null);
+				confirmDialogScreen.PopupConfirmDialog("Reported Error", null, null, null, null, null, null);
 			}
 			text6 = empty;
 		}

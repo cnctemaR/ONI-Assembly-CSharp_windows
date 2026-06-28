@@ -366,14 +366,14 @@ public class CircuitManager
 		return joules_needed;
 	}
 
-	private float GetBatteryChargeCapacity(IList<Battery> batteries, out int num_to_charge)
+	private float GetBatteryChargeCapacity(Generator g, IList<Battery> batteries, out int num_to_charge)
 	{
 		float num = 0f;
 		num_to_charge = 0;
 		for (int i = 0; i < batteries.Count; i++)
 		{
 			Battery battery = batteries[i];
-			if (battery.Capacity > battery.JoulesAvailable)
+			if (battery.gameObject != g.gameObject && battery.Capacity > battery.JoulesAvailable)
 			{
 				num = battery.Capacity - battery.JoulesAvailable;
 				num_to_charge = batteries.Count - i;
@@ -400,7 +400,7 @@ public class CircuitManager
 	private bool ChargeBattery(Generator g, IList<Battery> batteries)
 	{
 		int num;
-		float batteryChargeCapacity = this.GetBatteryChargeCapacity(batteries, out num);
+		float batteryChargeCapacity = this.GetBatteryChargeCapacity(g, batteries, out num);
 		if (batteryChargeCapacity <= 0f)
 		{
 			return false;
@@ -410,7 +410,10 @@ public class CircuitManager
 		for (int i = batteries.Count - num; i < batteries.Count; i++)
 		{
 			Battery battery = batteries[i];
-			battery.AddEnergy(num2);
+			if (g.gameObject != battery.gameObject)
+			{
+				battery.AddEnergy(num2);
+			}
 		}
 		return true;
 	}

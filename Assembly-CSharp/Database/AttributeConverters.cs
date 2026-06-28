@@ -14,7 +14,7 @@ namespace Database
 			this.DiggingSpeed = this.Create("DiggingSpeed", "Digging Speed", DUPLICANTS.ATTRIBUTES.DIGGING.SPEEDMODIFIER, "Digging", 0.25f, 0f, toPercentAttributeFormatter);
 			this.MachinerySpeed = this.Create("MachinerySpeed", "Machinery Speed", DUPLICANTS.ATTRIBUTES.MACHINERY.SPEEDMODIFIER, "Machinery", 0.1f, 0f, toPercentAttributeFormatter);
 			this.TemperatureInsulation = this.Create("TemperatureInsulation", "Temperature Insulation", DUPLICANTS.ATTRIBUTES.INSULATION.SPEEDMODIFIER, "Insulation", 0.1f, 0f, toPercentAttributeFormatter);
-			this.ResearchSpeed = this.Create("ResearchSpeed", "Research Speed", DUPLICANTS.ATTRIBUTES.LEARNING.RESEARCHSPEED, "Learning", 0.1f, 0f, toPercentAttributeFormatter);
+			this.ResearchSpeed = this.Create("ResearchSpeed", "Research Speed", DUPLICANTS.ATTRIBUTES.LEARNING.RESEARCHSPEED, "Learning", 0.4f, 0f, toPercentAttributeFormatter);
 			this.TrainingSpeed = this.Create("TrainingSpeed", "Training Speed", DUPLICANTS.ATTRIBUTES.LEARNING.SPEEDMODIFIER, "Learning", 0.1f, 0f, toPercentAttributeFormatter);
 			this.CookingSpeed = this.Create("CookingSpeed", "Cooking Speed", DUPLICANTS.ATTRIBUTES.COOKING.SPEEDMODIFIER, "Cooking", 0.1f, 0f, toPercentAttributeFormatter);
 			this.ArtSpeed = this.Create("ArtSpeed", "Art Speed", DUPLICANTS.ATTRIBUTES.ART.SPEEDMODIFIER, "Art", 0.1f, 0f, toPercentAttributeFormatter);

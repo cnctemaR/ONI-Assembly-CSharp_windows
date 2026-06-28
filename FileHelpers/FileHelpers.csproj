@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{B3F37800-5319-4325-B591-99335A49EBF3}</ProjectGuid>
+    <ProjectGuid>{5C59EAFB-3DA4-4372-AF15-F5A6042354E0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>FileHelpers</RootNamespace>
     <AssemblyName>FileHelpers</AssemblyName>
@@ -176,19 +176,19 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{B3F37800-5319-4325-B591-99335A49EBFC}</Project>
+      <Project>{5C59EAFB-3DA4-4372-AF15-F5A6042354E9}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Data\System.Data.csproj">
-      <Project>{B3F37800-5319-4325-B591-99335A49EC02}</Project>
+      <Project>{5C59EAFB-3DA4-4372-AF15-F5A6042354EF}</Project>
       <Name>System.Data</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{B3F37800-5319-4325-B591-99335A49EC09}</Project>
+      <Project>{5C59EAFB-3DA4-4372-AF15-F5A6042354F6}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{B3F37800-5319-4325-B591-99335A49EC03}</Project>
+      <Project>{5C59EAFB-3DA4-4372-AF15-F5A6042354F0}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

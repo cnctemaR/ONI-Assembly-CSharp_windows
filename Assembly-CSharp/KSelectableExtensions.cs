@@ -5,7 +5,7 @@ public static class KSelectableExtensions
 {
 	public static string GetProperName(this Component cmp)
 	{
-		if (cmp.gameObject != null)
+		if (cmp != null && cmp.gameObject != null)
 		{
 			return cmp.gameObject.GetProperName();
 		}
@@ -14,16 +14,23 @@ public static class KSelectableExtensions
 
 	public static string GetProperName(this GameObject go)
 	{
-		KSelectable component = go.GetComponent<KSelectable>();
-		if (component != null)
+		if (go != null)
 		{
-			return component.GetName();
+			KSelectable component = go.GetComponent<KSelectable>();
+			if (component != null)
+			{
+				return component.GetName();
+			}
 		}
-		return go.name;
+		return string.Empty;
 	}
 
 	public static string GetProperName(this KSelectable cmp)
 	{
-		return cmp.GetName();
+		if (cmp != null)
+		{
+			return cmp.GetName();
+		}
+		return string.Empty;
 	}
 }

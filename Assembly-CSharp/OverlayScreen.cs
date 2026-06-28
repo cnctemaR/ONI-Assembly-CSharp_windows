@@ -477,7 +477,10 @@ public class OverlayScreen : KMonoBehaviour
 			if (!(gameObject2 == null))
 			{
 				KBatchedAnimController component3 = gameObject2.GetComponent<KBatchedAnimController>();
-				component3.HighlightColour = color;
+				if (component3 != null)
+				{
+					component3.HighlightColour = color;
+				}
 			}
 		}
 	}

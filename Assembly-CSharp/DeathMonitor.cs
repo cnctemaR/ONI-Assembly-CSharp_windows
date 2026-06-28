@@ -20,6 +20,10 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 		this.dead.Enter("ApplyDeath", delegate(DeathMonitor.Instance smi)
 		{
 			Death death2 = this.death.Get(smi);
+			if (death2 == null)
+			{
+				death2 = Db.Get().Deaths.Generic;
+			}
 			smi.GetComponent<KAnimControllerBase>().Play(death2.loopAnim, KAnim.PlayMode.Once, 1f, 0f);
 		});
 	}

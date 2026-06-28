@@ -36,14 +36,18 @@ public class Infrared : MonoBehaviour
 	public void SetMode(Infrared.Mode mode)
 	{
 		Vector4 zero;
-		if (mode != Infrared.Mode.Disabled)
+		switch (mode)
 		{
-			zero = new Vector4(1f, 0f, 0f, 0f);
-		}
-		else
-		{
+		case Infrared.Mode.Disabled:
 			zero = Vector4.zero;
+			goto IL_006E;
+		case Infrared.Mode.Disease:
+			zero = new Vector4(1f, 0f, 0f, 0f);
+			GameComps.InfraredVisualizers.ClearOverlayColour();
+			goto IL_006E;
 		}
+		zero = new Vector4(1f, 0f, 0f, 0f);
+		IL_006E:
 		Shader.SetGlobalVector("_ColouredOverlayParameters", zero);
 		this.mode = mode;
 		this.UpdateState();
@@ -66,7 +70,6 @@ public class Infrared : MonoBehaviour
 			GameComps.InfraredVisualizers.UpdateTemperature();
 			break;
 		case Infrared.Mode.Disease:
-			GameComps.InfraredVisualizers.ClearOverlayColour();
 			GameComps.DiseaseContainers.UpdateOverlayColours();
 			break;
 		}

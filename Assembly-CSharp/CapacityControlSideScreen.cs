@@ -75,8 +75,8 @@ public class CapacityControlSideScreen : SideScreenContent
 
 	private IUserControlledCapacity target;
 
-	[Header("Slider")]
 	[SerializeField]
+	[Header("Slider")]
 	private KSlider slider;
 
 	[SerializeField]

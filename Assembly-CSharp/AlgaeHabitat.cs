@@ -15,6 +15,10 @@ public class AlgaeHabitat : StateMachineComponent<AlgaeHabitat.SMInstance>
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
+		GameScheduler.Instance.Schedule("WaterFetchingTutorial", 2f, delegate(object obj)
+		{
+			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_FetchingWater);
+		}, null, null);
 	}
 
 	[MyCmpGet]

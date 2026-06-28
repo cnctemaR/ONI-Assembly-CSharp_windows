@@ -158,8 +158,8 @@ public class ManualGenerator : Workable, IBatteryRefillControl
 
 	private const float batteryStopRunningPercent = 1f;
 
-	[SerializeField]
 	[Serialize]
+	[SerializeField]
 	private float batteryRefillPercent = 0.5f;
 
 	[MyCmpReq]

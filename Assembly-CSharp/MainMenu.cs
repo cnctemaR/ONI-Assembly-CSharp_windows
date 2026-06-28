@@ -38,7 +38,6 @@ public class MainMenu : KMonoBehaviour
 			this.patchNotesScreen.SetActive(true);
 		}
 		this.lastUpdateTime = Time.unscaledTime;
-		KPlayerPrefs.DeleteKey(Game.BaseAlreadyCreatedKey);
 	}
 
 	public void RefreshMainMenu()
@@ -131,7 +130,7 @@ public class MainMenu : KMonoBehaviour
 				}
 				SaveGame.Header header;
 				SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(latestSaveFile, out header);
-				if (header.buildVersion > 230587U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 230787U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}

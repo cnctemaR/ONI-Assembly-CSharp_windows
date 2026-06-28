@@ -212,6 +212,10 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 			base.OnPrefabInit();
 			this.resetProgressOnStop = true;
 			this.shouldTransferDiseaseWithWorker = false;
+			GameScheduler.Instance.Schedule("WaterFetchingTutorial", 2f, delegate(object obj)
+			{
+				Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_FetchingWater);
+			}, null, null);
 		}
 
 		protected override void OnStartWork(Worker worker)

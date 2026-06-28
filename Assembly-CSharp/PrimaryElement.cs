@@ -411,8 +411,8 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 
 	private float _units = 1f;
 
-	[SerializeField]
 	[Serialize]
+	[SerializeField]
 	private float _Temperature;
 
 	[Serialize]

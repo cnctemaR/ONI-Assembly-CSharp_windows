@@ -52,8 +52,8 @@ public class WorldGaps
 	[Serialize]
 	public WorldGaps.State state = WorldGaps.State.EnabledOff;
 
-	[SerializeField]
 	[Serialize]
+	[SerializeField]
 	public HashSet<int> voidCells;
 
 	[Serialize]

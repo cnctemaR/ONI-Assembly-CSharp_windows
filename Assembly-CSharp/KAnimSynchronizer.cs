@@ -40,6 +40,10 @@ public class KAnimSynchronizer
 		{
 			return;
 		}
+		if (controller == null)
+		{
+			return;
+		}
 		KAnim.Anim currentAnim = this.masterController.GetCurrentAnim();
 		if (currentAnim == null)
 		{

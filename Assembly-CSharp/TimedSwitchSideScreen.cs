@@ -212,8 +212,8 @@ public class TimedSwitchSideScreen : SideScreenContent
 	[SerializeField]
 	private KButton offButton;
 
-	[Header("On Time")]
 	[SerializeField]
+	[Header("On Time")]
 	private KButton onTimeIncreaseButton;
 
 	[SerializeField]
@@ -225,8 +225,8 @@ public class TimedSwitchSideScreen : SideScreenContent
 	[SerializeField]
 	private Image onTimeBG;
 
-	[Header("Off Time")]
 	[SerializeField]
+	[Header("Off Time")]
 	private KButton offTimeIncreaseButton;
 
 	[SerializeField]

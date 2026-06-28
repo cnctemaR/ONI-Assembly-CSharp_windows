@@ -152,8 +152,8 @@ public class Substance
 
 	public GameObject hitEffect;
 
-	[EventRef]
 	[FormerlySerializedAs("fallingStartSoundMigrated")]
+	[EventRef]
 	public string fallingStartSound;
 
 	[EventRef]

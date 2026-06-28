@@ -11,6 +11,7 @@ public class AutoDisinfectable : Workable
 		this.faceTargetWhenWorking = true;
 		this.synchronizeAnims = false;
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Disinfecting;
+		this.resetProgressOnStop = true;
 	}
 
 	protected override void OnSpawn()
@@ -23,6 +24,10 @@ public class AutoDisinfectable : Workable
 
 	private void Update()
 	{
+		if (KMonoBehaviour.isLoadingScene)
+		{
+			return;
+		}
 		this.RefreshChore();
 	}
 
@@ -40,7 +45,7 @@ public class AutoDisinfectable : Workable
 		{
 			if (this.chore == null && this.primaryElement.DiseaseCount > SaveGame.Instance.minGermCountForDisinfect)
 			{
-				this.chore = new WorkChore<Disinfectable>(Db.Get().ChoreTypes.Disinfect, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true);
+				this.chore = new WorkChore<AutoDisinfectable>(Db.Get().ChoreTypes.Disinfect, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true);
 			}
 			else if (this.primaryElement.DiseaseCount < SaveGame.Instance.minGermCountForDisinfect && this.chore != null)
 			{

@@ -124,10 +124,10 @@ public class DiseaseContainers : KGameObjectComponentManager<DiseaseContainer>
 			KBatchedAnimController controller = diseaseContainer.controller;
 			if (controller != null)
 			{
+				Color32 color2 = color;
 				Vector3 position = controller.transform.position;
 				if (visibleArea.Min <= position && position <= visibleArea.Max)
 				{
-					Color32 color2 = color;
 					int num = 0;
 					if (diseaseContainer.diseaseIdx != 255)
 					{
@@ -169,8 +169,8 @@ public class DiseaseContainers : KGameObjectComponentManager<DiseaseContainer>
 							color2.a = byte.MaxValue;
 						}
 					}
-					diseaseContainer.controller.OverlayColour = color2;
 				}
+				controller.OverlayColour = color2;
 			}
 		}
 	}

@@ -16,6 +16,15 @@ public class MicrobeMusher : Fabricator
 		this.meter.meterController.GetComponent<KBatchedAnimTracker>().skipInitialDisable = true;
 	}
 
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		GameScheduler.Instance.Schedule("WaterFetchingTutorial", 2f, delegate(object obj)
+		{
+			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_FetchingWater);
+		}, null, null);
+	}
+
 	protected override void OnBuildQueued(Fabricator.MachineOrder order)
 	{
 		base.OnBuildQueued(order);

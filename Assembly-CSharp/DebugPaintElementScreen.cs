@@ -289,15 +289,15 @@ public class DebugPaintElementScreen : KScreen
 	[SerializeField]
 	private KButton diseaseButton;
 
-	[Header("Popup Menus")]
 	[SerializeField]
+	[Header("Popup Menus")]
 	private KPopupMenu elementPopup;
 
 	[SerializeField]
 	private KPopupMenu diseasePopup;
 
-	[SerializeField]
 	[Header("Value Inputs")]
+	[SerializeField]
 	private InputField massPressureInput;
 
 	[SerializeField]

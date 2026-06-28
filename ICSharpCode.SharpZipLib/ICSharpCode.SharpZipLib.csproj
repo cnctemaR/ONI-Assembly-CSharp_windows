@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{FF6A2606-2174-4A33-BAEC-0BF4AA723CC8}</ProjectGuid>
+    <ProjectGuid>{D805914D-024F-4801-857C-8544E6154E59}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>ICSharpCode.SharpZipLib</RootNamespace>
     <AssemblyName>ICSharpCode.SharpZipLib</AssemblyName>
@@ -118,11 +118,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{FF6A2606-2174-4A33-BAEC-0BF4AA723CCE}</Project>
+      <Project>{D805914D-024F-4801-857C-8544E6154E5F}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{FF6A2606-2174-4A33-BAEC-0BF4AA723CD5}</Project>
+      <Project>{D805914D-024F-4801-857C-8544E6154E66}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

@@ -151,8 +151,8 @@ public class ThresholdSwitchSideScreen : SideScreenContent
 	[SerializeField]
 	private KToggle belowToggle;
 
-	[SerializeField]
 	[Header("Slider")]
+	[SerializeField]
 	private KSlider thresholdSlider;
 
 	[SerializeField]

@@ -143,10 +143,9 @@ public class Game : KMonoBehaviour
 		TagManager.FillMissingProperNames();
 		CameraController.Instance.SetOrthographicsSize(20f);
 		this.customSettings = global::UnityEngine.Object.FindObjectOfType<CustomGameSettings>();
-		if (KPlayerPrefs.HasKey(Game.BaseAlreadyCreatedKey))
+		if (SaveLoader.Instance.loadedFromSave)
 		{
 			this.baseAlreadyCreated = true;
-			KPlayerPrefs.DeleteKey(Game.BaseAlreadyCreatedKey);
 			this.Trigger(-1992507039, null);
 			this.Trigger(-838649377, null);
 		}
@@ -781,7 +780,6 @@ public class Game : KMonoBehaviour
 	{
 		Game.Settings settings = new Game.Settings();
 		deserializer.Deserialize(settings);
-		KPlayerPrefs.SetInt(Game.BaseAlreadyCreatedKey, (!settings.baseAlreadyCreated) ? 0 : 1);
 		KPlayerPrefs.SetInt(Game.NextUniqueIDKey, settings.nextUniqueID);
 		KleiMetrics.SetGameID(settings.gameID);
 	}

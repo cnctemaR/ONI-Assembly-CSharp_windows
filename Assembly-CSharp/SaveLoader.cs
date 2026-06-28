@@ -13,6 +13,8 @@ using UnityEngine;
 
 public class SaveLoader : KMonoBehaviour
 {
+	public bool loadedFromSave { get; private set; }
+
 	public static SaveLoader Instance { get; private set; }
 
 	public global::System.Action OnWorldGenComplete { get; set; }
@@ -52,6 +54,7 @@ public class SaveLoader : KMonoBehaviour
 			Sim.SIM_Initialize(null);
 			SimMessages.CreateSimElementsTable(ElementLoader.elements);
 			SimMessages.CreateDiseaseTable();
+			this.loadedFromSave = true;
 			this.loadedFromSave = this.Load(activeSaveFilePath);
 			this.saveFileCorrupt = !this.loadedFromSave;
 			if (!this.loadedFromSave)
@@ -556,8 +559,6 @@ public class SaveLoader : KMonoBehaviour
 
 	[MyCmpGet]
 	private GridSettings gridSettings;
-
-	private bool loadedFromSave;
 
 	private bool saveFileCorrupt;
 

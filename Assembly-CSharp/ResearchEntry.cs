@@ -373,8 +373,8 @@ public class ResearchEntry : KMonoBehaviour
 	[SerializeField]
 	private Sprite completedBG;
 
-	[Header("Colors")]
 	[SerializeField]
+	[Header("Colors")]
 	private Color defaultColor = Color.blue;
 
 	[SerializeField]

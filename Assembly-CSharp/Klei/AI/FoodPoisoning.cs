@@ -36,7 +36,8 @@ namespace Klei.AI
 			});
 			base.AddGrowthRule(new Disease.StateGrowthRule(Element.State.Solid)
 			{
-				populationHalfLife = new float?(3000f),
+				populationHalfLife = new float?(300f),
+				overPopulationHalfLife = new float?(10f),
 				minDiffusionCount = new int?(1000000)
 			});
 			base.AddGrowthRule(new Disease.ElementGrowthRule(SimHashes.ToxicSand)
@@ -88,7 +89,7 @@ namespace Klei.AI
 			});
 			base.AddGrowthRule(new Disease.TagGrowthRule(GameTags.Edible)
 			{
-				populationHalfLife = new float?(-3000f),
+				populationHalfLife = new float?(-12000f),
 				overPopulationHalfLife = new float?(float.PositiveInfinity)
 			});
 			base.AddGrowthRule(new Disease.TagGrowthRule(GameTags.Pickled)
@@ -169,6 +170,10 @@ namespace Klei.AI
 					ChoreProvider chore_provider = this.go.GetComponent<ChoreProvider>();
 					this.vomitHandle = GameScheduler.Instance.Schedule("Vomit", 200f, delegate(object data)
 					{
+						if (chore_provider == null)
+						{
+							return;
+						}
 						if (!this.diseaseInstance.IsDoctored)
 						{
 							this.chore = new VomitChore(Db.Get().ChoreTypes.Vomit, chore_provider, Db.Get().DuplicantStatusItems.Vomiting, this.vomiting, delegate(Chore unused)

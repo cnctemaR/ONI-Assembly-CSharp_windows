@@ -65,6 +65,8 @@ public class Components
 
 	public static Components.Cmps<Clinic> Clinics = new Components.Cmps<Clinic>();
 
+	public static Components.Cmps<HandSanitizer> HandSanitizers = new Components.Cmps<HandSanitizer>();
+
 	public class Cmps<T> : IEnumerable, IEnumerable<T>
 	{
 		public Cmps()

@@ -1,6 +1,5 @@
 ﻿using System;
 using KSerialization;
-using STRINGS;
 
 public class Disinfectable : Workable
 {
@@ -21,14 +20,14 @@ public class Disinfectable : Workable
 		{
 			this.MarkForDisinfect(true);
 		}
-		base.SetWorkTime(35f);
+		base.SetWorkTime(10f);
 		this.shouldTransferDiseaseWithWorker = false;
 	}
 
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
-		this.diseasePerSecond = (float)base.GetComponent<PrimaryElement>().DiseaseCount / 35f;
+		this.diseasePerSecond = (float)base.GetComponent<PrimaryElement>().DiseaseCount / 10f;
 	}
 
 	protected override bool OnWorkTick(Worker worker, float dt)
@@ -59,7 +58,7 @@ public class Disinfectable : Workable
 		}
 		else
 		{
-			base.SetWorkTime(35f);
+			base.SetWorkTime(10f);
 			this.MarkForDisinfect(false);
 		}
 	}
@@ -98,25 +97,6 @@ public class Disinfectable : Workable
 
 	private void OnRefreshUserMenu(object data)
 	{
-		if (!this.isMarkedForDisinfect)
-		{
-			bool flag = base.GetComponent<PrimaryElement>().DiseaseIdx != byte.MaxValue;
-			string text = BUILDINGS.DISINFECTABLE.ENABLE_DISINFECT.TOOLTIP;
-			if (!flag)
-			{
-				text = BUILDINGS.DISINFECTABLE.NO_DISEASE.TOOLTIP;
-			}
-			UserMenu userMenu = this.userMenu;
-			string text2 = text;
-			bool flag2 = flag;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_disinfect", BUILDINGS.DISINFECTABLE.ENABLE_DISINFECT.NAME, new global::System.Action(this.ToggleMarkForDisinfect), global::Action.NumActions, null, null, null, text2, flag2), 1f);
-		}
-		else
-		{
-			UserMenu userMenu2 = this.userMenu;
-			string text2 = BUILDINGS.DISINFECTABLE.DISABLE_DISINFECT.TOOLTIP;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_disinfect", BUILDINGS.DISINFECTABLE.DISABLE_DISINFECT.NAME, new global::System.Action(this.ToggleMarkForDisinfect), global::Action.NumActions, null, null, null, text2, true), 1f);
-		}
 	}
 
 	private void OnCancel(object data)
@@ -124,7 +104,7 @@ public class Disinfectable : Workable
 		this.CancelDisinfection();
 	}
 
-	private const float MAX_WORK_TIME = 35f;
+	private const float MAX_WORK_TIME = 10f;
 
 	[MyCmpGet]
 	private UserMenu userMenu;

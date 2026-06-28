@@ -418,8 +418,8 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	[Tooltip("What layer does the dupe switch to when interacting with the building")]
 	public Grid.SceneLayer workLayer = Grid.SceneLayer.Move;
 
-	[SerializeField]
 	[Serialize]
+	[SerializeField]
 	protected float workTimeRemaining = float.PositiveInfinity;
 
 	[SerializeField]
@@ -429,8 +429,8 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	[Tooltip("Whether to user the KAnimSynchronizer or not")]
 	public bool synchronizeAnims = true;
 
-	[SerializeField]
 	[Tooltip("Whether to display number of uses in the details panel")]
+	[SerializeField]
 	public bool trackUses;
 
 	[Serialize]

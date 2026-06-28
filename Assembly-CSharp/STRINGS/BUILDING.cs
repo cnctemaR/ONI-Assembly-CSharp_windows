@@ -44,14 +44,14 @@ namespace STRINGS
 			{
 				public static class ALLOWED
 				{
-					public static LocString NAME = "Bottler Delivery: On";
+					public static LocString NAME = "Liquid Bottler Delivery: On";
 
 					public static LocString TOOLTIP = "Duplicants may fetch bottled liquid from bottling stations to bring to this location";
 				}
 
 				public static class DENIED
 				{
-					public static LocString NAME = "Bottler Delivery: Off";
+					public static LocString NAME = "Liquid Bottler Delivery: Off";
 
 					public static LocString TOOLTIP = "Duplicants may not fetch bottled liquid from bottling stations to bring to this location";
 				}

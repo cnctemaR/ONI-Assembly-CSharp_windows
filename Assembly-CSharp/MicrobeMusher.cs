@@ -41,6 +41,11 @@ public class MicrobeMusher : Fabricator
 		GameObject gameObject = base.CompleteOrder(completed_order);
 		gameObject.transform.Translate(this.mushbarSpawnOffset);
 		gameObject.SetActive(true);
+		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+		if (component != null && component.DiseaseCount > 0)
+		{
+			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_DiseaseCooking);
+		}
 		this.workTimeRemaining = this.GetWorkTime();
 		this.UpdateMeter();
 		return gameObject;

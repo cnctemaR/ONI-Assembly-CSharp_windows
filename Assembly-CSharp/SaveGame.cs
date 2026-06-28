@@ -57,7 +57,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		}
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		header = default(SaveGame.Header);
-		header.buildVersion = 230042U;
+		header.buildVersion = 230103U;
 		header.headerSize = bytes.Length;
 		header.headerVersion = 1U;
 		header.compression = ((!isCompressed) ? 0 : 1);
@@ -117,6 +117,9 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 
 	[Serialize]
 	public List<Tag> expandedResourceTags = new List<Tag>();
+
+	[Serialize]
+	public int minGermCountForDisinfect = 10000;
 
 	private string baseName;
 

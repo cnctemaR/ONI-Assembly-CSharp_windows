@@ -28,7 +28,7 @@ public class HandSanitizerConfig : IBuildingConfig
 		handSanitizer.diseaseRemovalCount = 480000;
 		HandSanitizer.Work work = go.AddOrGet<HandSanitizer.Work>();
 		work.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_handsanitizer_kanim") };
-		work.workTime = 10.200001f;
+		work.workTime = 3.5f;
 		work.trackUses = true;
 		Storage storage = go.AddOrGet<Storage>();
 		storage.defaultStoredItemModifers = HandSanitizerConfig.StoredItemModifiers;
@@ -52,6 +52,8 @@ public class HandSanitizerConfig : IBuildingConfig
 	private const float MASS_PER_USE = 0.07f;
 
 	private const int DISEASE_REMOVAL_COUNT = 480000;
+
+	private const float WORK_TIME = 3.5f;
 
 	private const SimHashes CONSUMED_ELEMENT = SimHashes.BleachStone;
 

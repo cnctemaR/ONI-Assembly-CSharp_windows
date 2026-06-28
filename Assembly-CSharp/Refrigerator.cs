@@ -30,10 +30,6 @@ public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IGameObject
 	{
 		bool isOperational = this.operational.IsOperational;
 		this.operational.SetActive(isOperational, false);
-		if (isOperational != base.enabled)
-		{
-			base.enabled = isOperational;
-		}
 	}
 
 	public bool IsActive()
@@ -43,6 +39,10 @@ public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IGameObject
 
 	private void SimUpdate(float dt)
 	{
+		if (!this.IsActive())
+		{
+			return;
+		}
 		this.temperatureAdjuster.Update(dt);
 	}
 

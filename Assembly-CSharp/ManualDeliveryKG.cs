@@ -4,8 +4,8 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-[SkipSaveFileSerialization]
 [SerializationConfig(MemberSerialization.OptIn)]
+[SkipSaveFileSerialization]
 public class ManualDeliveryKG : KMonoBehaviour
 {
 	public float Capacity

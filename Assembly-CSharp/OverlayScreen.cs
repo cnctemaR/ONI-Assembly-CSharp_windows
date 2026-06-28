@@ -1127,8 +1127,8 @@ public class OverlayScreen : KMonoBehaviour
 
 	public static OverlayScreen Instance;
 
-	[SerializeField]
 	[Header("Power")]
+	[SerializeField]
 	private Canvas powerLabelParent;
 
 	[SerializeField]
@@ -1163,8 +1163,8 @@ public class OverlayScreen : KMonoBehaviour
 
 	private List<BatteryUI> batteryUIList;
 
-	[SerializeField]
 	[Header("Circuits")]
+	[SerializeField]
 	private Color32 circuitUnpoweredColour;
 
 	[SerializeField]
@@ -1173,8 +1173,8 @@ public class OverlayScreen : KMonoBehaviour
 	[SerializeField]
 	private Color32 circuitStrainingColour;
 
-	[Header("Crops")]
 	[SerializeField]
+	[Header("Crops")]
 	private Canvas harvestableUIParent;
 
 	[SerializeField]
@@ -1184,8 +1184,8 @@ public class OverlayScreen : KMonoBehaviour
 
 	private List<GameObject> harvestableNotificationList;
 
-	[Header("Disease")]
 	[SerializeField]
+	[Header("Disease")]
 	private Canvas diseaseUIParent;
 
 	[SerializeField]

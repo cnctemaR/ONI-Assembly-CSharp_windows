@@ -54,7 +54,14 @@ public class Tutorial : KMonoBehaviour
 		item.notification = new Notification(MISC.NOTIFICATIONS.THERMALCOMFORT.NAME, NotificationType.Tutorial, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.THERMALCOMFORT.TOOLTIP.text, null, true, 0f, null, null, null);
 		list5.Add(item);
 		this.itemTree.Add(list3);
-		List<Tutorial.Item> list6 = this.warningItems;
+		List<Tutorial.Item> list6 = new List<Tutorial.Item>();
+		List<Tutorial.Item> list7 = list6;
+		item = new Tutorial.Item();
+		item.notification = new Notification(MISC.NOTIFICATIONS.HYGENE_NEEDED.NAME, NotificationType.Tutorial, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.HYGENE_NEEDED.TOOLTIP, null, true, 20f, null, null, null);
+		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.HygeneExists);
+		list7.Add(item);
+		this.itemTree.Add(list6);
+		List<Tutorial.Item> list8 = this.warningItems;
 		item = new Tutorial.Item();
 		Tutorial.Item item2 = item;
 		HashedString invalid = HashedString.Invalid;
@@ -62,7 +69,7 @@ public class Tutorial : KMonoBehaviour
 		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.SufficientOxygen);
 		item.minTimeToNotify = 80f;
 		item.lastNotifyTime = 0f;
-		list6.Add(item);
+		list8.Add(item);
 		this.warningItems.Add(new Tutorial.Item
 		{
 			notification = new Notification(MISC.NOTIFICATIONS.UNREFRIGERATEDFOOD.NAME, NotificationType.Tutorial, HashedString.Invalid, new Func<List<Notification>, object, string>(this.UnrefrigeratedFoodTooltip), null, false, 0f, null, null, null),
@@ -77,13 +84,13 @@ public class Tutorial : KMonoBehaviour
 			minTimeToNotify = 10f,
 			lastNotifyTime = 0f
 		});
-		List<Tutorial.Item> list7 = this.warningItems;
+		List<Tutorial.Item> list9 = this.warningItems;
 		item = new Tutorial.Item();
 		item.notification = new Notification(MISC.NOTIFICATIONS.NO_MEDICAL_COTS.NAME, NotificationType.Bad, HashedString.Invalid, (List<Notification> n, object o) => MISC.NOTIFICATIONS.NO_MEDICAL_COTS.TOOLTIP, null, false, 0f, null, null, null);
 		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.EnoughMedicalCots);
 		item.minTimeToNotify = 10f;
 		item.lastNotifyTime = 0f;
-		list7.Add(item);
+		list9.Add(item);
 	}
 
 	public void TutorialMessage(Tutorial.TutorialMessages tm)
@@ -134,8 +141,8 @@ public class Tutorial : KMonoBehaviour
 		case Tutorial.TutorialMessages.TM_BeingInfected:
 			message = new GenericMessage(MISC.NOTIFICATIONS.BEING_INFECTED.NAME, MISC.NOTIFICATIONS.BEING_INFECTED.MESSAGEBODY, MISC.NOTIFICATIONS.BEING_INFECTED.TOOLTIP);
 			break;
-		case Tutorial.TutorialMessages.TM_InfectedFood:
-			message = new GenericMessage(MISC.NOTIFICATIONS.INFECTED_FOOD.NAME, MISC.NOTIFICATIONS.INFECTED_FOOD.MESSAGEBODY, MISC.NOTIFICATIONS.INFECTED_FOOD.TOOLTIP);
+		case Tutorial.TutorialMessages.TM_DiseaseCooking:
+			message = new GenericMessage(MISC.NOTIFICATIONS.DISEASE_COOKING.NAME, MISC.NOTIFICATIONS.DISEASE_COOKING.MESSAGEBODY, MISC.NOTIFICATIONS.DISEASE_COOKING.TOOLTIP);
 			break;
 		}
 		this.tutorialMessagesRemaining.Remove(tm);
@@ -340,6 +347,11 @@ public class Tutorial : KMonoBehaviour
 		return Components.PlantablePlots.Count > 0;
 	}
 
+	private bool HygeneExists()
+	{
+		return Components.HandSanitizers.Count > 0;
+	}
+
 	private bool ToiletExists()
 	{
 		return Components.Toilets.Count > 0;
@@ -378,7 +390,7 @@ public class Tutorial : KMonoBehaviour
 		TM_OverheatingBuildings,
 		TM_LotsOfGerms,
 		TM_BeingInfected,
-		TM_InfectedFood,
+		TM_DiseaseCooking,
 		TM_COUNT
 	}
 

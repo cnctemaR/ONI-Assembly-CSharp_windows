@@ -65,7 +65,6 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 		base.GetComponent<KPrefabID>().AddTag(GameTags.Edible);
 		this.Subscribe(748399584, new Action<object>(this.OnCraft));
 		this.Subscribe(1272413801, new Action<object>(this.OnCraft));
-		this.Subscribe(-1689370368, new Action<object>(this.OnGermPresenceChanged));
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Eating;
 		Components.Edibles.Add(this);
 	}
@@ -79,15 +78,6 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 	private void OnCraft(object data)
 	{
 		RationTracker.Get().RegisterCaloriesProduced(this.Calories);
-	}
-
-	private void OnGermPresenceChanged(object data)
-	{
-		bool flag = (bool)data;
-		if (flag)
-		{
-			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_InfectedFood);
-		}
 	}
 
 	public float GetFeedingTime(Worker worker)

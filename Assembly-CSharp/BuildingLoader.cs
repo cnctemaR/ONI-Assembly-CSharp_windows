@@ -230,6 +230,7 @@ public class BuildingLoader : DefLoader
 			}
 			if (def.Disinfectable)
 			{
+				gameObject.AddOrGet<AutoDisinfectable>();
 				gameObject.AddOrGet<Disinfectable>();
 			}
 			if (def.Overheatable)

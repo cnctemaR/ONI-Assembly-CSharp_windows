@@ -183,9 +183,9 @@ namespace STRINGS
 				{
 					public class IMMUNESYSTEM
 					{
-						public static LocString NAME = "Immune System";
+						public static LocString NAME = "Immune Systems";
 
-						public static LocString TOOLTIP = "Affects how resilient your Dupes are to disease";
+						public static LocString TOOLTIP = "Affects how resistant your Duplicants are to disease";
 
 						public static class LEVELS
 						{
@@ -193,7 +193,7 @@ namespace STRINGS
 							{
 								public static LocString NAME = "Weak";
 
-								public static LocString TOOLTIP = "Reduces Duplicant immunity recovery";
+								public static LocString TOOLTIP = "Duplicant immune recovery is reduced";
 
 								public static LocString ATTRIBUTE_MODIFIER_NAME = "Weak Immune System";
 							}
@@ -202,14 +202,14 @@ namespace STRINGS
 							{
 								public static LocString NAME = "Regular";
 
-								public static LocString TOOLTIP = "Default immunity recovery";
+								public static LocString TOOLTIP = "Duplicants regain immunity normally";
 							}
 
 							public static class STRONG
 							{
 								public static LocString NAME = "Strong";
 
-								public static LocString TOOLTIP = "Increases immunity recovery";
+								public static LocString TOOLTIP = "Duplicant immune recovery is increased";
 
 								public static LocString ATTRIBUTE_MODIFIER_NAME = "Strong Immune System";
 							}
@@ -218,9 +218,9 @@ namespace STRINGS
 
 					public class STRESS
 					{
-						public static LocString NAME = "Disposition";
+						public static LocString NAME = "Duplicant Mood";
 
-						public static LocString TOOLTIP = "Affects Duplicant stress levels";
+						public static LocString TOOLTIP = "Affects how well your Duplicants deal with stress";
 
 						public static class LEVELS
 						{
@@ -228,7 +228,7 @@ namespace STRINGS
 							{
 								public static LocString NAME = "Optimistic";
 
-								public static LocString TOOLTIP = "Reduces duplicant stress levels";
+								public static LocString TOOLTIP = "Duplicants are harder to stress out";
 
 								public static LocString ATTRIBUTE_MODIFIER_NAME = "Optimistic";
 							}
@@ -237,14 +237,14 @@ namespace STRINGS
 							{
 								public static LocString NAME = "Regular";
 
-								public static LocString TOOLTIP = "The regular rate of stress";
+								public static LocString TOOLTIP = "Duplicants gain and lose stress normally";
 							}
 
 							public static class PESSIMISTIC
 							{
 								public static LocString NAME = "Pessimistic";
 
-								public static LocString TOOLTIP = "Increases Duplicant stress levels";
+								public static LocString TOOLTIP = "Duplicants stress out easily";
 
 								public static LocString ATTRIBUTE_MODIFIER_NAME = "Pessimistic";
 							}
@@ -298,7 +298,7 @@ namespace STRINGS
 
 				public static LocString BODY = "<b>Welcome to the Outbreak Upgrade!</b>\n\n{0}";
 
-				public static LocString PATCHNOTES = "Update Features:\n\n• New disease simulation, complete with new illnesses, attributes, overlays and more.\n• New Farming Overlay, plants, food recipes and plant requirements\n• Explore deep enough into your surroundings and you may chance upon the remnants of, well... something.\n• Explore deep enough into your surroundings and you may chance upon the remnants of, well... something.\n• Bug fixes, performance improvements, new buildings and more.";
+				public static LocString PATCHNOTES = "<b>Important Notes:</b>\n\n• <u>Duplicants will now automatically disinfect buildings. You can tune the minimum germ threshold at the top right of the germ overlay.</u>\n\n <b>Update Features:</b>\n\n• New disease simulation, complete with new illnesses, attributes, overlays and more.\n• New plants, food recipes, growth requirements and Farming Overlay.\n• Explore deep enough into your surroundings and you may chance upon the remnants of, well... something.\n• New Duplicants; say hello to Ari, Jean, Camille and Ashkan.\n• Bug fixes, performance improvements, new buildings, creatures and more.";
 
 				public static LocString OK_BUTTON = "OK";
 			}
@@ -1148,25 +1148,25 @@ namespace STRINGS
 
 				public class TOOLTIPS
 				{
-					public static LocString LEGEND1 = "High oxygen concentrations";
+					public static LocString LEGEND1 = "<b>Very Breathable</b>\nHigh oxygen concentrations";
 
-					public static LocString LEGEND2 = "Sufficient oxygen concentrations";
+					public static LocString LEGEND2 = "<b>Breathable</b>\nSufficient oxygen concentrations";
 
-					public static LocString LEGEND3 = "Low oxygen concentrations";
+					public static LocString LEGEND3 = "<b>Barely Breathable</b>\nLow oxygen concentrations";
 
-					public static LocString LEGEND4 = "Extremely low or absent oxygen concentrations";
+					public static LocString LEGEND4 = "<b>Unbreathable</b>\nExtremely low or absent oxygen concentrations" + UI.HORIZONTAL_BR_RULE + "Duplicants will suffocate if trapped in these areas";
 
-					public static LocString LEGEND5 = "Harmful gas concentration";
+					public static LocString LEGEND5 = "<b>Slightly Toxic</b>\nHarmful gas concentration";
 
-					public static LocString LEGEND6 = "Lethal gas concentration";
+					public static LocString LEGEND6 = "<b>Very Toxic</b>\nLethal gas concentration";
 				}
 			}
 
 			public class ELECTRICAL
 			{
-				public static LocString NAME = "POWER GRID OVERLAY";
+				public static LocString NAME = "POWER OVERLAY";
 
-				public static LocString BUTTON = "Power Grid Overlay";
+				public static LocString BUTTON = "Power Overlay";
 
 				public static LocString LEGEND1 = "<b>BUILDING POWER</b>";
 
@@ -1192,21 +1192,21 @@ namespace STRINGS
 				{
 					public static LocString LEGEND1 = "Displays whether buildings use or generate <style=\"power\">Power</style>";
 
-					public static LocString LEGEND2 = "Building draws power from a circuit";
+					public static LocString LEGEND2 = "<b>Consumer</b>\nThese buildings draw power from a circuit";
 
-					public static LocString LEGEND3 = "Building generates power for a circuit";
+					public static LocString LEGEND3 = "<b>Producer</b>\nThese buildings generate power for a circuit";
 
-					public static LocString LEGEND4 = "Displays the power loads on wire systems";
+					public static LocString LEGEND4 = "Displays the power load on wire systems";
 
-					public static LocString LEGEND5 = "Circuit produces more power than it can consume";
+					public static LocString LEGEND5 = "<b>Energy Surplus</b>\nThese circuits produce more power than they can consume";
 
-					public static LocString LEGEND6 = "Circuit consumes nearly all power it produces";
+					public static LocString LEGEND6 = "<b>Strained</b>\nThese circuits consume nearly all power they produce";
 
 					public static LocString LEGEND7 = "Too much power being drawn from system";
 
-					public static LocString LEGEND8 = "Circuit consumes more power than it can produce";
+					public static LocString LEGEND8 = "<b>Underpowered</b>\nThese circuits consume more power than they can produce";
 
-					public static LocString LEGEND_SWITCH = "Building activates or deactivates a circuit";
+					public static LocString LEGEND_SWITCH = "<b>Switch</b>\nActivates or deactivates connected circuits";
 				}
 			}
 
@@ -1254,11 +1254,11 @@ namespace STRINGS
 
 				public class TOOLTIPS
 				{
-					public static LocString COOLING = "Uncomfortably cold area\n* Duplicants lose more heat than they can absorb";
+					public static LocString COOLING = "<b>Body Heat Loss</b>\nUncomfortably cold" + UI.HORIZONTAL_BR_RULE + "Duplicants lose more heat in these areas than they can absorb\n* Warm Sweaters help Duplicants retain body heat";
 
-					public static LocString NEUTRAL = "Comfortable area\n* Duplicants can regulate their internal temperatures in this environment";
+					public static LocString NEUTRAL = "<b>Comfort Zone</b>\nComfortable area" + UI.HORIZONTAL_BR_RULE + "Duplicants can regulate their internal temperatures in these areas";
 
-					public static LocString HEATING = "Uncomfortably warm area\n* Duplicants absorb more heat than they can release";
+					public static LocString HEATING = "<b>Body Heat Retention</b>\nUncomfortably warm" + UI.HORIZONTAL_BR_RULE + "Duplicants absorb more heat in these areas than they can release\n* Cool Vests help Duplicants shed excess body heat";
 				}
 			}
 
@@ -1294,9 +1294,9 @@ namespace STRINGS
 				{
 					public static LocString NAME = "LIGHT OVERLAY";
 
-					public static LocString LITAREA = "Duplicants have adequate lighting in these areas";
+					public static LocString LITAREA = "<b>Lit Area</b>\nDuplicants have adequate lighting in these areas";
 
-					public static LocString DARK = "Duplicants cannot see in these areas";
+					public static LocString DARK = "<b>Unlit Area</b>\nDuplicants cannot see in these areas";
 				}
 			}
 
@@ -1304,7 +1304,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "FARMING OVERLAY";
 
-				public static LocString BUTTON = "Crop Overlay";
+				public static LocString BUTTON = "Farming Overlay";
 
 				public static LocString GROWTH_HALTED = "Halted Growth";
 
@@ -1314,11 +1314,11 @@ namespace STRINGS
 
 				public class TOOLTIPS
 				{
-					public static LocString GROWTH_HALTED = "Substandard conditions are preventing this plant from growing";
+					public static LocString GROWTH_HALTED = "<b>Halted Growth</b>\nSubstandard conditions prevent these plants from growing";
 
-					public static LocString GROWING = "This plant is thriving in satisfactory conditions";
+					public static LocString GROWING = "<b>Growing</b>\nThese plants are thriving in their current conditions";
 
-					public static LocString FULLY_GROWN = "This plant is ready for harvest";
+					public static LocString FULLY_GROWN = "<b>Fully Grown</b>\nThese plants have reached maturation" + UI.HORIZONTAL_BR_RULE + "Select the <style=\"misc\">HARVEST TOOL</style> <color=#F44A47><b>[Y]</b></color> to batch harvest";
 				}
 			}
 
@@ -1368,11 +1368,11 @@ namespace STRINGS
 
 					public static LocString DISCONNECTED = "Not connected to a <style=\"LiquidPiping\">Liquid Pipe</style>";
 
-					public static LocString CONSUMER = "Outputs send liquid into pipes\n* Must be on the same network as at least one <style=\"LiquidDestination\">Intake</style>";
+					public static LocString CONSUMER = "<b>Output Pipe</b>\nOutputs send liquid into pipes" + UI.HORIZONTAL_BR_RULE + "Must be on the same network as at least one <style=\"LiquidDestination\">Intake</style>";
 
-					public static LocString FILTERED = "Filtered Outputs send filtered liquid into pipes\n* Must be on the same network as at least one <style=\"LiquidDestination\">Intake</style>";
+					public static LocString FILTERED = "<b>Filtered Output Pipe</b>\nFiltered Outputs send filtered liquid into pipes" + UI.HORIZONTAL_BR_RULE + "Must be on the same network as at least one <style=\"LiquidDestination\">Intake</style>";
 
-					public static LocString PRODUCER = "Intakes send liquid into buildings\n* Must be on the same network as at least one <style=\"LiquidSource\">Output</style>";
+					public static LocString PRODUCER = "<b>Building Intake</b>\nIntakes send liquid into buildings" + UI.HORIZONTAL_BR_RULE + "Must be on the same network as at least one <style=\"LiquidSource\">Output</style>";
 
 					public static LocString NETWORK = "Liquid network {0}";
 				}
@@ -1406,11 +1406,11 @@ namespace STRINGS
 
 					public static LocString DISCONNECTED = "Not connected to a <style=\"GasPiping\">Gas Pipe</style>";
 
-					public static LocString CONSUMER = "Outputs send gas into pipes\n* Must be on the same network as at least one <style=\"GasDestination\">Intake</style>";
+					public static LocString CONSUMER = "<b>Output Pipe</b>\nOutputs send gas into pipes" + UI.HORIZONTAL_BR_RULE + "Must be on the same network as at least one <style=\"GasDestination\">Intake</style>";
 
-					public static LocString FILTERED = "Filtered Outputs send filtered gas into pipes\n* Must be on the same network as at least one <style=\"GasDestination\">Intake</style>";
+					public static LocString FILTERED = "<b>Filtered Output Pipe</b>\nFiltered Outputs send filtered gas into pipes" + UI.HORIZONTAL_BR_RULE + "Must be on the same network as at least one <style=\"GasDestination\">Intake</style>";
 
-					public static LocString PRODUCER = "Intakes send gas into buildings\n* Must be on the same network as at least one <style=\"GasSource\">Output</style>";
+					public static LocString PRODUCER = "<b>Building Intake</b>\nIntakes send gas into buildings" + UI.HORIZONTAL_BR_RULE + "Must be on the same network as at least one <style=\"GasSource\">Output</style>";
 
 					public static LocString NETWORK = "Gas network {0}";
 				}
@@ -1456,9 +1456,9 @@ namespace STRINGS
 
 				public class TOOLTIPS
 				{
-					public static LocString LOWDECOR = "Insufficient decor values\n* Resources on the floor are considered \"debris\" and will decrease decor";
+					public static LocString LOWDECOR = "<b>High Decor</b>\nArea with insufficient decor values\n* Resources on the floor are considered \"debris\" and will decrease decor";
 
-					public static LocString HIGHDECOR = "Sufficient decor values\n* Lighting and aesthetically pleasing buildings increase decor";
+					public static LocString HIGHDECOR = "<b>Low Decor</b>\nArea with sufficient decor values\n* Lighting and aesthetically pleasing buildings increase decor";
 				}
 			}
 
@@ -1574,18 +1574,11 @@ namespace STRINGS
 
 				public static LocString INTERNAL_GERMS = "Germ Host";
 
-				public static LocString INTERNAL_GERMS_TOOLTIP = string.Concat(new string[]
-				{
-					"Duplicants become a germ host when germs enter their body through inhalation or ingestion",
-					UI.HORIZONTAL_BR_RULE,
-					"Germ hosts may not show symptoms of disease",
-					UI.HORIZONTAL_BR_RULE,
-					"Internal germs cannot be washed off"
-				});
+				public static LocString INTERNAL_GERMS_TOOLTIP = "<b>Germ Host</b>\nGerm hosts may be asymptomatic and show no signs of disease" + UI.HORIZONTAL_BR_RULE + "Duplicants become hosts when germs enter their body through inhalation or ingestion\n* Unlike surface germs, internal germs cannot be washed off";
 
 				public static LocString INFECTION_SOURCE = "Germ Source";
 
-				public static LocString INFECTION_SOURCE_TOOLTIP = "Areas where germs are produced";
+				public static LocString INFECTION_SOURCE_TOOLTIP = "<b>Germ Source</b>\nAreas where germs are produced\n* Placing Wash Basins or Hand Sanitizers near these areas may prevent disease spread";
 
 				public static LocString NO_DISEASE = "Zero surface germs";
 
@@ -1596,6 +1589,15 @@ namespace STRINGS
 				public static LocString CONTAINER_FORMAT = "\n    {0}: {1}";
 
 				public static LocString IMMUNITY = DUPLICANTS.STATS.IMMUNELEVEL.NAME + ": {0}";
+
+				public class DISINFECT_THRESHOLD_DIAGRAM
+				{
+					public static LocString UNITS = "Germs";
+
+					public static LocString THRESHOLD_PREFIX = "Disinfect At:";
+
+					public static LocString TOOLTIP = "Automatically disinfect any building with more than {NumberOfGerms} germs.";
+				}
 			}
 
 			public class CROPS
@@ -2622,21 +2624,21 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Direction: Both";
 
-				public static LocString TOOLTIP = "Duplicants will wash up when passing this building in either direction";
+				public static LocString TOOLTIP = "Select to make Duplicants wash when passing by in either direction";
 			}
 
 			public class WORKABLE_DIRECTION_LEFT
 			{
 				public static LocString NAME = "Direction: Left";
 
-				public static LocString TOOLTIP = "Duplicants will wash up when passing this building from right to left";
+				public static LocString TOOLTIP = "Select to make Duplicants wash when passing by from right to left";
 			}
 
 			public class WORKABLE_DIRECTION_RIGHT
 			{
 				public static LocString NAME = "Direction: Right";
 
-				public static LocString TOOLTIP = "Duplicants will wash up when passing this building from left to right";
+				public static LocString TOOLTIP = "Select to make Duplicants wash when passing by from left to right";
 			}
 
 			public class MANUAL_PUMP_DELIVERY

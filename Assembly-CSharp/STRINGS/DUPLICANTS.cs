@@ -1073,7 +1073,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "This Duplicant is feeling the pressure";
 
-				public static LocString NOTIFICATION_NAME = "Stressed";
+				public static LocString NOTIFICATION_NAME = "High stress";
 
 				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants are <style=\"stress\">Stressed</style> and need to unwind:";
 			}
@@ -3097,30 +3097,30 @@ namespace STRINGS
 
 			public class REGENERATION
 			{
-				public static LocString NAME = "Regeneration";
+				public static LocString NAME = "Regenerative";
 
-				public static LocString DESC = "This duplicant constantly regenerated health.";
+				public static LocString DESC = "This Duplicant is constantly regenerating health.";
 			}
 
 			public class DEEPERDIVERSLUNGS
 			{
 				public static LocString NAME = "Deeper Diver's Lungs";
 
-				public static LocString DESC = "This duplicant was a talented opera singer and a snorkeling instructor.";
+				public static LocString DESC = "This Duplicant was a talented opera singer and a snorkeling instructor.";
 			}
 
 			public class SUNNYDISPOSITION
 			{
 				public static LocString NAME = "Sunny Disposition";
 
-				public static LocString DESC = "This duplicant has a positive outlook on life.";
+				public static LocString DESC = "This Duplicant has an unwaveringly positive outlook on life.";
 			}
 
 			public class ROCKCRUSHER
 			{
 				public static LocString NAME = "Rock Crusher";
 
-				public static LocString DESC = "This duplicant is incredibly strong.";
+				public static LocString DESC = "This Duplicant is incredibly strong.";
 			}
 		}
 

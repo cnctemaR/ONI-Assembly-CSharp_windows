@@ -158,7 +158,7 @@ namespace TUNING
 			},
 			{
 				"TemperatureModulation",
-				new string[] { "LiquidCooledFan", "AirConditioner", "TemperatureControlledSwitch", "LiquidHeater" }
+				new string[] { "LiquidCooledFan", "AirConditioner", "TemperatureControlledSwitch", "LiquidHeater", "LiquidConditioner" }
 			},
 			{
 				"Insulation",

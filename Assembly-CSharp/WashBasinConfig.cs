@@ -23,7 +23,7 @@ public class WashBasinConfig : IBuildingConfig
 		go.AddOrGet<DirectionControl>();
 		HandSanitizer.Work work = go.AddOrGet<HandSanitizer.Work>();
 		work.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_washbasin_kanim") };
-		work.workTime = 10.200001f;
+		work.workTime = 5f;
 		work.trackUses = true;
 		Storage storage = go.AddOrGet<Storage>();
 		storage.defaultStoredItemModifers = WashBasinConfig.StoredItemModifiers;
@@ -46,6 +46,8 @@ public class WashBasinConfig : IBuildingConfig
 	public const float WATER_PER_USE = 5f;
 
 	public const int USES_PER_FLUSH = 40;
+
+	public const float WORK_TIME = 5f;
 
 	private static readonly List<Storage.StoredItemModifier> StoredItemModifiers = new List<Storage.StoredItemModifier>
 	{

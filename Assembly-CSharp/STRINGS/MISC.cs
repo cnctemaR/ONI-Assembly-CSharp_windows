@@ -586,29 +586,29 @@ namespace STRINGS
 
 			public class LOTS_OF_GERMS
 			{
-				public static LocString NAME = "TIP: Germs and Infections";
+				public static LocString NAME = "TIP: Germs and Disease";
 
-				public static LocString TOOLTIP = "Learn about disease risks";
+				public static LocString TOOLTIP = "Learn about the risks of Duplicant disease";
 
-				public static LocString MESSAGEBODY = "There are many sources of germs in the world. If your duplicants consume these germs, it can make thems sick. Maintaining good base hygene and cleaning the various substances in your base is essential for controlling the spread of germs. Each disease has different materials it prefers to grow on, and different tools for reducing its spread in your base. The <style=\"misc\">GERM OVERLAY</style> <color=#F44A47><b>[F9]</b></color> will allow you to see germ concentrations and spot new sources of germs.";
+				public static LocString MESSAGEBODY = "<style=\"disease\">Germs</style> are an invisible peril that cause <style=\"disease\">Disease</style> in your Duplicants. The <style=\"misc\">GERM OVERLAY</style> <color=#F44A47><b>[F9]</b></color> will allow you to view all germ concentrations in your colony and the sources spawning them.\n\nWash Basins can be built in dirty areas from the <style=\"misc\">MEDICINE TAB</style> <color=#F44A47><b>[9]</b></color> to tell your Duplicants to where to wash up. If you keep your base clean and your Duplicants hygienic, your colony's Immunity will handle the rest.";
 			}
 
 			public class BEING_INFECTED
 			{
 				public static LocString NAME = "TIP: Duplicant Immune Systems";
 
-				public static LocString TOOLTIP = "Learn how Duplicants get sick";
+				public static LocString TOOLTIP = "Keep your Duplicants in peak health";
 
-				public static LocString MESSAGEBODY = "One of your duplicants has consumed enough germs that it is beginning to impact their health. The more disease they consume, the harder it is for their immune system to fight off the germs. If their immune system reaches 0%, infection occurs, and medical intervention will be necessary. Use the <style=\"misc\">Vitals Screen</style> to keep an eye on Duplicant immune levels.";
+				public static LocString MESSAGEBODY = "Duplicants must spend points of immunity to fight the various <style=\"disease\">Germs</style> they're exposed to. If their immunity reaches 0%, they'll be unable to fight off any more germs and contract the next disease they encounter.\n\nDoors with Access Permissions can be built from the <style=\"misc\">BASE TAB</style> of the <style=\"misc\">BUILD MENU</style> to block Duplicants from entering biohazardous areas while they recover their spent immunity points.";
 			}
 
-			public class INFECTED_FOOD
+			public class DISEASE_COOKING
 			{
-				public static LocString NAME = "TIP: Infected Food";
+				public static LocString NAME = "TIP: Food Safety";
 
-				public static LocString TOOLTIP = "Deal with the spread of filth";
+				public static LocString TOOLTIP = "Learn how to manage food contamination";
 
-				public static LocString MESSAGEBODY = "A germ has found its way on to one of your rations. Small numbers of germs are not a threat to your colony as Duplicant immune systems can fight off substantial infection. However some diseases like Food Poisoning will grow quickly on food, creating a hazardous situation. Badly contaminated food can be Marked For Compost, and further contamination can be slowed or halted by storing your food in a refrigerated or other germ-hostile environment.";
+				public static LocString MESSAGEBODY = "The <style=\"food\">food</style> your Duplicants make is only as clean as the <style=\"solid\">ingredients</style> used to make it. Storing food in sterile or <style=\"heat\">Refrigerated</style> environments will keep the produced food clean, while carefully placed hygene systems will prevent your cooks from infecting the food while they handle it.\n\nDangerously contaminated food can be recycled by clicking the <style=\"misc\">COMPOST</style> button on the selected item.";
 			}
 
 			public class NOMESSAGES
@@ -760,6 +760,13 @@ namespace STRINGS
 				public static LocString NAME = "Colony requires a food source";
 
 				public static LocString TOOLTIP = "Your colony will soon exhaust their supplies without a new <style=\"food\">Food</style> source";
+			}
+
+			public class HYGENE_NEEDED
+			{
+				public static LocString NAME = "Colony requires hygene";
+
+				public static LocString TOOLTIP = "Your duplicants are spreading germs around the colony because they have nowhere to wash off their germs";
 			}
 
 			public class NEEDSLEEP

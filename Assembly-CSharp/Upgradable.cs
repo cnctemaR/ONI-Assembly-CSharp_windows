@@ -517,9 +517,9 @@ public class Upgradable : Workable, ISaveLoadable
 		}
 	}
 
+	[IgnoreFirst(1)]
 	[IgnoreEmptyLines]
 	[DelimitedRecord(",")]
-	[IgnoreFirst(1)]
 	public class UpgradableConfig
 	{
 		public UpgradableConfig(string prefabID, int id, int builderCount, float buildTime, string materialTags, float materialMass, Upgradable.UpgradableConfig.UpgradeModifier[] modifiers)

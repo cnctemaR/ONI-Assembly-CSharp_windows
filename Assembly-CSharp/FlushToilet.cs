@@ -268,7 +268,7 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 		private Chore CreateUseChore(FlushToilet.SMInstance smi)
 		{
 			ScheduleBlockType hygiene = Db.Get().ScheduleBlockTypes.Hygiene;
-			return new WorkChore<ToiletWorkableUse>(Db.Get().ChoreTypes.Pee, smi.master, null, true, null, null, null, false, hygiene, true, default(Tag), null, false, true, true);
+			return new WorkChore<ToiletWorkableUse>(Db.Get().ChoreTypes.Pee, smi.master, null, true, null, null, null, false, hygiene, true, default(Tag), null, false, true, false);
 		}
 
 		public GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.State disconnected;

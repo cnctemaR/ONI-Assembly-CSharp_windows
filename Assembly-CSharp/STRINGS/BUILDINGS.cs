@@ -616,7 +616,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Ore scrubbers sanitize freshly mined resources before bringing them into the colony.";
 
-				public static LocString EFFECT = "Kills all <style=\"disease\">Germs</style> present on raw <style=\"RawMineral\">ore</style>.";
+				public static LocString EFFECT = "Kills a significant amount of <style=\"disease\">Germs</style> present on raw <style=\"RawMineral\">ore</style>.";
 			}
 
 			public class OUTHOUSE
@@ -795,7 +795,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Clean water is a necessary resource for most life sustaining processes.";
 
-				public static LocString EFFECT = "Uses <style=\"misc\">Sand</style> to purify <style=\"liquid\">Polluted Water</style>.";
+				public static LocString EFFECT = "Uses <style=\"misc\">Sand</style> to filter <style=\"liquid\">Polluted Water</style>.\n\nTransfers a portion of disease to the Polluted Dirt.";
 			}
 
 			public class DISTILLATIONCOLUMN
@@ -879,6 +879,28 @@ namespace STRINGS
 			public static LocString LIQUID_PRESSURE = "neighboring liquid pressure";
 
 			public static LocString CIRCUIT_OVERLOADED = "an overloaded circuit";
+		}
+
+		public static class AUTODISINFECTABLE
+		{
+			public static class ENABLE_AUTODISINFECT
+			{
+				public static LocString NAME = "Enable Auto-Disinfect";
+
+				public static LocString TOOLTIP = "Dupes will automatically disinfect this building";
+			}
+
+			public static class DISABLE_AUTODISINFECT
+			{
+				public static LocString NAME = "Disable Auto-Disinfect";
+
+				public static LocString TOOLTIP = "Dupes will no longer automatically disinfect this building";
+			}
+
+			public static class NO_DISEASE
+			{
+				public static LocString TOOLTIP = "This building is already clean";
+			}
 		}
 
 		public static class DISINFECTABLE

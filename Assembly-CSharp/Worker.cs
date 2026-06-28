@@ -138,47 +138,54 @@ public class Worker : KMonoBehaviour
 		{
 			this.lastWorkTick = Time.time;
 			this.workable.StartWork(this);
-			this.workComplete = false;
-			KSelectable component = base.GetComponent<KSelectable>();
-			this.previousStatusItem = component.GetStatusItem(Db.Get().StatusItemCategories.Main);
-			component.SetStatusItem(Db.Get().StatusItemCategories.Main, this.workable.GetWorkerStatusItem(), this.workable);
-			this.animInfo = this.workable.GetAnim(this);
-			if (this.animInfo.smi != null)
+			if (this.workable == null)
 			{
-				this.smi = this.animInfo.smi;
-				this.smi.StartSM();
+				global::Debug.LogWarning("Stopped work as soon as I started. This is usuually a sign that a chore is open when it shouldn't be or that it's preconditions are wrong.", null);
 			}
-			if (this.OnWorkStartCallback != null)
+			else
 			{
-				this.OnWorkStartCallback();
-			}
-			Vector3 position = this.transform.position;
-			position.z = Grid.GetLayerZ(this.workable.workLayer);
-			this.transform.SetPosition(position);
-			KAnimControllerBase component2 = base.GetComponent<KAnimControllerBase>();
-			if (this.animInfo.smi == null)
-			{
-				this.AttachOverrideAnims(component2);
-			}
-			HashedString[] workAnims = this.workable.GetWorkAnims(this);
-			Vector3 workOffset = this.workable.GetWorkOffset();
-			this.workAnimOffset = workOffset;
-			component2.Offset += workOffset;
-			if (this.animInfo.smi == null && workAnims != null)
-			{
-				if (this.workable.synchronizeAnims)
+				this.workComplete = false;
+				KSelectable component = base.GetComponent<KSelectable>();
+				this.previousStatusItem = component.GetStatusItem(Db.Get().StatusItemCategories.Main);
+				component.SetStatusItem(Db.Get().StatusItemCategories.Main, this.workable.GetWorkerStatusItem(), this.workable);
+				this.animInfo = this.workable.GetAnim(this);
+				if (this.animInfo.smi != null)
 				{
-					KAnimControllerBase component3 = this.workable.GetComponent<KAnimControllerBase>();
-					if (component3 != null)
+					this.smi = this.animInfo.smi;
+					this.smi.StartSM();
+				}
+				if (this.OnWorkStartCallback != null)
+				{
+					this.OnWorkStartCallback();
+				}
+				Vector3 position = this.transform.position;
+				position.z = Grid.GetLayerZ(this.workable.workLayer);
+				this.transform.SetPosition(position);
+				KAnimControllerBase component2 = base.GetComponent<KAnimControllerBase>();
+				if (this.animInfo.smi == null)
+				{
+					this.AttachOverrideAnims(component2);
+				}
+				HashedString[] workAnims = this.workable.GetWorkAnims(this);
+				Vector3 workOffset = this.workable.GetWorkOffset();
+				this.workAnimOffset = workOffset;
+				component2.Offset += workOffset;
+				if (this.animInfo.smi == null && workAnims != null)
+				{
+					if (this.workable.synchronizeAnims)
 					{
-						this.kanimSynchronizer = component3.GetSynchronizer();
-						if (this.kanimSynchronizer != null)
+						KAnimControllerBase component3 = this.workable.GetComponent<KAnimControllerBase>();
+						if (component3 != null)
 						{
-							this.kanimSynchronizer.Add(component2);
+							this.kanimSynchronizer = component3.GetSynchronizer();
+							if (this.kanimSynchronizer != null)
+							{
+								this.kanimSynchronizer.Add(component2);
+							}
 						}
 					}
+					component2.Play(workAnims, KAnim.PlayMode.Loop);
 				}
-				component2.Play(workAnims, KAnim.PlayMode.Loop);
 			}
 		}
 		catch (Exception ex)

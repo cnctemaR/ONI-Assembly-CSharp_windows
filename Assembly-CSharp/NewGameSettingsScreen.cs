@@ -96,8 +96,8 @@ public class NewGameSettingsScreen : KScreen
 		}
 	}
 
-	[SerializeField]
 	[Header("Static UI Refs")]
+	[SerializeField]
 	private MultiToggle toggle_standard_game;
 
 	[SerializeField]

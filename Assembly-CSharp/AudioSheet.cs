@@ -18,8 +18,8 @@ public class AudioSheet
 	public AudioSheet.SoundInfo[] soundInfos;
 
 	[DelimitedRecord(",")]
-	[IgnoreEmptyLines]
 	[IgnoreFirst(1)]
+	[IgnoreEmptyLines]
 	[Serializable]
 	public class SoundInfo
 	{
@@ -105,15 +105,15 @@ public class AudioSheet
 		[FieldOptional]
 		public string Name10;
 
-		[FieldNullValue(0)]
 		[FieldOptional]
+		[FieldNullValue(0)]
 		public int Frame10;
 
 		[FieldOptional]
 		public string Name11;
 
-		[FieldNullValue(0)]
 		[FieldOptional]
+		[FieldNullValue(0)]
 		public int Frame11;
 	}
 }

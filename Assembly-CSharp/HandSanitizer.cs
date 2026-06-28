@@ -11,6 +11,7 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 	{
 		base.OnPrefabInit();
 		base.gameObject.FindOrAddComponent<Workable>();
+		base.GetComponent<Storage>().choreType = Db.Get().ChoreTypes.FetchCritical;
 	}
 
 	private void RefreshMeters()
@@ -38,10 +39,17 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 		this.cleanMeter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_clean_target", "meter_clean", Meter.Offset.Infront, new string[] { "meter_clean_target" });
 		this.dirtyMeter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_dirty_target", "meter_dirty", Meter.Offset.Infront, new string[] { "meter_dirty_target" });
 		this.RefreshMeters();
+		Components.HandSanitizers.Add(this);
 		this.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
 		DirectionControl component = base.GetComponent<DirectionControl>();
 		component.onDirectionChanged = (Action<WorkableReactable.AllowedDirection>)Delegate.Combine(component.onDirectionChanged, new Action<WorkableReactable.AllowedDirection>(this.OnDirectionChanged));
 		this.OnDirectionChanged(base.GetComponent<DirectionControl>().allowedDirection);
+	}
+
+	protected override void OnCleanUp()
+	{
+		Components.HandSanitizers.Remove(this);
+		base.OnCleanUp();
 	}
 
 	private void OnDirectionChanged(WorkableReactable.AllowedDirection allowed_direction)

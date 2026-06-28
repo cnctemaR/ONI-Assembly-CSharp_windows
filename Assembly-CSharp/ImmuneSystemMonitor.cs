@@ -23,16 +23,15 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 		{
 			smi.UpdateImmuneSystem();
 		});
-		this.infecting.DefaultState(this.infecting.high).ParamTransition<bool>(this.isLosingImmunity, this.healthy, (ImmuneSystemMonitor.Instance smi, bool p) => !p).Enter(delegate(ImmuneSystemMonitor.Instance smi)
+		this.infecting.DefaultState(this.infecting.high).ParamTransition<bool>(this.isLosingImmunity, this.healthy, (ImmuneSystemMonitor.Instance smi, bool p) => !p).Update(delegate(ImmuneSystemMonitor.Instance smi)
+		{
+			smi.UpdateImmuneSystem();
+		});
+		this.infecting.high.Transition(this.infecting.low, (ImmuneSystemMonitor.Instance smi) => smi.IsLowImmuneLevel());
+		this.infecting.low.Transition(this.infecting.high, (ImmuneSystemMonitor.Instance smi) => !smi.IsLowImmuneLevel()).Enter(delegate(ImmuneSystemMonitor.Instance smi)
 		{
 			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_BeingInfected);
-		})
-			.Update(delegate(ImmuneSystemMonitor.Instance smi)
-			{
-				smi.UpdateImmuneSystem();
-			});
-		this.infecting.high.Transition(this.infecting.low, (ImmuneSystemMonitor.Instance smi) => smi.IsLowImmuneLevel());
-		this.infecting.low.Transition(this.infecting.high, (ImmuneSystemMonitor.Instance smi) => !smi.IsLowImmuneLevel()).ToggleStatusItem(Db.Get().DuplicantStatusItems.LowImmunity, null);
+		}).ToggleStatusItem(Db.Get().DuplicantStatusItems.LowImmunity, null);
 		this.infected.Update(delegate(ImmuneSystemMonitor.Instance smi)
 		{
 			smi.ClearInternalDisease();
@@ -244,7 +243,7 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 
 		public bool IsLowImmuneLevel()
 		{
-			return this.immuneLevel.value < 30f;
+			return this.immuneLevel.value < 40f;
 		}
 
 		public bool IsSick()
@@ -262,7 +261,7 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 			ReportManager.Instance.ReportValue(ReportManager.ReportType.DiseaseStatus, (float)this.primaryElement.DiseaseCount, string.Format(UI.ENDOFDAYREPORT.NOTES.GERMS, base.master.name));
 		}
 
-		private const float LOW_IMMUNE_LEVEL = 30f;
+		private const float LOW_IMMUNE_LEVEL = 40f;
 
 		[Serialize]
 		public Dictionary<HashedString, ImmuneSystemMonitor.Instance.DiseaseSourceInfo> lastDiseaseSources;

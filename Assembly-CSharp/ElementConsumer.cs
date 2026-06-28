@@ -289,8 +289,8 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 		ElementConsumer.handleInstanceMap[this.simHandle] = this;
 	}
 
-	[HashedEnum]
 	[SerializeField]
+	[HashedEnum]
 	public SimHashes elementToConsume = SimHashes.Vacuum;
 
 	[SerializeField]

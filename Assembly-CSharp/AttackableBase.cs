@@ -2,6 +2,12 @@
 
 public class AttackableBase : Workable, IApproachable
 {
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		this.synchronizeAnims = false;
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();

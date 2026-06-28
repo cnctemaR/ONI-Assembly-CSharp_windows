@@ -262,6 +262,18 @@ public class ConduitFlow : IConduitFlow
 		this.TryAdd(list);
 	}
 
+	private static int FindIndex(List<ConduitFlow.Conduit> path, int idx)
+	{
+		for (int i = 0; i < path.Count; i++)
+		{
+			if (path[i].idx == idx)
+			{
+				return i;
+			}
+		}
+		return -1;
+	}
+
 	private void TryAdd(List<ConduitFlow.Conduit> new_path)
 	{
 		foreach (List<ConduitFlow.Conduit> list in this.pathList)
@@ -269,8 +281,8 @@ public class ConduitFlow : IConduitFlow
 			if (list.Count >= new_path.Count)
 			{
 				bool flag = false;
-				int num = list.FindIndex((ConduitFlow.Conduit t) => t.idx == new_path[0].idx);
-				int num2 = list.FindIndex((ConduitFlow.Conduit t) => t.idx == new_path[new_path.Count - 1].idx);
+				int num = ConduitFlow.FindIndex(list, new_path[0].idx);
+				int num2 = ConduitFlow.FindIndex(list, new_path[new_path.Count - 1].idx);
 				if (num != -1 && num2 != -1)
 				{
 					flag = true;
@@ -302,12 +314,12 @@ public class ConduitFlow : IConduitFlow
 		}
 		for (int k = this.pathList.Count - 1; k >= 0; k--)
 		{
-			List<ConduitFlow.Conduit> old_path = this.pathList[k];
-			if (new_path.Count >= old_path.Count)
+			List<ConduitFlow.Conduit> list2 = this.pathList[k];
+			if (new_path.Count >= list2.Count)
 			{
 				bool flag2 = false;
-				int num4 = new_path.FindIndex((ConduitFlow.Conduit t) => t.idx == old_path[0].idx);
-				int num5 = new_path.FindIndex((ConduitFlow.Conduit t) => t.idx == old_path[old_path.Count - 1].idx);
+				int num4 = ConduitFlow.FindIndex(new_path, list2[0].idx);
+				int num5 = ConduitFlow.FindIndex(new_path, list2[list2.Count - 1].idx);
 				if (num4 != -1 && num5 != -1)
 				{
 					flag2 = true;
@@ -315,7 +327,7 @@ public class ConduitFlow : IConduitFlow
 					int num6 = 0;
 					while (l < num5)
 					{
-						if (new_path[l].idx != old_path[num6].idx)
+						if (new_path[l].idx != list2[num6].idx)
 						{
 							flag2 = false;
 							break;
@@ -330,15 +342,15 @@ public class ConduitFlow : IConduitFlow
 				}
 			}
 		}
-		foreach (List<ConduitFlow.Conduit> list2 in this.pathList)
+		foreach (List<ConduitFlow.Conduit> list3 in this.pathList)
 		{
 			for (int m = new_path.Count - 1; m >= 0; m--)
 			{
-				ConduitFlow.Conduit new_conduit = new_path[m];
-				int num7 = list2.FindIndex((ConduitFlow.Conduit t) => t.idx == new_conduit.idx);
+				ConduitFlow.Conduit conduit = new_path[m];
+				int num7 = ConduitFlow.FindIndex(list3, conduit.idx);
 				if (num7 != -1)
 				{
-					int permittedFlowDirections = this.soaInfo.GetPermittedFlowDirections(new_conduit.idx);
+					int permittedFlowDirections = this.soaInfo.GetPermittedFlowDirections(conduit.idx);
 					if (Mathf.IsPowerOfTwo(permittedFlowDirections))
 					{
 						new_path.RemoveAt(m);

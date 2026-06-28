@@ -340,8 +340,8 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	protected bool forcePlayPst;
 
-	[Serialize]
 	[SerializeField]
+	[Serialize]
 	protected float workTimeRemaining = float.PositiveInfinity;
 
 	[SerializeField]

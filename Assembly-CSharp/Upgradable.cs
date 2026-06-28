@@ -510,8 +510,8 @@ public class Upgradable : Workable, ISaveLoadable
 		}
 	}
 
-	[DelimitedRecord(",")]
 	[IgnoreEmptyLines]
+	[DelimitedRecord(",")]
 	[IgnoreFirst(1)]
 	public class UpgradableConfig
 	{

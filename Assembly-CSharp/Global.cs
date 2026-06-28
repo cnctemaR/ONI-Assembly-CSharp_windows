@@ -84,7 +84,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 220993U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 221295U);
 		if (PlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{
 			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(UnitConfigurationScreen.MassUnitKey, ((GameUtil.MassUnit)PlayerPrefs.GetInt(UnitConfigurationScreen.MassUnitKey)).ToString());

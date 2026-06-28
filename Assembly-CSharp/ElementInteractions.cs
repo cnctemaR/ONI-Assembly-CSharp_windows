@@ -26,10 +26,10 @@ public class ElementInteractions
 
 	private TextAsset asset;
 
-	[IgnoreFirst(1)]
-	[IgnoreEmptyLines]
 	[IgnoreCommentedLines("//")]
 	[DelimitedRecord(",")]
+	[IgnoreFirst(1)]
+	[IgnoreEmptyLines]
 	private class InteractionDef
 	{
 		public SimMessages.ElementInteraction Transform()

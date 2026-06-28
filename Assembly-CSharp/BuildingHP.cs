@@ -133,8 +133,8 @@ public class BuildingHP : BuildingWorkable
 		}
 	}
 
-	[SerializeField]
 	[Serialize]
+	[SerializeField]
 	private int hitpoints;
 
 	[Serialize]

@@ -26,8 +26,9 @@ public class CO2ScrubberConfig : IBuildingConfig
 		go.AddOrGet<LoopingSounds>();
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
 		storage.showInUI = true;
-		go.AddOrGet<AirFilter>();
-		ElementConsumer elementConsumer = go.AddOrGet<ElementConsumer>();
+		AirFilter airFilter = go.AddOrGet<AirFilter>();
+		airFilter.filterTag = TagManager.Create(SimHashes.Water);
+		ElementConsumer elementConsumer = go.AddOrGet<PassiveElementConsumer>();
 		elementConsumer.elementToConsume = SimHashes.CarbonDioxide;
 		elementConsumer.consumptionRate = 0.3f;
 		elementConsumer.consumptionRadius = 3;
@@ -54,6 +55,7 @@ public class CO2ScrubberConfig : IBuildingConfig
 		conduitConsumer.capacityKG = 20f;
 		conduitConsumer.capacityTag = ElementLoader.FindElementByHash(SimHashes.Water).tag;
 		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Store;
+		conduitConsumer.forceAlwaysSatisfied = true;
 		ConduitDispenser conduitDispenser = go.AddOrGet<ConduitDispenser>();
 		conduitDispenser.conduitType = ConduitType.Liquid;
 		conduitDispenser.invertElementFilter = true;

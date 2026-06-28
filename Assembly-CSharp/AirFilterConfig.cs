@@ -22,6 +22,7 @@ public class AirFilterConfig : IBuildingConfig
 		go.AddOrGet<Prioritizable>();
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
 		storage.showInUI = true;
+		storage.capacityKg = 200f;
 		ElementConsumer elementConsumer = go.AddOrGet<ElementConsumer>();
 		elementConsumer.elementToConsume = SimHashes.ContaminatedOxygen;
 		elementConsumer.consumptionRate = 0.1f;
@@ -51,7 +52,8 @@ public class AirFilterConfig : IBuildingConfig
 		manualDeliveryKG.requestedItemTag = new Tag("Filter");
 		manualDeliveryKG.capacity = 100f;
 		manualDeliveryKG.refillMass = 25f;
-		go.AddOrGet<AirFilter>();
+		AirFilter airFilter = go.AddOrGet<AirFilter>();
+		airFilter.filterTag = new Tag("Filter");
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

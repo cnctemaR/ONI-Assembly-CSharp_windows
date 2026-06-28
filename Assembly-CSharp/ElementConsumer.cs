@@ -4,8 +4,8 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-[SkipSaveFileSerialization]
 [SerializationConfig(MemberSerialization.OptIn)]
+[SkipSaveFileSerialization]
 public class ElementConsumer : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 {
 	public float AverageConsumeRate
@@ -29,8 +29,13 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 		{
 			throw new ArgumentException("No consumable elements specified");
 		}
-		this.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
 		this.SimRegister();
+		this.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
+		if (this.capacityKG != float.PositiveInfinity)
+		{
+			this.hasAvailableCapacity = this.IsStorageFull();
+			this.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
+		}
 	}
 
 	protected override void OnCleanUp()
@@ -59,6 +64,12 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 		}
 	}
 
+	private bool IsStorageFull()
+	{
+		PrimaryElement primaryElement = this.storage.FindPrimaryElement(this.elementToConsume);
+		return primaryElement != null && primaryElement.Mass >= this.capacityKG;
+	}
+
 	public void RefreshConsumptionRate()
 	{
 		if (!Sim.IsValidHandle(this.simHandle))
@@ -70,7 +81,7 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 
 	private void UpdateSimData()
 	{
-		SimMessages.SetElementConsumerData(this.simHandle, (!this.consumptionEnabled) ? 0f : this.consumptionRate);
+		SimMessages.SetElementConsumerData(this.simHandle, (!this.consumptionEnabled || !this.hasAvailableCapacity) ? 0f : this.consumptionRate);
 	}
 
 	public static void AddMass(Sim.ConsumedMassInfo consumed_info)
@@ -136,6 +147,16 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 			{
 				base.GetComponent<KSelectable>().RemoveStatusItem(this.statusHandle, false);
 			}
+		}
+	}
+
+	private void OnStorageChange(object data)
+	{
+		bool flag = !this.IsStorageFull();
+		if (flag != this.hasAvailableCapacity)
+		{
+			this.hasAvailableCapacity = flag;
+			this.RefreshConsumptionRate();
 		}
 	}
 
@@ -288,8 +309,8 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 		}
 	}
 
-	[SerializeField]
 	[HashedEnum]
+	[SerializeField]
 	public SimHashes elementToConsume = SimHashes.Vacuum;
 
 	[SerializeField]
@@ -342,6 +363,8 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 	public bool isRequired = true;
 
 	private bool consumptionEnabled;
+
+	private bool hasAvailableCapacity = true;
 
 	[SerializeField]
 	private int simHandle = -1;

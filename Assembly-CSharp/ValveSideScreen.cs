@@ -58,8 +58,8 @@ public class ValveSideScreen : SideScreenContent
 
 	private Valve targetValve;
 
-	[SerializeField]
 	[Header("Slider")]
+	[SerializeField]
 	private KSlider flowSlider;
 
 	[SerializeField]

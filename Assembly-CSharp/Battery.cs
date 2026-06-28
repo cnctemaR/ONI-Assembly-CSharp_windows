@@ -5,8 +5,8 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-[SerializationConfig(MemberSerialization.OptIn)]
 [DebuggerDisplay("{name}")]
+[SerializationConfig(MemberSerialization.OptIn)]
 public class Battery : KMonoBehaviour, IEnergyConsumer, IEnergyProducer, IEffectDescriptor
 {
 	public float WattsUsed { get; private set; }

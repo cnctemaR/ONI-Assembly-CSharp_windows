@@ -160,8 +160,8 @@ public class Substance
 	[EventRef]
 	public string fallingStartSound;
 
-	[FormerlySerializedAs("fallingStopSoundMigrated")]
 	[EventRef]
+	[FormerlySerializedAs("fallingStopSoundMigrated")]
 	public string fallingStopSound;
 
 	[NonSerialized]

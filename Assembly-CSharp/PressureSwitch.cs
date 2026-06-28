@@ -120,8 +120,8 @@ public class PressureSwitch : CircuitSwitch, ISaveLoadable, IThresholdSwitch
 
 	private const int WINDOW_SIZE = 8;
 
-	[Serialize]
 	[SerializeField]
+	[Serialize]
 	private float threshold;
 
 	[Serialize]

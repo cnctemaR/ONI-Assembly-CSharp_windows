@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using STRINGS;
-using UnityEngine;
 
 public class OxygenRecharger : BuildingWorkable, IEffectDescriptor
 {
@@ -121,7 +120,7 @@ public class OxygenRecharger : BuildingWorkable, IEffectDescriptor
 		SuitTank tank = OxygenRecharger.GetTank(worker);
 		if (tank == null)
 		{
-			Debug.LogError("Something went wront, the worker is supposed to carry an oxygen tank.");
+			Debug.LogError("Something went wront, the worker is supposed to carry an oxygen tank.", null);
 			return;
 		}
 		this.animController.Play("working_pre", KAnim.PlayMode.Once, 1f, 0f);
@@ -139,7 +138,7 @@ public class OxygenRecharger : BuildingWorkable, IEffectDescriptor
 		}
 		else
 		{
-			Debug.LogError("Something went wrong, the worker is supposed to carry an oxygen tank.");
+			Debug.LogError("Something went wrong, the worker is supposed to carry an oxygen tank.", null);
 		}
 		return base.OnWorkTick(worker, dt);
 	}

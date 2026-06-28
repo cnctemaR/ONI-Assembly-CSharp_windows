@@ -254,7 +254,7 @@ public class ConsumablesTableScreen : TableScreen
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
 		if (widgetRow == null)
 		{
-			Debug.LogWarning("Row is null");
+			global::Debug.LogWarning("Row is null", null);
 			return;
 		}
 		FoodInfoTableColumn foodInfoTableColumn = base.GetWidgetColumn(widget_go) as FoodInfoTableColumn;
@@ -291,7 +291,7 @@ public class ConsumablesTableScreen : TableScreen
 				ConsumableConsumer component = minionIdentity.GetComponent<ConsumableConsumer>();
 				if (component == null)
 				{
-					Debug.LogError("Could not find minion identity / row associated with the widget");
+					global::Debug.LogError("Could not find minion identity / row associated with the widget", null);
 					return;
 				}
 				component.SetPermitted(food_info.Id, new_value);
@@ -336,7 +336,7 @@ public class ConsumablesTableScreen : TableScreen
 				ConsumableConsumer component = minionIdentity.GetComponent<ConsumableConsumer>();
 				if (component == null)
 				{
-					Debug.LogError("Could not find minion identity / row associated with the widget");
+					global::Debug.LogError("Could not find minion identity / row associated with the widget", null);
 					return;
 				}
 				EdiblesManager.FoodInfo foodInfo = foodInfoTableColumn.food_info;

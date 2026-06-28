@@ -11,7 +11,6 @@ public class App : MonoBehaviour
 
 	public static void LoadScene(string scene_name)
 	{
-		Debug.Assert(!App.isLoading, "Scene [" + App.sceneName + "] is already being loaded!");
 		KMonoBehaviour.isLoadingScene = true;
 		App.isLoading = true;
 		App.sceneName = scene_name;

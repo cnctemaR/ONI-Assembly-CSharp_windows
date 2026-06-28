@@ -12,7 +12,7 @@ namespace TMPro
 		{
 			if (!baseMaterial.HasProperty(ShaderUtilities.ID_StencilID))
 			{
-				Debug.LogWarning("Selected Shader does not support Stencil Masking. Please select the Distance Field or Mobile Distance Field Shader.");
+				global::Debug.LogWarning("Selected Shader does not support Stencil Masking. Please select the Distance Field or Mobile Distance Field Shader.", null);
 				return baseMaterial;
 			}
 			int instanceID = baseMaterial.GetInstanceID();
@@ -118,29 +118,29 @@ namespace TMPro
 			int num = TMP_MaterialManager.m_materialList.FindIndex((TMP_MaterialManager.MaskingMaterial item) => item.baseMaterial == baseMaterial);
 			if (num == -1)
 			{
-				Debug.Log("No Masking Material exists for " + baseMaterial.name);
+				global::Debug.Log("No Masking Material exists for " + baseMaterial.name, null);
 			}
 			else if (TMP_MaterialManager.m_materialList[num].count > 1)
 			{
 				TMP_MaterialManager.m_materialList[num].count--;
-				Debug.Log(string.Concat(new object[]
+				global::Debug.Log(string.Concat(new object[]
 				{
 					"Removed (1) reference to ",
 					TMP_MaterialManager.m_materialList[num].stencilMaterial.name,
 					". There are ",
 					TMP_MaterialManager.m_materialList[num].count,
 					" references left."
-				}));
+				}), null);
 			}
 			else
 			{
-				Debug.Log(string.Concat(new object[]
+				global::Debug.Log(string.Concat(new object[]
 				{
 					"Removed last reference to ",
 					TMP_MaterialManager.m_materialList[num].stencilMaterial.name,
 					" with ID ",
 					TMP_MaterialManager.m_materialList[num].stencilMaterial.GetInstanceID()
-				}));
+				}), null);
 				global::UnityEngine.Object.DestroyImmediate(TMP_MaterialManager.m_materialList[num].stencilMaterial);
 				TMP_MaterialManager.m_materialList.RemoveAt(num);
 			}
@@ -150,7 +150,7 @@ namespace TMPro
 		{
 			if (TMP_MaterialManager.m_materialList.Count<TMP_MaterialManager.MaskingMaterial>() == 0)
 			{
-				Debug.Log("Material List has already been cleared.");
+				global::Debug.Log("Material List has already been cleared.", null);
 				return;
 			}
 			for (int i = 0; i < TMP_MaterialManager.m_materialList.Count<TMP_MaterialManager.MaskingMaterial>(); i++)

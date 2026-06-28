@@ -97,7 +97,7 @@ public static class GarbageProfiler
 			}
 		}
 		GarbageProfiler.previousSnapshot = memorySnapshot;
-		Debug.Log("Done writing snapshot!");
+		global::Debug.Log("Done writing snapshot!", null);
 	}
 
 	public static void DebugDumpGarbageStats()
@@ -150,7 +150,7 @@ public static class GarbageProfiler
 			}
 		}
 		GarbageProfiler.previousSnapshot = memorySnapshot;
-		Debug.Log("Done writing reference stats!");
+		global::Debug.Log("Done writing reference stats!", null);
 	}
 
 	private static MemorySnapshot previousSnapshot;

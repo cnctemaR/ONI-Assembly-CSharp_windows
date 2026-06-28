@@ -129,7 +129,6 @@ public class KAnimBatchGroup
 
 	private void SetupMeshData(int layer)
 	{
-		Debug.Assert(this.maxGroupSize > 0, "Group size must be >0");
 		this.layer = layer;
 		this.maxGroupSize = Mathf.Min(this.maxGroupSize, 60);
 		this.mesh = this.BuildMesh(this.maxGroupSize * this.data.maxVisibleSymbols);
@@ -262,13 +261,7 @@ public class KAnimBatchGroup
 			instance.buildTex.name = "BuildData:" + this.batchID.ToString();
 			this.buildByteToFloat.bytes = null;
 		}
-		Debug.AssertFormat(num2 <= (float)(instance.buildTex.width * instance.buildTex.height), "Build texture is the wrong size! {0} <= {1}", new object[]
-		{
-			num2,
-			instance.buildTex.width * instance.buildTex.height
-		});
 		int num3 = instance.buildTex.width * instance.buildTex.height * 4 * 4;
-		Debug.AssertFormat(num3 > 0, "Init build failure for [{0}]", new object[] { this.batchID });
 		if (this.buildByteToFloat.bytes == null)
 		{
 			this.buildByteToFloat = new KAnimConverter.ByteToFloatConverter
@@ -331,7 +324,6 @@ public class KAnimBatchGroup
 		{
 			return null;
 		}
-		Debug.AssertFormat(this.texureSize > 0, "Need to init AnimBatchGroup [{0}] first!", new object[] { this.batchID });
 		Texture2D texture2D = KAnimBatchGroup.cache.Get(this.texureSize);
 		texture2D.name = "InstanceData:" + this.batchID.ToString();
 		return texture2D;
@@ -344,7 +336,6 @@ public class KAnimBatchGroup
 
 	public void GetDataTextures(BatchGroupInstance instance, MaterialPropertyBlock matProperties)
 	{
-		Debug.AssertFormat(instance != null, "Got null Group Instace from AnimBatchGroup [{0}]", new object[] { this.batchID });
 		matProperties.SetFloat("MAX_VISIBLE_SYMBOLS", (float)this.data.maxVisibleSymbols);
 		if (this.animDataTex != null)
 		{

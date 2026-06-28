@@ -188,14 +188,14 @@ public class Pickupable : Workable
 		int num = Grid.PosToCell(this);
 		if (!Grid.IsValidCell(num))
 		{
-			Debug.LogWarning(string.Concat(new object[]
+			global::Debug.LogWarning(string.Concat(new object[]
 			{
 				"Destroying GO [",
 				base.name,
 				"] because it is in an invalid position [",
 				this.transform.position,
 				"]"
-			}));
+			}), null);
 			base.gameObject.DeleteObject();
 			return;
 		}
@@ -515,7 +515,7 @@ public class Pickupable : Workable
 			}
 			catch
 			{
-				Debug.Log("!");
+				global::Debug.Log("!", null);
 			}
 		}
 	}

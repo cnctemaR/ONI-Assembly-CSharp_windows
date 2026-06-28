@@ -100,13 +100,13 @@ public class TimedSwitchSideScreen : SideScreenContent
 	{
 		if (target == null)
 		{
-			Debug.LogError("Invalid gameObject received");
+			global::Debug.LogError("Invalid gameObject received", null);
 			return;
 		}
 		this.targetTimedSwitch = target.GetComponent<TimedSwitch>();
 		if (this.targetTimedSwitch == null)
 		{
-			Debug.LogError("The gameObject received does not contain a TimedSwitch component");
+			global::Debug.LogError("The gameObject received does not contain a TimedSwitch component", null);
 			return;
 		}
 		if (!this.targetTimedSwitch.IsConnected())

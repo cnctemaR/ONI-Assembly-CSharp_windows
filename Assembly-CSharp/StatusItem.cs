@@ -43,7 +43,7 @@ public class StatusItem : Resource
 		this.showShowWorldIcon = showShowWorldIcon;
 		if (this.sprite == null)
 		{
-			Debug.LogWarning("Status item '" + id + "' references a missing icon: " + icon);
+			global::Debug.LogWarning("Status item '" + id + "' references a missing icon: " + icon, null);
 		}
 	}
 
@@ -68,7 +68,7 @@ public class StatusItem : Resource
 		this.overlay = overlay;
 		if (this.sprite == null)
 		{
-			Debug.LogWarning("Status item '" + id + "' references a missing icon: " + icon);
+			global::Debug.LogWarning("Status item '" + id + "' references a missing icon: " + icon, null);
 		}
 	}
 

@@ -124,7 +124,7 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 	[MyCmpAdd]
 	private ChoreConsumer choreConsumer;
 
-	[Serialize]
 	[ReadOnly]
+	[Serialize]
 	public int nextNeedDay;
 }

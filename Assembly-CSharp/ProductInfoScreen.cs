@@ -287,12 +287,12 @@ public class ProductInfoScreen : KScreen
 	{
 		if (recipe == null)
 		{
-			Debug.LogError("Trying to verify the materials on a null recipe!");
+			global::Debug.LogError("Trying to verify the materials on a null recipe!", null);
 			return false;
 		}
 		if (recipe.Ingredients == null || recipe.Ingredients.Count == 0)
 		{
-			Debug.LogError("Trying to verify the materials on a recipe with no MaterialCategoryTags!");
+			global::Debug.LogError("Trying to verify the materials on a recipe with no MaterialCategoryTags!", null);
 			return false;
 		}
 		int i;

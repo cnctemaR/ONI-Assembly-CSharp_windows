@@ -4,7 +4,6 @@ using System.IO;
 using System.Net;
 using System.Text;
 using Newtonsoft.Json;
-using UnityEngine;
 
 public class KleiAccount : ThreadedHttps<KleiAccount>
 {
@@ -45,13 +44,13 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 		KleiAccount.AccountReply accountReply = JsonConvert.DeserializeObject<KleiAccount.AccountReply>(text);
 		if (!accountReply.Error)
 		{
-			Debug.Log("[Account] Got login for user " + accountReply.UserID);
+			Debug.Log("[Account] Got login for user " + accountReply.UserID, null);
 			KleiAccount.KleiUserID = ((!(accountReply.UserID == string.Empty)) ? accountReply.UserID : null);
 			this.gotUserID();
 		}
 		else
 		{
-			Debug.Log("[Account] Error logging in: " + text);
+			Debug.Log("[Account] Error logging in: " + text, null);
 			this.gotUserID();
 		}
 		base.End();
@@ -79,7 +78,7 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 	{
 		if (KleiAccount.KleiUserID == null)
 		{
-			Debug.Log("[Account] Requesting auth ticket from " + DistributionPlatform.Inst.Name);
+			Debug.Log("[Account] Requesting auth ticket from " + DistributionPlatform.Inst.Name, null);
 			this.gotUserID = cb;
 			byte[] array = this.AuthTicket();
 			if (array == null || array.Length == 0)

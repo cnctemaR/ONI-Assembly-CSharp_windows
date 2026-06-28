@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using UnityEngine;
 
 [Serializable]
 public class ResourceSet<T> : ResourceSet where T : Resource
@@ -83,7 +82,7 @@ public class ResourceSet<T> : ResourceSet where T : Resource
 				return t;
 			}
 		}
-		Debug.LogError("Could not find " + typeof(T).ToString() + ": " + id);
+		Debug.LogError("Could not find " + typeof(T).ToString() + ": " + id, null);
 		return (T)((object)null);
 	}
 
@@ -92,7 +91,7 @@ public class ResourceSet<T> : ResourceSet where T : Resource
 		T t = resource as T;
 		if (t == null)
 		{
-			Debug.LogError("Resource type mismatch: " + resource.GetType().Name + " does not match " + typeof(T).Name);
+			Debug.LogError("Resource type mismatch: " + resource.GetType().Name + " does not match " + typeof(T).Name, null);
 		}
 		this.Add(t);
 		return resource;

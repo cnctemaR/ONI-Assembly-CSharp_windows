@@ -73,7 +73,6 @@ public class SteamUGCService : MonoBehaviour
 	public void OnEnable()
 	{
 		this.setupComplete = false;
-		Debug.Assert(SteamUGCService.instance == null);
 		SteamUGCService.instance = this;
 	}
 
@@ -89,7 +88,6 @@ public class SteamUGCService : MonoBehaviour
 
 	private void OnDestroy()
 	{
-		Debug.Assert(SteamUGCService.instance == this);
 		SteamUGCService.instance = null;
 	}
 
@@ -300,10 +298,10 @@ public class SteamUGCService : MonoBehaviour
 			PublishedFileId_t[] array = new PublishedFileId_t[num];
 			SteamUGC.GetSubscribedItems(array, (uint)array.Length);
 			this.subscribed = new List<PublishedFileId_t>(array);
-			Debug.Log("Refresh should be called next");
+			global::Debug.Log("Refresh should be called next", null);
 			if (this.OnRefreshLanguage != null)
 			{
-				Debug.Log("Refresh");
+				global::Debug.Log("Refresh", null);
 				this.OnRefreshLanguage();
 			}
 		}
@@ -324,7 +322,7 @@ public class SteamUGCService : MonoBehaviour
 		}
 		else
 		{
-			Debug.Log(string.Concat(new object[] { "[SteamUGCQueryCompleted] - handle: ", pCallback.m_handle, " -- Result: ", pCallback.m_eResult, " -- NUm results: ", pCallback.m_unNumResultsReturned, " --Total Matching: ", pCallback.m_unTotalMatchingResults, " -- cached: ", pCallback.m_bCachedData }));
+			global::Debug.Log(string.Concat(new object[] { "[SteamUGCQueryCompleted] - handle: ", pCallback.m_handle, " -- Result: ", pCallback.m_eResult, " -- NUm results: ", pCallback.m_unNumResultsReturned, " --Total Matching: ", pCallback.m_unTotalMatchingResults, " -- cached: ", pCallback.m_bCachedData }), null);
 		}
 		SteamUGC.ReleaseQueryUGCRequest(this.m_UGCQueryHandle);
 	}

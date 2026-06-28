@@ -225,7 +225,7 @@ public class TableScreen : KScreen
 	{
 		if (widget_go == null)
 		{
-			Debug.LogWarning("Widget is null");
+			global::Debug.LogWarning("Widget is null", null);
 			return null;
 		}
 		if (this.known_widget_rows.ContainsKey(widget_go))
@@ -240,7 +240,7 @@ public class TableScreen : KScreen
 				return tableRow;
 			}
 		}
-		Debug.LogWarning("Row is null for widget: " + widget_go.name + " parent is " + widget_go.transform.parent.name);
+		global::Debug.LogWarning("Row is null for widget: " + widget_go.name + " parent is " + widget_go.transform.parent.name, null);
 		return null;
 	}
 
@@ -297,7 +297,7 @@ public class TableScreen : KScreen
 			superCheckboxTableColumn.MarkDirty(null, false);
 			return superCheckboxTableColumn;
 		}
-		Debug.LogWarning("SuperCheckbox column registration failed");
+		global::Debug.LogWarning("SuperCheckbox column registration failed", null);
 		return null;
 	}
 
@@ -305,7 +305,7 @@ public class TableScreen : KScreen
 	{
 		if (this.columns.ContainsKey(id))
 		{
-			Debug.LogWarning(string.Format("Column with id {0} already in dictionary", id));
+			global::Debug.LogWarning(string.Format("Column with id {0} already in dictionary", id), null);
 			return false;
 		}
 		new_column.screen = this;
@@ -328,7 +328,7 @@ public class TableScreen : KScreen
 				return keyValuePair.Value;
 			}
 		}
-		Debug.LogWarning("No column found for widget gameobject " + widget_go.name);
+		global::Debug.LogWarning("No column found for widget gameobject " + widget_go.name, null);
 		return null;
 	}
 

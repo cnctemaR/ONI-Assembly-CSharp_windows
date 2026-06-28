@@ -16,10 +16,8 @@ public class EquipmentConfigManager : KMonoBehaviour
 		GameObject gameObject = EntityTemplates.CreateLooseEntity(equipmentDef.Id, equipmentDef.Name, equipmentDef.RecipeDescription, equipmentDef.Mass, true, equipmentDef.Anim, "object", Grid.SceneLayer.Use, equipmentDef.CollisionShape, equipmentDef.width, equipmentDef.height, true, equipmentDef.OutputElement, null);
 		Equippable equippable = gameObject.AddComponent<Equippable>();
 		equippable.def = equipmentDef;
-		Debug.Assert(equippable.def != null);
 		EquipmentSlot equipmentSlot = EquipmentSet.Get().slotSet.Get(equipmentDef.Slot);
 		equippable.slot = equipmentSlot;
-		Debug.Assert(equippable.slot != null);
 		this.LoadRecipe(equipmentDef, equippable);
 		config.DoPostConfigure(gameObject);
 		Assets.AddPrefab(gameObject.GetComponent<KPrefabID>());

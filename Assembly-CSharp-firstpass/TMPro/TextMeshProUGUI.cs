@@ -5,11 +5,11 @@ using UnityEngine.UI;
 
 namespace TMPro
 {
-	[SelectionBase]
+	[RequireComponent(typeof(CanvasRenderer))]
 	[DisallowMultipleComponent]
 	[RequireComponent(typeof(RectTransform))]
-	[RequireComponent(typeof(CanvasRenderer))]
 	[AddComponentMenu("UI/TextMeshPro - Text (UI)", 11)]
+	[SelectionBase]
 	[ExecuteInEditMode]
 	public class TextMeshProUGUI : TMP_Text, ILayoutElement
 	{
@@ -52,7 +52,7 @@ namespace TMPro
 			}
 			if (this.m_fontAsset == null)
 			{
-				Debug.LogWarning("Please assign a Font Asset to this " + base.transform.name + " gameobject.", this);
+				global::Debug.LogWarning("Please assign a Font Asset to this " + base.transform.name + " gameobject.", this);
 				return;
 			}
 			if (this.m_fontSizeMin == 0f)
@@ -135,12 +135,12 @@ namespace TMPro
 				}
 				if (this.m_fontAsset == null)
 				{
-					Debug.LogWarning("The ARIAL SDF Font Asset was not found. There is no Font Asset assigned to " + base.gameObject.name + ".", this);
+					global::Debug.LogWarning("The ARIAL SDF Font Asset was not found. There is no Font Asset assigned to " + base.gameObject.name + ".", this);
 					return;
 				}
 				if (this.m_fontAsset.characterDictionary == null)
 				{
-					Debug.Log("Dictionary is Null!");
+					global::Debug.Log("Dictionary is Null!", null);
 				}
 				this.m_sharedMaterial = this.m_fontAsset.material;
 			}
@@ -159,7 +159,7 @@ namespace TMPro
 				{
 					if (this.m_fontAsset.material == null)
 					{
-						Debug.LogWarning(string.Concat(new string[]
+						global::Debug.LogWarning(string.Concat(new string[]
 						{
 							"The Font Atlas Texture of the Font Asset ",
 							this.m_fontAsset.name,
@@ -784,7 +784,7 @@ namespace TMPro
 				{
 					text = text + num8.ToString() + " ";
 				}
-				Debug.LogWarning("Characters with ASCII values were not found in the Font Asset Glyph Table: " + text, this);
+				global::Debug.LogWarning("Characters with ASCII values were not found in the Font Asset Glyph Table: " + text, this);
 			}
 			return this.m_totalCharacterCount;
 		}
@@ -887,7 +887,7 @@ namespace TMPro
 		{
 			if (this.m_fontAsset == null || this.m_fontAsset.characterDictionary == null)
 			{
-				Debug.LogWarning("Can't Generate Mesh! No Font Asset has been assigned to Object ID: " + base.GetInstanceID());
+				global::Debug.LogWarning("Can't Generate Mesh! No Font Asset has been assigned to Object ID: " + base.GetInstanceID(), null);
 				return;
 			}
 			if (this.m_textInfo != null)
@@ -985,22 +985,22 @@ namespace TMPro
 				int currentMaterialIndex = this.m_currentMaterialIndex;
 				if (!this.m_isRichText || num14 != 60)
 				{
-					goto IL_04B6;
+					goto IL_04B7;
 				}
 				this.m_isParsingText = true;
 				if (!base.ValidateHtmlTag(this.m_char_buffer, num13 + 1, out num12))
 				{
-					goto IL_04B6;
+					goto IL_04B7;
 				}
 				num13 = num12;
 				if (this.m_textElementType != TMP_TextElementType.Character)
 				{
-					goto IL_04B6;
+					goto IL_04B7;
 				}
-				IL_2CAD:
+				IL_2CAE:
 				num13++;
 				continue;
-				IL_04B6:
+				IL_04B7:
 				this.m_isParsingText = false;
 				bool isUsingAlternateTypeface = this.m_textInfo.characterInfo[this.m_characterCount].isUsingAlternateTypeface;
 				float num15 = 1f;
@@ -1031,7 +1031,7 @@ namespace TMPro
 					TMP_Sprite tmp_Sprite = this.m_currentSpriteAsset.spriteInfoList[this.m_spriteIndex];
 					if (tmp_Sprite == null)
 					{
-						goto IL_2CAD;
+						goto IL_2CAE;
 					}
 					num14 = 57344 + this.m_spriteIndex;
 					this.m_currentFontAsset = this.m_fontAsset;
@@ -1051,7 +1051,7 @@ namespace TMPro
 					this.m_cached_TextElement = this.m_textInfo.characterInfo[this.m_characterCount].textElement;
 					if (this.m_cached_TextElement == null)
 					{
-						goto IL_2CAD;
+						goto IL_2CAE;
 					}
 					this.m_currentFontAsset = this.m_textInfo.characterInfo[this.m_characterCount].fontAsset;
 					this.m_currentMaterial = this.m_textInfo.characterInfo[this.m_characterCount].material;
@@ -1206,7 +1206,7 @@ namespace TMPro
 									this.m_recursiveCount++;
 									if (this.m_recursiveCount > 20)
 									{
-										goto IL_2CAD;
+										goto IL_2CAE;
 									}
 								}
 							}
@@ -1277,7 +1277,7 @@ namespace TMPro
 							this.m_maxLineAscender = float.NegativeInfinity;
 							this.m_maxLineDescender = float.PositiveInfinity;
 							this.m_xAdvance = 0f + this.tag_Indent;
-							goto IL_2CAD;
+							goto IL_2CAE;
 						}
 						else if (this.m_enableAutoSizing && this.m_fontSize > this.m_fontSizeMin)
 						{
@@ -1329,7 +1329,7 @@ namespace TMPro
 									}
 									else
 									{
-										Debug.LogWarning("Unable to use Ellipsis character since it wasn't found in the current Font Asset [" + this.m_fontAsset.name + "]. Consider regenerating this font asset to include the Ellipsis character (u+2026).\nNote: Warnings can be disabled in the TMP Settings file.", this);
+										global::Debug.LogWarning("Unable to use Ellipsis character since it wasn't found in the current Font Asset [" + this.m_fontAsset.name + "]. Consider regenerating this font asset to include the Ellipsis character (u+2026).\nNote: Warnings can be disabled in the TMP Settings file.", this);
 									}
 									this.m_totalCharacterCount = num7 + 1;
 									this.GenerateTextMesh();
@@ -1472,7 +1472,7 @@ namespace TMPro
 								}
 								else
 								{
-									Debug.LogWarning("Unable to use Ellipsis character since it wasn't found in the current Font Asset [" + this.m_fontAsset.name + "]. Consider regenerating this font asset to include the Ellipsis character (u+2026).\nNote: Warnings can be disabled in the TMP Settings file.", this);
+									global::Debug.LogWarning("Unable to use Ellipsis character since it wasn't found in the current Font Asset [" + this.m_fontAsset.name + "]. Consider regenerating this font asset to include the Ellipsis character (u+2026).\nNote: Warnings can be disabled in the TMP Settings file.", this);
 								}
 								this.m_totalCharacterCount = num7 + 1;
 								this.GenerateTextMesh();
@@ -1526,7 +1526,7 @@ namespace TMPro
 								this.m_lineOffset = 0f;
 								this.m_lineNumber++;
 								this.m_pageNumber++;
-								goto IL_2CAD;
+								goto IL_2CAE;
 							}
 							break;
 						}
@@ -1623,7 +1623,7 @@ namespace TMPro
 						this.m_xAdvance = 0f + this.tag_LineIndent + this.tag_Indent;
 						num7 = this.m_characterCount - 1;
 						this.m_characterCount++;
-						goto IL_2CAD;
+						goto IL_2CAE;
 					}
 				}
 				if (this.m_textInfo.characterInfo[this.m_characterCount].isVisible)
@@ -1674,7 +1674,7 @@ namespace TMPro
 					}
 				}
 				this.m_characterCount++;
-				goto IL_2CAD;
+				goto IL_2CAE;
 			}
 			float num35 = this.m_maxFontSize - this.m_minFontSize;
 			if (!this.m_isCharacterWrappingEnabled && this.m_enableAutoSizing && num35 > 0.051f && this.m_fontSize < this.m_fontSizeMax)
@@ -1927,7 +1927,7 @@ namespace TMPro
 									characterInfo[i].vertex_BR.uv2.y = characterInfo[i].vertex_TL.uv2.y;
 									break;
 								case TextureMappingOptions.MatchAspect:
-									Debug.Log("ERROR: Cannot Match both Vertical & Horizontal.");
+									global::Debug.Log("ERROR: Cannot Match both Vertical & Horizontal.", null);
 									break;
 								}
 								float num55 = (1f - (characterInfo[i].vertex_BL.uv2.y + characterInfo[i].vertex_TL.uv2.y) * characterInfo[i].aspectRatio) / 2f;

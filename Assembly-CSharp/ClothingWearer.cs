@@ -2,7 +2,6 @@
 using Klei.AI;
 using KSerialization;
 using STRINGS;
-using UnityEngine;
 
 public class ClothingWearer : KMonoBehaviour
 {
@@ -43,7 +42,7 @@ public class ClothingWearer : KMonoBehaviour
 	{
 		if (this.refreshHandle.TimeRemaining > 0f)
 		{
-			Debug.LogWarning(base.gameObject.GetProperName() + " is already in the process of changing clothing");
+			Debug.LogWarning(base.gameObject.GetProperName() + " is already in the process of changing clothing", null);
 			return;
 		}
 		this.decorProvider.baseRadius = 3f;

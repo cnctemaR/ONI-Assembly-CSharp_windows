@@ -68,12 +68,12 @@ public class CharacterSelectionController : KModalScreen
 	{
 		if (this.startingStats.Contains(charStats))
 		{
-			Debug.Log("Tried to add the same minion twice.");
+			global::Debug.Log("Tried to add the same minion twice.", null);
 			return;
 		}
 		if (this.startingStats.Count >= this.selectableCharCount)
 		{
-			Debug.LogError("Tried to add minions beyond the allowed limit");
+			global::Debug.LogError("Tried to add minions beyond the allowed limit", null);
 			return;
 		}
 		this.startingStats.Add(charStats);

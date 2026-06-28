@@ -19,7 +19,7 @@ public class ReceptacleSideScreen : SideScreenContent
 	{
 		if (target == null)
 		{
-			Debug.LogError("SingleObjectReceptacle provided was null.");
+			global::Debug.LogError("SingleObjectReceptacle provided was null.", null);
 			return;
 		}
 		this.targetReceptacle = target;
@@ -266,7 +266,7 @@ public class ReceptacleSideScreen : SideScreenContent
 		SingleEntityReceptacle component = target.GetComponent<SingleEntityReceptacle>();
 		if (component == null)
 		{
-			Debug.LogError("The object selected doesn't have a SingleObjectReceptacle!");
+			global::Debug.LogError("The object selected doesn't have a SingleObjectReceptacle!", null);
 			return;
 		}
 		this.Initialize(component);
@@ -380,7 +380,7 @@ public class ReceptacleSideScreen : SideScreenContent
 	{
 		if (!this.depositObjectMap.ContainsKey(toggle))
 		{
-			Debug.LogError("Recipe not found on recipe list.");
+			global::Debug.LogError("Recipe not found on recipe list.", null);
 			return;
 		}
 		this.selectedEntityToggle = toggle;

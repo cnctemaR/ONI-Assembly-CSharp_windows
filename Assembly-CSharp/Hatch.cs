@@ -266,7 +266,7 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 		GameObject gameObject = this.FindExistingDigPlacer();
 		if (gameObject != null)
 		{
-			Debug.LogWarning("User menu trying to create dig placer on hatch while it already has one. This should not be possible");
+			global::Debug.LogWarning("User menu trying to create dig placer on hatch while it already has one. This should not be possible", null);
 			return;
 		}
 		DigTool.PlaceDig(Grid.PosToCell(base.gameObject), 0);

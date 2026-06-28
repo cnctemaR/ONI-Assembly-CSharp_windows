@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Generated;
 using KSerialization.Converters;
-using UnityEngine;
 
 namespace Klei
 {
@@ -40,7 +39,7 @@ namespace Klei
 			{
 				return global::Generated.Util.WeightedRandom.Choose<WeightedSimHash>(this.ElementChoiceGroups[item].choices);
 			}
-			Debug.LogError("Couldnt get SimHash [" + item + "]");
+			Debug.LogError("Couldnt get SimHash [" + item + "]", null);
 			return null;
 		}
 	}

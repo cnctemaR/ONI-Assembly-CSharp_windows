@@ -69,7 +69,7 @@ public class World : KMonoBehaviour
 			int cellIdx2 = solid_substance_change_info[k].cellIdx;
 			if (!Grid.IsValidCell(cellIdx2))
 			{
-				Debug.LogError(cellIdx2);
+				global::Debug.LogError(cellIdx2, null);
 			}
 			else
 			{
@@ -82,7 +82,7 @@ public class World : KMonoBehaviour
 		for (int l = 0; l < num_liquid_change_info; l++)
 		{
 			int cellIdx3 = liquid_change_info[l].cellIdx;
-			Debug.Assert(Grid.IsValidCell(cellIdx3));
+			global::UnityEngine.Debug.Assert(Grid.IsValidCell(cellIdx3));
 			this.changedCells.Add(cellIdx3);
 			if (this.OnLiquidChanged != null)
 			{

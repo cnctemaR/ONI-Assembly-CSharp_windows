@@ -57,7 +57,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		}
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		header = default(SaveGame.Header);
-		header.buildVersion = 217565U;
+		header.buildVersion = 217794U;
 		header.headerSize = bytes.Length;
 		header.headerVersion = 1U;
 		header.compression = ((!isCompressed) ? 0 : 1);
@@ -100,7 +100,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 	{
 		if (string.IsNullOrEmpty(newBaseName))
 		{
-			Debug.LogWarning("Cannot give the base an empty name");
+			global::UnityEngine.Debug.LogWarning("Cannot give the base an empty name");
 			return;
 		}
 		this.baseName = newBaseName;

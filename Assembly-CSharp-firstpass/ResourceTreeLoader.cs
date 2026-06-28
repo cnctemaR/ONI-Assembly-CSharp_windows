@@ -35,7 +35,6 @@ public class ResourceTreeLoader<T> : ResourceLoader<T> where T : ResourceTreeNod
 					xmlReader.MoveToAttribute("height");
 					num4 = float.Parse(xmlReader.Value);
 				}
-				Debug.Assert(num3 != 0f && num4 != 0f, "Error parsing GRAPHML");
 				if (xmlReader.ReadToFollowing("NodeLabel"))
 				{
 					string text = xmlReader.ReadString();

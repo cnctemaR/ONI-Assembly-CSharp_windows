@@ -39,11 +39,10 @@ public class EntitySplitter : KMonoBehaviour
 		Storage storage = base.GetComponent<Pickupable>().storage;
 		GameObject prefab = Assets.GetPrefab(base.GetComponent<KPrefabID>().PrefabTag);
 		GameObject gameObject = GameUtil.KInstantiate(prefab, this.transform.position, Grid.SceneLayer.Use, this.transform.parent.gameObject, null, 0);
-		Debug.Assert(gameObject != null, "WTH, the GO is null, shouldn't happen on instantiate");
 		Pickupable component = gameObject.GetComponent<Pickupable>();
 		if (component == null)
 		{
-			Debug.LogError("Edible::OnTake() No Pickupable component for " + gameObject.name, gameObject);
+			global::Debug.LogError("Edible::OnTake() No Pickupable component for " + gameObject.name, gameObject);
 		}
 		gameObject.SetActive(true);
 		component.TotalAmount = Mathf.Min(amount, this.pickupable.TotalAmount);

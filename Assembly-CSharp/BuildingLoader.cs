@@ -112,7 +112,7 @@ public class BuildingLoader : DefLoader
 		}
 		if (def.AnimFiles == null)
 		{
-			Debug.LogError(def.Name + " Def missing anim files");
+			global::Debug.LogError(def.Name + " Def missing anim files", null);
 		}
 		return flag;
 	}
@@ -194,7 +194,7 @@ public class BuildingLoader : DefLoader
 			}
 			if (!BuildingLoader.Add2DComponents(def, gameObject, null, false, -1))
 			{
-				Debug.Log(def.Name + " is not yet a 2d building!");
+				global::Debug.Log(def.Name + " is not yet a 2d building!", null);
 			}
 			BuildingLoader.UpdateComponentRequirement<EnergyConsumer>(gameObject, def.RequiresPowerInput);
 			Rotatable rotatable = BuildingLoader.UpdateComponentRequirement<Rotatable>(gameObject, def.PermittedRotations != PermittedRotations.Unrotatable);

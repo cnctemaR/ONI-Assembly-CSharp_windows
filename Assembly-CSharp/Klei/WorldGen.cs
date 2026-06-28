@@ -228,7 +228,7 @@ namespace Klei
 			}
 			if (WorldGen.wasLoaded)
 			{
-				Debug.Log("Worldgen loaded, dont need to do anything else...");
+				global::Debug.Log("Worldgen loaded, dont need to do anything else...", null);
 				return;
 			}
 			WorldGen.data = new Data();
@@ -277,7 +277,7 @@ namespace Klei
 		{
 			if (WorldGen.wasLoaded)
 			{
-				Debug.LogError("Initialise called after load");
+				global::Debug.LogError("Initialise called after load", null);
 				return;
 			}
 			WorldGen.successCallbackFn = callbackFn;
@@ -300,7 +300,7 @@ namespace Klei
 		{
 			if (WorldGen.wasLoaded)
 			{
-				Debug.LogError("GenerateOfflineThreaded called after load");
+				global::Debug.LogError("GenerateOfflineThreaded called after load", null);
 				return;
 			}
 			WorldGen.running = true;
@@ -312,7 +312,7 @@ namespace Klei
 		{
 			if (WorldGen.wasLoaded)
 			{
-				Debug.LogError("RenderWorldThreaded called after load");
+				global::Debug.LogError("RenderWorldThreaded called after load", null);
 				return;
 			}
 			WorldGen.running = true;
@@ -450,7 +450,7 @@ namespace Klei
 				{
 					if (!WorldGen.Settings.mobs.GetMobTags().Contains(list[j]))
 					{
-						Debug.LogError("Missing sample description for tag [" + list[j].Name + "]");
+						global::Debug.LogError("Missing sample description for tag [" + list[j].Name + "]", null);
 					}
 					else
 					{
@@ -460,7 +460,7 @@ namespace Klei
 						float num2 = mob.density.GetValue();
 						if (num2 > 1f)
 						{
-							Debug.LogWarning("Got a mob density greater than 1.0 for " + list[j].Name + ". Probably using density as spacing!");
+							global::Debug.LogWarning("Got a mob density greater than 1.0 for " + list[j].Name + ". Probably using density as spacing!", null);
 							num2 = 1f;
 						}
 						int num3 = Mathf.RoundToInt((float)list2.Count * num2);
@@ -658,7 +658,6 @@ namespace Klei
 				{
 					return false;
 				}
-				Debug.Assert(WorldGen.data.world.size.x != 0 && WorldGen.data.world.size.y != 0, "Map size has not been set");
 				WorldGen.data.worldLayout = new WorldLayout(WorldGen.data.world.size.x, WorldGen.data.world.size.y);
 				WorldGen.running = updateProgressFn(UI.WORLDGEN.WORLDLAYOUT.key, 5f, WorldGenProgressStages.Stages.WorldLayout);
 				WorldGen.data.voronoiTree = null;
@@ -786,7 +785,7 @@ namespace Klei
 			}
 			if (num2 < num)
 			{
-				Debug.LogWarning("Not enough Algae in startion biome - inflating mass");
+				global::Debug.LogWarning("Not enough Algae in startion biome - inflating mass", null);
 				float num5 = (num - num2) / (float)num3;
 				foreach (TerrainCell terrainCell2 in terrainCellsForTag)
 				{
@@ -805,8 +804,6 @@ namespace Klei
 		public static bool RenderToMap(WorldGen.OfflineCallbackFunction updateProgressFn, ref Sim.Cell[] cells, ref float[] bgTemp)
 		{
 			WorldGen.stats.ConvertVoroToMapTime = global::System.DateTime.Now.Ticks;
-			Debug.Assert(Grid.CellCount == Grid.WidthInCells * Grid.HeightInCells);
-			Debug.Assert(Grid.CellSizeInMeters != 0f);
 			cells = new Sim.Cell[Grid.CellCount];
 			bgTemp = new float[Grid.CellCount];
 			WorldGen.running = updateProgressFn(UI.WORLDGEN.CLEARINGLEVEL.key, 0f, WorldGenProgressStages.Stages.ClearingLevel);
@@ -959,7 +956,7 @@ namespace Klei
 		{
 			if (n1 is VoronoiTree || n2 is VoronoiTree)
 			{
-				Debug.Log("WorldGen::SwitchNodes() Skipping tree node");
+				global::Debug.Log("WorldGen::SwitchNodes() Skipping tree node", null);
 				return;
 			}
 			Node node = WorldGen.data.worldLayout.localGraph.FindNodeByID(n1.site.id);
@@ -1089,7 +1086,7 @@ namespace Klei
 				}
 				else
 				{
-					Debug.LogError(string.Concat(new object[] { "Process::SetValuesFunction Index [", index, "] is not valid. cells.Length [", cells.Length, "]" }));
+					global::Debug.LogError(string.Concat(new object[] { "Process::SetValuesFunction Index [", index, "] is not valid. cells.Length [", cells.Length, "]" }), null);
 				}
 			};
 			float num = 265f;
@@ -1175,7 +1172,7 @@ namespace Klei
 			{
 				if (WorldGen.settings.features.TerrainFeatures[nt] == null)
 				{
-					Debug.LogError("TerrainFeatureLookupTable is null for [" + nt + "]");
+					global::Debug.LogError("TerrainFeatureLookupTable is null for [" + nt + "]", null);
 				}
 				string type = WorldGen.settings.features.TerrainFeatures[nt].defaultBiome.type;
 				if (WorldGen.settings.biomes.TerrainBiomeLookupTable.ContainsKey(type))
@@ -1185,7 +1182,7 @@ namespace Klei
 				}
 				else
 				{
-					Debug.LogError("No biome lookup table of type " + type + " is loaded.");
+					global::Debug.LogError("No biome lookup table of type " + type + " is loaded.", null);
 				}
 			}
 			pd = element.defaultValues;
@@ -1311,7 +1308,7 @@ namespace Klei
 				string message = ex.Message;
 				string stackTrace = ex.StackTrace;
 				updateProgressFn(new StringKey("Exception in TerrainCell.Process"), -1f, WorldGenProgressStages.Stages.Failure);
-				Debug.LogError("Error:" + message + "\n" + stackTrace);
+				global::Debug.LogError("Error:" + message + "\n" + stackTrace, null);
 			}
 			List<WeightedSimHash> list = new List<WeightedSimHash>
 			{
@@ -1339,7 +1336,6 @@ namespace Klei
 					{
 						TerrainCell terrainCell = WorldGen.data.overworldCells.Find((TerrainCell c) => c.node.node == edge2.site0.node);
 						TerrainCell terrainCell2 = WorldGen.data.overworldCells.Find((TerrainCell c) => c.node.node == edge2.site1.node);
-						Debug.Assert(terrainCell != null && terrainCell2 != null, "NULL Terrainell nodes with EdgeUnpassable");
 						list4.Add(new Border(new Neighbors(terrainCell, terrainCell2), edge2.corner0.position, edge2.corner1.position)
 						{
 							element = list3,
@@ -1357,7 +1353,6 @@ namespace Klei
 						{
 							TerrainCell terrainCell3 = WorldGen.data.overworldCells.Find((TerrainCell c) => c.node.node == edge.site0.node);
 							TerrainCell terrainCell4 = WorldGen.data.overworldCells.Find((TerrainCell c) => c.node.node == edge.site1.node);
-							Debug.Assert(terrainCell3 != null && terrainCell4 != null, "NULL Terraincell nodes with EdgeClosed");
 							Border border = new Border(new Neighbors(terrainCell3, terrainCell4), edge.corner0.position, edge.corner1.position);
 							border.element = list2;
 							if (edge.tags.Contains(WorldGenTags.RoomBorderMixed))
@@ -1375,7 +1370,7 @@ namespace Klei
 				string message2 = ex2.Message;
 				string stackTrace2 = ex2.StackTrace;
 				updateProgressFn(new StringKey("Exception in Border creation"), -1f, WorldGenProgressStages.Stages.Failure);
-				Debug.LogError("Error:" + message2 + " " + stackTrace2);
+				global::Debug.LogError("Error:" + message2 + " " + stackTrace2, null);
 			}
 			try
 			{
@@ -1393,7 +1388,7 @@ namespace Klei
 				string message3 = ex3.Message;
 				string stackTrace3 = ex3.StackTrace;
 				updateProgressFn(new StringKey("Exception in border.defaultTemp"), -1f, WorldGenProgressStages.Stages.Failure);
-				Debug.LogError("Error:" + message3 + " " + stackTrace3);
+				global::Debug.LogError("Error:" + message3 + " " + stackTrace3, null);
 			}
 			try
 			{
@@ -1409,7 +1404,7 @@ namespace Klei
 					}
 					else
 					{
-						Debug.LogError(string.Concat(new object[] { "Process::SetValuesFunction Index [", index, "] is not valid. cells.Length [", map_cells.Length, "]" }));
+						global::Debug.LogError(string.Concat(new object[] { "Process::SetValuesFunction Index [", index, "] is not valid. cells.Length [", map_cells.Length, "]" }), null);
 					}
 				};
 				for (int m = 0; m < list4.Count; m++)
@@ -1429,7 +1424,7 @@ namespace Klei
 				string message4 = ex4.Message;
 				string stackTrace4 = ex4.StackTrace;
 				updateProgressFn(new StringKey("Exception in border.ConvertToMap"), -1f, WorldGenProgressStages.Stages.Failure);
-				Debug.LogError("Error:" + message4 + " " + stackTrace4);
+				global::Debug.LogError("Error:" + message4 + " " + stackTrace4, null);
 			}
 		}
 
@@ -1543,10 +1538,6 @@ namespace Klei
 		{
 			Vector2f lowerBound = tree.settings.lowerBound;
 			Vector2f upperBound = tree.settings.upperBound;
-			Debug.Assert(lowerBound.x < upperBound.x, string.Concat(new object[] { "BuildNoiseSource X range broken [l: ", lowerBound.x, " h: ", upperBound.x, "]" }));
-			Debug.Assert(lowerBound.y < upperBound.y, string.Concat(new object[] { "BuildNoiseSource Y range broken [l: ", lowerBound.y, " h: ", upperBound.y, "]" }));
-			Debug.Assert(width > 0, "BuildNoiseSource width <=0: [" + width + "]");
-			Debug.Assert(height > 0, "BuildNoiseSource height <=0: [" + height + "]");
 			NoiseMapBuilderPlane noiseMapBuilderPlane = new NoiseMapBuilderPlane(lowerBound.x, upperBound.x, lowerBound.y, upperBound.y, false);
 			noiseMapBuilderPlane.SetSize(width, height);
 			noiseMapBuilderPlane.SourceModule = tree.BuildFinalModule();
@@ -1595,7 +1586,6 @@ namespace Klei
 
 		public static void Normalise(float[] data)
 		{
-			Debug.Assert(data != null && data.Length > 0, "MISSING DATA FOR NORMALIZE");
 			float num = float.MaxValue;
 			float num2 = float.MinValue;
 			for (int i = 0; i < data.Length; i++)
@@ -1624,7 +1614,7 @@ namespace Klei
 			};
 			if (noiseMapBuilderCallback == null)
 			{
-				Debug.LogError("nupd is null");
+				global::Debug.LogError("nupd is null", null);
 			}
 			WorldGen.data.world.heatOffset = WorldGen.GenerateNoise(vector, WorldGen.settings.noise.GetZoomForTree("Heat"), WorldGen.heatSource, WorldGen.data.world.size.x, WorldGen.data.world.size.y, noiseMapBuilderCallback);
 			WorldGen.data.world.data = new float[WorldGen.data.world.heatOffset.Length];
@@ -1654,7 +1644,7 @@ namespace Klei
 				SubWorld subWorld = WorldGen.Settings.subworlds.GetSubWorld(terrainCell.node.type);
 				if (subWorld == null)
 				{
-					Debug.Log("Couldnt find Subworld for overworld node [" + terrainCell.node.type + "] using defaults");
+					global::Debug.Log("Couldnt find Subworld for overworld node [" + terrainCell.node.type + "] using defaults", null);
 				}
 				else
 				{
@@ -1988,7 +1978,7 @@ namespace Klei
 			}
 			if (simSaveFileStructure.worldDetail == null)
 			{
-				Debug.LogError("Detail is null");
+				global::Debug.LogError("Detail is null", null);
 			}
 			else
 			{

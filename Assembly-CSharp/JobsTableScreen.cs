@@ -37,7 +37,7 @@ public class JobsTableScreen : TableScreen
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
 		if (widgetRow == null)
 		{
-			Debug.LogWarning("Row is null");
+			global::Debug.LogWarning("Row is null", null);
 			return;
 		}
 		ChoreGroupTableColumn choreGroupTableColumn = base.GetWidgetColumn(widget_go) as ChoreGroupTableColumn;
@@ -74,7 +74,7 @@ public class JobsTableScreen : TableScreen
 				ChoreConsumer component = minionIdentity.GetComponent<ChoreConsumer>();
 				if (component == null)
 				{
-					Debug.LogError("Could not find minion identity / row associated with the widget");
+					global::Debug.LogError("Could not find minion identity / row associated with the widget", null);
 					return;
 				}
 				component.SetPermitted(chore_group, new_value);
@@ -119,7 +119,7 @@ public class JobsTableScreen : TableScreen
 				ChoreConsumer component = minionIdentity.GetComponent<ChoreConsumer>();
 				if (component == null)
 				{
-					Debug.LogError("Could not find minion identity / row associated with the widget");
+					global::Debug.LogError("Could not find minion identity / row associated with the widget", null);
 					return;
 				}
 				ChoreGroup choreGroup = choreGroupTableColumn.chore_group;

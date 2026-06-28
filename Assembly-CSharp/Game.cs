@@ -410,9 +410,9 @@ public class Game : KMonoBehaviour
 		}
 		using (new KProfiler.Region("Game.Update", null))
 		{
-			if (Debug.developerConsoleVisible)
+			if (global::Debug.developerConsoleVisible)
 			{
-				Debug.developerConsoleVisible = false;
+				global::Debug.developerConsoleVisible = false;
 			}
 			if (Time.frameCount == 5)
 			{
@@ -535,7 +535,6 @@ public class Game : KMonoBehaviour
 				{
 					for (int i = 0; i < drops.Count; i++)
 					{
-						Debug.Assert(Grid.IsValidCell(drops[i].Key));
 						GameObject gameObject = GameUtil.KInstantiate(EntityPrefabs.Instance.Spawner, Grid.SceneLayer.Move, Folder.Misc, null, 0);
 						gameObject.name = "Spawner:" + drops[i].Value.Name;
 						gameObject.transform.localPosition = Grid.CellToPosCCC(drops[i].Key, Grid.SceneLayer.Move);
@@ -762,7 +761,6 @@ public class Game : KMonoBehaviour
 		gameSaveData.unstableGround = this.world.GetComponent<UnstableGroundManager>();
 		gameSaveData.worldDetail = SaveLoader.Instance.worldDetailSave;
 		gameSaveData.debugWasUsed = this.debugWasUsed;
-		Debug.Assert(gameSaveData.worldDetail != null, "World detail null");
 		byte[] array = new byte[Grid.CellCount];
 		for (int i = 0; i < Grid.CellCount; i++)
 		{
@@ -996,7 +994,7 @@ public class Game : KMonoBehaviour
 	private void Print()
 	{
 		Console.WriteLine("This is a console writeline test");
-		Debug.Log("This is a debug log test");
+		global::Debug.Log("This is a debug log test", null);
 	}
 
 	private bool startPaused = true;

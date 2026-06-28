@@ -34,7 +34,7 @@ namespace NodeEditorFramework
 				if (type == null)
 				{
 					typeData = ConnectionTypes.types.First<KeyValuePair<string, TypeData>>().Value;
-					Debug.LogError("No TypeData defined for: " + typeName + " and type could not be found either");
+					global::Debug.LogError("No TypeData defined for: " + typeName + " and type could not be found either", null);
 				}
 				else
 				{

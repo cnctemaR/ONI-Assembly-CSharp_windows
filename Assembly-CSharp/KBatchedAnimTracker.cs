@@ -21,7 +21,7 @@ public class KBatchedAnimTracker : MonoBehaviour
 		}
 		if (this.controller == null)
 		{
-			Debug.Log("Controller Null for tracker on " + base.gameObject.name, base.gameObject);
+			global::Debug.Log("Controller Null for tracker on " + base.gameObject.name, base.gameObject);
 		}
 		this.myAnim = base.GetComponent<KBatchedAnimController>();
 		List<KAnimControllerBase> list = new List<KAnimControllerBase>(base.GetComponentsInChildren<KAnimControllerBase>(true));

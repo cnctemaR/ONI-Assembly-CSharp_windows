@@ -23,22 +23,11 @@ public class MainMenu : KMonoBehaviour
 		{
 			this.Button_LoadGame.isInteractable = false;
 		}
-		LoadScreen.OnFileDeleted += this.RefreshMainMenu;
 		if (PatchNotesScreen.ShouldShowScreen())
 		{
 			this.patchNotesScreen.SetActive(true);
 		}
-	}
-
-	protected override void OnCleanUp()
-	{
-		base.OnCleanUp();
-		this.ClearFileDeletedCallback();
-	}
-
-	public void ClearFileDeletedCallback()
-	{
-		LoadScreen.OnFileDeleted -= this.RefreshMainMenu;
+		this.lastUpdateTime = Time.unscaledTime;
 	}
 
 	public void RefreshMainMenu()
@@ -74,14 +63,12 @@ public class MainMenu : KMonoBehaviour
 	{
 		LoadingOverlay.Load(delegate
 		{
-			this.ClearFileDeletedCallback();
 			App.LoadScene("backend");
 		});
 	}
 
 	private void NewGame()
 	{
-		this.ClearFileDeletedCallback();
 		this.TriggerLoadingMusic();
 		WorldGen.Reset();
 		SaveLoader.SetActiveSaveFilePath(null);
@@ -109,6 +96,15 @@ public class MainMenu : KMonoBehaviour
 		LoadScreen.Instance.gameObject.SetActive(true);
 	}
 
+	private void Update()
+	{
+		if (Time.unscaledTime - this.lastUpdateTime > 1f)
+		{
+			this.RefreshResumeButton();
+			this.lastUpdateTime = Time.unscaledTime;
+		}
+	}
+
 	private void RefreshResumeButton()
 	{
 		string latestSaveFile = SaveLoader.GetLatestSaveFile();
@@ -119,7 +115,7 @@ public class MainMenu : KMonoBehaviour
 			{
 				SaveGame.Header header;
 				SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(latestSaveFile, out header);
-				if (header.buildVersion > 217565U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 217794U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}
@@ -137,7 +133,7 @@ public class MainMenu : KMonoBehaviour
 			}
 			catch (Exception ex)
 			{
-				Debug.LogWarning(ex);
+				global::Debug.LogWarning(ex, null);
 				flag = false;
 			}
 		}
@@ -147,7 +143,7 @@ public class MainMenu : KMonoBehaviour
 		}
 		else
 		{
-			Debug.LogWarning("Why is the resume game button null?");
+			global::Debug.LogWarning("Why is the resume game button null?", null);
 		}
 	}
 
@@ -213,4 +209,6 @@ public class MainMenu : KMonoBehaviour
 	public GameObject patchNotesScreen;
 
 	public GameObject topLeftAlphaMessage;
+
+	private float lastUpdateTime;
 }

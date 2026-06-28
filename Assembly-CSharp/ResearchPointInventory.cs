@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class ResearchPointInventory
 {
@@ -16,7 +15,7 @@ public class ResearchPointInventory
 	{
 		if (!this.PointsByTypeID.ContainsKey(researchTypeID))
 		{
-			Debug.LogWarning("Research inventory is missing research point key " + researchTypeID);
+			Debug.LogWarning("Research inventory is missing research point key " + researchTypeID, null);
 			return;
 		}
 		Dictionary<string, float> pointsByTypeID;

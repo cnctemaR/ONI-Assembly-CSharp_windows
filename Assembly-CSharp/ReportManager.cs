@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using KSerialization;
 using STRINGS;
-using UnityEngine;
 
 public class ReportManager : KMonoBehaviour
 {
@@ -110,7 +109,7 @@ public class ReportManager : KMonoBehaviour
 		Notification notification = new Notification(string.Format(UI.ENDOFDAYREPORT.NOTIFICATION_TITLE, day), NotificationType.Good, HashedString.Invalid, (List<Notification> n, object d) => string.Format(UI.ENDOFDAYREPORT.NOTIFICATION_TOOLTIP, day), null, true, 0f, clickCallback, null, null);
 		if (this.notifier == null)
 		{
-			Debug.LogError("Cant notify, null notifier");
+			Debug.LogError("Cant notify, null notifier", null);
 		}
 		else
 		{

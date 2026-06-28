@@ -223,7 +223,7 @@ public class VoronoiNode
 	{
 		if (home == null)
 		{
-			Debug.LogError("FilterNeighbours home == null");
+			global::Debug.LogError("FilterNeighbours home == null", null);
 		}
 		HashSet<KeyValuePair<uint, int>> hashSet = new HashSet<KeyValuePair<uint, int>>();
 		HashSet<uint>.Enumerator niter = neighbours.GetEnumerator();
@@ -234,7 +234,7 @@ public class VoronoiNode
 			{
 				if (site.poly == null)
 				{
-					Debug.LogError("FilterNeighbours neighbour.poly == null");
+					global::Debug.LogError("FilterNeighbours neighbour.poly == null", null);
 				}
 				int num = -1;
 				Polygon.Commonality commonality = home.poly.SharesEdge(site.poly, ref num);

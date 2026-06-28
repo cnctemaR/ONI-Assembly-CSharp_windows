@@ -49,7 +49,6 @@ public class BuildingWorkable : Workable
 
 	protected override void OnStartWork(Worker worker)
 	{
-		Debug.Assert(worker != null, "How did we get a null worker?");
 		this.AddEffect();
 		this.Trigger(-1358696400, worker);
 		worker.Trigger(-1358696400, base.gameObject);
@@ -57,7 +56,6 @@ public class BuildingWorkable : Workable
 
 	protected override void OnStopWork(Worker worker)
 	{
-		Debug.Assert(worker != null, "How did we get a null worker?");
 		this.ClearEffect();
 		this.Trigger(116081340, worker);
 		worker.Trigger(116081340, base.gameObject);
@@ -65,7 +63,6 @@ public class BuildingWorkable : Workable
 
 	protected override void OnCompleteWork(Worker worker)
 	{
-		Debug.Assert(worker != null, "How did we get a null worker?");
 		this.Trigger(155714618, worker);
 		worker.Trigger(155714618, base.gameObject);
 		this.ClearEffect();

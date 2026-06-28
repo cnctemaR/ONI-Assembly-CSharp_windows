@@ -62,7 +62,7 @@ namespace Klei.AI
 				Trait trait = Db.Get().traits.TryGet(text);
 				if (trait == null)
 				{
-					Debug.LogWarning("Trait " + text + " was not found in database");
+					global::Debug.LogWarning("Trait " + text + " was not found in database", null);
 					return;
 				}
 				this.traits.Add(trait);

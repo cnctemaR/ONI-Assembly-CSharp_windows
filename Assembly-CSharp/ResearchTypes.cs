@@ -28,7 +28,7 @@ public class ResearchTypes
 				return researchType;
 			}
 		}
-		Debug.LogWarning(string.Format("No research with type id {0} found", id));
+		global::Debug.LogWarning(string.Format("No research with type id {0} found", id), null);
 		return null;
 	}
 

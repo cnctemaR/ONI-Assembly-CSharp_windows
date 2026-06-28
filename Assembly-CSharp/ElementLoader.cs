@@ -174,7 +174,7 @@ public class ElementLoader
 			Tag tag = TagManager.Create(materialCategoryField, null);
 			if (!GameTags.MaterialCategories.Contains(tag) && !GameTags.IgnoredMaterialCategories.Contains(tag))
 			{
-				Debug.LogWarningFormat("Element {0} has category {1}, but that isn't in GameTags.MaterialCategores!", new object[] { element.id, materialCategoryField });
+				global::Debug.LogWarningFormat("Element {0} has category {1}, but that isn't in GameTags.MaterialCategores!", new object[] { element.id, materialCategoryField });
 			}
 			return tag;
 		}

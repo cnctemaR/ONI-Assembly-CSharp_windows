@@ -121,7 +121,7 @@ namespace NodeEditorFramework
 			{
 				return this.value;
 			}
-			Debug.LogError("Trying to GetValue<" + type.FullName + "> for Output Type: " + this.typeData.Type.FullName);
+			global::Debug.LogError("Trying to GetValue<" + type.FullName + "> for Output Type: " + this.typeData.Type.FullName, null);
 			return null;
 		}
 
@@ -134,7 +134,7 @@ namespace NodeEditorFramework
 			}
 			else
 			{
-				Debug.LogError("Trying to SetValue of type " + Value.GetType().FullName + " for Output Type: " + this.typeData.Type.FullName);
+				global::Debug.LogError("Trying to SetValue of type " + Value.GetType().FullName + " for Output Type: " + this.typeData.Type.FullName, null);
 			}
 		}
 
@@ -150,7 +150,7 @@ namespace NodeEditorFramework
 				}
 				return (T)((object)obj);
 			}
-			Debug.LogError("Trying to GetValue<" + typeof(T).FullName + "> for Output Type: " + this.typeData.Type.FullName);
+			global::Debug.LogError("Trying to GetValue<" + typeof(T).FullName + "> for Output Type: " + this.typeData.Type.FullName, null);
 			return NodeOutput.GetDefault<T>();
 		}
 
@@ -163,7 +163,7 @@ namespace NodeEditorFramework
 			}
 			else
 			{
-				Debug.LogError("Trying to SetValue<" + typeof(T).FullName + "> for Output Type: " + this.typeData.Type.FullName);
+				global::Debug.LogError("Trying to SetValue<" + typeof(T).FullName + "> for Output Type: " + this.typeData.Type.FullName, null);
 			}
 		}
 

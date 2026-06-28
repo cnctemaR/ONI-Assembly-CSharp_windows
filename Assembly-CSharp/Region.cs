@@ -387,7 +387,7 @@ public class Region : KMonoBehaviour, ISaveLoadable
 	{
 		if (building == null)
 		{
-			Debug.LogError("Can't remove a null building.");
+			global::Debug.LogError("Can't remove a null building.", null);
 			return;
 		}
 		KPrefabID kpid = building.GetComponent<KPrefabID>();
@@ -932,7 +932,7 @@ public class Region : KMonoBehaviour, ISaveLoadable
 				KPrefabID prefabID = gameObject.GetComponent<KPrefabID>();
 				if (prefabID == null)
 				{
-					Debug.LogError("Building Object is missing KPrefabID.");
+					global::Debug.LogError("Building Object is missing KPrefabID.", null);
 					return false;
 				}
 				Region.BuildingRequirement buildingRequirement = this.buildingRequirements.Find((Region.BuildingRequirement req) => prefabID.HasTag(req.buildingTag));
@@ -951,14 +951,14 @@ public class Region : KMonoBehaviour, ISaveLoadable
 			GameObject prefab = Assets.GetPrefab(new Tag(this.missingRequirements[i].buildingTag));
 			if (prefab == null)
 			{
-				Debug.LogError("There's no building with the given tag");
+				global::Debug.LogError("There's no building with the given tag", null);
 			}
 			else
 			{
 				BuildingComplete component = prefab.GetComponent<BuildingComplete>();
 				if (component == null)
 				{
-					Debug.LogError("The prefab retrieved does not contain a BuildingComplete component");
+					global::Debug.LogError("The prefab retrieved does not contain a BuildingComplete component", null);
 				}
 				else
 				{

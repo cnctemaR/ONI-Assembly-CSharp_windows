@@ -87,7 +87,7 @@ public class BatchedAnimBulkDisplayer : MonoBehaviour
 			}
 			catch (Exception ex)
 			{
-				Debug.LogError(string.Concat(new string[]
+				global::Debug.LogError(string.Concat(new string[]
 				{
 					"Exception while creating [",
 					group.files[i].name,
@@ -97,7 +97,7 @@ public class BatchedAnimBulkDisplayer : MonoBehaviour
 					ex.Message,
 					"\n",
 					ex.StackTrace
-				}));
+				}), null);
 				return;
 			}
 			this.offsetx += 4;
@@ -241,7 +241,6 @@ public class BatchedAnimBulkDisplayer : MonoBehaviour
 		if (group.renderType == KAnimBatchGroup.RendererType.AnimOnly && group.animTarget.HashValue != 0)
 		{
 			KAnimGroupFile.Group group2 = KAnimGroupFile.GetGroup(group.animTarget);
-			Debug.Assert(group2 != null, "Missing group for [" + group.animTarget + "]");
 			list.AddRange(group2.files);
 		}
 		list.Add(file);

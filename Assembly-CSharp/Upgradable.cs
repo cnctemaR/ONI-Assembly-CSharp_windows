@@ -358,7 +358,7 @@ public class Upgradable : Workable, ISaveLoadable
 		}
 		else
 		{
-			Debug.LogError("Something weird happened while trying to complete the upgrade.");
+			global::Debug.LogError("Something weird happened while trying to complete the upgrade.", null);
 		}
 		this.Trigger(-235298596, upgrade);
 	}

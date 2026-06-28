@@ -16,13 +16,13 @@ public class BatteryRefillSideScreen : SideScreenContent
 	{
 		if (new_target == null)
 		{
-			Debug.LogError("Invalid gameObject received");
+			global::Debug.LogError("Invalid gameObject received", null);
 			return;
 		}
 		this.target = new_target.GetComponent<IBatteryRefillControl>();
 		if (this.target == null)
 		{
-			Debug.LogError("The gameObject received does not contain a Manual Generator component");
+			global::Debug.LogError("The gameObject received does not contain a Manual Generator component", null);
 			return;
 		}
 		this.percentSlider.value = this.target.BatteryRefillPercent;

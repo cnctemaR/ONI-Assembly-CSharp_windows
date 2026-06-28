@@ -92,11 +92,11 @@ public class FloorSoundEvent : AnimEvent
 	{
 		if (sound != null)
 		{
-			global::UnityEngine.Debug.Log(string.Concat(new object[] { anim_name, ", ", sound_name, ", ", this.Frame, ", ", sound_pos }));
+			global::Debug.Log(string.Concat(new object[] { anim_name, ", ", sound_name, ", ", this.Frame, ", ", sound_pos }), null);
 		}
 		else
 		{
-			global::UnityEngine.Debug.Log("Missing sound: " + anim_name + ", " + sound_name);
+			global::Debug.Log("Missing sound: " + anim_name + ", " + sound_name, null);
 		}
 	}
 

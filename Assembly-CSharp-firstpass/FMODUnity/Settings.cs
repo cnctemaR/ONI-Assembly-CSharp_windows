@@ -44,7 +44,7 @@ namespace FMODUnity
 					Settings.instance = Resources.Load("FMODStudioSettings") as Settings;
 					if (Settings.instance == null)
 					{
-						Debug.Log("FMOD Studio: cannot find integration settings, creating default settings");
+						global::UnityEngine.Debug.Log("FMOD Studio: cannot find integration settings, creating default settings");
 						Settings.instance = ScriptableObject.CreateInstance<Settings>();
 						Settings.instance.name = "FMOD Studio Integration Settings";
 					}

@@ -143,7 +143,7 @@ namespace Database
 				Region region = (Region)data;
 				if (region == null)
 				{
-					Debug.LogError("The region provided was null.");
+					global::Debug.LogError("The region provided was null.", null);
 					return string.Empty;
 				}
 				str = string.Format(str, region.GetMissingRequirementsString());

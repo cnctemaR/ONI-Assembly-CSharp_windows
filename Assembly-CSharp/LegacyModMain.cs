@@ -52,7 +52,7 @@ public class LegacyModMain
 				"\n"
 			});
 		}
-		Debug.Log(text);
+		global::Debug.Log(text, null);
 	}
 
 	private static void ListUnusedTypes()
@@ -89,7 +89,7 @@ public class LegacyModMain
 		{
 			text = text + "\n" + type3.FullName;
 		}
-		Debug.Log(text);
+		global::Debug.Log(text, null);
 	}
 
 	private static void DebugSelected()
@@ -101,7 +101,7 @@ public class LegacyModMain
 		Constructable component = go.GetComponent<Constructable>();
 		int num = 0;
 		num++;
-		Debug.Log(component);
+		global::Debug.Log(component, null);
 	}
 
 	private static void LoadOre()

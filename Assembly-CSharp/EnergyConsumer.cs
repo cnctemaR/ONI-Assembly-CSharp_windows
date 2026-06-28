@@ -189,7 +189,7 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IE
 		}
 		else
 		{
-			global::UnityEngine.Debug.Log("Invalid state for sound in EnergyConsumer.");
+			global::Debug.Log("Invalid state for sound in EnergyConsumer.", null);
 		}
 		float num;
 		if (!this.lastTimeSoundPlayed.TryGetValue(state, out num))

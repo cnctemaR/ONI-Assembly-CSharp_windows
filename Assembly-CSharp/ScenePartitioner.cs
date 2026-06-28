@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class ScenePartitioner
 {
@@ -63,7 +62,7 @@ public class ScenePartitioner
 	{
 		if (entry.obj == null)
 		{
-			Debug.LogWarning("Trying to put null go into scene partitioner");
+			Debug.LogWarning("Trying to put null go into scene partitioner", null);
 			return;
 		}
 		Extents nodeExtents = this.GetNodeExtents(entry);
@@ -78,7 +77,7 @@ public class ScenePartitioner
 				nodeExtents.width,
 				" < ",
 				this.nodes.GetLength(1)
-			}));
+			}), null);
 		}
 		if (nodeExtents.y + nodeExtents.height > this.nodes.GetLength(0))
 		{
@@ -91,7 +90,7 @@ public class ScenePartitioner
 				nodeExtents.height,
 				" < ",
 				this.nodes.GetLength(0)
-			}));
+			}), null);
 		}
 		for (int i = nodeExtents.y; i < nodeExtents.y + nodeExtents.height; i++)
 		{
@@ -115,7 +114,7 @@ public class ScenePartitioner
 				nodeExtents.width,
 				" < ",
 				this.nodes.GetLength(1)
-			}));
+			}), null);
 		}
 		if (nodeExtents.y + nodeExtents.height > this.nodes.GetLength(0))
 		{
@@ -127,7 +126,7 @@ public class ScenePartitioner
 				nodeExtents.height,
 				" < ",
 				this.nodes.GetLength(0)
-			}));
+			}), null);
 		}
 		for (int i = nodeExtents.y; i < nodeExtents.y + nodeExtents.height; i++)
 		{

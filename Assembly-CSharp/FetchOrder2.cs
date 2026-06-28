@@ -122,12 +122,12 @@ public class FetchOrder2
 
 	public void Suspend(string reason)
 	{
-		Debug.LogError("UNIMPLEMENTED!");
+		global::Debug.LogError("UNIMPLEMENTED!", null);
 	}
 
 	public void Resume(string reason)
 	{
-		Debug.LogError("UNIMPLEMENTED!");
+		global::Debug.LogError("UNIMPLEMENTED!", null);
 	}
 
 	public void Submit(Action<FetchOrder2, Pickupable> on_complete, bool check_storage_contents)
@@ -233,7 +233,7 @@ public class FetchOrder2
 		}
 		text = text + "\nTotal Amount: " + this.TotalAmount;
 		text = text + "\nUnfetched Amount: " + this._UnfetchedAmount;
-		Debug.LogError(text);
+		global::Debug.LogError(text, null);
 	}
 
 	public Action<FetchOrder2, Pickupable> OnComplete;

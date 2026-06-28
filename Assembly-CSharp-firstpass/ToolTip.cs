@@ -37,7 +37,7 @@ public class ToolTip : KMonoBehaviour, IEventSystemHandler, IPointerEnterHandler
 	{
 		if (base.gameObject.GetComponents<ToolTip>().Length > 1)
 		{
-			Debug.LogError("The object " + base.gameObject.name + " has more than one ToolTip, it conflict when displaying this tooltip.");
+			global::Debug.LogError("The object " + base.gameObject.name + " has more than one ToolTip, it conflict when displaying this tooltip.", null);
 		}
 		if (this.OnToolTip == null)
 		{

@@ -50,13 +50,13 @@ public class ActiveRangeSideScreen : SideScreenContent
 	{
 		if (new_target == null)
 		{
-			Debug.LogError("Invalid gameObject received");
+			global::Debug.LogError("Invalid gameObject received", null);
 			return;
 		}
 		this.target = new_target.GetComponent<IActivationRangeTarget>();
 		if (this.target == null)
 		{
-			Debug.LogError("The gameObject received does not contain a IActivationRangeTarget component");
+			global::Debug.LogError("The gameObject received does not contain a IActivationRangeTarget component", null);
 			return;
 		}
 		this.activateValueSlider.onValueChanged.RemoveListener(new UnityAction<float>(this.OnActivateValueChanged));

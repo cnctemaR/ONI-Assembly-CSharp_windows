@@ -30,7 +30,7 @@ public static class TemplateLoader
 		int num = Grid.OffsetCell(0, baseX, baseY);
 		if (TemplateLoader.Template == null)
 		{
-			Debug.LogError("No stamp template");
+			global::Debug.LogError("No stamp template", null);
 		}
 		if (TemplateLoader.Template.buildings != null)
 		{
@@ -70,7 +70,7 @@ public static class TemplateLoader
 						Storage component3 = component.gameObject.GetComponent<Storage>();
 						if (component3 == null)
 						{
-							Debug.LogWarning("No storage component on stampTemplate building " + baseTemplatePrefabInfo.id + ". Saved storage contents will be ignored.");
+							global::Debug.LogWarning("No storage component on stampTemplate building " + baseTemplatePrefabInfo.id + ". Saved storage contents will be ignored.", null);
 						}
 						for (int k = 0; k < baseTemplatePrefabInfo.storage.Count; k++)
 						{
@@ -177,7 +177,7 @@ public static class TemplateLoader
 		HandleVector<global::System.Action>.Handle handle = Game.Instance.callbackManager.Add(callback, "TemplateLoaderAddStartLoc");
 		if (template == null)
 		{
-			Debug.LogError("Template Loader does not have template.");
+			global::Debug.LogError("Template Loader does not have template.", null);
 		}
 		for (int i = 0; i < template.cells.Count; i++)
 		{

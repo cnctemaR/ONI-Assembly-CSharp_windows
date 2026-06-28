@@ -9,7 +9,7 @@ public static class DebugUtil
 		if (!test)
 		{
 			Output.LogError(new object[] { message });
-			global::UnityEngine.Debug.Break();
+			global::Debug.Break();
 		}
 	}
 
@@ -20,7 +20,7 @@ public static class DebugUtil
 			if (Application.isEditor)
 			{
 				Output.LogError(new object[] { message });
-				global::UnityEngine.Debug.Break();
+				global::Debug.Break();
 			}
 			else
 			{
@@ -33,7 +33,7 @@ public static class DebugUtil
 	{
 		if (!test)
 		{
-			global::UnityEngine.Debug.LogWarning(message);
+			global::Debug.LogWarning(message, null);
 		}
 	}
 

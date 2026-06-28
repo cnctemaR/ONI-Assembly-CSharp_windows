@@ -72,7 +72,7 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 			}
 			else
 			{
-				Debug.Log("has no approachable");
+				global::Debug.Log("has no approachable", null);
 			}
 		}
 		if (this.multiTool != null)

@@ -22,12 +22,13 @@ public class ReportErrorDialog : MonoBehaviour
 		this.continueGameButton.gameObject.SetActive(!KCrashReporter.terminateOnError);
 		this.submitButton.onClick += this.OnSelect_SUBMIT;
 		this.quitButton.onClick += this.OnSelect_QUIT;
+		this.messageInputField.text = UI.CRASHSCREEN.BODY.text;
 		ReportErrorDialog.hasCrash = true;
 	}
 
 	private void Update()
 	{
-		Debug.developerConsoleVisible = false;
+		global::Debug.developerConsoleVisible = false;
 	}
 
 	private void OnDestroy()

@@ -26,7 +26,6 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 			this.graveName = gameObject.name;
 			Util.KDestroyGameObject(gameObject);
 		}
-		base.GetComponent<Storage>().DropAll();
 	}
 
 	private void OnDestroyObject(object data)

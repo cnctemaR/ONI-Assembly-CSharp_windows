@@ -81,7 +81,7 @@ public class Light2D : KMonoBehaviour
 			}
 			else
 			{
-				Debug.Assert(false);
+				global::UnityEngine.Debug.Assert(false);
 			}
 			this.cell = num;
 			LightGridManager.AddToLightGrid(this.cell, num2, this.Range, this.Color, this.shape);

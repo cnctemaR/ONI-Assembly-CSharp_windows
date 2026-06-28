@@ -202,7 +202,6 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>, KleiMetricsInterface
 
 	private Dictionary<string, object> GetUserSession()
 	{
-		Debug.Assert(this.enabled);
 		Dictionary<string, object> dictionary = new Dictionary<string, object>();
 		if (!this.sessionStarted)
 		{
@@ -236,7 +235,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>, KleiMetricsInterface
 			dictionary.Add("Level", text2);
 		}
 		dictionary.Add("Branch", "release");
-		dictionary.Add("Build", 217565U);
+		dictionary.Add("Build", 217794U);
 		return dictionary;
 	}
 

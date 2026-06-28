@@ -60,7 +60,7 @@ namespace Klei.AI
 			}
 			else
 			{
-				Debug.LogError("Could not find attribute " + attribute_id);
+				global::Debug.LogError("Could not find attribute " + attribute_id, null);
 			}
 			return num;
 		}
@@ -92,7 +92,7 @@ namespace Klei.AI
 			}
 			else
 			{
-				Debug.LogError("Could not find attribute " + id);
+				global::Debug.LogError("Could not find attribute " + id, null);
 			}
 			return num;
 		}

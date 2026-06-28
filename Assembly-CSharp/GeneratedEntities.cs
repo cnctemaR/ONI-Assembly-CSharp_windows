@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Reflection;
 using TUNING;
-using UnityEngine;
 
 public class GeneratedEntities
 {
@@ -27,7 +26,7 @@ public class GeneratedEntities
 				string name = type2.Name;
 				if (!BUILDINGS.COMPONENT_DESCRIPTION_ORDER.Contains(name))
 				{
-					Debug.LogWarning(string.Format("Component [{0}] is an effect descriptor but is missing from TUNING.BUILDINGS.COMPONENT_DESCRIPTION_ORDER!", name));
+					Debug.LogWarning(string.Format("Component [{0}] is an effect descriptor but is missing from TUNING.BUILDINGS.COMPONENT_DESCRIPTION_ORDER!", name), null);
 				}
 			}
 		}

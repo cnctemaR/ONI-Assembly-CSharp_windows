@@ -10,7 +10,7 @@ public class UpgradeTab : TargetScreen
 		this.upgradeTarget = target.GetComponent<Upgradable>();
 		if (this.upgradeTarget == null)
 		{
-			Debug.LogError("The target provided does not have an Upgradable component");
+			global::Debug.LogError("The target provided does not have an Upgradable component", null);
 			return;
 		}
 		this.InitializeIconDataMap();
@@ -156,8 +156,8 @@ public class UpgradeTab : TargetScreen
 		});
 	}
 
-	[SerializeField]
 	[Header("UI Elements")]
+	[SerializeField]
 	private GameObject availableGrid;
 
 	[SerializeField]
@@ -169,8 +169,8 @@ public class UpgradeTab : TargetScreen
 	[SerializeField]
 	private ProgressBar progressBar;
 
-	[Header("References")]
 	[SerializeField]
+	[Header("References")]
 	private List<UpgradeTab.UpgradeIconData> icons;
 
 	private Upgradable upgradeTarget;

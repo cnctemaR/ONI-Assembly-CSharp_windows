@@ -21,7 +21,7 @@ public class Fishable : Harvestable
 	{
 		if (this.bodyOfWater == null)
 		{
-			Debug.Log("force cancel body null");
+			global::Debug.Log("force cancel body null", null);
 			this.ForceCancelHarvest(null);
 		}
 	}

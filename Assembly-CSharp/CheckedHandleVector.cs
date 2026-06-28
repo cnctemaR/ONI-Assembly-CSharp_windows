@@ -16,7 +16,7 @@ public class CheckedHandleVector<T> where T : class
 
 	public HandleVector<T>.Handle Add(T item, string debug_info)
 	{
-		Debug.Assert(item != null);
+		global::UnityEngine.Debug.Assert(item != null);
 		HandleVector<T>.Handle handle = this.handleVector.Add(item);
 		if (handle.index >= this.isFree.Count)
 		{

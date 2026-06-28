@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine;
 
 [SkipSaveFileSerialization]
 public class TileTemperature : KMonoBehaviour
@@ -30,11 +29,7 @@ public class TileTemperature : KMonoBehaviour
 	private static void OnSetTemperature(PrimaryElement primary_element, float temperature)
 	{
 		SimCellOccupier component = primary_element.GetComponent<SimCellOccupier>();
-		if (component != null && component.IsReady())
-		{
-			Debug.Assert(false, "Only set a tile's temperature during initialization. Otherwise you should be modifying the cell via the sim!");
-		}
-		else
+		if (!(component != null) || !component.IsReady())
 		{
 			primary_element.InternalTemperature = temperature;
 		}

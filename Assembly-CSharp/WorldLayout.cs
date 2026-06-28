@@ -64,7 +64,6 @@ public class WorldLayout
 
 	public VoronoiTree GenerateOverworld()
 	{
-		Debug.Assert(this.mapWidth != 0 && this.mapHeight != 0, "Map size has not been set");
 		VoronoiDiagram.Site site = new VoronoiDiagram.Site(0U, new Vector2((float)(this.mapWidth / 2), (float)(this.mapHeight / 2)), 1f);
 		this.topEdge = new LineSegment(new Vector2?(new Vector2(0f, (float)(this.mapHeight - 5))), new Vector2?(new Vector2((float)this.mapWidth, (float)(this.mapHeight - 5))));
 		this.bottomEdge = new LineSegment(new Vector2?(new Vector2(0f, 5f)), new Vector2?(new Vector2((float)this.mapWidth, 5f)));
@@ -162,7 +161,7 @@ public class WorldLayout
 				int num2 = WorldGen.RandomSource().Next(this.voronoiTree.ChildCount());
 				VoronoiNode child2 = this.voronoiTree.GetChild(num2);
 				child2.AddTag(new Tag(text));
-				Debug.Log("Applying Overworld Add Tag " + text);
+				global::Debug.Log("Applying Overworld Add Tag " + text, null);
 			}
 		}
 		this.FlatternOverworld();
@@ -191,20 +190,20 @@ public class WorldLayout
 			KeyValuePair<VoronoiNode, LineSegment> keyValuePair = neighborsByEdge[i];
 			if (keyValuePair.Key == null)
 			{
-				Debug.Log("Weird, kvp.Key NULL");
+				global::Debug.Log("Weird, kvp.Key NULL", null);
 			}
 			else
 			{
 				VoronoiTree voronoiTree = (VoronoiTree)keyValuePair.Key;
 				if (voronoiTree == null)
 				{
-					Debug.Log(string.Concat(new object[]
+					global::Debug.Log(string.Concat(new object[]
 					{
 						"Weird, VT null [",
 						keyValuePair.Key.type,
 						"] site ID: ",
 						keyValuePair.Key.site.id
-					}));
+					}), null);
 				}
 				else
 				{
@@ -330,11 +329,10 @@ public class WorldLayout
 				}
 				else
 				{
-					Debug.LogWarning("No allowedSubworld types. Using default.");
+					global::Debug.LogWarning("No allowedSubworld types. Using default.", null);
 					text = "subworldDefault";
 				}
 			}
-			Debug.Assert(text != "NONE", "Cant find subworld");
 			node.SetType(text);
 			foreach (string text2 in list3[0].tags)
 			{
@@ -406,7 +404,6 @@ public class WorldLayout
 					VoronoiTree voronoiTree3 = child3 as VoronoiTree;
 					global::Klei.Node node2 = this.overworldGraph.FindNodeByID(voronoiTree3.site.id);
 					Cell cell2 = this.overworldGraph.GetCell(node2.node);
-					Debug.Assert(cell2 != null, "cell is null: " + node2.node);
 					List<KeyValuePair<VoronoiNode, LineSegment>> neighborsByEdge2 = voronoiTree3.GetNeighborsByEdge();
 					for (int m = 0; m < neighborsByEdge2.Count; m++)
 					{
@@ -414,18 +411,15 @@ public class WorldLayout
 						MapGraph mapGraph3 = this.overworldGraph;
 						Vector2? p3 = keyValuePair2.Value.p0;
 						Corner corner = mapGraph3.GetCorner(p3.Value, false);
-						Debug.Assert(corner != null, "corner0 is null: " + keyValuePair2.Value.p0);
 						MapGraph mapGraph4 = this.overworldGraph;
 						Vector2? p4 = keyValuePair2.Value.p1;
 						Corner corner2 = mapGraph4.GetCorner(p4.Value, false);
-						Debug.Assert(corner2 != null, "corner1 is null: " + keyValuePair2.Value.p1);
 						VoronoiNode key = keyValuePair2.Key;
 						Edge edge;
 						if (key != null)
 						{
 							global::Klei.Node node3 = this.overworldGraph.FindNodeByID(key.site.id);
 							Cell cell3 = this.overworldGraph.GetCell(node3.node);
-							Debug.Assert(cell3 != null, "otherCell is null: " + node3.node);
 							edge = this.overworldGraph.GetEdge(corner, corner2, cell2, cell3, true);
 							SubWorld subWorld = WorldGen.Settings.subworlds.GetSubWorld(node2.type);
 							SubWorld subWorld2 = WorldGen.Settings.subworlds.GetSubWorld(node3.type);
@@ -534,7 +528,7 @@ public class WorldLayout
 							VoronoiTree voronoiTree3 = voronoiNode2.Split((VoronoiNode.SplitType)0, tagSet3, tagSet2, null);
 							if (voronoiTree3.ChildCount() <= 1)
 							{
-								Debug.LogError("split did not work.");
+								global::Debug.LogError("split did not work.", null);
 							}
 							for (int m = 0; m < voronoiTree3.ChildCount(); m++)
 							{
@@ -725,14 +719,14 @@ public class WorldLayout
 			List<VoronoiNode> nodes = this.GetStartNodes();
 			if (nodes == null || nodes.Count == 0)
 			{
-				Debug.LogWarning("Couldnt find start node");
+				global::Debug.LogWarning("Couldnt find start node", null);
 				return new Vector2I(this.mapWidth / 2, this.mapHeight / 2);
 			}
 			node2 = this.localGraph.FindNode((global::Klei.Node node) => (uint)node.node.Id == nodes[0].site.id);
 		}
 		if (node2 == null)
 		{
-			Debug.LogWarning("Couldnt find start node");
+			global::Debug.LogWarning("Couldnt find start node", null);
 			return new Vector2I(this.mapWidth / 2, this.mapHeight / 2);
 		}
 		return new Vector2I((int)node2.position.x, (int)node2.position.y);
@@ -877,7 +871,7 @@ public class WorldLayout
 			string message = ex.Message;
 			string stackTrace = ex.StackTrace;
 			WorldGenLogger.LogException(message, stackTrace);
-			Debug.Log("Error deserialising " + ex.Message);
+			global::Debug.Log("Error deserialising " + ex.Message, null);
 		}
 	}
 
@@ -919,7 +913,7 @@ public class WorldLayout
 			string message = ex.Message;
 			string stackTrace = ex.StackTrace;
 			WorldGenLogger.LogException(message, stackTrace);
-			Debug.Log("Error deserialising " + ex.Message);
+			global::Debug.Log("Error deserialising " + ex.Message, null);
 		}
 		this.extra = null;
 	}

@@ -24,7 +24,7 @@ public class AssignableSideScreenRow : KMonoBehaviour
 	{
 		if (identity == null)
 		{
-			Debug.LogError("Invalid data received.");
+			global::Debug.LogError("Invalid data received.", null);
 			return;
 		}
 		if (!string.IsNullOrEmpty(assignmentStr))

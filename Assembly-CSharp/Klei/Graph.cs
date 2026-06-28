@@ -110,7 +110,7 @@ namespace Klei
 				string message = ex.Message;
 				string stackTrace = ex.StackTrace;
 				WorldGenLogger.LogException(message, stackTrace);
-				Debug.Log("Error deserialising " + ex.Message);
+				global::Debug.Log("Error deserialising " + ex.Message, null);
 			}
 		}
 
@@ -186,7 +186,7 @@ namespace Klei
 						if (!bounds.Contains(vector))
 						{
 							flag = false;
-							Debug.LogWarning("Re-doing layout - cell was off map");
+							global::Debug.LogWarning("Re-doing layout - cell was off map", null);
 							break;
 						}
 						node2.SetPosition(vector);
@@ -201,7 +201,7 @@ namespace Klei
 			}
 			if (num >= 10)
 			{
-				Debug.LogWarning("Re-ran layout " + num + " times");
+				global::Debug.LogWarning("Re-ran layout " + num + " times", null);
 			}
 			return flag;
 		}
@@ -252,17 +252,17 @@ namespace Klei
 		{
 			if (this.nodeList == null)
 			{
-				Debug.LogWarning("nodeList is null");
+				global::Debug.LogWarning("nodeList is null", null);
 				return;
 			}
 			if (this.arcList == null)
 			{
-				Debug.LogWarning("arcList is null");
+				global::Debug.LogWarning("arcList is null", null);
 				return;
 			}
 			if (this.baseGraph == null)
 			{
-				Debug.LogWarning("baseGraph is null");
+				global::Debug.LogWarning("baseGraph is null", null);
 				return;
 			}
 			for (int i = 0; i < this.arcList.Count; i++)
@@ -270,13 +270,12 @@ namespace Klei
 				Arc a = this.arcList[i];
 				if (a == null)
 				{
-					Debug.LogWarning("Arc [" + i + "] is null");
+					global::Debug.LogWarning("Arc [" + i + "] is null", null);
 				}
 				else
 				{
 					Node node = this.nodeList.Find((Node n) => n.node == this.baseGraph.U(a.arc));
 					Node node2 = this.nodeList.Find((Node n) => n.node == this.baseGraph.V(a.arc));
-					Debug.DrawLine(node.position, node2.position, ((this.drawOptions & Graph.DebugFlags.ArcType) == (Graph.DebugFlags)0) ? Color.red : Graph.GetColourForArcType(a.type));
 				}
 			}
 		}

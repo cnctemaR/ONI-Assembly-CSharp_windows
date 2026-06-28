@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using STRINGS;
-using UnityEngine;
 
 namespace Database
 {
@@ -125,7 +124,7 @@ namespace Database
 			}
 			if (!string.IsNullOrEmpty(text))
 			{
-				Debug.LogError(text);
+				Debug.LogError(text, null);
 			}
 			string text2 = string.Empty;
 			foreach (ChoreType choreType2 in this)
@@ -137,7 +136,7 @@ namespace Database
 			}
 			if (!string.IsNullOrEmpty(text2))
 			{
-				Debug.LogError(text2);
+				Debug.LogError(text2, null);
 			}
 		}
 

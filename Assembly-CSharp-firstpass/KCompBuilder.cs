@@ -6,18 +6,7 @@ public class KCompBuilder : MonoBehaviour
 {
 	private void GetSymbolsFromBuild(KBatchGroupData batch_group, KAnim.Build src_build, KAnim.Build target_build, KAnimHashedString src_name, KAnimHashedString target_name, List<KAnim.Build.Symbol> symbols, List<KAnim.Build.SymbolFrame> frames, List<Texture2D> textures)
 	{
-		Debug.Assert(src_build != null);
-		Debug.Assert(src_name.IsValid());
-		Debug.Assert(symbols != null);
-		Debug.Assert(frames != null);
-		Debug.Assert(textures != null);
 		KAnim.Build.Symbol symbol = src_build.GetSymbol(src_name);
-		Debug.AssertFormat(symbol != null, "Please check the DB: Couldnt find symbol [{1} {0} ] in Group [{2}] format is eyes_hair_headshape_mouth_torso_arms", new object[]
-		{
-			src_name.ToString(),
-			HashCache.Get().Get(src_name),
-			batch_group.groupID.ToString()
-		});
 		if (symbol == null)
 		{
 			return;
@@ -53,21 +42,12 @@ public class KCompBuilder : MonoBehaviour
 
 	private KAnim.Build GetBuildForVariation(KBatchGroupData batch_group, KAnimHashedString fileHash, string eyes, string hair, string headshape, string mouth, string body, string arms)
 	{
-		Debug.Assert(this.master_anims != null);
 		KAnimFileData data = this.master_anims.GetData();
-		Debug.Assert(data != null);
 		KAnim.Build build = data.build;
-		Debug.Assert(build != null);
-		Debug.Assert(this.face_variations != null);
 		KAnimFileData data2 = this.face_variations.GetData();
-		Debug.Assert(data2 != null);
 		KAnim.Build build2 = data2.build;
-		Debug.Assert(build2 != null);
-		Debug.Assert(this.body_variations != null);
 		KAnimFileData data3 = this.body_variations.GetData();
-		Debug.Assert(data3 != null);
 		KAnim.Build build3 = data3.build;
-		Debug.Assert(build3 != null);
 		List<KAnim.Build.Symbol> list = new List<KAnim.Build.Symbol>();
 		List<KAnim.Build.SymbolFrame> list2 = new List<KAnim.Build.SymbolFrame>();
 		List<Texture2D> list3 = new List<Texture2D>();
@@ -207,7 +187,7 @@ public class KCompBuilder : MonoBehaviour
 		{
 			if (KCompBuilder.instance == null)
 			{
-				Debug.LogError("No CompBuilder instance");
+				global::Debug.LogError("No CompBuilder instance", null);
 			}
 			return KCompBuilder.instance;
 		}

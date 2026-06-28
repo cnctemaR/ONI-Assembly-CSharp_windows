@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using KSerialization;
-using UnityEngine;
 
 namespace Klei.AI
 {
@@ -66,7 +65,7 @@ namespace Klei.AI
 			AttributeLevel attributeLevel = this.GetAttributeLevel(attribute_id);
 			if (attributeLevel == null)
 			{
-				Debug.LogWarning(attribute_id + " has no level.");
+				Debug.LogWarning(attribute_id + " has no level.", null);
 				return false;
 			}
 			bool flag = attributeLevel.AddExperience(this, experience);

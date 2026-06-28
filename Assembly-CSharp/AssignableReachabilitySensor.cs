@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine;
 
 public class AssignableReachabilitySensor : Sensor
 {
@@ -33,7 +32,7 @@ public class AssignableReachabilitySensor : Sensor
 				return this.slots[i].isReachable;
 			}
 		}
-		Debug.LogError("Could not find slot: " + slot);
+		Debug.LogError("Could not find slot: " + slot, null);
 		return false;
 	}
 

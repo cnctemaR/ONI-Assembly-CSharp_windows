@@ -148,8 +148,8 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 		float internalTemperature = data.primaryElement.InternalTemperature;
 		float num = data.building.Def.MassForTemperatureModification;
 		float operatingKilowatts = data.OperatingKilowatts;
-		Debug.Assert(internalTemperature > 0f, "Invalid temperature");
-		Debug.Assert(num > 0f);
+		global::UnityEngine.Debug.Assert(internalTemperature > 0f, "Invalid temperature");
+		global::UnityEngine.Debug.Assert(num > 0f);
 		if (!data.enabled)
 		{
 			num = 0f;
@@ -278,9 +278,9 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 					float internalTemperature = primaryElement.InternalTemperature;
 					float massForTemperatureModification = primaryElement.GetComponent<Building>().Def.MassForTemperatureModification;
 					float operatingKilowatts = data.OperatingKilowatts;
-					Debug.Assert(internalTemperature > 0f, "Invalid temperature");
-					Debug.Assert(primaryElement.Mass > 0f);
-					Debug.Assert(massForTemperatureModification > 0f);
+					global::UnityEngine.Debug.Assert(internalTemperature > 0f, "Invalid temperature");
+					global::UnityEngine.Debug.Assert(primaryElement.Mass > 0f);
+					global::UnityEngine.Debug.Assert(massForTemperatureModification > 0f);
 					Extents extents = data.GetExtents();
 					byte b = (byte)ElementLoader.elements.IndexOf(primaryElement.Element);
 					SimMessages.AddBuildingHeatExchange(extents, internalTemperature, operatingKilowatts, b, massForTemperatureModification, handle2.index);

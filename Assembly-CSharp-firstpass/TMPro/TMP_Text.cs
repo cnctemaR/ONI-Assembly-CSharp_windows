@@ -1758,7 +1758,7 @@ namespace TMPro
 		{
 			if (this.m_fontAsset == null || this.m_fontAsset.characterDictionary == null)
 			{
-				Debug.LogWarning("Can't Generate Mesh! No Font Asset has been assigned to Object ID: " + base.GetInstanceID());
+				global::Debug.LogWarning("Can't Generate Mesh! No Font Asset has been assigned to Object ID: " + base.GetInstanceID(), null);
 				return Vector2.zero;
 			}
 			if (this.m_char_buffer == null || this.m_char_buffer.Length == 0 || this.m_char_buffer[0] == 0)
@@ -1824,22 +1824,22 @@ namespace TMPro
 				int currentMaterialIndex = this.m_currentMaterialIndex;
 				if (!this.m_isRichText || num10 != 60)
 				{
-					goto IL_03A6;
+					goto IL_03A7;
 				}
 				this.m_isParsingText = true;
 				if (!this.ValidateHtmlTag(this.m_char_buffer, num9 + 1, out num8))
 				{
-					goto IL_03A6;
+					goto IL_03A7;
 				}
 				num9 = num8;
 				if (this.m_textElementType != TMP_TextElementType.Character)
 				{
-					goto IL_03A6;
+					goto IL_03A7;
 				}
-				IL_113E:
+				IL_113F:
 				num9++;
 				continue;
-				IL_03A6:
+				IL_03A7:
 				this.m_isParsingText = false;
 				bool isUsingAlternateTypeface = this.m_internalCharacterInfo[this.m_characterCount].isUsingAlternateTypeface;
 				float num11 = 1f;
@@ -1870,7 +1870,7 @@ namespace TMPro
 					TMP_Sprite tmp_Sprite = this.m_currentSpriteAsset.spriteInfoList[this.m_spriteIndex];
 					if (tmp_Sprite == null)
 					{
-						goto IL_113E;
+						goto IL_113F;
 					}
 					num10 = 57344 + this.m_spriteIndex;
 					this.m_currentFontAsset = this.m_fontAsset;
@@ -1885,7 +1885,7 @@ namespace TMPro
 					this.m_cached_TextElement = this.m_textInfo.characterInfo[this.m_characterCount].textElement;
 					if (this.m_cached_TextElement == null)
 					{
-						goto IL_113E;
+						goto IL_113F;
 					}
 					this.m_currentMaterialIndex = this.m_textInfo.characterInfo[this.m_characterCount].materialReferenceIndex;
 					this.m_fontScale = this.m_currentFontSize * num11 / this.m_currentFontAsset.fontInfo.PointSize * this.m_currentFontAsset.fontInfo.Scale * ((!this.m_isOrthographic) ? 0.1f : 1f);
@@ -2006,7 +2006,7 @@ namespace TMPro
 						this.m_maxLineAscender = float.NegativeInfinity;
 						this.m_maxLineDescender = float.PositiveInfinity;
 						this.m_xAdvance = 0f + this.tag_Indent;
-						goto IL_113E;
+						goto IL_113F;
 					}
 				}
 				if (this.m_lineNumber > 0 && !TMP_Math.Approximately(this.m_maxLineAscender, this.m_startOfLineAscender) && this.m_lineHeight == 0f && !this.m_isNewPage)
@@ -2102,7 +2102,7 @@ namespace TMPro
 					}
 				}
 				this.m_characterCount++;
-				goto IL_113E;
+				goto IL_113F;
 			}
 			this.m_isCharacterWrappingEnabled = false;
 			num5 += ((this.m_margin.x <= 0f) ? 0f : this.m_margin.x);
@@ -2413,7 +2413,7 @@ namespace TMPro
 			{
 				if (!TMP_Settings.warningsDisabled)
 				{
-					Debug.LogWarning("Unable to add underline since the Font Asset doesn't contain the underline character.", this);
+					global::Debug.LogWarning("Unable to add underline since the Font Asset doesn't contain the underline character.", this);
 				}
 				return;
 			}
@@ -3177,7 +3177,7 @@ namespace TMPro
 																				if (this.m_isParsingText)
 																				{
 																					this.m_actionStack.Add(valueHashCode);
-																					Debug.Log(string.Concat(new object[] { "Action ID: [", valueHashCode, "] First character index: ", this.m_characterCount }));
+																					global::Debug.Log(string.Concat(new object[] { "Action ID: [", valueHashCode, "] First character index: ", this.m_characterCount }), null);
 																				}
 																				return true;
 																			}
@@ -3296,13 +3296,13 @@ namespace TMPro
 																							{
 																								if (this.m_isParsingText)
 																								{
-																									Debug.Log(string.Concat(new object[]
+																									global::Debug.Log(string.Concat(new object[]
 																									{
 																										"Action ID: [",
 																										this.m_actionStack.CurrentItem(),
 																										"] Last character index: ",
 																										this.m_characterCount - 1
-																									}));
+																									}), null);
 																								}
 																								this.m_actionStack.Remove();
 																								return true;

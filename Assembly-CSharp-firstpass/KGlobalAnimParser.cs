@@ -19,7 +19,7 @@ public class KGlobalAnimParser
 	{
 		if (KGlobalAnimParser.instance != null)
 		{
-			Debug.Log("Destroying KGlobalAnimParser");
+			global::Debug.Log("Destroying KGlobalAnimParser", null);
 			KGlobalAnimParser.instance.commandFiles.Clear();
 			KGlobalAnimParser.instance.commandFiles = null;
 			KGlobalAnimParser.instance.files.Clear();
@@ -95,7 +95,6 @@ public class KGlobalAnimParser
 	{
 		string text = path + "/mygroup.yaml";
 		KAnimGroupFile.GroupFile groupFile = YamlIO<KAnimGroupFile.GroupFile>.LoadFile(text);
-		Debug.Assert(groupFile != null, text);
 		return groupFile.groupID;
 	}
 
@@ -110,7 +109,7 @@ public class KGlobalAnimParser
 			}
 			else
 			{
-				Debug.LogWarning("No file.path for [" + file.name + "]");
+				global::Debug.LogWarning("No file.path for [" + file.name + "]", null);
 			}
 			if (ignore == KAnimBatchManager.IGNORE)
 			{
@@ -138,16 +137,8 @@ public class KGlobalAnimParser
 	{
 		TextAsset animFile2 = file.animFile;
 		TextAsset buildFile = file.buildFile;
-		Debug.Assert(batchTag.isValid && batchTag != KAnimBatchManager.NO_BATCH);
 		KAnimGroupFile.Group group = KAnimGroupFile.GetGroup(batchTag);
-		Debug.AssertFormat(group != null, "group was null: batch: {0} file {1}", new object[]
-		{
-			batchTag.ToString(),
-			file.name
-		});
-		Debug.Assert(group.id.isValid && group.id != KAnimBatchManager.NO_BATCH);
 		KBatchGroupData kbatchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(group.id, false);
-		Debug.Assert(kbatchGroupData != null, group.id.ToString());
 		animFile.batchTag = kbatchGroupData.groupID;
 		HashedString hashedString = new HashedString(file.name);
 		HashCache.Get().Add(hashedString.HashValue, file.name);
@@ -157,17 +148,16 @@ public class KGlobalAnimParser
 			{
 				if (group.renderType == KAnimBatchGroup.RendererType.AnimOnly && group.swapTarget.isValid)
 				{
-					Debug.Log(string.Concat(new string[]
+					global::Debug.Log(string.Concat(new string[]
 					{
 						"BUILD Anim only [",
 						group.id.ToString(),
 						"] -> swapTarget [",
 						group.swapTarget.ToString(),
 						"]"
-					}));
+					}), null);
 					kbatchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(group.swapTarget, false);
 				}
-				Debug.Assert(kbatchGroupData != null);
 				animFile.batchTag = kbatchGroupData.groupID;
 				animFile.buildIndex = KGlobalAnimParser.ParseBuildData(kbatchGroupData, hashedString, new FastReader(buildFile.bytes), file.textures);
 			}
@@ -175,17 +165,16 @@ public class KGlobalAnimParser
 			{
 				if (group.renderType == KAnimBatchGroup.RendererType.AnimOnly && group.animTarget.isValid)
 				{
-					Debug.Log(string.Concat(new string[]
+					global::Debug.Log(string.Concat(new string[]
 					{
 						"ANIM Anim only [",
 						group.id.ToString(),
 						"] -> animTarget [",
 						group.animTarget.ToString(),
 						"]"
-					}));
+					}), null);
 					kbatchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(group.animTarget, false);
 				}
-				Debug.Assert(kbatchGroupData != null);
 				KGlobalAnimParser.ParseAnimData(kbatchGroupData, hashedString, new FastReader(animFile2.bytes), animFile);
 			}
 		}
@@ -290,7 +279,6 @@ public class KGlobalAnimParser
 			data.AddAnim(anim);
 			animFile.animCount++;
 		}
-		Debug.Assert(num2 == animFile.animCount);
 		data.animCount[fileNameHash] = animFile.animCount;
 		animFile.maxVisSymbolFrames = Math.Max(animFile.maxVisSymbolFrames, reader.ReadInt32());
 		data.UpdateMaxVisibleSymbols(animFile.maxVisSymbolFrames);
@@ -316,12 +304,11 @@ public class KGlobalAnimParser
 		{
 			if (num != 9)
 			{
-				Debug.LogError(string.Concat(new object[] { fileNameHash, " has invalid build.bytes version [", num, "]" }));
+				global::Debug.LogError(string.Concat(new object[] { fileNameHash, " has invalid build.bytes version [", num, "]" }), null);
 				return -1;
 			}
 		}
 		KAnimGroupFile.Group group = KAnimGroupFile.GetGroup(data.groupID);
-		Debug.AssertFormat(group != null, "[{1}] Failed to get group [{0}]", new object[] { data.groupID, fileNameHash.DebuggerDisplay });
 		KAnim.Build build = data.AddNewBuildFile(fileNameHash);
 		build.textureCount = textures.Count;
 		if (textures.Count > 0)
@@ -360,14 +347,6 @@ public class KGlobalAnimParser
 				symbolFrame.sourceFrameNum = reader.ReadInt32();
 				symbolFrame.duration = reader.ReadInt32();
 				symbolFrameInstance.buildImageIdx = data.textureStartIndex[fileNameHash] + reader.ReadInt32();
-				Debug.AssertFormat(symbolFrameInstance.buildImageIdx < textures.Count + data.textureStartIndex[fileNameHash], "{0} Symbol: [{1}] tex count: [{2}] buildImageIdx: [{3}] group total [{4}]", new object[]
-				{
-					fileNameHash.ToString(),
-					symbol.hash,
-					textures.Count,
-					symbolFrameInstance.buildImageIdx,
-					data.textureStartIndex[fileNameHash]
-				});
 				symbolFrameInstance.symbolIdx = data.GetSymbolCount();
 				num5 = Math.Max(symbolFrame.sourceFrameNum + symbolFrame.duration, num5);
 				float num6 = reader.ReadSingle();
@@ -409,7 +388,7 @@ public class KGlobalAnimParser
 			KAnim.Build.Symbol symbol = data.GetSymbol(i);
 			if (symbol == null)
 			{
-				Debug.LogWarning(string.Concat(new object[] { "Symbol null for [", data.groupID, "] idx: [", i, "]" }));
+				global::Debug.LogWarning(string.Concat(new object[] { "Symbol null for [", data.groupID, "] idx: [", i, "]" }), null);
 			}
 			else
 			{
@@ -426,7 +405,7 @@ public class KGlobalAnimParser
 				symbol.frameLookup = new int[symbol.numLookupFrames];
 				if (symbol.numLookupFrames <= 0)
 				{
-					Debug.LogWarning(string.Concat(new object[]
+					global::Debug.LogWarning(string.Concat(new object[]
 					{
 						"No lookup frames for  [",
 						data.groupID,
@@ -437,7 +416,7 @@ public class KGlobalAnimParser
 						"] id: [",
 						symbol.hash,
 						"]"
-					}));
+					}), null);
 				}
 				else
 				{
@@ -450,7 +429,7 @@ public class KGlobalAnimParser
 						KAnim.Build.SymbolFrameInstance symbolFrameInstance2 = data.GetSymbolFrameInstance(l);
 						if (symbolFrameInstance2.symbolFrame == null)
 						{
-							Debug.LogWarning(string.Concat(new object[] { "No symbol frame  [", data.groupID, "] symFrameIdx: [", l, "] id: [", symbol.hash, "]" }));
+							global::Debug.LogWarning(string.Concat(new object[] { "No symbol frame  [", data.groupID, "] symFrameIdx: [", l, "] id: [", symbol.hash, "]" }), null);
 						}
 						else
 						{
@@ -458,7 +437,7 @@ public class KGlobalAnimParser
 							{
 								if (m >= symbol.frameLookup.Length)
 								{
-									Debug.LogWarning(string.Concat(new object[]
+									global::Debug.LogWarning(string.Concat(new object[]
 									{
 										"Too many lookup frames [",
 										m,
@@ -471,7 +450,7 @@ public class KGlobalAnimParser
 										"] id: [",
 										symbol.hash,
 										"]"
-									}));
+									}), null);
 								}
 								else
 								{

@@ -125,7 +125,7 @@ public static class GameUtil
 		num3 = Mathf.Clamp(num3, num4, num5);
 		if (float.IsNaN(num3) || float.IsInfinity(num3))
 		{
-			Debug.LogError("Calculated an invalid temperature");
+			global::Debug.LogError("Calculated an invalid temperature", null);
 		}
 		return num3;
 	}
@@ -835,7 +835,7 @@ public static class GameUtil
 													}
 													else
 													{
-														Debug.LogWarning("Unable to find proper string for KKeyCode: " + key_code.ToString() + "using key_code.ToString()");
+														global::Debug.LogWarning("Unable to find proper string for KKeyCode: " + key_code.ToString() + "using key_code.ToString()", null);
 													}
 												}
 												else
@@ -1378,7 +1378,6 @@ public static class GameUtil
 
 	public static List<Descriptor> GetEquipmentEffects(EquipmentDef def)
 	{
-		Debug.Assert(def != null);
 		List<Descriptor> list = new List<Descriptor>();
 		List<AttributeModifier> attributeModifiers = def.AttributeModifiers;
 		if (attributeModifiers != null)
@@ -1406,7 +1405,7 @@ public static class GameUtil
 		if (text == null)
 		{
 			text = "MISSING RECIPEDESCRIPTION";
-			Debug.LogWarning("Missing recipeDescription");
+			global::Debug.LogWarning("Missing recipeDescription", null);
 		}
 		return text;
 	}

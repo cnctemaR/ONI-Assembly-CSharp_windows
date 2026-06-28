@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine;
 
 public class KCompBuildInstance
 {
@@ -70,7 +69,7 @@ public class KCompBuildInstance
 		}
 		catch (Exception ex)
 		{
-			Debug.LogError("Exception while applying override " + ex.Message + "\n" + ex.StackTrace);
+			Debug.LogError("Exception while applying override " + ex.Message + "\n" + ex.StackTrace, null);
 		}
 	}
 

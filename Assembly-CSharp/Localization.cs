@@ -163,7 +163,7 @@ public static class Localization
 					}
 					else
 					{
-						Console.WriteLine("TRANSLATION ERROR! " + text + " has missing or mismatched parameters");
+						global::Debug.Log("TRANSLATION ERROR! " + text + " has missing or mismatched parameters", null);
 					}
 				}
 			}

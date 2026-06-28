@@ -41,7 +41,7 @@ public abstract class SubstanceSource : KMonoBehaviour
 				}
 				else
 				{
-					Debug.LogWarning("Attempting to set substance source temperature to: " + num4.ToString());
+					global::Debug.LogWarning("Attempting to set substance source temperature to: " + num4.ToString(), null);
 				}
 			}
 		}

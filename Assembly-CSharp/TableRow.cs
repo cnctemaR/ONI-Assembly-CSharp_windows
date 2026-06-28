@@ -87,7 +87,7 @@ public class TableRow : KMonoBehaviour
 		{
 			return this.widgets[column];
 		}
-		Debug.LogWarning("Widget is null or row does not contain widget for column " + column);
+		global::Debug.LogWarning("Widget is null or row does not contain widget for column " + column, null);
 		return null;
 	}
 

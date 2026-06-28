@@ -83,7 +83,7 @@ public class LoopingSounds : KMonoBehaviour
 	{
 		if (asset == null || asset == string.Empty)
 		{
-			global::UnityEngine.Debug.LogWarning("Missing sound");
+			global::Debug.LogWarning("Missing sound", null);
 			return false;
 		}
 		if (!this.IsSoundPlaying(asset))
@@ -178,7 +178,7 @@ public class LoopingSounds : KMonoBehaviour
 	{
 		if (AudioDebug.Get().debugGameEventSounds)
 		{
-			global::UnityEngine.Debug.Log("GameSoundEvent: " + ev.Name);
+			global::Debug.Log("GameSoundEvent: " + ev.Name, null);
 		}
 		List<AnimEvent> events = GameAudioSheets.Get().GetEvents(ev.Name);
 		if (events == null)
@@ -195,7 +195,7 @@ public class LoopingSounds : KMonoBehaviour
 			}
 			if (AudioDebug.Get().debugGameEventSounds)
 			{
-				global::UnityEngine.Debug.Log("GameSound: " + soundEvent.sound);
+				global::Debug.Log("GameSound: " + soundEvent.sound, null);
 			}
 			float num = 0f;
 			if (this.lastTimePlayed.TryGetValue(soundEvent.soundHash, out num))

@@ -516,17 +516,10 @@ namespace Delaunay.Geo
 				{
 					Vector2 vector4 = (vector2 - vector).normalized * -inset;
 					Vector2 vector5 = (vector3 - vector).normalized * -inset;
-					Debug.DrawLine(vector2 + vector4, vector3 + vector5, colour, duration);
-				}
-				else
-				{
-					Debug.DrawLine(vector3, vector2, colour, duration);
 				}
 			}
 			if (drawCentroid)
 			{
-				Debug.DrawLine(new Vector2(vector.x - 0.5f, vector.y), new Vector2(vector.x + 0.5f, vector.y), colour, duration);
-				Debug.DrawLine(new Vector2(vector.x, vector.y - 0.5f), new Vector2(vector.x, vector.y + 0.5f), colour, duration);
 			}
 		}
 

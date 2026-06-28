@@ -30,7 +30,7 @@ namespace Database
 			Klei.AI.Attribute attribute = Db.Get().Attributes.TryGet(attribute_name);
 			if (attribute == null)
 			{
-				Debug.LogWarning("Attribute does not exist: " + attribute_name);
+				global::Debug.LogWarning("Attribute does not exist: " + attribute_name, null);
 			}
 			else
 			{

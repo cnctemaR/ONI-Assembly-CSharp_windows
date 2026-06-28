@@ -50,13 +50,13 @@ public class Output
 	public static void LogWarning(params object[] objs)
 	{
 		string text = Output.BuildString(objs);
-		Debug.LogWarning(text);
+		global::Debug.LogWarning(text, null);
 	}
 
 	public static void LogWarningWithObj(global::UnityEngine.Object obj, params object[] objs)
 	{
 		string text = Output.BuildString(objs);
-		Debug.LogWarning(text, obj);
+		global::Debug.LogWarning(text, obj);
 	}
 
 	public static void Print(string str)
@@ -80,11 +80,11 @@ public class Output
 
 	private static void LogError(string str)
 	{
-		Debug.LogError(str);
+		global::Debug.LogError(str, null);
 	}
 
 	private static void LogErrorWithObj(global::UnityEngine.Object obj, string str)
 	{
-		Debug.LogError(str, obj);
+		global::Debug.LogError(str, obj);
 	}
 }

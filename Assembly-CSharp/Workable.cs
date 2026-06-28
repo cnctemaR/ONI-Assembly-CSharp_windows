@@ -103,7 +103,6 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		{
 			this.selectable.AddStatusItem(this.workingStatusItem, this.statusItemData);
 		}
-		Debug.Assert(workerToStart != null, "How did we get a null worker?");
 		this.worker = workerToStart;
 		this.ShowProgressBar(true);
 		this.OnStartWork(this.worker);

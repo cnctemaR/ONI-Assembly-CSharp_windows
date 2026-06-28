@@ -225,11 +225,11 @@ namespace Delaunay
 			Side side = this._edgeOrientations[num];
 			if (edge.clippedEnds[side] == null)
 			{
-				Debug.LogError("XXX: Null detected when there should be a Vector2!");
+				global::Debug.LogError("XXX: Null detected when there should be a Vector2!", null);
 			}
 			if (edge.clippedEnds[SideHelper.Other(side)] == null)
 			{
-				Debug.LogError("XXX: Null detected when there should be a Vector2!");
+				global::Debug.LogError("XXX: Null detected when there should be a Vector2!", null);
 			}
 			list.Add(edge.clippedEnds[side].Value);
 			list.Add(edge.clippedEnds[SideHelper.Other(side)].Value);
@@ -257,7 +257,7 @@ namespace Delaunay
 			Side side = this._edgeOrientations[j];
 			if (edge.clippedEnds[side] == null)
 			{
-				Debug.LogError("XXX: Null detected when there should be a Vector2!");
+				global::Debug.LogError("XXX: Null detected when there should be a Vector2!", null);
 			}
 			Vector2 value = edge.clippedEnds[side].Value;
 			if (!Site.CloseEnough(vector, value))
@@ -387,7 +387,7 @@ namespace Delaunay
 			}
 			if (edge.clippedEnds[SideHelper.Other(side)] == null)
 			{
-				Debug.LogError("XXX: Null detected when there should be a Vector2!");
+				global::Debug.LogError("XXX: Null detected when there should be a Vector2!", null);
 			}
 			Vector2 value2 = edge.clippedEnds[SideHelper.Other(side)].Value;
 			if (!Site.CloseEnough(points[0], value2))

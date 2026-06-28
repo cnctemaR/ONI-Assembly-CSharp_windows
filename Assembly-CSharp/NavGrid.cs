@@ -127,7 +127,6 @@ public class NavGrid
 	{
 		Vector3 vector = Grid.CellToPosCCF(start_cell, Grid.SceneLayer.Move);
 		Vector3 vector2 = Grid.CellToPosCCF(end_cell, Grid.SceneLayer.Move);
-		Debug.DrawLine(vector, vector2);
 	}
 
 	public static void DebugDrawPath(PathFinder.Path path)
@@ -168,7 +167,6 @@ public class NavGrid
 				{
 					Vector3 navPos = NavTypeHelper.GetNavPos(i, this.Links[num].startNavType);
 					Vector3 navPos2 = NavTypeHelper.GetNavPos(num2, this.Links[num].endNavType);
-					Debug.DrawLine(navPos, navPos2);
 					num++;
 				}
 			}

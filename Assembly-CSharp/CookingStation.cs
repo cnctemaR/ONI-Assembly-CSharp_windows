@@ -20,7 +20,6 @@ public class CookingStation : Fabricator
 
 	protected override bool OnWorkTick(Worker worker, float dt)
 	{
-		Debug.Assert(worker != null, "How did we get a null worker?");
 		return false;
 	}
 

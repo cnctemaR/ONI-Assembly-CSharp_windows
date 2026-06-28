@@ -397,7 +397,7 @@ public class DragTool : InterfaceTool
 			}
 			else
 			{
-				Debug.Log("no hover text configuration " + base.gameObject.name);
+				global::Debug.Log("no hover text configuration " + base.gameObject.name, null);
 			}
 		}
 	}

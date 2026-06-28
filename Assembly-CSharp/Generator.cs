@@ -203,7 +203,6 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 
 	public void GenerateJoules(float joulesAvailable, bool canOverPower = false)
 	{
-		global::UnityEngine.Debug.Assert(base.GetComponent<Battery>() == null);
 		this.joulesAvailable = Mathf.Clamp(joulesAvailable, 0f, (!canOverPower) ? this.Capacity : float.MaxValue);
 		ReportManager.Instance.ReportValue(ReportManager.ReportType.EnergyCreated, this.joulesAvailable, null);
 	}

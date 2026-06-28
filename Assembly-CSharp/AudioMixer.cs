@@ -223,7 +223,7 @@ public class AudioMixer
 	{
 		if (!this.userVolumeSettings.ContainsKey(bus))
 		{
-			Debug.LogError("The provided bus doesn't exist. Check yo'self fool!");
+			global::Debug.LogError("The provided bus doesn't exist. Check yo'self fool!", null);
 			return;
 		}
 		if (value > 1f)

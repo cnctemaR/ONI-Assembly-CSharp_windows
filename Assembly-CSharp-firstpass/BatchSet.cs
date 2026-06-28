@@ -48,25 +48,25 @@ public class BatchSet
 	{
 		if (this.group.dataType == KAnimBatchGroup.DataType.DontRender || this.group.dataType == KAnimBatchGroup.DataType.AnimOnly)
 		{
-			Debug.LogWarning(string.Concat(new object[]
+			global::Debug.LogWarning(string.Concat(new object[]
 			{
 				"Cant add [",
 				controller.GetName(),
 				"] to group [",
 				this.group.batchID,
 				"]"
-			}));
+			}), null);
 			return;
 		}
 		int layer = controller.GetLayer();
 		if (layer != this.key.layer)
 		{
-			Debug.LogError("Registering with wrong batch set (layer) " + controller.GetName());
+			global::Debug.LogError("Registering with wrong batch set (layer) " + controller.GetName(), null);
 		}
 		HashedString batchGroupID = controller.GetBatchGroupID(false);
 		if (!(batchGroupID == this.key.groupID))
 		{
-			Debug.LogError("Registering with wrong batch set (groupID) " + controller.GetName());
+			global::Debug.LogError("Registering with wrong batch set (groupID) " + controller.GetName(), null);
 		}
 		KAnimBatchGroup.MaterialType materialType = controller.GetMaterialType();
 		for (int i = 0; i < this.batches.Count; i++)
@@ -88,7 +88,6 @@ public class BatchSet
 
 	public void RemoveBatch(KAnimBatch batch)
 	{
-		Debug.Assert(batch.batchset == this);
 		if (this.batches.Contains(batch))
 		{
 			this.group.batchCount--;
@@ -113,8 +112,6 @@ public class BatchSet
 				this.batches.Sort((KAnimBatch b0, KAnimBatch b1) => b0.position.z.CompareTo(b1.position.z));
 			}
 		}
-		Debug.Assert(batch.position.x == (float)(this.idx.x * 16));
-		Debug.Assert(batch.position.y == (float)(this.idx.y * 16));
 		this.SetDirty();
 	}
 
@@ -168,7 +165,7 @@ public class BatchSet
 				}
 				catch (Exception ex)
 				{
-					Debug.LogError("BatchSet.UpdateDirty: " + ex.Message + "\n" + ex.StackTrace);
+					global::Debug.LogError("BatchSet.UpdateDirty: " + ex.Message + "\n" + ex.StackTrace, null);
 				}
 			}
 			this.lastDirtyFrame = frame;

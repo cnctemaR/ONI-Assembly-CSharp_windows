@@ -124,56 +124,48 @@ public class NoiseNodeCanvas : NodeCanvas
 		if (type == typeof(PrimitiveNodeEditor))
 		{
 			PrimitiveNodeEditor primitiveNodeEditor = node as PrimitiveNodeEditor;
-			Debug.Assert(primitiveNodeEditor.target.name != null && primitiveNodeEditor.target.name != string.Empty, "Invalid target name");
 			link.name = primitiveNodeEditor.target.name;
 			link.type = Link.Type.Primitive;
 		}
 		else if (type == typeof(FilterNodeEditor))
 		{
 			FilterNodeEditor filterNodeEditor = node as FilterNodeEditor;
-			Debug.Assert(filterNodeEditor.target.name != null && filterNodeEditor.target.name != string.Empty, "Invalid target name");
 			link.name = filterNodeEditor.target.name;
 			link.type = Link.Type.Filter;
 		}
 		else if (type == typeof(TransformerNodeEditor))
 		{
 			TransformerNodeEditor transformerNodeEditor = node as TransformerNodeEditor;
-			Debug.Assert(transformerNodeEditor.target.name != null && transformerNodeEditor.target.name != string.Empty, "Invalid target name");
 			link.name = transformerNodeEditor.target.name;
 			link.type = Link.Type.Transformer;
 		}
 		else if (type == typeof(SelectorModuleNodeEditor))
 		{
 			SelectorModuleNodeEditor selectorModuleNodeEditor = node as SelectorModuleNodeEditor;
-			Debug.Assert(selectorModuleNodeEditor.target.name != null && selectorModuleNodeEditor.target.name != string.Empty, "Invalid target name");
 			link.name = selectorModuleNodeEditor.target.name;
 			link.type = Link.Type.Selector;
 		}
 		else if (type == typeof(ModifierModuleNodeEditor))
 		{
 			ModifierModuleNodeEditor modifierModuleNodeEditor = node as ModifierModuleNodeEditor;
-			Debug.Assert(modifierModuleNodeEditor.target.name != null && modifierModuleNodeEditor.target.name != string.Empty, "Invalid target name");
 			link.name = modifierModuleNodeEditor.target.name;
 			link.type = Link.Type.Modifier;
 		}
 		else if (type == typeof(CombinerModuleNodeEditor))
 		{
 			CombinerModuleNodeEditor combinerModuleNodeEditor = node as CombinerModuleNodeEditor;
-			Debug.Assert(combinerModuleNodeEditor.target.name != null && combinerModuleNodeEditor.target.name != string.Empty, "Invalid target name");
 			link.name = combinerModuleNodeEditor.target.name;
 			link.type = Link.Type.Combiner;
 		}
 		else if (type == typeof(FloatPointsNodeEditor))
 		{
 			FloatPointsNodeEditor floatPointsNodeEditor = node as FloatPointsNodeEditor;
-			Debug.Assert(floatPointsNodeEditor.target.name != null && floatPointsNodeEditor.target.name != string.Empty, "Invalid target name");
 			link.name = floatPointsNodeEditor.target.name;
 			link.type = Link.Type.FloatPoints;
 		}
 		else if (type == typeof(ControlPointsNodeEditor))
 		{
 			ControlPointsNodeEditor controlPointsNodeEditor = node as ControlPointsNodeEditor;
-			Debug.Assert(controlPointsNodeEditor.target.name != null && controlPointsNodeEditor.target.name != string.Empty, "Invalid target name");
 			link.name = controlPointsNodeEditor.target.name;
 			link.type = Link.Type.ControlPoints;
 		}
@@ -404,56 +396,56 @@ public class NoiseNodeCanvas : NodeCanvas
 			{
 				return this.primitiveLookup[link.name];
 			}
-			Debug.LogError("Couldnt find [" + link.name + "] in primitives");
+			global::Debug.LogError("Couldnt find [" + link.name + "] in primitives", null);
 			break;
 		case Link.Type.Filter:
 			if (this.filterLookup.ContainsKey(link.name))
 			{
 				return this.filterLookup[link.name];
 			}
-			Debug.LogError("Couldnt find [" + link.name + "] in filters");
+			global::Debug.LogError("Couldnt find [" + link.name + "] in filters", null);
 			break;
 		case Link.Type.Transformer:
 			if (this.transformerLookup.ContainsKey(link.name))
 			{
 				return this.transformerLookup[link.name];
 			}
-			Debug.LogError("Couldnt find [" + link.name + "] in transformers");
+			global::Debug.LogError("Couldnt find [" + link.name + "] in transformers", null);
 			break;
 		case Link.Type.Selector:
 			if (this.selectorLookup.ContainsKey(link.name))
 			{
 				return this.selectorLookup[link.name];
 			}
-			Debug.LogError("Couldnt find [" + link.name + "] in selectors");
+			global::Debug.LogError("Couldnt find [" + link.name + "] in selectors", null);
 			break;
 		case Link.Type.Modifier:
 			if (this.modifierLookup.ContainsKey(link.name))
 			{
 				return this.modifierLookup[link.name];
 			}
-			Debug.LogError("Couldnt find [" + link.name + "] in modifiers");
+			global::Debug.LogError("Couldnt find [" + link.name + "] in modifiers", null);
 			break;
 		case Link.Type.Combiner:
 			if (this.combinerLookup.ContainsKey(link.name))
 			{
 				return this.combinerLookup[link.name];
 			}
-			Debug.LogError("Couldnt find [" + link.name + "] in combiners");
+			global::Debug.LogError("Couldnt find [" + link.name + "] in combiners", null);
 			break;
 		case Link.Type.FloatPoints:
 			if (this.floatlistLookup.ContainsKey(link.name))
 			{
 				return this.floatlistLookup[link.name];
 			}
-			Debug.LogError("Couldnt find [" + link.name + "] in float points");
+			global::Debug.LogError("Couldnt find [" + link.name + "] in float points", null);
 			break;
 		case Link.Type.ControlPoints:
 			if (this.ctrlpointsLookup.ContainsKey(link.name))
 			{
 				return this.ctrlpointsLookup[link.name];
 			}
-			Debug.LogError("Couldnt find [" + link.name + "] in control points");
+			global::Debug.LogError("Couldnt find [" + link.name + "] in control points", null);
 			break;
 		case Link.Type.Terminator:
 			if (this.terminator == null)
@@ -463,14 +455,14 @@ public class NoiseNodeCanvas : NodeCanvas
 			}
 			return this.terminator;
 		}
-		Debug.LogError(string.Concat(new string[]
+		global::Debug.LogError(string.Concat(new string[]
 		{
 			"Couldnt find link [",
 			link.name,
 			"] [",
 			link.type.ToString(),
 			"]"
-		}));
+		}), null);
 		return null;
 	}
 
@@ -586,25 +578,25 @@ public class NoiseNodeCanvas : NodeCanvas
 			{
 				if (nodeFromLink.Inputs.Count == 0)
 				{
-					Debug.LogError(string.Concat(new object[]
+					global::Debug.LogError(string.Concat(new object[]
 					{
 						"Target [",
 						nodeFromLink.name,
 						"][",
 						nodeLink.target.type,
 						"] doesnt have any inputs"
-					}));
+					}), null);
 				}
 				if (node.Outputs.Count == 0)
 				{
-					Debug.LogError(string.Concat(new object[]
+					global::Debug.LogError(string.Concat(new object[]
 					{
 						"Source [",
 						node.name,
 						"][",
 						nodeLink.source0.type,
 						"] doesnt have any outputs"
-					}));
+					}), null);
 				}
 				nodeFromLink.Inputs[0].ApplyConnection(node.Outputs[0]);
 			}

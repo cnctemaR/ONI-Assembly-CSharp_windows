@@ -128,7 +128,7 @@ public class CrewPortrait : KMonoBehaviour
 				{
 					this.targetImage.enabled = true;
 				}
-				Debug.LogWarning("Controller for [" + base.name + "] null");
+				global::Debug.LogWarning("Controller for [" + base.name + "] null", null);
 				return;
 			}
 		}

@@ -4,9 +4,9 @@ using UnityEngine.EventSystems;
 
 namespace TMPro
 {
-	[RequireComponent(typeof(RectTransform))]
 	[AddComponentMenu("Layout/Text Container")]
 	[ExecuteInEditMode]
+	[RequireComponent(typeof(RectTransform))]
 	public class TextContainer : UIBehaviour
 	{
 		public bool hasChanged
@@ -222,7 +222,7 @@ namespace TMPro
 			{
 				if (this.m_textMeshPro != null && this.m_textMeshPro.anchor != TMP_Compatibility.AnchorPositions.None)
 				{
-					Debug.LogWarning("Converting from using anchor and lineLength properties to Text Container.", this);
+					global::Debug.LogWarning("Converting from using anchor and lineLength properties to Text Container.", this);
 					this.m_isDefaultHeight = true;
 					int num = (int)this.m_textMeshPro.anchor;
 					this.m_textMeshPro.anchor = TMP_Compatibility.AnchorPositions.None;

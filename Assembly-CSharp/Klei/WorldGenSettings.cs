@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Klei.Noise;
-using UnityEngine;
 
 namespace Klei
 {
@@ -67,7 +66,7 @@ namespace Klei
 			worldGenSettings.biomes = YamlIO<TerrainBiomeSettings>.LoadFile(path + WorldGenSettings.BIOME_FILE + ".yaml");
 			if (worldGenSettings.biomes.LoadBiomeFiles.Count == 0)
 			{
-				Debug.LogError("WorldGen: No biome lookup table files will be loaded");
+				Debug.LogError("WorldGen: No biome lookup table files will be loaded", null);
 			}
 			else
 			{
@@ -87,7 +86,7 @@ namespace Klei
 					}
 					else
 					{
-						Debug.LogWarning("WorldGen: Attempting to load biome: " + text + " failed");
+						Debug.LogWarning("WorldGen: Attempting to load biome: " + text + " failed", null);
 					}
 				}
 			}
@@ -109,7 +108,7 @@ namespace Klei
 			worldGenSettings.featuresettings = new Dictionary<string, FeatureSettings>();
 			if (worldGenSettings.features.LoadFeatureFiles.Count == 0)
 			{
-				Debug.LogError("WorldGen: No feature files will be loaded");
+				Debug.LogError("WorldGen: No feature files will be loaded", null);
 			}
 			else
 			{
@@ -123,7 +122,7 @@ namespace Klei
 					}
 					else
 					{
-						Debug.LogWarning("WorldGen: Attempting to load feature: " + text2 + " failed");
+						Debug.LogWarning("WorldGen: Attempting to load feature: " + text2 + " failed", null);
 					}
 				}
 			}

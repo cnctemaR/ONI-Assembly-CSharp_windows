@@ -184,7 +184,7 @@ public class DebugHandler : IInputHandler
 		}
 		else if (e.TryConsume(global::Action.DebugGotoTarget))
 		{
-			Debug.Log("Debug GoTo");
+			global::Debug.Log("Debug GoTo", null);
 			Game.Instance.Trigger(775300118, null);
 			foreach (Brain brain in Components.Brains)
 			{
@@ -251,7 +251,7 @@ public class DebugHandler : IInputHandler
 				else if (e.TryConsume(global::Action.DebugPathFinding))
 				{
 					DebugHandler.DebugPathFinding = !DebugHandler.DebugPathFinding;
-					Debug.Log("DebugPathFinding=" + DebugHandler.DebugPathFinding);
+					global::Debug.Log("DebugPathFinding=" + DebugHandler.DebugPathFinding, null);
 				}
 				else if (!e.TryConsume(global::Action.DebugFocus))
 				{
@@ -277,7 +277,7 @@ public class DebugHandler : IInputHandler
 					}
 					else if (e.TryConsume(global::Action.DebugReloadLevel))
 					{
-						Debug.Log("Reloading Level.");
+						global::Debug.Log("Reloading Level.", null);
 						SaveLoader.Instance.InitialSave();
 						LoadScreen.ForceStopGame();
 						SaveLoader.SetActiveSaveFilePath(SaveLoader.GetAutosaveFilePath());
@@ -293,7 +293,7 @@ public class DebugHandler : IInputHandler
 					}
 					else if (e.TryConsume(global::Action.DebugTriggerError))
 					{
-						Debug.LogError("Oooops! Testing error!");
+						global::Debug.LogError("Oooops! Testing error!", null);
 					}
 					else if (e.TryConsume(global::Action.DebugDumpGarbageReferences))
 					{

@@ -2147,8 +2147,8 @@ namespace TMPro
 		[SerializeField]
 		protected string m_Text = string.Empty;
 
-		[SerializeField]
 		[Range(0f, 4f)]
+		[SerializeField]
 		private float m_CaretBlinkRate = 0.85f;
 
 		[SerializeField]

@@ -1,6 +1,5 @@
 ﻿using System;
 using FileHelpers;
-using UnityEngine;
 
 public class ElementsAudio
 {
@@ -18,10 +17,8 @@ public class ElementsAudio
 
 	public void LoadData(string csvData)
 	{
-		Debug.Assert(csvData != null && csvData != string.Empty, "Empty element audio config file... ");
 		FileHelperEngine fileHelperEngine = new FileHelperEngine(typeof(ElementsAudio.ElementAudioConfig));
 		this.elementAudioConfigs = fileHelperEngine.ReadString(csvData) as ElementsAudio.ElementAudioConfig[];
-		Debug.Assert(this.elementAudioConfigs != null, "Failed to load audio configs for elements");
 	}
 
 	public ElementsAudio.ElementAudioConfig GetConfigForElement(SimHashes id)

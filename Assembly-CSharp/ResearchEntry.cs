@@ -50,7 +50,7 @@ public class ResearchEntry : KMonoBehaviour
 	{
 		if (newTech == null)
 		{
-			Debug.LogError("The research provided is null!");
+			global::Debug.LogError("The research provided is null!", null);
 			return;
 		}
 		if (this.targetTech == newTech)
@@ -332,15 +332,15 @@ public class ResearchEntry : KMonoBehaviour
 	[Header("Labels")]
 	private LocText researchName;
 
-	[Header("Transforms")]
 	[SerializeField]
+	[Header("Transforms")]
 	private Transform progressBarContainer;
 
 	[SerializeField]
 	private Transform lineContainer;
 
-	[SerializeField]
 	[Header("Prefabs")]
+	[SerializeField]
 	private GameObject iconPanel;
 
 	[SerializeField]
@@ -368,8 +368,8 @@ public class ResearchEntry : KMonoBehaviour
 	[SerializeField]
 	private Sprite completedBG;
 
-	[SerializeField]
 	[Header("Colors")]
+	[SerializeField]
 	private Color defaultColor = Color.blue;
 
 	[SerializeField]

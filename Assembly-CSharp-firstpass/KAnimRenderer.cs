@@ -123,7 +123,6 @@ public class KAnimRenderer : MonoBehaviour
 				this.atlasMaterial.SetTexture("_Tex" + num, atlas);
 			}
 		}
-		Debug.AssertFormat(num <= 8, " Shader only handles 8 atlases atm atlasIndex [{0}]", new object[] { num });
 		return num;
 	}
 

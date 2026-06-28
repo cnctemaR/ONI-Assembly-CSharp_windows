@@ -475,7 +475,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 			}
 			if (this.curBuild == null)
 			{
-				Debug.LogWarning(string.Concat(new object[]
+				global::Debug.LogWarning(string.Concat(new object[]
 				{
 					"[",
 					base.gameObject.name,
@@ -509,7 +509,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 	{
 		if (this.curBuild == null)
 		{
-			Debug.LogWarning(string.Concat(new object[]
+			global::Debug.LogWarning(string.Concat(new object[]
 			{
 				"[",
 				base.gameObject.name,
@@ -754,7 +754,6 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public void AddAnimOverrides(KAnimFile kanim_file, float priority = 0f)
 	{
-		Debug.Assert(kanim_file != null);
 		this.overrideAnimFiles.Add(new KAnimControllerBase.OverrideAnimFileData
 		{
 			priority = priority,
@@ -766,7 +765,6 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public void RemoveAnimOverrides(KAnimFile kanim_file)
 	{
-		Debug.Assert(kanim_file != null);
 		for (int i = 0; i < this.overrideAnimFiles.Count; i++)
 		{
 			if (this.overrideAnimFiles[i].file == kanim_file)
@@ -793,12 +791,6 @@ public abstract class KAnimControllerBase : MonoBehaviour
 			for (int j = 0; j < data.animCount; j++)
 			{
 				KAnim.Anim anim = data.GetAnim(j);
-				Debug.AssertFormat(anim.animFile.hashName == data.hashName, "How did we get an anim from another file? [{0}] != [{1}] for anim [{2}]", new object[]
-				{
-					data.name,
-					anim.animFile.name,
-					j
-				});
 				KAnimControllerBase.AnimLookupData animLookupData = default(KAnimControllerBase.AnimLookupData);
 				animLookupData.animIndex = anim.index;
 				HashedString hashedString = new HashedString(anim.name);
@@ -877,19 +869,13 @@ public abstract class KAnimControllerBase : MonoBehaviour
 	{
 		if (animFile == null)
 		{
-			Debug.LogError("AddAnims() Null animfile data");
+			global::Debug.LogError("AddAnims() Null animfile data", null);
 			return;
 		}
 		this.maxSymbols = Mathf.Max(this.maxSymbols, animFile.maxVisSymbolFrames);
 		for (int i = 0; i < animFile.animCount; i++)
 		{
 			KAnim.Anim anim = animFile.GetAnim(i);
-			Debug.AssertFormat(anim.animFile.hashName == animFile.hashName, "How did we get an anim from another file? [{0}] != [{1}] for anim [{2}]", new object[]
-			{
-				animFile.name,
-				anim.animFile.name,
-				i
-			});
 			this.anims[anim.hash] = new KAnimControllerBase.AnimLookupData
 			{
 				animIndex = anim.index

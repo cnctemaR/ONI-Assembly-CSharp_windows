@@ -13,7 +13,7 @@ public class KAnimBatchManager
 			KAnimBatchManager.instance = new KAnimBatchManager();
 			if (!SystemInfo.SupportsTextureFormat(TextureFormat.RGBAFloat))
 			{
-				Debug.LogError("Machine does not support RGBAFloat32");
+				global::Debug.LogError("Machine does not support RGBAFloat32", null);
 			}
 		}
 		return KAnimBatchManager.instance;
@@ -112,7 +112,6 @@ public class KAnimBatchManager
 
 	public void MoveChunk(KAnimConverter.IAnimConverter controller, Vector2I lastChunkXY, Vector2I newChunkXY)
 	{
-		Debug.Assert(lastChunkXY != newChunkXY);
 		BatchKey batchKey = new BatchKey(controller, newChunkXY);
 		KAnimBatch batch = controller.GetBatch();
 		BatchSet batchSet;
@@ -126,7 +125,6 @@ public class KAnimBatchManager
 
 	public void Register(KAnimConverter.IAnimConverter controller)
 	{
-		Debug.AssertFormat(this.isReady, "Batcher isnt finished setting up, controller [{0}] is registering too early.", new object[] { controller.GetName() });
 		BatchKey batchKey = new BatchKey(controller);
 		Vector2I cellXY = controller.GetCellXY();
 		Vector2I vector2I = KAnimBatchManager.CellXYToChunkXY(cellXY);
@@ -188,7 +186,7 @@ public class KAnimBatchManager
 			}
 			catch (Exception ex)
 			{
-				Debug.LogError("KAnimBatchManager.UpdateDirty " + ex.Message + "\n" + ex.StackTrace);
+				global::Debug.LogError("KAnimBatchManager.UpdateDirty " + ex.Message + "\n" + ex.StackTrace, null);
 			}
 		}
 		return this.dirtyBatchLastFrame;

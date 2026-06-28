@@ -63,7 +63,7 @@ public class SoundEvent : AnimEvent
 		Vector3 vector = ((!this.playAtTarget) ? position : position2);
 		if (AudioDebug.Get().debugSoundEvents)
 		{
-			global::UnityEngine.Debug.Log(string.Concat(new object[] { behaviour.name, ", ", this.sound, ", ", this.Frame, ", ", vector }));
+			global::Debug.Log(string.Concat(new object[] { behaviour.name, ", ", this.sound, ", ", this.Frame, ", ", vector }), null);
 		}
 		try
 		{
@@ -72,7 +72,7 @@ public class SoundEvent : AnimEvent
 				LoopingSounds component = behaviour.GetComponent<LoopingSounds>();
 				if (component == null)
 				{
-					global::UnityEngine.Debug.Log(behaviour.name + " is missing LoopingSounds component. ");
+					global::Debug.Log(behaviour.name + " is missing LoopingSounds component. ", null);
 				}
 				else if (!component.StartSound(this.sound, vector))
 				{

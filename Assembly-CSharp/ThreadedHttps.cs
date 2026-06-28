@@ -5,7 +5,6 @@ using System.Net;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
-using UnityEngine;
 
 public class ThreadedHttps<T> where T : class, new()
 {
@@ -73,7 +72,7 @@ public class ThreadedHttps<T> where T : class, new()
 				text,
 				"\n",
 				x509Certificate.ToString()
-			}));
+			}), null);
 		}
 		return !this.certFail;
 	}
@@ -140,7 +139,7 @@ public class ThreadedHttps<T> where T : class, new()
 						": Exception getting Request Stream:",
 						message
 					});
-					Debug.LogWarning(text);
+					Debug.LogWarning(text, null);
 					throw;
 				}
 				try
@@ -158,7 +157,7 @@ public class ThreadedHttps<T> where T : class, new()
 						": Exception writing data to Stream:",
 						message2
 					});
-					Debug.LogWarning(text);
+					Debug.LogWarning(text, null);
 					throw;
 				}
 				stream.Close();
@@ -191,7 +190,7 @@ public class ThreadedHttps<T> where T : class, new()
 						message3,
 						text
 					});
-					Debug.LogWarning(text);
+					Debug.LogWarning(text, null);
 					throw;
 				}
 				text = ((HttpWebResponse)webResponse).StatusDescription;
@@ -223,7 +222,7 @@ public class ThreadedHttps<T> where T : class, new()
 			{
 				if (this.certFail)
 				{
-					Debug.LogWarning(this.serviceName + ": Cert fail, quitting");
+					Debug.LogWarning(this.serviceName + ": Cert fail, quitting", null);
 					try
 					{
 						this.OnReplyRecieved(null);
@@ -248,7 +247,7 @@ public class ThreadedHttps<T> where T : class, new()
 						this.serviceName,
 						"..."
 					});
-					Debug.LogWarning(text);
+					Debug.LogWarning(text, null);
 					try
 					{
 						this.OnReplyRecieved(null);
@@ -271,10 +270,10 @@ public class ThreadedHttps<T> where T : class, new()
 					" seconds): ",
 					message4
 				});
-				Debug.LogWarning(text);
+				Debug.LogWarning(text, null);
 				if (isForce)
 				{
-					Debug.LogWarning(ex4.StackTrace);
+					Debug.LogWarning(ex4.StackTrace, null);
 					break;
 				}
 				Thread.Sleep(timeSpan);

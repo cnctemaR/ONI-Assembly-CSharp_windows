@@ -12,7 +12,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 		List<GameObject> list = base.smi.master.gasStorage.Find(GameTags.Water);
 		if (list != null && list.Count > 0)
 		{
-			Debug.LogWarning("Liquid Cooled fan Gas storage contains water - A duplicant probably delivered to the wrong stroage - moving it to liquid storage.");
+			global::Debug.LogWarning("Liquid Cooled fan Gas storage contains water - A duplicant probably delivered to the wrong stroage - moving it to liquid storage.", null);
 			foreach (GameObject gameObject in list)
 			{
 				base.smi.master.gasStorage.Transfer(gameObject, base.smi.master.liquidStorage, false);
@@ -152,7 +152,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 		}
 		if (num6 >= 100)
 		{
-			Debug.LogWarning("Liquid cooled fan could not cool contents as much as desired. Something is wrong...");
+			global::Debug.LogWarning("Liquid cooled fan could not cool contents as much as desired. Something is wrong...", null);
 		}
 		float num9 = Mathf.Abs(num5 * this.waterKGConsumedPerKJ);
 		base.smi.master.waterConsumptionAccumulator.Accumulate(num9);

@@ -114,7 +114,7 @@ public class Constructable : Workable, ISaveLoadable
 					}
 					else
 					{
-						Debug.LogWarning("Why am I trying to replace a: " + gameObject2.name);
+						global::Debug.LogWarning("Why am I trying to replace a: " + gameObject2.name, null);
 						this.FinishConstruction(connections);
 					}
 				}

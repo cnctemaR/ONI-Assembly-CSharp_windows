@@ -80,7 +80,7 @@ public class Artable : Workable
 		}
 		if (stage == null)
 		{
-			Debug.LogError("Missing stage: " + stage_id);
+			global::Debug.LogError("Missing stage: " + stage_id, null);
 		}
 		else
 		{

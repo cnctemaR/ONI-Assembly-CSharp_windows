@@ -101,7 +101,7 @@ public class OptionsMenuScreen : KModalButtonMenu
 
 	private void Update()
 	{
-		Debug.developerConsoleVisible = false;
+		global::Debug.developerConsoleVisible = false;
 	}
 
 	[SerializeField]

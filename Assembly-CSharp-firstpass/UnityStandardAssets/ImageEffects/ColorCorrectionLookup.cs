@@ -104,7 +104,7 @@ namespace UnityStandardAssets.ImageEffects
 				num = temp2DTex.height;
 				if (!this.ValidDimensions(temp2DTex))
 				{
-					Debug.LogWarning("The given 2D texture " + temp2DTex.name + " cannot be used as a 3D LUT.");
+					global::Debug.LogWarning("The given 2D texture " + temp2DTex.name + " cannot be used as a 3D LUT.", null);
 					this.basedOnTempTex = string.Empty;
 					return;
 				}
@@ -132,7 +132,7 @@ namespace UnityStandardAssets.ImageEffects
 			}
 			else
 			{
-				Debug.LogError("Couldn't color correct with 3D LUT texture. Image Effect will be disabled.");
+				global::Debug.LogError("Couldn't color correct with 3D LUT texture. Image Effect will be disabled.", null);
 			}
 		}
 

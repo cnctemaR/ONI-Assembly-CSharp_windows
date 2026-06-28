@@ -467,7 +467,7 @@ public class BuildingDef : Def
 		KAnimFile kanimFile = this.AnimFiles[0];
 		if (this.AnimFiles[0] == null)
 		{
-			Debug.LogError("Missing anim file for building: " + base.name);
+			global::Debug.LogError("Missing anim file for building: " + base.name, null);
 		}
 		KAnimFileData data = kanimFile.GetData();
 		if (!data.batchTag.isValid || data.batchTag == KAnimBatchManager.NO_BATCH)

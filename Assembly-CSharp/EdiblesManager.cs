@@ -1,6 +1,5 @@
 ﻿using System;
 using TUNING;
-using UnityEngine;
 
 public class EdiblesManager : KMonoBehaviour
 {
@@ -18,7 +17,7 @@ public class EdiblesManager : KMonoBehaviour
 				return foodInfo;
 			}
 		}
-		Debug.LogWarning("No food with ID: " + FoodID);
+		Debug.LogWarning("No food with ID: " + FoodID, null);
 		return null;
 	}
 

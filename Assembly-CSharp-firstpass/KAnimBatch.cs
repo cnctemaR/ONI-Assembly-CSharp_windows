@@ -92,20 +92,18 @@ public class KAnimBatch
 	public void Init()
 	{
 		this.batchGroupInstance = this.group.GetBatchGroupInstance(this);
-		Debug.AssertFormat(this.batchGroupInstance != null, "Got null groupInstance from AnimBatchGroup [{0}]", new object[] { this.batchGroup });
 		this.dataTex = this.group.CreateTexture();
-		Debug.AssertFormat(this.dataTex != null, "Got null data texture from AnimBatchGroup [{0}]", new object[] { this.batchGroup });
 		int width = this.dataTex.width;
 		if (width == 0)
 		{
-			Debug.LogWarning(string.Concat(new object[]
+			global::Debug.LogWarning(string.Concat(new object[]
 			{
 				"Empty group [",
 				this.group.batchID,
 				"] ",
 				this.batchset.idx,
 				" (probably just anims)"
-			}));
+			}), null);
 			return;
 		}
 		this.texBytes = new byte[width * width * 4 * 4];
@@ -149,7 +147,6 @@ public class KAnimBatch
 	public void ClearRender(KAnimConverter.IAnimConverter controller)
 	{
 		int num = this.controllers.IndexOf(controller);
-		Debug.AssertFormat(num >= 0, "Wrong batch - couldn't find {0}]", new object[] { controller.GetName() });
 		if (num >= 0)
 		{
 			int num2 = num * 64;
@@ -221,7 +218,7 @@ public class KAnimBatch
 		{
 			if (!this.controllers.Remove(controller))
 			{
-				Debug.LogError("Failed to remove controller [" + controller.GetName() + "]");
+				global::Debug.LogError("Failed to remove controller [" + controller.GetName() + "]", null);
 			}
 			controller.SetBatch(null);
 			this.currentOffset -= 64;
@@ -239,7 +236,7 @@ public class KAnimBatch
 		}
 		else
 		{
-			Debug.LogError("Deregister called for [" + controller.GetName() + "] but its not in this batch ");
+			global::Debug.LogError("Deregister called for [" + controller.GetName() + "] but its not in this batch ", null);
 		}
 		if (this.controllers.Count == 0)
 		{
@@ -275,7 +272,7 @@ public class KAnimBatch
 		int num = this.controllers.IndexOf(controller);
 		if (num < 0)
 		{
-			Debug.LogError("Setting controller [" + controller.GetName() + "] to dirty but its not in this batch");
+			global::Debug.LogError("Setting controller [" + controller.GetName() + "] to dirty but its not in this batch", null);
 			return;
 		}
 		this.AddToDirty(num);
@@ -321,7 +318,7 @@ public class KAnimBatch
 				}
 				catch (Exception ex)
 				{
-					Debug.LogError("WriteToByteArray: " + ex.Message + "\n" + ex.StackTrace);
+					global::Debug.LogError("WriteToByteArray: " + ex.Message + "\n" + ex.StackTrace, null);
 				}
 				this.writtenLastFrame++;
 			}
@@ -331,7 +328,7 @@ public class KAnimBatch
 			}
 			else
 			{
-				Debug.LogError("dirtySet not written");
+				global::Debug.LogError("dirtySet not written", null);
 			}
 		}
 		this.UpdateTexture();

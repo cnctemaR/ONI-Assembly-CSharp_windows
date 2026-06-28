@@ -176,7 +176,7 @@ public class RootMenu : KScreen
 		}
 		else
 		{
-			Debug.LogWarning("OnUIClear() Event system is null");
+			global::Debug.LogWarning("OnUIClear() Event system is null", null);
 		}
 	}
 

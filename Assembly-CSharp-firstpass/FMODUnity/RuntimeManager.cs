@@ -88,7 +88,7 @@ namespace FMODUnity
 
 		private void Initialiase(bool forceNoNetwork)
 		{
-			global::UnityEngine.Debug.Log("FMOD Studio: Creating runtime system instance");
+			global::Debug.Log("FMOD Studio: Creating runtime system instance", null);
 			RESULT result = global::FMOD.Studio.System.create(out this.studioSystem);
 			this.CheckInitResult(result, "Creating System Object");
 			this.studioSystem.getLowLevelSystem(out this.lowlevelSystem);
@@ -118,7 +118,7 @@ namespace FMODUnity
 			if (result3 == RESULT.ERR_NET_SOCKET_ERROR)
 			{
 				this.studioSystem.release();
-				global::UnityEngine.Debug.LogWarning("FMOD Studio: Cannot open network port for Live Update, restarting with Live Update disabled. Check for other applications that are running FMOD Studio");
+				global::Debug.LogWarning("FMOD Studio: Cannot open network port for Live Update, restarting with Live Update disabled. Check for other applications that are running FMOD Studio", null);
 				this.Initialiase(true);
 			}
 			else
@@ -144,7 +144,7 @@ namespace FMODUnity
 					}
 					catch (BankLoadException ex)
 					{
-						global::UnityEngine.Debug.LogException(ex);
+						global::Debug.LogException(ex);
 					}
 					if (settings.AutomaticEventLoading)
 					{
@@ -154,7 +154,7 @@ namespace FMODUnity
 						}
 						catch (BankLoadException ex2)
 						{
-							global::UnityEngine.Debug.LogException(ex2);
+							global::Debug.LogException(ex2);
 						}
 						foreach (string text2 in settings.Banks)
 						{
@@ -164,7 +164,7 @@ namespace FMODUnity
 							}
 							catch (BankLoadException ex3)
 							{
-								global::UnityEngine.Debug.LogException(ex3);
+								global::Debug.LogException(ex3);
 							}
 						}
 						RuntimeManager.WaitForAllLoads();
@@ -322,7 +322,7 @@ namespace FMODUnity
 		{
 			if (this.studioSystem != null)
 			{
-				global::UnityEngine.Debug.Log("FMOD Studio: Destroying runtime system instance");
+				global::Debug.Log("FMOD Studio: Destroying runtime system instance", null);
 				this.studioSystem.release();
 				this.studioSystem = null;
 			}

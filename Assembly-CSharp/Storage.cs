@@ -75,14 +75,6 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		{
 			return null;
 		}
-		Debug.Assert(!this.endOfLife, string.Concat(new string[]
-		{
-			"Storage [",
-			base.gameObject.name,
-			"] is being destroyed but an object [",
-			go.name,
-			"] is being added"
-		}));
 		Pickupable component = go.GetComponent<Pickupable>();
 		if (!hide_popups && PopFXManager.Instance != null)
 		{
@@ -650,7 +642,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 	{
 		if (this.items.Count != 0)
 		{
-			Debug.LogWarning("Storage for [" + base.gameObject.name + "] is being destroyed but it still contains items!", base.gameObject);
+			global::Debug.LogWarning("Storage for [" + base.gameObject.name + "] is being destroyed but it still contains items!", base.gameObject);
 		}
 	}
 

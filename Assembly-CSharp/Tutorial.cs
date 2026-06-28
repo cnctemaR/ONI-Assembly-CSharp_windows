@@ -121,7 +121,6 @@ public class Tutorial : KMonoBehaviour
 			message = new GenericMessage(MISC.NOTIFICATIONS.TUTORIAL_OVERHEATING.NAME, MISC.NOTIFICATIONS.TUTORIAL_OVERHEATING.MESSAGEBODY, MISC.NOTIFICATIONS.TUTORIAL_OVERHEATING.TOOLTIP);
 			break;
 		}
-		Debug.Assert(message != null, string.Format("No Tutorial message: {0}", tm.ToString()));
 		this.tutorialMessagesRemaining.Remove(tm);
 		Messenger.Instance.QueueMessage(message);
 	}

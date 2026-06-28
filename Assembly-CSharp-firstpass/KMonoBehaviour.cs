@@ -144,7 +144,7 @@ public class KMonoBehaviour : MonoBehaviour, ISaveLoadable, IStateMachineTarget
 		}
 		if (!this.isInitialized)
 		{
-			Debug.LogError(base.name + "." + text + " is not initialized.");
+			global::Debug.LogError(base.name + "." + text + " is not initialized.", null);
 			return;
 		}
 		this.isSpawned = true;

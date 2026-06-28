@@ -80,7 +80,7 @@ namespace FMODUnity
 				}
 				catch (BankLoadException ex)
 				{
-					Debug.LogException(ex);
+					global::UnityEngine.Debug.LogException(ex);
 				}
 			}
 			RuntimeManager.WaitForAllLoads();

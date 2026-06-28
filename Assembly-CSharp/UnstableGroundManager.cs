@@ -49,7 +49,7 @@ public class UnstableGroundManager : KMonoBehaviour
 		Vector3 vector = Grid.CellToPosCCC(cell, Grid.SceneLayer.TileMain);
 		if (float.IsNaN(temperature) || float.IsInfinity(temperature))
 		{
-			Debug.LogError("Tried to spawn unstable ground with NaN temperature");
+			global::Debug.LogError("Tried to spawn unstable ground with NaN temperature", null);
 			temperature = 293f;
 		}
 		KBatchedAnimController kbatchedAnimController = this.Spawn(vector, element, mass, temperature);
@@ -98,7 +98,7 @@ public class UnstableGroundManager : KMonoBehaviour
 		instance.transform.SetPosition(pos);
 		if (float.IsNaN(temperature) || float.IsInfinity(temperature))
 		{
-			Debug.LogError("Tried to spawn unstable ground with NaN temperature");
+			global::Debug.LogError("Tried to spawn unstable ground with NaN temperature", null);
 			temperature = 293f;
 		}
 		PrimaryElement component = instance.GetComponent<PrimaryElement>();

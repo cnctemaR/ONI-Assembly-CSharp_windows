@@ -110,7 +110,7 @@ public class NewBaseScreen : KScreen
 	{
 		if (this.baseTemplate == null)
 		{
-			Debug.LogError("NewBaseScreen lacks a reference to a BaseTemplate Object. Ensure that Assets/tuning/Bases/startingBase.asset exists and that Assets prefab has a reference to it.");
+			global::Debug.LogError("NewBaseScreen lacks a reference to a BaseTemplate Object. Ensure that Assets/tuning/Bases/startingBase.asset exists and that Assets prefab has a reference to it.", null);
 		}
 		TemplateLoader.Stamp(this.baseTemplate, pos, new global::System.Action(this.Final));
 		for (int i = 0; i < Grid.CellCount; i++)
@@ -139,7 +139,7 @@ public class NewBaseScreen : KScreen
 	{
 		if (headquartersCell == -1)
 		{
-			Debug.LogWarning("No headquarters in saved base template. Cannot place minions. Confirm there is a headquarters saved to the base template, or consider creating a new one.");
+			global::Debug.LogWarning("No headquarters in saved base template. Cannot place minions. Confirm there is a headquarters saved to the base template, or consider creating a new one.", null);
 			return;
 		}
 		int num;

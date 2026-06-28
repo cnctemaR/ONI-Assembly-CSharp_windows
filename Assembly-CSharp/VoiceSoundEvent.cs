@@ -52,7 +52,7 @@ public class VoiceSoundEvent : AnimEvent
 				LoopingSounds component3 = cmp.GetComponent<LoopingSounds>();
 				if (component3 == null)
 				{
-					Debug.Log(cmp.name + " is missing LoopingSounds component. ");
+					global::Debug.Log(cmp.name + " is missing LoopingSounds component. ", null);
 				}
 				else if (!component3.StartSound(sound, position))
 				{
@@ -76,7 +76,7 @@ public class VoiceSoundEvent : AnimEvent
 		}
 		else if (AudioDebug.Get().debugVoiceSounds)
 		{
-			Debug.LogWarning("Missing voice sound: " + assetName);
+			global::Debug.LogWarning("Missing voice sound: " + assetName, null);
 		}
 	}
 

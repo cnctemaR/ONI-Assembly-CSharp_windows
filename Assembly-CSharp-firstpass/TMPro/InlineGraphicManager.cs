@@ -53,7 +53,7 @@ namespace TMPro
 		{
 			if (!TMP_Settings.warningsDisabled)
 			{
-				Debug.LogWarning("InlineGraphicManager component is now Obsolete and has been removed from [" + base.gameObject.name + "] along with its InlineGraphic child.", this);
+				global::Debug.LogWarning("InlineGraphicManager component is now Obsolete and has been removed from [" + base.gameObject.name + "] along with its InlineGraphic child.", this);
 			}
 			if (this.inlineGraphic.gameObject != null)
 			{
@@ -167,12 +167,12 @@ namespace TMPro
 		{
 			if (this.m_spriteAsset == null)
 			{
-				Debug.LogWarning("No Sprite Asset is assigned.", this);
+				global::Debug.LogWarning("No Sprite Asset is assigned.", this);
 				return null;
 			}
 			if (this.m_spriteAsset.spriteInfoList == null || index > this.m_spriteAsset.spriteInfoList.Count - 1)
 			{
-				Debug.LogWarning("Sprite index exceeds the number of sprites in this Sprite Asset.", this);
+				global::Debug.LogWarning("Sprite index exceeds the number of sprites in this Sprite Asset.", this);
 				return null;
 			}
 			return this.m_spriteAsset.spriteInfoList[index];
@@ -182,7 +182,7 @@ namespace TMPro
 		{
 			if (this.m_spriteAsset == null || this.m_spriteAsset.spriteInfoList == null)
 			{
-				Debug.LogWarning("No Sprite Asset is assigned.", this);
+				global::Debug.LogWarning("No Sprite Asset is assigned.", this);
 				return -1;
 			}
 			return this.m_spriteAsset.spriteInfoList.FindIndex((TMP_Sprite item) => item.hashCode == hashCode);
@@ -192,7 +192,7 @@ namespace TMPro
 		{
 			if (this.m_spriteAsset == null || this.m_spriteAsset.spriteInfoList == null)
 			{
-				Debug.LogWarning("No Sprite Asset is assigned.", this);
+				global::Debug.LogWarning("No Sprite Asset is assigned.", this);
 				return -1;
 			}
 			return this.m_spriteAsset.spriteInfoList.FindIndex((TMP_Sprite item) => item.id == index);
@@ -206,8 +206,8 @@ namespace TMPro
 		[SerializeField]
 		private TMP_SpriteAsset m_spriteAsset;
 
-		[SerializeField]
 		[HideInInspector]
+		[SerializeField]
 		private InlineGraphic m_inlineGraphic;
 
 		[SerializeField]

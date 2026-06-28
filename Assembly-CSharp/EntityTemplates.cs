@@ -50,7 +50,6 @@ public class EntityTemplates
 
 	public static GameObject CreatePlacedEntity(string id, string name, string desc, float mass, KAnimFile anim, string initialAnim, Grid.SceneLayer sceneLayer, int width, int height, DecorValues decor, SimHashes element = SimHashes.Creature, List<Tag> additionalTags = null)
 	{
-		Debug.AssertFormat(anim != null, "Cant create [{0}] entity witiout an anim", new object[] { name });
 		GameObject gameObject = EntityTemplates.CreateBasicEntity(id, name, desc, mass, true, anim, initialAnim, sceneLayer, element, additionalTags);
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
 		component.defaultSpawnOffset = CellAlignment.Bottom;

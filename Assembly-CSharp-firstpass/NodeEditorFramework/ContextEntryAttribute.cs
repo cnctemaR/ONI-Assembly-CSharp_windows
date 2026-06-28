@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reflection;
-using UnityEngine;
 
 namespace NodeEditorFramework
 {
@@ -26,7 +25,7 @@ namespace NodeEditorFramework
 				{
 					return true;
 				}
-				Debug.LogWarning("Method " + method.Name + " has incorrect signature for ContextAttribute!");
+				Debug.LogWarning("Method " + method.Name + " has incorrect signature for ContextAttribute!", null);
 			}
 			return false;
 		}

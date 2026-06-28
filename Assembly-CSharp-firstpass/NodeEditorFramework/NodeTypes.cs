@@ -37,7 +37,7 @@ namespace NodeEditorFramework
 					}
 					catch (Exception ex)
 					{
-						Debug.LogError(ex.Message + " " + type.Name);
+						global::Debug.LogError(ex.Message + " " + type.Name, null);
 					}
 				}
 			}

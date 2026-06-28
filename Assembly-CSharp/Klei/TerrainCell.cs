@@ -113,7 +113,6 @@ namespace Klei
 			{
 				return 0f;
 			}
-			Debug.Assert(world.density[cellIdx] >= 0f && world.density[cellIdx] <= 1f, "Density [" + world.density[cellIdx] + "] out of range [0-1]");
 			float num = world.density[cellIdx] - 0.5f;
 			float num2 = mass + mass * num;
 			if (num2 > 10000f)
@@ -180,7 +179,7 @@ namespace Klei
 			}
 			if (this.centerPoints.Count == 0)
 			{
-				Debug.LogWarning(string.Concat(new object[]
+				global::Debug.LogWarning(string.Concat(new object[]
 				{
 					"Room has no centerpoints. Terrain Cell [ shape: ",
 					shape.ToString(),
@@ -193,7 +192,7 @@ namespace Klei
 					" ",
 					this.node.position,
 					"]"
-				}));
+				}), null);
 			}
 			else if (bordersWidths != null && bordersWidths.Count > 0 && bordersWidths[0] > 0)
 			{
@@ -361,7 +360,7 @@ namespace Klei
 			{
 				if (!WorldGen.Settings.mobs.MobLookupTable.ContainsKey(mobTags[i].type))
 				{
-					Debug.LogError("Missing sample description for tag [" + mobTags[i].type + "]");
+					global::Debug.LogError("Missing sample description for tag [" + mobTags[i].type + "]", null);
 				}
 				else
 				{
@@ -448,7 +447,7 @@ namespace Klei
 					{
 						if (this.debugMode)
 						{
-							Debug.LogWarning(string.Concat(new object[]
+							global::Debug.LogWarning(string.Concat(new object[]
 							{
 								this.node.type,
 								" ",
@@ -457,7 +456,7 @@ namespace Klei
 								num,
 								"->",
 								(num2 - 6f).ToString()
-							}));
+							}), null);
 						}
 						num = num2 - 6f;
 					}
@@ -717,7 +716,7 @@ namespace Klei
 				}
 				else
 				{
-					Debug.LogError(string.Concat(new object[] { "Process::SetValuesFunction Index [", index, "] is not valid. cells.Length [", cells.Length, "]" }));
+					global::Debug.LogError(string.Concat(new object[] { "Process::SetValuesFunction Index [", index, "] is not valid. cells.Length [", cells.Length, "]" }), null);
 				}
 			};
 			this.DoProcess(world, setValuesFunction);

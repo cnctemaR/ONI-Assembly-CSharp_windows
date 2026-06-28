@@ -166,14 +166,14 @@ public static class Strings
 	[IgnoreEmptyLines]
 	public class StringKeyConfig
 	{
-		[FieldOrder(1)]
 		[FieldOptional]
+		[FieldOrder(1)]
 		public string name;
 
+		[FieldNullValue(typeof(string), "")]
+		[FieldOrder(2)]
 		[FieldQuoted(QuoteMode.OptionalForRead, MultilineMode.AllowForRead)]
 		[FieldOptional]
-		[FieldOrder(2)]
-		[FieldNullValue(typeof(string), "")]
 		public string[] values;
 	}
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using LibNoiseDotNet.Graphics.Tools.Noise;
-using UnityEngine;
 
 namespace Klei.Noise
 {
@@ -112,42 +111,42 @@ namespace Klei.Noise
 				{
 					return this.primitiveLookup[link.name];
 				}
-				Debug.LogError("Couldnt find [" + link.name + "] in primitives");
+				Debug.LogError("Couldnt find [" + link.name + "] in primitives", null);
 				break;
 			case Link.Type.Filter:
 				if (this.filterLookup.ContainsKey(link.name))
 				{
 					return this.filterLookup[link.name];
 				}
-				Debug.LogError("Couldnt find [" + link.name + "] in filters");
+				Debug.LogError("Couldnt find [" + link.name + "] in filters", null);
 				break;
 			case Link.Type.Transformer:
 				if (this.transformerLookup.ContainsKey(link.name))
 				{
 					return this.transformerLookup[link.name];
 				}
-				Debug.LogError("Couldnt find [" + link.name + "] in transformers");
+				Debug.LogError("Couldnt find [" + link.name + "] in transformers", null);
 				break;
 			case Link.Type.Selector:
 				if (this.selectorLookup.ContainsKey(link.name))
 				{
 					return this.selectorLookup[link.name];
 				}
-				Debug.LogError("Couldnt find [" + link.name + "] in selectors");
+				Debug.LogError("Couldnt find [" + link.name + "] in selectors", null);
 				break;
 			case Link.Type.Modifier:
 				if (this.modifierLookup.ContainsKey(link.name))
 				{
 					return this.modifierLookup[link.name];
 				}
-				Debug.LogError("Couldnt find [" + link.name + "] in modifiers");
+				Debug.LogError("Couldnt find [" + link.name + "] in modifiers", null);
 				break;
 			case Link.Type.Combiner:
 				if (this.combinerLookup.ContainsKey(link.name))
 				{
 					return this.combinerLookup[link.name];
 				}
-				Debug.LogError("Couldnt find [" + link.name + "] in combiners");
+				Debug.LogError("Couldnt find [" + link.name + "] in combiners", null);
 				break;
 			case Link.Type.Terminator:
 				return null;
@@ -159,7 +158,7 @@ namespace Klei.Noise
 				"] [",
 				link.type.ToString(),
 				"]"
-			}));
+			}), null);
 			return null;
 		}
 
@@ -258,7 +257,6 @@ namespace Klei.Noise
 					}
 				}
 			}
-			Debug.Assert(module3D != null, "Missing Terminus module");
 			return module3D;
 		}
 

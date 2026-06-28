@@ -52,7 +52,7 @@ public class UpgradeMenuDetails : SideTargetScreen
 		{
 			this.cancelButton.gameObject.SetActive(false);
 			this.matSelectionPanel.gameObject.SetActive(true);
-			Debug.Break();
+			global::Debug.Break();
 			this.matSelectionPanel.ConfigureScreen(null);
 			this.matSelectionPanel.ClearSelectActions();
 			this.matSelectionPanel.AddSelectAction(delegate
@@ -89,7 +89,7 @@ public class UpgradeMenuDetails : SideTargetScreen
 							}
 							else
 							{
-								Debug.LogError("Something went wrong! We're trying to update a component that doesn't exist in the selected target!");
+								global::Debug.LogError("Something went wrong! We're trying to update a component that doesn't exist in the selected target!", null);
 							}
 						}
 					}
@@ -103,7 +103,7 @@ public class UpgradeMenuDetails : SideTargetScreen
 						}
 						else
 						{
-							Debug.LogError("Something went wrong! We're trying to update a component that doesn't exist in the selected target!");
+							global::Debug.LogError("Something went wrong! We're trying to update a component that doesn't exist in the selected target!", null);
 						}
 					}
 				}
@@ -118,7 +118,7 @@ public class UpgradeMenuDetails : SideTargetScreen
 				}
 				else
 				{
-					Debug.LogError("Something went wrong! We're trying to update a component that doesn't exist in the selected target!");
+					global::Debug.LogError("Something went wrong! We're trying to update a component that doesn't exist in the selected target!", null);
 				}
 			}
 		}
@@ -132,7 +132,7 @@ public class UpgradeMenuDetails : SideTargetScreen
 			}
 			else
 			{
-				Debug.LogError("Something went wrong! We're trying to update a component that doesn't exist in the selected target!");
+				global::Debug.LogError("Something went wrong! We're trying to update a component that doesn't exist in the selected target!", null);
 			}
 		}
 	}

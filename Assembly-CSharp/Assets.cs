@@ -177,7 +177,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		prefab.UpdateSaveLoadTag();
 		if (Assets.PrefabsByTag.ContainsKey(prefab.PrefabTag))
 		{
-			Debug.LogWarning("Tried loading prefab with duplicate tag, ignoring: " + prefab.PrefabTag);
+			global::Debug.LogWarning("Tried loading prefab with duplicate tag, ignoring: " + prefab.PrefabTag, null);
 		}
 		Assets.PrefabsByTag[prefab.PrefabTag] = prefab;
 		for (int i = 0; i < prefab.Tags.Length; i++)
@@ -211,7 +211,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		Assets.PrefabsByTag.TryGetValue(tag, out kprefabID);
 		if (kprefabID == null)
 		{
-			Debug.LogWarning("Missing prefab: " + tag);
+			global::Debug.LogWarning("Missing prefab: " + tag, null);
 		}
 		return (!(kprefabID != null)) ? null : kprefabID.gameObject;
 	}
@@ -292,14 +292,14 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 	{
 		if (!name.IsValid())
 		{
-			Debug.LogWarning("Invalid hash name");
+			global::Debug.LogWarning("Invalid hash name", null);
 			return null;
 		}
 		KAnimFile kanimFile = null;
 		Assets.AnimTable.TryGetValue(name, out kanimFile);
 		if (kanimFile == null)
 		{
-			Debug.LogWarning("Missing Anim: [" + name.ToString() + "]. You may have to run Collect Anim on the Assets prefab");
+			global::Debug.LogWarning("Missing Anim: [" + name.ToString() + "]. You may have to run Collect Anim on the Assets prefab", null);
 		}
 		return kanimFile;
 	}

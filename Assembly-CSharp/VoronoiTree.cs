@@ -403,7 +403,6 @@ public class VoronoiTree : VoronoiNode
 		{
 			node = WorldGen.WorldLayout.localGraph.FindNodeByID(this.site.id);
 		}
-		Debug.Assert(node != null, "Null terrain node WTF");
 		TagSet tagSet = new TagSet(this.tags);
 		if (dontCopyTags != null)
 		{

@@ -23,7 +23,7 @@ public class ResourceLoader<T> where T : Resource, new()
 	{
 		if (file == null)
 		{
-			Debug.LogWarning("Missing resource file of type: " + typeof(T).Name);
+			global::Debug.LogWarning("Missing resource file of type: " + typeof(T).Name, null);
 			return;
 		}
 		string[,] array = CSVReader.SplitCsvGrid(file.text, file.name);

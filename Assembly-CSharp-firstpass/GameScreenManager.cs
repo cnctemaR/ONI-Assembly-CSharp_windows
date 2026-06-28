@@ -16,13 +16,11 @@ public class GameScreenManager : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		Debug.Assert(GameScreenManager.Instance == null);
 		GameScreenManager.Instance = this;
 	}
 
 	protected override void OnCleanUp()
 	{
-		Debug.Assert(GameScreenManager.Instance != null);
 		GameScreenManager.Instance = null;
 	}
 

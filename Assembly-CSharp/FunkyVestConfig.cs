@@ -27,7 +27,7 @@ public class FunkyVestConfig : IEquipmentConfig
 			}
 			else
 			{
-				Debug.LogWarning("Clothing item cannot be equipped to assignee because they lack ClothingWearer component");
+				global::Debug.LogWarning("Clothing item cannot be equipped to assignee because they lack ClothingWearer component", null);
 			}
 		};
 		equipmentDef.OnUnequipCallBack = delegate(Equippable eq)

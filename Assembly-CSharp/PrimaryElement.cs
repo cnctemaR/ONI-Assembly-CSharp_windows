@@ -215,7 +215,6 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 
 	private static void OnSetTemperature(PrimaryElement primary_element, float temperature)
 	{
-		Debug.Assert(!float.IsNaN(temperature));
 		if (temperature <= 0f)
 		{
 			Output.LogErrorWithObj(primary_element.gameObject, new object[] { primary_element.gameObject.name + " has a temperature of zero which has always been an error in my experience." });

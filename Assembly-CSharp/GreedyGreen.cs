@@ -74,7 +74,7 @@ public class GreedyGreen : StateMachineComponent<GreedyGreen.StatesInstance>
 
 	private void CleanUp()
 	{
-		Debug.Log("Clean up");
+		global::Debug.Log("Clean up", null);
 		if (this.partitionerEntry != null)
 		{
 			this.partitionerEntry.Release();

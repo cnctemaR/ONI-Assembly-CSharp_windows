@@ -24,7 +24,7 @@ public class EquipmentSlotInstance : AssignableSlotInstance
 		{
 			if (saveData.assignable == null || saveData.assignable.Get<Equippable>() == null)
 			{
-				Debug.LogWarning("Equippable was not loaded because it was not saved properly. This is expected for save games prior to March 8 2017");
+				global::Debug.LogWarning("Equippable was not loaded because it was not saved properly. This is expected for save games prior to March 8 2017", null);
 			}
 			else
 			{
@@ -35,7 +35,7 @@ public class EquipmentSlotInstance : AssignableSlotInstance
 				}
 				else
 				{
-					Debug.LogWarning("Equippable was not loaded because it was null");
+					global::Debug.LogWarning("Equippable was not loaded because it was null", null);
 				}
 			}
 		}
@@ -55,8 +55,6 @@ public class EquipmentSlotInstance : AssignableSlotInstance
 
 	public void Equip(Equippable equippable)
 	{
-		Debug.Assert(equippable != null);
-		Debug.Assert(equippable.gameObject != null);
 		base.Assign(equippable);
 		this.isEquipped = true;
 		equippable.gameObject.SetActive(false);

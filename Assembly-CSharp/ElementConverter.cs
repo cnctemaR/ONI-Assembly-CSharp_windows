@@ -170,7 +170,6 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 				}
 				if (num7 <= 0f)
 				{
-					global::UnityEngine.Debug.Assert(num7 <= 0f);
 				}
 				this.storage.Trigger(-1697596308, base.gameObject);
 			}

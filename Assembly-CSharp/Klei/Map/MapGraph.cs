@@ -50,7 +50,7 @@ namespace Klei.Map
 			}
 			if (!createOK)
 			{
-				Debug.LogWarning("Cant create Edge but no edge found");
+				global::Debug.LogWarning("Cant create Edge but no edge found", null);
 				return null;
 			}
 			Arc arc = base.baseGraph.AddArc(corner0.node, corner1.node, Directedness.Undirected);
@@ -68,7 +68,7 @@ namespace Klei.Map
 			{
 				if (!createOK)
 				{
-					Debug.LogWarning("Cant create Corner but no corner found");
+					global::Debug.LogWarning("Cant create Corner but no corner found", null);
 					return null;
 				}
 				corner = new Corner(base.baseGraph.AddNode());
@@ -84,7 +84,7 @@ namespace Klei.Map
 			Cell cell = this.cellList.Find((Cell c) => c.node == node);
 			if (cell == null)
 			{
-				Debug.LogWarning("GetCell by node Cant find cell");
+				global::Debug.LogWarning("GetCell by node Cant find cell", null);
 			}
 			return cell;
 		}
@@ -95,7 +95,7 @@ namespace Klei.Map
 			Cell cell = this.cellList.Find((Cell c) => c.position == position);
 			if (cell == null)
 			{
-				Debug.LogWarning("GetCell by position Cant find cell");
+				global::Debug.LogWarning("GetCell by position Cant find cell", null);
 			}
 			return cell;
 		}
@@ -108,7 +108,7 @@ namespace Klei.Map
 			{
 				if (!createOK)
 				{
-					Debug.LogWarning("Cant create Cell but no cell found");
+					global::Debug.LogWarning("Cant create Cell but no cell found", null);
 					return null;
 				}
 				cell = this.cellList.Find((Cell c) => c.node == node);
@@ -120,7 +120,7 @@ namespace Klei.Map
 				}
 				else
 				{
-					Debug.LogWarning("GetCell Same node differnt position!");
+					global::Debug.LogWarning("GetCell Same node differnt position!", null);
 				}
 			}
 			return cell;
@@ -149,17 +149,17 @@ namespace Klei.Map
 					{
 						if (this.cellList[i] == this.cellList[j])
 						{
-							Debug.LogError("Duplicate cell (class)");
+							global::Debug.LogError("Duplicate cell (class)", null);
 							return;
 						}
 						if (this.cellList[i].position == this.cellList[j].position)
 						{
-							Debug.LogError("Duplicate cell (position)");
+							global::Debug.LogError("Duplicate cell (position)", null);
 							return;
 						}
 						if (this.cellList[i].node == this.cellList[j].node)
 						{
-							Debug.LogError("Duplicate cell (node)");
+							global::Debug.LogError("Duplicate cell (node)", null);
 							return;
 						}
 					}
@@ -173,17 +173,17 @@ namespace Klei.Map
 					{
 						if (this.cornerList[k] == this.cornerList[l])
 						{
-							Debug.LogError("Duplicate corner (class)");
+							global::Debug.LogError("Duplicate corner (class)", null);
 							return;
 						}
 						if (this.cornerList[k].position == this.cornerList[l].position)
 						{
-							Debug.LogError("Duplicate corner (position)");
+							global::Debug.LogError("Duplicate corner (position)", null);
 							return;
 						}
 						if (this.cornerList[k].node == this.cornerList[l].node)
 						{
-							Debug.LogError("Duplicate corner (node)");
+							global::Debug.LogError("Duplicate corner (node)", null);
 							return;
 						}
 					}
@@ -199,12 +199,12 @@ namespace Klei.Map
 						Edge edge2 = this.edgeList[n];
 						if (edge == edge2)
 						{
-							Debug.LogError("Duplicate edge (class)");
+							global::Debug.LogError("Duplicate edge (class)", null);
 							return;
 						}
 						if (edge.arc == edge2.arc)
 						{
-							Debug.LogError(string.Concat(new object[]
+							global::Debug.LogError(string.Concat(new object[]
 							{
 								"Duplicate EDGE [",
 								edge.arc,
@@ -215,17 +215,17 @@ namespace Klei.Map
 								"] &  [",
 								edge.site1.node.Id,
 								"]"
-							}));
+							}), null);
 							return;
 						}
 						if (edge.corner0 == edge2.corner0 && edge.corner1 == edge2.corner1)
 						{
-							Debug.LogError("Duplicate edge (corner same order)");
+							global::Debug.LogError("Duplicate edge (corner same order)", null);
 							return;
 						}
 						if (edge.corner0 == edge2.corner1 && edge.corner1 == edge2.corner0)
 						{
-							Debug.LogError("Duplicate edge (corner different order)");
+							global::Debug.LogError("Duplicate edge (corner different order)", null);
 							return;
 						}
 						if (edge.site0 != edge.site1)
@@ -234,12 +234,12 @@ namespace Klei.Map
 							{
 								if (edge.site0 == edge2.site0 && edge.site1 == edge2.site1)
 								{
-									Debug.LogError("Duplicate edge (site same order)");
+									global::Debug.LogError("Duplicate edge (site same order)", null);
 									return;
 								}
 								if (edge.site0 == edge2.site1 && edge.site1 == edge2.site0)
 								{
-									Debug.LogError(string.Concat(new object[]
+									global::Debug.LogError(string.Concat(new object[]
 									{
 										"Duplicate Edge [",
 										edge.arc.Id,
@@ -262,39 +262,37 @@ namespace Klei.Map
 										" -- ",
 										edge2.site1.node.Id,
 										"] - (site differnt order)"
-									}));
-									Debug.Log(string.Concat(new object[]
+									}), null);
+									global::Debug.Log(string.Concat(new object[]
 									{
 										"CE 0: ",
 										edge.corner0.position,
 										" 1: ",
 										edge.corner1.position
-									}));
-									Debug.DrawLine(edge.corner0.position, edge.corner1.position, Color.red, 15f);
-									Debug.Log(string.Concat(new object[]
+									}), null);
+									global::Debug.Log(string.Concat(new object[]
 									{
 										"OE 0: ",
 										edge2.corner0.position,
 										" 1: ",
 										edge2.corner1.position
-									}));
-									Debug.DrawLine(edge2.corner0.position, edge2.corner1.position, Color.green, 15f);
-									Debug.Log(string.Concat(new object[]
+									}), null);
+									global::Debug.Log(string.Concat(new object[]
 									{
 										"Sites C 0: ",
 										edge.site0.position,
 										" 1: ",
 										edge.site1.position
-									}));
+									}), null);
 									DebugExtension.DebugCircle2d(edge.site0.position, Color.red, 1f, 15f, true);
 									DebugExtension.DebugCircle2d(edge.site1.position, Color.magenta, 2f, 15f, true);
-									Debug.Log(string.Concat(new object[]
+									global::Debug.Log(string.Concat(new object[]
 									{
 										"Sites O 0: ",
 										edge2.site0.position,
 										" 1: ",
 										edge2.site1.position
-									}));
+									}), null);
 									DebugExtension.DebugCircle2d(edge2.site0.position, Color.green, 3f, 15f, true);
 									DebugExtension.DebugCircle2d(edge2.site1.position, Color.cyan, 4f, 15f, true);
 								}
@@ -302,12 +300,12 @@ namespace Klei.Map
 								{
 									if (edge.site0.node == edge2.site0.node && edge.site1.node == edge2.site1.node)
 									{
-										Debug.LogError("Duplicate edge (site node same order)");
+										global::Debug.LogError("Duplicate edge (site node same order)", null);
 										return;
 									}
 									if (edge.site1.node == edge2.site0.node && edge.site0.node == edge2.site1.node)
 									{
-										Debug.LogError("Duplicate edge (site node differnt order)");
+										global::Debug.LogError("Duplicate edge (site node differnt order)", null);
 										return;
 									}
 								}
@@ -330,7 +328,7 @@ namespace Klei.Map
 				string message = ex.Message;
 				string stackTrace = ex.StackTrace;
 				WorldGenLogger.LogException(message, stackTrace);
-				Debug.Log("Error deserialising " + ex.Message);
+				global::Debug.Log("Error deserialising " + ex.Message, null);
 			}
 		}
 
@@ -357,7 +355,6 @@ namespace Klei.Map
 				Arc a = this.edgeList[i];
 				Node node = this.nodeList.Find((Node n) => n.node == this.baseGraph.U(a.arc));
 				Node node2 = this.nodeList.Find((Node n) => n.node == this.baseGraph.V(a.arc));
-				Debug.DrawLine(node.position, node2.position, ((this.drawOptions & Graph.DebugFlags.ArcType) == (Graph.DebugFlags)0) ? Color.black : Graph.GetColourForArcType(a.type));
 			}
 		}
 

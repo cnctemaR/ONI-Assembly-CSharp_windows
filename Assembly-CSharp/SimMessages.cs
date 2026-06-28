@@ -9,7 +9,6 @@ public static class SimMessages
 {
 	public unsafe static void AddElementConsumer(int gameCell, ElementConsumer.Configuration configuration, SimHashes element, byte radius, int cb_handle)
 	{
-		Debug.Assert(Grid.IsValidCell(gameCell));
 		if (!Grid.IsValidCell(gameCell))
 		{
 			return;
@@ -40,7 +39,6 @@ public static class SimMessages
 	{
 		if (!Sim.IsValidHandle(sim_handle))
 		{
-			Debug.Assert(false, "Invalid handle");
 			return;
 		}
 		SimMessages.RemoveElementConsumerMessage* ptr = stackalloc SimMessages.RemoveElementConsumerMessage[checked(1 * sizeof(SimMessages.RemoveElementConsumerMessage))];
@@ -58,7 +56,6 @@ public static class SimMessages
 
 	public unsafe static void ModifyElementEmitter(int sim_handle, int game_cell, SimHashes element, float emit_interval, float emit_mass, float emit_temperature)
 	{
-		Debug.Assert(Grid.IsValidCell(game_cell));
 		if (!Grid.IsValidCell(game_cell))
 		{
 			return;
@@ -78,7 +75,6 @@ public static class SimMessages
 	{
 		if (!Sim.IsValidHandle(sim_handle))
 		{
-			Debug.Assert(false, "Invalid handle");
 			return;
 		}
 		SimMessages.RemoveElementEmitterMessage* ptr = stackalloc SimMessages.RemoveElementEmitterMessage[checked(1 * sizeof(SimMessages.RemoveElementEmitterMessage))];
@@ -89,12 +85,11 @@ public static class SimMessages
 
 	public unsafe static void AddElementChunk(int gameCell, SimHashes element, float mass, float temperature, float surface_area, float thickness, int cb_handle)
 	{
-		Debug.Assert(Grid.IsValidCell(gameCell));
 		if (!Grid.IsValidCell(gameCell))
 		{
 			return;
 		}
-		Debug.Assert(mass * temperature > 0f, "Tried to add an SimTemperatureTransfer component with 0 mass or temperature. Unsupported! Your game is now in a bad state.");
+		global::UnityEngine.Debug.Assert(mass * temperature > 0f, "Tried to add an SimTemperatureTransfer component with 0 mass or temperature. Unsupported! Your game is now in a bad state.");
 		if (mass * temperature > 0f)
 		{
 			int elementIndex = ElementLoader.GetElementIndex(element);
@@ -114,7 +109,6 @@ public static class SimMessages
 	{
 		if (!Sim.IsValidHandle(sim_handle))
 		{
-			Debug.Assert(false, "Invalid handle");
 			return;
 		}
 		SimMessages.RemoveElementChunkMessage* ptr = stackalloc SimMessages.RemoveElementChunkMessage[checked(1 * sizeof(SimMessages.RemoveElementChunkMessage))];
@@ -140,7 +134,6 @@ public static class SimMessages
 	{
 		if (!Sim.IsValidHandle(sim_handle))
 		{
-			Debug.Assert(false, "Invalid handle");
 			return;
 		}
 		SimMessages.MoveElementChunkMessage* ptr = stackalloc SimMessages.MoveElementChunkMessage[checked(1 * sizeof(SimMessages.MoveElementChunkMessage))];
@@ -153,7 +146,6 @@ public static class SimMessages
 	{
 		if (!Sim.IsValidHandle(sim_handle))
 		{
-			Debug.Assert(false, "Invalid handle");
 			return;
 		}
 		SimMessages.ModifyElementChunkEnergyMessage* ptr = stackalloc SimMessages.ModifyElementChunkEnergyMessage[checked(1 * sizeof(SimMessages.ModifyElementChunkEnergyMessage))];
@@ -165,13 +157,11 @@ public static class SimMessages
 	public unsafe static void AddBuildingHeatExchange(Extents extents, float temperature, float operating_kw, byte element_idx, float mass, int callbackIdx = -1)
 	{
 		int num = Grid.XYToCell(extents.x, extents.y);
-		Debug.Assert(Grid.IsValidCell(num));
 		if (!Grid.IsValidCell(num))
 		{
 			return;
 		}
 		int num2 = Grid.XYToCell(extents.x + extents.width, extents.y + extents.height);
-		Debug.Assert(Grid.IsValidCell(num2));
 		if (!Grid.IsValidCell(num2))
 		{
 			return;
@@ -192,13 +182,11 @@ public static class SimMessages
 	public unsafe static void ModifyBuildingHeatExchange(int sim_handle, Extents extents, float temperature, float operating_kw, byte element_idx, float mass)
 	{
 		int num = Grid.XYToCell(extents.x, extents.y);
-		Debug.Assert(Grid.IsValidCell(num));
 		if (!Grid.IsValidCell(num))
 		{
 			return;
 		}
 		int num2 = Grid.XYToCell(extents.x + extents.width, extents.y + extents.height);
-		Debug.Assert(Grid.IsValidCell(num2));
 		if (!Grid.IsValidCell(num2))
 		{
 			return;
@@ -220,7 +208,6 @@ public static class SimMessages
 	public unsafe static void RemoveBuildingHeatExchange(int sim_handle, int callbackIdx = -1)
 	{
 		SimMessages.RemoveBuildingHeatExchangeMessage* ptr = stackalloc SimMessages.RemoveBuildingHeatExchangeMessage[checked(1 * sizeof(SimMessages.RemoveBuildingHeatExchangeMessage))];
-		Debug.Assert(Sim.IsValidHandle(sim_handle));
 		ptr->handle = sim_handle;
 		ptr->callbackIdx = callbackIdx;
 		Sim.SIM_HandleMessage(-456116629, sizeof(SimMessages.RemoveBuildingHeatExchangeMessage), (byte*)ptr);
@@ -229,7 +216,6 @@ public static class SimMessages
 	public unsafe static void ModifyBuildingEnergy(int sim_handle, float delta_kj)
 	{
 		SimMessages.ModifyBuildingEnergyMessage* ptr = stackalloc SimMessages.ModifyBuildingEnergyMessage[checked(1 * sizeof(SimMessages.ModifyBuildingEnergyMessage))];
-		Debug.Assert(Sim.IsValidHandle(sim_handle));
 		ptr->handle = sim_handle;
 		ptr->deltaKJ = delta_kj;
 		Sim.SIM_HandleMessage(-1348791658, sizeof(SimMessages.ModifyBuildingEnergyMessage), (byte*)ptr);
@@ -273,7 +259,6 @@ public static class SimMessages
 
 	public unsafe static void Dig(int gameCell, int callbackIdx = -1)
 	{
-		Debug.Assert(Grid.IsValidCell(gameCell));
 		if (!Grid.IsValidCell(gameCell))
 		{
 			return;
@@ -286,7 +271,6 @@ public static class SimMessages
 
 	public unsafe static void SetInsulation(int gameCell, float value)
 	{
-		Debug.Assert(Grid.IsValidCell(gameCell));
 		if (!Grid.IsValidCell(gameCell))
 		{
 			return;
@@ -299,7 +283,6 @@ public static class SimMessages
 
 	public unsafe static void SetStrength(int gameCell, int weight, float strengthMultiplier)
 	{
-		Debug.Assert(Grid.IsValidCell(gameCell));
 		if (!Grid.IsValidCell(gameCell))
 		{
 			return;
@@ -314,7 +297,6 @@ public static class SimMessages
 
 	public unsafe static void SetCellProperties(int gameCell, byte properties)
 	{
-		Debug.Assert(Grid.IsValidCell(gameCell));
 		if (!Grid.IsValidCell(gameCell))
 		{
 			return;
@@ -328,7 +310,6 @@ public static class SimMessages
 
 	public unsafe static void ClearCellProperties(int gameCell, byte properties)
 	{
-		Debug.Assert(Grid.IsValidCell(gameCell));
 		if (!Grid.IsValidCell(gameCell))
 		{
 			return;
@@ -342,7 +323,6 @@ public static class SimMessages
 
 	public unsafe static void ModifyCell(int gameCell, int elementIdx, float temperature, float mass, SimMessages.ReplaceType replace_type = SimMessages.ReplaceType.None, int callbackIdx = -1)
 	{
-		Debug.Assert(Grid.IsValidCell(gameCell));
 		if (!Grid.IsValidCell(gameCell))
 		{
 			return;
@@ -376,7 +356,6 @@ public static class SimMessages
 
 	public unsafe static void ConsumeMass(int gameCell, SimHashes element, float mass, byte radius, int callbackIdx = -1)
 	{
-		Debug.Assert(Grid.IsValidCell(gameCell));
 		if (!Grid.IsValidCell(gameCell))
 		{
 			return;
@@ -432,7 +411,6 @@ public static class SimMessages
 
 	public unsafe static void ModifyEnergy(int gameCell, float kilojoules, SimMessages.EnergySourceID id)
 	{
-		Debug.Assert(Grid.IsValidCell(gameCell));
 		if (!Grid.IsValidCell(gameCell))
 		{
 			return;
@@ -461,7 +439,6 @@ public static class SimMessages
 		}
 		else
 		{
-			Debug.Assert(mass < 0f);
 			SimMessages.ModifyCell(gameCell, 0, temperature, mass, SimMessages.ReplaceType.None, -1);
 		}
 	}

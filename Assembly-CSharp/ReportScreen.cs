@@ -49,7 +49,6 @@ public class ReportScreen : KScreen
 
 	private void Refresh()
 	{
-		Debug.Assert(this.currentReport != null);
 		this.ClearLineItems();
 		if (this.currentReport.day == ReportManager.Instance.TodaysReport.day)
 		{
@@ -108,7 +107,6 @@ public class ReportScreen : KScreen
 	public void ShowReport(int day)
 	{
 		this.currentReport = ReportManager.Instance.FindReport(day);
-		Debug.Assert(this.currentReport != null, "Can't find report for day: " + day.ToString());
 		this.Refresh();
 	}
 

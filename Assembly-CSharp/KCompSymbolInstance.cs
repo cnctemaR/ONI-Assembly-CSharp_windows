@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine;
 
 public class KCompSymbolInstance
 {
@@ -36,7 +35,7 @@ public class KCompSymbolInstance
 		KAnim.Anim anim = this.GetAnim(parent_anim);
 		if (anim == null)
 		{
-			Debug.LogError("Head comp missing anim:" + HashCache.Get().Get(parent_anim));
+			Debug.LogError("Head comp missing anim:" + HashCache.Get().Get(parent_anim), null);
 		}
 		return anim.GetFrame(this.build.GetData().batchTag, frame_idx);
 	}

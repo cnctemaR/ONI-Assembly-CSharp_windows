@@ -227,7 +227,7 @@ namespace Klei
 			{
 				for (int n = 0; n < tagSet2.Count; n++)
 				{
-					Debug.Log(string.Format("Applying Moved Tag {0} to {1}", tagSet2[n].Name, node.site.id));
+					global::Debug.Log(string.Format("Applying Moved Tag {0} to {1}", tagSet2[n].Name, node.site.id), null);
 					VoronoiNode child = node.GetChild(WorldGen.RandomSource().Next(node.ChildCount()));
 					child.AddTag(tagSet2[n]);
 				}

@@ -109,23 +109,13 @@ public class VoronoiDiagram
 					for (int k = 1; k < list.Count; k++)
 					{
 						Vector2 vector2 = list[k];
-						if (vector.y == vector2.y && vector2.y == this.bounds.height)
+						if (vector.y != vector2.y || vector2.y == this.bounds.height)
 						{
-							Debug.DrawLine(vector, vector2, Color.red);
-						}
-						else
-						{
-							Debug.DrawLine(vector, vector2, Color.blue);
 						}
 						vector = vector2;
 					}
-					if (vector.y == list[0].y && list[0].y == this.bounds.height)
+					if (vector.y != list[0].y || list[0].y == this.bounds.height)
 					{
-						Debug.DrawLine(vector, list[0], Color.red);
-					}
-					else
-					{
-						Debug.DrawLine(vector, list[0], Color.blue);
 					}
 				}
 			}
@@ -139,23 +129,13 @@ public class VoronoiDiagram
 				for (int l = 1; l < list2.Count; l++)
 				{
 					Vector2 vector4 = list2[l];
-					if (vector3.y == vector4.y && vector4.y == this.bounds.height)
+					if (vector3.y != vector4.y || vector4.y == this.bounds.height)
 					{
-						Debug.DrawLine(vector3, vector4, Color.blue);
-					}
-					else
-					{
-						Debug.DrawLine(vector3, vector4, Color.yellow);
 					}
 					vector3 = vector4;
 				}
-				if (vector3.y == list2[0].y && list2[0].y == this.bounds.height)
+				if (vector3.y != list2[0].y || list2[0].y == this.bounds.height)
 				{
-					Debug.DrawLine(vector3, list2[0], Color.blue);
-				}
-				else
-				{
-					Debug.DrawLine(vector3, list2[0], Color.yellow);
 				}
 			}
 		}

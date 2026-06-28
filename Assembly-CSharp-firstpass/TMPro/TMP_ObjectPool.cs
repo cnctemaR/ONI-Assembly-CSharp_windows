@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.Events;
 
 namespace TMPro
@@ -54,7 +53,7 @@ namespace TMPro
 		{
 			if (this.m_Stack.Count > 0 && object.ReferenceEquals(this.m_Stack.Peek(), element))
 			{
-				Debug.LogError("Internal error. Trying to destroy object that is already released to pool.");
+				Debug.LogError("Internal error. Trying to destroy object that is already released to pool.", null);
 			}
 			if (this.m_ActionOnRelease != null)
 			{

@@ -84,9 +84,7 @@ public class BatchGroupInstance
 
 	public bool AddOverride(KAnimHashedString target, HashedString source, List<KAnim.Build.SymbolFrameInstance> substituteFrames, List<int> textureIndexList, KAnimHashedString srcPath, bool is_perminent)
 	{
-		Debug.Assert(source != this.group.batchID, "Cant override if its already in the batch");
 		KAnim.Build.Symbol buildSymbol = this.group.data.GetBuildSymbol(target);
-		Debug.Assert(buildSymbol != null && buildSymbol.numFrames > 0);
 		if (!this.overriddenSymbols.ContainsKey(target))
 		{
 			List<KAnim.Build.SymbolFrameInstance> list = new List<KAnim.Build.SymbolFrameInstance>();
@@ -128,7 +126,6 @@ public class BatchGroupInstance
 
 	public bool AddOverrideTexture(Texture2D atlas, ref int index)
 	{
-		Debug.Assert(atlas != null);
 		index = this.group.data.textures.FindIndex((Texture2D a) => a == atlas);
 		if (index != -1)
 		{
@@ -151,7 +148,6 @@ public class BatchGroupInstance
 			return true;
 		}
 		index += this.group.data.textures.Count;
-		Debug.Assert(index < this.textures.Count + this.group.data.textures.Count);
 		return false;
 	}
 
@@ -162,7 +158,6 @@ public class BatchGroupInstance
 			List<int> list = this.texIndexes[target];
 			for (int i = 0; i < list.Count; i++)
 			{
-				Debug.Assert(list[i] >= 0);
 				this.texUse[list[i]].Remove(target);
 				if (this.texUse[list[i]].Count == 0)
 				{

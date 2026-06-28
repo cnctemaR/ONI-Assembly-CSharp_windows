@@ -84,7 +84,7 @@ namespace TMPro
 
 		private void PerformUpdateForMeshRendererObjects()
 		{
-			Debug.Log("Perform update of MeshRenderer objects.");
+			global::Debug.Log("Perform update of MeshRenderer objects.", null);
 		}
 
 		public static void UnRegisterCanvasElementForRebuild(ICanvasElement element)

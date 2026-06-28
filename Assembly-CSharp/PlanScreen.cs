@@ -734,7 +734,7 @@ public class PlanScreen : KIconToggleMenu
 		}
 		if (buildingDef == null)
 		{
-			Debug.Log("No def!");
+			global::Debug.Log("No def!", null);
 		}
 		if (buildingDef.isKAnimTile && buildingDef.isUtility)
 		{

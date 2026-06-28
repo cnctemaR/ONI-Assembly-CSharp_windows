@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine;
 
 public class DebugOverlays : KScreen
 {
@@ -32,6 +31,6 @@ public class DebugOverlays : KScreen
 			SimDebugView.Instance.SetMode(SimViewMode.Rooms);
 			return;
 		}
-		Debug.LogError("Unknown debug view: " + str);
+		Debug.LogError("Unknown debug view: " + str, null);
 	}
 }

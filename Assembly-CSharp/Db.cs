@@ -72,13 +72,13 @@ public class Db : EntityModifierSet
 		Resource resource = this.ResourceTable.FirstOrDefault<Resource>((Resource s) => s.Guid == guid);
 		if (resource == null)
 		{
-			Debug.LogWarning("Could not find resource: " + guid);
+			global::Debug.LogWarning("Could not find resource: " + guid, null);
 			return (ResourceType)((object)null);
 		}
 		ResourceType resourceType = (ResourceType)((object)resource);
 		if (resourceType == null)
 		{
-			Debug.LogError(string.Concat(new string[]
+			global::Debug.LogError(string.Concat(new string[]
 			{
 				"Resource type mismatch for resource: ",
 				resource.Id,
@@ -86,7 +86,7 @@ public class Db : EntityModifierSet
 				typeof(ResourceType).Name,
 				"\nGot Type: ",
 				resource.GetType().Name
-			}));
+			}), null);
 			return (ResourceType)((object)null);
 		}
 		return resourceType;

@@ -40,7 +40,7 @@ public class NavGridUpdater
 			links[num2].link = NavGridUpdater.InvalidCell;
 			if (num2 - num > NavGrid.MaxLinksPerCell)
 			{
-				Debug.LogError("Nav link overflow!");
+				global::Debug.LogError("Nav link overflow!", null);
 			}
 		}
 	}
@@ -122,7 +122,6 @@ public class NavGridUpdater
 	{
 		Vector3 vector = Grid.CellToPosCCF(start_cell, Grid.SceneLayer.Move);
 		Vector3 vector2 = Grid.CellToPosCCF(end_cell, Grid.SceneLayer.Move);
-		Debug.DrawLine(vector, vector2);
 	}
 
 	public static void DebugDrawPath(PathFinder.Path path)

@@ -42,7 +42,7 @@ public class AudioSheets : ScriptableObject
 		AnimEvent animEvent = this.CreateSoundOfType(type, file_name, sound_name, frame, min_interval);
 		if (animEvent == null)
 		{
-			Debug.LogError("Unknown sound type: " + type);
+			global::Debug.LogError("Unknown sound type: " + type, null);
 		}
 		else
 		{

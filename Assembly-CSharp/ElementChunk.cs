@@ -53,7 +53,7 @@ public class ElementChunk : KMonoBehaviour
 				{
 					component.Temperature = primaryElement.Temperature;
 				}
-				Debug.Assert(component.Temperature > 0f || component.Mass == 0f, "OnAbsorb resulted in a temperature of 0", base.gameObject);
+				global::UnityEngine.Debug.Assert(component.Temperature > 0f || component.Mass == 0f, "OnAbsorb resulted in a temperature of 0", base.gameObject);
 				if (CameraController.Instance != null)
 				{
 					string sound = GlobalAssets.GetSound("Ore_absorb", false);

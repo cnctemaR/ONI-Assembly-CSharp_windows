@@ -184,7 +184,6 @@ public class SaveLoader : KMonoBehaviour
 	private bool Load(IReader reader)
 	{
 		string text = reader.ReadKleiString();
-		Debug.Assert(text == "world");
 		Deserializer deserializer = new Deserializer(reader);
 		SaveFileRoot saveFileRoot = new SaveFileRoot();
 		deserializer.Deserialize(saveFileRoot);
@@ -290,7 +289,7 @@ public class SaveLoader : KMonoBehaviour
 				}
 				catch (Exception ex)
 				{
-					Debug.LogWarning("Problem reading file: " + text + "\n" + ex.ToString());
+					global::Debug.LogWarning("Problem reading file: " + text + "\n" + ex.ToString(), null);
 				}
 			}
 		}
@@ -471,13 +470,13 @@ public class SaveLoader : KMonoBehaviour
 		SimSaveFileStructure simSaveFileStructure = WorldGen.LoadWorldGenSim();
 		if (simSaveFileStructure == null)
 		{
-			Debug.LogError("Attempt failed");
+			global::Debug.LogError("Attempt failed", null);
 			return false;
 		}
 		this.worldDetailSave = simSaveFileStructure.worldDetail;
 		if (this.worldDetailSave == null)
 		{
-			Debug.LogError("Detail is null");
+			global::Debug.LogError("Detail is null", null);
 		}
 		GridSettings.Reset(simSaveFileStructure.WidthInCells, simSaveFileStructure.HeightInCells);
 		Sim.SIM_Initialize(null);
@@ -494,11 +493,11 @@ public class SaveLoader : KMonoBehaviour
 		}
 		catch (Exception ex)
 		{
-			Debug.LogWarning("--- Error loading Sim FROM NEW WORLDGEN ---" + ex.Message + "\n" + ex.StackTrace);
+			global::Debug.LogWarning("--- Error loading Sim FROM NEW WORLDGEN ---" + ex.Message + "\n" + ex.StackTrace, null);
 			Sim.Shutdown();
 			return false;
 		}
-		Debug.Log("Attempt success");
+		global::Debug.Log("Attempt success", null);
 		SceneInitializer.Instance.PostLoadPrefabs();
 		SceneInitializer.Instance.NewSaveGamePrefab();
 		WorldGen.ReplayGenerate(new WorldGen.ResetFunction(this.Reset));

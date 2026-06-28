@@ -210,7 +210,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			Pickupable pickupable = base.sm.deliveryObject.Get<Pickupable>(base.smi);
 			if (pickupable == null || pickupable.TotalAmount <= 0f)
 			{
-				Debug.LogWarning("How did the thing that I am holding disappear?");
+				global::Debug.LogWarning("How did the thing that I am holding disappear?", null);
 				base.smi.GoTo(base.sm.delivering.deliverfail);
 			}
 			else
@@ -421,7 +421,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			{
 				if (reservation_amount <= 0f)
 				{
-					Debug.LogError("Invalid amount: " + reservation_amount);
+					global::Debug.LogError("Invalid amount: " + reservation_amount, null);
 				}
 				this.amount = reservation_amount;
 				this.pickupable = pickupable;

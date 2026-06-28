@@ -225,7 +225,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 
 	private void Update()
 	{
-		Debug.developerConsoleVisible = false;
+		global::Debug.developerConsoleVisible = false;
 	}
 
 	[SerializeField]

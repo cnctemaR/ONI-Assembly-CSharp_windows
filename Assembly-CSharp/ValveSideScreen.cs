@@ -22,7 +22,7 @@ public class ValveSideScreen : SideScreenContent
 		this.targetValve = target.GetComponent<Valve>();
 		if (this.targetValve == null)
 		{
-			Debug.LogError("The target object does not have a Valve component.");
+			global::Debug.LogError("The target object does not have a Valve component.", null);
 			return;
 		}
 		this.flowSlider.minValue = 0f;
@@ -58,12 +58,12 @@ public class ValveSideScreen : SideScreenContent
 
 	private Valve targetValve;
 
-	[SerializeField]
 	[Header("Slider")]
+	[SerializeField]
 	private KSlider flowSlider;
 
-	[Header("Labels")]
 	[SerializeField]
+	[Header("Labels")]
 	private LocText currentFlowLabel;
 
 	[SerializeField]

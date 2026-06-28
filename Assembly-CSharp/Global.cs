@@ -15,7 +15,7 @@ public class Global : MonoBehaviour
 		SystemScheduler.Initialize();
 		if (DistributionPlatform.Initialized)
 		{
-			Debug.Log(string.Concat(new object[]
+			global::Debug.Log(string.Concat(new object[]
 			{
 				"Logged into ",
 				DistributionPlatform.Inst.Name,
@@ -23,12 +23,12 @@ public class Global : MonoBehaviour
 				DistributionPlatform.Inst.LocalUser.Id,
 				", NAME:",
 				DistributionPlatform.Inst.LocalUser.Name
-			}));
+			}), null);
 			ThreadedHttps<KleiAccount>.Instance.AuthenticateUser(new KleiAccount.GetUserIDdelegate(this.OnGetUserIdKey));
 		}
 		else
 		{
-			Debug.LogWarning("Can't init " + DistributionPlatform.Inst.Name + " distribution platform...");
+			global::Debug.LogWarning("Can't init " + DistributionPlatform.Inst.Name + " distribution platform...", null);
 			this.OnGetUserIdKey();
 		}
 	}

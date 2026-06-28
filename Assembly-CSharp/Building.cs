@@ -107,7 +107,7 @@ public class Building : KMonoBehaviour, IEffectDescriptor
 	{
 		if (this.Def == null)
 		{
-			Debug.LogError("Missing building definition on object " + base.name);
+			global::Debug.LogError("Missing building definition on object " + base.name, null);
 		}
 		KSelectable component = base.GetComponent<KSelectable>();
 		if (component != null)

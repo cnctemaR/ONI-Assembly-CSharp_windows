@@ -68,7 +68,7 @@ public class SimCellOccupier : KMonoBehaviour
 	public void DestroySelf(global::System.Action onComplete)
 	{
 		this.callDestroy = false;
-		Debug.Assert(this.building.PlacementCells.Length == 1);
+		global::UnityEngine.Debug.Assert(this.building.PlacementCells.Length == 1);
 		for (int i = 0; i < this.building.PlacementCells.Length; i++)
 		{
 			int num = this.building.PlacementCells[i];

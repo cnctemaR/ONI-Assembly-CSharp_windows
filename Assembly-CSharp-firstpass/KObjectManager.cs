@@ -8,14 +8,11 @@ public class KObjectManager : MonoBehaviour
 
 	private void Awake()
 	{
-		Debug.Assert(KObjectManager.Instance == null);
 		KObjectManager.Instance = this;
 	}
 
 	private void OnDestroy()
 	{
-		Debug.Assert(KObjectManager.Instance != null);
-		Debug.Assert(KObjectManager.Instance == this);
 		this.Cleanup();
 		KObjectManager.Instance = null;
 	}

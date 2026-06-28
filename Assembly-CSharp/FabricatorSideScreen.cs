@@ -22,7 +22,7 @@ public class FabricatorSideScreen : SideScreenContent
 		Fabricator component = target.GetComponent<Fabricator>();
 		if (component == null)
 		{
-			Debug.LogError("The object selected doesn't have a fabricator!");
+			global::Debug.LogError("The object selected doesn't have a fabricator!", null);
 			return;
 		}
 		this.queue.SetFabricator(component);
@@ -46,7 +46,7 @@ public class FabricatorSideScreen : SideScreenContent
 	{
 		if (target == null)
 		{
-			Debug.LogError("Fabricator provided was null.");
+			global::Debug.LogError("Fabricator provided was null.", null);
 			return;
 		}
 		this.targetFab = target;
@@ -63,13 +63,10 @@ public class FabricatorSideScreen : SideScreenContent
 		for (int i = 0; i < array.Length; i++)
 		{
 			Recipe recipe = array[i];
-			Debug.AssertFormat(recipe.Result.IsValid, "Cant proceed without a recipe end product! [{0}]", new object[] { recipe.Name });
 			GameObject prefab = Assets.GetPrefab(recipe.Result);
 			KToggle newToggle = global::Util.KInstantiateUI<KToggle>(this.recipeButton, this.recipeGrid, false);
 			newToggle.GetComponentInChildren<LocText>().text = recipe.Name;
 			KBatchedAnimController component = prefab.GetComponent<KBatchedAnimController>();
-			Debug.Assert(component != null);
-			Debug.AssertFormat(component.AnimFiles != null && component.AnimFiles.Count > 0, "Missing UI sprite anim files for {0}", new object[] { recipe.Name });
 			Sprite sprite = ((!(recipe.Icon == null)) ? recipe.Icon : Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui"));
 			if (sprite == null)
 			{
@@ -126,7 +123,7 @@ public class FabricatorSideScreen : SideScreenContent
 	{
 		if (!this.recipeMap.ContainsKey(toggle))
 		{
-			Debug.LogError("Recipe not found on recipe list.");
+			global::Debug.LogError("Recipe not found on recipe list.", null);
 			return;
 		}
 		this.selectedToggle = toggle;
@@ -249,7 +246,7 @@ public class FabricatorSideScreen : SideScreenContent
 	{
 		if (this.selectedRecipe == null)
 		{
-			Debug.LogError("Cannot create an order for a null recipe");
+			global::Debug.LogError("Cannot create an order for a null recipe", null);
 			return;
 		}
 		List<Tag> list = new List<Tag>();
@@ -283,8 +280,8 @@ public class FabricatorSideScreen : SideScreenContent
 
 	public DescriptorPanel EffectsDescriptorPanel;
 
-	[Header("Recipe List")]
 	[SerializeField]
+	[Header("Recipe List")]
 	private GameObject recipeGrid;
 
 	[SerializeField]

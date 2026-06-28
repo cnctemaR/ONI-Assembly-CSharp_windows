@@ -28,7 +28,7 @@ public class Spawner : KMonoBehaviour, ISaveLoadable
 		GameObject prefab = Assets.GetPrefab(this.prefabTag);
 		if (prefab == null)
 		{
-			Debug.LogWarning("Spawner could not find prefab with tag: " + this.prefabTag);
+			global::Debug.LogWarning("Spawner could not find prefab with tag: " + this.prefabTag, null);
 			Util.KDestroyGameObject(base.gameObject);
 			return;
 		}

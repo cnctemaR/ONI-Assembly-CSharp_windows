@@ -40,7 +40,7 @@ public class MinionStartingStats
 					num4 = this.personality.headShape;
 					if (num4 > accessorySlot.accessories.Count - 1)
 					{
-						Debug.LogWarning(string.Format("CHECK DB AccessorySlots Invalid index {0} for accessory slot {1} setting to 0", num4, accessorySlot.Id));
+						global::Debug.LogWarning(string.Format("CHECK DB AccessorySlots Invalid index {0} for accessory slot {1} setting to 0", num4, accessorySlot.Id), null);
 						num4 = 0;
 						this.personality.headShape = 0;
 					}
@@ -50,7 +50,7 @@ public class MinionStartingStats
 					num4 = this.personality.mouth;
 					if (num4 > accessorySlot.accessories.Count - 1)
 					{
-						Debug.LogWarning(string.Format("CHECK DB AccessorySlots Invalid index {0} for accessory slot {1} setting to 0", num4, accessorySlot.Id));
+						global::Debug.LogWarning(string.Format("CHECK DB AccessorySlots Invalid index {0} for accessory slot {1} setting to 0", num4, accessorySlot.Id), null);
 						num4 = 0;
 						this.personality.mouth = 0;
 					}
@@ -60,7 +60,7 @@ public class MinionStartingStats
 					num4 = this.personality.neck;
 					if (num4 > accessorySlot.accessories.Count - 1)
 					{
-						Debug.LogWarning(string.Format("CHECK DB AccessorySlots Invalid index {0} for accessory slot {1} setting to 0", num4, accessorySlot.Id));
+						global::Debug.LogWarning(string.Format("CHECK DB AccessorySlots Invalid index {0} for accessory slot {1} setting to 0", num4, accessorySlot.Id), null);
 						num4 = 0;
 						this.personality.neck = 0;
 					}
@@ -70,7 +70,7 @@ public class MinionStartingStats
 					num4 = this.personality.eyes;
 					if (num4 > accessorySlot.accessories.Count - 1)
 					{
-						Debug.LogWarning(string.Format("CHECK DB AccessorySlots Invalid index {0} for accessory slot {1} setting to 0", num4, accessorySlot.Id));
+						global::Debug.LogWarning(string.Format("CHECK DB AccessorySlots Invalid index {0} for accessory slot {1} setting to 0", num4, accessorySlot.Id), null);
 						num4 = 0;
 						this.personality.eyes = 0;
 					}
@@ -80,7 +80,7 @@ public class MinionStartingStats
 					num4 = this.personality.hair;
 					if (num4 > accessorySlot.accessories.Count - 1)
 					{
-						Debug.LogWarning(string.Format("CHECK DB AccessorySlots Invalid index {0} for accessory slot {1} setting to 0", num4, accessorySlot.Id));
+						global::Debug.LogWarning(string.Format("CHECK DB AccessorySlots Invalid index {0} for accessory slot {1} setting to 0", num4, accessorySlot.Id), null);
 						num4 = 0;
 						this.personality.hair = 0;
 					}
@@ -90,7 +90,7 @@ public class MinionStartingStats
 					num4 = this.personality.body;
 					if (num4 > accessorySlot.accessories.Count - 1)
 					{
-						Debug.LogWarning(string.Format("CHECK DB AccessorySlots Invalid index {0} for accessory slot {1} setting to 0", num4, accessorySlot.Id));
+						global::Debug.LogWarning(string.Format("CHECK DB AccessorySlots Invalid index {0} for accessory slot {1} setting to 0", num4, accessorySlot.Id), null);
 						num4 = 0;
 						this.personality.body = 0;
 					}
@@ -101,7 +101,7 @@ public class MinionStartingStats
 				}
 				if (num4 > accessorySlot.accessories.Count - 1)
 				{
-					Debug.LogWarning(string.Format("Invalid index {0} for accessory slot {1}", num4, accessorySlot.Id));
+					global::Debug.LogWarning(string.Format("Invalid index {0} for accessory slot {1}", num4, accessorySlot.Id), null);
 					num4 = 0;
 				}
 				Accessory accessory = accessorySlot.accessories[num4];
@@ -163,7 +163,7 @@ public class MinionStartingStats
 						Trait trait3 = Db.Get().traits.TryGet(traitVal.id);
 						if (trait3 == null)
 						{
-							Debug.LogWarning("Trying to add nonexistent trait: " + traitVal.id);
+							global::Debug.LogWarning("Trying to add nonexistent trait: " + traitVal.id, null);
 						}
 						else if (!is_starter_minion || trait3.ValidStarterTrait)
 						{

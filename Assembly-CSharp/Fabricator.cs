@@ -391,7 +391,7 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 	{
 		if (fetchList == null || ingredients == null || ingredients.Length == 0)
 		{
-			Debug.LogError("Invalid parameters received for the fetch list.");
+			global::Debug.LogError("Invalid parameters received for the fetch list.", null);
 			return;
 		}
 		foreach (Recipe.Ingredient ingredient in ingredients)

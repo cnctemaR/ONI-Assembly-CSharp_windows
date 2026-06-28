@@ -170,7 +170,6 @@ public class NotificationScreen : KScreen
 			else if (notification.Type == NotificationType.Messages)
 			{
 				colors.normalColor = this.messageColorBG;
-				Debug.Assert(notification.GetType() == typeof(MessageNotification), string.Format("Notification: \"{0}\" is not of type MessageNotification", notification.titleText));
 				componentsInChildren[1].onClick.AddListener(delegate
 				{
 					List<Notification> list = this.notifications.FindAll((Notification n) => n.titleText == notification.titleText);
@@ -223,7 +222,7 @@ public class NotificationScreen : KScreen
 				case NotificationType.Good:
 				case NotificationType.BadMinor:
 				case NotificationType.Neutral:
-					goto IL_0330;
+					goto IL_02FD;
 				case NotificationType.Tutorial:
 					locText.color = this.warningColor;
 					componentInChildren.sprite = this.icon_warning;
@@ -233,9 +232,9 @@ public class NotificationScreen : KScreen
 					componentInChildren.sprite = this.icon_message;
 					break;
 				default:
-					goto IL_0330;
+					goto IL_02FD;
 				}
-				IL_034E:
+				IL_031B:
 				componentInChildren.color = locText.color;
 				string text = string.Empty;
 				if (KTime.Instance.UnscaledGameTime - this.initTime > 5f && notification.playSound)
@@ -248,14 +247,14 @@ public class NotificationScreen : KScreen
 				}
 				if (AudioDebug.Get().debugNotificationSounds)
 				{
-					Debug.Log("Notification(" + notification.titleText + "):" + text);
+					global::Debug.Log("Notification(" + notification.titleText + "):" + text, null);
 				}
 				i++;
 				continue;
-				IL_0330:
+				IL_02FD:
 				locText.color = this.normalColor;
 				componentInChildren.sprite = this.icon_normal;
-				goto IL_034E;
+				goto IL_031B;
 			}
 		}
 		entry.Add(notification);

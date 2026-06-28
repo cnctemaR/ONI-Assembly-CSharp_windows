@@ -70,19 +70,19 @@ public class TableColumn
 
 	public virtual GameObject GetMinionWidget(GameObject parent)
 	{
-		Debug.LogError("Table Column has no Widget prefab");
+		global::Debug.LogError("Table Column has no Widget prefab", null);
 		return null;
 	}
 
 	public virtual GameObject GetHeaderWidget(GameObject parent)
 	{
-		Debug.LogError("Table Column has no Widget prefab");
+		global::Debug.LogError("Table Column has no Widget prefab", null);
 		return null;
 	}
 
 	public virtual GameObject GetDefaultWidget(GameObject parent)
 	{
-		Debug.LogError("Table Column has no Widget prefab");
+		global::Debug.LogError("Table Column has no Widget prefab", null);
 		return null;
 	}
 

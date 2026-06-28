@@ -48,7 +48,7 @@ public class Scheduler : IScheduler
 	{
 		if (group != null && group.scheduler != this)
 		{
-			Debug.LogError("Scheduler group mismatch!");
+			global::Debug.LogError("Scheduler group mismatch!", null);
 		}
 		Guid nextId = this.GetNextId();
 		SchedulerHandle schedulerHandle = this.Schedule(name, interval + time_offset, interval, callback, callback_data, nextId, profiler_obj);
@@ -63,7 +63,7 @@ public class Scheduler : IScheduler
 	{
 		if (group != null && group.scheduler != this)
 		{
-			Debug.LogError("Scheduler group mismatch!");
+			global::Debug.LogError("Scheduler group mismatch!", null);
 		}
 		Guid nextId = this.GetNextId();
 		SchedulerHandle schedulerHandle = this.Schedule(name, time, -1f, callback, callback_data, nextId, null);

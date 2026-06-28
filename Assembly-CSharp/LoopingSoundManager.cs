@@ -77,7 +77,7 @@ public class LoopingSoundManager : KMonoBehaviour
 	{
 		if (path == null)
 		{
-			global::UnityEngine.Debug.LogWarning("Missing sound");
+			global::Debug.LogWarning("Missing sound", null);
 			return null;
 		}
 		EventInstance eventInstance = KFMOD.CreateInstance(path);
@@ -101,7 +101,7 @@ public class LoopingSoundManager : KMonoBehaviour
 	{
 		if (path == null)
 		{
-			global::UnityEngine.Debug.LogWarning("Missing sound");
+			global::Debug.LogWarning("Missing sound", null);
 			return null;
 		}
 		EventInstance eventInstance = KFMOD.CreateInstance(path);

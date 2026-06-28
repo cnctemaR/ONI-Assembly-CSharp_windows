@@ -1008,7 +1008,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 				{
 					if (this.value.Guid == null)
 					{
-						global::UnityEngine.Debug.LogError("Cannot serialize resource with invalid guid: " + this.value.Id);
+						global::Debug.LogError("Cannot serialize resource with invalid guid: " + this.value.Id, null);
 					}
 					else
 					{
@@ -1084,7 +1084,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 				{
 					return smi2;
 				}
-				global::UnityEngine.Debug.LogError(gameObject.name + " does not have state machine " + typeof(StateMachineType).Name);
+				global::Debug.LogError(gameObject.name + " does not have state machine " + typeof(StateMachineType).Name, null);
 			}
 			return (StateMachineType)((object)null);
 		}
@@ -1105,7 +1105,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 				{
 					return component;
 				}
-				global::UnityEngine.Debug.LogError(gameObject.name + " does not have component " + typeof(ComponentType).Name);
+				global::Debug.LogError(gameObject.name + " does not have component " + typeof(ComponentType).Name, null);
 			}
 			return default(ComponentType);
 		}

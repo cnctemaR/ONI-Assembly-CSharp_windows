@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class Pathfinding : KMonoBehaviour
 {
@@ -23,7 +22,7 @@ public class Pathfinding : KMonoBehaviour
 				return navGrid;
 			}
 		}
-		Debug.LogError("Could not find nav grid: " + id);
+		Debug.LogError("Could not find nav grid: " + id, null);
 		return null;
 	}
 

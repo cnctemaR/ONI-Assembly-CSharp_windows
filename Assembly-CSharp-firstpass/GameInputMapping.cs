@@ -42,7 +42,6 @@ public class GameInputMapping
 				return bindingEntry;
 			}
 		}
-		Debug.Assert(false, "Unbound action " + mAction.ToString());
 		return GameInputMapping.KeyBindings[0];
 	}
 

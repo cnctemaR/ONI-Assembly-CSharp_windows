@@ -213,7 +213,7 @@ public class SingleEntityReceptacle : KMonoBehaviour
 		}
 		else
 		{
-			Debug.LogWarning(base.gameObject.name + " EntityReceptacle did not spawn occupying entity.");
+			global::Debug.LogWarning(base.gameObject.name + " EntityReceptacle did not spawn occupying entity.", null);
 		}
 		this.fetchChore = null;
 		if (!this.autoReplaceEntity)

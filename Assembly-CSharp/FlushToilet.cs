@@ -59,7 +59,6 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 			num2 -= num3;
 			num += num3 * component.Temperature;
 		}
-		Debug.Assert(num2 == 0f);
 		float num4 = num / this.massConsumedPerUse;
 		this.storage.AddLiquid(SimHashes.DirtyWater, this.massEmittedPerUse, num4, false);
 	}

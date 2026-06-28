@@ -23,7 +23,7 @@ internal class SteamManager : MonoBehaviour
 
 	private static void SteamAPIDebugTextHook(int nSeverity, StringBuilder pchDebugText)
 	{
-		Debug.LogWarning(pchDebugText);
+		global::Debug.LogWarning(pchDebugText, null);
 	}
 
 	private void Awake()
@@ -37,11 +37,11 @@ internal class SteamManager : MonoBehaviour
 		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		if (!Packsize.Test())
 		{
-			Debug.LogError("[Steamworks.NET] Packsize Test returned false, the wrong version of Steamworks.NET is being run in this platform.", this);
+			global::Debug.LogError("[Steamworks.NET] Packsize Test returned false, the wrong version of Steamworks.NET is being run in this platform.", this);
 		}
 		if (!DllCheck.Test())
 		{
-			Debug.LogError("[Steamworks.NET] DllCheck Test returned false, One or more of the Steamworks binaries seems to be the wrong version.", this);
+			global::Debug.LogError("[Steamworks.NET] DllCheck Test returned false, One or more of the Steamworks binaries seems to be the wrong version.", this);
 		}
 		try
 		{
@@ -53,7 +53,7 @@ internal class SteamManager : MonoBehaviour
 		}
 		catch (DllNotFoundException ex)
 		{
-			Debug.LogError("[Steamworks.NET] Could not load [lib]steam_api.dll/so/dylib. It's likely not in the correct location. Refer to the README for more details.\n" + ex, this);
+			global::Debug.LogError("[Steamworks.NET] Could not load [lib]steam_api.dll/so/dylib. It's likely not in the correct location. Refer to the README for more details.\n" + ex, this);
 			Application.Quit();
 			return;
 		}

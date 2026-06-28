@@ -36,7 +36,7 @@ public class AssignableRegion : KMonoBehaviour
 	{
 		if (buildingComplete == null)
 		{
-			Debug.LogError("Tried adding a null building to the region.");
+			global::Debug.LogError("Tried adding a null building to the region.", null);
 			return;
 		}
 		Assignable component = buildingComplete.GetComponent<Assignable>();
@@ -92,7 +92,7 @@ public class AssignableRegion : KMonoBehaviour
 	{
 		if (this.assignedDuplicants.Contains(duplicant))
 		{
-			Debug.LogError("Duplicant was already assigned to this region");
+			global::Debug.LogError("Duplicant was already assigned to this region", null);
 			return;
 		}
 		this.PopulateAssignablesByPrefabTag();
@@ -125,7 +125,7 @@ public class AssignableRegion : KMonoBehaviour
 	{
 		if (!this.assignablesByPrefabTag.ContainsKey(prefabID.PrefabTag.Name))
 		{
-			Debug.LogError("The building removed was not contained in the region. That shouldn't happen.");
+			global::Debug.LogError("The building removed was not contained in the region. That shouldn't happen.", null);
 			return;
 		}
 		this.assignablesByPrefabTag[prefabID.PrefabTag.Name].Remove(asg);

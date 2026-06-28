@@ -27,7 +27,7 @@ public class FlowUtilityNetwork : UtilityNetwork
 			{
 				if (endpointType != Endpoint.Sink)
 				{
-					Debug.Assert(false, "wtf");
+					global::UnityEngine.Debug.Assert(false, "wtf");
 					item.Network = this;
 				}
 				else

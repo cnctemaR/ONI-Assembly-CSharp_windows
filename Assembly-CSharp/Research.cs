@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using KSerialization;
-using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 public class Research : KMonoBehaviour, ISaveLoadable
@@ -154,7 +153,7 @@ public class Research : KMonoBehaviour, ISaveLoadable
 	{
 		if (!this.UseGlobalPointInventory && this.activeResearch == null)
 		{
-			Debug.LogWarning("No active research to add research points to. Global research inventory is disabled.");
+			Debug.LogWarning("No active research to add research points to. Global research inventory is disabled.", null);
 			return;
 		}
 		ResearchPointInventory researchPointInventory = ((!this.UseGlobalPointInventory) ? this.activeResearch.progressInventory : this.globalPointInventory);

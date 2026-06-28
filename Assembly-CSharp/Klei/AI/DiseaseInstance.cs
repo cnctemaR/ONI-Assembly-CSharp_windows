@@ -68,7 +68,7 @@ namespace Klei.AI
 		{
 			if (this.smi == null)
 			{
-				Debug.LogWarning("Attempting to resolve string when smi is null");
+				global::Debug.LogWarning("Attempting to resolve string when smi is null", null);
 				return str;
 			}
 			KSelectable component = this.gameObject.GetComponent<KSelectable>();

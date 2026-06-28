@@ -20,7 +20,7 @@ namespace Klei
 				}
 				text += "\n";
 			}
-			Debug.Log(text);
+			global::Debug.Log(text, null);
 		}
 
 		public static string[,] SplitCsvGrid(string csvText, string csv_name)

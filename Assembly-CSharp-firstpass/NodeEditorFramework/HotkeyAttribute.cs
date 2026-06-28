@@ -64,7 +64,7 @@ namespace NodeEditorFramework
 				{
 					return true;
 				}
-				Debug.LogWarning("Method " + method.Name + " has incorrect signature for HotkeyAttribute!");
+				global::Debug.LogWarning("Method " + method.Name + " has incorrect signature for HotkeyAttribute!", null);
 			}
 			return false;
 		}

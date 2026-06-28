@@ -70,7 +70,6 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 
 	private void UpdateSimData()
 	{
-		Debug.Assert(Sim.IsValidHandle(this.simHandle));
 		SimMessages.SetElementConsumerData(this.simHandle, (!this.consumptionEnabled) ? 0f : this.consumptionRate);
 	}
 

@@ -35,7 +35,6 @@ public class Equippable : Assignable, ISaveLoadable, IQuality, IGameObjectEffect
 		KPrefabID originalPrefab = component.GetOriginalPrefab();
 		Equippable component2 = originalPrefab.GetComponent<Equippable>();
 		this.def = component2.def;
-		Debug.Assert(this.def != null, "Cant continue without a def");
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Equipping;
 		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_equip_clothing_kanim") };
 		this.forcePlayPst = true;
@@ -65,7 +64,7 @@ public class Equippable : Assignable, ISaveLoadable, IQuality, IGameObjectEffect
 	{
 		if (this.equipment == null)
 		{
-			Debug.LogFormat("Looks like we already assigned this [{0}/{1}]", new object[]
+			global::Debug.LogFormat("Looks like we already assigned this [{0}/{1}]", new object[]
 			{
 				base.name,
 				base.gameObject.GetInstanceID()

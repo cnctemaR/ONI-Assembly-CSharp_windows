@@ -39,13 +39,13 @@ public class TemperatureSwitchSideScreen : SideScreenContent
 	{
 		if (target == null)
 		{
-			Debug.LogError("Invalid gameObject received");
+			global::Debug.LogError("Invalid gameObject received", null);
 			return;
 		}
 		this.targetTemperatureSwitch = target.GetComponent<TemperatureControlledSwitch>();
 		if (this.targetTemperatureSwitch == null)
 		{
-			Debug.LogError("The gameObject received does not contain a TimedSwitch component");
+			global::Debug.LogError("The gameObject received does not contain a TimedSwitch component", null);
 			return;
 		}
 		this.UpdateLabels();

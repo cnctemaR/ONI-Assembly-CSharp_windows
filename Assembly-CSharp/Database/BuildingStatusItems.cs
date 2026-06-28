@@ -456,7 +456,7 @@ namespace Database
 				KPrefabID component8 = requiresRegion.GetComponent<KPrefabID>();
 				if (component8 == null)
 				{
-					Debug.LogError("The object provided does not have a prefabID.");
+					global::Debug.LogError("The object provided does not have a prefabID.", null);
 					return string.Empty;
 				}
 				string text12 = requiresRegion.RequiredRegions.ToString();

@@ -35,9 +35,9 @@ public class FrontEndManager : KMonoBehaviour
 
 	private void LateUpdate()
 	{
-		if (Debug.developerConsoleVisible)
+		if (global::Debug.developerConsoleVisible)
 		{
-			Debug.developerConsoleVisible = false;
+			global::Debug.developerConsoleVisible = false;
 		}
 		KAnimBatchManager.Instance().UpdateActiveArea(new Vector2I(0, 0), new Vector2I(9999, 9999));
 		KAnimBatchManager.Instance().UpdateDirty(Time.frameCount);

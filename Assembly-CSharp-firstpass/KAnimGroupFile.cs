@@ -22,7 +22,6 @@ public class KAnimGroupFile : ScriptableObject
 		{
 			KAnimGroupFile.groupfile = (KAnimGroupFile)Resources.Load("animgrouptags", typeof(KAnimGroupFile));
 		}
-		Debug.Assert(KAnimGroupFile.groupfile != null, "Couldn't load group file from resources directory");
 		return KAnimGroupFile.groupfile;
 	}
 
@@ -46,7 +45,6 @@ public class KAnimGroupFile : ScriptableObject
 		KAnimGroupFile.Group group = null;
 		KAnimGroupFile.GetGroupFile();
 		List<KAnimGroupFile.Group> data = KAnimGroupFile.groupfile.GetData();
-		Debug.Assert(data != null, data.Count > 0);
 		for (int i = 0; i < data.Count; i++)
 		{
 			KAnimGroupFile.Group group2 = data[i];
@@ -136,9 +134,6 @@ public class KAnimGroupFile : ScriptableObject
 
 	public bool AddAnimFile(KAnimGroupFile.GroupFile gf, AnimCommandFile akf, KAnimFile file)
 	{
-		Debug.Assert(gf != null);
-		Debug.Assert(file != null, gf.groupID);
-		Debug.Assert(akf != null, gf.groupID);
 		int num = this.AddGroup(akf, gf, file);
 		return this.AddFile(num, file);
 	}
@@ -175,7 +170,6 @@ public class KAnimGroupFile : ScriptableObject
 		int i = 0;
 		while (i < this.groups.Count)
 		{
-			Debug.AssertFormat(this.groups[i].id.isValid, "Group invalid groupIndex [{0}]", new object[] { i });
 			KBatchGroupData kbatchGroupData;
 			if (this.groups[i].target.isValid)
 			{
@@ -189,18 +183,18 @@ public class KAnimGroupFile : ScriptableObject
 			HashedString hashedString = this.groups[i].id;
 			if (this.groups[i].renderType != KAnimBatchGroup.RendererType.AnimOnly)
 			{
-				goto IL_0136;
+				goto IL_0107;
 			}
 			if (this.groups[i].swapTarget.isValid)
 			{
 				kbatchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[i].swapTarget, false);
 				hashedString = this.groups[i].swapTarget;
-				goto IL_0136;
+				goto IL_0107;
 			}
-			IL_0279:
+			IL_024B:
 			i++;
 			continue;
-			IL_0136:
+			IL_0107:
 			for (int j = 0; j < this.groups[i].files.Count; j++)
 			{
 				KAnimFile kanimFile = this.groups[i].files[j];
@@ -208,7 +202,7 @@ public class KAnimGroupFile : ScriptableObject
 				{
 					if (kanimFile.buildFile.bytes == null || kanimFile.buildFile.bytes.Length == 0)
 					{
-						Debug.LogWarning("Build File [" + kanimFile.buildFile.name + "] has 0 bytes");
+						global::Debug.LogWarning("Build File [" + kanimFile.buildFile.name + "] has 0 bytes", null);
 					}
 					else
 					{
@@ -222,7 +216,7 @@ public class KAnimGroupFile : ScriptableObject
 					}
 				}
 			}
-			goto IL_0279;
+			goto IL_024B;
 		}
 		for (int k = 0; k < this.groups.Count; k++)
 		{
@@ -269,23 +263,16 @@ public class KAnimGroupFile : ScriptableObject
 		}
 		for (int num = 0; num < this.groups.Count; num++)
 		{
-			Debug.AssertFormat(this.groups[num].id.isValid, "Group invalid groupIndex [{0}]", new object[] { num });
 			if (this.groups[num].renderType != KAnimBatchGroup.RendererType.DontRender)
 			{
 				KBatchGroupData kbatchGroupData2;
 				if (this.groups[num].animTarget.isValid)
 				{
 					kbatchGroupData2 = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[num].animTarget, false);
-					Debug.AssertFormat(kbatchGroupData2 != null, "Anim group is null for [{0}] -> [{1}]", new object[]
-					{
-						this.groups[num].id,
-						this.groups[num].animTarget
-					});
 				}
 				else
 				{
 					kbatchGroupData2 = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[num].id, false);
-					Debug.AssertFormat(kbatchGroupData2 != null, "Anim group is null for [{0}]", new object[] { this.groups[num].id });
 				}
 				for (int num2 = 0; num2 < this.groups[num].files.Count; num2++)
 				{
@@ -294,7 +281,7 @@ public class KAnimGroupFile : ScriptableObject
 					{
 						if (kanimFile2.animFile.bytes == null || kanimFile2.animFile.bytes.Length == 0)
 						{
-							Debug.LogWarning("Anim File [" + kanimFile2.animFile.name + "] has 0 bytes");
+							global::Debug.LogWarning("Anim File [" + kanimFile2.animFile.name + "] has 0 bytes", null);
 						}
 						else
 						{
@@ -316,21 +303,14 @@ public class KAnimGroupFile : ScriptableObject
 		}
 		for (int num3 = 0; num3 < this.groups.Count; num3++)
 		{
-			Debug.AssertFormat(this.groups[num3].id.isValid, "Group invalid groupIndex [{0}]", new object[] { num3 });
 			KBatchGroupData kbatchGroupData3;
 			if (this.groups[num3].target.isValid)
 			{
 				kbatchGroupData3 = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[num3].target, false);
-				Debug.AssertFormat(kbatchGroupData3 != null, "Group is null for  [{0}] target [{1}]", new object[]
-				{
-					this.groups[num3].id,
-					this.groups[num3].target
-				});
 			}
 			else
 			{
 				kbatchGroupData3 = KAnimBatchManager.Instance().GetBatchGroupData(this.groups[num3].id, false);
-				Debug.AssertFormat(kbatchGroupData3 != null, "Group is null for [{0}]", new object[] { this.groups[num3].id });
 			}
 			KGlobalAnimParser.PostParse(kbatchGroupData3);
 		}

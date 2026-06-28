@@ -255,7 +255,7 @@ public class RegionTool : DragTool
 		}
 		else
 		{
-			Debug.LogError("Tried selecting a Region prefab with an invalid id.");
+			global::Debug.LogError("Tried selecting a Region prefab with an invalid id.", null);
 		}
 	}
 

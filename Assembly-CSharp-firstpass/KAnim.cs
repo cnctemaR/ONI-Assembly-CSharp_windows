@@ -69,19 +69,13 @@ public class KAnim
 
 		private static KBatchGroupData GetAnimBatchGroupData(KAnimFileData animFile)
 		{
-			Debug.AssertFormat(animFile.batchTag.isValid, "Invalid batchTag for anim [{0}]", new object[] { animFile.name });
-			Debug.Assert(animFile.batchTag.isValid, "Invalid batch tag");
 			KAnimGroupFile.Group group = KAnimGroupFile.GetGroup(animFile.batchTag);
-			Debug.AssertFormat(group != null, "Null group for tag [{0}]", new object[] { animFile.batchTag });
 			HashedString hashedString = animFile.batchTag;
 			if (group.renderType == KAnimBatchGroup.RendererType.DontRender || group.renderType == KAnimBatchGroup.RendererType.AnimOnly)
 			{
-				Debug.AssertFormat(group.swapTarget.isValid, "Invalid swap target for group [{0}]", new object[] { group.id });
 				hashedString = group.swapTarget;
 			}
-			KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(hashedString, false);
-			Debug.AssertFormat(batchGroupData != null, "Null batch group for tag [{0}]", new object[] { hashedString });
-			return batchGroupData;
+			return KAnimBatchManager.Instance().GetBatchGroupData(hashedString, false);
 		}
 
 		public KAnim.Anim.Frame GetFrame(KAnimFileData animFile, KAnim.PlayMode mode, float t)
@@ -238,7 +232,6 @@ public class KAnim
 
 		public Texture2D GetTexture(int index)
 		{
-			Debug.Assert(index >= 0 && index < this.textureCount);
 			KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.batchTag, false);
 			return batchGroupData.GetTexure(this.textureStartIdx + index);
 		}
@@ -337,13 +330,6 @@ public class KAnim
 		{
 			public int GetFrameIdx(int frame)
 			{
-				Debug.AssertFormat(this.frameLookup != null, "Cant get frame [{2}] because Symbol [{0}] for build [{1}] batch [{3}] has no frameLookup", new object[]
-				{
-					this.hash.ToString(),
-					this.build.name,
-					frame,
-					this.build.batchTag.ToString()
-				});
 				if (this.frameLookup.Length == 0 || frame >= this.frameLookup.Length)
 				{
 					return -1;

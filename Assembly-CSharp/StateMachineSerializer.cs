@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using KSerialization;
-using UnityEngine;
 
 public class StateMachineSerializer
 {
@@ -89,7 +88,7 @@ public class StateMachineSerializer
 				"!=",
 				StateMachineSerializer.serializerVersion,
 				"\nDiscarding data."
-			}));
+			}), null);
 			reader.SkipBytes(num2);
 			return false;
 		}

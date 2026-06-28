@@ -122,7 +122,7 @@ public class AmbienceManager : KMonoBehaviour
 					EventInstance eventInstance = KFMOD.CreateInstance(this.oneShotSound);
 					if (eventInstance == null)
 					{
-						global::UnityEngine.Debug.LogWarning("Could not find event: " + this.oneShotSound);
+						global::Debug.LogWarning("Could not find event: " + this.oneShotSound, null);
 						return;
 					}
 					Vector3 vector = new Vector3(emitter_position.x, emitter_position.y, 0f);
@@ -200,7 +200,7 @@ public class AmbienceManager : KMonoBehaviour
 			{
 				if (j >= def.solidSounds.Length)
 				{
-					global::UnityEngine.Debug.LogError("Missing solid layer: " + ((SolidAmbienceType)j).ToString());
+					global::Debug.LogError("Missing solid layer: " + ((SolidAmbienceType)j).ToString(), null);
 				}
 				this.solidLayers[j] = new AmbienceManager.Layer(null, def.solidSounds[j]);
 				this.allLayers.Add(this.solidLayers[j]);

@@ -200,7 +200,6 @@ public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, Ferti
 									}
 									primaryElement = storage.FindFirstWithMass(base.def.consumedElements[i].tag);
 								}
-								Debug.Assert(num <= 0f);
 							}
 						}
 					}

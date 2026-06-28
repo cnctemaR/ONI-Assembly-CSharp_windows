@@ -66,12 +66,12 @@ public class KCrashReporter : MonoBehaviour
 		}
 		if (KCrashReporter.ignoreAll)
 		{
-			global::UnityEngine.Debug.Log("Ignoring crash due to mismatched hashes.json entries.");
+			global::Debug.Log("Ignoring crash due to mismatched hashes.json entries.", null);
 		}
 		if (File.Exists("ignorekcrashreporter.txt"))
 		{
 			KCrashReporter.ignoreAll = true;
-			global::UnityEngine.Debug.Log("Ignoring crash due to ignorekcrashreporter.txt");
+			global::Debug.Log("Ignoring crash due to ignorekcrashreporter.txt", null);
 		}
 		if (Application.isEditor)
 		{
@@ -248,10 +248,10 @@ public class KCrashReporter : MonoBehaviour
 	{
 		if (KCrashReporter.debugWasUsed)
 		{
-			global::UnityEngine.Debug.Log("Ignoring crash because debug was used.");
+			global::Debug.Log("Ignoring crash because debug was used.", null);
 			return;
 		}
-		global::UnityEngine.Debug.Log("Reporting error.");
+		global::Debug.Log("Reporting error.", null);
 		KCrashReporter.hasReportedError = true;
 		string text3;
 		using (WebClient webClient = new WebClient())
@@ -307,7 +307,7 @@ public class KCrashReporter : MonoBehaviour
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
 			error.fullstack = "UNITY_OUTPUT:\n" + msg;
-			error.build = 217565;
+			error.build = 217794;
 			error.log = KCrashReporter.GetLogContents();
 			error.summaryline = text;
 			error.user_message = userMessage;
@@ -318,14 +318,14 @@ public class KCrashReporter : MonoBehaviour
 			string text2 = JsonConvert.SerializeObject(error);
 			string empty = string.Empty;
 			Uri uri = new Uri("http://crashes.klei.ca/submitCrash");
-			global::UnityEngine.Debug.Log("Submitting crash:");
+			global::Debug.Log("Submitting crash:", null);
 			try
 			{
 				webClient.UploadStringAsync(uri, text2);
 			}
 			catch (Exception ex)
 			{
-				global::UnityEngine.Debug.Log(ex);
+				global::Debug.Log(ex, null);
 			}
 			if (confirm_prefab != null)
 			{

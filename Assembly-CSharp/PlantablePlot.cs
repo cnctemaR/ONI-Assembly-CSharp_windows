@@ -102,7 +102,7 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 		PlantableSeed component = depositedEntity.GetComponent<PlantableSeed>();
 		if (component == null)
 		{
-			Debug.LogError("Planted seed " + depositedEntity.gameObject.name + " is missing PlantableSeed component");
+			global::Debug.LogError("Planted seed " + depositedEntity.gameObject.name + " is missing PlantableSeed component", null);
 			return null;
 		}
 		Vector3 vector = Grid.CellToPosCBC(Grid.PosToCell(this), Grid.SceneLayer.BuildingBack);

@@ -76,7 +76,7 @@ public class KScreen : KMonoBehaviour, IInputHandler, IEventSystemHandler, IPoin
 		}
 		if (this.ConsumeMouseScroll && !this.activateOnSpawn)
 		{
-			Debug.LogWarning("ConsumeMouseScroll is true on" + base.gameObject.name + " , but activateOnSpawn is disabled. Mouse scrolling might not work properly on this screen.");
+			global::Debug.LogWarning("ConsumeMouseScroll is true on" + base.gameObject.name + " , but activateOnSpawn is disabled. Mouse scrolling might not work properly on this screen.", null);
 		}
 	}
 
@@ -160,7 +160,7 @@ public class KScreen : KMonoBehaviour, IInputHandler, IEventSystemHandler, IPoin
 	{
 		if (this._rectTransform == null)
 		{
-			Debug.LogWarning("Hey you are calling this function too early!");
+			global::Debug.LogWarning("Hey you are calling this function too early!", null);
 			return Vector3.zero;
 		}
 		Camera main = Camera.main;

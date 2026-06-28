@@ -288,7 +288,7 @@ public class KInputController : IInputHandler
 
 		private void Print()
 		{
-			Debug.Log(this.mKeyCode.ToString() + this.mModifier.ToString());
+			global::Debug.Log(this.mKeyCode.ToString() + this.mModifier.ToString(), null);
 		}
 
 		private KKeyCode mKeyCode;

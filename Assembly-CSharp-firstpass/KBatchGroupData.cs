@@ -86,18 +86,11 @@ public class KBatchGroupData
 
 	public void AddAnim(KAnim.Anim anim)
 	{
-		Debug.Assert(anim.index == this.anims.Count);
 		this.anims.Add(anim);
 	}
 
 	public KAnim.Anim GetAnim(int anim)
 	{
-		Debug.AssertFormat(anim >= 0 && anim < this.anims.Count, "Anim [{0}] out of range [{1}] in batch [{2}]", new object[]
-		{
-			anim,
-			this.anims.Count,
-			this.groupID
-		});
 		return this.anims[anim];
 	}
 
@@ -225,7 +218,6 @@ public class KBatchGroupData
 
 	public int GetFrame(string name)
 	{
-		Debug.Assert(name != null && name.Length > 0, "Frame name is blank");
 		return this.animFrameIndex[new KAnimHashedString(name)];
 	}
 
@@ -252,7 +244,7 @@ public class KBatchGroupData
 		int num2 = 1 + ((animFrames.Count != 0) ? animFrames.Count : this.symbolFrameInstances.Count);
 		if (animFrames.Count == 0 && this.symbolFrameInstances.Count == 0 && animFrameElements.Count == 0)
 		{
-			Debug.LogError(string.Concat(new object[]
+			global::Debug.LogError(string.Concat(new object[]
 			{
 				"Eh, no data ",
 				animFrames.Count,
@@ -260,7 +252,7 @@ public class KBatchGroupData
 				this.symbolFrameInstances.Count,
 				" ",
 				animFrameElements.Count
-			}));
+			}), null);
 		}
 		data[num++] = (float)num2;
 		data[num++] = (float)animFrames.Count;
@@ -299,14 +291,14 @@ public class KBatchGroupData
 					KAnim.Build.Symbol buildSymbol = this.GetBuildSymbol(symbolIndex);
 					if (buildSymbol == null)
 					{
-						Debug.LogError(string.Concat(new object[]
+						global::Debug.LogError(string.Concat(new object[]
 						{
 							"Missing symbol for Anim Frame Element: [",
 							HashCache.Get().Get(frameElement.symbol),
 							": ",
 							frameElement.symbol,
 							"]"
-						}));
+						}), null);
 					}
 					int frameIdx = buildSymbol.GetFrameIdx(frameElement.frame);
 					this.Write(data, num, frameIdx, l, frameElement);
@@ -355,7 +347,6 @@ public class KBatchGroupData
 		data[startIndex++] = (float)thisFrameIndex;
 		data[startIndex++] = (float)symbol_frame_instance.symbolIdx;
 		KAnim.Build.SymbolFrame symbolFrame = symbol_frame_instance.symbolFrame;
-		Debug.AssertFormat(symbolFrame != null, "symbolFrame is null groupID: [{0}]", new object[] { this.groupID.ToString() });
 		KAnim.Build.Symbol buildSymbol = this.GetBuildSymbol(symbol_frame_instance.symbolIdx);
 		data[startIndex++] = (float)((buildSymbol == null) ? 0 : buildSymbol.numFrames);
 		data[startIndex++] = (float)((buildSymbol == null) ? 0 : buildSymbol.flags);

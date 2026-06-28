@@ -102,7 +102,7 @@ public class HoverTextScreen : KScreen
 				return sprite;
 			}
 		}
-		Debug.LogWarning("No icon named " + byName + " was found on HoverTextScreen.prefab");
+		global::Debug.LogWarning("No icon named " + byName + " was found on HoverTextScreen.prefab", null);
 		return null;
 	}
 
@@ -137,7 +137,7 @@ public class HoverTextScreen : KScreen
 
 	public void ClearConfigurationLabels(HoverTextConfiguration config)
 	{
-		Debug.Log("Clearing configuration for: " + config.ActionName);
+		global::Debug.Log("Clearing configuration for: " + config.ActionName, null);
 		if (this.CachedToolFields.ContainsKey(config))
 		{
 			string text = string.Empty;
@@ -151,7 +151,7 @@ public class HoverTextScreen : KScreen
 				text = text + "\n" + this.CachedToolFields[config].ShadowBars[j].gameObject.name;
 				this.CachedToolFields[config].ShadowBars[j].gameObject.SetActive(false);
 			}
-			Debug.Log(text);
+			global::Debug.Log(text, null);
 		}
 	}
 

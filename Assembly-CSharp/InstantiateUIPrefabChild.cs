@@ -15,7 +15,7 @@ public class InstantiateUIPrefabChild : KMonoBehaviour
 	{
 		if (this.alreadyInstantiated)
 		{
-			Debug.LogWarning(base.gameObject.name + "trying to instantiate UI prefabs multiple times.");
+			global::Debug.LogWarning(base.gameObject.name + "trying to instantiate UI prefabs multiple times.", null);
 			return;
 		}
 		this.alreadyInstantiated = true;

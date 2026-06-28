@@ -8,9 +8,6 @@ public static class DebugExtension
 	public static void DebugPoint(Vector3 position, Color color, float scale = 1f, float duration = 0f, bool depthTest = true)
 	{
 		color = ((!(color == default(Color))) ? color : Color.white);
-		Debug.DrawRay(position + Vector3.up * (scale * 0.5f), -Vector3.up * scale, color, duration, depthTest);
-		Debug.DrawRay(position + Vector3.right * (scale * 0.5f), -Vector3.right * scale, color, duration, depthTest);
-		Debug.DrawRay(position + Vector3.forward * (scale * 0.5f), -Vector3.forward * scale, color, duration, depthTest);
 	}
 
 	public static void DebugPoint(Vector3 position, float scale = 1f, float duration = 0f, bool depthTest = true)
@@ -36,18 +33,6 @@ public static class DebugExtension
 		Vector3 vector6 = center + new Vector3(x, -y, -z);
 		Vector3 vector7 = center + new Vector3(-x, -y, z);
 		Vector3 vector8 = center + new Vector3(-x, -y, -z);
-		Debug.DrawLine(vector, vector3, color, duration, depthTest);
-		Debug.DrawLine(vector, vector2, color, duration, depthTest);
-		Debug.DrawLine(vector3, vector4, color, duration, depthTest);
-		Debug.DrawLine(vector2, vector4, color, duration, depthTest);
-		Debug.DrawLine(vector, vector5, color, duration, depthTest);
-		Debug.DrawLine(vector2, vector6, color, duration, depthTest);
-		Debug.DrawLine(vector3, vector7, color, duration, depthTest);
-		Debug.DrawLine(vector4, vector8, color, duration, depthTest);
-		Debug.DrawLine(vector5, vector7, color, duration, depthTest);
-		Debug.DrawLine(vector5, vector6, color, duration, depthTest);
-		Debug.DrawLine(vector7, vector8, color, duration, depthTest);
-		Debug.DrawLine(vector8, vector6, color, duration, depthTest);
 	}
 
 	public static void DebugAABB(AABB3 bounds, Color color, float duration = 0f, bool depthTest = true)
@@ -64,10 +49,6 @@ public static class DebugExtension
 
 	public static void DebugRect(Rect rect, Color color, float duration = 0f, bool depthTest = true)
 	{
-		Debug.DrawLine(rect.min, rect.min + new Vector2(rect.width, 0f), color, duration, depthTest);
-		Debug.DrawLine(rect.min, rect.min + new Vector2(0f, rect.height), color, duration, depthTest);
-		Debug.DrawLine(rect.max, rect.max - new Vector2(rect.width, 0f), color, duration, depthTest);
-		Debug.DrawLine(rect.max, rect.max - new Vector2(0f, rect.height), color, duration, depthTest);
 	}
 
 	public static void DebugBounds(Bounds bounds, float duration = 0f, bool depthTest = true)
@@ -85,18 +66,6 @@ public static class DebugExtension
 		Vector3 vector6 = transform.TransformPoint(center + new Vector3(size.x, size.y, -size.z) * 0.5f);
 		Vector3 vector7 = transform.TransformPoint(center + size * 0.5f);
 		Vector3 vector8 = transform.TransformPoint(center + new Vector3(-size.x, size.y, size.z) * 0.5f);
-		Debug.DrawLine(vector, vector2, color, duration, depthTest);
-		Debug.DrawLine(vector2, vector3, color, duration, depthTest);
-		Debug.DrawLine(vector3, vector4, color, duration, depthTest);
-		Debug.DrawLine(vector4, vector, color, duration, depthTest);
-		Debug.DrawLine(vector5, vector6, color, duration, depthTest);
-		Debug.DrawLine(vector6, vector7, color, duration, depthTest);
-		Debug.DrawLine(vector7, vector8, color, duration, depthTest);
-		Debug.DrawLine(vector8, vector5, color, duration, depthTest);
-		Debug.DrawLine(vector, vector5, color, duration, depthTest);
-		Debug.DrawLine(vector2, vector6, color, duration, depthTest);
-		Debug.DrawLine(vector3, vector7, color, duration, depthTest);
-		Debug.DrawLine(vector4, vector8, color, duration, depthTest);
 	}
 
 	public static void DebugLocalCube(Transform transform, Vector3 size, [Optional] Vector3 center, float duration = 0f, bool depthTest = true)
@@ -115,18 +84,6 @@ public static class DebugExtension
 		Vector3 vector6 = space.MultiplyPoint3x4(center + new Vector3(size.x, size.y, -size.z) * 0.5f);
 		Vector3 vector7 = space.MultiplyPoint3x4(center + size * 0.5f);
 		Vector3 vector8 = space.MultiplyPoint3x4(center + new Vector3(-size.x, size.y, size.z) * 0.5f);
-		Debug.DrawLine(vector, vector2, color, duration, depthTest);
-		Debug.DrawLine(vector2, vector3, color, duration, depthTest);
-		Debug.DrawLine(vector3, vector4, color, duration, depthTest);
-		Debug.DrawLine(vector4, vector, color, duration, depthTest);
-		Debug.DrawLine(vector5, vector6, color, duration, depthTest);
-		Debug.DrawLine(vector6, vector7, color, duration, depthTest);
-		Debug.DrawLine(vector7, vector8, color, duration, depthTest);
-		Debug.DrawLine(vector8, vector5, color, duration, depthTest);
-		Debug.DrawLine(vector, vector5, color, duration, depthTest);
-		Debug.DrawLine(vector2, vector6, color, duration, depthTest);
-		Debug.DrawLine(vector3, vector7, color, duration, depthTest);
-		Debug.DrawLine(vector4, vector8, color, duration, depthTest);
 	}
 
 	public static void DebugLocalCube(Matrix4x4 space, Vector3 size, [Optional] Vector3 center, float duration = 0f, bool depthTest = true)
@@ -158,8 +115,6 @@ public static class DebugExtension
 			vector5.z = Mathf.Sin((float)(i * 4) * 0.017453292f);
 			vector5.y = 0f;
 			vector5 = position + matrix4x.MultiplyPoint3x4(vector5);
-			Debug.DrawLine(vector4, vector5, color, duration, depthTest);
-			vector4 = vector5;
 		}
 	}
 
@@ -194,9 +149,6 @@ public static class DebugExtension
 			Vector3 vector4 = new Vector3(position.x, position.y + radius * Mathf.Sin(num * (float)i * 0.017453292f), position.z + radius * Mathf.Cos(num * (float)i * 0.017453292f));
 			Vector3 vector5 = new Vector3(position.x + radius * Mathf.Cos(num * (float)i * 0.017453292f), position.y, position.z + radius * Mathf.Sin(num * (float)i * 0.017453292f));
 			Vector3 vector6 = new Vector3(position.x + radius * Mathf.Cos(num * (float)i * 0.017453292f), position.y + radius * Mathf.Sin(num * (float)i * 0.017453292f), position.z);
-			Debug.DrawLine(vector, vector4, color, duration, depthTest);
-			Debug.DrawLine(vector2, vector5, color, duration, depthTest);
-			Debug.DrawLine(vector3, vector6, color, duration, depthTest);
 			vector = vector4;
 			vector2 = vector5;
 			vector3 = vector6;
@@ -216,14 +168,6 @@ public static class DebugExtension
 		DebugExtension.DebugCircle(start, vector, color, radius, duration, depthTest);
 		DebugExtension.DebugCircle(end, -vector, color, radius, duration, depthTest);
 		DebugExtension.DebugCircle((start + end) * 0.5f, vector, color, radius, duration, depthTest);
-		Debug.DrawLine(start + vector3, end + vector3, color, duration, depthTest);
-		Debug.DrawLine(start - vector3, end - vector3, color, duration, depthTest);
-		Debug.DrawLine(start + vector2, end + vector2, color, duration, depthTest);
-		Debug.DrawLine(start - vector2, end - vector2, color, duration, depthTest);
-		Debug.DrawLine(start - vector3, start + vector3, color, duration, depthTest);
-		Debug.DrawLine(start - vector2, start + vector2, color, duration, depthTest);
-		Debug.DrawLine(end - vector3, end + vector3, color, duration, depthTest);
-		Debug.DrawLine(end - vector2, end + vector2, color, duration, depthTest);
 	}
 
 	public static void DebugCylinder(Vector3 start, Vector3 end, float radius = 1f, float duration = 0f, bool depthTest = true)
@@ -243,10 +187,6 @@ public static class DebugExtension
 		Ray ray = new Ray(position, vector4);
 		float num;
 		plane.Raycast(ray, out num);
-		Debug.DrawRay(position, vector4.normalized * num, color);
-		Debug.DrawRay(position, Vector3.Slerp(vector, -vector2, angle / 90f).normalized * num, color, duration, depthTest);
-		Debug.DrawRay(position, Vector3.Slerp(vector, vector3, angle / 90f).normalized * num, color, duration, depthTest);
-		Debug.DrawRay(position, Vector3.Slerp(vector, -vector3, angle / 90f).normalized * num, color, duration, depthTest);
 		DebugExtension.DebugCircle(position + vector, direction, color, (vector - vector4.normalized * num).magnitude, duration, depthTest);
 		DebugExtension.DebugCircle(position + vector * 0.5f, direction, color, (vector * 0.5f - vector4.normalized * (num * 0.5f)).magnitude, duration, depthTest);
 	}
@@ -268,7 +208,6 @@ public static class DebugExtension
 
 	public static void DebugArrow(Vector3 position, Vector3 direction, Color color, float duration = 0f, bool depthTest = true)
 	{
-		Debug.DrawRay(position, direction, color, duration, depthTest);
 		DebugExtension.DebugCone(position + direction, -direction * 0.333f, color, 15f, duration, depthTest);
 	}
 
@@ -289,20 +228,8 @@ public static class DebugExtension
 		end = vector4 + (end - vector4).normalized * num;
 		DebugExtension.DebugCircle(start, vector, color, radius, duration, depthTest);
 		DebugExtension.DebugCircle(end, -vector, color, radius, duration, depthTest);
-		Debug.DrawLine(start + vector3, end + vector3, color, duration, depthTest);
-		Debug.DrawLine(start - vector3, end - vector3, color, duration, depthTest);
-		Debug.DrawLine(start + vector2, end + vector2, color, duration, depthTest);
-		Debug.DrawLine(start - vector2, end - vector2, color, duration, depthTest);
 		for (int i = 1; i < 26; i++)
 		{
-			Debug.DrawLine(Vector3.Slerp(vector3, -vector, (float)i / 25f) + start, Vector3.Slerp(vector3, -vector, (float)(i - 1) / 25f) + start, color, duration, depthTest);
-			Debug.DrawLine(Vector3.Slerp(-vector3, -vector, (float)i / 25f) + start, Vector3.Slerp(-vector3, -vector, (float)(i - 1) / 25f) + start, color, duration, depthTest);
-			Debug.DrawLine(Vector3.Slerp(vector2, -vector, (float)i / 25f) + start, Vector3.Slerp(vector2, -vector, (float)(i - 1) / 25f) + start, color, duration, depthTest);
-			Debug.DrawLine(Vector3.Slerp(-vector2, -vector, (float)i / 25f) + start, Vector3.Slerp(-vector2, -vector, (float)(i - 1) / 25f) + start, color, duration, depthTest);
-			Debug.DrawLine(Vector3.Slerp(vector3, vector, (float)i / 25f) + end, Vector3.Slerp(vector3, vector, (float)(i - 1) / 25f) + end, color, duration, depthTest);
-			Debug.DrawLine(Vector3.Slerp(-vector3, vector, (float)i / 25f) + end, Vector3.Slerp(-vector3, vector, (float)(i - 1) / 25f) + end, color, duration, depthTest);
-			Debug.DrawLine(Vector3.Slerp(vector2, vector, (float)i / 25f) + end, Vector3.Slerp(vector2, vector, (float)(i - 1) / 25f) + end, color, duration, depthTest);
-			Debug.DrawLine(Vector3.Slerp(-vector2, vector, (float)i / 25f) + end, Vector3.Slerp(-vector2, vector, (float)(i - 1) / 25f) + end, color, duration, depthTest);
 		}
 	}
 
@@ -480,8 +407,6 @@ public static class DebugExtension
 			vector4.z = Mathf.Sin((float)(i * 4) * 0.017453292f);
 			vector4.y = 0f;
 			vector4 = position + matrix4x.MultiplyPoint3x4(vector4);
-			Debug.DrawLine(vector3, vector4, color);
-			vector3 = vector4;
 		}
 	}
 

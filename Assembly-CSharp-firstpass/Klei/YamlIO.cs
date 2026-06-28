@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using UnityEngine;
 using YamlDotNet.Serialization;
 
 namespace Klei
@@ -22,7 +21,7 @@ namespace Klei
 			T t = YamlIO<T>.Parse(text);
 			if (t == null)
 			{
-				Debug.LogError("Exception while loading yaml file [" + filename + "]");
+				Debug.LogError("Exception while loading yaml file [" + filename + "]", null);
 			}
 			return t;
 		}

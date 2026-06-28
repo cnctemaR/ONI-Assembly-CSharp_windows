@@ -8,13 +8,13 @@ public class TagFilterScreen : SideScreenContent
 	{
 		if (target == null)
 		{
-			Debug.LogError("The target object provided was null");
+			global::Debug.LogError("The target object provided was null", null);
 			return;
 		}
 		this.targetFilterable = target.GetComponent<TreeFilterable>();
 		if (this.targetFilterable == null)
 		{
-			Debug.LogError("The target provided does not have a Tree Filterable component");
+			global::Debug.LogError("The target provided does not have a Tree Filterable component", null);
 			return;
 		}
 		if (!this.targetFilterable.showUserMenu)
@@ -146,7 +146,7 @@ public class TagFilterScreen : SideScreenContent
 	{
 		if (this.targetFilterable == null)
 		{
-			Debug.LogError("Cannot update the filters on a null target.");
+			global::Debug.LogError("Cannot update the filters on a null target.", null);
 			return;
 		}
 		List<Tag> list = new List<Tag>();

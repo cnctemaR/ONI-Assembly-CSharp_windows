@@ -24,7 +24,7 @@ public class HierarchyReferences : KMonoBehaviour
 				return elementReference.behaviour;
 			}
 		}
-		Debug.LogWarning("Couldn't find reference to object named {0} Make sure the name matches the field in the inspector.");
+		global::Debug.LogWarning("Couldn't find reference to object named {0} Make sure the name matches the field in the inspector.", null);
 		return null;
 	}
 

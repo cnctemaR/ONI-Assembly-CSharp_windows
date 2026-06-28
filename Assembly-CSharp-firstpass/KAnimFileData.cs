@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using UnityEngine;
 
 [DebuggerDisplay("{name}")]
 public class KAnimFileData
@@ -31,36 +30,19 @@ public class KAnimFileData
 				return null;
 			}
 			KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.batchTag, false);
-			global::UnityEngine.Debug.AssertFormat(batchGroupData != null, "[{0}] No such batch group [{1}]", new object[]
-			{
-				this.name,
-				this.batchTag.ToString()
-			});
 			return batchGroupData.GetBuild(this.buildIndex);
 		}
 	}
 
 	public KAnim.Anim GetAnim(int index)
 	{
-		global::UnityEngine.Debug.Assert(index >= 0 && index < this.animCount);
 		KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.animBatchTag, false);
-		global::UnityEngine.Debug.AssertFormat(batchGroupData != null, "[{0}] No such batch group [{1}]", new object[]
-		{
-			this.name,
-			this.animBatchTag.ToString()
-		});
 		return batchGroupData.GetAnim(index + this.firstAnimIndex);
 	}
 
 	public KAnim.Anim.FrameElement GetAnimFrameElement(int index)
 	{
-		global::UnityEngine.Debug.Assert(index >= 0 && index < this.elementCount);
 		KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.animBatchTag, false);
-		global::UnityEngine.Debug.AssertFormat(batchGroupData != null, "[{0}] No such batch group [{1}]", new object[]
-		{
-			this.name,
-			this.animBatchTag.ToString()
-		});
 		return batchGroupData.GetFrameElement(this.firstElementIndex + index);
 	}
 

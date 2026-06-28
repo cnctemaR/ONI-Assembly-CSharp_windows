@@ -29,7 +29,7 @@ public class AssignableSideScreen : SideScreenContent
 		this.targetAssignable = target.GetComponent<Assignable>();
 		if (this.targetAssignable == null)
 		{
-			Debug.LogError("Object selected has no Assignable component.");
+			global::Debug.LogError("Object selected has no Assignable component.", null);
 			return;
 		}
 		if (this.rowPool == null)

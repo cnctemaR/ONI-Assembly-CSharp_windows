@@ -52,7 +52,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			else
 			{
 				MasterType master = base.master;
-				Debug.LogWarning(master.name + " is missing a anim controller");
+				global::Debug.LogWarning(master.name + " is missing a anim controller", null);
 			}
 		}
 
@@ -65,7 +65,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			else
 			{
 				MasterType master = base.master;
-				Debug.LogWarning(master.name + " is missing a anim controller");
+				global::Debug.LogWarning(master.name + " is missing a anim controller", null);
 			}
 		}
 
@@ -333,7 +333,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 					KAnimFile anim = Assets.GetAnim(hashedString);
 					if (anim == null)
 					{
-						Debug.LogWarning("Missing anims: " + hashedString);
+						global::Debug.LogWarning("Missing anims: " + hashedString, null);
 					}
 					else
 					{
@@ -385,7 +385,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 				KAnimFile anim = Assets.GetAnim(anim_file);
 				if (anim == null)
 				{
-					Debug.LogWarning("Missing anims: " + anim_file);
+					global::Debug.LogWarning("Missing anims: " + anim_file, null);
 				}
 				else
 				{
@@ -1089,7 +1089,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 				if (num3 <= 0f)
 				{
 					pickupable.PrintReservations();
-					Debug.LogError(string.Concat(new object[] { num2, ", ", num, ", ", pickupable.UnreservedAmount, ", ", num3 }));
+					global::Debug.LogError(string.Concat(new object[] { num2, ", ", num, ", ", pickupable.UnreservedAmount, ", ", num3 }), null);
 				}
 				actual_amount.Set(num3, smi);
 				int num4 = pickupable.Reserve("ToggleReserve", gameObject, num3);

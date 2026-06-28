@@ -6,8 +6,6 @@ using UnityEngine;
 
 public class LoadScreen : KModalScreen
 {
-	public static event global::System.Action OnFileDeleted;
-
 	public static LoadScreen Instance { get; private set; }
 
 	protected override void OnPrefabInit()
@@ -102,7 +100,7 @@ public class LoadScreen : KModalScreen
 		}
 		catch (Exception ex)
 		{
-			Debug.LogWarning("Corrupted save file: " + filename + "\n" + ex.ToString());
+			global::Debug.LogWarning("Corrupted save file: " + filename + "\n" + ex.ToString(), null);
 		}
 		if (flag)
 		{
@@ -132,14 +130,14 @@ public class LoadScreen : KModalScreen
 
 	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header)
 	{
-		return header.buildVersion > 217565U;
+		return header.buildVersion > 217794U;
 	}
 
 	private void SetSelectedGame(string filename)
 	{
 		if (string.IsNullOrEmpty(filename) || !File.Exists(filename))
 		{
-			Debug.LogError("The filename provided is not valid.");
+			global::Debug.LogError("The filename provided is not valid.", null);
 			return;
 		}
 		KButton kbutton = ((this.selectedFileName == null) ? null : this.fileButtonMap[this.selectedFileName]);
@@ -173,7 +171,7 @@ public class LoadScreen : KModalScreen
 			this.saveDetails.text = text4;
 			if (LoadScreen.IsSaveFileFromUnsupportedFutureBuild(header))
 			{
-				this.saveDetails.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_TOO_NEW, filename, header.buildVersion, 217565U);
+				this.saveDetails.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_TOO_NEW, filename, header.buildVersion, 217794U);
 				this.loadButton.isInteractable = false;
 				this.loadButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Disabled);
 			}
@@ -192,7 +190,7 @@ public class LoadScreen : KModalScreen
 		}
 		catch (Exception ex)
 		{
-			Debug.LogWarning(ex);
+			global::Debug.LogWarning(ex, null);
 			this.saveDetails.text = string.Format(UI.FRONTEND.LOADSCREEN.CORRUPTEDSAVE, filename);
 			if (this.loadButton.isInteractable)
 			{
@@ -214,10 +212,10 @@ public class LoadScreen : KModalScreen
 		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(this.selectedFileName, out header);
 		string text = null;
 		string text2 = null;
-		if (header.buildVersion > 217565U)
+		if (header.buildVersion > 217794U)
 		{
 			text = header.buildVersion.ToString();
-			text2 = 217565U.ToString();
+			text2 = 217794U.ToString();
 		}
 		else if (gameInfo.saveMajorVersion < 7)
 		{
@@ -235,11 +233,6 @@ public class LoadScreen : KModalScreen
 		{
 			LoadScreen.ForceStopGame();
 		}
-		MainMenu mainMenu = global::UnityEngine.Object.FindObjectOfType<MainMenu>();
-		if (mainMenu != null)
-		{
-			mainMenu.ClearFileDeletedCallback();
-		}
 		SaveLoader.SetActiveSaveFilePath(this.selectedFileName);
 		App.LoadScene("backend");
 		this.Deactivate();
@@ -254,7 +247,7 @@ public class LoadScreen : KModalScreen
 	{
 		if (string.IsNullOrEmpty(this.selectedFileName))
 		{
-			Debug.LogError("The path provided is not valid and cannot be deleted.");
+			global::Debug.LogError("The path provided is not valid and cannot be deleted.", null);
 			return;
 		}
 		this.ConfirmDoAction(string.Format(UI.FRONTEND.LOADSCREEN.CONFIRMDELETE, Path.GetFileName(this.selectedFileName)), delegate
@@ -265,10 +258,6 @@ public class LoadScreen : KModalScreen
 			File.Delete(this.selectedFileName);
 			this.selectedFileName = null;
 			this.RefreshFiles();
-			if (LoadScreen.OnFileDeleted != null)
-			{
-				LoadScreen.OnFileDeleted();
-			}
 		});
 	}
 

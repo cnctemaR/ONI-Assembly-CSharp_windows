@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class AccessorySlot : Resource
 {
 	public AccessorySlot(string id, ResourceSet parent, KAnimFile swap_build)
 		: base(id, parent, null)
 	{
-		Debug.AssertFormat(swap_build != null, "AccessorySlot {0} missing swap_build", new object[] { id });
 		this.targetSymbolId = new KAnimHashedString("snapTo_" + id.ToLower());
 		this.accessories = new List<Accessory>();
 		this.file = swap_build;

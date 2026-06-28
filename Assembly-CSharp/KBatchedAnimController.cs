@@ -77,7 +77,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		int symbolIndex = batchGroupData.GetSymbolIndex(name, new KAnimHashedString(this.curAnimFile.name));
 		if (symbolIndex == -1)
 		{
-			global::UnityEngine.Debug.LogWarning("Couldn't set tint for [" + name + "] - not found");
+			global::Debug.LogWarning("Couldn't set tint for [" + name + "] - not found", null);
 			return;
 		}
 		if (stIdx == KBatchedAnimController.SymbolTintIndex.First)
@@ -131,9 +131,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	public override KAnim.Anim GetAnim(int index)
 	{
-		global::UnityEngine.Debug.AssertFormat(this.batchGroupID.isValid && this.batchGroupID != KAnimBatchManager.NO_BATCH, "[{0}] Batch not ready", new object[] { base.name });
 		KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.batchGroupID, false);
-		global::UnityEngine.Debug.Assert(batchGroupData != null);
 		return batchGroupData.GetAnim(index);
 	}
 
@@ -148,7 +146,6 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	public override void AddAnims(params KAnimFile[] addedAnims)
 	{
-		global::UnityEngine.Debug.AssertFormat(addedAnims != null && addedAnims.Length > 0 && addedAnims[0] != null, "Adding null or zero length anims for [{0}]", new object[] { base.name });
 		List<KAnimFile> list = new List<KAnimFile>(this.animFiles.Length + addedAnims.Length);
 		list.AddRange(this.animFiles);
 		for (int i = 0; i < addedAnims.Length; i++)
@@ -156,7 +153,6 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 			if (addedAnims[i] != null && !list.Contains(addedAnims[i]))
 			{
 				KAnimFileData data = addedAnims[i].GetData();
-				global::UnityEngine.Debug.Assert(data != null);
 				if (data.buildIndex != -1)
 				{
 					this.SetBatchGroup(data);
@@ -188,7 +184,6 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 			KAnimGroupFile.Group group = KAnimGroupFile.GetGroup(kafd.build.batchTag);
 			if (group.renderType == KAnimBatchGroup.RendererType.DontRender || group.renderType == KAnimBatchGroup.RendererType.AnimOnly)
 			{
-				global::UnityEngine.Debug.Assert(group.swapTarget.isValid, "Invalid swap target fro group [" + group.id + "]");
 				this.batchGroupID = group.swapTarget;
 				return;
 			}
@@ -198,7 +193,6 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	public void LoadAnims()
 	{
-		global::UnityEngine.Debug.AssertFormat(KAnimBatchManager.Instance().isReady, base.gameObject, "Why are we loading now? Dont expect {0} to work", new object[] { base.name });
 		this.overrideAnims.Clear();
 		this.anims.Clear();
 		if (this.animFiles != null)
@@ -213,7 +207,6 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 					{
 						KAnimFileData data = list[i].GetData();
 						this.SetBatchGroup(data);
-						global::UnityEngine.Debug.AssertFormat(this.batchGroupID.isValid && this.batchGroupID != KAnimBatchManager.NO_BATCH, "[{0}] Batch not ready", new object[] { base.name });
 						base.AddAnims(data);
 						list.RemoveAt(i);
 						break;
@@ -381,7 +374,6 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		while (num2 < symbolCount && num2 / 30 < 4)
 		{
 			KAnim.Build.Symbol symbol = batchGroupData.GetSymbol(num2);
-			global::UnityEngine.Debug.Assert(symbol != null);
 			if (this.visibleSymbols.Contains(symbol.hash))
 			{
 				this.batchInstanceData.UnsetHiddenBit(num2);
@@ -413,7 +405,6 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	public HashedString GetBatchGroupID(bool isEditorWindow = false)
 	{
-		global::UnityEngine.Debug.Assert(isEditorWindow || this.animFiles == null || this.animFiles.Length == 0 || (this.batchGroupID.isValid && this.batchGroupID != KAnimBatchManager.NO_BATCH));
 		return this.batchGroupID;
 	}
 
@@ -736,9 +727,6 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	private void GetSubstituteFrames(KAnim.Build.Symbol substituteSymbol, List<KAnim.Build.SymbolFrameInstance> substituteFrames, List<Texture2D> textures)
 	{
-		global::UnityEngine.Debug.Assert(substituteSymbol != null, "Symbol is null");
-		global::UnityEngine.Debug.AssertFormat(substituteSymbol.build != null, "Symbol {0} build is null", new object[] { substituteSymbol.hash.ToString() });
-		global::UnityEngine.Debug.Assert(substituteSymbol.build.batchTag.isValid, "Invalid batchtag");
 		KBatchGroupData batch_group = KAnimBatchManager.Instance().GetBatchGroupData(substituteSymbol.build.batchTag, false);
 		for (int i = 0; i < substituteSymbol.numFrames; i++)
 		{
@@ -789,7 +777,6 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	protected void ReApplySymbolOverrides()
 	{
-		global::UnityEngine.Debug.Assert(this.batch != null);
 		if (this.pendingSymbolOverrides != null)
 		{
 			this.AcceptOverrides();
@@ -844,7 +831,6 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	protected override void ApplySymbolOverride(KAnimHashedString overridden_symbol_name, HashedString batchSource, KAnim.Build.Symbol new_symbol, bool is_perminent)
 	{
-		global::UnityEngine.Debug.Assert(new_symbol != null, "Symbol is null");
 		if (this.batch != null && this.batch.batchGroupInstance != null)
 		{
 			if (batchSource == this.batch.group.batchID)
@@ -861,30 +847,15 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 			this.GetSubstituteFrames(new_symbol, this.substituteFrames, list);
 			if (this.substituteFrames.Count == 0)
 			{
-				global::UnityEngine.Debug.LogWarning("substituteFrames == 0 for [" + overridden_symbol_name + "]");
+				global::Debug.LogWarning("substituteFrames == 0 for [" + overridden_symbol_name + "]", null);
 				return;
 			}
-			global::UnityEngine.Debug.Assert(new_symbol != null);
-			global::UnityEngine.Debug.Assert(list.Count > 0);
 			List<int> list2 = new List<int>();
 			Dictionary<int, int> dictionary = new Dictionary<int, int>();
 			for (int i = 0; i < list.Count; i++)
 			{
 				int num = -1;
 				bool flag = this.batch.batchGroupInstance.AddOverrideTexture(list[i], ref num);
-				global::UnityEngine.Debug.Assert(num >= 0, "No texture slot assigned", base.gameObject);
-				global::UnityEngine.Debug.AssertFormat(num < KBatchedAnimCanvasRenderer.atlasNames.Length, "Too many textures [{2}] texIndex: [{0}] tex count: [{1}]", new object[]
-				{
-					num,
-					this.batch.batchGroupInstance.textures.Count + this.batch.group.data.textures.Count,
-					this.batchGroupID.ToString()
-				});
-				global::UnityEngine.Debug.AssertFormat(num < this.batch.batchGroupInstance.textures.Count + this.batch.group.data.textures.Count, "Too many textures {2} texIndex: [{0}] tex count: [{1}]", new object[]
-				{
-					num,
-					this.batch.batchGroupInstance.textures.Count + this.batch.group.data.textures.Count,
-					this.batchGroupID.ToString()
-				});
 				list2.Add(num);
 				dictionary[i] = num;
 				if (flag)
@@ -907,8 +878,6 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	protected override void RebuildBatchGroupInstance()
 	{
-		global::UnityEngine.Debug.Assert(this.batch != null);
-		global::UnityEngine.Debug.Assert(this.batch.group != null);
 		if (this.batch.batchGroupInstance.requiresRebuild)
 		{
 			try
@@ -953,8 +922,6 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	private void MoveToNewChunk(Vector2I newChunkXY)
 	{
-		global::UnityEngine.Debug.Assert(this.batch != null);
-		global::UnityEngine.Debug.Assert(this.lastChunkXY != newChunkXY);
 		KAnimBatchManager.Instance().MoveChunk(this, this.lastChunkXY, newChunkXY);
 	}
 

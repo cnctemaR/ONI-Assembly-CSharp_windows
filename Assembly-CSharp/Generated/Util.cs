@@ -217,7 +217,7 @@ namespace Generated
 			}
 			else
 			{
-				Debug.LogWarning("GetBlob(): Calling unseeded random");
+				global::Debug.LogWarning("GetBlob(): Calling unseeded random", null);
 				circle.Shuffle<Vector2>();
 			}
 			for (int i = 0; i < circle.Count; i++)

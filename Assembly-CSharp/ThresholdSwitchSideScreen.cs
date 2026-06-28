@@ -36,13 +36,13 @@ public class ThresholdSwitchSideScreen : SideScreenContent
 	{
 		if (new_target == null)
 		{
-			Debug.LogError("Invalid gameObject received");
+			global::Debug.LogError("Invalid gameObject received", null);
 			return;
 		}
 		this.target = new_target.GetComponent<IThresholdSwitch>();
 		if (this.target == null)
 		{
-			Debug.LogError("The gameObject received does not contain a IThresholdSwitch component");
+			global::Debug.LogError("The gameObject received does not contain a IThresholdSwitch component", null);
 			return;
 		}
 		this.UpdateLabels();

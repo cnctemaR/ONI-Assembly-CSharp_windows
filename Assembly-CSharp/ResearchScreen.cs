@@ -117,7 +117,7 @@ public class ResearchScreen : KModalScreen
 	{
 		if (!this.entryMap.ContainsKey(tech))
 		{
-			Debug.LogError("The Tech provided was not present in the dictionary");
+			global::Debug.LogError("The Tech provided was not present in the dictionary", null);
 			return Vector3.zero;
 		}
 		return this.entryMap[tech].transform.position;
@@ -131,7 +131,7 @@ public class ResearchScreen : KModalScreen
 		}
 		if (!this.entryMap.ContainsKey(tech))
 		{
-			Debug.LogError("The Tech provided was not present in the dictionary");
+			global::Debug.LogError("The Tech provided was not present in the dictionary", null);
 			return null;
 		}
 		return this.entryMap[tech];

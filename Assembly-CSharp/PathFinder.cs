@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class PathFinder
 {
@@ -209,7 +208,7 @@ public class PathFinder
 				num++;
 				if (num >= links.Length)
 				{
-					Debug.LogError("Out of nav links. Need to increase NavGrid.MaxLinksPerCell");
+					Debug.LogError("Out of nav links. Need to increase NavGrid.MaxLinksPerCell", null);
 				}
 			}
 		}

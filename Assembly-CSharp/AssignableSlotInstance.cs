@@ -38,7 +38,7 @@ public abstract class AssignableSlotInstance
 		{
 			if (assignable != null)
 			{
-				Debug.Log("Assign() Already assigned " + assignable.name);
+				global::Debug.Log("Assign() Already assigned " + assignable.name, null);
 			}
 			return;
 		}

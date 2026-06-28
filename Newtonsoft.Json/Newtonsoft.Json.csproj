@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{20939EC5-8289-411F-91AE-BBDBFACE98ED}</ProjectGuid>
+    <ProjectGuid>{89ABFE56-005D-4990-BBAC-1168CE6EF74E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Newtonsoft.Json</RootNamespace>
     <AssemblyName>Newtonsoft.Json</AssemblyName>
@@ -245,31 +245,31 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{20939EC5-8289-411F-91AE-BBDBFACE98EC}</Project>
+      <Project>{89ABFE56-005D-4990-BBAC-1168CE6EF74D}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{20939EC5-8289-411F-91AE-BBDBFACE98F1}</Project>
+      <Project>{89ABFE56-005D-4990-BBAC-1168CE6EF752}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Data\System.Data.csproj">
-      <Project>{20939EC5-8289-411F-91AE-BBDBFACE98F2}</Project>
+      <Project>{89ABFE56-005D-4990-BBAC-1168CE6EF753}</Project>
       <Name>System.Data</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Runtime.Serialization\System.Runtime.Serialization.csproj">
-      <Project>{20939EC5-8289-411F-91AE-BBDBFACE98F6}</Project>
+      <Project>{89ABFE56-005D-4990-BBAC-1168CE6EF757}</Project>
       <Name>System.Runtime.Serialization</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml.Linq\System.Xml.Linq.csproj">
-      <Project>{20939EC5-8289-411F-91AE-BBDBFACE98FA}</Project>
+      <Project>{89ABFE56-005D-4990-BBAC-1168CE6EF75B}</Project>
       <Name>System.Xml.Linq</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{20939EC5-8289-411F-91AE-BBDBFACE98F9}</Project>
+      <Project>{89ABFE56-005D-4990-BBAC-1168CE6EF75A}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{20939EC5-8289-411F-91AE-BBDBFACE98F3}</Project>
+      <Project>{89ABFE56-005D-4990-BBAC-1168CE6EF754}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

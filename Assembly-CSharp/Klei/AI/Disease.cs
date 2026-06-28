@@ -513,8 +513,6 @@ namespace Klei.AI
 
 		public string overlayLegendHovertext;
 
-		public bool isPathogen;
-
 		private List<Disease.DiseaseComponent> components = new List<Disease.DiseaseComponent>();
 
 		public Amount amount;

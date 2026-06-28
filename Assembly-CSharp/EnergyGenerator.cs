@@ -295,8 +295,8 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 	[MyCmpGet]
 	private ManualDeliveryKG delivery;
 
-	[SerializeField]
 	[Serialize]
+	[SerializeField]
 	private float batteryRefillPercent = 0.5f;
 
 	public bool ignoreBatteryRefillPercent;

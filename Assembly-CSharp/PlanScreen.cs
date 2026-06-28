@@ -874,9 +874,9 @@ public class PlanScreen : KIconToggleMenu
 	}
 
 	[IgnoreCommentedLines("#")]
-	[IgnoreFirst(1)]
-	[IgnoreEmptyLines]
 	[DelimitedRecord(",")]
+	[IgnoreEmptyLines]
+	[IgnoreFirst(1)]
 	private class FabricatorConfig
 	{
 		public string planCategory;

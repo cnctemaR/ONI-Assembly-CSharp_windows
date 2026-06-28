@@ -224,8 +224,8 @@ public class OverlayScreen : KMonoBehaviour
 	[Header("Suit")]
 	private GameObject suitOverlayPrefab;
 
-	[SerializeField]
 	[Header("ToolTip")]
+	[SerializeField]
 	private TextStyleSetting TooltipHeader;
 
 	[SerializeField]

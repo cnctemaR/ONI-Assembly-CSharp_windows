@@ -211,6 +211,10 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 
 		private void OnImmuneDelta(float delta)
 		{
+			if (Game.Instance.customSettings.GetCurrentQualitySetting("ImmuneSystem").id == "Invincible")
+			{
+				return;
+			}
 			if (this.immuneLevel.value <= 0f && this.lastHighestDisease != null)
 			{
 				ImmuneSystemMonitor.Instance.DiseaseSourceInfo diseaseSourceInfo;

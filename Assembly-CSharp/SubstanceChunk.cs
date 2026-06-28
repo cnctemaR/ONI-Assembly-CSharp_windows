@@ -3,8 +3,8 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-[SerializationConfig(MemberSerialization.OptIn)]
 [SkipSaveFileSerialization]
+[SerializationConfig(MemberSerialization.OptIn)]
 public class SubstanceChunk : KMonoBehaviour, ISaveLoadable
 {
 	protected override void OnSpawn()

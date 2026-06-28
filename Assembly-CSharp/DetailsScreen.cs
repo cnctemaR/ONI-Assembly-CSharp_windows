@@ -419,12 +419,12 @@ public class DetailsScreen : KTabMenu
 	[Header("Panels")]
 	public Transform UserMenuPanel;
 
-	[SerializeField]
 	[Header("Name Editing (disabled)")]
+	[SerializeField]
 	private KButton CloseButton;
 
-	[SerializeField]
 	[Header("Tabs")]
+	[SerializeField]
 	private EditableTitleBar TabTitle;
 
 	[SerializeField]

@@ -3,8 +3,8 @@ using System.Diagnostics;
 using KSerialization;
 using UnityEngine;
 
-[SerializationConfig(MemberSerialization.OptIn)]
 [DebuggerDisplay("{name}")]
+[SerializationConfig(MemberSerialization.OptIn)]
 public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 {
 	public int PowerDistributionOrder

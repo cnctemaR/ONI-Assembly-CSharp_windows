@@ -220,8 +220,8 @@ public class WorldDamage : KMonoBehaviour
 	[SerializeField]
 	private FMODAsset leakSound;
 
-	[EventRef]
 	[SerializeField]
+	[EventRef]
 	private string leakSoundMigrated;
 
 	private List<int> queuedDigCallbackCells = new List<int>();

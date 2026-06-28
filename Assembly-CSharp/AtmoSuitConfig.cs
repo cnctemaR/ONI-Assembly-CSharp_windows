@@ -25,6 +25,7 @@ public class AtmoSuitConfig : IEquipmentConfig
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("SoakingWet"));
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("WetFeet"));
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("PoppedEarDrums"));
+		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("Unclean"));
 		string helmet_name = "helmet_name";
 		equipmentDef.OnEquipCallBack = delegate(Equippable eq)
 		{

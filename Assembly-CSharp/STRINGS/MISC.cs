@@ -631,7 +631,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Learn about exosuits";
 
-				public static LocString MESSAGEBODY = "<style=\"equipment\">Exosuits</style> protect your Duplicants from environmental hazards like extreme <style=\\heat\">Heat</style>, airborne <style=\"disease\">Germs</style>, and unbreathable <style=\"gas\">Gases</style>. In order to utilize these suits, you'll need to store them in an Exosuit Dock and hook that dock up to a Suit Checkpoint.\n\nDuplicants will equip an exosuit when walking past a Checkpoint in the direction it's facing and will unequip the suit when walking the oppposite way.";
+				public static LocString MESSAGEBODY = "<style=\"equipment\">Exosuits</style> protect your Duplicants from environmental hazards like extreme <style=\"heat\">Heat</style>, airborne <style=\"disease\">Germs</style>, and unbreathable <style=\"gas\">Gases</style>. In order to utilize these suits, you'll need to store them in an Exosuit Dock and hook that dock up to a Suit Checkpoint.\n\nDuplicants will equip an exosuit when walking past a Checkpoint in the direction it's facing and will unequip the suit when walking the oppposite way.";
 			}
 
 			public class NOMESSAGES

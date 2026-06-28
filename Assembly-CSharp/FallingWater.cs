@@ -559,8 +559,8 @@ public class FallingWater : KMonoBehaviour
 	[SerializeField]
 	private string liquid_top_loop;
 
-	[SerializeField]
 	[EventRef]
+	[SerializeField]
 	private string liquid_splash_initial;
 
 	[EventRef]

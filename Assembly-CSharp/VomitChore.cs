@@ -42,10 +42,15 @@ public class VomitChore : Chore<VomitChore.StatesInstance>
 				float num = dt / totalTime;
 				Diseases diseases = base.master.GetComponent<MinionModifiers>().diseases;
 				SimUtil.DiseaseInfo invalid = SimUtil.DiseaseInfo.Invalid;
-				if (diseases.Count > 0)
+				for (int i = 0; i < diseases.Count; i++)
 				{
-					invalid.idx = Db.Get().Diseases.GetIndex(diseases[0].modifier.id);
-					invalid.count = Mathf.RoundToInt(100000f * num);
+					DiseaseInstance diseaseInstance = diseases[i];
+					if (diseaseInstance.modifier.diseaseType == Disease.DiseaseType.Pathogen)
+					{
+						invalid.idx = Db.Get().Diseases.GetIndex(diseaseInstance.modifier.id);
+						invalid.count = Mathf.RoundToInt(100000f * num);
+						break;
+					}
 				}
 				Facing component = base.sm.vomiter.Get(base.smi).GetComponent<Facing>();
 				int num2 = Grid.PosToCell(component.transform.position);

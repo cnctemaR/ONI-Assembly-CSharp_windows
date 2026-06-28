@@ -55,8 +55,9 @@ public class BladderMonitor : GameStateMachine<BladderMonitor, BladderMonitor.In
 
 		public bool NeedsToPee()
 		{
-			if (base.smi.isMasterNull)
+			if (base.smi == null)
 			{
+				Debug.LogWarning("How can my state machine instance be null?", null);
 				return false;
 			}
 			StaminaMonitor.Instance smi = base.smi.master.gameObject.GetSMI<StaminaMonitor.Instance>();

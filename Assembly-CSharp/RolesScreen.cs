@@ -206,32 +206,44 @@ public class RolesScreen : KModalScreen
 
 	public void RefreshWidgetPositions()
 	{
+		float num = 0f;
 		foreach (KeyValuePair<string, GameObject> keyValuePair in this.roleWidgets)
 		{
-			keyValuePair.Value.rectTransform().anchoredPosition = Vector2.down * this.GetRowPosition(Game.Instance.roleManager.GetRowIndex(keyValuePair.Key));
+			float rowPosition = this.GetRowPosition(Game.Instance.roleManager.GetRowIndex(keyValuePair.Key));
+			num = Mathf.Max(rowPosition, num);
+			keyValuePair.Value.rectTransform().anchoredPosition = Vector2.down * rowPosition;
+		}
+		num = Mathf.Max(num, this.GetRowHeight(0) + (float)this.HEADER_HEIGHT);
+		float rowHeight = this.GetRowHeight(Game.Instance.roleManager.NumberOfRows);
+		foreach (GameObject gameObject in this.tierColumns)
+		{
+			gameObject.GetComponent<LayoutElement>().minHeight = num + rowHeight;
 		}
 		this.linesPending = true;
 	}
 
 	public float GetRowPosition(int rowIndex)
 	{
-		float num = 32f;
-		int num2 = 0;
-		float num3 = 0f;
+		float num = 0f;
 		for (int i = 1; i < rowIndex; i++)
 		{
-			num2 = 0;
-			foreach (RoleConfig roleConfig in Game.Instance.roleManager.RolesConfigs)
-			{
-				if (Game.Instance.roleManager.GetRowIndex(roleConfig.id) == i)
-				{
-					num2 = Math.Max(num2, Game.Instance.roleManager.GetRoleAssignees(roleConfig.id).Count);
-				}
-			}
-			num3 += Math.Max((float)this.layoutRowHeight, 72f + (float)num2 * num);
+			num += this.GetRowHeight(i);
 		}
-		int num4 = 192;
-		return num3 + (float)num4;
+		return num + (float)this.HEADER_HEIGHT;
+	}
+
+	public float GetRowHeight(int rowIndex)
+	{
+		float num = 32f;
+		int num2 = 0;
+		foreach (RoleConfig roleConfig in Game.Instance.roleManager.RolesConfigs)
+		{
+			if (Game.Instance.roleManager.GetRowIndex(roleConfig.id) == rowIndex)
+			{
+				num2 = Math.Max(num2, Game.Instance.roleManager.GetRoleAssignees(roleConfig.id).Count);
+			}
+		}
+		return Math.Max((float)this.layoutRowHeight, 72f + (float)num2 * num);
 	}
 
 	public RoleWidget GetRoleWidget(string roleID)
@@ -387,6 +399,8 @@ public class RolesScreen : KModalScreen
 	private GameObject SlotWidgetPool;
 
 	private List<GameObject> freeWidgetSlots = new List<GameObject>();
+
+	private int HEADER_HEIGHT = 192;
 
 	private bool dirty;
 

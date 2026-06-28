@@ -168,7 +168,19 @@ public class Worker : KMonoBehaviour
 		Game.Instance.StartedWork();
 		if (this.state != Worker.State.Idle)
 		{
-			global::Debug.LogError(base.name + ".state should be idle but instead it's:" + this.state.ToString(), null);
+			string text = string.Empty;
+			if (this.workable != null)
+			{
+				text = this.workable.name;
+			}
+			global::Debug.LogError(string.Concat(new string[]
+			{
+				base.name,
+				".",
+				text,
+				".state should be idle but instead it's:",
+				this.state.ToString()
+			}), null);
 		}
 		string name = this.workable.GetType().Name;
 		try
@@ -224,8 +236,8 @@ public class Worker : KMonoBehaviour
 		}
 		catch (Exception ex)
 		{
-			string text = "Exception in: Worker.StartWork(" + name + ")";
-			Output.LogErrorWithObj(this, new object[] { text + "\n" + ex.ToString() });
+			string text2 = "Exception in: Worker.StartWork(" + name + ")";
+			Output.LogErrorWithObj(this, new object[] { text2 + "\n" + ex.ToString() });
 			throw;
 		}
 	}

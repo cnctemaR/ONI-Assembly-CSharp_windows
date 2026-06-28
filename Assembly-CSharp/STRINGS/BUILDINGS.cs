@@ -1117,7 +1117,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Splitting generators onto separate systems can prevent power overloads and wasted electricity.";
 
-				public static LocString EFFECT = "Runs one wire section over another without joining them.\n\nCan be run through tiles.";
+				public static LocString EFFECT = "Carries more <style=\"power\">Wattage</style> than a regular Wire Bridge without overloading.\n\nRuns one wire section over another without joining them.\n\nCan be run through tiles.";
 			}
 
 			public class WIREREFINEDHIGHWATTAGE
@@ -1135,7 +1135,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Joint plates can run Heavi wires through walls without leaking gas or liquid.";
 
-				public static LocString EFFECT = "Allows Heavi-Watt Wire to be run through wall and floor tiles.\n\nFunctions as a regular tile.";
+				public static LocString EFFECT = "Carries more <style=\"power\">Wattage</style> than a regular Heavi-Watt Joint Plate without overloading.\n\nAllows Heavi-Watt Wire to be run through wall and floor tiles.\n\nFunctions as a regular tile.";
 			}
 
 			public class HANDSANITIZER

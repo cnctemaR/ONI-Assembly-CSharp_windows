@@ -18,24 +18,24 @@ public class AssignableSideScreenRow : KMonoBehaviour
 		}
 		else
 		{
-			Assignables assignables = null;
-			if (this.targetIdentity is MinionIdentity)
+			Assignable assignable = null;
+			MinionIdentity minionIdentity = this.targetIdentity as MinionIdentity;
+			if (minionIdentity != null)
 			{
-				assignables = (this.targetIdentity as MinionIdentity).GetComponent<Assignables>();
+				foreach (Assignables assignables in minionIdentity.GetComponents<Assignables>())
+				{
+					Assignable assignable2 = assignables.GetAssignable(this.sideScreen.targetAssignable.slot);
+					if (assignable2 != null && assignable2 != this.sideScreen.targetAssignable)
+					{
+						assignable = assignable2;
+						break;
+					}
+				}
 			}
-			if (assignables != null)
+			if (assignable != null)
 			{
-				Assignable assignable = assignables.GetAssignable(this.sideScreen.targetAssignable.slot);
-				if (assignable != null && assignable != this.sideScreen.targetAssignable)
-				{
-					this.currentState = AssignableSideScreenRow.AssignableState.AssignedToOther;
-					this.assignmentText.text = assignable.GetProperName();
-				}
-				else
-				{
-					this.currentState = AssignableSideScreenRow.AssignableState.Unassigned;
-					this.assignmentText.text = UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.UNASSIGNED;
-				}
+				this.currentState = AssignableSideScreenRow.AssignableState.AssignedToOther;
+				this.assignmentText.text = assignable.GetProperName();
 			}
 			else
 			{

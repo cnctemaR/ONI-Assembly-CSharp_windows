@@ -140,6 +140,8 @@ namespace STRINGS
 			public static LocString NAME = "Chlorine";
 
 			public static LocString DESC = "(Cl) Chlorine is an extremely toxic element in a <style=\"solid\">Solid</style> state.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class CHLORINEGAS
@@ -234,6 +236,8 @@ namespace STRINGS
 			public static LocString NAME = "Crushed Ice";
 
 			public static LocString DESC = "(H<sub>2</sub>0) A slush of crushed, semi-solid ice.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class CRUSHEDROCK
@@ -277,6 +281,8 @@ namespace STRINGS
 			public static LocString NAME = "Polluted Ice";
 
 			public static LocString DESC = "Polluted Ice is dirty, unfiltered water frozen into a <style=\"solid\">Solid</style> state.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class DIRTYWATER
@@ -389,6 +395,8 @@ namespace STRINGS
 			public static LocString NAME = "Ice";
 
 			public static LocString DESC = "(H<sub>2</sub>0) Ice is clean water frozen into a <style=\"solid\">Solid</style> state.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class IGNEOUSROCK
@@ -592,6 +600,8 @@ namespace STRINGS
 			public static LocString NAME = "Oxylite";
 
 			public static LocString DESC = "(Ir<sub>3</sub>O<sub>2</sub>) Oxylite is a chemical compound that slowly emits breathable <style=\"oxygen\">Oxygen</style>.\n\nExcavating Oxylite increases its emission rate, but depletes the ore more rapidly.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class PHOSPHATENODULES
@@ -640,6 +650,8 @@ namespace STRINGS
 			public static LocString NAME = "Radium";
 
 			public static LocString DESC = "(Ra) Radium is a <style=\"light\">Light</style> emitting radioactive substance.\n\nIt is useful as a <style=\"power\">Power</style> source.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class ROCKGAS
@@ -699,6 +711,8 @@ namespace STRINGS
 			public static LocString NAME = "Snow";
 
 			public static LocString DESC = "(H<sub>2</sub>0) Snow is a mass of loose, crystalline ice particles.\n\nIt becomes <style=\"liquid\">Water</style> when melted.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SOLIDCARBONDIOXIDE
@@ -713,6 +727,8 @@ namespace STRINGS
 			public static LocString NAME = "Chlorine";
 
 			public static LocString DESC = "(Cl) Chlorine is a toxic chemical element in a <style=\"solid\">Solid</style> state.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SOLIDHYDROGEN
@@ -720,6 +736,8 @@ namespace STRINGS
 			public static LocString NAME = "Hydrogen";
 
 			public static LocString DESC = "(H) Hydrogen is the universe's most common element in a <style=\"solid\">Solid</style> state.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SOLIDMERCURY
@@ -736,6 +754,8 @@ namespace STRINGS
 			public static LocString NAME = "Oxygen";
 
 			public static LocString DESC = "(O<sub>2</sub>) Oxygen is a breathable element in a <style=\"solid\">Solid</style> state.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SOLIDMETHANE
@@ -743,6 +763,8 @@ namespace STRINGS
 			public static LocString NAME = "Methane";
 
 			public static LocString DESC = "(CH<sub>4</sub>) Methane is an alkane in a <style=\"solid\">Solid</style> state.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SOLIDPROPANE
@@ -759,6 +781,8 @@ namespace STRINGS
 			public static LocString NAME = "Crude Oil";
 
 			public static LocString DESC = "Crude Oil is a raw potential <style=\"power\">Power</style> source in a <style=\"solid\">Solid</style> state.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SOLIDNAPHTHA
@@ -766,6 +790,8 @@ namespace STRINGS
 			public static LocString NAME = "Naphtha";
 
 			public static LocString DESC = "Naphtha is a distilled hydrocarbon mixture in a <style=\"solid\">Solid</style> state.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SOLIDPETROLEUM
@@ -773,6 +799,8 @@ namespace STRINGS
 			public static LocString NAME = "Petroleum";
 
 			public static LocString DESC = "Petroleum is a <style=\"power\">Power</style> source in a <style=\"solid\">Solid</style> state.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class STEAM
@@ -819,6 +847,8 @@ namespace STRINGS
 			public static LocString NAME = "Tungsten Diselenide";
 
 			public static LocString DESC = "(WSe<sub>2</sub>) Tungsten Diselenide is an inorganic <style=\"RawMetal\">Metal</style> compound with a crystalline structure.\n\nIt is suitable for building <style=\"power\">Power</style> systems.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class TUNGSTENDISELENIDEGAS
@@ -833,6 +863,8 @@ namespace STRINGS
 			public static LocString NAME = "Polluted Dirt";
 
 			public static LocString DESC = "Polluted Dirt is toxic biological waste.\n\nIt emits <style=\"disease\">Polluted Oxygen</style> over time.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class UNOBTANIUM
@@ -840,6 +872,8 @@ namespace STRINGS
 			public static LocString NAME = "Neutronium";
 
 			public static LocString DESC = "(Nt) Neutronium is a mysterious and extremely resilient <style=\"RawMetal\">Metallic</style> element.\n\nIt cannot be excavated by any Duplicant mining tool.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class VACUUM

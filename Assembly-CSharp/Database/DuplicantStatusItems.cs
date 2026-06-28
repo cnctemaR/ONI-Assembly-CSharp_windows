@@ -166,23 +166,20 @@ namespace Database
 			this.Storing.resolveStringCallback = delegate(string str, object data)
 			{
 				Workable workable3 = (Workable)data;
-				if (workable3 != null)
+				if (workable3 != null && workable3.worker != null)
 				{
 					KSelectable component = workable3.GetComponent<KSelectable>();
 					if (component)
 					{
 						str = str.Replace("{Target}", component.GetName());
 					}
-					if (workable3.worker != null)
+					Pickupable pickupable = workable3.worker.workCompleteData as Pickupable;
+					if (workable3.worker != null && pickupable)
 					{
-						Pickupable pickupable = workable3.worker.workCompleteData as Pickupable;
-						if (workable3.worker != null && pickupable)
+						KSelectable component2 = pickupable.GetComponent<KSelectable>();
+						if (component2)
 						{
-							KSelectable component2 = pickupable.GetComponent<KSelectable>();
-							if (component2)
-							{
-								str = str.Replace("{Item}", component2.GetName());
-							}
+							str = str.Replace("{Item}", component2.GetName());
 						}
 					}
 				}

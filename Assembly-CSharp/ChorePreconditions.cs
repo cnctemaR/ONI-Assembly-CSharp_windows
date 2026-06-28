@@ -48,7 +48,7 @@ public class ChorePreconditions
 		precondition4.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_PERMITTED;
 		precondition4.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			return context.consumer.IsPermittedOrEnabled(context.chore);
+			return context.consumer.IsPermittedOrEnabled(context.choreTypeForPermission, context.chore);
 		};
 		this.IsPermitted = precondition4;
 		Chore.Precondition precondition5 = default(Chore.Precondition);
@@ -90,15 +90,20 @@ public class ChorePreconditions
 					}
 					return false;
 				}
+				Room room2 = null;
 				FetchChore fetchChore = context.chore as FetchChore;
 				if (fetchChore != null && fetchChore.destination != null)
 				{
-					Room room2 = Game.Instance.roomProber.GetCavityForCell(Grid.PosToCell(fetchChore.destination.gameObject)).room;
+					CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(Grid.PosToCell(fetchChore.destination));
+					if (cavityForCell != null)
+					{
+						room2 = cavityForCell.room;
+					}
 					return room2 != null && room2 == room;
 				}
 				if (context.chore is WorkChore<Tinkerable>)
 				{
-					Room room2 = Game.Instance.roomProber.GetCavityForCell(Grid.PosToCell((context.chore as WorkChore<Tinkerable>).gameObject)).room;
+					room2 = Game.Instance.roomProber.GetCavityForCell(Grid.PosToCell((context.chore as WorkChore<Tinkerable>).gameObject)).room;
 					return room2 != null && room2 == room;
 				}
 				return false;
@@ -142,6 +147,10 @@ public class ChorePreconditions
 		precondition10.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			MinionResume component = context.consumer.GetComponent<MinionResume>();
+			if (!component)
+			{
+				return false;
+			}
 			if (data is RolePerk)
 			{
 				RolePerk rolePerk = data as RolePerk;
@@ -161,6 +170,10 @@ public class ChorePreconditions
 		precondition11.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			MinionResume component2 = context.consumer.GetComponent<MinionResume>();
+			if (!component2)
+			{
+				return false;
+			}
 			if (data is string)
 			{
 				string text = (string)data;

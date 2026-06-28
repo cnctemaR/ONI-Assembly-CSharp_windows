@@ -21,7 +21,7 @@ public class ColdWheatConfig : IEntityConfig
 			SimHashes.Oxygen,
 			SimHashes.ContaminatedOxygen,
 			SimHashes.CarbonDioxide
-		}, true, 0f, 0.15f, 1f, "ColdWheatSeed", true, true);
+		}, true, 0f, 0.15f, "ColdWheatSeed", true, true);
 		EntityTemplates.ExtendPlantToFertilizable(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
 			new PlantElementAbsorber.ConsumeInfo

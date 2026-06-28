@@ -170,6 +170,7 @@ public class Fabricator : Workable, IEffectDescriptor, IHasBuildQueue
 
 	private void Cancel(Fabricator.UserOrder order)
 	{
+		this.isCancellingOrder = true;
 		for (int i = this.machineOrders.Count - 1; i >= 0; i--)
 		{
 			Fabricator.MachineOrder machineOrder = this.machineOrders[i];
@@ -184,6 +185,14 @@ public class Fabricator : Workable, IEffectDescriptor, IHasBuildQueue
 			}
 		}
 		order.Cleanup(this.OnOrderCancelledOrComplete);
+		this.isCancellingOrder = false;
+	}
+
+	public override void AwardExperience(float work_dt, MinionResume resume)
+	{
+		resume.AddExperienceIfRole(MachineTechnician.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
+		resume.AddExperienceIfRole("PowerTechnician", work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
+		resume.AddExperienceIfRole("MechatronicEngineer", work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
 	}
 
 	protected override void OnCleanUp()
@@ -477,6 +486,10 @@ public class Fabricator : Workable, IEffectDescriptor, IHasBuildQueue
 
 	protected override void OnCompleteWork(Worker worker)
 	{
+		if (this.isCancellingOrder)
+		{
+			return;
+		}
 		base.OnCompleteWork(worker);
 		if (this.machineOrders.Count <= 0)
 		{
@@ -541,6 +554,8 @@ public class Fabricator : Workable, IEffectDescriptor, IHasBuildQueue
 	protected virtual void OnBuildQueued(Fabricator.MachineOrder order)
 	{
 	}
+
+	private bool isCancellingOrder;
 
 	public const int MAX_NUM_ORDERS = 6;
 

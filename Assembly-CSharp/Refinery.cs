@@ -126,6 +126,13 @@ public class Refinery : Workable, IEffectDescriptor, IHasBuildQueue
 		this.UpdateOrderQueue(true);
 	}
 
+	public override void AwardExperience(float work_dt, MinionResume resume)
+	{
+		resume.AddExperienceIfRole(MachineTechnician.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
+		resume.AddExperienceIfRole("PowerTechnician", work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
+		resume.AddExperienceIfRole("MechatronicEngineer", work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
+	}
+
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
@@ -144,6 +151,7 @@ public class Refinery : Workable, IEffectDescriptor, IHasBuildQueue
 
 	private void Cancel(Refinery.UserOrder order)
 	{
+		this.isCancellingOrder = true;
 		for (int i = this.machineOrders.Count - 1; i >= 0; i--)
 		{
 			Refinery.MachineOrder machineOrder = this.machineOrders[i];
@@ -161,6 +169,7 @@ public class Refinery : Workable, IEffectDescriptor, IHasBuildQueue
 		{
 			this.OnOrderCancelledOrComplete(order);
 		}
+		this.isCancellingOrder = false;
 	}
 
 	protected override void OnCleanUp()
@@ -424,6 +433,10 @@ public class Refinery : Workable, IEffectDescriptor, IHasBuildQueue
 
 	protected override void OnCompleteWork(Worker worker)
 	{
+		if (this.isCancellingOrder)
+		{
+			return;
+		}
 		base.OnCompleteWork(worker);
 		if (this.machineOrders.Count <= 0)
 		{
@@ -493,6 +506,8 @@ public class Refinery : Workable, IEffectDescriptor, IHasBuildQueue
 	{
 		return new List<Descriptor>();
 	}
+
+	private bool isCancellingOrder;
 
 	public Action<Refinery.UserOrder> OnCreateOrder;
 

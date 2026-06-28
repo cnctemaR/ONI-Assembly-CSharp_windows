@@ -47,6 +47,7 @@ public class OuthouseConfig : IBuildingConfig
 		toiletWorkableClean.workTime = 90f;
 		toiletWorkableClean.overrideAnims = array;
 		toiletWorkableClean.workLayer = Grid.SceneLayer.BuildingFront;
+		Prioritizable.AddRef(go);
 		Storage storage = go.AddOrGet<Storage>();
 		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		storage.showInUI = true;

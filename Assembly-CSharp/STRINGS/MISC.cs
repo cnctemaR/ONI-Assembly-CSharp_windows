@@ -138,25 +138,25 @@ namespace STRINGS
 
 			public static LocString GENE_SHUFFLER = "Neural Vacillator";
 
-			public static LocString FARMING = "Farming-related building and delivery";
+			public static LocString FARMING = "Farm Build-Delivery";
 
-			public static LocString RESEARCH = "Research-related delivery";
+			public static LocString RESEARCH = "Research Delivery";
 
-			public static LocString POWER = "Power-related delivery";
+			public static LocString POWER = "Generator Delivery";
 
-			public static LocString BUILDING = "Build-related delivery and digging";
+			public static LocString BUILDING = "Build Dig-Delivery";
 
-			public static LocString COOKING = "Cooking-related delivery";
+			public static LocString COOKING = "Cook Delivery";
 
-			public static LocString FABRICATING = "Fabrication-related delivery";
+			public static LocString FABRICATING = "Fabricate Delivery";
 
-			public static LocString WIRING = "Wiring-related delivery and building";
+			public static LocString WIRING = "Wire Build-Delivery";
 
-			public static LocString ART = "Wiring-related delivery and building";
+			public static LocString ART = "Art Build-Delivery";
 
-			public static LocString DOCTORING = "Medicine-related delivery";
+			public static LocString DOCTORING = "Care Delivery";
 
-			public static LocString CONVEYOR = "Shipping-related building";
+			public static LocString CONVEYOR = "Shipping Build";
 		}
 
 		public class STATUSITEMS

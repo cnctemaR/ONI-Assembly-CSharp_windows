@@ -21,7 +21,7 @@ public class PrickleFlowerConfig : IEntityConfig
 			SimHashes.Oxygen,
 			SimHashes.ContaminatedOxygen,
 			SimHashes.CarbonDioxide
-		}, true, 0f, 0.15f, 1f, PrickleFruitConfig.ID, true, true);
+		}, true, 0f, 0.15f, PrickleFruitConfig.ID, true, true);
 		EntityTemplates.ExtendPlantToIrrigated(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
 			new PlantElementAbsorber.ConsumeInfo

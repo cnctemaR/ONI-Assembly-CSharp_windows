@@ -58,6 +58,13 @@ public class AttackableBase : Workable, IApproachable
 		return 1f;
 	}
 
+	public override void AwardExperience(float work_dt, MinionResume resume)
+	{
+		resume.AddExperienceIfRole(JuniorMiner.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
+		resume.AddExperienceIfRole(Miner.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
+		resume.AddExperienceIfRole(SeniorMiner.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
+	}
+
 	protected override void OnCleanUp()
 	{
 		base.Unsubscribe(-1506500077, new Action<object>(this.OnDefeated));

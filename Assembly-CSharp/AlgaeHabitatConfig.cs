@@ -33,19 +33,19 @@ public class AlgaeHabitatConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		Storage storage = go.AddOrGet<Storage>();
-		storage.capacityKg = 990.00006f;
+		storage.capacityKg = 396f;
 		storage.showInUI = true;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.requestedItemTag = new Tag("Algae");
-		manualDeliveryKG.capacity = 90f;
-		manualDeliveryKG.refillMass = 18f;
+		manualDeliveryKG.capacity = 36f;
+		manualDeliveryKG.refillMass = 7.2f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
 		ManualDeliveryKG manualDeliveryKG2 = go.AddComponent<ManualDeliveryKG>();
 		manualDeliveryKG2.SetStorage(storage);
 		manualDeliveryKG2.requestedItemTag = new Tag("Water");
-		manualDeliveryKG2.capacity = 900.00006f;
-		manualDeliveryKG2.refillMass = 180.00002f;
+		manualDeliveryKG2.capacity = 360f;
+		manualDeliveryKG2.refillMass = 72f;
 		manualDeliveryKG2.allowPause = true;
 		manualDeliveryKG2.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
 		AlgaeHabitat algaeHabitat = go.AddOrGet<AlgaeHabitat>();
@@ -74,7 +74,7 @@ public class AlgaeHabitatConfig : IBuildingConfig
 		elementConsumer2.consumptionRadius = 1;
 		elementConsumer2.showDescriptor = false;
 		elementConsumer2.storeOnConsume = true;
-		elementConsumer2.capacityKG = 900.00006f;
+		elementConsumer2.capacityKG = 360f;
 		go.AddOrGet<AnimTileable>();
 		Prioritizable.AddRef(go);
 	}
@@ -90,7 +90,7 @@ public class AlgaeHabitatConfig : IBuildingConfig
 
 	private const float WATER_RATE = 0.3f;
 
-	private const float ALGAE_CAPACITY = 90f;
+	private const float ALGAE_CAPACITY = 36f;
 
-	private const float WATER_CAPACITY = 900.00006f;
+	private const float WATER_CAPACITY = 360f;
 }

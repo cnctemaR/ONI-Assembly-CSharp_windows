@@ -562,13 +562,14 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 					if (currentChore != null)
 					{
 						ReportManager.Instance.ReportValue(ReportManager.ReportType.TravelTime, dt, currentChore.choreType.Name, currentChore.driver.GetProperName());
-						if (currentChore.choreType == Db.Get().ChoreTypes.Fetch)
+						if (currentChore is FetchAreaChore)
 						{
 							MinionResume component = smi.GetComponent<MinionResume>();
 							if (component != null)
 							{
 								component.AddExperienceIfRole("Hauler", dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
 								component.AddExperienceIfRole(MaterialsManager.ID, dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
+								component.AddExperienceIfRole(Handyman.ID, dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
 							}
 						}
 					}

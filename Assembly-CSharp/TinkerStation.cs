@@ -14,12 +14,29 @@ public class TinkerStation : Workable, IEffectDescriptor, ISim200ms
 		this.attributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.MOST_DAY_EXPERIENCE;
 		base.SetWorkTime(15f);
+		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 	}
 
 	private bool CorrectRolePrecondition(MinionIdentity worker)
 	{
 		MinionResume component = worker.GetComponent<MinionResume>();
 		return component != null && component.HasPerk(this.requiredRolePerk);
+	}
+
+	private void OnOperationalChanged(object data)
+	{
+		RoomTracker component = base.GetComponent<RoomTracker>();
+		if (component != null && component.room != null)
+		{
+			component.room.RetriggerBuildings();
+		}
+	}
+
+	public override void AwardExperience(float work_dt, MinionResume resume)
+	{
+		resume.AddExperienceIfRole("PowerTechnician", work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
+		resume.AddExperienceIfRole("Farmer", work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
+		resume.AddExperienceIfRole("SeniorFarmer", work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
 	}
 
 	protected override void OnStartWork(Worker worker)

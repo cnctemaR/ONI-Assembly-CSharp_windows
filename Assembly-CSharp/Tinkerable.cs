@@ -121,7 +121,7 @@ public class Tinkerable : Workable
 	{
 		Operational component = base.GetComponent<Operational>();
 		bool flag = component == null || component.IsFunctional;
-		bool flag2 = !this.HasEffect() && this.roomTracker.IsInCorrectRoom() && flag;
+		bool flag2 = !this.HasEffect() && this.RoomHasActiveTinkerstation() && flag;
 		if (this.chore == null && flag2)
 		{
 			this.UpdateMaterialReservation(true);
@@ -151,6 +151,27 @@ public class Tinkerable : Workable
 			this.chore.Cancel("No longer needed");
 			this.chore = null;
 		}
+	}
+
+	private bool RoomHasActiveTinkerstation()
+	{
+		if (!this.roomTracker.IsInCorrectRoom())
+		{
+			return false;
+		}
+		foreach (KPrefabID kprefabID in this.roomTracker.room.buildings)
+		{
+			TinkerStation component = kprefabID.GetComponent<TinkerStation>();
+			if (component != null && component.outputPrefab == this.tinkerMaterialTag)
+			{
+				Operational component2 = kprefabID.GetComponent<Operational>();
+				if (component2.IsOperational)
+				{
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	private void UpdateMaterialReservation(bool shouldReserve)
@@ -211,7 +232,7 @@ public class Tinkerable : Workable
 
 	public string addedEffect;
 
-	protected Tag[] choreTags;
+	public Tag[] choreTags;
 
 	protected ChoreType choreTypeTinker = Db.Get().ChoreTypes.PowerTinker;
 

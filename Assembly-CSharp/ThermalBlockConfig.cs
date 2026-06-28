@@ -25,7 +25,7 @@ public class ThermalBlockConfig : IBuildingConfig
 		buildingDef.ViewMode = SimViewMode.TemperatureMap;
 		buildingDef.DefaultAnimState = "off";
 		buildingDef.ObjectLayer = ObjectLayer.Backwall;
-		buildingDef.SceneLayer = Grid.SceneLayer.Background;
+		buildingDef.SceneLayer = Grid.SceneLayer.TempShiftPlate;
 		return buildingDef;
 	}
 

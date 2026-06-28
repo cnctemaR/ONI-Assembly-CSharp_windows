@@ -138,10 +138,88 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 			this.absorptionRate = new AttributeModifier(Db.Get().Amounts.Irrigation.deltaAttribute.Id, 1.6666666f, CREATURES.STATS.IRRIGATION.ABSORBING_MODIFIER, false, false, true);
 		}
 
+		public static void DumpIncorrectFertilizers(Storage storage, GameObject go)
+		{
+			if (storage == null)
+			{
+				return;
+			}
+			if (go == null)
+			{
+				return;
+			}
+			IrrigationMonitor.Instance smi = go.GetSMI<IrrigationMonitor.Instance>();
+			PlantElementAbsorber.ConsumeInfo[] array = null;
+			if (smi != null)
+			{
+				array = smi.def.consumedElements;
+			}
+			IrrigationMonitor.Instance.DumpIncorrectFertilizers(storage, array, false);
+			FertilizationMonitor.Instance smi2 = go.GetSMI<FertilizationMonitor.Instance>();
+			PlantElementAbsorber.ConsumeInfo[] array2 = null;
+			if (smi2 != null)
+			{
+				array2 = smi2.def.consumedElements;
+			}
+			IrrigationMonitor.Instance.DumpIncorrectFertilizers(storage, array2, true);
+		}
+
+		private static void DumpIncorrectFertilizers(Storage storage, PlantElementAbsorber.ConsumeInfo[] consumed_infos, bool validate_solids)
+		{
+			if (storage == null)
+			{
+				return;
+			}
+			for (int i = storage.items.Count - 1; i >= 0; i--)
+			{
+				GameObject gameObject = storage.items[i];
+				if (!(gameObject == null))
+				{
+					PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+					if (!(component == null))
+					{
+						if (!(gameObject.GetComponent<ElementChunk>() == null))
+						{
+							if (validate_solids)
+							{
+								if (!component.Element.IsSolid)
+								{
+									goto IL_0105;
+								}
+							}
+							else if (!component.Element.IsLiquid)
+							{
+								goto IL_0105;
+							}
+							bool flag = false;
+							KPrefabID component2 = component.GetComponent<KPrefabID>();
+							if (consumed_infos != null)
+							{
+								foreach (PlantElementAbsorber.ConsumeInfo consumeInfo in consumed_infos)
+								{
+									if (component2.HasTag(consumeInfo.tag))
+									{
+										flag = true;
+										break;
+									}
+								}
+							}
+							if (!flag)
+							{
+								storage.Drop(gameObject);
+							}
+						}
+					}
+				}
+				IL_0105:;
+			}
+		}
+
 		public void SetStorage(object obj)
 		{
 			this.storage = (Storage)obj;
 			base.sm.resourceStorage.Set(this.storage, base.smi);
+			IrrigationMonitor.Instance.DumpIncorrectFertilizers(this.storage, base.smi.gameObject);
 			foreach (ManualDeliveryKG manualDeliveryKG in base.smi.gameObject.GetComponents<ManualDeliveryKG>())
 			{
 				bool flag = false;

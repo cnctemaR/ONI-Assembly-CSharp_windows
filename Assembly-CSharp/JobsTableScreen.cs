@@ -691,7 +691,7 @@ public class JobsTableScreen : TableScreen
 
 	public TextStyleSetting TooltipTextStyle_AbilityNegativeModifier;
 
-	private List<MinionIdentity> dirty_single_minion_rows = new List<MinionIdentity>();
+	private HashSet<MinionIdentity> dirty_single_minion_rows = new HashSet<MinionIdentity>();
 
 	private ChoreGroup current_sort_choregroup;
 

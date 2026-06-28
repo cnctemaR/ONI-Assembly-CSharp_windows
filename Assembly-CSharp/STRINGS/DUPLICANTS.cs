@@ -894,7 +894,7 @@ namespace STRINGS
 
 			public class PRECONDITIONS
 			{
-				public static LocString HEADER = "Errands {Selected} could perform here:";
+				public static LocString HEADER = "The selected {Selected} could:";
 
 				public static LocString CHORE_DRIVER_IS_NULL = "Assigned to: {Assignee}";
 
@@ -1662,7 +1662,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Allocating {Item} to {Target}";
 
-				public static LocString TOOLTIP = "This Duplicant is delivering {Item} resources to a {Target} construction errand";
+				public static LocString TOOLTIP = "This Duplicant is delivering materials to a {Target} construction errand";
 			}
 
 			public class BUILDDELIVERSTATUS
@@ -2317,9 +2317,9 @@ namespace STRINGS
 		{
 			public static LocString MODIFIER_FORMAT = "{0}: {1}";
 
-			public static LocString TIME_REMAINING = "\nWears off in: {0}";
+			public static LocString TIME_REMAINING = "\nTime Remaining: {0}";
 
-			public static LocString TIME_TOTAL = "\nEffect duration: {0}";
+			public static LocString TIME_TOTAL = "\nDuration: {0}";
 
 			public class SKILLLEVEL
 			{
@@ -3066,7 +3066,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Engie's Jerryrig";
 
-				public static LocString TOOLTIP = "A skilled Engineer has fine tuned all the gears and sprockets to make things run faster";
+				public static LocString TOOLTIP = "A skilled Engineer has jerryrigged this generator to temporarily run faster";
 			}
 		}
 
@@ -4108,6 +4108,11 @@ namespace STRINGS
 
 				public static LocString DESC = "Speed Bonus";
 			}
+
+			public abstract class GENERATOROUTPUT
+			{
+				public static LocString NAME = "Power Output";
+			}
 		}
 
 		public class OPINIONS
@@ -4146,42 +4151,42 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Unemployed";
 
-				public static LocString DESCRIPTION = "This Duplicant has not been assigned a job";
+				public static LocString DESCRIPTION = "No job assignment.";
 			}
 
 			public class JUNIOR_ARTIST
 			{
 				public static LocString NAME = "Art Student";
 
-				public static LocString DESCRIPTION = "Artists make better art";
+				public static LocString DESCRIPTION = "Artist Students are new artists who make improved paintings and sculptures.";
 			}
 
 			public class ARTIST
 			{
 				public static LocString NAME = "Artist";
 
-				public static LocString DESCRIPTION = "Artists make better art";
+				public static LocString DESCRIPTION = "Artists are experienced sculptors and painters and create higher quality art.";
 			}
 
 			public class JUNIOR_BUILDER
 			{
 				public static LocString NAME = "Apprentice Architect";
 
-				public static LocString DESCRIPTION = "Builders can build buildings faster";
+				public static LocString DESCRIPTION = "Apprentice Architects are new builders with marginally improved construction speeds.";
 			}
 
 			public class BUILDER
 			{
 				public static LocString NAME = "Architect";
 
-				public static LocString DESCRIPTION = "Builders can build buildings faster";
+				public static LocString DESCRIPTION = "Architects are competent builders with moderately improved construction speeds.";
 			}
 
 			public class SENIOR_BUILDER
 			{
 				public static LocString NAME = "Senior Architect";
 
-				public static LocString DESCRIPTION = "Builders can build buildings faster";
+				public static LocString DESCRIPTION = "Senior Architects are experienced builders with vastly improved construction speeds.";
 			}
 
 			public class JUNIOR_RESEARCHER

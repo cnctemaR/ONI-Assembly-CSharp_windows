@@ -68,19 +68,6 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 		ListPool<ScenePartitionerEntry, GameScenePartitioner>.Free(list);
 	}
 
-	public static void GatherNearbyFetchChoresWithoutContext(int x, int y, int radius, List<Chore> chores)
-	{
-		List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
-		GameScenePartitioner.Instance.GatherEntries(x - radius, y - radius, radius * 2 + 1, radius * 2 + 1, GameScenePartitioner.Instance.fetchChoreLayer, list);
-		for (int i = 0; i < list.Count; i++)
-		{
-			ScenePartitionerEntry scenePartitionerEntry = list[i];
-			Chore chore = scenePartitionerEntry.obj as Chore;
-			chores.Add(chore);
-		}
-		ListPool<ScenePartitionerEntry, GameScenePartitioner>.Free(list);
-	}
-
 	public class StatesInstance : GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.GameInstance
 	{
 		public StatesInstance(FetchAreaChore master, Chore.Precondition.Context context)

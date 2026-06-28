@@ -631,7 +631,8 @@ public class Grid
 	{
 		NoLayer = -2,
 		Background,
-		GasConduits = 1,
+		TempShiftPlate = 1,
+		GasConduits,
 		GasConduitBridges,
 		LiquidConduits,
 		LiquidConduitBridges,

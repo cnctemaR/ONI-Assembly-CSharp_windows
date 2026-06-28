@@ -37,7 +37,7 @@ public class MineralDeoxidizerConfig : IBuildingConfig
 		electrolyzer.maxMass = 1.8f;
 		electrolyzer.hasMeter = false;
 		Storage storage = go.AddOrGet<Storage>();
-		storage.capacityKg = 800f;
+		storage.capacityKg = 330f;
 		storage.showInUI = true;
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
@@ -51,8 +51,8 @@ public class MineralDeoxidizerConfig : IBuildingConfig
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.requestedItemTag = new Tag("Algae");
-		manualDeliveryKG.capacity = 800f;
-		manualDeliveryKG.refillMass = 320f;
+		manualDeliveryKG.capacity = 330f;
+		manualDeliveryKG.refillMass = 132f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.Fetch.IdHash;
 	}
 
@@ -82,7 +82,7 @@ public class MineralDeoxidizerConfig : IBuildingConfig
 
 	private const float ALGAE_BURN_RATE = 0.55f;
 
-	private const float ALGAE_STORAGE = 800f;
+	private const float ALGAE_STORAGE = 330f;
 
 	private const float OXYGEN_GENERATION_RATE = 0.5f;
 

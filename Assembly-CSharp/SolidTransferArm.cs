@@ -7,7 +7,7 @@ using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstance>, ISim1000ms, ISim33ms
+public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstance>, ISim1000ms, ISim33ms, IRenderEveryTick
 {
 	public TagBits tagBits { get; private set; }
 
@@ -33,6 +33,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		this.GetAttributes().Add("base", attributeModifier);
 		this.worker.usesMultiTool = false;
 		this.storage.fxPrefix = Storage.FXPrefix.PickedUp;
+		this.simRenderLoadBalance = true;
 	}
 
 	protected override void OnSpawn()
@@ -228,6 +229,10 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		{
 			this.MarkReachableCells();
 		}
+	}
+
+	public void RenderEveryTick(float dt)
+	{
 		if (this.worker.workable)
 		{
 			Vector3 targetPoint = this.worker.workable.GetTargetPoint();

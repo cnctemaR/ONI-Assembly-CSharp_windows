@@ -673,7 +673,7 @@ namespace STRINGS
 
 			public static LocString ROLE_PROGRESS = "<b>Job Experience: {0}/{1}</b>\nDuplicants can become eligible for specialized jobs by maxing their current job experience";
 
-			public static LocString NO_JOB_STATION_WARNING = "Build a Jobs Desk to unlock Job Assignments";
+			public static LocString NO_JOB_STATION_WARNING = "Build a Jobs Board to unlock Job Assignments";
 
 			public static LocString HIGHEST_EXPECTATIONS_TIER = "<b>Highest Expectations</b>";
 
@@ -1512,6 +1512,10 @@ namespace STRINGS
 			public static LocString EDITNAME = "Give this Duplicant a new name";
 
 			public static LocString RANDOMIZENAME = "Randomize this Duplicant's name";
+
+			public static LocString EDITCREATURENAME = "Give this lil' creature a new name";
+
+			public static LocString RANDOMIZECREATURENAME = "Randomize this creature's name";
 
 			public static LocString BASE_VALUE = "Base Value";
 

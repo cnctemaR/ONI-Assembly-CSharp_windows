@@ -77,6 +77,10 @@ public class Sublimates : KMonoBehaviour, ISim200ms
 		{
 			return;
 		}
+		if (this.HasTag(GameTags.Sealed))
+		{
+			return;
+		}
 		float mass = Grid.Cell[num].mass;
 		if (mass < this.info.maxDestinationMass)
 		{

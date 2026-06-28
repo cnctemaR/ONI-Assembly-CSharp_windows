@@ -21,6 +21,7 @@ public class DropDown : KMonoBehaviour
 		{
 			this.OnClick();
 		};
+		this.canvasScaler = GameScreenManager.Instance.ssOverlayCanvas.GetComponent<KCanvasScaler>();
 	}
 
 	public void OnClick()
@@ -55,7 +56,8 @@ public class DropDown : KMonoBehaviour
 		{
 			return;
 		}
-		if (this.scrollRect.rectTransform().GetPosition().x + this.scrollRect.rectTransform().sizeDelta.x < Input.mousePosition.x || this.scrollRect.rectTransform().GetPosition().x > Input.mousePosition.x || this.scrollRect.rectTransform().GetPosition().y - this.scrollRect.rectTransform().sizeDelta.y > Input.mousePosition.y || this.scrollRect.rectTransform().GetPosition().y < Input.mousePosition.y)
+		float canvasScale = this.canvasScaler.GetCanvasScale();
+		if (this.scrollRect.rectTransform().GetPosition().x + this.scrollRect.rectTransform().sizeDelta.x * canvasScale < Input.mousePosition.x || this.scrollRect.rectTransform().GetPosition().x > Input.mousePosition.x || this.scrollRect.rectTransform().GetPosition().y - this.scrollRect.rectTransform().sizeDelta.y * canvasScale > Input.mousePosition.y || this.scrollRect.rectTransform().GetPosition().y < Input.mousePosition.y)
 		{
 			this.Close();
 		}
@@ -196,4 +198,6 @@ public class DropDown : KMonoBehaviour
 	private bool displaySelectedValueWhenClosed = true;
 
 	private const int ROWS_BEFORE_SCROLL = 8;
+
+	private KCanvasScaler canvasScaler;
 }

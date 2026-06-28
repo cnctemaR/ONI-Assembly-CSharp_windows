@@ -186,6 +186,7 @@ public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, Ferti
 		{
 			this.storage = (Storage)obj;
 			base.sm.fertilizerStorage.Set(this.storage, base.smi);
+			IrrigationMonitor.Instance.DumpIncorrectFertilizers(this.storage, base.smi.gameObject);
 			foreach (ManualDeliveryKG manualDeliveryKG in base.smi.gameObject.GetComponents<ManualDeliveryKG>())
 			{
 				bool flag = false;

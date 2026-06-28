@@ -331,7 +331,7 @@ namespace TUNING
 				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
 				probability = DUPLICANTSTATS.PROBABILITY_MED,
 				mutuallyExclusiveTraits = new List<string> { "InteriorDecorator" },
-				requiredNonPositiveAptitudes = new List<HashedString> { "Research" }
+				requiredNonPositiveAptitudes = new List<HashedString> { "Art" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{

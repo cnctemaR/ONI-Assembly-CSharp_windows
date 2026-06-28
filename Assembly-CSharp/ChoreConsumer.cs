@@ -82,10 +82,27 @@ public class ChoreConsumer : KMonoBehaviour
 	public bool FindNextChore(ref Chore.Precondition.Context out_context)
 	{
 		this.preconditionSnapshot.Clear();
-		for (int i = 0; i < this.providers.Count; i++)
+		if (this.IsStationary)
 		{
-			ChoreProvider choreProvider = this.providers[i];
-			choreProvider.CollectChores(this, this.preconditionSnapshot.succeededContexts, this.preconditionSnapshot.failedContexts);
+			SolidTransferArm component = base.GetComponent<SolidTransferArm>();
+			CellOffset offset = Grid.GetOffset(Grid.PosToCell(component));
+			int pickupRange = component.pickupRange;
+			List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+			GameScenePartitioner.Instance.GatherEntries(offset.x - pickupRange, offset.y - pickupRange, pickupRange * 2 + 1, pickupRange * 2 + 1, GameScenePartitioner.Instance.fetchChoreLayer, list);
+			foreach (ScenePartitionerEntry scenePartitionerEntry in list)
+			{
+				Chore chore = scenePartitionerEntry.obj as Chore;
+				chore.CollectChores(this, this.preconditionSnapshot.succeededContexts, this.preconditionSnapshot.failedContexts, false);
+			}
+			ListPool<ScenePartitionerEntry, GameScenePartitioner>.Free(list);
+		}
+		else
+		{
+			for (int i = 0; i < this.providers.Count; i++)
+			{
+				ChoreProvider choreProvider = this.providers[i];
+				choreProvider.CollectChores(this, this.preconditionSnapshot.succeededContexts, this.preconditionSnapshot.failedContexts);
+			}
 		}
 		List<Chore.Precondition.Context> succeededContexts = this.preconditionSnapshot.succeededContexts;
 		succeededContexts.Sort();
@@ -168,9 +185,9 @@ public class ChoreConsumer : KMonoBehaviour
 		return chore.isPreferredChoreRegardlessOfTags || (this.resume != null && (this.resume.IsFavouredChore(chore) || this.resume.IsPreferredChore(chore)));
 	}
 
-	public bool IsPermittedOrEnabled(Chore chore)
+	public bool IsPermittedOrEnabled(ChoreType chore_type, Chore chore)
 	{
-		if (chore.choreType.groups.Length == 0)
+		if (chore_type.groups.Length == 0)
 		{
 			return true;
 		}
@@ -178,9 +195,9 @@ public class ChoreConsumer : KMonoBehaviour
 		{
 			return true;
 		}
-		for (int i = 0; i < chore.choreType.groups.Length; i++)
+		for (int i = 0; i < chore_type.groups.Length; i++)
 		{
-			ChoreGroup choreGroup = chore.choreType.groups[i];
+			ChoreGroup choreGroup = chore_type.groups[i];
 			if (this.IsEnabled(choreGroup) && (this.IsPermitted(choreGroup) || (this.resume != null && this.resume.IsChoreGroupInCurrentRoleGroup(choreGroup))))
 			{
 				return true;

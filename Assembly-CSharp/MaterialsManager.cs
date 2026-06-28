@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei.AI;
 using STRINGS;
 
 public class MaterialsManager : RoleConfig
@@ -17,6 +18,7 @@ public class MaterialsManager : RoleConfig
 			Db.Get().ChoreTypes.FetchCritical,
 			Db.Get().ChoreTypes.Transport
 		};
+		this.relevantAttributes = new Klei.AI.Attribute[] { Db.Get().Attributes.Athletics };
 		base.perks = new RolePerk[]
 		{
 			RoleManager.rolePerks.IncreaseStrengthMedium,

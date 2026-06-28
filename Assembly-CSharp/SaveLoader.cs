@@ -420,6 +420,7 @@ public class SaveLoader : KMonoBehaviour
 			"Saved to",
 			"[" + filename + "]"
 		});
+		GC.Collect();
 		return filename;
 	}
 
@@ -499,6 +500,7 @@ public class SaveLoader : KMonoBehaviour
 				"]"
 			})
 		});
+		GC.Collect();
 		return true;
 	}
 

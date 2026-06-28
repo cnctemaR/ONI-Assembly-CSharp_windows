@@ -402,7 +402,7 @@ public abstract class Chore
 				this.failedPreconditionId = -1;
 				this.isAttemptingOverride = is_attempting_override;
 				this.data = data;
-				this.isPreferredChore = ((!consumer.DoesPrefer(chore)) ? 0 : 1);
+				this.choreTypeForPermission = chore.choreType;
 				this.SetPriority(chore);
 			}
 
@@ -418,7 +418,7 @@ public abstract class Chore
 				this.failedPreconditionId = -1;
 				this.isAttemptingOverride = is_attempting_override;
 				this.data = data;
-				this.isPreferredChore = ((!consumer.DoesPrefer(chore)) ? 0 : 1);
+				this.choreTypeForPermission = chore.choreType;
 				this.SetPriority(chore);
 			}
 
@@ -518,8 +518,6 @@ public abstract class Chore
 
 			public PrioritySetting masterPriority;
 
-			public int isPreferredChore;
-
 			public int priority;
 
 			public int priorityMod;
@@ -537,6 +535,8 @@ public abstract class Chore
 			public object data;
 
 			public bool isAttemptingOverride;
+
+			public ChoreType choreTypeForPermission;
 		}
 	}
 }

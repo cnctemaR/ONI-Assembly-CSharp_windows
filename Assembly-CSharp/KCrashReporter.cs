@@ -298,10 +298,13 @@ public class KCrashReporter : MonoBehaviour
 			{
 				text3 = "No save file uploaded";
 			}
-			msg = string.Format("{0}\n\nSave File: {1}", msg, text3);
 			if (string.IsNullOrEmpty(stack_trace))
 			{
 				stack_trace = string.Format("No stack trace.\n\n{0}", msg);
+			}
+			else
+			{
+				msg = string.Format("{0}\n\nSave File: {1}", msg, text3);
 			}
 			int num = stack_trace.IndexOf('\n');
 			string text4 = stack_trace;
@@ -340,7 +343,7 @@ public class KCrashReporter : MonoBehaviour
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
 			error.fullstack = "UNITY_OUTPUT:\n" + msg;
-			error.build = 254781;
+			error.build = 255385;
 			error.log = KCrashReporter.GetLogContents();
 			error.summaryline = text4;
 			error.user_message = userMessage;

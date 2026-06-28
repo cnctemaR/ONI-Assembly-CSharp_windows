@@ -24,6 +24,7 @@ public class ClearChore : Chore<ClearChore.StatesInstance>
 			if (flag)
 			{
 				context.Set(fetch.chore, consumer, is_attempting_override, pickupable);
+				context.choreTypeForPermission = base.choreType;
 				context.RunPreconditions();
 				if (context.IsSuccess())
 				{

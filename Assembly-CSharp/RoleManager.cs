@@ -57,6 +57,13 @@ public class RoleManager
 		liveMinionIdentities.OnAdd = (Action<MinionIdentity>)Delegate.Combine(liveMinionIdentities.OnAdd, new Action<MinionIdentity>(this.OnIDsChanged));
 		Components.Cmps<MinionIdentity> liveMinionIdentities2 = Components.LiveMinionIdentities;
 		liveMinionIdentities2.OnRemove = (Action<MinionIdentity>)Delegate.Combine(liveMinionIdentities2.OnRemove, new Action<MinionIdentity>(this.OnIDsChanged));
+		foreach (KeyValuePair<string, int> keyValuePair in this.roleRowIndex)
+		{
+			if (keyValuePair.Value > this.NumberOfRows)
+			{
+				this.NumberOfRows = keyValuePair.Value;
+			}
+		}
 	}
 
 	public List<RoleConfig> RolesConfigs { get; private set; }
@@ -298,8 +305,12 @@ public class RoleManager
 		RoleConfig role = this.GetRole(roleID);
 		text = text + "<b><size=16>" + role.name + "</size></b>";
 		text = text + UI.HORIZONTAL_BR_RULE + role.description;
-		text = text + "\n\n" + this.RolePerkString(roleID);
-		return text + "\n\n" + this.RoleCriteriaString(roleID, null);
+		if (roleID != "NoRole")
+		{
+			text = text + "\n\n" + this.RolePerkString(roleID);
+			text = text + "\n\n" + this.RoleCriteriaString(roleID, null);
+		}
+		return text;
 	}
 
 	public string RolePriorityString(string roleID)
@@ -333,21 +344,32 @@ public class RoleManager
 	{
 		string text = string.Empty;
 		RoleConfig role = this.GetRole(roleID);
-		text = text + "<b>" + UI.ROLES_SCREEN.PERKS.TITLE + "</b>\n";
-		if (role.perks.Length > 0)
+		if (!(roleID == "NoRole"))
 		{
-			for (int i = 0; i < role.perks.Length; i++)
+			if (role.perks.Length > 0)
 			{
-				text = text + "    • " + role.perks[i].description;
-				if (i < role.perks.Length - 1)
+				text = text + "<b>" + UI.ROLES_SCREEN.PERKS.TITLE + "</b>\n";
+				for (int i = 0; i < role.perks.Length; i++)
 				{
-					text += "\n";
+					text = text + "    • " + role.perks[i].description;
+					if (i < role.perks.Length - 1)
+					{
+						text += "\n";
+					}
 				}
 			}
-		}
-		else
-		{
-			text = text + "    • " + UI.ROLES_SCREEN.PERKS.NO_PERKS;
+			else
+			{
+				string text2 = text;
+				text = string.Concat(new string[]
+				{
+					text2,
+					"<b>",
+					UI.ROLES_SCREEN.PERKS.TITLE,
+					"</b>\n    • ",
+					UI.ROLES_SCREEN.PERKS.NO_PERKS
+				});
+			}
 		}
 		return text;
 	}
@@ -372,6 +394,7 @@ public class RoleManager
 			else if (resume.CurrentRole == roleID && resume.TargetRole != roleID)
 			{
 				text += string.Format(UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.ELIGIBILITY.ELIGIBLE, resume.GetProperName(), role.name);
+				text += "\n\n";
 			}
 			else if (this.CanAssignToRole(roleID, resume))
 			{
@@ -379,11 +402,13 @@ public class RoleManager
 				if (resume.CurrentRole != "NoRole")
 				{
 					text = text + "\n" + string.Format(UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.WILL_BE_UNASSIGNED, resume.GetProperName(), role.name, this.GetRole(resume.CurrentRole).name);
+					text += "\n\n";
 				}
 			}
 			else
 			{
 				text += string.Format(UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.ELIGIBILITY.INELIGIBLE, resume.GetProperName(), role.name);
+				text += "\n\n";
 			}
 			text += "\n\n";
 			text += UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.RELEVANT_APTITUDES;
@@ -438,59 +463,35 @@ public class RoleManager
 					"</b></color>"
 				});
 			}
+		}
+		if (resume != null)
+		{
 			text += "\n\n";
 		}
-		text = text + "<b>" + UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.TITLE + "</b>\n";
-		if (role.requirements.Length > 0)
+		if (!(roleID == "NoRole"))
 		{
-			if (resume != null)
+			if (role.requirements.Length > 0)
 			{
-			}
-			for (int j = 0; j < role.requirements.Length; j++)
-			{
-				text += ((!(resume == null) && !role.requirements[j].isSatisfied(resume)) ? "<color=#F44A47FF>" : "<color=#FFFFFF>");
-				text = text + "    • " + string.Format("{0}", role.requirements[j].GetDescription());
-				text += "</color>";
-				if (j != role.requirements.Length - 1)
+				text = text + "<b>" + UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.TITLE + "</b>\n";
+				if (resume != null)
 				{
-					text += "\n";
+				}
+				for (int j = 0; j < role.requirements.Length; j++)
+				{
+					text += ((!(resume == null) && !role.requirements[j].isSatisfied(resume)) ? "<color=#F44A47FF>" : "<color=#FFFFFF>");
+					text = text + "    • " + string.Format("{0}", role.requirements[j].GetDescription());
+					text += "</color>";
+					if (j != role.requirements.Length - 1)
+					{
+						text += "\n";
+					}
 				}
 			}
-		}
-		else
-		{
-			text = text + "    • " + string.Format(UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.NONE, role.name);
-		}
-		return text;
-	}
-
-	public string RoleExpectationsString(string roleID, MinionResume resume)
-	{
-		string text = string.Empty;
-		RoleConfig role = this.GetRole(roleID);
-		text = text + "<b>" + UI.ROLES_SCREEN.EXPECTATIONS.TITLE + "</b>\n";
-		if (Expectations.ExpectationsByTier[role.tier].Length > 0)
-		{
-			for (int i = 0; i < Expectations.ExpectationsByTier[role.tier].Length; i++)
+			else
 			{
-				string text2 = text;
-				text = string.Concat(new string[]
-				{
-					text2,
-					"    • ",
-					Expectations.ExpectationsByTier[role.tier][i].name,
-					": ",
-					Expectations.ExpectationsByTier[role.tier][i].description
-				});
-				if (i != Expectations.ExpectationsByTier[role.tier].Length - 1)
-				{
-					text += "\n";
-				}
+				text = text + "<b>" + UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.TITLE + "</b>\n";
+				text = text + "    • " + string.Format(UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.NONE, role.name);
 			}
-		}
-		else
-		{
-			text = text + "    • " + UI.ROLES_SCREEN.EXPECTATIONS.NO_EXPECTATIONS;
 		}
 		return text;
 	}
@@ -614,7 +615,7 @@ public class RoleManager
 			{
 				this.Unassign(resume);
 				resume.SetTargetRole(roleID);
-				goto IL_00BC;
+				return;
 			}
 		}
 		resume.OnEnterRole(roleID, !instant);
@@ -623,8 +624,6 @@ public class RoleManager
 			resume.SetTargetRole(resume.CurrentRole);
 		}
 		RoleManager.ApplyRoleHat(role, resume.GetComponent<Accessorizer>(), resume.GetComponent<KBatchedAnimController>());
-		IL_00BC:
-		Research.Instance.Trigger(-1523247426, resume);
 	}
 
 	public void Unassign(MinionResume resume)
@@ -851,6 +850,8 @@ public class RoleManager
 			10
 		}
 	};
+
+	public int NumberOfRows;
 
 	private List<MinionResume> Assignees = new List<MinionResume>();
 

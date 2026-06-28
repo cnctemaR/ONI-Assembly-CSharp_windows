@@ -97,7 +97,7 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 			if (currentChore != null)
 			{
 				ChoreConsumer component = base.GetComponent<ChoreConsumer>();
-				if (!component.IsPermittedOrEnabled(currentChore))
+				if (!component.IsPermittedOrEnabled(currentChore.choreType, currentChore))
 				{
 					this.EndChore("Permissions changed");
 				}

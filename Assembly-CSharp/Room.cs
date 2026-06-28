@@ -61,6 +61,17 @@ public class Room : IAssignableIdentity
 		return this.primary_buildings;
 	}
 
+	public void RetriggerBuildings()
+	{
+		foreach (KPrefabID kprefabID in this.buildings)
+		{
+			if (!(kprefabID == null))
+			{
+				kprefabID.Trigger(144050788, this);
+			}
+		}
+	}
+
 	public void CleanUp()
 	{
 		Game.Instance.assignmentManager.RemoveFromAllGroups(this);

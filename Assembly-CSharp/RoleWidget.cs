@@ -326,14 +326,7 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 			{
 				reference.SetAlpha(0f);
 			}
-			if (roleConfig.relevantAttributes.Length > 0)
-			{
-				reference2.gameObject.SetActive(num2 > 0f);
-			}
-			else
-			{
-				reference2.gameObject.SetActive(false);
-			}
+			reference2.gameObject.SetActive(num2 > 0f);
 		}
 	}
 

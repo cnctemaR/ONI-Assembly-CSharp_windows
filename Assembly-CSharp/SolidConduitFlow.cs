@@ -389,12 +389,9 @@ public class SolidConduitFlow : IConduitFlow
 				pickupable = pickupable
 			};
 			conduitContents.pickupableHandle = this.conveyorPickupables.Allocate(storedInfo);
-			KPrefabID component2 = pickupable.GetComponent<KPrefabID>();
-			component2.AddTag(GameTags.Sealed);
-			component2.AddTag(GameTags.Preserved);
-			KBatchedAnimController component3 = pickupable.GetComponent<KBatchedAnimController>();
-			component3.enabled = false;
-			component3.enabled = true;
+			KBatchedAnimController component2 = pickupable.GetComponent<KBatchedAnimController>();
+			component2.enabled = false;
+			component2.enabled = true;
 			pickupable.Trigger(856640610, true);
 		}
 		this.SetContents(cell, conduitContents);
@@ -619,9 +616,6 @@ public class SolidConduitFlow : IConduitFlow
 		{
 			pickupable.storage.Remove(pickupable.gameObject);
 		}
-		KPrefabID component2 = pickupable.GetComponent<KPrefabID>();
-		component2.AddTag(GameTags.Sealed);
-		component2.AddTag(GameTags.Preserved);
 		pickupable.Trigger(856640610, true);
 		this.SetContents(cell_idx, contents);
 	}
@@ -641,9 +635,6 @@ public class SolidConduitFlow : IConduitFlow
 				if (pickupable)
 				{
 					pickupable.Trigger(856640610, false);
-					KPrefabID component = pickupable.GetComponent<KPrefabID>();
-					component.RemoveTag(GameTags.Sealed);
-					component.RemoveTag(GameTags.Preserved);
 				}
 				this.freedHandles.Add(conduitContents.pickupableHandle);
 			}

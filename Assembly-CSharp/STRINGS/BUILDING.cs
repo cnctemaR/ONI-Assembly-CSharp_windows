@@ -1326,21 +1326,21 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Underpressure";
 
-				public static LocString TOOLTIP = "This turbine must have {MASS} more {ELEMENT} below it than above it in order to run";
+				public static LocString TOOLTIP = "The {ELEMENT} present below this turbine must be {MASS} more pressurized than the {ELEMENT} above it in order to turn the turbine";
 			}
 
 			public class TURBINE_INSUFFICIENT_TEMPERATURE
 			{
-				public static LocString NAME = "Too Cold";
+				public static LocString NAME = "Cold {ELEMENT}";
 
-				public static LocString TOOLTIP = "The {ELEMENT} used to power the turbine must be at least {TEMPERATURE}";
+				public static LocString TOOLTIP = "This turbine requires {ELEMENT} that is a minimum of {TEMPERATURE}";
 			}
 
 			public class TURBINE_SPINNING_UP
 			{
 				public static LocString NAME = "Spinning Up";
 
-				public static LocString TOOLTIP = "The turbine needs more time to spin up";
+				public static LocString TOOLTIP = "This turbine is currently spinning up\n\nSpinning up allows a turbine to continue running for a short period if the pressure it needs to run becomes unanavailable";
 			}
 
 			public class TURBINE_ACTIVE
@@ -1375,7 +1375,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Outside of {0}";
 
-				public static LocString TOOLTIP = "It is recommended to place this building inside a {0}\n\nOpen the Room Overlay <color=#F44A47>[F11]</color> to view full room status";
+				public static LocString TOOLTIP = "It is recommended to build this building inside a {0}\n\nOpen the Room Overlay <color=#F44A47>[F11]</color> to view full room status";
 			}
 
 			public class RELEASING_PRESSURE

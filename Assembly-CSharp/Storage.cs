@@ -871,11 +871,6 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 
 	private static void MakeItemSealed(GameObject go, bool is_stored, bool is_initializing)
 	{
-		Sublimates component = go.GetComponent<Sublimates>();
-		if (component != null)
-		{
-			component.enabled = !is_stored;
-		}
 		if (go != null)
 		{
 			if (is_stored)

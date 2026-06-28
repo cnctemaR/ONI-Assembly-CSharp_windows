@@ -148,8 +148,8 @@ public class BuildingElementEmitter : KMonoBehaviour, IElementEmitter, IEffectDe
 	[SerializeField]
 	public float temperature = 293f;
 
-	[SerializeField]
 	[HashedEnum]
+	[SerializeField]
 	public SimHashes element = SimHashes.Oxygen;
 
 	[SerializeField]

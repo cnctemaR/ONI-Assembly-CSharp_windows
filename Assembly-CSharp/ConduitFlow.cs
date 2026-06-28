@@ -495,7 +495,7 @@ public class ConduitFlow
 					flag = true;
 					break;
 				}
-				if (conduitFromDirection2.GetContents().element != SimHashes.Vacuum)
+				if (conduitFromDirection2 != null && conduitFromDirection2.GetContents().element != SimHashes.Vacuum)
 				{
 					break;
 				}

@@ -25,7 +25,7 @@ public class PauseScreen : KModalButtonMenu
 	protected override void OnPrefabInit()
 	{
 		this.keepMenuOpen = true;
-		this.versionText.text = UI.FRONTEND.GAME_VERSION + 236191U;
+		this.versionText.text = UI.FRONTEND.GAME_VERSION + 236264U;
 		this.versionText.transform.parent.gameObject.SetActive(false);
 		base.OnPrefabInit();
 		if (!GenericGameSettings.instance.demoMode)

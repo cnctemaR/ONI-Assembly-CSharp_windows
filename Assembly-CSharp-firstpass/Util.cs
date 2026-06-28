@@ -253,6 +253,11 @@ public static class Util
 		return Util.KInstantiate(original.gameObject, position, rotation, parent, name, true, 0);
 	}
 
+	public static GameObject KInstantiate(GameObject go, Vector3 position, Quaternion rotation, Folder folder)
+	{
+		return Util.KInstantiate(go, position, rotation, SceneOrganizer.Instance.GetFolder(folder), null, true, 0);
+	}
+
 	public static GameObject KInstantiate(GameObject original, Vector3 position, Quaternion rotation, GameObject parent = null, string name = null, bool initialize_id = true, int gameLayer = 0)
 	{
 		if (App.IsExiting)

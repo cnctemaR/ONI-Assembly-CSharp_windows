@@ -10,7 +10,7 @@ public class LaunchInitializer : MonoBehaviour
 
 	private void Awake()
 	{
-		global::Debug.Log("Development Build: OI-" + 236191U.ToString(), null);
+		global::Debug.Log("Development Build: OI-" + 236264U.ToString(), null);
 		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		this.CheckForSavePathIssue();
 		if (LaunchInitializer.savePathState == LaunchInitializer.SavePathIssue.Ok)

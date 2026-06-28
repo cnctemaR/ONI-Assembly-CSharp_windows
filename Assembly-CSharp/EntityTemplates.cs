@@ -211,6 +211,7 @@ public class EntityTemplates
 		Assets.AddPrefab(component3);
 		Baggable baggable = gameObject.AddComponent<Baggable>();
 		baggable.animOverride = Assets.GetAnim("anim_restrain_creature_kanim");
+		baggable.creatureTag = creature.GetComponent<KPrefabID>().PrefabTag;
 		return gameObject;
 	}
 

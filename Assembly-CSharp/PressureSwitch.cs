@@ -187,8 +187,8 @@ public class PressureSwitch : CircuitSwitch, ISaveLoadable, IThresholdSwitch
 	[Serialize]
 	private float threshold;
 
-	[Serialize]
 	[SerializeField]
+	[Serialize]
 	private bool activateAboveThreshold = true;
 
 	public float rangeMin;

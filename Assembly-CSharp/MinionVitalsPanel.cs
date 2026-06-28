@@ -353,7 +353,11 @@ public class MinionVitalsPanel : KMonoBehaviour
 	private string GetAtmosphereTooltip(GameObject go)
 	{
 		PressureVulnerable component = go.GetComponent<PressureVulnerable>();
-		return UI.TOOLTIPS.VITALS_CHECKBOX_ATMOSPHERE.text.Replace("{element}", component.GetExternalElement.name);
+		if (component != null)
+		{
+			return UI.TOOLTIPS.VITALS_CHECKBOX_ATMOSPHERE.text.Replace("{element}", component.GetExternalElement.name);
+		}
+		return UI.TOOLTIPS.VITALS_CHECKBOX_ATMOSPHERE;
 	}
 
 	private string GetSubmersionTooltip(GameObject go)

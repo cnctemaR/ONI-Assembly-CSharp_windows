@@ -177,14 +177,14 @@ public static class Strings
 	[IgnoreEmptyLines]
 	public class StringKeyConfig
 	{
-		[FieldOptional]
 		[FieldOrder(1)]
+		[FieldOptional]
 		public string name;
 
-		[FieldQuoted(QuoteMode.OptionalForRead, MultilineMode.AllowForRead)]
-		[FieldOrder(2)]
 		[FieldOptional]
 		[FieldNullValue(typeof(string), "")]
+		[FieldQuoted(QuoteMode.OptionalForRead, MultilineMode.AllowForRead)]
+		[FieldOrder(2)]
 		public string[] values;
 	}
 }

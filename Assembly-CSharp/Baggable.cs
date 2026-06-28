@@ -9,28 +9,30 @@ public class Baggable : KMonoBehaviour
 		if (this.animOverride != null)
 		{
 			this.Subscribe(856640610, new Action<object>(this.OnStorageChanged));
-			this.Subscribe(1228788923, new Action<object>(this.OnStorageChanged));
 		}
 	}
 
 	private void OnStorageChanged(object data)
 	{
-		Pickupable component = base.GetComponent<Pickupable>();
-		if (component.storage.GetComponent<MinionIdentity>() != null)
+		Storage storage = (Storage)data;
+		if (storage == null)
 		{
-			KBatchedAnimController component2 = base.GetComponent<KBatchedAnimController>();
-			component2.Play("carry", KAnim.PlayMode.Once, 1f, 0f);
-			KBatchedAnimController component3 = component.storage.GetComponent<KBatchedAnimController>();
-			this.currentOwner = component3;
+			GameObject prefab = Assets.GetPrefab(this.creatureTag);
+			Vector3 vector = Grid.CellToPosCCC(Grid.PosToCell(base.gameObject.transform.position), Grid.SceneLayer.Creatures);
+			GameObject gameObject = Util.KInstantiate(prefab, vector, Quaternion.identity, Folder.Entities);
+			gameObject.SetActive(true);
+			Util.KDestroyGameObject(base.gameObject);
 		}
-		else if (this.currentOwner != null)
+		else if (storage.GetComponent<MinionIdentity>() != null)
 		{
-			this.currentOwner = null;
+			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+			component.Play("carry", KAnim.PlayMode.Once, 1f, 0f);
 		}
 	}
 
 	[SerializeField]
 	public KAnimFile animOverride;
 
-	private KBatchedAnimController currentOwner;
+	[SerializeField]
+	public Tag creatureTag;
 }

@@ -61,10 +61,15 @@ public class MainMenu : KMonoBehaviour
 
 	private void ResumeGame()
 	{
-		LoadingOverlay.Load(delegate
+		string latestSaveFile = SaveLoader.GetLatestSaveFile();
+		if (!string.IsNullOrEmpty(latestSaveFile))
 		{
-			App.LoadScene("backend");
-		});
+			SaveLoader.SetActiveSaveFilePath(latestSaveFile);
+			LoadingOverlay.Load(delegate
+			{
+				App.LoadScene("backend");
+			});
+		}
 	}
 
 	private void NewGame()
@@ -115,7 +120,7 @@ public class MainMenu : KMonoBehaviour
 			{
 				SaveGame.Header header;
 				SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(latestSaveFile, out header);
-				if (header.buildVersion > 217794U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 217844U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}
@@ -129,7 +134,6 @@ public class MainMenu : KMonoBehaviour
 					this.Button_ResumeGame.GetComponentsInChildren<LocText>()[1].text = fileNameWithoutExtension;
 				}
 				this.Button_ResumeGame.GetComponent<ToolTip>().toolTip = fileNameWithoutExtension;
-				SaveLoader.SetActiveSaveFilePath(latestSaveFile);
 			}
 			catch (Exception ex)
 			{

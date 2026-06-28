@@ -29,7 +29,7 @@ public class TableColumn
 				break;
 			}
 		}
-		if (this.on_tooltip != null)
+		if (tableRow != null && this.on_tooltip != null)
 		{
 			this.on_tooltip(tableRow.GetMinionIdentity(), gameObject, tool_tip_instance);
 		}
@@ -48,7 +48,7 @@ public class TableColumn
 				break;
 			}
 		}
-		if (this.on_sort_tooltip != null)
+		if (tableRow != null && this.on_sort_tooltip != null)
 		{
 			this.on_sort_tooltip(tableRow.GetMinionIdentity(), gameObject, sort_tooltip_instance);
 		}

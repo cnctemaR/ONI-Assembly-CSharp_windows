@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{2C3A4742-5A25-4742-AFD6-0683BED9A0A5}</ProjectGuid>
+    <ProjectGuid>{35560A18-2C82-4931-93A9-83B1D05EACA0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System.Data</RootNamespace>
     <AssemblyName>System.Data</AssemblyName>
@@ -441,31 +441,31 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.Data.Tds\Mono.Data.Tds.csproj">
-      <Project>{2C3A4742-5A25-4742-AFD6-0683BED9A09C}</Project>
+      <Project>{35560A18-2C82-4931-93A9-83B1D05EAC97}</Project>
       <Name>Mono.Data.Tds</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{2C3A4742-5A25-4742-AFD6-0683BED9A09F}</Project>
+      <Project>{35560A18-2C82-4931-93A9-83B1D05EAC9A}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Configuration\System.Configuration.csproj">
-      <Project>{2C3A4742-5A25-4742-AFD6-0683BED9A0A3}</Project>
+      <Project>{35560A18-2C82-4931-93A9-83B1D05EAC9E}</Project>
       <Name>System.Configuration</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.EnterpriseServices\System.EnterpriseServices.csproj">
-      <Project>{2C3A4742-5A25-4742-AFD6-0683BED9A0A8}</Project>
+      <Project>{35560A18-2C82-4931-93A9-83B1D05EACA3}</Project>
       <Name>System.EnterpriseServices</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Transactions\System.Transactions.csproj">
-      <Project>{2C3A4742-5A25-4742-AFD6-0683BED9A0AB}</Project>
+      <Project>{35560A18-2C82-4931-93A9-83B1D05EACA6}</Project>
       <Name>System.Transactions</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{2C3A4742-5A25-4742-AFD6-0683BED9A0AC}</Project>
+      <Project>{35560A18-2C82-4931-93A9-83B1D05EACA7}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{2C3A4742-5A25-4742-AFD6-0683BED9A0A6}</Project>
+      <Project>{35560A18-2C82-4931-93A9-83B1D05EACA1}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

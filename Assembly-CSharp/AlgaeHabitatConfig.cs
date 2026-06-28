@@ -58,7 +58,7 @@ public class AlgaeHabitatConfig : IBuildingConfig
 		elementConsumer2.consumptionRadius = 1;
 		elementConsumer2.showDescriptor = false;
 		elementConsumer2.storeOnConsume = true;
-		elementConsumer2.capacityKG = 10f;
+		elementConsumer2.capacityKG = 200f;
 		go.AddOrGet<AnimTileable>();
 		go.AddOrGet<Prioritizable>();
 	}

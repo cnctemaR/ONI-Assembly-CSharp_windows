@@ -26,6 +26,7 @@ public class CO2ScrubberConfig : IBuildingConfig
 		go.AddOrGet<LoopingSounds>();
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
 		storage.showInUI = true;
+		storage.capacityKg = 30000f;
 		AirFilter airFilter = go.AddOrGet<AirFilter>();
 		airFilter.filterTag = TagManager.Create(SimHashes.Water);
 		ElementConsumer elementConsumer = go.AddOrGet<PassiveElementConsumer>();

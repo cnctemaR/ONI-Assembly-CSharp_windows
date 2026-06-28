@@ -204,9 +204,11 @@ public class PlanScreen : KIconToggleMenu
 							this.buildableDefs[buildingDef] = requirementsState;
 							if (this.productInfoScreen.currentDef == buildingDef)
 							{
+								this.ignoreToolChangeMessages++;
 								this.productInfoScreen.ClearProduct(false);
 								this.productInfoScreen.Show(true);
 								this.productInfoScreen.ConfigureScreen(buildingDef);
+								this.ignoreToolChangeMessages--;
 							}
 							if (requirementsState == PlanScreen.RequirementsState.Complete)
 							{

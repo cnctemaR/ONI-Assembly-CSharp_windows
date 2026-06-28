@@ -46,6 +46,7 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 						gravityComponent.initialVelocity.x = 0f;
 						gravityComponent.elapsedTime = -1f;
 						gravityComponent.transform.SetPosition(new Vector3(vector2.x, vector2.y, position.z));
+						this.data[i] = gravityComponent;
 						EventSystem.Trigger(gravityComponent.transform.gameObject, 1188683690, velocity);
 						if (gravityComponent.onLanded != null)
 						{
@@ -56,9 +57,9 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 					{
 						gravityComponent.transform.SetPosition(new Vector3(vector2.x, vector2.y, position.z));
 						gravityComponent.elapsedTime += dt;
+						this.data[i] = gravityComponent;
 					}
 				}
-				this.data[i] = gravityComponent;
 			}
 		}
 	}

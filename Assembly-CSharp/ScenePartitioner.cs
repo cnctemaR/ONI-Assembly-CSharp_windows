@@ -288,6 +288,21 @@ public class ScenePartitioner
 		this.ReleaseList(list);
 	}
 
+	public void TriggerEvent(HashSet<int> cells, ScenePartitionerLayer layer, object event_data)
+	{
+		List<ScenePartitionerEntry> list = this.ReserveList();
+		this.queryId++;
+		foreach (int num in cells)
+		{
+			int num2 = 0;
+			int num3 = 0;
+			Grid.CellToXY(num, out num2, out num3);
+			this.GatherEntries(num2, num3, 1, 1, layer, event_data, list, this.queryId);
+		}
+		this.RunEntries(list, event_data);
+		this.ReleaseList(list);
+	}
+
 	public void TriggerEvent(int x, int y, int width, int height, ScenePartitionerLayer layer, object event_data)
 	{
 		List<ScenePartitionerEntry> list = this.ReserveList();

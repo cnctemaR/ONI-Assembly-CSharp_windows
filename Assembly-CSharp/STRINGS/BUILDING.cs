@@ -1387,6 +1387,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "A straight Transit Tube must be connected to the top of the launch rail for this building to function.";
 			}
 
+			public class NOTUBEEXITS
+			{
+				public static LocString NAME = "No Valid Landing Spot";
+
+				public static LocString TOOLTIP = "Dupes can exit a transit tube if there is a spot to land within 2 tiles of the tube's end.";
+			}
+
 			public class STOREDCHARGE
 			{
 				public static LocString NAME = "Stored Charge: {0}/{1}";

@@ -23,8 +23,6 @@ public class TravelTube : KMonoBehaviour, IFirstFrameCallback, ITravelTubePiece
 		base.OnPrefabInit();
 		Grid.HasTube[Grid.PosToCell(this)] = true;
 		Components.ITravelTubePieces.Add(this);
-		base.Subscribe(774203113, new Action<object>(this.OnBuildingBroken));
-		base.Subscribe(-1735440190, new Action<object>(this.OnBuildingFullyRepaired));
 	}
 
 	protected override void OnSpawn()
@@ -32,6 +30,7 @@ public class TravelTube : KMonoBehaviour, IFirstFrameCallback, ITravelTubePiece
 		base.OnSpawn();
 		int num = Grid.PosToCell(base.transform.position);
 		Game.Instance.travelTubeSystem.AddToNetworks(num, this, false);
+		base.Subscribe(-1041684577, new Action<object>(this.OnConnectionsChanged));
 	}
 
 	protected override void OnCleanUp()
@@ -42,19 +41,90 @@ public class TravelTube : KMonoBehaviour, IFirstFrameCallback, ITravelTubePiece
 		{
 			Game.Instance.travelTubeSystem.RemoveFromNetworks(num, this, false);
 		}
-		base.Unsubscribe(774203113, new Action<object>(this.OnBuildingBroken));
-		base.Unsubscribe(-1735440190, new Action<object>(this.OnBuildingFullyRepaired));
+		base.Unsubscribe(-1041684577);
 		Grid.HasTube[Grid.PosToCell(this)] = false;
 		Components.ITravelTubePieces.Remove(this);
+		if (this.dirtyNavCellUpdatedEntry != null)
+		{
+			this.dirtyNavCellUpdatedEntry.Release();
+			this.dirtyNavCellUpdatedEntry = null;
+		}
 		base.OnCleanUp();
 	}
 
-	private void OnBuildingBroken(object data)
+	private void OnConnectionsChanged(object data)
 	{
+		this.connections = (UtilityConnections)data;
+		bool flag = this.connections == UtilityConnections.Up || this.connections == UtilityConnections.Down || this.connections == UtilityConnections.Left || this.connections == UtilityConnections.Right;
+		if (flag != this.isExitTube)
+		{
+			this.isExitTube = flag;
+			this.UpdateExitListener(this.isExitTube);
+			this.UpdateExitStatus();
+		}
 	}
 
-	private void OnBuildingFullyRepaired(object data)
+	private void UpdateExitListener(bool enable)
 	{
+		if (enable && this.dirtyNavCellUpdatedEntry == null)
+		{
+			int num = Grid.PosToCell(base.transform.position);
+			this.dirtyNavCellUpdatedEntry = GameScenePartitioner.Instance.Add("TravelTube.OnDirtyNavCellUpdated", this, num, GameScenePartitioner.Instance.dirtyNavCellUpdateLayer, new Action<object>(this.OnDirtyNavCellUpdated));
+			this.OnDirtyNavCellUpdated(null);
+		}
+		else if (!enable && this.dirtyNavCellUpdatedEntry != null)
+		{
+			this.dirtyNavCellUpdatedEntry.Release();
+			this.dirtyNavCellUpdatedEntry = null;
+		}
+	}
+
+	private void OnDirtyNavCellUpdated(object data)
+	{
+		int num = Grid.PosToCell(base.transform.position);
+		int num2 = num * NavGrid.MaxLinksPerCell;
+		bool flag = false;
+		if (this.isExitTube)
+		{
+			NavGrid navGrid = Pathfinding.Instance.GetNavGrid("MinionNavGrid");
+			NavGrid.Link link = navGrid.Links[num2];
+			while (link.link != PathFinder.InvalidHandle)
+			{
+				if (link.startNavType == NavType.Tube)
+				{
+					if (link.endNavType != NavType.Tube)
+					{
+						flag = true;
+						break;
+					}
+					UtilityConnections utilityConnections = UtilityConnectionsExtensions.DirectionFromToCell(link.link, num);
+					if (this.connections == utilityConnections)
+					{
+						flag = true;
+						break;
+					}
+				}
+				num2++;
+				link = navGrid.Links[num2];
+			}
+		}
+		if (flag != this.hasValidExitTransitions)
+		{
+			this.hasValidExitTransitions = flag;
+			this.UpdateExitStatus();
+		}
+	}
+
+	private void UpdateExitStatus()
+	{
+		if (!this.isExitTube || this.hasValidExitTransitions)
+		{
+			this.connectedStatus = this.selectable.RemoveStatusItem(this.connectedStatus, false);
+		}
+		else if (this.connectedStatus == Guid.Empty)
+		{
+			this.connectedStatus = this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.NoTubeExits, null);
+		}
 	}
 
 	public void SetFirstFrameCallback(global::System.Action ffCb)
@@ -74,6 +144,19 @@ public class TravelTube : KMonoBehaviour, IFirstFrameCallback, ITravelTubePiece
 		yield return null;
 		yield break;
 	}
+
+	[MyCmpReq]
+	private KSelectable selectable;
+
+	private GameScenePartitionerEntry dirtyNavCellUpdatedEntry;
+
+	private bool isExitTube;
+
+	private bool hasValidExitTransitions;
+
+	private UtilityConnections connections;
+
+	private Guid connectedStatus;
 
 	private global::System.Action firstFrameCallback;
 }

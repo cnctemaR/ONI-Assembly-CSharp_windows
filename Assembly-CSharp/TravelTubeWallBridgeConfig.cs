@@ -29,7 +29,7 @@ public class TravelTubeWallBridgeConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Plastic";
 		buildingDef.AudioSize = "small";
 		buildingDef.BaseTimeUntilRepair = -1f;
-		buildingDef.PermittedRotations = PermittedRotations.R360;
+		buildingDef.PermittedRotations = PermittedRotations.R90;
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 2);
 		buildingDef.IsFoundation = true;

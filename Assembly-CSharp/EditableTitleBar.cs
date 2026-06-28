@@ -22,7 +22,7 @@ public class EditableTitleBar : TitleBar
 		}
 		if (this.editNameButton != null)
 		{
-			this.editNameButton.onClick += this.ToggleNameEditing;
+			this.EnableEditButtonClick();
 		}
 		if (this.inputField != null)
 		{
@@ -49,11 +49,11 @@ public class EditableTitleBar : TitleBar
 		}
 		if (base.gameObject.activeInHierarchy && base.enabled)
 		{
-			this.postEndEdit = base.StartCoroutine(this.PostOnEndEdit());
+			this.postEndEdit = base.StartCoroutine(this.PostOnEndEditRoutine());
 		}
 	}
 
-	private IEnumerator PostOnEndEdit()
+	private IEnumerator PostOnEndEditRoutine()
 	{
 		int i = 0;
 		while (i < 10)
@@ -61,12 +61,32 @@ public class EditableTitleBar : TitleBar
 			i++;
 			yield return new WaitForEndOfFrame();
 		}
-		this.editNameButton.onClick += this.ToggleNameEditing;
+		this.EnableEditButtonClick();
 		if (this.randomNameButton != null)
 		{
 			this.randomNameButton.gameObject.SetActive(false);
 		}
 		yield break;
+	}
+
+	private IEnumerator PreToggleNameEditingRoutine()
+	{
+		yield return new WaitForEndOfFrame();
+		this.ToggleNameEditing();
+		this.preToggleNameEditing = null;
+		yield break;
+	}
+
+	private void EnableEditButtonClick()
+	{
+		this.editNameButton.onClick += delegate
+		{
+			if (this.preToggleNameEditing != null)
+			{
+				return;
+			}
+			this.preToggleNameEditing = base.StartCoroutine(this.PreToggleNameEditingRoutine());
+		};
 	}
 
 	private void GenerateRandomName()
@@ -131,7 +151,7 @@ public class EditableTitleBar : TitleBar
 		}
 		this.editNameButton.ClearOnClick();
 		this.SetEditingState(false);
-		this.editNameButton.onClick += this.ToggleNameEditing;
+		this.EnableEditButtonClick();
 	}
 
 	public void SetUserEditable(bool editable)
@@ -139,7 +159,7 @@ public class EditableTitleBar : TitleBar
 		this.userEditable = editable;
 		this.editNameButton.gameObject.SetActive(editable);
 		this.editNameButton.ClearOnClick();
-		this.editNameButton.onClick += this.ToggleNameEditing;
+		this.EnableEditButtonClick();
 	}
 
 	public KButton editNameButton;
@@ -149,4 +169,6 @@ public class EditableTitleBar : TitleBar
 	public TMP_InputField inputField;
 
 	private Coroutine postEndEdit;
+
+	private Coroutine preToggleNameEditing;
 }

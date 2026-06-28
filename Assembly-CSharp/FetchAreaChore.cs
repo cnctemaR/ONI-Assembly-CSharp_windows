@@ -103,6 +103,10 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 					float unreservedAmount = pickupable2.UnreservedAmount;
 					list3.Add(pickupable2);
 					num5 += unreservedAmount;
+					if (list3.Count >= 10)
+					{
+						break;
+					}
 				}
 			}
 			GameScenePartitioner.Instance.ReleaseList(list4);
@@ -137,6 +141,10 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 					this.chores.Add(fetchChore);
 					this.deliveries.Add(new FetchAreaChore.StatesInstance.Delivery(context2, num9, new Action<FetchChore>(this.OnFetchChoreCancelled)));
 					num10 += num9;
+					if (this.deliveries.Count >= 10)
+					{
+						break;
+					}
 				}
 			}
 			num10 = Mathf.Min(num10, num5);

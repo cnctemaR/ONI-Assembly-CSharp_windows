@@ -290,16 +290,16 @@ public class OilFloater : StateMachineComponent<OilFloater.StatesInstance>
 				.Enter(delegate(OilFloater.StatesInstance smi)
 				{
 					smi.Subscribe(-787691065, new Action<object>(smi.master.OnAttacked));
+					Navigator component = smi.GetComponent<Navigator>();
+					component.SetCurrentNavType(NavType.Hover);
+					smi.master.CheckForUnderwater();
 				})
 				.ToggleSchedulePeriodic("floater drown check", 2f, delegate(OilFloater.StatesInstance smi)
 				{
 					smi.master.CheckForUnderwater();
 				});
 			this.alive.flee.InitializeStates(this.mover, this.alive.idle);
-			this.alive.idle.DefaultState(this.alive.idle.idle).Enter(delegate(OilFloater.StatesInstance smi)
-			{
-				smi.master.CheckForUnderwater();
-			});
+			this.alive.idle.DefaultState(this.alive.idle.idle);
 			this.alive.idle.idle.PlayAnim("idle_loop", KAnim.PlayMode.Loop).Enter(delegate(OilFloater.StatesInstance smi)
 			{
 				if (smi.master.HasConsumedEnough())
@@ -385,9 +385,9 @@ public class OilFloater : StateMachineComponent<OilFloater.StatesInstance>
 			this.alive.inhale.pst.PlayAnim("eat_pst", KAnim.PlayMode.Once).OnAnimQueueComplete(this.alive.idle.move);
 			this.underwater.DefaultState(this.underwater.move).Enter(delegate(OilFloater.StatesInstance smi)
 			{
+				Navigator component2 = smi.GetComponent<Navigator>();
+				component2.SetCurrentNavType(NavType.Swim);
 				smi.master.CheckForAbovewater();
-				Navigator component = smi.GetComponent<Navigator>();
-				component.SetCurrentNavType(NavType.Swim);
 			}).ToggleSchedulePeriodic("floater surface check", 2f, delegate(OilFloater.StatesInstance smi)
 			{
 				smi.master.CheckForAbovewater();

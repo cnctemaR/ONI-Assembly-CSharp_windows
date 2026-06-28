@@ -254,6 +254,7 @@ namespace Database
 			this.NoWireConnected = new StatusItem("NoWireConnected", "BUILDING", "status_item_no_wire_connected", StatusItem.IconType.Custom, NotificationType.BadMinor, true, SimViewMode.PowerMap, true, 30718);
 			this.NoLogicWireConnected = new StatusItem("NoLogicWireConnected", "BUILDING", "status_item_no_logic_wire_connected", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.Logic, true, 30718);
 			this.NoTubeConnected = new StatusItem("NoTubeConnected", "BUILDING", "status_item_need_supply_out", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
+			this.NoTubeExits = new StatusItem("NoTubeExits", "BUILDING", "status_item_need_supply_out", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 30718);
 			this.StoredCharge = new StatusItem("StoredCharge", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 30718);
 			this.StoredCharge.resolveStringCallback = delegate(string str, object data)
 			{
@@ -662,6 +663,8 @@ namespace Database
 		public StatusItem NoLogicWireConnected;
 
 		public StatusItem NoTubeConnected;
+
+		public StatusItem NoTubeExits;
 
 		public StatusItem StoredCharge;
 

@@ -94,6 +94,10 @@ public class NavGrid
 	public void UpdateGraph(HashSet<int> dirty_nav_cells)
 	{
 		NavGridUpdater.UpdateNavGrid(this.NavTable, this.ValidNavTypes, this.Validators, this.boundingOffsets, this.Links, this.transitions, Grid.BitFields, dirty_nav_cells);
+		if (this.OnNavGridUpdateComplete != null)
+		{
+			this.OnNavGridUpdateComplete(dirty_nav_cells);
+		}
 	}
 
 	public static void DebugDrawPath(int start_cell, int end_cell)
@@ -215,6 +219,8 @@ public class NavGrid
 	private CellOffset[] boundingOffsets;
 
 	public string id;
+
+	public Action<HashSet<int>> OnNavGridUpdateComplete;
 
 	public NavType[] ValidNavTypes;
 

@@ -37,6 +37,8 @@ namespace ProcGen
 
 		public List<WeightedBiome> biomes { get; private set; }
 
+		public Dictionary<string, string[]> pointsOfInterest { get; private set; }
+
 		public int iterations { get; private set; }
 
 		public float minEnergy { get; private set; }

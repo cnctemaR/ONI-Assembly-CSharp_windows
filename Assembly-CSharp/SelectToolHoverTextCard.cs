@@ -161,7 +161,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 				GameScenePartitioner.Instance.TriggerEvent(num, GameScenePartitioner.Instance.decorProviderLayer, list);
 				float decorAtCell = GameUtil.GetDecorAtCell(num);
 				hoverTextDrawer.BeginShadowBar(false);
-				hoverTextDrawer.DrawText(UI.OVERLAYS.HEATFLOW.HOVERTITLE, this.Styles_Title.Standard);
+				hoverTextDrawer.DrawText(UI.OVERLAYS.DECOR.HOVERTITLE, this.Styles_Title.Standard);
 				hoverTextDrawer.NewLine(26);
 				hoverTextDrawer.DrawText(UI.OVERLAYS.DECOR.TOTAL + GameUtil.GetFormattedDecor(decorAtCell), this.Styles_BodyText.Standard);
 				if (!Grid.Solid[num] && Grid.Visible[num] > 0)

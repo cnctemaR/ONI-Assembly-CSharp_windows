@@ -129,6 +129,10 @@ public class KAnimLayering
 			return;
 		}
 		this.foregroundController.Offset = this.controller.Offset;
+		this.foregroundController.Pivot = this.controller.Pivot;
+		this.foregroundController.Rotation = this.controller.Rotation;
+		this.foregroundController.FlipX = this.controller.FlipX;
+		this.foregroundController.FlipY = this.controller.FlipY;
 	}
 
 	private bool isForeground;

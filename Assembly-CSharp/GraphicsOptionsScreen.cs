@@ -11,6 +11,10 @@ internal class GraphicsOptionsScreen : KModalScreen
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		if (Application.platform == RuntimePlatform.LinuxPlayer || Application.platform == RuntimePlatform.LinuxEditor)
+		{
+			this.resDropdownAlwaysActive = true;
+		}
 		this.title.SetText(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.TITLE);
 		this.originalSettings = this.CaptureSettings();
 		this.applyButton.isInteractable = false;
@@ -29,7 +33,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 		this.fullscreenToggle.isOn = Screen.fullScreen;
 		this.fullscreenToggle.onValueChanged.AddListener(new UnityAction<bool>(this.OnFullscreenToggle));
 		this.fullscreenToggle.GetComponentInChildren<LocText>().SetText(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.FULLSCREEN);
-		this.resolutionDropdown.interactable = this.fullscreenToggle.isOn;
+		this.resolutionDropdown.interactable = this.resDropdownAlwaysActive || this.fullscreenToggle.isOn;
 		this.resolutionDropdown.transform.parent.GetComponentInChildren<LocText>().SetText(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.RESOLUTION);
 		if (this.fullscreenToggle.isOn)
 		{
@@ -191,7 +195,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 
 	private void OnFullscreenToggle(bool enabled)
 	{
-		this.resolutionDropdown.interactable = this.fullscreenToggle.isOn;
+		this.resolutionDropdown.interactable = this.resDropdownAlwaysActive || this.fullscreenToggle.isOn;
 		this.RefreshApplyButton();
 	}
 
@@ -293,6 +297,8 @@ internal class GraphicsOptionsScreen : KModalScreen
 	private List<Dropdown.OptionData> options = new List<Dropdown.OptionData>();
 
 	private GraphicsOptionsScreen.Settings originalSettings;
+
+	private bool resDropdownAlwaysActive;
 
 	private struct Settings
 	{

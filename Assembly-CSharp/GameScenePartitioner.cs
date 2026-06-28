@@ -29,10 +29,10 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.wiresLayer = this.partitioner.CreateMask(new HashedString("Wire"));
 		this.noisePolluterLayer = this.partitioner.CreateMask(new HashedString("NoisePolluters"));
 		this.validNavCellChangedLayer = this.partitioner.CreateMask(new HashedString("validNavCellChangedLayer"));
+		this.dirtyNavCellUpdateLayer = this.partitioner.CreateMask(new HashedString("dirtyNavCellUpdateLayer"));
 		this.trapsLayer = this.partitioner.CreateMask(new HashedString("trapsLayer"));
 		this.floorSwitchActivatorLayer = this.partitioner.CreateMask(new HashedString("FloorSwitchActivatorLayer"));
 		this.floorSwitchActivatorChangedLayer = this.partitioner.CreateMask(new HashedString("FloorSwitchActivatorChangedLayer"));
-		this.tubeConnectionsChangedLayer = this.partitioner.CreateMask(new HashedString("TubeConnectionsChangedLayer"));
 		this.objectLayers = new ScenePartitionerLayer[32];
 		for (int i = 0; i < 32; i++)
 		{
@@ -60,10 +60,10 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.wiresLayer = null;
 		this.noisePolluterLayer = null;
 		this.validNavCellChangedLayer = null;
+		this.dirtyNavCellUpdateLayer = null;
 		this.trapsLayer = null;
 		this.floorSwitchActivatorLayer = null;
 		this.floorSwitchActivatorChangedLayer = null;
-		this.tubeConnectionsChangedLayer = null;
 		this.objectLayers = null;
 	}
 
@@ -71,6 +71,8 @@ public class GameScenePartitioner : KMonoBehaviour
 	{
 		base.OnSpawn();
 		NavGrid navGrid = Pathfinding.Instance.GetNavGrid("MinionNavGrid");
+		NavGrid navGrid2 = navGrid;
+		navGrid2.OnNavGridUpdateComplete = (Action<HashSet<int>>)Delegate.Combine(navGrid2.OnNavGridUpdateComplete, new Action<HashSet<int>>(this.OnNavGridUpdateComplete));
 		NavTable navTable = navGrid.NavTable;
 		navTable.OnValidCellChanged = (Action<int, NavType>)Delegate.Combine(navTable.OnValidCellChanged, new Action<int, NavType>(this.OnValidNavCellChanged));
 	}
@@ -96,6 +98,11 @@ public class GameScenePartitioner : KMonoBehaviour
 	}
 
 	public void TriggerEvent(List<int> cells, ScenePartitionerLayer layer, object event_data)
+	{
+		this.partitioner.TriggerEvent(cells, layer, event_data);
+	}
+
+	public void TriggerEvent(HashSet<int> cells, ScenePartitionerLayer layer, object event_data)
 	{
 		this.partitioner.TriggerEvent(cells, layer, event_data);
 	}
@@ -135,7 +142,20 @@ public class GameScenePartitioner : KMonoBehaviour
 
 	private void OnValidNavCellChanged(int cell, NavType nav_type)
 	{
-		GameScenePartitioner.Instance.TriggerEvent(cell, GameScenePartitioner.Instance.validNavCellChangedLayer, null);
+		this.changedCells.Add(cell);
+	}
+
+	private void OnNavGridUpdateComplete(HashSet<int> dirty_nav_cells)
+	{
+		if (dirty_nav_cells.Count > 0)
+		{
+			GameScenePartitioner.Instance.TriggerEvent(dirty_nav_cells, GameScenePartitioner.Instance.dirtyNavCellUpdateLayer, null);
+		}
+		if (this.changedCells.Count > 0)
+		{
+			GameScenePartitioner.Instance.TriggerEvent(this.changedCells, GameScenePartitioner.Instance.validNavCellChangedLayer, null);
+			this.changedCells.Clear();
+		}
 	}
 
 	public ScenePartitionerLayer solidChangedLayer;
@@ -168,15 +188,17 @@ public class GameScenePartitioner : KMonoBehaviour
 
 	public ScenePartitionerLayer validNavCellChangedLayer;
 
+	public ScenePartitionerLayer dirtyNavCellUpdateLayer;
+
 	public ScenePartitionerLayer trapsLayer;
 
 	public ScenePartitionerLayer floorSwitchActivatorLayer;
 
 	public ScenePartitionerLayer floorSwitchActivatorChangedLayer;
 
-	public ScenePartitionerLayer tubeConnectionsChangedLayer;
-
 	private ScenePartitioner partitioner;
 
 	private static GameScenePartitioner instance;
+
+	private List<int> changedCells = new List<int>();
 }

@@ -289,11 +289,7 @@ public class Door : Workable, ISaveLoadable
 				World.Instance.groundRenderer.MarkDirty(num);
 				if (is_door_open)
 				{
-					if (Grid.Element[num].IsGas)
-					{
-						this.OnSimDoorOpened();
-					}
-					else
+					if (Grid.Element[num].IsSolid)
 					{
 						HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorOpened), false));
 						int num2 = num;
@@ -303,6 +299,10 @@ public class Door : Workable, ISaveLoadable
 						float num4 = -1f;
 						int num5 = handle.index;
 						SimMessages.ReplaceElement(num2, simHashes, cellElementEvent, num3, num4, byte.MaxValue, 0, num5);
+					}
+					else
+					{
+						this.OnSimDoorOpened();
 					}
 				}
 				else if (Grid.Element[num].IsSolid)
@@ -532,7 +532,16 @@ public class Door : Workable, ISaveLoadable
 		}
 		bool flag = newValue == 1;
 		this.requestedState = ((!flag) ? Door.ControlState.Closed : Door.ControlState.Opened);
-		this.ApplyRequestedControlState(false);
+		this.applyLogicChange = true;
+	}
+
+	private void SimUpdate(float dt)
+	{
+		if (this.applyLogicChange)
+		{
+			this.applyLogicChange = false;
+			this.ApplyRequestedControlState(false);
+		}
 	}
 
 	[MyCmpReq]
@@ -587,6 +596,8 @@ public class Door : Workable, ISaveLoadable
 	public static readonly HashedString OPEN_CLOSE_PORT_ID = new HashedString("DoorOpenClose");
 
 	private static readonly KAnimFile[] OVERRIDE_ANIMS = new KAnimFile[] { Assets.GetAnim("anim_use_remote_kanim") };
+
+	private bool applyLogicChange;
 
 	public enum DoorType
 	{

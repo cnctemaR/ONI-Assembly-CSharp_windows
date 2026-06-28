@@ -1173,8 +1173,8 @@ public class OverlayScreen : KMonoBehaviour
 	[SerializeField]
 	private Color32 circuitStrainingColour;
 
-	[Header("Crops")]
 	[SerializeField]
+	[Header("Crops")]
 	private Canvas harvestableUIParent;
 
 	[SerializeField]

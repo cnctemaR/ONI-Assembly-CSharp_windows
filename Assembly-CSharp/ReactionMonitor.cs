@@ -70,6 +70,7 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 						this.justReacted = true;
 						base.sm.reactable.Set(reactable, base.smi);
 						base.smi.GoTo(base.sm.reacting);
+						break;
 					}
 				}
 			}

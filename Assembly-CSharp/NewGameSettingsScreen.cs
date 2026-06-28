@@ -121,8 +121,8 @@ public class NewGameSettingsScreen : KScreen
 	[SerializeField]
 	private Transform checkbox_grid;
 
-	[SerializeField]
 	[Header("Prefab UI Refs")]
+	[SerializeField]
 	private GameObject prefab_cycle_setting;
 
 	[SerializeField]

@@ -40,8 +40,8 @@ public class ElementsAudio
 
 	private ElementsAudio.ElementAudioConfig[] elementAudioConfigs;
 
-	[DelimitedRecord(",")]
 	[IgnoreEmptyLines]
+	[DelimitedRecord(",")]
 	[IgnoreFirst(1)]
 	public class ElementAudioConfig
 	{

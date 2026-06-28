@@ -17,9 +17,9 @@ public class AudioSheet
 
 	public AudioSheet.SoundInfo[] soundInfos;
 
-	[DelimitedRecord(",")]
 	[IgnoreFirst(1)]
 	[IgnoreEmptyLines]
+	[DelimitedRecord(",")]
 	[Serializable]
 	public class SoundInfo
 	{

@@ -405,8 +405,8 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		GameTags.RefinedMetal
 	};
 
-	[HashedEnum]
 	[Serialize]
+	[HashedEnum]
 	public SimHashes ElementID;
 
 	private float _units = 1f;

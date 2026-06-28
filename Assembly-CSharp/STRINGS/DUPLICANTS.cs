@@ -2396,7 +2396,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Low Oxygen";
 
-				public static LocString TOOLTIP = "The air quite thin in this area";
+				public static LocString TOOLTIP = "The air is thin in this area";
 			}
 
 			public class MOURNING

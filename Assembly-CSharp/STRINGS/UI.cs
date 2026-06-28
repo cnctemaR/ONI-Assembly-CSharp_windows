@@ -1456,9 +1456,9 @@ namespace STRINGS
 
 				public class TOOLTIPS
 				{
-					public static LocString LOWDECOR = "<b>High Decor</b>\nArea with insufficient decor values\n* Resources on the floor are considered \"debris\" and will decrease decor";
+					public static LocString LOWDECOR = "<b>Low Decor</b>\nArea with insufficient decor values\n* Resources on the floor are considered \"debris\" and will decrease decor";
 
-					public static LocString HIGHDECOR = "<b>Low Decor</b>\nArea with sufficient decor values\n* Lighting and aesthetically pleasing buildings increase decor";
+					public static LocString HIGHDECOR = "<b>High Decor</b>\nArea with sufficient decor values\n* Lighting and aesthetically pleasing buildings increase decor";
 				}
 			}
 

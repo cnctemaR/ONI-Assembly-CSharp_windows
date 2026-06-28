@@ -502,8 +502,8 @@ public class PropertyTextures : KMonoBehaviour
 	[SerializeField]
 	private Vector2 PressureRange = new Vector2(15f, 200f);
 
-	[Range(0f, 1f)]
 	[SerializeField]
+	[Range(0f, 1f)]
 	private float TemperatureStateChangeRange = 0.05f;
 
 	public static PropertyTextures instance;

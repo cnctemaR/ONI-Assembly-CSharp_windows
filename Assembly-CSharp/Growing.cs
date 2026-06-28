@@ -225,8 +225,13 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 				Harvestable component = smi.master.GetComponent<Harvestable>();
 				if (component)
 				{
+					bool harvestWhenReady = component.HarvestWhenReady;
 					component.ForceCancelHarvest(null);
 					component.Harvest();
+					if (harvestWhenReady && component != null)
+					{
+						component.SetHarvestWhenReady(true);
+					}
 				}
 				smi.master.maturity.SetValue(0f);
 				smi.master.oldAge.SetValue(0f);

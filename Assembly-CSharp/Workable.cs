@@ -300,6 +300,10 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	protected override void OnCleanUp()
 	{
 		this.ShowProgressBar(false);
+		if (this.offsetTracker != null)
+		{
+			this.offsetTracker.Clear();
+		}
 		base.OnCleanUp();
 	}
 

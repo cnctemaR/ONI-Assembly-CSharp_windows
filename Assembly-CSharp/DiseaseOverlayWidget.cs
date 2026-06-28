@@ -68,14 +68,14 @@ public class DiseaseOverlayWidget : KMonoBehaviour
 					num2++;
 				}
 			}
-			for (int i = this.displayedDiseases.Count - 1; i > num2; i--)
+			for (int i = this.displayedDiseases.Count - 1; i >= num2; i--)
 			{
 				Util.KDestroyGameObject(this.displayedDiseases[i].gameObject);
 				this.displayedDiseases.RemoveAt(i);
 			}
 			this.diseasedImage.enabled = false;
 			this.progressFill.transform.parent.gameObject.SetActive(this.displayedDiseases.Count > 0);
-			this.germsImage.transform.parent.gameObject.SetActive(true);
+			this.germsImage.transform.parent.gameObject.SetActive(this.displayedDiseases.Count > 0);
 		}
 	}
 

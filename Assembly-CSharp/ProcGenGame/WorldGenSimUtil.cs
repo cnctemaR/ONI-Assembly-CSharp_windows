@@ -84,11 +84,28 @@ namespace ProcGenGame
 							dcs[num2].elementCount = templateCellData.diseaseCount;
 						}
 					}
-					if (j == num - 2)
+				}
+			}
+			for (int m = 0; m < Grid.CellCount; m++)
+			{
+				int num3 = ((m != Grid.CellCount - 1) ? (-1) : 2147481337);
+				SimMessages.ModifyCell(m, (int)cells[m].elementIdx, cells[m].temperature, cells[m].mass, dcs[m].diseaseIdx, dcs[m].elementCount, SimMessages.ReplaceType.Replace, num3);
+			}
+			bool flag = false;
+			while (!flag)
+			{
+				SimMessages.NewGameFrame(0.25f, vector2I, vector2I2);
+				IntPtr intPtr2 = Sim.HandleMessage(SimMessageHashes.PrepareGameData, array3.Length, array3);
+				if (!(intPtr2 == IntPtr.Zero))
+				{
+					Sim.GameDataUpdate* ptr2 = (Sim.GameDataUpdate*)(void*)intPtr2;
+					for (int n = 0; n < ptr2->numCallbackInfo; n++)
 					{
-						for (int m = 0; m < Grid.CellCount; m++)
+						Sim.CallbackInfo callbackInfo = ptr2->callbackInfo[n];
+						if (callbackInfo.callbackIdx == 2147481337)
 						{
-							SimMessages.ModifyCell(m, (int)cells[m].elementIdx, cells[m].temperature, cells[m].mass, dcs[m].diseaseIdx, dcs[m].elementCount, SimMessages.ReplaceType.Replace, -1);
+							flag = true;
+							break;
 						}
 					}
 				}

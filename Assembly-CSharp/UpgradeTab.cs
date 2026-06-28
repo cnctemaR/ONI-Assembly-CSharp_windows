@@ -156,8 +156,8 @@ public class UpgradeTab : TargetScreen
 		});
 	}
 
-	[SerializeField]
 	[Header("UI Elements")]
+	[SerializeField]
 	private GameObject availableGrid;
 
 	[SerializeField]

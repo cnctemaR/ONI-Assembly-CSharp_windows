@@ -11,6 +11,14 @@ public class Harvestable : Workable
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
 	}
 
+	public bool HarvestWhenReady
+	{
+		get
+		{
+			return this.harvestWhenReady;
+		}
+	}
+
 	public bool CanBeHavested
 	{
 		get

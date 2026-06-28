@@ -341,21 +341,21 @@ public class RoomProber : ISim1000ms
 
 	public Room GetRoomOfBuilding(GameObject bc)
 	{
-		KPrefabID component = bc.GetComponent<KPrefabID>();
-		foreach (CavityInfo cavityInfo in this.cavityInfos.GetDataList())
+		if (bc == null)
 		{
-			if (cavityInfo.numCells != 0)
-			{
-				foreach (KPrefabID kprefabID in cavityInfo.buildings)
-				{
-					if (component.gameObject == kprefabID.gameObject)
-					{
-						return cavityInfo.room;
-					}
-				}
-			}
+			return null;
 		}
-		return null;
+		int num = Grid.PosToCell(bc);
+		if (!Grid.IsValidCell(num))
+		{
+			return null;
+		}
+		CavityInfo cavityForCell = this.GetCavityForCell(num);
+		if (cavityForCell == null)
+		{
+			return null;
+		}
+		return cavityForCell.room;
 	}
 
 	private CavityInfo GetCavityInfo(HandleVector<int>.Handle id)

@@ -132,12 +132,13 @@ public class ScenePartitioner
 		{
 			for (int j = nodeExtents.x; j < nodeExtents.x + nodeExtents.width; j++)
 			{
-				int count = this.nodes[i, j].entries.Count;
+				List<ScenePartitionerEntry> entries = this.nodes[i, j].entries;
+				int count = entries.Count;
 				for (int k = 0; k < count; k++)
 				{
-					if (this.nodes[i, j].entries[k] == entry)
+					if (entries[k] == entry)
 					{
-						this.nodes[i, j].entries[k] = null;
+						entries[k] = null;
 						break;
 					}
 				}
@@ -167,12 +168,13 @@ public class ScenePartitioner
 	public void TriggerEvent(List<int> cells, int masks, object event_data)
 	{
 		List<ScenePartitionerEntry> list = this.ReserveList();
+		this.queryId++;
 		for (int i = 0; i < cells.Count; i++)
 		{
 			int num = 0;
 			int num2 = 0;
 			Grid.CellToXY(cells[i], out num, out num2);
-			this.GatherEntries(num, num2, 1, 1, masks, event_data, list);
+			this.GatherEntries(num, num2, 1, 1, masks, event_data, list, this.queryId);
 		}
 		this.RunEntries(list, event_data);
 		this.ReleaseList(list);
@@ -200,7 +202,11 @@ public class ScenePartitioner
 
 	public void GatherEntries(int x, int y, int width, int height, int masks, object event_data, List<ScenePartitionerEntry> gathered_entries)
 	{
-		this.queryId++;
+		this.GatherEntries(x, y, width, height, masks, event_data, gathered_entries, ++this.queryId);
+	}
+
+	public void GatherEntries(int x, int y, int width, int height, int masks, object event_data, List<ScenePartitionerEntry> gathered_entries, int query_id)
+	{
 		Extents nodeExtents = this.GetNodeExtents(x, y, width, height);
 		int num = Math.Min(nodeExtents.y + nodeExtents.height, this.nodes.GetLength(0));
 		int num2 = Math.Max(nodeExtents.y, 0);
@@ -222,13 +228,13 @@ public class ScenePartitioner
 						{
 							if ((scenePartitionerEntry.masks & masks) != 0)
 							{
-								scenePartitionerEntry.queryId = this.queryId;
 								if (scenePartitionerEntry.obj == null)
 								{
 									entries[k] = null;
 								}
 								else if (scenePartitionerEntry.x < x + width && scenePartitionerEntry.x + scenePartitionerEntry.width >= x && scenePartitionerEntry.y < y + height && scenePartitionerEntry.y + scenePartitionerEntry.height >= y)
 								{
+									scenePartitionerEntry.queryId = this.queryId;
 									gathered_entries.Add(scenePartitionerEntry);
 								}
 							}

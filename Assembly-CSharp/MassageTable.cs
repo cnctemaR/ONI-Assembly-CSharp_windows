@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Klei.AI;
 using KSerialization;
 using STRINGS;
+using UnityEngine;
 
 public class MassageTable : RelaxationPoint, IEffectDescriptor, IActivationRangeTarget
 {
@@ -34,6 +35,23 @@ public class MassageTable : RelaxationPoint, IEffectDescriptor, IActivationRange
 		get
 		{
 			return BUILDINGS.PREFABS.MASSAGETABLE.DEACTIVATE_TOOLTIP;
+		}
+	}
+
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		this.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
+	}
+
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = (GameObject)data;
+		MassageTable component = gameObject.GetComponent<MassageTable>();
+		if (component != null)
+		{
+			this.ActivateValue = component.ActivateValue;
+			this.DeactivateValue = component.DeactivateValue;
 		}
 	}
 

@@ -607,7 +607,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Stifled";
 
-				public static LocString TOOLTIP = "This plant has stopped growing because one of its basic requirements has not been met\n\nUnmet Condition: {0}";
+				public static LocString TOOLTIP = "This plant has stopped growing because one of its basic requirements has not been met";
 			}
 
 			public class BARREN

@@ -42,7 +42,6 @@ public class FertilizationMonitor : GameStateMachine<FertilizationMonitor, Ferti
 		this.replanted.fertilized.decaying.normal.ParamTransition<bool>(this.hasIncorrectFertilizer, this.replanted.fertilized.decaying.wrongFert, (FertilizationMonitor.Instance smi, bool p) => p);
 		this.replanted.fertilized.decaying.wrongFert.ParamTransition<bool>(this.hasIncorrectFertilizer, this.replanted.fertilized.decaying.normal, (FertilizationMonitor.Instance smi, bool p) => !p).ToggleStatusItem((FertilizationMonitor.Instance smi) => smi.GetIncorrectFertStatusItemMajor(), (FertilizationMonitor.Instance smi) => smi);
 		this.replanted.fertilized.absorbing.DefaultState(this.replanted.fertilized.absorbing.normal).ParamTransition<bool>(this.hasCorrectFertilizer, this.replanted.fertilized.decaying, (FertilizationMonitor.Instance smi, bool p) => !p).ToggleAttributeModifier("Absorbing", (FertilizationMonitor.Instance smi) => smi.absorptionRate, null)
-			.ToggleAttributeModifier("FertCondition", (FertilizationMonitor.Instance smi) => smi.goodConditionModifier, null)
 			.Update(delegate(FertilizationMonitor.Instance smi)
 			{
 				smi.AbsorbFertilizer(smi.deltatime);

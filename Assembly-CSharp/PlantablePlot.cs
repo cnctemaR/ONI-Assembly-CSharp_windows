@@ -7,15 +7,15 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectEffectDescriptor, IEffectDescriptor
 {
-	public Growing crop
+	public KPrefabID plant
 	{
 		get
 		{
-			return this.cropRef.Get();
+			return this.plantRef.Get();
 		}
 		set
 		{
-			this.cropRef.Set(value);
+			this.plantRef.Set(value);
 		}
 	}
 
@@ -47,6 +47,7 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 	{
 		base.OnPrefabInit();
 		this.cropRef = new Ref<Growing>();
+		this.plantRef = new Ref<KPrefabID>();
 		this.destroyEntityOnDeposit = true;
 		this.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
 	}
@@ -55,19 +56,38 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 	{
 		GameObject gameObject = (GameObject)data;
 		PlantablePlot component = gameObject.GetComponent<PlantablePlot>();
-		if (component != null && base.occupyingObject == null && this.requestedEntityTag != component.requestedEntityTag)
+		if (component != null)
 		{
-			base.CancelActiveRequest();
-			base.CreateOrder(component.requestedEntityTag);
+			if (base.occupyingObject == null && this.requestedEntityTag != component.requestedEntityTag)
+			{
+				base.CancelActiveRequest();
+				base.CreateOrder(component.requestedEntityTag);
+			}
+			if (base.occupyingObject != null)
+			{
+				Prioritizable component2 = base.GetComponent<Prioritizable>();
+				if (component2 != null)
+				{
+					Prioritizable component3 = base.occupyingObject.GetComponent<Prioritizable>();
+					if (component3 != null)
+					{
+						component3.SetMasterPriority(component2.GetMasterPriority());
+					}
+				}
+			}
 		}
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		if (this.crop != null)
+		if (this.cropRef.Get() != null && this.plantRef.Get() == null)
 		{
-			this.RegisterWithPlant(this.crop.gameObject);
+			this.plantRef.Set(this.cropRef.Get<KPrefabID>());
+		}
+		if (this.plant != null)
+		{
+			this.RegisterWithPlant(this.plant.gameObject);
 		}
 		this.autoReplaceEntity = true;
 		if (base.Occupant != null && base.Occupant.GetComponent<Uprootable>().IsMarkedForUproot)
@@ -108,12 +128,8 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 		Vector3 vector = Grid.CellToPosCBC(Grid.PosToCell(this), Grid.SceneLayer.BuildingBack);
 		GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(component.PlantID), vector, Grid.SceneLayer.BuildingBack, SceneOrganizer.Instance.GetFolder(Folder.Entities), null, 0);
 		gameObject.SetActive(true);
-		Growing component2 = gameObject.GetComponent<Growing>();
-		if (component2)
-		{
-			component2.OnReplant();
-		}
-		this.cropRef.Set(component2);
+		KPrefabID component2 = gameObject.GetComponent<KPrefabID>();
+		this.plantRef.Set(component2);
 		Crop component3 = gameObject.GetComponent<Crop>();
 		if (component3 != null)
 		{
@@ -127,6 +143,15 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 			component5.canBeUprooted = false;
 		}
 		this.autoReplaceEntity = true;
+		Prioritizable component6 = base.GetComponent<Prioritizable>();
+		if (component6 != null)
+		{
+			Prioritizable component7 = gameObject.GetComponent<Prioritizable>();
+			if (component7 != null)
+			{
+				component7.SetMasterPriority(component6.GetMasterPriority());
+			}
+		}
 		return gameObject;
 	}
 
@@ -260,6 +285,9 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 
 	[Serialize]
 	private Ref<Growing> cropRef;
+
+	[Serialize]
+	private Ref<KPrefabID> plantRef;
 
 	private PlantPreview plantPreview;
 

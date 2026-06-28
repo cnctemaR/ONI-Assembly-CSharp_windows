@@ -3,6 +3,15 @@ using UnityEngine;
 
 public class PrickleGrass : StateMachineComponent<PrickleGrass.StatesInstance>
 {
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		this.Subscribe(1309017699, delegate(object o)
+		{
+			this.replanted = true;
+		});
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -22,6 +31,8 @@ public class PrickleGrass : StateMachineComponent<PrickleGrass.StatesInstance>
 	[MyCmpReq]
 	private EntombVulnerable entombVulnerable;
 
+	public bool replanted;
+
 	public class StatesInstance : GameStateMachine<PrickleGrass.States, PrickleGrass.StatesInstance, PrickleGrass, object>.GameInstance
 	{
 		public StatesInstance(PrickleGrass smi)
@@ -34,7 +45,7 @@ public class PrickleGrass : StateMachineComponent<PrickleGrass.StatesInstance>
 	{
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
-			default_state = this.alive;
+			default_state = this.grow;
 			base.serializable = true;
 			this.dead.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Dead).Enter(delegate(PrickleGrass.StatesInstance smi)
 			{
@@ -44,21 +55,22 @@ public class PrickleGrass : StateMachineComponent<PrickleGrass.StatesInstance>
 				global::UnityEngine.Object.Destroy(smi.master.GetComponent<KBatchedAnimController>());
 				smi.Schedule(0.5f, new Action<object>(smi.master.DestroySelf), null);
 			});
-			this.blocked_from_growing.ToggleStatusItem(Db.Get().MiscStatusItems.RegionIsBlocked, null).EventTransition(GameHashes.EntombedChanged, this.dead, (PrickleGrass.StatesInstance smi) => smi.master.entombVulnerable.GetEntombed).EventTransition(GameHashes.TooColdWarning, this.alive.seed_grow, (PrickleGrass.StatesInstance smi) => this.alive.ForceUpdateStatus(smi.master.gameObject))
-				.EventTransition(GameHashes.TooHotWarning, this.alive.seed_grow, (PrickleGrass.StatesInstance smi) => this.alive.ForceUpdateStatus(smi.master.gameObject))
+			this.blocked_from_growing.ToggleStatusItem(Db.Get().MiscStatusItems.RegionIsBlocked, null).EventTransition(GameHashes.EntombedChanged, this.alive, (PrickleGrass.StatesInstance smi) => this.alive.ForceUpdateStatus(smi.master.gameObject)).EventTransition(GameHashes.TooColdWarning, this.alive, (PrickleGrass.StatesInstance smi) => this.alive.ForceUpdateStatus(smi.master.gameObject))
+				.EventTransition(GameHashes.TooHotWarning, this.alive, (PrickleGrass.StatesInstance smi) => this.alive.ForceUpdateStatus(smi.master.gameObject))
 				.EventTransition(GameHashes.Uprooted, this.dead, (PrickleGrass.StatesInstance smi) => UprootedMonitor.IsObjectUprooted(smi.master.gameObject));
-			this.alive.InitializeStates(this.masterTarget, this.dead).DefaultState(this.alive.seed_grow).Enter(delegate(PrickleGrass.StatesInstance smi)
+			this.grow.Enter(delegate(PrickleGrass.StatesInstance smi)
 			{
-				if (!this.alive.ForceUpdateStatus(smi.master.gameObject))
+				if (smi.master.replanted && !this.alive.ForceUpdateStatus(smi.master.gameObject))
 				{
 					smi.GoTo(this.blocked_from_growing);
 				}
-			})
-				.ToggleStatusItem(Db.Get().CreatureStatusItems.Idle, null);
-			this.alive.seed_grow.QueueAnim("grow_seed", false, null).EventTransition(GameHashes.AnimQueueComplete, this.alive.idle, null);
+			}).PlayAnim("grow_seed", KAnim.PlayMode.Once, null).EventTransition(GameHashes.AnimQueueComplete, this.alive, null);
+			this.alive.InitializeStates(this.masterTarget, this.dead).DefaultState(this.alive.idle).ToggleStatusItem(Db.Get().CreatureStatusItems.Idle, null);
 			this.alive.idle.EventTransition(GameHashes.Wilt, this.alive.wilting, (PrickleGrass.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).PlayAnim("idle", KAnim.PlayMode.Loop, null);
 			this.alive.wilting.PlayAnim("wilt1", KAnim.PlayMode.Loop, null).EventTransition(GameHashes.WiltRecover, this.alive.idle, null);
 		}
+
+		public GameStateMachine<PrickleGrass.States, PrickleGrass.StatesInstance, PrickleGrass, object>.State grow;
 
 		public GameStateMachine<PrickleGrass.States, PrickleGrass.StatesInstance, PrickleGrass, object>.State blocked_from_growing;
 
@@ -68,13 +80,9 @@ public class PrickleGrass : StateMachineComponent<PrickleGrass.StatesInstance>
 
 		public class AliveStates : GameStateMachine<PrickleGrass.States, PrickleGrass.StatesInstance, PrickleGrass, object>.PlantAliveSubState
 		{
-			public GameStateMachine<PrickleGrass.States, PrickleGrass.StatesInstance, PrickleGrass, object>.State seed_grow;
-
 			public GameStateMachine<PrickleGrass.States, PrickleGrass.StatesInstance, PrickleGrass, object>.State idle;
 
 			public PrickleGrass.States.WiltingState wilting;
-
-			public GameStateMachine<PrickleGrass.States, PrickleGrass.StatesInstance, PrickleGrass, object>.State destroy;
 		}
 
 		public class WiltingState : GameStateMachine<PrickleGrass.States, PrickleGrass.StatesInstance, PrickleGrass, object>.State

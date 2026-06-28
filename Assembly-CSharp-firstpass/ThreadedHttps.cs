@@ -133,7 +133,7 @@ public class ThreadedHttps<T> where T : class, new()
 					string message = ex.Message;
 					text = string.Concat(new string[]
 					{
-						global::System.DateTime.Now.ToLongTimeString(),
+						DateTime.Now.ToLongTimeString(),
 						" ",
 						this.serviceName,
 						": Exception getting Request Stream:",
@@ -151,7 +151,7 @@ public class ThreadedHttps<T> where T : class, new()
 					string message2 = ex2.Message;
 					text = string.Concat(new string[]
 					{
-						global::System.DateTime.Now.ToLongTimeString(),
+						DateTime.Now.ToLongTimeString(),
 						" ",
 						this.serviceName,
 						": Exception writing data to Stream:",
@@ -183,7 +183,7 @@ public class ThreadedHttps<T> where T : class, new()
 					}
 					text = string.Concat(new string[]
 					{
-						global::System.DateTime.Now.ToLongTimeString(),
+						DateTime.Now.ToLongTimeString(),
 						" ",
 						this.serviceName,
 						": Exception getting response:",
@@ -238,7 +238,7 @@ public class ThreadedHttps<T> where T : class, new()
 				{
 					text = string.Concat(new object[]
 					{
-						global::System.DateTime.Now.ToLongTimeString(),
+						DateTime.Now.ToLongTimeString(),
 						" ",
 						this.serviceName,
 						": Max Retries (",
@@ -262,7 +262,7 @@ public class ThreadedHttps<T> where T : class, new()
 				TimeSpan timeSpan = TimeSpan.FromSeconds(Math.Pow(2.0, (double)(num + 3)));
 				text = string.Concat(new object[]
 				{
-					global::System.DateTime.Now.ToLongTimeString(),
+					DateTime.Now.ToLongTimeString(),
 					" ",
 					this.serviceName,
 					": Exception (retrying in ",

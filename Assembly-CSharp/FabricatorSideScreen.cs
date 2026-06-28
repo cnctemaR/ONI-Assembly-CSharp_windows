@@ -140,18 +140,6 @@ public class FabricatorSideScreen : SideScreenContent
 		this.selectedRecipe = this.recipeMap[toggle];
 		this.selectedRecipeFabricatorMap[this.targetFab] = this.recipeToggles.IndexOf(toggle);
 		Element[] recipeElements = this.GetRecipeElements(this.selectedRecipe);
-		if (this.elementContainers == null)
-		{
-			this.elementContainers = new List<GameObject>();
-		}
-		else
-		{
-			this.elementContainers.ForEach(delegate(GameObject ec)
-			{
-				global::UnityEngine.Object.Destroy(ec.gameObject);
-			});
-			this.elementContainers.Clear();
-		}
 		this.buildBtn.GetComponent<ToolTip>().toolTip = string.Format(UI.TOOLTIPS.RECIPE_QUEUE, this.selectedRecipe.Name);
 		this.infiniteBuildBtn.GetComponent<ToolTip>().toolTip = string.Format(UI.TOOLTIPS.RECIPE_QUEUE_INFINITE, this.selectedRecipe.Name);
 		this.buildBtn.ClearOnClick();
@@ -172,14 +160,7 @@ public class FabricatorSideScreen : SideScreenContent
 		}
 		this.descriptionLabel.gameObject.SetActive(true);
 		this.descriptionLabel.SetText(recipeDescription);
-		List<Descriptor> ingredientDescriptions = this.GetIngredientDescriptions(recipeElements);
-		if (ingredientDescriptions.Count > 0)
-		{
-			GameUtil.IndentListOfDescriptors(ingredientDescriptions);
-			ingredientDescriptions.Insert(0, new Descriptor(UI.UISIDESCREENS.FABRICATORSIDESCREEN.COST, UI.UISIDESCREENS.FABRICATORSIDESCREEN.COST, Descriptor.DescriptorType.Requirement, false));
-			this.IngredientsDescriptorPanel.gameObject.SetActive(true);
-		}
-		this.IngredientsDescriptorPanel.SetDescriptors(ingredientDescriptions);
+		this.RefreshIngredientDescriptors();
 		GameObject prefab = Assets.GetPrefab(this.selectedRecipe.Result);
 		List<Descriptor> list = new List<Descriptor>(this.selectedRecipe.EffectDescription);
 		list.AddRange(GameUtil.GetGameObjectEffects(prefab, false));
@@ -190,6 +171,28 @@ public class FabricatorSideScreen : SideScreenContent
 			this.EffectsDescriptorPanel.gameObject.SetActive(true);
 		}
 		this.EffectsDescriptorPanel.SetDescriptors(list);
+	}
+
+	private void RefreshIngredientDescriptors()
+	{
+		if (this.selectedRecipe == null)
+		{
+			return;
+		}
+		Element[] recipeElements = this.GetRecipeElements(this.selectedRecipe);
+		List<Descriptor> ingredientDescriptions = this.GetIngredientDescriptions(recipeElements);
+		if (ingredientDescriptions.Count > 0)
+		{
+			GameUtil.IndentListOfDescriptors(ingredientDescriptions);
+			ingredientDescriptions.Insert(0, new Descriptor(UI.UISIDESCREENS.FABRICATORSIDESCREEN.COST, UI.UISIDESCREENS.FABRICATORSIDESCREEN.COST, Descriptor.DescriptorType.Requirement, false));
+			this.IngredientsDescriptorPanel.gameObject.SetActive(true);
+		}
+		this.IngredientsDescriptorPanel.SetDescriptors(ingredientDescriptions);
+	}
+
+	private void Update()
+	{
+		this.RefreshIngredientDescriptors();
 	}
 
 	public List<Descriptor> GetIngredientDescriptions(Element[] elements)
@@ -280,8 +283,8 @@ public class FabricatorSideScreen : SideScreenContent
 
 	public DescriptorPanel EffectsDescriptorPanel;
 
-	[Header("Recipe List")]
 	[SerializeField]
+	[Header("Recipe List")]
 	private GameObject recipeGrid;
 
 	[SerializeField]
@@ -300,8 +303,6 @@ public class FabricatorSideScreen : SideScreenContent
 
 	[SerializeField]
 	private GameObject elementContainer;
-
-	private List<GameObject> elementContainers;
 
 	[SerializeField]
 	private KButton buildBtn;

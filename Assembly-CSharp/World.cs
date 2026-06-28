@@ -42,7 +42,10 @@ public class World : KMonoBehaviour
 			SolidInfo solidInfo2 = solidInfo[i];
 			bool isSolid = solidInfo2.isSolid;
 			int cellIdx = solidInfo2.cellIdx;
-			this.changedCells.Add(cellIdx);
+			if (!this.changedCells.Contains(cellIdx))
+			{
+				this.changedCells.Add(cellIdx);
+			}
 			Pathfinding.Instance.AddDirtyNavGridCell(cellIdx);
 			WorldDamage.Instance.OnSolidStateChanged(cellIdx);
 			if (this.OnSolidChanged != null)

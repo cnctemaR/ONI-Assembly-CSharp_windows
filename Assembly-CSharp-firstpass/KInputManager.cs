@@ -5,19 +5,20 @@ public class KInputManager
 {
 	public KInputManager()
 	{
+		KInputManager.lastUserActionTicks = DateTime.Now.Ticks;
 		KInputManager.isFocused = true;
 		KInput.Log("KinputManager initialized.");
 	}
 
 	public static bool isFocused { get; private set; }
 
-	public static long lastUserActionTick { get; private set; }
+	public static long lastUserActionTicks { get; private set; }
 
 	public static void SetUserActive()
 	{
 		if (KInputManager.isFocused)
 		{
-			KInputManager.lastUserActionTick = DateTime.Now.Ticks;
+			KInputManager.lastUserActionTicks = DateTime.Now.Ticks;
 		}
 	}
 

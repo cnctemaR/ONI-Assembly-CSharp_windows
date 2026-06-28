@@ -41,7 +41,6 @@ public class MaterialSelectionPanel : KScreen
 		this.MaterialSelectors[0].gameObject.SetActive(true);
 		this.MaterialSelectorTemplate.SetActive(false);
 		this.ResearchRequired.SetActive(false);
-		this.priorityScreen.gameObject.SetActive(false);
 		Game.Instance.Subscribe(-107300940, delegate(object d)
 		{
 			this.RefreshSelectors();

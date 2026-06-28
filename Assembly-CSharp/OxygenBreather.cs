@@ -3,8 +3,8 @@ using Klei.AI;
 using KSerialization;
 using UnityEngine;
 
-[RequireComponent(typeof(Health))]
 [SerializationConfig(MemberSerialization.OptIn)]
+[RequireComponent(typeof(Health))]
 public class OxygenBreather : KMonoBehaviour
 {
 	public SuitTank SuitTank

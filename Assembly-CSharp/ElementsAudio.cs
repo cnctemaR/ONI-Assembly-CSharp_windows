@@ -40,37 +40,37 @@ public class ElementsAudio
 
 	private ElementsAudio.ElementAudioConfig[] elementAudioConfigs;
 
-	[DelimitedRecord(",")]
 	[IgnoreEmptyLines]
 	[IgnoreFirst(1)]
+	[DelimitedRecord(",")]
 	public class ElementAudioConfig
 	{
 		[FieldOrder(1)]
 		public SimHashes elementID;
 
+		[FieldNullValue(AmbienceType.None)]
 		[FieldOptional]
 		[FieldOrder(2)]
-		[FieldNullValue(AmbienceType.None)]
 		public AmbienceType ambienceType;
 
-		[FieldOptional]
 		[FieldOrder(3)]
+		[FieldOptional]
 		[FieldNullValue(SolidAmbienceType.None)]
 		public SolidAmbienceType solidAmbienceType;
 
-		[FieldOptional]
 		[FieldNullValue("")]
 		[FieldOrder(4)]
+		[FieldOptional]
 		public string miningSound;
 
-		[FieldOptional]
-		[FieldNullValue("")]
 		[FieldOrder(5)]
+		[FieldNullValue("")]
+		[FieldOptional]
 		public string miningBreakSound;
 
+		[FieldOptional]
 		[FieldNullValue("")]
 		[FieldOrder(6)]
-		[FieldOptional]
 		public string oreBumpSound;
 
 		[FieldNullValue("")]

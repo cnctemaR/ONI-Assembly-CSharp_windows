@@ -11,18 +11,40 @@ using UnityEngine;
 
 public static class Localization
 {
-	public static void LoadTranslation(string filename)
+	public static bool LoadTranslation(string filename)
 	{
-		Dictionary<string, string> dictionary = Localization.LoadTranslatedStrings(filename);
-		Localization.OverloadStrings(dictionary);
-		Localization.isLocalized = true;
+		bool flag;
+		try
+		{
+			Dictionary<string, string> dictionary = Localization.LoadTranslatedStrings(filename);
+			Localization.OverloadStrings(dictionary);
+			Localization.isLocalized = true;
+			flag = true;
+		}
+		catch (Exception ex)
+		{
+			global::Debug.LogWarning(ex, null);
+			flag = false;
+		}
+		return flag;
 	}
 
-	public static void LoadTranslation(string[] lines)
+	public static bool LoadTranslation(string[] lines)
 	{
-		Dictionary<string, string> dictionary = Localization.LoadTranslatedStrings(lines);
-		Localization.OverloadStrings(dictionary);
-		Localization.isLocalized = true;
+		bool flag;
+		try
+		{
+			Dictionary<string, string> dictionary = Localization.LoadTranslatedStrings(lines);
+			Localization.OverloadStrings(dictionary);
+			Localization.isLocalized = true;
+			flag = true;
+		}
+		catch (Exception ex)
+		{
+			global::Debug.LogWarning(ex, null);
+			flag = false;
+		}
+		return flag;
 	}
 
 	private static Dictionary<string, string> LoadTranslatedStrings(string filename)
@@ -73,19 +95,22 @@ public static class Localization
 							break;
 						}
 						text4 = Localization.FixupString(text4);
-						if (text2 == null)
+						if (text4 != null && text4.Length > 2)
 						{
-							text2 = text4.Substring(1, text4.Length - 2);
-						}
-						else
-						{
-							text2 += text4.Substring(1, text4.Length - 2);
+							if (text2 == null)
+							{
+								text2 = text4.Substring(1, text4.Length - 2);
+							}
+							else
+							{
+								text2 += text4.Substring(1, text4.Length - 2);
+							}
 						}
 						i++;
 					}
 					if (text2 != null)
 					{
-						entry.msgstr = text2;
+						entry.msgstr = text2.Replace("<color=^p", "<color=#");
 					}
 				}
 			}

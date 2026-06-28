@@ -50,12 +50,12 @@ public class WorldGaps
 	[Serialize]
 	public WorldGaps.State state = WorldGaps.State.EnabledOff;
 
-	[Serialize]
 	[SerializeField]
+	[Serialize]
 	public HashSet<int> voidCells;
 
-	[SerializeField]
 	[Serialize]
+	[SerializeField]
 	public float currentTime;
 
 	[SerializeField]

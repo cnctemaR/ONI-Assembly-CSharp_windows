@@ -37,6 +37,7 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 		this.yieldBonus = amounts.Add(new AmountInstance(Db.Get().Amounts.YieldBonus, base.gameObject));
 		base.OnPrefabInit();
 		this.Subscribe(1119167081, new Action<object>(this.OnNewGameSpawn));
+		this.Subscribe(1309017699, new Action<object>(this.OnReplant));
 	}
 
 	protected override void OnSpawn()
@@ -116,7 +117,7 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 		return this.maturity.value / this.maturity.GetMax();
 	}
 
-	public void OnReplant()
+	public void OnReplant(object data)
 	{
 		this.replanted = true;
 	}

@@ -5,7 +5,7 @@ using System.Timers;
 using Newtonsoft.Json;
 using UnityEngine;
 
-public class KleiMetrics : ThreadedHttps<KleiMetrics>, KleiMetricsInterface
+public class KleiMetrics : ThreadedHttps<KleiMetrics>
 {
 	public KleiMetrics()
 	{
@@ -88,7 +88,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>, KleiMetricsInterface
 			KleiMetrics.installTimeStamp = PlayerPrefs.GetString("INSTALL_TIMESTAMP", null);
 			if (KleiMetrics.installTimeStamp == null || KleiMetrics.installTimeStamp == string.Empty)
 			{
-				KleiMetrics.installTimeStamp = global::System.DateTime.UtcNow.Ticks.ToString();
+				KleiMetrics.installTimeStamp = DateTime.UtcNow.Ticks.ToString();
 				PlayerPrefs.SetString("INSTALL_TIMESTAMP", KleiMetrics.installTimeStamp);
 			}
 		}
@@ -100,7 +100,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>, KleiMetricsInterface
 		return null;
 	}
 
-	public void SetLastUserAction(long lastUserActionTick)
+	public void SetLastUserAction(long lastUserActionTicks)
 	{
 		if (!this.enabled)
 		{
@@ -110,19 +110,19 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>, KleiMetricsInterface
 		{
 			return;
 		}
-		this.currentSessionTicks = global::System.DateTime.Now.Ticks;
+		this.currentSessionTicks = DateTime.Now.Ticks;
 		if (this.shouldEndSession)
 		{
 			this.EndSession(false);
 			this.shouldEndSession = false;
 			this.shouldStartSession = true;
 		}
-		else if (this.shouldStartSession && lastUserActionTick > this.lastHeartBeatTick)
+		else if (this.shouldStartSession && lastUserActionTicks > this.lastHeartBeatTicks)
 		{
 			this.StartSession();
 			this.shouldStartSession = false;
 		}
-		this.timeSinceLastUserAction = (float)TimeSpan.FromTicks(this.currentSessionTicks - lastUserActionTick).TotalSeconds;
+		this.timeSinceLastUserAction = (float)TimeSpan.FromTicks(this.currentSessionTicks - lastUserActionTicks).TotalSeconds;
 	}
 
 	private void StopHeartBeat()
@@ -150,12 +150,17 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>, KleiMetricsInterface
 		KleiMetrics.heartbeatTimer.Elapsed += this.SendHeartBeat;
 		KleiMetrics.heartbeatTimer.AutoReset = true;
 		KleiMetrics.heartbeatTimer.Enabled = true;
-		this.lastHeartBeatTick = global::System.DateTime.Now.Ticks;
+		this.lastHeartBeatTicks = DateTime.Now.Ticks;
 	}
 
-	private int GetSessionTime()
+	private uint GetSessionTime()
 	{
-		return (int)TimeSpan.FromTicks(this.currentSessionTicks - this.startTime).TotalSeconds;
+		int num = (int)TimeSpan.FromTicks(this.currentSessionTicks - this.startTimeTicks).TotalSeconds;
+		if (num < 0)
+		{
+			global::Debug.LogWarning("Session time is < 0", null);
+		}
+		return (uint)num;
 	}
 
 	private void SendHeartBeat(object source, ElapsedEventArgs e)
@@ -168,18 +173,18 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>, KleiMetricsInterface
 		{
 			return;
 		}
-		Dictionary<string, object> userSession = this.GetUserSession();
-		userSession.Add("LastUA", (int)this.timeSinceLastUserAction);
+		Dictionary<string, object> dictionary = this.GetUserSession();
+		dictionary.Add("LastUA", (int)this.timeSinceLastUserAction);
 		if (this.timeSinceLastUserAction > (float)this.HeartBeatTimeOutInSeconds)
 		{
-			userSession.Add("HeartBeatTimeOut", true);
+			dictionary.Add("HeartBeatTimeOut", true);
 			KleiMetrics.heartbeatTimer.Stop();
 			this.shouldEndSession = true;
 		}
-		long num = global::System.DateTime.Now.Ticks - this.lastHeartBeatTick;
-		userSession.Add("HeartBeat", (int)TimeSpan.FromTicks(num).TotalSeconds);
-		this.PostMetricData(userSession);
-		this.lastHeartBeatTick = global::System.DateTime.Now.Ticks;
+		long num = DateTime.Now.Ticks - this.lastHeartBeatTicks;
+		dictionary.Add("HeartBeat", (int)TimeSpan.FromTicks(num).TotalSeconds);
+		this.PostMetricData(dictionary);
+		this.lastHeartBeatTicks = DateTime.Now.Ticks;
 	}
 
 	private void StartThread()
@@ -200,6 +205,39 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>, KleiMetricsInterface
 		}
 	}
 
+	public void SetStaticSessionVariable(string name, object var)
+	{
+		if (this.userSession.ContainsKey(name))
+		{
+			this.userSession[name] = var;
+		}
+		else
+		{
+			this.userSession.Add(name, var);
+		}
+	}
+
+	public void RemoveStaticSessionVariable(string name)
+	{
+		if (this.userSession.ContainsKey(name))
+		{
+			this.userSession.Remove(name);
+		}
+	}
+
+	public void AddDefaultSessionVariables()
+	{
+		this.userSession.Clear();
+		this.SetStaticSessionVariable("InstallTimeStamp", KleiMetrics.GetInstallTimeStamp());
+		this.SetStaticSessionVariable("user", KleiMetrics.UserID());
+		this.SetStaticSessionVariable("SessionID", KleiMetrics.SessionID());
+		this.SetStaticSessionVariable("SessionStartTimeStamp", this.sessionStartUtcTicks.ToString());
+		if (KleiAccount.KleiUserID != null)
+		{
+			this.SetStaticSessionVariable("KU", KleiAccount.KleiUserID);
+		}
+	}
+
 	private Dictionary<string, object> GetUserSession()
 	{
 		Dictionary<string, object> dictionary = new Dictionary<string, object>();
@@ -207,36 +245,47 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>, KleiMetricsInterface
 		{
 			return dictionary;
 		}
-		dictionary.Add("InstallTimeStamp", KleiMetrics.GetInstallTimeStamp());
-		dictionary.Add("user", KleiMetrics.UserID());
-		dictionary.Add("SessionID", KleiMetrics.SessionID());
-		dictionary.Add("SessionStartTimeStamp", this.startTime.ToString());
+		foreach (KeyValuePair<string, object> keyValuePair in this.userSession)
+		{
+			dictionary.Add(keyValuePair.Key, keyValuePair.Value);
+		}
 		dictionary.Add("SessionTimeSeconds", this.GetSessionTime());
-		string text = KleiMetrics.PlatformUserID();
-		if (text != null)
-		{
-		}
-		if (KleiAccount.KleiUserID != null)
-		{
-			dictionary.Add("KU", KleiAccount.KleiUserID);
-		}
 		int num = KleiMetrics.GameID();
 		if (num != -1)
 		{
 			dictionary.Add("GameID", KleiMetrics.GameID());
 		}
-		if (Game.Instance != null && GameClock.Instance != null)
+		string text = KleiMetrics.CurrentLevel();
+		if (text != null)
 		{
-			dictionary.Add("GameTimeSeconds", (int)GameClock.Instance.GetTime());
+			dictionary.Add("Level", text);
 		}
-		string text2 = KleiMetrics.CurrentLevel();
-		if (text2 != null)
+		if (this.SetDynamicSessionVariables != null)
 		{
-			dictionary.Add("Level", text2);
+			try
+			{
+				this.SetDynamicSessionVariables(dictionary);
+			}
+			catch (Exception ex)
+			{
+				global::Debug.LogError("Dynamic session variables may be set from a thread. " + ex.Message + "\n" + ex.StackTrace, null);
+			}
 		}
-		dictionary.Add("Branch", "release");
-		dictionary.Add("Build", 218235U);
 		return dictionary;
+	}
+
+	public void SetCallBacks(global::System.Action setStaticSessionVariables, Action<Dictionary<string, object>> setDynamicSessionVariables)
+	{
+		this.SetDynamicSessionVariables = setDynamicSessionVariables;
+		this.SetStaticSessionVariables = setStaticSessionVariables;
+	}
+
+	private void SetStartTime()
+	{
+		this.sessionStartUtcTicks = DateTime.UtcNow.Ticks;
+		this.startTimeTicks = DateTime.Now.Ticks;
+		this.currentSessionTicks = DateTime.Now.Ticks;
+		this.sessionStarted = true;
 	}
 
 	public void StartSession()
@@ -250,28 +299,31 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>, KleiMetricsInterface
 			this.EndSession(false);
 		}
 		this.StartThread();
-		this.sessionStarted = true;
-		this.startTime = global::System.DateTime.Now.Ticks;
-		this.currentSessionTicks = this.startTime;
+		this.SetStartTime();
 		this.IncrementSessionCount();
-		Dictionary<string, object> userSession = this.GetUserSession();
-		userSession.Add("StartSession", true);
+		this.AddDefaultSessionVariables();
+		if (this.SetStaticSessionVariables != null)
+		{
+			this.SetStaticSessionVariables();
+		}
+		Dictionary<string, object> dictionary = this.GetUserSession();
+		dictionary.Add("StartSession", true);
 		string text = KleiMetrics.PlatformUserID();
 		if (text != null)
 		{
-			userSession.Add(this.PlatformUserIDFieldName, text);
+			dictionary.Add(this.PlatformUserIDFieldName, text);
 		}
-		userSession.Add("UserName", Environment.UserName);
+		dictionary.Add("UserName", Environment.UserName);
 		if (this.shouldStartSession)
 		{
-			userSession.Add("HeartBeatTimeOut", false);
+			dictionary.Add("HeartBeatTimeOut", false);
 		}
 		Dictionary<string, object> hardwareStats = KleiMetrics.GetHardwareStats();
 		foreach (KeyValuePair<string, object> keyValuePair in hardwareStats)
 		{
-			userSession.Add(keyValuePair.Key, keyValuePair.Value);
+			dictionary.Add(keyValuePair.Key, keyValuePair.Value);
 		}
-		this.PostMetricData(userSession);
+		this.PostMetricData(dictionary);
 		this.StartHeartBeat();
 	}
 
@@ -285,17 +337,17 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>, KleiMetricsInterface
 		{
 			return;
 		}
-		Dictionary<string, object> userSession = this.GetUserSession();
-		userSession.Add("EndSession", true);
+		Dictionary<string, object> dictionary = this.GetUserSession();
+		dictionary.Add("EndSession", true);
 		if (crashed)
 		{
-			userSession.Add("EndSessionCrashed", true);
+			dictionary.Add("EndSessionCrashed", true);
 		}
 		if (this.shouldEndSession)
 		{
-			userSession.Add("HeartBeatTimeOut", true);
+			dictionary.Add("HeartBeatTimeOut", true);
 		}
-		this.PostMetricData(userSession);
+		this.PostMetricData(dictionary);
 		this.sessionStarted = false;
 		this.StopHeartBeat();
 		this.EndThread();
@@ -312,9 +364,9 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>, KleiMetricsInterface
 			this.StartSession();
 		}
 		this.IncrementGameCount();
-		Dictionary<string, object> userSession = this.GetUserSession();
-		userSession.Add("NewGame", true);
-		this.PostMetricData(userSession);
+		Dictionary<string, object> dictionary = this.GetUserSession();
+		dictionary.Add("NewGame", true);
+		this.PostMetricData(dictionary);
 	}
 
 	public void EndGame()
@@ -327,9 +379,9 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>, KleiMetricsInterface
 		{
 			return;
 		}
-		Dictionary<string, object> userSession = this.GetUserSession();
-		userSession.Add("EndGame", true);
-		this.PostMetricData(userSession);
+		Dictionary<string, object> dictionary = this.GetUserSession();
+		dictionary.Add("EndGame", true);
+		this.PostMetricData(dictionary);
 	}
 
 	public void SendEvent(Dictionary<string, object> eventData)
@@ -342,12 +394,12 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>, KleiMetricsInterface
 		{
 			this.StartSession();
 		}
-		Dictionary<string, object> userSession = this.GetUserSession();
+		Dictionary<string, object> dictionary = this.GetUserSession();
 		foreach (KeyValuePair<string, object> keyValuePair in eventData)
 		{
-			userSession.Add(keyValuePair.Key, keyValuePair.Value);
+			dictionary.Add(keyValuePair.Key, keyValuePair.Value);
 		}
-		this.PostMetricData(userSession);
+		this.PostMetricData(dictionary);
 	}
 
 	public bool SendProfileStats()
@@ -356,8 +408,8 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>, KleiMetricsInterface
 		{
 			return false;
 		}
-		Dictionary<string, object> userSession = this.GetUserSession();
-		return ThreadedHttps<KleiMetrics>.Instance.PostMetricData(userSession) == "OK";
+		Dictionary<string, object> dictionary = this.GetUserSession();
+		return ThreadedHttps<KleiMetrics>.Instance.PostMetricData(dictionary) == "OK";
 	}
 
 	public static Dictionary<string, object> GetHardwareStats()
@@ -523,13 +575,13 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>, KleiMetricsInterface
 
 	private const string EndGameFieldName = "EndGame";
 
-	private const string GameTimeFieldName = "GameTimeSeconds";
+	public const string GameTimeFieldName = "GameTimeSeconds";
 
 	private const string LevelFieldName = "Level";
 
-	private const string BuildBranchName = "Branch";
+	public const string BuildBranchName = "Branch";
 
-	private const string BuildFieldName = "Build";
+	public const string BuildFieldName = "Build";
 
 	private const int EDITOR_BUILD_ID = -1;
 
@@ -549,25 +601,33 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>, KleiMetricsInterface
 
 	private static global::System.Timers.Timer heartbeatTimer;
 
-	private int HeartBeatInSeconds = 120;
+	private int HeartBeatInSeconds = 180;
 
 	private int HeartBeatTimeOutInSeconds = 1200;
 
-	private long currentSessionTicks;
+	private long currentSessionTicks = DateTime.Now.Ticks;
 
 	private float timeSinceLastUserAction;
 
-	private long lastHeartBeatTick;
+	private long lastHeartBeatTicks = DateTime.Now.Ticks;
+
+	private long startTimeTicks = DateTime.Now.Ticks;
 
 	private bool shouldEndSession;
 
 	private bool shouldStartSession;
 
-	private long startTime;
-
 	private bool hasStarted;
 
+	private Dictionary<string, object> userSession = new Dictionary<string, object>();
+
+	private Action<Dictionary<string, object>> SetDynamicSessionVariables;
+
+	private global::System.Action SetStaticSessionVariables;
+
 	private bool sessionStarted;
+
+	private long sessionStartUtcTicks = DateTime.UtcNow.Ticks;
 
 	public struct PostData
 	{

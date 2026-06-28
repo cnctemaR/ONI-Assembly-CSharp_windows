@@ -146,6 +146,10 @@ public class SteamUGCService : MonoBehaviour
 						this.previewImages.Add(nPublishedFileId, texture2D);
 						this.doClearList = true;
 					}
+					else
+					{
+						this.previewImages.Add(nPublishedFileId, null);
+					}
 				}
 			}
 		}
@@ -173,6 +177,19 @@ public class SteamUGCService : MonoBehaviour
 			}
 		}
 		return null;
+	}
+
+	public string GetInstalledLanguageCode(out PublishedFileId_t installed)
+	{
+		string text = string.Empty;
+		installed = SteamUGCService.GetInstalledLanguage();
+		string languageFile = SteamUGCService.GetLanguageFile(installed);
+		if (languageFile != null && languageFile.Length > 0)
+		{
+			string[] array = languageFile.Split(new char[] { '\n' });
+			text = Localization.GetLanguageCode(array);
+		}
+		return text;
 	}
 
 	public string GetInstalledLanguageData()

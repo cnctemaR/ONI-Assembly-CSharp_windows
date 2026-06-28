@@ -109,7 +109,7 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 							list.Add(new Tag(tagNames[j]));
 						}
 						flag2 = true;
-						this.userOrders.Add(new Fabricator.UserOrder(recipes[i], list, orderSaveData.infinite));
+						this.userOrders.Add(new Fabricator.UserOrder(recipes[i], list, this.OnCreateOrder, orderSaveData.infinite));
 						if (flag)
 						{
 							base.SetWorkTime(recipes[i].FabricationTime);
@@ -179,6 +179,7 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 				}
 			}
 		}
+		order.Cleanup(this.OnOrderCancelledOrComplete);
 	}
 
 	protected override void OnCleanUp()
@@ -220,6 +221,10 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 			break;
 		}
 		}
+		if (!completed_order.infinite)
+		{
+			completed_order.Cleanup(this.OnOrderCancelledOrComplete);
+		}
 		return gameObject;
 	}
 
@@ -238,16 +243,15 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 	{
 		if (DebugHandler.InstantBuildMode)
 		{
-			Fabricator.UserOrder userOrder = new Fabricator.UserOrder(recipe, tags, false);
+			Fabricator.UserOrder userOrder = new Fabricator.UserOrder(recipe, tags, this.OnCreateOrder, false);
 			this.CompleteOrder(userOrder);
 		}
 		else if (!this.IsQueueFull)
 		{
 			KFMOD.PlayOneShot(soundPath);
-			Fabricator.UserOrder userOrder2 = new Fabricator.UserOrder(recipe, tags, isInfinite);
+			Fabricator.UserOrder userOrder2 = new Fabricator.UserOrder(recipe, tags, this.OnCreateOrder, isInfinite);
 			this.userOrders.Add(userOrder2);
 			this.UpdateOrderQueue(false);
-			this.OnCreateOrder.Signal(userOrder2);
 		}
 		else
 		{
@@ -416,10 +420,6 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 			this.userOrders.RemoveAt(idx);
 			this.operational.SetActive(false, false);
 		}
-		if (this.OnOrderCancelled != null)
-		{
-			this.OnOrderCancelled();
-		}
 		if (this.userOrders.Count == 0)
 		{
 			this.CancelAll();
@@ -536,7 +536,7 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 
 	public Action<Fabricator.UserOrder> OnCreateOrder;
 
-	public global::System.Action OnOrderCancelled;
+	public Action<Fabricator.UserOrder> OnOrderCancelledOrComplete;
 
 	[MyCmpAdd]
 	private LoopingSounds loopingSounds;
@@ -574,11 +574,17 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 	[Serializable]
 	public class UserOrder
 	{
-		public UserOrder(Recipe recipe, List<Tag> orderTags, bool infinite = false)
+		public UserOrder(Recipe recipe, List<Tag> orderTags, Action<Fabricator.UserOrder> on_create_order, bool infinite = false)
 		{
 			this.recipe = recipe;
 			this.orderTags = orderTags;
 			this.infinite = infinite;
+			on_create_order(this);
+		}
+
+		public void Cleanup(Action<Fabricator.UserOrder> on_order_cancelled_or_complete)
+		{
+			on_order_cancelled_or_complete(this);
 		}
 
 		public Recipe recipe;
@@ -586,10 +592,6 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 		public List<Tag> orderTags;
 
 		public bool infinite;
-
-		public Action<Fabricator.UserOrder> OnComplete;
-
-		public Action<Fabricator.UserOrder> OnCancel;
 	}
 
 	public class MachineOrder
@@ -606,12 +608,10 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 				this.fetchList.Cancel("Fabrication cancelled");
 				this.fetchList = null;
 			}
-			this.parentOrder.OnCancel.Signal(this.parentOrder);
 		}
 
 		public void Complete()
 		{
-			this.parentOrder.OnComplete.Signal(this.parentOrder);
 		}
 
 		public Fabricator.UserOrder parentOrder;

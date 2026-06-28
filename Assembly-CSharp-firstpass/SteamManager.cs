@@ -3,7 +3,7 @@ using System.Text;
 using Steamworks;
 using UnityEngine;
 
-internal class SteamManager : MonoBehaviour
+public class SteamManager : MonoBehaviour
 {
 	private static SteamManager Instance
 	{

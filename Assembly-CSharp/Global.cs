@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using Steamworks;
 using UnityEngine;
 
 public class Global : MonoBehaviour
@@ -72,10 +74,43 @@ public class Global : MonoBehaviour
 		if (this.gotKleiUserID)
 		{
 			this.gotKleiUserID = false;
+			ThreadedHttps<KleiMetrics>.Instance.SetCallBacks(new global::System.Action(this.SetONIStaticSessionVariables), new Action<Dictionary<string, object>>(this.SetONIDynamicSessionVariables));
 			ThreadedHttps<KleiMetrics>.Instance.StartSession();
 		}
-		ThreadedHttps<KleiMetrics>.Instance.SetLastUserAction(KInputManager.lastUserActionTick);
+		ThreadedHttps<KleiMetrics>.Instance.SetLastUserAction(KInputManager.lastUserActionTicks);
 		int num2 = KProfiler.EndSampleI();
+	}
+
+	private void SetONIStaticSessionVariables()
+	{
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 219035U);
+		if (PlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
+		{
+			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(UnitConfigurationScreen.MassUnitKey, ((GameUtil.MassUnit)PlayerPrefs.GetInt(UnitConfigurationScreen.MassUnitKey)).ToString());
+		}
+		if (PlayerPrefs.HasKey(UnitConfigurationScreen.TemperatureUnitKey))
+		{
+			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(UnitConfigurationScreen.TemperatureUnitKey, ((GameUtil.TemperatureUnit)PlayerPrefs.GetInt(UnitConfigurationScreen.TemperatureUnitKey)).ToString());
+		}
+		PublishedFileId_t publishedFileId_t;
+		string installedLanguageCode = SteamUGCService.Instance.GetInstalledLanguageCode(out publishedFileId_t);
+		if (publishedFileId_t != PublishedFileId_t.Invalid)
+		{
+			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(Global.LanguagePackKey, publishedFileId_t.m_PublishedFileId);
+		}
+		if (installedLanguageCode != null && installedLanguageCode != string.Empty)
+		{
+			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(Global.LanguageCodeKey, installedLanguageCode);
+		}
+	}
+
+	private void SetONIDynamicSessionVariables(Dictionary<string, object> data)
+	{
+		if (Game.Instance != null && GameClock.Instance != null)
+		{
+			data.Add("GameTimeSeconds", (int)GameClock.Instance.GetTime());
+		}
 	}
 
 	private void LateUpdate()
@@ -104,4 +139,8 @@ public class Global : MonoBehaviour
 	private AnimEventManager mAnimEventManager;
 
 	private bool gotKleiUserID;
+
+	public static readonly string LanguagePackKey = "LanguagePack";
+
+	public static readonly string LanguageCodeKey = "LanguageCode";
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using STRINGS;
-using TMPro;
 using UnityEngine;
 
 public class LoadingOverlay : KModalScreen
@@ -26,7 +25,7 @@ public class LoadingOverlay : KModalScreen
 		if (LoadingOverlay.instance == null)
 		{
 			LoadingOverlay.instance = Util.KInstantiateUI<LoadingOverlay>(ScreenPrefabs.Instance.loadingOverlay.gameObject, (!(GameScreenManager.Instance == null)) ? GameScreenManager.Instance.ssOverlayCanvas : gameObject, false);
-			LoadingOverlay.instance.GetComponentInChildren<TMP_Text>().SetText(UI.FRONTEND.LOADING);
+			LoadingOverlay.instance.GetComponentInChildren<LocText>().SetText(UI.FRONTEND.LOADING);
 		}
 		if (GameScreenManager.Instance != null)
 		{

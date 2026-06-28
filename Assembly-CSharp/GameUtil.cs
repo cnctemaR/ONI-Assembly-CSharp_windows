@@ -1514,7 +1514,7 @@ public static class GameUtil
 		else
 		{
 			string text2 = tag.ToString();
-			if (text2 == "Filter" || text2 == "Coal")
+			if (text2 == "Filter" || text2 == "Coal" || text2 == "BasicFabric")
 			{
 				text = "solid";
 			}

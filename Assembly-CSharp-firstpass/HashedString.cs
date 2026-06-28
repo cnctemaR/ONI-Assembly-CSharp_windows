@@ -105,7 +105,7 @@ public struct HashedString : ISerializationCallbackReceiver, IComparable<HashedS
 
 	public static HashedString Invalid = default(HashedString);
 
-	[Serialize]
 	[SerializeField]
+	[Serialize]
 	private int hash;
 }

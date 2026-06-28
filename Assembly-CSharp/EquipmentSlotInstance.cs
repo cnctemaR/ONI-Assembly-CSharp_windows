@@ -57,7 +57,7 @@ public class EquipmentSlotInstance : AssignableSlotInstance
 	{
 		base.Assign(equippable);
 		this.isEquipped = true;
-		equippable.gameObject.SetActive(false);
+		equippable.GetComponent<KBatchedAnimController>().enabled = false;
 		equippable.OnEquip(this);
 	}
 
@@ -66,7 +66,7 @@ public class EquipmentSlotInstance : AssignableSlotInstance
 		if (this.assignable != null)
 		{
 			Equippable equippable = this.assignable as Equippable;
-			this.assignable.gameObject.SetActive(true);
+			equippable.GetComponent<KBatchedAnimController>().enabled = true;
 			this.assignable.gameObject.transform.SetPosition(base.assignables.gameObject.transform.position + Vector3.up / 2f);
 			equippable.OnUnequip(this);
 			this.isEquipped = false;

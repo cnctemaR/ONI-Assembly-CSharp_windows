@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{565589DF-B67A-41EC-ACAE-A05769824847}</ProjectGuid>
+    <ProjectGuid>{D737EB01-4725-4CA1-8E2E-8894D94303B0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp-firstpass</RootNamespace>
     <AssemblyName>Assembly-CSharp-firstpass</AssemblyName>
@@ -92,6 +92,7 @@
     <Compile Include="Delaunay\Voronoi.cs" />
     <Compile Include="Descriptor.cs" />
     <Compile Include="DetailScreenTabHeader.cs" />
+    <Compile Include="DistributionPlatform.cs" />
     <Compile Include="DrawUtil.cs" />
     <Compile Include="EnumFlagsAttribute.cs" />
     <Compile Include="EventExtensions.cs" />
@@ -428,6 +429,8 @@
     <Compile Include="KInputHandler.cs" />
     <Compile Include="KInputManager.cs" />
     <Compile Include="KKeyCode.cs" />
+    <Compile Include="KleiAccount.cs" />
+    <Compile Include="KleiMetrics.cs" />
     <Compile Include="Klei\CSVReader.cs" />
     <Compile Include="Klei\MeshCreator.cs" />
     <Compile Include="Klei\YamlIO.cs" />
@@ -534,6 +537,7 @@
     <Compile Include="PerlinSimplexNoise.cs" />
     <Compile Include="PreUpdateScheduler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RailAPI.cs" />
     <Compile Include="ReadOnlyAttribute.cs" />
     <Compile Include="Ref.cs" />
     <Compile Include="RenderTextureDestroyer.cs" />
@@ -564,6 +568,8 @@
     <Compile Include="Singleton.cs" />
     <Compile Include="SingletonResource.cs" />
     <Compile Include="SoundListenerController.cs" />
+    <Compile Include="SteamDistributionPlatform.cs" />
+    <Compile Include="SteamManager.cs" />
     <Compile Include="Steamworks\AccountID_t.cs" />
     <Compile Include="Steamworks\AppId_t.cs" />
     <Compile Include="Steamworks\AppProofOfPurchaseKeyResponse_t.cs" />
@@ -930,6 +936,7 @@
     <Compile Include="TexturePagePool.cs" />
     <Compile Include="TextureRegion.cs" />
     <Compile Include="TextureUtil.cs" />
+    <Compile Include="ThreadedHttps.cs" />
     <Compile Include="Timer.cs" />
     <Compile Include="TMPro\CaretInfo.cs" />
     <Compile Include="TMPro\CaretPosition.cs" />
@@ -1043,39 +1050,39 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FileHelpers\FileHelpers.csproj">
-      <Project>{565589DF-B67A-41EC-ACAE-A05769824849}</Project>
+      <Project>{D737EB01-4725-4CA1-8E2E-8894D94303B2}</Project>
       <Name>FileHelpers</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{565589DF-B67A-41EC-ACAE-A05769824852}</Project>
+      <Project>{D737EB01-4725-4CA1-8E2E-8894D94303BB}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\Newtonsoft.Json\Newtonsoft.Json.csproj">
-      <Project>{565589DF-B67A-41EC-ACAE-A05769824853}</Project>
+      <Project>{D737EB01-4725-4CA1-8E2E-8894D94303BC}</Project>
       <Name>Newtonsoft.Json</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{565589DF-B67A-41EC-ACAE-A05769824857}</Project>
+      <Project>{D737EB01-4725-4CA1-8E2E-8894D94303C0}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{565589DF-B67A-41EC-ACAE-A0576982485F}</Project>
+      <Project>{D737EB01-4725-4CA1-8E2E-8894D94303C8}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{565589DF-B67A-41EC-ACAE-A05769824859}</Project>
+      <Project>{D737EB01-4725-4CA1-8E2E-8894D94303C2}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{565589DF-B67A-41EC-ACAE-A05769824863}</Project>
+      <Project>{D737EB01-4725-4CA1-8E2E-8894D94303CC}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine\UnityEngine.csproj">
-      <Project>{565589DF-B67A-41EC-ACAE-A05769824861}</Project>
+      <Project>{D737EB01-4725-4CA1-8E2E-8894D94303CA}</Project>
       <Name>UnityEngine</Name>
     </ProjectReference>
     <ProjectReference Include="..\YamlDotNet\YamlDotNet.csproj">
-      <Project>{565589DF-B67A-41EC-ACAE-A05769824864}</Project>
+      <Project>{D737EB01-4725-4CA1-8E2E-8894D94303CD}</Project>
       <Name>YamlDotNet</Name>
     </ProjectReference>
   </ItemGroup>

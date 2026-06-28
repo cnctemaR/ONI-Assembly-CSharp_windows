@@ -874,8 +874,8 @@ public class OverlayScreen : KMonoBehaviour
 
 	private static readonly Tag[] RoomBuildingsIDs = new Tag[] { TagManager.Create("Bed", null) };
 
-	[SerializeField]
 	[EventRef]
+	[SerializeField]
 	private string techViewSoundPath;
 
 	private EventInstance techViewSound;

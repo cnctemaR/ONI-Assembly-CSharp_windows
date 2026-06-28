@@ -162,18 +162,18 @@ public static class Strings
 
 	private static HashSet<string> invalidKeys = new HashSet<string>();
 
-	[DelimitedRecord(",")]
 	[IgnoreEmptyLines]
+	[DelimitedRecord(",")]
 	public class StringKeyConfig
 	{
-		[FieldOrder(1)]
 		[FieldOptional]
+		[FieldOrder(1)]
 		public string name;
 
-		[FieldOrder(2)]
+		[FieldOptional]
 		[FieldNullValue(typeof(string), "")]
 		[FieldQuoted(QuoteMode.OptionalForRead, MultilineMode.AllowForRead)]
-		[FieldOptional]
+		[FieldOrder(2)]
 		public string[] values;
 	}
 }

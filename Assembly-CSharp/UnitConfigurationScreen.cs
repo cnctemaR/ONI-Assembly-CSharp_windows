@@ -19,7 +19,7 @@ public class UnitConfigurationScreen : KModalScreen
 		this.fahrenheitToggle.GetComponentInChildren<ToolTip>().toolTip = UI.FRONTEND.UNIT_OPTIONS_SCREEN.FAHRENHEIT_TOOLTIP;
 		this.fahrenheitToggle.GetComponentInChildren<KButton>().onClick += this.OnFahrenheitClicked;
 		this.fahrenheitToggle.GetComponentInChildren<LocText>().text = UI.FRONTEND.UNIT_OPTIONS_SCREEN.FAHRENHEIT;
-		switch (PlayerPrefs.GetInt("TemperatureUnit", 0))
+		switch (PlayerPrefs.GetInt(UnitConfigurationScreen.TemperatureUnitKey, 0))
 		{
 		case 0:
 			this.celsiusToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(true);
@@ -55,7 +55,7 @@ public class UnitConfigurationScreen : KModalScreen
 	private void OnCelsiusClicked()
 	{
 		GameUtil.temperatureUnit = GameUtil.TemperatureUnit.Celsius;
-		PlayerPrefs.SetInt("TemperatureUnit", GameUtil.temperatureUnit.GetHashCode());
+		PlayerPrefs.SetInt(UnitConfigurationScreen.TemperatureUnitKey, GameUtil.temperatureUnit.GetHashCode());
 		this.celsiusToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(true);
 		this.kelvinToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
 		this.fahrenheitToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
@@ -64,7 +64,7 @@ public class UnitConfigurationScreen : KModalScreen
 	private void OnKelvinClicked()
 	{
 		GameUtil.temperatureUnit = GameUtil.TemperatureUnit.Kelvin;
-		PlayerPrefs.SetInt("TemperatureUnit", GameUtil.temperatureUnit.GetHashCode());
+		PlayerPrefs.SetInt(UnitConfigurationScreen.TemperatureUnitKey, GameUtil.temperatureUnit.GetHashCode());
 		this.celsiusToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
 		this.kelvinToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(true);
 		this.fahrenheitToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
@@ -73,7 +73,7 @@ public class UnitConfigurationScreen : KModalScreen
 	private void OnFahrenheitClicked()
 	{
 		GameUtil.temperatureUnit = GameUtil.TemperatureUnit.Fahrenheit;
-		PlayerPrefs.SetInt("TemperatureUnit", GameUtil.temperatureUnit.GetHashCode());
+		PlayerPrefs.SetInt(UnitConfigurationScreen.TemperatureUnitKey, GameUtil.temperatureUnit.GetHashCode());
 		this.celsiusToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
 		this.kelvinToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
 		this.fahrenheitToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(true);
@@ -96,4 +96,8 @@ public class UnitConfigurationScreen : KModalScreen
 	private GameObject kelvinToggle;
 
 	private GameObject fahrenheitToggle;
+
+	public static readonly string TemperatureUnitKey = "TemperatureUnit";
+
+	public static readonly string MassUnitKey = "MassUnit";
 }

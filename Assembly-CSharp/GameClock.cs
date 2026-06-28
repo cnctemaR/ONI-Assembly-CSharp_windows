@@ -97,7 +97,7 @@ public class GameClock : KMonoBehaviour, ISaveLoadable
 	private void DoAutoSave(int day)
 	{
 		day++;
-		this.newDayMetric["NewCycle"] = day;
+		this.newDayMetric[GameClock.NewCycleKey] = day;
 		ThreadedHttps<KleiMetrics>.Instance.SendEvent(this.newDayMetric);
 		string text = SaveLoader.GetActiveSaveFilePath();
 		if (text == null)
@@ -132,5 +132,11 @@ public class GameClock : KMonoBehaviour, ISaveLoadable
 
 	private bool isNight;
 
-	private Dictionary<string, object> newDayMetric = new Dictionary<string, object> { { "NewCycle", null } };
+	public static readonly string NewCycleKey = "NewCycle";
+
+	private Dictionary<string, object> newDayMetric = new Dictionary<string, object> { 
+	{
+		GameClock.NewCycleKey,
+		null
+	} };
 }

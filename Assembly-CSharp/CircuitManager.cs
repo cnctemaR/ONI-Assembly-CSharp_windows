@@ -301,13 +301,23 @@ public class CircuitManager
 			this.ChargeBatteries(j, circuitInfo2.outputTransformers, circuitInfo2.inputTransformers);
 			this.ChargeBatteries(j, circuitInfo2.generators, circuitInfo2.batteries);
 			this.ChargeBatteries(j, circuitInfo2.outputTransformers, circuitInfo2.batteries);
+			circuitInfo2.minBatteryPercentFull = 1f;
+			foreach (Battery battery3 in batteries2)
+			{
+				float percentFull = battery3.PercentFull;
+				if (percentFull < circuitInfo2.minBatteryPercentFull)
+				{
+					circuitInfo2.minBatteryPercentFull = percentFull;
+				}
+			}
+			this.circuitInfo[j] = circuitInfo2;
 		}
 		for (int k = 0; k < this.circuitInfo.Count; k++)
 		{
 			CircuitManager.CircuitInfo circuitInfo3 = this.circuitInfo[k];
-			foreach (Battery battery3 in circuitInfo3.inputTransformers)
+			foreach (Battery battery4 in circuitInfo3.inputTransformers)
 			{
-				this.ChargeTransformer(battery3, circuitInfo3.batteries);
+				this.ChargeTransformer(battery4, circuitInfo3.batteries);
 			}
 		}
 		for (int l = 0; l < this.circuitInfo.Count; l++)

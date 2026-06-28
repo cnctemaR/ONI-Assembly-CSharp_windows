@@ -108,22 +108,16 @@ internal class GraphicsOptionsScreen : KModalScreen
 
 	private GraphicsOptionsScreen.Settings CaptureSettings()
 	{
-		GraphicsOptionsScreen.Settings settings = default(GraphicsOptionsScreen.Settings);
-		settings.fullscreen = Screen.fullScreen;
-		if (Screen.fullScreen)
+		return new GraphicsOptionsScreen.Settings
 		{
-			settings.resolution = Screen.currentResolution;
-		}
-		else
-		{
-			settings.resolution = new Resolution
+			fullscreen = Screen.fullScreen,
+			resolution = new Resolution
 			{
 				width = Screen.width,
 				height = Screen.height,
 				refreshRate = Screen.currentResolution.refreshRate
-			};
-		}
-		return settings;
+			}
+		};
 	}
 
 	private void OnApply()

@@ -9,7 +9,7 @@ public class ColdBreatherConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		DecorValues tier = DECOR.BONUS.TIER1;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("ColdBreather", global::STRINGS.CREATURES.SPECIES.COLDBREATHER.NAME, global::STRINGS.CREATURES.SPECIES.COLDBREATHER.DESC, 400f, Assets.GetAnim("coldbreather_kanim"), "in_pre", Grid.SceneLayer.BuildingFront, 1, 2, tier, SimHashes.Creature, null);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity("ColdBreather", global::STRINGS.CREATURES.SPECIES.COLDBREATHER.NAME, global::STRINGS.CREATURES.SPECIES.COLDBREATHER.DESC, 400f, Assets.GetAnim("coldbreather_kanim"), "grow_seed", Grid.SceneLayer.BuildingFront, 1, 2, tier, SimHashes.Creature, null);
 		gameObject.UpdateComponentRequirement<EntombVulnerable>(true);
 		gameObject.UpdateComponentRequirement<WiltCondition>(true);
 		gameObject.UpdateComponentRequirement<Uprootable>(true);

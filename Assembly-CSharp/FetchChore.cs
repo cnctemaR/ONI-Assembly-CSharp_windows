@@ -241,6 +241,8 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		base.choreType = this.smi.sm.destination.Get<Storage>(this.smi).choreType;
 	}
 
+	public bool allowMultifetch = true;
+
 	private GameScenePartitionerEntry partitionerEntry;
 
 	public static Chore.Precondition IsFetchTargetAvailable;

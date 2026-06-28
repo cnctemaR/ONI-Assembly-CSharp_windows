@@ -74,6 +74,7 @@ public class MaterialSelector : KScreen
 			if (!this.ElementToggles.ContainsValue(element2))
 			{
 				GameObject gameObject = Util.KInstantiate(this.TogglePrefab, this.LayoutContainer, "MaterialSelection_" + element2.name);
+				gameObject.transform.localScale = Vector3.one;
 				gameObject.SetActive(true);
 				KToggle component = gameObject.GetComponent<KToggle>();
 				this.ElementToggles.Add(component, element2);

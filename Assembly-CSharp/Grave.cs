@@ -53,6 +53,7 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 		public void CreateFetchTask()
 		{
 			this.chore = new FetchChore(base.GetComponent<Storage>(), 1f, new Tag[] { GameTags.Corpse }, null, true, null, null, null, FetchOrder2.OperationalRequirement.Operational, 0);
+			this.chore.allowMultifetch = false;
 		}
 
 		public void CancelFetchTask()

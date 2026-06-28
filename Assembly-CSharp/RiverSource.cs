@@ -41,8 +41,8 @@ public class RiverSource : KMonoBehaviour
 		}
 	}
 
-	[HashedEnum]
 	[SerializeField]
+	[HashedEnum]
 	public SimHashes elementID;
 
 	[SerializeField]

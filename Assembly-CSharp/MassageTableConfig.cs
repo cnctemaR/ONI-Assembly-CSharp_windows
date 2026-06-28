@@ -32,5 +32,6 @@ public class MassageTableConfig : IBuildingConfig
 	{
 		BuildingTemplates.DoPostConfigure(go);
 		go.GetComponent<KAnimControllerBase>().initialAnim = "off";
+		go.AddOrGet<CopyBuildingSettings>();
 	}
 }

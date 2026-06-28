@@ -70,10 +70,10 @@ namespace NodeEditorFramework
 			}
 		}
 
-		[Hotkey(KeyCode.RightArrow, EventType.KeyDown)]
-		[Hotkey(KeyCode.LeftArrow, EventType.KeyDown)]
 		[Hotkey(KeyCode.UpArrow, EventType.KeyDown)]
 		[Hotkey(KeyCode.DownArrow, EventType.KeyDown)]
+		[Hotkey(KeyCode.RightArrow, EventType.KeyDown)]
+		[Hotkey(KeyCode.LeftArrow, EventType.KeyDown)]
 		private static void KB_MoveNode(NodeEditorInputInfo inputInfo)
 		{
 			NodeEditorState editorState = inputInfo.editorState;
@@ -186,8 +186,8 @@ namespace NodeEditorFramework
 			}
 		}
 
-		[EventHandler(EventType.MouseDown)]
 		[EventHandler(EventType.MouseUp)]
+		[EventHandler(EventType.MouseDown)]
 		private static void HandleWindowPanningEnd(NodeEditorInputInfo inputInfo)
 		{
 			inputInfo.editorState.panWindow = false;

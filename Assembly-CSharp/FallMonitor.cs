@@ -24,11 +24,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 		{
 			smi.Recover();
 		}).EventTransition(GameHashes.DestinationReached, this.standing, null)
-			.EventTransition(GameHashes.NavigationFailed, this.standing, null)
-			.Enter("Recover", delegate(FallMonitor.Instance smi)
-			{
-				smi.UpdateEntombed();
-			});
+			.EventTransition(GameHashes.NavigationFailed, this.standing, null);
 		this.landfloor.Enter("Land", delegate(FallMonitor.Instance smi)
 		{
 			smi.LandFloor();
@@ -163,23 +159,24 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 			return !flag;
 		}
 
-		public void UpdateEntombed()
-		{
-			int num = Grid.PosToCell(base.transform.position);
-			bool flag = !this.IsCellSafe(num) && !this.navigator.IsMoving();
-			base.sm.isEntombed.Set(flag, base.smi);
-		}
-
 		public void FixedUpdate()
 		{
-			this.UpdateEntombed();
-			base.sm.isFalling.Set(this.IsFalling(), base.smi);
+			bool flag = false;
+			bool flag2 = false;
+			if (!this.navigator.IsMoving())
+			{
+				int num = Grid.PosToCell(base.transform.position);
+				bool flag3 = this.navigator.NavGrid.NavTable.IsValid(num, this.navigator.CurrentNavType);
+				flag2 = !flag3 && (Grid.Solid[num] || Grid.Solid[Grid.CellAbove(num)]);
+				flag = !flag3 && !flag2;
+			}
+			base.sm.isFalling.Set(flag, base.smi);
+			base.sm.isEntombed.Set(flag2, base.smi);
 		}
 
 		public bool IsCellSafe(int cell)
 		{
-			int num = Grid.CellAbove(cell);
-			return (!Grid.Solid[cell] || Grid.ForceField[cell] || Grid.HasDoor[cell]) && (!Grid.Solid[num] || Grid.ForceField[num] || Grid.HasDoor[num]);
+			return this.navigator.NavGrid.NavTable.IsValid(cell, this.navigator.CurrentNavType);
 		}
 
 		public void TryEntombedEscape()
@@ -193,7 +190,20 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 					base.transform.SetPosition(Grid.CellToPosCBC(num2, Grid.SceneLayer.Move));
 					base.transform.GetComponent<Navigator>().Stop(false);
 					base.transform.GetComponent<Navigator>().SetCurrentNavType(NavType.Floor);
-					this.UpdateEntombed();
+					this.FixedUpdate();
+					this.GoTo(base.sm.standing);
+					return;
+				}
+			}
+			foreach (CellOffset cellOffset2 in this.entombedEscapeOffsets)
+			{
+				int num3 = Grid.OffsetCell(num, cellOffset2);
+				if (!Grid.Solid[num3] && !Grid.Solid[Grid.CellAbove(num3)])
+				{
+					base.transform.SetPosition(Grid.CellToPosCBC(num3, Grid.SceneLayer.Move));
+					base.transform.GetComponent<Navigator>().Stop(false);
+					base.transform.GetComponent<Navigator>().SetCurrentNavType(NavType.Floor);
+					this.FixedUpdate();
 					this.GoTo(base.sm.standing);
 					return;
 				}

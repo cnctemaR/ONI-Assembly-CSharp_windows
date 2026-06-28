@@ -258,23 +258,31 @@ public class KCrashReporter : MonoBehaviour
 			{
 				msg = "No message";
 			}
-			string text = save_file_hash;
+			Match match = KCrashReporter.failedToLoadModuleRegEx.Match(msg);
+			if (match.Success)
+			{
+				string text = match.Groups[1].ToString();
+				string text2 = match.Groups[2].ToString();
+				string fileName = Path.GetFileName(text);
+				msg = string.Concat(new string[] { "Failed to load '", fileName, "' with error '", text2, "'." });
+			}
+			string text3 = save_file_hash;
 			if (string.IsNullOrEmpty(save_file_hash))
 			{
-				text = "No save file uploaded";
+				text3 = "No save file uploaded";
 			}
-			msg = string.Format("{0}\n\nSave File: {1}", msg, text);
+			msg = string.Format("{0}\n\nSave File: {1}", msg, text3);
 			if (string.IsNullOrEmpty(stack_trace))
 			{
 				stack_trace = string.Format("No stack trace.\n\n{0}", msg);
 			}
 			int num = stack_trace.IndexOf('\n');
-			string text2 = stack_trace;
+			string text4 = stack_trace;
 			if (num > 0)
 			{
-				text2 = stack_trace.Substring(0, num);
+				text4 = stack_trace.Substring(0, num);
 			}
-			while (text2 == string.Empty || text2.StartsWith("UnityEngine.Debug:LogError(Object)") || text2.StartsWith("UnityEngine.Debug:LogError(Object, Object)") || text2.StartsWith("UnityEngine.Debug:Assert(Boolean, String)") || text2.StartsWith("Output:LogError(String)") || text2.StartsWith("Output:LogErrorWithObj(Object, String)") || text2.StartsWith("Output:LogErrorWithObj(Object, Object[])") || text2.StartsWith("DebugUtil:Assert(Boolean, String)") || text2.StartsWith("KCrashReporter.Assert(Boolean condition, System.String message)") || text2.StartsWith("No stack trace."))
+			while (text4 == string.Empty || text4.StartsWith("UnityEngine.Debug:LogError(Object)") || text4.StartsWith("UnityEngine.Debug:LogError(Object, Object)") || text4.StartsWith("UnityEngine.Debug:Assert(Boolean, String)") || text4.StartsWith("Output:LogError(String)") || text4.StartsWith("Output:LogErrorWithObj(Object, String)") || text4.StartsWith("Output:LogErrorWithObj(Object, Object[])") || text4.StartsWith("DebugUtil:Assert(Boolean, String)") || text4.StartsWith("KCrashReporter.Assert(Boolean condition, System.String message)") || text4.StartsWith("No stack trace."))
 			{
 				int num2 = num + 1;
 				bool flag = false;
@@ -283,23 +291,15 @@ public class KCrashReporter : MonoBehaviour
 					num = stack_trace.IndexOf('\n', num2);
 					if (num < stack_trace.Length)
 					{
-						text2 = stack_trace.Substring(num2, num - num2);
+						text4 = stack_trace.Substring(num2, num - num2);
 						flag = true;
 					}
 				}
 				if (!flag)
 				{
-					text2 = string.Empty;
+					text4 = string.Empty;
 					break;
 				}
-			}
-			Match match = KCrashReporter.failedToLoadModuleRegEx.Match(text2);
-			if (match.Success)
-			{
-				string text3 = match.Groups[1].ToString();
-				string text4 = match.Groups[2].ToString();
-				string fileName = Path.GetFileName(text3);
-				text2 = string.Concat(new string[] { "Failed to load '", fileName, "' with error '", text4, "'." });
 			}
 			if (userMessage == UI.CRASHSCREEN.BODY.text)
 			{
@@ -313,9 +313,9 @@ public class KCrashReporter : MonoBehaviour
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
 			error.fullstack = "UNITY_OUTPUT:\n" + msg;
-			error.build = 218235;
+			error.build = 219035;
 			error.log = KCrashReporter.GetLogContents();
-			error.summaryline = text2;
+			error.summaryline = text4;
 			error.user_message = userMessage;
 			if (!string.IsNullOrEmpty(save_file_hash))
 			{
@@ -389,7 +389,7 @@ public class KCrashReporter : MonoBehaviour
 
 	private static bool hasReportedError;
 
-	private static readonly Regex failedToLoadModuleRegEx = new Regex("^Failed to load '(.*?)' with error '(.*?)'.$");
+	private static readonly Regex failedToLoadModuleRegEx = new Regex("^Failed to load '(.*?)' with error (.*)", RegexOptions.Multiline);
 
 	[SerializeField]
 	private LoadScreen loadScreenPrefab;

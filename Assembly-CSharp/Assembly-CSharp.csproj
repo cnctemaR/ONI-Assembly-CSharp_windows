@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{565589DF-B67A-41EC-ACAE-A05769824848}</ProjectGuid>
+    <ProjectGuid>{D737EB01-4725-4CA1-8E2E-8894D94303B1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp</RootNamespace>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -352,7 +352,6 @@
     <Compile Include="DiseaseMonitor.cs" />
     <Compile Include="DiseaseTrigger.cs" />
     <Compile Include="DisplayNodeEditor.cs" />
-    <Compile Include="DistributionPlatform.cs" />
     <Compile Include="DividerColumn.cs" />
     <Compile Include="DoctorChore.cs" />
     <Compile Include="DoctorMonitor.cs" />
@@ -686,9 +685,6 @@
     <Compile Include="KCrashReporter.cs" />
     <Compile Include="KIconButtonMenu.cs" />
     <Compile Include="KIconToggleMenu.cs" />
-    <Compile Include="KleiAccount.cs" />
-    <Compile Include="KleiMetrics.cs" />
-    <Compile Include="KleiMetricsInterface.cs" />
     <Compile Include="KleiVersion.cs" />
     <Compile Include="Klei\AI\Amount.cs" />
     <Compile Include="Klei\AI\AmountInstance.cs" />
@@ -1072,7 +1068,6 @@
     <Compile Include="QuarantineMonitor.cs" />
     <Compile Include="QuarryingGunConfig.cs" />
     <Compile Include="Race.cs" />
-    <Compile Include="RailAPI.cs" />
     <Compile Include="RangedAttackable.cs" />
     <Compile Include="RationalAi.cs" />
     <Compile Include="RationBox.cs" />
@@ -1292,8 +1287,6 @@
     <Compile Include="StatusItemRenderer.cs" />
     <Compile Include="StatusScreen.cs" />
     <Compile Include="StatusType.cs" />
-    <Compile Include="SteamDistributionPlatform.cs" />
-    <Compile Include="SteamManager.cs" />
     <Compile Include="SteamUGCService.cs" />
     <Compile Include="SteppedInMonitor.cs" />
     <Compile Include="Stinky.cs" />
@@ -1372,7 +1365,6 @@
     <Compile Include="TextureLerper.cs" />
     <Compile Include="Thought.cs" />
     <Compile Include="ThoughtGraph.cs" />
-    <Compile Include="ThreadedHttps.cs" />
     <Compile Include="ThreatMonitor.cs" />
     <Compile Include="ThresholdSwitchSideScreen.cs" />
     <Compile Include="TileConfig.cs" />
@@ -1515,47 +1507,47 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Assembly-CSharp-firstpass\Assembly-CSharp-firstpass.csproj">
-      <Project>{565589DF-B67A-41EC-ACAE-A05769824847}</Project>
+      <Project>{D737EB01-4725-4CA1-8E2E-8894D94303B0}</Project>
       <Name>Assembly-CSharp-firstpass</Name>
     </ProjectReference>
     <ProjectReference Include="..\FileHelpers\FileHelpers.csproj">
-      <Project>{565589DF-B67A-41EC-ACAE-A05769824849}</Project>
+      <Project>{D737EB01-4725-4CA1-8E2E-8894D94303B2}</Project>
       <Name>FileHelpers</Name>
     </ProjectReference>
     <ProjectReference Include="..\Ionic.Zip\Ionic.Zip.csproj">
-      <Project>{565589DF-B67A-41EC-ACAE-A0576982484D}</Project>
+      <Project>{D737EB01-4725-4CA1-8E2E-8894D94303B6}</Project>
       <Name>Ionic.Zip</Name>
     </ProjectReference>
     <ProjectReference Include="..\libnoise\libnoise.csproj">
-      <Project>{565589DF-B67A-41EC-ACAE-A0576982484E}</Project>
+      <Project>{D737EB01-4725-4CA1-8E2E-8894D94303B7}</Project>
       <Name>libnoise</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{565589DF-B67A-41EC-ACAE-A05769824852}</Project>
+      <Project>{D737EB01-4725-4CA1-8E2E-8894D94303BB}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\Newtonsoft.Json\Newtonsoft.Json.csproj">
-      <Project>{565589DF-B67A-41EC-ACAE-A05769824853}</Project>
+      <Project>{D737EB01-4725-4CA1-8E2E-8894D94303BC}</Project>
       <Name>Newtonsoft.Json</Name>
     </ProjectReference>
     <ProjectReference Include="..\Satsuma\Satsuma.csproj">
-      <Project>{565589DF-B67A-41EC-ACAE-A05769824855}</Project>
+      <Project>{D737EB01-4725-4CA1-8E2E-8894D94303BE}</Project>
       <Name>Satsuma</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{565589DF-B67A-41EC-ACAE-A05769824857}</Project>
+      <Project>{D737EB01-4725-4CA1-8E2E-8894D94303C0}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{565589DF-B67A-41EC-ACAE-A05769824859}</Project>
+      <Project>{D737EB01-4725-4CA1-8E2E-8894D94303C2}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{565589DF-B67A-41EC-ACAE-A05769824863}</Project>
+      <Project>{D737EB01-4725-4CA1-8E2E-8894D94303CC}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine\UnityEngine.csproj">
-      <Project>{565589DF-B67A-41EC-ACAE-A05769824861}</Project>
+      <Project>{D737EB01-4725-4CA1-8E2E-8894D94303CA}</Project>
       <Name>UnityEngine</Name>
     </ProjectReference>
   </ItemGroup>

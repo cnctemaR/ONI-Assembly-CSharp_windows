@@ -43,6 +43,7 @@ public class GameInputManager : KInputManager
 			{
 				kinputController.Bind(bindingEntry.mKeyCode, bindingEntry.mModifier, bindingEntry.mAction);
 			}
+			kinputController.HandleCancelInput();
 		}
 	}
 

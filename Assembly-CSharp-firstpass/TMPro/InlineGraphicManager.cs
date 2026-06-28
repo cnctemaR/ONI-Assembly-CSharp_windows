@@ -206,8 +206,8 @@ namespace TMPro
 		[SerializeField]
 		private TMP_SpriteAsset m_spriteAsset;
 
-		[HideInInspector]
 		[SerializeField]
+		[HideInInspector]
 		private InlineGraphic m_inlineGraphic;
 
 		[HideInInspector]

@@ -319,6 +319,11 @@ public class ResearchEntry : KMonoBehaviour
 		this.BG.color = this.completedColor;
 		this.titleBG.color = this.completedHeaderColor;
 		this.defaultColor = this.completedColor;
+		if (notify)
+		{
+			this.unlockedTechMetric[ResearchEntry.UnlockedTechKey] = this.targetTech.Id;
+			ThreadedHttps<KleiMetrics>.Instance.SendEvent(this.unlockedTechMetric);
+		}
 		this.toggle.ClearOnClick();
 		if (notify)
 		{
@@ -328,8 +333,8 @@ public class ResearchEntry : KMonoBehaviour
 		}
 	}
 
-	[SerializeField]
 	[Header("Labels")]
+	[SerializeField]
 	private LocText researchName;
 
 	[Header("Transforms")]
@@ -352,8 +357,8 @@ public class ResearchEntry : KMonoBehaviour
 	[SerializeField]
 	private GameObject progressBarPrefab;
 
-	[SerializeField]
 	[Header("Graphics")]
+	[SerializeField]
 	private Image BG;
 
 	[SerializeField]
@@ -368,8 +373,8 @@ public class ResearchEntry : KMonoBehaviour
 	[SerializeField]
 	private Sprite completedBG;
 
-	[Header("Colors")]
 	[SerializeField]
+	[Header("Colors")]
 	private Color defaultColor = Color.blue;
 
 	[SerializeField]
@@ -417,4 +422,12 @@ public class ResearchEntry : KMonoBehaviour
 	private Dictionary<string, GameObject> progressBarsByResearchTypeID = new Dictionary<string, GameObject>();
 
 	private Coroutine turnEverythingOn;
+
+	public static readonly string UnlockedTechKey = "UnlockedTech";
+
+	private Dictionary<string, object> unlockedTechMetric = new Dictionary<string, object> { 
+	{
+		ResearchEntry.UnlockedTechKey,
+		null
+	} };
 }

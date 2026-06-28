@@ -49,15 +49,18 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			num -= num3 / 2;
 			num2 -= num3 / 2;
 			List<ScenePartitionerEntry> list = GameScenePartitioner.Instance.ReserveList();
-			GameScenePartitioner.Instance.GatherEntries(num, num2, num3, num3, GameScenePartitioner.Instance.fetchChores.mask, list);
 			List<Chore.Precondition.Context> list2 = new List<Chore.Precondition.Context>();
-			for (int i = 0; i < list.Count; i++)
+			if (this.rootChore.allowMultifetch)
 			{
-				ScenePartitionerEntry scenePartitionerEntry = list[i];
-				Chore chore = scenePartitionerEntry.obj as Chore;
-				chore.CollectChores(context.consumer, list2, true);
+				GameScenePartitioner.Instance.GatherEntries(num, num2, num3, num3, GameScenePartitioner.Instance.fetchChores.mask, list);
+				for (int i = 0; i < list.Count; i++)
+				{
+					ScenePartitionerEntry scenePartitionerEntry = list[i];
+					Chore chore = scenePartitionerEntry.obj as Chore;
+					chore.CollectChores(context.consumer, list2, true);
+				}
+				GameScenePartitioner.Instance.ReleaseList(list);
 			}
-			GameScenePartitioner.Instance.ReleaseList(list);
 			float num4 = 600f;
 			AttributeConverterInstance attributeConverterInstance = Db.Get().AttributeConverters.CarryAmount.Lookup(context.consumer);
 			num4 += attributeConverterInstance.Evaluate();

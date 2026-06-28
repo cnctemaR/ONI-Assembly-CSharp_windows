@@ -15,19 +15,6 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 		this.ClearAuthTicket();
 	}
 
-	private Dictionary<string, object> BuildLoginRequest(byte[] ticket)
-	{
-		return new Dictionary<string, object>
-		{
-			{
-				"SteamTicket",
-				this.EncodeToAsciiHEX(ticket)
-			},
-			{ "Game", this.CLIENT_KEY },
-			{ "NoEmail", true }
-		};
-	}
-
 	protected override void OnReplyRecieved(WebResponse response)
 	{
 		if (response == null)
@@ -131,7 +118,18 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 		this.authTicket = null;
 	}
 
-	private const string TicketFieldName = "SteamTicket";
+	private Dictionary<string, object> BuildLoginRequest(byte[] ticket)
+	{
+		return new Dictionary<string, object>
+		{
+			{
+				"SteamTicket",
+				this.EncodeToAsciiHEX(ticket)
+			},
+			{ "Game", this.CLIENT_KEY },
+			{ "NoEmail", true }
+		};
+	}
 
 	public const string KleiAccountKey = "KleiAccount";
 
@@ -144,6 +142,8 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 	private const string UserIDFieldName = "UserID";
 
 	private const string AuthTicketKey = "AUTH_TICKET";
+
+	private const string TicketFieldName = "SteamTicket";
 
 	public static string KleiUserID;
 

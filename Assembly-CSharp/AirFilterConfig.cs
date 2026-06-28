@@ -30,6 +30,10 @@ public class AirFilterConfig : IBuildingConfig
 		elementConsumer.sampleCellOffset = new Vector3(0f, 0f, 0f);
 		elementConsumer.isRequired = false;
 		elementConsumer.storeOnConsume = true;
+		ElementDropper elementDropper = go.AddComponent<ElementDropper>();
+		elementDropper.emitMass = 10f;
+		elementDropper.emitTag = new Tag("Clay");
+		elementDropper.emitOffset = new Vector3(0f, 1f, 0f);
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
@@ -38,7 +42,7 @@ public class AirFilterConfig : IBuildingConfig
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(0.5f, SimHashes.Clay, 0f, false, 0f, 0.5f, false),
+			new ElementConverter.OutputElement(0.5f, SimHashes.Clay, 0f, true, 0f, 0.5f, false),
 			new ElementConverter.OutputElement(0.05f, SimHashes.Oxygen, 0f, false, 0f, 1f, false)
 		};
 		elementConverter.conversionInterval = 1f;
@@ -63,4 +67,6 @@ public class AirFilterConfig : IBuildingConfig
 	public const float CO2_CONSUMPTION_RATE = 0.1f;
 
 	private const float SAND_CONSUMPTION_RATE = 1f;
+
+	private const float CLAY_PER_LOAD = 10f;
 }

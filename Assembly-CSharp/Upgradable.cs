@@ -511,8 +511,8 @@ public class Upgradable : Workable, ISaveLoadable
 	}
 
 	[DelimitedRecord(",")]
-	[IgnoreEmptyLines]
 	[IgnoreFirst(1)]
+	[IgnoreEmptyLines]
 	public class UpgradableConfig
 	{
 		public UpgradableConfig(string prefabID, int id, int builderCount, float buildTime, string materialTags, float materialMass, Upgradable.UpgradableConfig.UpgradeModifier[] modifiers)

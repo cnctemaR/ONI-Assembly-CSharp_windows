@@ -10,12 +10,6 @@ public class BuildMenuPriorityScreen : PriorityScreen
 		BuildMenuPriorityScreen.Instance = this;
 	}
 
-	protected override void OnSpawn()
-	{
-		base.OnSpawn();
-		base.gameObject.SetActive(false);
-	}
-
 	protected override void OnCmpEnable()
 	{
 		base.OnCmpEnable();

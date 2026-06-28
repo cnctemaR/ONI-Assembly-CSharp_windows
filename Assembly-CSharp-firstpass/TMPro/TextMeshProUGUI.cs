@@ -5,12 +5,12 @@ using UnityEngine.UI;
 
 namespace TMPro
 {
-	[AddComponentMenu("UI/TextMeshPro - Text (UI)", 11)]
-	[SelectionBase]
 	[DisallowMultipleComponent]
-	[RequireComponent(typeof(CanvasRenderer))]
 	[RequireComponent(typeof(RectTransform))]
+	[RequireComponent(typeof(CanvasRenderer))]
+	[AddComponentMenu("UI/TextMeshPro - Text (UI)", 11)]
 	[ExecuteInEditMode]
+	[SelectionBase]
 	public class TextMeshProUGUI : TMP_Text, ILayoutElement
 	{
 		protected override void Awake()

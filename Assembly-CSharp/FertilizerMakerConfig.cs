@@ -24,6 +24,7 @@ public class FertilizerMakerConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
+		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
 		storage.defaultStoredItemModifers = FertilizerMakerConfig.StoredItemModifiers;
 		go.AddOrGet<WaterPurifier>();

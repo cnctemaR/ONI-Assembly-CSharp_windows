@@ -17,18 +17,6 @@ public class Equippable : Assignable, ISaveLoadable, IQuality, IGameObjectEffect
 		this.assignablesRef.Set((Equipment)assignables);
 	}
 
-	private Equipment equipment
-	{
-		get
-		{
-			return this.GetAssignables() as Equipment;
-		}
-		set
-		{
-			this.SetAssignables(value);
-		}
-	}
-
 	protected override void OnPrefabInit()
 	{
 		KPrefabID component = base.GetComponent<KPrefabID>();
@@ -39,6 +27,13 @@ public class Equippable : Assignable, ISaveLoadable, IQuality, IGameObjectEffect
 		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_equip_clothing_kanim") };
 		this.forcePlayPst = true;
 		base.OnPrefabInit();
+		if (this.def.AdditionalTags != null)
+		{
+			foreach (Tag tag in this.def.AdditionalTags)
+			{
+				base.GetComponent<KPrefabID>().AddTag(tag);
+			}
+		}
 	}
 
 	public global::QualityLevel GetQuality()
@@ -54,29 +49,43 @@ public class Equippable : Assignable, ISaveLoadable, IQuality, IGameObjectEffect
 	protected override void OnSpawn()
 	{
 		base.SetWorkTime(1.5f);
-		if (this.equipment != null && !this.equipment.IsEquipped(this))
+		base.OnAssign += this.RefreshChore;
+		this.Subscribe(1969584890, delegate(object o)
 		{
-			this.CreateChore();
+			this.destroyed = true;
+		});
+		if (this.isEquipped)
+		{
+			if (this.assignee != null)
+			{
+				this.assignee.GetSoleOwner().GetComponent<Equipment>().Equip(this);
+			}
+			else
+			{
+				global::Debug.LogWarning("Equippable trying to be equipped to missing prefab", null);
+				this.isEquipped = false;
+			}
 		}
+	}
+
+	public override void Assign(IAssignableIdentity new_assignee)
+	{
+		if (new_assignee == this.assignee)
+		{
+			return;
+		}
+		if (new_assignee is MinionIdentity && base.slot != null && new_assignee.GetSoleOwner().GetComponent<Equipment>().GetSlot(base.slot)
+			.assignable != null)
+		{
+			new_assignee.GetSoleOwner().GetComponent<Equipment>().GetSlot(base.slot)
+				.assignable.Unassign();
+		}
+		base.Assign(new_assignee);
 	}
 
 	private void CreateChore()
 	{
-		if (this.equipment == null)
-		{
-			global::Debug.LogFormat("Looks like we already assigned this [{0}/{1}]", new object[]
-			{
-				base.name,
-				base.gameObject.GetInstanceID()
-			});
-			return;
-		}
-		this.chore = new WorkChore<Equippable>(Db.Get().ChoreTypes.Equip, this, this.equipment.GetComponent<ChoreProvider>(), true, null, null, null, true, null, true, default(Tag), null, false, true, true);
-	}
-
-	public bool IsEquipped()
-	{
-		return this.equipment != null && this.equipment.IsEquipped(this);
+		this.chore = new WorkChore<Equippable>(Db.Get().ChoreTypes.Equip, this, this.assignee.GetSoleOwner().GetComponent<ChoreProvider>(), true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue);
 	}
 
 	public override Assignables GetAssignables(GameObject go)
@@ -84,60 +93,62 @@ public class Equippable : Assignable, ISaveLoadable, IQuality, IGameObjectEffect
 		return go.GetComponent<Equipment>();
 	}
 
-	protected override void OnClickAssign(Assignables new_assignables)
+	public void CancelChore()
 	{
-		if (this.equipment == null)
+		if (this.chore != null)
 		{
-			this.equipment = base.GetComponent<Equipment>();
+			this.chore.Cancel("Manual equip");
+			this.chore = null;
 		}
-		base.OnClickAssign(new_assignables);
+	}
+
+	private void RefreshChore(IAssignableIdentity target)
+	{
 		if (this.chore != null)
 		{
 			this.chore.Cancel("Equipment Reassigned");
 			this.chore = null;
 		}
-		if (new_assignables != null)
+		if (target != null && !target.GetSoleOwner().GetComponent<Equipment>().IsEquipped(this))
 		{
 			this.CreateChore();
 		}
 	}
 
-	public Equipment GetEquipment()
-	{
-		return this.equipment;
-	}
-
 	protected override void OnCompleteWork(Worker worker)
 	{
-		if (this.equipment != null)
+		if (this.assignee != null)
 		{
-			if (SelectTool.Instance.selected == this.selectable)
-			{
-				SelectTool.Instance.Select(null, false);
-			}
-			this.equipment.Equip(this);
+			this.assignee.GetSoleOwner().GetComponent<Equipment>().Equip(this);
 		}
 	}
 
-	public void OnEquip(EquipmentSlotInstance slot)
+	public override void Unassign()
 	{
-		KBatchedAnimController component = slot.gameObject.GetComponent<KBatchedAnimController>();
-		Attributes attributes = slot.gameObject.GetAttributes();
-		string name = base.GetComponent<KSelectable>().GetName();
-		foreach (AttributeModifier attributeModifier in this.def.AttributeModifiers)
+		if (this.isEquipped)
 		{
-			attributes.Add(name, attributeModifier);
+			(this.assignee as MinionIdentity).GetComponent<Equipment>().Unequip(this);
+			this.OnUnequip();
 		}
-		SnapOn component2 = slot.gameObject.GetComponent<SnapOn>();
-		component2.AttachSnapOnByName(this.def.SnapOn);
-		if (this.def.SnapOn1 != null)
+		base.Unassign();
+	}
+
+	public void OnEquip(AssignableSlotInstance slot)
+	{
+		this.isEquipped = true;
+		if (SelectTool.Instance.selected == this.selectable)
 		{
-			component2.AttachSnapOnByName(this.def.SnapOn1);
+			SelectTool.Instance.Select(null, false);
 		}
-		slot.gameObject.GetComponent<Navigator>().SetAbilityFlag(this.def.PathFinderFlags);
-		if (this.def.BuildOverride != null)
+		base.GetComponent<KBatchedAnimController>().enabled = false;
+		base.GetComponent<KSelectable>().IsSelectable = false;
+		base.GetComponent<Pickupable>().UnregisterListeners();
+		this.transform.parent = slot.gameObject.transform;
+		this.transform.localPosition = Vector3.zero;
+		Effects component = slot.gameObject.GetComponent<Effects>();
+		foreach (Effect effect in this.def.EffectImmunites)
 		{
-			component.AddBuildOverride(this.def.BuildOverride, true, false);
+			component.AddImmunity(effect);
 		}
 		if (this.def.OnEquipCallBack != null)
 		{
@@ -145,28 +156,23 @@ public class Equippable : Assignable, ISaveLoadable, IQuality, IGameObjectEffect
 		}
 	}
 
-	public void OnUnequip(EquipmentSlotInstance slot)
+	public void OnUnequip()
 	{
-		KBatchedAnimController component = slot.gameObject.GetComponent<KBatchedAnimController>();
-		if (this.def.BuildOverride != null)
+		this.isEquipped = false;
+		if (this.destroyed)
 		{
-			component.ClearBuildOverride(this.def.BuildOverride, !this.def.IsBody);
+			return;
 		}
-		Attributes attributes = slot.gameObject.GetAttributes();
-		foreach (AttributeModifier attributeModifier in this.def.AttributeModifiers)
+		base.GetComponent<KBatchedAnimController>().enabled = true;
+		base.GetComponent<KSelectable>().IsSelectable = true;
+		base.GetComponent<Pickupable>().RegisterListeners();
+		Effects component = this.assignee.GetSoleOwner().GetComponent<Effects>();
+		foreach (Effect effect in this.def.EffectImmunites)
 		{
-			attributes.Remove(attributeModifier);
+			component.RemoveImmunity(effect);
 		}
-		if (!this.def.IsBody)
-		{
-			SnapOn component2 = slot.gameObject.GetComponent<SnapOn>();
-			component2.DetachSnapOnByName(this.def.SnapOn);
-			if (this.def.SnapOn1 != null)
-			{
-				component2.DetachSnapOnByName(this.def.SnapOn1);
-			}
-		}
-		slot.gameObject.GetComponent<Navigator>().ClearAbilityFlag(this.def.PathFinderFlags);
+		this.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.Misc).transform;
+		base.gameObject.transform.SetPosition(this.assignee.GetSoleOwner().gameObject.transform.position + Vector3.up / 2f);
 		if (this.def.OnUnequipCallBack != null)
 		{
 			this.def.OnUnequipCallBack(this);
@@ -192,6 +198,8 @@ public class Equippable : Assignable, ISaveLoadable, IQuality, IGameObjectEffect
 
 	public EquipmentDef def;
 
+	private bool destroyed;
+
 	[MyCmpAdd]
 	private UserMenu userMenu;
 
@@ -199,6 +207,9 @@ public class Equippable : Assignable, ISaveLoadable, IQuality, IGameObjectEffect
 
 	[Serialize]
 	private Ref<Equipment> assignablesRef = new Ref<Equipment>();
+
+	[Serialize]
+	public bool isEquipped;
 
 	private global::QualityLevel quality;
 }

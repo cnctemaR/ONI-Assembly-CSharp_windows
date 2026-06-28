@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Klei.AI;
-using ProcGenGame;
 using UnityEngine;
 
 public class Scenario : KMonoBehaviour
@@ -554,7 +553,7 @@ public class Scenario : KMonoBehaviour
 		{
 			ElementLoader.FindElementByHash(element),
 			ElementLoader.FindElementByHash(SimHashes.SedimentaryRock)
-		}, false, false);
+		}, 293.15f, false, false);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.InternalTemperature = 300f;
 		component.Temperature = 300f;
@@ -594,29 +593,7 @@ public class Scenario : KMonoBehaviour
 		{
 			return null;
 		}
-		GameObject gameObject = GameUtil.KInstantiate(prefab, Grid.CellToPosCBC(num, scene_layer), scene_layer, SceneOrganizer.Instance.GetFolder(folder), null, 0);
-		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-		if (component)
-		{
-			component.InternalTemperature = 300f;
-			component.Temperature = 300f;
-		}
-		return gameObject;
-	}
-
-	private void SetupStressTest()
-	{
-		int baseBot = WorldGen.BaseBot;
-		int baseLeft = WorldGen.BaseLeft;
-		for (int i = -50; i < 50; i++)
-		{
-			this.PlaceBuilding(baseLeft + i, baseBot + 1, "StorageLocker", SimHashes.Cuprite);
-			this.SpawnPrefab(baseLeft + i, baseBot + 1, "FrozenMinion", Grid.SceneLayer.Use, Folder.Entities);
-			this.SpawnPrefab(baseLeft + i, baseBot + 2, "FrozenMinion", Grid.SceneLayer.Use, Folder.Entities);
-			this.SpawnPrefab(baseLeft + i, baseBot + 3, "FrozenMinion", Grid.SceneLayer.Use, Folder.Entities);
-			this.SpawnPrefab(baseLeft + i, baseBot + 4, "FrozenMinion", Grid.SceneLayer.Use, Folder.Entities);
-			this.SpawnPrefab(baseLeft + i, baseBot + 5, "FrozenMinion", Grid.SceneLayer.Use, Folder.Entities);
-		}
+		return GameUtil.KInstantiate(prefab, Grid.CellToPosCBC(num, scene_layer), scene_layer, SceneOrganizer.Instance.GetFolder(folder), null, 0);
 	}
 
 	public void SetupElementTest()

@@ -244,7 +244,12 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 				{
 					Vector3 vector = new Vector3(this.transform.position.x + outputElement.outputElementOffset.x, this.transform.position.y + outputElement.outputElementOffset.y, 0f);
 					int num14 = Grid.PosToCell(vector);
-					if (outputElement.element.IsSolid)
+					if (outputElement.element.IsLiquid)
+					{
+						int elementIndex = ElementLoader.GetElementIndex(outputElement.element.id);
+						FallingWater.instance.AddParticle(num14, (byte)elementIndex, num12, num13, diseaseInfo2.idx, diseaseInfo2.count, false, false, false, false);
+					}
+					else if (outputElement.element.IsSolid)
 					{
 						outputElement.element.substance.SpawnResource(vector, num12, num13, diseaseInfo2.idx, diseaseInfo2.count, false, false);
 					}
@@ -255,7 +260,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 				}
 				if (outputElement.elementHash == SimHashes.Oxygen)
 				{
-					ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, num12, null);
+					ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, num12, base.gameObject.GetProperName(), null);
 				}
 			}
 		}
@@ -267,7 +272,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 		base.OnPrefabInit();
 		if (ElementConverter.ElementConverterInput == null)
 		{
-			ElementConverter.ElementConverterInput = new StatusItem("ElementConverterInput", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, SimViewMode.None, SimViewMode.None, true, 2046).SetResolveStringCallback(delegate(string str, object data)
+			ElementConverter.ElementConverterInput = new StatusItem("ElementConverterInput", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, SimViewMode.None, true, 14334).SetResolveStringCallback(delegate(string str, object data)
 			{
 				ElementConverter.ConsumedElement consumedElement = (ElementConverter.ConsumedElement)data;
 				str = str.Replace("{ElementTypes}", consumedElement.Name);
@@ -277,7 +282,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 		}
 		if (ElementConverter.ElementConverterOutput == null)
 		{
-			ElementConverter.ElementConverterOutput = new StatusItem("ElementConverterOutput", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, SimViewMode.None, SimViewMode.None, true, 2046).SetResolveStringCallback(delegate(string str, object data)
+			ElementConverter.ElementConverterOutput = new StatusItem("ElementConverterOutput", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, SimViewMode.None, true, 14334).SetResolveStringCallback(delegate(string str, object data)
 			{
 				ElementConverter.OutputElement outputElement = (ElementConverter.OutputElement)data;
 				str = str.Replace("{ElementTypes}", outputElement.Name);
@@ -477,14 +482,14 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.disabled;
-			this.disabled.EventTransition(GameHashes.ActiveChanged, this.converting, (ElementConverter.StatesInstance smi) => smi.master.operational.IsActive);
+			this.disabled.EventTransition(GameHashes.ActiveChanged, this.converting, (ElementConverter.StatesInstance smi) => smi.master.operational == null || smi.master.operational.IsActive);
 			this.converting.Enter("AddStatusItems", delegate(ElementConverter.StatesInstance smi)
 			{
 				smi.AddStatusItems();
 			}).Exit("RemoveStatusItems", delegate(ElementConverter.StatesInstance smi)
 			{
 				smi.RemoveStatusItems();
-			}).EventTransition(GameHashes.ActiveChanged, this.disabled, (ElementConverter.StatesInstance smi) => !smi.master.operational.IsActive)
+			}).EventTransition(GameHashes.ActiveChanged, this.disabled, (ElementConverter.StatesInstance smi) => smi.master.operational != null && !smi.master.operational.IsActive)
 				.ToggleSchedulePeriodic("ConvertMass", (ElementConverter.StatesInstance smi) => smi.master.conversionInterval, delegate(ElementConverter.StatesInstance smi)
 				{
 					smi.master.ConvertMass(smi.master.conversionInterval);

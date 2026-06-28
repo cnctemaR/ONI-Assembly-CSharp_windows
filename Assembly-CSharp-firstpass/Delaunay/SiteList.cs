@@ -92,8 +92,7 @@ namespace Delaunay
 			List<uint> list = new List<uint>();
 			for (int i = 0; i < this._sites.Count; i++)
 			{
-				Site site = this._sites[i];
-				list.Add(site.color);
+				list.Add(this._sites[i].color);
 			}
 			return list;
 		}
@@ -103,10 +102,17 @@ namespace Delaunay
 			List<Vector2> list = new List<Vector2>();
 			for (int i = 0; i < this._sites.Count; i++)
 			{
-				Site site = this._sites[i];
-				list.Add(site.Coord);
+				list.Add(this._sites[i].Coord);
 			}
 			return list;
+		}
+
+		public void ScaleWeight(float scale)
+		{
+			for (int i = 0; i < this._sites.Count; i++)
+			{
+				this._sites[i].scaled_weight = this._sites[i].weight * scale;
+			}
 		}
 
 		public List<Circle> Circles()
@@ -114,14 +120,13 @@ namespace Delaunay
 			List<Circle> list = new List<Circle>();
 			for (int i = 0; i < this._sites.Count; i++)
 			{
-				Site site = this._sites[i];
 				float num = 0f;
-				Edge edge = site.NearestEdge();
+				Edge edge = this._sites[i].NearestEdge();
 				if (!edge.IsPartOfConvexHull())
 				{
 					num = edge.SitesDistance() * 0.5f;
 				}
-				list.Add(new Circle(site.x, site.y, num));
+				list.Add(new Circle(this._sites[i].x, this._sites[i].y, num));
 			}
 			return list;
 		}

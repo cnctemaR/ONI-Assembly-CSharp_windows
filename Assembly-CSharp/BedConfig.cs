@@ -16,6 +16,7 @@ public class BedConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
 		go.AddOrGet<LoopingSounds>();
+		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.Bed);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -23,7 +24,7 @@ public class BedConfig : IBuildingConfig
 		BuildingTemplates.DoPostConfigure(go);
 		go.GetComponent<KAnimControllerBase>().initialAnim = "off";
 		Bed bed = go.AddOrGet<Bed>();
-		bed.effects = new string[] { "BedHealth" };
+		bed.effects = new string[] { "BedStamina" };
 		Sleepable sleepable = go.AddOrGet<Sleepable>();
 		sleepable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_sleep_bed_kanim") };
 	}

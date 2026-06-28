@@ -11,6 +11,7 @@ namespace Database
 		{
 			this.Die = this.Add("Die", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.DIE.NAME, DUPLICANTS.CHORES.DIE.STATUS);
 			this.Entombed = this.Add("Entombed", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.ENTOMBED.NAME, DUPLICANTS.CHORES.ENTOMBED.STATUS);
+			this.SuitMarker = this.Add("SuitMarker", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.WASHHANDS.NAME, DUPLICANTS.CHORES.WASHHANDS.STATUS);
 			this.WashHands = this.Add("WashHands", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.WASHHANDS.NAME, DUPLICANTS.CHORES.WASHHANDS.STATUS);
 			this.HealCritical = this.Add("HealCritical", new string[0], "HealCritical", new string[] { "Vomit", "Cough" }, DUPLICANTS.CHORES.HEALCRITICAL.NAME, DUPLICANTS.CHORES.HEALCRITICAL.STATUS);
 			this.BeIncapacitated = this.Add("BeIncapacitated", new string[0], "BeIncapacitated", new string[0], DUPLICANTS.CHORES.BEINCAPACITATED.NAME, DUPLICANTS.CHORES.BEINCAPACITATED.STATUS);
@@ -37,10 +38,11 @@ namespace Database
 			this.UseToilet = this.Add("UseToilet", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.USETOILET.NAME, DUPLICANTS.CHORES.USETOILET.STATUS);
 			this.Eat = this.Add("Eat", new string[0], "Eat", new string[0], DUPLICANTS.CHORES.EAT.NAME, DUPLICANTS.CHORES.EAT.STATUS);
 			this.Narcolepsy = this.Add("Narcolepsy", new string[0], "Narcolepsy", new string[0], DUPLICANTS.CHORES.NARCOLEPSY.NAME, DUPLICANTS.CHORES.NARCOLEPSY.STATUS);
+			this.ReturnSuitUrgent = this.Add("ReturnSuitUrgent", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.RETURNSUIT.NAME, DUPLICANTS.CHORES.RETURNSUIT.STATUS);
 			this.SleepDueToDisease = this.Add("SleepDueToDisease", new string[0], "Sleep", new string[0], DUPLICANTS.CHORES.RESTDUETODISEASE.NAME, DUPLICANTS.CHORES.RESTDUETODISEASE.STATUS);
 			this.Sleep = this.Add("Sleep", new string[0], "Sleep", new string[0], DUPLICANTS.CHORES.SLEEP.NAME, DUPLICANTS.CHORES.SLEEP.STATUS);
 			this.RestDueToDisease = this.Add("RestDueToDisease", new string[0], "RestDueToDisease", new string[0], DUPLICANTS.CHORES.RESTDUETODISEASE.NAME, DUPLICANTS.CHORES.RESTDUETODISEASE.STATUS);
-			this.TakeMedicine = this.Add("TakeMedicine", new string[0], "TakeMedicine", new string[0], DUPLICANTS.CHORES.TAKEMEDICINE.NAME, DUPLICANTS.CHORES.TAKEMEDICINE.STATUS);
+			this.TakeMedicine = this.Add("TakeMedicine", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.TAKEMEDICINE.NAME, DUPLICANTS.CHORES.TAKEMEDICINE.STATUS);
 			this.ScrubOre = this.Add("ScrubOre", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.SCRUBORE.NAME, DUPLICANTS.CHORES.SCRUBORE.STATUS);
 			this.DeliverFood = this.Add("DeliverFood", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.DELIVERFOOD.NAME, DUPLICANTS.CHORES.DELIVERFOOD.STATUS);
 			this.FetchCritical = this.Add("FetchCritical", new string[] { "Deliver" }, string.Empty, new string[0], DUPLICANTS.CHORES.FETCHCRITICAL.NAME, DUPLICANTS.CHORES.FETCHCRITICAL.STATUS);
@@ -76,6 +78,7 @@ namespace Database
 			this.MushFetch = this.Add("MushFetch", new string[] { "Cook", "Deliver" }, string.Empty, new string[0], DUPLICANTS.CHORES.MUSHFETCH.NAME, DUPLICANTS.CHORES.MUSHFETCH.STATUS);
 			this.CompostWorkable = this.Add("CompostWorkable", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.COMPOSTWORKABLE.NAME, DUPLICANTS.CHORES.COMPOSTWORKABLE.STATUS);
 			this.FlipCompost = this.Add("FlipCompost", new string[] { "Compost" }, string.Empty, new string[0], DUPLICANTS.CHORES.FLIPCOMPOST.NAME, DUPLICANTS.CHORES.FLIPCOMPOST.STATUS);
+			this.Depressurize = this.Add("Depressurize", new string[] { "Maintenance" }, string.Empty, new string[0], DUPLICANTS.CHORES.DEPRESSURIZE.NAME, DUPLICANTS.CHORES.DEPRESSURIZE.STATUS);
 			this.Fabricate = this.Add("Fabricate", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.FABRICATE.NAME, DUPLICANTS.CHORES.FABRICATE.STATUS);
 			this.FabricateFetch = this.Add("FabricateFetch", new string[] { "Deliver" }, string.Empty, new string[0], DUPLICANTS.CHORES.FABRICATEFETCH.NAME, DUPLICANTS.CHORES.FABRICATEFETCH.STATUS);
 			this.Transport = this.Add("Transport", new string[] { "Sweep" }, string.Empty, new string[0], DUPLICANTS.CHORES.TRANSPORT.NAME, DUPLICANTS.CHORES.TRANSPORT.STATUS);
@@ -85,6 +88,7 @@ namespace Database
 			this.Dig = this.Add("Dig", new string[] { "Dig" }, string.Empty, new string[0], DUPLICANTS.CHORES.DIG.NAME, DUPLICANTS.CHORES.DIG.STATUS);
 			this.Fetch = this.Add("Fetch", new string[] { "Deliver", "Sweep" }, string.Empty, new string[0], DUPLICANTS.CHORES.FETCH.NAME, DUPLICANTS.CHORES.FETCH.STATUS);
 			this.MoveToSafety = this.Add("MoveToSafety", new string[0], "MoveToSafety", new string[0], DUPLICANTS.CHORES.MOVETOSAFETY.NAME, DUPLICANTS.CHORES.MOVETOSAFETY.STATUS);
+			this.ReturnSuitIdle = this.Add("ReturnSuitIdle", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.RETURNSUIT.NAME, DUPLICANTS.CHORES.RETURNSUIT.STATUS);
 			this.Idle = this.Add("IdleChore", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.IDLE.NAME, DUPLICANTS.CHORES.IDLE.STATUS);
 			ChoreType[][] array = new ChoreType[][]
 			{
@@ -110,12 +114,13 @@ namespace Database
 				new ChoreType[] { this.Equip, this.Unequip },
 				new ChoreType[]
 				{
-					this.DeliverFood, this.Sigh, this.EmptyStorage, this.Upgrade, this.Repair, this.Disinfect, this.Shower, this.CleanToilet, this.LiquidCooledFan, this.WashHands,
-					this.TakeMedicine, this.Doctor, this.Recharge, this.FetchCritical, this.ScrubOre, this.MoveToSafety, this.Relocate, this.Research, this.ResearchFetch, this.Mop,
-					this.Toggle, this.Deconstruct, this.Fetch, this.Transport, this.Art, this.GeneratePower, this.CompostWorkable, this.DropUnusedInventory, this.Harvest, this.Uproot,
-					this.Fabricate, this.Mush, this.Cook, this.Build, this.Dig, this.BuildDig, this.FlipCompost, this.BuildFetch, this.CookFetch, this.MushFetch,
-					this.FabricateFetch, this.StressEmote
+					this.DeliverFood, this.Sigh, this.EmptyStorage, this.Upgrade, this.Repair, this.Disinfect, this.Shower, this.CleanToilet, this.LiquidCooledFan, this.SuitMarker,
+					this.WashHands, this.TakeMedicine, this.Doctor, this.Recharge, this.FetchCritical, this.ScrubOre, this.MoveToSafety, this.Relocate, this.Research, this.ResearchFetch,
+					this.Mop, this.Toggle, this.Deconstruct, this.Fetch, this.Transport, this.Art, this.GeneratePower, this.CompostWorkable, this.DropUnusedInventory, this.Harvest,
+					this.Uproot, this.Fabricate, this.Mush, this.Cook, this.Build, this.Dig, this.BuildDig, this.FlipCompost, this.Depressurize, this.BuildFetch,
+					this.CookFetch, this.MushFetch, this.FabricateFetch, this.StressEmote, this.ReturnSuitUrgent
 				},
+				new ChoreType[] { this.ReturnSuitIdle },
 				new ChoreType[] { this.Idle }
 			};
 			string text = string.Empty;
@@ -298,6 +303,8 @@ namespace Database
 
 		public ChoreType FlipCompost;
 
+		public ChoreType Depressurize;
+
 		public ChoreType Transport;
 
 		public ChoreType DropUnusedInventory;
@@ -315,6 +322,12 @@ namespace Database
 		public ChoreType StressIdle;
 
 		public ChoreType ScrubOre;
+
+		public ChoreType SuitMarker;
+
+		public ChoreType ReturnSuitUrgent;
+
+		public ChoreType ReturnSuitIdle;
 
 		private int nextPriority = 10000;
 	}

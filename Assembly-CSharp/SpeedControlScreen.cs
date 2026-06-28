@@ -131,40 +131,46 @@ public class SpeedControlScreen : KScreen
 	public void Pause(bool playSound = true)
 	{
 		this.pauseCount++;
-		if (this.pauseCount == 1 && playSound)
+		if (this.pauseCount == 1)
 		{
-			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Speed_Pause", false));
-			if (SoundListenerController.Instance != null)
+			if (playSound)
 			{
-				SoundListenerController.Instance.SetLoopingVolume(0f);
+				KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Speed_Pause", false));
+				if (SoundListenerController.Instance != null)
+				{
+					SoundListenerController.Instance.SetLoopingVolume(0f);
+				}
 			}
+			AudioMixer.instance.Start(AudioMixerSnapshots.Get().SpeedPausedMigrated);
+			MusicManager.instance.SetDynamicMusicPaused();
+			this.pauseButtonWidget.GetComponent<ToolTip>().ClearMultiStringTooltip();
+			this.pauseButtonWidget.GetComponent<ToolTip>().AddMultiStringTooltip(UI.TOOLTIPS.UNPAUSE + " " + GameUtil.GetHotkeyString(global::Action.TogglePause), this.TooltipTextStyle);
+			this.pauseButton.isOn = true;
+			this.OnPause();
 		}
-		AudioMixer.instance.Start(AudioMixerSnapshots.Get().SpeedPausedMigrated);
-		MusicManager.instance.SetDynamicMusicPaused();
-		this.pauseButtonWidget.GetComponent<ToolTip>().ClearMultiStringTooltip();
-		this.pauseButtonWidget.GetComponent<ToolTip>().AddMultiStringTooltip(UI.TOOLTIPS.UNPAUSE + " " + GameUtil.GetHotkeyString(global::Action.TogglePause), this.TooltipTextStyle);
-		this.pauseButton.isOn = true;
-		this.OnPause();
 	}
 
 	public void Unpause(bool playSound = true)
 	{
 		this.pauseCount = Mathf.Max(0, this.pauseCount - 1);
-		if (this.pauseCount == 0 && playSound)
+		if (this.pauseCount == 0)
 		{
-			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Speed_Unpause", false));
-			if (SoundListenerController.Instance != null)
+			if (playSound)
 			{
-				SoundListenerController.Instance.SetLoopingVolume(1f);
+				KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Speed_Unpause", false));
+				if (SoundListenerController.Instance != null)
+				{
+					SoundListenerController.Instance.SetLoopingVolume(1f);
+				}
 			}
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().SpeedPausedMigrated, STOP_MODE.ALLOWFADEOUT);
+			MusicManager.instance.SetDynamicMusicUnpaused();
+			this.pauseButtonWidget.GetComponent<ToolTip>().ClearMultiStringTooltip();
+			this.pauseButtonWidget.GetComponent<ToolTip>().AddMultiStringTooltip(UI.TOOLTIPS.PAUSE + " " + GameUtil.GetHotkeyString(global::Action.TogglePause), this.TooltipTextStyle);
+			this.pauseButton.isOn = false;
+			this.SetSpeed(this.speed);
+			this.OnPlay();
 		}
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().SpeedPausedMigrated, STOP_MODE.ALLOWFADEOUT);
-		MusicManager.instance.SetDynamicMusicUnpaused();
-		this.pauseButtonWidget.GetComponent<ToolTip>().ClearMultiStringTooltip();
-		this.pauseButtonWidget.GetComponent<ToolTip>().AddMultiStringTooltip(UI.TOOLTIPS.PAUSE + " " + GameUtil.GetHotkeyString(global::Action.TogglePause), this.TooltipTextStyle);
-		this.pauseButton.isOn = false;
-		this.SetSpeed(this.speed);
-		this.OnPlay();
 	}
 
 	private void OnPause()

@@ -58,6 +58,11 @@ public struct Extents
 		this.height = num4 - num2 + 1;
 	}
 
+	public bool Contains(Vector2I pos)
+	{
+		return this.x <= pos.x && pos.x < this.x + this.width && this.y <= pos.y && pos.y < this.y + this.height;
+	}
+
 	public int x;
 
 	public int y;

@@ -86,7 +86,6 @@ public class Sublimates : KMonoBehaviour
 				if (this.sublimatedMass > this.info.minSublimationAmount)
 				{
 					float num5 = this.sublimatedMass / this.primaryElement.Mass;
-					this.primaryElement.Mass = Mathf.Max(0f, this.primaryElement.Mass - this.sublimatedMass);
 					byte b;
 					int num6;
 					if (this.info.diseaseIdx == 255)
@@ -101,16 +100,27 @@ public class Sublimates : KMonoBehaviour
 						b = this.info.diseaseIdx;
 						num6 = (int)((float)this.info.diseaseCount * num7);
 					}
-					this.Emit(num, this.sublimatedMass, this.primaryElement.Temperature, b, num6);
-					this.sublimatedMass = 0f;
+					float num8 = Mathf.Min(this.sublimatedMass, this.info.maxDestinationMass - mass);
+					if (num8 > 0f)
+					{
+						this.Emit(num, num8, this.primaryElement.Temperature, b, num6);
+						this.sublimatedMass = Mathf.Max(0f, this.sublimatedMass - num8);
+						this.primaryElement.Mass = Mathf.Max(0f, this.primaryElement.Mass - num8);
+					}
+				}
+			}
+			else if (this.sublimatedMass > 0f)
+			{
+				float num9 = Mathf.Min(this.sublimatedMass, this.info.maxDestinationMass - mass);
+				if (num9 > 0f)
+				{
+					this.Emit(num, num9, this.primaryElement.Temperature, this.primaryElement.DiseaseIdx, this.primaryElement.DiseaseCount);
+					this.sublimatedMass = Mathf.Max(0f, this.sublimatedMass - num9);
+					this.primaryElement.Mass = Mathf.Max(0f, this.primaryElement.Mass - num9);
 				}
 			}
 			else
 			{
-				if (this.sublimatedMass > 0f)
-				{
-					this.Emit(num, this.sublimatedMass, this.primaryElement.Temperature, this.primaryElement.DiseaseIdx, this.primaryElement.DiseaseCount);
-				}
 				Util.KDestroyGameObject(base.gameObject);
 			}
 		}
@@ -122,7 +132,7 @@ public class Sublimates : KMonoBehaviour
 		this.flowAccumulator.Accumulate(mass);
 		if (this.info.sublimatedElement == SimHashes.ContaminatedOxygen && BaseArea.Instance.IsInsideBase(cell))
 		{
-			ReportManager.Instance.ReportValue(ReportManager.ReportType.ContaminatedOxygenSublimation, mass, null);
+			ReportManager.Instance.ReportValue(ReportManager.ReportType.ContaminatedOxygenSublimation, mass, this.GetProperName(), null);
 		}
 		if (this.spawnFXHash != SpawnFXHashes.None)
 		{

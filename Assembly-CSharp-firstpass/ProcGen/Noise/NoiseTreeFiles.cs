@@ -17,7 +17,7 @@ namespace ProcGen.Noise
 
 		public static string GetPath()
 		{
-			return Path.Combine(Application.streamingAssetsPath, "worldgen/" + WorldGenSettings.NOISE_FILE + ".yaml");
+			return Path.Combine(Application.streamingAssetsPath, "worldgen/" + NoiseTreeFiles.NOISE_FILE + ".yaml");
 		}
 
 		public static string GetTreeFilePath(string filename)
@@ -37,6 +37,23 @@ namespace ProcGen.Noise
 					this.trees.Add(this.tree_files[i], tree);
 				}
 			}
+		}
+
+		public Tree LoadTree(string name, string path)
+		{
+			if (name != null && name.Length > 0)
+			{
+				if (!this.trees.ContainsKey(name))
+				{
+					Tree tree = YamlIO<Tree>.LoadFile(path + name + ".yaml");
+					if (tree != null)
+					{
+						this.trees.Add(name, tree);
+					}
+				}
+				return this.trees[name];
+			}
+			return null;
 		}
 
 		public float GetZoomForTree(string name)
@@ -64,6 +81,20 @@ namespace ProcGen.Noise
 			return array;
 		}
 
+		public Tree GetTree(string name, string path)
+		{
+			if (!this.trees.ContainsKey(name))
+			{
+				Tree tree = YamlIO<Tree>.LoadFile(path + "/" + name + ".yaml");
+				if (tree == null)
+				{
+					return null;
+				}
+				this.trees.Add(name, tree);
+			}
+			return this.trees[name];
+		}
+
 		public Tree GetTree(string name)
 		{
 			if (!this.trees.ContainsKey(name))
@@ -81,6 +112,8 @@ namespace ProcGen.Noise
 			}
 			return this.trees[name].BuildFinalModule(globalSeed);
 		}
+
+		public static string NOISE_FILE = "noise";
 
 		private Dictionary<string, Tree> trees;
 	}

@@ -6,10 +6,10 @@ public class RiverSource : KMonoBehaviour
 {
 	protected override void OnSpawn()
 	{
-		River riverForCell = Rivers.GetRiverForCell(WorldGen.Rivers, Grid.PosToCell(this.transform.position));
+		River riverForCell = River.GetRiverForCell(WorldGen.Rivers, Grid.PosToCell(this.transform.position));
 		if (riverForCell != null)
 		{
-			this.elementID = riverForCell.element;
+			this.elementID = ElementLoader.FindElementByName(riverForCell.element).id;
 			this.maxMass = riverForCell.maxMass;
 			this.flowRate = riverForCell.flowIn;
 			this.temperature = riverForCell.temperature;

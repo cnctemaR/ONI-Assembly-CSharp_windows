@@ -184,6 +184,10 @@ public class BuildingLoader : DefLoader
 			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 			component.MassPerUnit = def.Mass[0];
 			BuildingHP buildingHP = BuildingLoader.UpdateComponentRequirement<BuildingHP>(gameObject, true);
+			if (def.Invincible)
+			{
+				buildingHP.invincible = true;
+			}
 			buildingHP.SetHitPoints(def.HitPoints);
 			if (def.Repairable)
 			{
@@ -257,10 +261,10 @@ public class BuildingLoader : DefLoader
 			DecorProvider decorProvider = BuildingLoader.UpdateComponentRequirement<DecorProvider>(gameObject, true);
 			decorProvider.baseDecor = def.BaseDecor;
 			decorProvider.baseRadius = def.BaseDecorRadius;
-			NoisePolluter noisePolluter = BuildingLoader.UpdateComponentRequirement<NoisePolluter>(gameObject, def.BaseNoisePollution > 0 && def.BaseNoisePollutionRadius > 0);
-			if (noisePolluter != null)
+			if (def.AttachableBuildingType != Tag.Invalid)
 			{
-				noisePolluter.SetValues(new EffectorValues(def.BaseNoisePollution, def.BaseNoisePollutionRadius));
+				AttachableBuilding attachableBuilding = BuildingLoader.UpdateComponentRequirement<AttachableBuilding>(gameObject, true);
+				attachableBuilding.attachableTag = def.AttachableBuildingType;
 			}
 			KPrefabID kprefabID = DefLoader.AddID(gameObject, def.PrefabID);
 			kprefabID.defaultLayer = num;

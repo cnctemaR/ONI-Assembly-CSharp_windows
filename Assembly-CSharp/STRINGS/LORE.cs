@@ -66,7 +66,7 @@ namespace STRINGS
 			{
 				public static LocString HEADER = "LOG FRAGMENT RECOVERED";
 
-				public static LocString ENTRY = "\"--fascinating that memories are not already inherent in our subjects; however, none as of yet have shown signs of recognition when introduced to familiar stimuli.\"\n\n\"Refer to Experiment 7D.\"\n\"Refer to Experiment 7F.\"\n\n\"Memories must be embedded physically within the brainmaps of our subjects. The only questions remains how to--\"";
+				public static LocString ENTRY = "\"--fascinating that memories are not already inherent in our subjects; however, none as of yet have shown signs of recognition when introduced to familiar stimuli.\"\n\n\"Refer to Experiment 7D.\"\n\"Refer to Experiment 7F.\"\n\n\"Memories must be embedded physically within the brainmaps of our subjects. The only question remains is--\"";
 			}
 		}
 	}

@@ -46,8 +46,7 @@ public class ElementLoader
 			{
 				int length = Enum.GetValues(typeof(SimHashes)).Length;
 				int idx = substance.idx;
-				ColourHSV colourHSV = new ColourHSV(350f * ((float)idx / (float)length), 1f, 1f);
-				substance.debugColour = colourHSV.ToColor();
+				substance.debugColour = Color.HSVToRGB((float)idx / (float)length, 1f, 1f);
 			}
 			if (substance.name == null || substance.name == string.Empty)
 			{

@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using Klei.AI;
+using Klei.CustomSettings;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class MinionIdentity : KMonoBehaviour, ISaveLoadable
+public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 {
 	[Serialize]
-	public string originalName { get; set; }
+	public string nameStringKey { get; set; }
 
 	protected override void OnPrefabInit()
 	{
@@ -29,9 +30,9 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable
 	protected override void OnSpawn()
 	{
 		this.SetName(this.name);
-		if (this.originalName == null)
+		if (this.nameStringKey == null)
 		{
-			this.originalName = this.name;
+			this.nameStringKey = this.name;
 		}
 		if (this.addToIdentityList)
 		{
@@ -40,6 +41,7 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable
 			{
 				Components.LiveMinionIdentities.Add(this);
 			}
+			Game.Instance.assignmentManager.AddToAssignmentGroup("public", this);
 		}
 		this.raceId = "Human";
 		this.bodyType = BodyType.Human;
@@ -57,8 +59,12 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable
 		{
 			component3.showIcon = false;
 		}
-		CustomGameSettings.SettingLevel currentQualitySetting = Game.Instance.customSettings.GetCurrentQualitySetting("ImmuneSystem");
-		if (currentQualitySetting.id == "Weak")
+		SettingLevel currentQualitySetting = Game.Instance.customSettings.GetCurrentQualitySetting("ImmuneSystem");
+		if (currentQualitySetting.id == "Compromised")
+		{
+			Db.Get().Amounts.ImmuneLevel.deltaAttribute.Lookup(this).Add(UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.IMMUNESYSTEM.LEVELS.COMPROMISED.ATTRIBUTE_MODIFIER_NAME, new AttributeModifier(Db.Get().Amounts.ImmuneLevel.deltaAttribute.Id, -0.025f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.IMMUNESYSTEM.LEVELS.COMPROMISED.ATTRIBUTE_MODIFIER_NAME, false, false));
+		}
+		else if (currentQualitySetting.id == "Weak")
 		{
 			Db.Get().Amounts.ImmuneLevel.deltaAttribute.Lookup(this).Add(UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.IMMUNESYSTEM.LEVELS.WEAK.ATTRIBUTE_MODIFIER_NAME, new AttributeModifier(Db.Get().Amounts.ImmuneLevel.deltaAttribute.Id, -0.008333334f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.IMMUNESYSTEM.LEVELS.WEAK.ATTRIBUTE_MODIFIER_NAME, false, false));
 		}
@@ -66,8 +72,16 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable
 		{
 			Db.Get().Amounts.ImmuneLevel.deltaAttribute.Lookup(this).Add(UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.IMMUNESYSTEM.LEVELS.STRONG.ATTRIBUTE_MODIFIER_NAME, new AttributeModifier(Db.Get().Amounts.ImmuneLevel.deltaAttribute.Id, 0.008333334f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.IMMUNESYSTEM.LEVELS.STRONG.ATTRIBUTE_MODIFIER_NAME, false, false));
 		}
-		CustomGameSettings.SettingLevel currentQualitySetting2 = Game.Instance.customSettings.GetCurrentQualitySetting("Stress");
-		if (currentQualitySetting2.id == "Pessimistic")
+		else if (currentQualitySetting.id == "Invincible")
+		{
+			Db.Get().Amounts.ImmuneLevel.deltaAttribute.Lookup(this).Add(UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.IMMUNESYSTEM.LEVELS.INVINCIBLE.ATTRIBUTE_MODIFIER_NAME, new AttributeModifier(Db.Get().Amounts.ImmuneLevel.deltaAttribute.Id, float.PositiveInfinity, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.IMMUNESYSTEM.LEVELS.INVINCIBLE.ATTRIBUTE_MODIFIER_NAME, false, false));
+		}
+		SettingLevel currentQualitySetting2 = Game.Instance.customSettings.GetCurrentQualitySetting("Stress");
+		if (currentQualitySetting2.id == "Doomed")
+		{
+			Db.Get().Amounts.Stress.deltaAttribute.Lookup(this).Add(UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.STRESS.LEVELS.DOOMED.ATTRIBUTE_MODIFIER_NAME, new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0.033333335f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.STRESS.LEVELS.DOOMED.ATTRIBUTE_MODIFIER_NAME, false, false));
+		}
+		else if (currentQualitySetting2.id == "Pessimistic")
 		{
 			Db.Get().Amounts.Stress.deltaAttribute.Lookup(this).Add(UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.STRESS.LEVELS.PESSIMISTIC.ATTRIBUTE_MODIFIER_NAME, new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0.016666668f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.STRESS.LEVELS.PESSIMISTIC.ATTRIBUTE_MODIFIER_NAME, false, false));
 		}
@@ -75,6 +89,15 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable
 		{
 			Db.Get().Amounts.Stress.deltaAttribute.Lookup(this).Add(UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.STRESS.LEVELS.OPTIMISTIC.ATTRIBUTE_MODIFIER_NAME, new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, -0.016666668f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.STRESS.LEVELS.OPTIMISTIC.ATTRIBUTE_MODIFIER_NAME, false, false));
 		}
+		else if (currentQualitySetting2.id == "Indomitable")
+		{
+			Db.Get().Amounts.Stress.deltaAttribute.Lookup(this).Add(UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.STRESS.LEVELS.INDOMITABLE.ATTRIBUTE_MODIFIER_NAME, new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, float.NegativeInfinity, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.STRESS.LEVELS.INDOMITABLE.ATTRIBUTE_MODIFIER_NAME, false, false));
+		}
+	}
+
+	public string GetProperName()
+	{
+		return base.gameObject.GetProperName();
 	}
 
 	public string GetVoiceId()
@@ -106,6 +129,7 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable
 
 	protected override void OnCleanUp()
 	{
+		Game.Instance.assignmentManager.RemoveFromAllGroups(this);
 		Components.MinionIdentities.Remove(this);
 		Components.LiveMinionIdentities.Remove(this);
 	}
@@ -119,7 +143,21 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable
 
 	private void OnDied(object data)
 	{
+		Ownables component = base.GetComponent<Ownables>();
+		component.UnassignAll();
+		Equipment component2 = base.GetComponent<Equipment>();
+		component2.UnequipAll();
 		Components.LiveMinionIdentities.Remove(this);
+	}
+
+	public List<Ownables> GetOwners()
+	{
+		return new List<Ownables> { base.GetComponent<Ownables>() };
+	}
+
+	public Ownables GetSoleOwner()
+	{
+		return base.GetComponent<Ownables>();
 	}
 
 	[MyCmpReq]

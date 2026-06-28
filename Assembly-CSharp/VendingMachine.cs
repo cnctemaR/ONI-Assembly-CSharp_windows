@@ -60,7 +60,7 @@ public class VendingMachine : StateMachineComponent<VendingMachine.StatesInstanc
 			this.CompleteChore();
 		};
 		KAnimFile anim = Assets.GetAnim("anim_break_kanim");
-		this.chore = new WorkChore<Workable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, action, null, null, true, null, true, default(Tag), anim, false, true, true);
+		this.chore = new WorkChore<Workable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, action, null, null, true, null, true, default(Tag), anim, false, true, true, int.MaxValue);
 		this.OnRefreshUserMenu(null);
 	}
 

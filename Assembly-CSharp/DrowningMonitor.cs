@@ -74,12 +74,12 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause
 		this.checkDrowningHandle.ClearScheduler();
 	}
 
-	public void Configure(float _maxStamina, float _staminaRegenRate, float _cellLiquidThreshold = 0.95f)
+	public void Configure(float maxStamina, float staminaRegenRate, float cellLiquidThreshold = 0.95f)
 	{
-		this.maxStamina = _maxStamina;
-		this.stamina = this.maxStamina;
-		this.staminaRegenRate = _staminaRegenRate;
-		this.cellLiquidThreshold = _cellLiquidThreshold;
+		this.maxStamina = maxStamina;
+		this.stamina = maxStamina;
+		this.staminaRegenRate = staminaRegenRate;
+		this.cellLiquidThreshold = cellLiquidThreshold;
 	}
 
 	private void CheckDrowning(object data = null)

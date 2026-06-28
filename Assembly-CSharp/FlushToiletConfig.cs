@@ -29,6 +29,7 @@ public class FlushToiletConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
 		go.AddOrGet<LoopingSounds>();
+		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.Toilet);
 		FlushToilet flushToilet = go.AddOrGet<FlushToilet>();
 		flushToilet.massConsumedPerUse = 5f;
 		flushToilet.massEmittedPerUse = 11.7f;
@@ -39,6 +40,7 @@ public class FlushToiletConfig : IBuildingConfig
 		ToiletWorkableUse toiletWorkableUse = go.AddOrGet<ToiletWorkableUse>();
 		toiletWorkableUse.overrideAnims = array;
 		toiletWorkableUse.workLayer = Grid.SceneLayer.BuildingFront;
+		toiletWorkableUse.canBePublic = true;
 		toiletWorkableUse.resetProgressOnStop = true;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;

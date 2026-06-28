@@ -84,6 +84,74 @@ namespace ProcGen
 			return this.arcList.Find(pred);
 		}
 
+		public int GetDistanceToTagSetFromNode(Node node, TagSet tagset)
+		{
+			List<Node> nodesWithAtLeastOneTag = this.GetNodesWithAtLeastOneTag(tagset);
+			if (nodesWithAtLeastOneTag.Count > 0)
+			{
+				Dijkstra dijkstra = new Dijkstra(this.baseGraph, (Arc arc) => 1.0, DijkstraMode.Sum);
+				for (int i = 0; i < nodesWithAtLeastOneTag.Count; i++)
+				{
+					dijkstra.AddSource(nodesWithAtLeastOneTag[i].node);
+				}
+				dijkstra.RunUntilFixed(node.node);
+				return (int)dijkstra.GetDistance(node.node);
+			}
+			return -1;
+		}
+
+		public int GetDistanceToTagFromNode(Node node, Tag tag)
+		{
+			List<Node> nodesWithTag = this.GetNodesWithTag(tag);
+			if (nodesWithTag.Count > 0)
+			{
+				Dijkstra dijkstra = new Dijkstra(this.baseGraph, (Arc arc) => 1.0, DijkstraMode.Sum);
+				for (int i = 0; i < nodesWithTag.Count; i++)
+				{
+					dijkstra.AddSource(nodesWithTag[i].node);
+				}
+				dijkstra.RunUntilFixed(node.node);
+				return (int)dijkstra.GetDistance(node.node);
+			}
+			return -1;
+		}
+
+		public Dictionary<uint, int> GetDistanceToTag(Tag tag)
+		{
+			List<Node> nodesWithTag = this.GetNodesWithTag(tag);
+			if (nodesWithTag.Count > 0)
+			{
+				Dijkstra dijkstra = new Dijkstra(this.baseGraph, (Arc arc) => 1.0, DijkstraMode.Sum);
+				for (int i = 0; i < nodesWithTag.Count; i++)
+				{
+					dijkstra.AddSource(nodesWithTag[i].node);
+				}
+				Dictionary<uint, int> dictionary = new Dictionary<uint, int>();
+				for (int j = 0; j < this.nodes.Count; j++)
+				{
+					dijkstra.RunUntilFixed(this.nodes[j].node);
+					dictionary[(uint)this.nodes[j].node.Id] = (int)dijkstra.GetDistance(this.nodes[j].node);
+				}
+				return dictionary;
+			}
+			return null;
+		}
+
+		public List<Node> GetNodesWithAtLeastOneTag(TagSet tagset)
+		{
+			return this.nodeList.FindAll((Node node) => node.tags.ContainsOne(tagset));
+		}
+
+		public List<Node> GetNodesWithTag(Tag tag)
+		{
+			return this.nodeList.FindAll((Node node) => node.tags.Contains(tag));
+		}
+
+		public List<Arc> GetArcsWithTag(Tag tag)
+		{
+			return this.arcList.FindAll((Arc arc) => arc.tags.Contains(tag));
+		}
+
 		[OnDeserialized]
 		internal void OnDeserializedMethod()
 		{

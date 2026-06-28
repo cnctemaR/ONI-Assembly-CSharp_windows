@@ -81,7 +81,7 @@ public class InspectSaveScreen : KModalScreen
 			this.confirmScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, false);
 			this.confirmScreen.PopupConfirmDialog(message, action, delegate
 			{
-			}, null, null, null, null);
+			}, null, null, null, null, null);
 			this.confirmScreen.GetComponent<LayoutElement>().ignoreLayout = true;
 			this.confirmScreen.gameObject.SetActive(true);
 		}

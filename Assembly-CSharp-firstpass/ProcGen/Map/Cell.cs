@@ -42,6 +42,13 @@ namespace ProcGen.Map
 			}
 		}
 
+		public void Remove(Edge e)
+		{
+			this.edges.Remove(e);
+			e.site0.neighbors.Remove(e.site1);
+			e.site1.neighbors.Remove(e.site0);
+		}
+
 		public void Add(Corner c)
 		{
 			if (!this.corners.Contains(c))

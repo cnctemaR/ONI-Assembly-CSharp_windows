@@ -1,5 +1,6 @@
 ﻿using System;
 using Klei.AI;
+using Klei.CustomSettings;
 
 public class StressMonitor : GameStateMachine<StressMonitor, StressMonitor.Instance>
 {
@@ -10,8 +11,8 @@ public class StressMonitor : GameStateMachine<StressMonitor, StressMonitor.Insta
 		this.root.ToggleUrge(Db.Get().Urges.Relax);
 		this.satisfied.Transition(this.stressed.tier1, (StressMonitor.Instance smi) => smi.stress.value >= 60f).ToggleExpression(Db.Get().Expressions.Neutral, null);
 		this.stressed.ToggleStatusItem(Db.Get().DuplicantStatusItems.Stressed, null).Transition(this.satisfied, (StressMonitor.Instance smi) => smi.stress.value < 60f).TriggerOnEnter(GameHashes.Stressed, null);
-		this.stressed.tier1.Transition(this.stressed.tier2, (StressMonitor.Instance smi) => smi.stress.value >= 100f);
-		this.stressed.tier2.TriggerOnEnter(GameHashes.StressedHadEnough, null).Transition(this.stressed.tier1, (StressMonitor.Instance smi) => smi.stress.value < 100f);
+		this.stressed.tier1.Transition(this.stressed.tier2, (StressMonitor.Instance smi) => smi.HasHadEnough());
+		this.stressed.tier2.TriggerOnEnter(GameHashes.StressedHadEnough, null).Transition(this.stressed.tier1, (StressMonitor.Instance smi) => !smi.HasHadEnough());
 	}
 
 	private const float StressThreshold_One = 60f;
@@ -35,6 +36,9 @@ public class StressMonitor : GameStateMachine<StressMonitor, StressMonitor.Insta
 			: base(master)
 		{
 			this.stress = Db.Get().Amounts.Stress.Lookup(base.gameObject);
+			SettingConfig settingConfig = Game.Instance.customSettings.QualitySettings["StressBreaks"];
+			SettingLevel currentQualitySetting = Game.Instance.customSettings.GetCurrentQualitySetting("StressBreaks");
+			this.allowStressBreak = settingConfig.IsDefaultLevel(currentQualitySetting.id);
 		}
 
 		public bool IsStressed()
@@ -44,9 +48,11 @@ public class StressMonitor : GameStateMachine<StressMonitor, StressMonitor.Insta
 
 		public bool HasHadEnough()
 		{
-			return this.stress.value >= 100f;
+			return this.allowStressBreak && this.stress.value >= 100f;
 		}
 
 		public AmountInstance stress;
+
+		private bool allowStressBreak = true;
 	}
 }

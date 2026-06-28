@@ -1,7 +1,6 @@
 ﻿using System;
 using FMOD.Studio;
 using Klei.AI;
-using TUNING;
 using UnityEngine;
 
 public class VoiceSoundEvent : SoundEvent
@@ -15,7 +14,7 @@ public class VoiceSoundEvent : SoundEvent
 	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
 	{
 		MinionIdentity component = behaviour.GetComponent<MinionIdentity>();
-		if (base.name.Contains("state") && Time.time - component.timeLastSpoke < this.intervalBetweenSpeaking)
+		if (component == null || (base.name.Contains("state") && Time.time - component.timeLastSpoke < this.intervalBetweenSpeaking))
 		{
 			return;
 		}
@@ -55,21 +54,15 @@ public class VoiceSoundEvent : SoundEvent
 			else
 			{
 				EventInstance eventInstance = SoundEvent.BeginOneShot(sound, position);
-				EffectorValues effectorValues = base.noiseValues;
 				if (sound.Contains("sleep_"))
 				{
 					Traits component4 = behaviour.GetComponent<Traits>();
 					if (component4.HasTrait("Snorer"))
 					{
 						eventInstance.setParameterValue("snoring", 1f);
-						effectorValues = NOISE_POLLUTION.CREATURES.TIER0;
 					}
 				}
 				SoundEvent.EndOneShot(eventInstance);
-				if (effectorValues.amount > 0)
-				{
-					AudioEventManager.Get().PlayTimedOnceOff(position, effectorValues.amount, effectorValues.radius, behaviour.GetComponent<KSelectable>().GetName(), 1f);
-				}
 				component.timeLastSpoke = Time.time;
 			}
 		}
@@ -82,10 +75,13 @@ public class VoiceSoundEvent : SoundEvent
 	private string GetAssetName(Component cmp)
 	{
 		string text = "F01";
-		MinionIdentity component = cmp.GetComponent<MinionIdentity>();
-		if (component != null)
+		if (cmp != null)
 		{
-			text = component.GetVoiceId();
+			MinionIdentity component = cmp.GetComponent<MinionIdentity>();
+			if (component != null)
+			{
+				text = component.GetVoiceId();
+			}
 		}
 		string text2 = base.name;
 		if (base.name.Contains(":"))

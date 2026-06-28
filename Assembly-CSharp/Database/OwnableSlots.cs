@@ -14,6 +14,7 @@ namespace Database
 			this.MedicalBed.showInUI = false;
 			this.GeneShuffler = base.Add(new OwnableSlot("GeneShuffler", MISC.TAGS.GENE_SHUFFLER));
 			this.GeneShuffler.showInUI = false;
+			this.Toilet = base.Add(new OwnableSlot("Toilet", MISC.TAGS.TOILET));
 		}
 
 		public OwnableSlot Bed;
@@ -25,5 +26,7 @@ namespace Database
 		public OwnableSlot GeneShuffler;
 
 		public OwnableSlot MedicalBed;
+
+		public OwnableSlot Toilet;
 	}
 }

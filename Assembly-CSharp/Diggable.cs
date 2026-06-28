@@ -47,7 +47,7 @@ public class Diggable : Workable
 			this.childRenderer.material.color = Game.Instance.uiColours.Dig.invalidLocation;
 		}
 		Grid.Objects[num, 7] = base.gameObject;
-		this.chore = new WorkChore<Diggable>(this.choreType, this, null, true, null, null, null, true, null, true, default(Tag), null, true, true, true);
+		this.chore = new WorkChore<Diggable>(this.choreType, this, null, true, null, null, null, true, null, true, default(Tag), null, true, true, true, int.MaxValue);
 		base.SetWorkTime(float.PositiveInfinity);
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("Diggable.OnSpawn", base.gameObject, Grid.PosToCell(this), GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
 		this.OnSolidChanged(null);

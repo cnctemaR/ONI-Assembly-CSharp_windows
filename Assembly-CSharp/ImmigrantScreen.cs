@@ -5,33 +5,59 @@ using UnityEngine;
 
 public class ImmigrantScreen : CharacterSelectionController
 {
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+	}
+
 	protected override void OnSpawn()
 	{
+		this.activateOnSpawn = false;
 		base.OnSpawn();
 		base.IsStarterMinion = false;
 		this.rejectButton.onClick += this.OnRejectAll;
 		this.confirmRejectionBtn.onClick += this.OnRejectionConfirmed;
 		this.cancelRejectionBtn.onClick += this.OnRejectionCancelled;
 		ImmigrantScreen.instance = this;
-		base.gameObject.SetActive(false);
 		this.title.text = UI.IMMIGRANTSCREEN.IMMIGRANTSCREENTITLE;
 		this.proceedButton.GetComponentInChildren<LocText>().text = UI.IMMIGRANTSCREEN.PROCEEDBUTTON;
 		this.closeButton.onClick += delegate
 		{
 			base.Show(false);
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MENUNewDuplicantSnapshot, STOP_MODE.ALLOWFADEOUT);
-			AudioMixer.instance.Start(AudioMixerSnapshots.Get().PortalLPDimmedSnapshot);
-			MusicManager.instance.StopSong("Music_SelectDuplicant", true, STOP_MODE.ALLOWFADEOUT);
 		};
+		base.Show(false);
+	}
+
+	protected override void OnShow(bool show)
+	{
+		if (show)
+		{
+			KFMOD.PlayOneShot(GlobalAssets.GetSound("Dialog_Popup", false));
+			AudioMixer.instance.Start(AudioMixerSnapshots.Get().MENUNewDuplicantSnapshot);
+			MusicManager.instance.PlaySong("Music_SelectDuplicant", false);
+			this.hasShown = true;
+		}
+		else
+		{
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MENUNewDuplicantSnapshot, STOP_MODE.ALLOWFADEOUT);
+			MusicManager.instance.StopSong("Music_SelectDuplicant", true, STOP_MODE.ALLOWFADEOUT);
+			if (Immigration.Instance.ImmigrantsAvailable && this.hasShown)
+			{
+				AudioMixer.instance.Start(AudioMixerSnapshots.Get().PortalLPDimmedSnapshot);
+			}
+		}
+		base.OnShow(show);
+	}
+
+	public override void Deactivate()
+	{
+		base.Show(false);
 	}
 
 	public static void InitializeImmigrantScreen(Telepad telepad)
 	{
 		ImmigrantScreen.instance.Initialize(telepad);
 		ImmigrantScreen.instance.Show(true);
-		KFMOD.PlayOneShot(GlobalAssets.GetSound("Dialog_Popup", false));
-		AudioMixer.instance.Start(AudioMixerSnapshots.Get().MENUNewDuplicantSnapshot);
-		MusicManager.instance.PlaySong("Music_SelectDuplicant", false);
 	}
 
 	private void Initialize(Telepad telepad)
@@ -106,4 +132,6 @@ public class ImmigrantScreen : CharacterSelectionController
 	private static ImmigrantScreen instance;
 
 	private Telepad telepad;
+
+	private bool hasShown;
 }

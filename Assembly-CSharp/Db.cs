@@ -37,6 +37,7 @@ public class Db : EntityModifierSet
 		this.Accessories = new Accessories(this.Root);
 		this.AccessorySlots = new AccessorySlots(this.Root, null, null, null);
 		this.ScheduleBlockTypes = new ScheduleBlockTypes(this.Root);
+		this.Roles = new Roles(this.Root);
 		this.MiscStatusItems = new MiscStatusItems(this.Root);
 		this.CreatureStatusItems = new CreatureStatusItems(this.Root);
 		this.BuildingStatusItems = new BuildingStatusItems(this.Root);
@@ -131,6 +132,8 @@ public class Db : EntityModifierSet
 	public Accessories Accessories;
 
 	public ScheduleBlockTypes ScheduleBlockTypes;
+
+	public Roles Roles;
 
 	[Serializable]
 	public class SlotInfo : Resource

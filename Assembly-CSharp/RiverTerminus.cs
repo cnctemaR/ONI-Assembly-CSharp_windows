@@ -6,7 +6,7 @@ public class RiverTerminus : KMonoBehaviour
 {
 	protected override void OnSpawn()
 	{
-		River riverForCell = Rivers.GetRiverForCell(WorldGen.Rivers, Grid.PosToCell(this.transform.position));
+		River riverForCell = River.GetRiverForCell(WorldGen.Rivers, Grid.PosToCell(this.transform.position));
 		if (riverForCell != null)
 		{
 			this.flowRate = riverForCell.flowOut;

@@ -6,8 +6,10 @@ public class DebugHandler : IInputHandler
 {
 	public DebugHandler()
 	{
-		this.enabled = File.Exists(Path.Combine(Application.dataPath, "debug_enable.txt"));
+		DebugHandler.enabled = File.Exists(Path.Combine(Application.dataPath, "debug_enable.txt"));
 	}
+
+	public static bool enabled { get; private set; }
 
 	public KInputHandler inputHandler { get; set; }
 
@@ -38,7 +40,7 @@ public class DebugHandler : IInputHandler
 
 	public void OnKeyDown(KButtonEvent e)
 	{
-		if (!this.enabled)
+		if (!DebugHandler.enabled)
 		{
 			return;
 		}
@@ -127,6 +129,26 @@ public class DebugHandler : IInputHandler
 		else if (e.TryConsume(global::Action.DebugToggleUI))
 		{
 			DebugHandler.ToggleScreenshotMode();
+		}
+		else if (e.TryConsume(global::Action.SreenShot1x))
+		{
+			string text = Path.ChangeExtension(SaveLoader.GetActiveSaveFilePath(), ".png");
+			Application.CaptureScreenshot(text, 1);
+		}
+		else if (e.TryConsume(global::Action.SreenShot2x))
+		{
+			string text2 = Path.ChangeExtension(SaveLoader.GetActiveSaveFilePath(), ".png");
+			Application.CaptureScreenshot(text2, 2);
+		}
+		else if (e.TryConsume(global::Action.SreenShot8x))
+		{
+			string text3 = Path.ChangeExtension(SaveLoader.GetActiveSaveFilePath(), ".png");
+			Application.CaptureScreenshot(text3, 8);
+		}
+		else if (e.TryConsume(global::Action.SreenShot32x))
+		{
+			string text4 = Path.ChangeExtension(SaveLoader.GetActiveSaveFilePath(), ".png");
+			Application.CaptureScreenshot(text4, 32);
 		}
 		else if (e.TryConsume(global::Action.DebugCellInfo))
 		{
@@ -266,12 +288,12 @@ public class DebugHandler : IInputHandler
 							}
 							num++;
 						}
-						string text = "No save file (front end)";
+						string text5 = "No save file (front end)";
 						if (SaveLoader.Instance != null)
 						{
-							text = SaveLoader.Instance.Save(validSaveFilename, false, false);
+							text5 = SaveLoader.Instance.Save(validSaveFilename, false, false);
 						}
-						KCrashReporter.ReportBug("Bug Report", text);
+						KCrashReporter.ReportBug("Bug Report", text5);
 					}
 					else if (e.TryConsume(global::Action.DebugReloadLevel))
 					{
@@ -286,8 +308,8 @@ public class DebugHandler : IInputHandler
 					}
 					else if (e.TryConsume(global::Action.DebugTriggerException))
 					{
-						string text2 = Guid.NewGuid().ToString();
-						KCrashReporter.ReportError("Debug crash with random stack", text2, null, ScreenPrefabs.Instance.ConfirmDialogScreen, string.Empty);
+						string text6 = Guid.NewGuid().ToString();
+						KCrashReporter.ReportError("Debug crash with random stack", text6, null, ScreenPrefabs.Instance.ConfirmDialogScreen, string.Empty);
 					}
 					else if (e.TryConsume(global::Action.DebugTriggerError))
 					{
@@ -300,6 +322,9 @@ public class DebugHandler : IInputHandler
 					else if (e.TryConsume(global::Action.DebugDumpEventData))
 					{
 						KObjectManager.Instance.DumpEventData();
+					}
+					else if (e.TryConsume(global::Action.DebugDumpSceneParitionerLeakData))
+					{
 					}
 				}
 			}
@@ -355,8 +380,6 @@ public class DebugHandler : IInputHandler
 	public static bool HideUI;
 
 	public static bool DebugCellInfo;
-
-	private bool enabled;
 
 	private bool superTestMode;
 

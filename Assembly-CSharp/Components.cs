@@ -21,8 +21,6 @@ public class Components
 
 	public static Components.Cmps<Notifier> Notifiers = new Components.Cmps<Notifier>();
 
-	public static Components.Cmps<SuffocationMonitor.Instance> SuffocationMonitorInstance = new Components.Cmps<SuffocationMonitor.Instance>();
-
 	public static Components.Cmps<Fabricator> Fabricators = new Components.Cmps<Fabricator>();
 
 	public static Components.Cmps<PlantablePlot> PlantablePlots = new Components.Cmps<PlantablePlot>();

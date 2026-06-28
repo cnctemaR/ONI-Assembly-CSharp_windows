@@ -85,7 +85,7 @@ public class SingleEntityReceptacle : KMonoBehaviour
 	{
 	}
 
-	public void CreateOrder(Tag entityTag)
+	public virtual void CreateOrder(Tag entityTag)
 	{
 		this.requestedEntityTag = entityTag;
 		this.CreateFetchChore(this.requestedEntityTag);

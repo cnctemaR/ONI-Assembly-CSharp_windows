@@ -1,6 +1,7 @@
 ﻿using System;
 using ProcGen;
 using ProcGenGame;
+using VoronoiTree;
 
 namespace Klei
 {
@@ -10,7 +11,7 @@ namespace Klei
 		{
 		}
 
-		public TerrainCellLogged(Node node, VoronoiDiagram.Site site)
+		public TerrainCellLogged(global::ProcGen.Node node, Diagram.Site site)
 			: base(node, site)
 		{
 		}

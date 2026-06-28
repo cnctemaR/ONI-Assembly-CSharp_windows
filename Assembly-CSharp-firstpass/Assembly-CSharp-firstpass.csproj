@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{3837DAC0-0759-4370-89BC-4340B01A5C70}</ProjectGuid>
+    <ProjectGuid>{A5D813ED-60ED-42E2-96BE-97616A76BC20}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp-firstpass</RootNamespace>
     <AssemblyName>Assembly-CSharp-firstpass</AssemblyName>
@@ -27,7 +27,6 @@
     <Compile Include="BatchSet.cs" />
     <Compile Include="BinaryHeap.cs" />
     <Compile Include="BindingEntry.cs" />
-    <Compile Include="Biome.cs" />
     <Compile Include="BoundsCheck.cs" />
     <Compile Include="ButtonLock.cs" />
     <Compile Include="ButtonSoundPlayer.cs" />
@@ -64,7 +63,6 @@
     <Compile Include="CmpFns.cs" />
     <Compile Include="CmpUtil.cs" />
     <Compile Include="ColorStyleSetting.cs" />
-    <Compile Include="ColourHSV.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="CoroutineManager.cs" />
     <Compile Include="CSVUtil.cs" />
@@ -99,6 +97,7 @@
     <Compile Include="DetailScreenTabHeader.cs" />
     <Compile Include="DistributionPlatform.cs" />
     <Compile Include="DrawUtil.cs" />
+    <Compile Include="ElementBandConfiguration.cs" />
     <Compile Include="ElementGradient.cs" />
     <Compile Include="EnumFlagsAttribute.cs" />
     <Compile Include="EventExtensions.cs" />
@@ -505,6 +504,31 @@
     <Compile Include="MathHelper.cs" />
     <Compile Include="MathUtil.cs" />
     <Compile Include="Matrix2x3.cs" />
+    <Compile Include="MIConvexHull\ConnectorList.cs" />
+    <Compile Include="MIConvexHull\Constants.cs" />
+    <Compile Include="MIConvexHull\ConvexFace.cs" />
+    <Compile Include="MIConvexHull\ConvexFaceInternal.cs" />
+    <Compile Include="MIConvexHull\ConvexHull.2.cs" />
+    <Compile Include="MIConvexHull\ConvexHull.cs" />
+    <Compile Include="MIConvexHull\ConvexHullAlgorithm.cs" />
+    <Compile Include="MIConvexHull\DefaultConvexFace.cs" />
+    <Compile Include="MIConvexHull\DefaultTriangulationCell.cs" />
+    <Compile Include="MIConvexHull\DefaultVertex.cs" />
+    <Compile Include="MIConvexHull\DeferredFace.cs" />
+    <Compile Include="MIConvexHull\DelaunayTriangulation.cs" />
+    <Compile Include="MIConvexHull\FaceConnector.cs" />
+    <Compile Include="MIConvexHull\FaceList.cs" />
+    <Compile Include="MIConvexHull\IndexBuffer.cs" />
+    <Compile Include="MIConvexHull\ITriangulation.cs" />
+    <Compile Include="MIConvexHull\IVertex.cs" />
+    <Compile Include="MIConvexHull\MathHelper.cs" />
+    <Compile Include="MIConvexHull\ObjectManager.cs" />
+    <Compile Include="MIConvexHull\SimpleList.cs" />
+    <Compile Include="MIConvexHull\Triangulation.cs" />
+    <Compile Include="MIConvexHull\TriangulationCell.cs" />
+    <Compile Include="MIConvexHull\VoronoiEdge.cs" />
+    <Compile Include="MIConvexHull\VoronoiMesh.2.cs" />
+    <Compile Include="MIConvexHull\VoronoiMesh.cs" />
     <Compile Include="Modifier.cs" />
     <Compile Include="MyCmp.cs" />
     <Compile Include="MyCmpAdd.cs" />
@@ -560,7 +584,6 @@
     <Compile Include="ProcGen\Arc.cs" />
     <Compile Include="ProcGen\BiomeSettings.cs" />
     <Compile Include="ProcGen\ChangeFloats.cs" />
-    <Compile Include="ProcGen\CloudSettings.cs" />
     <Compile Include="ProcGen\DefaultSettings.cs" />
     <Compile Include="ProcGen\ElementChoiceGroup.cs" />
     <Compile Include="ProcGen\Feature.cs" />
@@ -592,23 +615,30 @@
     <Compile Include="ProcGen\Noise\Selector.cs" />
     <Compile Include="ProcGen\Noise\Transformer.cs" />
     <Compile Include="ProcGen\Noise\Tree.cs" />
+    <Compile Include="ProcGen\Path.cs" />
+    <Compile Include="ProcGen\River.cs" />
+    <Compile Include="ProcGen\Rivers.cs" />
     <Compile Include="ProcGen\Room.cs" />
     <Compile Include="ProcGen\RoomDescriptions.cs" />
     <Compile Include="ProcGen\SampleDescriber.cs" />
+    <Compile Include="ProcGen\Segment.cs" />
     <Compile Include="ProcGen\SubWorld.cs" />
-    <Compile Include="ProcGen\SubWorlds.cs" />
+    <Compile Include="ProcGen\SubWorldFile.cs" />
     <Compile Include="ProcGen\Temperature.cs" />
     <Compile Include="ProcGen\Temperatures.cs" />
-    <Compile Include="ProcGen\TerrainBiomeSettings.cs" />
+    <Compile Include="ProcGen\TerrainElementBandSettings.cs" />
     <Compile Include="ProcGen\TerrainFeature.cs" />
     <Compile Include="ProcGen\TerrainFeatureSettings.cs" />
     <Compile Include="ProcGen\Util.cs" />
     <Compile Include="ProcGen\WeightedBiome.cs" />
     <Compile Include="ProcGen\WeightedMob.cs" />
+    <Compile Include="ProcGen\WeightedName.cs" />
     <Compile Include="ProcGen\WeightedRandom.cs" />
     <Compile Include="ProcGen\WeightedSimHash.cs" />
+    <Compile Include="ProcGen\World.cs" />
     <Compile Include="ProcGen\WorldGenSettings.cs" />
     <Compile Include="ProcGen\WorldGenTags.cs" />
+    <Compile Include="ProcGen\Worlds.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RailAPI.cs" />
     <Compile Include="ReadOnlyAttribute.cs" />
@@ -646,6 +676,7 @@
     <Compile Include="SteamDistributionPlatform.cs" />
     <Compile Include="SteamManager.cs" />
     <Compile Include="Steamworks\AccountID_t.cs" />
+    <Compile Include="Steamworks\AddUGCDependencyResult_t.cs" />
     <Compile Include="Steamworks\AppId_t.cs" />
     <Compile Include="Steamworks\AppProofOfPurchaseKeyResponse_t.cs" />
     <Compile Include="Steamworks\AssociateWithClanResult_t.cs" />
@@ -783,6 +814,7 @@
     <Compile Include="Steamworks\GCMessageAvailable_t.cs" />
     <Compile Include="Steamworks\GCMessageFailed_t.cs" />
     <Compile Include="Steamworks\GetAuthSessionTicketResponse_t.cs" />
+    <Compile Include="Steamworks\GetOPFSettingsResult_t.cs" />
     <Compile Include="Steamworks\GetUserItemVoteResult_t.cs" />
     <Compile Include="Steamworks\GetVideoURLResult_t.cs" />
     <Compile Include="Steamworks\GlobalAchievementPercentagesReady_t.cs" />
@@ -914,6 +946,7 @@
     <Compile Include="Steamworks\RemoteStorageUpdatePublishedFileResult_t.cs" />
     <Compile Include="Steamworks\RemoteStorageUpdateUserPublishedItemVoteResult_t.cs" />
     <Compile Include="Steamworks\RemoteStorageUserVoteDetails_t.cs" />
+    <Compile Include="Steamworks\RemoveUGCDependencyResult_t.cs" />
     <Compile Include="Steamworks\ScreenshotHandle.cs" />
     <Compile Include="Steamworks\ScreenshotReady_t.cs" />
     <Compile Include="Steamworks\ScreenshotRequested_t.cs" />
@@ -1100,6 +1133,7 @@
     <Compile Include="Traces.cs" />
     <Compile Include="TracesExtesions.cs" />
     <Compile Include="TransformExtensions.cs" />
+    <Compile Include="Tuple.cs" />
     <Compile Include="UIHashes.cs" />
     <Compile Include="UIUtil.cs" />
     <Compile Include="UniformGrid.cs" />
@@ -1124,61 +1158,63 @@
     <Compile Include="Vector3F.cs" />
     <Compile Include="Vector3I.cs" />
     <Compile Include="VectorUtil.cs" />
-    <Compile Include="VoronoiDiagram.cs" />
-    <Compile Include="VoronoiLeaf.cs" />
-    <Compile Include="VoronoiNode.cs" />
-    <Compile Include="VoronoiTree.cs" />
+    <Compile Include="VoronoiTree\Diagram.cs" />
+    <Compile Include="VoronoiTree\Leaf.cs" />
+    <Compile Include="VoronoiTree\Node.cs" />
+    <Compile Include="VoronoiTree\PowerDiagram.cs" />
+    <Compile Include="VoronoiTree\Site.cs" />
+    <Compile Include="VoronoiTree\Tree.cs" />
     <Compile Include="WidgetSoundPlayer.cs" />
     <Compile Include="WidgetTransition.cs" />
     <Compile Include="WorldGenUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ArabicSupport\ArabicSupport.csproj">
-      <Project>{3837DAC0-0759-4370-89BC-4340B01A5C6F}</Project>
+      <Project>{A5D813ED-60ED-42E2-96BE-97616A76BC1F}</Project>
       <Name>ArabicSupport</Name>
     </ProjectReference>
     <ProjectReference Include="..\FileHelpers\FileHelpers.csproj">
-      <Project>{3837DAC0-0759-4370-89BC-4340B01A5C73}</Project>
+      <Project>{A5D813ED-60ED-42E2-96BE-97616A76BC23}</Project>
       <Name>FileHelpers</Name>
     </ProjectReference>
     <ProjectReference Include="..\libnoise\libnoise.csproj">
-      <Project>{3837DAC0-0759-4370-89BC-4340B01A5C78}</Project>
+      <Project>{A5D813ED-60ED-42E2-96BE-97616A76BC28}</Project>
       <Name>libnoise</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{3837DAC0-0759-4370-89BC-4340B01A5C7C}</Project>
+      <Project>{A5D813ED-60ED-42E2-96BE-97616A76BC2C}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\Newtonsoft.Json\Newtonsoft.Json.csproj">
-      <Project>{3837DAC0-0759-4370-89BC-4340B01A5C7D}</Project>
+      <Project>{A5D813ED-60ED-42E2-96BE-97616A76BC2D}</Project>
       <Name>Newtonsoft.Json</Name>
     </ProjectReference>
     <ProjectReference Include="..\Satsuma\Satsuma.csproj">
-      <Project>{3837DAC0-0759-4370-89BC-4340B01A5C7F}</Project>
+      <Project>{A5D813ED-60ED-42E2-96BE-97616A76BC2F}</Project>
       <Name>Satsuma</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{3837DAC0-0759-4370-89BC-4340B01A5C81}</Project>
+      <Project>{A5D813ED-60ED-42E2-96BE-97616A76BC31}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{3837DAC0-0759-4370-89BC-4340B01A5C89}</Project>
+      <Project>{A5D813ED-60ED-42E2-96BE-97616A76BC39}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{3837DAC0-0759-4370-89BC-4340B01A5C83}</Project>
+      <Project>{A5D813ED-60ED-42E2-96BE-97616A76BC33}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{3837DAC0-0759-4370-89BC-4340B01A5C8D}</Project>
+      <Project>{A5D813ED-60ED-42E2-96BE-97616A76BC3D}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine\UnityEngine.csproj">
-      <Project>{3837DAC0-0759-4370-89BC-4340B01A5C8B}</Project>
+      <Project>{A5D813ED-60ED-42E2-96BE-97616A76BC3B}</Project>
       <Name>UnityEngine</Name>
     </ProjectReference>
     <ProjectReference Include="..\YamlDotNet\YamlDotNet.csproj">
-      <Project>{3837DAC0-0759-4370-89BC-4340B01A5C8E}</Project>
+      <Project>{A5D813ED-60ED-42E2-96BE-97616A76BC3E}</Project>
       <Name>YamlDotNet</Name>
     </ProjectReference>
   </ItemGroup>

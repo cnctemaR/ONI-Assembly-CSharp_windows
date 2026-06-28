@@ -17,13 +17,14 @@ public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IGameObject
 	{
 		this.operational.SetActive(this.operational.IsOperational, false);
 		base.GetComponent<KAnimControllerBase>().Play("off", KAnim.PlayMode.Once, 1f, 0f);
-		this.temperatureAdjuster = new SimulatedTemperatureAdjuster(this.simulatedInternalTemperature, this.simulatedInternalHeatCapacity, this.simulatedThermalConductivity, base.GetComponent<Storage>());
 		this.filteredStorage.FilterChanged();
+		this.temperatureAdjuster = new SimulatedTemperatureAdjuster(this.simulatedInternalTemperature, this.simulatedInternalHeatCapacity, this.simulatedThermalConductivity, base.GetComponent<Storage>());
 	}
 
 	protected override void OnCleanUp()
 	{
 		this.filteredStorage.CleanUp();
+		this.temperatureAdjuster.CleanUp();
 	}
 
 	private void OnOperationalChanged(object data)
@@ -35,15 +36,6 @@ public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IGameObject
 	public bool IsActive()
 	{
 		return this.operational.IsActive;
-	}
-
-	private void SimUpdate(float dt)
-	{
-		if (!this.IsActive())
-		{
-			return;
-		}
-		this.temperatureAdjuster.Update(dt);
 	}
 
 	private void OnCopySettings(object data)

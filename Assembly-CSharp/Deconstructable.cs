@@ -59,13 +59,16 @@ public class Deconstructable : Workable
 		int disease_count = component.DiseaseCount;
 		if (component2 != null)
 		{
-			int num = Grid.PosToCell(this.transform.position);
-			if (Grid.Objects[num, (int)building.Def.TileLayer] == base.gameObject)
+			if (building.Def.TileLayer != ObjectLayer.NumLayers)
 			{
-				Grid.Objects[num, (int)building.Def.ObjectLayer] = null;
-				Grid.Objects[num, (int)building.Def.TileLayer] = null;
-				Grid.Foundation[num] = false;
-				TileVisualizer.RefreshCell(num, building.Def.TileLayer);
+				int num = Grid.PosToCell(this.transform.position);
+				if (Grid.Objects[num, (int)building.Def.TileLayer] == base.gameObject)
+				{
+					Grid.Objects[num, (int)building.Def.ObjectLayer] = null;
+					Grid.Objects[num, (int)building.Def.TileLayer] = null;
+					Grid.Foundation[num] = false;
+					TileVisualizer.RefreshCell(num, building.Def.TileLayer);
+				}
 			}
 			component2.DestroySelf(delegate
 			{
@@ -86,6 +89,10 @@ public class Deconstructable : Workable
 
 	private void TriggerDestroy(Building building, SimHashes element, float mass, float temperature, byte disease_idx, int disease_count)
 	{
+		if (this == null || this.destroyed)
+		{
+			return;
+		}
 		GameObject gameObject = Deconstructable.SpawnItem(this.transform.position, building.Def, element, mass, temperature, disease_idx, disease_count);
 		gameObject.transform.position += Vector3.up * 0.5f;
 		int num = Grid.PosToCell(gameObject.transform.position);
@@ -106,6 +113,7 @@ public class Deconstructable : Workable
 			GameComps.Fallers.Remove(gameObject);
 		}
 		GameComps.Fallers.Add(gameObject, vector);
+		this.destroyed = true;
 		base.gameObject.DeleteObject();
 	}
 
@@ -119,7 +127,7 @@ public class Deconstructable : Workable
 			}
 			else
 			{
-				this.chore = new WorkChore<Deconstructable>(Db.Get().ChoreTypes.Deconstruct, this, null, true, null, null, null, true, null, false, default(Tag), null, true, true, true);
+				this.chore = new WorkChore<Deconstructable>(Db.Get().ChoreTypes.Deconstruct, this, null, true, null, null, null, true, null, false, default(Tag), null, true, true, true, int.MaxValue);
 				base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.PendingDeconstruction, this);
 				this.isMarkedForDeconstruction = true;
 				Prioritizable.AddRef(base.gameObject);
@@ -232,4 +240,6 @@ public class Deconstructable : Workable
 	private bool isMarkedForDeconstruction;
 
 	private static Vector2 scale = new Vector2(0.5f, 4f);
+
+	private bool destroyed;
 }

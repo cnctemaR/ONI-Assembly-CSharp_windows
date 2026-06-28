@@ -12,7 +12,6 @@ public class DiseaseMonitor : GameStateMachine<DiseaseMonitor, DiseaseMonitor.In
 		this.healthy.EventTransition(GameHashes.DiseaseAdded, this.sick, (DiseaseMonitor.Instance smi) => smi.IsSick());
 		this.sick.DefaultState(this.sick.notify).EventTransition(GameHashes.DiseaseCured, this.post_nocheer, (DiseaseMonitor.Instance smi) => !smi.IsSick()).ToggleAnims("anim_idle_sick_kanim", 0f)
 			.ToggleExpression(Db.Get().Expressions.Sick, null)
-			.ToggleUrge(Db.Get().Urges.TakeMedicine)
 			.ToggleUrge(Db.Get().Urges.RestDueToDisease)
 			.ToggleSchedulePeriodic("AutoAssignClinic", 10f, delegate(DiseaseMonitor.Instance smi)
 			{
@@ -107,7 +106,7 @@ public class DiseaseMonitor : GameStateMachine<DiseaseMonitor, DiseaseMonitor.In
 			AssignableSlotInstance slot = component.GetSlot(clinic);
 			if (slot != null)
 			{
-				slot.Unassign(true);
+				slot.Unassign();
 			}
 		}
 

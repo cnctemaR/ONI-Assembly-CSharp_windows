@@ -27,7 +27,7 @@ public class Moppable : Workable
 			return;
 		}
 		Grid.Objects[Grid.PosToCell(base.gameObject), 8] = base.gameObject;
-		new WorkChore<Moppable>(Db.Get().ChoreTypes.Mop, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true);
+		new WorkChore<Moppable>(Db.Get().ChoreTypes.Mop, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue);
 		base.SetWorkTime(float.PositiveInfinity);
 		this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().MiscStatusItems.WaitingForMop, null);
 		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
@@ -201,11 +201,11 @@ public class Moppable : Workable
 			if (flag)
 			{
 				material.color = Game.Instance.uiColours.Dig.validLocation;
-				this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.DigUnreachable, false);
+				this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.MopUnreachable, false);
 			}
 			else
 			{
-				this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.DigUnreachable, this);
+				this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.MopUnreachable, this);
 				GameScheduler.Instance.Schedule("Locomotion Tutorial", 2f, delegate(object obj)
 				{
 					Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Locomotion);

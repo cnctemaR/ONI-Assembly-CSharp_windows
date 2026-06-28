@@ -23,20 +23,18 @@ public class RationalAi : GameStateMachine<RationalAi, RationalAi.Instance>
 			.ToggleStateMachine((RationalAi.Instance smi) => new BreathMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new TemperatureMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new ExternalTemperatureMonitor.Instance(smi.master))
-			.ToggleStateMachine((RationalAi.Instance smi) => new SuffocationMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new BladderMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new SteppedInMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new RedAlertMonitor.Instance(smi.master))
-			.ToggleStateMachine((RationalAi.Instance smi) => new SafeCellMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new CringeMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new HygieneMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new FallMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new ThreatMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new WoundMonitor.Instance(smi.master))
-			.ToggleStateMachine((RationalAi.Instance smi) => new SuitRegionMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new TiredMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new MoveToLocationMonitor.Instance(smi.master))
-			.ToggleStateMachine((RationalAi.Instance smi) => new ReactionMonitor.Instance(smi.master));
+			.ToggleStateMachine((RationalAi.Instance smi) => new ReactionMonitor.Instance(smi.master))
+			.ToggleStateMachine((RationalAi.Instance smi) => new SuitWearer.Instance(smi.master));
 		this.dead.ToggleStateMachine((RationalAi.Instance smi) => new FallWhenDeadMonitor.Instance(smi.master)).ToggleBrain("dead").Enter("RefreshUserMenu", delegate(RationalAi.Instance smi)
 		{
 			smi.RefreshUserMenu();

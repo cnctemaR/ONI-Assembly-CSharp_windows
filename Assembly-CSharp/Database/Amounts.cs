@@ -40,11 +40,11 @@ namespace Database
 		{
 			string text = Strings.Get(string.Format("{1}.{0}.NAME", id.ToUpper(), string_root.ToUpper()));
 			string text2 = Strings.Get(string.Format("{1}.{0}.TOOLTIP", id.ToUpper(), string_root.ToUpper()));
-			Klei.AI.Attribute attribute = new Klei.AI.Attribute(id + "Min", "Minimum" + text, string.Empty, string.Empty, min, Klei.AI.Attribute.Display.Never, false);
-			Klei.AI.Attribute attribute2 = new Klei.AI.Attribute(id + "Max", "Maximum" + text, string.Empty, string.Empty, max, Klei.AI.Attribute.Display.Never, false);
+			Klei.AI.Attribute attribute = new Klei.AI.Attribute(id + "Min", "Minimum" + text, string.Empty, string.Empty, min, Klei.AI.Attribute.Display.Normal, false);
+			Klei.AI.Attribute attribute2 = new Klei.AI.Attribute(id + "Max", "Maximum" + text, string.Empty, string.Empty, max, Klei.AI.Attribute.Display.Normal, false);
 			string text3 = id + "Delta";
 			string text4 = Strings.Get(string.Format("STRINGS.DUPLICANTS.ATTRIBUTES.{0}.NAME", text3.ToUpper()));
-			Klei.AI.Attribute attribute3 = new Klei.AI.Attribute(text3, text4, string.Empty, string.Empty, 0f, Klei.AI.Attribute.Display.Never, false);
+			Klei.AI.Attribute attribute3 = new Klei.AI.Attribute(text3, text4, string.Empty, string.Empty, 0f, Klei.AI.Attribute.Display.Normal, false);
 			Amount amount = new Amount(id, text, text2, initial_min, initial_max, attribute, attribute2, attribute3, show_max, units, delta_threshold, show_in_ui);
 			Db.Get().Attributes.Add(attribute);
 			Db.Get().Attributes.Add(attribute2);

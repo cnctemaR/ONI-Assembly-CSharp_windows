@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using STRINGS;
 using UnityEngine;
 
-public class Vent : KMonoBehaviour
+public class Vent : KMonoBehaviour, IEffectDescriptor
 {
 	public int SortKey
 	{
@@ -77,35 +79,23 @@ public class Vent : KMonoBehaviour
 		}
 	}
 
-	private bool GasPressureRangeValid(int cell)
-	{
-		return Grid.Cell[cell].mass < 2f;
-	}
-
-	private bool LiquidPressureRangeValid(int cell)
-	{
-		return Grid.Cell[cell].mass < 1000f;
-	}
-
 	private bool IsValidOutputCell(int output_cell)
 	{
 		bool flag = false;
 		if ((this.structure == null || !this.structure.IsEntombed()) && !Grid.Solid[output_cell])
 		{
-			ConduitType conduitType = this.conduitType;
-			if (conduitType != ConduitType.Gas)
-			{
-				if (conduitType == ConduitType.Liquid)
-				{
-					flag = this.LiquidPressureRangeValid(output_cell);
-				}
-			}
-			else
-			{
-				flag = this.GasPressureRangeValid(output_cell);
-			}
+			flag = Grid.Cell[output_cell].mass < this.overpressureMass;
 		}
 		return flag;
+	}
+
+	public List<Descriptor> GetDescriptors(BuildingDef def)
+	{
+		string formattedMass = GameUtil.GetFormattedMass(this.overpressureMass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
+		return new List<Descriptor>
+		{
+			new Descriptor(string.Format(UI.BUILDINGEFFECTS.OVER_PRESSURE_MASS, formattedMass), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.OVER_PRESSURE_MASS, formattedMass), Descriptor.DescriptorType.Effect, false)
+		};
 	}
 
 	private int cell = -1;
@@ -121,6 +111,9 @@ public class Vent : KMonoBehaviour
 
 	[SerializeField]
 	public Endpoint endpointType;
+
+	[SerializeField]
+	public float overpressureMass = 1f;
 
 	[NonSerialized]
 	public bool showConnectivityIcons = true;

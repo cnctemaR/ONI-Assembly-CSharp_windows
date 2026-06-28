@@ -15,6 +15,8 @@ public class GameTags
 
 	public static readonly Tag CookingIngredient = TagManager.Create("CookingIngredient", null);
 
+	public static readonly Tag Medicine = TagManager.Create("Medicine", null);
+
 	public static readonly Tag Plant = TagManager.Create("Plant", null);
 
 	public static readonly Tag Pickupable = TagManager.Create("Pickupable", null);
@@ -41,6 +43,8 @@ public class GameTags
 
 	public static readonly Tag Other = TagManager.Create("Other", null);
 
+	public static readonly Tag Plastic = TagManager.Create("Plastic", null);
+
 	public static readonly Tag Incapacitated = TagManager.Create("Incapacitated", null);
 
 	public static readonly Tag CaloriesDepleted = TagManager.Create("CaloriesDepleted", null);
@@ -56,6 +60,10 @@ public class GameTags
 	public static readonly Tag HeatBulb = TagManager.Create("HeatBulb", null);
 
 	public static readonly Tag Egg = TagManager.Create("Egg", null);
+
+	public static readonly Tag Trapped = TagManager.Create("Trapped", null);
+
+	public static readonly Tag BagableCreature = TagManager.Create("BagableCreature", null);
 
 	public static readonly Tag Spawner = TagManager.Create("Spawner", null);
 
@@ -147,6 +155,8 @@ public class GameTags
 
 	public static readonly Tag Garbage = TagManager.Create("Garbage", null);
 
+	public static readonly Tag OilWell = TagManager.Create("OilWell", null);
+
 	public static readonly Tag MISSING_TAG = TagManager.Create("MISSING_TAG", null);
 
 	public static readonly Tag PlantRenderer = TagManager.Create("PlantRenderer", null);
@@ -155,11 +165,11 @@ public class GameTags
 
 	public static readonly Tag Suit = TagManager.Create("Suit", null);
 
-	public static readonly Tag AtmoSuit = TagManager.Create("AtmoSuit", null);
+	public static readonly Tag AtmoSuit = TagManager.Create("Atmo_Suit", null);
 
-	public static readonly Tag AquaSuit = TagManager.Create("AquaSuit", null);
+	public static readonly Tag AquaSuit = TagManager.Create("Aqua_Suit", null);
 
-	public static readonly Tag TemperatureSuit = TagManager.Create("TemperatureSuit", null);
+	public static readonly Tag TemperatureSuit = TagManager.Create("Temperature_Suit", null);
 
 	public static readonly List<Tag> AllSuitTags = new List<Tag>
 	{
@@ -169,7 +179,7 @@ public class GameTags
 		GameTags.TemperatureSuit
 	};
 
-	public static readonly List<Tag> OxygenSuitTaags = new List<Tag>
+	public static readonly List<Tag> OxygenSuitTags = new List<Tag>
 	{
 		GameTags.AtmoSuit,
 		GameTags.AquaSuit
@@ -190,6 +200,10 @@ public class GameTags
 		GameTags.CoolVest,
 		GameTags.FunkyVest
 	};
+
+	public static readonly Tag Assigned = TagManager.Create("Assigned", null);
+
+	public static readonly Tag Helmet = TagManager.Create("Helmet", null);
 
 	public static readonly Tag Entombed = TagManager.Create("Entombed", null);
 
@@ -248,6 +262,7 @@ public class GameTags
 	public static TagSet UnitCategories = new TagSet
 	{
 		GameTags.CookingIngredient,
+		GameTags.Medicine,
 		GameTags.Seed,
 		GameTags.Clothes,
 		GameTags.IndustrialIngredient
@@ -274,14 +289,18 @@ public class GameTags
 		GameTags.Organics,
 		GameTags.Farmable,
 		GameTags.Agriculture,
-		GameTags.Other
+		GameTags.Other,
+		GameTags.Plastic
 	};
+
+	public static TagSet OtherEntityTags = new TagSet { GameTags.BagableCreature };
 
 	public static TagSet AllCategories = new TagSet(new TagSet[]
 	{
 		GameTags.CalorieCategories,
 		GameTags.UnitCategories,
-		GameTags.MaterialCategories
+		GameTags.MaterialCategories,
+		GameTags.OtherEntityTags
 	});
 
 	public static TagSet DisplayAsCalories = new TagSet(GameTags.CalorieCategories);

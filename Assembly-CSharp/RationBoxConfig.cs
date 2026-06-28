@@ -27,8 +27,6 @@ public class RationBoxConfig : IBuildingConfig
 		storage.storageFilters = STORAGEFILTERS.FOOD;
 		storage.allowItemRemoval = true;
 		TreeFilterable treeFilterable = go.AddOrGet<TreeFilterable>();
-		treeFilterable.AddTagToFilter(GameTags.Edible);
-		treeFilterable.AddTagToFilter(GameTags.CookingIngredient);
 		go.AddOrGet<UserMenu>();
 		RationBox rationBox = go.AddOrGet<RationBox>();
 		rationBox.noFilterTint = new Color(0.5147059f, 0.5147059f, 0.5147059f, 1f);

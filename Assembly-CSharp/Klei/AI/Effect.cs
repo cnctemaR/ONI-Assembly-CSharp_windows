@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using STRINGS;
 
 namespace Klei.AI
 {
@@ -33,6 +34,28 @@ namespace Klei.AI
 			{
 				this.OnAddRemove(attributes.gameObject.GetComponent<Effects>(), this, false);
 			}
+		}
+
+		public static string CreateTooltip(Effect effect, bool showDuration)
+		{
+			string text = string.Empty;
+			foreach (AttributeModifier attributeModifier in effect.SelfModifiers)
+			{
+				if (Db.Get().Attributes.Get(attributeModifier.AttributeId).ShowInUI != Attribute.Display.Never)
+				{
+					text = text + "\n" + string.Format(DUPLICANTS.MODIFIERS.MODIFIER_FORMAT, Db.Get().Attributes.Get(attributeModifier.AttributeId).Name, attributeModifier.GetFormattedString(null));
+				}
+			}
+			StringEntry stringEntry;
+			if (Strings.TryGet("STRINGS.DUPLICANTS.MODIFIERS." + effect.Id.ToUpper() + ".ADDITIONAL_EFFECTS", out stringEntry))
+			{
+				text = text + "\n" + stringEntry;
+			}
+			if (showDuration && effect.duration > 0f)
+			{
+				text = text + "\n" + string.Format(DUPLICANTS.MODIFIERS.TIME_TOTAL, GameUtil.GetFormattedCycles(effect.duration, "F1"));
+			}
+			return text;
 		}
 
 		public float duration;

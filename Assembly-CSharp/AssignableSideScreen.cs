@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class AssignableSideScreen : SideScreenContent
 {
+	public Assignable targetAssignable { get; private set; }
+
 	public override string GetTitle()
 	{
 		if (this.targetAssignable != null)
@@ -26,6 +28,10 @@ public class AssignableSideScreen : SideScreenContent
 
 	public override void SetTarget(GameObject target)
 	{
+		if (this.targetAssignableSubscriptionHandle != -1)
+		{
+			this.targetAssignable.Unsubscribe(this.targetAssignableSubscriptionHandle);
+		}
 		this.targetAssignable = target.GetComponent<Assignable>();
 		if (this.targetAssignable == null)
 		{
@@ -46,7 +52,6 @@ public class AssignableSideScreen : SideScreenContent
 		}
 		base.gameObject.SetActive(true);
 		this.identityList = new List<MinionIdentity>(Components.LiveMinionIdentities);
-		this.currentOwnerStr = UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.GENERAL_CURRENTASSIGNED;
 		this.dupeSortingToggle.ChangeState(0);
 		this.generalSortingToggle.ChangeState(0);
 		this.activeSortToggle = null;
@@ -59,6 +64,15 @@ public class AssignableSideScreen : SideScreenContent
 		else
 		{
 			this.HideScreen(false);
+		}
+		this.targetAssignableSubscriptionHandle = this.targetAssignable.Subscribe(2070884250, new Action<object>(this.OnForceAssigneeChanged));
+	}
+
+	private void OnForceAssigneeChanged(object data = null)
+	{
+		foreach (KeyValuePair<IAssignableIdentity, AssignableSideScreenRow> keyValuePair in this.identityRowMap)
+		{
+			keyValuePair.Value.Refresh(null);
 		}
 	}
 
@@ -73,22 +87,39 @@ public class AssignableSideScreen : SideScreenContent
 			return;
 		}
 		this.currentOwnerText.text = string.Format(UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.UNASSIGNED, new object[0]);
+		BuildingComplete component = this.targetAssignable.GetComponent<BuildingComplete>();
+		if (component != null)
+		{
+			Room roomOfBuilding = Game.Instance.roomProber.GetRoomOfBuilding(component);
+			if (roomOfBuilding != null)
+			{
+				RoomTypes.RoomType roomType = RoomTypes.GetRoomType(roomOfBuilding);
+				if (roomType.primary_constraint != null && !roomType.primary_constraint.building_criteria(component))
+				{
+					AssignableSideScreenRow freeElement = this.rowPool.GetFreeElement(this.rowGroup, true);
+					freeElement.SetContent(roomOfBuilding, new Action<IAssignableIdentity>(this.OnRowClicked), this);
+					freeElement.sideScreen = this;
+					this.identityRowMap.Add(roomOfBuilding, freeElement);
+					freeElement.Refresh(null);
+					return;
+				}
+			}
+		}
+		if (this.targetAssignable.canBePublic)
+		{
+			AssignableSideScreenRow freeElement2 = this.rowPool.GetFreeElement(this.rowGroup, true);
+			freeElement2.sideScreen = this;
+			freeElement2.transform.SetAsFirstSibling();
+			this.identityRowMap.Add(Game.Instance.assignmentManager.assignment_groups["public"], freeElement2);
+			freeElement2.SetContent(Game.Instance.assignmentManager.assignment_groups["public"], new Action<IAssignableIdentity>(this.OnRowClicked), this);
+			freeElement2.Refresh(null);
+		}
 		foreach (MinionIdentity minionIdentity in identities)
 		{
-			Assignables assignables = this.targetAssignable.GetAssignables(minionIdentity.gameObject);
-			AssignableSideScreenRow freeElement = this.rowPool.GetFreeElement(this.rowGroup, true);
-			this.identityRowMap.Add(minionIdentity, freeElement);
-			string text = string.Empty;
-			if (assignables == this.targetAssignable.assignee)
-			{
-				this.SetSelectedUI(minionIdentity, true);
-				this.currentOwnerText.text = string.Format(UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.ASSIGNEDTO, minionIdentity.GetProperName());
-			}
-			else if (assignables.GetAssignable(this.targetAssignable.slot) != null)
-			{
-				text = assignables.GetAssignable(this.targetAssignable.slot).GetProperName();
-			}
-			freeElement.SetContent(minionIdentity, text, new Action<MinionIdentity>(this.OnRowClicked));
+			AssignableSideScreenRow freeElement3 = this.rowPool.GetFreeElement(this.rowGroup, true);
+			freeElement3.sideScreen = this;
+			this.identityRowMap.Add(minionIdentity, freeElement3);
+			freeElement3.SetContent(minionIdentity, new Action<IAssignableIdentity>(this.OnRowClicked), this);
 		}
 	}
 
@@ -154,12 +185,11 @@ public class AssignableSideScreen : SideScreenContent
 		{
 			this.rowPool.DestroyAll();
 		}
-		foreach (KeyValuePair<MinionIdentity, AssignableSideScreenRow> keyValuePair in this.identityRowMap)
+		foreach (KeyValuePair<IAssignableIdentity, AssignableSideScreenRow> keyValuePair in this.identityRowMap)
 		{
-			keyValuePair.Value.Selected = false;
+			keyValuePair.Value.targetIdentity = null;
 		}
 		this.identityRowMap.Clear();
-		this.currentSelectedIdentity = null;
 		this.regionNeededText.SetText(string.Empty);
 	}
 
@@ -186,43 +216,34 @@ public class AssignableSideScreen : SideScreenContent
 		this.regionNeededText.SetText(string.Format(text2, properName, text));
 	}
 
-	private void OnRowClicked(MinionIdentity identity)
+	private void OnRowClicked(IAssignableIdentity identity)
 	{
-		if (identity == null)
+		if (this.targetAssignable.assignee != identity)
 		{
-			return;
+			this.ChangeAssignment(identity);
 		}
-		if (this.currentSelectedIdentity != identity)
+		else if (this.CanDeselect(identity))
 		{
-			if (this.currentSelectedIdentity != null)
-			{
-				this.SetSelectedUI(this.currentSelectedIdentity, false);
-			}
-			this.SetSelectedUI(identity, true);
-		}
-		else
-		{
-			this.SetSelectedUI(this.currentSelectedIdentity, false);
-			this.currentSelectedIdentity = null;
+			this.ChangeAssignment(null);
 		}
 	}
 
-	private void SetSelectedUI(MinionIdentity identity, bool isSelected)
+	private bool CanDeselect(IAssignableIdentity identity)
 	{
-		this.currentSelectedIdentity = identity;
-		AssignableSideScreenRow assignableSideScreenRow = this.identityRowMap[identity];
-		assignableSideScreenRow.Selected = isSelected;
-		if (this.targetAssignable is Ownable)
+		return identity is MinionIdentity;
+	}
+
+	private void ChangeAssignment(IAssignableIdentity new_identity)
+	{
+		this.targetAssignable.Unassign();
+		if (new_identity != null)
 		{
-			this.targetAssignable.Assign((!isSelected) ? null : identity.GetComponent<Ownables>());
+			this.targetAssignable.Assign(new_identity);
 		}
-		else if (this.targetAssignable is Equippable)
+		foreach (KeyValuePair<IAssignableIdentity, AssignableSideScreenRow> keyValuePair in this.identityRowMap)
 		{
-			this.targetAssignable.Assign((!isSelected) ? null : identity.GetComponent<Equipment>());
-			this.targetAssignable.ClickAssign(identity.GetComponent<Equipment>());
+			keyValuePair.Value.Refresh(null);
 		}
-		assignableSideScreenRow.SetAssignmentText((!isSelected) ? string.Empty : (this.targetAssignable.GetProperName() + "\n" + this.currentOwnerStr));
-		this.currentOwnerText.text = string.Format(UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.ASSIGNEDTO, identity.GetProperName());
 	}
 
 	private void OnRegionChanged(Region newRegion)
@@ -267,18 +288,14 @@ public class AssignableSideScreen : SideScreenContent
 
 	private bool sortReversed;
 
+	private int targetAssignableSubscriptionHandle = -1;
+
 	[SerializeField]
 	private GameObject validRegionContent;
 
-	private Assignable targetAssignable;
-
 	private UIPool<AssignableSideScreenRow> rowPool;
 
-	private Dictionary<MinionIdentity, AssignableSideScreenRow> identityRowMap = new Dictionary<MinionIdentity, AssignableSideScreenRow>();
+	private Dictionary<IAssignableIdentity, AssignableSideScreenRow> identityRowMap = new Dictionary<IAssignableIdentity, AssignableSideScreenRow>();
 
 	private List<MinionIdentity> identityList = new List<MinionIdentity>();
-
-	private MinionIdentity currentSelectedIdentity;
-
-	private string currentOwnerStr;
 }

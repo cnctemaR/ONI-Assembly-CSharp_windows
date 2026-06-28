@@ -22,10 +22,11 @@ public class GeneratorConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
+		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		EnergyGenerator energyGenerator = go.AddOrGet<EnergyGenerator>();
 		energyGenerator.formula = EnergyGenerator.CreateSimpleFormula(SimHashes.Carbon, 1f, 500f, SimHashes.Void, 0f, true);
 		energyGenerator.meterOffset = Meter.Offset.Behind;
-		energyGenerator.BatteryRefillPercent = 0.5f;
+		energyGenerator.SingleSliderPercent = 0.5f;
 		energyGenerator.powerDistributionOrder = 9;
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 500f;

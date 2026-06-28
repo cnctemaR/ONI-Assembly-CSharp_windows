@@ -17,6 +17,17 @@ public class Ownables : Assignables
 		base.Load(this.saveData);
 	}
 
+	public void UnassignAll()
+	{
+		foreach (AssignableSlotInstance assignableSlotInstance in this.slots)
+		{
+			if (assignableSlotInstance.assignable != null)
+			{
+				assignableSlotInstance.assignable.Unassign();
+			}
+		}
+	}
+
 	[Serialize]
 	private OwnableSlotInstance.SaveData[] saveData = new OwnableSlotInstance.SaveData[0];
 }

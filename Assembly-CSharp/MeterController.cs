@@ -46,27 +46,39 @@ public class MeterController
 		GameObject gameObject = new GameObject(text);
 		gameObject.SetActive(false);
 		gameObject.transform.parent = building_controller.transform;
-		gameObject.transform.localPosition = Vector3.zero;
 		this.gameObject = gameObject;
 		KPrefabID kprefabID = gameObject.AddComponent<KPrefabID>();
 		kprefabID.PrefabTag = new Tag(text);
-		Meter meter = gameObject.AddComponent<Meter>();
-		meter.offset = front_back;
+		Vector3 position = building_controller.transform.position;
+		if (front_back == Meter.Offset.Behind)
+		{
+			position.z = Grid.GetLayerZ(Grid.SceneLayer.BuildingBack);
+		}
+		else
+		{
+			position.z = Grid.GetLayerZ(Grid.SceneLayer.BuildingFront);
+		}
+		gameObject.transform.position = position;
 		KBatchedAnimController kbatchedAnimController = gameObject.AddComponent<KBatchedAnimController>();
 		kbatchedAnimController.initialAnim = meter_animation;
 		kbatchedAnimController.AddAnims(new KAnimFile[] { building_controller.GetAnims()[0] });
 		kbatchedAnimController.fgLayer = Grid.SceneLayer.NoLayer;
 		kbatchedAnimController.initialMode = KAnim.PlayMode.Paused;
 		kbatchedAnimController.isMovable = true;
+		kbatchedAnimController.FlipX = building_controller.FlipX;
+		kbatchedAnimController.FlipY = building_controller.FlipY;
 		this.meterController = kbatchedAnimController;
 		KBatchedAnimTracker kbatchedAnimTracker = gameObject.AddComponent<KBatchedAnimTracker>();
 		kbatchedAnimTracker.offset = tracker_offset;
 		kbatchedAnimTracker.symbol = new HashedString(meter_target);
 		gameObject.SetActive(true);
 		building_controller.HideSymbol(new KAnimHashedString(meter_target), true);
-		for (int i = 0; i < symbols_to_hide.Length; i++)
+		if (symbols_to_hide != null)
 		{
-			building_controller.HideSymbol(new KAnimHashedString(symbols_to_hide[i]), true);
+			for (int i = 0; i < symbols_to_hide.Length; i++)
+			{
+				building_controller.HideSymbol(new KAnimHashedString(symbols_to_hide[i]), true);
+			}
 		}
 		this.link = new KAnimLink(building_controller, kbatchedAnimController);
 	}
@@ -88,9 +100,9 @@ public class MeterController
 
 	public void SetVisible(bool visible)
 	{
-		if (this.gameObject != null)
+		if (this.meterController != null)
 		{
-			this.gameObject.SetActive(visible);
+			this.meterController.enabled = visible;
 		}
 	}
 

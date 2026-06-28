@@ -34,7 +34,7 @@ namespace Klei
 			public OverworldCell(TerrainCell tc)
 			{
 				this.poly = tc.poly;
-				SubWorld subWorld = WorldGen.Settings.subworlds.zones[tc.node.type];
+				SubWorld subWorld = WorldGen.Settings.GetSubWorld(tc.node.type);
 				this.zoneType = subWorld.zoneType;
 			}
 

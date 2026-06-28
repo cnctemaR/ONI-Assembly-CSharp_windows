@@ -4,9 +4,9 @@ using UnityEngine.EventSystems;
 
 namespace TMPro
 {
-	[AddComponentMenu("Layout/Text Container")]
 	[ExecuteInEditMode]
 	[RequireComponent(typeof(RectTransform))]
+	[AddComponentMenu("Layout/Text Container")]
 	public class TextContainer : UIBehaviour
 	{
 		public bool hasChanged

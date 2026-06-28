@@ -34,7 +34,11 @@ public class FloorSoundEvent : SoundEvent
 		{
 			return;
 		}
-		vector = CameraController.Instance.GetVerticallyScaledPosition(vector);
+		vector = SoundEvent.GetCameraScaledPosition(vector);
+		if (Grid.Element == null)
+		{
+			return;
+		}
 		bool isLiquid = Grid.Element[num].IsLiquid;
 		float num3 = 0f;
 		if (isLiquid)
@@ -47,11 +51,6 @@ public class FloorSoundEvent : SoundEvent
 				if (num3 > 0f)
 				{
 					eventInstance.setParameterValue("liquidDepth", num3);
-					if (base.noiseValues.amount > 0)
-					{
-						EffectorValues volume = SoundEventVolumeCache.instance.GetVolume("FloorSoundEvent", "Liquid_footstep");
-						AudioEventManager.Get().PlayTimedOnceOff(vector, volume.amount, volume.radius, behaviour.GetComponent<KSelectable>().GetName(), 1f);
-					}
 				}
 				SoundEvent.EndOneShot(eventInstance);
 			}
@@ -69,10 +68,6 @@ public class FloorSoundEvent : SoundEvent
 				{
 					eventInstance2.setVolume(FloorSoundEvent.IDLE_WALKING_VOLUME_REDUCTION);
 				}
-				if (base.noiseValues.amount > 0)
-				{
-					AudioEventManager.Get().PlayTimedOnceOff(vector, base.noiseValues.amount, base.noiseValues.radius, behaviour.GetComponent<KSelectable>().GetName(), 1f);
-				}
 				SoundEvent.EndOneShot(eventInstance2);
 			}
 		}
@@ -87,7 +82,17 @@ public class FloorSoundEvent : SoundEvent
 		Element element = Grid.Element[cell];
 		if (Grid.Foundation[cell])
 		{
-			return "Tile";
+			BuildingDef buildingDef = null;
+			GameObject gameObject = Grid.Objects[cell, 1];
+			if (gameObject != null)
+			{
+				Building component = gameObject.GetComponent<BuildingComplete>();
+				if (component != null)
+				{
+					buildingDef = component.Def;
+				}
+			}
+			return (!(buildingDef != null) || !(buildingDef.PrefabID == "PlasticTile")) ? "Tile" : "TilePlastic";
 		}
 		string floorEventAudioCategory = element.substance.GetFloorEventAudioCategory();
 		if (floorEventAudioCategory != null)

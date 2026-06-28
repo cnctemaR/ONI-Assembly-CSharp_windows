@@ -1,17 +1,36 @@
 ﻿using System;
+using System.Collections.Generic;
 
-public struct MedicineInfo
+[Serializable]
+public class MedicineInfo
 {
-	public MedicineInfo(string[] curedDiseases, float[] boostMultipliers, MedicinalPill.MedicineType medicineType)
+	public MedicineInfo(string id, string effect, MedicineInfo.MedicineType medicineType, string[] curedDiseases = null)
 	{
-		this.curedDiseases = curedDiseases;
-		this.boostMultipliers = boostMultipliers;
+		this.id = id;
+		this.effect = effect;
 		this.medicineType = medicineType;
+		if (curedDiseases != null)
+		{
+			this.curedDiseases = new List<string>(curedDiseases);
+		}
+		else
+		{
+			this.curedDiseases = new List<string>();
+		}
 	}
 
-	public string[] curedDiseases;
+	public string id;
 
-	public float[] boostMultipliers;
+	public string effect;
 
-	public MedicinalPill.MedicineType medicineType;
+	public MedicineInfo.MedicineType medicineType;
+
+	public List<string> curedDiseases;
+
+	public enum MedicineType
+	{
+		Booster,
+		CureAny,
+		CureSpecific
+	}
 }

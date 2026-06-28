@@ -11,7 +11,7 @@ namespace Database
 			ResourceLoader<Personalities.PersonalityInfo> resourceLoader = new ResourceLoader<Personalities.PersonalityInfo>(file);
 			foreach (Personalities.PersonalityInfo personalityInfo in resourceLoader)
 			{
-				Personality personality = new Personality(Strings.Get(string.Format("STRINGS.DUPLICANTS.PERSONALITIES.{0}.NAME", personalityInfo.Name.ToUpper())), Strings.Get(string.Format("STRINGS.DUPLICANTS.GENDER.{0}.NAME", personalityInfo.Name.ToUpper())), personalityInfo.StressTrait, personalityInfo.CongenitalTrait, personalityInfo.HeadShape, personalityInfo.Mouth, personalityInfo.Neck, personalityInfo.Eyes, personalityInfo.Hair, personalityInfo.Body, Strings.Get(string.Format("STRINGS.DUPLICANTS.PERSONALITIES.{0}.DESC", personalityInfo.Name.ToUpper())));
+				Personality personality = new Personality(personalityInfo.Name.ToUpper(), Strings.Get(string.Format("STRINGS.DUPLICANTS.PERSONALITIES.{0}.NAME", personalityInfo.Name.ToUpper())), Strings.Get(string.Format("STRINGS.DUPLICANTS.GENDER.{0}.NAME", personalityInfo.Name.ToUpper())), personalityInfo.StressTrait, personalityInfo.CongenitalTrait, personalityInfo.HeadShape, personalityInfo.Mouth, personalityInfo.Neck, personalityInfo.Eyes, personalityInfo.Hair, personalityInfo.Body, Strings.Get(string.Format("STRINGS.DUPLICANTS.PERSONALITIES.{0}.DESC", personalityInfo.Name.ToUpper())));
 				base.Add(personality);
 			}
 		}

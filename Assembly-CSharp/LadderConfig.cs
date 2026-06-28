@@ -23,7 +23,8 @@ public class LadderConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
-		go.AddOrGet<Ladder>();
+		Ladder ladder = go.AddOrGet<Ladder>();
+		ladder.movementSpeedMultiplier = 1f;
 		go.AddOrGet<AnimTileable>();
 	}
 

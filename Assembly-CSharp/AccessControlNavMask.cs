@@ -14,11 +14,15 @@ public class AccessControlNavMask : NavMask
 		this.maxPathCost = max_path_cost;
 	}
 
-	public override bool IsTraversable(int cell, int from_cell, int cost, PathFinderAbilities abilities)
+	public override bool IsTraversable(PathFinder.PotentialPath path, int from_cell, int cost, PathFinderAbilities abilities)
 	{
 		if (cost > this.maxPathCost)
 		{
 			return false;
+		}
+		int cell = path.cell;
+		if (!Grid.HasAccessDoor[cell])
+		{
 		}
 		if (!Grid.HasAccessDoor[cell])
 		{
@@ -39,8 +43,24 @@ public class AccessControlNavMask : NavMask
 		{
 			return false;
 		}
+		if (permission == AccessControl.Permission.Both)
+		{
+			return true;
+		}
 		Vector3 vector = Grid.CellToPosCCC(cell, Grid.SceneLayer.NoLayer) - Grid.CellToPosCCC(from_cell, Grid.SceneLayer.NoLayer);
-		return permission == AccessControl.Permission.Both || (permission == AccessControl.Permission.GoLeft && vector.x < 0f) || (permission == AccessControl.Permission.GoRight && vector.x > 0f);
+		Door component2 = component.GetComponent<Door>();
+		if (component2.GetComponent<Rotatable>().IsRotated)
+		{
+			if ((permission == AccessControl.Permission.GoLeft && vector.y > 0f) || (permission == AccessControl.Permission.GoRight && vector.y < 0f))
+			{
+				return true;
+			}
+		}
+		else if ((permission == AccessControl.Permission.GoLeft && vector.x < 0f) || (permission == AccessControl.Permission.GoRight && vector.x > 0f))
+		{
+			return true;
+		}
+		return false;
 	}
 
 	private GameObject agent;

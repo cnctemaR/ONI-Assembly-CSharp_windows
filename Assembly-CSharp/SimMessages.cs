@@ -6,6 +6,7 @@ using System.Text;
 using Database;
 using Klei;
 using Klei.AI;
+using Klei.AI.DiseaseGrowthRules;
 using UnityEngine;
 
 public static class SimMessages
@@ -159,6 +160,20 @@ public static class SimMessages
 		ptr->handle = sim_handle;
 		ptr->deltaKJ = delta_kj;
 		Sim.SIM_HandleMessage(1020555667, sizeof(SimMessages.ModifyElementChunkEnergyMessage), (byte*)ptr);
+	}
+
+	public unsafe static void ModifyElementChunkTemperatureAdjuster(int sim_handle, float temperature, float heat_capacity, float thermal_conductivity)
+	{
+		if (!Sim.IsValidHandle(sim_handle))
+		{
+			return;
+		}
+		SimMessages.ModifyElementChunkAdjusterMessage* ptr = stackalloc SimMessages.ModifyElementChunkAdjusterMessage[checked(1 * sizeof(SimMessages.ModifyElementChunkAdjusterMessage))];
+		ptr->handle = sim_handle;
+		ptr->temperature = temperature;
+		ptr->heatCapacity = heat_capacity;
+		ptr->thermalConductivity = thermal_conductivity;
+		Sim.SIM_HandleMessage(-1387601379, sizeof(SimMessages.ModifyElementChunkAdjusterMessage), (byte*)ptr);
 	}
 
 	public unsafe static void AddBuildingHeatExchange(Extents extents, float temperature, float operating_kw, byte element_idx, float mass, int callbackIdx = -1)
@@ -338,7 +353,7 @@ public static class SimMessages
 			disease.pressureHalfLives.Write(binaryWriter);
 			for (int j = 0; j < elements.Count; j++)
 			{
-				Disease.ElemGrowthInfo elemGrowthInfo = disease.elemGrowthInfo[j];
+				ElemGrowthInfo elemGrowthInfo = disease.elemGrowthInfo[j];
 				elemGrowthInfo.Write(binaryWriter);
 			}
 		}
@@ -523,7 +538,10 @@ public static class SimMessages
 			Element element = ElementLoader.elements[elementIdx];
 			float num = ((temperature == -1f) ? element.defaultValues.temperature : temperature);
 			SimMessages.ModifyCell(gameCell, elementIdx, num, mass, disease_idx, disease_count, SimMessages.ReplaceType.None, callbackIdx);
-			ev.Log(gameCell, ElementLoader.elements[elementIdx].id, mass, callbackIdx);
+			if (ev != null)
+			{
+				ev.Log(gameCell, ElementLoader.elements[elementIdx].id, mass, callbackIdx);
+			}
 		}
 	}
 
@@ -750,6 +768,18 @@ public static class SimMessages
 		public int handle;
 
 		public float deltaKJ;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	private struct ModifyElementChunkAdjusterMessage
+	{
+		public int handle;
+
+		public float temperature;
+
+		public float heatCapacity;
+
+		public float thermalConductivity;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]

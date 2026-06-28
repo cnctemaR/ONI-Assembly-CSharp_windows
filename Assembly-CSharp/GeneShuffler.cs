@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Klei.AI;
+using KSerialization;
 using STRINGS;
 using TUNING;
 using UnityEngine;
@@ -23,14 +24,6 @@ public class GeneShuffler : Ownable
 		}
 	}
 
-	public bool IsConsumed
-	{
-		get
-		{
-			return this.geneShufflerSMI.IsInsideState(this.geneShufflerSMI.sm.consumed);
-		}
-	}
-
 	public bool IsWorking
 	{
 		get
@@ -50,14 +43,41 @@ public class GeneShuffler : Ownable
 		this.geneShufflerSMI = new GeneShuffler.GeneShufflerSM.Instance(this);
 		this.geneShufflerSMI.StartSM();
 		this.showProgressBar = false;
+		if (!this.IsConsumed)
+		{
+			if (this.assignable.assignee != null)
+			{
+				if (!this.geneShufflerSMI.IsInsideState(this.geneShufflerSMI.sm.consumed))
+				{
+					this.ActivateChore(null);
+				}
+				else
+				{
+					this.geneShufflerSMI.GoTo(this.geneShufflerSMI.sm.idle);
+				}
+			}
+		}
+		else
+		{
+			this.geneShufflerSMI.GoTo(this.geneShufflerSMI.sm.consumed);
+		}
 	}
 
-	protected override void SetAssignables(Assignables assignables)
+	public override void Assign(IAssignableIdentity new_assignee)
 	{
-		base.SetAssignables(assignables);
-		if (!this.geneShufflerSMI.IsInsideState(this.geneShufflerSMI.sm.consumed))
+		base.Assign(new_assignee);
+		if (this.geneShufflerSMI != null && !this.geneShufflerSMI.IsInsideState(this.geneShufflerSMI.sm.consumed))
 		{
 			this.ActivateChore(null);
+		}
+	}
+
+	public override void Unassign()
+	{
+		base.Unassign();
+		if (this.geneShufflerSMI.IsInsideState(this.geneShufflerSMI.sm.idle))
+		{
+			this.CancelChore(null);
 		}
 	}
 
@@ -127,15 +147,15 @@ public class GeneShuffler : Ownable
 			string text = list[global::UnityEngine.Random.Range(0, list.Count)];
 			Trait trait = Db.Get().traits.TryGet(text);
 			worker.GetComponent<Traits>().Add(trait);
-			LoreDialogScreen loreDialogScreen = (LoreDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.LoreDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
+			InfoDialogScreen infoDialogScreen = (InfoDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.InfoDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
 			string text2 = string.Format(UI.GENESHUFFLERMESSAGE.BODY_SUCCESS, worker.GetProperName(), trait.Name, trait.GetTooltip());
-			loreDialogScreen.PopupLoreDialog(text2, UI.GENESHUFFLERMESSAGE.HEADER, null);
+			infoDialogScreen.SetHeader(UI.GENESHUFFLERMESSAGE.HEADER).AddPlainText(text2);
 		}
 		else
 		{
-			LoreDialogScreen loreDialogScreen2 = (LoreDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.LoreDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
+			InfoDialogScreen infoDialogScreen2 = (InfoDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.InfoDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
 			string text3 = string.Format(UI.GENESHUFFLERMESSAGE.BODY_FAILURE, worker.GetProperName());
-			loreDialogScreen2.PopupLoreDialog(text3, UI.GENESHUFFLERMESSAGE.HEADER, null);
+			infoDialogScreen2.SetHeader(UI.GENESHUFFLERMESSAGE.HEADER).AddPlainText(text3);
 		}
 	}
 
@@ -151,7 +171,7 @@ public class GeneShuffler : Ownable
 			this.CompleteChore();
 		};
 		KAnimFile anim = Assets.GetAnim("anim_interacts_neuralvacillator_kanim");
-		this.chore = new WorkChore<Workable>(Db.Get().ChoreTypes.GeneShuffle, this, null, true, action, null, null, true, null, true, default(Tag), anim, false, true, true);
+		this.chore = new WorkChore<Workable>(Db.Get().ChoreTypes.GeneShuffle, this, null, true, action, null, null, true, null, true, default(Tag), anim, false, true, true, int.MaxValue);
 		this.chore.AddPrecondition(ChorePreconditions.IsAssignedtoMe, this.assignable);
 		this.chore.AddPrecondition(ChorePreconditions.IsOperational, this.assignable.gameObject);
 	}
@@ -184,11 +204,14 @@ public class GeneShuffler : Ownable
 
 	private GeneShuffler.GeneShufflerSM.Instance geneShufflerSMI;
 
+	[Serialize]
+	public bool IsConsumed;
+
 	public class GeneShufflerSM : GameStateMachine<GeneShuffler.GeneShufflerSM, GeneShuffler.GeneShufflerSM.Instance, GeneShuffler>
 	{
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
-			base.serializable = true;
+			base.serializable = false;
 			default_state = this.idle;
 			this.idle.PlayAnim("idle", KAnim.PlayMode.Once, null).WorkableStartTransition((GeneShuffler.GeneShufflerSM.Instance smi) => smi.master, this.working.pre);
 			this.working.pre.PlayAnim("working_pre", KAnim.PlayMode.Once, null).EventTransition(GameHashes.AnimQueueComplete, this.working.loop, null);
@@ -201,7 +224,10 @@ public class GeneShuffler : Ownable
 				}
 			}).WorkableStopTransition((GeneShuffler.GeneShufflerSM.Instance smi) => smi.master, this.working.pst);
 			this.working.pst.EventTransition(GameHashes.AnimQueueComplete, this.consumed, null);
-			this.consumed.PlayAnim("off", KAnim.PlayMode.Once, null);
+			this.consumed.PlayAnim("off", KAnim.PlayMode.Once, null).Enter(delegate(GeneShuffler.GeneShufflerSM.Instance smi)
+			{
+				smi.master.IsConsumed = true;
+			});
 		}
 
 		public GameStateMachine<GeneShuffler.GeneShufflerSM, GeneShuffler.GeneShufflerSM.Instance, GeneShuffler, object>.State idle;

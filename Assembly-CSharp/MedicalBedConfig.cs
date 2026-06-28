@@ -19,6 +19,7 @@ public class MedicalBedConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
 		go.AddOrGet<LoopingSounds>();
+		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.Clinic);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -28,9 +29,19 @@ public class MedicalBedConfig : IBuildingConfig
 		go.GetComponent<KPrefabID>().AddTag(TagManager.Create("Bed", null));
 		Clinic clinic = go.AddOrGet<Clinic>();
 		clinic.workerInjuredAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_medical_bed_kanim") };
+		clinic.workerDiseasedAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_medical_bed_kanim") };
 		clinic.workLayer = Grid.SceneLayer.BuildingFront;
-		clinic.doctorVisitInterval = 300f;
+		clinic.doctorVisitInterval = 450f;
 		clinic.workLayer = Grid.SceneLayer.BuildingFront;
-		clinic.healthEffect = "Rejuvenator";
+		string text = "Rejuvenator";
+		string text2 = "RejuvenatorDoctored";
+		clinic.diseaseEffect = text;
+		clinic.doctoredDiseaseEffect = text2;
+		clinic.doctoredPlaceholderEffect = "DoctoredOffRejuvenatorEffect";
+		Sleepable sleepable = go.AddOrGet<Sleepable>();
+		sleepable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_medical_bed_kanim") };
+		DoctorChore doctorChore = go.AddOrGet<DoctorChore>();
+		doctorChore.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_med_cot_doctor_kanim") };
+		doctorChore.workTime = 25f;
 	}
 }

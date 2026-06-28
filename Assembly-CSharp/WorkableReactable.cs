@@ -4,13 +4,13 @@ using UnityEngine;
 public class WorkableReactable : Reactable
 {
 	public WorkableReactable(Workable workable, ChoreType chore_type, WorkableReactable.AllowedDirection allowed_direction = WorkableReactable.AllowedDirection.Any)
-		: base(workable.gameObject, chore_type, 0, 0, false)
+		: base(workable.gameObject, chore_type, 1, 1, false)
 	{
 		this.workable = workable;
 		this.allowedDirection = allowed_direction;
 	}
 
-	public override bool InternalCanBegin(GameObject new_reactor)
+	public override bool InternalCanBegin(GameObject new_reactor, Navigator.ActiveTransition transition)
 	{
 		if (this.workable == null)
 		{
@@ -78,7 +78,7 @@ public class WorkableReactable : Reactable
 	{
 	}
 
-	private Workable workable;
+	protected Workable workable;
 
 	private Worker worker;
 

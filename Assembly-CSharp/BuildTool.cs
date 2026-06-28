@@ -60,11 +60,12 @@ public class BuildTool : DragTool
 		base.OnDeactivateTool(new_tool);
 	}
 
-	public void Activate(BuildingDef def, IList<Element> selected_elements)
+	public void Activate(BuildingDef def, IList<Element> selected_elements, GameObject source = null)
 	{
 		this.buildingOrientation = Orientation.Neutral;
 		this.selectedElements = selected_elements;
 		this.def = def;
+		this.source = source;
 		if (def.ViewMode != SimViewMode.None)
 		{
 			this.viewMode = def.ViewMode;
@@ -82,6 +83,7 @@ public class BuildTool : DragTool
 		this.selectedElements = null;
 		SelectTool.Instance.Activate();
 		this.def = null;
+		this.source = null;
 		this.buildingOrientation = Orientation.Neutral;
 		ResourceRemainingDisplayScreen.instance.DeactivateDisplay();
 	}
@@ -153,7 +155,7 @@ public class BuildTool : DragTool
 						GameObject gameObject2 = null;
 						if (this.def.ReplacementLayer != ObjectLayer.NumLayers)
 						{
-							gameObject2 = Grid.Objects[num, 10];
+							gameObject2 = Grid.Objects[num, 11];
 						}
 						if (gameObject == null || (gameObject.GetComponent<Constructable>() == null && gameObject2 == null))
 						{
@@ -176,8 +178,8 @@ public class BuildTool : DragTool
 		}
 		if (this.visualizer != null)
 		{
-			bool flag = this.def.IsValidPlaceLocation(cursorPos, this.buildingOrientation);
-			bool flag2 = this.def.IsValidBuildLocation(cursorPos, this.buildingOrientation);
+			bool flag = this.def.IsValidPlaceLocation(this.visualizer, cursorPos, this.buildingOrientation);
+			bool flag2 = this.def.IsValidBuildLocation(this.visualizer, cursorPos, this.buildingOrientation);
 			Color color = Color.white;
 			float num3 = 0f;
 			if (!flag)
@@ -225,11 +227,13 @@ public class BuildTool : DragTool
 		GameObject gameObject = null;
 		if (DebugHandler.InstantBuildMode)
 		{
-			if (this.def.IsValidBuildLocation(vector, this.buildingOrientation) && this.def.IsValidPlaceLocation(vector, this.buildingOrientation))
+			if (this.def.IsValidBuildLocation(this.visualizer, vector, this.buildingOrientation) && this.def.IsValidPlaceLocation(this.visualizer, vector, this.buildingOrientation))
 			{
-				gameObject = this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, false, true);
-				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-				component.Temperature = 293.15f;
+				gameObject = this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, 293.15f, false, true);
+				if (this.source != null)
+				{
+					this.source.DeleteObject();
+				}
 			}
 		}
 		else
@@ -244,13 +248,13 @@ public class BuildTool : DragTool
 				GameObject gameObject2 = Grid.ObjectLayers[(int)this.def.TileLayer][cell];
 				if (gameObject2 != null && Grid.Objects[cell, (int)this.def.ReplacementLayer] == null)
 				{
-					BuildingComplete component2 = gameObject2.GetComponent<BuildingComplete>();
-					if (component2 != null && component2.Def.Replaceable && component2.Def.IsFoundation && component2.Def.isKAnimTile && (component2.Def != this.def || this.selectedElements[0] != gameObject2.GetComponent<PrimaryElement>().Element))
+					BuildingComplete component = gameObject2.GetComponent<BuildingComplete>();
+					if (component != null && component.Def.Replaceable && component.Def.IsFoundation && component.Def.isKAnimTile && (component.Def != this.def || this.selectedElements[0] != gameObject2.GetComponent<PrimaryElement>().Element))
 					{
-						Constructable component3 = this.def.BuildingUnderConstruction.GetComponent<Constructable>();
-						component3.IsReplacementTile = true;
+						Constructable component2 = this.def.BuildingUnderConstruction.GetComponent<Constructable>();
+						component2.IsReplacementTile = true;
 						gameObject = this.def.Instantiate(vector, this.buildingOrientation, this.selectedElements, 0, false);
-						component3.IsReplacementTile = false;
+						component2.IsReplacementTile = false;
 						Grid.Objects[cell, (int)this.def.ReplacementLayer] = gameObject;
 					}
 				}
@@ -258,17 +262,21 @@ public class BuildTool : DragTool
 			if (gameObject != null)
 			{
 				this.def.MarkArea(cell, this.buildingOrientation, this.def.ObjectLayer, gameObject);
-				Prioritizable component4 = gameObject.GetComponent<Prioritizable>();
-				if (component4 != null)
+				Prioritizable component3 = gameObject.GetComponent<Prioritizable>();
+				if (component3 != null)
 				{
-					component4.SetMasterPriority(BuildMenuPriorityScreen.Instance.GetScreenPriority());
+					component3.SetMasterPriority(BuildMenuPriorityScreen.Instance.GetScreenPriority());
+				}
+				if (this.source != null)
+				{
+					this.source.Trigger(2121280625, gameObject);
 				}
 			}
 		}
 		if (gameObject != null)
 		{
-			BuildToolHoverTextCard component5 = base.GetComponent<BuildToolHoverTextCard>();
-			component5.UpdateHoverElements(null);
+			BuildToolHoverTextCard component4 = base.GetComponent<BuildToolHoverTextCard>();
+			component4.UpdateHoverElements(null);
 			this.placeSound = GlobalAssets.GetSound("Place_Building_" + this.def.AudioSize, false);
 			if (this.placeSound != null)
 			{
@@ -279,10 +287,10 @@ public class BuildTool : DragTool
 					eventInstance.setParameterValue("tileCount", (float)this.buildingCount);
 				}
 				SoundEvent.EndOneShot(eventInstance);
-				Rotatable component6 = gameObject.GetComponent<Rotatable>();
-				if (component6 != null)
+				Rotatable component5 = gameObject.GetComponent<Rotatable>();
+				if (component5 != null)
 				{
-					component6.SetOrientation(this.buildingOrientation);
+					component5.SetOrientation(this.buildingOrientation);
 				}
 			}
 		}
@@ -349,6 +357,8 @@ public class BuildTool : DragTool
 	private BuildingDef def;
 
 	private Orientation buildingOrientation;
+
+	private GameObject source;
 
 	private ToolTip tooltip;
 

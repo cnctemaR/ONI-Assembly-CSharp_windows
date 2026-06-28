@@ -21,8 +21,8 @@ public class MinionSounds : KMonoBehaviour
 	{
 		if (this.miningSound == null)
 		{
-			Workable workTarget = this.worker.GetWorkTarget();
-			Diggable diggable = workTarget as Diggable;
+			Workable workable = this.worker.workable;
+			Diggable diggable = workable as Diggable;
 			if (diggable != null)
 			{
 				Element targetElement = diggable.GetTargetElement();

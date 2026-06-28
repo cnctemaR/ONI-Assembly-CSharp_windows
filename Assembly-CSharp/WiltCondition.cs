@@ -34,6 +34,7 @@ public class WiltCondition : KMonoBehaviour
 		this.WiltConditions.Add(WiltCondition.Condition.Irrigation, true);
 		this.WiltConditions.Add(WiltCondition.Condition.IlluminationComfort, true);
 		this.WiltConditions.Add(WiltCondition.Condition.Receptacle, true);
+		this.WiltConditions.Add(WiltCondition.Condition.Entombed, true);
 		this.Subscribe(-107174716, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.Temperature, false);
@@ -46,6 +47,10 @@ public class WiltCondition : KMonoBehaviour
 		{
 			this.SetCondition(WiltCondition.Condition.Temperature, true);
 		});
+		this.Subscribe(-593125877, delegate(object data)
+		{
+			this.SetCondition(WiltCondition.Condition.Pressure, false);
+		});
 		this.Subscribe(-1175525437, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.Pressure, false);
@@ -53,6 +58,14 @@ public class WiltCondition : KMonoBehaviour
 		this.Subscribe(-907106982, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.Pressure, true);
+		});
+		this.Subscribe(103243573, delegate(object data)
+		{
+			this.SetCondition(WiltCondition.Condition.Pressure, false);
+		});
+		this.Subscribe(646131325, delegate(object data)
+		{
+			this.SetCondition(WiltCondition.Condition.Pressure, false);
 		});
 		this.Subscribe(221594799, delegate(object data)
 		{
@@ -109,6 +122,10 @@ public class WiltCondition : KMonoBehaviour
 		this.Subscribe(960378201, delegate(object data)
 		{
 			this.SetCondition(WiltCondition.Condition.Receptacle, false);
+		});
+		this.Subscribe(-1089732772, delegate(object data)
+		{
+			this.SetCondition(WiltCondition.Condition.Entombed, !(bool)data);
 		});
 	}
 
@@ -221,13 +238,28 @@ public class WiltCondition : KMonoBehaviour
 			this.wilting = true;
 			this.Trigger(-724860998, null);
 		}
-		if (this.growing != null && this.growing.Replanted)
+		if (this.growing != null)
 		{
-			component.AddStatusItem(Db.Get().CreatureStatusItems.WiltingDomestic, base.GetComponent<Growing>());
+			if (this.growing.Replanted)
+			{
+				component.AddStatusItem(Db.Get().CreatureStatusItems.WiltingDomestic, base.GetComponent<Growing>());
+			}
+			else
+			{
+				component.AddStatusItem(Db.Get().CreatureStatusItems.Wilting, base.GetComponent<Growing>());
+			}
 		}
 		else
 		{
-			component.AddStatusItem(Db.Get().CreatureStatusItems.Wilting, base.GetComponent<Growing>());
+			ReceptacleMonitor.StatesInstance smi = component.GetSMI<ReceptacleMonitor.StatesInstance>();
+			if (smi != null && !smi.IsInsideState(smi.sm.wild))
+			{
+				component.AddStatusItem(Db.Get().CreatureStatusItems.WiltingNonGrowingDomestic, this);
+			}
+			else
+			{
+				component.AddStatusItem(Db.Get().CreatureStatusItems.WiltingNonGrowing, this);
+			}
 		}
 		component.GetComponent<KPrefabID>().AddTag(GameTags.Wilting);
 	}
@@ -261,14 +293,10 @@ public class WiltCondition : KMonoBehaviour
 		KSelectable component = base.GetComponent<KSelectable>();
 		this.wilting = false;
 		this.Trigger(712767498, null);
-		if (this.growing != null && this.growing.Replanted)
-		{
-			component.RemoveStatusItem(Db.Get().CreatureStatusItems.WiltingDomestic, false);
-		}
-		else
-		{
-			component.RemoveStatusItem(Db.Get().CreatureStatusItems.Wilting, false);
-		}
+		component.RemoveStatusItem(Db.Get().CreatureStatusItems.WiltingDomestic, false);
+		component.RemoveStatusItem(Db.Get().CreatureStatusItems.Wilting, false);
+		component.RemoveStatusItem(Db.Get().CreatureStatusItems.WiltingNonGrowing, false);
+		component.RemoveStatusItem(Db.Get().CreatureStatusItems.WiltingNonGrowingDomestic, false);
 		component.GetComponent<KPrefabID>().RemoveTag(GameTags.Wilting);
 	}
 
@@ -305,6 +333,7 @@ public class WiltCondition : KMonoBehaviour
 		IlluminationComfort,
 		Darkness,
 		Receptacle,
+		Entombed,
 		Count
 	}
 }

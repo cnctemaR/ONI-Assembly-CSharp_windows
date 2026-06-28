@@ -25,7 +25,7 @@ public class EdiblesManager : KMonoBehaviour
 
 	public static EdiblesManager instance;
 
-	public class FoodInfo
+	public class FoodInfo : IConsumableUIItem
 	{
 		public FoodInfo(string id, float caloriesPerUnit, int quality, float preserveTemperatue, float rotTemperature, float spoilTime)
 		{
@@ -46,6 +46,46 @@ public class EdiblesManager : KMonoBehaviour
 		{
 			this.Effects.AddRange(effects);
 			return this;
+		}
+
+		public string ConsumableId
+		{
+			get
+			{
+				return this.Id;
+			}
+		}
+
+		public string ConsumableName
+		{
+			get
+			{
+				return this.Name;
+			}
+		}
+
+		public int MajorOrder
+		{
+			get
+			{
+				return this.Quality;
+			}
+		}
+
+		public int MinorOrder
+		{
+			get
+			{
+				return (int)this.CaloriesPerUnit;
+			}
+		}
+
+		public bool Display
+		{
+			get
+			{
+				return this.CaloriesPerUnit != 0f;
+			}
 		}
 
 		public string Id;

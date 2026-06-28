@@ -27,7 +27,7 @@ public class Fashionable : StateMachineComponent<Fashionable.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.satisfied;
-			this.root.EventHandler(GameHashes.EquippedItem, delegate(Fashionable.StatesInstance smi)
+			this.root.EventHandler(GameHashes.EquippedItemEquipper, delegate(Fashionable.StatesInstance smi)
 			{
 				if (smi.master.IsUncomfortable())
 				{
@@ -37,7 +37,7 @@ public class Fashionable : StateMachineComponent<Fashionable.StatesInstance>
 				{
 					smi.GoTo(this.satisfied);
 				}
-			}).EventHandler(GameHashes.UnequippedItem, delegate(Fashionable.StatesInstance smi)
+			}).EventHandler(GameHashes.UnequippedItemEquipper, delegate(Fashionable.StatesInstance smi)
 			{
 				if (smi.master.IsUncomfortable())
 				{

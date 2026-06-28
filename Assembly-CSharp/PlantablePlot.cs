@@ -70,7 +70,7 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 					}
 				}
 				base.CancelActiveRequest();
-				base.CreateOrder(tag);
+				this.CreateOrder(tag);
 			}
 			if (base.occupyingObject != null)
 			{
@@ -84,6 +84,19 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 					}
 				}
 			}
+		}
+	}
+
+	public override void CreateOrder(Tag entityTag)
+	{
+		this.SetPreview(entityTag, false);
+		if (this.ValidPlant)
+		{
+			base.CreateOrder(entityTag);
+		}
+		else
+		{
+			this.SetPreview(Tag.Invalid, false);
 		}
 	}
 
@@ -263,7 +276,7 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 		if (plantableSeed != null)
 		{
 			GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(plantableSeed.PreviewID), Grid.SceneLayer.Front, Folder.BuildingPreviews, null, 0);
-			this.plantPreview = gameObject.GetComponent<PlantPreview>();
+			this.plantPreview = gameObject.GetComponent<EntityPreview>();
 			gameObject.transform.position = Vector3.zero;
 			gameObject.transform.SetParent(base.gameObject.transform, false);
 			gameObject.transform.localPosition = Vector3.zero;
@@ -292,12 +305,17 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 			{
 				this.plantPreview.SetSolid();
 			}
+			this.plantPreview.UpdateValidity();
 		}
 	}
 
 	private void OnValidChanged(object obj)
 	{
 		this.Trigger(-1820564715, obj);
+		if (!this.plantPreview.Valid && base.GetActiveRequest != null)
+		{
+			base.CancelActiveRequest();
+		}
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)
@@ -323,7 +341,7 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectE
 	[Serialize]
 	private Ref<KPrefabID> plantRef;
 
-	private PlantPreview plantPreview;
+	private EntityPreview plantPreview;
 
 	[SerializeField]
 	private bool accepts_fertilizer;

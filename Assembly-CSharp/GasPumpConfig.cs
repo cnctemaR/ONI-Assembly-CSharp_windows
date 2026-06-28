@@ -24,6 +24,7 @@ public class GasPumpConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
+		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		go.AddOrGet<LoopingSounds>();
 		go.AddOrGet<EnergyConsumer>();
 		go.AddOrGet<Pump>();

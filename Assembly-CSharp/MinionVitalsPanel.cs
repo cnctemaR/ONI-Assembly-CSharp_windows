@@ -57,11 +57,8 @@ public class MinionVitalsPanel : KMonoBehaviour
 		}, (GameObject go) => this.check_fertilizer(go), (GameObject go) => this.GetFertilizationTooltip(go));
 		this.AddCheckboxLine(Db.Get().Amounts.Irrigation, this.conditionsContainerAdditional, (GameObject go) => this.GetIrrigationLabel(go), delegate(GameObject go)
 		{
-			if (go.GetComponent<Growing>().Replanted)
-			{
-				return MinionVitalsPanel.CheckboxLineDisplayType.Normal;
-			}
-			return MinionVitalsPanel.CheckboxLineDisplayType.Diminished;
+			Growing component = go.GetComponent<Growing>();
+			return (!(component != null) || !component.Replanted) ? MinionVitalsPanel.CheckboxLineDisplayType.Diminished : MinionVitalsPanel.CheckboxLineDisplayType.Normal;
 		}, (GameObject go) => this.check_irrigation(go), (GameObject go) => this.GetIrrigationTooltip(go));
 		this.AddCheckboxLine(Db.Get().Amounts.Illumination, this.conditionsContainerNormal, (GameObject go) => this.GetIlluminationLabel(go), (GameObject go) => MinionVitalsPanel.CheckboxLineDisplayType.Normal, (GameObject go) => this.check_illumination(go), (GameObject go) => this.GetIlluminationTooltip(go));
 	}
@@ -156,8 +153,9 @@ public class MinionVitalsPanel : KMonoBehaviour
 
 	public void Refresh(object data)
 	{
-		if (this.selectedEntity == null)
+		if (this.selectedEntity == null || this.selectedEntity.gameObject == null)
 		{
+			base.enabled = false;
 			return;
 		}
 		Amounts amounts = this.selectedEntity.GetAmounts();
@@ -345,7 +343,7 @@ public class MinionVitalsPanel : KMonoBehaviour
 		{
 			return string.Empty;
 		}
-		if (component.IsInOperationalReceptacle())
+		if (component.HasOperationalReceptacle())
 		{
 			return UI.TOOLTIPS.VITALS_CHECKBOX_RECEPTACLE_OPERATIONAL;
 		}
@@ -482,7 +480,7 @@ public class MinionVitalsPanel : KMonoBehaviour
 	private bool check_receptacle(GameObject go)
 	{
 		ReceptacleMonitor component = go.GetComponent<ReceptacleMonitor>();
-		return !(component == null) && component.IsInOperationalReceptacle();
+		return !(component == null) && component.HasOperationalReceptacle();
 	}
 
 	private bool check_fertilizer(GameObject go)

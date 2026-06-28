@@ -338,7 +338,7 @@ public class KCrashReporter : MonoBehaviour
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
 			error.fullstack = "UNITY_OUTPUT:\n" + msg;
-			error.build = 234130;
+			error.build = 235856;
 			error.log = KCrashReporter.GetLogContents();
 			error.summaryline = text4;
 			error.user_message = userMessage;
@@ -365,7 +365,7 @@ public class KCrashReporter : MonoBehaviour
 			if (confirm_prefab != null)
 			{
 				ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)KScreenManager.Instance.StartScreen(confirm_prefab.gameObject, null);
-				confirmDialogScreen.PopupConfirmDialog("Reported Error", null, null, null, null, null, null);
+				confirmDialogScreen.PopupConfirmDialog("Reported Error", null, null, null, null, null, null, null);
 			}
 			text6 = empty;
 		}
@@ -433,7 +433,7 @@ public class KCrashReporter : MonoBehaviour
 
 	public static bool terminateOnError = true;
 
-	private static readonly string[] IgnoreStrings = new string[] { "Releasing render texture whose render buffer is set as Camera's target buffer with Camera.SetTargetBuffers!", "The profiler has run out of samples for this frame. This frame will be skipped. Increase the sample limit using Profiler.maxNumberOfSamplesPerFrame" };
+	private static readonly string[] IgnoreStrings = new string[] { "Releasing render texture whose render buffer is set as Camera's target buffer with Camera.SetTargetBuffers!", "The profiler has run out of samples for this frame. This frame will be skipped. Increase the sample limit using Profiler.maxNumberOfSamplesPerFrame", "Trying to add Text (LocText) for graphic rebuild while we are already inside a graphic rebuild loop. This is not supported." };
 
 	private class Error
 	{

@@ -7,7 +7,7 @@ public class BaseArea : KMonoBehaviour
 	{
 		BaseArea.Instance = this;
 		this.cells = new BaseArea.Cell[Grid.CellCount];
-		this.pendingCells = new int[Grid.CellCount];
+		this.pendingCells = new int[Grid.CellCount * 2];
 	}
 
 	public bool IsInsideBase(int cell)

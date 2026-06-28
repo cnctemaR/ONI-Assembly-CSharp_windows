@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using Klei;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -14,17 +13,7 @@ public class Constructable : Workable, ISaveLoadable
 		base.preferPrimaryCell = false;
 	}
 
-	public Relocatable Source
-	{
-		get
-		{
-			return this.source.Get();
-		}
-		set
-		{
-			this.source.Set(value);
-		}
-	}
+	public GameObject Source { get; set; }
 
 	public Recipe Recipe
 	{
@@ -54,7 +43,6 @@ public class Constructable : Workable, ISaveLoadable
 	{
 		float num = 0f;
 		float num2 = 0f;
-		SimUtil.DiseaseInfo accumulatedDisease = SimUtil.DiseaseInfo.Invalid;
 		foreach (GameObject gameObject in this.storage.items)
 		{
 			if (!(gameObject == null))
@@ -64,7 +52,6 @@ public class Constructable : Workable, ISaveLoadable
 				{
 					num += component.Mass;
 					num2 += component.Temperature * component.Mass;
-					accumulatedDisease = SimUtil.CalculateFinalDiseaseInfo(component.DiseaseIdx, component.DiseaseCount, accumulatedDisease.idx, accumulatedDisease.count);
 				}
 			}
 		}
@@ -94,7 +81,7 @@ public class Constructable : Workable, ISaveLoadable
 					{
 						if (this != null && this.gameObject != null)
 						{
-							this.FinishConstruction(connections, accumulatedDisease);
+							this.FinishConstruction(connections);
 						}
 					});
 				}
@@ -111,13 +98,13 @@ public class Constructable : Workable, ISaveLoadable
 					{
 						component5.onCleanUp += delegate
 						{
-							this.FinishConstruction(connections, accumulatedDisease);
+							this.FinishConstruction(connections);
 						};
 					}
 					else
 					{
 						global::Debug.LogWarning("Why am I trying to replace a: " + gameObject2.name, null);
-						this.FinishConstruction(connections, accumulatedDisease);
+						this.FinishConstruction(connections);
 					}
 				}
 				KAnimGraphTileVisualizer component6 = gameObject2.GetComponent<KAnimGraphTileVisualizer>();
@@ -130,43 +117,40 @@ public class Constructable : Workable, ISaveLoadable
 		}
 		else
 		{
-			this.FinishConstruction(connections, accumulatedDisease);
+			this.FinishConstruction(connections);
 		}
 		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Building, base.GetComponent<KSelectable>().GetName(), this.transform, 1.5f, false);
 	}
 
-	private void FinishConstruction(UtilityConnections connections, SimUtil.DiseaseInfo diseaseInfo)
+	private void FinishConstruction(UtilityConnections connections)
 	{
 		Rotatable component = base.GetComponent<Rotatable>();
 		Orientation orientation = ((!(component != null)) ? Orientation.Neutral : component.GetOrientation());
 		int num = Grid.PosToCell(this.transform.localPosition);
-		GameObject gameObject = this.building.Def.Build(num, orientation, this.storage, this.selectedElements, this.isRelocating, true);
-		PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
-		component2.Temperature = this.initialTemperature;
-		component2.AddDisease(diseaseInfo.idx, diseaseInfo.count, "Constructable.FinishConstruction");
+		GameObject gameObject = this.building.Def.Build(num, orientation, this.storage, this.selectedElements, this.initialTemperature, this.isRelocating, true);
 		gameObject.transform.rotation = this.transform.rotation;
-		Rotatable component3 = gameObject.GetComponent<Rotatable>();
+		Rotatable component2 = gameObject.GetComponent<Rotatable>();
+		if (component2 != null)
+		{
+			component2.SetOrientation(orientation);
+		}
+		KAnimGraphTileVisualizer component3 = base.GetComponent<KAnimGraphTileVisualizer>();
 		if (component3 != null)
 		{
-			component3.SetOrientation(orientation);
+			KAnimGraphTileVisualizer component4 = gameObject.GetComponent<KAnimGraphTileVisualizer>();
+			component4.Connections = connections;
+			component3.skipCleanup = true;
 		}
-		KAnimGraphTileVisualizer component4 = base.GetComponent<KAnimGraphTileVisualizer>();
-		if (component4 != null)
+		KSelectable component5 = base.GetComponent<KSelectable>();
+		if (component5 != null && component5.IsSelected && gameObject.GetComponent<KSelectable>() != null)
 		{
-			KAnimGraphTileVisualizer component5 = gameObject.GetComponent<KAnimGraphTileVisualizer>();
-			component5.Connections = connections;
-			component4.skipCleanup = true;
-		}
-		KSelectable component6 = base.GetComponent<KSelectable>();
-		if (component6 != null && component6.IsSelected && gameObject.GetComponent<KSelectable>() != null)
-		{
-			component6.Unselect();
+			component5.Unselect();
 			if (PlayerController.Instance.ActiveTool.name == "SelectTool")
 			{
 				((SelectTool)PlayerController.Instance.ActiveTool).SelectNextFrame(gameObject.GetComponent<KSelectable>(), false);
 			}
 		}
-		base.GetComponent<Storage>().ConsumeAll();
+		this.storage.ConsumeAllIgnoringDisease();
 		this.DeleteObject();
 	}
 
@@ -453,7 +437,7 @@ public class Constructable : Workable, ISaveLoadable
 			});
 			this.OnDiggableReachabilityChanged(null);
 		}
-		bool flag = this.building.Def.IsValidBuildLocation(this.transform.position, this.building.Orientation);
+		bool flag = this.building.Def.IsValidBuildLocation(base.gameObject, this.transform.position, this.building.Orientation);
 		if (flag)
 		{
 			this.notifier.Remove(this.invalidLocation);
@@ -468,7 +452,7 @@ public class Constructable : Workable, ISaveLoadable
 		{
 			Action<Chore> action = new Action<Chore>(this.UpdateBuildState);
 			Action<Chore> action2 = new Action<Chore>(this.UpdateBuildState);
-			this.buildChore = new WorkChore<Constructable>(this.choreType, this, null, true, action, action2, new Action<Chore>(this.UpdateBuildState), true, null, true, default(Tag), null, true, true, true);
+			this.buildChore = new WorkChore<Constructable>(this.choreType, this, null, true, action, action2, new Action<Chore>(this.UpdateBuildState), true, null, true, default(Tag), null, true, true, true, int.MaxValue);
 			this.UpdateBuildState(this.buildChore);
 		}
 		else if (!flag2 && this.buildChore != null)
@@ -633,9 +617,6 @@ public class Constructable : Workable, ISaveLoadable
 	private bool materialNeedsCleared;
 
 	private bool hasUnreachableDigs;
-
-	[Serialize]
-	private Ref<Relocatable> source = new Ref<Relocatable>();
 
 	[Serialize]
 	public bool isRelocating;

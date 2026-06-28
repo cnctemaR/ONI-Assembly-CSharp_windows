@@ -203,7 +203,7 @@ public class BuildingCellVisualizer : KMonoBehaviour
 
 	private bool CompareWireConnection(int cell, UtilityConnections[] connections)
 	{
-		GameObject gameObject = Grid.Objects[cell, 19];
+		GameObject gameObject = Grid.Objects[cell, 20];
 		if (gameObject != null)
 		{
 			Wire component = gameObject.GetComponent<Wire>();
@@ -225,7 +225,7 @@ public class BuildingCellVisualizer : KMonoBehaviour
 	private Color GetWireColor(int cell)
 	{
 		Color color = Color.white;
-		GameObject gameObject = Grid.Objects[cell, 19];
+		GameObject gameObject = Grid.Objects[cell, 20];
 		if (gameObject != null)
 		{
 			KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
@@ -291,7 +291,7 @@ public class BuildingCellVisualizer : KMonoBehaviour
 						}
 						else
 						{
-							UtilityNetworkLink component4 = base.GetComponent<UtilityNetworkLink>();
+							WireUtilityNetworkLink component4 = base.GetComponent<WireUtilityNetworkLink>();
 							if (component4 != null)
 							{
 								int num2;
@@ -312,14 +312,14 @@ public class BuildingCellVisualizer : KMonoBehaviour
 				{
 					if (this.requiresLiquidInput)
 					{
-						bool flag3 = null != Grid.Objects[component.GetUtilityInputCell(), 15];
+						bool flag3 = null != Grid.Objects[component.GetUtilityInputCell(), 16];
 						BuildingCellVisualizerResources.ConnectedDisconnectedColours input = this.resources.liquidIOColours.input;
 						Color color5 = ((!flag3) ? input.disconnected : input.connected);
 						this.DrawUtilityIcon(component.GetUtilityInputCell(), this.resources.liquidInputIcon, ref this.inputVisualizer, color5);
 					}
 					if (this.requiresLiquidOutput)
 					{
-						bool flag4 = null != Grid.Objects[component.GetUtilityOutputCell(), 15];
+						bool flag4 = null != Grid.Objects[component.GetUtilityOutputCell(), 16];
 						BuildingCellVisualizerResources.ConnectedDisconnectedColours output = this.resources.liquidIOColours.output;
 						Color color6 = ((!flag4) ? output.disconnected : output.connected);
 						this.DrawUtilityIcon(component.GetUtilityOutputCell(), this.resources.liquidOutputIcon, ref this.outputVisualizer, color6);
@@ -348,7 +348,7 @@ public class BuildingCellVisualizer : KMonoBehaviour
 			if (this.requiresGasInput)
 			{
 				Sprite gasInputIcon = this.resources.gasInputIcon;
-				bool flag5 = null != Grid.Objects[component.GetUtilityInputCell(), 11];
+				bool flag5 = null != Grid.Objects[component.GetUtilityInputCell(), 12];
 				BuildingCellVisualizerResources.ConnectedDisconnectedColours input2 = this.resources.gasIOColours.input;
 				Color color7 = ((!flag5) ? input2.disconnected : input2.connected);
 				this.DrawUtilityIcon(component.GetUtilityInputCell(), gasInputIcon, ref this.inputVisualizer, color7);
@@ -356,7 +356,7 @@ public class BuildingCellVisualizer : KMonoBehaviour
 			if (this.requiresGasOutput)
 			{
 				Sprite gasOutputIcon = this.resources.gasOutputIcon;
-				bool flag6 = null != Grid.Objects[component.GetUtilityOutputCell(), 11];
+				bool flag6 = null != Grid.Objects[component.GetUtilityOutputCell(), 12];
 				BuildingCellVisualizerResources.ConnectedDisconnectedColours output2 = this.resources.gasIOColours.output;
 				Color color8 = ((!flag6) ? output2.disconnected : output2.connected);
 				this.DrawUtilityIcon(component.GetUtilityOutputCell(), gasOutputIcon, ref this.outputVisualizer, color8);

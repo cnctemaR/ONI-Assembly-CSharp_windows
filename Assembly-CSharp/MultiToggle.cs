@@ -5,7 +5,15 @@ using UnityEngine.UI;
 
 public class MultiToggle : KMonoBehaviour, IPointerEnterHandler, IEventSystemHandler, IPointerExitHandler, IPointerClickHandler
 {
-	protected void NextState()
+	public int CurrentState
+	{
+		get
+		{
+			return this.state;
+		}
+	}
+
+	public void NextState()
 	{
 		this.ChangeState((this.state + 1) % this.states.Length);
 	}
@@ -90,8 +98,8 @@ public class MultiToggle : KMonoBehaviour, IPointerEnterHandler, IEventSystemHan
 		}
 	}
 
-	[SerializeField]
 	[Header("Settings")]
+	[SerializeField]
 	public ToggleState[] states;
 
 	public bool play_sound_on_click = true;

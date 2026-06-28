@@ -9,6 +9,7 @@ public class GasConduitBridgeConfig : IBuildingConfig
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("GasConduitBridge", 3, 1, "utilitygasbridge_kanim", 50f, 10, 3f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER1, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.Conduit, BUILDINGS.DECOR.NONE, none);
 		buildingDef.ObjectLayer = ObjectLayer.GasConduitConnection;
+		buildingDef.SceneLayer = Grid.SceneLayer.GasConduitBridges;
 		buildingDef.InputConduitType = ConduitType.Gas;
 		buildingDef.OutputConduitType = ConduitType.Gas;
 		buildingDef.Floodable = false;

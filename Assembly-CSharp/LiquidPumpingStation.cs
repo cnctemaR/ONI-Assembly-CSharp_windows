@@ -277,11 +277,6 @@ public class LiquidPumpingStation : Workable
 		return false;
 	}
 
-	protected override void OnAbortWork(Worker worker)
-	{
-		base.OnAbortWork(worker);
-	}
-
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();

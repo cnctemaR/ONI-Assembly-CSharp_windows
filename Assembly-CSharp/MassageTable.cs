@@ -99,7 +99,7 @@ public class MassageTable : RelaxationPoint, IEffectDescriptor, IActivationRange
 
 	protected override WorkChore<RelaxationPoint> CreateWorkChore()
 	{
-		WorkChore<RelaxationPoint> workChore = new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, true, null, null, null, false, null, true, default(Tag), null, false, true, true);
+		WorkChore<RelaxationPoint> workChore = new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, true, null, null, null, false, null, true, default(Tag), null, false, true, true, int.MaxValue);
 		workChore.AddPrecondition(MassageTable.IsStressAboveActivationRange, this);
 		return workChore;
 	}

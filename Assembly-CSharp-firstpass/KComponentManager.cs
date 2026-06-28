@@ -9,17 +9,9 @@ public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentMana
 	{
 	}
 
-	public int Count
-	{
-		get
-		{
-			return this.data.Count;
-		}
-	}
-
 	public bool Has(object go)
 	{
-		if (this.cleanupList.Contains(go))
+		if (this.cleanupList.Exists((KComponentManager<T>.CleanupInfo x) => x.instance == go))
 		{
 			return false;
 		}
@@ -47,24 +39,36 @@ public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentMana
 		return handle;
 	}
 
-	protected void InternalRemoveComponent(object instance)
+	protected void InternalRemoveComponent(KComponentManager<T>.CleanupInfo info)
 	{
-		if (!this.instanceHandleMap.ContainsKey(instance))
+		if (info.instance != null)
 		{
-			Output.LogError(new object[]
+			if (!this.instanceHandleMap.ContainsKey(info.instance))
 			{
-				"Tried to remove component of type",
-				typeof(T).ToString(),
-				"on instance",
-				instance.ToString(),
-				"but instance has not been registered yet."
-			});
-			return;
+				Output.LogError(new object[]
+				{
+					"Tried to remove component of type",
+					typeof(T).ToString(),
+					"on instance",
+					info.instance.ToString(),
+					"but instance has not been registered yet."
+				});
+				return;
+			}
+			this.instanceHandleMap.Remove(info.instance);
 		}
-		HandleVector<int>.Handle handle = this.instanceHandleMap[instance];
-		base.Free(handle);
-		this.instanceHandleMap.Remove(instance);
-		this.spawnList.Remove(handle);
+		else
+		{
+			foreach (KeyValuePair<object, HandleVector<int>.Handle> keyValuePair in this.instanceHandleMap)
+			{
+				if (keyValuePair.Value == info.handle)
+				{
+					this.instanceHandleMap.Remove(keyValuePair.Key);
+				}
+			}
+		}
+		base.Free(info.handle);
+		this.spawnList.Remove(info.handle);
 	}
 
 	public HandleVector<int>.Handle GetHandle(object instance)
@@ -81,9 +85,9 @@ public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentMana
 	{
 		this.shadowSpawnList.AddRange(this.spawnList);
 		this.spawnList.Clear();
-		foreach (object obj in this.cleanupList)
+		foreach (KComponentManager<T>.CleanupInfo cleanupInfo in this.cleanupList)
 		{
-			HandleVector<int>.Handle handle = this.GetHandle(obj);
+			HandleVector<int>.Handle handle = this.GetHandle(cleanupInfo);
 			this.shadowSpawnList.Remove(handle);
 		}
 		foreach (HandleVector<int>.Handle handle2 in this.shadowSpawnList)
@@ -109,25 +113,24 @@ public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentMana
 	{
 		this.shadowCleanupList.AddRange(this.cleanupList);
 		this.cleanupList.Clear();
-		foreach (object obj in this.shadowCleanupList)
+		foreach (KComponentManager<T>.CleanupInfo cleanupInfo in this.shadowCleanupList)
 		{
-			HandleVector<int>.Handle handle = this.GetHandle(obj);
-			this.OnCleanUp(handle);
-		}
-		foreach (object obj2 in this.shadowCleanupList)
-		{
-			this.InternalRemoveComponent(obj2);
+			this.OnCleanUp(cleanupInfo.handle);
+			this.InternalRemoveComponent(cleanupInfo);
 		}
 		this.shadowCleanupList.Clear();
 	}
 
 	protected void RemoveFromCleanupList(object instance)
 	{
-		int num = this.cleanupList.IndexOf(instance);
-		if (num != -1)
+		for (int i = 0; i < this.cleanupList.Count; i++)
 		{
-			this.cleanupList[num] = this.cleanupList[this.cleanupList.Count - 1];
-			this.cleanupList.RemoveAt(this.cleanupList.Count - 1);
+			if (this.cleanupList[i].instance == instance)
+			{
+				this.cleanupList[i] = this.cleanupList[this.cleanupList.Count - 1];
+				this.cleanupList.RemoveAt(this.cleanupList.Count - 1);
+				break;
+			}
 		}
 	}
 
@@ -153,13 +156,31 @@ public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentMana
 	{
 	}
 
+	virtual int IComponentManager.get_Count()
+	{
+		return base.Count;
+	}
+
 	protected Dictionary<object, HandleVector<int>.Handle> instanceHandleMap = new Dictionary<object, HandleVector<int>.Handle>();
 
 	private List<HandleVector<int>.Handle> spawnList = new List<HandleVector<int>.Handle>();
 
 	private List<HandleVector<int>.Handle> shadowSpawnList = new List<HandleVector<int>.Handle>();
 
-	protected List<object> cleanupList = new List<object>();
+	protected List<KComponentManager<T>.CleanupInfo> cleanupList = new List<KComponentManager<T>.CleanupInfo>();
 
-	private List<object> shadowCleanupList = new List<object>();
+	private List<KComponentManager<T>.CleanupInfo> shadowCleanupList = new List<KComponentManager<T>.CleanupInfo>();
+
+	protected struct CleanupInfo
+	{
+		public CleanupInfo(object instance, HandleVector<int>.Handle handle)
+		{
+			this.instance = instance;
+			this.handle = handle;
+		}
+
+		public object instance;
+
+		public HandleVector<int>.Handle handle;
+	}
 }

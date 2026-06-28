@@ -19,10 +19,6 @@ public static class LightGridManager
 
 	public static void DestroyPreview()
 	{
-		foreach (int num in LightGridManager.previewLightCells)
-		{
-			Grid.LightCount[num] = (byte)Mathf.Max(0, (int)(Grid.LightCount[num] - 1));
-		}
 		LightGridManager.previewLightCells.Clear();
 	}
 
@@ -31,13 +27,9 @@ public static class LightGridManager
 		LightGridManager.previewLightCells.Clear();
 		LightGridManager.previewLightCells.Add(origin_cell);
 		DiscreteShadowCaster.GetVisibleCells(origin_cell, LightGridManager.previewLightCells, (int)radius, shape);
-		foreach (int num in LightGridManager.previewLightCells)
-		{
-			Grid.LightCount[num] = Grid.LightCount[num] + 1;
-		}
 	}
 
-	private static List<int> previewLightCells = new List<int>();
+	public static List<int> previewLightCells = new List<int>();
 
 	public class LightGridEmitter
 	{

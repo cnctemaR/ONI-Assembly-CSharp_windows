@@ -3,7 +3,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class KMonoBehaviour : MonoBehaviour, ISaveLoadable, IStateMachineTarget
+public class KMonoBehaviour : MonoBehaviour, ISaveLoadable, IStateMachineTarget, IUniformGridObject
 {
 	public bool isSpawned { get; private set; }
 
@@ -305,6 +305,16 @@ public class KMonoBehaviour : MonoBehaviour, ISaveLoadable, IStateMachineTarget
 		{
 			Output.LogWarning(new object[] { "AUDIOERROR: Missing [" + asset + "]" });
 		}
+	}
+
+	public virtual Vector2 PosMin()
+	{
+		return this.transform.position;
+	}
+
+	public virtual Vector2 PosMax()
+	{
+		return this.transform.position;
 	}
 
 	virtual ComponentType IStateMachineTarget.GetComponent<ComponentType>()

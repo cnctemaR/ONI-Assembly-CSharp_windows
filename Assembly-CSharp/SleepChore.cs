@@ -1,5 +1,4 @@
 ﻿using System;
-using Klei.AI;
 using UnityEngine;
 
 public class SleepChore : Chore<SleepChore.StatesInstance>
@@ -42,46 +41,6 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 		{
 			base.sm.sleeper.Set(sleeper, base.smi);
 			base.sm.bed.Set(bed, base.smi);
-		}
-
-		public void EvaluateSleepQuality()
-		{
-			if (base.sm.sleepingOnFloor.Get(base.smi))
-			{
-				base.sm.sleeper.Get<Effects>(base.smi).Add(Db.Get().effects.Get("SoreBack"), true);
-			}
-		}
-
-		public bool SleepingPeacefully()
-		{
-			return false;
-		}
-
-		public void SetHadNormalSleep()
-		{
-			if (!this.hadNormalSleep)
-			{
-				this.stateChangeNoiseSource = GameUtil.GetLoudestNoisePollutorAtCell(Grid.CellAbove(Grid.PosToCell(base.gameObject)));
-			}
-			this.hadNormalSleep = true;
-		}
-
-		public void SetHadBadSleep()
-		{
-			if (!this.hadBadSleep)
-			{
-				this.stateChangeNoiseSource = GameUtil.GetLoudestNoisePollutorAtCell(Grid.CellAbove(Grid.PosToCell(base.gameObject)));
-			}
-			this.hadBadSleep = true;
-		}
-
-		public void SetHadTerribleSleep()
-		{
-			if (!this.hadTerribleSleep)
-			{
-				this.stateChangeNoiseSource = GameUtil.GetLoudestNoisePollutorAtCell(Grid.CellAbove(Grid.PosToCell(base.gameObject)));
-			}
-			this.hadTerribleSleep = true;
 		}
 
 		public void CreateLocator()
@@ -163,53 +122,12 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 			this.sleep.Enter("SetAnims", delegate(SleepChore.StatesInstance smi)
 			{
 				smi.SetAnim();
-			}).DefaultState(this.sleep.condition_transition_pre).ToggleEffect("Sleep")
+			}).DefaultState(this.sleep.normal).ToggleEffect("Sleep")
 				.DoSleep(this.sleeper, this.bed, this.success, null);
-			this.sleep.condition_transition_pre.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Sleep, Db.Get().DuplicantStatusItems.Sleeping, null).QueueAnim("working_loop", true, null).ScheduleGoTo((SleepChore.StatesInstance smi) => smi.wakeUpBuffer, this.sleep.condition_transition);
-			this.sleep.condition_transition.Transition(this.sleep.normal, (SleepChore.StatesInstance smi) => smi.timeinstate > smi.wakeUpBuffer && !smi.SleepingPeacefully()).Transition(this.sleep.peaceful, (SleepChore.StatesInstance smi) => smi.timeinstate > smi.wakeUpBuffer && smi.SleepingPeacefully());
-			this.sleep.peaceful.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Sleep, Db.Get().DuplicantStatusItems.SleepingPeacefully, null).PlayAnim("trans_peaceful", KAnim.PlayMode.Once, null).QueueAnim("peaceful_loop", true, null)
-				.EventTransition(GameHashes.SleepFail, this.sleep.interrupt, null)
-				.EventTransition(GameHashes.SleepDisturbed, this.sleep.interrupt_light, null)
-				.Transition(this.sleep.normal, (SleepChore.StatesInstance smi) => !smi.SleepingPeacefully())
-				.Exit(delegate(SleepChore.StatesInstance smi)
-				{
-					KAnimControllerBase kanimControllerBase = smi.Get<KAnimControllerBase>();
-					if (kanimControllerBase != null)
-					{
-						kanimControllerBase.Play("trans_working", KAnim.PlayMode.Once, 1f, 0f);
-					}
-				});
-			this.sleep.normal.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Sleep, Db.Get().DuplicantStatusItems.Sleeping, null).QueueAnim("working_loop", true, null).EventTransition(GameHashes.SleepFail, this.sleep.interrupt, null)
-				.EventTransition(GameHashes.SleepDisturbed, this.sleep.interrupt_light, null);
-			this.sleep.interrupt_light.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Sleep, Db.Get().DuplicantStatusItems.SleepingInterruptedLight, null).QueueAnim("interrupt_light", false, null).EventTransition(GameHashes.AnimQueueComplete, this.sleep.bad, (SleepChore.StatesInstance smi) => smi.timeinstate > 0f && smi.hadBadSleep && !smi.hadTerribleSleep)
-				.EventTransition(GameHashes.AnimQueueComplete, this.sleep.terrible, (SleepChore.StatesInstance smi) => smi.timeinstate > 0f && smi.hadTerribleSleep);
-			this.sleep.bad.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Sleep, Db.Get().DuplicantStatusItems.SleepingBadly, null).QueueAnim("trans_bad", false, null).QueueAnim("bad_loop", true, null)
-				.EventTransition(GameHashes.SleepFail, this.sleep.interrupt, (SleepChore.StatesInstance smi) => smi.timeinstate > smi.wakeUpBuffer)
-				.EventTransition(GameHashes.SleepDisturbed, this.sleep.interrupt_light, (SleepChore.StatesInstance smi) => smi.timeinstate > smi.wakeUpBuffer)
-				.Exit(delegate(SleepChore.StatesInstance smi)
-				{
-					KAnimControllerBase kanimControllerBase2 = smi.Get<KAnimControllerBase>();
-					if (kanimControllerBase2 != null)
-					{
-						kanimControllerBase2.Play("trans_bad_working", KAnim.PlayMode.Once, 1f, 0f);
-					}
-				});
-			this.sleep.interrupt.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Sleep, Db.Get().DuplicantStatusItems.SleepingInterrupted, null).QueueAnim("interrupt", false, null).EventTransition(GameHashes.AnimQueueComplete, this.sleep.normal, null);
-			this.sleep.terrible.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Sleep, Db.Get().DuplicantStatusItems.SleepingTerribly, null).QueueAnim("trans_terrible", false, null).QueueAnim("terrible_loop", true, null)
-				.EventTransition(GameHashes.SleepFail, this.sleep.interrupt, null)
-				.EventTransition(GameHashes.SleepDisturbed, this.sleep.interrupt_light, null)
-				.Exit(delegate(SleepChore.StatesInstance smi)
-				{
-					KAnimControllerBase kanimControllerBase3 = smi.Get<KAnimControllerBase>();
-					if (kanimControllerBase3 != null)
-					{
-						kanimControllerBase3.Play("trans_terrible_working", KAnim.PlayMode.Once, 1f, 0f);
-					}
-				});
-			this.success.Enter(delegate(SleepChore.StatesInstance smi)
-			{
-				smi.EvaluateSleepQuality();
-			}).ReturnSuccess();
+			this.sleep.normal.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Sleep, Db.Get().DuplicantStatusItems.Sleeping, null).QueueAnim("working_loop", true, null).EventTransition(GameHashes.SleepFail, this.sleep.interrupt, null);
+			this.sleep.interrupt.ToggleCategoryStatusItem(Db.Get().StatusItemCategories.Sleep, Db.Get().DuplicantStatusItems.SleepingInterrupted, null).QueueAnim("interrupt", false, null).EventTransition(GameHashes.AnimQueueComplete, this.sleep.normal, (SleepChore.StatesInstance smi) => GameClock.Instance.IsNighttime())
+				.EventTransition(GameHashes.AnimQueueComplete, this.success, (SleepChore.StatesInstance smi) => !GameClock.Instance.IsNighttime());
+			this.success.ReturnSuccess();
 		}
 
 		public StateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.TargetParameter sleeper;
@@ -232,17 +150,9 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 
 			public GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State condition_transition_pre;
 
-			public GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State peaceful;
-
 			public GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State normal;
 
-			public GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State bad;
-
-			public GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State terrible;
-
 			public GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State interrupt;
-
-			public GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State interrupt_light;
 		}
 	}
 }

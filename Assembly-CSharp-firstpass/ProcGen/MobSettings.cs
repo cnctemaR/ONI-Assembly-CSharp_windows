@@ -13,6 +13,18 @@ namespace ProcGen
 
 		public Dictionary<string, Mob> MobLookupTable { get; private set; }
 
+		public bool HasMob(string id)
+		{
+			return this.MobLookupTable.ContainsKey(id);
+		}
+
+		public Mob GetMob(string id)
+		{
+			Mob mob = null;
+			this.MobLookupTable.TryGetValue(id, out mob);
+			return mob;
+		}
+
 		public TagSet GetMobTags()
 		{
 			if (this.mobkeys == null)

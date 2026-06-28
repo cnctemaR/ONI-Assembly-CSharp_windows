@@ -70,11 +70,12 @@ namespace Klei.AI
 
 		public enum Display
 		{
-			Never,
+			Normal,
 			Skill,
 			Expectation,
 			General,
-			Details
+			Details,
+			Never
 		}
 	}
 }

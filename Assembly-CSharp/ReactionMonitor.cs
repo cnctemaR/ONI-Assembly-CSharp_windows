@@ -10,9 +10,6 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 		this.idle.Enter("ClearReactable", delegate(ReactionMonitor.Instance smi)
 		{
 			this.reactable.Set(null, smi);
-		}).Update("PollForReactables", delegate(ReactionMonitor.Instance smi)
-		{
-			smi.PollForReactables();
 		}).TagTransition(GameTags.Dead, this.dead, false);
 		this.reacting.Enter("Reactable.Begin", delegate(ReactionMonitor.Instance smi)
 		{
@@ -46,7 +43,7 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 		{
 		}
 
-		public void PollForReactables()
+		public void PollForReactables(Navigator.ActiveTransition transition)
 		{
 			if (this.IsReacting())
 			{
@@ -55,7 +52,10 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 			if (this.justReacted)
 			{
 				this.justReacted = false;
-				return;
+			}
+			else
+			{
+				this.lastReactable = null;
 			}
 			int num = Grid.PosToCell(base.smi.gameObject);
 			List<ScenePartitionerEntry> list = GameScenePartitioner.Instance.ReserveList();
@@ -63,11 +63,12 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 			for (int i = 0; i < list.Count; i++)
 			{
 				Reactable reactable = list[i].obj as Reactable;
-				if (reactable != null)
+				if (reactable != null && reactable != this.lastReactable)
 				{
-					if (reactable.CanBegin(base.gameObject))
+					if (reactable.CanBegin(base.gameObject, transition))
 					{
 						this.justReacted = true;
+						this.lastReactable = reactable;
 						base.sm.reactable.Set(reactable, base.smi);
 						base.smi.GoTo(base.sm.reacting);
 						break;
@@ -88,5 +89,7 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 		}
 
 		private bool justReacted;
+
+		private Reactable lastReactable;
 	}
 }

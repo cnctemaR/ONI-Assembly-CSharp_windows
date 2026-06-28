@@ -7,6 +7,10 @@ using UnityEngine;
 
 public class SaveManager : KMonoBehaviour
 {
+	public event Action<SaveLoadRoot> onRegister;
+
+	public event Action<SaveLoadRoot> onUnregister;
+
 	protected override void OnPrefabInit()
 	{
 		Assets.RegisterOnAddPrefab(new Action<KPrefabID>(this.OnAddPrefab));
@@ -56,10 +60,18 @@ public class SaveManager : KMonoBehaviour
 			return;
 		}
 		saveLoadRootList.Add(root);
+		if (this.onRegister != null)
+		{
+			this.onRegister(root);
+		}
 	}
 
 	public void Unregister(SaveLoadRoot root)
 	{
+		if (this.onRegister != null)
+		{
+			this.onUnregister(root);
+		}
 		List<SaveLoadRoot> saveLoadRootList = this.GetSaveLoadRootList(root);
 		if (saveLoadRootList == null)
 		{

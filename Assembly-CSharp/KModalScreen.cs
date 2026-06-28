@@ -27,6 +27,7 @@ public class KModalScreen : KScreen
 		{
 			CameraController.Instance.DisableUserCameraControl = false;
 		}
+		this.Trigger(476357528, null);
 	}
 
 	public override bool IsModal()
@@ -39,10 +40,20 @@ public class KModalScreen : KScreen
 		return 100f;
 	}
 
+	protected override void OnActivate()
+	{
+		this.OnShow(true);
+	}
+
+	protected override void OnDeactivate()
+	{
+		this.OnShow(false);
+	}
+
 	protected override void OnShow(bool show)
 	{
 		base.OnShow(show);
-		if (SpeedControlScreen.Instance != null)
+		if (this.pause && SpeedControlScreen.Instance != null)
 		{
 			if (show && !this.shown)
 			{
@@ -58,9 +69,13 @@ public class KModalScreen : KScreen
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (e.TryConsume(global::Action.TogglePause) || e.TryConsume(global::Action.CycleSpeed))
+		if (Game.Instance != null && (e.TryConsume(global::Action.TogglePause) || e.TryConsume(global::Action.CycleSpeed)))
 		{
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Negative", false));
+		}
+		if (!e.Consumed && e.TryConsume(global::Action.Escape))
+		{
+			this.Deactivate();
 		}
 		e.Consumed = true;
 	}
@@ -77,4 +92,6 @@ public class KModalScreen : KScreen
 	}
 
 	private bool shown;
+
+	public bool pause = true;
 }

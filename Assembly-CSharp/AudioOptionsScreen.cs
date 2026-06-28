@@ -41,15 +41,16 @@ public class AudioOptionsScreen : KModalScreen
 				this.CheckMasterValue(keyValuePair.Value.busLevel);
 			}
 		}
-		GameObject gameObject = this.alwaysPlayMusicButton.transform.GetChild(0).gameObject;
+		HierarchyReferences component = this.alwaysPlayMusicButton.GetComponent<HierarchyReferences>();
+		GameObject gameObject = component.GetReference("Button").gameObject;
 		gameObject.GetComponent<ToolTip>().SetSimpleTooltip(UI.FRONTEND.AUDIO_OPTIONS_SCREEN.MUSIC_EVERY_CYCLE_TOOLTIP);
-		gameObject.transform.GetChild(0).gameObject.SetActive(MusicManager.instance.alwaysPlayMusic);
+		component.GetReference("CheckMark").gameObject.SetActive(MusicManager.instance.alwaysPlayMusic);
 		gameObject.GetComponent<KButton>().onClick += delegate
 		{
 			this.ToggleAlwaysPlayMusic();
 		};
-		LocText component = this.alwaysPlayMusicButton.transform.GetChild(1).GetComponent<LocText>();
-		component.SetText(UI.FRONTEND.AUDIO_OPTIONS_SCREEN.MUSIC_EVERY_CYCLE);
+		LocText reference = component.GetReference<LocText>("Label");
+		reference.SetText(UI.FRONTEND.AUDIO_OPTIONS_SCREEN.MUSIC_EVERY_CYCLE);
 	}
 
 	public override void OnKeyDown(KButtonEvent e)
@@ -77,7 +78,7 @@ public class AudioOptionsScreen : KModalScreen
 	private void ToggleAlwaysPlayMusic()
 	{
 		MusicManager.instance.alwaysPlayMusic = !MusicManager.instance.alwaysPlayMusic;
-		this.alwaysPlayMusicButton.transform.GetChild(0).GetChild(0).gameObject.SetActive(MusicManager.instance.alwaysPlayMusic);
+		this.alwaysPlayMusicButton.GetComponent<HierarchyReferences>().GetReference("CheckMark").gameObject.SetActive(MusicManager.instance.alwaysPlayMusic);
 		KPlayerPrefs.SetInt(AudioOptionsScreen.AlwaysPlayMusicKey, (!MusicManager.instance.alwaysPlayMusic) ? 0 : 1);
 	}
 

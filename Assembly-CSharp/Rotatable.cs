@@ -85,7 +85,19 @@ public class Rotatable : KMonoBehaviour, ISaveLoadable
 
 	public Vector3 GetVisualizerPivot()
 	{
-		return this.pivot;
+		Vector3 vector = this.pivot;
+		Orientation orientation = this.orientation;
+		if (orientation != Orientation.FlipH)
+		{
+			if (orientation != Orientation.FlipV)
+			{
+			}
+		}
+		else
+		{
+			vector.x = -this.pivot.x;
+		}
+		return vector;
 	}
 
 	public Vector3 GetVisualizerOffset()

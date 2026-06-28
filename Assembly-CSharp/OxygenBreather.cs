@@ -4,24 +4,9 @@ using KSerialization;
 using UnityEngine;
 
 [RequireComponent(typeof(Health))]
-[SerializationConfig(MemberSerialization.OptIn)]
 public class OxygenBreather : KMonoBehaviour
 {
-	public SuitTank SuitTank
-	{
-		get
-		{
-			return this.suitTank;
-		}
-	}
-
-	public float TargetAirConsumptionRate
-	{
-		get
-		{
-			return this.airConsumptionRate.GetTotalValue();
-		}
-	}
+	public Accumulator o2Accumulator { get; private set; }
 
 	public float O2ConsumptionRate
 	{
@@ -43,18 +28,18 @@ public class OxygenBreather : KMonoBehaviour
 	{
 		this.Subscribe(1623392196, new Action<object>(this.OnDeath));
 		this.Subscribe(-1117766961, new Action<object>(this.OnRevived));
-		this.Subscribe(-1195989806, new Action<object>(this.OnEquippedItem));
-		this.Subscribe(-272419061, new Action<object>(this.OnUnequippedItem));
 	}
 
-	public bool isLowOxygen()
+	public bool IsLowOxygen()
 	{
 		return this.GetOxygenPressure(this.mouthCell) < this.lowOxygenThreshold;
 	}
 
-	public bool isNoOxygen()
+	public bool IsOverPressure()
 	{
-		return this.GetOxygenPressure(this.mouthCell) < this.noOxygenThreshold;
+		bool isGas = Grid.Element[this.mouthCell].IsGas;
+		bool flag = Grid.Cell[this.mouthCell].mass >= 4f;
+		return isGas && flag;
 	}
 
 	protected override void OnSpawn()
@@ -62,21 +47,11 @@ public class OxygenBreather : KMonoBehaviour
 		this.airConsumptionRate = Db.Get().Attributes.AirConsumptionRate.Lookup(this);
 		this.o2Accumulator = new Accumulator("O2", this, 3f);
 		this.CO2Accumulator = new Accumulator("CO2", this, 3f);
-		base.GetComponent<KSelectable>().AddStatusItem(Db.Get().DuplicantStatusItems.BreathingO2, this);
-		base.GetComponent<KSelectable>().AddStatusItem(Db.Get().DuplicantStatusItems.EmittingCO2, this);
+		KSelectable component = base.GetComponent<KSelectable>();
+		component.AddStatusItem(Db.Get().DuplicantStatusItems.BreathingO2, this);
+		component.AddStatusItem(Db.Get().DuplicantStatusItems.EmittingCO2, this);
 		this.temperature = Db.Get().Amounts.Temperature.Lookup(this);
-	}
-
-	private void OnSimConsume(object obj)
-	{
-		if (!typeof(Sim.MassConsumptionCallback).IsAssignableFrom(obj.GetType()))
-		{
-			global::Debug.LogError("Error converting obj to MassConsumptionCallback: " + obj.GetType(), null);
-		}
-		Sim.MassConsumptionCallback massConsumptionCallback = (Sim.MassConsumptionCallback)obj;
-		this.o2Accumulator.Accumulate(massConsumptionCallback.mass);
-		ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, -massConsumptionCallback.mass, null);
-		this.Trigger(240573938, massConsumptionCallback);
+		NameDisplayScreen.Instance.RegisterComponent(base.gameObject, this);
 	}
 
 	private void SimUpdate(float dt)
@@ -84,13 +59,9 @@ public class OxygenBreather : KMonoBehaviour
 		if (!base.gameObject.HasTag(GameTags.Dead))
 		{
 			float num = this.airConsumptionRate.GetTotalValue() * dt;
-			bool isUsingOxygenTank = this.IsUsingOxygenTank;
-			SimHashes getBreathableElement = this.GetBreathableElement;
-			bool flag;
-			if (!isUsingOxygenTank && getBreathableElement != SimHashes.Vacuum)
+			bool flag = this.gasProvider.ConsumeGas(this, num);
+			if (flag && this.gasProvider.ShouldEmitCO2())
 			{
-				HandleVector<Game.ComplexCallbackInfo>.Handle handle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnSimConsume)));
-				SimMessages.ConsumeMass(this.mouthCell, getBreathableElement, num, 3, handle.index);
 				float num2 = num * this.O2toCO2conversion;
 				this.CO2Accumulator.Accumulate(num2);
 				this.accumulatedCO2 += num2;
@@ -103,29 +74,8 @@ public class OxygenBreather : KMonoBehaviour
 					position.z -= 0.5f;
 					CO2Manager.instance.SpawnBreath(position, this.minCO2ToEmit, this.temperature.value);
 				}
-				flag = true;
-				if (this.isLowOxygen())
-				{
-					base.gameObject.GetComponent<Effects>().Add("LowOxygen", false);
-				}
-				else
-				{
-					base.gameObject.GetComponent<Effects>().Remove("LowOxygen");
-				}
 			}
-			else if (isUsingOxygenTank)
-			{
-				this.suitTank.amount -= num;
-				base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().DuplicantStatusItems.LowOxygen, this.suitTank.IsLow(), this);
-				flag = true;
-				ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, -num, null);
-			}
-			else
-			{
-				base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().DuplicantStatusItems.LowOxygen, false);
-				flag = false;
-			}
-			if (flag != this.hasAir && !isUsingOxygenTank)
+			if (flag != this.hasAir)
 			{
 				this.hasAirTimer.Start();
 				if (this.hasAirTimer.TryStop(2f))
@@ -143,55 +93,14 @@ public class OxygenBreather : KMonoBehaviour
 	private void OnDeath(object data)
 	{
 		base.enabled = false;
-		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().DuplicantStatusItems.BreathingO2, false);
-		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().DuplicantStatusItems.EmittingCO2, false);
+		KSelectable component = base.GetComponent<KSelectable>();
+		component.RemoveStatusItem(Db.Get().DuplicantStatusItems.BreathingO2, false);
+		component.RemoveStatusItem(Db.Get().DuplicantStatusItems.EmittingCO2, false);
 	}
 
 	private void OnRevived(object data)
 	{
 		base.enabled = true;
-	}
-
-	private void OnEquippedItem(object data)
-	{
-		KPrefabID kprefabID = (KPrefabID)data;
-		if (kprefabID != null)
-		{
-			foreach (Tag tag in kprefabID.Tags)
-			{
-				if (GameTags.OxygenSuitTaags.Contains(tag))
-				{
-					this.suitTank = kprefabID.GetComponent<SuitTank>();
-					if (NameDisplayScreen.Instance != null)
-					{
-						NameDisplayScreen.Instance.SetSuitTankDisplayState(true, base.gameObject);
-					}
-					break;
-				}
-			}
-		}
-		base.GetComponent<Sensors>().UpdateSensors();
-	}
-
-	private void OnUnequippedItem(object data)
-	{
-		KPrefabID kprefabID = (KPrefabID)data;
-		if (kprefabID != null && GameTags.AllSuitTags.Contains(kprefabID.PrefabTag))
-		{
-			foreach (Tag tag in kprefabID.Tags)
-			{
-				if (GameTags.AllSuitTags.Contains(tag))
-				{
-					if (this.suitTank != null && NameDisplayScreen.Instance != null)
-					{
-						NameDisplayScreen.Instance.SetSuitTankDisplayState(false, base.gameObject);
-					}
-					this.suitTank = null;
-					break;
-				}
-			}
-		}
-		base.GetComponent<Sensors>().UpdateSensors();
 	}
 
 	private int GetMouthCellAtCell(int cell, CellOffset[] offsets)
@@ -273,14 +182,6 @@ public class OxygenBreather : KMonoBehaviour
 		}
 	}
 
-	public bool IsUsingOxygenTank
-	{
-		get
-		{
-			return !this.IsBreathableElement && this.suitTank != null && !this.suitTank.IsEmpty();
-		}
-	}
-
 	private float GetOxygenPressure(int cell)
 	{
 		if (Grid.IsValidCell(cell))
@@ -294,6 +195,21 @@ public class OxygenBreather : KMonoBehaviour
 		return 0f;
 	}
 
+	public OxygenBreather.IGasProvider GetGasProvider()
+	{
+		return this.gasProvider;
+	}
+
+	public void SetGasProvider(OxygenBreather.IGasProvider gas_provider)
+	{
+		if (this.gasProvider != null)
+		{
+			this.gasProvider.OnClearOxygenBreather(this);
+		}
+		this.gasProvider = gas_provider;
+		this.gasProvider.OnSetOxygenBreather(this);
+	}
+
 	public float O2toCO2conversion = 0.5f;
 
 	public float lowOxygenThreshold;
@@ -303,7 +219,7 @@ public class OxygenBreather : KMonoBehaviour
 	public Vector2 mouthOffset;
 
 	[Serialize]
-	private float accumulatedCO2;
+	public float accumulatedCO2;
 
 	[SerializeField]
 	private float minCO2ToEmit = 0.3f;
@@ -318,15 +234,24 @@ public class OxygenBreather : KMonoBehaviour
 	[MyCmpGet]
 	private Facing facing;
 
-	private Accumulator o2Accumulator;
-
 	private Accumulator CO2Accumulator;
 
 	private AmountInstance temperature;
 
-	private SuitTank suitTank;
-
 	private AttributeInstance airConsumptionRate;
 
 	public CellOffset[] breathableCells;
+
+	private OxygenBreather.IGasProvider gasProvider;
+
+	public interface IGasProvider
+	{
+		void OnSetOxygenBreather(OxygenBreather oxygen_breather);
+
+		void OnClearOxygenBreather(OxygenBreather oxygen_breather);
+
+		bool ConsumeGas(OxygenBreather oxygen_breather, float amount);
+
+		bool ShouldEmitCO2();
+	}
 }

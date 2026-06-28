@@ -39,6 +39,7 @@ public class AlgaeHabitatConfig : IBuildingConfig
 		manualDeliveryKG2.allowPause = true;
 		AlgaeHabitat algaeHabitat = go.AddOrGet<AlgaeHabitat>();
 		algaeHabitat.lightBonusMultiplier = 1.1f;
+		algaeHabitat.pressureSampleOffset = new CellOffset(0, 1);
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
@@ -72,6 +73,8 @@ public class AlgaeHabitatConfig : IBuildingConfig
 	{
 		BuildingTemplates.DoPostConfigure(go);
 	}
+
+	public const string ID = "AlgaeHabitat";
 
 	private const float ALGAE_CAPACITY = 100f;
 

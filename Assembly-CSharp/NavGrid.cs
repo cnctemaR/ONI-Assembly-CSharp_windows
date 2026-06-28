@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using HUSL;
 using UnityEngine;
 
 public class NavGrid
@@ -150,7 +151,7 @@ public class NavGrid
 				NavType navType = (NavType)j;
 				if (this.NavTable.IsValid(i, navType))
 				{
-					DebugExtension.DebugPoint(NavTypeHelper.GetNavPos(i, navType), 1f, 0f, true);
+					DebugExtension.DebugPoint(NavTypeHelper.GetNavPos(i, navType), this.NavTypeColor(navType), 1f, 0f, true);
 				}
 			}
 		}
@@ -198,6 +199,26 @@ public class NavGrid
 		}
 	}
 
+	private Color NavTypeColor(NavType navType)
+	{
+		if (this.debugColorLookup == null)
+		{
+			this.debugColorLookup = new Color[7];
+			for (int i = 0; i < 7; i++)
+			{
+				double num = (double)i / 7.0;
+				IList<double> list = ColorConverter.HUSLToRGB(new double[]
+				{
+					num * 360.0,
+					100.0,
+					50.0
+				});
+				this.debugColorLookup[i] = new Color((float)list[0], (float)list[1], (float)list[2]);
+			}
+		}
+		return this.debugColorLookup[(int)navType];
+	}
+
 	public static int MaxLinksPerCell = 22;
 
 	public bool DebugViewAllPaths;
@@ -230,19 +251,18 @@ public class NavGrid
 
 	private static List<int> Potentials = new List<int>();
 
+	private Color[] debugColorLookup;
+
 	public struct Link
 	{
-		public Link(int link, PathFinderFlags flags, NavType start_nav_type, NavType end_nav_type, int transition_id, int cost)
+		public Link(int link, NavType start_nav_type, NavType end_nav_type, int transition_id, int cost)
 		{
 			this.link = link;
-			this.flags = flags;
 			this.startNavType = start_nav_type;
 			this.endNavType = end_nav_type;
 			this.transitionId = transition_id;
 			this.cost = cost;
 		}
-
-		public PathFinderFlags flags;
 
 		public int link;
 

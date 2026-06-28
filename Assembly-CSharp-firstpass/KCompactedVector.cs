@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine.Assertions;
 
-public abstract class KCompactedVector<T> where T : new()
+public class KCompactedVector<T> where T : new()
 {
 	public KCompactedVector(int initial_count = 0)
 	{
@@ -83,6 +83,19 @@ public abstract class KCompactedVector<T> where T : new()
 		this.dataHandleIndices.Clear();
 		this.handles.Clear();
 		this.data.Clear();
+	}
+
+	public int Count
+	{
+		get
+		{
+			return this.data.Count;
+		}
+	}
+
+	public List<T> GetDataList()
+	{
+		return this.data;
 	}
 
 	protected List<T> data;

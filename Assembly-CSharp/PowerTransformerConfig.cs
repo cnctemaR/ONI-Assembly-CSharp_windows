@@ -11,8 +11,8 @@ public class PowerTransformerConfig : IBuildingConfig
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.UseWhitePowerOutputConnectorColour = true;
 		buildingDef.PowerInputOffset = new CellOffset(-1, 1);
-		buildingDef.ElectricalArrowOffset = new CellOffset(1, 0);
 		buildingDef.PowerOutputOffset = new CellOffset(1, 0);
+		buildingDef.ElectricalArrowOffset = new CellOffset(1, 0);
 		buildingDef.ExhaustKilowattsWhenActive = 0.25f;
 		buildingDef.OperatingKilowatts = 1f;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
@@ -23,11 +23,13 @@ public class PowerTransformerConfig : IBuildingConfig
 		buildingDef.Entombable = true;
 		buildingDef.GeneratorWattageRating = 1000f;
 		buildingDef.GeneratorBaseCapacity = 1000f;
+		buildingDef.PermittedRotations = PermittedRotations.FlipH;
 		return buildingDef;
 	}
 
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
+		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		go.AddComponent<RequireInputs>();
 		Battery battery = go.AddOrGet<Battery>();
 		battery.powerSortOrder = 1000;

@@ -13,14 +13,14 @@ public class CoolVestConfig : IEquipmentConfig
 		dictionary.Add("BasicFabric", (float)global::TUNING.EQUIPMENT.VESTS.COOL_VEST_MASS);
 		ClothingWearer.ClothingInfo clothingInfo = ClothingWearer.ClothingInfo.COOL_CLOTHING;
 		List<AttributeModifier> list = new List<AttributeModifier>();
-		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef("Cool_Vest", global::TUNING.EQUIPMENT.SUITS.SLOT, global::TUNING.EQUIPMENT.VESTS.FABRICATOR, 300f, SimHashes.Carbon, dictionary, (float)global::TUNING.EQUIPMENT.VESTS.COOL_VEST_MASS, global::TUNING.EQUIPMENT.VESTS.COOL_VEST_ICON0, global::TUNING.EQUIPMENT.VESTS.SNAPON0, global::TUNING.EQUIPMENT.VESTS.COOL_VEST_ANIM0, PathFinderFlags.None, list, global::TUNING.EQUIPMENT.VESTS.SNAPON1, true, EntityTemplates.CollisionShape.RECTANGLE, 0.75f, 0.4f);
+		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef("Cool_Vest", global::TUNING.EQUIPMENT.CLOTHING.SLOT, global::TUNING.EQUIPMENT.VESTS.FABRICATOR, 300f, SimHashes.Carbon, dictionary, (float)global::TUNING.EQUIPMENT.VESTS.COOL_VEST_MASS, global::TUNING.EQUIPMENT.VESTS.COOL_VEST_ICON0, global::TUNING.EQUIPMENT.VESTS.SNAPON0, global::TUNING.EQUIPMENT.VESTS.COOL_VEST_ANIM0, list, global::TUNING.EQUIPMENT.VESTS.SNAPON1, true, EntityTemplates.CollisionShape.RECTANGLE, 0.75f, 0.4f, null);
 		Descriptor descriptor = new Descriptor(string.Format("{0}: {1}", DUPLICANTS.ATTRIBUTES.THERMALCONDUCTIVITYBARRIER.NAME, GameUtil.GetFormattedDistance(ClothingWearer.ClothingInfo.COOL_CLOTHING.conductivityMod)), string.Format("{0}: {1}", DUPLICANTS.ATTRIBUTES.THERMALCONDUCTIVITYBARRIER.NAME, GameUtil.GetFormattedDistance(ClothingWearer.ClothingInfo.COOL_CLOTHING.conductivityMod)), Descriptor.DescriptorType.Effect, false);
 		Descriptor descriptor2 = new Descriptor(string.Format("{0}: {1}", DUPLICANTS.ATTRIBUTES.DECOR.NAME, ClothingWearer.ClothingInfo.COOL_CLOTHING.decorMod), string.Format("{0}: {1}", DUPLICANTS.ATTRIBUTES.DECOR.NAME, ClothingWearer.ClothingInfo.COOL_CLOTHING.decorMod), Descriptor.DescriptorType.Effect, false);
 		equipmentDef.additionalDescriptors.Add(descriptor);
 		equipmentDef.additionalDescriptors.Add(descriptor2);
 		equipmentDef.OnEquipCallBack = delegate(Equippable eq)
 		{
-			ClothingWearer component = eq.assignee.GetComponent<ClothingWearer>();
+			ClothingWearer component = eq.assignee.GetSoleOwner().GetComponent<ClothingWearer>();
 			if (component != null)
 			{
 				component.ChangeClothes(clothingInfo);
@@ -34,7 +34,7 @@ public class CoolVestConfig : IEquipmentConfig
 		{
 			if (eq != null && eq.assignee != null)
 			{
-				ClothingWearer component2 = eq.assignee.GetComponent<ClothingWearer>();
+				ClothingWearer component2 = eq.assignee.GetSoleOwner().GetComponent<ClothingWearer>();
 				component2.ChangeToDefaultClothes();
 			}
 		};
@@ -51,11 +51,6 @@ public class CoolVestConfig : IEquipmentConfig
 			equippable = go.AddComponent<Equippable>();
 		}
 		equippable.SetQuality(global::QualityLevel.Poor);
-		Equipment equipment = go.GetComponent<Equipment>();
-		if (equipment == null)
-		{
-			equipment = go.AddComponent<Equipment>();
-		}
 		go.GetComponent<KBatchedAnimController>().sceneLayer = Grid.SceneLayer.BuildingBack;
 	}
 

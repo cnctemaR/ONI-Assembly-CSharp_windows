@@ -34,7 +34,7 @@ public class Assignables : KMonoBehaviour
 	{
 		foreach (AssignableSlotInstance assignableSlotInstance in this.slots)
 		{
-			assignableSlotInstance.Unassign(true);
+			assignableSlotInstance.Unassign();
 		}
 	}
 
@@ -77,23 +77,6 @@ public class Assignables : KMonoBehaviour
 		return this.IsAssigned(assignable.slot);
 	}
 
-	public void Assign(Assignable assignable)
-	{
-		if (assignable != null)
-		{
-			AssignableSlotInstance assignableSlotInstance = this.GetSlot(assignable.slot);
-			assignableSlotInstance.Assign(assignable);
-			if (assignable.subSlots != null)
-			{
-				foreach (AssignableSlot assignableSlot in assignable.subSlots)
-				{
-					assignableSlotInstance = this.GetSlot(assignableSlot);
-					assignableSlotInstance.Assign(assignable);
-				}
-			}
-		}
-	}
-
 	public void Unassign(Assignable assignable)
 	{
 		if (assignable != null)
@@ -101,13 +84,13 @@ public class Assignables : KMonoBehaviour
 			AssignableSlotInstance assignableSlotInstance = this.GetSlot(assignable.slot);
 			if (assignableSlotInstance != null)
 			{
-				assignableSlotInstance.Unassign(true);
+				assignableSlotInstance.Unassign();
 				if (assignable.subSlots != null)
 				{
 					foreach (AssignableSlot assignableSlot in assignable.subSlots)
 					{
 						assignableSlotInstance = this.GetSlot(assignableSlot);
-						assignableSlotInstance.Unassign(true);
+						assignableSlotInstance.Unassign();
 					}
 				}
 			}
@@ -148,7 +131,7 @@ public class Assignables : KMonoBehaviour
 			return assignable;
 		}
 		int num = int.MaxValue;
-		foreach (Assignable assignable2 in AssignmentManager.Instance)
+		foreach (Assignable assignable2 in Game.Instance.assignmentManager)
 		{
 			if (!(assignable2 == null))
 			{
@@ -171,7 +154,7 @@ public class Assignables : KMonoBehaviour
 		}
 		if (assignable != null)
 		{
-			assignable.Assign(this);
+			assignable.Assign(base.GetComponent<IAssignableIdentity>());
 		}
 		return assignable;
 	}
@@ -181,7 +164,7 @@ public class Assignables : KMonoBehaviour
 		base.OnCleanUp();
 		foreach (AssignableSlotInstance assignableSlotInstance in this)
 		{
-			assignableSlotInstance.Unassign(true);
+			assignableSlotInstance.Unassign();
 		}
 	}
 

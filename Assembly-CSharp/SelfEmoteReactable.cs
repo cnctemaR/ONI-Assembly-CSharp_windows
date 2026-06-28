@@ -8,7 +8,7 @@ public class SelfEmoteReactable : EmoteReactable
 	{
 	}
 
-	public override bool InternalCanBegin(GameObject reactor)
+	public override bool InternalCanBegin(GameObject reactor, Navigator.ActiveTransition transition)
 	{
 		if (reactor == null)
 		{

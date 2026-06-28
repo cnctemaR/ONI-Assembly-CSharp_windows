@@ -1,23 +1,35 @@
 ﻿using System;
 using Klei.AI;
+using KSerialization;
 
 public class HygieneMonitor : GameStateMachine<HygieneMonitor, HygieneMonitor.Instance>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.clean;
+		base.serializable = true;
 		this.root.EventHandler(GameHashes.NewDay, (HygieneMonitor.Instance smi) => GameClock.Instance, delegate(HygieneMonitor.Instance smi)
 		{
 			smi.AddUncleanEffect();
-		});
-		this.clean.EventTransition(GameHashes.EffectAdded, this.needsshower, (HygieneMonitor.Instance smi) => smi.NeedsShower()).Update(delegate(HygieneMonitor.Instance smi)
+		}).Update(delegate(HygieneMonitor.Instance smi)
 		{
 			smi.UpdateDirtiness();
 		});
-		this.needsshower.EventTransition(GameHashes.EffectRemoved, this.clean, (HygieneMonitor.Instance smi) => !smi.NeedsShower()).ToggleUrge(Db.Get().Urges.Shower);
+		this.clean.EventTransition(GameHashes.EffectAdded, this.needsshower_pre, (HygieneMonitor.Instance smi) => smi.NeedsShower());
+		this.needsshower_pre.Enter(delegate(HygieneMonitor.Instance smi)
+		{
+			smi.SetDirtiness(1f);
+			smi.GoTo(this.needsshower);
+		});
+		this.needsshower.EventTransition(GameHashes.EffectRemoved, this.clean, (HygieneMonitor.Instance smi) => !smi.NeedsShower()).ToggleUrge(Db.Get().Urges.Shower).Exit(delegate(HygieneMonitor.Instance smi)
+		{
+			smi.SetDirtiness(0f);
+		});
 	}
 
 	public GameStateMachine<HygieneMonitor, HygieneMonitor.Instance, IStateMachineTarget, object>.State clean;
+
+	public GameStateMachine<HygieneMonitor, HygieneMonitor.Instance, IStateMachineTarget, object>.State needsshower_pre;
 
 	public GameStateMachine<HygieneMonitor, HygieneMonitor.Instance, IStateMachineTarget, object>.State needsshower;
 
@@ -34,13 +46,23 @@ public class HygieneMonitor : GameStateMachine<HygieneMonitor, HygieneMonitor.In
 			this.effects.Add("Unclean", true);
 		}
 
+		public float GetDirtiness()
+		{
+			return this.dirtiness;
+		}
+
+		public void SetDirtiness(float dirtiness)
+		{
+			this.dirtiness = dirtiness;
+		}
+
 		public bool NeedsShower()
 		{
 			bool flag = false;
 			for (int i = 0; i < HygieneMonitor.Instance.NeedsShowerEffectsIDs.Length; i++)
 			{
 				string text = HygieneMonitor.Instance.NeedsShowerEffectsIDs[i];
-				if (this.effects.Has(text))
+				if (this.effects.HasEffect(text))
 				{
 					flag = true;
 					break;
@@ -66,6 +88,9 @@ public class HygieneMonitor : GameStateMachine<HygieneMonitor, HygieneMonitor.In
 		}
 
 		private Effects effects;
+
+		[Serialize]
+		private float dirtiness;
 
 		private static readonly string[] NeedsShowerEffectsIDs = new string[] { "Unclean" };
 	}

@@ -159,7 +159,7 @@ public class DisplayNodeEditor : BaseNodeEditor
 
 	private Texture2D texture;
 
-	private Biome biome;
+	private ElementBandConfiguration biome;
 
 	private string[] biomeOptions;
 

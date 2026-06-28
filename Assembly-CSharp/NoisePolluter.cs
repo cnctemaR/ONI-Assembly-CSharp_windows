@@ -19,14 +19,9 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 			global::Debug.LogFormat("[{0}] has a 0 radius noise, this will disable it", new object[] { this.GetName() });
 			return;
 		}
-		int num = (2 * this.radius + 5) * (2 * this.radius + 5);
-		if (this.cells.Length < num)
-		{
-			this.cells = new Pair<int, int>[num];
-		}
 	}
 
-	public void SetAttributes(Vector2 pos, int dB, string name)
+	public void SetAttributes(Vector2 pos, int dB, GameObject go, string name)
 	{
 		this.sourceName = name;
 		this.noise = dB;
@@ -42,27 +37,23 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 		return this.noise;
 	}
 
-	public int GetCellCount()
+	public GameObject GetGameObject()
 	{
-		return this.cellCount;
+		return base.gameObject;
 	}
 
-	public void AddCell(Pair<int, int> cell)
+	public void SetSplat(NoiseSplat new_splat)
 	{
-		for (int i = 0; i < this.cellCount; i++)
-		{
-		}
-		this.cells[this.cellCount++] = cell;
-	}
-
-	public Pair<int, int> GetCell(int index)
-	{
-		return this.cells[index];
+		this.splat = new_splat;
 	}
 
 	public void Clear()
 	{
-		this.cellCount = 0;
+		if (this.splat != null)
+		{
+			this.splat.Clear();
+			this.splat = null;
+		}
 	}
 
 	public Vector2 GetPosition()
@@ -72,15 +63,14 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 
 	public string sourceName { get; private set; }
 
-	public long noiseSplatID { get; private set; }
-
 	public bool active { get; private set; }
 
 	public void SetActive(bool active = true)
 	{
-		if (!active)
+		if (!active && this.splat != null)
 		{
-			AudioEventManager.Get().ClearNoiseSplat(this.noiseSplatID);
+			AudioEventManager.Get().ClearNoiseSplat(this.splat);
+			this.splat.Clear();
 		}
 		this.active = active;
 	}
@@ -89,39 +79,29 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 	{
 		if (this.active)
 		{
-			AudioEventManager.Get().ClearNoiseSplat(this.noiseSplatID);
-			this.noiseSplatID = AudioEventManager.Get().UpdateConstantNoiseSplat(this);
+			if (this.splat != null)
+			{
+				AudioEventManager.Get().ClearNoiseSplat(this.splat);
+				this.splat.Clear();
+			}
+			KSelectable component = base.GetComponent<KSelectable>();
+			string text = ((!(component != null)) ? base.name : component.GetName());
+			GameObject gameObject = base.GetComponent<KMonoBehaviour>().gameObject;
+			this.splat = AudioEventManager.Get().CreateNoiseSplat(this.GetPosition(), this.noise, this.radius, text, gameObject);
 		}
 	}
 
 	private void OnActiveChanged(object data)
 	{
-		this.SetActive(this.operational.IsActive);
+		bool flag = (bool)data;
+		this.SetActive(flag);
 		this.Refresh();
-	}
-
-	public int GetNoisePollutionForCell(int cell)
-	{
-		for (int i = 0; i < this.cellCount; i++)
-		{
-			if (this.cells[i].first == cell)
-			{
-				return this.cells[i].second;
-			}
-		}
-		return 0;
 	}
 
 	public void SetValues(EffectorValues values)
 	{
 		this.noise = values.amount;
 		this.radius = values.radius;
-	}
-
-	protected override void OnPrefabInit()
-	{
-		base.OnPrefabInit();
-		this.noiseSplatID = -1L;
 	}
 
 	protected override void OnSpawn()
@@ -143,7 +123,8 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 			return;
 		}
 		this.ResetCells();
-		if (this.operational != null)
+		Operational component = base.GetComponent<Operational>();
+		if (component != null)
 		{
 			this.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
 		}
@@ -177,8 +158,8 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 				"]"
 			}), null);
 		}
-		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		this.isMovable = component != null && component.isMovable;
+		KBatchedAnimController component2 = base.GetComponent<KBatchedAnimController>();
+		this.isMovable = component2 != null && component2.isMovable;
 		if (this.isMovable)
 		{
 			CellChangeMonitor.Instance.Add(this, new Action<int, int>(this.OnCellChange), false);
@@ -187,9 +168,9 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 		attributeInstance.OnDirty = (global::System.Action)Delegate.Combine(attributeInstance.OnDirty, this.refreshCallback);
 		AttributeInstance attributeInstance2 = this.dBRadius;
 		attributeInstance2.OnDirty = (global::System.Action)Delegate.Combine(attributeInstance2.OnDirty, this.refreshCallback);
-		if (this.operational != null)
+		if (component != null)
 		{
-			this.OnActiveChanged(null);
+			this.OnActiveChanged(component.IsActive);
 		}
 	}
 
@@ -230,7 +211,51 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 				CellChangeMonitor.Instance.Remove(this, new Action<int, int>(this.OnCellChange), false);
 			}
 		}
-		AudioEventManager.Get().ClearNoiseSplat(this.noiseSplatID);
+		if (this.splat != null)
+		{
+			AudioEventManager.Get().ClearNoiseSplat(this.splat);
+			this.splat.Clear();
+		}
+	}
+
+	public float GetNoiseForCell(int cell)
+	{
+		return this.splat.GetDBForCell(cell);
+	}
+
+	public List<Descriptor> GetEffectDescriptions()
+	{
+		List<Descriptor> list = new List<Descriptor>();
+		if (this.dB != null && this.dBRadius != null)
+		{
+			float totalValue = this.dB.GetTotalValue();
+			float totalValue2 = this.dBRadius.GetTotalValue();
+			string text = ((this.noise <= 0) ? "consumed" : "produced");
+			string text2 = ((this.noise <= 0) ? UI.BUILDINGEFFECTS.TOOLTIPS.NOISE_POLLUTION_DECREASE : UI.BUILDINGEFFECTS.TOOLTIPS.NOISE_POLLUTION_INCREASE);
+			text2 = text2 + "\n\n" + this.dB.GetAttributeValueTooltip();
+			string text3 = GameUtil.AddPositiveSign(totalValue.ToString(), totalValue > 0f);
+			Descriptor descriptor = new Descriptor(string.Format(UI.BUILDINGEFFECTS.NOISE_CREATED, text, text3, totalValue2), string.Format(text2, text3, totalValue2), Descriptor.DescriptorType.Effect, false);
+			list.Add(descriptor);
+		}
+		else if (this.noise != 0)
+		{
+			string text4 = ((this.noise < 0) ? "consumed" : "produced");
+			string text5 = ((this.noise < 0) ? UI.BUILDINGEFFECTS.TOOLTIPS.NOISE_POLLUTION_DECREASE : UI.BUILDINGEFFECTS.TOOLTIPS.NOISE_POLLUTION_INCREASE);
+			string text6 = GameUtil.AddPositiveSign(this.noise.ToString(), this.noise > 0);
+			Descriptor descriptor2 = new Descriptor(string.Format(UI.BUILDINGEFFECTS.NOISE_CREATED, text4, text6, this.radius), string.Format(text5, text6, this.radius), Descriptor.DescriptorType.Effect, false);
+			list.Add(descriptor2);
+		}
+		return list;
+	}
+
+	public List<Descriptor> GetDescriptors(BuildingDef def)
+	{
+		return this.GetEffectDescriptions();
+	}
+
+	public List<Descriptor> GetDescriptors(GameObject go)
+	{
+		return this.GetEffectDescriptions();
 	}
 
 	public const string ID = "NoisePolluter";
@@ -239,13 +264,11 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 
 	public int noise;
 
-	private Pair<int, int>[] cells = new Pair<int, int>[0];
-
-	private int cellCount;
-
 	public AttributeInstance dB;
 
 	public AttributeInstance dBRadius;
+
+	private NoiseSplat splat;
 
 	public global::System.Action refreshCallback;
 
@@ -257,10 +280,4 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 
 	[MyCmpReq]
 	public OccupyArea occupyArea;
-
-	[MyCmpGet]
-	public SimCellOccupier simCellOccupier;
-
-	[MyCmpGet]
-	private Operational operational;
 }

@@ -23,14 +23,6 @@ public class Pickupable : Workable
 
 	public Storage storage { get; set; }
 
-	public bool CountableUnits
-	{
-		get
-		{
-			return this.primaryElement.CountableUnits;
-		}
-	}
-
 	public float MinTakeAmount
 	{
 		get
@@ -258,6 +250,10 @@ public class Pickupable : Workable
 
 	public void RegisterListeners()
 	{
+		if (this.cleaningUp)
+		{
+			return;
+		}
 		if (this.solidPartitionerEntry != null)
 		{
 			return;
@@ -410,6 +406,7 @@ public class Pickupable : Workable
 
 	protected override void OnCleanUp()
 	{
+		this.cleaningUp = true;
 		this.ReleaseEntombedVisualizer();
 		this.RemoveFaller();
 		if (this.storage)
@@ -739,6 +736,8 @@ public class Pickupable : Workable
 	private bool isReachable;
 
 	private bool isEntombed;
+
+	private bool cleaningUp;
 
 	private bool wasAbsorbed;
 

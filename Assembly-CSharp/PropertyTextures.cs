@@ -266,7 +266,7 @@ public class PropertyTextures : KMonoBehaviour
 				else if (element.IsLiquid)
 				{
 					int num4 = Grid.CellAbove(num2);
-					if (Grid.IsValidCell(num4))
+					if (Grid.IsValidCell(num4) && Grid.Element[num4].IsGas)
 					{
 						num3 = Mathf.Clamp01((Grid.Pressure[num4] - this.PressureRange.x) / num);
 					}
@@ -502,8 +502,8 @@ public class PropertyTextures : KMonoBehaviour
 	[SerializeField]
 	private Vector2 PressureRange = new Vector2(15f, 200f);
 
-	[Range(0f, 1f)]
 	[SerializeField]
+	[Range(0f, 1f)]
 	private float TemperatureStateChangeRange = 0.05f;
 
 	public static PropertyTextures instance;

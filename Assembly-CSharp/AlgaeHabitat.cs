@@ -27,6 +27,8 @@ public class AlgaeHabitat : StateMachineComponent<AlgaeHabitat.SMInstance>
 	[SerializeField]
 	public float lightBonusMultiplier = 1.1f;
 
+	public CellOffset pressureSampleOffset = CellOffset.none;
+
 	public class SMInstance : GameStateMachine<AlgaeHabitat.States, AlgaeHabitat.SMInstance, AlgaeHabitat, object>.GameInstance
 	{
 		public SMInstance(AlgaeHabitat master)
@@ -88,8 +90,6 @@ public class AlgaeHabitat : StateMachineComponent<AlgaeHabitat.SMInstance>
 		public GameStateMachine<AlgaeHabitat.States, AlgaeHabitat.SMInstance, AlgaeHabitat, object>.State gotAlgae;
 
 		public GameStateMachine<AlgaeHabitat.States, AlgaeHabitat.SMInstance, AlgaeHabitat, object>.State gotWater;
-
-		public GameStateMachine<AlgaeHabitat.States, AlgaeHabitat.SMInstance, AlgaeHabitat, object>.State lostWater;
 
 		public GameStateMachine<AlgaeHabitat.States, AlgaeHabitat.SMInstance, AlgaeHabitat, object>.State lostAlgae;
 

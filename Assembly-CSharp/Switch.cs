@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Switch : KMonoBehaviour, ISaveLoadable, IToggleHandler, IEffectDescriptor
+public class Switch : KMonoBehaviour, ISaveLoadable, IToggleHandler
 {
 	public event Action<bool> OnToggle;
 
@@ -83,15 +82,6 @@ public class Switch : KMonoBehaviour, ISaveLoadable, IToggleHandler, IEffectDesc
 	{
 		StatusItem statusItem = ((!this.switchedOn) ? Db.Get().BuildingStatusItems.SwitchStatusInactive : Db.Get().BuildingStatusItems.SwitchStatusActive);
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, statusItem, null);
-	}
-
-	public List<Descriptor> GetDescriptors(BuildingDef def)
-	{
-		List<Descriptor> list = new List<Descriptor>();
-		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.REQUIRESMANUALOPERATION, UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESMANUALOPERATION, Descriptor.DescriptorType.Requirement);
-		list.Add(descriptor);
-		return list;
 	}
 
 	[SerializeField]

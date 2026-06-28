@@ -103,6 +103,17 @@ public static class GameUtil
 		return text;
 	}
 
+	public static float GetThermalEnergy(PrimaryElement pe)
+	{
+		return pe.Temperature * pe.Mass * pe.Element.specificHeatCapacity;
+	}
+
+	public static void DeltaThermalEnergy(PrimaryElement pe, float kilowatts)
+	{
+		float num = kilowatts / (pe.Element.specificHeatCapacity * pe.Mass);
+		pe.Temperature += num;
+	}
+
 	public static BindingEntry ActionToBinding(global::Action action)
 	{
 		foreach (BindingEntry bindingEntry in GameInputMapping.KeyBindings)
@@ -146,10 +157,11 @@ public static class GameUtil
 
 	public static string GetUnitFormattedName(GameObject go, bool upperName = false)
 	{
-		PrimaryElement component = go.GetComponent<PrimaryElement>();
-		if (component != null && component.CountableUnits)
+		KPrefabID component = go.GetComponent<KPrefabID>();
+		if (component != null && Assets.IsTagCountable(component.PrefabTag))
 		{
-			return GameUtil.GetUnitFormattedName(go.GetProperName(), component.Units, upperName);
+			PrimaryElement component2 = go.GetComponent<PrimaryElement>();
+			return GameUtil.GetUnitFormattedName(go.GetProperName(), component2.Units, upperName);
 		}
 		return (!upperName) ? go.GetProperName() : go.GetProperName().ToUpper();
 	}
@@ -285,6 +297,10 @@ public static class GameUtil
 
 	public static string GetFormattedJoules(float joules, string floatFormat = "F1")
 	{
+		if (Math.Abs(joules) > 1000000f)
+		{
+			return (joules / 1000000f).ToString(floatFormat) + UI.UNITSUFFIXES.ELECTRICAL.MEGAJOULE;
+		}
 		if (Mathf.Abs(joules) > 1000f)
 		{
 			return (joules / 1000f).ToString(floatFormat) + UI.UNITSUFFIXES.ELECTRICAL.KILOJOULE;
@@ -292,13 +308,31 @@ public static class GameUtil
 		return joules.ToString(floatFormat) + UI.UNITSUFFIXES.ELECTRICAL.JOULE;
 	}
 
-	public static string GetFormattedWattage(float watts, string floatFormat = "F1")
+	public static string GetFormattedWattage(float watts, GameUtil.WattageFormatterUnit unit = GameUtil.WattageFormatterUnit.Automatic)
 	{
-		if (Mathf.Abs(watts) > 1000f)
+		LocString locString = string.Empty;
+		switch (unit)
 		{
-			return (watts / 1000f).ToString(floatFormat) + UI.UNITSUFFIXES.ELECTRICAL.KILOWATT;
+		case GameUtil.WattageFormatterUnit.Watts:
+			locString = UI.UNITSUFFIXES.ELECTRICAL.WATT;
+			break;
+		case GameUtil.WattageFormatterUnit.Kilowatts:
+			watts /= 1000f;
+			locString = UI.UNITSUFFIXES.ELECTRICAL.KILOWATT;
+			break;
+		case GameUtil.WattageFormatterUnit.Automatic:
+			if (Mathf.Abs(watts) > 1000f)
+			{
+				watts /= 1000f;
+				locString = UI.UNITSUFFIXES.ELECTRICAL.KILOWATT;
+			}
+			else
+			{
+				locString = UI.UNITSUFFIXES.ELECTRICAL.WATT;
+			}
+			break;
 		}
-		return watts.ToString(floatFormat) + UI.UNITSUFFIXES.ELECTRICAL.WATT;
+		return watts.ToString("###0.##") + locString;
 	}
 
 	public static string GetFormattedInt(float num, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
@@ -321,15 +355,15 @@ public static class GameUtil
 		}
 		else if (Mathf.Abs(num) < 1f)
 		{
-			text = num.ToString("#,##0.#");
+			text = num.ToString("#,##0.##");
 		}
 		else if (Mathf.Abs(num) < 10f)
 		{
-			text = num.ToString("#,###.#");
+			text = num.ToString("#,###.##");
 		}
 		else
 		{
-			text = num.ToString("#,###");
+			text = num.ToString("#,###.##");
 		}
 		return GameUtil.AddTimeSliceText(text, timeSlice);
 	}
@@ -356,7 +390,7 @@ public static class GameUtil
 		string text;
 		if (GameUtil.massUnit == GameUtil.MassUnit.Kilograms)
 		{
-			text = UI.UNITSUFFIXES.MASS.KILOGRAM;
+			text = UI.UNITSUFFIXES.MASS.TONNE;
 			if (massFormat == GameUtil.MetricMassFormat.UseThreshold)
 			{
 				float num = Mathf.Abs(mass);
@@ -377,7 +411,24 @@ public static class GameUtil
 						mass *= 1000f;
 						text = UI.UNITSUFFIXES.MASS.GRAM;
 					}
+					else if (Mathf.Abs(mass) < 5000f)
+					{
+						text = UI.UNITSUFFIXES.MASS.KILOGRAM;
+					}
+					else
+					{
+						mass /= 1000f;
+						text = UI.UNITSUFFIXES.MASS.TONNE;
+					}
 				}
+				else
+				{
+					text = UI.UNITSUFFIXES.MASS.KILOGRAM;
+				}
+			}
+			else if (massFormat == GameUtil.MetricMassFormat.Kilogram)
+			{
+				text = UI.UNITSUFFIXES.MASS.KILOGRAM;
 			}
 			else if (massFormat == GameUtil.MetricMassFormat.Gram)
 			{
@@ -466,17 +517,17 @@ public static class GameUtil
 		return hashSet;
 	}
 
-	public static HashSet<int> FloodCollectCells(int start_cell, Func<int, bool> is_valid, int maxSize = 300, HashSet<int> AddInvalidCells = null)
+	public static HashSet<int> FloodCollectCells(int start_cell, Func<int, bool> is_valid, int maxSize = 300, HashSet<int> AddInvalidCellsToSet = null)
 	{
 		HashSet<int> hashSet = new HashSet<int>();
 		HashSet<int> hashSet2 = new HashSet<int>();
 		GameUtil.probeFromCell(start_cell, is_valid, hashSet, hashSet2, maxSize);
-		if (AddInvalidCells != null)
+		if (AddInvalidCellsToSet != null)
 		{
-			AddInvalidCells.UnionWith(hashSet2);
+			AddInvalidCellsToSet.UnionWith(hashSet2);
 			if (hashSet.Count > maxSize)
 			{
-				AddInvalidCells.UnionWith(hashSet);
+				AddInvalidCellsToSet.UnionWith(hashSet);
 			}
 		}
 		if (hashSet.Count > maxSize)
@@ -484,6 +535,20 @@ public static class GameUtil
 			hashSet.Clear();
 		}
 		return hashSet;
+	}
+
+	public static HashSet<int> FloodCollectCells(HashSet<int> results, int start_cell, Func<int, bool> is_valid, int maxSize = 300, HashSet<int> AddInvalidCellsToSet = null)
+	{
+		GameUtil.probeFromCell(start_cell, is_valid, results, AddInvalidCellsToSet, maxSize);
+		if (AddInvalidCellsToSet != null && results.Count > maxSize)
+		{
+			AddInvalidCellsToSet.UnionWith(results);
+		}
+		if (results.Count > maxSize)
+		{
+			results.Clear();
+		}
+		return results;
 	}
 
 	private static void probeFromCell(int start_cell, Func<int, bool> is_valid, HashSet<int> cells, HashSet<int> invalidCells, int maxSize = 300)
@@ -565,6 +630,50 @@ public static class GameUtil
 		return num;
 	}
 
+	public static void FloodFillConditional(int start_cell, Func<int, bool> condition, ICollection<int> visited_cells)
+	{
+		GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
+		{
+			cell = start_cell,
+			depth = 0
+		});
+		while (GameUtil.FloodFillNext.Count > 0)
+		{
+			GameUtil.FloodFillInfo floodFillInfo = GameUtil.FloodFillNext.Dequeue();
+			if (Grid.IsValidCell(floodFillInfo.cell))
+			{
+				if (!visited_cells.Contains(floodFillInfo.cell))
+				{
+					visited_cells.Add(floodFillInfo.cell);
+					if (condition(floodFillInfo.cell))
+					{
+						GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
+						{
+							cell = Grid.CellLeft(floodFillInfo.cell),
+							depth = floodFillInfo.depth + 1
+						});
+						GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
+						{
+							cell = Grid.CellRight(floodFillInfo.cell),
+							depth = floodFillInfo.depth + 1
+						});
+						GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
+						{
+							cell = Grid.CellAbove(floodFillInfo.cell),
+							depth = floodFillInfo.depth + 1
+						});
+						GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
+						{
+							cell = Grid.CellBelow(floodFillInfo.cell),
+							depth = floodFillInfo.depth + 1
+						});
+					}
+				}
+			}
+		}
+		GameUtil.FloodFillNext.Clear();
+	}
+
 	public static string GetHardnessString(Element element, bool addColor = true)
 	{
 		if (!element.IsSolid)
@@ -614,6 +723,56 @@ public static class GameUtil
 			text = string.Format("<color=#{0}>{1}</color>", color7.ToHexString(), text);
 		}
 		return text;
+	}
+
+	public static string GetThermalConductivityString(Element element, bool addColor = true, bool addValue = true)
+	{
+		Color color = new Color(0.83137256f, 0.28627452f, 0.28235295f);
+		Color color2 = new Color(0.7411765f, 0.34901962f, 0.49803922f);
+		Color color3 = new Color(0.6392157f, 0.39215687f, 0.6039216f);
+		Color color4 = new Color(0.5254902f, 0.41960785f, 0.64705884f);
+		Color color5 = new Color(0.42745098f, 0.48235294f, 0.75686276f);
+		string text = string.Empty;
+		Color color6;
+		if (element.thermalConductivity >= 50f)
+		{
+			color6 = color5;
+			text = UI.ELEMENTAL.THERMALCONDUCTIVITY.ADJECTIVES.VERY_HIGH_CONDUCTIVITY;
+		}
+		else if (element.thermalConductivity >= 10f)
+		{
+			color6 = color4;
+			text = UI.ELEMENTAL.THERMALCONDUCTIVITY.ADJECTIVES.HIGH_CONDUCTIVITY;
+		}
+		else if (element.thermalConductivity >= 2f)
+		{
+			color6 = color3;
+			text = UI.ELEMENTAL.THERMALCONDUCTIVITY.ADJECTIVES.MEDIUM_CONDUCTIVITY;
+		}
+		else if (element.thermalConductivity >= 1f)
+		{
+			color6 = color2;
+			text = UI.ELEMENTAL.THERMALCONDUCTIVITY.ADJECTIVES.LOW_CONDUCTIVITY;
+		}
+		else
+		{
+			color6 = color;
+			text = UI.ELEMENTAL.THERMALCONDUCTIVITY.ADJECTIVES.VERY_LOW_CONDUCTIVITY;
+		}
+		if (addColor)
+		{
+			text = string.Format("<color=#{0}>{1}</color>", color6.ToHexString(), text);
+		}
+		if (addValue)
+		{
+			text = string.Format(UI.ELEMENTAL.THERMALCONDUCTIVITY.ADJECTIVES.VALUE_WITH_ADJECTIVE, element.thermalConductivity.ToString(), text);
+		}
+		return text;
+	}
+
+	public static string GetFormattedThermalConductivity(float tc)
+	{
+		return string.Empty;
 	}
 
 	public static string GetBreathableString(Element element, float Mass)
@@ -1401,23 +1560,13 @@ public static class GameUtil
 		}
 	}
 
-	public static float GetNoisePollutionAtCell(int cell)
+	public static float GetDecorAtCell(int cell)
 	{
-		return AudioEventManager.Get().GetNoisePollutionAtCell(cell);
-	}
-
-	public static string GetLoudestNoisePollutorAtCell(int cell)
-	{
-		return AudioEventManager.GetLoudestNoisePollutorAtCell(cell);
-	}
-
-	public static int GetDecorAtCell(int cell)
-	{
-		int num = 0;
+		float num = 0f;
 		if (!Grid.Solid[cell])
 		{
 			num = Grid.Decor[cell];
-			num += DecorProvider.GetLightDecorBonus(cell);
+			num += (float)DecorProvider.GetLightDecorBonus(cell);
 		}
 		return num;
 	}
@@ -1430,22 +1579,17 @@ public static class GameUtil
 		{
 			text = GameUtil.GetKeywordStyle(element);
 		}
+		else if (GameUtil.foodTags.Contains(tag))
+		{
+			text = "food";
+		}
+		else if (GameUtil.solidTags.Contains(tag))
+		{
+			text = "solid";
+		}
 		else
 		{
-			string text2 = tag.ToString();
-			TagSet tagSet = new TagSet(new string[] { "BasicPlantFood", "MushBar", "ColdWheatSeed", "ColdWheatSeed", "SpiceNut", "PrickleFruit", "Meat", "Mushroom" });
-			if (tagSet.Contains(tag))
-			{
-				text = "food";
-			}
-			else if (text2 == "Filter" || text2 == "Coal" || text2 == "BasicFabric")
-			{
-				text = "solid";
-			}
-			else
-			{
-				text = null;
-			}
+			text = null;
 		}
 		return text;
 	}
@@ -1606,45 +1750,89 @@ public static class GameUtil
 		return string.Format("{0:X2}{1:X2}{2:X2}{3:X2}", new object[] { colour.r, colour.g, colour.b, colour.a });
 	}
 
-	public static string GetFormattedDecibels(float db)
-	{
-		Color noisePollutionCategoryColourFromDecibels = SimDebugView.Instance.GetNoisePollutionCategoryColourFromDecibels(db);
-		return string.Format(string.Format(UI.OVERLAYS.NOISE_POLLUTION.VALUE, noisePollutionCategoryColourFromDecibels.ToHexString(), db.ToString()), new object[0]);
-	}
-
-	public static string GetDecibelLoudnessString(float db)
+	public static string GetFormattedDecor(float value)
 	{
 		string text = string.Empty;
-		Color noisePollutionCategoryColourFromDecibels = SimDebugView.Instance.GetNoisePollutionCategoryColourFromDecibels(db);
-		if (db <= 36f)
+		string text2 = string.Empty;
+		LocString locString = UI.OVERLAYS.DECOR.VALUE;
+		if (value > 0f)
 		{
-			text = UI.OVERLAYS.NOISE_POLLUTION.NAMES.PEACEFUL;
+			text = "produced";
+			text2 = "+";
 		}
-		else if (db >= 36f && db < 45f)
+		else if (value < 0f)
 		{
-			text = UI.OVERLAYS.NOISE_POLLUTION.NAMES.QUIET;
-		}
-		else if (db >= 45f && db < 60f)
-		{
-			text = UI.OVERLAYS.NOISE_POLLUTION.NAMES.TOSSANDTURN;
-		}
-		else if (db >= 60f && db < 80f)
-		{
-			text = UI.OVERLAYS.NOISE_POLLUTION.NAMES.WAKEUP;
-		}
-		else if (db >= 80f && db < 106f)
-		{
-			text = UI.OVERLAYS.NOISE_POLLUTION.NAMES.PASSIVE;
-		}
-		else if (db >= 106f && db < 125f)
-		{
-			text = UI.OVERLAYS.NOISE_POLLUTION.NAMES.ACTIVE;
+			text = "consumed";
 		}
 		else
 		{
-			text = UI.OVERLAYS.NOISE_POLLUTION.NAMES.EXTREME;
+			locString = UI.OVERLAYS.DECOR.VALUE_ZERO;
 		}
-		return string.Format(UI.OVERLAYS.NOISE_POLLUTION.LOUDNESS_STRING, noisePollutionCategoryColourFromDecibels.ToHexString(), text);
+		return string.Format(locString, text, text2, value);
+	}
+
+	public static Color GetDecorColourFromValue(int decor)
+	{
+		Color color = Color.black;
+		float num = (float)decor / 100f;
+		if (num > 0f)
+		{
+			color = Color.Lerp(new Color(0.15f, 0f, 0f), new Color(0f, 1f, 0f), Mathf.Abs(num));
+		}
+		else
+		{
+			color = Color.Lerp(new Color(0.15f, 0f, 0f), new Color(1f, 0f, 0f), Mathf.Abs(num));
+		}
+		return color;
+	}
+
+	public static string GetSignificantMaterialPropertyTooltips(Element element)
+	{
+		string text = string.Empty;
+		List<Descriptor> significantMaterialPropertyDescriptors = GameUtil.GetSignificantMaterialPropertyDescriptors(element);
+		if (significantMaterialPropertyDescriptors.Count > 0)
+		{
+			text += "\n";
+			for (int i = 0; i < significantMaterialPropertyDescriptors.Count; i++)
+			{
+				text = text + "    • " + Util.StripTextFormatting(significantMaterialPropertyDescriptors[i].text) + "\n";
+			}
+		}
+		return text;
+	}
+
+	public static List<Descriptor> GetSignificantMaterialPropertyDescriptors(Element element)
+	{
+		List<Descriptor> list = new List<Descriptor>();
+		if (element.thermalConductivity > 10f)
+		{
+			Descriptor descriptor = default(Descriptor);
+			descriptor.SetupDescriptor(string.Format(ELEMENTS.MATERIAL_MODIFIERS.HIGH_THERMAL_CONDUCTIVITY, GameUtil.GetThermalConductivityString(element, false, false)), string.Format(ELEMENTS.MATERIAL_MODIFIERS.TOOLTIP.HIGH_THERMAL_CONDUCTIVITY, element.name, element.thermalConductivity.ToString("0.#####")), Descriptor.DescriptorType.Effect);
+			descriptor.IncreaseIndent();
+			list.Add(descriptor);
+		}
+		if (element.thermalConductivity < 1f)
+		{
+			Descriptor descriptor2 = default(Descriptor);
+			descriptor2.SetupDescriptor(string.Format(ELEMENTS.MATERIAL_MODIFIERS.LOW_THERMAL_CONDUCTIVITY, GameUtil.GetThermalConductivityString(element, false, false)), string.Format(ELEMENTS.MATERIAL_MODIFIERS.TOOLTIP.LOW_THERMAL_CONDUCTIVITY, element.name, element.thermalConductivity.ToString("0.#####")), Descriptor.DescriptorType.Effect);
+			descriptor2.IncreaseIndent();
+			list.Add(descriptor2);
+		}
+		if (element.specificHeatCapacity <= 0.2f)
+		{
+			Descriptor descriptor3 = default(Descriptor);
+			descriptor3.SetupDescriptor(ELEMENTS.MATERIAL_MODIFIERS.LOW_SPECIFIC_HEAT_CAPACITY, string.Format(ELEMENTS.MATERIAL_MODIFIERS.TOOLTIP.LOW_SPECIFIC_HEAT_CAPACITY, element.name, element.specificHeatCapacity), Descriptor.DescriptorType.Effect);
+			descriptor3.IncreaseIndent();
+			list.Add(descriptor3);
+		}
+		if (element.specificHeatCapacity >= 1f)
+		{
+			Descriptor descriptor4 = default(Descriptor);
+			descriptor4.SetupDescriptor(ELEMENTS.MATERIAL_MODIFIERS.HIGH_SPECIFIC_HEAT_CAPACITY, string.Format(ELEMENTS.MATERIAL_MODIFIERS.TOOLTIP.HIGH_SPECIFIC_HEAT_CAPACITY, element.name, element.specificHeatCapacity), Descriptor.DescriptorType.Effect);
+			descriptor4.IncreaseIndent();
+			list.Add(descriptor4);
+		}
+		return list;
 	}
 
 	public static GameUtil.TemperatureUnit temperatureUnit;
@@ -1657,7 +1845,11 @@ public static class GameUtil
 	private static Queue<GameUtil.FloodFillInfo> FloodFillNext = new Queue<GameUtil.FloodFillInfo>();
 
 	[ThreadStatic]
-	private static List<int> FloodFillVisited = new List<int>();
+	private static HashSet<int> FloodFillVisited = new HashSet<int>();
+
+	public static TagSet foodTags = new TagSet(new string[] { "BasicPlantFood", "MushBar", "ColdWheatSeed", "ColdWheatSeed", "SpiceNut", "PrickleFruit", "Meat", "Mushroom" });
+
+	public static TagSet solidTags = new TagSet(new string[] { "Filter", "Coal", "BasicFabric", "SwampLilyFlower" });
 
 	public enum UnitClass
 	{
@@ -1703,6 +1895,13 @@ public static class GameUtil
 		ModifyOnly,
 		PerSecond,
 		PerCycle
+	}
+
+	public enum WattageFormatterUnit
+	{
+		Watts,
+		Kilowatts,
+		Automatic
 	}
 
 	private struct FloodFillInfo

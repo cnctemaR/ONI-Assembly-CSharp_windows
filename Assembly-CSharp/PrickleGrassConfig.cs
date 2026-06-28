@@ -23,7 +23,7 @@ public class PrickleGrassConfig : IEntityConfig
 		gameObject.AddOrGet<PrickleGrass>();
 		List<Tag> list = new List<Tag> { GameTags.DecorSeed };
 		GameObject gameObject2 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Hidden, "PrickleGrassSeed", CREATURES.SPECIES.SEEDS.PRICKLEGRASS.NAME, CREATURES.SPECIES.SEEDS.PRICKLEGRASS.DESC, Assets.GetAnim("seed_bristlebriar_kanim"), "object", 1, list, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 5, CREATURES.SPECIES.PRICKLEGRASS.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, string.Empty);
-		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject, gameObject2, "PrickleGrass_preview", Assets.GetAnim("bristlebriar_kanim"), "place", 1, 1);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject2, "PrickleGrass_preview", Assets.GetAnim("bristlebriar_kanim"), "place", 1, 1);
 		return gameObject;
 	}
 

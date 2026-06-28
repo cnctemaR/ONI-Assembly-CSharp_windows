@@ -24,11 +24,14 @@ public class HarvestableOverlayWidget : KMonoBehaviour
 			GameObject gameObject = Util.KInstantiateUI(this.horizontal_container_prefab, this.vertical_container, false);
 			this.horizontal_containers[i] = gameObject;
 		}
-		for (int j = 0; j < 10; j++)
+		for (int j = 0; j < 11; j++)
 		{
-			GameObject gameObject2 = Util.KInstantiateUI(this.icon_gameobject_prefab, base.gameObject, false);
-			gameObject2.GetComponent<Image>().sprite = this.condition_sprites[(WiltCondition.Condition)j];
-			this.condition_icons.Add((WiltCondition.Condition)j, gameObject2);
+			if (this.condition_sprites.ContainsKey((WiltCondition.Condition)j))
+			{
+				GameObject gameObject2 = Util.KInstantiateUI(this.icon_gameobject_prefab, base.gameObject, false);
+				gameObject2.GetComponent<Image>().sprite = this.condition_sprites[(WiltCondition.Condition)j];
+				this.condition_icons.Add((WiltCondition.Condition)j, gameObject2);
+			}
 		}
 	}
 
@@ -74,9 +77,12 @@ public class HarvestableOverlayWidget : KMonoBehaviour
 				{
 					for (int j = 0; j < list.Count; j++)
 					{
-						this.condition_icons[list[j]].SetActive(true);
-						this.horizontal_containers[j / 2].SetActive(true);
-						this.condition_icons[list[j]].transform.SetParent(this.horizontal_containers[j / 2].transform);
+						if (this.condition_icons.ContainsKey(list[j]))
+						{
+							this.condition_icons[list[j]].SetActive(true);
+							this.horizontal_containers[j / 2].SetActive(true);
+							this.condition_icons[list[j]].transform.SetParent(this.horizontal_containers[j / 2].transform);
+						}
 					}
 				}
 			}

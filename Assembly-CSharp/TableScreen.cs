@@ -354,7 +354,7 @@ public class TableScreen : KScreen
 		CrewPortrait component = widget_go.GetComponent<CrewPortrait>();
 		if (minion != null)
 		{
-			component.SetCrewMember(minion, false);
+			component.SetIdentityObject(minion, false);
 		}
 		else if (widgetRow.rowType == TableRow.RowType.Default)
 		{

@@ -19,6 +19,7 @@ namespace Database
 			this.GeneratePower = this.Add("GeneratePower", DUPLICANTS.CHOREGROUPS.GENERATEPOWER.NAME, "Athletics");
 			this.Disinfect = this.Add("Disinfect", DUPLICANTS.CHOREGROUPS.DISINFECT.NAME, "Digging");
 			this.Repair = this.Add("Repair", DUPLICANTS.CHOREGROUPS.REPAIR.NAME, "Machinery");
+			this.Maintenance = this.Add("Maintenance", DUPLICANTS.CHOREGROUPS.MAINTENANCE.NAME, "Machinery");
 			this.Mop = this.Add("Mop", DUPLICANTS.CHOREGROUPS.MOP.NAME, "Digging");
 			this.Harvest = this.Add("Harvest", DUPLICANTS.CHOREGROUPS.HARVEST.NAME, "Digging");
 			this.Transport = this.Add("Sweep", DUPLICANTS.CHOREGROUPS.SWEEP.NAME, "Athletics");
@@ -69,5 +70,7 @@ namespace Database
 		public ChoreGroup Massage;
 
 		public ChoreGroup MedicalAid;
+
+		public ChoreGroup Maintenance;
 	}
 }

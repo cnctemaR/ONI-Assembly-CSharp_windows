@@ -28,6 +28,7 @@ public class GasVentConfig : IBuildingConfig
 		Vent vent = go.AddOrGet<Vent>();
 		vent.conduitType = ConduitType.Gas;
 		vent.endpointType = Endpoint.Sink;
+		vent.overpressureMass = 2f;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Gas;
 		conduitConsumer.ignoreMinMassCheck = true;
@@ -45,6 +46,10 @@ public class GasVentConfig : IBuildingConfig
 			instance.StartSM();
 		};
 	}
+
+	public const string ID = "GasVent";
+
+	public const float OVERPRESSURE_MASS = 2f;
 
 	private const ConduitType CONDUIT_TYPE = ConduitType.Gas;
 }

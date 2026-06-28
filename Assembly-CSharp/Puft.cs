@@ -1,4 +1,5 @@
 ﻿using System;
+using Klei;
 using UnityEngine;
 
 public class Puft : StateMachineComponent<Puft.StatesInstance>
@@ -14,8 +15,8 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.consumer.EnableConsumption(false);
 		base.smi.StartSM();
+		this.inhaleSound = GlobalAssets.GetSound(this.inhaleSound, false);
 	}
 
 	private int GetBreathMoveTarget()
@@ -23,9 +24,20 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 		return this.breathTargetCell;
 	}
 
+	private bool HasConsumedEnough()
+	{
+		return this.storage.MassStored() > 1f;
+	}
+
 	private int FindTargetGasCell()
 	{
 		return GameUtil.FloodFillFind(new Func<int, bool>(this.isTargetElement), Grid.PosToCell(base.gameObject), 8, true, true);
+	}
+
+	private bool StandingOnFood()
+	{
+		int num = Grid.PosToCell(this);
+		return this.isTargetElement(num);
 	}
 
 	private bool isTargetElement(int cell)
@@ -41,27 +53,111 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 		}
 	}
 
-	[MyCmpAdd]
-	private ElementConsumer consumer;
+	private void ConsumeFood(float dt)
+	{
+		int index = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnMassConsumed))).index;
+		SimMessages.ConsumeMass(Grid.PosToCell(this), this.consumedElement, this.consumptionRate * dt, 3, index);
+	}
 
-	[MyCmpAdd]
+	private void OnMassConsumed(object data)
+	{
+		Sim.MassConsumptionCallback massConsumptionCallback = (Sim.MassConsumptionCallback)data;
+		if (massConsumptionCallback.mass > 0f)
+		{
+			this.storage.AddGasChunk(ElementLoader.elements[(int)massConsumptionCallback.removedElemIdx].id, massConsumptionCallback.mass, massConsumptionCallback.temperature, massConsumptionCallback.diseaseIdx, massConsumptionCallback.diseaseCount, true, true);
+			if (this.HasConsumedEnough())
+			{
+				base.smi.sm.noFood.Trigger(base.smi);
+			}
+		}
+		else
+		{
+			base.smi.sm.noFood.Trigger(base.smi);
+		}
+	}
+
+	private void ConvertFoodToPoop()
+	{
+		float massAvailable = this.storage.GetMassAvailable(this.consumedElement);
+		SimUtil.DiseaseInfo diseaseInfo;
+		float num;
+		this.storage.ConsumeAndGetDisease(this.consumedElement.CreateTag(), massAvailable, out diseaseInfo, out num);
+		diseaseInfo = SimUtil.CalculateFinalDiseaseInfo(diseaseInfo, new SimUtil.DiseaseInfo
+		{
+			idx = this.emitDiseaseIdx,
+			count = Mathf.RoundToInt((float)this.emitDiseasePerKg * massAvailable)
+		});
+		base.smi.master.emitter.ForceEmit(massAvailable, diseaseInfo.idx, diseaseInfo.count, num);
+	}
+
+	private void StartInhaleSound()
+	{
+		if (!this.playingInhaleSound)
+		{
+			LoopingSounds component = base.GetComponent<LoopingSounds>();
+			if (component != null)
+			{
+				component.AddLoopingSoundUpdater();
+				component.StartSound(this.inhaleSound, this.transform.position);
+				this.playingInhaleSound = true;
+			}
+		}
+	}
+
+	private void StopInhaleSound()
+	{
+		if (this.playingInhaleSound)
+		{
+			LoopingSounds component = base.GetComponent<LoopingSounds>();
+			if (component != null)
+			{
+				component.StopSound(this.inhaleSound);
+				component.RemoveLoopingSoundUpdater();
+				this.playingInhaleSound = false;
+			}
+		}
+	}
+
+	private void UpdateInhaleSound()
+	{
+		if (this.playingInhaleSound)
+		{
+			LoopingSounds component = base.GetComponent<LoopingSounds>();
+			if (component != null)
+			{
+				component.SetParameter(this.inhaleSound, "consumedMass", this.storage.MassStored() / 1f);
+			}
+		}
+	}
+
+	[NonSerialized]
+	public string inhaleSound = "Puft_air_intake";
+
+	[MyCmpReq]
 	private ElementEmitter emitter;
 
-	[MyCmpAdd]
+	[MyCmpReq]
 	private KBatchedAnimController anim;
 
-	[MyCmpAdd]
+	[MyCmpReq]
 	private Navigator nav;
+
+	[MyCmpReq]
+	private Storage storage;
 
 	private int breathTargetCell = -1;
 
 	public SimHashes consumedElement;
+
+	public float consumptionRate;
 
 	public float minimumApproachMass;
 
 	public byte emitDiseaseIdx = byte.MaxValue;
 
 	public int emitDiseasePerKg;
+
+	private bool playingInhaleSound;
 
 	public class StatesInstance : GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.GameInstance
 	{
@@ -95,7 +191,7 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 			this.alive.idle.idle.Enter(delegate(Puft.StatesInstance smi)
 			{
 				smi.Play("idle_loop", KAnim.PlayMode.Loop);
-				if (smi.master.consumer.IsElementAvailable && !Grid.Solid[Grid.CellAbove(Grid.PosToCell(smi.gameObject))])
+				if (smi.master.StandingOnFood())
 				{
 					smi.GoTo(this.alive.inhale.pre);
 				}
@@ -122,37 +218,41 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 			this.alive.full.full.MoveTo((Puft.StatesInstance smi) => Grid.CellAbove(Grid.PosToCell(smi.master.gameObject)), this.alive.full.alt, this.alive.full.fart, false).PlayAnim("idle_loop_full", KAnim.PlayMode.Loop, null);
 			this.alive.full.fart.PlayAnim("fart", KAnim.PlayMode.Once, null).Enter(delegate(Puft.StatesInstance smi)
 			{
-				smi.Schedule(1f, delegate
+				smi.Schedule(1f, delegate(object obj)
 				{
-					smi.master.emitter.ForceEmit(smi.master.consumer.consumedMass, smi.master.emitDiseaseIdx, Mathf.FloorToInt((float)smi.master.emitDiseasePerKg * smi.master.consumer.consumedMass), ElementLoader.FindElementByHash(smi.master.emitter.outputElement.elementHash).defaultValues.temperature);
-					smi.master.consumer.consumedMass = 0f;
+					smi.master.ConvertFoodToPoop();
 				}, null);
 			}).OnAnimQueueComplete(this.alive.idle.idle);
-			this.alive.inhale.pre.Enter(delegate(Puft.StatesInstance smi)
+			this.alive.inhale.DefaultState(this.alive.inhale.pre).Update(delegate(Puft.StatesInstance smi)
 			{
-				smi.Play("inhale_pre", KAnim.PlayMode.Once);
-			}).EventTransition(GameHashes.AnimQueueComplete, this.alive.inhale.loop, (Puft.StatesInstance smi) => smi.timeinstate > 0f);
-			this.alive.inhale.loop.Enter(delegate(Puft.StatesInstance smi)
-			{
-				smi.master.consumer.EnableConsumption(true);
-				smi.Play("inhale_loop", KAnim.PlayMode.Loop);
-				smi.Schedule(3f, delegate
-				{
-					if (smi.master.consumer.consumedMass > 1f)
-					{
-						smi.GoTo(this.alive.inhale.pst);
-					}
-					else
-					{
-						smi.GoTo(this.alive.idle.move);
-					}
-				}, null);
+				smi.master.ConsumeFood(smi.deltatime);
 			});
+			this.alive.inhale.pre.PlayAnim("inhale_pre", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.alive.inhale.loop);
+			this.alive.inhale.loop.PlayAnim("inhale_loop", KAnim.PlayMode.Loop, null).Enter(delegate(Puft.StatesInstance smi)
+			{
+				smi.master.StartInhaleSound();
+			}).Update(delegate(Puft.StatesInstance smi)
+			{
+				smi.master.UpdateInhaleSound();
+			})
+				.Exit(delegate(Puft.StatesInstance smi)
+				{
+					smi.master.StopInhaleSound();
+				})
+				.ScheduleGoTo(2f, this.alive.inhale.pst)
+				.OnSignal(this.noFood, this.alive.inhale.pst);
 			this.alive.inhale.pst.Enter(delegate(Puft.StatesInstance smi)
 			{
-				smi.master.consumer.EnableConsumption(false);
-				smi.Play("inhale_pst", KAnim.PlayMode.Once);
-			}).EventTransition(GameHashes.AnimQueueComplete, this.alive.full.alt, null);
+				if (smi.master.HasConsumedEnough())
+				{
+					smi.GoTo(this.alive.inhale.pst_full);
+				}
+				else
+				{
+					smi.GoTo(this.alive.idle.move);
+				}
+			});
+			this.alive.inhale.pst_full.PlayAnim("inhale_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.alive.full.alt);
 			this.death.ToggleGravity().PlayAnim("death", KAnim.PlayMode.Once, null).EventHandler(GameHashes.AnimQueueComplete, delegate(Puft.StatesInstance smi)
 			{
 				Util.KDestroyGameObject(smi.gameObject);
@@ -169,6 +269,8 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 		public StateMachine<Puft.States, Puft.StatesInstance, Puft, object>.TargetParameter breathMoveTarget;
 
 		public StateMachine<Puft.States, Puft.StatesInstance, Puft, object>.TargetParameter mover;
+
+		public StateMachine<Puft.States, Puft.StatesInstance, Puft, object>.Signal noFood;
 
 		public Puft.States.AliveStates alive;
 
@@ -212,6 +314,8 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.State loop;
 
 			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.State pst;
+
+			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.State pst_full;
 		}
 
 		public class DistressStates : GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.State

@@ -30,7 +30,6 @@ public class HeadquartersConfig : IBuildingConfig
 		light2D.Offset = LIGHT2D.HEADQUARTERS_OFFSET;
 		light2D.overlayColour = LIGHT2D.HEADQUARTERS_OVERLAYCOLOR;
 		light2D.shape = LightShape.Circle;
-		light2D.Intensity = 4f;
 		light2D.drawOverlay = true;
 	}
 

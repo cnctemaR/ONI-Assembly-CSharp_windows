@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using KSerialization.Converters;
+using VoronoiTree;
 
 namespace ProcGen
 {
@@ -44,7 +45,7 @@ namespace ProcGen
 
 		public List<SampleDescriber> samplers { get; private set; }
 
-		public Node AddCenteralFeature(VoronoiTree node, Graph graph, TagSet newTags)
+		public Node AddCenteralFeature(Tree node, Graph graph, TagSet newTags)
 		{
 			if (this.centralFeature == null)
 			{
@@ -52,21 +53,23 @@ namespace ProcGen
 			}
 			Node node2 = graph.AddNode(this.centralFeature.type);
 			node2.SetPosition(node.site.poly.Centroid());
-			VoronoiNode voronoiNode = node.AddSite(new VoronoiDiagram.Site((uint)node2.node.Id, node2.position, 1f), VoronoiNode.NodeType.Internal);
-			voronoiNode.tags = new TagSet(newTags);
-			voronoiNode.AddTag(new Tag(this.centralFeature.type));
-			voronoiNode.AddTag(WorldGenTags.Feature);
-			voronoiNode.AddTag(WorldGenTags.CenteralFeature);
+			Node node3 = node.AddSite(new Diagram.Site((uint)node2.node.Id, node2.position, 1f), Node.NodeType.Internal);
+			node3.tags = new TagSet(newTags);
+			node3.AddTag(new Tag(this.centralFeature.type));
+			node3.AddTag(WorldGenTags.Feature);
+			node3.AddTag(WorldGenTags.CenteralFeature);
 			for (int i = 0; i < this.centralFeature.tags.Count; i++)
 			{
-				voronoiNode.AddTag(new Tag(this.centralFeature.tags[i]));
+				node3.AddTag(new Tag(this.centralFeature.tags[i]));
 			}
 			return node2;
 		}
 
-		public void GenerateStartArea(VoronoiTree node, Graph graph)
+		public void GenerateStartArea(Tree node, Graph graph)
 		{
 		}
+
+		public float pdWeight;
 
 		public enum ZoneType
 		{
@@ -75,7 +78,8 @@ namespace ProcGen
 			BoggyMarsh,
 			Sandstone,
 			ToxicJungle,
-			MagmaCore
+			MagmaCore,
+			OilField
 		}
 	}
 }

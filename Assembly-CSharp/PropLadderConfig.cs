@@ -11,7 +11,8 @@ public class PropLadderConfig : IEntityConfig
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.Unobtanium);
 		component.Temperature = 294.15f;
-		gameObject.AddOrGet<Ladder>();
+		Ladder ladder = gameObject.AddOrGet<Ladder>();
+		ladder.movementSpeedMultiplier = 1.5f;
 		gameObject.AddOrGet<AnimTileable>();
 		return gameObject;
 	}

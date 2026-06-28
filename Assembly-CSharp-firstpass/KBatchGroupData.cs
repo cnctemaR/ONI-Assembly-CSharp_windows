@@ -428,9 +428,25 @@ public class KBatchGroupData
 		data[startIndex++] = (float)symbol_frame_instance.symbolIdx;
 		KAnim.Build.SymbolFrame symbolFrame = symbol_frame_instance.symbolFrame;
 		KAnim.Build.Symbol buildSymbol = this.GetBuildSymbol(symbol_frame_instance.symbolIdx);
-		data[startIndex++] = (float)((buildSymbol == null) ? 0 : buildSymbol.numFrames);
-		data[startIndex++] = (float)((buildSymbol == null) ? 0 : buildSymbol.flags);
-		data[startIndex++] = 2.8801546E+09f;
+		if (buildSymbol == null)
+		{
+			data[startIndex++] = 0f;
+			data[startIndex++] = 0f;
+			data[startIndex++] = 0f;
+		}
+		else
+		{
+			data[startIndex++] = (float)buildSymbol.numFrames;
+			data[startIndex++] = (float)buildSymbol.flags;
+			if (this.firstSymbolIndex.ContainsKey(buildSymbol.build.fileHash))
+			{
+				data[startIndex++] = (float)this.firstSymbolIndex[buildSymbol.build.fileHash];
+			}
+			else
+			{
+				data[startIndex++] = 0f;
+			}
+		}
 		data[startIndex++] = 3.1664858E+09f;
 		data[startIndex++] = 3.452817E+09f;
 		data[startIndex++] = symbolFrame.v0[0];

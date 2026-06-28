@@ -36,8 +36,6 @@ public class FarmTileConfig : IBuildingConfig
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		GeneratedBuildings.MakeBuildableAnywhere(go);
-		PrimaryElement primaryElement = go.AddOrGet<PrimaryElement>();
-		primaryElement.useSimDiseaseInfo = true;
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.doReplaceElement = true;
 		go.AddOrGet<TileTemperature>();

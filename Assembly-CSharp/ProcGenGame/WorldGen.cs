@@ -12,6 +12,7 @@ using ProcGen.Map;
 using ProcGen.Noise;
 using STRINGS;
 using UnityEngine;
+using VoronoiTree;
 
 namespace ProcGenGame
 {
@@ -54,7 +55,7 @@ namespace ProcGenGame
 		{
 			get
 			{
-				return Path.Combine(global::Util.RootFolder(), "WorldGenSimSave.dat");
+				return global::System.IO.Path.Combine(global::Util.RootFolder(), "WorldGenSimSave.dat");
 			}
 		}
 
@@ -62,7 +63,7 @@ namespace ProcGenGame
 		{
 			get
 			{
-				return Path.Combine(global::Util.RootFolder(), "WorldGenDataSave.dat");
+				return global::System.IO.Path.Combine(global::Util.RootFolder(), "WorldGenDataSave.dat");
 			}
 		}
 
@@ -207,9 +208,13 @@ namespace ProcGenGame
 			WorldGen.wasLoaded = false;
 		}
 
-		private static string GetPath()
+		public static string GetPath()
 		{
-			return Path.Combine(Application.streamingAssetsPath, "worldgen/");
+			if (WorldGen.PATH == null)
+			{
+				WorldGen.PATH = global::System.IO.Path.Combine(Application.streamingAssetsPath, "worldgen/");
+			}
+			return WorldGen.PATH;
 		}
 
 		public static void LoadSettings()
@@ -247,7 +252,7 @@ namespace ProcGenGame
 			this.myRandom = new SeededRandom(worldSeed);
 		}
 
-		public void Initialise(WorldGen.OfflineCallbackFunction callbackFn, int worldSeed = -1, int layoutSeed = -1, int terrainSeed = -1, int noiseSeed = -1)
+		public void Initialise(WorldGen.OfflineCallbackFunction callbackFn, Action<OfflineWorldGen.ErrorInfo> error_cb, int worldSeed = -1, int layoutSeed = -1, int terrainSeed = -1, int noiseSeed = -1)
 		{
 			if (WorldGen.wasLoaded)
 			{
@@ -255,6 +260,7 @@ namespace ProcGenGame
 				return;
 			}
 			WorldGen.successCallbackFn = callbackFn;
+			this.errorCallback = error_cb;
 			WorldGen.running = false;
 			if (worldSeed == -1)
 			{
@@ -272,6 +278,7 @@ namespace ProcGenGame
 			{
 				noiseSeed = global::UnityEngine.Random.Range(0, int.MaxValue);
 			}
+			Output.Log(new object[] { string.Format("World seeds: [{0}/{1}/{2}/{3}]", new object[] { worldSeed, layoutSeed, terrainSeed, noiseSeed }) });
 			this.InitRandom(worldSeed, layoutSeed, terrainSeed, noiseSeed);
 			WorldGen.data.gameSpawnData = new GameSpawnData();
 			TerrainCell.ClearClaimedCells();
@@ -288,6 +295,10 @@ namespace ProcGenGame
 			if (WorldGen.wasLoaded)
 			{
 				global::Debug.LogError("GenerateOfflineThreaded called after load", null);
+				return;
+			}
+			if (WorldGen.Settings.GetWorld() == null)
+			{
 				return;
 			}
 			WorldGen.running = true;
@@ -360,7 +371,7 @@ namespace ProcGenGame
 					return keyValuePair;
 				}
 			}
-			if (tc.node.tags.Contains(WorldGenTags.StartLocation) || tc.node.tags.Contains(WorldGenTags.NearStartLocation) || tc.node.tags.Contains(WorldGenTags.POI) || tc.node.tags.Contains(WorldGenTags.AtLeftEdge) || tc.node.tags.Contains(WorldGenTags.AtRightEdge) || tc.node.tags.Contains(WorldGenTags.AtDepths) || tc.node.tags.Contains(WorldGenTags.AtSurface))
+			if (tc.node.tags.Contains(WorldGenTags.StartLocation) || tc.node.tags.Contains(WorldGenTags.NearStartLocation) || tc.node.tags.Contains(WorldGenTags.POI) || tc.node.tags.Contains(WorldGenTags.AtEdge) || tc.node.tags.Contains(WorldGenTags.AtDepths) || tc.node.tags.Contains(WorldGenTags.AtSurface))
 			{
 				return keyValuePair;
 			}
@@ -402,9 +413,10 @@ namespace ProcGenGame
 			Sim.Cell[] array = null;
 			float[] array2 = null;
 			dc = null;
+			HashSet<int> hashSet = new HashSet<int>();
 			this.CompleteLayout(WorldGen.successCallbackFn);
 			WorldGen.WriteOverWorldNoise(WorldGen.successCallbackFn);
-			if (!WorldGen.RenderToMap(WorldGen.successCallbackFn, ref array, ref array2, ref dc))
+			if (!WorldGen.RenderToMap(WorldGen.successCallbackFn, ref array, ref array2, ref dc, ref hashSet))
 			{
 				WorldGen.successCallbackFn(UI.WORLDGEN.FAILED.key, -100f, WorldGenProgressStages.Stages.Failure);
 				return null;
@@ -418,10 +430,11 @@ namespace ProcGenGame
 				list.Add(new KeyValuePair<Vector2I, TemplateContainer>(new Vector2I((int)terrainCell.poly.Centroid().x, (int)terrainCell.poly.Centroid().y), baseStartingTemplate));
 			}
 			List<TemplateContainer> list2 = TemplateCache.CollectBaseTemplateAssets("poi/");
-			WorldGen.TerrainCells.ShuffleSeeded<TerrainCell>(this.myRandom.RandomSource());
-			for (int i = 0; i < WorldGen.TerrainCells.Count; i++)
+			List<TerrainCell> list3 = new List<TerrainCell>(WorldGen.TerrainCells);
+			list3.ShuffleSeeded<TerrainCell>(this.myRandom.RandomSource());
+			for (int i = 0; i < list3.Count; i++)
 			{
-				TerrainCell terrainCell2 = WorldGen.TerrainCells[i];
+				TerrainCell terrainCell2 = list3[i];
 				KeyValuePair<Vector2I, TemplateContainer> poispawnTarget = this.GetPOISpawnTarget(array, terrainCell2, list2);
 				if (poispawnTarget.Key.x != -1 && poispawnTarget.Value != null)
 				{
@@ -430,16 +443,20 @@ namespace ProcGenGame
 			}
 			if (doSettle)
 			{
-				WorldGen.running = WorldGenSimUtil.DoSettleSim(array, array2, dc, WorldGen.successCallbackFn, WorldGen.data, list);
+				foreach (int num in hashSet)
+				{
+					array[num].SetValues(WorldGen.unobtaniumElement, ElementLoader.elements);
+				}
+				WorldGen.running = WorldGenSimUtil.DoSettleSim(array, array2, dc, WorldGen.successCallbackFn, WorldGen.data, list, this.errorCallback);
 			}
 			MobSpawning.DetectNaturalCavities(WorldGen.successCallbackFn);
 			SeededRandom seededRandom = new SeededRandom(WorldGen.data.globalTerrainSeed);
-			for (int j = 0; j < WorldGen.TerrainCells.Count; j++)
+			for (int j = 0; j < list3.Count; j++)
 			{
-				float num = (float)j / (float)WorldGen.TerrainCells.Count * 100f;
-				WorldGen.successCallbackFn(UI.WORLDGEN.PLACINGCREATURES.key, num, WorldGenProgressStages.Stages.PlacingCreatures);
-				TerrainCell terrainCell3 = WorldGen.TerrainCells[j];
-				Dictionary<int, string> dictionary = MobSpawning.PlaceAmbientMobs(terrainCell3, seededRandom, array, array2, dc);
+				float num2 = (float)j / (float)list3.Count * 100f;
+				WorldGen.successCallbackFn(UI.WORLDGEN.PLACINGCREATURES.key, num2, WorldGenProgressStages.Stages.PlacingCreatures);
+				TerrainCell terrainCell3 = list3[j];
+				Dictionary<int, string> dictionary = MobSpawning.PlaceAmbientMobs(terrainCell3, seededRandom, array, array2, dc, hashSet);
 				if (dictionary != null)
 				{
 					WorldGen.data.gameSpawnData.AddRange(dictionary);
@@ -449,6 +466,38 @@ namespace ProcGenGame
 			foreach (KeyValuePair<Vector2I, TemplateContainer> keyValuePair in list)
 			{
 				this.PlaceTemplateSpawners(keyValuePair.Key, keyValuePair.Value);
+			}
+			for (int k = WorldGen.data.gameSpawnData.buildings.Count - 1; k >= 0; k--)
+			{
+				int num3 = Grid.XYToCell(WorldGen.data.gameSpawnData.buildings[k].location_x, WorldGen.data.gameSpawnData.buildings[k].location_y);
+				if (hashSet.Contains(num3))
+				{
+					WorldGen.data.gameSpawnData.buildings.RemoveAt(k);
+				}
+			}
+			for (int l = WorldGen.data.gameSpawnData.elementalOres.Count - 1; l >= 0; l--)
+			{
+				int num4 = Grid.XYToCell(WorldGen.data.gameSpawnData.elementalOres[l].location_x, WorldGen.data.gameSpawnData.elementalOres[l].location_y);
+				if (hashSet.Contains(num4))
+				{
+					WorldGen.data.gameSpawnData.elementalOres.RemoveAt(l);
+				}
+			}
+			for (int m = WorldGen.data.gameSpawnData.otherEntities.Count - 1; m >= 0; m--)
+			{
+				int num5 = Grid.XYToCell(WorldGen.data.gameSpawnData.otherEntities[m].location_x, WorldGen.data.gameSpawnData.otherEntities[m].location_y);
+				if (hashSet.Contains(num5))
+				{
+					WorldGen.data.gameSpawnData.otherEntities.RemoveAt(m);
+				}
+			}
+			for (int n = WorldGen.data.gameSpawnData.pickupables.Count - 1; n >= 0; n--)
+			{
+				int num6 = Grid.XYToCell(WorldGen.data.gameSpawnData.pickupables[n].location_x, WorldGen.data.gameSpawnData.pickupables[n].location_y);
+				if (hashSet.Contains(num6))
+				{
+					WorldGen.data.gameSpawnData.pickupables.RemoveAt(n);
+				}
 			}
 			WorldGen.SaveWorldGen();
 			WorldGen.successCallbackFn(UI.WORLDGEN.COMPLETE.key, 101f, WorldGenProgressStages.Stages.Complete);
@@ -509,7 +558,8 @@ namespace ProcGenGame
 				WorldGen.data.voronoiTree = null;
 				try
 				{
-					WorldGen.data.voronoiTree = WorldGen.WorldLayout.GenerateOverworld();
+					WorldGen.data.voronoiTree = WorldGen.WorldLayout.GenerateOverworld(WorldGen.settings.GetWorld().layoutMethod == global::ProcGen.World.LayoutMethod.PowerTree);
+					WorldGen.WorldLayout.PopulateSubworlds();
 				}
 				catch (Exception ex)
 				{
@@ -522,9 +572,9 @@ namespace ProcGenGame
 				WorldGen.data.overworldCells = new List<TerrainCell>(40);
 				for (int i = 0; i < WorldGen.data.voronoiTree.ChildCount(); i++)
 				{
-					VoronoiTree voronoiTree = WorldGen.data.voronoiTree.GetChild(i) as VoronoiTree;
-					Node node = WorldGen.data.worldLayout.overworldGraph.FindNodeByID(voronoiTree.site.id);
-					WorldGen.data.overworldCells.Add(new TerrainCellLogged(node, voronoiTree.site));
+					global::VoronoiTree.Tree tree = WorldGen.data.voronoiTree.GetChild(i) as global::VoronoiTree.Tree;
+					global::ProcGen.Node node = WorldGen.data.worldLayout.overworldGraph.FindNodeByID(tree.site.id);
+					WorldGen.data.overworldCells.Add(new TerrainCellLogged(node, tree.site));
 				}
 				WorldGen.running = updateProgressFn(UI.WORLDGEN.WORLDLAYOUT.key, 100f, WorldGenProgressStages.Stages.WorldLayout);
 			}
@@ -565,20 +615,20 @@ namespace ProcGenGame
 				}
 				this.ApplyStartNode();
 				WorldGen.data.terrainCells = new List<TerrainCell>(4000);
-				List<VoronoiNode> list2 = new List<VoronoiNode>();
+				List<global::VoronoiTree.Node> list2 = new List<global::VoronoiTree.Node>();
 				WorldGen.data.voronoiTree.ForceLowestToLeaf();
-				WorldGen.data.voronoiTree.VisitAll(new Action<VoronoiNode>(this.UpdateVoronoiNodeTags));
+				WorldGen.data.voronoiTree.VisitAll(new Action<global::VoronoiTree.Node>(this.UpdateVoronoiNodeTags));
 				WorldGen.data.voronoiTree.GetLeafNodes(list2, null);
 				for (int i = 0; i < list2.Count; i++)
 				{
-					VoronoiNode voronoiNode = list2[i];
-					Node tn = WorldGen.data.worldLayout.localGraph.FindNodeByID(voronoiNode.site.id);
+					global::VoronoiTree.Node node = list2[i];
+					global::ProcGen.Node tn = WorldGen.data.worldLayout.localGraph.FindNodeByID(node.site.id);
 					if (tn != null)
 					{
 						TerrainCell terrainCell = WorldGen.data.terrainCells.Find((TerrainCell c) => c.node == tn);
 						if (terrainCell == null)
 						{
-							TerrainCell terrainCell2 = new TerrainCellLogged(tn, voronoiNode.site);
+							TerrainCell terrainCell2 = new TerrainCellLogged(tn, node.site);
 							WorldGen.data.terrainCells.Add(terrainCell2);
 						}
 						else
@@ -616,9 +666,9 @@ namespace ProcGenGame
 			return true;
 		}
 
-		public void UpdateVoronoiNodeTags(VoronoiNode node)
+		public void UpdateVoronoiNodeTags(global::VoronoiTree.Node node)
 		{
-			Node node2;
+			global::ProcGen.Node node2;
 			if (node.tags.Contains(WorldGenTags.Overworld))
 			{
 				node2 = WorldGen.WorldLayout.overworldGraph.FindNodeByID(node.site.id);
@@ -667,7 +717,6 @@ namespace ProcGenGame
 			}
 			if (num2 < num)
 			{
-				global::Debug.LogWarning("Not enough Algae in starting biome - inflating mass", null);
 				float num5 = (num - num2) / (float)num3;
 				foreach (TerrainCell terrainCell2 in terrainCellsForTag)
 				{
@@ -683,8 +732,9 @@ namespace ProcGenGame
 			}
 		}
 
-		public static bool RenderToMap(WorldGen.OfflineCallbackFunction updateProgressFn, ref Sim.Cell[] cells, ref float[] bgTemp, ref Sim.DiseaseCell[] dcs)
+		public static bool RenderToMap(WorldGen.OfflineCallbackFunction updateProgressFn, ref Sim.Cell[] cells, ref float[] bgTemp, ref Sim.DiseaseCell[] dcs, ref HashSet<int> borderCells)
 		{
+			borderCells = new HashSet<int>();
 			cells = new Sim.Cell[Grid.CellCount];
 			bgTemp = new float[Grid.CellCount];
 			dcs = new Sim.DiseaseCell[Grid.CellCount];
@@ -722,28 +772,28 @@ namespace ProcGenGame
 			{
 				SeededRandom seededRandom = new SeededRandom(0);
 				updateProgressFn(UI.WORLDGEN.DRAWWORLDBORDER.key, 0f, WorldGenProgressStages.Stages.DrawWorldBorder);
-				WorldGen.DrawWorldBorder(cells, WorldGen.data.world, seededRandom);
+				WorldGen.DrawWorldBorder(cells, WorldGen.data.world, seededRandom, borderCells);
 				updateProgressFn(UI.WORLDGEN.DRAWWORLDBORDER.key, 100f, WorldGenProgressStages.Stages.DrawWorldBorder);
 			}
 			WorldGen.data.gameSpawnData.baseStartPos = WorldGen.data.worldLayout.GetStartLocation();
 			return true;
 		}
 
-		public static SubWorld GetSubWorldForNode(VoronoiTree node)
+		public static SubWorld GetSubWorldForNode(global::VoronoiTree.Tree node)
 		{
-			Node node2 = WorldGen.WorldLayout.overworldGraph.FindNodeByID(node.site.id);
+			global::ProcGen.Node node2 = WorldGen.WorldLayout.overworldGraph.FindNodeByID(node.site.id);
 			if (node2 == null)
 			{
 				return null;
 			}
-			if (!WorldGen.Settings.subworlds.zones.ContainsKey(node2.type))
+			if (!WorldGen.Settings.GetSubWorlds().ContainsKey(node2.type))
 			{
 				return null;
 			}
-			return WorldGen.Settings.subworlds.zones[node2.type];
+			return WorldGen.Settings.GetSubWorld(node2.type);
 		}
 
-		public static VoronoiTree GetOverworldForNode(VoronoiLeaf leaf)
+		public static global::VoronoiTree.Tree GetOverworldForNode(Leaf leaf)
 		{
 			if (leaf == null)
 			{
@@ -752,22 +802,22 @@ namespace ProcGenGame
 			return WorldGen.data.worldLayout.GetVoronoiTree().GetChildContainingLeaf(leaf);
 		}
 
-		public static VoronoiLeaf GetLeafForTerrainCell(TerrainCell cell)
+		public static Leaf GetLeafForTerrainCell(TerrainCell cell)
 		{
 			if (cell == null)
 			{
 				return null;
 			}
-			return WorldGen.data.worldLayout.GetVoronoiTree().GetNodeForSite(cell.site) as VoronoiLeaf;
+			return WorldGen.data.worldLayout.GetVoronoiTree().GetNodeForSite(cell.site) as Leaf;
 		}
 
 		public static List<TerrainCell> GetTerrainCellsForTag(Tag tag)
 		{
 			List<TerrainCell> list = new List<TerrainCell>();
-			List<VoronoiNode> leafNodesWithTag = WorldGen.WorldLayout.GetLeafNodesWithTag(tag);
+			List<global::VoronoiTree.Node> leafNodesWithTag = WorldGen.WorldLayout.GetLeafNodesWithTag(tag);
 			for (int i = 0; i < leafNodesWithTag.Count; i++)
 			{
-				VoronoiNode node = leafNodesWithTag[i];
+				global::VoronoiTree.Node node = leafNodesWithTag[i];
 				TerrainCell terrainCell = WorldGen.data.terrainCells.Find((TerrainCell cell) => cell.site.id == node.site.id);
 				if (terrainCell != null)
 				{
@@ -788,11 +838,11 @@ namespace ProcGenGame
 			baseY = startLocation.y;
 		}
 
-		public static void ChooseBaseLocation(VoronoiNode startNode)
+		public static void ChooseBaseLocation(global::VoronoiTree.Node startNode)
 		{
 			TagSet tagSet = new TagSet();
 			tagSet.Add(WorldGenTags.StartLocation);
-			List<VoronoiNode> startNodes = WorldGen.WorldLayout.GetStartNodes();
+			List<global::VoronoiTree.Node> startNodes = WorldGen.WorldLayout.GetStartNodes();
 			for (int i = 0; i < startNodes.Count; i++)
 			{
 				if (startNodes[i] != startNode)
@@ -802,16 +852,16 @@ namespace ProcGenGame
 			}
 		}
 
-		private static void SwitchNodes(VoronoiNode n1, VoronoiNode n2)
+		private static void SwitchNodes(global::VoronoiTree.Node n1, global::VoronoiTree.Node n2)
 		{
-			if (n1 is VoronoiTree || n2 is VoronoiTree)
+			if (n1 is global::VoronoiTree.Tree || n2 is global::VoronoiTree.Tree)
 			{
 				global::Debug.Log("WorldGen::SwitchNodes() Skipping tree node", null);
 				return;
 			}
-			Node node = WorldGen.data.worldLayout.localGraph.FindNodeByID(n1.site.id);
-			Node node2 = WorldGen.data.worldLayout.localGraph.FindNodeByID(n2.site.id);
-			VoronoiDiagram.Site site = n1.site;
+			global::ProcGen.Node node = WorldGen.data.worldLayout.localGraph.FindNodeByID(n1.site.id);
+			global::ProcGen.Node node2 = WorldGen.data.worldLayout.localGraph.FindNodeByID(n2.site.id);
+			Diagram.Site site = n1.site;
 			n1.site = n2.site;
 			n2.site = site;
 			string type = node.type;
@@ -821,44 +871,44 @@ namespace ProcGenGame
 
 		public void ApplyStartNode()
 		{
-			VoronoiNode voronoiNode = WorldGen.data.worldLayout.GetLeafNodesWithTag(WorldGenTags.StartLocation)[0];
-			voronoiNode.parent.AddTagToChildren(WorldGenTags.IgnoreCaveOverride);
-			voronoiNode.parent.tags.Remove(WorldGenTags.StartLocation);
-			List<VoronoiNode> siblings = voronoiNode.GetSiblings();
-			List<VoronoiNode> neighbors = voronoiNode.GetNeighbors();
-			siblings.RemoveAll((VoronoiNode node) => neighbors.Contains(node));
+			global::VoronoiTree.Node node3 = WorldGen.data.worldLayout.GetLeafNodesWithTag(WorldGenTags.StartLocation)[0];
+			node3.parent.AddTagToChildren(WorldGenTags.IgnoreCaveOverride);
+			node3.parent.tags.Remove(WorldGenTags.StartLocation);
+			List<global::VoronoiTree.Node> siblings = node3.GetSiblings();
+			List<global::VoronoiTree.Node> neighbors = node3.GetNeighbors();
+			siblings.RemoveAll((global::VoronoiTree.Node node) => neighbors.Contains(node));
 			if (neighbors.Count > 0)
 			{
-				neighbors.ShuffleSeeded<VoronoiNode>(this.myRandom.RandomSource());
-				List<VoronoiNode> list = new List<VoronoiNode>();
-				List<VoronoiNode> list2 = new List<VoronoiNode>();
+				neighbors.ShuffleSeeded<global::VoronoiTree.Node>(this.myRandom.RandomSource());
+				List<global::VoronoiTree.Node> list = new List<global::VoronoiTree.Node>();
+				List<global::VoronoiTree.Node> list2 = new List<global::VoronoiTree.Node>();
 				for (int i = 0; i < neighbors.Count; i++)
 				{
-					VoronoiNode voronoiNode2 = neighbors[i];
-					bool flag = !voronoiNode2.tags.Contains(WorldGenTags.Wet);
-					bool flag2 = voronoiNode2.site.poly.Centroid().y > voronoiNode.site.poly.Centroid().y;
+					global::VoronoiTree.Node node2 = neighbors[i];
+					bool flag = !node2.tags.Contains(WorldGenTags.Wet);
+					bool flag2 = node2.site.poly.Centroid().y > node3.site.poly.Centroid().y;
 					if (!flag && flag2)
 					{
 						if (list2.Count > 0)
 						{
-							WorldGen.SwitchNodes(voronoiNode2, list2[0]);
+							WorldGen.SwitchNodes(node2, list2[0]);
 							list2.RemoveAt(0);
 						}
 						else
 						{
-							list.Add(voronoiNode2);
+							list.Add(node2);
 						}
 					}
 					else if (flag && !flag2)
 					{
 						if (list.Count > 0)
 						{
-							WorldGen.SwitchNodes(voronoiNode2, list[0]);
+							WorldGen.SwitchNodes(node2, list[0]);
 							list.RemoveAt(0);
 						}
 						else
 						{
-							list2.Add(voronoiNode2);
+							list2.Add(node2);
 						}
 					}
 				}
@@ -872,10 +922,6 @@ namespace ProcGenGame
 						num++;
 					}
 				}
-				if (neighbors.Count > 1)
-				{
-					neighbors[1].AddTag(WorldGenTags.OxySpace);
-				}
 			}
 		}
 
@@ -888,9 +934,9 @@ namespace ProcGenGame
 		{
 			dc = Sim.DiseaseCell.Invalid;
 			TerrainCell.ElementOverride elementOverride = TerrainCell.GetElementOverride(WorldGen.voidElement.tag.ToString(), null);
-			if (WorldGen.settings.biomes.TerrainBiomeLookupTable.ContainsKey(nt))
+			if (WorldGen.settings.biomes.BiomeBackgroundElementBandConfigurations.ContainsKey(nt))
 			{
-				elementOverride = WorldGen.GetElementFromBiomeElementTable(chunk, pos, WorldGen.settings.biomes.TerrainBiomeLookupTable[nt], erode);
+				elementOverride = WorldGen.GetElementFromBiomeElementTable(chunk, pos, WorldGen.settings.biomes.BiomeBackgroundElementBandConfigurations[nt], erode);
 			}
 			else if (WorldGen.settings.features.TerrainFeatures.ContainsKey(nt))
 			{
@@ -898,16 +944,14 @@ namespace ProcGenGame
 				{
 					global::Debug.LogError("TerrainFeatureLookupTable is null for [" + nt + "]", null);
 				}
-				string type = WorldGen.settings.features.TerrainFeatures[nt].defaultBiome.type;
-				if (WorldGen.settings.biomes.TerrainBiomeLookupTable.ContainsKey(type))
+				string defaultBiome = WorldGen.settings.GetDefaultBiome(nt);
+				if (!WorldGen.settings.biomes.BiomeBackgroundElementBandConfigurations.ContainsKey(defaultBiome))
 				{
-					Biome biome = WorldGen.settings.biomes.TerrainBiomeLookupTable[type];
-					elementOverride = WorldGen.GetElementFromBiomeElementTable(chunk, pos, biome, erode);
+					global::Debug.LogError(string.Concat(new string[] { "No biome lookup table of type ", defaultBiome, " is loaded. nt [", nt, "]" }), null);
+					throw new Exception(string.Concat(new string[] { "No biome lookup table of type ", defaultBiome, " is loaded. nt [", nt, "]" }));
 				}
-				else
-				{
-					global::Debug.LogError("No biome lookup table of type " + type + " is loaded.", null);
-				}
+				ElementBandConfiguration elementBandConfiguration = WorldGen.settings.biomes.BiomeBackgroundElementBandConfigurations[defaultBiome];
+				elementOverride = WorldGen.GetElementFromBiomeElementTable(chunk, pos, elementBandConfiguration, erode);
 			}
 			element = elementOverride.element;
 			pd = elementOverride.pdelement;
@@ -1002,10 +1046,10 @@ namespace ProcGenGame
 			return list;
 		}
 
-		public static List<VoronoiNode> GetNodesForStartAreas()
+		public static List<global::VoronoiTree.Node> GetNodesForStartAreas()
 		{
-			List<VoronoiNode> list = new List<VoronoiNode>();
-			VoronoiTree voronoiTree = WorldGen.data.worldLayout.GetVoronoiTree();
+			List<global::VoronoiTree.Node> list = new List<global::VoronoiTree.Node>();
+			global::VoronoiTree.Tree voronoiTree = WorldGen.data.worldLayout.GetVoronoiTree();
 			if (voronoiTree != null)
 			{
 				voronoiTree.GetNodesWithTag(WorldGenTags.StartLocation, list);
@@ -1133,8 +1177,8 @@ namespace ProcGenGame
 				for (int m = 0; m < list4.Count; m++)
 				{
 					Border border2 = list4[m];
-					SubWorld subWorld = WorldGen.Settings.subworlds.GetSubWorld(border2.neighbors.n0.node.type);
-					SubWorld subWorld2 = WorldGen.Settings.subworlds.GetSubWorld(border2.neighbors.n1.node.type);
+					SubWorld subWorld = WorldGen.Settings.GetSubWorld(border2.neighbors.n0.node.type);
+					SubWorld subWorld2 = WorldGen.Settings.GetSubWorld(border2.neighbors.n1.node.type);
 					float num = Mathf.Min(WorldGen.Settings.temperatures.ranges[subWorld.temperatureRange].min, WorldGen.Settings.temperatures.ranges[subWorld2.temperatureRange].min);
 					float num2 = Mathf.Max(WorldGen.Settings.temperatures.ranges[subWorld.temperatureRange].max, WorldGen.Settings.temperatures.ranges[subWorld2.temperatureRange].max);
 					float num3 = num2 - num;
@@ -1203,7 +1247,7 @@ namespace ProcGenGame
 			}
 		}
 
-		private static void DrawWorldBorder(Sim.Cell[] cells, Chunk world, SeededRandom rnd)
+		private static void DrawWorldBorder(Sim.Cell[] cells, Chunk world, SeededRandom rnd, HashSet<int> borderCells)
 		{
 			int num = int.Parse(WorldGen.settings.defaults.data["WorldBorderThickness"] as string);
 			int num2 = int.Parse(WorldGen.settings.defaults.data["WorldBorderRange"] as string);
@@ -1214,28 +1258,36 @@ namespace ProcGenGame
 				num3 = Mathf.Max(-num2, Mathf.Min(num3 + rnd.RandomRange(-2, 2), num2));
 				for (int j = 0; j < num + num3; j++)
 				{
-					cells[Grid.XYToCell(j, i)].SetValues(WorldGen.unobtaniumElement, ElementLoader.elements);
+					int num5 = Grid.XYToCell(j, i);
+					borderCells.Add(num5);
+					cells[num5].SetValues(WorldGen.unobtaniumElement, ElementLoader.elements);
 				}
 				num4 = Mathf.Max(-num2, Mathf.Min(num4 + rnd.RandomRange(-2, 2), num2));
 				for (int k = 0; k < num + num4; k++)
 				{
-					cells[Grid.XYToCell(world.size.x - 1 - k, i)].SetValues(WorldGen.unobtaniumElement, ElementLoader.elements);
+					int num6 = Grid.XYToCell(world.size.x - 1 - k, i);
+					borderCells.Add(num6);
+					cells[num6].SetValues(WorldGen.unobtaniumElement, ElementLoader.elements);
 				}
 			}
-			int num5 = 0;
-			int num6 = 0;
+			int num7 = 0;
+			int num8 = 0;
 			bool flag = bool.Parse(WorldGen.settings.defaults.data["DrawWorldBorderTop"] as string);
 			for (int l = 0; l < world.size.x; l++)
 			{
-				num5 = Mathf.Max(-num2, Mathf.Min(num5 + rnd.RandomRange(-2, 2), num2));
-				for (int m = 0; m < num + num5; m++)
+				num7 = Mathf.Max(-num2, Mathf.Min(num7 + rnd.RandomRange(-2, 2), num2));
+				for (int m = 0; m < num + num7; m++)
 				{
-					cells[Grid.XYToCell(l, m)].SetValues(WorldGen.unobtaniumElement, ElementLoader.elements);
+					int num9 = Grid.XYToCell(l, m);
+					borderCells.Add(num9);
+					cells[num9].SetValues(WorldGen.unobtaniumElement, ElementLoader.elements);
 				}
-				num6 = Mathf.Max(-num2, Mathf.Min(num6 + rnd.RandomRange(-2, 2), num2));
-				for (int n = 0; n < num + num6; n++)
+				num8 = Mathf.Max(-num2, Mathf.Min(num8 + rnd.RandomRange(-2, 2), num2));
+				for (int n = 0; n < num + num8; n++)
 				{
-					cells[Grid.XYToCell(l, world.size.y - 1 - n)].SetValues((!flag) ? WorldGen.voidElement : WorldGen.unobtaniumElement, ElementLoader.elements);
+					int num10 = Grid.XYToCell(l, world.size.y - 1 - n);
+					borderCells.Add(num10);
+					cells[num10].SetValues((!flag) ? WorldGen.voidElement : WorldGen.unobtaniumElement, ElementLoader.elements);
 				}
 			}
 		}
@@ -1243,13 +1295,13 @@ namespace ProcGenGame
 		private static void SetupNoise(WorldGen.OfflineCallbackFunction updateProgressFn)
 		{
 			updateProgressFn(UI.WORLDGEN.BUILDNOISESOURCE.key, 0f, WorldGenProgressStages.Stages.SetupNoise);
-			WorldGen.heatSource = WorldGen.BuildNoiseSource(WorldGen.data.world.size.x, WorldGen.data.world.size.y, "Heat");
+			WorldGen.heatSource = WorldGen.BuildNoiseSource(WorldGen.data.world.size.x, WorldGen.data.world.size.y, "noise/Heat");
 			updateProgressFn(UI.WORLDGEN.BUILDNOISESOURCE.key, 100f, WorldGenProgressStages.Stages.SetupNoise);
 		}
 
 		public static NoiseMapBuilderPlane BuildNoiseSource(int width, int height, string name)
 		{
-			global::ProcGen.Noise.Tree tree = WorldGen.settings.noise.GetTree(name);
+			global::ProcGen.Noise.Tree tree = WorldGen.settings.noise.GetTree(name, WorldGen.PATH);
 			return WorldGen.BuildNoiseSource(width, height, tree);
 		}
 
@@ -1327,12 +1379,12 @@ namespace ProcGenGame
 			{
 				global::Debug.LogError("nupd is null", null);
 			}
-			WorldGen.data.world.heatOffset = WorldGen.GenerateNoise(vector, WorldGen.settings.noise.GetZoomForTree("Heat"), WorldGen.heatSource, WorldGen.data.world.size.x, WorldGen.data.world.size.y, noiseMapBuilderCallback);
+			WorldGen.data.world.heatOffset = WorldGen.GenerateNoise(vector, WorldGen.settings.noise.GetZoomForTree("noise/Heat"), WorldGen.heatSource, WorldGen.data.world.size.x, WorldGen.data.world.size.y, noiseMapBuilderCallback);
 			WorldGen.data.world.data = new float[WorldGen.data.world.heatOffset.Length];
 			WorldGen.data.world.density = new float[WorldGen.data.world.heatOffset.Length];
 			WorldGen.data.world.overrides = new float[WorldGen.data.world.heatOffset.Length];
 			updateProgressFn(UI.WORLDGEN.NORMALISENOISE.key, 50f, WorldGenProgressStages.Stages.GenerateNoise);
-			if (WorldGen.settings.noise.ShouldNormaliseTree("Heat"))
+			if (WorldGen.settings.noise.ShouldNormaliseTree("noise/Heat"))
 			{
 				WorldGen.Normalise(WorldGen.data.world.heatOffset);
 			}
@@ -1346,13 +1398,10 @@ namespace ProcGenGame
 			float currentProgress = 0f;
 			foreach (TerrainCell terrainCell in WorldGen.OverworldCells)
 			{
-				string text = "Default";
-				string text2 = "DefaultCave";
-				string text3 = "DefaultDensity";
-				global::ProcGen.Noise.Tree tree = WorldGen.Settings.noise.GetTree(text);
-				global::ProcGen.Noise.Tree tree2 = WorldGen.Settings.noise.GetTree(text2);
-				global::ProcGen.Noise.Tree tree3 = WorldGen.Settings.noise.GetTree(text3);
-				SubWorld subWorld = WorldGen.Settings.subworlds.GetSubWorld(terrainCell.node.type);
+				global::ProcGen.Noise.Tree tree = WorldGen.Settings.noise.GetTree("noise/Default", WorldGen.PATH);
+				global::ProcGen.Noise.Tree tree2 = WorldGen.Settings.noise.GetTree("noise/DefaultCave", WorldGen.PATH);
+				global::ProcGen.Noise.Tree tree3 = WorldGen.Settings.noise.GetTree("noise/DefaultDensity", WorldGen.PATH);
+				SubWorld subWorld = WorldGen.Settings.GetSubWorld(terrainCell.node.type);
 				if (subWorld == null)
 				{
 					global::Debug.Log("Couldnt find Subworld for overworld node [" + terrainCell.node.type + "] using defaults", null);
@@ -1497,6 +1546,11 @@ namespace ProcGenGame
 			}
 			for (int i = 0; i < table.Count; i++)
 			{
+				if (table[i] == null || table[i].content == null || table[i].content.Length == 0)
+				{
+					int num2 = 0;
+					num2++;
+				}
 				if (num < table[i].maxValue)
 				{
 					return TerrainCell.GetElementOverride(table[i].content, table[i].overrides);
@@ -1662,6 +1716,14 @@ namespace ProcGenGame
 
 		private const int UNPASSABLE_EDGE_COUNT = 4;
 
+		private const string heat_noise_name = "noise/Heat";
+
+		private const string base_noise_name = "noise/Default";
+
+		private const string cave_noise_name = "noise/DefaultCave";
+
+		private const string density_noise_name = "noise/DefaultDensity";
+
 		public const int WORLDGEN_SAVE_MAJOR_VERSION = 1;
 
 		public const int WORLDGEN_SAVE_MINOR_VERSION = 1;
@@ -1675,6 +1737,8 @@ namespace ProcGenGame
 		private SeededRandom myRandom;
 
 		private static WorldGen.OfflineCallbackFunction successCallbackFn;
+
+		private Action<OfflineWorldGen.ErrorInfo> errorCallback;
 
 		private static bool running = true;
 
@@ -1697,6 +1761,8 @@ namespace ProcGenGame
 		private static WorldGenSettings settings;
 
 		private static bool wasLoaded = false;
+
+		private static string PATH = null;
 
 		public static List<string> diseaseIds = new List<string>
 		{

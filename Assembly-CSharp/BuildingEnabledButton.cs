@@ -42,6 +42,7 @@ public class BuildingEnabledButton : KMonoBehaviour, ISaveLoadable, IToggleHandl
 
 	public void HandleToggle()
 	{
+		Prioritizable.RemoveRef(base.gameObject);
 		this.OnToggle();
 	}
 
@@ -63,6 +64,11 @@ public class BuildingEnabledButton : KMonoBehaviour, ISaveLoadable, IToggleHandl
 		if (this.Toggleable.IsToggleQueued(this.ToggleIdx))
 		{
 			flag = !flag;
+			Prioritizable.AddRef(base.gameObject);
+		}
+		else
+		{
+			Prioritizable.RemoveRef(base.gameObject);
 		}
 	}
 

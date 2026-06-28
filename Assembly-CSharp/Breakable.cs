@@ -46,6 +46,7 @@ public class Breakable : Workable
 
 	protected override void OnStartWork(Worker worker)
 	{
+		base.OnStartWork(worker);
 		this.secondsPerTenPercentDamage = 2f;
 		this.tenPercentDamage = Mathf.CeilToInt((float)this.hp.MaxHitPoints * 0.1f);
 		base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.AngerDamage, this);

@@ -20,22 +20,31 @@ public struct PathFinderAbilities
 		}
 	}
 
-	public bool CanTraverse(int cell, int from_cell, int cost, int underwater_cost)
+	public bool CanTraverse(PathFinder.PotentialPath path, int from_cell, int cost, int underwater_cost)
 	{
 		if (this.masks != null && !this.ignoreNavigationMasks)
 		{
 			for (int i = 0; i < this.masks.Count; i++)
 			{
-				if (!this.masks[i].IsTraversable(cell, from_cell, cost, this))
+				if (!this.masks[i].IsTraversable(path, from_cell, cost, this))
 				{
 					return false;
 				}
 			}
 		}
-		return underwater_cost <= this.maxUnderwaterCost && (!Grid.SuitRequired[cell] || (byte)(this.flags & PathFinderFlags.SuitRequired) != 0);
+		return path.HasFlag(PathFinder.PotentialPath.Flags.HasSuit) || underwater_cost <= this.maxUnderwaterCost;
 	}
 
-	public PathFinderFlags flags;
+	public void ApplyTraversalToPath(ref PathFinder.PotentialPath path, int from_cell)
+	{
+		if (this.masks != null && !this.ignoreNavigationMasks)
+		{
+			for (int i = 0; i < this.masks.Count; i++)
+			{
+				this.masks[i].ApplyTraversalToPath(ref path, from_cell);
+			}
+		}
+	}
 
 	public int maxUnderwaterCost;
 

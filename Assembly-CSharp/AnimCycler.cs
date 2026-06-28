@@ -16,6 +16,7 @@ public class AnimCycler : Cycler
 			boxCollider2D.size = Vector2.one * 3f;
 			boxCollider2D.offset = Vector2.up * 1.5f;
 			BatchAnimCamera.bounds.Encapsulate(boxCollider2D.bounds);
+			base.gameObject.AddComponent<LoopingSounds>();
 		}
 	}
 

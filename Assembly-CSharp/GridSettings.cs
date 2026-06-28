@@ -24,11 +24,12 @@ public class GridSettings : KMonoBehaviour
 		Grid.HasDoor = new bool[Grid.CellCount];
 		Grid.HasAccessDoor = new bool[Grid.CellCount];
 		Grid.HasLadder = new bool[Grid.CellCount];
-		Grid.Decor = new int[Grid.CellCount];
-		Grid.NoisePollution = new int[Grid.CellCount];
+		Grid.Decor = new float[Grid.CellCount];
+		Grid.Loudness = new float[Grid.CellCount];
 		Grid.PreventFogOfWarReveal = new bool[Grid.CellCount];
 		Grid.IsTileUnderConstruction = new bool[Grid.CellCount];
-		Grid.ObjectLayers = new Dictionary<int, GameObject>[23];
+		Grid.PreventIdlingOnCell = new bool[Grid.CellCount];
+		Grid.ObjectLayers = new Dictionary<int, GameObject>[25];
 		for (int i = 0; i < Grid.ObjectLayers.Length; i++)
 		{
 			Grid.ObjectLayers[i] = new Dictionary<int, GameObject>();
@@ -37,8 +38,7 @@ public class GridSettings : KMonoBehaviour
 		for (int j = 0; j < Grid.CellCount; j++)
 		{
 			Grid.Room[j] = ushort.MaxValue;
-			Grid.SuitRequired[j] = false;
-			Grid.NoisePollution[j] = -1;
+			Grid.Loudness[j] = 0f;
 		}
 		if (Game.Instance != null)
 		{

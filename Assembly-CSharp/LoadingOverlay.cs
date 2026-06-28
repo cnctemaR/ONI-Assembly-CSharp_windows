@@ -4,6 +4,13 @@ using UnityEngine;
 
 public class LoadingOverlay : KModalScreen
 {
+	protected override void OnPrefabInit()
+	{
+		this.pause = false;
+		this.fadeIn = false;
+		base.OnPrefabInit();
+	}
+
 	private void Update()
 	{
 		if (!this.loadNextFrame && this.showLoad)

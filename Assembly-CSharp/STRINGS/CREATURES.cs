@@ -4,6 +4,10 @@ namespace STRINGS
 {
 	public class CREATURES
 	{
+		public static LocString BAGGED_NAME_FMT = "Bagged {0}";
+
+		public static LocString BAGGED_DESC_FMT = "This {0} has been captured and is now safe to relocate.";
+
 		public class SPECIES
 		{
 			public class CHLORINEGEYSER
@@ -32,6 +36,13 @@ namespace STRINGS
 				public static LocString NAME = "Hatch";
 
 				public static LocString DESC = "Hatches excrete solid <style=\"solid\">Coal</style> as waste and may be uncovered by digging up Buried Objects.";
+			}
+
+			public class OIL_FLOATER
+			{
+				public static LocString NAME = "Slickster";
+
+				public static LocString DESC = "Slicksters are slimy creatures that consume <style=\"gas\">Carbon Dioxide</style> and exude <style=\"misc\">Crude Oil</style>.";
 			}
 
 			public class PUFT
@@ -74,6 +85,13 @@ namespace STRINGS
 				public static LocString NAME = "Natural Gas Geyser";
 
 				public static LocString DESC = "A highly pressurized geyser that periodically erupts with <style=\"gas\">Natural Gas</style>.";
+			}
+
+			public class OIL_WELL
+			{
+				public static LocString NAME = "Oil Reservoir";
+
+				public static LocString DESC = "Oil Reservoirs are rock formations with <style=\"liquid\">Crude Oil</style> deposits beneath their surface.\n\nOil can be extracted from a reservoir with sufficient pressure.";
 			}
 
 			public class MUSHROOMPLANT
@@ -179,9 +197,9 @@ namespace STRINGS
 
 			public class PRICKLEGRASS
 			{
-				public static LocString NAME = "Bristle Briar";
+				public static LocString NAME = "Bluff Briar";
 
-				public static LocString DESC = "Bristle Briars exude pheromones that make creatures view them as especially beautiful.";
+				public static LocString DESC = "Bluff Briars exude pheromones causing creatures to view them as especially beautiful.";
 
 				public static LocString DOMESTICATEDDESC = "This plant improves <style=\"decor\">Decor</style>.";
 			}
@@ -215,7 +233,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Wheezewort";
 
-				public static LocString DESC = "Wheezeworts can be grown in flower vases and absorb <style=\"heat\">Heat</style> by respiring through their porous outer membranes.";
+				public static LocString DESC = "Wheezeworts can be grown in flower pots and absorb <style=\"heat\">Heat</style> by respiring through their porous outer membranes.";
 
 				public static LocString DOMESTICATEDDESC = "This plant absorbs <style=\"heat\">Heat</style>.";
 			}
@@ -263,7 +281,7 @@ namespace STRINGS
 				{
 					public static LocString NAME = "Briar Seed";
 
-					public static LocString DESC = "The <style=\"seed\">Seed</style> of a <style=\"plant\">Bristle Briar</style>.\n\nDigging up Buried Objects may uncover a Briar Seed.";
+					public static LocString DESC = "The <style=\"seed\">Seed</style> of a <style=\"plant\">Bluff Briar</style>.\n\nDigging up Buried Objects may uncover a Briar Seed.";
 				}
 
 				public class SWAMPLILY
@@ -282,9 +300,9 @@ namespace STRINGS
 
 				public class COLDBREATHER
 				{
-					public static LocString NAME = "Wheezewort Seed";
+					public static LocString NAME = "Wort Seed";
 
-					public static LocString DESC = "The <style=\"seed\">Seed</style> of a <style=\"plant\">Wheezewort</style>.\n\nDigging up Buried Objects may uncover a Wheezewort Seed.";
+					public static LocString DESC = "The <style=\"seed\">Seed</style> of a <style=\"plant\">Wheezewort</style>.\n\nDigging up Buried Objects may uncover a Wort Seed.";
 				}
 
 				public class BASICFABRICMATERIALPLANT
@@ -299,6 +317,13 @@ namespace STRINGS
 					public static LocString NAME = "Pincha Pepper Seed";
 
 					public static LocString DESC = "The <style=\"seed\">Seed</style> of a <style=\"plant\">Pincha Pepperplant</style>.\n\nDigging up Buried Objects may uncover a Pincha Pepper Seed.";
+				}
+
+				public class OILEATER
+				{
+					public static LocString NAME = "Ink Bloom Seed";
+
+					public static LocString DESC = "The <style=\"seed\">Seed</style> of a <style=\"plant\">Ink Bloom</style>.\n\nDigging up Buried Objects may uncover an Ink Bloom Seed.";
 				}
 			}
 		}
@@ -651,13 +676,27 @@ namespace STRINGS
 				public static LocString NAME = "Entombed";
 
 				public static LocString TOOLTIP = "This creature is trapped and needs help digging out";
+
+				public static LocString LINE_ITEM = "    • Entombed";
 			}
 
 			public class WILTING
 			{
 				public static LocString NAME = "Growth Halted{Reasons}";
 
-				public static LocString NAME_NON_GROWING_PLANT = "Wilting";
+				public static LocString TOOLTIP = "Growth will resume when conditions improve";
+			}
+
+			public class WILTINGDOMESTIC
+			{
+				public static LocString NAME = "Growth Halted{Reasons}";
+
+				public static LocString TOOLTIP = "Growth will resume when conditions improve";
+			}
+
+			public class WILTING_NON_GROWING_PLANT
+			{
+				public static LocString NAME = "Growth Halted{Reasons}";
 
 				public static LocString TOOLTIP = "Growth will resume when conditions improve";
 			}
@@ -767,6 +806,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This farm plot cannot grow plants in its current state";
 			}
 
+			public class TRAPPED
+			{
+				public static LocString NAME = "Trapped";
+
+				public static LocString TOOLTIP = "This creature is contained and cannot move";
+			}
+
 			public class EXHALING
 			{
 				public static LocString NAME = "Exhaling";
@@ -844,7 +890,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Thermal Conductivity";
 
-				public static LocString TOOLTIP = "Heat can pass through the selected item at a rate of (W/m)/K";
+				public static LocString TOOLTIP = "Heat can pass through the selected object at a rate of (W/m)/K";
 			}
 
 			public class THERMALCONDUCTIVITYBARRIER

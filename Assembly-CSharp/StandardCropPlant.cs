@@ -111,7 +111,7 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 				{
 					smi.master.animController.SetPositionPercent(smi.master.growing.PercentOfCurrentHarvest());
 				});
-			this.alive.pre_fruiting.QueueAnim("grow_pst", false, null).EventHandler(GameHashes.AnimQueueComplete, delegate(StandardCropPlant.StatesInstance smi)
+			this.alive.pre_fruiting.PlayAnim("grow_pst", KAnim.PlayMode.Once, null).EventHandler(GameHashes.AnimQueueComplete, delegate(StandardCropPlant.StatesInstance smi)
 			{
 				smi.GoTo(this.alive.fruiting);
 			});

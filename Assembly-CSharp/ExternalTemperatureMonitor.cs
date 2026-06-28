@@ -1,5 +1,6 @@
 ﻿using System;
 using Klei.AI;
+using STRINGS;
 using UnityEngine;
 
 public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMonitor, ExternalTemperatureMonitor.Instance>
@@ -8,18 +9,18 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 	{
 		if (affected_attributes == null)
 		{
-			return -0.22314668f;
+			return -0.36261335f;
 		}
-		return -(0.22314668f - affected_attributes.GetValue(Db.Get().Attributes.RoomTemperaturePreference.Id));
+		return -(0.36261335f - affected_attributes.GetValue(Db.Get().Attributes.RoomTemperaturePreference.Id));
 	}
 
 	public static float GetExternalWarmThreshold(Attributes affected_attributes)
 	{
 		if (affected_attributes == null)
 		{
-			return 0.05578666f;
+			return 0.19525334f;
 		}
-		return -(-0.05578666f - affected_attributes.GetValue(Db.Get().Attributes.RoomTemperaturePreference.Id));
+		return -(-0.19525334f - affected_attributes.GetValue(Db.Get().Attributes.RoomTemperaturePreference.Id));
 	}
 
 	public override void InitializeStates(out StateMachine.BaseState default_state)
@@ -66,9 +67,9 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 
 	private const float BODY_TEMPERATURE_AFFECT_EXTERNAL_FEEL_THRESHOLD = 0.5f;
 
-	public const float BASE_STRESS_TOLERANCE_COLD = 0.13946667f;
+	public const float BASE_STRESS_TOLERANCE_COLD = 0.27893335f;
 
-	public const float BASE_STRESS_TOLERANCE_WARM = 0.13946667f;
+	public const float BASE_STRESS_TOLERANCE_WARM = 0.27893335f;
 
 	private const float START_GAME_AVERAGING_DELAY = 6f;
 
@@ -124,6 +125,12 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 			}
 		}
 
+		public override void StartSM()
+		{
+			base.StartSM();
+			base.smi.attributes.Get("ScaldingThreshold").Add("base", this.baseScalindingThreshold);
+		}
+
 		public float GetCurrentColdThreshold
 		{
 			get
@@ -134,6 +141,11 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 				}
 				return CreatureSimTemperatureTransfer.PotentialEnergyFlowToCreature(Grid.PosToCell(base.gameObject), this.primaryElement, this.temperatureTransferer, 1f);
 			}
+		}
+
+		public float GetScaldingThreshold()
+		{
+			return base.smi.attributes.GetValue("ScaldingThreshold");
 		}
 
 		public float GetCurrentHotThreshold
@@ -156,7 +168,7 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 
 		public bool IsScalding()
 		{
-			return this.AverageExternalTemperature > this.ScaldingThreshold;
+			return this.AverageExternalTemperature > base.smi.attributes.GetValue("ScaldingThreshold");
 		}
 
 		public void ScaldDamage(float deltaTime)
@@ -178,7 +190,7 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 
 		public float HotThreshold = 306.15f;
 
-		public float ScaldingThreshold = 345f;
+		private AttributeModifier baseScalindingThreshold = new AttributeModifier("ScaldingThreshold", 345f, DUPLICANTS.STATS.SKIN_DURABILITY.NAME, false, false);
 
 		public Attributes attributes;
 

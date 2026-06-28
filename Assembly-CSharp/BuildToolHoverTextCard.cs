@@ -62,7 +62,7 @@ public class BuildToolHoverTextCard : HoverTextConfiguration
 				Orientation getBuildingOrientation = BuildTool.Instance.GetBuildingOrientation;
 				int getLastCell = BuildTool.Instance.GetLastCell;
 				string text = "Unknown reason";
-				if (!this.currentDef.IsValidBuildLocation(getLastCell, getBuildingOrientation, out text))
+				if (!this.currentDef.IsValidBuildLocation(null, getLastCell, getBuildingOrientation, out text))
 				{
 					base.SetLineActive(this.BuildWarningText.transform.parent.gameObject, true);
 					this.BuildWarningText.text = text;
@@ -94,7 +94,7 @@ public class BuildToolHoverTextCard : HoverTextConfiguration
 				num2 += this.currentDef.EnergyConsumptionWhenActive;
 				float maxSafeWattageForCircuit = circuitManager.GetMaxSafeWattageForCircuit(circuitID);
 				this.PowerText.color = ((num2 < maxSafeWattageForCircuit) ? Color.white : Color.red);
-				this.PowerText.text = string.Format(UI.DETAILTABS.ENERGYGENERATOR.POTENTIAL_WATTAGE_CONSUMED, GameUtil.GetFormattedWattage(num2, "F1"));
+				this.PowerText.text = string.Format(UI.DETAILTABS.ENERGYGENERATOR.POTENTIAL_WATTAGE_CONSUMED, GameUtil.GetFormattedWattage(num2, GameUtil.WattageFormatterUnit.Automatic));
 			}
 			base.SetLineActive(this.PowerText.transform.parent.gameObject, flag);
 		}

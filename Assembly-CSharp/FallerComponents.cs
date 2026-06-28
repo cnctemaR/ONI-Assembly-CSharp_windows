@@ -10,14 +10,16 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 
 	public override void Remove(GameObject go)
 	{
-		this.OnCleanUpImmediate(base.GetHandle(go));
+		HandleVector<int>.Handle handle = base.GetHandle(go);
+		this.OnCleanUpImmediate(handle);
+		KComponentManager<FallerComponent>.CleanupInfo cleanupInfo = new KComponentManager<FallerComponent>.CleanupInfo(go, handle);
 		if (!KComponentCleanUp.InCleanUpPhase)
 		{
-			this.cleanupList.Add(go);
+			this.cleanupList.Add(cleanupInfo);
 		}
 		else
 		{
-			base.InternalRemoveComponent(go);
+			base.InternalRemoveComponent(cleanupInfo);
 		}
 	}
 

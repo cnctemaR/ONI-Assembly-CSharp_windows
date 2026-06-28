@@ -9,6 +9,11 @@ public class SubworldZoneRenderData : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.GenerateTexture();
+	}
+
+	public void GenerateTexture()
+	{
 		this.regionTex = new Texture2D(Grid.WidthInCells, Grid.HeightInCells, TextureFormat.ARGB32, false);
 		this.regionTex.name = "SubworldRegionData";
 		this.regionTex.filterMode = FilterMode.Bilinear;
@@ -95,16 +100,18 @@ public class SubworldZoneRenderData : KMonoBehaviour
 
 	private Texture2D regionTex;
 
+	[HideInInspector]
 	public SubWorld.ZoneType[] worldZoneTypes;
 
 	[SerializeField]
-	private Color32[] zoneColours = new Color32[]
+	public Color32[] zoneColours = new Color32[]
 	{
 		new Color32(145, 198, 213, 0),
 		new Color32(135, 82, 160, 1),
 		new Color32(123, 151, 75, 2),
 		new Color32(236, 189, 89, 3),
 		new Color32(201, 152, 181, 4),
-		new Color32(222, 90, 59, 5)
+		new Color32(222, 90, 59, 5),
+		new Color32(201, 152, 181, 6)
 	};
 }

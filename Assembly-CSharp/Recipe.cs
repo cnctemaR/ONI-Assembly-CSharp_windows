@@ -80,14 +80,14 @@ public class Recipe : IHasSortOrder
 		List<Recipe.Ingredient> list = new List<Recipe.Ingredient>();
 		for (int i = 0; i < this.Ingredients.Count; i++)
 		{
-			int num = (int)this.Ingredients[i].amount;
+			float amount = this.Ingredients[i].amount;
 			if (i < selectedTags.Count)
 			{
-				list.Add(new Recipe.Ingredient(selectedTags[i], (float)num));
+				list.Add(new Recipe.Ingredient(selectedTags[i], amount));
 			}
 			else
 			{
-				list.Add(new Recipe.Ingredient(this.Ingredients[i].tag, (float)num));
+				list.Add(new Recipe.Ingredient(this.Ingredients[i].tag, amount));
 			}
 		}
 		return list.ToArray();
@@ -130,6 +130,15 @@ public class Recipe : IHasSortOrder
 		float num2 = 0f;
 		foreach (Recipe.Ingredient ingredient in ingredientTags)
 		{
+			GameObject gameObject = resource_storage.FindFirst(ingredient.tag);
+			if (gameObject != null)
+			{
+				Edible component = gameObject.GetComponent<Edible>();
+				if (component)
+				{
+					ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, -component.Calories, string.Format(UI.ENDOFDAYREPORT.NOTES.CRAFTED_USED, component.GetProperName()), UI.ENDOFDAYREPORT.NOTES.CRAFTED_CONTEXT);
+				}
+			}
 			SimUtil.DiseaseInfo diseaseInfo2;
 			float num3;
 			resource_storage.ConsumeAndGetDisease(ingredient, out diseaseInfo2, out num3);
@@ -138,42 +147,42 @@ public class Recipe : IHasSortOrder
 			num2 += ingredient.amount;
 		}
 		GameObject prefab = Assets.GetPrefab(this.Result);
-		GameObject gameObject = null;
+		GameObject gameObject2 = null;
 		if (prefab != null)
 		{
-			gameObject = GameUtil.KInstantiate(prefab, Grid.SceneLayer.Use, Folder.Loot, null, 0);
-			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-			gameObject.GetComponent<KSelectable>().entityName = this.Name;
-			if (component != null)
+			gameObject2 = GameUtil.KInstantiate(prefab, Grid.SceneLayer.Use, Folder.Loot, null, 0);
+			PrimaryElement component2 = gameObject2.GetComponent<PrimaryElement>();
+			gameObject2.GetComponent<KSelectable>().entityName = this.Name;
+			if (component2 != null)
 			{
-				gameObject.GetComponent<KPrefabID>().RemoveTag(TagManager.Create("Vacuum", null));
+				gameObject2.GetComponent<KPrefabID>().RemoveTag(TagManager.Create("Vacuum", null));
 				if (this.ResultElementOverride != (SimHashes)0)
 				{
-					if (component.GetComponent<ElementChunk>() != null)
+					if (component2.GetComponent<ElementChunk>() != null)
 					{
-						component.SetElement(this.ResultElementOverride);
+						component2.SetElement(this.ResultElementOverride);
 					}
 					else
 					{
-						component.ElementID = this.ResultElementOverride;
+						component2.ElementID = this.ResultElementOverride;
 					}
 				}
-				component.Temperature = num;
-				component.Units = this.OutputUnits;
+				component2.Temperature = num;
+				component2.Units = this.OutputUnits;
 			}
-			Edible component2 = gameObject.GetComponent<Edible>();
-			if (component2)
+			Edible component3 = gameObject2.GetComponent<Edible>();
+			if (component3)
 			{
-				ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, component2.Calories, string.Format(UI.ENDOFDAYREPORT.NOTES.CRAFTED, component2.name));
+				ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, component3.Calories, string.Format(UI.ENDOFDAYREPORT.NOTES.CRAFTED, component3.GetProperName()), UI.ENDOFDAYREPORT.NOTES.CRAFTED_CONTEXT);
 			}
-			gameObject.SetActive(true);
-			if (component != null)
+			gameObject2.SetActive(true);
+			if (component2 != null)
 			{
-				component.AddDisease(diseaseInfo.idx, diseaseInfo.count, "Recipe.CraftRecipe");
+				component2.AddDisease(diseaseInfo.idx, diseaseInfo.count, "Recipe.CraftRecipe");
 			}
-			gameObject.GetComponent<KMonoBehaviour>().Trigger(748399584, null);
+			gameObject2.GetComponent<KMonoBehaviour>().Trigger(748399584, null);
 		}
-		return gameObject;
+		return gameObject2;
 	}
 
 	public string[] MaterialOptionNames

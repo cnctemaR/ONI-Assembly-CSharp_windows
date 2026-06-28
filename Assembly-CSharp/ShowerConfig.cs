@@ -24,6 +24,7 @@ public class ShowerConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
 		go.AddOrGet<LoopingSounds>();
+		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.WashStation);
 		Shower shower = go.AddOrGet<Shower>();
 		shower.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_shower_kanim") };
 		shower.workTime = 30f;

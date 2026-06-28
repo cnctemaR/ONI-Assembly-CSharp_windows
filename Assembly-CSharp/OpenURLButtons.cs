@@ -1,29 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using STRINGS;
 using UnityEngine;
 
 public class OpenURLButtons : KMonoBehaviour
 {
-	public OpenURLButtons()
-	{
-		KeyValuePair<LocString, Action<OpenURLButtons>>[] array = new KeyValuePair<LocString, Action<OpenURLButtons>>[3];
-		array[0] = new KeyValuePair<LocString, Action<OpenURLButtons>>(UI.DEVELOPMENTBUILDS.ALPHA.MESSAGES.MAILINGLIST, delegate(OpenURLButtons o)
-		{
-			o.OpenURL("http://eepurl.com/cw2Nrn");
-		});
-		array[1] = new KeyValuePair<LocString, Action<OpenURLButtons>>(UI.DEVELOPMENTBUILDS.ALPHA.MESSAGES.FORUMBUTTON, delegate(OpenURLButtons o)
-		{
-			o.OpenURL("http://forums.kleientertainment.com/forum/118-oxygen-not-included/");
-		});
-		array[2] = new KeyValuePair<LocString, Action<OpenURLButtons>>(UI.DEVELOPMENTBUILDS.ALPHA.MESSAGES.PATCHNOTES, delegate(OpenURLButtons o)
-		{
-			o.OpenPatchNotes();
-		});
-		this.buttons = array;
-		base..ctor();
-	}
-
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -67,8 +47,6 @@ public class OpenURLButtons : KMonoBehaviour
 	public GameObject buttonPrefab;
 
 	public List<OpenURLButtons.URLButtonData> buttonData;
-
-	private KeyValuePair<LocString, Action<OpenURLButtons>>[] buttons;
 
 	[SerializeField]
 	private GameObject patchNotesScreen;

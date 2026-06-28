@@ -23,8 +23,6 @@ public class SimpleInfoScreen : TargetScreen
 		this.infoPanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.SIMPLEINFO.GROUPNAME_DESCRIPTION;
 		GameObject gameObject = this.infoPanel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject;
 		this.descriptionContainer = Util.KInstantiateUI<DescriptionContainer>(this.DescriptionContainerTemplate, gameObject, false);
-		this.lorePanel = Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
-		this.loreContent = Util.KInstantiateUI(this.TextContainerPrefab, this.lorePanel.Content.gameObject, true);
 		this.storagePanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.stampContainer = Util.KInstantiateUI(this.StampContainerTemplate, gameObject, false);
 		this.Subscribe(-1514841199, new Action<object>(this.OnRefreshData));
@@ -115,7 +113,7 @@ public class SimpleInfoScreen : TargetScreen
 	{
 		GameObject gameObject = this.statusItemsFolder;
 		Color color;
-		if (status_item.item.notificationType == NotificationType.BadMinor || status_item.item.notificationType == NotificationType.Bad)
+		if (status_item.item.notificationType == NotificationType.BadMinor || status_item.item.notificationType == NotificationType.Bad || status_item.item.notificationType == NotificationType.DuplicantThreatening)
 		{
 			color = this.statusItemTextColor_bad;
 		}
@@ -472,10 +470,6 @@ public class SimpleInfoScreen : TargetScreen
 	private CollapsibleDetailContentPanel statusItemPanel;
 
 	private CollapsibleDetailContentPanel vitalsPanel;
-
-	private CollapsibleDetailContentPanel lorePanel;
-
-	private GameObject loreContent;
 
 	private GameObject storagePanel;
 

@@ -240,12 +240,18 @@ public class SimTemperatureTransfer : KMonoBehaviour
 				instance.ModifyEnergy(instance.pendingEnergyModifications);
 				instance.pendingEnergyModifications = 0f;
 			}
+			if (instance.onSimRegistered != null)
+			{
+				instance.onSimRegistered(instance);
+			}
 		}
 		else
 		{
 			SimMessages.RemoveElementChunk(num, -1);
 		}
 	}
+
+	public Action<SimTemperatureTransfer> onSimRegistered;
 
 	protected int simHandle = -1;
 

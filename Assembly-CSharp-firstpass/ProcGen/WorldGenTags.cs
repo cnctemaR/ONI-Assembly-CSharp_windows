@@ -4,14 +4,6 @@ namespace ProcGen
 {
 	public class WorldGenTags
 	{
-		public static readonly Tag UnassignedNode = TagManager.Create("UnassignedNode", null);
-
-		public static readonly Tag Feature = TagManager.Create("Feature", null);
-
-		public static readonly Tag CenteralFeature = TagManager.Create("CenteralFeature", null);
-
-		public static readonly Tag Overworld = TagManager.Create("Overworld", null);
-
 		public static readonly Tag ConnectToSiblings = TagManager.Create("ConnectToSiblings", null);
 
 		public static readonly Tag ConnectTypeMinSpan = TagManager.Create("ConnectTypeMinSpan", null);
@@ -35,18 +27,6 @@ namespace ProcGen
 		public static readonly Tag EdgeClosed = TagManager.Create("EdgeClosed", null);
 
 		public static readonly Tag EdgeOpen = TagManager.Create("EdgeOpen", null);
-
-		public static readonly Tag NearSurface = TagManager.Create("NearSurface", null);
-
-		public static readonly Tag NearDepths = TagManager.Create("NearDepths", null);
-
-		public static readonly Tag AtSurface = TagManager.Create("AtSurface", null);
-
-		public static readonly Tag AtDepths = TagManager.Create("AtDepths", null);
-
-		public static readonly Tag AtLeftEdge = TagManager.Create("AtLeftEdge", null);
-
-		public static readonly Tag AtRightEdge = TagManager.Create("AtRightEdge", null);
 
 		public static readonly Tag IgnoreCaveOverride = TagManager.Create("IgnoreCaveOverride", null);
 
@@ -74,11 +54,33 @@ namespace ProcGen
 
 		public static readonly Tag MediumDensitySplit = TagManager.Create("MediumDensitySplit", null);
 
+		public static readonly Tag UnassignedNode = TagManager.Create("UnassignedNode", null);
+
+		public static readonly Tag Feature = TagManager.Create("Feature", null);
+
+		public static readonly Tag CenteralFeature = TagManager.Create("CenteralFeature", null);
+
+		public static readonly Tag Overworld = TagManager.Create("Overworld", null);
+
 		public static readonly Tag StartNear = TagManager.Create("StartNear", null);
 
 		public static readonly Tag StartMedium = TagManager.Create("StartMedium", null);
 
 		public static readonly Tag StartFar = TagManager.Create("StartFar", null);
+
+		public static readonly Tag NearEdge = TagManager.Create("NearEdge", null);
+
+		public static readonly Tag NearSurface = TagManager.Create("NearSurface", null);
+
+		public static readonly Tag NearDepths = TagManager.Create("NearDepths", null);
+
+		public static readonly Tag AtSurface = TagManager.Create("AtSurface", null);
+
+		public static readonly Tag AtDepths = TagManager.Create("AtDepths", null);
+
+		public static readonly Tag AtEdge = TagManager.Create("AtEdge", null);
+
+		public static readonly Tag EdgeOfVoid = TagManager.Create("EdgeOfVoid", null);
 
 		public static readonly Tag Dry = TagManager.Create("Dry", null);
 
@@ -108,15 +110,9 @@ namespace ProcGen
 
 		public static readonly Tag TheVoid = TagManager.Create("TheVoid", null);
 
-		public static readonly Tag FakeStart = TagManager.Create("FakeStart", null);
-
 		public static readonly Tag SprinkleOfMetal = TagManager.Create("SprinkleOfMetal", null);
 
 		public static readonly Tag SprinkleOfOxyRock = TagManager.Create("SprinkleOfOxyRock", null);
-
-		public static readonly Tag OxySpace = TagManager.Create("OxySpace", null);
-
-		public static readonly Tag Hive = TagManager.Create("Hive", null);
 
 		public static readonly Tag Infected = TagManager.Create("Infected", null);
 
@@ -149,5 +145,66 @@ namespace ProcGen
 		public static readonly Tag DEBUG_SplitLargeStartingSites = TagManager.Create("DEBUG_SplitLargeStartingSites", null);
 
 		public static readonly Tag DEBUG_NoSplitForChildCount = TagManager.Create("DEBUG_NoSplitForChildCount", null);
+
+		public static readonly TagSet DebugTags = new TagSet(new Tag[]
+		{
+			WorldGenTags.DEBUG_Split,
+			WorldGenTags.DEBUG_SplitForChildCount,
+			WorldGenTags.DEBUG_SplitTopSite,
+			WorldGenTags.DEBUG_SplitBottomSite,
+			WorldGenTags.DEBUG_SplitLargeStartingSites,
+			WorldGenTags.DEBUG_NoSplitForChildCount
+		});
+
+		public static readonly TagSet MapTags = new TagSet(new Tag[]
+		{
+			WorldGenTags.Cell,
+			WorldGenTags.Edge,
+			WorldGenTags.Corner,
+			WorldGenTags.EdgeUnpassable,
+			WorldGenTags.EdgeClosed,
+			WorldGenTags.EdgeOpen
+		});
+
+		public static readonly TagSet CommandTags = new TagSet(new Tag[]
+		{
+			WorldGenTags.IgnoreCaveOverride,
+			WorldGenTags.ErodePointToCentroid,
+			WorldGenTags.ErodePointToCentroidInv,
+			WorldGenTags.DistFunctionPointCentroid,
+			WorldGenTags.DistFunctionPointEdge,
+			WorldGenTags.SplitOnParentDensity,
+			WorldGenTags.SplitTwice,
+			WorldGenTags.UltraHighDensitySplit,
+			WorldGenTags.VeryHighDensitySplit,
+			WorldGenTags.HighDensitySplit,
+			WorldGenTags.MediumDensitySplit
+		});
+
+		public static readonly TagSet WorldTags = new TagSet(new Tag[]
+		{
+			WorldGenTags.UnassignedNode,
+			WorldGenTags.Feature,
+			WorldGenTags.CenteralFeature,
+			WorldGenTags.Overworld,
+			WorldGenTags.NearSurface,
+			WorldGenTags.NearDepths,
+			WorldGenTags.AtSurface,
+			WorldGenTags.AtDepths,
+			WorldGenTags.AtEdge,
+			WorldGenTags.StartNear,
+			WorldGenTags.StartMedium
+		});
+
+		public static readonly TagSet DistanceTags = new TagSet(new Tag[]
+		{
+			WorldGenTags.NearEdge,
+			WorldGenTags.NearSurface,
+			WorldGenTags.NearDepths,
+			WorldGenTags.AtSurface,
+			WorldGenTags.AtDepths,
+			WorldGenTags.AtEdge,
+			WorldGenTags.StartWorld
+		});
 	}
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Klei;
 using STRINGS;
 using UnityEngine;
 
@@ -12,26 +11,15 @@ public class SimulatedTemperatureAdjuster
 		this.heatCapacity = heat_capacity;
 		this.thermalConductivity = thermal_conductivity;
 		this.storage = storage;
-	}
-
-	public void Update(float dt)
-	{
-		if (this.storage.items.Count <= 0)
+		storage.temperatureAdjuster = this;
+		storage.gameObject.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		for (int i = 0; i < storage.items.Count; i++)
 		{
-			return;
-		}
-		for (int i = 0; i < this.storage.items.Count; i++)
-		{
-			GameObject gameObject = this.storage.items[i];
-			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-			float num = component.Mass * component.Element.specificHeatCapacity;
-			float num2 = component.Temperature;
-			float num3 = SimUtil.CalculateEnergyFlow(this.temperature, this.heatCapacity, num2, this.thermalConductivity, 1f, 1f);
-			if (num3 < 1f)
+			GameObject gameObject = storage.items[i];
+			if (gameObject != null)
 			{
-				float num4 = SimUtil.ClampEnergyTransfer(dt, this.temperature, this.heatCapacity, num2, num, num3);
-				SimTemperatureTransfer component2 = gameObject.GetComponent<SimTemperatureTransfer>();
-				component2.ModifyEnergy(num4);
+				SimTemperatureTransfer component = gameObject.GetComponent<SimTemperatureTransfer>();
+				this.Register(component);
 			}
 		}
 	}
@@ -48,6 +36,82 @@ public class SimulatedTemperatureAdjuster
 		Descriptor descriptor = new Descriptor(string.Format(UI.BUILDINGEFFECTS.ITEM_TEMPERATURE_ADJUST, formattedTemperature), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ITEM_TEMPERATURE_ADJUST, formattedTemperature), Descriptor.DescriptorType.Effect, false);
 		list.Add(descriptor);
 		return list;
+	}
+
+	public void Register(SimTemperatureTransfer stt)
+	{
+		if (stt == null)
+		{
+			return;
+		}
+		stt.onSimRegistered = (Action<SimTemperatureTransfer>)Delegate.Remove(stt.onSimRegistered, new Action<SimTemperatureTransfer>(this.OnItemSimRegistered));
+		stt.onSimRegistered = (Action<SimTemperatureTransfer>)Delegate.Combine(stt.onSimRegistered, new Action<SimTemperatureTransfer>(this.OnItemSimRegistered));
+		if (Sim.IsValidHandle(stt.SimHandle))
+		{
+			this.OnItemSimRegistered(stt);
+		}
+	}
+
+	public void Unregister(SimTemperatureTransfer stt)
+	{
+		if (stt == null)
+		{
+			return;
+		}
+		stt.onSimRegistered = (Action<SimTemperatureTransfer>)Delegate.Remove(stt.onSimRegistered, new Action<SimTemperatureTransfer>(this.OnItemSimRegistered));
+		SimMessages.ModifyElementChunkTemperatureAdjuster(stt.SimHandle, 0f, 0f, 0f);
+	}
+
+	private void OnItemSimRegistered(SimTemperatureTransfer stt)
+	{
+		if (stt == null)
+		{
+			return;
+		}
+		if (Sim.IsValidHandle(stt.SimHandle))
+		{
+			SimMessages.ModifyElementChunkTemperatureAdjuster(stt.SimHandle, this.temperature, this.heatCapacity, this.thermalConductivity);
+		}
+	}
+
+	private void OnOperationalChanged(object data)
+	{
+		bool flag = (bool)data;
+		if (flag)
+		{
+			foreach (GameObject gameObject in this.storage.items)
+			{
+				if (gameObject != null)
+				{
+					SimTemperatureTransfer component = gameObject.GetComponent<SimTemperatureTransfer>();
+					this.OnItemSimRegistered(component);
+				}
+			}
+		}
+		else
+		{
+			foreach (GameObject gameObject2 in this.storage.items)
+			{
+				if (gameObject2 != null)
+				{
+					SimTemperatureTransfer component2 = gameObject2.GetComponent<SimTemperatureTransfer>();
+					this.Unregister(component2);
+				}
+			}
+		}
+	}
+
+	public void CleanUp()
+	{
+		foreach (GameObject gameObject in this.storage.items)
+		{
+			if (gameObject != null)
+			{
+				SimTemperatureTransfer component = gameObject.GetComponent<SimTemperatureTransfer>();
+				this.Unregister(component);
+			}
+		}
+		this.storage.temperatureAdjuster = null;
 	}
 
 	private float temperature;

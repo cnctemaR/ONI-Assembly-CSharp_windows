@@ -37,4 +37,12 @@ public class InfraredVisualizerComponents : KGameObjectComponentManager<Infrared
 			}
 		}
 	}
+
+	public static void ClearOverlayColour(KBatchedAnimController controller)
+	{
+		if (controller != null)
+		{
+			controller.OverlayColour = Color.black;
+		}
+	}
 }

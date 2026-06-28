@@ -74,6 +74,12 @@ public class IrrigationMonitor : GameStateMachine<IrrigationMonitor, IrrigationM
 
 	public struct LiquidResourceInfo
 	{
+		public LiquidResourceInfo(Tag tag, float mass_consumption_rate)
+		{
+			this.tag = tag;
+			this.massConsumptionRate = mass_consumption_rate;
+		}
+
 		public Tag tag;
 
 		public float massConsumptionRate;

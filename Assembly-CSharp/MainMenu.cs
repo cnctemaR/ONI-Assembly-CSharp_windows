@@ -1,10 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using FMODUnity;
 using Klei;
 using Steamworks;
 using STRINGS;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,7 +14,6 @@ public class MainMenu : KMonoBehaviour
 	{
 		base.OnPrefabInit();
 		KCrashReporter.MOST_RECENT_SAVEFILE = null;
-		this.StartFEAudio();
 		this.RefreshResumeButton();
 		this.Button_ResumeGame.onClick += this.ResumeGame;
 		this.Button_NewGame.onClick += this.NewGame;
@@ -34,11 +33,12 @@ public class MainMenu : KMonoBehaviour
 		{
 			this.Button_LoadGame.isInteractable = false;
 		}
-		this.CheckForCommonIssues();
+		this.StartFEAudio();
 		if (PatchNotesScreen.ShouldShowScreen())
 		{
 			this.patchNotesScreen.SetActive(true);
 		}
+		this.CheckDoubleBoundKeys();
 		this.lastUpdateTime = Time.unscaledTime;
 	}
 
@@ -74,28 +74,20 @@ public class MainMenu : KMonoBehaviour
 
 	private void ShowLanguageConfirmation()
 	{
-		string steamUILanguage = SteamUtils.GetSteamUILanguage();
-		if (steamUILanguage != "schinese")
+		if (SteamManager.Initialized)
 		{
-			return;
+			string steamUILanguage = SteamUtils.GetSteamUILanguage();
+			if (steamUILanguage != "schinese")
+			{
+				return;
+			}
+			if (KPlayerPrefs.GetInt("LanguageConfirmationVersion") >= MainMenu.LANGUAGE_CONFIRMATION_VERSION)
+			{
+				return;
+			}
+			KPlayerPrefs.SetInt("LanguageConfirmationVersion", MainMenu.LANGUAGE_CONFIRMATION_VERSION);
+			this.Translations();
 		}
-		if (KPlayerPrefs.GetInt("LanguageConfirmationVersion") >= MainMenu.LANGUAGE_CONFIRMATION_VERSION)
-		{
-			return;
-		}
-		KPlayerPrefs.SetInt("LanguageConfirmationVersion", MainMenu.LANGUAGE_CONFIRMATION_VERSION);
-		ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
-		TMP_FontAsset tmp_FontAsset = Resources.Load<TMP_FontAsset>("NotoSansCJKsc-Regular");
-		foreach (LocText locText in confirmDialogScreen.GetComponentsInChildren<LocText>())
-		{
-			locText.font = tmp_FontAsset;
-		}
-		confirmDialogScreen.PopupConfirmDialog("您的 Steam 界面语言设为简体中文。 Klei 10月份将要推出缺氧的中文翻译。您想暂时查看用于您的语言的翻译 Mod 吗？", delegate
-		{
-			Application.OpenURL("http://steamcommunity.com/workshop/filedetails/?id=1142206368");
-		}, delegate
-		{
-		}, null, null, "是", "否");
 	}
 
 	private void ResumeGame()
@@ -114,14 +106,8 @@ public class MainMenu : KMonoBehaviour
 
 	private void NewGame()
 	{
-		if (this.GameSettingsScreen == null)
-		{
-			this.GameSettingsScreen = Util.KInstantiateUI(ScreenPrefabs.Instance.NewGameSettingsScreen.gameObject, base.gameObject, true);
-		}
-		else
-		{
-			this.GameSettingsScreen.GetComponent<KScreen>().Show(true);
-		}
+		this.GameSettingsScreen = Util.KInstantiateUI(ScreenPrefabs.Instance.NewGameSettingsScreen.gameObject, base.gameObject, true);
+		this.GameSettingsScreen.GetComponent<KScreen>().Activate();
 	}
 
 	private void LoadGame()
@@ -159,7 +145,7 @@ public class MainMenu : KMonoBehaviour
 				}
 				SaveGame.Header header;
 				SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(latestSaveFile, out header);
-				if (header.buildVersion > 234130U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 235856U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}
@@ -191,15 +177,7 @@ public class MainMenu : KMonoBehaviour
 
 	private void Translations()
 	{
-		if (SteamManager.Initialized)
-		{
-			Util.KInstantiateUI(ScreenPrefabs.Instance.languageOptionsScreen.gameObject, this.transform.parent.gameObject, false);
-		}
-		else
-		{
-			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
-			confirmDialogScreen.PopupConfirmDialog(UI.FRONTEND.TRANSLATIONS_SCREEN.NO_STEAM, null, null, null, null, null, null);
-		}
+		Util.KInstantiateUI(ScreenPrefabs.Instance.languageOptionsScreen.gameObject, this.transform.parent.gameObject, false);
 	}
 
 	private void Options()
@@ -228,12 +206,7 @@ public class MainMenu : KMonoBehaviour
 		{
 			MusicManager.instance.PlaySong("Music_TitleTheme", false);
 		}
-	}
-
-	private void CheckForCommonIssues()
-	{
 		this.CheckForAudioDriverIssue();
-		this.CheckForSavePathIssue();
 	}
 
 	private void CheckForAudioDriverIssue()
@@ -242,54 +215,65 @@ public class MainMenu : KMonoBehaviour
 		{
 			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
 			confirmDialogScreen.imageGO.GetComponent<Image>().sprite = GlobalResources.Instance().sadDupeAudio;
-			confirmDialogScreen.PopupConfirmDialog(UI.FRONTEND.SUPPORTWARNINGS.AUDIO_DRIVERS, null, null, null, null, null, null);
+			confirmDialogScreen.PopupConfirmDialog(UI.FRONTEND.SUPPORTWARNINGS.AUDIO_DRIVERS, null, null, null, null, null, null, null);
 		}
 	}
 
-	private void CheckForSavePathIssue()
+	private void CheckDoubleBoundKeys()
 	{
-		string savePrefix = SaveLoader.GetSavePrefix();
-		string text = "testfile";
-		string text2 = "testsavefile";
-		bool flag;
-		try
+		string text = string.Empty;
+		List<BindingEntry> list = new List<BindingEntry>();
+		for (int i = 0; i < GameInputMapping.KeyBindings.Length; i++)
 		{
-			FileStream fileStream = File.Open(savePrefix + text, FileMode.Create, FileAccess.Write);
-			new BinaryWriter(fileStream);
-			fileStream.Close();
-			flag = false;
+			if (GameInputMapping.KeyBindings[i].mKeyCode != KKeyCode.Mouse1)
+			{
+				for (int j = 0; j < GameInputMapping.KeyBindings.Length; j++)
+				{
+					if (i != j)
+					{
+						if (!list.Contains(GameInputMapping.KeyBindings[j]))
+						{
+							BindingEntry bindingEntry = GameInputMapping.KeyBindings[i];
+							BindingEntry bindingEntry2 = GameInputMapping.KeyBindings[j];
+							if (bindingEntry.mKeyCode != KKeyCode.None && bindingEntry.mKeyCode == bindingEntry2.mKeyCode && bindingEntry.mModifier == bindingEntry2.mModifier && bindingEntry.mRebindable && bindingEntry2.mRebindable)
+							{
+								if (!(GameInputMapping.KeyBindings[i].mGroup != GameInputMapping.KeyBindings[j].mGroup) || GameInputMapping.KeyBindings[i].mGroup == "Root" || GameInputMapping.KeyBindings[j].mGroup == "Root")
+								{
+									string text2 = text;
+									text = string.Concat(new object[]
+									{
+										text2,
+										"\n\n",
+										GameInputMapping.KeyBindings[i].mAction,
+										": <b>",
+										GameInputMapping.KeyBindings[i].mKeyCode,
+										"</b>\n",
+										GameInputMapping.KeyBindings[j].mAction,
+										": <b>",
+										GameInputMapping.KeyBindings[j].mKeyCode,
+										"</b>"
+									});
+									BindingEntry bindingEntry3 = GameInputMapping.KeyBindings[i];
+									bindingEntry3.mKeyCode = KKeyCode.None;
+									bindingEntry3.mModifier = Modifier.None;
+									GameInputMapping.KeyBindings[i] = bindingEntry3;
+									bindingEntry3 = GameInputMapping.KeyBindings[j];
+									bindingEntry3.mKeyCode = KKeyCode.None;
+									bindingEntry3.mModifier = Modifier.None;
+									GameInputMapping.KeyBindings[j] = bindingEntry3;
+								}
+							}
+						}
+					}
+				}
+				list.Add(GameInputMapping.KeyBindings[i]);
+			}
 		}
-		catch
+		if (text != string.Empty)
 		{
 			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
 			confirmDialogScreen.imageGO.GetComponent<Image>().sprite = GlobalResources.Instance().sadDupe;
-			confirmDialogScreen.PopupConfirmDialog(string.Format(UI.FRONTEND.SUPPORTWARNINGS.SAVE_DIRECTORY_READ_ONLY, savePrefix), null, null, null, null, null, null);
-			flag = true;
-		}
-		if (!flag)
-		{
-			FileStream fileStream2 = File.Open(savePrefix + text2, FileMode.Create, FileAccess.Write);
-			try
-			{
-				fileStream2.SetLength(15000000L);
-				new BinaryWriter(fileStream2);
-				fileStream2.Close();
-			}
-			catch
-			{
-				fileStream2.Close();
-				ConfirmDialogScreen confirmDialogScreen2 = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
-				confirmDialogScreen2.imageGO.GetComponent<Image>().sprite = GlobalResources.Instance().sadDupe;
-				confirmDialogScreen2.PopupConfirmDialog(string.Format(UI.FRONTEND.SUPPORTWARNINGS.SAVE_DIRECTORY_INSUFFICIENT_SPACE, savePrefix), null, null, null, null, null, null);
-			}
-		}
-		if (File.Exists(savePrefix + text))
-		{
-			File.Delete(savePrefix + text);
-		}
-		if (File.Exists(savePrefix + text2))
-		{
-			File.Delete(savePrefix + text2);
+			confirmDialogScreen.PopupConfirmDialog(string.Format(UI.FRONTEND.SUPPORTWARNINGS.DUPLICATE_KEY_BINDINGS, text), null, null, null, null, null, null, null);
 		}
 	}
 
@@ -315,5 +299,5 @@ public class MainMenu : KMonoBehaviour
 
 	private GameObject GameSettingsScreen;
 
-	private static int LANGUAGE_CONFIRMATION_VERSION = 1;
+	private static int LANGUAGE_CONFIRMATION_VERSION = 2;
 }

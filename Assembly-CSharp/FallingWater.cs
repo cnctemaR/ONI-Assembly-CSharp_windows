@@ -42,13 +42,13 @@ public class FallingWater : KMonoBehaviour
 		return Time.time % 360f;
 	}
 
-	public void AddParticle(int cell, byte elementIdx, float base_mass, float temperature, byte disease_idx, int base_disease_count, bool skip_sound = false, bool skip_decor = false, bool debug_track = false)
+	public void AddParticle(int cell, byte elementIdx, float base_mass, float temperature, byte disease_idx, int base_disease_count, bool skip_sound = false, bool skip_decor = false, bool debug_track = false, bool disable_randomness = false)
 	{
 		Vector2 vector = Grid.CellToPos2D(cell);
-		this.AddParticle(vector, elementIdx, base_mass, temperature, disease_idx, base_disease_count, skip_sound, skip_decor, debug_track);
+		this.AddParticle(vector, elementIdx, base_mass, temperature, disease_idx, base_disease_count, skip_sound, skip_decor, debug_track, disable_randomness);
 	}
 
-	public void AddParticle(Vector2 root_pos, byte elementIdx, float base_mass, float temperature, byte disease_idx, int base_disease_count, bool skip_sound = false, bool skip_decor = false, bool debug_track = false)
+	public void AddParticle(Vector2 root_pos, byte elementIdx, float base_mass, float temperature, byte disease_idx, int base_disease_count, bool skip_sound = false, bool skip_decor = false, bool debug_track = false, bool disable_randomness = false)
 	{
 		int num = Grid.PosToCell(root_pos);
 		if (!Grid.IsValidCell(num))
@@ -81,8 +81,8 @@ public class FallingWater : KMonoBehaviour
 			base_mass -= num3;
 			int num5 = (int)(num4 * (float)base_disease_count);
 			int num6 = global::UnityEngine.Random.Range(0, this.numFrames);
-			Vector2 vector = new Vector2(this.jitterStep * Mathf.Sin(this.offset), this.jitterStep * Mathf.Sin(this.offset + 17f));
-			Vector2 vector2 = new Vector2(global::UnityEngine.Random.Range(-this.multipleOffsetRange.x, this.multipleOffsetRange.x), global::UnityEngine.Random.Range(-this.multipleOffsetRange.y, this.multipleOffsetRange.y));
+			Vector2 vector = ((!disable_randomness) ? new Vector2(this.jitterStep * Mathf.Sin(this.offset), this.jitterStep * Mathf.Sin(this.offset + 17f)) : Vector2.zero);
+			Vector2 vector2 = ((!disable_randomness) ? new Vector2(global::UnityEngine.Random.Range(-this.multipleOffsetRange.x, this.multipleOffsetRange.x), global::UnityEngine.Random.Range(-this.multipleOffsetRange.y, this.multipleOffsetRange.y)) : Vector2.zero);
 			Element element = ElementLoader.elements[(int)elementIdx];
 			Vector2 vector3 = root_pos;
 			bool flag = !skip_decor && this.SpawnLiquidTopDecor(time, Grid.CellLeft(num), false, element);
@@ -559,12 +559,12 @@ public class FallingWater : KMonoBehaviour
 	[SerializeField]
 	private string liquid_top_loop;
 
-	[EventRef]
 	[SerializeField]
+	[EventRef]
 	private string liquid_splash_initial;
 
-	[SerializeField]
 	[EventRef]
+	[SerializeField]
 	private string liquid_splash_loop;
 
 	[SerializeField]

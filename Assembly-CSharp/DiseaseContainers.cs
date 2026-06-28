@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Database;
 using Klei;
 using Klei.AI;
+using Klei.AI.DiseaseGrowthRules;
 using UnityEngine;
 
 public class DiseaseContainers : KGameObjectComponentManager<DiseaseContainer>
@@ -59,14 +60,14 @@ public class DiseaseContainers : KGameObjectComponentManager<DiseaseContainer>
 	public static float CalculateDelta(DiseaseContainer container, Disease disease, float dt)
 	{
 		int num = Grid.PosToCell(container.primaryElement.transform.position);
-		return DiseaseContainers.CalculateDelta(container.diseaseCount, (int)container.elemIdx, num, container.primaryElement.Temperature, container.instanceGrowthRate, disease, dt);
+		return DiseaseContainers.CalculateDelta(container.diseaseCount, (int)container.elemIdx, container.primaryElement.Mass, num, container.primaryElement.Temperature, container.instanceGrowthRate, disease, dt);
 	}
 
-	public static float CalculateDelta(int disease_count, int element_idx, int environment_cell, float temperature, float tags_multiplier_base, Disease disease, float dt)
+	public static float CalculateDelta(int disease_count, int element_idx, float mass, int environment_cell, float temperature, float tags_multiplier_base, Disease disease, float dt)
 	{
 		float num = 0f;
-		Disease.ElemGrowthInfo elemGrowthInfo = disease.elemGrowthInfo[element_idx];
-		num += elemGrowthInfo.CalculateDiseaseCountDelta(disease_count, dt);
+		ElemGrowthInfo elemGrowthInfo = disease.elemGrowthInfo[element_idx];
+		num += elemGrowthInfo.CalculateDiseaseCountDelta(disease_count, mass, dt);
 		float num2 = Disease.CalculateRangeHalfLife(temperature, ref disease.temperatureRange, ref disease.temperatureHalfLives);
 		float num3 = Disease.HalfLifeToGrowthRate(num2, dt);
 		num += (float)disease_count * num3 - (float)disease_count;
@@ -75,8 +76,8 @@ public class DiseaseContainers : KGameObjectComponentManager<DiseaseContainer>
 		if (Grid.IsValidCell(environment_cell))
 		{
 			byte elementIdx = Grid.Cell[environment_cell].elementIdx;
-			Disease.ElemGrowthInfo elemGrowthInfo2 = disease.elemExposureInfo[(int)elementIdx];
-			num += elemGrowthInfo2.CalculateDiseaseCountDelta(disease_count, dt);
+			ElemExposureInfo elemExposureInfo = disease.elemExposureInfo[(int)elementIdx];
+			num += elemExposureInfo.CalculateExposureDiseaseCountDelta(disease_count, dt);
 		}
 		return num;
 	}
@@ -129,10 +130,13 @@ public class DiseaseContainers : KGameObjectComponentManager<DiseaseContainer>
 				if (visibleArea.Min <= position && position <= visibleArea.Max)
 				{
 					int num = 0;
-					if (diseaseContainer.diseaseIdx != 255)
+					int num2 = 255;
+					int num3 = 0;
+					diseaseContainer.GetVisualDiseaseIdxAndCount(out num2, out num3);
+					if (num2 != 255)
 					{
-						color2 = diseases[(int)diseaseContainer.diseaseIdx].overlayColour;
-						num = diseaseContainer.diseaseCount;
+						color2 = diseases[num2].overlayColour;
+						num = num3;
 					}
 					if (diseaseContainer.isContainer)
 					{
@@ -160,8 +164,8 @@ public class DiseaseContainers : KGameObjectComponentManager<DiseaseContainer>
 					if (diseaseContainer.conduitType != ConduitType.None)
 					{
 						ConduitFlow flowManager = Conduit.GetFlowManager(diseaseContainer.conduitType);
-						int num2 = Grid.PosToCell(position);
-						ConduitFlow.ConduitContents contents = flowManager.GetContents(num2);
+						int num4 = Grid.PosToCell(position);
+						ConduitFlow.ConduitContents contents = flowManager.GetContents(num4);
 						if (contents.diseaseIdx != 255 && contents.diseaseCount > num)
 						{
 							num = contents.diseaseCount;
@@ -179,9 +183,9 @@ public class DiseaseContainers : KGameObjectComponentManager<DiseaseContainer>
 	{
 		Disease disease = Db.Get().Diseases[(int)container.diseaseIdx];
 		KPrefabID component = container.primaryElement.GetComponent<KPrefabID>();
-		Disease.ElemGrowthInfo elemGrowthInfo = disease.elemGrowthInfo[(int)container.diseaseIdx];
-		container.overpopulationCount = elemGrowthInfo.maxCount;
-		container.instanceGrowthRate = disease.GetGrowthRateForTags(component.Tags, container.diseaseCount > elemGrowthInfo.maxCount);
+		ElemGrowthInfo elemGrowthInfo = disease.elemGrowthInfo[(int)container.diseaseIdx];
+		container.overpopulationCount = (int)(elemGrowthInfo.maxCountPerKG * container.primaryElement.Mass);
+		container.instanceGrowthRate = disease.GetGrowthRateForTags(component.Tags, container.diseaseCount > container.overpopulationCount);
 		return container;
 	}
 

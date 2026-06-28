@@ -751,7 +751,7 @@ public class PlanScreen : KIconToggleMenu
 		}
 		else
 		{
-			BuildTool.Instance.Activate(buildingDef, this.productInfoScreen.materialSelectionPanel.GetSelectedElementAsList);
+			BuildTool.Instance.Activate(buildingDef, this.productInfoScreen.materialSelectionPanel.GetSelectedElementAsList, null);
 		}
 	}
 
@@ -873,9 +873,9 @@ public class PlanScreen : KIconToggleMenu
 		public TextStyleSetting InactiveDeselected;
 	}
 
-	[IgnoreEmptyLines]
-	[IgnoreFirst(1)]
 	[IgnoreCommentedLines("#")]
+	[IgnoreFirst(1)]
+	[IgnoreEmptyLines]
 	[DelimitedRecord(",")]
 	private class FabricatorConfig
 	{

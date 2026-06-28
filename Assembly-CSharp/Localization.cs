@@ -29,40 +29,87 @@ public static class Localization
 		}
 	}
 
-	private static Dictionary<string, string> LoadTranslatedStrings(string filename)
+	public static void Initialize(bool dontCheckSteam = false)
 	{
-		string[] array = File.ReadAllLines(filename, Encoding.UTF8);
-		return Localization.LoadTranslatedStrings(array, false);
-	}
-
-	public static void Initialize()
-	{
-		if (SteamManager.Initialized && SteamUGCService.HasInstalledLanguage())
+		global::Debug.Log("Localization.Initialize!", null);
+		Localization.SelectedLanguageType selectedLanguageType = (Localization.SelectedLanguageType)((int)Enum.Parse(typeof(Localization.SelectedLanguageType), KPlayerPrefs.GetString(Localization.SELECTED_LANGUAGE_TYPE_KEY, Localization.SelectedLanguageType.None.ToString()), true));
+		if (selectedLanguageType == Localization.SelectedLanguageType.Preinstalled)
 		{
-			Localization.sLocale = SteamUGCService.GetLocale();
-			SteamUGCService.LoadTranslation(false);
-			SteamUGCService.SetFontForLocalization();
+			global::Debug.Log("Initialize... Preinstalled localization", null);
+			string @string = KPlayerPrefs.GetString(Localization.SELECTED_LANGUAGE_CODE_KEY, string.Empty);
+			Localization.LoadPreinstalledTranslation(@string);
+		}
+		else if (selectedLanguageType == Localization.SelectedLanguageType.UGC && !dontCheckSteam && SteamManager.Initialized && SteamUGCService.HasInstalledLanguage())
+		{
+			global::Debug.Log("Initialize... SteamUGCService", null);
+			SteamUGCService.LoadTranslation();
 		}
 		else
 		{
-			string localizationFilePath = Localization.GetLocalizationFilePath();
-			if (File.Exists(localizationFilePath))
-			{
-				string[] array = File.ReadAllLines(localizationFilePath, Encoding.UTF8);
-				Localization.sLocale = Localization.GetLocale(array);
-				string fontName = Localization.GetFontName(array);
-				Localization.LoadTranslation(array, false);
-				Localization.SwapToLocalizedFont(fontName);
-			}
+			global::Debug.Log("Initialize... Local mod localization", null);
+			string modLocalizationFilePath = Localization.GetModLocalizationFilePath();
+			Localization.LoadLocalTranslationFile(Localization.SelectedLanguageType.None, modLocalizationFilePath);
 		}
 	}
 
-	public static bool LoadTranslation(string[] lines, bool reset = false)
+	public static void LoadPreinstalledTranslation(string code)
+	{
+		if (!string.IsNullOrEmpty(code) && code != Localization.DEFAULT_LANGUAGE_CODE)
+		{
+			string preinstalledLocalizationFilePath = Localization.GetPreinstalledLocalizationFilePath(code);
+			bool flag = Localization.LoadLocalTranslationFile(Localization.SelectedLanguageType.Preinstalled, preinstalledLocalizationFilePath);
+			if (flag)
+			{
+				KPlayerPrefs.SetString(Localization.SELECTED_LANGUAGE_CODE_KEY, code);
+			}
+		}
+		else
+		{
+			Localization.ClearLanguage();
+		}
+	}
+
+	public static bool LoadLocalTranslationFile(Localization.SelectedLanguageType source, string path)
+	{
+		if (File.Exists(path))
+		{
+			string[] array = File.ReadAllLines(path, Encoding.UTF8);
+			bool flag = Localization.LoadTranslationFromLines(array);
+			if (flag)
+			{
+				KPlayerPrefs.SetString(Localization.SELECTED_LANGUAGE_TYPE_KEY, source.ToString());
+			}
+			else
+			{
+				Localization.ClearLanguage();
+			}
+			return flag;
+		}
+		return false;
+	}
+
+	private static bool LoadTranslationFromLines(string[] lines)
+	{
+		bool flag = false;
+		if (lines != null && lines.Length > 0)
+		{
+			Localization.sLocale = Localization.GetLocale(lines);
+			flag = Localization.LoadTranslation(lines, false);
+			if (flag)
+			{
+				Localization.currentFontName = Localization.GetFontName(lines);
+				Localization.SwapToLocalizedFont(Localization.currentFontName);
+			}
+		}
+		return flag;
+	}
+
+	private static bool LoadTranslation(string[] lines, bool isTemplate = false)
 	{
 		bool flag;
 		try
 		{
-			Dictionary<string, string> dictionary = Localization.LoadTranslatedStrings(lines, reset);
+			Dictionary<string, string> dictionary = Localization.ExtractTranslatedStrings(lines, isTemplate);
 			Localization.OverloadStrings(dictionary);
 			flag = true;
 		}
@@ -74,11 +121,11 @@ public static class Localization
 		return flag;
 	}
 
-	private static Dictionary<string, string> LoadTranslatedStrings(string[] lines, bool isReset = false)
+	private static Dictionary<string, string> ExtractTranslatedStrings(string[] lines, bool isTemplate = false)
 	{
 		Dictionary<string, string> dictionary = new Dictionary<string, string>();
 		Localization.Entry entry = default(Localization.Entry);
-		string text = ((!isReset) ? "msgstr" : "msgid");
+		string text = ((!isTemplate) ? "msgstr" : "msgid");
 		for (int i = 0; i < lines.Length; i++)
 		{
 			string text2 = lines[i];
@@ -228,9 +275,38 @@ public static class Localization
 		}
 	}
 
-	public static string GetLocalizationFilePath()
+	public static string GetDefaultLocalizationFilePath()
+	{
+		return Path.Combine(Application.streamingAssetsPath, "Mods/strings_template.pot");
+	}
+
+	public static string GetModLocalizationFilePath()
 	{
 		return Path.Combine(Application.streamingAssetsPath, "Mods/strings.po");
+	}
+
+	public static string GetPreinstalledLocalizationFilePath(string code)
+	{
+		string text = "Mods/strings_preinstalled_" + code + ".po";
+		return Path.Combine(Application.streamingAssetsPath, text);
+	}
+
+	public static string GetPreinstalledLocalizationTitle(string code)
+	{
+		return Strings.Get("STRINGS.UI.FRONTEND.TRANSLATIONS_SCREEN.PREINSTALLED_LANGUAGES." + code.ToUpper());
+	}
+
+	public static Texture2D GetPreinstalledLocalizationImage(string code)
+	{
+		string text = Path.Combine(Application.streamingAssetsPath, "Mods/preinstalled_icon_" + code + ".png");
+		if (File.Exists(text))
+		{
+			byte[] array = File.ReadAllBytes(text);
+			Texture2D texture2D = new Texture2D(2, 2);
+			texture2D.LoadImage(array);
+			return texture2D;
+		}
+		return null;
 	}
 
 	public static void SetLocale(Localization.Locale locale)
@@ -307,6 +383,16 @@ public static class Localization
 			locale.SetCode(text);
 		}
 		return locale;
+	}
+
+	public static TMP_FontAsset GetFontForLocale(string code)
+	{
+		Localization.Locale locale = Localization.GetLocaleForCode(code);
+		if (locale == null)
+		{
+			locale = Localization.GetDefaultLocale();
+		}
+		return Resources.Load<TMP_FontAsset>(locale.FontName);
 	}
 
 	private static string GetFontName(string filename)
@@ -389,19 +475,12 @@ public static class Localization
 
 	public static void SwapToLocalizedFont()
 	{
-		string localizationFilePath = Localization.GetLocalizationFilePath();
-		if (File.Exists(localizationFilePath))
-		{
-			string[] array = File.ReadAllLines(localizationFilePath, Encoding.UTF8);
-			Localization.sLocale = Localization.GetLocale(array);
-			string fontName = Localization.GetFontName(array);
-			Localization.SwapToLocalizedFont(fontName);
-		}
+		Localization.SwapToLocalizedFont(Localization.currentFontName);
 	}
 
 	public static void SwapToLocalizedFont(string fontname)
 	{
-		if (fontname != null)
+		if (!string.IsNullOrEmpty(fontname))
 		{
 			TMP_FontAsset tmp_FontAsset = Resources.Load<TMP_FontAsset>(fontname);
 			if (tmp_FontAsset != null)
@@ -489,7 +568,17 @@ public static class Localization
 	public static void ClearLanguage()
 	{
 		Localization.sFontAsset = null;
-		SteamUGCService.Instance.ClearInstall();
+		Localization.sLocale = null;
+		KPlayerPrefs.SetString(Localization.SELECTED_LANGUAGE_TYPE_KEY, Localization.SelectedLanguageType.None.ToString());
+		KPlayerPrefs.SetString(Localization.SELECTED_LANGUAGE_CODE_KEY, string.Empty);
+		Localization.SwapToLocalizedFont(Localization.GetDefaultLocale().FontName);
+		string defaultLocalizationFilePath = Localization.GetDefaultLocalizationFilePath();
+		if (File.Exists(defaultLocalizationFilePath))
+		{
+			string[] array = File.ReadAllLines(defaultLocalizationFilePath, Encoding.UTF8);
+			Localization.LoadTranslation(array, true);
+		}
+		SteamUGCService.Instance.CleanUpCurrentModLanguage();
 	}
 
 	private static string ReverseText(string source)
@@ -539,6 +628,20 @@ public static class Localization
 	};
 
 	private static Localization.Locale sLocale = null;
+
+	private static string currentFontName = null;
+
+	public static string DEFAULT_LANGUAGE_CODE = "en";
+
+	public static readonly List<string> PreinstalledLanguages = new List<string>
+	{
+		Localization.DEFAULT_LANGUAGE_CODE,
+		"zh_klei"
+	};
+
+	public static string SELECTED_LANGUAGE_TYPE_KEY = "SelectedLanguageType";
+
+	public static string SELECTED_LANGUAGE_CODE_KEY = "SelectedLanguageCode";
 
 	public enum Language
 	{
@@ -650,5 +753,12 @@ public static class Localization
 		public string msgctxt;
 
 		public string msgstr;
+	}
+
+	public enum SelectedLanguageType
+	{
+		None,
+		Preinstalled,
+		UGC
 	}
 }

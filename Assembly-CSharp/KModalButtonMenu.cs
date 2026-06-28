@@ -11,6 +11,15 @@ public class KModalButtonMenu : KButtonMenu
 		this.activateOnSpawn = true;
 	}
 
+	protected override void OnCmpDisable()
+	{
+		base.OnCmpDisable();
+		if (this.childDialog == null)
+		{
+			this.Trigger(476357528, null);
+		}
+	}
+
 	public override bool IsModal()
 	{
 		return true;
@@ -60,5 +69,30 @@ public class KModalButtonMenu : KButtonMenu
 		base.GetComponent<Image>().color = new Color32(0, 0, 0, (byte)num);
 	}
 
+	protected void ActivateChildScreen(GameObject screenPrefab)
+	{
+		GameObject gameObject = Util.KInstantiateUI(screenPrefab, this.transform.parent.gameObject, false);
+		this.childDialog = gameObject;
+		gameObject.Subscribe(476357528, new Action<object>(this.Unhide));
+		this.Hide();
+	}
+
+	private void Hide()
+	{
+		this.panelRoot.rectTransform().localScale = Vector3.zero;
+	}
+
+	private void Unhide(object data = null)
+	{
+		this.panelRoot.rectTransform().localScale = Vector3.one;
+		this.childDialog.Unsubscribe(476357528, new Action<object>(this.Unhide));
+		this.childDialog = null;
+	}
+
 	private bool shown;
+
+	[SerializeField]
+	private GameObject panelRoot;
+
+	private GameObject childDialog;
 }

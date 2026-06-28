@@ -28,8 +28,9 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.wiresLayer = this.partitioner.CreateMask(new HashedString("Wire"));
 		this.noisePolluterLayer = this.partitioner.CreateMask(new HashedString("NoisePolluters"));
 		this.validNavCellChangedLayer = this.partitioner.CreateMask(new HashedString("validNavCellChangedLayer"));
-		this.objectLayers = new ScenePartitionerLayer[23];
-		for (int i = 0; i < 23; i++)
+		this.trapsLayer = this.partitioner.CreateMask(new HashedString("trapsLayer"));
+		this.objectLayers = new ScenePartitionerLayer[25];
+		for (int i = 0; i < 25; i++)
 		{
 			ObjectLayer objectLayer = (ObjectLayer)i;
 			this.objectLayers[i] = this.partitioner.CreateMask(new HashedString(objectLayer.ToString()));
@@ -54,6 +55,7 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.wiresLayer = null;
 		this.noisePolluterLayer = null;
 		this.validNavCellChangedLayer = null;
+		this.trapsLayer = null;
 		this.objectLayers = null;
 	}
 
@@ -155,6 +157,8 @@ public class GameScenePartitioner : KMonoBehaviour
 	public ScenePartitionerLayer noisePolluterLayer;
 
 	public ScenePartitionerLayer validNavCellChangedLayer;
+
+	public ScenePartitionerLayer trapsLayer;
 
 	private ScenePartitioner partitioner;
 

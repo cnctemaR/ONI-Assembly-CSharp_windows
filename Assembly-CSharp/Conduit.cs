@@ -38,8 +38,6 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback
 			ConduitFlowVisualizer flowVisualizer = this.GetFlowVisualizer();
 			flowVisualizer.SetInsulated(Grid.PosToCell(this.transform.position), true);
 		}
-		PrimaryElement component = base.GetComponent<PrimaryElement>();
-		component.ForcePermanentDiseaseContainer();
 	}
 
 	protected override void OnCleanUp()

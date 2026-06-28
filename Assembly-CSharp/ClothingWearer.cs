@@ -40,23 +40,11 @@ public class ClothingWearer : KMonoBehaviour
 
 	public void ChangeClothes(ClothingWearer.ClothingInfo clothingInfo)
 	{
-		if (this.refreshHandle.TimeRemaining > 0f)
-		{
-			Debug.LogWarning(base.gameObject.GetProperName() + " is already in the process of changing clothing", null);
-			return;
-		}
 		this.decorProvider.baseRadius = 3f;
 		this.currentClothing = clothingInfo;
 		this.conductivityModifier.Description = clothingInfo.name;
 		this.conductivityModifier.SetValue(this.currentClothing.conductivityMod);
 		this.decorModifier.SetValue((float)this.currentClothing.decorMod);
-		this.refreshHandle = GameScheduler.Instance.Schedule("ChangeClothes", 2f, delegate(object obj)
-		{
-			if (this.temperatureTransferer != null)
-			{
-				this.temperatureTransferer.RefreshRegistration();
-			}
-		}, null, null);
 	}
 
 	public void ChangeToDefaultClothes()
@@ -67,8 +55,6 @@ public class ClothingWearer : KMonoBehaviour
 	private CreatureSimTemperatureTransfer temperatureTransferer;
 
 	private DecorProvider decorProvider;
-
-	private SchedulerHandle refreshHandle;
 
 	private AttributeModifier decorModifier;
 

@@ -19,6 +19,7 @@ namespace Steamworks
 		k_EControllerSourceMode_MouseJoystick,
 		k_EControllerSourceMode_MouseRegion,
 		k_EControllerSourceMode_RadialMenu,
+		k_EControllerSourceMode_SingleButton,
 		k_EControllerSourceMode_Switches
 	}
 }

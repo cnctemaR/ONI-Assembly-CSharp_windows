@@ -5,10 +5,17 @@ namespace TUNING
 {
 	public class EQUIPMENT
 	{
+		public static EquipmentSlot SUIT_SLOT = new EquipmentSlot(EQUIPMENT.SUITS.SLOT, MISC.TAGS.SUIT, true);
+
+		public static EquipmentSlot TOOL_SLOT = new EquipmentSlot(EQUIPMENT.TOOLS.TOOLSLOT, MISC.TAGS.MULTITOOL, false);
+
+		public static EquipmentSlot OUTFIT_SLOT = new EquipmentSlot(EQUIPMENT.CLOTHING.SLOT, MISC.TAGS.CLOTHES, true);
+
 		public static EquipmentSlot[] SLOTS = new EquipmentSlot[]
 		{
-			new EquipmentSlot(EQUIPMENT.SUITS.SLOT, MISC.TAGS.SUIT, true),
-			new EquipmentSlot(EQUIPMENT.TOOLS.TOOLSLOT, MISC.TAGS.MULTITOOL, false)
+			EQUIPMENT.SUIT_SLOT,
+			EQUIPMENT.TOOL_SLOT,
+			EQUIPMENT.OUTFIT_SLOT
 		};
 
 		public class ATTRIBUTE_MOD_IDS
@@ -22,6 +29,8 @@ namespace TUNING
 			public static string DIGGING = "Digging";
 
 			public static string MAX_UNDERWATER_TRAVELCOST = "MaxUnderwaterTravelCost";
+
+			public static string THERMAL_CONDUCTIVITY_BARRIER = "ThermalConductivityBarrier";
 		}
 
 		public class TOOLS
@@ -45,6 +54,11 @@ namespace TUNING
 			public static int QUARRYINGGUN_MASS = 100;
 		}
 
+		public class CLOTHING
+		{
+			public static string SLOT = "Outfit";
+		}
+
 		public class SUITS
 		{
 			public static string SLOT = "Suit";
@@ -57,11 +71,21 @@ namespace TUNING
 
 			public static int ATMOSUIT_FABTIME = 40;
 
-			public static int ATMOSUIT_INSULATION = 5;
+			public static int ATMOSUIT_INSULATION = 50;
 
-			public static int ATMOSUIT_ATHLETICS = -3;
+			public static int ATMOSUIT_ATHLETICS = -6;
+
+			public static float ATMOSUIT_THERMAL_CONDUCTIVITY_BARRIER = 0.2f;
+
+			public static int ATMOSUIT_DIGGING = 10;
+
+			public static int ATMOSUIT_CONSTRUCTION = 10;
+
+			public static float ATMOSUIT_BLADDER = -0.18333334f;
 
 			public static int ATMOSUIT_MASS = 200;
+
+			public static int ATMOSUIT_SCALDING = 1000;
 
 			public static int AQUASUIT_FABTIME = EQUIPMENT.SUITS.ATMOSUIT_FABTIME;
 
@@ -75,7 +99,7 @@ namespace TUNING
 
 			public static int TEMPERATURESUIT_FABTIME = EQUIPMENT.SUITS.ATMOSUIT_FABTIME;
 
-			public static int TEMPERATURESUIT_INSULATION = 10;
+			public static float TEMPERATURESUIT_INSULATION = 0.2f;
 
 			public static int TEMPERATURESUIT_ATHLETICS = EQUIPMENT.SUITS.ATMOSUIT_ATHLETICS;
 

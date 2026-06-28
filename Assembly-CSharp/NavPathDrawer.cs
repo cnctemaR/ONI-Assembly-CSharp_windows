@@ -53,7 +53,6 @@ public class NavPathDrawer : KMonoBehaviour
 			{
 				Vector3 navPos = NavTypeHelper.GetNavPos(path.nodes[i].cell, path.nodes[i].navType);
 				Vector3 navPos2 = NavTypeHelper.GetNavPos(path.nodes[i + 1].cell, path.nodes[i + 1].navType);
-				GL.Color(((byte)(path.nodes[i].flags & PathFinderFlags.SuitRequired) == 0) ? color : Color.red);
 				GL.Vertex(navPos);
 				GL.Vertex(navPos2);
 			}
@@ -73,7 +72,7 @@ public class NavPathDrawer : KMonoBehaviour
 			this.material.SetPass(0);
 			GL.Begin(1);
 			PathFinderQuery pathFinderQuery = PathFinderQueries.drawNavGridQuery.Reset(null);
-			PathFinder.Run(this.navigator.NavGrid, this.navigator.GetCurrentAbilities(), Grid.PosToCell(this.navigator), this.navigator.CurrentNavType, pathFinderQuery);
+			this.navigator.RunQuery(pathFinderQuery);
 			GL.End();
 			GL.PopMatrix();
 		}
@@ -101,8 +100,9 @@ public class NavPathDrawer : KMonoBehaviour
 		int mouseCell = DebugHandler.GetMouseCell();
 		if (Grid.IsValidCell(mouseCell))
 		{
+			PathFinder.PotentialPath potentialPath = new PathFinder.PotentialPath(Grid.PosToCell(component), component.CurrentNavType, component.flags);
 			PathFinder.Path path = default(PathFinder.Path);
-			PathFinder.UpdatePath(component.NavGrid, component.GetCurrentAbilities(), Grid.PosToCell(component), component.CurrentNavType, PathFinderQueries.cellOffsetQuery.Reset(mouseCell, Grid.DefaultOffset), ref path);
+			PathFinder.UpdatePath(component.NavGrid, component.GetCurrentAbilities(), potentialPath, PathFinderQueries.cellOffsetQuery.Reset(mouseCell, Grid.DefaultOffset), ref path);
 			string text = string.Empty;
 			string text2 = text;
 			text = string.Concat(new object[]

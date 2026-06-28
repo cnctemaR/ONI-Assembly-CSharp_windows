@@ -181,10 +181,10 @@ public static class Strings
 		[FieldOrder(1)]
 		public string name;
 
+		[FieldQuoted(QuoteMode.OptionalForRead, MultilineMode.AllowForRead)]
+		[FieldOrder(2)]
 		[FieldOptional]
 		[FieldNullValue(typeof(string), "")]
-		[FieldOrder(2)]
-		[FieldQuoted(QuoteMode.OptionalForRead, MultilineMode.AllowForRead)]
 		public string[] values;
 	}
 }

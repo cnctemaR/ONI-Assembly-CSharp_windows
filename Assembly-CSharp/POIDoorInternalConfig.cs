@@ -10,6 +10,8 @@ public class POIDoorInternalConfig : IBuildingConfig
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("POIDoorInternal", 1, 2, "door_poi_internal_kanim", 100f, 30, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER2, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.NONE, none);
 		buildingDef.ShowInBuildMenu = false;
 		buildingDef.Entombable = false;
+		buildingDef.Floodable = false;
+		buildingDef.Invincible = true;
 		buildingDef.IsFoundation = true;
 		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "Metal";

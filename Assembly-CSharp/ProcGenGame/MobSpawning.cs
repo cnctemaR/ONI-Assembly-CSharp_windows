@@ -8,7 +8,7 @@ namespace ProcGenGame
 {
 	public static class MobSpawning
 	{
-		public static Dictionary<int, string> PlaceAmbientMobs(TerrainCell tc, SeededRandom rnd, Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dc)
+		public static Dictionary<int, string> PlaceAmbientMobs(TerrainCell tc, SeededRandom rnd, Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dc, HashSet<int> avoidCells)
 		{
 			Dictionary<int, string> dictionary = new Dictionary<int, string>();
 			Node node = tc.node;
@@ -22,7 +22,7 @@ namespace ProcGenGame
 			}
 			foreach (Tag tag in node.biomeSpecificTags)
 			{
-				if (WorldGen.Settings.mobs.MobLookupTable.ContainsKey(tag.Name) && WorldGen.Settings.mobs.MobLookupTable[tag.Name] != null)
+				if (WorldGen.Settings.mobs.HasMob(tag.Name) && WorldGen.Settings.mobs.GetMob(tag.Name) != null)
 				{
 					list.Add(tag);
 					num++;
@@ -39,7 +39,7 @@ namespace ProcGenGame
 			for (int i = availableCells.Count - 1; i > 0; i--)
 			{
 				int num2 = availableCells[i];
-				if (ElementLoader.elements[(int)cells[num2].elementIdx].id == SimHashes.Katairite || ElementLoader.elements[(int)cells[num2].elementIdx].id == SimHashes.Unobtanium)
+				if (ElementLoader.elements[(int)cells[num2].elementIdx].id == SimHashes.Katairite || ElementLoader.elements[(int)cells[num2].elementIdx].id == SimHashes.Unobtanium || avoidCells.Contains(num2))
 				{
 					availableCells.RemoveAt(i);
 				}

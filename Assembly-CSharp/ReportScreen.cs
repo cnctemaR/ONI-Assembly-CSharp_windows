@@ -86,20 +86,17 @@ public class ReportScreen : KScreen
 		}
 		this.AddSpacer(0);
 		int num = 1;
-		foreach (ReportManager.ReportEntry reportEntry in this.currentReport.reportEntries)
+		foreach (KeyValuePair<ReportManager.ReportType, ReportManager.ReportGroup> keyValuePair in ReportManager.Instance.ReportGroups)
 		{
-			if (ReportManager.Instance.ReportGroups.ContainsKey((ReportManager.ReportType)reportEntry.gameHash))
+			ReportManager.ReportEntry entry = this.currentReport.GetEntry(keyValuePair.Key);
+			if (keyValuePair.Value.reportIfZero || entry.accumulate != 0f)
 			{
-				ReportManager.ReportGroup reportGroup = ReportManager.Instance.ReportGroups[(ReportManager.ReportType)reportEntry.gameHash];
-				if (num != reportGroup.group)
+				if (num != keyValuePair.Value.group)
 				{
-					num = reportGroup.group;
+					num = keyValuePair.Value.group;
 					this.AddSpacer(num);
 				}
-				if (reportGroup.reportIfZero || reportEntry.accumulate != 0f)
-				{
-					this.AddLine(reportEntry, reportGroup);
-				}
+				this.AddLine(entry, keyValuePair.Value);
 			}
 		}
 	}
@@ -129,8 +126,7 @@ public class ReportScreen : KScreen
 
 	private GameObject AddLine(ReportManager.ReportEntry entry, ReportManager.ReportGroup reportGroup)
 	{
-		float num = Mathf.Abs(entry.Negative);
-		GameObject gameObject = null;
+		GameObject gameObject;
 		if (this.lineItems.ContainsKey(reportGroup.stringKey))
 		{
 			gameObject = this.lineItems[reportGroup.stringKey];
@@ -142,28 +138,8 @@ public class ReportScreen : KScreen
 			this.lineItems[reportGroup.stringKey] = gameObject;
 		}
 		gameObject.SetActive(true);
-		LocText[] componentsInChildren = gameObject.GetComponentsInChildren<LocText>();
-		componentsInChildren[0].text = reportGroup.stringKey;
-		string text = string.Empty;
-		foreach (KeyValuePair<string, float> keyValuePair in entry.posNotes)
-		{
-			text = string.Format("{0}\n{1} : {2}", text, keyValuePair.Key, reportGroup.formatfn(keyValuePair.Value));
-		}
-		componentsInChildren[1].text = reportGroup.formatfn(entry.Positive);
-		string text2 = string.Format(reportGroup.positiveTooltip + "\n" + text, reportGroup.formatfn(entry.Positive));
-		componentsInChildren[1].GetComponent<ToolTip>().toolTip = text2;
-		string text3 = string.Empty;
-		foreach (KeyValuePair<string, float> keyValuePair2 in entry.negNotes)
-		{
-			text3 = string.Format("{0}\n{1} : {2}", text3, keyValuePair2.Key, reportGroup.formatfn(keyValuePair2.Value));
-		}
-		componentsInChildren[2].text = reportGroup.formatfn(num);
-		string text4 = string.Format(reportGroup.negativeTooltip + "\n" + text3, reportGroup.formatfn(num));
-		componentsInChildren[2].GetComponent<ToolTip>().toolTip = text4;
-		string text5 = ((entry.Positive < num) ? text4 : text2);
-		componentsInChildren[3].text = ((reportGroup.formatfn != null) ? reportGroup.formatfn(entry.Net) : entry.Net.ToString());
-		componentsInChildren[3].GetComponent<ToolTip>().toolTip = text5;
-		componentsInChildren[0].GetComponent<ToolTip>().toolTip = text5;
+		ReportScreenEntry component = gameObject.GetComponent<ReportScreenEntry>();
+		component.SetMainEntry(entry, reportGroup);
 		return gameObject;
 	}
 

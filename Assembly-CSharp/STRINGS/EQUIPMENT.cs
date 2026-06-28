@@ -15,6 +15,8 @@ namespace STRINGS
 				public static LocString EFFECT = "Supplies Duplicants with <style=\"oxygen\">Oxygen</style> in toxic and low breathability environments.\n\nMust be refilled with oxygen at an Exosuit Recharger when depleted.";
 
 				public static LocString RECIPE_DESC = "Supplies Duplicants with <style=\"oxygen\">Oxygen</style> in toxic and low breathability environments.";
+
+				public static LocString GENERICNAME = "Suit";
 			}
 
 			public class AQUA_SUIT

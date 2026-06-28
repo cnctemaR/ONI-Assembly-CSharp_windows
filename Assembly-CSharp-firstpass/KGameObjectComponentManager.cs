@@ -10,16 +10,17 @@ public abstract class KGameObjectComponentManager<T> : KComponentManager<T> wher
 
 	public virtual void Remove(GameObject go)
 	{
+		HandleVector<int>.Handle handle = this.GetHandle(go);
+		KComponentManager<T>.CleanupInfo cleanupInfo = new KComponentManager<T>.CleanupInfo(go, handle);
 		if (!KComponentCleanUp.InCleanUpPhase)
 		{
-			this.cleanupList.Add(go);
+			this.cleanupList.Add(cleanupInfo);
 		}
 		else
 		{
 			base.RemoveFromCleanupList(go);
-			HandleVector<int>.Handle handle = this.GetHandle(go);
 			this.OnCleanUp(handle);
-			base.InternalRemoveComponent(go);
+			base.InternalRemoveComponent(cleanupInfo);
 		}
 	}
 

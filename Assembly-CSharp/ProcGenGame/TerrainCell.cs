@@ -5,6 +5,7 @@ using Delaunay.Geo;
 using KSerialization;
 using ProcGen;
 using UnityEngine;
+using VoronoiTree;
 
 namespace ProcGenGame
 {
@@ -15,7 +16,7 @@ namespace ProcGenGame
 		{
 		}
 
-		protected TerrainCell(Node node, VoronoiDiagram.Site site)
+		protected TerrainCell(global::ProcGen.Node node, Diagram.Site site)
 		{
 			this.node = node;
 			this.site = site;
@@ -31,15 +32,15 @@ namespace ProcGenGame
 		}
 
 		[Serialize]
-		public Node node { get; private set; }
+		public global::ProcGen.Node node { get; private set; }
 
-		public void SetNode(Node newNode)
+		public void SetNode(global::ProcGen.Node newNode)
 		{
 			this.node = newNode;
 		}
 
 		[Serialize]
-		public VoronoiDiagram.Site site { get; private set; }
+		public Diagram.Site site { get; private set; }
 
 		public bool HasMobs
 		{
@@ -53,6 +54,7 @@ namespace ProcGenGame
 
 		public virtual void LogInfo(string evt, string param, float value)
 		{
+			global::Debug.Log(string.Concat(new object[] { evt, ":", param, "=", value }), null);
 		}
 
 		public static void ClearClaimedCells()
@@ -145,11 +147,11 @@ namespace ProcGenGame
 			{
 				return Temperature.Range.Mild;
 			}
-			if (!WorldGen.Settings.subworlds.zones.ContainsKey(subWorldType))
+			if (!WorldGen.Settings.GetSubWorlds().ContainsKey(subWorldType))
 			{
 				return Temperature.Range.Mild;
 			}
-			return WorldGen.Settings.subworlds.zones[subWorldType].temperatureRange;
+			return WorldGen.Settings.GetSubWorld(subWorldType).temperatureRange;
 		}
 
 		protected void GetTemperatureRange(ref float min, ref float range)
@@ -203,7 +205,7 @@ namespace ProcGenGame
 			}
 		}
 
-		private HashSet<Vector2I> DigFeature(Room.Shape shape, float size, List<int> bordersWidths, SeededRandom rnd)
+		private HashSet<Vector2I> DigFeature(global::ProcGen.Room.Shape shape, float size, List<int> bordersWidths, SeededRandom rnd)
 		{
 			HashSet<Vector2I> hashSet = new HashSet<Vector2I>();
 			if (size < 1f)
@@ -214,19 +216,19 @@ namespace ProcGenGame
 			this.finalSize = size;
 			switch (shape)
 			{
-			case Room.Shape.Circle:
+			case global::ProcGen.Room.Shape.Circle:
 				this.centerPoints = global::ProcGen.Util.GetFilledCircle(vector, this.finalSize);
 				break;
-			case Room.Shape.Blob:
+			case global::ProcGen.Room.Shape.Blob:
 				this.centerPoints = global::ProcGen.Util.GetBlob(vector, this.finalSize, rnd.RandomSource());
 				break;
-			case Room.Shape.Square:
+			case global::ProcGen.Room.Shape.Square:
 				this.centerPoints = global::ProcGen.Util.GetFilledRectangle(vector, this.finalSize, this.finalSize, rnd, 2f, 2f);
 				break;
-			case Room.Shape.TallThin:
+			case global::ProcGen.Room.Shape.TallThin:
 				this.centerPoints = global::ProcGen.Util.GetFilledRectangle(vector, this.finalSize / 4f, this.finalSize, rnd, 2f, 2f);
 				break;
-			case Room.Shape.ShortWide:
+			case global::ProcGen.Room.Shape.ShortWide:
 				this.centerPoints = global::ProcGen.Util.GetFilledRectangle(vector, this.finalSize, this.finalSize / 4f, rnd, 2f, 2f);
 				break;
 			}
@@ -339,7 +341,7 @@ namespace ProcGenGame
 			}
 			switch (feature.ElementChoiceGroups[group].selectionMethod)
 			{
-			case Room.Selection.WeightedResample:
+			case global::ProcGen.Room.Selection.WeightedResample:
 			{
 				for (int i = 0; i < cells.Count; i++)
 				{
@@ -433,13 +435,13 @@ namespace ProcGenGame
 			}
 			for (int i = 0; i < mobTags.Count; i++)
 			{
-				if (!WorldGen.Settings.mobs.MobLookupTable.ContainsKey(mobTags[i].type))
+				if (!WorldGen.Settings.mobs.HasMob(mobTags[i].type))
 				{
 					global::Debug.LogError("Missing sample description for tag [" + mobTags[i].type + "]", null);
 				}
 				else
 				{
-					Mob mob = WorldGen.Settings.mobs.MobLookupTable[mobTags[i].type];
+					Mob mob = WorldGen.Settings.mobs.GetMob(mobTags[i].type);
 					int num = Mathf.RoundToInt(mobTags[i].count.GetRandomValueWithinRange(rnd));
 					for (int j = 0; j < num; j++)
 					{
@@ -573,7 +575,7 @@ namespace ProcGenGame
 		{
 			float defaultFloat = WorldGen.Settings.GetDefaultFloat("CaveOverrideMaxValue");
 			float defaultFloat2 = WorldGen.Settings.GetDefaultFloat("CaveOverrideSliverValue");
-			VoronoiLeaf leafForTerrainCell = WorldGen.GetLeafForTerrainCell(this);
+			Leaf leafForTerrainCell = WorldGen.GetLeafForTerrainCell(this);
 			bool flag = leafForTerrainCell.tags.Contains(WorldGenTags.IgnoreCaveOverride);
 			bool flag2 = leafForTerrainCell.tags.Contains(WorldGenTags.CaveVoidSliver);
 			bool flag3 = leafForTerrainCell.tags.Contains(WorldGenTags.ErodePointToCentroid);
@@ -694,11 +696,11 @@ namespace ProcGenGame
 
 		private void GenerateActionCells(Tag tag, HashSet<Vector2I> possiblePoints, SeededRandom rnd)
 		{
-			Room desription = WorldGen.Settings.rooms.GetDesription(tag);
+			global::ProcGen.Room desription = WorldGen.Settings.rooms.GetDesription(tag);
 			SampleDescriber sampleDescriber = desription;
 			if (sampleDescriber == null && WorldGen.Settings.mobs.GetMobTags().Contains(tag))
 			{
-				sampleDescriber = WorldGen.Settings.mobs.MobLookupTable[tag.Name];
+				sampleDescriber = WorldGen.Settings.mobs.GetMob(tag.Name);
 			}
 			if (sampleDescriber == null)
 			{
@@ -729,7 +731,7 @@ namespace ProcGenGame
 					hashSet.Add(vector2I);
 				}
 			}
-			if (desription != null && desription.mobselection == Room.Selection.None)
+			if (desription != null && desription.mobselection == global::ProcGen.Room.Selection.None)
 			{
 				if (this.terrainPositions == null)
 				{
@@ -793,8 +795,8 @@ namespace ProcGenGame
 		[OnDeserializing]
 		internal void OnDeserializingMethod()
 		{
-			this.node = new Node();
-			this.site = new VoronoiDiagram.Site();
+			this.node = new global::ProcGen.Node();
+			this.site = new Diagram.Site();
 		}
 
 		public const int DONT_SET_TEMPERATURE_DEFAULTS = -1;

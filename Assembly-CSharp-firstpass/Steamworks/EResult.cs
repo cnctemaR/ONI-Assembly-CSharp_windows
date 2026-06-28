@@ -108,6 +108,8 @@ namespace Steamworks
 		k_EResultGSOwnerDenied,
 		k_EResultInvalidItemType,
 		k_EResultIPBanned,
-		k_EResultGSLTExpired
+		k_EResultGSLTExpired,
+		k_EResultInsufficientFunds,
+		k_EResultTooManyPending
 	}
 }

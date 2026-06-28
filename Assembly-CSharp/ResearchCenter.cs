@@ -50,7 +50,7 @@ public class ResearchCenter : Workable, IEffectDescriptor
 		{
 			if (this.operational.IsOperational && this.chore == null && this.HasMaterial())
 			{
-				this.chore = new WorkChore<ResearchCenter>(Db.Get().ChoreTypes.Research, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true);
+				this.chore = new WorkChore<ResearchCenter>(Db.Get().ChoreTypes.Research, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue);
 				base.SetWorkTime(float.PositiveInfinity);
 			}
 		}
@@ -88,7 +88,18 @@ public class ResearchCenter : Workable, IEffectDescriptor
 	private bool ResearchComponentCompleted()
 	{
 		TechInstance activeResearch = Research.Instance.GetActiveResearch();
-		return activeResearch != null && activeResearch.progressInventory.PointsByTypeID[this.research_point_type_id] >= activeResearch.tech.costsByResearchTypeID[this.research_point_type_id];
+		if (activeResearch != null)
+		{
+			float num = 0f;
+			float num2 = 0f;
+			activeResearch.progressInventory.PointsByTypeID.TryGetValue(this.research_point_type_id, out num);
+			activeResearch.tech.costsByResearchTypeID.TryGetValue(this.research_point_type_id, out num2);
+			if (num >= num2)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void CheckValidResearchSelected(object data)
@@ -133,7 +144,7 @@ public class ResearchCenter : Workable, IEffectDescriptor
 		this.operational.SetFlag(ResearchCenter.ResearchSelectedFlag, flag && flag2);
 		if ((!flag || !flag2) && base.worker)
 		{
-			base.StopWork(base.worker);
+			base.StopWork(base.worker, true);
 		}
 	}
 

@@ -16,7 +16,7 @@ public class Global : MonoBehaviour
 		KBatchedAnimUpdater.CreateInstance();
 		SystemScheduler.Initialize();
 		DistributionPlatform.Initialize();
-		Localization.Initialize();
+		Localization.Initialize(false);
 		if (DistributionPlatform.Initialized)
 		{
 			global::Debug.Log(string.Concat(new object[]
@@ -93,8 +93,8 @@ public class Global : MonoBehaviour
 
 	private void SetONIStaticSessionVariables()
 	{
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 234130U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "preview");
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 235856U);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{
 			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(UnitConfigurationScreen.MassUnitKey, ((GameUtil.MassUnit)KPlayerPrefs.GetInt(UnitConfigurationScreen.MassUnitKey)).ToString());

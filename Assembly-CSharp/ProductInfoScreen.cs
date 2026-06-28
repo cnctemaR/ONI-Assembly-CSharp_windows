@@ -90,15 +90,39 @@ public class ProductInfoScreen : KScreen
 		}
 		if (this.ProductRequirementsPane != null)
 		{
-			this.ProductRequirementsPane.gameObject.SetActive(this.expandedInfo);
+			if (this.expandedInfo)
+			{
+				if (this.ProductRequirementsPane.labels.Count > 0)
+				{
+					this.ProductRequirementsPane.gameObject.SetActive(true);
+				}
+			}
+			else
+			{
+				this.ProductRequirementsPane.gameObject.SetActive(false);
+			}
 		}
 		if (this.ProductEffectsPane != null)
 		{
-			this.ProductEffectsPane.gameObject.SetActive(this.expandedInfo);
+			if (this.expandedInfo)
+			{
+				if (this.ProductEffectsPane.labels.Count > 0)
+				{
+					this.ProductEffectsPane.gameObject.SetActive(true);
+				}
+			}
+			else
+			{
+				this.ProductEffectsPane.gameObject.SetActive(false);
+			}
 		}
 		if (this.ProductFlavourPane != null)
 		{
 			this.ProductFlavourPane.SetActive(this.expandedInfo);
+		}
+		if (this.materialSelectionPanel != null && this.materialSelectionPanel.CurrentSelectedElement != null)
+		{
+			this.materialSelectionPanel.ToggleShowDescriptorPanels(this.expandedInfo);
 		}
 	}
 
@@ -215,6 +239,11 @@ public class ProductInfoScreen : KScreen
 			Descriptor descriptor = default(Descriptor);
 			descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.OPERATIONREQUIREMENTS, UI.BUILDINGEFFECTS.TOOLTIPS.OPERATIONREQUIREMENTS, Descriptor.DescriptorType.Effect);
 			requirementDescriptors.Insert(0, descriptor);
+			this.ProductRequirementsPane.gameObject.SetActive(true);
+		}
+		else
+		{
+			this.ProductRequirementsPane.gameObject.SetActive(false);
 		}
 		this.ProductRequirementsPane.SetDescriptors(requirementDescriptors);
 		List<Descriptor> effectDescriptors = GameUtil.GetEffectDescriptors(allDescriptors);
@@ -223,6 +252,11 @@ public class ProductInfoScreen : KScreen
 			Descriptor descriptor2 = default(Descriptor);
 			descriptor2.SetupDescriptor(UI.BUILDINGEFFECTS.OPERATIONEFFECTS, UI.BUILDINGEFFECTS.TOOLTIPS.OPERATIONEFFECTS, Descriptor.DescriptorType.Effect);
 			effectDescriptors.Insert(0, descriptor2);
+			this.ProductEffectsPane.gameObject.SetActive(true);
+		}
+		else
+		{
+			this.ProductEffectsPane.gameObject.SetActive(false);
 		}
 		this.ProductEffectsPane.SetDescriptors(effectDescriptors);
 	}
@@ -250,6 +284,7 @@ public class ProductInfoScreen : KScreen
 		Recipe craftRecipe = def.CraftRecipe;
 		this.materialSelectionPanel.ClearSelectActions();
 		this.materialSelectionPanel.ConfigureScreen(craftRecipe);
+		this.materialSelectionPanel.ToggleShowDescriptorPanels(false);
 		this.materialSelectionPanel.AddSelectAction(new MaterialSelector.SelectMaterialActions(this.RefreshScreen));
 		this.materialSelectionPanel.AddSelectAction(new MaterialSelector.SelectMaterialActions(this.onMenuMaterialChanged));
 		this.materialSelectionPanel.AutoSelectAvailableMaterial();

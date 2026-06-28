@@ -17,7 +17,6 @@ public class WarmBlooded : StateMachineComponent<WarmBlooded.StatesInstance>
 		this.externalTemperature.value = Grid.Temperature[Grid.PosToCell(this)];
 		this.temperature = Db.Get().Amounts.Temperature.Lookup(base.gameObject);
 		base.smi.StartSM();
-		this.Subscribe(-1195989806, new Action<object>(this.OnEquippedItem));
 	}
 
 	private void SimUpdate(float dt)
@@ -32,43 +31,6 @@ public class WarmBlooded : StateMachineComponent<WarmBlooded.StatesInstance>
 		}
 	}
 
-	private void OnEquippedItem(object data)
-	{
-		KPrefabID kprefabID = (KPrefabID)data;
-		if (kprefabID != null)
-		{
-			foreach (Tag tag in kprefabID.Tags)
-			{
-				if (tag == GameTags.TemperatureSuit)
-				{
-					this.suitTank = kprefabID.GetComponent<SuitTank>();
-					if (this.suitTank != null)
-					{
-						NameDisplayScreen.Instance.SetSuitTankDisplay(base.gameObject, new Func<float>(this.GetTankPercentage), true);
-						break;
-					}
-				}
-			}
-		}
-	}
-
-	private void OnUnequippedItem(object data)
-	{
-		KPrefabID kprefabID = (KPrefabID)data;
-		if (kprefabID != null && GameTags.AllSuitTags.Contains(kprefabID.PrefabTag))
-		{
-			foreach (Tag tag in kprefabID.Tags)
-			{
-				if (tag == GameTags.TemperatureSuit)
-				{
-					NameDisplayScreen.Instance.SetSuitTankDisplayState(false, base.gameObject);
-					this.suitTank = null;
-					break;
-				}
-			}
-		}
-	}
-
 	public bool IsAtReasonableTemperature()
 	{
 		return !base.smi.IsHot() && !base.smi.IsCold();
@@ -77,15 +39,6 @@ public class WarmBlooded : StateMachineComponent<WarmBlooded.StatesInstance>
 	public void SetTemperatureImmediate(float t)
 	{
 		this.temperature.value = t;
-	}
-
-	private float GetTankPercentage()
-	{
-		if (this.suitTank == null)
-		{
-			return 0f;
-		}
-		return this.suitTank.PercentFull();
 	}
 
 	public const float TRANSITION_DELAY_HOT = 3f;
@@ -106,8 +59,6 @@ public class WarmBlooded : StateMachineComponent<WarmBlooded.StatesInstance>
 	private PrimaryElement primaryElement;
 
 	private TemperatureMonitor.Instance monitorInstance;
-
-	private SuitTank suitTank;
 
 	public class StatesInstance : GameStateMachine<WarmBlooded.States, WarmBlooded.StatesInstance, WarmBlooded, object>.GameInstance
 	{
@@ -151,16 +102,6 @@ public class WarmBlooded : StateMachineComponent<WarmBlooded.StatesInstance>
 			return this.BodyTemperature < 310.15f;
 		}
 
-		public void UpdateTank(float dt)
-		{
-			int num = Grid.PosToCell(base.master);
-			base.master.externalTemperature.value = Grid.Temperature[num];
-			if (base.master.suitTank != null && !base.master.suitTank.IsEmpty())
-			{
-				base.master.suitTank.amount -= dt;
-			}
-		}
-
 		public AttributeModifier baseTemperatureModification;
 
 		public AttributeModifier bodyRegulator;
@@ -185,9 +126,6 @@ public class WarmBlooded : StateMachineComponent<WarmBlooded.StatesInstance>
 				CreatureSimTemperatureTransfer component2 = smi.master.GetComponent<CreatureSimTemperatureTransfer>();
 				component2.NonSimTemperatureModifiers.Add(smi.baseTemperatureModification);
 				component2.NonSimTemperatureModifiers.Add(smi.bodyRegulator);
-			}).Update(delegate(WarmBlooded.StatesInstance smi)
-			{
-				smi.UpdateTank(smi.dt);
 			});
 			this.alive.normal.Transition(this.alive.cold.transition, (WarmBlooded.StatesInstance smi) => smi.IsCold()).Transition(this.alive.hot.transition, (WarmBlooded.StatesInstance smi) => smi.IsHot());
 			this.alive.cold.transition.ScheduleGoTo(3f, this.alive.cold.regulating).Transition(this.alive.normal, (WarmBlooded.StatesInstance smi) => !smi.IsCold());

@@ -190,6 +190,17 @@ public class MaterialSelectionPanel : KScreen
 		return selectedElemInfo;
 	}
 
+	public void ToggleShowDescriptorPanels(bool show)
+	{
+		for (int i = 0; i < this.MaterialSelectors.Count; i++)
+		{
+			if (this.MaterialSelectors[i] != null)
+			{
+				this.MaterialSelectors[i].ToggleShowDescriptorsPanel(show);
+			}
+		}
+	}
+
 	public Dictionary<KToggle, Element> ElementToggles = new Dictionary<KToggle, Element>();
 
 	private List<MaterialSelector> MaterialSelectors = new List<MaterialSelector>();

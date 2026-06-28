@@ -9,6 +9,11 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 {
+	public void SetUseSimDiseaseInfo(bool use)
+	{
+		this.useSimDiseaseInfo = use;
+	}
+
 	[Serialize]
 	public float Units
 	{
@@ -256,13 +261,21 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
-	public void ForcePermanentDiseaseContainer()
+	public void ForcePermanentDiseaseContainer(bool force_on)
 	{
-		this.forcePermanentDiseaseContainer = true;
-		if (!this.diseaseHandle.IsValid())
+		if (force_on)
 		{
-			this.diseaseHandle = GameComps.DiseaseContainers.Add(base.gameObject, byte.MaxValue, 0);
+			if (!this.diseaseHandle.IsValid())
+			{
+				this.diseaseHandle = GameComps.DiseaseContainers.Add(base.gameObject, byte.MaxValue, 0);
+			}
 		}
+		else if (this.diseaseHandle.IsValid() && this.DiseaseIdx == 255)
+		{
+			GameComps.DiseaseContainers.Remove(base.gameObject);
+			this.diseaseHandle.Clear();
+		}
+		this.forcePermanentDiseaseContainer = force_on;
 	}
 
 	protected override void OnCleanUp()
@@ -309,6 +322,11 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 
 	public void ModifyDiseaseCount(int delta, string reason)
 	{
+		if (this.ModifyDiseaseCountHandler != null)
+		{
+			this.ModifyDiseaseCountHandler(delta, reason);
+			return;
+		}
 		if (this.useSimDiseaseInfo)
 		{
 			int num = Grid.PosToCell(this);
@@ -330,6 +348,11 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 	{
 		if (delta == 0)
 		{
+			return;
+		}
+		if (this.AddDiseaseHandler != null)
+		{
+			this.AddDiseaseHandler(disease_idx, delta, reason);
 			return;
 		}
 		if (this.useSimDiseaseInfo)
@@ -391,13 +414,28 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		this.AddDisease(pickupable.PrimaryElement.DiseaseIdx, pickupable.PrimaryElement.DiseaseCount, "PrimaryElement.OnAbsorb");
 	}
 
+	public void SetDiseaseVisualProvider(GameObject visualizer)
+	{
+		HandleVector<int>.Handle handle = GameComps.DiseaseContainers.GetHandle(base.gameObject);
+		if (handle != HandleVector<int>.InvalidHandle)
+		{
+			DiseaseContainer data = GameComps.DiseaseContainers.GetData(handle);
+			data.visualDiseaseProvider = visualizer;
+			GameComps.DiseaseContainers.SetData(handle, data);
+		}
+	}
+
 	public const float DefaultChunkMass = 400f;
 
 	public PrimaryElement.GetTemperatureCallback getTemperatureCallback = new PrimaryElement.GetTemperatureCallback(PrimaryElement.OnGetTemperature);
 
 	public PrimaryElement.SetTemperatureCallback setTemperatureCallback = new PrimaryElement.SetTemperatureCallback(PrimaryElement.OnSetTemperature);
 
-	public bool useSimDiseaseInfo;
+	public Action<int, string> ModifyDiseaseCountHandler;
+
+	public Action<byte, int, string> AddDiseaseHandler;
+
+	private bool useSimDiseaseInfo;
 
 	private static readonly Tag[] metalTags = new Tag[]
 	{
@@ -405,8 +443,8 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		GameTags.RefinedMetal
 	};
 
-	[HashedEnum]
 	[Serialize]
+	[HashedEnum]
 	public SimHashes ElementID;
 
 	private float _units = 1f;
@@ -426,8 +464,6 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 	private int diseaseCount;
 
 	private HandleVector<int>.Handle diseaseHandle = HandleVector<int>.InvalidHandle;
-
-	public bool CountableUnits;
 
 	public float MassPerUnit = 1f;
 

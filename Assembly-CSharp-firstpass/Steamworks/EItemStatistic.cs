@@ -14,6 +14,8 @@ namespace Steamworks
 		k_EItemStatistic_ReportScore,
 		k_EItemStatistic_NumSecondsPlayed,
 		k_EItemStatistic_NumPlaytimeSessions,
-		k_EItemStatistic_NumComments
+		k_EItemStatistic_NumComments,
+		k_EItemStatistic_NumSecondsPlayedDuringTimePeriod,
+		k_EItemStatistic_NumPlaytimeSessionsDuringTimePeriod
 	}
 }

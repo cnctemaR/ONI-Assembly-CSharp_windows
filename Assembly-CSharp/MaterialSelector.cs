@@ -123,6 +123,16 @@ public class MaterialSelector : KScreen
 				this.selectMaterialActions();
 			}
 			this.UpdateHeader();
+			this.SetDescription(element);
+			this.SetEffects(element);
+			if (!this.MaterialDescriptionPane.gameObject.activeSelf && !this.MaterialEffectsPane.gameObject.activeSelf)
+			{
+				this.DescriptorsPanel.SetActive(false);
+			}
+			else
+			{
+				this.DescriptorsPanel.SetActive(true);
+			}
 		}
 		this.RefreshToggleContents();
 	}
@@ -216,13 +226,13 @@ public class MaterialSelector : KScreen
 			string text = keyValuePair2.Value.tag.ProperName();
 			if (keyValuePair2.Value.attributeModifiers.Count > 0)
 			{
-				text += "\n";
 				foreach (AttributeModifier attributeModifier in keyValuePair2.Value.attributeModifiers)
 				{
 					string name = Db.Get().BuildingAttributes.Get(attributeModifier.AttributeId).Name;
-					text += string.Format("\n{0}: {1}", name, attributeModifier.GetFormattedString(null));
+					text = text + "\n    • " + string.Format(DUPLICANTS.MODIFIERS.MODIFIER_FORMAT, name, attributeModifier.GetFormattedString(null));
 				}
 			}
+			text += GameUtil.GetSignificantMaterialPropertyTooltips(keyValuePair2.Value);
 			component.toolTip = text;
 		}
 		this.UpdateScrollBar();
@@ -278,6 +288,63 @@ public class MaterialSelector : KScreen
 		}
 	}
 
+	public void ToggleShowDescriptorsPanel(bool show)
+	{
+		this.DescriptorsPanel.gameObject.SetActive(show);
+	}
+
+	private void SetDescription(Element element)
+	{
+		string text = Strings.Get(new StringKey("STRINGS.ELEMENTS." + element.tag.ToString().ToUpper() + ".BUILD_DESC"));
+		if (text == string.Empty)
+		{
+			this.MaterialDescriptionPane.SetActive(false);
+			return;
+		}
+		this.MaterialDescriptionPane.SetActive(true);
+		this.MaterialDescriptionText.text = text;
+	}
+
+	private void SetEffects(Element element)
+	{
+		List<Descriptor> list = new List<Descriptor>();
+		if (element.attributeModifiers.Count > 0)
+		{
+			foreach (AttributeModifier attributeModifier in element.attributeModifiers)
+			{
+				string modifierString = this.GetModifierString(attributeModifier);
+				string modifierTooltip = this.GetModifierTooltip(attributeModifier);
+				Descriptor descriptor = default(Descriptor);
+				descriptor.SetupDescriptor(modifierString, modifierTooltip, Descriptor.DescriptorType.Effect);
+				descriptor.IncreaseIndent();
+				list.Add(descriptor);
+			}
+		}
+		list.AddRange(GameUtil.GetSignificantMaterialPropertyDescriptors(element));
+		if (list.Count > 0)
+		{
+			Descriptor descriptor2 = default(Descriptor);
+			descriptor2.SetupDescriptor(ELEMENTS.MATERIAL_MODIFIERS.EFFECTS_HEADER, ELEMENTS.MATERIAL_MODIFIERS.TOOLTIP.EFFECTS_HEADER, Descriptor.DescriptorType.Effect);
+			list.Insert(0, descriptor2);
+			this.MaterialEffectsPane.gameObject.SetActive(true);
+			this.MaterialEffectsPane.SetDescriptors(list);
+		}
+		else
+		{
+			this.MaterialEffectsPane.gameObject.SetActive(false);
+		}
+	}
+
+	private string GetModifierString(AttributeModifier modifier)
+	{
+		return string.Format(Strings.Get(new StringKey("STRINGS.ELEMENTS.MATERIAL_MODIFIERS." + modifier.AttributeId.ToUpper())), modifier.GetFormattedString(null));
+	}
+
+	private string GetModifierTooltip(AttributeModifier modifier)
+	{
+		return string.Format(Strings.Get(new StringKey("STRINGS.ELEMENTS.MATERIAL_MODIFIERS.TOOLTIP." + modifier.AttributeId.ToUpper())), modifier.GetFormattedString(null));
+	}
+
 	public Element CurrentSelectedElement;
 
 	public Dictionary<KToggle, Element> ElementToggles = new Dictionary<KToggle, Element>();
@@ -301,6 +368,14 @@ public class MaterialSelector : KScreen
 	public GameObject BadBG;
 
 	public LocText NoMaterialDiscovered;
+
+	public GameObject MaterialDescriptionPane;
+
+	public LocText MaterialDescriptionText;
+
+	public DescriptorPanel MaterialEffectsPane;
+
+	public GameObject DescriptorsPanel;
 
 	private KToggle selectedToggle;
 

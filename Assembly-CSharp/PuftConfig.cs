@@ -13,15 +13,16 @@ public class PuftConfig : IEntityConfig
 		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, 25f, "FlyerNavGrid1x1", NavType.Hover, 2f, "Meat", 1, true, true, 30f, 302f, 318f, 243f, 343f);
 		Puft puft = gameObject.UpdateComponentRequirement<Puft>(true);
 		puft.consumedElement = SimHashes.ContaminatedOxygen;
+		puft.consumptionRate = 0.25f;
 		puft.minimumApproachMass = 0.1f;
 		puft.emitDiseaseIdx = Db.Get().Diseases.GetIndex("SlimeLung");
 		puft.emitDiseasePerKg = 1000;
 		gameObject.UpdateComponentRequirement<LoopingSounds>(true);
 		gameObject.UpdateComponentRequirement<SimpleMover>(true);
+		Storage storage = gameObject.UpdateComponentRequirement<Storage>(true);
+		storage.capacityKg = 50f;
 		ElementEmitter elementEmitter = gameObject.AddElementEmitter(SimHashes.SlimeMold, 0f, 0f, SimUtil.DiseaseInfo.Invalid);
-		ElementConsumer elementConsumer = gameObject.AddElementConsumer(SimHashes.ContaminatedOxygen, 0.25f, 0.05f, 3);
 		elementEmitter.showDescriptor = false;
-		elementConsumer.showDescriptor = false;
 		SoundEventVolumeCache.instance.AddVolume("puft_kanim", "Puft_voice_idle", NOISE_POLLUTION.CREATURES.TIER2);
 		SoundEventVolumeCache.instance.AddVolume("puft_kanim", "Puft_air_intake", NOISE_POLLUTION.CREATURES.TIER4);
 		SoundEventVolumeCache.instance.AddVolume("puft_kanim", "Puft_toot", NOISE_POLLUTION.CREATURES.TIER5);
@@ -42,6 +43,8 @@ public class PuftConfig : IEntityConfig
 	public const string ID = "Puft";
 
 	public const SimHashes consumeElement = SimHashes.ContaminatedOxygen;
+
+	public const float consumptionRate = 0.25f;
 
 	public const SimHashes emitElement = SimHashes.SlimeMold;
 

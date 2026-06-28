@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Klei.AI;
+using Klei.AI.DiseaseGrowthRules;
 using STRINGS;
-using TMPro;
 using UnityEngine;
 
 public class DiseaseInfoScreen : TargetScreen
@@ -10,11 +10,16 @@ public class DiseaseInfoScreen : TargetScreen
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.diseaseSourcePanel = new DiseaseInfoScreen.InfoPanel(UI.DETAILTABS.DISEASE.DISEASE_SOURCE, this.labelTemplate, base.gameObject);
-		this.immuneSystemPanel = new DiseaseInfoScreen.InfoPanel(UI.DETAILTABS.DISEASE.IMMUNE_SYSTEM, this.labelTemplate, base.gameObject);
-		this.currentGermsPanel = new DiseaseInfoScreen.InfoPanel(UI.DETAILTABS.DISEASE.CURRENT_GERMS, this.labelTemplate, base.gameObject);
-		this.infoPanel = new DiseaseInfoScreen.InfoPanel(UI.DETAILTABS.DISEASE.GERMS_INFO, this.labelTemplate, base.gameObject);
-		this.infectionPanel = new DiseaseInfoScreen.InfoPanel(UI.DETAILTABS.DISEASE.INFECTION_INFO, this.labelTemplate, base.gameObject);
+		this.diseaseSourcePanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false).GetComponent<CollapsibleDetailContentPanel>();
+		this.diseaseSourcePanel.SetTitle(UI.DETAILTABS.DISEASE.DISEASE_SOURCE);
+		this.immuneSystemPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false).GetComponent<CollapsibleDetailContentPanel>();
+		this.immuneSystemPanel.SetTitle(UI.DETAILTABS.DISEASE.IMMUNE_SYSTEM);
+		this.currentGermsPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false).GetComponent<CollapsibleDetailContentPanel>();
+		this.currentGermsPanel.SetTitle(UI.DETAILTABS.DISEASE.CURRENT_GERMS);
+		this.infoPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false).GetComponent<CollapsibleDetailContentPanel>();
+		this.infoPanel.SetTitle(UI.DETAILTABS.DISEASE.GERMS_INFO);
+		this.infectionPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false).GetComponent<CollapsibleDetailContentPanel>();
+		this.infectionPanel.SetTitle(UI.DETAILTABS.DISEASE.INFECTION_INFO);
 		this.Subscribe(-1514841199, new Action<object>(this.OnRefreshData));
 	}
 
@@ -34,11 +39,6 @@ public class DiseaseInfoScreen : TargetScreen
 		{
 			return;
 		}
-		this.diseaseSourcePanel.DeactivateAll();
-		this.immuneSystemPanel.DeactivateAll();
-		this.currentGermsPanel.DeactivateAll();
-		this.infoPanel.DeactivateAll();
-		this.infectionPanel.DeactivateAll();
 		List<Descriptor> list = GameUtil.GetAllDescriptors(this.selectedTarget, true);
 		Diseases diseases = this.selectedTarget.GetDiseases();
 		if (diseases != null)
@@ -53,30 +53,22 @@ public class DiseaseInfoScreen : TargetScreen
 		{
 			for (int j = 0; j < list.Count; j++)
 			{
-				GameObject gameObject = this.diseaseSourcePanel.AddOrGetLabel("source_" + j.ToString());
-				gameObject.GetComponent<LocText>().text = list[j].text;
-				gameObject.GetComponent<ToolTip>().toolTip = list[j].tooltipText;
-				gameObject.SetActive(true);
+				this.diseaseSourcePanel.SetLabel("source_" + j.ToString(), list[j].text, list[j].tooltipText);
 			}
 		}
-		else
+		if (this.CreateImmuneInfo())
 		{
-			this.diseaseSourcePanel.SetActive(false);
-		}
-		if (!this.CreateImmuneInfo())
-		{
-			this.immuneSystemPanel.SetActive(false);
 		}
 		if (!this.CreateDiseaseInfo())
 		{
-			this.infoPanel.SetActive(false);
-			this.infectionPanel.SetActive(false);
-			GameObject gameObject = this.currentGermsPanel.AddOrGetLabel("nodisease");
-			this.currentGermsPanel.container.HeaderLabel.text = UI.DETAILTABS.DISEASE.NO_CURRENT_GERMS;
-			gameObject.GetComponent<LocText>().text = UI.DETAILTABS.DISEASE.DETAILS.NODISEASE;
-			gameObject.GetComponent<ToolTip>().toolTip = UI.DETAILTABS.DISEASE.DETAILS.NODISEASE_TOOLTIP;
-			gameObject.SetActive(true);
+			this.currentGermsPanel.SetTitle(UI.DETAILTABS.DISEASE.NO_CURRENT_GERMS);
+			this.currentGermsPanel.SetLabel("nodisease", UI.DETAILTABS.DISEASE.DETAILS.NODISEASE, UI.DETAILTABS.DISEASE.DETAILS.NODISEASE_TOOLTIP);
 		}
+		this.diseaseSourcePanel.Commit();
+		this.immuneSystemPanel.Commit();
+		this.currentGermsPanel.Commit();
+		this.infoPanel.Commit();
+		this.infectionPanel.Commit();
 	}
 
 	private bool CreateImmuneInfo()
@@ -84,24 +76,20 @@ public class DiseaseInfoScreen : TargetScreen
 		ImmuneSystemMonitor.Instance smi = this.selectedTarget.GetSMI<ImmuneSystemMonitor.Instance>();
 		if (smi != null)
 		{
-			AmountInstance amountInstance = Db.Get().Amounts.ImmuneLevel.Lookup(this.selectedTarget);
 			for (int i = 0; i < Db.Get().Diseases.Count; i++)
 			{
 				Disease disease = Db.Get().Diseases[i];
-				AmountInstance amountInstance2 = disease.amount.Lookup(this.selectedTarget);
-				if (amountInstance2.value > 0f)
+				AmountInstance amountInstance = disease.amount.Lookup(this.selectedTarget);
+				if (amountInstance.value > 0f)
 				{
-					GameObject gameObject = this.immuneSystemPanel.AddOrGetLabel("disease_" + disease.Id);
-					gameObject.GetComponent<LocText>().text = string.Format(UI.DETAILTABS.DISEASE.IMMUNE_FACTORS.INTERNAL_GERMS, disease.Name, GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(amountInstance2.value)));
-					gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.DETAILTABS.DISEASE.IMMUNE_FACTORS.INTERNAL_GERMS_TOOLTIP, disease.Name, GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(amountInstance2.value)));
-					gameObject.SetActive(true);
+					this.immuneSystemPanel.SetLabelWithButton("disease_" + disease.Id, string.Format(UI.DETAILTABS.DISEASE.IMMUNE_FACTORS.INTERNAL_GERMS, disease.Name, GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(amountInstance.value))), string.Format(UI.DETAILTABS.DISEASE.IMMUNE_FACTORS.INTERNAL_GERMS_TOOLTIP, disease.Name, GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(amountInstance.value))), UI.DETAILTABS.DISEASE.DISEASE_INFO_POPUP_BUTTON, string.Format(UI.DETAILTABS.DISEASE.DISEASE_INFO_POPUP_TOOLTIP, disease.Name), delegate
+					{
+						this.ShowDiseaseInfoPopup(disease);
+					});
 					AttributeModifier currentImmuneModifier = smi.GetCurrentImmuneModifier(disease);
 					if (currentImmuneModifier != null)
 					{
-						gameObject = this.immuneSystemPanel.AddOrGetLabel("disease_rate2_" + disease.Id);
-						gameObject.GetComponent<LocText>().text = string.Format(UI.DETAILTABS.DISEASE.IMMUNE_FACTORS.IMMUNE_ATTACK_RATE2, currentImmuneModifier.GetFormattedString(this.selectedTarget), GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(amountInstance2.value)));
-						gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.DETAILTABS.DISEASE.IMMUNE_FACTORS.IMMUNE_ATTACK_RATE2_TOOLTIP, currentImmuneModifier.GetFormattedString(this.selectedTarget), GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(amountInstance2.value)));
-						gameObject.SetActive(true);
+						this.immuneSystemPanel.SetLabel("disease_rate2_" + disease.Id, string.Format(UI.DETAILTABS.DISEASE.IMMUNE_FACTORS.IMMUNE_ATTACK_RATE2, currentImmuneModifier.GetFormattedString(this.selectedTarget), GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(amountInstance.value))), string.Format(UI.DETAILTABS.DISEASE.IMMUNE_FACTORS.IMMUNE_ATTACK_RATE2_TOOLTIP, currentImmuneModifier.GetFormattedString(this.selectedTarget), GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(amountInstance.value))));
 					}
 				}
 			}
@@ -119,15 +107,6 @@ public class DiseaseInfoScreen : TargetScreen
 		}
 		CellSelectionObject component2 = this.selectedTarget.GetComponent<CellSelectionObject>();
 		return component2 != null && this.CreateDiseaseInfo_CellSelectionObject(component2);
-	}
-
-	private string GetFormattedHalfLife(int count, Disease.CompositeGrowthRule rule)
-	{
-		if (count >= rule.minCount)
-		{
-			return this.GetFormattedHalfLife(rule.GetHalfLifeForCount(count));
-		}
-		return UI.DETAILTABS.DISEASE.DETAILS.DYING_OFF;
 	}
 
 	private string GetFormattedHalfLife(float hl)
@@ -166,187 +145,93 @@ public class DiseaseInfoScreen : TargetScreen
 		return string.Format(text, name, this.GetFormattedHalfLife(halfLife));
 	}
 
-	private void BuildFactorsStrings(int diseaseCount, int elementIdx, int environmentCell, float temperature, Tag[] tags, Disease disease)
+	private void BuildFactorsStrings(int diseaseCount, int elementIdx, int environmentCell, float environmentMass, float temperature, Tag[] tags, Disease disease)
 	{
-		this.currentGermsPanel.container.HeaderLabel.text = string.Format(UI.DETAILTABS.DISEASE.CURRENT_GERMS, disease.Name.ToUpper());
-		this.infectionPanel.container.HeaderLabel.text = string.Format(UI.DETAILTABS.DISEASE.INFECTION_INFO, disease.Name.ToUpper());
-		this.infoPanel.container.HeaderLabel.text = string.Format(UI.DETAILTABS.DISEASE.GERMS_INFO, disease.Name.ToUpper());
-		GameObject gameObject = this.currentGermsPanel.AddOrGetLabel("currentgerms");
-		gameObject.GetComponent<LocText>().text = string.Format(UI.DETAILTABS.DISEASE.DETAILS.DISEASE_AMOUNT, disease.Name, GameUtil.GetFormattedDiseaseAmount(diseaseCount));
-		gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.DETAILTABS.DISEASE.DETAILS.DISEASE_AMOUNT_TOOLTIP, GameUtil.GetFormattedDiseaseAmount(diseaseCount));
-		gameObject.SetActive(true);
+		this.currentGermsPanel.SetTitle(string.Format(UI.DETAILTABS.DISEASE.CURRENT_GERMS, disease.Name.ToUpper()));
+		this.currentGermsPanel.SetLabelWithButton("currentgerms", string.Format(UI.DETAILTABS.DISEASE.DETAILS.DISEASE_AMOUNT, disease.Name, GameUtil.GetFormattedDiseaseAmount(diseaseCount)), string.Format(UI.DETAILTABS.DISEASE.DETAILS.DISEASE_AMOUNT_TOOLTIP, GameUtil.GetFormattedDiseaseAmount(diseaseCount)), UI.DETAILTABS.DISEASE.DISEASE_INFO_POPUP_BUTTON, string.Format(UI.DETAILTABS.DISEASE.DISEASE_INFO_POPUP_TOOLTIP, disease.Name), delegate
+		{
+			this.ShowDiseaseInfoPopup(disease);
+		});
 		Element element = ElementLoader.elements[elementIdx];
-		Disease.CompositeGrowthRule growthRuleForElement = disease.GetGrowthRuleForElement(element);
-		if (diseaseCount < growthRuleForElement.minCount)
-		{
-			gameObject = this.currentGermsPanel.AddOrGetLabel("critical_status");
-			gameObject.GetComponent<LocText>().text = UI.DETAILTABS.DISEASE.DETAILS.DYING_OFF;
-			gameObject.GetComponent<ToolTip>().toolTip = UI.DETAILTABS.DISEASE.DETAILS.DYING_OFF_TOOLTIP;
-			gameObject.SetActive(true);
-		}
-		else if (diseaseCount > growthRuleForElement.maxCount)
-		{
-			gameObject = this.currentGermsPanel.AddOrGetLabel("critical_status");
-			gameObject.GetComponent<LocText>().text = UI.DETAILTABS.DISEASE.DETAILS.OVERPOPULATED;
-			gameObject.GetComponent<ToolTip>().toolTip = UI.DETAILTABS.DISEASE.DETAILS.OVERPOPULATED_TOOLTIP;
-			gameObject.SetActive(true);
-		}
+		CompositeGrowthRule growthRuleForElement = disease.GetGrowthRuleForElement(element);
 		float num = 1f;
 		if (tags != null && tags.Length > 0)
 		{
-			num = disease.GetGrowthRateForTags(tags, diseaseCount > growthRuleForElement.maxCount);
+			num = disease.GetGrowthRateForTags(tags, (float)diseaseCount > growthRuleForElement.maxCountPerKG * environmentMass);
 		}
-		float num2 = DiseaseContainers.CalculateDelta(diseaseCount, elementIdx, environmentCell, temperature, num, disease, 1f);
-		gameObject = this.currentGermsPanel.AddOrGetLabel("finaldelta");
-		gameObject.GetComponent<LocText>().text = string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.RATE_OF_CHANGE, GameUtil.GetFormattedSimple(num2, GameUtil.TimeSlice.PerSecond, "F0"));
-		gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.RATE_OF_CHANGE_TOOLTIP, GameUtil.GetFormattedSimple(num2, GameUtil.TimeSlice.PerSecond, "F0"));
-		gameObject.SetActive(true);
+		float num2 = DiseaseContainers.CalculateDelta(diseaseCount, elementIdx, environmentMass, environmentCell, temperature, num, disease, 1f);
+		this.currentGermsPanel.SetLabel("finaldelta", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.RATE_OF_CHANGE, GameUtil.GetFormattedSimple(num2, GameUtil.TimeSlice.PerSecond, "F0")), string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.RATE_OF_CHANGE_TOOLTIP, GameUtil.GetFormattedSimple(num2, GameUtil.TimeSlice.PerSecond, "F0")));
 		float num3 = Disease.GrowthRateToHalfLife(1f - num2 / (float)diseaseCount);
-		gameObject = this.currentGermsPanel.AddOrGetLabel("finalhalflife");
 		if (num3 > 0f)
 		{
-			gameObject.GetComponent<LocText>().text = string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.HALF_LIFE_NEG, GameUtil.GetFormattedCycles(num3, "F1"));
-			gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.HALF_LIFE_NEG_TOOLTIP, GameUtil.GetFormattedCycles(num3, "F1"));
+			this.currentGermsPanel.SetLabel("finalhalflife", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.HALF_LIFE_NEG, GameUtil.GetFormattedCycles(num3, "F1")), string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.HALF_LIFE_NEG_TOOLTIP, GameUtil.GetFormattedCycles(num3, "F1")));
 		}
 		else if (num3 < 0f)
 		{
-			gameObject.GetComponent<LocText>().text = string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.HALF_LIFE_POS, GameUtil.GetFormattedCycles(-num3, "F1"));
-			gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.HALF_LIFE_POS_TOOLTIP, GameUtil.GetFormattedCycles(num3, "F1"));
+			this.currentGermsPanel.SetLabel("finalhalflife", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.HALF_LIFE_POS, GameUtil.GetFormattedCycles(-num3, "F1")), string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.HALF_LIFE_POS_TOOLTIP, GameUtil.GetFormattedCycles(num3, "F1")));
 		}
 		else
 		{
-			gameObject.GetComponent<LocText>().text = UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.HALF_LIFE_NEUTRAL;
-			gameObject.GetComponent<ToolTip>().toolTip = UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.HALF_LIFE_NEUTRAL_TOOLTIP;
+			this.currentGermsPanel.SetLabel("finalhalflife", UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.HALF_LIFE_NEUTRAL, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.HALF_LIFE_NEUTRAL_TOOLTIP);
 		}
-		gameObject.SetActive(true);
-		gameObject = this.currentGermsPanel.AddOrGetLabel("factors");
-		gameObject.GetComponent<LocText>().text = string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TITLE, new object[0]);
-		gameObject.GetComponent<ToolTip>().toolTip = UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TOOLTIP;
-		gameObject.SetActive(true);
-		gameObject = this.currentGermsPanel.AddOrGetLabel("substrate");
-		gameObject.GetComponent<LocText>().text = this.GetFormattedGrowthEntry(growthRuleForElement.Name(), growthRuleForElement.populationHalfLife, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.DIE, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.GROW, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.NEUTRAL);
-		gameObject.GetComponent<ToolTip>().toolTip = this.GetFormattedGrowthEntry(growthRuleForElement.Name(), growthRuleForElement.populationHalfLife, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.DIE_TOOLTIP, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.GROW_TOOLTIP, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.NEUTRAL_TOOLTIP);
-		gameObject.SetActive(true);
+		this.currentGermsPanel.SetLabel("factors", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TITLE, new object[0]), UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TOOLTIP);
+		bool flag = false;
+		if ((float)diseaseCount < growthRuleForElement.minCountPerKG * environmentMass)
+		{
+			this.currentGermsPanel.SetLabel("critical_status", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.DYING_OFF.TITLE, this.GetFormattedGrowthRate(growthRuleForElement.underPopulationDeathRate)), string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.DYING_OFF.TOOLTIP, GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(growthRuleForElement.minCountPerKG * environmentMass)), GameUtil.GetFormattedMass(environmentMass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), growthRuleForElement.minCountPerKG));
+			flag = true;
+		}
+		else if ((float)diseaseCount > growthRuleForElement.maxCountPerKG * environmentMass)
+		{
+			this.currentGermsPanel.SetLabel("critical_status", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.OVERPOPULATED.TITLE, this.GetFormattedHalfLife(growthRuleForElement.overPopulationHalfLife)), string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.OVERPOPULATED.TOOLTIP, GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(growthRuleForElement.maxCountPerKG * environmentMass)), GameUtil.GetFormattedMass(environmentMass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), growthRuleForElement.maxCountPerKG));
+			flag = true;
+		}
+		if (!flag)
+		{
+			this.currentGermsPanel.SetLabel("substrate", this.GetFormattedGrowthEntry(growthRuleForElement.Name(), growthRuleForElement.populationHalfLife, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.DIE, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.GROW, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.NEUTRAL), this.GetFormattedGrowthEntry(growthRuleForElement.Name(), growthRuleForElement.populationHalfLife, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.DIE_TOOLTIP, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.GROW_TOOLTIP, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.NEUTRAL_TOOLTIP));
+		}
 		for (int i = 0; i < tags.Length; i++)
 		{
-			Disease.TagGrowthRule growthRuleForTag = disease.GetGrowthRuleForTag(tags[i]);
+			TagGrowthRule growthRuleForTag = disease.GetGrowthRuleForTag(tags[i]);
 			if (growthRuleForTag != null)
 			{
-				gameObject = this.currentGermsPanel.AddOrGetLabel("tag_" + i);
-				TMP_Text component = gameObject.GetComponent<LocText>();
-				string text = growthRuleForTag.Name();
-				float? populationHalfLife = growthRuleForTag.populationHalfLife;
-				component.text = this.GetFormattedGrowthEntry(text, populationHalfLife.Value, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.DIE, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.GROW, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.NEUTRAL);
-				ToolTip component2 = gameObject.GetComponent<ToolTip>();
+				CollapsibleDetailContentPanel collapsibleDetailContentPanel = this.currentGermsPanel;
+				string text = "tag_" + i;
 				string text2 = growthRuleForTag.Name();
+				float? populationHalfLife = growthRuleForTag.populationHalfLife;
+				string formattedGrowthEntry = this.GetFormattedGrowthEntry(text2, populationHalfLife.Value, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.DIE, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.GROW, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.NEUTRAL);
+				string text3 = growthRuleForTag.Name();
 				float? populationHalfLife2 = growthRuleForTag.populationHalfLife;
-				component2.toolTip = this.GetFormattedGrowthEntry(text2, populationHalfLife2.Value, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.DIE_TOOLTIP, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.GROW_TOOLTIP, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.NEUTRAL_TOOLTIP);
-				gameObject.SetActive(true);
+				collapsibleDetailContentPanel.SetLabel(text, formattedGrowthEntry, this.GetFormattedGrowthEntry(text3, populationHalfLife2.Value, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.DIE_TOOLTIP, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.GROW_TOOLTIP, UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.SUBSTRATE.NEUTRAL_TOOLTIP));
 			}
 		}
 		if (Grid.IsValidCell(environmentCell))
 		{
-			Disease.CompositeGrowthRule exposureRuleForElement = disease.GetExposureRuleForElement(Grid.Element[environmentCell]);
+			CompositeExposureRule exposureRuleForElement = disease.GetExposureRuleForElement(Grid.Element[environmentCell]);
 			if (exposureRuleForElement != null && exposureRuleForElement.populationHalfLife != float.PositiveInfinity)
 			{
-				gameObject = this.currentGermsPanel.AddOrGetLabel("environment");
-				gameObject.GetComponent<LocText>().text = string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.ENVIRONMENT.TITLE, exposureRuleForElement.Name(), this.GetFormattedHalfLife(exposureRuleForElement.GetHalfLifeForCount(diseaseCount)));
 				if (exposureRuleForElement.GetHalfLifeForCount(diseaseCount) > 0f)
 				{
-					gameObject.GetComponent<ToolTip>().toolTip = UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.ENVIRONMENT.DIE_TOOLTIP;
+					this.currentGermsPanel.SetLabel("environment", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.ENVIRONMENT.TITLE, exposureRuleForElement.Name(), this.GetFormattedHalfLife(exposureRuleForElement.GetHalfLifeForCount(diseaseCount))), UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.ENVIRONMENT.DIE_TOOLTIP);
 				}
 				else
 				{
-					gameObject.GetComponent<ToolTip>().toolTip = UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.ENVIRONMENT.GROW_TOOLTIP;
+					this.currentGermsPanel.SetLabel("environment", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.ENVIRONMENT.TITLE, exposureRuleForElement.Name(), this.GetFormattedHalfLife(exposureRuleForElement.GetHalfLifeForCount(diseaseCount))), UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.ENVIRONMENT.GROW_TOOLTIP);
 				}
-				gameObject.SetActive(true);
 			}
 		}
 		float num4 = disease.CalculateTemperatureHalfLife(temperature);
 		if (num4 != float.PositiveInfinity)
 		{
-			gameObject = this.currentGermsPanel.AddOrGetLabel("temperature");
-			gameObject.GetComponent<LocText>().text = string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.TITLE, GameUtil.GetFormattedTemperature(temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true), this.GetFormattedHalfLife(num4));
 			if (num4 > 0f)
 			{
-				gameObject.GetComponent<ToolTip>().toolTip = UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.DIE_TOOLTIP;
+				this.currentGermsPanel.SetLabel("temperature", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.TITLE, GameUtil.GetFormattedTemperature(temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true), this.GetFormattedHalfLife(num4)), UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.DIE_TOOLTIP);
 			}
 			else
 			{
-				gameObject.GetComponent<ToolTip>().toolTip = UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.GROW_TOOLTIP;
-			}
-			gameObject.SetActive(true);
-		}
-		List<Descriptor> quantitativeDescriptors = disease.GetQuantitativeDescriptors();
-		for (int j = 0; j < quantitativeDescriptors.Count; j++)
-		{
-			gameObject = this.infoPanel.AddOrGetLabel("info_" + j);
-			gameObject.GetComponent<LocText>().text = quantitativeDescriptors[j].IndentedText();
-			gameObject.GetComponent<ToolTip>().toolTip = quantitativeDescriptors[j].tooltipText;
-			gameObject.SetActive(true);
-		}
-		gameObject = this.infectionPanel.AddOrGetLabel("disclaimer");
-		gameObject.GetComponent<LocText>().text = UI.DETAILTABS.DISEASE.INFECTION.DISCLAIMER;
-		gameObject.GetComponent<ToolTip>().toolTip = UI.DETAILTABS.DISEASE.INFECTION.DISCLAIMER_TOOLTIP;
-		gameObject.SetActive(true);
-		gameObject = this.infectionPanel.AddOrGetLabel("duration");
-		gameObject.GetComponent<LocText>().text = UI.DETAILTABS.DISEASE.INFECTION.DURATION;
-		gameObject.GetComponent<ToolTip>().toolTip = UI.DETAILTABS.DISEASE.INFECTION.DURATION_TOOLTIP;
-		gameObject.SetActive(true);
-		gameObject = this.infectionPanel.AddOrGetLabel("duration_amount");
-		if (disease.doctorRequired)
-		{
-			gameObject.GetComponent<LocText>().text = string.Format(UI.DETAILTABS.DISEASE.INFECTION.DURATION_AIDREQ, GameUtil.GetFormattedCycles(disease.SicknessDuration, "F1"));
-			gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.DETAILTABS.DISEASE.INFECTION.DURATION_AIDREQ_TOOLTIP, GameUtil.GetFormattedCycles(disease.SicknessDuration, "F1"));
-		}
-		else
-		{
-			gameObject.GetComponent<LocText>().text = string.Format(UI.DETAILTABS.DISEASE.INFECTION.DURATION_NORMAL, GameUtil.GetFormattedCycles(disease.SicknessDuration, "F1"));
-			gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.DETAILTABS.DISEASE.INFECTION.DURATION_NORMAL_TOOLTIP, GameUtil.GetFormattedCycles(disease.SicknessDuration, "F1"));
-		}
-		gameObject.SetActive(true);
-		List<Descriptor> symptoms = disease.GetSymptoms();
-		GameUtil.IndentListOfDescriptors(symptoms);
-		List<Descriptor> list = symptoms.FindAll((Descriptor d) => d.type == Descriptor.DescriptorType.SymptomAidable);
-		if (list.Count > 0)
-		{
-			gameObject = this.infectionPanel.AddOrGetLabel("symptoms_aid");
-			gameObject.GetComponent<LocText>().text = UI.DETAILTABS.DISEASE.INFECTION.AID_SYMPTOMS;
-			gameObject.GetComponent<ToolTip>().toolTip = UI.DETAILTABS.DISEASE.INFECTION.AID_SYMPTOMS_TOOLTIP;
-			gameObject.SetActive(true);
-			for (int k = 0; k < list.Count; k++)
-			{
-				gameObject = this.infectionPanel.AddOrGetLabel("symptoms_aid_" + k);
-				gameObject.GetComponent<LocText>().text = list[k].IndentedText();
-				gameObject.GetComponent<ToolTip>().toolTip = list[k].tooltipText;
-				gameObject.SetActive(true);
+				this.currentGermsPanel.SetLabel("temperature", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.TITLE, GameUtil.GetFormattedTemperature(temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true), this.GetFormattedHalfLife(num4)), UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.TEMPERATURE.GROW_TOOLTIP);
 			}
 		}
-		List<Descriptor> list2 = symptoms.FindAll((Descriptor d) => d.type == Descriptor.DescriptorType.Symptom);
-		if (list.Count > 0)
-		{
-			gameObject = this.infectionPanel.AddOrGetLabel("symptoms_noaid");
-			gameObject.GetComponent<LocText>().text = UI.DETAILTABS.DISEASE.INFECTION.SYMPTOMS;
-			gameObject.GetComponent<ToolTip>().toolTip = UI.DETAILTABS.DISEASE.INFECTION.SYMPTOMS_TOOLTIP;
-			gameObject.SetActive(true);
-			for (int l = 0; l < list2.Count; l++)
-			{
-				gameObject = this.infectionPanel.AddOrGetLabel("symptoms_noaid_" + l);
-				gameObject.GetComponent<LocText>().text = list2[l].IndentedText();
-				gameObject.GetComponent<ToolTip>().toolTip = list2[l].tooltipText;
-				gameObject.SetActive(true);
-			}
-		}
-	}
-
-	public override void OnSelectTarget(GameObject target)
-	{
-		base.OnSelectTarget(target);
-	}
-
-	public override void OnDeselectTarget(GameObject target)
-	{
-		base.OnSelectTarget(target);
 	}
 
 	private bool CreateDiseaseInfo_PrimaryElement()
@@ -365,7 +250,7 @@ public class DiseaseInfoScreen : TargetScreen
 			Disease disease = Db.Get().Diseases[(int)component.DiseaseIdx];
 			int num = Grid.PosToCell(component.transform.position);
 			KPrefabID component2 = component.GetComponent<KPrefabID>();
-			this.BuildFactorsStrings(component.DiseaseCount, ElementLoader.GetElementIndex(component.Element.id), num, component.Temperature, component2.Tags, disease);
+			this.BuildFactorsStrings(component.DiseaseCount, ElementLoader.GetElementIndex(component.Element.id), num, component.Mass, component.Temperature, component2.Tags, disease);
 			return true;
 		}
 		return false;
@@ -377,73 +262,62 @@ public class DiseaseInfoScreen : TargetScreen
 		{
 			Disease disease = Db.Get().Diseases[(int)cso.diseaseIdx];
 			int elementIndex = ElementLoader.GetElementIndex(cso.element.id);
-			this.BuildFactorsStrings(cso.diseaseCount, elementIndex, -1, cso.temperature, new Tag[0], disease);
+			this.BuildFactorsStrings(cso.diseaseCount, elementIndex, -1, cso.Mass, cso.temperature, new Tag[0], disease);
 			return true;
 		}
 		return false;
 	}
 
-	public GameObject labelTemplate;
-
-	private DiseaseInfoScreen.InfoPanel infectionPanel;
-
-	private DiseaseInfoScreen.InfoPanel immuneSystemPanel;
-
-	private DiseaseInfoScreen.InfoPanel diseaseSourcePanel;
-
-	private DiseaseInfoScreen.InfoPanel currentGermsPanel;
-
-	private DiseaseInfoScreen.InfoPanel infoPanel;
-
-	public class InfoPanel
+	private void ShowDiseaseInfoPopup(Disease disease)
 	{
-		public InfoPanel(string label, GameObject labelTemplate, GameObject parent)
+		InfoDialogScreen infoDialogScreen = (InfoDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.InfoDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
+		infoDialogScreen.SetHeader(string.Format(UI.DETAILTABS.DISEASE.DISEASE_INFO_POPUP_HEADER, disease.Name.ToUpper()));
+		infoDialogScreen.AddSubHeader(UI.DETAILTABS.DISEASE.GERMS_INFO);
+		List<Descriptor> quantitativeDescriptors = disease.GetQuantitativeDescriptors();
+		for (int i = 0; i < quantitativeDescriptors.Count; i++)
 		{
-			GameObject gameObject = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, parent, false);
-			this.container = gameObject.GetComponent<CollapsibleDetailContentPanel>();
-			this.container.HeaderLabel.text = label;
-			this.labelTemplate = labelTemplate;
-			this.labels = new Dictionary<string, GameObject>();
+			infoDialogScreen.AddLineItem(quantitativeDescriptors[i].IndentedText(), quantitativeDescriptors[i].tooltipText);
 		}
-
-		public GameObject AddOrGetLabel(string id)
+		infoDialogScreen.AddSubHeader(UI.DETAILTABS.DISEASE.INFECTION_INFO);
+		infoDialogScreen.AddPlainText(UI.DETAILTABS.DISEASE.INFECTION.DISCLAIMER);
+		infoDialogScreen.AddLineItem(UI.DETAILTABS.DISEASE.INFECTION.DURATION, UI.DETAILTABS.DISEASE.INFECTION.DURATION_TOOLTIP);
+		if (disease.doctorRequired)
 		{
-			if (!this.container.gameObject.activeSelf)
-			{
-				this.container.gameObject.SetActive(true);
-			}
-			GameObject gameObject;
-			if (this.labels.ContainsKey(id))
-			{
-				gameObject = this.labels[id];
-			}
-			else
-			{
-				gameObject = Util.KInstantiate(this.labelTemplate, this.container.Content.gameObject, null);
-				gameObject.transform.localScale = new Vector3(1f, 1f, 1f);
-				this.labels[id] = gameObject;
-			}
-			gameObject.transform.SetAsLastSibling();
-			return gameObject;
+			infoDialogScreen.AddLineItem(string.Format(UI.DETAILTABS.DISEASE.INFECTION.DURATION_AIDREQ, GameUtil.GetFormattedCycles(disease.SicknessDuration, "F1")), string.Format(UI.DETAILTABS.DISEASE.INFECTION.DURATION_AIDREQ_TOOLTIP, GameUtil.GetFormattedCycles(disease.SicknessDuration, "F1")));
 		}
-
-		public void DeactivateAll()
+		else
 		{
-			foreach (KeyValuePair<string, GameObject> keyValuePair in this.labels)
+			infoDialogScreen.AddLineItem(string.Format(UI.DETAILTABS.DISEASE.INFECTION.DURATION_NORMAL, GameUtil.GetFormattedCycles(disease.SicknessDuration, "F1")), string.Format(UI.DETAILTABS.DISEASE.INFECTION.DURATION_NORMAL_TOOLTIP, GameUtil.GetFormattedCycles(disease.SicknessDuration, "F1")));
+		}
+		List<Descriptor> symptoms = disease.GetSymptoms();
+		GameUtil.IndentListOfDescriptors(symptoms);
+		List<Descriptor> list = symptoms.FindAll((Descriptor d) => d.type == Descriptor.DescriptorType.SymptomAidable);
+		if (list.Count > 0)
+		{
+			infoDialogScreen.AddLineItem(UI.DETAILTABS.DISEASE.INFECTION.AID_SYMPTOMS, UI.DETAILTABS.DISEASE.INFECTION.AID_SYMPTOMS_TOOLTIP);
+			for (int j = 0; j < list.Count; j++)
 			{
-				keyValuePair.Value.SetActive(false);
+				infoDialogScreen.AddLineItem(list[j].IndentedText(), list[j].tooltipText);
 			}
 		}
-
-		public void SetActive(bool active)
+		List<Descriptor> list2 = symptoms.FindAll((Descriptor d) => d.type == Descriptor.DescriptorType.Symptom);
+		if (list.Count > 0)
 		{
-			this.container.gameObject.SetActive(active);
+			infoDialogScreen.AddLineItem(UI.DETAILTABS.DISEASE.INFECTION.SYMPTOMS, UI.DETAILTABS.DISEASE.INFECTION.SYMPTOMS_TOOLTIP);
+			for (int k = 0; k < list2.Count; k++)
+			{
+				infoDialogScreen.AddLineItem(list2[k].IndentedText(), list2[k].tooltipText);
+			}
 		}
-
-		public GameObject labelTemplate;
-
-		public CollapsibleDetailContentPanel container;
-
-		public Dictionary<string, GameObject> labels;
 	}
+
+	private CollapsibleDetailContentPanel infectionPanel;
+
+	private CollapsibleDetailContentPanel immuneSystemPanel;
+
+	private CollapsibleDetailContentPanel diseaseSourcePanel;
+
+	private CollapsibleDetailContentPanel currentGermsPanel;
+
+	private CollapsibleDetailContentPanel infoPanel;
 }

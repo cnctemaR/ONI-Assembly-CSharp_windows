@@ -16,6 +16,7 @@ public class MedicalCotConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
 		go.AddOrGet<LoopingSounds>();
+		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.Clinic);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -34,6 +35,7 @@ public class MedicalCotConfig : IBuildingConfig
 		clinic.doctoredHealthEffect = text2;
 		clinic.diseaseEffect = text;
 		clinic.doctoredDiseaseEffect = text2;
+		clinic.doctoredPlaceholderEffect = "DoctoredOffCotEffect";
 		Sleepable sleepable = go.AddOrGet<Sleepable>();
 		sleepable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_med_cot_sick_kanim") };
 		DoctorChore doctorChore = go.AddOrGet<DoctorChore>();

@@ -60,6 +60,9 @@ public class AccessControlSideScreen : SideScreenContent
 
 	private void Refresh(List<MinionIdentity> identities, bool rebuild)
 	{
+		Rotatable component = this.target.GetComponent<Rotatable>();
+		bool flag = component != null && component.IsRotated;
+		this.defaultsRow.SetRotated(flag);
 		this.defaultsRow.SetContent(this.target.DefaultPermission, new Action<MinionIdentity, AccessControl.Permission>(this.OnDefaultPermissionChanged));
 		if (rebuild)
 		{
@@ -78,8 +81,9 @@ public class AccessControlSideScreen : SideScreenContent
 				accessControlSideScreenRow = this.identityRowMap[minionIdentity];
 			}
 			AccessControl.Permission setPermission = this.target.GetSetPermission(minionIdentity.gameObject);
-			bool flag = this.target.IsDefaultPermission(minionIdentity.gameObject);
-			accessControlSideScreenRow.SetMinionContent(minionIdentity, setPermission, flag, new Action<MinionIdentity, AccessControl.Permission>(this.OnPermissionChanged), new Action<MinionIdentity, bool>(this.OnPermissionDefault));
+			bool flag2 = this.target.IsDefaultPermission(minionIdentity.gameObject);
+			accessControlSideScreenRow.SetRotated(flag);
+			accessControlSideScreenRow.SetMinionContent(minionIdentity, setPermission, flag2, new Action<MinionIdentity, AccessControl.Permission>(this.OnPermissionChanged), new Action<MinionIdentity, bool>(this.OnPermissionDefault));
 		}
 		this.RefreshOnline();
 		this.ContentContainer.SetActive(this.target.controlEnabled);

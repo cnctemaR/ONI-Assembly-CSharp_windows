@@ -43,6 +43,14 @@ public class SaveLoader : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		WorldGen.LoadSettings();
+		if (DebugHandler.enabled && CustomGameSettings.Get().is_custom_game)
+		{
+			WorldGen.Settings.SetWorld(CustomGameSettings.Get().GetCurrentQualitySetting("World").id, WorldGen.GetPath());
+		}
+		else
+		{
+			WorldGen.Settings.SetDefaultWorld(WorldGen.GetPath());
+		}
 		this.CheckForLoad();
 	}
 
@@ -239,7 +247,7 @@ public class SaveLoader : KMonoBehaviour
 	public static string GetSavePrefix()
 	{
 		string text = Util.RootFolder();
-		string text2 = global::System.IO.Path.Combine(text, "save_files/");
+		string text2 = Path.Combine(text, "save_files/");
 		if (!Directory.Exists(text2))
 		{
 			Directory.CreateDirectory(text2);
@@ -249,7 +257,7 @@ public class SaveLoader : KMonoBehaviour
 
 	public static string GetAutoSavePrefix()
 	{
-		string text = global::System.IO.Path.Combine(SaveLoader.GetSavePrefix(), "auto_save/");
+		string text = Path.Combine(SaveLoader.GetSavePrefix(), "auto_save/");
 		if (!Directory.Exists(text))
 		{
 			Directory.CreateDirectory(text);
@@ -277,7 +285,7 @@ public class SaveLoader : KMonoBehaviour
 		string activeSaveFilePath = SaveLoader.GetActiveSaveFilePath();
 		if (!string.IsNullOrEmpty(activeSaveFilePath))
 		{
-			return global::System.IO.Path.GetDirectoryName(activeSaveFilePath);
+			return Path.GetDirectoryName(activeSaveFilePath);
 		}
 		return null;
 	}
@@ -344,7 +352,7 @@ public class SaveLoader : KMonoBehaviour
 	{
 		if (isAutoSave)
 		{
-			List<string> list = SaveLoader.GetSaveFiles(global::System.IO.Path.GetDirectoryName(filename));
+			List<string> list = SaveLoader.GetSaveFiles(Path.GetDirectoryName(filename));
 			list = list.OrderBy<string, global::System.DateTime>((string file) => File.GetLastWriteTime(file)).ToList<string>();
 			while (list.Count >= 10)
 			{
@@ -390,7 +398,7 @@ public class SaveLoader : KMonoBehaviour
 			{
 				Output.Log(new object[] { "UnauthorizedAccessException for " + filename });
 				ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
-				confirmDialogScreen.PopupConfirmDialog(string.Format(UI.CRASHSCREEN.SAVEFAILED, "Unauthorized Access Exception"), null, null, null, null, null, null);
+				confirmDialogScreen.PopupConfirmDialog(string.Format(UI.CRASHSCREEN.SAVEFAILED, "Unauthorized Access Exception"), null, null, null, null, null, null, null);
 				return SaveLoader.GetActiveSaveFilePath();
 			}
 			throw ex;

@@ -7,30 +7,27 @@ public class GenericFabricatorConfig : IBuildingConfig
 	public override BuildingDef CreateBuildingDef()
 	{
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER3;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("GenericFabricator", 2, 3, "microbemusher_kanim", 1200f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.ALL_METALS, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, tier);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("GenericFabricator", 3, 3, "fabricator_generic_kanim", 1200f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.ALL_METALS, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, tier);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 240f;
 		buildingDef.ExhaustKilowattsWhenActive = 0.5f;
 		buildingDef.OperatingKilowatts = 2f;
-		buildingDef.Deprecated = true;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
 		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "Glass";
 		buildingDef.AudioSize = "large";
+		buildingDef.Deprecated = true;
 		return buildingDef;
 	}
 
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
-		go.AddOrGet<DropAllWorkable>();
+		go.UpdateComponentRequirement<DropAllWorkable>(true);
 		Prioritizable.AddRef(go);
-		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
-		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
-		conduitConsumer.conduitType = ConduitType.Liquid;
-		MicrobeMusher microbeMusher = go.AddOrGet<MicrobeMusher>();
-		microbeMusher.mushbarSpawnOffset = new Vector3(1f, 0f, 0f);
-		microbeMusher.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_musher_kanim") };
-		BuildingTemplates.CreateFabricatorStorage(go, microbeMusher);
+		go.UpdateComponentRequirement<BuildingComplete>(true).isManuallyOperated = true;
+		Fabricator fabricator = go.UpdateComponentRequirement<Fabricator>(true);
+		fabricator.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_fabricator_generic_kanim") };
+		BuildingTemplates.CreateFabricatorStorage(go, fabricator);
 		go.UpdateComponentRequirement<LoopingSounds>(true);
 	}
 

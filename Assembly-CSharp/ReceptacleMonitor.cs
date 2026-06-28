@@ -22,7 +22,7 @@ public class ReceptacleMonitor : StateMachineComponent<ReceptacleMonitor.StatesI
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.handle = GameScheduler.Instance.SchedulePeriodic("PressureVulnerable", 1f, new Action<object>(this.UpdateReceptacle), null, null, 0f, null);
+		this.handle = GameScheduler.Instance.SchedulePeriodic("ReceptacleMonitor", 1f, new Action<object>(this.UpdateReceptacle), null, null, 0f, null);
 		base.smi.StartSM();
 	}
 
@@ -67,7 +67,12 @@ public class ReceptacleMonitor : StateMachineComponent<ReceptacleMonitor.StatesI
 		}
 	}
 
-	public bool IsInOperationalReceptacle()
+	public bool HasReceptacle()
+	{
+		return !base.smi.IsInsideState(base.smi.sm.wild);
+	}
+
+	public bool HasOperationalReceptacle()
 	{
 		return base.smi.IsInsideState(base.smi.sm.operational);
 	}

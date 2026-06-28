@@ -4,14 +4,14 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class ManualGenerator : Workable, IBatteryRefillControl
+public class ManualGenerator : Workable, ISingleSliderControl
 {
 	private ManualGenerator()
 	{
 		this.showProgressBar = false;
 	}
 
-	public float BatteryRefillPercent
+	public float SingleSliderPercent
 	{
 		get
 		{
@@ -20,6 +20,22 @@ public class ManualGenerator : Workable, IBatteryRefillControl
 		set
 		{
 			this.batteryRefillPercent = value;
+		}
+	}
+
+	public string SliderTitleKey
+	{
+		get
+		{
+			return "STRINGS.UI.UISIDESCREENS.MANUALGENERATORSIDESCREEN.TITLE";
+		}
+	}
+
+	public string SliderTooltipKey
+	{
+		get
+		{
+			return "STRINGS.UI.UISIDESCREENS.MANUALGENERATORSIDESCREEN.TOOLTIP";
 		}
 	}
 
@@ -94,7 +110,7 @@ public class ManualGenerator : Workable, IBatteryRefillControl
 				{
 					if (this.chore == null && this.smi.GetCurrentState() == this.smi.sm.on)
 					{
-						this.chore = new WorkChore<ManualGenerator>(Db.Get().ChoreTypes.GeneratePower, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true);
+						this.chore = new WorkChore<ManualGenerator>(Db.Get().ChoreTypes.GeneratePower, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue);
 					}
 				}
 				else if (this.chore != null)

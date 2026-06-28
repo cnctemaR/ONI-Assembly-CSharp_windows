@@ -24,7 +24,7 @@ public class DigMonitor : KMonoBehaviour
 		{
 			EquipmentSlot equipmentSlot = EquipmentSet.Get().slotSet.Get("Multitool");
 			Equipment component = minionIdentity.GetComponent<Equipment>();
-			if (component != null && component.IsEquipped(equipmentSlot))
+			if (component != null && component.IsSlotOccupied(equipmentSlot))
 			{
 				flag = true;
 				break;

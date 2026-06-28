@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 using ClipperLib;
 using KSerialization;
@@ -52,7 +53,16 @@ namespace Delaunay.Geo
 			this.Initialize();
 		}
 
-		private void Initialize()
+		public void Add(Vector2 newVert)
+		{
+			if (this.vertices == null)
+			{
+				this.vertices = new List<Vector2>();
+			}
+			this.vertices.Add(newVert);
+		}
+
+		public void Initialize()
 		{
 			Vector2 vector = new Vector2(float.MaxValue, float.MaxValue);
 			Vector2 vector2 = new Vector2(float.MinValue, float.MinValue);
@@ -78,6 +88,38 @@ namespace Delaunay.Geo
 			this.bounds = Rect.MinMaxRect(vector.x, vector.y, vector2.x, vector2.y);
 		}
 
+		public float MinX
+		{
+			get
+			{
+				return this.vertices.Min<Vector2>((Vector2 point) => point.x);
+			}
+		}
+
+		public float MinY
+		{
+			get
+			{
+				return this.vertices.Min<Vector2>((Vector2 point) => point.y);
+			}
+		}
+
+		public float MaxX
+		{
+			get
+			{
+				return this.vertices.Max<Vector2>((Vector2 point) => point.x);
+			}
+		}
+
+		public float MaxY
+		{
+			get
+			{
+				return this.vertices.Max<Vector2>((Vector2 point) => point.y);
+			}
+		}
+
 		public float Area()
 		{
 			return Mathf.Abs(this.SignedDoubleArea() * 0.5f);
@@ -95,6 +137,14 @@ namespace Delaunay.Geo
 				return Delaunay.Geo.Winding.COUNTERCLOCKWISE;
 			}
 			return Delaunay.Geo.Winding.NONE;
+		}
+
+		public void ForceWinding(Winding wind)
+		{
+			if (this.Winding() != wind)
+			{
+				this.vertices.Reverse();
+			}
 		}
 
 		private float SignedDoubleArea()

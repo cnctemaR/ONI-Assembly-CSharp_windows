@@ -189,6 +189,7 @@ public class ImageToggleState : KMonoBehaviour
 	{
 		if (this.currentState == ImageToggleState.State.Disabled)
 		{
+			this.TargetImage.color = this.DisabledColour;
 			return;
 		}
 		this.isActive = false;

@@ -97,7 +97,7 @@ public class DirectionControl : KMonoBehaviour
 		DirectionControl.DirectionInfo directionInfo = this.directionInfos[num];
 		UserMenu userMenu = this.userMenu;
 		string tooltip = directionInfo.tooltip;
-		userMenu.AddButton(new KIconButtonMenu.ButtonInfo(directionInfo.iconName, directionInfo.name, new global::System.Action(this.OnChangeWorkableDirection), global::Action.NumActions, null, null, null, tooltip, true), 1f);
+		userMenu.AddButton(new KIconButtonMenu.ButtonInfo(directionInfo.iconName, directionInfo.name, new global::System.Action(this.OnChangeWorkableDirection), global::Action.NumActions, null, null, null, tooltip, true), 0f);
 	}
 
 	[Serialize]

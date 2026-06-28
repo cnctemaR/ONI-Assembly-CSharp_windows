@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Worker : KMonoBehaviour
 {
+	public Worker.State state { get; private set; }
+
 	public Worker.StartWorkInfo startWorkInfo { get; private set; }
 
 	public Workable workable
@@ -18,102 +20,102 @@ public class Worker : KMonoBehaviour
 		}
 	}
 
-	public bool CompleteWork()
+	protected override void OnPrefabInit()
 	{
+		base.OnPrefabInit();
+		this.state = Worker.State.Idle;
+	}
+
+	private string GetWorkableDebugString()
+	{
+		if (this.workable == null)
+		{
+			return "Null";
+		}
+		return this.workable.name;
+	}
+
+	public void CompleteWork()
+	{
+		if (this.state == Worker.State.PendingCompletion)
+		{
+			this.state = Worker.State.Idle;
+		}
 		if (this.workable != null)
 		{
-			Workable workable = this.workable;
-			this.startWorkInfo.workable = null;
-			workable.CompleteWork(this);
-			KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
-			component.Offset -= this.workAnimOffset;
-			this.workAnimOffset = Vector3.zero;
-			return true;
+			this.workable.CompleteWork(this);
 		}
-		return false;
+		this.InternalStopWork(this.workable, false);
 	}
 
 	public bool Work()
 	{
-		if (this.workable == null)
+		if (this.state == Worker.State.PendingCompletion)
 		{
-			return false;
+			return base.GetComponent<KAnimControllerBase>().IsStopped() || Time.time - this.workCompleteTime > 2f;
 		}
-		if (!this.workComplete)
+		float num = Time.time - this.lastWorkTick;
+		this.lastWorkTick = Time.time;
+		Facing component = base.GetComponent<Facing>();
+		if (this.workable.ShouldFaceTargetWhenWorking())
 		{
-			float num = Time.time - this.lastWorkTick;
-			this.lastWorkTick = Time.time;
-			Facing component = base.GetComponent<Facing>();
-			if (this.workable.ShouldFaceTargetWhenWorking())
+			component.Face(this.workable.transform.position);
+		}
+		else
+		{
+			component.Face(component.transform.position + Vector3.right);
+		}
+		if (this.workable != null)
+		{
+			Klei.AI.Attribute workAttribute = this.workable.GetWorkAttribute();
+			if (workAttribute != null && workAttribute.IsTrainable)
 			{
-				component.Face(this.workable.transform.position);
+				float experienceMultiplier = this.workable.GetExperienceMultiplier();
+				base.GetComponent<AttributeLevels>().AddExperience(workAttribute.Id, num * experienceMultiplier);
 			}
-			else
+			float efficiencyMultiplier = this.workable.GetEfficiencyMultiplier(this);
+			float num2 = num * efficiencyMultiplier * 1f;
+			if (this.workable.WorkTick(this, num2) && this.state == Worker.State.Working)
 			{
-				component.Face(component.transform.position + Vector3.right);
-			}
-			if (this.workable != null)
-			{
-				Klei.AI.Attribute workAttribute = this.workable.GetWorkAttribute();
-				if (workAttribute != null && workAttribute.IsTrainable)
+				base.GetComponent<KPrefabID>().AddTag(GameTags.PreventChoreInterruption);
+				this.state = Worker.State.PendingCompletion;
+				this.workCompleteTime = Time.time;
+				KAnimControllerBase component2 = base.GetComponent<KAnimControllerBase>();
+				component2.Stop();
+				if (this.workable != null && this.workable.synchronizeAnims)
 				{
-					float experienceMultiplier = this.workable.GetExperienceMultiplier();
-					base.GetComponent<AttributeLevels>().AddExperience(workAttribute.Id, num * experienceMultiplier);
-				}
-				float efficiencyMultiplier = this.workable.GetEfficiencyMultiplier(this);
-				float num2 = num * efficiencyMultiplier * 1f;
-				if (this.workable.WorkTick(this, num2))
-				{
-					this.workComplete = true;
-					this.workCompleteTime = Time.time;
-					KAnimControllerBase component2 = base.GetComponent<KAnimControllerBase>();
-					component2.Stop();
-					if (this.workable != null && this.workable.synchronizeAnims)
+					KAnimControllerBase component3 = this.workable.GetComponent<KAnimControllerBase>();
+					if (component3 != null && component3.HasAnimation("working_pst"))
 					{
-						KAnimControllerBase component3 = this.workable.GetComponent<KAnimControllerBase>();
-						if (component3 != null && component3.HasAnimation("working_pst"))
-						{
-							component3.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
-							component2.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
-						}
-					}
-					if (this.animInfo.forcePlayPst)
-					{
+						component3.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
 						component2.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
 					}
 				}
+				if (this.animInfo.forcePlayPst)
+				{
+					component2.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
+				}
 			}
-			return false;
-		}
-		if (base.GetComponent<KAnimControllerBase>().IsStopped() || Time.time - this.workCompleteTime > 2f)
-		{
-			if (this.OnWorkCompleteCallback != null)
-			{
-				this.OnWorkCompleteCallback();
-			}
-			return true;
 		}
 		return false;
 	}
 
-	public void StopWork()
+	private void InternalStopWork(Workable target_workable, bool is_aborted)
 	{
-		this.workComplete = false;
-		Workable workable = this.workable;
-		this.startWorkInfo = null;
+		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
+		component.Offset -= this.workAnimOffset;
+		this.workAnimOffset = Vector3.zero;
+		base.GetComponent<KPrefabID>().RemoveTag(GameTags.PreventChoreInterruption);
 		this.DetachAnimOverrides();
 		base.GetComponent<AnimEventHandler>().ClearContext();
 		if (this.previousStatusItem.item != null)
 		{
 			base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, this.previousStatusItem.item, this.previousStatusItem.data);
 		}
-		if (workable != null)
+		if (target_workable != null)
 		{
-			workable.StopWork(this);
+			target_workable.StopWork(this, is_aborted);
 		}
-		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
-		component.Offset -= this.workAnimOffset;
-		this.workAnimOffset = Vector3.zero;
 		if (this.smi != null)
 		{
 			this.smi.StopSM("stopping work");
@@ -122,20 +124,32 @@ public class Worker : KMonoBehaviour
 		Vector3 position = this.transform.position;
 		position.z = Grid.GetLayerZ(Grid.SceneLayer.Move);
 		this.transform.SetPosition(position);
+		this.startWorkInfo = null;
 	}
 
-	public Workable GetWorkTarget()
+	public void StopWork()
 	{
-		return this.workable;
+		if (this.state == Worker.State.PendingCompletion)
+		{
+			this.state = Worker.State.Idle;
+			this.CompleteWork();
+		}
+		else if (this.state == Worker.State.Working)
+		{
+			this.state = Worker.State.Idle;
+			this.InternalStopWork(this.workable, true);
+		}
 	}
 
 	public void StartWork(Worker.StartWorkInfo start_work_info)
 	{
 		this.startWorkInfo = start_work_info;
 		Game.Instance.StartedWork();
+		DebugUtil.Assert(this.state == Worker.State.Idle, "Assert!");
 		string name = this.workable.GetType().Name;
 		try
 		{
+			this.state = Worker.State.Working;
 			this.lastWorkTick = Time.time;
 			this.workable.StartWork(this);
 			if (this.workable == null)
@@ -144,7 +158,6 @@ public class Worker : KMonoBehaviour
 			}
 			else
 			{
-				this.workComplete = false;
 				KSelectable component = base.GetComponent<KSelectable>();
 				this.previousStatusItem = component.GetStatusItem(Db.Get().StatusItemCategories.Main);
 				component.SetStatusItem(Db.Get().StatusItemCategories.Main, this.workable.GetWorkerStatusItem(), this.workable);
@@ -153,10 +166,6 @@ public class Worker : KMonoBehaviour
 				{
 					this.smi = this.animInfo.smi;
 					this.smi.StartSM();
-				}
-				if (this.OnWorkStartCallback != null)
-				{
-					this.OnWorkStartCallback();
 				}
 				Vector3 position = this.transform.position;
 				position.z = Grid.GetLayerZ(this.workable.workLayer);
@@ -225,27 +234,6 @@ public class Worker : KMonoBehaviour
 		}
 	}
 
-	public bool HasWorkPath
-	{
-		get
-		{
-			return this.navigator.path.nodes != null;
-		}
-	}
-
-	public int TaskCost
-	{
-		get
-		{
-			return this.navigator.path.cost;
-		}
-	}
-
-	public Workable GetWorkable()
-	{
-		return this.workable;
-	}
-
 	[MyCmpReq]
 	private SnapOn snapOn;
 
@@ -258,13 +246,7 @@ public class Worker : KMonoBehaviour
 	[MyCmpReq]
 	private Effects effects;
 
-	private bool workComplete;
-
 	private float lastWorkTick;
-
-	public global::System.Action OnWorkCompleteCallback;
-
-	public global::System.Action OnWorkStartCallback;
 
 	private float workCompleteTime;
 
@@ -279,6 +261,13 @@ public class Worker : KMonoBehaviour
 	private StateMachine.Instance smi;
 
 	private Vector3 workAnimOffset = Vector3.zero;
+
+	public enum State
+	{
+		Idle,
+		Working,
+		PendingCompletion
+	}
 
 	public class StartWorkInfo
 	{

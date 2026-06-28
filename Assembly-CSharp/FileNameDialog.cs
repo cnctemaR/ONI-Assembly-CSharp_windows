@@ -7,7 +7,7 @@ public class FileNameDialog : KScreen
 {
 	public override float GetSortKey()
 	{
-		return 10f;
+		return 1000f;
 	}
 
 	protected override void OnSpawn()
@@ -73,6 +73,10 @@ public class FileNameDialog : KScreen
 		if (e.TryConsume(global::Action.Escape))
 		{
 			this.Deactivate();
+		}
+		else if (e.TryConsume(global::Action.DialogSubmit))
+		{
+			this.OnConfirm();
 		}
 		e.Consumed = true;
 	}

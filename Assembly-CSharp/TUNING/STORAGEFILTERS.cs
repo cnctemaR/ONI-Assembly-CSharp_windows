@@ -8,8 +8,11 @@ namespace TUNING
 		public static List<Tag> FOOD = new List<Tag>
 		{
 			GameTags.Edible,
-			GameTags.CookingIngredient
+			GameTags.CookingIngredient,
+			GameTags.Medicine
 		};
+
+		public static List<Tag> BAGABLE_CREATURES = new List<Tag> { GameTags.BagableCreature };
 
 		public static List<Tag> NOT_EDIBLE_SOLIDS = new List<Tag>
 		{
@@ -29,6 +32,7 @@ namespace TUNING
 			GameTags.IndustrialProduct,
 			GameTags.IndustrialIngredient,
 			GameTags.Clothes,
+			GameTags.Plastic,
 			GameTags.Other
 		};
 

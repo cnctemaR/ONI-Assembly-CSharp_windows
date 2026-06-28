@@ -21,11 +21,13 @@ public class WaterPurifierConfig : IBuildingConfig
 		buildingDef.PowerInputOffset = new CellOffset(2, 0);
 		buildingDef.UtilityInputOffset = new CellOffset(-1, 2);
 		buildingDef.UtilityOutputOffset = new CellOffset(2, 2);
+		buildingDef.PermittedRotations = PermittedRotations.FlipH;
 		return buildingDef;
 	}
 
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
+		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
 		storage.defaultStoredItemModifers = WaterPurifierConfig.StoredItemModifiers;
 		go.AddOrGet<WaterPurifier>();

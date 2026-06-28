@@ -6,7 +6,7 @@ public class ManualGeneratorConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER4;
+		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER3;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("ManualGenerator", 2, 2, "generatormanual_kanim", 200f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, tier);
 		buildingDef.GeneratorWattageRating = 400f;
 		buildingDef.GeneratorBaseCapacity = 10000f;
@@ -22,13 +22,14 @@ public class ManualGeneratorConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
+		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		go.AddOrGet<LoopingSounds>();
 		Prioritizable.AddRef(go);
 		Generator generator = go.AddOrGet<Generator>();
 		generator.powerDistributionOrder = 10;
 		ManualGenerator manualGenerator = go.AddOrGet<ManualGenerator>();
-		manualGenerator.BatteryRefillPercent = 0.5f;
+		manualGenerator.SingleSliderPercent = 0.5f;
 		manualGenerator.workLayer = Grid.SceneLayer.BuildingFront;
 		KBatchedAnimController kbatchedAnimController = go.AddOrGet<KBatchedAnimController>();
 		kbatchedAnimController.fgLayer = Grid.SceneLayer.BuildingFront;

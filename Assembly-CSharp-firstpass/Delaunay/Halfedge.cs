@@ -77,8 +77,8 @@ namespace Delaunay
 
 		internal bool IsLeftOf(Vector2 p)
 		{
-			Site rightSite = this.edge.rightSite;
-			bool flag = p.x > rightSite.x;
+			Vector2 coord = this.edge.rightSite.Coord;
+			bool flag = p.x > coord.x;
 			if (flag && this.leftRight == Side.LEFT)
 			{
 				return true;
@@ -90,8 +90,8 @@ namespace Delaunay
 			bool flag3;
 			if ((double)this.edge.a == 1.0)
 			{
-				float num = p.y - rightSite.y;
-				float num2 = p.x - rightSite.x;
+				float num = p.y - coord.y;
+				float num2 = p.x - coord.x;
 				bool flag2 = false;
 				if ((!flag && (double)this.edge.b < 0.0) || (flag && (double)this.edge.b >= 0.0))
 				{
@@ -112,7 +112,7 @@ namespace Delaunay
 				}
 				if (!flag2)
 				{
-					float num3 = rightSite.x - this.edge.leftSite.x;
+					float num3 = coord.x - this.edge.leftSite.x;
 					flag3 = (double)(this.edge.b * (num2 * num2 - num * num)) < (double)(num3 * num) * (1.0 + 2.0 * (double)num2 / (double)num3 + (double)(this.edge.b * this.edge.b));
 					if ((double)this.edge.b < 0.0)
 					{
@@ -124,8 +124,8 @@ namespace Delaunay
 			{
 				float num4 = this.edge.c - this.edge.a * p.x;
 				float num5 = p.y - num4;
-				float num6 = p.x - rightSite.x;
-				float num7 = num4 - rightSite.y;
+				float num6 = p.x - coord.x;
+				float num7 = num4 - coord.y;
 				flag3 = num5 * num5 > num6 * num6 + num7 * num7;
 			}
 			return (!(this.leftRight == Side.LEFT)) ? (!flag3) : flag3;

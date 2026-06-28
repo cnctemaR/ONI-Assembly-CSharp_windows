@@ -1,9 +1,10 @@
 ﻿using System;
-using KSerialization;
+using System.Collections.Generic;
+using STRINGS;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class SimCellOccupier : KMonoBehaviour
+public class SimCellOccupier : KMonoBehaviour, IEffectDescriptor
 {
 	public bool IsVisuallySolid
 	{
@@ -28,7 +29,8 @@ public class SimCellOccupier : KMonoBehaviour
 			if (this.doReplaceElement)
 			{
 				SimMessages.ReplaceAndDisplaceElement(offset_cell, this.primaryElement.ElementID, CellEventLogger.Instance.SimCellOccupierOnSpawn, mass_per_cell, this.primaryElement.Temperature, this.primaryElement.DiseaseIdx, this.primaryElement.DiseaseCount, callbackHandle.index);
-				SimMessages.SetStrength(offset_cell, 0, 1f);
+				callbackHandle.index = -1;
+				SimMessages.SetStrength(offset_cell, 0, this.strengthMultiplier);
 				Game.Instance.RemoveSolidChangedFilter(offset_cell);
 			}
 			else
@@ -39,7 +41,6 @@ public class SimCellOccupier : KMonoBehaviour
 			Sim.Cell.Properties simCellProperties = this.GetSimCellProperties();
 			SimMessages.SetCellProperties(offset_cell, (byte)simCellProperties);
 			Grid.RenderedByWorld[offset_cell] = false;
-			Grid.SuitRequired[offset_cell] = false;
 			Game.Instance.GetComponent<EntombedItemVisualizer>().ForceClear(offset_cell);
 		});
 	}
@@ -69,7 +70,6 @@ public class SimCellOccupier : KMonoBehaviour
 	public void DestroySelf(global::System.Action onComplete)
 	{
 		this.callDestroy = false;
-		global::UnityEngine.Debug.Assert(this.building.PlacementCells.Length == 1);
 		for (int i = 0; i < this.building.PlacementCells.Length; i++)
 		{
 			int num = this.building.PlacementCells[i];
@@ -115,7 +115,12 @@ public class SimCellOccupier : KMonoBehaviour
 
 	private void OnModifyComplete()
 	{
+		if (this == null || base.gameObject == null)
+		{
+			return;
+		}
 		this.isReady = true;
+		base.GetComponent<PrimaryElement>().SetUseSimDiseaseInfo(true);
 	}
 
 	private void ForceSetGameCellData(int cell)
@@ -126,7 +131,19 @@ public class SimCellOccupier : KMonoBehaviour
 		Pathfinding.Instance.AddDirtyNavGridCell(cell);
 		GameScenePartitioner.Instance.TriggerEvent(cell, GameScenePartitioner.Instance.solidChangedLayer, null);
 		Grid.Damage[cell] = 0f;
-		Grid.SuitRequired[cell] = false;
+	}
+
+	public List<Descriptor> GetDescriptors(BuildingDef def)
+	{
+		List<Descriptor> list = null;
+		if (this.movementSpeedMultiplier != 1f)
+		{
+			list = new List<Descriptor>();
+			Descriptor descriptor = default(Descriptor);
+			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.DUPLICANTMOVEMENTBOOST, GameUtil.GetFormattedPercent(this.movementSpeedMultiplier * 100f - 100f, GameUtil.TimeSlice.None)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.DUPLICANTMOVEMENTBOOST, GameUtil.GetFormattedPercent(this.movementSpeedMultiplier * 100f - 100f, GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Effect);
+			list.Add(descriptor);
+		}
+		return list;
 	}
 
 	[MyCmpReq]
@@ -144,13 +161,13 @@ public class SimCellOccupier : KMonoBehaviour
 	[SerializeField]
 	public bool setLiquidImpermeable;
 
+	[SerializeField]
+	public float strengthMultiplier = 1f;
+
+	[SerializeField]
+	public float movementSpeedMultiplier = 1f;
+
 	private bool isReady;
 
 	private bool callDestroy = true;
-
-	[Serialize]
-	private HashedString diseaseID;
-
-	[Serialize]
-	private int diseaseCount;
 }

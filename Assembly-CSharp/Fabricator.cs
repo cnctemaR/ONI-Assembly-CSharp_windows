@@ -297,7 +297,7 @@ public class Fabricator : Workable, IEffectDescriptor
 				}
 				if (flag)
 				{
-					machineOrder2.chore = new WorkChore<Fabricator>(this.choreType, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true);
+					machineOrder2.chore = new WorkChore<Fabricator>(this.choreType, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue);
 					if (this.workTimeRemaining <= 0f)
 					{
 						this.workTimeRemaining = this.GetWorkTime();
@@ -518,11 +518,15 @@ public class Fabricator : Workable, IEffectDescriptor
 	private void CancelAll()
 	{
 		this.buildStorage.Transfer(this.inStorage, true);
-		foreach (Fabricator.MachineOrder machineOrder in this.machineOrders)
+		while (this.machineOrders.Count > 0)
 		{
+			Fabricator.MachineOrder machineOrder = this.machineOrders[0];
 			machineOrder.Cancel();
+			if (this.machineOrders.Count > 0 && this.machineOrders[0] == machineOrder)
+			{
+				this.machineOrders.RemoveAt(0);
+			}
 		}
-		this.machineOrders.Clear();
 		base.ShowProgressBar(this.userOrders.Count > 0);
 	}
 

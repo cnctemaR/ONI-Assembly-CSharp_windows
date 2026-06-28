@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Klei.AI;
-using STRINGS;
 using TemplateClasses;
 using TMPro;
 using UnityEngine;
@@ -16,6 +15,7 @@ public class DebugBaseTemplateButton : KScreen
 		DebugBaseTemplateButton.Instance = this;
 		base.gameObject.SetActive(false);
 		this.SetupLocText();
+		this.ConsumeMouseScroll = true;
 		TMP_InputField tmp_InputField = this.nameField;
 		tmp_InputField.onFocus = (global::System.Action)Delegate.Combine(tmp_InputField.onFocus, new global::System.Action(delegate
 		{
@@ -29,6 +29,12 @@ public class DebugBaseTemplateButton : KScreen
 		{
 			Util.ScrubInputField(this.nameField, true);
 		});
+	}
+
+	protected override void OnActivate()
+	{
+		base.OnActivate();
+		this.ConsumeMouseScroll = true;
 	}
 
 	public override float GetSortKey()
@@ -95,13 +101,6 @@ public class DebugBaseTemplateButton : KScreen
 
 	private void SetupLocText()
 	{
-		this.transform.GetChild(2).GetComponent<LocText>().text = UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.TITLE;
-		this.transform.GetChild(9).GetComponent<LocText>().text = UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.SAVE_TITLE;
-		this.clearButton.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.CLEAR_BUTTON;
-		this.DestroyButton.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.DESTROY_BUTTON;
-		this.DeconstructButton.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.DECONSTRUCT_BUTTON;
-		this.clearSelectionButton.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.CLEAR_SELECTION_BUTTON;
-		this.nameField.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.DEFAULT_SAVE_NAME;
 	}
 
 	private void OnClickPasteStartingBase()
@@ -597,5 +596,5 @@ public class DebugBaseTemplateButton : KScreen
 
 	public Grid.SceneLayer visualizerLayer = Grid.SceneLayer.Move;
 
-	private List<int> SelectedCells = new List<int>();
+	public List<int> SelectedCells = new List<int>();
 }

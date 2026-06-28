@@ -1,6 +1,7 @@
 ﻿using System;
 using Klei.AI;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
@@ -47,6 +48,21 @@ public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 			base.sm.locator.Set(null, this);
 		}
 
+		public void RemoveSuitIfNecessary()
+		{
+			Equipment equipment = base.sm.recoverer.Get<Equipment>(base.smi);
+			if (equipment == null)
+			{
+				return;
+			}
+			Assignable assignable = equipment.GetAssignable(global::TUNING.EQUIPMENT.SUIT_SLOT);
+			if (assignable == null)
+			{
+				return;
+			}
+			assignable.Unassign();
+		}
+
 		public AttributeModifier recoveringbreath;
 	}
 
@@ -66,7 +82,11 @@ public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 			{
 				smi.UpdateLocator();
 			});
-			this.approach.InitializeStates(this.recoverer, this.locator, this.recover, null, null, null);
+			this.approach.InitializeStates(this.recoverer, this.locator, this.remove_suit, null, null, null);
+			this.remove_suit.Enter("RemoveSuitIfNecessary", delegate(RecoverBreathChore.StatesInstance smi)
+			{
+				smi.RemoveSuitIfNecessary();
+			}).GoTo(this.recover);
 			this.recover.DefaultState(this.recover.pre).ToggleAttributeModifier("Recovering Breath", (RecoverBreathChore.StatesInstance smi) => smi.recoveringbreath, null).ToggleTag(GameTags.RecoveringBreath);
 			this.recover.pre.PlayAnim("breathe_pre", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.recover.loop);
 			this.recover.loop.PlayAnim("breathe_loop", KAnim.PlayMode.Loop, null);
@@ -76,6 +96,8 @@ public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 		public GameStateMachine<RecoverBreathChore.States, RecoverBreathChore.StatesInstance, RecoverBreathChore, object>.ApproachSubState<Approachable> approach;
 
 		public GameStateMachine<RecoverBreathChore.States, RecoverBreathChore.StatesInstance, RecoverBreathChore, object>.PLPState recover;
+
+		public GameStateMachine<RecoverBreathChore.States, RecoverBreathChore.StatesInstance, RecoverBreathChore, object>.State remove_suit;
 
 		public StateMachine<RecoverBreathChore.States, RecoverBreathChore.StatesInstance, RecoverBreathChore, object>.TargetParameter recoverer;
 

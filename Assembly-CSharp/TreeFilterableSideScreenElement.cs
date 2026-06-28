@@ -90,17 +90,17 @@ public class TreeFilterableSideScreenElement : KMonoBehaviour
 
 	private void CheckBoxClicked()
 	{
-		this.checkBoxImg.enabled = this.checkBox.isOn;
-		if (this.OnSelectionChanged != null)
-		{
-			this.OnSelectionChanged(this.elementTag, this.checkBox.isOn);
-		}
+		this.SetCheckBox(!this.parent.IsTagAllowed(this.GetElementTag()));
 	}
 
 	public void SetCheckBox(bool checkBoxState)
 	{
 		this.checkBox.isOn = checkBoxState;
 		this.checkBoxImg.enabled = checkBoxState;
+		if (this.OnSelectionChanged != null)
+		{
+			this.OnSelectionChanged(this.GetElementTag(), checkBoxState);
+		}
 	}
 
 	[SerializeField]

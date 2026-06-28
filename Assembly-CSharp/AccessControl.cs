@@ -34,8 +34,9 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 		base.OnPrefabInit();
 		if (AccessControl.accessControlActive == null)
 		{
-			AccessControl.accessControlActive = new StatusItem("accessControlActive", BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.NAME, BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, 2046);
+			AccessControl.accessControlActive = new StatusItem("accessControlActive", BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.NAME, BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 14334);
 		}
+		this.Subscribe(279163026, new Action<object>(this.OnControlStateChanged));
 	}
 
 	[OnDeserialized]
@@ -71,6 +72,11 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 		this.SetStatusItem();
 	}
 
+	private void OnControlStateChanged(object data)
+	{
+		this.overrideAccess = (Door.ControlState)((int)data);
+	}
+
 	public void SetPermission(GameObject key, AccessControl.Permission permission)
 	{
 		this.permissions[key] = permission;
@@ -79,7 +85,16 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 
 	public AccessControl.Permission GetPermission(GameObject key)
 	{
-		return this.GetSetPermission(key);
+		Door.ControlState controlState = this.overrideAccess;
+		if (controlState == Door.ControlState.Opened)
+		{
+			return AccessControl.Permission.Both;
+		}
+		if (controlState != Door.ControlState.Closed)
+		{
+			return this.GetSetPermission(key);
+		}
+		return AccessControl.Permission.Neither;
 	}
 
 	public AccessControl.Permission GetSetPermission(GameObject key)
@@ -131,6 +146,8 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 
 	[Serialize]
 	public bool controlEnabled;
+
+	public Door.ControlState overrideAccess;
 
 	private static StatusItem accessControlActive;
 

@@ -341,7 +341,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 			this.SuspendUpdates(true);
 		}
 		this.curAnimFrameIdx = base.GetFrameIdx(this.elapsedTime, true);
-		if (this.eventManagerHandle != -1 && this.aem != null)
+		if (this.eventManagerHandle.IsValid() && this.aem != null)
 		{
 			float elapsedTime = this.aem.GetElapsedTime(this.eventManagerHandle);
 			if ((int)((this.elapsedTime - elapsedTime) * 100f) != 0)
@@ -438,25 +438,17 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 				break;
 			}
 			KAnim.Build.Symbol symbol = batchGroupData.GetSymbol(i);
+			int num4 = i - num;
 			if (this.visibleSymbols.Contains(symbol.hash))
 			{
-				this.batchInstanceData.UnsetHiddenBit(i);
+				this.batchInstanceData.UnsetHiddenBit(num4);
 			}
 			else if ((this.hiddenSymbols != null && this.hiddenSymbols.Contains(symbol.hash)) || (this.baseHiddenSymbols != null && this.baseHiddenSymbols.Contains(symbol.hash)))
 			{
-				this.batchInstanceData.SetHiddenBit(i);
+				this.batchInstanceData.SetHiddenBit(num4);
 			}
 		}
 		this.SetDirty();
-	}
-
-	public void ForceHideAll()
-	{
-		if (this.batchInstanceData != null)
-		{
-			this.batchInstanceData.HideAll();
-			this.SetDirty();
-		}
 	}
 
 	public int GetMaxVisible()
@@ -654,30 +646,6 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		return Matrix2x3.identity;
 	}
 
-	public void SetBuild(string build, KAnimHashedString symbolName)
-	{
-		for (int i = 0; i < this.animFiles.Length; i++)
-		{
-			if (this.animFiles[i].GetData().build.name == build)
-			{
-				this.curBuild = this.animFiles[i].GetData().build;
-				KAnim.Build.Symbol symbol = this.curBuild.GetSymbol(symbolName);
-				if (symbol == null)
-				{
-					symbol = this.curBuild.GetSymbolByIndex(0U);
-				}
-				this.curAnim = new KAnim.Anim(this.animFiles[i].GetData(), 0);
-				this.curAnim.firstFrameIdx = symbol.firstFrameIdx;
-				this.curAnim.numFrames = 1;
-				this.curAnimFrameIdx = symbol.GetFrameIdx(0);
-				this.dirtyBuild = true;
-				this.Initialize();
-				break;
-			}
-		}
-		this.mode = KAnim.PlayMode.Paused;
-	}
-
 	public void SetBatchGroupRenderQueueOverride()
 	{
 		if (this.batch != null)
@@ -697,9 +665,18 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 			return;
 		}
 		base.SetLayer(layer);
-		this.DeRegister();
-		base.gameObject.layer = layer;
-		this.Register();
+		if (this.batch == null || this.batch.group == null || !this.batch.group.isMultiInstance)
+		{
+			this.DeRegister();
+			base.gameObject.layer = layer;
+			this.Register();
+		}
+		else
+		{
+			base.gameObject.layer = layer;
+			this.batch.SetLayer(layer);
+			this.SetDirty();
+		}
 	}
 
 	public override void SetDirty()
@@ -757,7 +734,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		this.SetDirty();
 		this.SuspendUpdates(false);
 		this.ConfigureVisibilityListener(true);
-		if (!this.stopped && this.curAnim != null && this.mode != KAnim.PlayMode.Paused && this.eventManagerHandle == -1)
+		if (!this.stopped && this.curAnim != null && this.mode != KAnim.PlayMode.Paused && !this.eventManagerHandle.IsValid())
 		{
 			base.StartAnimEventSequence();
 		}
@@ -1072,6 +1049,10 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	private void Register()
 	{
+		if (!base.enabled)
+		{
+			return;
+		}
 		if (this.batch != null)
 		{
 			return;

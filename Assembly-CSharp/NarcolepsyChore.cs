@@ -44,7 +44,6 @@ public class NarcolepsyChore : Chore<NarcolepsyChore.StatesInstance>
 			Grid.Reserved[num] = true;
 			GameObject gameObject = ChoreHelpers.CreateLocator("SleepLocator", vector);
 			Sleepable sleepable = gameObject.AddComponent<Sleepable>();
-			sleepable.overrideAnims = new KAnimFile[] { this.GetAnims() };
 			base.sm.locator.Set(gameObject, this);
 			this.locatorCell = num;
 		}
@@ -56,10 +55,19 @@ public class NarcolepsyChore : Chore<NarcolepsyChore.StatesInstance>
 			base.sm.locator.Set(null, this);
 		}
 
-		public KAnimFile GetAnims()
+		private KAnimFile GetAnims()
 		{
 			string text = ((base.sm.sleeper.Get<Navigator>(base.smi).CurrentNavType != NavType.Ladder) ? "anim_sleep_floor_kanim" : "anim_sleep_ladder_kanim");
 			return Assets.GetAnim(text);
+		}
+
+		public void ApplyAnims()
+		{
+			Sleepable sleepable = base.sm.locator.Get<Sleepable>(base.smi);
+			if (sleepable != null)
+			{
+				sleepable.overrideAnims = new KAnimFile[] { this.GetAnims() };
+			}
 		}
 
 		private int locatorCell;
@@ -79,7 +87,11 @@ public class NarcolepsyChore : Chore<NarcolepsyChore.StatesInstance>
 				smi.DestroyLocator();
 			});
 			this.approach.InitializeStates(this.sleeper, this.locator, this.sleep, null, null, null);
-			this.sleep.DoSleep(this.sleeper, this.locator, this.pst, null).ToggleEffect("NarcolepticSleep").PlayAnim("working_pre", KAnim.PlayMode.Once, null)
+			this.sleep.Enter("ApplyAnims", delegate(NarcolepsyChore.StatesInstance smi)
+			{
+				smi.ApplyAnims();
+			}).DoSleep(this.sleeper, this.locator, this.pst, null).ToggleEffect("NarcolepticSleep")
+				.PlayAnim("working_pre", KAnim.PlayMode.Once, null)
 				.QueueAnim("working_loop", true, null);
 			this.pst.PlayAnim("working_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.success);
 			this.success.ReturnSuccess();

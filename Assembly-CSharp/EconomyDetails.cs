@@ -475,7 +475,7 @@ public class EconomyDetails
 	{
 		for (int i = 0; i < Grid.CellCount; i++)
 		{
-			if (World.Instance.zoneRenderData.worldZoneTypes[i] == SubWorld.ZoneType.Sandstone)
+			if (global::World.Instance.zoneRenderData.worldZoneTypes[i] == SubWorld.ZoneType.Sandstone)
 			{
 				Element element = Grid.Element[i];
 				float num = 0f;
@@ -560,38 +560,47 @@ public class EconomyDetails
 		scenario7.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("HydrogenGenerator", null), 1));
 		scenario7.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("PrickleFlower", null), 29));
 		list.Add(scenario7);
-		EconomyDetails.Scenario scenario8 = new EconomyDetails.Scenario("waste/outhouse", 0, null);
-		scenario8.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("Outhouse", null), 1));
-		scenario8.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("Compost", null), 1));
+		EconomyDetails.Scenario scenario8 = new EconomyDetails.Scenario("energy/petroleum_generator", 0, null);
+		scenario8.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("PetroleumGenerator", null), 1));
+		scenario8.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("OilRefinery", null), 1));
+		scenario8.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("WaterPurifier", null), 1));
+		scenario8.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("LiquidPump", null), 1));
+		scenario8.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("GasPump", null), 1));
+		scenario8.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("CO2Scrubber", null), 1));
+		scenario8.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("MethaneGenerator", null), 1));
 		list.Add(scenario8);
-		EconomyDetails.Scenario scenario9 = new EconomyDetails.Scenario("stress/massage_table", 1, null);
-		scenario9.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("MassageTable", null), 1));
-		scenario9.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("ManualGenerator", null), 1));
+		EconomyDetails.Scenario scenario9 = new EconomyDetails.Scenario("waste/outhouse", 0, null);
+		scenario9.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("Outhouse", null), 1));
+		scenario9.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("Compost", null), 1));
 		list.Add(scenario9);
-		EconomyDetails.Scenario scenario10 = new EconomyDetails.Scenario("waste/flush_toilet", 0, null);
-		scenario10.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("FlushToilet", null), 1));
-		scenario10.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("WaterPurifier", null), 1));
-		scenario10.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("LiquidPump", null), 1));
-		scenario10.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("FertilizerMaker", null), 1));
+		EconomyDetails.Scenario scenario10 = new EconomyDetails.Scenario("stress/massage_table", 1, null);
+		scenario10.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("MassageTable", null), 1));
+		scenario10.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("ManualGenerator", null), 1));
 		list.Add(scenario10);
-		EconomyDetails.Scenario scenario11 = new EconomyDetails.Scenario("stress/stress", 1, (EconomyDetails.Transformation t) => t.GetDelta(details.GetResource(new Tag(Db.Get().Amounts.Stress.deltaAttribute.Id))) != null);
+		EconomyDetails.Scenario scenario11 = new EconomyDetails.Scenario("waste/flush_toilet", 0, null);
+		scenario11.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("FlushToilet", null), 1));
+		scenario11.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("WaterPurifier", null), 1));
+		scenario11.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("LiquidPump", null), 1));
+		scenario11.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("FertilizerMaker", null), 1));
 		list.Add(scenario11);
-		EconomyDetails.Scenario scenario12 = new EconomyDetails.Scenario("food/foods", 1, (EconomyDetails.Transformation t) => t.type == details.foodTransformationType);
+		EconomyDetails.Scenario scenario12 = new EconomyDetails.Scenario("stress/stress", 1, (EconomyDetails.Transformation t) => t.GetDelta(details.GetResource(new Tag(Db.Get().Amounts.Stress.deltaAttribute.Id))) != null);
 		list.Add(scenario12);
-		EconomyDetails.Scenario scenario13 = new EconomyDetails.Scenario("food/plants", 1, (EconomyDetails.Transformation t) => t.type == details.plantTransformationType);
+		EconomyDetails.Scenario scenario13 = new EconomyDetails.Scenario("food/foods", 1, (EconomyDetails.Transformation t) => t.type == details.foodTransformationType);
 		list.Add(scenario13);
+		EconomyDetails.Scenario scenario14 = new EconomyDetails.Scenario("food/plants", 1, (EconomyDetails.Transformation t) => t.type == details.plantTransformationType);
+		list.Add(scenario14);
 		foreach (EconomyDetails.Transformation transformation in details.transformations)
 		{
 			EconomyDetails.Transformation transformation_iter = transformation;
-			EconomyDetails.Scenario scenario14 = new EconomyDetails.Scenario("transformations/" + transformation.tag.Name, 1, (EconomyDetails.Transformation t) => transformation_iter == t);
-			list.Add(scenario14);
+			EconomyDetails.Scenario scenario15 = new EconomyDetails.Scenario("transformations/" + transformation.tag.Name, 1, (EconomyDetails.Transformation t) => transformation_iter == t);
+			list.Add(scenario15);
 		}
 		foreach (EdiblesManager.FoodInfo foodInfo in FOOD.FOOD_TYPES_LIST)
 		{
-			EconomyDetails.Scenario scenario15 = new EconomyDetails.Scenario("food/" + foodInfo.Id, 0, null);
+			EconomyDetails.Scenario scenario16 = new EconomyDetails.Scenario("food/" + foodInfo.Id, 0, null);
 			Tag tag2 = TagManager.Create(foodInfo.Id, null);
-			scenario15.AddEntry(new EconomyDetails.Scenario.Entry(tag2, 1));
-			scenario15.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("Duplicant", null), 1));
+			scenario16.AddEntry(new EconomyDetails.Scenario.Entry(tag2, 1));
+			scenario16.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("Duplicant", null), 1));
 			List<Tag> list2 = new List<Tag>();
 			list2.Add(tag2);
 			while (list2.Count > 0)
@@ -603,7 +612,7 @@ public class EconomyDetails
 				{
 					foreach (Recipe.Ingredient ingredient in recipe.Ingredients)
 					{
-						scenario15.AddEntry(new EconomyDetails.Scenario.Entry(ingredient.tag, 1));
+						scenario16.AddEntry(new EconomyDetails.Scenario.Entry(ingredient.tag, 1));
 						list2.Add(ingredient.tag);
 					}
 				}
@@ -612,18 +621,18 @@ public class EconomyDetails
 					Crop component = kprefabID.GetComponent<Crop>();
 					if (component != null && component.cropVal.cropId == tag.Name)
 					{
-						scenario15.AddEntry(new EconomyDetails.Scenario.Entry(kprefabID.PrefabTag, 1));
+						scenario16.AddEntry(new EconomyDetails.Scenario.Entry(kprefabID.PrefabTag, 1));
 						list2.Add(kprefabID.PrefabTag);
 					}
 				}
 			}
-			list.Add(scenario15);
+			list.Add(scenario16);
 		}
-		foreach (EconomyDetails.Scenario scenario16 in list)
+		foreach (EconomyDetails.Scenario scenario17 in list)
 		{
-			using (StreamWriter streamWriter = new StreamWriter("assets/Tuning/Economy/" + scenario16.name + ".csv"))
+			using (StreamWriter streamWriter = new StreamWriter("assets/Tuning/Economy/" + scenario17.name + ".csv"))
 			{
-				details.DumpTransformations(scenario16, streamWriter);
+				details.DumpTransformations(scenario17, streamWriter);
 			}
 		}
 		float dupeBreathingPerSecond = details.GetDupeBreathingPerSecond(details);

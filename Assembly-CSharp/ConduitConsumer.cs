@@ -9,7 +9,7 @@ public class ConduitConsumer : KMonoBehaviour
 	{
 		get
 		{
-			GameObject gameObject = Grid.Objects[this.utilityCell, (this.conduitType != ConduitType.Gas) ? 15 : 11];
+			GameObject gameObject = Grid.Objects[this.utilityCell, (this.conduitType != ConduitType.Gas) ? 16 : 12];
 			return gameObject != null && gameObject.GetComponent<BuildingComplete>() != null;
 		}
 	}
@@ -105,7 +105,7 @@ public class ConduitConsumer : KMonoBehaviour
 	{
 		base.OnSpawn();
 		this.utilityCell = this.building.GetUtilityInputCell();
-		ScenePartitionerLayer scenePartitionerLayer = GameScenePartitioner.Instance.objectLayers[(this.conduitType != ConduitType.Gas) ? 15 : 11];
+		ScenePartitionerLayer scenePartitionerLayer = GameScenePartitioner.Instance.objectLayers[(this.conduitType != ConduitType.Gas) ? 16 : 12];
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("ConduitConsumer.OnSpawn", base.gameObject, this.utilityCell, scenePartitionerLayer, new Action<object>(this.OnConduitConnectionChanged));
 		this.GetConduitManager().AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlow.Priority.Default);
 		this.OnConduitConnectionChanged(null);

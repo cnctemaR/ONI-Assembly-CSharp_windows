@@ -16,7 +16,5 @@ public static class PathFinderQueries
 
 	public static BreathableCellQuery breathableCellQuery = new BreathableCellQuery();
 
-	public static SuitNotRequiredQuery suitNotRequiredQuery = new SuitNotRequiredQuery();
-
 	public static DrawNavGridQuery drawNavGridQuery = new DrawNavGridQuery();
 }

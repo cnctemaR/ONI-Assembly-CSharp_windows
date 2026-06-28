@@ -22,6 +22,26 @@ public class Ownable : Assignable, ISaveLoadable, IEffectDescriptor
 		return go.GetComponent<Ownables>();
 	}
 
+	public bool isAllowedToUse(GameObject duplicant)
+	{
+		return this.assignee == null || duplicant.GetComponent<Ownables>().GetSlot(base.slot).assignable == this;
+	}
+
+	public override void Assign(IAssignableIdentity new_assignee)
+	{
+		if (new_assignee == this.assignee)
+		{
+			return;
+		}
+		if (new_assignee is MinionIdentity && base.slot != null && new_assignee.GetSoleOwner().GetComponent<Ownables>().GetSlot(base.slot)
+			.assignable != null)
+		{
+			new_assignee.GetSoleOwner().GetComponent<Ownables>().GetSlot(base.slot)
+				.assignable.Unassign();
+		}
+		base.Assign(new_assignee);
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -30,7 +50,7 @@ public class Ownable : Assignable, ISaveLoadable, IEffectDescriptor
 		this.UpdateStatusString();
 	}
 
-	private void OnNewAssignment(Assignables assignables)
+	private void OnNewAssignment(IAssignableIdentity assignables)
 	{
 		this.UpdateTint();
 		this.UpdateStatusString();
@@ -41,14 +61,14 @@ public class Ownable : Assignable, ISaveLoadable, IEffectDescriptor
 		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
 		if (component != null)
 		{
-			component.TintColour = ((!(this.GetAssignables() == null)) ? this.ownedTint : this.unownedTint);
+			component.TintColour = ((this.assignee != null) ? this.ownedTint : this.unownedTint);
 		}
 		else
 		{
 			KBatchedAnimController component2 = base.GetComponent<KBatchedAnimController>();
 			if (component2 != null)
 			{
-				component2.TintColour = ((!(this.GetAssignables() == null)) ? this.ownedTint : this.unownedTint);
+				component2.TintColour = ((this.assignee != null) ? this.ownedTint : this.unownedTint);
 			}
 		}
 	}
@@ -60,10 +80,25 @@ public class Ownable : Assignable, ISaveLoadable, IEffectDescriptor
 		{
 			return;
 		}
-		StatusItem statusItem = Db.Get().BuildingStatusItems.Unassigned;
-		if (this.GetAssignables() != null)
+		StatusItem statusItem;
+		if (this.assignee != null)
 		{
-			statusItem = Db.Get().BuildingStatusItems.AssignedTo;
+			if (this.assignee is MinionIdentity)
+			{
+				statusItem = Db.Get().BuildingStatusItems.AssignedTo;
+			}
+			else if (this.assignee is Room)
+			{
+				statusItem = Db.Get().BuildingStatusItems.AssignedTo;
+			}
+			else
+			{
+				statusItem = Db.Get().BuildingStatusItems.AssignedTo;
+			}
+		}
+		else
+		{
+			statusItem = Db.Get().BuildingStatusItems.Unassigned;
 		}
 		component.SetStatusItem(Db.Get().StatusItemCategories.Main, statusItem, this);
 	}

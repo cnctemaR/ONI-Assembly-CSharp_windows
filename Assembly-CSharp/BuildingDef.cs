@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
@@ -88,43 +89,50 @@ public class BuildingDef : Def
 		return text + UIConstants.ColorSuffix;
 	}
 
-	public GameObject Create(Vector3 pos, Storage resource_storage, Recipe.Ingredient[] tags, GameObject obj)
+	public GameObject Create(Vector3 pos, Storage resource_storage, IList<Element> selected_elements, Recipe recipe, float temperature, GameObject obj)
 	{
-		if (tags != null)
+		SimUtil.DiseaseInfo diseaseInfo = SimUtil.DiseaseInfo.Invalid;
+		if (resource_storage != null)
 		{
-			foreach (Recipe.Ingredient ingredient in tags)
+			Recipe.Ingredient[] allIngredients = recipe.GetAllIngredients(selected_elements);
+			if (allIngredients != null)
 			{
-				if (resource_storage != null)
+				foreach (Recipe.Ingredient ingredient in allIngredients)
 				{
-					resource_storage.Consume(ingredient.tag, ingredient.amount);
+					SimUtil.DiseaseInfo diseaseInfo2;
+					float num;
+					resource_storage.ConsumeAndGetDisease(ingredient.tag, ingredient.amount, out diseaseInfo2, out num);
+					diseaseInfo = SimUtil.CalculateFinalDiseaseInfo(diseaseInfo, diseaseInfo2);
 				}
 			}
 		}
-		GameObject gameObject = GameUtil.KInstantiate(obj, pos, Grid.SceneLayer.Building, Folder.Buildings, null, 0);
+		GameObject gameObject = GameUtil.KInstantiate(obj, pos, this.SceneLayer, Folder.Buildings, null, 0);
+		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+		component.ElementID = selected_elements[0].id;
+		component.Temperature = temperature;
+		component.AddDisease(diseaseInfo.idx, diseaseInfo.count, "BuildingDef.Create");
 		gameObject.name = obj.name;
 		gameObject.SetActive(true);
 		return gameObject;
 	}
 
-	public GameObject Build(int cell, Orientation orientation, Storage resource_storage, IList<Element> selected_elements, bool relocated, bool playsound = true)
+	public GameObject Build(int cell, Orientation orientation, Storage resource_storage, IList<Element> selected_elements, float temperature, bool relocated, bool playsound = true)
 	{
 		Vector3 vector = Grid.CellToPosCBC(cell, this.SceneLayer);
 		GameObject gameObject;
 		if (relocated)
 		{
-			gameObject = this.Create(vector, resource_storage, this.RelocateRecipe.GetAllIngredients(selected_elements), this.BuildingComplete);
+			gameObject = this.Create(vector, resource_storage, selected_elements, this.RelocateRecipe, temperature, this.BuildingComplete);
 		}
 		else
 		{
-			gameObject = this.Create(vector, resource_storage, this.CraftRecipe.GetAllIngredients(selected_elements), this.BuildingComplete);
+			gameObject = this.Create(vector, resource_storage, selected_elements, this.CraftRecipe, temperature, this.BuildingComplete);
 		}
 		Rotatable component = gameObject.GetComponent<Rotatable>();
 		if (component != null)
 		{
 			component.SetOrientation(orientation);
 		}
-		PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
-		component2.ElementID = selected_elements[0].id;
 		this.MarkArea(cell, orientation, this.ObjectLayer, gameObject);
 		if (this.IsTilePiece)
 		{
@@ -146,7 +154,7 @@ public class BuildingDef : Def
 	public GameObject TryPlace(Vector3 pos, Orientation orientation, IList<Element> selected_elements, int layer = 0, bool relocated = false)
 	{
 		GameObject gameObject = null;
-		if (this.IsValidPlaceLocation(pos, orientation))
+		if (this.IsValidPlaceLocation(null, pos, orientation))
 		{
 			gameObject = this.Instantiate(pos, orientation, selected_elements, layer, relocated);
 		}
@@ -164,7 +172,7 @@ public class BuildingDef : Def
 		return gameObject;
 	}
 
-	private bool IsAreaClear(int cell, Orientation orientation, ObjectLayer layer, ObjectLayer tile_layer)
+	private bool IsAreaClear(GameObject source_go, int cell, Orientation orientation, ObjectLayer layer, ObjectLayer tile_layer)
 	{
 		BuildLocationRule buildLocationRule = this.BuildLocationRule;
 		if (buildLocationRule == BuildLocationRule.Conduit)
@@ -193,7 +201,7 @@ public class BuildingDef : Def
 			}
 			if (this.BuildLocationRule == BuildLocationRule.Tile)
 			{
-				GameObject gameObject = Grid.Objects[cell, 20];
+				GameObject gameObject = Grid.Objects[cell, 21];
 				if (gameObject != null)
 				{
 					Building component = gameObject.GetComponent<Building>();
@@ -205,7 +213,8 @@ public class BuildingDef : Def
 			}
 			return this.IsValidConduitLocation(cell, orientation);
 		}
-		return Grid.Objects[cell, 9] == null;
+		GameObject gameObject2 = Grid.Objects[cell, 9];
+		return gameObject2 == null || gameObject2 == source_go;
 	}
 
 	public void RunOnArea(int cell, Orientation orientation, Action<int> callback)
@@ -240,12 +249,12 @@ public class BuildingDef : Def
 			{
 				if (conduitType == ConduitType.Liquid)
 				{
-					Grid.Objects[num2, 18] = go;
+					Grid.Objects[num2, 19] = go;
 				}
 			}
 			else
 			{
-				Grid.Objects[num2, 14] = go;
+				Grid.Objects[num2, 15] = go;
 			}
 		}
 		if (this.OutputConduitType != ConduitType.None)
@@ -257,12 +266,12 @@ public class BuildingDef : Def
 			{
 				if (conduitType == ConduitType.Liquid)
 				{
-					Grid.Objects[num3, 18] = go;
+					Grid.Objects[num3, 19] = go;
 				}
 			}
 			else
 			{
-				Grid.Objects[num3, 14] = go;
+				Grid.Objects[num3, 15] = go;
 			}
 		}
 	}
@@ -288,12 +297,12 @@ public class BuildingDef : Def
 			{
 				if (conduitType == ConduitType.Liquid)
 				{
-					Grid.Objects[num2, 18] = null;
+					Grid.Objects[num2, 19] = null;
 				}
 			}
 			else
 			{
-				Grid.Objects[num2, 14] = null;
+				Grid.Objects[num2, 15] = null;
 			}
 		}
 		if (this.OutputConduitType != ConduitType.None)
@@ -305,12 +314,12 @@ public class BuildingDef : Def
 			{
 				if (conduitType == ConduitType.Liquid)
 				{
-					Grid.Objects[num3, 18] = null;
+					Grid.Objects[num3, 19] = null;
 				}
 			}
 			else
 			{
-				Grid.Objects[num3, 14] = null;
+				Grid.Objects[num3, 15] = null;
 			}
 		}
 	}
@@ -325,19 +334,19 @@ public class BuildingDef : Def
 		return Vector3.right * (0.5f * (float)((this.WidthInCells + 1) % 2));
 	}
 
-	public bool IsValidPlaceLocation(Vector3 pos, Orientation orientation)
+	public bool IsValidPlaceLocation(GameObject go, Vector3 pos, Orientation orientation)
 	{
 		int num = Grid.PosToCell(pos);
-		return Grid.IsValidCell(num) && this.IsAreaClear(num, orientation, this.ObjectLayer, this.TileLayer);
+		return Grid.IsValidCell(num) && this.IsAreaClear(go, num, orientation, this.ObjectLayer, this.TileLayer);
 	}
 
-	public bool IsValidBuildLocation(Vector3 pos, Orientation orientation)
+	public bool IsValidBuildLocation(GameObject source_go, Vector3 pos, Orientation orientation)
 	{
 		string empty = string.Empty;
-		return this.IsValidBuildLocation(pos, orientation, out empty);
+		return this.IsValidBuildLocation(source_go, pos, orientation, out empty);
 	}
 
-	public bool IsValidBuildLocation(Vector3 pos, Orientation orientation, out string reason)
+	public bool IsValidBuildLocation(GameObject source_go, Vector3 pos, Orientation orientation, out string reason)
 	{
 		int num = Grid.PosToCell(pos);
 		if (!Grid.IsValidCell(num))
@@ -345,10 +354,10 @@ public class BuildingDef : Def
 			reason = "Invalid cell";
 			return false;
 		}
-		return this.IsValidBuildLocation(num, orientation, out reason);
+		return this.IsValidBuildLocation(source_go, num, orientation, out reason);
 	}
 
-	public bool IsValidBuildLocation(int cell, Orientation orientation, out string reason)
+	public bool IsValidBuildLocation(GameObject source_go, int cell, Orientation orientation, out string reason)
 	{
 		if (!Grid.IsValidCell(cell))
 		{
@@ -399,7 +408,7 @@ public class BuildingDef : Def
 		case BuildLocationRule.Tile:
 		{
 			flag = true;
-			GameObject gameObject = Grid.Objects[cell, 20];
+			GameObject gameObject = Grid.Objects[cell, 21];
 			if (gameObject != null)
 			{
 				Building component = gameObject.GetComponent<Building>();
@@ -411,8 +420,26 @@ public class BuildingDef : Def
 			break;
 		}
 		case BuildLocationRule.NotInTiles:
-			flag = Grid.Objects[cell, 9] == null;
+		{
+			GameObject gameObject2 = Grid.Objects[cell, 9];
+			flag = gameObject2 == null || gameObject2 == source_go;
 			break;
+		}
+		case BuildLocationRule.BuildingAttachPoint:
+		{
+			flag = false;
+			GameObject gameObject3 = Grid.Objects[cell, 1];
+			if (gameObject3 != null && Grid.PosToCell(gameObject3) == cell)
+			{
+				BuildingAttachPoint component2 = gameObject3.GetComponent<BuildingAttachPoint>();
+				if (component2 != null && component2.AcceptsAttachment(this.AttachableBuildingType))
+				{
+					flag = true;
+				}
+			}
+			reason = string.Format(UI.TOOLTIPS.HELP_BUILDLOCATION_ATTACHPOINT, this.AttachableBuildingType);
+			break;
+		}
 		}
 		return flag;
 	}
@@ -429,12 +456,12 @@ public class BuildingDef : Def
 			{
 				if (conduitType == ConduitType.Liquid)
 				{
-					flag = flag && Grid.Objects[num, 18] == null;
+					flag = flag && Grid.Objects[num, 19] == null;
 				}
 			}
 			else
 			{
-				flag = flag && Grid.Objects[num, 14] == null;
+				flag = flag && Grid.Objects[num, 15] == null;
 			}
 		}
 		if (this.OutputConduitType != ConduitType.None)
@@ -446,12 +473,12 @@ public class BuildingDef : Def
 			{
 				if (conduitType == ConduitType.Liquid)
 				{
-					flag = flag && Grid.Objects[num2, 18] == null;
+					flag = flag && Grid.Objects[num2, 19] == null;
 				}
 			}
 			else
 			{
-				flag = flag && Grid.Objects[num2, 14] == null;
+				flag = flag && Grid.Objects[num2, 15] == null;
 			}
 		}
 		return flag;
@@ -524,6 +551,10 @@ public class BuildingDef : Def
 		}
 		KAnim.Build.SymbolFrame symbolFrame = symbol.GetFrame(frameElement.frame).symbolFrame;
 		Texture2D texture = build.GetTexture(0);
+		if (texture == null)
+		{
+			global::Debug.LogError("Missing build texture for:" + base.name, null);
+		}
 		float x = symbolFrame.uv0.x;
 		float x2 = symbolFrame.uv1.x;
 		float y = symbolFrame.uv2.y;
@@ -670,6 +701,8 @@ public class BuildingDef : Def
 
 	public bool Replaceable = true;
 
+	public bool Invincible;
+
 	public bool Overheatable = true;
 
 	public bool Repairable = true;
@@ -791,15 +824,21 @@ public class BuildingDef : Def
 
 	public TextureAtlas BlockTilePlaceAtlas;
 
+	public TextureAtlas BlockTileShineAtlas;
+
 	public Material BlockTileMaterial;
 
 	public BlockTileDecorInfo DecorBlockTileInfo;
 
 	public BlockTileDecorInfo DecorPlaceBlockTileInfo;
 
-	public List<Klei.AI.Attribute> attributes = new List<Klei.AI.Attribute>();
+	public List<global::Klei.AI.Attribute> attributes = new List<global::Klei.AI.Attribute>();
 
 	public List<AttributeModifier> attributeModifiers = new List<AttributeModifier>();
+
+	public Tag AttachableBuildingType;
+
+	public bool PreventIdlingInFrontOfBuilding;
 
 	public GameObject BuildingComplete;
 

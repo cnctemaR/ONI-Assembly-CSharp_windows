@@ -31,7 +31,7 @@ public class Tutorial : KMonoBehaviour
 	{
 		if (this.tutorialMessagesRemaining.Count == 0)
 		{
-			for (int i = 0; i <= 14; i++)
+			for (int i = 0; i <= 15; i++)
 			{
 				this.tutorialMessagesRemaining.Add((Tutorial.TutorialMessages)i);
 			}
@@ -143,6 +143,9 @@ public class Tutorial : KMonoBehaviour
 			break;
 		case Tutorial.TutorialMessages.TM_DiseaseCooking:
 			message = new GenericMessage(MISC.NOTIFICATIONS.DISEASE_COOKING.NAME, MISC.NOTIFICATIONS.DISEASE_COOKING.MESSAGEBODY, MISC.NOTIFICATIONS.DISEASE_COOKING.TOOLTIP);
+			break;
+		case Tutorial.TutorialMessages.TM_Suits:
+			message = new GenericMessage(MISC.NOTIFICATIONS.SUITS.NAME, MISC.NOTIFICATIONS.SUITS.MESSAGEBODY, MISC.NOTIFICATIONS.SUITS.TOOLTIP);
 			break;
 		}
 		this.tutorialMessagesRemaining.Remove(tm);
@@ -391,6 +394,7 @@ public class Tutorial : KMonoBehaviour
 		TM_LotsOfGerms,
 		TM_BeingInfected,
 		TM_DiseaseCooking,
+		TM_Suits,
 		TM_COUNT
 	}
 

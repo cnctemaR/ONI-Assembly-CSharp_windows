@@ -75,7 +75,7 @@ public class InterfaceTool : KMonoBehaviour
 		{
 			return;
 		}
-		if (OverlayScreen.Instance != null && this.viewMode != new_tool.viewMode && this.viewMode != SimViewMode.Ignore)
+		if (OverlayScreen.Instance != null && this.viewMode != SimViewMode.Ignore && new_tool.viewMode != SimViewMode.Ignore && this.viewMode != new_tool.viewMode)
 		{
 			OverlayScreen.Instance.ToggleOverlay(SimViewMode.None);
 		}

@@ -17,16 +17,10 @@ public class TileVisualizer
 		if (gameObject != null)
 		{
 			World.Instance.blockTileRenderer.Rebuild(tile_layer, cell);
-			KAnimGridTileVisualizer componentInChildren = gameObject.GetComponentInChildren<KAnimGridTileVisualizer>();
+			KAnimGraphTileVisualizer componentInChildren = gameObject.GetComponentInChildren<KAnimGraphTileVisualizer>();
 			if (componentInChildren != null)
 			{
 				componentInChildren.Refresh();
-				return;
-			}
-			KAnimGraphTileVisualizer componentInChildren2 = gameObject.GetComponentInChildren<KAnimGraphTileVisualizer>();
-			if (componentInChildren2 != null)
-			{
-				componentInChildren2.Refresh();
 				return;
 			}
 		}

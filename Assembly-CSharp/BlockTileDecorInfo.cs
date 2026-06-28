@@ -17,7 +17,13 @@ public class BlockTileDecorInfo : ScriptableObject
 						bool flag = false;
 						foreach (TextureAtlas.Item item in this.atlas.items)
 						{
-							if (this.decor[i].variants[j].name == item.name)
+							string text = item.name;
+							int num = text.IndexOf("/");
+							if (num != -1)
+							{
+								text = text.Substring(num + 1);
+							}
+							if (this.decor[i].variants[j].name == text)
 							{
 								this.decor[i].variants[j].atlasItem = item;
 								flag = true;
@@ -44,6 +50,8 @@ public class BlockTileDecorInfo : ScriptableObject
 	}
 
 	public TextureAtlas atlas;
+
+	public TextureAtlas atlasSpec;
 
 	public int sortOrder;
 

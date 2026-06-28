@@ -23,6 +23,7 @@ public class LiquidPumpingStationConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
 		go.AddOrGet<LoopingSounds>();
+		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		LiquidPumpingStation liquidPumpingStation = go.AddOrGet<LiquidPumpingStation>();
 		liquidPumpingStation.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_waterpump_kanim") };
 		Storage storage = go.AddOrGet<Storage>();

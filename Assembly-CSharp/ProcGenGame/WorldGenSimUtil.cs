@@ -10,7 +10,7 @@ namespace ProcGenGame
 {
 	public static class WorldGenSimUtil
 	{
-		public unsafe static bool DoSettleSim(Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dcs, WorldGen.OfflineCallbackFunction updateProgressFn, Data data, List<KeyValuePair<Vector2I, TemplateContainer>> templateSpawnTargets)
+		public unsafe static bool DoSettleSim(Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dcs, WorldGen.OfflineCallbackFunction updateProgressFn, Data data, List<KeyValuePair<Vector2I, TemplateContainer>> templateSpawnTargets, Action<OfflineWorldGen.ErrorInfo> error_cb)
 		{
 			Sim.SIM_Initialize(null);
 			SimMessages.CreateSimElementsTable(ElementLoader.elements);
@@ -110,13 +110,14 @@ namespace ProcGenGame
 					}
 				}
 			}
-			WorldGenSimUtil.SaveSim(data);
+			bool flag2 = WorldGenSimUtil.SaveSim(data, error_cb);
 			Sim.Shutdown();
-			return true;
+			return flag2;
 		}
 
-		private static void SaveSim(Data data)
+		private static bool SaveSim(Data data, Action<OfflineWorldGen.ErrorInfo> error_cb)
 		{
+			bool flag;
 			try
 			{
 				Manager.Clear();
@@ -158,11 +159,19 @@ namespace ProcGenGame
 						binaryWriter3.Write(memoryStream2.ToArray());
 					}
 				}
+				flag = true;
 			}
 			catch (Exception ex2)
 			{
+				error_cb(new OfflineWorldGen.ErrorInfo
+				{
+					errorDesc = string.Format(UI.FRONTEND.SUPPORTWARNINGS.SAVE_DIRECTORY_READ_ONLY, WorldGen.SIM_SAVE_FILENAME),
+					exception = ex2
+				});
 				Output.LogError(new object[] { "Couldn't write", ex2.Message, ex2.StackTrace });
+				flag = false;
 			}
+			return flag;
 		}
 	}
 }

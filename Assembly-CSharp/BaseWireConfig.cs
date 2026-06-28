@@ -58,7 +58,7 @@ public abstract class BaseWireConfig : IBuildingConfig
 		component.MaxWattageRating = rating;
 		float maxWattageAsFloat = Wire.GetMaxWattageAsFloat(rating);
 		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.MAX_WATTAGE, GameUtil.GetFormattedWattage(maxWattageAsFloat, "F1")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.MAX_WATTAGE, new object[0]), Descriptor.DescriptorType.Effect);
+		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.MAX_WATTAGE, GameUtil.GetFormattedWattage(maxWattageAsFloat, GameUtil.WattageFormatterUnit.Automatic)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.MAX_WATTAGE, new object[0]), Descriptor.DescriptorType.Effect);
 		Building component2 = go.GetComponent<Building>();
 		BuildingDef def = component2.Def;
 		if (def.EffectDescription == null)

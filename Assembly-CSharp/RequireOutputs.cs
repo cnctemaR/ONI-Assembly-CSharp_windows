@@ -130,7 +130,7 @@ public class RequireOutputs : KMonoBehaviour
 
 	private bool IsConnected(int cell)
 	{
-		GameObject gameObject = Grid.Objects[cell, (this.conduitType != ConduitType.Gas) ? 15 : 11];
+		GameObject gameObject = Grid.Objects[cell, (this.conduitType != ConduitType.Gas) ? 16 : 12];
 		return gameObject != null && gameObject.GetComponent<BuildingComplete>() != null;
 	}
 

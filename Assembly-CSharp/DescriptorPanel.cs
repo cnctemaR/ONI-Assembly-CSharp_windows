@@ -31,5 +31,5 @@ public class DescriptorPanel : KMonoBehaviour
 		}
 	}
 
-	private List<GameObject> labels = new List<GameObject>();
+	public List<GameObject> labels = new List<GameObject>();
 }

@@ -19,25 +19,29 @@ public class UnitConfigurationScreen : KModalScreen
 		this.fahrenheitToggle.GetComponentInChildren<ToolTip>().toolTip = UI.FRONTEND.UNIT_OPTIONS_SCREEN.FAHRENHEIT_TOOLTIP;
 		this.fahrenheitToggle.GetComponentInChildren<KButton>().onClick += this.OnFahrenheitClicked;
 		this.fahrenheitToggle.GetComponentInChildren<LocText>().text = UI.FRONTEND.UNIT_OPTIONS_SCREEN.FAHRENHEIT;
+		this.DisplayCurrentUnit();
+		this.closeButton.onClick += this.Deactivate;
+		this.doneButton.onClick += this.Deactivate;
+	}
+
+	private void DisplayCurrentUnit()
+	{
 		switch (KPlayerPrefs.GetInt(UnitConfigurationScreen.TemperatureUnitKey, 0))
 		{
 		case 0:
-			this.celsiusToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(true);
-			this.kelvinToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
-			this.fahrenheitToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
-			goto IL_02A4;
+			this.celsiusToggle.GetComponent<HierarchyReferences>().GetReference("Checkmark").gameObject.SetActive(true);
+			this.kelvinToggle.GetComponent<HierarchyReferences>().GetReference("Checkmark").gameObject.SetActive(false);
+			this.fahrenheitToggle.GetComponent<HierarchyReferences>().GetReference("Checkmark").gameObject.SetActive(false);
+			return;
 		case 2:
-			this.celsiusToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
-			this.kelvinToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(true);
-			this.fahrenheitToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
-			goto IL_02A4;
+			this.celsiusToggle.GetComponent<HierarchyReferences>().GetReference("Checkmark").gameObject.SetActive(false);
+			this.kelvinToggle.GetComponent<HierarchyReferences>().GetReference("Checkmark").gameObject.SetActive(true);
+			this.fahrenheitToggle.GetComponent<HierarchyReferences>().GetReference("Checkmark").gameObject.SetActive(false);
+			return;
 		}
-		this.celsiusToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
-		this.kelvinToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
-		this.fahrenheitToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(true);
-		IL_02A4:
-		this.closeButton.onClick += this.Deactivate;
-		this.doneButton.onClick += this.Deactivate;
+		this.celsiusToggle.GetComponent<HierarchyReferences>().GetReference("Checkmark").gameObject.SetActive(false);
+		this.kelvinToggle.GetComponent<HierarchyReferences>().GetReference("Checkmark").gameObject.SetActive(false);
+		this.fahrenheitToggle.GetComponent<HierarchyReferences>().GetReference("Checkmark").gameObject.SetActive(true);
 	}
 
 	public override void OnKeyDown(KButtonEvent e)
@@ -56,27 +60,21 @@ public class UnitConfigurationScreen : KModalScreen
 	{
 		GameUtil.temperatureUnit = GameUtil.TemperatureUnit.Celsius;
 		KPlayerPrefs.SetInt(UnitConfigurationScreen.TemperatureUnitKey, GameUtil.temperatureUnit.GetHashCode());
-		this.celsiusToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(true);
-		this.kelvinToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
-		this.fahrenheitToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
+		this.DisplayCurrentUnit();
 	}
 
 	private void OnKelvinClicked()
 	{
 		GameUtil.temperatureUnit = GameUtil.TemperatureUnit.Kelvin;
 		KPlayerPrefs.SetInt(UnitConfigurationScreen.TemperatureUnitKey, GameUtil.temperatureUnit.GetHashCode());
-		this.celsiusToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
-		this.kelvinToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(true);
-		this.fahrenheitToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
+		this.DisplayCurrentUnit();
 	}
 
 	private void OnFahrenheitClicked()
 	{
 		GameUtil.temperatureUnit = GameUtil.TemperatureUnit.Fahrenheit;
 		KPlayerPrefs.SetInt(UnitConfigurationScreen.TemperatureUnitKey, GameUtil.temperatureUnit.GetHashCode());
-		this.celsiusToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
-		this.kelvinToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(false);
-		this.fahrenheitToggle.transform.GetChild(0).GetChild(0).gameObject.SetActive(true);
+		this.DisplayCurrentUnit();
 	}
 
 	[SerializeField]

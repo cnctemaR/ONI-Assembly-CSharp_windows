@@ -18,14 +18,12 @@ public class LightBugConfig : IEntityConfig
 		Light2D light2D = gameObject.AddOrGet<Light2D>();
 		light2D.overlayColour = LIGHT2D.LIGHTBUG_OVERLAYCOLOR;
 		light2D.Color = LIGHT2D.LIGHTBUG_COLOR;
-		light2D.Intensity = 0.5f;
 		light2D.Range = 5f;
 		light2D.Angle = 0f;
 		light2D.Direction = LIGHT2D.LIGHTBUG_DIRECTION;
 		light2D.Offset = LIGHT2D.LIGHTBUG_OFFSET;
 		light2D.shape = LightShape.Circle;
 		light2D.drawOverlay = true;
-		SoundEventVolumeCache.instance.AddVolume("shockworm_kanim", "Shockworm_attack_arc", NOISE_POLLUTION.CREATURES.TIER6);
 		return gameObject;
 	}
 

@@ -146,7 +146,7 @@ public class FishingStation : Harvestable
 	{
 		if (this.chore == null)
 		{
-			this.chore = new WorkChore<FishingStation>(Db.Get().ChoreTypes.Harvest, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true);
+			this.chore = new WorkChore<FishingStation>(Db.Get().ChoreTypes.Harvest, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue);
 			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.PendingFish, null);
 		}
 		this.isMarkedForHarvest = true;

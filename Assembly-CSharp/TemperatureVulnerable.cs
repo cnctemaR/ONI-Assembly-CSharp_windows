@@ -93,7 +93,6 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		float num = this.internalTemperatureWarning_Low + 0.5f * (this.internalTemperatureWarning_High - this.internalTemperatureWarning_Low);
 		base.smi.sm.internalTemp.Set(this.primaryElement.Temperature, base.smi);
 		this.handle = GameScheduler.Instance.SchedulePeriodic("TemperatureVulnerable", 1f, new Action<object>(this.UpdateTemperature), null, null, 0f, null);
 		base.smi.StartSM();

@@ -65,7 +65,7 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 			this.CompleteChore();
 		};
 		KAnimFile anim = Assets.GetAnim("anim_interacts_clothingfactory_kanim");
-		this.chore = new WorkChore<Workable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, action, null, null, true, null, true, default(Tag), anim, false, true, true);
+		this.chore = new WorkChore<Workable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, action, null, null, true, null, true, default(Tag), anim, false, true, true, int.MaxValue);
 		this.OnRefreshUserMenu(null);
 	}
 

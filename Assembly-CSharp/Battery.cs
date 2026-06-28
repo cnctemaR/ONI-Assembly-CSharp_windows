@@ -73,7 +73,8 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEnergyProducer, IEffect
 	{
 		get
 		{
-			return this.connectionStatus != CircuitManager.ConnectionStatus.NotConnected;
+			GameObject gameObject = Grid.Objects[this.PowerCell, 20];
+			return gameObject != null;
 		}
 	}
 

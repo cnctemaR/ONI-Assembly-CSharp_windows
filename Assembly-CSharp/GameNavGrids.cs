@@ -7,6 +7,7 @@ public class GameNavGrids
 	{
 		this.CreateDuplicantNavigation(pathfinding);
 		this.CreateHatchNavigation(pathfinding);
+		this.CreateFloaterNavigation(pathfinding);
 		this.FlyerGrid1x1 = this.CreateFlyerNavigation(pathfinding, "FlyerNavGrid1x1", new CellOffset[]
 		{
 			new CellOffset(0, 0)
@@ -193,6 +194,99 @@ public class GameNavGrids
 		pathfinding.AddNavGrid(this.HatchGrid);
 	}
 
+	private void CreateFloaterNavigation(Pathfinding pathfinding)
+	{
+		CellOffset[] array = new CellOffset[]
+		{
+			new CellOffset(0, 0)
+		};
+		NavGrid.Transition[] array2 = new NavGrid.Transition[]
+		{
+			new NavGrid.Transition(NavType.Hover, NavType.Hover, 1, 0, true, true, 1, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Hover, 1, -1)
+			}),
+			new NavGrid.Transition(NavType.Hover, NavType.Hover, 1, 1, false, true, 1, string.Empty, new CellOffset[]
+			{
+				new CellOffset(0, 1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Hover, 1, 0)
+			}),
+			new NavGrid.Transition(NavType.Hover, NavType.Hover, 1, -1, false, true, 1, string.Empty, new CellOffset[]
+			{
+				new CellOffset(1, 0)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Hover, 1, -2)
+			}),
+			new NavGrid.Transition(NavType.Hover, NavType.Hover, 0, 1, false, true, 1, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Hover, 0, 0)
+			}),
+			new NavGrid.Transition(NavType.Hover, NavType.Hover, 0, -1, false, true, 1, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Hover, 0, -2)
+			}),
+			new NavGrid.Transition(NavType.Hover, NavType.Hover, 2, 1, false, true, 3, string.Empty, new CellOffset[]
+			{
+				new CellOffset(1, 0),
+				new CellOffset(1, 1),
+				new CellOffset(1, -1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Hover, 2, 0)
+			}),
+			new NavGrid.Transition(NavType.Hover, NavType.Hover, 2, 0, false, true, 3, string.Empty, new CellOffset[]
+			{
+				new CellOffset(1, 0),
+				new CellOffset(1, -1),
+				new CellOffset(1, 1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Hover, 2, -1)
+			}),
+			new NavGrid.Transition(NavType.Hover, NavType.Hover, 2, -1, false, true, 3, string.Empty, new CellOffset[]
+			{
+				new CellOffset(1, 0),
+				new CellOffset(1, -1),
+				new CellOffset(1, -2)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Hover, 2, -2)
+			}),
+			new NavGrid.Transition(NavType.Hover, NavType.Hover, 1, 2, false, true, 3, string.Empty, new CellOffset[]
+			{
+				new CellOffset(0, 1),
+				new CellOffset(0, 2)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Hover, 1, 1)
+			}),
+			new NavGrid.Transition(NavType.Hover, NavType.Hover, 1, -2, false, true, 3, string.Empty, new CellOffset[]
+			{
+				new CellOffset(1, 0),
+				new CellOffset(1, -1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[]
+			{
+				new NavOffset(NavType.Hover, 1, -3)
+			}),
+			new NavGrid.Transition(NavType.Hover, NavType.Hover, 0, -1, false, true, 4, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Swim, NavType.Swim, 0, 1, false, true, 4, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Swim, NavType.Hover, 0, 1, false, true, 4, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0])
+		};
+		NavGrid.Transition[] array3 = this.MirrorTransitions(array2);
+		Dictionary<NavType, string> dictionary = new Dictionary<NavType, string>();
+		dictionary[NavType.Hover] = "idle_default";
+		dictionary[NavType.Swim] = "idle_default";
+		this.FloaterGrid = new NavGrid("FloaterNavGrid", array3, dictionary, array, new NavTableValidator[]
+		{
+			new GameNavGrids.HoverValidator(),
+			new GameNavGrids.SwimValidator()
+		});
+		pathfinding.AddNavGrid(this.FloaterGrid);
+	}
+
 	private NavGrid CreateFlyerNavigation(Pathfinding pathfinding, string id, CellOffset[] bounding_offsets)
 	{
 		NavGrid.Transition[] array = new NavGrid.Transition[]
@@ -292,6 +386,8 @@ public class GameNavGrids
 	public NavGrid DuplicantGrid;
 
 	public NavGrid HatchGrid;
+
+	public NavGrid FloaterGrid;
 
 	public NavGrid FlyerGrid1x2;
 

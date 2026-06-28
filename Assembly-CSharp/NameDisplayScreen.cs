@@ -26,14 +26,6 @@ public class NameDisplayScreen : KScreen
 		{
 			this.RegisterComponent(equipment.gameObject, equipment);
 		}, null);
-		foreach (SuffocationMonitor.Instance instance in Components.SuffocationMonitorInstance)
-		{
-			this.RegisterComponent(instance.gameObject, instance);
-		}
-		Components.SuffocationMonitorInstance.Register(delegate(SuffocationMonitor.Instance SuffocationMonitorInstance)
-		{
-			this.RegisterComponent(SuffocationMonitorInstance.gameObject, SuffocationMonitorInstance);
-		}, null);
 	}
 
 	protected override void OnPrefabInit()
@@ -102,7 +94,7 @@ public class NameDisplayScreen : KScreen
 			entry.healthBar = health.healthBar;
 			gameObject.transform.FindChild("Bar").GetComponent<Image>().color = ProgressBarsConfig.Instance.GetBarColor("HealthBar");
 		}
-		else if (Component is SuffocationMonitor.Instance)
+		else if (Component is OxygenBreather)
 		{
 			GameObject gameObject2 = Util.KInstantiateUI(ProgressBarsConfig.Instance.progressBarUIPrefab, transform.gameObject, false);
 			entry.breathBar = gameObject2.GetComponent<ProgressBar>();
@@ -226,12 +218,6 @@ public class NameDisplayScreen : KScreen
 		}
 		entry.suitBar.SetUpdateFunc(updatePercentFull);
 		entry.suitBar.gameObject.SetActive(bVisible);
-	}
-
-	public void SetSuitTankDisplayState(bool state, GameObject minion_go)
-	{
-		NameDisplayScreen.Entry entry = this.GetEntry(minion_go);
-		entry.suitBar.gameObject.SetActive(state);
 	}
 
 	private NameDisplayScreen.Entry GetEntry(GameObject worldObject)

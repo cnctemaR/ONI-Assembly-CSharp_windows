@@ -12,6 +12,8 @@ namespace STRINGS
 
 		public static LocString POSITIVE_FORMAT = "+{0}";
 
+		public static LocString NEGATIVE_FORMAT = "-{0}";
+
 		public static LocString SPEED_SLOW = "SLOW";
 
 		public static LocString SPEED_MEDIUM = "MEDIUM";
@@ -189,11 +191,20 @@ namespace STRINGS
 
 						public static class LEVELS
 						{
+							public static class COMPROMISED
+							{
+								public static LocString NAME = "Miserable";
+
+								public static LocString TOOLTIP = "Duplicants are exceptionally vulnerable to infection";
+
+								public static LocString ATTRIBUTE_MODIFIER_NAME = "Vulnerable Immune System";
+							}
+
 							public static class WEAK
 							{
 								public static LocString NAME = "Weak";
 
-								public static LocString TOOLTIP = "Duplicant immune recovery is reduced";
+								public static LocString TOOLTIP = "Duplicants have reduced immune recovery";
 
 								public static LocString ATTRIBUTE_MODIFIER_NAME = "Weak Immune System";
 							}
@@ -209,11 +220,27 @@ namespace STRINGS
 							{
 								public static LocString NAME = "Strong";
 
-								public static LocString TOOLTIP = "Duplicant immune recovery is increased";
+								public static LocString TOOLTIP = "Duplicants have increased immune recovery";
 
 								public static LocString ATTRIBUTE_MODIFIER_NAME = "Strong Immune System";
 							}
+
+							public static class INVINCIBLE
+							{
+								public static LocString NAME = "Impervious";
+
+								public static LocString TOOLTIP = "Duplicants will never catch a germ-based disease";
+
+								public static LocString ATTRIBUTE_MODIFIER_NAME = "Impervious Immune System";
+							}
 						}
+					}
+
+					public class WORLD_CHOICE
+					{
+						public static LocString NAME = "World(DEBUG)";
+
+						public static LocString TOOLTIP = "(DEBUG FEATURE) Select your starting world.";
 					}
 
 					public class STRESS
@@ -224,6 +251,15 @@ namespace STRINGS
 
 						public static class LEVELS
 						{
+							public static class INDOMITABLE
+							{
+								public static LocString NAME = "Unflappable";
+
+								public static LocString TOOLTIP = "Duplicants will never get stressed";
+
+								public static LocString ATTRIBUTE_MODIFIER_NAME = "Unflappable";
+							}
+
 							public static class OPTIMISTIC
 							{
 								public static LocString NAME = "Optimistic";
@@ -248,7 +284,47 @@ namespace STRINGS
 
 								public static LocString ATTRIBUTE_MODIFIER_NAME = "Pessimistic";
 							}
+
+							public static class DOOMED
+							{
+								public static LocString NAME = "Fatalistic";
+
+								public static LocString TOOLTIP = "Duplicants stress out at an extremely accelerated rate";
+
+								public static LocString ATTRIBUTE_MODIFIER_NAME = "Fatalistic";
+							}
 						}
+					}
+
+					public class STRESS_BREAKS
+					{
+						public static LocString NAME = "Stress Responses";
+
+						public static LocString TOOLTIP = "Whether or not your Duplicants act out when they reach maximum stress";
+
+						public static class LEVELS
+						{
+							public static class DEFAULT
+							{
+								public static LocString NAME = "Normal";
+
+								public static LocString TOOLTIP = "Duplicants will act out when they reach 100% stress";
+							}
+
+							public static class DISABLED
+							{
+								public static LocString NAME = "Disabled";
+
+								public static LocString TOOLTIP = "Duplicants will not act out at maximum stress";
+							}
+						}
+					}
+
+					public class WORLDGEN_SEED
+					{
+						public static LocString NAME = "Worldgen Seed";
+
+						public static LocString TOOLTIP = "This chooses the random parameters of your new world";
 					}
 				}
 			}
@@ -296,9 +372,9 @@ namespace STRINGS
 			{
 				public static LocString TITLE = "OUTBREAK UPGRADE";
 
-				public static LocString BODY = "<b>Welcome to the Outbreak Upgrade!</b>\n\n{0}";
+				public static LocString BODY = "<b>Welcome to the Oil Upgrade!</b>\n\n{0}";
 
-				public static LocString PATCHNOTES = "<b>Important Notes:</b>\n\n• <u>Duplicants will now automatically disinfect buildings. You can tune the minimum germ threshold at the top right of the germ overlay.</u>\n\n <b>Update Features:</b>\n\n• New disease simulation, complete with new illnesses, attributes, overlays and more.\n• New plants, food recipes, growth requirements and Farming Overlay.\n• Explore deep enough into your surroundings and you may chance upon the remnants of, well... something.\n• New Duplicants; say hello to Ari, Jean, Camille and Ashkan.\n• Bug fixes, performance improvements, new buildings, creatures and more.";
+				public static LocString PATCHNOTES = "<b>Update Features:</b>\n\n• New Oil Biome and Oil Geysers\n• New resources including Crude Oil, Petroleum, Naphtha, Plastic and Diamond\n• New rechargeable Exosuits for Duplicants to wear\n• New Rooms system and accompanying overlay\n• Revamped research tree and dozens of new buildings to unlock\n• Bug fixes, performance improvements, new plants, creatures and more.";
 
 				public static LocString OK_BUTTON = "OK";
 			}
@@ -412,6 +488,12 @@ namespace STRINGS
 
 				public static LocString UNINSTALL = "Uninstall";
 
+				public static LocString PREINSTALLED_HEADER = "Preinstalled Language Packs";
+
+				public static LocString UGC_HEADER = "Subscribed Workshop Language Packs";
+
+				public static LocString UGC_MOD_TITLE_FORMAT = "{0} (workshop)";
+
 				public static LocString ARE_YOU_SURE = "Are you sure you want to uninstall this language pack?";
 
 				public static LocString PLEASE_REBOOT = "Please restart your game for these changes to take effect.";
@@ -425,6 +507,13 @@ namespace STRINGS
 				public static LocString INSTALLED = "Installed";
 
 				public static LocString NO_STEAM = "Unable to retrieve language list from Steam";
+
+				public class PREINSTALLED_LANGUAGES
+				{
+					public static LocString EN = "English (Klei)";
+
+					public static LocString ZH_KLEI = "Chinese (Klei)";
+				}
 			}
 
 			public class AUDIO_OPTIONS_SCREEN
@@ -551,6 +640,8 @@ namespace STRINGS
 			{
 				public static LocString AUDIO_DRIVERS = "A problem occurred initializing your audio device.\nSorry about that!\n\nThis is usually caused by outdated audio drivers.\n\nPlease visit your audio device manufacturer's website to download the latest drivers.";
 
+				public static LocString DUPLICATE_KEY_BINDINGS = "<b>Duplicate key bindings were detected.\nThis may be because your custom key bindings conflicted with a new feature's default key.\nPlease visit the controls screen to ensure your key bindings are set how you like them.</b>\n{0}";
+
 				public static LocString SAVE_DIRECTORY_READ_ONLY = "A problem occurred while accessing your save directory.\nThis may be because your directory is set to read-only.\n\nPlease ensure your save directory is writable and re-launch the game.\n{0}";
 
 				public static LocString SAVE_DIRECTORY_INSUFFICIENT_SPACE = "There is insufficient disk space to write to your save directory.\n\nPlease free at least 15 MB to give your saves some room to breathe.\n{0}";
@@ -594,7 +685,7 @@ namespace STRINGS
 
 				public static LocString SAVE_TITLE = "Save Selection";
 
-				public static LocString CLEAR_BUTTON = "Clear Ground";
+				public static LocString CLEAR_BUTTON = "Clear Floor";
 
 				public static LocString DESTROY_BUTTON = "Destroy";
 
@@ -603,6 +694,21 @@ namespace STRINGS
 				public static LocString CLEAR_SELECTION_BUTTON = "Clear Selection";
 
 				public static LocString DEFAULT_SAVE_NAME = "TemplateSaveName";
+
+				public static LocString MORE = "More";
+
+				public class SELECTION_INFO_PANEL
+				{
+					public static LocString TOTAL_MASS = "Total mass: {0}";
+
+					public static LocString AVERAGE_MASS = "Average cell mass: {0}";
+
+					public static LocString AVERAGE_TEMPERATURE = "Average temperature: {0}";
+
+					public static LocString TOTAL_JOULES = "Total joules: {0}";
+
+					public static LocString JOULES_PER_KILOGRAM = "Joules per kilogram: {0}";
+				}
 			}
 		}
 
@@ -823,7 +929,7 @@ namespace STRINGS
 
 			public static LocString MANAGEMENTMENU_SCHEDULE = "Adjust colony timetable";
 
-			public static LocString MANAGEMENTMENU_REQUIRES_RESEARCH = "Build a Research Station to unlock" + UI.HORIZONTAL_BR_RULE + "Research buildings can be found in the Stations Tab <color=#F44A47>[9]</color> of the Build Menu";
+			public static LocString MANAGEMENTMENU_REQUIRES_RESEARCH = "Build a Research Station to unlock" + UI.HORIZONTAL_BR_RULE + "Research buildings can be found in the Stations Tab <color=#F44A47>[0]</color> of the Build Menu";
 
 			public static LocString METERSCREEN_AVGSTRESS = "Highest Stress: {0}";
 
@@ -889,6 +995,8 @@ namespace STRINGS
 
 			public static LocString HELP_BUILDLOCATION_INSIDEGROUND = "Must be built in the ground";
 
+			public static LocString HELP_BUILDLOCATION_ATTACHPOINT = "Must be built overlapping a {0}";
+
 			public static LocString OXYGENOVERLAYSTRING = "Displays ambient oxygen density";
 
 			public static LocString POWEROVERLAYSTRING = "Displays power grid components";
@@ -898,6 +1006,8 @@ namespace STRINGS
 			public static LocString HEATFLOWOVERLAYSTRING = "Displays areas with comfortable temperatures for Duplicants";
 
 			public static LocString ROOMSOVERLAYSTRING = "Displays fully enclosed rooms";
+
+			public static LocString JOULESOVERLAYSTRING = "Displays the thermal energy in each cell";
 
 			public static LocString LIGHTSOVERLAYSTRING = "Displays the visibility radius of light sources";
 
@@ -979,7 +1089,7 @@ namespace STRINGS
 
 			public static LocString VITALS_CHECKBOX_PRESSURE = "The current air pressure is {pressure}";
 
-			public static LocString VITALS_CHECKBOX_ATMOSPHERE = "This plant is submerged in {element} gas";
+			public static LocString VITALS_CHECKBOX_ATMOSPHERE = "This plant is immersed in {element}";
 
 			public static LocString VITALS_CHECKBOX_ILLUMINATION_DARK = "This plant is currently in the dark";
 
@@ -1020,7 +1130,7 @@ namespace STRINGS
 
 					public static LocString FORUMBUTTON = "FORUMS";
 
-					public static LocString MAILINGLIST = "MAILING LIST";
+					public static LocString MAILINGLIST = "NOTIFY ME!";
 
 					public static LocString PATCHNOTES = "PATCH NOTES";
 
@@ -1068,6 +1178,8 @@ namespace STRINGS
 
 			public class MASS
 			{
+				public static LocString TONNE = " t";
+
 				public static LocString KILOGRAM = " Kg";
 
 				public static LocString GRAM = " g";
@@ -1104,6 +1216,8 @@ namespace STRINGS
 				public static LocString JOULE = " J";
 
 				public static LocString KILOJOULE = " kJ";
+
+				public static LocString MEGAJOULE = " MJ";
 
 				public static LocString WATT = " W";
 
@@ -1270,7 +1384,14 @@ namespace STRINGS
 
 				public static LocString ROOM = "Room {0}";
 
-				public static LocString NOROOMS = "No rooms created";
+				public static LocString HOVERTITLE = "ROOMS";
+
+				public static class NOROOM
+				{
+					public static LocString HEADER = "No Room";
+
+					public static LocString DESC = "Enclose this space with walls and/or doors to make a room";
+				}
 
 				public class TOOLTIPS
 				{
@@ -1278,6 +1399,15 @@ namespace STRINGS
 
 					public static LocString NOROOMS = "Duplicants have nowhere to sleep";
 				}
+			}
+
+			public class JOULES
+			{
+				public static LocString NAME = "JOULES";
+
+				public static LocString HOVERTITLE = "JOULES";
+
+				public static LocString BUTTON = "Joules Overlay";
 			}
 
 			public class LIGHTING
@@ -1416,22 +1546,15 @@ namespace STRINGS
 				}
 			}
 
-			public class EXOSUIT
+			public class SUIT
 			{
 				public static LocString NAME = "EXOSUIT OVERLAY";
 
 				public static LocString BUTTON = "Exosuit Overlay";
 
-				public static LocString EXOSUITREQUIRED = "Exosuit required";
+				public static LocString SUIT_ICON = "Suit";
 
-				public static LocString EXOSUITNOTREQUIRED = "Exosuit not required";
-
-				public class TOOLTIPS
-				{
-					public static LocString EXOSUITREQUIRED = "Duplicants must wear an <style=\"equipment\">Exosuit</style> to survive in these areas";
-
-					public static LocString EXOSUITNOTREQUIRED = "Duplicants can safely enter these areas unprotected";
-				}
+				public static LocString SUIT_ICON_TOOLTIP = "Shows the location of suits";
 			}
 
 			public class DECOR
@@ -1440,7 +1563,19 @@ namespace STRINGS
 
 				public static LocString BUTTON = "Decor Overlay";
 
-				public static LocString TOTAL = "Total";
+				public static LocString TOTAL = "Total Decor: ";
+
+				public static LocString ENTRY = "{0} {1} {2}";
+
+				public static LocString COUNT = "({0})";
+
+				public static LocString VALUE = "<style=\"{0}\">{1}{2}</color>";
+
+				public static LocString VALUE_ZERO = "{1}{2}</color>";
+
+				public static LocString HEADER_POSITIVE = "Positive Value:";
+
+				public static LocString HEADER_NEGATIVE = "Negative Value:";
 
 				public static LocString LOWDECOR = "Low Decor";
 
@@ -1450,7 +1585,7 @@ namespace STRINGS
 
 				public static LocString LIGHTING = "Lighting";
 
-				public static LocString CLOTHING = "{0}'s Clothing";
+				public static LocString CLOTHING = "{0}'s Outfit";
 
 				public static LocString HOVERTITLE = "DECOR";
 
@@ -1480,7 +1615,7 @@ namespace STRINGS
 
 				public static LocString LOUDNESS_STRING = " <color=#{0}>({1})</color>";
 
-				public static LocString DESCRIPTION = "Two <style=\"sound\">Sounds</style> of equal dB will sum for a <style=\"produced\">+3 dB</style> increase.\nA <style=\"sound\">Sound</style> that is 10 dB quieter will add <style=\"produced\">+0.5 dB</style> to the total signal.\nAnything more than 10 dB quieter will be inaudible.";
+				public static LocString DESCRIPTION = "Two <style=\"sound\">Sounds</style> of equal dB will sum for a <style=\"produced\">+3 dB</style> increase.\nA <style=\"sound\">Sound</style> that is 10 dB quieter will add approximately <style=\"produced\">+0.5 dB</style> to the total signal.\nAnything more than 10 dB quieter will be inaudible.";
 
 				public class NAMES
 				{
@@ -1593,6 +1728,10 @@ namespace STRINGS
 				public class DISINFECT_THRESHOLD_DIAGRAM
 				{
 					public static LocString UNITS = "Germs";
+
+					public static LocString MIN_LABEL = "0";
+
+					public static LocString MAX_LABEL = "1m";
 
 					public static LocString THRESHOLD_PREFIX = "Disinfect At:";
 
@@ -1913,6 +2052,8 @@ namespace STRINGS
 			public static LocString OK = "OK";
 
 			public static LocString CANCEL = "CANCEL";
+
+			public static LocString DIALOG_HEADER = "MESSAGE";
 		}
 
 		public class FILE_NAME_DIALOG
@@ -2150,6 +2291,14 @@ namespace STRINGS
 
 				public static LocString GO_RIGHT_DISABLED = "Passing Right through this door is not permitted\n\nClick to grant permission";
 
+				public static LocString GO_UP_ENABLED = "Passing Up through this door is permitted\n\nClick to revoke permission";
+
+				public static LocString GO_UP_DISABLED = "Passing Up through this door is not permitted\n\nClick to grant permission";
+
+				public static LocString GO_DOWN_ENABLED = "Passing Down through this door is permitted\n\nClick to revoke permission";
+
+				public static LocString GO_DOWN_DISABLED = "Passing Down through this door is not permitted\n\nClick to grant permission";
+
 				public static LocString SET_TO_DEFAULT = "Click to clear custom permissions";
 
 				public static LocString SET_TO_CUSTOM = "Click to assign custom permissions";
@@ -2171,8 +2320,6 @@ namespace STRINGS
 
 				public static LocString UNASSIGNED = "Unassigned";
 
-				public static LocString GENERAL_CURRENTASSIGNED = "(Owner)";
-
 				public static LocString SORT_BY_DUPLICANT = "Duplicant";
 
 				public static LocString SORT_BY_ASSIGNMENT = "Assignment";
@@ -2180,6 +2327,8 @@ namespace STRINGS
 				public static LocString ASSIGN_TO_TOOLTIP = "Assign to {0}";
 
 				public static LocString UNASSIGN_TOOLTIP = "Assigned to {0}";
+
+				public static string PUBLIC = "Public";
 			}
 
 			public class EQUIPPABLESIDESCREEN
@@ -2229,6 +2378,13 @@ namespace STRINGS
 				public static LocString CURRENT_THRESHOLD = "Current Threshold: {0}%";
 
 				public static LocString TOOLTIP = "Duplicants will operate this generator when battery charge falls below the selected percentage";
+			}
+
+			public class OIL_WELL_CAP_SIDE_SCREEN
+			{
+				public static LocString TITLE = "Pressure Release Threshold";
+
+				public static LocString TOOLTIP = "Duplicants will release gas buildup in this well when it exceeds the selected percentage";
 			}
 
 			public class TIMEDSWITCHSIDESCREEN
@@ -2337,6 +2493,29 @@ namespace STRINGS
 			{
 				public static LocString TOOLTIP = "Adjust the maximum amount that can be stored here";
 			}
+
+			public class SUIT_SIDE_SCREEN
+			{
+				public static LocString TITLE = "Dock Inventory";
+
+				public static LocString CONFIG_REQUEST_SUIT = "Request Exosuit";
+
+				public static LocString CONFIG_REQUEST_SUIT_TOOLTIP = "Deliver the nearest unassigned suit to this building";
+
+				public static LocString CONFIG_NO_SUIT = "No Exosuit";
+
+				public static LocString CONFIG_NO_SUIT_TOOLTIP = "Duplicants will drop an equipped suit at this locker when passing by";
+
+				public static LocString CONFIG_CANCEL_REQUEST = "Cancel Request";
+
+				public static LocString CONFIG_CANCEL_REQUEST_TOOLTIP = "Cancel this suit delivery";
+
+				public static LocString CONFIG_DROP_SUIT = "Undock Exosuit";
+
+				public static LocString CONFIG_DROP_SUIT_TOOLTIP = "Disconnect this suit, dropping it on the ground";
+
+				public static LocString CONFIG_DROP_SUIT_NO_SUIT_TOOLTIP = "There is no suit in this building to undock";
+			}
 		}
 
 		public class USERMENUACTIONS
@@ -2353,6 +2532,21 @@ namespace STRINGS
 				public static LocString NAME = "Cancel Clean";
 
 				public static LocString TOOLTIP = "Cancel this cleaning order";
+			}
+
+			public class CHANGE_ROOM
+			{
+				public static LocString REQUEST_OUTFIT = "Request Outfit";
+
+				public static LocString REQUEST_OUTFIT_TOOLTIP = "Request outfit to be delivered to this change room";
+
+				public static LocString CANCEL_REQUEST = "Cancel Request";
+
+				public static LocString CANCEL_REQUEST_TOOLTIP = "Cancel outfit request";
+
+				public static LocString DROP_OUTFIT = "Drop Outfit";
+
+				public static LocString DROP_OUTFIT_TOOLTIP = "Drop outfit on floor";
 			}
 
 			public class DUMP
@@ -2584,6 +2778,13 @@ namespace STRINGS
 				public static LocString TOOLTIP_OFF = "Cancel this compost order";
 			}
 
+			public class UNEQUIP
+			{
+				public static LocString NAME = "Unequip {0}";
+
+				public static LocString TOOLTIP = "Take off and drop this equipment";
+			}
+
 			public class QUARANTINE
 			{
 				public static LocString NAME = "Quarantine";
@@ -2649,14 +2850,31 @@ namespace STRINGS
 				{
 					public static LocString NAME = "Enable Autobottling";
 
-					public static LocString TOOLTIP = "If enabled, Duplicants will deliver bottled liquids to this building directly from Liquid Bottlers";
+					public static LocString TOOLTIP = "If enabled, Duplicants will deliver bottled liquids to this building directly from Pitcher Pumps";
 				}
 
 				public static class DENIED
 				{
 					public static LocString NAME = "Disable Autobottling";
 
-					public static LocString TOOLTIP = "If disabled, Duplicants will no longer deliver bottled liquids directly from Liquid Bottlers";
+					public static LocString TOOLTIP = "If disabled, Duplicants will no longer deliver bottled liquids directly from Pitcher Pumps";
+				}
+			}
+
+			public class SUIT_MARKER_TRAVERSAL
+			{
+				public static class ONLY_WHEN_ROOM_AVAILABLE
+				{
+					public static LocString NAME = "Set Clearance: Vacant";
+
+					public static LocString TOOLTIP = "If clearance is vacant, Duplicants wearing suits will pass by this arrow and unequip their suits only if there is room available in the attached lockers.";
+				}
+
+				public static class ALWAYS
+				{
+					public static LocString NAME = "Set Clearance: Always";
+
+					public static LocString TOOLTIP = "If clearance is always, Duplicants wearing suits will pass by this arrow and unequip their suits even if there is no room available.";
 				}
 			}
 		}
@@ -2966,7 +3184,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Info";
 
-				public static LocString TOOLTIP = "View the status of the selected item";
+				public static LocString TOOLTIP = "View the status of the selected object";
 
 				public static LocString GROUPNAME_STATUS = "STATUS";
 
@@ -3079,9 +3297,15 @@ namespace STRINGS
 
 				public static LocString NO_CURRENT_GERMS = "SURFACE GERMS";
 
-				public static LocString GERMS_INFO = "LIFECYCLE: {0}";
+				public static LocString GERMS_INFO = "GERM LIFECYCLE";
 
-				public static LocString INFECTION_INFO = "INFECTION: {0}";
+				public static LocString INFECTION_INFO = "INFECTION DETAILS";
+
+				public static LocString DISEASE_INFO_POPUP_HEADER = "DISEASE INFO: {0}";
+
+				public static LocString DISEASE_INFO_POPUP_BUTTON = "FULL INFO";
+
+				public static LocString DISEASE_INFO_POPUP_TOOLTIP = "View detailed germ and infection info for {0}";
 
 				public class IMMUNE_FACTORS
 				{
@@ -3151,14 +3375,6 @@ namespace STRINGS
 
 					public static LocString NEUTRAL_FORMAT_TOOLTIP = "Germ count is static";
 
-					public static LocString DYING_OFF = "Dying off";
-
-					public static LocString DYING_OFF_TOOLTIP = "Low germ count in this area is causing germs to die rapidly";
-
-					public static LocString OVERPOPULATED = "Overpopulated";
-
-					public static LocString OVERPOPULATED_TOOLTIP = "Too many germs are present in this area, resulting in rapid die-off until the population stabilizes";
-
 					public class GROWTH_FACTORS
 					{
 						public static LocString TITLE = "\nGrowth factors:";
@@ -3222,6 +3438,20 @@ namespace STRINGS
 
 							public static LocString DIE_TOOLTIP = "Atmospheric pressure is causing germs to die off";
 						}
+
+						public class DYING_OFF
+						{
+							public static LocString TITLE = "    • <b>Dying off: {0}</b>";
+
+							public static LocString TOOLTIP = "Low germ count in this area is causing germs to die rapidly\n\nLess than {0} germs are on this {1} of material.\n({2} germs/Kg)";
+						}
+
+						public class OVERPOPULATED
+						{
+							public static LocString TITLE = "    • <b>Overpopulated: {0}</b>";
+
+							public static LocString TOOLTIP = "Too many germs are present in this area, resulting in rapid die-off until the population stabilizes\n\nA maximum of {0} germs can be on this {1} of material.\n({2} germs/Kg)";
+						}
 					}
 				}
 			}
@@ -3256,6 +3486,10 @@ namespace STRINGS
 				public static LocString GROUPNAME_OWNABLE = "EQUIPMENT";
 
 				public static LocString GROUPNAME_EQUIPMENT = "HELD ITEMS";
+
+				public static LocString NOTHING = "No amenities assigned";
+
+				public static LocString NOTHING_TOOLTIP = "No personal buildings are assigned to this Duplicant";
 
 				public static LocString UNASSIGNED = "Unassigned";
 
@@ -3349,6 +3583,8 @@ namespace STRINGS
 
 			public static LocString OVERHEAT_TEMP = "Overheat <style=\"heat\">Temperature</style>: {0}";
 
+			public static LocString OVER_PRESSURE_MASS = "Over Pressure: {0}";
+
 			public static LocString REFILLOXYGENTANK = "Refills <style=\"equipment\">Exosuit Oxygen Tank</style>";
 
 			public static LocString DUPLICANTMOVEMENTBOOST = "Runspeed: <style=\"produced\">+{0}</style>";
@@ -3441,9 +3677,9 @@ namespace STRINGS
 
 				public static LocString ENABLESDOMESTICGROWTH = "Accelerates plant growth and maturation";
 
-				public static LocString HEATGENERATED = "Generates +{0} of heat";
+				public static LocString HEATGENERATED = "Generates {0} per second\n\nSum temperature change is affected by the material attributes of the heated substance:\n    • mass\n    • specific heat capacity\n    • surface area\n    • insulation thickness\n    • thermal conductivity";
 
-				public static LocString HEATCONSUMED = "Dissipates -{0} of heat";
+				public static LocString HEATCONSUMED = "Dissipates {0} per second\n\nSum temperature change can be affected by the material attributes of the cooled substance:\n    • mass\n    • specific heat capacity\n    • surface area\n    • insulation thickness\n    • thermal conductivity";
 
 				public static LocString FABRICATES = "Fabrication is the production of items and equipment";
 
@@ -3454,6 +3690,8 @@ namespace STRINGS
 				public static LocString DECORDECREASED = "Decreases Decor values by {0} in a {1} tile radius";
 
 				public static LocString OVERHEAT_TEMP = "Begins overheating at {0} and melts down at {1}";
+
+				public static LocString OVER_PRESSURE_MASS = "Ceases to function when the surrounding mass is above {0}";
 
 				public static LocString REFILLOXYGENTANK = "Refills Exosuit Oxygen Tanks with oxygen for reuse";
 
@@ -3482,6 +3720,8 @@ namespace STRINGS
 				public static LocString HEATGENERATED_AIRCONDITIONER = "Generates heat based on the volume, temperature, and specific heat capacity of the pumped gas\n\nCooling 1 Kg of room temperature oxygen will output {0} per second";
 
 				public static LocString HEATGENERATED_LIQUIDCONDITIONER = "Generates heat based on the volume, temperature, and specific heat capacity of the pumped liquid\n\nCooling 1 Kg of room temperature water will output {0} per second";
+
+				public static LocString MOVEMENT_BONUS = "Increases the run speed of Duplicants";
 
 				public static LocString NOISE_POLLUTION_INCREASE = "Produces noise at {0} dB in a {1} tile radius";
 
@@ -3538,6 +3778,8 @@ namespace STRINGS
 			public static LocString REQUIRES_SUBMERSION = "<style=\"liquid\">Liquid</style> Submersion";
 
 			public static LocString FOOD_EFFECTS = "Effects:";
+
+			public static LocString EMITS_LIGHT = "<style=\"heat\">Light Range</style>: {0} tiles";
 
 			public static LocString DARKNESS = "Darkness";
 
@@ -3604,6 +3846,8 @@ namespace STRINGS
 				public static LocString FOOD_EFFECTS = "Duplicants will gain the following effects from eating this food: {0}";
 
 				public static LocString REQUIRES_RECEPTACLE = "This plant must be housed in a planter box, farm tile or hydroponic farm to grow domestically";
+
+				public static LocString EMITS_LIGHT = "Emits light";
 
 				public static LocString SEED_PRODUCTION_DIG_ONLY = "May be replanted, but will produce no further seeds";
 
@@ -3787,20 +4031,32 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Disease Status:";
 
-				public static LocString TOOLTIP = "Your inhabitants are covered in {0} germs";
+				public static LocString TOOLTIP = "Your Duplicants are covered in {0}";
 			}
 
 			public class NOTES
 			{
-				public static LocString BUTCHERED = "Butchered to make a {0}";
+				public static LocString NOTE_ENTRY_LINE_ITEM = "{0}\n{1}: {2}";
+
+				public static LocString BUTCHERED = "Butchered for {0}";
+
+				public static LocString BUTCHERED_CONTEXT = "Butchered";
 
 				public static LocString CRAFTED = "Crafted a {0}";
 
-				public static LocString HARVESTED = "Harvested a {0}";
+				public static LocString CRAFTED_USED = "{0} used as ingredient";
 
-				public static LocString BURNED = "Burned by {0}";
+				public static LocString CRAFTED_CONTEXT = "Crafted";
+
+				public static LocString HARVESTED = "Harvested {0}";
+
+				public static LocString HARVESTED_CONTEXT = "Harvested";
+
+				public static LocString EATEN = "{0} eaten";
 
 				public static LocString ROTTED = "Rotten {0}";
+
+				public static LocString ROTTED_CONTEXT = "Rotted";
 
 				public static LocString GERMS = "On {0}";
 
@@ -3852,7 +4108,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Primary Element: {0}";
 
-				public static LocString TOOLTIP = "The selected item is primarily composed of {0}";
+				public static LocString TOOLTIP = "The selected object is primarily composed of {0}";
 			}
 
 			public class UNITS
@@ -3866,56 +4122,71 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Mass: {0}";
 
-				public static LocString TOOLTIP = "The selected item has a mass of {0}";
+				public static LocString TOOLTIP = "The selected object has a mass of {0}";
 			}
 
 			public class TEMPERATURE
 			{
 				public static LocString NAME = "Temperature: {0}";
 
-				public static LocString TOOLTIP = "The selected item's current temperature is {0}";
+				public static LocString TOOLTIP = "The selected object's current temperature is {0}";
 			}
 
 			public class DISEASE
 			{
 				public static LocString NAME = "Disease: {0}";
 
-				public static LocString TOOLTIP = "The selected item's has {0} on its surface";
+				public static LocString TOOLTIP = "There are {0} on the selected object";
 			}
 
 			public class SHC
 			{
 				public static LocString NAME = "Specific Heat Capacity: {0}";
 
-				public static LocString TOOLTIP = "The minimum amount of energy needed to raise the selected item's temperature is {0}";
+				public static LocString TOOLTIP = "{0} J is required to heat 1 g of the selected object by 1 K";
 			}
 
 			public class THERMALCONDUCTIVITY
 			{
 				public static LocString NAME = "Thermal Conductivity: {0}";
 
-				public static LocString TOOLTIP = "The selected item can conduct heat at a rate of {0}";
+				public static LocString TOOLTIP = "This object can conduct heat to other materials at a rate of {0} W for each K degree difference\n\nBetween two objects, the rate of heat transfer will be determined by the object with the lowest Thermal Conductivity";
+
+				public class ADJECTIVES
+				{
+					public static LocString VALUE_WITH_ADJECTIVE = "{0} ({1})";
+
+					public static LocString VERY_LOW_CONDUCTIVITY = "Highly Insulating";
+
+					public static LocString LOW_CONDUCTIVITY = "Insulating";
+
+					public static LocString MEDIUM_CONDUCTIVITY = "Conductive";
+
+					public static LocString HIGH_CONDUCTIVITY = "Highly Conductive";
+
+					public static LocString VERY_HIGH_CONDUCTIVITY = "Extremely Conductive";
+				}
 			}
 
 			public class CONDUCTIVITYBARRIER
 			{
 				public static LocString NAME = "Insulation Thickness: {0}";
 
-				public static LocString TOOLTIP = "Thicker insulation reduces an item's Thermal Conductivity";
+				public static LocString TOOLTIP = "Thick insulation reduces an object's Thermal Conductivity";
 			}
 
 			public class VAPOURIZATIONPOINT
 			{
 				public static LocString NAME = "Vaporization Point: {0}";
 
-				public static LocString TOOLTIP = "The selected item will evaporate into a gas at {0}";
+				public static LocString TOOLTIP = "The selected object will evaporate into a gas at {0}";
 			}
 
 			public class MELTINGPOINT
 			{
 				public static LocString NAME = "Melting Point: {0}";
 
-				public static LocString TOOLTIP = "The selected item will melt into a liquid at {0}";
+				public static LocString TOOLTIP = "The selected object will melt into a liquid at {0}";
 			}
 
 			public class OVERHEATPOINT
@@ -3929,14 +4200,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Freeze Point: {0}";
 
-				public static LocString TOOLTIP = "The selected item will cool into a solid at {0}";
+				public static LocString TOOLTIP = "The selected object will cool into a solid at {0}";
 			}
 
 			public class DEWPOINT
 			{
-				public static LocString NAME = "Dew Point: {0}";
+				public static LocString NAME = "Condensation Point: {0}";
 
-				public static LocString TOOLTIP = "The selected item will condense into a liquid at {0}";
+				public static LocString TOOLTIP = "The selected object will condense into a liquid at {0}";
 			}
 		}
 

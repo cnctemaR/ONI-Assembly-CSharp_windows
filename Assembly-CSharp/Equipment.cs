@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Runtime.Serialization;
+using Klei.AI;
 using KSerialization;
+using STRINGS;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 public class Equipment : Assignables
 {
-	[OnSerializing]
-	protected void OnSerializing()
-	{
-		base.Save<EquipmentSlotInstance.SaveData>(ref this.saveData);
-	}
-
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -20,8 +15,17 @@ public class Equipment : Assignables
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Load(this.saveData);
 		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		this.Subscribe(1502190696, delegate(object o)
+		{
+			this.destroyed = true;
+			Debug.Log("QueueDestroyed", null);
+		});
+		this.Subscribe(1969584890, delegate(object o)
+		{
+			this.destroyed = true;
+			Debug.Log("Destroyed", null);
+		});
 	}
 
 	protected override void OnCleanUp()
@@ -33,32 +37,99 @@ public class Equipment : Assignables
 	public void Equip(Equippable equippable)
 	{
 		EquipmentSlotInstance equipmentSlotInstance = base.GetSlot(equippable.slot) as EquipmentSlotInstance;
-		equipmentSlotInstance.Equip(equippable);
-		this.Trigger(-1195989806, equippable.GetComponent<KPrefabID>());
+		equipmentSlotInstance.Assign(equippable);
+		this.Trigger(-448952673, equippable.GetComponent<KPrefabID>());
+		equippable.Trigger(-1617557748, this);
+		KBatchedAnimController component = equipmentSlotInstance.gameObject.GetComponent<KBatchedAnimController>();
+		Attributes attributes = base.gameObject.GetAttributes();
+		string name = base.GetComponent<KSelectable>().GetName();
+		foreach (AttributeModifier attributeModifier in equippable.def.AttributeModifiers)
+		{
+			attributes.Add(name, attributeModifier);
+		}
+		SnapOn component2 = equipmentSlotInstance.gameObject.GetComponent<SnapOn>();
+		component2.AttachSnapOnByName(equippable.def.SnapOn);
+		if (equippable.def.SnapOn1 != null)
+		{
+			component2.AttachSnapOnByName(equippable.def.SnapOn1);
+		}
+		if (equippable.def.BuildOverride != null)
+		{
+			component.AddBuildOverride(equippable.def.BuildOverride, true, false);
+		}
+		equippable.GetComponent<KBatchedAnimController>().enabled = false;
+		equippable.OnEquip(equipmentSlotInstance);
+		if (this.refreshHandle.TimeRemaining > 0f)
+		{
+			Debug.LogWarning(base.gameObject.GetProperName() + " is already in the process of changing equipment", null);
+			this.refreshHandle.ClearScheduler();
+		}
+		this.refreshHandle = GameScheduler.Instance.Schedule("ChangeEquipment", 2f, delegate(object obj)
+		{
+			if (base.gameObject != null)
+			{
+				CreatureSimTemperatureTransfer component3 = base.gameObject.GetComponent<CreatureSimTemperatureTransfer>();
+				if (component3 != null)
+				{
+					component3.RefreshRegistration();
+				}
+			}
+		}, null, null);
+		Game.Instance.Trigger(-2146166042, null);
 	}
 
 	public void Unequip(Equippable equippable)
 	{
-		EquipmentSlotInstance equipmentSlotInstance = base.GetSlot(equippable.slot) as EquipmentSlotInstance;
-		equipmentSlotInstance.Unequip();
-		this.Trigger(-272419061, equippable.GetComponent<KPrefabID>());
+		equippable.GetComponent<KBatchedAnimController>().enabled = true;
+		AssignableSlotInstance slot = base.GetSlot(equippable.slot);
+		slot.Unassign();
+		this.Trigger(-1285462312, equippable.GetComponent<KPrefabID>());
+		equippable.Trigger(-170173755, this);
+		KBatchedAnimController component = slot.gameObject.GetComponent<KBatchedAnimController>();
+		if (!this.destroyed)
+		{
+			if (equippable.def.BuildOverride != null)
+			{
+				component.ClearBuildOverride(equippable.def.BuildOverride, !equippable.def.IsBody);
+			}
+			Attributes attributes = slot.gameObject.GetAttributes();
+			foreach (AttributeModifier attributeModifier in equippable.def.AttributeModifiers)
+			{
+				attributes.Remove(attributeModifier);
+			}
+			if (!equippable.def.IsBody)
+			{
+				SnapOn component2 = slot.gameObject.GetComponent<SnapOn>();
+				component2.DetachSnapOnByName(equippable.def.SnapOn);
+				if (equippable.def.SnapOn1 != null)
+				{
+					component2.DetachSnapOnByName(equippable.def.SnapOn1);
+				}
+			}
+			this.refreshHandle = GameScheduler.Instance.Schedule("ChangeEquipment", 1f, delegate(object obj)
+			{
+				if (base.gameObject != null)
+				{
+					CreatureSimTemperatureTransfer component3 = base.gameObject.GetComponent<CreatureSimTemperatureTransfer>();
+					if (component3 != null)
+					{
+						component3.RefreshRegistration();
+					}
+				}
+			}, null, null);
+		}
+		Game.Instance.Trigger(-2146166042, null);
 	}
 
 	public bool IsEquipped(Equippable equippable)
 	{
-		EquipmentSlotInstance equipmentSlotInstance = base.GetSlot(equippable.slot) as EquipmentSlotInstance;
-		return equipmentSlotInstance.isEquipped;
+		return equippable.assignee == this && equippable.isEquipped;
 	}
 
-	public bool IsEquipped(EquipmentSlot slot)
+	public bool IsSlotOccupied(AssignableSlot slot)
 	{
 		EquipmentSlotInstance equipmentSlotInstance = base.GetSlot(slot) as EquipmentSlotInstance;
-		return equipmentSlotInstance.isEquipped;
-	}
-
-	private void OnClickUnequip(EquipmentSlotInstance slot)
-	{
-		slot.Unequip();
+		return equipmentSlotInstance.IsAssigned() && (equipmentSlotInstance.assignable as Equippable).isEquipped;
 	}
 
 	private void OnRefreshUserMenu(object data)
@@ -69,11 +140,22 @@ public class Equipment : Assignables
 			if (equipmentSlotInstance.assignable != null)
 			{
 				EquipmentSlotInstance slot_iter = equipmentSlotInstance;
-				string text = "Unequip " + equipmentSlotInstance.assignable.GetComponent<Equippable>().def.GenericName;
+				string text = string.Format(UI.USERMENUACTIONS.UNEQUIP.NAME, equipmentSlotInstance.assignable.GetComponent<Equippable>().def.GenericName);
 				this.userMenu.AddButton(new KIconButtonMenu.ButtonInfo("iconDown", text, delegate
 				{
-					this.Unequip((Equippable)slot_iter.assignable);
+					((Equippable)slot_iter.assignable).Unassign();
 				}, global::Action.NumActions, null, null, null, string.Empty, true), 2f);
+			}
+		}
+	}
+
+	public void UnequipAll()
+	{
+		foreach (AssignableSlotInstance assignableSlotInstance in this.slots)
+		{
+			if (assignableSlotInstance.assignable != null)
+			{
+				assignableSlotInstance.assignable.Unassign();
 			}
 		}
 	}
@@ -81,6 +163,7 @@ public class Equipment : Assignables
 	[MyCmpAdd]
 	private UserMenu userMenu;
 
-	[Serialize]
-	private EquipmentSlotInstance.SaveData[] saveData = new EquipmentSlotInstance.SaveData[0];
+	private SchedulerHandle refreshHandle;
+
+	private bool destroyed;
 }

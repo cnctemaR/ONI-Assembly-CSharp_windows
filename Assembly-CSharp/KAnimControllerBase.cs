@@ -1011,7 +1011,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	protected void UpdateAnimEventSequenceTime()
 	{
-		if (this.eventManagerHandle != -1 && this.aem != null)
+		if (this.eventManagerHandle.IsValid() && this.aem != null)
 		{
 			this.aem.SetElapsedTime(this.eventManagerHandle, this.elapsedTime);
 		}
@@ -1019,13 +1019,14 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	protected void StopAnimEventSequence()
 	{
-		if (this.eventManagerHandle != -1 && this.aem != null)
+		if (this.eventManagerHandle.IsValid() && this.aem != null)
 		{
 			if (!this.stopped && this.mode != KAnim.PlayMode.Paused)
 			{
 				this.elapsedTime = this.aem.GetElapsedTime(this.eventManagerHandle);
 			}
-			this.eventManagerHandle = this.aem.StopAnim(this.eventManagerHandle);
+			this.aem.StopAnim(this.eventManagerHandle);
+			this.eventManagerHandle = HandleVector<int>.InvalidHandle;
 		}
 	}
 
@@ -1090,7 +1091,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	protected KAnim.Build curBuild;
 
-	protected int eventManagerHandle = -1;
+	protected HandleVector<int>.Handle eventManagerHandle = HandleVector<int>.InvalidHandle;
 
 	protected List<KAnimControllerBase.OverrideAnimFileData> overrideAnimFiles = new List<KAnimControllerBase.OverrideAnimFileData>();
 

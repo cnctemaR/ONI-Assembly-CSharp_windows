@@ -7,5 +7,6 @@ public enum NotificationType
 	Bad = 1,
 	Neutral = 4,
 	Tutorial,
-	Messages
+	Messages,
+	DuplicantThreatening
 }

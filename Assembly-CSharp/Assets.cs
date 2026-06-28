@@ -61,10 +61,13 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 
 	private static void TryAddCountableTag(KPrefabID prefab)
 	{
-		PrimaryElement component = prefab.GetComponent<PrimaryElement>();
-		if (component != null && component.CountableUnits)
+		foreach (Tag tag in GameTags.UnitCategories)
 		{
-			Assets.AddCountableTag(prefab.PrefabTag);
+			if (prefab.HasPrefabTag(tag))
+			{
+				Assets.AddCountableTag(prefab.PrefabTag);
+				break;
+			}
 		}
 	}
 

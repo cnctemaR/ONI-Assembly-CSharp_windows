@@ -62,7 +62,7 @@ namespace Klei.AI
 			}
 			levels.GetComponent<Notifier>().Add(this.notification, string.Format(MISC.NOTIFICATIONS.LEVELUP.SUFFIX, this.attribute.modifier.Name, this.level));
 			StateMachine.Instance instance = new UpgradeFX.Instance(levels.GetComponent<KMonoBehaviour>(), new Vector3(0f, 0f, -0.1f));
-			ReportManager.Instance.ReportValue(ReportManager.ReportType.LevelUp, 1f, null);
+			ReportManager.Instance.ReportValue(ReportManager.ReportType.LevelUp, 1f, levels.GetProperName(), null);
 			instance.StartSM();
 			levels.Trigger(-110704193, this.attribute.Id);
 		}

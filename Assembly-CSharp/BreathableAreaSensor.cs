@@ -14,10 +14,8 @@ public class BreathableAreaSensor : Sensor
 			this.breather = base.GetComponent<OxygenBreather>();
 		}
 		bool flag = this.isBreathable;
-		bool flag2 = this.usingTank;
-		this.usingTank = this.breather.IsUsingOxygenTank;
 		this.isBreathable = this.breather.IsBreathableElement;
-		if (this.isBreathable != flag || this.usingTank != flag2)
+		if (this.isBreathable != flag)
 		{
 			if (this.isBreathable)
 			{
@@ -41,8 +39,6 @@ public class BreathableAreaSensor : Sensor
 	}
 
 	private bool isBreathable;
-
-	private bool usingTank;
 
 	private OxygenBreather breather;
 }

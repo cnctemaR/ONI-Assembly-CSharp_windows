@@ -12,6 +12,7 @@ public enum ObjectLayer
 	DigPlacer,
 	MopPlacer,
 	FoundationTile,
+	PlasticTile,
 	ReplacementTile,
 	GasConduit,
 	GasConduitTile,
@@ -25,5 +26,6 @@ public enum ObjectLayer
 	WireTile,
 	ReplacementWire,
 	WireConnectors,
+	AttachableBuilding,
 	NumLayers
 }

@@ -104,8 +104,10 @@ public class ThoughtGraph : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance
 			this.bubble.transform.localRotation = EffectPrefabs.Instance.ThoughtBubble.transform.localRotation;
 			this.bubble.GetComponent<KSelectable>().entityName = thought.hoverText;
 			VoiceSoundEvent voiceSoundEvent = new VoiceSoundEvent("ThoughtGraph", thought.texture.name, 0, false);
-			AnimEventManager.EventPlayerData eventPlayerData = new AnimEventManager.EventPlayerData();
-			eventPlayerData.controller = base.transform.GetComponent<KBatchedAnimController>();
+			AnimEventManager.EventPlayerData eventPlayerData = new AnimEventManager.EventPlayerData
+			{
+				controller = base.transform.GetComponent<KBatchedAnimController>()
+			};
 			voiceSoundEvent.Play(eventPlayerData);
 			this.schedulerHandle.ClearScheduler();
 			this.schedulerHandle = GameScheduler.Instance.SchedulePeriodic("ThoughtGraph", 0f, new Action<object>(this.UpdatePosition), eventPlayerData.controller, null, 0f, null);

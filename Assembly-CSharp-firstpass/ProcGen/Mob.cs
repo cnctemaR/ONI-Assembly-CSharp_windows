@@ -30,7 +30,8 @@ namespace ProcGen
 			NearWater,
 			NearLiquid,
 			Solid,
-			Water
+			Water,
+			ShallowLiquid
 		}
 	}
 }

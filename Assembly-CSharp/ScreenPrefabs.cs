@@ -15,7 +15,7 @@ public class ScreenPrefabs : KMonoBehaviour
 		ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, parent.gameObject);
 		confirmDialogScreen.PopupConfirmDialog(message, action, delegate
 		{
-		}, null, null, null, null);
+		}, null, null, null, null, null);
 	}
 
 	public ControlsScreen ControlsScreen;
@@ -52,7 +52,7 @@ public class ScreenPrefabs : KMonoBehaviour
 
 	public ConfirmDialogScreen ConfirmDialogScreen;
 
-	public LoreDialogScreen LoreDialogScreen;
+	public InfoDialogScreen InfoDialogScreen;
 
 	public FileNameDialog FileNameDialog;
 

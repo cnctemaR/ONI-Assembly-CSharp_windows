@@ -30,7 +30,7 @@ namespace TUNING
 		public static List<Crop.CropVal> CROP_TYPES = new List<Crop.CropVal>
 		{
 			new Crop.CropVal("BasicPlantFood", 1800f, 8, true),
-			new Crop.CropVal("SwampLilyFlower", 1200f, 1, true),
+			new Crop.CropVal(SwampLilyFlowerConfig.ID, 7200f, 2, true),
 			new Crop.CropVal(PrickleFruitConfig.ID, 2400f, 1, true),
 			new Crop.CropVal("ColdWheatSeed", 12000f, 25, true),
 			new Crop.CropVal(SpiceNutConfig.ID, 13200f, 4, true),

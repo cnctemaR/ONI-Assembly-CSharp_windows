@@ -67,11 +67,20 @@ public class ElementSplitterComponents : KGameObjectComponentManager<ElementSpli
 		Pickupable component3 = component2.Element.substance.SpawnResource(component.transform.position, amount, component2.Temperature, byte.MaxValue, 0, true, false).GetComponent<Pickupable>();
 		component.TotalAmount -= amount;
 		component3.Trigger(1335436905, component);
+		ElementSplitterComponents.CopyRenderSettings(component.GetComponent<KBatchedAnimController>(), component3.GetComponent<KBatchedAnimController>());
 		if (storage != null)
 		{
 			storage.Trigger(-1697596308, data.primaryElement.gameObject);
 		}
 		return component3;
+	}
+
+	private static void CopyRenderSettings(KBatchedAnimController src, KBatchedAnimController dest)
+	{
+		if (src != null && dest != null)
+		{
+			dest.OverlayColour = src.OverlayColour;
+		}
 	}
 
 	private const float MAX_STACK_SIZE = 25000f;

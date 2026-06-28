@@ -1,0 +1,119 @@
+﻿using System;
+using KSerialization;
+using STRINGS;
+using UnityEngine;
+
+[SerializationConfig(MemberSerialization.OptIn)]
+public class Placeable : KMonoBehaviour
+{
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+	}
+
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		this.prefabId.AddTag(new Tag(this.prefabId.InstanceID.ToString()));
+		if (this.targetCell != -1)
+		{
+			this.QueuePlacement(this.targetCell);
+		}
+	}
+
+	protected override void OnCleanUp()
+	{
+		if (this.preview != null)
+		{
+			this.preview.DeleteObject();
+		}
+		base.OnCleanUp();
+	}
+
+	public void QueuePlacement(int target)
+	{
+		this.targetCell = target;
+		Vector3 vector = Grid.CellToPosCBC(this.targetCell, Grid.SceneLayer.Front);
+		if (this.preview == null)
+		{
+			this.preview = GameUtil.KInstantiate(Assets.GetPrefab(this.previewTag), vector, Grid.SceneLayer.Front, Folder.BuildingPreviews, null, 0);
+			this.preview.SetActive(true);
+		}
+		else
+		{
+			this.preview.transform.SetPosition(vector);
+		}
+		if (this.chore != null)
+		{
+			this.chore.Cancel("new target");
+		}
+		Action<Chore> action = new Action<Chore>(this.OnChoreComplete);
+		this.chore = new FetchChore(this.preview.GetComponent<Storage>(), 1f, new Tag[]
+		{
+			new Tag(this.prefabId.InstanceID.ToString())
+		}, null, null, true, action, null, null, FetchOrder2.OperationalRequirement.None, 0);
+	}
+
+	private void OnChoreComplete(Chore completed_chore)
+	{
+		this.Place(this.targetCell);
+	}
+
+	public void Place(int target)
+	{
+		Vector3 vector = Grid.CellToPosCBC(target, Grid.SceneLayer.Front);
+		GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(this.spawnOnPlaceTag), vector, Grid.SceneLayer.Front, Folder.BuildingPreviews, null, 0);
+		gameObject.SetActive(true);
+		this.DeleteObject();
+	}
+
+	private void OpenPlaceTool()
+	{
+		PrimaryElement component = base.GetComponent<PrimaryElement>();
+		PlaceTool.Instance.Activate(this, this.previewTag);
+	}
+
+	private void OnRefreshUserMenu(object data)
+	{
+		if (this.targetCell == -1)
+		{
+			UserMenu userMenu = this.userMenu;
+			string text = UI.USERMENUACTIONS.RELOCATE.TOOLTIP;
+			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_deconstruct", UI.USERMENUACTIONS.RELOCATE.NAME, new global::System.Action(this.OpenPlaceTool), global::Action.NumActions, null, null, null, text, true), 1f);
+		}
+		else
+		{
+			UserMenu userMenu2 = this.userMenu;
+			string text = UI.USERMENUACTIONS.RELOCATE.TOOLTIP_OFF;
+			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_deconstruct", UI.USERMENUACTIONS.RELOCATE.NAME_OFF, new global::System.Action(this.CancelRelocation), global::Action.NumActions, null, null, null, text, true), 1f);
+		}
+	}
+
+	private void CancelRelocation()
+	{
+		if (this.preview != null)
+		{
+			this.preview.DeleteObject();
+			this.preview = null;
+		}
+		this.targetCell = -1;
+	}
+
+	[MyCmpAdd]
+	private UserMenu userMenu;
+
+	[MyCmpReq]
+	private KPrefabID prefabId;
+
+	[Serialize]
+	private int targetCell = -1;
+
+	public Tag previewTag;
+
+	public Tag spawnOnPlaceTag;
+
+	private GameObject preview;
+
+	private FetchChore chore;
+}

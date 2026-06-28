@@ -23,6 +23,8 @@ namespace ProcGen
 			this.node = other.node;
 			this.type = other.type;
 			this.tags = new TagSet(other.tags);
+			this.featureTags = new TagSet(other.featureTags);
+			this.biomeSpecificTags = new TagSet(other.biomeSpecificTags);
 		}
 
 		public Node(Node node, string type)
@@ -51,6 +53,8 @@ namespace ProcGen
 
 		[Serialize]
 		public TagSet tags = new TagSet();
+
+		public TagSet featureTags = new TagSet();
 
 		public TagSet biomeSpecificTags = new TagSet();
 	}

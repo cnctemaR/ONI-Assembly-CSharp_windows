@@ -25,8 +25,7 @@ public class SafeCellQuery : PathFinderQuery
 		bool flag5 = Grid.Temperature[cell] < 303f;
 		bool flag6 = brain.OxygenBreather.IsBreathableElementAtCell(cell, Grid.DefaultOffset);
 		bool flag7 = !brain.Navigator.NavGrid.NavTable.IsValid(cell, NavType.Ladder);
-		bool flag8 = !Grid.SuitRequired[cell];
-		bool flag9 = Grid.IsTileUnderConstruction[cell] || (Grid.IsValidCell(num) && Grid.IsTileUnderConstruction[num]);
+		bool flag8 = Grid.IsTileUnderConstruction[cell] || (Grid.IsValidCell(num) && Grid.IsTileUnderConstruction[num]);
 		if (cell == Grid.PosToCell(brain))
 		{
 			flag6 = !brain.OxygenBreather.IsSuffocating;
@@ -56,11 +55,7 @@ public class SafeCellQuery : PathFinderQuery
 		{
 			safeFlags |= SafeCellQuery.SafeFlags.IsNotLiquidOnMyFace;
 		}
-		if (flag8)
-		{
-			safeFlags |= SafeCellQuery.SafeFlags.DoesNotRequireSuit;
-		}
-		if (flag4 || flag9)
+		if (flag4 || flag8)
 		{
 			safeFlags = (SafeCellQuery.SafeFlags)0;
 		}
@@ -102,7 +97,6 @@ public class SafeCellQuery : PathFinderQuery
 		CorrectTemperature = 8,
 		HasSomeOxygen = 16,
 		HasLotsOxygen = 32,
-		IsClear = 64,
-		DoesNotRequireSuit = 128
+		IsClear = 64
 	}
 }

@@ -12,7 +12,7 @@ public class MinionStartingStats
 		this.personality = Db.Get().Personalities[num];
 		this.voiceIdx = global::UnityEngine.Random.Range(0, 4);
 		this.Name = this.personality.Name;
-		this.OriginalName = this.personality.Name;
+		this.NameStringKey = this.personality.nameStringKey;
 		List<Race> list = new List<Race>();
 		foreach (Race race in MinionResources.Get().races)
 		{
@@ -281,7 +281,7 @@ public class MinionStartingStats
 	{
 		MinionIdentity component = go.GetComponent<MinionIdentity>();
 		component.SetName(this.Name);
-		component.originalName = this.OriginalName;
+		component.nameStringKey = this.NameStringKey;
 		this.ApplyTraits(go);
 		this.ApplyRace(go);
 		this.ApplyAccessories(go);
@@ -350,7 +350,7 @@ public class MinionStartingStats
 
 	public string Name;
 
-	public string OriginalName;
+	public string NameStringKey;
 
 	public List<Trait> Traits = new List<Trait>();
 

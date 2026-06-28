@@ -17,6 +17,7 @@ public class GeneShufflerConfig : IEntityConfig
 		gameObject.UpdateComponentRequirement<LoreBearer>(true);
 		gameObject.UpdateComponentRequirement<LoopingSounds>(true);
 		KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
+		kbatchedAnimController.sceneLayer = Grid.SceneLayer.BuildingBack;
 		kbatchedAnimController.fgLayer = Grid.SceneLayer.BuildingFront;
 		return gameObject;
 	}

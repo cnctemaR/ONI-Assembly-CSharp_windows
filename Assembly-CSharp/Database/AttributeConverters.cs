@@ -13,6 +13,7 @@ namespace Database
 			this.ConstructionSpeed = this.Create("ConstructionSpeed", "Construction Speed", DUPLICANTS.ATTRIBUTES.CONSTRUCTION.SPEEDMODIFIER, "Construction", 0.25f, 0f, toPercentAttributeFormatter);
 			this.DiggingSpeed = this.Create("DiggingSpeed", "Digging Speed", DUPLICANTS.ATTRIBUTES.DIGGING.SPEEDMODIFIER, "Digging", 0.25f, 0f, toPercentAttributeFormatter);
 			this.MachinerySpeed = this.Create("MachinerySpeed", "Machinery Speed", DUPLICANTS.ATTRIBUTES.MACHINERY.SPEEDMODIFIER, "Machinery", 0.1f, 0f, toPercentAttributeFormatter);
+			this.CompoundingSpeed = this.Create("CompoundingSpeed", "Compounding Speed", DUPLICANTS.ATTRIBUTES.MEDICAL.FABRICATE_SPEEDMODIFIER, "Medical", 0.1f, 0f, toPercentAttributeFormatter);
 			this.TemperatureInsulation = this.Create("TemperatureInsulation", "Temperature Insulation", DUPLICANTS.ATTRIBUTES.INSULATION.SPEEDMODIFIER, "Insulation", 0.1f, 0f, toPercentAttributeFormatter);
 			this.ResearchSpeed = this.Create("ResearchSpeed", "Research Speed", DUPLICANTS.ATTRIBUTES.LEARNING.RESEARCHSPEED, "Learning", 0.4f, 0f, toPercentAttributeFormatter);
 			this.TrainingSpeed = this.Create("TrainingSpeed", "Training Speed", DUPLICANTS.ATTRIBUTES.LEARNING.SPEEDMODIFIER, "Learning", 0.1f, 0f, toPercentAttributeFormatter);
@@ -40,6 +41,8 @@ namespace Database
 		public AttributeConverter DiggingSpeed;
 
 		public AttributeConverter MachinerySpeed;
+
+		public AttributeConverter CompoundingSpeed;
 
 		public AttributeConverter TemperatureInsulation;
 

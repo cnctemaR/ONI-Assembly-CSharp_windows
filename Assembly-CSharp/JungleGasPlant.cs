@@ -64,18 +64,18 @@ public class JungleGasPlant : StateMachineComponent<JungleGasPlant.StatesInstanc
 			this.alive.InitializeStates(this.masterTarget, this.dead);
 			this.alive.seed_grow.QueueAnim("seed_grow", false, null).EventTransition(GameHashes.AnimQueueComplete, this.alive.idle, null).EventTransition(GameHashes.Wilt, this.alive.wilting, (JungleGasPlant.StatesInstance smi) => smi.master.wiltCondition.IsWilting());
 			this.alive.idle.EventTransition(GameHashes.Wilt, this.alive.wilting, (JungleGasPlant.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).EventTransition(GameHashes.Grow, this.alive.grown, (JungleGasPlant.StatesInstance smi) => smi.master.growing.IsGrown()).PlayAnim("idle_loop", KAnim.PlayMode.Loop, null);
-			this.alive.grown.defaultState = this.alive.grown.pre;
-			this.alive.grown.EventTransition(GameHashes.Wilt, this.alive.wilting, (JungleGasPlant.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).Enter(delegate(JungleGasPlant.StatesInstance smi)
+			this.alive.grown.DefaultState(this.alive.grown.pre).EventTransition(GameHashes.Wilt, this.alive.wilting, (JungleGasPlant.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).Enter(delegate(JungleGasPlant.StatesInstance smi)
 			{
 				smi.master.elementEmitter.SetEmitting(true);
-			}).Exit(delegate(JungleGasPlant.StatesInstance smi)
-			{
-				smi.master.elementEmitter.SetEmitting(false);
-			});
-			this.alive.grown.pre.QueueAnim("grow", false, null).OnAnimQueueComplete(this.alive.grown.idle);
+			})
+				.Exit(delegate(JungleGasPlant.StatesInstance smi)
+				{
+					smi.master.elementEmitter.SetEmitting(false);
+				});
+			this.alive.grown.pre.PlayAnim("grow", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.alive.grown.idle);
 			this.alive.grown.idle.PlayAnim("idle_bloom_loop", KAnim.PlayMode.Loop, null);
-			this.alive.wilting.defaultState = this.alive.wilting.pre;
-			this.alive.wilting.pre.QueueAnim("wilt_pre", false, null).OnAnimQueueComplete(this.alive.wilting.idle).EventTransition(GameHashes.WiltRecover, this.alive.wilting.pst, (JungleGasPlant.StatesInstance smi) => !smi.master.wiltCondition.IsWilting());
+			this.alive.wilting.pre.DefaultState(this.alive.wilting.pre).PlayAnim("wilt_pre", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.alive.wilting.idle)
+				.EventTransition(GameHashes.WiltRecover, this.alive.wilting.pst, (JungleGasPlant.StatesInstance smi) => !smi.master.wiltCondition.IsWilting());
 			this.alive.wilting.idle.PlayAnim("idle_wilt_loop", KAnim.PlayMode.Loop, null).EventTransition(GameHashes.WiltRecover, this.alive.wilting.pst, (JungleGasPlant.StatesInstance smi) => !smi.master.wiltCondition.IsWilting());
 			this.alive.wilting.pst.PlayAnim("wilt_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.alive.idle);
 		}

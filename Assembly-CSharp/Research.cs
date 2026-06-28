@@ -96,7 +96,7 @@ public class Research : KMonoBehaviour, ISaveLoadable
 
 	public void CancelResearch(Tech tech, bool clickedEntry = true)
 	{
-		Research.<CancelResearch>c__AnonStoreyE4 <CancelResearch>c__AnonStoreyE = new Research.<CancelResearch>c__AnonStoreyE4();
+		Research.<CancelResearch>c__AnonStoreyE1 <CancelResearch>c__AnonStoreyE = new Research.<CancelResearch>c__AnonStoreyE1();
 		<CancelResearch>c__AnonStoreyE.tech = tech;
 		<CancelResearch>c__AnonStoreyE.ti = this.queuedTech.Find((TechInstance qt) => qt.tech == <CancelResearch>c__AnonStoreyE.tech);
 		if (<CancelResearch>c__AnonStoreyE.ti == null)

@@ -29,7 +29,7 @@ public class CreatureSimTemperatureTransfer : SimTemperatureTransfer
 	protected override void OnPrefabInit()
 	{
 		this.primaryElement = base.GetComponent<PrimaryElement>();
-		this.average_kilowatts_exchanged = new RunningWeightedAverage(-10f, 10f, 20, false);
+		this.average_kilowatts_exchanged = new RunningWeightedAverage(-10f, 10f, 20, true);
 		this.surfaceArea = 1f;
 		this.thickness = 0.002f;
 		Attributes attributes = base.gameObject.GetAttributes();

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Database;
 using Klei.AI;
 using KSerialization;
 using STRINGS;
@@ -70,7 +71,7 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 			this.immuneLevel = Db.Get().Amounts.ImmuneLevel.Lookup(base.gameObject);
 			AmountInstance amountInstance = this.immuneLevel;
 			amountInstance.OnDelta = (Action<float>)Delegate.Combine(amountInstance.OnDelta, new Action<float>(this.OnImmuneDelta));
-			AttributeConverterInstance attributeConverterInstance = master.GetComponent<AttributeConverters>().Get(Db.Get().AttributeConverters.ImmuneLevelBoost);
+			AttributeConverterInstance attributeConverterInstance = master.GetComponent<Klei.AI.AttributeConverters>().Get(Db.Get().AttributeConverters.ImmuneLevelBoost);
 			this.immuneLevel.deltaAttribute.Add("immunity stat", new AttributeModifier(this.immuneLevel.deltaAttribute.Id, attributeConverterInstance.Evaluate(), DUPLICANTS.ATTRIBUTES.IMMUNITY.BOOST_STAT, false, false));
 			this.immuneSuppress = new AttributeModifier(this.immuneLevel.deltaAttribute.Id, -0.025f, DUPLICANTS.DISEASES.INFECTED_MODIFIER, false, false);
 			this.activeDiseases = master.GetComponent<MinionModifiers>().diseases;
@@ -79,7 +80,7 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 			this.lastDiseaseSources = new Dictionary<HashedString, ImmuneSystemMonitor.Instance.DiseaseSourceInfo>();
 			this.activeImmuneModifiers = new Dictionary<HashedString, AttributeModifier>();
 			this.diseaseCountMultModifiers = new Dictionary<HashedString, AttributeModifier>();
-			Attributes attributes = base.gameObject.GetAttributes();
+			Klei.AI.Attributes attributes = base.gameObject.GetAttributes();
 			foreach (Disease disease in Db.Get().Diseases)
 			{
 				attributes.Add("linear disease loss", new AttributeModifier(disease.amountDeltaAttribute.Id, -0.8333333f, disease.Name, false, false));
@@ -88,6 +89,8 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 				attributes.Add("geometric disease loss", attributeModifier);
 			}
 			GameClock.Instance.Subscribe(-722330267, new Action<object>(this.OnNightTime));
+			this.modifiers = base.gameObject.GetComponent<Modifiers>();
+			this.immuneDelta = Db.Get().Amounts.ImmuneLevel.deltaAttribute.Lookup(base.gameObject);
 		}
 
 		public override void StopSM(string reason)
@@ -134,7 +137,7 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 		public void InjectDisease(Disease disease, int count, Tag source, Disease.InfectionVector vector)
 		{
 			Modifiers component = base.gameObject.GetComponent<Modifiers>();
-			Amounts amounts = component.GetAmounts();
+			Klei.AI.Amounts amounts = component.GetAmounts();
 			AmountInstance amountInstance = amounts.Get(disease.amount);
 			amountInstance.ApplyDelta((float)count);
 			this.lastDiseaseSources[disease.id] = new ImmuneSystemMonitor.Instance.DiseaseSourceInfo(source, vector);
@@ -142,56 +145,60 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 
 		public void UpdateImmuneSystem()
 		{
-			Modifiers component = base.gameObject.GetComponent<Modifiers>();
-			Amounts amounts = component.GetAmounts();
-			AttributeInstance attributeInstance = Db.Get().Amounts.ImmuneLevel.deltaAttribute.Lookup(base.gameObject);
-			Disease disease = null;
+			Klei.AI.Amounts amounts = this.modifiers.GetAmounts();
+			Disease disease3 = null;
 			float num = -1f;
-			foreach (Disease disease2 in Db.Get().Diseases)
+			global::Database.Diseases diseases = Db.Get().Diseases;
+			for (int i = 0; i < diseases.Count; i++)
 			{
-				float value = amounts.Get(disease2.amount).value;
+				Disease disease = diseases[i];
+				float value = amounts.Get(disease.amount).value;
 				if (value > 0f)
 				{
 					if (value > num)
 					{
-						disease = disease2;
+						disease3 = disease;
 						num = value;
 					}
 					float num2 = -0.8333333f;
 					float num3 = value * -0.00066666666f;
 					num2 += num3;
-					this.diseaseCountMultModifiers[disease2.id].SetValue(num3);
-					float num4 = num2 * disease2.immuneAttackStrength;
+					this.diseaseCountMultModifiers[disease.id].SetValue(num3);
+					float num4 = num2 * disease.immuneAttackStrength;
 					if (num4 <= -0.00016666666f && value > 1f)
 					{
-						string text = string.Format(DUPLICANTS.DISEASES.INFECTION_MODIFIER, disease2.Name, GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(value)));
 						AttributeModifier attributeModifier;
-						if (!this.activeImmuneModifiers.TryGetValue(disease2.id, out attributeModifier))
+						if (!this.activeImmuneModifiers.TryGetValue(disease.id, out attributeModifier))
 						{
-							attributeModifier = new AttributeModifier(attributeInstance.Id, 0f, text, false, false);
-							base.gameObject.GetAttributes().Add("immune damage from " + disease2.id, attributeModifier);
-							this.activeImmuneModifiers[disease2.id] = attributeModifier;
+							attributeModifier = new AttributeModifier(this.immuneDelta.Id, 0f, delegate
+							{
+								Disease disease2 = disease;
+								float value2 = amounts.Get(disease2.amount).value;
+								return string.Format(DUPLICANTS.DISEASES.INFECTION_MODIFIER, disease2.Name, GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(value2)));
+							}, false, false);
+							base.gameObject.GetAttributes().Add("immune damage from " + disease.id, attributeModifier);
+							this.activeImmuneModifiers[disease.id] = attributeModifier;
 						}
 						attributeModifier.Value = num4;
-						attributeModifier.Description = text;
 					}
-					else if (this.activeImmuneModifiers.ContainsKey(disease2.id))
+					else if (this.activeImmuneModifiers.ContainsKey(disease.id))
 					{
-						base.gameObject.GetAttributes().Remove(this.activeImmuneModifiers[disease2.id]);
-						this.activeImmuneModifiers.Remove(disease2.id);
+						base.gameObject.GetAttributes().Remove(this.activeImmuneModifiers[disease.id]);
+						this.activeImmuneModifiers.Remove(disease.id);
 					}
 				}
 			}
-			this.lastHighestDisease = disease;
-			base.sm.isLosingImmunity.Set(attributeInstance.GetTotalValue() < 0f, base.smi);
+			this.lastHighestDisease = disease3;
+			base.sm.isLosingImmunity.Set(this.immuneDelta.GetTotalValue() < 0f, base.smi);
 		}
 
 		public void ClearInternalDisease()
 		{
-			Modifiers component = base.gameObject.GetComponent<Modifiers>();
-			Amounts amounts = component.GetAmounts();
-			foreach (Disease disease in Db.Get().Diseases)
+			Klei.AI.Amounts amounts = this.modifiers.GetAmounts();
+			global::Database.Diseases diseases = Db.Get().Diseases;
+			for (int i = 0; i < diseases.Count; i++)
 			{
+				Disease disease = diseases[i];
 				AmountInstance amountInstance = amounts.Get(disease.amount);
 				amountInstance.SetValue(0f);
 				if (this.activeImmuneModifiers.ContainsKey(disease.id))
@@ -258,7 +265,7 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 
 		private void UpdateReports()
 		{
-			ReportManager.Instance.ReportValue(ReportManager.ReportType.DiseaseStatus, (float)this.primaryElement.DiseaseCount, string.Format(UI.ENDOFDAYREPORT.NOTES.GERMS, base.master.name));
+			ReportManager.Instance.ReportValue(ReportManager.ReportType.DiseaseStatus, (float)this.primaryElement.DiseaseCount, string.Format(UI.ENDOFDAYREPORT.NOTES.GERMS, base.master.name), base.master.gameObject.GetProperName());
 		}
 
 		private const float LOW_IMMUNE_LEVEL = 40f;
@@ -270,9 +277,11 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 
 		public Dictionary<HashedString, AttributeModifier> diseaseCountMultModifiers;
 
-		private Diseases activeDiseases;
+		private Klei.AI.Diseases activeDiseases;
 
 		private PrimaryElement primaryElement;
+
+		private Modifiers modifiers;
 
 		public Effects effects;
 
@@ -281,6 +290,8 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 		public AttributeModifier immuneSuppress;
 
 		public AttributeConverterInstance immuneBoostConverter;
+
+		private AttributeInstance immuneDelta;
 
 		public Disease lastHighestDisease;
 

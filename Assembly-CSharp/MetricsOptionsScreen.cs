@@ -8,21 +8,21 @@ public class MetricsOptionsScreen : KModalScreen
 	{
 		base.OnSpawn();
 		this.title.SetText(UI.FRONTEND.METRICS_OPTIONS_SCREEN.TITLE);
-		GameObject gameObject = this.enableButton.transform.GetChild(0).gameObject;
+		GameObject gameObject = this.enableButton.GetComponent<HierarchyReferences>().GetReference("Button").gameObject;
 		gameObject.GetComponent<ToolTip>().SetSimpleTooltip(UI.FRONTEND.METRICS_OPTIONS_SCREEN.TOOLTIP);
 		gameObject.transform.GetChild(0).gameObject.SetActive(ThreadedHttps<KleiMetrics>.Instance.enabled);
 		gameObject.GetComponent<KButton>().onClick += delegate
 		{
 			this.EnableToggle();
 		};
-		LocText component = this.enableButton.transform.GetChild(1).GetComponent<LocText>();
-		component.SetText(UI.FRONTEND.METRICS_OPTIONS_SCREEN.ENABLE_BUTTON);
+		LocText reference = this.enableButton.GetComponent<HierarchyReferences>().GetReference<LocText>("Text");
+		reference.SetText(UI.FRONTEND.METRICS_OPTIONS_SCREEN.ENABLE_BUTTON);
 		this.dismissButton.onClick += delegate
 		{
 			this.Deactivate();
 		};
-		LocText component2 = this.dismissButton.transform.GetChild(0).GetComponent<LocText>();
-		component2.SetText(UI.FRONTEND.METRICS_OPTIONS_SCREEN.DONE_BUTTON);
+		LocText reference2 = this.dismissButton.GetComponent<HierarchyReferences>().GetReference<LocText>("Text");
+		reference2.SetText(UI.FRONTEND.METRICS_OPTIONS_SCREEN.DONE_BUTTON);
 		this.closeButton.onClick += delegate
 		{
 			this.Deactivate();
@@ -32,7 +32,7 @@ public class MetricsOptionsScreen : KModalScreen
 	private void EnableToggle()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetEnabled(!ThreadedHttps<KleiMetrics>.Instance.enabled);
-		this.enableButton.transform.GetChild(0).GetChild(0).gameObject.SetActive(ThreadedHttps<KleiMetrics>.Instance.enabled);
+		this.enableButton.GetComponent<HierarchyReferences>().GetReference("CheckMark").gameObject.SetActive(ThreadedHttps<KleiMetrics>.Instance.enabled);
 	}
 
 	public LocText title;

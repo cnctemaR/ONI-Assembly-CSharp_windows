@@ -28,6 +28,7 @@ public class CompostConfig : IBuildingConfig
 		Compost compost = go.AddOrGet<Compost>();
 		compost.emitHash = SimHashes.Fertilizer;
 		compost.emitMassThreshold = 10f;
+		compost.simulatedInternalTemperature = 348.15f;
 		CompostWorkable compostWorkable = go.AddOrGet<CompostWorkable>();
 		compostWorkable.workTime = 20f;
 		compostWorkable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_compost_kanim") };
@@ -38,7 +39,7 @@ public class CompostConfig : IBuildingConfig
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(0.1f, SimHashes.Fertilizer, 323.15f, true, 0.5f, 1f, false, 1f, byte.MaxValue, 0)
+			new ElementConverter.OutputElement(0.1f, SimHashes.Fertilizer, 348.15f, true, 0.5f, 1f, false, 1f, byte.MaxValue, 0)
 		};
 		elementConverter.conversionInterval = 1f;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
@@ -61,4 +62,6 @@ public class CompostConfig : IBuildingConfig
 	public const float SAND_INPUT_PER_SECOND = 0.1f;
 
 	public const float FERTILIZER_OUTPUT_PER_SECOND = 0.1f;
+
+	public const float FERTILIZER_OUTPUT_TEMP = 348.15f;
 }

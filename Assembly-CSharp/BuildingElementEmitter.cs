@@ -4,7 +4,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-public class BuildingElementEmitter : KMonoBehaviour, IEffectDescriptor
+public class BuildingElementEmitter : KMonoBehaviour, IElementEmitter, IEffectDescriptor
 {
 	public float AverageEmitRate
 	{
@@ -63,7 +63,7 @@ public class BuildingElementEmitter : KMonoBehaviour, IEffectDescriptor
 			this.accumulator.Accumulate(emittedMassInfo.mass);
 			if (this.element == SimHashes.Oxygen)
 			{
-				ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, emittedMassInfo.mass, null);
+				ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, emittedMassInfo.mass, base.gameObject.GetProperName(), null);
 			}
 		}
 	}
@@ -148,8 +148,8 @@ public class BuildingElementEmitter : KMonoBehaviour, IEffectDescriptor
 	[SerializeField]
 	public float temperature = 293f;
 
-	[HashedEnum]
 	[SerializeField]
+	[HashedEnum]
 	public SimHashes element = SimHashes.Oxygen;
 
 	[SerializeField]

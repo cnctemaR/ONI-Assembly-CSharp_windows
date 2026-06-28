@@ -314,7 +314,7 @@ public class ScenePartitioner
 							{
 								entries[k] = null;
 							}
-							else if (scenePartitionerEntry.x < x + width && scenePartitionerEntry.x + scenePartitionerEntry.width >= x && scenePartitionerEntry.y < y + height && scenePartitionerEntry.y + scenePartitionerEntry.height >= y)
+							else if (x + width - 1 >= scenePartitionerEntry.x && x <= scenePartitionerEntry.x + scenePartitionerEntry.width - 1 && y + height - 1 >= scenePartitionerEntry.y && y <= scenePartitionerEntry.y + scenePartitionerEntry.height - 1)
 							{
 								scenePartitionerEntry.queryId = this.queryId;
 								gathered_entries.Add(scenePartitionerEntry);

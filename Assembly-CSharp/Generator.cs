@@ -3,8 +3,8 @@ using System.Diagnostics;
 using KSerialization;
 using UnityEngine;
 
-[DebuggerDisplay("{name}")]
 [SerializationConfig(MemberSerialization.OptIn)]
+[DebuggerDisplay("{name}")]
 public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 {
 	public int PowerDistributionOrder
@@ -79,7 +79,7 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 	{
 		get
 		{
-			return Grid.Objects[this.PowerCell, 19] != null;
+			return Grid.Objects[this.PowerCell, 20] != null;
 		}
 	}
 
@@ -105,10 +105,11 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 	{
 		base.OnSpawn();
 		Components.Generators.Add(this);
+		this.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 		this.capacity = Generator.CalculateCapacity(this.building.Def, null);
 		this.PowerCell = this.building.GetPowerOutputCell();
-		Game.Instance.circuitManager.Connect(this);
 		this.CheckConnectionStatus();
+		this.OnOperationalChanged(null);
 	}
 
 	protected virtual void SimUpdate(float dt)
@@ -136,15 +137,18 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 			if (this.HasWire)
 			{
 				this.SetStatusItem(Db.Get().BuildingStatusItems.NoPowerConsumers);
+				this.operational.SetFlag(Generator.generatorConnectedFlag, true);
 			}
 			else
 			{
 				this.SetStatusItem(Db.Get().BuildingStatusItems.NoWireConnected);
+				this.operational.SetFlag(Generator.generatorConnectedFlag, false);
 			}
 		}
 		else
 		{
 			this.SetStatusItem(null);
+			this.operational.SetFlag(Generator.generatorConnectedFlag, true);
 		}
 	}
 
@@ -204,7 +208,19 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 	public void GenerateJoules(float joulesAvailable, bool canOverPower = false)
 	{
 		this.joulesAvailable = Mathf.Clamp(joulesAvailable, 0f, (!canOverPower) ? this.Capacity : float.MaxValue);
-		ReportManager.Instance.ReportValue(ReportManager.ReportType.EnergyCreated, this.joulesAvailable, null);
+		ReportManager.Instance.ReportValue(ReportManager.ReportType.EnergyCreated, this.joulesAvailable, this.GetProperName(), null);
+	}
+
+	private void OnOperationalChanged(object data)
+	{
+		if (this.operational.IsOperational)
+		{
+			Game.Instance.circuitManager.Connect(this);
+		}
+		else
+		{
+			Game.Instance.circuitManager.Disconnect(this);
+		}
 	}
 
 	protected const int SimUpdateSortKey = 1001;
@@ -226,6 +242,8 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 
 	[SerializeField]
 	public int powerDistributionOrder;
+
+	public static readonly Operational.Flag generatorConnectedFlag = new Operational.Flag("GeneratorConnected", Operational.Flag.Type.Requirement);
 
 	private float capacity;
 

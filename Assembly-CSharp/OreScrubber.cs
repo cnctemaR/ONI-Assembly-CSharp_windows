@@ -114,9 +114,9 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IEffec
 		{
 		}
 
-		public override bool InternalCanBegin(GameObject new_reactor)
+		public override bool InternalCanBegin(GameObject new_reactor, Navigator.ActiveTransition transition)
 		{
-			if (base.InternalCanBegin(new_reactor))
+			if (base.InternalCanBegin(new_reactor, transition))
 			{
 				Storage component = new_reactor.GetComponent<Storage>();
 				if (component != null && OreScrubber.GetFirstInfected(component) != null)

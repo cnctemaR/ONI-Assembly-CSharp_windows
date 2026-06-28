@@ -20,7 +20,6 @@ public class WallDamageSoundEvent : SoundEvent
 			vector = Grid.CellToPos(this.tile);
 			EventInstance eventInstance = SoundEvent.BeginOneShot(base.sound, vector);
 			eventInstance.setParameterValue("material_ID", (float)audioCategory);
-			AudioEventManager.Get().PlayTimedOnceOff(vector, base.noiseValues.amount, base.noiseValues.radius, behaviour.GetComponent<KSelectable>().GetName(), 1f);
 			SoundEvent.EndOneShot(eventInstance);
 		}
 	}

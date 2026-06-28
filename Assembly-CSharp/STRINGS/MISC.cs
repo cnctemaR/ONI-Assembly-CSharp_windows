@@ -28,6 +28,8 @@ namespace STRINGS
 
 			public static LocString ALLOY = "Alloy";
 
+			public static LocString BAGABLECREATURE = "Creatures";
+
 			public static LocString LIFE = "Life";
 
 			public static LocString LIQUIFIABLE = "Liquifiable";
@@ -98,6 +100,8 @@ namespace STRINGS
 
 			public static LocString COOKINGINGREDIENT = "Cooking Ingredient";
 
+			public static LocString MEDICINE = "Medicine";
+
 			public static LocString SEED = "Seed";
 
 			public static LocString ANYWATER = "Water Based";
@@ -107,6 +111,14 @@ namespace STRINGS
 			public static LocString COMPOSTMEAT = "Compost Meat";
 
 			public static LocString PICKLED = "Pickled";
+
+			public static LocString PLASTIC = "Plastic";
+
+			public static LocString TOILET = "Toilet";
+
+			public static LocString ANTISEPTIC = "Antiseptic";
+
+			public static LocString OIL = "Hydrocarbon";
 
 			public static LocString GENE_SHUFFLER = "Neural Vacillator";
 		}
@@ -263,14 +275,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "{Category}";
 
-				public static LocString TOOLTIP = "The selected item belongs to the {Category} resource category";
+				public static LocString TOOLTIP = "The selected object belongs to the {Category} resource category";
 			}
 
 			public class ELEMENTALMASS
 			{
 				public static LocString NAME = "{Mass}";
 
-				public static LocString TOOLTIP = "The selected item has a mass of {Mass}";
+				public static LocString TOOLTIP = "The selected object has a mass of {Mass}";
 			}
 
 			public class ELEMENTALDISEASE
@@ -284,7 +296,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "{Temp}";
 
-				public static LocString TOOLTIP = "The selected item is currently {Temp}";
+				public static LocString TOOLTIP = "The selected object is currently {Temp}";
 			}
 
 			public class BURIEDITEM
@@ -529,7 +541,7 @@ namespace STRINGS
 
 				public static LocString MESSAGEBODY = "<style=\"liquid\">Polluted Water</style> emits <style=\"gas\">Polluted Oxygen</style> and can accelerate the spread of <style=\"disease\">Disease</style> through your base.\n\nSmall accidents can be cleaned up by clicking and dragging with the <style=\"misc\">MOP TOOL</style> <color=#F44A47><b>[M]</b></color>, while larger bodies may be worth filtering. Polluted water also <style=\"stress\">Stresses</style> out Duplicants that come into contact with it, so it is best removed quickly for your colony's safety.";
 
-				public static LocString TOOLTIP = "Learn how to hand polluted materials";
+				public static LocString TOOLTIP = "Learn how to handle polluted materials";
 			}
 
 			public class LOCOMOTIONMESSAGE
@@ -554,7 +566,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "TIP: Fetching Water";
 
-				public static LocString MESSAGEBODY = "In order to carry <style=\"liquid\">Liquids</style> from place to place, Duplicants must first bottle them for transport.\n\nBuild Liquid Bottlers over pools of liquid from the <style=\"misc\">PLUMBING TAB</style> of the <style=\"misc\">BUILD MENU</style> to pump those liquids into bottles. Duplicants will then automatically deliver the bottled liquids where they need to go.";
+				public static LocString MESSAGEBODY = "In order to carry <style=\"liquid\">Liquids</style> from place to place, Duplicants must first bottle them for transport.\n\nBuild Pitcher Pumps over pools of liquid from the <style=\"misc\">PLUMBING TAB</style> of the <style=\"misc\">BUILD MENU</style> to pump those liquids into bottles. Duplicants will then automatically deliver the bottled liquids where they need to go.";
 
 				public static LocString TOOLTIP = "How to fetch a pail of water";
 			}
@@ -610,7 +622,16 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Learn how to manage food contamination";
 
-				public static LocString MESSAGEBODY = "The <style=\"food\">food</style> your Duplicants make is only as clean as the <style=\"solid\">ingredients</style> used to make it. Storing food in sterile or <style=\"heat\">Refrigerated</style> environments will keep the produced food clean, while carefully placed hygene systems will prevent your cooks from infecting the food while they handle it.\n\nDangerously contaminated food can be recycled by clicking the <style=\"misc\">COMPOST</style> button on the selected item.";
+				public static LocString MESSAGEBODY = "The <style=\"food\">food</style> your Duplicants make is only as clean as the <style=\"solid\">ingredients</style> used to make it. Storing food in sterile or <style=\"heat\">Refrigerated</style> environments will keep the produced food clean, while carefully placed hygiene systems will prevent your cooks from infecting the food while they handle it.\n\nDangerously contaminated food can be recycled by clicking the <style=\"misc\">COMPOST</style> button on the selected item.";
+			}
+
+			public class SUITS
+			{
+				public static LocString NAME = "TIP: Exosuits";
+
+				public static LocString TOOLTIP = "Learn about exosuits";
+
+				public static LocString MESSAGEBODY = "<style=\"equipment\">Exosuits</style> protect your Duplicants from environmental hazards like extreme <style=\\heat\">Heat</style>, airborne <style=\"disease\">Germs</style>, and unbreathable <style=\"gas\">Gases</style>. In order to utilize these suits, you'll need to store them in an Exosuit Dock and hook that dock up to a Suit Checkpoint.\n\nDuplicants will equip an exosuit when walking past a Checkpoint in the direction it's facing and will unequip the suit when walking the oppposite way.";
 			}
 
 			public class NOMESSAGES
@@ -747,7 +768,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Colony requires Med-Beds";
 
-				public static LocString TOOLTIP = "Your sick Duplicants have no where to rest or receive medical aid";
+				public static LocString TOOLTIP = "Your sick Duplicants have nowhere to rest or receive medical aid";
 			}
 
 			public class NEEDTOILET
@@ -768,7 +789,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Colony requires wash basins";
 
-				public static LocString TOOLTIP = "<style=\"disease\">Germs</style> are spreading in your colony because your Duplicants have no where to clean up";
+				public static LocString TOOLTIP = "<style=\"disease\">Germs</style> are spreading in your colony because your Duplicants have nowhere to clean up";
 			}
 
 			public class NEEDSLEEP
@@ -952,6 +973,13 @@ namespace STRINGS
 				public static LocString NAME = "Fabricator idle";
 
 				public static LocString TOOLTIP = "These fabricators have no recipes queued:";
+			}
+
+			public class SUIT_DROPPED
+			{
+				public static LocString NAME = "No Docks available";
+
+				public static LocString TOOLTIP = "An exosuit was dropped because there were no empty Exosuit Docks available";
 			}
 
 			public class DEATH_SUFFOCATION

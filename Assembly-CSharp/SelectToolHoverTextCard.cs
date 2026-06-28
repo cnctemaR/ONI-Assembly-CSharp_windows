@@ -26,6 +26,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 			return Grid.Element[num3].IsLiquid;
 		});
 		this.overlayFilterMap.Add(SimViewMode.Decor, () => false);
+		this.overlayFilterMap.Add(SimViewMode.Rooms, () => false);
 	}
 
 	public override void ConfigureHoverScreen()
@@ -52,13 +53,13 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 		instance.NewLine("OverlayInfo", 24);
 		this.hoverScreenElements.OverlayInfo = instance.AddText(string.Empty, this.Styles_BodyText.Standard, true);
 		instance.EndShadowBar();
-		this.hoverScreenElements.OverlayInfoDivider = instance.NewLine("Divider", this.divederHeight);
+		this.hoverScreenElements.OverlayInfoDivider = instance.NewLine("Divider", this.dividerHeight);
 		this.hoverScreenElements.selectableHoverFields = new SelectToolHoverTextCard.SelectableHoverFields[this.maxNumberOfDisplaySelectables];
 		for (int i = 0; i < this.maxNumberOfDisplaySelectables; i++)
 		{
 			if (i != 0)
 			{
-				this.hoverScreenElements.selectableHoverFields[i].selectableDivider = instance.NewLine("Divider", this.divederHeight);
+				this.hoverScreenElements.selectableHoverFields[i].selectableDivider = instance.NewLine("Divider", this.dividerHeight);
 			}
 			this.hoverScreenElements.selectableHoverFields[i].shadowBar = instance.StartShadowBar(0f, 0f, i == this.currentSelectedSelectableIndex);
 			instance.NewLine("SelectableName", 24);
@@ -85,7 +86,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 			this.hoverScreenElements.selectableHoverFields[i].selectableTemperature = instance.AddText(string.Empty, this.Styles_Values.Property.Standard, true);
 			instance.EndShadowBar();
 		}
-		this.hoverScreenElements.selectableHoverFields[0].selectableDivider = instance.NewLine("Divider", this.divederHeight);
+		this.hoverScreenElements.selectableHoverFields[0].selectableDivider = instance.NewLine("Divider", this.dividerHeight);
 		this.hoverScreenElements.cellElement.ElementShadowBar = instance.StartShadowBar(0f, 0f, false);
 		instance.NewLine("Line_ElementName", 24);
 		this.hoverScreenElements.cellElement.ElementName = instance.AddText(string.Empty, this.Styles_Title.Standard, true);
@@ -136,7 +137,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 
 	private bool IsStatusItemWarning(StatusItemGroup.Entry item)
 	{
-		return item.item.notificationType == NotificationType.Bad || item.item.notificationType == NotificationType.BadMinor;
+		return item.item.notificationType == NotificationType.Bad || item.item.notificationType == NotificationType.BadMinor || item.item.notificationType == NotificationType.DuplicantThreatening;
 	}
 
 	public override void UpdateHoverElements(KSelectable[] hoverObjects)
@@ -154,6 +155,10 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 			}
 		}
 		this.currentSelectedSelectableIndex = -1;
+		if (SelectToolHoverTextCard.highlightedObjects.Count > 0)
+		{
+			SelectToolHoverTextCard.highlightedObjects.Clear();
+		}
 		int num = Grid.PosToCell(Camera.main.ScreenToWorldPoint(Input.mousePosition));
 		if (!Grid.IsValidCell(num))
 		{
@@ -354,6 +359,9 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 		base.SetLineActive(this.hoverScreenElements.cellElement.ElementDisease.transform.parent.gameObject, (Grid.Disease[num].elementCount > 0 || flag) && flag2);
 		base.SetLineActive(this.hoverScreenElements.cellElement.ElementCategory.transform.parent.gameObject, flag2);
 		base.SetLineActive(this.hoverScreenElements.cellElement.ElementTemperature.transform.parent.gameObject, !Grid.Element[num].IsVacuum && flag2);
+		base.SetLineActive(this.hoverScreenElements.cellElement.BuriedItem.transform.parent.gameObject, flag2);
+		base.SetLineActive(this.hoverScreenElements.FlowRateStatusLine.transform.parent.gameObject, false);
+		base.SetLineActive(this.hoverScreenElements.AverageFlowRateLine.transform.parent.gameObject, false);
 		bool flag8 = flag2 && num2 > 0;
 		base.SetLineActive(this.hoverScreenElements.selectableHoverFields[0].selectableDivider, flag8);
 		if (flag2)
@@ -443,97 +451,182 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 		string text6 = string.Empty;
 		string text7 = string.Empty;
 		SimViewMode mode2 = SimDebugView.Instance.GetMode();
-		if (mode2 != SimViewMode.HeatFlow)
+		if (mode2 != SimViewMode.Rooms)
 		{
-			if (mode2 != SimViewMode.Disease)
+			if (mode2 != SimViewMode.HeatFlow)
 			{
-				if (mode2 == SimViewMode.Decor)
+				if (mode2 != SimViewMode.Disease)
 				{
-					List<DecorProvider> list = new List<DecorProvider>();
-					GameScenePartitioner.Instance.TriggerEvent(num, GameScenePartitioner.Instance.decorProviderLayer, list);
-					text5 = string.Concat(new object[]
+					if (mode2 == SimViewMode.Decor)
 					{
-						UI.OVERLAYS.DECOR.TOTAL,
-						" ",
-						Db.Get().BuildingAttributes.Decor.Name,
-						": ",
-						GameUtil.GetDecorAtCell(num)
-					});
-					if (!Grid.Solid[num])
-					{
-						List<EffectorEntry> list2 = new List<EffectorEntry>();
-						foreach (DecorProvider decorProvider in list)
+						List<DecorProvider> list = new List<DecorProvider>();
+						GameScenePartitioner.Instance.TriggerEvent(num, GameScenePartitioner.Instance.decorProviderLayer, list);
+						float decorAtCell = GameUtil.GetDecorAtCell(num);
+						text5 = UI.OVERLAYS.DECOR.TOTAL + GameUtil.GetFormattedDecor(decorAtCell);
+						if (!Grid.Solid[num])
 						{
-							int decorForCell = decorProvider.GetDecorForCell(num);
-							if (decorForCell != 0)
+							List<EffectorEntry> list2 = new List<EffectorEntry>();
+							List<EffectorEntry> list3 = new List<EffectorEntry>();
+							foreach (DecorProvider decorProvider in list)
 							{
-								string name = decorProvider.GetName();
-								bool flag14 = false;
-								for (int num6 = 0; num6 < list2.Count; num6++)
+								float decorForCell = decorProvider.GetDecorForCell(num);
+								if (decorForCell != 0f)
 								{
-									if (list2[num6].name == name)
+									string name = decorProvider.GetName();
+									KMonoBehaviour component5 = decorProvider.GetComponent<KMonoBehaviour>();
+									if (component5 != null && component5.gameObject != null)
 									{
-										EffectorEntry effectorEntry = list2[num6];
-										effectorEntry.count++;
-										effectorEntry.value += decorForCell;
-										list2[num6] = effectorEntry;
-										flag14 = true;
-										break;
+										SelectToolHoverTextCard.highlightedObjects.Add(component5.gameObject);
+									}
+									bool flag14 = false;
+									if (decorForCell > 0f)
+									{
+										for (int num6 = 0; num6 < list2.Count; num6++)
+										{
+											if (list2[num6].name == name)
+											{
+												EffectorEntry effectorEntry = list2[num6];
+												effectorEntry.count++;
+												effectorEntry.value += decorForCell;
+												list2[num6] = effectorEntry;
+												flag14 = true;
+												break;
+											}
+										}
+										if (!flag14)
+										{
+											list2.Add(new EffectorEntry(name, decorForCell));
+										}
+									}
+									else
+									{
+										for (int num7 = 0; num7 < list3.Count; num7++)
+										{
+											if (list3[num7].name == name)
+											{
+												EffectorEntry effectorEntry2 = list3[num7];
+												effectorEntry2.count++;
+												effectorEntry2.value += decorForCell;
+												list3[num7] = effectorEntry2;
+												flag14 = true;
+												break;
+											}
+										}
+										if (!flag14)
+										{
+											list3.Add(new EffectorEntry(name, decorForCell));
+										}
 									}
 								}
-								if (!flag14)
-								{
-									list2.Add(new EffectorEntry(name, decorForCell));
-								}
+							}
+							int lightDecorBonus = DecorProvider.GetLightDecorBonus(num);
+							if (lightDecorBonus > 0)
+							{
+								list2.Add(new EffectorEntry(UI.OVERLAYS.DECOR.LIGHTING, (float)lightDecorBonus));
+							}
+							list2.Sort((EffectorEntry x, EffectorEntry y) => y.value.CompareTo(x.value));
+							if (list2.Count > 0)
+							{
+								text5 = text5 + "\n\n" + UI.OVERLAYS.DECOR.HEADER_POSITIVE;
+							}
+							foreach (EffectorEntry effectorEntry3 in list2)
+							{
+								text5 = text5 + "\n• " + effectorEntry3.ToString();
+							}
+							list3.Sort((EffectorEntry x, EffectorEntry y) => Mathf.Abs(y.value).CompareTo(Mathf.Abs(x.value)));
+							if (list3.Count > 0)
+							{
+								text5 = text5 + "\n\n" + UI.OVERLAYS.DECOR.HEADER_NEGATIVE;
+							}
+							foreach (EffectorEntry effectorEntry4 in list3)
+							{
+								text5 = text5 + "\n• " + effectorEntry4.ToString();
 							}
 						}
-						int lightDecorBonus = DecorProvider.GetLightDecorBonus(num);
-						if (lightDecorBonus > 0)
-						{
-							list2.Add(new EffectorEntry(UI.OVERLAYS.DECOR.LIGHTING, lightDecorBonus));
-						}
-						list2.Sort((EffectorEntry x, EffectorEntry y) => y.value.CompareTo(x.value));
-						if (list2.Count > 0)
-						{
-							text5 += "\n";
-						}
-						foreach (EffectorEntry effectorEntry2 in list2)
-						{
-							text5 = text5 + "\n• " + effectorEntry2.ToString();
-						}
+						text5 += "\n";
+						text6 = UI.OVERLAYS.DECOR.HOVERTITLE;
+						text7 = text5;
 					}
-					text5 += "\n";
-					text6 = UI.OVERLAYS.DECOR.HOVERTITLE;
-					text7 = text5;
+				}
+				else
+				{
+					text7 = string.Empty;
 				}
 			}
-			else
+			else if (!Grid.Solid[num])
 			{
-				text7 = string.Empty;
+				float thermalComfort = GameUtil.GetThermalComfort(num, 0f);
+				float thermalComfort2 = GameUtil.GetThermalComfort(num, -0.08368001f);
+				float num8 = 0f;
+				if (thermalComfort2 * 0.001f > -0.27893335f - num8 && thermalComfort2 * 0.001f < 0.27893335f + num8)
+				{
+					text5 = UI.OVERLAYS.HEATFLOW.NEUTRAL;
+				}
+				else if (thermalComfort2 <= ExternalTemperatureMonitor.GetExternalColdThreshold(null))
+				{
+					text5 = UI.OVERLAYS.HEATFLOW.COOLING;
+				}
+				else if (thermalComfort2 >= ExternalTemperatureMonitor.GetExternalWarmThreshold(null))
+				{
+					text5 = UI.OVERLAYS.HEATFLOW.HEATING;
+				}
+				text5 = text5 + " (" + GameUtil.GetFormattedWattage(thermalComfort, GameUtil.WattageFormatterUnit.Automatic) + ")";
+				text7 = text5;
+				text6 = UI.OVERLAYS.HEATFLOW.HOVERTITLE;
 			}
 		}
-		else if (!Grid.Solid[num])
+		else
 		{
-			float thermalComfort = GameUtil.GetThermalComfort(num, 0f);
-			float thermalComfort2 = GameUtil.GetThermalComfort(num, -0.08368001f);
-			float num7 = 0f;
-			if (thermalComfort2 * 0.001f > -0.13946667f - num7 && thermalComfort2 * 0.001f < 0.13946667f + num7)
+			CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(num);
+			if (cavityForCell != null)
 			{
-				text5 = UI.OVERLAYS.HEATFLOW.NEUTRAL;
+				Room room = cavityForCell.room;
+				RoomTypes.RoomType roomType = null;
+				if (room != null)
+				{
+					roomType = RoomTypes.GetRoomType(room);
+					text6 = roomType.name;
+				}
+				else
+				{
+					text6 = UI.OVERLAYS.ROOMS.NOROOM.HEADER;
+				}
+				text5 = string.Empty;
+				if (room != null)
+				{
+					string text8 = string.Empty;
+					text8 = RoomDetails.EFFECT.resolve_string_function(room);
+					string text9 = string.Empty;
+					text9 = RoomDetails.ASSIGNED_TO.resolve_string_function(room);
+					string text10 = string.Empty;
+					text10 = RoomDetails.RoomDetailString(room);
+					string text11 = string.Empty;
+					text11 = RoomConstraints.RoomCriteriaString(room);
+					if (text8 != string.Empty)
+					{
+						text5 = text5 + text8 + "\n";
+					}
+					if (text9 != string.Empty && roomType != RoomTypes.neutral_type)
+					{
+						text5 = text5 + "\n" + text9 + "\n";
+					}
+					if (text10 != string.Empty)
+					{
+						text5 = text5 + "\n" + text10 + "\n";
+					}
+					if (text11 != string.Empty)
+					{
+						text5 = text5 + "\n" + text11 + "\n";
+					}
+				}
+				else
+				{
+					text5 += UI.OVERLAYS.ROOMS.NOROOM.DESC;
+				}
+				text7 = text5;
 			}
-			else if (thermalComfort2 <= ExternalTemperatureMonitor.GetExternalColdThreshold(null))
-			{
-				text5 = UI.OVERLAYS.HEATFLOW.COOLING;
-			}
-			else if (thermalComfort2 >= ExternalTemperatureMonitor.GetExternalWarmThreshold(null))
-			{
-				text5 = UI.OVERLAYS.HEATFLOW.HEATING;
-			}
-			text5 = text5 + " (" + GameUtil.GetFormattedWattage(thermalComfort, "F1") + ")";
-			text7 = text5;
-			text6 = UI.OVERLAYS.HEATFLOW.HOVERTITLE;
 		}
-		bool flag15 = SimDebugView.Instance.GetMode() != SimViewMode.None && text7 != string.Empty;
+		bool flag15 = SimDebugView.Instance.GetMode() != SimViewMode.None && text7 != string.Empty && (Grid.Visible[num] > 0 || DebugPaintElementScreen.Instance.gameObject.activeSelf);
 		this.hoverScreenElements.OverlayInfoHeader.text = text6;
 		this.hoverScreenElements.OverlayInfo.text = text7;
 		base.SetLineActive(this.hoverScreenElements.OverlayInfoHeader.transform.parent.gameObject, flag15);
@@ -639,13 +732,15 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 
 	public static int maxNumberOfDisplayedSelectableWarnings = 10;
 
-	private int divederHeight = 20;
+	private int dividerHeight = 20;
 
 	private Dictionary<SimViewMode, Func<bool>> overlayFilterMap = new Dictionary<SimViewMode, Func<bool>>();
 
 	public int recentNumberOfDisplayedSelectables;
 
 	public int currentSelectedSelectableIndex = -1;
+
+	public static List<GameObject> highlightedObjects = new List<GameObject>();
 
 	private SelectToolHoverTextCard.HoverScreenFields hoverScreenElements;
 

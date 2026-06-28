@@ -83,7 +83,7 @@ public class Disinfectable : Workable
 		{
 			this.isMarkedForDisinfect = true;
 			Prioritizable.AddRef(base.gameObject);
-			this.chore = new WorkChore<Disinfectable>(Db.Get().ChoreTypes.Disinfect, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true);
+			this.chore = new WorkChore<Disinfectable>(Db.Get().ChoreTypes.Disinfect, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, int.MaxValue);
 			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.MarkedForDisinfection, this);
 		}
 	}

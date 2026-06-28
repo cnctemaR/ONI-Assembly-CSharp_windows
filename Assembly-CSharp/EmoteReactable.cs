@@ -17,7 +17,7 @@ public class EmoteReactable : Reactable
 		return this;
 	}
 
-	public override bool InternalCanBegin(GameObject new_reactor)
+	public override bool InternalCanBegin(GameObject new_reactor, Navigator.ActiveTransition transition)
 	{
 		if (new_reactor == null)
 		{

@@ -162,7 +162,7 @@ public class NotificationScreen : KScreen
 			KImage componentInChildren = label.GetComponentInChildren<KImage>(true);
 			Button[] componentsInChildren = label.gameObject.GetComponentsInChildren<Button>();
 			ColorBlock colors = componentsInChildren[0].colors;
-			if (notification.Type == NotificationType.Bad)
+			if (notification.Type == NotificationType.Bad || notification.Type == NotificationType.DuplicantThreatening)
 			{
 				colors.normalColor = this.badColorBG;
 			}
@@ -221,7 +221,7 @@ public class NotificationScreen : KScreen
 				case NotificationType.Good:
 				case NotificationType.BadMinor:
 				case NotificationType.Neutral:
-					goto IL_02FD;
+					goto IL_0331;
 				case NotificationType.Tutorial:
 					locText.color = this.warningColor;
 					componentInChildren.sprite = this.icon_warning;
@@ -230,15 +230,19 @@ public class NotificationScreen : KScreen
 					locText.color = this.messageColor;
 					componentInChildren.sprite = this.icon_message;
 					break;
+				case NotificationType.DuplicantThreatening:
+					locText.color = this.badColor;
+					componentInChildren.sprite = this.icon_bad;
+					break;
 				default:
-					goto IL_02FD;
+					goto IL_0331;
 				}
-				IL_031B:
+				IL_034F:
 				componentInChildren.color = locText.color;
 				string text = string.Empty;
 				if (KTime.Instance.UnscaledGameTime - this.initTime > 5f && notification.playSound)
 				{
-					this.PlayDingSound(notification);
+					this.PlayDingSound(notification, 0);
 				}
 				else
 				{
@@ -250,14 +254,14 @@ public class NotificationScreen : KScreen
 				}
 				i++;
 				continue;
-				IL_02FD:
+				IL_0331:
 				locText.color = this.normalColor;
 				componentInChildren.sprite = this.icon_normal;
-				goto IL_031B;
+				goto IL_034F;
 			}
 		}
 		entry.Add(notification);
-		entry.UpdateMessage(notification.titleText);
+		entry.UpdateMessage(notification, true);
 		this.dirty = true;
 		this.SortNotifications();
 	}
@@ -298,7 +302,7 @@ public class NotificationScreen : KScreen
 		}
 	}
 
-	private void PlayDingSound(Notification notification)
+	private void PlayDingSound(Notification notification, int count)
 	{
 		string text;
 		if (!this.notificationSounds.TryGetValue(notification.Type, out text))
@@ -311,10 +315,23 @@ public class NotificationScreen : KScreen
 			num = 0f;
 		}
 		float num2 = (Time.time - num) / this.soundDecayTime;
-		EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound(this.notificationSounds[notification.Type], false), Vector3.zero);
+		this.timeOfLastNotification[text] = Time.time;
+		string text2;
+		if (count > 1)
+		{
+			text2 = GlobalAssets.GetSound(text + "_AddCount", true);
+			if (text2 == null)
+			{
+				text2 = GlobalAssets.GetSound(text, false);
+			}
+		}
+		else
+		{
+			text2 = GlobalAssets.GetSound(text, false);
+		}
+		EventInstance eventInstance = KFMOD.BeginOneShot(text2, Vector3.zero);
 		eventInstance.setParameterValue("timeSinceLast", num2);
 		KFMOD.EndOneShot(eventInstance);
-		this.timeOfLastNotification[text] = Time.time;
 	}
 
 	private void Update()
@@ -404,6 +421,7 @@ public class NotificationScreen : KScreen
 		this.notificationSounds[NotificationType.Neutral] = "Notification";
 		this.notificationSounds[NotificationType.Tutorial] = "Notification";
 		this.notificationSounds[NotificationType.Messages] = "Message";
+		this.notificationSounds[NotificationType.DuplicantThreatening] = "Warning_DupeThreatening";
 	}
 
 	public Color32 BadColorBG
@@ -496,24 +514,28 @@ public class NotificationScreen : KScreen
 		public void Add(Notification notification)
 		{
 			this.notifications.Add(notification);
-			this.UpdateMessage(notification.titleText);
+			this.UpdateMessage(notification, true);
 		}
 
 		public void Remove(Notification notification)
 		{
 			this.notifications.Remove(notification);
-			this.UpdateMessage(notification.titleText);
+			this.UpdateMessage(notification, false);
 		}
 
-		public void UpdateMessage(string base_message)
+		public void UpdateMessage(Notification notification, bool playSound = true)
 		{
 			if (Game.IsQuitting())
 			{
 				return;
 			}
-			this.message = base_message;
+			this.message = notification.titleText;
 			if (this.notifications.Count > 1)
 			{
+				if (playSound && (notification.Type == NotificationType.Bad || notification.Type == NotificationType.DuplicantThreatening))
+				{
+					NotificationScreen.Instance.PlayDingSound(notification, this.notifications.Count);
+				}
 				this.message = this.message + " (" + this.notifications.Count.ToString() + ")";
 			}
 			if (this.label.gameObject != null)

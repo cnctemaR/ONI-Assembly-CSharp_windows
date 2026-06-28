@@ -98,6 +98,7 @@ public class ResearchScreen : KModalScreen
 		};
 		base.StartCoroutine(this.WaitAndSetActiveResearch());
 		ManagementMenu.Instance.AddResearchScreen(this);
+		this.foreground.GetComponent<KScrollRect>().allowHorizontalScrollWheel = false;
 		base.OnSpawn();
 		base.Show(false);
 	}

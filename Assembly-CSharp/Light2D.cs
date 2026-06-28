@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using STRINGS;
 using UnityEngine;
 
-public class Light2D : KMonoBehaviour
+public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 {
 	public float IntensityAnimation { get; set; }
 
@@ -37,6 +39,16 @@ public class Light2D : KMonoBehaviour
 	protected override void OnCleanUp()
 	{
 		this.UnregisterLight();
+		if (this.solidPartitionerEntry != null)
+		{
+			this.solidPartitionerEntry.Release();
+			this.solidPartitionerEntry = null;
+		}
+		if (this.liquidPartitionerEntry != null)
+		{
+			this.liquidPartitionerEntry.Release();
+			this.liquidPartitionerEntry = null;
+		}
 	}
 
 	private void UnregisterLight()
@@ -112,9 +124,15 @@ public class Light2D : KMonoBehaviour
 		this.Refresh();
 	}
 
-	public Color Color = Color.white;
+	public List<Descriptor> GetDescriptors(GameObject go)
+	{
+		return new List<Descriptor>
+		{
+			new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.EMITS_LIGHT, this.Range), UI.GAMEOBJECTEFFECTS.TOOLTIPS.EMITS_LIGHT, Descriptor.DescriptorType.Effect, false)
+		};
+	}
 
-	public float Intensity = 5f;
+	public Color Color = Color.white;
 
 	public float Range = 5f;
 

@@ -41,7 +41,6 @@ public class Stinky : StateMachineComponent<Stinky.StatesInstance>
 		float value = Db.Get().Amounts.Temperature.Lookup(this).value;
 		SimMessages.AddRemoveSubstance(num2, SimHashes.ContaminatedOxygen, CellEventLogger.Instance.ElementConsumerSimUpdate, 0.0025000002f, value, byte.MaxValue, 0, -1);
 		KFMOD.PlayOneShot(GlobalAssets.GetSound("Dupe_Flatulence", false), this.transform.position);
-		ReportManager.Instance.ReportValue(ReportManager.ReportType.ContaminatedOxygenFlatulence, 0.0025000002f, null);
 	}
 
 	private void OnDeath(object data)

@@ -103,7 +103,7 @@ public class WorldGenSpawner : KMonoBehaviour
 	public void AddLegacySpawner(Tag tag, int cell)
 	{
 		Vector2I vector2I = Grid.CellToXY(cell);
-		this.AddSpawnable(new Prefab(tag.Name, Prefab.Type.Other, vector2I.x, vector2I.y, SimHashes.Carbon, 300f, 1f, null, 0, Orientation.Neutral, null, null, 0));
+		this.AddSpawnable(new Prefab(tag.Name, Prefab.Type.Other, vector2I.x, vector2I.y, SimHashes.Carbon, -1f, 1f, null, 0, Orientation.Neutral, null, null, 0));
 	}
 
 	private void PlaceTemplates()
@@ -259,8 +259,8 @@ public class WorldGenSpawner : KMonoBehaviour
 
 		private Tag GetPrefabTag()
 		{
-			Mob mob;
-			if (WorldGen.Settings.mobs.MobLookupTable.TryGetValue(this.spawnInfo.id, out mob) && mob.prefabName != null)
+			Mob mob = WorldGen.Settings.mobs.GetMob(this.spawnInfo.id);
+			if (mob != null && mob.prefabName != null)
 			{
 				return new Tag(mob.prefabName);
 			}

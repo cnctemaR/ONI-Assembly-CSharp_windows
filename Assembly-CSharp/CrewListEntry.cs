@@ -47,7 +47,7 @@ public class CrewListEntry : KMonoBehaviour, IPointerEnterHandler, IEventSystemH
 				this.portrait.transform.SetSiblingIndex(2);
 			}
 		}
-		this.portrait.SetCrewMember(_identity, true);
+		this.portrait.SetIdentityObject(_identity, true);
 	}
 
 	public virtual void Refresh()

@@ -10,10 +10,15 @@ public class IdleCellQuery : PathFinderQuery
 		return this;
 	}
 
+	public override bool CanTraverse(int cell, int from_cell, int cost, int underwater_cost)
+	{
+		return !Grid.PreventIdlingOnCell[cell] && !Grid.PreventIdlingOnCell[from_cell];
+	}
+
 	public override bool IsMatch(int cell, int parent_cell, int cost)
 	{
 		SafeCellQuery.SafeFlags flags = SafeCellQuery.GetFlags(cell, this.brain);
-		if ((flags & SafeCellQuery.SafeFlags.IsClear) != (SafeCellQuery.SafeFlags)0 && (flags & SafeCellQuery.SafeFlags.IsNotLadder) != (SafeCellQuery.SafeFlags)0 && (flags & SafeCellQuery.SafeFlags.HasSomeOxygen) != (SafeCellQuery.SafeFlags)0 && (flags & SafeCellQuery.SafeFlags.IsNotLiquid) != (SafeCellQuery.SafeFlags)0 && (flags & SafeCellQuery.SafeFlags.DoesNotRequireSuit) != (SafeCellQuery.SafeFlags)0 && (flags & SafeCellQuery.SafeFlags.IsNotLadder) != (SafeCellQuery.SafeFlags)0)
+		if ((flags & SafeCellQuery.SafeFlags.IsClear) != (SafeCellQuery.SafeFlags)0 && (flags & SafeCellQuery.SafeFlags.IsNotLadder) != (SafeCellQuery.SafeFlags)0 && (flags & SafeCellQuery.SafeFlags.HasSomeOxygen) != (SafeCellQuery.SafeFlags)0 && (flags & SafeCellQuery.SafeFlags.IsNotLiquid) != (SafeCellQuery.SafeFlags)0)
 		{
 			this.targetCell = cell;
 		}

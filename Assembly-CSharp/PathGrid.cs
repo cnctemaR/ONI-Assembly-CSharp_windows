@@ -25,6 +25,11 @@ public class PathGrid
 		this.Cells = new PathFinder.Cell[width_in_cells * height_in_cells * this.ValidNavTypes.Length];
 	}
 
+	public PathFinder.Cell GetCell(PathFinder.PotentialPath potential_path)
+	{
+		return this.GetCell(potential_path.cell, potential_path.navType);
+	}
+
 	public PathFinder.Cell GetCell(int cell, NavType nav_type)
 	{
 		int num = this.OffsetCell(cell);
@@ -40,14 +45,14 @@ public class PathGrid
 		return this.Cells[num3];
 	}
 
-	public void SetCell(int cell, NavType nav_type, ref PathFinder.Cell cell_data)
+	public void SetCell(PathFinder.PotentialPath potential_path, ref PathFinder.Cell cell_data)
 	{
-		int num = this.OffsetCell(cell);
+		int num = this.OffsetCell(potential_path.cell);
 		if (!this.IsValidOffsetCell(num))
 		{
 			return;
 		}
-		int num2 = this.NavTypeTable[(int)nav_type];
+		int num2 = this.NavTypeTable[(int)potential_path.navType];
 		int num3 = num * this.ValidNavTypes.Length + num2;
 		this.Cells[num3] = cell_data;
 	}

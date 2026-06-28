@@ -4,9 +4,9 @@ using Newtonsoft.Json.Converters;
 
 public struct BindingEntry
 {
-	public BindingEntry(string screen, GamepadButton button, KKeyCode key_code, Modifier modifier, global::Action action, bool rebindable = true)
+	public BindingEntry(string group, GamepadButton button, KKeyCode key_code, Modifier modifier, global::Action action, bool rebindable = true)
 	{
-		this.mScreen = screen;
+		this.mGroup = group;
 		this.mButton = button;
 		this.mKeyCode = key_code;
 		this.mAction = action;
@@ -54,7 +54,7 @@ public struct BindingEntry
 
 	public static bool operator ==(BindingEntry a, BindingEntry b)
 	{
-		return a.mScreen == b.mScreen && a.mButton == b.mButton && a.mKeyCode == b.mKeyCode && a.mAction == b.mAction && a.mModifier == b.mModifier && a.mRebindable == b.mRebindable;
+		return a.mGroup == b.mGroup && a.mButton == b.mButton && a.mKeyCode == b.mKeyCode && a.mAction == b.mAction && a.mModifier == b.mModifier && a.mRebindable == b.mRebindable;
 	}
 
 	public static bool operator !=(BindingEntry a, BindingEntry b)
@@ -63,7 +63,7 @@ public struct BindingEntry
 	}
 
 	[JsonIgnore]
-	public string mScreen;
+	public string mGroup;
 
 	[JsonIgnore]
 	public bool mRebindable;

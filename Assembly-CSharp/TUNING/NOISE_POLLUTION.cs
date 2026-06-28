@@ -54,25 +54,25 @@ namespace TUNING
 			public static EffectorValues TIER3 = new EffectorValues
 			{
 				amount = 75,
-				radius = 10
+				radius = 15
 			};
 
 			public static EffectorValues TIER4 = new EffectorValues
 			{
 				amount = 90,
-				radius = 10
+				radius = 15
 			};
 
 			public static EffectorValues TIER5 = new EffectorValues
 			{
 				amount = 105,
-				radius = 10
+				radius = 20
 			};
 
 			public static EffectorValues TIER6 = new EffectorValues
 			{
 				amount = 125,
-				radius = 10
+				radius = 20
 			};
 		}
 

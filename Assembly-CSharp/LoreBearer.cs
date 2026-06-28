@@ -32,8 +32,8 @@ public class LoreBearer : KMonoBehaviour
 
 	private void OnClickRead()
 	{
-		LoreDialogScreen loreDialogScreen = (LoreDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.LoreDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
-		loreDialogScreen.PopupLoreDialog(this.content, Strings.Get("STRINGS.LORE.BUILDINGS." + base.gameObject.name + ".HEADER"), null);
+		InfoDialogScreen infoDialogScreen = (InfoDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.InfoDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
+		infoDialogScreen.SetHeader(Strings.Get("STRINGS.LORE.BUILDINGS." + base.gameObject.name + ".HEADER")).AddPlainText(this.content);
 	}
 
 	private UserMenu userMenu;

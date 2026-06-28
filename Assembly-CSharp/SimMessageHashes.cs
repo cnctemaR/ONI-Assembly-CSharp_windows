@@ -33,6 +33,7 @@ public enum SimMessageHashes
 	SetElementChunkData = -435115907,
 	MoveElementChunk = -374911358,
 	ModifyElementChunkEnergy = 1020555667,
+	ModifyChunkTemperatureAdjuster = -1387601379,
 	AddDiseaseEmitter = 1486783027,
 	ModifyDiseaseEmitter = -1899123924,
 	RemoveDiseaseEmitter = 468135926,

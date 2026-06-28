@@ -17,7 +17,7 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 		liquidConduitFlow.RegisterContentListener(this.inputCell, base.gameObject);
 		liquidConduitFlow.RegisterContentListener(this.outputCell, base.gameObject);
 		ToiletWorkableUse component2 = base.GetComponent<ToiletWorkableUse>();
-		component2.onComplete = new Action<Worker>(this.Flush);
+		component2.onStop = new Action<Worker>(this.Flush);
 		KBatchedAnimController component3 = base.GetComponent<KBatchedAnimController>();
 		this.fillMeter = new MeterController(component3, "meter_target", "meter", Meter.Offset.Behind, new Vector3(0.4f, 3.2f, 0.1f), new string[0]);
 		this.contaminationMeter = new MeterController(component3, "meter_target", "meter_dirty", Meter.Offset.Behind, new Vector3(0.4f, 3.2f, 0.1f), new string[0]);
@@ -267,8 +267,7 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 
 		private Chore CreateUseChore(FlushToilet.SMInstance smi)
 		{
-			ScheduleBlockType hygiene = Db.Get().ScheduleBlockTypes.Hygiene;
-			return new WorkChore<ToiletWorkableUse>(Db.Get().ChoreTypes.Pee, smi.master, null, true, null, null, null, false, hygiene, true, default(Tag), null, false, true, false);
+			return new WorkChore<ToiletWorkableUse>(Db.Get().ChoreTypes.Pee, smi.master, null, true, null, null, null, false, null, true, default(Tag), null, false, true, false, int.MaxValue);
 		}
 
 		public GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.State disconnected;

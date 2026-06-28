@@ -60,18 +60,17 @@ public class AdditionalDetailsPanel : TargetScreen
 		bool flag = false;
 		float num2;
 		float num3;
-		float num4;
 		Element element;
 		byte b;
-		int num5;
+		int num4;
 		if (component != null)
 		{
 			num2 = component.Mass;
-			num3 = component.Units;
-			num4 = component.Temperature;
+			float units = component.Units;
+			num3 = component.Temperature;
 			element = component.Element;
 			b = component.DiseaseIdx;
-			num5 = component.DiseaseCount;
+			num4 = component.DiseaseCount;
 			Attributes attributes = this.selectedTarget.GetAttributes();
 			if (attributes != null)
 			{
@@ -90,30 +89,17 @@ public class AdditionalDetailsPanel : TargetScreen
 				return;
 			}
 			num2 = component2.Mass;
-			num3 = 1f;
-			num4 = component2.temperature;
+			num3 = component2.temperature;
 			element = component2.element;
 			b = component2.diseaseIdx;
-			num5 = component2.diseaseCount;
+			num4 = component2.diseaseCount;
 		}
 		bool flag2 = element.id == SimHashes.Vacuum || element.id == SimHashes.Void;
 		float specificHeatCapacity = element.specificHeatCapacity;
 		float thermalConductivity = element.thermalConductivity;
 		float highTemp = element.highTemp;
 		float lowTemp = element.lowTemp;
-		GameObject gameObject;
-		if (component != null && component.CountableUnits)
-		{
-			gameObject = this.AddOrGetLabel(this.detailLabels, this.detailsPanel, "Units");
-			gameObject.GetComponent<LocText>().text = string.Format(UI.ELEMENTAL.UNITS.NAME, num3.ToString("F0"));
-			gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.ELEMENTAL.UNITS.TOOLTIP, num3.ToString("F0"), this.selectedTarget.GetProperName());
-		}
-		else
-		{
-			gameObject = this.AddOrGetLabel(this.detailLabels, this.detailsPanel, "Units");
-			gameObject.SetActive(false);
-		}
-		gameObject = this.AddOrGetLabel(this.detailLabels, this.detailsPanel, "Element");
+		GameObject gameObject = this.AddOrGetLabel(this.detailLabels, this.detailsPanel, "Element");
 		gameObject.GetComponent<LocText>().text = string.Format(UI.ELEMENTAL.PRIMARYELEMENT.NAME, element.name);
 		gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.ELEMENTAL.PRIMARYELEMENT.TOOLTIP, element.name);
 		gameObject = this.AddOrGetLabel(this.detailLabels, this.detailsPanel, "Mass");
@@ -121,12 +107,12 @@ public class AdditionalDetailsPanel : TargetScreen
 		gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.ELEMENTAL.MASS.TOOLTIP, GameUtil.GetFormattedMass(num2, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 		gameObject = this.AddOrGetLabel(this.detailLabels, this.detailsPanel, "Temperature");
 		gameObject.SetActive(!flag2);
-		gameObject.GetComponent<LocText>().text = string.Format(UI.ELEMENTAL.TEMPERATURE.NAME, GameUtil.GetFormattedTemperature(num4, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
-		gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.ELEMENTAL.TEMPERATURE.TOOLTIP, GameUtil.GetFormattedTemperature(num4, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
+		gameObject.GetComponent<LocText>().text = string.Format(UI.ELEMENTAL.TEMPERATURE.NAME, GameUtil.GetFormattedTemperature(num3, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
+		gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.ELEMENTAL.TEMPERATURE.TOOLTIP, GameUtil.GetFormattedTemperature(num3, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
 		gameObject = this.AddOrGetLabel(this.detailLabels, this.detailsPanel, "Disease");
 		gameObject.SetActive(!flag2);
-		gameObject.GetComponent<LocText>().text = string.Format(UI.ELEMENTAL.DISEASE.NAME, GameUtil.GetFormattedDisease(b, num5, false));
-		gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.ELEMENTAL.DISEASE.TOOLTIP, GameUtil.GetFormattedDisease(b, num5, true));
+		gameObject.GetComponent<LocText>().text = string.Format(UI.ELEMENTAL.DISEASE.NAME, GameUtil.GetFormattedDisease(b, num4, false));
+		gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.ELEMENTAL.DISEASE.TOOLTIP, GameUtil.GetFormattedDisease(b, num4, true));
 		gameObject = this.AddOrGetLabel(this.detailLabels, this.detailsPanel, "SHC");
 		gameObject.SetActive(!flag2);
 		gameObject.GetComponent<LocText>().text = string.Concat(new string[]
@@ -162,7 +148,7 @@ public class AdditionalDetailsPanel : TargetScreen
 			text += UI.HORIZONTAL_BR_RULE;
 			foreach (AttributeInstance.AttributeModifierEntry attributeModifierEntry in attributeInstance3.Modifiers)
 			{
-				text += string.Format(DUPLICANTS.ATTRIBUTES.MODIFIER_ENTRY, attributeModifierEntry.Modifier.Description, attributeModifierEntry.Modifier.GetFormattedString(attributeInstance3.gameObject));
+				text += string.Format(DUPLICANTS.ATTRIBUTES.MODIFIER_ENTRY, (attributeModifierEntry.Modifier.DescriptionCB == null) ? attributeModifierEntry.Modifier.Description : attributeModifierEntry.Modifier.DescriptionCB(), attributeModifierEntry.Modifier.GetFormattedString(attributeInstance3.gameObject));
 			}
 			return text;
 		};

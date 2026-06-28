@@ -43,9 +43,12 @@ public class BuildingHP : Workable
 
 	public void DoDamage(int damage)
 	{
-		damage = Math.Max(0, damage);
-		this.hitpoints = Math.Max(0, this.hitpoints - damage);
-		this.Trigger(-1964935036, this);
+		if (!this.invincible)
+		{
+			damage = Math.Max(0, damage);
+			this.hitpoints = Math.Max(0, this.hitpoints - damage);
+			this.Trigger(-1964935036, this);
+		}
 	}
 
 	public void Repair(int repair_amount)
@@ -139,8 +142,8 @@ public class BuildingHP : Workable
 		}
 	}
 
-	[SerializeField]
 	[Serialize]
+	[SerializeField]
 	private int hitpoints;
 
 	[Serialize]
@@ -149,6 +152,8 @@ public class BuildingHP : Workable
 	public static List<Meter> kbacQueryList = new List<Meter>();
 
 	public bool destroyOnDamaged;
+
+	public bool invincible;
 
 	[MyCmpGet]
 	private Building building;
@@ -187,7 +192,7 @@ public class BuildingHP : Workable
 
 		public void ShowProgressBar(bool show)
 		{
-			if (show)
+			if (show && Grid.Visible[Grid.PosToCell(base.gameObject)] > 0)
 			{
 				this.CreateProgressBar();
 			}
@@ -200,6 +205,10 @@ public class BuildingHP : Workable
 
 		public void UpdateMeter()
 		{
+			if (this.progressBar == null)
+			{
+				this.ShowProgressBar(true);
+			}
 			this.progressBar.Update();
 		}
 
@@ -337,7 +346,7 @@ public class BuildingHP : Workable
 
 		private Chore CreateRepairChore(BuildingHP.SMInstance smi)
 		{
-			return new WorkChore<BuildingHP>(Db.Get().ChoreTypes.Repair, smi.master, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true);
+			return new WorkChore<BuildingHP>(Db.Get().ChoreTypes.Repair, smi.master, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, int.MaxValue);
 		}
 
 		private static Operational.Flag healthyFlag = new Operational.Flag("healthy", Operational.Flag.Type.Functional);

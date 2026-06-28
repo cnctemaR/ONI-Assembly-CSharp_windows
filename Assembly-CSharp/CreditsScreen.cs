@@ -4,7 +4,7 @@ using Klei;
 using STRINGS;
 using UnityEngine;
 
-public class CreditsScreen : KScreen
+public class CreditsScreen : KModalScreen
 {
 	protected override void OnSpawn()
 	{

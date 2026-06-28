@@ -5,6 +5,15 @@ using UnityEngine;
 
 public class UniformGrid<T> where T : IUniformGridObject
 {
+	public UniformGrid()
+	{
+	}
+
+	public UniformGrid(int width, int height, int cellWidth, int cellHeight)
+	{
+		this.Reset(width, height, cellWidth, cellHeight);
+	}
+
 	public void Reset(int width, int height, int cellWidth, int cellHeight)
 	{
 		this.cellWidth = cellWidth;
@@ -13,6 +22,16 @@ public class UniformGrid<T> where T : IUniformGridObject
 		this.numYCells = (int)Math.Ceiling((double)((float)height / (float)cellHeight));
 		int num = this.numXCells * this.numYCells;
 		this.cells = new List<T>[num];
+		this.items = new List<T>();
+	}
+
+	public void Clear()
+	{
+		this.cellWidth = 0;
+		this.cellHeight = 0;
+		this.numXCells = 0;
+		this.numYCells = 0;
+		this.cells = null;
 	}
 
 	public void Add(T item)
@@ -53,8 +72,15 @@ public class UniformGrid<T> where T : IUniformGridObject
 			for (int j = num; j <= num3; j++)
 			{
 				List<T> list = this.cells[i * this.numXCells + j];
-				list.Remove(item);
-				this.items.Remove(item);
+				if (list != null)
+				{
+					int num5 = list.IndexOf(item);
+					if (num5 != -1)
+					{
+						list.Remove(item);
+						this.items.Remove(item);
+					}
+				}
 			}
 		}
 	}
@@ -73,11 +99,17 @@ public class UniformGrid<T> where T : IUniformGridObject
 
 	public IEnumerable GetAllIntersecting(Vector2 min, Vector2 max)
 	{
-		int num = Math.Min((int)(min.x / (float)this.cellWidth), this.numXCells - 1);
-		int num2 = Math.Min((int)Math.Ceiling((double)(max.x / (float)this.cellWidth)), this.numXCells - 1);
-		int num3 = Math.Min((int)(min.y / (float)this.cellHeight), this.numYCells - 1);
-		int num4 = Math.Min((int)Math.Ceiling((double)(max.y / (float)this.cellHeight)), this.numYCells - 1);
 		HashSet<T> hashSet = new HashSet<T>();
+		this.GetAllIntersecting(min, max, hashSet);
+		return hashSet;
+	}
+
+	public void GetAllIntersecting(Vector2 min, Vector2 max, ICollection<T> results)
+	{
+		int num = Math.Max(0, Math.Min((int)(min.x / (float)this.cellWidth), this.numXCells - 1));
+		int num2 = Math.Max(0, Math.Min((int)Math.Ceiling((double)(max.x / (float)this.cellWidth)), this.numXCells - 1));
+		int num3 = Math.Max(0, Math.Min((int)(min.y / (float)this.cellHeight), this.numYCells - 1));
+		int num4 = Math.Max(0, Math.Min((int)Math.Ceiling((double)(max.y / (float)this.cellHeight)), this.numYCells - 1));
 		for (int i = num3; i <= num4; i++)
 		{
 			for (int j = num; j <= num2; j++)
@@ -87,12 +119,11 @@ public class UniformGrid<T> where T : IUniformGridObject
 				{
 					for (int k = 0; k < list.Count; k++)
 					{
-						hashSet.Add(list[k]);
+						results.Add(list[k]);
 					}
 				}
 			}
 		}
-		return hashSet;
 	}
 
 	public ICollection<T> GetAllItems()
@@ -102,7 +133,7 @@ public class UniformGrid<T> where T : IUniformGridObject
 
 	private List<T>[] cells;
 
-	private List<T> items = new List<T>();
+	private List<T> items;
 
 	private int cellWidth;
 

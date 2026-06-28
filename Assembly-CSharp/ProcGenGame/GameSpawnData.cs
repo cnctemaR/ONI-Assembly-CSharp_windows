@@ -14,7 +14,7 @@ namespace ProcGenGame
 			{
 				this.ClearTemplatesInCell(keyValuePair.Key);
 				Vector2I vector2I = Grid.CellToXY(keyValuePair.Key);
-				Prefab prefab = new Prefab(keyValuePair.Value, Prefab.Type.Other, vector2I.x, vector2I.y, (SimHashes)0, 300f, 1f, null, 0, Orientation.Neutral, null, null, 0);
+				Prefab prefab = new Prefab(keyValuePair.Value, Prefab.Type.Other, vector2I.x, vector2I.y, (SimHashes)0, -1f, 1f, null, 0, Orientation.Neutral, null, null, 0);
 				this.otherEntities.Add(prefab);
 			}
 		}

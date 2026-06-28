@@ -1,47 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
-using Database;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
-public class MedicinalPill : Workable, IGameObjectEffectDescriptor
+public class MedicinalPill : Workable, IGameObjectEffectDescriptor, IConsumableUIItem
 {
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		base.SetWorkTime(10f);
+		this.showProgressBar = false;
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.Normal, null);
 		this.CreateChore();
 	}
 
 	protected override void OnCompleteWork(Worker worker)
 	{
-		Klei.AI.Diseases diseases = worker.GetComponent<MinionModifiers>().diseases;
-		global::Database.Diseases diseases2 = Db.Get().Diseases;
-		ResourceSet<Effect> effects = Db.Get().effects;
-		for (int i = 0; i < this.curedDiseases.Length; i++)
+		Effects component = worker.GetComponent<Effects>();
+		EffectInstance effectInstance = component.Get(this.info.effect);
+		if (effectInstance != null)
 		{
-			string text = this.curedDiseases[i];
-			for (int j = 0; j < diseases2.Count; j++)
-			{
-				if (Klei.AI.Diseases.CanCure(text, diseases2[j].Id))
-				{
-					Disease disease = diseases2[j];
-					if (this.medicineType == MedicinalPill.MedicineType.InstantCure)
-					{
-						diseases.Cure(disease);
-					}
-					if (this.medicineType == MedicinalPill.MedicineType.BoostImmunity)
-					{
-						effects.Add(Db.Get().effects.Get("VitaminSupplement"));
-					}
-					else
-					{
-						diseases.ApplyPill(disease, base.gameObject.GetProperName(), this.boostMultipliers[i]);
-					}
-					break;
-				}
-			}
+			effectInstance.startTime = Time.time;
+		}
+		else
+		{
+			component.Add(this.info.effect, true);
 		}
 	}
 
@@ -50,46 +34,58 @@ public class MedicinalPill : Workable, IGameObjectEffectDescriptor
 		new TakeMedicineChore(this);
 	}
 
+	public bool CanBeTakenBy(GameObject consumer)
+	{
+		Effects component = consumer.GetComponent<Effects>();
+		if (component.HasEffect(this.info.effect))
+		{
+			return false;
+		}
+		if (this.info.medicineType == MedicineInfo.MedicineType.Booster)
+		{
+			AmountInstance amountInstance = Db.Get().Amounts.ImmuneLevel.Lookup(consumer);
+			return amountInstance != null && amountInstance.value < amountInstance.GetMax();
+		}
+		Diseases diseases = consumer.GetDiseases();
+		if (this.info.medicineType == MedicineInfo.MedicineType.CureAny && diseases.Count > 0)
+		{
+			return true;
+		}
+		foreach (DiseaseInstance diseaseInstance in diseases)
+		{
+			if (this.info.curedDiseases.Contains(diseaseInstance.modifier.Id))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public List<Descriptor> EffectDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		List<string> list2 = new List<string>();
-		foreach (string text in this.curedDiseases)
+		switch (this.info.medicineType)
 		{
-			list2.Add(Strings.Get("STRINGS.DUPLICANTS.DISEASES." + text.ToUpper() + ".NAME"));
-		}
-		if (this.medicineType == MedicinalPill.MedicineType.InstantCure)
+		case MedicineInfo.MedicineType.Booster:
+			list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.MEDICINE.BOOSTER, new object[0]), string.Format(DUPLICANTS.DISEASES.MEDICINE.BOOSTER_TOOLTIP, new object[0]), Descriptor.DescriptorType.Effect, false));
+			break;
+		case MedicineInfo.MedicineType.CureAny:
+			list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.MEDICINE.CURES_ANY, new object[0]), string.Format(DUPLICANTS.DISEASES.MEDICINE.CURES_ANY_TOOLTIP, new object[0]), Descriptor.DescriptorType.Effect, false));
+			break;
+		case MedicineInfo.MedicineType.CureSpecific:
 		{
-			string text2 = string.Empty;
-			for (int j = 0; j < this.curedDiseases.Length; j++)
+			List<string> list2 = new List<string>();
+			foreach (string text in this.info.curedDiseases)
 			{
-				text2 += list2[j];
-				if (j < this.curedDiseases.Length - 1)
-				{
-					text2 += ", ";
-				}
+				list2.Add(Strings.Get("STRINGS.DUPLICANTS.DISEASES." + text.ToUpper() + ".NAME"));
 			}
-			list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.CURES, text2), string.Format(DUPLICANTS.DISEASES.CURES, text2), Descriptor.DescriptorType.Effect, false));
+			string text2 = string.Join(",", list2.ToArray());
+			list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.MEDICINE.CURES, text2), string.Format(DUPLICANTS.DISEASES.MEDICINE.CURES_TOOLTIP, text2), Descriptor.DescriptorType.Effect, false));
+			break;
 		}
-		if (this.medicineType == MedicinalPill.MedicineType.BoostImmunity)
-		{
-			list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.BOOSTSIMMUNITY, new object[0]), string.Format(DUPLICANTS.DISEASES.BOOSTSIMMUNITY, new object[0]), Descriptor.DescriptorType.Effect, false));
 		}
-		else
-		{
-			for (int k = 0; k < this.curedDiseases.Length; k++)
-			{
-				float num = (this.boostMultipliers[k] - 1f) * 100f;
-				if (num >= 0f)
-				{
-					list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.BOOSTSCURESPEED, list2[k], GameUtil.GetFormattedPercent(num, GameUtil.TimeSlice.None)), string.Format(DUPLICANTS.DISEASES.BOOSTSCURESPEED, list2[k], GameUtil.GetFormattedPercent(num, GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Effect, false));
-				}
-				else
-				{
-					list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.REDUCECURESPEED, list2[k], GameUtil.GetFormattedPercent(num, GameUtil.TimeSlice.None)), string.Format(DUPLICANTS.DISEASES.REDUCECURESPEED, list2[k], GameUtil.GetFormattedPercent(num, GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Effect, false));
-				}
-			}
-		}
+		Effect effect = Db.Get().effects.Get(this.info.effect);
+		list.Add(new Descriptor(string.Format("Applies the <style=\"disease\">{0}</style> effect", effect.Name), string.Format("{0}\n{1}", effect.description, Effect.CreateTooltip(effect, true)), Descriptor.DescriptorType.Effect, false));
 		return list;
 	}
 
@@ -98,16 +94,45 @@ public class MedicinalPill : Workable, IGameObjectEffectDescriptor
 		return this.EffectDescriptors(go);
 	}
 
-	public string[] curedDiseases;
-
-	public float[] boostMultipliers;
-
-	public MedicinalPill.MedicineType medicineType;
-
-	public enum MedicineType
+	public string ConsumableId
 	{
-		InstantCure,
-		BoostCureSpeed,
-		BoostImmunity
+		get
+		{
+			return this.PrefabID().Name;
+		}
 	}
+
+	public string ConsumableName
+	{
+		get
+		{
+			return this.GetProperName();
+		}
+	}
+
+	public int MajorOrder
+	{
+		get
+		{
+			return (int)(this.info.medicineType + 1000);
+		}
+	}
+
+	public int MinorOrder
+	{
+		get
+		{
+			return 0;
+		}
+	}
+
+	public bool Display
+	{
+		get
+		{
+			return true;
+		}
+	}
+
+	public MedicineInfo info;
 }

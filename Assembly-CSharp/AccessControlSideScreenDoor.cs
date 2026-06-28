@@ -38,10 +38,23 @@ public class AccessControlSideScreenDoor : KMonoBehaviour
 
 	protected virtual void UpdateButtonStates(bool isDefault)
 	{
-		ToolTip toolTip = this.leftButton.GetComponent<ToolTip>();
-		toolTip.SetSimpleTooltip((!this.leftButton.isOn) ? UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.GO_LEFT_DISABLED : UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.GO_LEFT_ENABLED);
-		toolTip = this.rightButton.GetComponent<ToolTip>();
-		toolTip.SetSimpleTooltip((!this.rightButton.isOn) ? UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.GO_RIGHT_DISABLED : UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.GO_RIGHT_ENABLED);
+		ToolTip component = this.leftButton.GetComponent<ToolTip>();
+		ToolTip component2 = this.rightButton.GetComponent<ToolTip>();
+		if (this.isUpDown)
+		{
+			component.SetSimpleTooltip((!this.leftButton.isOn) ? UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.GO_UP_DISABLED : UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.GO_UP_ENABLED);
+			component2.SetSimpleTooltip((!this.rightButton.isOn) ? UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.GO_DOWN_DISABLED : UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.GO_DOWN_ENABLED);
+		}
+		else
+		{
+			component.SetSimpleTooltip((!this.leftButton.isOn) ? UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.GO_LEFT_DISABLED : UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.GO_LEFT_ENABLED);
+			component2.SetSimpleTooltip((!this.rightButton.isOn) ? UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.GO_RIGHT_DISABLED : UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.GO_RIGHT_ENABLED);
+		}
+	}
+
+	public void SetRotated(bool rotated)
+	{
+		this.isUpDown = rotated;
 	}
 
 	public void SetContent(AccessControl.Permission permission, Action<MinionIdentity, AccessControl.Permission> onPermissionChange)
@@ -57,6 +70,8 @@ public class AccessControlSideScreenDoor : KMonoBehaviour
 	public KToggle rightButton;
 
 	private Action<MinionIdentity, AccessControl.Permission> permissionChangedCallback;
+
+	private bool isUpDown;
 
 	protected MinionIdentity targetIdentity;
 }

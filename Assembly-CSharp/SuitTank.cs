@@ -5,7 +5,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor
+public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreather.IGasProvider
 {
 	public float LowThreshold
 	{
@@ -22,7 +22,9 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.initialAmount = this.amount;
+		this.amount = this.capacity;
+		this.Subscribe(-1617557748, new Action<object>(this.OnEquipped));
+		this.Subscribe(-170173755, new Action<object>(this.OnUnequipped));
 	}
 
 	public float PercentFull()
@@ -31,7 +33,7 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor
 		{
 			return 0f;
 		}
-		return this.amount / this.initialAmount;
+		return this.amount / this.capacity;
 	}
 
 	public bool IsElement(string elementComparisson)
@@ -49,29 +51,14 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor
 		return this.PercentFull() < this.lowThreshold;
 	}
 
-	public float GetInitialAmount()
+	public bool NeedsRecharging()
 	{
-		return this.initialAmount;
-	}
-
-	public void Empty()
-	{
-		this.amount = 0f;
+		return this.PercentFull() < 0.25f;
 	}
 
 	public void Refill()
 	{
-		this.amount = this.initialAmount;
-	}
-
-	public void RemovePercentage(float percentage)
-	{
-		this.amount -= percentage * this.initialAmount;
-	}
-
-	public void Add(float amt)
-	{
-		this.amount = Math.Min(this.initialAmount, this.amount + amt);
+		this.amount = this.capacity;
 	}
 
 	public List<Descriptor> GetDescriptors(GameObject go)
@@ -85,6 +72,64 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor
 		return list;
 	}
 
+	private void OnEquipped(object data)
+	{
+		Equipment equipment = (Equipment)data;
+		NameDisplayScreen.Instance.SetSuitTankDisplay(equipment.gameObject, new Func<float>(this.PercentFull), true);
+		equipment.GetComponent<OxygenBreather>().SetGasProvider(this);
+	}
+
+	private void OnUnequipped(object data)
+	{
+		Equipment equipment = (Equipment)data;
+		NameDisplayScreen.Instance.SetSuitTankDisplay(equipment.gameObject, new Func<float>(this.PercentFull), false);
+		equipment.GetComponent<OxygenBreather>().SetGasProvider(new GasBreatherFromWorldProvider());
+	}
+
+	public void OnSetOxygenBreather(OxygenBreather oxygen_breather)
+	{
+		this.suitSuffocationMonitor = new SuitSuffocationMonitor.Instance(oxygen_breather, this);
+		this.suitSuffocationMonitor.StartSM();
+	}
+
+	public void OnClearOxygenBreather(OxygenBreather oxygen_breather)
+	{
+		this.suitSuffocationMonitor.StopSM("Removed suit tank");
+		this.suitSuffocationMonitor = null;
+	}
+
+	public bool ConsumeGas(OxygenBreather oxygen_breather, float gas_consumed)
+	{
+		if (this.IsEmpty())
+		{
+			return false;
+		}
+		gas_consumed = Mathf.Min(gas_consumed, this.amount);
+		this.amount -= gas_consumed;
+		oxygen_breather.o2Accumulator.Accumulate(gas_consumed);
+		ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, -gas_consumed, oxygen_breather.GetProperName(), null);
+		return true;
+	}
+
+	public bool ShouldEmitCO2()
+	{
+		return false;
+	}
+
+	[ContextMenu("SetToRefillAmount")]
+	public void SetToRefillAmount()
+	{
+		this.amount = 0.25f * this.capacity;
+	}
+
+	[ContextMenu("Empty")]
+	public void Empty()
+	{
+		this.amount = 0f;
+	}
+
+	public const float REFILL_PERCENT = 0.25f;
+
 	[Serialize]
 	public string element;
 
@@ -94,8 +139,9 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor
 	[Serialize]
 	private float lowThreshold = 0.333f;
 
-	[Serialize]
-	private float initialAmount;
+	public float capacity;
 
 	public bool underwaterSupport;
+
+	private SuitSuffocationMonitor.Instance suitSuffocationMonitor;
 }

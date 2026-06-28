@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei.AI.DiseaseGrowthRules;
 using STRINGS;
 using UnityEngine;
 
@@ -23,102 +24,99 @@ namespace Klei.AI
 		protected override void PopulateElemGrowthInfo()
 		{
 			base.InitializeElemGrowthArray(ref this.elemGrowthInfo, Disease.DEFAULT_GROWTH_INFO);
-			base.AddGrowthRule(new Disease.GrowthRule
+			base.AddGrowthRule(new GrowthRule
 			{
 				underPopulationDeathRate = new float?(2.6666667f),
-				minCount = new int?(500),
+				minCountPerKG = new float?(0.4f),
 				populationHalfLife = new float?(12000f),
-				maxCount = new int?(1000000),
+				maxCountPerKG = new float?(1000f),
 				overPopulationHalfLife = new float?(3000f),
 				minDiffusionCount = new int?(1000),
 				diffusionScale = new float?(0.001f),
 				minDiffusionInfestationTickCount = 1
 			});
-			base.AddGrowthRule(new Disease.StateGrowthRule(Element.State.Solid)
+			base.AddGrowthRule(new StateGrowthRule(Element.State.Solid)
 			{
+				minCountPerKG = new float?(0.4f),
 				populationHalfLife = new float?(300f),
 				overPopulationHalfLife = new float?(10f),
 				minDiffusionCount = new int?(1000000)
 			});
-			base.AddGrowthRule(new Disease.ElementGrowthRule(SimHashes.ToxicSand)
+			base.AddGrowthRule(new ElementGrowthRule(SimHashes.ToxicSand)
 			{
 				populationHalfLife = new float?(float.PositiveInfinity),
 				overPopulationHalfLife = new float?(12000f)
 			});
-			base.AddGrowthRule(new Disease.ElementGrowthRule(SimHashes.Creature)
+			base.AddGrowthRule(new ElementGrowthRule(SimHashes.Creature)
 			{
 				populationHalfLife = new float?(float.PositiveInfinity),
+				maxCountPerKG = new float?(4000f),
 				overPopulationHalfLife = new float?(3000f)
 			});
-			base.AddGrowthRule(new Disease.ElementGrowthRule(SimHashes.BleachStone)
+			base.AddGrowthRule(new ElementGrowthRule(SimHashes.BleachStone)
 			{
 				populationHalfLife = new float?(10f),
 				overPopulationHalfLife = new float?(10f),
-				minDiffusionCount = new int?(100000),
 				diffusionScale = new float?(0.001f)
 			});
-			base.AddGrowthRule(new Disease.StateGrowthRule(Element.State.Gas)
+			base.AddGrowthRule(new StateGrowthRule(Element.State.Gas)
 			{
+				minCountPerKG = new float?(250f),
 				populationHalfLife = new float?(1200f),
 				overPopulationHalfLife = new float?(300f),
 				diffusionScale = new float?(0.01f)
 			});
-			base.AddGrowthRule(new Disease.ElementGrowthRule(SimHashes.ContaminatedOxygen)
+			base.AddGrowthRule(new ElementGrowthRule(SimHashes.ContaminatedOxygen)
 			{
 				populationHalfLife = new float?(12000f),
-				maxCount = new int?(10000000),
+				maxCountPerKG = new float?(10000f),
 				overPopulationHalfLife = new float?(3000f),
 				diffusionScale = new float?(0.05f)
 			});
-			base.AddGrowthRule(new Disease.ElementGrowthRule(SimHashes.ChlorineGas)
+			base.AddGrowthRule(new ElementGrowthRule(SimHashes.ChlorineGas)
 			{
 				populationHalfLife = new float?(10f),
 				overPopulationHalfLife = new float?(10f),
-				minDiffusionCount = new int?(100000)
+				minDiffusionCount = new int?(1000000)
 			});
-			base.AddGrowthRule(new Disease.StateGrowthRule(Element.State.Liquid)
+			base.AddGrowthRule(new StateGrowthRule(Element.State.Liquid)
 			{
+				minCountPerKG = new float?(0.4f),
 				populationHalfLife = new float?(12000f),
-				maxCount = new int?(10000000),
+				maxCountPerKG = new float?(5000f),
 				diffusionScale = new float?(0.2f)
 			});
-			base.AddGrowthRule(new Disease.ElementGrowthRule(SimHashes.DirtyWater)
+			base.AddGrowthRule(new ElementGrowthRule(SimHashes.DirtyWater)
 			{
 				populationHalfLife = new float?(-12000f),
 				overPopulationHalfLife = new float?(12000f)
 			});
-			base.AddGrowthRule(new Disease.TagGrowthRule(GameTags.Edible)
+			base.AddGrowthRule(new TagGrowthRule(GameTags.Edible)
 			{
 				populationHalfLife = new float?(-12000f),
 				overPopulationHalfLife = new float?(float.PositiveInfinity)
 			});
-			base.AddGrowthRule(new Disease.TagGrowthRule(GameTags.Pickled)
+			base.AddGrowthRule(new TagGrowthRule(GameTags.Pickled)
 			{
 				populationHalfLife = new float?(10f),
 				overPopulationHalfLife = new float?(10f)
 			});
-			base.InitializeElemGrowthArray(ref this.elemExposureInfo, Disease.DEFAULT_GROWTH_INFO);
-			base.AddExposureRule(new Disease.GrowthRule
+			base.InitializeElemExposureArray(ref this.elemExposureInfo, Disease.DEFAULT_EXPOSURE_INFO);
+			base.AddExposureRule(new ExposureRule
 			{
-				underPopulationDeathRate = new float?(0f),
-				minCount = new int?(100),
-				populationHalfLife = new float?(float.PositiveInfinity),
-				maxCount = new int?(1000000),
-				overPopulationHalfLife = new float?(float.PositiveInfinity)
+				populationHalfLife = new float?(float.PositiveInfinity)
 			});
-			base.AddExposureRule(new Disease.ElementGrowthRule(SimHashes.DirtyWater)
+			base.AddExposureRule(new ElementExposureRule(SimHashes.DirtyWater)
 			{
 				populationHalfLife = new float?(-12000f)
 			});
-			base.AddExposureRule(new Disease.ElementGrowthRule(SimHashes.ContaminatedOxygen)
+			base.AddExposureRule(new ElementExposureRule(SimHashes.ContaminatedOxygen)
 			{
 				populationHalfLife = new float?(-12000f)
 			});
-			base.AddExposureRule(new Disease.ElementGrowthRule(SimHashes.ChlorineGas)
+			base.AddExposureRule(new ElementExposureRule(SimHashes.ChlorineGas)
 			{
-				underPopulationDeathRate = new float?(2.6666667f),
-				populationHalfLife = new float?(10f),
-				overPopulationHalfLife = new float?(10f)
+				populationHalfLife = new float?(10f)
 			});
 		}
 
@@ -190,9 +188,12 @@ namespace Klei.AI
 
 				public void StopChore()
 				{
-					if (this.chore != null)
+					if (this.vomitHandle.IsValid)
 					{
 						this.vomitHandle.ClearScheduler();
+					}
+					if (this.chore != null)
+					{
 						this.chore.Cancel("FoodPoisoning.StopChore");
 					}
 				}

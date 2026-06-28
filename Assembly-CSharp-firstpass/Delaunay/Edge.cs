@@ -16,11 +16,13 @@ namespace Delaunay
 
 		public static Edge CreateBisectingEdge(Site site0, Site site1)
 		{
-			float num = site1.x - site0.x;
-			float num2 = site1.y - site0.y;
+			Vector2 coord = site1.Coord;
+			Vector2 coord2 = site0.Coord;
+			float num = coord2.x - coord.x;
+			float num2 = coord2.y - coord.y;
 			float num3 = ((num <= 0f) ? (-num) : num);
 			float num4 = ((num2 <= 0f) ? (-num2) : num2);
-			float num5 = site0.x * num + site0.y * num2 + (num * num + num2 * num2) * 0.5f;
+			float num5 = coord.x * num + coord.y * num2 + (num * num + num2 * num2) * 0.5f;
 			float num6;
 			float num7;
 			if (num3 > num4)
@@ -117,7 +119,7 @@ namespace Delaunay
 
 		public float SitesDistance()
 		{
-			return Vector2.Distance(this.leftSite.Coord, this.rightSite.Coord);
+			return Vector2.Distance(this.leftSite.Coord, this.rightSite.Coord) + (this.leftSite.weight + this.rightSite.weight) * (this.leftSite.weight + this.rightSite.weight);
 		}
 
 		public static int CompareSitesDistances_MAX(Edge edge0, Edge edge1)

@@ -23,7 +23,6 @@ public class HatchChewSoundEvent : SoundEvent
 		int audioCategory = HatchChewSoundEvent.GetAudioCategory(behaviour);
 		EventInstance eventInstance = SoundEvent.BeginOneShot(base.sound, position);
 		eventInstance.setParameterValue("material_ID", (float)audioCategory);
-		AudioEventManager.Get().PlayTimedOnceOff(position, base.noiseValues.amount, base.noiseValues.radius, behaviour.GetComponent<KSelectable>().GetName(), 1f);
 		SoundEvent.EndOneShot(eventInstance);
 	}
 

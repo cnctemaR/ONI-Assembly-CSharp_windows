@@ -1,6 +1,5 @@
 ﻿using System;
 using Klei.AI;
-using TUNING;
 using UnityEngine;
 
 public class BipedTransitionLayer : TransitionDriver.OverrideLayer
@@ -32,6 +31,16 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 		if (transition.start == NavType.Ladder && transition.end == NavType.Ladder)
 		{
 			transition.speed = this.ladderSpeed * movementSpeedMultiplier;
+			GameObject gameObject = Grid.Objects[num, 1];
+			if (gameObject != null)
+			{
+				Ladder component = gameObject.GetComponent<Ladder>();
+				if (component != null)
+				{
+					transition.speed *= component.movementSpeedMultiplier;
+					transition.animSpeed *= component.movementSpeedMultiplier;
+				}
+			}
 		}
 		else
 		{
@@ -39,10 +48,22 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 		}
 		float num2 = movementSpeedMultiplier - 1f;
 		transition.animSpeed += transition.animSpeed * num2 / 2f;
-		if (transition.start == NavType.Floor && transition.end == NavType.Floor && Grid.Foundation[Grid.CellBelow(num)])
+		if (transition.start == NavType.Floor && transition.end == NavType.Floor)
 		{
-			transition.speed *= DUPLICANTSTATS.FOUNDATION_MOVEMENT_BOOST;
-			transition.animSpeed *= DUPLICANTSTATS.FOUNDATION_MOVEMENT_BOOST;
+			int num3 = Grid.CellBelow(num);
+			if (Grid.Foundation[num3])
+			{
+				GameObject gameObject2 = Grid.Objects[num3, 1];
+				if (gameObject2 != null)
+				{
+					SimCellOccupier component2 = gameObject2.GetComponent<SimCellOccupier>();
+					if (component2 != null)
+					{
+						transition.speed *= component2.movementSpeedMultiplier;
+						transition.animSpeed *= component2.movementSpeedMultiplier;
+					}
+				}
+			}
 		}
 		this.startTime = Time.time;
 	}

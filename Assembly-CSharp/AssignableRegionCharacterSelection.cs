@@ -21,7 +21,7 @@ public class AssignableRegionCharacterSelection : KMonoBehaviour
 		{
 			KButton btn = this.buttonPool.GetFreeElement(this.buttonParent, true);
 			CrewPortrait componentInChildren = btn.GetComponentInChildren<CrewPortrait>();
-			componentInChildren.SetCrewMember(minionIdentity, true);
+			componentInChildren.SetIdentityObject(minionIdentity, true);
 			this.portraitList.Add(componentInChildren);
 			btn.ClearOnClick();
 			btn.onClick += delegate

@@ -1,24 +1,13 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using KSerialization;
 using UnityEngine;
 
 public abstract class Assignable : Workable
 {
-	public event Action<Assignables> OnAssign;
+	public event Action<IAssignableIdentity> OnAssign;
 
 	public AssignableSlot slot { get; set; }
-
-	public Assignables assignee
-	{
-		get
-		{
-			return this.GetAssignables();
-		}
-		set
-		{
-			this.SetAssignables(value);
-		}
-	}
 
 	public RequiresRegion RequiresRegion
 	{
@@ -42,9 +31,32 @@ public abstract class Assignable : Workable
 
 	public abstract Assignables GetAssignables(GameObject go);
 
-	protected virtual void OnClickAssign(Assignables new_assignee)
+	protected virtual void OnClickAssign(IAssignableIdentity new_assignee)
 	{
 		this.Assign(new_assignee);
+	}
+
+	[OnDeserialized]
+	internal void OnDeserialized()
+	{
+		IAssignableIdentity savedAssignee = this.GetSavedAssignee();
+		if (savedAssignee != null)
+		{
+			this.Assign(savedAssignee);
+		}
+	}
+
+	private IAssignableIdentity GetSavedAssignee()
+	{
+		if (this.assignee_identityRef.Get() != null)
+		{
+			return this.assignee_identityRef.Get().GetComponent<IAssignableIdentity>();
+		}
+		if (this.assignee_groupID != string.Empty)
+		{
+			return Game.Instance.assignmentManager.assignment_groups[this.assignee_groupID];
+		}
+		return null;
 	}
 
 	protected override void OnPrefabInit()
@@ -58,13 +70,17 @@ public abstract class Assignable : Workable
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		AssignmentManager.Instance.Add(this);
+		Game.Instance.assignmentManager.Add(this);
+		if (this.assignee == null && this.canBePublic)
+		{
+			this.Assign(Game.Instance.assignmentManager.assignment_groups["public"]);
+		}
 	}
 
 	protected override void OnCleanUp()
 	{
 		this.Unassign();
-		AssignmentManager.Instance.Remove(this);
+		Game.Instance.assignmentManager.Remove(this);
 		base.OnCleanUp();
 	}
 
@@ -73,31 +89,37 @@ public abstract class Assignable : Workable
 		return true;
 	}
 
-	public void ClickAssign(Assignables new_assignables)
-	{
-		this.OnClickAssign(new_assignables);
-	}
-
 	public bool IsAssigned()
 	{
 		return this.assignee != null;
 	}
 
-	public void Assign(Assignables new_assignee)
+	public virtual void Assign(IAssignableIdentity new_assignee)
 	{
 		if (new_assignee == this.assignee)
 		{
 			return;
 		}
-		Assignables assignee = this.assignee;
-		this.assignee = new_assignee;
-		if (this.assignee != null)
+		if (new_assignee is KMonoBehaviour)
 		{
-			this.assignee.Assign(this);
+			this.assignee_identityRef.Set(new_assignee as KMonoBehaviour);
+			this.assignee_groupID = string.Empty;
 		}
-		if (assignee != null)
+		else if (new_assignee is AssignmentGroup)
 		{
-			assignee.Unassign(this);
+			this.assignee_identityRef.Set(null);
+			this.assignee_groupID = (new_assignee as AssignmentGroup).id;
+		}
+		base.GetComponent<KPrefabID>().AddTag(GameTags.Assigned);
+		this.assignee = new_assignee;
+		if (this.slot != null && new_assignee is MinionIdentity)
+		{
+			Assignables component = (new_assignee as MinionIdentity).GetComponent<Ownables>();
+			AssignableSlotInstance slot = component.GetSlot(this.slot);
+			if (slot != null)
+			{
+				component.GetSlot(this.slot).Assign(this);
+			}
 		}
 		if (this.OnAssign != null)
 		{
@@ -106,18 +128,30 @@ public abstract class Assignable : Workable
 		}
 	}
 
-	public void Unassign()
+	public virtual void Unassign()
 	{
 		if (this.assignee == null)
 		{
 			return;
 		}
-		Assignables assignee = this.assignee;
-		this.assignee = null;
-		if (assignee != null)
+		base.GetComponent<KPrefabID>().RemoveTag(GameTags.Assigned);
+		if (this.slot != null && this.assignee is MinionIdentity)
 		{
-			assignee.Unassign(this);
+			Assignables component = (this.assignee as MinionIdentity).GetComponent<Ownables>();
+			AssignableSlotInstance slot = component.GetSlot(this.slot);
+			if (slot != null)
+			{
+				slot.Unassign();
+			}
 		}
+		this.assignee = null;
+		if (this.canBePublic)
+		{
+			this.Assign(Game.Instance.assignmentManager.assignment_groups["public"]);
+			this.Trigger(2070884250, null);
+		}
+		this.assignee_identityRef.Set(null);
+		this.assignee_groupID = string.Empty;
 		if (this.OnAssign != null)
 		{
 			this.OnAssign(null);
@@ -132,7 +166,17 @@ public abstract class Assignable : Workable
 	[MyCmpGet]
 	private RequiresRegion requiresRegion;
 
+	public IAssignableIdentity assignee;
+
+	[Serialize]
+	private Ref<KMonoBehaviour> assignee_identityRef = new Ref<KMonoBehaviour>();
+
+	[Serialize]
+	private string assignee_groupID = string.Empty;
+
 	public AssignableSlot[] subSlots;
+
+	public bool canBePublic;
 
 	[Serialize]
 	private bool canBeAssigned = true;

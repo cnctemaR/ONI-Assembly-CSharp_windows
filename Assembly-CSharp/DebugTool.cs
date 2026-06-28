@@ -118,10 +118,10 @@ public class DebugTool : DragTool
 				Grid.Objects[cell, 1],
 				Grid.Objects[cell, 2],
 				Grid.Objects[cell, 9],
-				Grid.Objects[cell, 15],
-				Grid.Objects[cell, 11],
-				Grid.Objects[cell, 15],
-				Grid.Objects[cell, 19]
+				Grid.Objects[cell, 16],
+				Grid.Objects[cell, 12],
+				Grid.Objects[cell, 16],
+				Grid.Objects[cell, 20]
 			})
 			{
 				if (gameObject != null)
@@ -158,10 +158,10 @@ public class DebugTool : DragTool
 		{
 			Grid.Objects[cell, 2],
 			Grid.Objects[cell, 1],
-			Grid.Objects[cell, 11],
-			Grid.Objects[cell, 15],
+			Grid.Objects[cell, 12],
+			Grid.Objects[cell, 16],
 			Grid.Objects[cell, 0],
-			Grid.Objects[cell, 19]
+			Grid.Objects[cell, 20]
 		})
 		{
 			if (gameObject != null)

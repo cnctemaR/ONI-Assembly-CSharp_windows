@@ -33,13 +33,12 @@ public class InsulationTileConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
-		PrimaryElement primaryElement = go.AddOrGet<PrimaryElement>();
-		primaryElement.useSimDiseaseInfo = true;
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.doReplaceElement = true;
 		go.AddOrGet<Insulator>();
 		go.AddOrGet<TileTemperature>();
-		go.AddOrGet<KAnimGridTileVisualizer>();
+		KAnimGridTileVisualizer kanimGridTileVisualizer = go.AddOrGet<KAnimGridTileVisualizer>();
+		kanimGridTileVisualizer.blockTileConnectorID = TileConfig.BlockTileConnectorID;
 		BuildingHP buildingHP = go.AddOrGet<BuildingHP>();
 		buildingHP.destroyOnDamaged = true;
 	}
@@ -54,4 +53,6 @@ public class InsulationTileConfig : IBuildingConfig
 		base.DoPostConfigureUnderConstruction(go);
 		go.AddOrGet<KAnimGridTileVisualizer>();
 	}
+
+	public const string ID = "InsulationTile";
 }

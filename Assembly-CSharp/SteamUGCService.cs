@@ -92,9 +92,9 @@ public class SteamUGCService : MonoBehaviour
 		global::System.DateTime dateTime;
 		global::System.DateTime dateTime2;
 		string languageFile = SteamUGCService.GetLanguageFile(out installed, out dateTime, out dateTime2);
-		if (languageFile != null && languageFile.Length > 0)
+		if (languageFile != null && File.Exists(languageFile))
 		{
-			string[] array = languageFile.Split(new char[] { '\n' });
+			string[] array = File.ReadAllLines(languageFile, Encoding.UTF8);
 			Localization.Locale locale = Localization.GetLocale(array);
 			if (locale != null)
 			{
@@ -110,11 +110,11 @@ public class SteamUGCService : MonoBehaviour
 		global::System.DateTime dateTime;
 		global::System.DateTime dateTime2;
 		string languageFile = SteamUGCService.GetLanguageFile(out publishedFileId_t, out dateTime, out dateTime2);
-		if (languageFile == null || languageFile.Length == 0)
+		if (languageFile == null || !File.Exists(languageFile))
 		{
 			return "None";
 		}
-		string[] array = languageFile.Split(new char[] { '\n' });
+		string[] array = File.ReadAllLines(languageFile, Encoding.UTF8);
 		Localization.Locale locale = Localization.GetLocale(array);
 		string text = "Error";
 		if (locale != null && locale.Code != null && locale.Code != string.Empty)
@@ -175,60 +175,10 @@ public class SteamUGCService : MonoBehaviour
 		return null;
 	}
 
-	public void ClearInstall()
-	{
-		SteamUGCService.InstalledModData.Delete();
-		string text = Path.Combine(Application.streamingAssetsPath, "Mods/strings_template.pot");
-		if (File.Exists(text))
-		{
-			string text2 = File.ReadAllText(text);
-			if (text2 != null && text2.Length > 0)
-			{
-				SteamUGCService.ConvertFileString(text2, true);
-			}
-			else
-			{
-				global::Debug.LogError("Error in default translation file, please run integrity check", null);
-			}
-		}
-		else
-		{
-			global::Debug.LogError("Missing default translation file, please run integrity check", null);
-		}
-		this.InstallLanguageFile(PublishedFileId_t.Invalid, false);
-	}
-
-	public static void LoadTranslation(bool isReset = false)
+	public static void LoadTranslation()
 	{
 		string installedLanguageFile = SteamUGCService.GetInstalledLanguageFile();
-		SteamUGCService.ConvertFileString(installedLanguageFile, isReset);
-	}
-
-	public static void SetFontForLocalization()
-	{
-		string installedLanguageFile = SteamUGCService.GetInstalledLanguageFile();
-		if (installedLanguageFile != null && installedLanguageFile.Length > 0)
-		{
-			string[] array = installedLanguageFile.Split(new char[] { '\n' });
-			SteamUGCService.SetFontForLocalization(array);
-		}
-	}
-
-	public static Localization.Locale GetLocale()
-	{
-		string installedLanguageFile = SteamUGCService.GetInstalledLanguageFile();
-		Localization.Locale locale;
-		if (installedLanguageFile != null && installedLanguageFile.Length > 0)
-		{
-			string[] array = installedLanguageFile.Split(new char[] { '\n' });
-			locale = Localization.GetLocale(array);
-		}
-		else
-		{
-			global::Debug.LogWarning("GetLocale() file is missing", null);
-			locale = Localization.GetDefaultLocale();
-		}
-		return locale;
+		Localization.LoadLocalTranslationFile(Localization.SelectedLanguageType.UGC, installedLanguageFile);
 	}
 
 	public void OnEnable()
@@ -349,7 +299,7 @@ public class SteamUGCService : MonoBehaviour
 		if (languageFileFromSteam != null && languageFileFromSteam.Length > 0)
 		{
 			SteamUGCService.InstalledModData.Set(item, this.currentLastModified, this.currentLastModifiedPofile);
-			File.WriteAllText(Localization.GetLocalizationFilePath(), languageFileFromSteam);
+			File.WriteAllText(Localization.GetModLocalizationFilePath(), languageFileFromSteam);
 			return;
 		}
 		global::Debug.LogWarning(string.Concat(new object[] { "Loc file was empty.. [", item, "]  [", this.currentLastModified, "]  [", this.currentLastModifiedPofile, "] " }), null);
@@ -357,37 +307,23 @@ public class SteamUGCService : MonoBehaviour
 
 	private void InstallLanguageFile(PublishedFileId_t item, bool fromDownload = false)
 	{
-		KPlayerPrefs.SetInt("InstalledLanguage", (int)item.m_PublishedFileId);
-		SteamUGCService.InstalledModData.Delete();
-		string localizationFilePath = Localization.GetLocalizationFilePath();
-		if (File.Exists(localizationFilePath))
-		{
-			File.Delete(localizationFilePath);
-		}
+		this.CleanUpCurrentModLanguage();
 		if (item != PublishedFileId_t.Invalid)
 		{
 			this.UpdateInstalledLanguage(item);
 		}
-		SteamUGCService.LoadTranslation(false);
+		SteamUGCService.LoadTranslation();
 		this.currentLanguage = item;
 	}
 
-	private static void ConvertFileString(string file, bool isReset = false)
+	public void CleanUpCurrentModLanguage()
 	{
-		if (file != null && file.Length > 0)
+		KPlayerPrefs.SetInt("InstalledLanguage", (int)PublishedFileId_t.Invalid.m_PublishedFileId);
+		SteamUGCService.InstalledModData.Delete();
+		string modLocalizationFilePath = Localization.GetModLocalizationFilePath();
+		if (File.Exists(modLocalizationFilePath))
 		{
-			string[] array = file.Split(new char[] { '\n' });
-			Localization.Locale locale = Localization.GetLocale(array);
-			Localization.SetLocale(locale);
-			SteamUGCService.SetFontForLocalization(array);
-			global::Debug.Log("Installing language pack " + SteamUGCService.Instance.GetInstalledLanguageData(), null);
-			Localization.LoadTranslation(array, isReset);
-		}
-		else
-		{
-			global::Debug.Log("No file given, uninstalling all localisation", null);
-			Localization.SetLocale(null);
-			SteamUGCService.SetFontForLocalization(null);
+			File.Delete(modLocalizationFilePath);
 		}
 	}
 
@@ -396,27 +332,17 @@ public class SteamUGCService : MonoBehaviour
 		return Localization.GetLocale(lines).FontName;
 	}
 
-	private static void SetFontForLocalization(string[] lines)
-	{
-		string fontForLocalisation = SteamUGCService.GetFontForLocalisation(lines);
-		if (fontForLocalisation != SteamUGCService.currentFont)
-		{
-			SteamUGCService.currentFont = fontForLocalisation;
-		}
-		Localization.SwapToLocalizedFont(SteamUGCService.currentFont);
-	}
-
 	private static string GetLanguageFile(out PublishedFileId_t item, out global::System.DateTime lastModified, out global::System.DateTime lastModifiedPofile)
 	{
 		SteamUGCService.InstalledModData.Get(out item, out lastModified, out lastModifiedPofile);
 		if (item != PublishedFileId_t.Invalid)
 		{
-			string localizationFilePath = Localization.GetLocalizationFilePath();
-			if (File.Exists(localizationFilePath))
+			string modLocalizationFilePath = Localization.GetModLocalizationFilePath();
+			if (File.Exists(modLocalizationFilePath))
 			{
-				return File.ReadAllText(localizationFilePath, Encoding.UTF8);
+				return modLocalizationFilePath;
 			}
-			global::Debug.LogWarning(string.Concat(new object[] { "GetLanguagFile [", localizationFilePath, "] missing for [", item, "]" }), null);
+			global::Debug.LogWarning(string.Concat(new object[] { "GetLanguagFile [", modLocalizationFilePath, "] missing for [", item, "]" }), null);
 		}
 		return null;
 	}
@@ -649,15 +575,15 @@ public class SteamUGCService : MonoBehaviour
 
 	private void AddPreviewToDownloadQueue(UGCHandle_t next)
 	{
-		CallResult<RemoteStorageDownloadUGCResult_t> callResult = CallResult<RemoteStorageDownloadUGCResult_t>.Create(new CallResult<RemoteStorageDownloadUGCResult_t>.APIDispatchDelegate(this.OnDownloadPrieviewResult));
+		CallResult<RemoteStorageDownloadUGCResult_t> callResult = CallResult<RemoteStorageDownloadUGCResult_t>.Create(new CallResult<RemoteStorageDownloadUGCResult_t>.APIDispatchDelegate(this.OnDownloadPreviewResult));
 		SteamAPICall_t steamAPICall_t = SteamRemoteStorage.UGCDownload(next, 0U);
 		callResult.Set(steamAPICall_t, null);
 		this.m_DownloadPreviewResult.Add(next, callResult);
 	}
 
-	private void OnDownloadPrieviewResult(RemoteStorageDownloadUGCResult_t pCallback, bool bIOFailure)
+	private void OnDownloadPreviewResult(RemoteStorageDownloadUGCResult_t pCallback, bool bIOFailure)
 	{
-		if (pCallback.m_eResult == EResult.k_EResultOK)
+		if (pCallback.m_eResult == EResult.k_EResultOK && !this.previewImages.ContainsKey(this.previews[pCallback.m_hFile]))
 		{
 			byte[] array = new byte[pCallback.m_nSizeInBytes];
 			SteamRemoteStorage.UGCRead(pCallback.m_hFile, array, array.Length, 0U, EUGCReadAction.k_EUGCRead_ContinueReadingUntilFinished);
@@ -700,7 +626,7 @@ public class SteamUGCService : MonoBehaviour
 		if (this.currentLanguage == pCallback.m_nPublishedFileId)
 		{
 			global::Debug.Log("Unsubscribe detected for currently installed font [" + pCallback.m_nPublishedFileId + "]", null);
-			this.ClearInstall();
+			this.CleanUpCurrentModLanguage();
 		}
 		this.doClearList = true;
 	}

@@ -23,6 +23,25 @@ public struct DiseaseContainer
 		this.overpopulationCount = 1;
 		this.instanceGrowthRate = 1f;
 		this.accumulatedError = 0f;
+		this.visualDiseaseProvider = null;
+	}
+
+	public void GetVisualDiseaseIdxAndCount(out int disease_idx, out int disease_count)
+	{
+		disease_idx = (int)this.diseaseIdx;
+		disease_count = this.diseaseCount;
+		if (this.visualDiseaseProvider != null)
+		{
+			disease_idx = 255;
+			disease_count = 0;
+			HandleVector<int>.Handle handle = GameComps.DiseaseContainers.GetHandle(this.visualDiseaseProvider);
+			if (handle != HandleVector<int>.InvalidHandle)
+			{
+				DiseaseContainer data = GameComps.DiseaseContainers.GetData(handle);
+				disease_idx = (int)data.diseaseIdx;
+				disease_count = data.diseaseCount;
+			}
+		}
 	}
 
 	public void Clear()
@@ -43,6 +62,8 @@ public struct DiseaseContainer
 	public ConduitType conduitType;
 
 	public KBatchedAnimController controller;
+
+	public GameObject visualDiseaseProvider;
 
 	public int overpopulationCount;
 

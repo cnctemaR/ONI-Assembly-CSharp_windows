@@ -17,25 +17,53 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 		}
 	}
 
-	public bool IsNotOff
+	public TreeFilterableSideScreenRow.State GetState()
 	{
-		get
+		bool flag = false;
+		bool flag2 = false;
+		foreach (TreeFilterableSideScreenElement treeFilterableSideScreenElement in this.rowElements)
 		{
-			foreach (TreeFilterableSideScreenElement treeFilterableSideScreenElement in this.rowElements)
+			if (this.parent.GetElementTagAcceptedState(treeFilterableSideScreenElement.GetElementTag()))
 			{
-				if (this.parent.GetElementTagAcceptedState(treeFilterableSideScreenElement.GetElementTag()))
-				{
-					return true;
-				}
+				flag = true;
 			}
-			return this.checkBoxToggle.isOn;
+			else
+			{
+				flag2 = true;
+			}
 		}
+		if (flag && !flag2)
+		{
+			return TreeFilterableSideScreenRow.State.On;
+		}
+		if (!flag && flag2)
+		{
+			return TreeFilterableSideScreenRow.State.Off;
+		}
+		if (flag && flag2)
+		{
+			return TreeFilterableSideScreenRow.State.Mixed;
+		}
+		return TreeFilterableSideScreenRow.State.On;
 	}
 
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.checkBoxToggle.onClick += this.OnCheckBoxToggled;
+		MultiToggle multiToggle = this.checkBoxToggle;
+		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(delegate
+		{
+			switch (this.GetState())
+			{
+			case TreeFilterableSideScreenRow.State.Off:
+			case TreeFilterableSideScreenRow.State.Mixed:
+				this.ChangeCheckBoxState(TreeFilterableSideScreenRow.State.On);
+				break;
+			case TreeFilterableSideScreenRow.State.On:
+				this.ChangeCheckBoxState(TreeFilterableSideScreenRow.State.Off);
+				break;
+			}
+		}));
 	}
 
 	protected override void OnCmpEnable()
@@ -60,60 +88,30 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 		this.arrowToggle.onClick -= this.ArrowToggleClicked;
 	}
 
-	private void SetCheckBoxVisualState(bool state)
+	public void UpdateCheckBoxVisualState()
 	{
-		this.checkBoxMarkImg.enabled = state;
-		this.mixedStateImg.enabled = false;
-		if (!state)
-		{
-			this.CheckForMixedState();
-		}
+		this.checkBoxToggle.ChangeState((int)this.GetState());
+		this.visualDirty = false;
 	}
 
-	private void CheckForMixedState()
+	public void ChangeCheckBoxState(TreeFilterableSideScreenRow.State newState)
 	{
-		int count = this.rowElements.FindAll((TreeFilterableSideScreenElement elem) => elem.IsSelected).Count;
-		if (count != 0)
+		switch (newState)
 		{
-			this.checkBoxMarkImg.enabled = false;
-			this.mixedStateImg.enabled = true;
-		}
-		else
-		{
-			this.mixedStateImg.enabled = false;
-		}
-	}
-
-	public void SetCheckBoxState(bool state, bool children)
-	{
-		this.checkBoxToggle.isOn = state;
-		this.UpdateCheckBoxState(children);
-	}
-
-	private void UpdateCheckBoxState(bool children)
-	{
-		if (children)
-		{
-			this.ChangeFilterByState(this.checkBoxToggle.isOn, this.subTags);
+		case TreeFilterableSideScreenRow.State.Off:
 			this.rowElements.ForEach(delegate(TreeFilterableSideScreenElement re)
 			{
-				re.SetCheckBox(this.checkBoxToggle.isOn);
+				re.SetCheckBox(false);
 			});
+			break;
+		case TreeFilterableSideScreenRow.State.On:
+			this.rowElements.ForEach(delegate(TreeFilterableSideScreenElement re)
+			{
+				re.SetCheckBox(true);
+			});
+			break;
 		}
-		if (this.checkBoxToggle.isOn)
-		{
-			this.parent.AddTag(this.categoryTag);
-		}
-		else
-		{
-			this.parent.RemoveTag(this.categoryTag);
-		}
-		this.SetCheckBoxVisualState(this.checkBoxToggle.isOn);
-	}
-
-	private void OnCheckBoxToggled()
-	{
-		this.UpdateCheckBoxState(true);
+		this.visualDirty = true;
 	}
 
 	private void ArrowToggleClicked()
@@ -140,18 +138,6 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Negative", false));
 	}
 
-	private void ChangeFilterByState(bool state, List<Tag> tagList)
-	{
-		if (state)
-		{
-			this.parent.AddTags(tagList);
-		}
-		else
-		{
-			this.parent.RemoveTags(tagList);
-		}
-	}
-
 	private void OnElementSelectionChanged(Tag t, bool state)
 	{
 		if (state)
@@ -161,10 +147,8 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 		else
 		{
 			this.parent.RemoveTag(t);
-			this.SetCheckBoxState(false, false);
 		}
-		this.CheckForMixedState();
-		this.parent.ElementSelectionChanged();
+		this.visualDirty = true;
 	}
 
 	public void SetElement(Tag mainElementTag, bool state, Dictionary<Tag, bool> filterMap)
@@ -172,7 +156,6 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 		this.subTags.Clear();
 		this.rowElements.Clear();
 		this.elementName.text = mainElementTag.ProperName();
-		this.categoryTag = mainElementTag;
 		this.arrowToggle.ClearOnClick();
 		this.bgImg.enabled = false;
 		string text = string.Format(UI.UISIDESCREENS.TREEFILTERABLESIDESCREEN.CATEGORYBUTTONTOOLTIP, mainElementTag.ProperName());
@@ -199,17 +182,15 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 				freeElement.SetTag(keyValuePair.Key);
 				freeElement.SetCheckBox(keyValuePair.Value);
 				freeElement.OnSelectionChanged += this.OnElementSelectionChanged;
+				freeElement.SetCheckBox(this.parent.IsTagAllowed(keyValuePair.Key));
 				this.rowElements.Add(freeElement);
 				this.subTags.Add(keyValuePair.Key);
-				if (keyValuePair.Value)
-				{
-					this.SetCheckBoxVisualState(true);
-				}
 			}
 		}
-		this.checkBoxToggle.isOn = state;
-		this.SetCheckBoxVisualState(state);
+		this.UpdateCheckBoxVisualState();
 	}
+
+	public bool visualDirty;
 
 	[SerializeField]
 	private LocText elementName;
@@ -218,13 +199,7 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 	private GameObject elementGroup;
 
 	[SerializeField]
-	private KToggle checkBoxToggle;
-
-	[SerializeField]
-	private KImage checkBoxMarkImg;
-
-	[SerializeField]
-	private KImage mixedStateImg;
+	private MultiToggle checkBoxToggle;
 
 	[SerializeField]
 	private KToggle arrowToggle;
@@ -236,7 +211,12 @@ public class TreeFilterableSideScreenRow : KMonoBehaviour
 
 	private List<TreeFilterableSideScreenElement> rowElements = new List<TreeFilterableSideScreenElement>();
 
-	private Tag categoryTag;
-
 	private TreeFilterableSideScreen parent;
+
+	public enum State
+	{
+		Off,
+		Mixed,
+		On
+	}
 }

@@ -7,7 +7,7 @@ public class TilePOIConfig : IBuildingConfig
 	public override BuildingDef CreateBuildingDef()
 	{
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(TilePOIConfig.ID, 1, 1, "floor_mesh_kanim", 100f, 100, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER2, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.Tile, BUILDINGS.DECOR.PENALTY.TIER0, none);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(TilePOIConfig.ID, 1, 1, "floor_mesh_kanim", 100f, 100, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER2, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.Tile, BUILDINGS.DECOR.BONUS.TIER1, none);
 		buildingDef.ShowInBuildMenu = false;
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
@@ -15,6 +15,7 @@ public class TilePOIConfig : IBuildingConfig
 		buildingDef.Relocatable = false;
 		buildingDef.Repairable = false;
 		buildingDef.Replaceable = false;
+		buildingDef.Invincible = true;
 		buildingDef.IsFoundation = true;
 		buildingDef.UseStructureTemperature = false;
 		buildingDef.TileLayer = ObjectLayer.FoundationTile;
@@ -41,8 +42,6 @@ public class TilePOIConfig : IBuildingConfig
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		GeneratedBuildings.MakeBuildableAnywhere(go);
-		PrimaryElement primaryElement = go.AddOrGet<PrimaryElement>();
-		primaryElement.useSimDiseaseInfo = true;
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.doReplaceElement = true;
 		go.AddOrGet<TileTemperature>();

@@ -52,21 +52,25 @@ public class DecorNeed : Need
 		{
 			return;
 		}
-		float num2 = (float)GameUtil.GetDecorAtCell(num);
-		float num3 = 0f;
-		float num4 = 4.1666665f;
-		if (Mathf.Abs(num2 - this.amount.value) > 0.1f)
+		float decorAtCell = GameUtil.GetDecorAtCell(num);
+		float num2 = 0f;
+		float num3 = 4.1666665f;
+		if (Mathf.Abs(decorAtCell - this.amount.value) > 0.1f)
 		{
-			if (num2 > this.amount.value)
+			if (decorAtCell > this.amount.value)
 			{
-				num3 = 3f * num4;
+				num2 = 3f * num3;
 			}
-			else if (num2 < this.amount.value)
+			else if (decorAtCell < this.amount.value)
 			{
-				num3 = -num4;
+				num2 = -num3;
 			}
 		}
-		this.modifier.Value = num3;
+		else
+		{
+			this.amount.value = decorAtCell;
+		}
+		this.modifier.Value = num2;
 		bool flag = false;
 		float totalValue = this.expectationAttribute.GetTotalValue();
 		AttributeModifier attributeModifier;

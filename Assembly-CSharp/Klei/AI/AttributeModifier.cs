@@ -12,6 +12,17 @@ namespace Klei.AI
 			this.AttributeId = attribute_id;
 			this.Value = value;
 			this.Description = string.Intern((description != null) ? description : string.Empty);
+			this.DescriptionCB = null;
+			this.IsMultiplier = is_multiplier;
+			this.UIOnly = uiOnly;
+		}
+
+		public AttributeModifier(string attribute_id, float value, Func<string> description_cb, bool is_multiplier = false, bool uiOnly = false)
+		{
+			this.AttributeId = attribute_id;
+			this.Value = value;
+			this.DescriptionCB = description_cb;
+			this.Description = null;
 			this.IsMultiplier = is_multiplier;
 			this.UIOnly = uiOnly;
 		}
@@ -37,10 +48,22 @@ namespace Klei.AI
 					attributeFormatter = attribute.formatter;
 				}
 			}
-			string text = ((attributeFormatter == null) ? GameUtil.GetFormattedSimple(this.Value, GameUtil.TimeSlice.None, null) : attributeFormatter.GetFormattedModifier(this, parent_instance));
+			string text = string.Empty;
+			if (attributeFormatter != null)
+			{
+				text = attributeFormatter.GetFormattedModifier(this, parent_instance);
+			}
+			else if (this.IsMultiplier)
+			{
+				text += GameUtil.GetFormattedPercent(this.Value * 100f, GameUtil.TimeSlice.None);
+			}
+			else
+			{
+				text += GameUtil.GetFormattedSimple(this.Value, GameUtil.TimeSlice.None, null);
+			}
 			if (text != null)
 			{
-				GameUtil.AddPositiveSign(text, this.Value > 0f);
+				text = GameUtil.AddPositiveSign(text, this.Value > 0f);
 			}
 			return text;
 		}
@@ -54,10 +77,12 @@ namespace Klei.AI
 
 		public float Value;
 
-		public string Description;
-
 		public bool IsMultiplier;
 
 		public bool UIOnly;
+
+		public string Description;
+
+		public Func<string> DescriptionCB;
 	}
 }

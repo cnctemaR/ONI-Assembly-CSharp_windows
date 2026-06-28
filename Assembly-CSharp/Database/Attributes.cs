@@ -26,27 +26,32 @@ namespace Database
 			this.Art.SetFormatter(new StandardAttributeFormatter(GameUtil.UnitClass.SimpleInteger, GameUtil.TimeSlice.None));
 			this.Strength = base.Add(new Klei.AI.Attribute("Strength", true, Klei.AI.Attribute.Display.Skill, true));
 			this.Strength.SetFormatter(new StandardAttributeFormatter(GameUtil.UnitClass.SimpleInteger, GameUtil.TimeSlice.None));
+			this.Botanist = base.Add(new Klei.AI.Attribute("Botanist", true, Klei.AI.Attribute.Display.Normal, true));
+			this.Botanist.SetFormatter(new StandardAttributeFormatter(GameUtil.UnitClass.SimpleInteger, GameUtil.TimeSlice.None));
 			this.Immunity = base.Add(new Klei.AI.Attribute("Immunity", true, Klei.AI.Attribute.Display.Skill, false));
 			this.Immunity.SetFormatter(new StandardAttributeFormatter(GameUtil.UnitClass.SimpleInteger, GameUtil.TimeSlice.None));
-			this.AirConsumptionRate = base.Add(new Klei.AI.Attribute("AirConsumptionRate", false, Klei.AI.Attribute.Display.Never, false));
-			this.AirConsumptionRate.SetFormatter(new StandardAttributeFormatter(GameUtil.UnitClass.Mass, GameUtil.TimeSlice.PerSecond));
-			this.ThermalConductivityBarrier = base.Add(new Klei.AI.Attribute("ThermalConductivityBarrier", false, Klei.AI.Attribute.Display.Never, false));
+			this.ThermalConductivityBarrier = base.Add(new Klei.AI.Attribute("ThermalConductivityBarrier", false, Klei.AI.Attribute.Display.Normal, false));
 			this.ThermalConductivityBarrier.SetFormatter(new StandardAttributeFormatter(GameUtil.UnitClass.Distance, GameUtil.TimeSlice.None));
 			this.Insulation = base.Add(new Klei.AI.Attribute("Insulation", false, Klei.AI.Attribute.Display.General, true));
 			this.Decor = base.Add(new Klei.AI.Attribute("Decor", false, Klei.AI.Attribute.Display.General, false));
+			this.FoodQuality = base.Add(new Klei.AI.Attribute("FoodQuality", false, Klei.AI.Attribute.Display.General, false));
+			this.FoodQuality.SetFormatter(new FoodQualityAttributeFormatter());
+			this.ScaldingThreshold = base.Add(new Klei.AI.Attribute("ScaldingThreshold", false, Klei.AI.Attribute.Display.General, false));
+			this.ScaldingThreshold.SetFormatter(new StandardAttributeFormatter(GameUtil.UnitClass.Temperature, GameUtil.TimeSlice.None));
 			this.DecorExpectation = base.Add(new Klei.AI.Attribute("DecorExpectation", false, Klei.AI.Attribute.Display.Expectation, false));
 			this.FoodExpectation = base.Add(new Klei.AI.Attribute("FoodExpectation", false, Klei.AI.Attribute.Display.Expectation, false));
 			this.FoodExpectation.SetFormatter(new FoodQualityAttributeFormatter());
-			this.MaxUnderwaterTravelCost = base.Add(new Klei.AI.Attribute("MaxUnderwaterTravelCost", false, Klei.AI.Attribute.Display.Never, false));
+			this.RoomTemperaturePreference = base.Add(new Klei.AI.Attribute("RoomTemperaturePreference", false, Klei.AI.Attribute.Display.Normal, false));
+			this.AirConsumptionRate = base.Add(new Klei.AI.Attribute("AirConsumptionRate", false, Klei.AI.Attribute.Display.Normal, false));
+			this.AirConsumptionRate.SetFormatter(new StandardAttributeFormatter(GameUtil.UnitClass.Mass, GameUtil.TimeSlice.PerSecond));
+			this.MaxUnderwaterTravelCost = base.Add(new Klei.AI.Attribute("MaxUnderwaterTravelCost", false, Klei.AI.Attribute.Display.Normal, false));
 			this.ToiletEfficiency = base.Add(new Klei.AI.Attribute("ToiletEfficiency", false, Klei.AI.Attribute.Display.Details, false));
 			this.ToiletEfficiency.SetFormatter(new ToPercentAttributeFormatter(1f, GameUtil.TimeSlice.None));
-			this.RoomTemperaturePreference = base.Add(new Klei.AI.Attribute("RoomTemperaturePreference", false, Klei.AI.Attribute.Display.Never, false));
 			this.Sneezyness = base.Add(new Klei.AI.Attribute("Sneezyness", false, Klei.AI.Attribute.Display.Details, false));
-			this.FoodQuality = base.Add(new Klei.AI.Attribute("FoodQuality", false, Klei.AI.Attribute.Display.General, false));
-			this.FoodQuality.SetFormatter(new FoodQualityAttributeFormatter());
-			this.DiseaseRecoveryTime = base.Add(new Klei.AI.Attribute("DiseaseRecoveryTime", false, Klei.AI.Attribute.Display.Never, false));
-			this.DiseaseRecoveryTime.BaseValue = 1f;
-			this.DiseaseRecoveryTime.SetFormatter(new ToPercentAttributeFormatter(1f, GameUtil.TimeSlice.None));
+			this.DiseaseCureSpeed = base.Add(new Klei.AI.Attribute("DiseaseCureSpeed", false, Klei.AI.Attribute.Display.Normal, false));
+			this.DiseaseCureSpeed.BaseValue = 1f;
+			this.DiseaseCureSpeed.SetFormatter(new ToPercentAttributeFormatter(1f, GameUtil.TimeSlice.None));
+			this.DoctoredLevel = base.Add(new Klei.AI.Attribute("DoctoredLevel", false, Klei.AI.Attribute.Display.Never, false));
 		}
 
 		public Klei.AI.Attribute Construction;
@@ -61,36 +66,42 @@ namespace Database
 
 		public Klei.AI.Attribute Cooking;
 
-		public Klei.AI.Attribute Insulation;
-
 		public Klei.AI.Attribute Medical;
-
-		public Klei.AI.Attribute AirConsumptionRate;
 
 		public Klei.AI.Attribute Strength;
 
 		public Klei.AI.Attribute Art;
 
-		public Klei.AI.Attribute DecorExpectation;
+		public Klei.AI.Attribute Botanist;
+
+		public Klei.AI.Attribute Immunity;
+
+		public Klei.AI.Attribute Insulation;
+
+		public Klei.AI.Attribute ThermalConductivityBarrier;
 
 		public Klei.AI.Attribute Decor;
 
+		public Klei.AI.Attribute FoodQuality;
+
+		public Klei.AI.Attribute ScaldingThreshold;
+
+		public Klei.AI.Attribute DecorExpectation;
+
 		public Klei.AI.Attribute FoodExpectation;
 
-		public Klei.AI.Attribute ThermalConductivityBarrier;
+		public Klei.AI.Attribute RoomTemperaturePreference;
+
+		public Klei.AI.Attribute AirConsumptionRate;
 
 		public Klei.AI.Attribute MaxUnderwaterTravelCost;
 
 		public Klei.AI.Attribute ToiletEfficiency;
 
-		public Klei.AI.Attribute RoomTemperaturePreference;
-
 		public Klei.AI.Attribute Sneezyness;
 
-		public Klei.AI.Attribute FoodQuality;
+		public Klei.AI.Attribute DiseaseCureSpeed;
 
-		public Klei.AI.Attribute Immunity;
-
-		public Klei.AI.Attribute DiseaseRecoveryTime;
+		public Klei.AI.Attribute DoctoredLevel;
 	}
 }

@@ -33,11 +33,32 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Only {Assignee} can use this amenity";
 			}
 
+			public class ASSIGNEDPUBLIC
+			{
+				public static LocString NAME = "Assigned to: Public";
+
+				public static LocString TOOLTIP = "Any Duplicant can use this amenity";
+			}
+
+			public class ASSIGNEDTOROOM
+			{
+				public static LocString NAME = "Assigned to: {0}";
+
+				public static LocString TOOLTIP = "Any Duplicant assigned to this room can use this amenity";
+			}
+
 			public class AWAITINGSEEDDELIVERY
 			{
 				public static LocString NAME = "Awaiting Delivery";
 
 				public static LocString TOOLTIP = "Awaiting delivery of selected seed";
+			}
+
+			public class CLINICOUTSIDEHOSPITAL
+			{
+				public static LocString NAME = "Medical building outside Med Bay";
+
+				public static LocString TOOLTIP = "Rebuild this medical equipment in a Med Bay to more effectively quaratine sick Duplicants";
 			}
 
 			public class BOTTLE_EMPTIER
@@ -46,14 +67,14 @@ namespace STRINGS
 				{
 					public static LocString NAME = "Autobottling: On";
 
-					public static LocString TOOLTIP = "Duplicants may specifically fetch liquid from Liquid Bottlers to bring to this location";
+					public static LocString TOOLTIP = "Duplicants may specifically fetch liquid from Pitcher Pumps to bring to this location";
 				}
 
 				public static class DENIED
 				{
 					public static LocString NAME = "Autobottling: Off";
 
-					public static LocString TOOLTIP = "Duplicants may not specifically fetch liquid from Liquid Bottlers to bring to this location";
+					public static LocString TOOLTIP = "Duplicants may not specifically fetch liquid from Pitcher Pumps to bring to this location";
 				}
 			}
 
@@ -69,6 +90,79 @@ namespace STRINGS
 				public static LocString NAME = "Pending Door State Change: {ControlState}";
 
 				public static LocString TOOLTIP = "Waiting for a Duplicant to change control state";
+			}
+
+			public class SUIT_LOCKER
+			{
+				public class NEED_CONFIGURATION
+				{
+					public static LocString NAME = "Current Status: Needs Configuration";
+
+					public static LocString TOOLTIP = "Exosuit Dock needs to cofigured to have an Exosuit delivered or to act as a charging station.";
+				}
+
+				public class READY
+				{
+					public static LocString NAME = "Current Status: On Standby";
+
+					public static LocString TOOLTIP = "On Standby";
+				}
+
+				public class SUIT_REQUESTED
+				{
+					public static LocString NAME = "Current Status: Awaiting Delivery";
+
+					public static LocString TOOLTIP = "Awaiting Exosuit Delivery";
+				}
+
+				public class CHARGING
+				{
+					public static LocString NAME = "Current Status: Charging Suit";
+
+					public static LocString TOOLTIP = "Exosuit is charging.";
+				}
+
+				public class NO_OXYGEN
+				{
+					public static LocString NAME = "Current Status: No Oxygen";
+
+					public static LocString TOOLTIP = "Exosuit Dock does not have enough Oxygen to fill Exosuit.";
+				}
+
+				public class NOT_OPERATIONAL
+				{
+					public static LocString NAME = "Current Status: Offline";
+
+					public static LocString TOOLTIP = "Exosuit Dock is offline.";
+				}
+
+				public class FULLY_CHARGED
+				{
+					public static LocString NAME = "Current Status: Full Charge";
+
+					public static LocString TOOLTIP = "Exosuit is fully charged and ready to go.";
+				}
+			}
+
+			public class SUITMARKERTRAVERSALANYTIME
+			{
+				public static LocString NAME = "Clearance: Always";
+
+				public static LocString TOOLTIP = "Duplicants wearing suits will pass by this arrow and unequip their suits even if there is no room available.";
+			}
+
+			public class SUITMARKERTRAVERSALONLYWHENROOMAVAILABLE
+			{
+				public static LocString NAME = "Clearance: Vacant";
+
+				public static LocString TOOLTIP = "Duplicants wearing suits will pass by this arrow and unequip their suits only if there is room available in the attached lockers.";
+			}
+
+			public class SUIT_LOCKER_NEEDS_CONFIGURATION
+			{
+				public static LocString NAME = "Not Configured";
+
+				public static LocString TOOLTIP = "Configuration required";
 			}
 
 			public class CURRENTDOORCONTROLSTATE
@@ -96,6 +190,13 @@ namespace STRINGS
 				public static LocString NAME = "Unreachable Build";
 
 				public static LocString TOOLTIP = "Duplicants cannot reach this construction site";
+			}
+
+			public class MOPUNREACHABLE
+			{
+				public static LocString NAME = "Unreachable Mop";
+
+				public static LocString TOOLTIP = "Duplicants cannot reach this area";
 			}
 
 			public class DIGUNREACHABLE
@@ -281,7 +382,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Multitool Required";
 
-				public static LocString TOOLTIP = "A multitool is required to mine this material" + UI.HORIZONTAL_BR_RULE + "Multitools can be made at Crafting Stations in the <color=#833A5FFF>Stations Tab</color> <color=#F44A47>[9]</color> of the Build Menu";
+				public static LocString TOOLTIP = "A multitool is required to mine this material" + UI.HORIZONTAL_BR_RULE + "Multitools can be made at Crafting Stations in the <color=#833A5FFF>Stations Tab</color> <color=#F44A47>[0]</color> of the Build Menu";
 			}
 
 			public class NEUTRONIUMUNMINABLE
@@ -409,6 +510,20 @@ namespace STRINGS
 				public static LocString NAME = "Storage Not Assigned";
 
 				public static LocString TOOLTIP = "No resources types are marked for storage in this building";
+			}
+
+			public class NOSUITMARKER
+			{
+				public static LocString NAME = "No Checkpoint";
+
+				public static LocString TOOLTIP = "Building needs to be adjacent to an Exosuit Checkpoint";
+			}
+
+			public class SUITMARKERWRONGSIDE
+			{
+				public static LocString NAME = "Invalid Checkpoint";
+
+				public static LocString TOOLTIP = "This building has been built on the wrong side of an Exosuit Checkpoint\n\nExosuit Docks must be placed beside a Checkpoint opposite the side its checkpoint faces";
 			}
 
 			public class NOFILTERELEMENTSELECTED
@@ -689,9 +804,9 @@ namespace STRINGS
 
 			public class EMITTINGCO2
 			{
-				public static LocString NAME = "Emitting CO2: {FlowRate}";
+				public static LocString NAME = "Emitting CO<sub>2</sub>: {FlowRate}";
 
-				public static LocString TOOLTIP = "Producing CO2 at {FlowRate}";
+				public static LocString TOOLTIP = "Producing CO<sub>2</sub> at {FlowRate}";
 			}
 
 			public class EMITTINGOXYGENAVG
@@ -878,6 +993,20 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This building cannot cool incoming pipe contents below {0}\n\nCurrent Pipe Contents: {0}";
 			}
 
+			public class COOLINGSTALLEDHOTLIQUID
+			{
+				public static LocString NAME = "Liquid Too Hot";
+
+				public static LocString TOOLTIP = "Incoming pipe contents cannot be cooled more than {2} below the surrounding environment\n\nEnvironment: {0}\nCurrent Pipe Contents: {1}";
+			}
+
+			public class COOLINGSTALLEDCOLDLIQUID
+			{
+				public static LocString NAME = "Liquid Too Cold";
+
+				public static LocString TOOLTIP = "This building cannot cool incoming pipe contents below {0}\n\nCurrent Pipe Contents: {0}";
+			}
+
 			public class CANNOTCOOLFURTHER
 			{
 				public static LocString NAME = "Minimum Temperature Reached";
@@ -1038,6 +1167,23 @@ namespace STRINGS
 				}
 			}
 
+			public class CREATURE_TRAP
+			{
+				public class READY
+				{
+					public static LocString NAME = "Set";
+
+					public static LocString TOOLTIP = "This trap has been set and is ready to catch a creature";
+				}
+
+				public class SPRUNG
+				{
+					public static LocString NAME = "Sprung";
+
+					public static LocString TOOLTIP = "This trap has caught a {0}!";
+				}
+			}
+
 			public class ACCESS_CONTROL
 			{
 				public class ACTIVE
@@ -1081,6 +1227,48 @@ namespace STRINGS
 				public static LocString NAME = "Unreachable restroom";
 
 				public static LocString TOOLTIP = "Recuperating Duplicants must have toilets available within {0} cells";
+			}
+
+			public class TURBINE_BLOCKED_OUTPUT
+			{
+				public static LocString NAME = "Output Blocked";
+
+				public static LocString TOOLTIP = "This turbine's output is blocked";
+			}
+
+			public class TURBINE_INSUFFICIENT_MASS
+			{
+				public static LocString NAME = "Underpowered";
+
+				public static LocString TOOLTIP = "This turbine requires {MASS} of {ELEMENT} at {TEMPERATURE} to run";
+			}
+
+			public class TURBINE_SPINNING_UP
+			{
+				public static LocString NAME = "Warming Up";
+
+				public static LocString TOOLTIP = "The turbine is spinning up";
+			}
+
+			public class WELL_PRESSURIZING
+			{
+				public static LocString NAME = "Backpressure: {0}";
+
+				public static LocString TOOLTIP = "Well pressure increases with each use and must be periodically relieved to prevent shutdown";
+			}
+
+			public class WELL_OVERPRESSURE
+			{
+				public static LocString NAME = "Overpressure";
+
+				public static LocString TOOLTIP = "This well can no longer function due to excessive backpressure";
+			}
+
+			public class RELEASING_PRESSURE
+			{
+				public static LocString NAME = "Releasing Pressure";
+
+				public static LocString TOOLTIP = "Pressure buildup is being safely released";
 			}
 		}
 

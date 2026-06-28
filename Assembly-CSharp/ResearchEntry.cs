@@ -333,8 +333,8 @@ public class ResearchEntry : KMonoBehaviour
 		}
 	}
 
-	[SerializeField]
 	[Header("Labels")]
+	[SerializeField]
 	private LocText researchName;
 
 	[Header("Transforms")]
@@ -357,8 +357,8 @@ public class ResearchEntry : KMonoBehaviour
 	[SerializeField]
 	private GameObject progressBarPrefab;
 
-	[SerializeField]
 	[Header("Graphics")]
+	[SerializeField]
 	private Image BG;
 
 	[SerializeField]
@@ -373,8 +373,8 @@ public class ResearchEntry : KMonoBehaviour
 	[SerializeField]
 	private Sprite completedBG;
 
-	[SerializeField]
 	[Header("Colors")]
+	[SerializeField]
 	private Color defaultColor = Color.blue;
 
 	[SerializeField]

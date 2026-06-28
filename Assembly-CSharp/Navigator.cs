@@ -115,7 +115,8 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 			}
 			else if (Grid.IsCellOffsetOf(this.reservedCell, num2, this.targetOffsets))
 			{
-				PathFinder.UpdatePath(this.NavGrid, this.GetCurrentAbilities(), num, this.CurrentNavType, PathFinderQueries.cellOffsetQuery.Reset(new int[] { this.reservedCell }), ref this.path);
+				PathFinder.PotentialPath potentialPath = new PathFinder.PotentialPath(num, this.CurrentNavType, this.flags);
+				PathFinder.UpdatePath(this.NavGrid, this.GetCurrentAbilities(), potentialPath, PathFinderQueries.cellOffsetQuery.Reset(new int[] { this.reservedCell }), ref this.path);
 				if (this.path.IsValid())
 				{
 					flag = false;
@@ -146,7 +147,8 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 				else
 				{
 					this.checkCellArray[0] = this.reservedCell;
-					PathFinder.UpdatePath(this.NavGrid, this.GetCurrentAbilities(), num, this.CurrentNavType, PathFinderQueries.cellOffsetQuery.Reset(this.checkCellArray), ref this.path);
+					PathFinder.PotentialPath potentialPath2 = new PathFinder.PotentialPath(num, this.CurrentNavType, this.flags);
+					PathFinder.UpdatePath(this.NavGrid, this.GetCurrentAbilities(), potentialPath2, PathFinderQueries.cellOffsetQuery.Reset(this.checkCellArray), ref this.path);
 				}
 			}
 			if (this.path.IsValid())
@@ -163,6 +165,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 				this.Stop(false);
 			}
 		}
+		this.Trigger(1347184327, null);
 	}
 
 	public void Stop(bool arrived_at_destination = false)
@@ -214,7 +217,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 		{
 			return;
 		}
-		this.PathProber.UpdateProbe(this.NavGrid, num, this.CurrentNavType, this.GetCurrentAbilities(), true);
+		this.PathProber.UpdateProbe(this.NavGrid, num, this.CurrentNavType, this.GetCurrentAbilities(), this.flags, true);
 	}
 
 	private void LateUpdate()
@@ -254,16 +257,6 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 	public int GetReservedCell()
 	{
 		return this.reservedCell;
-	}
-
-	public void SetAbilityFlag(PathFinderFlags flag)
-	{
-		this.abilities.flags = this.abilities.flags | flag;
-	}
-
-	public void ClearAbilityFlag(PathFinderFlags flag)
-	{
-		this.abilities.flags = this.abilities.flags & ~flag;
 	}
 
 	public int GetAnchorCell()
@@ -342,10 +335,6 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 			pathFinderAbilities.maxUnderwaterCost = int.MaxValue;
 		}
 		int num = Grid.PosToCell(this);
-		if (Grid.SuitRequired[num])
-		{
-			pathFinderAbilities.flags |= PathFinderFlags.SuitRequired;
-		}
 		if (PathFinder.IsSubmerged(num))
 		{
 			pathFinderAbilities.maxUnderwaterCost = int.MaxValue;
@@ -412,7 +401,8 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 	public void RunQuery(PathFinderQuery query)
 	{
 		int num = Grid.PosToCell(this);
-		PathFinder.Run(this.NavGrid, this.GetCurrentAbilities(), num, this.CurrentNavType, query);
+		PathFinder.PotentialPath potentialPath = new PathFinder.PotentialPath(num, this.CurrentNavType, this.flags);
+		PathFinder.Run(this.NavGrid, this.GetCurrentAbilities(), potentialPath, query);
 	}
 
 	public void AddMask(NavMask mask)
@@ -423,6 +413,16 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 	public void RemoveMask(NavMask mask)
 	{
 		this.abilities.RemoveMask(mask);
+	}
+
+	public void SetFlags(PathFinder.PotentialPath.Flags new_flags)
+	{
+		this.flags |= new_flags;
+	}
+
+	public void ClearFlags(PathFinder.PotentialPath.Flags new_flags)
+	{
+		this.flags &= ~new_flags;
 	}
 
 	protected override void OnCleanUp()
@@ -454,6 +454,8 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 	public bool updateProber;
 
 	public int maxProbingRadius;
+
+	public PathFinder.PotentialPath.Flags flags;
 
 	private AttributeInstance maxUnderwaterTravelCost;
 
@@ -538,10 +540,10 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 					Chore currentChore = smi.GetComponent<ChoreDriver>().GetCurrentChore();
 					if (currentChore != null)
 					{
-						ReportManager.Instance.ReportValue(ReportManager.ReportType.TravelTime, smi.dt, currentChore.choreType.Name);
+						ReportManager.Instance.ReportValue(ReportManager.ReportType.TravelTime, smi.dt, currentChore.choreType.Name, currentChore.driver.GetProperName());
 					}
 				}
-			}).Enter(delegate(Navigator.StatesInstance smi)
+			}).Exit(delegate(Navigator.StatesInstance smi)
 			{
 				smi.Trigger(1027377649, GameHashes.ObjectMovementSleep);
 			});

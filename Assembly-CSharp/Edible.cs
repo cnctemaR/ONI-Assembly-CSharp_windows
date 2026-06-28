@@ -61,7 +61,6 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 			}
 			this.foodInfo = EdiblesManager.instance.GetFoodInfo(this.FoodID);
 		}
-		base.GetComponent<KSelectable>().SetName(this.foodInfo.Name);
 		base.GetComponent<KPrefabID>().AddTag(GameTags.Edible);
 		this.Subscribe(748399584, new Action<object>(this.OnCraft));
 		this.Subscribe(1272413801, new Action<object>(this.OnCraft));
@@ -124,6 +123,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 		{
 			worker.GetComponent<Effects>().Add(this.foodInfo.Effects[i], true);
 		}
+		ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, -this.caloriesConsumed, string.Format(UI.ENDOFDAYREPORT.NOTES.EATEN, this.GetProperName()), worker.GetProperName());
 		worker.Trigger(1121894420, this);
 		this.Trigger(-10536414, worker.gameObject);
 		this.unitsConsumed = float.NaN;

@@ -40,7 +40,7 @@ public abstract class Reactable
 		}
 	}
 
-	public bool CanBegin(GameObject reactor)
+	public bool CanBegin(GameObject reactor, Navigator.ActiveTransition transition)
 	{
 		ChoreConsumer component = reactor.GetComponent<ChoreConsumer>();
 		if (component == null)
@@ -48,10 +48,10 @@ public abstract class Reactable
 			return false;
 		}
 		Chore currentChore = component.choreDriver.GetCurrentChore();
-		return currentChore != null && this.choreType.priority > currentChore.choreType.priority && this.InternalCanBegin(reactor);
+		return currentChore != null && this.choreType.priority > currentChore.choreType.priority && this.InternalCanBegin(reactor, transition);
 	}
 
-	public abstract bool InternalCanBegin(GameObject reactor);
+	public abstract bool InternalCanBegin(GameObject reactor, Navigator.ActiveTransition transition);
 
 	public abstract void Update(float dt);
 
@@ -90,7 +90,7 @@ public abstract class Reactable
 
 	private GameScenePartitionerEntry partitionerEntry;
 
-	private GameObject gameObject;
+	protected GameObject gameObject;
 
 	public int sourceCell;
 
@@ -103,4 +103,6 @@ public abstract class Reactable
 	protected GameObject reactor;
 
 	private ChoreType choreType;
+
+	protected LoggerFSS log;
 }

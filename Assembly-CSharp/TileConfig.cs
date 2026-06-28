@@ -39,12 +39,13 @@ public class TileConfig : IBuildingConfig
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		GeneratedBuildings.MakeBuildableAnywhere(go);
-		PrimaryElement primaryElement = go.AddOrGet<PrimaryElement>();
-		primaryElement.useSimDiseaseInfo = true;
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.doReplaceElement = true;
+		simCellOccupier.strengthMultiplier = 1.5f;
+		simCellOccupier.movementSpeedMultiplier = DUPLICANTSTATS.MOVEMENT.BONUS_2;
 		go.AddOrGet<TileTemperature>();
-		go.AddOrGet<KAnimGridTileVisualizer>();
+		KAnimGridTileVisualizer kanimGridTileVisualizer = go.AddOrGet<KAnimGridTileVisualizer>();
+		kanimGridTileVisualizer.blockTileConnectorID = TileConfig.BlockTileConnectorID;
 		BuildingHP buildingHP = go.AddOrGet<BuildingHP>();
 		buildingHP.destroyOnDamaged = true;
 	}
@@ -60,4 +61,8 @@ public class TileConfig : IBuildingConfig
 		base.DoPostConfigureUnderConstruction(go);
 		go.AddOrGet<KAnimGridTileVisualizer>();
 	}
+
+	public const string ID = "Tile";
+
+	public static readonly int BlockTileConnectorID = Hash.SDBMLower("tiles_solid_tops");
 }

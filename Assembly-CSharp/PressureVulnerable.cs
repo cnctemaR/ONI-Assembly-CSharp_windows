@@ -104,12 +104,12 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 	public void Configure(SimHashes[] safeAtmospheres = null)
 	{
 		this.pressure_sensitive = false;
-		this.pressureWarning_Low = -1f;
-		this.pressureLethal_Low = -1f;
-		this.pressureLethal_High = -1f;
-		this.pressureWarning_High = -1f;
-		this.pressurePerfect_Low = -1f;
-		this.pressurePerfect_High = -1f;
+		this.pressureWarning_Low = float.MinValue;
+		this.pressureLethal_Low = float.MinValue;
+		this.pressureLethal_High = float.MaxValue;
+		this.pressureWarning_High = float.MaxValue;
+		this.pressurePerfect_Low = float.MinValue;
+		this.pressurePerfect_High = float.MaxValue;
 		this.safe_atmospheres = new HashSet<Element>();
 		if (safeAtmospheres != null)
 		{

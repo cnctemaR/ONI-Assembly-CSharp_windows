@@ -14,15 +14,21 @@ public class LoopingSoundManager : KMonoBehaviour
 
 	protected override void OnSpawn()
 	{
-		SpeedControlScreen speedControlScreen = SpeedControlScreen.Instance;
-		speedControlScreen.OnGameSpeedChanged = (global::System.Action)Delegate.Combine(speedControlScreen.OnGameSpeedChanged, new global::System.Action(LoopingSoundManager.instance.OnGameSpeedChanged));
-		Game.Instance.Subscribe(-1788536802, new Action<object>(LoopingSoundManager.instance.OnPauseChanged));
+		if (SpeedControlScreen.Instance != null && Game.Instance != null)
+		{
+			SpeedControlScreen speedControlScreen = SpeedControlScreen.Instance;
+			speedControlScreen.OnGameSpeedChanged = (global::System.Action)Delegate.Combine(speedControlScreen.OnGameSpeedChanged, new global::System.Action(LoopingSoundManager.instance.OnGameSpeedChanged));
+			Game.Instance.Subscribe(-1788536802, new Action<object>(LoopingSoundManager.instance.OnPauseChanged));
+		}
 	}
 
 	protected override void OnCleanUp()
 	{
-		SpeedControlScreen speedControlScreen = SpeedControlScreen.Instance;
-		speedControlScreen.OnGameSpeedChanged = (global::System.Action)Delegate.Remove(speedControlScreen.OnGameSpeedChanged, new global::System.Action(LoopingSoundManager.instance.OnGameSpeedChanged));
+		if (SpeedControlScreen.Instance != null)
+		{
+			SpeedControlScreen speedControlScreen = SpeedControlScreen.Instance;
+			speedControlScreen.OnGameSpeedChanged = (global::System.Action)Delegate.Remove(speedControlScreen.OnGameSpeedChanged, new global::System.Action(LoopingSoundManager.instance.OnGameSpeedChanged));
+		}
 	}
 
 	private void Update()
@@ -88,7 +94,7 @@ public class LoopingSoundManager : KMonoBehaviour
 		}
 		LoopingSoundManager.Get().Add(path, eventInstance, pauseOnGamePause);
 		Vector3 vector = new Vector3(pos.x, pos.y, 0f);
-		eventInstance.set3DAttributes(CameraController.Instance.GetVerticallyScaledPosition(vector).To3DAttributes());
+		eventInstance.set3DAttributes(SoundEvent.GetCameraScaledPosition(vector).To3DAttributes());
 		LoopingSoundManager.UpdateSpeed(eventInstance);
 		if (Time.timeScale == 0f)
 		{
@@ -112,7 +118,7 @@ public class LoopingSoundManager : KMonoBehaviour
 		}
 		LoopingSoundManager.Get().Add(path, eventInstance, pauseOnGamePause);
 		Vector3 vector = new Vector3(pos.x, pos.y, 0f);
-		eventInstance.set3DAttributes(CameraController.Instance.GetVerticallyScaledPosition(vector).To3DAttributes());
+		eventInstance.set3DAttributes(SoundEvent.GetCameraScaledPosition(vector).To3DAttributes());
 		LoopingSoundManager.UpdateSpeed(eventInstance);
 		eventInstance.start();
 		if (Time.timeScale == 0f && pauseOnGamePause)
@@ -214,7 +220,7 @@ public class LoopingSoundManager : KMonoBehaviour
 			float num = 0f;
 			foreach (EventInstance eventInstance in this.events)
 			{
-				if (CameraController.Instance.IsAudibleSound(KFMOD.GetInstancePosition(eventInstance), 0f))
+				if (CameraController.Instance == null || CameraController.Instance.IsAudibleSound(KFMOD.GetInstancePosition(eventInstance), 0f))
 				{
 					num += 1f;
 				}

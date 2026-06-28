@@ -42,6 +42,25 @@ namespace ProcGen.Map
 			}
 		}
 
+		public Edge GetEdge(Corner corner0, Corner corner1, bool createOK = true)
+		{
+			Edge edge = this.edgeList.Find((Edge e) => (e.corner0 == corner0 || e.corner0 == corner1) && (e.corner1 == corner0 || e.corner1 == corner1));
+			if (edge != null)
+			{
+				return edge;
+			}
+			if (!createOK)
+			{
+				global::Debug.LogWarning("Cant create Edge but no edge found", null);
+				return null;
+			}
+			Arc arc = base.baseGraph.AddArc(corner0.node, corner1.node, Directedness.Undirected);
+			edge = new Edge(arc, corner0, corner1);
+			this.arcList.Add(edge);
+			this.edgeList.Add(edge);
+			return edge;
+		}
+
 		public Edge GetEdge(Corner corner0, Corner corner1, Cell site0, Cell site1, bool createOK = true)
 		{
 			Edge edge = this.edgeList.Find((Edge e) => (e.corner0 == corner0 || e.corner0 == corner1) && (e.corner1 == corner0 || e.corner1 == corner1));
@@ -82,23 +101,13 @@ namespace ProcGen.Map
 
 		public Cell GetCell(Node node)
 		{
-			Cell cell = this.cellList.Find((Cell c) => c.node == node);
-			if (cell == null)
-			{
-				global::Debug.LogWarning("GetCell by node Cant find cell", null);
-			}
-			return cell;
+			return this.cellList.Find((Cell c) => c.node == node);
 		}
 
 		public Cell GetCell(Vector2 position)
 		{
 			position = new Vector2((float)((int)position.x), (float)((int)position.y));
-			Cell cell = this.cellList.Find((Cell c) => c.position == position);
-			if (cell == null)
-			{
-				global::Debug.LogWarning("GetCell by position Cant find cell", null);
-			}
-			return cell;
+			return this.cellList.Find((Cell c) => c.position == position);
 		}
 
 		public Cell GetCell(Vector2 position, Node node, bool createOK = true)
@@ -121,7 +130,7 @@ namespace ProcGen.Map
 				}
 				else
 				{
-					global::Debug.LogWarning("GetCell Same node differnt position!", null);
+					global::Debug.LogWarning("GetCell Same node [" + node.Id + "] differnt position!", null);
 				}
 			}
 			return cell;
@@ -138,6 +147,13 @@ namespace ProcGen.Map
 				}
 			}
 			return list;
+		}
+
+		public void Remove(Edge n)
+		{
+			n.site0.Remove(n);
+			n.site1.Remove(n);
+			this.edges.Remove(n);
 		}
 
 		public void Validate()
@@ -285,8 +301,8 @@ namespace ProcGen.Map
 										" 1: ",
 										edge.site1.position
 									}), null);
-									DebugExtension.DebugCircle2d(edge.site0.position, Color.red, 1f, 15f, true);
-									DebugExtension.DebugCircle2d(edge.site1.position, Color.magenta, 2f, 15f, true);
+									DebugExtension.DebugCircle2d(edge.site0.position, Color.red, 1f, 15f, true, 4f);
+									DebugExtension.DebugCircle2d(edge.site1.position, Color.magenta, 2f, 15f, true, 4f);
 									global::Debug.Log(string.Concat(new object[]
 									{
 										"Sites O 0: ",
@@ -294,8 +310,8 @@ namespace ProcGen.Map
 										" 1: ",
 										edge2.site1.position
 									}), null);
-									DebugExtension.DebugCircle2d(edge2.site0.position, Color.green, 3f, 15f, true);
-									DebugExtension.DebugCircle2d(edge2.site1.position, Color.cyan, 4f, 15f, true);
+									DebugExtension.DebugCircle2d(edge2.site0.position, Color.green, 3f, 15f, true, 4f);
+									DebugExtension.DebugCircle2d(edge2.site1.position, Color.cyan, 4f, 15f, true, 4f);
 								}
 								else
 								{

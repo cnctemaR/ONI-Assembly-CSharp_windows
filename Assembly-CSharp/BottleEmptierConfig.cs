@@ -26,7 +26,9 @@ public class BottleEmptierConfig : IBuildingConfig
 		storage.capacityKg = 200f;
 		go.AddOrGet<TreeFilterable>();
 		go.AddOrGet<UserMenu>();
-		go.AddOrGet<BottleEmptier>();
+		BottleEmptier bottleEmptier = go.AddOrGet<BottleEmptier>();
+		bottleEmptier.noFilterTint = BottleEmptierConfig.NoFilterTint;
+		bottleEmptier.filterTint = BottleEmptierConfig.FilterTint;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -35,4 +37,8 @@ public class BottleEmptierConfig : IBuildingConfig
 	}
 
 	public const string ID = "BottleEmptier";
+
+	private static readonly Color NoFilterTint = new Color(0.5019608f, 0.5019608f, 0.5019608f, 1f);
+
+	private static readonly Color FilterTint = new Color(1f, 1f, 1f, 1f);
 }

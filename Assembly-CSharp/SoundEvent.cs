@@ -42,16 +42,20 @@ public class SoundEvent : AnimEvent
 	public bool ShouldPlaySound(AnimEventManager.EventPlayerData behaviour, bool isDynamic = false)
 	{
 		CameraController instance = CameraController.Instance;
+		if (instance == null)
+		{
+			return true;
+		}
 		SpeedControlScreen instance2 = SpeedControlScreen.Instance;
 		if (isDynamic)
 		{
-			return (!(instance2 != null) || !instance2.IsPaused) && (!(instance != null) || instance.IsAudibleSound(behaviour.position, 0f));
+			return (!(instance2 != null) || !instance2.IsPaused) && instance.IsAudibleSound(behaviour.position, 0f);
 		}
 		if (this.sound == null || this.IsLowPrioritySound(this.sound))
 		{
 			return false;
 		}
-		if (instance != null && !instance.IsAudibleSound(behaviour.position, this.sound))
+		if (!instance.IsAudibleSound(behaviour.position, this.sound))
 		{
 			if (!this.looping && !GlobalAssets.IsHighPriority(this.sound))
 			{
@@ -77,7 +81,8 @@ public class SoundEvent : AnimEvent
 	{
 		Vector3 position = behaviour.GetComponent<Transform>().position;
 		Vector3 position2 = behaviour.position;
-		if (AudioDebug.Get().debugSoundEvents)
+		AudioDebug audioDebug = AudioDebug.Get();
+		if (audioDebug != null && audioDebug.debugSoundEvents)
 		{
 			Vector3 vector = ((!this.playAtTarget) ? position : position2);
 			global::Debug.Log(string.Concat(new object[] { behaviour.name, ", ", this.sound, ", ", base.frame, ", ", vector }), null);
@@ -103,22 +108,28 @@ public class SoundEvent : AnimEvent
 		}
 		catch (Exception ex)
 		{
-			string text = string.Format(("Error trying to trigger sound [{0}] in behaviour [{1}]" + this.sound == null) ? "null" : this.sound.ToString(), behaviour.GetType().ToString());
-			Output.LogError(new object[] { text });
+			string text = string.Format(("Error trying to trigger sound [{0}] in behaviour [{1}] [{2}]\n{3}" + this.sound == null) ? "null" : this.sound.ToString(), behaviour.GetType().ToString(), ex.Message, ex.StackTrace);
+			global::Debug.LogError(text, null);
 			throw new ArgumentException(text, ex);
 		}
 	}
 
+	public static Vector3 GetCameraScaledPosition(Vector3 pos)
+	{
+		Vector3 zero = Vector3.zero;
+		return CameraController.Instance.GetVerticallyScaledPosition(pos);
+	}
+
 	public static FMOD.Studio.EventInstance BeginOneShot(string ev, Vector3 pos)
 	{
-		FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(ev, CameraController.Instance.GetVerticallyScaledPosition(pos));
+		FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(ev, SoundEvent.GetCameraScaledPosition(pos));
 		LoopingSoundManager.UpdateSpeed(eventInstance);
 		return eventInstance;
 	}
 
 	public static FMOD.Studio.EventInstance BeginOneShot(FMOD.Studio.EventInstance instance, Vector3 pos)
 	{
-		FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(instance, CameraController.Instance.GetVerticallyScaledPosition(pos));
+		FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(instance, SoundEvent.GetCameraScaledPosition(pos));
 		LoopingSoundManager.UpdateSpeed(eventInstance);
 		return eventInstance;
 	}
@@ -153,10 +164,6 @@ public class SoundEvent : AnimEvent
 			FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(sound, vector);
 			if (eventInstance != null)
 			{
-				if (noiseValues.amount != 0)
-				{
-					AudioEventManager.Get().PlayTimedOnceOff(vector, noiseValues.amount, noiseValues.radius, behaviour.GetComponent<KSelectable>().GetName(), 1f);
-				}
 				flag = SoundEvent.EndOneShot(eventInstance);
 			}
 		}

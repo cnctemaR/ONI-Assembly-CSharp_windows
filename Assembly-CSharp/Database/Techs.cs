@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Database
@@ -35,15 +36,11 @@ namespace Database
 			foreach (Tech tech3 in this)
 			{
 				tech3.tier = this.GetTier(tech3);
-				if (tech3.tier == 0)
+				List<Tuple<string, float>> list = this.TECH_TIERS[tech3.tier];
+				foreach (Tuple<string, float> tuple in list)
 				{
-					tech3.costsByResearchTypeID.Add(ResearchTypes.ID.ALPHA, (float)(20 * (tech3.tier + 1)));
+					tech3.costsByResearchTypeID.Add(tuple.first, tuple.second);
 				}
-				else
-				{
-					tech3.costsByResearchTypeID.Add(ResearchTypes.ID.ALPHA, (float)(20 * tech3.tier));
-				}
-				tech3.costsByResearchTypeID.Add(ResearchTypes.ID.BETA, (float)Mathf.Max(0, 10 * tech3.tier));
 				this.tierCount = Math.Max(tech3.tier + 1, this.tierCount);
 			}
 		}
@@ -73,5 +70,28 @@ namespace Database
 		}
 
 		public int tierCount;
+
+		private readonly List<List<Tuple<string, float>>> TECH_TIERS = new List<List<Tuple<string, float>>>
+		{
+			new List<Tuple<string, float>>
+			{
+				new Tuple<string, float>(ResearchTypes.ID.ALPHA, 15f)
+			},
+			new List<Tuple<string, float>>
+			{
+				new Tuple<string, float>(ResearchTypes.ID.ALPHA, 20f),
+				new Tuple<string, float>(ResearchTypes.ID.BETA, 10f)
+			},
+			new List<Tuple<string, float>>
+			{
+				new Tuple<string, float>(ResearchTypes.ID.ALPHA, 30f),
+				new Tuple<string, float>(ResearchTypes.ID.BETA, 20f)
+			},
+			new List<Tuple<string, float>>
+			{
+				new Tuple<string, float>(ResearchTypes.ID.ALPHA, 35f),
+				new Tuple<string, float>(ResearchTypes.ID.BETA, 30f)
+			}
+		};
 	}
 }

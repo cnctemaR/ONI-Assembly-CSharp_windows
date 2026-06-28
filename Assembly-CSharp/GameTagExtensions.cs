@@ -17,4 +17,9 @@ public static class GameTagExtensions
 	{
 		return TagManager.Create(id.ToString(), null);
 	}
+
+	public static Tag CreateTag(this SimHashes id)
+	{
+		return TagManager.Create(id.ToString(), null);
+	}
 }

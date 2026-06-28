@@ -27,7 +27,7 @@ public class ConfirmDialogScreen : KModalScreen
 		}
 	}
 
-	public void PopupConfirmDialog(string text, global::System.Action on_confirm, global::System.Action on_cancel, string configurable_text = null, global::System.Action on_configurable_clicked = null, string confirm_text = null, string cancel_text = null)
+	public void PopupConfirmDialog(string text, global::System.Action on_confirm, global::System.Action on_cancel, string configurable_text = null, global::System.Action on_configurable_clicked = null, string title_text = null, string confirm_text = null, string cancel_text = null)
 	{
 		this.confirmAction = on_confirm;
 		this.cancelAction = on_cancel;
@@ -70,6 +70,10 @@ public class ConfirmDialogScreen : KModalScreen
 		if (component != null && component.sprite != null)
 		{
 			this.imageGO.SetActive(true);
+		}
+		if (title_text != null)
+		{
+			this.titleText.text = title_text;
 		}
 		this.popupMessage.text = text;
 	}
@@ -130,4 +134,7 @@ public class ConfirmDialogScreen : KModalScreen
 
 	[SerializeField]
 	private GameObject configurableButton;
+
+	[SerializeField]
+	private LocText titleText;
 }

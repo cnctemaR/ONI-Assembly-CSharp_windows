@@ -42,7 +42,7 @@ public class AccessControlSideScreenRow : AccessControlSideScreenDoor
 			this.portraitInstance.SetAlpha(1f);
 		}
 		this.targetIdentity = identity;
-		this.portraitInstance.SetCrewMember(identity, false);
+		this.portraitInstance.SetIdentityObject(identity, false);
 		this.portraitInstance.SetSubTitle((!isDefault) ? UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.USING_CUSTOM : UI.UISIDESCREENS.ACCESS_CONTROL_SIDE_SCREEN.USING_DEFAULT);
 		this.defaultClickedCallback = null;
 		this.defaultButton.isOn = !isDefault;

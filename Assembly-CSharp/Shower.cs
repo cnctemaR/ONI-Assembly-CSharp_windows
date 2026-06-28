@@ -10,8 +10,16 @@ public class Shower : Workable, IGameObjectEffectDescriptor, IEffectDescriptor
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.resetProgressOnStop = true;
 		this.smi = new Shower.ShowerSM.Instance(this);
 		this.smi.StartSM();
+	}
+
+	protected override void OnStartWork(Worker worker)
+	{
+		HygieneMonitor.Instance instance = worker.GetSMI<HygieneMonitor.Instance>();
+		base.WorkTimeRemaining = this.workTime * instance.GetDirtiness();
+		base.OnStartWork(worker);
 	}
 
 	protected override void OnCompleteWork(Worker worker)
@@ -22,6 +30,16 @@ public class Shower : Workable, IGameObjectEffectDescriptor, IEffectDescriptor
 		{
 			string text = Shower.EffectsRemoved[i];
 			component.Remove(text);
+		}
+	}
+
+	protected override void OnStopWork(Worker worker)
+	{
+		base.OnStopWork(worker);
+		HygieneMonitor.Instance instance = worker.GetSMI<HygieneMonitor.Instance>();
+		if (instance != null)
+		{
+			instance.SetDirtiness(1f - this.GetPercentComplete());
 		}
 	}
 
@@ -63,12 +81,11 @@ public class Shower : Workable, IGameObjectEffectDescriptor, IEffectDescriptor
 		{
 			default_state = this.unoperational;
 			this.unoperational.EventTransition(GameHashes.OperationalChanged, this.operational, (Shower.ShowerSM.Instance smi) => smi.IsOperational).PlayAnim("off", KAnim.PlayMode.Once, null);
-			this.operational.DefaultState(this.operational.idle).EventTransition(GameHashes.OperationalChanged, this.unoperational, (Shower.ShowerSM.Instance smi) => !smi.IsOperational).ToggleChore((Shower.ShowerSM.Instance smi) => new WorkChore<Shower>(Db.Get().ChoreTypes.Shower, smi.master, null, true, null, null, null, false, null, true, default(Tag), null, false, true, true), this.unoperational);
+			this.operational.DefaultState(this.operational.idle).EventTransition(GameHashes.OperationalChanged, this.unoperational, (Shower.ShowerSM.Instance smi) => !smi.IsOperational).ToggleChore((Shower.ShowerSM.Instance smi) => new WorkChore<Shower>(Db.Get().ChoreTypes.Shower, smi.master, null, true, null, null, null, false, null, true, default(Tag), null, false, true, true, int.MaxValue), this.unoperational);
 			this.operational.idle.WorkableStartTransition((Shower.ShowerSM.Instance smi) => smi.master, this.operational.showering);
 			this.operational.showering.WorkableStopTransition((Shower.ShowerSM.Instance smi) => smi.master, this.operational.exiting).Enter(delegate(Shower.ShowerSM.Instance smi)
 			{
 				smi.master.GetComponent<Operational>().SetActive(true, false);
-				smi.master.SetWorkTime(smi.master.workTime);
 			}).Update(delegate(Shower.ShowerSM.Instance smi)
 			{
 				smi.RemoveDisease(smi.deltatime);
@@ -78,11 +95,7 @@ public class Shower : Workable, IGameObjectEffectDescriptor, IEffectDescriptor
 				{
 					smi.master.GetComponent<Operational>().SetActive(false, false);
 				});
-			this.operational.exiting.PlayAnim("working_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.unoperational).Enter("ClearProgressBar", delegate(Shower.ShowerSM.Instance smi)
-			{
-				smi.master.ShowProgressBar(false);
-				smi.master.SetWorkTime(smi.master.workTime);
-			});
+			this.operational.exiting.PlayAnim("working_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.unoperational);
 		}
 
 		public GameStateMachine<Shower.ShowerSM, Shower.ShowerSM.Instance, Shower, object>.State unoperational;

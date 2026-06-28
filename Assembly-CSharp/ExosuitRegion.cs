@@ -28,7 +28,6 @@ public class ExosuitRegion : KMonoBehaviour
 	{
 		foreach (int num in this.cells)
 		{
-			Grid.SuitRequired[num] = state;
 		}
 	}
 

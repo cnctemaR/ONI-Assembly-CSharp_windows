@@ -19,6 +19,7 @@ public class GlomConfig : IEntityConfig
 		glom.dirtyMassReleaseOnDeath = 3f;
 		glom.emitDiseaseIdx = Db.Get().Diseases.GetIndex("SlimeLung");
 		glom.emitDiseasePerKg = 1000;
+		gameObject.UpdateComponentRequirement<Trappable>(true);
 		gameObject.UpdateComponentRequirement<LoopingSounds>(true);
 		LoopingSounds component = gameObject.GetComponent<LoopingSounds>();
 		component.updatePosition = true;
@@ -30,6 +31,8 @@ public class GlomConfig : IEntityConfig
 		SoundEventVolumeCache.instance.AddVolume("glom_kanim", "Morb_jump", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("glom_kanim", "Morb_land", NOISE_POLLUTION.CREATURES.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("glom_kanim", "Morb_expel", NOISE_POLLUTION.CREATURES.TIER4);
+		GameObject gameObject2 = EntityTemplates.CreateAndRegisterPreview("Glom_Preview", Assets.GetAnim("glom_kanim"), "idle", ObjectLayer.NumLayers, 1, 1);
+		GameObject gameObject3 = EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, string.Format(global::STRINGS.CREATURES.BAGGED_NAME_FMT, global::STRINGS.CREATURES.SPECIES.GLOM.NAME), string.Format(global::STRINGS.CREATURES.BAGGED_DESC_FMT, global::STRINGS.CREATURES.SPECIES.GLOM.NAME), Assets.GetAnim("creature_interacts_trap_glom_kanim"), "working_pre", new Tag("Glom_Preview"));
 		return gameObject;
 	}
 
@@ -42,6 +45,8 @@ public class GlomConfig : IEntityConfig
 	}
 
 	public const string ID = "Glom";
+
+	public const string PREVIEW_ID = "Glom_Preview";
 
 	public const SimHashes dirtyEmitElement = SimHashes.ContaminatedOxygen;
 

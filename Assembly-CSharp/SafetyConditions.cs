@@ -35,12 +35,10 @@ public class SafetyConditions
 		this.IsWarming = new SafetyChecker.Condition("IsWarming", num *= 2, (int cell, int cost, SafetyChecker.Context context) => true);
 		this.IsCooling = new SafetyChecker.Condition("IsCooling", num *= 2, (int cell, int cost, SafetyChecker.Context context) => false);
 		this.HasSomeOxygen = new SafetyChecker.Condition("HasSomeOxygen", num *= 2, (int cell, int cost, SafetyChecker.Context context) => context.oxygenBreather.IsBreathableElementAtCell(cell, null));
-		this.IsClear = new SafetyChecker.Condition("IsClear", num *= 2, (int cell, int cost, SafetyChecker.Context context) => context.minionBrain.IsCellClear(cell));
-		this.DoesNotRequireSuit = new SafetyChecker.Condition("DoesNotRequireSuit", num * 2, (int cell, int cost, SafetyChecker.Context context) => !Grid.SuitRequired[cell]);
+		this.IsClear = new SafetyChecker.Condition("IsClear", num * 2, (int cell, int cost, SafetyChecker.Context context) => context.minionBrain.IsCellClear(cell));
 		this.WarmUpChecker = new SafetyChecker(new List<SafetyChecker.Condition> { this.IsWarming }.ToArray());
 		this.CoolDownChecker = new SafetyChecker(new List<SafetyChecker.Condition> { this.IsCooling }.ToArray());
 		List<SafetyChecker.Condition> list = new List<SafetyChecker.Condition>();
-		list.Add(this.DoesNotRequireSuit);
 		list.Add(this.HasSomeOxygen);
 		list.Add(this.IsNotDoor);
 		this.RecoverBreathChecker = new SafetyChecker(list.ToArray());
@@ -65,8 +63,6 @@ public class SafetyConditions
 	public SafetyChecker.Condition HasSomeOxygen;
 
 	public SafetyChecker.Condition IsClear;
-
-	public SafetyChecker.Condition DoesNotRequireSuit;
 
 	public SafetyChecker.Condition IsNotFoundation;
 

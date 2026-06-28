@@ -11,12 +11,19 @@ namespace Delaunay
 	{
 		public Voronoi(List<Vector2> points, List<uint> colors, List<float> weights, Rect plotBounds)
 		{
+			this._plotBounds = plotBounds;
+			this.min_weight = float.MaxValue;
+			this.max_weight = float.MinValue;
 			this._sites = new SiteList();
 			this._sitesIndexedByLocation = new Dictionary<Vector2, Site>();
-			this.AddSites(points, colors, weights);
-			this._plotBounds = plotBounds;
 			this._triangles = new List<Triangle>();
 			this._edges = new List<Edge>();
+			this.AddSites(points, colors, weights);
+			float num = this.max_weight - this.min_weight;
+			if (num > 0f)
+			{
+				this._sites.ScaleWeight(1f + num);
+			}
 			this.FortunesAlgorithm();
 		}
 
@@ -60,8 +67,8 @@ namespace Delaunay
 
 		private void AddSites(List<Vector2> points, List<uint> colors, List<float> weights)
 		{
-			int count = points.Count;
-			for (int i = 0; i < count; i++)
+			this.weightSum = 0f;
+			for (int i = 0; i < points.Count; i++)
 			{
 				this.AddSite(points[i], (colors == null) ? 0U : colors[i], i, (weights != null) ? weights[i] : 1f);
 			}
@@ -74,8 +81,16 @@ namespace Delaunay
 				return;
 			}
 			Site site = Site.Create(p, (uint)index, weight, color);
-			this._sites.Add(site);
+			this.min_weight = Mathf.Min(this.min_weight, weight);
+			this.max_weight = Mathf.Max(this.max_weight, weight);
 			this._sitesIndexedByLocation[p] = site;
+			this._sites.Add(site);
+			this.weightSum += site.weight;
+		}
+
+		public Site GetSiteByLocation(Vector2 p)
+		{
+			return this._sitesIndexedByLocation[p];
 		}
 
 		public List<Edge> Edges()
@@ -124,6 +139,22 @@ namespace Delaunay
 				hashSet.Add(list[i].color);
 			}
 			return hashSet;
+		}
+
+		public List<uint> ListNeighborSitesIDsForSite(Vector2 coord)
+		{
+			List<uint> list = new List<uint>();
+			Site site = this._sitesIndexedByLocation[coord];
+			if (site == null)
+			{
+				return list;
+			}
+			List<Site> list2 = site.NeighborSites();
+			for (int i = 0; i < list2.Count; i++)
+			{
+				list.Add(list2[i].color);
+			}
+			return list;
 		}
 
 		public List<Circle> Circles()
@@ -404,7 +435,13 @@ namespace Delaunay
 
 		private List<Edge> _edges;
 
+		private float min_weight;
+
+		private float max_weight;
+
 		private Rect _plotBounds;
+
+		private float weightSum;
 
 		private Site fortunesAlgorithm_bottomMostSite;
 	}

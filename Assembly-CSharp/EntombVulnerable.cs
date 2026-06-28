@@ -1,7 +1,8 @@
 ﻿using System;
 using KSerialization;
+using STRINGS;
 
-public class EntombVulnerable : KMonoBehaviour
+public class EntombVulnerable : KMonoBehaviour, IWiltCause
 {
 	private OccupyArea occupyArea
 	{
@@ -23,11 +24,31 @@ public class EntombVulnerable : KMonoBehaviour
 		}
 	}
 
+	public string WiltStateString
+	{
+		get
+		{
+			return Db.Get().CreatureStatusItems.Entombed.resolveStringCallback(CREATURES.STATUSITEMS.ENTOMBED.LINE_ITEM, this);
+		}
+	}
+
+	public WiltCondition.Condition[] Conditions
+	{
+		get
+		{
+			return new WiltCondition.Condition[] { WiltCondition.Condition.Entombed };
+		}
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("EntombVulnerable", base.gameObject, this.occupyArea.GetExtents(), GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
 		this.CheckEntombed();
+		if (this.isEntombed)
+		{
+			this.Trigger(-1089732772, true);
+		}
 	}
 
 	protected override void OnCleanUp()

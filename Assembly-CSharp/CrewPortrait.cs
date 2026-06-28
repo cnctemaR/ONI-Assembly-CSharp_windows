@@ -38,13 +38,10 @@ public class CrewPortrait : KMonoBehaviour
 		instance.OnResize = (global::System.Action)Delegate.Remove(instance.OnResize, new global::System.Action(this.RefreshScale));
 	}
 
-	public void SetCrewMember(MinionIdentity identity, bool jobEnabled = true)
+	public void SetIdentityObject(IAssignableIdentity identity, bool jobEnabled = true)
 	{
-		if (identity != null)
-		{
-			this.crewMember = identity.gameObject;
-		}
-		if (this.useLabels)
+		this.identityObject = identity;
+		if (this.useLabels && identity is MinionIdentity)
 		{
 			this.SetDuplicantJobTitleActive(jobEnabled);
 		}
@@ -96,7 +93,7 @@ public class CrewPortrait : KMonoBehaviour
 
 	public void Update()
 	{
-		if (this.requiresRefresh && this.crewMember != null)
+		if (this.requiresRefresh)
 		{
 			this.requiresRefresh = false;
 			this.Rebuild();
@@ -136,27 +133,32 @@ public class CrewPortrait : KMonoBehaviour
 		{
 			this.targetImage.enabled = false;
 		}
-		CrewPortrait.SetPortraitData(this.crewMember, this.controller, this.useDefaultExpression);
-		if (this.useLabels)
+		CrewPortrait.SetPortraitData(this.identityObject, this.controller, this.useDefaultExpression);
+		if (this.useLabels && this.duplicantName != null)
 		{
-			if (this.duplicantName != null)
+			this.duplicantName.SetText(this.identityObject.GetProperName());
+			if (this.identityObject is MinionIdentity && this.duplicantJob != null)
 			{
-				this.duplicantName.SetText(this.crewMember.GetProperName());
-			}
-			if (this.duplicantJob != null)
-			{
-				this.duplicantJob.SetText(this.crewMember.GetAttributes().GetProfessionString(true));
-				this.duplicantJob.GetComponent<ToolTip>().toolTip = this.crewMember.GetAttributes().GetProfessionDescriptionString();
+				this.duplicantJob.SetText((this.identityObject == null) ? string.Empty : (this.identityObject as MinionIdentity).GetAttributes().GetProfessionString(true));
+				this.duplicantJob.GetComponent<ToolTip>().toolTip = (this.identityObject as MinionIdentity).GetAttributes().GetProfessionDescriptionString();
 			}
 		}
 	}
 
-	public static void SetPortraitData(GameObject crewMember, KBatchedAnimController controller, bool useDefaultExpression = true)
+	public static void SetPortraitData(IAssignableIdentity identityObject, KBatchedAnimController controller, bool useDefaultExpression = true)
 	{
+		if (identityObject == null)
+		{
+			return;
+		}
 		controller.gameObject.SetActive(true);
-		FaceGraph component = crewMember.GetComponent<FaceGraph>();
-		KCompBuildInstance headComp = component.GetHeadComp();
 		controller.ClearAnims();
+		if (!(identityObject is MinionIdentity))
+		{
+			return;
+		}
+		FaceGraph component = (identityObject as MinionIdentity).GetComponent<FaceGraph>();
+		KCompBuildInstance headComp = component.GetHeadComp();
 		controller.SetAnims(new KAnimFile[] { Assets.GetAnim("body_comp_default_kanim") }, false);
 		controller.AddBuildOverride(headComp.GetData(), true, false);
 		headComp.Refresh(controller);
@@ -176,6 +178,10 @@ public class CrewPortrait : KMonoBehaviour
 			}
 		}
 		controller.Play(text, KAnim.PlayMode.Once, 1f, 0f);
+		controller.HideSymbol(true, CrewPortrait.snapTo_neck);
+		controller.HideSymbol(true, CrewPortrait.snapTo_pivot);
+		controller.HideSymbol(true, CrewPortrait.snapTo_rgthand);
+		controller.HideSymbol(true, CrewPortrait.snapTo_chest);
 	}
 
 	public void SetAlpha(float value)
@@ -190,7 +196,7 @@ public class CrewPortrait : KMonoBehaviour
 		}
 	}
 
-	public GameObject crewMember;
+	public IAssignableIdentity identityObject;
 
 	public Image targetImage;
 
@@ -212,4 +218,12 @@ public class CrewPortrait : KMonoBehaviour
 	public bool useDefaultExpression = true;
 
 	private bool requiresRefresh;
+
+	private static readonly HashedString snapTo_neck = new HashedString("snapTo_neck");
+
+	private static readonly HashedString snapTo_pivot = new HashedString("snapTo_pivot");
+
+	private static readonly HashedString snapTo_rgthand = new HashedString("snapTo_rgthand");
+
+	private static readonly HashedString snapTo_chest = new HashedString("snapTo_chest");
 }

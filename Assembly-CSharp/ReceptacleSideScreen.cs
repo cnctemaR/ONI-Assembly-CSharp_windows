@@ -171,6 +171,7 @@ public class ReceptacleSideScreen : SideScreenContent
 				this.UpdateState(null);
 			};
 			this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = UI.PLACEINRECEPTACLE;
+			this.targetReceptacle.SetPreview(this.depositObjectMap[this.selectedEntityToggle].tag, false);
 			bool flag = this.ValidRotationForDeposit(this.depositObjectMap[this.selectedEntityToggle].direction) && this.GetAvailableAmount(this.depositObjectMap[this.selectedEntityToggle].tag) > 0f && this.AdditionalCanDepositTest();
 			this.requestSelectedEntityBtn.isInteractable = flag;
 			this.SetImageToggleState(this.selectedEntityToggle.toggle, (!flag) ? ImageToggleState.State.DisabledActive : ImageToggleState.State.Active);
@@ -181,7 +182,6 @@ public class ReceptacleSideScreen : SideScreenContent
 				this.subtitleLabel.SetText(string.Format(Strings.Get(this.subtitleStringAwaitingSelection).ToString(), prefab2.GetProperName()));
 				this.SetResultDescriptions(prefab2);
 			}
-			this.targetReceptacle.SetPreview(this.depositObjectMap[this.selectedEntityToggle].tag, false);
 		}
 		else
 		{
@@ -189,6 +189,7 @@ public class ReceptacleSideScreen : SideScreenContent
 			this.requestSelectedEntityBtn.isInteractable = false;
 			this.ToggleSeedSelector(true);
 		}
+		this.UpdateAvailableAmounts(null);
 		this.UpdateListeners();
 	}
 
@@ -216,7 +217,13 @@ public class ReceptacleSideScreen : SideScreenContent
 		{
 			return;
 		}
-		this.UpdateState(null);
+		if (!this.CheckReceptacleOccupied() && this.targetReceptacle.GetActiveRequest != null && (!this.ValidRotationForDeposit(this.depositObjectMap[this.selectedEntityToggle].direction) || this.GetAvailableAmount(this.depositObjectMap[this.selectedEntityToggle].tag) <= 0f || !this.AdditionalCanDepositTest()))
+		{
+			this.targetReceptacle.CancelActiveRequest();
+			this.ClearSelection();
+			this.UpdateState(null);
+			this.UpdateAvailableAmounts(null);
+		}
 	}
 
 	protected virtual bool AdditionalCanDepositTest()
@@ -270,7 +277,7 @@ public class ReceptacleSideScreen : SideScreenContent
 			return;
 		}
 		this.Initialize(component);
-		this.UpdateAvailableAmounts(null);
+		this.UpdateState(null);
 	}
 
 	public override void ClearTarget()
@@ -342,25 +349,25 @@ public class ReceptacleSideScreen : SideScreenContent
 				flag = true;
 				keyValuePair.Value.lastAmount = availableAmount;
 				keyValuePair.Key.amount.text = availableAmount.ToString();
-				if (!this.ValidRotationForDeposit(keyValuePair.Value.direction) || availableAmount <= 0f)
+			}
+			if (!this.ValidRotationForDeposit(keyValuePair.Value.direction) || availableAmount <= 0f)
+			{
+				if (this.selectedEntityToggle != keyValuePair.Key)
 				{
-					if (this.selectedEntityToggle != keyValuePair.Key)
-					{
-						this.SetImageToggleState(keyValuePair.Key.toggle, ImageToggleState.State.Disabled);
-					}
-					else
-					{
-						this.SetImageToggleState(keyValuePair.Key.toggle, ImageToggleState.State.DisabledActive);
-					}
-				}
-				else if (this.selectedEntityToggle != keyValuePair.Key)
-				{
-					this.SetImageToggleState(keyValuePair.Key.toggle, ImageToggleState.State.Inactive);
+					this.SetImageToggleState(keyValuePair.Key.toggle, ImageToggleState.State.Disabled);
 				}
 				else
 				{
-					this.SetImageToggleState(keyValuePair.Key.toggle, ImageToggleState.State.Active);
+					this.SetImageToggleState(keyValuePair.Key.toggle, ImageToggleState.State.DisabledActive);
 				}
+			}
+			else if (this.selectedEntityToggle != keyValuePair.Key)
+			{
+				this.SetImageToggleState(keyValuePair.Key.toggle, ImageToggleState.State.Inactive);
+			}
+			else
+			{
+				this.SetImageToggleState(keyValuePair.Key.toggle, ImageToggleState.State.Active);
 			}
 		}
 		return flag;

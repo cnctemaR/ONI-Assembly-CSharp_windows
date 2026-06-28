@@ -36,8 +36,8 @@ public class DisinfectThresholdDiagram : MonoBehaviour
 			this.OnReleaseHandle();
 		};
 		this.unitsLabel.SetText(UI.OVERLAYS.DISEASE.DISINFECT_THRESHOLD_DIAGRAM.UNITS);
-		this.minLabel.SetText(0.ToString());
-		this.maxLabel.SetText(DisinfectThresholdDiagram.MAX_VALUE.ToString());
+		this.minLabel.SetText(UI.OVERLAYS.DISEASE.DISINFECT_THRESHOLD_DIAGRAM.MIN_LABEL);
+		this.maxLabel.SetText(UI.OVERLAYS.DISEASE.DISINFECT_THRESHOLD_DIAGRAM.MAX_LABEL);
 		this.thresholdPrefix.SetText(UI.OVERLAYS.DISEASE.DISINFECT_THRESHOLD_DIAGRAM.THRESHOLD_PREFIX);
 		this.toolTip.OnToolTip = delegate
 		{

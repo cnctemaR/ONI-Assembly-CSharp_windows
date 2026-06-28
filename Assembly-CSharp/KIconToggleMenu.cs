@@ -18,7 +18,7 @@ public class KIconToggleMenu : KScreen
 		this.RefreshButtons();
 	}
 
-	protected void RefreshButtons()
+	protected virtual void RefreshButtons()
 	{
 		foreach (KToggle ktoggle in this.toggles)
 		{

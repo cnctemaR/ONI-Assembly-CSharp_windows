@@ -6,7 +6,7 @@ namespace STRINGS
 	{
 		public class ROOT
 		{
-			public static LocString NAME = "Root";
+			public static LocString NAME = "Global";
 
 			public static LocString PANUP = "PanUp";
 
@@ -15,16 +15,6 @@ namespace STRINGS
 			public static LocString PANLEFT = "PanLeft";
 
 			public static LocString PANRIGHT = "PanRight";
-
-			public static LocString MANAGEPEOPLE = "ManagePeople";
-
-			public static LocString MANAGECONSUMABLES = "ManageConsumables";
-
-			public static LocString MANAGEVITALS = "ManageVitals";
-
-			public static LocString MANAGERESEARCH = "ManageResearch";
-
-			public static LocString MANAGEREPORT = "ManageReport";
 
 			public static LocString DIG = "Dig";
 
@@ -102,6 +92,8 @@ namespace STRINGS
 
 			public static LocString OVERLAY11 = "Overlay11";
 
+			public static LocString OVERLAY12 = "Overlay12";
+
 			public static LocString SPEEDUP = "SpeedUp";
 
 			public static LocString SLOWDOWN = "SlowDown";
@@ -120,27 +112,34 @@ namespace STRINGS
 			public static LocString DRAGSTRAIGHT = "DragStraight";
 		}
 
+		public class MANAGEMENT
+		{
+			public static LocString NAME = "Management";
+
+			public static LocString MANAGEPEOPLE = "ManagePeople";
+
+			public static LocString MANAGECONSUMABLES = "ManageConsumables";
+
+			public static LocString MANAGEVITALS = "ManageVitals";
+
+			public static LocString MANAGERESEARCH = "ManageResearch";
+
+			public static LocString MANAGEREPORT = "ManageReport";
+		}
+
 		public class BUILDING
 		{
 			public static LocString NAME = "Building";
 
 			public static LocString TOGGLEOPEN = "ToggleOpen";
 
-			public static LocString EMPTY = "Empty";
-
-			public static LocString DROPALL = "DropAll";
-
 			public static LocString TOGGLEENABLED = "ToggleEnabled";
 
-			public static LocString COPYBUILDINGSETTINGS = "CopyBuildingSettings";
+			public static LocString BUILDINGUTILITY1 = "BuildingUtility1";
 
-			public static LocString INCREMENT = "Increment";
+			public static LocString BUILDINGUTILITY2 = "BuildingUtility2";
 
-			public static LocString DECREMENT = "Decrement";
-
-			public static LocString INCREMENTALT = "IncrementAlt";
-
-			public static LocString DECREMENTALT = "DecrementAlt";
+			public static LocString BUILDINGUTILITY3 = "BuildingUtility3";
 		}
 
 		public class DEBUG
@@ -195,8 +194,6 @@ namespace STRINGS
 
 			public static LocString DEBUGDISCOVERALLELEMENTS = "DebugDiscoverAllElements";
 
-			public static LocString DEBUGPAINTFORCEFLOWER = "DebugPaintForceFlower";
-
 			public static LocString DEBUGTOGGLESELECTINEDITOR = "DebugToggleSelectInEditor";
 
 			public static LocString DEBUGPATHFINDING = "DebugPathFinding";
@@ -215,11 +212,11 @@ namespace STRINGS
 
 			public static LocString DEBUGNOTIFICATIONMESSAGE = "DebugNotificationMessage";
 
-			public static LocString DEBUGCELLINFO = "DebugCellInfo";
-
 			public static LocString TOGGLEPROFILER = "ToggleProfiler";
 
 			public static LocString TOGGLECHROMEPROFILER = "ToggleChromeProfiler";
+
+			public static LocString DEBUGDUMPSCENEPARITIONERLEAKDATA = "DebugDumpSceneParitionerLeakData";
 
 			public static LocString DEBUGTRIGGEREXCEPTION = "DebugTriggerException";
 
@@ -228,6 +225,14 @@ namespace STRINGS
 			public static LocString DEBUGDUMPGARBAGEREFERENCES = "DebugDumpGarbageReferences";
 
 			public static LocString DEBUGDUMPEVENTDATA = "DebugDumpEventData";
+
+			public static LocString SREENSHOT1X = "SreenShot1x";
+
+			public static LocString SREENSHOT2X = "SreenShot2x";
+
+			public static LocString SREENSHOT8X = "SreenShot8x";
+
+			public static LocString SREENSHOT32X = "SreenShot32x";
 
 			public static LocString DEBUGREPORTBUG = "DebugReportBug";
 		}

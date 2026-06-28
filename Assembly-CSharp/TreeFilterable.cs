@@ -21,8 +21,18 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 		if (element != null)
 		{
 			Tag materialCategoryTag = element.GetMaterialCategoryTag();
-			if (this.acceptedTags.Contains(materialCategoryTag))
+			if (this.storage.storageFilters.Contains(materialCategoryTag))
 			{
+				foreach (Tag tag2 in WorldInventory.Instance.GetDiscoveredResourcesFromTag(materialCategoryTag))
+				{
+					if (!(tag2 == tag))
+					{
+						if (!this.acceptedTags.Contains(tag2))
+						{
+							return;
+						}
+					}
+				}
 				this.AddTagToFilter(tag);
 			}
 		}
@@ -172,8 +182,8 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 
 	public bool showUserMenu = true;
 
-	[Serialize]
 	[SerializeField]
+	[Serialize]
 	private List<Tag> acceptedTags = new List<Tag>();
 
 	public Action<Tag[]> OnFilterChanged;

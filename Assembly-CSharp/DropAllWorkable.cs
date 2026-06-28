@@ -43,7 +43,7 @@ public class DropAllWorkable : Workable
 		}
 		else if (this.chore == null)
 		{
-			this.chore = new WorkChore<DropAllWorkable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true);
+			this.chore = new WorkChore<DropAllWorkable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, int.MaxValue);
 		}
 		else
 		{
@@ -85,13 +85,13 @@ public class DropAllWorkable : Workable
 			{
 				UserMenu userMenu = this.userMenu;
 				string text = UI.USERMENUACTIONS.EMPTYSTORAGE.TOOLTIP;
-				userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.EMPTYSTORAGE.NAME, new global::System.Action(this.DropAll), global::Action.DropAll, null, null, null, text, true), 1f);
+				userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.EMPTYSTORAGE.NAME, new global::System.Action(this.DropAll), global::Action.BuildingUtility1, null, null, null, text, true), 1f);
 			}
 			else
 			{
 				UserMenu userMenu2 = this.userMenu;
 				string text = UI.USERMENUACTIONS.EMPTYSTORAGE.TOOLTIP_OFF;
-				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.EMPTYSTORAGE.NAME_OFF, new global::System.Action(this.DropAll), global::Action.DropAll, null, null, null, text, true), 1f);
+				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.EMPTYSTORAGE.NAME_OFF, new global::System.Action(this.DropAll), global::Action.BuildingUtility1, null, null, null, text, true), 1f);
 			}
 		}
 	}

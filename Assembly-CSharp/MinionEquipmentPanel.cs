@@ -20,13 +20,13 @@ public class MinionEquipmentPanel : KMonoBehaviour
 	{
 		if (this.SelectedMinion != null)
 		{
-			this.SelectedMinion.Unsubscribe(-1195989806, new Action<object>(this.Refresh));
-			this.SelectedMinion.Unsubscribe(-272419061, new Action<object>(this.Refresh));
+			this.SelectedMinion.Unsubscribe(-448952673, new Action<object>(this.Refresh));
+			this.SelectedMinion.Unsubscribe(-1285462312, new Action<object>(this.Refresh));
 			this.SelectedMinion.Unsubscribe(-1585839766, new Action<object>(this.Refresh));
 		}
 		this.SelectedMinion = minion;
-		this.SelectedMinion.Subscribe(-1195989806, new Action<object>(this.Refresh));
-		this.SelectedMinion.Subscribe(-272419061, new Action<object>(this.Refresh));
+		this.SelectedMinion.Subscribe(-448952673, new Action<object>(this.Refresh));
+		this.SelectedMinion.Subscribe(-1285462312, new Action<object>(this.Refresh));
 		this.SelectedMinion.Subscribe(-1585839766, new Action<object>(this.Refresh));
 		this.Refresh(null);
 	}
@@ -49,8 +49,8 @@ public class MinionEquipmentPanel : KMonoBehaviour
 		base.OnCleanUp();
 		if (this.SelectedMinion != null)
 		{
-			this.SelectedMinion.Unsubscribe(-1195989806, new Action<object>(this.Refresh));
-			this.SelectedMinion.Unsubscribe(-272419061, new Action<object>(this.Refresh));
+			this.SelectedMinion.Unsubscribe(-448952673, new Action<object>(this.Refresh));
+			this.SelectedMinion.Unsubscribe(-1285462312, new Action<object>(this.Refresh));
 			this.SelectedMinion.Unsubscribe(-1585839766, new Action<object>(this.Refresh));
 		}
 	}
@@ -80,21 +80,38 @@ public class MinionEquipmentPanel : KMonoBehaviour
 
 	private void ShowAssignables(Assignables assignables, GameObject panel)
 	{
+		bool flag = false;
 		foreach (AssignableSlotInstance assignableSlotInstance in assignables)
 		{
 			if (assignableSlotInstance.slot.showInUI)
 			{
 				GameObject gameObject = this.AddOrGetLabel(this.labels, panel, assignableSlotInstance.slot.Name);
-				string text = ((!assignableSlotInstance.IsAssigned()) ? UI.DETAILTABS.POSSESSIONS.UNASSIGNED.text : assignableSlotInstance.assignable.GetComponent<KSelectable>().GetName());
-				gameObject.GetComponent<LocText>().text = string.Format("{0}: {1}", assignableSlotInstance.slot.Name, text);
 				if (assignableSlotInstance.IsAssigned())
 				{
+					gameObject.SetActive(true);
+					flag = true;
+					string text = ((!assignableSlotInstance.IsAssigned()) ? UI.DETAILTABS.POSSESSIONS.UNASSIGNED.text : assignableSlotInstance.assignable.GetComponent<KSelectable>().GetName());
+					gameObject.GetComponent<LocText>().text = string.Format("{0}: {1}", assignableSlotInstance.slot.Name, text);
 					gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.DETAILTABS.POSSESSIONS.ASSIGNED_TOOLTIP, text, this.GetAssignedEffectsString(assignableSlotInstance));
 				}
 				else
 				{
-					gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.DETAILTABS.POSSESSIONS.UNASSIGNED_TOOLTIP, assignableSlotInstance.slot.Name);
+					gameObject.SetActive(false);
 				}
+			}
+		}
+		if (assignables is Ownables)
+		{
+			if (!flag)
+			{
+				GameObject gameObject2 = this.AddOrGetLabel(this.labels, panel, "NothingAssigned");
+				this.labels["NothingAssigned"].SetActive(true);
+				gameObject2.GetComponent<LocText>().text = UI.DETAILTABS.POSSESSIONS.NOTHING;
+				gameObject2.GetComponent<ToolTip>().toolTip = UI.DETAILTABS.POSSESSIONS.NOTHING_TOOLTIP;
+			}
+			else if (this.labels.ContainsKey("NothingAssigned"))
+			{
+				this.labels["NothingAssigned"].SetActive(false);
 			}
 		}
 	}

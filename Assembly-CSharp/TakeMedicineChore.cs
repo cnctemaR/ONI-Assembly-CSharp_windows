@@ -1,5 +1,4 @@
 ﻿using System;
-using Klei.AI;
 
 public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 {
@@ -11,6 +10,7 @@ public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 		this.smi = new TakeMedicineChore.StatesInstance(this);
 		base.AddPrecondition(ChorePreconditions.CanPickup, this.pickupable);
 		base.AddPrecondition(TakeMedicineChore.CanCure, this);
+		base.AddPrecondition(TakeMedicineChore.IsConsumptionPermitted, this);
 	}
 
 	// Note: this type is marked as 'beforefieldinit'.
@@ -21,20 +21,18 @@ public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 		precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			TakeMedicineChore takeMedicineChore = (TakeMedicineChore)data;
-			Diseases diseases = context.consumer.GetDiseases();
-			foreach (DiseaseInstance diseaseInstance in diseases)
-			{
-				foreach (string text in takeMedicineChore.medicine.curedDiseases)
-				{
-					if (Diseases.CanCure(text, diseaseInstance.modifier.Id) && !diseaseInstance.HasTakenPill(takeMedicineChore.medicine.gameObject.GetProperName()))
-					{
-						return true;
-					}
-				}
-			}
-			return false;
+			return takeMedicineChore.medicine.CanBeTakenBy(context.consumer.gameObject);
 		};
 		TakeMedicineChore.CanCure = precondition;
+		Chore.Precondition precondition2 = default(Chore.Precondition);
+		precondition2.id = "IsConsumptionPermitted";
+		precondition2.fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			TakeMedicineChore takeMedicineChore2 = (TakeMedicineChore)data;
+			ConsumableConsumer component = context.consumer.GetComponent<ConsumableConsumer>();
+			return component == null || component.IsPermitted(takeMedicineChore2.medicine.PrefabID().Name);
+		};
+		TakeMedicineChore.IsConsumptionPermitted = precondition2;
 	}
 
 	public override void Begin(Chore.Precondition.Context context)
@@ -51,6 +49,8 @@ public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 
 	public static Chore.Precondition CanCure;
 
+	public static Chore.Precondition IsConsumptionPermitted;
+
 	public class StatesInstance : GameStateMachine<TakeMedicineChore.States, TakeMedicineChore.StatesInstance, TakeMedicineChore, object>.GameInstance
 	{
 		public StatesInstance(TakeMedicineChore master)
@@ -66,7 +66,7 @@ public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 			default_state = this.fetch;
 			base.Target(this.eater);
 			this.fetch.InitializeStates(this.eater, this.source, this.chunk, this.requestedpillcount, this.actualpillcount, this.takemedicine, null);
-			this.takemedicine.ToggleWork("TakeMedicine", delegate(TakeMedicineChore.StatesInstance smi)
+			this.takemedicine.ToggleAnims("anim_eat_floor_kanim", 0f).ToggleWork("TakeMedicine", delegate(TakeMedicineChore.StatesInstance smi)
 			{
 				MedicinalPill medicinalPill = this.chunk.Get<MedicinalPill>(smi);
 				Worker worker = this.eater.Get<Worker>(smi);

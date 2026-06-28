@@ -26,7 +26,7 @@ public class GasConduitConfig : IBuildingConfig
 		buildingDef.isUtility = true;
 		buildingDef.OverlayAnim = Assets.GetAnim("utilities_gas_kanim");
 		buildingDef.DragBuild = true;
-		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.GasVentIDs, "GasConduit");
+		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.GasVentIDs, buildingDef.PrefabID);
 		return buildingDef;
 	}
 

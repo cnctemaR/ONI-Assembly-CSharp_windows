@@ -24,7 +24,6 @@ public class FloorLampConfig : IBuildingConfig
 		Light2D light2D = go.AddOrGet<Light2D>();
 		light2D.overlayColour = LIGHT2D.FLOORLAMP_OVERLAYCOLOR;
 		light2D.Color = LIGHT2D.FLOORLAMP_COLOR;
-		light2D.Intensity = 4f;
 		light2D.Range = 4f;
 		light2D.Angle = 0f;
 		light2D.Direction = LIGHT2D.FLOORLAMP_DIRECTION;

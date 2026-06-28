@@ -36,7 +36,6 @@ public class NavGridUpdater
 		if (num2 > num)
 		{
 			link_handles[cell] = num;
-			links[num2].flags = PathFinderFlags.None;
 			links[num2].link = NavGridUpdater.InvalidCell;
 			if (num2 - num > NavGrid.MaxLinksPerCell)
 			{
@@ -74,12 +73,6 @@ public class NavGridUpdater
 		jobBatch.Run();
 	}
 
-	private static PathFinderFlags GetPathDoorRequirements(int cell, ushort[] gridBitFields)
-	{
-		bool flag = (gridBitFields[cell] & 8) != 0;
-		return (!flag) ? PathFinderFlags.None : PathFinderFlags.SuitRequired;
-	}
-
 	private static void CreateLinks(int cell, NavTable nav_table, ushort[] gridBitFields, NavGrid.Link[] links, ref int link_idx, NavGrid.Transition[] link_offsets)
 	{
 		int num = link_offsets.Length;
@@ -88,7 +81,7 @@ public class NavGridUpdater
 			int num2 = link_offsets[i].IsValid(cell, nav_table, gridBitFields, true);
 			if (num2 != Grid.InvalidCell)
 			{
-				links[link_idx] = new NavGrid.Link(num2, NavGridUpdater.GetPathDoorRequirements(num2, gridBitFields), link_offsets[i].start, link_offsets[i].end, link_offsets[i].id, link_offsets[i].cost);
+				links[link_idx] = new NavGrid.Link(num2, link_offsets[i].start, link_offsets[i].end, link_offsets[i].id, link_offsets[i].cost);
 				link_idx++;
 			}
 		}

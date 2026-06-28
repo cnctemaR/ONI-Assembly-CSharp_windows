@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class Wire : KMonoBehaviour, IFirstFrameCallback, IDisconnectable
+public class Wire : KMonoBehaviour, IFirstFrameCallback, IDisconnectable, IWattageRating
 {
 	public void SetFirstFrameCallback(global::System.Action ffCb)
 	{
@@ -167,7 +167,7 @@ public class Wire : KMonoBehaviour, IFirstFrameCallback, IDisconnectable
 		base.OnPrefabInit();
 		if (Wire.WireCircuitStatus == null)
 		{
-			Wire.WireCircuitStatus = new StatusItem("WireCircuitStatus", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true, 2046).SetResolveStringCallback(delegate(string str, object data)
+			Wire.WireCircuitStatus = new StatusItem("WireCircuitStatus", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 14334).SetResolveStringCallback(delegate(string str, object data)
 			{
 				Wire wire = (Wire)data;
 				int num = Grid.PosToCell(wire.transform.position);
@@ -175,20 +175,35 @@ public class Wire : KMonoBehaviour, IFirstFrameCallback, IDisconnectable
 				ushort circuitID = circuitManager.GetCircuitID(num);
 				float wattsUsedByCircuit = circuitManager.GetWattsUsedByCircuit(circuitID);
 				float wattsNeededWhenActive = circuitManager.GetWattsNeededWhenActive(circuitID);
-				str = str.Replace("{CurrentLoad}", GameUtil.GetFormattedWattage(wattsUsedByCircuit, "F1"));
-				str = str.Replace("{MaxLoad}", GameUtil.GetFormattedWattage(wattsNeededWhenActive, "F1"));
+				GameUtil.WattageFormatterUnit wattageFormatterUnit = GameUtil.WattageFormatterUnit.Watts;
+				if (wire.MaxWattageRating == Wire.WattageRating.Max20000)
+				{
+					wattageFormatterUnit = GameUtil.WattageFormatterUnit.Kilowatts;
+				}
+				str = str.Replace("{CurrentLoad}", GameUtil.GetFormattedWattage(wattsUsedByCircuit, wattageFormatterUnit));
+				str = str.Replace("{MaxLoad}", GameUtil.GetFormattedWattage(wattsNeededWhenActive, wattageFormatterUnit));
 				return str;
 			});
 		}
 		if (Wire.WireMaxWattageStatus == null)
 		{
-			Wire.WireMaxWattageStatus = new StatusItem("WireMaxWattageStatus", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true, 2046).SetResolveStringCallback(delegate(string str, object data)
+			Wire.WireMaxWattageStatus = new StatusItem("WireMaxWattageStatus", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 14334).SetResolveStringCallback(delegate(string str, object data)
 			{
 				Wire wire2 = (Wire)data;
-				str = str.Replace("{WireMaxWattage}", GameUtil.GetFormattedWattage(Wire.GetMaxWattageAsFloat(wire2.MaxWattageRating), "F1"));
+				GameUtil.WattageFormatterUnit wattageFormatterUnit2 = GameUtil.WattageFormatterUnit.Watts;
+				if (wire2.MaxWattageRating == Wire.WattageRating.Max20000)
+				{
+					wattageFormatterUnit2 = GameUtil.WattageFormatterUnit.Kilowatts;
+				}
+				str = str.Replace("{WireMaxWattage}", GameUtil.GetFormattedWattage(Wire.GetMaxWattageAsFloat(wire2.MaxWattageRating), wattageFormatterUnit2));
 				return str;
 			});
 		}
+	}
+
+	public Wire.WattageRating GetMaxWattageRating()
+	{
+		return this.MaxWattageRating;
 	}
 
 	[SerializeField]

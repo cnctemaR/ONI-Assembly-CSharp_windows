@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ProcGen;
 using ProcGenGame;
+using VoronoiTree;
 
 namespace Klei
 {
@@ -12,10 +13,10 @@ namespace Klei
 			this.worldLayout = new WorldLayout(0);
 			this.terrainCells = new List<TerrainCell>();
 			this.overworldCells = new List<TerrainCell>();
-			this.rivers = new List<River>();
+			this.rivers = new List<global::ProcGen.River>();
 			this.gameSpawnData = new GameSpawnData();
 			this.world = new Chunk();
-			this.voronoiTree = new VoronoiTree(0);
+			this.voronoiTree = new Tree(0);
 		}
 
 		public int globalWorldSeed;
@@ -36,12 +37,12 @@ namespace Klei
 
 		public List<TerrainCell> overworldCells;
 
-		public List<River> rivers;
+		public List<global::ProcGen.River> rivers;
 
 		public GameSpawnData gameSpawnData;
 
 		public Chunk world;
 
-		public VoronoiTree voronoiTree;
+		public Tree voronoiTree;
 	}
 }

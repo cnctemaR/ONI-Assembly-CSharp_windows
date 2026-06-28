@@ -240,6 +240,13 @@ namespace STRINGS
 
 				public static LocString DESC = "A ball of raw cellulose used in the production of <style=\"equipment\">Clothing</style> and textiles.";
 			}
+
+			public class TRAP_PARTS
+			{
+				public static LocString NAME = "Trap Components";
+
+				public static LocString DESC = "These components can be assembled into an Animal Trap and used to catch creatures.";
+			}
 		}
 	}
 }

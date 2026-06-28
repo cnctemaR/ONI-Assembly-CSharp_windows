@@ -42,26 +42,15 @@ public abstract class AssignableSlotInstance
 			}
 			return;
 		}
-		this.Unassign(false);
+		this.Unassign();
 		this.assignable = assignable;
-		if (this.assignable != null)
-		{
-			this.assignable.Assign(this.assignables);
-		}
-		this.assignables.Trigger(-1585839766, this);
 	}
 
-	public virtual void Unassign(bool trigger_event = true)
+	public virtual void Unassign()
 	{
 		if (this.IsAssigned())
 		{
-			Assignable assignable = this.assignable;
 			this.assignable = null;
-			assignable.Unassign();
-			if (trigger_event)
-			{
-				this.assignables.Trigger(-1585839766, this);
-			}
 		}
 	}
 

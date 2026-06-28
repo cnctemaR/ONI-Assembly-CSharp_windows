@@ -51,7 +51,7 @@ public class IdleChore : Chore<IdleChore.StatesInstance>
 			})
 				.ToggleSchedulePeriodic("Log idle time", 1f, delegate(IdleChore.StatesInstance smi)
 				{
-					ReportManager.Instance.ReportValue(ReportManager.ReportType.IdleTime, 1f, null);
+					ReportManager.Instance.ReportValue(ReportManager.ReportType.IdleTime, 1f, this.idler.Get(smi).GetProperName(), null);
 				})
 				.ToggleStateMachine((IdleChore.StatesInstance smi) => new TaskAvailabilityMonitor.Instance(smi.master));
 			this.idle.onfloor.PlayAnim("idle_default", KAnim.PlayMode.Loop, null).ParamTransition<bool>(this.isOnLadder, this.idle.onladder, (IdleChore.StatesInstance smi, bool p) => p).ToggleSchedulePeriodic("IdleMove", (IdleChore.StatesInstance smi) => (float)global::UnityEngine.Random.Range(5, 15), delegate(IdleChore.StatesInstance smi)

@@ -104,11 +104,12 @@ namespace Steamworks
 			}
 		}
 
-		private void OnRunCallResult(IntPtr thisptr, IntPtr pvParam, bool bFailed, ulong hSteamAPICall)
+		private void OnRunCallResult(IntPtr thisptr, IntPtr pvParam, bool bFailed, ulong hSteamAPICall_)
 		{
-			SteamAPICall_t steamAPICall_t = (SteamAPICall_t)hSteamAPICall;
+			SteamAPICall_t steamAPICall_t = (SteamAPICall_t)hSteamAPICall_;
 			if (steamAPICall_t == this.m_hAPICall)
 			{
+				this.m_hAPICall = SteamAPICall_t.Invalid;
 				try
 				{
 					this.m_Func((T)((object)Marshal.PtrToStructure(pvParam, typeof(T))), bFailed);
@@ -116,10 +117,6 @@ namespace Steamworks
 				catch (Exception ex)
 				{
 					CallbackDispatcher.ExceptionHandler(ex);
-				}
-				if (steamAPICall_t == this.m_hAPICall)
-				{
-					this.m_hAPICall = SteamAPICall_t.Invalid;
 				}
 			}
 		}

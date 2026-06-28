@@ -3,15 +3,39 @@ using System.Diagnostics;
 using KSerialization;
 using UnityEngine;
 
-[SerializationConfig(MemberSerialization.OptIn)]
 [DebuggerDisplay("{x}, {y}")]
+[SerializationConfig(MemberSerialization.OptIn)]
 [Serializable]
-public struct Vector2I
+public struct Vector2I : IComparable<Vector2I>, IEquatable<Vector2I>
 {
 	public Vector2I(int a, int b)
 	{
 		this.x = a;
 		this.y = b;
+	}
+
+	public int X
+	{
+		get
+		{
+			return this.x;
+		}
+		set
+		{
+			this.x = value;
+		}
+	}
+
+	public int Y
+	{
+		get
+		{
+			return this.y;
+		}
+		set
+		{
+			this.y = value;
+		}
 	}
 
 	public static Vector2I Min(Vector2I v, Vector2I w)
@@ -38,6 +62,11 @@ public struct Vector2I
 		return vector2I.x == this.x && vector2I.y == this.y;
 	}
 
+	public bool Equals(Vector2I v)
+	{
+		return v.x == this.x && v.y == this.y;
+	}
+
 	public override int GetHashCode()
 	{
 		return this.x ^ this.y;
@@ -46,6 +75,16 @@ public struct Vector2I
 	public override string ToString()
 	{
 		return string.Format("{0}, {1}", this.x, this.y);
+	}
+
+	public int CompareTo(Vector2I other)
+	{
+		int num = this.y - other.y;
+		if (other.y == 0)
+		{
+			return this.x - other.x;
+		}
+		return num;
 	}
 
 	public static Vector2I operator +(Vector2I u, Vector2I v)

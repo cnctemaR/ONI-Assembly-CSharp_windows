@@ -18,10 +18,10 @@ public class SleepChoreMonitor : GameStateMachine<SleepChoreMonitor, SleepChoreM
 			{
 				smi.AutoAssignBed();
 			}
-		}).ToggleChore(new Func<SleepChoreMonitor.Instance, Chore>(this.CreateSleepOnFloorChore), this.satisfied).ParamTransition<GameObject>(this.bed, this.bedassigned, (SleepChoreMonitor.Instance smi, GameObject p) => p != null);
+		}).ToggleChore(new Func<SleepChoreMonitor.Instance, Chore>(this.CreateSleepOnFloorChore), this.satisfied, this.satisfied).ParamTransition<GameObject>(this.bed, this.bedassigned, (SleepChoreMonitor.Instance smi, GameObject p) => p != null);
 		this.bedassigned.DefaultState(this.bedassigned.bedunreachable).ParamTransition<GameObject>(this.bed, this.nobedassigned, (SleepChoreMonitor.Instance smi, GameObject p) => p == null).EventTransition(GameHashes.AssignablesChanged, this.nobedassigned, null);
 		this.bedassigned.bedunreachable.ToggleChore(new Func<SleepChoreMonitor.Instance, Chore>(this.CreateSleepOnFloorChore), this.bedassigned.bedunreachable).EventTransition(GameHashes.AssignableReachabilityChanged, this.bedassigned.bedreachable, (SleepChoreMonitor.Instance smi) => smi.IsBedReachable()).ToggleStatusItem(Db.Get().DuplicantStatusItems.BedUnreachable, null);
-		this.bedassigned.bedreachable.ToggleChore(new Func<SleepChoreMonitor.Instance, Chore>(this.CreateSleepChore), this.satisfied).EventTransition(GameHashes.AssignableReachabilityChanged, this.bedassigned.bedunreachable, (SleepChoreMonitor.Instance smi) => !smi.IsBedReachable());
+		this.bedassigned.bedreachable.ToggleChore(new Func<SleepChoreMonitor.Instance, Chore>(this.CreateSleepChore), this.satisfied, this.satisfied).EventTransition(GameHashes.AssignableReachabilityChanged, this.bedassigned.bedunreachable, (SleepChoreMonitor.Instance smi) => !smi.IsBedReachable());
 	}
 
 	private Chore CreateSleepOnFloorChore(SleepChoreMonitor.Instance smi)

@@ -309,21 +309,21 @@ public class Upgradable : Workable, ISaveLoadable
 
 	private void DoGenerateBuildChores(Upgradable.Upgrade upgrade)
 	{
-		Upgradable.<DoGenerateBuildChores>c__AnonStorey9C <DoGenerateBuildChores>c__AnonStorey9C = new Upgradable.<DoGenerateBuildChores>c__AnonStorey9C();
-		<DoGenerateBuildChores>c__AnonStorey9C.upgrade = upgrade;
-		<DoGenerateBuildChores>c__AnonStorey9C.<>f__this = this;
-		<DoGenerateBuildChores>c__AnonStorey9C.upgrade.buildChoresRemain = <DoGenerateBuildChores>c__AnonStorey9C.upgrade.builderCount;
-		<DoGenerateBuildChores>c__AnonStorey9C.upgrade.buildChores = new WorkChore<Upgradable>[<DoGenerateBuildChores>c__AnonStorey9C.upgrade.buildChoresRemain];
+		Upgradable.<DoGenerateBuildChores>c__AnonStorey94 <DoGenerateBuildChores>c__AnonStorey = new Upgradable.<DoGenerateBuildChores>c__AnonStorey94();
+		<DoGenerateBuildChores>c__AnonStorey.upgrade = upgrade;
+		<DoGenerateBuildChores>c__AnonStorey.<>f__this = this;
+		<DoGenerateBuildChores>c__AnonStorey.upgrade.buildChoresRemain = <DoGenerateBuildChores>c__AnonStorey.upgrade.builderCount;
+		<DoGenerateBuildChores>c__AnonStorey.upgrade.buildChores = new WorkChore<Upgradable>[<DoGenerateBuildChores>c__AnonStorey.upgrade.buildChoresRemain];
 		int i;
-		for (i = 0; i < <DoGenerateBuildChores>c__AnonStorey9C.upgrade.buildChoresRemain; i++)
+		for (i = 0; i < <DoGenerateBuildChores>c__AnonStorey.upgrade.buildChoresRemain; i++)
 		{
-			WorkChore<Upgradable>[] buildChores = <DoGenerateBuildChores>c__AnonStorey9C.upgrade.buildChores;
+			WorkChore<Upgradable>[] buildChores = <DoGenerateBuildChores>c__AnonStorey.upgrade.buildChores;
 			int j = i;
 			Action<Chore> action = delegate
 			{
-				this.DoBuildChoreComplete(<DoGenerateBuildChores>c__AnonStorey9C.upgrade, i);
+				this.DoBuildChoreComplete(<DoGenerateBuildChores>c__AnonStorey.upgrade, i);
 			};
-			buildChores[j] = new WorkChore<Upgradable>(Db.Get().ChoreTypes.Upgrade, this, null, true, action, null, null, true, null, false, default(Tag), null, false, true, true);
+			buildChores[j] = new WorkChore<Upgradable>(Db.Get().ChoreTypes.Upgrade, this, null, true, action, null, null, true, null, false, default(Tag), null, false, true, true, int.MaxValue);
 		}
 	}
 
@@ -518,8 +518,8 @@ public class Upgradable : Workable, ISaveLoadable
 	}
 
 	[IgnoreFirst(1)]
-	[IgnoreEmptyLines]
 	[DelimitedRecord(",")]
+	[IgnoreEmptyLines]
 	public class UpgradableConfig
 	{
 		public UpgradableConfig(string prefabID, int id, int builderCount, float buildTime, string materialTags, float materialMass, Upgradable.UpgradableConfig.UpgradeModifier[] modifiers)

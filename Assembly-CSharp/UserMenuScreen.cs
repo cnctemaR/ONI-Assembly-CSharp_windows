@@ -28,6 +28,7 @@ public class UserMenuScreen : KIconButtonMenu
 		{
 			return;
 		}
+		this.priorityScreen.SetTarget(go);
 		this.buttonInfos.Clear();
 		this.slidersInfos.Clear();
 		UserMenu[] components = go.GetComponents<UserMenu>();

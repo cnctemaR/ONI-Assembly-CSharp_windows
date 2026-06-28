@@ -23,8 +23,8 @@ public class HumanEntityTypeSet : EntityTypeSet
 		entityType.amounts.Add(Db.Get().Amounts.Bladder);
 		entityType.amounts.Add(Db.Get().Amounts.Decor);
 		entityType.amounts.Add(Db.Get().Amounts.ImmuneLevel);
-		Trait trait = GameEntityTypeSet.CreateLivingEntityBaseTrait(id, name, -0.16666667f, -1666.6666f, 0.1f, 0f, 0.16666667f, 8f, modifier_set);
-		trait.Add(new AttributeModifier(Db.Get().Attributes.DecorExpectation.Id, -25f, name, false, false));
+		Trait trait = GameEntityTypeSet.CreateLivingEntityBaseTrait(id, name, -0.11666667f, -1666.6666f, 0.1f, 0f, 0.16666667f, 8f, modifier_set);
+		trait.Add(new AttributeModifier(Db.Get().Attributes.DecorExpectation.Id, -35f, name, false, false));
 		trait.Add(new AttributeModifier(Db.Get().Attributes.FoodExpectation.Id, -3f, name, false, false));
 		trait.Add(new AttributeModifier(Db.Get().Attributes.ToiletEfficiency.Id, 1f, name, false, false));
 		trait.Add(new AttributeModifier(Db.Get().Attributes.RoomTemperaturePreference.Id, 0f, name, false, false));
@@ -33,7 +33,9 @@ public class HumanEntityTypeSet : EntityTypeSet
 		foreach (Disease disease in Db.Get().Diseases)
 		{
 			entityType.amounts.Add(disease.amount);
+			entityType.attributes.Add(disease.cureSpeedBase);
 		}
+		entityType.attributes.Add(Db.Get().Attributes.DoctoredLevel);
 		DuplicantNoiseLevels.SetupNoiseLevels();
 		entityType.baseTraits.Add(trait);
 		EntityPrefabs.Instance.MinionPrefab.GetComponent<Health>().SetMaxHitPoints(100f);
@@ -55,6 +57,10 @@ public class HumanEntityTypeSet : EntityTypeSet
 				StateMachineController component2 = go.GetComponent<StateMachineController>();
 				RationalAi.Instance instance = new RationalAi.Instance(component2);
 				instance.StartSM();
+				if (go.GetComponent<OxygenBreather>().GetGasProvider() == null)
+				{
+					go.GetComponent<OxygenBreather>().SetGasProvider(new GasBreatherFromWorldProvider());
+				}
 				Navigator component3 = go.GetComponent<Navigator>();
 				component3.transitionDriver.overrideLayers.Add(new BipedTransitionLayer(component3, 3.325f, 2.5f));
 				component3.transitionDriver.overrideLayers.Add(new DoorTransitionLayer(component3));

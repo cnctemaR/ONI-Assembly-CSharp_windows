@@ -10,6 +10,7 @@ public class POIBunkerExteriorDoor : IBuildingConfig
 		buildingDef.Overheatable = false;
 		buildingDef.Repairable = false;
 		buildingDef.Floodable = false;
+		buildingDef.Invincible = true;
 		buildingDef.Entombable = false;
 		buildingDef.IsFoundation = true;
 		buildingDef.ViewMode = SimViewMode.None;

@@ -31,7 +31,6 @@ public class Game : KMonoBehaviour
 	{
 		SimTemperatureTransfer.ClearInstanceMap();
 		StructureTemperatureComponents.ClearInstanceMap();
-		AudioEventManager.Get();
 		App.OnPreLoadScene = (global::System.Action)Delegate.Combine(App.OnPreLoadScene, new global::System.Action(this.StopBE));
 		Game.Instance = this;
 		this.statusItemRenderer = new StatusItemRenderer();
@@ -50,13 +49,12 @@ public class Game : KMonoBehaviour
 		Game.BlockSelectionLayerMask = LayerMask.GetMask(new string[] { "BlockSelection" });
 		this.world = World.Instance;
 		KPrefabID.NextUniqueID = KPlayerPrefs.GetInt(Game.NextUniqueIDKey, 0);
-		this.roomProber = new RoomProber(Grid.CellCount);
 		this.circuitManager = new CircuitManager();
 		this.RegionManager = new RegionManager(Grid.CellCount, REGIONS.REGIONS_TYPES);
 		this.elementInteractions = new ElementInteractions(this.elementInteractionsData);
-		this.gasConduitSystem = new UtilityNetworkManager<FlowUtilityNetwork, Vent>(Grid.WidthInCells, Grid.HeightInCells, 12, 1, false);
-		this.liquidConduitSystem = new UtilityNetworkManager<FlowUtilityNetwork, Vent>(Grid.WidthInCells, Grid.HeightInCells, 16, 1, false);
-		this.electricalConduitSystem = new UtilityNetworkManager<ElectricalUtilityNetwork, Wire>(Grid.WidthInCells, Grid.HeightInCells, 20, 19, true);
+		this.gasConduitSystem = new UtilityNetworkManager<FlowUtilityNetwork, Vent>(Grid.WidthInCells, Grid.HeightInCells, 13, 1, false);
+		this.liquidConduitSystem = new UtilityNetworkManager<FlowUtilityNetwork, Vent>(Grid.WidthInCells, Grid.HeightInCells, 17, 1, false);
+		this.electricalConduitSystem = new UtilityNetworkManager<ElectricalUtilityNetwork, Wire>(Grid.WidthInCells, Grid.HeightInCells, 21, 20, true);
 		this.conduitTemperatureManager = new ConduitTemperatureManager(1f);
 		this.conduitDiseaseManager = new ConduitDiseaseManager(this.conduitTemperatureManager);
 		this.gasConduitFlow = new ConduitFlow(ConduitType.Gas, Grid.CellCount, this.gasConduitSystem, 1f);
@@ -74,6 +72,8 @@ public class Game : KMonoBehaviour
 		PathFinder.Initialize();
 		new GameNavGrids(Pathfinding.Instance);
 		this.screenMgr = global::Util.KInstantiate(this.screenManagerPrefab, null, null).GetComponent<GameScreenManager>();
+		this.roomProber = new RoomProber();
+		this.roomProber.Init();
 	}
 
 	public void SetGameStarted()
@@ -160,6 +160,10 @@ public class Game : KMonoBehaviour
 			meshRenderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
 		}
 		this.Subscribe(1798162660, new Action<object>(this.MarkStatusItemRendererDirty));
+		UIScheduler.Instance.SchedulePeriodic("RoomProberUpdate", 1f, delegate(object o)
+		{
+			this.roomProber.Update();
+		}, null, null);
 	}
 
 	private void UnsafeOnSpawn()
@@ -216,13 +220,21 @@ public class Game : KMonoBehaviour
 		}
 	}
 
+	private void SimUpdateLast(float dt)
+	{
+		if (this.circuitManager != null)
+		{
+			this.circuitManager.UpdateLast(dt);
+		}
+	}
+
 	private unsafe Sim.GameDataUpdate* StepTheSim()
 	{
 		Sim.GameDataUpdate* ptr;
 		using (new KProfiler.Region("StepTheSim", null))
 		{
 			IntPtr intPtr = IntPtr.Zero;
-			using (new KProfiler.Region("Step", null))
+			using (new KProfiler.Region("WaitingForSim", null))
 			{
 				if (Grid.Visible == null || Grid.Visible.Length == 0)
 				{
@@ -279,7 +291,7 @@ public class Game : KMonoBehaviour
 				for (int l = 0; l < numSpawnFallingLiquidInfo; l++)
 				{
 					Sim.SpawnFallingLiquidInfo spawnFallingLiquidInfo = ptr2->spawnFallingLiquidInfo[l];
-					FallingWater.instance.AddParticle(spawnFallingLiquidInfo.cellIdx, spawnFallingLiquidInfo.elemIdx, spawnFallingLiquidInfo.mass, spawnFallingLiquidInfo.temperature, spawnFallingLiquidInfo.diseaseIdx, spawnFallingLiquidInfo.diseaseCount, false, false, false);
+					FallingWater.instance.AddParticle(spawnFallingLiquidInfo.cellIdx, spawnFallingLiquidInfo.elemIdx, spawnFallingLiquidInfo.mass, spawnFallingLiquidInfo.temperature, spawnFallingLiquidInfo.diseaseIdx, spawnFallingLiquidInfo.diseaseCount, false, false, false, false);
 				}
 				int numDigInfo = ptr2->numDigInfo;
 				WorldDamage component = this.world.GetComponent<WorldDamage>();
@@ -454,7 +466,6 @@ public class Game : KMonoBehaviour
 	{
 		Output.Log(new object[] { "Force-stepping the sim" });
 		this.forceSimStep = true;
-		this.simElapsedTime = 0.25f;
 		this.simDT = 0.25f;
 	}
 
@@ -486,10 +497,10 @@ public class Game : KMonoBehaviour
 			this.simActiveRegionMax = new Vector2I(Grid.WidthInCells, Grid.HeightInCells);
 			LightGridManager.SetActiveWindow(this.simActiveRegionMin, this.simActiveRegionMax);
 			Pathfinding.Instance.DebugUpdate();
+			CellChangeMonitor.Instance.Update();
 			if (this.forceSimStep || Mathf.CeilToInt(Time.timeScale) != 0)
 			{
 				this.UpdateModifiers();
-				CellChangeMonitor.Instance.Update();
 				this.UnsafeUpdate();
 				this.forceSimStep = false;
 			}
@@ -499,7 +510,7 @@ public class Game : KMonoBehaviour
 	private unsafe void UnsafeUpdate()
 	{
 		this.simDT += Time.deltaTime;
-		if (this.simDT >= 0.25f)
+		while (this.simDT >= 0.25f)
 		{
 			Sim.GameDataUpdate* ptr = this.StepTheSim();
 			if (ptr == null)
@@ -592,10 +603,6 @@ public class Game : KMonoBehaviour
 		{
 			this.statusItemRenderer.Render();
 			this.prioritizableRenderer.Render();
-		}
-		if (this.circuitManager != null)
-		{
-			this.circuitManager.UpdateLast(Time.deltaTime);
 		}
 	}
 
@@ -787,7 +794,6 @@ public class Game : KMonoBehaviour
 	public void Save(BinaryWriter writer)
 	{
 		Game.GameSaveData gameSaveData = new Game.GameSaveData();
-		gameSaveData.worldGaps = this.worldGapManager.gaps;
 		gameSaveData.gasConduitFlow = this.gasConduitFlow;
 		gameSaveData.liquidConduitFlow = this.liquidConduitFlow;
 		gameSaveData.simActiveRegionMin = this.simActiveRegionMin;
@@ -797,12 +803,6 @@ public class Game : KMonoBehaviour
 		gameSaveData.worldDetail = SaveLoader.Instance.worldDetailSave;
 		gameSaveData.debugWasUsed = this.debugWasUsed;
 		gameSaveData.customGameSettings = this.customSettings;
-		byte[] array = new byte[Grid.CellCount];
-		for (int i = 0; i < Grid.CellCount; i++)
-		{
-			array[i] = ((!Grid.SuitRequired[i]) ? 0 : 1);
-		}
-		gameSaveData.suitRequired = array;
 		if (this.OnSave != null)
 		{
 			this.OnSave(gameSaveData);
@@ -815,7 +815,6 @@ public class Game : KMonoBehaviour
 		Game.GameSaveData gameSaveData = new Game.GameSaveData();
 		gameSaveData.gasConduitFlow = this.gasConduitFlow;
 		gameSaveData.liquidConduitFlow = this.liquidConduitFlow;
-		gameSaveData.worldGaps = this.worldGapManager.gaps;
 		gameSaveData.simActiveRegionMin = new Vector2I(Grid.WidthInCells - 1, Grid.HeightInCells - 1);
 		gameSaveData.simActiveRegionMax = new Vector2I(0, 0);
 		gameSaveData.fallingWater = this.world.GetComponent<FallingWater>();
@@ -835,12 +834,7 @@ public class Game : KMonoBehaviour
 			this.customSettings.Print();
 		}
 		KCrashReporter.debugWasUsed = this.debugWasUsed;
-		for (int i = 0; i < gameSaveData.suitRequired.Length; i++)
-		{
-			Grid.SuitRequired[i] = gameSaveData.suitRequired[i] != 0;
-		}
 		SaveLoader.Instance.SetWorldDetail(gameSaveData.worldDetail);
-		this.worldGapManager.OnDeserialized();
 		if (this.OnLoad != null)
 		{
 			this.OnLoad(gameSaveData);
@@ -1049,8 +1043,6 @@ public class Game : KMonoBehaviour
 		global::Debug.Log("This is a debug log test", null);
 	}
 
-	public static readonly string BaseAlreadyCreatedKey = "BaseAlreadyCreated";
-
 	private static readonly string NextUniqueIDKey = "NextUniqueID";
 
 	private PlayerController playerController;
@@ -1066,14 +1058,13 @@ public class Game : KMonoBehaviour
 
 	public static bool quitting;
 
+	public AssignmentManager assignmentManager;
+
 	public GameObject playerPrefab;
 
 	public GameObject screenManagerPrefab;
 
 	public GameObject cameraControllerPrefab;
-
-	[MyCmpReq]
-	private WorldGapManager worldGapManager;
 
 	public GameObject tempIntroScreenPrefab;
 
@@ -1205,8 +1196,6 @@ public class Game : KMonoBehaviour
 	public SimData simData = new SimData();
 
 	private bool gameStarted;
-
-	private float simElapsedTime = 0.25f;
 
 	private float simDT;
 
@@ -1360,13 +1349,9 @@ public class Game : KMonoBehaviour
 
 	public class GameSaveData
 	{
-		public WorldGaps worldGaps;
-
 		public ConduitFlow gasConduitFlow;
 
 		public ConduitFlow liquidConduitFlow;
-
-		public byte[] suitRequired;
 
 		public Vector2I simActiveRegionMin;
 

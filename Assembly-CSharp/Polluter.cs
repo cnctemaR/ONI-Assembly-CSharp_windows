@@ -22,19 +22,15 @@ public class Polluter : IPolluter
 				global::Debug.LogFormat("[{0}] has a 0 radius noise, this will disable it", new object[] { this.GetName() });
 				return;
 			}
-			int num = (2 * this._radius + 5) * (2 * this._radius + 5);
-			if (this.cells.Length < num)
-			{
-				this.cells = new Pair<int, int>[num];
-			}
 		}
 	}
 
-	public void SetAttributes(Vector2 pos, int dB, string name)
+	public void SetAttributes(Vector2 pos, int dB, GameObject go, string name)
 	{
 		this.position = pos;
 		this.sourceName = name;
-		this.noise = dB;
+		this.decibels = dB;
+		this.gameObject = go;
 	}
 
 	public string GetName()
@@ -49,27 +45,35 @@ public class Polluter : IPolluter
 
 	public int GetNoise()
 	{
-		return this.noise;
+		return this.decibels;
 	}
 
-	public int GetCellCount()
+	public GameObject GetGameObject()
 	{
-		return this.cellCount;
+		return this.gameObject;
 	}
 
-	public void AddCell(Pair<int, int> cell)
+	public void SetSplat(NoiseSplat new_splat)
 	{
-		this.cells[this.cellCount++] = cell;
-	}
-
-	public Pair<int, int> GetCell(int index)
-	{
-		return this.cells[index];
+		if (new_splat == null && this.splat != null)
+		{
+			this.Clear();
+		}
+		this.splat = new_splat;
+		if (this.splat != null)
+		{
+			AudioEventManager.Get().AddSplat(this.splat);
+		}
 	}
 
 	public void Clear()
 	{
-		this.cellCount = 0;
+		if (this.splat != null)
+		{
+			AudioEventManager.Get().ClearNoiseSplat(this.splat);
+			this.splat.Clear();
+			this.splat = null;
+		}
 	}
 
 	public Vector2 GetPosition()
@@ -79,13 +83,13 @@ public class Polluter : IPolluter
 
 	private int _radius;
 
-	private int noise;
-
-	private int cellCount;
+	private int decibels;
 
 	private Vector2 position;
 
 	private string sourceName;
 
-	private Pair<int, int>[] cells = new Pair<int, int>[0];
+	private GameObject gameObject;
+
+	private NoiseSplat splat;
 }

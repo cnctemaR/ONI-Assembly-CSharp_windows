@@ -346,7 +346,7 @@ public class BaseUtilityBuildTool : DragTool
 					node2.Play(this.conduitMgr.GetVisualizerString(node2.cell));
 				}
 				string reason;
-				kbac.TintColour = ((!this.def.IsValidBuildLocation(node2.cell, Orientation.Neutral, out reason)) ? Color.red : Color.white);
+				kbac.TintColour = ((!this.def.IsValidBuildLocation(null, node2.cell, Orientation.Neutral, out reason)) ? Color.red : Color.white);
 				TileVisualizer.RefreshCell(node2.cell, this.def.TileLayer);
 			}
 			this.conduitMgr.UnstashVisualGrids();
@@ -368,70 +368,68 @@ public class BaseUtilityBuildTool : DragTool
 			if (gameObject == null)
 			{
 				utilityConnections = this.conduitMgr.GetConnections(pathNode.cell, false);
-				if (DebugHandler.InstantBuildMode && this.def.IsValidBuildLocation(vector, Orientation.Neutral) && this.def.IsValidPlaceLocation(vector, Orientation.Neutral))
+				if (DebugHandler.InstantBuildMode && this.def.IsValidBuildLocation(this.visualizer, vector, Orientation.Neutral) && this.def.IsValidPlaceLocation(this.visualizer, vector, Orientation.Neutral))
 				{
-					gameObject = this.def.Build(pathNode.cell, Orientation.Neutral, null, this.selectedElements, false, true);
-					PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-					component.Temperature = 293.15f;
+					gameObject = this.def.Build(pathNode.cell, Orientation.Neutral, null, this.selectedElements, 293.15f, false, true);
 				}
 				else
 				{
 					gameObject = this.def.TryPlace(vector, Orientation.Neutral, this.selectedElements, 0, false);
 					if (gameObject != null)
 					{
-						Constructable component2 = gameObject.GetComponent<Constructable>();
-						if (component2.IconConnectionAnimation(0.1f * (float)num, num, "Wire", "OutletConnected_release") || component2.IconConnectionAnimation(0.1f * (float)num, num, "Pipe", "OutletConnected_release"))
+						Constructable component = gameObject.GetComponent<Constructable>();
+						if (component.IconConnectionAnimation(0.1f * (float)num, num, "Wire", "OutletConnected_release") || component.IconConnectionAnimation(0.1f * (float)num, num, "Pipe", "OutletConnected_release"))
 						{
 							num++;
 						}
-						Prioritizable component3 = gameObject.GetComponent<Prioritizable>();
-						if (component3 != null)
+						Prioritizable component2 = gameObject.GetComponent<Prioritizable>();
+						if (component2 != null)
 						{
-							component3.SetMasterPriority(BuildMenuPriorityScreen.Instance.GetScreenPriority());
+							component2.SetMasterPriority(BuildMenuPriorityScreen.Instance.GetScreenPriority());
 						}
 					}
 				}
 			}
 			else
 			{
-				IUtilityItem component4 = gameObject.GetComponent<KAnimGraphTileVisualizer>();
-				if (component4 != null)
+				IUtilityItem component3 = gameObject.GetComponent<KAnimGraphTileVisualizer>();
+				if (component3 != null)
 				{
-					utilityConnections = component4.Connections;
+					utilityConnections = component3.Connections;
 				}
 				utilityConnections |= this.conduitMgr.GetConnections(pathNode.cell, false);
 				if (gameObject.GetComponent<BuildingComplete>() != null)
 				{
-					component4.UpdateConnections(utilityConnections);
+					component3.UpdateConnections(utilityConnections);
 					if (DebugHandler.InstantBuildMode)
 					{
 						this.conduitMgr.SetConnections(utilityConnections, pathNode.cell, true);
 					}
 				}
 			}
-			if (this.def.ReplacementLayer != ObjectLayer.NumLayers && !DebugHandler.InstantBuildMode && this.def.IsValidBuildLocation(vector, Orientation.Neutral))
+			if (this.def.ReplacementLayer != ObjectLayer.NumLayers && !DebugHandler.InstantBuildMode && this.def.IsValidBuildLocation(null, vector, Orientation.Neutral))
 			{
 				GameObject gameObject2 = Grid.Objects[pathNode.cell, (int)this.def.TileLayer];
 				GameObject gameObject3 = Grid.Objects[pathNode.cell, (int)this.def.ReplacementLayer];
 				if (gameObject2 != null && gameObject3 == null)
 				{
-					BuildingComplete component5 = gameObject2.GetComponent<BuildingComplete>();
-					if (component5 != null && component5.Def != this.def)
+					BuildingComplete component4 = gameObject2.GetComponent<BuildingComplete>();
+					if (component4 != null && component4.Def != this.def)
 					{
-						Constructable component6 = this.def.BuildingUnderConstruction.GetComponent<Constructable>();
-						component6.IsReplacementTile = true;
+						Constructable component5 = this.def.BuildingUnderConstruction.GetComponent<Constructable>();
+						component5.IsReplacementTile = true;
 						gameObject = this.def.Instantiate(vector, Orientation.Neutral, this.selectedElements, 0, false);
-						component6.IsReplacementTile = false;
+						component5.IsReplacementTile = false;
 						Grid.Objects[pathNode.cell, (int)this.def.ReplacementLayer] = gameObject;
-						IUtilityItem component7 = gameObject.GetComponent<KAnimGraphTileVisualizer>();
-						if (component7 != null)
+						IUtilityItem component6 = gameObject.GetComponent<KAnimGraphTileVisualizer>();
+						if (component6 != null)
 						{
-							utilityConnections = component7.Connections;
+							utilityConnections = component6.Connections;
 						}
 						utilityConnections |= this.conduitMgr.GetConnections(pathNode.cell, false);
 						if (gameObject.GetComponent<BuildingComplete>() != null)
 						{
-							component7.UpdateConnections(utilityConnections);
+							component6.UpdateConnections(utilityConnections);
 						}
 						string visualizerString = this.conduitMgr.GetVisualizerString(utilityConnections);
 						string text = visualizerString;
@@ -445,10 +443,10 @@ public class BaseUtilityBuildTool : DragTool
 			}
 			if (gameObject != null)
 			{
-				IUtilityItem component8 = gameObject.GetComponent<KAnimGraphTileVisualizer>();
-				if (component8 != null)
+				IUtilityItem component7 = gameObject.GetComponent<KAnimGraphTileVisualizer>();
+				if (component7 != null)
 				{
-					component8.Connections = utilityConnections;
+					component7.Connections = utilityConnections;
 				}
 			}
 			TileVisualizer.RefreshCell(pathNode.cell, this.def.TileLayer);

@@ -73,12 +73,12 @@ public class TitleBarPortrait : KMonoBehaviour
 		CrewPortrait component = base.GetComponent<CrewPortrait>();
 		if (component != null)
 		{
-			component.SetCrewMember(identity, true);
+			component.SetIdentityObject(identity, true);
 		}
 		else if (this.AnimControllerObject)
 		{
 			this.AnimControllerObject.SetActive(true);
-			CrewPortrait.SetPortraitData(identity.gameObject, this.AnimControllerObject.GetComponent<KBatchedAnimController>(), true);
+			CrewPortrait.SetPortraitData(identity, this.AnimControllerObject.GetComponent<KBatchedAnimController>(), true);
 		}
 	}
 
@@ -100,7 +100,7 @@ public class TitleBarPortrait : KMonoBehaviour
 		{
 			this.AnimControllerObject.SetActive(true);
 			KBatchedAnimController component = this.AnimControllerObject.GetComponent<KBatchedAnimController>();
-			CrewPortrait.SetPortraitData(base.gameObject, component, true);
+			CrewPortrait.SetPortraitData(base.gameObject.GetComponent<IAssignableIdentity>(), component, true);
 			component.ClearAnims();
 			component.FlipX = false;
 			component.SetAnims(animFiles, true);

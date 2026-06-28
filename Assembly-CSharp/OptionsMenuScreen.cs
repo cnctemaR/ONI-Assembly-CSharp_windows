@@ -17,17 +17,17 @@ public class OptionsMenuScreen : KModalButtonMenu
 			new KButtonMenu.ButtonInfo(UI.FRONTEND.OPTIONS_SCREEN.CONTROLS, global::Action.NumActions, new UnityAction(this.OnKeyBindings), null, null),
 			new KButtonMenu.ButtonInfo(UI.FRONTEND.OPTIONS_SCREEN.UNITS, global::Action.NumActions, new UnityAction(this.OnUnits), null, null),
 			new KButtonMenu.ButtonInfo(UI.FRONTEND.OPTIONS_SCREEN.METRICS, global::Action.NumActions, new UnityAction(this.OnMetrics), null, null),
-			new KButtonMenu.ButtonInfo(UI.FRONTEND.OPTIONS_SCREEN.WORLD_GEN, global::Action.NumActions, new UnityAction(this.OnWorldGen), null, null),
-			new KButtonMenu.ButtonInfo(UI.FRONTEND.OPTIONS_SCREEN.CREDITS, global::Action.NumActions, new UnityAction(this.OnCredits), null, null),
-			new KButtonMenu.ButtonInfo(UI.FRONTEND.OPTIONS_SCREEN.BACK, global::Action.NumActions, new UnityAction(this.Deactivate), null, null)
+			new KButtonMenu.ButtonInfo(UI.FRONTEND.OPTIONS_SCREEN.CREDITS, global::Action.NumActions, new UnityAction(this.OnCredits), null, null)
 		};
 		this.closeButton.onClick += this.Deactivate;
+		this.backButton.onClick += this.Deactivate;
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
 		this.title.SetText(UI.FRONTEND.OPTIONS_SCREEN.TITLE);
+		this.backButton.transform.SetAsLastSibling();
 	}
 
 	protected override void OnActivate()
@@ -53,37 +53,32 @@ public class OptionsMenuScreen : KModalButtonMenu
 
 	private void OnGraphicsOptions()
 	{
-		Util.KInstantiateUI(this.graphicsOptionsScreenPrefab.gameObject, this.transform.parent.gameObject, false);
+		base.ActivateChildScreen(this.graphicsOptionsScreenPrefab.gameObject);
 	}
 
 	private void OnAudioOptions()
 	{
-		Util.KInstantiateUI(this.audioOptionsScreenPrefab.gameObject, this.transform.parent.gameObject, false);
+		base.ActivateChildScreen(this.audioOptionsScreenPrefab.gameObject);
 	}
 
 	private void OnKeyBindings()
 	{
-		Util.KInstantiateUI(this.inputBindingsScreenPrefab.gameObject, this.transform.parent.gameObject, false);
+		base.ActivateChildScreen(this.inputBindingsScreenPrefab.gameObject);
 	}
 
 	private void OnUnits()
 	{
-		Util.KInstantiateUI(this.unitScreenPrefab.gameObject, this.transform.parent.gameObject, false);
+		base.ActivateChildScreen(this.unitScreenPrefab.gameObject);
 	}
 
 	private void OnMetrics()
 	{
-		Util.KInstantiateUI(this.metricsScreenPrefab.gameObject, this.transform.parent.gameObject, false);
-	}
-
-	private void OnWorldGen()
-	{
-		Util.KInstantiateUI(this.worldGenScreenPrefab.gameObject, this.transform.parent.gameObject, false);
+		base.ActivateChildScreen(this.metricsScreenPrefab.gameObject);
 	}
 
 	private void OnCredits()
 	{
-		Util.KInstantiateUI(this.creditsScreenPrefab.gameObject, this.transform.parent.gameObject, false);
+		base.ActivateChildScreen(this.creditsScreenPrefab.gameObject);
 	}
 
 	private void Update()
@@ -113,8 +108,8 @@ public class OptionsMenuScreen : KModalButtonMenu
 	private MetricsOptionsScreen metricsScreenPrefab;
 
 	[SerializeField]
-	private WorldGenOptionsScreen worldGenScreenPrefab;
+	private LocText title;
 
 	[SerializeField]
-	private LocText title;
+	private KButton backButton;
 }

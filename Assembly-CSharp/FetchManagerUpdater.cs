@@ -124,11 +124,10 @@ public class FetchManagerUpdater
 		return pickup_id.HasAnyTags(tags) && pickup_unreserved_amount > 0f;
 	}
 
-	public static PathFinderFlags FindFetchTarget(Worker worker, Storage destination, List<Pickupable> pickupables, Tag[] tags, Tag[] required_tags, Tag[] forbid_tags, float required_amount, ref Pickupable workable)
+	public static void FindFetchTarget(Worker worker, Storage destination, List<Pickupable> pickupables, Tag[] tags, Tag[] required_tags, Tag[] forbid_tags, float required_amount, ref Pickupable workable)
 	{
 		workable = null;
 		int num = int.MaxValue;
-		PathFinderFlags pathFinderFlags = PathFinderFlags.None;
 		for (int i = 0; i < FetchManagerUpdater.PickupCount; i++)
 		{
 			FetchManagerUpdater.Pickup pickup = FetchManagerUpdater.Pickups[i];
@@ -139,7 +138,6 @@ public class FetchManagerUpdater
 				num = (int)pickup.PathCost;
 			}
 		}
-		return pathFinderFlags;
 	}
 
 	public static void FreeResources()

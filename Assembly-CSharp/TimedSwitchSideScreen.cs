@@ -225,8 +225,8 @@ public class TimedSwitchSideScreen : SideScreenContent
 	[SerializeField]
 	private Image onTimeBG;
 
-	[SerializeField]
 	[Header("Off Time")]
+	[SerializeField]
 	private KButton offTimeIncreaseButton;
 
 	[SerializeField]

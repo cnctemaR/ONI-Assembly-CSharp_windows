@@ -27,6 +27,40 @@ namespace STRINGS
 			public static LocString VACUUM = "None";
 		}
 
+		public class MATERIAL_MODIFIERS
+		{
+			public static LocString EFFECTS_HEADER = "<b>Resource Effects:</b>";
+
+			public static LocString DECOR = "<style=\"decor\">Decor</style>: {0}";
+
+			public static LocString OVERHEATTEMPERATURE = "<style=\"heat\">Overheat Temperature</style>: {0}";
+
+			public static LocString HIGH_THERMAL_CONDUCTIVITY = "<style=\"heat\">High Thermal Conductivity</style>";
+
+			public static LocString LOW_THERMAL_CONDUCTIVITY = "<style=\"heat\">Insulator</style>";
+
+			public static LocString LOW_SPECIFIC_HEAT_CAPACITY = "<style=\"heat\">Thermally Reactive</style>";
+
+			public static LocString HIGH_SPECIFIC_HEAT_CAPACITY = "<style=\"heat\">Slow Heating</style>";
+
+			public class TOOLTIP
+			{
+				public static LocString EFFECTS_HEADER = "Buildings made from the selected material will inherit the listed properties";
+
+				public static LocString DECOR = "This material will add {0} to the finished building's Decor";
+
+				public static LocString OVERHEATTEMPERATURE = "This material will add {0} to the finished building's Overheat Temperature";
+
+				public static LocString HIGH_THERMAL_CONDUCTIVITY = "This material disperses heat because energy transfers quickly through materials with high thermal conductivity\n\nBetween two objects, the rate of heat transfer will be determined by the object with the lowest Thermal Conductivity\n\nThermal Conductivity: {1} W per degree K difference (Oxygen: 0.024 W)";
+
+				public static LocString LOW_THERMAL_CONDUCTIVITY = "This material retains heat because energy transfers slowly through materials with low thermal conductivity\n\nBetween two objects, the rate of heat transfer will be determined by the object with the lowest Thermal Conductivity\n\nThermal Conductivity: {1} W per degree K difference (Oxygen: 0.024 W)";
+
+				public static LocString LOW_SPECIFIC_HEAT_CAPACITY = "Thermally Reactive materials require little energy to raise in temperature, and therefore heat and cool quickly\n\nSpecific Heat Capacity: {1} J to raise 1g by 1K";
+
+				public static LocString HIGH_SPECIFIC_HEAT_CAPACITY = "Slow Heating materials require a large amount of energy to raise in temperature, and therefore heat and cool slowly\n\nSpecific Heat Capacity: {1} J to raise 1g by 1K";
+			}
+		}
+
 		public class HARDNESS
 		{
 			public static LocString NA = "N/A";
@@ -49,6 +83,8 @@ namespace STRINGS
 			public static LocString NAME = "Algae";
 
 			public static LocString DESC = "Algae is a cluster of non-motile, single-celled lifeforms.\n\nIt can be used to produce <style=\"oxygen\">Oxygen</style> when grown in Algae Terrariums.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class BLEACHSTONE
@@ -56,6 +92,8 @@ namespace STRINGS
 			public static LocString NAME = "Bleach Stone";
 
 			public static LocString DESC = "Bleach stone is an unstable compound that emits toxic <style=\"gas\">Chlorine Gas</style>.\n\nIt is useful in <style=\"hygiene\">Hygienic</style> processes.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class BOTTLEDWATER
@@ -84,6 +122,8 @@ namespace STRINGS
 			public static LocString NAME = "Carbon Fiber";
 
 			public static LocString DESC = "Carbon Fiber is a <style=\"RefinedMineral\">Manufactured Material</style> with high tensile strength.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class CARBONGAS
@@ -112,6 +152,8 @@ namespace STRINGS
 			public static LocString NAME = "Clay";
 
 			public static LocString DESC = "Clay is a soft, naturally occurring composite of stone and soil that hardens at high <style=\"heat\">Temperatures</style>.\n\nIt is a reliable <style=\"RawMineral\">Construction Material</style>.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class BRICK
@@ -119,6 +161,8 @@ namespace STRINGS
 			public static LocString NAME = "Ceramic";
 
 			public static LocString DESC = "Ceramic is a hard, brittle material formed from heated <style=\"RawMineral\">Clay</style>.\n\nIt is a reliable <style=\"RawMineral\">Construction Material</style>.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class CONTAMINATEDOXYGEN
@@ -133,6 +177,8 @@ namespace STRINGS
 			public static LocString NAME = "Copper";
 
 			public static LocString DESC = "(Cu) Copper is a conductive <style=\"RawMetal\">Metal</style>.\n\nIt is suitable for building <style=\"power\">Power</style> systems.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class COPPERGAS
@@ -153,7 +199,14 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Crude Oil";
 
-			public static LocString DESC = "Crude Oil is a raw <style=\"power\">Power</style> source composed of billions of dead, primordial organisms.";
+			public static LocString DESC = "Crude Oil is a raw potential <style=\"power\">Power</style> source composed of billions of dead, primordial organisms.\n\nIt must be refined into <style=\"liquid\">Petroleum</style> before it can be used to generate power.";
+		}
+
+		public class PETROLEUM
+		{
+			public static LocString NAME = "Petroleum";
+
+			public static LocString DESC = "Petroleum is a <style=\"power\">Power</style> source refined from <style=\"liquid\">Crude Oil</style>.\n\nIt is also an essential ingredient in the production of <style=\"solid\">Plastic</style>.";
 		}
 
 		public class CRUSHEDICE
@@ -168,6 +221,8 @@ namespace STRINGS
 			public static LocString NAME = "Crushed Rock";
 
 			public static LocString DESC = "Crushed Rock is <style=\"solid\">Igneous Rock</style> crushed into a mechanical mixture.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class CUPRITE
@@ -175,13 +230,17 @@ namespace STRINGS
 			public static LocString NAME = "Copper Ore";
 
 			public static LocString DESC = "(Cu<sub>2</sub>0) Copper Ore is a conductive <style=\"RawMetal\">Metal</style>.\n\nIt is suitable for building <style=\"power\">Power</style> systems.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class DIAMOND
 		{
 			public static LocString NAME = "Diamond";
 
-			public static LocString DESC = "(C) Diamond are industrial-grade, high density carbon.\n\nIt is very difficult to excavate.";
+			public static LocString DESC = "(C) Diamond is industrial-grade, high density carbon.\n\nIt is very difficult to excavate.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class DIRT
@@ -189,6 +248,8 @@ namespace STRINGS
 			public static LocString NAME = "Dirt";
 
 			public static LocString DESC = "Dirt is a soft, nutrient-rich substance capable of supporting life.\n\nIt is necessary in some forms of <style=\"food\">Food</style> production.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class DIRTYICE
@@ -210,6 +271,8 @@ namespace STRINGS
 			public static LocString NAME = "Electrum";
 
 			public static LocString DESC = "Electrum is a conductive <style=\"RawMetal\">Metal</style> alloy composed of gold and silver.\n\nIt is suitable for building <style=\"power\">Power</style> systems.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class FERTILIZER
@@ -217,6 +280,8 @@ namespace STRINGS
 			public static LocString NAME = "Fertilizer";
 
 			public static LocString DESC = "Fertilizer is a processed mixture of biological nutrients.\n\nIt aids in the growth of certain <style=\"plant\">Plants</style>.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class PONDSCUM
@@ -231,6 +296,8 @@ namespace STRINGS
 			public static LocString NAME = "Pyrite";
 
 			public static LocString DESC = "(FeS<sub>2</sub>) Pyrite is a conductive <style=\"RawMetal\">Metal</style>.\n\nAlso known as \"Fool's Gold\", is suitable for building <style=\"power\">Power</style> systems.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class GLASS
@@ -238,6 +305,8 @@ namespace STRINGS
 			public static LocString NAME = "Glass";
 
 			public static LocString DESC = string.Empty;
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class GOLD
@@ -245,6 +314,8 @@ namespace STRINGS
 			public static LocString NAME = "Gold";
 
 			public static LocString DESC = "(Au) Gold is a conductive precious <style=\"RawMetal\">Metal</style>.\n\nIt is suitable for building <style=\"power\">Power</style> systems.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class GOLDAMALGAM
@@ -252,6 +323,8 @@ namespace STRINGS
 			public static LocString NAME = "Gold Amalgam";
 
 			public static LocString DESC = "Gold Amalgam is a conductive amalgam of gold and mercury.\n\nIt is suitable for building <style=\"power\">Power</style> systems.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class GOLDGAS
@@ -266,6 +339,8 @@ namespace STRINGS
 			public static LocString NAME = "Granite";
 
 			public static LocString DESC = "Granite is a dense composite of <style=\"RawMineral\">Igneous Rock</style>.\n\nIt is useful as a <style=\"RawMineral\">Construction Material</style>.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class HELIUM
@@ -286,7 +361,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Natural Gas";
 
-			public static LocString DESC = "(CH<sub>4</sub>) Natural Gas is a mixture of various alkanes in a <style=\"gas\">Gaseous</style> state.\n\nIt is useful in <style=\"power\">Power</style> production.";
+			public static LocString DESC = "Natural Gas is a mixture of various alkanes in a <style=\"gas\">Gaseous</style> state.\n\nIt is useful in <style=\"power\">Power</style> production.";
 		}
 
 		public class ICE
@@ -301,6 +376,8 @@ namespace STRINGS
 			public static LocString NAME = "Igneous Rock";
 
 			public static LocString DESC = "Igneous Rock is a composite of solidified volcanic rock.\n\nIt is useful as a <style=\"RawMineral\">Construction Material</style>.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class IRON
@@ -308,6 +385,8 @@ namespace STRINGS
 			public static LocString NAME = "Iron";
 
 			public static LocString DESC = "(Fe) Iron is a common industrial <style=\"RawMetal\">Metal</style>.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class IRONINGOT
@@ -315,6 +394,8 @@ namespace STRINGS
 			public static LocString NAME = "Iron";
 
 			public static LocString DESC = "(Fe) Iron is refined <style=\"RawMetal\">Iron Ore</style>.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class IRONGAS
@@ -329,6 +410,8 @@ namespace STRINGS
 			public static LocString NAME = "Iron Ore";
 
 			public static LocString DESC = "(Fe) Iron Ore is a soft <style=\"RawMetal\">Metal</style>.\n\nIt is suitable for building <style=\"power\">Power</style> systems.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class KATAIRITE
@@ -336,6 +419,8 @@ namespace STRINGS
 			public static LocString NAME = "Abyssalite";
 
 			public static LocString DESC = "(Ab) Abyssalite is a resilient, crystalline element.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class LIQUIDCARBONDIOXIDE
@@ -399,6 +484,8 @@ namespace STRINGS
 			public static LocString NAME = "Mercury";
 
 			public static LocString DESC = "(Hg) Mercury is a toxic, <style=\"RawMetal\">Metallic</style> <style=\"liquid\">Liquid</style>.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class MERCURYGAS
@@ -469,6 +556,8 @@ namespace STRINGS
 			public static LocString NAME = "Obsidian";
 
 			public static LocString DESC = "Obsidian is a brittle composite of volcanic <style=\"solid\">Glass</style>.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class OXYGEN
@@ -490,6 +579,8 @@ namespace STRINGS
 			public static LocString NAME = "Phosphate Nodules";
 
 			public static LocString DESC = "(PO<sup>3-</sup><sub>4</sub>) Nodules of sedimentary rock containing high concentrations of phosphate.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class PHOSPHORITE
@@ -497,6 +588,8 @@ namespace STRINGS
 			public static LocString NAME = "Phosphorite";
 
 			public static LocString DESC = "Phosphorite is a composite of sedimentary rock, saturated with phosphate.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class PHOSPHORUS
@@ -504,6 +597,8 @@ namespace STRINGS
 			public static LocString NAME = "Phosphorus";
 
 			public static LocString DESC = "(P) Phosphorus is a chemical element in its <style=\"solid\">Solid</style> state.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class PHOSPHORUSGAS
@@ -539,6 +634,8 @@ namespace STRINGS
 			public static LocString NAME = "Sand";
 
 			public static LocString DESC = "Sand is a composite of granular rock.\n\nIt is useful as a <style=\"misc\">Filtration Medium</style>.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SANDCEMENT
@@ -546,6 +643,8 @@ namespace STRINGS
 			public static LocString NAME = "Sand Cement";
 
 			public static LocString DESC = string.Empty;
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SANDSTONE
@@ -553,6 +652,8 @@ namespace STRINGS
 			public static LocString NAME = "Sandstone";
 
 			public static LocString DESC = "Sandstone is a composite of relatively soft sedimentary rock.\n\nIt is useful as a <style=\"RawMineral\">Construction Material</style>.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SEDIMENTARYROCK
@@ -560,6 +661,8 @@ namespace STRINGS
 			public static LocString NAME = "Sedimentary Rock";
 
 			public static LocString DESC = "Sedimentary Rock is a hardened composite of sediment layers.\n\nIt is useful as a <style=\"RawMineral\">Construction Material</style>.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SLIMEMOLD
@@ -567,6 +670,8 @@ namespace STRINGS
 			public static LocString NAME = "Slime";
 
 			public static LocString DESC = "Slime is a thick biomixture of algae, fungi, and mucopolysaccharides.\n\nIt can be distilled into <style=\"solid\">Algae</style> and is useful in some <style=\"oxygen\">Oxygen</style> production processes.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SNOW
@@ -602,6 +707,8 @@ namespace STRINGS
 			public static LocString NAME = "Mercury";
 
 			public static LocString DESC = "(Hg) Mercury is a toxic <style=\"RawMetal\">Metal</style> in a <style=\"solid\">Solid</style> state.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SOLIDOXYGEN
@@ -637,6 +744,8 @@ namespace STRINGS
 			public static LocString NAME = "Steel";
 
 			public static LocString DESC = "Steel is a <style=\"RefinedMetal\">Metal Alloy</style> composed of iron and carbon.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class STEELGAS
@@ -651,6 +760,8 @@ namespace STRINGS
 			public static LocString NAME = "Tungsten";
 
 			public static LocString DESC = "(W) Tungsten is an extremely tough crystalline <style=\"RawMetal\">Metal</style>.\n\nIt is suitable for building <style=\"power\">Power</style> systems.";
+
+			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class TUNGSTENGAS
@@ -706,7 +817,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Water";
 
-			public static LocString DESC = "(H<sub>2</sub>0) Clean <style=\"liquid\">Water</style>, suitable for consumption.";
+			public static LocString DESC = "(H<sub>2</sub>O) Clean <style=\"liquid\">Water</style>, suitable for consumption.";
 		}
 
 		public class WOLFRAMITE
@@ -714,6 +825,24 @@ namespace STRINGS
 			public static LocString NAME = "Wolframite";
 
 			public static LocString DESC = "((Fe,Mn)WO<sub>4</sub>) Wolframite is a dense <style=\"RawMetal\">Metallic</style> element in a <style=\"solid\">Solid</style> state.\n\nIt is a source of <style=\"RawMetal\">Tungsten</style> and is suitable for building <style=\"power\">Power</style> systems.";
+
+			public static LocString BUILD_DESC = string.Empty;
+		}
+
+		public class POLYPROPYLENE
+		{
+			public static LocString NAME = "Plastic";
+
+			public static LocString DESC = "(C<sub>3</sub>H<sub>6</sub>)<sub>n</sub> Plastic is a thermoplastic polymer.\n\nIt is useful as a raw <style=\"misc\">Plastic</style> feedstock.";
+
+			public static LocString BUILD_DESC = "Buildings made of this material have an antiseptic property";
+		}
+
+		public class NAPHTHA
+		{
+			public static LocString NAME = "Naphtha";
+
+			public static LocString DESC = "Naphtha a distilled hydrocarbon mixture produced from the burning of <style=\"solid\">Plastics</style>.";
 		}
 
 		public class STEELDOOR

@@ -55,16 +55,16 @@ public class WorldDamage : KMonoBehaviour
 				Element element = Grid.Element[src_cell];
 				if (element.IsLiquid && Grid.Cell[src_cell].mass > 1f)
 				{
-					int elementIndex = ElementLoader.GetElementIndex(element.id);
-					float temperature = Grid.Cell[src_cell].temperature;
 					int num2 = cell - src_cell;
 					if (num2 == 1 || num2 == -1 || num2 == Grid.WidthInCells || num2 == -Grid.WidthInCells)
 					{
 						int num3 = cell + num2;
 						Element element2 = Grid.Element[num3];
-						if (!element2.IsSolid && (!element2.IsLiquid || (element2.id == element.id && Grid.Cell[num3].mass <= 100f)) && !this.spawnTimes.ContainsKey(num3))
+						if (!element2.IsSolid && (!element2.IsLiquid || (element2.id == element.id && Grid.Cell[num3].mass <= 100f)) && (Grid.Cell[num3].properties & 2) == 0 && !this.spawnTimes.ContainsKey(num3))
 						{
 							this.spawnTimes[num3] = Time.realtimeSinceStartup;
+							int elementIndex = ElementLoader.GetElementIndex(element.id);
+							float temperature = Grid.Cell[src_cell].temperature;
 							base.StartCoroutine(this.DelayedSpawnFX(src_cell, num3, num2, element, elementIndex, temperature));
 						}
 					}
@@ -94,7 +94,7 @@ public class WorldDamage : KMonoBehaviour
 			kanim.Play("side", KAnim.PlayMode.Once, 1f, 0f);
 			kanim.FlipX = true;
 			fx.transform.position += Vector3.right * 0.5f;
-			FallingWater.instance.AddParticle(dest_cell, (byte)idx, 1f, temperature, byte.MaxValue, 0, true, false, false);
+			FallingWater.instance.AddParticle(dest_cell, (byte)idx, 1f, temperature, byte.MaxValue, 0, true, false, false, false);
 		}
 		else if (offset == Grid.WidthInCells)
 		{
@@ -106,13 +106,13 @@ public class WorldDamage : KMonoBehaviour
 		{
 			kanim.Play("ceiling", KAnim.PlayMode.Once, 1f, 0f);
 			fx.transform.position += Vector3.up * 0.5f;
-			FallingWater.instance.AddParticle(dest_cell, (byte)idx, 1f, temperature, byte.MaxValue, 0, true, false, false);
+			FallingWater.instance.AddParticle(dest_cell, (byte)idx, 1f, temperature, byte.MaxValue, 0, true, false, false, false);
 		}
 		else
 		{
 			kanim.Play("side", KAnim.PlayMode.Once, 1f, 0f);
 			fx.transform.position -= Vector3.right * 0.5f;
-			FallingWater.instance.AddParticle(dest_cell, (byte)idx, 1f, temperature, byte.MaxValue, 0, true, false, false);
+			FallingWater.instance.AddParticle(dest_cell, (byte)idx, 1f, temperature, byte.MaxValue, 0, true, false, false, false);
 		}
 		if (CameraController.Instance.IsAudibleSound(fx.transform.position, this.leakSoundMigrated))
 		{

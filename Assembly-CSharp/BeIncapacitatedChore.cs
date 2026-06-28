@@ -87,7 +87,7 @@ public class BeIncapacitatedChore : Chore<BeIncapacitatedChore.StatesInstance>
 				{
 					flag = true;
 				}
-				else if (this.clinic.Get(smi).GetComponent<Clinic>().assignee.gameObject != smi.master.gameObject)
+				else if (this.clinic.Get(smi).GetComponent<Clinic>().assignee.GetSoleOwner().gameObject != smi.master.gameObject)
 				{
 					flag = true;
 				}
@@ -107,7 +107,7 @@ public class BeIncapacitatedChore : Chore<BeIncapacitatedChore.StatesInstance>
 				{
 					flag2 = true;
 				}
-				else if (this.clinic.Get(smi).GetComponent<Clinic>().assignee.gameObject != smi.master.gameObject)
+				else if (this.clinic.Get(smi).GetComponent<Clinic>().assignee.GetSoleOwner().gameObject != smi.master.gameObject)
 				{
 					flag2 = true;
 				}

@@ -80,7 +80,11 @@ namespace Klei.AI
 					num2 += modifier.Value;
 				}
 			}
-			return num + Mathf.Abs(num) * num2;
+			if (num2 != 0f)
+			{
+				num += Mathf.Abs(num) * num2;
+			}
+			return num;
 		}
 
 		public float GetTotalValue()
@@ -102,7 +106,11 @@ namespace Klei.AI
 					}
 				}
 			}
-			return num + Mathf.Abs(num) * num2;
+			if (num2 != 0f)
+			{
+				num += Mathf.Abs(num) * num2;
+			}
+			return num;
 		}
 
 		public float GetModifierContribution(AttributeModifier testModifier)

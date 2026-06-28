@@ -28,6 +28,7 @@ public class MeshTileConfig : IBuildingConfig
 		buildingDef.isKAnimTile = true;
 		buildingDef.BlockTileAtlas = Assets.GetTextureAtlas("tiles_mesh");
 		buildingDef.BlockTilePlaceAtlas = Assets.GetTextureAtlas("tiles_mesh_place");
+		buildingDef.BlockTileShineAtlas = Assets.GetTextureAtlas("tiles_mesh_spec");
 		buildingDef.BlockTileMaterial = Assets.GetMaterial("tiles_solid");
 		buildingDef.DecorBlockTileInfo = Assets.GetBlockTileDecorInfo("tiles_mesh_tops_decor_info");
 		buildingDef.DecorPlaceBlockTileInfo = Assets.GetBlockTileDecorInfo("tiles_mesh_tops_decor_place_info");
@@ -41,7 +42,10 @@ public class MeshTileConfig : IBuildingConfig
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.doReplaceElement = false;
 		go.AddOrGet<TileTemperature>();
-		go.AddOrGet<KAnimGridTileVisualizer>();
+		KAnimGridTileVisualizer kanimGridTileVisualizer = go.AddOrGet<KAnimGridTileVisualizer>();
+		kanimGridTileVisualizer.blockTileConnectorID = MeshTileConfig.BlockTileConnectorID;
+		BuildingHP buildingHP = go.AddOrGet<BuildingHP>();
+		buildingHP.destroyOnDamaged = true;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -57,4 +61,6 @@ public class MeshTileConfig : IBuildingConfig
 	}
 
 	public const string ID = "MeshTile";
+
+	public static readonly int BlockTileConnectorID = Hash.SDBMLower("tiles_mesh_tops");
 }

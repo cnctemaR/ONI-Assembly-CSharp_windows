@@ -130,7 +130,7 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 		{
 			if (this.lowTempLag >= 1f && !this.showingLowTemp)
 			{
-				this.statusHandle = this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.CoolingStalledColdGas, this);
+				this.statusHandle = ((!this.isLiquidConditioner) ? this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.CoolingStalledColdGas, this) : this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.CoolingStalledColdLiquid, this));
 				this.showingLowTemp = true;
 				this.showingHotEnv = false;
 			}
@@ -157,9 +157,16 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		string formattedTemperature = GameUtil.GetFormattedTemperature(this.temperatureDelta, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Relative, true);
+		Element element = ((!this.isLiquidConditioner) ? ElementLoader.GetElement("Oxygen") : ElementLoader.GetElement("Water"));
+		float num = Mathf.Abs(this.temperatureDelta * element.specificHeatCapacity);
 		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.GASCOOLING, formattedTemperature), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.GASCOOLING, formattedTemperature), Descriptor.DescriptorType.Effect);
+		string text = string.Format((!this.isLiquidConditioner) ? UI.BUILDINGEFFECTS.HEATGENERATED_AIRCONDITIONER : UI.BUILDINGEFFECTS.HEATGENERATED_LIQUIDCONDITIONER, GameUtil.GetFormattedWattage(num, GameUtil.WattageFormatterUnit.Automatic));
+		string text2 = string.Format((!this.isLiquidConditioner) ? UI.BUILDINGEFFECTS.TOOLTIPS.HEATGENERATED_AIRCONDITIONER : UI.BUILDINGEFFECTS.TOOLTIPS.HEATGENERATED_LIQUIDCONDITIONER, GameUtil.GetFormattedJoules(num, string.Empty));
+		descriptor.SetupDescriptor(text, text2, Descriptor.DescriptorType.Effect);
 		list.Add(descriptor);
+		Descriptor descriptor2 = default(Descriptor);
+		descriptor2.SetupDescriptor(string.Format((!this.isLiquidConditioner) ? UI.BUILDINGEFFECTS.GASCOOLING : UI.BUILDINGEFFECTS.LIQUIDCOOLING, formattedTemperature), string.Format((!this.isLiquidConditioner) ? UI.BUILDINGEFFECTS.TOOLTIPS.GASCOOLING : UI.BUILDINGEFFECTS.TOOLTIPS.LIQUIDCOOLING, formattedTemperature), Descriptor.DescriptorType.Effect);
+		list.Add(descriptor2);
 		return list;
 	}
 

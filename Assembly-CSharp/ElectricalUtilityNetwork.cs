@@ -42,24 +42,23 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 		this.RemoveOverloadedNotification();
 	}
 
-	public void UpdateOverloadTime(float dt, float watts_used, List<UtilityNetworkLink> bridges)
+	public void UpdateOverloadTime(float dt, float watts_used, List<WireUtilityNetworkLink>[] bridgeGroups)
 	{
 		bool flag = false;
 		List<Wire> list = null;
-		for (int i = 0; i < this.wireGroups.Length; i++)
+		List<WireUtilityNetworkLink> list2 = null;
+		for (int i = 0; i < 3; i++)
 		{
-			List<Wire> list2 = this.wireGroups[i];
-			bool flag2 = list2 != null && list2.Count > 0;
-			if (flag2)
+			List<Wire> list3 = this.wireGroups[i];
+			List<WireUtilityNetworkLink> list4 = bridgeGroups[i];
+			Wire.WattageRating wattageRating = (Wire.WattageRating)i;
+			float maxWattageAsFloat = Wire.GetMaxWattageAsFloat(wattageRating);
+			if (watts_used > maxWattageAsFloat && ((list4 != null && list4.Count > 0) || (list3 != null && list3.Count > 0)))
 			{
-				Wire.WattageRating wattageRating = (Wire.WattageRating)i;
-				float maxWattageAsFloat = Wire.GetMaxWattageAsFloat(wattageRating);
-				flag = watts_used > maxWattageAsFloat;
-				if (flag)
-				{
-					list = list2;
-					break;
-				}
+				flag = true;
+				list = list3;
+				list2 = list4;
+				break;
 			}
 		}
 		if (flag)
@@ -70,12 +69,12 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 				this.timeOverloaded = 0f;
 				if (this.targetOverloadedWire == null)
 				{
-					if (bridges != null && bridges.Count > 0)
+					if (list2 != null && list2.Count > 0)
 					{
-						int num = global::UnityEngine.Random.Range(0, bridges.Count);
-						this.targetOverloadedWire = bridges[num].gameObject;
+						int num = global::UnityEngine.Random.Range(0, list2.Count);
+						this.targetOverloadedWire = list2[num].gameObject;
 					}
-					else
+					else if (list != null && list.Count > 0)
 					{
 						int num2 = global::UnityEngine.Random.Range(0, list.Count);
 						this.targetOverloadedWire = list[num2].gameObject;

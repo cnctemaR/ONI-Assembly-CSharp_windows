@@ -20,13 +20,18 @@ namespace Klei.AI
 		{
 			get
 			{
-				AttributeInstance attributeInstance = Db.Get().Attributes.DiseaseRecoveryTime.Lookup(this.smi.master.gameObject);
+				AttributeInstance attributeInstance = Db.Get().Attributes.DiseaseCureSpeed.Lookup(this.smi.master.gameObject);
+				AttributeInstance attributeInstance2 = this.modifier.cureSpeedBase.Lookup(this.smi.master.gameObject);
 				float num = 1f;
 				if (attributeInstance != null)
 				{
-					num = attributeInstance.GetTotalValue();
+					num *= attributeInstance.GetTotalValue();
 				}
-				return num * this.cureSpeedMultiplier;
+				if (attributeInstance2 != null)
+				{
+					num *= attributeInstance2.GetTotalValue();
+				}
+				return num;
 			}
 		}
 
@@ -38,8 +43,8 @@ namespace Klei.AI
 				{
 					return false;
 				}
-				Effects component = this.gameObject.GetComponent<Effects>();
-				return !(component == null) && component.HasEffect("MedicalCotDoctored");
+				AttributeInstance attributeInstance = Db.Get().Attributes.DoctoredLevel.Lookup(this.gameObject);
+				return attributeInstance != null && attributeInstance.GetTotalValue() > 0f;
 			}
 		}
 
@@ -83,7 +88,7 @@ namespace Klei.AI
 			string name = disease.Name;
 			string infectionSourceInfo = this.exposureInfo.infectionSourceInfo;
 			this.notification = new Notification(name, (disease.severity > Disease.Severity.Minor) ? NotificationType.Bad : NotificationType.BadMinor, HashedString.Invalid, func, infectionSourceInfo, true, 0f, null, null, null);
-			this.statusItem = new StatusItem(disease.Id, disease.Name, DUPLICANTS.DISEASES.STATUS_ITEM_TOOLTIP.TEMPLATE, string.Empty, (disease.severity > Disease.Severity.Minor) ? StatusItem.IconType.Exclamation : StatusItem.IconType.Info, (disease.severity > Disease.Severity.Minor) ? NotificationType.Bad : NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, 2046);
+			this.statusItem = new StatusItem(disease.Id, disease.Name, DUPLICANTS.DISEASES.STATUS_ITEM_TOOLTIP.TEMPLATE, string.Empty, (disease.severity > Disease.Severity.Minor) ? StatusItem.IconType.Exclamation : StatusItem.IconType.Info, (disease.severity > Disease.Severity.Minor) ? NotificationType.Bad : NotificationType.BadMinor, false, SimViewMode.None, 14334);
 			this.statusItem.resolveTooltipCallback = new Func<string, object, string>(this.ResolveString);
 			if (this.smi != null)
 			{
@@ -159,40 +164,6 @@ namespace Klei.AI
 			this.smi.sm.percentRecovered.Set(pct, this.smi);
 		}
 
-		public void AddCureSpeedMultiplier(string cure, float multiplier)
-		{
-			this.curesApplied.Add(new DiseaseInstance.CureInfo
-			{
-				name = cure,
-				multiplier = multiplier
-			});
-			this.cureSpeedMultiplier = Mathf.Max(multiplier, this.cureSpeedMultiplier);
-		}
-
-		public void RemoveCureSpeedMultiplier(string cure)
-		{
-			this.curesApplied.RemoveAll((DiseaseInstance.CureInfo c) => c.name == cure);
-			this.cureSpeedMultiplier = 1f;
-			for (int i = 0; i < this.curesApplied.Count; i++)
-			{
-				this.cureSpeedMultiplier = Mathf.Max(this.cureSpeedMultiplier, this.curesApplied[i].multiplier);
-			}
-		}
-
-		public bool HasTakenPill(string pillName)
-		{
-			bool flag = false;
-			for (int i = 0; i < this.curesApplied.Count; i++)
-			{
-				if (this.curesApplied[i].name == pillName)
-				{
-					flag = true;
-					break;
-				}
-			}
-			return flag;
-		}
-
 		public void Cure()
 		{
 			this.smi.Cure();
@@ -219,12 +190,6 @@ namespace Klei.AI
 
 		[Serialize]
 		private DiseaseExposureInfo exposureInfo;
-
-		[Serialize]
-		private float cureSpeedMultiplier = 1f;
-
-		[Serialize]
-		private List<DiseaseInstance.CureInfo> curesApplied = new List<DiseaseInstance.CureInfo>();
 
 		private DiseaseInstance.StatesInstance smi;
 

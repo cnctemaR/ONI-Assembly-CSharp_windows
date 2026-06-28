@@ -70,13 +70,12 @@ public class BuildingComplete : Building
 		{
 			foreach (int num2 in base.PlacementCells)
 			{
-				Game.Instance.roomProber.AddFoundationCell(num2);
 				Grid.Foundation[num2] = true;
 			}
-			if (this.Def.PlacementOffsets.Length > 0)
-			{
-				Game.Instance.roomProber.BuildRooms();
-			}
+		}
+		else
+		{
+			Game.Instance.roomProber.AddBuilding(this);
 		}
 		Vector3 vector = Grid.CellToPosCBC(num, this.Def.SceneLayer);
 		this.transform.SetPosition(vector);
@@ -117,6 +116,13 @@ public class BuildingComplete : Building
 				break;
 			}
 		}
+		if (this.Def.PreventIdlingInFrontOfBuilding)
+		{
+			for (int k = 0; k < base.PlacementCells.Length; k++)
+			{
+				Grid.PreventIdlingOnCell[base.PlacementCells[k]] = true;
+			}
+		}
 		KSelectable component6 = base.GetComponent<KSelectable>();
 		if (component6 != null)
 		{
@@ -149,13 +155,13 @@ public class BuildingComplete : Building
 			foreach (CellOffset cellOffset in this.Def.PlacementOffsets)
 			{
 				int num2 = Grid.OffsetCell(num, cellOffset);
-				Game.Instance.roomProber.RemoveFoundationCell(num2);
 				Grid.Foundation[num2] = false;
 			}
-			if (this.Def.PlacementOffsets.Length > 0)
-			{
-				Game.Instance.roomProber.BuildRooms();
-			}
+		}
+		Game.Instance.roomProber.RemoveBuilding(this);
+		if (base.GetComponent<Door>() != null)
+		{
+			Game.Instance.roomProber.SolidChangedEvent(Grid.PosToCell(base.gameObject), false);
 		}
 		for (int j = 0; j < base.PlacementCells.Length; j++)
 		{
@@ -164,6 +170,13 @@ public class BuildingComplete : Building
 			{
 				intersectionRegion.RemoveBuilding(this, true);
 				break;
+			}
+		}
+		if (this.Def.PreventIdlingInFrontOfBuilding)
+		{
+			for (int k = 0; k < base.PlacementCells.Length; k++)
+			{
+				Grid.PreventIdlingOnCell[base.PlacementCells[k]] = false;
 			}
 		}
 		Components.BuildingCompletes.Remove(this);
@@ -179,6 +192,12 @@ public class BuildingComplete : Building
 
 	[MyCmpReq]
 	private Modifiers modifiers;
+
+	[MyCmpGet]
+	public Assignable assignable;
+
+	[MyCmpGet]
+	public KPrefabID prefabid;
 
 	public bool isManuallyOperated;
 

@@ -21,6 +21,7 @@ public class SwitchConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
+		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		CircuitSwitch circuitSwitch = go.AddOrGet<CircuitSwitch>();
 		circuitSwitch.objectLayer = ObjectLayer.Wire;

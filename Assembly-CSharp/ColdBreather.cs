@@ -6,15 +6,6 @@ using UnityEngine;
 [SkipSaveFileSerialization]
 public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, IGameObjectEffectDescriptor
 {
-	protected override void OnPrefabInit()
-	{
-		base.OnPrefabInit();
-		this.Subscribe(1309017699, delegate(object o)
-		{
-			this.replanted = true;
-		});
-	}
-
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -55,7 +46,8 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 	[MyCmpReq]
 	private ElementConsumer elementConsumer;
 
-	public bool replanted;
+	[MyCmpReq]
+	private ReceptacleMonitor receptacleMonitor;
 
 	public class StatesInstance : GameStateMachine<ColdBreather.States, ColdBreather.StatesInstance, ColdBreather, object>.GameInstance
 	{
@@ -76,7 +68,7 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 					float num = Mathf.Max(component.Element.lowTemp + 5f, component.Temperature + base.master.deltaEmitTemperature);
 					int num2 = Grid.PosToCell(base.transform.position + base.master.emitOffsetCell);
 					SimMessages.AddRemoveSubstance(num2, component.Element.id, CellEventLogger.Instance.ElementEmitted, component.Mass, num, component.DiseaseIdx, component.DiseaseCount, -1);
-					base.master.storage.Consume(this.gases[i].PrefabID(), component.Mass);
+					base.master.storage.ConsumeIgnoringDisease(this.gases[i]);
 				}
 			}
 		}
@@ -90,7 +82,7 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 		{
 			base.serializable = true;
 			default_state = this.grow;
-			this.statusItemCooling = new StatusItem("cooling", CREATURES.STATUSITEMS.COOLING.NAME, CREATURES.STATUSITEMS.COOLING.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, 2046);
+			this.statusItemCooling = new StatusItem("cooling", CREATURES.STATUSITEMS.COOLING.NAME, CREATURES.STATUSITEMS.COOLING.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 14334);
 			this.dead.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Dead).Enter(delegate(ColdBreather.StatesInstance smi)
 			{
 				GameUtil.KInstantiate(EffectPrefabs.Instance.PlantDeath, smi.master.transform.position, Grid.SceneLayer.FXFront, SceneOrganizer.Instance.GetFolder(Folder.FX), null, 0);
@@ -104,7 +96,7 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 				.EventTransition(GameHashes.Uprooted, this.dead, (ColdBreather.StatesInstance smi) => UprootedMonitor.IsObjectUprooted(smi.master.gameObject));
 			this.grow.Enter(delegate(ColdBreather.StatesInstance smi)
 			{
-				if (smi.master.replanted && !this.alive.ForceUpdateStatus(smi.master.gameObject))
+				if (smi.master.receptacleMonitor.HasReceptacle() && !this.alive.ForceUpdateStatus(smi.master.gameObject))
 				{
 					smi.GoTo(this.blocked_from_growing);
 				}

@@ -125,9 +125,23 @@ public class OverlayLegend : KScreen
 		if (overlayInfo.isProgrammaticallyPopulated)
 		{
 			SimViewMode mode = overlayInfo.mode;
-			if (mode == SimViewMode.Disease)
+			if (mode != SimViewMode.NoisePollution)
 			{
-				this.PopulateDiseaseLegend(overlayInfo);
+				if (mode != SimViewMode.Rooms)
+				{
+					if (mode == SimViewMode.Disease)
+					{
+						this.PopulateDiseaseLegend(overlayInfo);
+					}
+				}
+				else
+				{
+					this.PopulateRoomsLegend(overlayInfo);
+				}
+			}
+			else
+			{
+				this.PopulateNoiseLegend(overlayInfo);
 			}
 		}
 		else
@@ -409,6 +423,28 @@ public class OverlayLegend : KScreen
 			ToolTip component2 = freeUnitObject.GetComponent<ToolTip>();
 			component2.enabled = true;
 			component2.toolTip = string.Format(Strings.Get("STRINGS.UI.OVERLAYS.NOISE_POLLUTION.TOOLTIPS." + text), num, num2);
+			freeUnitObject.SetActive(true);
+			freeUnitObject.transform.SetParent(this.activeUnitsParent.transform);
+		}
+	}
+
+	private void PopulateRoomsLegend(OverlayLegend.OverlayInfo info)
+	{
+		for (int i = 0; i < RoomTypes.types.Length; i++)
+		{
+			GameObject freeUnitObject = this.GetFreeUnitObject();
+			LocText componentInChildren = freeUnitObject.GetComponentInChildren<LocText>();
+			componentInChildren.enabled = true;
+			componentInChildren.text = RoomTypes.types[i].name + "\n" + RoomTypes.types[i].effect;
+			Image component = freeUnitObject.transform.FindChild("Icon").GetComponent<Image>();
+			component.gameObject.SetActive(true);
+			component.sprite = Assets.instance.LegendColourBox;
+			component.color = RoomTypes.types[i].category.color;
+			component.enabled = true;
+			component.type = Image.Type.Simple;
+			ToolTip component2 = freeUnitObject.GetComponent<ToolTip>();
+			component2.enabled = true;
+			component2.toolTip = RoomTypes.types[i].GetCriteriaString();
 			freeUnitObject.SetActive(true);
 			freeUnitObject.transform.SetParent(this.activeUnitsParent.transform);
 		}

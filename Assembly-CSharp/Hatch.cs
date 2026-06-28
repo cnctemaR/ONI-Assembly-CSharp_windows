@@ -175,11 +175,15 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 
 	private bool CanBurrowInto(int cell)
 	{
-		return Grid.IsValidCell(cell) && Grid.Solid[cell] && !Grid.IsSubstantialLiquid(Grid.CellAbove(cell), 0.35f) && !(Grid.Objects[cell, 1] != null) && (float)Grid.Element[cell].hardness <= this.DigHardnessLimit;
+		return Grid.IsValidCell(cell) && Grid.Solid[cell] && !Grid.IsSubstantialLiquid(Grid.CellAbove(cell), 0.35f) && !(Grid.Objects[cell, 1] != null) && (float)Grid.Element[cell].hardness <= this.DigHardnessLimit && !Grid.Foundation[cell];
 	}
 
 	private GameObject EdibleOnCell(int cell)
 	{
+		if (base.smi.sm.eatMoveTarget.Get(base.smi) != null && Grid.PosToCell(base.smi.sm.eatMoveTarget.Get(base.smi)) == cell)
+		{
+			return base.smi.sm.eatMoveTarget.Get(base.smi);
+		}
 		GameObject gameObject = Grid.Objects[cell, 3];
 		if (gameObject != null && gameObject.GetComponent<Pickupable>().storage == null && (gameObject.HasTag(GameTags.Ore) || gameObject.HasTag(GameTags.Edible) || gameObject.HasTag(GameTags.BuildableRaw) || gameObject.HasTag(GameTags.Solid)))
 		{
@@ -427,17 +431,26 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 			{
 				bool flag = false;
 				int num = Grid.PosToCell(smi.master.gameObject);
-				int num2 = 0;
-				while (!flag && num2 < 20)
+				if (Grid.Solid[num])
 				{
-					if (smi.master.CanBurrowInto(Grid.CellBelow(num)))
+					int num2 = 0;
+					while (!flag && num2 < 20)
 					{
-						flag = true;
-						smi.master.mover.TeleportToTarget(Grid.CellToPos(Grid.CellBelow(num), 0.5f, 0f, 0f), 0f);
-						smi.GoTo(this.alive.hide.loop);
+						num = Grid.CellBelow(num);
+						if (smi.master.CanBurrowInto(num))
+						{
+							flag = true;
+							smi.master.mover.TeleportToTarget(Grid.CellToPos(num, 0.5f, 0f, 0f), 0f);
+							smi.GoTo(this.alive.hide.loop);
+						}
+						num2++;
 					}
-					num = Grid.CellBelow(num);
-					num2++;
+				}
+				else
+				{
+					flag = true;
+					smi.master.mover.TeleportToTarget(Grid.CellToPos(num, 0.5f, 0f, 0f), 0f);
+					smi.GoTo(this.alive.grounded.idle);
 				}
 				if (!flag)
 				{
@@ -458,66 +471,59 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 					this.hungerLevel.Set(Mathf.Min(smi.master.maxHunger, this.hungerLevel.Get(smi) + smi.deltatime), smi);
 					this.timeSinceLastMeal.Delta(smi.deltatime, smi);
 				});
-			this.alive.dormant.Update(delegate(Hatch.StatesInstance smi)
-			{
-				int num3 = Grid.PosToCell(smi.transform.position + Vector3.down);
-				if (Grid.IsValidCell(num3) && !Grid.Solid[num3])
+			this.alive.grounded.DefaultState(this.alive.grounded.idle).EventTransition(GameHashes.Drowning, this.alive.grounded.distressed.Drowning, null).TagTransition(GameTags.Trapped, this.alive.grounded.caged, false)
+				.Enter(delegate(Hatch.StatesInstance smi)
 				{
-					smi.GoTo(this.alive.fall);
-				}
-			});
-			this.alive.grounded.EventTransition(GameHashes.Drowning, this.alive.grounded.distressed.Drowning, null).Enter(delegate(Hatch.StatesInstance smi)
-			{
-				int num4 = Grid.PosToCell(smi.transform.position + Vector3.down);
-				if (Grid.IsValidCell(num4) && !Grid.Solid[num4])
+					int num3 = Grid.PosToCell(smi.transform.position + Vector3.down);
+					if (Grid.IsValidCell(num3) && !Grid.Solid[num3])
+					{
+						smi.GoTo(this.alive.fall);
+					}
+				})
+				.Update(delegate(Hatch.StatesInstance smi)
 				{
-					smi.GoTo(this.alive.fall);
-				}
-			}).Update(delegate(Hatch.StatesInstance smi)
-			{
-				this.awakeTime.Set(this.awakeTime.Get(smi) + smi.deltatime, smi);
-				int num5 = Grid.PosToCell(smi.transform.position + Vector3.down);
-				if (Grid.IsValidCell(num5) && !Grid.Solid[num5])
-				{
-					smi.GoTo(this.alive.fall);
-				}
-			});
-			this.alive.grounded.Idle.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Idle).ToggleSchedulePeriodic("HatchLooksForFood", 1f, delegate(Hatch.StatesInstance smi)
+					this.awakeTime.Set(this.awakeTime.Get(smi) + smi.deltatime, smi);
+					int num4 = Grid.PosToCell(smi.transform.position + Vector3.down);
+					if (Grid.IsValidCell(num4) && !Grid.Solid[num4])
+					{
+						smi.GoTo(this.alive.fall);
+					}
+				});
+			this.alive.grounded.caged.DefaultState(this.alive.grounded.caged.idle).TagTransition(GameTags.Trapped, this.alive.grounded, true);
+			this.alive.grounded.caged.idle.PlayAnim("idle_loop", KAnim.PlayMode.Loop, null).ScheduleGoTo(3f, this.alive.grounded.caged.funny_idle);
+			this.alive.grounded.caged.funny_idle.PlayAnim("harvest", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.alive.grounded.caged.idle);
+			this.alive.grounded.idle.DefaultState(this.alive.grounded.idle.idle).ToggleMainStatusItem(Db.Get().CreatureStatusItems.Idle).ToggleSchedulePeriodic("HatchLooksForFood", 1f, delegate(Hatch.StatesInstance smi)
 			{
 				smi.master.FindAndMoveToFood();
-			}).EventTransition(GameHashes.Threatned, this.alive.grounded.attackStates.plan_attack, null)
+			})
+				.EventTransition(GameHashes.Threatned, this.alive.grounded.attackStates, null)
 				.Update(delegate(Hatch.StatesInstance smi)
 				{
 					if (this.awakeTime.Get(smi) > Hatch.minimumAwakeTime && smi.master.ShouldBurrow())
 					{
-						smi.GoTo(this.alive.hide.pre);
+						smi.GoTo(this.alive.hide);
 					}
 				});
-			this.alive.grounded.Idle.idle.PlayAnim("idle_loop", KAnim.PlayMode.Loop, null).ScheduleGoTo(3f, this.alive.grounded.Idle.move).Enter(delegate(Hatch.StatesInstance smi)
+			this.alive.grounded.idle.idle.PlayAnim("idle_loop", KAnim.PlayMode.Loop, null).ScheduleGoTo(3f, this.alive.grounded.idle.move).Enter(delegate(Hatch.StatesInstance smi)
 			{
-				if (smi.master.EdibleOnCell(Grid.PosToCell(smi.transform.position)) != null)
+				if (smi.master.isHungry(smi) && smi.master.EdibleOnCell(Grid.PosToCell(smi.transform.position)) != null)
 				{
-					if (smi.master.isHungry(smi))
-					{
-						smi.GoTo(this.alive.grounded.eatStates.eat_pre);
-					}
+					smi.GoTo(this.alive.grounded.eatStates);
 				}
-				else if (smi.sm.consumedMass.Get(smi) > smi.master.minPoopSize)
+				else if (smi.sm.consumedMass.Get(smi) >= smi.master.minPoopSize)
 				{
-					smi.GoTo(this.alive.grounded.Idle.poop);
+					smi.GoTo(this.alive.grounded.idle.poop);
 				}
 				if (smi.master.isHungry(smi) && this.eatMoveTarget.Get(smi) != null && Grid.PosToCell(smi.master.gameObject) == Grid.PosToCell(this.eatMoveTarget.Get(smi).gameObject))
 				{
-					smi.GoTo(this.alive.grounded.eatStates.eat_pre);
+					smi.GoTo(this.alive.grounded.eatStates);
 				}
 			});
-			this.alive.grounded.Idle.poop.PlayAnim("harvest", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.alive.grounded.Idle.idle).Enter(delegate(Hatch.StatesInstance smi)
+			this.alive.grounded.idle.poop.PlayAnim("harvest", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.alive.grounded.idle).Enter(delegate(Hatch.StatesInstance smi)
 			{
 				smi.master.Poop();
 			});
-			this.alive.grounded.eatStates.EventTransition(GameHashes.Threatned, this.alive.grounded.attackStates.plan_attack, null);
-			this.alive.grounded.eatStates.moveToFood.InitializeStates(this.mover, this.eatMoveTarget, this.alive.grounded.Idle.idle, this.alive.grounded.Idle.idle, Grid.DefaultOffset, null);
-			this.alive.grounded.Idle.move.InitializeStates(this.alive.grounded.Idle.idle);
+			this.alive.grounded.idle.move.InitializeStates(this.alive.grounded.idle);
 			this.alive.grounded.distressed.DrowningEmerge.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Emerging).Enter(delegate(Hatch.StatesInstance smi)
 			{
 				if (smi.sm.DigPlacer.Get(smi) != null)
@@ -537,72 +543,11 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 				DrowningMonitor component = smi.master.GetComponent<DrowningMonitor>();
 				if (component != null && !component.Drowning)
 				{
-					smi.GoTo(this.alive.grounded.Idle.move);
+					smi.GoTo(this.alive.grounded.idle.move);
 				}
-			}).EventTransition(GameHashes.EnteredBreathableArea, this.alive.grounded.Idle.move, null);
-			this.alive.hide.EventTransition(GameHashes.Drowning, this.alive.grounded.distressed.DrowningEmerge, null).Enter(delegate(Hatch.StatesInstance smi)
-			{
-				smi.master.userMenu.Refresh();
-				smi.master.GetComponent<FactionAlignment>().ToggleAlignmentActive(false);
-				smi.master.mainThreat = null;
-				this.threatMoveTarget.Set(null, smi);
-				int num6 = Grid.PosToCell(smi.master.transform.position);
-				if (Grid.IsValidCell(num6))
-				{
-					smi.master.solidCellMonitor = GameScenePartitioner.Instance.Add("Hatch.Hide", smi.master.gameObject, num6, GameScenePartitioner.Instance.solidChangedLayer, delegate(object data)
-					{
-						if (!Grid.Solid[Grid.PosToCell(smi.master.transform.position)])
-						{
-							smi.GoTo(this.alive.dormant.pre);
-						}
-					});
-				}
-			}).Exit(delegate(Hatch.StatesInstance smi)
-			{
-				smi.master.StopListeningForDigPlacerChanged();
-				smi.master.solidCellMonitor.Release();
-				smi.master.GetComponent<FactionAlignment>().ToggleAlignmentActive(true);
-			});
-			this.alive.hide.pre.PlayAnim("hide", KAnim.PlayMode.Once, null).EventTransition(GameHashes.AnimQueueComplete, this.alive.hide.loop, null).ToggleMainStatusItem(Db.Get().CreatureStatusItems.Burrowing)
-				.Enter(delegate(Hatch.StatesInstance smi)
-				{
-					smi.master.userMenu.Refresh();
-					smi.master.GetComponent<Navigator>().Stop(false);
-				})
-				.Exit(delegate(Hatch.StatesInstance smi)
-				{
-					smi.master.mover.TeleportToTarget(Grid.CellToPos(Grid.CellBelow(Grid.PosToCell(smi.master.transform.position)), 0.5f, 0f, 0f), 0f);
-				});
-			this.alive.hide.loop.PlayAnim("idle_mound", KAnim.PlayMode.Loop, null).ToggleMainStatusItem(Db.Get().CreatureStatusItems.Burrowed).Enter(delegate(Hatch.StatesInstance smi)
-			{
-				smi.master.InheritExistingDigPlacer();
-				smi.master.ListenForDigPlacerChanged();
-				smi.master.mCollider.size = new Vector2(1f, 1.5f);
-				smi.master.mCollider.offset = new Vector2(0f, 0.75f);
-			})
-				.EventTransition(GameHashes.Nighttime, (Hatch.StatesInstance smi) => GameClock.Instance, this.alive.grounded.emerge, (Hatch.StatesInstance smi) => GameClock.Instance.IsNighttime() && smi.master.EmergeIsClear())
-				.Update(delegate(Hatch.StatesInstance smi)
-				{
-					int num7 = Grid.PosToCell(smi.transform.position);
-					if (Grid.IsValidCell(num7) && !Grid.Solid[num7])
-					{
-						smi.GoTo(this.alive.dormant.pre);
-					}
-				})
-				.Exit(delegate(Hatch.StatesInstance smi)
-				{
-					smi.master.userMenu.Refresh();
-					this.awakeTime.Set(0f, smi);
-					smi.master.mCollider.size = new Vector2(1f, 1f);
-					smi.master.mCollider.offset = new Vector2(0f, 0.5f);
-				});
-			this.alive.dormant.pre.PlayAnim("dormant_pre", KAnim.PlayMode.Once, null).EventTransition(GameHashes.AnimQueueComplete, this.alive.dormant.pst, null).EventTransition(GameHashes.Nighttime, (Hatch.StatesInstance smi) => GameClock.Instance, this.alive.dormant.pst, null)
-				.OnAnimQueueComplete(this.alive.dormant.pst)
-				.Enter(delegate(Hatch.StatesInstance smi)
-				{
-					smi.master.userMenu.Refresh();
-				});
-			this.alive.dormant.pst.PlayAnim("dormant_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.alive.grounded.attackStates.plan_attack);
+			}).EventTransition(GameHashes.EnteredBreathableArea, this.alive.grounded.idle.move, null);
+			this.alive.grounded.eatStates.DefaultState(this.alive.grounded.eatStates.eat_pre).EventTransition(GameHashes.Threatned, this.alive.grounded.attackStates, null);
+			this.alive.grounded.eatStates.moveToFood.InitializeStates(this.mover, this.eatMoveTarget, this.alive.grounded.idle, this.alive.grounded.idle, Grid.DefaultOffset, null);
 			this.alive.grounded.eatStates.eat_pre.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Eating).Enter(delegate(Hatch.StatesInstance smi)
 			{
 				smi.Play("eat_pre", KAnim.PlayMode.Once);
@@ -630,36 +575,8 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 			this.alive.grounded.eatStates.eat_pst.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Eating).Enter(delegate(Hatch.StatesInstance smi)
 			{
 				smi.Queue("eat_pst", KAnim.PlayMode.Once);
-			}).EventTransition(GameHashes.AnimQueueComplete, this.alive.grounded.Idle.idle, (Hatch.StatesInstance smi) => smi.timeinstate > 0f);
-			this.alive.grounded.emerge.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Emerging).Enter(delegate(Hatch.StatesInstance smi)
-			{
-				if (smi.sm.DigPlacer.Get(smi) != null)
-				{
-					smi.master.ForgetDigPlacer();
-				}
-				smi.master.mover.TeleportToTarget(Grid.CellToPos(Grid.CellAbove(Grid.PosToCell(smi.master.transform.position)), 0.5f, 0f, 0f), 0f);
-			}).QueueAnim("emerge", false, null)
-				.OnAnimQueueComplete(this.alive.grounded.Idle.idle)
-				.Exit(delegate(Hatch.StatesInstance smi)
-				{
-					smi.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().CreatureStatusItems.Emerging, false);
-				});
-			this.death.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Dead).Enter(delegate(Hatch.StatesInstance smi)
-			{
-				smi.master.alive = false;
-				Butcherable component2 = smi.master.GetComponent<Butcherable>();
-				if (component2)
-				{
-					component2.OnButcherComplete();
-				}
-				smi.Play("death", KAnim.PlayMode.Once);
-				smi.Schedule(2f, delegate(object d)
-				{
-					Util.KDestroyGameObject(smi.gameObject);
-				}, null);
-			});
-			this.alive.fall.PlayAnim("fall", KAnim.PlayMode.Loop, null).ToggleGravity(this.alive.grounded.Idle.idle);
-			this.alive.grounded.attackStates.EventTransition(GameHashes.SafeFromThreats, this.alive.grounded.Idle.idle, null);
+			}).EventTransition(GameHashes.AnimQueueComplete, this.alive.grounded.idle, (Hatch.StatesInstance smi) => smi.timeinstate > 0f);
+			this.alive.grounded.attackStates.DefaultState(this.alive.grounded.attackStates.plan_attack).EventTransition(GameHashes.SafeFromThreats, this.alive.grounded.idle, null);
 			this.alive.grounded.attackStates.plan_attack.Enter(delegate(Hatch.StatesInstance smi)
 			{
 				if (!CreatureHelpers.WillEngageNonEssentialTargets(smi.gameObject, Health.HealthState.Dead))
@@ -689,7 +606,106 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 					smi.master.weapon.AttackTarget(smi.master.mainThreat);
 				}, null);
 			});
-			this.alive.grounded.attackStates.flee.InitializeStates(this.mover, this.alive.grounded.Idle.idle);
+			this.alive.grounded.attackStates.flee.InitializeStates(this.mover, this.alive.grounded.idle);
+			this.alive.grounded.emerge.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Emerging).Enter(delegate(Hatch.StatesInstance smi)
+			{
+				if (smi.sm.DigPlacer.Get(smi) != null)
+				{
+					smi.master.ForgetDigPlacer();
+				}
+				smi.master.mover.TeleportToTarget(Grid.CellToPos(Grid.CellAbove(Grid.PosToCell(smi.master.transform.position)), 0.5f, 0f, 0f), 0f);
+			}).QueueAnim("emerge", false, null)
+				.OnAnimQueueComplete(this.alive.grounded.idle)
+				.Exit(delegate(Hatch.StatesInstance smi)
+				{
+					smi.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().CreatureStatusItems.Emerging, false);
+				});
+			this.alive.hide.DefaultState(this.alive.hide.pre).EventTransition(GameHashes.Drowning, this.alive.grounded.distressed.DrowningEmerge, null).Enter(delegate(Hatch.StatesInstance smi)
+			{
+				smi.master.userMenu.Refresh();
+				smi.master.GetComponent<FactionAlignment>().ToggleAlignmentActive(false);
+				smi.master.mainThreat = null;
+				this.threatMoveTarget.Set(null, smi);
+				int num5 = Grid.PosToCell(smi.master.transform.position);
+				if (Grid.IsValidCell(num5))
+				{
+					smi.master.solidCellMonitor = GameScenePartitioner.Instance.Add("Hatch.Hide", smi.master.gameObject, num5, GameScenePartitioner.Instance.solidChangedLayer, delegate(object data)
+					{
+						if (!Grid.Solid[Grid.PosToCell(smi.master.transform.position)])
+						{
+							smi.GoTo(this.alive.dormant.pre);
+						}
+					});
+				}
+			})
+				.Exit(delegate(Hatch.StatesInstance smi)
+				{
+					smi.master.StopListeningForDigPlacerChanged();
+					smi.master.solidCellMonitor.Release();
+					smi.master.GetComponent<FactionAlignment>().ToggleAlignmentActive(true);
+				});
+			this.alive.hide.pre.PlayAnim("hide", KAnim.PlayMode.Once, null).EventTransition(GameHashes.AnimQueueComplete, this.alive.hide.loop, null).ToggleMainStatusItem(Db.Get().CreatureStatusItems.Burrowing)
+				.Enter(delegate(Hatch.StatesInstance smi)
+				{
+					smi.master.userMenu.Refresh();
+					smi.master.GetComponent<Navigator>().Stop(false);
+				})
+				.Exit(delegate(Hatch.StatesInstance smi)
+				{
+					smi.master.mover.TeleportToTarget(Grid.CellToPos(Grid.CellBelow(Grid.PosToCell(smi.master.transform.position)), 0.5f, 0f, 0f), 0f);
+				});
+			this.alive.hide.loop.PlayAnim("idle_mound", KAnim.PlayMode.Loop, null).ToggleMainStatusItem(Db.Get().CreatureStatusItems.Burrowed).Enter(delegate(Hatch.StatesInstance smi)
+			{
+				smi.master.InheritExistingDigPlacer();
+				smi.master.ListenForDigPlacerChanged();
+				smi.master.mCollider.size = new Vector2(1f, 1.5f);
+				smi.master.mCollider.offset = new Vector2(0f, 0.75f);
+			})
+				.EventTransition(GameHashes.Nighttime, (Hatch.StatesInstance smi) => GameClock.Instance, this.alive.grounded.emerge, (Hatch.StatesInstance smi) => GameClock.Instance.IsNighttime() && smi.master.EmergeIsClear())
+				.Update(delegate(Hatch.StatesInstance smi)
+				{
+					int num6 = Grid.PosToCell(smi.transform.position);
+					if (Grid.IsValidCell(num6) && !Grid.Solid[num6])
+					{
+						smi.GoTo(this.alive.dormant.pre);
+					}
+				})
+				.Exit(delegate(Hatch.StatesInstance smi)
+				{
+					smi.master.userMenu.Refresh();
+					this.awakeTime.Set(0f, smi);
+					smi.master.mCollider.size = new Vector2(1f, 1f);
+					smi.master.mCollider.offset = new Vector2(0f, 0.5f);
+				});
+			this.alive.dormant.Update(delegate(Hatch.StatesInstance smi)
+			{
+				int num7 = Grid.PosToCell(smi.transform.position + Vector3.down);
+				if (Grid.IsValidCell(num7) && !Grid.Solid[num7])
+				{
+					smi.GoTo(this.alive.fall);
+				}
+			});
+			this.alive.dormant.pre.PlayAnim("dormant_pre", KAnim.PlayMode.Once, null).EventTransition(GameHashes.Nighttime, (Hatch.StatesInstance smi) => GameClock.Instance, this.alive.dormant.pst, null).OnAnimQueueComplete(this.alive.dormant.pst)
+				.Enter(delegate(Hatch.StatesInstance smi)
+				{
+					smi.master.userMenu.Refresh();
+				});
+			this.alive.dormant.pst.PlayAnim("dormant_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.alive.grounded.attackStates);
+			this.alive.fall.PlayAnim("fall", KAnim.PlayMode.Loop, null).ToggleGravity(this.alive.grounded.idle);
+			this.death.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Dead).Enter(delegate(Hatch.StatesInstance smi)
+			{
+				smi.master.alive = false;
+				Butcherable component2 = smi.master.GetComponent<Butcherable>();
+				if (component2)
+				{
+					component2.OnButcherComplete();
+				}
+				smi.Play("death", KAnim.PlayMode.Once);
+				smi.Schedule(2f, delegate(object d)
+				{
+					Util.KDestroyGameObject(smi.gameObject);
+				}, null);
+			});
 		}
 
 		public StateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.TargetParameter eatMoveTarget;
@@ -736,7 +752,7 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 
 		public class GroundedState : GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State
 		{
-			public Hatch.States.IdleStates Idle;
+			public Hatch.States.IdleStates idle;
 
 			public Hatch.States.EatStates eatStates;
 
@@ -745,6 +761,8 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State emerge;
 
 			public Hatch.States.DistressStates distressed;
+
+			public Hatch.States.CagedStates caged;
 		}
 
 		public class EatStates : GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State
@@ -783,6 +801,13 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State DrowningEmerge;
 
 			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State Drowning;
+		}
+
+		public class CagedStates : GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State
+		{
+			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State idle;
+
+			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State funny_idle;
 		}
 	}
 }

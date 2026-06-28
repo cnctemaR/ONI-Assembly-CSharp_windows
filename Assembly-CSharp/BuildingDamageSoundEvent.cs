@@ -12,13 +12,19 @@ public class BuildingDamageSoundEvent : SoundEvent
 	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
 	{
 		Vector3 position = behaviour.GetComponent<Transform>().position;
-		Workable workable = behaviour.GetComponent<Worker>().workable;
+		Worker component = behaviour.GetComponent<Worker>();
+		if (component == null)
+		{
+			SoundEvent.PlayOneShot(GlobalAssets.GetSound("Building_Dmg_Metal", false), position);
+			return;
+		}
+		Workable workable = component.workable;
 		if (workable != null)
 		{
-			Building component = workable.GetComponent<Building>();
-			if (component != null)
+			Building component2 = workable.GetComponent<Building>();
+			if (component2 != null)
 			{
-				BuildingDef def = component.Def;
+				BuildingDef def = component2.Def;
 				string text = base.name + "_" + def.AudioCategory;
 				string text2 = GlobalAssets.GetSound(text, false);
 				if (text2 == null)

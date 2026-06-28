@@ -10,7 +10,6 @@ namespace ProcGen
 		{
 			this.baseData = new BaseLocation();
 			this.data = new Dictionary<string, object>();
-			this.cloudSettings = new CloudSettings();
 		}
 
 		public BaseLocation baseData { get; private set; }
@@ -20,7 +19,5 @@ namespace ProcGen
 		public List<string> defaultMoveTags { get; private set; }
 
 		public List<string> overworldAddTags { get; private set; }
-
-		public CloudSettings cloudSettings { get; private set; }
 	}
 }

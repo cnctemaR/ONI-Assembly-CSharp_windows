@@ -148,7 +148,7 @@ public class RelocateTool : DragTool
 						GameObject gameObject2 = null;
 						if (this.def.ReplacementLayer != ObjectLayer.NumLayers)
 						{
-							gameObject2 = Grid.Objects[num, 10];
+							gameObject2 = Grid.Objects[num, 11];
 						}
 						if (gameObject == null || (gameObject.GetComponent<Constructable>() == null && gameObject2 == null))
 						{
@@ -171,8 +171,8 @@ public class RelocateTool : DragTool
 		}
 		if (this.visualizer != null)
 		{
-			bool flag = this.def.IsValidPlaceLocation(cursorPos, this.buildingOrientation);
-			bool flag2 = this.def.IsValidBuildLocation(cursorPos, this.buildingOrientation);
+			bool flag = this.def.IsValidPlaceLocation(this.visualizer, cursorPos, this.buildingOrientation);
+			bool flag2 = this.def.IsValidBuildLocation(this.visualizer, cursorPos, this.buildingOrientation);
 			Color color = Color.white;
 			float num3 = 0f;
 			if (!flag)
@@ -219,9 +219,9 @@ public class RelocateTool : DragTool
 		GameObject gameObject = null;
 		if (DebugHandler.InstantBuildMode)
 		{
-			if (this.def.IsValidBuildLocation(vector, this.buildingOrientation) && this.def.IsValidPlaceLocation(vector, this.buildingOrientation))
+			if (this.def.IsValidBuildLocation(this.visualizer, vector, this.buildingOrientation) && this.def.IsValidPlaceLocation(this.visualizer, vector, this.buildingOrientation))
 			{
-				gameObject = this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, true, true);
+				gameObject = this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, 293.15f, true, true);
 				this.source.DeleteObject();
 			}
 		}

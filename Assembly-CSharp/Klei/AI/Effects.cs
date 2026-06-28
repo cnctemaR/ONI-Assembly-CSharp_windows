@@ -34,16 +34,6 @@ namespace Klei.AI
 			}
 		}
 
-		public bool Has(string effect_id)
-		{
-			return this.Get(effect_id) != null;
-		}
-
-		public bool Has(Effect effect)
-		{
-			return this.Get(effect) != null;
-		}
-
 		public EffectInstance Get(string effect_id)
 		{
 			foreach (EffectInstance effectInstance in this.effects)
@@ -76,6 +66,10 @@ namespace Klei.AI
 
 		public EffectInstance Add(Effect effect, bool should_save)
 		{
+			if (this.effectImmunites.Contains(effect))
+			{
+				return null;
+			}
 			bool flag = true;
 			foreach (Trait trait in base.GetComponent<Traits>())
 			{
@@ -169,6 +163,16 @@ namespace Klei.AI
 			}
 		}
 
+		public void AddImmunity(Effect effect)
+		{
+			this.effectImmunites.Add(effect);
+		}
+
+		public void RemoveImmunity(Effect effect)
+		{
+			this.effectImmunites.Remove(effect);
+		}
+
 		[OnSerializing]
 		internal void OnSerializing()
 		{
@@ -192,6 +196,8 @@ namespace Klei.AI
 		private Effects.SaveLoadEffect[] saveLoadEffects;
 
 		private List<EffectInstance> effects = new List<EffectInstance>();
+
+		private List<Effect> effectImmunites = new List<Effect>();
 
 		[Serializable]
 		private struct SaveLoadEffect

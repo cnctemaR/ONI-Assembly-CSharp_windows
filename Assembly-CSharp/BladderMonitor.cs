@@ -18,14 +18,8 @@ public class BladderMonitor : GameStateMachine<BladderMonitor, BladderMonitor.In
 		})
 			.OnSignal(this.noBathrooms, this.needstopee.holdingitin.nobathrooms)
 			.OnSignal(this.hasBathrooms, this.needstopee.holdingitin.hasbathrooms);
-		this.needstopee.urgent.ToggleChore(new Func<BladderMonitor.Instance, Chore>(this.CreatePeeChore), this.satisfied);
 		this.needstopee.peeing.EventTransition(GameHashes.EndChore, this.satisfied, (BladderMonitor.Instance smi) => !smi.IsPeeing());
 		this.needstopee.holdingitin.nobathrooms.ToggleStatusItem(Db.Get().DuplicantStatusItems.NoToilets, null);
-	}
-
-	private Chore CreatePeeChore(BladderMonitor.Instance smi)
-	{
-		return new PeeChore(smi.master);
 	}
 
 	public GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget, object>.State satisfied;
@@ -47,8 +41,6 @@ public class BladderMonitor : GameStateMachine<BladderMonitor, BladderMonitor.In
 	{
 		public BladderMonitor.BathroomsState holdingitin;
 
-		public GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget, object>.State urgent;
-
 		public GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget, object>.State peeing;
 	}
 
@@ -63,7 +55,8 @@ public class BladderMonitor : GameStateMachine<BladderMonitor, BladderMonitor.In
 
 		public bool NeedsToPee()
 		{
-			return this.bladder.value >= 100f;
+			StaminaMonitor.Instance smi = base.smi.master.gameObject.GetSMI<StaminaMonitor.Instance>();
+			return (smi == null || !smi.IsSleeping()) && this.bladder.value >= 100f;
 		}
 
 		public bool IsPeeing()

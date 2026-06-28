@@ -35,7 +35,7 @@ public class SpiceVineConfig : IEntityConfig
 		gameObject.UpdateComponentRequirement<StandardCropPlant>(true);
 		list = new List<Tag> { GameTags.CropSeed };
 		GameObject gameObject2 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Harvest, "SpiceVineSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.SPICE_VINE.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.SPICE_VINE.DESC, Assets.GetAnim("seed_spicenut_kanim"), "object", 1, list, SingleEntityReceptacle.ReceptacleDirection.Bottom, default(Tag), 4, global::STRINGS.CREATURES.SPECIES.SPICE_VINE.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, string.Empty);
-		GameObject gameObject3 = EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject, gameObject2, "SpiceVine_preview", Assets.GetAnim("vinespicenut_kanim"), "place", 1, 3);
+		GameObject gameObject3 = EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject2, "SpiceVine_preview", Assets.GetAnim("vinespicenut_kanim"), "place", 1, 3);
 		EntityTemplates.MakeHangingOffsets(gameObject3, 1, 3);
 		return gameObject;
 	}

@@ -24,7 +24,6 @@ public class CeilingLightConfig : IBuildingConfig
 		Light2D light2D = go.AddOrGet<Light2D>();
 		light2D.overlayColour = LIGHT2D.CEILINGLIGHT_OVERLAYCOLOR;
 		light2D.Color = LIGHT2D.CEILINGLIGHT_COLOR;
-		light2D.Intensity = 4f;
 		light2D.Range = 8f;
 		light2D.Angle = 2.6f;
 		light2D.Direction = LIGHT2D.CEILINGLIGHT_DIRECTION;

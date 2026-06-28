@@ -530,9 +530,11 @@ public class Grid
 
 	public static bool[] PreventFogOfWarReveal;
 
-	public static int[] Decor;
+	public static bool[] PreventIdlingOnCell;
 
-	public static int[] NoisePollution;
+	public static float[] Decor;
+
+	public static float[] Loudness;
 
 	public static ushort[] Room;
 
@@ -549,8 +551,6 @@ public class Grid
 	public static Grid.PreviousSolidIndexer PreviousSolid;
 
 	public static Grid.RenderedByWorldIndexer RenderedByWorld;
-
-	public static Grid.SuitRequiredIndexer SuitRequired;
 
 	public static Grid.FakeFloorIndexer FakeFloor;
 
@@ -591,8 +591,11 @@ public class Grid
 		NoLayer = -2,
 		Background,
 		GasConduits = 1,
+		GasConduitBridges,
 		LiquidConduits,
+		LiquidConduitBridges,
 		Wires,
+		WireBridges,
 		BuildingBack,
 		Building,
 		BuildingFront,
@@ -663,7 +666,7 @@ public class Grid
 			get
 			{
 				Element element = ElementLoader.elements[(int)Grid.Cell[i].elementIdx];
-				return Grid.Cell[i].mass * element.defaultValues.pressure;
+				return Grid.Cell[i].mass * 101.3f;
 			}
 		}
 	}
@@ -748,23 +751,6 @@ public class Grid
 				Grid.BitFields[i] = (ushort)((int)Grid.BitFields[i] & -129);
 				ushort[] bitFields = Grid.BitFields;
 				bitFields[i] |= ((!value) ? 0 : 128);
-			}
-		}
-	}
-
-	public struct SuitRequiredIndexer
-	{
-		public bool this[int i]
-		{
-			get
-			{
-				return (Grid.BitFields[i] & 8) != 0;
-			}
-			set
-			{
-				Grid.BitFields[i] = (ushort)((int)Grid.BitFields[i] & -9);
-				ushort[] bitFields = Grid.BitFields;
-				bitFields[i] |= ((!value) ? 0 : 8);
 			}
 		}
 	}

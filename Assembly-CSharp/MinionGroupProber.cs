@@ -55,7 +55,7 @@ public class MinionGroupProber : KMonoBehaviour
 				PathFinderAbilities currentAbilities = minionIdentity.GetComponent<Navigator>().GetCurrentAbilities();
 				currentAbilities.maxUnderwaterCost = 8;
 				currentAbilities.ignoreNavigationMasks = true;
-				this.pathProber.UpdateProbe(this.navGrid, num, component.CurrentNavType, currentAbilities, flag);
+				this.pathProber.UpdateProbe(this.navGrid, num, component.CurrentNavType, currentAbilities, PathFinder.PotentialPath.Flags.UnlimitedSubmergedTravel, flag);
 				flag = false;
 			}
 		}
@@ -63,13 +63,6 @@ public class MinionGroupProber : KMonoBehaviour
 		{
 			this.islands = new MinionGroupProber.Island[this.pathProber.IslandCount];
 		}
-	}
-
-	public int GetNavCostBetweenCells(int source_cell, int dest_cell, int max_cost = 10)
-	{
-		PathFinderQueries.cellCostQuery.Reset(dest_cell, max_cost);
-		PathFinder.Run(this.navGrid, default(PathFinderAbilities), source_cell, NavType.Floor, PathFinderQueries.cellCostQuery);
-		return PathFinderQueries.cellCostQuery.resultCost;
 	}
 
 	private static MinionGroupProber Instance;

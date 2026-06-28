@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace Steamworks
 {
@@ -6,6 +7,7 @@ namespace Steamworks
 	{
 		public static void ExceptionHandler(Exception e)
 		{
+			global::UnityEngine.Debug.LogException(e);
 		}
 	}
 }

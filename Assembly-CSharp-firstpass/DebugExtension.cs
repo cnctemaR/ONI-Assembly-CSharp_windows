@@ -91,7 +91,7 @@ public static class DebugExtension
 		DebugExtension.DebugLocalCube(space, size, Color.white, center, duration, depthTest);
 	}
 
-	public static void DebugCircle(Vector3 position, Vector3 up, Color color, float radius = 1f, float duration = 0f, bool depthTest = true)
+	public static void DebugCircle(Vector3 position, Vector3 up, Color color, float radius = 1f, float duration = 0f, bool depthTest = true, float jumpPerSegment = 4f)
 	{
 		Vector3 vector = up.normalized * radius;
 		Vector3 vector2 = Vector3.Slerp(vector, -vector, 0.5f);
@@ -109,33 +109,35 @@ public static class DebugExtension
 		Vector3 vector4 = position + matrix4x.MultiplyPoint3x4(new Vector3(Mathf.Cos(0f), 0f, Mathf.Sin(0f)));
 		Vector3 vector5 = Vector3.zero;
 		color = ((!(color == default(Color))) ? color : Color.white);
-		for (int i = 0; i < 91; i++)
+		int num = 0;
+		while ((float)num < 364f / jumpPerSegment)
 		{
-			vector5.x = Mathf.Cos((float)(i * 4) * 0.017453292f);
-			vector5.z = Mathf.Sin((float)(i * 4) * 0.017453292f);
+			vector5.x = Mathf.Cos((float)num * jumpPerSegment * 0.017453292f);
+			vector5.z = Mathf.Sin((float)num * jumpPerSegment * 0.017453292f);
 			vector5.y = 0f;
 			vector5 = position + matrix4x.MultiplyPoint3x4(vector5);
+			num++;
 		}
 	}
 
 	public static void DebugCircle(Vector3 position, Color color, float radius = 1f, float duration = 0f, bool depthTest = true)
 	{
-		DebugExtension.DebugCircle(position, Vector3.up, color, radius, duration, depthTest);
+		DebugExtension.DebugCircle(position, Vector3.up, color, radius, duration, depthTest, 4f);
 	}
 
-	public static void DebugCircle2d(Vector2 position, Color color, float radius = 1f, float duration = 0f, bool depthTest = true)
+	public static void DebugCircle2d(Vector2 position, Color color, float radius = 1f, float duration = 0f, bool depthTest = true, float jumpPerSegment = 4f)
 	{
-		DebugExtension.DebugCircle(position, Vector3.forward, color, radius, duration, depthTest);
+		DebugExtension.DebugCircle(position, Vector3.forward, color, radius, duration, depthTest, jumpPerSegment);
 	}
 
 	public static void DebugCircle(Vector3 position, Vector3 up, float radius = 1f, float duration = 0f, bool depthTest = true)
 	{
-		DebugExtension.DebugCircle(position, up, Color.white, radius, duration, depthTest);
+		DebugExtension.DebugCircle(position, up, Color.white, radius, duration, depthTest, 4f);
 	}
 
 	public static void DebugCircle(Vector3 position, float radius = 1f, float duration = 0f, bool depthTest = true)
 	{
-		DebugExtension.DebugCircle(position, Vector3.up, Color.white, radius, duration, depthTest);
+		DebugExtension.DebugCircle(position, Vector3.up, Color.white, radius, duration, depthTest, 4f);
 	}
 
 	public static void DebugWireSphere(Vector3 position, Color color, float radius = 1f, float duration = 0f, bool depthTest = true)
@@ -165,9 +167,9 @@ public static class DebugExtension
 		Vector3 vector = (end - start).normalized * radius;
 		Vector3 vector2 = Vector3.Slerp(vector, -vector, 0.5f);
 		Vector3 vector3 = Vector3.Cross(vector, vector2).normalized * radius;
-		DebugExtension.DebugCircle(start, vector, color, radius, duration, depthTest);
-		DebugExtension.DebugCircle(end, -vector, color, radius, duration, depthTest);
-		DebugExtension.DebugCircle((start + end) * 0.5f, vector, color, radius, duration, depthTest);
+		DebugExtension.DebugCircle(start, vector, color, radius, duration, depthTest, 4f);
+		DebugExtension.DebugCircle(end, -vector, color, radius, duration, depthTest, 4f);
+		DebugExtension.DebugCircle((start + end) * 0.5f, vector, color, radius, duration, depthTest, 4f);
 	}
 
 	public static void DebugCylinder(Vector3 start, Vector3 end, float radius = 1f, float duration = 0f, bool depthTest = true)
@@ -187,8 +189,8 @@ public static class DebugExtension
 		Ray ray = new Ray(position, vector4);
 		float num;
 		plane.Raycast(ray, out num);
-		DebugExtension.DebugCircle(position + vector, direction, color, (vector - vector4.normalized * num).magnitude, duration, depthTest);
-		DebugExtension.DebugCircle(position + vector * 0.5f, direction, color, (vector * 0.5f - vector4.normalized * (num * 0.5f)).magnitude, duration, depthTest);
+		DebugExtension.DebugCircle(position + vector, direction, color, (vector - vector4.normalized * num).magnitude, duration, depthTest, 4f);
+		DebugExtension.DebugCircle(position + vector * 0.5f, direction, color, (vector * 0.5f - vector4.normalized * (num * 0.5f)).magnitude, duration, depthTest, 4f);
 	}
 
 	public static void DebugCone(Vector3 position, Vector3 direction, float angle = 45f, float duration = 0f, bool depthTest = true)
@@ -226,8 +228,8 @@ public static class DebugExtension
 		Vector3 vector4 = (end + start) * 0.5f;
 		start = vector4 + (start - vector4).normalized * num;
 		end = vector4 + (end - vector4).normalized * num;
-		DebugExtension.DebugCircle(start, vector, color, radius, duration, depthTest);
-		DebugExtension.DebugCircle(end, -vector, color, radius, duration, depthTest);
+		DebugExtension.DebugCircle(start, vector, color, radius, duration, depthTest, 4f);
+		DebugExtension.DebugCircle(end, -vector, color, radius, duration, depthTest, 4f);
 		for (int i = 1; i < 26; i++)
 		{
 		}

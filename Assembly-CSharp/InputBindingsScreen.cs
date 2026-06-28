@@ -56,13 +56,13 @@ public class InputBindingsScreen : KModalScreen
 		for (int i = 0; i < GameInputMapping.KeyBindings.Length; i++)
 		{
 			BindingEntry bindingEntry = GameInputMapping.KeyBindings[i];
-			if (bindingEntry.mScreen != null && bindingEntry.mRebindable && !this.screens.Contains(bindingEntry.mScreen))
+			if (bindingEntry.mGroup != null && bindingEntry.mRebindable && !this.screens.Contains(bindingEntry.mGroup))
 			{
-				if (bindingEntry.mScreen == "Root")
+				if (bindingEntry.mGroup == "Root")
 				{
 					this.activeScreen = this.screens.Count;
 				}
-				this.screens.Add(bindingEntry.mScreen);
+				this.screens.Add(bindingEntry.mGroup);
 			}
 		}
 	}
@@ -102,11 +102,11 @@ public class InputBindingsScreen : KModalScreen
 		for (int i = 0; i < GameInputMapping.KeyBindings.Length; i++)
 		{
 			BindingEntry binding = GameInputMapping.KeyBindings[i];
-			if (binding.mScreen == this.screens[this.activeScreen] && binding.mRebindable)
+			if (binding.mGroup == this.screens[this.activeScreen] && binding.mRebindable)
 			{
 				GameObject gameObject = this.entryPool.GetFreeElement(this.parent, true).gameObject;
 				LocText componentInChildren = gameObject.transform.GetChild(0).GetComponentInChildren<LocText>();
-				string text3 = "STRINGS.INPUT_BINDINGS." + binding.mScreen.ToUpper() + "." + binding.mAction.ToString().ToUpper();
+				string text3 = "STRINGS.INPUT_BINDINGS." + binding.mGroup.ToUpper() + "." + binding.mAction.ToString().ToUpper();
 				componentInChildren.text = Strings.Get(text3);
 				LocText key_label = gameObject.transform.GetChild(1).GetComponentInChildren<LocText>();
 				key_label.text = this.GetBindingText(binding);
@@ -175,7 +175,7 @@ public class InputBindingsScreen : KModalScreen
 		for (int i = 0; i < GameInputMapping.KeyBindings.Length; i++)
 		{
 			BindingEntry bindingEntry2 = GameInputMapping.KeyBindings[i];
-			if ((bindingEntry2.mScreen == null || bindingEntry2.mScreen == activeScreen) && new_binding.IsBindingEqual(bindingEntry2))
+			if ((bindingEntry2.mGroup == null || bindingEntry2.mGroup == activeScreen || bindingEntry2.mGroup == "Root" || activeScreen == "Root") && new_binding.IsBindingEqual(bindingEntry2))
 			{
 				bindingEntry = bindingEntry2;
 				break;
@@ -232,7 +232,7 @@ public class InputBindingsScreen : KModalScreen
 			}, delegate
 			{
 				this.confirmDialog.Deactivate();
-			}, null, null, null, null);
+			}, null, null, null, null, null);
 			this.confirmDialog.gameObject.SetActive(true);
 		}
 	}
@@ -278,8 +278,12 @@ public class InputBindingsScreen : KModalScreen
 		if (this.activeScreen > 0)
 		{
 			this.activeScreen--;
-			this.BuildDisplay();
 		}
+		else
+		{
+			this.activeScreen = this.screens.Count - 1;
+		}
+		this.BuildDisplay();
 	}
 
 	public void OnNextScreen()
@@ -287,8 +291,12 @@ public class InputBindingsScreen : KModalScreen
 		if (this.activeScreen < this.screens.Count - 1)
 		{
 			this.activeScreen++;
-			this.BuildDisplay();
 		}
+		else
+		{
+			this.activeScreen = 0;
+		}
+		this.BuildDisplay();
 	}
 
 	private void Bind(KKeyCode kkey_code, Modifier modifier)
@@ -306,12 +314,12 @@ public class InputBindingsScreen : KModalScreen
 				if (duplicatedBinding.mAction != global::Action.Invalid && duplicatedBinding.mAction != this.actionToRebind)
 				{
 					this.confirmDialog = Util.KInstantiateUI(this.confirmPrefab.gameObject, this.transform.gameObject, false).GetComponent<ConfirmDialogScreen>();
-					string text = "STRINGS.INPUT_BINDINGS." + duplicatedBinding.mScreen.ToUpper() + "." + duplicatedBinding.mAction.ToString().ToUpper();
+					string text = "STRINGS.INPUT_BINDINGS." + duplicatedBinding.mGroup.ToUpper() + "." + duplicatedBinding.mAction.ToString().ToUpper();
 					string text2 = Strings.Get(text);
 					string bindingText = this.GetBindingText(duplicatedBinding);
 					string text3 = string.Format(UI.FRONTEND.INPUT_BINDINGS_SCREEN.DUPLICATE, text2, bindingText);
 					this.Unbind(duplicatedBinding.mAction);
-					this.confirmDialog.PopupConfirmDialog(text3, null, null, null, null, null, null);
+					this.confirmDialog.PopupConfirmDialog(text3, null, null, null, null, null, null, null);
 					this.confirmDialog.gameObject.SetActive(true);
 				}
 				Global.Instance.GetInputManager().RebindControls();

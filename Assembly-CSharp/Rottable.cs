@@ -44,7 +44,7 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance>
 			Edible component = smi.GetComponent<Edible>();
 			if (component != null)
 			{
-				ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, -component.Calories, string.Format(UI.ENDOFDAYREPORT.NOTES.ROTTED, smi.gameObject.name));
+				ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, -component.Calories, string.Format(UI.ENDOFDAYREPORT.NOTES.ROTTED, smi.gameObject.GetProperName()), UI.ENDOFDAYREPORT.NOTES.ROTTED_CONTEXT);
 			}
 			Util.KDestroyGameObject(smi.gameObject);
 		});

@@ -9,12 +9,9 @@ namespace ProcGen
 		public TerrainFeatureSettings()
 		{
 			this.TerrainFeatures = new Dictionary<string, TerrainFeature>();
-			this.LoadFeatureFiles = new List<string>();
 		}
 
 		public Dictionary<string, TerrainFeature> TerrainFeatures { get; private set; }
-
-		public List<string> LoadFeatureFiles { get; private set; }
 
 		public string[] GetNames()
 		{

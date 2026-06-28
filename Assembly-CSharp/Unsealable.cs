@@ -45,11 +45,6 @@ public class Unsealable : Workable
 		component.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
 	}
 
-	protected override void OnAbortWork(Worker worker)
-	{
-		base.OnAbortWork(worker);
-	}
-
 	[Serialize]
 	public bool facingRight;
 

@@ -7,17 +7,15 @@ public interface IPolluter
 
 	int GetNoise();
 
-	void SetAttributes(Vector2 pos, int dB, string name = null);
+	GameObject GetGameObject();
+
+	void SetAttributes(Vector2 pos, int dB, GameObject go, string name = null);
 
 	string GetName();
 
-	void AddCell(Pair<int, int> cell);
-
-	Pair<int, int> GetCell(int index);
-
-	int GetCellCount();
+	Vector2 GetPosition();
 
 	void Clear();
 
-	Vector2 GetPosition();
+	void SetSplat(NoiseSplat splat);
 }

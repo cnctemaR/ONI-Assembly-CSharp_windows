@@ -957,6 +957,7 @@ public class ConduitFlow
 			HandleVector<int>.Handle handle = GameComps.StructureTemperatures.GetHandle(conduit_go);
 			this.temperatureHandle = Game.Instance.conduitTemperatureManager.Allocate(handle, ref contents);
 			this.diseaseHandle = Game.Instance.conduitDiseaseManager.Allocate(this.temperatureHandle, ref contents);
+			this.conduitGO = conduit_go;
 		}
 
 		private HandleVector<int>.Handle GetConduitTemperatureHandle()
@@ -1045,6 +1046,14 @@ public class ConduitFlow
 			if (conduitTemperatureHandle.IsValid())
 			{
 				Game.Instance.conduitTemperatureManager.SetData(this.temperatureHandle, conduitTemperatureHandle, ref contents);
+			}
+			if (this.conduitGO != null)
+			{
+				PrimaryElement component = this.conduitGO.GetComponent<PrimaryElement>();
+				if (component != null)
+				{
+					component.ForcePermanentDiseaseContainer(contents.diseaseIdx != byte.MaxValue);
+				}
 			}
 			Game.Instance.conduitDiseaseManager.SetData(this.diseaseHandle, ref contents);
 		}
@@ -1149,6 +1158,8 @@ public class ConduitFlow
 		}
 
 		private ConduitFlow manager;
+
+		private GameObject conduitGO;
 
 		public int cell;
 

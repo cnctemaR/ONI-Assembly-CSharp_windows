@@ -103,7 +103,10 @@ public static class TemplateLoader
 			component2.SetOrientation(prefab.rotationOrientation);
 		}
 		PrimaryElement component3 = component.GetComponent<PrimaryElement>();
-		component3.Temperature = prefab.temperature;
+		if (prefab.temperature > 0f)
+		{
+			component3.Temperature = prefab.temperature;
+		}
 		component3.AddDisease(Db.Get().Diseases.GetIndex(prefab.diseaseName), prefab.diseaseCount, "TemplateLoader.PlaceBuilding");
 		if (prefab.id == "Door")
 		{
@@ -187,7 +190,7 @@ public static class TemplateLoader
 				{
 					Substance substance = ElementLoader.FindElementByHash(storageItem.element).substance;
 					gameObject2 = substance.SpawnResource(Vector3.zero, storageItem.units, storageItem.temperature, Db.Get().Diseases.GetIndex(storageItem.diseaseName), storageItem.diseaseCount, false, false);
-					goto IL_048F;
+					goto IL_04A0;
 				}
 				gameObject2 = Scenario.SpawnPrefab(root_cell, 0, 0, id2, Grid.SceneLayer.Use, Folder.Entities);
 				if (gameObject2 == null)
@@ -205,21 +208,21 @@ public static class TemplateLoader
 					if (smi != null)
 					{
 						smi.RotValue = storageItem.rottable.rotAmount;
-						goto IL_048F;
+						goto IL_04A0;
 					}
-					goto IL_048F;
+					goto IL_04A0;
 				}
-				IL_04C5:
+				IL_04D6:
 				l++;
 				continue;
-				IL_048F:
+				IL_04A0:
 				GameObject gameObject3 = component6.Store(gameObject2, true, true, true);
 				if (gameObject3 != null)
 				{
 					gameObject3.GetComponent<Pickupable>().OnStore(component6);
 				}
 				gameObject2.GetComponent<SavedObject>().inStorage = true;
-				goto IL_04C5;
+				goto IL_04D6;
 			}
 		}
 		if (prefab.connections != 0)
@@ -314,7 +317,12 @@ public static class TemplateLoader
 		{
 			return null;
 		}
-		KBatchedAnimController kbatchedAnimController = Assets.GetPrefab(new Tag(prefab.id)).AddOrGet<KBatchedAnimController>();
+		GameObject prefab2 = Assets.GetPrefab(new Tag(prefab.id));
+		if (prefab2 == null)
+		{
+			return null;
+		}
+		KBatchedAnimController kbatchedAnimController = prefab2.AddOrGet<KBatchedAnimController>();
 		GameObject gameObject = Scenario.SpawnPrefab(root_cell, location_x, location_y, prefab.id, kbatchedAnimController.sceneLayer, Folder.Entities);
 		if (gameObject == null)
 		{
@@ -351,6 +359,11 @@ public static class TemplateLoader
 		int num = Grid.OffsetCell(root_cell, location_x, location_y);
 		Vector3 vector = Grid.CellToPosCCC(num, Grid.SceneLayer.Use);
 		byte index = Db.Get().Diseases.GetIndex(prefab.diseaseName);
+		if (prefab.temperature <= 0f)
+		{
+			global::Debug.LogWarning("Template trying to spawn zero temperature substance!", null);
+			prefab.temperature = 300f;
+		}
 		return substance.SpawnResource(vector, prefab.units, prefab.temperature, index, prefab.diseaseCount, false, false);
 	}
 

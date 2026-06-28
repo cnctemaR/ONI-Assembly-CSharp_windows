@@ -13,6 +13,7 @@ public class WireBridgeConfig : IBuildingConfig
 		buildingDef.Entombable = false;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
 		buildingDef.ObjectLayer = ObjectLayer.WireConnectors;
+		buildingDef.SceneLayer = Grid.SceneLayer.WireBridges;
 		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "small";
@@ -31,32 +32,35 @@ public class WireBridgeConfig : IBuildingConfig
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
 	{
 		base.DoPostConfigurePreview(def, go);
-		UtilityNetworkLink utilityNetworkLink = this.AddNetworkLink(go);
-		utilityNetworkLink.visualizeOnly = true;
+		WireUtilityNetworkLink wireUtilityNetworkLink = this.AddNetworkLink(go);
+		wireUtilityNetworkLink.visualizeOnly = true;
 		go.AddOrGet<BuildingCellVisualizer>();
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)
 	{
 		base.DoPostConfigureUnderConstruction(go);
-		UtilityNetworkLink utilityNetworkLink = this.AddNetworkLink(go);
-		utilityNetworkLink.visualizeOnly = true;
+		WireUtilityNetworkLink wireUtilityNetworkLink = this.AddNetworkLink(go);
+		wireUtilityNetworkLink.visualizeOnly = true;
 		go.AddOrGet<BuildingCellVisualizer>();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		UtilityNetworkLink utilityNetworkLink = this.AddNetworkLink(go);
-		utilityNetworkLink.visualizeOnly = false;
+		WireUtilityNetworkLink wireUtilityNetworkLink = this.AddNetworkLink(go);
+		wireUtilityNetworkLink.visualizeOnly = false;
 		go.AddOrGet<BuildingCellVisualizer>();
 		BuildingTemplates.DoPostConfigure(go);
 	}
 
-	private UtilityNetworkLink AddNetworkLink(GameObject go)
+	private WireUtilityNetworkLink AddNetworkLink(GameObject go)
 	{
-		UtilityNetworkLink utilityNetworkLink = go.AddOrGet<UtilityNetworkLink>();
-		utilityNetworkLink.link1 = new CellOffset(-1, 0);
-		utilityNetworkLink.link2 = new CellOffset(1, 0);
-		return utilityNetworkLink;
+		WireUtilityNetworkLink wireUtilityNetworkLink = go.AddOrGet<WireUtilityNetworkLink>();
+		wireUtilityNetworkLink.maxWattageRating = Wire.WattageRating.Max1000;
+		wireUtilityNetworkLink.link1 = new CellOffset(-1, 0);
+		wireUtilityNetworkLink.link2 = new CellOffset(1, 0);
+		return wireUtilityNetworkLink;
 	}
+
+	public const string ID = "WireBridge";
 }

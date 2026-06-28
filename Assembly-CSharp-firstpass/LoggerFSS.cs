@@ -9,7 +9,7 @@ public class LoggerFSS : Logger<LoggerFSS.Entry>
 	}
 
 	[Conditional("UNITY_EDITOR")]
-	public void Log(string evt, string param)
+	public void Log(string evt, string param = "")
 	{
 	}
 

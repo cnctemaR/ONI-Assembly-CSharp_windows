@@ -2,7 +2,6 @@
 using System.IO;
 using Klei.AI;
 using KSerialization;
-using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -39,12 +38,10 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 		AmountInstance amountInstance = this.GetAmounts().Get("Stress");
 		amountInstance.OnDelta = (Action<float>)Delegate.Combine(amountInstance.OnDelta, new Action<float>(delegate(float delta)
 		{
-			ReportManager.Instance.ReportValue(ReportManager.ReportType.StressDelta, delta, null);
+			ReportManager.Instance.ReportValue(ReportManager.ReportType.StressDelta, delta, base.gameObject.GetProperName(), null);
 		}));
 		AmountInstance amountInstance2 = this.GetAmounts().Get("Calories");
-		amountInstance2.OnDelta = (Action<float>)Delegate.Combine(amountInstance2.OnDelta, new Action<float>(this.OnUsedCalories));
-		AmountInstance amountInstance3 = this.GetAmounts().Get("Calories");
-		amountInstance3.OnMaxValueReached = (global::System.Action)Delegate.Combine(amountInstance3.OnMaxValueReached, new global::System.Action(this.OnMaxCaloriesReached));
+		amountInstance2.OnMaxValueReached = (global::System.Action)Delegate.Combine(amountInstance2.OnMaxValueReached, new global::System.Action(this.OnMaxCaloriesReached));
 		Vector3 position = this.transform.position;
 		position.z = Grid.GetLayerZ(Grid.SceneLayer.Move);
 		this.transform.SetPosition(position);
@@ -82,14 +79,6 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 	private void OnMaxCaloriesReached()
 	{
 		base.GetComponent<Effects>().Add("WellFed", true);
-	}
-
-	private void OnUsedCalories(float delta)
-	{
-		if (delta < 0f)
-		{
-			ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, delta, string.Format(UI.ENDOFDAYREPORT.NOTES.BURNED, base.gameObject.name));
-		}
 	}
 
 	private void OnBeginChore(object data)

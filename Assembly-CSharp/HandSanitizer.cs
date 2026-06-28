@@ -122,9 +122,9 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 		{
 		}
 
-		public override bool InternalCanBegin(GameObject new_reactor)
+		public override bool InternalCanBegin(GameObject new_reactor, Navigator.ActiveTransition transition)
 		{
-			if (base.InternalCanBegin(new_reactor))
+			if (base.InternalCanBegin(new_reactor, transition))
 			{
 				PrimaryElement component = new_reactor.GetComponent<PrimaryElement>();
 				if (component != null)

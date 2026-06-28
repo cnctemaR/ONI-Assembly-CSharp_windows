@@ -24,6 +24,10 @@ public class GameAudioSheets : AudioSheets
 			bool flag = type == "LoopingSoundEvent";
 			return new SoundEvent(file_name, sound_name, frame, true, flag, min_interval, false);
 		}
+		if (type == "LadderSoundEvent")
+		{
+			return new LadderSoundEvent(file_name, sound_name, frame);
+		}
 		if (type == "LaserSoundEvent")
 		{
 			return new LaserSoundEvent(file_name, sound_name, frame, min_interval);

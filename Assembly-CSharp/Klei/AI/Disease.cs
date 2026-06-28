@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using Klei.AI.DiseaseGrowthRules;
 using STRINGS;
 using UnityEngine;
 
@@ -34,13 +35,17 @@ namespace Klei.AI
 				text = text + string.Empty + descriptor.IndentedText() + "\n";
 			}
 			this.overlayLegendHovertext = text + DUPLICANTS.DISEASES.LEGEND_POSTAMBLE;
-			Attribute attribute = new Attribute(id + "Min", "Minimum" + id.ToString(), string.Empty, string.Empty, 0f, Attribute.Display.Never, false);
-			Attribute attribute2 = new Attribute(id + "Max", "Maximum" + id.ToString(), string.Empty, string.Empty, 10000000f, Attribute.Display.Never, false);
-			this.amountDeltaAttribute = new Attribute(id + "Delta", id.ToString(), string.Empty, string.Empty, 0f, Attribute.Display.Never, false);
+			Attribute attribute = new Attribute(id + "Min", "Minimum" + id.ToString(), string.Empty, string.Empty, 0f, Attribute.Display.Normal, false);
+			Attribute attribute2 = new Attribute(id + "Max", "Maximum" + id.ToString(), string.Empty, string.Empty, 10000000f, Attribute.Display.Normal, false);
+			this.amountDeltaAttribute = new Attribute(id + "Delta", id.ToString(), string.Empty, string.Empty, 0f, Attribute.Display.Normal, false);
 			this.amount = new Amount(id, id + " " + DUPLICANTS.DISEASES.GERMS, id + " " + DUPLICANTS.DISEASES.GERMS, 0f, 10000000f, attribute, attribute2, this.amountDeltaAttribute, false, Units.Flat, 0.01f, true);
 			Db.Get().Attributes.Add(attribute);
 			Db.Get().Attributes.Add(attribute2);
 			Db.Get().Attributes.Add(this.amountDeltaAttribute);
+			this.cureSpeedBase = new Attribute(id + "CureSpeed", false, Attribute.Display.Normal, false);
+			this.cureSpeedBase.BaseValue = 1f;
+			this.cureSpeedBase.SetFormatter(new ToPercentAttributeFormatter(1f, GameUtil.TimeSlice.None));
+			Db.Get().Attributes.Add(this.cureSpeedBase);
 		}
 
 		public new string Name
@@ -62,49 +67,45 @@ namespace Klei.AI
 		protected virtual void PopulateElemGrowthInfo()
 		{
 			this.InitializeElemGrowthArray(ref this.elemGrowthInfo, Disease.DEFAULT_GROWTH_INFO);
-			this.AddGrowthRule(new Disease.GrowthRule
+			this.AddGrowthRule(new GrowthRule
 			{
 				underPopulationDeathRate = new float?(0f),
-				minCount = new int?(100),
+				minCountPerKG = new float?(100f),
 				populationHalfLife = new float?(float.PositiveInfinity),
-				maxCount = new int?(1000000),
+				maxCountPerKG = new float?(1000f),
 				overPopulationHalfLife = new float?(float.PositiveInfinity),
 				minDiffusionCount = new int?(1000),
 				diffusionScale = new float?(0.001f),
 				minDiffusionInfestationTickCount = 1
 			});
-			this.InitializeElemGrowthArray(ref this.elemExposureInfo, Disease.DEFAULT_GROWTH_INFO);
-			this.AddExposureRule(new Disease.GrowthRule
+			this.InitializeElemExposureArray(ref this.elemExposureInfo, Disease.DEFAULT_EXPOSURE_INFO);
+			this.AddExposureRule(new ExposureRule
 			{
-				underPopulationDeathRate = new float?(0f),
-				minCount = new int?(100),
-				populationHalfLife = new float?(float.PositiveInfinity),
-				maxCount = new int?(1000000),
-				overPopulationHalfLife = new float?(float.PositiveInfinity)
+				populationHalfLife = new float?(float.PositiveInfinity)
 			});
 		}
 
-		protected void AddGrowthRule(Disease.GrowthRule g)
+		protected void AddGrowthRule(GrowthRule g)
 		{
 			if (this.growthRules == null)
 			{
-				this.growthRules = new List<Disease.GrowthRule>();
+				this.growthRules = new List<GrowthRule>();
 			}
 			this.growthRules.Add(g);
 		}
 
-		protected void AddExposureRule(Disease.GrowthRule g)
+		protected void AddExposureRule(ExposureRule g)
 		{
 			if (this.exposureRules == null)
 			{
-				this.exposureRules = new List<Disease.GrowthRule>();
+				this.exposureRules = new List<ExposureRule>();
 			}
 			this.exposureRules.Add(g);
 		}
 
-		public Disease.CompositeGrowthRule GetGrowthRuleForElement(Element e)
+		public CompositeGrowthRule GetGrowthRuleForElement(Element e)
 		{
-			Disease.CompositeGrowthRule compositeGrowthRule = new Disease.CompositeGrowthRule();
+			CompositeGrowthRule compositeGrowthRule = new CompositeGrowthRule();
 			if (this.growthRules != null)
 			{
 				for (int i = 0; i < this.growthRules.Count; i++)
@@ -118,29 +119,29 @@ namespace Klei.AI
 			return compositeGrowthRule;
 		}
 
-		public Disease.CompositeGrowthRule GetExposureRuleForElement(Element e)
+		public CompositeExposureRule GetExposureRuleForElement(Element e)
 		{
-			Disease.CompositeGrowthRule compositeGrowthRule = new Disease.CompositeGrowthRule();
+			CompositeExposureRule compositeExposureRule = new CompositeExposureRule();
 			if (this.exposureRules != null)
 			{
 				for (int i = 0; i < this.exposureRules.Count; i++)
 				{
 					if (this.exposureRules[i].Test(e))
 					{
-						compositeGrowthRule.Overlay(this.exposureRules[i]);
+						compositeExposureRule.Overlay(this.exposureRules[i]);
 					}
 				}
 			}
-			return compositeGrowthRule;
+			return compositeExposureRule;
 		}
 
-		public Disease.TagGrowthRule GetGrowthRuleForTag(Tag t)
+		public TagGrowthRule GetGrowthRuleForTag(Tag t)
 		{
 			if (this.growthRules != null)
 			{
 				for (int i = 0; i < this.growthRules.Count; i++)
 				{
-					Disease.TagGrowthRule tagGrowthRule = this.growthRules[i] as Disease.TagGrowthRule;
+					TagGrowthRule tagGrowthRule = this.growthRules[i] as TagGrowthRule;
 					if (tagGrowthRule != null && tagGrowthRule.tag == t)
 					{
 						return tagGrowthRule;
@@ -168,10 +169,31 @@ namespace Klei.AI
 			}
 		}
 
-		protected void InitializeElemGrowthArray(ref Disease.ElemGrowthInfo[] infoArray, Disease.ElemGrowthInfo default_value)
+		protected void InitializeElemGrowthArray(ref ElemGrowthInfo[] infoArray, ElemGrowthInfo default_value)
 		{
 			List<Element> elements = ElementLoader.elements;
-			infoArray = new Disease.ElemGrowthInfo[elements.Count];
+			infoArray = new ElemGrowthInfo[elements.Count];
+			for (int i = 0; i < elements.Count; i++)
+			{
+				infoArray[i] = default_value;
+			}
+			infoArray[ElementLoader.GetElementIndex(SimHashes.Polypropylene)] = new ElemGrowthInfo
+			{
+				underPopulationDeathRate = 2.6666667f,
+				populationHalfLife = 10f,
+				overPopulationHalfLife = 10f,
+				minCountPerKG = 0f,
+				maxCountPerKG = float.PositiveInfinity,
+				minDiffusionCount = int.MaxValue,
+				diffusionScale = 1f,
+				minDiffusionInfestationTickCount = byte.MaxValue
+			};
+		}
+
+		protected void InitializeElemExposureArray(ref ElemExposureInfo[] infoArray, ElemExposureInfo default_value)
+		{
+			List<Element> elements = ElementLoader.elements;
+			infoArray = new ElemExposureInfo[elements.Count];
 			for (int i = 0; i < elements.Count; i++)
 			{
 				infoArray[i] = default_value;
@@ -185,7 +207,7 @@ namespace Klei.AI
 			{
 				for (int i = 0; i < this.growthRules.Count; i++)
 				{
-					Disease.TagGrowthRule tagGrowthRule = this.growthRules[i] as Disease.TagGrowthRule;
+					TagGrowthRule tagGrowthRule = this.growthRules[i] as TagGrowthRule;
 					if (tagGrowthRule != null && tags.Contains(tagGrowthRule.tag))
 					{
 						num *= Disease.HalfLifeToGrowthRate(((!overpopulated) ? tagGrowthRule.populationHalfLife : tagGrowthRule.overPopulationHalfLife).Value, 1f);
@@ -376,12 +398,12 @@ namespace Klei.AI
 				GameUtil.GetFormattedMass(this.pressureRange.minGrowth, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"),
 				GameUtil.GetFormattedMass(this.pressureRange.maxGrowth, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")
 			}), Descriptor.DescriptorType.Information, false));
-			List<Disease.GrowthRule> list2 = new List<Disease.GrowthRule>();
-			List<Disease.GrowthRule> list3 = new List<Disease.GrowthRule>();
-			List<Disease.GrowthRule> list4 = new List<Disease.GrowthRule>();
-			List<Disease.GrowthRule> list5 = new List<Disease.GrowthRule>();
-			List<Disease.GrowthRule> list6 = new List<Disease.GrowthRule>();
-			foreach (Disease.GrowthRule growthRule in this.growthRules)
+			List<GrowthRule> list2 = new List<GrowthRule>();
+			List<GrowthRule> list3 = new List<GrowthRule>();
+			List<GrowthRule> list4 = new List<GrowthRule>();
+			List<GrowthRule> list5 = new List<GrowthRule>();
+			List<GrowthRule> list6 = new List<GrowthRule>();
+			foreach (GrowthRule growthRule in this.growthRules)
 			{
 				float? populationHalfLife = growthRule.populationHalfLife;
 				if (populationHalfLife != null)
@@ -432,7 +454,7 @@ namespace Klei.AI
 			return list;
 		}
 
-		private List<Descriptor> BuildGrowthInfoDescriptors(List<Disease.GrowthRule> rules, string section_text, string section_tooltip, string item_tooltip)
+		private List<Descriptor> BuildGrowthInfoDescriptors(List<GrowthRule> rules, string section_text, string section_tooltip, string item_tooltip)
 		{
 			List<Descriptor> list = new List<Descriptor>();
 			if (rules.Count > 0)
@@ -477,13 +499,13 @@ namespace Klei.AI
 
 		public Disease.RangeInfo pressureHalfLives;
 
-		public List<Disease.GrowthRule> growthRules;
+		public List<GrowthRule> growthRules;
 
-		public List<Disease.GrowthRule> exposureRules;
+		public List<ExposureRule> exposureRules;
 
-		public Disease.ElemGrowthInfo[] elemGrowthInfo;
+		public ElemGrowthInfo[] elemGrowthInfo;
 
-		public Disease.ElemGrowthInfo[] elemExposureInfo;
+		public ElemExposureInfo[] elemExposureInfo;
 
 		public List<Disease.InfectionVector> infectionVectors;
 
@@ -499,15 +521,23 @@ namespace Klei.AI
 
 		public Attribute amountDeltaAttribute;
 
-		public static Disease.ElemGrowthInfo DEFAULT_GROWTH_INFO = new Disease.ElemGrowthInfo
+		public Attribute cureSpeedBase;
+
+		public static ElemGrowthInfo DEFAULT_GROWTH_INFO = new ElemGrowthInfo
 		{
 			underPopulationDeathRate = 0f,
 			populationHalfLife = float.PositiveInfinity,
 			overPopulationHalfLife = float.PositiveInfinity,
+			minCountPerKG = 0f,
+			maxCountPerKG = float.PositiveInfinity,
+			minDiffusionCount = 0,
 			diffusionScale = 1f,
-			minCount = 0,
-			maxCount = int.MaxValue,
-			minDiffusionCount = 0
+			minDiffusionInfestationTickCount = byte.MaxValue
+		};
+
+		public static ElemExposureInfo DEFAULT_EXPOSURE_INFO = new ElemExposureInfo
+		{
+			populationHalfLife = float.PositiveInfinity
 		};
 
 		public struct RangeInfo
@@ -557,312 +587,6 @@ namespace Klei.AI
 			public float maxGrowth;
 
 			public float maxViable;
-		}
-
-		public class GrowthRule
-		{
-			public void Apply(Disease.ElemGrowthInfo[] infoList)
-			{
-				List<Element> elements = ElementLoader.elements;
-				for (int i = 0; i < elements.Count; i++)
-				{
-					if (this.Test(elements[i]))
-					{
-						Disease.ElemGrowthInfo elemGrowthInfo = infoList[i];
-						float? num = this.underPopulationDeathRate;
-						if (num != null)
-						{
-							float? num2 = this.underPopulationDeathRate;
-							elemGrowthInfo.underPopulationDeathRate = num2.Value;
-						}
-						float? num3 = this.populationHalfLife;
-						if (num3 != null)
-						{
-							float? num4 = this.populationHalfLife;
-							elemGrowthInfo.populationHalfLife = num4.Value;
-						}
-						float? num5 = this.overPopulationHalfLife;
-						if (num5 != null)
-						{
-							float? num6 = this.overPopulationHalfLife;
-							elemGrowthInfo.overPopulationHalfLife = num6.Value;
-						}
-						float? num7 = this.diffusionScale;
-						if (num7 != null)
-						{
-							float? num8 = this.diffusionScale;
-							elemGrowthInfo.diffusionScale = num8.Value;
-						}
-						int? num9 = this.minCount;
-						if (num9 != null)
-						{
-							int? num10 = this.minCount;
-							elemGrowthInfo.minCount = num10.Value;
-						}
-						int? num11 = this.maxCount;
-						if (num11 != null)
-						{
-							int? num12 = this.maxCount;
-							elemGrowthInfo.maxCount = num12.Value;
-						}
-						int? num13 = this.minDiffusionCount;
-						if (num13 != null)
-						{
-							int? num14 = this.minDiffusionCount;
-							elemGrowthInfo.minDiffusionCount = num14.Value;
-						}
-						byte? b = this.minDiffusionInfestationTickCount;
-						if (b != null)
-						{
-							byte? b2 = this.minDiffusionInfestationTickCount;
-							elemGrowthInfo.minDiffusionInfestationTickCount = b2.Value;
-						}
-						infoList[i] = elemGrowthInfo;
-					}
-				}
-			}
-
-			public virtual bool Test(Element e)
-			{
-				return true;
-			}
-
-			public virtual string Name()
-			{
-				return null;
-			}
-
-			public float? underPopulationDeathRate;
-
-			public float? populationHalfLife;
-
-			public float? overPopulationHalfLife;
-
-			public float? diffusionScale;
-
-			public int? minCount;
-
-			public int? maxCount;
-
-			public int? minDiffusionCount;
-
-			public byte? minDiffusionInfestationTickCount;
-		}
-
-		public class StateGrowthRule : Disease.GrowthRule
-		{
-			public StateGrowthRule(Element.State state)
-			{
-				this.state = state;
-			}
-
-			public override bool Test(Element e)
-			{
-				return e.IsState(this.state);
-			}
-
-			public override string Name()
-			{
-				return Element.GetStateString(this.state);
-			}
-
-			public Element.State state;
-		}
-
-		public class ElementGrowthRule : Disease.GrowthRule
-		{
-			public ElementGrowthRule(SimHashes element)
-			{
-				this.element = element;
-			}
-
-			public override bool Test(Element e)
-			{
-				return e.id == this.element;
-			}
-
-			public override string Name()
-			{
-				return ElementLoader.FindElementByHash(this.element).name;
-			}
-
-			public SimHashes element;
-		}
-
-		public class TagGrowthRule : Disease.GrowthRule
-		{
-			public TagGrowthRule(Tag tag)
-			{
-				this.tag = tag;
-			}
-
-			public override bool Test(Element e)
-			{
-				return e.HasTag(this.tag);
-			}
-
-			public override string Name()
-			{
-				return this.tag.ProperName();
-			}
-
-			public Tag tag;
-		}
-
-		public class CompositeGrowthRule
-		{
-			public string Name()
-			{
-				return this.name;
-			}
-
-			public void Overlay(Disease.GrowthRule rule)
-			{
-				float? num = rule.underPopulationDeathRate;
-				if (num != null)
-				{
-					float? num2 = rule.underPopulationDeathRate;
-					this.underPopulationDeathRate = num2.Value;
-				}
-				float? num3 = rule.populationHalfLife;
-				if (num3 != null)
-				{
-					float? num4 = rule.populationHalfLife;
-					this.populationHalfLife = num4.Value;
-				}
-				float? num5 = rule.overPopulationHalfLife;
-				if (num5 != null)
-				{
-					float? num6 = rule.overPopulationHalfLife;
-					this.overPopulationHalfLife = num6.Value;
-				}
-				float? num7 = rule.diffusionScale;
-				if (num7 != null)
-				{
-					float? num8 = rule.diffusionScale;
-					this.diffusionScale = num8.Value;
-				}
-				int? num9 = rule.minCount;
-				if (num9 != null)
-				{
-					int? num10 = rule.minCount;
-					this.minCount = num10.Value;
-				}
-				int? num11 = rule.maxCount;
-				if (num11 != null)
-				{
-					int? num12 = rule.maxCount;
-					this.maxCount = num12.Value;
-				}
-				int? num13 = rule.minDiffusionCount;
-				if (num13 != null)
-				{
-					int? num14 = rule.minDiffusionCount;
-					this.minDiffusionCount = num14.Value;
-				}
-				byte? b = rule.minDiffusionInfestationTickCount;
-				if (b != null)
-				{
-					byte? b2 = rule.minDiffusionInfestationTickCount;
-					this.minDiffusionInfestationTickCount = b2.Value;
-				}
-				this.name = rule.Name();
-			}
-
-			public float GetHalfLifeForCount(int count)
-			{
-				if (count < this.minCount)
-				{
-					return this.populationHalfLife;
-				}
-				if (count < this.maxCount)
-				{
-					return this.populationHalfLife;
-				}
-				return this.overPopulationHalfLife;
-			}
-
-			public string name;
-
-			public float underPopulationDeathRate;
-
-			public float populationHalfLife;
-
-			public float overPopulationHalfLife;
-
-			public float diffusionScale;
-
-			public int minCount;
-
-			public int maxCount;
-
-			public int minDiffusionCount;
-
-			public byte minDiffusionInfestationTickCount;
-		}
-
-		public struct ElemGrowthInfo
-		{
-			public void Write(BinaryWriter writer)
-			{
-				writer.Write(this.underPopulationDeathRate);
-				writer.Write(this.populationHalfLife);
-				writer.Write(this.overPopulationHalfLife);
-				writer.Write(this.diffusionScale);
-				writer.Write(this.minCount);
-				writer.Write(this.maxCount);
-				writer.Write(this.minDiffusionCount);
-				writer.Write(this.minDiffusionInfestationTickCount);
-			}
-
-			public static void SetBulk(Disease.ElemGrowthInfo[] info, Func<Element, bool> test, Disease.ElemGrowthInfo settings)
-			{
-				List<Element> elements = ElementLoader.elements;
-				for (int i = 0; i < elements.Count; i++)
-				{
-					if (test(elements[i]))
-					{
-						info[i] = settings;
-					}
-				}
-			}
-
-			public float CalculateDiseaseCountDelta(int disease_count, float dt)
-			{
-				float num2;
-				if (this.minCount <= disease_count && disease_count <= this.maxCount)
-				{
-					float num = Disease.HalfLifeToGrowthRate(this.populationHalfLife, dt);
-					num2 = (float)disease_count * num - (float)disease_count;
-				}
-				else if (disease_count < this.minCount)
-				{
-					num2 = -this.underPopulationDeathRate * dt;
-				}
-				else
-				{
-					float num3 = Disease.HalfLifeToGrowthRate(this.overPopulationHalfLife, dt);
-					int num4 = disease_count - this.maxCount;
-					num2 = (float)num4 * num3 - (float)num4;
-				}
-				return num2;
-			}
-
-			public float underPopulationDeathRate;
-
-			public float populationHalfLife;
-
-			public float overPopulationHalfLife;
-
-			public float diffusionScale;
-
-			public int minCount;
-
-			public int maxCount;
-
-			public int minDiffusionCount;
-
-			public byte minDiffusionInfestationTickCount;
 		}
 
 		public abstract class DiseaseComponent

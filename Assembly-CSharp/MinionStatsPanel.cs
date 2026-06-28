@@ -57,7 +57,7 @@ public class MinionStatsPanel : TargetScreen
 		this.bioPanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.STATS.GROUPNAME_BIO;
 		MinionIdentity component2 = this.selectedTarget.GetComponent<MinionIdentity>();
 		GameObject gameObject = this.AddOrGetLabel(this.bioLabels, this.bioPanel, "About");
-		gameObject.GetComponent<LocText>().text = string.Format(Strings.Get(string.Format("STRINGS.DUPLICANTS.PERSONALITIES.{0}.DESC", component2.originalName.ToUpper())), component2.name);
+		gameObject.GetComponent<LocText>().text = string.Format(Strings.Get(string.Format("STRINGS.DUPLICANTS.PERSONALITIES.{0}.DESC", component2.nameStringKey.ToUpper())), component2.name);
 	}
 
 	private void RefreshAttributes()

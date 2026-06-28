@@ -7,5 +7,6 @@ public enum BuildLocationRule
 	OnCeiling,
 	Tile,
 	Conduit,
-	NotInTiles
+	NotInTiles,
+	BuildingAttachPoint
 }

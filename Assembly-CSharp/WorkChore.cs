@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInstance> where WorkableType : Workable
 {
-	public WorkChore(ChoreType chore_type, IStateMachineTarget target, ChoreProvider chore_provider = null, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, bool allow_in_red_alert = true, ScheduleBlockType schedule_block = null, bool only_when_operational = true, [Optional] Tag required_region, KAnimFile override_anims = null, bool is_preemptable = false, bool allow_in_context_menu = true, bool allow_prioritization = true)
-		: base(chore_type, target, chore_provider, run_until_complete, on_complete, on_begin, on_end, int.MaxValue, is_preemptable, allow_in_context_menu, 0)
+	public WorkChore(ChoreType chore_type, IStateMachineTarget target, ChoreProvider chore_provider = null, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, bool allow_in_red_alert = true, ScheduleBlockType schedule_block = null, bool only_when_operational = true, [Optional] Tag required_region, KAnimFile override_anims = null, bool is_preemptable = false, bool allow_in_context_menu = true, bool allow_prioritization = true, int master_priority = 2147483647)
+		: base(chore_type, target, chore_provider, run_until_complete, on_complete, on_begin, on_end, master_priority, is_preemptable, allow_in_context_menu, 0)
 	{
 		this.smi = new WorkChore<WorkableType>.StatesInstance(this, target.gameObject, override_anims);
 		if (allow_prioritization)

@@ -46,7 +46,7 @@ public class LiquidCooledFanConfig : IBuildingConfig
 		elementConsumer.storeOnConsume = true;
 		elementConsumer.storage = storage;
 		elementConsumer.configuration = ElementConsumer.Configuration.AllGas;
-		elementConsumer.consumptionRadius = 4;
+		elementConsumer.consumptionRadius = 8;
 		elementConsumer.EnableConsumption(true);
 		elementConsumer.sampleCellOffset = new Vector3(0f, 0f);
 		elementConsumer.showDescriptor = false;

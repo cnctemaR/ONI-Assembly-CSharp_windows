@@ -23,6 +23,12 @@ public class Exhaust : KMonoBehaviour
 		this.operational.SetActive(this.operational.IsOperational && !this.vent.IsBlocked, false);
 	}
 
+	private void CalculateDiseaseTransfer(PrimaryElement item1, PrimaryElement item2, float transfer_rate, out int disease_to_item1, out int disease_to_item2)
+	{
+		disease_to_item1 = (int)((float)item2.DiseaseCount * transfer_rate);
+		disease_to_item2 = (int)((float)item1.DiseaseCount * transfer_rate);
+	}
+
 	private void SimUpdate(float dt)
 	{
 		this.operational.SetFlag(Exhaust.canExhaust, !this.vent.IsBlocked);
@@ -54,10 +60,17 @@ public class Exhaust : KMonoBehaviour
 							PrimaryElement component = items[i].GetComponent<PrimaryElement>();
 							if (component.Mass > 0f && component.Element.IsLiquid)
 							{
+								int num3;
+								int num4;
+								this.CalculateDiseaseTransfer(this.exhaustPE, component, 0.05f, out num3, out num4);
+								component.ModifyDiseaseCount(-num3, "Exhaust transfer");
+								component.AddDisease(this.exhaustPE.DiseaseIdx, num4, "Exhaust transfer");
+								this.exhaustPE.ModifyDiseaseCount(-num4, "Exhaust transfer");
+								this.exhaustPE.AddDisease(component.DiseaseIdx, num3, "Exhaust transfer");
 								if (flag)
 								{
 									byte b = (byte)ElementLoader.elements.IndexOf(component.Element);
-									FallingWater.instance.AddParticle(num, b, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, true, false, true);
+									FallingWater.instance.AddParticle(num, b, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, true, false, true, false);
 								}
 								else
 								{
@@ -79,6 +92,13 @@ public class Exhaust : KMonoBehaviour
 						PrimaryElement component2 = items[j].GetComponent<PrimaryElement>();
 						if (component2.Mass > 0f && component2.Element.IsGas)
 						{
+							int num5;
+							int num6;
+							this.CalculateDiseaseTransfer(this.exhaustPE, component2, 0.05f, out num5, out num6);
+							component2.ModifyDiseaseCount(-num5, "Exhaust transfer");
+							component2.AddDisease(this.exhaustPE.DiseaseIdx, num6, "Exhaust transfer");
+							this.exhaustPE.ModifyDiseaseCount(-num6, "Exhaust transfer");
+							this.exhaustPE.AddDisease(component2.DiseaseIdx, num5, "Exhaust transfer");
 							SimMessages.AddRemoveSubstance(num, component2.ElementID, CellEventLogger.Instance.ExhaustSimUpdate, component2.Mass, component2.Temperature, component2.DiseaseIdx, component2.DiseaseCount, -1);
 							component2.KeepZeroMassObject = true;
 							component2.Mass = 0f;
@@ -121,6 +141,9 @@ public class Exhaust : KMonoBehaviour
 
 	[MyCmpGet]
 	private ConduitConsumer consumer;
+
+	[MyCmpGet]
+	private PrimaryElement exhaustPE;
 
 	private static Operational.Flag canExhaust = new Operational.Flag("canExhaust", Operational.Flag.Type.Requirement);
 

@@ -20,6 +20,11 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>, IGameObjec
 		base.smi.StartSM();
 	}
 
+	protected override void OnCleanUp()
+	{
+		this.temperatureAdjuster.CleanUp();
+	}
+
 	private void OnStorageChanged(object data)
 	{
 		GameObject gameObject = (GameObject)data;
@@ -27,11 +32,6 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>, IGameObjec
 		{
 			return;
 		}
-	}
-
-	private void SimulateTemperatureAdjustments(float dt)
-	{
-		this.temperatureAdjuster.Update(dt);
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)
@@ -140,10 +140,6 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>, IGameObjec
 				})
 				.ScheduleGoTo((Compost.StatesInstance smi) => smi.master.flipInterval, this.inert)
 				.PlayAnims((Compost.StatesInstance smi) => Compost.States.compostingAnims, KAnim.PlayMode.Loop)
-				.Update(delegate(Compost.StatesInstance smi)
-				{
-					smi.master.SimulateTemperatureAdjustments(smi.deltatime);
-				})
 				.Exit(delegate(Compost.StatesInstance smi)
 				{
 					smi.master.operational.SetActive(false, false);
@@ -161,7 +157,7 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>, IGameObjec
 
 		private Chore CreateFlipChore(Compost.StatesInstance smi)
 		{
-			return new WorkChore<CompostWorkable>(Db.Get().ChoreTypes.FlipCompost, smi.master, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true);
+			return new WorkChore<CompostWorkable>(Db.Get().ChoreTypes.FlipCompost, smi.master, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue);
 		}
 
 		public GameStateMachine<Compost.States, Compost.StatesInstance, Compost, object>.State empty;

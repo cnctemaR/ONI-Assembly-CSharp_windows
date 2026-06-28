@@ -7,9 +7,9 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class EnergyGenerator : Generator, IBatteryRefillControl, IEffectDescriptor
+public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderControl
 {
-	public float BatteryRefillPercent
+	public float SingleSliderPercent
 	{
 		get
 		{
@@ -18,6 +18,22 @@ public class EnergyGenerator : Generator, IBatteryRefillControl, IEffectDescript
 		set
 		{
 			this.batteryRefillPercent = value;
+		}
+	}
+
+	public string SliderTitleKey
+	{
+		get
+		{
+			return "STRINGS.UI.UISIDESCREENS.MANUALGENERATORSIDESCREEN.TITLE";
+		}
+	}
+
+	public string SliderTooltipKey
+	{
+		get
+		{
+			return "STRINGS.UI.UISIDESCREENS.MANUALGENERATORSIDESCREEN.TOOLTIP";
 		}
 	}
 
@@ -38,7 +54,10 @@ public class EnergyGenerator : Generator, IBatteryRefillControl, IEffectDescript
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", this.meterOffset, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
+		if (this.hasMeter)
+		{
+			this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", this.meterOffset, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
+		}
 	}
 
 	private bool IsConvertible(float dt)
@@ -68,15 +87,18 @@ public class EnergyGenerator : Generator, IBatteryRefillControl, IEffectDescript
 	protected override void SimUpdate(float dt)
 	{
 		base.SimUpdate(dt);
-		EnergyGenerator.InputItem inputItem = this.formula.inputs[0];
-		float num = 0f;
-		GameObject gameObject = this.storage.FindFirst(inputItem.tag);
-		if (gameObject != null)
+		if (this.hasMeter)
 		{
-			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-			num = component.Mass / inputItem.maxStoredMass;
+			EnergyGenerator.InputItem inputItem = this.formula.inputs[0];
+			float num = 0f;
+			GameObject gameObject = this.storage.FindFirst(inputItem.tag);
+			if (gameObject != null)
+			{
+				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+				num = component.Mass / inputItem.maxStoredMass;
+			}
+			this.meter.SetPositionPercent(num);
 		}
-		this.meter.SetPositionPercent(num);
 		ushort circuitID = base.CircuitID;
 		this.operational.SetFlag(EnergyGenerator.wireConnectedFlag, circuitID != ushort.MaxValue);
 		bool flag = false;
@@ -116,7 +138,7 @@ public class EnergyGenerator : Generator, IBatteryRefillControl, IEffectDescript
 					foreach (EnergyGenerator.InputItem inputItem2 in this.formula.inputs)
 					{
 						float num2 = inputItem2.consumptionRate * dt;
-						this.storage.Consume(inputItem2.tag, num2);
+						this.storage.ConsumeIgnoringDisease(inputItem2.tag, num2);
 					}
 					PrimaryElement component2 = base.GetComponent<PrimaryElement>();
 					foreach (EnergyGenerator.OutputItem outputItem in this.formula.outputs)
@@ -198,11 +220,11 @@ public class EnergyGenerator : Generator, IBatteryRefillControl, IEffectDescript
 	{
 		if (EnergyGenerator.batteriesSufficientlyFull == null)
 		{
-			EnergyGenerator.batteriesSufficientlyFull = new StatusItem("BatteriesSufficientlyFull", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true, 2046);
+			EnergyGenerator.batteriesSufficientlyFull = new StatusItem("BatteriesSufficientlyFull", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 14334);
 		}
 		if (EnergyGenerator.insufficientConversionMass == null)
 		{
-			EnergyGenerator.insufficientConversionMass = new StatusItem("INSUFFICIENT_CONVERSION_MASS", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true, 2046);
+			EnergyGenerator.insufficientConversionMass = new StatusItem("INSUFFICIENT_CONVERSION_MASS", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 14334);
 		}
 	}
 
@@ -258,7 +280,7 @@ public class EnergyGenerator : Generator, IBatteryRefillControl, IEffectDescript
 			else if (element.IsLiquid)
 			{
 				int elementIndex = ElementLoader.GetElementIndex(output.element);
-				FallingWater.instance.AddParticle(num3, (byte)elementIndex, num, root_pe.Temperature, byte.MaxValue, 0, false, false, false);
+				FallingWater.instance.AddParticle(num3, (byte)elementIndex, num, root_pe.Temperature, byte.MaxValue, 0, false, false, false, false);
 			}
 			else
 			{
@@ -273,11 +295,13 @@ public class EnergyGenerator : Generator, IBatteryRefillControl, IEffectDescript
 	[MyCmpGet]
 	private ManualDeliveryKG delivery;
 
-	[Serialize]
 	[SerializeField]
+	[Serialize]
 	private float batteryRefillPercent = 0.5f;
 
 	public bool ignoreBatteryRefillPercent;
+
+	public bool hasMeter = true;
 
 	private static StatusItem batteriesSufficientlyFull;
 

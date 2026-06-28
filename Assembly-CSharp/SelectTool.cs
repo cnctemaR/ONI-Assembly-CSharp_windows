@@ -374,7 +374,7 @@ public class SelectTool : InterfaceTool
 			this.selectMarker.SetTargetTransform(gameObject.transform);
 			this.selectMarker.gameObject.SetActive(!new_selected.DisableSelectMarker);
 		}
-		else
+		else if (this.selectMarker != null)
 		{
 			this.selectMarker.gameObject.SetActive(false);
 		}

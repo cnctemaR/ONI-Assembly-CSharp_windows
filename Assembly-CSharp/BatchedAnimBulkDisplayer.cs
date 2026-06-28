@@ -17,6 +17,7 @@ public class BatchedAnimBulkDisplayer : MonoBehaviour
 
 	private void Start()
 	{
+		AudioEventManager.Get();
 		KBatchedAnimUpdater.CreateInstance();
 		DebugHandler.FreeCameraMode = true;
 		this.slots = new AccessorySlots(null, this.head_default_anim, this.head_swap_anim, this.body_swap_anim);
@@ -158,7 +159,7 @@ public class BatchedAnimBulkDisplayer : MonoBehaviour
 
 	private void ApplyToMinions()
 	{
-		FrontEndBackground.AnimChoice animChoice = default(FrontEndBackground.AnimChoice);
+		UIDupeRandomizer.AnimChoice animChoice = default(UIDupeRandomizer.AnimChoice);
 		for (int i = 0; i < this.minions.Count; i++)
 		{
 			this.Apply(this.minions[i], animChoice);
@@ -182,35 +183,35 @@ public class BatchedAnimBulkDisplayer : MonoBehaviour
 		}
 	}
 
-	private void Apply(KBatchedAnimController minon, FrontEndBackground.AnimChoice anim)
+	private void Apply(KBatchedAnimController minon, UIDupeRandomizer.AnimChoice anim)
 	{
 		if (anim.curHair.IsValid())
 		{
 			minon.RemoveSymbolOverride(anim.curHair);
 		}
-		anim.curHair = FrontEndBackground.AddAccessory(minon, this.slots.Hair.accessories[this.bodyData.hair]);
+		anim.curHair = UIDupeRandomizer.AddAccessory(minon, this.slots.Hair.accessories[this.bodyData.hair]);
 		if (anim.curEyes.IsValid())
 		{
 			minon.RemoveSymbolOverride(anim.curEyes);
 		}
-		anim.curEyes = FrontEndBackground.AddAccessory(minon, this.slots.Eyes.accessories[this.bodyData.eyes]);
+		anim.curEyes = UIDupeRandomizer.AddAccessory(minon, this.slots.Eyes.accessories[this.bodyData.eyes]);
 		if (anim.curHeadShape.IsValid())
 		{
 			minon.RemoveSymbolOverride(anim.curHeadShape);
 		}
-		anim.curHeadShape = FrontEndBackground.AddAccessory(minon, this.slots.HeadShape.accessories[this.bodyData.headShape]);
+		anim.curHeadShape = UIDupeRandomizer.AddAccessory(minon, this.slots.HeadShape.accessories[this.bodyData.headShape]);
 		if (anim.curMouth.IsValid())
 		{
 			minon.RemoveSymbolOverride(anim.curMouth);
 		}
-		anim.curMouth = FrontEndBackground.AddAccessory(minon, this.slots.Mouth.accessories[this.bodyData.mouth]);
+		anim.curMouth = UIDupeRandomizer.AddAccessory(minon, this.slots.Mouth.accessories[this.bodyData.mouth]);
 		if (anim.curTorso.IsValid())
 		{
 			minon.RemoveSymbolOverride(anim.curTorso);
 			minon.RemoveSymbolOverride(anim.curArm);
 		}
-		anim.curTorso = FrontEndBackground.AddAccessory(minon, this.slots.Body.accessories[this.bodyData.body]);
-		anim.curArm = FrontEndBackground.AddAccessory(minon, this.slots.Arm.accessories[this.bodyData.body]);
+		anim.curTorso = UIDupeRandomizer.AddAccessory(minon, this.slots.Body.accessories[this.bodyData.body]);
+		anim.curArm = UIDupeRandomizer.AddAccessory(minon, this.slots.Arm.accessories[this.bodyData.body]);
 		if (this.hideGuides)
 		{
 			minon.HideSymbol(true, this.snapto_pivot);

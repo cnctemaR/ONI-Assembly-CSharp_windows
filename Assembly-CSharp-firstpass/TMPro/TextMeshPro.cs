@@ -7,12 +7,12 @@ using UnityEngine.UI;
 namespace TMPro
 {
 	[SelectionBase]
+	[DisallowMultipleComponent]
+	[ExecuteInEditMode]
 	[RequireComponent(typeof(TextContainer))]
 	[RequireComponent(typeof(MeshRenderer))]
 	[AddComponentMenu("Mesh/TextMeshPro - Text")]
 	[RequireComponent(typeof(MeshFilter))]
-	[ExecuteInEditMode]
-	[DisallowMultipleComponent]
 	public class TextMeshPro : TMP_Text, ILayoutElement
 	{
 		protected override void Awake()

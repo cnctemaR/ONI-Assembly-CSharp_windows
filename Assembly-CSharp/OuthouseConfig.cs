@@ -21,6 +21,7 @@ public class OuthouseConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
 		go.AddOrGet<LoopingSounds>();
+		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.Toilet);
 		Toilet toilet = go.AddOrGet<Toilet>();
 		toilet.maxFlushes = 15;
 		toilet.solidWastePerUse = new Toilet.SpawnInfo(SimHashes.ToxicSand, 6.7f, 0f);
@@ -32,6 +33,7 @@ public class OuthouseConfig : IBuildingConfig
 		ToiletWorkableUse toiletWorkableUse = go.AddOrGet<ToiletWorkableUse>();
 		toiletWorkableUse.overrideAnims = array;
 		toiletWorkableUse.workLayer = Grid.SceneLayer.BuildingFront;
+		toiletWorkableUse.canBePublic = true;
 		ToiletWorkableClean toiletWorkableClean = go.AddOrGet<ToiletWorkableClean>();
 		toiletWorkableClean.workTime = 90f;
 		toiletWorkableClean.overrideAnims = array;

@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class WaitingForMaterialsStatusItem : MaterialsStatusItem
 {
-	public WaitingForMaterialsStatusItem(string id, string prefix, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, SimViewMode overlay, SimViewMode second_overlay)
-		: base(id, prefix, icon, icon_type, notification_type, allow_multiples, overlay, second_overlay)
+	public WaitingForMaterialsStatusItem(string id, string prefix, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, SimViewMode overlay)
+		: base(id, prefix, icon, icon_type, notification_type, allow_multiples, overlay)
 	{
 	}
 

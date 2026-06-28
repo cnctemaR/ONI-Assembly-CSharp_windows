@@ -64,9 +64,9 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Cot";
 
-				public static LocString DESC = "Duplicants without a private bed will develop sore backs from sleeping on the floor.";
+				public static LocString DESC = "Duplicants without a bed will develop sore backs from sleeping on the floor.";
 
-				public static LocString EFFECT = "Provides a sleeping area for one Duplicant and relieves <style=\"stress\">Stress</style>.\n\nDuplicants will automatically sleep in their assigned cots at night.";
+				public static LocString EFFECT = "Provides a sleeping area for one Duplicant and restores <style=\"misc\">Stamina</style>.\n\nDuplicants will automatically sleep in their assigned cots at night.";
 			}
 
 			public class BOTTLEEMPTIER
@@ -85,6 +85,15 @@ namespace STRINGS
 				public static LocString DESC = "A thermo aquatuner cools liquid and outputs the heat elsewhere.";
 
 				public static LocString EFFECT = "Cools the <style=\"liquid\">Liquid</style> piped through it, but outputs <style=\"heat\">Heat</style> in its immediate vicinity.";
+			}
+
+			public class LUXURYBED
+			{
+				public static LocString NAME = "Comfy Bed";
+
+				public static LocString DESC = "Duplicants prefer comfy beds to cots and will gain more stamina from sleeping in them.";
+
+				public static LocString EFFECT = "Provides a sleeping area for one Duplicant and restores additional <style=\"stress\">Stamina</style>.\n\nDuplicants will automatically sleep in their assigned beds at night.";
 			}
 
 			public class MEDICALCOT
@@ -358,22 +367,31 @@ namespace STRINGS
 				public static LocString EFFECT = "Releases <style=\"gas\">Gas</style> from <style=\"GasPiping\">Gas Pipes</style>.";
 			}
 
+			public class GASVENTHIGHPRESSURE
+			{
+				public static LocString NAME = "High Pressure Gas Vent";
+
+				public static LocString DESC = "High pressure Vents can exhaust gas into more highly pressurized environments.";
+
+				public static LocString EFFECT = "Releases <style=\"gas\">Gas</style> from <style=\"GasPiping\">Gas Pipes</style> into high pressure locations.";
+			}
+
 			public class GENERATOR
 			{
 				public static LocString NAME = "Coal Generator";
 
-				public static LocString DESC = "Coal generators produce twice the energy of manual generators, but emit heat and exhaust.";
+				public static LocString DESC = "Coal generators produce more energy than manual generators, but emit heat and exhaust.";
 
 				public static LocString EFFECT = "Converts <style=\"RawMineral\">Coal</style> into electrical <style=\"power\">Power</style>.";
 			}
 
 			public class GENERICFABRICATOR
 			{
-				public static LocString NAME = "Generic Fabricator";
+				public static LocString NAME = "Omniprinter";
 
-				public static LocString DESC = "This is the generic fabricator.";
+				public static LocString DESC = "Omniprinters are incapable of printing organic matter.";
 
-				public static LocString EFFECT = "Converts <style=\"RawMineral\">Raw Minerals</style> into fabrications.";
+				public static LocString EFFECT = "Converts <style=\"RawMineral\">Raw Minerals</style> into unique materials and objects.";
 			}
 
 			public class GRAVE
@@ -410,6 +428,15 @@ namespace STRINGS
 				public static LocString DESC = "Natural gas generators leak polluted water and are best built above a waste reservoir.";
 
 				public static LocString EFFECT = "Converts <style=\"gas\">Natural Gas</style> into electrical <style=\"power\">Power</style>.";
+			}
+
+			public class PETROLEUMGENERATOR
+			{
+				public static LocString NAME = "Petroleum Generator";
+
+				public static LocString DESC = "Petroleum generators have a high energy output but produce a great deal of waste.";
+
+				public static LocString EFFECT = "Converts <style=\"liquid\">Petroleum</style> into electrical <style=\"power\">Power</style>.";
 			}
 
 			public class HYDROPONICFARM
@@ -484,6 +511,15 @@ namespace STRINGS
 				public static LocString EFFECT = "Enables vertical mobility for Duplicants.";
 			}
 
+			public class LADDERFAST
+			{
+				public static LocString NAME = "Plastic Ladder";
+
+				public static LocString DESC = "Plastic ladders are mildly antiseptic and can help limit the spread of germs in a colony.";
+
+				public static LocString EFFECT = "Increases Duplicant climbing speed.";
+			}
+
 			public class LIQUIDCONDUIT
 			{
 				public static LocString NAME = "Liquid Pipe";
@@ -511,6 +547,33 @@ namespace STRINGS
 				public static LocString EFFECT = "Dissipates a small amount of the <style=\"heat\">Heat</style>.";
 			}
 
+			public class BURNER
+			{
+				public static LocString NAME = "Burner";
+
+				public static LocString DESC = "Burners reach incredible temperatures and can quickly melt large areas.";
+
+				public static LocString EFFECT = "Produces a searing <style=\"heat\">Heat Jet</style> using liquid <style=\"liquid\">Oil</style>.";
+			}
+
+			public class CREATURETRAP
+			{
+				public static LocString NAME = "Animal Trap";
+
+				public static LocString DESC = "Traps do not harm the creatures they capture.";
+
+				public static LocString EFFECT = "Captures a living creature for transport.\n\nSingle use.";
+			}
+
+			public class CREATUREDELIVERYPOINT
+			{
+				public static LocString NAME = "Animal Relocator";
+
+				public static LocString DESC = "Duplicants automatically bring captured creatures to these relocation points for release.";
+
+				public static LocString EFFECT = "Releases trapped creatures back into the world.\n\nCan be used multiple times.";
+			}
+
 			public class LIQUIDFILTER
 			{
 				public static LocString NAME = "Liquid Filter";
@@ -531,11 +594,11 @@ namespace STRINGS
 
 			public class LIQUIDPUMPINGSTATION
 			{
-				public static LocString NAME = "Liquid Bottler";
+				public static LocString NAME = "Pitcher Pump";
 
-				public static LocString DESC = "This building will pump whatever liquid is present beneath it into bottles for delivery.";
+				public static LocString DESC = "Pitcher pumps are used to fetch water and other liquids for delivery to buildings.";
 
-				public static LocString EFFECT = "Pumps <style=\"liquid\">Liquid</style> into bottles for transport.\n\nDuplicants can only carry bottled liquids.";
+				public static LocString EFFECT = "Manually pumps <style=\"liquid\">Liquid</style> into bottles for transport.\n\nDuplicants can only carry bottled liquids.";
 			}
 
 			public class LIQUIDVALVE
@@ -576,11 +639,11 @@ namespace STRINGS
 
 			public class MEDICALBED
 			{
-				public static LocString NAME = "Rejuvenator";
+				public static LocString NAME = "Pharma Chamber";
 
-				public static LocString DESC = "Rejuvenators allow Duplicants to regain lost health and heal wounds extremely quickly.";
+				public static LocString DESC = "Pharma Chambers decrease patients' disease recovery time, but cannot heal physical injuries.";
 
-				public static LocString EFFECT = "Greatly accelerates <style=\"Health\">Health</style> recovery and the healing of physical injuries.";
+				public static LocString EFFECT = "Greatly accelerates recovery from <style=\"disease\">Diseases</style>.";
 			}
 
 			public class MESHTILE
@@ -590,6 +653,15 @@ namespace STRINGS
 				public static LocString DESC = "Mesh tiles can be used to make Duplicant pathways in areas where liquid needs to flow.";
 
 				public static LocString EFFECT = "Used as floor and wall tile to build rooms.\n\nDoes not obstruct <style=\"liquid\">Liquid</style> or <style=\"gas\">Gas</style> flow.";
+			}
+
+			public class PLASTICTILE
+			{
+				public static LocString NAME = "Plastic Tile";
+
+				public static LocString DESC = "Plastic tiles are mildly antiseptic and can help limit the spread of germs in a colony.";
+
+				public static LocString EFFECT = "Used as floor and wall tile to build rooms.\n\nSignificantly increases Duplicant runspeed.";
 			}
 
 			public class MICROBEMUSHER
@@ -626,6 +698,15 @@ namespace STRINGS
 				public static LocString DESC = "Duplicants with no bathroom access will make \"messes\", causing stress and spreading germs.";
 
 				public static LocString EFFECT = string.Format("Gives Duplicants a place to relieve themselves.\n\nRequires no <style=\"GasPiping\">Piping</style>.\n\nMust be periodically emptied of <style=\"solid\">{0}</style>.", ELEMENTS.TOXICSAND.NAME.text);
+			}
+
+			public class APOTHECARY
+			{
+				public static LocString NAME = "Apothecary";
+
+				public static LocString DESC = "All-natural remedies to cure what ails you.";
+
+				public static LocString EFFECT = "Produces <style=\"medicine\">Medicine</style> to cure most basic <style=\"disease\">Diseases</style>.\n\nDuplicants will not fabricate unless recipes are queued.";
 			}
 
 			public class PLANTERBOX
@@ -695,13 +776,40 @@ namespace STRINGS
 				public static LocString AVERAGEQUALITYNAME = "Mediocre Sculpture";
 			}
 
-			public class SEEDSPLICER
+			public class SUITMARKER
 			{
-				public static LocString NAME = "Seed Splicer";
+				public static LocString NAME = "Exosuit Checkpoint";
 
-				public static LocString DESC = "Just think of it as genetic \"enhancement\".";
+				public static LocString DESC = "A checkpoint must have an exosuit dock built on the opposite side its arrow faces.";
 
-				public static LocString EFFECT = "Splices <style=\"seed\">Seeds</style> to produce advanced <style=\"plant\">Plant</style> strains.\n\nDuplicants will not fabricate unless recipes are queued.";
+				public static LocString EFFECT = "Marks a threshold where Duplicants must change into or out of <style=\"equipment\">Exosuits</style>.\n\nMust be built next to an Exosuit Dock.\n\nCan be rotated before construction.";
+			}
+
+			public class SUITLOCKER
+			{
+				public static LocString NAME = "Exosuit Dock";
+
+				public static LocString DESC = "Docks can refill exosuits with air or empty them of waste, but can only charge one suit at a time.";
+
+				public static LocString EFFECT = "Stores and recharges <style=\"equipment\">Exosuits</style>.\n\nBuild next to an Exosuit Checkpoint to make Duplicants change into suits when passing by.";
+			}
+
+			public class SUITFABRICATOR
+			{
+				public static LocString NAME = "Exosuit Forge";
+
+				public static LocString DESC = "Exosuits can be filled with oxygen to allow Duplicants to safely enter uninhabitable areas.";
+
+				public static LocString EFFECT = "Forges protective <style=\"equipment\">Exosuits</style> for Duplicants to wear.\n\nDuplicants will not fabricate unless recipes are queued.";
+			}
+
+			public class CLOTHINGFABRICATOR
+			{
+				public static LocString NAME = "Textile Loom";
+
+				public static LocString DESC = "A textile loom can be used to spin Reed Fiber into wearable Duplicant clothing.";
+
+				public static LocString EFFECT = "Tailors Duplicant <style=\"equipment\">Clothing</style> items.\n\nDuplicants will not fabricate unless recipes are queued.";
 			}
 
 			public class SPACEHEATER
@@ -720,15 +828,6 @@ namespace STRINGS
 				public static LocString DESC = "Resources left on the floor become \"debris\" and lower decor when not put away.";
 
 				public static LocString EFFECT = "Stores the resources of your choosing.";
-			}
-
-			public class CLOTHINGFABRICATOR
-			{
-				public static LocString NAME = "Textile Loom";
-
-				public static LocString DESC = "A textile loom can be used to spin Reed Fiber into wearable Duplicant clothing.";
-
-				public static LocString EFFECT = "Tailors Duplicant <style=\"equipment\">Clothing</style> items.\n\nDuplicants will not fabricate unless recipes are queued.";
 			}
 
 			public class LIQUIDHEATER
@@ -786,16 +885,16 @@ namespace STRINGS
 
 				public static LocString DESC = "Tiles can be used to build rooms, floors, or bridges to new areas.";
 
-				public static LocString EFFECT = "Used as floor and wall tile to build rooms.";
+				public static LocString EFFECT = "Used as floor and wall tile to build rooms.\n\nIncreases Duplicant runspeed.";
 			}
 
 			public class WATERPURIFIER
 			{
-				public static LocString NAME = "Water Purifier";
+				public static LocString NAME = "Water Distiller";
 
-				public static LocString DESC = "Clean water is a necessary resource for most life sustaining processes.";
+				public static LocString DESC = "Distillers cannot kill germs and pass some disease contamination they receive into their waste output.";
 
-				public static LocString EFFECT = "Uses <style=\"misc\">Sand</style> to filter <style=\"liquid\">Polluted Water</style>.\n\nTransfers a portion of disease to the Polluted Dirt.";
+				public static LocString EFFECT = "Uses <style=\"misc\">Sand</style> to filter <style=\"liquid\">Polluted Water</style>.\n\nProduces <style=\"RawMineral\">Polluted Dirt</style>.";
 			}
 
 			public class DISTILLATIONCOLUMN
@@ -816,15 +915,6 @@ namespace STRINGS
 				public static LocString EFFECT = "Connects buildings to <style=\"power\">Power</style> sources.\n\nCan be run through tiles.";
 			}
 
-			public class HIGHWATTAGEWIRE
-			{
-				public static LocString NAME = "Heavi-Watt Wire";
-
-				public static LocString DESC = "Higher wattage wire is used to avoid power overloads, particularly for strong generators.";
-
-				public static LocString EFFECT = "Carries more <style=\"power\">Wattage</style> than regular Wire without overloading.\n\nCannot be run through tiles.";
-			}
-
 			public class WIREBRIDGE
 			{
 				public static LocString NAME = "Wire Bridge";
@@ -834,13 +924,31 @@ namespace STRINGS
 				public static LocString EFFECT = "Runs one wire section over another without joining them.\n\nCan be run through tiles.";
 			}
 
+			public class HIGHWATTAGEWIRE
+			{
+				public static LocString NAME = "Heavi-Watt Wire";
+
+				public static LocString DESC = "Higher wattage wire is used to avoid power overloads, particularly for strong generators.";
+
+				public static LocString EFFECT = "Carries more <style=\"power\">Wattage</style> than regular Wire without overloading.\n\nCannot be run through tiles.";
+			}
+
+			public class WIREBRIDGEHIGHWATTAGE
+			{
+				public static LocString NAME = "Heavi-Watt Joint Plate";
+
+				public static LocString DESC = "Joint plates can run Heavi-Watt wires through walls without leaking gas or liquid.";
+
+				public static LocString EFFECT = "Allows Heavi-Watt Wire to be run through wall and floor tiles.\n\nFunctions as a regular tile.";
+			}
+
 			public class HANDSANITIZER
 			{
 				public static LocString NAME = "Hand Sanitizer";
 
 				public static LocString DESC = "Hand sanitizers kill germs more effectively than wash basins.";
 
-				public static LocString EFFECT = "Removes most <style=\"disease\">Germs</style> from Duplicants.\n\nDuplicants use Hand Sanitizers when passing by in the selected direction.";
+				public static LocString EFFECT = "Removes most <style=\"disease\">Germs</style> from Duplicants.\n\nGerm-covered Duplicants use Hand Sanitizers when passing by in the selected direction.";
 			}
 
 			public class WASHBASIN
@@ -849,7 +957,16 @@ namespace STRINGS
 
 				public static LocString DESC = "Germ spread can be reduced by building wash basins where Duplicants are likely to get dirty.";
 
-				public static LocString EFFECT = "Removes some <style=\"disease\">Germs</style> from Duplicants.\n\nDuplicants use Wash Basins when passing by in the selected direction only if they have germs on them.";
+				public static LocString EFFECT = "Removes some <style=\"disease\">Germs</style> from Duplicants.\n\nGerm-covered Duplicants use Wash Basins when passing by in the selected direction.";
+			}
+
+			public class WASHSINK
+			{
+				public static LocString NAME = "Sink";
+
+				public static LocString DESC = "Sinks are plumbed and do not need to be manually emptied or refilled.";
+
+				public static LocString EFFECT = "Removes <style=\"disease\">Germs</style> from Duplicants.\n\nGerm-covered Duplicants use Sinks when passing by in the selected direction.";
 			}
 
 			public class TILEPOI
@@ -859,6 +976,51 @@ namespace STRINGS
 				public static LocString DESC = string.Empty;
 
 				public static LocString EFFECT = "Used as floor and wall tile to build rooms.";
+			}
+
+			public class POLYMERIZER
+			{
+				public static LocString NAME = "Polymer Press";
+
+				public static LocString DESC = "Plastic can be used to craft unique buildings and goods.";
+
+				public static LocString EFFECT = "Converts <style=\"liquid\">Petroleum</style> into raw <style=\"solid\">Plastic</style>.";
+			}
+
+			public class DIRECTIONALWORLDPUMPLIQUID
+			{
+				public static LocString NAME = "Liquid Channel";
+
+				public static LocString DESC = "Channels move more volume than pumps and require no power, but need sufficient pressure to function.";
+
+				public static LocString EFFECT = "Directionally moves large volumes of liquid through a channel.\n\nCan be used as floor tile and rotated before construction.";
+			}
+
+			public class STEAMTURBINE
+			{
+				public static LocString NAME = "Steam Turbine";
+
+				public static LocString DESC = "Turbines are capable of industrial strength power generation with virtually no waste.";
+
+				public static LocString EFFECT = "Generates exceptional electrial <style=\"power\">Power</style> when supplied with <style=\"gas\">Steam</style>.";
+			}
+
+			public class OILREFINERY
+			{
+				public static LocString NAME = "Oil Refinery";
+
+				public static LocString DESC = "Petroleum can only be produced from the refinement of crude oil.";
+
+				public static LocString EFFECT = "Converts <style=\"liquid\">Crude Oil</style> into <style=\"liquid\">Petroleum</style> and <style=\"gas\">Natural Gas</style>.";
+			}
+
+			public class OILWELLCAP
+			{
+				public static LocString NAME = "Oil Well";
+
+				public static LocString DESC = "Water pumped into an oil reservoir cannot be recovered.";
+
+				public static LocString EFFECT = "Extracts <style=\"liquid\">Crude Oil</style> using clean <style=\"liquid\">Water</style>.\n\nMust be built atop an Oil Reservoir.";
 			}
 		}
 
@@ -885,14 +1047,14 @@ namespace STRINGS
 		{
 			public static class ENABLE_AUTODISINFECT
 			{
-				public static LocString NAME = "Enable Autodisinfect";
+				public static LocString NAME = "Enable Disinfect";
 
 				public static LocString TOOLTIP = "Automatically disinfect this building when it becomes contaminated";
 			}
 
 			public static class DISABLE_AUTODISINFECT
 			{
-				public static LocString NAME = "Disable Autodisinfect";
+				public static LocString NAME = "Disable Disinfect";
 
 				public static LocString TOOLTIP = "Do not automatically disinfect this building";
 			}

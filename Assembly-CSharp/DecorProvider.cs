@@ -14,7 +14,7 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor, IEffec
 		this.splat = new DecorProvider.Splat(this);
 	}
 
-	public int GetDecorForCell(int cell)
+	public float GetDecorForCell(int cell)
 	{
 		for (int i = 0; i < this.cellCount; i++)
 		{
@@ -23,7 +23,7 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor, IEffec
 				return this.splat.decor;
 			}
 		}
-		return 0;
+		return 0f;
 	}
 
 	public void SetValues(EffectorValues values)
@@ -200,15 +200,15 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor, IEffec
 		public Splat(DecorProvider provider)
 		{
 			AttributeInstance decor = provider.decor;
-			this.decor = 0;
+			this.decor = 0f;
 			if (decor != null)
 			{
-				this.decor = (int)decor.GetTotalValue();
+				this.decor = decor.GetTotalValue();
 			}
 			Pickupable pickupable = provider.pickupable;
 			if (pickupable != null && pickupable.storage != null)
 			{
-				this.decor = 0;
+				this.decor = 0f;
 			}
 			int num = Grid.PosToCell(provider.gameObject);
 			if (!Grid.IsValidCell(num))
@@ -217,9 +217,9 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor, IEffec
 			}
 			if (Grid.Solid[num] && provider.simCellOccupier == null)
 			{
-				this.decor = 0;
+				this.decor = 0f;
 			}
-			if (this.decor == 0)
+			if (this.decor == 0f)
 			{
 				return;
 			}
@@ -247,11 +247,11 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor, IEffec
 			this.AddDecor();
 		}
 
-		public int decor { get; private set; }
+		public float decor { get; private set; }
 
 		public void Clear()
 		{
-			if (this.decor == 0)
+			if (this.decor == 0f)
 			{
 				return;
 			}
@@ -298,7 +298,7 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor, IEffec
 
 		private void RemoveDecor()
 		{
-			if (this.decor == 0)
+			if (this.decor == 0f)
 			{
 				return;
 			}

@@ -171,7 +171,7 @@ public class Fishable : Harvestable
 	{
 		if (this.chore == null)
 		{
-			this.chore = new WorkChore<Fishable>(Db.Get().ChoreTypes.Harvest, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true);
+			this.chore = new WorkChore<Fishable>(Db.Get().ChoreTypes.Harvest, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue);
 		}
 		this.isMarkedForHarvest = true;
 	}

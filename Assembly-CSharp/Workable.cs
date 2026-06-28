@@ -146,6 +146,11 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		return null;
 	}
 
+	public void SetAttributeConverter(AttributeConverter attributeConverter)
+	{
+		this.attributeConverter = attributeConverter;
+	}
+
 	public virtual float GetExperienceMultiplier()
 	{
 		return 1f;
@@ -156,22 +161,22 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		return false;
 	}
 
-	public void StopWork(Worker workerToStop)
+	public void StopWork(Worker workerToStop, bool aborted)
 	{
 		if (this.selectable != null && this.workingStatusItem != null)
 		{
 			this.selectable.RemoveStatusItem(this.workingStatusItem, false);
 		}
-		if (this.worker != null)
+		if (this.worker == workerToStop && aborted)
 		{
-			this.OnAbortWork(this.worker);
+			this.OnAbortWork(workerToStop);
 		}
 		if (this.shouldTransferDiseaseWithWorker)
 		{
-			this.TransferDiseaseWithWorker(this.worker);
+			this.TransferDiseaseWithWorker(workerToStop);
 		}
 		this.OnWorkStoppedCB.Signal();
-		this.OnStopWork(this.worker);
+		this.OnStopWork(workerToStop);
 		if (this.resetProgressOnStop)
 		{
 			this.workTimeRemaining = this.GetWorkTime();
@@ -198,10 +203,8 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		this.OnCompleteWork(worker);
 		this.OnWorkCompleteCB.Signal();
 		this.OnWorkStoppedCB.Signal();
-		this.OnStopWork(worker);
 		this.workTimeRemaining = this.GetWorkTime();
 		this.ShowProgressBar(false);
-		this.worker = null;
 	}
 
 	protected virtual void OnStartWork(Worker worker)
@@ -418,8 +421,8 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	protected bool shouldTransferDiseaseWithWorker = true;
 
-	[Tooltip("What layer does the dupe switch to when interacting with the building")]
 	[SerializeField]
+	[Tooltip("What layer does the dupe switch to when interacting with the building")]
 	public Grid.SceneLayer workLayer = Grid.SceneLayer.Move;
 
 	[SerializeField]
@@ -429,12 +432,12 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	[SerializeField]
 	public KAnimFile[] overrideAnims;
 
-	[Tooltip("Whether to user the KAnimSynchronizer or not")]
 	[SerializeField]
+	[Tooltip("Whether to user the KAnimSynchronizer or not")]
 	public bool synchronizeAnims = true;
 
-	[Tooltip("Whether to display number of uses in the details panel")]
 	[SerializeField]
+	[Tooltip("Whether to display number of uses in the details panel")]
 	public bool trackUses;
 
 	[Serialize]

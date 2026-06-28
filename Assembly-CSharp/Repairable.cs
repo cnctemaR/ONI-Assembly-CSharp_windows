@@ -246,7 +246,7 @@ public class Repairable : Workable
 
 		public void ConsumeRepairMaterials()
 		{
-			base.smi.master.storageProxy.ConsumeAll();
+			base.smi.master.storageProxy.ConsumeAllIgnoringDisease();
 		}
 
 		public void DestroyStorageProxy()
@@ -290,7 +290,7 @@ public class Repairable : Workable
 		{
 			default_state = this.repaired;
 			base.serializable = true;
-			this.forbidden.OnSignal(this.allow, this.allowed);
+			this.forbidden.OnSignal(this.allow, this.repaired);
 			this.allowed.Enter(delegate(Repairable.SMInstance smi)
 			{
 				smi.master.CreateStorageProxy();
@@ -305,7 +305,7 @@ public class Repairable : Workable
 					smi.DestroyStorageProxy();
 				});
 			this.allowed.needMass.EventTransition(GameHashes.OnStorageChange, this.allowed.repairable, (Repairable.SMInstance smi) => smi.HasRequiredMass()).ToggleChore(new Func<Repairable.SMInstance, Chore>(this.CreateFetchChore), this.allowed.repairable, this.allowed.needMass).ToggleStatusItem(Db.Get().BuildingStatusItems.WaitingForRepairMaterials, (Repairable.SMInstance smi) => smi.GetRequiredMass());
-			this.allowed.repairable.ToggleRecurringChore(new Func<Repairable.SMInstance, Chore>(this.CreateRepairChore)).ToggleStatusItem(Db.Get().BuildingStatusItems.PendingRepair, null);
+			this.allowed.repairable.ToggleRecurringChore(new Func<Repairable.SMInstance, Chore>(this.CreateRepairChore), null).ToggleStatusItem(Db.Get().BuildingStatusItems.PendingRepair, null);
 			this.repaired.EventTransition(GameHashes.BuildingReceivedDamage, this.allowed, (Repairable.SMInstance smi) => smi.NeedsRepairs()).OnSignal(this.allow, this.allowed).OnSignal(this.forbid, this.forbidden);
 		}
 
@@ -321,7 +321,7 @@ public class Repairable : Workable
 
 		private Chore CreateRepairChore(Repairable.SMInstance smi)
 		{
-			WorkChore<Repairable> workChore = new WorkChore<Repairable>(Db.Get().ChoreTypes.Repair, smi.master, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true);
+			WorkChore<Repairable> workChore = new WorkChore<Repairable>(Db.Get().ChoreTypes.Repair, smi.master, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, int.MaxValue);
 			workChore.AddPrecondition(Repairable.States.IsNotBeingAttacked, smi.master.GetComponent<Breakable>());
 			return workChore;
 		}

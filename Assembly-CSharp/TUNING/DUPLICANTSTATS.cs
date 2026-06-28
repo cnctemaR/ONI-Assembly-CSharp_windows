@@ -38,8 +38,6 @@ namespace TUNING
 
 		public const float RECOVER_BREATH_DELTA = 3f;
 
-		public static float FOUNDATION_MOVEMENT_BOOST = 1.5f;
-
 		public static string[] DISTRIBUTED_ATTRIBUTES = new string[] { "Strength", "Construction", "Digging", "Machinery", "Athletics", "Learning", "Cooking", "Medical", "Art" };
 
 		public static string[] ROLLED_ATTRIBUTES = new string[] { "Immunity" };
@@ -77,31 +75,18 @@ namespace TUNING
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "Leira",
-				statBonus = DUPLICANTSTATS.TINY_STATPOINT_BONUS,
-				mutuallyExclusiveTraits = new List<string> { "Uncultured" }
-			},
-			new DUPLICANTSTATS.TraitVal
-			{
-				id = "Abe",
-				statBonus = DUPLICANTSTATS.TINY_STATPOINT_BONUS,
-				mutuallyExclusiveTraits = new List<string> { "CantCook" }
-			},
-			new DUPLICANTSTATS.TraitVal
-			{
 				id = "Ellie",
 				statBonus = DUPLICANTSTATS.TINY_STATPOINT_BONUS,
 				mutuallyExclusiveTraits = new List<string> { "InteriorDecorator", "MouthBreather", "Uncultured" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "Catalina",
-				statBonus = DUPLICANTSTATS.TINY_STATPOINT_BONUS,
-				mutuallyExclusiveTraits = new List<string> { "NightOwl" }
+				id = "Stinky",
+				mutuallyExclusiveTraits = new List<string> { "Flatulence", "InteriorDecorator" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
-				id = "Stinky",
+				id = "Liam",
 				mutuallyExclusiveTraits = new List<string> { "Flatulence", "InteriorDecorator" }
 			}
 		};
@@ -392,7 +377,7 @@ namespace TUNING
 
 		public class BASESTATS
 		{
-			public const float STAMINA_USED_PER_SECOND = -0.16666667f;
+			public const float STAMINA_USED_PER_SECOND = -0.11666667f;
 
 			public const float CALORIES_BURNED_PER_CYCLE = -1000000f;
 
@@ -406,7 +391,7 @@ namespace TUNING
 
 			public const float BLADDER_INCREASE_PER_SECOND = 0.16666667f;
 
-			public const float DECOR_EXPECTATION = -25f;
+			public const float DECOR_EXPECTATION = -35f;
 
 			public const float FOOD_QUALITY_EXPECTATION = -3f;
 
@@ -495,6 +480,27 @@ namespace TUNING
 			public const float SUFFOCATE_AMOUNT = 45.454548f;
 
 			public const float BREATH_RATE = 0.90909094f;
+		}
+
+		public class MOVEMENT
+		{
+			public static float NEUTRAL = 1f;
+
+			public static float BONUS_1 = 1.1f;
+
+			public static float BONUS_2 = 1.25f;
+
+			public static float BONUS_3 = 1.5f;
+
+			public static float BONUS_4 = 1.75f;
+
+			public static float PENALTY_1 = 0.9f;
+
+			public static float PENALTY_2 = 0.75f;
+
+			public static float PENALTY_3 = 0.5f;
+
+			public static float PENALTY_4 = 0.25f;
 		}
 
 		public class COMBAT

@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using STRINGS;
-using TUNING;
 using UnityEngine;
 
-public class Building : KMonoBehaviour, IEffectDescriptor
+public class Building : KMonoBehaviour, IUniformGridObject, IEffectDescriptor
 {
 	public Orientation Orientation
 	{
@@ -307,7 +306,7 @@ public class Building : KMonoBehaviour, IEffectDescriptor
 			float wattsNeededWhenActive = base.GetComponent<IEnergyConsumer>().WattsNeededWhenActive;
 			if (wattsNeededWhenActive > 0f)
 			{
-				string formattedWattage = GameUtil.GetFormattedWattage(wattsNeededWhenActive, string.Empty);
+				string formattedWattage = GameUtil.GetFormattedWattage(wattsNeededWhenActive, GameUtil.WattageFormatterUnit.Automatic);
 				Descriptor descriptor = new Descriptor(string.Format(UI.BUILDINGEFFECTS.REQUIRESPOWER, formattedWattage), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESPOWER, formattedWattage), Descriptor.DescriptorType.Requirement, false);
 				list.Add(descriptor);
 			}
@@ -361,20 +360,14 @@ public class Building : KMonoBehaviour, IEffectDescriptor
 		if (def.GeneratorWattageRating > 0f && base.GetComponent<Battery>() == null)
 		{
 			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ENERGYGENERATED, GameUtil.GetFormattedWattage(def.GeneratorWattageRating, string.Empty)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ENERGYGENERATED, GameUtil.GetFormattedWattage(def.GeneratorWattageRating, string.Empty)), Descriptor.DescriptorType.Effect);
+			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ENERGYGENERATED, GameUtil.GetFormattedWattage(def.GeneratorWattageRating, GameUtil.WattageFormatterUnit.Automatic)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ENERGYGENERATED, GameUtil.GetFormattedWattage(def.GeneratorWattageRating, GameUtil.WattageFormatterUnit.Automatic)), Descriptor.DescriptorType.Effect);
 			list.Add(descriptor);
 		}
 		if (def.ExhaustKilowattsWhenActive > 0f || def.OperatingKilowatts > 0f)
 		{
 			Descriptor descriptor2 = default(Descriptor);
-			descriptor2.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.HEATGENERATED, GameUtil.GetFormattedWattage(5f * (def.ExhaustKilowattsWhenActive + def.OperatingKilowatts), string.Empty)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.HEATGENERATED, GameUtil.GetFormattedWattage(5f * (def.ExhaustKilowattsWhenActive + def.OperatingKilowatts), string.Empty)), Descriptor.DescriptorType.Effect);
+			descriptor2.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.HEATGENERATED, GameUtil.GetFormattedWattage(5f * (def.ExhaustKilowattsWhenActive + def.OperatingKilowatts), GameUtil.WattageFormatterUnit.Automatic)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.HEATGENERATED, GameUtil.GetFormattedJoules(5f * (def.ExhaustKilowattsWhenActive + def.OperatingKilowatts), "F1")), Descriptor.DescriptorType.Effect);
 			list.Add(descriptor2);
-		}
-		if (def.IsFoundation)
-		{
-			Descriptor descriptor3 = default(Descriptor);
-			descriptor3.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.DUPLICANTMOVEMENTBOOST, GameUtil.GetFormattedPercent((DUPLICANTSTATS.FOUNDATION_MOVEMENT_BOOST - 1f) * 100f, GameUtil.TimeSlice.None)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.DUPLICANTMOVEMENTBOOST, GameUtil.GetFormattedPercent((DUPLICANTSTATS.FOUNDATION_MOVEMENT_BOOST - 1f) * 100f, GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Effect);
-			list.Add(descriptor3);
 		}
 		return list;
 	}
@@ -391,6 +384,18 @@ public class Building : KMonoBehaviour, IEffectDescriptor
 			list.Add(descriptor2);
 		}
 		return list;
+	}
+
+	public override Vector2 PosMin()
+	{
+		Extents extents = this.GetExtents();
+		return new Vector2((float)extents.x, (float)extents.y);
+	}
+
+	public override Vector2 PosMax()
+	{
+		Extents extents = this.GetExtents();
+		return new Vector2((float)(extents.x + extents.width), (float)(extents.y + extents.height));
 	}
 
 	public BuildingDef Def;

@@ -4,6 +4,15 @@ using UnityEngine;
 
 public class BodyOfWater : KMonoBehaviour
 {
+	protected override void OnCleanUp()
+	{
+		if (this.partitionerEntry != null)
+		{
+			this.partitionerEntry.Release();
+		}
+		base.OnCleanUp();
+	}
+
 	public void Setup(List<int> WaterCells, List<int> WorkPoints)
 	{
 		this.waterCells = WaterCells;

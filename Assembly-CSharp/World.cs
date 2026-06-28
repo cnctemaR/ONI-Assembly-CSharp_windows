@@ -72,10 +72,6 @@ public class World : KMonoBehaviour
 			{
 				this.OnSolidChanged(cellIdx);
 			}
-			if (isSolid && !Grid.Foundation[cellIdx])
-			{
-				Grid.SuitRequired[cellIdx] = false;
-			}
 		}
 		GameScenePartitioner.Instance.TriggerEvent(this.changedCells, GameScenePartitioner.Instance.solidChangedLayer, null);
 		int count2 = callbackInfo.Count;

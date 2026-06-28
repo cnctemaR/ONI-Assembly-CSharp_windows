@@ -1,22 +1,24 @@
 ﻿using System;
+using Rendering;
+using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class KAnimGridTileVisualizer : KMonoBehaviour
+public class KAnimGridTileVisualizer : KMonoBehaviour, IBlockTileInfo
 {
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.Refresh();
 		this.Subscribe(-1503271301, new Action<object>(this.OnSelectionChanged));
 		this.Subscribe(-1201923725, new Action<object>(this.OnHighlightChanged));
 	}
 
 	protected override void OnCleanUp()
 	{
-		if (this.Building != null)
+		Building component = base.GetComponent<Building>();
+		if (component != null)
 		{
 			int num = Grid.PosToCell(this.transform.position);
-			ObjectLayer tileLayer = this.Building.Def.TileLayer;
+			ObjectLayer tileLayer = component.Def.TileLayer;
 			if (Grid.Objects[num, (int)tileLayer] == base.gameObject)
 			{
 				Grid.Objects[num, (int)tileLayer] = null;
@@ -38,53 +40,11 @@ public class KAnimGridTileVisualizer : KMonoBehaviour
 		World.Instance.blockTileRenderer.HighlightCell(Grid.PosToCell(this.transform.position), flag);
 	}
 
-	public void Refresh()
+	public int GetBlockTileConnectorID()
 	{
-		if (this.Building == null)
-		{
-			this.Building = base.GetComponentInParent<Building>();
-		}
-		if (this.Building == null)
-		{
-			return;
-		}
-		if (this.controller != null)
-		{
-			int num = Grid.PosToCell(this.transform.position);
-			string tile = this.GetTile(num, this.Building.Def.TileLayer);
-			if (tile != string.Empty)
-			{
-				this.controller.Play(tile, KAnim.PlayMode.Once, 1f, 0f);
-			}
-		}
+		return this.blockTileConnectorID;
 	}
 
-	private unsafe string GetTile(int cell, ObjectLayer layer)
-	{
-		string text = string.Empty;
-		int* ptr = stackalloc int[checked(4 * 4)];
-		*ptr = Grid.CellLeft(cell);
-		ptr[1] = Grid.CellRight(cell);
-		ptr[2] = Grid.CellAbove(cell);
-		ptr[3] = Grid.CellBelow(cell);
-		for (int i = 0; i < 4; i++)
-		{
-			if (Grid.IsValidCell(ptr[i]) && Grid.Objects[ptr[i], (int)layer] != null)
-			{
-				text += "LRTB"[i];
-			}
-		}
-		if (text == string.Empty)
-		{
-			text = "LR";
-		}
-		return text;
-	}
-
-	private Building Building;
-
-	[MyCmpGet]
-	private KAnimControllerBase controller;
-
-	private KAnimControllerBase sub_controller;
+	[SerializeField]
+	public int blockTileConnectorID;
 }

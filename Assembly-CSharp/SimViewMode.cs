@@ -42,5 +42,7 @@ public enum SimViewMode
 	Forcefield = -1202046481,
 	NoisePollution = 1766337936,
 	Disease = -812707172,
-	Crop = 917814544
+	Crop = 917814544,
+	Joules = 453935242,
+	RoomProber = -1249384771
 }

@@ -4,6 +4,15 @@ using UnityEngine;
 [SkipSaveFileSerialization]
 public class AnimTileable : KMonoBehaviour
 {
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		if (this.tags == null || this.tags.Length == 0)
+		{
+			this.tags = new Tag[] { base.GetComponent<KPrefabID>().PrefabTag };
+		}
+	}
+
 	protected override void OnSpawn()
 	{
 		OccupyArea component = base.GetComponent<OccupyArea>();
@@ -17,7 +26,7 @@ public class AnimTileable : KMonoBehaviour
 			Building component2 = base.GetComponent<Building>();
 			extents = component2.GetExtents();
 		}
-		extents = new Extents(extents.x - 1, extents.y, extents.width + 2, 1);
+		extents = new Extents(extents.x - 1, extents.y - 1, extents.width + 2, extents.height + 2);
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("AnimTileable.OnSpawn", base.gameObject, extents, GameScenePartitioner.Instance.objectLayers[1], new Action<object>(this.OnNeighbourCellsUpdated));
 		this.UpdateEndCaps();
 	}
@@ -34,7 +43,6 @@ public class AnimTileable : KMonoBehaviour
 	private void UpdateEndCaps()
 	{
 		int num = Grid.PosToCell(this);
-		KPrefabID component = base.GetComponent<KPrefabID>();
 		bool flag = true;
 		bool flag2 = true;
 		bool flag3 = true;
@@ -45,19 +53,19 @@ public class AnimTileable : KMonoBehaviour
 		int num5 = Grid.CellBelow(num);
 		if (Grid.IsValidCell(num2))
 		{
-			flag = !this.HasTileableNeighbour(component.PrefabTag, num2);
+			flag = !this.HasTileableNeighbour(num2);
 		}
 		if (Grid.IsValidCell(num3))
 		{
-			flag2 = !this.HasTileableNeighbour(component.PrefabTag, num3);
+			flag2 = !this.HasTileableNeighbour(num3);
 		}
 		if (Grid.IsValidCell(num4))
 		{
-			flag3 = !this.HasTileableNeighbour(component.PrefabTag, num4);
+			flag3 = !this.HasTileableNeighbour(num4);
 		}
 		if (Grid.IsValidCell(num5))
 		{
-			flag4 = !this.HasTileableNeighbour(component.PrefabTag, num5);
+			flag4 = !this.HasTileableNeighbour(num5);
 		}
 		KBatchedAnimController[] componentsInChildren = base.GetComponentsInChildren<KBatchedAnimController>();
 		foreach (KBatchedAnimController kbatchedAnimController in componentsInChildren)
@@ -81,16 +89,23 @@ public class AnimTileable : KMonoBehaviour
 		}
 	}
 
-	private bool HasTileableNeighbour(Tag expected_tag, int neighbour_cell)
+	private bool HasTileableNeighbour(int neighbour_cell)
 	{
 		bool flag = false;
 		GameObject gameObject = Grid.Objects[neighbour_cell, 1];
 		if (gameObject != null)
 		{
 			KPrefabID component = gameObject.GetComponent<KPrefabID>();
-			if (component != null && component.PrefabTag == expected_tag)
+			if (component != null)
 			{
-				flag = true;
+				for (int i = 0; i < this.tags.Length; i++)
+				{
+					if (component.PrefabTag == this.tags[i])
+					{
+						flag = true;
+						break;
+					}
+				}
 			}
 		}
 		return flag;
@@ -102,6 +117,8 @@ public class AnimTileable : KMonoBehaviour
 	}
 
 	private GameScenePartitionerEntry partitionerEntry;
+
+	public Tag[] tags;
 
 	private static readonly KAnimHashedString[] leftSymbols = new KAnimHashedString[]
 	{

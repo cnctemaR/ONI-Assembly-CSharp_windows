@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Klei.AI;
 using UnityEngine;
 
@@ -80,7 +81,12 @@ public class EatChore : Chore<EatChore.StatesInstance>
 		{
 			Ownables component = base.sm.eater.Get(base.smi).GetComponent<Ownables>();
 			Navigator component2 = component.GetComponent<Navigator>();
-			Assignable assignable = component.AutoAssignSlot(component2, Db.Get().OwnableSlots.MessStation);
+			List<Assignable> preferredAssignables = Game.Instance.assignmentManager.GetPreferredAssignables(component2, Db.Get().OwnableSlots.MessStation);
+			Assignable assignable = ((preferredAssignables.Count <= 0) ? null : preferredAssignables[0]);
+			if (assignable == null)
+			{
+				component.AutoAssignSlot(component2, Db.Get().OwnableSlots.MessStation);
+			}
 			base.smi.sm.messstation.Set(assignable, base.smi);
 		}
 
@@ -139,10 +145,20 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			this.eatatmessstation.eat.ToggleAnims("anim_eat_table_kanim", 0f).DoEat(this.ediblechunk, this.actualfoodunits, null, null).Enter(delegate(EatChore.StatesInstance smi)
 			{
 				smi.SetZ(this.eater.Get(smi), Grid.GetLayerZ(Grid.SceneLayer.BuildingFront));
+				Room roomOfBuilding = Game.Instance.roomProber.GetRoomOfBuilding(this.messstation.Get(smi).GetComponent<BuildingComplete>());
+				if (roomOfBuilding != null)
+				{
+					string id = RoomTypes.GetRoomType(roomOfBuilding).id;
+					if (id == "MessHall")
+					{
+						this.eater.Get(smi).gameObject.GetComponent<Effects>().Add("EatInMessHall", true);
+					}
+				}
 			})
 				.Exit(delegate(EatChore.StatesInstance smi)
 				{
 					smi.SetZ(this.eater.Get(smi), Grid.GetLayerZ(Grid.SceneLayer.Move));
+					this.eater.Get(smi).gameObject.GetComponent<Effects>().Remove("EatInMessHall");
 				});
 			this.eatonfloorstate.DefaultState(this.eatonfloorstate.moveto).Enter("CreateLocator", delegate(EatChore.StatesInstance smi)
 			{

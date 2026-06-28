@@ -45,6 +45,12 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 	[Serialize]
 	public bool allowManualPumpingStationFetching;
 
+	[SerializeField]
+	public Color noFilterTint = Color.white;
+
+	[SerializeField]
+	public Color filterTint = Color.white;
+
 	[MyCmpAdd]
 	private UserMenu userMenu;
 
@@ -63,11 +69,14 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 
 		public void CreateChore()
 		{
+			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 			Tag[] tags = base.GetComponent<TreeFilterable>().GetTags();
-			if (tags.Length == 0)
+			if (tags == null || tags.Length == 0)
 			{
+				component.TintColour = base.master.noFilterTint;
 				return;
 			}
+			component.TintColour = base.master.filterTint;
 			Tag[] array;
 			if (!base.master.allowManualPumpingStationFetching)
 			{
@@ -77,8 +86,8 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 			{
 				array = new Tag[0];
 			}
-			Storage component = base.GetComponent<Storage>();
-			this.chore = new FetchChore(component, component.Capacity(), base.GetComponent<TreeFilterable>().GetTags(), array, null, true, null, null, null, FetchOrder2.OperationalRequirement.Operational, 0);
+			Storage component2 = base.GetComponent<Storage>();
+			this.chore = new FetchChore(component2, component2.Capacity(), base.GetComponent<TreeFilterable>().GetTags(), array, null, true, null, null, null, FetchOrder2.OperationalRequirement.Operational, 0);
 		}
 
 		public void CancelChore()
@@ -162,9 +171,15 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 			float num3;
 			component.ConsumeAndGetDisease(prefabTag, num2, out diseaseInfo, out num3);
 			Vector3 position = base.transform.position;
-			position.x += ((base.GetComponent<Rotatable>().GetOrientation() != Orientation.FlipH) ? 0.2f : (-1.7f));
 			position.y += 1.8f;
-			FallingWater.instance.AddParticle(new Vector2(position.x, position.y), (byte)ElementLoader.GetElementIndex(firstPrimaryElement.ElementID), num2, num3, diseaseInfo.idx, diseaseInfo.count, false, false, false);
+			bool flag = base.GetComponent<Rotatable>().GetOrientation() == Orientation.FlipH;
+			position.x += ((!flag) ? 0.2f : (-0.2f));
+			int num4 = Grid.PosToCell(position) + ((!flag) ? 1 : (-1));
+			if (Grid.Solid[num4])
+			{
+				num4 += ((!flag) ? (-1) : 1);
+			}
+			FallingWater.instance.AddParticle(num4, (byte)ElementLoader.GetElementIndex(firstPrimaryElement.ElementID), num2, num3, diseaseInfo.idx, diseaseInfo.count, false, false, false, false);
 		}
 
 		private FetchChore chore;
@@ -175,7 +190,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.waitingfordelivery;
-			this.statusItem = new StatusItem("BottleEmptier", string.Empty, string.Empty, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, 2046);
+			this.statusItem = new StatusItem("BottleEmptier", string.Empty, string.Empty, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 14334);
 			this.statusItem.resolveStringCallback = delegate(string str, object data)
 			{
 				BottleEmptier bottleEmptier = (BottleEmptier)data;

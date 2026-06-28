@@ -116,6 +116,10 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 				{
 					return;
 				}
+				if (name.Contains("death_"))
+				{
+					return;
+				}
 			}
 			string text = "hit";
 			AttackChore.StatesInstance smi = base.gameObject.GetSMI<AttackChore.StatesInstance>();

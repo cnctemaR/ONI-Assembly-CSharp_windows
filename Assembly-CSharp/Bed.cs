@@ -10,28 +10,58 @@ public class Bed : Ownable, IEffectDescriptor
 		base.slot = Db.Get().OwnableSlots.Bed;
 	}
 
-	protected override void OnStartWork(Worker worker)
+	protected override void OnSpawn()
 	{
-		base.OnStartWork(worker);
+		base.OnSpawn();
+		this.sleepable = base.GetComponent<Sleepable>();
+		Sleepable sleepable = this.sleepable;
+		sleepable.OnWorkStartedCB = (global::System.Action)Delegate.Combine(sleepable.OnWorkStartedCB, new global::System.Action(this.AddEffects));
+		Sleepable sleepable2 = this.sleepable;
+		sleepable2.OnWorkStoppedCB = (global::System.Action)Delegate.Combine(sleepable2.OnWorkStoppedCB, new global::System.Action(this.RemoveEffects));
+	}
+
+	private void AddEffects()
+	{
+		this.targetWorker = this.sleepable.worker;
 		if (this.effects != null)
 		{
 			foreach (string text in this.effects)
 			{
-				worker.GetComponent<Effects>().Add(text, false);
+				this.targetWorker.GetComponent<Effects>().Add(text, false);
 			}
+		}
+		string text2 = string.Empty;
+		Room roomOfBuilding = Game.Instance.roomProber.GetRoomOfBuilding(base.GetComponent<BuildingComplete>());
+		if (roomOfBuilding != null)
+		{
+			text2 = RoomTypes.GetRoomType(roomOfBuilding).id;
+		}
+		if (text2 == "Barracks")
+		{
+			this.targetWorker.GetComponent<Effects>().Add("BarracksStamina", false);
+		}
+		else if (text2 == "PrivateBedroom")
+		{
+			this.targetWorker.GetComponent<Effects>().Add("BedroomStamina", false);
 		}
 	}
 
-	protected override void OnStopWork(Worker worker)
+	private void RemoveEffects()
 	{
+		if (this.targetWorker == null)
+		{
+			return;
+		}
 		if (this.effects != null)
 		{
 			foreach (string text in this.effects)
 			{
-				worker.GetComponent<Effects>().Remove(text);
+				this.targetWorker.GetComponent<Effects>().Remove(text);
 			}
 		}
-		base.OnStopWork(worker);
+		this.targetWorker.GetComponent<Effects>().Remove("BarracksStamina");
+		this.targetWorker.GetComponent<Effects>().Remove("BedroomStamina");
+		this.targetWorker = null;
 	}
 
 	private void AddModifierDescriptions(List<Descriptor> descs, string effect_id, bool increase_indent = false)
@@ -65,4 +95,8 @@ public class Bed : Ownable, IEffectDescriptor
 	}
 
 	public string[] effects;
+
+	private Sleepable sleepable;
+
+	private Worker targetWorker;
 }

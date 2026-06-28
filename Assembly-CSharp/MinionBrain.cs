@@ -11,11 +11,6 @@ public class MinionBrain : Brain
 		return (gameObject == null && !Grid.Reserved[cell]) || !flag;
 	}
 
-	public static bool RequiresSuitAtCell(int cell)
-	{
-		return Grid.SuitRequired[cell] || Grid.SuitRequired[Grid.CellAbove(cell)];
-	}
-
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -23,6 +18,7 @@ public class MinionBrain : Brain
 		component.defaultStoredItemModifers = MinionBrain.MinionStoredItemModifiers;
 		this.accessControlNavMask = new AccessControlNavMask(base.gameObject, int.MaxValue);
 		this.Navigator.AddMask(this.accessControlNavMask);
+		this.Navigator.AddMask(new NavigationFeatureMask(base.gameObject));
 		this.Subscribe(-1697596308, new Action<object>(this.AnimTrackStoredItem));
 	}
 

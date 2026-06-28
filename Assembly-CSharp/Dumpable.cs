@@ -16,7 +16,7 @@ public class Dumpable : Workable
 		base.OnSpawn();
 		if (this.isMarkedForDumping)
 		{
-			this.chore = new WorkChore<Dumpable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true);
+			this.chore = new WorkChore<Dumpable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue);
 		}
 		base.SetWorkTime(0.1f);
 	}
@@ -37,7 +37,7 @@ public class Dumpable : Workable
 		else
 		{
 			this.isMarkedForDumping = true;
-			this.chore = new WorkChore<Dumpable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true);
+			this.chore = new WorkChore<Dumpable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue);
 		}
 	}
 
@@ -61,13 +61,13 @@ public class Dumpable : Workable
 		{
 			UserMenu userMenu = this.userMenu;
 			string text = UI.USERMENUACTIONS.DUMP.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.DUMP.NAME, new global::System.Action(this.ToggleDumping), global::Action.DropAll, null, null, null, text, true), 1f);
+			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.DUMP.NAME, new global::System.Action(this.ToggleDumping), global::Action.BuildingUtility1, null, null, null, text, true), 1f);
 		}
 		else
 		{
 			UserMenu userMenu2 = this.userMenu;
 			string text = UI.USERMENUACTIONS.DUMP.TOOLTIP_OFF;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.DUMP.NAME_OFF, new global::System.Action(this.ToggleDumping), global::Action.DropAll, null, null, null, text, true), 1f);
+			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.DUMP.NAME_OFF, new global::System.Action(this.ToggleDumping), global::Action.BuildingUtility1, null, null, null, text, true), 1f);
 		}
 	}
 

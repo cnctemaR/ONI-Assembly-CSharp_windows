@@ -14,7 +14,7 @@ public class CopyBuildingSettings : KMonoBehaviour
 	{
 		UserMenu userMenu = this.userMenu;
 		string text = UI.USERMENUACTIONS.COPY_BUILDING_SETTINGS.TOOLTIP;
-		userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_mirror", UI.USERMENUACTIONS.COPY_BUILDING_SETTINGS.NAME, new global::System.Action(this.ActivateCopyTool), global::Action.CopyBuildingSettings, null, null, null, text, true), 1f);
+		userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_mirror", UI.USERMENUACTIONS.COPY_BUILDING_SETTINGS.NAME, new global::System.Action(this.ActivateCopyTool), global::Action.BuildingUtility1, null, null, null, text, true), 1f);
 	}
 
 	private void ActivateCopyTool()

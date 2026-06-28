@@ -21,7 +21,6 @@ public class ReportManager : KMonoBehaviour
 		dictionary.Add(ReportManager.ReportType.LevelUp, new ReportManager.ReportGroup(null, false, 3, UI.ENDOFDAYREPORT.LEVEL_UP.NAME, UI.ENDOFDAYREPORT.LEVEL_UP.TOOLTIP, string.Empty));
 		dictionary.Add(ReportManager.ReportType.ToiletIncident, new ReportManager.ReportGroup(null, false, 3, UI.ENDOFDAYREPORT.TOILET_INCIDENT.NAME, UI.ENDOFDAYREPORT.TOILET_INCIDENT.TOOLTIP, string.Empty));
 		dictionary.Add(ReportManager.ReportType.DiseaseAdded, new ReportManager.ReportGroup(null, false, 3, UI.ENDOFDAYREPORT.DISEASE_ADDED.NAME, UI.ENDOFDAYREPORT.DISEASE_ADDED.POSITIVE_TOOLTIP, UI.ENDOFDAYREPORT.DISEASE_ADDED.NEGATIVE_TOOLTIP));
-		dictionary.Add(ReportManager.ReportType.ContaminatedOxygenFlatulence, new ReportManager.ReportGroup((float v) => GameUtil.GetFormattedMass(v, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), false, 4, UI.ENDOFDAYREPORT.CONTAMINATED_OXYGEN_FLATULENCE.NAME, UI.ENDOFDAYREPORT.CONTAMINATED_OXYGEN_FLATULENCE.POSITIVE_TOOLTIP, UI.ENDOFDAYREPORT.CONTAMINATED_OXYGEN_FLATULENCE.NEGATIVE_TOOLTIP));
 		dictionary.Add(ReportManager.ReportType.ContaminatedOxygenToilet, new ReportManager.ReportGroup((float v) => GameUtil.GetFormattedMass(v, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), false, 4, UI.ENDOFDAYREPORT.CONTAMINATED_OXYGEN_TOILET.NAME, UI.ENDOFDAYREPORT.CONTAMINATED_OXYGEN_TOILET.POSITIVE_TOOLTIP, UI.ENDOFDAYREPORT.CONTAMINATED_OXYGEN_TOILET.NEGATIVE_TOOLTIP));
 		dictionary.Add(ReportManager.ReportType.ContaminatedOxygenSublimation, new ReportManager.ReportGroup((float v) => GameUtil.GetFormattedMass(v, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), false, 4, UI.ENDOFDAYREPORT.CONTAMINATED_OXYGEN_SUBLIMATION.NAME, UI.ENDOFDAYREPORT.CONTAMINATED_OXYGEN_SUBLIMATION.POSITIVE_TOOLTIP, UI.ENDOFDAYREPORT.CONTAMINATED_OXYGEN_SUBLIMATION.NEGATIVE_TOOLTIP));
 		this.ReportGroups = dictionary;
@@ -68,44 +67,9 @@ public class ReportManager : KMonoBehaviour
 		}
 	}
 
-	public void ReportValue(ReportManager.ReportType gameHash, float value, string note = null)
+	public void ReportValue(ReportManager.ReportType reportType, float value, string note = null, string context = null)
 	{
-		ReportManager.ReportEntry entry = this.TodaysReport.GetEntry(gameHash);
-		if (entry == null)
-		{
-			return;
-		}
-		entry.accumulate += value;
-		if (value > 0f)
-		{
-			entry.accPositive += value;
-			if (note != null && entry.posNotes != null)
-			{
-				if (!entry.posNotes.ContainsKey(note))
-				{
-					entry.posNotes[note] = 0f;
-				}
-				Dictionary<string, float> posNotes;
-				Dictionary<string, float> dictionary = (posNotes = entry.posNotes);
-				float num = posNotes[note];
-				dictionary[note] = num + value;
-			}
-		}
-		else
-		{
-			entry.accNegative += value;
-			if (note != null && entry.negNotes != null)
-			{
-				if (!entry.negNotes.ContainsKey(note))
-				{
-					entry.negNotes[note] = 0f;
-				}
-				Dictionary<string, float> negNotes;
-				Dictionary<string, float> dictionary2 = (negNotes = entry.negNotes);
-				float num = negNotes[note];
-				dictionary2[note] = num + value;
-			}
-		}
+		this.TodaysReport.AddData(reportType, value, note, context);
 	}
 
 	private void OnNightTime(object data)
@@ -215,6 +179,8 @@ public class ReportManager : KMonoBehaviour
 		public ReportEntry(ReportManager.ReportEntry entry)
 		{
 			this.gameHash = entry.gameHash;
+			this.reportType = entry.reportType;
+			this.context = entry.context;
 			this.accumulate = entry.accumulate;
 			this.accPositive = entry.accPositive;
 			this.accNegative = entry.accNegative;
@@ -222,9 +188,10 @@ public class ReportManager : KMonoBehaviour
 			this.negNotes = entry.negNotes;
 		}
 
-		public ReportEntry(int gameHash)
+		public ReportEntry(ReportManager.ReportType reportType, string context)
 		{
-			this.gameHash = gameHash;
+			this.reportType = reportType;
+			this.context = context;
 			this.accumulate = 0f;
 			this.accPositive = 0f;
 			this.accNegative = 0f;
@@ -259,12 +226,97 @@ public class ReportManager : KMonoBehaviour
 		[OnDeserializing]
 		private void OnDeserialize()
 		{
+			this.contextEntries = new List<ReportManager.ReportEntry>();
 			this.posNotes = new Dictionary<string, float>();
 			this.negNotes = new Dictionary<string, float>();
 		}
 
+		[OnDeserialized]
+		private void OnDeserialized()
+		{
+			if (this.gameHash != -1)
+			{
+				this.reportType = (ReportManager.ReportType)this.gameHash;
+				this.gameHash = -1;
+			}
+		}
+
+		public void AddData(float value, string note = null, string dataContext = null)
+		{
+			this.AddActualData(value, note);
+			if (dataContext != null)
+			{
+				ReportManager.ReportEntry reportEntry = null;
+				for (int i = 0; i < this.contextEntries.Count; i++)
+				{
+					if (this.contextEntries[i].context == dataContext)
+					{
+						reportEntry = this.contextEntries[i];
+						break;
+					}
+				}
+				if (reportEntry == null)
+				{
+					reportEntry = new ReportManager.ReportEntry(this.reportType, dataContext);
+					this.contextEntries.Add(reportEntry);
+				}
+				reportEntry.AddActualData(value, note);
+			}
+		}
+
+		private void AddActualData(float value, string note = null)
+		{
+			this.accumulate += value;
+			if (value > 0f)
+			{
+				this.accPositive += value;
+				if (note != null && this.posNotes != null)
+				{
+					if (!this.posNotes.ContainsKey(note))
+					{
+						this.posNotes[note] = 0f;
+					}
+					Dictionary<string, float> dictionary2;
+					Dictionary<string, float> dictionary = (dictionary2 = this.posNotes);
+					float num = dictionary2[note];
+					dictionary[note] = num + value;
+				}
+			}
+			else
+			{
+				this.accNegative += value;
+				if (note != null && this.negNotes != null)
+				{
+					if (!this.negNotes.ContainsKey(note))
+					{
+						this.negNotes[note] = 0f;
+					}
+					Dictionary<string, float> dictionary4;
+					Dictionary<string, float> dictionary3 = (dictionary4 = this.negNotes);
+					float num = dictionary4[note];
+					dictionary3[note] = num + value;
+				}
+			}
+		}
+
+		public bool HasContextEntries()
+		{
+			return this.contextEntries.Count > 0;
+		}
+
+		public List<ReportManager.ReportEntry> GetContextEntries()
+		{
+			return this.contextEntries;
+		}
+
 		[Serialize]
-		public int gameHash;
+		public int gameHash = -1;
+
+		[Serialize]
+		public ReportManager.ReportType reportType;
+
+		[Serialize]
+		public string context;
 
 		[Serialize]
 		public float accumulate;
@@ -274,6 +326,9 @@ public class ReportManager : KMonoBehaviour
 
 		[Serialize]
 		public float accNegative;
+
+		[Serialize]
+		public List<ReportManager.ReportEntry> contextEntries = new List<ReportManager.ReportEntry>();
 
 		[Serialize]
 		public Dictionary<string, float> posNotes = new Dictionary<string, float>();
@@ -288,21 +343,29 @@ public class ReportManager : KMonoBehaviour
 		{
 			foreach (KeyValuePair<ReportManager.ReportType, ReportManager.ReportGroup> keyValuePair in manager.ReportGroups)
 			{
-				this.reportEntries.Add(new ReportManager.ReportEntry((int)keyValuePair.Key));
+				this.reportEntries.Add(new ReportManager.ReportEntry(keyValuePair.Key, null));
 			}
 		}
 
-		public ReportManager.ReportEntry GetEntry(ReportManager.ReportType hash)
+		public ReportManager.ReportEntry GetEntry(ReportManager.ReportType reportType)
 		{
 			for (int i = 0; i < this.reportEntries.Count; i++)
 			{
 				ReportManager.ReportEntry reportEntry = this.reportEntries[i];
-				if (reportEntry.gameHash == (int)hash)
+				if (reportEntry.reportType == reportType)
 				{
 					return reportEntry;
 				}
 			}
-			return null;
+			ReportManager.ReportEntry reportEntry2 = new ReportManager.ReportEntry(reportType, null);
+			this.reportEntries.Add(reportEntry2);
+			return reportEntry2;
+		}
+
+		public void AddData(ReportManager.ReportType reportType, float value, string note = null, string context = null)
+		{
+			ReportManager.ReportEntry entry = this.GetEntry(reportType);
+			entry.AddData(value, note, context);
 		}
 
 		[Serialize]

@@ -110,8 +110,10 @@ public class KBatchedAnimTracker : MonoBehaviour
 				}
 				else
 				{
-					base.transform.up = matrix4x.MultiplyVector(Vector3.up);
-					base.transform.right = matrix4x.MultiplyVector(Vector3.right);
+					Vector3 vector2 = ((!this.controller.FlipX) ? Vector3.right : Vector3.left);
+					Vector3 vector3 = ((!this.controller.FlipY) ? Vector3.up : Vector3.down);
+					base.transform.up = matrix4x.MultiplyVector(vector3);
+					base.transform.right = matrix4x.MultiplyVector(vector2);
 				}
 				base.transform.SetPosition(new Vector3(base.transform.position.x, base.transform.position.y, z));
 				this.myAnim.MarkDirty();

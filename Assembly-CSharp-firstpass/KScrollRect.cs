@@ -14,7 +14,6 @@ public class KScrollRect : ScrollRect
 		base.inertia = this.default_intertia;
 		base.decelerationRate = this.default_decelerationRate;
 		base.scrollSensitivity = 1f;
-		base.movementType = ScrollRect.MovementType.Elastic;
 		foreach (KeyValuePair<KScrollRect.SoundType, string> keyValuePair in KScrollRect.DefaultSounds)
 		{
 			this.currentSounds[keyValuePair.Key] = keyValuePair.Value;
@@ -23,11 +22,11 @@ public class KScrollRect : ScrollRect
 
 	public override void OnScroll(PointerEventData data)
 	{
-		if (base.vertical)
+		if (base.vertical && this.allowVerticalScrollWheel)
 		{
 			this.scrollVelocity += data.scrollDelta.y * this.verticalScrollInertiaScale;
 		}
-		else if (base.horizontal)
+		else if (base.horizontal && this.allowHorizontalScrollWheel)
 		{
 			this.scrollVelocity -= data.scrollDelta.y * this.horizontalScrollInertiaScale;
 		}
@@ -102,21 +101,21 @@ public class KScrollRect : ScrollRect
 		else
 		{
 			Vector2 anchoredPosition = base.content.anchoredPosition;
-			if (base.vertical)
+			if (base.vertical && this.allowVerticalScrollWheel)
 			{
 				anchoredPosition.y -= this.scrollVelocity;
 			}
-			if (base.horizontal)
+			if (base.horizontal && this.allowHorizontalScrollWheel)
 			{
 				anchoredPosition.x -= this.scrollVelocity;
 			}
 			base.content.anchoredPosition = anchoredPosition;
 		}
-		if (base.vertical && (base.verticalNormalizedPosition < -0.05f || base.verticalNormalizedPosition > 1.05f))
+		if (base.vertical && this.allowVerticalScrollWheel && (base.verticalNormalizedPosition < -0.05f || base.verticalNormalizedPosition > 1.05f))
 		{
 			this.scrollVelocity *= 0.9f;
 		}
-		if (base.horizontal && (base.horizontalNormalizedPosition < -0.05f || base.horizontalNormalizedPosition > 1.05f))
+		if (base.horizontal && this.allowHorizontalScrollWheel && (base.horizontalNormalizedPosition < -0.05f || base.horizontalNormalizedPosition > 1.05f))
 		{
 			this.scrollVelocity *= 0.9f;
 		}
@@ -139,6 +138,12 @@ public class KScrollRect : ScrollRect
 	private float horizontalScrollInertiaScale = 5f;
 
 	private float scrollDeceleration = 0.25f;
+
+	[SerializeField]
+	public bool allowHorizontalScrollWheel = true;
+
+	[SerializeField]
+	public bool allowVerticalScrollWheel = true;
 
 	public enum SoundType
 	{

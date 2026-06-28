@@ -89,11 +89,11 @@ namespace Rendering
 		{
 			if (src != null && target != null)
 			{
-				BuildingDef def = src.GetComponent<Building>().Def;
-				BuildingDef def2 = target.GetComponent<Building>().Def;
-				if (def != null && def2 != null)
+				IBlockTileInfo component = src.GetComponent<IBlockTileInfo>();
+				IBlockTileInfo component2 = target.GetComponent<IBlockTileInfo>();
+				if (component != null && component2 != null)
 				{
-					return def.SceneLayer == def2.SceneLayer;
+					return component.GetBlockTileConnectorID() == component2.GetBlockTileConnectorID();
 				}
 			}
 			return false;
@@ -196,7 +196,7 @@ namespace Rendering
 			if (!this.renderInfo.TryGetValue(keyValuePair, out renderInfo))
 			{
 				float num = ((element != SimHashes.Void) ? 1f : 0f);
-				renderInfo = new BlockTileRenderer.RenderInfo((int)def.TileLayer, renderLayer, def, element, num);
+				renderInfo = new BlockTileRenderer.RenderInfo(this, (int)def.TileLayer, renderLayer, def, element, num);
 				this.renderInfo[keyValuePair] = renderInfo;
 			}
 			renderInfo.AddCell(cell);
@@ -314,7 +314,7 @@ namespace Rendering
 
 		protected class RenderInfo
 		{
-			public RenderInfo(int queryLayer, int renderLayer, BuildingDef def, SimHashes element, float tint_scale)
+			public RenderInfo(BlockTileRenderer renderer, int queryLayer, int renderLayer, BuildingDef def, SimHashes element, float tint_scale)
 			{
 				this.queryLayer = queryLayer;
 				this.renderLayer = renderLayer;
@@ -324,7 +324,22 @@ namespace Rendering
 				{
 					this.material.renderQueue = 3700;
 				}
-				this.material.SetTexture("_MainTex", (element != SimHashes.Void) ? def.BlockTileAtlas.texture : def.BlockTilePlaceAtlas.texture);
+				this.material.DisableKeyword("ENABLE_SHINE");
+				if (element != SimHashes.Void)
+				{
+					this.material.SetTexture("_MainTex", def.BlockTileAtlas.texture);
+					this.material.name = def.BlockTileAtlas.name + "Mat";
+					if (def.BlockTileShineAtlas != null)
+					{
+						this.material.SetTexture("_SpecularTex", def.BlockTileShineAtlas.texture);
+						this.material.EnableKeyword("ENABLE_SHINE");
+					}
+				}
+				else
+				{
+					this.material.SetTexture("_MainTex", def.BlockTilePlaceAtlas.texture);
+					this.material.name = def.BlockTilePlaceAtlas.name + "Mat";
+				}
 				this.material.SetFloat("_DarkenTintScale", tint_scale);
 				int num = Grid.WidthInCells / 16;
 				int num2 = Grid.HeightInCells / 16;
@@ -604,6 +619,15 @@ namespace Rendering
 				}
 				this.material.SetTexture("_MainTex", decorInfo.atlas.texture);
 				this.material.SetFloat("_DarkenTintScale", tint_scale);
+				if (decorInfo.atlasSpec != null)
+				{
+					this.material.SetTexture("_SpecularTex", decorInfo.atlasSpec.texture);
+					this.material.EnableKeyword("ENABLE_SHINE");
+				}
+				else
+				{
+					this.material.DisableKeyword("ENABLE_SHINE");
+				}
 				this.meshChunks = new Mesh[num_x_chunks, num_y_chunks];
 			}
 

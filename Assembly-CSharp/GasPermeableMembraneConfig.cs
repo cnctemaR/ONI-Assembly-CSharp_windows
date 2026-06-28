@@ -40,7 +40,8 @@ public class GasPermeableMembraneConfig : IBuildingConfig
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.setLiquidImpermeable = true;
 		simCellOccupier.doReplaceElement = false;
-		go.AddOrGet<KAnimGridTileVisualizer>();
+		KAnimGridTileVisualizer kanimGridTileVisualizer = go.AddOrGet<KAnimGridTileVisualizer>();
+		kanimGridTileVisualizer.blockTileConnectorID = MeshTileConfig.BlockTileConnectorID;
 		BuildingHP buildingHP = go.AddOrGet<BuildingHP>();
 		buildingHP.destroyOnDamaged = true;
 		go.AddComponent<SimTemperatureTransfer>();
@@ -56,4 +57,6 @@ public class GasPermeableMembraneConfig : IBuildingConfig
 		base.DoPostConfigureUnderConstruction(go);
 		go.AddOrGet<KAnimGridTileVisualizer>();
 	}
+
+	public const string ID = "GasPermeableMembrane";
 }

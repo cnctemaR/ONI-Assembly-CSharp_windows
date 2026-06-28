@@ -16,7 +16,7 @@ public class ReactableTransitionLayer : TransitionDriver.OverrideLayer
 	{
 		base.BeginTransition(navigator, transition);
 		ReactionMonitor.Instance reaction_monitor = navigator.GetSMI<ReactionMonitor.Instance>();
-		reaction_monitor.PollForReactables();
+		reaction_monitor.PollForReactables(transition);
 		if (reaction_monitor.IsReacting())
 		{
 			transition.anim = null;

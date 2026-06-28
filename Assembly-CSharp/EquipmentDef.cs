@@ -46,9 +46,9 @@ public class EquipmentDef : Def
 
 	public List<AttributeModifier> AttributeModifiers;
 
-	public PathFinderFlags PathFinderFlags;
-
 	public string RecipeDescription;
+
+	public List<Effect> EffectImmunites = new List<Effect>();
 
 	public Action<Equippable> OnEquipCallBack;
 
@@ -59,6 +59,8 @@ public class EquipmentDef : Def
 	public float width;
 
 	public float height = 0.325f;
+
+	public Tag[] AdditionalTags;
 
 	public List<Descriptor> additionalDescriptors = new List<Descriptor>();
 }

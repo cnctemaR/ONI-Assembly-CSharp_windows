@@ -162,8 +162,7 @@ public class SimDebugView : KMonoBehaviour
 	{
 		float num = (temperature - minTempExpected) / (maxTempExpected - minTempExpected);
 		float num2 = Mathf.Clamp(num, 0f, 1f);
-		ColourHSV colourHSV = new ColourHSV(10f + (1f - num2) * 171f, 1f, 1f);
-		return colourHSV.ToColor();
+		return Color.HSVToRGB((10f + (1f - num2) * 171f) / 360f, 1f, 1f);
 	}
 
 	public Color NormalizedTemperature(float temperature)
@@ -224,9 +223,9 @@ public class SimDebugView : KMonoBehaviour
 	{
 		Color color = Color.black;
 		bool flag = (byte)(Grid.Element[cell].state & Element.State.TemperatureInsulated) != 0;
-		if (viewMode != SimViewMode.TemperatureMapOld)
+		if (viewMode != SimViewMode.PressureMap)
 		{
-			if (viewMode != SimViewMode.PressureMap)
+			if (viewMode != SimViewMode.Rooms)
 			{
 				if (viewMode != SimViewMode.MinionOccupied)
 				{
@@ -268,67 +267,87 @@ public class SimDebugView : KMonoBehaviour
 																						{
 																							if (viewMode != SimViewMode.Decor)
 																							{
-																								if (viewMode != SimViewMode.OxygenMap)
+																								if (viewMode != SimViewMode.Joules)
 																								{
-																									if (viewMode != SimViewMode.MinionGroupProber)
+																									if (viewMode != SimViewMode.OxygenMap)
 																									{
-																										if (viewMode != SimViewMode.SimCheckErrorMap)
+																										if (viewMode != SimViewMode.MinionGroupProber)
 																										{
-																											if (viewMode != SimViewMode.TileType)
+																											if (viewMode != SimViewMode.SimCheckErrorMap)
 																											{
-																												if (viewMode != SimViewMode.Crop)
+																												if (viewMode != SimViewMode.TileType)
 																												{
-																													if (viewMode == SimViewMode.MassMap)
+																													if (viewMode != SimViewMode.Crop)
 																													{
-																														if (!flag)
+																														if (viewMode == SimViewMode.MassMap)
 																														{
-																															float mass = Grid.Cell[cell].mass;
-																															if (mass > 0f)
+																															if (!flag)
 																															{
-																																float num = (mass - SimDebugView.Instance.minMassExpected) / (SimDebugView.Instance.maxMassExpected - SimDebugView.Instance.minMassExpected);
-																																ColourHSV colourHSV = new ColourHSV((1f - num) * 100f, 1f, 1f);
-																																color = colourHSV.ToColor();
+																																float mass = Grid.Cell[cell].mass;
+																																if (mass > 0f)
+																																{
+																																	float num = (mass - SimDebugView.Instance.minMassExpected) / (SimDebugView.Instance.maxMassExpected - SimDebugView.Instance.minMassExpected);
+																																	color = Color.HSVToRGB(1f - num, 1f, 1f);
+																																}
 																															}
-																														}
-																														return color;
-																													}
-																													if (viewMode != SimViewMode.HarvestWhenReady)
-																													{
-																														if (viewMode != SimViewMode.Priorities)
-																														{
 																															return color;
 																														}
-																														return Color.black;
+																														if (viewMode != SimViewMode.HarvestWhenReady)
+																														{
+																															if (viewMode == SimViewMode.Priorities)
+																															{
+																																return Color.black;
+																															}
+																															if (viewMode == SimViewMode.TemperatureMapOld)
+																															{
+																																if (!flag)
+																																{
+																																	color = SimDebugView.TemperatureToColor(Grid.Temperature[cell], this.minTempExpected, this.maxTempExpected);
+																																}
+																																return color;
+																															}
+																															if (viewMode != SimViewMode.NoisePollution)
+																															{
+																																return color;
+																															}
+																															return this.GetNoisePollutionColour(cell);
+																														}
 																													}
+																													color = Color.black;
 																												}
-																												color = Color.black;
+																												else
+																												{
+																													color = this.GetTileTypeColour(cell);
+																												}
 																											}
 																											else
 																											{
-																												color = this.GetTileTypeColour(cell);
+																												color = this.GetSimCheckErrorMapColour(cell);
 																											}
 																										}
 																										else
 																										{
-																											color = this.GetSimCheckErrorMapColour(cell);
+																											int cost = MinionGroupProber.Get().GetPathProber().GetCost(cell);
+																											if (cost != PathProber.InvalidCost)
+																											{
+																												color = Color.white;
+																											}
+																											else
+																											{
+																												color = Color.black;
+																											}
 																										}
 																									}
 																									else
 																									{
-																										int cost = MinionGroupProber.Get().GetPathProber().GetCost(cell);
-																										if (cost != PathProber.InvalidCost)
-																										{
-																											color = Color.white;
-																										}
-																										else
-																										{
-																											color = Color.black;
-																										}
+																										color = this.GetOxygenMapColour(cell);
 																									}
 																								}
 																								else
 																								{
-																									color = this.GetOxygenMapColour(cell);
+																									float num2 = Grid.Element[cell].specificHeatCapacity * Grid.Temperature[cell] * (Grid.Cell[cell].mass * 1000f);
+																									float num3 = 0.5f * num2 / (ElementLoader.FindElementByHash(SimHashes.SandStone).specificHeatCapacity * 294f * 1000000f);
+																									color = Color.Lerp(Color.black, Color.red, num3);
 																								}
 																							}
 																							else
@@ -357,7 +376,7 @@ public class SimDebugView : KMonoBehaviour
 																			}
 																			else
 																			{
-																				color = ((Grid.LightCount[cell] <= 0) ? new Color32(0, 0, 0, byte.MaxValue) : Lighting.Instance.Settings.LightColour);
+																				color = ((Grid.LightCount[cell] <= 0 && !LightGridManager.previewLightCells.Contains(cell)) ? new Color32(0, 0, 0, byte.MaxValue) : Lighting.Instance.Settings.LightColour);
 																			}
 																		}
 																		else
@@ -463,7 +482,7 @@ public class SimDebugView : KMonoBehaviour
 						}
 						else
 						{
-							color = ((!Grid.SuitRequired[cell]) ? Color.black : Color.red);
+							color = Color.black;
 						}
 					}
 					else
@@ -478,21 +497,30 @@ public class SimDebugView : KMonoBehaviour
 			}
 			else
 			{
-				color = this.GetPressureMapColour(cell);
+				CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(cell);
+				if (cavityForCell != null && cavityForCell.room != null)
+				{
+					Room room = cavityForCell.room;
+					color = RoomTypes.GetRoomType(room).category.color;
+					color.a = 0.45f;
+					int num4 = Grid.PosToCell(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+					CavityInfo cavityForCell2 = Game.Instance.roomProber.GetCavityForCell(num4);
+					if (cavityForCell2 == cavityForCell)
+					{
+						color.a += 0.3f;
+					}
+				}
+				else
+				{
+					color = Color.black;
+				}
 			}
 		}
-		else if (!flag)
+		else
 		{
-			color = SimDebugView.TemperatureToColor(Grid.Temperature[cell], this.minTempExpected, this.maxTempExpected);
+			color = this.GetPressureMapColour(cell);
 		}
 		return color;
-	}
-
-	public Color[] GetRoomColours()
-	{
-		Color[] array = new Color[this.roomColours.Length];
-		this.roomColours.CopyTo(array, 0);
-		return array;
 	}
 
 	private Color GetGameGridColour(int cell, SimDebugView.GameGridMode mode)
@@ -504,21 +532,13 @@ public class SimDebugView : KMonoBehaviour
 			color = ((!Grid.Solid[cell]) ? Color.black : Color.white);
 			break;
 		case SimDebugView.GameGridMode.Lighting:
-			color = ((Grid.LightCount[cell] <= 0) ? Color.black : Color.white);
+			color = ((Grid.LightCount[cell] <= 0 && !LightGridManager.previewLightCells.Contains(cell)) ? Color.black : Color.white);
 			break;
-		case SimDebugView.GameGridMode.RoomMap:
-		{
-			ushort num = Grid.Room[cell];
-			int num2 = (int)num % this.roomColours.Length;
-			color = ((num == ushort.MaxValue) ? Color.black : this.roomColours[num2]);
-			break;
-		}
 		case SimDebugView.GameGridMode.DigAmount:
 			if (Grid.Element[cell].IsSolid)
 			{
-				float num3 = Grid.Damage[cell] / 255f;
-				ColourHSV colourHSV = new ColourHSV((1f - num3) * 350f, 1f, 1f);
-				color = colourHSV.ToColor();
+				float num = Grid.Damage[cell] / 255f;
+				color = Color.HSVToRGB(1f - num, 1f, 1f);
 			}
 			break;
 		case SimDebugView.GameGridMode.ForceField:
@@ -648,38 +668,38 @@ public class SimDebugView : KMonoBehaviour
 		Color color = Color.black;
 		if (NoisePolluter.IsNoiseableCell(cell))
 		{
-			float noisePollutionAtCell = GameUtil.GetNoisePollutionAtCell(cell);
-			if (noisePollutionAtCell == 0f)
+			float num = Grid.Loudness[cell];
+			if (num == 0f)
 			{
 				color = this.dbColours[0];
 			}
-			else if (noisePollutionAtCell <= 36f)
-			{
-				color = Color.Lerp(this.dbColours[0], this.dbColours[1], Mathf.Abs(noisePollutionAtCell / 36f));
-			}
-			else if (noisePollutionAtCell >= 36f && noisePollutionAtCell < 45f)
-			{
-				color = Color.Lerp(this.dbColours[2], this.dbColours[3], Mathf.Abs(noisePollutionAtCell / 45f));
-			}
-			else if (noisePollutionAtCell >= 45f && noisePollutionAtCell < 60f)
-			{
-				color = Color.Lerp(this.dbColours[4], this.dbColours[5], Mathf.Abs((noisePollutionAtCell - 45f) / 15f));
-			}
-			else if (noisePollutionAtCell >= 60f && noisePollutionAtCell < 80f)
-			{
-				color = Color.Lerp(this.dbColours[6], this.dbColours[7], Mathf.Abs((noisePollutionAtCell - 60f) / 20f));
-			}
-			else if (noisePollutionAtCell >= 80f && noisePollutionAtCell < 106f)
-			{
-				color = Color.Lerp(this.dbColours[8], this.dbColours[9], Mathf.Abs((noisePollutionAtCell - 80f) / 26f));
-			}
-			else if (noisePollutionAtCell >= 106f && noisePollutionAtCell < 125f)
-			{
-				color = Color.Lerp(this.dbColours[10], this.dbColours[11], Mathf.Abs((noisePollutionAtCell - 106f) / 19f));
-			}
 			else
 			{
-				color = this.dbColours[11];
+				float num2 = AudioEventManager.LoudnessToDB(num);
+				if (num2 <= 36f)
+				{
+					color = Color.Lerp(this.dbColours[0], this.dbColours[1], Mathf.Abs(num2 / 36f));
+				}
+				else if (num2 >= 36f && num2 < 45f)
+				{
+					color = Color.Lerp(this.dbColours[2], this.dbColours[3], Mathf.Abs(num2 / 45f));
+				}
+				else if (num2 >= 45f && num2 < 60f)
+				{
+					color = Color.Lerp(this.dbColours[4], this.dbColours[5], Mathf.Abs((num2 - 45f) / 15f));
+				}
+				else if (num2 >= 60f && num2 < 80f)
+				{
+					color = Color.Lerp(this.dbColours[6], this.dbColours[7], Mathf.Abs((num2 - 60f) / 20f));
+				}
+				else if (num2 >= 80f && num2 < 106f)
+				{
+					color = Color.Lerp(this.dbColours[8], this.dbColours[9], Mathf.Abs((num2 - 80f) / 26f));
+				}
+				else
+				{
+					color = Color.Lerp(this.dbColours[10], this.dbColours[11], Mathf.Abs((num2 - 106f) / 19f));
+				}
 			}
 		}
 		return color;
@@ -688,7 +708,7 @@ public class SimDebugView : KMonoBehaviour
 	public Color GetNoisePollutionCategoryColourFromDecibels(float db)
 	{
 		Color color = Color.white;
-		if (db <= 36f)
+		if (db < 36f)
 		{
 			color = Color.Lerp(this.dbColours[0], this.dbColours[1], 0.8f);
 		}
@@ -708,13 +728,40 @@ public class SimDebugView : KMonoBehaviour
 		{
 			color = Color.Lerp(this.dbColours[8], this.dbColours[9], 0.5f);
 		}
-		else if (db >= 106f && db < 125f)
+		else
 		{
 			color = Color.Lerp(this.dbColours[10], this.dbColours[11], 0.5f);
 		}
+		color.a = 1f;
+		return color;
+	}
+
+	public Color GetNoisePollutionHoverColourFromDecibels(float db)
+	{
+		Color color = Color.white;
+		if (db <= 36f)
+		{
+			color = Color.Lerp(this.dbColours[0], this.dbColours[1], 0.3f);
+		}
+		else if (db >= 36f && db < 45f)
+		{
+			color = Color.Lerp(this.dbColours[2], this.dbColours[3], 0.5f);
+		}
+		else if (db >= 45f && db < 60f)
+		{
+			color = Color.Lerp(this.dbColours[4], this.dbColours[5], 0.5f);
+		}
+		else if (db >= 60f && db < 80f)
+		{
+			color = Color.Lerp(this.dbColours[6], this.dbColours[7], 0.5f);
+		}
+		else if (db >= 80f && db < 106f)
+		{
+			color = Color.Lerp(this.dbColours[8], this.dbColours[9], 0.5f);
+		}
 		else
 		{
-			color = this.dbColours[11];
+			color = Color.Lerp(this.dbColours[10], this.dbColours[11], 0.5f);
 		}
 		color.a = 1f;
 		return color;
@@ -725,15 +772,15 @@ public class SimDebugView : KMonoBehaviour
 		Color color = Color.black;
 		if (!Grid.Solid[cell])
 		{
-			float num = (float)GameUtil.GetDecorAtCell(cell);
-			float num2 = num / 100f;
-			if (num2 > 0f)
+			float decorAtCell = GameUtil.GetDecorAtCell(cell);
+			float num = decorAtCell / 100f;
+			if (num > 0f)
 			{
-				color = Color.Lerp(new Color(0.15f, 0f, 0f), new Color(0f, 1f, 0f), Mathf.Abs(num2));
+				color = Color.Lerp(new Color(0.15f, 0f, 0f), new Color(0f, 1f, 0f), Mathf.Abs(num));
 			}
 			else
 			{
-				color = Color.Lerp(new Color(0.15f, 0f, 0f), new Color(1f, 0f, 0f), Mathf.Abs(num2));
+				color = Color.Lerp(new Color(0.15f, 0f, 0f), new Color(1f, 0f, 0f), Mathf.Abs(num));
 			}
 		}
 		return color;
@@ -789,8 +836,7 @@ public class SimDebugView : KMonoBehaviour
 		if (dangerAmount != SimDebugView.DangerAmount.None)
 		{
 			float num2 = (float)dangerAmount / 6f;
-			ColourHSV colourHSV = new ColourHSV(80f - num2 * 80f, 1f, 1f);
-			color = colourHSV.ToColor();
+			color = Color.HSVToRGB((80f - num2 * 80f) / 360f, 1f, 1f);
 		}
 		return color;
 	}
@@ -906,18 +952,6 @@ public class SimDebugView : KMonoBehaviour
 	private static float maxMinionTemperature = 310f;
 
 	private static float minMinionPressure = 80f;
-
-	[SerializeField]
-	private Color[] roomColours = new Color[]
-	{
-		new Color(1f, 0f, 0f),
-		new Color(0f, 1f, 0f),
-		new Color(0f, 0f, 1f),
-		new Color(1f, 1f, 0f),
-		new Color(1f, 0f, 1f),
-		new Color(0f, 1f, 1f),
-		new Color(1f, 1f, 1f)
-	};
 
 	public Color[] dbColours = new Color[]
 	{

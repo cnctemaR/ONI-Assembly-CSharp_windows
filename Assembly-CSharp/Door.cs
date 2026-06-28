@@ -65,7 +65,6 @@ public class Door : Workable, ISaveLoadable
 		StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
 		HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
 		structureTemperatures.Disable(handle);
-		Game.Instance.roomProber.AddDoor(this);
 		this.requestedState = this.CurrentState;
 		this.RefreshControlState();
 		this.OnOperationalChanged(null);
@@ -134,6 +133,7 @@ public class Door : Workable, ISaveLoadable
 				}
 			}
 		}
+		Game.Instance.roomProber.AddDoor(this, list2, list);
 	}
 
 	protected override void OnCleanUp()
@@ -171,7 +171,6 @@ public class Door : Workable, ISaveLoadable
 				}
 			}
 		}
-		Game.Instance.roomProber.RemoveDoor(this);
 		foreach (int num3 in this.building.PlacementCells)
 		{
 			Grid.HasDoor[num3] = false;
@@ -180,6 +179,7 @@ public class Door : Workable, ISaveLoadable
 			Grid.Impassable[num3] = false;
 			Pathfinding.Instance.AddDirtyNavGridCell(num3);
 		}
+		Game.Instance.roomProber.RemoveDoor(this);
 	}
 
 	public bool isSealed
@@ -217,6 +217,7 @@ public class Door : Workable, ISaveLoadable
 			this.controller.sm.isLocked.Set(true, this.controller);
 			break;
 		}
+		this.Trigger(279163026, this.controlState);
 		this.SetWorldState();
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.CurrentDoorControlState, this);
 	}
@@ -329,7 +330,7 @@ public class Door : Workable, ISaveLoadable
 				this.changeStateChore.Cancel("Change state");
 			}
 			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.ChangeDoorControlState, this);
-			this.changeStateChore = new WorkChore<Door>(Db.Get().ChoreTypes.Toggle, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true);
+			this.changeStateChore = new WorkChore<Door>(Db.Get().ChoreTypes.Toggle, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true, int.MaxValue);
 		}
 	}
 
@@ -458,7 +459,7 @@ public class Door : Workable, ISaveLoadable
 	private KBatchedAnimController animController;
 
 	[MyCmpReq]
-	private Building building;
+	public Building building;
 
 	[MyCmpGet]
 	private EnergyConsumer consumer;
@@ -575,6 +576,8 @@ public class Door : Workable, ISaveLoadable
 				if (smi.master.GetComponent<Unsealable>().unsealed)
 				{
 					smi.GoTo(this.opening);
+					FogOfWarMask.ClearMask(Grid.CellRight(Grid.PosToCell(smi.master.gameObject)));
+					FogOfWarMask.ClearMask(Grid.CellLeft(Grid.PosToCell(smi.master.gameObject)));
 				}
 				else
 				{
@@ -585,7 +588,7 @@ public class Door : Workable, ISaveLoadable
 
 		private Chore CreateUnsealChore(Door.Controller.Instance smi, bool approach_right)
 		{
-			return new WorkChore<Unsealable>(Db.Get().ChoreTypes.Toggle, smi.master, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true);
+			return new WorkChore<Unsealable>(Db.Get().ChoreTypes.Toggle, smi.master, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true, int.MaxValue);
 		}
 
 		public GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.State open;

@@ -16,7 +16,7 @@ public class PrioritizeTool : DragTool
 	{
 		int screenPriority = ToolMenuPriorityScreen.Instance.GetScreenPriority();
 		int num = 0;
-		for (int i = 0; i < 23; i++)
+		for (int i = 0; i < 25; i++)
 		{
 			GameObject gameObject = Grid.Objects[cell, i];
 			if (gameObject != null)

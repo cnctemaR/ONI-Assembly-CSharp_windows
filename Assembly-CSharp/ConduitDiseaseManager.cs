@@ -1,6 +1,7 @@
 ﻿using System;
 using Klei;
 using Klei.AI;
+using Klei.AI.DiseaseGrowthRules;
 
 public class ConduitDiseaseManager : KCompactedVector<ConduitDiseaseManager.Data>
 {
@@ -10,9 +11,9 @@ public class ConduitDiseaseManager : KCompactedVector<ConduitDiseaseManager.Data
 		this.temperatureManager = temperature_manager;
 	}
 
-	private static Disease.ElemGrowthInfo GetGrowthInfo(byte disease_idx, byte elem_idx)
+	private static ElemGrowthInfo GetGrowthInfo(byte disease_idx, byte elem_idx)
 	{
-		Disease.ElemGrowthInfo elemGrowthInfo;
+		ElemGrowthInfo elemGrowthInfo;
 		if (disease_idx != 255)
 		{
 			Disease disease = Db.Get().Diseases[(int)disease_idx];
@@ -28,7 +29,7 @@ public class ConduitDiseaseManager : KCompactedVector<ConduitDiseaseManager.Data
 	public HandleVector<int>.Handle Allocate(HandleVector<int>.Handle temperature_handle, ref ConduitFlow.ConduitContents contents)
 	{
 		byte b = (byte)ElementLoader.GetElementIndex(contents.element);
-		ConduitDiseaseManager.Data data = new ConduitDiseaseManager.Data(temperature_handle, b, contents.diseaseIdx, contents.diseaseCount);
+		ConduitDiseaseManager.Data data = new ConduitDiseaseManager.Data(temperature_handle, b, contents.mass, contents.diseaseIdx, contents.diseaseCount);
 		return base.Allocate(data);
 	}
 
@@ -54,7 +55,7 @@ public class ConduitDiseaseManager : KCompactedVector<ConduitDiseaseManager.Data
 				if (data.diseaseIdx != 255)
 				{
 					float num = data.accumulatedError;
-					num += data.growthInfo.CalculateDiseaseCountDelta(data.diseaseCount, dt);
+					num += data.growthInfo.CalculateDiseaseCountDelta(data.diseaseCount, data.mass, dt);
 					Disease disease = Db.Get().Diseases[(int)data.diseaseIdx];
 					float temperature = this.temperatureManager.GetData(data.temperatureHandle).temperature;
 					float num2 = Disease.CalculateRangeHalfLife(temperature, ref disease.temperatureRange, ref disease.temperatureHalfLives);
@@ -99,10 +100,11 @@ public class ConduitDiseaseManager : KCompactedVector<ConduitDiseaseManager.Data
 
 	public struct Data
 	{
-		public Data(HandleVector<int>.Handle temperature_handle, byte elem_idx, byte disease_idx, int disease_count)
+		public Data(HandleVector<int>.Handle temperature_handle, byte elem_idx, float mass, byte disease_idx, int disease_count)
 		{
 			this.diseaseIdx = disease_idx;
 			this.elemIdx = elem_idx;
+			this.mass = mass;
 			this.diseaseCount = disease_count;
 			this.accumulatedError = 0f;
 			this.temperatureHandle = temperature_handle;
@@ -117,8 +119,10 @@ public class ConduitDiseaseManager : KCompactedVector<ConduitDiseaseManager.Data
 
 		public float accumulatedError;
 
+		public float mass;
+
 		public HandleVector<int>.Handle temperatureHandle;
 
-		public Disease.ElemGrowthInfo growthInfo;
+		public ElemGrowthInfo growthInfo;
 	}
 }

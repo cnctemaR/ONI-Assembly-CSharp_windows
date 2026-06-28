@@ -190,7 +190,8 @@ public class GroundRenderer : KMonoBehaviour
 				this.InitOpaqueMaterial(material, element);
 				Material material2 = new Material(material);
 				this.InitAlphaMaterial(material2, element);
-				this.elementMaterials[element.id] = new GroundRenderer.Materials(material, material2);
+				GroundRenderer.Materials materials = new GroundRenderer.Materials(material, material2);
+				this.elementMaterials[element.id] = materials;
 			}
 		}
 		if (this.worldChunks != null)
@@ -246,6 +247,7 @@ public class GroundRenderer : KMonoBehaviour
 			global::UnityEngine.Object.Destroy(materials.opaque);
 			global::UnityEngine.Object.Destroy(materials.alpha);
 		}
+		this.elementMaterials.Clear();
 	}
 
 	private const int ChunkEdgeSize = 16;
@@ -265,6 +267,7 @@ public class GroundRenderer : KMonoBehaviour
 
 	private static bool forceVisibleRebuild;
 
+	[Serializable]
 	private struct Materials
 	{
 		public Materials(Material opaque, Material alpha)
@@ -558,7 +561,7 @@ public class GroundRenderer : KMonoBehaviour
 			{
 				return 0;
 			}
-			return (int)World.Instance.zoneRenderData.GetSubWorldZoneType(cell);
+			return (int)global::World.Instance.zoneRenderData.GetSubWorldZoneType(cell);
 		}
 
 		private static float GetStaticRandom(int x, int y)

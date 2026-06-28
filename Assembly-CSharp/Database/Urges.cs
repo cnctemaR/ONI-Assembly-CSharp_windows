@@ -20,7 +20,6 @@ namespace Database
 			this.Shower = base.Add(new Urge("Shower"));
 			this.Eat = base.Add(new Urge("Eat"));
 			this.Pee = base.Add(new Urge("Pee"));
-			this.TakeMedicine = base.Add(new Urge("TakeMedicine"));
 			this.RestDueToDisease = base.Add(new Urge("RestDueToDisease"));
 			this.Sleep = base.Add(new Urge("Sleep"));
 			this.Narcolepsy = base.Add(new Urge("Narcolepsy"));
@@ -71,8 +70,6 @@ namespace Database
 		public Urge PacifySleep;
 
 		public Urge PacifyRelocate;
-
-		public Urge TakeMedicine;
 
 		public Urge RestDueToDisease;
 

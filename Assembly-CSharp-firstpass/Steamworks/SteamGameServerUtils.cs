@@ -183,5 +183,17 @@ namespace Steamworks
 			InteropHelp.TestIfAvailableGameServer();
 			NativeMethods.ISteamGameServerUtils_StartVRDashboard();
 		}
+
+		public static bool IsVRHeadsetStreamingEnabled()
+		{
+			InteropHelp.TestIfAvailableGameServer();
+			return NativeMethods.ISteamGameServerUtils_IsVRHeadsetStreamingEnabled();
+		}
+
+		public static void SetVRHeadsetStreamingEnabled(bool bEnabled)
+		{
+			InteropHelp.TestIfAvailableGameServer();
+			NativeMethods.ISteamGameServerUtils_SetVRHeadsetStreamingEnabled(bEnabled);
+		}
 	}
 }

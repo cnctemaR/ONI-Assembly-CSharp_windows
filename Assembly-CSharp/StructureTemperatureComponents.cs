@@ -32,7 +32,7 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 		{
 			return;
 		}
-		this.operatingEnergyStatusItem = new StatusItem("OperatingEnergy", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true, 2046);
+		this.operatingEnergyStatusItem = new StatusItem("OperatingEnergy", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 14334);
 		this.operatingEnergyStatusItem.resolveStringCallback = delegate(string str, object ev_data)
 		{
 			int num = (int)ev_data;
@@ -42,7 +42,7 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 			{
 				try
 				{
-					str = string.Format(str, GameUtil.GetFormattedWattage(data.TotalEnergyProducedKW * 1000f * 0.005f, "F1"));
+					str = string.Format(str, GameUtil.GetFormattedWattage(data.TotalEnergyProducedKW * 1000f * 0.005f, GameUtil.WattageFormatterUnit.Automatic));
 				}
 				catch (Exception ex)
 				{
@@ -56,9 +56,9 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 				string text = string.Empty;
 				foreach (StructureTemperatureData.EnergySource energySource in data.energySourcesKW)
 				{
-					text += string.Format(BUILDING.STATUSITEMS.OPERATINGENERGY.LINEITEM, energySource.source, GameUtil.GetFormattedWattage(energySource.value * 1000f * 0.005f, "F1"));
+					text += string.Format(BUILDING.STATUSITEMS.OPERATINGENERGY.LINEITEM, energySource.source, GameUtil.GetFormattedWattage(energySource.value * 1000f * 0.005f, GameUtil.WattageFormatterUnit.Automatic));
 				}
-				str = string.Format(str, GameUtil.GetFormattedWattage(data.TotalEnergyProducedKW * 1000f * 0.005f, "F1"), text);
+				str = string.Format(str, GameUtil.GetFormattedWattage(data.TotalEnergyProducedKW * 1000f * 0.005f, GameUtil.WattageFormatterUnit.Automatic), text);
 			}
 			return str;
 		};

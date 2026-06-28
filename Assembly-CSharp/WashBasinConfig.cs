@@ -9,11 +9,12 @@ public class WashBasinConfig : IBuildingConfig
 	{
 		string[] raw_MINERALS = MATERIALS.RAW_MINERALS;
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER0;
-		return BuildingTemplates.CreateBuildingDef("WashBasin", 2, 3, "wash_basin_kanim", 50f, 30, 30f, new float[] { BUILDINGS.CONSTRUCTION_MASS_KG.TIER1[0] }, raw_MINERALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER1, tier);
+		return BuildingTemplates.CreateBuildingDef("WashBasin", 2, 3, "wash_basin_kanim", 50f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER1, raw_MINERALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER1, tier);
 	}
 
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
+		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.WashStation);
 		HandSanitizer handSanitizer = go.AddOrGet<HandSanitizer>();
 		handSanitizer.massConsumedPerUse = 5f;
 		handSanitizer.consumedElement = SimHashes.Water;
@@ -40,6 +41,8 @@ public class WashBasinConfig : IBuildingConfig
 	{
 		BuildingTemplates.DoPostConfigure(go);
 	}
+
+	public const string ID = "WashBasin";
 
 	public const int DISEASE_REMOVAL_COUNT = 120000;
 

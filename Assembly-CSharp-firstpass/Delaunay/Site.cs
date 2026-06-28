@@ -13,6 +13,52 @@ namespace Delaunay
 			this.Init(p, index, weight, color);
 		}
 
+		public uint color { get; private set; }
+
+		public float weight { get; private set; }
+
+		internal List<Edge> edges
+		{
+			get
+			{
+				return this._edges;
+			}
+		}
+
+		public float x
+		{
+			get
+			{
+				return this._coord.x;
+			}
+		}
+
+		internal float y
+		{
+			get
+			{
+				return this._coord.y;
+			}
+		}
+
+		public Vector2 Coord
+		{
+			get
+			{
+				return this._coord;
+			}
+		}
+
+		public float Dist(ICoord p)
+		{
+			return Vector2.Distance(p.Coord, this._coord);
+		}
+
+		public override string ToString()
+		{
+			return "Site " + this._siteIndex.ToString() + ": " + this.Coord.ToString();
+		}
+
 		public static Site Create(Vector2 p, uint index, float weight, uint color)
 		{
 			if (Site._pool.Count > 0)
@@ -54,28 +100,9 @@ namespace Delaunay
 			return Vector2.Distance(p0, p1) < Site.EPSILON;
 		}
 
-		public Vector2 Coord
-		{
-			get
-			{
-				return this._coord;
-			}
-		}
-
-		public uint color { get; private set; }
-
-		public float weight { get; private set; }
-
-		internal List<Edge> edges
-		{
-			get
-			{
-				return this._edges;
-			}
-		}
-
 		private Site Init(Vector2 p, uint index, float weight, uint color)
 		{
+			this.scaled_weight = -1f;
 			this._coord = p;
 			this._siteIndex = index;
 			this.weight = weight;
@@ -83,11 +110,6 @@ namespace Delaunay
 			this._edges = new List<Edge>();
 			this._region = null;
 			return this;
-		}
-
-		public override string ToString()
-		{
-			return "Site " + this._siteIndex.ToString() + ": " + this.Coord.ToString();
 		}
 
 		private void Move(Vector2 p)
@@ -124,6 +146,12 @@ namespace Delaunay
 		public void AddEdge(Edge edge)
 		{
 			this._edges.Add(edge);
+		}
+
+		public Vector2 GetClosestPt(Vector2 p)
+		{
+			Vector2 normalized = (p - this._coord).normalized;
+			return this._coord + normalized * this.weight;
 		}
 
 		public Edge NearestEdge()
@@ -396,32 +424,13 @@ namespace Delaunay
 			}
 		}
 
-		public float x
-		{
-			get
-			{
-				return this._coord.x;
-			}
-		}
-
-		internal float y
-		{
-			get
-			{
-				return this._coord.y;
-			}
-		}
-
-		public float Dist(ICoord p)
-		{
-			return Vector2.Distance(p.Coord, this._coord);
-		}
-
 		private static Stack<Site> _pool = new Stack<Site>();
 
 		private static readonly float EPSILON = 0.005f;
 
 		private Vector2 _coord;
+
+		public float scaled_weight;
 
 		private uint _siteIndex;
 

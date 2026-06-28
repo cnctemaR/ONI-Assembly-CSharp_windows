@@ -17,6 +17,21 @@ namespace Steamworks
 			return NativeMethods.ISteamInventory_GetResultItems(resultHandle, pOutItemsArray, ref punOutItemsArraySize);
 		}
 
+		public static bool GetResultItemProperty(SteamInventoryResult_t resultHandle, uint unItemIndex, string pchPropertyName, out string pchValueBuffer, ref uint punValueBufferSizeOut)
+		{
+			InteropHelp.TestIfAvailableClient();
+			IntPtr intPtr = Marshal.AllocHGlobal((int)punValueBufferSizeOut);
+			bool flag2;
+			using (InteropHelp.UTF8StringHandle utf8StringHandle = new InteropHelp.UTF8StringHandle(pchPropertyName))
+			{
+				bool flag = NativeMethods.ISteamInventory_GetResultItemProperty(resultHandle, unItemIndex, utf8StringHandle, intPtr, ref punValueBufferSizeOut);
+				pchValueBuffer = ((!flag) ? null : InteropHelp.PtrToStringUTF8(intPtr));
+				Marshal.FreeHGlobal(intPtr);
+				flag2 = flag;
+			}
+			return flag2;
+		}
+
 		public static uint GetResultTimestamp(SteamInventoryResult_t resultHandle)
 		{
 			InteropHelp.TestIfAvailableClient();

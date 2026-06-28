@@ -11,17 +11,26 @@ public class KFMOD : KMonoBehaviour
 	{
 		Vector3 vector = new Vector3(position.x, position.y, 0f);
 		RuntimeManager.PlayOneShot(path, vector);
+		if (KFMODDebugger.instance != null)
+		{
+		}
 	}
 
 	public static void PlayOneShot(Guid guid, [Optional] Vector3 position)
 	{
 		Vector3 vector = new Vector3(position.x, position.y, 0f);
 		RuntimeManager.PlayOneShot(guid, vector);
+		if (KFMODDebugger.instance != null)
+		{
+		}
 	}
 
 	public static void PlayOneShot(string sound)
 	{
 		RuntimeManager.PlayOneShot(sound, default(Vector3));
+		if (KFMODDebugger.instance != null)
+		{
+		}
 	}
 
 	public static EventInstance BeginOneShot(string ev, Vector3 position)
@@ -37,9 +46,15 @@ public class KFMOD : KMonoBehaviour
 		EventInstance eventInstance = RuntimeManager.CreateInstance(ev);
 		if (eventInstance == null)
 		{
+			if (KFMODDebugger.instance != null)
+			{
+			}
 			return null;
 		}
 		Vector3 vector = new Vector3(position.x, position.y, 0f);
+		if (KFMODDebugger.instance != null)
+		{
+		}
 		return KFMOD.BeginOneShot(eventInstance, vector);
 	}
 
@@ -65,6 +80,9 @@ public class KFMOD : KMonoBehaviour
 
 	public static EventInstance CreateInstance(string path)
 	{
+		if (KFMODDebugger.instance != null)
+		{
+		}
 		return RuntimeManager.CreateInstance(path);
 	}
 

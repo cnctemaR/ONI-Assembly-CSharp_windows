@@ -183,5 +183,17 @@ namespace Steamworks
 			InteropHelp.TestIfAvailableClient();
 			NativeMethods.ISteamUtils_StartVRDashboard();
 		}
+
+		public static bool IsVRHeadsetStreamingEnabled()
+		{
+			InteropHelp.TestIfAvailableClient();
+			return NativeMethods.ISteamUtils_IsVRHeadsetStreamingEnabled();
+		}
+
+		public static void SetVRHeadsetStreamingEnabled(bool bEnabled)
+		{
+			InteropHelp.TestIfAvailableClient();
+			NativeMethods.ISteamUtils_SetVRHeadsetStreamingEnabled(bEnabled);
+		}
 	}
 }

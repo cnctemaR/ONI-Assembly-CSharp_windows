@@ -176,7 +176,7 @@ public class StatusItemGroup
 				{
 					this.gameObject.GetComponent<Notifier>().Remove(entry2.notification);
 				}
-				if (entry.item.ShouldShowIcon())
+				if (entry.item.ShouldShowIcon() && Game.Instance != null)
 				{
 					Game.Instance.RemoveStatusItem(this.gameObject.transform, entry2.item);
 				}

@@ -26,12 +26,18 @@ public class PathGrid
 		this.ProberCells = new PathGrid.ProberCell[width_in_cells * height_in_cells];
 	}
 
-	public PathFinder.Cell GetCell(PathFinder.PotentialPath potential_path)
+	public PathFinder.Cell GetCell(PathFinder.PotentialPath potential_path, int query_id)
 	{
-		return this.GetCell(potential_path.cell, potential_path.navType);
+		return this.GetCell(potential_path.cell, potential_path.navType, query_id);
 	}
 
-	public PathFinder.Cell GetCell(int cell, NavType nav_type)
+	public bool IsCellInRange(int cell)
+	{
+		int num = this.OffsetCell(cell);
+		return this.IsValidOffsetCell(num);
+	}
+
+	public PathFinder.Cell GetCell(int cell, NavType nav_type, int query_id)
 	{
 		int num = this.OffsetCell(cell);
 		if (!this.IsValidOffsetCell(num))
@@ -43,7 +49,15 @@ public class PathGrid
 		}
 		int num2 = this.NavTypeTable[(int)nav_type];
 		int num3 = num * this.ValidNavTypes.Length + num2;
-		return this.Cells[num3];
+		PathFinder.Cell cell2 = this.Cells[num3];
+		if (cell2.queryId == query_id)
+		{
+			return cell2;
+		}
+		return new PathFinder.Cell
+		{
+			cost = PathProber.InvalidCost
+		};
 	}
 
 	public void SetCell(PathFinder.PotentialPath potential_path, ref PathFinder.Cell cell_data)

@@ -104,18 +104,27 @@ public class GameClock : KMonoBehaviour, ISaveLoadable
 		{
 			text = SaveLoader.GetAutosaveFilePath();
 		}
+		int num = text.LastIndexOf("\\");
+		if (num > 0)
+		{
+			int num2 = text.IndexOf(" Cycle ", num);
+			if (num2 > 0)
+			{
+				text = text.Substring(0, num2);
+			}
+		}
 		text = text.Replace(".sav", string.Empty);
 		text = text + " Cycle " + day.ToString();
 		text = SaveScreen.GetValidSaveFilename(text);
 		string autoSavePrefix = SaveLoader.GetAutoSavePrefix();
 		text = Path.Combine(autoSavePrefix, Path.GetFileName(text));
 		string text2 = text;
-		int num = 1;
+		int num3 = 1;
 		while (File.Exists(text))
 		{
 			text = text2.Replace(".sav", string.Empty);
-			text = SaveScreen.GetValidSaveFilename(string.Concat(new object[] { text2, " (", num, ")" }));
-			num++;
+			text = SaveScreen.GetValidSaveFilename(string.Concat(new object[] { text2, " (", num3, ")" }));
+			num3++;
 		}
 		Game.Instance.StartDelayedSave(text, true, false);
 	}

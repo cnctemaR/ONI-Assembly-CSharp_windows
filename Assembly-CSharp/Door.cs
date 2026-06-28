@@ -146,7 +146,10 @@ public class Door : Workable, ISaveLoadable
 			SimMessages.ClearCellProperties(num, 12);
 			Grid.RenderedByWorld[num] = Grid.Element[num].substance.renderedByWorld;
 			Grid.FakeFloor[num] = false;
-			SimMessages.ReplaceAndDisplaceElement(num, SimHashes.Vacuum, CellEventLogger.Instance.DoorOpen, 0f, -1f, byte.MaxValue, 0, -1);
+			if (Grid.Element[num].IsSolid)
+			{
+				SimMessages.ReplaceAndDisplaceElement(num, SimHashes.Vacuum, CellEventLogger.Instance.DoorOpen, 0f, -1f, byte.MaxValue, 0, -1);
+			}
 			Pathfinding.Instance.AddDirtyNavGridCell(num);
 			if (this.rotatable.IsRotated)
 			{
@@ -286,14 +289,25 @@ public class Door : Workable, ISaveLoadable
 				World.Instance.groundRenderer.MarkDirty(num);
 				if (is_door_open)
 				{
-					HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorOpened), false));
-					int num2 = num;
-					SimHashes simHashes = SimHashes.Vacuum;
-					CellElementEvent cellElementEvent = CellEventLogger.Instance.DoorOpen;
-					float num3 = 0f;
-					float num4 = -1f;
-					int num5 = handle.index;
-					SimMessages.ReplaceElement(num2, simHashes, cellElementEvent, num3, num4, byte.MaxValue, 0, num5);
+					if (Grid.Element[num].IsGas)
+					{
+						this.OnSimDoorOpened();
+					}
+					else
+					{
+						HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorOpened), false));
+						int num2 = num;
+						SimHashes simHashes = SimHashes.Vacuum;
+						CellElementEvent cellElementEvent = CellEventLogger.Instance.DoorOpen;
+						float num3 = 0f;
+						float num4 = -1f;
+						int num5 = handle.index;
+						SimMessages.ReplaceElement(num2, simHashes, cellElementEvent, num3, num4, byte.MaxValue, 0, num5);
+					}
+				}
+				else if (Grid.Element[num].IsSolid)
+				{
+					this.OnSimDoorClosed();
 				}
 				else
 				{

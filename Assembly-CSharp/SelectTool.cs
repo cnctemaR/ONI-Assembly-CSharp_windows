@@ -97,7 +97,8 @@ public class SelectTool : InterfaceTool
 				distance = -100f
 			});
 		}
-		if (Grid.Visible[Grid.PosToCell(vector2)] != 0 || DebugPaintElementScreen.Instance.gameObject.activeSelf)
+		int num2 = Grid.PosToCell(vector2);
+		if (Grid.IsValidCell(num2) && (Grid.Visible[num2] != 0 || DebugPaintElementScreen.Instance.gameObject.activeSelf))
 		{
 			num = Physics2D.OverlapPointNonAlloc(vector3, this.overlaps, layer_mask);
 			Game.Instance.statusItemRenderer.GetIntersections(vector3, intersections);
@@ -112,14 +113,14 @@ public class SelectTool : InterfaceTool
 			}
 			if (t != null && (condition == null || condition(t)))
 			{
-				float num2 = gameObject.transform.position.z - vector2.z;
+				float num3 = gameObject.transform.position.z - vector2.z;
 				bool flag = false;
 				for (int j = 0; j < intersections.Count; j++)
 				{
 					SelectTool.Intersection intersection = intersections[j];
 					if (intersection.component.gameObject == t.gameObject)
 					{
-						intersection.distance = Mathf.Min(intersection.distance, num2);
+						intersection.distance = Mathf.Min(intersection.distance, num3);
 						intersections[j] = intersection;
 						flag = true;
 						break;
@@ -130,7 +131,7 @@ public class SelectTool : InterfaceTool
 					intersections.Add(new SelectTool.Intersection
 					{
 						component = t,
-						distance = num2
+						distance = num3
 					});
 				}
 			}

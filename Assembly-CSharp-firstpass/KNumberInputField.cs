@@ -61,7 +61,14 @@ public class KNumberInputField : KScreen
 	private void ProcessInput(string input)
 	{
 		input = ((!(input == string.Empty)) ? input : this.minValue.ToString());
-		float num = float.Parse(input);
+		float num = this.minValue;
+		try
+		{
+			num = float.Parse(input);
+		}
+		catch (Exception ex)
+		{
+		}
 		num = Mathf.Clamp(num, this.minValue, this.maxValue);
 		if (this.decimalPlaces != -1)
 		{

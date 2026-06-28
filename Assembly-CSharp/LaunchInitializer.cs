@@ -14,7 +14,7 @@ public class LaunchInitializer : MonoBehaviour
 	{
 		GraphicsOptionsScreen.SetResolutionFromPrefs();
 		Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
-		global::Debug.Log("Development Build: TB-" + 246879U.ToString(), null);
+		global::Debug.Log("Development Build: TB-" + 247173U.ToString(), null);
 		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		this.CheckForSavePathIssue();
 		if (LaunchInitializer.savePathState == LaunchInitializer.SavePathIssue.Ok)

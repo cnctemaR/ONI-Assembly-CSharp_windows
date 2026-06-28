@@ -58,6 +58,7 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 		this.CreateNewWaitReactable();
 		Grid.HasTubeEntrance[Grid.PosToCell(this)] = true;
 		base.smi.StartSM();
+		this.UpdateCharge();
 	}
 
 	protected override void OnCleanUp()

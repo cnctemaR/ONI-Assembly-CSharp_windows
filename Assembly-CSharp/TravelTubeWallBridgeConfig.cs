@@ -34,6 +34,7 @@ public class TravelTubeWallBridgeConfig : IBuildingConfig
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 2);
 		buildingDef.IsFoundation = true;
 		buildingDef.SceneLayer = Grid.SceneLayer.BuildingFront;
+		buildingDef.ForegroundLayer = Grid.SceneLayer.TileFront;
 		buildingDef.HotKey = global::Action.BuildMenuKeyQ;
 		return buildingDef;
 	}

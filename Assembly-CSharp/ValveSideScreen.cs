@@ -112,8 +112,8 @@ public class ValveSideScreen : SideScreenContent
 	[SerializeField]
 	private LocText maxFlowLabel;
 
-	[Header("Input Field")]
 	[SerializeField]
+	[Header("Input Field")]
 	private KNumberInputField numberInput;
 
 	[SerializeField]

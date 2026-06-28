@@ -128,16 +128,20 @@ public class ResourceCategoryHeader : MonoBehaviour, IPointerEnterHandler, IEven
 		{
 			this.Background.color = new Color(0f, 0f, 0f, 0f);
 		}
-		List<Pickupable> pickupables = WorldInventory.Instance.GetPickupables(this.ResourceCategoryTag);
-		if (pickupables == null)
+		List<Pickupable> list = null;
+		if (WorldInventory.Instance != null)
+		{
+			list = WorldInventory.Instance.GetPickupables(this.ResourceCategoryTag);
+		}
+		if (list == null)
 		{
 			return;
 		}
-		for (int i = 0; i < pickupables.Count; i++)
+		for (int i = 0; i < list.Count; i++)
 		{
-			if (!(pickupables[i] == null))
+			if (!(list[i] == null))
 			{
-				KAnimControllerBase component = pickupables[i].GetComponent<KAnimControllerBase>();
+				KAnimControllerBase component = list[i].GetComponent<KAnimControllerBase>();
 				if (!(component == null))
 				{
 					if (is_hovering)

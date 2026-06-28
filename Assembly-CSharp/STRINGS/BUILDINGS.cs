@@ -885,21 +885,21 @@ namespace STRINGS
 		{
 			public static class ENABLE_AUTODISINFECT
 			{
-				public static LocString NAME = "Enable Auto-Disinfect";
+				public static LocString NAME = "Enable Autodisinfect";
 
-				public static LocString TOOLTIP = "Dupes will automatically disinfect this building";
+				public static LocString TOOLTIP = "Automatically disinfect this building when it becomes contaminated";
 			}
 
 			public static class DISABLE_AUTODISINFECT
 			{
-				public static LocString NAME = "Disable Auto-Disinfect";
+				public static LocString NAME = "Disable Autodisinfect";
 
-				public static LocString TOOLTIP = "Dupes will no longer automatically disinfect this building";
+				public static LocString TOOLTIP = "Do not automatically disinfect this building";
 			}
 
 			public static class NO_DISEASE
 			{
-				public static LocString TOOLTIP = "This building is already clean";
+				public static LocString TOOLTIP = "This building is clean";
 			}
 		}
 

@@ -10,6 +10,7 @@ namespace Klei
 		{
 			this.demoMode = false;
 			this.demoTime = 300;
+			this.showDemoTimer = true;
 			GenericGameSettings._instance = this;
 		}
 
@@ -35,6 +36,8 @@ namespace Klei
 		public bool demoMode { get; private set; }
 
 		public int demoTime { get; private set; }
+
+		public bool showDemoTimer { get; private set; }
 
 		private static GenericGameSettings _instance;
 	}

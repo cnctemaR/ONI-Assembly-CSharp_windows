@@ -2647,14 +2647,14 @@ namespace STRINGS
 			{
 				public static class ALLOWED
 				{
-					public static LocString NAME = "Allow Auto-Bottling";
+					public static LocString NAME = "Enable Autobottling";
 
 					public static LocString TOOLTIP = "If enabled, Duplicants will deliver bottled liquids to this building directly from Liquid Bottlers";
 				}
 
 				public static class DENIED
 				{
-					public static LocString NAME = "Stop Auto-Bottling";
+					public static LocString NAME = "Disable Autobottling";
 
 					public static LocString TOOLTIP = "If disabled, Duplicants will no longer deliver bottled liquids directly from Liquid Bottlers";
 				}

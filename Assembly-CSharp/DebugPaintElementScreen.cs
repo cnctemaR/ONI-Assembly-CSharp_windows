@@ -306,8 +306,8 @@ public class DebugPaintElementScreen : KScreen
 	[SerializeField]
 	private InputField diseaseCountInput;
 
-	[SerializeField]
 	[Header("Tool Buttons")]
+	[SerializeField]
 	private KButton paintButton;
 
 	[SerializeField]

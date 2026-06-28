@@ -72,7 +72,6 @@ public class AutoDisinfectable : Workable
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.MarkedForDisinfection, this);
 		this.chore = null;
 		this.userMenu.Refresh();
-		Prioritizable.RemoveRef(base.gameObject);
 	}
 
 	public override Workable.AnimInfo GetAnim(Worker worker)

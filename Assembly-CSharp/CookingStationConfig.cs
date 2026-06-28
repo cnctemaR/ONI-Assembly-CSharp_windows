@@ -13,7 +13,7 @@ public class CookingStationConfig : IBuildingConfig
 		buildingDef.AudioSize = "large";
 		buildingDef.EnergyConsumptionWhenActive = 60f;
 		buildingDef.ExhaustKilowattsWhenActive = 0.5f;
-		buildingDef.OperatingKilowatts = 32f;
+		buildingDef.OperatingKilowatts = 4f;
 		return buildingDef;
 	}
 

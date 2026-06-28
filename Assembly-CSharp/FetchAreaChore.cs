@@ -371,15 +371,18 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 						Pickupable pickupable = null;
 						for (int i = 0; i < deliverables.Count; i++)
 						{
-							Pickupable pickupable2 = deliverables[i].Take(num);
-							if (pickupable2 != null && pickupable2.TotalAmount > 0f)
+							if (!(deliverables[i] == null))
 							{
-								num -= pickupable2.TotalAmount;
-								this.destination.Store(pickupable2.gameObject, false, false, true);
-								pickupable = pickupable2;
-								if (pickupable2 == deliverables[i])
+								Pickupable pickupable2 = deliverables[i].Take(num);
+								if (pickupable2 != null && pickupable2.TotalAmount > 0f)
 								{
-									deliverables[i] = null;
+									num -= pickupable2.TotalAmount;
+									this.destination.Store(pickupable2.gameObject, false, false, true);
+									pickupable = pickupable2;
+									if (pickupable2 == deliverables[i])
+									{
+										deliverables[i] = null;
+									}
 								}
 							}
 						}

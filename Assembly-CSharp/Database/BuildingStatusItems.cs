@@ -492,7 +492,9 @@ namespace Database
 			{
 				Grave.StatesInstance statesInstance2 = (Grave.StatesInstance)data;
 				string text12 = str.Replace("{DeadDupe}", statesInstance2.master.graveName);
-				return text12.Replace("{Epitaph}", LocString.GetStrings(typeof(NAMEGEN.GRAVE.EPITAPHS)).GetRandom<string>());
+				string[] strings = LocString.GetStrings(typeof(NAMEGEN.GRAVE.EPITAPHS));
+				int num3 = statesInstance2.master.epitaphIdx % strings.Length;
+				return text12.Replace("{Epitaph}", strings[num3]);
 			};
 			this.GraveEmpty = new StatusItem("GraveEmpty", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true, 2046);
 			this.CannotCoolFurther = new StatusItem("CannotCoolFurther", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true, 2046);

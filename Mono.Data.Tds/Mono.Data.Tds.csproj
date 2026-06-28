@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{68F2EF45-D4D4-4329-AB18-23E95E5FBDAF}</ProjectGuid>
+    <ProjectGuid>{FF6A2606-2174-4A33-BAEC-0BF4AA723CCB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Mono.Data.Tds</RootNamespace>
     <AssemblyName>Mono.Data.Tds</AssemblyName>
@@ -63,15 +63,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mono.Security\Mono.Security.csproj">
-      <Project>{68F2EF45-D4D4-4329-AB18-23E95E5FBDB1}</Project>
+      <Project>{FF6A2606-2174-4A33-BAEC-0BF4AA723CCD}</Project>
       <Name>Mono.Security</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{68F2EF45-D4D4-4329-AB18-23E95E5FBDB2}</Project>
+      <Project>{FF6A2606-2174-4A33-BAEC-0BF4AA723CCE}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{68F2EF45-D4D4-4329-AB18-23E95E5FBDB9}</Project>
+      <Project>{FF6A2606-2174-4A33-BAEC-0BF4AA723CD5}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

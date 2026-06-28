@@ -19,12 +19,15 @@ public class MainMenu : KMonoBehaviour
 		this.Button_LoadGame.onClick += this.LoadGame;
 		this.Button_Options.onClick += this.Options;
 		this.Button_QuitGame.onClick += this.QuitGame;
+		this.Button_Translations.onClick += this.Translations;
 		if (GenericGameSettings.instance != null && GenericGameSettings.instance.demoMode)
 		{
 			this.Button_ResumeGame.gameObject.SetActive(false);
 			this.Button_LoadGame.gameObject.SetActive(false);
+			this.Button_Options.gameObject.SetActive(false);
+			this.Button_Translations.gameObject.SetActive(false);
+			this.topLeftAlphaMessage.gameObject.SetActive(false);
 		}
-		this.Button_Translations.onClick += this.Translations;
 		if (SaveLoader.GetSaveFileCount() == 0)
 		{
 			this.Button_LoadGame.isInteractable = false;
@@ -128,7 +131,7 @@ public class MainMenu : KMonoBehaviour
 				}
 				SaveGame.Header header;
 				SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(latestSaveFile, out header);
-				if (header.buildVersion > 230365U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 230587U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}

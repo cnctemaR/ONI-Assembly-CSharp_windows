@@ -18,8 +18,9 @@ public class DisinfectThresholdDiagram : MonoBehaviour
 		this.inputField.decimalPlaces = 1;
 		this.inputField.Activate();
 		this.slider.minValue = 0f;
-		this.slider.maxValue = (float)DisinfectThresholdDiagram.MAX_VALUE;
-		this.slider.value = (float)SaveGame.Instance.minGermCountForDisinfect;
+		this.slider.maxValue = (float)(DisinfectThresholdDiagram.MAX_VALUE / DisinfectThresholdDiagram.SLIDER_CONVERSION);
+		this.slider.wholeNumbers = true;
+		this.slider.value = (float)(SaveGame.Instance.minGermCountForDisinfect / DisinfectThresholdDiagram.SLIDER_CONVERSION);
 		this.slider.onReleaseHandle += this.OnReleaseHandle;
 		this.slider.onDrag += delegate
 		{
@@ -58,20 +59,20 @@ public class DisinfectThresholdDiagram : MonoBehaviour
 
 	private void OnReleaseHandle()
 	{
-		float num = (float)((int)this.slider.value);
+		float num = (float)((int)this.slider.value * DisinfectThresholdDiagram.SLIDER_CONVERSION);
 		SaveGame.Instance.minGermCountForDisinfect = (int)num;
 		this.inputField.SetDisplayValue(num.ToString());
 	}
 
 	private void ReceiveValueFromSlider(float new_value)
 	{
-		SaveGame.Instance.minGermCountForDisinfect = (int)new_value;
-		this.inputField.SetDisplayValue(new_value.ToString());
+		SaveGame.Instance.minGermCountForDisinfect = (int)new_value * DisinfectThresholdDiagram.SLIDER_CONVERSION;
+		this.inputField.SetDisplayValue((new_value * (float)DisinfectThresholdDiagram.SLIDER_CONVERSION).ToString());
 	}
 
 	private void ReceiveValueFromInput(float new_value)
 	{
-		this.slider.value = new_value;
+		this.slider.value = new_value / (float)DisinfectThresholdDiagram.SLIDER_CONVERSION;
 		SaveGame.Instance.minGermCountForDisinfect = (int)new_value;
 	}
 
@@ -108,5 +109,7 @@ public class DisinfectThresholdDiagram : MonoBehaviour
 	[SerializeField]
 	private Image disabledImage;
 
-	private static int MAX_VALUE = 100000;
+	private static int MAX_VALUE = 1000000;
+
+	private static int SLIDER_CONVERSION = 1000;
 }

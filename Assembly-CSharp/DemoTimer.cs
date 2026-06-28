@@ -14,6 +14,8 @@ public class DemoTimer : MonoBehaviour
 			if (GenericGameSettings.instance.demoMode)
 			{
 				this.duration = (float)GenericGameSettings.instance.demoTime;
+				this.labelText.gameObject.SetActive(GenericGameSettings.instance.showDemoTimer);
+				this.clockImage.gameObject.SetActive(GenericGameSettings.instance.showDemoTimer);
 			}
 			else
 			{
@@ -69,7 +71,7 @@ public class DemoTimer : MonoBehaviour
 		int num3 = num % 60;
 		this.labelText.text = string.Concat(new string[]
 		{
-			UI.DEMOOVERSCREEN.TIMEREMAINING.key.ToString(),
+			UI.DEMOOVERSCREEN.TIMEREMAINING,
 			" ",
 			num2.ToString("00"),
 			":",
@@ -77,7 +79,7 @@ public class DemoTimer : MonoBehaviour
 		});
 		if (!this.CountdownActive)
 		{
-			this.labelText.text = UI.DEMOOVERSCREEN.TIMERINACTIVE.key.ToString();
+			this.labelText.text = UI.DEMOOVERSCREEN.TIMERINACTIVE;
 		}
 	}
 
@@ -95,6 +97,8 @@ public class DemoTimer : MonoBehaviour
 	public static DemoTimer Instance;
 
 	public LocText labelText;
+
+	public Image clockImage;
 
 	public GameObject Prefab_DemoOverScreen;
 

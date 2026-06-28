@@ -10,6 +10,7 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 		this.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
 		this.Subscribe(1502190696, new Action<object>(this.OnDestroyObject));
 		base.GetComponent<Storage>().choreType = Db.Get().ChoreTypes.FetchCritical;
+		this.epitaphIdx = global::UnityEngine.Random.Range(0, int.MaxValue);
 	}
 
 	protected override void OnSpawn()
@@ -42,6 +43,9 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 
 	[Serialize]
 	public string graveName;
+
+	[Serialize]
+	public int epitaphIdx;
 
 	public class StatesInstance : GameStateMachine<Grave.States, Grave.StatesInstance, Grave, object>.GameInstance
 	{

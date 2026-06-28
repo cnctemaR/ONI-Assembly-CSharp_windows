@@ -48,16 +48,16 @@ public class WorldGaps
 		this.voidCells = new HashSet<int>();
 	}
 
-	[Serialize]
 	[SerializeField]
+	[Serialize]
 	public WorldGaps.State state = WorldGaps.State.EnabledOff;
 
-	[Serialize]
 	[SerializeField]
+	[Serialize]
 	public HashSet<int> voidCells;
 
-	[SerializeField]
 	[Serialize]
+	[SerializeField]
 	public float currentTime;
 
 	[SerializeField]

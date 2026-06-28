@@ -104,6 +104,8 @@ namespace STRINGS
 
 			public static LocString MARKEDFORCOMPOST = "Compost Edibles";
 
+			public static LocString COMPOSTMEAT = "Compost Meat";
+
 			public static LocString PICKLED = "Pickled";
 
 			public static LocString GENE_SHUFFLER = "Neural Vacillator";
@@ -764,9 +766,9 @@ namespace STRINGS
 
 			public class HYGENE_NEEDED
 			{
-				public static LocString NAME = "Colony requires hygene";
+				public static LocString NAME = "Colony requires wash basins";
 
-				public static LocString TOOLTIP = "Your duplicants are spreading germs around the colony because they have nowhere to wash off their germs";
+				public static LocString TOOLTIP = "<style=\"disease\">Germs</style> are spreading in your colony because your Duplicants have no where to clean up";
 			}
 
 			public class NEEDSLEEP

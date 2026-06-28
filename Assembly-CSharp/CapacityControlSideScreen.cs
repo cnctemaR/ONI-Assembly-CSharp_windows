@@ -79,8 +79,8 @@ public class CapacityControlSideScreen : SideScreenContent
 	[SerializeField]
 	private KSlider slider;
 
-	[Header("Number Input")]
 	[SerializeField]
+	[Header("Number Input")]
 	private KNumberInputField numberInput;
 
 	[SerializeField]

@@ -63,7 +63,14 @@ public class KPlayerPrefs : YamlIO<KPlayerPrefs>
 
 	public static void Save()
 	{
-		KPlayerPrefs.instance.Save(KPlayerPrefs.PATH);
+		try
+		{
+			KPlayerPrefs.instance.Save(KPlayerPrefs.PATH);
+		}
+		catch (Exception ex)
+		{
+			global::Debug.LogWarning("Failed to save kplayerprefs: " + ex.ToString(), null);
+		}
 	}
 
 	public void Load()

@@ -3570,7 +3570,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Determines a Duplicant's disease susceptibility and recovery time.";
 
-				public static LocString BOOST_MODIFIER = "{0} Immune System Regen";
+				public static LocString BOOST_MODIFIER = "{0} Immunity Regen";
 
 				public static LocString BOOST_STAT = "Immunity Attribute";
 			}

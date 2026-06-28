@@ -4,7 +4,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Health : KMonoBehaviour, ISaveLoadableJson
+public class Health : KMonoBehaviour, ISaveLoadable
 {
 	public float percent()
 	{
@@ -37,7 +37,6 @@ public class Health : KMonoBehaviour, ISaveLoadableJson
 		Components.Health.Add(this);
 		this.amountInstance = new AmountInstance(Db.Get().Amounts.HitPoints, base.gameObject);
 		this.amountInstance.value = this.maxHitPoints;
-		this.amountInstance.maxAttribute.Add("Base", new AttributeModifier(this.amountInstance.maxAttribute.Id, this.maxHitPoints, null, false));
 		base.gameObject.GetAmounts().Add(this.amountInstance);
 		AmountInstance amountInstance = this.amountInstance;
 		amountInstance.OnDelta = (Action<float>)Delegate.Combine(amountInstance.OnDelta, new Action<float>(this.OnHealthChanged));
@@ -55,9 +54,11 @@ public class Health : KMonoBehaviour, ISaveLoadableJson
 		{
 			this.ApplyDeath();
 		}
-		this.UpdateStatus();
+		if (this.State != Health.HealthState.Incapacitated && this.State != Health.HealthState.Dead)
+		{
+			this.UpdateStatus();
+		}
 		this.effects = base.GetComponent<Effects>();
-		NameDisplayScreen.Instance.RegisterComponent(base.gameObject, this);
 	}
 
 	protected override void OnCleanUp()
@@ -98,7 +99,7 @@ public class Health : KMonoBehaviour, ISaveLoadableJson
 			if (this.bleedOutStamina <= 0f)
 			{
 				this.State = Health.HealthState.Dead;
-				this.Kill(Db.Get().Deaths.Generic);
+				this.Kill((this.incapacitatedLoomingDeath != null) ? this.incapacitatedLoomingDeath : Db.Get().Deaths.Generic);
 				return true;
 			}
 		}
@@ -122,11 +123,11 @@ public class Health : KMonoBehaviour, ISaveLoadableJson
 		{
 			if (this.CanBeIncapacitated)
 			{
-				this.Incapacitate();
+				this.Incapacitate(Db.Get().Deaths.Slain);
 			}
 			else
 			{
-				this.Kill(Db.Get().Deaths.Generic);
+				this.Kill(Db.Get().Deaths.Slain);
 			}
 		}
 		this.UpdateStatus();
@@ -236,6 +237,10 @@ public class Health : KMonoBehaviour, ISaveLoadableJson
 			{
 				this.Trigger(-1491582671, this);
 			}
+			if (healthState == Health.HealthState.Perfect)
+			{
+				this.Trigger(-1491582671, this);
+			}
 			this.State = healthState;
 			KSelectable component = base.GetComponent<KSelectable>();
 			if (this.State != Health.HealthState.Dead && this.State != Health.HealthState.Perfect)
@@ -254,6 +259,11 @@ public class Health : KMonoBehaviour, ISaveLoadableJson
 		return this.death.Get() != null;
 	}
 
+	public bool IsIncapacitated()
+	{
+		return this.State == Health.HealthState.Incapacitated;
+	}
+
 	public bool IsDefeated()
 	{
 		return this.State == Health.HealthState.Incapacitated || this.State == Health.HealthState.Dead;
@@ -270,10 +280,15 @@ public class Health : KMonoBehaviour, ISaveLoadableJson
 		base.GetComponent<KPrefabID>().AddTag(GameTags.Corpse);
 	}
 
-	public void Incapacitate()
+	public void Incapacitate(Death source_of_death)
 	{
-		IncapacitationMonitor.Instance smi = this.GetSMI<IncapacitationMonitor.Instance>();
-		smi.Incapacitate();
+		this.incapacitatedLoomingDeath = source_of_death;
+		this.State = Health.HealthState.Incapacitated;
+		IncapacitationMonitor.Instance smi = base.gameObject.GetSMI<IncapacitationMonitor.Instance>();
+		if (smi != null)
+		{
+			smi.Incapacitate();
+		}
 	}
 
 	public void Kill(Death death)
@@ -304,11 +319,11 @@ public class Health : KMonoBehaviour, ISaveLoadableJson
 	private ResourceRef<Death> death = new ResourceRef<Death>();
 
 	[Serialize]
-	private float bleedOutStamina = 100f;
+	public float bleedOutStamina = 60f;
 
 	private static float baseBleedOutSpeed = 0.5f;
 
-	private float maxBleedOutStamina = 100f;
+	private float maxBleedOutStamina = 60f;
 
 	[Serialize]
 	public float maxHitPoints = 100f;
@@ -321,6 +336,9 @@ public class Health : KMonoBehaviour, ISaveLoadableJson
 	private Effects effects;
 
 	private AmountInstance amountInstance;
+
+	[Serialize]
+	private Death incapacitatedLoomingDeath;
 
 	public enum HealthState
 	{

@@ -11,13 +11,13 @@ public class StorageController : GameStateMachine<StorageController, StorageCont
 		this.working.PlayAnim("working", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.off);
 	}
 
-	public GameStateMachine<StorageController, StorageController.Instance, IStateMachineTarget>.State off;
+	public GameStateMachine<StorageController, StorageController.Instance, IStateMachineTarget, object>.State off;
 
-	public GameStateMachine<StorageController, StorageController.Instance, IStateMachineTarget>.State on;
+	public GameStateMachine<StorageController, StorageController.Instance, IStateMachineTarget, object>.State on;
 
-	public GameStateMachine<StorageController, StorageController.Instance, IStateMachineTarget>.State working;
+	public GameStateMachine<StorageController, StorageController.Instance, IStateMachineTarget, object>.State working;
 
-	public new class Instance : GameStateMachine<StorageController, StorageController.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<StorageController, StorageController.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)

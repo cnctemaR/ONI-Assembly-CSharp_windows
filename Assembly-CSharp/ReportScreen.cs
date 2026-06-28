@@ -64,7 +64,7 @@ public class ReportScreen : KScreen
 			this.SetTitle(string.Format(UI.ENDOFDAYREPORT.DAY_TITLE, this.currentReport.day));
 		}
 		bool flag = this.currentReport.day < ReportManager.Instance.TodaysReport.day;
-		this.nextButton.interactable = flag;
+		this.nextButton.isInteractable = flag;
 		if (flag)
 		{
 			this.nextButton.GetComponent<ToolTip>().toolTip = string.Format(UI.ENDOFDAYREPORT.DAY_TITLE, this.currentReport.day + 1);
@@ -75,7 +75,7 @@ public class ReportScreen : KScreen
 			this.nextButton.GetComponent<ToolTip>().enabled = false;
 		}
 		flag = this.currentReport.day > 1;
-		this.prevButton.interactable = flag;
+		this.prevButton.isInteractable = flag;
 		if (flag)
 		{
 			this.prevButton.GetComponent<ToolTip>().toolTip = string.Format(UI.ENDOFDAYREPORT.DAY_TITLE, this.currentReport.day - 1);
@@ -149,7 +149,7 @@ public class ReportScreen : KScreen
 		string text = string.Empty;
 		foreach (KeyValuePair<string, float> keyValuePair in entry.posNotes)
 		{
-			text = string.Format("{0}\n{1} : {2}", text, keyValuePair.Key, keyValuePair.Value);
+			text = string.Format("{0}\n{1} : {2}", text, keyValuePair.Key, reportGroup.formatfn(keyValuePair.Value));
 		}
 		componentsInChildren[1].text = reportGroup.formatfn(entry.Positive);
 		string text2 = string.Format(reportGroup.positiveTooltip + "\n" + text, reportGroup.formatfn(entry.Positive));
@@ -157,7 +157,7 @@ public class ReportScreen : KScreen
 		string text3 = string.Empty;
 		foreach (KeyValuePair<string, float> keyValuePair2 in entry.negNotes)
 		{
-			text3 = string.Format("{0}\n{1} : {2}", text3, keyValuePair2.Key, keyValuePair2.Value);
+			text3 = string.Format("{0}\n{1} : {2}", text3, keyValuePair2.Key, reportGroup.formatfn(keyValuePair2.Value));
 		}
 		componentsInChildren[2].text = reportGroup.formatfn(num);
 		string text4 = string.Format(reportGroup.negativeTooltip + "\n" + text3, reportGroup.formatfn(num));

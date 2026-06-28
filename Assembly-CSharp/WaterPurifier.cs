@@ -4,11 +4,10 @@ using KSerialization;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class WaterPurifier : StateMachineComponent<WaterPurifier.StatesInstance>
 {
-	public int DescriptionOrder { get; set; }
-
-	public bool HasRequiredElements()
+	protected override void OnPrefabInit()
 	{
-		return this.converter.HasEnoughMass();
+		base.OnPrefabInit();
+		base.GetComponent<Storage>().choreType = Db.Get().ChoreTypes.FetchCritical;
 	}
 
 	protected override void OnSpawn()
@@ -16,7 +15,7 @@ public class WaterPurifier : StateMachineComponent<WaterPurifier.StatesInstance>
 		base.OnSpawn();
 		this.deliveryComponents = base.GetComponents<ManualDeliveryKG>();
 		this.OnConduitConnectionChanged(base.GetComponent<ConduitConsumer>().IsConnected);
-		this.Subscribe(-2094018600, new EventSystem.EventHandler(this.OnConduitConnectionChanged));
+		this.Subscribe(-2094018600, new Action<object>(this.OnConduitConnectionChanged));
 		base.smi.StartSM();
 	}
 
@@ -41,7 +40,7 @@ public class WaterPurifier : StateMachineComponent<WaterPurifier.StatesInstance>
 
 	private ManualDeliveryKG[] deliveryComponents;
 
-	public class StatesInstance : GameStateMachine<WaterPurifier.States, WaterPurifier.StatesInstance, WaterPurifier>.GameInstance
+	public class StatesInstance : GameStateMachine<WaterPurifier.States, WaterPurifier.StatesInstance, WaterPurifier, object>.GameInstance
 	{
 		public StatesInstance(WaterPurifier smi)
 			: base(smi)
@@ -56,32 +55,32 @@ public class WaterPurifier : StateMachineComponent<WaterPurifier.StatesInstance>
 			default_state = this.off;
 			this.off.PlayAnim("off", KAnim.PlayMode.Once, null).EventTransition(GameHashes.OperationalChanged, this.on, (WaterPurifier.StatesInstance smi) => smi.master.operational.IsOperational);
 			this.on.PlayAnim("on", KAnim.PlayMode.Once, null).EventTransition(GameHashes.OperationalChanged, this.off, (WaterPurifier.StatesInstance smi) => !smi.master.operational.IsOperational).DefaultState(this.on.waiting);
-			this.on.waiting.EventTransition(GameHashes.OnStorageChange, this.on.working_pre, (WaterPurifier.StatesInstance smi) => smi.master.HasRequiredElements());
-			this.on.working_pre.QueueAnim("working_pre", false, null).OnAnimQueueComplete(this.on.working);
+			this.on.waiting.EventTransition(GameHashes.OnStorageChange, this.on.working_pre, (WaterPurifier.StatesInstance smi) => smi.master.GetComponent<ElementConverter>().HasEnoughMassToStartConverting());
+			this.on.working_pre.PlayAnim("working_pre", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.on.working);
 			this.on.working.Enter(delegate(WaterPurifier.StatesInstance smi)
 			{
 				smi.master.operational.SetActive(true, false);
-			}).QueueAnim("working_loop", true, null).EventTransition(GameHashes.OnStorageChange, this.on.working_pst, (WaterPurifier.StatesInstance smi) => !smi.master.HasRequiredElements())
+			}).QueueAnim("working_loop", true, null).EventTransition(GameHashes.OnStorageChange, this.on.working_pst, (WaterPurifier.StatesInstance smi) => !smi.master.GetComponent<ElementConverter>().CanConvertAtAll())
 				.Exit(delegate(WaterPurifier.StatesInstance smi)
 				{
 					smi.master.operational.SetActive(false, false);
 				});
-			this.on.working_pst.QueueAnim("working_pst", false, null).OnAnimQueueComplete(this.on.waiting);
+			this.on.working_pst.PlayAnim("working_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.on.waiting);
 		}
 
-		public GameStateMachine<WaterPurifier.States, WaterPurifier.StatesInstance, WaterPurifier>.State off;
+		public GameStateMachine<WaterPurifier.States, WaterPurifier.StatesInstance, WaterPurifier, object>.State off;
 
 		public WaterPurifier.States.OnStates on;
 
-		public class OnStates : GameStateMachine<WaterPurifier.States, WaterPurifier.StatesInstance, WaterPurifier>.State
+		public class OnStates : GameStateMachine<WaterPurifier.States, WaterPurifier.StatesInstance, WaterPurifier, object>.State
 		{
-			public GameStateMachine<WaterPurifier.States, WaterPurifier.StatesInstance, WaterPurifier>.State waiting;
+			public GameStateMachine<WaterPurifier.States, WaterPurifier.StatesInstance, WaterPurifier, object>.State waiting;
 
-			public GameStateMachine<WaterPurifier.States, WaterPurifier.StatesInstance, WaterPurifier>.State working_pre;
+			public GameStateMachine<WaterPurifier.States, WaterPurifier.StatesInstance, WaterPurifier, object>.State working_pre;
 
-			public GameStateMachine<WaterPurifier.States, WaterPurifier.StatesInstance, WaterPurifier>.State working;
+			public GameStateMachine<WaterPurifier.States, WaterPurifier.StatesInstance, WaterPurifier, object>.State working;
 
-			public GameStateMachine<WaterPurifier.States, WaterPurifier.StatesInstance, WaterPurifier>.State working_pst;
+			public GameStateMachine<WaterPurifier.States, WaterPurifier.StatesInstance, WaterPurifier, object>.State working_pst;
 		}
 	}
 }

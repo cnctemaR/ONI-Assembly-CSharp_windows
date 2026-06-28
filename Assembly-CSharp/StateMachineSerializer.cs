@@ -131,6 +131,10 @@ public class StateMachineSerializer
 		{
 			return false;
 		}
+		if (Manager.GetDeserializationMapping(smi.GetType()) == null)
+		{
+			return false;
+		}
 		this.entryData.Position = entry.dataPos;
 		Deserializer.DeserializeTypeless(smi, this.entryData);
 		StateMachine.Parameter.Context[] parameterContexts = smi.GetParameterContexts();
@@ -232,7 +236,6 @@ public class StateMachineSerializer
 			Type type = Type.GetType(text);
 			if (type == null)
 			{
-				Debug.LogWarning("Missing state machine of type: " + text);
 				return null;
 			}
 			return new StateMachineSerializer.Entry(num, num2, type, text2);

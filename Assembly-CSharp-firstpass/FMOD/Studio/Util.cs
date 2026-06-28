@@ -14,7 +14,7 @@ namespace FMOD.Studio
 			return result;
 		}
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_ParseID(byte[] idString, byte[] id);
 	}
 }

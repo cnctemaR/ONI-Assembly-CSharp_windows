@@ -4,12 +4,15 @@ using UnityEngine;
 
 public class KBatchGroupData
 {
-	public KBatchGroupData(HashedString id)
+	public KBatchGroupData(HashedString id, bool dynamic)
 	{
 		this.groupID = id;
 		this.maxVisibleSymbols = 1;
+		this.isDynamic = dynamic;
 		this.Init();
 	}
+
+	public bool isDynamic { get; private set; }
 
 	public HashedString groupID { get; private set; }
 
@@ -20,6 +23,8 @@ public class KBatchGroupData
 	public List<KAnim.Anim> anims { get; private set; }
 
 	public Dictionary<KAnimHashedString, int> animIndex { get; private set; }
+
+	public Dictionary<KAnimHashedString, int> animCount { get; private set; }
 
 	public Dictionary<KAnimHashedString, int> animFrameIndex { get; private set; }
 
@@ -47,6 +52,7 @@ public class KBatchGroupData
 	{
 		this.anims = new List<KAnim.Anim>();
 		this.animIndex = new Dictionary<KAnimHashedString, int>();
+		this.animCount = new Dictionary<KAnimHashedString, int>();
 		this.animFrameIndex = new Dictionary<KAnimHashedString, int>();
 		this.animFrames = new List<KAnim.Anim.Frame>();
 		this.frameElements = new List<KAnim.Anim.FrameElement>();
@@ -60,16 +66,39 @@ public class KBatchGroupData
 		this.firstSymbolIndex = new Dictionary<KAnimHashedString, int>();
 	}
 
-	public void AddNewBuildFile(KAnimHashedString fileHash)
+	public KAnim.Build AddNewBuildFile(KAnimHashedString fileHash)
 	{
 		this.textureStartIndex.Add(fileHash, this.textures.Count);
 		this.buildIndex.Add(fileHash, this.builds.Count);
 		this.firstSymbolIndex.Add(fileHash, this.GetSymbolCount());
+		KAnim.Build build = new KAnim.Build();
+		build.textureStartIdx = this.textures.Count;
+		build.fileHash = fileHash;
+		build.index = this.builds.Count;
+		this.builds.Add(build);
+		return build;
 	}
 
-	public void AddBuild(KAnim.Build build)
+	public void AddTextures(List<Texture2D> buildtextures)
 	{
-		this.builds.Add(build);
+		this.textures.AddRange(buildtextures);
+	}
+
+	public void AddAnim(KAnim.Anim anim)
+	{
+		Debug.Assert(anim.index == this.anims.Count);
+		this.anims.Add(anim);
+	}
+
+	public KAnim.Anim GetAnim(int anim)
+	{
+		Debug.AssertFormat(anim >= 0 && anim < this.anims.Count, "Anim [{0}] out of range [{1}] in batch [{2}]", new object[]
+		{
+			anim,
+			this.anims.Count,
+			this.groupID
+		});
+		return this.anims[anim];
 	}
 
 	public KAnim.Build GetBuild(KAnimHashedString fileHash)
@@ -81,14 +110,23 @@ public class KBatchGroupData
 		return null;
 	}
 
+	public KAnim.Build GetBuild(int index)
+	{
+		return this.builds[index];
+	}
+
 	public void UpdateMaxVisibleSymbols(int newCount)
 	{
-		this.maxVisibleSymbols = Mathf.Min(128, Mathf.Max(this.maxVisibleSymbols, newCount));
+		this.maxVisibleSymbols = Mathf.Min(120, Mathf.Max(this.maxVisibleSymbols, newCount));
 	}
 
 	public KAnim.Build.Symbol GetSymbol(int index)
 	{
-		return this.frameElementSymbols[index];
+		if (index >= 0 && index < this.frameElementSymbols.Count)
+		{
+			return this.frameElementSymbols[index];
+		}
+		return null;
 	}
 
 	public void AddBuildSymbol(KAnim.Build.Symbol symbol)
@@ -283,10 +321,10 @@ public class KBatchGroupData
 		KAnim.Build.Symbol symbol2 = new KAnim.Build.Symbol();
 		symbol2.hash = symbol;
 		symbol2.build = targetBuild;
-		int count = this.frameElementSymbols.Count;
+		symbol2.index = this.frameElementSymbols.Count;
 		this.frameElementSymbols.Add(symbol2);
 		this.symbolColourOveride.Add(Color.white);
-		return count;
+		return symbol2.index;
 	}
 
 	public int GetFirstIndex(KAnimHashedString symbol)
@@ -313,19 +351,14 @@ public class KBatchGroupData
 
 	private void Write(float[] data, int startIndex, int thisFrameIndex, int atlasIndex, KAnim.Build.SymbolFrameInstance symbol_frame_instance)
 	{
-		KAnim.Build.SymbolFrame symbolFrame = symbol_frame_instance.symbolFrame;
 		data[startIndex++] = (float)atlasIndex;
 		data[startIndex++] = (float)thisFrameIndex;
 		data[startIndex++] = (float)symbol_frame_instance.symbolIdx;
+		KAnim.Build.SymbolFrame symbolFrame = symbol_frame_instance.symbolFrame;
+		Debug.AssertFormat(symbolFrame != null, "symbolFrame is null groupID: [{0}]", new object[] { this.groupID.ToString() });
 		KAnim.Build.Symbol buildSymbol = this.GetBuildSymbol(symbol_frame_instance.symbolIdx);
-		Debug.AssertFormat(buildSymbol.numFrames > 0, "{0} bs.numFrames: [{1}] groupID: [{2}]", new object[]
-		{
-			symbol_frame_instance.symbolFrame.fileNameHash,
-			buildSymbol.numFrames,
-			this.groupID.ToString()
-		});
-		data[startIndex++] = (float)buildSymbol.numFrames;
-		data[startIndex++] = (float)buildSymbol.flags;
+		data[startIndex++] = (float)((buildSymbol == null) ? 0 : buildSymbol.numFrames);
+		data[startIndex++] = (float)((buildSymbol == null) ? 0 : buildSymbol.flags);
 		data[startIndex++] = 2.8801546E+09f;
 		data[startIndex++] = 3.1664858E+09f;
 		data[startIndex++] = 3.452817E+09f;
@@ -349,10 +382,13 @@ public class KBatchGroupData
 		data[startIndex++] = symbolFrame.uv2[1];
 		data[startIndex++] = symbolFrame.uv3[0];
 		data[startIndex++] = symbolFrame.uv3[1];
-		data[startIndex++] = this.symbolColourOveride[symbol_frame_instance.symbolIdx][0];
-		data[startIndex++] = this.symbolColourOveride[symbol_frame_instance.symbolIdx][1];
-		data[startIndex++] = this.symbolColourOveride[symbol_frame_instance.symbolIdx][2];
-		data[startIndex++] = this.symbolColourOveride[symbol_frame_instance.symbolIdx][3];
+		if (this.symbolColourOveride != null && symbol_frame_instance.symbolIdx >= 0 && symbol_frame_instance.symbolIdx < this.symbolColourOveride.Count)
+		{
+			data[startIndex++] = this.symbolColourOveride[symbol_frame_instance.symbolIdx][0];
+			data[startIndex++] = this.symbolColourOveride[symbol_frame_instance.symbolIdx][1];
+			data[startIndex++] = this.symbolColourOveride[symbol_frame_instance.symbolIdx][2];
+			data[startIndex++] = this.symbolColourOveride[symbol_frame_instance.symbolIdx][3];
+		}
 	}
 
 	private void WriteAnimFrame(float[] data, int startIndex, int firstElementIdx, int idx, int numElements, int thisFrameIndex)
@@ -404,7 +440,7 @@ public class KBatchGroupData
 
 	public const int SIZE_OF_ANIM_FRAME_ELEMENT = 16;
 
-	private const int MAX_VISIBLE_SYMBOLS = 128;
+	private const int MAX_VISIBLE_SYMBOLS = 120;
 
 	public const int MAX_GROUP_SIZE = 60;
 

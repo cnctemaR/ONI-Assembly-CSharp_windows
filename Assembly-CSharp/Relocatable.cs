@@ -4,7 +4,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Relocatable : Workable, ISaveLoadableJson
+public class Relocatable : Workable, ISaveLoadable
 {
 	private Relocatable()
 	{
@@ -26,9 +26,9 @@ public class Relocatable : Workable, ISaveLoadableJson
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(493375141, new EventSystem.EventHandler(this.OnRefreshUserMenu));
-		this.Subscribe(-111137758, new EventSystem.EventHandler(this.OnRefreshUserMenu));
-		this.Subscribe(2127324410, new EventSystem.EventHandler(this.OnCancel));
+		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		this.Subscribe(-111137758, new Action<object>(this.OnRefreshUserMenu));
+		this.Subscribe(2127324410, new Action<object>(this.OnCancel));
 		this.faceTargetWhenWorking = true;
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Relocating;
 		this.attributeConverter = Db.Get().AttributeConverters.ConstructionSpeed;
@@ -38,7 +38,7 @@ public class Relocatable : Workable, ISaveLoadableJson
 	protected override void OnStartWork(Worker worker)
 	{
 		this.progressBar.barColor = Color.red;
-		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.PendingDeconstruction);
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.PendingDeconstruction, false);
 	}
 
 	protected override void OnCompleteWork(Worker worker)
@@ -64,7 +64,7 @@ public class Relocatable : Workable, ISaveLoadableJson
 			{
 				this.SpawnPackage(this.transform.position, building.Def, primary_element);
 				this.gameObject.DeleteObject();
-			}, false);
+			});
 		}
 		else
 		{
@@ -124,7 +124,7 @@ public class Relocatable : Workable, ISaveLoadableJson
 			{
 				this.chore.Cancel("Cancelled relocation");
 				this.chore = null;
-				base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.PendingDeconstruction);
+				base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.PendingDeconstruction, false);
 				base.ShowProgressBar(false);
 			}
 			this.Target.Trigger(2127324410, null);

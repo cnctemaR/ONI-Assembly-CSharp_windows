@@ -14,15 +14,19 @@ public class FetchableMonitor : GameStateMachine<FetchableMonitor, FetchableMoni
 			smi.UnregisterFetchable();
 		}).EventTransition(GameHashes.ReachableChanged, this.unfetchable, (FetchableMonitor.Instance smi) => !smi.IsFetchable())
 			.EventTransition(GameHashes.AssigneeChanged, this.unfetchable, (FetchableMonitor.Instance smi) => !smi.IsFetchable())
-			.EventTransition(GameHashes.EntombedChanged, this.unfetchable, (FetchableMonitor.Instance smi) => !smi.IsFetchable());
-		this.unfetchable.EventTransition(GameHashes.ReachableChanged, this.fetchable, (FetchableMonitor.Instance smi) => smi.IsFetchable()).EventTransition(GameHashes.AssigneeChanged, this.fetchable, (FetchableMonitor.Instance smi) => smi.IsFetchable()).EventTransition(GameHashes.EntombedChanged, this.fetchable, (FetchableMonitor.Instance smi) => smi.IsFetchable());
+			.EventTransition(GameHashes.EntombedChanged, this.unfetchable, (FetchableMonitor.Instance smi) => !smi.IsFetchable())
+			.ParamTransition<bool>(this.forceUnfetchable, this.unfetchable, (FetchableMonitor.Instance smi, bool p) => !smi.IsFetchable());
+		this.unfetchable.EventTransition(GameHashes.ReachableChanged, this.fetchable, (FetchableMonitor.Instance smi) => smi.IsFetchable()).EventTransition(GameHashes.AssigneeChanged, this.fetchable, (FetchableMonitor.Instance smi) => smi.IsFetchable()).EventTransition(GameHashes.EntombedChanged, this.fetchable, (FetchableMonitor.Instance smi) => smi.IsFetchable())
+			.ParamTransition<bool>(this.forceUnfetchable, this.fetchable, (FetchableMonitor.Instance smi, bool p) => smi.IsFetchable());
 	}
 
-	public GameStateMachine<FetchableMonitor, FetchableMonitor.Instance, IStateMachineTarget>.State fetchable;
+	public GameStateMachine<FetchableMonitor, FetchableMonitor.Instance, IStateMachineTarget, object>.State fetchable;
 
-	public GameStateMachine<FetchableMonitor, FetchableMonitor.Instance, IStateMachineTarget>.State unfetchable;
+	public GameStateMachine<FetchableMonitor, FetchableMonitor.Instance, IStateMachineTarget, object>.State unfetchable;
 
-	public new class Instance : GameStateMachine<FetchableMonitor, FetchableMonitor.Instance, IStateMachineTarget>.GameInstance
+	public StateMachine<FetchableMonitor, FetchableMonitor.Instance, IStateMachineTarget, object>.BoolParameter forceUnfetchable = new StateMachine<FetchableMonitor, FetchableMonitor.Instance, IStateMachineTarget, object>.BoolParameter(false);
+
+	public new class Instance : GameStateMachine<FetchableMonitor, FetchableMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)
@@ -43,9 +47,14 @@ public class FetchableMonitor : GameStateMachine<FetchableMonitor, FetchableMoni
 			FetchManager.Instance.Remove(this.pickupable);
 		}
 
+		public void SetForceUnfetchable(bool is_unfetchable)
+		{
+			base.sm.forceUnfetchable.Set(is_unfetchable, base.smi);
+		}
+
 		public bool IsFetchable()
 		{
-			return this.pickupable != null && !this.pickupable.IsEntombed && this.pickupable.IsReachable() && (this.equippable == null || !this.equippable.IsEquipped());
+			return !base.sm.forceUnfetchable.Get(this) && this.pickupable != null && !this.pickupable.IsEntombed && this.pickupable.IsReachable() && (this.equippable == null || !this.equippable.IsEquipped());
 		}
 
 		private Pickupable pickupable;

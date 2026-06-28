@@ -4,7 +4,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class GroneHogMound : StateMachineComponent<GroneHogMound.StatesInstance>, ISaveLoadableJson
+public class GroneHogMound : StateMachineComponent<GroneHogMound.StatesInstance>, ISaveLoadable
 {
 	protected override void OnPrefabInit()
 	{
@@ -97,7 +97,7 @@ public class GroneHogMound : StateMachineComponent<GroneHogMound.StatesInstance>
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
-		Grid.Objects[Grid.PosToCell(base.gameObject), 3] = base.gameObject;
+		Grid.Objects[Grid.PosToCell(base.gameObject), 1] = base.gameObject;
 	}
 
 	protected void EnableHog(GameObject hog)
@@ -127,7 +127,7 @@ public class GroneHogMound : StateMachineComponent<GroneHogMound.StatesInstance>
 
 	private List<GameObject> hogs;
 
-	public class StatesInstance : GameStateMachine<GroneHogMound.States, GroneHogMound.StatesInstance, GroneHogMound>.GameInstance
+	public class StatesInstance : GameStateMachine<GroneHogMound.States, GroneHogMound.StatesInstance, GroneHogMound, object>.GameInstance
 	{
 		public StatesInstance(GroneHogMound smi)
 			: base(smi)
@@ -185,17 +185,17 @@ public class GroneHogMound : StateMachineComponent<GroneHogMound.StatesInstance>
 
 		public GroneHogMound.States.HarvestableStates harvestableStates;
 
-		public GameStateMachine<GroneHogMound.States, GroneHogMound.StatesInstance, GroneHogMound>.State collapse;
+		public GameStateMachine<GroneHogMound.States, GroneHogMound.StatesInstance, GroneHogMound, object>.State collapse;
 
-		public class HarvestableStates : GameStateMachine<GroneHogMound.States, GroneHogMound.StatesInstance, GroneHogMound>.State
+		public class HarvestableStates : GameStateMachine<GroneHogMound.States, GroneHogMound.StatesInstance, GroneHogMound, object>.State
 		{
-			public GameStateMachine<GroneHogMound.States, GroneHogMound.StatesInstance, GroneHogMound>.State idle;
+			public GameStateMachine<GroneHogMound.States, GroneHogMound.StatesInstance, GroneHogMound, object>.State idle;
 
-			public GameStateMachine<GroneHogMound.States, GroneHogMound.StatesInstance, GroneHogMound>.State enter;
+			public GameStateMachine<GroneHogMound.States, GroneHogMound.StatesInstance, GroneHogMound, object>.State enter;
 
-			public GameStateMachine<GroneHogMound.States, GroneHogMound.StatesInstance, GroneHogMound>.State idle_alt;
+			public GameStateMachine<GroneHogMound.States, GroneHogMound.StatesInstance, GroneHogMound, object>.State idle_alt;
 
-			public GameStateMachine<GroneHogMound.States, GroneHogMound.StatesInstance, GroneHogMound>.State respawn;
+			public GameStateMachine<GroneHogMound.States, GroneHogMound.StatesInstance, GroneHogMound, object>.State respawn;
 		}
 	}
 }

@@ -15,11 +15,11 @@ public class EditableTitleBar : TitleBar
 		base.OnSpawn();
 		if (this.randomNameButton != null)
 		{
-			this.randomNameButton.onClickDown += this.GenerateRandomName;
+			this.randomNameButton.onClick += this.GenerateRandomName;
 		}
 		if (this.editNameButton != null)
 		{
-			this.editNameButton.onClickDown += this.ToggleNameEditing;
+			this.editNameButton.onClick += this.ToggleNameEditing;
 		}
 		if (this.inputField != null)
 		{
@@ -29,6 +29,7 @@ public class EditableTitleBar : TitleBar
 
 	private void OnEndEdit(string finalStr)
 	{
+		finalStr = Localization.FilterDirtyWords(finalStr);
 		this.SetEditingState(false);
 		if (string.IsNullOrEmpty(finalStr))
 		{
@@ -43,7 +44,7 @@ public class EditableTitleBar : TitleBar
 		{
 			base.StopCoroutine(this.postEndEdit);
 		}
-		if (base.gameObject.activeSelf && base.enabled)
+		if (base.gameObject.activeInHierarchy && base.enabled)
 		{
 			this.postEndEdit = base.StartCoroutine(this.PostOnEndEdit());
 		}
@@ -57,7 +58,7 @@ public class EditableTitleBar : TitleBar
 			i++;
 			yield return new WaitForEndOfFrame();
 		}
-		this.editNameButton.onClickDown += this.ToggleNameEditing;
+		this.editNameButton.onClick += this.ToggleNameEditing;
 		if (this.randomNameButton != null)
 		{
 			this.randomNameButton.gameObject.SetActive(false);
@@ -71,7 +72,7 @@ public class EditableTitleBar : TitleBar
 		{
 			base.StopCoroutine(this.postEndEdit);
 		}
-		string text = GameUtil.GenerateRandomDuplicantName(this.isMaleDuplicant);
+		string text = GameUtil.GenerateRandomDuplicantName();
 		if (this.OnNameChanged != null)
 		{
 			this.OnNameChanged(text);
@@ -82,7 +83,7 @@ public class EditableTitleBar : TitleBar
 
 	private void ToggleNameEditing()
 	{
-		this.editNameButton.ClearOnClickDown();
+		this.editNameButton.ClearOnClick();
 		bool flag = !this.inputField.gameObject.activeInHierarchy;
 		if (this.randomNameButton != null)
 		{
@@ -125,19 +126,11 @@ public class EditableTitleBar : TitleBar
 		this.editNameButton.gameObject.SetActive(editable);
 	}
 
-	public void SetTitle(string Name, bool isMale)
-	{
-		this.isMaleDuplicant = isMale;
-		base.SetTitle(Name);
-	}
-
 	public KButton editNameButton;
 
 	public KButton randomNameButton;
 
 	public TMP_InputField inputField;
-
-	private bool isMaleDuplicant;
 
 	private Coroutine postEndEdit;
 }

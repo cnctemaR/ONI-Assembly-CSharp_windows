@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 public class CellSolidFilterEvent : CellEvent
 {
@@ -7,6 +8,7 @@ public class CellSolidFilterEvent : CellEvent
 	{
 	}
 
+	[Conditional("UNITY_EDITOR")]
 	public void Log(int cell, bool solid)
 	{
 		if (!this.enableLogging)

@@ -7,8 +7,6 @@ using UnityEngine;
 
 public class MedicinalPill : Workable, IGameObjectEffectDescriptor
 {
-	public int DescriptionOrder { get; set; }
-
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -47,14 +45,9 @@ public class MedicinalPill : Workable, IGameObjectEffectDescriptor
 		new TakeMedicineChore(this);
 	}
 
-	public List<Descriptor> GetRequirementDescriptions(GameObject go)
+	public List<Descriptor> EffectDescriptors(GameObject go)
 	{
-		return null;
-	}
-
-	public List<string> GetEffectDescriptions(GameObject go)
-	{
-		List<string> list = new List<string>();
+		List<Descriptor> list = new List<Descriptor>();
 		List<string> list2 = new List<string>();
 		foreach (string text in this.curedDiseases)
 		{
@@ -71,7 +64,7 @@ public class MedicinalPill : Workable, IGameObjectEffectDescriptor
 					text2 += ", ";
 				}
 			}
-			list.Add(string.Format(DUPLICANTS.DISEASES.CURES, text2));
+			list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.CURES, text2), string.Format(DUPLICANTS.DISEASES.CURES, text2), Descriptor.DescriptorType.Effect, false));
 		}
 		else
 		{
@@ -80,15 +73,20 @@ public class MedicinalPill : Workable, IGameObjectEffectDescriptor
 				float num = (this.boostMultipliers[k] - 1f) * 100f;
 				if (num >= 0f)
 				{
-					list.Add(string.Format(DUPLICANTS.DISEASES.BOOSTSCURESPEED, list2[k], GameUtil.GetFormattedPercent(num, GameUtil.TimeSlice.None)));
+					list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.BOOSTSCURESPEED, list2[k], GameUtil.GetFormattedPercent(num, GameUtil.TimeSlice.None)), string.Format(DUPLICANTS.DISEASES.BOOSTSCURESPEED, list2[k], GameUtil.GetFormattedPercent(num, GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Effect, false));
 				}
 				else
 				{
-					list.Add(string.Format(DUPLICANTS.DISEASES.REDUCECURESPEED, list2[k], GameUtil.GetFormattedPercent(num, GameUtil.TimeSlice.None)));
+					list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.REDUCECURESPEED, list2[k], GameUtil.GetFormattedPercent(num, GameUtil.TimeSlice.None)), string.Format(DUPLICANTS.DISEASES.REDUCECURESPEED, list2[k], GameUtil.GetFormattedPercent(num, GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Effect, false));
 				}
 			}
 		}
 		return list;
+	}
+
+	public List<Descriptor> GetDescriptors(GameObject go)
+	{
+		return this.EffectDescriptors(go);
 	}
 
 	public string[] curedDiseases;

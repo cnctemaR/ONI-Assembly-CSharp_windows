@@ -119,6 +119,11 @@ namespace FMOD.Studio
 			return EventDescription.FMOD_Studio_EventDescription_GetSoundSize(this.rawPtr, out size);
 		}
 
+		public RESULT isSnapshot(out bool snapshot)
+		{
+			return EventDescription.FMOD_Studio_EventDescription_IsSnapshot(this.rawPtr, out snapshot);
+		}
+
 		public RESULT isOneshot(out bool oneshot)
 		{
 			return EventDescription.FMOD_Studio_EventDescription_IsOneshot(this.rawPtr, out oneshot);
@@ -225,85 +230,88 @@ namespace FMOD.Studio
 			return EventDescription.FMOD_Studio_EventDescription_SetUserData(this.rawPtr, userData);
 		}
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern bool FMOD_Studio_EventDescription_IsValid(IntPtr eventdescription);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_GetID(IntPtr eventdescription, [Out] byte[] id);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_GetPath(IntPtr eventdescription, [Out] byte[] path, int size, out int retrieved);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_GetParameterCount(IntPtr eventdescription, out int count);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_GetParameterByIndex(IntPtr eventdescription, int index, out PARAMETER_DESCRIPTION_INTERNAL parameter);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_GetParameter(IntPtr eventdescription, byte[] name, out PARAMETER_DESCRIPTION_INTERNAL parameter);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_GetUserPropertyCount(IntPtr eventdescription, out int count);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_GetUserPropertyByIndex(IntPtr eventdescription, int index, out USER_PROPERTY_INTERNAL property);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_GetUserProperty(IntPtr eventdescription, byte[] name, out USER_PROPERTY_INTERNAL property);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_GetLength(IntPtr eventdescription, out int length);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_GetMinimumDistance(IntPtr eventdescription, out float distance);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_GetMaximumDistance(IntPtr eventdescription, out float distance);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_GetSoundSize(IntPtr eventdescription, out float size);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD_Studio_EventDescription_IsSnapshot(IntPtr eventdescription, out bool snapshot);
+
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_IsOneshot(IntPtr eventdescription, out bool oneshot);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_IsStream(IntPtr eventdescription, out bool isStream);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_Is3D(IntPtr eventdescription, out bool is3D);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_HasCue(IntPtr eventdescription, out bool cue);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_CreateInstance(IntPtr eventdescription, out IntPtr instance);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_GetInstanceCount(IntPtr eventdescription, out int count);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_GetInstanceList(IntPtr eventdescription, IntPtr[] array, int capacity, out int count);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_LoadSampleData(IntPtr eventdescription);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_UnloadSampleData(IntPtr eventdescription);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_GetSampleLoadingState(IntPtr eventdescription, out LOADING_STATE state);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_ReleaseAllInstances(IntPtr eventdescription);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_SetCallback(IntPtr eventdescription, EVENT_CALLBACK callback, EVENT_CALLBACK_TYPE callbackmask);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_GetUserData(IntPtr eventdescription, out IntPtr userData);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_SetUserData(IntPtr eventdescription, IntPtr userData);
 
 		protected override bool isValidInternal()

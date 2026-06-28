@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 public class CellDigEvent : CellEvent
 {
@@ -7,6 +8,7 @@ public class CellDigEvent : CellEvent
 	{
 	}
 
+	[Conditional("UNITY_EDITOR")]
 	public void Log(int cell, int callback_id)
 	{
 		if (!this.enableLogging)
@@ -15,7 +17,6 @@ public class CellDigEvent : CellEvent
 		}
 		CellEventInstance cellEventInstance = new CellEventInstance(cell, 0, 0, this);
 		CellEventLogger.Instance.Add(cellEventInstance);
-		CellEventLogger.Instance.LogCallbackSend(cell, callback_id);
 	}
 
 	public override string GetDescription(EventInstanceBase ev)

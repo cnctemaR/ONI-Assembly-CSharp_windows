@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using Klei.AI;
+using STRINGS;
 
-public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>
+public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IEffectDescriptor
 {
 	protected override void OnPrefabInit()
 	{
@@ -15,10 +17,44 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>
 		base.smi.StartSM();
 	}
 
+	public List<Descriptor> RequirementDescriptors(BuildingDef def)
+	{
+		List<Descriptor> list = new List<Descriptor>();
+		Descriptor descriptor = default(Descriptor);
+		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.REQUIRESELEMENT, "anyElement", ELEMENTS.BLEACHSTONE.NAME), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESELEMENT, "anyElement", ELEMENTS.BLEACHSTONE.NAME), Descriptor.DescriptorType.Requirement);
+		list.Add(descriptor);
+		return list;
+	}
+
+	public List<Descriptor> EffectDescriptors(BuildingDef def)
+	{
+		List<Descriptor> list = new List<Descriptor>();
+		Descriptor descriptor = default(Descriptor);
+		string text = UI.BUILDINGEFFECTS.REMOVESEFFECTSUBTITLE + " " + string.Format(UI.BUILDINGEFFECTS.REMOVEDEFFECT, DUPLICANTS.MODIFIERS.DIRTYHANDS.NAME);
+		string text2 = UI.BUILDINGEFFECTS.REMOVESEFFECTSUBTITLE + " " + string.Format(UI.BUILDINGEFFECTS.REMOVEDEFFECT, DUPLICANTS.MODIFIERS.DIRTYHANDS.NAME);
+		descriptor.SetupDescriptor(text, text2, Descriptor.DescriptorType.Effect);
+		list.Add(descriptor);
+		return list;
+	}
+
+	public List<Descriptor> GetDescriptors(BuildingDef def)
+	{
+		List<Descriptor> list = new List<Descriptor>();
+		foreach (Descriptor descriptor in this.RequirementDescriptors(def))
+		{
+			list.Add(descriptor);
+		}
+		foreach (Descriptor descriptor2 in this.EffectDescriptors(def))
+		{
+			list.Add(descriptor2);
+		}
+		return list;
+	}
+
 	[NonSerialized]
 	public float massConsumedPerUse = 1f;
 
-	public class SMInstance : GameStateMachine<HandSanitizer.States, HandSanitizer.SMInstance, HandSanitizer>.GameInstance
+	public class SMInstance : GameStateMachine<HandSanitizer.States, HandSanitizer.SMInstance, HandSanitizer, object>.GameInstance
 	{
 		public SMInstance(HandSanitizer master)
 			: base(master)
@@ -69,15 +105,15 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>
 				});
 		}
 
-		public GameStateMachine<HandSanitizer.States, HandSanitizer.SMInstance, HandSanitizer>.State notready;
+		public GameStateMachine<HandSanitizer.States, HandSanitizer.SMInstance, HandSanitizer, object>.State notready;
 
 		public HandSanitizer.States.ReadyStates ready;
 
-		public class ReadyStates : GameStateMachine<HandSanitizer.States, HandSanitizer.SMInstance, HandSanitizer>.State
+		public class ReadyStates : GameStateMachine<HandSanitizer.States, HandSanitizer.SMInstance, HandSanitizer, object>.State
 		{
-			public GameStateMachine<HandSanitizer.States, HandSanitizer.SMInstance, HandSanitizer>.State free;
+			public GameStateMachine<HandSanitizer.States, HandSanitizer.SMInstance, HandSanitizer, object>.State free;
 
-			public GameStateMachine<HandSanitizer.States, HandSanitizer.SMInstance, HandSanitizer>.State occupied;
+			public GameStateMachine<HandSanitizer.States, HandSanitizer.SMInstance, HandSanitizer, object>.State occupied;
 		}
 	}
 

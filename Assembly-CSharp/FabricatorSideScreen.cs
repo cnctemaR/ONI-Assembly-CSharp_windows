@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using FMOD.Studio;
+using FMODUnity;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
@@ -27,6 +29,19 @@ public class FabricatorSideScreen : SideScreenContent
 		this.Initialize(component);
 	}
 
+	protected override void OnShow(bool show)
+	{
+		if (show)
+		{
+			AudioMixer.instance.Start(AudioMixerSnapshots.Get().FabricatorSideScreenOpenSnapshot);
+		}
+		else
+		{
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FabricatorSideScreenOpenSnapshot, STOP_MODE.ALLOWFADEOUT);
+		}
+		base.OnShow(show);
+	}
+
 	public void Initialize(Fabricator target)
 	{
 		if (target == null)
@@ -48,9 +63,13 @@ public class FabricatorSideScreen : SideScreenContent
 		for (int i = 0; i < array.Length; i++)
 		{
 			Recipe recipe = array[i];
-			KToggle newToggle = Util.KInstantiateUI<KToggle>(this.recipeButton, this.recipeGrid, false);
+			Debug.AssertFormat(recipe.Result.IsValid, "Cant proceed without a recipe end product! [{0}]", new object[] { recipe.Name });
+			GameObject prefab = Assets.GetPrefab(recipe.Result);
+			KToggle newToggle = global::Util.KInstantiateUI<KToggle>(this.recipeButton, this.recipeGrid, false);
 			newToggle.GetComponentInChildren<LocText>().text = recipe.Name;
-			KBatchedAnimController component = recipe.Result.GetComponent<KBatchedAnimController>();
+			KBatchedAnimController component = prefab.GetComponent<KBatchedAnimController>();
+			Debug.Assert(component != null);
+			Debug.AssertFormat(component.AnimFiles != null && component.AnimFiles.Count > 0, "Missing UI sprite anim files for {0}", new object[] { recipe.Name });
 			Sprite sprite = ((!(recipe.Icon == null)) ? recipe.Icon : Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui"));
 			if (sprite == null)
 			{
@@ -60,7 +79,7 @@ public class FabricatorSideScreen : SideScreenContent
 			componentInChildrenOnly.sprite = sprite;
 			newToggle.onClick += delegate
 			{
-				this.ToggleClicked(newToggle, true);
+				this.ToggleClicked(newToggle);
 			};
 			newToggle.gameObject.SetActive(true);
 			if (recipe.Icon != null)
@@ -77,7 +96,7 @@ public class FabricatorSideScreen : SideScreenContent
 			if (this.selectedRecipeFabricatorMap.ContainsKey(this.targetFab))
 			{
 				int num = this.selectedRecipeFabricatorMap[this.targetFab];
-				this.ToggleClicked(this.recipeToggles[num], false);
+				this.ToggleClicked(this.recipeToggles[num]);
 			}
 			else
 			{
@@ -93,28 +112,27 @@ public class FabricatorSideScreen : SideScreenContent
 				if (this.noRecipeSelectedLabel != null)
 				{
 					this.noRecipeSelectedLabel.gameObject.SetActive(true);
+					this.IngredientsDescriptorPanel.gameObject.SetActive(false);
+					this.EffectsDescriptorPanel.gameObject.SetActive(false);
 				}
-				this.buildBtn.interactable = false;
-				this.infiniteBuildBtn.interactable = false;
+				this.buildBtn.isInteractable = false;
+				this.infiniteBuildBtn.isInteractable = false;
 			}
 		}
+		this.scrollBarContainer.SetActive(this.recipeToggles.Count > 4);
 	}
 
-	private void ToggleClicked(KToggle toggle, bool shouldSound)
+	private void ToggleClicked(KToggle toggle)
 	{
 		if (!this.recipeMap.ContainsKey(toggle))
 		{
 			Debug.LogError("Recipe not found on recipe list.");
 			return;
 		}
-		if (shouldSound)
-		{
-			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
-		}
 		this.selectedToggle = toggle;
 		this.selectedToggle.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Active);
-		this.buildBtn.interactable = true;
-		this.infiniteBuildBtn.interactable = true;
+		this.buildBtn.isInteractable = true;
+		this.infiniteBuildBtn.isInteractable = true;
 		this.recipeToggles.ForEach(delegate(KToggle tg)
 		{
 			if (tg != this.selectedToggle)
@@ -149,47 +167,37 @@ public class FabricatorSideScreen : SideScreenContent
 		{
 			this.CreateOrder(true);
 		};
-		string text = GameUtil.GetRecipeDescription(this.selectedRecipe);
-		if (!string.IsNullOrEmpty(text))
-		{
-			text += "\n\n";
-		}
-		text += UI.UISIDESCREENS.FABRICATORSIDESCREEN.COST;
-		List<string> ingredientDescriptions = this.GetIngredientDescriptions(recipeElements);
-		string text2 = string.Empty;
-		if (ingredientDescriptions != null)
-		{
-			foreach (string text3 in ingredientDescriptions)
-			{
-				text2 += string.Format(UI.LISTENTRYSTRING, text3);
-			}
-		}
-		text += text2;
-		string text4 = GameUtil.GetGameObjectEffectsString(this.selectedRecipe.Result);
-		if (this.selectedRecipe.EffectDescription != null && this.selectedRecipe.EffectDescription.Count > 0)
-		{
-			for (int i = 0; i < this.selectedRecipe.EffectDescription.Count; i++)
-			{
-				text4 += string.Format(UI.LISTENTRYSTRING, this.selectedRecipe.EffectDescription[i]);
-			}
-		}
-		if (!string.IsNullOrEmpty(text4))
-		{
-			text = text + "\n" + UI.UISIDESCREENS.FABRICATORSIDESCREEN.RESULTEFFECTS + "\n";
-			text += text4;
-		}
-		this.subtitleLabel.SetText(this.selectedRecipe.Result.GetProperName());
+		string recipeDescription = GameUtil.GetRecipeDescription(this.selectedRecipe);
+		this.subtitleLabel.SetText(this.selectedRecipe.Name);
 		if (this.noRecipeSelectedLabel != null)
 		{
 			this.noRecipeSelectedLabel.gameObject.SetActive(false);
 		}
 		this.descriptionLabel.gameObject.SetActive(true);
-		this.descriptionLabel.SetText(text);
+		this.descriptionLabel.SetText(recipeDescription);
+		List<Descriptor> ingredientDescriptions = this.GetIngredientDescriptions(recipeElements);
+		if (ingredientDescriptions.Count > 0)
+		{
+			GameUtil.IndentListOfDescriptors(ingredientDescriptions);
+			ingredientDescriptions.Insert(0, new Descriptor(UI.UISIDESCREENS.FABRICATORSIDESCREEN.COST, UI.UISIDESCREENS.FABRICATORSIDESCREEN.COST, Descriptor.DescriptorType.Requirement, false));
+			this.IngredientsDescriptorPanel.gameObject.SetActive(true);
+		}
+		this.IngredientsDescriptorPanel.SetDescriptors(ingredientDescriptions);
+		GameObject prefab = Assets.GetPrefab(this.selectedRecipe.Result);
+		List<Descriptor> list = new List<Descriptor>(this.selectedRecipe.EffectDescription);
+		list.AddRange(GameUtil.GetGameObjectEffects(prefab, false));
+		if (list.Count > 0)
+		{
+			GameUtil.IndentListOfDescriptors(list);
+			list.Insert(0, new Descriptor(UI.UISIDESCREENS.FABRICATORSIDESCREEN.RESULTEFFECTS, UI.UISIDESCREENS.FABRICATORSIDESCREEN.RESULTEFFECTS, Descriptor.DescriptorType.Effect, false));
+			this.EffectsDescriptorPanel.gameObject.SetActive(true);
+		}
+		this.EffectsDescriptorPanel.SetDescriptors(list);
 	}
 
-	public List<string> GetIngredientDescriptions(Element[] elements)
+	public List<Descriptor> GetIngredientDescriptions(Element[] elements)
 	{
-		List<string> list = new List<string>();
+		List<Descriptor> list = new List<Descriptor>();
 		for (int i = 0; i < elements.Length; i++)
 		{
 			Tag tag = this.selectedRecipe.Ingredients[i].tag;
@@ -199,8 +207,40 @@ public class FabricatorSideScreen : SideScreenContent
 			{
 				text = "solid";
 			}
-			string text2 = string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPERQUIREMENT, text, prefab.GetProperName(), GameUtil.GetFormattedMass(this.selectedRecipe.Ingredients[i].amount, GameUtil.TimeSlice.None, true, "F1"));
-			list.Add(string.Format(text2, new object[0]));
+			LocString reciperquirement = UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPERQUIREMENT;
+			LocString locString = UI.UISIDESCREENS.FABRICATORSIDESCREEN.TOOLTIPS.RECIPERQUIREMENT_INSUFFICIENT;
+			if (WorldInventory.Instance.GetAmount(tag) >= this.selectedRecipe.Ingredients[i].amount)
+			{
+				locString = UI.UISIDESCREENS.FABRICATORSIDESCREEN.TOOLTIPS.RECIPERQUIREMENT_SUFFICIENT;
+			}
+			string text2;
+			string text3;
+			if (GameTags.DisplayAsCalories.Contains(tag))
+			{
+				EdiblesManager.FoodInfo foodInfo = EdiblesManager.instance.GetFoodInfo(tag.Name);
+				float num = foodInfo.CaloriesPerUnit * this.selectedRecipe.Ingredients[i].amount;
+				text2 = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
+				float num2 = WorldInventory.Instance.GetAmount(tag) * foodInfo.CaloriesPerUnit;
+				text3 = GameUtil.GetFormattedCalories(num2, GameUtil.TimeSlice.None, true);
+			}
+			else if (GameTags.DisplayAsUnits.Contains(tag))
+			{
+				text2 = GameUtil.GetFormattedUnits(this.selectedRecipe.Ingredients[i].amount, GameUtil.TimeSlice.None, false);
+				text3 = GameUtil.GetFormattedUnits(WorldInventory.Instance.GetAmount(tag), GameUtil.TimeSlice.None, false);
+			}
+			else
+			{
+				text2 = GameUtil.GetFormattedMass(this.selectedRecipe.Ingredients[i].amount, GameUtil.TimeSlice.None, true, "{0:0.#}");
+				text3 = GameUtil.GetFormattedMass(WorldInventory.Instance.GetAmount(tag), GameUtil.TimeSlice.None, true, "{0:0.#}");
+			}
+			Descriptor descriptor = new Descriptor(string.Format(reciperquirement, new object[]
+			{
+				text,
+				prefab.GetProperName(),
+				text2,
+				text3
+			}), string.Format(locString, prefab.GetProperName(), text2, text3), Descriptor.DescriptorType.Requirement, false);
+			list.Add(descriptor);
 		}
 		return list;
 	}
@@ -217,7 +257,7 @@ public class FabricatorSideScreen : SideScreenContent
 		{
 			list.Add(ingredient.tag);
 		}
-		this.targetFab.CreateOrder(this.selectedRecipe, list, isInfinite);
+		this.targetFab.CreateOrder(this.selectedRecipe, list, isInfinite, this.createOrderSound);
 	}
 
 	private Element[] GetRecipeElements(Recipe recipe)
@@ -239,28 +279,9 @@ public class FabricatorSideScreen : SideScreenContent
 		return array;
 	}
 
-	private Element[] CheckElementsForOrder(Recipe recipe)
-	{
-		Element[] recipeElements = this.GetRecipeElements(recipe);
-		for (int i = 0; i < recipeElements.Length; i++)
-		{
-			Tag tag = recipe.Ingredients[i].tag;
-			foreach (Element element in ElementLoader.elements)
-			{
-				Tag tag2 = TagManager.Create(element.id);
-				if (tag2 == tag)
-				{
-					recipeElements[i] = element;
-					break;
-				}
-			}
-			if (recipeElements[i] == null)
-			{
-				throw new ArgumentException("Tag in smelter recipe doesn't match element name.");
-			}
-		}
-		return recipeElements;
-	}
+	public DescriptorPanel IngredientsDescriptorPanel;
+
+	public DescriptorPanel EffectsDescriptorPanel;
 
 	[Header("Recipe List")]
 	[SerializeField]
@@ -295,6 +316,9 @@ public class FabricatorSideScreen : SideScreenContent
 	private BuildQueue queue;
 
 	[SerializeField]
+	private GameObject scrollBarContainer;
+
+	[SerializeField]
 	private LocText descriptionLabel;
 
 	[SerializeField]
@@ -304,6 +328,9 @@ public class FabricatorSideScreen : SideScreenContent
 	private LocText noRecipeSelectedLabel;
 
 	private Dictionary<Fabricator, int> selectedRecipeFabricatorMap = new Dictionary<Fabricator, int>();
+
+	[EventRef]
+	public string createOrderSound;
 
 	private Fabricator targetFab;
 

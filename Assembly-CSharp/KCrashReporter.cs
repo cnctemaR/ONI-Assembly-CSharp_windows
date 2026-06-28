@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json;
-using Steamworks;
+using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,9 +17,61 @@ public class KCrashReporter : MonoBehaviour
 	private void OnEnable()
 	{
 		Application.logMessageReceived += this.HandleLog;
+		KCrashReporter.ignoreAll = true;
+		string dataPath = Application.dataPath;
+		string text = Path.Combine(dataPath, "hashes.json");
+		if (File.Exists(text))
+		{
+			StringBuilder stringBuilder = new StringBuilder();
+			MD5 md = MD5.Create();
+			string text2 = File.ReadAllText(text);
+			Dictionary<string, string> dictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(text2);
+			if (dictionary.Count > 0)
+			{
+				bool flag = true;
+				foreach (KeyValuePair<string, string> keyValuePair in dictionary)
+				{
+					string key = keyValuePair.Key;
+					string value = keyValuePair.Value;
+					stringBuilder.Length = 0;
+					string text3 = Path.Combine(dataPath, key);
+					using (FileStream fileStream = new FileStream(text3, FileMode.Open, FileAccess.Read))
+					{
+						byte[] array = md.ComputeHash(fileStream);
+						foreach (byte b in array)
+						{
+							stringBuilder.AppendFormat("{0:x2}", b);
+						}
+						string text4 = stringBuilder.ToString();
+						if (text4 != value)
+						{
+							flag = false;
+							break;
+						}
+					}
+				}
+				if (flag)
+				{
+					KCrashReporter.ignoreAll = false;
+				}
+			}
+			else
+			{
+				KCrashReporter.ignoreAll = false;
+			}
+		}
+		else
+		{
+			KCrashReporter.ignoreAll = false;
+		}
+		if (KCrashReporter.ignoreAll)
+		{
+			global::UnityEngine.Debug.Log("Ignoring crash due to mismatched hashes.json entries.");
+		}
 		if (File.Exists("ignorekcrashreporter.txt"))
 		{
 			KCrashReporter.ignoreAll = true;
+			global::UnityEngine.Debug.Log("Ignoring crash due to ignorekcrashreporter.txt");
 		}
 		if (Application.isEditor)
 		{
@@ -35,7 +90,7 @@ public class KCrashReporter : MonoBehaviour
 		{
 			return;
 		}
-		if (msg == "Releasing render texture whose render buffer is set as Camera's target buffer with Camera.SetTargetBuffers!")
+		if (Array.IndexOf<string>(KCrashReporter.IgnoreStrings, msg) != -1)
 		{
 			return;
 		}
@@ -151,11 +206,18 @@ public class KCrashReporter : MonoBehaviour
 		{
 			return Environment.UserName;
 		}
-		if (SteamManager.Initialized)
+		if (DistributionPlatform.Initialized)
 		{
-			return "SteamID_" + SteamFriends.GetPersonaName() + "_" + SteamUser.GetSteamID().ToString();
+			return string.Concat(new object[]
+			{
+				DistributionPlatform.Inst.Name,
+				"ID_",
+				DistributionPlatform.Inst.LocalUser.Name,
+				"_",
+				DistributionPlatform.Inst.LocalUser.Id
+			});
 		}
-		return "NO_STEAM";
+		return "NO_PLATFORM";
 	}
 
 	private static string GetLogContents()
@@ -182,8 +244,15 @@ public class KCrashReporter : MonoBehaviour
 		return string.Empty;
 	}
 
-	private static void ReportError(string msg, string stack_trace, string save_file_link, ConfirmDialogScreen confirm_prefab, string userMessage = "")
+	public static void ReportError(string msg, string stack_trace, string save_file_link, ConfirmDialogScreen confirm_prefab, string userMessage = "")
 	{
+		if (KCrashReporter.debugWasUsed)
+		{
+			global::UnityEngine.Debug.Log("Ignoring crash because debug was used.");
+			return;
+		}
+		global::UnityEngine.Debug.Log("Reporting error.");
+		KCrashReporter.hasReportedError = true;
 		string text3;
 		using (WebClient webClient = new WebClient())
 		{
@@ -201,18 +270,69 @@ public class KCrashReporter : MonoBehaviour
 			{
 				stack_trace = string.Format("No stack trace.\n\n{0}", msg);
 			}
-			string text = JsonConvert.SerializeObject(new KCrashReporter.Error
+			int num = stack_trace.IndexOf('\n');
+			string text = stack_trace;
+			if (num > 0)
 			{
-				user = KCrashReporter.GetUserID(),
-				callstack = stack_trace,
-				fullstack = "USER_MESSAGE:\n" + userMessage + "\n\nUNITY_OUTPUT:\n" + msg,
-				build = 208689,
-				log = KCrashReporter.GetLogContents()
-			});
-			string text2 = webClient.UploadString("http://crashes.klei.ca/submitCrash", text);
-			ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)KScreenManager.Instance.StartScreen(confirm_prefab.gameObject, null);
-			confirmDialogScreen.PopupConfirmDialog("Reported Error", null, null, null, null);
-			text3 = text2;
+				text = stack_trace.Substring(0, num);
+			}
+			while (text == string.Empty || text.StartsWith("UnityEngine.Debug:LogError(Object)") || text.StartsWith("UnityEngine.Debug:LogError(Object, Object)") || text.StartsWith("UnityEngine.Debug:Assert(Boolean, String)") || text.StartsWith("Output:LogError(String)") || text.StartsWith("Output:LogErrorWithObj(Object, String)") || text.StartsWith("Output:LogErrorWithObj(Object, Object[])") || text.StartsWith("DebugUtil:Assert(Boolean, String)") || text.StartsWith("KCrashReporter.Assert(Boolean condition, System.String message)") || text.StartsWith("No stack trace."))
+			{
+				int num2 = num + 1;
+				bool flag = false;
+				if (num2 < stack_trace.Length)
+				{
+					num = stack_trace.IndexOf('\n', num2);
+					if (num < stack_trace.Length)
+					{
+						text = stack_trace.Substring(num2, num - num2);
+						flag = true;
+					}
+				}
+				if (!flag)
+				{
+					text = string.Empty;
+					break;
+				}
+			}
+			if (userMessage == UI.CRASHSCREEN.BODY.text)
+			{
+				userMessage = string.Empty;
+			}
+			KCrashReporter.Error error = new KCrashReporter.Error();
+			error.user = KCrashReporter.GetUserID();
+			error.callstack = stack_trace;
+			if (KCrashReporter.disableDeduping)
+			{
+				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
+			}
+			error.fullstack = "UNITY_OUTPUT:\n" + msg;
+			error.build = 217311;
+			error.log = KCrashReporter.GetLogContents();
+			error.summaryline = text;
+			error.user_message = userMessage;
+			if (DistributionPlatform.Initialized)
+			{
+				error.steam64_verified = DistributionPlatform.Inst.LocalUser.Id.ToInt64();
+			}
+			string text2 = JsonConvert.SerializeObject(error);
+			string empty = string.Empty;
+			Uri uri = new Uri("http://crashes.klei.ca/submitCrash");
+			global::UnityEngine.Debug.Log("Submitting crash:");
+			try
+			{
+				webClient.UploadStringAsync(uri, text2);
+			}
+			catch (Exception ex)
+			{
+				global::UnityEngine.Debug.Log(ex);
+			}
+			if (confirm_prefab != null)
+			{
+				ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)KScreenManager.Instance.StartScreen(confirm_prefab.gameObject, null);
+				confirmDialogScreen.PopupConfirmDialog("Reported Error", null, null, null, null);
+			}
+			text3 = empty;
 		}
 		if (KCrashReporter.onCrashReported != null)
 		{
@@ -227,9 +347,33 @@ public class KCrashReporter : MonoBehaviour
 		KCrashReporter.ReportError(string.Empty, text, text2, ScreenPrefabs.Instance.ConfirmDialogScreen, string.Empty);
 	}
 
-	public static bool ignoreAll;
+	public static void Assert(bool condition, string message)
+	{
+		if (!condition && !KCrashReporter.hasReportedError)
+		{
+			StackTrace stackTrace = new StackTrace(0, true);
+			KCrashReporter.ReportError(message, stackTrace.ToString(), null, null, string.Empty);
+		}
+	}
+
+	public static void Assert(bool condition)
+	{
+		if (!condition && !KCrashReporter.hasReportedError)
+		{
+			StackTrace stackTrace = new StackTrace(0, true);
+			KCrashReporter.ReportError("Assertion failed", stackTrace.ToString(), null, null, string.Empty);
+		}
+	}
+
+	public static bool ignoreAll = false;
+
+	public static bool debugWasUsed = false;
 
 	public static string error_canvas_name = "ErrorCanvas";
+
+	private static bool disableDeduping = false;
+
+	private static bool hasReportedError;
 
 	[SerializeField]
 	private LoadScreen loadScreenPrefab;
@@ -244,6 +388,8 @@ public class KCrashReporter : MonoBehaviour
 
 	public static bool terminateOnError = true;
 
+	private static readonly string[] IgnoreStrings = new string[] { "Releasing render texture whose render buffer is set as Camera's target buffer with Camera.SetTargetBuffers!", "The profiler has run out of samples for this frame. This frame will be skipped. Increase the sample limit using Profiler.maxNumberOfSamplesPerFrame" };
+
 	private class Error
 	{
 		public string game = "simgame";
@@ -254,11 +400,17 @@ public class KCrashReporter : MonoBehaviour
 
 		public string user = "unknown";
 
+		public ulong steam64_verified;
+
 		public string callstack = string.Empty;
 
 		public string fullstack = string.Empty;
 
 		public string log = string.Empty;
+
+		public string summaryline = string.Empty;
+
+		public string user_message = string.Empty;
 
 		public bool is_server;
 

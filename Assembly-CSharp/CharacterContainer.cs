@@ -117,10 +117,13 @@ public class CharacterContainer : KScreen
 		this.SetInfoText();
 		base.StartCoroutine(this.SetAttributes());
 		this.selectButton.ClearOnClick();
-		this.selectButton.onClick += delegate
+		if (!this.controller.IsStarterMinion)
 		{
-			this.SelectCharacter();
-		};
+			this.selectButton.onClick += delegate
+			{
+				this.SelectCharacter();
+			};
+		}
 	}
 
 	private void OnResize()
@@ -146,8 +149,9 @@ public class CharacterContainer : KScreen
 		this.stats.ApplyExperience(this.animController.gameObject);
 		DecorNeed decorNeed = this.animController.gameObject.AddComponent<DecorNeed>();
 		decorNeed.skipUpdate = true;
-		string text = CharacterContainer.idleAnims[global::UnityEngine.Random.Range(0, CharacterContainer.idleAnims.Length)];
-		this.idle_anim = Assets.GetAnim(text);
+		this.animController.gameObject.AddComponent<FoodQualityNeed>();
+		HashedString hashedString = CharacterContainer.idleAnims[global::UnityEngine.Random.Range(0, CharacterContainer.idleAnims.Length)];
+		this.idle_anim = Assets.GetAnim(hashedString);
 		if (this.idle_anim != null)
 		{
 			this.animController.AddAnimOverrides(this.idle_anim, 0f);
@@ -162,7 +166,7 @@ public class CharacterContainer : KScreen
 			global::UnityEngine.Object.Destroy(tl.gameObject);
 		});
 		this.traitLabels.Clear();
-		this.characterNameTitle.SetTitle(this.stats.Name, this.stats.isMale);
+		this.characterNameTitle.SetTitle(this.stats.Name);
 		string professionString = this.animController.gameObject.GetAttributes().GetProfessionString();
 		this.characterJob.text = professionString;
 		string professionDescriptionString = this.animController.gameObject.GetAttributes().GetProfessionDescriptionString();
@@ -188,7 +192,7 @@ public class CharacterContainer : KScreen
 			LocText locText3 = Util.KInstantiateUI<LocText>(this.expectation.gameObject, this.expectation.transform.parent.gameObject, false);
 			locText3.gameObject.SetActive(true);
 			AttributeInstance attributeInstance = need.GetExpectationAttribute().Lookup(this.animController);
-			locText3.text = string.Format(UI.CHARACTERCONTAINER_NEED, need.Name, attributeInstance.GetTotalValue());
+			locText3.text = string.Format(UI.CHARACTERCONTAINER_NEED, need.Name, attributeInstance.GetFormattedValue(false));
 			this.expectationLabels.Add(locText3);
 			string text = attributeInstance.GetAttributeValueTooltip();
 			text += UI.TOOLTIPS.TOOLTIP_SEPERATOR;
@@ -203,6 +207,14 @@ public class CharacterContainer : KScreen
 			locText4.GetComponent<ToolTip>().SetSimpleTooltip(this.stats.stressTrait.GetTooltip());
 			this.expectationLabels.Add(locText4);
 		}
+		if (this.stats.congenitaltrait != null)
+		{
+			LocText locText5 = Util.KInstantiateUI<LocText>(this.expectationRight.gameObject, this.expectationRight.transform.parent.gameObject, false);
+			locText5.gameObject.SetActive(true);
+			locText5.text = string.Format(UI.CHARACTERCONTAINER_CONGENITALTRAIT, this.stats.congenitaltrait.Name);
+			locText5.GetComponent<ToolTip>().SetSimpleTooltip(this.stats.congenitaltrait.GetTooltip());
+			this.expectationLabels.Add(locText5);
+		}
 		this.description.text = this.stats.personality.description;
 	}
 
@@ -215,8 +227,8 @@ public class CharacterContainer : KScreen
 		});
 		this.iconGroups.Clear();
 		Attributes attr = this.animController.gameObject.GetAttributes();
-		List<AttributeInstance> attributes = new List<AttributeInstance>(attr.AttributeTable.Values);
-		attributes.RemoveAll((AttributeInstance at) => !at.Attribute.ShowInUI);
+		List<AttributeInstance> attributes = new List<AttributeInstance>(attr.AttributeTable);
+		attributes.RemoveAll((AttributeInstance at) => at.Attribute.ShowInUI != Klei.AI.Attribute.Display.Skill);
 		attributes = attributes.OrderBy<AttributeInstance, string>((AttributeInstance at) => at.Name).ToList<AttributeInstance>();
 		for (int i = 0; i < attributes.Count; i++)
 		{
@@ -260,7 +272,6 @@ public class CharacterContainer : KScreen
 		{
 			this.controller.AddCharacter(this.stats);
 		}
-		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
 		if (MusicManager.instance.SongIsPlaying("Music_SelectDuplicant"))
 		{
 			MusicManager.instance.SetSongParameter("Music_SelectDuplicant", "songSection", 1f, true);
@@ -269,7 +280,6 @@ public class CharacterContainer : KScreen
 		this.selectButton.ClearOnClick();
 		this.selectButton.onClick += delegate
 		{
-			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Deselect", false));
 			this.DeselectCharacter();
 			if (MusicManager.instance.SongIsPlaying("Music_SelectDuplicant"))
 			{
@@ -391,8 +401,9 @@ public class CharacterContainer : KScreen
 
 	public void DisableSelectButton()
 	{
-		this.selectButton.onValidate += () => false;
+		this.selectButton.soundPlayer.AcceptClickCondition = () => false;
 		this.selectButton.GetComponent<ImageToggleState>().SetDisabled();
+		this.selectButton.soundPlayer.Enabled = false;
 	}
 
 	private bool IsCharacterRedundant()
@@ -501,7 +512,7 @@ public class CharacterContainer : KScreen
 
 	private Dictionary<string, Sprite> professionIconMap;
 
-	private static string[] idleAnims = new string[] { "anim_idle_healthy", "anim_idle_susceptible", "anim_idle_keener", "anim_idle_coaster", "anim_idle_fastfeet", "anim_idle_breatherdeep", "anim_idle_breathershallow" };
+	private static HashedString[] idleAnims = new HashedString[] { "anim_idle_healthy_kanim", "anim_idle_susceptible_kanim", "anim_idle_keener_kanim", "anim_idle_coaster_kanim", "anim_idle_fastfeet_kanim", "anim_idle_breatherdeep_kanim", "anim_idle_breathershallow_kanim" };
 
 	public float baseCharacterScale = 0.38f;
 

@@ -105,7 +105,7 @@ public class TrashRegion : KMonoBehaviour
 			return false;
 		}
 		int num = Grid.CellAbove(cell);
-		return !(Grid.Objects[num, 17] != null);
+		return !(Grid.Objects[num, 3] != null);
 	}
 
 	public bool IsFull()
@@ -118,7 +118,7 @@ public class TrashRegion : KMonoBehaviour
 		Tag[] tags = this.filterable.GetTags();
 		Action<Chore> action = new Action<Chore>(this.OnFetchComplete);
 		Action<Chore> action2 = new Action<Chore>(this.OnFetchStart);
-		FetchChore fetchChore = new FetchChore(this.storage, 2.1474836E+09f, tags, null, true, action, action2, new Action<Chore>(this.OnFetchEnd), true);
+		FetchChore fetchChore = new FetchChore(this.storage, 2.1474836E+09f, tags, null, true, action, action2, new Action<Chore>(this.OnFetchEnd), FetchOrder2.OperationalRequirement.Operational, 0);
 		this.fetchChores.Add(fetchChore);
 	}
 

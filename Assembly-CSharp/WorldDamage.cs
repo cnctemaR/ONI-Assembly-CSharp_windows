@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using FMODUnity;
+using STRINGS;
 using UnityEngine;
 
 public class WorldDamage : KMonoBehaviour
@@ -15,27 +16,41 @@ public class WorldDamage : KMonoBehaviour
 
 	public bool ApplyDamage(Sim.WorldDamageInfo damage_info)
 	{
-		return this.ApplyDamage(damage_info.gameCell, this.damageAmount, damage_info.damageSourceOffset);
+		return this.ApplyDamage(damage_info.gameCell, this.damageAmount, damage_info.damageSourceOffset, -1);
 	}
 
-	public bool ApplyDamage(int cell, float amount, int src_cell)
+	public bool ApplyDamage(int cell, float amount, int src_cell, int destroy_cb_index = -1)
 	{
 		if (Grid.Solid[cell])
 		{
 			float num = Grid.Damage[cell];
 			num += amount;
-			Grid.Damage[cell] = num;
-			GameObject gameObject = Grid.Objects[cell, 8];
-			if (gameObject != null)
+			bool flag = num > 0.15f;
+			if (flag)
 			{
-				gameObject.Trigger(-184635526, num >= 1f);
+				bool flag2 = Grid.Objects[cell, 9] != null;
+				if (flag2)
+				{
+					GameObject gameObject = Grid.Objects[cell, 1];
+					if (gameObject != null && gameObject.GetComponent<Constructable>() == null)
+					{
+						gameObject.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+						{
+							damage = 10,
+							source = BUILDINGS.DAMAGESOURCES.LIQUID_PRESSURE,
+							popString = UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.LIQUID_PRESSURE
+						});
+						num = 0f;
+					}
+				}
 			}
+			Grid.Damage[cell] = num;
 			if (Grid.Damage[cell] >= 1f)
 			{
-				this.DestroyCell(cell);
+				this.DestroyCell(cell, destroy_cb_index);
 				return true;
 			}
-			if (src_cell != -1 && num > 0.15f)
+			if (src_cell != -1 && flag)
 			{
 				Element element = Grid.Element[src_cell];
 				if (element.IsLiquid && Grid.Cell[src_cell].mass > 1f)
@@ -47,7 +62,7 @@ public class WorldDamage : KMonoBehaviour
 					{
 						int num3 = cell + num2;
 						Element element2 = Grid.Element[num3];
-						if (!element2.IsSolid && (!element2.IsLiquid || Grid.Cell[num3].mass <= 100f) && !this.spawnTimes.ContainsKey(num3))
+						if (!element2.IsSolid && (!element2.IsLiquid || (element2.id == element.id && Grid.Cell[num3].mass <= 100f)) && !this.spawnTimes.ContainsKey(num3))
 						{
 							this.spawnTimes[num3] = Time.realtimeSinceStartup;
 							base.StartCoroutine(this.DelayedSpawnFX(src_cell, num3, num2, element, elementIndex, temperature));
@@ -77,9 +92,9 @@ public class WorldDamage : KMonoBehaviour
 		if (offset == -1)
 		{
 			kanim.Play("side", KAnim.PlayMode.Once, 1f, 0f);
-			kanim.Flip = true;
+			kanim.FlipX = true;
 			fx.transform.position += Vector3.right * 0.5f;
-			FallingWater.instance.AddParticle(dest_cell, (byte)idx, 1f, temperature, true, false);
+			FallingWater.instance.AddParticle(dest_cell, (byte)idx, 1f, temperature, true, false, false);
 		}
 		else if (offset == Grid.WidthInCells)
 		{
@@ -91,13 +106,13 @@ public class WorldDamage : KMonoBehaviour
 		{
 			kanim.Play("ceiling", KAnim.PlayMode.Once, 1f, 0f);
 			fx.transform.position += Vector3.up * 0.5f;
-			FallingWater.instance.AddParticle(dest_cell, (byte)idx, 1f, temperature, true, false);
+			FallingWater.instance.AddParticle(dest_cell, (byte)idx, 1f, temperature, true, false, false);
 		}
 		else
 		{
 			kanim.Play("side", KAnim.PlayMode.Once, 1f, 0f);
 			fx.transform.position -= Vector3.right * 0.5f;
-			FallingWater.instance.AddParticle(dest_cell, (byte)idx, 1f, temperature, true, false);
+			FallingWater.instance.AddParticle(dest_cell, (byte)idx, 1f, temperature, true, false, false);
 		}
 		if (CameraController.Instance.IsAudibleSound(fx.transform.position, this.leakSoundMigrated))
 		{
@@ -125,19 +140,30 @@ public class WorldDamage : KMonoBehaviour
 		this.expiredCells.Clear();
 	}
 
-	public void DestroyCell(int cell)
+	public void DestroyCell(int cell, int cb_index = -1)
 	{
 		if (Grid.Solid[cell])
 		{
-			float mass = Grid.Cell[cell].mass;
-			Element element = Grid.Element[cell];
-			float temperature = Grid.Temperature[cell];
-			global::System.Action action = delegate
+			if (cb_index == -1)
 			{
-				WorldDamage.OnDigComplete(cell, mass, temperature, element);
-			};
-			HandleVector<global::System.Action>.Handle handle = Game.Instance.callbackManager.Add(action, "WorldDamage");
-			SimMessages.Dig(cell, handle.index);
+				if (!this.queuedDigCallbackCells.Contains(cell))
+				{
+					this.queuedDigCallbackCells.Add(cell);
+					float mass = Grid.Cell[cell].mass;
+					Element element = Grid.Element[cell];
+					float temperature = Grid.Temperature[cell];
+					global::System.Action action = delegate
+					{
+						WorldDamage.OnDigComplete(this, cell, mass, temperature, element);
+					};
+					HandleVector<global::System.Action>.Handle handle = Game.Instance.callbackManager.Add(action, "WorldDamage");
+					SimMessages.Dig(cell, handle.index);
+				}
+			}
+			else
+			{
+				SimMessages.Dig(cell, cb_index);
+			}
 		}
 	}
 
@@ -146,21 +172,25 @@ public class WorldDamage : KMonoBehaviour
 		Grid.Damage[cell] = 0f;
 	}
 
-	private static void OnDigComplete(int cell, float mass, float temperature, Element element)
+	private static void OnDigComplete(WorldDamage t, int cell, float mass, float temperature, Element element)
 	{
-		Vector3 vector = Grid.CellToPos(cell, CellAlignment.RandomInternal, Grid.SceneLayer.Use);
-		Grid.Damage[cell] = 0f;
-		WorldDamage.Instance.PlaySoundForSubstance(element, vector);
-		float num = mass * 0.5f;
-		if (num <= 0f)
+		if (t.queuedDigCallbackCells.Contains(cell))
 		{
-			return;
-		}
-		GameObject gameObject = element.substance.SpawnResource(vector, num, temperature, false, false);
-		Pickupable component = gameObject.GetComponent<Pickupable>();
-		if (component != null && WorldInventory.Instance.IsReachable(gameObject.GetComponent<Pickupable>()))
-		{
-			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, Mathf.RoundToInt(num).ToString() + " " + element.name, gameObject.transform, 1.5f, false);
+			t.queuedDigCallbackCells.Remove(cell);
+			Vector3 vector = Grid.CellToPos(cell, CellAlignment.RandomInternal, Grid.SceneLayer.Use);
+			Grid.Damage[cell] = 0f;
+			WorldDamage.Instance.PlaySoundForSubstance(element, vector);
+			float num = mass * 0.5f;
+			if (num <= 0f)
+			{
+				return;
+			}
+			GameObject gameObject = element.substance.SpawnResource(vector, num, temperature, false, false);
+			Pickupable component = gameObject.GetComponent<Pickupable>();
+			if (component != null && WorldInventory.Instance.IsReachable(gameObject.GetComponent<Pickupable>()))
+			{
+				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, Mathf.RoundToInt(num).ToString() + " " + element.name, gameObject.transform, 1.5f, false);
+			}
 		}
 	}
 
@@ -186,7 +216,7 @@ public class WorldDamage : KMonoBehaviour
 		text = GlobalAssets.GetSound(text, false);
 		if (CameraController.Instance && CameraController.Instance.IsAudibleSound(pos, text))
 		{
-			KFMOD.PlayOneShot(text, pos);
+			KFMOD.PlayOneShot(text, CameraController.Instance.GetVerticallyScaledPosition(pos));
 		}
 	}
 
@@ -197,27 +227,15 @@ public class WorldDamage : KMonoBehaviour
 	[SerializeField]
 	private FMODAsset leakSound;
 
-	[SerializeField]
 	[EventRef]
+	[SerializeField]
 	private string leakSoundMigrated;
+
+	private List<int> queuedDigCallbackCells = new List<int>();
 
 	private float damageAmount = 0.00083333335f;
 
 	private Dictionary<int, float> spawnTimes = new Dictionary<int, float>();
 
 	private List<int> expiredCells = new List<int>();
-
-	[Serializable]
-	public struct SoundData : ISerializationCallbackReceiver
-	{
-		public void OnBeforeSerialize()
-		{
-		}
-
-		public void OnAfterDeserialize()
-		{
-		}
-
-		public string name;
-	}
 }

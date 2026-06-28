@@ -7,6 +7,10 @@ public class SideScreenContent : KScreen
 	{
 	}
 
+	public virtual void ClearTarget()
+	{
+	}
+
 	public virtual string GetTitle()
 	{
 		return Strings.Get(this.titleKey);

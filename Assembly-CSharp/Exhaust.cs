@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[SkipSaveFileSerialization]
 public class Exhaust : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(-592767678, new EventSystem.EventHandler(this.OnConduitStateChanged));
-		this.Subscribe(-111137758, new EventSystem.EventHandler(this.OnConduitStateChanged));
+		this.Subscribe(-592767678, new Action<object>(this.OnConduitStateChanged));
+		this.Subscribe(-111137758, new Action<object>(this.OnConduitStateChanged));
 		base.GetComponent<RequireInputs>().visualizeRequirements = false;
 	}
 
@@ -35,8 +36,8 @@ public class Exhaust : KMonoBehaviour
 			}
 			return;
 		}
-		int cell = this.vent.Cell;
-		if (!Grid.Solid[cell] && this.consumer.ConsumptionRate != 0f)
+		int num = Grid.PosToCell(this.transform.position);
+		if (!Grid.Solid[num] && this.consumer.ConsumptionRate != 0f)
 		{
 			List<GameObject> items = this.storage.items;
 			if (items.Count > 0)
@@ -46,8 +47,8 @@ public class Exhaust : KMonoBehaviour
 				{
 					if (typeOfConduit == ConduitType.Liquid)
 					{
-						int num = Grid.CellBelow(cell);
-						bool flag = Grid.IsValidCell(num) && !Grid.Solid[num];
+						int num2 = Grid.CellBelow(num);
+						bool flag = Grid.IsValidCell(num2) && !Grid.Solid[num2];
 						for (int i = 0; i < items.Count; i++)
 						{
 							PrimaryElement component = items[i].GetComponent<PrimaryElement>();
@@ -56,11 +57,11 @@ public class Exhaust : KMonoBehaviour
 								if (flag)
 								{
 									byte b = (byte)ElementLoader.elements.IndexOf(component.Element);
-									FallingWater.instance.AddParticle(cell, b, component.Mass, component.Temperature, true, false);
+									FallingWater.instance.AddParticle(num, b, component.Mass, component.Temperature, true, false, true);
 								}
 								else
 								{
-									SimMessages.AddRemoveSubstance(cell, component.ElementID, CellEventLogger.Instance.ExhaustSimUpdate, component.Mass, component.Temperature, -1);
+									SimMessages.AddRemoveSubstance(num, component.ElementID, CellEventLogger.Instance.ExhaustSimUpdate, component.Mass, component.Temperature, -1);
 								}
 								this.recentlyExhausted = true;
 								component.KeepZeroMassObject = true;
@@ -77,7 +78,7 @@ public class Exhaust : KMonoBehaviour
 						PrimaryElement component2 = items[j].GetComponent<PrimaryElement>();
 						if (component2.Mass > 0f && component2.Element.IsGas)
 						{
-							SimMessages.AddRemoveSubstance(cell, component2.ElementID, CellEventLogger.Instance.ExhaustSimUpdate, component2.Mass, component2.Temperature, -1);
+							SimMessages.AddRemoveSubstance(num, component2.ElementID, CellEventLogger.Instance.ExhaustSimUpdate, component2.Mass, component2.Temperature, -1);
 							component2.KeepZeroMassObject = true;
 							component2.Mass = 0f;
 							this.recentlyExhausted = true;

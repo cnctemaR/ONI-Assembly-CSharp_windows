@@ -12,10 +12,10 @@ public class DecompositionMonitor : GameStateMachine<DecompositionMonitor, Decom
 		this.satisfied.Update("UpdateDecomposition", delegate(DecompositionMonitor.Instance smi)
 		{
 			smi.UpdateDecomposition();
-		}).ParamTransition<float>(this.decomposition, this.rotten, (DecompositionMonitor.Instance smi, float p) => p >= 1f).ToggleAttributeModifier("Dead", (DecompositionMonitor.Instance smi) => smi.satisfiedDecorModifier)
-			.ToggleAttributeModifier("Dead", (DecompositionMonitor.Instance smi) => smi.satisfiedDecorRadiusModifier);
-		this.rotten.DefaultState(this.rotten.exposed).ToggleStatusItem(Db.Get().DuplicantStatusItems.Rotten, null).ToggleAttributeModifier("Rotten", (DecompositionMonitor.Instance smi) => smi.rottenDecorModifier)
-			.ToggleAttributeModifier("Rotten", (DecompositionMonitor.Instance smi) => smi.rottenDecorRadiusModifier);
+		}).ParamTransition<float>(this.decomposition, this.rotten, (DecompositionMonitor.Instance smi, float p) => p >= 1f).ToggleAttributeModifier("Dead", (DecompositionMonitor.Instance smi) => smi.satisfiedDecorModifier, null)
+			.ToggleAttributeModifier("Dead", (DecompositionMonitor.Instance smi) => smi.satisfiedDecorRadiusModifier, null);
+		this.rotten.DefaultState(this.rotten.exposed).ToggleStatusItem(Db.Get().DuplicantStatusItems.Rotten, null).ToggleAttributeModifier("Rotten", (DecompositionMonitor.Instance smi) => smi.rottenDecorModifier, null)
+			.ToggleAttributeModifier("Rotten", (DecompositionMonitor.Instance smi) => smi.rottenDecorRadiusModifier, null);
 		this.rotten.exposed.DefaultState(this.rotten.exposed.openair).EventTransition(GameHashes.OnStore, this.rotten.stored, (DecompositionMonitor.Instance smi) => !smi.IsExposed());
 		this.rotten.exposed.openair.Enter(delegate(DecompositionMonitor.Instance smi)
 		{
@@ -23,7 +23,7 @@ public class DecompositionMonitor : GameStateMachine<DecompositionMonitor, Decom
 			{
 				smi.ScheduleGoTo(global::UnityEngine.Random.Range(150f, 300f), this.rotten.spawningmonster);
 			}
-		}).Transition(this.rotten.exposed.submerged, (DecompositionMonitor.Instance smi) => smi.IsSubmerged()).ToggleFX((DecompositionMonitor.Instance smi) => new FliesFX.Instance(smi.master, new Vector3(0f, 0f, -0.1f)));
+		}).Transition(this.rotten.exposed.submerged, (DecompositionMonitor.Instance smi) => smi.IsSubmerged()).ToggleFX((DecompositionMonitor.Instance smi) => this.CreateFX(smi));
 		this.rotten.exposed.submerged.DefaultState(this.rotten.exposed.submerged.idle).Transition(this.rotten.exposed.openair, (DecompositionMonitor.Instance smi) => !smi.IsSubmerged());
 		this.rotten.exposed.submerged.idle.ScheduleGoTo(0.25f, this.rotten.exposed.submerged.dirtywater);
 		this.rotten.exposed.submerged.dirtywater.Enter("DirtyWater", delegate(DecompositionMonitor.Instance smi)
@@ -43,39 +43,48 @@ public class DecompositionMonitor : GameStateMachine<DecompositionMonitor, Decom
 		this.rotten.stored.EventTransition(GameHashes.OnStore, this.rotten.exposed, (DecompositionMonitor.Instance smi) => smi.IsExposed());
 	}
 
-	public StateMachine<DecompositionMonitor, DecompositionMonitor.Instance, IStateMachineTarget>.FloatParameter decomposition;
+	private FliesFX.Instance CreateFX(DecompositionMonitor.Instance smi)
+	{
+		if (!smi.isMasterNull)
+		{
+			return new FliesFX.Instance(smi.master, new Vector3(0f, 0f, -0.1f));
+		}
+		return null;
+	}
+
+	public StateMachine<DecompositionMonitor, DecompositionMonitor.Instance, IStateMachineTarget, object>.FloatParameter decomposition;
 
 	[SerializeField]
 	public int remainingRotMonsters = 3;
 
-	public GameStateMachine<DecompositionMonitor, DecompositionMonitor.Instance, IStateMachineTarget>.State satisfied;
+	public GameStateMachine<DecompositionMonitor, DecompositionMonitor.Instance, IStateMachineTarget, object>.State satisfied;
 
 	public DecompositionMonitor.RottenState rotten;
 
-	public class SubmergedState : GameStateMachine<DecompositionMonitor, DecompositionMonitor.Instance, IStateMachineTarget>.State
+	public class SubmergedState : GameStateMachine<DecompositionMonitor, DecompositionMonitor.Instance, IStateMachineTarget, object>.State
 	{
-		public GameStateMachine<DecompositionMonitor, DecompositionMonitor.Instance, IStateMachineTarget>.State idle;
+		public GameStateMachine<DecompositionMonitor, DecompositionMonitor.Instance, IStateMachineTarget, object>.State idle;
 
-		public GameStateMachine<DecompositionMonitor, DecompositionMonitor.Instance, IStateMachineTarget>.State dirtywater;
+		public GameStateMachine<DecompositionMonitor, DecompositionMonitor.Instance, IStateMachineTarget, object>.State dirtywater;
 	}
 
-	public class ExposedState : GameStateMachine<DecompositionMonitor, DecompositionMonitor.Instance, IStateMachineTarget>.State
+	public class ExposedState : GameStateMachine<DecompositionMonitor, DecompositionMonitor.Instance, IStateMachineTarget, object>.State
 	{
 		public DecompositionMonitor.SubmergedState submerged;
 
-		public GameStateMachine<DecompositionMonitor, DecompositionMonitor.Instance, IStateMachineTarget>.State openair;
+		public GameStateMachine<DecompositionMonitor, DecompositionMonitor.Instance, IStateMachineTarget, object>.State openair;
 	}
 
-	public class RottenState : GameStateMachine<DecompositionMonitor, DecompositionMonitor.Instance, IStateMachineTarget>.State
+	public class RottenState : GameStateMachine<DecompositionMonitor, DecompositionMonitor.Instance, IStateMachineTarget, object>.State
 	{
 		public DecompositionMonitor.ExposedState exposed;
 
-		public GameStateMachine<DecompositionMonitor, DecompositionMonitor.Instance, IStateMachineTarget>.State stored;
+		public GameStateMachine<DecompositionMonitor, DecompositionMonitor.Instance, IStateMachineTarget, object>.State stored;
 
-		public GameStateMachine<DecompositionMonitor, DecompositionMonitor.Instance, IStateMachineTarget>.State spawningmonster;
+		public GameStateMachine<DecompositionMonitor, DecompositionMonitor.Instance, IStateMachineTarget, object>.State spawningmonster;
 	}
 
-	public new class Instance : GameStateMachine<DecompositionMonitor, DecompositionMonitor.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<DecompositionMonitor, DecompositionMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master, Disease disease, float decompositionRate = 0.00083333335f, bool spawnRotMonsters = true)
 			: base(master)
@@ -154,12 +163,12 @@ public class DecompositionMonitor : GameStateMachine<DecompositionMonitor, Decom
 
 		public bool spawnsRotMonsters = true;
 
-		public AttributeModifier satisfiedDecorModifier = new AttributeModifier(Db.Get().BuildingAttributes.Decor.Id, -65f, DUPLICANTS.MODIFIERS.DEAD.NAME, false);
+		public AttributeModifier satisfiedDecorModifier = new AttributeModifier(Db.Get().BuildingAttributes.Decor.Id, -65f, DUPLICANTS.MODIFIERS.DEAD.NAME, false, false);
 
-		public AttributeModifier satisfiedDecorRadiusModifier = new AttributeModifier(Db.Get().BuildingAttributes.DecorRadius.Id, 4f, DUPLICANTS.MODIFIERS.DEAD.NAME, false);
+		public AttributeModifier satisfiedDecorRadiusModifier = new AttributeModifier(Db.Get().BuildingAttributes.DecorRadius.Id, 4f, DUPLICANTS.MODIFIERS.DEAD.NAME, false, false);
 
-		public AttributeModifier rottenDecorModifier = new AttributeModifier(Db.Get().BuildingAttributes.Decor.Id, -100f, DUPLICANTS.MODIFIERS.ROTTING.NAME, false);
+		public AttributeModifier rottenDecorModifier = new AttributeModifier(Db.Get().BuildingAttributes.Decor.Id, -100f, DUPLICANTS.MODIFIERS.ROTTING.NAME, false, false);
 
-		public AttributeModifier rottenDecorRadiusModifier = new AttributeModifier(Db.Get().BuildingAttributes.DecorRadius.Id, 4f, DUPLICANTS.MODIFIERS.ROTTING.NAME, false);
+		public AttributeModifier rottenDecorRadiusModifier = new AttributeModifier(Db.Get().BuildingAttributes.DecorRadius.Id, 4f, DUPLICANTS.MODIFIERS.ROTTING.NAME, false, false);
 	}
 }

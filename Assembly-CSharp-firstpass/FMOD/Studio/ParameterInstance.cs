@@ -33,16 +33,16 @@ namespace FMOD.Studio
 			return ParameterInstance.FMOD_Studio_ParameterInstance_SetValue(this.rawPtr, value);
 		}
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern bool FMOD_Studio_ParameterInstance_IsValid(IntPtr parameter);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_ParameterInstance_GetDescription(IntPtr parameter, out PARAMETER_DESCRIPTION_INTERNAL description);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_ParameterInstance_GetValue(IntPtr parameter, out float value);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_ParameterInstance_SetValue(IntPtr parameter, float value);
 
 		protected override bool isValidInternal()

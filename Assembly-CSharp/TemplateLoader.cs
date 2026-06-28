@@ -80,21 +80,18 @@ public static class TemplateLoader
 							if (baseTemplateStorageItem.isOre)
 							{
 								Substance substance = ElementLoader.FindElementByHash(baseTemplateStorageItem.element).substance;
-								gameObject2 = substance.SpawnResource(Vector3.zero, baseTemplateStorageItem.mass, baseTemplateStorageItem.temperature, false, false);
+								gameObject2 = substance.SpawnResource(Vector3.zero, baseTemplateStorageItem.units, baseTemplateStorageItem.temperature, false, false);
 							}
 							else
 							{
 								gameObject2 = Scenario.SpawnPrefab(num, 0, 0, id, Grid.SceneLayer.Use, Folder.Entities);
 								gameObject2.SetActive(true);
-								Edible component4 = gameObject2.GetComponent<Edible>();
+								PrimaryElement component4 = gameObject2.GetComponent<PrimaryElement>();
+								component4.Units = baseTemplateStorageItem.units;
 								Rottable.Instance smi = gameObject2.GetSMI<Rottable.Instance>();
-								if (component4)
-								{
-									component4.rations = (float)baseTemplateStorageItem.rations.rations;
-								}
 								if (smi != null)
 								{
-									smi.RotAmount = baseTemplateStorageItem.rottable.rotAmount;
+									smi.RotValue = baseTemplateStorageItem.rottable.rotAmount;
 								}
 							}
 							component3.Store(gameObject2, true, false);
@@ -144,15 +141,15 @@ public static class TemplateLoader
 				int location_x = TemplateLoader.Template.pickupables[i].location_x;
 				int location_y = TemplateLoader.Template.pickupables[i].location_y;
 				GameObject gameObject = Scenario.SpawnPrefab(num, location_x, location_y, TemplateLoader.Template.pickupables[i].id, Grid.SceneLayer.Use, Folder.Entities);
-				Edible component = gameObject.GetComponent<Edible>();
-				if (component != null && TemplateLoader.Template.pickupables[i].rations.rations != 0f)
+				if (TemplateLoader.Template.pickupables[i].units != 0f)
 				{
-					component.rations = TemplateLoader.Template.pickupables[i].rations.rations;
+					PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+					component.Units = TemplateLoader.Template.pickupables[i].units;
 				}
 				Rottable.Instance smi = gameObject.GetSMI<Rottable.Instance>();
 				if (smi != null)
 				{
-					smi.RotAmount = TemplateLoader.Template.pickupables[i].rottable.rotAmount;
+					smi.RotValue = TemplateLoader.Template.pickupables[i].rottable.rotAmount;
 				}
 			}
 		}
@@ -165,7 +162,7 @@ public static class TemplateLoader
 				Substance substance = ElementLoader.FindElementByHash(TemplateLoader.Template.elementalOres[j].element).substance;
 				int num2 = Grid.OffsetCell(num, location_x2, location_y2);
 				Vector3 vector = Grid.CellToPosCCC(num2, Grid.SceneLayer.Use);
-				substance.SpawnResource(vector, TemplateLoader.Template.elementalOres[j].mass, TemplateLoader.Template.elementalOres[j].temperature, false, false);
+				substance.SpawnResource(vector, TemplateLoader.Template.elementalOres[j].units, TemplateLoader.Template.elementalOres[j].temperature, false, false);
 			}
 		}
 		TemplateLoader.Template = null;

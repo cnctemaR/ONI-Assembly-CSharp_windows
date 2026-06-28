@@ -165,12 +165,6 @@ public class DisplayNodeEditor : BaseNodeEditor
 
 	private string[] featureOptions;
 
-	[SerializeField]
-	private int featureOptionsIndex;
-
-	[SerializeField]
-	private int biomeOptionsIndex;
-
 	public TextAsset simElementsSolidsFile;
 
 	public TextAsset simElementsLiquidsFile;

@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace TMPro
 {
-	[ExecuteInEditMode]
 	[RequireComponent(typeof(MeshRenderer))]
 	[RequireComponent(typeof(MeshFilter))]
+	[ExecuteInEditMode]
 	public class TMP_SubMesh : MonoBehaviour
 	{
 		public TMP_FontAsset fontAsset
@@ -119,6 +119,7 @@ namespace TMPro
 				if (this.m_mesh == null)
 				{
 					this.m_mesh = new Mesh();
+					this.m_mesh.name = "TMPro";
 					this.m_mesh.hideFlags = HideFlags.HideAndDontSave;
 					this.meshFilter.mesh = this.m_mesh;
 				}

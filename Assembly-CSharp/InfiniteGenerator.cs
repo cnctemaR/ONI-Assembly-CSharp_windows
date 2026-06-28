@@ -13,6 +13,6 @@ public class InfiniteGenerator : Generator
 	protected override void SimUpdate(float dt)
 	{
 		base.SimUpdate(dt);
-		base.ApplyDeltaJoules(base.WattageRating * dt, false);
+		this.ApplyDeltaJoules(base.WattageRating * dt, false);
 	}
 }

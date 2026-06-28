@@ -5,5 +5,7 @@ public enum BuildLocationRule
 	OnFloor,
 	Anywhere,
 	OnCeiling,
-	Tile
+	Tile,
+	Conduit,
+	NotInTiles
 }

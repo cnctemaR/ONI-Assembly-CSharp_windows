@@ -7,13 +7,13 @@ public class WarmingPoint : BuildingWorkable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(-1643076535, new EventSystem.EventHandler(this.OnRotated));
+		this.Subscribe(-1643076535, new Action<object>(this.OnRotated));
 		this.actualOffsets = new CellOffset[this.offsets.Length];
 		this.UpdateOffsets();
 		this.workTime = float.PositiveInfinity;
 		this.workTimeRemaining = float.PositiveInfinity;
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.WarmingUp;
-		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_use_machine") };
+		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_use_machine_kanim") };
 	}
 
 	protected override void OnSpawn()

@@ -5,11 +5,17 @@ namespace FMODUnity
 	public enum EmitterGameEvent
 	{
 		None,
-		LevelStart,
-		LevelEnd,
+		ObjectStart,
+		ObjectDestroy,
 		TriggerEnter,
 		TriggerExit,
+		TriggerEnter2D,
+		TriggerExit2D,
 		CollisionEnter,
-		CollisionExit
+		CollisionExit,
+		CollisionEnter2D,
+		CollisionExit2D,
+		ObjectEnable,
+		ObjectDisable
 	}
 }

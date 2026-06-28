@@ -1,11 +1,9 @@
 ﻿using System;
-using KSerialization;
 using UnityEngine;
 
 namespace Klei.AI
 {
-	[SerializationConfig(MemberSerialization.OptIn)]
-	public class ModifierInstance<ModifierType> : IStateMachineTarget, ISaveLoadableJson
+	public class ModifierInstance<ModifierType> : IStateMachineTarget
 	{
 		public ModifierInstance(GameObject game_object, ModifierType modifier)
 		{
@@ -20,14 +18,19 @@ namespace Klei.AI
 			return this.gameObject.GetComponent<ComponentType>();
 		}
 
-		public void Subscribe(int hash, EventSystem.EventHandler handler)
+		public int Subscribe(int hash, Action<object> handler)
 		{
-			this.gameObject.GetComponent<KMonoBehaviour>().Subscribe(hash, handler);
+			return this.gameObject.GetComponent<KMonoBehaviour>().Subscribe(hash, handler);
 		}
 
-		public void Unsubscribe(int hash, EventSystem.EventHandler handler)
+		public void Unsubscribe(int hash, Action<object> handler)
 		{
 			this.gameObject.GetComponent<KMonoBehaviour>().Unsubscribe(hash, handler);
+		}
+
+		public void Unsubscribe(int id)
+		{
+			this.gameObject.GetComponent<KMonoBehaviour>().Unsubscribe(id);
 		}
 
 		public void Trigger(int hash, object data = null)

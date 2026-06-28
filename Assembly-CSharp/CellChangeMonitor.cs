@@ -39,7 +39,7 @@ public class CellChangeMonitor
 				callbacks = new List<Action<int, int>>(),
 				name = component.name,
 				prefabId = transform.GetComponent<KMonoBehaviour>(),
-				previouslyMoved = true
+				previouslyMoved = false
 			};
 			list.Add(entry);
 			num = list.Count - 1;

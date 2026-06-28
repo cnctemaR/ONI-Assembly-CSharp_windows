@@ -15,6 +15,7 @@ namespace TMPro
 			{
 				mesh.Clear();
 			}
+			mesh.name = "TMPro";
 			this.mesh = mesh;
 			int num = size * 4;
 			int num2 = size * 6;

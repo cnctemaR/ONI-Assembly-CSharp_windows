@@ -7,18 +7,16 @@ using UnityEngine;
 public class PeeChore : Chore<PeeChore.StatesInstance>
 {
 	public PeeChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.Pee, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true)
+		: base(Db.Get().ChoreTypes.Pee, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true, 0)
 	{
 		this.smi = new PeeChore.StatesInstance(this, target.gameObject);
 	}
 
-	public class StatesInstance : GameStateMachine<PeeChore.States, PeeChore.StatesInstance, PeeChore>.GameInstance
+	public class StatesInstance : GameStateMachine<PeeChore.States, PeeChore.StatesInstance, PeeChore, object>.GameInstance
 	{
 		public StatesInstance(PeeChore master, GameObject worker)
+			: base(master)
 		{
-			Func<List<Notification>, object, string> func = (List<Notification> notificationList, object data) => DUPLICANTS.STATUSITEMS.STRESSFULLYEMPTYINGBLADDER.NOTIFICATION_TOOLTIP + notificationList.ReduceMessages(false);
-			this.stressfullyEmptyingBladder = new Notification(DUPLICANTS.STATUSITEMS.STRESSFULLYEMPTYINGBLADDER.NOTIFICATION_NAME, NotificationType.Bad, null, func, null, true, 0f, null, null, null);
-			base..ctor(master);
 			this.bladder = Db.Get().Amounts.Bladder.Lookup(worker);
 			this.bodyTemperature = Db.Get().Amounts.Temperature.Lookup(worker);
 			base.sm.worker.Set(worker, base.smi);
@@ -35,7 +33,7 @@ public class PeeChore : Chore<PeeChore.StatesInstance>
 			SimMessages.AddRemoveSubstance(num, SimHashes.DirtyWater, CellEventLogger.Instance.Vomit, 0.05f, this.bodyTemperature.value, -1);
 		}
 
-		public Notification stressfullyEmptyingBladder;
+		public Notification stressfullyEmptyingBladder = new Notification(DUPLICANTS.STATUSITEMS.STRESSFULLYEMPTYINGBLADDER.NOTIFICATION_NAME, NotificationType.Bad, HashedString.Invalid, (List<Notification> notificationList, object data) => DUPLICANTS.STATUSITEMS.STRESSFULLYEMPTYINGBLADDER.NOTIFICATION_TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null);
 
 		public AmountInstance bladder;
 
@@ -48,7 +46,7 @@ public class PeeChore : Chore<PeeChore.StatesInstance>
 		{
 			default_state = this.running;
 			base.Target(this.worker);
-			this.running.ToggleAnims("anim_expel", 0f).ToggleStatusItem(Db.Get().DuplicantStatusItems.StressfullyEmptyingBladder, null).DoNotification((PeeChore.StatesInstance smi) => smi.stressfullyEmptyingBladder)
+			this.running.ToggleAnims("anim_expel_kanim", 0f).ToggleStatusItem(Db.Get().DuplicantStatusItems.StressfullyEmptyingBladder, null).DoNotification((PeeChore.StatesInstance smi) => smi.stressfullyEmptyingBladder)
 				.DoReport(ReportManager.ReportType.ToiletIncident, (PeeChore.StatesInstance smi) => 1f)
 				.DoTutorial(Tutorial.TutorialMessages.TM_Mopping)
 				.Transition(null, (PeeChore.StatesInstance smi) => smi.IsDonePeeing())
@@ -59,8 +57,8 @@ public class PeeChore : Chore<PeeChore.StatesInstance>
 				.PlayAnim("working_loop", KAnim.PlayMode.Loop, null);
 		}
 
-		public StateMachine<PeeChore.States, PeeChore.StatesInstance, PeeChore>.TargetParameter worker;
+		public StateMachine<PeeChore.States, PeeChore.StatesInstance, PeeChore, object>.TargetParameter worker;
 
-		public GameStateMachine<PeeChore.States, PeeChore.StatesInstance, PeeChore>.State running;
+		public GameStateMachine<PeeChore.States, PeeChore.StatesInstance, PeeChore, object>.State running;
 	}
 }

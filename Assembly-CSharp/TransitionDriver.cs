@@ -7,7 +7,6 @@ public class TransitionDriver
 	public TransitionDriver(Navigator navigator)
 	{
 		this.log = new LoggerFS("TransitionDriver");
-		navigator.GetComponent<KPrefabID>().AddLog(this.log);
 	}
 
 	public void BeginTransition(Navigator navigator, Navigator.ActiveTransition transition)
@@ -34,7 +33,7 @@ public class TransitionDriver
 		else
 		{
 			navigator.GetComponent<KAnimControllerBase>().Play(transition.anim, KAnim.PlayMode.Once, 1f, 0f);
-			navigator.Subscribe(-1061186183, new EventSystem.EventHandler(this.OnAnimComplete));
+			navigator.Subscribe(-1061186183, new Action<object>(this.OnAnimComplete));
 		}
 		navigator.GetComponent<Facing>().Face(this.targetPos.x);
 		navigator.GetComponent<KAnimControllerBase>().MovementSpeedMultiplier = transition.animSpeed;
@@ -127,7 +126,7 @@ public class TransitionDriver
 	{
 		if (this.navigator != null)
 		{
-			this.navigator.Unsubscribe(-1061186183, new EventSystem.EventHandler(this.OnAnimComplete));
+			this.navigator.Unsubscribe(-1061186183, new Action<object>(this.OnAnimComplete));
 		}
 		this.isComplete = true;
 	}
@@ -143,7 +142,7 @@ public class TransitionDriver
 			}
 			this.navigator = null;
 			navigator.GetComponent<KAnimControllerBase>().MovementSpeedMultiplier = 1f;
-			navigator.Unsubscribe(-1061186183, new EventSystem.EventHandler(this.OnAnimComplete));
+			navigator.Unsubscribe(-1061186183, new Action<object>(this.OnAnimComplete));
 			Brain component = navigator.GetComponent<Brain>();
 			if (component != null)
 			{

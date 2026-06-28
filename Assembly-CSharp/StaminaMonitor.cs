@@ -20,18 +20,18 @@ public class StaminaMonitor : GameStateMachine<StaminaMonitor, StaminaMonitor.In
 
 	private const float OUTSIDE_SCHEDULE_STAMINA_THRESHOLD = 0f;
 
-	public GameStateMachine<StaminaMonitor, StaminaMonitor.Instance, IStateMachineTarget>.State satisfied;
+	public GameStateMachine<StaminaMonitor, StaminaMonitor.Instance, IStateMachineTarget, object>.State satisfied;
 
 	public StaminaMonitor.SleepyState sleepy;
 
-	public class SleepyState : GameStateMachine<StaminaMonitor, StaminaMonitor.Instance, IStateMachineTarget>.State
+	public class SleepyState : GameStateMachine<StaminaMonitor, StaminaMonitor.Instance, IStateMachineTarget, object>.State
 	{
-		public GameStateMachine<StaminaMonitor, StaminaMonitor.Instance, IStateMachineTarget>.State needssleep;
+		public GameStateMachine<StaminaMonitor, StaminaMonitor.Instance, IStateMachineTarget, object>.State needssleep;
 
-		public GameStateMachine<StaminaMonitor, StaminaMonitor.Instance, IStateMachineTarget>.State sleeping;
+		public GameStateMachine<StaminaMonitor, StaminaMonitor.Instance, IStateMachineTarget, object>.State sleeping;
 	}
 
-	public new class Instance : GameStateMachine<StaminaMonitor, StaminaMonitor.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<StaminaMonitor, StaminaMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)

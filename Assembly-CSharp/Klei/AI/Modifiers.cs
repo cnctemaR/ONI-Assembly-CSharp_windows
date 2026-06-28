@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Klei.AI
 {
 	[SerializationConfig(MemberSerialization.OptIn)]
-	public class Modifiers : KMonoBehaviour, ISaveLoadableDetailJson
+	public class Modifiers : KMonoBehaviour, ISaveLoadableDetails
 	{
 		protected override void OnPrefabInit()
 		{
@@ -43,10 +43,13 @@ namespace Klei.AI
 			for (int i = 0; i < count; i++)
 			{
 				AmountInstance amountInstance = modifierList[i];
-				float num = amountInstance.GetDelta() * deltaTime;
-				if (num != 0f)
+				if (!amountInstance.paused)
 				{
-					amountInstance.ApplyDelta(num);
+					float num = amountInstance.GetDelta() * deltaTime;
+					if (num != 0f)
+					{
+						amountInstance.ApplyDelta(num);
+					}
 				}
 			}
 		}

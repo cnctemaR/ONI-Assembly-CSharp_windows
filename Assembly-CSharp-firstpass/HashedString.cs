@@ -1,12 +1,19 @@
 ﻿using System;
+using KSerialization;
 using UnityEngine;
 
+[SerializationConfig(MemberSerialization.OptIn)]
 [Serializable]
 public struct HashedString : ISerializationCallbackReceiver, IComparable<HashedString>, IEquatable<HashedString>
 {
 	public HashedString(string name)
 	{
 		this.hash = global::Hash.SDBMLower(name);
+	}
+
+	public HashedString(int initial_hash)
+	{
+		this.hash = initial_hash;
 	}
 
 	public bool isValid
@@ -81,6 +88,11 @@ public struct HashedString : ISerializationCallbackReceiver, IComparable<HashedS
 		return this.hash != 0;
 	}
 
+	public static implicit operator HashedString(string s)
+	{
+		return new HashedString(s);
+	}
+
 	public static bool operator ==(HashedString x, HashedString y)
 	{
 		return x.hash == y.hash;
@@ -91,8 +103,9 @@ public struct HashedString : ISerializationCallbackReceiver, IComparable<HashedS
 		return x.hash != y.hash;
 	}
 
+	public static HashedString Invalid = default(HashedString);
+
+	[Serialize]
 	[SerializeField]
 	private int hash;
-
-	public static HashedString Invalid = default(HashedString);
 }

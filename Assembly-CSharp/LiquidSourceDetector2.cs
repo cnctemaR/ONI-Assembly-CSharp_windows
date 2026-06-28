@@ -8,7 +8,10 @@ public class LiquidSourceDetector2 : KMonoBehaviour
 		LiquidSourceDetector2.Instance = this;
 		for (int i = 0; i < Grid.CellCount; i++)
 		{
-			this.Refresh(i);
+			if (Grid.Element[i].IsLiquid)
+			{
+				this.potentialCells.Add(i);
+			}
 		}
 		World instance = World.Instance;
 		instance.OnLiquidChanged = (Action<int>)Delegate.Combine(instance.OnLiquidChanged, new Action<int>(this.OnLiquidChanged));
@@ -16,42 +19,13 @@ public class LiquidSourceDetector2 : KMonoBehaviour
 
 	private void OnLiquidChanged(int cell)
 	{
-		this.Refresh(cell);
-		for (int i = 0; i < LiquidSourceDetector2.workTestOffsets.Length; i++)
-		{
-			int num = Grid.OffsetCell(cell, LiquidSourceDetector2.workTestOffsets[i]);
-			if (Grid.IsValidCell(num))
-			{
-				this.Refresh(num);
-			}
-		}
-	}
-
-	private void Refresh(int cell)
-	{
 		if (!Grid.IsValidCell(cell))
 		{
 			return;
 		}
-		if (Grid.Element[cell].IsLiquid)
+		if (Grid.Element[cell].IsLiquid && !this.potentialCells.Contains(cell))
 		{
-			for (int i = 0; i < LiquidSourceDetector2.workTestOffsets.Length; i++)
-			{
-				int num = Grid.OffsetCell(cell, LiquidSourceDetector2.workTestOffsets[i]);
-				if (Grid.IsValidCell(num) && !Grid.Solid[num] && !Grid.Element[num].IsLiquid)
-				{
-					if (!this.potentialCells.Contains(cell))
-					{
-						this.potentialCells.Add(cell);
-					}
-					break;
-				}
-			}
-		}
-		else
-		{
-			this.potentialCells.Remove(cell);
-			this.RemoveSource(cell);
+			this.potentialCells.Add(cell);
 		}
 	}
 
@@ -61,7 +35,7 @@ public class LiquidSourceDetector2 : KMonoBehaviour
 		this.sources.TryGetValue(cell, out liquidSource);
 		if (liquidSource != null)
 		{
-			liquidSource.gameObject.DeleteObject();
+			LiquidSourceManager.Instance.DestroySource(liquidSource);
 			this.sources.Remove(cell);
 		}
 	}
@@ -76,12 +50,14 @@ public class LiquidSourceDetector2 : KMonoBehaviour
 			int num2 = this.lastUpdateIdx++ % this.potentialCells.Count;
 			int num3 = this.potentialCells[num2];
 			this.tempOffsets.Clear();
-			OffsetTableTracker.GetOffsets(num3, OffsetGroups.InvertedStandardTable, navGrid, this.tempOffsets);
-			if (this.tempOffsets.Count > 0)
+			LiquidSource liquidSource = null;
+			this.sources.TryGetValue(num3, out liquidSource);
+			if (Grid.Element[num3].IsLiquid)
 			{
-				bool flag = false;
-				if (Grid.Element[num3].IsLiquid)
+				OffsetTableTracker.GetOffsets(num3, OffsetGroups.InvertedStandardTable, navGrid, this.tempOffsets);
+				if (this.tempOffsets.Count > 0)
 				{
+					bool flag = false;
 					for (int j = 0; j < this.tempOffsets.Count; j++)
 					{
 						if (pathProber.GetCost(Grid.OffsetCell(num3, this.tempOffsets[j])) != PathProber.InvalidCost)
@@ -90,37 +66,39 @@ public class LiquidSourceDetector2 : KMonoBehaviour
 							break;
 						}
 					}
-				}
-				if (flag)
-				{
-					LiquidSource liquidSource = null;
-					this.sources.TryGetValue(num3, out liquidSource);
-					if (liquidSource == null)
+					if (flag)
 					{
-						liquidSource = LiquidSourceManager.Instance.CreateSource(Grid.Element[num3]);
-						liquidSource.transform.position = Grid.CellToPosCBC(num3, Grid.SceneLayer.Move);
-						this.sources[num3] = liquidSource;
-						liquidSource.GetComponent<Pickupable>().SetOffsets(this.tempOffsets.ToArray());
-					}
-					else
-					{
-						Pickupable component = liquidSource.GetComponent<Pickupable>();
-						CellOffset[] offsets = component.GetOffsets();
-						if (offsets.Length != this.tempOffsets.Count)
+						if (liquidSource == null)
 						{
-							component.SetOffsets(this.tempOffsets.ToArray());
+							liquidSource = LiquidSourceManager.Instance.CreateSource(Grid.Element[num3]);
+							liquidSource.transform.position = Grid.CellToPosCBC(num3, Grid.SceneLayer.Move);
+							this.sources[num3] = liquidSource;
+							liquidSource.GetComponent<Pickupable>().SetOffsets(this.tempOffsets.ToArray());
 						}
 						else
 						{
-							for (int k = 0; k < offsets.Length; k++)
+							Pickupable component = liquidSource.GetComponent<Pickupable>();
+							CellOffset[] offsets = component.GetOffsets();
+							if (offsets.Length != this.tempOffsets.Count)
 							{
-								if (offsets[k] != this.tempOffsets[k])
+								component.SetOffsets(this.tempOffsets.ToArray());
+							}
+							else
+							{
+								for (int k = 0; k < offsets.Length; k++)
 								{
-									component.SetOffsets(this.tempOffsets.ToArray());
-									break;
+									if (offsets[k] != this.tempOffsets[k])
+									{
+										component.SetOffsets(this.tempOffsets.ToArray());
+										break;
+									}
 								}
 							}
 						}
+					}
+					else
+					{
+						this.RemoveSource(num3);
 					}
 				}
 				else
@@ -130,6 +108,15 @@ public class LiquidSourceDetector2 : KMonoBehaviour
 			}
 			else
 			{
+				for (int l = 0; l < this.potentialCells.Count; l++)
+				{
+					if (this.potentialCells[l] == num3)
+					{
+						this.potentialCells[l] = this.potentialCells[this.potentialCells.Count - 1];
+						this.potentialCells.RemoveAt(this.potentialCells.Count - 1);
+						break;
+					}
+				}
 				this.RemoveSource(num3);
 			}
 		}
@@ -147,13 +134,10 @@ public class LiquidSourceDetector2 : KMonoBehaviour
 		return false;
 	}
 
-	private static CellOffset[] workTestOffsets = new CellOffset[]
+	public bool HasSource(int cell)
 	{
-		new CellOffset(-1, 0),
-		new CellOffset(0, -1),
-		new CellOffset(1, 0),
-		new CellOffset(0, 1)
-	};
+		return this.sources.ContainsKey(cell);
+	}
 
 	private List<int> potentialCells = new List<int>();
 

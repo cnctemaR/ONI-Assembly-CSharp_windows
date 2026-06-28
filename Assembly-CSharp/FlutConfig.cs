@@ -8,27 +8,21 @@ public class FlutConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		DecorValues tier = DECOR.BONUS.TIER0;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("Flut", global::STRINGS.CREATURES.SPECIES.FLUT.NAME, global::STRINGS.CREATURES.SPECIES.FLUT.DESC, 25f, "flut_single", "idle_loop", Grid.SceneLayer.Creatures, 1, 1, tier);
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, false, FactionManager.FactionID.Prey, 25f, "SwimmerNavGrid", NavType.Swim, 2f, "Meat", 2, false, true, 30f, 283f, 294f, 273f, 315f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity("Flut", global::STRINGS.CREATURES.SPECIES.FLUT.NAME, global::STRINGS.CREATURES.SPECIES.FLUT.DESC, 25f, Assets.GetAnim("flut_single_kanim"), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, tier, SimHashes.Creature, null);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, 25f, "SwimmerNavGrid", NavType.Swim, 2f, "Meat", 2, false, true, 30f, 283f, 294f, 243f, 343f);
 		gameObject.UpdateComponentRequirement<Flut>(true);
 		gameObject.UpdateComponentRequirement<Catchable>(true);
 		gameObject.UpdateComponentRequirement<Storage>(true);
 		gameObject.UpdateComponentRequirement<Operational>(true);
 		ElementConverter elementConverter = gameObject.UpdateComponentRequirement<ElementConverter>(true);
+		elementConverter.conversionInterval = 150f;
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(null, 0.25f, SimHashes.Fertilizer, 0f, false, 0f, 0f)
+			new ElementConverter.OutputElement(0.25f / elementConverter.conversionInterval, SimHashes.Fertilizer, 0f, false, 0f, 0f, false)
 		};
-		elementConverter.conversionInterval = 150f;
-		KBatchedAnimController kbatchedAnimController = gameObject.AddAnimController("flut_single", Grid.SceneLayer.Front);
+		KBatchedAnimController kbatchedAnimController = gameObject.AddAnimController("flut_single_kanim", Grid.SceneLayer.Front);
 		kbatchedAnimController.isMovable = true;
 		gameObject.AddAquaticReproducer("flutEgg".ToTag(), 60f, 100f, 0.08f);
-		KPrefabID component = gameObject.GetComponent<KPrefabID>();
-		component.prefabSpawnFn += delegate(GameObject go)
-		{
-			Navigator component2 = go.GetComponent<Navigator>();
-			component2.transitionDriver.overrideLayers.Add(new DoorTransitionLayer(component2));
-		};
 		return gameObject;
 	}
 

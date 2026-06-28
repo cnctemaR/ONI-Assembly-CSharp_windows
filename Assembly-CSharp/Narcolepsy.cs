@@ -3,13 +3,13 @@ using Klei.AI;
 using TUNING;
 using UnityEngine;
 
-[SkipSerialization]
+[SkipSaveFileSerialization]
 public class Narcolepsy : StateMachineComponent<Narcolepsy.StatesInstance>
 {
 	protected override void OnPrefabInit()
 	{
-		this.Subscribe(1623392196, new EventSystem.EventHandler(this.OnDeath));
-		this.Subscribe(-1117766961, new EventSystem.EventHandler(this.OnRevived));
+		this.Subscribe(1623392196, new Action<object>(this.OnDeath));
+		this.Subscribe(-1117766961, new Action<object>(this.OnRevived));
 	}
 
 	protected override void OnSpawn()
@@ -36,7 +36,7 @@ public class Narcolepsy : StateMachineComponent<Narcolepsy.StatesInstance>
 	{
 	}
 
-	public class StatesInstance : GameStateMachine<Narcolepsy.States, Narcolepsy.StatesInstance, Narcolepsy>.GameInstance
+	public class StatesInstance : GameStateMachine<Narcolepsy.States, Narcolepsy.StatesInstance, Narcolepsy, object>.GameInstance
 	{
 		public StatesInstance(Narcolepsy master)
 			: base(master)
@@ -93,10 +93,10 @@ public class Narcolepsy : StateMachineComponent<Narcolepsy.StatesInstance>
 			return global::UnityEngine.Random.Range(min, max);
 		}
 
-		public GameStateMachine<Narcolepsy.States, Narcolepsy.StatesInstance, Narcolepsy>.State idle;
+		public GameStateMachine<Narcolepsy.States, Narcolepsy.StatesInstance, Narcolepsy, object>.State idle;
 
-		public GameStateMachine<Narcolepsy.States, Narcolepsy.StatesInstance, Narcolepsy>.State sleepy;
+		public GameStateMachine<Narcolepsy.States, Narcolepsy.StatesInstance, Narcolepsy, object>.State sleepy;
 
-		public GameStateMachine<Narcolepsy.States, Narcolepsy.StatesInstance, Narcolepsy>.State dead;
+		public GameStateMachine<Narcolepsy.States, Narcolepsy.StatesInstance, Narcolepsy, object>.State dead;
 	}
 }

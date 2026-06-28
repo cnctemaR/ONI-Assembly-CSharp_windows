@@ -115,64 +115,64 @@ namespace FMOD
 			return Geometry.FMOD5_Geometry_GetUserData(this.rawPtr, out userdata);
 		}
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_Geometry_Release(IntPtr geometry);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_Geometry_AddPolygon(IntPtr geometry, float directocclusion, float reverbocclusion, bool doublesided, int numvertices, VECTOR[] vertices, out int polygonindex);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_Geometry_GetNumPolygons(IntPtr geometry, out int numpolygons);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_Geometry_GetMaxPolygons(IntPtr geometry, out int maxpolygons, out int maxvertices);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_Geometry_GetPolygonNumVertices(IntPtr geometry, int index, out int numvertices);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_Geometry_SetPolygonVertex(IntPtr geometry, int index, int vertexindex, ref VECTOR vertex);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_Geometry_GetPolygonVertex(IntPtr geometry, int index, int vertexindex, out VECTOR vertex);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_Geometry_SetPolygonAttributes(IntPtr geometry, int index, float directocclusion, float reverbocclusion, bool doublesided);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_Geometry_GetPolygonAttributes(IntPtr geometry, int index, out float directocclusion, out float reverbocclusion, out bool doublesided);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_Geometry_SetActive(IntPtr geometry, bool active);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_Geometry_GetActive(IntPtr geometry, out bool active);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_Geometry_SetRotation(IntPtr geometry, ref VECTOR forward, ref VECTOR up);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_Geometry_GetRotation(IntPtr geometry, out VECTOR forward, out VECTOR up);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_Geometry_SetPosition(IntPtr geometry, ref VECTOR position);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_Geometry_GetPosition(IntPtr geometry, out VECTOR position);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_Geometry_SetScale(IntPtr geometry, ref VECTOR scale);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_Geometry_GetScale(IntPtr geometry, out VECTOR scale);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_Geometry_Save(IntPtr geometry, IntPtr data, out int datasize);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_Geometry_SetUserData(IntPtr geometry, IntPtr userdata);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_Geometry_GetUserData(IntPtr geometry, out IntPtr userdata);
 	}
 }

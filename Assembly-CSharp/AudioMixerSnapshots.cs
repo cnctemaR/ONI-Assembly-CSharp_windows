@@ -46,6 +46,12 @@ public class AudioMixerSnapshots : ScriptableObject
 	public string FrontEndSnapshot;
 
 	[EventRef]
+	public string FrontEndWelcomeScreenSnapshot;
+
+	[EventRef]
+	public string FrontEndWorldGenerationSnapshot;
+
+	[EventRef]
 	public string IntroNIS;
 
 	[EventRef]
@@ -65,6 +71,15 @@ public class AudioMixerSnapshots : ScriptableObject
 
 	[EventRef]
 	public string DuplicantCountSleepingSnapshot;
+
+	[EventRef]
+	public string PortalLPDimmedSnapshot;
+
+	[EventRef]
+	public string DynamicMusicPlayingSnapshot;
+
+	[EventRef]
+	public string FabricatorSideScreenOpenSnapshot;
 
 	[SerializeField]
 	[EventRef]

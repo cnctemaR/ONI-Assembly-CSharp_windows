@@ -104,7 +104,7 @@ internal class SteamManager : MonoBehaviour
 		SteamAPI.RunCallbacks();
 	}
 
-	private const uint STEAM_APPLICATION_ID = 457140U;
+	public const uint STEAM_APPLICATION_ID = 457140U;
 
 	private static SteamManager s_instance;
 

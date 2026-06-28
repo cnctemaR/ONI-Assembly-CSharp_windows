@@ -1,13 +1,12 @@
 ﻿using System;
 using FMODUnity;
-using UnityEngine;
 
 public class MinionSounds : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
 	{
-		this.Subscribe(-1762453998, new EventSystem.EventHandler(this.OnStartMiningSound));
-		this.Subscribe(939543986, new EventSystem.EventHandler(this.OnStopMiningSound));
+		this.Subscribe(-1762453998, new Action<object>(this.OnStartMiningSound));
+		this.Subscribe(939543986, new Action<object>(this.OnStopMiningSound));
 	}
 
 	private void OnPlayOneShot(object data)
@@ -30,7 +29,6 @@ public class MinionSounds : KMonoBehaviour
 				string text = targetElement.substance.GetMiningSound();
 				if (text == null || text == string.Empty)
 				{
-					Debug.LogWarning("Missing Mining sound for element [" + targetElement.name + "]");
 					return;
 				}
 				text = "Mine_" + text;

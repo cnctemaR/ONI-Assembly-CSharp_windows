@@ -33,24 +33,27 @@ public class DigTool : DragTool
 
 	protected override void OnDragTool(int cell, int distFromOrigin)
 	{
-		foreach (Uprootable uprootable in Components.Uprootables)
+		if (!Grid.Solid[cell])
 		{
-			if (Grid.PosToCell(uprootable.gameObject) == cell)
+			foreach (Uprootable uprootable in Components.Uprootables)
 			{
-				uprootable.MarkForUproot();
-				break;
-			}
-			OccupyArea area = uprootable.area;
-			if (area != null && area.CheckIsOccupying(cell))
-			{
-				uprootable.MarkForUproot();
+				if (Grid.PosToCell(uprootable.gameObject) == cell)
+				{
+					uprootable.MarkForUproot();
+					break;
+				}
+				OccupyArea area = uprootable.area;
+				if (area != null && area.CheckIsOccupying(cell))
+				{
+					uprootable.MarkForUproot();
+				}
 			}
 		}
 		if (DebugHandler.InstantBuildMode)
 		{
 			if (Grid.IsValidCell(cell))
 			{
-				WorldDamage.Instance.DestroyCell(cell);
+				WorldDamage.Instance.DestroyCell(cell, -1);
 			}
 		}
 		else
@@ -69,9 +72,9 @@ public class DigTool : DragTool
 
 	public static GameObject PlaceDig(int cell, int animationDelay = 0)
 	{
-		if (Grid.Solid[cell] && !Grid.Foundation[cell] && Grid.Objects[cell, 0] == null)
+		if (Grid.Solid[cell] && !Grid.Foundation[cell] && Grid.Objects[cell, 7] == null)
 		{
-			for (int i = 0; i < 25; i++)
+			for (int i = 0; i < 23; i++)
 			{
 				if (Grid.Objects[cell, i] != null && Grid.Objects[cell, i].GetComponent<Constructable>() != null)
 				{
@@ -79,7 +82,7 @@ public class DigTool : DragTool
 				}
 			}
 			GameObject gameObject = Util.KInstantiate(DigTool.Instance.Placer, SceneOrganizer.Instance.GetFolder(Folder.Placers), null);
-			Grid.Objects[cell, 0] = gameObject;
+			Grid.Objects[cell, 7] = gameObject;
 			Vector3 vector = Grid.CellToPosCBC(cell, DigTool.Instance.visualizerLayer);
 			float depthBias = InterfaceTool.DepthBias;
 			vector.z += depthBias;
@@ -87,9 +90,9 @@ public class DigTool : DragTool
 			gameObject.GetComponentInChildren<EasingAnimations>().PlayAnimation("ScaleUp", Mathf.Max(0f, (float)animationDelay * 0.02f));
 			return gameObject;
 		}
-		if (Grid.Objects[cell, 0] != null)
+		if (Grid.Objects[cell, 7] != null)
 		{
-			return Grid.Objects[cell, 0];
+			return Grid.Objects[cell, 7];
 		}
 		return null;
 	}

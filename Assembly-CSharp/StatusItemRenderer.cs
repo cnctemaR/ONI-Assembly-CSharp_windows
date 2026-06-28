@@ -6,18 +6,13 @@ public class StatusItemRenderer
 {
 	public StatusItemRenderer()
 	{
-		this.layer = LayerMask.NameToLayer("Overlay");
-		this.entries = new StatusItemRenderer.Entry[10000];
-		Shader shader = Shader.Find("Klei/StatusItem");
+		this.layer = LayerMask.NameToLayer("UI");
+		this.entries = new StatusItemRenderer.Entry[100];
+		this.shader = Shader.Find("Klei/StatusItem");
 		for (int i = 0; i < this.entries.Length; i++)
 		{
 			StatusItemRenderer.Entry entry = default(StatusItemRenderer.Entry);
-			entry.statusItems = new List<StatusItem>();
-			entry.mesh = new Mesh();
-			entry.mesh.name = "StatusItem" + i;
-			entry.name = string.Empty;
-			entry.dirty = true;
-			entry.material = new Material(shader);
+			entry.Init(this.shader);
 			this.entries[i] = entry;
 		}
 		this.backgroundColor = new Color32(244, 74, 71, byte.MaxValue);
@@ -25,7 +20,7 @@ public class StatusItemRenderer
 		this.arrowSprite = Assets.GetSprite("StatusBubbleTop");
 		this.backgroundSprite = Assets.GetSprite("StatusBubble");
 		this.scale = 1f;
-		Game.Instance.Subscribe(2095258329, new EventSystem.EventHandler(this.OnHighlightObject));
+		Game.Instance.Subscribe(2095258329, new Action<object>(this.OnHighlightObject));
 	}
 
 	public int layer { get; private set; }
@@ -54,7 +49,6 @@ public class StatusItemRenderer
 			this.handleTable[instanceID] = num;
 			StatusItemRenderer.Entry entry = this.entries[num];
 			entry.handle = instanceID;
-			entry.name = transform.name;
 			entry.transform = transform;
 			this.entries[num] = entry;
 		}
@@ -63,6 +57,19 @@ public class StatusItemRenderer
 
 	public void Add(Transform transform, StatusItem status_item)
 	{
+		if (this.entryCount == this.entries.Length)
+		{
+			StatusItemRenderer.Entry[] array = new StatusItemRenderer.Entry[this.entries.Length * 2];
+			for (int i = 0; i < this.entries.Length; i++)
+			{
+				array[i] = this.entries[i];
+			}
+			for (int j = this.entries.Length; j < array.Length; j++)
+			{
+				array[j].Init(this.shader);
+			}
+			this.entries = array;
+		}
 		int idx = this.GetIdx(transform);
 		StatusItemRenderer.Entry entry = this.entries[idx];
 		entry.Add(status_item);
@@ -210,8 +217,13 @@ public class StatusItemRenderer
 
 	public void Destroy()
 	{
-		Game.Instance.Unsubscribe(-1503271301, new EventSystem.EventHandler(this.OnSelectObject));
-		Game.Instance.Unsubscribe(-1201923725, new EventSystem.EventHandler(this.OnHighlightObject));
+		Game.Instance.Unsubscribe(-1503271301, new Action<object>(this.OnSelectObject));
+		Game.Instance.Unsubscribe(-1201923725, new Action<object>(this.OnHighlightObject));
+		foreach (StatusItemRenderer.Entry entry in this.entries)
+		{
+			entry.Clear();
+			entry.FreeResources();
+		}
 	}
 
 	private StatusItemRenderer.Entry[] entries;
@@ -220,14 +232,25 @@ public class StatusItemRenderer
 
 	private Dictionary<int, int> handleTable = new Dictionary<int, int>();
 
+	private Shader shader;
+
 	private struct Entry
 	{
+		public void Init(Shader shader)
+		{
+			this.statusItems = new List<StatusItem>();
+			this.mesh = new Mesh();
+			this.mesh.name = "StatusItemRenderer";
+			this.dirty = true;
+			this.material = new Material(shader);
+		}
+
 		public void Render(StatusItemRenderer renderer, Vector3 camera_bl, Vector3 camera_tr, SimViewMode overlay)
 		{
 			Vector3 vector = Vector3.zero;
 			if (!(this.transform != null))
 			{
-				string text = "Error cleaning up status items on " + this.name + ":";
+				string text = "Error cleaning up status items:";
 				foreach (StatusItem statusItem in this.statusItems)
 				{
 					text += statusItem.Id;
@@ -245,8 +268,7 @@ public class StatusItemRenderer
 				int num = 0;
 				foreach (StatusItem statusItem2 in this.statusItems)
 				{
-					bool flag = overlay != SimViewMode.None && statusItem2.conditionalOverlayCallback != null && statusItem2.conditionalOverlayCallback(overlay, this.transform);
-					if (overlay == SimViewMode.None || statusItem2.overlay == overlay || flag)
+					if (statusItem2.UseConditionalCallback(overlay, this.transform) || overlay == SimViewMode.None || statusItem2.overlay == overlay)
 					{
 						num++;
 					}
@@ -271,8 +293,8 @@ public class StatusItemRenderer
 				int num5 = 0;
 				for (int i = 0; i < this.statusItems.Count; i++)
 				{
-					bool flag2 = overlay != SimViewMode.None && this.statusItems[i].conditionalOverlayCallback != null && this.statusItems[i].conditionalOverlayCallback(overlay, this.transform);
-					if (overlay == SimViewMode.None || this.statusItems[i].overlay == overlay || flag2)
+					StatusItem statusItem3 = this.statusItems[i];
+					if (statusItem3.UseConditionalCallback(overlay, this.transform) || overlay == SimViewMode.None || statusItem3.overlay == overlay)
 					{
 						float num6 = (float)num5 * num2 * 2f - num2 * (float)(num - 1);
 						Sprite sprite = this.statusItems[i].sprite.sprite;
@@ -285,9 +307,9 @@ public class StatusItemRenderer
 				meshBuilder.End(this.mesh);
 				this.dirty = false;
 			}
-			if (this.hasVisibleStatusItems)
+			if (this.hasVisibleStatusItems && GameScreenManager.Instance != null)
 			{
-				Graphics.DrawMesh(this.mesh, vector + this.offset, Quaternion.identity, this.material, renderer.layer, null, 0, null, false, false);
+				Graphics.DrawMesh(this.mesh, vector + this.offset, Quaternion.identity, this.material, renderer.layer, GameScreenManager.Instance.worldSpaceCanvas.GetComponent<Canvas>().worldCamera, 0, null, false, false);
 			}
 		}
 
@@ -307,14 +329,18 @@ public class StatusItemRenderer
 		{
 			this.handle = entry.handle;
 			this.transform = entry.transform;
+			this.offset = entry.offset;
 			this.dirty = true;
-			this.name = entry.name;
 			this.statusItems.Clear();
 			this.statusItems.AddRange(entry.statusItems);
 		}
 
 		private bool Intersects(Vector2 pos, float scale, SimViewMode overlay)
 		{
+			if (this.transform == null)
+			{
+				return false;
+			}
 			Vector3 vector = this.transform.position + this.offset;
 			Bounds bounds = this.mesh.bounds;
 			bounds.size *= scale;
@@ -351,7 +377,17 @@ public class StatusItemRenderer
 		public void Clear()
 		{
 			this.statusItems.Clear();
+			this.offset = Vector3.zero;
 			this.dirty = false;
+		}
+
+		public void FreeResources()
+		{
+			if (this.mesh != null)
+			{
+				global::UnityEngine.Object.DestroyImmediate(this.mesh);
+				this.mesh = null;
+			}
 		}
 
 		public void MarkDirty()
@@ -372,8 +408,6 @@ public class StatusItemRenderer
 		public int layer;
 
 		public Material material;
-
-		public string name;
 
 		public Vector3 offset;
 

@@ -15,7 +15,7 @@ namespace FMOD.Studio
 		{
 			studiosystem = null;
 			IntPtr intPtr;
-			RESULT result = FMOD.Studio.System.FMOD_Studio_System_Create(out intPtr, 67588U);
+			RESULT result = FMOD.Studio.System.FMOD_Studio_System_Create(out intPtr, 67606U);
 			if (result != RESULT.OK)
 			{
 				return result;
@@ -378,124 +378,124 @@ namespace FMOD.Studio
 			return FMOD.Studio.System.FMOD_Studio_System_SetUserData(this.rawPtr, userData);
 		}
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_Create(out IntPtr studiosystem, uint headerversion);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern bool FMOD_Studio_System_IsValid(IntPtr studiosystem);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_SetAdvancedSettings(IntPtr studiosystem, ref ADVANCEDSETTINGS settings);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_GetAdvancedSettings(IntPtr studiosystem, out ADVANCEDSETTINGS settings);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_Initialize(IntPtr studiosystem, int maxchannels, INITFLAGS studioFlags, INITFLAGS flags, IntPtr extradriverdata);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_Release(IntPtr studiosystem);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_Update(IntPtr studiosystem);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_GetLowLevelSystem(IntPtr studiosystem, out IntPtr system);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_GetEvent(IntPtr studiosystem, byte[] path, out IntPtr description);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_GetBus(IntPtr studiosystem, byte[] path, out IntPtr bus);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_GetVCA(IntPtr studiosystem, byte[] path, out IntPtr vca);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_GetBank(IntPtr studiosystem, byte[] path, out IntPtr bank);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_GetEventByID(IntPtr studiosystem, byte[] guid, out IntPtr description);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_GetBusByID(IntPtr studiosystem, byte[] guid, out IntPtr bus);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_GetVCAByID(IntPtr studiosystem, byte[] guid, out IntPtr vca);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_GetBankByID(IntPtr studiosystem, byte[] guid, out IntPtr bank);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_GetSoundInfo(IntPtr studiosystem, byte[] key, IntPtr info);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_LookupID(IntPtr studiosystem, byte[] path, [Out] byte[] guid);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_LookupPath(IntPtr studiosystem, byte[] guid, [Out] byte[] path, int size, out int retrieved);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_GetNumListeners(IntPtr studiosystem, out int numlisteners);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_SetNumListeners(IntPtr studiosystem, int numlisteners);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_GetListenerAttributes(IntPtr studiosystem, int listener, out ATTRIBUTES_3D attributes);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_SetListenerAttributes(IntPtr studiosystem, int listener, ref ATTRIBUTES_3D attributes);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_LoadBankFile(IntPtr studiosystem, byte[] filename, LOAD_BANK_FLAGS flags, out IntPtr bank);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_LoadBankMemory(IntPtr studiosystem, IntPtr buffer, int length, LOAD_MEMORY_MODE mode, LOAD_BANK_FLAGS flags, out IntPtr bank);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_LoadBankCustom(IntPtr studiosystem, ref BANK_INFO info, LOAD_BANK_FLAGS flags, out IntPtr bank);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_UnloadAll(IntPtr studiosystem);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_FlushCommands(IntPtr studiosystem);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_FlushSampleLoading(IntPtr studiosystem);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_StartCommandCapture(IntPtr studiosystem, byte[] path, COMMANDCAPTURE_FLAGS flags);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_StopCommandCapture(IntPtr studiosystem);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_LoadCommandReplay(IntPtr studiosystem, byte[] path, COMMANDREPLAY_FLAGS flags, out IntPtr commandReplay);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_GetBankCount(IntPtr studiosystem, out int count);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_GetBankList(IntPtr studiosystem, IntPtr[] array, int capacity, out int count);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_GetCPUUsage(IntPtr studiosystem, out CPU_USAGE usage);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_GetBufferUsage(IntPtr studiosystem, out BUFFER_USAGE usage);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_ResetBufferUsage(IntPtr studiosystem);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_SetCallback(IntPtr studiosystem, SYSTEM_CALLBACK callback, SYSTEM_CALLBACK_TYPE callbackmask);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_GetUserData(IntPtr studiosystem, out IntPtr userData);
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_System_SetUserData(IntPtr studiosystem, IntPtr userData);
 
 		protected override bool isValidInternal()

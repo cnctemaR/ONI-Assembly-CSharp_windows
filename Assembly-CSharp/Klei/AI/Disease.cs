@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using STRINGS;
 using UnityEngine;
 
 namespace Klei.AI
@@ -71,10 +72,14 @@ namespace Klei.AI
 			return Strings.Get("STRINGS.DUPLICANTS.DISEASES." + this.Id.ToUpper() + ".DESCRIPTION");
 		}
 
+		public virtual string InfectionSourceString()
+		{
+			return DUPLICANTS.DISEASES.INFECTIONSOURCES.FOOD.text;
+		}
+
 		protected KAnimControllerBase StartCommonSickEffect(GameObject parent_go)
 		{
-			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("contaminated_crew_fx", parent_go.transform, true, Grid.SceneLayer.Front);
-			kbatchedAnimController.transform.localPosition = new Vector3(0f, 0f, -0.1f);
+			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("contaminated_crew_fx_kanim", parent_go.transform.position + new Vector3(0f, 0f, -0.1f), parent_go.transform, true, Grid.SceneLayer.Front);
 			kbatchedAnimController.Play("fx_loop", KAnim.PlayMode.Loop, 1f, 0f);
 			return kbatchedAnimController;
 		}

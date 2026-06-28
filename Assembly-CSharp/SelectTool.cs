@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using FMOD.Studio;
 using UnityEngine;
@@ -16,18 +17,10 @@ public class SelectTool : InterfaceTool
 		SelectTool.Instance = this;
 	}
 
-	public bool IsManualControlActive()
-	{
-		return base.enabled && this.selected != null && this.selected.GetSMI<ManualControlMonitor.Instance>() != null && this.selected.GetSMI<ManualControlMonitor.Instance>().IsControlled();
-	}
-
 	public void Activate()
 	{
-		if (!this.IsManualControlActive())
-		{
-			PlayerController.Instance.ActivateTool(this);
-			this.Select(null, false);
-		}
+		PlayerController.Instance.ActivateTool(this);
+		this.Select(null, false);
 	}
 
 	public void SetLayerMask(int mask)
@@ -175,7 +168,7 @@ public class SelectTool : InterfaceTool
 		}
 	}
 
-	private KSelectable[] GetSelectablesUnderCursor(bool includeRegions = false)
+	public KSelectable[] GetSelectablesUnderCursor(bool includeRegions = false)
 	{
 		this.hits.Clear();
 		if (this.hoverOverride != null)
@@ -295,7 +288,7 @@ public class SelectTool : InterfaceTool
 		}
 		pos.z = -40f;
 		pos += offset;
-		CameraController.Instance.SetTargetPos(pos, 8f);
+		CameraController.Instance.SetTargetPos(pos, 8f, true);
 	}
 
 	public void SelectAndFocus(Vector3 pos, KSelectable selectable, Vector3 offset)
@@ -309,9 +302,23 @@ public class SelectTool : InterfaceTool
 		this.SelectAndFocus(pos, selectable, Vector3.zero);
 	}
 
+	public void SelectNextFrame(KSelectable new_selected, bool skipSound = false)
+	{
+		this.delayedNextSelection = new_selected;
+		this.delayedSkipSound = skipSound;
+		base.StartCoroutine(this.DoSelectNextFrame());
+	}
+
+	private IEnumerator DoSelectNextFrame()
+	{
+		yield return null;
+		this.Select(this.delayedNextSelection, this.delayedSkipSound);
+		this.delayedNextSelection = null;
+		yield break;
+	}
+
 	public void Select(KSelectable new_selected, bool skipSound = false)
 	{
-		this.ClearContextMenu();
 		if (new_selected == this.previousSelection)
 		{
 			return;
@@ -324,14 +331,6 @@ public class SelectTool : InterfaceTool
 		GameObject gameObject = null;
 		if (new_selected != null)
 		{
-			if (new_selected == this.hover)
-			{
-				this.ClearHover();
-			}
-			new_selected.Select();
-			gameObject = new_selected.gameObject;
-			this.selectMarker.SetTargetTransform(gameObject.transform);
-			this.selectMarker.gameObject.SetActive(!new_selected.DisableSelectMarker);
 			SelectToolHoverTextCard component = base.GetComponent<SelectToolHoverTextCard>();
 			if (component != null)
 			{
@@ -356,6 +355,14 @@ public class SelectTool : InterfaceTool
 					}
 				}
 			}
+			if (new_selected == this.hover)
+			{
+				this.ClearHover();
+			}
+			new_selected.Select();
+			gameObject = new_selected.gameObject;
+			this.selectMarker.SetTargetTransform(gameObject.transform);
+			this.selectMarker.gameObject.SetActive(!new_selected.DisableSelectMarker);
 		}
 		else
 		{
@@ -370,15 +377,6 @@ public class SelectTool : InterfaceTool
 		KSelectable objectUnderCursor = this.GetObjectUnderCursor<KSelectable>(true, (KSelectable s) => s.GetComponent<KSelectable>().IsSelectable, this.selected);
 		this.selectedCell = Grid.PosToCell(cursor_pos);
 		this.Select(objectUnderCursor, false);
-	}
-
-	private void ClearContextMenu()
-	{
-	}
-
-	public override void OnRightClickDown(Vector3 cursor_pos, KButtonEvent e)
-	{
-		base.OnRightClickDown(cursor_pos, e);
 	}
 
 	public override void OnRightClickUp(Vector3 cursor_pos)
@@ -430,6 +428,10 @@ public class SelectTool : InterfaceTool
 	private HashSet<Component> prevIntersectionGroup = new HashSet<Component>();
 
 	private HashSet<Component> curIntersectionGroup = new HashSet<Component>();
+
+	private KSelectable delayedNextSelection;
+
+	private bool delayedSkipSound;
 
 	private KSelectable previousSelection;
 

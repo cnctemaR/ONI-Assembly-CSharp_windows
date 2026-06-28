@@ -95,24 +95,24 @@ public class GreedyGreen : StateMachineComponent<GreedyGreen.StatesInstance>
 	{
 		for (int i = 0; i < this.OccupiedCells.Count; i++)
 		{
-			if (Grid.Objects[this.OccupiedCells[i], 22] == base.gameObject)
+			if (Grid.Objects[this.OccupiedCells[i], 5] == base.gameObject)
 			{
-				Grid.Objects[this.OccupiedCells[i], 22] = null;
+				Grid.Objects[this.OccupiedCells[i], 5] = null;
 			}
-			if (Grid.Objects[this.OccupiedCells[i], 3] == base.gameObject)
+			if (Grid.Objects[this.OccupiedCells[i], 1] == base.gameObject)
 			{
-				Grid.Objects[this.OccupiedCells[i], 3] = null;
+				Grid.Objects[this.OccupiedCells[i], 1] = null;
 			}
 		}
 		this.OccupiedCells.Clear();
 		this.OccupiedCells.Add(Grid.PosToCell(base.gameObject.transform.position));
-		Grid.Objects[Grid.PosToCell(base.gameObject.transform.position), 22] = base.gameObject;
-		Grid.Objects[Grid.PosToCell(base.gameObject.transform.position), 3] = base.gameObject;
+		Grid.Objects[Grid.PosToCell(base.gameObject.transform.position), 5] = base.gameObject;
+		Grid.Objects[Grid.PosToCell(base.gameObject.transform.position), 1] = base.gameObject;
 		for (int j = 1; j < this.growthState.Maturity; j++)
 		{
 			this.OccupiedCells.Add(Grid.PosToCell(base.gameObject.transform.position + this.GrowDirection * (float)j));
-			Grid.Objects[Grid.PosToCell(base.gameObject.transform.position + this.GrowDirection * (float)j), 22] = base.gameObject;
-			Grid.Objects[Grid.PosToCell(base.gameObject.transform.position + this.GrowDirection * (float)j), 3] = base.gameObject;
+			Grid.Objects[Grid.PosToCell(base.gameObject.transform.position + this.GrowDirection * (float)j), 5] = base.gameObject;
+			Grid.Objects[Grid.PosToCell(base.gameObject.transform.position + this.GrowDirection * (float)j), 1] = base.gameObject;
 		}
 	}
 
@@ -173,12 +173,12 @@ public class GreedyGreen : StateMachineComponent<GreedyGreen.StatesInstance>
 
 	private bool PlantableCell(int cell)
 	{
-		return Grid.Solid[cell] && !Grid.Solid[Grid.CellAbove(cell)] && Grid.Objects[cell, 22] == null && Grid.Objects[cell, 1] == null && Grid.Objects[cell, 3] == null;
+		return Grid.Solid[cell] && !Grid.Solid[Grid.CellAbove(cell)] && Grid.Objects[cell, 5] == null && Grid.Objects[cell, 0] == null && Grid.Objects[cell, 1] == null;
 	}
 
 	private bool CellIsClear(int cell)
 	{
-		return !Grid.Solid[cell] && Grid.Objects[cell, 22] == null && Grid.Objects[cell, 1] == null && Grid.Objects[cell, 3] == null;
+		return !Grid.Solid[cell] && Grid.Objects[cell, 5] == null && Grid.Objects[cell, 0] == null && Grid.Objects[cell, 1] == null;
 	}
 
 	[MyCmpAdd]
@@ -206,7 +206,7 @@ public class GreedyGreen : StateMachineComponent<GreedyGreen.StatesInstance>
 
 	private List<int> OccupiedCells = new List<int>();
 
-	public class StatesInstance : GameStateMachine<GreedyGreen.States, GreedyGreen.StatesInstance, GreedyGreen>.GameInstance
+	public class StatesInstance : GameStateMachine<GreedyGreen.States, GreedyGreen.StatesInstance, GreedyGreen, object>.GameInstance
 	{
 		public StatesInstance(GreedyGreen smi)
 			: base(smi)
@@ -275,15 +275,15 @@ public class GreedyGreen : StateMachineComponent<GreedyGreen.StatesInstance>
 
 		public GreedyGreen.States.HarvestableState harvestable;
 
-		public class HarvestableState : GameStateMachine<GreedyGreen.States, GreedyGreen.StatesInstance, GreedyGreen>.State
+		public class HarvestableState : GameStateMachine<GreedyGreen.States, GreedyGreen.StatesInstance, GreedyGreen, object>.State
 		{
-			public GameStateMachine<GreedyGreen.States, GreedyGreen.StatesInstance, GreedyGreen>.State idle;
+			public GameStateMachine<GreedyGreen.States, GreedyGreen.StatesInstance, GreedyGreen, object>.State idle;
 
-			public GameStateMachine<GreedyGreen.States, GreedyGreen.StatesInstance, GreedyGreen>.State grow;
+			public GameStateMachine<GreedyGreen.States, GreedyGreen.StatesInstance, GreedyGreen, object>.State grow;
 
-			public GameStateMachine<GreedyGreen.States, GreedyGreen.StatesInstance, GreedyGreen>.State harvest;
+			public GameStateMachine<GreedyGreen.States, GreedyGreen.StatesInstance, GreedyGreen, object>.State harvest;
 
-			public GameStateMachine<GreedyGreen.States, GreedyGreen.StatesInstance, GreedyGreen>.State death;
+			public GameStateMachine<GreedyGreen.States, GreedyGreen.StatesInstance, GreedyGreen, object>.State death;
 		}
 	}
 }

@@ -17,6 +17,7 @@ public class OptionsMenuScreen : KModalButtonMenu
 			new KButtonMenu.ButtonInfo(UI.FRONTEND.OPTIONS_SCREEN.CONTROLS, global::Action.NumActions, new UnityAction(this.OnKeyBindings), null, null),
 			new KButtonMenu.ButtonInfo(UI.FRONTEND.OPTIONS_SCREEN.UNITS, global::Action.NumActions, new UnityAction(this.OnUnits), null, null),
 			new KButtonMenu.ButtonInfo(UI.FRONTEND.OPTIONS_SCREEN.METRICS, global::Action.NumActions, new UnityAction(this.OnMetrics), null, null),
+			new KButtonMenu.ButtonInfo(UI.FRONTEND.OPTIONS_SCREEN.LANGUAGE, global::Action.NumActions, new UnityAction(this.OnLanguage), null, null),
 			new KButtonMenu.ButtonInfo(UI.FRONTEND.OPTIONS_SCREEN.CREDITS, global::Action.NumActions, new UnityAction(this.OnCredits), null, null),
 			new KButtonMenu.ButtonInfo(UI.FRONTEND.OPTIONS_SCREEN.BACK, global::Action.NumActions, new UnityAction(this.Deactivate), null, null)
 		};
@@ -75,6 +76,24 @@ public class OptionsMenuScreen : KModalButtonMenu
 		Util.KInstantiateUI(this.metricsScreenPrefab.gameObject, this.transform.parent.gameObject, false);
 	}
 
+	private void OnLanguage()
+	{
+		if (SteamManager.Initialized)
+		{
+			Util.KInstantiateUI(this.languageOptionsScreen.gameObject, this.transform.parent.gameObject, false);
+		}
+		else
+		{
+			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
+			confirmDialogScreen.PopupConfirmDialog(UI.FRONTEND.TRANSLATIONS_SCREEN.NO_STEAM, null, null, null, null);
+		}
+	}
+
+	private void OnWorldGen()
+	{
+		Util.KInstantiateUI(this.worldGenScreenPrefab.gameObject, this.transform.parent.gameObject, false);
+	}
+
 	private void OnCredits()
 	{
 		Util.KInstantiateUI(this.creditsScreenPrefab.gameObject, this.transform.parent.gameObject, false);
@@ -105,6 +124,12 @@ public class OptionsMenuScreen : KModalButtonMenu
 
 	[SerializeField]
 	private MetricsOptionsScreen metricsScreenPrefab;
+
+	[SerializeField]
+	private LanguageOptionsScreen languageOptionsScreen;
+
+	[SerializeField]
+	private WorldGenOptionsScreen worldGenScreenPrefab;
 
 	[SerializeField]
 	private LocText title;

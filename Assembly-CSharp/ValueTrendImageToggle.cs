@@ -10,7 +10,7 @@ public class ValueTrendImageToggle : MonoBehaviour
 		this.tooltip.toolTip = tooltip_func(ainstance);
 		float delta = ainstance.GetDelta();
 		Sprite sprite = null;
-		if (delta == 0f)
+		if (ainstance.paused || delta == 0f)
 		{
 			this.targetImage.gameObject.SetActive(false);
 		}

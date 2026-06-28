@@ -5,7 +5,7 @@ public class DescriptionContainer : MonoBehaviour
 {
 	public LocText description;
 
-	public LocText attributePrefab;
+	public DescriptorPanel descriptors;
 
 	public LocText flavour;
 }

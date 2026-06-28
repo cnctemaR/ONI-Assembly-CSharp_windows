@@ -5,7 +5,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class TreeFilterable : KMonoBehaviour, ISaveLoadableJson
+public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 {
 	public List<Tag> AcceptedTags
 	{
@@ -28,6 +28,12 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadableJson
 		}
 	}
 
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		this.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
+	}
+
 	protected override void OnSpawn()
 	{
 		WorldInventory.Instance.OnDiscover += this.OnDiscover;
@@ -48,6 +54,16 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadableJson
 	{
 		WorldInventory.Instance.OnDiscover -= this.OnDiscover;
 		base.OnCleanUp();
+	}
+
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = (GameObject)data;
+		TreeFilterable component = gameObject.GetComponent<TreeFilterable>();
+		if (component != null)
+		{
+			this.UpdateFilters(component.GetTags());
+		}
 	}
 
 	public void SetTags(List<Tag> tags)
@@ -150,6 +166,9 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadableJson
 
 	[MyCmpReq]
 	private UserMenu userMenu;
+
+	[MyCmpAdd]
+	private CopyBuildingSettings copyBuildingSettings;
 
 	public bool showUserMenu = true;
 

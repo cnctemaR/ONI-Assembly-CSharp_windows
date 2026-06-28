@@ -12,26 +12,7 @@ public class MinionGroupProber : KMonoBehaviour
 		base.OnPrefabInit();
 		MinionGroupProber.Instance = this;
 		this.navGrid = Pathfinding.Instance.GetNavGrid("MinionNavGrid");
-		this.navTypeCount = new int[Grid.CellCount];
-		PathGrid pathGrid = this.pathProber.GetPathGrid();
-		pathGrid.OnCellCostChanged = (Action<int, NavType, int, int>)Delegate.Combine(pathGrid.OnCellCostChanged, new Action<int, NavType, int, int>(this.OnCellCostChanged));
-	}
-
-	private void OnCellCostChanged(int cell, NavType nav_type, int previous_cost, int new_cost)
-	{
-		int num = this.navTypeCount[cell];
-		if (previous_cost == PathProber.InvalidCost && new_cost != PathProber.InvalidCost)
-		{
-			this.navTypeCount[cell] = this.navTypeCount[cell] + 1;
-		}
-		else if (previous_cost != PathProber.InvalidCost && new_cost == PathProber.InvalidCost)
-		{
-			this.navTypeCount[cell] = this.navTypeCount[cell] - 1;
-		}
-		if (num != this.navTypeCount[cell])
-		{
-			GameScenePartitioner.Instance.TriggerEvent(cell, GameScenePartitioner.Instance.navigableChanged.mask, null);
-		}
+		this.pathProber.SetValidNavTypes(this.navGrid.ValidNavTypes, 0);
 	}
 
 	public bool IsReachable(Workable workable)
@@ -73,6 +54,7 @@ public class MinionGroupProber : KMonoBehaviour
 				Navigator component = minionIdentity.GetComponent<Navigator>();
 				PathFinderAbilities currentAbilities = minionIdentity.GetComponent<Navigator>().GetCurrentAbilities();
 				currentAbilities.maxUnderwaterCost = 8;
+				currentAbilities.ignoreAccessControl = true;
 				this.pathProber.UpdateProbe(this.navGrid, num, component.CurrentNavType, currentAbilities, flag);
 				flag = false;
 			}
@@ -89,8 +71,6 @@ public class MinionGroupProber : KMonoBehaviour
 	private PathProber pathProber;
 
 	private NavGrid navGrid;
-
-	private int[] navTypeCount;
 
 	private MinionGroupProber.Island[] islands = new MinionGroupProber.Island[0];
 

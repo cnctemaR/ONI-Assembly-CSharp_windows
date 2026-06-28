@@ -1,5 +1,6 @@
 ﻿using System;
 
+[SkipSaveFileSerialization]
 public class CharacterOverlay : KMonoBehaviour
 {
 	protected override void OnSpawn()

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
+[SkipSaveFileSerialization]
 public class Operational : KMonoBehaviour
 {
 	public bool IsOperational { get; private set; }

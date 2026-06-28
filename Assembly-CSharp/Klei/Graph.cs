@@ -97,7 +97,7 @@ namespace Klei
 				{
 					this.AddType(this.nodeList[i].type, Graph.nodeTypes);
 					Node node = new Node(this.baseGraph.AddNode(), this.nodeList[i].type);
-					node.position = this.nodeList[i].position;
+					node.SetPosition(this.nodeList[i].position);
 					this.nodeList[i] = node;
 				}
 				for (int j = 0; j < this.arcList.Count; j++)
@@ -156,7 +156,7 @@ namespace Klei
 					list = PointGenerator.GetRandomPoints(bounds, 10f, 20f, list, PointGenerator.SampleBehaviour.PoissonDisk, true, true, true);
 					num = 0;
 				}
-				this.nodeList[i].position = list[num++];
+				this.nodeList[i].SetPosition(list[num++]);
 			}
 		}
 
@@ -189,7 +189,7 @@ namespace Klei
 							Debug.LogWarning("Re-doing layout - cell was off map");
 							break;
 						}
-						node2.position = vector;
+						node2.SetPosition(vector);
 					}
 					if (!flag)
 					{

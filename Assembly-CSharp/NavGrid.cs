@@ -200,7 +200,7 @@ public class NavGrid
 		}
 	}
 
-	public static int MaxLinksPerCell = 18;
+	public static int MaxLinksPerCell = 22;
 
 	public bool DebugViewAllPaths;
 

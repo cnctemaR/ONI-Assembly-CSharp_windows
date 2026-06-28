@@ -5,13 +5,10 @@ using System.Runtime.Serialization;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
-using UnityEngine.Assertions;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 public class Fabricator : BuildingWorkable, IEffectDescriptor
 {
-	public int DescriptionOrder { get; set; }
-
 	public string FabricationMachine
 	{
 		get
@@ -57,7 +54,7 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 			{
 				array[j] = userOrder.orderTags[j].Name;
 			}
-			this.savedOrders.Add(new Fabricator.OrderSaveData(userOrder.recipe.Name, array, infinite));
+			this.savedOrders.Add(new Fabricator.OrderSaveData(userOrder.recipe.Result.Name, array, infinite));
 		}
 	}
 
@@ -94,30 +91,36 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 		{
 			return;
 		}
+		bool flag = true;
 		foreach (Fabricator.OrderSaveData orderSaveData in this.savedOrders)
 		{
 			string[] tagNames = orderSaveData.tagNames;
 			if (tagNames != null)
 			{
-				string recipeName = orderSaveData.recipeName;
-				bool flag = false;
+				string recipePrefab = orderSaveData.recipePrefab;
+				bool flag2 = false;
 				for (int i = 0; i < recipes.Length; i++)
 				{
-					if (recipes[i].Name == recipeName)
+					if (recipes[i].Result.Name == recipePrefab)
 					{
 						List<Tag> list = new List<Tag>();
 						for (int j = 0; j < tagNames.Length; j++)
 						{
 							list.Add(new Tag(tagNames[j]));
 						}
-						flag = true;
+						flag2 = true;
 						this.userOrders.Add(new Fabricator.UserOrder(recipes[i], list, orderSaveData.infinite));
+						if (flag)
+						{
+							base.SetWorkTime(recipes[i].FabricationTime);
+							flag = false;
+						}
 						break;
 					}
 				}
-				if (!flag)
+				if (!flag2)
 				{
-					Output.LogWarning(new object[] { "Order failed, missing recipe [", recipeName, "]" });
+					Output.LogWarning(new object[] { "Order failed, missing recipe [", recipePrefab, "]" });
 				}
 			}
 		}
@@ -129,8 +132,8 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 		base.OnPrefabInit();
 		this.choreType = Db.Get().ChoreTypes.Fabricate;
 		base.GetComponent<Storage>().choreType = Db.Get().ChoreTypes.FabricateFetch;
-		this.Subscribe(-1957399615, new EventSystem.EventHandler(this.OnDroppedAll));
-		this.Subscribe(-592767678, new EventSystem.EventHandler(this.OnOperationalChanged));
+		this.Subscribe(-1957399615, new Action<object>(this.OnDroppedAll));
+		this.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 		Components.Fabricators.Add(this);
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Fabricating;
 		this.attributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
@@ -139,7 +142,7 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.Subscribe(-235298596, new EventSystem.EventHandler(this.OnBuildingUpgraded));
+		this.Subscribe(-235298596, new Action<object>(this.OnBuildingUpgraded));
 		this.ReloadSavedQueue();
 		this.buildStorage.Transfer(this.inStorage, true);
 		this.UpdateOrderQueue(true);
@@ -180,6 +183,7 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 
 	protected override void OnCleanUp()
 	{
+		base.OnCleanUp();
 		foreach (Fabricator.UserOrder userOrder in this.userOrders)
 		{
 			this.Cancel(userOrder);
@@ -187,58 +191,36 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 		Components.Fabricators.Remove(this);
 	}
 
-	protected virtual void CompleteOrder(Fabricator.UserOrder completed_order)
+	protected virtual GameObject CompleteOrder(Fabricator.UserOrder completed_order)
 	{
-		int num = Math.Max(completed_order.recipe.NumProduced, 1);
-		for (int i = 0; i < num; i++)
+		GameObject gameObject = completed_order.recipe.Craft(this.buildStorage, completed_order.orderTags);
+		gameObject.transform.localPosition = this.transform.localPosition;
+		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+		switch (this.resultState)
 		{
-			GameObject gameObject;
-			PrimaryElement primaryElement;
-			if (i == 0)
-			{
-				gameObject = completed_order.recipe.Craft(this.buildStorage, completed_order.orderTags);
-				primaryElement = gameObject.GetComponent<PrimaryElement>();
-			}
-			else
-			{
-				gameObject = Util.KInstantiate(completed_order.recipe.Result, Vector3.zero, Quaternion.identity, SceneOrganizer.Instance.GetFolder(Folder.Entities), null, true, 0);
-				primaryElement = gameObject.GetComponent<PrimaryElement>();
-				if (primaryElement != null)
-				{
-					if (completed_order.orderTags != null && completed_order.orderTags.Count > 0)
-					{
-						Element element = ElementLoader.GetElement(completed_order.orderTags[0]);
-						primaryElement.ElementID = element.id;
-					}
-					Assert.IsTrue(primaryElement.ElementID != (SimHashes)0);
-				}
-			}
-			gameObject.transform.localPosition = this.transform.localPosition;
-			switch (this.resultState)
-			{
-			case Fabricator.ResultState.Normal:
-			{
-				int num2 = Grid.PosToCell(this);
-				gameObject.transform.SetPosition(Grid.CellToPosCCC(num2, Grid.SceneLayer.Use));
-				break;
-			}
-			case Fabricator.ResultState.Hot:
-			{
-				int num3 = Grid.PosToCell(this);
-				primaryElement.gameObject.transform.SetPosition(Grid.CellToPosCCC(num3, Grid.SceneLayer.Use));
-				primaryElement.Temperature = primaryElement.Element.highTemp - 10f;
-				break;
-			}
-			case Fabricator.ResultState.Melted:
-			{
-				int outputCell = this.outputPoint.GetOutputCell();
-				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-				SimMessages.AddRemoveSubstance(outputCell, primaryElement.Element.highTempTransition.id, CellEventLogger.Instance.FabricatorProduceMelted, component.Mass, primaryElement.Element.highTempTransition.defaultValues.temperature + 10f, -1);
-				primaryElement.gameObject.DeleteObject();
-				break;
-			}
-			}
+		case Fabricator.ResultState.Normal:
+		{
+			int num = Grid.PosToCell(this);
+			gameObject.transform.SetPosition(Grid.CellToPosCCC(num, Grid.SceneLayer.Use));
+			break;
 		}
+		case Fabricator.ResultState.Hot:
+		{
+			int num2 = Grid.PosToCell(this);
+			component.gameObject.transform.SetPosition(Grid.CellToPosCCC(num2, Grid.SceneLayer.Use));
+			component.Temperature = component.Element.highTemp - 10f;
+			break;
+		}
+		case Fabricator.ResultState.Melted:
+		{
+			int outputCell = this.outputPoint.GetOutputCell();
+			PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
+			SimMessages.AddRemoveSubstance(outputCell, component.Element.highTempTransition.id, CellEventLogger.Instance.FabricatorProduceMelted, component2.Mass, component.Element.highTempTransition.defaultValues.temperature + 10f, -1);
+			component.gameObject.DeleteObject();
+			break;
+		}
+		}
+		return gameObject;
 	}
 
 	public override float GetWorkTime()
@@ -252,7 +234,7 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 		return -1f;
 	}
 
-	public void CreateOrder(Recipe recipe, List<Tag> tags, bool isInfinite)
+	public void CreateOrder(Recipe recipe, List<Tag> tags, bool isInfinite, string soundPath)
 	{
 		if (DebugHandler.InstantBuildMode)
 		{
@@ -261,6 +243,7 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 		}
 		else if (!this.IsQueueFull)
 		{
+			KFMOD.PlayOneShot(soundPath);
 			Fabricator.UserOrder userOrder2 = new Fabricator.UserOrder(recipe, tags, isInfinite);
 			this.userOrders.Add(userOrder2);
 			this.UpdateOrderQueue(false);
@@ -319,7 +302,7 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 					{
 						this.inStorage.Transfer(this.buildStorage, ingredient2.tag, ingredient2.amount, false, true);
 					}
-					this.OnBuildQueued();
+					this.OnBuildQueued(machineOrder2);
 				}
 			}
 			Dictionary<Tag, float> dictionary = new Dictionary<Tag, float>();
@@ -343,26 +326,38 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 				{
 					Fabricator.UserOrder parentOrder2 = machineOrder4.parentOrder;
 					Recipe.Ingredient[] allIngredients3 = parentOrder2.recipe.GetAllIngredients(parentOrder2.orderTags);
-					bool flag2 = false;
+					bool flag2 = true;
 					foreach (Recipe.Ingredient ingredient4 in allIngredients3)
 					{
 						if (dictionary[ingredient4.tag] < ingredient4.amount)
 						{
+							ingredient4.amount -= dictionary[ingredient4.tag];
+							dictionary[ingredient4.tag] = 0f;
 							flag2 = false;
 						}
-						Dictionary<Tag, float> dictionary3;
-						Dictionary<Tag, float> dictionary2 = (dictionary3 = dictionary);
-						Tag tag2;
-						Tag tag = (tag2 = ingredient4.tag);
-						float num2 = dictionary3[tag2];
-						dictionary2[tag] = num2 - ingredient4.amount;
+						else
+						{
+							Dictionary<Tag, float> dictionary3;
+							Dictionary<Tag, float> dictionary2 = (dictionary3 = dictionary);
+							Tag tag2;
+							Tag tag = (tag2 = ingredient4.tag);
+							float num2 = dictionary3[tag2];
+							dictionary2[tag] = num2 - ingredient4.amount;
+							ingredient4.amount = 0f;
+						}
 					}
+					int num3 = -m;
 					if (machineOrder4.fetchList == null && !flag2)
 					{
 						machineOrder4.fetchList = new FetchList2(this.inStorage);
 						machineOrder4.fetchList.ShowStatusItem = false;
+						machineOrder4.fetchList.SetPriorityMod(num3);
 						this.AddIngredientsToFetchList(allIngredients3, machineOrder4.fetchList);
 						machineOrder4.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
+					}
+					else if (machineOrder4.fetchList != null)
+					{
+						machineOrder4.fetchList.SetPriorityMod(num3);
 					}
 				}
 			}
@@ -401,11 +396,14 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 		}
 		foreach (Recipe.Ingredient ingredient in ingredients)
 		{
-			fetchList.Add(ingredient.tag, ingredient.amount, false);
+			if (ingredient.amount > 0f)
+			{
+				fetchList.Add(ingredient.tag, ingredient.amount, FetchOrder2.OperationalRequirement.None);
+			}
 		}
 	}
 
-	public void CancelOrder(int idx)
+	public virtual void CancelOrder(int idx)
 	{
 		if (idx == 0)
 		{
@@ -452,27 +450,23 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 		return this.CanFabricate(order, this.inStorage);
 	}
 
-	public List<Descriptor> GetRequirementDescriptions(BuildingDef def)
-	{
-		return null;
-	}
-
-	public List<Descriptor> GetEffectDescriptions(BuildingDef def)
+	public List<Descriptor> GetDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		Recipe[] recipes = this.GetRecipes();
 		if (recipes.Length > 0)
 		{
 			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, UI.BUILDINGEFFECTS.FABRICATES), UI.BUILDINGEFFECTS.TOOLTIPS.FABRICATES);
+			descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.FABRICATES, UI.BUILDINGEFFECTS.TOOLTIPS.FABRICATES, Descriptor.DescriptorType.Effect);
 			list.Add(descriptor);
 		}
 		foreach (Recipe recipe in this.GetRecipes())
 		{
-			string keywordStyle = GameUtil.GetKeywordStyle(recipe.Result);
+			GameObject prefab = Assets.GetPrefab(recipe.Result);
+			string keywordStyle = GameUtil.GetKeywordStyle(prefab);
 			Descriptor descriptor2 = default(Descriptor);
-			string text = UI.LISTENTRYTAB + UI.LISTENTRYTAB + "• ";
-			descriptor2.SetupDescriptor(text + string.Format(UI.BUILDINGEFFECTS.FABRICATEDITEM, keywordStyle, recipe.Name), GameUtil.GetGameObjectEffectsTooltipString(recipe.Result));
+			descriptor2.IncreaseIndent();
+			descriptor2.SetupDescriptor("• " + string.Format(UI.BUILDINGEFFECTS.FABRICATEDITEM, keywordStyle, recipe.Name), GameUtil.GetGameObjectEffectsTooltipString(prefab), Descriptor.DescriptorType.Effect);
 			list.Add(descriptor2);
 		}
 		return list;
@@ -532,7 +526,7 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 		base.ShowProgressBar(this.userOrders.Count > 0);
 	}
 
-	protected virtual void OnBuildQueued()
+	protected virtual void OnBuildQueued(Fabricator.MachineOrder order)
 	{
 	}
 
@@ -630,14 +624,14 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 	[Serializable]
 	public struct OrderSaveData
 	{
-		public OrderSaveData(string recipeName, string[] tagNames, bool infinite)
+		public OrderSaveData(string recipePrefab, string[] tagNames, bool infinite)
 		{
-			this.recipeName = recipeName;
+			this.recipePrefab = recipePrefab;
 			this.tagNames = tagNames;
 			this.infinite = infinite;
 		}
 
-		public string recipeName;
+		public string recipePrefab;
 
 		public string[] tagNames;
 

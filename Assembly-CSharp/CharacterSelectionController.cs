@@ -112,7 +112,7 @@ public class CharacterSelectionController : KModalScreen
 
 	protected void EnableProceedButton()
 	{
-		this.proceedButton.interactable = true;
+		this.proceedButton.isInteractable = true;
 		this.proceedButton.ClearOnClick();
 		this.proceedButton.onClick += delegate
 		{
@@ -123,7 +123,7 @@ public class CharacterSelectionController : KModalScreen
 	protected void DisableProceedButton()
 	{
 		this.proceedButton.ClearOnClick();
-		this.proceedButton.interactable = false;
+		this.proceedButton.isInteractable = false;
 		this.proceedButton.onClick += delegate
 		{
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Negative", false));

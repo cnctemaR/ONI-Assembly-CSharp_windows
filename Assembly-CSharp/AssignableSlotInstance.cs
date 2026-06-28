@@ -36,6 +36,10 @@ public abstract class AssignableSlotInstance
 	{
 		if (this.assignable == assignable)
 		{
+			if (assignable != null)
+			{
+				Debug.Log("Assign() Already assigned " + assignable.name);
+			}
 			return;
 		}
 		this.Unassign(false);

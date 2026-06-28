@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Klei.AI
 {
 	[SerializationConfig(MemberSerialization.OptIn)]
-	public class Modifications<ModifierType, InstanceType> : ISaveLoadableDetailJson where ModifierType : Resource where InstanceType : ModifierInstance<ModifierType>
+	public class Modifications<ModifierType, InstanceType> : ISaveLoadableDetails where ModifierType : Resource where InstanceType : ModifierInstance<ModifierType>
 	{
 		public Modifications(GameObject go, ResourceSet<ModifierType> resources = null)
 		{
@@ -29,6 +29,14 @@ namespace Klei.AI
 		}
 
 		public GameObject gameObject { get; private set; }
+
+		public InstanceType this[int idx]
+		{
+			get
+			{
+				return this.ModifierList[idx];
+			}
+		}
 
 		public ComponentType GetComponent<ComponentType>()
 		{
@@ -145,10 +153,13 @@ namespace Klei.AI
 				}
 				if (instanceType == null)
 				{
-					Output.LogWarning(new object[] { "Missing modifier: " + text });
+					if (text != "Condition")
+					{
+						Output.LogWarning(new object[] { "Missing modifier: " + text });
+					}
 					reader.SkipBytes(num2);
 				}
-				else if (!(instanceType is ISaveLoadableJson))
+				else if (!(instanceType is ISaveLoadable))
 				{
 					reader.SkipBytes(num2);
 				}

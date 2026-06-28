@@ -3,8 +3,8 @@ using UnityEngine;
 
 public class FetchChore : Chore<FetchChore.StatesInstance>
 {
-	public FetchChore(Storage destination, float amount, Tag[] tags, ChoreProvider chore_provider = null, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, bool only_when_operational = true)
-		: base(destination.choreType, destination, chore_provider, run_until_complete, on_complete, on_begin, on_end, int.MaxValue, false, true)
+	public FetchChore(Storage destination, float amount, Tag[] tags, ChoreProvider chore_provider = null, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, FetchOrder2.OperationalRequirement operational_requirement = FetchOrder2.OperationalRequirement.Operational, int priority_mod = 0)
+		: base(destination.choreType, destination, chore_provider, run_until_complete, on_complete, on_begin, on_end, int.MaxValue, false, true, priority_mod)
 	{
 		if (amount <= 0f)
 		{
@@ -23,9 +23,16 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		base.AddPrecondition(FetchChore.IsFetchTargetAvailable, null);
 		base.AddPrecondition(ChorePreconditions.IsMarkedForDeconstruction, this.target.gameObject);
 		base.AddPrecondition(ChorePreconditions.IsMarkedForDisable, this.target.gameObject);
-		if (only_when_operational && destination.gameObject.GetComponent<Operational>())
+		if (operational_requirement != FetchOrder2.OperationalRequirement.None && destination.gameObject.GetComponent<Operational>())
 		{
-			base.AddPrecondition(ChorePreconditions.IsOperational, destination.gameObject);
+			if (operational_requirement == FetchOrder2.OperationalRequirement.Operational)
+			{
+				base.AddPrecondition(ChorePreconditions.IsOperational, destination.gameObject);
+			}
+			if (operational_requirement == FetchOrder2.OperationalRequirement.Functional)
+			{
+				base.AddPrecondition(ChorePreconditions.IsFunctional, destination.gameObject);
+			}
 		}
 		this.partitionerEntry = GameScenePartitioner.Instance.Add(destination.name, this, Grid.PosToCell(destination), GameScenePartitioner.Instance.fetchChores.mask, null);
 		destination.onPriorityChanged = (global::System.Action)Delegate.Combine(destination.onPriorityChanged, new global::System.Action(this.OnPriorityChanged));
@@ -48,7 +55,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 			}
 			else
 			{
-				flag = FetchManagerUpdater.IsFetchablePickup(pickupable.GetComponent<KPrefabID>(), pickupable.storage, pickupable.UnreservedAmount, pickupable.MinTakeAmount, fetchChore.originalAmount, fetchChore.tags, fetchChore.requiredTags, context.consumer.GetComponent<Storage>());
+				flag = FetchManagerUpdater.IsFetchablePickup(pickupable.GetComponent<KPrefabID>(), pickupable.storage, pickupable.UnreservedAmount, pickupable.MinTakeAmount, fetchChore.originalAmount, fetchChore.tags, fetchChore.requiredTags, null, context.consumer.GetComponent<Storage>());
 			}
 			if (flag)
 			{
@@ -149,7 +156,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		Pickupable pickupable = null;
 		if (this.destination != null)
 		{
-			FetchManager.Instance.FindFetchTarget(consumer.GetComponent<Worker>(), this.destination, this.tags, this.requiredTags, this.originalAmount, ref pickupable);
+			FetchManager.Instance.FindFetchTarget(consumer.GetComponent<Worker>(), this.destination, this.tags, this.requiredTags, null, this.originalAmount, ref pickupable);
 		}
 		return pickupable;
 	}
@@ -191,6 +198,15 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		context.chore = new FetchAreaChore(context);
 	}
 
+	public float AmountWaitingToFetch()
+	{
+		if (this.fetcher == null)
+		{
+			return this.originalAmount;
+		}
+		return this.amount;
+	}
+
 	private void OnPriorityChanged()
 	{
 		if (this.smi.sm.destination.Get<Storage>(this.smi).GetOnlyFetchMarkedItems())
@@ -229,7 +245,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 
 	public static Chore.Precondition IsFetchTargetAvailable;
 
-	public class StatesInstance : GameStateMachine<FetchChore.States, FetchChore.StatesInstance, FetchChore>.GameInstance
+	public class StatesInstance : GameStateMachine<FetchChore.States, FetchChore.StatesInstance, FetchChore, object>.GameInstance
 	{
 		public StatesInstance(FetchChore master)
 			: base(master)
@@ -244,16 +260,16 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 			default_state = this.root;
 		}
 
-		public StateMachine<FetchChore.States, FetchChore.StatesInstance, FetchChore>.TargetParameter fetcher;
+		public StateMachine<FetchChore.States, FetchChore.StatesInstance, FetchChore, object>.TargetParameter fetcher;
 
-		public StateMachine<FetchChore.States, FetchChore.StatesInstance, FetchChore>.TargetParameter source;
+		public StateMachine<FetchChore.States, FetchChore.StatesInstance, FetchChore, object>.TargetParameter source;
 
-		public StateMachine<FetchChore.States, FetchChore.StatesInstance, FetchChore>.TargetParameter chunk;
+		public StateMachine<FetchChore.States, FetchChore.StatesInstance, FetchChore, object>.TargetParameter chunk;
 
-		public StateMachine<FetchChore.States, FetchChore.StatesInstance, FetchChore>.TargetParameter destination;
+		public StateMachine<FetchChore.States, FetchChore.StatesInstance, FetchChore, object>.TargetParameter destination;
 
-		public StateMachine<FetchChore.States, FetchChore.StatesInstance, FetchChore>.FloatParameter requestedamount;
+		public StateMachine<FetchChore.States, FetchChore.StatesInstance, FetchChore, object>.FloatParameter requestedamount;
 
-		public StateMachine<FetchChore.States, FetchChore.StatesInstance, FetchChore>.FloatParameter actualamount;
+		public StateMachine<FetchChore.States, FetchChore.StatesInstance, FetchChore, object>.FloatParameter actualamount;
 	}
 }

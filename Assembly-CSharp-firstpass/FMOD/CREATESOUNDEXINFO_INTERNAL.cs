@@ -10,6 +10,7 @@ namespace FMOD
 			return new CREATESOUNDEXINFO_INTERNAL
 			{
 				cbsize = Marshal.SizeOf(typeof(CREATESOUNDEXINFO_INTERNAL)),
+				length = exinfoExt.length,
 				fileoffset = exinfoExt.fileoffset,
 				numchannels = exinfoExt.numchannels,
 				defaultfrequency = exinfoExt.defaultfrequency,
@@ -53,6 +54,7 @@ namespace FMOD
 			return new CREATESOUNDEXINFO
 			{
 				cbsize = Marshal.SizeOf(typeof(CREATESOUNDEXINFO_INTERNAL)),
+				length = exinfoInt.length,
 				fileoffset = exinfoInt.fileoffset,
 				numchannels = exinfoInt.numchannels,
 				defaultfrequency = exinfoInt.defaultfrequency,

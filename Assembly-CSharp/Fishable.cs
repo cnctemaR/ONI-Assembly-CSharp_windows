@@ -1,9 +1,7 @@
 ﻿using System;
-using KSerialization;
 using UnityEngine;
 
-[SerializationConfig(MemberSerialization.OptIn)]
-public class Fishable : Harvestable, ISaveLoadableJson
+public class Fishable : Harvestable
 {
 	protected Fishable()
 	{
@@ -14,9 +12,9 @@ public class Fishable : Harvestable, ISaveLoadableJson
 	{
 		base.OnSpawn();
 		base.SetWorkTime(60f);
-		base.gameObject.Subscribe(-1358696400, new EventSystem.EventHandler(this.PositionProgressBar));
-		base.gameObject.Subscribe(1272413801, new EventSystem.EventHandler(this.OnCatchComplete));
-		base.Subscribe(WaterBodyProbe.Instance.gameObject, -263784810, new EventSystem.EventHandler(this.RefreshBodyOfWater));
+		base.gameObject.Subscribe(-1358696400, new Action<object>(this.PositionProgressBar));
+		base.gameObject.Subscribe(1272413801, new Action<object>(this.OnCatchComplete));
+		base.Subscribe(WaterBodyProbe.Instance.gameObject, -263784810, new Action<object>(this.RefreshBodyOfWater));
 	}
 
 	public virtual void RefreshBodyOfWater(object param)
@@ -57,11 +55,6 @@ public class Fishable : Harvestable, ISaveLoadableJson
 		}
 		if (this.isMarkedForHarvest)
 		{
-			this.userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_fish", "Cancel Fishing", new global::System.Action(base.OnClickCancelHarvest), global::Action.NumActions, null, null, null, null, string.Empty));
-		}
-		else
-		{
-			this.userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_fish", "Fish", new global::System.Action(this.OnClickHarvest), global::Action.NumActions, null, null, null, null, string.Empty));
 		}
 	}
 
@@ -146,7 +139,7 @@ public class Fishable : Harvestable, ISaveLoadableJson
 		{
 			return 0;
 		}
-		if (!Grid.Objects[num, 22])
+		if (!Grid.Objects[num, 5])
 		{
 			return 2;
 		}

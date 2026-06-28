@@ -27,6 +27,7 @@ public class Db : EntityModifierSet
 		this.StateMachineCategories = new StateMachineCategories();
 		this.Personalities = new Personalities(this.personalitiesFile);
 		this.Faces = new Faces();
+		this.Shirts = new Shirts();
 		this.Expressions = new Expressions(this.Root);
 		this.Thoughts = new Thoughts(this.Root);
 		this.Deaths = new Deaths(this.Root);
@@ -34,17 +35,19 @@ public class Db : EntityModifierSet
 		this.Techs = new Techs(this.Root);
 		this.Techs.Load(this.researchTreeFile);
 		this.Accessories = new Accessories(this.Root);
-		this.AccessorySlots = new AccessorySlots(this.Root, null, null);
+		this.AccessorySlots = new AccessorySlots(this.Root, null, null, null);
 		this.ScheduleBlockTypes = new ScheduleBlockTypes(this.Root);
 		this.MiscStatusItems = new MiscStatusItems(this.Root);
 		this.CreatureStatusItems = new CreatureStatusItems(this.Root);
 		this.BuildingStatusItems = new BuildingStatusItems(this.Root);
 		this.ChoreTypes = new ChoreTypes(this.Root);
-		this.mentalBreakEffect = this.effects.Get("MentalBreak");
 		this.interruptedSleep = new Effect("InterruptedSleep", DUPLICANTS.MODIFIERS.INTERRUPTEDSLEEP.NAME, DUPLICANTS.MODIFIERS.INTERRUPTEDSLEEP.TOOLTIP, 0f, true, true, true);
-		this.interruptedSleep.Add(new AttributeModifier("StressDelta", 0.033333335f, DUPLICANTS.MODIFIERS.INTERRUPTEDSLEEP.NAME, false));
-		this.interruptedSleep.Add(new AttributeModifier("Athletics", -2f, DUPLICANTS.MODIFIERS.INTERRUPTEDSLEEP.NAME, false));
+		this.interruptedSleep.Add(new AttributeModifier("StressDelta", 0.016666668f, DUPLICANTS.MODIFIERS.INTERRUPTEDSLEEP.NAME, false, false));
+		this.interruptedSleep.Add(new AttributeModifier("Athletics", -2f, DUPLICANTS.MODIFIERS.INTERRUPTEDSLEEP.NAME, false, false));
 		this.effects.Add(this.interruptedSleep);
+		Effect effect = new Effect("CenterOfAttention", DUPLICANTS.MODIFIERS.CENTEROFATTENTION.NAME, DUPLICANTS.MODIFIERS.CENTEROFATTENTION.TOOLTIP, 0f, true, true, false);
+		effect.Add(new AttributeModifier("StressDelta", -0.008333334f, DUPLICANTS.MODIFIERS.CENTEROFATTENTION.NAME, false, false));
+		this.effects.Add(effect);
 		this.CollectResources(this.Root, this.ResourceTable);
 	}
 
@@ -95,8 +98,6 @@ public class Db : EntityModifierSet
 
 	public TextAsset researchTreeFile;
 
-	public Effect mentalBreakEffect;
-
 	public Effect interruptedSleep;
 
 	public global::Database.Diseases Diseases;
@@ -110,6 +111,8 @@ public class Db : EntityModifierSet
 	public Personalities Personalities;
 
 	public Faces Faces;
+
+	public Shirts Shirts;
 
 	public Expressions Expressions;
 

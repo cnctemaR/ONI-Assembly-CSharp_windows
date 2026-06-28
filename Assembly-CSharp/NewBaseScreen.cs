@@ -30,7 +30,7 @@ public class NewBaseScreen : KScreen
 		vector.z = CameraController.Instance.defaultDepth;
 		CameraController.Instance.SetMaxOrthographicSize(40f);
 		CameraController.Instance.SnapTo(vector);
-		CameraController.Instance.SetTargetPos(vector, 20f);
+		CameraController.Instance.SetTargetPos(vector, 20f, false);
 		CameraController.Instance.SetOrthographicsSize(40f);
 		CameraSaveData.valid = false;
 		return baseStartPos;

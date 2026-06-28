@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class GameTags
 {
-	public static readonly Tag Empty = TagManager.Create("Empty", null);
+	public static readonly Tag Any = TagManager.Create("Any", null);
 
 	public static readonly Tag Miscellaneous = TagManager.Create("Miscellaneous", null);
 
@@ -12,6 +12,8 @@ public class GameTags
 	public static readonly Tag Seed = TagManager.Create("Seed", null);
 
 	public static readonly Tag Edible = TagManager.Create("Edible", null);
+
+	public static readonly Tag CookingIngredient = TagManager.Create("CookingIngredient", null);
 
 	public static readonly Tag Plant = TagManager.Create("Plant", null);
 
@@ -29,7 +31,15 @@ public class GameTags
 
 	public static readonly Tag Farmable = TagManager.Create("Farmable", null);
 
+	public static readonly Tag Agriculture = TagManager.Create("Agriculture", null);
+
 	public static readonly Tag Organics = TagManager.Create("Organics", null);
+
+	public static readonly Tag IndustrialProduct = TagManager.Create("IndustrialProduct", null);
+
+	public static readonly Tag IndustrialIngredient = TagManager.Create("IndustrialIngredient", null);
+
+	public static readonly Tag Other = TagManager.Create("Other", null);
 
 	public static readonly Tag Creature = TagManager.Create("Creature", null);
 
@@ -57,9 +67,23 @@ public class GameTags
 
 	public static readonly Tag Water = TagManager.Create("Water", null);
 
+	public static readonly Tag DirtyWater = TagManager.Create("DirtyWater", null);
+
+	public static readonly Tag AnyWater = TagManager.Create("AnyWater", null);
+
+	public static readonly Tag Algae = TagManager.Create("Algae", null);
+
 	public static readonly Tag Void = TagManager.Create("Void", null);
 
 	public static readonly Tag Oxygen = TagManager.Create("Oxygen", null);
+
+	public static readonly Tag Hydrogen = TagManager.Create("Hydrogen", null);
+
+	public static readonly Tag Methane = TagManager.Create("Methane", null);
+
+	public static readonly Tag CarbonDioxide = TagManager.Create("CarbonDioxide", null);
+
+	public static readonly Tag Carbon = TagManager.Create("Carbon", null);
 
 	public static readonly Tag BuildableRaw = TagManager.Create("BuildableRaw", null);
 
@@ -95,6 +119,8 @@ public class GameTags
 
 	public static readonly Tag Breathable = TagManager.Create("Breathable", null);
 
+	public static readonly Tag Unbreathable = TagManager.Create("Unbreathable", null);
+
 	public static readonly Tag Gas = TagManager.Create("Gas", null);
 
 	public static readonly Tag Minion = TagManager.Create("Minion", null);
@@ -121,27 +147,102 @@ public class GameTags
 
 	public static readonly Tag TemperatureSuit = TagManager.Create("TemperatureSuit", null);
 
-	public static readonly List<Tag> AllSuitTags = new List<Tag>(new Tag[]
+	public static readonly List<Tag> AllSuitTags = new List<Tag>
 	{
 		GameTags.Suit,
 		GameTags.AquaSuit,
 		GameTags.AtmoSuit,
 		GameTags.TemperatureSuit
-	});
+	};
 
-	public static readonly List<Tag> OxygenSuitTaags = new List<Tag>(new Tag[]
+	public static readonly List<Tag> OxygenSuitTaags = new List<Tag>
 	{
 		GameTags.AtmoSuit,
 		GameTags.AquaSuit
-	});
+	};
+
+	public static readonly Tag Clothes = TagManager.Create("Clothes", null);
+
+	public static readonly Tag WarmVest = TagManager.Create("Warm_Vest", null);
+
+	public static readonly Tag CoolVest = TagManager.Create("Cool_Vest", null);
+
+	public static readonly Tag FunkyVest = TagManager.Create("Funky_Vest", null);
+
+	public static readonly List<Tag> AllClothesTags = new List<Tag>
+	{
+		GameTags.Clothes,
+		GameTags.WarmVest,
+		GameTags.CoolVest,
+		GameTags.FunkyVest
+	};
 
 	public static readonly Tag CropSeed = TagManager.Create("CropSeed", null);
 
 	public static readonly Tag DecorSeed = TagManager.Create("DecorSeed", null);
+
+	public static readonly Tag WaterSeed = TagManager.Create("WaterSeed", null);
+
+	public static readonly Tag Harvestable = TagManager.Create("Harvestable", null);
+
+	public static readonly Tag Hanging = TagManager.Create("Hanging", null);
 
 	public static readonly Tag MassChunk = TagManager.Create("MassChunk", null);
 
 	public static readonly Tag UnitChunk = TagManager.Create("UnitChunk", null);
 
 	public static readonly Tag MinionSelectPreview = TagManager.Create("MinionSelectPreview", null);
+
+	public static readonly Tag Empty = TagManager.Create("Empty", null);
+
+	public static TagSet SolidElements = new TagSet();
+
+	public static TagSet LiquidElements = new TagSet();
+
+	public static TagSet GasElements = new TagSet();
+
+	public static TagSet CalorieCategories = new TagSet { GameTags.Edible };
+
+	public static TagSet UnitCategories = new TagSet
+	{
+		GameTags.CookingIngredient,
+		GameTags.Seed,
+		GameTags.Clothes,
+		GameTags.IndustrialIngredient
+	};
+
+	public static TagSet IgnoredMaterialCategories = new TagSet
+	{
+		GameTags.Special,
+		GameTags.Breathable,
+		GameTags.Unbreathable
+	};
+
+	public static TagSet MaterialCategories = new TagSet
+	{
+		GameTags.Alloy,
+		GameTags.Metal,
+		GameTags.RefinedMetal,
+		GameTags.BuildableRaw,
+		GameTags.BuildableProcessed,
+		GameTags.Filter,
+		GameTags.Liquifiable,
+		GameTags.Liquid,
+		GameTags.ConsumableOre,
+		GameTags.Organics,
+		GameTags.Farmable,
+		GameTags.Agriculture,
+		GameTags.Other
+	};
+
+	public static TagSet AllCategories = new TagSet(new TagSet[]
+	{
+		GameTags.CalorieCategories,
+		GameTags.UnitCategories,
+		GameTags.MaterialCategories
+	});
+
+	public static TagSet DisplayAsCalories = new TagSet(GameTags.CalorieCategories);
+
+	public static TagSet DisplayAsUnits = new TagSet(GameTags.UnitCategories);
 }

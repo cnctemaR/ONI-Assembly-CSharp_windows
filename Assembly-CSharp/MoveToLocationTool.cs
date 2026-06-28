@@ -21,6 +21,18 @@ public class MoveToLocationTool : InterfaceTool
 		return this.targetNavigator.CanReach(target_cell);
 	}
 
+	protected override void OnActivateTool()
+	{
+		base.OnActivateTool();
+		this.visualizer.gameObject.SetActive(true);
+	}
+
+	protected override void OnDeactivateTool(InterfaceTool new_tool)
+	{
+		base.OnDeactivateTool(new_tool);
+		this.visualizer.gameObject.SetActive(false);
+	}
+
 	public override void OnLeftClickDown(Vector3 cursor_pos)
 	{
 		base.OnLeftClickDown(cursor_pos);
@@ -32,11 +44,15 @@ public class MoveToLocationTool : InterfaceTool
 				MoveToLocationMonitor.Instance smi = this.targetNavigator.GetSMI<MoveToLocationMonitor.Instance>();
 				if (smi != null)
 				{
+					KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
 					this.targetNavigator.GetSMI<MoveToLocationMonitor.Instance>().MoveToLocation(mouseCell);
+				}
+				else
+				{
+					KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Negative", false));
 				}
 			}
 		}
-		this.visualizer.gameObject.SetActive(false);
 		SelectTool.Instance.Activate();
 	}
 

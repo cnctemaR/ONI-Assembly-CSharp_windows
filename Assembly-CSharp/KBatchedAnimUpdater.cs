@@ -112,6 +112,17 @@ public class KBatchedAnimUpdater
 		}
 	}
 
+	public bool IsChunkVisible(Vector2I chunk_xy)
+	{
+		return this.visibleChunkGrid[chunk_xy.x, chunk_xy.y];
+	}
+
+	public void GetVisibleArea(out Vector2I vis_chunk_min, out Vector2I vis_chunk_max)
+	{
+		vis_chunk_min = this.vis_chunk_min;
+		vis_chunk_max = this.vis_chunk_max;
+	}
+
 	private void UpdateVisibility(KBatchedAnimController controller)
 	{
 		Vector2I vector2I = KBatchedAnimUpdater.PosToChunkXY(controller.transform.position);
@@ -128,8 +139,7 @@ public class KBatchedAnimUpdater
 	public static Vector2I PosToChunkXY(Vector3 pos)
 	{
 		Vector2I vector2I = Grid.PosToXY(pos);
-		Vector2I vector2I2 = new Vector2I(vector2I.x / 16, vector2I.y / 16);
-		return vector2I2;
+		return KAnimBatchManager.CellXYToChunkXY(vector2I);
 	}
 
 	private void UpdateVisibility()
@@ -140,11 +150,11 @@ public class KBatchedAnimUpdater
 		}
 		Vector2I vector2I;
 		Vector2I vector2I2;
-		this.GetVisibleCellRange(out vector2I, out vector2I2);
-		Vector2I vector2I3 = new Vector2I(vector2I.x / 16, vector2I.y / 16);
-		Vector2I vector2I4 = new Vector2I(vector2I2.x / 16, vector2I2.y / 16);
-		vector2I4.x = Math.Min(vector2I4.x, this.controllerGrid.GetLength(0) - 1);
-		vector2I4.y = Math.Min(vector2I4.y, this.controllerGrid.GetLength(1) - 1);
+		KBatchedAnimUpdater.GetVisibleCellRange(out vector2I, out vector2I2);
+		this.vis_chunk_min = new Vector2I(vector2I.x / 16, vector2I.y / 16);
+		this.vis_chunk_max = new Vector2I(vector2I2.x / 16, vector2I2.y / 16);
+		this.vis_chunk_max.x = Math.Min(this.vis_chunk_max.x, this.controllerGrid.GetLength(0) - 1);
+		this.vis_chunk_max.y = Math.Min(this.vis_chunk_max.y, this.controllerGrid.GetLength(1) - 1);
 		bool[,] array = this.previouslyVisibleChunkGrid;
 		this.previouslyVisibleChunkGrid = this.visibleChunkGrid;
 		this.visibleChunkGrid = array;
@@ -153,9 +163,9 @@ public class KBatchedAnimUpdater
 		this.previouslyVisibleChunks = this.visibleChunks;
 		this.visibleChunks = list;
 		this.visibleChunks.Clear();
-		for (int i = vector2I3.y; i <= vector2I4.y; i++)
+		for (int i = this.vis_chunk_min.y; i <= this.vis_chunk_max.y; i++)
 		{
-			for (int j = vector2I3.x; j <= vector2I4.x; j++)
+			for (int j = this.vis_chunk_min.x; j <= this.vis_chunk_max.x; j++)
 			{
 				this.visibleChunkGrid[j, i] = true;
 				this.visibleChunks.Add(new Vector2I(j, i));
@@ -172,10 +182,10 @@ public class KBatchedAnimUpdater
 		}
 		for (int l = 0; l < this.previouslyVisibleChunks.Count; l++)
 		{
-			Vector2I vector2I5 = this.previouslyVisibleChunks[l];
-			if (!this.visibleChunkGrid[vector2I5.x, vector2I5.y])
+			Vector2I vector2I3 = this.previouslyVisibleChunks[l];
+			if (!this.visibleChunkGrid[vector2I3.x, vector2I3.y])
 			{
-				List<KBatchedAnimController> list3 = this.controllerGrid[vector2I5.x, vector2I5.y];
+				List<KBatchedAnimController> list3 = this.controllerGrid[vector2I3.x, vector2I3.y];
 				for (int m = 0; m < list3.Count; m++)
 				{
 					list3[m].OnBecameInvisible();
@@ -249,7 +259,7 @@ public class KBatchedAnimUpdater
 		this.cleanUpChunkIndex = (this.cleanUpChunkIndex + 16) % this.controllerGrid.Length;
 	}
 
-	private void GetVisibleCellRange(out Vector2I min, out Vector2I max)
+	public static void GetVisibleCellRange(out Vector2I min, out Vector2I max)
 	{
 		Grid.GetVisibleExtents(out min.x, out min.y, out max.x, out max.y);
 		min.x -= 4;
@@ -269,8 +279,6 @@ public class KBatchedAnimUpdater
 
 	private const int VISIBLE_BORDER = 4;
 
-	private const int CHUNK_SIZE = 16;
-
 	private const int CHUNKS_TO_CLEAN_PER_TICK = 16;
 
 	public static KBatchedAnimUpdater instance;
@@ -288,6 +296,10 @@ public class KBatchedAnimUpdater
 	private List<Vector2I> visibleChunks = new List<Vector2I>();
 
 	private List<Vector2I> previouslyVisibleChunks = new List<Vector2I>();
+
+	private Vector2I vis_chunk_min = Vector2I.zero;
+
+	private Vector2I vis_chunk_max = Vector2I.zero;
 
 	private List<KBatchedAnimUpdater.RegistrationInfo> queuedRegistrations = new List<KBatchedAnimUpdater.RegistrationInfo>();
 

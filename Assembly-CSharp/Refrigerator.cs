@@ -1,15 +1,13 @@
 ﻿using System;
-using KSerialization;
 using UnityEngine;
 
-[SerializationConfig(MemberSerialization.OptIn)]
-public class Refrigerator : KMonoBehaviour, ISaveLoadableJson
+public class Refrigerator : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
 	{
 		TreeFilterable treeFilterable = this.filterable;
 		treeFilterable.OnFilterChanged = (Action<Tag[]>)Delegate.Combine(treeFilterable.OnFilterChanged, new Action<Tag[]>(this.OnFilterChanged));
-		this.Subscribe(-592767678, new EventSystem.EventHandler(this.OnOperationalChanged));
+		this.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 	}
 
 	protected override void OnSpawn()
@@ -24,7 +22,7 @@ public class Refrigerator : KMonoBehaviour, ISaveLoadableJson
 		}
 		this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.StorageLocker, this);
 		this.OnStorageChange(null);
-		this.Subscribe(-1697596308, new EventSystem.EventHandler(this.OnStorageChange));
+		this.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
 	}
 
 	private void PreventStoredItemRotting(object data)
@@ -76,10 +74,6 @@ public class Refrigerator : KMonoBehaviour, ISaveLoadableJson
 			this.fetchList.Cancel(string.Empty);
 			this.fetchList = null;
 		}
-		if (this.closed)
-		{
-			return;
-		}
 		int num = (int)this.storage.RemainingCapacity();
 		if (num <= 0)
 		{
@@ -89,7 +83,7 @@ public class Refrigerator : KMonoBehaviour, ISaveLoadableJson
 		{
 			this.fetchList = new FetchList2(this.storage);
 			this.fetchList.ShowStatusItem = false;
-			this.fetchList.Add(tags, (float)num, false);
+			this.fetchList.Add(tags, (float)num, FetchOrder2.OperationalRequirement.None);
 			this.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
 		}
 	}
@@ -107,6 +101,11 @@ public class Refrigerator : KMonoBehaviour, ISaveLoadableJson
 		this.operational.SetActive(this.operational.IsOperational, false);
 	}
 
+	public bool IsActive()
+	{
+		return this.operational.IsActive;
+	}
+
 	[MyCmpReq]
 	private Storage storage;
 
@@ -121,9 +120,6 @@ public class Refrigerator : KMonoBehaviour, ISaveLoadableJson
 
 	[MyCmpReq]
 	private KSelectable selectable;
-
-	[Serialize]
-	private bool closed;
 
 	private FetchList2 fetchList;
 

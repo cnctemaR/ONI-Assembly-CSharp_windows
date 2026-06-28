@@ -91,6 +91,78 @@ public class VoronoiDiagram
 
 	public void OnDrawGizmos()
 	{
+		if ((VoronoiDiagram.drawOptions & VoronoiDiagram.DebugFlags.Points) != (VoronoiDiagram.DebugFlags)0 && this.points != null)
+		{
+			for (int i = 0; i < this.points.Count; i++)
+			{
+				DebugExtension.DebugPoint(this.points[i], Color.red, 1f, 0f, true);
+			}
+		}
+		if ((VoronoiDiagram.drawOptions & VoronoiDiagram.DebugFlags.TopEdge) != (VoronoiDiagram.DebugFlags)0 && this.points != null)
+		{
+			for (int j = 0; j < this.points.Count; j++)
+			{
+				if (this.IsTopEdgeCell(j))
+				{
+					List<Vector2> list = this.diagram.Region(this.points[j]);
+					Vector2 vector = list[0];
+					for (int k = 1; k < list.Count; k++)
+					{
+						Vector2 vector2 = list[k];
+						if (vector.y == vector2.y && vector2.y == this.bounds.height)
+						{
+							Debug.DrawLine(vector, vector2, Color.red);
+						}
+						else
+						{
+							Debug.DrawLine(vector, vector2, Color.blue);
+						}
+						vector = vector2;
+					}
+					if (vector.y == list[0].y && list[0].y == this.bounds.height)
+					{
+						Debug.DrawLine(vector, list[0], Color.red);
+					}
+					else
+					{
+						Debug.DrawLine(vector, list[0], Color.blue);
+					}
+				}
+			}
+		}
+		if ((VoronoiDiagram.drawOptions & VoronoiDiagram.DebugFlags.Site) != (VoronoiDiagram.DebugFlags)0 && this.points != null && this.siteIndex >= 0 && this.siteIndex < this.points.Count)
+		{
+			List<Vector2> list2 = this.diagram.Region(this.points[this.siteIndex]);
+			if (list2.Count > 0)
+			{
+				Vector2 vector3 = list2[0];
+				for (int l = 1; l < list2.Count; l++)
+				{
+					Vector2 vector4 = list2[l];
+					if (vector3.y == vector4.y && vector4.y == this.bounds.height)
+					{
+						Debug.DrawLine(vector3, vector4, Color.blue);
+					}
+					else
+					{
+						Debug.DrawLine(vector3, vector4, Color.yellow);
+					}
+					vector3 = vector4;
+				}
+				if (vector3.y == list2[0].y && list2[0].y == this.bounds.height)
+				{
+					Debug.DrawLine(vector3, list2[0], Color.blue);
+				}
+				else
+				{
+					Debug.DrawLine(vector3, list2[0], Color.yellow);
+				}
+			}
+		}
+		if ((VoronoiDiagram.drawOptions & VoronoiDiagram.DebugFlags.Border) != (VoronoiDiagram.DebugFlags)0)
+		{
+			DebugExtension.DebugRect(this.bounds, Color.yellow, 0f, true);
+		}
 	}
 
 	private List<Vector2> points;
@@ -147,12 +219,8 @@ public class VoronoiDiagram
 	public enum DebugFlags
 	{
 		Points = 1,
-		Edges = 2,
-		DelaunayTriangulation = 4,
-		SpanningTree = 8,
 		Border = 16,
 		Site = 32,
-		TopEdge = 64,
-		BottomEdge = 128
+		TopEdge = 64
 	}
 }

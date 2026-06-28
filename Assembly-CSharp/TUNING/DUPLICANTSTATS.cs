@@ -6,13 +6,29 @@ namespace TUNING
 {
 	public class DUPLICANTSTATS
 	{
+		public const float DEFAULT_MASS = 30f;
+
 		public const float PEE_PER_FLOOR_PEE = 0.05f;
 
-		public const float PEE_PER_TOILET_PEE = 100f;
+		public const float PEE_PER_TOILET_PEE = 6.7f;
 
-		public const float DUPLICANT_COOLING_WATTS = 48f;
+		public const float KCAL2JOULES = 4184f;
 
-		public const float DUPLICANT_WARMING_WATTS = 48f;
+		public const float COOLING_EFFICIENCY = 0.08f;
+
+		public const float DUPLICANT_COOLING_KILOWATTS = 0.5578667f;
+
+		public const float WARMING_EFFICIENCY = 0.08f;
+
+		public const float DUPLICANT_WARMING_KILOWATTS = 0.5578667f;
+
+		public const float HEAT_GENERATION_EFFICIENCY = 0.012f;
+
+		public const float DUPLICANT_BASE_GENERATION_KILOWATTS = 0.08368001f;
+
+		public const float STANDARD_STRESS_PENALTY = 0.016666668f;
+
+		public const float STANDARD_STRESS_BONUS = -0.033333335f;
 
 		public static float FOUNDATION_MOVEMENT_BOOST = 1.5f;
 
@@ -23,6 +39,8 @@ namespace TUNING
 		public static float PROBABILITY_LOW = 1.5f;
 
 		public static float PROBABILITY_MED = 1f;
+
+		public static int TINY_STATPOINT_BONUS = 2;
 
 		public static int SMALL_STATPOINT_BONUS = 4;
 
@@ -35,6 +53,48 @@ namespace TUNING
 		public static int MAX_TRAITS = 4;
 
 		public static List<string> CONTRACTEDTRAITS_HEALING = new List<string> { "IrritableBowel", "Aggressive", "SlowLearner", "WeakImmuneSystem", "Snorer", "CantDig" };
+
+		public static List<DUPLICANTSTATS.TraitVal> CONGENITALTRAITS = new List<DUPLICANTSTATS.TraitVal>
+		{
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "None"
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "Joshua",
+				mutuallyExclusiveTraits = new List<string> { "ScaredyCat", "Aggressive" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "Leira",
+				statBonus = DUPLICANTSTATS.TINY_STATPOINT_BONUS,
+				mutuallyExclusiveTraits = new List<string> { "Uncultured" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "Abe",
+				statBonus = DUPLICANTSTATS.TINY_STATPOINT_BONUS,
+				mutuallyExclusiveTraits = new List<string> { "CantCook" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "Ellie",
+				statBonus = DUPLICANTSTATS.TINY_STATPOINT_BONUS,
+				mutuallyExclusiveTraits = new List<string> { "InteriorDecorator", "MouthBreather", "Uncultured" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "Catalina",
+				statBonus = DUPLICANTSTATS.TINY_STATPOINT_BONUS,
+				mutuallyExclusiveTraits = new List<string> { "NightOwl" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "Stinky",
+				mutuallyExclusiveTraits = new List<string> { "Flatulence", "InteriorDecorator" }
+			}
+		};
 
 		public static List<DUPLICANTSTATS.TraitVal> BADTRAITS = new List<DUPLICANTSTATS.TraitVal>
 		{
@@ -124,6 +184,12 @@ namespace TUNING
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
+				id = "NoodleArms",
+				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
+				probability = DUPLICANTSTATS.PROBABILITY_MED
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
 				id = "ScaredyCat",
 				statBonus = DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
 				probability = DUPLICANTSTATS.PROBABILITY_MED
@@ -139,6 +205,14 @@ namespace TUNING
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "StressVomiter"
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "UglyCrier"
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "BingeEater"
 			}
 		};
 
@@ -150,6 +224,13 @@ namespace TUNING
 				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
 				probability = DUPLICANTSTATS.PROBABILITY_MED,
 				mutuallyExclusiveTraits = new List<string> { "Anemic" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "StrongArm",
+				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
+				probability = DUPLICANTSTATS.PROBABILITY_MED,
+				mutuallyExclusiveTraits = new List<string> { "NoodleArms" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
@@ -183,13 +264,6 @@ namespace TUNING
 				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
 				probability = DUPLICANTSTATS.PROBABILITY_MED,
 				mutuallyExclusiveTraits = new List<string> { "NightOwl" }
-			},
-			new DUPLICANTSTATS.TraitVal
-			{
-				id = "NightOwl",
-				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
-				probability = DUPLICANTSTATS.PROBABILITY_MED,
-				mutuallyExclusiveTraits = new List<string> { "EarlyBird" }
 			},
 			new DUPLICANTSTATS.TraitVal
 			{
@@ -227,13 +301,63 @@ namespace TUNING
 			}
 		};
 
+		public static List<DUPLICANTSTATS.TraitVal> NEEDTRAITS = new List<DUPLICANTSTATS.TraitVal>
+		{
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "Claustrophobic",
+				probability = DUPLICANTSTATS.PROBABILITY_MED
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "PrefersWarmer",
+				probability = DUPLICANTSTATS.PROBABILITY_MED,
+				mutuallyExclusiveTraits = new List<string> { "PrefersColder" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "PrefersColder",
+				probability = DUPLICANTSTATS.PROBABILITY_MED,
+				mutuallyExclusiveTraits = new List<string> { "PrefersWarmer" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "SensitiveFeet",
+				probability = DUPLICANTSTATS.PROBABILITY_MED
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "Fashionable",
+				probability = DUPLICANTSTATS.PROBABILITY_MED
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "Climacophobic",
+				probability = DUPLICANTSTATS.PROBABILITY_MED
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "SolitarySleeper",
+				probability = DUPLICANTSTATS.PROBABILITY_MED
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "Workaholic",
+				probability = DUPLICANTSTATS.PROBABILITY_MED
+			}
+		};
+
 		public class BASESTATS
 		{
 			public const float STAMINA_USED_PER_DAY = -100f;
 
-			public const float CALORIES_BURNED_PER_DAY = -1000000f;
+			public const float CALORIES_BURNED_PER_CYCLE = -1000000f;
 
 			public const float CALORIES_BURNED_PER_SECOND = -1666.6666f;
+
+			public const float GUESSTIMATE_CALORIES_PER_CYCLE = -1600000f;
+
+			public const float GUESSTIMATE_CALORIES_BURNED_PER_SECOND = -1666.6666f;
 
 			public const float OXYGEN_USED_PER_SECOND = 0.1f;
 
@@ -241,11 +365,55 @@ namespace TUNING
 
 			public const float DECOR_EXPECTATION = -25f;
 
-			public const float MAX_PROFESSION_EXPECTATION = 75f;
+			public const float FOOD_QUALITY_EXPECTATION = -3f;
+
+			public const float MAX_PROFESSION_DECOR_EXPECTATION = 75f;
+
+			public const float MAX_PROFESSION_FOOD_EXPECTATION = 3f;
 
 			public const int MAX_UNDERWATER_TRAVEL_COST = 8;
 
 			public const float TOILET_EFFICIENCY = 1f;
+
+			public const float ROOM_TEMPERATURE_PREFERENCE = 0f;
+
+			public const int BUILDING_DAMAGE_ACTING_OUT = 100;
+		}
+
+		public class TEMPERATURE
+		{
+			public const float SKIN_THICKNESS = 0.002f;
+
+			public const float SURFACE_AREA = 1f;
+
+			public class EXTERNAL
+			{
+				public const float THRESHOLD_COLD = 283.15f;
+
+				public const float THRESHOLD_HOT = 306.15f;
+
+				public const float THRESHOLD_SCALDING = 345f;
+			}
+
+			public class INTERNAL
+			{
+				public const float IDEAL = 310.15f;
+
+				public const float THRESHOLD_HYPOTHERMIA = 308.15f;
+
+				public const float THRESHOLD_HYPERTHERMIA = 312.15f;
+
+				public const float THRESHOLD_FATAL_HOT = 320.15f;
+
+				public const float THRESHOLD_FATAL_COLD = 300.15f;
+			}
+
+			public class CONDUCTIVITY_BARRIER_MODIFICATION
+			{
+				public const float SKINNY = -0.005f;
+
+				public const float PUDGY = 0.005f;
+			}
 		}
 
 		public class BREATH
@@ -278,6 +446,42 @@ namespace TUNING
 				public const int MAX_HITS = 1;
 
 				public const float AREA_OF_EFFECT_RADIUS = 0f;
+			}
+		}
+
+		public class CLOTHING
+		{
+			public class DECOR_MODIFICATION
+			{
+				public const int NEGATIVE_SIGNIFICANT = -30;
+
+				public const int NEGATIVE_MILD = -10;
+
+				public const int BASIC = -5;
+
+				public const int POSITIVE_MILD = 10;
+
+				public const int POSITIVE_SIGNIFICANT = 30;
+			}
+
+			public class CONDUCTIVITY_BARRIER_MODIFICATION
+			{
+				public const float THIN = 0.0005f;
+
+				public const float BASIC = 0.0025f;
+
+				public const float THICK = 0.01f;
+			}
+
+			public class SWEAT_EFFICIENCY_MULTIPLIER
+			{
+				public const float DIMINISH_SIGNIFICANT = -2.5f;
+
+				public const float DIMINISH_MILD = -1.25f;
+
+				public const float NEUTRAL = 0f;
+
+				public const float IMPROVE = 2f;
 			}
 		}
 

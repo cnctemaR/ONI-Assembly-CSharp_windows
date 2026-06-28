@@ -130,6 +130,7 @@ namespace TMPro
 				if (this.m_mesh == null)
 				{
 					this.m_mesh = new Mesh();
+					this.m_mesh.name = "TMPro";
 					this.m_mesh.hideFlags = HideFlags.HideAndDontSave;
 				}
 				return this.m_mesh;

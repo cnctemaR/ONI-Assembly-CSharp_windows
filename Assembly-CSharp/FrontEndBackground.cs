@@ -9,17 +9,13 @@ public class FrontEndBackground : MonoBehaviour
 	private void Start()
 	{
 		this.SetupCameras();
-		this.slots = new AccessorySlots(null, this.head_default_anim, this.head_swap_anim);
+		this.slots = new AccessorySlots(null, this.head_default_anim, this.head_swap_anim, this.body_swap_anim);
 		for (int i = 0; i < this.anims.Length; i++)
 		{
 			int minionIndex = i;
-			KAnimControllerBase minon = this.anims[i].minon;
+			KBatchedAnimController minon = this.anims[i].minon;
 			this.anims[i].curBody = null;
 			this.anims[i].overrideSet = false;
-			minon.onAnimEnter += delegate(HashedString name)
-			{
-				this.GetNewBody(minionIndex, name);
-			};
 			minon.onAnimComplete += delegate(HashedString name)
 			{
 				this.WaitForABit(minionIndex, name);
@@ -38,47 +34,66 @@ public class FrontEndBackground : MonoBehaviour
 	{
 		this.anims[minonIdx].lastWaitTime = global::UnityEngine.Random.Range(this.anims[minonIdx].minSecondsBetweenAction, this.anims[minonIdx].maxSecondsBetweenAction);
 		yield return new WaitForSeconds(this.anims[minonIdx].lastWaitTime);
+		this.GetNewBody(minonIdx, base.name);
+		this.anims[minonIdx].minon.ClearQueue();
 		this.anims[minonIdx].minon.Play(this.anims[minonIdx].anim_name, KAnim.PlayMode.Once, 1f, 0f);
 		yield break;
 	}
 
 	private void GetNewBody(int minonIdx, HashedString name)
 	{
-		KAnimControllerBase minon = this.anims[minonIdx].minon;
-		if (this.anims[minonIdx].curHair.IsValid())
+		this.Apply(this.anims[minonIdx].minon, ref this.anims[minonIdx]);
+	}
+
+	private void Apply(KBatchedAnimController minon, ref FrontEndBackground.AnimChoice anim)
+	{
+		if (anim.curHair.IsValid())
 		{
-			minon.RemoveSymbolOverride(this.anims[minonIdx].curHair);
+			minon.RemoveSymbolOverride(anim.curHair);
 		}
-		this.anims[minonIdx].curHair = this.AddRandomAccessory(minon, this.slots.Hair.accessories);
-		if (this.anims[minonIdx].curEyes.IsValid())
+		anim.curHair = this.AddRandomAccessory(minon, this.slots.Hair.accessories);
+		if (anim.curEyes.IsValid())
 		{
-			minon.RemoveSymbolOverride(this.anims[minonIdx].curEyes);
+			minon.RemoveSymbolOverride(anim.curEyes);
 		}
-		this.anims[minonIdx].curEyes = this.AddRandomAccessory(minon, this.slots.Eyes.accessories);
-		if (this.anims[minonIdx].curHeadShape.IsValid())
+		anim.curEyes = this.AddRandomAccessory(minon, this.slots.Eyes.accessories);
+		if (anim.curHeadShape.IsValid())
 		{
-			minon.RemoveSymbolOverride(this.anims[minonIdx].curHeadShape);
+			minon.RemoveSymbolOverride(anim.curHeadShape);
 		}
-		this.anims[minonIdx].curHeadShape = this.AddRandomAccessory(minon, this.slots.HeadShape.accessories);
-		if (this.anims[minonIdx].curMouth.IsValid())
+		anim.curHeadShape = this.AddRandomAccessory(minon, this.slots.HeadShape.accessories);
+		if (anim.curMouth.IsValid())
 		{
-			minon.RemoveSymbolOverride(this.anims[minonIdx].curMouth);
+			minon.RemoveSymbolOverride(anim.curMouth);
 		}
-		this.anims[minonIdx].curMouth = this.AddRandomAccessory(minon, this.slots.Mouth.accessories);
-		if (!this.anims[minonIdx].overrideSet)
+		anim.curMouth = this.AddRandomAccessory(minon, this.slots.Mouth.accessories);
+		if (anim.curTorso.IsValid())
 		{
-			minon.AddAnimOverrides(this.anims[minonIdx].target_minion_anim, 0f);
-			this.anims[minonIdx].overrideSet = true;
+			minon.RemoveSymbolOverride(anim.curTorso);
+			minon.RemoveSymbolOverride(anim.curArm);
+		}
+		int num = global::UnityEngine.Random.Range(1, this.slots.Body.accessories.Count);
+		anim.curTorso = FrontEndBackground.AddAccessory(minon, this.slots.Body.accessories[num]);
+		anim.curArm = FrontEndBackground.AddAccessory(minon, this.slots.Arm.accessories[num]);
+		if (!anim.overrideSet)
+		{
+			minon.AddAnimOverrides(anim.target_minion_anim, 0f);
+			anim.overrideSet = true;
 		}
 		minon.UpdateSymbolLookups();
 	}
 
-	public KAnimHashedString AddRandomAccessory(KAnimControllerBase minon, List<Accessory> choices)
+	public static KAnimHashedString AddAccessory(KBatchedAnimController minon, Accessory accessory)
 	{
-		Accessory accessory = choices[global::UnityEngine.Random.Range(0, choices.Count)];
-		minon.AddSymbolOverride(accessory.slot.targetSymbolId, accessory.symbol.build.batchTag, accessory.symbol);
+		minon.AddSymbolOverride(accessory.slot.targetSymbolId, accessory.symbol.build.batchTag, accessory.symbol, false);
 		minon.ShowSymbol(accessory.slot.targetSymbolId);
 		return accessory.slot.targetSymbolId;
+	}
+
+	public KAnimHashedString AddRandomAccessory(KBatchedAnimController minon, List<Accessory> choices)
+	{
+		Accessory accessory = choices[global::UnityEngine.Random.Range(1, choices.Count)];
+		return FrontEndBackground.AddAccessory(minon, accessory);
 	}
 
 	private void SetupCameras()
@@ -126,11 +141,11 @@ public class FrontEndBackground : MonoBehaviour
 		this.overlayNoDepthCamera.tag = "MainCamera";
 	}
 
-	public KAnimFile[] bodies = new KAnimFile[0];
-
 	public KAnimFile head_default_anim;
 
 	public KAnimFile head_swap_anim;
+
+	public KAnimFile body_swap_anim;
 
 	public FrontEndBackground.AnimChoice[] anims;
 
@@ -153,7 +168,7 @@ public class FrontEndBackground : MonoBehaviour
 	{
 		public string anim_name;
 
-		public KAnimControllerBase minon;
+		public KBatchedAnimController minon;
 
 		public float minSecondsBetweenAction;
 
@@ -174,5 +189,9 @@ public class FrontEndBackground : MonoBehaviour
 		public KAnimHashedString curHeadShape;
 
 		public KAnimHashedString curMouth;
+
+		public KAnimHashedString curTorso;
+
+		public KAnimHashedString curArm;
 	}
 }

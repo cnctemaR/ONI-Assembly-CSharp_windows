@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using STRINGS;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class ResearchSideScreen : FabricatorSideScreen
+public class ResearchSideScreen : SideScreenContent
 {
 	protected override void OnPrefabInit()
 	{
@@ -11,7 +13,8 @@ public class ResearchSideScreen : FabricatorSideScreen
 		{
 			ManagementMenu.Instance.ToggleResearch();
 		};
-		Research.Instance.Subscribe(-1914338957, new EventSystem.EventHandler(this.RefreshDisplayState));
+		Research.Instance.Subscribe(-1914338957, new Action<object>(this.RefreshDisplayState));
+		Research.Instance.Subscribe(-125623018, new Action<object>(this.RefreshDisplayState));
 		this.RefreshDisplayState(null);
 	}
 
@@ -20,8 +23,8 @@ public class ResearchSideScreen : FabricatorSideScreen
 		base.OnCmpEnable();
 		this.RefreshDisplayState(null);
 		this.target = SelectTool.Instance.selected.GetComponent<KMonoBehaviour>().gameObject;
-		this.target.gameObject.Subscribe(-1852328367, new EventSystem.EventHandler(this.RefreshDisplayState));
-		this.target.gameObject.Subscribe(-592767678, new EventSystem.EventHandler(this.RefreshDisplayState));
+		this.target.gameObject.Subscribe(-1852328367, new Action<object>(this.RefreshDisplayState));
+		this.target.gameObject.Subscribe(-592767678, new Action<object>(this.RefreshDisplayState));
 	}
 
 	protected override void OnCmpDisable()
@@ -29,8 +32,8 @@ public class ResearchSideScreen : FabricatorSideScreen
 		base.OnCmpDisable();
 		if (this.target)
 		{
-			this.target.gameObject.Unsubscribe(-1852328367, new EventSystem.EventHandler(this.RefreshDisplayState));
-			this.target.gameObject.Unsubscribe(187661686, new EventSystem.EventHandler(this.RefreshDisplayState));
+			this.target.gameObject.Unsubscribe(-1852328367, new Action<object>(this.RefreshDisplayState));
+			this.target.gameObject.Unsubscribe(187661686, new Action<object>(this.RefreshDisplayState));
 			this.target = null;
 		}
 	}
@@ -38,11 +41,12 @@ public class ResearchSideScreen : FabricatorSideScreen
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
-		Research.Instance.Unsubscribe(-1914338957, new EventSystem.EventHandler(this.RefreshDisplayState));
+		Research.Instance.Unsubscribe(-1914338957, new Action<object>(this.RefreshDisplayState));
+		Research.Instance.Unsubscribe(-125623018, new Action<object>(this.RefreshDisplayState));
 		if (this.target)
 		{
-			this.target.gameObject.Unsubscribe(-1852328367, new EventSystem.EventHandler(this.RefreshDisplayState));
-			this.target.gameObject.Unsubscribe(187661686, new EventSystem.EventHandler(this.RefreshDisplayState));
+			this.target.gameObject.Unsubscribe(-1852328367, new Action<object>(this.RefreshDisplayState));
+			this.target.gameObject.Unsubscribe(187661686, new Action<object>(this.RefreshDisplayState));
 			this.target = null;
 		}
 	}
@@ -58,41 +62,64 @@ public class ResearchSideScreen : FabricatorSideScreen
 		{
 			return;
 		}
-		Operational component2 = component.GetComponent<Operational>();
-		DetailsScreen.Instance.MaskSideContent(false);
-		if (component2.IsOperational)
+		this.researchButtonIcon.color = Research.Instance.researchTypes.GetResearchType(component.research_point_type_id).color;
+		TechInstance activeResearch = Research.Instance.GetActiveResearch();
+		if (activeResearch == null)
 		{
-			DetailsScreen.Instance.RefreshTitle();
-			this.content.SetActive(true);
-			this.overrideContent.SetActive(false);
+			this.DescriptionText.text = "<b>" + UI.UISIDESCREENS.RESEARCHSIDESCREEN.NOSELECTEDRESEARCH + "</b>";
 		}
 		else
 		{
-			bool flag = true;
-			foreach (KeyValuePair<Operational.Flag, bool> keyValuePair in component2.Flags)
+			string text = string.Empty;
+			if (!activeResearch.tech.costsByResearchTypeID.ContainsKey(component.research_point_type_id) || activeResearch.tech.costsByResearchTypeID[component.research_point_type_id] <= 0f)
 			{
-				if (!keyValuePair.Value && keyValuePair.Key != ResearchCenter.ResearchSelectedFlag)
+				text += "<color=#7f7f7f>";
+			}
+			text = text + "<b>" + activeResearch.tech.Name + "</b>";
+			if (!activeResearch.tech.costsByResearchTypeID.ContainsKey(component.research_point_type_id) || activeResearch.tech.costsByResearchTypeID[component.research_point_type_id] <= 0f)
+			{
+				text += "</color>";
+			}
+			foreach (KeyValuePair<string, float> keyValuePair in activeResearch.tech.costsByResearchTypeID)
+			{
+				if (keyValuePair.Value != 0f)
 				{
-					flag = false;
+					bool flag = keyValuePair.Key == component.research_point_type_id;
+					text += "\n   ";
+					text += "<b>";
+					if (!flag)
+					{
+						text += "<color=#7f7f7f>";
+					}
+					string text2 = text;
+					text = string.Concat(new object[]
+					{
+						text2,
+						"- ",
+						Research.Instance.researchTypes.GetResearchType(keyValuePair.Key).name,
+						": ",
+						activeResearch.progressInventory.PointsByTypeID[keyValuePair.Key],
+						"/",
+						activeResearch.tech.costsByResearchTypeID[keyValuePair.Key]
+					});
+					if (!flag)
+					{
+						text += "</color>";
+					}
+					text += "</b>";
 				}
 			}
-			if (flag)
-			{
-				this.overrideContent.SetActive(true);
-			}
-			else
-			{
-				this.overrideContent.SetActive(false);
-				DetailsScreen.Instance.MaskSideContent(true);
-			}
+			this.DescriptionText.text = text;
 		}
 	}
 
 	public KButton selectResearchButton;
 
+	public Image researchButtonIcon;
+
 	public GameObject content;
 
-	public GameObject overrideContent;
-
 	private GameObject target;
+
+	public LocText DescriptionText;
 }

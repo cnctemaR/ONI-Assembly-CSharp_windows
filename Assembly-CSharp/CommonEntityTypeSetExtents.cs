@@ -37,7 +37,7 @@ public static class CommonEntityTypeSetExtents
 	public static ElementEmitter AddElementEmitter(this GameObject prefab, SimHashes element, float emission_frequency, float emission_mass)
 	{
 		ElementEmitter elementEmitter = prefab.UpdateComponentRequirement<ElementEmitter>(true);
-		elementEmitter.outputElement = new ElementConverter.OutputElement(null, emission_mass, element, 0f, false, 0f, 0f);
+		elementEmitter.outputElement = new ElementConverter.OutputElement(emission_mass / emission_frequency, element, 0f, false, 0f, 0f, false);
 		elementEmitter.emissionFrequency = emission_frequency;
 		return elementEmitter;
 	}

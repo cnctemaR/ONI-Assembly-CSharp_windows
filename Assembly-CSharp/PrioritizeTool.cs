@@ -12,17 +12,24 @@ public class PrioritizeTool : DragTool
 
 	protected override void OnDragTool(int cell, int distFromOrigin)
 	{
-		for (int i = 0; i < 25; i++)
+		int screenPriority = ToolMenuPriorityScreen.Instance.GetScreenPriority();
+		int num = 0;
+		for (int i = 0; i < 23; i++)
 		{
 			GameObject gameObject = Grid.Objects[cell, i];
 			if (gameObject != null)
 			{
 				Prioritizable component = gameObject.GetComponent<Prioritizable>();
-				if (component != null)
+				if (component != null && component.priorityOverlayIcon != null)
 				{
-					component.SetMasterPriority(ToolMenuPriorityScreen.Instance.GetScreenPriority());
+					component.SetMasterPriority(screenPriority);
+					num++;
 				}
 			}
+		}
+		if (num > 0)
+		{
+			ToolMenuPriorityScreen.Instance.PlayPriorityConfirmSound(screenPriority);
 		}
 	}
 

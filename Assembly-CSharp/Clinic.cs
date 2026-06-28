@@ -46,7 +46,7 @@ public class Clinic : BuildingWorkable, IAssignable
 
 	protected override bool OnWorkTick(Worker worker, float dt)
 	{
-		if (worker.GetSMI<WoundMonitor.Instance>().ShouldExitClinic() && !worker.GetSMI<DiseaseMonitor.Instance>().IsSick())
+		if (worker.GetSMI<WoundMonitor.Instance>().ShouldExitClinic() && !worker.GetSMI<DiseaseMonitor.Instance>().IsSick() && worker.GetSMI<CalorieMonitor.Instance>().ShouldExitClinic())
 		{
 			return true;
 		}
@@ -133,22 +133,22 @@ public class Clinic : BuildingWorkable, IAssignable
 			});
 		}
 
-		public GameStateMachine<Clinic.ClinicSM, Clinic.ClinicSM.Instance, IStateMachineTarget>.State unoperational;
+		public GameStateMachine<Clinic.ClinicSM, Clinic.ClinicSM.Instance, IStateMachineTarget, object>.State unoperational;
 
 		public Clinic.ClinicSM.OperationalStates operational;
 
-		public GameStateMachine<Clinic.ClinicSM, Clinic.ClinicSM.Instance, IStateMachineTarget>.State invalidRegion;
+		public GameStateMachine<Clinic.ClinicSM, Clinic.ClinicSM.Instance, IStateMachineTarget, object>.State invalidRegion;
 
-		public class OperationalStates : GameStateMachine<Clinic.ClinicSM, Clinic.ClinicSM.Instance, IStateMachineTarget>.State
+		public class OperationalStates : GameStateMachine<Clinic.ClinicSM, Clinic.ClinicSM.Instance, IStateMachineTarget, object>.State
 		{
-			public GameStateMachine<Clinic.ClinicSM, Clinic.ClinicSM.Instance, IStateMachineTarget>.State idle;
+			public GameStateMachine<Clinic.ClinicSM, Clinic.ClinicSM.Instance, IStateMachineTarget, object>.State idle;
 
-			public GameStateMachine<Clinic.ClinicSM, Clinic.ClinicSM.Instance, IStateMachineTarget>.State healing;
+			public GameStateMachine<Clinic.ClinicSM, Clinic.ClinicSM.Instance, IStateMachineTarget, object>.State healing;
 
-			public GameStateMachine<Clinic.ClinicSM, Clinic.ClinicSM.Instance, IStateMachineTarget>.State exiting;
+			public GameStateMachine<Clinic.ClinicSM, Clinic.ClinicSM.Instance, IStateMachineTarget, object>.State exiting;
 		}
 
-		public new class Instance : GameStateMachine<Clinic.ClinicSM, Clinic.ClinicSM.Instance, IStateMachineTarget>.GameInstance
+		public new class Instance : GameStateMachine<Clinic.ClinicSM, Clinic.ClinicSM.Instance, IStateMachineTarget, object>.GameInstance
 		{
 			public Instance(IStateMachineTarget master)
 				: base(master)

@@ -37,7 +37,19 @@ public static class Constants
 
 	public const string BULLETSTRING = "• ";
 
+	public const string TABSTRING = "    ";
+
+	public const string TABBULLETSTRING = "    • ";
+
+	public const float W2KW = 0.001f;
+
+	public const float KW2W = 1000f;
+
+	public const float HEAT_KW_DISPLAY_FUDGEFACTOR = 0.005f;
+
 	public const float G2KG = 0.001f;
+
+	public const float KG2G = 1000f;
 
 	public const float CELSIUS2KELVIN = 273.15f;
 
@@ -45,15 +57,11 @@ public static class Constants
 
 	public const float KCAL2CAL = 1000f;
 
-	public const float JOULES2CALORIES = 34.285717f;
-
 	public const float HEATOFVAPORIZATION_WATER = 580f;
 
-	public const float DUPLICANT_BODY_TEMPERATURE = 310.15f;
+	public const float DefaultEntityThickness = 0.01f;
 
-	public const float DUPLICANT_BODY_TEMPERATURE_ACCEPTABLE_RANGE = 5f;
-
-	public const float DUPLICANT_SHC = 3.47f;
+	public const float DefaultSurfaceArea = 10f;
 
 	public static readonly Color POSITIVE_COLOR = new Color(0.32156864f, 0.7529412f, 0.4745098f);
 

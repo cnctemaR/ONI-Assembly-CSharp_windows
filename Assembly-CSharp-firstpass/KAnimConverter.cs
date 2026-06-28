@@ -4,21 +4,21 @@ using UnityEngine;
 
 public class KAnimConverter
 {
-	public const int COST_PER_CONTROLLER = 48;
+	public const int COST_PER_CONTROLLER = 64;
 
-	public interface IAnimConverter : IEquatable<global::UnityEngine.Object>, IEquatable<KAnimConverter.IAnimConverter>, IEquatable<object>
+	public interface IAnimConverter
 	{
 		int GetMaxVisible();
 
 		HashedString GetBatchGroupID(bool isEditorWindow = false);
 
-		Tag GetPrefabTag();
-
 		KAnimBatch GetBatch();
 
 		void SetBatch(KAnimBatch id);
 
-		Vector3 GetPosition();
+		Vector2I GetCellXY();
+
+		float GetZ();
 
 		int GetLayer();
 
@@ -50,7 +50,7 @@ public class KAnimConverter
 
 		int GetSecondTintIndex();
 
-		KAnimBatchInstanceData GetBatchInstanceData();
+		KBatchedAnimInstanceData GetBatchInstanceData();
 
 		KAnimBatchGroup.MaterialType GetMaterialType();
 	}

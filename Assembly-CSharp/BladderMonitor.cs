@@ -28,31 +28,31 @@ public class BladderMonitor : GameStateMachine<BladderMonitor, BladderMonitor.In
 		return new PeeChore(smi.master);
 	}
 
-	public GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget>.State satisfied;
+	public GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget, object>.State satisfied;
 
 	public BladderMonitor.NeedsToPeeState needstopee;
 
-	public StateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget>.Signal noBathrooms;
+	public StateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget, object>.Signal noBathrooms;
 
-	public StateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget>.Signal hasBathrooms;
+	public StateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget, object>.Signal hasBathrooms;
 
-	public class BathroomsState : GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget>.State
+	public class BathroomsState : GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget, object>.State
 	{
-		public GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget>.State nobathrooms;
+		public GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget, object>.State nobathrooms;
 
-		public GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget>.State hasbathrooms;
+		public GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget, object>.State hasbathrooms;
 	}
 
-	public class NeedsToPeeState : GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget>.State
+	public class NeedsToPeeState : GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget, object>.State
 	{
 		public BladderMonitor.BathroomsState holdingitin;
 
-		public GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget>.State urgent;
+		public GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget, object>.State urgent;
 
-		public GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget>.State peeing;
+		public GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget, object>.State peeing;
 	}
 
-	public new class Instance : GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<BladderMonitor, BladderMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)

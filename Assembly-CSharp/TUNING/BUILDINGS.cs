@@ -7,37 +7,11 @@ namespace TUNING
 	{
 		public const float DEFAULT_STORAGE_CAPACITY = 2000f;
 
-		public const float MINERAL_DEOXIDIZER_OXYGEN_GENERATED = 0.6f;
-
-		public const float MINERAL_DEOXIDIZER_OXYGEN_TEMP = 303.15f;
-
-		public const float WATER2OXYGEN_RATIO = 0.888f;
-
-		public const float OXYGEN_CONVERSION_RATE = 1f;
-
-		public const float AIR_FILTER_OXYGEN_CONSUME_RATE = 0.1f;
-
-		public const float AIR_FILTER_SAND_CONSUME_RATE = 1f;
-
-		public const float INDUSTRIAL_AIR_FILTER_OXYGEN_CONSUME_RATE = 0.3f;
+		public const float MASS_TEMPERATURE_SCALE = 0.2f;
 
 		public const float AIRCONDITIONER_TEMPDELTA = -14f;
 
-		public const float MUSHBAR_RECIPE_FABRICATIONTIME = 40f;
-
-		public const float MUSHBAR_RECIPE_WATERKG = 75f;
-
-		public const float MUSHBAR_RECIPE_DIRTKG = 75f;
-
-		public const int FRIEDMUSHBAR_RECIPE_MUSHBAR_AMOUNT = 2;
-
-		public const int BASICPLANTBAR_RECIPE_GRAIN_AMOUNT = 5;
-
-		public const int BASICPLANTBAR_RECIPE_PRODUCTION_AMOUNT = 1;
-
-		public const float BASICPLANTBAR_RECIPE_WATERKG = 50f;
-
-		public const float BASICPLANTBAR_RECIPE_FABRICATIONTIME = 20f;
+		public const float MAX_ENVIRONMENT_DELTA = -50f;
 
 		public const float COMPOST_FLIP_TIME = 20f;
 
@@ -69,6 +43,18 @@ namespace TUNING
 
 		public const float MASS_BURN_RATE_HYDROGENGENERATOR = 0.1f;
 
+		public const float OVERHEAT_DAMAGE_INTERVAL = 7.5f;
+
+		public const float MIN_BUILD_TEMPERATURE = 288.15f;
+
+		public const float MAX_BUILD_TEMPERATURE = 318.15f;
+
+		public const float MELTDOWN_TEMPERATURE = 533.15f;
+
+		public const float REPAIR_FORCE_TEMPERATURE = 293.15f;
+
+		public const int REPAIR_EFFECTIVENESS_BASE = 10;
+
 		public static Dictionary<PlanCategory, string[]> PLANORDER = new Dictionary<PlanCategory, string[]>
 		{
 			{
@@ -81,24 +67,40 @@ namespace TUNING
 			},
 			{
 				PlanCategory.Power,
-				new string[] { "ManualGenerator", "Generator", "HydrogenGenerator", "Wire", "InsulatedWire", "WireBridge", "Switch", "Battery", "BatteryMedium" }
+				new string[]
+				{
+					"ManualGenerator",
+					"Generator",
+					"HydrogenGenerator",
+					"MethaneGenerator",
+					"Wire",
+					"HighWattageWire",
+					"WireBridge",
+					"Battery",
+					"BatteryMedium",
+					"PowerTransformer",
+					SwitchConfig.ID,
+					TemperatureControlledSwitchConfig.ID,
+					PressureSwitchLiquidConfig.ID,
+					PressureSwitchGasConfig.ID
+				}
 			},
 			{
 				PlanCategory.Food,
-				new string[] { "RationBox", "Refrigerator", "MicrobeMusher", "PlanterBox", "CookingStation" }
-			},
-			{
-				PlanCategory.Utilities,
-				new string[] { "LiquidCooledFan", "AirConditioner" }
+				new string[] { "RationBox", "Refrigerator", "MicrobeMusher", "CookingStation", "PlanterBox", "Aquafarm", "FarmTile", "HydroponicFarm" }
 			},
 			{
 				PlanCategory.Plumbing,
 				new string[]
 				{
-					"Outhouse", "FlushToilet", "Shower", "LiquidConduit", "InsulatedLiquidConduit", "LiquidConduitJoiner", "LiquidConduitSplitter", "LiquidConduitBridge", "LiquidPump", "LiquidValve",
-					"LiquidVent", "LiquidReservoir", "LiquidFilter", "Liquifier", "GasConduit", "InsulatedGasConduit", "GasConduitJoiner", "GasConduitSplitter", "GasConduitBridge", "GasPump",
+					"Outhouse", "FlushToilet", "Shower", "LiquidConduit", "InsulatedLiquidConduit", "LiquidConduitBridge", "LiquidConduitSplitter", "LiquidConduitBridge", "LiquidPump", "LiquidValve",
+					"LiquidVent", "LiquidReservoir", "LiquidFilter", "Liquifier", "GasConduit", "InsulatedGasConduit", "GasConduitBridge", "GasConduitSplitter", "GasConduitBridge", "GasPump",
 					"GasValve", "GasVent", "GasFilter"
 				}
+			},
+			{
+				PlanCategory.Utilities,
+				new string[] { "LiquidCooledFan", "AirConditioner", "SpaceHeater", "LiquidHeater" }
 			},
 			{
 				PlanCategory.Refining,
@@ -114,7 +116,7 @@ namespace TUNING
 			},
 			{
 				PlanCategory.Equipment,
-				new string[] { "ResearchCenter", "AdvancedResearchCenter" }
+				new string[] { "ResearchCenter", "AdvancedResearchCenter", "ClothingFabricator" }
 			},
 			{
 				PlanCategory.Misc,
@@ -130,7 +132,7 @@ namespace TUNING
 			},
 			{
 				"FineDining",
-				new string[] { "CookingStation", "Refrigerator", "FertilizerMaker" }
+				new string[] { "CookingStation", "Refrigerator", "FarmTile", "FertilizerMaker", "Aquafarm", "HydroponicFarm" }
 			},
 			{
 				"GasPiping",
@@ -138,15 +140,22 @@ namespace TUNING
 			},
 			{
 				"TemperatureModulation",
-				new string[] { "LiquidCooledFan", "AirConditioner", "TemperatureControlledSwitch" }
+				new string[] { "LiquidCooledFan", "AirConditioner", "TemperatureControlledSwitch", "LiquidHeater" }
 			},
 			{
 				"Insulation",
-				new string[] { "InsulatedWire", "InsulatedGasConduit", "InsulatedLiquidConduit", "InsulationTile" }
+				new string[] { "InsulatedWire", "InsulatedGasConduit", "InsulatedLiquidConduit", "InsulationTile", "ClothingFabricator" }
 			},
 			{
 				"PressureManagement",
-				new string[] { "SuitFabricator", "SuitRecharger", "LiquidValve", "GasValve", "PressureDoor" }
+				new string[]
+				{
+					"LiquidValve",
+					"GasValve",
+					"PressureDoor",
+					PressureSwitchLiquidConfig.ID,
+					PressureSwitchGasConfig.ID
+				}
 			},
 			{
 				"LiquidPiping",
@@ -154,7 +163,7 @@ namespace TUNING
 			},
 			{
 				"SanitationSciences",
-				new string[] { "HandSanitizer", "FlushToilet", "Shower", "AirFilter", "ManualPressureDoor" }
+				new string[] { "HandSanitizer", "FlushToilet", "Shower", "AirFilter" }
 			},
 			{
 				"Medbay",
@@ -162,36 +171,80 @@ namespace TUNING
 			},
 			{
 				"Percolation",
-				new string[] { "Electrolyzer", "WaterPurifier", "AlgaeDistillery" }
+				new string[] { "Electrolyzer", "CO2Scrubber" }
 			},
 			{
 				"AdvancedFiltration",
-				new string[] { "CO2Scrubber", "GasFilter", "LiquidFilter" }
+				new string[] { "GasFilter", "LiquidFilter", "WaterPurifier", "AlgaeDistillery" }
 			},
 			{
 				"PowerRegulation",
 				new string[] { "Switch", "TimedSwitch", "WireBridge", "BatteryMedium" }
 			},
 			{
+				"AdvancedPowerRegulation",
+				new string[] { "HighWattageWire", "PowerTransformer" }
+			},
+			{
 				"Combustion",
-				new string[] { "Generator", "HydrogenGenerator" }
+				new string[] { "Generator" }
+			},
+			{
+				"ImprovedCombustion",
+				new string[] { "MethaneGenerator", "HydrogenGenerator" }
 			},
 			{
 				"InteriorDecor",
-				new string[] { "Canvas", "Sculpture", "DiningTable", "CeilingLight" }
+				new string[] { "Canvas", "Sculpture", "DiningTable", "CeilingLight", "Door" }
 			}
 		};
 
-		public static string[] COMPONENT_DESCRIPTION_ORDER = new string[]
+		public static List<string> COMPONENT_DESCRIPTION_ORDER = new List<string>
 		{
-			"AlgaeHabitat", "Fabricator", "MicrobeMusher", "CookingStation", "ResearchCenter", "LiquidCooledFan", "OxygenRecharger", "BuildingElementEmitter", "ElementConverter", "ElementConsumer",
-			"PassiveElementConsumer", "EnergyConsumer", "AirConditioner", "Storage", "Battery", "Switch", "ManualDelivery", "ManualDeliveryKG", "AirFilter", "FlushToilet",
-			"Toilet", "EnergyGenerator", "MassageTable", "Shower", "Ownable", "PlantablePlot", "RelaxationPoint", "BuildingComplete", "DecorProvider"
+			"AlgaeHabitat", "Fabricator", "MicrobeMusher", "CookingStation", "ResearchCenter", "LiquidCooledFan", "OxygenRecharger", "HandSanitizer", "PlantAirConditioner", "BuildingElementEmitter",
+			"ElementConverter", "ElementConsumer", "PassiveElementConsumer", "EnergyConsumer", "AirConditioner", "Storage", "Battery", "Switch", "CircuitSwitch", "ManualDelivery",
+			"ManualDeliveryKG", "AirFilter", "FlushToilet", "Toilet", "EnergyGenerator", "MassageTable", "Shower", "LiquidHeater", "Ownable", "PlantablePlot",
+			"RelaxationPoint", "BuildingComplete", "Building", "BuildingPreview", "BuildingUnderConstruction", "TemperatureControlledSwitch", "TimedSwitch", "Crop", "Instance", "Growing",
+			"Equippable", "ColdBreather", "ResearchPointObject", "SuitTank", "TemperatureVulnerable", "PressureVulnerable", "SubmersionMonitor", "PressureSwitch", "FertilizationMonitor", "RestRestoreHealth",
+			"Edible", "PlantableSeed", "FriedMushBar", "BasicSingleHarvestPlant", "PrickleFlower", "DiseaseTrigger", "MedicinalHerb", "MedicinalPill", "SeedProducer", "Def",
+			"DecorProvider", "Overheatable"
 		};
 
-		public static string[] GAMEOBJECT_COMPONENT_DESCRIPTION_ORDER = new string[] { "Edible", "FriedMushBar", "BasicSingleHarvestPlant", "PrickleFlower", "DiseaseTrigger", "MedicinalHerb", "MedicinalPill", "DecorProvider" };
+		public class OVERHEAT_TEMPERATURES
+		{
+			public const float LOW_3 = 10f;
 
-		public class CONSTRUCTION_MASS
+			public const float LOW_2 = 328.15f;
+
+			public const float LOW_1 = 338.15f;
+
+			public const float NORMAL = 348.15f;
+
+			public const float HIGH_1 = 363.15f;
+
+			public const float HIGH_2 = 398.15f;
+
+			public const float HIGH_3 = 2273.15f;
+		}
+
+		public class OVERHEAT_MATERIAL_MOD
+		{
+			public const float LOW_3 = -200f;
+
+			public const float LOW_2 = -20f;
+
+			public const float LOW_1 = -10f;
+
+			public const float NORMAL = 0f;
+
+			public const float HIGH_1 = 15f;
+
+			public const float HIGH_2 = 50f;
+
+			public const float HIGH_3 = 2000f;
+		}
+
+		public class CONSTRUCTION_MASS_KG
 		{
 			public static float[] TIER0 = new float[] { 25f };
 
@@ -229,45 +282,70 @@ namespace TUNING
 			public const float TIER7 = 2000f;
 		}
 
-		public class TEMPERATURE_MODIFICATION_WHEN_ACTIVE
+		public class EXHAUST_ENERGY_ACTIVE
 		{
 			public const float TIER0 = 0f;
 
-			public const float TIER1 = 2f;
+			public const float TIER1 = 0.125f;
 
-			public const float TIER2 = 4f;
+			public const float TIER2 = 0.25f;
 
-			public const float TIER3 = 8f;
+			public const float TIER3 = 0.5f;
 
-			public const float TIER4 = 16f;
+			public const float TIER4 = 1f;
 
-			public const float TIER5 = 32f;
+			public const float TIER5 = 2f;
 
-			public const float TIER6 = 64f;
+			public const float TIER6 = 4f;
 
-			public const float TIER7 = 128f;
+			public const float TIER7 = 8f;
+
+			public const float TIER8 = 16f;
 		}
 
 		public class OPERATING_TEMPERATURE
 		{
 			public const float TIER0 = 0f;
 
-			public const float TIER1 = 350f;
+			public const float TIER1 = 1f;
 
-			public const float TIER2 = 400f;
+			public const float TIER2 = 2f;
 
-			public const float TIER3 = 500f;
+			public const float TIER3 = 4f;
 
-			public const float TIER4 = 800f;
+			public const float TIER4 = 8f;
 
-			public const float TIER5 = 1200f;
+			public const float TIER5 = 16f;
 
-			public const float TIER6 = 1600f;
+			public const float TIER6 = 32f;
 
-			public const float TIER7 = 2000f;
+			public const float TIER7 = 64f;
+
+			public const float TIER8 = 128f;
 		}
 
-		public class MELTING_POINT
+		public class OPERATING_KILOWATTS
+		{
+			public const float TIER0 = 0f;
+
+			public const float TIER1 = 0.5f;
+
+			public const float TIER2 = 1f;
+
+			public const float TIER3 = 2f;
+
+			public const float TIER4 = 4f;
+
+			public const float TIER5 = 8f;
+
+			public const float TIER6 = 16f;
+
+			public const float TIER7 = 32f;
+
+			public const float TIER8 = 64f;
+		}
+
+		public class MELTING_POINT_KELVIN
 		{
 			public const float TIER0 = 800f;
 
@@ -278,7 +356,7 @@ namespace TUNING
 			public const float TIER3 = 3200f;
 		}
 
-		public class CONSTRUCTION_TIME
+		public class CONSTRUCTION_TIME_SECONDS
 		{
 			public const float TIER0 = 3f;
 
@@ -295,20 +373,46 @@ namespace TUNING
 			public const float TIER6 = 480f;
 		}
 
-		public class RELOCATION_TIME
+		public class HITPOINTS
+		{
+			public const int TIER0 = 10;
+
+			public const int TIER1 = 30;
+
+			public const int TIER2 = 100;
+
+			public const int TIER3 = 250;
+		}
+
+		public class DAMAGE_SOURCES
+		{
+			public const int CONDUIT_CONTENTS_BOILED = 2147483647;
+
+			public const int CONDUIT_CONTENTS_FROZE = 2147483647;
+
+			public const int BAD_INPUT_ELEMENT = 1;
+
+			public const int BUILDING_OVERHEATED = 1;
+
+			public const int HIGH_LIQUID_PRESSURE = 10;
+		}
+
+		public class RELOCATION_TIME_SECONDS
 		{
 			public const float DECONSTRUCT = 4f;
 
 			public const float CONSTRUCT = 4f;
 		}
 
-		public class WORK_TIME
+		public class WORK_TIME_SECONDS
 		{
 			public const float VERYSHORT_WORK_TIME = 5f;
 
-			public const float MEDIUM_WORK_TIME = 45f;
+			public const float MEDIUM_WORK_TIME = 30f;
 
 			public const float LONG_WORK_TIME = 90f;
+
+			public const float EXTENSIVE_WORK_TIME = 180f;
 		}
 
 		public class DECOR
@@ -398,7 +502,7 @@ namespace TUNING
 			}
 		}
 
-		public class MASS
+		public class MASS_KG
 		{
 			public const float TIER0 = 25f;
 
@@ -447,21 +551,9 @@ namespace TUNING
 
 				public const float MANUALGENERATOR_CAPACITY = 2f;
 
-				public const float ELECTROLYZER_ENERGYCONSUMPTION = 0.76f;
-
-				public const float ELECTROLYZER_LIQUIDINPUT = 2f;
-
-				public const float ELECTROLYZER_MASSGENERATION = 1.3f;
-
 				public const float PROPANEGENERATOR_ENERGYGENERATION = 1.6f;
 
 				public const float PROPANEGENERATOR_HEATGENERATION = 1.6f;
-
-				public const float MINERALDEOXIDIZER_ENERGYCONSUMPTION = 0.76f;
-
-				public const float MINERALDEOXIDIZER_MASSGENERATION = 1.1f;
-
-				public const float MICROBEMUSHER_LIQUIDINPUT = 2f;
 
 				public const float GENERATOR_HEATGENERATION = 0.8f;
 

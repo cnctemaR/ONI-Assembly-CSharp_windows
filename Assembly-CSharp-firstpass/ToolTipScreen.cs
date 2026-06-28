@@ -171,22 +171,25 @@ public class ToolTipScreen : KScreen
 				component.preferredHeight = num;
 				layoutElement3.minHeight = num;
 				component.rectTransform().sizeDelta = new Vector2(setting.WrapWidth, component.minHeight);
-				this.multiTooltipContainer.GetComponent<KChildFitter>().fitWidth = false;
+				base.GetComponentInChildren<ContentSizeFitter>(true).horizontalFit = ContentSizeFitter.FitMode.MinSize;
 				this.multiTooltipContainer.GetComponent<LayoutElement>().minWidth = setting.WrapWidth;
 			}
 			else if (setting.SizingSetting == ToolTip.ToolTipSizeSetting.DynamicWidthNoWrap)
 			{
-				this.multiTooltipContainer.GetComponent<KChildFitter>().fitWidth = true;
+				base.GetComponentInChildren<ContentSizeFitter>(true).horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
 				Vector2 preferredValues = component2.GetPreferredValues();
-				LayoutElement layoutElement4 = component;
+				LayoutElement component4 = this.multiTooltipContainer.GetComponent<LayoutElement>();
 				float num = preferredValues.x;
 				component.preferredWidth = num;
-				layoutElement4.minWidth = num;
-				LayoutElement layoutElement5 = component;
+				num = num;
+				component.minWidth = num;
+				component4.minWidth = num;
+				LayoutElement layoutElement4 = component;
 				num = preferredValues.y;
 				component.preferredHeight = num;
-				layoutElement5.minHeight = num;
-				this.multiTooltipContainer.GetComponent<KChildFitter>().FitSize();
+				layoutElement4.minHeight = num;
+				base.GetComponentInChildren<ContentSizeFitter>(true).SetLayoutHorizontal();
+				base.GetComponentInChildren<ContentSizeFitter>(true).SetLayoutVertical();
 				this.multiTooltipContainer.rectTransform().sizeDelta = new Vector2(component.minWidth, component.minHeight);
 				this.multiTooltipContainer.transform.parent.rectTransform().sizeDelta = this.multiTooltipContainer.rectTransform().sizeDelta;
 			}
@@ -199,6 +202,12 @@ public class ToolTipScreen : KScreen
 		if (this.multiTooltipContainer == null || this.anchorRoot == null)
 		{
 			return;
+		}
+		if (this.dirtyHoverTooltip != null)
+		{
+			ToolTip toolTip = this.dirtyHoverTooltip;
+			this.MakeDirtyTooltipClean(toolTip);
+			this.ClearToolTip(toolTip);
 		}
 		if (this.tooltipIncubating)
 		{
@@ -231,6 +240,16 @@ public class ToolTipScreen : KScreen
 				this.anchorRoot.GetComponentInChildren<Image>(true).enabled = true;
 			}
 			this.multiTooltipContainer.transform.localScale = Vector3.one;
+		}
+	}
+
+	public void HotSwapTooltipString(string newString, int lineIndex)
+	{
+		if (this.multiTooltipContainer.transform.childCount > lineIndex)
+		{
+			Transform child = this.multiTooltipContainer.transform.GetChild(lineIndex);
+			TextMeshProUGUI component = child.GetComponent<TextMeshProUGUI>();
+			component.text = newString;
 		}
 	}
 

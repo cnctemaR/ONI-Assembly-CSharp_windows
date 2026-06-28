@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class MinionBrain : Brain
 {
 	public bool IsCellClear(int cell)
 	{
-		GameObject gameObject = Grid.Objects[cell, 1];
+		GameObject gameObject = Grid.Objects[cell, 0];
 		bool flag = gameObject != null && base.gameObject != gameObject && !gameObject.GetComponent<Navigator>().IsMoving();
 		return (gameObject == null && !Grid.Reserved[cell]) || !flag;
 	}
@@ -19,8 +20,10 @@ public class MinionBrain : Brain
 	{
 		base.OnPrefabInit();
 		Storage component = base.GetComponent<Storage>();
-		component.DisableDefaultItemModifer(Storage.StoredItemModifier.Hide);
-		this.Subscribe(-1697596308, new EventSystem.EventHandler(this.AnimTrackStoredItem));
+		component.defaultStoredItemModifers = MinionBrain.MinionStoredItemModifiers;
+		AccessControlNavMask accessControlNavMask = new AccessControlNavMask(base.gameObject);
+		this.Navigator.AddMask(accessControlNavMask);
+		this.Subscribe(-1697596308, new Action<object>(this.AnimTrackStoredItem));
 	}
 
 	protected override void OnSpawn()
@@ -85,4 +88,6 @@ public class MinionBrain : Brain
 
 	[MyCmpGet]
 	public OxygenBreather OxygenBreather;
+
+	private static readonly List<Storage.StoredItemModifier> MinionStoredItemModifiers = new List<Storage.StoredItemModifier>();
 }

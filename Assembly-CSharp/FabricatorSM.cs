@@ -11,7 +11,7 @@ public class FabricatorSM : StateMachineComponent<FabricatorSM.StatesInstance>
 	[MyCmpGet]
 	private Fabricator fabricator;
 
-	public class StatesInstance : GameStateMachine<FabricatorSM.States, FabricatorSM.StatesInstance, FabricatorSM>.GameInstance
+	public class StatesInstance : GameStateMachine<FabricatorSM.States, FabricatorSM.StatesInstance, FabricatorSM, object>.GameInstance
 	{
 		public StatesInstance(FabricatorSM master)
 			: base(master)
@@ -53,12 +53,12 @@ public class FabricatorSM : StateMachineComponent<FabricatorSM.StatesInstance>
 			this.operating.Transition(this.waitingForWorker, (FabricatorSM.StatesInstance smi) => smi.master.fabricator.worker == null);
 		}
 
-		public GameStateMachine<FabricatorSM.States, FabricatorSM.StatesInstance, FabricatorSM>.State idleQueue;
+		public GameStateMachine<FabricatorSM.States, FabricatorSM.StatesInstance, FabricatorSM, object>.State idleQueue;
 
-		public GameStateMachine<FabricatorSM.States, FabricatorSM.StatesInstance, FabricatorSM>.State waitingForMaterial;
+		public GameStateMachine<FabricatorSM.States, FabricatorSM.StatesInstance, FabricatorSM, object>.State waitingForMaterial;
 
-		public GameStateMachine<FabricatorSM.States, FabricatorSM.StatesInstance, FabricatorSM>.State waitingForWorker;
+		public GameStateMachine<FabricatorSM.States, FabricatorSM.StatesInstance, FabricatorSM, object>.State waitingForWorker;
 
-		public GameStateMachine<FabricatorSM.States, FabricatorSM.StatesInstance, FabricatorSM>.State operating;
+		public GameStateMachine<FabricatorSM.States, FabricatorSM.StatesInstance, FabricatorSM, object>.State operating;
 	}
 }

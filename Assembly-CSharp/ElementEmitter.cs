@@ -6,17 +6,7 @@ public class ElementEmitter : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-	}
-
-	protected override void OnCmpEnable()
-	{
-		base.OnCmpEnable();
-	}
-
-	protected override void OnCmpDisable()
-	{
-		this.SimUnregister();
-		base.OnCmpDisable();
+		this.SimRegister();
 	}
 
 	protected override void OnCleanUp()
@@ -25,15 +15,49 @@ public class ElementEmitter : KMonoBehaviour
 		base.OnCleanUp();
 	}
 
-	public void SetEmitting(bool t)
+	public void SetEmitting(bool emitting)
 	{
-		if (t)
+		this.simActive = emitting;
+		this.dirty = true;
+	}
+
+	private void SimUpdate(float dt)
+	{
+		if (!Sim.IsValidHandle(this.simHandle))
 		{
-			this.SimRegister();
+			return;
+		}
+		this.UpdateSimState();
+	}
+
+	private void UpdateSimState()
+	{
+		if (!this.dirty)
+		{
+			return;
+		}
+		this.dirty = false;
+		int num = Grid.PosToCell(this.transform.position);
+		int num2 = Grid.OffsetCell(num, (int)this.outputElement.outputElementOffset.x, (int)this.outputElement.outputElementOffset.y);
+		if (this.simActive)
+		{
+			if (this.outputElement.elementHash != (SimHashes)0 && this.outputElement.massGenerationRate > 0f && this.emissionFrequency > 0f)
+			{
+				float num3 = ((this.outputElement.outputTemperature != 0f) ? this.outputElement.outputTemperature : base.GetComponent<PrimaryElement>().Temperature);
+				SimMessages.ModifyElementEmitter(this.simHandle, num2, this.outputElement.elementHash, this.emissionFrequency, this.outputElement.massGenerationRate, num3);
+			}
+			if (this.showDescriptor)
+			{
+				this.statusHandle = base.GetComponent<KSelectable>().ReplaceStatusItem(this.statusHandle, Db.Get().BuildingStatusItems.ElementEmitterOutput, this);
+			}
 		}
 		else
 		{
-			this.SimUnregister();
+			SimMessages.ModifyElementEmitter(this.simHandle, num2, SimHashes.Vacuum, 0f, 0f, 0f);
+			if (this.showDescriptor)
+			{
+				this.statusHandle = base.GetComponent<KSelectable>().RemoveStatusItem(this.statusHandle, false);
+			}
 		}
 	}
 
@@ -45,7 +69,7 @@ public class ElementEmitter : KMonoBehaviour
 			return;
 		}
 		Element element = ElementLoader.FindElementByHash(this.outputElement.elementHash);
-		float num = element.defaultValues.temperature;
+		float num = this.outputElement.outputTemperature;
 		if (temperature > 0f)
 		{
 			num = temperature;
@@ -64,18 +88,13 @@ public class ElementEmitter : KMonoBehaviour
 
 	private void SimRegister()
 	{
-		if (base.isSpawned && this.simHandle == -1 && this.outputElement.elementHash != (SimHashes)0 && this.outputElement.outputMass > 0f && this.emissionFrequency > 0f)
+		if (base.isSpawned && this.simHandle == -1)
 		{
-			int num = Grid.PosToCell(this.transform.position);
-			int num2 = Grid.OffsetCell(num, (int)this.outputElement.outputElementOffset.x, (int)this.outputElement.outputElementOffset.y);
-			this.statusHandle = base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.ElementEmitterOutput, this);
 			this.simHandle = -2;
-			HandleVector<Action<object>>.Handle handle = Game.Instance.complexCallbackManager.Add(delegate(object data)
+			SimMessages.AddElementEmitter(Game.Instance.complexCallbackManager.Add(delegate(object data)
 			{
 				ElementEmitter.OnSimRegistered(this, data);
-			}, "ElementEmitter");
-			float num3 = ((this.outputElement.outputTemperature != 0f) ? this.outputElement.outputTemperature : base.GetComponent<PrimaryElement>().Temperature);
-			SimMessages.AddElementEmitter(num2, this.outputElement.elementHash, this.emissionFrequency, this.outputElement.outputMass, num3, handle.index);
+			}, "ElementEmitter").index);
 		}
 	}
 
@@ -86,8 +105,6 @@ public class ElementEmitter : KMonoBehaviour
 			if (Sim.IsValidHandle(this.simHandle))
 			{
 				SimMessages.RemoveElementEmitter(-1, this.simHandle);
-				base.GetComponent<KSelectable>().RemoveStatusItem(this.statusHandle);
-				this.statusHandle = Guid.Empty;
 			}
 			this.simHandle = -1;
 		}
@@ -115,4 +132,10 @@ public class ElementEmitter : KMonoBehaviour
 	private int simHandle = -1;
 
 	private Guid statusHandle = Guid.Empty;
+
+	private bool simActive = true;
+
+	private bool dirty = true;
+
+	public bool showDescriptor = true;
 }

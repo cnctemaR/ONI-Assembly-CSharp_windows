@@ -15,7 +15,6 @@ public class CellAddRemoveSubstanceEvent : CellEvent
 		}
 		CellEventInstance cellEventInstance = new CellEventInstance(cell, (int)element, (int)(amount * 1000f), this);
 		CellEventLogger.Instance.Add(cellEventInstance);
-		CellEventLogger.Instance.LogCallbackSend(cell, callback_id);
 	}
 
 	public override string GetDescription(EventInstanceBase ev)

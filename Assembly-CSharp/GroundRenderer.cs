@@ -71,7 +71,7 @@ public class GroundRenderer : KMonoBehaviour
 			{
 				if (this.dirtyChunks[j, i])
 				{
-					SystemScheduler.instance.AddTask(Guid.NewGuid(), SystemScheduler.Priority.Lowest, new Action<object>(this.RebuildDirtyChunk), new Vector2I(j, i), "DirtyChunk");
+					SystemScheduler.instance.AddTask(Guid.NewGuid(), SystemScheduler.Priority.Lowest, new Action<object>(this.RebuildDirtyChunk), new Vector2I(j, i), "DirtyChunk", base.gameObject);
 				}
 			}
 		}
@@ -182,6 +182,10 @@ public class GroundRenderer : KMonoBehaviour
 		{
 			if (element.IsSolid)
 			{
+				if (element.substance.material == null)
+				{
+					Output.LogError(new object[] { element.name, "must have material associated with it in the substance table" });
+				}
 				Material material = new Material(element.substance.material);
 				this.InitOpaqueMaterial(material, element);
 				Material material2 = new Material(material);
@@ -316,14 +320,8 @@ public class GroundRenderer : KMonoBehaviour
 
 		public void FreeResources()
 		{
-			if (this.alpha.mesh != null)
-			{
-				global::UnityEngine.Object.DestroyImmediate(this.alpha.mesh);
-			}
-			if (this.opaque.mesh != null)
-			{
-				global::UnityEngine.Object.DestroyImmediate(this.opaque.mesh);
-			}
+			this.alpha.ClearMesh();
+			this.opaque.ClearMesh();
 		}
 
 		public SimHashes element;
@@ -345,6 +343,15 @@ public class GroundRenderer : KMonoBehaviour
 				this.pos = new List<Vector3>();
 				this.uv = new List<Vector2>();
 				this.indices = new List<int>();
+			}
+
+			public void ClearMesh()
+			{
+				if (this.mesh != null)
+				{
+					global::UnityEngine.Object.DestroyImmediate(this.mesh);
+					this.mesh = null;
+				}
 			}
 
 			public void Clear()

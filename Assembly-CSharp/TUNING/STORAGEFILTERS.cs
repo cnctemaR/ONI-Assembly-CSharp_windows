@@ -5,9 +5,13 @@ namespace TUNING
 {
 	public class STORAGEFILTERS
 	{
-		public static List<Tag> FOOD = new List<Tag> { GameTags.Edible };
+		public static List<Tag> FOOD = new List<Tag>
+		{
+			GameTags.Edible,
+			GameTags.CookingIngredient
+		};
 
-		public static List<Tag> NOT_EDIBLE = new List<Tag>
+		public static List<Tag> NOT_EDIBLE_SOLIDS = new List<Tag>
 		{
 			GameTags.Alloy,
 			GameTags.RefinedMetal,
@@ -17,24 +21,16 @@ namespace TUNING
 			GameTags.Farmable,
 			GameTags.Organics,
 			GameTags.Seed,
+			GameTags.Agriculture,
 			GameTags.Filter,
-			GameTags.ConsumableOre
+			GameTags.ConsumableOre,
+			GameTags.Liquifiable,
+			GameTags.IndustrialProduct,
+			GameTags.IndustrialIngredient,
+			GameTags.Clothes,
+			GameTags.Other
 		};
 
 		public static List<Tag> LIQUIDS = new List<Tag> { GameTags.Liquid };
-
-		public static List<Tag> DEFAULT = new List<Tag>
-		{
-			GameTags.Alloy,
-			GameTags.RefinedMetal,
-			GameTags.Metal,
-			GameTags.BuildableRaw,
-			GameTags.BuildableProcessed,
-			GameTags.Farmable,
-			GameTags.Organics,
-			GameTags.Seed,
-			GameTags.Filter,
-			GameTags.ConsumableOre
-		};
 	}
 }

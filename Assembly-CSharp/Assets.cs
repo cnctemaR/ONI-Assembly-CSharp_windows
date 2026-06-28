@@ -15,11 +15,11 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		Assets.RegionPrefabs.Clear();
 		Assets.PrefabsByTag.Clear();
 		Assets.PrefabsByAdditionalTags.Clear();
+		Assets.CountableTags.Clear();
 		Assets.Sprites = this.SpriteAssets.Where<Sprite>((Sprite x) => x != null).ToArray<Sprite>();
 		Assets.TintedSprites = this.TintedSpriteAssets.Where<TintedSprite>((TintedSprite x) => x != null && x.sprite != null).ToArray<TintedSprite>();
 		Assets.Materials = this.MaterialAssets.Where<Material>((Material x) => x != null).ToArray<Material>();
 		Assets.Textures = this.TextureAssets.Where<Texture2D>((Texture2D x) => x != null).ToArray<Texture2D>();
-		Assets.StringTables = this.StringTableAssets.Where<TextAsset>((TextAsset x) => x != null).ToArray<TextAsset>();
 		Assets.TextureAtlases = this.TextureAtlasAssets.Where<TextureAtlas>((TextureAtlas x) => x != null).ToArray<TextureAtlas>();
 		Assets.BlockTileDecorInfos = this.BlockTileDecorInfoAssets.Where<BlockTileDecorInfo>((BlockTileDecorInfo x) => x != null).ToArray<BlockTileDecorInfo>();
 		Assets.Controllers = this.BuildingControllers.Where<RuntimeAnimatorController>((RuntimeAnimatorController x) => x != null).ToArray<RuntimeAnimatorController>();
@@ -34,16 +34,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		{
 			if (!(kprefabID == null))
 			{
-				kprefabID.UpdateSaveLoadTag();
-				Assets.PrefabsByTag[kprefabID.PrefabTag] = kprefabID;
-				for (int i = 0; i < kprefabID.Tags.Length; i++)
-				{
-					if (!Assets.PrefabsByAdditionalTags.ContainsKey(kprefabID.Tags[i]))
-					{
-						Assets.PrefabsByAdditionalTags[kprefabID.Tags[i]] = new List<KPrefabID>();
-					}
-					Assets.PrefabsByAdditionalTags[kprefabID.Tags[i]].Add(kprefabID);
-				}
+				Assets.AddPrefab(kprefabID);
 			}
 		}
 		Assets.AnimTable.Clear();
@@ -51,12 +42,32 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		{
 			if (kanimFile != null)
 			{
-				Assets.AnimTable[kanimFile.name] = kanimFile;
+				HashedString hashedString = kanimFile.name;
+				Assets.AnimTable[hashedString] = kanimFile;
 			}
 		}
 		GameEntityTypeSet.Destroy();
 		this.entityTypeSet = GameEntityTypeSet.Instance;
 		LegacyModMain.Load();
+	}
+
+	private static void TryAddCountableTag(KPrefabID prefab)
+	{
+		PrimaryElement component = prefab.GetComponent<PrimaryElement>();
+		if (component != null && component.CountableUnits)
+		{
+			Assets.AddCountableTag(prefab.PrefabTag);
+		}
+	}
+
+	public static void AddCountableTag(Tag tag)
+	{
+		Assets.CountableTags.Add(tag);
+	}
+
+	public static bool IsTagCountable(Tag tag)
+	{
+		return Assets.CountableTags.Contains(tag);
 	}
 
 	private void SubstanceListHookup()
@@ -99,26 +110,32 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 	public static TintedSprite GetTintedSprite(string name)
 	{
 		TintedSprite tintedSprite = null;
-		for (int i = 0; i < Assets.TintedSprites.Length; i++)
+		if (Assets.TintedSprites != null)
 		{
-			if (Assets.TintedSprites[i].sprite.name == name)
+			for (int i = 0; i < Assets.TintedSprites.Length; i++)
 			{
-				return Assets.TintedSprites[i];
+				if (Assets.TintedSprites[i].sprite.name == name)
+				{
+					tintedSprite = Assets.TintedSprites[i];
+					break;
+				}
 			}
 		}
-		Debug.LogWarning("Could not find sprite: " + name);
 		return tintedSprite;
 	}
 
 	public static Sprite GetSprite(string name)
 	{
 		Sprite sprite = null;
-		for (int i = 0; i < Assets.Sprites.Length; i++)
+		if (Assets.Sprites != null)
 		{
-			if (Assets.Sprites[i].name == name)
+			for (int i = 0; i < Assets.Sprites.Length; i++)
 			{
-				sprite = Assets.Sprites[i];
-				break;
+				if (Assets.Sprites[i].name == name)
+				{
+					sprite = Assets.Sprites[i];
+					break;
+				}
 			}
 		}
 		return sprite;
@@ -127,12 +144,15 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 	public static Texture2D GetTexture(string name)
 	{
 		Texture2D texture2D = null;
-		for (int i = 0; i < Assets.Textures.Length; i++)
+		if (Assets.Textures != null)
 		{
-			if (Assets.Textures[i].name == name)
+			for (int i = 0; i < Assets.Textures.Length; i++)
 			{
-				texture2D = Assets.Textures[i];
-				break;
+				if (Assets.Textures[i].name == name)
+				{
+					texture2D = Assets.Textures[i];
+					break;
+				}
 			}
 		}
 		return texture2D;
@@ -169,6 +189,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 			Assets.PrefabsByAdditionalTags[prefab.Tags[i]].Add(prefab);
 		}
 		Assets.Prefabs.Add(prefab);
+		Assets.TryAddCountableTag(prefab);
 		if (Assets.OnAddPrefab != null)
 		{
 			Assets.OnAddPrefab(prefab);
@@ -190,7 +211,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		Assets.PrefabsByTag.TryGetValue(tag, out kprefabID);
 		if (kprefabID == null)
 		{
-			Debug.LogError("Missing prefab: " + tag);
+			Debug.LogWarning("Missing prefab: " + tag);
 		}
 		return (!(kprefabID != null)) ? null : kprefabID.gameObject;
 	}
@@ -267,23 +288,18 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		return null;
 	}
 
-	public static KAnimFile GetAnim(string name)
+	public static KAnimFile GetAnim(HashedString name)
 	{
-		if (name == null || name.Length == 0)
+		if (!name.IsValid())
 		{
-			Debug.LogWarning("Null Anim Name");
+			Debug.LogWarning("Invalid hash name");
 			return null;
 		}
 		KAnimFile kanimFile = null;
-		string text = name;
-		if (name.IndexOf("_kanim") == -1)
-		{
-			text += "_kanim";
-		}
-		Assets.AnimTable.TryGetValue(text, out kanimFile);
+		Assets.AnimTable.TryGetValue(name, out kanimFile);
 		if (kanimFile == null)
 		{
-			Debug.LogWarning("Missing Anim: [" + text + "]. You may have to run Collect Anim on the Assets prefab");
+			Debug.LogWarning("Missing Anim: [" + name.ToString() + "]. You may have to run Collect Anim on the Assets prefab");
 		}
 		return kanimFile;
 	}
@@ -318,6 +334,8 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public static List<KPrefabID> Prefabs = new List<KPrefabID>();
 
+	private static HashSet<Tag> CountableTags = new HashSet<Tag>();
+
 	public static List<GameObject> RegionPrefabs = new List<GameObject>();
 
 	public Sprite[] SpriteAssets;
@@ -331,10 +349,6 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 	public Texture2D[] TextureAssets;
 
 	public static Texture2D[] Textures;
-
-	public TextAsset[] StringTableAssets;
-
-	public static TextAsset[] StringTables;
 
 	public static TextureAtlas[] TextureAtlases;
 
@@ -368,7 +382,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 
 	private static Dictionary<Tag, List<KPrefabID>> PrefabsByAdditionalTags = new Dictionary<Tag, List<KPrefabID>>();
 
-	private static Dictionary<string, KAnimFile> AnimTable = new Dictionary<string, KAnimFile>();
+	private static Dictionary<HashedString, KAnimFile> AnimTable = new Dictionary<HashedString, KAnimFile>();
 
 	public PhysicsMaterial2D defaultPhysicsMaterialAsset;
 
@@ -414,6 +428,40 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		public Image RegionCellBlocked;
 
 		public RectTransform PriorityOverlayIcon;
+
+		public RectTransform HarvestWhenReadyOverlayIcon;
+
+		public Assets.TableScreenAssets TableScreenWidgets;
+	}
+
+	[Serializable]
+	public struct TableScreenAssets
+	{
+		public Material DefaultUIMaterial;
+
+		public Material DesaturatedUIMaterial;
+
+		public GameObject MinionPortrait;
+
+		public GameObject GenericPortrait;
+
+		public GameObject TogglePortrait;
+
+		public GameObject ButtonLabel;
+
+		public GameObject Label;
+
+		public GameObject LabelHeader;
+
+		public GameObject Checkbox;
+
+		public GameObject BlankCell;
+
+		public GameObject SuperCheckbox_Horizontal;
+
+		public GameObject SuperCheckbox_Vertical;
+
+		public GameObject Spacer;
 	}
 
 	[Serializable]

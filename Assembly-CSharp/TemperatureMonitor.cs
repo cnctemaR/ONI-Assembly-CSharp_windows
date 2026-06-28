@@ -5,60 +5,95 @@ public class TemperatureMonitor : GameStateMachine<TemperatureMonitor, Temperatu
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
-		default_state = this.satisfied;
-		this.satisfied.Transition(this.hot, (TemperatureMonitor.Instance smi) => smi.IsHot()).Transition(this.cold, (TemperatureMonitor.Instance smi) => smi.IsCold());
-		this.hot.Transition(this.satisfied, (TemperatureMonitor.Instance smi) => !smi.IsHot()).Transition(this.deathhot, (TemperatureMonitor.Instance smi) => smi.IsOverHeated()).ToggleExpression(Db.Get().Expressions.Hot, null)
-			.ToggleThought(Db.Get().Thoughts.Hot, null)
-			.ToggleStatusItem(Db.Get().DuplicantStatusItems.Hot, null);
-		this.deathhot.Enter("KillHot", delegate(TemperatureMonitor.Instance smi)
+		default_state = this.homeostatic;
+		this.root.Enter(delegate(TemperatureMonitor.Instance smi)
 		{
-			smi.KillHot();
+			smi.averageTemperature = smi.primaryElement.Temperature;
+			DiseaseTrigger component = smi.master.GetComponent<DiseaseTrigger>();
+			if (component != null)
+			{
+				component.AddTrigger(GameHashes.TooHotDisease, new string[] { "HeatRash" });
+				component.AddTrigger(GameHashes.TooColdDisease, new string[] { "ColdBrain" });
+			}
+		}).Update(delegate(TemperatureMonitor.Instance smi)
+		{
+			smi.averageTemperature *= 1f - smi.dt / 4f;
+			smi.averageTemperature += smi.primaryElement.Temperature * (smi.dt / 4f);
+			smi.temperature.SetValue(smi.averageTemperature);
 		});
-		this.cold.Transition(this.cold, (TemperatureMonitor.Instance smi) => !smi.IsCold()).Transition(this.deathcold, (TemperatureMonitor.Instance smi) => smi.IsFrozenSolid()).ToggleExpression(Db.Get().Expressions.Cold, null)
-			.ToggleThought(Db.Get().Thoughts.Cold, null)
-			.ToggleStatusItem(Db.Get().DuplicantStatusItems.Cold, null);
+		this.homeostatic.Transition(this.hyperthermic_pre, (TemperatureMonitor.Instance smi) => smi.IsHyperthermic()).Transition(this.hypothermic_pre, (TemperatureMonitor.Instance smi) => smi.IsHypothermic()).TriggerOnEnter(GameHashes.OptimalTemperatureAchieved, null);
+		this.hyperthermic_pre.Enter(delegate(TemperatureMonitor.Instance smi)
+		{
+			smi.master.Trigger(534694243, smi.master.gameObject);
+			smi.GoTo(this.hyperthermic);
+		});
+		this.hypothermic_pre.Enter(delegate(TemperatureMonitor.Instance smi)
+		{
+			smi.master.Trigger(1662224548, smi.master.gameObject);
+			smi.GoTo(this.hypothermic);
+		});
+		this.hyperthermic.Transition(this.homeostatic, (TemperatureMonitor.Instance smi) => !smi.IsHyperthermic()).ToggleUrge(Db.Get().Urges.CoolDown);
+		this.hypothermic.Transition(this.homeostatic, (TemperatureMonitor.Instance smi) => !smi.IsHypothermic()).ToggleUrge(Db.Get().Urges.WarmUp);
 		this.deathcold.Enter("KillCold", delegate(TemperatureMonitor.Instance smi)
 		{
 			smi.KillCold();
-		});
+		}).TriggerOnEnter(GameHashes.TooColdFatal, null);
+		this.deathhot.Enter("KillHot", delegate(TemperatureMonitor.Instance smi)
+		{
+			smi.KillHot();
+		}).TriggerOnEnter(GameHashes.TooHotFatal, null);
 	}
 
-	public GameStateMachine<TemperatureMonitor, TemperatureMonitor.Instance, IStateMachineTarget>.State satisfied;
+	private const float TEMPERATURE_AVERAGING_RANGE = 4f;
 
-	public GameStateMachine<TemperatureMonitor, TemperatureMonitor.Instance, IStateMachineTarget>.State hot;
+	public GameStateMachine<TemperatureMonitor, TemperatureMonitor.Instance, IStateMachineTarget, object>.State homeostatic;
 
-	public GameStateMachine<TemperatureMonitor, TemperatureMonitor.Instance, IStateMachineTarget>.State deathhot;
+	public GameStateMachine<TemperatureMonitor, TemperatureMonitor.Instance, IStateMachineTarget, object>.State hyperthermic;
 
-	public GameStateMachine<TemperatureMonitor, TemperatureMonitor.Instance, IStateMachineTarget>.State cold;
+	public GameStateMachine<TemperatureMonitor, TemperatureMonitor.Instance, IStateMachineTarget, object>.State hypothermic;
 
-	public GameStateMachine<TemperatureMonitor, TemperatureMonitor.Instance, IStateMachineTarget>.State deathcold;
+	public GameStateMachine<TemperatureMonitor, TemperatureMonitor.Instance, IStateMachineTarget, object>.State hyperthermic_pre;
 
-	public new class Instance : GameStateMachine<TemperatureMonitor, TemperatureMonitor.Instance, IStateMachineTarget>.GameInstance
+	public GameStateMachine<TemperatureMonitor, TemperatureMonitor.Instance, IStateMachineTarget, object>.State hypothermic_pre;
+
+	public GameStateMachine<TemperatureMonitor, TemperatureMonitor.Instance, IStateMachineTarget, object>.State deathcold;
+
+	public GameStateMachine<TemperatureMonitor, TemperatureMonitor.Instance, IStateMachineTarget, object>.State deathhot;
+
+	public StateMachine<TemperatureMonitor, TemperatureMonitor.Instance, IStateMachineTarget, object>.IntParameter warmUpCell;
+
+	public StateMachine<TemperatureMonitor, TemperatureMonitor.Instance, IStateMachineTarget, object>.IntParameter coolDownCell;
+
+	public new class Instance : GameStateMachine<TemperatureMonitor, TemperatureMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)
 		{
+			this.primaryElement = base.GetComponent<PrimaryElement>();
 			this.temperature = Db.Get().Amounts.Temperature.Lookup(base.gameObject);
+			this.warmUpQuery = new SafetyQuery(Game.Instance.safetyConditions.WarmUpChecker, base.GetComponent<KMonoBehaviour>(), int.MaxValue);
+			this.coolDownQuery = new SafetyQuery(Game.Instance.safetyConditions.CoolDownChecker, base.GetComponent<KMonoBehaviour>(), int.MaxValue);
+			this.navigator = base.GetComponent<Navigator>();
 		}
 
-		public bool IsHot()
+		public bool IsHyperthermic()
 		{
-			return this.temperature.value > 318f;
+			return this.temperature.value > this.HyperthermiaThreshold;
 		}
 
-		public bool IsCold()
+		public bool IsHypothermic()
 		{
-			return this.temperature.value < 273f;
+			return this.temperature.value < this.HypothermiaThreshold;
 		}
 
-		public bool IsFrozenSolid()
+		public bool IsFatalHypothermic()
 		{
-			return this.temperature.value < 268f;
+			return this.temperature.value < this.FatalHypothermia;
 		}
 
-		public bool IsOverHeated()
+		public bool IsFatalHyperthermic()
 		{
-			return this.temperature.value > 323f;
+			return this.temperature.value > this.FatalHyperthermia;
 		}
 
 		public void KillHot()
@@ -71,6 +106,66 @@ public class TemperatureMonitor : GameStateMachine<TemperatureMonitor, Temperatu
 			base.GetComponent<Health>().Kill(Db.Get().Deaths.Frozen);
 		}
 
+		public float ExtremeTemperatureDelta()
+		{
+			if (this.temperature.value > this.HyperthermiaThreshold)
+			{
+				return this.temperature.value - this.HyperthermiaThreshold;
+			}
+			if (this.temperature.value < this.HypothermiaThreshold)
+			{
+				return this.temperature.value - this.HypothermiaThreshold;
+			}
+			return 0f;
+		}
+
+		public float IdealTemperatureDelta()
+		{
+			return this.temperature.value - 310.15f;
+		}
+
+		public int GetWarmUpCell()
+		{
+			return base.sm.warmUpCell.Get(base.smi);
+		}
+
+		public int GetCoolDownCell()
+		{
+			return base.sm.coolDownCell.Get(base.smi);
+		}
+
+		public void UpdateWarmUpCell()
+		{
+			this.warmUpQuery.Reset();
+			this.navigator.RunQuery(this.warmUpQuery);
+			base.sm.warmUpCell.Set(this.warmUpQuery.GetResultCell(), base.smi);
+		}
+
+		public void UpdateCoolDownCell()
+		{
+			this.coolDownQuery.Reset();
+			this.navigator.RunQuery(this.coolDownQuery);
+			base.sm.coolDownCell.Set(this.coolDownQuery.GetResultCell(), base.smi);
+		}
+
 		public AmountInstance temperature;
+
+		public PrimaryElement primaryElement;
+
+		private Navigator navigator;
+
+		private SafetyQuery warmUpQuery;
+
+		private SafetyQuery coolDownQuery;
+
+		public float averageTemperature;
+
+		public float HypothermiaThreshold = 307.15f;
+
+		public float HyperthermiaThreshold = 313.15f;
+
+		public float FatalHypothermia = 305.15f;
+
+		public float FatalHyperthermia = 315.15f;
 	}
 }

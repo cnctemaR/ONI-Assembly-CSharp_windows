@@ -24,17 +24,17 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 		});
 	}
 
-	public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget>.State satisfied;
+	public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, object>.State satisfied;
 
-	public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget>.State dying;
+	public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, object>.State dying;
 
-	public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget>.State die;
+	public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, object>.State die;
 
-	public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget>.State dead;
+	public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, object>.State dead;
 
-	public StateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget>.ResourceParameter<Death> death;
+	public StateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, object>.ResourceParameter<Death> death;
 
-	public new class Instance : GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)

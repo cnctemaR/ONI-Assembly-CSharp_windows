@@ -19,11 +19,12 @@ public class SlimeMoldConfig : IOreConfig
 		}
 	}
 
-	public void ConfigurePrefab(GameObject go)
+	public GameObject CreatePrefab()
 	{
-		GeneratedOre.ConfigureAnims(go, "slime_mold_kanim");
-		Sublimates sublimates = go.AddOrGet<Sublimates>();
+		GameObject gameObject = EntityTemplates.CreateOreEntity(this.ElementID, null);
+		Sublimates sublimates = gameObject.AddOrGet<Sublimates>();
 		sublimates.spawnFXHash = SpawnFXHashes.ContaminatedOxygenBubble;
-		sublimates.info = new Sublimates.Info(0.025f, 0.125f, 1.8f, 0f, SimHashes.ContaminatedOxygen);
+		sublimates.info = new Sublimates.Info(0.025f, 0.125f, 1.8f, 0f, this.SublimeElementID);
+		return gameObject;
 	}
 }

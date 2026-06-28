@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
+[SkipSaveFileSerialization]
 public class ChoreProvider : KMonoBehaviour
 {
 	public IEnumerator<Chore> GetEnumerator()

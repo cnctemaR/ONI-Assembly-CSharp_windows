@@ -12,12 +12,14 @@ public class VoronoiNode
 	public VoronoiNode()
 	{
 		this.type = VoronoiNode.NodeType.Unknown;
+		this.log = new LoggerSSF("VoronoiNode");
 	}
 
 	public VoronoiNode(VoronoiNode.NodeType type)
 	{
 		this.type = type;
 		this.tags = new TagSet();
+		this.log = new LoggerSSF("VoronoiNode");
 	}
 
 	protected VoronoiNode(VoronoiDiagram.Site site, VoronoiNode.NodeType type, VoronoiTree parent)
@@ -26,6 +28,7 @@ public class VoronoiNode
 		this.site = site;
 		this.type = type;
 		this.parent = parent;
+		this.log = new LoggerSSF("VoronoiNode");
 	}
 
 	public VoronoiTree parent { get; private set; }
@@ -451,6 +454,8 @@ public class VoronoiNode
 	public VoronoiNode.NodeType type;
 
 	public VoronoiNode.VisitedType visited;
+
+	public LoggerSSF log;
 
 	[Serialize]
 	public VoronoiDiagram.Site site;

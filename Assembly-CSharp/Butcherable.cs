@@ -1,7 +1,8 @@
 ﻿using System;
+using STRINGS;
 using UnityEngine;
 
-public class Butcherable : Workable, ISaveLoadableJson
+public class Butcherable : Workable, ISaveLoadable
 {
 	public void SetDrops(string[] drops)
 	{
@@ -11,8 +12,8 @@ public class Butcherable : Workable, ISaveLoadableJson
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(1272413801, new EventSystem.EventHandler(this.SetReadyToButcher));
-		this.Subscribe(493375141, new EventSystem.EventHandler(this.OnRefreshUserMenu));
+		this.Subscribe(1272413801, new Action<object>(this.SetReadyToButcher));
+		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		this.workTime = 3f;
 	}
 
@@ -71,11 +72,11 @@ public class Butcherable : Workable, ISaveLoadableJson
 		}
 		if (this.chore != null)
 		{
-			this.userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_harvest", "Cancel Meatify", new global::System.Action(this.OnClickCancel), global::Action.NumActions, null, null, null, null, string.Empty));
+			this.userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_harvest", "Cancel Meatify", new global::System.Action(this.OnClickCancel), global::Action.NumActions, null, null, null, string.Empty, true), 1f);
 		}
 		else
 		{
-			this.userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_harvest", "Meatify", new global::System.Action(this.OnClickButcher), global::Action.NumActions, null, null, null, null, string.Empty));
+			this.userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_harvest", "Meatify", new global::System.Action(this.OnClickButcher), global::Action.NumActions, null, null, null, string.Empty, true), 1f);
 		}
 	}
 
@@ -102,7 +103,7 @@ public class Butcherable : Workable, ISaveLoadableJson
 			Edible component2 = gameObject.GetComponent<Edible>();
 			if (component2)
 			{
-				ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, component2.rations * 100000f, "Butchered to make a " + gameObject.name);
+				ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, component2.Calories, string.Format(UI.ENDOFDAYREPORT.NOTES.BUTCHERED, gameObject.name));
 			}
 		}
 		this.chore = null;

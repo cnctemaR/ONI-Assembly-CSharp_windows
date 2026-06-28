@@ -13,16 +13,14 @@ public class UpgradeFX : GameStateMachine<UpgradeFX, UpgradeFX.Instance>
 		});
 	}
 
-	public StateMachine<UpgradeFX, UpgradeFX.Instance, IStateMachineTarget>.TargetParameter fx;
+	public StateMachine<UpgradeFX, UpgradeFX.Instance, IStateMachineTarget, object>.TargetParameter fx;
 
-	public new class Instance : GameStateMachine<UpgradeFX, UpgradeFX.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<UpgradeFX, UpgradeFX.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master, Vector3 offset)
 			: base(master)
 		{
-			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("upgrade_fx", null, false, Grid.SceneLayer.Front);
-			kbatchedAnimController.transform.parent = base.smi.master.transform;
-			kbatchedAnimController.transform.localPosition = offset;
+			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("upgrade_fx_kanim", master.gameObject.transform.position + offset, master.gameObject.transform, true, Grid.SceneLayer.Front);
 			base.sm.fx.Set(kbatchedAnimController.gameObject, base.smi);
 		}
 

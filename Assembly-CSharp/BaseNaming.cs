@@ -20,10 +20,16 @@ public class BaseNaming : KMonoBehaviour
 
 	private void OnEndEdit(string newName)
 	{
+		if (Localization.HasDirtyWords(newName))
+		{
+			this.inputField.text = this.GenerateBaseNameString();
+			newName = this.inputField.text;
+		}
 		if (string.IsNullOrEmpty(newName))
 		{
 			return;
 		}
+		this.inputField.text = newName;
 		SaveGame.Instance.SetBaseName(newName);
 		string text = newName;
 		if (!text.Contains(".sav"))
@@ -48,12 +54,13 @@ public class BaseNaming : KMonoBehaviour
 
 	private string GenerateBaseNameString()
 	{
-		string text = NAMEGEN.COLONY.FORMATS.GetRandom<string>();
-		text = this.ReplaceStringWithRandom(text, "{noun}", NAMEGEN.COLONY.NOUN);
-		text = this.ReplaceStringWithRandom(text, "{adjective}", NAMEGEN.COLONY.ADJECTIVE);
-		text = this.ReplaceStringWithRandom(text, "{adjective2}", NAMEGEN.COLONY.ADJECTIVE);
-		text = this.ReplaceStringWithRandom(text, "{adjective3}", NAMEGEN.COLONY.ADJECTIVE);
-		return this.ReplaceStringWithRandom(text, "{adjective4}", NAMEGEN.COLONY.ADJECTIVE);
+		string text = LocString.GetStrings(typeof(NAMEGEN.COLONY.FORMATS)).GetRandom<string>();
+		text = this.ReplaceStringWithRandom(text, "{noun}", LocString.GetStrings(typeof(NAMEGEN.COLONY.NOUN)));
+		string[] strings = LocString.GetStrings(typeof(NAMEGEN.COLONY.ADJECTIVE));
+		text = this.ReplaceStringWithRandom(text, "{adjective}", strings);
+		text = this.ReplaceStringWithRandom(text, "{adjective2}", strings);
+		text = this.ReplaceStringWithRandom(text, "{adjective3}", strings);
+		return this.ReplaceStringWithRandom(text, "{adjective4}", strings);
 	}
 
 	private string ReplaceStringWithRandom(string fullString, string replacementKey, string[] replacementValues)

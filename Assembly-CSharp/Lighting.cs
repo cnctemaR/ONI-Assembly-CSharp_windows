@@ -60,8 +60,6 @@ public class Lighting : MonoBehaviour
 			Shader.SetGlobalVector("_AnimParameters", new Vector4(this.Settings.AnimIntensity, 0f, 0f, 0f));
 		}
 		Shader.SetGlobalVector("_GasOpacity", new Vector4(this.Settings.GasMinOpacity, this.Settings.GasMaxOpacity, 0f, 0f));
-		Shader.SetGlobalVector("_DetectorParameters", new Vector4(this.Settings.DetectorEdge, 0f, 0f, 0f));
-		Shader.SetGlobalColor("_DetectorMaskColor", this.Settings.DetectorMaskColor);
 		Shader.SetGlobalColor("_DarkenTintBackground", this.Settings.DarkenTints[0]);
 		Shader.SetGlobalColor("_DarkenTintMidground", this.Settings.DarkenTints[1]);
 		Shader.SetGlobalColor("_DarkenTintForeground", this.Settings.DarkenTints[2]);
@@ -92,6 +90,10 @@ public class Lighting : MonoBehaviour
 		Shader.SetGlobalFloat("_WorldZoneAnimBlend", this.Settings.WorldZoneAnimBlend);
 		Shader.SetGlobalColor("_CharacterLitColour", this.Settings.characterLighting.litColour);
 		Shader.SetGlobalColor("_CharacterUnlitColour", this.Settings.characterLighting.unlitColour);
+		Shader.SetGlobalTexture("_BuildingDamagedTex", this.Settings.BuildingDamagedTex);
+		Shader.SetGlobalVector("_BuildingDamagedUVParameters", this.Settings.BuildingDamagedUVParameters);
+		Shader.SetGlobalVector("_BuildingDamagedUVParameters", this.Settings.BuildingDamagedUVParameters);
+		Shader.SetGlobalColor("_BuildingDamagedTint", this.Settings.BuildingDamagedTint);
 		if (LightBuffer.Instance != null && LightBuffer.Instance.Texture != null)
 		{
 			Shader.SetGlobalTexture("_LightBufferTex", LightBuffer.Instance.Texture);

@@ -71,7 +71,7 @@ public class DoorTransitionLayer : TransitionDriver.OverrideLayer
 
 	private Door GetDoor(int cell)
 	{
-		GameObject gameObject = Grid.Objects[cell, 3];
+		GameObject gameObject = Grid.Objects[cell, 1];
 		if (gameObject != null)
 		{
 			Door component = gameObject.GetComponent<Door>();

@@ -3,12 +3,12 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class PlantState : KMonoBehaviour, ISaveLoadableJson
+public class PlantState : KMonoBehaviour, ISaveLoadable
 {
 	protected override void OnSpawn()
 	{
 		this.Refresh();
-		this.Subscribe(1272413801, new EventSystem.EventHandler(this.OnHarvest));
+		this.Subscribe(1272413801, new Action<object>(this.OnHarvest));
 	}
 
 	private void Refresh()

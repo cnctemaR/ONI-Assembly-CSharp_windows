@@ -10,6 +10,12 @@ public class MoveToLocationToolHoverTextCard : HoverTextConfiguration
 		{
 			this.ActionName = Strings.Get(this.ActionStringKey);
 		}
+		if (instance.LoadPreConfiguredToolFields(this))
+		{
+			this.isConfigured = true;
+			return;
+		}
+		instance.ToggleIncubating(true);
 		instance.ClearLabels();
 		instance.StartShadowBar(0f, 0f, false);
 		if (this.printTitle)
@@ -20,6 +26,7 @@ public class MoveToLocationToolHoverTextCard : HoverTextConfiguration
 		instance.NewLine("Unreachable Line", 24);
 		this.unreachableLine = instance.AddText("Unreachable", this.Styles_Title.Standard, true);
 		instance.EndShadowBar();
+		this.isConfigured = true;
 	}
 
 	public override void UpdateHoverElements(KSelectable[] selected)
@@ -29,7 +36,7 @@ public class MoveToLocationToolHoverTextCard : HoverTextConfiguration
 		{
 			return;
 		}
-		if (this.unreachableLine == null)
+		if (!this.isConfigured)
 		{
 			this.ConfigureHoverScreen();
 		}

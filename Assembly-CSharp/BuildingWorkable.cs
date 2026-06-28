@@ -14,9 +14,9 @@ public class BuildingWorkable : Workable
 		}
 	}
 
-	public override string[] GetWorkAnims(Worker worker)
+	public override Vector3 GetWorkOffset()
 	{
-		return this.WorkAnims;
+		return this.AnimOffset;
 	}
 
 	protected override void OnPrefabInit()
@@ -84,7 +84,5 @@ public class BuildingWorkable : Workable
 
 	private EffectInstance effectInstance;
 
-	protected static readonly string[] DefaultWorkAnims = new string[] { "working_pre", "working_loop" };
-
-	protected string[] WorkAnims = BuildingWorkable.DefaultWorkAnims;
+	public Vector3 AnimOffset = Vector3.zero;
 }

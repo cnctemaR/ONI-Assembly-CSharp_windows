@@ -7,7 +7,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Constructable : Workable, ISaveLoadableJson
+public class Constructable : Workable, ISaveLoadable
 {
 	private Constructable()
 	{
@@ -76,7 +76,7 @@ public class Constructable : Workable, ISaveLoadableJson
 			});
 			return;
 		}
-		this.initialTemperature = num2 / num;
+		this.initialTemperature = Mathf.Clamp(num2 / num, 288.15f, 318.15f);
 		KAnimGraphTileVisualizer component2 = base.GetComponent<KAnimGraphTileVisualizer>();
 		UtilityConnections connections = ((!(component2 == null)) ? component2.Connections : ((UtilityConnections)0));
 		if (this.IsReplacementTile)
@@ -90,16 +90,19 @@ public class Constructable : Workable, ISaveLoadableJson
 				{
 					component3.DestroySelf(delegate
 					{
-						this.FinishConstruction(connections);
-					}, true);
+						if (this != null && this.gameObject != null)
+						{
+							this.FinishConstruction(connections);
+						}
+					});
 				}
 				else
 				{
-					Vent component4 = gameObject2.GetComponent<Vent>();
+					Conduit component4 = gameObject2.GetComponent<Conduit>();
 					if (component4 != null)
 					{
-						ConduitFlow conduitFlowManager = Game.Instance.GetConduitFlowManager(component4.transferType);
-						conduitFlowManager.MarkForReplacement(num3);
+						ConduitFlow flowManager = component4.GetFlowManager();
+						flowManager.MarkForReplacement(num3);
 					}
 					BuildingComplete component5 = gameObject2.GetComponent<BuildingComplete>();
 					if (component5 != null)
@@ -127,14 +130,14 @@ public class Constructable : Workable, ISaveLoadableJson
 		{
 			this.FinishConstruction(connections);
 		}
-		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Building, this.building.name, this.transform, 1.5f, false);
+		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Building, base.GetComponent<KSelectable>().GetName(), this.transform, 1.5f, false);
 		worker.GetComponent<Effects>().Add("DirtyHands", true);
 	}
 
 	private void FinishConstruction(UtilityConnections connections)
 	{
 		Rotatable component = base.GetComponent<Rotatable>();
-		Orientation orientation = ((!(component != null)) ? Orientation.None : component.GetOrientation());
+		Orientation orientation = ((!(component != null)) ? Orientation.Neutral : component.GetOrientation());
 		int num = Grid.PosToCell(this.transform.localPosition);
 		GameObject gameObject = this.building.Def.Build(num, orientation, this.storage, this.selectedElements, this.isRelocating);
 		gameObject.GetComponent<PrimaryElement>().Temperature = this.initialTemperature;
@@ -157,7 +160,7 @@ public class Constructable : Workable, ISaveLoadableJson
 			component5.Unselect();
 			if (PlayerController.Instance.ActiveTool.name == "SelectTool")
 			{
-				((SelectTool)PlayerController.Instance.ActiveTool).Select(gameObject.GetComponent<KSelectable>(), false);
+				((SelectTool)PlayerController.Instance.ActiveTool).SelectNextFrame(gameObject.GetComponent<KSelectable>(), false);
 			}
 		}
 		base.GetComponent<Storage>().ConsumeAll();
@@ -168,14 +171,17 @@ public class Constructable : Workable, ISaveLoadableJson
 	{
 		base.OnPrefabInit();
 		this.choreType = Db.Get().ChoreTypes.Build;
-		base.GetComponent<KPrefabID>().AddLog(this.log);
-		Func<List<Notification>, object, string> func = (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.TOOLTIP + notificationList.ReduceMessages(false);
-		this.invalidLocation = new Notification(MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.NAME, NotificationType.BadMinor, null, func, null, true, 0f, null, null, null);
-		CellOffset[][] array = OffsetGroups.BuildReachabilityTable(this.building.Def.PlacementOffsets, OffsetGroups.InvertedStandardTable, this.building.Def.ConstructionOffsetFilter);
-		base.SetOffsetTable(array);
-		base.GetComponent<Storage>().SetOffsetTable(array);
+		this.invalidLocation = new Notification(MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.NAME, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null);
+		CellOffset[][] array = OffsetGroups.InvertedStandardTable;
+		if (this.building.Def.IsTilePiece)
+		{
+			array = OffsetGroups.InvertedStandardTableWithCorners;
+		}
+		CellOffset[][] array2 = OffsetGroups.BuildReachabilityTable(this.building.Def.PlacementOffsets, array, this.building.Def.ConstructionOffsetFilter);
+		base.SetOffsetTable(array2);
+		base.GetComponent<Storage>().SetOffsetTable(array2);
 		this.faceTargetWhenWorking = true;
-		this.Subscribe(-1432940121, new EventSystem.EventHandler(this.OnReachableChanged));
+		this.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
 		if (this.rotatable == null)
 		{
 			this.MarkArea();
@@ -190,6 +196,7 @@ public class Constructable : Workable, ISaveLoadableJson
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.Subscribe(2127324410, new Action<object>(this.OnCancel));
 		if (this.rotatable != null)
 		{
 			this.MarkArea();
@@ -198,10 +205,14 @@ public class Constructable : Workable, ISaveLoadableJson
 		this.fetchList = new FetchList2(this.storage);
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
 		component.ElementID = this.selectedElements[0].id;
-		component.Temperature = component.Element.defaultValues.temperature;
+		PrimaryElement primaryElement = component;
+		float num = 293.15f;
+		component.Temperature = num;
+		primaryElement.Temperature = num;
 		foreach (Recipe.Ingredient ingredient in this.Recipe.GetAllIngredients(this.selectedElements))
 		{
-			this.fetchList.Add(ingredient.tag, ingredient.amount, false);
+			this.fetchList.Add(ingredient.tag, ingredient.amount, FetchOrder2.OperationalRequirement.None);
+			MaterialNeeds.Instance.UpdateNeed(ingredient.tag, ingredient.amount);
 		}
 		if (!this.building.Def.IsTilePiece)
 		{
@@ -209,25 +220,28 @@ public class Constructable : Workable, ISaveLoadableJson
 		}
 		this.building.RunOnArea(delegate(int offset_cell)
 		{
-			GameObject gameObject2 = Grid.Objects[offset_cell, 0];
-			if (gameObject2 != null)
+			if (base.gameObject.GetComponent<ConduitBridge>() == null)
 			{
-				gameObject2.DeleteObject();
+				GameObject gameObject2 = Grid.Objects[offset_cell, 7];
+				if (gameObject2 != null)
+				{
+					gameObject2.DeleteObject();
+				}
 			}
 		});
 		if (this.IsReplacementTile && this.building.Def.ReplacementLayer != ObjectLayer.NumLayers)
 		{
-			int num = Grid.PosToCell(this.transform.position);
-			GameObject gameObject = Grid.Objects[num, (int)this.building.Def.ReplacementLayer];
+			int num2 = Grid.PosToCell(this.transform.position);
+			GameObject gameObject = Grid.Objects[num2, (int)this.building.Def.ReplacementLayer];
 			if (gameObject == null || gameObject == base.gameObject)
 			{
-				Grid.Objects[num, (int)this.building.Def.ReplacementLayer] = base.gameObject;
+				Grid.Objects[num2, (int)this.building.Def.ReplacementLayer] = base.gameObject;
 				if (base.gameObject.GetComponent<SimCellOccupier>() != null)
 				{
-					int num2 = LayerMask.NameToLayer("Overlay");
-					World.Instance.blockTileRenderer.AddBlock(num2, this.building.Def, SimHashes.Void, num);
+					int num3 = LayerMask.NameToLayer("Overlay");
+					World.Instance.blockTileRenderer.AddBlock(num3, this.building.Def, SimHashes.Void, num2);
 				}
-				TileVisualizer.RefreshCell(num, this.building.Def.TileLayer);
+				TileVisualizer.RefreshCell(num2, this.building.Def.TileLayer);
 			}
 			else
 			{
@@ -238,7 +252,7 @@ public class Constructable : Workable, ISaveLoadableJson
 		this.fetchList.Submit(new global::System.Action(this.OnFetchListComplete), true);
 		ReachabilityMonitor.Instance instance = new ReachabilityMonitor.Instance(this);
 		instance.StartSM();
-		this.Subscribe(493375141, new EventSystem.EventHandler(this.OnRefreshUserMenu));
+		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		Prioritizable component2 = base.GetComponent<Prioritizable>();
 		Prioritizable prioritizable = component2;
 		prioritizable.onPriorityChanged = (Action<int>)Delegate.Combine(prioritizable.onPriorityChanged, new Action<int>(this.OnPriorityChanged));
@@ -263,7 +277,8 @@ public class Constructable : Workable, ISaveLoadableJson
 		int num = Grid.PosToCell(this.transform.position);
 		BuildingDef def = this.building.Def;
 		Orientation orientation = this.building.Orientation;
-		def.MarkArea(num, orientation, def.ObjectLayer, base.gameObject);
+		ObjectLayer objectLayer = ((!this.IsReplacementTile) ? def.ObjectLayer : def.ReplacementLayer);
+		def.MarkArea(num, orientation, objectLayer, base.gameObject);
 		if (def.IsTilePiece)
 		{
 			GameObject gameObject = Grid.Objects[num, (int)def.TileLayer];
@@ -275,6 +290,18 @@ public class Constructable : Workable, ISaveLoadableJson
 					TileVisualizer.RefreshCell(c, def.TileLayer);
 				});
 			}
+			Grid.IsTileUnderConstruction[num] = true;
+		}
+	}
+
+	private void UnmarkArea()
+	{
+		int num = Grid.PosToCell(this.transform.position);
+		ObjectLayer objectLayer = ((!this.IsReplacementTile) ? this.building.Def.ObjectLayer : this.building.Def.ReplacementLayer);
+		this.building.Def.UnmarkArea(num, this.building.Orientation, objectLayer, base.gameObject);
+		if (this.building.Def.IsTilePiece)
+		{
+			Grid.IsTileUnderConstruction[num] = false;
 		}
 	}
 
@@ -284,7 +311,7 @@ public class Constructable : Workable, ISaveLoadableJson
 		if (this.building.Def.Name.Contains(defName))
 		{
 			Building building = null;
-			GameObject gameObject = Grid.Objects[num, 3];
+			GameObject gameObject = Grid.Objects[num, 1];
 			if (gameObject != null)
 			{
 				building = gameObject.GetComponent<Building>();
@@ -346,43 +373,38 @@ public class Constructable : Workable, ISaveLoadableJson
 			this.fetchList.Cancel("Constructable destroyed");
 		}
 		Components.Constructables.Remove(this);
+		this.UnmarkArea();
 		base.OnCleanUp();
-	}
-
-	public Dictionary<Tag, float> GetRemaining()
-	{
-		if (this.fetchList != null)
-		{
-			return this.fetchList.GetRemaining();
-		}
-		return new Dictionary<Tag, float>();
 	}
 
 	private void PlaceDiggables()
 	{
 		bool digs_complete = true;
-		this.building.RunOnArea(delegate(int offset_cell)
+		if (!this.IsReplacementTile)
 		{
-			int masterPriority = this.GetComponent<Prioritizable>().GetMasterPriority();
-			if (Diggable.IsDiggable(offset_cell))
+			this.building.RunOnArea(delegate(int offset_cell)
 			{
-				digs_complete = false;
-				Diggable diggable = Diggable.GetDiggable(offset_cell);
-				if (diggable == null)
+				int masterPriority = this.GetComponent<Prioritizable>().GetMasterPriority();
+				if (Diggable.IsDiggable(offset_cell))
 				{
-					diggable = GameUtil.KInstantiate(EntityPrefabs.Instance.DigPlacer, Grid.SceneLayer.Move, Folder.Placers, null, 0).GetComponent<Diggable>();
-					diggable.transform.SetPosition(Grid.CellToPosCBC(offset_cell, Grid.SceneLayer.Move));
+					digs_complete = false;
+					Diggable diggable = Diggable.GetDiggable(offset_cell);
+					if (diggable == null)
+					{
+						diggable = GameUtil.KInstantiate(EntityPrefabs.Instance.DigPlacer, Grid.SceneLayer.Move, Folder.Placers, null, 0).GetComponent<Diggable>();
+						diggable.transform.SetPosition(Grid.CellToPosCBC(offset_cell, Grid.SceneLayer.Move));
+					}
+					diggable.SetChoreType(Db.Get().ChoreTypes.BuildDig);
+					diggable.GetComponent<Prioritizable>().SetMasterPriority(masterPriority);
+					RenderUtil.EnableRenderer(diggable.transform, false);
+					SaveLoadRoot component = diggable.GetComponent<SaveLoadRoot>();
+					if (component != null)
+					{
+						global::UnityEngine.Object.Destroy(component);
+					}
 				}
-				diggable.SetChoreType(Db.Get().ChoreTypes.BuildDig);
-				diggable.GetComponent<Prioritizable>().SetMasterPriority(masterPriority);
-				RenderUtil.EnableRenderer(diggable.transform, false);
-				SaveLoadRoot component = diggable.GetComponent<SaveLoadRoot>();
-				if (component != null)
-				{
-					global::UnityEngine.Object.Destroy(component);
-				}
-			}
-		});
+			});
+		}
 		bool flag = this.building.Def.IsValidBuildLocation(this.transform.position, this.building.Orientation);
 		if (flag)
 		{
@@ -414,6 +436,20 @@ public class Constructable : Workable, ISaveLoadableJson
 		Extents validPlacementExtents = this.building.GetValidPlacementExtents();
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("Constructable.OnFetchListComplete", base.gameObject, validPlacementExtents, GameScenePartitioner.Instance.digDestroyedMask.mask | GameScenePartitioner.Instance.solidChangedMask.mask, new Action<object>(this.OnSolidChangedOrDigDestroyed));
 		this.fetchList = null;
+		this.ClearMaterialNeeds();
+	}
+
+	private void ClearMaterialNeeds()
+	{
+		if (this.materialNeedsCleared)
+		{
+			return;
+		}
+		foreach (Recipe.Ingredient ingredient in this.Recipe.GetAllIngredients(this.SelectedElements))
+		{
+			MaterialNeeds.Instance.UpdateNeed(ingredient.tag, -ingredient.amount);
+		}
+		this.materialNeedsCleared = true;
 	}
 
 	private void OnSolidChangedOrDigDestroyed(object data)
@@ -476,7 +512,7 @@ public class Constructable : Workable, ISaveLoadableJson
 		bool flag = (bool)data;
 		if (flag)
 		{
-			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ConstructionUnreachable);
+			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ConstructionUnreachable, false);
 			if (component != null)
 			{
 				component.TintColour = Game.Instance.uiColours.Build.validLocation;
@@ -496,17 +532,22 @@ public class Constructable : Workable, ISaveLoadableJson
 	{
 		UserMenu userMenu = this.userMenu;
 		string text = UI.USERMENUACTIONS.CANCELCONSTRUCTION.TOOLTIP;
-		userMenu.AddButton(new KIconButtonMenu.ButtonInfo("icon_cancel", UI.USERMENUACTIONS.CANCELCONSTRUCTION.NAME, new global::System.Action(this.OnCancel), global::Action.NumActions, null, null, null, null, text));
+		userMenu.AddButton(new KIconButtonMenu.ButtonInfo("icon_cancel", UI.USERMENUACTIONS.CANCELCONSTRUCTION.NAME, new global::System.Action(this.OnPressCancel), global::Action.NumActions, null, null, null, text, true), 1f);
 	}
 
-	private void OnCancel()
+	private void OnPressCancel()
 	{
 		if (this.Source != null)
 		{
 			this.Source.Trigger(2127324410, null);
 		}
-		DetailsScreen.Instance.Show(false);
 		base.gameObject.Trigger(2127324410, null);
+	}
+
+	private void OnCancel(object data = null)
+	{
+		DetailsScreen.Instance.Show(false);
+		this.ClearMaterialNeeds();
 	}
 
 	[MyCmpAdd]
@@ -539,6 +580,8 @@ public class Constructable : Workable, ISaveLoadableJson
 	private Chore buildChore;
 
 	private ChoreType choreType;
+
+	private bool materialNeedsCleared;
 
 	[Serialize]
 	private Ref<Relocatable> source = new Ref<Relocatable>();

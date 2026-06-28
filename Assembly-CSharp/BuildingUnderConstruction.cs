@@ -16,17 +16,15 @@ public class BuildingUnderConstruction : Building
 	{
 		base.OnSpawn();
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		if (component != null)
+		Rotatable component2 = base.GetComponent<Rotatable>();
+		if (component != null && component2 == null)
+		{
+			component.Offset = this.Def.GetVisualizerOffset();
+		}
+		BoxCollider2D component3 = base.GetComponent<BoxCollider2D>();
+		if (component3 != null)
 		{
 			Vector3 visualizerOffset = this.Def.GetVisualizerOffset();
-			Rotatable component2 = base.GetComponent<Rotatable>();
-			if (component2 != null)
-			{
-				component.Rotation = component2.GetVisualizerRotation();
-				component.Pivot = component2.GetVisualizerPivot();
-			}
-			component.Offset = visualizerOffset;
-			BoxCollider2D component3 = base.GetComponent<BoxCollider2D>();
 			component3.offset += new Vector2(visualizerOffset.x, visualizerOffset.y);
 		}
 		if (this.Def.IsTilePiece)

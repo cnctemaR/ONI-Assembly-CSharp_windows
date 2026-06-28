@@ -20,7 +20,8 @@ public class ImmigrantScreen : CharacterSelectionController
 		{
 			base.Show(false);
 			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MENUNewDuplicantSnapshot, STOP_MODE.ALLOWFADEOUT);
-			MusicManager.instance.StopSong("Music_SelectDuplicant", true);
+			AudioMixer.instance.Start(AudioMixerSnapshots.Get().PortalLPDimmedSnapshot);
+			MusicManager.instance.StopSong("Music_SelectDuplicant", true, STOP_MODE.ALLOWFADEOUT);
 		};
 	}
 
@@ -28,6 +29,7 @@ public class ImmigrantScreen : CharacterSelectionController
 	{
 		ImmigrantScreen.instance.Initialize(telepad);
 		ImmigrantScreen.instance.Show(true);
+		KFMOD.PlayOneShot(GlobalAssets.GetSound("Dialog_Popup", false));
 		AudioMixer.instance.Start(AudioMixerSnapshots.Get().MENUNewDuplicantSnapshot);
 		MusicManager.instance.PlaySong("Music_SelectDuplicant", false);
 	}
@@ -56,7 +58,8 @@ public class ImmigrantScreen : CharacterSelectionController
 		});
 		this.containers.Clear();
 		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MENUNewDuplicantSnapshot, STOP_MODE.ALLOWFADEOUT);
-		MusicManager.instance.StopSong("Music_SelectDuplicant", true);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().PortalLPDimmedSnapshot, STOP_MODE.ALLOWFADEOUT);
+		MusicManager.instance.StopSong("Music_SelectDuplicant", true, STOP_MODE.ALLOWFADEOUT);
 		MusicManager.instance.PlaySong("Stinger_NewDuplicant", false);
 	}
 
@@ -82,7 +85,8 @@ public class ImmigrantScreen : CharacterSelectionController
 		this.rejectConfirmationScreen.SetActive(false);
 		base.Show(false);
 		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MENUNewDuplicantSnapshot, STOP_MODE.ALLOWFADEOUT);
-		MusicManager.instance.StopSong("Music_SelectDuplicant", true);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().PortalLPDimmedSnapshot, STOP_MODE.ALLOWFADEOUT);
+		MusicManager.instance.StopSong("Music_SelectDuplicant", true, STOP_MODE.ALLOWFADEOUT);
 	}
 
 	[SerializeField]

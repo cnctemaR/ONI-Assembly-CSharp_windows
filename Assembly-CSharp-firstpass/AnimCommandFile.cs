@@ -10,6 +10,7 @@ public class AnimCommandFile : YamlIO<AnimCommandFile>
 	{
 		this.MaxGroupSize = 60;
 		this.DefaultBuilds = new Dictionary<string, List<string>>();
+		this.TagGroup = AnimCommandFile.GroupBy.Folder;
 	}
 
 	[StringEnumConverter]
@@ -41,13 +42,13 @@ public class AnimCommandFile : YamlIO<AnimCommandFile>
 
 	public int MaxGroupSize { get; private set; }
 
-	public bool IsSwap()
+	public bool IsSwap(KAnimFile file)
 	{
 		if (this.TagGroup != AnimCommandFile.GroupBy.NamedGroup)
 		{
 			return false;
 		}
-		string fileName = Path.GetFileName(this.directory);
+		string fileName = Path.GetFileName(file.homedirectory);
 		foreach (KeyValuePair<string, List<string>> keyValuePair in this.DefaultBuilds)
 		{
 			if (keyValuePair.Value.Contains(fileName))
@@ -58,57 +59,45 @@ public class AnimCommandFile : YamlIO<AnimCommandFile>
 		return true;
 	}
 
-	public string GetGroupName()
+	public void AddGroupFile(KAnimGroupFile.GroupFile gf)
 	{
-		string text = Path.GetFileName(this.directory);
-		string fullName = Directory.GetParent(this.directory).FullName;
-		string siblingIndex = this.GetSiblingIndex(fullName, text);
+		if (!this.groupFiles.Contains(gf))
+		{
+			this.groupFiles.Add(gf);
+		}
+	}
+
+	public string GetGroupName(KAnimFile kaf)
+	{
 		switch (this.TagGroup)
 		{
 		case AnimCommandFile.GroupBy.__IGNORE__:
 			return null;
 		case AnimCommandFile.GroupBy.Folder:
-			text = Directory.GetParent(this.directory).Name;
-			text += siblingIndex;
-			break;
+			return Path.GetFileName(this.directory) + (this.groupFiles.Count / 10).ToString();
 		case AnimCommandFile.GroupBy.NamedGroup:
+		{
+			string fileName = Path.GetFileName(kaf.homedirectory);
 			foreach (KeyValuePair<string, List<string>> keyValuePair in this.DefaultBuilds)
 			{
-				if (keyValuePair.Value.Contains(text))
+				if (keyValuePair.Value.Contains(fileName))
 				{
 					return keyValuePair.Key;
 				}
 			}
-			text = this.TargetBuild;
-			break;
+			return this.TargetBuild;
+		}
 		case AnimCommandFile.GroupBy.NamedGroupNoSplit:
-			text = this.TargetBuild;
-			break;
+			return this.TargetBuild;
 		}
-		return text;
-	}
-
-	private string GetSiblingIndex(string parentDirectory, string target)
-	{
-		string[] directories = Directory.GetDirectories(parentDirectory);
-		string text = string.Empty;
-		if (directories.Length > 10)
-		{
-			for (int i = 0; i < directories.Length; i++)
-			{
-				string fileName = Path.GetFileName(directories[i]);
-				if (fileName == target)
-				{
-					text = (i / 10).ToString();
-					break;
-				}
-			}
-		}
-		return text;
+		return null;
 	}
 
 	[NonSerialized]
 	public string directory = string.Empty;
+
+	[NonSerialized]
+	private List<KAnimGroupFile.GroupFile> groupFiles = new List<KAnimGroupFile.GroupFile>();
 
 	public enum ConfigType
 	{

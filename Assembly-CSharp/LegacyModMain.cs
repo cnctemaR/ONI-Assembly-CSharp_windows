@@ -112,6 +112,8 @@ public class LegacyModMain
 	private static void LoadBuildings()
 	{
 		LocString.CreateLocStringKeys(typeof(BUILDINGS.PREFABS), "STRINGS.BUILDINGS.");
+		LocString.CreateLocStringKeys(typeof(BUILDINGS.DAMAGESOURCES), "STRINGS.BUILDINGS.DAMAGESOURCES");
+		LocString.CreateLocStringKeys(typeof(BUILDINGS.REPAIRABLE), "STRINGS.BUILDINGS.REPAIRABLE");
 		GeneratedBuildings.LoadGeneratedBuildings();
 	}
 
@@ -132,28 +134,86 @@ public class LegacyModMain
 		{
 			new LegacyModMain.ElementInfo
 			{
+				id = SimHashes.Katairite,
+				overheatMod = 2000f
+			},
+			new LegacyModMain.ElementInfo
+			{
 				id = SimHashes.Cuprite,
 				decor = 0.1f
 			},
 			new LegacyModMain.ElementInfo
 			{
 				id = SimHashes.Copper,
-				decor = 0.2f
+				decor = 0.2f,
+				overheatMod = 50f
 			},
 			new LegacyModMain.ElementInfo
 			{
 				id = SimHashes.Gold,
-				decor = 0.3f
+				decor = 0.3f,
+				overheatMod = 50f
 			},
 			new LegacyModMain.ElementInfo
 			{
 				id = SimHashes.Granite,
-				decor = 0.2f
+				decor = 0.2f,
+				overheatMod = 15f
 			},
 			new LegacyModMain.ElementInfo
 			{
 				id = SimHashes.SandStone,
 				decor = 0.1f
+			},
+			new LegacyModMain.ElementInfo
+			{
+				id = SimHashes.ToxicSand,
+				overheatMod = -10f
+			},
+			new LegacyModMain.ElementInfo
+			{
+				id = SimHashes.Dirt,
+				overheatMod = -10f
+			},
+			new LegacyModMain.ElementInfo
+			{
+				id = SimHashes.Sand,
+				overheatMod = -10f
+			},
+			new LegacyModMain.ElementInfo
+			{
+				id = SimHashes.IgneousRock,
+				overheatMod = 15f
+			},
+			new LegacyModMain.ElementInfo
+			{
+				id = SimHashes.Obsidian,
+				overheatMod = 15f
+			},
+			new LegacyModMain.ElementInfo
+			{
+				id = SimHashes.Iron,
+				overheatMod = 50f
+			},
+			new LegacyModMain.ElementInfo
+			{
+				id = SimHashes.Tungsten,
+				overheatMod = 50f
+			},
+			new LegacyModMain.ElementInfo
+			{
+				id = SimHashes.Steel,
+				overheatMod = 50f
+			},
+			new LegacyModMain.ElementInfo
+			{
+				id = SimHashes.GoldAmalgam,
+				overheatMod = 50f
+			},
+			new LegacyModMain.ElementInfo
+			{
+				id = SimHashes.Diamond,
+				overheatMod = 2000f
 			}
 		};
 		foreach (LegacyModMain.ElementInfo elementInfo in array)
@@ -161,8 +221,13 @@ public class LegacyModMain
 			Element element = ElementLoader.FindElementByHash(elementInfo.id);
 			if (elementInfo.decor != 0f)
 			{
-				AttributeModifier attributeModifier = new AttributeModifier("Decor", elementInfo.decor, element.name, true);
+				AttributeModifier attributeModifier = new AttributeModifier("Decor", elementInfo.decor, element.name, true, false);
 				element.attributeModifiers.Add(attributeModifier);
+			}
+			if (elementInfo.overheatMod != 0f)
+			{
+				AttributeModifier attributeModifier2 = new AttributeModifier(Db.Get().BuildingAttributes.OverheatTemperature.Id, elementInfo.overheatMod, element.name, false, false);
+				element.attributeModifiers.Add(attributeModifier2);
 			}
 		}
 	}
@@ -179,5 +244,7 @@ public class LegacyModMain
 		public SimHashes id;
 
 		public float decor;
+
+		public float overheatMod;
 	}
 }

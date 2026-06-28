@@ -179,6 +179,7 @@ public class KScreen : KMonoBehaviour, IInputHandler, IEventSystemHandler, IPoin
 
 	public void Show(bool show = true)
 	{
+		this.mouseOver = false;
 		base.gameObject.SetActive(show);
 		this.OnShow(show);
 	}

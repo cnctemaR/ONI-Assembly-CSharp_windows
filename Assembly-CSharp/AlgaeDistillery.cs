@@ -33,6 +33,12 @@ public class AlgaeDistillery : StateMachineComponent<AlgaeDistillery.StatesInsta
 	[SerializeField]
 	public bool hasMeter = true;
 
+	[SerializeField]
+	public Tag emitTag;
+
+	[SerializeField]
+	public float emitMass;
+
 	[MyCmpAdd]
 	private Storage storage;
 
@@ -44,11 +50,25 @@ public class AlgaeDistillery : StateMachineComponent<AlgaeDistillery.StatesInsta
 
 	private MeterController meter;
 
-	public class StatesInstance : GameStateMachine<AlgaeDistillery.States, AlgaeDistillery.StatesInstance, AlgaeDistillery>.GameInstance
+	public class StatesInstance : GameStateMachine<AlgaeDistillery.States, AlgaeDistillery.StatesInstance, AlgaeDistillery, object>.GameInstance
 	{
 		public StatesInstance(AlgaeDistillery smi)
 			: base(smi)
 		{
+		}
+
+		public void TryEmit()
+		{
+			Storage storage = base.smi.master.storage;
+			GameObject gameObject = storage.FindFirst(base.smi.master.emitTag);
+			if (gameObject != null)
+			{
+				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+				if (component.Mass >= base.master.emitMass)
+				{
+					storage.Drop(gameObject);
+				}
+			}
 		}
 	}
 
@@ -62,19 +82,22 @@ public class AlgaeDistillery : StateMachineComponent<AlgaeDistillery.StatesInsta
 			this.waiting.Enter("Waiting", delegate(AlgaeDistillery.StatesInstance smi)
 			{
 				smi.master.operational.SetActive(false, false);
-			}).EventTransition(GameHashes.OnStorageChange, this.converting, (AlgaeDistillery.StatesInstance smi) => smi.master.GetComponent<ElementConverter>().HasEnoughMass());
+			}).EventTransition(GameHashes.OnStorageChange, this.converting, (AlgaeDistillery.StatesInstance smi) => smi.master.GetComponent<ElementConverter>().HasEnoughMassToStartConverting());
 			this.converting.Enter("Ready", delegate(AlgaeDistillery.StatesInstance smi)
 			{
 				smi.master.operational.SetActive(true, false);
-			}).Transition(this.waiting, (AlgaeDistillery.StatesInstance smi) => !smi.master.GetComponent<ElementConverter>().HasEnoughMass());
+			}).Transition(this.waiting, (AlgaeDistillery.StatesInstance smi) => !smi.master.GetComponent<ElementConverter>().CanConvertAtAll()).EventHandler(GameHashes.OnStorageChange, delegate(AlgaeDistillery.StatesInstance smi)
+			{
+				smi.TryEmit();
+			});
 		}
 
-		public GameStateMachine<AlgaeDistillery.States, AlgaeDistillery.StatesInstance, AlgaeDistillery>.State disabled;
+		public GameStateMachine<AlgaeDistillery.States, AlgaeDistillery.StatesInstance, AlgaeDistillery, object>.State disabled;
 
-		public GameStateMachine<AlgaeDistillery.States, AlgaeDistillery.StatesInstance, AlgaeDistillery>.State waiting;
+		public GameStateMachine<AlgaeDistillery.States, AlgaeDistillery.StatesInstance, AlgaeDistillery, object>.State waiting;
 
-		public GameStateMachine<AlgaeDistillery.States, AlgaeDistillery.StatesInstance, AlgaeDistillery>.State converting;
+		public GameStateMachine<AlgaeDistillery.States, AlgaeDistillery.StatesInstance, AlgaeDistillery, object>.State converting;
 
-		public GameStateMachine<AlgaeDistillery.States, AlgaeDistillery.StatesInstance, AlgaeDistillery>.State overpressure;
+		public GameStateMachine<AlgaeDistillery.States, AlgaeDistillery.StatesInstance, AlgaeDistillery, object>.State overpressure;
 	}
 }

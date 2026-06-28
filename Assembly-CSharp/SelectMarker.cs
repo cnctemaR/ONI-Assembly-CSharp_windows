@@ -21,7 +21,7 @@ public class SelectMarker : KMonoBehaviour
 		if (component != null)
 		{
 			position.x = component.bounds.center.x;
-			position.y += component.bounds.size.y + 0.1f;
+			position.y = component.bounds.center.y + component.bounds.size.y / 2f + 0.1f;
 		}
 		else
 		{

@@ -14,6 +14,8 @@ namespace Database
 			this.Cold = new Thought("Cold", this, "crew_state_temp_down", DUPLICANTS.THOUGHTS.COLD.TOOLTIP, false);
 			this.FullBladder = new Thought("FullBladder", this, "crew_state_full_bladder", DUPLICANTS.THOUGHTS.FULLBLADDER.TOOLTIP, false);
 			this.PoorDecor = new Thought("PoorDecor", this, "crew_state_decor", DUPLICANTS.THOUGHTS.POORDECOR.TOOLTIP, false);
+			this.PoorFoodQuality = new Thought("PoorFoodQuality", this, "crew_state_yuck", DUPLICANTS.THOUGHTS.POOR_FOOD_QUALITY.TOOLTIP, false);
+			this.GoodFoodQuality = new Thought("GoodFoodQuality", this, "crew_state_happy", DUPLICANTS.THOUGHTS.GOOD_FOOD_QUALITY.TOOLTIP, false);
 			this.Happy = new Thought("Happy", this, "crew_state_happy", DUPLICANTS.THOUGHTS.HAPPY.TOOLTIP, false);
 			this.Unhappy = new Thought("Unhappy", this, "crew_state_unhappy", DUPLICANTS.THOUGHTS.UNHAPPY.TOOLTIP, false);
 			this.Sleepy = new Thought("Sleepy", this, "crew_state_sleepy", DUPLICANTS.THOUGHTS.SLEEPY.TOOLTIP, false);
@@ -40,6 +42,10 @@ namespace Database
 		public Thought Unhappy;
 
 		public Thought PoorDecor;
+
+		public Thought PoorFoodQuality;
+
+		public Thought GoodFoodQuality;
 
 		public Thought Sleepy;
 

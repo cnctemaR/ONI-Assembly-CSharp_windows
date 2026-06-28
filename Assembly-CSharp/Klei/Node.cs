@@ -34,10 +34,20 @@ namespace Klei
 		public Node node { get; private set; }
 
 		[Serialize]
-		public string type = string.Empty;
+		public string type { get; private set; }
+
+		public void SetType(string newtype)
+		{
+			this.type = newtype;
+		}
 
 		[Serialize]
-		public Vector2 position;
+		public Vector2 position { get; private set; }
+
+		public void SetPosition(Vector2 newPos)
+		{
+			this.position = newPos;
+		}
 
 		[Serialize]
 		public TagSet tags = new TagSet();

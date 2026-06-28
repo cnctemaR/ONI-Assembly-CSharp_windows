@@ -6,9 +6,11 @@ public class LiquidFilterConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("LiquidFilter", 3, 1, "filter_liquid_kanim", 200f, 10f, BUILDINGS.CONSTRUCTION_MASS.TIER3, MATERIALS.RAW_METALS, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.PENALTY.TIER0, null);
-		buildingDef.RequiresPower = true;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("LiquidFilter", 3, 1, "filter_liquid_kanim", 200f, 30, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.RAW_METALS, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.PENALTY.TIER0, null);
+		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 120f;
+		buildingDef.OperatingKilowatts = 4f;
+		buildingDef.ExhaustKilowattsWhenActive = 0f;
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.OutputConduitType = ConduitType.Liquid;
 		buildingDef.Floodable = false;
@@ -17,7 +19,7 @@ public class LiquidFilterConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.UtilityInputOffset = new CellOffset(-1, 0);
 		buildingDef.UtilityOutputOffset = new CellOffset(1, 0);
-		buildingDef.PermittedRotations = Rotatable.PermittedRotations.R360;
+		buildingDef.PermittedRotations = PermittedRotations.R360;
 		return buildingDef;
 	}
 
@@ -25,11 +27,12 @@ public class LiquidFilterConfig : IBuildingConfig
 	{
 		go.AddOrGet<Structure>();
 		ElementFilter elementFilter = go.AddOrGet<ElementFilter>();
-		elementFilter.transferType = Vent.Transfer.Liquid;
+		elementFilter.conduitType = ConduitType.Liquid;
+		elementFilter.filterOffset = new CellOffset(1, 0);
 		go.AddOrGet<LiquidFilterable>();
 	}
 
-	public override void DoPostConfigure(GameObject go)
+	public override void DoPostConfigureComplete(GameObject go)
 	{
 		BuildingTemplates.DoPostConfigure(go);
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
@@ -40,4 +43,6 @@ public class LiquidFilterConfig : IBuildingConfig
 			}.StartSM();
 		};
 	}
+
+	private const ConduitType CONDUIT_TYPE = ConduitType.Liquid;
 }

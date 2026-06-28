@@ -11,7 +11,7 @@ public class Diggable : Workable
 {
 	private Diggable()
 	{
-		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
+		base.SetOffsetTable(OffsetGroups.InvertedStandardTableWithCorners);
 	}
 
 	public bool Reachable
@@ -32,7 +32,7 @@ public class Diggable : Workable
 			this.choreType = Db.Get().ChoreTypes.Dig;
 		}
 		this.faceTargetWhenWorking = true;
-		this.Subscribe(-1432940121, new EventSystem.EventHandler(this.OnReachableChanged));
+		this.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
 		this.attributeConverter = Db.Get().AttributeConverters.DiggingSpeed;
 	}
 
@@ -46,15 +46,14 @@ public class Diggable : Workable
 		{
 			this.childRenderer.material.color = Game.Instance.uiColours.Dig.invalidLocation;
 		}
-		Grid.Objects[num, 0] = base.gameObject;
+		Grid.Objects[num, 7] = base.gameObject;
 		this.chore = new WorkChore<Diggable>(this.choreType, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true);
 		base.SetWorkTime(float.PositiveInfinity);
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("Diggable.OnSpawn", base.gameObject, Grid.PosToCell(this), GameScenePartitioner.Instance.solidChangedMask.mask, new Action<object>(this.OnSolidChanged));
 		this.OnSolidChanged(null);
 		ReachabilityMonitor.Instance instance = new ReachabilityMonitor.Instance(this);
 		instance.StartSM();
-		this.Subscribe(493375141, new EventSystem.EventHandler(this.OnRefreshUserMenu));
-		this.SetChoreType(Db.Get().ChoreTypes.Dig);
+		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		Components.Diggables.Add(this);
 	}
 
@@ -135,7 +134,7 @@ public class Diggable : Workable
 		float num5 = 4f * num4;
 		float num6 = num5 + num3 * num5;
 		float num7 = dt / num6;
-		if (WorldDamage.Instance.ApplyDamage(num, num7, -1))
+		if (WorldDamage.Instance.ApplyDamage(num, num7, -1, -1))
 		{
 			worker.GetComponent<Effects>().Add("DirtyHands", true);
 		}
@@ -151,7 +150,7 @@ public class Diggable : Workable
 
 	public static Diggable GetDiggable(int cell)
 	{
-		GameObject gameObject = Grid.Objects[cell, 0];
+		GameObject gameObject = Grid.Objects[cell, 7];
 		if (gameObject != null)
 		{
 			return gameObject.GetComponent<Diggable>();
@@ -227,7 +226,7 @@ public class Diggable : Workable
 			if (this.isReachable)
 			{
 				material.color = Game.Instance.uiColours.Dig.validLocation;
-				this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.DigUnreachable);
+				this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.DigUnreachable, false);
 			}
 			else
 			{
@@ -271,7 +270,7 @@ public class Diggable : Workable
 	{
 		UserMenu userMenu = this.userMenu;
 		string text = UI.USERMENUACTIONS.CANCELDIG.TOOLTIP;
-		userMenu.AddButton(new KIconButtonMenu.ButtonInfo("icon_cancel", UI.USERMENUACTIONS.CANCELDIG.NAME, new global::System.Action(this.OnCancel), global::Action.NumActions, null, null, null, null, text));
+		userMenu.AddButton(new KIconButtonMenu.ButtonInfo("icon_cancel", UI.USERMENUACTIONS.CANCELDIG.NAME, new global::System.Action(this.OnCancel), global::Action.NumActions, null, null, null, text, true), 1f);
 	}
 
 	public void SetChoreType(ChoreType chore_type)

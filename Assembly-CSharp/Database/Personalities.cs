@@ -11,7 +11,7 @@ namespace Database
 			ResourceLoader<Personalities.PersonalityInfo> resourceLoader = new ResourceLoader<Personalities.PersonalityInfo>(file);
 			foreach (Personalities.PersonalityInfo personalityInfo in resourceLoader)
 			{
-				Personality personality = new Personality(Strings.Get(string.Format("STRINGS.DUPLICANTS.PERSONALITIES.{0}.NAME", personalityInfo.Name.ToUpper())), personalityInfo.IsFemale, personalityInfo.HeadShape, personalityInfo.Mouth, personalityInfo.Neck, personalityInfo.Eyes, personalityInfo.Hair, Strings.Get(string.Format("STRINGS.DUPLICANTS.PERSONALITIES.{0}.DESC", personalityInfo.Name.ToUpper())));
+				Personality personality = new Personality(Strings.Get(string.Format("STRINGS.DUPLICANTS.PERSONALITIES.{0}.NAME", personalityInfo.Name.ToUpper())), personalityInfo.IsFemale, personalityInfo.IsMale, personalityInfo.StressTrait, personalityInfo.CongenitalTrait, personalityInfo.HeadShape, personalityInfo.Mouth, personalityInfo.Neck, personalityInfo.Eyes, personalityInfo.Hair, personalityInfo.Body, Strings.Get(string.Format("STRINGS.DUPLICANTS.PERSONALITIES.{0}.DESC", personalityInfo.Name.ToUpper())));
 				base.Add(personality);
 			}
 		}
@@ -42,6 +42,8 @@ namespace Database
 		{
 			public bool IsFemale;
 
+			public bool IsMale;
+
 			public int HeadShape;
 
 			public int Mouth;
@@ -51,6 +53,12 @@ namespace Database
 			public int Eyes;
 
 			public int Hair;
+
+			public int Body;
+
+			public string StressTrait;
+
+			public string CongenitalTrait;
 
 			public string Design;
 		}

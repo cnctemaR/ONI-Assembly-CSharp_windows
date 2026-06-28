@@ -129,11 +129,11 @@ public class FilterSideScreen : SideScreenContent
 
 	public LocText selectElementHeaderLabel;
 
-	private Color outputIconColor = new Color(0.5294118f, 0.27058825f, 0.4f);
+	private Color outputIconColor = BuildingCellVisualizer.secondOutputColour;
 
-	private Color colorLiquid = new Color(0.29411766f, 0.7882353f, 0.83137256f);
+	private Color colorLiquid = Color.white;
 
-	private Color colorGas = new Color(1f, 0.6627451f, 0.14117648f);
+	private Color colorGas = Color.white;
 
 	public Dictionary<Element, FilterSideScreenRow> filterRowMap = new Dictionary<Element, FilterSideScreenRow>();
 

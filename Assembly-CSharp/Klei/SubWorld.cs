@@ -54,7 +54,7 @@ namespace Klei
 				return null;
 			}
 			Node node2 = graph.AddNode(this.centralFeature.type);
-			node2.position = node.site.poly.Centroid();
+			node2.SetPosition(node.site.poly.Centroid());
 			VoronoiNode voronoiNode = node.AddSite(new VoronoiDiagram.Site((uint)node2.node.Id, node2.position, 1f), VoronoiNode.NodeType.Internal);
 			voronoiNode.tags = new TagSet(newTags);
 			voronoiNode.AddTag(new Tag(this.centralFeature.type));
@@ -73,38 +73,31 @@ namespace Klei
 
 		public void GenerateChildren(VoronoiTree node, Graph graph, float worldHeight)
 		{
-			TagSet tagSet = new TagSet();
-			tagSet.Add(WorldGenTags.Geode);
-			TagSet tagSet2 = new TagSet(node.tags);
-			tagSet2.Remove(WorldGenTags.Overworld);
-			for (int i = 0; i < this.tags.Count; i++)
-			{
-				tagSet2.Add(new Tag(this.tags[i]));
-			}
-			TagSet tagSet3 = new TagSet();
+			TagSet tagSet = new TagSet(WorldGen.Settings.defaults.defaultMoveTags);
+			TagSet tagSet2 = new TagSet();
 			if (tagSet != null)
 			{
-				for (int j = 0; j < tagSet.Count; j++)
+				for (int i = 0; i < tagSet.Count; i++)
 				{
-					Tag tag = tagSet[j];
+					Tag tag = tagSet[i];
 					if (node.tags.Contains(tag))
 					{
 						node.tags.Remove(tag);
-						tagSet3.Add(tag);
-					}
-					else if (tagSet2.Contains(tag))
-					{
-						tagSet2.Remove(tag);
-						tagSet3.Add(tag);
+						tagSet2.Add(tag);
 					}
 				}
 			}
+			TagSet tagSet3 = new TagSet(node.tags);
+			tagSet3.Remove(WorldGenTags.Overworld);
+			for (int j = 0; j < this.tags.Count; j++)
+			{
+				tagSet3.Add(new Tag(this.tags[j]));
+			}
 			float value = base.density.GetValue();
-			Node node2 = this.AddCenteralFeature(node, graph, tagSet2);
-			List<Vector2> list = null;
+			Node node2 = this.AddCenteralFeature(node, graph, tagSet3);
+			List<Vector2> list = new List<Vector2>();
 			if (node2 != null)
 			{
-				list = new List<Vector2>();
 				list.Add(node2.position);
 				foreach (WeightedBiome weightedBiome in this.biomes)
 				{
@@ -122,7 +115,8 @@ namespace Klei
 			{
 				list.AddRange(randomPoints);
 				float value2 = this.samplers[k].density.GetValue();
-				randomPoints.AddRange(PointGenerator.GetRandomPoints(node.site.poly, value2, this.samplers[k].avoidRadius, list, this.samplers[k].sampleBehaviour, true, true, this.samplers[k].doAvoidPoints));
+				List<Vector2> randomPoints2 = PointGenerator.GetRandomPoints(node.site.poly, value2, this.samplers[k].avoidRadius, list, this.samplers[k].sampleBehaviour, true, true, this.samplers[k].doAvoidPoints);
+				randomPoints.AddRange(randomPoints2);
 			}
 			if (randomPoints.Count > 200)
 			{
@@ -179,22 +173,25 @@ namespace Klei
 					node3.biomeSpecificTags = new TagSet(tagSet6);
 					VoronoiNode voronoiNode = node.AddSite(new VoronoiDiagram.Site((uint)node3.node.Id, node3.position, 1f), VoronoiNode.NodeType.Internal);
 					voronoiNode.tags = new TagSet(tagSet5);
-					node3.position = randomPoints[l++];
+					node3.SetPosition(randomPoints[l++]);
 					Node node4 = graph.AddNode(feature.type);
 					node4.biomeSpecificTags = new TagSet(tagSet6);
 					VoronoiNode voronoiNode2 = node.AddSite(new VoronoiDiagram.Site((uint)node4.node.Id, node4.position, 1f), VoronoiNode.NodeType.Internal);
 					voronoiNode2.tags = new TagSet(tagSet5);
-					node4.position = randomPoints[l++];
+					node4.SetPosition(randomPoints[l++]);
 					graph.AddArc(node3, node4, feature.type);
 				}
-				else if (l + 1 < randomPoints.Count)
+				else if (l < randomPoints.Count)
 				{
 					Node node5 = graph.AddNode(feature.type);
 					node5.biomeSpecificTags = new TagSet(tagSet6);
-					node5.position = ((!(feature.type == WorldGenTags.StartLocation.Name)) ? randomPoints[l++] : node.site.poly.Centroid());
+					node5.SetPosition((!(feature.type == WorldGenTags.StartLocation.Name)) ? randomPoints[l++] : node.site.poly.Centroid());
 					VoronoiNode voronoiNode3 = node.AddSite(new VoronoiDiagram.Site((uint)node5.node.Id, node5.position, 1f), VoronoiNode.NodeType.Internal);
 					voronoiNode3.tags = new TagSet(tagSet5);
 				}
+			}
+			if (this.features.Count > randomPoints.Count)
+			{
 			}
 			while (l < randomPoints.Count)
 			{
@@ -215,21 +212,25 @@ namespace Klei
 				}
 				Node node6 = graph.AddNode(text);
 				node6.biomeSpecificTags = tagSet9;
-				node6.position = randomPoints[l];
+				node6.SetPosition(randomPoints[l]);
 				VoronoiNode voronoiNode4 = node.AddSite(new VoronoiDiagram.Site((uint)node6.node.Id, node6.position, 1f), VoronoiNode.NodeType.Internal);
-				voronoiNode4.tags = new TagSet(tagSet2);
+				voronoiNode4.tags = new TagSet(tagSet3);
 				if (tagSet9 != null)
 				{
 					voronoiNode4.tags.Union(tagSet9);
 				}
 				voronoiNode4.AddTag(new Tag(text));
-				voronoiNode4.AddTag(new Tag(string.Concat(new object[] { "ExtraPoint:", text, "(", l, ")" })));
 				l++;
 			}
 			node.ComputeChildren();
-			for (int n = 0; n < tagSet3.Count; n++)
+			if (node.ChildCount() > 0)
 			{
-				node.GetChild((int)WorldGen.RandomRange(0f, (float)node.ChildCount())).AddTag(tagSet3[n]);
+				for (int n = 0; n < tagSet2.Count; n++)
+				{
+					Debug.Log(string.Format("Applying Moved Tag {0} to {1}", tagSet2[n].Name, node.site.id));
+					VoronoiNode child = node.GetChild(WorldGen.RandomSource().Next(node.ChildCount()));
+					child.AddTag(tagSet2[n]);
+				}
 			}
 		}
 

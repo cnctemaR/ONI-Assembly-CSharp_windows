@@ -4,16 +4,15 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
+[SkipSaveFileSerialization]
 [SerializationConfig(MemberSerialization.OptIn)]
-public class ElementConsumer : KMonoBehaviour, ISaveLoadableJson, IEffectDescriptor
+public class ElementConsumer : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 {
-	public int DescriptionOrder { get; set; }
-
 	public float AverageConsumeRate
 	{
 		get
 		{
-			return this.accumulator.AvgFlowRate;
+			return this.accumulator.AvgRate;
 		}
 	}
 
@@ -30,12 +29,14 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadableJson, IEffectDescrip
 		{
 			throw new ArgumentException("No consumable elements specified");
 		}
-		this.Subscribe(824508782, new EventSystem.EventHandler(this.OnActiveChanged));
-		this.Subscribe(-1697596308, new EventSystem.EventHandler(this.OnStorageChanged));
-		if (this.IsActive())
-		{
-			this.SimRegister();
-		}
+		this.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
+		this.SimRegister();
+	}
+
+	protected override void OnCleanUp()
+	{
+		this.SimUnregister();
+		base.OnForcedCleanUp();
 	}
 
 	protected virtual bool IsActive()
@@ -43,40 +44,75 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadableJson, IEffectDescrip
 		return this.operational == null || this.operational.IsActive;
 	}
 
-	protected unsafe void SimUpdate(float dt)
+	public void EnableConsumption(bool enabled)
+	{
+		bool flag = this.consumptionEnabled;
+		this.consumptionEnabled = enabled;
+		if (!Sim.IsValidHandle(this.simHandle))
+		{
+			return;
+		}
+		if (enabled != flag)
+		{
+			this.UpdateSimData();
+			this.UpdateStatusItem();
+		}
+	}
+
+	public void RefreshConsumptionRate()
 	{
 		if (!Sim.IsValidHandle(this.simHandle))
 		{
 			return;
 		}
-		bool flag = false;
-		Sim.MassChangeInfo massChangeInfo = Game.Instance.simData.removedMassEntries[this.simHandle];
-		if (massChangeInfo.mass > 0f)
+		this.UpdateSimData();
+	}
+
+	private void UpdateSimData()
+	{
+		Debug.Assert(Sim.IsValidHandle(this.simHandle));
+		SimMessages.SetElementConsumerData(this.simHandle, (!this.consumptionEnabled) ? 0f : this.consumptionRate);
+	}
+
+	public static void AddMass(Sim.ConsumedMassInfo consumed_info)
+	{
+		if (!Sim.IsValidHandle(consumed_info.simHandle))
+		{
+			return;
+		}
+		ElementConsumer elementConsumer = null;
+		if (ElementConsumer.handleInstanceMap.TryGetValue(consumed_info.simHandle, out elementConsumer))
+		{
+			elementConsumer.AddMassInternal(consumed_info);
+		}
+	}
+
+	private void AddMassInternal(Sim.ConsumedMassInfo consumed_info)
+	{
+		if (consumed_info.mass > 0f)
 		{
 			if (this.storeOnConsume)
 			{
-				Element element = ElementLoader.elements[(int)massChangeInfo.removedElemIdx];
+				Element element = ElementLoader.elements[(int)consumed_info.removedElemIdx];
 				if (this.elementToConsume == SimHashes.Vacuum || this.elementToConsume == element.id)
 				{
 					if (element.IsLiquid)
 					{
-						this.storage.AddLiquid(element.id, massChangeInfo.mass, massChangeInfo.temperature, true);
+						this.storage.AddLiquid(element.id, consumed_info.mass, consumed_info.temperature, true);
 					}
 					else if (element.IsGas)
 					{
-						this.storage.AddGasChunk(element.id, massChangeInfo.mass, massChangeInfo.temperature, true);
+						this.storage.AddGasChunk(element.id, consumed_info.mass, consumed_info.temperature, true);
 					}
 				}
 			}
 			else
 			{
-				this.consumedTemperature = GameUtil.GetFinalTemperature(massChangeInfo.temperature, massChangeInfo.mass, this.consumedTemperature, this.consumedMass);
-				this.consumedMass += massChangeInfo.mass;
+				this.consumedTemperature = GameUtil.GetFinalTemperature(consumed_info.temperature, consumed_info.mass, this.consumedTemperature, this.consumedMass);
+				this.consumedMass += consumed_info.mass;
 			}
-			flag = true;
 		}
-		this.TriggerEvents(flag);
-		this.accumulator.Accumulate(this.consumedMass);
+		this.accumulator.Accumulate(consumed_info.mass);
 	}
 
 	public bool IsElementAvailable
@@ -86,6 +122,21 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadableJson, IEffectDescrip
 			int num = Grid.PosToCell(this.transform.position + this.sampleCellOffset);
 			SimHashes id = Grid.Element[num].id;
 			return this.elementToConsume == id && Grid.Cell[num].mass >= this.minimumMass;
+		}
+	}
+
+	private void UpdateStatusItem()
+	{
+		if (this.showInStatusPanel)
+		{
+			if (this.statusHandle == Guid.Empty && this.IsActive() && this.consumptionEnabled)
+			{
+				this.statusHandle = this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.ElementConsumer, this);
+			}
+			else if (this.statusHandle != Guid.Empty)
+			{
+				base.GetComponent<KSelectable>().RemoveStatusItem(this.statusHandle, false);
+			}
 		}
 	}
 
@@ -99,35 +150,15 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadableJson, IEffectDescrip
 		{
 			return;
 		}
-		KSelectable component = base.GetComponent<KSelectable>();
-		if (this.showInStatusPanel)
-		{
-			this.statusHandle = component.AddStatusItem(Db.Get().BuildingStatusItems.ElementConsumer, this);
-		}
-		this.SimRegister();
+		this.UpdateStatusItem();
 	}
 
 	protected override void OnCmpDisable()
 	{
-		if (this.previouslyActive)
-		{
-			this.Trigger(-2065215890, this);
-			this.previouslyActive = false;
-		}
-		if (this.showInStatusPanel)
-		{
-			base.GetComponent<KSelectable>().RemoveStatusItem(this.statusHandle);
-		}
-		this.SimUnregister();
+		this.UpdateStatusItem();
 	}
 
-	protected override void OnCleanUp()
-	{
-		this.SimUnregister();
-		base.OnCleanUp();
-	}
-
-	public List<Descriptor> GetRequirementDescriptions(BuildingDef def)
+	public List<Descriptor> RequirementDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		if (this.isRequired && this.showDescriptor)
@@ -137,32 +168,72 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadableJson, IEffectDescrip
 			string text2 = GameUtil.GetKeywordStyle(this.elementToConsume);
 			if (element.IsVacuum)
 			{
-				text2 = GameUtil.GetKeywordStyle(SimHashes.Oxygen);
-				text = ELEMENTS.STATEGAS;
+				if (this.configuration == ElementConsumer.Configuration.AllGas)
+				{
+					text2 = "gas";
+					text = ELEMENTS.STATEGAS;
+				}
+				else if (this.configuration == ElementConsumer.Configuration.AllLiquid)
+				{
+					text2 = "liquid";
+					text = ELEMENTS.STATELIQUID;
+				}
+				else
+				{
+					text2 = "anyElement";
+					text = UI.BUILDINGEFFECTS.CONSUMESANYELEMENT;
+				}
 			}
 			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, string.Format(UI.BUILDINGEFFECTS.REQUIRESELEMENT, text2, text)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESELEMENT, text2, text));
+			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.REQUIRESELEMENT, text2, text), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESELEMENT, text2, text), Descriptor.DescriptorType.Requirement);
 			list.Add(descriptor);
 		}
 		return list;
 	}
 
-	public List<Descriptor> GetEffectDescriptions(BuildingDef def)
+	public List<Descriptor> EffectDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		if (this.showDescriptor)
 		{
 			Element element = ElementLoader.FindElementByHash(this.elementToConsume);
 			string text = element.tag.ProperName();
-			string text2 = element.keywordStyle;
+			string text2 = GameUtil.GetKeywordStyle(element);
 			if (element.IsVacuum)
 			{
-				text2 = GameUtil.GetKeywordStyle(SimHashes.Oxygen);
-				text = ELEMENTS.STATEGAS;
+				if (this.configuration == ElementConsumer.Configuration.AllGas)
+				{
+					text2 = "gas";
+					text = ELEMENTS.STATEGAS;
+				}
+				else if (this.configuration == ElementConsumer.Configuration.AllLiquid)
+				{
+					text2 = "liquid";
+					text = ELEMENTS.STATELIQUID;
+				}
+				else
+				{
+					text2 = "anyElement";
+					text = UI.BUILDINGEFFECTS.CONSUMESANYELEMENT;
+				}
 			}
 			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMED, text2, text, GameUtil.GetFormattedMass(this.consumptionRate, GameUtil.TimeSlice.PerSecond, true, "F1"))), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMED, text2, text, GameUtil.GetFormattedMass(this.consumptionRate, GameUtil.TimeSlice.PerSecond, true, "F1")));
+			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMED, text2, text, GameUtil.GetFormattedMass(this.consumptionRate / 100f * 100f, GameUtil.TimeSlice.PerSecond, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMED, text2, text, GameUtil.GetFormattedMass(this.consumptionRate / 100f * 100f, GameUtil.TimeSlice.PerSecond, true, "{0:0.##}")), Descriptor.DescriptorType.Effect);
 			list.Add(descriptor);
+		}
+		return list;
+	}
+
+	public List<Descriptor> GetDescriptors(BuildingDef def)
+	{
+		List<Descriptor> list = new List<Descriptor>();
+		foreach (Descriptor descriptor in this.RequirementDescriptors(def))
+		{
+			list.Add(descriptor);
+		}
+		foreach (Descriptor descriptor2 in this.EffectDescriptors(def))
+		{
+			list.Add(descriptor2);
 		}
 		return list;
 	}
@@ -170,15 +241,7 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadableJson, IEffectDescrip
 	private void OnActiveChanged(object data)
 	{
 		bool isActive = this.operational.IsActive;
-		base.enabled = isActive;
-		if (base.enabled && isActive)
-		{
-			this.SimRegister();
-		}
-		else
-		{
-			this.SimUnregister();
-		}
+		this.EnableConsumption(isActive);
 	}
 
 	private void SimRegister()
@@ -191,7 +254,7 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadableJson, IEffectDescrip
 			{
 				ElementConsumer.OnSimRegistered(this, data);
 			}, "ElementConsumer");
-			SimMessages.AddElementConsumer(num, this.configuration, this.elementToConsume, this.consumptionRate, this.consumptionRadius, handle.index);
+			SimMessages.AddElementConsumer(num, this.configuration, this.elementToConsume, this.consumptionRadius, handle.index);
 		}
 	}
 
@@ -201,6 +264,7 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadableJson, IEffectDescrip
 		{
 			if (Sim.IsValidHandle(this.simHandle))
 			{
+				ElementConsumer.handleInstanceMap.Remove(this.simHandle);
 				SimMessages.RemoveElementConsumer(-1, this.simHandle);
 			}
 			this.simHandle = -1;
@@ -213,38 +277,15 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadableJson, IEffectDescrip
 		if (instance != null && instance.simHandle == -2)
 		{
 			instance.simHandle = num;
+			if (instance.consumptionEnabled)
+			{
+				instance.UpdateSimData();
+			}
+			ElementConsumer.handleInstanceMap[num] = instance;
 		}
 		else
 		{
 			SimMessages.RemoveElementConsumer(-1, num);
-		}
-	}
-
-	private void OnStorageChanged(object data)
-	{
-		bool flag = true;
-		if (this.operational != null)
-		{
-			flag = this.operational.IsOperational && !this.storage.IsFull();
-			this.operational.SetActive(flag, false);
-		}
-		this.TriggerEvents(flag);
-	}
-
-	private void TriggerEvents(bool active)
-	{
-		if (!active)
-		{
-			if (this.previouslyActive)
-			{
-				this.previouslyActive = false;
-				this.Trigger(-2065215890, this);
-			}
-		}
-		else if (!this.previouslyActive)
-		{
-			this.previouslyActive = true;
-			this.Trigger(-1995890641, this);
 		}
 	}
 
@@ -285,22 +326,28 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadableJson, IEffectDescrip
 	public bool storeOnConsume;
 
 	[MyCmpGet]
+	public Storage storage;
+
+	[MyCmpGet]
 	private Operational operational;
 
 	[MyCmpGet]
-	private Storage storage;
+	private KSelectable selectable;
 
 	private Accumulator accumulator;
 
 	private Guid statusHandle;
 
-	private bool previouslyActive;
-
 	public bool showDescriptor = true;
 
 	public bool isRequired = true;
 
+	private bool consumptionEnabled;
+
+	[SerializeField]
 	private int simHandle = -1;
+
+	private static Dictionary<int, ElementConsumer> handleInstanceMap = new Dictionary<int, ElementConsumer>();
 
 	public enum Configuration
 	{

@@ -53,8 +53,8 @@ namespace Klei.AI
 			};
 			string name = disease.Name;
 			string infectionSourceInfo = this.exposureInfo.infectionSourceInfo;
-			this.notification = new Notification(name, NotificationType.Bad, null, func, infectionSourceInfo, true, 0f, null, null, null);
-			this.statusItem = new StatusItem(disease.Id, disease.Name, string.Empty, DUPLICANTS.DISEASES.STATUS_ITEM_TOOLTIP, false, StatusItem.IconType.Exclamation, NotificationType.Bad, SimViewMode.None, SimViewMode.None);
+			this.notification = new Notification(name, NotificationType.Bad, HashedString.Invalid, func, infectionSourceInfo, true, 0f, null, null, null);
+			this.statusItem = new StatusItem(disease.Id, disease.Name, DUPLICANTS.DISEASES.STATUS_ITEM_TOOLTIP, string.Empty, StatusItem.IconType.Exclamation, NotificationType.Bad, false, SimViewMode.None, SimViewMode.None);
 			this.statusItem.resolveStringCallback = new Func<string, object, string>(this.ResolveString);
 			if (this.smi != null)
 			{
@@ -75,7 +75,7 @@ namespace Klei.AI
 			string properName = component.GetProperName();
 			str = str.Replace("{Infectee}", properName);
 			str = str.Replace("{InfectionSource}", this.exposureInfo.infectionSourceInfo);
-			str = str.Replace("{Duration}", GameUtil.GetFormattedCycles(this.GetInfectedTimeRemaining()));
+			str = str.Replace("{Duration}", GameUtil.GetFormattedCycles(this.GetInfectedTimeRemaining(), "F1"));
 			str = str.Replace("{Symptoms}", this.modifier.GetSymptoms());
 			if (this.curesApplied.Count > 0)
 			{
@@ -176,7 +176,7 @@ namespace Klei.AI
 			public float multiplier;
 		}
 
-		public class StatesInstance : GameStateMachine<DiseaseInstance.States, DiseaseInstance.StatesInstance, DiseaseInstance>.GameInstance
+		public class StatesInstance : GameStateMachine<DiseaseInstance.States, DiseaseInstance.StatesInstance, DiseaseInstance, object>.GameInstance
 		{
 			public StatesInstance(DiseaseInstance master)
 				: base(master)
@@ -239,9 +239,9 @@ namespace Klei.AI
 					.ToggleStatusItem((DiseaseInstance.StatesInstance smi) => smi.master.GetStatusItem(), (DiseaseInstance.StatesInstance smi) => smi.GetExposureInfo());
 			}
 
-			public StateMachine<DiseaseInstance.States, DiseaseInstance.StatesInstance, DiseaseInstance>.FloatParameter percentRecovered;
+			public StateMachine<DiseaseInstance.States, DiseaseInstance.StatesInstance, DiseaseInstance, object>.FloatParameter percentRecovered;
 
-			public GameStateMachine<DiseaseInstance.States, DiseaseInstance.StatesInstance, DiseaseInstance>.State infected;
+			public GameStateMachine<DiseaseInstance.States, DiseaseInstance.StatesInstance, DiseaseInstance, object>.State infected;
 		}
 	}
 }

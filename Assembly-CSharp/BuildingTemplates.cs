@@ -6,29 +6,30 @@ using UnityEngine;
 
 public class BuildingTemplates
 {
-	public static BuildingDef CreateBuildingDef(string id, int width, int height, string anim, float mass, float construction_time, float[] construction_mass, string[] construction_materials, float melting_point, BuildLocationRule build_location_rule, DecorValues decor, AttributeInfo[] attribute_infos = null)
+	public static BuildingDef CreateBuildingDef(string id, int width, int height, string anim, float mass, int hitpoints, float construction_time, float[] construction_mass, string[] construction_materials, float melting_point, BuildLocationRule build_location_rule, DecorValues decor, AttributeInfo[] attribute_infos = null)
 	{
 		BuildingDef buildingDef = ScriptableObject.CreateInstance<BuildingDef>();
 		buildingDef.PrefabID = id;
 		buildingDef.InitDef();
 		buildingDef.name = id;
 		buildingDef.Mass = construction_mass;
+		buildingDef.MassForTemperatureModification = construction_mass[0] * 0.2f;
 		buildingDef.WidthInCells = width;
 		buildingDef.HeightInCells = height;
+		buildingDef.HitPoints = hitpoints;
 		buildingDef.ConstructionTime = construction_time;
 		buildingDef.SceneLayer = Grid.SceneLayer.Building;
 		buildingDef.MaterialCategory = construction_materials;
-		buildingDef.MassForTemperatureModification = mass;
 		buildingDef.BaseMeltingPoint = melting_point;
 		switch (build_location_rule)
 		{
 		case BuildLocationRule.Anywhere:
 		case BuildLocationRule.Tile:
 			buildingDef.ContinuouslyCheckFoundation = false;
-			goto IL_008D;
+			goto IL_009D;
 		}
 		buildingDef.ContinuouslyCheckFoundation = true;
-		IL_008D:
+		IL_009D:
 		buildingDef.BuildLocationRule = build_location_rule;
 		BuildingTemplates.GetPlanCategory(id, out buildingDef.PlanCategory, out buildingDef.PlanOrder);
 		BuildingTemplates.GetResearchRequirement(id, out buildingDef.RequiredTechName);
@@ -41,7 +42,7 @@ public class BuildingTemplates
 		{
 			foreach (AttributeInfo attributeInfo in attribute_infos)
 			{
-				AttributeModifier attributeModifier = new AttributeModifier(attributeInfo.id, attributeInfo.value, null, false);
+				AttributeModifier attributeModifier = new AttributeModifier(attributeInfo.id, attributeInfo.value, null, false, false);
 				buildingDef.attributeModifiers.Add(attributeModifier);
 			}
 		}
@@ -63,7 +64,6 @@ public class BuildingTemplates
 				}
 			}
 		}
-		Debug.LogWarning("Unassigned planorder for: " + id);
 		planCategory = PlanCategory.Base.ToString();
 		planOrder = 0f;
 	}
@@ -88,13 +88,12 @@ public class BuildingTemplates
 	public static void CreateStandardBuildingDef(BuildingDef def)
 	{
 		def.Breakable = true;
-		def.ExplosionSize = Overheatable.ExplosionSize.None;
 	}
 
 	public static void CreateElectricalBuildingDef(BuildingDef def)
 	{
 		BuildingTemplates.CreateStandardBuildingDef(def);
-		def.RequiresPower = true;
+		def.RequiresPowerInput = true;
 		def.ViewMode = SimViewMode.PowerMap;
 		def.MaterialCategory = MATERIALS.ALL_METALS;
 		def.AudioCategory = "HollowMetal";
@@ -127,25 +126,5 @@ public class BuildingTemplates
 
 	public static void DoPostConfigure(GameObject go)
 	{
-		IEffectDescriptor[] components = go.GetComponents<IEffectDescriptor>();
-		foreach (IEffectDescriptor effectDescriptor in components)
-		{
-			int num = 9999;
-			effectDescriptor.DescriptionOrder = num;
-			KMonoBehaviour kmonoBehaviour = (KMonoBehaviour)effectDescriptor;
-			string name = kmonoBehaviour.GetType().Name;
-			for (int j = 0; j < BUILDINGS.COMPONENT_DESCRIPTION_ORDER.Length; j++)
-			{
-				if (BUILDINGS.COMPONENT_DESCRIPTION_ORDER[j] == name)
-				{
-					effectDescriptor.DescriptionOrder = j;
-					break;
-				}
-			}
-			if (effectDescriptor.DescriptionOrder == num)
-			{
-				Debug.LogWarning("Missing Effect Descriptor Order: " + name);
-			}
-		}
 	}
 }

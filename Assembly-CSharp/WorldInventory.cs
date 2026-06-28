@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class WorldInventory : KMonoBehaviour, ISaveLoadableJson
+public class WorldInventory : KMonoBehaviour, ISaveLoadable
 {
 	public event Action<Tag> OnDiscover;
 
@@ -14,13 +15,35 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadableJson
 	{
 		WorldInventory.Instance = this;
 		Components.LiquidSources.Register(new Action<LiquidSource>(this.OnAddLiquidSource), new Action<LiquidSource>(this.OnRemoveLiquidSource));
-		base.Subscribe(Game.Instance.gameObject, -1588644844, new EventSystem.EventHandler(this.OnAddedFetchable));
-		base.Subscribe(Game.Instance.gameObject, -1491270284, new EventSystem.EventHandler(this.OnRemovedFetchable));
+		base.Subscribe(Game.Instance.gameObject, -1588644844, new Action<object>(this.OnAddedFetchable));
+		base.Subscribe(Game.Instance.gameObject, -1491270284, new Action<object>(this.OnRemovedFetchable));
 	}
 
 	protected override void OnSpawn()
 	{
 		this.Prober = MinionGroupProber.Get();
+		base.StartCoroutine(this.InitialRefresh());
+	}
+
+	private IEnumerator InitialRefresh()
+	{
+		for (int i = 0; i < 1; i++)
+		{
+			yield return null;
+		}
+		for (int t = 0; t < Components.Pickupables.Count; t++)
+		{
+			Pickupable pickupable = Components.Pickupables[t];
+			if (pickupable != null)
+			{
+				ReachabilityMonitor.Instance reachability_monitor = pickupable.GetSMI<ReachabilityMonitor.Instance>();
+				if (reachability_monitor != null)
+				{
+					reachability_monitor.UpdateReachability();
+				}
+			}
+		}
+		yield break;
 	}
 
 	public void OnAddLiquidSource(LiquidSource source)
@@ -81,17 +104,30 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadableJson
 		return Mathf.Max(num, 0f);
 	}
 
-	public void Discover(Tag tag)
+	public void Discover(Tag tag, Tag categoryTag)
 	{
-		if (this.Discovered.Add(tag) && this.OnDiscover != null)
+		bool flag = this.Discovered.Add(tag);
+		this.DiscoverCategory(categoryTag, tag);
+		if (flag && this.OnDiscover != null)
 		{
 			this.OnDiscover(tag);
 		}
 	}
 
+	private void DiscoverCategory(Tag category_tag, Tag item_tag)
+	{
+		HashSet<Tag> hashSet;
+		if (!this.DiscoveredCategories.TryGetValue(category_tag, out hashSet))
+		{
+			hashSet = new HashSet<Tag>();
+			this.DiscoveredCategories[category_tag] = hashSet;
+		}
+		hashSet.Add(item_tag);
+	}
+
 	public bool IsDiscovered(Tag tag)
 	{
-		return this.Discovered.Contains(tag);
+		return this.Discovered.Contains(tag) || this.DiscoveredCategories.ContainsKey(tag);
 	}
 
 	public bool AnyDiscovered(ICollection<Tag> tags)
@@ -120,22 +156,14 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadableJson
 		return flag;
 	}
 
-	public Dictionary<Tag, Tag> GetDiscoveredResourceTags()
+	public HashSet<Tag> GetDiscoveredResourcesFromTag(Tag tag)
 	{
-		return this.discoveredResourceTags;
-	}
-
-	public List<Tag> GetDiscoveredResourcesFromTag(Tag tag)
-	{
-		List<Tag> list = new List<Tag>();
-		foreach (KeyValuePair<Tag, Tag> keyValuePair in this.discoveredResourceTags)
+		HashSet<Tag> hashSet;
+		if (this.DiscoveredCategories.TryGetValue(tag, out hashSet))
 		{
-			if (keyValuePair.Value == tag)
-			{
-				list.Add(keyValuePair.Key);
-			}
+			return hashSet;
 		}
-		return list;
+		return new HashSet<Tag>();
 	}
 
 	private void Update()
@@ -148,21 +176,15 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadableJson
 				Tag key = keyValuePair.Key;
 				List<Pickupable> value = keyValuePair.Value;
 				float num2 = 0f;
-				Element element = ElementLoader.GetElement(key);
-				if (element != null && !this.discoveredResourceTags.ContainsKey(key))
-				{
-					DebugUtil.SoftAssert(element.GetMaterialCategoryTag().IsValid, element.name + " was found by worldinventory but doesn't have a category! Add it to the element definition.");
-					this.discoveredResourceTags[key] = element.GetMaterialCategoryTag();
-				}
 				for (int i = 0; i < value.Count; i++)
 				{
 					Pickupable pickupable = value[i];
-					if (pickupable != null && (pickupable.storage == null || pickupable.storage.allowItemRemoval))
+					if (pickupable != null && (pickupable.storage == null || pickupable.storage.allowItemRemoval || pickupable.storage.countAsAccessible))
 					{
 						num2 += pickupable.TotalAmount;
 					}
 				}
-				this.accessibleAmounts[keyValuePair.Key] = num2;
+				this.accessibleAmounts[key] = num2;
 				this.accessibleUpdateIndex = (this.accessibleUpdateIndex + 1) % this.Inventory.Count;
 				break;
 			}
@@ -174,7 +196,7 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadableJson
 			List<LiquidSource> list;
 			if (!this.LiquidSources.TryGetValue(elementTag, out list))
 			{
-				this.Discover(elementTag);
+				this.Discover(elementTag, this.PendingLiquidAdds[j].GetMaterialCategoryTag());
 				list = new List<LiquidSource>();
 				this.LiquidSources[elementTag] = list;
 			}
@@ -189,12 +211,6 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadableJson
 				if (value2[k] == null)
 				{
 					value2.RemoveAt(k);
-				}
-				else if (!this.discoveredResourceTags.ContainsKey(value2[k].GetElementTag()))
-				{
-					Element element2 = ElementLoader.FindElementByHash(value2[k].GetElementID());
-					DebugUtil.SoftAssert(element2.GetMaterialCategoryTag().IsValid, element2.name + " was found by worldinventory but doesn't have a category! Add it to the element definition.");
-					this.discoveredResourceTags[element2.tag] = element2.GetMaterialCategoryTag();
 				}
 			}
 		}
@@ -211,15 +227,32 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadableJson
 		GameObject gameObject = (GameObject)data;
 		Pickupable component = gameObject.GetComponent<Pickupable>();
 		KPrefabID component2 = component.GetComponent<KPrefabID>();
-		for (int i = 0; i < component2.Tags.Length; i++)
+		Tag tag = component2.PrefabID();
+		if (!this.Inventory.ContainsKey(tag))
 		{
-			Tag tag = component2.Tags[i];
-			List<Pickupable> list;
-			if (!this.Inventory.TryGetValue(tag, out list))
+			Tag tag2 = Tag.Invalid;
+			for (int i = 0; i < component2.Tags.Length; i++)
 			{
-				this.Discover(tag);
+				if (GameTags.AllCategories.Contains(component2.Tags[i]))
+				{
+					tag2 = component2.Tags[i];
+					break;
+				}
+			}
+			if (!tag2.IsValid)
+			{
+				DebugUtil.SoftAssert(false, component.name + " was found by worldinventory but doesn't have a category! Add it to the element definition.");
+			}
+			this.Discover(tag, tag2);
+		}
+		for (int j = 0; j < component2.Tags.Length; j++)
+		{
+			Tag tag3 = component2.Tags[j];
+			List<Pickupable> list;
+			if (!this.Inventory.TryGetValue(tag3, out list))
+			{
 				list = new List<Pickupable>();
-				this.Inventory[tag] = list;
+				this.Inventory[tag3] = list;
 			}
 			list.Add(component);
 		}
@@ -243,7 +276,7 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadableJson
 	private HashSet<Tag> Discovered = new HashSet<Tag>();
 
 	[Serialize]
-	private Dictionary<Tag, Tag> discoveredResourceTags = new Dictionary<Tag, Tag>();
+	private Dictionary<Tag, HashSet<Tag>> DiscoveredCategories = new Dictionary<Tag, HashSet<Tag>>();
 
 	private Dictionary<Tag, List<LiquidSource>> LiquidSources = new Dictionary<Tag, List<LiquidSource>>();
 

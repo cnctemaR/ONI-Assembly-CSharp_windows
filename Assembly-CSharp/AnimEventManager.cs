@@ -11,12 +11,12 @@ public class AnimEventManager
 		animData.totalTime = anim.totalTime;
 		animData.numFrames = anim.numFrames;
 		animData.useUnscaledTime = use_unscaled_time;
-		AnimEventManager.EventPlayerData eventPlayerData = default(AnimEventManager.EventPlayerData);
+		AnimEventManager.EventPlayerData eventPlayerData = new AnimEventManager.EventPlayerData();
 		eventPlayerData.elapsedTime = time;
 		eventPlayerData.mode = mode;
-		eventPlayerData.currentFrame = this.GetFrameIdx(mode, time, animData);
+		eventPlayerData.controller = controller as KBatchedAnimController;
+		eventPlayerData.currentFrame = eventPlayerData.controller.GetFrameIdx(eventPlayerData.elapsedTime, false);
 		eventPlayerData.previousFrame = -1;
-		eventPlayerData.controller = controller;
 		eventPlayerData.events = null;
 		eventPlayerData.updatingEvents = null;
 		KPrefabID component = controller.GetComponent<KPrefabID>();
@@ -69,6 +69,11 @@ public class AnimEventManager
 		return this.eventData[handle].elapsedTime;
 	}
 
+	public void SetElapsedTime(int handle, float elapsedTime)
+	{
+		this.eventData[handle].SetElapsedTime(elapsedTime);
+	}
+
 	public void Update()
 	{
 		float deltaTime = Time.deltaTime;
@@ -78,29 +83,33 @@ public class AnimEventManager
 			AnimEventManager.EventPlayerData eventPlayerData = this.eventData[i];
 			if (!(eventPlayerData.controller == null))
 			{
-				eventPlayerData.currentFrame = this.GetFrameIdx(eventPlayerData.mode, eventPlayerData.elapsedTime, this.animData[i]);
+				eventPlayerData.currentFrame = eventPlayerData.controller.GetFrameIdx(eventPlayerData.elapsedTime, false);
 				this.PlayEvents(eventPlayerData);
-				eventPlayerData.elapsedTime += ((!this.animData[i].useUnscaledTime) ? deltaTime : unscaledDeltaTime);
+				float num = ((!this.animData[i].useUnscaledTime) ? deltaTime : unscaledDeltaTime);
 				eventPlayerData.previousFrame = eventPlayerData.currentFrame;
-				if (eventPlayerData.updatingEvents != null)
+				eventPlayerData.elapsedTime += num * eventPlayerData.controller.GetPlaySpeed();
+				if (num > 0f && eventPlayerData.mode != KAnim.PlayMode.Paused)
 				{
-					for (int j = 0; j < eventPlayerData.updatingEvents.Count; j++)
+					if (eventPlayerData.updatingEvents != null)
 					{
-						AnimEvent animEvent = eventPlayerData.updatingEvents[j];
-						animEvent.OnUpdate(eventPlayerData);
+						for (int j = 0; j < eventPlayerData.updatingEvents.Count; j++)
+						{
+							AnimEvent animEvent = eventPlayerData.updatingEvents[j];
+							animEvent.OnUpdate(eventPlayerData);
+						}
 					}
-				}
-				this.eventData[i] = eventPlayerData;
-				if (eventPlayerData.mode != KAnim.PlayMode.Loop && eventPlayerData.currentFrame >= this.animData[i].numFrames - 1)
-				{
-					this.StopEvents(eventPlayerData);
-					this.finishedCalls.Add(eventPlayerData.controller);
+					this.eventData[i] = eventPlayerData;
+					if (eventPlayerData.mode != KAnim.PlayMode.Loop && eventPlayerData.currentFrame >= this.animData[i].numFrames - 1)
+					{
+						this.StopEvents(eventPlayerData);
+						this.finishedCalls.Add(eventPlayerData.controller);
+					}
 				}
 			}
 		}
 		for (int k = 0; k < this.finishedCalls.Count; k++)
 		{
-			KBatchedAnimController kbatchedAnimController = this.finishedCalls[k] as KBatchedAnimController;
+			KBatchedAnimController kbatchedAnimController = this.finishedCalls[k];
 			kbatchedAnimController.TriggerStop();
 		}
 		this.finishedCalls.Clear();
@@ -128,31 +137,6 @@ public class AnimEventManager
 		}
 	}
 
-	private int GetFrameIdx(KAnim.PlayMode mode, float t, AnimEventManager.AnimData anim_data)
-	{
-		if (anim_data.numFrames <= 0)
-		{
-			return -1;
-		}
-		int num = 0;
-		if (mode != KAnim.PlayMode.Loop)
-		{
-			if (mode != KAnim.PlayMode.Once)
-			{
-			}
-		}
-		else
-		{
-			t %= anim_data.totalTime;
-		}
-		if (t > 0f)
-		{
-			float num2 = t * anim_data.frameRate + 0.49999997f;
-			num = Math.Min(anim_data.numFrames - 1, (int)num2);
-		}
-		return num;
-	}
-
 	private static readonly List<AnimEvent> emptyEventList = new List<AnimEvent>();
 
 	private List<AnimEventManager.EventPlayerData> eventData = new List<AnimEventManager.EventPlayerData>();
@@ -161,7 +145,7 @@ public class AnimEventManager
 
 	private List<int> freeIndices = new List<int>();
 
-	private List<KAnimControllerBase> finishedCalls = new List<KAnimControllerBase>();
+	private List<KBatchedAnimController> finishedCalls = new List<KBatchedAnimController>();
 
 	private struct AnimData
 	{
@@ -174,7 +158,7 @@ public class AnimEventManager
 		public bool useUnscaledTime;
 	}
 
-	private struct EventPlayerData : IAnimBehaviour
+	public class EventPlayerData
 	{
 		public int currentFrame { get; set; }
 
@@ -209,6 +193,14 @@ public class AnimEventManager
 			}
 		}
 
+		public KAnimHashedString currentAnimFileHash
+		{
+			get
+			{
+				return this.controller.currentAnimFileHash;
+			}
+		}
+
 		public string currentAnim
 		{
 			get
@@ -234,6 +226,11 @@ public class AnimEventManager
 			this.updatingEvents.Add(ev);
 		}
 
+		public void SetElapsedTime(float elapsedTime)
+		{
+			this.elapsedTime = elapsedTime;
+		}
+
 		public float elapsedTime;
 
 		public KAnim.PlayMode mode;
@@ -242,6 +239,6 @@ public class AnimEventManager
 
 		public List<AnimEvent> updatingEvents;
 
-		public KAnimControllerBase controller;
+		public KBatchedAnimController controller;
 	}
 }

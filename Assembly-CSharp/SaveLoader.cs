@@ -7,6 +7,7 @@ using Delaunay.Geo;
 using Ionic.Zlib;
 using Klei;
 using KSerialization;
+using STRINGS;
 using UnityEngine;
 
 public class SaveLoader : KMonoBehaviour
@@ -15,7 +16,9 @@ public class SaveLoader : KMonoBehaviour
 
 	public global::System.Action OnWorldGenComplete { get; set; }
 
-	public SaveGame.HeaderData SaveHeader { get; private set; }
+	public SaveGame.Header LoadedHeader { get; private set; }
+
+	public SaveGame.GameInfo GameInfo { get; private set; }
 
 	protected override void OnPrefabInit()
 	{
@@ -23,7 +26,7 @@ public class SaveLoader : KMonoBehaviour
 		this.saveManager = base.GetComponent<SaveManager>();
 	}
 
-	private void MoveCurruptFile(string filename)
+	private void MoveCorruptFile(string filename)
 	{
 		try
 		{
@@ -48,13 +51,13 @@ public class SaveLoader : KMonoBehaviour
 			Sim.SIM_Initialize(null);
 			SimMessages.CreateSimElementsTable(ElementLoader.elements);
 			this.loadedFromSave = this.Load(activeSaveFilePath);
-			this.saveFileCurrupt = !this.loadedFromSave;
+			this.saveFileCorrupt = !this.loadedFromSave;
 			if (!this.loadedFromSave)
 			{
 				SaveLoader.SetActiveSaveFilePath(null);
 				if (this.mustRestartOnFail)
 				{
-					this.MoveCurruptFile(activeSaveFilePath);
+					this.MoveCorruptFile(activeSaveFilePath);
 					Sim.Shutdown();
 					App.LoadScene("frontend");
 					return;
@@ -68,9 +71,9 @@ public class SaveLoader : KMonoBehaviour
 			{
 				Output.Log(new object[] { "Couldn't load [" + activeSaveFilePath + "]" });
 			}
-			if (this.saveFileCurrupt)
+			if (this.saveFileCorrupt)
 			{
-				this.MoveCurruptFile(activeSaveFilePath);
+				this.MoveCorruptFile(activeSaveFilePath);
 			}
 			bool flag = WorldGen.CanLoad(WorldGen.SIM_SAVE_FILENAME);
 			if (!flag || !this.LoadFromWorldGen())
@@ -79,7 +82,7 @@ public class SaveLoader : KMonoBehaviour
 				if (flag)
 				{
 					KMonoBehaviour.isLoadingScene = true;
-					this.MoveCurruptFile(WorldGen.SIM_SAVE_FILENAME);
+					this.MoveCorruptFile(WorldGen.SIM_SAVE_FILENAME);
 				}
 				App.LoadScene("frontend");
 			}
@@ -89,12 +92,17 @@ public class SaveLoader : KMonoBehaviour
 
 	public static byte[] CompressContents(byte[] uncompressed)
 	{
+		return SaveLoader.CompressContents(uncompressed, uncompressed.Length);
+	}
+
+	public static byte[] CompressContents(byte[] uncompressed, int length)
+	{
 		byte[] array;
-		using (MemoryStream memoryStream = new MemoryStream(uncompressed.Length))
+		using (MemoryStream memoryStream = new MemoryStream(length))
 		{
 			using (ZlibStream zlibStream = new ZlibStream(memoryStream, CompressionMode.Compress, CompressionLevel.BestSpeed))
 			{
-				zlibStream.Write(uncompressed, 0, uncompressed.Length);
+				zlibStream.Write(uncompressed, 0, length);
 				zlibStream.Flush();
 			}
 			memoryStream.Flush();
@@ -173,6 +181,50 @@ public class SaveLoader : KMonoBehaviour
 		Game.Instance.Save(writer);
 	}
 
+	private bool Load(IReader reader)
+	{
+		string text = reader.ReadKleiString();
+		Debug.Assert(text == "world");
+		Deserializer deserializer = new Deserializer(reader);
+		SaveFileRoot saveFileRoot = new SaveFileRoot();
+		deserializer.Deserialize(saveFileRoot);
+		Game.LoadSettings(deserializer);
+		GridSettings.Reset(saveFileRoot.WidthInCells, saveFileRoot.HeightInCells);
+		Sim.SIM_Initialize(null);
+		SimMessages.CreateSimElementsTable(ElementLoader.elements);
+		byte[] array = saveFileRoot.streamed["Sim"];
+		FastReader fastReader = new FastReader(array);
+		if (Sim.Load(fastReader) != 0)
+		{
+			Output.LogWarning(new object[] { "\n--- Error loading save ---\nSimDLL found bad data\n" });
+			Sim.Shutdown();
+			return false;
+		}
+		if (PlayerPrefs.HasKey("TemperatureUnit"))
+		{
+			GameUtil.temperatureUnit = (GameUtil.TemperatureUnit)PlayerPrefs.GetInt("TemperatureUnit");
+		}
+		if (PlayerPrefs.HasKey("MassUnit"))
+		{
+			GameUtil.massUnit = (GameUtil.MassUnit)PlayerPrefs.GetInt("MassUnit");
+		}
+		SceneInitializer.Instance.PostLoadPrefabs();
+		this.mustRestartOnFail = true;
+		if (!this.saveManager.Load(reader))
+		{
+			Sim.Shutdown();
+			Output.LogWarning(new object[] { "\n--- Error loading save ---\n" });
+			SaveLoader.SetActiveSaveFilePath(null);
+			return false;
+		}
+		Grid.Visible = saveFileRoot.streamed["GridVisible"];
+		Grid.Damage = this.BytesToFloat(saveFileRoot.streamed["GridDamage"]);
+		Game.Instance.Load(deserializer);
+		FastReader fastReader2 = new FastReader(saveFileRoot.streamed["Camera"]);
+		CameraSaveData.Load(fastReader2);
+		return true;
+	}
+
 	public static string GetSavePrefix()
 	{
 		string text = Util.RootFolder();
@@ -238,7 +290,7 @@ public class SaveLoader : KMonoBehaviour
 				}
 				catch (Exception ex)
 				{
-					Debug.LogWarning("Problem reading file: " + text);
+					Debug.LogWarning("Problem reading file: " + text + "\n" + ex.ToString());
 				}
 			}
 		}
@@ -294,25 +346,49 @@ public class SaveLoader : KMonoBehaviour
 				list.RemoveAt(0);
 			}
 		}
+		byte[] array = null;
 		using (MemoryStream memoryStream = new MemoryStream())
 		{
 			using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
 			{
-				using (BinaryWriter binaryWriter2 = new BinaryWriter(File.Open(filename, FileMode.Create)))
+				this.Save(binaryWriter);
+				if (this.compressSaveData)
 				{
-					SaveGame.Header header;
-					byte[] saveHeader = SaveGame.Instance.GetSaveHeader(isAutoSave, out header);
-					binaryWriter2.Write(header.buildVersion);
-					binaryWriter2.Write(header.headerSize);
-					binaryWriter2.Write(header.headerVersion);
-					binaryWriter2.Write(saveHeader);
-					this.Save(binaryWriter);
-					Manager.SerializeDirectory(binaryWriter2);
-					memoryStream.WriteTo(binaryWriter2.BaseStream);
-					Stats.Print();
-					Manager.Clear();
+					array = SaveLoader.CompressContents(memoryStream.GetBuffer(), (int)memoryStream.Length);
+				}
+				else
+				{
+					array = memoryStream.ToArray();
 				}
 			}
+		}
+		try
+		{
+			using (BinaryWriter binaryWriter2 = new BinaryWriter(File.Open(filename, FileMode.Create)))
+			{
+				SaveGame.Header header;
+				byte[] saveHeader = SaveGame.Instance.GetSaveHeader(isAutoSave, this.compressSaveData, out header);
+				binaryWriter2.Write(header.buildVersion);
+				binaryWriter2.Write(header.headerSize);
+				binaryWriter2.Write(header.headerVersion);
+				binaryWriter2.Write(header.compression);
+				binaryWriter2.Write(saveHeader);
+				Manager.SerializeDirectory(binaryWriter2);
+				binaryWriter2.Write(array);
+				Stats.Print();
+				Manager.Clear();
+			}
+		}
+		catch (Exception ex)
+		{
+			if (ex is UnauthorizedAccessException)
+			{
+				Output.Log(new object[] { "UnauthorizedAccessException for " + filename });
+				ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
+				confirmDialogScreen.PopupConfirmDialog(string.Format(UI.CRASHSCREEN.SAVEFAILED, "Unauthorized Access Exception"), null, null, null, null);
+				return SaveLoader.GetActiveSaveFilePath();
+			}
+			throw ex;
 		}
 		if (updateSavePointer)
 		{
@@ -326,16 +402,16 @@ public class SaveLoader : KMonoBehaviour
 		return filename;
 	}
 
-	public static SaveGame.HeaderData LoadHeader(string filename, out SaveGame.Header header)
+	public static SaveGame.GameInfo LoadHeader(string filename, out SaveGame.Header header)
 	{
-		SaveGame.HeaderData headerData;
+		SaveGame.GameInfo gameInfo;
 		using (BinaryReader binaryReader = new BinaryReader(File.Open(filename, FileMode.Open)))
 		{
 			header = SaveGame.GetHeader(binaryReader);
 			byte[] array = binaryReader.ReadBytes(header.headerSize);
-			headerData = SaveGame.GetHeaderData(array);
+			gameInfo = SaveGame.GetGameInfo(array);
 		}
-		return headerData;
+		return gameInfo;
 	}
 
 	public bool Load(string filename)
@@ -346,7 +422,8 @@ public class SaveLoader : KMonoBehaviour
 			byte[] array = File.ReadAllBytes(filename);
 			IReader reader = new FastReader(array);
 			SaveGame.Header header;
-			this.SaveHeader = SaveGame.GetHeader(reader, out header);
+			this.GameInfo = SaveGame.GetHeader(reader, out header);
+			this.LoadedHeader = header;
 			Manager.assemblies = new Assembly[]
 			{
 				typeof(WorldGen).Assembly,
@@ -354,48 +431,22 @@ public class SaveLoader : KMonoBehaviour
 				typeof(Vector2).Assembly
 			};
 			Manager.DeserializeDirectory(reader);
-			string text = reader.ReadKleiString();
-			Debug.Assert(text == "world");
-			Deserializer deserializer = new Deserializer(reader);
-			SaveFileRoot saveFileRoot = new SaveFileRoot();
-			deserializer.Deserialize(saveFileRoot);
-			Game.LoadSettings(deserializer);
-			GridSettings.Reset(saveFileRoot.WidthInCells, saveFileRoot.HeightInCells);
-			Sim.SIM_Initialize(null);
-			SimMessages.CreateSimElementsTable(ElementLoader.elements);
-			byte[] array2 = saveFileRoot.streamed["Sim"];
-			FastReader fastReader = new FastReader(array2);
-			if (Sim.Load(fastReader) != 0)
+			if (header.IsCompressed)
 			{
-				Output.LogWarning(new object[] { "\n--- Error loading save ---\nSimDLL found bad data\n" });
-				Sim.Shutdown();
-				return false;
+				int num = array.Length - reader.Position;
+				byte[] array2 = new byte[num];
+				Array.Copy(array, reader.Position, array2, 0, num);
+				byte[] array3 = SaveLoader.DecompressContents(array2);
+				IReader reader2 = new FastReader(array3);
+				this.Load(reader2);
 			}
-			if (PlayerPrefs.HasKey("TemperatureUnit"))
+			else
 			{
-				GameUtil.temperatureUnit = (GameUtil.TemperatureUnit)PlayerPrefs.GetInt("TemperatureUnit");
+				this.Load(reader);
 			}
-			if (PlayerPrefs.HasKey("MassUnit"))
+			if (this.GameInfo.isAutoSave && !string.IsNullOrEmpty(this.GameInfo.originalSaveName))
 			{
-				GameUtil.massUnit = (GameUtil.MassUnit)PlayerPrefs.GetInt("MassUnit");
-			}
-			SceneInitializer.Instance.PostLoadPrefabs();
-			this.mustRestartOnFail = true;
-			if (!this.saveManager.Load(reader))
-			{
-				Sim.Shutdown();
-				Output.LogWarning(new object[] { "\n--- Error loading save ---\n" });
-				SaveLoader.SetActiveSaveFilePath(null);
-				return false;
-			}
-			Grid.Visible = saveFileRoot.streamed["GridVisible"];
-			Grid.Damage = this.BytesToFloat(saveFileRoot.streamed["GridDamage"]);
-			Game.Instance.Load(deserializer);
-			FastReader fastReader2 = new FastReader(saveFileRoot.streamed["Camera"]);
-			CameraSaveData.Load(fastReader2);
-			if (this.SaveHeader.isAutoSave && !string.IsNullOrEmpty(this.SaveHeader.originalSaveName))
-			{
-				SaveLoader.SetActiveSaveFilePath(this.SaveHeader.originalSaveName);
+				SaveLoader.SetActiveSaveFilePath(this.GameInfo.originalSaveName);
 			}
 		}
 		catch (Exception ex)
@@ -489,7 +540,9 @@ public class SaveLoader : KMonoBehaviour
 
 	private bool loadedFromSave;
 
-	private bool saveFileCurrupt;
+	private bool saveFileCorrupt;
+
+	private bool compressSaveData = true;
 
 	public bool saveAsText;
 
@@ -523,7 +576,7 @@ public class SaveLoader : KMonoBehaviour
 	}
 
 	[SerializationConfig(MemberSerialization.OptOut)]
-	public class FlowUtilityNetworkSaver : ISaveLoadableJson
+	public class FlowUtilityNetworkSaver : ISaveLoadable
 	{
 		public FlowUtilityNetworkSaver()
 		{

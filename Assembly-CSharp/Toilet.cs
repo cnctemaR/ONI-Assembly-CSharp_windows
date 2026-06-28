@@ -8,9 +8,6 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		Component[] components = base.gameObject.GetComponents<Storage>();
-		this.inStorage = (Storage)components[0];
-		this.outStorage = (Storage)components[1];
 		Components.Toilets.Add(this);
 		base.smi.StartSM();
 		ToiletWorkableUse component = base.GetComponent<ToiletWorkableUse>();
@@ -18,8 +15,8 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 		component.onAbort = new Action<Worker>(this.Flush);
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Behind, new string[] { "meter_target", "meter_arrow", "meter_scale" });
 		this.meter.SetPositionPercent((float)base.smi.sm.flushes.Get(base.smi) / (float)base.smi.master.maxFlushes);
-		this.Subscribe(493375141, new EventSystem.EventHandler(this.OnRefreshUserMenu));
-		foreach (GameObject gameObject in this.inStorage.items)
+		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		foreach (GameObject gameObject in this.storage.items)
 		{
 			if (gameObject != null)
 			{
@@ -42,22 +39,15 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 	public void Flush(Worker worker)
 	{
 		float temperature = base.GetComponent<PrimaryElement>().Temperature;
-		Element element = ElementLoader.FindElementByHash(this.solidWaste.elementID);
+		Element element = ElementLoader.FindElementByHash(this.solidWastePerUse.elementID);
 		GameObject gameObject = element.substance.SpawnResource(this.transform.position, base.smi.MassPerFlush(), temperature, true, false);
-		this.inStorage.Store(gameObject, false, false);
+		this.storage.Store(gameObject, false, false);
 		base.smi.sm.flushes.Delta(1, base.smi);
 		this.meter.SetPositionPercent((float)base.smi.sm.flushes.Get(base.smi) / (float)base.smi.master.maxFlushes);
 	}
 
 	private void OnEmitGas()
 	{
-		bool flag = this.outStorage != null && !this.outStorage.IsEmpty();
-		if (flag)
-		{
-			int num = Grid.PosToCell(this);
-			float temperature = base.GetComponent<PrimaryElement>().Temperature;
-			SimMessages.AddRemoveSubstance(num, this.gasWaste.elementID, CellEventLogger.Instance.ToiletEmit, this.gasWaste.mass, temperature, -1);
-		}
 	}
 
 	private void OnRefreshUserMenu(object data)
@@ -71,7 +61,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 		userMenu.AddButton(new KIconButtonMenu.ButtonInfo("status_item_toilet_needs_emptying", UI.USERMENUACTIONS.CLEANTOILET.NAME, delegate
 		{
 			base.smi.GoTo(base.smi.sm.earlyclean);
-		}, global::Action.NumActions, null, null, null, null, text));
+		}, global::Action.NumActions, null, null, null, text, true), 1f);
 	}
 
 	private void SpawnMonster()
@@ -84,7 +74,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 	{
 		base.OnPrefabInit();
 		base.GetComponent<Storage>().choreType = Db.Get().ChoreTypes.FetchCritical;
-		this.Subscribe(-1697596308, new EventSystem.EventHandler(this.OnStorageChanged));
+		this.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
 	}
 
 	private void OnStorageChanged(object data)
@@ -102,42 +92,54 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 		Sublimates component = go.GetComponent<Sublimates>();
 		if (component != null)
 		{
-			bool flag = this.inStorage.items.Contains(go);
+			bool flag = this.storage.items.Contains(go);
 			component.enabled = !flag;
 		}
 	}
 
-	public List<Descriptor> GetRequirementDescriptions(BuildingDef def)
+	public List<Descriptor> RequirementDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		ManualDeliveryKG component = base.GetComponent<ManualDeliveryKG>();
 		Tag requestedItemTag = component.requestedItemTag;
 		string keywordStyle = GameUtil.GetKeywordStyle(requestedItemTag);
 		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMEDPERUSE, keywordStyle, requestedItemTag, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, true, "F1"))), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMEDPERUSE, keywordStyle, requestedItemTag, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, true, "F1")));
+		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMEDPERUSE, keywordStyle, requestedItemTag, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMEDPERUSE, keywordStyle, requestedItemTag, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, true, "{0:0.##}")), Descriptor.DescriptorType.Requirement);
 		list.Add(descriptor);
 		return list;
 	}
 
-	public int DescriptionOrder { get; set; }
-
-	public List<Descriptor> GetEffectDescriptions(BuildingDef def)
+	public List<Descriptor> EffectDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		Element element = ElementLoader.FindElementByHash(this.solidWaste.elementID);
+		Element element = ElementLoader.FindElementByHash(this.solidWastePerUse.elementID);
 		string text = element.tag.ProperName();
-		string keywordStyle = element.keywordStyle;
+		string keywordStyle = GameUtil.GetKeywordStyle(element);
 		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTEDPERUSE, keywordStyle, text, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, true, "F1"))), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTEDPERUSE, keywordStyle, text, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, true, "F1")));
+		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTEDPERUSE, keywordStyle, text, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTEDPERUSE, keywordStyle, text, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, true, "{0:0.##}")), Descriptor.DescriptorType.Effect);
 		list.Add(descriptor);
 		return list;
 	}
 
-	[SerializeField]
-	public Toilet.SpawnInfo solidWaste;
+	public List<Descriptor> GetDescriptors(BuildingDef def)
+	{
+		List<Descriptor> list = new List<Descriptor>();
+		foreach (Descriptor descriptor in this.RequirementDescriptors(def))
+		{
+			list.Add(descriptor);
+		}
+		foreach (Descriptor descriptor2 in this.EffectDescriptors(def))
+		{
+			list.Add(descriptor2);
+		}
+		return list;
+	}
 
 	[SerializeField]
-	public Toilet.SpawnInfo gasWaste;
+	public Toilet.SpawnInfo solidWastePerUse;
+
+	[SerializeField]
+	public Toilet.SpawnInfo gasWasteWhenFull;
 
 	[SerializeField]
 	public int maxFlushes = 15;
@@ -145,9 +147,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 	private MeterController meter;
 
 	[MyCmpReq]
-	private Storage inStorage;
-
-	private Storage outStorage;
+	private Storage storage;
 
 	[MyCmpAdd]
 	private UserMenu userMenu;
@@ -170,7 +170,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 		public float interval;
 	}
 
-	public class StatesInstance : GameStateMachine<Toilet.States, Toilet.StatesInstance, Toilet>.GameInstance
+	public class StatesInstance : GameStateMachine<Toilet.States, Toilet.StatesInstance, Toilet, object>.GameInstance
 	{
 		public StatesInstance(Toilet master)
 			: base(master)
@@ -197,13 +197,13 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 
 		public float MassPerFlush()
 		{
-			return base.master.solidWaste.mass / (float)base.master.maxFlushes;
+			return base.master.solidWastePerUse.mass;
 		}
 
 		public bool IsToxicSandRemoved()
 		{
-			Tag tag = TagManager.Create(base.master.solidWaste.elementID);
-			return base.master.inStorage.Find(tag).Count == 0;
+			Tag tag = TagManager.Create(base.master.solidWastePerUse.elementID);
+			return base.master.storage.Find(tag).Count == 0;
 		}
 
 		public void CreateCleanChore()
@@ -229,11 +229,11 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 		private void OnCleanComplete(Chore chore)
 		{
 			this.cleanChore = null;
-			Tag tag = TagManager.Create(base.master.solidWaste.elementID);
-			List<GameObject> list = base.master.inStorage.Find(tag);
+			Tag tag = TagManager.Create(base.master.solidWastePerUse.elementID);
+			List<GameObject> list = base.master.storage.Find(tag);
 			foreach (GameObject gameObject in list)
 			{
-				base.master.inStorage.Drop(gameObject);
+				base.master.storage.Drop(gameObject);
 			}
 		}
 
@@ -273,10 +273,10 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 				.QueueAnim("full", false, null)
 				.ToggleStatusItem(Db.Get().BuildingStatusItems.ToiletNeedsEmptying, null)
 				.ToggleMainStatusItem(Db.Get().BuildingStatusItems.Unusable)
-				.ToggleSchedulePeriodic("toilet_emit_gas", (Toilet.StatesInstance smi) => smi.master.gasWaste.interval, delegate(Toilet.StatesInstance smi)
+				.ToggleSchedulePeriodic("toilet_emit_gas", (Toilet.StatesInstance smi) => smi.master.gasWasteWhenFull.interval, delegate(Toilet.StatesInstance smi)
 				{
 					smi.master.OnEmitGas();
-				})
+				}, null)
 				.EventTransition(GameHashes.OnStorageChange, this.empty, (Toilet.StatesInstance smi) => smi.IsToxicSandRemoved())
 				.Enter(delegate(Toilet.StatesInstance smi)
 				{
@@ -301,18 +301,18 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 			return new WorkChore<ToiletWorkableUse>(Db.Get().ChoreTypes.Pee, smi.master, null, true, null, null, null, false, null, true, default(Tag), null, false, true);
 		}
 
-		public GameStateMachine<Toilet.States, Toilet.StatesInstance, Toilet>.State needsdirt;
+		public GameStateMachine<Toilet.States, Toilet.StatesInstance, Toilet, object>.State needsdirt;
 
-		public GameStateMachine<Toilet.States, Toilet.StatesInstance, Toilet>.State empty;
+		public GameStateMachine<Toilet.States, Toilet.StatesInstance, Toilet, object>.State empty;
 
-		public GameStateMachine<Toilet.States, Toilet.StatesInstance, Toilet>.State notoperational;
+		public GameStateMachine<Toilet.States, Toilet.StatesInstance, Toilet, object>.State notoperational;
 
-		public GameStateMachine<Toilet.States, Toilet.StatesInstance, Toilet>.State ready;
+		public GameStateMachine<Toilet.States, Toilet.StatesInstance, Toilet, object>.State ready;
 
-		public GameStateMachine<Toilet.States, Toilet.StatesInstance, Toilet>.State full;
+		public GameStateMachine<Toilet.States, Toilet.StatesInstance, Toilet, object>.State full;
 
-		public GameStateMachine<Toilet.States, Toilet.StatesInstance, Toilet>.State earlyclean;
+		public GameStateMachine<Toilet.States, Toilet.StatesInstance, Toilet, object>.State earlyclean;
 
-		public StateMachine<Toilet.States, Toilet.StatesInstance, Toilet>.IntParameter flushes = new StateMachine<Toilet.States, Toilet.StatesInstance, Toilet>.IntParameter(0);
+		public StateMachine<Toilet.States, Toilet.StatesInstance, Toilet, object>.IntParameter flushes = new StateMachine<Toilet.States, Toilet.StatesInstance, Toilet, object>.IntParameter(0);
 	}
 }

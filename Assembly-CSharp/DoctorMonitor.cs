@@ -9,7 +9,7 @@ public class DoctorMonitor : GameStateMachine<DoctorMonitor, DoctorMonitor.Insta
 		this.root.ToggleUrge(Db.Get().Urges.Doctor);
 	}
 
-	public new class Instance : GameStateMachine<DoctorMonitor, DoctorMonitor.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<DoctorMonitor, DoctorMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)

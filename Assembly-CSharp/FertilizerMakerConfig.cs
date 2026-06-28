@@ -6,12 +6,11 @@ public class FertilizerMakerConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("FertilizerMaker", 4, 3, "fertilizer_maker_kanim", 100f, 30f, BUILDINGS.CONSTRUCTION_MASS.TIER3, MATERIALS.ALL_METALS, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, null);
-		buildingDef.ExplosionSize = Overheatable.ExplosionSize.Small;
-		buildingDef.RequiresPower = true;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("FertilizerMaker", 4, 3, "fertilizer_maker_kanim", 100f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.ALL_METALS, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, null);
+		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 120f;
-		buildingDef.TemperatureModificationWhenActive = 4f;
-		buildingDef.OperatingTemperature = 400f;
+		buildingDef.ExhaustKilowattsWhenActive = 0.25f;
+		buildingDef.OperatingKilowatts = 0.5f;
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.ViewMode = SimViewMode.LiquidVentMap;
 		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
@@ -25,27 +24,35 @@ public class FertilizerMakerConfig : IBuildingConfig
 	{
 		BuildingTemplates.CreateDefaultStorage(go, false);
 		go.AddOrGet<WaterPurifier>();
+		ElementDropper elementDropper = go.AddComponent<ElementDropper>();
+		elementDropper.emitMass = FertilizerMakerConfig.FERTILIZER_PER_LOAD;
+		elementDropper.emitTag = new Tag("Fertilizer");
+		elementDropper.emitOffset = new Vector3(0f, 1f, 0f);
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
+		elementConverter.conversionInterval = 1f;
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
-			new ElementConverter.ConsumedElement(new Tag("DirtyWater"), 40f)
+			new ElementConverter.ConsumedElement(new Tag("DirtyWater"), FertilizerMakerConfig.WATER_PER_CYCLE / 600f)
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(null, 20f, SimHashes.Fertilizer, 323.15f, false, 0f, 1f)
+			new ElementConverter.OutputElement(FertilizerMakerConfig.FERTILIZER_PER_CYCLE / 600f, SimHashes.Fertilizer, 323.15f, true, 0f, 0f, false)
 		};
-		elementConverter.conversionInterval = 30f;
-		ManualDeliveryKG manualDeliveryKG = go.AddComponent<ManualDeliveryKG>();
-		manualDeliveryKG.requestedItemTag = new Tag("DirtyWater");
-		manualDeliveryKG.capacity = 400f;
-		manualDeliveryKG.refillMass = 50f;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
 		conduitConsumer.consumptionRate = 10f;
+		conduitConsumer.capacityTag = ElementLoader.FindElementByHash(SimHashes.DirtyWater).tag;
+		conduitConsumer.capacityKG = FertilizerMakerConfig.WATER_PER_CYCLE * 5f;
+		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Dump;
+		BuildingElementEmitter buildingElementEmitter = go.AddOrGet<BuildingElementEmitter>();
+		buildingElementEmitter.emitRate = 0.02f;
+		buildingElementEmitter.temperature = 303f;
+		buildingElementEmitter.element = SimHashes.Methane;
+		buildingElementEmitter.modifierOffset = new Vector2(2f, 2f);
 		go.AddOrGet<Prioritizable>();
 	}
 
-	public override void DoPostConfigure(GameObject go)
+	public override void DoPostConfigureComplete(GameObject go)
 	{
 		BuildingTemplates.DoPostConfigure(go);
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
@@ -55,11 +62,17 @@ public class FertilizerMakerConfig : IBuildingConfig
 		};
 	}
 
-	private const float FERTILIZER_PER_CYCLE = 400f;
+	public const float METHANE_EMIT_RATE = 0.02f;
 
-	private const float LOADS_PER_CYCLE = 20f;
+	private static float _NUM_PLANTS_PER_DUPE = (float)Math.Ceiling(2.880000114440918);
 
-	private const float FERTILIZER_PER_LOAD = 20f;
+	private static float _NUM_DUPES = 6f;
 
-	private const float WATER_PER_LOAD = 40f;
+	private static float _PLANTS_FED = FertilizerMakerConfig._NUM_DUPES * FertilizerMakerConfig._NUM_PLANTS_PER_DUPE;
+
+	private static float FERTILIZER_PER_LOAD = 4f;
+
+	private static float FERTILIZER_PER_CYCLE = FertilizerMakerConfig._PLANTS_FED * FertilizerMakerConfig.FERTILIZER_PER_LOAD;
+
+	private static float WATER_PER_CYCLE = FertilizerMakerConfig.FERTILIZER_PER_CYCLE / 0.8f;
 }

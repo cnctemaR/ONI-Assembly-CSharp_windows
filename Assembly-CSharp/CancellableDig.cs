@@ -1,5 +1,6 @@
 ﻿using System;
 
+[SkipSaveFileSerialization]
 public class CancellableDig : Cancellable
 {
 	protected override void OnCancel(object data)

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -8,12 +7,11 @@ public class EdiblesManager : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		EdiblesManager.instance = this;
-		this.foodInfos = new List<EdiblesManager.FoodInfo>(FOOD.FOOD_TYPES_LIST);
 	}
 
 	public EdiblesManager.FoodInfo GetFoodInfo(string FoodID)
 	{
-		foreach (EdiblesManager.FoodInfo foodInfo in this.foodInfos)
+		foreach (EdiblesManager.FoodInfo foodInfo in FOOD.FOOD_TYPES_LIST)
 		{
 			if (foodInfo.Id == FoodID)
 			{
@@ -26,19 +24,16 @@ public class EdiblesManager : KMonoBehaviour
 
 	public static EdiblesManager instance;
 
-	[HideInInspector]
-	public List<EdiblesManager.FoodInfo> foodInfos;
-
 	public class FoodInfo
 	{
-		public FoodInfo(string id, int rations, Edible.Quality quality, float rotTemperature, float staleTime, float spoilTime, string tags = "")
+		public FoodInfo(string id, float caloriesPerUnit, int quality, float preserveTemperatue, float rotTemperature, float spoilTime)
 		{
 			this.Id = id;
-			this.Rations = rations;
+			this.CaloriesPerUnit = caloriesPerUnit;
 			this.Quality = quality;
-			this.Tags = tags;
+			this.PreserveTemperature = preserveTemperatue;
 			this.RotTemperature = rotTemperature;
-			this.StaleTime = staleTime;
+			this.StaleTime = spoilTime / 2f;
 			this.SpoilTime = spoilTime;
 			this.Name = Strings.Get("STRINGS.ITEMS.FOOD." + id.ToUpper() + ".NAME");
 			this.Description = Strings.Get("STRINGS.ITEMS.FOOD." + id.ToUpper() + ".DESC");
@@ -51,7 +46,9 @@ public class EdiblesManager : KMonoBehaviour
 
 		public string Description;
 
-		public int Rations;
+		public float CaloriesPerUnit;
+
+		public float PreserveTemperature;
 
 		public float RotTemperature;
 
@@ -59,8 +56,6 @@ public class EdiblesManager : KMonoBehaviour
 
 		public float SpoilTime;
 
-		public string Tags;
-
-		public Edible.Quality Quality;
+		public int Quality;
 	}
 }

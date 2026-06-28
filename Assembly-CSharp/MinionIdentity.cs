@@ -4,13 +4,13 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class MinionIdentity : KMonoBehaviour, ISaveLoadableJson
+public class MinionIdentity : KMonoBehaviour, ISaveLoadable
 {
 	protected override void OnPrefabInit()
 	{
 		if (this.name == null)
 		{
-			this.name = MinionIdentity.ChooseRandomName(false);
+			this.name = MinionIdentity.ChooseRandomName();
 		}
 		if (GameClock.Instance != null)
 		{
@@ -18,7 +18,7 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadableJson
 		}
 		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
 		component.OnUpdateBounds = (Action<Bounds>)Delegate.Combine(component.OnUpdateBounds, new Action<Bounds>(this.OnUpdateBounds));
-		this.Subscribe(1623392196, new EventSystem.EventHandler(this.OnDied));
+		this.Subscribe(1623392196, new Action<object>(this.OnDied));
 	}
 
 	protected override void OnSpawn()
@@ -34,14 +34,13 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadableJson
 		}
 		this.raceId = "Human";
 		this.bodyType = BodyType.Human;
-		if (this.raceId != null && this.raceId != string.Empty)
-		{
-			Accessorizer component = base.gameObject.GetComponent<Accessorizer>();
-			this.faceData = default(Accessorizer.FaceData);
-			component.GetFaceSlots(ref this.faceData);
-			this.headComp = MinionStartingStats.ApplyRace(base.gameObject, MinionResources.Get().races.Get(this.raceId), this.bodyType, this.faceData, this.isMale);
-			base.GetComponent<FaceGraph>().SetHeadComp(this.headComp);
-		}
+		Accessorizer component = base.gameObject.GetComponent<Accessorizer>();
+		this.bodyData = default(KCompBuilder.BodyData);
+		component.GetBodySlots(ref this.bodyData);
+		this.headComp = MinionStartingStats.ApplyRace(base.gameObject, MinionResources.Get().races.Get(this.raceId), this.bodyType, this.bodyData);
+		FaceGraph component2 = base.GetComponent<FaceGraph>();
+		component2.SetHeadComp(this.headComp);
+		base.GetComponent<KBatchedAnimController>().AddBuildOverride(this.headComp.GetData(), true, true);
 		this.voiceId = "0";
 		this.voiceId += (this.voiceIdx + 1).ToString();
 	}
@@ -59,14 +58,14 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadableJson
 		NameDisplayScreen.Instance.UpdateName(base.gameObject);
 	}
 
-	public static string ChooseRandomName(bool is_male)
+	public static string ChooseRandomName()
 	{
 		if (MinionIdentity.femaleNameList == null)
 		{
 			MinionIdentity.maleNameList = new MinionIdentity.NameList(Game.Instance.maleNamesFile);
 			MinionIdentity.femaleNameList = new MinionIdentity.NameList(Game.Instance.femaleNamesFile);
 		}
-		if (is_male)
+		if (global::UnityEngine.Random.value > 0.5f)
 		{
 			return MinionIdentity.maleNameList.Next();
 		}
@@ -101,8 +100,8 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadableJson
 	[Serialize]
 	private new string name;
 
-	[Serialize]
 	[ReadOnly]
+	[Serialize]
 	public float arrivalTime;
 
 	[Serialize]
@@ -112,13 +111,12 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadableJson
 	public BodyType bodyType;
 
 	[Serialize]
-	public bool isMale;
-
-	[Serialize]
 	public int voiceIdx;
 
 	[Serialize]
-	public Accessorizer.FaceData faceData;
+	public KCompBuilder.BodyData bodyData;
+
+	public float timeLastSpoke;
 
 	private string voiceId;
 

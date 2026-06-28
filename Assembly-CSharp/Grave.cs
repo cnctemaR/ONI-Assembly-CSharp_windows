@@ -7,8 +7,8 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(-1697596308, new EventSystem.EventHandler(this.OnStorageChanged));
-		this.Subscribe(1502190696, new EventSystem.EventHandler(this.OnDestroyObject));
+		this.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
+		this.Subscribe(1502190696, new Action<object>(this.OnDestroyObject));
 		base.GetComponent<Storage>().choreType = Db.Get().ChoreTypes.FetchCritical;
 	}
 
@@ -44,7 +44,7 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 	[Serialize]
 	public string graveName;
 
-	public class StatesInstance : GameStateMachine<Grave.States, Grave.StatesInstance, Grave>.GameInstance
+	public class StatesInstance : GameStateMachine<Grave.States, Grave.StatesInstance, Grave, object>.GameInstance
 	{
 		public StatesInstance(Grave master)
 			: base(master)
@@ -53,7 +53,7 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 
 		public void CreateFetchTask()
 		{
-			this.chore = new FetchChore(base.GetComponent<Storage>(), 1f, new Tag[] { GameTags.Corpse }, null, true, null, null, null, true);
+			this.chore = new FetchChore(base.GetComponent<Storage>(), 1f, new Tag[] { GameTags.Corpse }, null, true, null, null, null, FetchOrder2.OperationalRequirement.Operational, 0);
 		}
 
 		public void CancelFetchTask()
@@ -83,8 +83,8 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 			this.full.PlayAnim("closed", KAnim.PlayMode.Once, null).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Grave);
 		}
 
-		public GameStateMachine<Grave.States, Grave.StatesInstance, Grave>.State empty;
+		public GameStateMachine<Grave.States, Grave.StatesInstance, Grave, object>.State empty;
 
-		public GameStateMachine<Grave.States, Grave.StatesInstance, Grave>.State full;
+		public GameStateMachine<Grave.States, Grave.StatesInstance, Grave, object>.State full;
 	}
 }

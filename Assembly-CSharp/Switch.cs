@@ -5,7 +5,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Switch : KMonoBehaviour, ISaveLoadableJson, IToggleHandler, IEffectDescriptor
+public class Switch : KMonoBehaviour, ISaveLoadable, IToggleHandler, IEffectDescriptor
 {
 	public event Action<bool> OnToggle;
 
@@ -17,20 +17,24 @@ public class Switch : KMonoBehaviour, ISaveLoadableJson, IToggleHandler, IEffect
 		}
 	}
 
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		this.switchedOn = this.defaultState;
+	}
+
 	protected override void OnSpawn()
 	{
 		this.openToggleIndex = this.openSwitch.SetTarget(this);
-		this.animController = base.GetComponent<KBatchedAnimController>();
-		this.Subscribe(493375141, new EventSystem.EventHandler(this.OnRefreshUserMenu));
-		this.UpdateCircuit();
-	}
-
-	protected override void OnCleanUp()
-	{
-		bool flag = this.switchedOn;
-		this.switchedOn = true;
-		this.UpdateCircuit();
-		this.switchedOn = flag;
+		if (this.OnToggle != null)
+		{
+			this.OnToggle(this.switchedOn);
+		}
+		if (this.manuallyControlled)
+		{
+			this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		}
+		this.UpdateSwitchStatus();
 	}
 
 	public void HandleToggle()
@@ -41,47 +45,6 @@ public class Switch : KMonoBehaviour, ISaveLoadableJson, IToggleHandler, IEffect
 	public bool IsHandlerOn()
 	{
 		return this.switchedOn;
-	}
-
-	public bool IsConnected()
-	{
-		int num = Grid.PosToCell(this.transform.position);
-		GameObject gameObject = Grid.Objects[num, (int)this.objectLayer];
-		return gameObject != null && gameObject.GetComponent<IDisconnectable>() != null;
-	}
-
-	public void UpdateCircuit()
-	{
-		int num = Grid.PosToCell(this.transform.position);
-		GameObject gameObject = Grid.Objects[num, (int)this.objectLayer];
-		IDisconnectable disconnectable = null;
-		if (gameObject != null)
-		{
-			disconnectable = gameObject.GetComponent<IDisconnectable>();
-		}
-		bool flag = this.switchedOn;
-		if (disconnectable != null)
-		{
-			if (this.switchedOn)
-			{
-				this.animController.Play("on", KAnim.PlayMode.Once, 1f, 0f);
-				disconnectable.Connect();
-			}
-			else
-			{
-				this.animController.Play("off", KAnim.PlayMode.Once, 1f, 0f);
-				disconnectable.Disconnect();
-			}
-		}
-		else
-		{
-			this.switchedOn = false;
-			this.animController.Play("off", KAnim.PlayMode.Once, 1f, 0f);
-		}
-		if (flag != this.switchedOn)
-		{
-			this.userMenu.Refresh();
-		}
 	}
 
 	private void OnMinionToggle()
@@ -99,55 +62,55 @@ public class Switch : KMonoBehaviour, ISaveLoadableJson, IToggleHandler, IEffect
 	protected virtual void Toggle()
 	{
 		this.switchedOn = !this.switchedOn;
-		this.UpdateCircuit();
-		this.userMenu.Refresh();
+		this.UpdateSwitchStatus();
 		if (this.OnToggle != null)
 		{
 			this.OnToggle(this.switchedOn);
+		}
+		if (this.manuallyControlled)
+		{
+			this.userMenu.Refresh();
 		}
 	}
 
 	protected virtual void OnRefreshUserMenu(object data)
 	{
-		if (this.switchedOn)
-		{
-			this.userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_power", "Turn Off", new global::System.Action(this.OnMinionToggle), global::Action.ToggleEnabled, null, null, null, null, string.Empty));
-		}
-		else
-		{
-			this.userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_power", "Turn On", new global::System.Action(this.OnMinionToggle), global::Action.ToggleEnabled, null, null, null, null, string.Empty));
-		}
+		LocString locString = ((!this.switchedOn) ? BUILDINGS.PREFABS.SWITCH.TURN_ON : BUILDINGS.PREFABS.SWITCH.TURN_OFF);
+		this.userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_power", locString, new global::System.Action(this.OnMinionToggle), global::Action.ToggleEnabled, null, null, null, string.Empty, true), 1f);
 	}
 
-	public int DescriptionOrder { get; set; }
+	protected void UpdateSwitchStatus()
+	{
+		StatusItem statusItem = ((!this.switchedOn) ? Db.Get().BuildingStatusItems.SwitchStatusInactive : Db.Get().BuildingStatusItems.SwitchStatusActive);
+		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, statusItem, null);
+	}
 
-	public virtual List<Descriptor> GetRequirementDescriptions(BuildingDef def)
+	public List<Descriptor> GetDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, UI.BUILDINGEFFECTS.REQUIRESMANUALOPERATION), UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESMANUALOPERATION);
+		descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.REQUIRESMANUALOPERATION, UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESMANUALOPERATION, Descriptor.DescriptorType.Requirement);
 		list.Add(descriptor);
 		return list;
 	}
 
-	public List<Descriptor> GetEffectDescriptions(BuildingDef def)
-	{
-		return null;
-	}
+	[SerializeField]
+	public bool manuallyControlled = true;
+
+	[SerializeField]
+	public bool defaultState = true;
+
+	[SerializeField]
+	public ObjectLayer objectLayer;
 
 	[Serialize]
-	private bool switchedOn = true;
+	protected bool switchedOn = true;
 
 	[MyCmpAdd]
 	protected UserMenu userMenu;
 
 	[MyCmpAdd]
 	private Toggleable openSwitch;
-
-	[SerializeField]
-	public ObjectLayer objectLayer;
-
-	private KBatchedAnimController animController;
 
 	private int openToggleIndex;
 }

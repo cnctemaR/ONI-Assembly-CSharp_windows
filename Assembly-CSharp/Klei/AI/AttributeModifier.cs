@@ -4,12 +4,13 @@ namespace Klei.AI
 {
 	public class AttributeModifier
 	{
-		public AttributeModifier(string attribute_id, float value, string description = null, bool is_multiplier = false)
+		public AttributeModifier(string attribute_id, float value, string description = null, bool is_multiplier = false, bool uiOnly = false)
 		{
 			this.AttributeId = attribute_id;
 			this.Value = value;
 			this.Description = string.Intern((description != null) ? description : string.Empty);
 			this.IsMultiplier = is_multiplier;
+			this.UIOnly = uiOnly;
 		}
 
 		public void SetValue(float value)
@@ -37,12 +38,12 @@ namespace Klei.AI
 			{
 				return GameUtil.AddPositiveSign(attributeFormatter.GetFormattedModifier(this), this.Value > 0f);
 			}
-			return GameUtil.AddPositiveSign(GameUtil.GetFormattedSimple(this.Value, GameUtil.TimeSlice.None), this.Value > 0f);
+			return GameUtil.AddPositiveSign(GameUtil.GetFormattedSimple(this.Value, GameUtil.TimeSlice.None, "F2"), this.Value > 0f);
 		}
 
 		public AttributeModifier Clone()
 		{
-			return new AttributeModifier(this.AttributeId, this.Value, this.Description, false);
+			return new AttributeModifier(this.AttributeId, this.Value, this.Description, false, false);
 		}
 
 		public string AttributeId;
@@ -52,5 +53,7 @@ namespace Klei.AI
 		public string Description;
 
 		public bool IsMultiplier;
+
+		public bool UIOnly;
 	}
 }

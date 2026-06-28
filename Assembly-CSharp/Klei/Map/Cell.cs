@@ -10,7 +10,7 @@ namespace Klei.Map
 	{
 		public Cell()
 		{
-			this.type = WorldGenTags.Cell.Name;
+			base.SetType(WorldGenTags.Cell.Name);
 			this.Init();
 		}
 

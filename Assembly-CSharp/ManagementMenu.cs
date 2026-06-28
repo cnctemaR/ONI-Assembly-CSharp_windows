@@ -9,31 +9,44 @@ public class ManagementMenu : KIconToggleMenu
 	{
 		base.OnPrefabInit();
 		ManagementMenu.Instance = this;
-		this.overviewScreen.gameObject.SetActive(false);
-		base.Subscribe(Game.Instance.gameObject, 288942073, new EventSystem.EventHandler(this.OnUIClear));
-		this.overviewInfo = new KIconToggleMenu.ToggleInfo(UI.JOBS, "OverviewUI_jobs_icon", null, global::Action.ManagePeople, UI.TOOLTIPS.MANAGEMENTMENU_JOBS);
+		this.instantiator.Instantiate();
+		this.jobsScreen = this.instantiator.GetComponentInChildren<JobsTableScreen>();
+		this.jobsScreen.gameObject.SetActive(false);
+		this.consumablesScreen = this.instantiator.GetComponentInChildren<ConsumablesTableScreen>();
+		this.consumablesScreen.gameObject.SetActive(false);
+		this.vitalsScreen = this.instantiator.GetComponentInChildren<CrewRationsScreen>();
+		this.vitalsScreen.gameObject.SetActive(false);
+		base.Subscribe(Game.Instance.gameObject, 288942073, new Action<object>(this.OnUIClear));
+		this.jobsInfo = new KIconToggleMenu.ToggleInfo(UI.JOBS, "OverviewUI_jobs_icon", null, global::Action.ManagePeople, UI.TOOLTIPS.MANAGEMENTMENU_JOBS);
+		this.consumablesInfo = new KIconToggleMenu.ToggleInfo(UI.CONSUMABLES, "OverviewUI_consumables_icon", null, global::Action.ManageConsumables, UI.TOOLTIPS.MANAGEMENTMENU_CONSUMABLES);
 		this.vitalsInfo = new KIconToggleMenu.ToggleInfo(UI.VITALS, "OverviewUI_vitals_icon", null, global::Action.ManageVitals, UI.TOOLTIPS.MANAGEMENTMENU_VITALS);
 		this.reportsInfo = new KIconToggleMenu.ToggleInfo(UI.REPORT, "OverviewUI_reports_icon", null, global::Action.ManageReport, UI.TOOLTIPS.MANAGEMENTMENU_DAILYREPORT);
 		this.ResearchInfo = new KIconToggleMenu.ToggleInfo(UI.RESEARCH, "OverviewUI_research_nav_icon", null, global::Action.ManageResearch, UI.TOOLTIPS.MANAGEMENTMENU_RESEARCH);
-		this.ScreenInfoMatch.Add(this.overviewInfo, new ManagementMenu.ScreenData
+		this.ScreenInfoMatch.Add(this.jobsInfo, new ManagementMenu.ScreenData
 		{
-			screen = this.overviewScreen,
+			screen = this.jobsScreen,
 			tabIdx = 0,
-			toggleInfo = this.overviewInfo
+			toggleInfo = this.jobsInfo
 		});
 		this.ScreenInfoMatch.Add(this.vitalsInfo, new ManagementMenu.ScreenData
 		{
-			screen = this.overviewScreen,
+			screen = this.vitalsScreen,
 			tabIdx = 1,
 			toggleInfo = this.vitalsInfo
+		});
+		this.ScreenInfoMatch.Add(this.consumablesInfo, new ManagementMenu.ScreenData
+		{
+			screen = this.consumablesScreen,
+			tabIdx = 2,
+			toggleInfo = this.consumablesInfo
 		});
 		this.ScreenInfoMatch.Add(this.reportsInfo, new ManagementMenu.ScreenData
 		{
 			screen = this.reportsScreen,
-			tabIdx = 0,
+			tabIdx = 3,
 			toggleInfo = this.reportsInfo
 		});
-		base.Setup(new List<KIconToggleMenu.ToggleInfo> { this.overviewInfo, this.vitalsInfo, this.reportsInfo, this.ResearchInfo });
+		base.Setup(new List<KIconToggleMenu.ToggleInfo> { this.jobsInfo, this.consumablesInfo, this.vitalsInfo, this.reportsInfo, this.ResearchInfo });
 		base.onSelect += this.OnButtonClick;
 		foreach (KeyValuePair<KIconToggleMenu.ToggleInfo, ManagementMenu.ScreenData> keyValuePair in this.ScreenInfoMatch)
 		{
@@ -43,11 +56,18 @@ public class ManagementMenu : KIconToggleMenu
 		researchCenters.OnAdd = (Action<ResearchCenter>)Delegate.Combine(researchCenters.OnAdd, new Action<ResearchCenter>(this.CheckResearch));
 		Components.Cmps<ResearchCenter> researchCenters2 = Components.ResearchCenters;
 		researchCenters2.OnRemove = (Action<ResearchCenter>)Delegate.Combine(researchCenters2.OnRemove, new Action<ResearchCenter>(this.CheckResearch));
-		Game.Instance.Subscribe(-809948329, new EventSystem.EventHandler(this.CheckResearch));
+		Game.Instance.Subscribe(-809948329, new Action<object>(this.CheckResearch));
 		this.CheckResearch(null);
+		this.ResearchInfo.toggle.soundPlayer.AcceptClickCondition = () => this.ResearchAvailable() || this.activeScreen == this.ScreenInfoMatch[ManagementMenu.Instance.ResearchInfo];
 		foreach (KButton kbutton in this.CloseButtons)
 		{
 			kbutton.onClick += this.CloseAll;
+			kbutton.soundPlayer.Enabled = false;
+		}
+		foreach (KToggle ktoggle in this.toggles)
+		{
+			ktoggle.soundPlayer.toggle_widget_sound_events[0].PlaySound = false;
+			ktoggle.soundPlayer.toggle_widget_sound_events[1].PlaySound = false;
 		}
 	}
 
@@ -98,30 +118,25 @@ public class ManagementMenu : KIconToggleMenu
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (this.activeScreen != null)
+		if (this.activeScreen != null && e.TryConsume(global::Action.Escape))
 		{
-			if (e.TryConsume(global::Action.MouseRight))
-			{
-				if (this.activeScreen != null)
-				{
-					this.ToggleScreen(this.activeScreen);
-				}
-			}
-			else if (e.TryConsume(global::Action.Escape))
-			{
-				if (this.activeScreen != null)
-				{
-					this.ToggleScreen(this.activeScreen);
-				}
-			}
-			else
-			{
-				base.OnKeyDown(e);
-			}
+			this.ToggleScreen(this.activeScreen);
 		}
-		else
+		if (!e.Consumed)
 		{
 			base.OnKeyDown(e);
+		}
+	}
+
+	public override void OnKeyUp(KButtonEvent e)
+	{
+		if (this.activeScreen != null && PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight))
+		{
+			this.ToggleScreen(this.activeScreen);
+		}
+		if (!e.Consumed)
+		{
+			base.OnKeyUp(e);
 		}
 	}
 
@@ -153,7 +168,7 @@ public class ManagementMenu : KIconToggleMenu
 	{
 		if (screenData != null && screenData.toggleInfo == this.ResearchInfo && !this.ResearchAvailable())
 		{
-			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Negative", false));
+			this.CheckResearch(null);
 			this.CloseActive();
 			return;
 		}
@@ -163,6 +178,7 @@ public class ManagementMenu : KIconToggleMenu
 		}
 		if (this.activeScreen != null)
 		{
+			this.activeScreen.toggleInfo.toggle.isOn = false;
 			this.activeScreen.toggleInfo.toggle.gameObject.GetComponentInChildren<ImageToggleState>().SetInactive();
 		}
 		if (this.activeScreen != screenData)
@@ -178,7 +194,7 @@ public class ManagementMenu : KIconToggleMenu
 			this.CloseActive();
 			this.activeScreen = screenData;
 			this.activeScreen.screen.Show(true);
-			OverlayScreen.Instance.DisableCurrentOverlay();
+			OverlayScreen.Instance.ToggleOverlay(SimViewMode.None);
 			KTabMenu componentInChildren = this.activeScreen.screen.GetComponentInChildren<KTabMenu>();
 			if (componentInChildren != null)
 			{
@@ -205,6 +221,7 @@ public class ManagementMenu : KIconToggleMenu
 	{
 		if (this.activeScreen != null)
 		{
+			this.activeScreen.toggleInfo.toggle.isOn = false;
 			this.activeScreen.screen.Show(false);
 			this.activeScreen = null;
 		}
@@ -235,17 +252,23 @@ public class ManagementMenu : KIconToggleMenu
 
 	public KScreen ResearchScreen;
 
-	public KScreen overviewScreen;
+	private KScreen jobsScreen;
+
+	public KScreen vitalsScreen;
 
 	public KScreen scheduleScreen;
 
 	public KScreen reportsScreen;
 
+	private KScreen consumablesScreen;
+
 	public string colourSchemeDisabled;
 
 	public InstantiateUIPrefabChild instantiator;
 
-	private KIconToggleMenu.ToggleInfo overviewInfo;
+	private KIconToggleMenu.ToggleInfo jobsInfo;
+
+	private KIconToggleMenu.ToggleInfo consumablesInfo;
 
 	private KIconToggleMenu.ToggleInfo scheduleInfo;
 

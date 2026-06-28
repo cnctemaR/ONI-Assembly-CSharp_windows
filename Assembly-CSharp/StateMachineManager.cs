@@ -10,17 +10,11 @@ public class StateMachineManager : IScheduler
 		{
 			foreach (Type type in assembly.GetTypes())
 			{
-				if (typeof(StateMachine).IsAssignableFrom(type) && !type.IsAbstract)
+				if (!type.IsAbstract && !type.IsGenericTypeDefinition && typeof(StateMachine).IsAssignableFrom(type))
 				{
-					try
-					{
-						StateMachine stateMachine = (StateMachine)Activator.CreateInstance(type);
-						stateMachine.InitializeStateMachine();
-						this.stateMachines[type] = stateMachine;
-					}
-					catch
-					{
-					}
+					StateMachine stateMachine = (StateMachine)Activator.CreateInstance(type);
+					stateMachine.InitializeStateMachine();
+					this.stateMachines[type] = stateMachine;
 				}
 			}
 		}
@@ -42,16 +36,6 @@ public class StateMachineManager : IScheduler
 	public void RegisterScheduler(Scheduler scheduler)
 	{
 		this.scheduler = scheduler;
-	}
-
-	public void Add(StateMachine.Instance state_machine_instance)
-	{
-		this.stateMachineInstances.Add(state_machine_instance);
-	}
-
-	public void Remove(StateMachine.Instance state_machine_instance)
-	{
-		this.stateMachineInstances.Remove(state_machine_instance);
 	}
 
 	public SchedulerHandle Schedule(string name, float time, Action<object> callback, object callback_data = null, SchedulerGroup group = null)
@@ -77,11 +61,18 @@ public class StateMachineManager : IScheduler
 		return (T)((object)stateMachine);
 	}
 
-	private List<StateMachine.Instance> stateMachineInstances = new List<StateMachine.Instance>();
+	public StateMachine.Instance CreateSMIFromDef(IStateMachineTarget master, StateMachine.Instance.BaseDef def)
+	{
+		StateMachineManager.parameters[0] = master;
+		StateMachineManager.parameters[1] = def;
+		return (StateMachine.Instance)Activator.CreateInstance(def.GetType().DeclaringType, StateMachineManager.parameters);
+	}
 
 	private Scheduler scheduler;
 
 	private float elapsedTime;
 
 	private Dictionary<Type, StateMachine> stateMachines = new Dictionary<Type, StateMachine>();
+
+	private static object[] parameters = new object[2];
 }

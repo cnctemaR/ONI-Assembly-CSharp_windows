@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using KSerialization;
 using UnityEngine;
 
-[SerializationConfig(MemberSerialization.OptIn)]
-public class MysteryEgg : StateMachineComponent<MysteryEgg.StatesInstance>, ISaveLoadableJson
+public class MysteryEgg : StateMachineComponent<MysteryEgg.StatesInstance>
 {
 	protected override void OnSpawn()
 	{
@@ -80,7 +79,7 @@ public class MysteryEgg : StateMachineComponent<MysteryEgg.StatesInstance>, ISav
 
 	private Dictionary<string, int> HatchPossibilities = new Dictionary<string, int>();
 
-	public class StatesInstance : GameStateMachine<MysteryEgg.States, MysteryEgg.StatesInstance, MysteryEgg>.GameInstance
+	public class StatesInstance : GameStateMachine<MysteryEgg.States, MysteryEgg.StatesInstance, MysteryEgg, object>.GameInstance
 	{
 		public StatesInstance(MysteryEgg smi)
 			: base(smi)
@@ -167,28 +166,28 @@ public class MysteryEgg : StateMachineComponent<MysteryEgg.StatesInstance>, ISav
 
 		public MysteryEgg.States.IncubatingState incubating;
 
-		public GameStateMachine<MysteryEgg.States, MysteryEgg.StatesInstance, MysteryEgg>.State hatch_pst;
+		public GameStateMachine<MysteryEgg.States, MysteryEgg.StatesInstance, MysteryEgg, object>.State hatch_pst;
 
-		public GameStateMachine<MysteryEgg.States, MysteryEgg.StatesInstance, MysteryEgg>.State dead;
+		public GameStateMachine<MysteryEgg.States, MysteryEgg.StatesInstance, MysteryEgg, object>.State dead;
 
-		public GameStateMachine<MysteryEgg.States, MysteryEgg.StatesInstance, MysteryEgg>.State fall;
+		public GameStateMachine<MysteryEgg.States, MysteryEgg.StatesInstance, MysteryEgg, object>.State fall;
 
-		public class GroundedState : GameStateMachine<MysteryEgg.States, MysteryEgg.StatesInstance, MysteryEgg>.State
+		public class GroundedState : GameStateMachine<MysteryEgg.States, MysteryEgg.StatesInstance, MysteryEgg, object>.State
 		{
-			public GameStateMachine<MysteryEgg.States, MysteryEgg.StatesInstance, MysteryEgg>.State idle;
+			public GameStateMachine<MysteryEgg.States, MysteryEgg.StatesInstance, MysteryEgg, object>.State idle;
 		}
 
-		public class IncubatingState : GameStateMachine<MysteryEgg.States, MysteryEgg.StatesInstance, MysteryEgg>.State
+		public class IncubatingState : GameStateMachine<MysteryEgg.States, MysteryEgg.StatesInstance, MysteryEgg, object>.State
 		{
-			public GameStateMachine<MysteryEgg.States, MysteryEgg.StatesInstance, MysteryEgg>.State idle;
+			public GameStateMachine<MysteryEgg.States, MysteryEgg.StatesInstance, MysteryEgg, object>.State idle;
 
-			public GameStateMachine<MysteryEgg.States, MysteryEgg.StatesInstance, MysteryEgg>.State idle_alt;
+			public GameStateMachine<MysteryEgg.States, MysteryEgg.StatesInstance, MysteryEgg, object>.State idle_alt;
 
-			public GameStateMachine<MysteryEgg.States, MysteryEgg.StatesInstance, MysteryEgg>.State wiggle_small;
+			public GameStateMachine<MysteryEgg.States, MysteryEgg.StatesInstance, MysteryEgg, object>.State wiggle_small;
 
-			public GameStateMachine<MysteryEgg.States, MysteryEgg.StatesInstance, MysteryEgg>.State wiggle_large;
+			public GameStateMachine<MysteryEgg.States, MysteryEgg.StatesInstance, MysteryEgg, object>.State wiggle_large;
 
-			public GameStateMachine<MysteryEgg.States, MysteryEgg.StatesInstance, MysteryEgg>.State wiggle_hatch;
+			public GameStateMachine<MysteryEgg.States, MysteryEgg.StatesInstance, MysteryEgg, object>.State wiggle_hatch;
 		}
 	}
 }

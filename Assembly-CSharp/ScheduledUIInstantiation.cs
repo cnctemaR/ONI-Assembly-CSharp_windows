@@ -12,7 +12,7 @@ public class ScheduledUIInstantiation : KMonoBehaviour
 		}
 		else
 		{
-			Game.Instance.Subscribe((int)this.InstantiationEvent, new EventSystem.EventHandler(this.InstantiateElements));
+			Game.Instance.Subscribe((int)this.InstantiationEvent, new Action<object>(this.InstantiateElements));
 		}
 	}
 
@@ -35,7 +35,7 @@ public class ScheduledUIInstantiation : KMonoBehaviour
 		}
 		if (!this.InstantiateOnAwake)
 		{
-			this.Unsubscribe((int)this.InstantiationEvent, new EventSystem.EventHandler(this.InstantiateElements));
+			this.Unsubscribe((int)this.InstantiationEvent, new Action<object>(this.InstantiateElements));
 		}
 	}
 

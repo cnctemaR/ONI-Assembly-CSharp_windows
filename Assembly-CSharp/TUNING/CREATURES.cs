@@ -18,5 +18,20 @@ namespace TUNING
 
 			public const float TIER6 = 400f;
 		}
+
+		public class YIELD_BONUS_MODIFIERS
+		{
+			public const int NUM_PERFECT_MODIFIERS = 4;
+
+			public const float PERFECT_TEMPERATURE = 0.00041666668f;
+
+			public const float PERFECT_PRESSURE = 0.00041666668f;
+
+			public const float FERTILIZED = 0.00041666668f;
+
+			public const float IRRIGATED = 0.00041666668f;
+
+			public const float CONDITION_NOT_MET = 0f;
+		}
 	}
 }

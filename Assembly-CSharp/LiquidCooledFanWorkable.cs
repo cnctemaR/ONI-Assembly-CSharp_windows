@@ -16,7 +16,6 @@ public class LiquidCooledFanWorkable : BuildingWorkable
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.SetWorkTime(float.PositiveInfinity);
 	}
 
 	protected override void OnStartWork(Worker worker)

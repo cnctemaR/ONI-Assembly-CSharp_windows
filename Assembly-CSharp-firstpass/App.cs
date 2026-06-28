@@ -21,6 +21,9 @@ public class App : MonoBehaviour
 	{
 		if (App.isLoading)
 		{
+			KObjectManager.Instance.Cleanup();
+			KGlobalAnimParser.Get().ClearDynamic();
+			KAnimBatchManager.Instance().ClearMultiInstances();
 			if (App.OnPreLoadScene != null)
 			{
 				App.OnPreLoadScene();
@@ -44,6 +47,4 @@ public class App : MonoBehaviour
 	public static bool isLoading;
 
 	public static string sceneName;
-
-	private static int loadCount;
 }

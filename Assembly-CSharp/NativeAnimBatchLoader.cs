@@ -8,12 +8,7 @@ public class NativeAnimBatchLoader : MonoBehaviour
 		KAnimBatchManager.Destroy();
 		KAnimGroupFile.Destroy();
 		KGlobalAnimParser.Destroy();
-		KGlobalAnimParser.ClearMissingSymbols();
 		KAnimGroupFile.GetGroupFile().LoadAll();
-		if (this.dumpMissingSymbols)
-		{
-			KGlobalAnimParser.DumpMissingSymbols();
-		}
 		KAnimBatchManager.Instance().CompleteInit();
 	}
 
@@ -49,7 +44,7 @@ public class NativeAnimBatchLoader : MonoBehaviour
 		if (this.performUpdate)
 		{
 			KAnimBatchManager.Instance().UpdateActiveArea(new Vector2I(0, 0), new Vector2I(9999, 9999));
-			KAnimBatchManager.Instance().UpdateDirty();
+			KAnimBatchManager.Instance().UpdateDirty(Time.frameCount);
 		}
 		if (this.performRender)
 		{
@@ -68,8 +63,6 @@ public class NativeAnimBatchLoader : MonoBehaviour
 	public bool destroySelf;
 
 	public bool generateObjects;
-
-	public bool dumpMissingSymbols;
 
 	public GameObject[] enableObjects;
 }

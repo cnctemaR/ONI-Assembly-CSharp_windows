@@ -20,8 +20,6 @@ public class EntityPrefabs : KMonoBehaviour
 
 	public GameObject MinionSelectPreview;
 
-	public GameObject GenericResource;
-
 	public GameObject Exclamation;
 
 	public GameObject LiquidSource;
@@ -37,6 +35,8 @@ public class EntityPrefabs : KMonoBehaviour
 	public GameObject ForegroundLayer;
 
 	public GameObject Bones;
+
+	public GameObject Spawner;
 
 	public GameObject GenericBuildingPackage;
 }

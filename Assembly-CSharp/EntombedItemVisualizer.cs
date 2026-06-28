@@ -13,7 +13,7 @@ public class EntombedItemVisualizer : KMonoBehaviour
 	public bool AddItem(int cell)
 	{
 		bool flag = false;
-		if (Grid.Objects[cell, 8] == null)
+		if (Grid.Objects[cell, 9] == null)
 		{
 			flag = true;
 			EntombedItemVisualizer.Data data;

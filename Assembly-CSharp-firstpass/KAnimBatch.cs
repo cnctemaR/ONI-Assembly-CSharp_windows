@@ -4,16 +4,14 @@ using UnityEngine;
 
 public class KAnimBatch
 {
-	public KAnimBatch(KAnimBatchGroup group, BatchSet batchset, int layer, float z, Vector2I idx, KAnimBatchGroup.MaterialType renderTypeOverride)
+	public KAnimBatch(KAnimBatchGroup group, int layer, float z, KAnimBatchGroup.MaterialType renderTypeOverride)
 	{
 		this.active = true;
-		this.position = new Vector3((float)(idx.x * 32), (float)(idx.y * 32), z);
-		this.batchset = batchset;
 		this.group = group;
 		this.layer = layer;
-		this.idx = idx;
 		this.batchGroup = group.batchID;
 		this.materialType = group.materialType;
+		this.position = new Vector3(0f, 0f, z);
 		this.instanceID = KAnimBatch.maxInstanceID++;
 	}
 
@@ -22,6 +20,14 @@ public class KAnimBatch
 		get
 		{
 			return this.dirtySet.Count > 0;
+		}
+	}
+
+	public int dirtyCount
+	{
+		get
+		{
+			return this.dirtySet.Count;
 		}
 	}
 
@@ -61,7 +67,7 @@ public class KAnimBatch
 
 	public Texture2D dataTex { get; private set; }
 
-	public BatchGroupInstance groupInstace { get; private set; }
+	public BatchGroupInstance batchGroupInstance { get; private set; }
 
 	public int GetInstanceID()
 	{
@@ -72,7 +78,7 @@ public class KAnimBatch
 	{
 		if (this.dataTex != null)
 		{
-			global::UnityEngine.Object.Destroy(this.dataTex);
+			this.group.FreeTexture(this.dataTex);
 			this.dataTex = null;
 		}
 	}
@@ -80,12 +86,13 @@ public class KAnimBatch
 	~KAnimBatch()
 	{
 		this.dataTex = null;
+		this.byteToFloat.bytes = null;
 	}
 
 	public void Init()
 	{
-		this.groupInstace = this.group.GetBatchGroupInstance(this);
-		Debug.AssertFormat(this.groupInstace != null, "Got null groupInstace from AnimBatchGroup [{0}]", new object[] { this.batchGroup });
+		this.batchGroupInstance = this.group.GetBatchGroupInstance(this);
+		Debug.AssertFormat(this.batchGroupInstance != null, "Got null groupInstance from AnimBatchGroup [{0}]", new object[] { this.batchGroup });
 		this.dataTex = this.group.CreateTexture();
 		Debug.AssertFormat(this.dataTex != null, "Got null data texture from AnimBatchGroup [{0}]", new object[] { this.batchGroup });
 		int width = this.dataTex.width;
@@ -96,7 +103,7 @@ public class KAnimBatch
 				"Empty group [",
 				this.group.batchID,
 				"] ",
-				this.idx,
+				this.batchset.idx,
 				" (probably just anims)"
 			}));
 			return;
@@ -117,12 +124,26 @@ public class KAnimBatch
 		this.matProperties.SetTexture("instanceTex", this.dataTex);
 		this.matProperties.SetVector("INSTANCE_TEXEL_SIZE", this.dataTex.texelSize);
 		this.matProperties.SetVector("INSTANCE_TEXTURE_SIZE", new Vector2((float)this.dataTex.width, (float)this.dataTex.height));
-		this.group.GetDataTextures(this.groupInstace, this.matProperties);
+		this.group.GetDataTextures(this.batchGroupInstance, this.matProperties);
+	}
+
+	public void SetBatchSet(BatchSet newBatchSet)
+	{
+		if (this.batchset != null && this.batchset != newBatchSet)
+		{
+			this.batchset.RemoveBatch(this);
+		}
+		this.batchset = newBatchSet;
+		if (this.batchset != null)
+		{
+			this.position = new Vector3((float)(this.batchset.idx.x * 16), (float)(this.batchset.idx.y * 16), this.position.z);
+			this.active = this.batchset.active;
+		}
 	}
 
 	public bool ContainsPos(Vector3 pos)
 	{
-		return new Vector2I((int)(pos.x / 32f), (int)(pos.y / 32f)) == this.idx;
+		return new Vector2I((int)(pos.x / 16f), (int)(pos.y / 16f)) == this.batchset.idx;
 	}
 
 	public void ClearRender(KAnimConverter.IAnimConverter controller)
@@ -131,8 +152,8 @@ public class KAnimBatch
 		Debug.AssertFormat(num >= 0, "Wrong batch - couldn't find {0}]", new object[] { controller.GetName() });
 		if (num >= 0)
 		{
-			int num2 = num * 48;
-			for (int i = 0; i < 48; i++)
+			int num2 = num * 64;
+			for (int i = 0; i < 64; i++)
 			{
 				this.byteToFloat.floats[num2 + i] = -1f;
 			}
@@ -154,16 +175,21 @@ public class KAnimBatch
 
 	public bool Register(KAnimConverter.IAnimConverter controller)
 	{
-		if (this.byteToFloat.floats == null || this.byteToFloat.floats.Length == 0)
+		if (this.dataTex == null || this.byteToFloat.floats == null || this.byteToFloat.floats.Length == 0)
 		{
-			return false;
+			this.Init();
 		}
 		if (!this.controllers.Contains(controller))
 		{
 			this.controllers.Add(controller);
-			this.currentOffset += 48;
+			this.currentOffset += 64;
 		}
 		this.AddToDirty(this.controllers.IndexOf(controller));
+		KAnimBatch batch = controller.GetBatch();
+		if (batch != null)
+		{
+			batch.Deregister(controller);
+		}
 		controller.SetBatch(this);
 		return true;
 	}
@@ -198,13 +224,13 @@ public class KAnimBatch
 				Debug.LogError("Failed to remove controller [" + controller.GetName() + "]");
 			}
 			controller.SetBatch(null);
-			this.currentOffset -= 48;
+			this.currentOffset -= 64;
 			this.currentOffset = Mathf.Max(0, this.currentOffset);
-			for (int i = 0; i < 48; i++)
+			for (int i = 0; i < 64; i++)
 			{
 				this.byteToFloat.floats[this.currentOffset + i] = -1f;
 			}
-			this.currentOffset = 48 * this.controllers.Count;
+			this.currentOffset = 64 * this.controllers.Count;
 			this.ClearDirty();
 			for (int j = 0; j < this.controllers.Count; j++)
 			{
@@ -218,6 +244,7 @@ public class KAnimBatch
 		if (this.controllers.Count == 0)
 		{
 			this.batchset.RemoveBatch(this);
+			this.DestroyTex();
 		}
 	}
 
@@ -258,7 +285,7 @@ public class KAnimBatch
 	{
 		if (this.controllers[index] != null && this.controllers[index] as global::UnityEngine.Object != null)
 		{
-			this.controllers[index].GetBatchInstanceData().WriteToTexture(this.byteToFloat.floats, index * 48, index);
+			this.controllers[index].GetBatchInstanceData().WriteToTexture(this.byteToFloat.floats, index * 64, index);
 		}
 		else
 		{
@@ -272,27 +299,44 @@ public class KAnimBatch
 		this.dataTex.Apply();
 	}
 
-	public int UpdateDirty()
+	public int UpdateDirty(int frame)
 	{
-		if (this.dataTex == null || !this.needsWrite)
+		if (!this.needsWrite)
 		{
 			return 0;
+		}
+		if (this.dataTex == null || this.byteToFloat.floats == null || this.byteToFloat.floats.Length == 0)
+		{
+			this.Init();
 		}
 		this.writtenLastFrame = 0;
 		if (this.dirtySet.Count > 0)
 		{
-			foreach (int num in this.dirtySet)
+			HashSet<int>.Enumerator enumerator = this.dirtySet.GetEnumerator();
+			while (enumerator.MoveNext())
 			{
-				this.WriteToByteArray(num);
+				try
+				{
+					this.WriteToByteArray(enumerator.Current);
+				}
+				catch (Exception ex)
+				{
+					Debug.LogError("WriteToByteArray: " + ex.Message + "\n" + ex.StackTrace);
+				}
 				this.writtenLastFrame++;
 			}
-			this.ClearDirty();
+			if (this.writtenLastFrame != 0)
+			{
+				this.ClearDirty();
+			}
+			else
+			{
+				Debug.LogError("dirtySet not written");
+			}
 		}
 		this.UpdateTexture();
 		return this.writtenLastFrame;
 	}
-
-	private const int BATCH_PHYSICAL_SIZE = 32;
 
 	private List<KAnimConverter.IAnimConverter> controllers = new List<KAnimConverter.IAnimConverter>();
 
@@ -303,8 +347,6 @@ public class KAnimBatch
 	private KAnimConverter.ByteToFloatConverter byteToFloat;
 
 	private int currentOffset;
-
-	private Vector2I idx;
 
 	private int instanceID = -1;
 

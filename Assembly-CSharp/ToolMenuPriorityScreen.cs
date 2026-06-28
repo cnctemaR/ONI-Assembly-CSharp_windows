@@ -6,7 +6,7 @@ public class ToolMenuPriorityScreen : PriorityScreen
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.buttons = base.InstantiateButtons(new Action<int>(this.OnClick), UI.PRIORITYSCREEN.TOOLPRIORITYTOOLTIP);
+		this.buttons = base.InstantiateButtons(new Action<int>(this.OnClick), UI.PRIORITYSCREEN.TOOLPRIORITYTOOLTIP, false);
 		ToolMenuPriorityScreen.Instance = this;
 	}
 

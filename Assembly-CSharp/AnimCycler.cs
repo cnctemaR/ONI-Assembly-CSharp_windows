@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class AnimCycler : MonoBehaviour
+public class AnimCycler : Cycler
 {
 	private void Start()
 	{
@@ -15,36 +15,23 @@ public class AnimCycler : MonoBehaviour
 		}
 	}
 
-	private void Update()
+	protected override void Next()
 	{
-		this.timer += Time.deltaTime;
-		if (this.timer > this.maxPerAnim)
+		if (this.file != null && this.file.animCount > 0)
 		{
-			this.timer = 0f;
-			this.Next();
-		}
-	}
-
-	private void Next()
-	{
-		if (this.file != null && this.file.anims != null && this.file.anims.Length > 0)
-		{
-			this.controller.Play(this.file.anims[this.index++].name, KAnim.PlayMode.Loop, 1f, 0f);
-			if (this.file.build != null)
+			this.controller.Play(this.file.GetAnim(this.index++).name, KAnim.PlayMode.Loop, 1f, 0f);
+			if (this.file.buildIndex != -1)
 			{
-				this.controller.AddBuildOverride(this.file, true);
+				this.controller.AddBuildOverride(this.file, true, false);
 			}
-			this.index %= this.file.anims.Length;
+			this.controller.UpdateSymbolLookups();
+			this.index %= this.file.animCount;
 		}
 	}
 
 	public KAnimFileData file;
 
 	public KBatchedAnimController controller;
-
-	private float timer;
-
-	public float maxPerAnim = 5f;
 
 	public int index;
 }

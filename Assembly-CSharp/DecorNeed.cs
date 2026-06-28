@@ -3,23 +3,23 @@ using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
-[SkipSerialization]
+[SkipSaveFileSerialization]
 public class DecorNeed : Need
 {
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.modifier = new AttributeModifier(Db.Get().Amounts.Decor.deltaAttribute.Id, 1f, DUPLICANTS.NEEDS.DECOR.OBSERVED_DECOR, false);
+		this.modifier = new AttributeModifier(Db.Get().Amounts.Decor.deltaAttribute.Id, 1f, DUPLICANTS.NEEDS.DECOR.OBSERVED_DECOR, false, false);
 		Attributes attributes = base.gameObject.GetAttributes();
 		attributes.Add(Db.Get().Attributes.DecorExpectation);
 		attributes.Add("Decor", this.modifier);
 		this.amount = Db.Get().Amounts.Decor.Lookup(this);
 		base.Name = DUPLICANTS.NEEDS.DECOR.NAME;
 		base.ExpectationTooltip = DUPLICANTS.NEEDS.DECOR.EXPECTATION_TOOLTIP;
-		float num = 0.016666668f;
-		this.expectationModifier = new AttributeModifier(Db.Get().Attributes.DecorExpectation.Id, 0f, attributes.GetProfession().name, false);
-		this.decorStressBonus = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, -num, DUPLICANTS.NEEDS.DECOR.NAME, false);
-		this.decorStressPenalty = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, num, DUPLICANTS.NEEDS.DECOR.NAME, false);
+		this.expectationModifier = new AttributeModifier(Db.Get().Attributes.DecorExpectation.Id, 0f, attributes.GetProfessionString(), false, false);
+		this.decorStressBonus = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, -0.033333335f, DUPLICANTS.NEEDS.DECOR.NAME, false, false);
+		this.decorStressNeutral = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0f, DUPLICANTS.NEEDS.DECOR.NAME, false, false);
+		this.decorStressPenalty = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0.016666668f, DUPLICANTS.NEEDS.DECOR.NAME, false, false);
 		attributes.Add("Profession", this.expectationModifier);
 		this.RefreshExpectations();
 		this.Subscribe(-110704193, delegate(object data)
@@ -54,12 +54,12 @@ public class DecorNeed : Need
 		}
 		float num2 = (float)GameUtil.GetDecorAtCell(num);
 		float num3 = 0f;
-		float num4 = 0.16666667f;
+		float num4 = 4.1666665f;
 		if (Mathf.Abs(num2 - this.amount.value) > 0.1f)
 		{
 			if (num2 > this.amount.value)
 			{
-				num3 = num4 * 1.5f;
+				num3 = 3f * num4;
 			}
 			else if (num2 < this.amount.value)
 			{
@@ -67,18 +67,21 @@ public class DecorNeed : Need
 			}
 		}
 		this.modifier.Value = num3;
-		AttributeModifier attributeModifier = null;
 		bool flag = false;
 		float totalValue = this.expectationAttribute.GetTotalValue();
-		float num5 = 20f;
-		if (this.amount.value <= totalValue - num5)
+		AttributeModifier attributeModifier;
+		if (this.amount.value <= 0f)
 		{
 			flag = true;
 			attributeModifier = this.decorStressPenalty;
 		}
-		else if (this.amount.value >= totalValue + num5)
+		else if (this.amount.value >= totalValue)
 		{
 			attributeModifier = this.decorStressBonus;
+		}
+		else
+		{
+			attributeModifier = this.decorStressNeutral;
 		}
 		if (this.currentStressModifier != attributeModifier)
 		{
@@ -97,12 +100,10 @@ public class DecorNeed : Need
 				if (flag)
 				{
 					base.GetComponent<KSelectable>().AddStatusItem(Db.Get().DuplicantStatusItems.PoorDecor, this);
-					smi.AddThought(Db.Get().Thoughts.PoorDecor);
 				}
 				else
 				{
-					base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().DuplicantStatusItems.PoorDecor);
-					smi.RemoveThought(Db.Get().Thoughts.PoorDecor);
+					base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().DuplicantStatusItems.PoorDecor, false);
 				}
 			}
 			this.currentStressModifier = attributeModifier;
@@ -123,6 +124,8 @@ public class DecorNeed : Need
 	private AttributeModifier expectationModifier;
 
 	private AttributeModifier decorStressBonus;
+
+	private AttributeModifier decorStressNeutral;
 
 	private AttributeModifier decorStressPenalty;
 

@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Klei.AI
 {
 	[SerializationConfig(MemberSerialization.OptIn)]
-	public class Effects : KMonoBehaviour, ISaveLoadableJson
+	public class Effects : KMonoBehaviour, ISaveLoadable
 	{
 		public IEnumerator<EffectInstance> GetEnumerator()
 		{

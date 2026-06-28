@@ -6,40 +6,45 @@ public class WaterPurifierConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("WaterPurifier", 3, 2, "waterpurifier_kanim", 100f, 30f, BUILDINGS.CONSTRUCTION_MASS.TIER3, MATERIALS.ALL_METALS, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, null);
-		buildingDef.ExplosionSize = Overheatable.ExplosionSize.Small;
-		buildingDef.RequiresPower = true;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("WaterPurifier", 4, 3, "waterpurifier_kanim", 100f, 100, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.ALL_METALS, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, null);
+		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 120f;
-		buildingDef.TemperatureModificationWhenActive = 4f;
-		buildingDef.OperatingTemperature = 400f;
+		buildingDef.ExhaustKilowattsWhenActive = 0f;
+		buildingDef.OperatingKilowatts = 4f;
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.OutputConduitType = ConduitType.Liquid;
 		buildingDef.ViewMode = SimViewMode.LiquidVentMap;
 		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "HollowMetal";
-		buildingDef.PowerInputOffset = new CellOffset(1, 0);
-		buildingDef.UtilityInputOffset = new CellOffset(-1, 1);
-		buildingDef.UtilityOutputOffset = new CellOffset(1, 1);
+		buildingDef.PowerInputOffset = new CellOffset(2, 0);
+		buildingDef.UtilityInputOffset = new CellOffset(-1, 2);
+		buildingDef.UtilityOutputOffset = new CellOffset(2, 2);
 		return buildingDef;
 	}
 
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
-		BuildingTemplates.CreateDefaultStorage(go, false);
+		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
 		go.AddOrGet<WaterPurifier>();
 		go.AddOrGet<Prioritizable>();
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.conversionInterval = 0.2f;
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
-			new ElementConverter.ConsumedElement(new Tag("Filter"), 0.2f),
-			new ElementConverter.ConsumedElement(new Tag("DirtyWater"), 1f)
+			new ElementConverter.ConsumedElement(new Tag("Filter"), 1f),
+			new ElementConverter.ConsumedElement(new Tag("DirtyWater"), 5f)
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(null, 1f, SimHashes.Water, 313.15f, true, 0f, 0f)
+			new ElementConverter.OutputElement(5f, SimHashes.Water, 313.15f, true, 0f, 0f, false),
+			new ElementConverter.OutputElement(0.2f, SimHashes.ToxicSand, 313.15f, true, 0f, 0f, false)
 		};
+		ElementDropper elementDropper = go.AddComponent<ElementDropper>();
+		elementDropper.emitMass = 10f;
+		elementDropper.emitTag = new Tag("ToxicSand");
+		elementDropper.emitOffset = new Vector3(0f, 1f, 0f);
 		ManualDeliveryKG manualDeliveryKG = go.AddComponent<ManualDeliveryKG>();
+		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.requestedItemTag = new Tag("Filter");
 		manualDeliveryKG.capacity = 200f;
 		manualDeliveryKG.refillMass = 50f;
@@ -47,13 +52,16 @@ public class WaterPurifierConfig : IBuildingConfig
 		conduitConsumer.conduitType = ConduitType.Liquid;
 		conduitConsumer.consumptionRate = 10f;
 		conduitConsumer.capacityKG = 10f;
-		conduitConsumer.capacityElement = SimHashes.DirtyWater;
+		conduitConsumer.capacityTag = GameTags.AnyWater;
+		conduitConsumer.forceAlwaysSatisfied = true;
+		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Store;
 		ConduitDispenser conduitDispenser = go.AddOrGet<ConduitDispenser>();
 		conduitDispenser.conduitType = ConduitType.Liquid;
-		conduitDispenser.elementFilter = SimHashes.Water;
+		conduitDispenser.invertElementFilter = true;
+		conduitDispenser.elementFilter = new SimHashes[] { SimHashes.DirtyWater };
 	}
 
-	public override void DoPostConfigure(GameObject go)
+	public override void DoPostConfigureComplete(GameObject go)
 	{
 		BuildingTemplates.DoPostConfigure(go);
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)

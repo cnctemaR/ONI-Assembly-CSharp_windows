@@ -5,7 +5,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class GameClock : KMonoBehaviour, ISaveLoadableJson
+public class GameClock : KMonoBehaviour, ISaveLoadable
 {
 	protected override void OnPrefabInit()
 	{

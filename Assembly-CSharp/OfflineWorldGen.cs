@@ -315,7 +315,8 @@ public class OfflineWorldGen : KMonoBehaviour
 	private void DoWordGenInitialise()
 	{
 		WorldGen.LoadSettings();
-		WorldGen.Initialise(new WorldGen.OfflineCallbackFunction(this.UpdateProgress), -1);
+		int @int = PlayerPrefs.GetInt(OfflineWorldGen.WORLD_GEN_SEED_KEY, -1);
+		WorldGen.Initialise(new WorldGen.OfflineCallbackFunction(this.UpdateProgress), @int);
 		this.firstPassGeneration = true;
 		WorldGen.GenerateOfflineThreaded();
 	}
@@ -411,6 +412,8 @@ public class OfflineWorldGen : KMonoBehaviour
 	private bool firstPassGeneration;
 
 	private bool secondPassGeneration;
+
+	public static string WORLD_GEN_SEED_KEY = "WorldGenSeedKey";
 
 	[Serializable]
 	private struct ValidDimensions

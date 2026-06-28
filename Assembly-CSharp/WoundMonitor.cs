@@ -5,7 +5,7 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.healthy;
-		this.root.ToggleAnims("anim_hits", 0f);
+		this.root.ToggleAnims("anim_hits_kanim", 0f);
 		this.healthy.Update(delegate(WoundMonitor.Instance smi)
 		{
 			if (smi.health.State != Health.HealthState.Perfect)
@@ -35,36 +35,39 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 			{
 				smi.GoToProperHeathState();
 			});
-		this.wounded.medium.ToggleAnims("anim_loco_wounded", 1f);
-		this.wounded.heavy.ToggleAnims("anim_loco_wounded", 3f);
+		this.wounded.medium.ToggleAnims("anim_loco_wounded_kanim", 1f);
+		this.wounded.heavy.ToggleAnims("anim_loco_wounded_kanim", 3f);
 	}
 
-	public GameStateMachine<WoundMonitor, WoundMonitor.Instance, IStateMachineTarget>.State healthy;
+	public GameStateMachine<WoundMonitor, WoundMonitor.Instance, IStateMachineTarget, object>.State healthy;
 
 	public WoundMonitor.Wounded wounded;
 
-	public class Wounded : GameStateMachine<WoundMonitor, WoundMonitor.Instance, IStateMachineTarget>.State
+	public class Wounded : GameStateMachine<WoundMonitor, WoundMonitor.Instance, IStateMachineTarget, object>.State
 	{
-		public GameStateMachine<WoundMonitor, WoundMonitor.Instance, IStateMachineTarget>.State light;
+		public GameStateMachine<WoundMonitor, WoundMonitor.Instance, IStateMachineTarget, object>.State light;
 
-		public GameStateMachine<WoundMonitor, WoundMonitor.Instance, IStateMachineTarget>.State medium;
+		public GameStateMachine<WoundMonitor, WoundMonitor.Instance, IStateMachineTarget, object>.State medium;
 
-		public GameStateMachine<WoundMonitor, WoundMonitor.Instance, IStateMachineTarget>.State heavy;
+		public GameStateMachine<WoundMonitor, WoundMonitor.Instance, IStateMachineTarget, object>.State heavy;
 	}
 
-	public new class Instance : GameStateMachine<WoundMonitor, WoundMonitor.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<WoundMonitor, WoundMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)
 		{
 			this.health = master.GetComponent<Health>();
 			this.worker = master.GetComponent<Worker>();
-			base.smi.master.gameObject.Subscribe(-2121334874, new EventSystem.EventHandler(base.smi.OnTookDamage));
+			base.smi.master.gameObject.Subscribe(-2121334874, new Action<object>(base.smi.OnTookDamage));
 		}
 
 		public void OnTookDamage(object data)
 		{
-			this.PlayHitAnimation();
+			if (this.health.hitPoints != 0f)
+			{
+				this.PlayHitAnimation();
+			}
 		}
 
 		private void PlayHitAnimation()
@@ -106,6 +109,14 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 					return;
 				}
 				if (currentAnim.Contains("1_2"))
+				{
+					return;
+				}
+				if (currentAnim.Contains("1_2"))
+				{
+					return;
+				}
+				if (currentAnim.Contains("breathe_"))
 				{
 					return;
 				}

@@ -5,7 +5,7 @@ using UnityEngine;
 public class DoctorChore : Chore<DoctorChore.StatesInstance>
 {
 	public DoctorChore(IStateMachineTarget target, GameObject patient)
-		: base(Db.Get().ChoreTypes.Doctor, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true)
+		: base(Db.Get().ChoreTypes.Doctor, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true, 0)
 	{
 		this.smi = new DoctorChore.StatesInstance(this);
 		this.smi.sm.patient.Set(patient, this.smi);
@@ -18,7 +18,7 @@ public class DoctorChore : Chore<DoctorChore.StatesInstance>
 		base.Begin(context);
 	}
 
-	public class StatesInstance : GameStateMachine<DoctorChore.States, DoctorChore.StatesInstance, DoctorChore>.GameInstance
+	public class StatesInstance : GameStateMachine<DoctorChore.States, DoctorChore.StatesInstance, DoctorChore, object>.GameInstance
 	{
 		public StatesInstance(DoctorChore master)
 			: base(master)
@@ -45,14 +45,14 @@ public class DoctorChore : Chore<DoctorChore.StatesInstance>
 			}).ReturnSuccess();
 		}
 
-		public StateMachine<DoctorChore.States, DoctorChore.StatesInstance, DoctorChore>.TargetParameter patient;
+		public StateMachine<DoctorChore.States, DoctorChore.StatesInstance, DoctorChore, object>.TargetParameter patient;
 
-		public StateMachine<DoctorChore.States, DoctorChore.StatesInstance, DoctorChore>.TargetParameter doctor;
+		public StateMachine<DoctorChore.States, DoctorChore.StatesInstance, DoctorChore, object>.TargetParameter doctor;
 
-		public GameStateMachine<DoctorChore.States, DoctorChore.StatesInstance, DoctorChore>.ApproachSubState<Chattable> approachpatient;
+		public GameStateMachine<DoctorChore.States, DoctorChore.StatesInstance, DoctorChore, object>.ApproachSubState<Chattable> approachpatient;
 
-		public GameStateMachine<DoctorChore.States, DoctorChore.StatesInstance, DoctorChore>.State heal;
+		public GameStateMachine<DoctorChore.States, DoctorChore.StatesInstance, DoctorChore, object>.State heal;
 
-		public GameStateMachine<DoctorChore.States, DoctorChore.StatesInstance, DoctorChore>.State success;
+		public GameStateMachine<DoctorChore.States, DoctorChore.StatesInstance, DoctorChore, object>.State success;
 	}
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class GameScenePartitioner : KMonoBehaviour
 {
@@ -14,12 +13,14 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.navCellChangedMask = this.partitioner.CreateMask(new HashedString("NavCellChanged"));
 		this.fogOfWarChanged = this.partitioner.CreateMask(new HashedString("FogOfWarChanged"));
 		this.decorProviders = this.partitioner.CreateMask(new HashedString("DecorProviders"));
-		this.navigableChanged = this.partitioner.CreateMask(new HashedString("NavigableChanged"));
-		this.factionedEntities = this.partitioner.CreateMask(new HashedString("FactionedEntities"));
+		this.attackableEntities = this.partitioner.CreateMask(new HashedString("FactionedEntities"));
 		this.fetchChores = this.partitioner.CreateMask(new HashedString("FetchChores"));
 		this.pickupables = this.partitioner.CreateMask(new HashedString("Pickupables"));
-		this.objectLayerMasks = new ScenePartitionerMask[25];
-		for (int i = 0; i < 25; i++)
+		this.gasConduits = this.partitioner.CreateMask(new HashedString("GasConduit"));
+		this.liquidConduits = this.partitioner.CreateMask(new HashedString("LiquidConduit"));
+		this.wires = this.partitioner.CreateMask(new HashedString("Wire"));
+		this.objectLayerMasks = new ScenePartitionerMask[23];
+		for (int i = 0; i < 23; i++)
 		{
 			ObjectLayer objectLayer = (ObjectLayer)i;
 			this.objectLayerMasks[i] = this.partitioner.CreateMask(new HashedString(objectLayer.ToString()));
@@ -40,11 +41,6 @@ public class GameScenePartitioner : KMonoBehaviour
 
 	public GameScenePartitionerEntry Add(string name, object obj, int x, int y, int width, int height, int masks, Action<object> event_callback)
 	{
-		if (!Grid.IsValidCell(Grid.XYToCell(x, y)))
-		{
-			Debug.LogWarning("Game object is outside of scene extents, it should be destroyed");
-			return null;
-		}
 		GameScenePartitionerEntry gameScenePartitionerEntry = new GameScenePartitionerEntry(name, obj, x, y, width, height, masks, this.partitioner, event_callback);
 		this.partitioner.Add(gameScenePartitionerEntry);
 		return gameScenePartitionerEntry;
@@ -57,11 +53,6 @@ public class GameScenePartitioner : KMonoBehaviour
 
 	public GameScenePartitionerEntry Add(string name, object obj, int cell, int masks, Action<object> event_callback)
 	{
-		if (!Grid.IsValidCell(cell))
-		{
-			Debug.LogWarning("Game object is outside of scene extents, it should be destroyed");
-			return null;
-		}
 		int num = 0;
 		int num2 = 0;
 		Grid.CellToXY(cell, out num, out num2);
@@ -96,11 +87,19 @@ public class GameScenePartitioner : KMonoBehaviour
 		}
 	}
 
-	public HashSet<ScenePartitionerEntry> GatherEntries(int x_bottomLeft, int y_bottomLeft, int width, int height, int masks)
+	public void GatherEntries(int x_bottomLeft, int y_bottomLeft, int width, int height, int masks, List<ScenePartitionerEntry> gathered_entries)
 	{
-		HashSet<ScenePartitionerEntry> hashSet = new HashSet<ScenePartitionerEntry>();
-		this.partitioner.GatherEntries(x_bottomLeft, y_bottomLeft, width, height, masks, null, ref hashSet);
-		return hashSet;
+		this.partitioner.GatherEntries(x_bottomLeft, y_bottomLeft, width, height, masks, null, gathered_entries);
+	}
+
+	public List<ScenePartitionerEntry> ReserveList()
+	{
+		return this.partitioner.ReserveList();
+	}
+
+	public void ReleaseList(List<ScenePartitionerEntry> list)
+	{
+		this.partitioner.ReleaseList(list);
 	}
 
 	public static GameScenePartitioner Instance;
@@ -117,13 +116,17 @@ public class GameScenePartitioner : KMonoBehaviour
 
 	public ScenePartitionerMask decorProviders;
 
-	public ScenePartitionerMask navigableChanged;
-
-	public ScenePartitionerMask factionedEntities;
+	public ScenePartitionerMask attackableEntities;
 
 	public ScenePartitionerMask fetchChores;
 
 	public ScenePartitionerMask pickupables;
+
+	public ScenePartitionerMask gasConduits;
+
+	public ScenePartitionerMask liquidConduits;
+
+	public ScenePartitionerMask wires;
 
 	public ScenePartitionerMask[] objectLayerMasks;
 

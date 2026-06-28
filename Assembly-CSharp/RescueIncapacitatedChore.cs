@@ -4,7 +4,7 @@ using UnityEngine;
 public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesInstance>
 {
 	public RescueIncapacitatedChore(IStateMachineTarget master, GameObject incapacitatedDuplicant)
-		: base(Db.Get().ChoreTypes.RescueIncapacitated, master, null, false, null, null, null, int.MaxValue, false, true)
+		: base(Db.Get().ChoreTypes.RescueIncapacitated, master, null, false, null, null, null, int.MaxValue, false, true, 0)
 	{
 		this.smi = new RescueIncapacitatedChore.StatesInstance(this);
 		base.AddPrecondition(ChorePreconditions.NotChoreCreator, incapacitatedDuplicant.gameObject);
@@ -27,10 +27,13 @@ public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesIns
 
 	private void DropIncapacitatedDuplicant()
 	{
-		this.smi.sm.rescuer.Get(this.smi).GetComponent<Storage>().Drop(this.smi.sm.rescueTarget.Get(this.smi));
+		if (this.smi.sm.rescuer.Get(this.smi) != null && this.smi.sm.rescueTarget.Get(this.smi) != null)
+		{
+			this.smi.sm.rescuer.Get(this.smi).GetComponent<Storage>().Drop(this.smi.sm.rescueTarget.Get(this.smi));
+		}
 	}
 
-	public class StatesInstance : GameStateMachine<RescueIncapacitatedChore.States, RescueIncapacitatedChore.StatesInstance, RescueIncapacitatedChore>.GameInstance
+	public class StatesInstance : GameStateMachine<RescueIncapacitatedChore.States, RescueIncapacitatedChore.StatesInstance, RescueIncapacitatedChore, object>.GameInstance
 	{
 		public StatesInstance(RescueIncapacitatedChore master)
 			: base(master)
@@ -51,7 +54,7 @@ public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesIns
 					smi.StopSM("target died");
 				}
 			});
-			this.holding.Target(this.rescuer).ToggleAnims("anim_incapacitated_carrier", 0f).Enter(delegate(RescueIncapacitatedChore.StatesInstance smi)
+			this.holding.Target(this.rescuer).ToggleAnims("anim_incapacitated_carrier_kanim", 0f).Enter(delegate(RescueIncapacitatedChore.StatesInstance smi)
 			{
 				smi.sm.rescueTarget.Get(smi).Subscribe(1623392196, delegate(object d)
 				{
@@ -95,27 +98,27 @@ public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesIns
 			});
 		}
 
-		public GameStateMachine<RescueIncapacitatedChore.States, RescueIncapacitatedChore.StatesInstance, RescueIncapacitatedChore>.ApproachSubState<Chattable> approachIncapacitated;
+		public GameStateMachine<RescueIncapacitatedChore.States, RescueIncapacitatedChore.StatesInstance, RescueIncapacitatedChore, object>.ApproachSubState<Chattable> approachIncapacitated;
 
-		public GameStateMachine<RescueIncapacitatedChore.States, RescueIncapacitatedChore.StatesInstance, RescueIncapacitatedChore>.State failure;
+		public GameStateMachine<RescueIncapacitatedChore.States, RescueIncapacitatedChore.StatesInstance, RescueIncapacitatedChore, object>.State failure;
 
 		public RescueIncapacitatedChore.States.HoldingIncapacitated holding;
 
-		public StateMachine<RescueIncapacitatedChore.States, RescueIncapacitatedChore.StatesInstance, RescueIncapacitatedChore>.TargetParameter rescueTarget;
+		public StateMachine<RescueIncapacitatedChore.States, RescueIncapacitatedChore.StatesInstance, RescueIncapacitatedChore, object>.TargetParameter rescueTarget;
 
-		public StateMachine<RescueIncapacitatedChore.States, RescueIncapacitatedChore.StatesInstance, RescueIncapacitatedChore>.TargetParameter deliverTarget;
+		public StateMachine<RescueIncapacitatedChore.States, RescueIncapacitatedChore.StatesInstance, RescueIncapacitatedChore, object>.TargetParameter deliverTarget;
 
-		public StateMachine<RescueIncapacitatedChore.States, RescueIncapacitatedChore.StatesInstance, RescueIncapacitatedChore>.TargetParameter rescuer;
+		public StateMachine<RescueIncapacitatedChore.States, RescueIncapacitatedChore.StatesInstance, RescueIncapacitatedChore, object>.TargetParameter rescuer;
 
-		public class HoldingIncapacitated : GameStateMachine<RescueIncapacitatedChore.States, RescueIncapacitatedChore.StatesInstance, RescueIncapacitatedChore>.State
+		public class HoldingIncapacitated : GameStateMachine<RescueIncapacitatedChore.States, RescueIncapacitatedChore.StatesInstance, RescueIncapacitatedChore, object>.State
 		{
-			public GameStateMachine<RescueIncapacitatedChore.States, RescueIncapacitatedChore.StatesInstance, RescueIncapacitatedChore>.State pickup;
+			public GameStateMachine<RescueIncapacitatedChore.States, RescueIncapacitatedChore.StatesInstance, RescueIncapacitatedChore, object>.State pickup;
 
-			public GameStateMachine<RescueIncapacitatedChore.States, RescueIncapacitatedChore.StatesInstance, RescueIncapacitatedChore>.ApproachSubState<Approachable> delivering;
+			public GameStateMachine<RescueIncapacitatedChore.States, RescueIncapacitatedChore.StatesInstance, RescueIncapacitatedChore, object>.ApproachSubState<Approachable> delivering;
 
-			public GameStateMachine<RescueIncapacitatedChore.States, RescueIncapacitatedChore.StatesInstance, RescueIncapacitatedChore>.State deposit;
+			public GameStateMachine<RescueIncapacitatedChore.States, RescueIncapacitatedChore.StatesInstance, RescueIncapacitatedChore, object>.State deposit;
 
-			public GameStateMachine<RescueIncapacitatedChore.States, RescueIncapacitatedChore.StatesInstance, RescueIncapacitatedChore>.State ditch;
+			public GameStateMachine<RescueIncapacitatedChore.States, RescueIncapacitatedChore.StatesInstance, RescueIncapacitatedChore, object>.State ditch;
 		}
 	}
 }

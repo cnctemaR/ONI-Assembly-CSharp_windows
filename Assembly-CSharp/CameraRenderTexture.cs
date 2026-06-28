@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class CameraRenderTexture : MonoBehaviour
 {
+	private void Awake()
+	{
+		this.material = new Material(Shader.Find("Klei/PostFX/CameraRenderTexture"));
+	}
+
 	private void Start()
 	{
 		ScreenResize instance = ScreenResize.Instance;
@@ -26,10 +31,12 @@ public class CameraRenderTexture : MonoBehaviour
 
 	private void OnRenderImage(RenderTexture source, RenderTexture dest)
 	{
-		Graphics.Blit(source, this.resultTexture);
+		Graphics.Blit(source, this.resultTexture, this.material);
 	}
 
 	public string TextureName;
 
 	public RenderTexture resultTexture;
+
+	private Material material;
 }

@@ -12,7 +12,6 @@ public class ScenePartitionerEntry
 		this.partitioner = partitioner;
 		this.eventCallback = event_callback;
 		this.obj = obj;
-		this.debugName = name;
 	}
 
 	public void UpdatePosition(int x, int y)
@@ -35,11 +34,11 @@ public class ScenePartitionerEntry
 
 	public int masks;
 
+	public int queryId;
+
 	public ScenePartitioner partitioner;
 
 	public Action<object> eventCallback;
 
 	public object obj;
-
-	public string debugName;
 }

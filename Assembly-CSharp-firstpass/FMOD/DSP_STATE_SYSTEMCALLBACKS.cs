@@ -20,6 +20,8 @@ namespace FMOD
 
 		private DSP_SYSTEM_GETSPEAKERMODE getspeakermode;
 
-		private FMOD_DSP_STATE_GETCLOCK getclock;
+		private DSP_STATE_GETCLOCK getclock;
+
+		private DSP_STATE_GETLISTENERATTRIBUTES getlistenerattributes;
 	}
 }

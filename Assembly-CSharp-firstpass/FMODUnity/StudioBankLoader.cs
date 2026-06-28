@@ -22,7 +22,7 @@ namespace FMODUnity
 		private void Start()
 		{
 			RuntimeUtils.EnforceLibraryOrder();
-			this.HandleGameEvent(LoaderGameEvent.LevelStart);
+			this.HandleGameEvent(LoaderGameEvent.ObjectStart);
 		}
 
 		private void OnApplicationQuit()
@@ -34,7 +34,7 @@ namespace FMODUnity
 		{
 			if (!this.isQuitting)
 			{
-				this.HandleGameEvent(LoaderGameEvent.LevelEnd);
+				this.HandleGameEvent(LoaderGameEvent.ObjectDestroy);
 			}
 		}
 
@@ -54,6 +54,22 @@ namespace FMODUnity
 			}
 		}
 
+		private void OnTriggerEnter2D(Collider2D other)
+		{
+			if (string.IsNullOrEmpty(this.CollisionTag) || other.CompareTag(this.CollisionTag))
+			{
+				this.HandleGameEvent(LoaderGameEvent.TriggerEnter2D);
+			}
+		}
+
+		private void OnTriggerExit2D(Collider2D other)
+		{
+			if (string.IsNullOrEmpty(this.CollisionTag) || other.CompareTag(this.CollisionTag))
+			{
+				this.HandleGameEvent(LoaderGameEvent.TriggerExit2D);
+			}
+		}
+
 		public void Load()
 		{
 			foreach (string text in this.Banks)
@@ -67,6 +83,7 @@ namespace FMODUnity
 					Debug.LogException(ex);
 				}
 			}
+			RuntimeManager.WaitForAllLoads();
 		}
 
 		public void Unload()

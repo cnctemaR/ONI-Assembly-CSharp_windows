@@ -30,17 +30,17 @@ public class ToxicantMonitor : GameStateMachine<ToxicantMonitor, ToxicantMonitor
 
 	private const float DiseaseExposureInterval = 5f;
 
-	public GameStateMachine<ToxicantMonitor, ToxicantMonitor.Instance, IStateMachineTarget>.State satisfied;
+	public GameStateMachine<ToxicantMonitor, ToxicantMonitor.Instance, IStateMachineTarget, object>.State satisfied;
 
-	public GameStateMachine<ToxicantMonitor, ToxicantMonitor.Instance, IStateMachineTarget>.State toxicarea;
+	public GameStateMachine<ToxicantMonitor, ToxicantMonitor.Instance, IStateMachineTarget, object>.State toxicarea;
 
-	public new class Instance : GameStateMachine<ToxicantMonitor, ToxicantMonitor.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<ToxicantMonitor, ToxicantMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)
 		{
 			this.sensor = master.GetComponent<Sensors>().GetSensor<ToxicantSensor>();
-			this.modifier = new AttributeModifier(Db.Get().Amounts.Toxicity.deltaAttribute.Id, 0f, DUPLICANTS.MODIFIERS.TOXICENVIRONMENT.NAME, false);
+			this.modifier = new AttributeModifier(Db.Get().Amounts.Toxicity.deltaAttribute.Id, 0f, DUPLICANTS.MODIFIERS.TOXICENVIRONMENT.NAME, false, false);
 			if (ToxicantMonitor.Instance.infectiousSubstances.Count == 0)
 			{
 				ToxicantMonitor.Instance.infectiousSubstances[SimHashes.ContaminatedOxygen] = new Disease[]

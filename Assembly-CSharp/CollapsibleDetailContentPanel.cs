@@ -74,9 +74,9 @@ public class CollapsibleDetailContentPanel : KMonoBehaviour
 
 	private void ToggleOpen()
 	{
-		bool flag = this.Content.gameObject.activeSelf;
+		bool flag = this.scalerMask.gameObject.activeSelf;
 		flag = !flag;
-		this.Content.gameObject.SetActive(flag);
+		this.scalerMask.gameObject.SetActive(flag);
 		if (flag)
 		{
 			this.ArrowIcon.SetActive();

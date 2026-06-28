@@ -14,11 +14,11 @@ public class ToiletMonitor : GameStateMachine<ToiletMonitor, ToiletMonitor.Insta
 		});
 	}
 
-	public GameStateMachine<ToiletMonitor, ToiletMonitor.Instance, IStateMachineTarget>.State satisfied;
+	public GameStateMachine<ToiletMonitor, ToiletMonitor.Instance, IStateMachineTarget, object>.State satisfied;
 
-	public GameStateMachine<ToiletMonitor, ToiletMonitor.Instance, IStateMachineTarget>.State unsatisfied;
+	public GameStateMachine<ToiletMonitor, ToiletMonitor.Instance, IStateMachineTarget, object>.State unsatisfied;
 
-	public new class Instance : GameStateMachine<ToiletMonitor, ToiletMonitor.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<ToiletMonitor, ToiletMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)

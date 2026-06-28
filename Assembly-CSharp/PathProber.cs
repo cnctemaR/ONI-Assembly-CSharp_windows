@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 
+[SkipSaveFileSerialization]
 public class PathProber : KMonoBehaviour
 {
-	public int QueryId { get; set; }
-
-	protected override void OnPrefabInit()
+	public void SetValidNavTypes(NavType[] nav_types, int max_probing_radius)
 	{
-		this.PathGrid = new PathGrid(Grid.CellCount);
-	}
-
-	public void SetValidNavTypes(NavType[] nav_types)
-	{
-		this.PathGrid.SetValidNavTypes(nav_types);
+		if (max_probing_radius != 0)
+		{
+			this.PathGrid = new PathGrid(max_probing_radius, max_probing_radius, true, nav_types);
+		}
+		else
+		{
+			this.PathGrid = new PathGrid(Grid.WidthInCells, Grid.HeightInCells, false, nav_types);
+		}
 	}
 
 	public int GetCost(int cell)
@@ -37,6 +38,7 @@ public class PathProber : KMonoBehaviour
 		{
 			this.IslandCount++;
 		}
+		this.PathGrid.SetRootCell(cell);
 		int num = 0;
 		PathFinder.Cell cell2 = this.PathGrid.GetCell(cell, nav_type);
 		PathFinder.AddPotential(cell, Grid.InvalidCell, nav_type, NavType.NumNavTypes, 0, 0, -1, ref num, this.Potentials, this.QueryId, this.PathGrid, false, ref cell2);
@@ -79,6 +81,8 @@ public class PathProber : KMonoBehaviour
 	public static int InvalidCost = -1;
 
 	public static int InvalidIsland = -1;
+
+	public int QueryId = 1;
 
 	public int IslandCount;
 

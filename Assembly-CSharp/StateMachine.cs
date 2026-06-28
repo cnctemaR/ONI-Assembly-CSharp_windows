@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using KSerialization;
@@ -137,7 +138,6 @@ public abstract class StateMachine
 		{
 			this.stateMachine = state_machine;
 			this.CreateParameterContexts();
-			this.log = new LoggerFS(this.stateMachine.name);
 		}
 
 		public abstract void Update();
@@ -179,12 +179,9 @@ public abstract class StateMachine
 			return this.stateMachine;
 		}
 
+		[Conditional("UNITY_EDITOR")]
 		public void Log(string message)
 		{
-			if (this.IsConsoleLoggingEnabled())
-			{
-				Debug.Log(this.GetMaster().name + "." + message);
-			}
 		}
 
 		public bool IsConsoleLoggingEnabled()
@@ -199,7 +196,7 @@ public abstract class StateMachine
 
 		public LoggerFS GetLog()
 		{
-			return this.log;
+			return null;
 		}
 
 		public StateMachine.Parameter.Context[] GetParameterContexts()
@@ -312,12 +309,12 @@ public abstract class StateMachine
 			this.Schedule(time, this.scheduleGoToCallback, state);
 		}
 
-		public void Subscribe(int hash, EventSystem.EventHandler handler)
+		public void Subscribe(int hash, Action<object> handler)
 		{
 			this.GetMaster().Subscribe(hash, handler);
 		}
 
-		public void Unsubscribe(int hash, EventSystem.EventHandler handler)
+		public void Unsubscribe(int hash, Action<object> handler)
 		{
 			this.GetMaster().Unsubscribe(hash, handler);
 		}
@@ -364,8 +361,6 @@ public abstract class StateMachine
 
 		public const float UPDATE_TIME = 0.2f;
 
-		protected LoggerFS log;
-
 		protected StateMachine.Status status;
 
 		protected StateMachine stateMachine;
@@ -391,6 +386,14 @@ public abstract class StateMachine
 		public bool isCrashed;
 
 		public static bool error;
+
+		public class BaseDef
+		{
+			public StateMachine.Instance CreateSMI(IStateMachineTarget master)
+			{
+				return StateMachineManager.Instance.CreateSMIFromDef(master, this);
+			}
+		}
 	}
 
 	public class BaseState
@@ -459,13 +462,16 @@ public abstract class StateMachine
 
 	public class BaseTransition
 	{
-		public BaseTransition(string name, StateMachine.BaseState target_state)
+		public BaseTransition(string name, StateMachine.BaseState source_state, StateMachine.BaseState target_state)
 		{
 			this.name = name;
+			this.sourceState = source_state;
 			this.targetState = target_state;
 		}
 
 		public string name;
+
+		public StateMachine.BaseState sourceState;
 
 		public StateMachine.BaseState targetState;
 	}
@@ -511,6 +517,10 @@ public abstract class StateMachine
 			public abstract void Serialize(BinaryWriter writer);
 
 			public abstract void Deserialize(IReader reader);
+
+			public virtual void Cleanup()
+			{
+			}
 
 			public abstract void ShowEditor(StateMachine.Instance base_smi);
 

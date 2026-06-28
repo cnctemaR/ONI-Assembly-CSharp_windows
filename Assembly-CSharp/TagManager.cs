@@ -8,7 +8,7 @@ public class TagManager
 	{
 		Tag tag = default(Tag);
 		tag.Name = tag_string;
-		if (proper_name != null)
+		if (!TagManager.ProperNames.ContainsKey(tag) || proper_name != null)
 		{
 			TagManager.SetProperName(tag, proper_name);
 		}
@@ -29,6 +29,17 @@ public class TagManager
 	public static Tag Create(SimHashes id)
 	{
 		return TagManager.Create(id.ToString(), null);
+	}
+
+	public static void FillMissingProperNames()
+	{
+		foreach (Tag tag in new List<Tag>(TagManager.ProperNames.Keys))
+		{
+			if (TagManager.ProperNames[tag] == null)
+			{
+				TagManager.ProperNames[tag] = TagDescriptions.GetDescription(tag.Name);
+			}
+		}
 	}
 
 	public static void SetProperName(string tag_name, string name)
@@ -52,22 +63,7 @@ public class TagManager
 		return text;
 	}
 
-	public static void SetUnitOfMeasurement(string tag_name, string unit)
-	{
-		Tag tag = TagManager.Create(tag_name, null);
-		TagManager.UnitsOfMeasurement[tag] = unit;
-	}
-
-	public static string GetUnitOfMeasurement(Tag tag)
-	{
-		string empty = string.Empty;
-		TagManager.UnitsOfMeasurement.TryGetValue(tag, out empty);
-		return empty;
-	}
-
 	private static Dictionary<Tag, string> ProperNames = new Dictionary<Tag, string>();
-
-	private static Dictionary<Tag, string> UnitsOfMeasurement = new Dictionary<Tag, string>();
 
 	public static readonly Tag Invalid = default(Tag);
 }

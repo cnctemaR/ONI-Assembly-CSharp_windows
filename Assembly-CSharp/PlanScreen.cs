@@ -33,13 +33,14 @@ public class PlanScreen : KIconToggleMenu
 		this.productInfoScreen = global::Util.KInstantiateUI<ProductInfoScreen>(this.productInfoScreenPrefab, this.recipeInfoScreenParent, true);
 		this.productInfoScreen.rectTransform().localPosition = new Vector3(280f, 0f, 0f);
 		this.productInfoScreen.onElementsFullySelected = new global::System.Action(this.OnRecipeElementsFullySelected);
-		Game.Instance.Subscribe(-107300940, new EventSystem.EventHandler(this.OnResearchComplete));
+		Game.Instance.Subscribe(-107300940, new Action<object>(this.OnResearchComplete));
 		this.buildingGroupsRoot.gameObject.SetActive(false);
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.initTime = KTime.Instance.UnscaledGameTime;
 		PlanScreen.Instance = this;
 		UIRegistry.planScreen = this;
 		base.onSelect += this.OnClickCategory;
@@ -127,11 +128,12 @@ public class PlanScreen : KIconToggleMenu
 			ImageToggleState[] components = to.GetComponents<ImageToggleState>();
 			foreach (ImageToggleState imageToggleState in components)
 			{
-				if (imageToggleState.TargetImage.sprite != null && imageToggleState.TargetImage.name == "FG" && !imageToggleState.spritesInitialized)
+				if (imageToggleState.TargetImage.sprite != null && imageToggleState.TargetImage.name == "FG" && !imageToggleState.useSprites)
 				{
 					imageToggleState.SetSprites(Assets.GetSprite(imageToggleState.TargetImage.sprite.name + "_disabled"), imageToggleState.TargetImage.sprite, imageToggleState.TargetImage.sprite, Assets.GetSprite(imageToggleState.TargetImage.sprite.name + "_disabled"));
 				}
 			}
+			to.GetComponent<KToggle>().soundPlayer.Enabled = false;
 		});
 	}
 
@@ -159,7 +161,6 @@ public class PlanScreen : KIconToggleMenu
 
 	private void OnSelectBuilding(GameObject button_go, BuildingDef def)
 	{
-		string text = GlobalAssets.GetSound("HUD_Click", false);
 		if (button_go == null)
 		{
 			Output.LogWithObj(base.gameObject, new object[] { "Button gameObject is null" });
@@ -167,20 +168,12 @@ public class PlanScreen : KIconToggleMenu
 		}
 		if (button_go == this.selectedBuildingGameObject)
 		{
-			this.CloseRecipe();
-			text = GlobalAssets.GetSound("HUD_Click_Deselect", false);
-			if (text != null)
-			{
-				KMonoBehaviour.PlaySound(text);
-			}
+			this.CloseRecipe(true);
 			return;
 		}
 		this.selectedBuildingGameObject = button_go;
 		this.currentlySelectedToggle = button_go.GetComponent<KToggle>();
-		if (text != null)
-		{
-			KMonoBehaviour.PlaySound(text);
-		}
+		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
 		this.productInfoScreen.ClearProduct(false);
 		ToolMenu.Instance.ClearSelection();
 		PrebuildTool.Instance.Activate(def, this.BuildableState(def));
@@ -211,6 +204,7 @@ public class PlanScreen : KIconToggleMenu
 		List<string> list = new List<string>();
 		for (int i = 0; i < num; i++)
 		{
+			this.buildable_state_update_idx = (this.buildable_state_update_idx + 1) % Assets.BuildingDefs.Length;
 			BuildingDef buildingDef = Assets.BuildingDefs[this.buildable_state_update_idx];
 			if (!buildingDef.Deprecated)
 			{
@@ -251,21 +245,24 @@ public class PlanScreen : KIconToggleMenu
 								{
 									list.Add(buildingDef.PlanCategory);
 									toggleInfo.toggle.gameObject.GetComponent<Animator>().Play(text);
-									if (this.timeSinceNotificationPing >= this.specialNotificationEmbellishDelay)
+									if (KTime.Instance.UnscaledGameTime - this.initTime > 1.5f)
 									{
-										string sound = GlobalAssets.GetSound("NewBuildable_Embellishment", false);
-										if (sound != null)
+										if (this.timeSinceNotificationPing >= this.specialNotificationEmbellishDelay)
 										{
-											EventInstance eventInstance = SoundEvent.BeginOneShot(sound, SoundListenerController.Instance.transform.position);
-											SoundEvent.EndOneShot(eventInstance);
+											string sound = GlobalAssets.GetSound("NewBuildable_Embellishment", false);
+											if (sound != null)
+											{
+												EventInstance eventInstance = SoundEvent.BeginOneShot(sound, SoundListenerController.Instance.transform.position);
+												SoundEvent.EndOneShot(eventInstance);
+											}
 										}
-									}
-									string sound2 = GlobalAssets.GetSound("NewBuildable", false);
-									if (sound2 != null)
-									{
-										EventInstance eventInstance2 = SoundEvent.BeginOneShot(sound2, SoundListenerController.Instance.transform.position);
-										eventInstance2.setParameterValue("playCount", (float)this.notificationPingCount);
-										SoundEvent.EndOneShot(eventInstance2);
+										string sound2 = GlobalAssets.GetSound("NewBuildable", false);
+										if (sound2 != null)
+										{
+											EventInstance eventInstance2 = SoundEvent.BeginOneShot(sound2, SoundListenerController.Instance.transform.position);
+											eventInstance2.setParameterValue("playCount", (float)this.notificationPingCount);
+											SoundEvent.EndOneShot(eventInstance2);
+										}
 									}
 									this.timeSinceNotificationPing = 0f;
 									this.notificationPingCount++;
@@ -274,7 +271,6 @@ public class PlanScreen : KIconToggleMenu
 						}
 					}
 				}
-				this.buildable_state_update_idx = (this.buildable_state_update_idx + 1) % Assets.BuildingDefs.Length;
 			}
 		}
 	}
@@ -360,8 +356,12 @@ public class PlanScreen : KIconToggleMenu
 		}
 	}
 
-	public void CloseRecipe()
+	public void CloseRecipe(bool playSound = false)
 	{
+		if (playSound)
+		{
+			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Deselect", false));
+		}
 		if (PlayerController.Instance.ActiveTool == PrebuildTool.Instance)
 		{
 			ToolMenu.Instance.ClearSelection();
@@ -398,7 +398,7 @@ public class PlanScreen : KIconToggleMenu
 
 	private void OnClickCategory(KIconToggleMenu.ToggleInfo toggle_info)
 	{
-		this.CloseRecipe();
+		this.CloseRecipe(false);
 		if (!this.CategoryInteractive.ContainsKey(toggle_info) || !this.CategoryInteractive[toggle_info])
 		{
 			this.CloseCategoryPanel(false);
@@ -513,6 +513,7 @@ public class PlanScreen : KIconToggleMenu
 		GameObject button_go = global::Util.KInstantiateUI(this.planButtonPrefab, parent, true);
 		button_go.name = def.name + " Group:" + plan_category;
 		KToggle componentInChildren = button_go.GetComponentInChildren<KToggle>();
+		componentInChildren.soundPlayer.Enabled = false;
 		this.ActiveToggles.Add(def, componentInChildren);
 		this.RefreshBuildingButton(def, componentInChildren);
 		componentInChildren.onClick += delegate
@@ -626,7 +627,7 @@ public class PlanScreen : KIconToggleMenu
 			component.AddMultiStringTooltip(text2, this.buildingToolTipSettings.ResearchRequirement);
 			foreach (Recipe.Ingredient ingredient in def.CraftRecipe.Ingredients)
 			{
-				string text3 = string.Format("{0}{1}: {2}", "• ", ingredient.tag.ProperName(), GameUtil.GetFormattedMass(ingredient.amount, GameUtil.TimeSlice.None, true, "F1"));
+				string text3 = string.Format("{0}{1}: {2}", "• ", ingredient.tag.ProperName(), GameUtil.GetFormattedMass(ingredient.amount, GameUtil.TimeSlice.None, true, "{0:0.#}"));
 				component.AddMultiStringTooltip(text3, this.buildingToolTipSettings.ResearchRequirement);
 			}
 			component.AddMultiStringTooltip(string.Empty, this.buildingToolTipSettings.ResearchRequirement);
@@ -691,15 +692,6 @@ public class PlanScreen : KIconToggleMenu
 		{
 			return;
 		}
-		if (this.selectedBuildingGameObject != null && e.TryConsume(global::Action.MouseRight))
-		{
-			this.CloseRecipe();
-			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
-		}
-		else if (this.activeCategoryInfo != null && e.TryConsume(global::Action.MouseRight))
-		{
-			this.ExternalClose();
-		}
 		if (!e.Consumed && this.activeCategoryInfo != null && e.TryConsume(global::Action.Escape))
 		{
 			this.OnClickCategory(this.activeCategoryInfo);
@@ -709,6 +701,23 @@ public class PlanScreen : KIconToggleMenu
 		else if (!e.Consumed)
 		{
 			base.OnKeyDown(e);
+		}
+	}
+
+	public override void OnKeyUp(KButtonEvent e)
+	{
+		if (this.selectedBuildingGameObject != null && PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight))
+		{
+			this.CloseRecipe(false);
+			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
+		}
+		else if (this.activeCategoryInfo != null && PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight))
+		{
+			this.ExternalClose();
+		}
+		if (!e.Consumed)
+		{
+			base.OnKeyUp(e);
 		}
 	}
 
@@ -782,10 +791,10 @@ public class PlanScreen : KIconToggleMenu
 
 	public PlanScreen.BuildingNameTextSetting buildingNameTextSettings;
 
+	private PlanScreen.FabricatorConfig[] fabricatorConfigs;
+
 	[SerializeField]
 	private TextAsset fabricatorConfigAsset;
-
-	private PlanScreen.FabricatorConfig[] fabricatorConfigs;
 
 	private KIconToggleMenu.ToggleInfo activeCategoryInfo;
 
@@ -823,6 +832,8 @@ public class PlanScreen : KIconToggleMenu
 
 	[SerializeField]
 	private TextStyleSetting[] CategoryLabelTextStyles;
+
+	private float initTime;
 
 	private Dictionary<string, PlanScreen.FabricatorConfig> activeSubGroups;
 
@@ -862,9 +873,9 @@ public class PlanScreen : KIconToggleMenu
 		public TextStyleSetting InactiveDeselected;
 	}
 
+	[DelimitedRecord(",")]
 	[IgnoreCommentedLines("#")]
 	[IgnoreFirst(1)]
-	[DelimitedRecord(",")]
 	[IgnoreEmptyLines]
 	private class FabricatorConfig
 	{

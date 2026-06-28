@@ -15,17 +15,16 @@ public class BuildingConfigManager : KMonoBehaviour
 		this.baseTemplate.AddComponent<PrimaryElement>();
 		this.baseTemplate.AddComponent<BuildingComplete>();
 		this.baseTemplate.AddComponent<ChoreProvider>();
+		this.baseTemplate.AddComponent<Notifier>();
 		this.baseTemplate.AddComponent<StateMachineController>();
 		this.baseTemplate.AddComponent<Deconstructable>();
 		this.baseTemplate.AddComponent<UserMenu>();
-		this.baseTemplate.AddComponent<Notifier>();
 		this.baseTemplate.AddComponent<SaveLoadRoot>();
-		this.baseTemplate.AddComponent<Overheatable>();
 		this.baseTemplate.AddComponent<OccupyArea>();
 		this.baseTemplate.AddComponent<DecorProvider>();
 		this.baseTemplate.AddComponent<Operational>();
 		this.baseTemplate.AddComponent<BuildingEnabledButton>();
-		this.baseTemplate.AddComponent<Sequenceable>();
+		this.baseTemplate.AddComponent<RequiresFoundation>();
 	}
 
 	public void RegisterBuilding(IBuildingConfig config)
@@ -44,8 +43,9 @@ public class BuildingConfigManager : KMonoBehaviour
 		buildingDef.BuildingPreview = BuildingLoader.Instance.CreateBuildingPreview(buildingDef);
 		buildingDef.BuildingPackage = BuildingLoader.Instance.CreateBuildingPackage(buildingDef);
 		buildingDef.PostProcess();
-		config.DoPostConfigure(buildingDef.BuildingComplete);
+		config.DoPostConfigureComplete(buildingDef.BuildingComplete);
 		config.DoPostConfigurePreview(buildingDef, buildingDef.BuildingPreview);
+		config.DoPostConfigureUnderConstruction(buildingDef.BuildingUnderConstruction);
 		Assets.AddBuildingDef(buildingDef);
 	}
 

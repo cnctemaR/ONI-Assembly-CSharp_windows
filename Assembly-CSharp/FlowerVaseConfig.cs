@@ -6,8 +6,9 @@ public class FlowerVaseConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("FlowerVase", 1, 2, "flowervase_kanim", 50f, 10f, BUILDINGS.CONSTRUCTION_MASS.TIER1, MATERIALS.FARMABLE, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER1, null);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("FlowerVase", 1, 1, "flowervase_kanim", 50f, 10, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER1, MATERIALS.FARMABLE, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER1, null);
 		buildingDef.Floodable = false;
+		buildingDef.Overheatable = false;
 		buildingDef.ViewMode = SimViewMode.Decor;
 		buildingDef.MaterialCategory = MATERIALS.RAW_MINERALS;
 		buildingDef.AudioCategory = "Glass";
@@ -25,7 +26,7 @@ public class FlowerVaseConfig : IBuildingConfig
 		go.AddOrGet<AnimTileable>();
 	}
 
-	public override void DoPostConfigure(GameObject go)
+	public override void DoPostConfigureComplete(GameObject go)
 	{
 		BuildingTemplates.DoPostConfigure(go);
 	}

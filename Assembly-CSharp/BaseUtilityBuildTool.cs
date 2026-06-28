@@ -35,14 +35,15 @@ public class BaseUtilityBuildTool : DragTool
 		component2.ConfigureHoverScreen();
 		component2.UpdateHoverElements(null);
 		ResourceRemainingDisplayScreen.instance.ActivateDisplay(this.visualizer);
-		this.vent = this.def.BuildingComplete.GetComponent<Vent>();
-		if (this.vent != null)
+		Wire component3 = this.def.BuildingComplete.GetComponent<Wire>();
+		if (component3 != null)
 		{
-			this.conduitMgr = ((this.vent.transferType != Vent.Transfer.Gas) ? Game.Instance.liquidConduitSystem : Game.Instance.gasConduitSystem);
+			this.conduitMgr = Game.Instance.electricalConduitSystem;
 		}
 		else
 		{
-			this.conduitMgr = Game.Instance.electricalConduitSystem;
+			this.conduit = this.def.BuildingComplete.GetComponent<Conduit>();
+			this.conduitMgr = this.conduit.GetNetworkManager();
 		}
 	}
 
@@ -69,7 +70,7 @@ public class BaseUtilityBuildTool : DragTool
 
 	protected override void OnDragTool(int cell, int distFromOrigin)
 	{
-		if (this.path[this.path.Count - 1].cell == cell)
+		if (this.path.Count == 0 || this.path[this.path.Count - 1].cell == cell)
 		{
 			return;
 		}
@@ -135,7 +136,11 @@ public class BaseUtilityBuildTool : DragTool
 					outBcv = component;
 					if (component != null)
 					{
-						bool flag2 = ((!flag) ? component.RequiresGasOrLiquid : component.RequiresPower);
+						bool flag2 = false;
+						if ((flag && component.RequiresPower) || (this.conduit != null && ((component.RequiresGas && this.conduit.type == ConduitType.Gas) || (component.RequiresLiquid && this.conduit.type == ConduitType.Liquid))))
+						{
+							flag2 = true;
+						}
 						if (flag2)
 						{
 							if (fireEvents)
@@ -159,7 +164,7 @@ public class BaseUtilityBuildTool : DragTool
 
 	private Building GetBuilding(int cell)
 	{
-		GameObject gameObject = Grid.Objects[cell, 3];
+		GameObject gameObject = Grid.Objects[cell, 1];
 		if (gameObject != null)
 		{
 			return gameObject.GetComponent<Building>();
@@ -331,7 +336,8 @@ public class BaseUtilityBuildTool : DragTool
 				node2 = this.CreateVisualizer(node2);
 				this.path[i] = node2;
 				string vis_string = this.conduitMgr.GetVisualizerString(node2.cell) + "_place";
-				if (node2.visualizer.GetComponent<KBatchedAnimController>().HasAnimation(vis_string))
+				KBatchedAnimController kbac = node2.visualizer.GetComponent<KBatchedAnimController>();
+				if (kbac.HasAnimation(vis_string))
 				{
 					node2.Play(vis_string);
 				}
@@ -339,6 +345,8 @@ public class BaseUtilityBuildTool : DragTool
 				{
 					node2.Play(this.conduitMgr.GetVisualizerString(node2.cell));
 				}
+				string reason;
+				kbac.TintColour = ((!this.def.IsValidBuildLocation(node2.cell, Orientation.Neutral, out reason)) ? Color.red : Color.white);
 				TileVisualizer.RefreshCell(node2.cell, this.def.TileLayer);
 			}
 			this.conduitMgr.UnstashVisualGrids();
@@ -360,15 +368,15 @@ public class BaseUtilityBuildTool : DragTool
 			if (gameObject == null)
 			{
 				utilityConnections = this.conduitMgr.GetConnections(pathNode.cell, false);
-				if (DebugHandler.InstantBuildMode && this.def.IsValidBuildLocation(vector, Orientation.None) && this.def.IsValidPlaceLocation(vector, Orientation.None))
+				if (DebugHandler.InstantBuildMode && this.def.IsValidBuildLocation(vector, Orientation.Neutral) && this.def.IsValidPlaceLocation(vector, Orientation.Neutral))
 				{
-					gameObject = this.def.Build(pathNode.cell, Orientation.None, null, this.selectedElements, false);
+					gameObject = this.def.Build(pathNode.cell, Orientation.Neutral, null, this.selectedElements, false);
 					PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-					component.Temperature = component.Element.defaultValues.temperature;
+					component.Temperature = 293.15f;
 				}
 				else
 				{
-					gameObject = this.def.TryPlace(vector, Orientation.None, this.selectedElements, 0, false);
+					gameObject = this.def.TryPlace(vector, Orientation.Neutral, this.selectedElements, 0, false);
 					if (gameObject != null)
 					{
 						Constructable component2 = gameObject.GetComponent<Constructable>();
@@ -401,7 +409,7 @@ public class BaseUtilityBuildTool : DragTool
 					}
 				}
 			}
-			if (this.def.ReplacementLayer != ObjectLayer.NumLayers && !DebugHandler.InstantBuildMode)
+			if (this.def.ReplacementLayer != ObjectLayer.NumLayers && !DebugHandler.InstantBuildMode && this.def.IsValidBuildLocation(vector, Orientation.Neutral))
 			{
 				GameObject gameObject2 = Grid.Objects[pathNode.cell, (int)this.def.TileLayer];
 				GameObject gameObject3 = Grid.Objects[pathNode.cell, (int)this.def.ReplacementLayer];
@@ -410,9 +418,10 @@ public class BaseUtilityBuildTool : DragTool
 					BuildingComplete component5 = gameObject2.GetComponent<BuildingComplete>();
 					if (component5 != null && component5.Def != this.def)
 					{
-						gameObject = this.def.Instantiate(vector, Orientation.None, this.selectedElements, 0, false);
-						Constructable component6 = gameObject.GetComponent<Constructable>();
+						Constructable component6 = this.def.BuildingUnderConstruction.GetComponent<Constructable>();
 						component6.IsReplacementTile = true;
+						gameObject = this.def.Instantiate(vector, Orientation.Neutral, this.selectedElements, 0, false);
+						component6.IsReplacementTile = false;
 						Grid.Objects[pathNode.cell, (int)this.def.ReplacementLayer] = gameObject;
 						IUtilityItem component7 = gameObject.GetComponent<KAnimGraphTileVisualizer>();
 						if (component7 != null)
@@ -477,7 +486,7 @@ public class BaseUtilityBuildTool : DragTool
 
 	private BuildingDef def;
 
-	private Vent vent;
+	private Conduit conduit;
 
 	protected List<BaseUtilityBuildTool.PathNode> path = new List<BaseUtilityBuildTool.PathNode>();
 

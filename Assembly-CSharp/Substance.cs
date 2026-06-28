@@ -14,7 +14,7 @@ public class Substance
 		if (!prevent_merge)
 		{
 			int num = Grid.PosToCell(position);
-			GameObject gameObject2 = Grid.Objects[num, 17];
+			GameObject gameObject2 = Grid.Objects[num, 3];
 			if (gameObject2 != null)
 			{
 				Pickupable component = gameObject2.GetComponent<Pickupable>();
@@ -29,6 +29,7 @@ public class Substance
 							gameObject = component2.gameObject;
 							primaryElement = component2.GetComponent<PrimaryElement>();
 							temperature = SimUtil.CalculateFinalTemperature(primaryElement.Mass, primaryElement.Temperature, mass, temperature);
+							position = gameObject.transform.position;
 							break;
 						}
 					}
@@ -52,33 +53,9 @@ public class Substance
 		return gameObject;
 	}
 
-	public KPrefabID GetPrefab()
+	public GameObject GetPrefab()
 	{
-		GameObject genericResource = EntityPrefabs.Instance.GenericResource;
-		genericResource.SetActive(false);
-		GameObject gameObject = GameUtil.KInstantiate(genericResource, Vector3.zero, Grid.SceneLayer.Use, Folder.EntityPrefabs, null, 0);
-		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-		KSelectable component2 = gameObject.GetComponent<KSelectable>();
-		Element element = ElementLoader.elementTable[this.elementID];
-		component2.name = element.name;
-		component2.SetName(component2.name);
-		KPrefabID component3 = gameObject.GetComponent<KPrefabID>();
-		component3.PrefabTag = TagManager.Create(component2.name, null);
-		component3.SaveLoadTag = component3.PrefabTag;
-		component.SetElement(this.elementID);
-		component.Mass = 1f;
-		component.Temperature = 293f;
-		if (element.substance.anim != null)
-		{
-			KBatchedAnimController component4 = gameObject.GetComponent<KBatchedAnimController>();
-			component4.SetAnims(element.substance.anims, true);
-		}
-		OccupyArea component5 = gameObject.GetComponent<OccupyArea>();
-		component5.OccupiedCellsOffsets = Grid.DefaultOffset;
-		DecorProvider component6 = gameObject.GetComponent<DecorProvider>();
-		component6.baseDecor = -10f;
-		component6.baseRadius = 1f;
-		return gameObject.GetComponent<KPrefabID>();
+		return EntityTemplates.CreateOreEntity(this.elementID, null);
 	}
 
 	private void SetTexture(MaterialPropertyBlock block, string texture_name)
@@ -183,8 +160,8 @@ public class Substance
 	[FormerlySerializedAs("fallingStartSoundMigrated")]
 	public string fallingStartSound;
 
-	[EventRef]
 	[FormerlySerializedAs("fallingStopSoundMigrated")]
+	[EventRef]
 	public string fallingStopSound;
 
 	[NonSerialized]
@@ -209,6 +186,8 @@ public class Substance
 	public MaterialPropertyBlock propertyBlock;
 
 	public ElementsAudio.ElementAudioConfig audioConfig;
+
+	public bool showInEditor = true;
 
 	[Serializable]
 	public struct Loot

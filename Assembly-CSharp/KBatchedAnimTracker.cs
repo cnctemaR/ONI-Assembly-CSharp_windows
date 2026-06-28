@@ -21,13 +21,16 @@ public class KBatchedAnimTracker : MonoBehaviour
 		}
 		if (this.controller == null)
 		{
-			Debug.Log("Controller Null for tracker", base.gameObject);
+			Debug.Log("Controller Null for tracker on " + base.gameObject.name, base.gameObject);
 		}
 		this.myAnim = base.GetComponent<KBatchedAnimController>();
 		List<KAnimControllerBase> list = new List<KAnimControllerBase>(base.GetComponentsInChildren<KAnimControllerBase>(true));
-		for (int i = 0; i < base.transform.childCount; i++)
+		if (!this.skipInitialDisable)
 		{
-			base.transform.GetChild(i).gameObject.SetActive(false);
+			for (int i = 0; i < base.transform.childCount; i++)
+			{
+				base.transform.GetChild(i).gameObject.SetActive(false);
+			}
 		}
 		for (int j = list.Count - 1; j >= 0; j--)
 		{
@@ -36,7 +39,6 @@ public class KBatchedAnimTracker : MonoBehaviour
 				list.RemoveAt(j);
 			}
 		}
-		this.anims = list.ToArray();
 	}
 
 	private void LateUpdate()
@@ -95,6 +97,7 @@ public class KBatchedAnimTracker : MonoBehaviour
 						base.transform.up = matrix4x.MultiplyVector(Vector3.up);
 						base.transform.right = matrix4x.MultiplyVector(Vector3.right);
 					}
+					this.myAnim.MarkDirty();
 					base.transform.SetPosition(new Vector3(base.transform.position.x, base.transform.position.y, z));
 				}
 				float num2 = (float)currentAnim.numFrames / currentAnim.frameRate;
@@ -170,9 +173,9 @@ public class KBatchedAnimTracker : MonoBehaviour
 
 	public bool fadeOut = true;
 
-	private bool wasVisible;
+	public bool skipInitialDisable;
 
-	private KAnimControllerBase[] anims;
+	private bool wasVisible;
 
 	private KBatchedAnimController myAnim;
 

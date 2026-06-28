@@ -5,14 +5,12 @@ using UnityEngine;
 
 public class ConduitFlowVisualizer
 {
-	public ConduitFlowVisualizer(ConduitFlow flow_manager, GameObject visualizer_prefab, Color32 tint, Color32 insulated_tint, string overlay_sound)
+	public ConduitFlowVisualizer(ConduitFlow flow_manager, Game.ConduitVisInfo vis_info, string overlay_sound)
 	{
 		this.flowManager = flow_manager;
-		this.visualizerPrefab = visualizer_prefab;
-		this.tint = tint;
-		this.insulatedTint = insulated_tint;
+		this.visInfo = vis_info;
 		this.overlaySound = overlay_sound;
-		this.visualizerPrefab.SetActive(false);
+		this.visInfo.prefab.SetActive(false);
 		this.visualizerPool = new ObjectPool(new Func<GameObject>(this.InstantiateVisualizer), 32);
 	}
 
@@ -49,7 +47,6 @@ public class ConduitFlowVisualizer
 				GameObject gameObject;
 				if (this.staticVisualizers.TryGetValue(conduit.cell, out gameObject))
 				{
-					gameObject.SetActive(false);
 					this.visualizerPool.ReleaseInstance(gameObject);
 					this.staticVisualizers.Remove(conduit.cell);
 				}
@@ -59,15 +56,15 @@ public class ConduitFlowVisualizer
 				{
 				case ConduitFlow.FlowDirection.Left:
 				case ConduitFlow.FlowDirection.Right:
-					goto IL_0205;
+					goto IL_01FD;
 				case ConduitFlow.FlowDirection.Up:
 				case ConduitFlow.FlowDirection.Down:
 					quaternion = ConduitFlowVisualizer.VerticalRotation;
 					break;
 				default:
-					goto IL_0205;
+					goto IL_01FD;
 				}
-				IL_0211:
+				IL_0209:
 				Vector2I vector2I3 = Grid.CellToXY(cellFromDirection);
 				Vector2 vector = new Vector2((float)num, (float)num2);
 				if (cellFromDirection != -1)
@@ -96,9 +93,9 @@ public class ConduitFlowVisualizer
 					this.AddAudioSource(conduit, position);
 				}
 				continue;
-				IL_0205:
+				IL_01FD:
 				quaternion = Quaternion.identity;
-				goto IL_0211;
+				goto IL_0209;
 			}
 			ConduitFlow.ConduitContents contents = conduit.GetContents();
 			if (conduit.initialElement != SimHashes.Vacuum && contents.element != SimHashes.Vacuum && contents.mass > 0f)
@@ -155,18 +152,18 @@ public class ConduitFlowVisualizer
 		component.SetLayer(this.layer);
 		if (this.showContents)
 		{
+			component.TintColour = Color32.Lerp(this.visInfo.overlayTint, this.visInfo.overlayInsulatedTint, insulation_lerp);
 			Color32 color = Color.white;
 			if (elem != null && elem.substance != null)
 			{
 				color = elem.substance.overlayColour;
 				color.a = 128;
 			}
-			component.TintColour = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, 0);
 			component.SetSymbolTint(KBatchedAnimController.SymbolTintIndex.Second, ConduitFlowVisualizer.TintSymbol, color);
 		}
 		else
 		{
-			component.TintColour = Color32.Lerp(this.tint, this.insulatedTint, insulation_lerp);
+			component.TintColour = Color32.Lerp(this.visInfo.tint, this.visInfo.insulatedTint, insulation_lerp);
 			int num = Grid.PosToCell(go.transform.position);
 			Color32 color2 = new Color32(0, 0, 0, 0);
 			if (num == this.highlightedCell)
@@ -207,37 +204,39 @@ public class ConduitFlowVisualizer
 
 	private void AddAudioSource(ConduitFlow.Conduit conduit, Vector3 camera_pos)
 	{
-		UtilityNetwork network = this.flowManager.GetNetwork(conduit);
-		if (network == null)
+		using (new KProfiler.Region("AddAudioSource", null))
 		{
-			return;
-		}
-		Vector3 vector = Grid.CellToPosCCC(conduit.cell, Grid.SceneLayer.Building);
-		float num = Vector3.SqrMagnitude(vector - camera_pos);
-		bool flag = false;
-		for (int i = 0; i < this.audioInfo.Count; i++)
-		{
-			ConduitFlowVisualizer.AudioInfo audioInfo = this.audioInfo[i];
-			if (audioInfo.networkID == network.id)
+			UtilityNetwork network = this.flowManager.GetNetwork(conduit);
+			if (network != null)
 			{
-				if (num < audioInfo.distance)
+				Vector3 vector = Grid.CellToPosCCC(conduit.cell, Grid.SceneLayer.Building);
+				float num = Vector3.SqrMagnitude(vector - camera_pos);
+				bool flag = false;
+				for (int i = 0; i < this.audioInfo.Count; i++)
 				{
-					audioInfo.distance = num;
-					audioInfo.position = vector;
-					this.audioInfo[i] = audioInfo;
+					ConduitFlowVisualizer.AudioInfo audioInfo = this.audioInfo[i];
+					if (audioInfo.networkID == network.id)
+					{
+						if (num < audioInfo.distance)
+						{
+							audioInfo.distance = num;
+							audioInfo.position = vector;
+							this.audioInfo[i] = audioInfo;
+						}
+						flag = true;
+						break;
+					}
 				}
-				flag = true;
-				break;
+				if (!flag)
+				{
+					ConduitFlowVisualizer.AudioInfo audioInfo2 = default(ConduitFlowVisualizer.AudioInfo);
+					audioInfo2.networkID = network.id;
+					audioInfo2.position = vector;
+					audioInfo2.distance = num;
+					audioInfo2.blobCount = 0;
+					this.audioInfo.Add(audioInfo2);
+				}
 			}
-		}
-		if (!flag)
-		{
-			ConduitFlowVisualizer.AudioInfo audioInfo2 = default(ConduitFlowVisualizer.AudioInfo);
-			audioInfo2.networkID = network.id;
-			audioInfo2.position = vector;
-			audioInfo2.distance = num;
-			audioInfo2.blobCount = 0;
-			this.audioInfo.Add(audioInfo2);
 		}
 	}
 
@@ -247,13 +246,25 @@ public class ConduitFlowVisualizer
 		{
 			return;
 		}
+		CameraController instance = CameraController.Instance;
+		int num = 0;
+		List<ConduitFlowVisualizer.AudioInfo> list = new List<ConduitFlowVisualizer.AudioInfo>();
 		for (int i = 0; i < this.audioInfo.Count; i++)
 		{
-			ConduitFlowVisualizer.AudioInfo audioInfo = this.audioInfo[i];
+			if (instance.IsVisiblePos(this.audioInfo[i].position))
+			{
+				list.Add(this.audioInfo[i]);
+				num++;
+			}
+		}
+		for (int j = 0; j < list.Count; j++)
+		{
+			ConduitFlowVisualizer.AudioInfo audioInfo = list[j];
 			if (audioInfo.distance != float.PositiveInfinity)
 			{
 				EventInstance eventInstance = SoundEvent.BeginOneShot(this.overlaySound, audioInfo.position);
 				eventInstance.setParameterValue("blobCount", (float)audioInfo.blobCount);
+				eventInstance.setParameterValue("networkCount", (float)num);
 				SoundEvent.EndOneShot(eventInstance);
 			}
 		}
@@ -261,7 +272,7 @@ public class ConduitFlowVisualizer
 
 	private GameObject InstantiateVisualizer()
 	{
-		GameObject gameObject = GameUtil.KInstantiate(this.visualizerPrefab, Grid.SceneLayer.BuildingFront, Folder.FX, null, 0);
+		GameObject gameObject = GameUtil.KInstantiate(this.visInfo.prefab, Grid.SceneLayer.BuildingFront, Folder.FX, null, 0);
 		gameObject.SetActive(false);
 		KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
 		component.destroyOnAnimComplete = true;
@@ -315,8 +326,6 @@ public class ConduitFlowVisualizer
 
 	private ObjectPool visualizerPool;
 
-	private GameObject visualizerPrefab;
-
 	private string overlaySound;
 
 	private static readonly Quaternion VerticalRotation = Quaternion.AngleAxis(-90f, Vector3.forward);
@@ -348,9 +357,7 @@ public class ConduitFlowVisualizer
 
 	private List<int> removedCells = new List<int>();
 
-	private Color32 tint = Color.white;
-
-	private Color32 insulatedTint = Color.white;
+	private Game.ConduitVisInfo visInfo;
 
 	private int highlightedCell = -1;
 

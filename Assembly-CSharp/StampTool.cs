@@ -101,7 +101,7 @@ public class StampTool : InterfaceTool
 		{
 			if (!list2.Contains(num))
 			{
-				GameObject gameObject = Grid.Objects[num, 15];
+				GameObject gameObject = Grid.Objects[num, 6];
 				if (gameObject != null)
 				{
 					gameObject.DeleteObject();
@@ -110,10 +110,10 @@ public class StampTool : InterfaceTool
 		}
 		foreach (int num2 in list2)
 		{
-			if (!list.Contains(num2) && Grid.Objects[num2, 15] == null)
+			if (!list.Contains(num2) && Grid.Objects[num2, 6] == null)
 			{
 				GameObject gameObject2 = Util.KInstantiate(this.PlacerPrefab, SceneOrganizer.Instance.GetFolder(Folder.Placers), null);
-				Grid.Objects[num2, 15] = gameObject2;
+				Grid.Objects[num2, 6] = gameObject2;
 				Vector3 vector = Grid.CellToPosCBC(num2, this.visualizerLayer);
 				float depthBias = InterfaceTool.DepthBias;
 				vector.z += depthBias;

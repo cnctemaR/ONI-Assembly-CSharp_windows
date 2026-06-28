@@ -85,9 +85,9 @@ public class ResourceRemainingDisplayScreen : KScreen
 					text2,
 					tag.ProperName(),
 					": ",
-					GameUtil.GetFormattedMass(num3, GameUtil.TimeSlice.None, true, "F1"),
+					GameUtil.GetFormattedMass(num3, GameUtil.TimeSlice.None, true, "{0:0.#}"),
 					" / ",
-					GameUtil.GetFormattedMass(this.currentRecipe.Ingredients[i].amount, GameUtil.TimeSlice.None, true, "F1")
+					GameUtil.GetFormattedMass(this.currentRecipe.Ingredients[i].amount, GameUtil.TimeSlice.None, true, "{0:0.#}")
 				});
 				if (i < this.selected_elements.Count - 1)
 				{

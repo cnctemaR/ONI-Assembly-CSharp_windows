@@ -30,7 +30,7 @@ public class Tutorial : KMonoBehaviour
 	{
 		if (this.tutorialMessagesRemaining.Count == 0)
 		{
-			for (int i = 0; i <= 9; i++)
+			for (int i = 0; i <= 11; i++)
 			{
 				this.tutorialMessagesRemaining.Add((Tutorial.TutorialMessages)i);
 			}
@@ -38,39 +38,44 @@ public class Tutorial : KMonoBehaviour
 		List<Tutorial.Item> list = new List<Tutorial.Item>();
 		List<Tutorial.Item> list2 = list;
 		Tutorial.Item item = new Tutorial.Item();
-		Tutorial.Item item2 = item;
-		Func<List<Notification>, object, string> func = (List<Notification> n, object d) => MISC.NOTIFICATIONS.NEEDTOILET.TOOLTIP.text;
-		item2.notification = new Notification(MISC.NOTIFICATIONS.NEEDTOILET.NAME, NotificationType.Tutorial, null, func, null, true, 5f, null, null, null);
+		item.notification = new Notification(MISC.NOTIFICATIONS.NEEDTOILET.NAME, NotificationType.Tutorial, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.NEEDTOILET.TOOLTIP.text, null, true, 5f, null, null, null);
 		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.ToiletExists);
 		list2.Add(item);
 		this.itemTree.Add(list);
 		List<Tutorial.Item> list3 = new List<Tutorial.Item>();
 		List<Tutorial.Item> list4 = list3;
 		item = new Tutorial.Item();
-		Tutorial.Item item3 = item;
-		func = (List<Notification> n, object d) => MISC.NOTIFICATIONS.NEEDFOOD.TOOLTIP.text;
-		item3.notification = new Notification(MISC.NOTIFICATIONS.NEEDFOOD.NAME, NotificationType.Tutorial, null, func, null, true, 20f, null, null, null);
+		item.notification = new Notification(MISC.NOTIFICATIONS.NEEDFOOD.NAME, NotificationType.Tutorial, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.NEEDFOOD.TOOLTIP.text, null, true, 20f, null, null, null);
 		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.FoodSourceExists);
 		list4.Add(item);
-		this.itemTree.Add(list3);
-		List<Tutorial.Item> list5 = this.warningItems;
+		List<Tutorial.Item> list5 = list3;
 		item = new Tutorial.Item();
-		Tutorial.Item item4 = item;
-		func = new Func<List<Notification>, object, string>(this.OnOxygenTooltip);
-		item4.notification = new Notification(MISC.NOTIFICATIONS.NEEDOXYGENSOURCE.NAME, NotificationType.Tutorial, null, func, null, false, 0f, null, null, null);
+		item.notification = new Notification(MISC.NOTIFICATIONS.THERMALCOMFORT.NAME, NotificationType.Tutorial, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.THERMALCOMFORT.TOOLTIP.text, null, true, 0f, null, null, null);
+		list5.Add(item);
+		this.itemTree.Add(list3);
+		List<Tutorial.Item> list6 = this.warningItems;
+		item = new Tutorial.Item();
+		Tutorial.Item item2 = item;
+		HashedString invalid = HashedString.Invalid;
+		item2.notification = new Notification(MISC.NOTIFICATIONS.NEEDOXYGENSOURCE.NAME, NotificationType.Tutorial, invalid, new Func<List<Notification>, object, string>(this.OnOxygenTooltip), null, false, 0f, null, null, null);
 		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.SufficientOxygen);
 		item.minTimeToNotify = 80f;
 		item.lastNotifyTime = 0f;
-		list5.Add(item);
-		List<Tutorial.Item> list6 = this.warningItems;
-		item = new Tutorial.Item();
-		Tutorial.Item item5 = item;
-		func = new Func<List<Notification>, object, string>(this.OnLowFoodTooltip);
-		item5.notification = new Notification(MISC.NOTIFICATIONS.FOODLOW.NAME, NotificationType.Bad, null, func, null, false, 0f, null, null, null);
-		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.EnoughFood);
-		item.minTimeToNotify = 10f;
-		item.lastNotifyTime = 0f;
 		list6.Add(item);
+		this.warningItems.Add(new Tutorial.Item
+		{
+			notification = new Notification(MISC.NOTIFICATIONS.UNREFRIGERATEDFOOD.NAME, NotificationType.Tutorial, HashedString.Invalid, new Func<List<Notification>, object, string>(this.UnrefrigeratedFoodTooltip), null, false, 0f, null, null, null),
+			requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.FoodIsRefrigerated),
+			minTimeToNotify = 6f,
+			lastNotifyTime = 0f
+		});
+		this.warningItems.Add(new Tutorial.Item
+		{
+			notification = new Notification(MISC.NOTIFICATIONS.FOODLOW.NAME, NotificationType.Bad, HashedString.Invalid, new Func<List<Notification>, object, string>(this.OnLowFoodTooltip), null, false, 0f, null, null, null),
+			requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.EnoughFood),
+			minTimeToNotify = 10f,
+			lastNotifyTime = 0f
+		});
 	}
 
 	public void TutorialMessage(Tutorial.TutorialMessages tm)
@@ -109,6 +114,12 @@ public class Tutorial : KMonoBehaviour
 		case Tutorial.TutorialMessages.TM_FetchingWater:
 			message = new GenericMessage(MISC.NOTIFICATIONS.FETCHINGWATERMESSAGE.NAME, MISC.NOTIFICATIONS.FETCHINGWATERMESSAGE.MESSAGEBODY, MISC.NOTIFICATIONS.FETCHINGWATERMESSAGE.TOOLTIP);
 			break;
+		case Tutorial.TutorialMessages.TM_ThermalComfort:
+			message = new GenericMessage(MISC.NOTIFICATIONS.THERMALCOMFORT.NAME, MISC.NOTIFICATIONS.THERMALCOMFORT.MESSAGEBODY, MISC.NOTIFICATIONS.THERMALCOMFORT.TOOLTIP);
+			break;
+		case Tutorial.TutorialMessages.TM_OverheatingBuildings:
+			message = new GenericMessage(MISC.NOTIFICATIONS.TUTORIAL_OVERHEATING.NAME, MISC.NOTIFICATIONS.TUTORIAL_OVERHEATING.MESSAGEBODY, MISC.NOTIFICATIONS.TUTORIAL_OVERHEATING.TOOLTIP);
+			break;
 		}
 		Debug.Assert(message != null, string.Format("No Tutorial message: {0}", tm.ToString()));
 		this.tutorialMessagesRemaining.Remove(tm);
@@ -119,13 +130,25 @@ public class Tutorial : KMonoBehaviour
 	{
 		ReportManager.ReportEntry entry = ReportManager.Instance.TodaysReport.GetEntry(ReportManager.ReportType.OxygenCreated);
 		string text = MISC.NOTIFICATIONS.NEEDOXYGENSOURCE.TOOLTIP;
-		text = text.Replace("{EmittingRate}", GameUtil.GetFormattedMass(entry.Positive, GameUtil.TimeSlice.None, true, "F1"));
-		return text.Replace("{ConsumptionRate}", GameUtil.GetFormattedMass(Mathf.Abs(entry.Negative), GameUtil.TimeSlice.None, true, "F1"));
+		text = text.Replace("{EmittingRate}", GameUtil.GetFormattedMass(entry.Positive, GameUtil.TimeSlice.None, true, "{0:0.#}"));
+		return text.Replace("{ConsumptionRate}", GameUtil.GetFormattedMass(Mathf.Abs(entry.Negative), GameUtil.TimeSlice.None, true, "{0:0.#}"));
+	}
+
+	private string UnrefrigeratedFoodTooltip(List<Notification> notifications, object data)
+	{
+		string text = MISC.NOTIFICATIONS.UNREFRIGERATEDFOOD.TOOLTIP;
+		List<string> list = new List<string>();
+		this.GetUnrefrigeratedFood(list);
+		for (int i = 0; i < list.Count; i++)
+		{
+			text = text + "\n" + list[i];
+		}
+		return text;
 	}
 
 	private string OnLowFoodTooltip(List<Notification> notifications, object data)
 	{
-		float num = RationTracker.Get().CountRations(null, true) * 100000f;
+		float num = RationTracker.Get().CountRations(null, true);
 		float num2 = (float)Components.LiveMinionIdentities.Count * -1000000f;
 		return string.Format(MISC.NOTIFICATIONS.FOODLOW.TOOLTIP, GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true), GameUtil.GetFormattedCalories(Mathf.Abs(num2), GameUtil.TimeSlice.None, true));
 	}
@@ -149,8 +172,7 @@ public class Tutorial : KMonoBehaviour
 			notificationType = NotificationType.Bad;
 			text = "Urgent important message. Uses Bad Color BG";
 		}
-		Func<List<Notification>, object, string> func = (List<Notification> n, object d) => MISC.NOTIFICATIONS.NEEDTOILET.TOOLTIP.text;
-		Notification notification = new Notification(string.Format("{0} ({1})", text, this.debugMessageCount++.ToString()), notificationType, null, func, null, true, 0f, null, null, null);
+		Notification notification = new Notification(string.Format("{0} ({1})", text, this.debugMessageCount++.ToString()), notificationType, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.NEEDTOILET.TOOLTIP.text, null, true, 0f, null, null, null);
 		this.notifier.Add(notification, string.Empty);
 	}
 
@@ -162,6 +184,10 @@ public class Tutorial : KMonoBehaviour
 
 	private void Update()
 	{
+		if (App.isLoading)
+		{
+			return;
+		}
 		if (Components.LiveMinionIdentities.Count == 0)
 		{
 			return;
@@ -172,15 +198,18 @@ public class Tutorial : KMonoBehaviour
 			for (int i = list.Count - 1; i >= 0; i--)
 			{
 				Tutorial.Item item = list[i];
-				if (item.requirementSatisfied())
+				if (item != null)
 				{
-					item.notification.Clear();
-					list.RemoveAt(i);
-				}
-				else
-				{
-					this.UpdateNotifierPosition();
-					this.notifier.Add(item.notification, string.Empty);
+					if (item.requirementSatisfied == null || item.requirementSatisfied())
+					{
+						item.notification.Clear();
+						list.RemoveAt(i);
+					}
+					else
+					{
+						this.UpdateNotifierPosition();
+						this.notifier.Add(item.notification, string.Empty);
+					}
 				}
 			}
 			if (list.Count == 0)
@@ -201,8 +230,9 @@ public class Tutorial : KMonoBehaviour
 				item2.lastNotifyTime = Time.time;
 			}
 		}
-		if (GameClock.Instance.GetDay() > 0 && !this.tutorialMessagesRemaining.Contains(Tutorial.TutorialMessages.TM_Priorities))
+		if (GameClock.Instance.GetDay() > 0 && !this.tutorialMessagesRemaining.Contains(Tutorial.TutorialMessages.TM_Priorities) && !this.queuedPrioritiesMessage)
 		{
+			this.queuedPrioritiesMessage = true;
 			GameScheduler.Instance.Schedule("PrioritiesTutorial", 2f, delegate(object obj)
 			{
 				Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Priorities);
@@ -214,6 +244,36 @@ public class Tutorial : KMonoBehaviour
 	{
 		ReportManager.ReportEntry entry = ReportManager.Instance.TodaysReport.GetEntry(ReportManager.ReportType.OxygenCreated);
 		return entry == null || entry.Net > 0.0001f || (GameClock.Instance.GetDay() < 1 && !GameClock.Instance.IsNighttime());
+	}
+
+	private bool FoodIsRefrigerated()
+	{
+		return this.GetUnrefrigeratedFood(null) <= 0;
+	}
+
+	private int GetUnrefrigeratedFood(List<string> foods)
+	{
+		int num = 0;
+		if (WorldInventory.Instance != null)
+		{
+			List<Pickupable> pickupables = WorldInventory.Instance.GetPickupables(GameTags.Edible);
+			if (pickupables == null)
+			{
+				return 0;
+			}
+			for (int i = 0; i < pickupables.Count; i++)
+			{
+				if (pickupables[i].storage != null && (pickupables[i].storage.GetComponent<RationBox>() != null || pickupables[i].storage.GetComponent<Refrigerator>() != null) && !Rottable.IsRefrigerated(pickupables[i].gameObject) && Rottable.AtmosphereQuality(pickupables[i].gameObject) != Rottable.RotAtmosphereQuality.Sterilizing && pickupables[i].GetSMI<Rottable.Instance>() != null)
+				{
+					num++;
+					if (foods != null)
+					{
+						foods.Add(pickupables[i].GetProperName());
+					}
+				}
+			}
+		}
+		return num;
 	}
 
 	private bool EnergySourceExists()
@@ -229,7 +289,7 @@ public class Tutorial : KMonoBehaviour
 	private bool EnoughFood()
 	{
 		float num = RationTracker.Get().CountRations(null, true);
-		float num2 = (float)Components.LiveMinionIdentities.Count * 10f;
+		float num2 = (float)Components.LiveMinionIdentities.Count * 1000000f;
 		return num / num2 > 1f;
 	}
 
@@ -260,6 +320,8 @@ public class Tutorial : KMonoBehaviour
 
 	private int debugMessageCount;
 
+	private bool queuedPrioritiesMessage;
+
 	private List<List<Tutorial.Item>> itemTree = new List<List<Tutorial.Item>>();
 
 	private List<Tutorial.Item> warningItems = new List<Tutorial.Item>();
@@ -277,6 +339,8 @@ public class Tutorial : KMonoBehaviour
 		TM_Locomotion,
 		TM_Priorities,
 		TM_FetchingWater,
+		TM_ThermalComfort,
+		TM_OverheatingBuildings,
 		TM_COUNT
 	}
 

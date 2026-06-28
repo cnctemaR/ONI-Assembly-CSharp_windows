@@ -11,7 +11,7 @@ public class MinionEquipmentScreen : TargetScreen
 	public override void OnSelectTarget(GameObject target)
 	{
 		this.panel.SetSelectedMinion(target);
-		this.panel.Refresh();
+		this.panel.Refresh(null);
 	}
 
 	public override void OnDeselectTarget(GameObject target)

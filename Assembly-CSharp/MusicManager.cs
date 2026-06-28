@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using FMOD.Studio;
@@ -119,7 +120,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		}
 	}
 
-	public void StopSong(string song_name, bool shouldLog = true)
+	public void StopSong(string song_name, bool shouldLog = true, STOP_MODE stopMode = STOP_MODE.ALLOWFADEOUT)
 	{
 		if (shouldLog)
 		{
@@ -137,8 +138,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 			return;
 		}
 		FMOD.Studio.EventInstance ev = songInfo.ev;
-		ev.stop(STOP_MODE.ALLOWFADEOUT);
-		KFMODDebugger.instance.Log("Stopping song: " + songInfo.fmodEvent);
+		ev.stop(stopMode);
 		ev.release();
 		if (songInfo.dynamic)
 		{
@@ -153,7 +153,6 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 				{
 					FMOD.Studio.EventInstance ev2 = songInfo2.ev;
 					this.Log("Undimming: " + Assets.GetSimpleSoundEventName(songInfo2.fmodEvent));
-					KFMODDebugger.instance.Log("interrupted_dimmed on " + ev2 + " being set to 0");
 					ev2.setParameterValue("interrupted_dimmed", 0f);
 					songInfo.songsOnHold.Remove(songInfo.songsOnHold[i]);
 				}
@@ -178,7 +177,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		this.Log("Kill All Songs");
 		if (this.DynamicMusicIsActive())
 		{
-			this.StopDynamicMusic();
+			this.StopDynamicMusic(true);
 		}
 		List<string> list = new List<string>(this.activeSongs.Keys);
 		for (int i = 0; i < list.Count; i++)
@@ -201,7 +200,6 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		MusicManager.SongInfo songInfo = null;
 		if (!this.activeSongs.TryGetValue(song_name, out songInfo))
 		{
-			Output.LogWarning(new object[] { "Tried to set a parameter (", parameter_name, ") on a song that isn't playing:", song_name });
 			return;
 		}
 		FMOD.Studio.EventInstance ev = songInfo.ev;
@@ -224,7 +222,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		this.SetDynamicMusicTimeSinceLastJob();
 		if (GameClock.Instance != null && GameClock.Instance.GetCurrentDayAsPercentage() >= this.duskTime && this.DynamicMusicIsActive())
 		{
-			this.StopDynamicMusic();
+			this.StopDynamicMusic(false);
 		}
 	}
 
@@ -260,8 +258,65 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		{
 			if (keyValuePair.Value != null)
 			{
-				keyValuePair.Value.ev.setPaused(paused);
+				this.StartFadeToPause(keyValuePair.Value.ev, paused, 0.25f);
 			}
+		}
+	}
+
+	public void StartFadeToPause(FMOD.Studio.EventInstance inst, bool paused, float fadeTime = 0.25f)
+	{
+		if (paused)
+		{
+			base.StartCoroutine(this.FadeToPause(inst, fadeTime));
+		}
+		else
+		{
+			base.StartCoroutine(this.FadeToUnpause(inst, fadeTime));
+		}
+	}
+
+	private IEnumerator FadeToPause(FMOD.Studio.EventInstance inst, float fadeTime)
+	{
+		float startVolume;
+		inst.getVolume(out startVolume);
+		float targetVolume = 0f;
+		float lerpTime = 0f;
+		float lerpedVolume = 0f;
+		while (lerpTime < 1f)
+		{
+			lerpTime += Time.unscaledDeltaTime / fadeTime;
+			lerpedVolume = Mathf.Lerp(startVolume, targetVolume, lerpTime);
+			inst.setVolume(lerpedVolume);
+			yield return null;
+		}
+		inst.setPaused(true);
+		yield break;
+	}
+
+	private IEnumerator FadeToUnpause(FMOD.Studio.EventInstance inst, float fadeTime)
+	{
+		float startVolume;
+		inst.getVolume(out startVolume);
+		float targetVolume = 1f;
+		float lerpTime = 0f;
+		float lerpedVolume = 0f;
+		inst.setPaused(false);
+		while (lerpTime < 1f)
+		{
+			lerpTime += Time.unscaledDeltaTime / fadeTime;
+			lerpedVolume = Mathf.Lerp(startVolume, targetVolume, lerpTime);
+			inst.setVolume(lerpedVolume);
+			yield return null;
+		}
+		yield break;
+	}
+
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		if (PlayerPrefs.HasKey(AudioOptionsScreen.AlwaysPlayMusicKey))
+		{
+			this.alwaysPlayMusic = PlayerPrefs.GetInt(AudioOptionsScreen.AlwaysPlayMusicKey) == 1;
 		}
 	}
 
@@ -275,6 +330,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		this.daysSinceDynamicMusic = 0;
 		string nextDynamicSong = this.GetNextDynamicSong();
 		this.PlaySong(nextDynamicSong, false);
+		AudioMixer.instance.Start(AudioMixerSnapshots.Get().DynamicMusicPlayingSnapshot);
 		MusicManager.SongInfo songInfo;
 		if (this.activeSongs.TryGetValue(nextDynamicSong, out songInfo))
 		{
@@ -284,15 +340,30 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		{
 			this.Log("DynamicMusic song " + nextDynamicSong + " did not start.");
 		}
+		if (SpeedControlScreen.Instance != null && SpeedControlScreen.Instance.IsPaused)
+		{
+			this.SetDynamicMusicPaused();
+		}
+		if (OverlayScreen.Instance != null && OverlayScreen.Instance.mode != SimViewMode.None)
+		{
+			this.SetDynamicMusicOverlayActive();
+		}
+		string text = "Volume_Music";
+		if (PlayerPrefs.HasKey(text))
+		{
+			float @float = PlayerPrefs.GetFloat(text);
+			AudioMixer.instance.SetSnapshotParameter(AudioMixerSnapshots.Get().DynamicMusicPlayingSnapshot, "userVolume_Music", @float, true);
+		}
 	}
 
-	public void StopDynamicMusic()
+	public void StopDynamicMusic(bool stopImmediate = false)
 	{
 		if (this.activeDynamicSong != null)
 		{
+			STOP_MODE stop_MODE = ((!stopImmediate) ? STOP_MODE.ALLOWFADEOUT : STOP_MODE.IMMEDIATE);
 			this.Log("Stop DynamicMusic: " + Assets.GetSimpleSoundEventName(this.activeDynamicSong.fmodEvent));
-			this.StopSong(Assets.GetSimpleSoundEventName(this.activeDynamicSong.fmodEvent), false);
-			this.activeDynamicSong = null;
+			this.StopSong(Assets.GetSimpleSoundEventName(this.activeDynamicSong.fmodEvent), true, stop_MODE);
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().DynamicMusicPlayingSnapshot, STOP_MODE.ALLOWFADEOUT);
 		}
 	}
 
@@ -363,7 +434,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public bool ShouldPlayDynamicMusicStartOfDay()
 	{
-		return this.daysSinceDynamicMusic - 1 >= this.daysBetweenDynamicMusic;
+		return this.alwaysPlayMusic || this.daysSinceDynamicMusic - 1 >= this.daysBetweenDynamicMusic;
 	}
 
 	public bool ShouldPlayDynamicMusicLoadedGame()
@@ -435,6 +506,8 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 	public int daysSinceDynamicMusic;
 
 	public int daysBetweenDynamicMusic;
+
+	public bool alwaysPlayMusic;
 
 	private float duskTime = 0.75f;
 

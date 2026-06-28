@@ -74,20 +74,13 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor
 		this.amount = Math.Min(this.initialAmount, this.amount + amt);
 	}
 
-	public int DescriptionOrder { get; set; }
-
-	public List<Descriptor> GetRequirementDescriptions(GameObject go)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
-		return null;
-	}
-
-	public List<string> GetEffectDescriptions(GameObject go)
-	{
-		List<string> list = new List<string>();
+		List<Descriptor> list = new List<Descriptor>();
 		if (this.element.ToLower() == "oxygen")
 		{
-			string text = ((!this.underwaterSupport) ? string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.EFFECTS.OXYGENTANK, GameUtil.GetFormattedMass(this.amount, GameUtil.TimeSlice.None, true, "F1")) : string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.EFFECTS.OXYGENTANKUNDERWATER, GameUtil.GetFormattedMass(this.amount, GameUtil.TimeSlice.None, true, "F1")));
-			list.Add(text);
+			string text = ((!this.underwaterSupport) ? string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.EFFECTS.OXYGEN_TANK, GameUtil.GetFormattedMass(this.amount, GameUtil.TimeSlice.None, true, "{0:0.#}")) : string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.EFFECTS.OXYGEN_TANK_UNDERWATER, GameUtil.GetFormattedMass(this.amount, GameUtil.TimeSlice.None, true, "{0:0.#}")));
+			list.Add(new Descriptor(text, text, Descriptor.DescriptorType.Effect, false));
 		}
 		return list;
 	}

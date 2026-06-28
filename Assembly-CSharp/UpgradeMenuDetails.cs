@@ -20,17 +20,6 @@ public class UpgradeMenuDetails : SideTargetScreen
 		this.upgradable = keyValuePair.Value;
 		this.def = this.upgradable.GetBuildingDef;
 		this.VerifyUpgradeType(this.upgrade.type);
-		string text = string.Empty;
-		for (int i = 0; i < 3; i++)
-		{
-			string modifierString = this.upgrade.config.GetModifierString(i);
-			if (string.IsNullOrEmpty(modifierString))
-			{
-				break;
-			}
-			text = modifierString;
-		}
-		this.details.text = this.upgrade.GetUpgradeDescription() + "\n" + text;
 		this.image.sprite = this.def.GetUISprite("ui");
 		this.image.GetComponent<ToolTip>().toolTip = this.def.Flavor;
 		if (this.upgrade.type != Upgradable.Upgrade.Target.None && this.iconMap.ContainsKey(this.upgrade.type))
@@ -84,35 +73,19 @@ public class UpgradeMenuDetails : SideTargetScreen
 				{
 					if (type != Upgradable.Upgrade.Target.MassGeneration)
 					{
-						if (type != Upgradable.Upgrade.Target.HeatGeneration)
+						if (type != Upgradable.Upgrade.Target.Capacity)
 						{
-							if (type != Upgradable.Upgrade.Target.Capacity)
+							if (type != Upgradable.Upgrade.Target.ExecutionTime)
 							{
-								if (type != Upgradable.Upgrade.Target.ExecutionTime)
-								{
-								}
-							}
-							else
-							{
-								Generator component = this.upgradable.GetComponent<Generator>();
-								if (component != null)
-								{
-									this.previousAmountLabel.text = component.Capacity.ToString("0.0");
-									this.afterAmountLabel.text = (component.BaseCapacity * this.upgradable.GetNextModifierForTarget(type)).ToString("0.0");
-								}
-								else
-								{
-									Debug.LogError("Something went wrong! We're trying to update a component that doesn't exist in the selected target!");
-								}
 							}
 						}
 						else
 						{
-							StructureTemperature component2 = this.upgradable.GetComponent<StructureTemperature>();
-							if (component2 != null)
+							Generator component = this.upgradable.GetComponent<Generator>();
+							if (component != null)
 							{
-								this.previousAmountLabel.text = GameUtil.GetFormattedTemperature(component2.OperatingTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute);
-								this.afterAmountLabel.text = GameUtil.GetFormattedTemperature(component2.BaseOperatingTemperature * this.upgradable.GetNextModifierForTarget(type), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute);
+								this.previousAmountLabel.text = component.Capacity.ToString("0.0");
+								this.afterAmountLabel.text = (component.BaseCapacity * this.upgradable.GetNextModifierForTarget(type)).ToString("0.0");
 							}
 							else
 							{
@@ -122,11 +95,11 @@ public class UpgradeMenuDetails : SideTargetScreen
 					}
 					else
 					{
-						BuildingElementEmitter component3 = this.upgradable.GetComponent<BuildingElementEmitter>();
-						if (component3 != null)
+						BuildingElementEmitter component2 = this.upgradable.GetComponent<BuildingElementEmitter>();
+						if (component2 != null)
 						{
-							this.previousAmountLabel.text = component3.MassChangeRate.ToString("0.0");
-							this.afterAmountLabel.text = (component3.MassChangeRate * this.upgradable.GetNextModifierForTarget(type)).ToString("0.0");
+							this.previousAmountLabel.text = component2.EmitRate.ToString("0.0");
+							this.afterAmountLabel.text = (component2.EmitRate * this.upgradable.GetNextModifierForTarget(type)).ToString("0.0");
 						}
 						else
 						{
@@ -137,11 +110,11 @@ public class UpgradeMenuDetails : SideTargetScreen
 			}
 			else
 			{
-				Generator component4 = this.upgradable.GetComponent<Generator>();
-				if (component4 != null)
+				Generator component3 = this.upgradable.GetComponent<Generator>();
+				if (component3 != null)
 				{
-					this.previousAmountLabel.text = component4.WattageRating.ToString("0.0") + "W";
-					this.afterAmountLabel.text = (component4.BaseWattageRating * BuildingDef.GetEnergyEfficiency(null, this.upgradable.GetNextModifierForTarget(type))).ToString("0.0") + "W";
+					this.previousAmountLabel.text = component3.WattageRating.ToString("0.0") + "W";
+					this.afterAmountLabel.text = (component3.BaseWattageRating * BuildingDef.GetEnergyEfficiency(null, this.upgradable.GetNextModifierForTarget(type))).ToString("0.0") + "W";
 				}
 				else
 				{
@@ -151,11 +124,11 @@ public class UpgradeMenuDetails : SideTargetScreen
 		}
 		else
 		{
-			EnergyConsumer component5 = this.upgradable.GetComponent<EnergyConsumer>();
-			if (component5 != null)
+			EnergyConsumer component4 = this.upgradable.GetComponent<EnergyConsumer>();
+			if (component4 != null)
 			{
-				this.previousAmountLabel.text = component5.WattsNeededWhenActive.ToString("0.0") + "W";
-				this.afterAmountLabel.text = (component5.BaseWattsNeededWhenActive * this.upgradable.GetNextModifierForTarget(type)).ToString("0.0") + "W";
+				this.previousAmountLabel.text = component4.WattsNeededWhenActive.ToString("0.0") + "W";
+				this.afterAmountLabel.text = (component4.BaseWattsNeededWhenActive * this.upgradable.GetNextModifierForTarget(type)).ToString("0.0") + "W";
 			}
 			else
 			{

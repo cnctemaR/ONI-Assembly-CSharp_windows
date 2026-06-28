@@ -9,8 +9,8 @@ public class MinionStatsPanel : TargetScreen
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.attributesPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.traitsPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.attributesPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 	}
 
 	private void Update()
@@ -51,14 +51,29 @@ public class MinionStatsPanel : TargetScreen
 		}
 		this.attributesPanel.SetActive(true);
 		this.attributesPanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.STATS.GROUPNAME_ATTRIBUTES;
-		foreach (AttributeInstance attributeInstance in this.selectedTarget.GetAttributes().AttributeTable.Values)
+		List<AttributeInstance> list = new List<AttributeInstance>(this.selectedTarget.GetAttributes().AttributeTable);
+		List<AttributeInstance> list2 = list.FindAll((AttributeInstance a) => a.Attribute.ShowInUI == Klei.AI.Attribute.Display.Skill);
+		List<AttributeInstance> list3 = list.FindAll((AttributeInstance a) => a.Attribute.ShowInUI == Klei.AI.Attribute.Display.Expectation);
+		if (list2.Count > 0)
 		{
-			if (attributeInstance.Attribute.ShowInUI)
+			GameObject gameObject = this.AddOrGetLabel(this.attributeLabels, this.attributesPanel, "SkillsTitle");
+			gameObject.GetComponent<LocText>().text = UI.DETAILTABS.STATS.GROUPNAME_ATTRIBUTES_SKILLS;
+			foreach (AttributeInstance attributeInstance in list2)
 			{
-				GameObject gameObject = this.AddOrGetLabel(this.attributeLabels, this.attributesPanel, attributeInstance.Id);
-				string text = attributeInstance.GetTotalValue().ToString();
-				gameObject.GetComponent<LocText>().text = string.Format("{0}: {1}", attributeInstance.Name, text);
+				gameObject = this.AddOrGetLabel(this.attributeLabels, this.attributesPanel, attributeInstance.Id);
+				gameObject.GetComponent<LocText>().text = string.Format("{0}: {1}", attributeInstance.Name, attributeInstance.GetFormattedValue(false));
 				gameObject.GetComponent<ToolTip>().toolTip = attributeInstance.GetAttributeValueTooltip();
+			}
+		}
+		if (list3.Count > 0)
+		{
+			GameObject gameObject2 = this.AddOrGetLabel(this.attributeLabels, this.attributesPanel, "ExpectationsTitle");
+			gameObject2.GetComponent<LocText>().text = UI.DETAILTABS.STATS.GROUPNAME_ATTRIBUTES_EXPECTATIONS;
+			foreach (AttributeInstance attributeInstance2 in list3)
+			{
+				gameObject2 = this.AddOrGetLabel(this.attributeLabels, this.attributesPanel, attributeInstance2.Id);
+				gameObject2.GetComponent<LocText>().text = string.Format("{0}: {1}", attributeInstance2.Name, attributeInstance2.GetFormattedValue(false));
+				gameObject2.GetComponent<ToolTip>().toolTip = attributeInstance2.GetAttributeValueTooltip();
 			}
 		}
 	}

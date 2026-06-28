@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using KSerialization;
 using UnityEngine;
 
+[SkipSaveFileSerialization]
 [SerializationConfig(MemberSerialization.OptIn)]
 public class ManualDeliveryKG : KMonoBehaviour
 {
@@ -30,30 +31,37 @@ public class ManualDeliveryKG : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		if (this.storage != null)
-		{
-			this.Subscribe(-1697596308, new EventSystem.EventHandler(this.OnStorageChanged));
-		}
+		this.getFetchAmount = new Func<float>(this.GetFetchAmount);
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		if (this.storage != null)
+		{
+			this.SetStorage(this.storage);
+		}
 		this.UpdateFilteredItems();
+	}
+
+	protected override void OnCleanUp()
+	{
+		base.OnCleanUp();
+		this.AbortDelivery("ManualDeliverKG destroyed");
 	}
 
 	public void SetStorage(Storage storage)
 	{
 		if (this.storage != null)
 		{
-			this.Unsubscribe(-1697596308, new EventSystem.EventHandler(this.OnStorageChanged));
+			this.storage.Unsubscribe(-1697596308, new Action<object>(this.OnStorageChanged));
 		}
 		this.AbortDelivery("storage pointer changed");
 		this.filteredStoredItems.Clear();
 		this.storage = storage;
-		if (this.storage != null)
+		if (this.storage != null && base.isSpawned)
 		{
-			this.storage.Subscribe(-1697596308, new EventSystem.EventHandler(this.OnStorageChanged));
+			this.storage.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
 		}
 	}
 
@@ -93,8 +101,8 @@ public class ManualDeliveryKG : KMonoBehaviour
 
 	private void RequestDelivery()
 	{
-		float fetchAmount = this.GetFetchAmount();
-		if (fetchAmount > 0f && (this.fetchList == null || this.fetchList.IsComplete))
+		float num = this.getFetchAmount();
+		if (num > 0f && (this.fetchList == null || this.fetchList.IsComplete))
 		{
 			if (this.fetchList != null)
 			{
@@ -103,7 +111,7 @@ public class ManualDeliveryKG : KMonoBehaviour
 			this.fetchList = new FetchList2(this.storage);
 			this.fetchList.ShowStatusItem = this.ShowStatusItem;
 			this.fetchList.MinimumAmount[this.requestedItemTag] = this.minimumMass;
-			this.fetchList.Add(new Tag[] { this.requestedItemTag }, fetchAmount, true);
+			this.fetchList.Add(new Tag[] { this.requestedItemTag }, num, this.operationalRequirement);
 			this.fetchList.Submit(null, false);
 		}
 	}
@@ -154,7 +162,7 @@ public class ManualDeliveryKG : KMonoBehaviour
 		}
 	}
 
-	[MyCmpGet]
+	[SerializeField]
 	private Storage storage;
 
 	[SerializeField]
@@ -169,6 +177,9 @@ public class ManualDeliveryKG : KMonoBehaviour
 	[SerializeField]
 	public float minimumMass = 10f;
 
+	[SerializeField]
+	public FetchOrder2.OperationalRequirement operationalRequirement;
+
 	[NonSerialized]
 	public bool ShowStatusItem = true;
 
@@ -177,4 +188,6 @@ public class ManualDeliveryKG : KMonoBehaviour
 	private List<PrimaryElement> filteredStoredItems = new List<PrimaryElement>();
 
 	private bool paused;
+
+	public Func<float> getFetchAmount;
 }

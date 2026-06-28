@@ -4,7 +4,7 @@ public class NeedsManager : KMonoBehaviour
 {
 	protected override void OnSpawn()
 	{
-		GameClock.Instance.Subscribe(631075836, new EventSystem.EventHandler(this.OnNewDay));
+		GameClock.Instance.Subscribe(631075836, new Action<object>(this.OnNewDay));
 	}
 
 	private void OnNewDay(object data)

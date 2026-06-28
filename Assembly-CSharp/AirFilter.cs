@@ -5,8 +5,6 @@ using KSerialization;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class AirFilter : StateMachineComponent<AirFilter.StatesInstance>, IEffectDescriptor
 {
-	public int DescriptionOrder { get; set; }
-
 	public bool IsConvertable()
 	{
 		Storage component = base.GetComponent<Storage>();
@@ -35,12 +33,7 @@ public class AirFilter : StateMachineComponent<AirFilter.StatesInstance>, IEffec
 		base.smi.StartSM();
 	}
 
-	public List<Descriptor> GetRequirementDescriptions(BuildingDef def)
-	{
-		return null;
-	}
-
-	public List<Descriptor> GetEffectDescriptions(BuildingDef def)
+	public List<Descriptor> GetDescriptors(BuildingDef def)
 	{
 		return null;
 	}
@@ -51,7 +44,7 @@ public class AirFilter : StateMachineComponent<AirFilter.StatesInstance>, IEffec
 	[MyCmpGet]
 	private Storage storage;
 
-	public class StatesInstance : GameStateMachine<AirFilter.States, AirFilter.StatesInstance, AirFilter>.GameInstance
+	public class StatesInstance : GameStateMachine<AirFilter.States, AirFilter.StatesInstance, AirFilter, object>.GameInstance
 	{
 		public StatesInstance(AirFilter smi)
 			: base(smi)
@@ -74,8 +67,8 @@ public class AirFilter : StateMachineComponent<AirFilter.StatesInstance>, IEffec
 			}).EventTransition(GameHashes.OnStorageChange, this.waiting, (AirFilter.StatesInstance smi) => !smi.master.IsConvertable()).EventTransition(GameHashes.OperationalChanged, this.waiting, (AirFilter.StatesInstance smi) => !smi.master.operational.IsOperational);
 		}
 
-		public GameStateMachine<AirFilter.States, AirFilter.StatesInstance, AirFilter>.State waiting;
+		public GameStateMachine<AirFilter.States, AirFilter.StatesInstance, AirFilter, object>.State waiting;
 
-		public GameStateMachine<AirFilter.States, AirFilter.StatesInstance, AirFilter>.State ready;
+		public GameStateMachine<AirFilter.States, AirFilter.StatesInstance, AirFilter, object>.State ready;
 	}
 }

@@ -6,7 +6,7 @@ using UnityEngine;
 public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 {
 	public FetchAreaChore(Chore.Precondition.Context context)
-		: base(context.chore.choreType, context.consumer, context.consumer.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true)
+		: base(context.chore.choreType, context.consumer, context.consumer.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true, 0)
 	{
 		this.smi = new FetchAreaChore.StatesInstance(this, context);
 	}
@@ -28,7 +28,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 		base.Cleanup();
 	}
 
-	public class StatesInstance : GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore>.GameInstance
+	public class StatesInstance : GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.GameInstance
 	{
 		public StatesInstance(FetchAreaChore master, Chore.Precondition.Context context)
 			: base(master)
@@ -48,19 +48,22 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			int num3 = 4;
 			num -= num3 / 2;
 			num2 -= num3 / 2;
-			HashSet<ScenePartitionerEntry> hashSet = GameScenePartitioner.Instance.GatherEntries(num, num2, num3, num3, GameScenePartitioner.Instance.fetchChores.mask);
-			List<Chore.Precondition.Context> list = new List<Chore.Precondition.Context>();
-			foreach (ScenePartitionerEntry scenePartitionerEntry in hashSet)
+			List<ScenePartitionerEntry> list = GameScenePartitioner.Instance.ReserveList();
+			GameScenePartitioner.Instance.GatherEntries(num, num2, num3, num3, GameScenePartitioner.Instance.fetchChores.mask, list);
+			List<Chore.Precondition.Context> list2 = new List<Chore.Precondition.Context>();
+			for (int i = 0; i < list.Count; i++)
 			{
+				ScenePartitionerEntry scenePartitionerEntry = list[i];
 				Chore chore = scenePartitionerEntry.obj as Chore;
-				chore.CollectChores(context.consumer, list, true);
+				chore.CollectChores(context.consumer, list2, true);
 			}
+			GameScenePartitioner.Instance.ReleaseList(list);
 			float num4 = 600f;
 			AttributeConverterInstance attributeConverterInstance = Db.Get().AttributeConverters.CarryAmount.Lookup(context.consumer);
 			num4 += attributeConverterInstance.Evaluate();
 			Pickupable pickupable = context.data as Pickupable;
-			List<Pickupable> list2 = new List<Pickupable>();
-			list2.Add(pickupable);
+			List<Pickupable> list3 = new List<Pickupable>();
+			list3.Add(pickupable);
 			float num5 = pickupable.UnreservedAmount;
 			float minTakeAmount = pickupable.MinTakeAmount;
 			int num6 = 0;
@@ -69,23 +72,27 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			int num8 = 4;
 			num6 -= num8 / 2;
 			num7 -= num8 / 2;
-			HashSet<ScenePartitionerEntry> hashSet2 = GameScenePartitioner.Instance.GatherEntries(num6, num7, num8, num8, GameScenePartitioner.Instance.pickupables.mask);
+			List<ScenePartitionerEntry> list4 = GameScenePartitioner.Instance.ReserveList();
+			GameScenePartitioner.Instance.GatherEntries(num6, num7, num8, num8, GameScenePartitioner.Instance.pickupables.mask, list4);
 			Tag prefabTag = pickupable.GetComponent<KPrefabID>().PrefabTag;
-			foreach (ScenePartitionerEntry scenePartitionerEntry2 in hashSet2)
+			this.rootTag = prefabTag;
+			for (int j = 0; j < list4.Count; j++)
 			{
+				ScenePartitionerEntry scenePartitionerEntry2 = list4[j];
 				if (num5 > num4)
 				{
 					break;
 				}
 				Pickupable pickupable2 = scenePartitionerEntry2.obj as Pickupable;
 				Tag prefabTag2 = pickupable2.GetComponent<KPrefabID>().PrefabTag;
-				if (!list2.Contains(pickupable2) && prefabTag2 == prefabTag && pickupable2.UnreservedAmount > 0f)
+				if (!list3.Contains(pickupable2) && prefabTag2 == prefabTag && pickupable2.UnreservedAmount > 0f)
 				{
 					float unreservedAmount = pickupable2.UnreservedAmount;
-					list2.Add(pickupable2);
+					list3.Add(pickupable2);
 					num5 += unreservedAmount;
 				}
 			}
+			GameScenePartitioner.Instance.ReleaseList(list4);
 			num5 = Mathf.Min(num4, num5);
 			if (minTakeAmount > 0f)
 			{
@@ -99,20 +106,20 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			}
 			this.deliveries.Add(new FetchAreaChore.StatesInstance.Delivery(this.rootContext, num9, new Action<FetchChore>(this.OnFetchChoreCancelled)));
 			float num10 = num9;
-			for (int i = 0; i < list.Count; i++)
+			for (int k = 0; k < list2.Count; k++)
 			{
 				if (num10 >= num5)
 				{
 					break;
 				}
-				Chore.Precondition.Context context2 = list[i];
+				Chore.Precondition.Context context2 = list2[k];
 				FetchChore fetchChore = context2.chore as FetchChore;
 				if (fetchChore != this.rootChore && context2.IsSuccess() && fetchChore.overrideTarget == null && fetchChore.driver == null && fetchChore.tags.Length == this.rootChore.tags.Length)
 				{
 					bool flag = true;
-					for (int j = 0; j < fetchChore.tags.Length; j++)
+					for (int l = 0; l < fetchChore.tags.Length; l++)
 					{
-						Tag tag = fetchChore.tags[j];
+						Tag tag = fetchChore.tags[l];
 						if (Array.IndexOf<Tag>(this.rootChore.tags, tag) < 0)
 						{
 							flag = false;
@@ -135,13 +142,13 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			num10 = Mathf.Min(num10, num5);
 			float num11 = num10;
 			this.fetchables.Clear();
-			for (int k = 0; k < list2.Count; k++)
+			for (int m = 0; m < list3.Count; m++)
 			{
 				if (num11 <= 0f)
 				{
 					break;
 				}
-				Pickupable pickupable3 = list2[k];
+				Pickupable pickupable3 = list3[m];
 				num11 -= pickupable3.UnreservedAmount;
 				this.fetchables.Add(pickupable3);
 			}
@@ -212,7 +219,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 				{
 					FetchAreaChore.StatesInstance.Delivery delivery = this.deliveries[0];
 					Chore chore = delivery.chore;
-					delivery.Complete(pickupable);
+					delivery.Complete(this.deliverables);
 					delivery.Cleanup();
 					if (this.deliveries.Count > 0 && this.deliveries[0].chore == chore)
 					{
@@ -232,10 +239,31 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 
 		public void FetchComplete()
 		{
-			this.deliverables.Add(base.sm.fetchResultTarget.Get<Pickupable>(base.smi));
 			this.reservations[0].Cleanup();
 			this.reservations.RemoveAt(0);
 			this.GoTo(base.sm.fetching.next);
+		}
+
+		public void SetupDeliverables()
+		{
+			foreach (GameObject gameObject in base.sm.fetcher.Get<Storage>(base.smi))
+			{
+				if (!(gameObject == null))
+				{
+					KPrefabID component = gameObject.GetComponent<KPrefabID>();
+					if (!(component == null))
+					{
+						if (component.PrefabTag == this.rootTag)
+						{
+							Pickupable component2 = component.GetComponent<Pickupable>();
+							if (component2 != null)
+							{
+								this.deliverables.Add(component2);
+							}
+						}
+					}
+				}
+			}
 		}
 
 		public void ReservePickupables()
@@ -304,6 +332,8 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 
 		private FetchChore rootChore;
 
+		private Tag rootTag;
+
 		private Chore.Precondition.Context rootContext;
 
 		private float fetchAmountRequested;
@@ -329,24 +359,37 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 
 			public FetchChore chore { get; private set; }
 
-			public void Complete(Pickupable pickupable)
+			public void Complete(List<Pickupable> deliverables)
 			{
-				if (this.destination == null || this.destination.IsEndOfLife())
+				using (new KProfiler.Region("FAC.Delivery.Complete", null))
 				{
-					return;
-				}
-				FetchChore chore = this.chore;
-				chore.onCleanup = (Action<Chore>)Delegate.Remove(chore.onCleanup, this.onFetchChoreCleanup);
-				pickupable = pickupable.Take(this.amount);
-				if (pickupable != null && pickupable.TotalAmount > 0f)
-				{
-					this.destination.Store(pickupable.gameObject, false, false);
-					if (this.chore.overrideTarget != null)
+					if (!(this.destination == null) && !this.destination.IsEndOfLife())
 					{
-						this.chore.FetchAreaEnd(this.chore.overrideTarget.GetComponent<ChoreDriver>(), pickupable, true);
+						FetchChore chore = this.chore;
+						chore.onCleanup = (Action<Chore>)Delegate.Remove(chore.onCleanup, this.onFetchChoreCleanup);
+						float num = this.amount;
+						Pickupable pickupable = null;
+						for (int i = 0; i < deliverables.Count; i++)
+						{
+							Pickupable pickupable2 = deliverables[i].Take(num);
+							if (pickupable2 != null && pickupable2.TotalAmount > 0f)
+							{
+								num -= pickupable2.TotalAmount;
+								this.destination.Store(pickupable2.gameObject, false, false);
+								pickupable = pickupable2;
+								if (pickupable2 == deliverables[i])
+								{
+									deliverables[i] = null;
+								}
+							}
+						}
+						if (pickupable != null && this.chore.overrideTarget != null)
+						{
+							this.chore.FetchAreaEnd(this.chore.overrideTarget.GetComponent<ChoreDriver>(), pickupable, true);
+						}
+						this.chore = null;
 					}
 				}
-				this.chore = null;
 			}
 
 			private void OnFetchChoreCleanup(Chore chore)
@@ -418,7 +461,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			{
 				smi.SetupFetch();
 			});
-			GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore>.ApproachSubState<Pickupable> movetopickupable = this.fetching.movetopickupable;
+			GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.ApproachSubState<Pickupable> movetopickupable = this.fetching.movetopickupable;
 			NavTactic navTactic = NavigationTactics.ReduceTravelDistance;
 			movetopickupable.InitializeStates(this.fetcher, this.fetchTarget, this.fetching.pickup, this.fetching.fetchfail, null, navTactic);
 			this.fetching.pickup.DoPickup(this.fetchTarget, this.fetchResultTarget, this.fetchAmount, this.fetching.fetchcomplete, this.fetching.fetchfail);
@@ -430,12 +473,15 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			{
 				smi.FetchFail();
 			});
-			this.delivering.DefaultState(this.delivering.next).OnSignal(this.currentdeliverycancelled, this.delivering.deliverfail);
+			this.delivering.DefaultState(this.delivering.next).OnSignal(this.currentdeliverycancelled, this.delivering.deliverfail).Enter("SetupDeliverables", delegate(FetchAreaChore.StatesInstance smi)
+			{
+				smi.SetupDeliverables();
+			});
 			this.delivering.next.Enter("SetupDelivery", delegate(FetchAreaChore.StatesInstance smi)
 			{
 				smi.SetupDelivery();
 			});
-			GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore>.ApproachSubState<Storage> movetostorage = this.delivering.movetostorage;
+			GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.ApproachSubState<Storage> movetostorage = this.delivering.movetostorage;
 			navTactic = NavigationTactics.ReduceTravelDistance;
 			movetostorage.InitializeStates(this.fetcher, this.deliveryDestination, this.delivering.storing, this.delivering.deliverfail, null, navTactic);
 			this.delivering.storing.ToggleStateMachine((FetchAreaChore.StatesInstance smi) => new MultitoolController.Instance(this.deliveryDestination.Get<Storage>(smi), this.fetcher.Get<Worker>(smi), "store", EffectPrefabs.Instance.PickupEffect)).ScheduleGoTo(1.5f, this.delivering.delivercomplete);
@@ -453,46 +499,46 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 
 		public FetchAreaChore.States.DeliverStates delivering;
 
-		public StateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore>.TargetParameter fetcher;
+		public StateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.TargetParameter fetcher;
 
-		public StateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore>.TargetParameter fetchTarget;
+		public StateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.TargetParameter fetchTarget;
 
-		public StateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore>.TargetParameter fetchResultTarget;
+		public StateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.TargetParameter fetchResultTarget;
 
-		public StateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore>.FloatParameter fetchAmount;
+		public StateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.FloatParameter fetchAmount;
 
-		public StateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore>.TargetParameter deliveryDestination;
+		public StateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.TargetParameter deliveryDestination;
 
-		public StateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore>.TargetParameter deliveryObject;
+		public StateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.TargetParameter deliveryObject;
 
-		public StateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore>.FloatParameter deliveryAmount;
+		public StateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.FloatParameter deliveryAmount;
 
-		public StateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore>.Signal currentdeliverycancelled;
+		public StateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.Signal currentdeliverycancelled;
 
-		public class FetchStates : GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore>.State
+		public class FetchStates : GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.State
 		{
-			public GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore>.State next;
+			public GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.State next;
 
-			public GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore>.ApproachSubState<Pickupable> movetopickupable;
+			public GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.ApproachSubState<Pickupable> movetopickupable;
 
-			public GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore>.State pickup;
+			public GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.State pickup;
 
-			public GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore>.State fetchfail;
+			public GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.State fetchfail;
 
-			public GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore>.State fetchcomplete;
+			public GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.State fetchcomplete;
 		}
 
-		public class DeliverStates : GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore>.State
+		public class DeliverStates : GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.State
 		{
-			public GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore>.State next;
+			public GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.State next;
 
-			public GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore>.ApproachSubState<Storage> movetostorage;
+			public GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.ApproachSubState<Storage> movetostorage;
 
-			public GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore>.State storing;
+			public GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.State storing;
 
-			public GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore>.State deliverfail;
+			public GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.State deliverfail;
 
-			public GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore>.State delivercomplete;
+			public GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.State delivercomplete;
 		}
 	}
 }

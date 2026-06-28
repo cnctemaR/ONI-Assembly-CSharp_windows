@@ -1,10 +1,27 @@
 ﻿using System;
+using System.Collections.Generic;
 using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class ConduitDispenser : KMonoBehaviour, ISaveLoadableJson
+public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
 {
+	public ConduitType TypeOfConduit
+	{
+		get
+		{
+			return this.conduitType;
+		}
+	}
+
+	public ConduitFlow.ConduitContents ConduitContents
+	{
+		get
+		{
+			return this.GetConduitManager().GetContents(this.utilityCell);
+		}
+	}
+
 	public void SetConduitData(ConduitType type)
 	{
 		this.conduitType = type;
@@ -32,8 +49,8 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadableJson
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.utilityCell = this.building.GetUtilityOutputCell();
-		int mask = GameScenePartitioner.Instance.objectLayerMasks[(this.conduitType != ConduitType.Gas) ? 12 : 10].mask;
+		this.utilityCell = base.GetComponent<Building>().GetUtilityOutputCell();
+		int mask = GameScenePartitioner.Instance.objectLayerMasks[(this.conduitType != ConduitType.Gas) ? 15 : 11].mask;
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("ConduitConsumer.OnSpawn", base.gameObject, this.utilityCell, mask, new Action<object>(this.OnConduitConnectionChanged));
 		this.GetConduitManager().AddConduitUpdater(new Action<float>(this.ConduitUpdate), 0);
 		this.OnConduitConnectionChanged(null);
@@ -52,65 +69,45 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadableJson
 	private void ConduitUpdate(float dt)
 	{
 		this.operational.SetFlag(ConduitDispenser.outputConduitFlag, this.IsConnected);
-		if (this.operational.IsOperational)
+		if (this.operational.IsOperational || this.alwaysDispense)
 		{
-			PrimaryElement primaryElement;
-			if (this.elementFilter != SimHashes.Vacuum)
-			{
-				primaryElement = this.storage.FindPrimaryElement(this.elementFilter);
-			}
-			else
-			{
-				primaryElement = this.storage.GetAnyChunk();
-			}
-			if (primaryElement != null && primaryElement.Mass > 0f)
+			PrimaryElement primaryElement = this.FindSuitableElement();
+			if (primaryElement != null)
 			{
 				primaryElement.KeepZeroMassObject = true;
 				ConduitFlow conduitManager = this.GetConduitManager();
 				float num = conduitManager.AddElement(this.utilityCell, primaryElement.ElementID, primaryElement.Mass, primaryElement.Temperature);
 				primaryElement.Mass -= num;
 				this.Trigger(-1697596308, primaryElement.gameObject);
-				Debug.Assert(primaryElement.Mass >= 0f);
 			}
 		}
+	}
+
+	private PrimaryElement FindSuitableElement()
+	{
+		List<GameObject> items = this.storage.items;
+		for (int i = 0; i < items.Count; i++)
+		{
+			PrimaryElement component = items[i].GetComponent<PrimaryElement>();
+			if (component != null && component.Mass > 0f && ((this.conduitType != ConduitType.Liquid) ? component.Element.IsGas : component.Element.IsLiquid) && (this.elementFilter == null || this.elementFilter.Length == 0 || (!this.invertElementFilter && this.IsFilteredElement(component.ElementID)) || (this.invertElementFilter && !this.IsFilteredElement(component.ElementID))))
+			{
+				return component;
+			}
+		}
+		return null;
+	}
+
+	private bool IsFilteredElement(SimHashes element)
+	{
+		return Array.IndexOf<SimHashes>(this.elementFilter, element) >= 0;
 	}
 
 	public bool IsConnected
 	{
 		get
 		{
-			GameObject gameObject = Grid.Objects[this.utilityCell, (this.conduitType != ConduitType.Gas) ? 12 : 10];
+			GameObject gameObject = Grid.Objects[this.utilityCell, (this.conduitType != ConduitType.Gas) ? 15 : 11];
 			return gameObject != null && gameObject.GetComponent<BuildingComplete>() != null;
-		}
-	}
-
-	public ConduitType TypeOfConduit
-	{
-		get
-		{
-			return this.conduitType;
-		}
-	}
-
-	public ConduitFlow.ConduitContents ConduitContents
-	{
-		get
-		{
-			return this.GetConduitManager().GetContents(this.utilityCell);
-		}
-	}
-
-	public bool CanDispense
-	{
-		get
-		{
-			bool flag = false;
-			if (this.IsConnected)
-			{
-				ConduitFlow conduitManager = this.GetConduitManager();
-				flag = conduitManager.GetContents(this.utilityCell).mass <= 0f;
-			}
-			return flag;
 		}
 	}
 
@@ -118,15 +115,18 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadableJson
 	public ConduitType conduitType;
 
 	[SerializeField]
-	public SimHashes elementFilter = SimHashes.Vacuum;
+	public SimHashes[] elementFilter;
 
-	public static Operational.Flag outputConduitFlag = new Operational.Flag("output_conduit", Operational.Flag.Type.Functional);
+	[SerializeField]
+	public bool invertElementFilter;
+
+	[SerializeField]
+	public bool alwaysDispense;
+
+	private static Operational.Flag outputConduitFlag = new Operational.Flag("output_conduit", Operational.Flag.Type.Functional);
 
 	[MyCmpReq]
 	private Operational operational;
-
-	[MyCmpReq]
-	private Building building;
 
 	[MyCmpReq]
 	private Storage storage;

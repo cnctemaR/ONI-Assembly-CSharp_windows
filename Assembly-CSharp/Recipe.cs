@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using STRINGS;
 using UnityEngine;
 
 public class Recipe : IHasSortOrder
@@ -9,71 +10,83 @@ public class Recipe : IHasSortOrder
 	{
 	}
 
-	public Recipe(GameObject prefab, string[] fabricators, float fabricationTime, float outputUnits = 1f, SimHashes elementOverride = (SimHashes)0, string nameOverride = null, string recipeDescription = null)
+	public Recipe(string prefabId, float outputUnits = 1f, SimHashes elementOverride = (SimHashes)0, string nameOverride = null, string recipeDescription = null, int sortOrder = 0)
 	{
-		Debug.Assert(prefab != null);
-		this.Result = prefab;
-		this.fabricators = fabricators;
+		Debug.Assert(prefabId != null);
+		this.Result = TagManager.Create(prefabId, null);
 		this.ResultElementOverride = elementOverride;
-		this.Name = ((nameOverride != null) ? nameOverride : prefab.GetProperName());
+		this.nameOverride = nameOverride;
 		this.OutputUnits = outputUnits;
-		this.FabricationTime = fabricationTime;
-		this.Ingredients = new List<Recipe.Ingredient>();
-		this.recipeDescription = recipeDescription;
-		this.EffectDescription = new List<string>();
-	}
-
-	public Recipe(GameObject prefab, string fabricator, float fabricationTime, float outputUnits = 1f, SimHashes elementOverride = (SimHashes)0, string nameOverride = null, string recipeDescription = null, int sortOrder = 0)
-	{
-		Debug.Assert(prefab != null);
-		this.Result = prefab;
-		this.fabricators = new string[] { fabricator };
-		this.ResultElementOverride = elementOverride;
-		this.Name = ((nameOverride != null) ? nameOverride : prefab.GetProperName());
-		this.OutputUnits = outputUnits;
-		this.FabricationTime = fabricationTime;
 		this.Ingredients = new List<Recipe.Ingredient>();
 		this.recipeDescription = recipeDescription;
 		this.sortOrder = sortOrder;
+		this.FabricationVisualizer = null;
 	}
 
 	public int sortOrder { get; set; }
 
-	public void AddIngredient(Recipe.Ingredient ingredient)
+	public string Name
+	{
+		get
+		{
+			return (this.nameOverride != null) ? this.nameOverride : this.Result.ProperName();
+		}
+		set
+		{
+			this.nameOverride = value;
+		}
+	}
+
+	public Recipe SetFabricator(string fabricator, float fabricationTime)
+	{
+		this.fabricators = new string[] { fabricator };
+		this.FabricationTime = fabricationTime;
+		RecipeManager.Get().Add(this);
+		return this;
+	}
+
+	public Recipe SetFabricators(string[] fabricators, float fabricationTime)
+	{
+		this.fabricators = fabricators;
+		this.FabricationTime = fabricationTime;
+		RecipeManager.Get().Add(this);
+		return this;
+	}
+
+	public Recipe SetIcon(Sprite Icon)
+	{
+		this.Icon = Icon;
+		this.IconColor = Color.white;
+		return this;
+	}
+
+	public Recipe SetIcon(Sprite Icon, Color IconColor)
+	{
+		this.Icon = Icon;
+		this.IconColor = IconColor;
+		return this;
+	}
+
+	public Recipe AddIngredient(Recipe.Ingredient ingredient)
 	{
 		this.Ingredients.Add(ingredient);
+		return this;
 	}
 
 	public Recipe.Ingredient[] GetAllIngredients(IList<Tag> selectedTags)
 	{
 		List<Recipe.Ingredient> list = new List<Recipe.Ingredient>();
-		int i = 0;
-		while (i < this.Ingredients.Count)
+		for (int i = 0; i < this.Ingredients.Count; i++)
 		{
-			TagSet tagSet = new TagSet();
-			tagSet.Add(this.Ingredients[i].tag);
 			int num = (int)this.Ingredients[i].amount;
-			bool flag = false;
-			if (i >= selectedTags.Count)
+			if (i < selectedTags.Count)
 			{
-				goto IL_0079;
+				list.Add(new Recipe.Ingredient(selectedTags[i], (float)num));
 			}
-			Tag tag = selectedTags[i];
-			if (!selectedTags.Contains(tag))
+			else
 			{
-				goto IL_0079;
+				list.Add(new Recipe.Ingredient(this.Ingredients[i].tag, (float)num));
 			}
-			list.Add(new Recipe.Ingredient(tag, (float)num));
-			IL_0094:
-			i++;
-			continue;
-			IL_0079:
-			if (!flag)
-			{
-				list.Add(new Recipe.Ingredient(tagSet[0], (float)num));
-				goto IL_0094;
-			}
-			goto IL_0094;
 		}
 		return list.ToArray();
 	}
@@ -83,62 +96,28 @@ public class Recipe : IHasSortOrder
 		List<Recipe.Ingredient> list = new List<Recipe.Ingredient>();
 		for (int i = 0; i < this.Ingredients.Count; i++)
 		{
-			TagSet tagSet = new TagSet();
-			tagSet.Add(this.Ingredients[i].tag);
 			int num = (int)this.Ingredients[i].amount;
 			bool flag = false;
 			if (i < selected_elements.Count)
 			{
 				Element element = selected_elements[i];
-				if (element != null)
+				if (element != null && element.HasTag(this.Ingredients[i].tag))
 				{
-					foreach (Tag tag in tagSet)
-					{
-						if (element.HasTag(tag))
-						{
-							list.Add(new Recipe.Ingredient(TagManager.Create(element.id), (float)num));
-							flag = true;
-							break;
-						}
-					}
+					list.Add(new Recipe.Ingredient(TagManager.Create(element.id), (float)num));
+					flag = true;
 				}
 			}
 			if (!flag)
 			{
-				list.Add(new Recipe.Ingredient(tagSet[0], (float)num));
+				list.Add(new Recipe.Ingredient(this.Ingredients[i].tag, (float)num));
 			}
 		}
 		return list.ToArray();
 	}
 
-	public Element[] GetElements()
-	{
-		Element[] array = new Element[this.Ingredients.Count];
-		for (int i = 0; i < this.Ingredients.Count; i++)
-		{
-			Tag tag = this.Ingredients[i].tag;
-			foreach (Element element in ElementLoader.elements)
-			{
-				Tag tag2 = TagManager.Create(element.id);
-				if (tag2 == tag)
-				{
-					array[i] = element;
-					break;
-				}
-			}
-		}
-		return array;
-	}
-
 	public GameObject Craft(Storage resource_storage, IList<Tag> selectedTags)
 	{
 		Recipe.Ingredient[] allIngredients = this.GetAllIngredients(selectedTags);
-		return this.CraftRecipe(resource_storage, allIngredients);
-	}
-
-	public GameObject Craft(Storage resource_storage, IList<Element> selected_element)
-	{
-		Recipe.Ingredient[] allIngredients = this.GetAllIngredients(selected_element);
 		return this.CraftRecipe(resource_storage, allIngredients);
 	}
 
@@ -148,10 +127,11 @@ public class Recipe : IHasSortOrder
 		{
 			resource_storage.Consume(ingredient);
 		}
+		GameObject prefab = Assets.GetPrefab(this.Result);
 		GameObject gameObject = null;
-		if (this.Result != null)
+		if (prefab != null)
 		{
-			gameObject = GameUtil.KInstantiate(this.Result, Grid.SceneLayer.Use, Folder.Loot, null, 0);
+			gameObject = GameUtil.KInstantiate(prefab, Grid.SceneLayer.Use, Folder.Loot, null, 0);
 			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 			gameObject.GetComponent<KSelectable>().entityName = this.Name;
 			if (component != null)
@@ -173,7 +153,7 @@ public class Recipe : IHasSortOrder
 			Edible component2 = gameObject.GetComponent<Edible>();
 			if (component2)
 			{
-				ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, component2.rations * 100000f, "Crafted a " + component2.name);
+				ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, component2.Calories, string.Format(UI.ENDOFDAYREPORT.NOTES.CRAFTED, component2.name));
 			}
 			gameObject.SetActive(true);
 			gameObject.GetComponent<KMonoBehaviour>().Trigger(748399584, null);
@@ -212,7 +192,8 @@ public class Recipe : IHasSortOrder
 
 	public BuildingDef GetBuildingDef()
 	{
-		BuildingComplete component = this.Result.GetComponent<BuildingComplete>();
+		GameObject prefab = Assets.GetPrefab(this.Result);
+		BuildingComplete component = prefab.GetComponent<BuildingComplete>();
 		if (component != null)
 		{
 			return component.Def;
@@ -220,23 +201,21 @@ public class Recipe : IHasSortOrder
 		return null;
 	}
 
-	public string Name;
+	private string nameOverride;
 
 	public string HotKey;
 
 	public string Type;
 
-	public float PlanOrder;
-
-	public int NumProduced;
-
 	public List<Recipe.Ingredient> Ingredients;
 
 	public string recipeDescription;
 
-	public List<string> EffectDescription = new List<string>();
+	public List<Descriptor> EffectDescription = new List<Descriptor>();
 
-	public GameObject Result;
+	public Tag Result;
+
+	public GameObject FabricationVisualizer;
 
 	public SimHashes ResultElementOverride;
 

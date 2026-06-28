@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.Serialization;
 using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class KPrefabID : KMonoBehaviour, ISaveLoadableJson
+public class KPrefabID : KMonoBehaviour, ISaveLoadable
 {
 	public event KPrefabID.PrefabFn instantiateFn;
 
@@ -83,11 +84,15 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadableJson
 		{
 			this.prefabInitFn(base.gameObject);
 		}
+		IStateMachineControllerHack component = base.GetComponent<IStateMachineControllerHack>();
+		if (component != null)
+		{
+			component.CreateSMIS();
+		}
 	}
 
 	protected override void OnSpawn()
 	{
-		this.AddLog(base.GetEventLog());
 		if (this.prefabSpawnFn != null)
 		{
 			this.prefabSpawnFn(base.gameObject);
@@ -106,7 +111,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadableJson
 
 	public void AddPrefabTag(Tag tag)
 	{
-		if (tag.IsValid && Array.IndexOf<Tag>(this.PrefabTags, tag) == -1)
+		if (tag.IsValid && !this.HasPrefabTag(tag))
 		{
 			this.PrefabTags = new List<Tag>(this.PrefabTags) { tag }.ToArray();
 		}
@@ -114,16 +119,49 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadableJson
 
 	public void AddPrefabTags(List<Tag> tags)
 	{
-		List<Tag> list = tags.FindAll((Tag t) => t.IsValid && Array.IndexOf<Tag>(this.PrefabTags, t) == -1);
+		List<Tag> list = tags.FindAll((Tag t) => t.IsValid && !this.HasPrefabTag(t));
 		if (list.Count > 0)
 		{
 			List<Tag> list2 = new List<Tag>(this.PrefabTags);
-			foreach (Tag tag in list)
-			{
-				list2.Add(tag);
-			}
+			list2.AddRange(list);
 			this.PrefabTags = list2.ToArray();
 		}
+	}
+
+	public bool HasPrefabTag(Tag tag)
+	{
+		if (tag == this.PrefabTag)
+		{
+			return true;
+		}
+		for (int i = 0; i < this.PrefabTags.Length; i++)
+		{
+			if (tag == this.PrefabTags[i])
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public bool HasAnyPrefabTags(IList<Tag> searchTags)
+	{
+		for (int i = 0; i < searchTags.Count; i++)
+		{
+			Tag tag = searchTags[i];
+			if (this.PrefabTag == tag)
+			{
+				return true;
+			}
+			for (int j = 0; j < this.PrefabTags.Length; j++)
+			{
+				if (tag == this.PrefabTags[j])
+				{
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	public void AddTag(Tag tag)
@@ -272,6 +310,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadableJson
 		this.Trigger(1969584890, null);
 	}
 
+	[Conditional("UNITY_EDITOR")]
 	public void AddLog(global::Logger logger)
 	{
 		if (this.logs == null)
@@ -281,6 +320,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadableJson
 		this.logs.Add(logger);
 	}
 
+	[Conditional("UNITY_EDITOR")]
 	public void RemoveLog(global::Logger logger)
 	{
 		this.logs.Remove(logger);
@@ -299,6 +339,24 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadableJson
 	internal void OnDeserializedMethod()
 	{
 		KPrefabIDTracker.Get().Update(this);
+	}
+
+	public void AddAdditionalRequirement(List<Descriptor> additional)
+	{
+		if (this.AdditionalRequirements == null)
+		{
+			this.AdditionalRequirements = new List<Descriptor>();
+		}
+		this.AdditionalRequirements.AddRange(additional);
+	}
+
+	public void AddAdditionalEffect(List<Descriptor> additional)
+	{
+		if (this.AdditionalEffects == null)
+		{
+			this.AdditionalEffects = new List<Descriptor>();
+		}
+		this.AdditionalRequirements.AddRange(additional);
 	}
 
 	public const int InvalidInstanceID = -1;
@@ -320,6 +378,10 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadableJson
 	public global::System.Action onTagsChanged;
 
 	private List<global::Logger> logs;
+
+	public List<Descriptor> AdditionalRequirements;
+
+	public List<Descriptor> AdditionalEffects;
 
 	private Tag[] tags;
 

@@ -13,18 +13,18 @@ public class PatientMonitor : GameStateMachine<PatientMonitor, PatientMonitor.In
 		this.infected.recovering.ScheduleGoTo(600f, this.infected.needdoctor);
 	}
 
-	public GameStateMachine<PatientMonitor, PatientMonitor.Instance, IStateMachineTarget>.State satisfied;
+	public GameStateMachine<PatientMonitor, PatientMonitor.Instance, IStateMachineTarget, object>.State satisfied;
 
 	public PatientMonitor.InfectedState infected;
 
-	public class InfectedState : GameStateMachine<PatientMonitor, PatientMonitor.Instance, IStateMachineTarget>.State
+	public class InfectedState : GameStateMachine<PatientMonitor, PatientMonitor.Instance, IStateMachineTarget, object>.State
 	{
-		public GameStateMachine<PatientMonitor, PatientMonitor.Instance, IStateMachineTarget>.State needdoctor;
+		public GameStateMachine<PatientMonitor, PatientMonitor.Instance, IStateMachineTarget, object>.State needdoctor;
 
-		public GameStateMachine<PatientMonitor, PatientMonitor.Instance, IStateMachineTarget>.State recovering;
+		public GameStateMachine<PatientMonitor, PatientMonitor.Instance, IStateMachineTarget, object>.State recovering;
 	}
 
-	public new class Instance : GameStateMachine<PatientMonitor, PatientMonitor.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<PatientMonitor, PatientMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)

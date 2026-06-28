@@ -1,32 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
 using Klei.AI;
+using KSerialization;
 using STRINGS;
 using TUNING;
-using UnityEngine;
 
-public class RelaxationPoint : BuildingWorkable, IAssignable, IEffectDescriptor
+public class RelaxationPoint : BuildingWorkable, IEffectDescriptor
 {
 	public RelaxationPoint()
 	{
 		this.showProgressBar = false;
 	}
 
-	public Assignable Assignable
-	{
-		get
-		{
-			return this.assignable;
-		}
-	}
-
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.GetComponent<KPrefabID>().AddTag(TagManager.Create("RelaxationPoint", TAGS.RELAXATION_POINT));
-		this.stressReductionEffect = new Effect("StressReduction", DUPLICANTS.RELAXATION.RELAXATION_EFFECT.NAME, DUPLICANTS.RELAXATION.RELAXATION_EFFECT.DESCRIPTION, 0f, true, false, false);
-		AttributeModifier attributeModifier = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, this.stressModificationValue / 600f, DUPLICANTS.RELAXATION.RELAXATION_EFFECT.NAME, false);
-		this.stressReductionEffect.Add(attributeModifier);
+		base.GetComponent<KPrefabID>().AddTag(TagManager.Create("RelaxationPoint", MISC.TAGS.RELAXATION_POINT));
+		this.stressReductionEffect = this.CreateEffect();
+	}
+
+	public Effect CreateEffect()
+	{
+		Effect effect = new Effect("StressReduction", DUPLICANTS.RELAXATION.RELAXATION_EFFECT.NAME, DUPLICANTS.RELAXATION.RELAXATION_EFFECT.DESCRIPTION, 0f, true, false, false);
+		AttributeModifier attributeModifier = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, this.stressModificationValue / 600f, DUPLICANTS.RELAXATION.RELAXATION_EFFECT.NAME, false, false);
+		effect.Add(attributeModifier);
+		return effect;
 	}
 
 	protected override void OnSpawn()
@@ -67,8 +65,12 @@ public class RelaxationPoint : BuildingWorkable, IAssignable, IEffectDescriptor
 
 	protected override void OnCompleteWork(Worker worker)
 	{
-		this.assignable.Unassign();
 		base.OnCompleteWork(worker);
+	}
+
+	protected virtual WorkChore<RelaxationPoint> CreateWorkChore()
+	{
+		return new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, false, null, null, null, false, null, true, default(Tag), null, false, true);
 	}
 
 	private void OnRegionChanged(Region new_region)
@@ -76,31 +78,17 @@ public class RelaxationPoint : BuildingWorkable, IAssignable, IEffectDescriptor
 		GameUtil.UpdateRegion(new_region, this, Db.Get().OwnableSlots.RelaxationPoint, global::TUNING.REGIONS.RecreationRegionTag);
 	}
 
-	public int DescriptionOrder { get; set; }
-
-	public List<Descriptor> GetRequirementDescriptions(BuildingDef def)
-	{
-		return null;
-	}
-
-	public List<Descriptor> GetEffectDescriptions(BuildingDef def)
+	public List<Descriptor> GetDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(string.Format(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, UI.BUILDINGEFFECTS.STRESSREDUCEDPERMINUTE), GameUtil.GetFormattedPercent(this.stressModificationValue / 600f * 60f, GameUtil.TimeSlice.None)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.STRESSREDUCEDPERMINUTE, GameUtil.GetFormattedPercent(this.stressModificationValue / 600f * 60f, GameUtil.TimeSlice.None)));
+		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.STRESSREDUCEDPERMINUTE, GameUtil.GetFormattedPercent(this.stressModificationValue / 600f * 60f, GameUtil.TimeSlice.None)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.STRESSREDUCEDPERMINUTE, GameUtil.GetFormattedPercent(this.stressModificationValue / 600f * 60f, GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Effect);
 		list.Add(descriptor);
 		return list;
 	}
 
-	virtual GameObject IAssignable.get_gameObject()
-	{
-		return base.gameObject;
-	}
-
-	[MyCmpGet]
-	private Assignable assignable;
-
-	public float stopStressingValue;
+	[Serialize]
+	protected float stopStressingValue;
 
 	public float stressModificationValue;
 
@@ -108,51 +96,50 @@ public class RelaxationPoint : BuildingWorkable, IAssignable, IEffectDescriptor
 
 	private Effect stressReductionEffect;
 
-	public class RelaxationPointSM : GameStateMachine<RelaxationPoint.RelaxationPointSM, RelaxationPoint.RelaxationPointSM.Instance>
+	public class RelaxationPointSM : GameStateMachine<RelaxationPoint.RelaxationPointSM, RelaxationPoint.RelaxationPointSM.Instance, RelaxationPoint>
 	{
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.unoperational;
 			this.unoperational.EventTransition(GameHashes.OperationalChanged, this.operational, (RelaxationPoint.RelaxationPointSM.Instance smi) => smi.GetComponent<Operational>().IsOperational);
-			this.operational.DefaultState(this.operational.idle).ToggleChore((RelaxationPoint.RelaxationPointSM.Instance smi) => new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, smi.master, null, false, null, null, null, false, null, true, global::TUNING.REGIONS.RecreationRegionTag, null, false, true), this.unoperational, false);
+			this.operational.DefaultState(this.operational.idle).ToggleChore((RelaxationPoint.RelaxationPointSM.Instance smi) => smi.master.CreateWorkChore(), this.unoperational, false);
 			this.operational.idle.EventTransition(GameHashes.WorkStarted, this.operational.healing, null);
-			this.operational.healing.EventTransition(GameHashes.AssigneeChanged, this.operational.exiting, null).EventTransition(GameHashes.WorkStopped, this.operational.exiting, null).EventTransition(GameHashes.OperationalChanged, this.operational.exiting, (RelaxationPoint.RelaxationPointSM.Instance smi) => !smi.GetComponent<Operational>().IsOperational)
-				.Enter(delegate(RelaxationPoint.RelaxationPointSM.Instance smi)
+			this.operational.healing.EventTransition(GameHashes.WorkStopped, this.operational.exiting, null).EventTransition(GameHashes.OperationalChanged, this.operational.exiting, (RelaxationPoint.RelaxationPointSM.Instance smi) => !smi.GetComponent<Operational>().IsOperational).Enter(delegate(RelaxationPoint.RelaxationPointSM.Instance smi)
+			{
+				if (!smi.master.GetComponent<Operational>().IsOperational)
 				{
-					if (!smi.master.GetComponent<Operational>().IsOperational)
-					{
-						smi.GoTo(this.operational.exiting);
-					}
-					else
-					{
-						smi.master.gameObject.GetComponent<Operational>().SetActive(true, false);
-						smi.Queue("working_pre", KAnim.PlayMode.Once);
-						smi.Queue("working_loop", KAnim.PlayMode.Loop);
-						smi.master.GetComponent<Operational>().SetActive(true, false);
-					}
-				});
+					smi.GoTo(this.operational.exiting);
+				}
+				else
+				{
+					smi.master.gameObject.GetComponent<Operational>().SetActive(true, false);
+					smi.Queue("working_pre", KAnim.PlayMode.Once);
+					smi.Queue("working_loop", KAnim.PlayMode.Loop);
+					smi.master.GetComponent<Operational>().SetActive(true, false);
+				}
+			});
 			this.operational.exiting.PlayAnim("working_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.unoperational).Enter(delegate(RelaxationPoint.RelaxationPointSM.Instance smi)
 			{
 				smi.master.gameObject.GetComponent<Operational>().SetActive(false, false);
 			});
 		}
 
-		public GameStateMachine<RelaxationPoint.RelaxationPointSM, RelaxationPoint.RelaxationPointSM.Instance, IStateMachineTarget>.State unoperational;
+		public GameStateMachine<RelaxationPoint.RelaxationPointSM, RelaxationPoint.RelaxationPointSM.Instance, RelaxationPoint, object>.State unoperational;
 
 		public RelaxationPoint.RelaxationPointSM.OperationalStates operational;
 
-		public class OperationalStates : GameStateMachine<RelaxationPoint.RelaxationPointSM, RelaxationPoint.RelaxationPointSM.Instance, IStateMachineTarget>.State
+		public class OperationalStates : GameStateMachine<RelaxationPoint.RelaxationPointSM, RelaxationPoint.RelaxationPointSM.Instance, RelaxationPoint, object>.State
 		{
-			public GameStateMachine<RelaxationPoint.RelaxationPointSM, RelaxationPoint.RelaxationPointSM.Instance, IStateMachineTarget>.State idle;
+			public GameStateMachine<RelaxationPoint.RelaxationPointSM, RelaxationPoint.RelaxationPointSM.Instance, RelaxationPoint, object>.State idle;
 
-			public GameStateMachine<RelaxationPoint.RelaxationPointSM, RelaxationPoint.RelaxationPointSM.Instance, IStateMachineTarget>.State healing;
+			public GameStateMachine<RelaxationPoint.RelaxationPointSM, RelaxationPoint.RelaxationPointSM.Instance, RelaxationPoint, object>.State healing;
 
-			public GameStateMachine<RelaxationPoint.RelaxationPointSM, RelaxationPoint.RelaxationPointSM.Instance, IStateMachineTarget>.State exiting;
+			public GameStateMachine<RelaxationPoint.RelaxationPointSM, RelaxationPoint.RelaxationPointSM.Instance, RelaxationPoint, object>.State exiting;
 		}
 
-		public new class Instance : GameStateMachine<RelaxationPoint.RelaxationPointSM, RelaxationPoint.RelaxationPointSM.Instance, IStateMachineTarget>.GameInstance
+		public new class Instance : GameStateMachine<RelaxationPoint.RelaxationPointSM, RelaxationPoint.RelaxationPointSM.Instance, RelaxationPoint, object>.GameInstance
 		{
-			public Instance(IStateMachineTarget master)
+			public Instance(RelaxationPoint master)
 				: base(master)
 			{
 			}

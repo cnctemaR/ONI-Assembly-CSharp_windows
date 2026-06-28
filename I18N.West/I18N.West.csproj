@@ -1,0 +1,57 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{B3F37800-5319-4325-B591-99335A49EBF5}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>I18N.West</RootNamespace>
+    <AssemblyName>I18N.West</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net20</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="Consts.cs" />
+    <Compile Include="CP10000.cs" />
+    <Compile Include="CP10079.cs" />
+    <Compile Include="CP1250.cs" />
+    <Compile Include="CP1252.cs" />
+    <Compile Include="CP1253.cs" />
+    <Compile Include="CP28592.cs" />
+    <Compile Include="CP28593.cs" />
+    <Compile Include="CP28597.cs" />
+    <Compile Include="CP28605.cs" />
+    <Compile Include="CP437.cs" />
+    <Compile Include="CP850.cs" />
+    <Compile Include="CP860.cs" />
+    <Compile Include="CP861.cs" />
+    <Compile Include="CP863.cs" />
+    <Compile Include="CP865.cs" />
+    <Compile Include="ENCibm437.cs" />
+    <Compile Include="ENCibm850.cs" />
+    <Compile Include="ENCibm860.cs" />
+    <Compile Include="ENCibm861.cs" />
+    <Compile Include="ENCibm863.cs" />
+    <Compile Include="ENCibm865.cs" />
+    <Compile Include="ENCiso_8859_15.cs" />
+    <Compile Include="ENCiso_8859_2.cs" />
+    <Compile Include="ENCiso_8859_3.cs" />
+    <Compile Include="ENCiso_8859_7.cs" />
+    <Compile Include="ENCmacintosh.cs" />
+    <Compile Include="ENCwindows_1250.cs" />
+    <Compile Include="ENCwindows_1252.cs" />
+    <Compile Include="ENCwindows_1253.cs" />
+    <Compile Include="ENCx_mac_icelandic.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\I18N\I18N.csproj">
+      <Project>{B3F37800-5319-4325-B591-99335A49EBF4}</Project>
+      <Name>I18N</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

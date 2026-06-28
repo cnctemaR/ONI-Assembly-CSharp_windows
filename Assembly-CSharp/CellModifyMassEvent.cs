@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 public class CellModifyMassEvent : CellEvent
 {
@@ -7,6 +8,7 @@ public class CellModifyMassEvent : CellEvent
 	{
 	}
 
+	[Conditional("UNITY_EDITOR")]
 	public void Log(int cell, SimHashes element, float amount)
 	{
 		if (!this.enableLogging)

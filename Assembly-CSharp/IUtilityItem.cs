@@ -8,5 +8,5 @@ public interface IUtilityItem
 
 	int GetNetworkID();
 
-	UtilityNetwork GetNetworkForOrientation(Orientation o);
+	UtilityNetwork GetNetworkForDirection(Direction d);
 }

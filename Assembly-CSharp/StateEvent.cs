@@ -37,11 +37,11 @@ public abstract class StateEvent
 		public Context(StateEvent state_event)
 		{
 			this.stateEvent = state_event;
-			this.data = null;
+			this.data = 0;
 		}
 
 		public StateEvent stateEvent;
 
-		public object data;
+		public int data;
 	}
 }

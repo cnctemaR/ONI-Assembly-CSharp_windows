@@ -35,7 +35,7 @@ public class SaveScreen : KScreen
 		KButton kbutton = Util.KInstantiateUI<KButton>(this.oldSaveButtonPrefab.gameObject, this.oldSavesRoot.gameObject, true);
 		LocText componentInChildren = kbutton.GetComponentInChildren<LocText>();
 		global::System.DateTime lastWriteTime = File.GetLastWriteTime(filename);
-		componentInChildren.text = string.Format("{0}\n{1:H:mm:ss}\n{1:dd / MMM / yyyy}", Path.GetFileNameWithoutExtension(filename), lastWriteTime);
+		componentInChildren.text = string.Format("{0}\n{1:H:mm:ss}\n" + Localization.GetFileDateFormat(1), Path.GetFileNameWithoutExtension(filename), lastWriteTime);
 		kbutton.onClick += delegate
 		{
 			this.Save(filename);
@@ -55,7 +55,6 @@ public class SaveScreen : KScreen
 
 	public void Save(string filename)
 	{
-		string filename2 = filename;
 		filename = SaveScreen.GetValidSaveFilename(filename);
 		if (File.Exists(filename))
 		{

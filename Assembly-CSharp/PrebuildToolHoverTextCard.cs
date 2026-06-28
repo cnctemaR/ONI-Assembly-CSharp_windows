@@ -7,6 +7,13 @@ public class PrebuildToolHoverTextCard : HoverTextConfiguration
 	public override void ConfigureHoverScreen()
 	{
 		HoverTextScreen instance = HoverTextScreen.Instance;
+		if (instance.LoadPreConfiguredToolFields(this))
+		{
+			this.isConfigured = true;
+			return;
+		}
+		instance.currentConfiguration = this;
+		instance.ToggleIncubating(true);
 		int num = 16;
 		int num2 = 46;
 		instance.ClearLabels();
@@ -31,8 +38,9 @@ public class PrebuildToolHoverTextCard : HoverTextConfiguration
 		instance.NewLine("NewLine", 24);
 		instance.AddIndent(34f, 18f);
 		instance.AddIcon(instance.GetSprite("icon_mouse_right"), 17f, 17f, Color.white);
-		instance.AddText("Back", this.Styles_Instruction.Standard, false);
+		instance.AddText(UI.TOOLS.GENERIC.BACK, this.Styles_Instruction.Standard, false);
 		instance.EndShadowBar();
+		this.isConfigured = true;
 	}
 
 	public PlanScreen.RequirementsState currentReqState;

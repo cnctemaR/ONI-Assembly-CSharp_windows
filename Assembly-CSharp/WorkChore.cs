@@ -5,7 +5,7 @@ using UnityEngine;
 public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInstance> where WorkableType : Workable
 {
 	public WorkChore(ChoreType chore_type, IStateMachineTarget target, ChoreProvider chore_provider = null, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, bool allow_in_red_alert = true, ScheduleBlockType schedule_block = null, bool only_when_operational = true, [Optional] Tag required_region, KAnimFile override_anims = null, bool is_preemptable = false, bool allow_in_context_menu = true)
-		: base(chore_type, target, chore_provider, run_until_complete, on_complete, on_begin, on_end, int.MaxValue, is_preemptable, allow_in_context_menu)
+		: base(chore_type, target, chore_provider, run_until_complete, on_complete, on_begin, on_end, int.MaxValue, is_preemptable, allow_in_context_menu, 0)
 	{
 		this.smi = new WorkChore<WorkableType>.StatesInstance(this, target.gameObject, override_anims);
 		base.SetPrioritizable(target.GetComponent<Prioritizable>());
@@ -21,7 +21,7 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 		if (only_when_operational && target.gameObject.GetComponent<Operational>() != null)
 		{
 			base.AddPrecondition(ChorePreconditions.IsOperational, target.gameObject);
-			target.Subscribe(-592767678, new EventSystem.EventHandler(this.OnOperationalChanged));
+			target.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 		}
 		if (only_when_operational && target.gameObject.GetComponent<Deconstructable>() != null)
 		{
@@ -44,7 +44,7 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 		base.Cleanup();
 		if (this.target != null)
 		{
-			this.target.Unsubscribe(-592767678, new EventSystem.EventHandler(this.OnOperationalChanged));
+			this.target.Unsubscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 		}
 	}
 
@@ -62,7 +62,7 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 		base.Begin(context);
 	}
 
-	public class StatesInstance : GameStateMachine<WorkChore<WorkableType>.States, WorkChore<WorkableType>.StatesInstance, WorkChore<WorkableType>>.GameInstance
+	public class StatesInstance : GameStateMachine<WorkChore<WorkableType>.States, WorkChore<WorkableType>.StatesInstance, WorkChore<WorkableType>, object>.GameInstance
 	{
 		public StatesInstance(WorkChore<WorkableType> master, GameObject workable, KAnimFile override_anims)
 			: base(master)
@@ -107,14 +107,14 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 			this.success.ReturnSuccess();
 		}
 
-		public GameStateMachine<WorkChore<WorkableType>.States, WorkChore<WorkableType>.StatesInstance, WorkChore<WorkableType>>.ApproachSubState<WorkableType> approach;
+		public GameStateMachine<WorkChore<WorkableType>.States, WorkChore<WorkableType>.StatesInstance, WorkChore<WorkableType>, object>.ApproachSubState<WorkableType> approach;
 
-		public GameStateMachine<WorkChore<WorkableType>.States, WorkChore<WorkableType>.StatesInstance, WorkChore<WorkableType>>.State work;
+		public GameStateMachine<WorkChore<WorkableType>.States, WorkChore<WorkableType>.StatesInstance, WorkChore<WorkableType>, object>.State work;
 
-		public GameStateMachine<WorkChore<WorkableType>.States, WorkChore<WorkableType>.StatesInstance, WorkChore<WorkableType>>.State success;
+		public GameStateMachine<WorkChore<WorkableType>.States, WorkChore<WorkableType>.StatesInstance, WorkChore<WorkableType>, object>.State success;
 
-		public StateMachine<WorkChore<WorkableType>.States, WorkChore<WorkableType>.StatesInstance, WorkChore<WorkableType>>.TargetParameter workable;
+		public StateMachine<WorkChore<WorkableType>.States, WorkChore<WorkableType>.StatesInstance, WorkChore<WorkableType>, object>.TargetParameter workable;
 
-		public StateMachine<WorkChore<WorkableType>.States, WorkChore<WorkableType>.StatesInstance, WorkChore<WorkableType>>.TargetParameter worker;
+		public StateMachine<WorkChore<WorkableType>.States, WorkChore<WorkableType>.StatesInstance, WorkChore<WorkableType>, object>.TargetParameter worker;
 	}
 }

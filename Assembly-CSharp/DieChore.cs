@@ -3,12 +3,12 @@
 public class DieChore : Chore<DieChore.StatesInstance>
 {
 	public DieChore(IStateMachineTarget master, Death death)
-		: base(Db.Get().ChoreTypes.Die, master, master.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true)
+		: base(Db.Get().ChoreTypes.Die, master, master.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true, 0)
 	{
 		this.smi = new DieChore.StatesInstance(this, death);
 	}
 
-	public class StatesInstance : GameStateMachine<DieChore.States, DieChore.StatesInstance, DieChore>.GameInstance
+	public class StatesInstance : GameStateMachine<DieChore.States, DieChore.StatesInstance, DieChore, object>.GameInstance
 	{
 		public StatesInstance(DieChore master, Death death)
 			: base(master)
@@ -35,10 +35,10 @@ public class DieChore : Chore<DieChore.StatesInstance>
 			this.dead.ReturnSuccess();
 		}
 
-		public GameStateMachine<DieChore.States, DieChore.StatesInstance, DieChore>.State dying;
+		public GameStateMachine<DieChore.States, DieChore.StatesInstance, DieChore, object>.State dying;
 
-		public GameStateMachine<DieChore.States, DieChore.StatesInstance, DieChore>.State dead;
+		public GameStateMachine<DieChore.States, DieChore.StatesInstance, DieChore, object>.State dead;
 
-		public StateMachine<DieChore.States, DieChore.StatesInstance, DieChore>.ResourceParameter<Death> death;
+		public StateMachine<DieChore.States, DieChore.StatesInstance, DieChore, object>.ResourceParameter<Death> death;
 	}
 }

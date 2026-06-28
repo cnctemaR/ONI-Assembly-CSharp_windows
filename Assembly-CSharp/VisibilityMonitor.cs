@@ -34,18 +34,18 @@ public class VisibilityMonitor : GameStateMachine<VisibilityMonitor, VisibilityM
 
 	public VisibilityMonitor.RevealedState revealed;
 
-	public GameStateMachine<VisibilityMonitor, VisibilityMonitor.Instance, IStateMachineTarget>.State hidden;
+	public GameStateMachine<VisibilityMonitor, VisibilityMonitor.Instance, IStateMachineTarget, object>.State hidden;
 
-	public StateMachine<VisibilityMonitor, VisibilityMonitor.Instance, IStateMachineTarget>.BoolParameter isHidden;
+	public StateMachine<VisibilityMonitor, VisibilityMonitor.Instance, IStateMachineTarget, object>.BoolParameter isHidden;
 
-	public class RevealedState : GameStateMachine<VisibilityMonitor, VisibilityMonitor.Instance, IStateMachineTarget>.State
+	public class RevealedState : GameStateMachine<VisibilityMonitor, VisibilityMonitor.Instance, IStateMachineTarget, object>.State
 	{
-		public GameStateMachine<VisibilityMonitor, VisibilityMonitor.Instance, IStateMachineTarget>.State visible;
+		public GameStateMachine<VisibilityMonitor, VisibilityMonitor.Instance, IStateMachineTarget, object>.State visible;
 
-		public GameStateMachine<VisibilityMonitor, VisibilityMonitor.Instance, IStateMachineTarget>.State culled;
+		public GameStateMachine<VisibilityMonitor, VisibilityMonitor.Instance, IStateMachineTarget, object>.State culled;
 	}
 
-	public new class Instance : GameStateMachine<VisibilityMonitor, VisibilityMonitor.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<VisibilityMonitor, VisibilityMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)

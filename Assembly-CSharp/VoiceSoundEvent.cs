@@ -11,40 +11,50 @@ public class VoiceSoundEvent : AnimEvent
 		this.looping = is_looping;
 	}
 
-	public override void OnPlay(IAnimBehaviour behaviour)
+	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
 	{
-		this.Play(behaviour.GetComponent<KMonoBehaviour>());
+		if (this.ShouldPlaySound(behaviour))
+		{
+			this.Play(behaviour.GetComponent<KMonoBehaviour>());
+		}
 	}
 
 	public void Play(Component cmp)
 	{
-		if (this.Name == "voice_jump" || this.Name == "voice_land")
+		MinionIdentity component = cmp.GetComponent<MinionIdentity>();
+		if (this.Name.Contains("state") && Time.time - component.timeLastSpoke < this.intervalBetweenSpeaking)
 		{
-			float num = (float)global::UnityEngine.Random.Range(0, 100);
-			if (num > VoiceSoundEvent.locomotionSoundProb)
+			return;
+		}
+		if (this.Name.Contains(":"))
+		{
+			string[] array = this.Name.Split(new char[] { ':' });
+			float num = float.Parse(array[1]);
+			float num2 = (float)global::UnityEngine.Random.Range(0, 100);
+			if (num2 > num)
 			{
 				return;
 			}
 		}
-		Worker component = cmp.GetComponent<Worker>();
-		StaminaMonitor.Instance smi = component.GetSMI<StaminaMonitor.Instance>();
+		Worker component2 = cmp.GetComponent<Worker>();
+		string assetName = this.GetAssetName(cmp);
+		StaminaMonitor.Instance smi = component2.GetSMI<StaminaMonitor.Instance>();
 		if (!this.Name.Contains("sleep_") && smi != null && smi.IsSleeping())
 		{
 			return;
 		}
 		Vector3 position = cmp.transform.position;
-		string assetName = this.GetAssetName(cmp);
 		string sound = GlobalAssets.GetSound(assetName, true);
 		if (sound != null)
 		{
 			if (this.looping)
 			{
-				LoopingSounds component2 = cmp.GetComponent<LoopingSounds>();
-				if (component2 == null)
+				LoopingSounds component3 = cmp.GetComponent<LoopingSounds>();
+				if (component3 == null)
 				{
 					Debug.Log(cmp.name + " is missing LoopingSounds component. ");
 				}
-				else if (!component2.StartSound(sound, position))
+				else if (!component3.StartSound(sound, position))
 				{
 					Output.LogWarning(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", sound, cmp.name) });
 				}
@@ -54,13 +64,14 @@ public class VoiceSoundEvent : AnimEvent
 				EventInstance eventInstance = SoundEvent.BeginOneShot(sound, position);
 				if (sound.Contains("sleep_"))
 				{
-					Traits component3 = cmp.GetComponent<Traits>();
-					if (component3.HasTrait("Snorer"))
+					Traits component4 = cmp.GetComponent<Traits>();
+					if (component4.HasTrait("Snorer"))
 					{
 						eventInstance.setParameterValue("snoring", 1f);
 					}
 				}
 				SoundEvent.EndOneShot(eventInstance);
+				component.timeLastSpoke = Time.time;
 			}
 		}
 		else if (AudioDebug.Get().debugVoiceSounds)
@@ -77,10 +88,16 @@ public class VoiceSoundEvent : AnimEvent
 		{
 			text = component.GetVoiceId();
 		}
-		return "DupVoc_" + text + "_" + this.Name;
+		string text2 = this.Name;
+		if (this.Name.Contains(":"))
+		{
+			string[] array = this.Name.Split(new char[] { ':' });
+			text2 = array[0];
+		}
+		return "DupVoc_" + text + "_" + text2;
 	}
 
-	public override void Stop(IAnimBehaviour behaviour)
+	public override void Stop(AnimEventManager.EventPlayerData behaviour)
 	{
 		if (this.looping)
 		{
@@ -97,4 +114,8 @@ public class VoiceSoundEvent : AnimEvent
 	public static float locomotionSoundProb = 50f;
 
 	public bool looping;
+
+	public float timeLastSpoke;
+
+	public float intervalBetweenSpeaking = 10f;
 }

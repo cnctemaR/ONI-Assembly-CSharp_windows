@@ -5,7 +5,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Upgradable : Workable, ISaveLoadableJson
+public class Upgradable : Workable, ISaveLoadable
 {
 	private Upgradable()
 	{
@@ -238,7 +238,7 @@ public class Upgradable : Workable, ISaveLoadableJson
 			base.SetWorkTime(upgrade.buildTime);
 			this.operational.SetFlag(Upgradable.notUpgradingFlag, false);
 			upgrade.fetchList = new FetchList2(this.storage);
-			upgrade.fetchList.Add(ingredient.tag, ingredient.amount, false);
+			upgrade.fetchList.Add(ingredient.tag, ingredient.amount, FetchOrder2.OperationalRequirement.None);
 			this.userMenu.Refresh();
 			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.PendingUpgrade, this);
 			upgrade.fetchList.Submit(delegate
@@ -293,7 +293,7 @@ public class Upgradable : Workable, ISaveLoadableJson
 		}
 		this.currentUpgrade = null;
 		base.ShowProgressBar(false);
-		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.PendingUpgrade);
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.PendingUpgrade, false);
 	}
 
 	private void DoFetchComplete(Upgradable.Upgrade upgrade)
@@ -308,7 +308,7 @@ public class Upgradable : Workable, ISaveLoadableJson
 
 	private void DoGenerateBuildChores(Upgradable.Upgrade upgrade)
 	{
-		Upgradable.<DoGenerateBuildChores>c__AnonStorey85 <DoGenerateBuildChores>c__AnonStorey = new Upgradable.<DoGenerateBuildChores>c__AnonStorey85();
+		Upgradable.<DoGenerateBuildChores>c__AnonStorey91 <DoGenerateBuildChores>c__AnonStorey = new Upgradable.<DoGenerateBuildChores>c__AnonStorey91();
 		<DoGenerateBuildChores>c__AnonStorey.upgrade = upgrade;
 		<DoGenerateBuildChores>c__AnonStorey.<>f__this = this;
 		<DoGenerateBuildChores>c__AnonStorey.upgrade.buildChoresRemain = <DoGenerateBuildChores>c__AnonStorey.upgrade.builderCount;
@@ -351,7 +351,7 @@ public class Upgradable : Workable, ISaveLoadableJson
 		this.ShowUpgradeFolder(this.animController, upgrade.config.id);
 		this.userMenu.Refresh();
 		this.operational.SetFlag(Upgradable.notUpgradingFlag, true);
-		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.PendingUpgrade);
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.PendingUpgrade, false);
 		if (upgrade == this.currentUpgrade)
 		{
 			this.currentUpgrade = null;
@@ -472,16 +472,6 @@ public class Upgradable : Workable, ISaveLoadableJson
 
 		public int id { get; private set; }
 
-		public string GetUpgradeType()
-		{
-			return Strings.Get(StringKeys.UpgradeDetails, new StringKey("UpgradeTarget_Type_" + this.config.GetModifierString(0)));
-		}
-
-		public string GetUpgradeDescription()
-		{
-			return Strings.Get(StringKeys.UpgradeDetails, new StringKey("UpgradeTarget_Desc_" + this.config.GetModifierString(0)));
-		}
-
 		public void ClearCallbacks()
 		{
 			this.fetchedCB = null;
@@ -520,9 +510,9 @@ public class Upgradable : Workable, ISaveLoadableJson
 		}
 	}
 
+	[IgnoreFirst(1)]
 	[DelimitedRecord(",")]
 	[IgnoreEmptyLines]
-	[IgnoreFirst(1)]
 	public class UpgradableConfig
 	{
 		public UpgradableConfig(string prefabID, int id, int builderCount, float buildTime, string materialTags, float materialMass, Upgradable.UpgradableConfig.UpgradeModifier[] modifiers)
@@ -542,16 +532,11 @@ public class Upgradable : Workable, ISaveLoadableJson
 			{
 				return string.Empty;
 			}
-			Upgradable.Upgrade.Target modifier = this.modifiers[idx].modifier;
-			if (modifier == Upgradable.Upgrade.Target.None)
+			if (this.modifiers[idx].modifier == Upgradable.Upgrade.Target.None)
 			{
 				return string.Empty;
 			}
-			string text = Strings.Get(StringKeys.UpgradeDetails, StringKeys.MODIFIES_TEXT);
-			string text2 = "UpgradeTarget_Type_" + modifier.ToString();
-			float modifierAmount = this.GetModifierAmount(idx);
-			string text3 = Strings.Get(StringKeys.UpgradeDetails, new StringKey(text2));
-			return string.Format(text, text3, modifierAmount);
+			return string.Empty;
 		}
 
 		public float GetModifierAmount(int idx)

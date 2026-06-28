@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
-using TUNING;
 using UnityEngine;
 
 public class PlanterSideScreen : ReceptacleSideScreen
@@ -16,18 +16,35 @@ public class PlanterSideScreen : ReceptacleSideScreen
 		return base.GetEntityIcon(prefabTag);
 	}
 
-	protected override string GetResultDescription(GameObject seed_or_plant)
+	protected override void SetResultDescriptions(GameObject seed_or_plant)
 	{
 		string text = string.Empty;
 		GameObject gameObject = seed_or_plant;
 		PlantableSeed component = seed_or_plant.GetComponent<PlantableSeed>();
+		List<Descriptor> list = new List<Descriptor>();
 		if (component != null)
 		{
+			list = component.GetDescriptors(component.gameObject);
+			if (this.targetReceptacle.rotatable != null && this.targetReceptacle.Direction != component.direction)
+			{
+				if (component.direction == SingleEntityReceptacle.ReceptacleDirection.Top)
+				{
+					text += UI.UISIDESCREENS.PLANTERSIDESCREEN.ROTATION_NEED_FLOOR;
+				}
+				else if (component.direction == SingleEntityReceptacle.ReceptacleDirection.Side)
+				{
+					text += UI.UISIDESCREENS.PLANTERSIDESCREEN.ROTATION_NEED_WALL;
+				}
+				else if (component.direction == SingleEntityReceptacle.ReceptacleDirection.Bottom)
+				{
+					text += UI.UISIDESCREENS.PLANTERSIDESCREEN.ROTATION_NEED_CEILING;
+				}
+				text += "\n\n";
+			}
 			gameObject = Assets.GetPrefab(component.PlantID);
 			if (!string.IsNullOrEmpty(component.domesticatedDescription))
 			{
 				text += component.domesticatedDescription;
-				text += "\n\n";
 			}
 		}
 		else
@@ -36,55 +53,43 @@ public class PlanterSideScreen : ReceptacleSideScreen
 			if (component2)
 			{
 				text += component2.description;
-				text += "\n\n";
 			}
 		}
-		Crop component3 = gameObject.GetComponent<Crop>();
-		string cropRequirements = this.GetCropRequirements(component3);
-		if (!string.IsNullOrEmpty(cropRequirements))
+		this.descriptionLabel.SetText(text);
+		List<Descriptor> plantRequirementDescriptors = GameUtil.GetPlantRequirementDescriptors(gameObject);
+		if (list.Count > 0)
 		{
-			text += UI.UISIDESCREENS.PLANTERSIDESCREEN.PLANTREQUIREMENTS;
-			text += cropRequirements;
-			text += "\n";
+			GameUtil.IndentListOfDescriptors(list);
+			plantRequirementDescriptors.InsertRange(plantRequirementDescriptors.Count, list);
 		}
-		string cropEffects = this.GetCropEffects(gameObject);
-		if (!string.IsNullOrEmpty(cropEffects))
+		if (plantRequirementDescriptors.Count > 0)
 		{
-			text += UI.UISIDESCREENS.PLANTERSIDESCREEN.PLANTEFFECTS;
-			text += cropEffects;
+			this.RequirementsDescriptorPanel.SetDescriptors(plantRequirementDescriptors);
+			this.RequirementsDescriptorPanel.gameObject.SetActive(true);
 		}
-		return text;
+		List<Descriptor> plantHarvestDescriptors = GameUtil.GetPlantHarvestDescriptors(gameObject);
+		if (plantHarvestDescriptors.Count > 0)
+		{
+			this.HarvestDescriptorPanel.SetDescriptors(plantHarvestDescriptors);
+			this.HarvestDescriptorPanel.gameObject.SetActive(true);
+		}
+		List<Descriptor> plantEffectDescriptors = GameUtil.GetPlantEffectDescriptors(gameObject);
+		if (plantEffectDescriptors.Count > 0)
+		{
+			this.EffectsDescriptorPanel.SetDescriptors(plantEffectDescriptors);
+			this.EffectsDescriptorPanel.gameObject.SetActive(true);
+		}
 	}
 
-	private string GetCropRequirements(Crop crop)
+	protected override bool AdditionalCanDepositTest()
 	{
-		string text = string.Empty;
-		if (crop != null)
-		{
-			string crop_id = crop.cropId;
-			CROPS.CropVal cropVal = CROPS.CROP_TYPES.Find((CROPS.CropVal m) => m.crop_id == crop_id);
-			if (cropVal.regrow_duration != cropVal.crop_duration)
-			{
-				text += string.Format(UI.LISTENTRYSTRING, string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.INITIALGROWTHTIME, GameUtil.GetFormattedCycles(cropVal.crop_duration)));
-				text += string.Format(UI.LISTENTRYSTRING, string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.REGROWTHTIME, GameUtil.GetFormattedCycles(cropVal.regrow_duration)));
-			}
-			else
-			{
-				text += string.Format(UI.LISTENTRYSTRING, string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.GROWTHTIME, GameUtil.GetFormattedCycles(cropVal.crop_duration)));
-			}
-			if (crop.EffectDescription != null && crop.EffectDescription.Count > 0)
-			{
-				for (int i = 0; i < crop.EffectDescription.Count; i++)
-				{
-					text += string.Format(UI.LISTENTRYSTRING, crop.EffectDescription[i]);
-				}
-			}
-		}
-		return text;
+		PlantablePlot plantablePlot = this.targetReceptacle as PlantablePlot;
+		return plantablePlot.ValidPlant;
 	}
 
-	private string GetCropEffects(GameObject plant_prefab)
-	{
-		return GameUtil.GetGameObjectEffectsString(plant_prefab);
-	}
+	public DescriptorPanel RequirementsDescriptorPanel;
+
+	public DescriptorPanel HarvestDescriptorPanel;
+
+	public DescriptorPanel EffectsDescriptorPanel;
 }

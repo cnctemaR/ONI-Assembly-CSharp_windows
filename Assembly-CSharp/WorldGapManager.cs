@@ -33,11 +33,11 @@ public class WorldGapManager : KMonoBehaviour
 
 	protected override void OnPrefabInit()
 	{
-		this.warning = new Notification(MISC.NOTIFICATIONS.GASCLOUDWARNING.NAME, NotificationType.BadMinor, null, null, null, true, 0f, null, null, null);
-		this.rampUp = new Notification(MISC.NOTIFICATIONS.GASCLOUDARRIVING.NAME, NotificationType.BadMinor, null, null, null, true, 0f, null, null, null);
-		this.peak = new Notification(MISC.NOTIFICATIONS.GASCLOUDPEAK.NAME, NotificationType.BadMinor, null, null, null, true, 0f, null, null, null);
-		this.rampDown = new Notification(MISC.NOTIFICATIONS.GASCLOUDDEPARTING.NAME, NotificationType.Good, null, null, null, true, 0f, null, null, null);
-		this.over = new Notification(MISC.NOTIFICATIONS.GASCLOUDGONE.NAME, NotificationType.Good, null, null, null, true, 0f, null, null, null);
+		this.warning = new Notification(MISC.NOTIFICATIONS.GASCLOUDWARNING.NAME, NotificationType.BadMinor, HashedString.Invalid, null, null, true, 0f, null, null, null);
+		this.rampUp = new Notification(MISC.NOTIFICATIONS.GASCLOUDARRIVING.NAME, NotificationType.BadMinor, HashedString.Invalid, null, null, true, 0f, null, null, null);
+		this.peak = new Notification(MISC.NOTIFICATIONS.GASCLOUDPEAK.NAME, NotificationType.BadMinor, HashedString.Invalid, null, null, true, 0f, null, null, null);
+		this.rampDown = new Notification(MISC.NOTIFICATIONS.GASCLOUDDEPARTING.NAME, NotificationType.Good, HashedString.Invalid, null, null, true, 0f, null, null, null);
+		this.over = new Notification(MISC.NOTIFICATIONS.GASCLOUDGONE.NAME, NotificationType.Good, HashedString.Invalid, null, null, true, 0f, null, null, null);
 		WorldGapManager.Instance = this;
 		if (this.gaps == null)
 		{
@@ -62,7 +62,6 @@ public class WorldGapManager : KMonoBehaviour
 			}
 			this.currentElement = ElementLoader.FindElementByHash(this.gaps.currentCloud.element);
 		}
-		this.ready = true;
 	}
 
 	private void SetValue(float percent)
@@ -136,7 +135,7 @@ public class WorldGapManager : KMonoBehaviour
 		return false;
 	}
 
-	public bool IsVoid(int cell)
+	private bool IsVoid(int cell)
 	{
 		return this.ready && this.gaps.voidCells.Contains(cell);
 	}

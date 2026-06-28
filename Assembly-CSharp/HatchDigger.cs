@@ -1,9 +1,8 @@
 ﻿using System;
-using KSerialization;
+using STRINGS;
 using UnityEngine;
 
-[SerializationConfig(MemberSerialization.OptIn)]
-public class HatchDigger : StateMachineComponent<HatchDigger.StatesInstance>, ISaveLoadableJson
+public class HatchDigger : StateMachineComponent<HatchDigger.StatesInstance>
 {
 	protected override void OnSpawn()
 	{
@@ -63,7 +62,7 @@ public class HatchDigger : StateMachineComponent<HatchDigger.StatesInstance>, IS
 
 	private GameObject EdibleOnCell(int cell)
 	{
-		GameObject gameObject = Grid.Objects[cell, 17];
+		GameObject gameObject = Grid.Objects[cell, 3];
 		if (gameObject != null && (gameObject.HasTag(GameTags.Ore) || gameObject.HasTag(GameTags.Edible) || gameObject.HasTag(GameTags.BuildableRaw) || gameObject.HasTag(GameTags.Solid)))
 		{
 			return gameObject;
@@ -102,7 +101,7 @@ public class HatchDigger : StateMachineComponent<HatchDigger.StatesInstance>, IS
 
 	private Vector3 harvestPosition;
 
-	public class StatesInstance : GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger>.GameInstance
+	public class StatesInstance : GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger, object>.GameInstance
 	{
 		public StatesInstance(HatchDigger smi)
 			: base(smi)
@@ -155,21 +154,21 @@ public class HatchDigger : StateMachineComponent<HatchDigger.StatesInstance>, IS
 				if (isSolid && global::UnityEngine.Random.Range(0, 100) > 80)
 				{
 					smi.Play("hide", KAnim.PlayMode.Once);
-					WorldDamage.Instance.ApplyDamage(Grid.CellBelow(Grid.PosToCell(smi.gameObject)), 1000f, -1);
+					WorldDamage.Instance.ApplyDamage(Grid.CellBelow(Grid.PosToCell(smi.gameObject)), 1000f, -1, -1);
 				}
 				else if ((isSolid2 && isSolid3 && global::UnityEngine.Random.Range(0, 100) > 50) || (isSolid3 && !isSolid2))
 				{
 					smi.master.Heading = Vector2.right;
 					CreatureHelpers.FlipAnim(smi.master.anim, smi.master.Heading);
 					smi.Play("eat_pre", KAnim.PlayMode.Once);
-					WorldDamage.Instance.ApplyDamage(Grid.CellRight(Grid.PosToCell(smi.gameObject)), 1000f, -1);
+					WorldDamage.Instance.ApplyDamage(Grid.CellRight(Grid.PosToCell(smi.gameObject)), 1000f, -1, -1);
 				}
 				else if (isSolid2)
 				{
 					smi.master.Heading = Vector2.left;
 					CreatureHelpers.FlipAnim(smi.master.anim, smi.master.Heading);
 					smi.Play("eat_pre", KAnim.PlayMode.Once);
-					WorldDamage.Instance.ApplyDamage(Grid.CellLeft(Grid.PosToCell(smi.gameObject)), 1000f, -1);
+					WorldDamage.Instance.ApplyDamage(Grid.CellLeft(Grid.PosToCell(smi.gameObject)), 1000f, -1, -1);
 				}
 			});
 			this.grounded.idle_alt.Enter(delegate(HatchDigger.StatesInstance smi)
@@ -204,7 +203,7 @@ public class HatchDigger : StateMachineComponent<HatchDigger.StatesInstance>, IS
 				GameObject gameObject = smi.master.EdibleOnCell(Grid.PosToCell(smi.master));
 				if (gameObject != null)
 				{
-					PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, "Resource Eaten", smi.transform, 1.5f, false);
+					PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, MISC.POPFX.RESOURCE_EATEN, smi.transform, 1.5f, false);
 					Util.KDestroyGameObject(gameObject);
 				}
 			});
@@ -310,35 +309,35 @@ public class HatchDigger : StateMachineComponent<HatchDigger.StatesInstance>, IS
 
 		public HatchDigger.States.GroundedState grounded;
 
-		public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger>.State fall;
+		public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger, object>.State fall;
 
-		public class GroundedState : GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger>.State
+		public class GroundedState : GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger, object>.State
 		{
-			public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger>.State idle;
+			public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger, object>.State idle;
 
-			public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger>.State idle_alt;
+			public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger, object>.State idle_alt;
 
-			public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger>.State dig;
+			public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger, object>.State dig;
 
-			public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger>.State move;
+			public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger, object>.State move;
 
-			public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger>.State move_pst;
+			public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger, object>.State move_pst;
 
-			public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger>.State jump;
+			public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger, object>.State jump;
 
-			public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger>.State eat_pre;
+			public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger, object>.State eat_pre;
 
-			public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger>.State eat;
+			public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger, object>.State eat;
 
-			public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger>.State eat_pst;
+			public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger, object>.State eat_pst;
 
-			public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger>.State harvest;
+			public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger, object>.State harvest;
 
-			public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger>.State death;
+			public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger, object>.State death;
 
-			public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger>.PLPState hide;
+			public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger, object>.PLPState hide;
 
-			public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger>.State emerge;
+			public GameStateMachine<HatchDigger.States, HatchDigger.StatesInstance, HatchDigger, object>.State emerge;
 		}
 	}
 }

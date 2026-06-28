@@ -3,7 +3,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Shockworm : StateMachineComponent<Shockworm.StatesInstance>, ISaveLoadableJson
+public class Shockworm : StateMachineComponent<Shockworm.StatesInstance>, ISaveLoadable
 {
 	protected override void OnPrefabInit()
 	{
@@ -18,8 +18,8 @@ public class Shockworm : StateMachineComponent<Shockworm.StatesInstance>, ISaveL
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
-		this.Subscribe(229718515, new EventSystem.EventHandler(this.OnThreatned));
-		this.Subscribe(-21431934, new EventSystem.EventHandler(this.ClearThreat));
+		this.Subscribe(229718515, new Action<object>(this.OnThreatned));
+		this.Subscribe(-21431934, new Action<object>(this.ClearThreat));
 	}
 
 	private void OnThreatned(object threat)
@@ -47,7 +47,7 @@ public class Shockworm : StateMachineComponent<Shockworm.StatesInstance>, ISaveL
 	[SerializeField]
 	private GameObject mainThreat;
 
-	public class StatesInstance : GameStateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm>.GameInstance
+	public class StatesInstance : GameStateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm, object>.GameInstance
 	{
 		public StatesInstance(Shockworm smi)
 			: base(smi)
@@ -123,17 +123,17 @@ public class Shockworm : StateMachineComponent<Shockworm.StatesInstance>, ISaveL
 				});
 		}
 
-		public StateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm>.TargetParameter threatMoveTarget;
+		public StateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm, object>.TargetParameter threatMoveTarget;
 
-		public StateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm>.TargetParameter mover;
+		public StateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm, object>.TargetParameter mover;
 
-		public StateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm>.ObjectParameter<ThreatMonitor> threatMonitor;
+		public StateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm, object>.ObjectParameter<ThreatMonitor> threatMonitor;
 
 		public Shockworm.States.AliveStates alive;
 
-		public GameStateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm>.State death;
+		public GameStateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm, object>.State death;
 
-		public class AliveStates : GameStateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm>.State
+		public class AliveStates : GameStateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm, object>.State
 		{
 			public Shockworm.States.IdleStates idleStates;
 
@@ -142,27 +142,27 @@ public class Shockworm : StateMachineComponent<Shockworm.StatesInstance>, ISaveL
 			public Shockworm.States.DistressStates distressed;
 		}
 
-		public class IdleStates : GameStateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm>.State
+		public class IdleStates : GameStateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm, object>.State
 		{
-			public GameStateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm>.State idle;
+			public GameStateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm, object>.State idle;
 
-			public GameStateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm>.IdleMoveSubState move;
+			public GameStateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm, object>.IdleMoveSubState move;
 
-			public GameStateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm>.DebugGoToSubState debug_go_to;
+			public GameStateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm, object>.DebugGoToSubState debug_go_to;
 		}
 
-		public class AttackStates : GameStateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm>.State
+		public class AttackStates : GameStateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm, object>.State
 		{
-			public GameStateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm>.State plan_attack;
+			public GameStateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm, object>.State plan_attack;
 
-			public GameStateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm>.ApproachSubState<AttackableBase> approachtarget;
+			public GameStateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm, object>.ApproachSubState<AttackableBase> approachtarget;
 
-			public GameStateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm>.State regular;
+			public GameStateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm, object>.State regular;
 		}
 
-		public class DistressStates : GameStateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm>.State
+		public class DistressStates : GameStateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm, object>.State
 		{
-			public GameStateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm>.State Drowning;
+			public GameStateMachine<Shockworm.States, Shockworm.StatesInstance, Shockworm, object>.State Drowning;
 		}
 	}
 }

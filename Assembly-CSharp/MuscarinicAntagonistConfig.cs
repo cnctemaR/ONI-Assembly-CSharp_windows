@@ -7,9 +7,8 @@ public class MuscarinicAntagonistConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateLooseEntity("MuscarinicAntagonist", ITEMS.PILLS.MUSCARINICANTAGONIST.NAME, ITEMS.PILLS.MUSCARINICANTAGONIST.DESC, 1f, "pill_1_kanim", "pyrus", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.POLYGONAL, 1f, 1f, true);
+		GameObject gameObject = EntityTemplates.CreateLooseEntity("MuscarinicAntagonist", ITEMS.PILLS.MUSCARINICANTAGONIST.NAME, ITEMS.PILLS.MUSCARINICANTAGONIST.DESC, 1f, true, Assets.GetAnim("pill_1_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.POLYGONAL, 1f, 1f, true, SimHashes.Creature, null);
 		EntityTemplates.ExtendEntityToMedicine(gameObject, MEDICINE.MUSCARINICANTAGONIST);
-		EntityTemplates.SetDescriptionOrder(gameObject);
 		return gameObject;
 	}
 

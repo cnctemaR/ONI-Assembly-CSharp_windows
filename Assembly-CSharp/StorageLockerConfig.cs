@@ -6,9 +6,10 @@ public class StorageLockerConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("StorageLocker", 1, 2, "storagelocker_kanim", 100f, 10f, BUILDINGS.CONSTRUCTION_MASS.TIER4, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER1, null);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("StorageLocker", 1, 2, "storagelocker_kanim", 100f, 30, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER1, null);
 		buildingDef.Floodable = false;
 		buildingDef.AudioCategory = "Metal";
+		buildingDef.Overheatable = false;
 		return buildingDef;
 	}
 
@@ -23,7 +24,7 @@ public class StorageLockerConfig : IBuildingConfig
 		StorageLocker storageLocker = go.AddOrGet<StorageLocker>();
 		storageLocker.noFilterTint = new Color(0.5019608f, 0.5019608f, 0.5019608f, 1f);
 		storageLocker.filterTint = new Color(1f, 1f, 1f, 1f);
-		storage.storageFilters = STORAGEFILTERS.DEFAULT;
+		storage.storageFilters = STORAGEFILTERS.NOT_EDIBLE_SOLIDS;
 		go.AddOrGet<UserMenu>();
 		go.AddOrGet<Upgradable>();
 		string prefabID = go.GetComponent<Building>().Def.PrefabID;
@@ -34,7 +35,7 @@ public class StorageLockerConfig : IBuildingConfig
 		Upgradable.AddToUpgradableConfigs(new Upgradable.UpgradableConfig(prefabID, 0, 1, 120f, "Metal", 400f, array));
 	}
 
-	public override void DoPostConfigure(GameObject go)
+	public override void DoPostConfigureComplete(GameObject go)
 	{
 		BuildingTemplates.DoPostConfigure(go);
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)

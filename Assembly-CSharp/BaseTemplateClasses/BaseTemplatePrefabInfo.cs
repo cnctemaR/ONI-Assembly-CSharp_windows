@@ -13,12 +13,12 @@ namespace BaseTemplateClasses
 			this.location_y = loc_y;
 		}
 
-		public BaseTemplatePrefabInfo(string _id, int loc_x, int loc_y, SimHashes _element, float _temperature, float _mass = 1f, Orientation _rotation = Orientation.Up)
+		public BaseTemplatePrefabInfo(string _id, int loc_x, int loc_y, SimHashes _element, float _temperature, float _units = 1f, Orientation _rotation = Orientation.Neutral)
 			: this(_id, loc_x, loc_y)
 		{
 			this.element = _element;
 			this.temperature = _temperature;
-			this.mass = _mass;
+			this.units = _units;
 			this.rotationOrientation = _rotation;
 		}
 
@@ -41,7 +41,7 @@ namespace BaseTemplateClasses
 
 		public float temperature;
 
-		public float mass;
+		public float units;
 
 		public BaseTemplateCellInfo[] placementCells;
 
@@ -49,15 +49,7 @@ namespace BaseTemplateClasses
 
 		public List<BaseTemplateStorageItem> storage;
 
-		public BaseTemplatePrefabInfo.Ration rations;
-
 		public BaseTemplatePrefabInfo.Rottable rottable;
-
-		[Serializable]
-		public struct Ration
-		{
-			public float rations;
-		}
 
 		[Serializable]
 		public struct Rottable

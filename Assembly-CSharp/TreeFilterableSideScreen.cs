@@ -5,14 +5,6 @@ using UnityEngine;
 
 public class TreeFilterableSideScreen : SideScreenContent
 {
-	public static TreeFilterableSideScreen Instance
-	{
-		get
-		{
-			return TreeFilterableSideScreen.instance;
-		}
-	}
-
 	public bool IsStorage
 	{
 		get
@@ -27,10 +19,12 @@ public class TreeFilterableSideScreen : SideScreenContent
 		this.rowPool = new UIPool<TreeFilterableSideScreenRow>(this.rowPrefab);
 		this.elementPool = new UIPool<TreeFilterableSideScreenElement>(this.elementPrefab);
 		this.allCheckBoxImg = this.allCheckBox.gameObject.GetComponentInChildrenOnly<KImage>();
-		this.allCheckBox.onClick += this.AllCheckBoxClicked;
+		this.allCheckBox.onClick += delegate
+		{
+			this.AllCheckBoxChanged(this.allCheckBox.isOn);
+		};
 		this.onlyAllowTransportItemsImg = this.onlyAllowTransportItemsCheckBox.gameObject.GetComponentInChildrenOnly<KImage>();
 		this.onlyAllowTransportItemsCheckBox.onClick += this.OnlyAllowTransportItemsClicked;
-		TreeFilterableSideScreen.instance = this;
 	}
 
 	protected override void OnSpawn()
@@ -42,7 +36,6 @@ public class TreeFilterableSideScreen : SideScreenContent
 
 	private void SetAllCheckBoxVisualState(bool state)
 	{
-		this.allCheckBox.isOn = state;
 		this.allCheckBoxImg.enabled = state;
 	}
 
@@ -51,13 +44,13 @@ public class TreeFilterableSideScreen : SideScreenContent
 		this.storage.SetOnlyFetchMarkedItems(!this.storage.GetOnlyFetchMarkedItems());
 	}
 
-	private void AllCheckBoxClicked()
+	private void AllCheckBoxChanged(bool is_on)
 	{
-		this.SetAllCheckBoxVisualState(!this.allCheckBox.isOn);
+		this.allCheckBoxImg.enabled = is_on;
 		foreach (KeyValuePair<Tag, TreeFilterableSideScreenRow> keyValuePair in this.tagRowMap)
 		{
-			keyValuePair.Value.SetCheckBoxState(this.allCheckBox.isOn, true);
-			if (this.allCheckBox.isOn)
+			keyValuePair.Value.SetCheckBoxState(is_on, true);
+			if (is_on)
 			{
 				this.targetFilterable.AddTagToFilter(keyValuePair.Key);
 			}
@@ -68,16 +61,23 @@ public class TreeFilterableSideScreen : SideScreenContent
 		}
 	}
 
+	public bool GetElementTagAcceptedState(Tag t)
+	{
+		return this.targetFilterable.ContainsTag(t);
+	}
+
 	public void ElementSelectionChanged()
 	{
 		foreach (KeyValuePair<Tag, TreeFilterableSideScreenRow> keyValuePair in this.tagRowMap)
 		{
-			if (keyValuePair.Value.IsSelected)
+			if (keyValuePair.Value.IsNotOff)
 			{
+				this.allCheckBox.isOn = true;
 				this.SetAllCheckBoxVisualState(true);
 				return;
 			}
 		}
+		this.allCheckBox.isOn = false;
 		this.SetAllCheckBoxVisualState(false);
 	}
 
@@ -161,34 +161,18 @@ public class TreeFilterableSideScreen : SideScreenContent
 		{
 			this.targetFilterable.RemoveTagFromFilter(tag);
 		}
-		if (this.allCheckBox.isOn)
-		{
-			this.ElementSelectionChanged();
-		}
+		this.ElementSelectionChanged();
 	}
 
 	private TreeFilterableSideScreenRow AddRow(Tag rowTag)
 	{
 		TreeFilterableSideScreenRow freeElement = this.rowPool.GetFreeElement(this.rowGroup, true);
+		freeElement.Parent = this;
 		this.tagRowMap.Add(rowTag, freeElement);
-		List<Tag> discoveredResourcesFromTag = WorldInventory.Instance.GetDiscoveredResourcesFromTag(rowTag);
-		if (discoveredResourcesFromTag.Count == 0)
-		{
-			List<Pickupable> pickupables = WorldInventory.Instance.GetPickupables(rowTag);
-			if (pickupables != null)
-			{
-				foreach (Pickupable pickupable in pickupables)
-				{
-					Tag prefabTag = pickupable.GetComponent<KPrefabID>().PrefabTag;
-					if (!discoveredResourcesFromTag.Contains(prefabTag))
-					{
-						discoveredResourcesFromTag.Add(prefabTag);
-					}
-				}
-			}
-		}
+		List<Tag> list = new List<Tag>(WorldInventory.Instance.GetDiscoveredResourcesFromTag(rowTag));
+		list.Sort();
 		Dictionary<Tag, bool> dictionary = new Dictionary<Tag, bool>();
-		foreach (Tag tag in discoveredResourcesFromTag)
+		foreach (Tag tag in list)
 		{
 			dictionary.Add(tag, this.targetFilterable.ContainsTag(tag) || this.targetFilterable.ContainsTag(rowTag));
 		}
@@ -209,20 +193,23 @@ public class TreeFilterableSideScreen : SideScreenContent
 	{
 		if (this.storage.storageFilters != null && this.storage.storageFilters.Count >= 1)
 		{
+			bool flag = false;
 			foreach (Tag tag in this.storage.storageFilters)
 			{
-				TreeFilterableSideScreenRow treeFilterableSideScreenRow = this.AddRow(tag);
-				if (!WorldInventory.Instance.IsDiscovered(tag))
+				bool flag2 = WorldInventory.Instance.IsDiscovered(tag);
+				if (flag2)
 				{
-					treeFilterableSideScreenRow.gameObject.SetActive(false);
+					TreeFilterableSideScreenRow treeFilterableSideScreenRow = this.AddRow(tag);
+					flag = flag || this.targetFilterable.ContainsTag(tag) || treeFilterableSideScreenRow.IsNotOff;
 				}
 			}
+			this.allCheckBox.isOn = flag;
+			this.SetAllCheckBoxVisualState(flag);
 		}
 		else
 		{
 			Output.LogError(new object[] { "If you're filtering, your storage filter should have the filters set on it" });
 		}
-		this.ElementSelectionChanged();
 	}
 
 	protected override void OnCmpDisable()
@@ -241,12 +228,8 @@ public class TreeFilterableSideScreen : SideScreenContent
 	[SerializeField]
 	private KToggle allCheckBox;
 
-	private KImage allCheckBoxImg;
-
 	[SerializeField]
 	private KToggle onlyAllowTransportItemsCheckBox;
-
-	private KImage onlyAllowTransportItemsImg;
 
 	[SerializeField]
 	private TreeFilterableSideScreenRow rowPrefab;
@@ -254,18 +237,20 @@ public class TreeFilterableSideScreen : SideScreenContent
 	[SerializeField]
 	private GameObject rowGroup;
 
-	private UIPool<TreeFilterableSideScreenRow> rowPool;
-
 	[SerializeField]
 	private TreeFilterableSideScreenElement elementPrefab;
 
+	private KImage allCheckBoxImg;
+
+	private KImage onlyAllowTransportItemsImg;
+
 	public UIPool<TreeFilterableSideScreenElement> elementPool;
+
+	private UIPool<TreeFilterableSideScreenRow> rowPool;
 
 	private TreeFilterable targetFilterable;
 
 	private Dictionary<Tag, TreeFilterableSideScreenRow> tagRowMap = new Dictionary<Tag, TreeFilterableSideScreenRow>();
-
-	private static TreeFilterableSideScreen instance;
 
 	private Storage storage;
 }

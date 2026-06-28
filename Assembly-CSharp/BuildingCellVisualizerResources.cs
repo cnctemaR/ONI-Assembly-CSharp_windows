@@ -91,6 +91,18 @@ public class BuildingCellVisualizerResources : ScriptableObject
 
 	public Sprite electricityConnectedIcon;
 
+	public Sprite electricityBridgeIcon;
+
+	public Sprite electricityBridgeConnectedIcon;
+
+	public Sprite electricityArrowIcon;
+
+	public Sprite switchIcon;
+
+	public Color32 switchColor;
+
+	public Color32 switchOffColor = Color.red;
+
 	[Header("Gas")]
 	public Sprite gasInputIcon;
 

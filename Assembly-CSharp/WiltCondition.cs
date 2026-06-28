@@ -9,13 +9,13 @@ public class WiltCondition : KMonoBehaviour
 		return this.wilting;
 	}
 
-	protected override void OnSpawn()
+	protected override void OnPrefabInit()
 	{
-		base.OnSpawn();
+		base.OnPrefabInit();
 		this.WiltConditions.Add("Temperature", true);
 		this.WiltConditions.Add("Pressure", true);
 		this.WiltConditions.Add("Drowning", true);
-		this.WiltConditions.Add("Fertilized", true);
+		this.WiltConditions.Add("DryingOut", true);
 		this.Subscribe(-107174716, delegate(object data)
 		{
 			this.SetCondition("Temperature", false);
@@ -44,14 +44,19 @@ public class WiltCondition : KMonoBehaviour
 		{
 			this.SetCondition("Drowning", true);
 		});
-		this.Subscribe(-1073674739, delegate(object data)
+		this.Subscribe(-2057657673, delegate(object data)
 		{
-			this.SetCondition("Fertilized", false);
+			this.SetCondition("DryingOut", false);
 		});
-		this.Subscribe(-1396791468, delegate(object data)
+		this.Subscribe(1555379996, delegate(object data)
 		{
-			this.SetCondition("Fertilized", true);
+			this.SetCondition("DryingOut", true);
 		});
+	}
+
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
 		if (this.wilting)
 		{
 			this.DoWilt(null);
@@ -91,18 +96,23 @@ public class WiltCondition : KMonoBehaviour
 
 	private void CheckShouldWilt()
 	{
+		bool flag = false;
 		foreach (KeyValuePair<string, bool> keyValuePair in this.WiltConditions)
 		{
 			if (!keyValuePair.Value)
 			{
-				if (!this.goingToWilt)
-				{
-					this.Wilt();
-				}
-				return;
+				flag = true;
+				break;
 			}
 		}
-		if (this.goingToWilt)
+		if (flag)
+		{
+			if (!this.goingToWilt)
+			{
+				this.Wilt();
+			}
+		}
+		else if (this.goingToWilt)
 		{
 			this.Recover();
 		}
@@ -158,11 +168,11 @@ public class WiltCondition : KMonoBehaviour
 		this.Trigger(712767498, null);
 		if (this.growing != null && this.growing.Replanted)
 		{
-			component.RemoveStatusItem(Db.Get().CreatureStatusItems.WiltingDomestic);
+			component.RemoveStatusItem(Db.Get().CreatureStatusItems.WiltingDomestic, false);
 		}
 		else
 		{
-			component.RemoveStatusItem(Db.Get().CreatureStatusItems.Wilting);
+			component.RemoveStatusItem(Db.Get().CreatureStatusItems.Wilting, false);
 		}
 	}
 

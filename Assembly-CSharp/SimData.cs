@@ -2,9 +2,9 @@
 
 public class SimData
 {
-	public unsafe Sim.MassChangeInfo* removedMassEntries;
-
-	public unsafe Sim.MassChangeInfo* emittedMassEntries;
+	public unsafe Sim.EmittedMassInfo* emittedMassEntries;
 
 	public unsafe Sim.ElementChunkInfo* elementChunks;
+
+	public unsafe Sim.BuildingTemperatureInfo* buildingTemperatures;
 }

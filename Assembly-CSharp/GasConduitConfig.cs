@@ -6,9 +6,9 @@ public class GasConduitConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("GasConduit", 1, 1, "utilities_gas_kanim", 400f, 3f, BUILDINGS.CONSTRUCTION_MASS.TIER2, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.Tile, BUILDINGS.DECOR.NONE, null);
-		buildingDef.InputConduitType = ConduitType.GasConduit;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("GasConduit", 1, 1, "utilities_gas_kanim", 50f, 10, 3f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER0, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.NONE, null);
 		buildingDef.Floodable = false;
+		buildingDef.Overheatable = false;
 		buildingDef.Entombable = false;
 		buildingDef.Relocatable = false;
 		buildingDef.ViewMode = SimViewMode.GasVentMap;
@@ -18,12 +18,10 @@ public class GasConduitConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "small";
 		buildingDef.BaseTimeUntilRepair = 0f;
-		buildingDef.DisableWhenInactive = true;
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 0);
 		buildingDef.SceneLayer = Grid.SceneLayer.GasConduits;
 		buildingDef.isKAnimTile = true;
-		buildingDef.isGraphTile = true;
 		buildingDef.isUtility = true;
 		buildingDef.OverlayAnim = Assets.GetAnim("utilities_gas_kanim");
 		buildingDef.DragBuild = true;
@@ -33,12 +31,25 @@ public class GasConduitConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
-		go.AddOrGet<Conduit>();
+		GeneratedBuildings.MakeBuildableAnywhere(go);
+		Conduit conduit = go.AddOrGet<Conduit>();
+		conduit.type = ConduitType.Gas;
 	}
 
-	public override void DoPostConfigure(GameObject go)
+	public override void DoPostConfigureComplete(GameObject go)
 	{
 		go.GetComponent<Building>().Def.BuildingUnderConstruction.GetComponent<Constructable>().isDiggingRequired = false;
+		KAnimGraphTileVisualizer kanimGraphTileVisualizer = go.AddComponent<KAnimGraphTileVisualizer>();
+		kanimGraphTileVisualizer.connectionSource = KAnimGraphTileVisualizer.ConnectionSource.Gas;
+		kanimGraphTileVisualizer.isPhysicalBuilding = true;
 		BuildingTemplates.DoPostConfigure(go);
+		LiquidConduitConfig.CommonConduitPostConfigureComplete(go);
+	}
+
+	public override void DoPostConfigureUnderConstruction(GameObject go)
+	{
+		KAnimGraphTileVisualizer kanimGraphTileVisualizer = go.AddComponent<KAnimGraphTileVisualizer>();
+		kanimGraphTileVisualizer.connectionSource = KAnimGraphTileVisualizer.ConnectionSource.Gas;
+		kanimGraphTileVisualizer.isPhysicalBuilding = false;
 	}
 }

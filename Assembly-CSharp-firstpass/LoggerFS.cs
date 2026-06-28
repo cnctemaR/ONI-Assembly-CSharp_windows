@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using UnityEngine;
 
 public class LoggerFS : Logger<LoggerFS.Entry>
 {
@@ -12,10 +11,6 @@ public class LoggerFS : Logger<LoggerFS.Entry>
 	[Conditional("UNITY_EDITOR")]
 	public void Log(string evt)
 	{
-		LoggerFS.Entry entry = default(LoggerFS.Entry);
-		entry.idx = global::Logger.NextIdx++;
-		entry.frame = Time.frameCount;
-		entry.evt = evt;
 	}
 
 	public struct Entry

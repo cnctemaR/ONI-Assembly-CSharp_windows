@@ -12,9 +12,7 @@ public class RationMonitor : GameStateMachine<RationMonitor, RationMonitor.Insta
 		}).EventHandler(GameHashes.NewDay, (RationMonitor.Instance smi) => GameClock.Instance, delegate(RationMonitor.Instance smi)
 		{
 			smi.OnNewDay();
-		}).ParamTransition<int>(this.dailyRations, this.rationsavailable, (RationMonitor.Instance smi, int p) => smi.HasRationsAvailable())
-			.ParamTransition<int>(this.dailyRations, this.outofrations, (RationMonitor.Instance smi, int p) => !smi.HasRationsAvailable())
-			.ParamTransition<float>(this.rationsAteToday, this.rationsavailable, (RationMonitor.Instance smi, float p) => smi.HasRationsAvailable())
+		}).ParamTransition<float>(this.rationsAteToday, this.rationsavailable, (RationMonitor.Instance smi, float p) => smi.HasRationsAvailable())
 			.ParamTransition<float>(this.rationsAteToday, this.outofrations, (RationMonitor.Instance smi, float p) => !smi.HasRationsAvailable());
 		this.rationsavailable.DefaultState(this.rationsavailable.noediblesavailable);
 		this.rationsavailable.noediblesavailable.InitializeStates(this.masterTarget, Db.Get().DuplicantStatusItems.NoRationsAvailable).EventTransition(GameHashes.ColonyHasRationsChanged, (RationMonitor.Instance smi) => SaveGame.Instance, this.rationsavailable.ediblesunreachable, (RationMonitor.Instance smi) => smi.AreThereAnyEdibles());
@@ -25,33 +23,29 @@ public class RationMonitor : GameStateMachine<RationMonitor, RationMonitor.Insta
 		this.outofrations.InitializeStates(this.masterTarget, Db.Get().DuplicantStatusItems.DailyRationLimitReached);
 	}
 
-	public StateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget>.IntParameter dailyRations = new StateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget>.IntParameter(16);
-
-	public StateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget>.FloatParameter rationsAteToday;
-
-	public StateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget>.BoolParameter isRationed;
+	public StateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget, object>.FloatParameter rationsAteToday;
 
 	public RationMonitor.RationsAvailableState rationsavailable;
 
-	public GameStateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget>.HungrySubState outofrations;
+	public GameStateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget, object>.HungrySubState outofrations;
 
-	public class EdibleAvailablestate : GameStateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget>.State
+	public class EdibleAvailablestate : GameStateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget, object>.State
 	{
-		public GameStateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget>.State readytoeat;
+		public GameStateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget, object>.State readytoeat;
 
-		public GameStateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget>.State eating;
+		public GameStateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget, object>.State eating;
 	}
 
-	public class RationsAvailableState : GameStateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget>.State
+	public class RationsAvailableState : GameStateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget, object>.State
 	{
-		public GameStateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget>.HungrySubState noediblesavailable;
+		public GameStateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget, object>.HungrySubState noediblesavailable;
 
-		public GameStateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget>.HungrySubState ediblesunreachable;
+		public GameStateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget, object>.HungrySubState ediblesunreachable;
 
 		public RationMonitor.EdibleAvailablestate edibleavailable;
 	}
 
-	public new class Instance : GameStateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<RationMonitor, RationMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)
@@ -82,14 +76,9 @@ public class RationMonitor : GameStateMachine<RationMonitor, RationMonitor.Insta
 			return this.GetEdible() != null;
 		}
 
-		public bool IsRationed()
-		{
-			return base.sm.isRationed.Get(base.smi);
-		}
-
 		public bool HasRationsAvailable()
 		{
-			return !this.IsRationed() || this.GetRationsRemaining() > 0f;
+			return true;
 		}
 
 		public float GetRationsAteToday()
@@ -99,36 +88,12 @@ public class RationMonitor : GameStateMachine<RationMonitor, RationMonitor.Insta
 
 		public float GetRationsRemaining()
 		{
-			if (this.IsRationed())
-			{
-				return Math.Max(0f, (float)base.sm.dailyRations.Get(base.smi) - base.sm.rationsAteToday.Get(base.smi));
-			}
-			return 10f;
-		}
-
-		public int GetDailyRations()
-		{
-			return base.smi.sm.dailyRations.Get(base.smi);
+			return 1f;
 		}
 
 		public bool IsEating()
 		{
 			return this.choreDriver.HasChore() && this.choreDriver.GetCurrentChore().choreType.urge == Db.Get().Urges.Eat;
-		}
-
-		public void SetDailyRations(int new_rations)
-		{
-			new_rations = Math.Max(0, new_rations);
-			base.smi.sm.dailyRations.Set(new_rations, base.smi);
-		}
-
-		public void SetRationed(bool t)
-		{
-			base.smi.sm.isRationed.Set(t, base.smi);
-			if (t)
-			{
-				base.smi.sm.dailyRations.Set(15, base.smi);
-			}
 		}
 
 		public void OnNewDay()
@@ -139,8 +104,8 @@ public class RationMonitor : GameStateMachine<RationMonitor, RationMonitor.Insta
 		public void OnEatComplete(object data)
 		{
 			Edible edible = (Edible)data;
-			base.sm.rationsAteToday.Delta(edible.rationsConsumed, base.smi);
-			RationTracker.Get().RegisterRationsConsumed(edible.rationsConsumed);
+			base.sm.rationsAteToday.Delta(edible.caloriesConsumed, base.smi);
+			RationTracker.Get().RegisterRationsConsumed(edible.caloriesConsumed);
 		}
 
 		private ChoreDriver choreDriver;

@@ -12,6 +12,11 @@ public class TagDescriptions
 		return Strings.Get("STRINGS.MISC.TAGS." + tag.ToUpper());
 	}
 
+	public static string GetDescription(Tag tag)
+	{
+		return Strings.Get("STRINGS.MISC.TAGS." + tag.Name.ToUpper());
+	}
+
 	public static string ReplaceTags(string text)
 	{
 		int num = text.IndexOf('{');

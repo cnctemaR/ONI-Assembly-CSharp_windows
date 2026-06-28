@@ -4,7 +4,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class GroneHog : StateMachineComponent<GroneHog.StatesInstance>, ISaveLoadableJson
+public class GroneHog : StateMachineComponent<GroneHog.StatesInstance>, ISaveLoadable
 {
 	public GroneHogMound mMound
 	{
@@ -148,7 +148,7 @@ public class GroneHog : StateMachineComponent<GroneHog.StatesInstance>, ISaveLoa
 
 	private Vector3 harvestPosition;
 
-	public class StatesInstance : GameStateMachine<GroneHog.States, GroneHog.StatesInstance, GroneHog>.GameInstance
+	public class StatesInstance : GameStateMachine<GroneHog.States, GroneHog.StatesInstance, GroneHog, object>.GameInstance
 	{
 		public StatesInstance(GroneHog master)
 			: base(master)
@@ -317,25 +317,25 @@ public class GroneHog : StateMachineComponent<GroneHog.StatesInstance>, ISaveLoa
 
 		public GroneHog.States.GroundedState grounded = new GroneHog.States.GroundedState();
 
-		public GameStateMachine<GroneHog.States, GroneHog.StatesInstance, GroneHog>.State fall = new GameStateMachine<GroneHog.States, GroneHog.StatesInstance, GroneHog>.State();
+		public GameStateMachine<GroneHog.States, GroneHog.StatesInstance, GroneHog, object>.State fall = new GameStateMachine<GroneHog.States, GroneHog.StatesInstance, GroneHog, object>.State();
 
-		public class GroundedState : GameStateMachine<GroneHog.States, GroneHog.StatesInstance, GroneHog>.State
+		public class GroundedState : GameStateMachine<GroneHog.States, GroneHog.StatesInstance, GroneHog, object>.State
 		{
-			public GameStateMachine<GroneHog.States, GroneHog.StatesInstance, GroneHog>.State idle;
+			public GameStateMachine<GroneHog.States, GroneHog.StatesInstance, GroneHog, object>.State idle;
 
-			public GameStateMachine<GroneHog.States, GroneHog.StatesInstance, GroneHog>.State idle_alt;
+			public GameStateMachine<GroneHog.States, GroneHog.StatesInstance, GroneHog, object>.State idle_alt;
 
-			public GameStateMachine<GroneHog.States, GroneHog.StatesInstance, GroneHog>.State move;
+			public GameStateMachine<GroneHog.States, GroneHog.StatesInstance, GroneHog, object>.State move;
 
-			public GameStateMachine<GroneHog.States, GroneHog.StatesInstance, GroneHog>.State move_flee;
+			public GameStateMachine<GroneHog.States, GroneHog.StatesInstance, GroneHog, object>.State move_flee;
 
-			public GameStateMachine<GroneHog.States, GroneHog.StatesInstance, GroneHog>.State startle;
+			public GameStateMachine<GroneHog.States, GroneHog.StatesInstance, GroneHog, object>.State startle;
 
-			public GameStateMachine<GroneHog.States, GroneHog.StatesInstance, GroneHog>.State jump;
+			public GameStateMachine<GroneHog.States, GroneHog.StatesInstance, GroneHog, object>.State jump;
 
-			public GameStateMachine<GroneHog.States, GroneHog.StatesInstance, GroneHog>.State harvest;
+			public GameStateMachine<GroneHog.States, GroneHog.StatesInstance, GroneHog, object>.State harvest;
 
-			public GameStateMachine<GroneHog.States, GroneHog.StatesInstance, GroneHog>.State death;
+			public GameStateMachine<GroneHog.States, GroneHog.StatesInstance, GroneHog, object>.State death;
 		}
 	}
 }

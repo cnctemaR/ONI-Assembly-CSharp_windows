@@ -6,11 +6,10 @@ public class RefrigeratorConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Refrigerator", 1, 2, "fridge_kanim", 100f, 10f, BUILDINGS.CONSTRUCTION_MASS.TIER4, MATERIALS.RAW_MINERALS, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER1, null);
-		buildingDef.RequiresPower = true;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Refrigerator", 1, 2, "fridge_kanim", 100f, 30, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.RAW_MINERALS, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER1, null);
+		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 120f;
-		buildingDef.TemperatureModificationWhenActive = 8f;
-		buildingDef.OperatingTemperature = 400f;
+		buildingDef.ExhaustKilowattsWhenActive = 0.5f;
 		buildingDef.Floodable = false;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
 		buildingDef.AudioCategory = "Metal";
@@ -36,7 +35,7 @@ public class RefrigeratorConfig : IBuildingConfig
 		go.AddOrGet<DropAllWorkable>();
 	}
 
-	public override void DoPostConfigure(GameObject go)
+	public override void DoPostConfigureComplete(GameObject go)
 	{
 		BuildingTemplates.DoPostConfigure(go);
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)

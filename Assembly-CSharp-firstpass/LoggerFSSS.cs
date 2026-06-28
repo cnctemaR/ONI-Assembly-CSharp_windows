@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using UnityEngine;
 
 public class LoggerFSSS : Logger<LoggerFSSS.Entry>
 {
@@ -12,12 +11,6 @@ public class LoggerFSSS : Logger<LoggerFSSS.Entry>
 	[Conditional("UNITY_EDITOR")]
 	public void Log(string evt, string param0, string param1)
 	{
-		LoggerFSSS.Entry entry = default(LoggerFSSS.Entry);
-		entry.idx = global::Logger.NextIdx++;
-		entry.frame = Time.frameCount;
-		entry.evt = evt;
-		entry.param0 = param0;
-		entry.param1 = param1;
 	}
 
 	public struct Entry

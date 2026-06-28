@@ -2,7 +2,7 @@
 using KSerialization;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class EventInstanceBase : ISaveLoadableJson
+public class EventInstanceBase : ISaveLoadable
 {
 	public EventInstanceBase(EventBase ev)
 	{

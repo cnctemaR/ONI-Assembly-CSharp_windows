@@ -9,19 +9,19 @@ public class Grid
 		return Grid.CellValues != null;
 	}
 
-	public static int GetCellInDirection(int cell, Orientation o)
+	public static int GetCellInDirection(int cell, Direction d)
 	{
-		switch (o)
+		switch (d)
 		{
-		case Orientation.Up:
+		case Direction.Up:
 			return cell + Grid.WidthInCells;
-		case Orientation.Right:
+		case Direction.Right:
 			return cell + 1;
-		case Orientation.Down:
+		case Direction.Down:
 			return cell - Grid.WidthInCells;
-		case Orientation.Left:
+		case Direction.Left:
 			return cell - 1;
-		case Orientation.None:
+		case Direction.None:
 			return cell;
 		}
 		return -1;
@@ -340,7 +340,6 @@ public class Grid
 		Grid.BitFields[cell] = (ushort)((byte)((int)Grid.BitFields[cell] & -33));
 		ushort[] bitFields = Grid.BitFields;
 		bitFields[cell] |= (ushort)((!solid) ? 0 : 32);
-		ev.Log(cell, solid);
 	}
 
 	public static bool IsSubstantialLiquid(int cell, float threshold = 0.35f)
@@ -353,6 +352,12 @@ public class Grid
 	{
 		Element element = ElementLoader.elements[(int)Grid.Cell[cell].elementIdx];
 		return element.IsLiquid;
+	}
+
+	public static bool IsGas(int cell)
+	{
+		Element element = ElementLoader.elements[(int)Grid.Cell[cell].elementIdx];
+		return element.IsGas;
 	}
 
 	public static void GetVisibleExtents(out int min_x, out int min_y, out int max_x, out int max_y)
@@ -386,7 +391,7 @@ public class Grid
 				int num2 = (int)Grid.BitFields[num];
 				num2 &= -233;
 				num2 |= ((!element.IsSolid) ? 0 : 96);
-				num2 |= ((element.substance == null || !element.substance.renderedByWorld || !(Grid.Objects[num, 8] == null)) ? 0 : 128);
+				num2 |= ((element.substance == null || !element.substance.renderedByWorld || !(Grid.Objects[num, 9] == null)) ? 0 : 128);
 				Grid.BitFields[num] = (ushort)((byte)num2);
 			}
 		}
@@ -496,13 +501,9 @@ public class Grid
 
 	public unsafe static Sim.Cell* CellValues = null;
 
-	public unsafe static Vector2* PropertyTextureFlowValues = null;
-
 	public unsafe static float* AccumulatedFlowValues = null;
 
 	public static Grid.CellIndexer Cell;
-
-	public static Grid.FlowIndexer PropertyTextureFlow;
 
 	public static bool[] Revealed;
 
@@ -514,7 +515,11 @@ public class Grid
 
 	public static bool[] HasDoor;
 
+	public static bool[] HasAccessDoor;
+
 	public static bool[] HasLadder;
+
+	public static bool[] IsTileUnderConstruction;
 
 	public static int[] Decor;
 
@@ -540,6 +545,8 @@ public class Grid
 
 	public static Grid.ForceFieldIndexer ForceField;
 
+	public static Grid.ImpassableIndexer Impassable;
+
 	public static ushort[] BitFields;
 
 	public static Element[] Element;
@@ -564,7 +571,8 @@ public class Grid
 		Foundation = 16,
 		Solid = 32,
 		PreviousSolid = 64,
-		RenderedByWorld = 128
+		RenderedByWorld = 128,
+		Impassable = 256
 	}
 
 	public enum SceneLayer
@@ -612,17 +620,6 @@ public class Grid
 				}
 				ScenePartitionerMask scenePartitionerMask = GameScenePartitioner.Instance.objectLayerMasks[layer];
 				GameScenePartitioner.Instance.TriggerEvent(cell, scenePartitionerMask.mask, value);
-			}
-		}
-	}
-
-	public struct FlowIndexer
-	{
-		public unsafe Vector2 this[int i]
-		{
-			get
-			{
-				return Grid.PropertyTextureFlowValues[i];
 			}
 		}
 	}
@@ -781,6 +778,23 @@ public class Grid
 				Grid.BitFields[i] = (ushort)((int)Grid.BitFields[i] & -5);
 				ushort[] bitFields = Grid.BitFields;
 				bitFields[i] |= ((!value) ? 0 : 4);
+			}
+		}
+	}
+
+	public struct ImpassableIndexer
+	{
+		public bool this[int i]
+		{
+			get
+			{
+				return (Grid.BitFields[i] & 256) != 0;
+			}
+			set
+			{
+				Grid.BitFields[i] = (ushort)((int)Grid.BitFields[i] & -257);
+				ushort[] bitFields = Grid.BitFields;
+				bitFields[i] |= ((!value) ? 0 : 256);
 			}
 		}
 	}

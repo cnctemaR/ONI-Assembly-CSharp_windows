@@ -62,7 +62,7 @@ public class SnapOn : KMonoBehaviour
 			text = overrideEntry.symbolName;
 		}
 		KAnim.Build.Symbol symbol = SnapOn.GetSymbol(kanimFile, text);
-		this.kanimController.AddSymbolOverride(point.overrideSymbol, kanimFile.batchTag, symbol);
+		this.kanimController.AddSymbolOverride(point.overrideSymbol, kanimFile.batchTag, symbol, false);
 		this.kanimController.ShowSymbol(point.overrideSymbol);
 	}
 

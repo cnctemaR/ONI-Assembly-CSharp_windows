@@ -16,6 +16,8 @@ namespace Klei
 
 		public MinMax units { get; private set; }
 
+		public string prefabName { get; private set; }
+
 		[StringEnumConverter]
 		public Mob.Location location { get; private set; }
 

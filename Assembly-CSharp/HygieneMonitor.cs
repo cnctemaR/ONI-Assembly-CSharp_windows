@@ -14,11 +14,11 @@ public class HygieneMonitor : GameStateMachine<HygieneMonitor, HygieneMonitor.In
 		this.needsshower.EventTransition(GameHashes.EffectRemoved, this.clean, (HygieneMonitor.Instance smi) => !smi.NeedsShower()).ToggleUrge(Db.Get().Urges.Shower);
 	}
 
-	public GameStateMachine<HygieneMonitor, HygieneMonitor.Instance, IStateMachineTarget>.State clean;
+	public GameStateMachine<HygieneMonitor, HygieneMonitor.Instance, IStateMachineTarget, object>.State clean;
 
-	public GameStateMachine<HygieneMonitor, HygieneMonitor.Instance, IStateMachineTarget>.State needsshower;
+	public GameStateMachine<HygieneMonitor, HygieneMonitor.Instance, IStateMachineTarget, object>.State needsshower;
 
-	public new class Instance : GameStateMachine<HygieneMonitor, HygieneMonitor.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<HygieneMonitor, HygieneMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)

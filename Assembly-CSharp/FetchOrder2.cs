@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class FetchOrder2
 {
-	public FetchOrder2(Tag[] tags, Storage destination, float amount, bool is_operational_task = false)
+	public FetchOrder2(Tag[] tags, Storage destination, float amount, FetchOrder2.OperationalRequirement operationalRequirement = FetchOrder2.OperationalRequirement.None, int priorityMod = 0)
 	{
 		if (amount <= 0f)
 		{
@@ -14,10 +14,13 @@ public class FetchOrder2
 		this.Destination = destination;
 		this.TotalAmount = amount;
 		this.UnfetchedAmount = amount;
-		this.IsOperationalTask = is_operational_task;
+		this.PriorityMod = priorityMod;
+		this.operationalRequirement = operationalRequirement;
 	}
 
 	public float TotalAmount { get; set; }
+
+	public int PriorityMod { get; set; }
 
 	public Tag[] Tags { get; protected set; }
 
@@ -63,13 +66,18 @@ public class FetchOrder2
 		}
 	}
 
+	public void SetPriorityMod(int priorityMod)
+	{
+		this.PriorityMod = priorityMod;
+		for (int i = 0; i < this.Chores.Count; i++)
+		{
+			this.Chores[i].SetPriorityMod(this.PriorityMod);
+		}
+	}
+
 	private void SetFetchTask(float amount)
 	{
-		FetchChore fetchChore = new FetchChore(this.Destination, amount, this.Tags, null, true, new Action<Chore>(this.OnFetchChoreComplete), new Action<Chore>(this.OnFetchChoreBegin), new Action<Chore>(this.OnFetchChoreEnd), true);
-		if (this.IsOperationalTask)
-		{
-			fetchChore.AddPrecondition(ChorePreconditions.IsOperational, this.Destination.gameObject);
-		}
+		FetchChore fetchChore = new FetchChore(this.Destination, amount, this.Tags, null, true, new Action<Chore>(this.OnFetchChoreComplete), new Action<Chore>(this.OnFetchChoreBegin), new Action<Chore>(this.OnFetchChoreEnd), this.operationalRequirement, this.PriorityMod);
 		this.Chores.Add(fetchChore);
 	}
 
@@ -125,6 +133,7 @@ public class FetchOrder2
 	public void Submit(Action<FetchOrder2, Pickupable> on_complete, bool check_storage_contents)
 	{
 		this.OnComplete = on_complete;
+		this.checkStorageContents = check_storage_contents;
 		if (check_storage_contents)
 		{
 			Pickupable pickupable = null;
@@ -180,6 +189,21 @@ public class FetchOrder2
 		return false;
 	}
 
+	public float AmountWaitingToFetch()
+	{
+		if (!this.checkStorageContents)
+		{
+			float num = this.UnfetchedAmount;
+			for (int i = 0; i < this.Chores.Count; i++)
+			{
+				num += this.Chores[i].AmountWaitingToFetch();
+			}
+			return num;
+		}
+		Pickupable pickupable;
+		return this.GetRemaining(out pickupable);
+	}
+
 	public float GetRemaining(out Pickupable out_item)
 	{
 		float num = this.TotalAmount;
@@ -218,5 +242,14 @@ public class FetchOrder2
 
 	private float _UnfetchedAmount;
 
-	private bool IsOperationalTask;
+	private bool checkStorageContents;
+
+	private FetchOrder2.OperationalRequirement operationalRequirement = FetchOrder2.OperationalRequirement.None;
+
+	public enum OperationalRequirement
+	{
+		Operational,
+		Functional,
+		None
+	}
 }

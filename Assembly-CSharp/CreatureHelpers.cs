@@ -63,11 +63,11 @@ public static class CreatureHelpers
 	{
 		if (heading.x < 0f)
 		{
-			anim.Flip = true;
+			anim.FlipX = true;
 		}
 		else if (heading.x > 0f)
 		{
-			anim.Flip = false;
+			anim.FlipX = false;
 		}
 	}
 
@@ -75,11 +75,11 @@ public static class CreatureHelpers
 	{
 		if (heading.x < 0f)
 		{
-			anim.Flip = true;
+			anim.FlipX = true;
 		}
 		else if (heading.x > 0f)
 		{
-			anim.Flip = false;
+			anim.FlipX = false;
 		}
 	}
 
@@ -188,11 +188,11 @@ public static class CreatureHelpers
 		{
 			int num2 = Grid.OffsetCell(num, i, 0);
 			int num3 = Grid.OffsetCell(num, -i, 0);
-			if (Grid.Objects[num2, 1] != null)
+			if (Grid.Objects[num2, 0] != null)
 			{
 				return true;
 			}
-			if (Grid.Objects[num3, 1] != null)
+			if (Grid.Objects[num3, 0] != null)
 			{
 				return true;
 			}

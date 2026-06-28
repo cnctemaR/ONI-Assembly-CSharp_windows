@@ -40,7 +40,7 @@ public class FrontEndManager : KMonoBehaviour
 			Debug.developerConsoleVisible = false;
 		}
 		KAnimBatchManager.Instance().UpdateActiveArea(new Vector2I(0, 0), new Vector2I(9999, 9999));
-		KAnimBatchManager.Instance().UpdateDirty();
+		KAnimBatchManager.Instance().UpdateDirty(Time.frameCount);
 		KAnimBatchManager.Instance().Render();
 	}
 

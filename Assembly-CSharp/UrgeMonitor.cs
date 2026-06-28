@@ -10,11 +10,11 @@ public class UrgeMonitor : GameStateMachine<UrgeMonitor, UrgeMonitor.Instance>
 		this.hasurge.Transition(this.satisfied, (UrgeMonitor.Instance smi) => !smi.HasUrge()).ToggleUrge((UrgeMonitor.Instance smi) => smi.GetUrge());
 	}
 
-	public GameStateMachine<UrgeMonitor, UrgeMonitor.Instance, IStateMachineTarget>.State satisfied;
+	public GameStateMachine<UrgeMonitor, UrgeMonitor.Instance, IStateMachineTarget, object>.State satisfied;
 
-	public GameStateMachine<UrgeMonitor, UrgeMonitor.Instance, IStateMachineTarget>.State hasurge;
+	public GameStateMachine<UrgeMonitor, UrgeMonitor.Instance, IStateMachineTarget, object>.State hasurge;
 
-	public new class Instance : GameStateMachine<UrgeMonitor, UrgeMonitor.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<UrgeMonitor, UrgeMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master, Urge urge, Amount amount, ScheduleBlockType schedule_block, float in_schedule_threshold, float out_of_schedule_threshold, bool is_threshold_minimum)
 			: base(master)

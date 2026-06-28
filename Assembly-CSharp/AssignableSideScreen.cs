@@ -76,7 +76,7 @@ public class AssignableSideScreen : SideScreenContent
 			}
 			else if (assignables.GetAssignable(this.targetAssignable.slot) != null)
 			{
-				text = this.targetAssignable.GetProperName();
+				text = assignables.GetAssignable(this.targetAssignable.slot).GetProperName();
 			}
 			freeElement.SetContent(minionIdentity, text, new Action<MinionIdentity>(this.OnRowClicked));
 		}
@@ -132,7 +132,7 @@ public class AssignableSideScreen : SideScreenContent
 		}
 		foreach (KeyValuePair<MinionIdentity, AssignableSideScreenRow> keyValuePair in this.identityRowMap)
 		{
-			keyValuePair.Value.SetSelected(false);
+			keyValuePair.Value.Selected = false;
 		}
 		this.identityRowMap.Clear();
 		this.currentSelectedIdentity = null;
@@ -160,7 +160,7 @@ public class AssignableSideScreen : SideScreenContent
 			{
 				this.SetSelectedUI(this.currentSelectedIdentity, false);
 			}
-			this.SetSelectedUI(identity, !this.identityRowMap[identity].IsSelected);
+			this.SetSelectedUI(identity, true);
 		}
 		else
 		{
@@ -173,8 +173,16 @@ public class AssignableSideScreen : SideScreenContent
 	{
 		this.currentSelectedIdentity = identity;
 		AssignableSideScreenRow assignableSideScreenRow = this.identityRowMap[identity];
-		assignableSideScreenRow.SetSelected(isSelected);
-		this.targetAssignable.Assign((!isSelected) ? null : identity.GetComponent<Ownables>());
+		assignableSideScreenRow.Selected = isSelected;
+		if (this.targetAssignable is Ownable)
+		{
+			this.targetAssignable.Assign((!isSelected) ? null : identity.GetComponent<Ownables>());
+		}
+		else if (this.targetAssignable is Equippable)
+		{
+			this.targetAssignable.Assign((!isSelected) ? null : identity.GetComponent<Equipment>());
+			this.targetAssignable.ClickAssign(identity.GetComponent<Equipment>());
+		}
 		assignableSideScreenRow.SetAssignmentText((!isSelected) ? string.Empty : (this.targetAssignable.GetProperName() + "\n" + this.currentOwnerStr));
 		this.currentOwnerText.text = string.Format(UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.ASSIGNEDTO, identity.GetProperName());
 	}

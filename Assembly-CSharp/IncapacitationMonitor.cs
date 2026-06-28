@@ -6,21 +6,21 @@ public class IncapacitationMonitor : GameStateMachine<IncapacitationMonitor, Inc
 	{
 		default_state = this.healthy;
 		base.serializable = true;
-		this.notHealthy.ToggleUrge(Db.Get().Urges.BeIncapacitated).ToggleChore((IncapacitationMonitor.Instance smi) => new BeIncapacitatedChore(smi.master), this.notHealthy.Incapacitated, true).EventTransition(GameHashes.IncapacitationRecovery, this.healthy, null);
+		this.notHealthy.ToggleUrge(Db.Get().Urges.BeIncapacitated).ToggleChore((IncapacitationMonitor.Instance smi) => new BeIncapacitatedChore(smi.master), this.healthy, true).EventTransition(GameHashes.IncapacitationRecovery, this.healthy, null);
 	}
 
-	public GameStateMachine<IncapacitationMonitor, IncapacitationMonitor.Instance, IStateMachineTarget>.State healthy;
+	public GameStateMachine<IncapacitationMonitor, IncapacitationMonitor.Instance, IStateMachineTarget, object>.State healthy;
 
 	public IncapacitationMonitor.NotHealth notHealthy;
 
-	public class NotHealth : GameStateMachine<IncapacitationMonitor, IncapacitationMonitor.Instance, IStateMachineTarget>.State
+	public class NotHealth : GameStateMachine<IncapacitationMonitor, IncapacitationMonitor.Instance, IStateMachineTarget, object>.State
 	{
-		public GameStateMachine<IncapacitationMonitor, IncapacitationMonitor.Instance, IStateMachineTarget>.State Incapacitated;
+		public GameStateMachine<IncapacitationMonitor, IncapacitationMonitor.Instance, IStateMachineTarget, object>.State Incapacitated;
 
-		public GameStateMachine<IncapacitationMonitor, IncapacitationMonitor.Instance, IStateMachineTarget>.State Recovering;
+		public GameStateMachine<IncapacitationMonitor, IncapacitationMonitor.Instance, IStateMachineTarget, object>.State Recovering;
 	}
 
-	public new class Instance : GameStateMachine<IncapacitationMonitor, IncapacitationMonitor.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<IncapacitationMonitor, IncapacitationMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)
@@ -34,10 +34,7 @@ public class IncapacitationMonitor : GameStateMachine<IncapacitationMonitor, Inc
 
 		public void Incapacitate()
 		{
-			this.isIncapacitated = true;
 			base.smi.GoTo(base.sm.notHealthy.Incapacitated);
 		}
-
-		public bool isIncapacitated;
 	}
 }

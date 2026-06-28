@@ -32,13 +32,12 @@ namespace Klei.AI
 		public void Remove()
 		{
 			this.gameObject.GetComponent<Effects>().Remove(this.effect);
-			this.gameObject.GetComponent<KSelectable>().RemoveStatusItem(this.statusItem);
+			this.gameObject.GetComponent<KSelectable>().RemoveStatusItem(this.statusItem, false);
 		}
 
 		private void ConfigureStatusItem()
 		{
-			StatusItem.IconType iconType = ((!this.effect.isBad) ? StatusItem.IconType.Info : StatusItem.IconType.Exclamation);
-			this.statusItem = new StatusItem(this.effect.Id, this.effect.Name, string.Empty, this.ResolveTooltip(), false, iconType, (!this.effect.isBad) ? NotificationType.Neutral : NotificationType.Bad, SimViewMode.None, SimViewMode.None);
+			this.statusItem = new StatusItem(this.effect.Id, this.effect.Name, this.ResolveTooltip(), string.Empty, (!this.effect.isBad) ? StatusItem.IconType.Info : StatusItem.IconType.Exclamation, (!this.effect.isBad) ? NotificationType.Neutral : NotificationType.Bad, false, SimViewMode.None, SimViewMode.None);
 			this.statusItem.resolveStringCallback = new Func<string, object, string>(this.ResolveString);
 		}
 

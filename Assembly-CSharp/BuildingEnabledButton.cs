@@ -3,7 +3,7 @@ using KSerialization;
 using STRINGS;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class BuildingEnabledButton : KMonoBehaviour, ISaveLoadableJson, IToggleHandler
+public class BuildingEnabledButton : KMonoBehaviour, ISaveLoadable, IToggleHandler
 {
 	public bool IsEnabled
 	{
@@ -32,7 +32,7 @@ public class BuildingEnabledButton : KMonoBehaviour, ISaveLoadableJson, IToggleH
 	protected override void OnPrefabInit()
 	{
 		this.ToggleIdx = this.Toggleable.SetTarget(this);
-		this.Subscribe(493375141, new EventSystem.EventHandler(this.OnRefreshUserMenu));
+		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 	}
 
 	protected override void OnSpawn()
@@ -72,13 +72,13 @@ public class BuildingEnabledButton : KMonoBehaviour, ISaveLoadableJson, IToggleH
 		{
 			UserMenu userMenu = this.UserMenu;
 			string text = UI.USERMENUACTIONS.ENABLEBUILDING.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_building_disabled", UI.USERMENUACTIONS.ENABLEBUILDING.NAME, new global::System.Action(this.OnMenuToggle), global::Action.ToggleEnabled, null, null, null, null, text));
+			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_building_disabled", UI.USERMENUACTIONS.ENABLEBUILDING.NAME, new global::System.Action(this.OnMenuToggle), global::Action.ToggleEnabled, null, null, null, text, true), 1f);
 		}
 		else
 		{
 			UserMenu userMenu2 = this.UserMenu;
 			string text = UI.USERMENUACTIONS.ENABLEBUILDING.TOOLTIP_OFF;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_building_disabled", UI.USERMENUACTIONS.ENABLEBUILDING.NAME_OFF, new global::System.Action(this.OnMenuToggle), global::Action.ToggleEnabled, null, null, null, null, text));
+			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_building_disabled", UI.USERMENUACTIONS.ENABLEBUILDING.NAME_OFF, new global::System.Action(this.OnMenuToggle), global::Action.ToggleEnabled, null, null, null, text, true), 1f);
 		}
 	}
 

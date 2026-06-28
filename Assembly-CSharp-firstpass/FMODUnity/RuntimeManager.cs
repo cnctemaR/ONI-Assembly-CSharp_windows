@@ -94,13 +94,14 @@ namespace FMODUnity
 			this.studioSystem.getLowLevelSystem(out this.lowlevelSystem);
 			Settings settings = Settings.Instance;
 			this.fmodPlatform = RuntimeUtils.GetCurrentPlatform();
-			int realChannels = settings.GetRealChannels(this.fmodPlatform);
-			result = this.lowlevelSystem.setSoftwareChannels(realChannels);
+			int num = settings.GetRealChannels(this.fmodPlatform);
+			num = Math.Min(num, 256);
+			result = this.lowlevelSystem.setSoftwareChannels(num);
 			this.CheckInitResult(result, "Set software channels");
 			result = this.lowlevelSystem.setSoftwareFormat(settings.GetSampleRate(this.fmodPlatform), (SPEAKERMODE)settings.GetSpeakerMode(this.fmodPlatform), 0);
 			this.CheckInitResult(result, "Set software format");
 			global::FMOD.ADVANCEDSETTINGS advancedsettings = default(global::FMOD.ADVANCEDSETTINGS);
-			advancedsettings.maxVorbisCodecs = realChannels;
+			advancedsettings.maxVorbisCodecs = num;
 			advancedsettings.randomSeed = (uint)DateTime.Now.Ticks;
 			result = this.lowlevelSystem.setAdvancedSettings(ref advancedsettings);
 			this.CheckInitResult(result, "Set advanced settings");
@@ -124,45 +125,49 @@ namespace FMODUnity
 			{
 				foreach (string text in settings.Plugins)
 				{
-					string text2 = RuntimeUtils.GetPluginPath(text);
-					uint num;
-					result = this.lowlevelSystem.loadPlugin(text2, out num);
+					string pluginPath = RuntimeUtils.GetPluginPath(text);
+					uint num2;
+					result = this.lowlevelSystem.loadPlugin(pluginPath, out num2);
 					if (result == RESULT.ERR_FILE_BAD || result == RESULT.ERR_FILE_NOTFOUND)
 					{
-						text2 = RuntimeUtils.GetPluginPath(text + "64");
-						result = this.lowlevelSystem.loadPlugin(text2, out num);
+						string pluginPath2 = RuntimeUtils.GetPluginPath(text + "64");
+						result = this.lowlevelSystem.loadPlugin(pluginPath2, out num2);
 					}
-					this.CheckInitResult(result, string.Format("Loading plugin '{0}' from '{1}'", text, text2));
-					this.loadedPlugins.Add(text, num);
+					this.CheckInitResult(result, string.Format("Loading plugin '{0}' from '{1}'", text, pluginPath));
+					this.loadedPlugins.Add(text, num2);
 				}
-				try
-				{
-					RuntimeManager.LoadBank(settings.MasterBank + ".strings", settings.AutomaticSampleLoading);
-				}
-				catch (BankLoadException ex)
-				{
-					global::UnityEngine.Debug.LogException(ex);
-				}
-				if (settings.AutomaticEventLoading)
+				if (settings.ImportType == ImportType.StreamingAssets)
 				{
 					try
 					{
-						RuntimeManager.LoadBank(settings.MasterBank, settings.AutomaticSampleLoading);
+						RuntimeManager.LoadBank(settings.MasterBank + ".strings", settings.AutomaticSampleLoading);
 					}
-					catch (BankLoadException ex2)
+					catch (BankLoadException ex)
 					{
-						global::UnityEngine.Debug.LogException(ex2);
+						global::UnityEngine.Debug.LogException(ex);
 					}
-					foreach (string text3 in settings.Banks)
+					if (settings.AutomaticEventLoading)
 					{
 						try
 						{
-							RuntimeManager.LoadBank(text3, settings.AutomaticSampleLoading);
+							RuntimeManager.LoadBank(settings.MasterBank, settings.AutomaticSampleLoading);
 						}
-						catch (BankLoadException ex3)
+						catch (BankLoadException ex2)
 						{
-							global::UnityEngine.Debug.LogException(ex3);
+							global::UnityEngine.Debug.LogException(ex2);
 						}
+						foreach (string text2 in settings.Banks)
+						{
+							try
+							{
+								RuntimeManager.LoadBank(text2, settings.AutomaticSampleLoading);
+							}
+							catch (BankLoadException ex3)
+							{
+								global::UnityEngine.Debug.LogException(ex3);
+							}
+						}
+						RuntimeManager.WaitForAllLoads();
 					}
 				}
 			}
@@ -177,22 +182,46 @@ namespace FMODUnity
 			if (this.studioSystem != null)
 			{
 				this.studioSystem.update();
-				if (!RuntimeManager.hasListener && !this.listenerWarningIssued)
+				bool flag = false;
+				bool flag2 = false;
+				int num = 0;
+				for (int i = 7; i >= 0; i--)
+				{
+					if (!flag && RuntimeManager.HasListener[i])
+					{
+						num = i + 1;
+						flag = true;
+						flag2 = true;
+					}
+					if (!RuntimeManager.HasListener[i] && flag)
+					{
+						flag2 = false;
+					}
+				}
+				if (flag)
+				{
+					this.studioSystem.setNumListeners(num);
+				}
+				if (!flag2 && !this.listenerWarningIssued)
 				{
 					this.listenerWarningIssued = true;
 				}
-				for (int i = 0; i < this.attachedInstances.Count; i++)
+				for (int j = 0; j < this.attachedInstances.Count; j++)
 				{
 					PLAYBACK_STATE playback_STATE = PLAYBACK_STATE.STOPPED;
-					this.attachedInstances[i].instance.getPlaybackState(out playback_STATE);
-					if (!this.attachedInstances[i].instance.isValid() || playback_STATE == PLAYBACK_STATE.STOPPED || this.attachedInstances[i].transform == null)
+					this.attachedInstances[j].instance.getPlaybackState(out playback_STATE);
+					if (!this.attachedInstances[j].instance.isValid() || playback_STATE == PLAYBACK_STATE.STOPPED || this.attachedInstances[j].transform == null)
 					{
-						this.attachedInstances.RemoveAt(i);
-						i--;
+						this.attachedInstances.RemoveAt(j);
+						j--;
+					}
+					else if (this.attachedInstances[j].rigidBody)
+					{
+						this.attachedInstances[j].instance.set3DAttributes(RuntimeUtils.To3DAttributes(this.attachedInstances[j].transform, this.attachedInstances[j].rigidBody));
 					}
 					else
 					{
-						this.attachedInstances[i].instance.set3DAttributes(RuntimeUtils.To3DAttributes(this.attachedInstances[i].transform, this.attachedInstances[i].rigidBody));
+						this.attachedInstances[j].instance.set3DAttributes(RuntimeUtils.To3DAttributes(this.attachedInstances[j].transform, this.attachedInstances[j].rigidBody2D));
 					}
 				}
 			}
@@ -204,6 +233,16 @@ namespace FMODUnity
 			attachedInstance.transform = transform;
 			attachedInstance.instance = instance;
 			attachedInstance.rigidBody = rigidBody;
+			RuntimeManager.Instance.attachedInstances.Add(attachedInstance);
+		}
+
+		public static void AttachInstanceToGameObject(EventInstance instance, Transform transform, Rigidbody2D rigidBody2D)
+		{
+			RuntimeManager.AttachedInstance attachedInstance = new RuntimeManager.AttachedInstance();
+			attachedInstance.transform = transform;
+			attachedInstance.instance = instance;
+			attachedInstance.rigidBody2D = rigidBody2D;
+			attachedInstance.rigidBody = null;
 			RuntimeManager.Instance.attachedInstances.Add(attachedInstance);
 		}
 
@@ -296,6 +335,7 @@ namespace FMODUnity
 		{
 			if (this.studioSystem != null && this.studioSystem.isValid())
 			{
+				RuntimeManager.PauseAllEvents(pauseStatus);
 				if (pauseStatus)
 				{
 					this.lowlevelSystem.mixerSuspend();
@@ -344,6 +384,43 @@ namespace FMODUnity
 			}
 		}
 
+		public static void LoadBank(TextAsset asset, bool loadSamples = false)
+		{
+			string name = asset.name;
+			if (RuntimeManager.Instance.loadedBanks.ContainsKey(name))
+			{
+				RuntimeManager.LoadedBank loadedBank = RuntimeManager.Instance.loadedBanks[name];
+				loadedBank.RefCount++;
+				if (loadSamples)
+				{
+					loadedBank.Bank.loadSampleData();
+				}
+			}
+			else
+			{
+				RuntimeManager.LoadedBank loadedBank2 = default(RuntimeManager.LoadedBank);
+				RESULT result = RuntimeManager.Instance.studioSystem.loadBankMemory(asset.bytes, LOAD_BANK_FLAGS.NORMAL, out loadedBank2.Bank);
+				if (result == RESULT.OK)
+				{
+					loadedBank2.RefCount = 1;
+					RuntimeManager.Instance.loadedBanks.Add(name, loadedBank2);
+					if (loadSamples)
+					{
+						loadedBank2.Bank.loadSampleData();
+					}
+				}
+				else
+				{
+					if (result != RESULT.ERR_EVENT_ALREADY_LOADED)
+					{
+						throw new BankLoadException(name, result);
+					}
+					loadedBank2.RefCount = 2;
+					RuntimeManager.Instance.loadedBanks.Add(name, loadedBank2);
+				}
+			}
+		}
+
 		public static void UnloadBank(string bankName)
 		{
 			RuntimeManager.LoadedBank loadedBank;
@@ -356,6 +433,23 @@ namespace FMODUnity
 					RuntimeManager.Instance.loadedBanks.Remove(bankName);
 				}
 			}
+		}
+
+		public static bool AnyBankLoading()
+		{
+			bool flag = false;
+			foreach (RuntimeManager.LoadedBank loadedBank in RuntimeManager.Instance.loadedBanks.Values)
+			{
+				LOADING_STATE loading_STATE;
+				loadedBank.Bank.getSampleLoadingState(out loading_STATE);
+				flag |= loading_STATE == LOADING_STATE.LOADING;
+			}
+			return flag;
+		}
+
+		public static void WaitForAllLoads()
+		{
+			RuntimeManager.Instance.studioSystem.flushSampleLoading();
 		}
 
 		public static Guid PathToGUID(string path)
@@ -435,6 +529,7 @@ namespace FMODUnity
 			EventInstance eventInstance = RuntimeManager.CreateInstance(guid);
 			RuntimeManager.AttachInstanceToGameObject(eventInstance, gameObject.transform, gameObject.GetComponent<Rigidbody>());
 			eventInstance.start();
+			eventInstance.release();
 		}
 
 		public static EventDescription GetEventDescription(string path)
@@ -473,26 +568,34 @@ namespace FMODUnity
 			return eventDescription;
 		}
 
-		public static bool HasListener
-		{
-			get
-			{
-				return RuntimeManager.hasListener;
-			}
-			set
-			{
-				RuntimeManager.hasListener = value;
-			}
-		}
-
 		public static void SetListenerLocation(GameObject gameObject, Rigidbody rigidBody = null)
 		{
 			RuntimeManager.Instance.studioSystem.setListenerAttributes(0, RuntimeUtils.To3DAttributes(gameObject, rigidBody));
 		}
 
+		public static void SetListenerLocation(GameObject gameObject, Rigidbody2D rigidBody2D)
+		{
+			RuntimeManager.Instance.studioSystem.setListenerAttributes(0, RuntimeUtils.To3DAttributes(gameObject, rigidBody2D));
+		}
+
 		public static void SetListenerLocation(Transform transform)
 		{
 			RuntimeManager.Instance.studioSystem.setListenerAttributes(0, transform.To3DAttributes());
+		}
+
+		public static void SetListenerLocation(int listenerIndex, GameObject gameObject, Rigidbody rigidBody = null)
+		{
+			RuntimeManager.Instance.studioSystem.setListenerAttributes(listenerIndex, RuntimeUtils.To3DAttributes(gameObject, rigidBody));
+		}
+
+		public static void SetListenerLocation(int listenerIndex, GameObject gameObject, Rigidbody2D rigidBody2D)
+		{
+			RuntimeManager.Instance.studioSystem.setListenerAttributes(listenerIndex, RuntimeUtils.To3DAttributes(gameObject, rigidBody2D));
+		}
+
+		public static void SetListenerLocation(int listenerIndex, Transform transform)
+		{
+			RuntimeManager.Instance.studioSystem.setListenerAttributes(listenerIndex, transform.To3DAttributes());
 		}
 
 		public static Bus GetBus(string path)
@@ -501,6 +604,7 @@ namespace FMODUnity
 			RESULT bus = RuntimeManager.StudioSystem.getBus(path, out bus2);
 			if (bus != RESULT.OK)
 			{
+				throw new BusNotFoundException(path);
 			}
 			return bus2;
 		}
@@ -511,15 +615,34 @@ namespace FMODUnity
 			RESULT vca = RuntimeManager.StudioSystem.getVCA(path, out vca2);
 			if (vca != RESULT.OK)
 			{
+				throw new VCANotFoundException(path);
 			}
 			return vca2;
 		}
 
-		private static SystemNotInitializedException initException;
+		public static void PauseAllEvents(bool paused)
+		{
+			RuntimeManager.GetBus("bus:/").setPaused(paused);
+		}
+
+		public static void MuteAllEvents(bool muted)
+		{
+			RuntimeManager.GetBus("bus:/").setMute(muted);
+		}
+
+		public static bool IsInitialized
+		{
+			get
+			{
+				return RuntimeManager.instance != null && RuntimeManager.instance.studioSystem != null;
+			}
+		}
+
+		private static SystemNotInitializedException initException = null;
 
 		private static RuntimeManager instance;
 
-		private static bool isQuitting;
+		private static bool isQuitting = false;
 
 		[SerializeField]
 		private FMODPlatform fmodPlatform;
@@ -549,7 +672,7 @@ namespace FMODUnity
 
 		private float lastDebugUpdate;
 
-		private static bool hasListener;
+		public static bool[] HasListener = new bool[8];
 
 		private struct LoadedBank
 		{
@@ -578,6 +701,8 @@ namespace FMODUnity
 			public Transform transform;
 
 			public Rigidbody rigidBody;
+
+			public Rigidbody2D rigidBody2D;
 		}
 	}
 }

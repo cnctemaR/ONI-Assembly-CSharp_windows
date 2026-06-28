@@ -1,5 +1,6 @@
 ﻿using System;
 
+[SkipSaveFileSerialization]
 public class Approachable : KMonoBehaviour, IApproachable
 {
 	public CellOffset[] GetOffsets()

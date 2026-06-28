@@ -36,10 +36,11 @@ public class PropertyTextures : KMonoBehaviour
 
 	public void OnReset(object data = null)
 	{
-		this.lerpers = new TextureLerper[14];
+		this.lerpers = new TextureLerper[11];
 		this.texturePagePool = new TexturePagePool();
-		this.textureBuffers = new TextureBuffer[14];
-		for (int i = 0; i < 14; i++)
+		this.textureBuffers = new TextureBuffer[11];
+		this.externallyUpdatedTextures = new Texture2D[11];
+		for (int i = 0; i < 11; i++)
 		{
 			PropertyTextures.TextureProperties textureProperties = new PropertyTextures.TextureProperties
 			{
@@ -55,25 +56,44 @@ public class PropertyTextures : KMonoBehaviour
 					textureProperties = this.textureProperties[j];
 				}
 			}
-			this.textureBuffers[i] = new TextureBuffer(((PropertyTextures.Property)i).ToString(), Grid.WidthInCells, Grid.HeightInCells, textureProperties.textureFormat, textureProperties.filterMode, this.texturePagePool);
+			if (this.externallyUpdatedTextures[i] != null)
+			{
+				global::UnityEngine.Object.Destroy(this.externallyUpdatedTextures[i]);
+				this.externallyUpdatedTextures[i] = null;
+			}
+			Texture texture;
+			if (textureProperties.updatedExternally)
+			{
+				this.externallyUpdatedTextures[i] = new Texture2D(Grid.WidthInCells, Grid.HeightInCells, textureProperties.textureFormat, false);
+				texture = this.externallyUpdatedTextures[i];
+				texture.name = "LerpTexture" + i.ToString();
+			}
+			else
+			{
+				this.textureBuffers[i] = new TextureBuffer(((PropertyTextures.Property)i).ToString(), Grid.WidthInCells, Grid.HeightInCells, textureProperties.textureFormat, textureProperties.filterMode, this.texturePagePool);
+				texture = this.textureBuffers[i].texture;
+			}
 			if (textureProperties.blend)
 			{
-				this.lerpers[i] = new TextureLerper(this.textureBuffers[i].texture, ((PropertyTextures.Property)i).ToString(), this.textureBuffers[i].texture.filterMode, textureProperties.textureFormat);
+				this.lerpers[i] = new TextureLerper(texture, ((PropertyTextures.Property)i).ToString(), texture.filterMode, textureProperties.textureFormat);
 				this.lerpers[i].Speed = textureProperties.blendSpeed;
 			}
 			string shaderPropertyName = this.GetShaderPropertyName((PropertyTextures.Property)i);
 			textureProperties.texturePropertyName = shaderPropertyName;
-			Shader.SetGlobalTexture(shaderPropertyName, this.textureBuffers[i].texture);
+			Shader.SetGlobalTexture(shaderPropertyName, texture);
 			this.allTextureProperties.Add(textureProperties);
 		}
 	}
 
 	private void OnShadersReloaded()
 	{
-		for (int i = 0; i < 14; i++)
+		for (int i = 0; i < 11; i++)
 		{
-			string shaderPropertyName = this.GetShaderPropertyName((PropertyTextures.Property)i);
-			Shader.SetGlobalTexture(shaderPropertyName, this.textureBuffers[i].texture);
+			TextureLerper textureLerper = this.lerpers[i];
+			if (textureLerper != null)
+			{
+				Shader.SetGlobalTexture(this.allTextureProperties[i].texturePropertyName, textureLerper.Update());
+			}
 		}
 	}
 
@@ -93,59 +113,64 @@ public class PropertyTextures : KMonoBehaviour
 		}
 	}
 
-	private void UpdateProperty(PropertyTextures.Property property, int x0, int y0, int x1, int y1)
+	private void UpdateProperty(ref PropertyTextures.TextureProperties p, int x0, int y0, int x1, int y1)
 	{
 		if (Game.Instance.IsLoading())
 		{
 			return;
 		}
-		TextureRegion textureRegion = this.textureBuffers[(int)property].Lock(x0, y0, x1 - x0 + 1, y1 - y0 + 1);
-		switch (property)
+		int simProperty = (int)p.simProperty;
+		if (!p.updatedExternally)
 		{
-		case PropertyTextures.Property.StateChange:
-			this.UpdateStateChange(textureRegion, x0, y0, x1, y1);
-			break;
-		case PropertyTextures.Property.GasPressure:
-			this.UpdatePressure(textureRegion, x0, y0, x1, y1);
-			break;
-		case PropertyTextures.Property.GasColour:
-			this.UpdateGasColour(textureRegion, x0, y0, x1, y1);
-			break;
-		case PropertyTextures.Property.GasDanger:
-			this.UpdateDanger(textureRegion, x0, y0, x1, y1);
-			break;
-		case PropertyTextures.Property.FogOfWar:
-			this.UpdateFogOfWar(textureRegion, x0, y0, x1, y1);
-			break;
-		case PropertyTextures.Property.Flow:
-			this.UpdateFlow(textureRegion, x0, y0, x1, y1);
-			break;
-		case PropertyTextures.Property.SolidDigAmount:
-			this.UpdateSolidDigAmount(textureRegion, x0, y0, x1, y1);
-			break;
-		case PropertyTextures.Property.SolidLiquidGasMass:
-			this.UpdateSolidLiquidGasMass(textureRegion, x0, y0, x1, y1);
-			break;
-		case PropertyTextures.Property.WorldLight:
-			this.UpdateWorldLight(textureRegion, x0, y0, x1, y1);
-			break;
-		case PropertyTextures.Property.Liquid:
-			this.UpdateLiquid(textureRegion, x0, y0, x1, y1);
-			break;
-		case PropertyTextures.Property.Metal:
-			this.UpdateMetal(textureRegion, x0, y0, x1, y1);
-			break;
-		case PropertyTextures.Property.Water:
-			this.UpdateWater(textureRegion, x0, y0, x1, y1);
-			break;
-		case PropertyTextures.Property.Temperature:
-			this.UpdateTemperature(textureRegion, x0, y0, x1, y1);
-			break;
-		case PropertyTextures.Property.InvalidRegion:
-			this.UpdateInvalidRegion(textureRegion, x0, y0, x1, y1);
-			break;
+			TextureRegion textureRegion = this.textureBuffers[simProperty].Lock(x0, y0, x1 - x0 + 1, y1 - y0 + 1);
+			switch (p.simProperty)
+			{
+			case PropertyTextures.Property.StateChange:
+				this.UpdateStateChange(textureRegion, x0, y0, x1, y1);
+				break;
+			case PropertyTextures.Property.GasPressure:
+				this.UpdatePressure(textureRegion, x0, y0, x1, y1);
+				break;
+			case PropertyTextures.Property.GasColour:
+				this.UpdateGasColour(textureRegion, x0, y0, x1, y1);
+				break;
+			case PropertyTextures.Property.GasDanger:
+				this.UpdateDanger(textureRegion, x0, y0, x1, y1);
+				break;
+			case PropertyTextures.Property.FogOfWar:
+				this.UpdateFogOfWar(textureRegion, x0, y0, x1, y1);
+				break;
+			case PropertyTextures.Property.SolidDigAmount:
+				this.UpdateSolidDigAmount(textureRegion, x0, y0, x1, y1);
+				break;
+			case PropertyTextures.Property.SolidLiquidGasMass:
+				this.UpdateSolidLiquidGasMass(textureRegion, x0, y0, x1, y1);
+				break;
+			case PropertyTextures.Property.WorldLight:
+				this.UpdateWorldLight(textureRegion, x0, y0, x1, y1);
+				break;
+			case PropertyTextures.Property.Temperature:
+				this.UpdateTemperature(textureRegion, x0, y0, x1, y1);
+				break;
+			}
+			textureRegion.Unlock();
 		}
-		textureRegion.Unlock();
+		else
+		{
+			PropertyTextures.Property simProperty2 = p.simProperty;
+			if (simProperty2 != PropertyTextures.Property.Flow)
+			{
+				if (simProperty2 == PropertyTextures.Property.Liquid)
+				{
+					this.externallyUpdatedTextures[simProperty].LoadRawTextureData(PropertyTextures.externalLiquidTex, 4 * Grid.WidthInCells * Grid.HeightInCells);
+				}
+			}
+			else
+			{
+				this.externallyUpdatedTextures[simProperty].LoadRawTextureData(PropertyTextures.externalFlowTex, 8 * Grid.WidthInCells * Grid.HeightInCells);
+			}
+			this.externallyUpdatedTextures[simProperty].Apply();
+		}
 	}
 
 	private void LateUpdate()
@@ -178,10 +203,10 @@ public class PropertyTextures : KMonoBehaviour
 			PropertyTextures.TextureProperties textureProperties2 = this.allTextureProperties[i];
 			if (num5 == i || textureProperties2.updateEveryFrame)
 			{
-				this.UpdateProperty(textureProperties2.simProperty, num, num2, num3, num4);
+				this.UpdateProperty(ref textureProperties2, num, num2, num3, num4);
 			}
 		}
-		for (int j = 0; j < 14; j++)
+		for (int j = 0; j < 11; j++)
 		{
 			TextureLerper textureLerper = this.lerpers[j];
 			if (textureLerper != null)
@@ -322,64 +347,6 @@ public class PropertyTextures : KMonoBehaviour
 		}
 	}
 
-	private void UpdateInvalidRegion(TextureRegion region, int x0, int y0, int x1, int y1)
-	{
-		for (int i = y0; i <= y1; i++)
-		{
-			for (int j = x0; j <= x1; j++)
-			{
-				byte b = 0;
-				region.SetBytes(j, i, b);
-			}
-		}
-	}
-
-	private void UpdateMetal(TextureRegion region, int x0, int y0, int x1, int y1)
-	{
-		for (int i = y0; i <= y1; i++)
-		{
-			for (int j = x0; j <= x1; j++)
-			{
-				int num = Grid.XYToCell(j, i);
-				Element element = Grid.Element[num];
-				byte b = 0;
-				byte b2 = 0;
-				if (element.HasTag(GameTags.Metal))
-				{
-					b = byte.MaxValue;
-				}
-				if (element.HasTag(GameTags.Metal))
-				{
-					b2 = byte.MaxValue;
-				}
-				region.SetBytes(j, i, b, b2, 0);
-			}
-		}
-	}
-
-	private void UpdateWater(TextureRegion region, int x0, int y0, int x1, int y1)
-	{
-		for (int i = y0; i <= y1; i++)
-		{
-			for (int j = x0; j <= x1; j++)
-			{
-				int num = Grid.XYToCell(j, i);
-				Element element = Grid.Element[num];
-				byte b = 0;
-				byte b2 = 0;
-				if (element.id == SimHashes.Water)
-				{
-					b = byte.MaxValue;
-				}
-				if (element.id == SimHashes.Ice)
-				{
-					b2 = byte.MaxValue;
-				}
-				region.SetBytes(j, i, b, b2, 0);
-			}
-		}
-	}
-
 	private void UpdateLiquid(TextureRegion region, int x0, int y0, int x1, int y1)
 	{
 		for (int i = x0; i <= x1; i++)
@@ -418,26 +385,30 @@ public class PropertyTextures : KMonoBehaviour
 
 	private void UpdateSolidDigAmount(TextureRegion region, int x0, int y0, int x1, int y1)
 	{
-		WorldGapManager worldGapManager = WorldGapManager.Instance;
+		int elementIndex = ElementLoader.GetElementIndex(SimHashes.Void);
 		for (int i = y0; i <= y1; i++)
 		{
-			for (int j = x0; j <= x1; j++)
+			int num = Grid.XYToCell(x0, i);
+			int num2 = Grid.XYToCell(x1, i);
+			int j = num;
+			int num3 = x0;
+			while (j <= num2)
 			{
-				int num = Grid.XYToCell(j, i);
-				Element element = Grid.Element[num];
 				byte b = 0;
 				byte b2 = 0;
 				byte b3 = 0;
-				if (element.id != SimHashes.Void && !worldGapManager.IsVoid(num))
+				if ((int)Grid.Cell[j].elementIdx != elementIndex)
 				{
 					b3 = byte.MaxValue;
 				}
-				if (Grid.Solid[num])
+				if (Grid.Solid[j])
 				{
 					b = byte.MaxValue;
-					b2 = (byte)(255f * Grid.Damage[num]);
+					b2 = (byte)(255f * Grid.Damage[j]);
 				}
-				region.SetBytes(j, i, b, b2, b3);
+				region.SetBytes(num3, i, b, b2, b3);
+				j++;
+				num3++;
 			}
 		}
 	}
@@ -500,16 +471,16 @@ public class PropertyTextures : KMonoBehaviour
 		{
 			for (int i = y0; i <= y1; i++)
 			{
-				for (int j = x0; j <= x1; j++)
+				int num = Grid.XYToCell(x0, i);
+				int num2 = Grid.XYToCell(x1, i);
+				int j = num;
+				int num3 = x0;
+				while (j <= num2)
 				{
-					int num = Grid.XYToCell(j, i);
-					float num2 = (float)Grid.LightCount[num] / 24f;
-					Color color = Color.Lerp(Color.black, Grid.Element[num].substance.colour, num2);
-					Color colorForCell = LightGridManager.GetColorForCell(num);
-					color.r = Mathf.Clamp01(colorForCell.r + color.r);
-					color.g = Mathf.Clamp01(colorForCell.g + color.g);
-					color.b = Mathf.Clamp01(colorForCell.b + color.b);
-					region.SetBytes(j, i, (byte)(color.r * 255f), (byte)(color.g * 255f), (byte)(color.b * 255f), (color.r + color.g + color.b <= 0f) ? 0 : byte.MaxValue);
+					Color32 colorForCell = LightGridManager.GetColorForCell(j);
+					region.SetBytes(num3, i, colorForCell.r, colorForCell.g, colorForCell.b, (colorForCell.r + colorForCell.g + colorForCell.b <= 0) ? 0 : byte.MaxValue);
+					j++;
+					num3++;
 				}
 			}
 		}
@@ -525,20 +496,6 @@ public class PropertyTextures : KMonoBehaviour
 		}
 	}
 
-	private void UpdateFlow(TextureRegion region, int x0, int y0, int x1, int y1)
-	{
-		for (int i = y0; i <= y1; i++)
-		{
-			int num = i * Grid.WidthInCells + x0;
-			for (int j = x0; j <= x1; j++)
-			{
-				Vector2 vector = Grid.PropertyTextureFlow[num];
-				region.SetBytes(j, i, vector.x, vector.y);
-				num++;
-			}
-		}
-	}
-
 	[NonSerialized]
 	public bool ForceLightEverywhere;
 
@@ -550,6 +507,12 @@ public class PropertyTextures : KMonoBehaviour
 	private float TemperatureStateChangeRange = 0.05f;
 
 	public static PropertyTextures instance;
+
+	public static IntPtr externalFlowTex;
+
+	public static IntPtr externalLiquidTex;
+
+	public static IntPtr externalSolidDigAmountTex;
 
 	[SerializeField]
 	private Vector2 coldRange;
@@ -579,6 +542,8 @@ public class PropertyTextures : KMonoBehaviour
 
 	private TexturePagePool texturePagePool;
 
+	private Texture2D[] externallyUpdatedTextures;
+
 	private PropertyTextures.TextureProperties[] textureProperties = new PropertyTextures.TextureProperties[]
 	{
 		new PropertyTextures.TextureProperties
@@ -587,26 +552,9 @@ public class PropertyTextures : KMonoBehaviour
 			textureFormat = TextureFormat.RGFloat,
 			filterMode = FilterMode.Bilinear,
 			updateEveryFrame = true,
+			updatedExternally = true,
 			blend = true,
 			blendSpeed = 0.25f
-		},
-		new PropertyTextures.TextureProperties
-		{
-			simProperty = PropertyTextures.Property.Temperature,
-			textureFormat = TextureFormat.RGB24,
-			filterMode = FilterMode.Bilinear,
-			updateEveryFrame = false,
-			blend = false,
-			blendSpeed = 0f
-		},
-		new PropertyTextures.TextureProperties
-		{
-			simProperty = PropertyTextures.Property.SolidDigAmount,
-			textureFormat = TextureFormat.RGB24,
-			filterMode = FilterMode.Bilinear,
-			updateEveryFrame = true,
-			blend = false,
-			blendSpeed = 1f
 		},
 		new PropertyTextures.TextureProperties
 		{
@@ -614,26 +562,19 @@ public class PropertyTextures : KMonoBehaviour
 			textureFormat = TextureFormat.ARGB32,
 			filterMode = FilterMode.Point,
 			updateEveryFrame = true,
+			updatedExternally = true,
 			blend = true,
 			blendSpeed = 1f
 		},
 		new PropertyTextures.TextureProperties
 		{
-			simProperty = PropertyTextures.Property.WorldLight,
-			textureFormat = TextureFormat.RGBA32,
+			simProperty = PropertyTextures.Property.SolidDigAmount,
+			textureFormat = TextureFormat.RGB24,
 			filterMode = FilterMode.Bilinear,
-			updateEveryFrame = false,
+			updateEveryFrame = true,
+			updatedExternally = false,
 			blend = false,
-			blendSpeed = 0.5f
-		},
-		new PropertyTextures.TextureProperties
-		{
-			simProperty = PropertyTextures.Property.GasPressure,
-			textureFormat = TextureFormat.Alpha8,
-			filterMode = FilterMode.Bilinear,
-			updateEveryFrame = false,
-			blend = true,
-			blendSpeed = 0.25f
+			blendSpeed = 0f
 		},
 		new PropertyTextures.TextureProperties
 		{
@@ -641,26 +582,9 @@ public class PropertyTextures : KMonoBehaviour
 			textureFormat = TextureFormat.ARGB32,
 			filterMode = FilterMode.Bilinear,
 			updateEveryFrame = false,
+			updatedExternally = false,
 			blend = true,
 			blendSpeed = 0.25f
-		},
-		new PropertyTextures.TextureProperties
-		{
-			simProperty = PropertyTextures.Property.SolidLiquidGasMass,
-			textureFormat = TextureFormat.RGBA32,
-			filterMode = FilterMode.Point,
-			updateEveryFrame = false,
-			blend = false,
-			blendSpeed = 1f
-		},
-		new PropertyTextures.TextureProperties
-		{
-			simProperty = PropertyTextures.Property.StateChange,
-			textureFormat = TextureFormat.Alpha8,
-			filterMode = FilterMode.Bilinear,
-			updateEveryFrame = false,
-			blend = false,
-			blendSpeed = 1f
 		},
 		new PropertyTextures.TextureProperties
 		{
@@ -668,6 +592,17 @@ public class PropertyTextures : KMonoBehaviour
 			textureFormat = TextureFormat.Alpha8,
 			filterMode = FilterMode.Bilinear,
 			updateEveryFrame = false,
+			updatedExternally = false,
+			blend = true,
+			blendSpeed = 0.25f
+		},
+		new PropertyTextures.TextureProperties
+		{
+			simProperty = PropertyTextures.Property.GasPressure,
+			textureFormat = TextureFormat.Alpha8,
+			filterMode = FilterMode.Bilinear,
+			updateEveryFrame = false,
+			updatedExternally = false,
 			blend = true,
 			blendSpeed = 0.25f
 		},
@@ -677,35 +612,49 @@ public class PropertyTextures : KMonoBehaviour
 			textureFormat = TextureFormat.Alpha8,
 			filterMode = FilterMode.Bilinear,
 			updateEveryFrame = false,
+			updatedExternally = false,
 			blend = false,
-			blendSpeed = 1f
+			blendSpeed = 0f
 		},
 		new PropertyTextures.TextureProperties
 		{
-			simProperty = PropertyTextures.Property.Metal,
-			textureFormat = TextureFormat.RGB24,
+			simProperty = PropertyTextures.Property.WorldLight,
+			textureFormat = TextureFormat.RGBA32,
 			filterMode = FilterMode.Bilinear,
 			updateEveryFrame = false,
+			updatedExternally = false,
 			blend = false,
-			blendSpeed = 1f
+			blendSpeed = 0f
 		},
 		new PropertyTextures.TextureProperties
 		{
-			simProperty = PropertyTextures.Property.Water,
-			textureFormat = TextureFormat.RGB24,
-			filterMode = FilterMode.Bilinear,
-			updateEveryFrame = false,
-			blend = false,
-			blendSpeed = 1f
-		},
-		new PropertyTextures.TextureProperties
-		{
-			simProperty = PropertyTextures.Property.InvalidRegion,
+			simProperty = PropertyTextures.Property.StateChange,
 			textureFormat = TextureFormat.Alpha8,
+			filterMode = FilterMode.Bilinear,
+			updateEveryFrame = false,
+			updatedExternally = false,
+			blend = false,
+			blendSpeed = 0f
+		},
+		new PropertyTextures.TextureProperties
+		{
+			simProperty = PropertyTextures.Property.SolidLiquidGasMass,
+			textureFormat = TextureFormat.RGBA32,
 			filterMode = FilterMode.Point,
 			updateEveryFrame = false,
+			updatedExternally = false,
 			blend = false,
-			blendSpeed = 1f
+			blendSpeed = 0f
+		},
+		new PropertyTextures.TextureProperties
+		{
+			simProperty = PropertyTextures.Property.Temperature,
+			textureFormat = TextureFormat.RGB24,
+			filterMode = FilterMode.Bilinear,
+			updateEveryFrame = false,
+			updatedExternally = false,
+			blend = false,
+			blendSpeed = 0f
 		}
 	};
 
@@ -723,10 +672,7 @@ public class PropertyTextures : KMonoBehaviour
 		SolidLiquidGasMass,
 		WorldLight,
 		Liquid,
-		Metal,
-		Water,
 		Temperature,
-		InvalidRegion,
 		Num
 	}
 
@@ -739,6 +685,8 @@ public class PropertyTextures : KMonoBehaviour
 		public FilterMode filterMode;
 
 		public bool updateEveryFrame;
+
+		public bool updatedExternally;
 
 		public bool blend;
 

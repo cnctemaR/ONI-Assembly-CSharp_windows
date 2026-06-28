@@ -63,24 +63,7 @@ public class Infrared : MonoBehaviour
 	{
 		if (this.IsOn())
 		{
-			GridArea visibleArea = GridVisibleArea.GetVisibleArea();
-			this.cleared = false;
-			foreach (InfraredVisualizer infraredVisualizer in Components.InfraredVisualizers)
-			{
-				Vector3 position = infraredVisualizer.transform.position;
-				if (visibleArea.Min <= position && position <= visibleArea.Max)
-				{
-					infraredVisualizer.UpdateTemperature();
-				}
-			}
-		}
-		else if (!this.cleared)
-		{
-			this.cleared = true;
-			foreach (InfraredVisualizer infraredVisualizer2 in Components.InfraredVisualizers)
-			{
-				infraredVisualizer2.Clear();
-			}
+			GameComps.InfraredVisualizers.UpdateTemperature();
 		}
 	}
 
@@ -93,6 +76,4 @@ public class Infrared : MonoBehaviour
 	public static int temperatureParametersId;
 
 	public static Infrared Instance;
-
-	private bool cleared;
 }

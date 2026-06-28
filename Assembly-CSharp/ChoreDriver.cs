@@ -38,7 +38,7 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 
 	private Chore.Precondition.Context context;
 
-	public class StatesInstance : GameStateMachine<ChoreDriver.States, ChoreDriver.StatesInstance, ChoreDriver>.GameInstance
+	public class StatesInstance : GameStateMachine<ChoreDriver.States, ChoreDriver.StatesInstance, ChoreDriver, object>.GameInstance
 	{
 		public StatesInstance(ChoreDriver master)
 			: base(master)
@@ -116,14 +116,14 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 			}).OnSignal(this.stop, this.nochore);
 		}
 
-		public StateMachine<ChoreDriver.States, ChoreDriver.StatesInstance, ChoreDriver>.ObjectParameter<Chore> currentChore;
+		public StateMachine<ChoreDriver.States, ChoreDriver.StatesInstance, ChoreDriver, object>.ObjectParameter<Chore> currentChore;
 
-		public StateMachine<ChoreDriver.States, ChoreDriver.StatesInstance, ChoreDriver>.ObjectParameter<Chore> nextChore;
+		public StateMachine<ChoreDriver.States, ChoreDriver.StatesInstance, ChoreDriver, object>.ObjectParameter<Chore> nextChore;
 
-		public StateMachine<ChoreDriver.States, ChoreDriver.StatesInstance, ChoreDriver>.Signal stop;
+		public StateMachine<ChoreDriver.States, ChoreDriver.StatesInstance, ChoreDriver, object>.Signal stop;
 
-		public GameStateMachine<ChoreDriver.States, ChoreDriver.StatesInstance, ChoreDriver>.State nochore;
+		public GameStateMachine<ChoreDriver.States, ChoreDriver.StatesInstance, ChoreDriver, object>.State nochore;
 
-		public GameStateMachine<ChoreDriver.States, ChoreDriver.StatesInstance, ChoreDriver>.State haschore;
+		public GameStateMachine<ChoreDriver.States, ChoreDriver.StatesInstance, ChoreDriver, object>.State haschore;
 	}
 }

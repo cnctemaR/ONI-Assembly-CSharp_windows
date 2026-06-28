@@ -24,15 +24,23 @@ public class ReceptacleSideScreen : SideScreenContent
 		}
 		this.targetReceptacle = target;
 		base.gameObject.SetActive(true);
-		this.despositObjectMap = new Dictionary<KToggle, Tag>();
-		this.entityToggles.ForEach(delegate(KToggle rbi)
+		this.depositObjectMap = new Dictionary<ReceptacleToggle, ReceptacleSideScreen.SelectableEntity>();
+		this.entityToggles.ForEach(delegate(ReceptacleToggle rbi)
 		{
-			global::UnityEngine.Object.Destroy(rbi.transform.parent.gameObject);
+			global::UnityEngine.Object.Destroy(rbi.gameObject);
 		});
 		this.entityToggles.Clear();
 		foreach (Tag tag in target.possibleDepositObjectTags)
 		{
 			List<GameObject> prefabsWithTag = Assets.GetPrefabsWithTag(tag);
+			if (this.targetReceptacle.rotatable == null)
+			{
+				prefabsWithTag.RemoveAll(delegate(GameObject go)
+				{
+					IReceptacleDirection component3 = go.GetComponent<IReceptacleDirection>();
+					return component3 != null && component3.Direction != this.targetReceptacle.Direction;
+				});
+			}
 			List<IHasSortOrder> list = new List<IHasSortOrder>();
 			foreach (GameObject gameObject in prefabsWithTag)
 			{
@@ -48,25 +56,30 @@ public class ReceptacleSideScreen : SideScreenContent
 				GameObject gameObject2 = (hasSortOrder as MonoBehaviour).gameObject;
 				GameObject gameObject3 = Util.KInstantiateUI(this.entityToggle, this.requestObjectList, false);
 				gameObject3.SetActive(true);
-				KToggle newToggle = gameObject3.transform.GetChild(0).GetComponent<KToggle>();
+				ReceptacleToggle newToggle = gameObject3.GetComponent<ReceptacleToggle>();
+				IReceptacleDirection component2 = gameObject2.GetComponent<IReceptacleDirection>();
 				string properName = gameObject2.GetProperName();
-				gameObject3.GetComponentInChildrenOnly<LocText>().text = properName;
+				newToggle.title.text = properName;
 				Sprite entityIcon = this.GetEntityIcon(gameObject2.PrefabID());
 				if (entityIcon == null)
 				{
 					entityIcon = this.elementPlaceholderSpr;
 				}
-				newToggle.gameObject.GetComponentInChildrenOnly<Image>().sprite = entityIcon;
-				newToggle.onClick += delegate
+				newToggle.image.sprite = entityIcon;
+				newToggle.toggle.onClick += delegate
 				{
 					this.ToggleClicked(newToggle);
 				};
-				newToggle.onPointerEnter += delegate
+				newToggle.toggle.onPointerEnter += delegate
 				{
-					this.UpdateAvailableAmounts(null);
+					this.CheckAmountsAndUpdate(null);
 				};
-				newToggle.gameObject.SetActive(true);
-				this.despositObjectMap.Add(newToggle, gameObject2.PrefabID());
+				this.depositObjectMap.Add(newToggle, new ReceptacleSideScreen.SelectableEntity
+				{
+					tag = gameObject2.PrefabID(),
+					direction = ((component2 == null) ? SingleEntityReceptacle.ReceptacleDirection.Top : component2.Direction),
+					asset = gameObject2
+				});
 				this.entityToggles.Add(newToggle);
 			}
 		}
@@ -81,24 +94,26 @@ public class ReceptacleSideScreen : SideScreenContent
 			else
 			{
 				this.subtitleLabel.SetText(UI.UISIDESCREENS.PLANTERSIDESCREEN.SELECTSEED_TITLE);
-				this.requestSelectedEntityBtn.interactable = false;
+				this.requestSelectedEntityBtn.isInteractable = false;
 				this.descriptionLabel.SetText(UI.UISIDESCREENS.PLANTERSIDESCREEN.SELECTSEED_DESC);
+				this.HideAllDescriptorPanels();
 			}
 		}
-		this.targetReceptacle.gameObject.Subscribe(-1697596308, new EventSystem.EventHandler(this.UpdateState));
+		this.onStorageChangedHandle = this.targetReceptacle.gameObject.Subscribe(-1697596308, new Action<object>(this.CheckAmountsAndUpdate));
+		this.onOccupantValidChangedHandle = this.targetReceptacle.gameObject.Subscribe(-1820564715, new Action<object>(this.OnOccupantValidChanged));
 		this.UpdateState(null);
-		this.handle = GameScheduler.Instance.SchedulePeriodic(base.name, 1f, new Action<object>(this.UpdateAvailableAmounts), null, null, 0f);
+		this.handle = GameScheduler.Instance.SchedulePeriodic(base.name, 1f, new Action<object>(this.CheckAmountsAndUpdate), null, null, 0f, null);
 	}
 
 	private void UpdateState(object data)
 	{
 		this.requestSelectedEntityBtn.ClearOnClick();
+		if (this.targetReceptacle == null)
+		{
+			return;
+		}
 		if (this.CheckReceptacleOccupied())
 		{
-			this.targetReceptacle.Occupant.gameObject.Subscribe(1969584890, delegate
-			{
-				this.UpdateState(null);
-			});
 			Uprootable uprootable = this.targetReceptacle.Occupant.GetComponent<Uprootable>();
 			if (uprootable != null && uprootable.IsMarkedForUproot)
 			{
@@ -107,8 +122,8 @@ public class ReceptacleSideScreen : SideScreenContent
 					uprootable.ForceCancelUproot(null);
 					this.UpdateState(null);
 				};
-				this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = Strings.Get(this.targetReceptacle.stringKey_CancelRemove);
-				this.requestSelectedEntityBtn.interactable = true;
+				this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = UI.CANCELREMOVALFROMRECEPTACLE;
+				this.requestSelectedEntityBtn.isInteractable = true;
 				this.subtitleLabel.SetText(string.Format(Strings.Get(this.subtitleStringAwaitingRemoval).ToString(), this.targetReceptacle.Occupant.GetProperName()));
 			}
 			else
@@ -118,15 +133,14 @@ public class ReceptacleSideScreen : SideScreenContent
 					this.targetReceptacle.OrderRemoveOccupant();
 					this.UpdateState(null);
 				};
-				this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = Strings.Get(this.targetReceptacle.stringKey_Remove);
-				this.requestSelectedEntityBtn.interactable = true;
+				this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = UI.USERMENUACTIONS.UPROOT.NAME;
+				this.requestSelectedEntityBtn.isInteractable = true;
 				this.subtitleLabel.SetText(string.Format(Strings.Get(this.subtitleStringEntityDeposited).ToString(), this.targetReceptacle.Occupant.GetProperName()));
 			}
 			this.ToggleSeedSelector(false);
 			Tag tag = this.targetReceptacle.Occupant.GetComponent<KSelectable>().PrefabID();
 			this.ConfigureActiveEntity(tag);
-			string resultDescription = this.GetResultDescription(this.targetReceptacle.Occupant);
-			this.descriptionLabel.SetText(resultDescription);
+			this.SetResultDescriptions(this.targetReceptacle.Occupant);
 		}
 		else if (this.targetReceptacle.GetActiveRequest != null)
 		{
@@ -137,16 +151,15 @@ public class ReceptacleSideScreen : SideScreenContent
 				this.UpdateAvailableAmounts(null);
 				this.UpdateState(null);
 			};
-			this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = Strings.Get(this.targetReceptacle.stringKey_CancelPlace);
-			this.requestSelectedEntityBtn.interactable = true;
+			this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = UI.CANCELPLACEINRECEPTACLE;
+			this.requestSelectedEntityBtn.isInteractable = true;
 			this.ToggleSeedSelector(false);
 			this.ConfigureActiveEntity(this.targetReceptacle.GetActiveRequest.tags[0]);
 			GameObject prefab = Assets.GetPrefab(this.targetReceptacle.GetActiveRequest.tags[0]);
 			if (prefab != null)
 			{
 				this.subtitleLabel.SetText(string.Format(Strings.Get(this.subtitleStringAwaitingDelivery).ToString(), prefab.GetProperName()));
-				string resultDescription2 = this.GetResultDescription(prefab);
-				this.descriptionLabel.SetText(resultDescription2);
+				this.SetResultDescriptions(prefab);
 			}
 		}
 		else if (this.selectedEntityToggle != null)
@@ -157,32 +170,65 @@ public class ReceptacleSideScreen : SideScreenContent
 				this.UpdateAvailableAmounts(null);
 				this.UpdateState(null);
 			};
-			this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = Strings.Get(this.targetReceptacle.stringKey_Place);
-			bool flag = this.GetAvailableAmount(this.despositObjectMap[this.selectedEntityToggle]) > 0f;
-			this.requestSelectedEntityBtn.interactable = flag;
-			this.SetImageToggleState(this.selectedEntityToggle, (!flag) ? ImageToggleState.State.DisabledActive : ImageToggleState.State.Active);
+			this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = UI.PLACEINRECEPTACLE;
+			bool flag = this.ValidRotationForDeposit(this.depositObjectMap[this.selectedEntityToggle].direction) && this.GetAvailableAmount(this.depositObjectMap[this.selectedEntityToggle].tag) > 0f && this.AdditionalCanDepositTest();
+			this.requestSelectedEntityBtn.isInteractable = flag;
+			this.SetImageToggleState(this.selectedEntityToggle.toggle, (!flag) ? ImageToggleState.State.DisabledActive : ImageToggleState.State.Active);
 			this.ToggleSeedSelector(true);
 			GameObject prefab2 = Assets.GetPrefab(this.selectedDepositObjectTag);
 			if (prefab2 != null)
 			{
 				this.subtitleLabel.SetText(string.Format(Strings.Get(this.subtitleStringAwaitingSelection).ToString(), prefab2.GetProperName()));
-				string resultDescription3 = this.GetResultDescription(prefab2);
-				this.descriptionLabel.SetText(resultDescription3);
+				this.SetResultDescriptions(prefab2);
 			}
+			this.targetReceptacle.SetPreview(this.depositObjectMap[this.selectedEntityToggle].tag, false);
 		}
 		else
 		{
-			this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = Strings.Get(this.targetReceptacle.stringKey_Place);
-			this.requestSelectedEntityBtn.interactable = false;
+			this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = UI.PLACEINRECEPTACLE;
+			this.requestSelectedEntityBtn.isInteractable = false;
 			this.ToggleSeedSelector(true);
 		}
+		this.UpdateListeners();
+	}
+
+	private void UpdateListeners()
+	{
+		if (this.CheckReceptacleOccupied())
+		{
+			if (this.onObjectDestroyedHandle == -1)
+			{
+				this.onObjectDestroyedHandle = this.targetReceptacle.Occupant.gameObject.Subscribe(1969584890, delegate
+				{
+					this.UpdateState(null);
+				});
+			}
+		}
+		else if (this.onObjectDestroyedHandle != -1)
+		{
+			this.onObjectDestroyedHandle = -1;
+		}
+	}
+
+	private void OnOccupantValidChanged(object obj)
+	{
+		if (this.targetReceptacle == null)
+		{
+			return;
+		}
+		this.UpdateState(null);
+	}
+
+	protected virtual bool AdditionalCanDepositTest()
+	{
+		return true;
 	}
 
 	private void ClearSelection()
 	{
-		foreach (KeyValuePair<KToggle, Tag> keyValuePair in this.despositObjectMap)
+		foreach (KeyValuePair<ReceptacleToggle, ReceptacleSideScreen.SelectableEntity> keyValuePair in this.depositObjectMap)
 		{
-			keyValuePair.Key.Deselect();
+			keyValuePair.Key.toggle.Deselect();
 		}
 	}
 
@@ -227,6 +273,28 @@ public class ReceptacleSideScreen : SideScreenContent
 		this.UpdateAvailableAmounts(null);
 	}
 
+	public override void ClearTarget()
+	{
+		if (this.targetReceptacle != null)
+		{
+			if (this.CheckReceptacleOccupied())
+			{
+				this.targetReceptacle.Occupant.gameObject.Unsubscribe(this.onObjectDestroyedHandle);
+				this.onObjectDestroyedHandle = -1;
+			}
+			this.targetReceptacle.Unsubscribe(this.onStorageChangedHandle);
+			this.onStorageChangedHandle = -1;
+			this.targetReceptacle.Unsubscribe(this.onOccupantValidChangedHandle);
+			this.onOccupantValidChangedHandle = -1;
+			if (this.targetReceptacle.GetActiveRequest == null)
+			{
+				this.targetReceptacle.SetPreview(Tag.Invalid, false);
+			}
+			this.handle.Clear();
+			this.targetReceptacle = null;
+		}
+	}
+
 	private void SetImageToggleState(KToggle toggle, ImageToggleState.State state)
 	{
 		switch (state)
@@ -250,36 +318,52 @@ public class ReceptacleSideScreen : SideScreenContent
 		}
 	}
 
-	private void UpdateAvailableAmounts(object data)
+	private void CheckAmountsAndUpdate(object data)
 	{
-		foreach (KeyValuePair<KToggle, Tag> keyValuePair in this.despositObjectMap)
+		bool flag = this.UpdateAvailableAmounts(null);
+		if (flag)
 		{
-			if (!keyValuePair.Key.transform.parent.gameObject.activeSelf)
+			this.UpdateState(null);
+		}
+	}
+
+	private bool UpdateAvailableAmounts(object data)
+	{
+		bool flag = false;
+		foreach (KeyValuePair<ReceptacleToggle, ReceptacleSideScreen.SelectableEntity> keyValuePair in this.depositObjectMap)
+		{
+			if (!keyValuePair.Key.gameObject.activeSelf)
 			{
-				keyValuePair.Key.transform.parent.gameObject.SetActive(true);
+				keyValuePair.Key.gameObject.SetActive(true);
 			}
-			float availableAmount = this.GetAvailableAmount(keyValuePair.Value);
-			keyValuePair.Key.transform.parent.gameObject.GetComponentsInChildren<LocText>()[1].text = availableAmount.ToString();
-			if (availableAmount <= 0f)
+			float availableAmount = this.GetAvailableAmount(keyValuePair.Value.tag);
+			if (keyValuePair.Value.lastAmount != availableAmount)
 			{
-				if (this.selectedEntityToggle != keyValuePair.Key)
+				flag = true;
+				keyValuePair.Value.lastAmount = availableAmount;
+				keyValuePair.Key.amount.text = availableAmount.ToString();
+				if (!this.ValidRotationForDeposit(keyValuePair.Value.direction) || availableAmount <= 0f)
 				{
-					this.SetImageToggleState(keyValuePair.Key, ImageToggleState.State.Disabled);
+					if (this.selectedEntityToggle != keyValuePair.Key)
+					{
+						this.SetImageToggleState(keyValuePair.Key.toggle, ImageToggleState.State.Disabled);
+					}
+					else
+					{
+						this.SetImageToggleState(keyValuePair.Key.toggle, ImageToggleState.State.DisabledActive);
+					}
+				}
+				else if (this.selectedEntityToggle != keyValuePair.Key)
+				{
+					this.SetImageToggleState(keyValuePair.Key.toggle, ImageToggleState.State.Inactive);
 				}
 				else
 				{
-					this.SetImageToggleState(keyValuePair.Key, ImageToggleState.State.DisabledActive);
+					this.SetImageToggleState(keyValuePair.Key.toggle, ImageToggleState.State.Active);
 				}
 			}
-			else if (this.selectedEntityToggle != keyValuePair.Key)
-			{
-				this.SetImageToggleState(keyValuePair.Key, ImageToggleState.State.Inactive);
-			}
-			else
-			{
-				this.SetImageToggleState(keyValuePair.Key, ImageToggleState.State.Active);
-			}
 		}
+		return flag;
 	}
 
 	private float GetAvailableAmount(Tag tag)
@@ -287,16 +371,21 @@ public class ReceptacleSideScreen : SideScreenContent
 		return WorldInventory.Instance.GetAmount(tag);
 	}
 
-	private void ToggleClicked(KToggle toggle)
+	private bool ValidRotationForDeposit(SingleEntityReceptacle.ReceptacleDirection depositDir)
 	{
-		if (!this.despositObjectMap.ContainsKey(toggle))
+		return this.targetReceptacle.rotatable == null || depositDir == this.targetReceptacle.Direction;
+	}
+
+	private void ToggleClicked(ReceptacleToggle toggle)
+	{
+		if (!this.depositObjectMap.ContainsKey(toggle))
 		{
 			Debug.LogError("Recipe not found on recipe list.");
 			return;
 		}
 		this.selectedEntityToggle = toggle;
 		this.entityPreviousSelectionMap[this.targetReceptacle] = this.entityToggles.IndexOf(toggle);
-		this.selectedDepositObjectTag = this.despositObjectMap[toggle];
+		this.selectedDepositObjectTag = this.depositObjectMap[toggle].tag;
 		this.UpdateAvailableAmounts(null);
 		this.UpdateState(null);
 	}
@@ -308,10 +397,10 @@ public class ReceptacleSideScreen : SideScreenContent
 
 	private bool CheckReceptacleOccupied()
 	{
-		return this.targetReceptacle.Occupant != null;
+		return this.targetReceptacle != null && this.targetReceptacle.Occupant != null;
 	}
 
-	protected virtual string GetResultDescription(GameObject go)
+	protected virtual void SetResultDescriptions(GameObject go)
 	{
 		string text = "Entity prefab has no info description component.";
 		InfoDescription component = go.GetComponent<InfoDescription>();
@@ -319,7 +408,15 @@ public class ReceptacleSideScreen : SideScreenContent
 		{
 			text = component.description;
 		}
-		return text;
+		this.descriptionLabel.SetText(text);
+	}
+
+	protected virtual void HideAllDescriptorPanels()
+	{
+		for (int i = 0; i < this.descriptorPanels.Count; i++)
+		{
+			this.descriptorPanels[i].gameObject.SetActive(false);
+		}
 	}
 
 	[SerializeField]
@@ -330,7 +427,7 @@ public class ReceptacleSideScreen : SideScreenContent
 	public GameObject nothingDiscoveredContainer;
 
 	[SerializeField]
-	private LocText descriptionLabel;
+	protected LocText descriptionLabel;
 
 	private Dictionary<SingleEntityReceptacle, int> entityPreviousSelectionMap = new Dictionary<SingleEntityReceptacle, int>();
 
@@ -348,6 +445,9 @@ public class ReceptacleSideScreen : SideScreenContent
 
 	[SerializeField]
 	private LocText subtitleLabel;
+
+	[SerializeField]
+	private List<DescriptorPanel> descriptorPanels;
 
 	public Material defaultMaterial;
 
@@ -374,15 +474,32 @@ public class ReceptacleSideScreen : SideScreenContent
 	[SerializeField]
 	private Sprite elementPlaceholderSpr;
 
-	private KToggle selectedEntityToggle;
+	private ReceptacleToggle selectedEntityToggle;
 
-	private SingleEntityReceptacle targetReceptacle;
+	protected SingleEntityReceptacle targetReceptacle;
 
 	private Tag selectedDepositObjectTag;
 
-	private Dictionary<KToggle, Tag> despositObjectMap;
+	private Dictionary<ReceptacleToggle, ReceptacleSideScreen.SelectableEntity> depositObjectMap;
 
-	private List<KToggle> entityToggles = new List<KToggle>();
+	private List<ReceptacleToggle> entityToggles = new List<ReceptacleToggle>();
+
+	private int onObjectDestroyedHandle = -1;
+
+	private int onOccupantValidChangedHandle = -1;
+
+	private int onStorageChangedHandle = -1;
 
 	private SchedulerHandle handle;
+
+	protected class SelectableEntity
+	{
+		public Tag tag;
+
+		public SingleEntityReceptacle.ReceptacleDirection direction;
+
+		public GameObject asset;
+
+		public float lastAmount = -1f;
+	}
 }

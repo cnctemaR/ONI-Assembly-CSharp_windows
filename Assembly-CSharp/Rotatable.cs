@@ -3,30 +3,44 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Rotatable : KMonoBehaviour, ISaveLoadableJson
+public class Rotatable : KMonoBehaviour, ISaveLoadable
 {
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		BuildingDef def = base.GetComponent<Building>().Def;
-		int widthInCells = def.WidthInCells;
-		this.pivot = new Vector3((float)((widthInCells + 1) % 2) * 0.5f, 0.5f, 0f);
+		if (this.building != null)
+		{
+			BuildingDef def = base.GetComponent<Building>().Def;
+			this.SetSize(def.WidthInCells, def.HeightInCells);
+		}
 		this.OrientVisualizer(this.orientation);
+		this.OrientCollider(this.orientation);
+	}
+
+	public void SetSize(int width, int height)
+	{
+		this.width = width;
+		this.height = height;
+		this.pivot = new Vector3((float)((width + 1) % 2) * 0.5f, 0.5f, 0f);
+		this.visualizerOffset = new Vector3((float)((width + 1) % 2) * 0.5f, 0f, 0f);
 	}
 
 	public Orientation Rotate()
 	{
-		Rotatable.PermittedRotations permittedRotations = this.permittedRotations;
-		if (permittedRotations != Rotatable.PermittedRotations.R90)
+		switch (this.permittedRotations)
 		{
-			if (permittedRotations == Rotatable.PermittedRotations.R360)
-			{
-				this.orientation = (this.orientation + 1) % Orientation.Num;
-			}
-		}
-		else
-		{
-			this.orientation = ((this.orientation != Orientation.Up) ? Orientation.Up : Orientation.Right);
+		case PermittedRotations.R90:
+			this.orientation = ((this.orientation != Orientation.Neutral) ? Orientation.Neutral : Orientation.R90);
+			break;
+		case PermittedRotations.R360:
+			this.orientation = (this.orientation + 1) % Orientation.NumRotations;
+			break;
+		case PermittedRotations.FlipH:
+			this.orientation = ((this.orientation != Orientation.Neutral) ? Orientation.Neutral : Orientation.FlipH);
+			break;
+		case PermittedRotations.FlipV:
+			this.orientation = ((this.orientation != Orientation.Neutral) ? Orientation.Neutral : Orientation.FlipV);
+			break;
 		}
 		this.OrientVisualizer(this.orientation);
 		return this.orientation;
@@ -36,17 +50,37 @@ public class Rotatable : KMonoBehaviour, ISaveLoadableJson
 	{
 		this.orientation = new_orientation;
 		this.OrientVisualizer(new_orientation);
+		this.OrientCollider(new_orientation);
 	}
 
-	private Quaternion GetRotation(Orientation orientation)
+	public void Match(Rotatable other)
 	{
-		float visualizerRotation = this.GetVisualizerRotation();
-		return Quaternion.Euler(0f, 0f, visualizerRotation);
+		this.pivot = other.pivot;
+		this.visualizerOffset = other.visualizerOffset;
+		this.permittedRotations = other.permittedRotations;
+		this.orientation = other.orientation;
+		this.OrientVisualizer(this.orientation);
+		this.OrientCollider(this.orientation);
 	}
 
 	public float GetVisualizerRotation()
 	{
+		PermittedRotations permittedRotations = this.permittedRotations;
+		if (permittedRotations != PermittedRotations.R90 && permittedRotations != PermittedRotations.R360)
+		{
+			return 0f;
+		}
 		return -90f * (float)this.orientation;
+	}
+
+	public bool GetVisualizerFlipX()
+	{
+		return this.orientation == Orientation.FlipH;
+	}
+
+	public bool GetVisualizerFlipY()
+	{
+		return this.orientation == Orientation.FlipV;
 	}
 
 	public Vector3 GetVisualizerPivot()
@@ -54,34 +88,57 @@ public class Rotatable : KMonoBehaviour, ISaveLoadableJson
 		return this.pivot;
 	}
 
+	public Vector3 GetVisualizerOffset()
+	{
+		return this.visualizerOffset;
+	}
+
 	private void OrientVisualizer(Orientation orientation)
 	{
 		float visualizerRotation = this.GetVisualizerRotation();
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		component.Offset = base.GetComponent<Building>().Def.GetVisualizerOffset();
+		component.Offset = this.GetVisualizerOffset();
 		component.Rotation = visualizerRotation;
+		component.FlipX = this.GetVisualizerFlipX();
+		component.FlipY = this.GetVisualizerFlipY();
 		component.Pivot = this.GetVisualizerPivot();
 		this.Trigger(-1643076535, this);
 	}
 
-	public CellOffset GetCellOffset()
+	private void OrientCollider(Orientation orientation)
 	{
-		return Rotatable.orientationOffsets[(int)this.orientation];
-	}
-
-	public static CellOffset GetCellOffset(Orientation orientation)
-	{
-		return Rotatable.orientationOffsets[(int)orientation];
-	}
-
-	public CellOffset GetRotatedCellOffset(Orientation direction)
-	{
-		if (direction != Orientation.None)
+		BoxCollider2D component = base.GetComponent<BoxCollider2D>();
+		if (component == null)
 		{
-			int num = (int)((this.orientation + (int)direction) % Orientation.Num);
-			return Rotatable.orientationOffsets[num];
+			return;
 		}
-		return CellOffset.none;
+		switch (orientation)
+		{
+		default:
+			component.offset = new Vector2(0f, 0.5f * (float)this.height);
+			component.size = new Vector2((float)this.width, (float)this.height);
+			break;
+		case Orientation.R90:
+			component.offset = new Vector2(0.5f * (float)(this.height - 1), 0.5f);
+			component.size = new Vector2((float)this.height, (float)this.width);
+			break;
+		case Orientation.R180:
+			component.offset = new Vector2(0f, -0.5f * (float)(this.height - 2));
+			component.size = new Vector2((float)this.width, (float)this.height);
+			break;
+		case Orientation.R270:
+			component.offset = new Vector2(-0.5f * (float)(this.height - 1), 0.5f);
+			component.size = new Vector2((float)this.height, (float)this.width);
+			break;
+		case Orientation.FlipH:
+			component.offset = new Vector2(0f, 0.5f * (float)this.height);
+			component.size = new Vector2((float)this.width, (float)this.height);
+			break;
+		case Orientation.FlipV:
+			component.offset = new Vector2(0f, -0.5f * (float)(this.height - 2));
+			component.size = new Vector2((float)this.width, (float)this.height);
+			break;
+		}
 	}
 
 	public CellOffset GetRotatedCellOffset(CellOffset offset)
@@ -93,17 +150,43 @@ public class Rotatable : KMonoBehaviour, ISaveLoadableJson
 	{
 		switch (orientation)
 		{
-		case Orientation.Right:
-			offset = new CellOffset(offset.y, -offset.x);
-			break;
-		case Orientation.Down:
-			offset = new CellOffset(-offset.x, -offset.y);
-			break;
-		case Orientation.Left:
-			offset = new CellOffset(-offset.y, offset.x);
-			break;
+		default:
+			return offset;
+		case Orientation.R90:
+			return new CellOffset(offset.y, -offset.x);
+		case Orientation.R180:
+			return new CellOffset(-offset.x, -offset.y);
+		case Orientation.R270:
+			return new CellOffset(-offset.y, offset.x);
+		case Orientation.FlipH:
+			return new CellOffset(-offset.x, offset.y);
+		case Orientation.FlipV:
+			return new CellOffset(offset.x, -offset.y);
 		}
-		return offset;
+	}
+
+	public Vector3 GetRotatedOffset(Vector3 offset)
+	{
+		return Rotatable.GetRotatedOffset(offset, this.orientation);
+	}
+
+	public static Vector3 GetRotatedOffset(Vector3 offset, Orientation orientation)
+	{
+		switch (orientation)
+		{
+		default:
+			return offset;
+		case Orientation.R90:
+			return new Vector3(offset.y, -offset.x);
+		case Orientation.R180:
+			return new Vector3(-offset.x, -offset.y);
+		case Orientation.R270:
+			return new Vector3(-offset.y, offset.x);
+		case Orientation.FlipH:
+			return new Vector3(-offset.x, offset.y);
+		case Orientation.FlipV:
+			return new Vector3(offset.x, -offset.y);
+		}
 	}
 
 	public Orientation GetOrientation()
@@ -111,18 +194,19 @@ public class Rotatable : KMonoBehaviour, ISaveLoadableJson
 		return this.orientation;
 	}
 
-	public Orientation GetRotatedOrientation(Orientation o)
-	{
-		return (o + (int)this.orientation) % Orientation.Num;
-	}
-
 	public bool IsRotated
 	{
 		get
 		{
-			return this.orientation != Orientation.Up;
+			return this.orientation != Orientation.Neutral;
 		}
 	}
+
+	[MyCmpReq]
+	private KBatchedAnimController batchedAnimController;
+
+	[MyCmpGet]
+	private Building building;
 
 	[Serialize]
 	private Orientation orientation;
@@ -130,22 +214,14 @@ public class Rotatable : KMonoBehaviour, ISaveLoadableJson
 	[SerializeField]
 	private Vector3 pivot = Vector3.zero;
 
-	public Rotatable.PermittedRotations permittedRotations = Rotatable.PermittedRotations.R360;
+	[SerializeField]
+	private Vector3 visualizerOffset = Vector3.zero;
 
-	public string orientationText = "Orientation";
+	public PermittedRotations permittedRotations;
 
-	private static readonly CellOffset[] orientationOffsets = new CellOffset[]
-	{
-		new CellOffset(0, 1),
-		new CellOffset(1, 0),
-		new CellOffset(0, -1),
-		new CellOffset(-1, 0)
-	};
+	[SerializeField]
+	private int width;
 
-	public enum PermittedRotations
-	{
-		Unrotatable,
-		R90,
-		R360
-	}
+	[SerializeField]
+	private int height;
 }

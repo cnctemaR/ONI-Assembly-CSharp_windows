@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using KSerialization;
 
 public class Filterable : KMonoBehaviour
 {
@@ -55,6 +56,7 @@ public class Filterable : KMonoBehaviour
 
 	private Tag defaultValue = GameTags.Void;
 
+	[Serialize]
 	private Tag selectedTag;
 
 	private static Operational.Flag filterSelected = new Operational.Flag("filterSelected", Operational.Flag.Type.Requirement);

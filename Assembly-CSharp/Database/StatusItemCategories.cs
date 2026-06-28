@@ -15,6 +15,14 @@ namespace Database
 			this.EntityReceptacle = new StatusItemCategory("EntityReceptacle", this, "EntityReceptacle");
 			this.Hitpoints = new StatusItemCategory("Hitpoints", this, "Hitpoints");
 			this.WoundEffects = new StatusItemCategory("WoundEffects", this, "WoundEffects");
+			this.PreservationState = new StatusItemCategory("PreservationState", this, "PreservationState");
+			this.PreservationTemperature = new StatusItemCategory("PreservationTemperature", this, "PreservationTemperature");
+			this.PreservationAtmosphere = new StatusItemCategory("PreservationAtmosphere", this, "PreservationAtmosphere");
+			this.ExhaustTemperature = new StatusItemCategory("ExhaustTemperature", this, "ExhaustTemperature");
+			this.OperatingEnergy = new StatusItemCategory("OperatingEnergy", this, "OperatingEnergy");
+			this.AccessControl = new StatusItemCategory("AccessControl", this, "AccessControl");
+			this.Heat = new StatusItemCategory("Heat", this, "Heat");
+			this.Yield = new StatusItemCategory("Yield", this, "Yield");
 		}
 
 		public StatusItemCategory Main;
@@ -32,5 +40,21 @@ namespace Database
 		public StatusItemCategory Hitpoints;
 
 		public StatusItemCategory WoundEffects;
+
+		public StatusItemCategory PreservationState;
+
+		public StatusItemCategory PreservationTemperature;
+
+		public StatusItemCategory PreservationAtmosphere;
+
+		public StatusItemCategory OperatingEnergy;
+
+		public StatusItemCategory ExhaustTemperature;
+
+		public StatusItemCategory AccessControl;
+
+		public StatusItemCategory Heat;
+
+		public StatusItemCategory Yield;
 	}
 }

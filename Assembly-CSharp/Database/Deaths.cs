@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 
 namespace Database
 {
@@ -7,13 +8,14 @@ namespace Database
 		public Deaths(ResourceSet parent)
 			: base("Deaths", parent)
 		{
-			this.Generic = new Death("Generic", this, "Generic", "{Target} has died.", "dead_on_back", "dead_on_back");
-			this.Frozen = new Death("Frozen", this, "Frozen", "{Target} has frozen to death.", "death_freeze_trans", "death_freeze_solid");
-			this.Suffocation = new Death("Suffocation", this, "Suffocation", "{Target} has suffocated to death.", "death_suffocation", "dead_on_back");
-			this.Starvation = new Death("Starvation", this, "Starvation", "{Target} has starved to death.", "dead_on_back", "dead_on_back");
-			this.Overheating = new Death("Overheating", this, "Overheating", "{Target} has overheated to death.", "dead_on_back", "dead_on_back");
-			this.Drowned = new Death("Drowned", this, "Drowned", "{Target} has drowned.", "death_suffocation", "dead_on_back");
-			this.Explosion = new Death("Explosion", this, "Explosion", "{Target} has died in an explosion.", "dead_on_back", "dead_on_back");
+			this.Generic = new Death("Generic", this, DUPLICANTS.DEATHS.GENERIC.NAME, DUPLICANTS.DEATHS.GENERIC.DESCRIPTION, "dead_on_back", "dead_on_back");
+			this.Frozen = new Death("Frozen", this, DUPLICANTS.DEATHS.FROZEN.NAME, DUPLICANTS.DEATHS.FROZEN.DESCRIPTION, "death_freeze_trans", "death_freeze_solid");
+			this.Suffocation = new Death("Suffocation", this, DUPLICANTS.DEATHS.SUFFOCATION.NAME, DUPLICANTS.DEATHS.SUFFOCATION.DESCRIPTION, "death_suffocation", "dead_on_back");
+			this.Starvation = new Death("Starvation", this, DUPLICANTS.DEATHS.STARVATION.NAME, DUPLICANTS.DEATHS.STARVATION.DESCRIPTION, "dead_on_back", "dead_on_back");
+			this.Overheating = new Death("Overheating", this, DUPLICANTS.DEATHS.OVERHEATING.NAME, DUPLICANTS.DEATHS.OVERHEATING.DESCRIPTION, "dead_on_back", "dead_on_back");
+			this.Drowned = new Death("Drowned", this, DUPLICANTS.DEATHS.DROWNED.NAME, DUPLICANTS.DEATHS.DROWNED.DESCRIPTION, "death_suffocation", "dead_on_back");
+			this.Explosion = new Death("Explosion", this, DUPLICANTS.DEATHS.EXPLOSION.NAME, DUPLICANTS.DEATHS.EXPLOSION.DESCRIPTION, "dead_on_back", "dead_on_back");
+			this.Slain = new Death("Combat", this, DUPLICANTS.DEATHS.COMBAT.NAME, DUPLICANTS.DEATHS.COMBAT.DESCRIPTION, "dead_on_back", "dead_on_back");
 		}
 
 		public Death Generic;
@@ -23,6 +25,8 @@ namespace Database
 		public Death Suffocation;
 
 		public Death Starvation;
+
+		public Death Slain;
 
 		public Death Overheating;
 

@@ -13,7 +13,7 @@ public class DebugGoToMonitor : StateMachineComponent<DebugGoToMonitor.StatesIns
 		base.smi.StartSM();
 	}
 
-	public class StatesInstance : GameStateMachine<DebugGoToMonitor.States, DebugGoToMonitor.StatesInstance, DebugGoToMonitor>.GameInstance
+	public class StatesInstance : GameStateMachine<DebugGoToMonitor.States, DebugGoToMonitor.StatesInstance, DebugGoToMonitor, object>.GameInstance
 	{
 		public StatesInstance(DebugGoToMonitor smi)
 			: base(smi)
@@ -30,8 +30,8 @@ public class DebugGoToMonitor : StateMachineComponent<DebugGoToMonitor.StatesIns
 			this.moving.ToggleChore((DebugGoToMonitor.StatesInstance smi) => new MoveChore(smi.master, Db.Get().ChoreTypes.DebugGoTo, (MoveChore.StatesInstance smii) => DebugHandler.GetMouseCell(), false), this.satisfied, false);
 		}
 
-		public GameStateMachine<DebugGoToMonitor.States, DebugGoToMonitor.StatesInstance, DebugGoToMonitor>.State satisfied;
+		public GameStateMachine<DebugGoToMonitor.States, DebugGoToMonitor.StatesInstance, DebugGoToMonitor, object>.State satisfied;
 
-		public GameStateMachine<DebugGoToMonitor.States, DebugGoToMonitor.StatesInstance, DebugGoToMonitor>.State moving;
+		public GameStateMachine<DebugGoToMonitor.States, DebugGoToMonitor.StatesInstance, DebugGoToMonitor, object>.State moving;
 	}
 }

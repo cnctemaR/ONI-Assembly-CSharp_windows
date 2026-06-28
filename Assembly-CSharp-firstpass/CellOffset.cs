@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 [Serializable]
 public struct CellOffset : IEquatable<CellOffset>
@@ -7,6 +8,12 @@ public struct CellOffset : IEquatable<CellOffset>
 	{
 		this.x = x;
 		this.y = y;
+	}
+
+	public CellOffset(Vector2 offset)
+	{
+		this.x = Mathf.RoundToInt(offset.x);
+		this.y = Mathf.RoundToInt(offset.y);
 	}
 
 	public static CellOffset none
@@ -20,6 +27,11 @@ public struct CellOffset : IEquatable<CellOffset>
 	public Vector2I ToVector2I()
 	{
 		return new Vector2I(this.x, this.y);
+	}
+
+	public Vector3 ToVector3()
+	{
+		return new Vector3((float)this.x, (float)this.y, 0f);
 	}
 
 	public CellOffset Offset(CellOffset offset)

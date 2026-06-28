@@ -3,7 +3,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class EggIncubator : KMonoBehaviour, ISaveLoadableJson
+public class EggIncubator : KMonoBehaviour, ISaveLoadable
 {
 	public Pickupable egg
 	{
@@ -27,14 +27,14 @@ public class EggIncubator : KMonoBehaviour, ISaveLoadableJson
 		if (this.fetchChore == null && this.egg == null)
 		{
 			Action<Chore> action = new Action<Chore>(this.OnFetchComplete);
-			this.fetchChore = new FetchChore(this.storage, 1f, new Tag[] { GameTags.Egg }, null, true, action, null, null, true);
+			this.fetchChore = new FetchChore(this.storage, 1f, new Tag[] { GameTags.Egg }, null, true, action, null, null, FetchOrder2.OperationalRequirement.Operational, 0);
 		}
 	}
 
 	private void OnFetchComplete(Chore chore)
 	{
 		this.egg = this.fetchChore.fetchTarget;
-		this.egg.gameObject.layer = 3;
+		this.egg.gameObject.layer = 1;
 		this.egg.transform.SetLocalPosition(this.eggPositionPoint);
 		this.fetchChore = null;
 		this.SetOperation();
@@ -61,7 +61,7 @@ public class EggIncubator : KMonoBehaviour, ISaveLoadableJson
 	{
 		this.storage.Remove(eggObject);
 		this.fetchChore = null;
-		this.egg.gameObject.layer = 17;
+		this.egg.gameObject.layer = 3;
 		KBatchedAnimController component = this.egg.GetComponent<KBatchedAnimController>();
 		component.enabled = false;
 		component.enabled = true;

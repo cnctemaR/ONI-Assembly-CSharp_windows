@@ -3,19 +3,17 @@ using System.Collections.Generic;
 using System.Text;
 using System.Timers;
 using Newtonsoft.Json;
-using Steamworks;
 using UnityEngine;
 
 public class KleiMetrics : ThreadedHttps<KleiMetrics>, KleiMetricsInterface
 {
 	public KleiMetrics()
 	{
-		this.CLIENT_KEY = "2Ehpf6QcWdCXV8eqbbiJBkrqD6xc8waX";
 		this.LIVE_ENDPOINT = "metric.kleientertainment.com/write";
 		this.serviceName = "KleiMetrics";
-		KleiMetrics.steamId = CSteamID.Nil;
+		this.CLIENT_KEY = DistributionPlatform.Inst.MetricsClientKey;
+		this.PlatformUserIDFieldName = DistributionPlatform.Inst.MetricsUserIDField;
 		KleiMetrics.sessionID = -1;
-		KleiMetrics.userID = null;
 		this.enabled = PlayerPrefs.GetInt("ENABLE_METRICS", 1) == 1;
 	}
 
@@ -36,23 +34,16 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>, KleiMetricsInterface
 		return "OK";
 	}
 
-	public static string SteamID()
+	public static string PlatformUserID()
 	{
-		if (KleiMetrics.steamId == CSteamID.Nil && SteamManager.Initialized)
-		{
-			KleiMetrics.steamId = SteamUser.GetSteamID();
-		}
-		return (!(KleiMetrics.steamId == CSteamID.Nil)) ? KleiMetrics.steamId.ToString() : null;
+		DistributionPlatform.User localUser = DistributionPlatform.Inst.LocalUser;
+		return (localUser == null) ? string.Empty : localUser.Id.ToString();
 	}
 
 	public static string UserID()
 	{
-		if (KleiMetrics.steamId == CSteamID.Nil && SteamManager.Initialized)
-		{
-			KleiMetrics.steamId = SteamUser.GetSteamID();
-		}
-		KleiMetrics.userID = ((!(KleiMetrics.steamId == CSteamID.Nil)) ? KleiMetrics.steamId.ToString() : Environment.UserName);
-		return KleiMetrics.userID;
+		DistributionPlatform.User localUser = DistributionPlatform.Inst.LocalUser;
+		return (localUser == null) ? string.Empty : localUser.Id.ToString();
 	}
 
 	private void IncrementSessionCount()
@@ -222,7 +213,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>, KleiMetricsInterface
 		dictionary.Add("SessionID", KleiMetrics.SessionID());
 		dictionary.Add("SessionStartTimeStamp", this.startTime.ToString());
 		dictionary.Add("SessionTimeSeconds", this.GetSessionTime());
-		string text = KleiMetrics.SteamID();
+		string text = KleiMetrics.PlatformUserID();
 		if (text != null)
 		{
 		}
@@ -245,7 +236,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>, KleiMetricsInterface
 			dictionary.Add("Level", text2);
 		}
 		dictionary.Add("Branch", "release");
-		dictionary.Add("Build", 208689U);
+		dictionary.Add("Build", 217311U);
 		return dictionary;
 	}
 
@@ -266,10 +257,10 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>, KleiMetricsInterface
 		this.IncrementSessionCount();
 		Dictionary<string, object> userSession = this.GetUserSession();
 		userSession.Add("StartSession", true);
-		string text = KleiMetrics.SteamID();
+		string text = KleiMetrics.PlatformUserID();
 		if (text != null)
 		{
-			userSession.Add("SteamUserID", text);
+			userSession.Add(this.PlatformUserIDFieldName, text);
 		}
 		userSession.Add("UserName", Environment.UserName);
 		if (this.shouldStartSession)
@@ -519,8 +510,6 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>, KleiMetricsInterface
 
 	private const string KleiUserFieldName = "KU";
 
-	private const string SteamIDFieldName = "SteamUserID";
-
 	private const string StartSessionFieldName = "StartSession";
 
 	private const string EndSessionFieldName = "EndSession";
@@ -551,15 +540,13 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>, KleiMetricsInterface
 
 	private const string LastUserActionFieldName = "LastUA";
 
-	private static CSteamID steamId = CSteamID.Nil;
-
-	private static string userID = null;
+	private string PlatformUserIDFieldName;
 
 	private static int sessionID = -1;
 
 	private static int gameID = -1;
 
-	private static string installTimeStamp = null;
+	private static string installTimeStamp;
 
 	private static global::System.Timers.Timer heartbeatTimer;
 

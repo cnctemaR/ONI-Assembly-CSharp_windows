@@ -99,20 +99,16 @@ public class KIconButtonMenu : KScreen
 				global::System.Action action = delegate
 				{
 					onClick.Signal();
-					if (!this.ignoreSound)
-					{
-						UISounds.PlaySound(UISounds.Sound.ClickObject);
-					}
 					if (!this.keepMenuOpen && screen != null)
 					{
 						screen.Deactivate();
 					}
 					if (binstance != null)
 					{
-						KToggle component4 = binstance.GetComponent<KToggle>();
-						if (component4 != null)
+						KToggle component3 = binstance.GetComponent<KToggle>();
+						if (component3 != null)
 						{
-							this.SelectToggle(component4);
+							this.SelectToggle(component3);
 						}
 					}
 				};
@@ -121,7 +117,6 @@ public class KIconButtonMenu : KScreen
 				if (componentInChildren4 != null)
 				{
 					componentInChildren4.onRefresh += buttonInfo.onRefresh;
-					componentInChildren4.onValidate += buttonInfo.onValidate;
 					ToggleGroup component2 = base.GetComponent<ToggleGroup>();
 					if (component2 == null)
 					{
@@ -141,10 +136,9 @@ public class KIconButtonMenu : KScreen
 						componentInChildren5.onClick += action;
 					}
 				}
-				if (buttonInfo.onValidate != null)
+				if (component != null)
 				{
-					Selectable component3 = binstance.GetComponent<Selectable>();
-					component3.interactable = buttonInfo.onValidate();
+					component.isInteractable = buttonInfo.isInteractable;
 				}
 				buttonInfo.onCreate.Signal(buttonInfo);
 			}
@@ -184,7 +178,7 @@ public class KIconButtonMenu : KScreen
 
 	protected override void OnPrefabInit()
 	{
-		this.Subscribe(315865555, new global::EventSystem.EventHandler(this.OnSetActivator));
+		this.Subscribe(315865555, new Action<object>(this.OnSetActivator));
 	}
 
 	private void OnSetActivator(object data)
@@ -227,30 +221,15 @@ public class KIconButtonMenu : KScreen
 			KToggle component = gameObject.GetComponent<KToggle>();
 			if (component != null)
 			{
-				ImageToggleState component2 = gameObject.GetComponent<ImageToggleState>();
 				if (component == this.currentlySelectedToggle)
 				{
 					component.Select();
 					component.isOn = true;
-					component.ActivateFlourish(true);
-					if (component2 && component2.GetIsActive())
-					{
-						component2.SetInactive();
-					}
-					else if (component2 && !component2.GetIsActive())
-					{
-						component2.SetActive();
-					}
 				}
 				else
 				{
 					component.Deselect();
 					component.isOn = false;
-					component.ActivateFlourish(false);
-					if (component2 && component2.GetIsActive())
-					{
-						component2.SetInactive();
-					}
 				}
 			}
 		}
@@ -263,7 +242,6 @@ public class KIconButtonMenu : KScreen
 			KToggle component = gameObject.GetComponent<KToggle>();
 			if (component != null)
 			{
-				component.ActivateFlourish(false);
 				component.Deselect();
 				component.isOn = false;
 			}
@@ -325,21 +303,19 @@ public class KIconButtonMenu : KScreen
 
 	protected IList<KIconButtonMenu.ButtonInfo> buttons;
 
-	protected bool ignoreSound;
-
 	public class ButtonInfo
 	{
-		public ButtonInfo(string iconName = "", string text = "", global::System.Action on_click = null, global::Action shortcutKey = global::Action.NumActions, Action<GameObject> on_refresh = null, Func<bool> on_validate = null, Action<KIconButtonMenu.ButtonInfo> on_create = null, Texture texture = null, string tooltipText = "")
+		public ButtonInfo(string iconName = "", string text = "", global::System.Action on_click = null, global::Action shortcutKey = global::Action.NumActions, Action<GameObject> on_refresh = null, Action<KIconButtonMenu.ButtonInfo> on_create = null, Texture texture = null, string tooltipText = "", bool is_interactable = true)
 		{
 			this.iconName = iconName;
 			this.text = text;
 			this.shortcutKey = shortcutKey;
 			this.onClick = on_click;
-			this.onValidate = on_validate;
 			this.onRefresh = on_refresh;
 			this.onCreate = on_create;
 			this.texture = texture;
 			this.tooltipText = tooltipText;
+			this.isInteractable = is_interactable;
 		}
 
 		public string GetTooltipText()
@@ -362,13 +338,13 @@ public class KIconButtonMenu : KScreen
 
 		public global::Action shortcutKey;
 
+		public bool isInteractable;
+
 		public Action<KIconButtonMenu.ButtonInfo> onCreate;
 
 		public global::System.Action onClick;
 
 		public Action<GameObject> onRefresh;
-
-		public Func<bool> onValidate;
 
 		public Func<string> onToolTip;
 

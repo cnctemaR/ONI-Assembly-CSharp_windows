@@ -30,10 +30,14 @@ public class BuildingComplete : Building
 		}
 		foreach (AttributeInstance attributeInstance in attributes)
 		{
-			AttributeModifier attributeModifier2 = new AttributeModifier(attributeInstance.Id, attributeInstance.GetTotalValue(), null, false);
+			AttributeModifier attributeModifier2 = new AttributeModifier(attributeInstance.Id, attributeInstance.GetTotalValue(), null, false, false);
 			this.regionModifiers.Add(attributeModifier2);
 		}
-		this.Subscribe(-1503271301, new EventSystem.EventHandler(this.OnSelectObject));
+		if (this.Def.UseStructureTemperature)
+		{
+			GameComps.StructureTemperatures.Add(base.gameObject);
+		}
+		this.Subscribe(-1503271301, new Action<object>(this.OnSelectObject));
 	}
 
 	private void OnSelectObject(object data)
@@ -50,17 +54,16 @@ public class BuildingComplete : Building
 	{
 		base.OnSpawn();
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		if (component != null)
+		Rotatable component2 = base.GetComponent<Rotatable>();
+		if (component != null && component2 == null)
 		{
 			component.Offset = this.Def.GetVisualizerOffset();
-			Rotatable component2 = base.GetComponent<Rotatable>();
-			if (component2 != null)
-			{
-				component.Rotation = component2.GetVisualizerRotation();
-				component.Pivot = component2.GetVisualizerPivot();
-			}
-			BoxCollider2D component3 = base.GetComponent<BoxCollider2D>();
-			component3.offset += new Vector2(component.Offset.x, component.Offset.y);
+		}
+		BoxCollider2D component3 = base.GetComponent<BoxCollider2D>();
+		if (component3 != null)
+		{
+			Vector3 visualizerOffset = this.Def.GetVisualizerOffset();
+			component3.offset += new Vector2(visualizerOffset.x, visualizerOffset.y);
 		}
 		int num = Grid.PosToCell(this.transform.position);
 		if (this.Def.IsFoundation)
@@ -129,6 +132,10 @@ public class BuildingComplete : Building
 		{
 			return;
 		}
+		if (this.Def.UseStructureTemperature)
+		{
+			GameComps.StructureTemperatures.Remove(base.gameObject);
+		}
 		base.OnCleanUp();
 		int num = Grid.PosToCell(this);
 		this.Def.UnmarkArea(num, base.Orientation, this.Def.ObjectLayer, base.gameObject);
@@ -162,16 +169,11 @@ public class BuildingComplete : Building
 		}
 	}
 
-	[MyCmpGet]
-	private Operational operational;
-
 	[MyCmpAdd]
 	private UserMenu userMenu;
 
 	[MyCmpReq]
 	private Modifiers modifiers;
-
-	private bool quitting;
 
 	public bool isManuallyOperated;
 

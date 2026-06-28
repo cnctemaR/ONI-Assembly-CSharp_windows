@@ -12,15 +12,15 @@ public class OperationalController : GameStateMachine<OperationalController, Ope
 		this.working_pst.PlayAnim("working_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.off);
 	}
 
-	public GameStateMachine<OperationalController, OperationalController.Instance, IStateMachineTarget>.State off;
+	public GameStateMachine<OperationalController, OperationalController.Instance, IStateMachineTarget, object>.State off;
 
-	public GameStateMachine<OperationalController, OperationalController.Instance, IStateMachineTarget>.State working_pre;
+	public GameStateMachine<OperationalController, OperationalController.Instance, IStateMachineTarget, object>.State working_pre;
 
-	public GameStateMachine<OperationalController, OperationalController.Instance, IStateMachineTarget>.State working_loop;
+	public GameStateMachine<OperationalController, OperationalController.Instance, IStateMachineTarget, object>.State working_loop;
 
-	public GameStateMachine<OperationalController, OperationalController.Instance, IStateMachineTarget>.State working_pst;
+	public GameStateMachine<OperationalController, OperationalController.Instance, IStateMachineTarget, object>.State working_pst;
 
-	public new class Instance : GameStateMachine<OperationalController, OperationalController.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<OperationalController, OperationalController.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)

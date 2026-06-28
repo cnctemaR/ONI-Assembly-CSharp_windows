@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 public class HandleVector<T>
 {
@@ -94,7 +95,8 @@ public class HandleVector<T>
 
 	protected List<T> items;
 
-	public struct Handle
+	[DebuggerDisplay("{index}")]
+	public struct Handle : IComparable<HandleVector<T>.Handle>, IEquatable<HandleVector<T>.Handle>
 	{
 		public bool IsValid()
 		{
@@ -104,6 +106,45 @@ public class HandleVector<T>
 		public void Clear()
 		{
 			this.index = -1;
+		}
+
+		public int CompareTo(HandleVector<T>.Handle obj)
+		{
+			if (this.index < obj.index)
+			{
+				return -1;
+			}
+			if (this.index > obj.index)
+			{
+				return 1;
+			}
+			return 0;
+		}
+
+		public override bool Equals(object obj)
+		{
+			HandleVector<T>.Handle handle = (HandleVector<T>.Handle)obj;
+			return this.index == handle.index;
+		}
+
+		public bool Equals(HandleVector<T>.Handle other)
+		{
+			return this.index == other.index;
+		}
+
+		public override int GetHashCode()
+		{
+			return this.index;
+		}
+
+		public static bool operator ==(HandleVector<T>.Handle x, HandleVector<T>.Handle y)
+		{
+			return x.index == y.index;
+		}
+
+		public static bool operator !=(HandleVector<T>.Handle x, HandleVector<T>.Handle y)
+		{
+			return x.index != y.index;
 		}
 
 		public const int InvalidIndex = -1;

@@ -1,11 +1,10 @@
 ﻿using System;
-using Klei.AI;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class GameFlowManager : StateMachineComponent<GameFlowManager.StatesInstance>, ISaveLoadableJson
+public class GameFlowManager : StateMachineComponent<GameFlowManager.StatesInstance>, ISaveLoadable
 {
 	protected override void OnPrefabInit()
 	{
@@ -27,7 +26,7 @@ public class GameFlowManager : StateMachineComponent<GameFlowManager.StatesInsta
 
 	public static GameFlowManager Instance;
 
-	public class StatesInstance : GameStateMachine<GameFlowManager.States, GameFlowManager.StatesInstance, GameFlowManager>.GameInstance
+	public class StatesInstance : GameStateMachine<GameFlowManager.States, GameFlowManager.StatesInstance, GameFlowManager, object>.GameInstance
 	{
 		public StatesInstance(GameFlowManager smi)
 			: base(smi)
@@ -36,7 +35,7 @@ public class GameFlowManager : StateMachineComponent<GameFlowManager.StatesInsta
 
 		public bool IsIncapacitated(GameObject go)
 		{
-			return go.GetComponent<Effects>().GetMentalBreakEffect() != null;
+			return false;
 		}
 
 		public void CheckForGameOver()
@@ -68,7 +67,7 @@ public class GameFlowManager : StateMachineComponent<GameFlowManager.StatesInsta
 			}
 		}
 
-		public Notification colonyLostNotification = new Notification(MISC.NOTIFICATIONS.COLONYLOST.NAME, NotificationType.Bad, null, null, null, false, 0f, null, null, null);
+		public Notification colonyLostNotification = new Notification(MISC.NOTIFICATIONS.COLONYLOST.NAME, NotificationType.Bad, HashedString.Invalid, null, null, false, 0f, null, null, null);
 	}
 
 	public class States : GameStateMachine<GameFlowManager.States, GameFlowManager.StatesInstance, GameFlowManager>
@@ -95,17 +94,17 @@ public class GameFlowManager : StateMachineComponent<GameFlowManager.StatesInsta
 			});
 		}
 
-		public GameStateMachine<GameFlowManager.States, GameFlowManager.StatesInstance, GameFlowManager>.State loading;
+		public GameStateMachine<GameFlowManager.States, GameFlowManager.StatesInstance, GameFlowManager, object>.State loading;
 
-		public GameStateMachine<GameFlowManager.States, GameFlowManager.StatesInstance, GameFlowManager>.State running;
+		public GameStateMachine<GameFlowManager.States, GameFlowManager.StatesInstance, GameFlowManager, object>.State running;
 
 		public GameFlowManager.States.GameOverState gameover;
 
-		public class GameOverState : GameStateMachine<GameFlowManager.States, GameFlowManager.StatesInstance, GameFlowManager>.State
+		public class GameOverState : GameStateMachine<GameFlowManager.States, GameFlowManager.StatesInstance, GameFlowManager, object>.State
 		{
-			public GameStateMachine<GameFlowManager.States, GameFlowManager.StatesInstance, GameFlowManager>.State pending;
+			public GameStateMachine<GameFlowManager.States, GameFlowManager.StatesInstance, GameFlowManager, object>.State pending;
 
-			public GameStateMachine<GameFlowManager.States, GameFlowManager.StatesInstance, GameFlowManager>.State active;
+			public GameStateMachine<GameFlowManager.States, GameFlowManager.StatesInstance, GameFlowManager, object>.State active;
 		}
 	}
 }

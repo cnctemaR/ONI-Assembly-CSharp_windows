@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class CancelTool : FilteredDragTool
@@ -10,11 +11,11 @@ public class CancelTool : FilteredDragTool
 		CancelTool.Instance = this;
 	}
 
-	public override void ResetFilter()
+	protected override void GetDefaultFilters(Dictionary<string, ToolParameterMenu.ToggleState> filters)
 	{
-		base.ResetFilter();
-		this.filterTargets.Add(FilteredDragTool.FILTERLAYERS.CLEANANDCLEAR, false);
-		this.filterTargets.Add(FilteredDragTool.FILTERLAYERS.DIGPLACER, false);
+		base.GetDefaultFilters(filters);
+		filters.Add(FilteredDragTool.FILTERLAYERS.CLEANANDCLEAR, ToolParameterMenu.ToggleState.Off);
+		filters.Add(FilteredDragTool.FILTERLAYERS.DIGPLACER, ToolParameterMenu.ToggleState.Off);
 	}
 
 	protected override string GetConfirmSound()
@@ -31,13 +32,13 @@ public class CancelTool : FilteredDragTool
 	{
 		if (DragTool.layerMask != this.regionLayerMask)
 		{
-			for (int i = 0; i < 25; i++)
+			for (int i = 0; i < 23; i++)
 			{
 				GameObject gameObject = Grid.Objects[cell, i];
 				if (gameObject != null)
 				{
 					string filterLayerFromGameObject = base.GetFilterLayerFromGameObject(gameObject);
-					if (this.filterTargets[FilteredDragTool.FILTERLAYERS.ALL] || (this.filterTargets.ContainsKey(filterLayerFromGameObject.ToUpper()) && this.filterTargets[filterLayerFromGameObject.ToUpper()]))
+					if (base.IsActiveLayer(filterLayerFromGameObject))
 					{
 						gameObject.Trigger(2127324410, null);
 					}

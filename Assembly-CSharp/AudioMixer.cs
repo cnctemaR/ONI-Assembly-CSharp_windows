@@ -45,7 +45,7 @@ public class AudioMixer
 		return eventInstance;
 	}
 
-	public bool Stop(string snapshot, STOP_MODE stop_mode = STOP_MODE.ALLOWFADEOUT)
+	public bool Stop(HashedString snapshot, STOP_MODE stop_mode = STOP_MODE.ALLOWFADEOUT)
 	{
 		bool flag = false;
 		EventInstance eventInstance = null;
@@ -55,8 +55,12 @@ public class AudioMixer
 			eventInstance.stop(stop_mode);
 			this.activeSnapshots.Remove(snapshot);
 			flag = true;
+			AudioMixer.instance.Log(string.Concat(new object[] { "Stop Snapshot: [", snapshot, "] with fadeout mode: [", stop_mode, "]" }));
 		}
-		AudioMixer.instance.Log(string.Concat(new object[] { "Stop Snapshot: ", snapshot, " with fadeout mode: ", stop_mode }));
+		else
+		{
+			AudioMixer.instance.Log("Tried to stop snapshot: [" + snapshot + "] but it wasn't active.");
+		}
 		return flag;
 	}
 
@@ -67,10 +71,10 @@ public class AudioMixer
 
 	public void StopAll(STOP_MODE stop_mode = STOP_MODE.IMMEDIATE)
 	{
-		List<string> list = new List<string>();
-		foreach (KeyValuePair<string, EventInstance> keyValuePair in this.activeSnapshots)
+		List<HashedString> list = new List<HashedString>();
+		foreach (KeyValuePair<HashedString, EventInstance> keyValuePair in this.activeSnapshots)
 		{
-			if (!keyValuePair.Key.Contains("UserVolumeSettings"))
+			if (keyValuePair.Key != AudioMixer.UserVolumeSettingsHash)
 			{
 				list.Add(keyValuePair.Key);
 			}
@@ -81,9 +85,26 @@ public class AudioMixer
 		}
 	}
 
-	public bool SnapshotIsActive(string snapshot_name)
+	public bool SnapshotIsActive(HashedString snapshot_name)
 	{
 		return this.activeSnapshots.ContainsKey(snapshot_name);
+	}
+
+	public void SetSnapshotParameter(string snapshot_name, string parameter_name, float parameter_value, bool shouldLog = true)
+	{
+		if (shouldLog)
+		{
+			this.Log(string.Format("Set Param {0}: {1}, {2}", snapshot_name, parameter_name, parameter_value));
+		}
+		EventInstance eventInstance = null;
+		if (this.activeSnapshots.TryGetValue(snapshot_name, out eventInstance))
+		{
+			eventInstance.setParameterValue(parameter_name, parameter_value);
+		}
+		else
+		{
+			this.Log(string.Concat(new object[] { "Tried to set [", parameter_name, "] to [", parameter_value, "] but [", snapshot_name, "] is not active." }));
+		}
 	}
 
 	public void StartPersistentSnapshots()
@@ -189,8 +210,11 @@ public class AudioMixer
 				{
 					num = PlayerPrefs.GetFloat(text);
 				}
-				this.userVolumeSettings.Add(array[i], num);
-				this.SetUserVolume(array[i], num);
+				AudioMixer.UserVolumeBus userVolumeBus = new AudioMixer.UserVolumeBus();
+				userVolumeBus.busLevel = num;
+				userVolumeBus.labelString = Strings.Get("STRINGS.UI.FRONTEND.AUDIO_OPTIONS_SCREEN.AUDIO_BUS_" + array[i].ToUpper());
+				this.userVolumeSettings.Add(array[i], userVolumeBus);
+				this.SetUserVolume(array[i], userVolumeBus.busLevel);
 			}
 		}
 	}
@@ -210,16 +234,20 @@ public class AudioMixer
 		{
 			value = 0f;
 		}
-		this.userVolumeSettings[bus] = value;
+		this.userVolumeSettings[bus].busLevel = value;
 		PlayerPrefs.SetFloat("Volume_" + bus, value);
 		EventInstance eventInstance = null;
 		if (this.activeSnapshots.TryGetValue(AudioMixerSnapshots.Get().UserVolumeSettingsSnapshot, out eventInstance))
 		{
-			eventInstance.setParameterValue(bus, this.userVolumeSettings[bus]);
+			eventInstance.setParameterValue(bus, this.userVolumeSettings[bus].busLevel);
 		}
 		else
 		{
 			this.Log(string.Concat(new object[] { "Tried to set [", bus, "] to [", value, "] but UserVolumeSettingsSnapshot is not active." }));
+		}
+		if (bus == "Music")
+		{
+			this.SetSnapshotParameter(AudioMixerSnapshots.Get().DynamicMusicPlayingSnapshot, "userVolume_Music", value, true);
 		}
 	}
 
@@ -227,11 +255,11 @@ public class AudioMixer
 	{
 	}
 
-	private static AudioMixer _instance;
+	private static AudioMixer _instance = null;
 
-	public Dictionary<string, EventInstance> activeSnapshots = new Dictionary<string, EventInstance>();
+	public Dictionary<HashedString, EventInstance> activeSnapshots = new Dictionary<HashedString, EventInstance>();
 
-	public List<string> SnapshotDebugLog = new List<string>();
+	public List<HashedString> SnapshotDebugLog = new List<HashedString>();
 
 	public bool activeNIS;
 
@@ -247,9 +275,18 @@ public class AudioMixer
 
 	private EventInstance duplicantCountSleepingInst;
 
+	private static readonly HashedString UserVolumeSettingsHash = new HashedString("event:/Snapshots/Mixing/Snapshot_UserVolumeSettings");
+
 	public bool persistentSnapshotsActive;
 
 	private Dictionary<string, int> visibleDupes = new Dictionary<string, int>();
 
-	public Dictionary<string, float> userVolumeSettings = new Dictionary<string, float>();
+	public Dictionary<string, AudioMixer.UserVolumeBus> userVolumeSettings = new Dictionary<string, AudioMixer.UserVolumeBus>();
+
+	public class UserVolumeBus
+	{
+		public string labelString;
+
+		public float busLevel;
+	}
 }

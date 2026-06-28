@@ -49,6 +49,12 @@ public class MaterialSelectionPanel : KScreen
 		});
 	}
 
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		this.activateOnSpawn = true;
+	}
+
 	public void AddSelectAction(MaterialSelector.SelectMaterialActions action)
 	{
 		this.MaterialSelectors.ForEach(delegate(MaterialSelector selector)

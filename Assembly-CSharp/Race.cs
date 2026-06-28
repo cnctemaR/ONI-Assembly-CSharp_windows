@@ -22,7 +22,7 @@ public class Race : Resource
 
 	public override void Initialize()
 	{
-		this.headComp = new KCompBuild(Assets.GetAnim("body_comp_default"));
+		this.headComp = new KCompBuild(Assets.GetAnim("body_comp_default_kanim"));
 	}
 
 	public string StringKey;

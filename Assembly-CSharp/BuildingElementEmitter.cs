@@ -6,21 +6,19 @@ using UnityEngine;
 
 public class BuildingElementEmitter : KMonoBehaviour, IEffectDescriptor
 {
-	public int DescriptionOrder { get; set; }
-
 	public float AverageEmitRate
 	{
 		get
 		{
-			return this.accumulator.AvgFlowRate;
+			return this.accumulator.AvgRate;
 		}
 	}
 
-	public float MassChangeRate
+	public float EmitRate
 	{
 		get
 		{
-			return this.massChangeRate;
+			return this.emitRate;
 		}
 	}
 
@@ -36,8 +34,8 @@ public class BuildingElementEmitter : KMonoBehaviour, IEffectDescriptor
 	{
 		base.OnSpawn();
 		this.accumulator = new Accumulator("Element", this, 3f);
-		this.Subscribe(824508782, new EventSystem.EventHandler(this.OnActiveChanged));
-		this.OnActiveChanged(null);
+		this.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
+		this.SimRegister();
 	}
 
 	protected override void OnCleanUp()
@@ -48,20 +46,8 @@ public class BuildingElementEmitter : KMonoBehaviour, IEffectDescriptor
 
 	private void OnActiveChanged(object data)
 	{
-		KSelectable component = base.GetComponent<KSelectable>();
-		Operational component2 = base.GetComponent<Operational>();
-		if (component2 != null && component2.IsActive)
-		{
-			this.statusHandle = component.AddStatusItem(Db.Get().BuildingStatusItems.EmittingElement, this);
-			base.enabled = true;
-			this.SimRegister();
-		}
-		else
-		{
-			component.RemoveStatusItem(this.statusHandle);
-			base.enabled = false;
-			this.SimUnregister();
-		}
+		this.simActive = (bool)data;
+		this.dirty = true;
 	}
 
 	private unsafe void SimUpdate(float dt)
@@ -70,46 +56,51 @@ public class BuildingElementEmitter : KMonoBehaviour, IEffectDescriptor
 		{
 			return;
 		}
-		Sim.MassChangeInfo massChangeInfo = Game.Instance.simData.emittedMassEntries[this.simHandle];
-		if (massChangeInfo.mass > 0f)
+		this.UpdateSimState();
+		Sim.EmittedMassInfo emittedMassInfo = Game.Instance.simData.emittedMassEntries[this.simHandle];
+		if (emittedMassInfo.mass > 0f)
 		{
-			this.accumulator.Accumulate(massChangeInfo.mass);
+			this.accumulator.Accumulate(emittedMassInfo.mass);
 			if (this.element == SimHashes.Oxygen)
 			{
-				ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, massChangeInfo.mass, null);
+				ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, emittedMassInfo.mass, null);
 			}
 		}
 	}
 
-	public List<Descriptor> GetRequirementDescriptions(BuildingDef def)
+	private void UpdateSimState()
 	{
-		return null;
-	}
-
-	public List<Descriptor> GetEffectDescriptions(BuildingDef def)
-	{
-		List<Descriptor> list = new List<Descriptor>();
-		Element element = ElementLoader.FindElementByHash(this.element);
-		string text = element.tag.ProperName();
-		string keywordStyle = GameUtil.GetKeywordStyle(this.element);
-		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTED, keywordStyle, text, GameUtil.GetFormattedMass(this.MassChangeRate, GameUtil.TimeSlice.PerSecond, true, "F1"))), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTED, keywordStyle, text, GameUtil.GetFormattedMass(this.MassChangeRate, GameUtil.TimeSlice.PerSecond, true, "F1")));
-		list.Add(descriptor);
-		return list;
+		if (!this.dirty)
+		{
+			return;
+		}
+		this.dirty = false;
+		if (this.simActive)
+		{
+			if (this.element != (SimHashes)0 && this.emitRate > 0f)
+			{
+				Vector3 vector = new Vector3(this.transform.position.x + this.modifierOffset.x, this.transform.position.y + this.modifierOffset.y, 0f);
+				int num = Grid.PosToCell(vector);
+				SimMessages.ModifyElementEmitter(this.simHandle, num, this.element, 0.25f, this.emitRate * 0.25f, this.temperature);
+			}
+			this.statusHandle = base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.EmittingElement, this);
+		}
+		else
+		{
+			SimMessages.ModifyElementEmitter(this.simHandle, 0, SimHashes.Vacuum, 0f, 0f, 0f);
+			this.statusHandle = base.GetComponent<KSelectable>().RemoveStatusItem(this.statusHandle, this);
+		}
 	}
 
 	private void SimRegister()
 	{
-		if (base.isSpawned && this.simHandle == -1 && this.element != (SimHashes)0 && this.massChangeRate > 0f)
+		if (base.isSpawned && this.simHandle == -1)
 		{
-			Vector3 vector = new Vector3(this.transform.position.x + this.modifierOffset.x, this.transform.position.y + this.modifierOffset.y, 0f);
-			int num = Grid.PosToCell(vector);
 			this.simHandle = -2;
-			HandleVector<Action<object>>.Handle handle = Game.Instance.complexCallbackManager.Add(delegate(object data)
+			SimMessages.AddElementEmitter(Game.Instance.complexCallbackManager.Add(delegate(object data)
 			{
 				BuildingElementEmitter.OnSimRegistered(this, data);
-			}, "BuildingElementEmitter");
-			SimMessages.AddElementEmitter(num, this.element, 0.25f, this.massChangeRate, this.temperature, handle.index);
+			}, "BuildingElementEmitter").index);
 		}
 	}
 
@@ -138,23 +129,39 @@ public class BuildingElementEmitter : KMonoBehaviour, IEffectDescriptor
 		}
 	}
 
+	public List<Descriptor> GetDescriptors(BuildingDef def)
+	{
+		List<Descriptor> list = new List<Descriptor>();
+		Element element = ElementLoader.FindElementByHash(this.element);
+		string text = element.tag.ProperName();
+		string keywordStyle = GameUtil.GetKeywordStyle(this.element);
+		Descriptor descriptor = default(Descriptor);
+		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTED, keywordStyle, text, GameUtil.GetFormattedMass(this.EmitRate, GameUtil.TimeSlice.PerSecond, true, "{0:0.#}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTED, keywordStyle, text, GameUtil.GetFormattedMass(this.EmitRate, GameUtil.TimeSlice.PerSecond, true, "{0:0.#}")), Descriptor.DescriptorType.Effect);
+		list.Add(descriptor);
+		return list;
+	}
+
 	[SerializeField]
-	public float massChangeRate = 0.3f;
+	public float emitRate = 0.3f;
 
 	[SerializeField]
 	[Serialize]
 	public float temperature = 293f;
 
-	[HashedEnum]
 	[SerializeField]
+	[HashedEnum]
 	public SimHashes element = SimHashes.Oxygen;
+
+	[SerializeField]
+	public Vector2 modifierOffset;
 
 	private Accumulator accumulator;
 
-	private Guid statusHandle;
-
 	private int simHandle = -1;
 
-	[NonSerialized]
-	public Vector2 modifierOffset;
+	private bool simActive;
+
+	private bool dirty = true;
+
+	private Guid statusHandle;
 }

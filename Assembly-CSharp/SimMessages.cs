@@ -7,7 +7,7 @@ using UnityEngine;
 
 public static class SimMessages
 {
-	public unsafe static void AddElementConsumer(int gameCell, ElementConsumer.Configuration configuration, SimHashes element, float consumption_rate, byte radius, int cb_handle)
+	public unsafe static void AddElementConsumer(int gameCell, ElementConsumer.Configuration configuration, SimHashes element, byte radius, int cb_handle)
 	{
 		Debug.Assert(Grid.IsValidCell(gameCell));
 		if (!Grid.IsValidCell(gameCell))
@@ -17,12 +17,23 @@ public static class SimMessages
 		int elementIndex = ElementLoader.GetElementIndex(element);
 		SimMessages.AddElementConsumerMessage* ptr = stackalloc SimMessages.AddElementConsumerMessage[checked(1 * sizeof(SimMessages.AddElementConsumerMessage))];
 		ptr->cellIdx = gameCell;
-		ptr->consumptionRate = consumption_rate;
 		ptr->configuration = (byte)configuration;
 		ptr->elementIdx = (byte)elementIndex;
 		ptr->radius = radius;
 		ptr->callbackIdx = cb_handle;
 		Sim.SIM_HandleMessage(2024405073, sizeof(SimMessages.AddElementConsumerMessage), (byte*)ptr);
+	}
+
+	public unsafe static void SetElementConsumerData(int sim_handle, float consumptionRate)
+	{
+		if (!Sim.IsValidHandle(sim_handle))
+		{
+			return;
+		}
+		SimMessages.SetElementConsumerDataMessage* ptr = stackalloc SimMessages.SetElementConsumerDataMessage[checked(1 * sizeof(SimMessages.SetElementConsumerDataMessage))];
+		ptr->handle = sim_handle;
+		ptr->consumptionRate = consumptionRate;
+		Sim.SIM_HandleMessage(1575539738, sizeof(SimMessages.SetElementConsumerDataMessage), (byte*)ptr);
 	}
 
 	public unsafe static void RemoveElementConsumer(int cb_handle, int sim_handle)
@@ -38,22 +49,29 @@ public static class SimMessages
 		Sim.SIM_HandleMessage(894417742, sizeof(SimMessages.RemoveElementConsumerMessage), (byte*)ptr);
 	}
 
-	public unsafe static void AddElementEmitter(int gameCell, SimHashes element, float emit_interval, float emit_mass, float emit_temperature, int cb_handle)
+	public unsafe static void AddElementEmitter(int cb_handle)
 	{
-		Debug.Assert(Grid.IsValidCell(gameCell));
-		if (!Grid.IsValidCell(gameCell))
+		SimMessages.AddElementEmitterMessage* ptr = stackalloc SimMessages.AddElementEmitterMessage[checked(1 * sizeof(SimMessages.AddElementEmitterMessage))];
+		ptr->callbackIdx = cb_handle;
+		Sim.SIM_HandleMessage(-505471181, sizeof(SimMessages.AddElementEmitterMessage), (byte*)ptr);
+	}
+
+	public unsafe static void ModifyElementEmitter(int sim_handle, int game_cell, SimHashes element, float emit_interval, float emit_mass, float emit_temperature)
+	{
+		Debug.Assert(Grid.IsValidCell(game_cell));
+		if (!Grid.IsValidCell(game_cell))
 		{
 			return;
 		}
 		int elementIndex = ElementLoader.GetElementIndex(element);
-		SimMessages.AddElementEmitterMessage* ptr = stackalloc SimMessages.AddElementEmitterMessage[checked(1 * sizeof(SimMessages.AddElementEmitterMessage))];
-		ptr->cellIdx = gameCell;
-		ptr->callbackIdx = cb_handle;
+		SimMessages.ModifyElementEmitterMessage* ptr = stackalloc SimMessages.ModifyElementEmitterMessage[checked(1 * sizeof(SimMessages.ModifyElementEmitterMessage))];
+		ptr->handle = sim_handle;
+		ptr->cellIdx = game_cell;
 		ptr->emitInterval = emit_interval;
 		ptr->emitMass = emit_mass;
 		ptr->emitTemperature = emit_temperature;
 		ptr->elementIdx = (byte)elementIndex;
-		Sim.SIM_HandleMessage(-505471181, sizeof(SimMessages.AddElementEmitterMessage), (byte*)ptr);
+		Sim.SIM_HandleMessage(403589164, sizeof(SimMessages.ModifyElementEmitterMessage), (byte*)ptr);
 	}
 
 	public unsafe static void RemoveElementEmitter(int cb_handle, int sim_handle)
@@ -69,7 +87,7 @@ public static class SimMessages
 		Sim.SIM_HandleMessage(-1524118282, sizeof(SimMessages.RemoveElementEmitterMessage), (byte*)ptr);
 	}
 
-	public unsafe static void AddElementChunk(int gameCell, SimHashes element, float mass, float temperature, int cb_handle)
+	public unsafe static void AddElementChunk(int gameCell, SimHashes element, float mass, float temperature, float surface_area, float thickness, int cb_handle)
 	{
 		Debug.Assert(Grid.IsValidCell(gameCell));
 		if (!Grid.IsValidCell(gameCell))
@@ -85,12 +103,14 @@ public static class SimMessages
 			ptr->callbackIdx = cb_handle;
 			ptr->mass = mass;
 			ptr->temperature = temperature;
+			ptr->surfaceArea = surface_area;
+			ptr->thickness = thickness;
 			ptr->elementIdx = (byte)elementIndex;
 			Sim.SIM_HandleMessage(1445724082, sizeof(SimMessages.AddElementChunkMessage), (byte*)ptr);
 		}
 	}
 
-	public unsafe static void RemoveElementChunk(int cb_handle, int sim_handle)
+	public unsafe static void RemoveElementChunk(int sim_handle, int cb_handle)
 	{
 		if (!Sim.IsValidHandle(sim_handle))
 		{
@@ -109,15 +129,11 @@ public static class SimMessages
 		{
 			return;
 		}
-		Debug.Assert(heat_capacity > 0f, "Tried to set SimTemperatureTransfer's heat capacity to zero. This is an invalid thing to do!");
-		if (heat_capacity > 0f)
-		{
-			SimMessages.SetElementChunkDataMessage* ptr = stackalloc SimMessages.SetElementChunkDataMessage[checked(1 * sizeof(SimMessages.SetElementChunkDataMessage))];
-			ptr->handle = sim_handle;
-			ptr->temperature = temperature;
-			ptr->heatCapacity = heat_capacity;
-			Sim.SIM_HandleMessage(-435115907, sizeof(SimMessages.SetElementChunkDataMessage), (byte*)ptr);
-		}
+		SimMessages.SetElementChunkDataMessage* ptr = stackalloc SimMessages.SetElementChunkDataMessage[checked(1 * sizeof(SimMessages.SetElementChunkDataMessage))];
+		ptr->handle = sim_handle;
+		ptr->temperature = temperature;
+		ptr->heatCapacity = heat_capacity;
+		Sim.SIM_HandleMessage(-435115907, sizeof(SimMessages.SetElementChunkDataMessage), (byte*)ptr);
 	}
 
 	public unsafe static void MoveElementChunk(int sim_handle, int cell)
@@ -131,6 +147,92 @@ public static class SimMessages
 		ptr->handle = sim_handle;
 		ptr->gameCell = cell;
 		Sim.SIM_HandleMessage(-374911358, sizeof(SimMessages.MoveElementChunkMessage), (byte*)ptr);
+	}
+
+	public unsafe static void ModifyElementChunkEnergy(int sim_handle, float delta_kj)
+	{
+		if (!Sim.IsValidHandle(sim_handle))
+		{
+			Debug.Assert(false, "Invalid handle");
+			return;
+		}
+		SimMessages.ModifyElementChunkEnergyMessage* ptr = stackalloc SimMessages.ModifyElementChunkEnergyMessage[checked(1 * sizeof(SimMessages.ModifyElementChunkEnergyMessage))];
+		ptr->handle = sim_handle;
+		ptr->deltaKJ = delta_kj;
+		Sim.SIM_HandleMessage(1020555667, sizeof(SimMessages.ModifyElementChunkEnergyMessage), (byte*)ptr);
+	}
+
+	public unsafe static void AddBuildingHeatExchange(Extents extents, float temperature, float operating_kw, byte element_idx, float mass, int callbackIdx = -1)
+	{
+		int num = Grid.XYToCell(extents.x, extents.y);
+		Debug.Assert(Grid.IsValidCell(num));
+		if (!Grid.IsValidCell(num))
+		{
+			return;
+		}
+		int num2 = Grid.XYToCell(extents.x + extents.width, extents.y + extents.height);
+		Debug.Assert(Grid.IsValidCell(num2));
+		if (!Grid.IsValidCell(num2))
+		{
+			return;
+		}
+		SimMessages.AddBuildingHeatExchangeMessage* ptr = stackalloc SimMessages.AddBuildingHeatExchangeMessage[checked(1 * sizeof(SimMessages.AddBuildingHeatExchangeMessage))];
+		ptr->callbackIdx = callbackIdx;
+		ptr->elemIdx = element_idx;
+		ptr->temperature = temperature;
+		ptr->operatingKilowatts = operating_kw;
+		ptr->mass = mass;
+		ptr->minX = extents.x;
+		ptr->minY = extents.y;
+		ptr->maxX = extents.x + extents.width;
+		ptr->maxY = extents.y + extents.height;
+		Sim.SIM_HandleMessage(1739021608, sizeof(SimMessages.AddBuildingHeatExchangeMessage), (byte*)ptr);
+	}
+
+	public unsafe static void ModifyBuildingHeatExchange(int sim_handle, Extents extents, float temperature, float operating_kw, byte element_idx, float mass)
+	{
+		int num = Grid.XYToCell(extents.x, extents.y);
+		Debug.Assert(Grid.IsValidCell(num));
+		if (!Grid.IsValidCell(num))
+		{
+			return;
+		}
+		int num2 = Grid.XYToCell(extents.x + extents.width, extents.y + extents.height);
+		Debug.Assert(Grid.IsValidCell(num2));
+		if (!Grid.IsValidCell(num2))
+		{
+			return;
+		}
+		SimMessages.ModifyBuildingHeatExchangeMessage* ptr = stackalloc SimMessages.ModifyBuildingHeatExchangeMessage[checked(1 * sizeof(SimMessages.ModifyBuildingHeatExchangeMessage))];
+		ptr->handle = sim_handle;
+		ptr->elemIdx = element_idx;
+		ptr->temperature = temperature;
+		ptr->operatingKilowatts = operating_kw;
+		ptr->mass = mass;
+		ptr->minX = extents.x;
+		ptr->minY = extents.y;
+		ptr->maxX = extents.x + extents.width;
+		ptr->maxY = extents.y + extents.height;
+		SimUtil.CheckValidValue(temperature);
+		Sim.SIM_HandleMessage(1818001569, sizeof(SimMessages.ModifyBuildingHeatExchangeMessage), (byte*)ptr);
+	}
+
+	public unsafe static void RemoveBuildingHeatExchange(int sim_handle, int callbackIdx = -1)
+	{
+		SimMessages.RemoveBuildingHeatExchangeMessage* ptr = stackalloc SimMessages.RemoveBuildingHeatExchangeMessage[checked(1 * sizeof(SimMessages.RemoveBuildingHeatExchangeMessage))];
+		Debug.Assert(Sim.IsValidHandle(sim_handle));
+		ptr->handle = sim_handle;
+		ptr->callbackIdx = callbackIdx;
+		Sim.SIM_HandleMessage(-456116629, sizeof(SimMessages.RemoveBuildingHeatExchangeMessage), (byte*)ptr);
+	}
+
+	public unsafe static void ModifyBuildingEnergy(int sim_handle, float delta_kj)
+	{
+		SimMessages.ModifyBuildingEnergyMessage* ptr = stackalloc SimMessages.ModifyBuildingEnergyMessage[checked(1 * sizeof(SimMessages.ModifyBuildingEnergyMessage))];
+		Debug.Assert(Sim.IsValidHandle(sim_handle));
+		ptr->handle = sim_handle;
+		ptr->deltaKJ = delta_kj;
+		Sim.SIM_HandleMessage(-1348791658, sizeof(SimMessages.ModifyBuildingEnergyMessage), (byte*)ptr);
 	}
 
 	public unsafe static void CreateSimElementsTable(List<Element> elements)
@@ -180,7 +282,6 @@ public static class SimMessages
 		ptr->cellIdx = gameCell;
 		ptr->callbackIdx = callbackIdx;
 		Sim.SIM_HandleMessage(833038498, sizeof(SimMessages.DigMessage), (byte*)ptr);
-		CellEventLogger.Instance.Dig.Log(gameCell, callbackIdx);
 	}
 
 	public unsafe static void SetInsulation(int gameCell, float value)
@@ -239,7 +340,7 @@ public static class SimMessages
 		Sim.SIM_HandleMessage(-469311643, sizeof(SimMessages.CellPropertiesMessage), (byte*)ptr);
 	}
 
-	public unsafe static void ModifyCell(int gameCell, int elementIdx, float temperature, float mass, bool replace = false, int callbackIdx = -1)
+	public unsafe static void ModifyCell(int gameCell, int elementIdx, float temperature, float mass, SimMessages.ReplaceType replace_type = SimMessages.ReplaceType.None, int callbackIdx = -1)
 	{
 		Debug.Assert(Grid.IsValidCell(gameCell));
 		if (!Grid.IsValidCell(gameCell))
@@ -252,7 +353,7 @@ public static class SimMessages
 		ptr->temperature = temperature;
 		ptr->mass = mass;
 		ptr->elementIdx = (byte)elementIdx;
-		ptr->replace = replace;
+		ptr->replaceType = (byte)replace_type;
 		SimUtil.CheckValidValue(temperature);
 		SimUtil.CheckValidValue(mass);
 		Sim.SIM_HandleMessage(-1252920804, sizeof(SimMessages.ModifyCellMessage), (byte*)ptr);
@@ -302,7 +403,7 @@ public static class SimMessages
 		{
 			Element element = ElementLoader.elements[elementIdx];
 			float num = ((temperature == -1f) ? element.defaultValues.temperature : temperature);
-			SimMessages.ModifyCell(gameCell, elementIdx, num, mass, false, callbackIdx);
+			SimMessages.ModifyCell(gameCell, elementIdx, num, mass, SimMessages.ReplaceType.None, callbackIdx);
 			ev.Log(gameCell, ElementLoader.elements[elementIdx].id, mass, callbackIdx);
 		}
 	}
@@ -314,41 +415,19 @@ public static class SimMessages
 		{
 			Element element = ElementLoader.elements[elementIndex];
 			float num = ((temperature == -1f) ? element.defaultValues.temperature : temperature);
-			SimMessages.ModifyCell(gameCell, elementIndex, num, mass, true, callbackIdx);
-			ev.Log(gameCell, new_element, callbackIdx);
+			SimMessages.ModifyCell(gameCell, elementIndex, num, mass, SimMessages.ReplaceType.Replace, callbackIdx);
 		}
 	}
 
-	public unsafe static void BuildingHeatExchange(bool add, int building_id, Extents extents, float mass, float temperature, float min_temperature, byte element_idx, byte pipe_layer, int callbackIdx = -1)
+	public static void ReplaceAndDisplaceElement(int gameCell, SimHashes new_element, CellElementEvent ev, float mass, float temperature = -1f, int callbackIdx = -1)
 	{
-		int num = Grid.XYToCell(extents.x, extents.y);
-		Debug.Assert(Grid.IsValidCell(num));
-		if (!Grid.IsValidCell(num))
+		int elementIndex = SimMessages.GetElementIndex(new_element);
+		if (elementIndex != -1)
 		{
-			return;
+			Element element = ElementLoader.elements[elementIndex];
+			float num = ((temperature == -1f) ? element.defaultValues.temperature : temperature);
+			SimMessages.ModifyCell(gameCell, elementIndex, num, mass, SimMessages.ReplaceType.ReplaceAndDisplace, callbackIdx);
 		}
-		int num2 = Grid.XYToCell(extents.x + extents.width, extents.y + extents.height);
-		Debug.Assert(Grid.IsValidCell(num2));
-		if (!Grid.IsValidCell(num2))
-		{
-			return;
-		}
-		Sim.BuildingHeatExchangeMessage* ptr = stackalloc Sim.BuildingHeatExchangeMessage[checked(1 * sizeof(Sim.BuildingHeatExchangeMessage))];
-		ptr->add = ((!add) ? 0 : 1);
-		ptr->buildingID = building_id;
-		ptr->callbackIdx = callbackIdx;
-		ptr->mass = mass;
-		ptr->temperature = temperature;
-		ptr->minTemperature = min_temperature;
-		ptr->elemIdx = element_idx;
-		ptr->pipeLayer = pipe_layer;
-		ptr->minX = extents.x;
-		ptr->minY = extents.y;
-		ptr->maxX = extents.x + extents.width;
-		ptr->maxY = extents.y + extents.height;
-		SimUtil.CheckValidValue(temperature);
-		SimUtil.CheckValidValue(min_temperature);
-		Sim.SIM_HandleMessage(-514856633, sizeof(Sim.BuildingHeatExchangeMessage), (byte*)ptr);
 	}
 
 	public unsafe static void ModifyEnergy(int gameCell, float kilojoules, SimMessages.EnergySourceID id)
@@ -377,15 +456,14 @@ public static class SimMessages
 				{
 					temperature = ElementLoader.elements[elementIndex].defaultValues.temperature;
 				}
-				SimMessages.ModifyCell(gameCell, elementIndex, temperature, mass, false, -1);
+				SimMessages.ModifyCell(gameCell, elementIndex, temperature, mass, SimMessages.ReplaceType.None, -1);
 			}
 		}
 		else
 		{
 			Debug.Assert(mass < 0f);
-			SimMessages.ModifyCell(gameCell, 0, temperature, mass, false, -1);
+			SimMessages.ModifyCell(gameCell, 0, temperature, mass, SimMessages.ReplaceType.None, -1);
 		}
-		ev.Log(gameCell, element, mass);
 	}
 
 	public unsafe static void CreateElementInteractions(SimMessages.ElementInteraction[] interactions)
@@ -399,24 +477,17 @@ public static class SimMessages
 		}
 	}
 
-	public unsafe static void NewGameFrame(Vector2I min, Vector2I max)
+	public unsafe static void NewGameFrame(float elapsed_seconds, Vector2I min, Vector2I max)
 	{
 		min = new Vector2I(MathUtil.Clamp(0, Grid.WidthInCells - 1, (min.x / 32 - 1) * 32), MathUtil.Clamp(0, Grid.HeightInCells - 1, (min.y / 32 - 1) * 32));
 		max = new Vector2I(MathUtil.Clamp(0, Grid.WidthInCells - 1, ((max.x + 31) / 32 + 1) * 32), MathUtil.Clamp(0, Grid.HeightInCells - 1, ((max.y + 31) / 32 + 1) * 32));
-		Sim.ActiveRegion* ptr = stackalloc Sim.ActiveRegion[checked(1 * sizeof(Sim.ActiveRegion))];
+		Sim.NewGameFrame* ptr = stackalloc Sim.NewGameFrame[checked(1 * sizeof(Sim.NewGameFrame))];
+		ptr->elapsedSeconds = elapsed_seconds;
 		ptr->minX = min.x;
 		ptr->minY = min.y;
 		ptr->maxX = max.x;
 		ptr->maxY = max.y;
-		Sim.SIM_HandleMessage(-775326397, sizeof(Sim.ActiveRegion), (byte*)ptr);
-	}
-
-	public unsafe static void SubmitPipeChanges(SimMessages.PipeChange[] pipe_changes, int num_changes)
-	{
-		fixed (SimMessages.PipeChange* ptr = (ref pipe_changes != null && pipe_changes.Length != 0 ? ref pipe_changes[0] : ref *null))
-		{
-			Sim.SIM_HandleMessage(84465086, num_changes, (byte*)ptr);
-		}
+		Sim.SIM_HandleMessage(-775326397, sizeof(Sim.NewGameFrame), (byte*)ptr);
 	}
 
 	public unsafe static void SetDebugProperties(Sim.DebugProperties properties)
@@ -439,8 +510,6 @@ public static class SimMessages
 
 		public int callbackIdx;
 
-		public float consumptionRate;
-
 		public byte radius;
 
 		public byte configuration;
@@ -448,8 +517,14 @@ public static class SimMessages
 		public byte elementIdx;
 
 		private byte pad0;
+	}
 
-		private byte pad1;
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	private struct SetElementConsumerDataMessage
+	{
+		public int handle;
+
+		public float consumptionRate;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -463,9 +538,15 @@ public static class SimMessages
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
 	private struct AddElementEmitterMessage
 	{
-		public int cellIdx;
-
 		public int callbackIdx;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	private struct ModifyElementEmitterMessage
+	{
+		public int handle;
+
+		public int cellIdx;
 
 		public float emitInterval;
 
@@ -501,6 +582,10 @@ public static class SimMessages
 
 		public float temperature;
 
+		public float surfaceArea;
+
+		public float thickness;
+
 		public byte elementIdx;
 
 		public byte pad0;
@@ -534,6 +619,86 @@ public static class SimMessages
 		public int handle;
 
 		public int gameCell;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	private struct ModifyElementChunkEnergyMessage
+	{
+		public int handle;
+
+		public float deltaKJ;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct AddBuildingHeatExchangeMessage
+	{
+		public int callbackIdx;
+
+		public byte elemIdx;
+
+		public byte pad0;
+
+		public byte pad1;
+
+		public byte pad2;
+
+		public float mass;
+
+		public float temperature;
+
+		public float operatingKilowatts;
+
+		public int minX;
+
+		public int minY;
+
+		public int maxX;
+
+		public int maxY;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct ModifyBuildingHeatExchangeMessage
+	{
+		public int handle;
+
+		public byte elemIdx;
+
+		public byte pad0;
+
+		public byte pad1;
+
+		public byte pad2;
+
+		public float mass;
+
+		public float temperature;
+
+		public float operatingKilowatts;
+
+		public int minX;
+
+		public int minY;
+
+		public int maxX;
+
+		public int maxY;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct ModifyBuildingEnergyMessage
+	{
+		public int handle;
+
+		public float deltaKJ;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct RemoveBuildingHeatExchangeMessage
+	{
+		public int handle;
+
+		public int callbackIdx;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -587,7 +752,14 @@ public static class SimMessages
 
 		public byte elementIdx;
 
-		public bool replace;
+		public byte replaceType;
+	}
+
+	public enum ReplaceType
+	{
+		None,
+		Replace,
+		ReplaceAndDisplace
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -625,7 +797,8 @@ public static class SimMessages
 		Excavator,
 		HeatBulb,
 		WarmBlooded,
-		StructureTemperature
+		StructureTemperature,
+		Burner
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]

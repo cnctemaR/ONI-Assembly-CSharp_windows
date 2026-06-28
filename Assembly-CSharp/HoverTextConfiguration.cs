@@ -5,6 +5,11 @@ using UnityEngine.UI;
 
 public class HoverTextConfiguration : KMonoBehaviour
 {
+	public virtual void SetNotConfigured()
+	{
+		this.isConfigured = false;
+	}
+
 	protected void SetLineActive(GameObject LineObject, bool active)
 	{
 		if (LineObject.activeSelf != active)
@@ -26,7 +31,7 @@ public class HoverTextConfiguration : KMonoBehaviour
 	protected virtual void ConfigureInstructions(HoverTextScreen screen)
 	{
 		TextStyleSetting standard = this.Styles_Instruction.Standard;
-		screen.NewLine("Instructions", 24);
+		this.InstructionLine = screen.NewLine("Instructions", 24);
 		screen.AddIcon(screen.GetSprite("icon_mouse_left"), 16f);
 		screen.AddText(this.ActionName, standard, true);
 		screen.AddIndent(8f, 18f);
@@ -41,6 +46,13 @@ public class HoverTextConfiguration : KMonoBehaviour
 			this.ActionName = Strings.Get(this.ActionStringKey);
 		}
 		HoverTextScreen instance = HoverTextScreen.Instance;
+		if (instance.LoadPreConfiguredToolFields(this))
+		{
+			this.isConfigured = true;
+			return;
+		}
+		instance.ToggleIncubating(true);
+		instance.currentConfiguration = this;
 		instance.ClearLabels();
 		instance.NewLine("Spacer", 24);
 		instance.StartShadowBar(0f, 0f, false);
@@ -50,10 +62,20 @@ public class HoverTextConfiguration : KMonoBehaviour
 		}
 		this.ConfigureInstructions(instance);
 		instance.EndShadowBar();
+		this.isConfigured = true;
+	}
+
+	protected override void OnCmpDisable()
+	{
+		base.OnCmpDisable();
 	}
 
 	public virtual void UpdateHoverElements(KSelectable[] hoverObjects)
 	{
+		if (!this.isConfigured)
+		{
+			this.ConfigureHoverScreen();
+		}
 	}
 
 	public bool printTitle = true;
@@ -72,9 +94,13 @@ public class HoverTextConfiguration : KMonoBehaviour
 
 	protected GameObject TitleLine;
 
+	protected GameObject InstructionLine;
+
 	protected LocText TitleText;
 
 	protected Text ActionText;
+
+	protected bool isConfigured;
 
 	protected Color iconColor_basic = Color.white;
 

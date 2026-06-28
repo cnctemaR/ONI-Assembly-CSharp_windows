@@ -4,11 +4,23 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class ManualGenerator : BuildingWorkable
+public class ManualGenerator : BuildingWorkable, IBatteryRefillControl
 {
 	private ManualGenerator()
 	{
 		this.showProgressBar = false;
+	}
+
+	public float BatteryRefillPercent
+	{
+		get
+		{
+			return this.batteryRefillPercent;
+		}
+		set
+		{
+			this.batteryRefillPercent = value;
+		}
 	}
 
 	public bool IsPowered
@@ -22,8 +34,8 @@ public class ManualGenerator : BuildingWorkable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(-592767678, new EventSystem.EventHandler(this.OnOperationalChanged));
-		this.Subscribe(824508782, new EventSystem.EventHandler(this.OnActiveChanged));
+		this.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		this.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.GeneratingPower;
 		this.attributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
 	}
@@ -43,9 +55,9 @@ public class ManualGenerator : BuildingWorkable
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		component.HideSymbols(true, ManualGenerator.symbol_names);
 		Building component2 = base.GetComponent<Building>();
-		this.powerCell = component2.GetPowerInputCell();
+		this.powerCell = component2.GetPowerOutputCell();
 		this.OnActiveChanged(null);
-		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_generatormanual") };
+		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_generatormanual_kanim") };
 		this.smi = new ManualGenerator.GeneratePowerSM.Instance(this);
 		this.smi.StartSM();
 	}
@@ -60,12 +72,12 @@ public class ManualGenerator : BuildingWorkable
 	{
 		if (this.operational.IsActive)
 		{
-			this.generator.ApplyImmediateJoulesAvailable(this.generator.WattageRating * dt, false);
+			this.generator.GenerateJoules(this.generator.WattageRating * dt, false);
 			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.Wattage, this.generator);
 		}
 		else
 		{
-			this.generator.JoulesAvailable = 0f;
+			this.generator.ResetJoules();
 			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.GeneratorOffline, null);
 			if (this.operational.IsOperational)
 			{
@@ -77,10 +89,19 @@ public class ManualGenerator : BuildingWorkable
 				ushort circuitID = circuitManager.GetCircuitID(this.powerCell);
 				bool flag = circuitManager.HasBatteries(circuitID);
 				bool flag2 = (flag && circuitManager.GetMinBatteryPercentFullOnCircuit(circuitID) < this.batteryRefillPercent) || (!flag && circuitManager.HasConsumers(circuitID));
-				if (flag2 && this.chore == null && this.smi.GetCurrentState() == this.smi.sm.on)
+				if (flag2)
 				{
-					this.chore = new WorkChore<ManualGenerator>(Db.Get().ChoreTypes.GeneratePower, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true);
+					if (this.chore == null && this.smi.GetCurrentState() == this.smi.sm.on)
+					{
+						this.chore = new WorkChore<ManualGenerator>(Db.Get().ChoreTypes.GeneratePower, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true);
+					}
 				}
+				else if (this.chore != null)
+				{
+					this.chore.Cancel("No refill needed");
+					this.chore = null;
+				}
+				base.GetComponent<KSelectable>().ToggleStatusItem(EnergyGenerator.BatteriesSufficientlyFull, !flag2, null);
 			}
 		}
 	}
@@ -130,7 +151,7 @@ public class ManualGenerator : BuildingWorkable
 	{
 		if (!this.buildingEnabledButton.IsEnabled)
 		{
-			this.generator.JoulesAvailable = 0f;
+			this.generator.ResetJoules();
 		}
 	}
 
@@ -138,7 +159,7 @@ public class ManualGenerator : BuildingWorkable
 
 	[SerializeField]
 	[Serialize]
-	public float batteryRefillPercent = 0.5f;
+	private float batteryRefillPercent = 0.5f;
 
 	[MyCmpReq]
 	private Generator generator;
@@ -179,22 +200,22 @@ public class ManualGenerator : BuildingWorkable
 			this.working.pst.PlayAnim("working_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.off);
 		}
 
-		public GameStateMachine<ManualGenerator.GeneratePowerSM, ManualGenerator.GeneratePowerSM.Instance, IStateMachineTarget>.State off;
+		public GameStateMachine<ManualGenerator.GeneratePowerSM, ManualGenerator.GeneratePowerSM.Instance, IStateMachineTarget, object>.State off;
 
-		public GameStateMachine<ManualGenerator.GeneratePowerSM, ManualGenerator.GeneratePowerSM.Instance, IStateMachineTarget>.State on;
+		public GameStateMachine<ManualGenerator.GeneratePowerSM, ManualGenerator.GeneratePowerSM.Instance, IStateMachineTarget, object>.State on;
 
 		public ManualGenerator.GeneratePowerSM.WorkingStates working;
 
-		public class WorkingStates : GameStateMachine<ManualGenerator.GeneratePowerSM, ManualGenerator.GeneratePowerSM.Instance, IStateMachineTarget>.State
+		public class WorkingStates : GameStateMachine<ManualGenerator.GeneratePowerSM, ManualGenerator.GeneratePowerSM.Instance, IStateMachineTarget, object>.State
 		{
-			public GameStateMachine<ManualGenerator.GeneratePowerSM, ManualGenerator.GeneratePowerSM.Instance, IStateMachineTarget>.State pre;
+			public GameStateMachine<ManualGenerator.GeneratePowerSM, ManualGenerator.GeneratePowerSM.Instance, IStateMachineTarget, object>.State pre;
 
-			public GameStateMachine<ManualGenerator.GeneratePowerSM, ManualGenerator.GeneratePowerSM.Instance, IStateMachineTarget>.State loop;
+			public GameStateMachine<ManualGenerator.GeneratePowerSM, ManualGenerator.GeneratePowerSM.Instance, IStateMachineTarget, object>.State loop;
 
-			public GameStateMachine<ManualGenerator.GeneratePowerSM, ManualGenerator.GeneratePowerSM.Instance, IStateMachineTarget>.State pst;
+			public GameStateMachine<ManualGenerator.GeneratePowerSM, ManualGenerator.GeneratePowerSM.Instance, IStateMachineTarget, object>.State pst;
 		}
 
-		public new class Instance : GameStateMachine<ManualGenerator.GeneratePowerSM, ManualGenerator.GeneratePowerSM.Instance, IStateMachineTarget>.GameInstance
+		public new class Instance : GameStateMachine<ManualGenerator.GeneratePowerSM, ManualGenerator.GeneratePowerSM.Instance, IStateMachineTarget, object>.GameInstance
 		{
 			public Instance(IStateMachineTarget master)
 				: base(master)

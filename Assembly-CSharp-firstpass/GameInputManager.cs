@@ -48,7 +48,7 @@ public class GameInputManager : KInputManager
 
 	public override void Update()
 	{
-		if (this.isFocused)
+		if (KInputManager.isFocused)
 		{
 			base.Update();
 		}
@@ -56,9 +56,6 @@ public class GameInputManager : KInputManager
 
 	public override void OnApplicationFocus(bool focusStatus)
 	{
-		this.isFocused = focusStatus;
 		base.OnApplicationFocus(focusStatus);
 	}
-
-	private new bool isFocused = true;
 }

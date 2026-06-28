@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class Attackable : Workable, ISaveLoadableJson
+public class Attackable : Workable
 {
 	public bool Slaughtered
 	{
@@ -19,9 +19,9 @@ public class Attackable : Workable, ISaveLoadableJson
 	{
 		base.OnPrefabInit();
 		Components.Attackables.Add(this);
-		this.Subscribe(493375141, new EventSystem.EventHandler(this.OnRefreshUserMenu));
+		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		this.workTime = 4f;
-		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_break") };
+		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_break_kanim") };
 	}
 
 	protected override void OnStartWork(Worker worker)
@@ -56,7 +56,7 @@ public class Attackable : Workable, ISaveLoadableJson
 
 	public void DeactivateChore(string reason)
 	{
-		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest);
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
 		if (this.chore == null)
 		{
 			return;
@@ -70,7 +70,7 @@ public class Attackable : Workable, ISaveLoadableJson
 		this.Slaughtered = true;
 		this.health.Kill(Db.Get().Deaths.Generic);
 		this.chore = null;
-		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest);
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
 		if (this.OnSlaughtered != null)
 		{
 			this.OnSlaughtered();
@@ -101,18 +101,18 @@ public class Attackable : Workable, ISaveLoadableJson
 		KIconButtonMenu.ButtonInfo buttonInfo = null;
 		if (!this.slaughtered && this.chore == null)
 		{
-			buttonInfo = new KIconButtonMenu.ButtonInfo("action_deconstruct", "Attack", new global::System.Action(this.ActivateChore), global::Action.NumActions, null, null, null, null, string.Empty);
+			buttonInfo = new KIconButtonMenu.ButtonInfo("action_deconstruct", "Attack", new global::System.Action(this.ActivateChore), global::Action.NumActions, null, null, null, string.Empty, true);
 		}
 		else if (this.chore != null)
 		{
 			buttonInfo = new KIconButtonMenu.ButtonInfo("action_deconstruct", "Cancel Attack", delegate
 			{
 				this.DeactivateChore("Attack cancelled");
-			}, global::Action.NumActions, null, null, null, null, string.Empty);
+			}, global::Action.NumActions, null, null, null, string.Empty, true);
 		}
 		if (buttonInfo != null)
 		{
-			this.userMenu.AddButton(buttonInfo);
+			this.userMenu.AddButton(buttonInfo, 1f);
 		}
 	}
 

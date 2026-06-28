@@ -25,7 +25,7 @@ public class BasicForagePlantPlanted : StateMachineComponent<BasicForagePlantPla
 	[MyCmpReq]
 	private KBatchedAnimController animController;
 
-	public class StatesInstance : GameStateMachine<BasicForagePlantPlanted.States, BasicForagePlantPlanted.StatesInstance, BasicForagePlantPlanted>.GameInstance
+	public class StatesInstance : GameStateMachine<BasicForagePlantPlanted.States, BasicForagePlantPlanted.StatesInstance, BasicForagePlantPlanted, object>.GameInstance
 	{
 		public StatesInstance(BasicForagePlantPlanted smi)
 			: base(smi)
@@ -39,16 +39,16 @@ public class BasicForagePlantPlanted : StateMachineComponent<BasicForagePlantPla
 		{
 			default_state = this.seed_grow;
 			base.serializable = true;
-			this.seed_grow.PlayAnim("idle_loop", KAnim.PlayMode.Once, null).EventTransition(GameHashes.AnimQueueComplete, this.alive.idle, null);
+			this.seed_grow.PlayAnim("idle", KAnim.PlayMode.Once, null).EventTransition(GameHashes.AnimQueueComplete, this.alive.idle, null);
 			this.alive.InitializeStates(this.masterTarget, this.dead);
-			this.alive.idle.PlayAnim("idle_loop", KAnim.PlayMode.Once, null).EventTransition(GameHashes.Uprooted, this.alive.harvest, null).EventTransition(GameHashes.Harvest, this.alive.harvest, null)
+			this.alive.idle.PlayAnim("idle", KAnim.PlayMode.Once, null).EventTransition(GameHashes.Uprooted, this.alive.harvest, null).EventTransition(GameHashes.Harvest, this.alive.harvest, null)
 				.Enter(delegate(BasicForagePlantPlanted.StatesInstance smi)
 				{
 					smi.master.harvestable.SetCanBeHarvested(true);
 				});
 			this.alive.harvest.Enter(delegate(BasicForagePlantPlanted.StatesInstance smi)
 			{
-				smi.master.seedProducer.ProduceSeed(null);
+				smi.master.seedProducer.DropSeed(null);
 			}).GoTo(this.dead);
 			this.dead.Enter(delegate(BasicForagePlantPlanted.StatesInstance smi)
 			{
@@ -60,17 +60,17 @@ public class BasicForagePlantPlanted : StateMachineComponent<BasicForagePlantPla
 			});
 		}
 
-		public GameStateMachine<BasicForagePlantPlanted.States, BasicForagePlantPlanted.StatesInstance, BasicForagePlantPlanted>.State seed_grow;
+		public GameStateMachine<BasicForagePlantPlanted.States, BasicForagePlantPlanted.StatesInstance, BasicForagePlantPlanted, object>.State seed_grow;
 
 		public BasicForagePlantPlanted.States.AliveStates alive;
 
-		public GameStateMachine<BasicForagePlantPlanted.States, BasicForagePlantPlanted.StatesInstance, BasicForagePlantPlanted>.State dead;
+		public GameStateMachine<BasicForagePlantPlanted.States, BasicForagePlantPlanted.StatesInstance, BasicForagePlantPlanted, object>.State dead;
 
-		public class AliveStates : GameStateMachine<BasicForagePlantPlanted.States, BasicForagePlantPlanted.StatesInstance, BasicForagePlantPlanted>.PlantAliveSubState
+		public class AliveStates : GameStateMachine<BasicForagePlantPlanted.States, BasicForagePlantPlanted.StatesInstance, BasicForagePlantPlanted, object>.PlantAliveSubState
 		{
-			public GameStateMachine<BasicForagePlantPlanted.States, BasicForagePlantPlanted.StatesInstance, BasicForagePlantPlanted>.State idle;
+			public GameStateMachine<BasicForagePlantPlanted.States, BasicForagePlantPlanted.StatesInstance, BasicForagePlantPlanted, object>.State idle;
 
-			public GameStateMachine<BasicForagePlantPlanted.States, BasicForagePlantPlanted.StatesInstance, BasicForagePlantPlanted>.State harvest;
+			public GameStateMachine<BasicForagePlantPlanted.States, BasicForagePlantPlanted.StatesInstance, BasicForagePlantPlanted, object>.State harvest;
 		}
 	}
 }

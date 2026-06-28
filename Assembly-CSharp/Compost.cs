@@ -6,7 +6,7 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(-1697596308, new EventSystem.EventHandler(this.OnStorageChanged));
+		this.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
 		base.GetComponent<Storage>().choreType = Db.Get().ChoreTypes.FetchCritical;
 	}
 
@@ -27,24 +27,36 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>
 		}
 	}
 
-	private const float FlipInterval = 600f;
-
 	[MyCmpGet]
 	private Operational operational;
 
 	[MyCmpGet]
 	private Storage storage;
 
-	public class StatesInstance : GameStateMachine<Compost.States, Compost.StatesInstance, Compost>.GameInstance
+	[SerializeField]
+	public float flipInterval = 600f;
+
+	[SerializeField]
+	public SimHashes emitHash = SimHashes.Vacuum;
+
+	[SerializeField]
+	public float emitMassThreshold = 1f;
+
+	public class StatesInstance : GameStateMachine<Compost.States, Compost.StatesInstance, Compost, object>.GameInstance
 	{
 		public StatesInstance(Compost master)
 			: base(master)
 		{
 		}
 
-		public bool HasSufficientMass()
+		public bool CanStartConverting()
 		{
-			return base.master.GetComponent<ElementConverter>().HasEnoughMass();
+			return base.master.GetComponent<ElementConverter>().HasEnoughMassToStartConverting();
+		}
+
+		public bool CanContinueConverting()
+		{
+			return base.master.GetComponent<ElementConverter>().CanConvertAtAll();
 		}
 
 		public bool IsEmpty()
@@ -57,6 +69,16 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>
 			CompostWorkable component = base.master.GetComponent<CompostWorkable>();
 			component.ShowProgressBar(false);
 			component.WorkTimeRemaining = component.GetWorkTime();
+		}
+
+		public void TryEmit()
+		{
+			PrimaryElement primaryElement = base.master.storage.FindPrimaryElement(base.master.emitHash);
+			if (primaryElement != null && primaryElement.Mass >= base.master.emitMassThreshold)
+			{
+				primaryElement.Temperature = base.master.GetComponent<PrimaryElement>().Temperature;
+				base.master.storage.Drop(primaryElement.gameObject);
+			}
 		}
 	}
 
@@ -75,7 +97,7 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>
 			this.insufficientMass.Enter("empty", delegate(Compost.StatesInstance smi)
 			{
 				smi.ResetWorkable();
-			}).EventTransition(GameHashes.OnStorageChange, this.empty, (Compost.StatesInstance smi) => smi.IsEmpty()).EventTransition(GameHashes.OnStorageChange, this.inert, (Compost.StatesInstance smi) => smi.HasSufficientMass())
+			}).EventTransition(GameHashes.OnStorageChange, this.empty, (Compost.StatesInstance smi) => smi.IsEmpty()).EventTransition(GameHashes.OnStorageChange, this.inert, (Compost.StatesInstance smi) => smi.CanStartConverting())
 				.ToggleStatusItem(Db.Get().BuildingStatusItems.AwaitingWaste, null)
 				.PlayAnim("idle_half", KAnim.PlayMode.Once, null);
 			this.inert.EventTransition(GameHashes.OperationalChanged, this.disabled, (Compost.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational).PlayAnim("on", KAnim.PlayMode.Once, null).ToggleStatusItem(Db.Get().BuildingStatusItems.AwaitingCompostFlip, null)
@@ -83,9 +105,13 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>
 			this.composting.Enter("Composting", delegate(Compost.StatesInstance smi)
 			{
 				smi.master.operational.SetActive(true, false);
-			}).EventTransition(GameHashes.OnStorageChange, this.empty, (Compost.StatesInstance smi) => !smi.HasSufficientMass()).EventTransition(GameHashes.OperationalChanged, this.disabled, (Compost.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational)
-				.ScheduleGoTo(600f, this.inert)
-				.PlayAnims((Compost.StatesInstance smi) => Compost.States.compostingStrings, KAnim.PlayMode.Loop)
+			}).EventTransition(GameHashes.OnStorageChange, this.empty, (Compost.StatesInstance smi) => !smi.CanContinueConverting()).EventTransition(GameHashes.OperationalChanged, this.disabled, (Compost.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational)
+				.EventHandler(GameHashes.OnStorageChange, delegate(Compost.StatesInstance smi)
+				{
+					smi.TryEmit();
+				})
+				.ScheduleGoTo((Compost.StatesInstance smi) => smi.master.flipInterval, this.inert)
+				.PlayAnims((Compost.StatesInstance smi) => Compost.States.compostingAnims, KAnim.PlayMode.Loop)
 				.Exit(delegate(Compost.StatesInstance smi)
 				{
 					smi.master.operational.SetActive(false, false);
@@ -106,20 +132,20 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>
 			return new WorkChore<CompostWorkable>(Db.Get().ChoreTypes.FlipCompost, smi.master, null, true, null, null, null, true, null, true, default(Tag), null, false, true);
 		}
 
-		public GameStateMachine<Compost.States, Compost.StatesInstance, Compost>.State empty;
+		public GameStateMachine<Compost.States, Compost.StatesInstance, Compost, object>.State empty;
 
-		public GameStateMachine<Compost.States, Compost.StatesInstance, Compost>.State insufficientMass;
+		public GameStateMachine<Compost.States, Compost.StatesInstance, Compost, object>.State insufficientMass;
 
-		public GameStateMachine<Compost.States, Compost.StatesInstance, Compost>.State disabled;
+		public GameStateMachine<Compost.States, Compost.StatesInstance, Compost, object>.State disabled;
 
-		public GameStateMachine<Compost.States, Compost.StatesInstance, Compost>.State disabledEmpty;
+		public GameStateMachine<Compost.States, Compost.StatesInstance, Compost, object>.State disabledEmpty;
 
-		public GameStateMachine<Compost.States, Compost.StatesInstance, Compost>.State inert;
+		public GameStateMachine<Compost.States, Compost.StatesInstance, Compost, object>.State inert;
 
-		public GameStateMachine<Compost.States, Compost.StatesInstance, Compost>.State composting;
+		public GameStateMachine<Compost.States, Compost.StatesInstance, Compost, object>.State composting;
 
-		public GameStateMachine<Compost.States, Compost.StatesInstance, Compost>.State compostingPst;
+		public GameStateMachine<Compost.States, Compost.StatesInstance, Compost, object>.State compostingPst;
 
-		private static readonly string[] compostingStrings = new string[] { "composting_pre", "composting_loop" };
+		private static readonly HashedString[] compostingAnims = new HashedString[] { "composting_pre", "composting_loop" };
 	}
 }

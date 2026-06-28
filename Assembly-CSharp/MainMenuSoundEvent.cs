@@ -15,16 +15,19 @@ public class MainMenuSoundEvent : AnimEvent
 		this.frameNumber = frame;
 	}
 
-	public void Play(IAnimBehaviour behaviour, string sound)
+	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
 	{
-		EventInstance eventInstance = KFMOD.BeginOneShot(sound, Vector3.zero);
-		eventInstance.setParameterValue("frame", (float)this.frameNumber);
-		KFMOD.EndOneShot(eventInstance);
+		this.PlaySound(behaviour);
 	}
 
-	public override void OnPlay(IAnimBehaviour behaviour)
+	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
 	{
-		this.Play(behaviour, this.sound);
+		EventInstance eventInstance = KFMOD.BeginOneShot(this.sound, Vector3.zero);
+		if (eventInstance != null)
+		{
+			eventInstance.setParameterValue("frame", (float)this.frameNumber);
+			KFMOD.EndOneShot(eventInstance);
+		}
 	}
 
 	[EventRef]

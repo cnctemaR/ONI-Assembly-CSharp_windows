@@ -18,7 +18,7 @@ public class MinionSelectScreen : CharacterSelectionController
 		GameObject gameObject2 = global::Util.KInstantiateUI(this.wattsonMessagePrefab.gameObject, gameObject, false);
 		gameObject2.name = "WattsonMessage";
 		gameObject2.SetActive(false);
-		Game.Instance.Subscribe(-1992507039, new EventSystem.EventHandler(this.OnBaseAlreadyCreated));
+		Game.Instance.Subscribe(-1992507039, new Action<object>(this.OnBaseAlreadyCreated));
 		this.backButton.onClick += delegate
 		{
 			LoadScreen.ForceStopGame();
@@ -42,9 +42,9 @@ public class MinionSelectScreen : CharacterSelectionController
 	protected override void OnProceed()
 	{
 		global::Util.KInstantiateUI(this.newBasePrefab.gameObject, GameScreenManager.Instance.ssOverlayCanvas, false);
-		MusicManager.instance.StopSong("Music_FrontEnd", true);
+		MusicManager.instance.StopSong("Music_FrontEnd", true, STOP_MODE.ALLOWFADEOUT);
 		AudioMixer.instance.Start(AudioMixerSnapshots.Get().NewBaseSetupSnapshot);
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndSnapshot, STOP_MODE.ALLOWFADEOUT);
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndWorldGenerationSnapshot, STOP_MODE.ALLOWFADEOUT);
 		this.startingStats.Clear();
 		foreach (CharacterContainer characterContainer in this.containers)
 		{
@@ -56,6 +56,7 @@ public class MinionSelectScreen : CharacterSelectionController
 			this.OnProceedEvent();
 		}
 		Game.Instance.Trigger(-838649377, null);
+		BuildWatermark.Instance.gameObject.SetActive(false);
 		this.Deactivate();
 	}
 

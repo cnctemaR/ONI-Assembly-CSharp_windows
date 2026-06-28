@@ -36,6 +36,9 @@ public class Worker : KMonoBehaviour
 			Workable workable = this.workable;
 			this.workable = null;
 			workable.CompleteWork(this);
+			KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
+			component.Offset -= this.workAnimOffset;
+			this.workAnimOffset = Vector3.zero;
 			return true;
 		}
 		return false;
@@ -86,6 +89,10 @@ public class Worker : KMonoBehaviour
 							component2.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
 						}
 					}
+					if (this.animInfo.forcePlayPst)
+					{
+						component2.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
+					}
 				}
 			}
 			return false;
@@ -117,14 +124,9 @@ public class Worker : KMonoBehaviour
 		{
 			workable.StopWork(this);
 		}
-		if (this.snapons != null)
-		{
-			SnapOn component = base.GetComponent<SnapOn>();
-			for (int i = 0; i < this.snapons.Length; i++)
-			{
-				component.DetachSnapOnByName(this.snapons[i]);
-			}
-		}
+		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
+		component.Offset -= this.workAnimOffset;
+		this.workAnimOffset = Vector3.zero;
 		if (this.smi != null)
 		{
 			this.smi.StopSM("stopping work");
@@ -156,23 +158,18 @@ public class Worker : KMonoBehaviour
 			component.SetStatusItem(Db.Get().StatusItemCategories.Main, workable.GetWorkerStatusItem(), workable);
 			this.animInfo = workable.GetAnim(this);
 			this.AttachOverrideAnims();
-			string[] workAnims = workable.GetWorkAnims(this);
+			HashedString[] workAnims = workable.GetWorkAnims(this);
 			if (workAnims != null)
 			{
-				base.GetComponent<KAnimControllerBase>().Play(workAnims, KAnim.PlayMode.Loop);
+				KAnimControllerBase component2 = base.GetComponent<KAnimControllerBase>();
+				Vector3 workOffset = workable.GetWorkOffset();
+				this.workAnimOffset = workOffset;
+				component2.Offset += workOffset;
+				component2.Play(workAnims, KAnim.PlayMode.Loop);
 			}
 			if (this.OnWorkStartCallback != null)
 			{
 				this.OnWorkStartCallback();
-			}
-			this.snapons = workable.snapons;
-			if (this.snapons != null)
-			{
-				SnapOn component2 = base.GetComponent<SnapOn>();
-				for (int i = 0; i < this.snapons.Length; i++)
-				{
-					component2.AttachSnapOnByName(this.snapons[i]);
-				}
 			}
 			if (this.animInfo.smi != null)
 			{
@@ -205,7 +202,11 @@ public class Worker : KMonoBehaviour
 			}
 			if (this.workable.GetWorkAnims(this) == null)
 			{
-				this.kanimSynchronizer = this.workable.GetComponent<KAnimControllerBase>().GetSynchronizer();
+				KAnimControllerBase component2 = this.workable.GetComponent<KAnimControllerBase>();
+				Vector3 workOffset = this.workable.GetWorkOffset();
+				this.workAnimOffset = workOffset;
+				component2.Offset += workOffset;
+				this.kanimSynchronizer = component2.GetSynchronizer();
 				if (this.kanimSynchronizer != null)
 				{
 					this.kanimSynchronizer.Add(component);
@@ -286,5 +287,5 @@ public class Worker : KMonoBehaviour
 
 	private StateMachine.Instance smi;
 
-	private string[] snapons;
+	private Vector3 workAnimOffset = Vector3.zero;
 }

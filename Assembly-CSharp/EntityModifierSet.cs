@@ -15,7 +15,6 @@ public class EntityModifierSet : ModifierSet
 
 	private void LoadEffectCallbacks()
 	{
-		this.effects.Get("MentalBreak").OnAddRemove += this.OnMentalBreak;
 		this.effects.Get("UncomfortableSleep").OnAddRemove += this.OnUncomfortableSleep;
 	}
 
@@ -24,14 +23,6 @@ public class EntityModifierSet : ModifierSet
 		if (!is_add)
 		{
 			effects.GetAmounts().Get("Stamina").SetValue(90f);
-		}
-	}
-
-	private void OnMentalBreak(Effects effects, Effect effect, bool is_add)
-	{
-		if (!is_add)
-		{
-			effects.GetAmounts().Get("Stress").SetValue(5f);
 		}
 	}
 

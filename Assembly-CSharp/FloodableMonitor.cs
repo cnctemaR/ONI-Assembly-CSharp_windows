@@ -10,11 +10,11 @@ public class FloodableMonitor : GameStateMachine<FloodableMonitor, FloodableMoni
 		this.flooded.DoNothing();
 	}
 
-	public GameStateMachine<FloodableMonitor, FloodableMonitor.Instance, IStateMachineTarget>.State satisfied;
+	public GameStateMachine<FloodableMonitor, FloodableMonitor.Instance, IStateMachineTarget, object>.State satisfied;
 
-	public GameStateMachine<FloodableMonitor, FloodableMonitor.Instance, IStateMachineTarget>.State flooded;
+	public GameStateMachine<FloodableMonitor, FloodableMonitor.Instance, IStateMachineTarget, object>.State flooded;
 
-	public new class Instance : GameStateMachine<FloodableMonitor, FloodableMonitor.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<FloodableMonitor, FloodableMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)

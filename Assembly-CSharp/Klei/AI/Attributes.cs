@@ -14,7 +14,7 @@ namespace Klei.AI
 
 		public IEnumerator<AttributeInstance> GetEnumerator()
 		{
-			return this.AttributeTable.Values.GetEnumerator();
+			return this.AttributeTable.GetEnumerator();
 		}
 
 		public int Count
@@ -27,24 +27,21 @@ namespace Klei.AI
 
 		public AttributeInstance Add(Attribute attribute)
 		{
-			AttributeInstance attributeInstance = null;
-			if (!this.AttributeTable.TryGetValue(attribute.Id, out attributeInstance))
+			AttributeInstance attributeInstance = this.Get(attribute.Id);
+			if (attributeInstance == null)
 			{
 				attributeInstance = new AttributeInstance(this.gameObject, attribute);
-				this.AttributeTable[attribute.Id] = attributeInstance;
+				this.AttributeTable.Add(attributeInstance);
 			}
 			return attributeInstance;
 		}
 
 		public void Add(string id, AttributeModifier modifier)
 		{
-			foreach (KeyValuePair<string, AttributeInstance> keyValuePair in this.AttributeTable)
+			AttributeInstance attributeInstance = this.Get(modifier.AttributeId);
+			if (attributeInstance != null)
 			{
-				if (keyValuePair.Key == modifier.AttributeId)
-				{
-					keyValuePair.Value.Add(id, modifier);
-					break;
-				}
+				attributeInstance.Add(id, modifier);
 			}
 		}
 
@@ -56,8 +53,8 @@ namespace Klei.AI
 		public float GetValuePercent(string attribute_id)
 		{
 			float num = 1f;
-			AttributeInstance attributeInstance = null;
-			if (this.AttributeTable.TryGetValue(attribute_id, out attributeInstance))
+			AttributeInstance attributeInstance = this.Get(attribute_id);
+			if (attributeInstance != null)
 			{
 				num = attributeInstance.GetTotalValue() / attributeInstance.GetBaseValue();
 			}
@@ -70,9 +67,14 @@ namespace Klei.AI
 
 		public AttributeInstance Get(string attribute_id)
 		{
-			AttributeInstance attributeInstance = null;
-			this.AttributeTable.TryGetValue(attribute_id, out attributeInstance);
-			return attributeInstance;
+			for (int i = 0; i < this.AttributeTable.Count; i++)
+			{
+				if (this.AttributeTable[i].Id == attribute_id)
+				{
+					return this.AttributeTable[i];
+				}
+			}
+			return null;
 		}
 
 		public AttributeInstance Get(Attribute attribute)
@@ -101,13 +103,10 @@ namespace Klei.AI
 			{
 				return;
 			}
-			foreach (KeyValuePair<string, AttributeInstance> keyValuePair in this.AttributeTable)
+			AttributeInstance attributeInstance = this.Get(modifier.AttributeId);
+			if (attributeInstance != null)
 			{
-				if (keyValuePair.Key == modifier.AttributeId)
-				{
-					keyValuePair.Value.Remove(modifier);
-					break;
-				}
+				attributeInstance.Remove(modifier);
 			}
 		}
 
@@ -151,7 +150,7 @@ namespace Klei.AI
 			return string.Format(DUPLICANTS.ATTRIBUTES.PROFESSION_DESC, profession.modifier.Name);
 		}
 
-		public Dictionary<string, AttributeInstance> AttributeTable = new Dictionary<string, AttributeInstance>();
+		public List<AttributeInstance> AttributeTable = new List<AttributeInstance>();
 
 		public GameObject gameObject;
 	}

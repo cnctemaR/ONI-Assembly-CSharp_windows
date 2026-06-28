@@ -5,7 +5,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class TimeOfDay : KMonoBehaviour, ISaveLoadableJson
+public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 {
 	protected override void OnPrefabInit()
 	{
@@ -88,7 +88,7 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadableJson
 			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().NightStartedMigrated, STOP_MODE.ALLOWFADEOUT);
 			if (MusicManager.instance.SongIsPlaying("Underscore_Night_LP"))
 			{
-				MusicManager.instance.StopSong("Underscore_Night_LP", true);
+				MusicManager.instance.StopSong("Underscore_Night_LP", true, STOP_MODE.ALLOWFADEOUT);
 			}
 			MusicManager.instance.PlaySong("Stinger_Day", false);
 			MusicManager.instance.daysSinceDynamicMusic++;

@@ -42,6 +42,7 @@ namespace UnityStandardAssets.ImageEffects
 		{
 			Mesh mesh = new Mesh();
 			mesh.hideFlags = HideFlags.DontSave;
+			mesh.name = "Triangle.cs";
 			Vector3[] array = new Vector3[triCount * 3];
 			Vector2[] array2 = new Vector2[triCount * 3];
 			Vector2[] array3 = new Vector2[triCount * 3];

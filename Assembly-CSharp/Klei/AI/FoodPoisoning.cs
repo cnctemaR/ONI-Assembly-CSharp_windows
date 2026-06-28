@@ -13,7 +13,7 @@ namespace Klei.AI
 				new Disease.EffectProbabilityDelta
 				{
 					effectID = "DirtyHands",
-					probabilityDelta = 0.005f
+					probabilityDelta = 5E-08f
 				}
 			})
 		{
@@ -37,9 +37,6 @@ namespace Klei.AI
 		{
 			public InstanceData(GameObject go, KAnimControllerBase fx_controller)
 			{
-				Func<List<Notification>, object, string> func = (List<Notification> notificationList, object data) => DUPLICANTS.STATUSITEMS.VOMITING.NOTIFICATION_TOOLTIP + notificationList.ReduceMessages(false);
-				this.vomiting = new Notification(DUPLICANTS.STATUSITEMS.VOMITING.NOTIFICATION_NAME, NotificationType.Bad, null, func, null, true, 0f, null, null, null);
-				base..ctor();
 				this.go = go;
 				this.fxController = fx_controller;
 			}
@@ -79,7 +76,7 @@ namespace Klei.AI
 
 			private SchedulerHandle vomitHandle;
 
-			public Notification vomiting;
+			public Notification vomiting = new Notification(DUPLICANTS.STATUSITEMS.VOMITING.NOTIFICATION_NAME, NotificationType.Bad, HashedString.Invalid, (List<Notification> notificationList, object data) => DUPLICANTS.STATUSITEMS.VOMITING.NOTIFICATION_TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null);
 		}
 	}
 }

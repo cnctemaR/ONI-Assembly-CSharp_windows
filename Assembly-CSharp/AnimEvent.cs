@@ -10,11 +10,17 @@ public class AnimEvent
 	public AnimEvent(string file, string name, int frame)
 	{
 		this.File = ((!(file == string.Empty)) ? file : null);
+		if (this.File != null)
+		{
+			this.FileHash = new KAnimHashedString(this.File);
+		}
 		this.Name = name;
 		this.Frame = frame;
 	}
 
-	public void Play(IAnimBehaviour behaviour)
+	public string File { get; private set; }
+
+	public void Play(AnimEventManager.EventPlayerData behaviour)
 	{
 		if (this.IsFilteredOut(behaviour))
 		{
@@ -33,26 +39,41 @@ public class AnimEvent
 		}
 	}
 
-	public virtual void OnPlay(IAnimBehaviour behaviour)
+	private void DebugAnimEvent(string ev_name, AnimEventManager.EventPlayerData behaviour)
 	{
 	}
 
-	public virtual void OnUpdate(IAnimBehaviour behaviour)
+	public virtual void OnPlay(AnimEventManager.EventPlayerData behaviour)
 	{
 	}
 
-	public virtual void Stop(IAnimBehaviour behaviour)
+	public virtual void OnUpdate(AnimEventManager.EventPlayerData behaviour)
 	{
 	}
 
-	protected bool IsFilteredOut(IAnimBehaviour behaviour)
+	public virtual void Stop(AnimEventManager.EventPlayerData behaviour)
 	{
-		return this.File != null && behaviour.currentAnimFile != null && this.File != behaviour.currentAnimFile.ToLower();
+	}
+
+	protected bool IsFilteredOut(AnimEventManager.EventPlayerData behaviour)
+	{
+		return this.File != null && behaviour.currentAnimFile != null && this.FileHash != behaviour.currentAnimFileHash;
+	}
+
+	public virtual bool ShouldPlaySound(AnimEventManager.EventPlayerData behaviour)
+	{
+		CameraController instance = CameraController.Instance;
+		SpeedControlScreen instance2 = SpeedControlScreen.Instance;
+		return (!(instance2 != null) || !instance2.IsPaused) && (!(instance != null) || instance.IsAudibleSound(behaviour.position, 0f));
+	}
+
+	public virtual void PlaySound(AnimEventManager.EventPlayerData behaviour)
+	{
 	}
 
 	public string Name;
 
-	public string File;
+	private KAnimHashedString FileHash;
 
 	public int Frame;
 

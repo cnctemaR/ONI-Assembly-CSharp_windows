@@ -9,13 +9,36 @@ public class UnstableGroundManager : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
 	{
-		this.objPool = new ObjectPool(new Func<GameObject>(this.InstantiateObj), 16);
-		this.prefab.SetActive(false);
+		UnstableGroundManager.EffectInfo[] array = this.effects;
+		for (int i = 0; i < array.Length; i++)
+		{
+			UnstableGroundManager.EffectInfo effectInfo = array[i];
+			GameObject prefab = effectInfo.prefab;
+			prefab.SetActive(false);
+			UnstableGroundManager.EffectRuntimeInfo effectRuntimeInfo = default(UnstableGroundManager.EffectRuntimeInfo);
+			ObjectPool pool = new ObjectPool(() => this.InstantiateObj(prefab), 16);
+			effectRuntimeInfo.pool = pool;
+			effectRuntimeInfo.releaseFunc = delegate(GameObject go)
+			{
+				this.ReleaseGO(go);
+				pool.ReleaseInstance(go);
+			};
+			this.runtimeInfo[effectInfo.element] = effectRuntimeInfo;
+		}
 	}
 
-	private GameObject InstantiateObj()
+	private void ReleaseGO(GameObject go)
 	{
-		GameObject gameObject = GameUtil.KInstantiate(this.prefab, Grid.SceneLayer.BuildingBack, Folder.FX, null, 0);
+		if (GameComps.Gravities.Has(go))
+		{
+			GameComps.Gravities.Remove(go);
+		}
+		go.SetActive(false);
+	}
+
+	private GameObject InstantiateObj(GameObject prefab)
+	{
+		GameObject gameObject = GameUtil.KInstantiate(prefab, Grid.SceneLayer.BuildingBack, Folder.FX, null, 0);
 		gameObject.SetActive(false);
 		gameObject.name = "UnstablePool";
 		return gameObject;
@@ -35,7 +58,7 @@ public class UnstableGroundManager : KMonoBehaviour
 		kbatchedAnimController.gameObject.name = "Falling " + element.name;
 		GameComps.Gravities.Add(kbatchedAnimController.gameObject, Vector2.zero, null);
 		this.fallingObjects.Add(kbatchedAnimController.gameObject);
-		this.SpawnSandPuff(vector, element, mass, temperature);
+		this.SpawnPuff(vector, element, mass, temperature);
 		Substance substance = element.substance;
 		if (substance != null && substance.fallingStartSound != null && CameraController.Instance.IsAudibleSound(vector, substance.fallingStartSound))
 		{
@@ -56,7 +79,7 @@ public class UnstableGroundManager : KMonoBehaviour
 		kbatchedAnimController.gameObject.name = "SpawnOld " + element.name;
 	}
 
-	private void SpawnSandPuff(Vector3 pos, Element element, float mass, float temperature)
+	private void SpawnPuff(Vector3 pos, Element element, float mass, float temperature)
 	{
 		if (!element.IsUnstable)
 		{
@@ -64,13 +87,14 @@ public class UnstableGroundManager : KMonoBehaviour
 		}
 		KBatchedAnimController kbatchedAnimController = this.Spawn(pos, element, mass, temperature);
 		kbatchedAnimController.Play("sandPuff", KAnim.PlayMode.Once, 1f, 0f);
-		kbatchedAnimController.gameObject.name = "SandPuff " + element.name;
-		kbatchedAnimController.transform.position += this.sandPuffOffset;
+		kbatchedAnimController.gameObject.name = "Puff " + element.name;
+		kbatchedAnimController.transform.position += this.spawnPuffOffset;
 	}
 
 	private KBatchedAnimController Spawn(Vector3 pos, Element element, float mass, float temperature)
 	{
-		GameObject instance = this.objPool.GetInstance();
+		UnstableGroundManager.EffectRuntimeInfo effectRuntimeInfo = this.runtimeInfo[element.id];
+		GameObject instance = effectRuntimeInfo.pool.GetInstance();
 		instance.transform.SetPosition(pos);
 		if (float.IsNaN(temperature) || float.IsInfinity(temperature))
 		{
@@ -83,23 +107,13 @@ public class UnstableGroundManager : KMonoBehaviour
 		component.Temperature = temperature;
 		instance.SetActive(true);
 		KBatchedAnimController component2 = instance.GetComponent<KBatchedAnimController>();
-		component2.onDestroySelf = new Action<GameObject>(this.ReleaseGO);
+		component2.onDestroySelf = effectRuntimeInfo.releaseFunc;
 		component2.Stop();
 		if (element.substance != null)
 		{
 			component2.TintColour = element.substance.colour;
 		}
 		return component2;
-	}
-
-	private void ReleaseGO(GameObject go)
-	{
-		if (GameComps.Gravities.Has(go))
-		{
-			GameComps.Gravities.Remove(go);
-		}
-		go.SetActive(false);
-		this.objPool.ReleaseInstance(go);
 	}
 
 	public List<int> GetCellsContainingFallingAbove(Vector2I cellXY)
@@ -134,6 +148,10 @@ public class UnstableGroundManager : KMonoBehaviour
 
 	private void Update()
 	{
+		if (App.isLoading)
+		{
+			return;
+		}
 		int i = 0;
 		while (i < this.fallingObjects.Count)
 		{
@@ -208,22 +226,38 @@ public class UnstableGroundManager : KMonoBehaviour
 	}
 
 	[SerializeField]
-	private GameObject prefab;
+	private Vector3 spawnPuffOffset;
 
 	[SerializeField]
 	private Vector3 landEffectOffset;
 
 	[SerializeField]
-	private Vector3 sandPuffOffset;
+	private UnstableGroundManager.EffectInfo[] effects;
 
 	private List<GameObject> fallingObjects = new List<GameObject>();
 
 	private List<int> pendingCells = new List<int>();
 
-	private ObjectPool objPool;
+	private Dictionary<SimHashes, UnstableGroundManager.EffectRuntimeInfo> runtimeInfo = new Dictionary<SimHashes, UnstableGroundManager.EffectRuntimeInfo>();
 
 	[Serialize]
 	private List<UnstableGroundManager.SerializedInfo> serializedInfo;
+
+	[Serializable]
+	private struct EffectInfo
+	{
+		[HashedEnum]
+		public SimHashes element;
+
+		public GameObject prefab;
+	}
+
+	private struct EffectRuntimeInfo
+	{
+		public ObjectPool pool;
+
+		public Action<GameObject> releaseFunc;
+	}
 
 	private struct SerializedInfo
 	{

@@ -56,7 +56,7 @@ public class KAnimSynchronizer
 		}
 		else
 		{
-			controller.Flip = false;
+			controller.FlipX = false;
 		}
 	}
 

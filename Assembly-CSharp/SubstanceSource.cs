@@ -83,11 +83,20 @@ public abstract class SubstanceSource : KMonoBehaviour
 
 	public Tag GetElementTag()
 	{
-		Tag tag = new Tag(string.Empty);
-		tag.Clear();
+		Tag tag = Tag.Invalid;
 		if (base.gameObject != null && this.primaryElement != null && this.primaryElement.Element != null)
 		{
 			tag = this.primaryElement.Element.tag;
+		}
+		return tag;
+	}
+
+	public Tag GetMaterialCategoryTag()
+	{
+		Tag tag = Tag.Invalid;
+		if (base.gameObject != null && this.primaryElement != null && this.primaryElement.Element != null)
+		{
+			tag = this.primaryElement.Element.GetMaterialCategoryTag();
 		}
 		return tag;
 	}

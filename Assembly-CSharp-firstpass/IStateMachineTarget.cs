@@ -3,9 +3,11 @@ using UnityEngine;
 
 public interface IStateMachineTarget
 {
-	void Subscribe(int hash, EventSystem.EventHandler handler);
+	int Subscribe(int hash, Action<object> handler);
 
-	void Unsubscribe(int hash, EventSystem.EventHandler handler);
+	void Unsubscribe(int hash, Action<object> handler);
+
+	void Unsubscribe(int id);
 
 	void Trigger(int hash, object data = null);
 

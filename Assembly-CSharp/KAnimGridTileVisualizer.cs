@@ -1,13 +1,14 @@
 ﻿using System;
 
+[SkipSaveFileSerialization]
 public class KAnimGridTileVisualizer : KMonoBehaviour
 {
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
 		this.Refresh();
-		this.Subscribe(-1503271301, new EventSystem.EventHandler(this.OnSelectionChanged));
-		this.Subscribe(-1201923725, new EventSystem.EventHandler(this.OnHighlightChanged));
+		this.Subscribe(-1503271301, new Action<object>(this.OnSelectionChanged));
+		this.Subscribe(-1201923725, new Action<object>(this.OnHighlightChanged));
 	}
 
 	protected override void OnCleanUp()

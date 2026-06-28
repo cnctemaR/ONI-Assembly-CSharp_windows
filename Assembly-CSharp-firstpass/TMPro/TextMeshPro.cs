@@ -9,10 +9,10 @@ namespace TMPro
 	[ExecuteInEditMode]
 	[DisallowMultipleComponent]
 	[RequireComponent(typeof(TextContainer))]
-	[RequireComponent(typeof(MeshFilter))]
-	[SelectionBase]
-	[AddComponentMenu("Mesh/TextMeshPro - Text")]
 	[RequireComponent(typeof(MeshRenderer))]
+	[RequireComponent(typeof(MeshFilter))]
+	[AddComponentMenu("Mesh/TextMeshPro - Text")]
+	[SelectionBase]
 	public class TextMeshPro : TMP_Text, ILayoutElement
 	{
 		protected override void Awake()
@@ -48,6 +48,7 @@ namespace TMPro
 			{
 				this.m_mesh = new Mesh();
 				this.m_mesh.hideFlags = HideFlags.HideAndDontSave;
+				this.m_mesh.name = "TMPro";
 				this.m_meshFilter.mesh = this.m_mesh;
 			}
 			this.m_meshFilter.hideFlags = HideFlags.HideInInspector;
@@ -2601,6 +2602,7 @@ namespace TMPro
 				if (this.m_mesh == null)
 				{
 					this.m_mesh = new Mesh();
+					this.m_mesh.name = "TMPro";
 					this.m_mesh.hideFlags = HideFlags.HideAndDontSave;
 					this.meshFilter.mesh = this.m_mesh;
 				}

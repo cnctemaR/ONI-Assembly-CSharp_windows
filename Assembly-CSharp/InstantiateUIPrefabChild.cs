@@ -28,6 +28,10 @@ public class InstantiateUIPrefabChild : KMonoBehaviour
 				gameObject2.transform.SetParent(this.transform);
 				gameObject2.rectTransform().anchoredPosition = vector;
 				gameObject2.rectTransform().localScale = Vector3.one;
+				if (this.setAsFirstSibling)
+				{
+					gameObject2.transform.SetAsFirstSibling();
+				}
 			}
 		}
 	}
@@ -37,4 +41,6 @@ public class InstantiateUIPrefabChild : KMonoBehaviour
 	public bool InstantiateOnAwake = true;
 
 	private bool alreadyInstantiated;
+
+	public bool setAsFirstSibling;
 }

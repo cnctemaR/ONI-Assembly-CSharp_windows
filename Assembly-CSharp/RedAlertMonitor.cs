@@ -14,11 +14,11 @@ public class RedAlertMonitor : GameStateMachine<RedAlertMonitor, RedAlertMonitor
 			.ToggleExpression(Db.Get().Expressions.RedAlert, null);
 	}
 
-	public GameStateMachine<RedAlertMonitor, RedAlertMonitor.Instance, IStateMachineTarget>.State off;
+	public GameStateMachine<RedAlertMonitor, RedAlertMonitor.Instance, IStateMachineTarget, object>.State off;
 
-	public GameStateMachine<RedAlertMonitor, RedAlertMonitor.Instance, IStateMachineTarget>.State on;
+	public GameStateMachine<RedAlertMonitor, RedAlertMonitor.Instance, IStateMachineTarget, object>.State on;
 
-	public new class Instance : GameStateMachine<RedAlertMonitor, RedAlertMonitor.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<RedAlertMonitor, RedAlertMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)

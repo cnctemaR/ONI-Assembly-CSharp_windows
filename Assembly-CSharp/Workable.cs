@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Workable : KMonoBehaviour, ISaveLoadableJson, IApproachable
+public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 {
 	public Workable()
 	{
@@ -52,12 +52,18 @@ public class Workable : KMonoBehaviour, ISaveLoadableJson, IApproachable
 		{
 			animInfo.overrideAnims = this.overrideAnims;
 		}
+		animInfo.forcePlayPst = this.forcePlayPst;
 		return animInfo;
 	}
 
-	public virtual string[] GetWorkAnims(Worker worker)
+	public virtual HashedString[] GetWorkAnims(Worker worker)
 	{
-		return null;
+		return Workable.DefaultWorkAnims;
+	}
+
+	public virtual Vector3 GetWorkOffset()
+	{
+		return Vector3.zero;
 	}
 
 	protected override void OnPrefabInit()
@@ -68,8 +74,6 @@ public class Workable : KMonoBehaviour, ISaveLoadableJson, IApproachable
 		this.statusItemData = this;
 		this.workTime = this.GetWorkTime();
 		this.workTimeRemaining = Mathf.Min(this.workTimeRemaining, this.workTime);
-		this.log = new LoggerFS(base.GetType().Name + ".Workable");
-		base.GetComponent<KPrefabID>().AddLog(this.log);
 	}
 
 	protected override void OnSpawn()
@@ -121,7 +125,7 @@ public class Workable : KMonoBehaviour, ISaveLoadableJson, IApproachable
 		if (this.attributeConverter != null)
 		{
 			AttributeConverterInstance converter = worker.GetComponent<AttributeConverters>().GetConverter(this.attributeConverter.Id);
-			return 1f + converter.Evaluate();
+			return Mathf.Max(1f + converter.Evaluate(), 0.1f);
 		}
 		return 1f;
 	}
@@ -149,7 +153,7 @@ public class Workable : KMonoBehaviour, ISaveLoadableJson, IApproachable
 	{
 		if (this.selectable != null && this.workingStatusItem != null)
 		{
-			this.selectable.RemoveStatusItem(this.workingStatusItem);
+			this.selectable.RemoveStatusItem(this.workingStatusItem, false);
 		}
 		if (this.worker != null)
 		{
@@ -168,7 +172,7 @@ public class Workable : KMonoBehaviour, ISaveLoadableJson, IApproachable
 	{
 		if (this.selectable != null && this.workingStatusItem != null)
 		{
-			this.selectable.RemoveStatusItem(this.workingStatusItem);
+			this.selectable.RemoveStatusItem(this.workingStatusItem, false);
 		}
 		this.OnCompleteWork(worker);
 		this.OnStopWork(worker);
@@ -321,8 +325,6 @@ public class Workable : KMonoBehaviour, ISaveLoadableJson, IApproachable
 
 	public float workTime;
 
-	private LoggerFS log;
-
 	protected bool showProgressBar = true;
 
 	protected float progressbar_y_offset = 0.45f;
@@ -337,14 +339,14 @@ public class Workable : KMonoBehaviour, ISaveLoadableJson, IApproachable
 
 	protected AttributeConverter attributeConverter;
 
-	[Serialize]
+	protected bool forcePlayPst;
+
 	[SerializeField]
+	[Serialize]
 	protected float workTimeRemaining = float.PositiveInfinity;
 
 	[SerializeField]
 	public KAnimFile[] overrideAnims;
-
-	public string[] snapons;
 
 	[MyCmpGet]
 	protected KSelectable selectable;
@@ -355,6 +357,8 @@ public class Workable : KMonoBehaviour, ISaveLoadableJson, IApproachable
 
 	public global::System.Action onPriorityChanged;
 
+	protected static readonly HashedString[] DefaultWorkAnims = new HashedString[] { "working_pre", "working_loop" };
+
 	protected ProgressBar progressBar;
 
 	public struct AnimInfo
@@ -362,5 +366,7 @@ public class Workable : KMonoBehaviour, ISaveLoadableJson, IApproachable
 		public KAnimFile[] overrideAnims;
 
 		public StateMachine.Instance smi;
+
+		public bool forcePlayPst;
 	}
 }

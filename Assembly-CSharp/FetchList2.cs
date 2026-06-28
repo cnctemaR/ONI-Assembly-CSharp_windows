@@ -52,9 +52,20 @@ public class FetchList2 : IFetchList
 
 	public Storage Destination { get; private set; }
 
+	public int PriorityMod { get; private set; }
+
 	public ChoreType ChoreType { get; private set; }
 
-	public void Add(Tag[] tags, float amount = 1f, bool is_operational_task = false)
+	public void SetPriorityMod(int priorityMod)
+	{
+		this.PriorityMod = priorityMod;
+		for (int i = 0; i < this.FetchOrders.Count; i++)
+		{
+			this.FetchOrders[i].SetPriorityMod(this.PriorityMod);
+		}
+	}
+
+	public void Add(Tag[] tags, float amount = 1f, FetchOrder2.OperationalRequirement operationalRequirement = FetchOrder2.OperationalRequirement.None)
 	{
 		if (amount <= 0f)
 		{
@@ -67,13 +78,13 @@ public class FetchList2 : IFetchList
 				this.MinimumAmount[tag] = amount;
 			}
 		}
-		FetchOrder2 fetchOrder = new FetchOrder2(tags, this.Destination, amount, is_operational_task);
+		FetchOrder2 fetchOrder = new FetchOrder2(tags, this.Destination, amount, operationalRequirement, this.PriorityMod);
 		this.FetchOrders.Add(fetchOrder);
 	}
 
-	public void Add(Tag tag, float amount = 1f, bool is_operational_task = false)
+	public void Add(Tag tag, float amount = 1f, FetchOrder2.OperationalRequirement operationalRequirement = FetchOrder2.OperationalRequirement.None)
 	{
-		this.Add(new Tag[] { tag }, amount, is_operational_task);
+		this.Add(new Tag[] { tag }, amount, operationalRequirement);
 	}
 
 	public float GetMinimumAmount(Tag tag)
@@ -123,25 +134,7 @@ public class FetchList2 : IFetchList
 				{
 					dictionary[tag] = 0f;
 				}
-				dictionary[tag] = num + fetchOrder.TotalAmount;
-			}
-		}
-		foreach (GameObject gameObject in this.Destination)
-		{
-			if (gameObject != null)
-			{
-				Pickupable component = gameObject.GetComponent<Pickupable>();
-				if (component != null)
-				{
-					KPrefabID component2 = component.GetComponent<KPrefabID>();
-					foreach (Tag tag2 in component2.Tags)
-					{
-						if (dictionary.ContainsKey(tag2))
-						{
-							dictionary[tag2] = Math.Max(dictionary[tag2] - component.TotalAmount, 0f);
-						}
-					}
-				}
+				dictionary[tag] = num + fetchOrder.AmountWaitingToFetch();
 			}
 		}
 		return dictionary;
@@ -216,9 +209,9 @@ public class FetchList2 : IFetchList
 			KSelectable component = this.Destination.GetComponent<KSelectable>();
 			if (component != null)
 			{
-				this.waitingForMaterialsHandle = component.RemoveStatusItem(this.waitingForMaterialsHandle);
-				this.materialsUnavailableHandle = component.RemoveStatusItem(this.materialsUnavailableHandle);
-				this.materialsUnavailableForRefillHandle = component.RemoveStatusItem(this.materialsUnavailableForRefillHandle);
+				this.waitingForMaterialsHandle = component.RemoveStatusItem(this.waitingForMaterialsHandle, false);
+				this.materialsUnavailableHandle = component.RemoveStatusItem(this.materialsUnavailableHandle, false);
+				this.materialsUnavailableForRefillHandle = component.RemoveStatusItem(this.materialsUnavailableForRefillHandle, false);
 			}
 		}
 	}
@@ -246,7 +239,7 @@ public class FetchList2 : IFetchList
 				KSelectable component2 = this.Destination.GetComponent<KSelectable>();
 				if (component2 != null)
 				{
-					handle = component2.RemoveStatusItem(handle);
+					handle = component2.RemoveStatusItem(handle, false);
 				}
 			}
 		}

@@ -8,11 +8,12 @@ public class KCompBuild
 		this.animFile = anim_file;
 		this.buildFile = anim_file;
 		KAnimFileData data = anim_file.GetData();
-		for (int i = 0; i < data.anims.Length; i++)
+		for (int i = 0; i < data.animCount; i++)
 		{
-			if (this.Get(data.anims[i].rootSymbol) == null)
+			KAnim.Anim anim = data.GetAnim(i);
+			if (this.Get(anim.rootSymbol) == null)
 			{
-				KCompSymbol kcompSymbol = new KCompSymbol(data.anims[i].rootSymbol, anim_file);
+				KCompSymbol kcompSymbol = new KCompSymbol(anim.rootSymbol, anim_file);
 				if (kcompSymbol.defaultAnim != null)
 				{
 					this.symbols.Add(kcompSymbol);

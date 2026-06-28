@@ -4,15 +4,15 @@ using UnityEngine;
 
 public abstract class Chore
 {
-	public Chore(ChoreType chore_type, ChoreProvider chore_provider, bool run_until_complete, Action<Chore> on_complete, Action<Chore> on_begin, Action<Chore> on_end, int master_priority, bool is_preemptable, bool allow_in_context_menu)
+	public Chore(ChoreType chore_type, ChoreProvider chore_provider, bool run_until_complete, Action<Chore> on_complete, Action<Chore> on_begin, Action<Chore> on_end, int master_priority, bool is_preemptable, bool allow_in_context_menu, int priority_mod)
 	{
 		if (master_priority == 2147483647)
 		{
 			master_priority = 10;
 		}
 		this.masterPriority = master_priority;
+		this.priorityMod = priority_mod;
 		this.id = ++Chore.nextId;
-		this.log = new LoggerFSS(chore_type.Id);
 		if (chore_provider == null)
 		{
 			chore_provider = GlobalChoreProvider.Instance;
@@ -22,7 +22,6 @@ public abstract class Chore
 		this.onComplete = on_complete;
 		this.onEnd = on_end;
 		this.onBegin = on_begin;
-		this.allowInContextMenu = allow_in_context_menu;
 		this.IsPreemptable = is_preemptable;
 		this.AddPrecondition(ChorePreconditions.IsValid, null);
 		this.AddPrecondition(ChorePreconditions.IsPermitted, null);
@@ -55,7 +54,7 @@ public abstract class Chore
 
 	public int masterPriority { get; set; }
 
-	public bool allowInContextMenu { get; private set; }
+	public int priorityMod { get; set; }
 
 	public bool InProgress()
 	{
@@ -76,6 +75,11 @@ public abstract class Chore
 	public virtual void Cleanup()
 	{
 		this.ClearPrioritizable();
+	}
+
+	public void SetPriorityMod(int priorityMod)
+	{
+		this.priorityMod = priorityMod;
 	}
 
 	protected void SetPrioritizable(Prioritizable prioritizable)
@@ -131,17 +135,15 @@ public abstract class Chore
 	{
 		Chore.Precondition.Context context = new Chore.Precondition.Context(this, consumer, is_attempting_override, null);
 		context.RunPreconditions();
-		contexts.Add(context);
+		if (Chore.enableChoreDebugging || context.IsSuccess())
+		{
+			contexts.Add(context);
+		}
 	}
 
 	public bool SatisfiesUrge(Urge urge)
 	{
 		return urge == this.choreType.urge;
-	}
-
-	public bool IsMoreSatisfyingThan(Chore chore)
-	{
-		return chore == null || this.choreType.priority > chore.choreType.priority;
 	}
 
 	public virtual void PrepareChore(ref Chore.Precondition.Context context)
@@ -286,9 +288,9 @@ public abstract class Chore
 
 	private static int nextId;
 
-	public bool isExpanded;
+	public static bool enableChoreDebugging;
 
-	protected LoggerFSS log;
+	public bool isExpanded;
 
 	public Action<Chore> onExit;
 
@@ -327,6 +329,22 @@ public abstract class Chore
 			{
 				this.masterPriority = chore.masterPriority;
 				this.priority = 0;
+				this.priorityMod = chore.priorityMod;
+				this.interruptPriority = 0;
+				this.cost = 0;
+				this.chore = chore;
+				this.consumer = consumer;
+				this.failedPreconditionId = -1;
+				this.isAttemptingOverride = is_attempting_override;
+				this.data = data;
+				this.SetPriority(chore);
+			}
+
+			public void Set(Chore chore, ChoreConsumer consumer, bool is_attempting_override, object data = null)
+			{
+				this.masterPriority = chore.masterPriority;
+				this.priority = 0;
+				this.priorityMod = chore.priorityMod;
 				this.interruptPriority = 0;
 				this.cost = 0;
 				this.chore = chore;
@@ -340,6 +358,7 @@ public abstract class Chore
 			public void SetPriority(Chore chore)
 			{
 				this.priority = chore.choreType.priority;
+				this.priorityMod = chore.priorityMod;
 				this.interruptPriority = chore.choreType.interruptPriority;
 			}
 
@@ -378,11 +397,16 @@ public abstract class Chore
 						return num;
 					}
 					int num2 = this.priority - obj.priority;
-					if (num2 == 0)
+					if (num2 != 0)
+					{
+						return num2;
+					}
+					int num3 = this.priorityMod - obj.priorityMod;
+					if (num3 == 0)
 					{
 						return obj.cost - this.cost;
 					}
-					return num2;
+					return num3;
 				}
 				else
 				{
@@ -423,6 +447,8 @@ public abstract class Chore
 			public int masterPriority;
 
 			public int priority;
+
+			public int priorityMod;
 
 			public int interruptPriority;
 

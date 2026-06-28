@@ -3,8 +3,8 @@ using System.Diagnostics;
 using KSerialization;
 using UnityEngine;
 
-[DebuggerDisplay("{x}, {y}")]
 [SerializationConfig(MemberSerialization.OptIn)]
+[DebuggerDisplay("{x}, {y}")]
 [Serializable]
 public struct Vector2I
 {
@@ -144,6 +144,10 @@ public struct Vector2I
 	}
 
 	public static readonly Vector2I zero = new Vector2I(0, 0);
+
+	public static readonly Vector2I one = new Vector2I(1, 1);
+
+	public static readonly Vector2I minusone = new Vector2I(-1, -1);
 
 	[Serialize]
 	public int x;

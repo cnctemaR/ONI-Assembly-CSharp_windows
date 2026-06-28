@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using Klei.AI;
-using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-[SerializationConfig(MemberSerialization.OptIn)]
-public class Edible : Workable, ISaveLoadableJson, IGameObjectEffectDescriptor
+public class Edible : Workable, IGameObjectEffectDescriptor
 {
 	private Edible()
 	{
@@ -14,17 +12,27 @@ public class Edible : Workable, ISaveLoadableJson, IGameObjectEffectDescriptor
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
 	}
 
-	public int DescriptionOrder { get; set; }
-
-	public float rations
+	public float Units
 	{
 		get
 		{
-			return base.GetComponent<PrimaryElement>().Units * (float)this.foodInfo.Rations;
+			return base.GetComponent<PrimaryElement>().Units;
 		}
 		set
 		{
-			base.GetComponent<PrimaryElement>().Units = value / (float)this.foodInfo.Rations;
+			base.GetComponent<PrimaryElement>().Units = value;
+		}
+	}
+
+	public float Calories
+	{
+		get
+		{
+			return this.Units * this.foodInfo.CaloriesPerUnit;
+		}
+		set
+		{
+			this.Units = value / this.foodInfo.CaloriesPerUnit;
 		}
 	}
 
@@ -44,7 +52,6 @@ public class Edible : Workable, ISaveLoadableJson, IGameObjectEffectDescriptor
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_break") };
 		if (this.foodInfo == null)
 		{
 			if (this.FoodID == null)
@@ -55,8 +62,8 @@ public class Edible : Workable, ISaveLoadableJson, IGameObjectEffectDescriptor
 		}
 		base.GetComponent<KSelectable>().SetName(this.foodInfo.Name);
 		base.GetComponent<KPrefabID>().AddTag(GameTags.Edible);
-		this.Subscribe(748399584, new EventSystem.EventHandler(this.OnCraft));
-		this.Subscribe(1272413801, new EventSystem.EventHandler(this.OnCraft));
+		this.Subscribe(748399584, new Action<object>(this.OnCraft));
+		this.Subscribe(1272413801, new Action<object>(this.OnCraft));
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Eating;
 		Components.Edibles.Add(this);
 	}
@@ -69,51 +76,62 @@ public class Edible : Workable, ISaveLoadableJson, IGameObjectEffectDescriptor
 
 	private void OnCraft(object data)
 	{
-		RationTracker.Get().RegisterRationsProduced((int)this.rations);
+		RationTracker.Get().RegisterCaloriesProduced(this.Calories);
 	}
 
-	public float GetFeedingTime()
+	public float GetFeedingTime(Worker worker)
 	{
-		return this.rations * Edible.secondsPerRation;
+		float num = this.Calories * 2E-05f;
+		if (worker != null)
+		{
+			BingeEatChore.StatesInstance smi = worker.GetSMI<BingeEatChore.StatesInstance>();
+			if (smi != null && smi.IsBingeEating())
+			{
+				num /= 2f;
+			}
+		}
+		return num;
 	}
 
 	protected override void OnStartWork(Worker worker)
 	{
-		base.SetWorkTime(this.GetFeedingTime());
+		base.SetWorkTime(this.GetFeedingTime(worker));
 		worker.GetAttributes().Add("Eating", this.caloriesModifier);
 		this.StartConsuming();
+		if (this.FoodID == "CookedMeat")
+		{
+			worker.GetComponent<Effects>().Add("GoodEats", true);
+		}
 	}
 
 	protected override void OnStopWork(Worker worker)
 	{
 		worker.GetAttributes().Remove(this.caloriesModifier);
-		this.StopConsuming(worker.gameObject);
+		this.StopConsuming(worker);
 	}
 
 	private void StartConsuming()
 	{
 		this.consumptionStartTime = Time.time;
+		base.worker.Trigger(1406130139, this);
 	}
 
-	private void StopConsuming(GameObject target)
+	private void StopConsuming(Worker worker)
 	{
 		float num = Time.time - this.consumptionStartTime;
-		float num2 = Mathf.Clamp01(num / this.GetFeedingTime());
-		this.rationsConsumed = this.rations * num2;
-		this.rations -= this.rationsConsumed;
-		target.Trigger(1121894420, this);
-		this.Trigger(-10536414, target);
-		this.rationsConsumed = float.NaN;
+		float num2 = Mathf.Clamp01(num / this.GetFeedingTime(worker));
+		this.unitsConsumed = this.Units * num2;
+		this.caloriesConsumed = this.unitsConsumed * this.foodInfo.CaloriesPerUnit;
+		this.Units -= this.unitsConsumed;
+		worker.Trigger(1121894420, this);
+		this.Trigger(-10536414, worker.gameObject);
+		this.unitsConsumed = float.NaN;
+		this.caloriesConsumed = float.NaN;
 		this.consumptionStartTime = float.NaN;
-		if (this.rations <= 0f)
+		if (this.Units <= 0f)
 		{
 			base.gameObject.DeleteObject();
 		}
-	}
-
-	public override string[] GetWorkAnims(Worker worker)
-	{
-		return new string[] { "eat_pre", "eat_loop" };
 	}
 
 	protected override void OnCleanUp()
@@ -122,25 +140,21 @@ public class Edible : Workable, ISaveLoadableJson, IGameObjectEffectDescriptor
 		Components.Edibles.Remove(this);
 	}
 
-	public Edible.Quality GetQuality()
+	public int GetQuality()
 	{
 		return this.foodInfo.Quality;
 	}
 
-	public List<Descriptor> GetRequirementDescriptions(GameObject go)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
-		return null;
-	}
-
-	public List<string> GetEffectDescriptions(GameObject go)
-	{
-		List<string> list = new List<string>();
-		list.Add(string.Format(UI.GAMEOBJECTEFFECTS.CALORIES, GameUtil.GetFormattedCalories((float)this.foodInfo.Rations * 100000f, GameUtil.TimeSlice.None, true)));
-		if (this.consumptionEffectsString.Count > 0)
+		List<Descriptor> list = new List<Descriptor>();
+		list.Add(new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.CALORIES, GameUtil.GetFormattedCalories(this.foodInfo.CaloriesPerUnit, GameUtil.TimeSlice.None, true)), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.CALORIES, GameUtil.GetFormattedCalories(this.foodInfo.CaloriesPerUnit, GameUtil.TimeSlice.None, true)), Descriptor.DescriptorType.Effect, false));
+		list.Add(new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.FOOD_QUALITY, GameUtil.GetFormattedFoodQuality(this.foodInfo.Quality, false)), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.FOOD_QUALITY, GameUtil.GetFormattedFoodQuality(this.foodInfo.Quality, true)), Descriptor.DescriptorType.Effect, false));
+		if (this.consumptionEffects.Count > 0)
 		{
-			for (int i = 0; i < this.consumptionEffectsString.Count; i++)
+			for (int i = 0; i < this.consumptionEffects.Count; i++)
 			{
-				list.Add(this.consumptionEffectsString[i]);
+				list.Add(this.consumptionEffects[i]);
 			}
 		}
 		return list;
@@ -150,23 +164,24 @@ public class Edible : Workable, ISaveLoadableJson, IGameObjectEffectDescriptor
 
 	private EdiblesManager.FoodInfo foodInfo;
 
-	private static float secondsPerRation = 3f;
-
-	private static float caloriesPerRation = 100000f;
-
 	private float consumptionStartTime = float.NaN;
 
-	public float rationsConsumed = float.NaN;
+	public float unitsConsumed = float.NaN;
 
-	private AttributeModifier caloriesModifier = new AttributeModifier("CaloriesDelta", Edible.caloriesPerRation / Edible.secondsPerRation, DUPLICANTS.MODIFIERS.EATINGCALORIES.NAME, false);
+	public float caloriesConsumed = float.NaN;
 
-	public List<string> consumptionEffectsString = new List<string>();
+	private AttributeModifier caloriesModifier = new AttributeModifier("CaloriesDelta", 50000f, DUPLICANTS.MODIFIERS.EATINGCALORIES.NAME, false, false);
+
+	public List<Descriptor> consumptionEffects = new List<Descriptor>();
 
 	public enum Quality
 	{
+		Awful = -3,
+		Terrible,
 		Poor,
 		Average,
 		Good,
-		Great
+		Great,
+		Amazing
 	}
 }

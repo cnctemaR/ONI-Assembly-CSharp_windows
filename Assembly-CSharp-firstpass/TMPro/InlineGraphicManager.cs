@@ -206,12 +206,12 @@ namespace TMPro
 		[SerializeField]
 		private TMP_SpriteAsset m_spriteAsset;
 
-		[HideInInspector]
 		[SerializeField]
+		[HideInInspector]
 		private InlineGraphic m_inlineGraphic;
 
-		[HideInInspector]
 		[SerializeField]
+		[HideInInspector]
 		private CanvasRenderer m_inlineGraphicCanvasRenderer;
 
 		private UIVertex[] m_uiVertex;

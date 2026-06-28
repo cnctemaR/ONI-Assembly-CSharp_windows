@@ -11,44 +11,28 @@ namespace TUNING
 
 		public const float PLANTERPLOT_GROWTH_PENTALY = -0.5f;
 
+		public const float YIELD_DISPLAY_TOTAL = 100f;
+
+		public const float MED_YIELD_THRESHOLD = 0.4f;
+
+		public const float HIGH_YIELD_THRESHOLD = 0.8f;
+
 		public const float SELF_HARVEST_TIME = 2400f;
 
 		public const float SELF_PLANT_TIME = 2400f;
 
-		public const float FERTILIZATION_GAIN_RATE = 0.16666667f;
+		public const float FERTILIZATION_GAIN_RATE = 1.6666666f;
 
 		public const float FERTILIZATION_LOSS_RATE = -0.16666667f;
 
-		public static List<CROPS.CropVal> CROP_TYPES = new List<CROPS.CropVal>
+		public static List<Crop.CropVal> CROP_TYPES = new List<Crop.CropVal>
 		{
-			new CROPS.CropVal("BasicPlantFood", 3000f, 1500f, 15, false, 3),
-			new CROPS.CropVal("SwampLilyFlower", 1200f, 1200f, 1, false, 1),
-			new CROPS.CropVal(PrickleFruitConfig.ID, 6000f, 1200f, 1, false, 5)
+			new Crop.CropVal("BasicPlantFood", 3000f, 1500f, 8, false, 3),
+			new Crop.CropVal("SwampLilyFlower", 1200f, 1200f, 1, false, 1),
+			new Crop.CropVal(PrickleFruitConfig.ID, 6000f, 1200f, 1, false, 5),
+			new Crop.CropVal("ColdWheatSeed", 12000f, 0f, 25, false, 1),
+			new Crop.CropVal(SpiceNutConfig.ID, 15000f, 12000f, 4, false, 3),
+			new Crop.CropVal(BasicFabricConfig.ID, 1800f, 1200f, 1, false, 5)
 		};
-
-		public struct CropVal
-		{
-			public CropVal(string crop_id, float crop_duration, float regrow_duration, int crop_num = 1, bool renewable = true, int harvests = 1)
-			{
-				this.crop_id = crop_id;
-				this.crop_duration = crop_duration;
-				this.regrow_duration = regrow_duration;
-				this.renewable = renewable;
-				this.harvests = harvests;
-				this.crop_num = crop_num;
-			}
-
-			public string crop_id;
-
-			public float crop_duration;
-
-			public float regrow_duration;
-
-			public bool renewable;
-
-			public int harvests;
-
-			public int crop_num;
-		}
 	}
 }

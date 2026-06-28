@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using KSerialization;
-using UnityEngine;
 
-[SerializationConfig(MemberSerialization.OptIn)]
-public class Assignables : KMonoBehaviour, ISaveLoadableJson
+public class Assignables : KMonoBehaviour
 {
 	public IEnumerator<AssignableSlotInstance> GetEnumerator()
 	{
@@ -30,7 +27,7 @@ public class Assignables : KMonoBehaviour, ISaveLoadableJson
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.Subscribe(1623392196, new EventSystem.EventHandler(this.OnDeath));
+		this.Subscribe(1623392196, new Action<object>(this.OnDeath));
 	}
 
 	private void OnDeath(object data)
@@ -65,7 +62,6 @@ public class Assignables : KMonoBehaviour, ISaveLoadableJson
 				return assignableSlotInstance;
 			}
 		}
-		Debug.LogError("Missing slot " + slot.Id + " on GameObject " + base.gameObject.name);
 		return null;
 	}
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
@@ -7,48 +8,95 @@ public class Breakable : BuildingWorkable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_break") };
-		base.SetWorkTime(20f);
+		this.showProgressBar = false;
+		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_break_kanim") };
+		base.SetWorkTime(float.PositiveInfinity);
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.chore = new WorkChore<Breakable>(Db.Get().ChoreTypes.StressActingOut, this, null, true, null, null, null, true, null, true, default(Tag), null, false, false);
-		this.chore.AddPrecondition(ChorePreconditions.ConsumerHasTrait, "Aggressive");
+		Components.Breakables.Add(this);
+	}
+
+	public bool isBroken()
+	{
+		return this.hp == null || this.hp.HitPoints <= 0;
+	}
+
+	public Notification CreateDamageNotification()
+	{
+		return new Notification(BUILDING.STATUSITEMS.ANGERDAMAGE.NOTIFICATION, NotificationType.BadMinor, HashedString.Invalid, new Func<List<Notification>, object, string>(Breakable.ToolTipResolver), this.selectable.GetProperName(), false, 0f, null, null, null);
+	}
+
+	private static string ToolTipResolver(List<Notification> notificationList, object data)
+	{
+		string text = string.Empty;
+		for (int i = 0; i < notificationList.Count; i++)
+		{
+			Notification notification = notificationList[i];
+			text += (string)notification.tooltipData;
+			if (i < notificationList.Count - 1)
+			{
+				text += "\n";
+			}
+		}
+		return string.Format(BUILDING.STATUSITEMS.ANGERDAMAGE.NOTIFICATION_TOOLTIP, text);
 	}
 
 	protected override void OnStartWork(Worker worker)
 	{
-		this.progressBar.barColor = Color.red;
+		this.secondsPerTenPercentDamage = 2f;
+		this.tenPercentDamage = Mathf.CeilToInt((float)this.hp.MaxHitPoints * 0.1f);
+		base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.AngerDamage, this);
+		this.notification = this.CreateDamageNotification();
+		base.GetComponent<Notifier>().Add(this.notification, string.Empty);
+		this.elapsedDamageTime = 0f;
 	}
 
-	protected override void OnCompleteWork(Worker worker)
+	protected override bool OnWorkTick(Worker worker, float dt)
 	{
-		this.operational.SetFlag(Breakable.notBrokenFlag, false);
-		this.repairable.Break();
-		base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.Broken, this);
-		base.GetComponent<Notifier>().Add(this.brokenMachine, string.Empty);
-		worker.Trigger(-1734580852, null);
-		base.GetComponent<UserMenu>().Refresh();
+		if (this.elapsedDamageTime >= this.secondsPerTenPercentDamage)
+		{
+			this.elapsedDamageTime -= this.elapsedDamageTime;
+			this.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+			{
+				damage = this.tenPercentDamage,
+				source = BUILDINGS.DAMAGESOURCES.MINION_DESTRUCTION,
+				popString = UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.MINION_DESTRUCTION
+			});
+		}
+		this.elapsedDamageTime += dt;
+		return this.hp.HitPoints <= 0;
 	}
 
-	public void Repair()
+	protected override void OnStopWork(Worker worker)
 	{
-		this.operational.SetFlag(Breakable.notBrokenFlag, true);
-		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.Broken);
-		base.GetComponent<Notifier>().Remove(this.brokenMachine);
+		base.OnStopWork(worker);
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.AngerDamage, false);
+		base.GetComponent<Notifier>().Remove(this.notification);
+		if (worker != null)
+		{
+			worker.Trigger(-1734580852, null);
+		}
 	}
 
-	[MyCmpReq]
-	private Repairable repairable;
+	protected override void OnCleanUp()
+	{
+		base.OnCleanUp();
+		Components.Breakables.Remove(this);
+	}
 
-	[MyCmpReq]
-	private Operational operational;
+	private const float TIME_TO_BREAK_AT_FULL_HEALTH = 20f;
 
-	public static Operational.Flag notBrokenFlag = new Operational.Flag("not_broken", Operational.Flag.Type.Functional);
+	private Notification notification;
 
-	private Notification brokenMachine = new Notification(MISC.NOTIFICATIONS.BROKENMACHINE.NAME, NotificationType.BadMinor, null, null, null, true, 0f, null, null, null);
+	private float secondsPerTenPercentDamage = float.PositiveInfinity;
 
-	private Chore chore;
+	private float elapsedDamageTime;
+
+	private int tenPercentDamage = int.MaxValue;
+
+	[MyCmpGet]
+	private BuildingHP hp;
 }

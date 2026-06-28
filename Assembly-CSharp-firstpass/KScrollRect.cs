@@ -29,7 +29,7 @@ public class KScrollRect : ScrollRect
 		}
 		else if (base.horizontal)
 		{
-			this.scrollVelocity += data.scrollDelta.y * this.horizontalScrollInertiaScale;
+			this.scrollVelocity -= data.scrollDelta.y * this.horizontalScrollInertiaScale;
 		}
 		if (Mathf.Abs(data.scrollDelta.y) > 0.2f)
 		{

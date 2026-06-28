@@ -33,5 +33,14 @@ public class GlobalResources : ScriptableObject
 	[EventRef]
 	public string ConduitOverlaySoundGas;
 
+	[EventRef]
+	public string AcousticDisturbanceSound;
+
+	[EventRef]
+	public string AcousticDisturbanceBubbleSound;
+
+	[EventRef]
+	public string WallDamageLayerSound;
+
 	private static GlobalResources _Instance;
 }

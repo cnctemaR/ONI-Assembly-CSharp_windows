@@ -4,7 +4,7 @@ public class ReachabilityMonitor : GameStateMachine<ReachabilityMonitor, Reachab
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
-		default_state = this.reachable;
+		default_state = this.unreachable;
 		base.serializable = false;
 		this.root.ToggleSchedulePeriodic("UpdateReachability", 3f, delegate(ReachabilityMonitor.Instance smi)
 		{
@@ -20,13 +20,13 @@ public class ReachabilityMonitor : GameStateMachine<ReachabilityMonitor, Reachab
 		}).ParamTransition<bool>(this.isReachable, this.reachable, (ReachabilityMonitor.Instance smi, bool p) => p);
 	}
 
-	public GameStateMachine<ReachabilityMonitor, ReachabilityMonitor.Instance, Workable>.State reachable;
+	public GameStateMachine<ReachabilityMonitor, ReachabilityMonitor.Instance, Workable, object>.State reachable;
 
-	public GameStateMachine<ReachabilityMonitor, ReachabilityMonitor.Instance, Workable>.State unreachable;
+	public GameStateMachine<ReachabilityMonitor, ReachabilityMonitor.Instance, Workable, object>.State unreachable;
 
-	public StateMachine<ReachabilityMonitor, ReachabilityMonitor.Instance, Workable>.BoolParameter isReachable = new StateMachine<ReachabilityMonitor, ReachabilityMonitor.Instance, Workable>.BoolParameter(true);
+	public StateMachine<ReachabilityMonitor, ReachabilityMonitor.Instance, Workable, object>.BoolParameter isReachable = new StateMachine<ReachabilityMonitor, ReachabilityMonitor.Instance, Workable, object>.BoolParameter(false);
 
-	public new class Instance : GameStateMachine<ReachabilityMonitor, ReachabilityMonitor.Instance, Workable>.GameInstance
+	public new class Instance : GameStateMachine<ReachabilityMonitor, ReachabilityMonitor.Instance, Workable, object>.GameInstance
 	{
 		public Instance(Workable workable)
 			: base(workable)

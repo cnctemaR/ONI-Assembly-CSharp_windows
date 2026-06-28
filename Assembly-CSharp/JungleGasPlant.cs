@@ -25,7 +25,7 @@ public class JungleGasPlant : StateMachineComponent<JungleGasPlant.StatesInstanc
 	[MyCmpReq]
 	private ElementEmitter elementEmitter;
 
-	public class StatesInstance : GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.GameInstance
+	public class StatesInstance : GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant, object>.GameInstance
 	{
 		public StatesInstance(JungleGasPlant master)
 			: base(master)
@@ -59,7 +59,8 @@ public class JungleGasPlant : StateMachineComponent<JungleGasPlant.StatesInstanc
 				smi.Schedule(0.5f, new Action<object>(smi.master.DestroySelf), null);
 			});
 			this.blocked_from_growing.ToggleStatusItem(Db.Get().MiscStatusItems.RegionIsBlocked, null).EventTransition(GameHashes.EntombedChanged, this.alive.seed_grow, (JungleGasPlant.StatesInstance smi) => !smi.master.GetComponent<EntombVulnerable>().GetEntombed).EventTransition(GameHashes.TooColdWarning, this.alive.seed_grow, null)
-				.EventTransition(GameHashes.TooHotWarning, this.alive.seed_grow, null);
+				.EventTransition(GameHashes.TooHotWarning, this.alive.seed_grow, null)
+				.EventTransition(GameHashes.Uprooted, this.dead, (JungleGasPlant.StatesInstance smi) => UprootedMonitor.IsObjectUprooted(smi.master.gameObject));
 			this.alive.InitializeStates(this.masterTarget, this.dead);
 			this.alive.seed_grow.QueueAnim("seed_grow", false, null).EventTransition(GameHashes.AnimQueueComplete, this.alive.idle, null).EventTransition(GameHashes.Wilt, this.alive.wilting, (JungleGasPlant.StatesInstance smi) => smi.master.wiltCondition.IsWilting());
 			this.alive.idle.EventTransition(GameHashes.Wilt, this.alive.wilting, (JungleGasPlant.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).EventTransition(GameHashes.Grow, this.alive.grown, (JungleGasPlant.StatesInstance smi) => smi.master.growing.IsGrown()).PlayAnim("idle_loop", KAnim.PlayMode.Loop, null);
@@ -79,39 +80,39 @@ public class JungleGasPlant : StateMachineComponent<JungleGasPlant.StatesInstanc
 			this.alive.wilting.pst.PlayAnim("wilt_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.alive.idle);
 		}
 
-		public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.State blocked_from_growing;
+		public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant, object>.State blocked_from_growing;
 
 		public JungleGasPlant.States.AliveStates alive;
 
-		public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.State dead;
+		public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant, object>.State dead;
 
-		public class AliveStates : GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.PlantAliveSubState
+		public class AliveStates : GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant, object>.PlantAliveSubState
 		{
-			public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.State seed_grow;
+			public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant, object>.State seed_grow;
 
-			public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.State idle;
+			public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant, object>.State idle;
 
 			public JungleGasPlant.States.WiltingState wilting;
 
 			public JungleGasPlant.States.GrownState grown;
 
-			public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.State destroy;
+			public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant, object>.State destroy;
 		}
 
-		public class GrownState : GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.State
+		public class GrownState : GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant, object>.State
 		{
-			public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.State pre;
+			public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant, object>.State pre;
 
-			public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.State idle;
+			public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant, object>.State idle;
 		}
 
-		public class WiltingState : GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.State
+		public class WiltingState : GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant, object>.State
 		{
-			public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.State pre;
+			public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant, object>.State pre;
 
-			public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.State idle;
+			public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant, object>.State idle;
 
-			public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant>.State pst;
+			public GameStateMachine<JungleGasPlant.States, JungleGasPlant.StatesInstance, JungleGasPlant, object>.State pst;
 		}
 	}
 }

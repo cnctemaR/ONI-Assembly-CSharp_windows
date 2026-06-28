@@ -120,7 +120,6 @@ public class TimedSwitchSideScreen : SideScreenContent
 			this.UpdateLabels();
 		}
 		this.UpdateInputFields();
-		this.targetTimedSwitch.OnToggle += this.OnToggle;
 	}
 
 	private void UpdateInputFields()
@@ -187,14 +186,8 @@ public class TimedSwitchSideScreen : SideScreenContent
 
 	private void UpdateLabels()
 	{
-		if (this.targetTimedSwitch.IsSwitchedOn)
-		{
-			this.currentTime.text = string.Format(UI.UISIDESCREENS.TIMEDSWITCHSIDESCREEN.TIMETODEACTIVATE, this.targetTimedSwitch.switchTime.ToString("F0"));
-		}
-		else
-		{
-			this.currentTime.text = string.Format(UI.UISIDESCREENS.TIMEDSWITCHSIDESCREEN.TIMETOACTIVATE, this.targetTimedSwitch.switchTime.ToString("F0"));
-		}
+		string text = ((!this.targetTimedSwitch.IsSwitchedOn) ? UI.UISIDESCREENS.TIMEDSWITCHSIDESCREEN.TIMETOACTIVATE : UI.UISIDESCREENS.TIMEDSWITCHSIDESCREEN.TIMETODEACTIVATE);
+		this.currentTime.text = string.Format(text, this.targetTimedSwitch.switchTime.ToString("F0"));
 	}
 
 	private const float MIN_TIME_CHANGE = 1f;
@@ -203,8 +196,8 @@ public class TimedSwitchSideScreen : SideScreenContent
 
 	private TimedSwitch targetTimedSwitch;
 
-	[Header("Header")]
 	[SerializeField]
+	[Header("Header")]
 	private GameObject validContent;
 
 	[SerializeField]
@@ -219,8 +212,8 @@ public class TimedSwitchSideScreen : SideScreenContent
 	[SerializeField]
 	private KButton offButton;
 
-	[SerializeField]
 	[Header("On Time")]
+	[SerializeField]
 	private KButton onTimeIncreaseButton;
 
 	[SerializeField]

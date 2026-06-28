@@ -6,7 +6,6 @@ public class UserMenuScreen : KIconButtonMenu
 {
 	protected override void OnPrefabInit()
 	{
-		this.ignoreSound = true;
 		this.keepMenuOpen = true;
 		base.OnPrefabInit();
 	}
@@ -14,7 +13,7 @@ public class UserMenuScreen : KIconButtonMenu
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		Game.Instance.Subscribe(1980521255, new EventSystem.EventHandler(this.OnUIRefresh));
+		Game.Instance.Subscribe(1980521255, new Action<object>(this.OnUIRefresh));
 	}
 
 	public void SetSelected(GameObject go)

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Klei.AI;
 using STRINGS;
-using UnityEngine;
 
 [DebuggerDisplay("{id}")]
 [Serializable]
@@ -62,6 +61,11 @@ public class Element : IComparable<Element>
 		}
 	}
 
+	public bool IsState(Element.State expected_state)
+	{
+		return (this.state & Element.State.Solid) == expected_state;
+	}
+
 	public bool HasTransitionUp
 	{
 		get
@@ -84,24 +88,19 @@ public class Element : IComparable<Element>
 		if (this.IsSolid)
 		{
 			text += "\n\n";
-			text += string.Format(ELEMENTS.ELEMENTDESCSOLID, this.GetMaterialCategoryTag().ProperName(), GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(this.highTemp), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute), GameUtil.GetHardnessString(this, addHardnessColor));
+			text += string.Format(ELEMENTS.ELEMENTDESCSOLID, this.GetMaterialCategoryTag().ProperName(), GameUtil.GetFormattedTemperature(this.highTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true), GameUtil.GetHardnessString(this, addHardnessColor));
 		}
 		else if (this.IsLiquid)
 		{
 			text += "\n\n";
-			text += string.Format(ELEMENTS.ELEMENTDESCLIQUID, this.GetMaterialCategoryTag().ProperName(), GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(this.lowTemp), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute), GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(this.highTemp), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute));
+			text += string.Format(ELEMENTS.ELEMENTDESCLIQUID, this.GetMaterialCategoryTag().ProperName(), GameUtil.GetFormattedTemperature(this.lowTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true), GameUtil.GetFormattedTemperature(this.highTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
 		}
-		else if (this.IsVacuum)
+		else if (!this.IsVacuum)
 		{
 			text += "\n\n";
-			text += string.Format(ELEMENTS.ELEMENTDESCVACUUM, this.GetMaterialCategoryTag().ProperName());
+			text += string.Format(ELEMENTS.ELEMENTDESCGAS, this.GetMaterialCategoryTag().ProperName(), GameUtil.GetFormattedTemperature(this.lowTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
 		}
-		else
-		{
-			text += "\n\n";
-			text += string.Format(ELEMENTS.ELEMENTDESCGAS, this.GetMaterialCategoryTag().ProperName(), GameUtil.GetFormattedTemperature((float)Mathf.RoundToInt(this.lowTemp), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute));
-		}
-		if (this.oreTags.Length > 0)
+		if (this.oreTags.Length > 0 && !this.IsVacuum)
 		{
 			text += "\n\n";
 			string text2 = string.Empty;
@@ -141,21 +140,20 @@ public class Element : IComparable<Element>
 		return Strings.Get("STRINGS.ELEMENTS." + this.id.ToString().ToUpper() + ".DESC");
 	}
 
-	public bool HasTag(Tag tag)
+	public bool HasTag(Tag search_tag)
 	{
+		if (this.tag == search_tag)
+		{
+			return true;
+		}
 		for (int i = 0; i < this.oreTags.Length; i++)
 		{
-			if (this.oreTags[i] == tag)
+			if (this.oreTags[i] == search_tag)
 			{
 				return true;
 			}
 		}
 		return false;
-	}
-
-	public static List<Tag> GetMaterialCategoryTags()
-	{
-		return new List<Tag>(Element.materialCategoryTags);
 	}
 
 	public Tag GetMaterialCategoryTag()
@@ -196,6 +194,12 @@ public class Element : IComparable<Element>
 
 	public float maxMass = 10000f;
 
+	public float solidSurfaceAreaMultiplier;
+
+	public float liquidSurfaceAreaMultiplier;
+
+	public float gasSurfaceAreaMultiplier;
+
 	public Element.State state;
 
 	public byte hardness;
@@ -233,20 +237,6 @@ public class Element : IComparable<Element>
 	public Tag[] oreTags = new Tag[0];
 
 	public List<AttributeModifier> attributeModifiers = new List<AttributeModifier>();
-
-	public string keywordStyle;
-
-	private static Tag[] materialCategoryTags = new Tag[]
-	{
-		GameTags.Alloy,
-		GameTags.Metal,
-		GameTags.RefinedMetal,
-		GameTags.BuildableRaw,
-		GameTags.BuildableProcessed,
-		GameTags.Liquifiable,
-		GameTags.Liquid,
-		GameTags.Farmable
-	};
 
 	public enum State : byte
 	{

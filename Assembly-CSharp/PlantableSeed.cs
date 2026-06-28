@@ -1,14 +1,45 @@
 ﻿using System;
+using System.Collections.Generic;
+using KSerialization;
+using STRINGS;
 using UnityEngine;
 
-public class PlantableSeed : KMonoBehaviour, IHasSortOrder
+public class PlantableSeed : KMonoBehaviour, IGameObjectEffectDescriptor, IHasSortOrder, IReceptacleDirection
 {
 	public int sortOrder { get; set; }
+
+	public SingleEntityReceptacle.ReceptacleDirection Direction
+	{
+		get
+		{
+			return this.direction;
+		}
+	}
 
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		this.Subscribe(-2064133523, new Action<object>(this.OnAbsorb));
+		this.Subscribe(1335436905, new Action<object>(this.OnSplit));
 		this.timeUntilSelfPlant = Util.RandomVariance(2400f, 600f);
+	}
+
+	private void OnAbsorb(object data)
+	{
+		Pickupable pickupable = (Pickupable)data;
+		PlantableSeed component = pickupable.GetComponent<PlantableSeed>();
+		this.timesHarvested += component.timesHarvested;
+	}
+
+	private void OnSplit(object data)
+	{
+		Pickupable pickupable = (Pickupable)data;
+		Pickupable component = base.GetComponent<Pickupable>();
+		float num = pickupable.TotalAmount + component.TotalAmount;
+		PlantableSeed component2 = pickupable.GetComponent<PlantableSeed>();
+		int num2 = Mathf.RoundToInt((float)component2.timesHarvested * component.TotalAmount / num);
+		this.timesHarvested = num2;
+		component2.timesHarvested -= num2;
 	}
 
 	private void SimUpdate(float dt)
@@ -31,7 +62,20 @@ public class PlantableSeed : KMonoBehaviour, IHasSortOrder
 			gameObject.SetActive(true);
 			Pickupable component = base.GetComponent<Pickupable>();
 			Pickupable pickupable = component.Take(1f);
-			Util.KDestroyGameObject(pickupable.gameObject);
+			if (pickupable != null)
+			{
+				Crop component2 = gameObject.GetComponent<Crop>();
+				if (component2 != null)
+				{
+					PlantableSeed component3 = pickupable.GetComponent<PlantableSeed>();
+					component2.SetTimesHarvested(component3.timesHarvested);
+				}
+				Util.KDestroyGameObject(pickupable.gameObject);
+			}
+			else
+			{
+				KCrashReporter.Assert(false, "Seed has fractional total amount < 1f");
+			}
 		}
 	}
 
@@ -83,11 +127,35 @@ public class PlantableSeed : KMonoBehaviour, IHasSortOrder
 		return true;
 	}
 
+	public List<Descriptor> GetDescriptors(GameObject go)
+	{
+		List<Descriptor> list = new List<Descriptor>();
+		if (this.direction == SingleEntityReceptacle.ReceptacleDirection.Bottom)
+		{
+			Descriptor descriptor = new Descriptor(UI.GAMEOBJECTEFFECTS.SEED_REQUIREMENT_CEILING, UI.GAMEOBJECTEFFECTS.TOOLTIPS.SEED_REQUIREMENT_CEILING, Descriptor.DescriptorType.Requirement, false);
+			list.Add(descriptor);
+		}
+		else if (this.direction == SingleEntityReceptacle.ReceptacleDirection.Side)
+		{
+			Descriptor descriptor2 = new Descriptor(UI.GAMEOBJECTEFFECTS.SEED_REQUIREMENT_WALL, UI.GAMEOBJECTEFFECTS.TOOLTIPS.SEED_REQUIREMENT_WALL, Descriptor.DescriptorType.Requirement, false);
+			list.Add(descriptor2);
+		}
+		return list;
+	}
+
 	public Tag PlantID;
 
+	public Tag PreviewID;
+
+	[Serialize]
 	public float timeUntilSelfPlant;
+
+	[Serialize]
+	public int timesHarvested;
 
 	public Tag replantGroundTag;
 
 	public string domesticatedDescription;
+
+	public SingleEntityReceptacle.ReceptacleDirection direction;
 }

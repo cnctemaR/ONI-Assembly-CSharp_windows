@@ -102,15 +102,15 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 		source.y += 0.7f;
 	}
 
-	public GameStateMachine<MultitoolController, MultitoolController.Instance, Worker>.State pre;
+	public GameStateMachine<MultitoolController, MultitoolController.Instance, Worker, object>.State pre;
 
-	public GameStateMachine<MultitoolController, MultitoolController.Instance, Worker>.State loop;
+	public GameStateMachine<MultitoolController, MultitoolController.Instance, Worker, object>.State loop;
 
-	public StateMachine<MultitoolController, MultitoolController.Instance, Worker>.TargetParameter worker;
+	public StateMachine<MultitoolController, MultitoolController.Instance, Worker, object>.TargetParameter worker;
 
-	public StateMachine<MultitoolController, MultitoolController.Instance, Worker>.TargetParameter workable;
+	public StateMachine<MultitoolController, MultitoolController.Instance, Worker, object>.TargetParameter workable;
 
-	public new class Instance : GameStateMachine<MultitoolController, MultitoolController.Instance, Worker>.GameInstance
+	public new class Instance : GameStateMachine<MultitoolController, MultitoolController.Instance, Worker, object>.GameInstance
 	{
 		public Instance(Workable workable, Worker worker, string context, GameObject hit_effect)
 			: base(worker)

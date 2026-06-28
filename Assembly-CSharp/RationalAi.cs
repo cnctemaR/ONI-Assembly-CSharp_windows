@@ -10,7 +10,7 @@ public class RationalAi : GameStateMachine<RationalAi, RationalAi.Instance>
 		this.alive.EventTransition(GameHashes.Died, this.dead, (RationalAi.Instance smi) => smi.IsDead()).ToggleStateMachine((RationalAi.Instance smi) => new ThoughtGraph.Instance(smi.master)).ToggleStateMachine((RationalAi.Instance smi) => new StaminaMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new StressMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new EmoteMonitor.Instance(smi.master))
-			.ToggleStateMachine((RationalAi.Instance smi) => new ManualControlMonitor.Instance(smi.master))
+			.ToggleStateMachine((RationalAi.Instance smi) => new SneezeMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new IdleMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new RationMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new CalorieMonitor.Instance(smi.master))
@@ -19,8 +19,8 @@ public class RationalAi : GameStateMachine<RationalAi, RationalAi.Instance>
 			.ToggleStateMachine((RationalAi.Instance smi) => new DiseaseMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new BreathMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new TemperatureMonitor.Instance(smi.master))
+			.ToggleStateMachine((RationalAi.Instance smi) => new ExternalTemperatureMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new SuffocationMonitor.Instance(smi.master))
-			.ToggleStateMachine((RationalAi.Instance smi) => new PrioritizedChoreMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new BladderMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new SteppedInMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new RedAlertMonitor.Instance(smi.master))
@@ -32,22 +32,25 @@ public class RationalAi : GameStateMachine<RationalAi, RationalAi.Instance>
 			.ToggleStateMachine((RationalAi.Instance smi) => new WoundMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new IncapacitationMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new SuitRegionMonitor.Instance(smi.master))
-			.ToggleStateMachine((RationalAi.Instance smi) => new DropUnusedInventoryMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new TiredMonitor.Instance(smi.master))
-			.ToggleStateMachine((RationalAi.Instance smi) => new WarmUpMonitor.Instance(smi.master))
-			.ToggleStateMachine((RationalAi.Instance smi) => new MoveToLocationMonitor.Instance(smi.master));
+			.ToggleStateMachine((RationalAi.Instance smi) => new MoveToLocationMonitor.Instance(smi.master))
+			.ToggleStateMachine((RationalAi.Instance smi) => new ReactionMonitor.Instance(smi.master));
 		this.dead.ToggleStateMachine((RationalAi.Instance smi) => new DecompositionMonitor.Instance(smi.master, Db.Get().Diseases.SawCorpsosis, 0.00083333335f, true)).ToggleStateMachine((RationalAi.Instance smi) => new FallWhenDeadMonitor.Instance(smi.master)).ToggleBrain("dead")
 			.Enter("RefreshUserMenu", delegate(RationalAi.Instance smi)
 			{
 				smi.RefreshUserMenu();
+			})
+			.Enter("DropStorage", delegate(RationalAi.Instance smi)
+			{
+				smi.GetComponent<Storage>().DropAll();
 			});
 	}
 
-	public GameStateMachine<RationalAi, RationalAi.Instance, IStateMachineTarget>.State alive;
+	public GameStateMachine<RationalAi, RationalAi.Instance, IStateMachineTarget, object>.State alive;
 
-	public GameStateMachine<RationalAi, RationalAi.Instance, IStateMachineTarget>.State dead;
+	public GameStateMachine<RationalAi, RationalAi.Instance, IStateMachineTarget, object>.State dead;
 
-	public new class Instance : GameStateMachine<RationalAi, RationalAi.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<RationalAi, RationalAi.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)

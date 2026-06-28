@@ -3,7 +3,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Ref<ReferenceType> : ISaveLoadableJson where ReferenceType : KMonoBehaviour
+public class Ref<ReferenceType> : ISaveLoadable where ReferenceType : KMonoBehaviour
 {
 	public Ref(ReferenceType obj)
 	{

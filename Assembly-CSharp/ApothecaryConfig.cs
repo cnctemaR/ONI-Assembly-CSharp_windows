@@ -6,11 +6,11 @@ public class ApothecaryConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Apothecary", 2, 3, "apothecary_kanim", 400f, 120f, BUILDINGS.CONSTRUCTION_MASS.TIER4, MATERIALS.ALL_METALS, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, null);
-		buildingDef.RequiresPower = true;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Apothecary", 2, 3, "apothecary_kanim", 400f, 30, 120f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.ALL_METALS, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, null);
+		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 240f;
-		buildingDef.TemperatureModificationWhenActive = 4f;
-		buildingDef.OperatingTemperature = 350f;
+		buildingDef.ExhaustKilowattsWhenActive = 0.25f;
+		buildingDef.OperatingKilowatts = 0.5f;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
 		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "Glass";
@@ -28,7 +28,7 @@ public class ApothecaryConfig : IBuildingConfig
 		fabricator.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_apothecary_kanim") };
 	}
 
-	public override void DoPostConfigure(GameObject go)
+	public override void DoPostConfigureComplete(GameObject go)
 	{
 		BuildingTemplates.DoPostConfigure(go);
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
@@ -37,4 +37,6 @@ public class ApothecaryConfig : IBuildingConfig
 			instance.StartSM();
 		};
 	}
+
+	public const string ID = "Apothecary";
 }

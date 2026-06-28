@@ -6,7 +6,7 @@ public class MessageNotification : Notification
 	public MessageNotification(Message m)
 	{
 		string sound = m.GetSound();
-		base..ctor(m.GetTitle(), NotificationType.Messages, null, null, null, false, 0f, null, null, sound);
+		base..ctor(m.GetTitle(), NotificationType.Messages, HashedString.Invalid, null, null, false, 0f, null, null, sound);
 		MessageNotification <>f__this = this;
 		this.message = m;
 		base.ToolTip = (List<Notification> notifications, object data) => <>f__this.OnToolTip(notifications, m.GetTooltip());

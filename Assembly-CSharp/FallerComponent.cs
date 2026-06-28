@@ -8,6 +8,8 @@ public struct FallerComponent
 		this.transform = transform;
 		this.isFalling = false;
 		this.initialVelocity = initial_velocity;
+		this.partitionerEntry = null;
+		this.solidChangedCB = null;
 		CircleCollider2D component = transform.GetComponent<CircleCollider2D>();
 		if (component != null)
 		{
@@ -27,64 +29,15 @@ public struct FallerComponent
 		}
 	}
 
-	public void Destroy()
-	{
-		FallerComponent.RemoveGravity(this.transform);
-	}
+	public Transform transform;
 
-	private static void RemoveGravity(Transform transform)
-	{
-		if (GameComps.Gravities.Has(transform.gameObject))
-		{
-			GameComps.Gravities.Remove(transform.gameObject);
-		}
-	}
+	public bool isFalling;
 
-	private static void AddGravity(Transform transform, Vector2 initial_velocity)
-	{
-		if (!GameComps.Gravities.Has(transform.gameObject))
-		{
-			GameComps.Gravities.Add(transform.gameObject, initial_velocity, delegate
-			{
-				FallerComponent.OnLanded(transform);
-			});
-		}
-	}
+	public float offset;
 
-	private static void OnLanded(Transform transform)
-	{
-		FallerComponent.RemoveGravity(transform);
-	}
+	public Vector2 initialVelocity;
 
-	public void FixedUpdate(float dt)
-	{
-		Vector3 position = this.transform.position;
-		position.y = position.y - this.offset - 0.1f;
-		int num = Grid.PosToCell(position);
-		if (!Grid.IsValidCell(num))
-		{
-			return;
-		}
-		bool flag = !Grid.Solid[num];
-		if (flag != this.isFalling)
-		{
-			this.isFalling = flag;
-			if (flag)
-			{
-				FallerComponent.AddGravity(this.transform, this.initialVelocity);
-			}
-			else
-			{
-				FallerComponent.RemoveGravity(this.transform);
-			}
-		}
-	}
+	public ScenePartitionerEntry partitionerEntry;
 
-	private Transform transform;
-
-	private bool isFalling;
-
-	private float offset;
-
-	private Vector2 initialVelocity;
+	public Action<object> solidChangedCB;
 }

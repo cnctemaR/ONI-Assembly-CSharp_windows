@@ -3,7 +3,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadableJson, IUtilityItem
+public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadable, IUtilityItem
 {
 	public UtilityConnections Connections
 	{
@@ -91,13 +91,13 @@ public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadableJson, IUtil
 	private UtilityNetwork GetNetwork()
 	{
 		int num = Grid.PosToCell(this.transform.position);
-		return this.connectionManager.GetNetworkForOrientation(num, Orientation.None);
+		return this.connectionManager.GetNetworkForDirection(num, Direction.None);
 	}
 
-	public UtilityNetwork GetNetworkForOrientation(Orientation o)
+	public UtilityNetwork GetNetworkForDirection(Direction d)
 	{
 		int num = Grid.PosToCell(this.transform.position);
-		return this.connectionManager.GetNetworkForOrientation(num, o);
+		return this.connectionManager.GetNetworkForDirection(num, d);
 	}
 
 	public void UpdateConnections(UtilityConnections new_connections)
@@ -108,33 +108,33 @@ public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadableJson, IUtil
 		this.Trigger(-1041684577, new_connections);
 	}
 
-	public KAnimGraphTileVisualizer GetNeighbour(Orientation o)
+	public KAnimGraphTileVisualizer GetNeighbour(Direction d)
 	{
 		KAnimGraphTileVisualizer kanimGraphTileVisualizer = null;
 		Vector2I vector2I;
 		Grid.PosToXY(this.transform.position, out vector2I);
 		int num = -1;
-		switch (o)
+		switch (d)
 		{
-		case Orientation.Up:
+		case Direction.Up:
 			if (vector2I.y < Grid.HeightInCells - 1)
 			{
 				num = Grid.XYToCell(vector2I.x, vector2I.y + 1);
 			}
 			break;
-		case Orientation.Right:
+		case Direction.Right:
 			if (vector2I.x < Grid.WidthInCells - 1)
 			{
 				num = Grid.XYToCell(vector2I.x + 1, vector2I.y);
 			}
 			break;
-		case Orientation.Down:
+		case Direction.Down:
 			if (vector2I.y > 0)
 			{
 				num = Grid.XYToCell(vector2I.x, vector2I.y - 1);
 			}
 			break;
-		case Orientation.Left:
+		case Direction.Left:
 			if (vector2I.x > 0)
 			{
 				num = Grid.XYToCell(vector2I.x - 1, vector2I.y);

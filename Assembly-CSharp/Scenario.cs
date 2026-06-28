@@ -124,7 +124,7 @@ public class Scenario : KMonoBehaviour
 		b.FinalizeRoom(SimHashes.Oxygen, SimHashes.Steel);
 	}
 
-	private void SetupBuildingTest(Scenario.Builder b, bool is_powered)
+	private void SetupBuildingTest(Scenario.Builder b, bool is_powered, bool break_building)
 	{
 		if (is_powered)
 		{
@@ -135,7 +135,15 @@ public class Scenario : KMonoBehaviour
 		{
 			if (buildingDef.Name != "Excavator")
 			{
-				b.Building(buildingDef.PrefabID);
+				GameObject gameObject = b.Building(buildingDef.PrefabID);
+				if (break_building)
+				{
+					BuildingHP component = gameObject.GetComponent<BuildingHP>();
+					if (component != null)
+					{
+						component.DoDamage(int.MaxValue);
+					}
+				}
 			}
 		}
 		b.FinalizeRoom(SimHashes.Oxygen, SimHashes.Steel);
@@ -512,7 +520,7 @@ public class Scenario : KMonoBehaviour
 	{
 		this.Init();
 		Scenario.RowLayout rowLayout = new Scenario.RowLayout(this.Left, this.Bot);
-		this.SetupBuildingTest(rowLayout.NextRow(), false);
+		this.SetupBuildingTest(rowLayout.NextRow(), false, true);
 		this.SetupPlacerTest(rowLayout.NextRow(), ElementLoader.FindElementByHash(SimHashes.Cuprite));
 	}
 
@@ -542,11 +550,15 @@ public class Scenario : KMonoBehaviour
 		{
 			Output.LogError(new object[] { "Missing def for", prefab_id });
 		}
-		return Assets.GetBuildingDef(prefab_id).Build(buildingDef.GetBuildingCell(num), Orientation.None, null, new Element[]
+		GameObject gameObject = buildingDef.Build(buildingDef.GetBuildingCell(num), Orientation.Neutral, null, new Element[]
 		{
 			ElementLoader.FindElementByHash(element),
 			ElementLoader.FindElementByHash(SimHashes.SedimentaryRock)
 		}, false);
+		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+		component.InternalTemperature = 300f;
+		component.Temperature = 300f;
+		return gameObject;
 	}
 
 	private void SpawnOre(int x, int y, SimHashes element = SimHashes.Cuprite)
@@ -578,7 +590,15 @@ public class Scenario : KMonoBehaviour
 		int num = Grid.OffsetCell(RootCell, x, y);
 		Tag tag = TagManager.Create(name, null);
 		GameObject prefab = Assets.GetPrefab(tag);
-		return (!(prefab == null)) ? GameUtil.KInstantiate(prefab, Grid.CellToPosCBC(num, scene_layer), scene_layer, SceneOrganizer.Instance.GetFolder(folder), null, 0) : null;
+		if (prefab == null)
+		{
+			return null;
+		}
+		GameObject gameObject = GameUtil.KInstantiate(prefab, Grid.CellToPosCBC(num, scene_layer), scene_layer, SceneOrganizer.Instance.GetFolder(folder), null, 0);
+		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+		component.InternalTemperature = 300f;
+		component.Temperature = 300f;
+		return gameObject;
 	}
 
 	private void SetupStressTest()
@@ -901,7 +921,7 @@ public class Scenario : KMonoBehaviour
 			this.Left += buildingDef.WidthInCells;
 			this.Scenario.RunAfterNextUpdate(delegate
 			{
-				Assets.GetBuildingDef(prefab_id).TryPlace(pos, Orientation.None, new Element[]
+				Assets.GetBuildingDef(prefab_id).TryPlace(pos, Orientation.Neutral, new Element[]
 				{
 					element,
 					ElementLoader.FindElementByHash(SimHashes.SedimentaryRock)

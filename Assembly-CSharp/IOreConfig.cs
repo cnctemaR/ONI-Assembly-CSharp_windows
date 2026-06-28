@@ -5,7 +5,5 @@ public interface IOreConfig
 {
 	SimHashes ElementID { get; }
 
-	SimHashes SublimeElementID { get; }
-
-	void ConfigurePrefab(GameObject go);
+	GameObject CreatePrefab();
 }

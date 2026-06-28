@@ -6,14 +6,33 @@ public class DropAllWorkable : Workable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(493375141, new EventSystem.EventHandler(this.OnRefreshUserMenu));
-		this.Subscribe(-1697596308, new EventSystem.EventHandler(this.OnStorageChange));
+		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		this.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Emptying;
+	}
+
+	private Storage[] GetStorages()
+	{
+		if (this.storages == null)
+		{
+			this.storages = base.GetComponents<Storage>();
+		}
+		return this.storages;
+	}
+
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		this.showCmd = this.GetNewShowCmd();
 	}
 
 	public void DropAll()
 	{
-		if (this.chore == null)
+		if (DebugHandler.InstantBuildMode)
+		{
+			this.OnCompleteWork(null);
+		}
+		else if (this.chore == null)
 		{
 			this.chore = new WorkChore<DropAllWorkable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true);
 		}
@@ -21,17 +40,17 @@ public class DropAllWorkable : Workable
 		{
 			this.chore.Cancel("Cancelled emptying");
 			this.chore = null;
-			base.GetComponent<KSelectable>().RemoveStatusItem(this.workerStatusItem);
+			base.GetComponent<KSelectable>().RemoveStatusItem(this.workerStatusItem, false);
 			base.ShowProgressBar(false);
 		}
 	}
 
 	protected override void OnCompleteWork(Worker worker)
 	{
-		Storage[] components = base.GetComponents<Storage>();
-		foreach (Storage storage in components)
+		Storage[] array = this.GetStorages();
+		for (int i = 0; i < array.Length; i++)
 		{
-			storage.DropAll();
+			array[i].DropAll();
 		}
 		this.chore = null;
 		this.Trigger(-1957399615, null);
@@ -39,36 +58,50 @@ public class DropAllWorkable : Workable
 
 	private void OnRefreshUserMenu(object data)
 	{
-		Storage[] components = base.GetComponents<Storage>();
-		bool flag = false;
-		foreach (Storage storage in components)
-		{
-			flag = flag || !storage.IsEmpty();
-		}
-		if (flag)
+		if (this.showCmd)
 		{
 			if (this.chore == null)
 			{
 				UserMenu userMenu = this.userMenu;
 				string text = UI.USERMENUACTIONS.EMPTYSTORAGE.TOOLTIP;
-				userMenu.AddButton(new KIconButtonMenu.ButtonInfo("iconEmptyOut", UI.USERMENUACTIONS.EMPTYSTORAGE.NAME, new global::System.Action(this.DropAll), global::Action.DropAll, null, null, null, null, text));
+				userMenu.AddButton(new KIconButtonMenu.ButtonInfo("iconEmptyOut", UI.USERMENUACTIONS.EMPTYSTORAGE.NAME, new global::System.Action(this.DropAll), global::Action.DropAll, null, null, null, text, true), 1f);
 			}
 			else
 			{
 				UserMenu userMenu2 = this.userMenu;
 				string text = UI.USERMENUACTIONS.EMPTYSTORAGE.TOOLTIP_OFF;
-				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("iconEmptyOut", UI.USERMENUACTIONS.EMPTYSTORAGE.NAME_OFF, new global::System.Action(this.DropAll), global::Action.DropAll, null, null, null, null, text));
+				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("iconEmptyOut", UI.USERMENUACTIONS.EMPTYSTORAGE.NAME_OFF, new global::System.Action(this.DropAll), global::Action.DropAll, null, null, null, text, true), 1f);
 			}
 		}
 	}
 
+	private bool GetNewShowCmd()
+	{
+		bool flag = false;
+		Storage[] array = this.GetStorages();
+		for (int i = 0; i < array.Length; i++)
+		{
+			flag = flag || !array[i].IsEmpty();
+		}
+		return flag;
+	}
+
 	private void OnStorageChange(object data)
 	{
-		this.userMenu.Refresh();
+		bool newShowCmd = this.GetNewShowCmd();
+		if (newShowCmd != this.showCmd)
+		{
+			this.showCmd = newShowCmd;
+			this.userMenu.Refresh();
+		}
 	}
 
 	[MyCmpAdd]
 	private UserMenu userMenu;
 
 	private Chore chore;
+
+	private bool showCmd;
+
+	private Storage[] storages;
 }

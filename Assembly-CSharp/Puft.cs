@@ -1,9 +1,7 @@
 ﻿using System;
-using KSerialization;
 using UnityEngine;
 
-[SerializationConfig(MemberSerialization.OptIn)]
-public class Puft : StateMachineComponent<Puft.StatesInstance>, ISaveLoadableJson
+public class Puft : StateMachineComponent<Puft.StatesInstance>
 {
 	protected override void OnPrefabInit()
 	{
@@ -16,7 +14,7 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>, ISaveLoadableJso
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.consumer.enabled = false;
+		this.consumer.EnableConsumption(false);
 		base.smi.StartSM();
 	}
 
@@ -57,7 +55,7 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>, ISaveLoadableJso
 
 	private int breathTargetCell = -1;
 
-	public class StatesInstance : GameStateMachine<Puft.States, Puft.StatesInstance, Puft>.GameInstance
+	public class StatesInstance : GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.GameInstance
 	{
 		public StatesInstance(Puft smi)
 			: base(smi)
@@ -81,7 +79,7 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>, ISaveLoadableJso
 				.EventTransition(GameHashes.Died, this.death, null)
 				.Enter(delegate(Puft.StatesInstance smi)
 				{
-					smi.Subscribe(-787691065, new EventSystem.EventHandler(smi.master.OnAttacked));
+					smi.Subscribe(-787691065, new Action<object>(smi.master.OnAttacked));
 				});
 			this.alive.flee.InitializeStates(this.mover, this.alive.idle.idle);
 			this.alive.distressed.Drowning.PlayAnim("harvest", KAnim.PlayMode.Loop, null).EventTransition(GameHashes.EnteredBreathableArea, this.alive.idle.move, null);
@@ -127,7 +125,7 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>, ISaveLoadableJso
 			}).EventTransition(GameHashes.AnimQueueComplete, this.alive.inhale.loop, (Puft.StatesInstance smi) => smi.timeinstate > 0f);
 			this.alive.inhale.loop.Enter(delegate(Puft.StatesInstance smi)
 			{
-				smi.master.consumer.enabled = true;
+				smi.master.consumer.EnableConsumption(true);
 				smi.Play("inhale_loop", KAnim.PlayMode.Loop);
 				smi.Schedule(3f, delegate
 				{
@@ -143,7 +141,7 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>, ISaveLoadableJso
 			});
 			this.alive.inhale.pst.Enter(delegate(Puft.StatesInstance smi)
 			{
-				smi.master.consumer.enabled = false;
+				smi.master.consumer.EnableConsumption(false);
 				smi.Play("inhale_pst", KAnim.PlayMode.Once);
 			}).EventTransition(GameHashes.AnimQueueComplete, this.alive.full.alt, null);
 			this.death.ToggleGravity().PlayAnim("death", KAnim.PlayMode.Once, null).EventHandler(GameHashes.AnimQueueComplete, delegate(Puft.StatesInstance smi)
@@ -159,21 +157,21 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>, ISaveLoadableJso
 				});
 		}
 
-		public StateMachine<Puft.States, Puft.StatesInstance, Puft>.TargetParameter breathMoveTarget;
+		public StateMachine<Puft.States, Puft.StatesInstance, Puft, object>.TargetParameter breathMoveTarget;
 
-		public StateMachine<Puft.States, Puft.StatesInstance, Puft>.TargetParameter mover;
+		public StateMachine<Puft.States, Puft.StatesInstance, Puft, object>.TargetParameter mover;
 
 		public Puft.States.AliveStates alive;
 
-		public GameStateMachine<Puft.States, Puft.StatesInstance, Puft>.State death;
+		public GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.State death;
 
-		public class AliveStates : GameStateMachine<Puft.States, Puft.StatesInstance, Puft>.State
+		public class AliveStates : GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.State
 		{
 			public Puft.States.IdleStates idle;
 
-			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft>.ApproachSubState<Approachable> moveToBreathable;
+			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.ApproachSubState<Approachable> moveToBreathable;
 
-			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft>.CreatureFleeSubState<Approachable> flee;
+			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.CreatureFleeSubState<Approachable> flee;
 
 			public Puft.States.InhaleStates inhale;
 
@@ -182,34 +180,34 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>, ISaveLoadableJso
 			public Puft.States.DistressStates distressed;
 		}
 
-		public class FullStates : GameStateMachine<Puft.States, Puft.StatesInstance, Puft>.State
+		public class FullStates : GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.State
 		{
-			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft>.ApproachSubState<Approachable> full;
+			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.ApproachSubState<Approachable> full;
 
-			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft>.State alt;
+			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.State alt;
 
-			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft>.State fart;
+			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.State fart;
 		}
 
-		public class IdleStates : GameStateMachine<Puft.States, Puft.StatesInstance, Puft>.State
+		public class IdleStates : GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.State
 		{
-			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft>.State idle;
+			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.State idle;
 
-			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft>.IdleMoveSubState move;
+			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.IdleMoveSubState move;
 		}
 
-		public class InhaleStates : GameStateMachine<Puft.States, Puft.StatesInstance, Puft>.State
+		public class InhaleStates : GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.State
 		{
-			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft>.State pre;
+			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.State pre;
 
-			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft>.State loop;
+			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.State loop;
 
-			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft>.State pst;
+			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.State pst;
 		}
 
-		public class DistressStates : GameStateMachine<Puft.States, Puft.StatesInstance, Puft>.State
+		public class DistressStates : GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.State
 		{
-			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft>.State Drowning;
+			public GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.State Drowning;
 		}
 	}
 }

@@ -12,7 +12,48 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 	{
 		for (int i = 0; i < this.data.Count; i++)
 		{
-			this.data[i].FixedUpdate(dt);
+			GravityComponent gravityComponent = this.data[i];
+			Vector2 velocity = gravityComponent.Velocity;
+			Vector3 position = gravityComponent.transform.position;
+			Vector2 vector = position;
+			Vector2 vector2 = vector + velocity * dt;
+			gravityComponent.transform.SetPosition(new Vector3(vector2.x, vector2.y, position.z));
+			Vector2 vector3 = vector2;
+			vector3.y -= gravityComponent.offset;
+			vector.y -= gravityComponent.offset;
+			int num = Grid.PosToCell(vector3);
+			if (Grid.IsValidCell(num))
+			{
+				if (velocity.sqrMagnitude > 0.2f)
+				{
+					int num2 = Grid.PosToCell(vector);
+					if (!Grid.Element[num2].IsLiquid && Grid.Element[num].IsLiquid)
+					{
+						AmbienceType ambience = Grid.Element[num].substance.GetAmbience();
+						if (ambience != AmbienceType.None)
+						{
+							string text = Sounds.Instance.OreSplashSoundsMigrated[(int)ambience];
+							if (CameraController.Instance != null && CameraController.Instance.IsAudibleSound(vector2, text))
+							{
+								SoundEvent.PlayOneShot(text, vector2);
+							}
+						}
+					}
+				}
+				if (Grid.Solid[num])
+				{
+					vector2.y = Grid.CellToPosCBC(Grid.CellAbove(num), Grid.SceneLayer.Move).y + gravityComponent.offset;
+					gravityComponent.initialVelocity.x = 0f;
+					gravityComponent.transform.SetPosition(new Vector3(vector2.x, vector2.y, position.z));
+					EventSystem.Trigger(gravityComponent.transform.gameObject, 1188683690, velocity);
+					if (gravityComponent.onLanded != null)
+					{
+						gravityComponent.onLanded();
+					}
+				}
+			}
+			gravityComponent.elapsedTime += dt;
+			this.data[i] = gravityComponent;
 		}
 	}
 }

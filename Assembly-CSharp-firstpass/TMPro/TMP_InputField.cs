@@ -22,6 +22,7 @@ namespace TMPro
 				if (this.m_Mesh == null)
 				{
 					this.m_Mesh = new Mesh();
+					this.m_Mesh.name = "TMPro";
 				}
 				return this.m_Mesh;
 			}
@@ -1004,12 +1005,12 @@ namespace TMPro
 					string commandName = this.m_ProcessingEvent.commandName;
 					if (commandName != null)
 					{
-						if (TMP_InputField.<>f__switch$map1 == null)
+						if (TMP_InputField.<>f__switch$map0 == null)
 						{
-							TMP_InputField.<>f__switch$map1 = new Dictionary<string, int>(1) { { "SelectAll", 0 } };
+							TMP_InputField.<>f__switch$map0 = new Dictionary<string, int>(1) { { "SelectAll", 0 } };
 						}
 						int num;
-						if (TMP_InputField.<>f__switch$map1.TryGetValue(commandName, out num))
+						if (TMP_InputField.<>f__switch$map0.TryGetValue(commandName, out num))
 						{
 							if (num == 0)
 							{
@@ -2146,8 +2147,8 @@ namespace TMPro
 		[SerializeField]
 		protected string m_Text = string.Empty;
 
-		[SerializeField]
 		[Range(0f, 4f)]
+		[SerializeField]
 		private float m_CaretBlinkRate = 0.85f;
 
 		[SerializeField]

@@ -19,18 +19,27 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Bio Distiller";
 
-				public static LocString DESC = "The resulting algae still looks pretty slimy, to be honest.";
+				public static LocString DESC = "Green goop goes in, green goop comes out.";
 
 				public static LocString EFFECT = "Converts <style=\"misc\">Slime</style> into <style=\"misc\">Algae</style>.";
+			}
+
+			public class AQUAFARM
+			{
+				public static LocString NAME = "Aquatic Farm Tile";
+
+				public static LocString DESC = "Overwatering these plants would frankly be impressive.";
+
+				public static LocString EFFECT = "Grows a single <style=\"plant\">Plant</style> when sown with a <style=\"seed\">Seed</style>.\n\nMust be submerged in <style=\"liquid\">Liquid</style>.\n\nCan be used as floor tile.";
 			}
 
 			public class FERTILIZERMAKER
 			{
 				public static LocString NAME = "Fertilizer Maker";
 
-				public static LocString DESC = "Don't breathe too deeply.";
+				public static LocString DESC = "Provides plants with all the nutrients they need to live a happy little plant life.";
 
-				public static LocString EFFECT = "Uses <style=\"liquid\">Contaminated Water</style> to produce <style=\"solid\">Fertilizer</style>.";
+				public static LocString EFFECT = "Uses <style=\"liquid\">Polluted Water</style> to produce <style=\"solid\">Fertilizer</style>.";
 			}
 
 			public class ALGAEHABITAT
@@ -46,7 +55,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Tiny Battery";
 
-				public static LocString DESC = "It isn't very efficient to let half your energy seep into the cosmos. Fight that entropy!";
+				public static LocString DESC = "Fight the entropy!";
 
 				public static LocString EFFECT = "Stores a bit of runoff <style=\"power\">Power</style> from generators, but loses charge over time.";
 			}
@@ -55,7 +64,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Battery";
 
-				public static LocString DESC = "Wow! Apparently size does matter.";
+				public static LocString DESC = "Size does matter.";
 
 				public static LocString EFFECT = "Stores most of the runoff <style=\"power\">Power</style> from generators, but loses charge over time.";
 			}
@@ -64,9 +73,9 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Cot";
 
-				public static LocString DESC = "A soft patch in a hard world.\nYour Duplicants will be grateful to have their own bed.";
+				public static LocString DESC = "The only soft patch in a hard, hard world.";
 
-				public static LocString EFFECT = "Reduces <style=\"stress\">Stress</style> by giving Duplicants a place to rest.\n\nAt night Duplicants will automatically sleep in the cot that has been assigned to them.";
+				public static LocString EFFECT = "Reduces <style=\"stress\">Stress</style> by giving Duplicants a comfortable place to rest.\n\nAt night Duplicants will automatically sleep in the cot that has been assigned to them.";
 			}
 
 			public class MEDICALCOT
@@ -82,27 +91,31 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Massage Table";
 
-				public static LocString DESC = "The Duplicants are carrying a lot of tension in their... everything.";
+				public static LocString DESC = "Duplicants tend to carry a lot of tension in their... everything.";
 
-				public static LocString EFFECT = "Rapidly reduces <style=\"stress\">Stress</style> for one Duplicant at a time.";
+				public static LocString EFFECT = "Rapidly reduces <style=\"stress\">Stress</style> for one Duplicant at a time.\n\nDuplicants will automatically use massage tables if their <style=\"stress\">Stress</style> enters Breaktime range.";
+
+				public static LocString ACTIVATE_TOOLTIP = "Duplicants must take a break when their stress reaches {0}";
+
+				public static LocString DEACTIVATE_TOOLTIP = "Breaktime ends when stress is reduced to {0}";
 			}
 
 			public class CEILINGLIGHT
 			{
 				public static LocString NAME = "Ceiling Lamp";
 
-				public static LocString DESC = "This light imitates the Duplicants' natural aboveground habitat.\nSort of. Maybe.";
+				public static LocString DESC = "This light imitates Duplicants' natural aboveground habitat.\nSort of. Maybe.";
 
-				public static LocString EFFECT = "Improves <style=\"decor\">Decor Opinion</style> and reduces <style=\"stress\">Stress</style> by providing <style=\"light\">Light</style>.";
+				public static LocString EFFECT = "Improves <style=\"decor\">Decor</style> and reduces <style=\"stress\">Stress</style> by providing <style=\"light\">Light</style>.";
 			}
 
 			public class AIRFILTER
 			{
 				public static LocString NAME = "Air Deodorizer";
 
-				public static LocString DESC = "Oh! Citrus scented!";
+				public static LocString DESC = "It's citrus scented!";
 
-				public static LocString EFFECT = "Reduces the threat of <style=\"disease\">Disease</style> by filtering <style=\"gas\">Contaminated Oxygen</style> out of the air.";
+				public static LocString EFFECT = "Reduces the threat of <style=\"disease\">Disease</style> by filtering <style=\"gas\">Polluted Oxygen</style> out of the air.";
 			}
 
 			public class CANVAS
@@ -111,7 +124,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Hopefully your Duplicants have been practicing their color theory.";
 
-				public static LocString EFFECT = "Increases <style=\"decor\">Decor Opinion</style> and reduces Duplicants' <style=\"stress\">Stress</style>.\n\nMust be painted by a Duplicant.";
+				public static LocString EFFECT = "Increases <style=\"decor\">Decor</style> and reduces Duplicants' <style=\"stress\">Stress</style>.\n\nMust be painted by a Duplicant.";
 
 				public static LocString POORQUALITYNAME = "Crude Painting";
 
@@ -124,7 +137,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Air Scrubber";
 
-				public static LocString DESC = "Everyone appreciates a little clean air.";
+				public static LocString DESC = "It's time to clear the air.";
 
 				public static LocString EFFECT = "Filters <style=\"gas\">Carbon Dioxide</style> and removes it from the air.";
 			}
@@ -133,18 +146,18 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Compost";
 
-				public static LocString DESC = "Don't waste your waste!";
+				public static LocString DESC = "Don't put your waste to waste.";
 
-				public static LocString EFFECT = string.Format("Breaks <style=\"solid\">{0}</style> down into <style=\"solid\">{1}</style>.", ELEMENTS.TOXICSAND.NAME, ELEMENTS.FERTILIZER.NAME);
+				public static LocString EFFECT = string.Format("Breaks <style=\"solid\">{0}</style> down into <style=\"solid\">{1}</style>.", ELEMENTS.TOXICSAND.NAME.text, ELEMENTS.FERTILIZER.NAME.text);
 			}
 
 			public class COOKINGSTATION
 			{
 				public static LocString NAME = "Cooking Station";
 
-				public static LocString DESC = "Two wrongs don't make a right, but two mush bars apparently make one okay meal.";
+				public static LocString DESC = "Make asteroid cuisine marginally more palatable.";
 
-				public static LocString EFFECT = "Converts two <style=\"food\">Mush Bars</style> into one improved <style=\"food\">Deep Fried Mush Bar</style>.\n\nDuplicants will not fabricate unless recipes are queued.";
+				public static LocString EFFECT = "Cooks improved <style=\"food\">Food</style> recipes using multiple ingredients.\n\nDuplicants will not fabricate unless recipes are queued.";
 			}
 
 			public class DININGTABLE
@@ -160,9 +173,9 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Pneumatic Door";
 
-				public static LocString DESC = "Makes a decent bedroom door, if you don't mind the occasional voyeur.";
+				public static LocString DESC = "Lesser creatures are incapable of operating it.\nMust be the lack of thumbs.";
 
-				public static LocString EFFECT = "Encloses rooms without blocking the flow of <style=\"gas\">Gas</style> or <style=\"liquid\">Liquid</style>.";
+				public static LocString EFFECT = "Encloses rooms without blocking the flow of <style=\"gas\">Gas</style> or <style=\"liquid\">Liquid</style>.\n\nWild creatures cannot pass through doors.";
 
 				public static LocString PRESSURE_SUIT_REQUIRED = "<style=\"equipment\">Exosuit</style> required {0}";
 
@@ -178,9 +191,9 @@ namespace STRINGS
 
 				public static class CONTROL_STATE
 				{
-					public static LocString OPEN = "Open Door";
+					public static LocString OPEN = "Open";
 
-					public static LocString CLOSE = "Close Door";
+					public static LocString CLOSE = "Lock";
 
 					public static LocString AUTO = "Auto";
 				}
@@ -190,34 +203,43 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Electrolyzer";
 
-				public static LocString DESC = "Water goes in one end, life-sustaining oxygen comes out the other.";
+				public static LocString DESC = "Water goes in, life-sustaining oxygen comes out.";
 
 				public static LocString EFFECT = "Produces a steady supply of <style=\"oxygen\">Oxygen</style> using piped in <style=\"liquid\">Water</style>.\n\nBecomes idle when the room enters maximum air pressure range.";
+			}
+
+			public class POWERTRANSFORMER
+			{
+				public static LocString NAME = "Power Transformer";
+
+				public static LocString DESC = "Power goes up, power goes down. You can't explain it.";
+
+				public static LocString EFFECT = "Protects circuits from overloading by increasing or decreasing the <style=\"power\">Power</style> provided.";
 			}
 
 			public class FLOORLAMP
 			{
 				public static LocString NAME = "Floor Lamp";
 
-				public static LocString DESC = "Now your Duplicants can read all those books they don't have!";
+				public static LocString DESC = "Shine a light on a dark situation.";
 
-				public static LocString EFFECT = "Improves <style=\"decor\">Decor Opinion</style> and reduces <style=\"stress\">Stress</style> by providing <style=\"light\">Light</style>.";
+				public static LocString EFFECT = "Improves <style=\"decor\">Decor</style> and reduces <style=\"stress\">Stress</style> by providing <style=\"light\">Light</style>.";
 			}
 
 			public class FLOWERVASE
 			{
 				public static LocString NAME = "Flower Vase";
 
-				public static LocString DESC = "Duplicants can't agree on how to pronounce \"vase\", but they *can* agree it looks nice.";
+				public static LocString DESC = "Duplicants can all agree it looks nice, even if they can't agree how to pronounce it.";
 
-				public static LocString EFFECT = "Increases <style=\"decor\">Decor Opinion</style> and reduces Duplicant <style=\"stress\">Stress</style>.";
+				public static LocString EFFECT = "Increases <style=\"decor\">Decor</style> and reduces Duplicant <style=\"stress\">Stress</style>.";
 			}
 
 			public class FLUSHTOILET
 			{
 				public static LocString NAME = "Lavatory";
 
-				public static LocString DESC = "No muss, no fuss.\nThis toilet is highly functional and (almost) always clean.";
+				public static LocString DESC = "What you do in here is your business.";
 
 				public static LocString EFFECT = "Greatly reduces <style=\"stress\">Stress</style> and <style=\"disease\">Disease</style> by more hygienically handling Duplicant waste.";
 			}
@@ -226,7 +248,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Shower";
 
-				public static LocString DESC = "Very few things in life can top a nice, hot shower.";
+				public static LocString DESC = "The perfect place to have an existential crisis.\nIt's also sorta useful for getting clean.";
 
 				public static LocString EFFECT = "Prevents <style=\"disease\">Disease</style> by improving Duplicant <style=\"hygiene\">Hygiene</style>.";
 			}
@@ -237,7 +259,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Easily transport gas with this simple, airtight piping.";
 
-				public static LocString EFFECT = "Transports <style=\"gas\">Gas</style> between <style=\"GasPiping\">Gas Intakes</style> and <style=\"GasPiping\">Gas Outputs</style>.\n\nCan be run through floor and wall tiles.";
+				public static LocString EFFECT = "Transports <style=\"gas\">Gas</style> between building <style=\"GasPiping\">Intakes</style> and <style=\"GasPiping\">Outputs</style>.\n\nCan be run through Tile.";
 			}
 
 			public class GASCONDUITBRIDGE
@@ -246,7 +268,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Keep those gas pipes separated.";
 
-				public static LocString EFFECT = "Runs one section of <style=\"GasPiping\">Gas Pipe</style> over another without joining their systems.\n\nCannot be run through floor or wall tiles.";
+				public static LocString EFFECT = "Runs one section of <style=\"GasPiping\">Gas Pipe</style> over another without joining their systems.";
 			}
 
 			public class GASFILTER
@@ -255,7 +277,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Remind those gases it's time for work, not mingling.";
 
-				public static LocString EFFECT = "Sieves one type of <style=\"gas\">Gas</style> out from a mixed composition, sending it into a separate <style=\"GasPiping\">Pipe</style>.";
+				public static LocString EFFECT = "Sieves the selected <style=\"gas\">Gas</style> out of gaseous mixtures, sending it into a separate <style=\"GasPiping\">Pipe</style>.";
 			}
 
 			public class GASPERMEABLEMEMBRANE
@@ -264,7 +286,7 @@ namespace STRINGS
 
 				public static LocString DESC = "It's like walking on a dream!";
 
-				public static LocString EFFECT = "Used as wall and floor tile to build rooms.\n\nBlocks the flow of <style=\"liquid\">Liquid</style> without obstructing the flow of <style=\"gas\">Gas</style>.";
+				public static LocString EFFECT = "Used as floor and wall tile to build rooms.\n\nBlocks the flow of <style=\"liquid\">Liquid</style> without obstructing the flow of <style=\"gas\">Gas</style>.";
 			}
 
 			public class GASPUMP
@@ -273,7 +295,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Get your colony all pumped up!";
 
-				public static LocString EFFECT = "Draws in <style=\"gas\">Gas</style> and runs it through the connected <style=\"GasPiping\">Gas Pipe</style>.";
+				public static LocString EFFECT = "Draws in <style=\"gas\">Gas</style> runs it through <style=\"GasPiping\">Gas Pipes</style>.\n\nMust be immersed in gas.";
 			}
 
 			public class GASVALVE
@@ -282,7 +304,7 @@ namespace STRINGS
 
 				public static LocString DESC = "It's the metal pipe equivalent of kinking a garden hose.";
 
-				public static LocString EFFECT = "Increases or decreases <style=\"gas\">Gas</style> volume in pipes to maintain ideal <style=\"GasPiping>Gas Pipe</style> pressure.";
+				public static LocString EFFECT = "Increases or decreases the <style=\"gas\">Gas</style> volume in <style=\"GasPiping>Pipes</style> to maintain ideal pressure.";
 			}
 
 			public class GASVENT
@@ -291,14 +313,14 @@ namespace STRINGS
 
 				public static LocString DESC = "Sometimes you just gotta vent.";
 
-				public static LocString EFFECT = "An output point for <style=\"GasPiping\">Gas Pipes</style>.";
+				public static LocString EFFECT = "Releases <style=\"gas\">Gas</style> back into the colony from <style=\"GasPiping\">Gas Pipes</style>.";
 			}
 
 			public class GENERATOR
 			{
 				public static LocString NAME = "Coal Generator";
 
-				public static LocString DESC = "It may not be the most clean-burning power source, but at least it's also inefficient!";
+				public static LocString DESC = "This may not be the most clean-burning power source, but at least it's also inefficient!";
 
 				public static LocString EFFECT = "A <style=\"power\">Power</style> source that burns <style=\"RawMineral\">Coal</style> to generate electricity.";
 			}
@@ -309,16 +331,16 @@ namespace STRINGS
 
 				public static LocString DESC = "A way to remember your fallen comrades... without remembering the smell.";
 
-				public static LocString EFFECT = "Reduces the spread of <style=\"disease\">Disease</style> and <style=\"stress\">Stress</style> caused by dead Duplicants.\n\nLiving Duplicants will automatically place an unburied corpse inside.";
+				public static LocString EFFECT = "Prevents <style=\"stress\">Stress</style> and the spread of <style=\"disease\">Disease</style> caused by unburied corpses.\n\nLiving Duplicants will automatically place a dead Duplicant inside.";
 			}
 
 			public class HEADQUARTERS
 			{
 				public static LocString NAME = "Printing Pod";
 
-				public static LocString DESC = "Newly printed Duplicants will come out here, but thank goodness, they'll never go back in.";
+				public static LocString DESC = "New Duplicants will come out here, but thank goodness, they'll never go back in.";
 
-				public static LocString EFFECT = "A bioprinting machine that periodically produces new Duplicants.";
+				public static LocString EFFECT = "An exceptionally advanced bioprinter of unknown origin.\n\nIt periodically produces new Duplicants.";
 			}
 
 			public class HYDROGENGENERATOR
@@ -330,22 +352,40 @@ namespace STRINGS
 				public static LocString EFFECT = "A <style=\"power\">Power</style> source that converts <style=\"gas\">Hydrogen</style> into electricity.";
 			}
 
+			public class METHANEGENERATOR
+			{
+				public static LocString NAME = "Natural Gas Generator";
+
+				public static LocString DESC = string.Empty;
+
+				public static LocString EFFECT = "A <style=\"power\">Power</style> source that converts <style=\"gas\">Natural Gas</style> into electricity.";
+			}
+
+			public class HYDROPONICFARM
+			{
+				public static LocString NAME = "Hydroponic Farm";
+
+				public static LocString DESC = "Reduce irritation with this automatic irrigation.";
+
+				public static LocString EFFECT = "Grows a single <style=\"plant\">Plant</style> when sown with a <style=\"seed\">Seed</style>.\n\nAllows <style=\"liquid\">Liquid</style> delivery for plant irrigation.\n\nCan be used as floor tile.\n\nCan be rotated before construction.";
+			}
+
 			public class INSULATEDGASCONDUIT
 			{
 				public static LocString NAME = "Insulated Gas Pipe";
 
-				public static LocString DESC = "Ensure your gas stays piping hot. Or cold.\nOr whatever.";
+				public static LocString DESC = "Ensure your gases stay piping hot.\nOr cold.\nOr what have you.";
 
-				public static LocString EFFECT = "Transports <style=\"gas\">Gas</style> between <style=\"GasPiping\">Intakes</style> and <style=\"GasPiping\">Outputs</style> with minimal change in <style=\"heat\">Temperature</style>.\n\nCan be run through floor and wall tiles.";
+				public static LocString EFFECT = "Transports <style=\"gas\">Gas</style> with minimal change in <style=\"heat\">Temperature</style>.\n\nCan be run through Tile.";
 			}
 
 			public class INSULATEDLIQUIDCONDUIT
 			{
 				public static LocString NAME = "Insulated Liquid Pipe";
 
-				public static LocString DESC = "Ensure your liquids stay piping hot. Or cold.\nOr whatever.";
+				public static LocString DESC = "Ensure your liquids stay piping hot.\nOr cold.\nOr what have you.";
 
-				public static LocString EFFECT = "Transports <style=\"liquid\">Liquid</style> between <style=\"LiquidPiping\">Intakes</style> and <style=\"LiquidPiping\">Outputs</style> with minimal change in <style=\"heat\">Temperature</style>.\n\nCan be run through floor and wall tiles.";
+				public static LocString EFFECT = "Transports <style=\"liquid\">Liquid</style> with minimal change in <style=\"heat\">Temperature</style>.\n\nCan be run through Tile.";
 			}
 
 			public class INSULATEDWIRE
@@ -354,16 +394,16 @@ namespace STRINGS
 
 				public static LocString DESC = "This stuff won't go melting if things get heated.";
 
-				public static LocString EFFECT = "Connects buildings to <style=\"power\">Power</style> sources in extreme <style=\"heat\">Heat</style>.\n\nCan be run through wall and floor tiles.";
+				public static LocString EFFECT = "Connects buildings to <style=\"power\">Power</style> sources in extreme <style=\"heat\">Heat</style>.\n\nCan be run through Tile.";
 			}
 
 			public class INSULATIONTILE
 			{
 				public static LocString NAME = "Insulated Tile";
 
-				public static LocString DESC = "Gives your Duplicants nice, toasty feet.\nPlus it's purple!";
+				public static LocString DESC = "Gives your Duplicants nice, toasty feet.\nAnd it's purple!";
 
-				public static LocString EFFECT = "Used as wall and floor tile to build rooms.\n\nReduces <style=\"heat\">Heat</style> transfer between walls.";
+				public static LocString EFFECT = "Used as floor and wall tile to build rooms.\n\nReduces <style=\"heat\">Heat</style> transfer between walls.";
 			}
 
 			public class INSULATIONWALL
@@ -379,9 +419,9 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Farm Tile";
 
-				public static LocString DESC = "Shag rugs are out. Farm floors are all the rage now!";
+				public static LocString DESC = "Shag rugs are out. Farm floors are all the rage!";
 
-				public static LocString EFFECT = "Grows a single <style=\"plant\">Plant</style> when sown with a <style=\"seed\">Seed</style>.\n\nCan be used as floor tile.";
+				public static LocString EFFECT = "Grows a single <style=\"plant\">Plant</style> when sown with a <style=\"seed\">Seed</style>.\n\nCan be used as floor tile.\n\nCan be rotated before construction.";
 			}
 
 			public class LADDER
@@ -399,25 +439,43 @@ namespace STRINGS
 
 				public static LocString DESC = "Easily transport liquid with this simple, airtight piping.";
 
-				public static LocString EFFECT = "Transports <style=\"liquid\">Liquid</style> between <style=\"LiquidPiping\">Liquid Intakes</style> and <style=\"LiquidPiping\">Liquid Outputs</style>.\n\nCan be run through floor and wall tiles.";
+				public static LocString EFFECT = "Transports <style=\"liquid\">Liquid</style> between building <style=\"LiquidPiping\">Intakes</style> and <style=\"LiquidPiping\">Outputs</style>.\n\nCan be run through Tile.";
 			}
 
 			public class LIQUIDCONDUITBRIDGE
 			{
 				public static LocString NAME = "Liquid Pipe Bridge";
 
-				public static LocString DESC = "A pipe bridge for making sure your streams don't cross.";
+				public static LocString DESC = "Keep those liquid pipes separated.";
 
-				public static LocString EFFECT = "Runs one section of <style=\"LiquidPiping\">Liquid Pipe</style> overtop another without joining their systems.\n\nCannot be run through wall or floor tiles.";
+				public static LocString EFFECT = "Runs one section of <style=\"LiquidPiping\">Liquid Pipe</style> overtop another without joining their systems.";
 			}
 
 			public class LIQUIDCOOLEDFAN
 			{
 				public static LocString NAME = "Hydrofan";
 
-				public static LocString DESC = "It's almost like a real breeze.\nHow refreshing!";
+				public static LocString DESC = "How refreshing!\nIt's almost like a real breeze.";
 
 				public static LocString EFFECT = "Dissipates a small amount of the <style=\"heat\">Heat</style>.";
+			}
+
+			public class FUELBRICKMAKER
+			{
+				public static LocString NAME = "Fuel Press";
+
+				public static LocString DESC = "A machine for most pressing matters.";
+
+				public static LocString EFFECT = "Presses consumable ore into dense Fuel Bricks.";
+			}
+
+			public class BURNER
+			{
+				public static LocString NAME = "Burner";
+
+				public static LocString DESC = "Some people just want to watch the world burn.";
+
+				public static LocString EFFECT = "Consumes one <style=\"misc\">Fuel Brick</style> to produce a <style=\"heat\">Hot</style> jet of flame.\n\nHas one use.";
 			}
 
 			public class LIQUIDFILTER
@@ -426,7 +484,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Ever tried separating liquids with your bare hands?\nVery difficult!";
 
-				public static LocString EFFECT = "Can sieve one selected <style=\"liquid\">Liquid</style> out of a liquid mixture, sending it into a separate <style=\"LiquidPiping\">Pipe</style>.";
+				public static LocString EFFECT = "Sieves the selected <style=\"liquid\">Liquid</style> out of a liquid mixture, sending it into a separate <style=\"LiquidPiping\">Pipe</style>.";
 			}
 
 			public class LIQUIDPUMP
@@ -435,7 +493,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Get your colony all pumped up!";
 
-				public static LocString EFFECT = "Draws in <style=\"liquid\">Liquid</style> and runs it through the connected <style=\"LiquidPiping\">Liquid Pipe</style>.\n\nMust be submerged in liquid to function.";
+				public static LocString EFFECT = "Draws in <style=\"liquid\">Liquid</style> and runs it through <style=\"LiquidPiping\">Liquid Pipes</style>.\n\nMust be submerged in liquid.";
 			}
 
 			public class LIQUIDRESERVOIR
@@ -453,7 +511,7 @@ namespace STRINGS
 
 				public static LocString DESC = "It's the metal pipe equivalent of kinking a garden hose.";
 
-				public static LocString EFFECT = "Increases or decreases <style=\"liquid\">Liquid</style> volume in pipes to maintain ideal <style=\"LiquidPiping>Liquid Pipe</style> pressure.";
+				public static LocString EFFECT = "Increases or decreases the <style=\"liquid\">Liquid</style> volume in <style=\"LiquidPiping\">Pipes</style> to maintain ideal pressure.";
 			}
 
 			public class LIQUIDVENT
@@ -462,14 +520,14 @@ namespace STRINGS
 
 				public static LocString DESC = "Sometimes you just gotta vent.";
 
-				public static LocString EFFECT = "An output point for <style=\"LiquidPiping\">Liquid Pipes</style>.";
+				public static LocString EFFECT = "Releases <style=\"liquid\">Liquid</style> back into the colony from <style=\"LiquidPiping\">Liquid Pipes</style>.";
 			}
 
 			public class MANUALGENERATOR
 			{
 				public static LocString NAME = "Manual Generator";
 
-				public static LocString DESC = "Watching Duplicants run on it is adorable... the electrical power is just an added bonus.";
+				public static LocString DESC = "Running on this wheel produces electricity.\nAnd smelly Duplicants.";
 
 				public static LocString EFFECT = "A <style=\"power\">Power</style> source that must be manually operated to produce electricity.";
 			}
@@ -478,16 +536,16 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Manual Airlock";
 
-				public static LocString DESC = "No gas escapes these airlocks, yet oddly you can smell what's on the other side.";
+				public static LocString DESC = "No gas can escape these airlocks, yet oddly you can often smell what's on the other side.";
 
-				public static LocString EFFECT = "Creates an airtight seal that maintains atmosphere and pressure between areas.";
+				public static LocString EFFECT = "Creates an airtight seal that maintains atmosphere and pressure between areas.\n\nWild creatures cannot pass through doors.";
 			}
 
 			public class MEDICALBED
 			{
 				public static LocString NAME = "Rejuvenator";
 
-				public static LocString DESC = "Stick a Duplicant into this state of the art triage tube and they'll pop out, good as new.";
+				public static LocString DESC = "Pop a Duplicant into this state of the art triage tube and they'll come out good as new.";
 
 				public static LocString EFFECT = "Greatly accelerates the regeneration of a wounded Duplicant's <style=\"Health\">Health</style>.";
 			}
@@ -496,9 +554,9 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Mesh Tile";
 
-				public static LocString DESC = "How do Duplicants keep their tiny feet from slipping through the holes?";
+				public static LocString DESC = "These mesh tiles always go with the flow.";
 
-				public static LocString EFFECT = "Can be used as wall or floor tile to enclose rooms.\n\nDoes not obstruct the flow of <style=\"liquid\">Liquid</style> or <style=\"gas\">Gas</style>.";
+				public static LocString EFFECT = "Can be used as floor and wall tile to build rooms.\n\nDoes not obstruct the flow of <style=\"liquid\">Liquid</style> or <style=\"gas\">Gas</style>.";
 			}
 
 			public class MICROBEMUSHER
@@ -514,7 +572,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Algae Deoxydizer";
 
-				public static LocString DESC = "Breathe easy knowing you've crushed a bunch of helpless algae into oblivion.";
+				public static LocString DESC = "Breathe easy knowing you've crushed tons of helpless algae into oblivion.";
 
 				public static LocString EFFECT = "Converts <style=\"misc\">Algae</style> into <style=\"oxygen\">Oxygen</style>.\n\nBecomes idle when the room enters maximum air pressure range.";
 			}
@@ -532,9 +590,9 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Outhouse";
 
-				public static LocString DESC = "Outhouses keep Duplicants from getting down in the dumps.\nNot building any'd be a real waste!";
+				public static LocString DESC = "Better outhouse than inhouse.";
 
-				public static LocString EFFECT = string.Format("Reduces <style=\"stress\">Stress</style> and the spread of <style=\"disease\">Disease</style> by regulating where Duplicants relieve themselves.\n\nRequires no <style=\"GasPiping\">Piping</style>.\n\nMust be emptied of <style=\"solid\">{0}</style> periodically.", ELEMENTS.TOXICSAND.NAME);
+				public static LocString EFFECT = string.Format("Reduces <style=\"stress\">Stress</style> and the spread of <style=\"disease\">Disease</style> by giving Duplicants a place to relieve themselves.\n\nRequires no <style=\"GasPiping\">Piping</style>.\n\nMust be periodically emptied of <style=\"solid\">{0}</style>.", ELEMENTS.TOXICSAND.NAME.text);
 			}
 
 			public class APOTHECARY
@@ -559,9 +617,9 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Mechanized Airlock";
 
-				public static LocString DESC = "Is there anything more thrilling than the automation of manual processes?";
+				public static LocString DESC = "Is there anything better than the automation of manual processes?";
 
-				public static LocString EFFECT = "Creates an airtight seal that maintains atmosphere and pressure between areas.\n\nFunctions as a Manual Airlock when no <style=\"power\">Power</style> is available.";
+				public static LocString EFFECT = "Creates an airtight seal that maintains atmosphere and pressure between areas.\n\nFunctions as a Manual Airlock when no <style=\"power\">Power</style> is available.\n\nWild creatures cannot pass through doors.";
 			}
 
 			public class RATIONBOX
@@ -570,14 +628,14 @@ namespace STRINGS
 
 				public static LocString DESC = "Storing food in a box?\nSeems rational!";
 
-				public static LocString EFFECT = "Stores a small amount of <style=\"food\">Food</style>.";
+				public static LocString EFFECT = "Stores a small amount of <style=\"food\">Food</style>.\n\nMust be filled with Food by Duplicants.";
 			}
 
 			public class REFRIGERATOR
 			{
 				public static LocString NAME = "Refrigerator";
 
-				public static LocString DESC = "Spoil your Duplicants with this hi-tech, spoilage-free food box.";
+				public static LocString DESC = "Put your rations on ice.";
 
 				public static LocString EFFECT = "Drastically increases the shelf life of <style=\"food\">Food</style> by storing it at an ideal <style=\"heat\">Temperature</style>.";
 			}
@@ -586,9 +644,9 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Research Station";
 
-				public static LocString DESC = "Duplicants' first chemistry set.";
+				public static LocString DESC = "Aw. Duplicants' first chemistry set.";
 
-				public static LocString EFFECT = "Can be worked by Duplicants to conduct <style=\"research\">Novice Research</style> and unlock new technologies.";
+				public static LocString EFFECT = "Conducts <style=\"research\">Novice Research</style> and unlocks new technologies when worked on by Duplicants.";
 			}
 
 			public class ADVANCEDRESEARCHCENTER
@@ -597,16 +655,16 @@ namespace STRINGS
 
 				public static LocString DESC = "Every additional monitor multiplies the research potential exponentially.";
 
-				public static LocString EFFECT = "Can be worked by Duplicants to conduct <style=\"research\">Intermediary Research</style> and unlock new technologies.";
+				public static LocString EFFECT = "Conducts <style=\"research\">Intermediate Research</style> and unlocks new technologies when worked on by Duplicants.";
 			}
 
 			public class SCULPTURE
 			{
 				public static LocString NAME = "Sculpting Block";
 
-				public static LocString DESC = "An object of questionable form and no discernible function.\nThe Duplicants love it.";
+				public static LocString DESC = "An object of questionable form and no discernible function.\nDuplicants love it.";
 
-				public static LocString EFFECT = "Increases <style=\"decor\">Decor Opinion</style> and reduces Duplicants' <style=\"stress\">Stress</style>.\n\nMust be sculpted by a Duplicant.";
+				public static LocString EFFECT = "Increases <style=\"decor\">Decor</style> and reduces Duplicants' <style=\"stress\">Stress</style>.\n\nMust be sculpted by a Duplicant after construction.";
 
 				public static LocString POORQUALITYNAME = "\"Abstract\" Sculpture";
 
@@ -626,7 +684,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Space Heater";
 
-				public static LocString DESC = "Stave off frostbite with this heartwarming doodad.\n(Warms other body parts too!)";
+				public static LocString DESC = "Stave off frostbite with this heartwarming doodad.";
 
 				public static LocString EFFECT = "Produces a moderate amount of <style=\"heat\">Heat</style> in its immediate vicinity.";
 			}
@@ -635,7 +693,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Storage Compactor";
 
-				public static LocString DESC = "Keep your clutter off the floor!";
+				public static LocString DESC = "Keep your debris off the floor!\nCan't you see we just swept in here?";
 
 				public static LocString EFFECT = "Stores the resources of your choosing.";
 			}
@@ -647,6 +705,24 @@ namespace STRINGS
 				public static LocString DESC = "Exosuits allow Duplicants to breathe in the harshest of environments.\nThey're also flatteringly form-fitting.";
 
 				public static LocString EFFECT = "Uses <style=\"RawMetal\">Raw Metal</style> or <style=\"RefinedMetal\">Refined Metal</style> to craft protective <style=\"equipment\">Exosuits</style> for Duplicants.\n\nDuplicants will not fabricate unless recipes are queued.";
+			}
+
+			public class CLOTHINGFABRICATOR
+			{
+				public static LocString NAME = "Textile Factory";
+
+				public static LocString DESC = "What's the point of surviving cosmic catastrophe if you don't look cute?";
+
+				public static LocString EFFECT = "Tailors enhanced clothing items for Duplicants.\n\nDuplicants will not fabricate unless recipes are queued.";
+			}
+
+			public class LIQUIDHEATER
+			{
+				public static LocString NAME = "Liquid Tepidizer";
+
+				public static LocString DESC = "Just the right amount of heat for a nice, hot shower.";
+
+				public static LocString EFFECT = "Marginally <style=\"heat\">Warms</style> large bodies of <style=\"liquid\">Liquid</style>.\n\nMust be fully submerged.";
 			}
 
 			public class SUITRECHARGER
@@ -664,7 +740,38 @@ namespace STRINGS
 
 				public static LocString DESC = "Put the power right in your Duplicants' cute little hands.";
 
-				public static LocString EFFECT = "Toggles all circuity following the switch without affecting the preceding circuitry.";
+				public static LocString EFFECT = "Toggles all circuitry following the switch without affecting the preceding circuitry.";
+
+				public static LocString TURN_ON = "Turn On";
+
+				public static LocString TURN_OFF = "Turn Off";
+			}
+
+			public class TEMPERATURECONTROLLEDSWITCH
+			{
+				public static LocString NAME = "Thermo Switch";
+
+				public static LocString DESC = "Make this colony a meltdown-free zone!";
+
+				public static LocString EFFECT = "Automates switching <style=\"power\">Power</style> grids on or off based on ambient <style=\"heat\">Heat</style>.";
+			}
+
+			public class PRESSURESWITCHLIQUID
+			{
+				public static LocString NAME = "Hydro Switch";
+
+				public static LocString DESC = "The pressure can't control you if you control the pressure.";
+
+				public static LocString EFFECT = "Automates switching <style=\"power\">Power</style> grids on or off based on ambient <style=\"liquid\">Liquid Pressure</style>.\n\nMust be submerged in <style=\"liquid\">Liquid</style>.";
+			}
+
+			public class PRESSURESWITCHGAS
+			{
+				public static LocString NAME = "Atmo Switch";
+
+				public static LocString DESC = "For when you feel the world pressing down on you. Or the Pascals.";
+
+				public static LocString EFFECT = "Automates switching <style=\"power\">Power</style> grids on or off based on ambient <style=\"gas\">Gas Pressure</style>.";
 			}
 
 			public class TILE
@@ -673,16 +780,16 @@ namespace STRINGS
 
 				public static LocString DESC = "Duplicants find these tiles easier on the feetsies than jagged bedrock.";
 
-				public static LocString EFFECT = "Used as wall and floor tile to build rooms.";
+				public static LocString EFFECT = "Used as floor and wall tile to build rooms.";
 			}
 
 			public class WALLLIGHT
 			{
 				public static LocString NAME = "Lamp";
 
-				public static LocString DESC = "The light helps imitate the Duplicants' natural aboveground habitat.\nSort of. Maybe.";
+				public static LocString DESC = "The light helps imitate Duplicants' natural aboveground habitat.\nSort of. Maybe.";
 
-				public static LocString EFFECT = "Improves <style=\"decor\">Decor Opinion</style> and reduces <style=\"stress\">Stress</style> by providing <style=\"light\">Light</style>.";
+				public static LocString EFFECT = "Improves <style=\"decor\">Decor</style> and reduces <style=\"stress\">Stress</style> by providing <style=\"light\">Light</style>.";
 			}
 
 			public class WATERPURIFIER
@@ -691,7 +798,7 @@ namespace STRINGS
 
 				public static LocString DESC = "You know it's just going to get dirty again.";
 
-				public static LocString EFFECT = "Uses <style=\"misc\">Sand</style> to purify <style=\"liquid\">Contaminated Water</style>.";
+				public static LocString EFFECT = "Uses <style=\"misc\">Sand</style> to purify <style=\"liquid\">Polluted Water</style>.";
 			}
 
 			public class DISTILLATIONCOLUMN
@@ -700,34 +807,88 @@ namespace STRINGS
 
 				public static LocString DESC = "Gets hot and steamy.";
 
-				public static LocString EFFECT = string.Format("Separates any <style=\"liquid\">{0}</style> piped through it into <style=\"gas\">Steam</style> and <style=\"solid\">{1}</style>.", ELEMENTS.DIRTYWATER.NAME, ELEMENTS.TOXICSAND.NAME);
+				public static LocString EFFECT = string.Format("Separates any <style=\"liquid\">{0}</style> piped through it into <style=\"gas\">Steam</style> and <style=\"solid\">{1}</style>.", ELEMENTS.DIRTYWATER.NAME.text, ELEMENTS.TOXICSAND.NAME.text);
 			}
 
 			public class WIRE
 			{
 				public static LocString NAME = "Electrical Wire";
 
-				public static LocString DESC = "A sleek, easy way of delivering electricity right where it needs to go.";
+				public static LocString DESC = "A sleek, easy way of delivering electricity where it needs to go.";
 
-				public static LocString EFFECT = "Connects buildings to <style=\"power\">Power</style> sources.\n\nCan be run through wall and floor tiles.";
+				public static LocString EFFECT = "Connects buildings to <style=\"power\">Power</style> sources.\n\nCan be run through Tile.";
+			}
+
+			public class HIGHWATTAGEWIRE
+			{
+				public static LocString NAME = "Heavi-Watt Wire";
+
+				public static LocString DESC = "Perfect for those heavy duty wiring jobs.";
+
+				public static LocString EFFECT = "Carries more <style=\"power\">Wattage</style> than regular Electrical Wire without overloading.\n\nCannot be run through Tile.";
 			}
 
 			public class WIREBRIDGE
 			{
 				public static LocString NAME = "Wire Bridge";
 
-				public static LocString DESC = "Two wires, running so close and yet never crossing paths.";
+				public static LocString DESC = "No crossed wires allowed in this colony.";
 
-				public static LocString EFFECT = "Runs one section of wire overtop another without joining the <style=\"power\">Power</style> grids.\n\nCan be run through wall and floor tiles.";
+				public static LocString EFFECT = "Runs one section of wire overtop another without joining their <style=\"power\">Power</style> grids.\n\nCan be run through Tile.";
 			}
 
 			public class HANDSANITIZER
 			{
 				public static LocString NAME = "Hand Sanitizer";
 
-				public static LocString DESC = "The only thing filthy hands are good for is picking up nasty diseases.";
+				public static LocString DESC = "The only thing filthy hands are good for is picking up disease.";
 
 				public static LocString EFFECT = "Produces a sanitizing gel to remove the <style=\"disease\">Dirty Hands</style> effect from Duplicants.\n\nDuplicants will only use the Hand Sanitizer before eating a meal.";
+			}
+
+			public class EXCAVATORBOMB
+			{
+				public static LocString NAME = "Mining Mine";
+
+				public static LocString DESC = "What's yours is mined, what's mined is yours.";
+
+				public static LocString EFFECT = "Fractures and destroys unmined resources with an explosive shockwave.\n\nShockwaves travel further through hard substances.";
+			}
+		}
+
+		public static class DAMAGESOURCES
+		{
+			public static LocString NOTIFICATION_TOOLTIP = "{0} received damage {1}";
+
+			public static LocString CONDUIT_CONTENTS_FROZE = "when the contents of its pipes froze";
+
+			public static LocString CONDUIT_CONTENTS_BOILED = "when the contents of its pipes boiled";
+
+			public static LocString BUILDING_OVERHEATED = "from overheating";
+
+			public static LocString BAD_INPUT_ELEMENT = "when an incorrect substance was piped into it";
+
+			public static LocString MINION_DESTRUCTION = "when a stressed Duplicant lashed out on it";
+
+			public static LocString LIQUID_PRESSURE = "from neighboring liquid pressure";
+
+			public static LocString CIRCUIT_OVERLOADED = "because the circuit is overloaded";
+		}
+
+		public static class REPAIRABLE
+		{
+			public static class ENABLE_AUTOREPAIR
+			{
+				public static LocString NAME = "Enable Autorepair";
+
+				public static LocString TOOLTIP = "If enabled, Duplicants will automatically repair this building when it sustains damage";
+			}
+
+			public static class DISABLE_AUTOREPAIR
+			{
+				public static LocString NAME = "Disable Autorepair";
+
+				public static LocString TOOLTIP = "If disabled, Duplicants will require orders to repair this building";
 			}
 		}
 	}

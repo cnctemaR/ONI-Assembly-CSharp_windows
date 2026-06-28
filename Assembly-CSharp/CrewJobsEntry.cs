@@ -68,8 +68,13 @@ public class CrewJobsEntry : CrewListEntry
 
 	private void ToggleTasksAll(Button button)
 	{
-		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
 		bool flag = this.rowToggleState != CrewJobsScreen.everyoneToggleState.on;
+		string text = "HUD_Click_Deselect";
+		if (flag)
+		{
+			text = "HUD_Click";
+		}
+		KMonoBehaviour.PlaySound(GlobalAssets.GetSound(text, false));
 		foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups)
 		{
 			this.consumer.SetPermitted(choreGroup, flag);
@@ -78,7 +83,13 @@ public class CrewJobsEntry : CrewListEntry
 
 	private void OnPriorityPress(ChoreGroup chore_group)
 	{
-		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
+		bool flag = this.consumer.IsPermitted(chore_group);
+		string text = "HUD_Click";
+		if (flag)
+		{
+			text = "HUD_Click_Deselect";
+		}
+		KMonoBehaviour.PlaySound(GlobalAssets.GetSound(text, false));
 		this.consumer.SetPermitted(chore_group, !this.consumer.IsPermitted(chore_group));
 	}
 
@@ -180,7 +191,7 @@ public class CrewJobsEntry : CrewListEntry
 					b.tooltip.AddMultiStringTooltip(text, this.TooltipTextStyle_AbilityNegativeModifier);
 					return string.Empty;
 				}
-				b.tooltip.AddMultiStringTooltip("Relevant Attributes:", this.TooltipTextStyle_Ability);
+				b.tooltip.AddMultiStringTooltip(UI.TOOLTIPS.JOBSSCREEN_RELEVANT_ATTRIBUTES, this.TooltipTextStyle_Ability);
 				Klei.AI.Attribute attribute = b.choreGroup.attribute;
 				AttributeInstance attributeInstance = attributes.Get(attribute);
 				float totalValue = attributeInstance.GetTotalValue();

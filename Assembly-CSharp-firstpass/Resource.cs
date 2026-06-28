@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using UnityEngine;
 
 [DebuggerDisplay("{Id}")]
 public class Resource
@@ -10,6 +11,7 @@ public class Resource
 
 	public Resource(string id, ResourceSet parent = null, string name = null)
 	{
+		global::UnityEngine.Debug.Assert(id != null);
 		this.Id = id;
 		this.Guid = new ResourceGuid(id, parent);
 		if (parent != null)
@@ -28,6 +30,7 @@ public class Resource
 
 	public Resource(string id, string name)
 	{
+		global::UnityEngine.Debug.Assert(id != null);
 		this.Guid = new ResourceGuid(id, null);
 		this.Id = id;
 		this.Name = name;

@@ -125,17 +125,17 @@ namespace Generated
 			int i = radius;
 			int num = 0;
 			int num2 = 1 - i;
-			List<Vector2> list = new List<Vector2>();
+			HashSet<Vector2> hashSet = new HashSet<Vector2>();
 			while (i >= num)
 			{
-				list.Add(new Vector2((float)i + center.x, (float)num + center.y));
-				list.Add(new Vector2((float)num + center.x, (float)i + center.y));
-				list.Add(new Vector2((float)(-(float)i) + center.x, (float)num + center.y));
-				list.Add(new Vector2((float)(-(float)num) + center.x, (float)i + center.y));
-				list.Add(new Vector2((float)(-(float)i) + center.x, (float)(-(float)num) + center.y));
-				list.Add(new Vector2((float)(-(float)num) + center.x, (float)(-(float)i) + center.y));
-				list.Add(new Vector2((float)i + center.x, (float)(-(float)num) + center.y));
-				list.Add(new Vector2((float)num + center.x, (float)(-(float)i) + center.y));
+				hashSet.Add(new Vector2((float)i + center.x, (float)num + center.y));
+				hashSet.Add(new Vector2((float)num + center.x, (float)i + center.y));
+				hashSet.Add(new Vector2((float)(-(float)i) + center.x, (float)num + center.y));
+				hashSet.Add(new Vector2((float)(-(float)num) + center.x, (float)i + center.y));
+				hashSet.Add(new Vector2((float)(-(float)i) + center.x, (float)(-(float)num) + center.y));
+				hashSet.Add(new Vector2((float)(-(float)num) + center.x, (float)(-(float)i) + center.y));
+				hashSet.Add(new Vector2((float)i + center.x, (float)(-(float)num) + center.y));
+				hashSet.Add(new Vector2((float)num + center.x, (float)(-(float)i) + center.y));
 				num++;
 				if (num2 < 0)
 				{
@@ -147,7 +147,7 @@ namespace Generated
 					num2 += 2 * (num - i) + 1;
 				}
 			}
-			return list;
+			return new List<Vector2>(hashSet);
 		}
 
 		private static void get8points(Vector2 c, float x, float y, List<Vector2I> points)

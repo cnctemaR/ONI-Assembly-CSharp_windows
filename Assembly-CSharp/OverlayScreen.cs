@@ -4,35 +4,12 @@ using FMOD.Studio;
 using FMODUnity;
 using STRINGS;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class OverlayScreen : KIconButtonMenu
+public class OverlayScreen : KMonoBehaviour
 {
-	private void GetOverlayButtonTooltip(ToolTip mTooltip, KIconButtonMenu.ButtonInfo button_info, OverlayScreen.OverlayButtonInfo button)
-	{
-		mTooltip.OnToolTip = delegate
-		{
-			mTooltip.ClearMultiStringTooltip();
-			mTooltip.AddMultiStringTooltip(button_info.GetTooltipText(), this.TooltipHeader);
-			mTooltip.AddMultiStringTooltip(button.description, this.TooltipDescription);
-			return string.Empty;
-		};
-	}
-
 	protected override void OnPrefabInit()
 	{
-		OverlayScreen.overlayButtons = new OverlayScreen.OverlayButtonInfo[]
-		{
-			new OverlayScreen.OverlayButtonInfo("overlay_oxygen", UI.OVERLAYS.OXYGEN.BUTTON, SimViewMode.OxygenMap, "Oxygen", UI.TOOLTIPS.OXYGENOVERLAYSTRING),
-			new OverlayScreen.OverlayButtonInfo("overlay_power", UI.OVERLAYS.ELECTRICAL.BUTTON, SimViewMode.PowerMap, "Power", UI.TOOLTIPS.POWEROVERLAYSTRING),
-			new OverlayScreen.OverlayButtonInfo("overlay_temperature", UI.OVERLAYS.TEMPERATURE.BUTTON, SimViewMode.TemperatureMap, "Temperature", UI.TOOLTIPS.TEMPERATUREOVERLAYSTRING),
-			new OverlayScreen.OverlayButtonInfo("overlay_lights", UI.OVERLAYS.LIGHTING.BUTTON, SimViewMode.Light, "Lights", UI.TOOLTIPS.LIGHTSOVERLAYSTRING),
-			new OverlayScreen.OverlayButtonInfo("overlay_liquidvent", UI.OVERLAYS.LIQUIDPLUMBING.BUTTON, SimViewMode.LiquidVentMap, "LiquidVent", UI.TOOLTIPS.LIQUIDVENTOVERLAYSTRING),
-			new OverlayScreen.OverlayButtonInfo("overlay_gasvent", UI.OVERLAYS.GASPLUMBING.BUTTON, SimViewMode.GasVentMap, "GasVent", UI.TOOLTIPS.GASVENTOVERLAYSTRING),
-			new OverlayScreen.OverlayButtonInfo("overlay_decor", UI.OVERLAYS.DECOR.BUTTON, SimViewMode.Decor, "Decor", UI.TOOLTIPS.DECOROVERLAYSTRING),
-			new OverlayScreen.OverlayButtonInfo("overlay_priority", UI.OVERLAYS.PRIORITIES.BUTTON, SimViewMode.Priorities, "Priorities", UI.TOOLTIPS.DECOROVERLAYSTRING)
-		};
 		OverlayScreen.Instance = this;
 		this.powerLabelParent = GameObject.Find("WorldSpaceCanvas").GetComponent<Canvas>();
 		List<Tag> list = new List<Tag>(OverlayScreen.WireIDs);
@@ -40,87 +17,19 @@ public class OverlayScreen : KIconButtonMenu
 		List<Tag> list3 = new List<Tag>(OverlayScreen.OxygenBreatherIDs);
 		List<Tag> list4 = new List<Tag>(OverlayScreen.LiquidVentIDs);
 		List<Tag> list5 = new List<Tag>(OverlayScreen.GasVentIDs);
-		List<Tag> list6 = new List<Tag>();
+		List<Tag> list6 = new List<Tag>(OverlayScreen.HarvestableIDs);
+		List<Tag> list7 = new List<Tag>();
 		this.itemOverlays = new OverlayScreen.LayerInfo[]
 		{
-			new OverlayScreen.LayerInfo(SimViewMode.OxygenMap, new string[] { "MaskedOverlay", "MaskedOverlayBG" }, list3.ToArray()),
-			new OverlayScreen.LayerInfo(SimViewMode.PowerMap, new string[] { "MaskedOverlay", "MaskedOverlayBG" }, list.ToArray()),
-			new OverlayScreen.LayerInfo(SimViewMode.Rooms, new string[] { "Regions" }, OverlayScreen.RoomBuildingsIDs),
-			new OverlayScreen.LayerInfo(SimViewMode.Light, new string[] { "MaskedOverlay", "MaskedOverlayBG" }, list2.ToArray()),
-			new OverlayScreen.LayerInfo(SimViewMode.Regions, new string[] { "Regions" }, list6.ToArray()),
-			new OverlayScreen.LayerInfo(SimViewMode.LiquidVentMap, new string[] { "MaskedOverlay", "MaskedOverlayBG" }, list4.ToArray()),
-			new OverlayScreen.LayerInfo(SimViewMode.GasVentMap, new string[] { "MaskedOverlay", "MaskedOverlayBG" }, list5.ToArray())
+			new OverlayScreen.LayerInfo(SimViewMode.OxygenMap, new string[] { "MaskedOverlay", "MaskedOverlayBG" }, list3.ToArray(), null, null),
+			new OverlayScreen.LayerInfo(SimViewMode.PowerMap, new string[] { "MaskedOverlay", "MaskedOverlayBG" }, list.ToArray(), null, null),
+			new OverlayScreen.LayerInfo(SimViewMode.Rooms, new string[] { "Regions" }, OverlayScreen.RoomBuildingsIDs, null, null),
+			new OverlayScreen.LayerInfo(SimViewMode.Light, new string[] { "MaskedOverlay", "MaskedOverlayBG" }, list2.ToArray(), null, null),
+			new OverlayScreen.LayerInfo(SimViewMode.Regions, new string[] { "Regions" }, list7.ToArray(), null, null),
+			new OverlayScreen.LayerInfo(SimViewMode.LiquidVentMap, new string[] { "MaskedOverlay", "MaskedOverlayBG" }, list4.ToArray(), null, null),
+			new OverlayScreen.LayerInfo(SimViewMode.GasVentMap, new string[] { "MaskedOverlay", "MaskedOverlayBG" }, list5.ToArray(), null, null),
+			new OverlayScreen.LayerInfo(SimViewMode.HarvestWhenReady, new string[] { "MaskedOverlay", "MaskedOverlayBG" }, list6.ToArray(), null, null)
 		};
-		this.keepMenuOpen = true;
-		this.automaticNavigation = false;
-		this.buttons = new KIconButtonMenu.ButtonInfo[OverlayScreen.overlayButtons.Length];
-		for (int i = 0; i < OverlayScreen.overlayButtons.Length; i++)
-		{
-			OverlayScreen.OverlayButtonInfo info = OverlayScreen.overlayButtons[i];
-			int idx = i;
-			KIconButtonMenu.ButtonInfo buttonInfo = new KIconButtonMenu.ButtonInfo(info.icon, info.text, delegate
-			{
-				this.OnSelect(idx, info.viewMode);
-			}, global::Action.Overlay1 + i, null, null, null, null, string.Empty);
-			this.buttons[i] = buttonInfo;
-		}
-	}
-
-	public override void RefreshButtons()
-	{
-		base.RefreshButtons();
-		for (int i = 0; i < this.buttonObjects.Length; i++)
-		{
-			GameObject gameObject = this.buttonObjects[i];
-			if (!(gameObject == null))
-			{
-				gameObject.GetComponent<ImageToggleState>().SetInactive();
-				KIconButtonMenu.ButtonInfo buttonInfo = this.buttons[i];
-				KToggle component = gameObject.GetComponent<KToggle>();
-				if (!(component == null))
-				{
-					ToolTip component2 = component.GetComponent<ToolTip>();
-					if (component2)
-					{
-						this.GetOverlayButtonTooltip(component2, this.buttons[i], OverlayScreen.overlayButtons[i]);
-					}
-					Image fgImage = component.fgImage;
-					if (fgImage != null)
-					{
-						fgImage.gameObject.SetActive(false);
-						foreach (Sprite sprite in this.icons)
-						{
-							if (sprite.name == buttonInfo.iconName)
-							{
-								fgImage.sprite = sprite;
-								fgImage.gameObject.SetActive(true);
-								break;
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	public override void OnKeyDown(KButtonEvent e)
-	{
-		base.OnKeyDown(e);
-		if (e.Consumed)
-		{
-			return;
-		}
-		if (this.currentMode != SimViewMode.None && (e.TryConsume(global::Action.MouseRight) || e.TryConsume(global::Action.Escape)))
-		{
-			foreach (KIconButtonMenu.ButtonInfo buttonInfo in this.buttons)
-			{
-				if (buttonInfo.buttonGo == this.currentlySelectedToggle.gameObject)
-				{
-					buttonInfo.onClick();
-					break;
-				}
-			}
-		}
 	}
 
 	protected override void OnSpawn()
@@ -139,54 +48,112 @@ public class OverlayScreen : KIconButtonMenu
 		}
 	}
 
-	protected override void OnActivate()
+	public void ToggleOverlay(SimViewMode mode)
 	{
-		base.OnActivate();
-		base.Subscribe(Game.Instance.gameObject, 1248612973, new global::EventSystem.EventHandler(this.OnEnableOverlay));
-		base.Subscribe(Game.Instance.gameObject, 2015652040, new global::EventSystem.EventHandler(this.OnDisableOverlay));
-	}
-
-	protected override void OnDeactivate()
-	{
-		if (Game.Instance != null)
+		string text = string.Empty;
+		SimViewMode simViewMode;
+		if (mode != this.currentMode && mode != SimViewMode.None)
 		{
-			base.Unsubscribe(Game.Instance.gameObject, 1248612973, new global::EventSystem.EventHandler(this.OnEnableOverlay));
-			base.Unsubscribe(Game.Instance.gameObject, 2015652040, new global::EventSystem.EventHandler(this.OnDisableOverlay));
+			simViewMode = mode;
+			if (simViewMode != SimViewMode.HeatFlow && simViewMode != SimViewMode.ThermalConductivity)
+			{
+				if (simViewMode != SimViewMode.TemperatureMap)
+				{
+					if (simViewMode != SimViewMode.Light)
+					{
+						if (simViewMode != SimViewMode.Decor)
+						{
+							if (simViewMode != SimViewMode.OxygenMap)
+							{
+								if (simViewMode != SimViewMode.HarvestWhenReady)
+								{
+									if (simViewMode != SimViewMode.LiquidVentMap)
+									{
+										if (simViewMode != SimViewMode.PowerMap)
+										{
+											if (simViewMode != SimViewMode.Priorities)
+											{
+												if (simViewMode == SimViewMode.GasVentMap)
+												{
+													text = "GasVent";
+												}
+											}
+											else
+											{
+												text = "Priorities";
+											}
+										}
+										else
+										{
+											text = "Power";
+										}
+									}
+									else
+									{
+										text = "LiquidVent";
+									}
+								}
+								else
+								{
+									text = "Harvest";
+								}
+							}
+							else
+							{
+								text = "Oxygen";
+							}
+						}
+						else
+						{
+							text = "Decor";
+						}
+					}
+					else
+					{
+						text = "Lights";
+					}
+				}
+				else
+				{
+					text = "Temperature";
+				}
+			}
+			else
+			{
+				text = "HeatFlow";
+			}
+			text = GlobalAssets.GetSound(text, false);
 		}
-		base.OnDeactivate();
-	}
-
-	private void OnSelect(int idx, SimViewMode mode)
-	{
-		if (global::UnityEngine.EventSystems.EventSystem.current == null || !global::UnityEngine.EventSystems.EventSystem.current.enabled)
+		else
 		{
-			return;
+			text = GlobalAssets.GetSound("Off", false);
 		}
-		this.ToggleOverlay(idx, mode);
-	}
-
-	private void ToggleOverlay(int idx, SimViewMode mode)
-	{
-		string text = ((mode == this.currentMode || mode == SimViewMode.None) ? "Off" : OverlayScreen.overlayButtons[idx].sound);
-		string sound = GlobalAssets.GetSound(text, false);
-		KMonoBehaviour.PlaySound(sound);
-		if (this.GetCurrentLayerInfo().IsValid())
-		{
-			this.ToggleOverlayView();
-		}
-		SimViewMode simViewMode = this.currentMode;
+		KMonoBehaviour.PlaySound(text);
+		OverlayScreen.LayerInfo currentLayerInfo = this.GetCurrentLayerInfo();
+		simViewMode = this.currentMode;
 		if (simViewMode != SimViewMode.TemperatureMap)
 		{
-			if (simViewMode == SimViewMode.PowerMap)
+			if (simViewMode != SimViewMode.HarvestWhenReady)
 			{
-				this.DisablePowerLabels();
-				this.DisableBatteryUIs();
+				if (simViewMode == SimViewMode.PowerMap)
+				{
+					this.DisablePowerLabels();
+					this.DisableBatteryUIs();
+				}
+			}
+			else
+			{
+				this.DisableHarvestWhenReady(this.GetCurrentLayerInfo(), SaveLoader.Instance.saveManager.GetLists());
 			}
 		}
 		else
 		{
 			Infrared.Instance.Toggle(false);
 			CameraController.Instance.ToggleTemperatureView(false);
+		}
+		if (currentLayerInfo.IsValid())
+		{
+			this.ToggleOverlayView();
 		}
 		if (mode == this.currentMode || mode == SimViewMode.None)
 		{
@@ -197,20 +164,6 @@ public class OverlayScreen : KIconButtonMenu
 		{
 			ManagementMenu.Instance.CloseAll();
 			ResourceCategoryScreen.Instance.Show(false);
-			KToggle component = this.buttonObjects[idx].gameObject.GetComponent<KToggle>();
-			if (component != null)
-			{
-				component.Select();
-				component.isOn = true;
-			}
-			else
-			{
-				KBasicToggle component2 = this.buttonObjects[idx].gameObject.GetComponent<KBasicToggle>();
-				if (component2 != null)
-				{
-					component2.isOn = true;
-				}
-			}
 		}
 		SimDebugView.Instance.SetMode(mode);
 		this.currentMode = mode;
@@ -294,18 +247,23 @@ public class OverlayScreen : KIconButtonMenu
 		{
 			this.targetViewData = new OverlayScreen.TargetViewData
 			{
-				targets = new HashSet<GameObject>()
+				layerTargets = new HashSet<GameObject>(),
+				privateTargets = new HashSet<GameObject>()
 			};
 			if (currentLayerInfo.IsValid())
 			{
 				Camera.main.cullingMask |= currentLayerInfo.mask;
 				SelectTool.Instance.SetLayerMask(currentLayerInfo.mask);
 				DragTool.SetLayerMask(currentLayerInfo.mask);
+				if (currentLayerInfo.onEnable != null)
+				{
+					currentLayerInfo.onEnable();
+				}
 			}
 		}
 		else
 		{
-			foreach (GameObject gameObject in this.targetViewData.targets)
+			foreach (GameObject gameObject in this.targetViewData.layerTargets)
 			{
 				if (!(gameObject == null))
 				{
@@ -320,6 +278,10 @@ public class OverlayScreen : KIconButtonMenu
 			this.targetViewData = null;
 			if (currentLayerInfo.IsValid())
 			{
+				if (currentLayerInfo.onDisable != null)
+				{
+					currentLayerInfo.onDisable();
+				}
 				if (Camera.main != null)
 				{
 					Camera.main.cullingMask &= ~currentLayerInfo.mask;
@@ -338,70 +300,61 @@ public class OverlayScreen : KIconButtonMenu
 			Vector2I vector2I2;
 			Grid.GetVisibleExtents(out vector2I, out vector2I2);
 			SaveManager saveManager = SaveLoader.Instance.saveManager;
-			Dictionary<Tag, List<SaveLoadRoot>> lists = saveManager.GetLists();
-			if (this.currentMode == SimViewMode.PowerMap)
-			{
-				this.DisablePowerLabels();
-				this.DisableBatteryUIs();
-			}
-			this.nonVisibleTargets.Clear();
-			foreach (GameObject gameObject in this.targetViewData.targets)
-			{
-				GameObject gameObject2 = gameObject.gameObject;
-				if (!(gameObject2 == null))
-				{
-					KBatchedAnimController component = gameObject2.GetComponent<KBatchedAnimController>();
-					if (component != null)
-					{
-						Vector2I vector2I3 = Grid.PosToXY(gameObject2.transform.position);
-						if (vector2I <= vector2I3 && vector2I3 <= vector2I2)
-						{
-							component.TintColour = Color.white;
-							component.SetLayer(gameObject2.GetComponent<KPrefabID>().defaultLayer);
-							this.nonVisibleTargets.Add(gameObject2);
-						}
-					}
-				}
-			}
-			foreach (GameObject gameObject3 in this.nonVisibleTargets)
-			{
-				this.targetViewData.targets.Remove(gameObject3);
-			}
-			this.nonVisibleTargets.Clear();
+			this.RemoveOffscreenTargets(this.targetViewData.layerTargets, vector2I, vector2I2);
+			this.RemoveOffscreenTargets(this.targetViewData.privateTargets, vector2I, vector2I2);
 			if (layer_info.itemIDs != null)
 			{
+				Dictionary<Tag, List<SaveLoadRoot>> lists = saveManager.GetLists();
 				SimViewMode simViewMode = this.currentMode;
-				if (simViewMode != SimViewMode.LiquidVentMap)
+				if (simViewMode != SimViewMode.HarvestWhenReady)
 				{
-					if (simViewMode == SimViewMode.PowerMap)
+					if (simViewMode != SimViewMode.LiquidVentMap)
 					{
-						this.UpdatePowerOverlayView(layer_info, lists);
-						return;
+						if (simViewMode == SimViewMode.PowerMap)
+						{
+							this.UpdatePowerOverlayView(layer_info, lists);
+							return;
+						}
+						if (simViewMode != SimViewMode.GasVentMap)
+						{
+							return;
+						}
 					}
-					if (simViewMode != SimViewMode.GasVentMap)
-					{
-						return;
-					}
+					this.UpdateConduitOverlayView(layer_info, lists);
 				}
-				this.UpdateConduitOverlayView(layer_info, lists);
+				else
+				{
+					this.UpdateHarvestWhenReadyOverlayView(layer_info, lists);
+				}
 			}
 		}
 	}
 
-	private bool SetUtilityColours(Color32 base_colour, GameObject root_obj, KAnimGraphTileVisualizer item, int cell)
+	private void RemoveOffscreenTargets(HashSet<GameObject> targets, Vector2I min, Vector2I max)
 	{
-		if (item == null)
+		this.nonVisibleTargets.Clear();
+		foreach (GameObject gameObject in targets)
 		{
-			return false;
+			if (!(gameObject == null))
+			{
+				Vector2I vector2I = Grid.PosToXY(gameObject.transform.position);
+				if (vector2I < min || max < vector2I)
+				{
+					KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
+					if (component != null)
+					{
+						component.TintColour = Color.white;
+						component.SetLayer(gameObject.GetComponent<KPrefabID>().defaultLayer);
+						this.nonVisibleTargets.Add(gameObject);
+					}
+				}
+			}
 		}
-		if (root_obj.GetComponent<BuildingComplete>() == null)
+		foreach (GameObject gameObject2 in this.nonVisibleTargets)
 		{
-			return false;
+			targets.Remove(gameObject2);
 		}
-		base_colour.a = 0;
-		KBatchedAnimController component = root_obj.GetComponent<KBatchedAnimController>();
-		component.TintColour = base_colour;
-		return true;
+		this.nonVisibleTargets.Clear();
 	}
 
 	private void SetBuildingColor(Color32 base_colour, GameObject root_obj)
@@ -418,7 +371,7 @@ public class OverlayScreen : KIconButtonMenu
 		}
 	}
 
-	private int GetNetworkIDInDirection(Orientation direction, KAnimGraphTileVisualizer item)
+	private int GetNetworkIDInDirection(Direction direction, KAnimGraphTileVisualizer item)
 	{
 		int num = 0;
 		while (item != null)
@@ -440,43 +393,6 @@ public class OverlayScreen : KIconButtonMenu
 			return Color.white;
 		}
 		return SimDebugView.Instance.GetColourForID(id);
-	}
-
-	private void OnEnableOverlay(object data)
-	{
-		SimViewMode simViewMode = (SimViewMode)((int)data);
-		if (this.currentMode != simViewMode)
-		{
-			int viewModeIdx = this.GetViewModeIdx(simViewMode);
-			KToggle ktoggle = ((simViewMode != SimViewMode.None) ? this.buttonObjects[viewModeIdx].GetComponent<KToggle>() : null);
-			base.SelectToggle(ktoggle);
-			this.OnSelect(viewModeIdx, simViewMode);
-		}
-	}
-
-	private void OnDisableOverlay(object data)
-	{
-		SimViewMode simViewMode = (SimViewMode)((int)data);
-		if (this.currentMode == simViewMode)
-		{
-			int viewModeIdx = this.GetViewModeIdx(simViewMode);
-			base.SelectToggle(this.buttonObjects[viewModeIdx].GetComponent<KToggle>());
-			this.OnSelect(viewModeIdx, simViewMode);
-		}
-	}
-
-	private int GetViewModeIdx(SimViewMode mode)
-	{
-		int num = 0;
-		for (int i = 0; i < OverlayScreen.overlayButtons.Length; i++)
-		{
-			if (mode == OverlayScreen.overlayButtons[i].viewMode)
-			{
-				num = i;
-				break;
-			}
-		}
-		return num;
 	}
 
 	public SimViewMode GetMode()
@@ -504,7 +420,7 @@ public class OverlayScreen : KIconButtonMenu
 	private BatteryUI GetFreeBatteryUI()
 	{
 		BatteryUI batteryUI;
-		if (this.freePowerLabelIdx < this.batteryUIList.Count)
+		if (this.freeBatUIIdx < this.batteryUIList.Count)
 		{
 			batteryUI = this.batteryUIList[this.freeBatUIIdx];
 			batteryUI.gameObject.SetActive(true);
@@ -519,197 +435,7 @@ public class OverlayScreen : KIconButtonMenu
 		return batteryUI;
 	}
 
-	private void DisablePowerLabels()
-	{
-		this.freePowerLabelIdx = 0;
-		foreach (LocText locText in this.powerLabels)
-		{
-			locText.gameObject.SetActive(false);
-		}
-	}
-
-	private void DisableBatteryUIs()
-	{
-		this.freeBatUIIdx = 0;
-		foreach (BatteryUI batteryUI in this.batteryUIList)
-		{
-			batteryUI.gameObject.SetActive(false);
-		}
-	}
-
-	private void AddPowerLabels(KBatchedAnimController controller, KMonoBehaviour item)
-	{
-		IEnergyConsumer componentInChildren = item.gameObject.GetComponentInChildren<IEnergyConsumer>();
-		Generator componentInChildren2 = item.gameObject.GetComponentInChildren<Generator>();
-		if (componentInChildren != null || componentInChildren2 != null)
-		{
-			float num = -10f;
-			if (componentInChildren2 != null && componentInChildren == null)
-			{
-				LocText freePowerLabel = this.GetFreePowerLabel();
-				freePowerLabel.gameObject.SetActive(true);
-				freePowerLabel.gameObject.name = item.gameObject.name + "power label";
-				LocText component = freePowerLabel.transform.GetChild(0).GetComponent<LocText>();
-				component.gameObject.SetActive(true);
-				freePowerLabel.enabled = true;
-				component.enabled = true;
-				ManualGenerator component2 = componentInChildren2.GetComponent<ManualGenerator>();
-				int num2;
-				if (component2 == null)
-				{
-					componentInChildren2.GetComponent<Operational>();
-					num2 = Mathf.Max(0, Mathf.RoundToInt(componentInChildren2.WattageRating));
-				}
-				else
-				{
-					num2 = Mathf.Max(0, Mathf.RoundToInt(componentInChildren2.WattageRating));
-				}
-				freePowerLabel.text = ((num2 == 0) ? num2.ToString() : ("+" + num2.ToString()));
-				Color color = this.generatorColour;
-				BuildingEnabledButton component3 = item.GetComponent<BuildingEnabledButton>();
-				if ((component3 != null && !component3.IsEnabled) || componentInChildren2.CircuitID == 65535)
-				{
-					color = this.buildingDisabledColour;
-				}
-				Vector3 vector = Grid.CellToPos(componentInChildren2.PowerCell, 0.5f, 0f, 0f);
-				freePowerLabel.rectTransform.position = vector + this.powerLabelOffset + Vector3.up * (num * 0.02f);
-				freePowerLabel.color = color;
-				component.color = color;
-				Image outputIcon = componentInChildren2.GetComponent<BuildingCellVisualizer>().GetOutputIcon();
-				if (outputIcon != null)
-				{
-					outputIcon.color = color;
-				}
-				num -= 15f;
-				this.SetToolTip(freePowerLabel, "Watts Generated");
-			}
-			if (componentInChildren != null)
-			{
-				LocText freePowerLabel2 = this.GetFreePowerLabel();
-				LocText component4 = freePowerLabel2.transform.GetChild(0).GetComponent<LocText>();
-				freePowerLabel2.gameObject.SetActive(true);
-				component4.gameObject.SetActive(true);
-				freePowerLabel2.gameObject.name = item.gameObject.name + "power label";
-				freePowerLabel2.enabled = true;
-				component4.enabled = true;
-				Color color2 = this.consumerColour;
-				BuildingEnabledButton component5 = item.GetComponent<BuildingEnabledButton>();
-				if ((component5 != null && !component5.IsEnabled) || Game.Instance.circuitManager.GetCircuitID(componentInChildren.PowerCell) == 65535)
-				{
-					color2 = this.buildingDisabledColour;
-				}
-				int num3 = Mathf.Max(0, Mathf.RoundToInt(componentInChildren.WattsNeededWhenActive));
-				string text = num3.ToString();
-				freePowerLabel2.text = ((num3 == 0) ? text : ("-" + text));
-				freePowerLabel2.color = color2;
-				component4.color = color2;
-				Vector3 vector2 = Grid.CellToPos(componentInChildren.PowerCell, 0.5f, 0f, 0f);
-				freePowerLabel2.rectTransform.position = vector2 + this.powerLabelOffset + Vector3.up * (num * 0.02f);
-				Image inputIcon = item.GetComponentInChildren<BuildingCellVisualizer>().GetInputIcon();
-				if (inputIcon != null)
-				{
-					inputIcon.color = color2;
-				}
-				this.SetToolTip(freePowerLabel2, "Watts Consumed");
-			}
-		}
-	}
-
-	private void AddBatteryUI(KMonoBehaviour item)
-	{
-		Battery component = item.GetComponent<Battery>();
-		if (component == null)
-		{
-			return;
-		}
-		BatteryUI freeBatteryUI = this.GetFreeBatteryUI();
-		freeBatteryUI.SetContent(component);
-		Vector3 vector = Grid.CellToPos(component.PowerCell, 0.5f, 0f, 0f);
-		freeBatteryUI.GetComponent<RectTransform>().position = vector + this.batteryUIOffset + Vector3.up;
-	}
-
-	private void SetToolTip(LocText label, string text)
-	{
-		ToolTip component = label.GetComponent<ToolTip>();
-		if (component != null)
-		{
-			component.toolTip = text;
-		}
-	}
-
-	public void DisableCurrentOverlay()
-	{
-		if (this.currentMode == SimViewMode.None)
-		{
-			return;
-		}
-		this.ToggleOverlay(this.GetViewModeIdx(this.currentMode), this.currentMode);
-		base.ClearSelection();
-	}
-
-	private void UpdatePowerOverlayView(OverlayScreen.LayerInfo layer_info, Dictionary<Tag, List<SaveLoadRoot>> registered_buildings)
-	{
-		Vector2I vector2I;
-		Vector2I vector2I2;
-		Grid.GetVisibleExtents(out vector2I, out vector2I2);
-		int num = LayerMask.NameToLayer("MaskedOverlayBG");
-		foreach (KeyValuePair<Tag, List<SaveLoadRoot>> keyValuePair in registered_buildings)
-		{
-			List<SaveLoadRoot> value = keyValuePair.Value;
-			bool flag = Array.IndexOf<Tag>(layer_info.itemIDs, keyValuePair.Key) != -1;
-			int num2 = ((!(keyValuePair.Key == OverlayScreen.WireTag)) ? num : layer_info.layer);
-			foreach (SaveLoadRoot saveLoadRoot in value)
-			{
-				GameObject gameObject = saveLoadRoot.gameObject;
-				KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
-				if (component != null)
-				{
-					Vector2I vector2I3 = Grid.PosToXY(gameObject.transform.position);
-					if (vector2I <= vector2I3 && vector2I3 <= vector2I2)
-					{
-						if (flag && !this.targetViewData.targets.Contains(gameObject))
-						{
-							component.SetLayer(num2);
-							this.targetViewData.targets.Add(gameObject);
-						}
-						this.AddPowerLabels(component, saveLoadRoot);
-						this.AddBatteryUI(saveLoadRoot);
-					}
-				}
-			}
-		}
-		CircuitManager circuitManager = Game.Instance.circuitManager;
-		foreach (GameObject gameObject2 in this.targetViewData.targets)
-		{
-			if (!(gameObject2 == null))
-			{
-				KAnimGraphTileVisualizer component2 = gameObject2.GetComponent<KAnimGraphTileVisualizer>();
-				int num3 = Grid.PosToCell(gameObject2.transform.position);
-				ushort circuitID = circuitManager.GetCircuitID(num3);
-				Color color = this.circuitBalancedColor;
-				float wattsNeededWhenActive = circuitManager.GetWattsNeededWhenActive(circuitID);
-				float wattsGeneratedByCircuit = circuitManager.GetWattsGeneratedByCircuit(circuitID);
-				if (!circuitManager.HasPowerSource(circuitID))
-				{
-					color = this.circuitInsufficientColor;
-				}
-				else if (wattsNeededWhenActive <= wattsGeneratedByCircuit)
-				{
-					color = this.circuitExceedingColor;
-				}
-				else if (wattsNeededWhenActive > wattsGeneratedByCircuit)
-				{
-					color = this.circuitBalancedColor;
-				}
-				if (!this.SetUtilityColours(color, gameObject2, component2, num3))
-				{
-					this.SetBuildingColor(this.buildingOverlayColor, gameObject2);
-				}
-			}
-		}
-	}
-
-	private void UpdateConduitOverlayView(OverlayScreen.LayerInfo layer_info, Dictionary<Tag, List<SaveLoadRoot>> registered_buildings)
+	private void DisableHarvestWhenReady(OverlayScreen.LayerInfo layer_info, Dictionary<Tag, List<SaveLoadRoot>> registered_buildings)
 	{
 		Vector2I vector2I;
 		Vector2I vector2I2;
@@ -724,14 +450,14 @@ public class OverlayScreen : KIconButtonMenu
 				foreach (SaveLoadRoot saveLoadRoot in value)
 				{
 					GameObject gameObject = saveLoadRoot.gameObject;
-					KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
-					if (component != null)
+					Vector2I vector2I3 = Grid.PosToXY(gameObject.transform.position);
+					if (vector2I <= vector2I3 && vector2I3 <= vector2I2 && !this.targetViewData.layerTargets.Contains(gameObject))
 					{
-						Vector2I vector2I3 = Grid.PosToXY(gameObject.transform.position);
-						if (vector2I <= vector2I3 && vector2I3 <= vector2I2 && !this.targetViewData.targets.Contains(gameObject))
+						KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
+						if (component != null)
 						{
-							Vent component2 = gameObject.GetComponent<Vent>();
-							if (component2 != null && component2.endpointType == Vent.Endpoint.Conduit)
+							Harvestable component2 = gameObject.GetComponent<Harvestable>();
+							if (component2 != null)
 							{
 								component.SetLayer(layer_info.layer);
 							}
@@ -739,59 +465,376 @@ public class OverlayScreen : KIconButtonMenu
 							{
 								component.SetLayer(num);
 							}
-							this.targetViewData.targets.Add(gameObject);
+							this.targetViewData.layerTargets.Add(gameObject);
 						}
 					}
 				}
 			}
 		}
-		foreach (GameObject gameObject2 in this.targetViewData.targets)
+		Color32 color = Color.clear;
+		foreach (GameObject gameObject2 in this.targetViewData.layerTargets)
 		{
 			if (!(gameObject2 == null))
 			{
-				Color32 color = Color.white;
-				Vent component3 = gameObject2.gameObject.GetComponent<Vent>();
-				KAnimGraphTileVisualizer component4 = gameObject2.GetComponent<KAnimGraphTileVisualizer>();
-				if (component3 != null)
+				KBatchedAnimController component3 = gameObject2.GetComponent<KBatchedAnimController>();
+				component3.HighlightColour = color;
+			}
+		}
+	}
+
+	private void DisablePowerLabels()
+	{
+		this.freePowerLabelIdx = 0;
+		foreach (LocText locText in this.powerLabels)
+		{
+			locText.gameObject.SetActive(false);
+		}
+		this.updatePowerInfo.Clear();
+	}
+
+	private void DisableBatteryUIs()
+	{
+		this.freeBatUIIdx = 0;
+		foreach (BatteryUI batteryUI in this.batteryUIList)
+		{
+			batteryUI.gameObject.SetActive(false);
+		}
+		this.updateBatteryInfo.Clear();
+	}
+
+	private void UpdatePowerLabels()
+	{
+		foreach (OverlayScreen.UpdatePowerInfo updatePowerInfo in this.updatePowerInfo)
+		{
+			KMonoBehaviour item = updatePowerInfo.item;
+			LocText powerLabel = updatePowerInfo.powerLabel;
+			LocText unitLabel = updatePowerInfo.unitLabel;
+			Generator generator = updatePowerInfo.generator;
+			IEnergyConsumer consumer = updatePowerInfo.consumer;
+			if (updatePowerInfo.item == null)
+			{
+				powerLabel.gameObject.SetActive(false);
+			}
+			else
+			{
+				if (generator != null && consumer == null)
 				{
-					switch (component3.endpointType)
+					ManualGenerator component = generator.GetComponent<ManualGenerator>();
+					int num;
+					if (component == null)
 					{
-					case Vent.Endpoint.Conduit:
-						color = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, 0);
-						break;
-					case Vent.Endpoint.Source:
-						color = this.utilitySourceColour;
-						break;
-					case Vent.Endpoint.Sink:
-						color = this.utilitySinkColour;
-						break;
+						generator.GetComponent<Operational>();
+						num = Mathf.Max(0, Mathf.RoundToInt(generator.WattageRating));
+					}
+					else
+					{
+						num = Mathf.Max(0, Mathf.RoundToInt(generator.WattageRating));
+					}
+					powerLabel.text = ((num == 0) ? num.ToString() : ("+" + num.ToString()));
+					BuildingEnabledButton component2 = item.GetComponent<BuildingEnabledButton>();
+					Color color = ((!(component2 != null) || component2.IsEnabled) ? this.generatorColour : this.buildingDisabledColour);
+					powerLabel.color = color;
+					unitLabel.color = color;
+					Image outputIcon = generator.GetComponent<BuildingCellVisualizer>().GetOutputIcon();
+					if (outputIcon != null)
+					{
+						outputIcon.color = color;
 					}
 				}
-				else
+				if (consumer != null)
 				{
-					color = this.GetColourForID(-1);
+					BuildingEnabledButton component3 = item.GetComponent<BuildingEnabledButton>();
+					Color color2 = ((!(component3 != null) || component3.IsEnabled) ? this.consumerColour : this.buildingDisabledColour);
+					int num2 = Mathf.Max(0, Mathf.RoundToInt(consumer.WattsNeededWhenActive));
+					string text = num2.ToString();
+					powerLabel.text = ((num2 == 0) ? text : ("-" + text));
+					powerLabel.color = color2;
+					unitLabel.color = color2;
+					Image inputIcon = item.GetComponentInChildren<BuildingCellVisualizer>().GetInputIcon();
+					if (inputIcon != null)
+					{
+						inputIcon.color = color2;
+					}
 				}
-				int num2 = Grid.PosToCell(gameObject2);
-				if (!this.SetUtilityColours(color, gameObject2, component4, num2))
+			}
+		}
+		foreach (OverlayScreen.UpdateBatteryInfo updateBatteryInfo in this.updateBatteryInfo)
+		{
+			updateBatteryInfo.ui.SetContent(updateBatteryInfo.battery);
+		}
+	}
+
+	private void AddPowerLabels(KMonoBehaviour item)
+	{
+		IEnergyConsumer componentInChildren = item.gameObject.GetComponentInChildren<IEnergyConsumer>();
+		Generator componentInChildren2 = item.gameObject.GetComponentInChildren<Generator>();
+		if (componentInChildren != null || componentInChildren2 != null)
+		{
+			float num = -10f;
+			if (componentInChildren2 != null)
+			{
+				LocText freePowerLabel = this.GetFreePowerLabel();
+				freePowerLabel.gameObject.SetActive(true);
+				freePowerLabel.gameObject.name = item.gameObject.name + "power label";
+				LocText component = freePowerLabel.transform.GetChild(0).GetComponent<LocText>();
+				component.gameObject.SetActive(true);
+				freePowerLabel.enabled = true;
+				component.enabled = true;
+				Vector3 vector = Grid.CellToPos(componentInChildren2.PowerCell, 0.5f, 0f, 0f);
+				freePowerLabel.rectTransform.position = vector + this.powerLabelOffset + Vector3.up * (num * 0.02f);
+				if (componentInChildren != null && componentInChildren.PowerCell == componentInChildren2.PowerCell)
 				{
-					this.SetBuildingColor(this.buildingOverlayColor, gameObject2);
+					num -= 15f;
+				}
+				this.SetToolTip(freePowerLabel, UI.OVERLAYS.POWER.WATTS_GENERATED);
+				this.updatePowerInfo.Add(new OverlayScreen.UpdatePowerInfo(item, freePowerLabel, component, componentInChildren2, null));
+			}
+			if (componentInChildren != null && componentInChildren.GetType() != typeof(Battery))
+			{
+				LocText freePowerLabel2 = this.GetFreePowerLabel();
+				LocText component2 = freePowerLabel2.transform.GetChild(0).GetComponent<LocText>();
+				freePowerLabel2.gameObject.SetActive(true);
+				component2.gameObject.SetActive(true);
+				freePowerLabel2.gameObject.name = item.gameObject.name + "power label";
+				freePowerLabel2.enabled = true;
+				component2.enabled = true;
+				Vector3 vector2 = Grid.CellToPos(componentInChildren.PowerCell, 0.5f, 0f, 0f);
+				freePowerLabel2.rectTransform.position = vector2 + this.powerLabelOffset + Vector3.up * (num * 0.02f);
+				this.SetToolTip(freePowerLabel2, UI.OVERLAYS.POWER.WATTS_CONSUMED);
+				this.updatePowerInfo.Add(new OverlayScreen.UpdatePowerInfo(item, freePowerLabel2, component2, null, componentInChildren));
+			}
+		}
+	}
+
+	private void AddBatteryUI(Battery bat)
+	{
+		BatteryUI freeBatteryUI = this.GetFreeBatteryUI();
+		freeBatteryUI.SetContent(bat);
+		Vector3 vector = Grid.CellToPos(bat.PowerCell, 0.5f, 0f, 0f);
+		bool flag = bat.GetComponent<PowerTransformer>() != null;
+		freeBatteryUI.GetComponent<RectTransform>().position = Vector3.up + vector + ((!flag) ? this.batteryUIOffset : this.batteryUITransformerOffset);
+		this.updateBatteryInfo.Add(new OverlayScreen.UpdateBatteryInfo(bat, freeBatteryUI));
+	}
+
+	private void SetToolTip(LocText label, string text)
+	{
+		ToolTip component = label.GetComponent<ToolTip>();
+		if (component != null)
+		{
+			component.toolTip = text;
+		}
+	}
+
+	private void UpdatePowerOverlayView(OverlayScreen.LayerInfo layer_info, Dictionary<Tag, List<SaveLoadRoot>> registered_buildings)
+	{
+		using (new KProfiler.Region("UpdatePowerOverlay", null))
+		{
+			Vector2I vector2I;
+			Vector2I vector2I2;
+			Grid.GetVisibleExtents(out vector2I, out vector2I2);
+			using (new KProfiler.Region("Wires", null))
+			{
+				foreach (KeyValuePair<Tag, List<SaveLoadRoot>> keyValuePair in registered_buildings)
+				{
+					bool flag = Array.IndexOf<Tag>(layer_info.itemIDs, keyValuePair.Key) != -1;
+					if (flag)
+					{
+						List<SaveLoadRoot> value = keyValuePair.Value;
+						foreach (SaveLoadRoot saveLoadRoot in value)
+						{
+							GameObject gameObject = saveLoadRoot.gameObject;
+							Vector2I vector2I3 = Grid.PosToXY(gameObject.transform.position);
+							if (vector2I <= vector2I3 && vector2I3 <= vector2I2 && !this.targetViewData.layerTargets.Contains(gameObject))
+							{
+								KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
+								component.SetLayer(layer_info.layer);
+								this.targetViewData.layerTargets.Add(gameObject);
+							}
+						}
+					}
+				}
+				CircuitManager circuitManager = Game.Instance.circuitManager;
+				foreach (GameObject gameObject2 in this.targetViewData.layerTargets)
+				{
+					if (!(gameObject2 == null))
+					{
+						Wire component2 = gameObject2.GetComponent<Wire>();
+						if (component2 != null)
+						{
+							KBatchedAnimController component3 = component2.GetComponent<KBatchedAnimController>();
+							ushort networkID = component2.NetworkID;
+							bool flag2 = circuitManager.HasGenerators(networkID) || circuitManager.HasBatteries(networkID);
+							Color32 color;
+							if (flag2)
+							{
+								float potentialWattsGeneratedByCircuit = circuitManager.GetPotentialWattsGeneratedByCircuit(networkID);
+								float wattsUsedByCircuit = circuitManager.GetWattsUsedByCircuit(networkID);
+								float num = wattsUsedByCircuit / potentialWattsGeneratedByCircuit;
+								color = ((num >= 0.85f) ? this.circuitStrainingColour : this.circuitSafeColour);
+							}
+							else
+							{
+								color = this.circuitUnpoweredColour;
+							}
+							component3.TintColour = color;
+						}
+					}
+				}
+			}
+			this.queuedAdds.Clear();
+			using (new KProfiler.Region("BatteryUI", null))
+			{
+				foreach (Battery battery in Components.Batteries)
+				{
+					GameObject gameObject3 = battery.gameObject;
+					Vector2I vector2I4 = Grid.PosToXY(gameObject3.transform.position);
+					if (vector2I <= vector2I4 && vector2I4 <= vector2I2 && !this.targetViewData.privateTargets.Contains(gameObject3))
+					{
+						this.AddBatteryUI(battery);
+						this.queuedAdds.Add(gameObject3);
+					}
+				}
+				foreach (Generator generator in Components.Generators)
+				{
+					GameObject gameObject4 = generator.gameObject;
+					Vector2I vector2I5 = Grid.PosToXY(gameObject4.transform.position);
+					if (vector2I <= vector2I5 && vector2I5 <= vector2I2 && !this.targetViewData.privateTargets.Contains(gameObject4))
+					{
+						this.targetViewData.privateTargets.Add(gameObject4);
+						if (gameObject4.GetComponent<PowerTransformer>() == null)
+						{
+							this.AddPowerLabels(generator);
+						}
+					}
+				}
+				foreach (EnergyConsumer energyConsumer in Components.EnergyConsumers)
+				{
+					GameObject gameObject5 = energyConsumer.gameObject;
+					Vector2I vector2I6 = Grid.PosToXY(gameObject5.transform.position);
+					if (vector2I <= vector2I6 && vector2I6 <= vector2I2 && !this.targetViewData.privateTargets.Contains(gameObject5))
+					{
+						this.targetViewData.privateTargets.Add(gameObject5);
+						this.AddPowerLabels(energyConsumer);
+					}
+				}
+			}
+			foreach (GameObject gameObject6 in this.queuedAdds)
+			{
+				this.targetViewData.privateTargets.Add(gameObject6);
+			}
+			this.queuedAdds.Clear();
+			this.UpdatePowerLabels();
+		}
+	}
+
+	private void UpdateConduitOverlayView(OverlayScreen.LayerInfo layer_info, Dictionary<Tag, List<SaveLoadRoot>> registered_buildings)
+	{
+		Vector2I vector2I;
+		Vector2I vector2I2;
+		Grid.GetVisibleExtents(out vector2I, out vector2I2);
+		Game.ConduitVisInfo conduitVisInfo = ((layer_info.viewMode != SimViewMode.LiquidVentMap) ? Game.Instance.gasConduitVisInfo : Game.Instance.liquidConduitVisInfo);
+		int num = LayerMask.NameToLayer("MaskedOverlayBG");
+		foreach (KeyValuePair<Tag, List<SaveLoadRoot>> keyValuePair in registered_buildings)
+		{
+			bool flag = Array.IndexOf<Tag>(layer_info.itemIDs, keyValuePair.Key) != -1;
+			if (flag)
+			{
+				List<SaveLoadRoot> value = keyValuePair.Value;
+				foreach (SaveLoadRoot saveLoadRoot in value)
+				{
+					GameObject gameObject = saveLoadRoot.gameObject;
+					Vector2I vector2I3 = Grid.PosToXY(gameObject.transform.position);
+					if (vector2I <= vector2I3 && vector2I3 <= vector2I2 && !this.targetViewData.layerTargets.Contains(gameObject))
+					{
+						KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
+						if (component != null)
+						{
+							Conduit component2 = gameObject.GetComponent<Conduit>();
+							if (component2 != null)
+							{
+								component.SetLayer(layer_info.layer);
+							}
+							else
+							{
+								component.SetLayer(num);
+							}
+							this.targetViewData.layerTargets.Add(gameObject);
+						}
+					}
+				}
+			}
+		}
+		foreach (GameObject gameObject2 in this.targetViewData.layerTargets)
+		{
+			if (!(gameObject2 == null))
+			{
+				BuildingDef def = gameObject2.GetComponent<Building>().Def;
+				Color32 color = ((!def.IsInsulated) ? conduitVisInfo.overlayTint : conduitVisInfo.overlayInsulatedTint);
+				KBatchedAnimController component3 = gameObject2.GetComponent<KBatchedAnimController>();
+				component3.TintColour = color;
+			}
+		}
+	}
+
+	private void UpdateHarvestWhenReadyOverlayView(OverlayScreen.LayerInfo layer_info, Dictionary<Tag, List<SaveLoadRoot>> registered_buildings)
+	{
+		Vector2I vector2I;
+		Vector2I vector2I2;
+		Grid.GetVisibleExtents(out vector2I, out vector2I2);
+		int num = LayerMask.NameToLayer("MaskedOverlayBG");
+		foreach (KeyValuePair<Tag, List<SaveLoadRoot>> keyValuePair in registered_buildings)
+		{
+			bool flag = Array.IndexOf<Tag>(layer_info.itemIDs, keyValuePair.Key) != -1;
+			if (flag)
+			{
+				List<SaveLoadRoot> value = keyValuePair.Value;
+				foreach (SaveLoadRoot saveLoadRoot in value)
+				{
+					if (Grid.Visible[Grid.PosToCell(saveLoadRoot.gameObject)] > 0 || DebugHandler.FreeCameraMode)
+					{
+						GameObject gameObject = saveLoadRoot.gameObject;
+						Vector2I vector2I3 = Grid.PosToXY(gameObject.transform.position);
+						if (vector2I <= vector2I3 && vector2I3 <= vector2I2 && !this.targetViewData.layerTargets.Contains(gameObject))
+						{
+							KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
+							if (component != null)
+							{
+								Harvestable component2 = gameObject.GetComponent<Harvestable>();
+								if (component2 != null)
+								{
+									component.SetLayer(layer_info.layer);
+								}
+								else
+								{
+									component.SetLayer(num);
+								}
+								this.targetViewData.layerTargets.Add(gameObject);
+							}
+						}
+					}
+				}
+			}
+		}
+		Color32 color = new Color32(128, 128, 128, 64);
+		foreach (GameObject gameObject2 in this.targetViewData.layerTargets)
+		{
+			if (!(gameObject2 == null))
+			{
+				KBatchedAnimController component3 = gameObject2.GetComponent<KBatchedAnimController>();
+				if (component3 != null)
+				{
+					component3.HighlightColour = color;
 				}
 			}
 		}
 	}
 
-	private const float lum = 0.25f;
-
-	private const float GlowStrength = 0.25f;
-
-	private static readonly Tag WireTag = TagManager.Create("Wire", null);
-
 	private static readonly Tag[] WireIDs = new Tag[]
 	{
 		TagManager.Create("Wire", null),
 		TagManager.Create("WireUnderConstruction", null),
-		TagManager.Create("InsulatedWire", null),
-		TagManager.Create("InsulatedWireUnderConstruction", null)
+		TagManager.Create("HighWattageWire", null),
+		TagManager.Create("HighWattageWireUnderConstruction", null)
 	};
 
 	private static readonly Tag[] GasVentIDs = new Tag[]
@@ -816,10 +859,20 @@ public class OverlayScreen : KIconButtonMenu
 		TagManager.Create("OxyRock", null)
 	};
 
+	private static readonly Tag[] HarvestableIDs = new Tag[]
+	{
+		TagManager.Create("BasicSingleHarvestPlant", null),
+		TagManager.Create("BasicFabricPlant", null),
+		TagManager.Create("PrickleFlower", null),
+		TagManager.Create("BasicForagePlantPlanted", null),
+		TagManager.Create("ColdWheat", null),
+		TagManager.Create("SpiceVine", null)
+	};
+
 	private static readonly Tag[] RoomBuildingsIDs = new Tag[] { TagManager.Create("Bed", null) };
 
-	[SerializeField]
 	[EventRef]
+	[SerializeField]
 	private string techViewSoundPath;
 
 	private EventInstance techViewSound;
@@ -829,9 +882,6 @@ public class OverlayScreen : KIconButtonMenu
 	private OverlayScreen.LayerInfo[] itemOverlays;
 
 	public static OverlayScreen Instance;
-
-	[SerializeField]
-	private OverlayScreen.ConduitFlowVisInfo[] conduitFlowVisInfo;
 
 	[SerializeField]
 	private Canvas powerLabelParent;
@@ -849,13 +899,13 @@ public class OverlayScreen : KIconButtonMenu
 	private Vector3 batteryUIOffset;
 
 	[SerializeField]
+	private Vector3 batteryUITransformerOffset;
+
+	[SerializeField]
 	private Color consumerColour;
 
 	[SerializeField]
 	private Color generatorColour;
-
-	[SerializeField]
-	private Color joulesAvailableColour;
 
 	[SerializeField]
 	private Color buildingDisabledColour = Color.gray;
@@ -875,26 +925,15 @@ public class OverlayScreen : KIconButtonMenu
 	private TextStyleSetting TooltipDescription;
 
 	[SerializeField]
-	private Color32 utilitySourceColour = Color.green;
+	private Color32 circuitUnpoweredColour;
 
 	[SerializeField]
-	private Color32 utilitySinkColour = Color.blue;
+	private Color32 circuitSafeColour;
 
 	[SerializeField]
-	private Color circuitBalancedColor = Color.yellow;
-
-	[SerializeField]
-	private Color circuitInsufficientColor = Color.red;
-
-	[SerializeField]
-	private Color circuitExceedingColor = Color.green;
-
-	[SerializeField]
-	private Color buildingOverlayColor = Color.gray;
+	private Color32 circuitStrainingColour;
 
 	public static Action<SimViewMode> OnOverlayChanged;
-
-	private static OverlayScreen.OverlayButtonInfo[] overlayButtons;
 
 	private SimViewMode currentMode;
 
@@ -902,14 +941,22 @@ public class OverlayScreen : KIconButtonMenu
 
 	private List<GameObject> nonVisibleTargets = new List<GameObject>();
 
+	private List<OverlayScreen.UpdatePowerInfo> updatePowerInfo = new List<OverlayScreen.UpdatePowerInfo>();
+
+	private List<OverlayScreen.UpdateBatteryInfo> updateBatteryInfo = new List<OverlayScreen.UpdateBatteryInfo>();
+
+	private List<GameObject> queuedAdds = new List<GameObject>();
+
 	private struct LayerInfo
 	{
-		public LayerInfo(SimViewMode viewMode, string[] layerNames, Tag[] itemIDs)
+		public LayerInfo(SimViewMode viewMode, string[] layerNames, Tag[] itemIDs, global::System.Action onEnable = null, global::System.Action onDisable = null)
 		{
 			this.viewMode = viewMode;
 			this.mask = LayerMask.GetMask(layerNames);
 			this.layer = LayerMask.NameToLayer(layerNames[0]);
 			this.itemIDs = itemIDs;
+			this.onEnable = onEnable;
+			this.onDisable = onDisable;
 		}
 
 		public bool IsValid()
@@ -924,56 +971,51 @@ public class OverlayScreen : KIconButtonMenu
 		public int layer;
 
 		public Tag[] itemIDs;
-	}
 
-	[Serializable]
-	private struct ConduitFlowVisInfo
-	{
-		[HashedEnum]
-		public SimViewMode viewMode;
+		public global::System.Action onEnable;
 
-		public GameObject visualizerPrefab;
-
-		public Vent.Transfer type;
-
-		public LayerMask layerMask;
-
-		public float previousLerpPercent;
-
-		[NonSerialized]
-		public ConduitFlowVisualizer visualizer;
-
-		[NonSerialized]
-		public ConduitFlow flowManager;
-
-		[NonSerialized]
-		public int renderLayer;
-	}
-
-	private struct OverlayButtonInfo
-	{
-		public OverlayButtonInfo(string icon, string text, SimViewMode viewMode, string sound, string description)
-		{
-			this.icon = icon;
-			this.text = text;
-			this.viewMode = viewMode;
-			this.sound = sound;
-			this.description = description;
-		}
-
-		public string icon;
-
-		public string text;
-
-		public SimViewMode viewMode;
-
-		public string sound;
-
-		public string description;
+		public global::System.Action onDisable;
 	}
 
 	private class TargetViewData
 	{
-		public HashSet<GameObject> targets;
+		public HashSet<GameObject> layerTargets;
+
+		public HashSet<GameObject> privateTargets;
+	}
+
+	private struct UpdatePowerInfo
+	{
+		public UpdatePowerInfo(KMonoBehaviour item, LocText power_label, LocText unit_label, Generator g, IEnergyConsumer c)
+		{
+			this.item = item;
+			this.powerLabel = power_label;
+			this.unitLabel = unit_label;
+			this.generator = g;
+			this.consumer = c;
+		}
+
+		public KMonoBehaviour item;
+
+		public LocText powerLabel;
+
+		public LocText unitLabel;
+
+		public Generator generator;
+
+		public IEnergyConsumer consumer;
+	}
+
+	private struct UpdateBatteryInfo
+	{
+		public UpdateBatteryInfo(Battery battery, BatteryUI ui)
+		{
+			this.battery = battery;
+			this.ui = ui;
+		}
+
+		public Battery battery;
+
+		public BatteryUI ui;
 	}
 }

@@ -15,7 +15,6 @@ public abstract class Brain : KMonoBehaviour
 
 	protected override void OnSpawn()
 	{
-		base.GetComponent<KPrefabID>().AddLog(this.log);
 		this.running = true;
 		Components.Brains.Add(this);
 	}

@@ -9,11 +9,17 @@ public class KObject
 		this.id = go.GetInstanceID();
 	}
 
+	~KObject()
+	{
+		this.OnCleanUp();
+	}
+
 	public void OnCleanUp()
 	{
 		if (this.eventSystem != null)
 		{
 			this.eventSystem.OnCleanUp();
+			this.eventSystem = null;
 		}
 	}
 
@@ -29,6 +35,14 @@ public class KObject
 	public int id { get; private set; }
 
 	public GameObject go { get; private set; }
+
+	public bool hasEventSystem
+	{
+		get
+		{
+			return this.eventSystem != null;
+		}
+	}
 
 	private EventSystem eventSystem;
 }

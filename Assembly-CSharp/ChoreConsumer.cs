@@ -4,6 +4,30 @@ using KSerialization;
 
 public class ChoreConsumer : KMonoBehaviour
 {
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		if (ChoreGroupManager.instance != null)
+		{
+			foreach (Tag tag in ChoreGroupManager.instance.DefaultForbiddenTagsList)
+			{
+				bool flag = false;
+				foreach (HashedString hashedString in this.forbiddenChoreGroups)
+				{
+					if (hashedString.HashValue == tag.Name.GetHashCode())
+					{
+						flag = true;
+						break;
+					}
+				}
+				if (!flag)
+				{
+					this.forbiddenChoreGroups.Add(new HashedString(tag.Name));
+				}
+			}
+		}
+	}
+
 	public bool IsPermitted(ChoreGroup chore_group)
 	{
 		return chore_group == null || !this.forbiddenChoreGroups.Contains(chore_group.Id);
@@ -55,21 +79,38 @@ public class ChoreConsumer : KMonoBehaviour
 			choreProvider.CollectChores(this, this.contexts);
 		}
 		this.contexts.Sort();
+		bool flag = false;
 		if (this.contexts.Count > 0)
 		{
 			Chore currentChore = base.GetComponent<ChoreDriver>().GetCurrentChore();
-			Chore.Precondition.Context context = this.contexts[this.contexts.Count - 1];
 			for (int j = this.contexts.Count - 1; j >= 0; j--)
 			{
+				Chore.Precondition.Context context = this.contexts[j];
 				if (context.IsSuccess() && (currentChore == null || context.interruptPriority > currentChore.choreType.interruptPriority))
 				{
-					context.chore.PrepareChore(ref context);
-					out_context = context;
-					return true;
+					bool flag2 = false;
+					if (currentChore != null)
+					{
+						for (int k = 0; k < currentChore.choreType.interruptExclusion.Count; k++)
+						{
+							if (context.chore.choreType.tags.Contains(currentChore.choreType.interruptExclusion[k]))
+							{
+								flag2 = true;
+								break;
+							}
+						}
+					}
+					if (!flag2)
+					{
+						context.chore.PrepareChore(ref context);
+						out_context = context;
+						flag = true;
+						break;
+					}
 				}
 			}
 		}
-		return false;
+		return flag;
 	}
 
 	public void AddProvider(ChoreProvider provider)
@@ -118,8 +159,9 @@ public class ChoreConsumer : KMonoBehaviour
 		{
 			return true;
 		}
-		foreach (ChoreGroup choreGroup in chore.choreType.groups)
+		for (int i = 0; i < chore.choreType.groups.Length; i++)
 		{
+			ChoreGroup choreGroup = chore.choreType.groups[i];
 			if (this.IsPermitted(choreGroup) && this.IsEnabled(choreGroup))
 			{
 				return true;
@@ -143,9 +185,9 @@ public class ChoreConsumer : KMonoBehaviour
 	private List<Chore.Precondition.Context> contexts = new List<Chore.Precondition.Context>();
 
 	[Serialize]
-	private List<string> forbiddenChoreGroups = new List<string>();
+	private List<HashedString> forbiddenChoreGroups = new List<HashedString>();
 
-	private List<string> disabledChoreGroups = new List<string>();
+	private List<HashedString> disabledChoreGroups = new List<HashedString>();
 
 	private LoggerFSS log = new LoggerFSS("ChoreConsumer");
 }

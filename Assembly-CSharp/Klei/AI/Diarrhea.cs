@@ -9,14 +9,14 @@ namespace Klei.AI
 		public Diarrhea()
 			: base("Diarrhea", false, new AttributeModifier[]
 			{
-				new AttributeModifier("BladderDelta", 1.25f, DUPLICANTS.DISEASES.DIARRHEA.NAME, false),
-				new AttributeModifier("ToiletEfficiency", -0.8f, DUPLICANTS.DISEASES.DIARRHEA.NAME, true)
-			}, 0.005f, 900f, new Disease.EffectProbabilityDelta[]
+				new AttributeModifier("BladderDelta", 1.25f, DUPLICANTS.DISEASES.DIARRHEA.NAME, false, false),
+				new AttributeModifier("ToiletEfficiency", -0.8f, DUPLICANTS.DISEASES.DIARRHEA.NAME, true, false)
+			}, 5E-08f, 900f, new Disease.EffectProbabilityDelta[]
 			{
 				new Disease.EffectProbabilityDelta
 				{
 					effectID = "DirtyHands",
-					probabilityDelta = 0.005f
+					probabilityDelta = 5E-08f
 				}
 			})
 		{

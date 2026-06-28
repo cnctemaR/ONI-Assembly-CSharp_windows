@@ -48,44 +48,56 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 
 	private void Flush(Worker worker)
 	{
-		BuildingComplete component = base.GetComponent<BuildingComplete>();
-		int utilityOutputCell = component.GetUtilityOutputCell();
 		List<GameObject> list = this.storage.Find(FlushToilet.WaterTag);
-		float num = this.massEmittedPerUse;
+		float num = 0f;
+		float num2 = this.massConsumedPerUse;
 		foreach (GameObject gameObject in list)
 		{
-			PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
-			float num2 = Mathf.Min(component2.Mass, num);
-			component2.Mass -= num2;
-			num -= num2;
-			Game.Instance.liquidConduitFlow.AddElement(utilityOutputCell, SimHashes.DirtyWater, num2, component2.Temperature);
+			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+			float num3 = Mathf.Min(component.Mass, num2);
+			component.Mass -= num3;
+			num2 -= num3;
+			num += num3 * component.Temperature;
 		}
-		Debug.Assert(num == 0f);
+		Debug.Assert(num2 == 0f);
+		float num4 = num / this.massConsumedPerUse;
+		this.storage.AddLiquid(SimHashes.DirtyWater, this.massEmittedPerUse, num4, false);
 	}
 
-	public int DescriptionOrder { get; set; }
-
-	public List<Descriptor> GetRequirementDescriptions(BuildingDef def)
+	public List<Descriptor> RequirementDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		Element element = ElementLoader.FindElementByHash(SimHashes.Water);
 		string text = element.tag.ProperName();
 		string keywordStyle = GameUtil.GetKeywordStyle(element);
-		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMEDPERUSE, keywordStyle, text, GameUtil.GetFormattedMass(this.massConsumedPerUse, GameUtil.TimeSlice.None, true, "F1"))), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMEDPERUSE, keywordStyle, text, GameUtil.GetFormattedMass(this.massConsumedPerUse, GameUtil.TimeSlice.None, true, "F1")));
+		Descriptor descriptor = new Descriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMEDPERUSE, keywordStyle, text, GameUtil.GetFormattedMass(this.massConsumedPerUse, GameUtil.TimeSlice.None, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMEDPERUSE, keywordStyle, text, GameUtil.GetFormattedMass(this.massConsumedPerUse, GameUtil.TimeSlice.None, true, "{0:0.##}")), Descriptor.DescriptorType.Requirement, false);
 		list.Add(descriptor);
 		return list;
 	}
 
-	public List<Descriptor> GetEffectDescriptions(BuildingDef def)
+	public List<Descriptor> EffectDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		Element element = ElementLoader.FindElementByHash(SimHashes.DirtyWater);
 		string text = element.tag.ProperName();
 		string keywordStyle = GameUtil.GetKeywordStyle(element);
 		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTEDPERUSE, keywordStyle, text, GameUtil.GetFormattedMass(this.massEmittedPerUse, GameUtil.TimeSlice.None, true, "F1"))), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTEDPERUSE, keywordStyle, text, GameUtil.GetFormattedMass(this.massEmittedPerUse, GameUtil.TimeSlice.None, true, "F1")));
+		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTEDPERUSE, keywordStyle, text, GameUtil.GetFormattedMass(this.massEmittedPerUse, GameUtil.TimeSlice.None, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTEDPERUSE, keywordStyle, text, GameUtil.GetFormattedMass(this.massEmittedPerUse, GameUtil.TimeSlice.None, true, "{0:0.##}")), Descriptor.DescriptorType.Effect);
 		list.Add(descriptor);
+		return list;
+	}
+
+	public List<Descriptor> GetDescriptors(BuildingDef def)
+	{
+		List<Descriptor> list = new List<Descriptor>();
+		foreach (Descriptor descriptor in this.RequirementDescriptors(def))
+		{
+			list.Add(descriptor);
+		}
+		foreach (Descriptor descriptor2 in this.EffectDescriptors(def))
+		{
+			list.Add(descriptor2);
+		}
 		return list;
 	}
 
@@ -111,7 +123,7 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 
 	private int outputCell;
 
-	public class SMInstance : GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet>.GameInstance
+	public class SMInstance : GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.GameInstance
 	{
 		public SMInstance(FlushToilet master)
 			: base(master)
@@ -155,7 +167,6 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 
 		public void StartFlush()
 		{
-			base.master.storage.ConsumeAll();
 			base.master.fillMeter.SetPositionPercent(0f);
 			base.master.contaminationMeter.SetPositionPercent(1f);
 			base.smi.ShowFillMeter();
@@ -200,7 +211,8 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 			this.fillingInactive.PlayAnim("off", KAnim.PlayMode.Once, null).Enter(delegate(FlushToilet.SMInstance smi)
 			{
 				smi.GetComponent<Operational>().SetActive(false, false);
-			}).EventTransition(GameHashes.OperationalChanged, this.filling, (FlushToilet.SMInstance smi) => smi.GetComponent<Operational>().IsOperational);
+			}).EventTransition(GameHashes.OperationalChanged, this.filling, (FlushToilet.SMInstance smi) => smi.GetComponent<Operational>().IsOperational)
+				.EventTransition(GameHashes.ConduitContentsChanged, this.backedup, (FlushToilet.SMInstance smi) => smi.OutputConduitBlocked());
 			this.ready.DefaultState(this.ready.idle).Enter(delegate(FlushToilet.SMInstance smi)
 			{
 				smi.master.fillMeter.SetPositionPercent(1f);
@@ -233,23 +245,23 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 			return new WorkChore<ToiletWorkableUse>(Db.Get().ChoreTypes.Pee, smi.master, null, true, null, null, null, false, hygiene, true, default(Tag), null, false, true);
 		}
 
-		public GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet>.State disconnected;
+		public GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.State disconnected;
 
-		public GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet>.State backedup;
+		public GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.State backedup;
 
 		public FlushToilet.States.ReadyStates ready;
 
-		public GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet>.State fillingInactive;
+		public GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.State fillingInactive;
 
-		public GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet>.State filling;
+		public GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.State filling;
 
-		public GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet>.State flushing;
+		public GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.State flushing;
 
-		public class ReadyStates : GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet>.State
+		public class ReadyStates : GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.State
 		{
-			public GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet>.State idle;
+			public GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.State idle;
 
-			public GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet>.State inuse;
+			public GameStateMachine<FlushToilet.States, FlushToilet.SMInstance, FlushToilet, object>.State inuse;
 		}
 	}
 }

@@ -13,5 +13,6 @@ public enum SolidAmbienceType
 	SlimeMold,
 	Ice,
 	Sand,
+	CrushedIce,
 	NumTypes
 }

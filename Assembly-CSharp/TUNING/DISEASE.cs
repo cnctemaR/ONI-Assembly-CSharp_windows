@@ -16,9 +16,15 @@ namespace TUNING
 
 		public const float GENERIC_INFECTION_INTERVAL = 5f;
 
-		public const float DIRTYHANDS_INFECTION_DELTA = 0.005f;
+		public const float GENERIC_EFFECT_INFECTION_DELTA = 1f;
 
-		public const float FOODBORNE_INFECTION_PROBABILITY = 0.005f;
+		public const float STINKY_EMIT_MASS = 0.0025000002f;
+
+		public const float STINKY_EMIT_INTERVAL = 2.5f;
+
+		public const float DIRTYHANDS_INFECTION_DELTA = 5E-08f;
+
+		public const float FOODBORNE_INFECTION_PROBABILITY = 5E-08f;
 
 		public const float AIRBORNE_INFECTION_PROBABILITY = 0.00083333335f;
 

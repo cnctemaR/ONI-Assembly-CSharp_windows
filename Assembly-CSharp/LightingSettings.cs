@@ -4,12 +4,18 @@ using UnityEngine;
 
 public class LightingSettings : ScriptableObject
 {
+	public List<LightSettings> LightSettings;
+
+	public bool UpdateLightSettings;
+
+	[Header("Digging")]
 	public float DigMapScale;
 
 	public Color DigMapColour;
 
 	public Texture2D DigDamageMap;
 
+	[Header("State Transition")]
 	public Texture2D StateTransitionMap;
 
 	public Color StateTransitionColor;
@@ -18,16 +24,14 @@ public class LightingSettings : ScriptableObject
 
 	public Vector2 StateTransitionUVOffsetRate;
 
+	[Header("Metal Shine")]
 	public Vector2 ShineCenter;
 
 	public Vector2 ShineRange;
 
 	public float ShineZoomSpeed;
 
-	public List<LightSettings> LightSettings;
-
-	public bool UpdateLightSettings;
-
+	[Header("Water")]
 	public Color WaterTrimColor;
 
 	public float WaterTrimSize;
@@ -74,6 +78,7 @@ public class LightingSettings : ScriptableObject
 
 	public float BloomScale;
 
+	[Header("Liquid")]
 	public float LiquidMin;
 
 	public float LiquidMax;
@@ -86,6 +91,7 @@ public class LightingSettings : ScriptableObject
 
 	public float LiquidMaxMass;
 
+	[Header("Grid")]
 	public float GridLineWidth;
 
 	public float GridSize;
@@ -96,6 +102,7 @@ public class LightingSettings : ScriptableObject
 
 	public Color GridColor;
 
+	[Header("Terrain")]
 	public float EdgeGlowCutoffStart;
 
 	public float EdgeGlowCutoffEnd;
@@ -124,10 +131,6 @@ public class LightingSettings : ScriptableObject
 
 	public float GasMaxOpacity;
 
-	public Color DetectorMaskColor;
-
-	public float DetectorEdge;
-
 	public Color[] DarkenTints;
 
 	public LightingSettings.LightingColours characterLighting;
@@ -138,6 +141,7 @@ public class LightingSettings : ScriptableObject
 
 	public Color[] HotColours;
 
+	[Header("Temperature Overlay Effects")]
 	public Vector4 TemperatureParallax;
 
 	public Texture2D EmberTex;
@@ -180,6 +184,7 @@ public class LightingSettings : ScriptableObject
 
 	public Texture2D HeatHazeTexture;
 
+	[Header("Biome")]
 	public float WorldZoneGasBlend;
 
 	public float WorldZoneLiquidBlend;
@@ -189,6 +194,16 @@ public class LightingSettings : ScriptableObject
 	public float WorldZoneSimpleAnimBlend;
 
 	public float WorldZoneAnimBlend;
+
+	[Header("FX")]
+	public Color32 SmokeDamageTint;
+
+	[Header("Building Damage")]
+	public Texture2D BuildingDamagedTex;
+
+	public Vector4 BuildingDamagedUVParameters;
+
+	public Color32 BuildingDamagedTint;
 
 	[Serializable]
 	public struct EdgeLighting

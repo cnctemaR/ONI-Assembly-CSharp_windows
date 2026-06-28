@@ -13,16 +13,12 @@ public class ResearchPointObject : KMonoBehaviour, IGameObjectEffectDescriptor
 		Util.KDestroyGameObject(base.gameObject);
 	}
 
-	public int DescriptionOrder { get; set; }
-
-	public List<Descriptor> GetRequirementDescriptions(GameObject go)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
-		return null;
-	}
-
-	public List<string> GetEffectDescriptions(GameObject go)
-	{
-		return new List<string> { string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.EFFECTS.RESEARCHPOINT, Strings.Get("STRINGS.RESEARCH.TYPES." + this.TypeID.ToUpper() + ".NAME")) };
+		return new List<Descriptor>
+		{
+			new Descriptor(string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.EFFECTS.RESEARCHPOINT, Strings.Get("STRINGS.RESEARCH.TYPES." + this.TypeID.ToUpper() + ".NAME")), string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.EFFECTS.RESEARCHPOINT, Strings.Get("STRINGS.RESEARCH.TYPES." + this.TypeID.ToUpper() + ".NAME")), Descriptor.DescriptorType.Effect, false)
+		};
 	}
 
 	public string TypeID = string.Empty;

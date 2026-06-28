@@ -11,7 +11,10 @@ public class KAnimBatchManager
 		if (KAnimBatchManager.instance == null)
 		{
 			KAnimBatchManager.instance = new KAnimBatchManager();
-			KAnimBatchManager.instance.currentActiveArea = default(Bounds);
+			if (!SystemInfo.SupportsTextureFormat(TextureFormat.RGBAFloat))
+			{
+				Debug.LogError("Machine does not support RGBAFloat32");
+			}
 		}
 		return KAnimBatchManager.instance;
 	}
@@ -29,8 +32,32 @@ public class KAnimBatchManager
 			KAnimBatchManager.instance.batchGroupData.Clear();
 			KAnimBatchManager.instance.activeBatchSets.Clear();
 			KAnimBatchManager.instance.batchSets.Clear();
+			KAnimBatchManager.instance.inactiveBatchSets.Clear();
 			KAnimBatchManager.instance.dirtyBatchLastFrame = 0;
 			KAnimBatchManager.instance = null;
+			KAnimBatchGroup.FinalizeTextureCache();
+		}
+	}
+
+	public void ClearMultiInstances()
+	{
+		List<BatchGroupKey> list = new List<BatchGroupKey>();
+		foreach (KeyValuePair<BatchGroupKey, KAnimBatchGroup> keyValuePair in this.batchGroups)
+		{
+			if (keyValuePair.Value.data != null && keyValuePair.Value.data.isDynamic)
+			{
+				list.Add(keyValuePair.Key);
+			}
+			keyValuePair.Value.ClearMuiltiInstanceData();
+		}
+		foreach (BatchGroupKey batchGroupKey in list)
+		{
+			if (this.batchGroupData.ContainsKey(batchGroupKey.groupID))
+			{
+				this.batchGroupData.Remove(batchGroupKey.groupID);
+			}
+			this.batchGroups[batchGroupKey].Finalise();
+			this.batchGroups.Remove(batchGroupKey);
 		}
 	}
 
@@ -47,7 +74,7 @@ public class KAnimBatchManager
 		return this.activeBatchSets;
 	}
 
-	public KBatchGroupData GetBatchGroupData(HashedString groupID)
+	public KBatchGroupData GetBatchGroupData(HashedString groupID, bool isDynamic = false)
 	{
 		if (!groupID.isValid || groupID == KAnimBatchManager.NO_BATCH || groupID == KAnimBatchManager.IGNORE)
 		{
@@ -55,7 +82,7 @@ public class KAnimBatchManager
 		}
 		if (!this.batchGroupData.ContainsKey(groupID))
 		{
-			this.batchGroupData[groupID] = new KBatchGroupData(groupID);
+			this.batchGroupData[groupID] = new KBatchGroupData(groupID, isDynamic);
 		}
 		return this.batchGroupData[groupID];
 	}
@@ -78,64 +105,75 @@ public class KAnimBatchManager
 		return kanimBatchGroup;
 	}
 
-	public static Vector2I GetBatchIndex(Vector3 pos)
+	public static Vector2I CellXYToChunkXY(Vector2I cell_xy)
 	{
-		return new Vector2I
+		return new Vector2I(cell_xy.x / 16, cell_xy.y / 16);
+	}
+
+	public void MoveChunk(KAnimConverter.IAnimConverter controller, Vector2I lastChunkXY, Vector2I newChunkXY)
+	{
+		Debug.Assert(lastChunkXY != newChunkXY);
+		BatchKey batchKey = new BatchKey(controller, newChunkXY);
+		KAnimBatch batch = controller.GetBatch();
+		BatchSet batchSet;
+		if (!this.batchSets.TryGetValue(batchKey, out batchSet))
 		{
-			x = (int)(pos.x / 16f),
-			y = (int)(pos.y / 16f)
-		};
+			batchSet = new BatchSet(this.GetBatchGroup(batchKey), batchKey, newChunkXY);
+			this.batchSets[batchKey] = batchSet;
+		}
+		batchSet.AddBatch(batch);
 	}
 
 	public void Register(KAnimConverter.IAnimConverter controller)
 	{
 		Debug.AssertFormat(this.isReady, "Batcher isnt finished setting up, controller [{0}] is registering too early.", new object[] { controller.GetName() });
 		BatchKey batchKey = new BatchKey(controller);
-		Vector3 position = controller.GetPosition();
-		if (position.z == 0f)
-		{
-		}
-		Vector2I batchIndex = KAnimBatchManager.GetBatchIndex(position);
+		Vector2I cellXY = controller.GetCellXY();
+		Vector2I vector2I = KAnimBatchManager.CellXYToChunkXY(cellXY);
 		BatchSet batchSet;
 		if (!this.batchSets.TryGetValue(batchKey, out batchSet))
 		{
-			batchSet = new BatchSet(this.GetBatchGroup(batchKey), batchKey, batchIndex);
+			batchSet = new BatchSet(this.GetBatchGroup(batchKey), batchKey, vector2I);
 			this.batchSets[batchKey] = batchSet;
 		}
 		batchSet.Add(controller);
 	}
 
-	private Bounds GetVisibleBounds(Vector2I visible_area_min, Vector2I visible_area_max)
+	private void AddToActiveBatchSet(BatchSet bs)
 	{
-		Vector2I vector2I = new Vector2I((visible_area_min.x - 1) / 16, (visible_area_min.y - 1) / 16);
-		Vector2I vector2I2 = new Vector2I((visible_area_max.x + 16 - 1) / 16, (visible_area_max.y + 16 - 1) / 16);
-		Bounds bounds = default(Bounds);
-		bounds.SetMinMax(new Vector3((float)vector2I.x, (float)vector2I.y), new Vector3((float)vector2I2.x, (float)vector2I2.y));
-		return bounds;
+		this.inactiveBatchSets.Remove(bs);
+		this.activeBatchSets.Add(bs);
+		bs.SetActive(true);
 	}
 
-	public Bounds currentActiveArea { get; private set; }
-
-	public void UpdateActiveArea(Vector2I visible_area_min, Vector2I visible_area_max)
+	private void AddToInactiveBatchSet(BatchSet bs)
 	{
-		this.currentActiveArea = this.GetVisibleBounds(visible_area_min, visible_area_max);
+		this.inactiveBatchSets.Add(bs);
+		this.activeBatchSets.Remove(bs);
+		bs.SetActive(false);
+	}
+
+	public void UpdateActiveArea(Vector2I vis_chunk_min, Vector2I vis_chunk_max)
+	{
+		this.currentActiveArea.SetMinMax(new Vector3((float)vis_chunk_min.x, (float)vis_chunk_min.y), new Vector3((float)vis_chunk_max.x, (float)vis_chunk_max.y));
 		foreach (KeyValuePair<BatchKey, BatchSet> keyValuePair in this.batchSets)
 		{
 			BatchSet value = keyValuePair.Value;
-			if (value.key.materialType == KAnimBatchGroup.MaterialType.UI || (value.batches.Count > 0 && this.currentActiveArea.Intersects(value.bounds)))
+			if (value.key.materialType == KAnimBatchGroup.MaterialType.UI || (value.batchCount > 0 && this.currentActiveArea.Intersects(value.bounds)))
 			{
-				this.activeBatchSets.Add(value);
-				value.SetActive(true);
+				if (!value.active || !this.activeBatchSets.Contains(value))
+				{
+					this.AddToActiveBatchSet(value);
+				}
 			}
-			else
+			else if (value.active || this.activeBatchSets.Contains(value))
 			{
-				this.activeBatchSets.Remove(value);
-				value.SetActive(false);
+				this.AddToInactiveBatchSet(value);
 			}
 		}
 	}
 
-	public int UpdateDirty()
+	public int UpdateDirty(int frame)
 	{
 		if (!this.ready)
 		{
@@ -144,7 +182,14 @@ public class KAnimBatchManager
 		this.dirtyBatchLastFrame = 0;
 		foreach (BatchSet batchSet in this.activeBatchSets)
 		{
-			this.dirtyBatchLastFrame += batchSet.UpdateDirty();
+			try
+			{
+				this.dirtyBatchLastFrame += batchSet.UpdateDirty(frame);
+			}
+			catch (Exception ex)
+			{
+				Debug.LogError("KAnimBatchManager.UpdateDirty " + ex.Message + "\n" + ex.StackTrace);
+			}
 		}
 		return this.dirtyBatchLastFrame;
 	}
@@ -161,17 +206,17 @@ public class KAnimBatchManager
 			{
 				Mesh mesh = batchSet.group.mesh;
 				Material material = batchSet.group.material;
-				for (int i = 0; i < batchSet.batches.Count; i++)
+				for (int i = 0; i < batchSet.batchCount; i++)
 				{
-					KAnimBatch kanimBatch = batchSet.batches[i];
-					if (kanimBatch.size != 0 && kanimBatch.active)
+					KAnimBatch batch = batchSet.GetBatch(i);
+					if (batch.size != 0 && batch.active)
 					{
-						if (kanimBatch.materialType != KAnimBatchGroup.MaterialType.UI)
+						if (batch.materialType != KAnimBatchGroup.MaterialType.UI)
 						{
 							Vector3 zero = Vector3.zero;
-							zero.z = kanimBatch.position.z;
-							int layer = kanimBatch.layer;
-							Graphics.DrawMesh(mesh, zero, Quaternion.identity, material, layer, null, 0, kanimBatch.matProperties);
+							zero.z = batch.position.z;
+							int layer = batch.layer;
+							Graphics.DrawMesh(mesh, zero, Quaternion.identity, material, layer, null, 0, batch.matProperties);
 						}
 					}
 				}
@@ -186,15 +231,17 @@ public class KAnimBatchManager
 
 	private const int DEFAULT_BATCH_SIZE = 60;
 
-	private const int GROUP_WIDTH = 16;
-
-	private const int GROUP_HEIGHT = 16;
+	public const int CHUNK_SIZE = 16;
 
 	public static HashedString NO_BATCH = new HashedString("NO_BATCH");
 
 	public static HashedString IGNORE = new HashedString("IGNORE");
 
+	public static Vector2 GROUP_SIZE = new Vector2(16f, 16f);
+
 	private bool ready;
+
+	private Bounds currentActiveArea = default(Bounds);
 
 	private Dictionary<HashedString, KBatchGroupData> batchGroupData = new Dictionary<HashedString, KBatchGroupData>();
 
@@ -204,7 +251,7 @@ public class KAnimBatchManager
 
 	private HashSet<BatchSet> activeBatchSets = new HashSet<BatchSet>();
 
-	private static KAnimBatchManager instance;
+	private HashSet<BatchSet> inactiveBatchSets = new HashSet<BatchSet>();
 
-	public static Vector2 GROUP_SIZE = new Vector2(16f, 16f);
+	private static KAnimBatchManager instance;
 }

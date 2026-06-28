@@ -4,6 +4,6 @@ namespace FMOD.Studio
 {
 	public class STUDIO_VERSION
 	{
-		public const string dll = "fmodstudiol";
+		public const string dll = "fmodstudio";
 	}
 }

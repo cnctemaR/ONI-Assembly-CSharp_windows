@@ -1,5 +1,6 @@
 ﻿using System;
 
+[SkipSaveFileSerialization]
 public class InfoDescription : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

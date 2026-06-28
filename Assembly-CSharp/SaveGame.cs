@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Text;
@@ -7,7 +8,7 @@ using Newtonsoft.Json;
 using UnityEngine;
 
 [SerializationConfig(global::KSerialization.MemberSerialization.OptIn)]
-public class SaveGame : KMonoBehaviour, ISaveLoadableJson
+public class SaveGame : KMonoBehaviour, ISaveLoadable
 {
 	public string BaseName
 	{
@@ -35,7 +36,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadableJson
 	[OnDeserializing]
 	private void OnDeserialize()
 	{
-		this.baseName = SaveLoader.Instance.SaveHeader.baseName;
+		this.baseName = SaveLoader.Instance.GameInfo.baseName;
 	}
 
 	public int GetSpeed()
@@ -43,47 +44,56 @@ public class SaveGame : KMonoBehaviour, ISaveLoadableJson
 		return this.speed;
 	}
 
-	public byte[] GetSaveHeader(bool isAutoSave, out SaveGame.Header header)
+	public byte[] GetSaveHeader(bool isAutoSave, bool isCompressed, out SaveGame.Header header)
 	{
 		string text;
 		if (isAutoSave)
 		{
-			text = JsonConvert.SerializeObject(new SaveGame.HeaderData(GameClock.Instance.GetDay(), Components.LiveMinionIdentities.Count, this.baseName, true, SaveLoader.GetActiveSaveFilePath()));
+			text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetDay(), Components.LiveMinionIdentities.Count, this.baseName, true, SaveLoader.GetActiveSaveFilePath()));
 		}
 		else
 		{
-			text = JsonConvert.SerializeObject(new SaveGame.HeaderData(GameClock.Instance.GetDay(), Components.LiveMinionIdentities.Count, this.baseName));
+			text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetDay(), Components.LiveMinionIdentities.Count, this.baseName));
 		}
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		header = default(SaveGame.Header);
-		header.buildVersion = 208689U;
+		header.buildVersion = 217311U;
 		header.headerSize = bytes.Length;
+		header.headerVersion = 1U;
+		header.compression = ((!isCompressed) ? 0 : 1);
 		return bytes;
 	}
 
 	public static SaveGame.Header GetHeader(BinaryReader br)
 	{
-		return new SaveGame.Header
+		SaveGame.Header header = default(SaveGame.Header);
+		header.buildVersion = br.ReadUInt32();
+		header.headerSize = br.ReadInt32();
+		header.headerVersion = br.ReadUInt32();
+		if (1U <= header.headerVersion)
 		{
-			buildVersion = br.ReadUInt32(),
-			headerSize = br.ReadInt32(),
-			headerVersion = br.ReadUInt32()
-		};
+			header.compression = br.ReadInt32();
+		}
+		return header;
 	}
 
-	public static SaveGame.HeaderData GetHeader(IReader br, out SaveGame.Header header)
+	public static SaveGame.GameInfo GetHeader(IReader br, out SaveGame.Header header)
 	{
 		header = default(SaveGame.Header);
 		header.buildVersion = br.ReadUInt32();
 		header.headerSize = br.ReadInt32();
 		header.headerVersion = br.ReadUInt32();
+		if (1U <= header.headerVersion)
+		{
+			header.compression = br.ReadInt32();
+		}
 		byte[] array = br.ReadBytes(header.headerSize);
-		return SaveGame.GetHeaderData(array);
+		return SaveGame.GetGameInfo(array);
 	}
 
-	public static SaveGame.HeaderData GetHeaderData(byte[] data)
+	public static SaveGame.GameInfo GetGameInfo(byte[] data)
 	{
-		return JsonConvert.DeserializeObject<SaveGame.HeaderData>(Encoding.UTF8.GetString(data));
+		return JsonConvert.DeserializeObject<SaveGame.GameInfo>(Encoding.UTF8.GetString(data));
 	}
 
 	public void SetBaseName(string newBaseName)
@@ -105,37 +115,54 @@ public class SaveGame : KMonoBehaviour, ISaveLoadableJson
 	[Serialize]
 	private int speed;
 
+	[Serialize]
+	public List<Tag> expandedResourceTags = new List<Tag>();
+
 	private string baseName;
 
 	public static SaveGame Instance;
 
 	public struct Header
 	{
+		public bool IsCompressed
+		{
+			get
+			{
+				return 0 != this.compression;
+			}
+		}
+
 		public uint buildVersion;
 
 		public int headerSize;
 
 		public uint headerVersion;
+
+		public int compression;
 	}
 
-	public struct HeaderData
+	public struct GameInfo
 	{
-		public HeaderData(int numberOfCycles, int numberOfDuplicants, string baseName, bool isAutoSave, string originalSaveName)
+		public GameInfo(int numberOfCycles, int numberOfDuplicants, string baseName, bool isAutoSave, string originalSaveName)
 		{
 			this.numberOfCycles = numberOfCycles;
 			this.numberOfDuplicants = numberOfDuplicants;
 			this.baseName = baseName;
 			this.isAutoSave = isAutoSave;
 			this.originalSaveName = originalSaveName;
+			this.saveMajorVersion = 7;
+			this.saveMinorVersion = 1;
 		}
 
-		public HeaderData(int numberOfCycles, int numberOfDuplicants, string baseName)
+		public GameInfo(int numberOfCycles, int numberOfDuplicants, string baseName)
 		{
 			this.numberOfCycles = numberOfCycles;
 			this.numberOfDuplicants = numberOfDuplicants;
 			this.baseName = baseName;
 			this.isAutoSave = false;
 			this.originalSaveName = string.Empty;
+			this.saveMajorVersion = 7;
+			this.saveMinorVersion = 1;
 		}
 
 		public int numberOfCycles;
@@ -147,5 +174,9 @@ public class SaveGame : KMonoBehaviour, ISaveLoadableJson
 		public bool isAutoSave;
 
 		public string originalSaveName;
+
+		public int saveMajorVersion;
+
+		public int saveMinorVersion;
 	}
 }

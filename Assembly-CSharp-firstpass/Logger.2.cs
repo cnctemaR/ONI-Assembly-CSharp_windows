@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using UnityEngine;
 
-public class Logger<EntryType> : global::Logger
+public class Logger<EntryType> : Logger
 {
 	public Logger(string name)
 		: base(name)
@@ -31,31 +30,14 @@ public class Logger<EntryType> : global::Logger
 		}
 	}
 
+	public void SetMaxEntries(int new_max)
+	{
+		this.maxEntries = new_max;
+	}
+
 	[Conditional("UNITY_EDITOR")]
 	public void Log(EntryType entry)
 	{
-		if (this.entries == null)
-		{
-			this.entries = new List<EntryType>();
-		}
-		if (this.OnLog != null)
-		{
-			this.OnLog(entry);
-		}
-		this.entries.Add(entry);
-		if (this.entries.Count > this.maxEntries)
-		{
-			this.entries.RemoveAt(0);
-		}
-		if (base.enableConsoleLogging)
-		{
-			global::UnityEngine.Debug.Log(entry.ToString());
-		}
-		if (base.breakOnLog)
-		{
-			int num = 0;
-			num++;
-		}
 	}
 
 	private List<EntryType> entries;

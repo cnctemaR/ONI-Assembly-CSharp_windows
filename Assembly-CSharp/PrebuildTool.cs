@@ -33,11 +33,6 @@ public class PrebuildTool : InterfaceTool
 	{
 	}
 
-	public override void OnKeyDown(KButtonEvent e)
-	{
-		base.OnKeyDown(e);
-	}
-
 	public override void OnLeftClickDown(Vector3 cursor_pos)
 	{
 		UISounds.PlaySound(UISounds.Sound.Negative);

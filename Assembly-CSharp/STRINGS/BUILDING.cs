@@ -6,8 +6,21 @@ namespace STRINGS
 	{
 		public class STATUSITEMS
 		{
+			public class ANGERDAMAGE
+			{
+				public static LocString NAME = "Damage: Tantrum";
+
+				public static LocString TOOLTIP = "A stressed Duplicant is damaging this building";
+
+				public static LocString NOTIFICATION = "Building Damage: Tantrum";
+
+				public static LocString NOTIFICATION_TOOLTIP = "Stressed Duplicants are damaging these buildings:\n\n{0}";
+			}
+
 			public class PIPECONTENTS
 			{
+				public static LocString EMPTY = "Empty";
+
 				public static LocString NAME = "{0} of {1} at {2}";
 			}
 
@@ -20,16 +33,16 @@ namespace STRINGS
 
 			public class AWAITINGSEEDDELIVERY
 			{
-				public static LocString NAME = "Awaiting delivery";
+				public static LocString NAME = "Awaiting Delivery";
 
-				public static LocString TOOLTIP = "Awaiting delivery of selected <style=\"seed\">Seed</style>";
+				public static LocString TOOLTIP = "Awaiting delivery of selected seed";
 			}
 
 			public class BROKEN
 			{
 				public static LocString NAME = "Broken";
 
-				public static LocString TOOLTIP = "This building was broken by a <style=\"stress\">Stressed</style> Duplicant\n\nIt must be repaired";
+				public static LocString TOOLTIP = "This building received damage {DamageInfo}";
 			}
 
 			public class CHANGEDOORCONTROLSTATE
@@ -43,13 +56,13 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Current State: {ControlState}";
 
-				public static LocString TOOLTIP = "Current State: {ControlState}\n\nAuto: Duplicants will open and close this door as needed\nClosed: This door will remain closed\nOpen: This door will remain open";
+				public static LocString TOOLTIP = "Current State: {ControlState}\n\nAuto: Duplicants open and close this door as needed\nLocked: Nothing may pass through\nOpen: This door will remain open";
 
 				public static LocString OPENED = "Opened";
 
 				public static LocString AUTO = "Auto";
 
-				public static LocString CLOSED = "Closed";
+				public static LocString CLOSED = "Locked";
 			}
 
 			public class CONDUITBLOCKED
@@ -84,6 +97,28 @@ namespace STRINGS
 				public static LocString NOTIFICATION_TOOLTIP = "These buildings are entombed and need to be dug out:";
 			}
 
+			public class OVERHEATED
+			{
+				public static LocString NAME = "Damage: Overheating";
+
+				public static LocString TOOLTIP = "This building is taking damage and will meltdown if not cooled";
+			}
+
+			public class OPERATINGENERGY
+			{
+				public static LocString NAME = "Heat Production: {0}";
+
+				public static LocString TOOLTIP = "This building is producing {0} of energy\n\nSources:\n{1}";
+
+				public static LocString LINEITEM = "    • {0}: {1}\n";
+
+				public static LocString OPERATING = "Normal operation";
+
+				public static LocString EXHAUSTING = "Exhaust produced";
+
+				public static LocString PIPECONTENTS_TRANSFER = "Transferred from pipes";
+			}
+
 			public class FLOODED
 			{
 				public static LocString NAME = "Building Flooded";
@@ -99,21 +134,21 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Gas Vent Obstructed";
 
-				public static LocString TOOLTIP = "Cannot release gas through this vent";
+				public static LocString TOOLTIP = "A pipe has been obstructed and is preventing gas flow to this vent";
 			}
 
 			public class GASVENTOVERPRESSURE
 			{
-				public static LocString NAME = "Gas Vent Overpressurized";
+				public static LocString NAME = "Gas Vent Overpressure";
 
-				public static LocString TOOLTIP = "Vent cannot function at current pressure";
+				public static LocString TOOLTIP = "Area's ambient pressure is too high to emit additional gas\nReduce pressure by pumping gas away or clearing more space";
 			}
 
 			public class WATTSONGAMEOVER
 			{
 				public static LocString NAME = "Colony Lost";
 
-				public static LocString TOOLTIP = "Colony Lost";
+				public static LocString TOOLTIP = "All Duplicants are dead or incapacitated";
 			}
 
 			public class INVALIDBUILDINGLOCATION
@@ -127,14 +162,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Liquid Vent Obstructed";
 
-				public static LocString TOOLTIP = "Cannot release liquid through this vent";
+				public static LocString TOOLTIP = "A pipe has been obstructed and is preventing liquid flow to this vent";
 			}
 
 			public class LIQUIDVENTOVERPRESSURE
 			{
-				public static LocString NAME = "Liquid Vent Overpressurized";
+				public static LocString NAME = "Liquid Vent Overpressure";
 
-				public static LocString TOOLTIP = "Vent cannot function at current pressure";
+				public static LocString TOOLTIP = "Area's ambient pressure is too high to emit additional liquid\nReduce pressure by pumping liquid away or clearing more space";
 			}
 
 			public class MANUALLYCONTROLLED
@@ -148,11 +183,15 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Insufficient Resources\n{ItemsRemaining}";
 
-				public static LocString TOOLTIP = "Materials for this building are beyond reach or unavailable";
+				public static LocString TOOLTIP = "Crucial materials for this building are beyond reach or unavailable";
 
-				public static LocString NOTIFICATION_NAME = "Insufficient resources";
+				public static LocString NOTIFICATION_NAME = "Building lacks resources";
 
 				public static LocString NOTIFICATION_TOOLTIP = "Crucial materials are unavailable or beyond reach for these buildings:";
+
+				public static LocString LINE_ITEM_MASS = "• {0}: {1}";
+
+				public static LocString LINE_ITEM_UNITS = "• {0}";
 			}
 
 			public class MATERIALSUNAVAILABLEFORREFILL
@@ -160,6 +199,8 @@ namespace STRINGS
 				public static LocString NAME = "Resources Low\n{ItemsRemaining}";
 
 				public static LocString TOOLTIP = "This building will soon require materials that are unavailable";
+
+				public static LocString LINE_ITEM = "• {0}";
 			}
 
 			public class MELTINGDOWN
@@ -177,56 +218,56 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Missing Foundation";
 
-				public static LocString TOOLTIP = "Build Tiles beneath this building\n------------------\nTiles can be found in the Base Tab <color=#FF0000>(1)</color> of the Build Menu";
+				public static LocString TOOLTIP = "Build Tiles beneath this building\n------------------\nTiles can be found in the <color=#833A5FFF>Base Tab</color> <color=#F44A47>[1]</color> of the Build Menu";
 			}
 
 			public class NEEDBORINGMACHINE
 			{
 				public static LocString NAME = "Multitool Required";
 
-				public static LocString TOOLTIP = "A <style=\"equipment\">Multitool</style> is required to mine this material\n------------------\nMultitools can be made at Crafting Stations in the Stations Tab <color=#FF0000>(9)</style> of the Build Menu";
+				public static LocString TOOLTIP = "A multitool is required to mine this material\n------------------\nMultitools can be made at Crafting Stations in the <color=#833A5FFF>Stations Tab</color> <color=#F44A47>[9]</color> of the Build Menu";
 			}
 
 			public class NEUTRONIUMUNMINABLE
 			{
 				public static LocString NAME = "Cannot Mine";
 
-				public static LocString TOOLTIP = "This material cannot be mined by Duplicant tools";
+				public static LocString TOOLTIP = "This resource cannot be mined by Duplicant tools";
 			}
 
 			public class NEEDGASIN
 			{
 				public static LocString NAME = "No Gas Intake";
 
-				public static LocString TOOLTIP = "This building has nowhere to receive <style=\"gas\">Gas</style> from";
+				public static LocString TOOLTIP = "This building has nowhere to receive gas from";
 			}
 
 			public class NEEDGASOUT
 			{
 				public static LocString NAME = "No Gas Output";
 
-				public static LocString TOOLTIP = "This building has nowhere to send <style=\"gas\">Gas</style>";
+				public static LocString TOOLTIP = "This building has nowhere to send gas";
 			}
 
 			public class NEEDLIQUIDIN
 			{
 				public static LocString NAME = "No Liquid Intake";
 
-				public static LocString TOOLTIP = "This building has nowhere to receive <style=\"liquid\">Liquid</style> from";
+				public static LocString TOOLTIP = "This building has nowhere to receive liquid from";
 			}
 
 			public class NEEDLIQUIDOUT
 			{
 				public static LocString NAME = "No Liquid Output";
 
-				public static LocString TOOLTIP = "This building has nowhere to send <style=\"liquid\">Liquid</style>";
+				public static LocString TOOLTIP = "This building has nowhere to send liquid";
 			}
 
 			public class LIQUIDPIPEEMPTY
 			{
 				public static LocString NAME = "Empty Pipe";
 
-				public static LocString TOOLTIP = "There is no <style=\"liquid\">Liquid</style> in the pipe";
+				public static LocString TOOLTIP = "There is no liquid in this pipe";
 			}
 
 			public class LIQUIDPIPEOBSTRUCTED
@@ -240,7 +281,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Empty Pipe";
 
-				public static LocString TOOLTIP = "There is no <style=\"Gas\">Gas</style> in the pipe";
+				public static LocString TOOLTIP = "There is no gas in this pipe";
 			}
 
 			public class GASPIPEOBSTRUCTED
@@ -254,21 +295,21 @@ namespace STRINGS
 			{
 				public static LocString NAME = "No Seeds";
 
-				public static LocString TOOLTIP = "Dig up wild <style=\"plant\">Plants</style> to obtain <style=\"seed\">Seeds</style>";
+				public static LocString TOOLTIP = "Uproot wild plants to obtain seeds";
 			}
 
 			public class NEEDSEED
 			{
-				public static LocString NAME = "No Seed selected";
+				public static LocString NAME = "No Seed Selected";
 
-				public static LocString TOOLTIP = "Dig up wild plants to obtain <style=\"seed\">Seeds</style>";
+				public static LocString TOOLTIP = "Uproot wild plants to obtain seeds";
 			}
 
 			public class NEEDPOWER
 			{
 				public static LocString NAME = "No Power";
 
-				public static LocString TOOLTIP = "All connected <style=\"power\">Power</style> sources have lost charge";
+				public static LocString TOOLTIP = "All connected power sources have lost charge";
 			}
 
 			public class NEEDRESOURCE
@@ -282,18 +323,18 @@ namespace STRINGS
 			{
 				public static LocString NAME = "New Duplicants Available";
 
-				public static LocString TOOLTIP = "A new colony member is ready be printed";
+				public static LocString TOOLTIP = "A new colony member is ready to be printed";
 
 				public static LocString NOTIFICATION_NAME = "New Duplicants are available";
 
-				public static LocString NOTIFICATION_TOOLTIP = "The Printing Pod is ready to print a new colony member\n\nPlease select a DNA blueprint";
+				public static LocString NOTIFICATION_TOOLTIP = "The Printing Pod <color=#F44A47>[H]</color> is ready to print a new Duplicant.\nPlease select a DNA blueprint:";
 			}
 
 			public class NOAPPLICABLERESEARCHSELECTED
 			{
 				public static LocString NAME = "Inapplicable Research";
 
-				public static LocString TOOLTIP = "This building cannot produce the correct <style=\"research\">Research Type</style> for the selected <style=\"research\">Research Task</style>";
+				public static LocString TOOLTIP = "This building cannot produce the correct research type for the selected research task";
 
 				public static LocString NOTIFICATION_NAME = "<style=\"research\">Research Center</style> idle";
 
@@ -302,14 +343,14 @@ namespace STRINGS
 
 			public class NOAVAILABLESEED
 			{
-				public static LocString NAME = "No Seed available";
+				public static LocString NAME = "No Seed Available";
 
-				public static LocString TOOLTIP = "The selected <style=\"seed\">Seed</style> is not available";
+				public static LocString TOOLTIP = "The selected seed is not available";
 			}
 
 			public class NOSTORAGEFILTERSET
 			{
-				public static LocString NAME = "Storage Not Allocated";
+				public static LocString NAME = "Storage Not Assigned";
 
 				public static LocString TOOLTIP = "No resources types are marked for storage in this building";
 			}
@@ -323,7 +364,7 @@ namespace STRINGS
 
 			public class NOFISHABLEWATERBELOW
 			{
-				public static LocString NAME = "No Fishable Water Below";
+				public static LocString NAME = "No Fishable Water";
 
 				public static LocString TOOLTIP = "There are no edible fish beneath this structure";
 			}
@@ -332,21 +373,21 @@ namespace STRINGS
 			{
 				public static LocString NAME = "No Power Consumers";
 
-				public static LocString TOOLTIP = "No buildings are connected to this <style=\"power\">Power</style> source";
+				public static LocString TOOLTIP = "No buildings are connected to this power source";
 			}
 
 			public class NOPOWERSOURCE
 			{
 				public static LocString NAME = "No Power";
 
-				public static LocString TOOLTIP = "This building must be connected to a <style=\"power\">Power</style> source";
+				public static LocString TOOLTIP = "This building must be connected to a power source";
 			}
 
 			public class NOWIRECONNECTED
 			{
 				public static LocString NAME = "No Wire Connected";
 
-				public static LocString TOOLTIP = "This building has not been connected to a <style=\"power\">Power</style> grid";
+				public static LocString TOOLTIP = "This building has not been connected to a power grid";
 			}
 
 			public class PENDINGDECONSTRUCTION
@@ -372,9 +413,9 @@ namespace STRINGS
 
 			public class PENDINGUPROOT
 			{
-				public static LocString NAME = "Dig Up Pending";
+				public static LocString NAME = "Uproot Pending";
 
-				public static LocString TOOLTIP = "Waiting for a Duplicant to dig up";
+				public static LocString TOOLTIP = "Waiting for a Duplicant to uproot";
 			}
 
 			public class PENDINGREPAIR
@@ -402,7 +443,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Function Suspended";
 
-				public static LocString TOOLTIP = "This building has been toggled off\n\nPress Enable Building to resume its use";
+				public static LocString TOOLTIP = "This building has been toggled off\nPress Enable Building to resume its use";
 			}
 
 			public class PRESSUREOK
@@ -410,6 +451,13 @@ namespace STRINGS
 				public static LocString NAME = "Max Gas Pressure";
 
 				public static LocString TOOLTIP = "Maximum air pressurization has been reached";
+			}
+
+			public class UNDERPRESSURE
+			{
+				public static LocString NAME = "Low Air Pressure";
+
+				public static LocString TOOLTIP = "A minimum atmospheric pressure of {TargetPressure} is needed for this building to operate";
 			}
 
 			public class STORAGELOCKER
@@ -435,7 +483,7 @@ namespace STRINGS
 
 			public class UNDERCONSTRUCTIONNOWORKER
 			{
-				public static LocString NAME = "Pending Construction";
+				public static LocString NAME = "Construction Pending";
 
 				public static LocString TOOLTIP = "Waiting for a Duplicant to build";
 			}
@@ -445,6 +493,19 @@ namespace STRINGS
 				public static LocString NAME = "Awaiting Material Delivery\n{ItemsRemaining}";
 
 				public static LocString TOOLTIP = "Waiting for a Duplicant to deliver:\n{ItemsRemaining}";
+
+				public static LocString LINE_ITEM_MASS = "• {0}: {1}";
+
+				public static LocString LINE_ITEM_UNITS = "• {0}";
+			}
+
+			public class WAITINGFORREPAIRMATERIALS
+			{
+				public static LocString NAME = "Awaiting Repair Material Delivery\n{ItemsRemaining}\n";
+
+				public static LocString TOOLTIP = "Waiting for a Duplicant to deliver:\n{ItemsRemaining}";
+
+				public static LocString LINE_ITEM = "• {0}: {1}";
 			}
 
 			public class NORMAL
@@ -465,7 +526,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Powering";
 
-				public static LocString TOOLTIP = "This <style=\"power\">Power</style> source is supplying <style=\"power\">Power</style> consumers";
+				public static LocString TOOLTIP = "This generator is supplying energy to power consumers";
 			}
 
 			public class GENERATOROFFLINE
@@ -493,14 +554,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "{FlushesRemaining} \"Visits\" Remaining";
 
-				public static LocString TOOLTIP = "This amenity can handle {FlushesRemaining} more \"visits\" before needing maintenance";
+				public static LocString TOOLTIP = "{FlushesRemaining} more Duplicants can use this amenity before it requires maintenance";
 			}
 
 			public class TOILETNEEDSEMPTYING
 			{
 				public static LocString NAME = "Requires Emptying";
 
-				public static LocString TOOLTIP = "This amenity cannot be used while full\n------------------\nEmptying it will produce <style=\"solid\">Contaminated Dirt</style>";
+				public static LocString TOOLTIP = "This amenity cannot be used while full\n------------------\nEmptying it will produce <style=\"solid\">Polluted Dirt</style>";
 			}
 
 			public class UNUSABLE
@@ -512,20 +573,20 @@ namespace STRINGS
 
 			public class NORESEARCHSELECTED
 			{
-				public static LocString NAME = "No Research Task selected";
+				public static LocString NAME = "No Research Task Selected";
 
-				public static LocString TOOLTIP = "Open the <color=#833A5FFF>RESEARCH TREE</color> [R] to select a new <style=\"research\">Research</style> project";
+				public static LocString TOOLTIP = "Open the <color=#833A5FFF>Research Tree</color> [R] to select a new <style=\"research\">Research</style> project";
 
 				public static LocString NOTIFICATION_NAME = "No <style=\"research\">Research Task</style> selected";
 
-				public static LocString NOTIFICATION_TOOLTIP = "Open the <color=#833A5FFF>RESEARCH TREE</color> [R] to select a new <style=\"research\">Research</style> project";
+				public static LocString NOTIFICATION_TOOLTIP = "Open the <color=#833A5FFF>Research Tree</color> [R] to select a new <style=\"research\">Research</style> project";
 			}
 
 			public class RESEARCHING
 			{
 				public static LocString NAME = "Current <style=\"research\">Research</style>: {Tech}";
 
-				public static LocString TOOLTIP = "<style=\"research\">Research</style> produced at this station will be invested in {Tech}";
+				public static LocString TOOLTIP = "Research produced at this station will be invested in {Tech}";
 			}
 
 			public class VALVE
@@ -546,14 +607,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Emitting Light";
 
-				public static LocString TOOLTIP = "Open the Light Overlay [{LightGridOverlay}] to view this <style=\"light\">Light</style>'s visibility radius";
+				public static LocString TOOLTIP = "Open the Light Overlay [{LightGridOverlay}] to view this light's visibility radius";
 			}
 
 			public class RATIONBOXCONTENTS
 			{
 				public static LocString NAME = "Storing: {Stored}";
 
-				public static LocString TOOLTIP = "This box contains {Stored} of <style=\"food\">Food</style>";
+				public static LocString TOOLTIP = "This box contains {Stored} of food";
 			}
 
 			public class EMITTINGELEMENT
@@ -574,14 +635,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Emitting <style=\"oxygen\">Oxygen</style>: {FlowRate}";
 
-				public static LocString TOOLTIP = "Producing <style=\"oxygen\">Oxygen</style> at {FlowRate}";
+				public static LocString TOOLTIP = "Producing oxygen at a rate of {FlowRate}";
 			}
 
 			public class EMITTINGGASAVG
 			{
 				public static LocString NAME = "Emitting <style=\"gas\">{Element}</style>: {FlowRate}";
 
-				public static LocString TOOLTIP = "Producing <style=\"gas\">{Element}</style> at {FlowRate}";
+				public static LocString TOOLTIP = "Producing {Element} at a rate of {FlowRate}";
 			}
 
 			public class PUMPINGLIQUIDORGAS
@@ -591,18 +652,32 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This building is pumping an average volume of {FlowRate}";
 			}
 
+			public class WIRECIRCUITSTATUS
+			{
+				public static LocString NAME = "Circuit Status: {CurrentLoad} / {MaxLoad}";
+
+				public static LocString TOOLTIP = "The current / maximum wattage used on this circuit";
+			}
+
+			public class WIREMAXWATTAGESTATUS
+			{
+				public static LocString NAME = "Max Wattage: {WireMaxWattage}";
+
+				public static LocString TOOLTIP = "The maximum wattage that this wire can safely sustain";
+			}
+
 			public class NOLIQUIDELEMENTTOPUMP
 			{
 				public static LocString NAME = "Pump Not In Liquid";
 
-				public static LocString TOOLTIP = "This pump must be submerged in <style=\"liquid\">Liquid</style> to work";
+				public static LocString TOOLTIP = "This pump must be submerged in liquid to work";
 			}
 
 			public class NOGASELEMENTTOPUMP
 			{
 				public static LocString NAME = "Pump Not In Gas";
 
-				public static LocString TOOLTIP = "This pump must be submerged in <style=\"gas\">Gas</style> to work";
+				public static LocString TOOLTIP = "This pump must be submerged in gas to work";
 			}
 
 			public class ELEMENTEMITTEROUTPUT
@@ -635,16 +710,23 @@ namespace STRINGS
 
 			public class AWAITINGCOMPOSTFLIP
 			{
-				public static LocString NAME = "Requires flipping";
+				public static LocString NAME = "Requires Flipping";
 
-				public static LocString TOOLTIP = "Compost must be flipped periodically to produce <style=\"solid\">Fertilizer</style>";
+				public static LocString TOOLTIP = "Compost must be flipped periodically to produce fertilizer";
 			}
 
 			public class AWAITINGWASTE
 			{
-				public static LocString NAME = "Awaiting compostables";
+				public static LocString NAME = "Awaiting Compostables";
 
-				public static LocString TOOLTIP = "More waste material is required to begin to composting process";
+				public static LocString TOOLTIP = "More waste material is required to begin the composting process";
+			}
+
+			public class BATTERIESSUFFICIENTLYFULL
+			{
+				public static LocString NAME = "Batteries Sufficiently Full";
+
+				public static LocString TOOLTIP = "All batteries are above the refill threshold";
 			}
 
 			public class JOULESAVAILABLE
@@ -658,14 +740,16 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Wattage: {Wattage}";
 
-				public static LocString TOOLTIP = "This building is generating {Wattage} of <style=\"power\">Power</style>";
+				public static LocString TOOLTIP = "This building is generating {Wattage} of power";
 			}
 
 			public class WATTSON
 			{
-				public static LocString NAME = "Next Duplicant: {TimeRemaining}s";
+				public static LocString NAME = "Next Duplicant: {TimeRemaining}";
 
-				public static LocString TOOLTIP = "The Printing Pod can print out new Duplicants over time.\nThe next one will be ready in {TimeRemaining}s";
+				public static LocString TOOLTIP = "The Printing Pod can print out new Duplicants over time.\nThe next one will be ready in {TimeRemaining}";
+
+				public static LocString UNAVAILABLE = "UNAVAILABLE";
 			}
 
 			public class FLUSHTOILET
@@ -710,23 +794,58 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This building is cooling the surrounding area";
 			}
 
+			public class COOLINGSTALLEDHOTENV
+			{
+				public static LocString NAME = "Gas Too Hot";
+
+				public static LocString TOOLTIP = "Incoming pipe contents cannot be cooled more than {2} below the surrounding environment\n\nEnvironment: {0}\nCurrent Pipe Contents: {1}";
+			}
+
+			public class COOLINGSTALLEDCOLDGAS
+			{
+				public static LocString NAME = "Gas Too Cold";
+
+				public static LocString TOOLTIP = "This building cannot cool incoming pipe contents below {0}\n\nCurrent Pipe Contents: {0}";
+			}
+
 			public class CANNOTCOOLFURTHER
 			{
-				public static LocString NAME = "Cannot cool further";
+				public static LocString NAME = "Minimum Temperature Reached";
 
-				public static LocString TOOLTIP = "This building cannot cool the surrounding area any further";
+				public static LocString TOOLTIP = "This building cannot cool the surrounding environment below {0}";
+			}
+
+			public class HEATINGSTALLEDHOTENV
+			{
+				public static LocString NAME = "Max Temperature Reached";
+
+				public static LocString TOOLTIP = "This building cannot heat the surrounding environment beyond {0}";
+			}
+
+			public class HEATINGSTALLEDLOWMASS_GAS
+			{
+				public static LocString NAME = "Low Air Pressure";
+
+				public static LocString TOOLTIP = "A minimum atmospheric pressure of {TargetPressure} is needed for this building to heat up";
+			}
+
+			public class HEATINGSTALLEDLOWMASS_LIQUID
+			{
+				public static LocString NAME = "Not Submerged In Liquid";
+
+				public static LocString TOOLTIP = "This building must be submerged in liquid to function";
 			}
 
 			public class BUILDINGDISABLED
 			{
 				public static LocString NAME = "Building Disabled";
 
-				public static LocString TOOLTIP = "This building has been disabled.";
+				public static LocString TOOLTIP = "Press <color=#F44A47>(ENTER)</color> to resume use";
 			}
 
 			public class WORKING
 			{
-				public static LocString NAME = "Functioning";
+				public static LocString NAME = "Nominal";
 
 				public static LocString TOOLTIP = "This building is working as intended";
 			}
@@ -761,30 +880,123 @@ namespace STRINGS
 
 			public class AWAITINGARTING
 			{
-				public static LocString NAME = "Awaiting decoration";
+				public static LocString NAME = "Incomplete Artwork";
 
-				public static LocString TOOLTIP = "A Duplicant must work on this to create art";
+				public static LocString TOOLTIP = "This building requires a Duplicant's artistic touch";
 			}
 
 			public class LOOKINGUGLY
 			{
 				public static LocString NAME = "Crude";
 
-				public static LocString TOOLTIP = "Honestly, a Morb could do better than this";
+				public static LocString TOOLTIP = "Honestly, a Morb could've done better";
 			}
 
 			public class LOOKINGOKAY
 			{
 				public static LocString NAME = "Quaint";
 
-				public static LocString TOOLTIP = "Duplicants find this art quite charming";
+				public static LocString TOOLTIP = "Duplicants find this artpiece quite charming";
 			}
 
 			public class LOOKINGGREAT
 			{
 				public static LocString NAME = "Masterpiece";
 
-				public static LocString TOOLTIP = "This poignant piece stirs something deep within Duplicants' souls";
+				public static LocString TOOLTIP = "This poignant piece stirs something deep within each Duplicant's soul";
+			}
+
+			public class EXPIRED
+			{
+				public static LocString NAME = "Depleted";
+
+				public static LocString TOOLTIP = "This building has no more use";
+			}
+
+			public class EXCAVATOR_BOMB
+			{
+				public class UNARMED
+				{
+					public static LocString NAME = "Unarmed";
+
+					public static LocString TOOLTIP = "This explosive is currently inactive";
+				}
+
+				public class ARMED
+				{
+					public static LocString NAME = "Armed";
+
+					public static LocString TOOLTIP = "Stand back, this baby's ready to blow!";
+				}
+
+				public class COUNTDOWN
+				{
+					public static LocString NAME = "Countdown: ({0})";
+
+					public static LocString TOOLTIP = "{0} seconds until detonation";
+				}
+
+				public class DUPE_DANGER
+				{
+					public static LocString NAME = "Duplicant Preservation Override";
+
+					public static LocString TOOLTIP = "Explosive disabled due to close Duplicant proximity";
+				}
+
+				public class EXPLODING
+				{
+					public static LocString NAME = "Exploding";
+
+					public static LocString TOOLTIP = "Kaboom!";
+				}
+			}
+
+			public class BURNER
+			{
+				public class BURNING_FUEL
+				{
+					public static LocString NAME = "Consuming Fuel: ({0})";
+
+					public static LocString TOOLTIP = "{0} fuel remaining";
+				}
+
+				public class HAS_FUEL
+				{
+					public static LocString NAME = "Fueled: ({0})";
+
+					public static LocString TOOLTIP = "{0} fuel remaining";
+				}
+			}
+
+			public class ACCESS_CONTROL
+			{
+				public class ACTIVE
+				{
+					public static LocString NAME = "Access Restrictions";
+
+					public static LocString TOOLTIP = "Some Duplicants are prohibited from passing through this door by the current access settings";
+				}
+
+				public class OFFLINE
+				{
+					public static LocString NAME = "Access Control Offline";
+
+					public static LocString TOOLTIP = "This door has granted Emergency Access Permissions\n----------\nAll Duplicants are permitted to pass through it until power is restored";
+				}
+			}
+
+			public class SWITCHSTATUSACTIVE
+			{
+				public static LocString NAME = "Active";
+
+				public static LocString TOOLTIP = "This switch is currently toggled on";
+			}
+
+			public class SWITCHSTATUSINACTIVE
+			{
+				public static LocString NAME = "Inactive";
+
+				public static LocString TOOLTIP = "This switch is currently toggled off";
 			}
 		}
 	}

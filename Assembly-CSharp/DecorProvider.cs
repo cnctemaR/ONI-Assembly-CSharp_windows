@@ -5,6 +5,7 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
+[SkipSaveFileSerialization]
 public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor, IEffectDescriptor
 {
 	public void Refresh()
@@ -49,8 +50,8 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor, IEffec
 		this.onCollectDecorProvidersCallback = new Action<object>(this.OnCollectDecorProviders);
 		if (this.baseDecor != 0f)
 		{
-			AttributeModifier attributeModifier = new AttributeModifier(Db.Get().BuildingAttributes.Decor.Id, this.baseDecor, UI.TOOLTIPS.BASE_VALUE, false);
-			AttributeModifier attributeModifier2 = new AttributeModifier(Db.Get().BuildingAttributes.DecorRadius.Id, this.baseRadius, UI.TOOLTIPS.BASE_VALUE, false);
+			AttributeModifier attributeModifier = new AttributeModifier(Db.Get().BuildingAttributes.Decor.Id, this.baseDecor, UI.TOOLTIPS.BASE_VALUE, false, false);
+			AttributeModifier attributeModifier2 = new AttributeModifier(Db.Get().BuildingAttributes.DecorRadius.Id, this.baseRadius, UI.TOOLTIPS.BASE_VALUE, false, false);
 			this.GetAttributes().Add("Base", attributeModifier);
 			this.GetAttributes().Add("Base", attributeModifier2);
 		}
@@ -104,31 +105,29 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor, IEffec
 		this.splat.Clear();
 	}
 
-	public int DescriptionOrder { get; set; }
-
-	public List<Descriptor> GetRequirementDescriptions(BuildingDef def)
-	{
-		return null;
-	}
-
 	public List<Descriptor> GetEffectDescriptions()
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		if (this.baseDecor != 0f)
+		if (this.decor != null && this.decorRadius != null)
 		{
+			float totalValue = this.decor.GetTotalValue();
+			float totalValue2 = this.decorRadius.GetTotalValue();
 			string text = ((this.baseDecor <= 0f) ? "consumed" : "produced");
 			string text2 = ((this.baseDecor <= 0f) ? UI.BUILDINGEFFECTS.TOOLTIPS.DECORDECREASED : UI.BUILDINGEFFECTS.TOOLTIPS.DECORPROVIDED);
-			string text3 = GameUtil.AddPositiveSign(this.baseDecor.ToString(), this.baseDecor > 0f);
-			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, string.Format(UI.BUILDINGEFFECTS.DECORPROVIDED, text, text3, this.baseRadius)), string.Format(text2, text3, this.baseRadius));
+			text2 = text2 + "\n\n" + this.decor.GetAttributeValueTooltip();
+			string text3 = GameUtil.AddPositiveSign(totalValue.ToString(), totalValue > 0f);
+			Descriptor descriptor = new Descriptor(string.Format(UI.BUILDINGEFFECTS.DECORPROVIDED, text, text3, totalValue2), string.Format(text2, text3, totalValue2), Descriptor.DescriptorType.Effect, false);
 			list.Add(descriptor);
 		}
+		else if (this.baseDecor != 0f)
+		{
+			string text4 = ((this.baseDecor < 0f) ? "consumed" : "produced");
+			string text5 = ((this.baseDecor < 0f) ? UI.BUILDINGEFFECTS.TOOLTIPS.DECORDECREASED : UI.BUILDINGEFFECTS.TOOLTIPS.DECORPROVIDED);
+			string text6 = GameUtil.AddPositiveSign(this.baseDecor.ToString(), this.baseDecor > 0f);
+			Descriptor descriptor2 = new Descriptor(string.Format(UI.BUILDINGEFFECTS.DECORPROVIDED, text4, text6, this.baseRadius), string.Format(text5, text6, this.baseRadius), Descriptor.DescriptorType.Effect, false);
+			list.Add(descriptor2);
+		}
 		return list;
-	}
-
-	public List<Descriptor> GetEffectDescriptions(BuildingDef def)
-	{
-		return this.GetEffectDescriptions();
 	}
 
 	public static int GetLightDecorBonus(int cell)
@@ -140,20 +139,14 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor, IEffec
 		return 0;
 	}
 
-	public List<Descriptor> GetRequirementDescriptions(GameObject go)
+	public List<Descriptor> GetDescriptors(BuildingDef def)
 	{
-		return null;
+		return this.GetEffectDescriptions();
 	}
 
-	public List<string> GetEffectDescriptions(GameObject go)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
-		List<string> list = new List<string>();
-		List<Descriptor> effectDescriptions = this.GetEffectDescriptions();
-		for (int i = 0; i < effectDescriptions.Count; i++)
-		{
-			list.Add(effectDescriptions[i].text);
-		}
-		return list;
+		return this.GetEffectDescriptions();
 	}
 
 	private int width;

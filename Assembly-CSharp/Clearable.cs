@@ -2,17 +2,16 @@
 using System.Runtime.Serialization;
 using KSerialization;
 using STRINGS;
-using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Clearable : Workable, ISaveLoadableJson
+public class Clearable : Workable, ISaveLoadable
 {
 	protected override void OnPrefabInit()
 	{
-		this.Subscribe(2127324410, new EventSystem.EventHandler(this.OnCancel));
-		this.Subscribe(856640610, new EventSystem.EventHandler(this.OnStore));
-		this.Subscribe(-2064133523, new EventSystem.EventHandler(this.OnAbsorb));
-		this.Subscribe(493375141, new EventSystem.EventHandler(this.OnRefreshUserMenu));
+		this.Subscribe(2127324410, new Action<object>(this.OnCancel));
+		this.Subscribe(856640610, new Action<object>(this.OnStore));
+		this.Subscribe(-2064133523, new Action<object>(this.OnAbsorb));
+		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Clearing;
 		Components.Clearables.Add(this);
 	}
@@ -22,7 +21,14 @@ public class Clearable : Workable, ISaveLoadableJson
 	{
 		if (this.isMarkedForClear)
 		{
-			this.MarkForClear(true);
+			if (base.GetComponent<Pickupable>().storage == null)
+			{
+				this.isMarkedForClear = false;
+			}
+			else
+			{
+				this.MarkForClear(true);
+			}
 		}
 	}
 
@@ -46,7 +52,7 @@ public class Clearable : Workable, ISaveLoadableJson
 	{
 		if (this.isMarkedForClear)
 		{
-			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingClear);
+			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingClear, false);
 			this.isMarkedForClear = false;
 			base.GetComponent<KPrefabID>().RemoveTag(GameTags.Garbage);
 			if (this.chore != null)
@@ -63,16 +69,13 @@ public class Clearable : Workable, ISaveLoadableJson
 		{
 			return;
 		}
-		if ((!this.isMarkedForClear || force) && !this.pickupable.IsEntombed && this.chore == null)
+		if ((!this.isMarkedForClear || force) && !this.pickupable.IsEntombed && this.chore == null && this.pickupable.storage == null)
 		{
-			if (this.pickupable.storage == null)
-			{
-				base.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.PendingClear, this);
-			}
+			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.PendingClear, this);
 			this.chore = new ClearChore(Db.Get().ChoreTypes.Transport, base.GetComponent<Pickupable>(), null, true, null, null, null);
 			base.GetComponent<KPrefabID>().AddTag(GameTags.Garbage);
+			this.isMarkedForClear = true;
 		}
-		this.isMarkedForClear = true;
 	}
 
 	private void OnClickClear()
@@ -95,22 +98,22 @@ public class Clearable : Workable, ISaveLoadableJson
 		{
 			UserMenu userMenu = this.userMenu;
 			string text = UI.USERMENUACTIONS.CLEAR.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_move_to_storage", UI.USERMENUACTIONS.CLEAR.NAME, new global::System.Action(this.OnClickClear), global::Action.NumActions, null, null, null, null, text));
+			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_move_to_storage", UI.USERMENUACTIONS.CLEAR.NAME, new global::System.Action(this.OnClickClear), global::Action.NumActions, null, null, null, text, true), 1f);
 		}
 		else
 		{
 			UserMenu userMenu2 = this.userMenu;
 			string text = UI.USERMENUACTIONS.CLEAR.TOOLTIP_OFF;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_move_to_storage", UI.USERMENUACTIONS.CLEAR.NAME_OFF, new global::System.Action(this.OnClickCancel), global::Action.NumActions, null, null, null, null, text));
+			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_move_to_storage", UI.USERMENUACTIONS.CLEAR.NAME_OFF, new global::System.Action(this.OnClickCancel), global::Action.NumActions, null, null, null, text, true), 1f);
 		}
 	}
 
 	private void OnAbsorb(object data)
 	{
-		GameObject gameObject = data as GameObject;
-		if (gameObject != null)
+		Pickupable pickupable = (Pickupable)data;
+		if (pickupable != null)
 		{
-			Clearable component = gameObject.GetComponent<Clearable>();
+			Clearable component = pickupable.GetComponent<Clearable>();
 			if (component != null && component.isMarkedForClear)
 			{
 				this.MarkForClear(false);

@@ -7,11 +7,6 @@ public class MetricsOptionsScreen : KModalScreen
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.Init();
-	}
-
-	private void Init()
-	{
 		this.title.SetText(UI.FRONTEND.METRICS_OPTIONS_SCREEN.TITLE);
 		GameObject gameObject = this.enableButton.transform.GetChild(0).gameObject;
 		gameObject.GetComponent<ToolTip>().SetSimpleTooltip(UI.FRONTEND.METRICS_OPTIONS_SCREEN.TOOLTIP);
@@ -24,13 +19,13 @@ public class MetricsOptionsScreen : KModalScreen
 		component.SetText(UI.FRONTEND.METRICS_OPTIONS_SCREEN.ENABLE_BUTTON);
 		this.dismissButton.onClick += delegate
 		{
-			this.Dismiss();
+			this.Deactivate();
 		};
 		LocText component2 = this.dismissButton.transform.GetChild(0).GetComponent<LocText>();
 		component2.SetText(UI.FRONTEND.METRICS_OPTIONS_SCREEN.DONE_BUTTON);
 		this.closeButton.onClick += delegate
 		{
-			this.Dismiss();
+			this.Deactivate();
 		};
 	}
 
@@ -38,11 +33,6 @@ public class MetricsOptionsScreen : KModalScreen
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetEnabled(!ThreadedHttps<KleiMetrics>.Instance.enabled);
 		this.enableButton.transform.GetChild(0).GetChild(0).gameObject.SetActive(ThreadedHttps<KleiMetrics>.Instance.enabled);
-	}
-
-	private void Dismiss()
-	{
-		base.Show(false);
 	}
 
 	public LocText title;

@@ -7,14 +7,13 @@ public class ToiletWorkableClean : BuildingWorkable
 		base.OnPrefabInit();
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Cleaning;
 		this.workingStatusItem = Db.Get().MiscStatusItems.Cleaning;
-		this.WorkAnims = ToiletWorkableClean.CleanAnims;
 	}
 
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
 		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
-		component.Play(this.WorkAnims, KAnim.PlayMode.Loop);
+		component.Play(ToiletWorkableClean.CleanAnims, KAnim.PlayMode.Loop);
 	}
 
 	protected override void OnStopWork(Worker worker)
@@ -24,5 +23,10 @@ public class ToiletWorkableClean : BuildingWorkable
 		base.OnStopWork(worker);
 	}
 
-	private static readonly string[] CleanAnims = new string[] { "unclog_pre", "unclog_loop" };
+	public override HashedString[] GetWorkAnims(Worker worker)
+	{
+		return ToiletWorkableClean.CleanAnims;
+	}
+
+	private static readonly HashedString[] CleanAnims = new HashedString[] { "unclog_pre", "unclog_loop" };
 }

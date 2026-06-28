@@ -24,6 +24,15 @@ public class World : KMonoBehaviour
 		this.zoneRenderData = base.GetComponent<SubworldZoneRenderData>();
 	}
 
+	protected new void OnDestroy()
+	{
+		if (this.groundRenderer != null)
+		{
+			this.groundRenderer.FreeResources();
+		}
+		base.OnDestroy();
+	}
+
 	public unsafe void UpdateCellInfo(List<SolidInfo> solidInfo, List<CallbackInfo> callbackInfo, int num_solid_substance_change_info, Sim.SolidSubstanceChangeInfo* solid_substance_change_info, int num_liquid_change_info, Sim.LiquidChangeInfo* liquid_change_info)
 	{
 		int count = solidInfo.Count;
@@ -52,7 +61,6 @@ public class World : KMonoBehaviour
 			if (callbackInfo[j].onComplete.IsValid())
 			{
 				global::System.Action action = Game.Instance.callbackManager.Release(callbackInfo[j].onComplete);
-				CellEventLogger.Instance.LogCallbackReceive(callbackInfo[j].onComplete.index);
 				action();
 			}
 		}
@@ -65,7 +73,7 @@ public class World : KMonoBehaviour
 			}
 			else
 			{
-				Grid.RenderedByWorld[cellIdx2] = Grid.Element[cellIdx2].substance.renderedByWorld && Grid.Objects[cellIdx2, 8] == null;
+				Grid.RenderedByWorld[cellIdx2] = Grid.Element[cellIdx2].substance.renderedByWorld && Grid.Objects[cellIdx2, 9] == null;
 				this.groundRenderer.MarkDirty(cellIdx2);
 			}
 		}
@@ -92,10 +100,12 @@ public class World : KMonoBehaviour
 		}
 		GridArea visibleArea = GridVisibleArea.GetVisibleArea();
 		this.groundRenderer.Render(visibleArea.Min, visibleArea.Max);
-		KAnimBatchManager.Instance().UpdateActiveArea(visibleArea.Min, visibleArea.Max);
-		KAnimBatchManager.Instance().UpdateDirty();
+		Vector2I vector2I;
+		Vector2I vector2I2;
+		KBatchedAnimUpdater.instance.GetVisibleArea(out vector2I, out vector2I2);
+		KAnimBatchManager.Instance().UpdateActiveArea(vector2I, vector2I2);
+		KAnimBatchManager.Instance().UpdateDirty(Time.frameCount);
 		KAnimBatchManager.Instance().Render();
-		LightGridManager.UpdateLightGrid();
 		if (Camera.main != null)
 		{
 			Vector3 vector = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, -Camera.main.transform.position.z));

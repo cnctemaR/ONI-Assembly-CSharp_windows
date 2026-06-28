@@ -4,7 +4,7 @@ using UnityEngine;
 public class SleepOnFloorChore : Chore<SleepOnFloorChore.StatesInstance>
 {
 	public SleepOnFloorChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.SleepOnFloor, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true)
+		: base(Db.Get().ChoreTypes.SleepOnFloor, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true, 0)
 	{
 		this.smi = new SleepOnFloorChore.StatesInstance(this, target.gameObject);
 		base.AddPrecondition(ChorePreconditions.IsNotRedAlert, null);
@@ -28,7 +28,7 @@ public class SleepOnFloorChore : Chore<SleepOnFloorChore.StatesInstance>
 
 	public static Chore.Precondition IsNarcolepsingOrIsSleepTime;
 
-	public class StatesInstance : GameStateMachine<SleepOnFloorChore.States, SleepOnFloorChore.StatesInstance, SleepOnFloorChore>.GameInstance
+	public class StatesInstance : GameStateMachine<SleepOnFloorChore.States, SleepOnFloorChore.StatesInstance, SleepOnFloorChore, object>.GameInstance
 	{
 		public StatesInstance(SleepOnFloorChore master, GameObject sleeper)
 			: base(master)
@@ -79,14 +79,14 @@ public class SleepOnFloorChore : Chore<SleepOnFloorChore.StatesInstance>
 			this.success.ReturnSuccess();
 		}
 
-		public StateMachine<SleepOnFloorChore.States, SleepOnFloorChore.StatesInstance, SleepOnFloorChore>.TargetParameter locator;
+		public StateMachine<SleepOnFloorChore.States, SleepOnFloorChore.StatesInstance, SleepOnFloorChore, object>.TargetParameter locator;
 
-		public StateMachine<SleepOnFloorChore.States, SleepOnFloorChore.StatesInstance, SleepOnFloorChore>.TargetParameter sleeper;
+		public StateMachine<SleepOnFloorChore.States, SleepOnFloorChore.StatesInstance, SleepOnFloorChore, object>.TargetParameter sleeper;
 
-		public GameStateMachine<SleepOnFloorChore.States, SleepOnFloorChore.StatesInstance, SleepOnFloorChore>.ApproachSubState<Approachable> approach;
+		public GameStateMachine<SleepOnFloorChore.States, SleepOnFloorChore.StatesInstance, SleepOnFloorChore, object>.ApproachSubState<Approachable> approach;
 
-		public GameStateMachine<SleepOnFloorChore.States, SleepOnFloorChore.StatesInstance, SleepOnFloorChore>.State sleep;
+		public GameStateMachine<SleepOnFloorChore.States, SleepOnFloorChore.StatesInstance, SleepOnFloorChore, object>.State sleep;
 
-		public GameStateMachine<SleepOnFloorChore.States, SleepOnFloorChore.StatesInstance, SleepOnFloorChore>.State success;
+		public GameStateMachine<SleepOnFloorChore.States, SleepOnFloorChore.StatesInstance, SleepOnFloorChore, object>.State success;
 	}
 }

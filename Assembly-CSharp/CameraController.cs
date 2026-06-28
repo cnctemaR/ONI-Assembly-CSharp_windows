@@ -2,15 +2,20 @@
 using System.Collections.Generic;
 using System.IO;
 using FMOD.Studio;
-using FMODUnity;
-using KSerialization;
 using UnityEngine;
 using UnityStandardAssets.ImageEffects;
 
-[SerializationConfig(MemberSerialization.OptIn)]
-public class CameraController : KMonoBehaviour, ISaveLoadableJson, IInputHandler
+public class CameraController : KMonoBehaviour, IInputHandler
 {
 	public KInputHandler inputHandler { get; set; }
+
+	private float zoomScaledKeyPanningSpeed
+	{
+		get
+		{
+			return this.keyPanningSpeed / 20f * this.targetOrthographicSize;
+		}
+	}
 
 	public bool DisableUserCameraControl { get; set; }
 
@@ -154,7 +159,6 @@ public class CameraController : KMonoBehaviour, ISaveLoadableJson, IInputHandler
 		else if (e.TryConsume(global::Action.MouseMiddle) || e.IsAction(global::Action.MouseRight))
 		{
 			this.panning = true;
-			this.panMousePos = Input.mousePosition;
 			this.overrideZoomSpeed = 0f;
 		}
 	}
@@ -175,16 +179,22 @@ public class CameraController : KMonoBehaviour, ISaveLoadableJson, IInputHandler
 		}
 	}
 
+	public void ForcePanningState(bool state)
+	{
+		this.panning = false;
+	}
+
 	public void CameraGoHome(float speed = 2f)
 	{
 		GameObject telepad = GameUtil.GetTelepad();
 		Vector3 vector = new Vector3(telepad.transform.position.x, telepad.transform.position.y + 1f, this.transform.position.z);
-		this.SetTargetPos(vector, 10f);
+		this.SetTargetPos(vector, 10f, true);
 		this.SetOverrideZoomSpeed(speed);
 	}
 
 	public void SnapTo(Vector3 pos)
 	{
+		this.ClearFollowTarget();
 		this.transform.SetPosition(pos);
 		this.keyPanDelta = Vector3.zero;
 		this.SetOrthographicsSize(this.targetOrthographicSize);
@@ -195,8 +205,13 @@ public class CameraController : KMonoBehaviour, ISaveLoadableJson, IInputHandler
 		this.overrideZoomSpeed = tempZoomSpeed;
 	}
 
-	public void SetTargetPos(Vector3 pos, float orthographic_size)
+	public void SetTargetPos(Vector3 pos, float orthographic_size, bool playSound)
 	{
+		this.ClearFollowTarget();
+		if (playSound && pos != this.targetPos)
+		{
+			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Click_Notification", false));
+		}
 		this.isTargetPosSet = true;
 		this.targetPos = pos;
 		this.targetOrthographicSize = orthographic_size;
@@ -246,58 +261,87 @@ public class CameraController : KMonoBehaviour, ISaveLoadableJson, IInputHandler
 				vector5 = this.targetPos - localPosition;
 			}
 		}
+		if (!PlayerController.Instance.IsDragging())
+		{
+			this.panning = false;
+		}
 		Vector3 vector6 = Vector3.zero;
 		if (this.panning)
 		{
-			Vector3 vector7 = main.ScreenToWorldPoint(this.panMousePos);
-			Vector3 vector8 = main.ScreenToWorldPoint(Input.mousePosition);
-			this.panMousePos = Input.mousePosition;
-			vector6 = vector7 - vector8;
+			vector6 = -PlayerController.Instance.GetWorldDragDelta();
 			this.isTargetPosSet = false;
 		}
-		Vector3 vector9 = localPosition + vector5 + vector6;
+		Vector3 vector7 = localPosition + vector5 + vector6;
 		if (this.panning)
 		{
+			if (vector6.magnitude > 0f)
+			{
+				this.ClearFollowTarget();
+			}
 			this.keyPanDelta = Vector3.zero;
 		}
 		else if (!this.DisableUserCameraControl)
 		{
 			if (this.inputHandler.IsActive(global::Action.PanLeft))
 			{
-				this.keyPanDelta.x = this.keyPanDelta.x - this.keyPanningSpeed;
+				this.ClearFollowTarget();
+				this.keyPanDelta.x = this.keyPanDelta.x - this.zoomScaledKeyPanningSpeed;
 				this.isTargetPosSet = false;
 				this.overrideZoomSpeed = 0f;
 			}
 			if (this.inputHandler.IsActive(global::Action.PanRight))
 			{
-				this.keyPanDelta.x = this.keyPanDelta.x + this.keyPanningSpeed;
+				this.ClearFollowTarget();
+				this.keyPanDelta.x = this.keyPanDelta.x + this.zoomScaledKeyPanningSpeed;
 				this.isTargetPosSet = false;
 				this.overrideZoomSpeed = 0f;
 			}
 			if (this.inputHandler.IsActive(global::Action.PanUp))
 			{
-				this.keyPanDelta.y = this.keyPanDelta.y + this.keyPanningSpeed;
+				this.ClearFollowTarget();
+				this.keyPanDelta.y = this.keyPanDelta.y + this.zoomScaledKeyPanningSpeed;
 				this.isTargetPosSet = false;
 				this.overrideZoomSpeed = 0f;
 			}
 			if (this.inputHandler.IsActive(global::Action.PanDown))
 			{
-				this.keyPanDelta.y = this.keyPanDelta.y - this.keyPanningSpeed;
+				this.ClearFollowTarget();
+				this.keyPanDelta.y = this.keyPanDelta.y - this.zoomScaledKeyPanningSpeed;
 				this.isTargetPosSet = false;
 				this.overrideZoomSpeed = 0f;
 			}
-			Vector3 vector10 = new Vector3(Mathf.Lerp(0f, this.keyPanDelta.x, unscaledDeltaTime * this.keyPanningEasing), Mathf.Lerp(0f, this.keyPanDelta.y, unscaledDeltaTime * this.keyPanningEasing), 0f);
-			this.keyPanDelta -= vector10;
-			vector9.x += vector10.x;
-			vector9.y += vector10.y;
+			Vector3 vector8 = new Vector3(Mathf.Lerp(0f, this.keyPanDelta.x, unscaledDeltaTime * this.keyPanningEasing), Mathf.Lerp(0f, this.keyPanDelta.y, unscaledDeltaTime * this.keyPanningEasing), 0f);
+			this.keyPanDelta -= vector8;
+			vector7.x += vector8.x;
+			vector7.y += vector8.y;
 		}
-		if ((double)(vector9 - this.transform.localPosition).magnitude > 0.001)
+		if (this.followTarget != null)
 		{
-			this.transform.localPosition = vector9;
+			vector7.x = this.followTargetPos.x;
+			vector7.y = this.followTargetPos.y;
+		}
+		if ((double)(vector7 - this.transform.localPosition).magnitude > 0.001)
+		{
+			this.transform.localPosition = vector7;
 		}
 		this.ConstrainToWorld();
 		Shader.SetGlobalVector("_WorldCameraPos", new Vector4(this.transform.position.x, this.transform.position.y, this.transform.position.z, main.orthographicSize));
 		this.VisibleArea.Update();
+	}
+
+	private Vector3 GetFollowPos()
+	{
+		if (this.followTarget != null)
+		{
+			Vector3 vector = this.followTarget.transform.position;
+			KAnimControllerBase component = this.followTarget.GetComponent<KAnimControllerBase>();
+			if (component != null)
+			{
+				vector = component.GetWorldPivot();
+			}
+			return vector;
+		}
+		return Vector3.zero;
 	}
 
 	private void ConstrainToWorld()
@@ -363,13 +407,18 @@ public class CameraController : KMonoBehaviour, ISaveLoadableJson, IInputHandler
 		this.cameras.Add(cam);
 	}
 
-	public bool IsAudibleSound(Vector3 pos)
+	public bool IsAudibleSound(Vector3 pos, float modifiedAudibleDistanceScale = 0f)
 	{
 		GridArea visibleArea = GridVisibleArea.GetVisibleArea();
 		Vector2 vector = visibleArea.Max + visibleArea.Min;
 		vector *= 0.5f;
 		Vector2 vector2 = visibleArea.Max - visibleArea.Min;
-		vector2 *= this.maxAudibleDistanceScale;
+		float num = this.maxAudibleDistanceScale;
+		if (modifiedAudibleDistanceScale != 0f)
+		{
+			num = modifiedAudibleDistanceScale;
+		}
+		vector2 *= num;
 		Vector2 vector3 = vector - vector2 * 0.5f;
 		Vector2 vector4 = vector + vector2 * 0.5f;
 		Vector2 vector5 = new Vector2(pos.x, pos.y);
@@ -383,12 +432,15 @@ public class CameraController : KMonoBehaviour, ISaveLoadableJson, IInputHandler
 		{
 			try
 			{
-				EventDescription eventDescription = RuntimeManager.GetEventDescription(RuntimeManager.PathToGUID(soundPath));
-				float num;
-				eventDescription.getMaximumDistance(out num);
-				num *= this.maxAudibleDistanceScale;
-				float num2 = (pos.x - this.transform.position.x) * (pos.x - this.transform.position.x) + (pos.y - this.transform.position.y) * (pos.y - this.transform.position.y);
-				flag = num2 < num * num;
+				EventDescription soundEventDescription = GlobalAssets.GetSoundEventDescription(soundPath);
+				if (soundEventDescription != null)
+				{
+					float num;
+					soundEventDescription.getMaximumDistance(out num);
+					num *= this.maxAudibleDistanceScale;
+					float num2 = (pos.x - this.transform.position.x) * (pos.x - this.transform.position.x) + (pos.y - this.transform.position.y) * (pos.y - this.transform.position.y);
+					flag = num2 < num * num;
+				}
 			}
 			catch
 			{
@@ -396,6 +448,46 @@ public class CameraController : KMonoBehaviour, ISaveLoadableJson, IInputHandler
 			}
 		}
 		return flag;
+	}
+
+	public Vector3 GetVerticallyScaledPosition(Vector3 pos)
+	{
+		GridArea visibleArea = GridVisibleArea.GetVisibleArea();
+		bool flag = false;
+		float num;
+		if (pos.y > (float)visibleArea.Max.y)
+		{
+			num = Mathf.Abs(pos.y - (float)visibleArea.Max.y);
+			flag = true;
+		}
+		else if (pos.y < (float)visibleArea.Min.y)
+		{
+			num = Mathf.Abs(pos.y - (float)visibleArea.Min.y);
+			flag = false;
+		}
+		else
+		{
+			num = 0f;
+		}
+		Audio audio = Audio.Get();
+		float orthographicSize = this.cameras[0].orthographicSize;
+		float num2 = orthographicSize / (audio.listenerReferenceZ - audio.listenerMinZ);
+		if (num2 <= 0f)
+		{
+			num2 = 2f;
+		}
+		else
+		{
+			num2 = 1f;
+		}
+		num = ((num >= 20f) ? 0f : num);
+		float num3 = num * num / (4f * num2);
+		if (num > 0f && !flag)
+		{
+			num3 *= -1f;
+		}
+		Vector3 vector = new Vector3(pos.x, pos.y + num3, pos.z);
+		return vector;
 	}
 
 	public float GetZoom0To1()
@@ -413,6 +505,43 @@ public class CameraController : KMonoBehaviour, ISaveLoadableJson, IInputHandler
 	protected override void OnCleanUp()
 	{
 		CameraController.Instance = null;
+	}
+
+	public void SetFollowTarget(Transform follow_target)
+	{
+		this.ClearFollowTarget();
+		if (follow_target == null)
+		{
+			return;
+		}
+		this.followTarget = follow_target;
+		this.SetOrthographicsSize(6f);
+		this.targetOrthographicSize = 6f;
+		Vector3 followPos = this.GetFollowPos();
+		this.followTargetPos = new Vector3(followPos.x, followPos.y, this.transform.position.z);
+		this.transform.position = this.followTargetPos;
+		this.followTarget.GetComponent<KMonoBehaviour>().Trigger(-1506069671, null);
+	}
+
+	public void ClearFollowTarget()
+	{
+		if (this.followTarget == null)
+		{
+			return;
+		}
+		this.followTarget.GetComponent<KMonoBehaviour>().Trigger(-485480405, null);
+		this.followTarget = null;
+	}
+
+	public void UpdateFollowTarget()
+	{
+		if (this.followTarget != null)
+		{
+			Vector3 followPos = this.GetFollowPos();
+			Vector2 vector = new Vector2(this.transform.localPosition.x, this.transform.localPosition.y);
+			Vector2 vector2 = Vector2.Lerp(vector, followPos, Time.unscaledDeltaTime * 25f);
+			this.followTargetPos = new Vector3(vector2.x, vector2.y, this.transform.localPosition.z);
+		}
 	}
 
 	public const float DEFAULT_MAX_ORTHO_SIZE = 20f;
@@ -441,6 +570,10 @@ public class CameraController : KMonoBehaviour, ISaveLoadableJson, IInputHandler
 
 	public Material GasMaterial;
 
+	public Transform followTarget;
+
+	public Vector3 followTargetPos;
+
 	public GridVisibleArea VisibleArea = new GridVisibleArea();
 
 	[SerializeField]
@@ -455,8 +588,6 @@ public class CameraController : KMonoBehaviour, ISaveLoadableJson, IInputHandler
 	private float overrideZoomSpeed;
 
 	private bool panning;
-
-	private Vector3 panMousePos;
 
 	private Vector3 keyPanDelta;
 

@@ -2,7 +2,7 @@
 using KSerialization;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class CellEventInstance : EventInstanceBase, ISaveLoadableJson
+public class CellEventInstance : EventInstanceBase, ISaveLoadable
 {
 	public CellEventInstance(int cell, int data, int data2, CellEvent ev)
 		: base(ev)

@@ -23,20 +23,13 @@ public class Shower : BuildingWorkable, IEffectDescriptor
 		}
 	}
 
-	public int DescriptionOrder { get; set; }
-
-	public List<Descriptor> GetRequirementDescriptions(BuildingDef def)
-	{
-		return null;
-	}
-
-	public List<Descriptor> GetEffectDescriptions(BuildingDef def)
+	public List<Descriptor> GetDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		if (Shower.EffectsRemoved.Length > 0)
 		{
 			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, UI.BUILDINGEFFECTS.REMOVESEFFECTSUBTITLE), UI.BUILDINGEFFECTS.TOOLTIPS.FABRICATES);
+			descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.REMOVESEFFECTSUBTITLE, UI.BUILDINGEFFECTS.TOOLTIPS.FABRICATES, Descriptor.DescriptorType.Effect);
 			list.Add(descriptor);
 			for (int i = 0; i < Shower.EffectsRemoved.Length; i++)
 			{
@@ -44,8 +37,8 @@ public class Shower : BuildingWorkable, IEffectDescriptor
 				string text2 = Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + text.ToUpper() + ".NAME");
 				string text3 = Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + text.ToUpper() + ".CAUSE");
 				Descriptor descriptor2 = default(Descriptor);
-				string text4 = UI.LISTENTRYTAB + UI.LISTENTRYTAB + "• ";
-				descriptor2.SetupDescriptor(text4 + string.Format(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, UI.BUILDINGEFFECTS.REMOVEDEFFECT), text2), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.REMOVEDEFFECT, text3));
+				descriptor2.IncreaseIndent();
+				descriptor2.SetupDescriptor("• " + string.Format(UI.BUILDINGEFFECTS.REMOVEDEFFECT, text2), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.REMOVEDEFFECT, text3), Descriptor.DescriptorType.Effect);
 				list.Add(descriptor2);
 			}
 		}
@@ -54,9 +47,9 @@ public class Shower : BuildingWorkable, IEffectDescriptor
 
 	private Shower.ShowerSM.Instance smi;
 
-	private static readonly string[] EffectsRemoved = new string[] { "DirtyHands", "Unclean" };
+	private static readonly string[] EffectsRemoved = new string[] { "DirtyHands", "Unclean", "SoakingWet", "WetFeet" };
 
-	public class ShowerSM : GameStateMachine<Shower.ShowerSM, Shower.ShowerSM.Instance>
+	public class ShowerSM : GameStateMachine<Shower.ShowerSM, Shower.ShowerSM.Instance, Shower>
 	{
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
@@ -67,30 +60,37 @@ public class Shower : BuildingWorkable, IEffectDescriptor
 			this.operational.showering.EventTransition(GameHashes.WorkStopped, this.operational.exiting, null).Enter(delegate(Shower.ShowerSM.Instance smi)
 			{
 				smi.master.GetComponent<Operational>().SetActive(true, false);
-			}).PlayAnims((Shower.ShowerSM.Instance smi) => new string[] { "working_pre", "working_loop" }, KAnim.PlayMode.Loop)
+				smi.master.SetWorkTime(smi.master.workTime);
+			}).PlayAnims((Shower.ShowerSM.Instance smi) => Shower.ShowerSM.workingAnims, KAnim.PlayMode.Loop)
 				.Exit(delegate(Shower.ShowerSM.Instance smi)
 				{
 					smi.master.GetComponent<Operational>().SetActive(false, false);
 				});
-			this.operational.exiting.PlayAnim("working_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.unoperational);
+			this.operational.exiting.PlayAnim("working_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.unoperational).Enter("ClearProgressBar", delegate(Shower.ShowerSM.Instance smi)
+			{
+				smi.master.ShowProgressBar(false);
+				smi.master.SetWorkTime(smi.master.workTime);
+			});
 		}
 
-		public GameStateMachine<Shower.ShowerSM, Shower.ShowerSM.Instance, IStateMachineTarget>.State unoperational;
+		public GameStateMachine<Shower.ShowerSM, Shower.ShowerSM.Instance, Shower, object>.State unoperational;
 
 		public Shower.ShowerSM.OperationalStates operational;
 
-		public class OperationalStates : GameStateMachine<Shower.ShowerSM, Shower.ShowerSM.Instance, IStateMachineTarget>.State
+		private static readonly HashedString[] workingAnims = new HashedString[] { "working_pre", "working_loop" };
+
+		public class OperationalStates : GameStateMachine<Shower.ShowerSM, Shower.ShowerSM.Instance, Shower, object>.State
 		{
-			public GameStateMachine<Shower.ShowerSM, Shower.ShowerSM.Instance, IStateMachineTarget>.State idle;
+			public GameStateMachine<Shower.ShowerSM, Shower.ShowerSM.Instance, Shower, object>.State idle;
 
-			public GameStateMachine<Shower.ShowerSM, Shower.ShowerSM.Instance, IStateMachineTarget>.State showering;
+			public GameStateMachine<Shower.ShowerSM, Shower.ShowerSM.Instance, Shower, object>.State showering;
 
-			public GameStateMachine<Shower.ShowerSM, Shower.ShowerSM.Instance, IStateMachineTarget>.State exiting;
+			public GameStateMachine<Shower.ShowerSM, Shower.ShowerSM.Instance, Shower, object>.State exiting;
 		}
 
-		public new class Instance : GameStateMachine<Shower.ShowerSM, Shower.ShowerSM.Instance, IStateMachineTarget>.GameInstance
+		public new class Instance : GameStateMachine<Shower.ShowerSM, Shower.ShowerSM.Instance, Shower, object>.GameInstance
 		{
-			public Instance(IStateMachineTarget master)
+			public Instance(Shower master)
 				: base(master)
 			{
 				this.operational = master.GetComponent<Operational>();

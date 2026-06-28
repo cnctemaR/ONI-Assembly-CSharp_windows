@@ -11,11 +11,11 @@ public class SafeCellMonitor : GameStateMachine<SafeCellMonitor, SafeCellMonitor
 		this.danger.EventTransition(GameHashes.SafeCellLost, this.satisfied, (SafeCellMonitor.Instance smi) => !smi.IsAreaUnsafe()).ToggleChore((SafeCellMonitor.Instance smi) => new MoveToSafetyChore(smi.master), this.satisfied, false);
 	}
 
-	public GameStateMachine<SafeCellMonitor, SafeCellMonitor.Instance, IStateMachineTarget>.State satisfied;
+	public GameStateMachine<SafeCellMonitor, SafeCellMonitor.Instance, IStateMachineTarget, object>.State satisfied;
 
-	public GameStateMachine<SafeCellMonitor, SafeCellMonitor.Instance, IStateMachineTarget>.State danger;
+	public GameStateMachine<SafeCellMonitor, SafeCellMonitor.Instance, IStateMachineTarget, object>.State danger;
 
-	public new class Instance : GameStateMachine<SafeCellMonitor, SafeCellMonitor.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<SafeCellMonitor, SafeCellMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)

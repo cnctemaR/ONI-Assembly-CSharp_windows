@@ -33,7 +33,7 @@ public class BuildQueueButton : KMonoBehaviour
 			bool flag = this.CheckMaterialAvailability(this.order, out empty);
 			if (this.materialsAvailable != flag)
 			{
-				this.SetAvailability(this.order.recipe.Result.GetProperName(), flag, empty);
+				this.SetAvailability(this.order.recipe.Name, flag, empty);
 			}
 		}
 	}
@@ -41,8 +41,8 @@ public class BuildQueueButton : KMonoBehaviour
 	private void SetAvailability(string recipeName, bool currentAvailability, string str)
 	{
 		str = recipeName + "\n" + str;
-		this.unavailableImg.SetActive(!currentAvailability);
 		this.texture.color = ((!currentAvailability) ? this.unavailableSpriteColor : this.order.recipe.IconColor);
+		this.texture.GetComponent<Image>().material = ((!currentAvailability) ? GlobalResources.Instance().AnimMaterialUIDesaturated : null);
 		this.BG.color = ((!currentAvailability) ? this.unavailableBGColor : Color.white);
 		this.materialsAvailable = currentAvailability;
 		if (!currentAvailability)
@@ -67,11 +67,10 @@ public class BuildQueueButton : KMonoBehaviour
 	private void ResetGraphics()
 	{
 		this.BG.sprite = this.emptyBG;
-		this.BG.color = Color.white;
+		this.BG.color = this.defaultBGColor;
 		this.texture.color = Color.white;
 		this.closeImg.SetActive(false);
 		this.infiniteImg.SetActive(false);
-		this.unavailableImg.SetActive(false);
 	}
 
 	private void PointerEntered()
@@ -94,40 +93,40 @@ public class BuildQueueButton : KMonoBehaviour
 	{
 		newTooltip = string.Empty;
 		Recipe recipe = order.recipe;
-		Element[] elements = recipe.GetElements();
 		bool flag = true;
 		for (int i = 0; i < recipe.Ingredients.Count; i++)
 		{
-			float amount = recipe.Ingredients[i].amount;
-			if (i < elements.Length)
+			Recipe.Ingredient ingredient = recipe.Ingredients[i];
+			float amount = ingredient.amount;
+			float num = WorldInventory.Instance.GetAmount(ingredient.tag);
+			if (num < amount && GameTags.LiquidElements.Contains(ingredient.tag))
 			{
-				Element element = elements[i];
-				if (element != null)
+				Element element = ElementLoader.GetElement(ingredient.tag);
+				if (element != null && LiquidSourceDetector2.Instance.IsLiquidAccessible(element))
 				{
-					Tag tag = TagManager.Create(element.id);
-					float num = WorldInventory.Instance.GetAmount(tag);
-					if (num < amount && element.IsLiquid && LiquidSourceDetector2.Instance.IsLiquidAccessible(element))
-					{
-						num = amount + 1f;
-					}
-					if (amount > num)
-					{
-						string text = tag.UnitOfMeasurement();
-						string text2 = newTooltip;
-						newTooltip = string.Concat(new string[]
-						{
-							text2,
-							"Missing ",
-							Mathf.Abs(amount - num).ToString(),
-							text,
-							" of ",
-							element.name,
-							"\n"
-						});
-					}
-					flag = flag && num >= amount;
+					num = amount + 1f;
 				}
 			}
+			if (amount > num)
+			{
+				string text;
+				if (GameTags.DisplayAsCalories.Contains(ingredient.tag))
+				{
+					EdiblesManager.FoodInfo foodInfo = EdiblesManager.instance.GetFoodInfo(ingredient.tag.Name);
+					float num2 = foodInfo.CaloriesPerUnit * (amount - num);
+					text = string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.CALS, GameUtil.GetFormattedCalories(num2, GameUtil.TimeSlice.None, true));
+				}
+				else if (GameTags.DisplayAsUnits.Contains(ingredient.tag))
+				{
+					text = GameUtil.GetFormattedUnits(amount - num, GameUtil.TimeSlice.None, true);
+				}
+				else
+				{
+					text = GameUtil.GetFormattedMass(amount - num, GameUtil.TimeSlice.None, true, "{0:0.#}");
+				}
+				newTooltip += string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.QUEUED_MISSING_INGREDIENTS_TOOLTIP, text, ingredient.tag.ProperName());
+			}
+			flag = flag && num >= amount;
 		}
 		return flag;
 	}
@@ -145,7 +144,8 @@ public class BuildQueueButton : KMonoBehaviour
 			this.texture.enabled = false;
 			if (order != null)
 			{
-				KBatchedAnimController component = order.recipe.Result.GetComponent<KBatchedAnimController>();
+				GameObject prefab = Assets.GetPrefab(order.recipe.Result);
+				KBatchedAnimController component = prefab.GetComponent<KBatchedAnimController>();
 				if (component != null)
 				{
 					this.texture.enabled = true;
@@ -181,7 +181,7 @@ public class BuildQueueButton : KMonoBehaviour
 				this.infiniteImg.SetActive(order.infinite);
 				string empty = string.Empty;
 				bool flag = this.CheckMaterialAvailability(order, out empty);
-				this.SetAvailability(order.recipe.Result.GetProperName(), flag, empty);
+				this.SetAvailability(order.recipe.Name, flag, empty);
 			}
 			else
 			{
@@ -209,10 +209,13 @@ public class BuildQueueButton : KMonoBehaviour
 	private Sprite filledBG;
 
 	[SerializeField]
-	private Color unavailableSpriteColor = Color.gray;
+	private Color unavailableSpriteColor = new Color32(120, 120, 120, byte.MaxValue);
 
 	[SerializeField]
-	private Color unavailableBGColor = Color.gray;
+	private Color unavailableBGColor = new Color32(120, 120, 120, byte.MaxValue);
+
+	[SerializeField]
+	private Color defaultBGColor = new Color32(135, 69, 102, byte.MaxValue);
 
 	public ToolTip toolTip;
 

@@ -4,125 +4,124 @@ using UnityEngine;
 
 public class EventSystem
 {
-	public EventSystem()
-	{
-		this.log = new LoggerFIO("Events");
-	}
-
 	public static void Trigger(GameObject go, int hash, object data = null)
 	{
-		KObject kobject = KObjectManager.Instance.CreateObject(go);
-		kobject.GetEventSystem().Trigger(hash, data);
+		KObject orCreateObject = KObjectManager.Instance.GetOrCreateObject(go);
+		orCreateObject.GetEventSystem().Trigger(hash, data);
 	}
 
 	public void OnCleanUp()
 	{
-		List<GameObject> list = new List<GameObject>(this.subscribedEvents.Keys);
-		foreach (GameObject gameObject in list)
+		for (int i = this.subscribedEvents.Count - 1; i >= 0; i--)
 		{
-			if (gameObject != null)
+			EventSystem.SubscribedEntry subscribedEntry = this.subscribedEvents[i];
+			if (subscribedEntry.go != null)
 			{
-				List<int> list2 = new List<int>(this.subscribedEvents[gameObject].Keys);
-				foreach (int num in list2)
-				{
-					List<EventSystem.EventHandler> list3 = new List<EventSystem.EventHandler>(this.subscribedEvents[gameObject][num]);
-					foreach (EventSystem.EventHandler eventHandler in list3)
-					{
-						this.Unsubscribe(gameObject, num, eventHandler);
-					}
-				}
+				this.Unsubscribe(subscribedEntry.go, subscribedEntry.hash, subscribedEntry.handler);
+			}
+		}
+		for (int j = 0; j < this.entries.Count; j++)
+		{
+			EventSystem.Entry entry = this.entries[j];
+			entry.handler = null;
+			this.entries[j] = entry;
+		}
+		this.entries.Clear();
+		this.subscribedEvents.Clear();
+	}
+
+	public void UnregisterEvent(GameObject target, int eventName, Action<object> handler)
+	{
+		for (int i = 0; i < this.subscribedEvents.Count; i++)
+		{
+			if (this.subscribedEvents[i].hash == eventName && this.subscribedEvents[i].handler == handler && this.subscribedEvents[i].go == target)
+			{
+				this.subscribedEvents.RemoveAt(i);
+				break;
 			}
 		}
 	}
 
-	public void UnregisterEvent(GameObject target, int eventName, EventSystem.EventHandler handler)
+	public void RegisterEvent(GameObject target, int eventName, Action<object> handler)
 	{
-		if (this.subscribedEvents.ContainsKey(target) && this.subscribedEvents[target].ContainsKey(eventName))
-		{
-			this.subscribedEvents[target][eventName].Remove(handler);
-		}
+		this.subscribedEvents.Add(new EventSystem.SubscribedEntry(target, eventName, handler));
 	}
 
-	public void RegisterEvent(GameObject target, int eventName, EventSystem.EventHandler handler)
+	public int Subscribe(int hash, Action<object> handler)
 	{
-		if (!this.subscribedEvents.ContainsKey(target))
-		{
-			this.subscribedEvents.Add(target, new Dictionary<int, List<EventSystem.EventHandler>>());
-		}
-		if (!this.subscribedEvents[target].ContainsKey(eventName))
-		{
-			this.subscribedEvents[target].Add(eventName, new List<EventSystem.EventHandler>());
-		}
-		if (!this.subscribedEvents[target][eventName].Contains(handler))
-		{
-			this.subscribedEvents[target][eventName].Add(handler);
-		}
+		this.entries.Add(new EventSystem.Entry(hash, handler, ++this.nextId));
+		return this.nextId;
 	}
 
-	public void Subscribe(int hash, EventSystem.EventHandler handler)
+	public void Unsubscribe(int hash, Action<object> handler)
 	{
-		EventSystem.ListenerList listenerList;
-		this.eventListeners.TryGetValue(hash, out listenerList);
-		if (listenerList == null)
+		int i = 0;
+		while (i < this.entries.Count)
 		{
-			listenerList = new EventSystem.ListenerList();
-			this.eventListeners[hash] = listenerList;
-		}
-		listenerList.listeners.Add(new EventSystem.ListenerList.Entry(handler));
-	}
-
-	public void Unsubscribe(int hash, EventSystem.EventHandler handler)
-	{
-		EventSystem.ListenerList listenerList;
-		if (this.eventListeners.TryGetValue(hash, out listenerList))
-		{
-			if (listenerList.currentlyTriggering == 0)
+			if (this.entries[i].hash == hash && this.entries[i].handler == handler)
 			{
-				for (int i = 0; i < listenerList.listeners.Count; i++)
+				if (this.currentlyTriggering == 0)
 				{
-					if (listenerList.listeners[i].handler == handler)
-					{
-						listenerList.listeners.RemoveAt(i);
-						break;
-					}
+					this.entries.RemoveAt(i);
+					break;
 				}
+				this.dirty = true;
+				EventSystem.Entry entry = this.entries[i];
+				entry.handler = null;
+				this.entries[i] = entry;
+				break;
 			}
 			else
 			{
-				for (int j = 0; j < listenerList.listeners.Count; j++)
-				{
-					EventSystem.ListenerList.Entry entry = listenerList.listeners[j];
-					if (!entry.pendingRemoval && entry.handler == handler)
-					{
-						entry.pendingRemoval = true;
-						listenerList.listeners[j] = entry;
-						listenerList.dirty = true;
-						break;
-					}
-				}
+				i++;
 			}
 		}
 	}
 
-	public void Subscribe(GameObject target, int eventName, EventSystem.EventHandler handler)
+	public void Unsubscribe(int id)
 	{
-		this.RegisterEvent(target, eventName, handler);
-		KObject kobject = KObjectManager.Instance.CreateObject(target);
-		kobject.GetEventSystem().Subscribe(eventName, handler);
+		int i = 0;
+		while (i < this.entries.Count)
+		{
+			if (this.entries[i].id == id)
+			{
+				if (this.currentlyTriggering == 0)
+				{
+					this.entries.RemoveAt(i);
+					break;
+				}
+				this.dirty = true;
+				EventSystem.Entry entry = this.entries[i];
+				entry.handler = null;
+				this.entries[i] = entry;
+				break;
+			}
+			else
+			{
+				i++;
+			}
+		}
 	}
 
-	public void Unsubscribe(GameObject target, int eventName, EventSystem.EventHandler handler)
+	public void Subscribe(GameObject target, int eventName, Action<object> handler)
+	{
+		this.RegisterEvent(target, eventName, handler);
+		KObject orCreateObject = KObjectManager.Instance.GetOrCreateObject(target);
+		orCreateObject.GetEventSystem().Subscribe(eventName, handler);
+	}
+
+	public void Unsubscribe(GameObject target, int eventName, Action<object> handler)
 	{
 		this.UnregisterEvent(target, eventName, handler);
 		if (target == null)
 		{
 			return;
 		}
-		KObject kobject = KObjectManager.Instance.CreateObject(target);
-		kobject.GetEventSystem().Unsubscribe(eventName, handler);
+		KObject orCreateObject = KObjectManager.Instance.GetOrCreateObject(target);
+		orCreateObject.GetEventSystem().Unsubscribe(eventName, handler);
 	}
 
-	public void Unsubscribe(string[] eventNames, EventSystem.EventHandler handler)
+	public void Unsubscribe(string[] eventNames, Action<object> handler)
 	{
 		foreach (string text in eventNames)
 		{
@@ -137,60 +136,75 @@ public class EventSystem
 		{
 			return;
 		}
-		EventSystem.ListenerList listenerList;
-		this.eventListeners.TryGetValue(hash, out listenerList);
-		if (listenerList != null)
+		this.currentlyTriggering++;
+		int count = this.entries.Count;
+		for (int i = 0; i < count; i++)
 		{
-			listenerList.currentlyTriggering++;
-			int count = listenerList.listeners.Count;
-			for (int i = 0; i < count; i++)
+			if (this.entries[i].hash == hash && this.entries[i].handler != null)
 			{
-				if (!listenerList.listeners[i].pendingRemoval)
+				if (EventSystem.ENABLE_DETAILED_EVENT_PROFILE_INFO)
 				{
-					listenerList.listeners[i].handler(data);
+				}
+				this.entries[i].handler(data);
+				if (EventSystem.ENABLE_DETAILED_EVENT_PROFILE_INFO)
+				{
 				}
 			}
-			listenerList.currentlyTriggering--;
-			if (listenerList.currentlyTriggering == 0 && listenerList.dirty)
-			{
-				listenerList.dirty = false;
-				listenerList.listeners.RemoveAll((EventSystem.ListenerList.Entry x) => x.pendingRemoval);
-			}
+		}
+		this.currentlyTriggering--;
+		if (this.dirty && this.currentlyTriggering == 0)
+		{
+			this.dirty = false;
+			this.entries.RemoveAll((EventSystem.Entry x) => x.handler == null);
 		}
 	}
 
 	public global::Logger GetLog()
 	{
-		return this.log;
+		return null;
 	}
 
-	private Dictionary<int, EventSystem.ListenerList> eventListeners = new Dictionary<int, EventSystem.ListenerList>();
+	private static bool ENABLE_DETAILED_EVENT_PROFILE_INFO;
 
-	private Dictionary<GameObject, Dictionary<int, List<EventSystem.EventHandler>>> subscribedEvents = new Dictionary<GameObject, Dictionary<int, List<EventSystem.EventHandler>>>();
+	private int nextId;
 
-	private LoggerFIO log;
+	private int currentlyTriggering;
 
-	private class ListenerList
+	private bool dirty;
+
+	private List<EventSystem.SubscribedEntry> subscribedEvents = new List<EventSystem.SubscribedEntry>();
+
+	private List<EventSystem.Entry> entries = new List<EventSystem.Entry>();
+
+	private struct Entry
 	{
-		public bool dirty = true;
-
-		public int currentlyTriggering;
-
-		public List<EventSystem.ListenerList.Entry> listeners = new List<EventSystem.ListenerList.Entry>();
-
-		public struct Entry
+		public Entry(int hash, Action<object> handler, int id)
 		{
-			public Entry(EventSystem.EventHandler handler)
-			{
-				this.pendingRemoval = false;
-				this.handler = handler;
-			}
-
-			public EventSystem.EventHandler handler;
-
-			public bool pendingRemoval;
+			this.handler = handler;
+			this.hash = hash;
+			this.id = id;
 		}
+
+		public Action<object> handler;
+
+		public int hash;
+
+		public int id;
 	}
 
-	public delegate void EventHandler(object data);
+	private struct SubscribedEntry
+	{
+		public SubscribedEntry(GameObject go, int hash, Action<object> handler)
+		{
+			this.go = go;
+			this.hash = hash;
+			this.handler = handler;
+		}
+
+		public Action<object> handler;
+
+		public int hash;
+
+		public GameObject go;
+	}
 }

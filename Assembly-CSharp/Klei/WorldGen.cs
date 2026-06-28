@@ -357,7 +357,6 @@ namespace Klei
 
 		public unsafe static void DoSettleSim(Sim.Cell[] cells, float[] bgTemp, WorldGen.OfflineCallbackFunction updateProgressFn)
 		{
-			SimMessages.SimDataInitializeFromCells(Grid.WidthInCells, Grid.HeightInCells, cells, bgTemp, ElementLoader.elements);
 			int num = 300;
 			updateProgressFn(UI.WORLDGEN.SETTLESIM.key, 0f, WorldGenProgressStages.Stages.SettleSim);
 			Vector2I vector2I = new Vector2I(0, 0);
@@ -395,8 +394,8 @@ namespace Klei
 			}
 			for (int j = 0; j < num; j++)
 			{
-				SimMessages.NewGameFrame(vector2I, vector2I2);
-				IntPtr intPtr = Sim.HandleMessage(SimMessageHashes.PrepareGameData, 0, array2);
+				SimMessages.NewGameFrame(0.25f, vector2I, vector2I2);
+				IntPtr intPtr = Sim.HandleMessage(SimMessageHashes.PrepareGameData, array2.Length, array2);
 				updateProgressFn(UI.WORLDGEN.SETTLESIM.key, (float)j / (float)num * 100f, WorldGenProgressStages.Stages.SettleSim);
 				if (!(intPtr == IntPtr.Zero))
 				{
@@ -469,7 +468,7 @@ namespace Klei
 						{
 							if (list2 != null && list2.Count != 0)
 							{
-								while (dictionary.ContainsKey(list2[0]))
+								while (list2.Count > 0 && dictionary.ContainsKey(list2[0]))
 								{
 									list2.RemoveAt(0);
 								}
@@ -498,6 +497,10 @@ namespace Klei
 
 		private static bool isSuitableMobSpawnPoint(int cell, Mob mob)
 		{
+			if (!Grid.IsValidCell(cell) || !Grid.IsValidCell(Grid.CellAbove(cell)) || !Grid.IsValidCell(Grid.CellBelow(cell)))
+			{
+				return false;
+			}
 			switch (mob.location)
 			{
 			case Mob.Location.Floor:
@@ -542,10 +545,10 @@ namespace Klei
 
 		private static void RenderOfflineThreadFn()
 		{
-			WorldGen.RenderOffline();
+			WorldGen.RenderOffline(true);
 		}
 
-		public static Sim.Cell[] RenderOffline()
+		public static Sim.Cell[] RenderOffline(bool doSettle)
 		{
 			Sim.Cell[] array = null;
 			float[] array2 = null;
@@ -558,7 +561,12 @@ namespace Klei
 			}
 			Sim.SIM_Initialize(null);
 			SimMessages.CreateSimElementsTable(ElementLoader.elements);
-			WorldGen.DoSettleSim(array, array2, WorldGen.successCallbackFn);
+			WorldGen.EnsureEnoughAlgaeInStartingBiome(array);
+			SimMessages.SimDataInitializeFromCells(Grid.WidthInCells, Grid.HeightInCells, array, array2, ElementLoader.elements);
+			if (doSettle)
+			{
+				WorldGen.DoSettleSim(array, array2, WorldGen.successCallbackFn);
+			}
 			WorldGen.DetectNaturalCavities(WorldGen.successCallbackFn);
 			for (int i = 0; i < WorldGen.TerrainCells.Count; i++)
 			{
@@ -759,6 +767,41 @@ namespace Klei
 			return true;
 		}
 
+		public static void EnsureEnoughAlgaeInStartingBiome(Sim.Cell[] cells)
+		{
+			List<TerrainCell> terrainCellsForTag = WorldGen.GetTerrainCellsForTag(WorldGenTags.StartWorld);
+			float num = 8200f;
+			float num2 = 0f;
+			int num3 = 0;
+			foreach (TerrainCell terrainCell in terrainCellsForTag)
+			{
+				foreach (int num4 in terrainCell.GetAllCells())
+				{
+					if (ElementLoader.GetElementIndex(SimHashes.Algae) == (int)cells[num4].elementIdx)
+					{
+						num3++;
+						num2 += cells[num4].mass;
+					}
+				}
+			}
+			if (num2 < num)
+			{
+				Debug.LogWarning("Not enough Algae in startion biome - inflating mass");
+				float num5 = (num - num2) / (float)num3;
+				foreach (TerrainCell terrainCell2 in terrainCellsForTag)
+				{
+					foreach (int num6 in terrainCell2.GetAllCells())
+					{
+						if (ElementLoader.GetElementIndex(SimHashes.Algae) == (int)cells[num6].elementIdx)
+						{
+							int num7 = num6;
+							cells[num7].mass = cells[num7].mass + num5;
+						}
+					}
+				}
+			}
+		}
+
 		public static bool RenderToMap(WorldGen.OfflineCallbackFunction updateProgressFn, ref Sim.Cell[] cells, ref float[] bgTemp)
 		{
 			WorldGen.stats.ConvertVoroToMapTime = global::System.DateTime.Now.Ticks;
@@ -925,8 +968,8 @@ namespace Klei
 			n1.site = n2.site;
 			n2.site = site;
 			string type = node.type;
-			node.type = node2.type;
-			node2.type = type;
+			node.SetType(node2.type);
+			node2.SetType(type);
 		}
 
 		public static void ApplyStartNode()
@@ -1189,7 +1232,7 @@ namespace Klei
 					{
 						if (WorldGen.data.terrainCells[i].poly.Contains(line[j]))
 						{
-							WorldGen.data.terrainCells[i].node.type = type;
+							WorldGen.data.terrainCells[i].node.SetType(type);
 						}
 					}
 				}
@@ -1296,7 +1339,7 @@ namespace Klei
 					{
 						TerrainCell terrainCell = WorldGen.data.overworldCells.Find((TerrainCell c) => c.node.node == edge2.site0.node);
 						TerrainCell terrainCell2 = WorldGen.data.overworldCells.Find((TerrainCell c) => c.node.node == edge2.site1.node);
-						Debug.Assert(terrainCell != null && terrainCell2 != null, "NULL Terraincell nodes with EdgeUnpassable");
+						Debug.Assert(terrainCell != null && terrainCell2 != null, "NULL Terrainell nodes with EdgeUnpassable");
 						list4.Add(new Border(new Neighbors(terrainCell, terrainCell2), edge2.corner0.position, edge2.corner1.position)
 						{
 							element = list3,
@@ -1782,7 +1825,6 @@ namespace Klei
 			}
 			catch (FileNotFoundException)
 			{
-				Output.LogWarning(new object[] { "File [" + fileName + "] not found" });
 				flag = false;
 			}
 			catch (Exception ex)
@@ -1803,6 +1845,7 @@ namespace Klei
 				{
 					simSaveFileStructure.worldDetail.overworldCells.Add(new WorldDetailSave.OverworldCell(WorldGen.data.overworldCells[i]));
 				}
+				simSaveFileStructure.worldDetail.globalWorldSeed = WorldGen.data.globalWorldSeed;
 				simSaveFileStructure.WidthInCells = Grid.WidthInCells;
 				simSaveFileStructure.HeightInCells = Grid.HeightInCells;
 				using (MemoryStream memoryStream = new MemoryStream())
@@ -2062,8 +2105,6 @@ namespace Klei
 		[Flags]
 		public enum DebugFlags
 		{
-			Site = 1,
-			Centroid = 2,
 			SitePoly = 4
 		}
 

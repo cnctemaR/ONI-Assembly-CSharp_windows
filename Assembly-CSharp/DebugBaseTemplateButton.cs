@@ -230,22 +230,22 @@ public class DebugBaseTemplateButton : KScreen
 					Element element3 = ElementLoader.elements[(int)Grid.Cell[num16].elementIdx];
 					list.Add(new BaseTemplateCellInfo(num17 - num7, num18 - num8, element3.id, cell3.temperature, cell3.mass));
 				}
-				Orientation orientation = Orientation.Up;
+				Orientation orientation = Orientation.Neutral;
 				Rotatable component = buildingComplete.gameObject.GetComponent<Rotatable>();
 				if (component != null)
 				{
 					orientation = component.GetOrientation();
 				}
 				float num19 = 280f;
-				StructureTemperature component2 = buildingComplete.gameObject.GetComponent<StructureTemperature>();
-				if (component2)
+				HandleVector<int>.Handle handle = GameComps.StructureTemperatures.GetHandle(buildingComplete.gameObject);
+				if (handle.IsValid())
 				{
-					num19 = buildingComplete.gameObject.GetComponent<StructureTemperature>().Temperature;
+					num19 = GameComps.StructureTemperatures.GetData(handle).Temperature;
 				}
 				string name = buildingComplete.PrefabID().Name;
 				if (name == null)
 				{
-					goto IL_0436;
+					goto IL_043F;
 				}
 				if (DebugBaseTemplateButton.<>f__switch$map1 == null)
 				{
@@ -264,133 +264,108 @@ public class DebugBaseTemplateButton : KScreen
 					{
 					case 0:
 						array[k] = new BaseTemplateConduitConnection(BaseTemplateConduitConnection.BaseTemplateConduitSystemType.Electrical, Game.Instance.electricalConduitSystem.GetConnections(Grid.PosToCell(buildingComplete), true));
-						goto IL_04E3;
+						goto IL_04EC;
 					case 1:
 						array[k] = new BaseTemplateConduitConnection(BaseTemplateConduitConnection.BaseTemplateConduitSystemType.Electrical, Game.Instance.electricalConduitSystem.GetConnections(Grid.PosToCell(buildingComplete), true));
-						goto IL_04E3;
+						goto IL_04EC;
 					case 2:
 						array[k] = new BaseTemplateConduitConnection(BaseTemplateConduitConnection.BaseTemplateConduitSystemType.Gas, Game.Instance.gasConduitSystem.GetConnections(Grid.PosToCell(buildingComplete), true));
-						goto IL_04E3;
+						goto IL_04EC;
 					case 3:
 						array[k] = new BaseTemplateConduitConnection(BaseTemplateConduitConnection.BaseTemplateConduitSystemType.Liquid, Game.Instance.liquidConduitSystem.GetConnections(Grid.PosToCell(buildingComplete), true));
-						goto IL_04E3;
+						goto IL_04EC;
 					}
-					goto IL_0436;
+					goto IL_043F;
 				}
-				goto IL_0436;
-				IL_04E3:
+				goto IL_043F;
+				IL_04EC:
 				num14 -= num7;
 				num15 -= num8;
 				num19 = Mathf.Clamp(num19, 1f, 99999f);
 				BaseTemplatePrefabInfo baseTemplatePrefabInfo = new BaseTemplatePrefabInfo(buildingComplete.PrefabID().Name, num14, num15, buildingComplete.GetComponent<PrimaryElement>().ElementID, num19, 0f, orientation);
-				Storage component3 = buildingComplete.gameObject.GetComponent<Storage>();
-				if (component3 != null)
+				Storage component2 = buildingComplete.gameObject.GetComponent<Storage>();
+				if (component2 != null)
 				{
-					foreach (GameObject gameObject in component3.items)
+					foreach (GameObject gameObject in component2.items)
 					{
 						float num21 = 0f;
 						SimHashes simHashes = SimHashes.Vacuum;
 						float num22 = 280f;
 						bool flag = false;
-						PrimaryElement component4 = gameObject.GetComponent<PrimaryElement>();
-						if (component4 != null)
+						PrimaryElement component3 = gameObject.GetComponent<PrimaryElement>();
+						if (component3 != null)
 						{
-							num21 = component4.Mass;
-							simHashes = component4.ElementID;
-							num22 = component4.Temperature;
+							num21 = component3.Units;
+							simHashes = component3.ElementID;
+							num22 = component3.Temperature;
 						}
-						ElementChunk component5 = gameObject.GetComponent<ElementChunk>();
-						int num23 = 0;
-						Edible component6 = gameObject.gameObject.GetComponent<Edible>();
-						if (component6 != null && component4 != null)
-						{
-							num23 = Mathf.RoundToInt(component4.Units);
-						}
-						float num24 = 0f;
+						float num23 = 0f;
 						Rottable.Instance smi = gameObject.gameObject.GetSMI<Rottable.Instance>();
 						if (smi != null)
 						{
-							num24 = smi.RotAmount;
+							num23 = smi.RotValue;
 						}
-						if (component4 != null && component6 == null && smi == null)
+						ElementChunk component4 = gameObject.GetComponent<ElementChunk>();
+						if (component4 != null)
 						{
 							flag = true;
-							if (component5 == null)
-							{
-								Debug.LogWarning("Template saver is unsure what this stored pickup object is: " + gameObject.GetProperName() + ". Unlikely to load correctly.");
-							}
 						}
 						BaseTemplateStorageItem baseTemplateStorageItem = new BaseTemplateStorageItem(gameObject.PrefabID().Name, num21, num22, simHashes, flag);
-						if (component6)
-						{
-							baseTemplateStorageItem.rations.rations = num23;
-						}
 						if (smi != null)
 						{
-							baseTemplateStorageItem.rottable.rotAmount = num24;
+							baseTemplateStorageItem.rottable.rotAmount = num23;
 						}
 						baseTemplatePrefabInfo.AssignStorage(baseTemplateStorageItem);
 					}
 				}
 				list2.Add(baseTemplatePrefabInfo);
-				goto IL_06E4;
-				IL_0436:
+				goto IL_065E;
+				IL_043F:
 				array[k] = new BaseTemplateConduitConnection(BaseTemplateConduitConnection.BaseTemplateConduitSystemType.None, (UtilityConnections)0);
-				goto IL_04E3;
+				goto IL_04EC;
 			}
-			IL_06E4:;
+			IL_065E:;
 		}
 		for (int m = 0; m < Components.Pickupables.Count; m++)
 		{
 			if (Components.Pickupables[m].gameObject.activeSelf)
 			{
 				Pickupable pickupable = Components.Pickupables[m];
-				int num25 = Grid.PosToCell(pickupable);
-				if (this.SaveAllPickups || this.SelectedCells.Contains(num25))
+				int num24 = Grid.PosToCell(pickupable);
+				if (this.SaveAllPickups || this.SelectedCells.Contains(num24))
 				{
 					if (!Components.Pickupables[m].gameObject.GetComponent<MinionBrain>())
 					{
+						int num25;
 						int num26;
-						int num27;
-						Grid.CellToXY(num25, out num26, out num27);
-						num26 -= num7;
-						num27 -= num8;
-						float num28 = 280f;
-						float num29 = 1f;
-						ElementChunk component7 = pickupable.gameObject.GetComponent<ElementChunk>();
-						float num30 = 0f;
-						Edible component8 = pickupable.gameObject.GetComponent<Edible>();
-						if (component8 != null)
-						{
-							num30 = component8.rations;
-						}
-						float num31 = 0f;
+						Grid.CellToXY(num24, out num25, out num26);
+						num25 -= num7;
+						num26 -= num8;
+						float num27 = 280f;
+						float num28 = 1f;
+						float num29 = 0f;
 						Rottable.Instance smi2 = pickupable.gameObject.GetSMI<Rottable.Instance>();
 						if (smi2 != null)
 						{
-							num31 = smi2.RotAmount;
+							num29 = smi2.RotValue;
 						}
-						PrimaryElement component9 = pickupable.gameObject.GetComponent<PrimaryElement>();
-						if (component9 != null)
+						PrimaryElement component5 = pickupable.gameObject.GetComponent<PrimaryElement>();
+						if (component5 != null)
 						{
-							num29 = component9.Mass;
-							num28 = component9.Temperature;
-							if (component7 == null && component8 == null && smi2 == null)
-							{
-								Debug.LogWarning("Template saver is unsure what this pickup object is: " + pickupable.GetProperName() + ". Unlikely to load correctly.");
-							}
+							num28 = component5.Units;
+							num27 = component5.Temperature;
 						}
-						PrimaryElement component10 = pickupable.gameObject.GetComponent<PrimaryElement>();
-						if (component10 != null && component9 != null && component8 == null)
+						ElementChunk component6 = pickupable.gameObject.GetComponent<ElementChunk>();
+						if (component6 != null)
 						{
-							BaseTemplatePrefabInfo baseTemplatePrefabInfo2 = new BaseTemplatePrefabInfo(pickupable.PrefabID().Name, num26, num27, component10.ElementID, num28, num29, Orientation.Up);
+							BaseTemplatePrefabInfo baseTemplatePrefabInfo2 = new BaseTemplatePrefabInfo(pickupable.PrefabID().Name, num25, num26, component5.ElementID, num27, num28, Orientation.Neutral);
 							list4.Add(baseTemplatePrefabInfo2);
 						}
 						else
 						{
-							BaseTemplatePrefabInfo baseTemplatePrefabInfo2 = new BaseTemplatePrefabInfo(pickupable.PrefabID().Name, num26, num27);
-							baseTemplatePrefabInfo2.rations.rations = num30;
-							baseTemplatePrefabInfo2.rottable.rotAmount = num31;
+							BaseTemplatePrefabInfo baseTemplatePrefabInfo2 = new BaseTemplatePrefabInfo(pickupable.PrefabID().Name, num25, num26);
+							baseTemplatePrefabInfo2.units = num28;
+							baseTemplatePrefabInfo2.rottable.rotAmount = num29;
 							list3.Add(baseTemplatePrefabInfo2);
 						}
 					}
@@ -428,7 +403,7 @@ public class DebugBaseTemplateButton : KScreen
 		if (!this.SelectedCells.Contains(cell))
 		{
 			GameObject gameObject = Util.KInstantiate(this.Placer, SceneOrganizer.Instance.GetFolder(Folder.Placers), null);
-			Grid.Objects[cell, 0] = gameObject;
+			Grid.Objects[cell, 7] = gameObject;
 			Vector3 vector = Grid.CellToPosCBC(cell, this.visualizerLayer);
 			float depthBias = InterfaceTool.DepthBias;
 			vector.z += depthBias;
@@ -441,7 +416,7 @@ public class DebugBaseTemplateButton : KScreen
 	{
 		if (this.SelectedCells.Contains(cell))
 		{
-			GameObject gameObject = Grid.Objects[cell, 0];
+			GameObject gameObject = Grid.Objects[cell, 7];
 			if (gameObject != null)
 			{
 				gameObject.DeleteObject();

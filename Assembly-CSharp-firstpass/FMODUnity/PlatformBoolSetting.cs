@@ -3,7 +3,7 @@
 namespace FMODUnity
 {
 	[Serializable]
-	public class PlatformBoolSetting : PlatformSetting<bool>
+	public class PlatformBoolSetting : PlatformSetting<TriStateBool>
 	{
 	}
 }

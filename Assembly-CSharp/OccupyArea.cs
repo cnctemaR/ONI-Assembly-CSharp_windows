@@ -1,13 +1,41 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using UnityEngine;
 
+[SkipSaveFileSerialization]
 public class OccupyArea : KMonoBehaviour
 {
+	public bool ApplyToCells
+	{
+		get
+		{
+			return this.applyToCells;
+		}
+		set
+		{
+			if (value != this.applyToCells)
+			{
+				if (value)
+				{
+					this.UpdateOccupiedArea();
+				}
+				else
+				{
+					this.ClearOccupiedArea();
+				}
+				this.applyToCells = value;
+			}
+		}
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.UpdateOccupiedArea();
+		if (this.applyToCells)
+		{
+			this.UpdateOccupiedArea();
+		}
 	}
 
 	private void ValidatePosition()
@@ -66,6 +94,10 @@ public class OccupyArea : KMonoBehaviour
 		{
 			return;
 		}
+		if (this.occupiedGridCells == null)
+		{
+			return;
+		}
 		foreach (int num in this.occupiedGridCells)
 		{
 			if (Grid.Objects[num, (int)this.objectLayer] == base.gameObject)
@@ -120,6 +152,11 @@ public class OccupyArea : KMonoBehaviour
 		return num2 - num + 1;
 	}
 
+	public Extents GetExtents()
+	{
+		return new Extents(Grid.PosToCell(base.gameObject), this.OccupiedCellsOffsets);
+	}
+
 	private void OnDrawGizmosSelected()
 	{
 		int num = Grid.PosToCell(base.gameObject);
@@ -129,8 +166,14 @@ public class OccupyArea : KMonoBehaviour
 			{
 				Gizmos.color = Color.cyan;
 				Gizmos.DrawWireCube(Grid.CellToPos(Grid.OffsetCell(num, cellOffset)) + Vector3.right / 2f + Vector3.up / 2f, Vector3.one);
-				Gizmos.color = Color.green;
-				Gizmos.DrawWireCube(Grid.CellToPos(Grid.OffsetCell(num, cellOffset)) + Vector3.right / 2f + Vector3.up / 2f, Vector3.one / 0.9f);
+			}
+		}
+		if (this.AboveOccupiedCellOffsets != null)
+		{
+			foreach (CellOffset cellOffset2 in this.AboveOccupiedCellOffsets)
+			{
+				Gizmos.color = Color.blue;
+				Gizmos.DrawWireCube(Grid.CellToPos(Grid.OffsetCell(num, cellOffset2)) + Vector3.right / 2f + Vector3.up / 2f, Vector3.one * 0.9f);
 			}
 		}
 	}
@@ -163,9 +206,40 @@ public class OccupyArea : KMonoBehaviour
 		return true;
 	}
 
+	public bool TestAreaAbove(int rootCell, Func<int, bool> testDelegate)
+	{
+		if (this.AboveOccupiedCellOffsets == null)
+		{
+			List<CellOffset> list = new List<CellOffset>();
+			for (int i = 0; i < this.OccupiedCellsOffsets.Length; i++)
+			{
+				CellOffset cellOffset = new CellOffset(this.OccupiedCellsOffsets[i].x, this.OccupiedCellsOffsets[i].y + 1);
+				if (Array.IndexOf<CellOffset>(this.OccupiedCellsOffsets, cellOffset) == -1)
+				{
+					list.Add(cellOffset);
+				}
+			}
+			this.AboveOccupiedCellOffsets = list.ToArray();
+		}
+		for (int j = 0; j < this.AboveOccupiedCellOffsets.Length; j++)
+		{
+			int num = Grid.OffsetCell(rootCell, this.AboveOccupiedCellOffsets[j]);
+			if (!testDelegate(num))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
 	public CellOffset[] OccupiedCellsOffsets;
+
+	private CellOffset[] AboveOccupiedCellOffsets;
 
 	private int[] occupiedGridCells;
 
 	public ObjectLayer objectLayer = ObjectLayer.NumLayers;
+
+	[SerializeField]
+	private bool applyToCells = true;
 }

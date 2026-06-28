@@ -33,7 +33,7 @@ namespace Klei.AI
 				}
 				foreach (ChoreGroup choreGroup in this.disabledChoreGroups)
 				{
-					text += string.Format("\n{0}{1}: {2}", "• ", text2, choreGroup.Id);
+					text += string.Format("\n{0}{1}: {2}", "• ", text2, choreGroup.Name);
 				}
 			}
 			if (this.ExtendedTooltip != null)

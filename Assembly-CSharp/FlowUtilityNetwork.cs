@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class FlowUtilityNetwork : UtilityNetwork
 {
@@ -16,42 +17,42 @@ public class FlowUtilityNetwork : UtilityNetwork
 		return this.sinks.Count;
 	}
 
-	protected override void AddItemInternal(int cell, FlowUtilityNetwork.IItem item)
+	public override void AddItem(int cell, object generic_item)
 	{
-		if (item != null && (item.TransferType == this.transferType || item.TransferType == Vent.Transfer.NumTypes))
+		FlowUtilityNetwork.IItem item = (FlowUtilityNetwork.IItem)generic_item;
+		if (item != null)
 		{
-			switch (item.EndpointType)
+			Endpoint endpointType = item.EndpointType;
+			if (endpointType != Endpoint.Source)
 			{
-			case Vent.Endpoint.Conduit:
-				if (this.conduits.Contains(item))
+				if (endpointType != Endpoint.Sink)
 				{
-					return;
+					Debug.Assert(false, "wtf");
+					item.Network = this;
 				}
-				this.conduits.Add(item);
-				item.Network = this;
-				break;
-			case Vent.Endpoint.Source:
+				else
+				{
+					if (this.sinks.Contains(item))
+					{
+						return;
+					}
+					this.sinks.Add(item);
+					item.Network = this;
+				}
+			}
+			else
+			{
 				if (this.sources.Contains(item))
 				{
 					return;
 				}
 				this.sources.Add(item);
 				item.Network = this;
-				break;
-			case Vent.Endpoint.Sink:
-			case Vent.Endpoint.Consumer:
-				if (this.sinks.Contains(item))
-				{
-					return;
-				}
-				this.sinks.Add(item);
-				item.Network = this;
-				break;
 			}
 		}
 	}
 
-	public override void Reset()
+	public override void Reset(UtilityNetworkGridNode[] grid)
 	{
 		for (int i = 0; i < this.sinks.Count; i++)
 		{
@@ -82,37 +83,36 @@ public class FlowUtilityNetwork : UtilityNetwork
 
 		FlowUtilityNetwork Network { set; }
 
-		Vent.Transfer TransferType { get; }
+		Endpoint EndpointType { get; }
 
-		Vent.Endpoint EndpointType { get; }
+		ConduitType ConduitType { get; }
 
 		int SortKey { get; }
 	}
 
 	public class NetworkItem : FlowUtilityNetwork.IItem
 	{
-		public NetworkItem(Vent.Transfer transfer_type, Vent.Endpoint endpoint_type, int cell, int sort_key = 1000, Action<FlowUtilityNetwork> on_set_network = null)
+		public NetworkItem(ConduitType conduit_type, Endpoint endpoint_type, int cell, int sort_key = 1000)
 		{
-			this.transferType = transfer_type;
+			this.conduitType = conduit_type;
 			this.endpointType = endpoint_type;
 			this.cell = cell;
 			this.sortKey = sort_key;
-			this.onSetNetwork = on_set_network;
 		}
 
-		public Vent.Transfer TransferType
-		{
-			get
-			{
-				return this.transferType;
-			}
-		}
-
-		public Vent.Endpoint EndpointType
+		public Endpoint EndpointType
 		{
 			get
 			{
 				return this.endpointType;
+			}
+		}
+
+		public ConduitType ConduitType
+		{
+			get
+			{
+				return this.conduitType;
 			}
 		}
 
@@ -133,10 +133,6 @@ public class FlowUtilityNetwork : UtilityNetwork
 			set
 			{
 				this.network = value;
-				if (this.onSetNetwork != null)
-				{
-					this.onSetNetwork(value);
-				}
 			}
 		}
 
@@ -156,10 +152,8 @@ public class FlowUtilityNetwork : UtilityNetwork
 
 		private FlowUtilityNetwork network;
 
-		private Vent.Transfer transferType;
+		private Endpoint endpointType;
 
-		private Vent.Endpoint endpointType;
-
-		private Action<FlowUtilityNetwork> onSetNetwork;
+		private ConduitType conduitType;
 	}
 }

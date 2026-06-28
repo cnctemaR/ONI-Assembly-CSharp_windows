@@ -4,7 +4,7 @@ using UnityEngine;
 public class SleepChore : Chore<SleepChore.StatesInstance>
 {
 	public SleepChore(IStateMachineTarget target, GameObject bed)
-		: base(Db.Get().ChoreTypes.Sleep, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true)
+		: base(Db.Get().ChoreTypes.Sleep, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true, 0)
 	{
 		this.smi = new SleepChore.StatesInstance(this, target.gameObject, bed);
 		base.AddPrecondition(ChorePreconditions.IsNotRedAlert, null);
@@ -12,7 +12,7 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 		base.AddPrecondition(ChorePreconditions.IsOperational, bed);
 	}
 
-	public class StatesInstance : GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore>.GameInstance
+	public class StatesInstance : GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.GameInstance
 	{
 		public StatesInstance(SleepChore master, GameObject sleeper, GameObject bed)
 			: base(master)
@@ -38,21 +38,21 @@ public class SleepChore : Chore<SleepChore.StatesInstance>
 			this.success.ReturnSuccess();
 		}
 
-		public StateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore>.TargetParameter sleeper;
+		public StateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.TargetParameter sleeper;
 
-		public StateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore>.TargetParameter bed;
+		public StateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.TargetParameter bed;
 
-		public GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore>.ApproachSubState<Approachable> approach;
+		public GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.ApproachSubState<Approachable> approach;
 
 		public SleepChore.States.SleepStates sleep;
 
-		public GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore>.State success;
+		public GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State success;
 
-		public class SleepStates : GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore>.State
+		public class SleepStates : GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State
 		{
-			public GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore>.State comfortable;
+			public GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State comfortable;
 
-			public GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore>.State irritated;
+			public GameStateMachine<SleepChore.States, SleepChore.StatesInstance, SleepChore, object>.State irritated;
 		}
 	}
 }

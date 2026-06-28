@@ -8,6 +8,18 @@ public struct SchedulerHandle
 		this.scheduler = scheduler;
 	}
 
+	public float TimeRemaining
+	{
+		get
+		{
+			if (!this.IsValid)
+			{
+				return -1f;
+			}
+			return this.entry.time - this.scheduler.GetTime();
+		}
+	}
+
 	public void Clear()
 	{
 		if (this.scheduler == null)

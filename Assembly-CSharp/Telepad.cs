@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Klei.AI;
-using KSerialization;
 using UnityEngine;
 
-[SerializationConfig(MemberSerialization.OptIn)]
-public class Telepad : StateMachineComponent<Telepad.StatesInstance>, ISaveLoadableJson
+public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 {
 	protected override void OnPrefabInit()
 	{
@@ -16,7 +14,14 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>, ISaveLoada
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		Components.Telepads.Add(this);
 		base.smi.StartSM();
+	}
+
+	protected override void OnCleanUp()
+	{
+		Components.Telepads.Remove(this);
+		base.OnCleanUp();
 	}
 
 	public void Update()
@@ -54,7 +59,7 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>, ISaveLoada
 		int num2 = Immigration.Instance.SpawnMinions();
 		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities)
 		{
-			minionIdentity.GetComponent<Effects>().Add("NewCrewArrival", false);
+			minionIdentity.GetComponent<Effects>().Add("NewCrewArrival", true);
 		}
 		for (int i = 0; i < num2; i++)
 		{
@@ -62,7 +67,7 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>, ISaveLoada
 			gameObject.transform.localPosition = Grid.CellToPosCBC(num, Grid.SceneLayer.Move);
 			starting_stats.Apply(gameObject);
 			ChoreProvider component = gameObject.GetComponent<ChoreProvider>();
-			new EmoteChore(component, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", new string[] { "portalbirth" }, null);
+			new EmoteChore(component, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", Telepad.PortalBirthAnim, null);
 		}
 		base.smi.sm.closePortal.Trigger(base.smi);
 	}
@@ -79,7 +84,9 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>, ISaveLoada
 
 	private List<MinionStartingStats> minionStats;
 
-	public class StatesInstance : GameStateMachine<Telepad.States, Telepad.StatesInstance, Telepad>.GameInstance
+	private static readonly HashedString[] PortalBirthAnim = new HashedString[] { "portalbirth" };
+
+	public class StatesInstance : GameStateMachine<Telepad.States, Telepad.StatesInstance, Telepad, object>.GameInstance
 	{
 		public StatesInstance(Telepad master)
 			: base(master)
@@ -98,22 +105,35 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>, ISaveLoada
 		{
 			default_state = this.idle;
 			base.serializable = true;
-			this.idle.PlayAnim("idle", KAnim.PlayMode.Once, null).OnSignal(this.openPortal, this.opening);
+			this.idle.EventTransition(GameHashes.OperationalChanged, this.unoperational, (Telepad.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational).PlayAnim("idle", KAnim.PlayMode.Once, null).OnSignal(this.openPortal, this.opening);
+			this.unoperational.PlayAnim("idle", KAnim.PlayMode.Once, null).Enter("StopImmigration", delegate(Telepad.StatesInstance smi)
+			{
+				Immigration.Instance.Stop();
+			}).Exit("StartImmigration", delegate(Telepad.StatesInstance smi)
+			{
+				Immigration.Instance.Restart();
+			})
+				.EventTransition(GameHashes.OperationalChanged, this.idle, (Telepad.StatesInstance smi) => smi.GetComponent<Operational>().IsOperational);
 			this.opening.PlayAnim("working_pre", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.open);
-			this.open.OnSignal(this.closePortal, this.close).PlayAnim("working_loop", KAnim.PlayMode.Loop, null).Transition(this.close, (Telepad.StatesInstance smi) => smi.IsColonyLost());
-			this.close.PlayAnims((Telepad.StatesInstance smi) => new string[] { "working_loop", "working_pst" }, KAnim.PlayMode.Once).OnAnimQueueComplete(this.idle);
+			this.open.OnSignal(this.closePortal, this.close).PlayAnim("working_loop", KAnim.PlayMode.Loop, null).Transition(this.close, (Telepad.StatesInstance smi) => smi.IsColonyLost())
+				.EventTransition(GameHashes.OperationalChanged, this.close, (Telepad.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational);
+			this.close.PlayAnims((Telepad.StatesInstance smi) => Telepad.States.workingAnims, KAnim.PlayMode.Once).OnAnimQueueComplete(this.idle);
 		}
 
-		public StateMachine<Telepad.States, Telepad.StatesInstance, Telepad>.Signal openPortal;
+		public StateMachine<Telepad.States, Telepad.StatesInstance, Telepad, object>.Signal openPortal;
 
-		public StateMachine<Telepad.States, Telepad.StatesInstance, Telepad>.Signal closePortal;
+		public StateMachine<Telepad.States, Telepad.StatesInstance, Telepad, object>.Signal closePortal;
 
-		public GameStateMachine<Telepad.States, Telepad.StatesInstance, Telepad>.State idle;
+		public GameStateMachine<Telepad.States, Telepad.StatesInstance, Telepad, object>.State idle;
 
-		public GameStateMachine<Telepad.States, Telepad.StatesInstance, Telepad>.State opening;
+		public GameStateMachine<Telepad.States, Telepad.StatesInstance, Telepad, object>.State opening;
 
-		public GameStateMachine<Telepad.States, Telepad.StatesInstance, Telepad>.State open;
+		public GameStateMachine<Telepad.States, Telepad.StatesInstance, Telepad, object>.State open;
 
-		public GameStateMachine<Telepad.States, Telepad.StatesInstance, Telepad>.State close;
+		public GameStateMachine<Telepad.States, Telepad.StatesInstance, Telepad, object>.State close;
+
+		public GameStateMachine<Telepad.States, Telepad.StatesInstance, Telepad, object>.State unoperational;
+
+		private static readonly HashedString[] workingAnims = new HashedString[] { "working_loop", "working_pst" };
 	}
 }

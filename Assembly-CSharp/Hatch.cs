@@ -1,10 +1,9 @@
 ﻿using System;
-using KSerialization;
+using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
-[SerializationConfig(MemberSerialization.OptIn)]
-public class Hatch : StateMachineComponent<Hatch.StatesInstance>, ISaveLoadableJson
+public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 {
 	private float hungerEatThreshold
 	{
@@ -30,11 +29,11 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>, ISaveLoadableJ
 		}
 	}
 
-	private int rationsPerFeeding
+	private float foodUnitsPerFeeding
 	{
 		get
 		{
-			return 5;
+			return 0.5f;
 		}
 	}
 
@@ -66,10 +65,10 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>, ISaveLoadableJ
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
-		this.Subscribe(493375141, new EventSystem.EventHandler(this.OnRefreshUserMenu));
-		this.Subscribe(2127324410, new EventSystem.EventHandler(this.OnRefreshUserMenu));
-		this.Subscribe(229718515, new EventSystem.EventHandler(this.OnThreatned));
-		this.Subscribe(-21431934, new EventSystem.EventHandler(this.ClearThreat));
+		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		this.Subscribe(2127324410, new Action<object>(this.OnRefreshUserMenu));
+		this.Subscribe(229718515, new Action<object>(this.OnThreatned));
+		this.Subscribe(-21431934, new Action<object>(this.ClearThreat));
 	}
 
 	private void FindAndMoveToFood()
@@ -110,30 +109,36 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>, ISaveLoadableJ
 	private Pickupable GetEatTarget()
 	{
 		Navigator component = base.GetComponent<Navigator>();
-		float num = float.PositiveInfinity;
+		int num = int.MaxValue;
 		Pickupable pickupable = null;
-		foreach (Pickupable pickupable2 in Components.Pickupables)
+		int num2 = 0;
+		int num3 = 0;
+		Grid.CellToXY(Grid.PosToCell(base.gameObject.transform.position), out num2, out num3);
+		int num4 = 8;
+		List<ScenePartitionerEntry> list = GameScenePartitioner.Instance.ReserveList();
+		GameScenePartitioner.Instance.GatherEntries(num2 - num4, num3 - num4, num4 * 2, num4 * 2, GameScenePartitioner.Instance.pickupables.mask, list);
+		for (int i = 0; i < list.Count; i++)
 		{
-			if (Vector2.Distance(pickupable2.transform.position, base.gameObject.transform.position) <= 25f)
+			ScenePartitionerEntry scenePartitionerEntry = list[i];
+			Pickupable pickupable2 = scenePartitionerEntry.obj as Pickupable;
+			if (!(pickupable2 == null))
 			{
 				if (!(null == pickupable2.GetComponent<ElementChunk>()) || !(null == pickupable2.GetComponent<Edible>()))
 				{
 					if (!(pickupable2.GetComponent<MinionIdentity>() != null))
 					{
-						int num2 = Grid.PosToCell(pickupable2);
-						if (component.CanReach(num2))
+						int num5 = Grid.PosToCell(pickupable2);
+						int navigationCost = component.GetNavigationCost(num5);
+						if (navigationCost != PathProber.InvalidCost && navigationCost < num && pickupable2.GetComponent<PrimaryElement>().ElementID != this.emitter.outputElement.elementHash)
 						{
-							float num3 = (float)component.GetNavigationCost(num2);
-							if (num3 < num && pickupable2.GetComponent<PrimaryElement>().ElementID != this.emitter.outputElement.elementHash)
-							{
-								num = num3;
-								pickupable = pickupable2;
-							}
+							num = navigationCost;
+							pickupable = pickupable2;
 						}
 					}
 				}
 			}
 		}
+		GameScenePartitioner.Instance.ReleaseList(list);
 		return pickupable;
 	}
 
@@ -170,12 +175,12 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>, ISaveLoadableJ
 
 	private bool CanBurrowInto(int cell)
 	{
-		return Grid.IsValidCell(cell) && Grid.Solid[cell] && !Grid.IsSubstantialLiquid(Grid.CellAbove(cell), 0.35f) && !(Grid.Objects[cell, 3] != null) && (float)Grid.Element[cell].hardness <= this.DigHardnessLimit;
+		return Grid.IsValidCell(cell) && Grid.Solid[cell] && !Grid.IsSubstantialLiquid(Grid.CellAbove(cell), 0.35f) && !(Grid.Objects[cell, 1] != null) && (float)Grid.Element[cell].hardness <= this.DigHardnessLimit;
 	}
 
 	private GameObject EdibleOnCell(int cell)
 	{
-		GameObject gameObject = Grid.Objects[cell, 17];
+		GameObject gameObject = Grid.Objects[cell, 3];
 		if (gameObject != null && gameObject.GetComponent<Pickupable>().storage == null && (gameObject.HasTag(GameTags.Ore) || gameObject.HasTag(GameTags.Edible) || gameObject.HasTag(GameTags.BuildableRaw) || gameObject.HasTag(GameTags.Solid)))
 		{
 			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
@@ -195,12 +200,12 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>, ISaveLoadableJ
 		this.latestMealElement = ElementLoader.FindElementByHash(component2.ElementID);
 		if (component)
 		{
-			float num = Mathf.Min((float)this.rationsPerFeeding, component.rations);
-			float num2 = num * (this.unitsPerFeeding / (float)this.rationsPerFeeding);
+			float num = Mathf.Min(this.foodUnitsPerFeeding, component.Units);
+			float num2 = num * (this.unitsPerFeeding / this.foodUnitsPerFeeding);
 			base.smi.sm.hungerLevel.Set(Mathf.Max(0f, base.smi.sm.hungerLevel.Get(base.smi) - this.hungerSatiationScale * num2), base.smi);
-			component.rations -= num;
+			component.Units -= num;
 			base.smi.sm.consumedMass.Delta(num * component2.MassPerUnit, base.smi);
-			if (component.rations <= 0f)
+			if (component.Units <= 0f)
 			{
 				Util.KDestroyGameObject(edibleObject);
 			}
@@ -231,20 +236,20 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>, ISaveLoadableJ
 			{
 				UserMenu userMenu = this.userMenu;
 				string text = UI.USERMENUACTIONS.DIG.TOOLTIP;
-				userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_dig", UI.USERMENUACTIONS.DIG.NAME, new global::System.Action(this.OnPressDig), global::Action.NumActions, null, null, null, null, text));
+				userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_uproot", UI.USERMENUACTIONS.DIG.NAME, new global::System.Action(this.OnPressDig), global::Action.NumActions, null, null, null, text, true), 1f);
 			}
 			else
 			{
 				UserMenu userMenu2 = this.userMenu;
 				string text = UI.USERMENUACTIONS.DIG.TOOLTIP_OFF;
-				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_dig", UI.USERMENUACTIONS.CANCELDIG.NAME, new global::System.Action(this.OnPressCancelDig), global::Action.NumActions, null, null, null, null, text));
+				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_uproot", UI.USERMENUACTIONS.CANCELDIG.NAME, new global::System.Action(this.OnPressCancelDig), global::Action.NumActions, null, null, null, text, true), 1f);
 			}
 		}
 	}
 
 	private GameObject FindExistingDigPlacer()
 	{
-		GameObject gameObject = Grid.Objects[Grid.PosToCell(base.gameObject), 0];
+		GameObject gameObject = Grid.Objects[Grid.PosToCell(base.gameObject), 7];
 		if (gameObject == null)
 		{
 			return null;
@@ -298,12 +303,12 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>, ISaveLoadableJ
 	{
 		if (this.currentDigPlacer != null)
 		{
-			this.currentDigPlacer.Unsubscribe(963113026, new EventSystem.EventHandler(this.OnDuplicantDigBurrow));
+			this.currentDigPlacer.Unsubscribe(963113026, new Action<object>(this.OnDuplicantDigBurrow));
 		}
 		this.prevDigPlacer = base.smi.sm.DigPlacer.Get(base.smi);
 		if (base.smi.sm.DigPlacer.Get(base.smi) != null)
 		{
-			base.smi.sm.DigPlacer.Get(base.smi).Unsubscribe(963113026, new EventSystem.EventHandler(this.OnDuplicantDigBurrow));
+			base.smi.sm.DigPlacer.Get(base.smi).Unsubscribe(963113026, new Action<object>(this.OnDuplicantDigBurrow));
 		}
 		base.smi.sm.DigPlacer.Set(null, base.smi);
 	}
@@ -312,7 +317,7 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>, ISaveLoadableJ
 	{
 		this.ForgetDigPlacer();
 		base.smi.sm.DigPlacer.Set(newDigPlacer, base.smi);
-		newDigPlacer.Subscribe(963113026, new EventSystem.EventHandler(this.OnDuplicantDigBurrow));
+		newDigPlacer.Subscribe(963113026, new Action<object>(this.OnDuplicantDigBurrow));
 		this.currentDigPlacer = newDigPlacer;
 	}
 
@@ -320,7 +325,7 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>, ISaveLoadableJ
 	{
 		this.StopListeningForDigPlacerChanged();
 		Vector2 vector = Grid.PosToXY(base.smi.master.transform.position);
-		base.smi.master.digPlacerChangedMonitor = GameScenePartitioner.Instance.Add("DigPlacerChanged", base.smi.master.gameObject, new Extents((int)vector.x, (int)vector.y, 1, 1), GameScenePartitioner.Instance.objectLayerMasks[0].mask, new Action<object>(base.smi.master.DigPlacerChanged));
+		base.smi.master.digPlacerChangedMonitor = GameScenePartitioner.Instance.Add("DigPlacerChanged", base.smi.master.gameObject, new Extents((int)vector.x, (int)vector.y, 1, 1), GameScenePartitioner.Instance.objectLayerMasks[7].mask, new Action<object>(base.smi.master.DigPlacerChanged));
 	}
 
 	private void StopListeningForDigPlacerChanged()
@@ -403,7 +408,7 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>, ISaveLoadableJ
 
 	public GameScenePartitionerEntry digPlacerChangedMonitor;
 
-	public class StatesInstance : GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.GameInstance
+	public class StatesInstance : GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.GameInstance
 	{
 		public StatesInstance(Hatch smi)
 			: base(smi)
@@ -523,7 +528,7 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>, ISaveLoadableJ
 				.OnAnimQueueComplete(this.alive.grounded.distressed.Drowning)
 				.Exit(delegate(Hatch.StatesInstance smi)
 				{
-					smi.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().CreatureStatusItems.Emerging);
+					smi.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().CreatureStatusItems.Emerging, false);
 				});
 			this.alive.grounded.distressed.Drowning.PlayAnim("harvest", KAnim.PlayMode.Loop, null).Enter(delegate(Hatch.StatesInstance smi)
 			{
@@ -610,7 +615,7 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>, ISaveLoadableJ
 					}
 					if (gameObject != null)
 					{
-						PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, "Resource Eaten", smi.transform, 1.5f, false);
+						PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, MISC.POPFX.RESOURCE_EATEN, smi.transform, 1.5f, false);
 						smi.master.RemoveMassFromEdible(gameObject);
 					}
 					smi.GoTo(this.alive.grounded.eatStates.eat);
@@ -636,7 +641,7 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>, ISaveLoadableJ
 				.OnAnimQueueComplete(this.alive.grounded.Idle.idle)
 				.Exit(delegate(Hatch.StatesInstance smi)
 				{
-					smi.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().CreatureStatusItems.Emerging);
+					smi.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().CreatureStatusItems.Emerging, false);
 				});
 			this.death.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Dead).Enter(delegate(Hatch.StatesInstance smi)
 			{
@@ -686,49 +691,49 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>, ISaveLoadableJ
 			this.alive.grounded.attackStates.flee.InitializeStates(this.mover, this.alive.grounded.Idle.idle);
 		}
 
-		public StateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.TargetParameter eatMoveTarget;
+		public StateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.TargetParameter eatMoveTarget;
 
-		public StateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.TargetParameter threatMoveTarget;
+		public StateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.TargetParameter threatMoveTarget;
 
-		public StateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.TargetParameter mover;
+		public StateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.TargetParameter mover;
 
-		public StateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.FloatParameter awakeTime;
+		public StateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.FloatParameter awakeTime;
 
-		public StateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.FloatParameter hungerLevel;
+		public StateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.FloatParameter hungerLevel;
 
-		public StateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.FloatParameter consumedMass;
+		public StateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.FloatParameter consumedMass;
 
-		public StateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.FloatParameter timeSinceLastMeal;
+		public StateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.FloatParameter timeSinceLastMeal;
 
-		public StateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.ObjectParameter<ThreatMonitor> threatMonitor;
+		public StateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.ObjectParameter<ThreatMonitor> threatMonitor;
 
-		public StateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.ObjectParameter<GameObject> DigPlacer;
+		public StateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.ObjectParameter<GameObject> DigPlacer;
 
-		public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.State newGame;
+		public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State newGame;
 
 		public Hatch.States.AliveStates alive;
 
-		public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.State death;
+		public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State death;
 
-		public class AliveStates : GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.State
+		public class AliveStates : GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State
 		{
 			public Hatch.States.GroundedState grounded;
 
 			public Hatch.States.AliveStates.DormantState dormant;
 
-			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.PLPState hide;
+			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.PLPState hide;
 
-			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.State fall;
+			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State fall;
 
-			public class DormantState : GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.State
+			public class DormantState : GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State
 			{
-				public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.State pre;
+				public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State pre;
 
-				public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.State pst;
+				public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State pst;
 			}
 		}
 
-		public class GroundedState : GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.State
+		public class GroundedState : GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State
 		{
 			public Hatch.States.IdleStates Idle;
 
@@ -736,47 +741,47 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>, ISaveLoadableJ
 
 			public Hatch.States.AttackStates attackStates;
 
-			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.State emerge;
+			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State emerge;
 
 			public Hatch.States.DistressStates distressed;
 		}
 
-		public class EatStates : GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.State
+		public class EatStates : GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State
 		{
-			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.ApproachSubState<Pickupable> moveToFood;
+			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.ApproachSubState<Pickupable> moveToFood;
 
-			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.State eat_pre;
+			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State eat_pre;
 
-			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.State eat;
+			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State eat;
 
-			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.State eat_pst;
+			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State eat_pst;
 		}
 
-		public class IdleStates : GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.State
+		public class IdleStates : GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State
 		{
-			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.State idle;
+			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State idle;
 
-			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.State poop;
+			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State poop;
 
-			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.IdleMoveSubState move;
+			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.IdleMoveSubState move;
 		}
 
-		public class AttackStates : GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.State
+		public class AttackStates : GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State
 		{
-			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.State plan_attack;
+			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State plan_attack;
 
-			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.ApproachSubState<AttackableBase> approachtarget;
+			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.ApproachSubState<AttackableBase> approachtarget;
 
-			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.State regular;
+			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State regular;
 
-			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.CreatureFleeSubState<Approachable> flee;
+			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.CreatureFleeSubState<Approachable> flee;
 		}
 
-		public class DistressStates : GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.State
+		public class DistressStates : GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State
 		{
-			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.State DrowningEmerge;
+			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State DrowningEmerge;
 
-			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch>.State Drowning;
+			public GameStateMachine<Hatch.States, Hatch.StatesInstance, Hatch, object>.State Drowning;
 		}
 	}
 }

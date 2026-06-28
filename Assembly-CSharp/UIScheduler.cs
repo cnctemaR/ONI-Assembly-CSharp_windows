@@ -15,7 +15,7 @@ public class UIScheduler : KMonoBehaviour, IScheduler
 
 	public SchedulerHandle SchedulePeriodic(string name, float interval, Action<object> callback, object callback_data = null, SchedulerGroup group = null)
 	{
-		return this.scheduler.SchedulePeriodic(name, interval, callback, callback_data, group, 0f);
+		return this.scheduler.SchedulePeriodic(name, interval, callback, callback_data, group, 0f, null);
 	}
 
 	private void Update()

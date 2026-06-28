@@ -4,13 +4,10 @@ using STRINGS;
 
 public class FactionAlignment : KMonoBehaviour
 {
-	public Health GetHealth
-	{
-		get
-		{
-			return this.health;
-		}
-	}
+	[MyCmpAdd]
+	public Health health { get; private set; }
+
+	public AttackableBase attackable { get; private set; }
 
 	public bool CheckAlignmentActive
 	{
@@ -23,8 +20,10 @@ public class FactionAlignment : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.health = base.GetComponent<Health>();
+		this.attackable = base.GetComponent<AttackableBase>();
 		Components.FactionAlignments.Add(this);
-		this.Subscribe(493375141, new EventSystem.EventHandler(this.OnRefreshUserMenu));
+		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		this.Subscribe(2127324410, delegate(object d)
 		{
 			this.SetPlayerTargeted(false);
@@ -33,14 +32,7 @@ public class FactionAlignment : KMonoBehaviour
 		{
 			FactionManager.Instance.GetFaction(this.Alignment).Members.Add(this);
 		}
-		Extents extents = new Extents(Grid.PosToXY(this.transform.position).x, Grid.PosToXY(this.transform.position).y, 1, 1);
-		int mask = GameScenePartitioner.Instance.factionedEntities.mask;
-		this.scenePartitionerEntry = GameScenePartitioner.Instance.Add(base.gameObject.name, base.gameObject, extents, mask, null);
-		this.Subscribe(1088554450, delegate(object o)
-		{
-			this.scenePartitionerEntry.UpdatePosition(Grid.PosToCell(base.gameObject));
-		});
-		this.Subscribe(1623392196, new EventSystem.EventHandler(this.OnDeath));
+		this.Subscribe(1623392196, new Action<object>(this.OnDeath));
 	}
 
 	private void OnDeath(object data)
@@ -80,7 +72,7 @@ public class FactionAlignment : KMonoBehaviour
 		}
 		else
 		{
-			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest);
+			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
 		}
 	}
 
@@ -93,11 +85,6 @@ public class FactionAlignment : KMonoBehaviour
 
 	protected override void OnCleanUp()
 	{
-		if (this.scenePartitionerEntry != null)
-		{
-			this.scenePartitionerEntry.Release();
-			this.scenePartitionerEntry = null;
-		}
 		Components.FactionAlignments.Remove(this);
 		FactionManager.Instance.GetFaction(this.Alignment).Members.Remove(this);
 		base.OnCleanUp();
@@ -119,23 +106,20 @@ public class FactionAlignment : KMonoBehaviour
 			buttonInfo = new KIconButtonMenu.ButtonInfo("action_deconstruct", UI.USERMENUACTIONS.ATTACK.NAME, delegate
 			{
 				this.SetPlayerTargeted(true);
-			}, global::Action.NumActions, null, null, null, null, string.Empty);
+			}, global::Action.NumActions, null, null, null, string.Empty, true);
 		}
 		else
 		{
 			buttonInfo = new KIconButtonMenu.ButtonInfo("action_deconstruct", UI.USERMENUACTIONS.CANCELATTACK.NAME, delegate
 			{
 				this.SetPlayerTargeted(false);
-			}, global::Action.NumActions, null, null, null, null, string.Empty);
+			}, global::Action.NumActions, null, null, null, string.Empty, true);
 		}
 		if (buttonInfo != null)
 		{
-			this.userMenu.AddButton(buttonInfo);
+			this.userMenu.AddButton(buttonInfo, 1f);
 		}
 	}
-
-	[MyCmpAdd]
-	private Health health;
 
 	[MyCmpAdd]
 	private UserMenu userMenu;
@@ -150,6 +134,4 @@ public class FactionAlignment : KMonoBehaviour
 
 	[Serialize]
 	public bool targetable = true;
-
-	private GameScenePartitionerEntry scenePartitionerEntry;
 }

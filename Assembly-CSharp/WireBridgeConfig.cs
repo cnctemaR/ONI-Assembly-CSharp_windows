@@ -6,7 +6,8 @@ public class WireBridgeConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("WireBridge", 3, 1, "utilityelectricbridge_kanim", 100f, 3f, BUILDINGS.CONSTRUCTION_MASS.TIER0, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.Tile, BUILDINGS.DECOR.PENALTY.TIER0, null);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("WireBridge", 3, 1, "utilityelectricbridge_kanim", 100f, 10, 3f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER0, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.Tile, BUILDINGS.DECOR.PENALTY.TIER0, null);
+		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
@@ -15,8 +16,7 @@ public class WireBridgeConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "small";
 		buildingDef.BaseTimeUntilRepair = -1f;
-		buildingDef.PermittedRotations = Rotatable.PermittedRotations.R360;
-		buildingDef.DisableWhenInactive = true;
+		buildingDef.PermittedRotations = PermittedRotations.R360;
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 2);
 		return buildingDef;
@@ -24,12 +24,38 @@ public class WireBridgeConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
-		UtilityNetworkLink utilityNetworkLink = go.AddOrGet<UtilityNetworkLink>();
-		utilityNetworkLink.link = new CellOffset(0, 2);
+		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 	}
 
-	public override void DoPostConfigure(GameObject go)
+	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
 	{
+		base.DoPostConfigurePreview(def, go);
+		UtilityNetworkLink utilityNetworkLink = this.AddNetworkLink(go);
+		utilityNetworkLink.visualizeOnly = true;
+		go.AddOrGet<BuildingCellVisualizer>();
+	}
+
+	public override void DoPostConfigureUnderConstruction(GameObject go)
+	{
+		base.DoPostConfigureUnderConstruction(go);
+		UtilityNetworkLink utilityNetworkLink = this.AddNetworkLink(go);
+		utilityNetworkLink.visualizeOnly = true;
+		go.AddOrGet<BuildingCellVisualizer>();
+	}
+
+	public override void DoPostConfigureComplete(GameObject go)
+	{
+		UtilityNetworkLink utilityNetworkLink = this.AddNetworkLink(go);
+		utilityNetworkLink.visualizeOnly = false;
+		go.AddOrGet<BuildingCellVisualizer>();
 		BuildingTemplates.DoPostConfigure(go);
+	}
+
+	private UtilityNetworkLink AddNetworkLink(GameObject go)
+	{
+		UtilityNetworkLink utilityNetworkLink = go.AddOrGet<UtilityNetworkLink>();
+		utilityNetworkLink.link1 = new CellOffset(-1, 0);
+		utilityNetworkLink.link2 = new CellOffset(1, 0);
+		return utilityNetworkLink;
 	}
 }

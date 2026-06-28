@@ -24,9 +24,9 @@ public class RootMenu : KScreen
 	{
 		RootMenu.Instance = this;
 		UIRegistry.rootMenu = this;
-		base.Subscribe(Game.Instance.gameObject, -1503271301, new global::EventSystem.EventHandler(this.OnSelectObject));
-		base.Subscribe(Game.Instance.gameObject, 288942073, new global::EventSystem.EventHandler(this.OnUIClear));
-		base.Subscribe(Game.Instance.gameObject, -809948329, new global::EventSystem.EventHandler(this.OnBuildingStatechanged));
+		base.Subscribe(Game.Instance.gameObject, -1503271301, new Action<object>(this.OnSelectObject));
+		base.Subscribe(Game.Instance.gameObject, 288942073, new Action<object>(this.OnUIClear));
+		base.Subscribe(Game.Instance.gameObject, -809948329, new Action<object>(this.OnBuildingStatechanged));
 		base.OnPrefabInit();
 	}
 
@@ -129,6 +129,7 @@ public class RootMenu : KScreen
 					}
 					else
 					{
+						CameraController.Instance.ForcePanningState(false);
 						this.TogglePauseScreen();
 					}
 				}

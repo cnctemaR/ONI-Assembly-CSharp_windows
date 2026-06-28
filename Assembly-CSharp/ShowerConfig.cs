@@ -6,15 +6,16 @@ public class ShowerConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Shower", 2, 4, "shower_kanim", 400f, 30f, BUILDINGS.CONSTRUCTION_MASS.TIER4, MATERIALS.RAW_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER1, null);
-		buildingDef.TemperatureModificationWhenActive = 4f;
-		buildingDef.OperatingTemperature = 350f;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(ShowerConfig.ID, 2, 4, "shower_kanim", 400f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.RAW_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER1, null);
+		buildingDef.Overheatable = false;
+		buildingDef.ExhaustKilowattsWhenActive = 0.25f;
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.OutputConduitType = ConduitType.Liquid;
 		buildingDef.ViewMode = SimViewMode.LiquidVentMap;
 		buildingDef.MaterialCategory = MATERIALS.RAW_METALS;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
+		buildingDef.UtilityOutputOffset = new CellOffset(1, 1);
 		return buildingDef;
 	}
 
@@ -23,12 +24,15 @@ public class ShowerConfig : IBuildingConfig
 		go.AddOrGet<LoopingSounds>();
 		Shower shower = go.AddOrGet<Shower>();
 		shower.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_shower_kanim") };
-		shower.workTime = 45f;
+		shower.workTime = 30f;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
+		conduitConsumer.capacityTag = ElementLoader.FindElementByHash(SimHashes.Water).tag;
+		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Store;
 		ConduitDispenser conduitDispenser = go.AddOrGet<ConduitDispenser>();
 		conduitDispenser.conduitType = ConduitType.Liquid;
-		conduitDispenser.elementFilter = SimHashes.DirtyWater;
+		conduitDispenser.invertElementFilter = true;
+		conduitDispenser.elementFilter = new SimHashes[] { SimHashes.Water };
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
@@ -36,7 +40,7 @@ public class ShowerConfig : IBuildingConfig
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(null, 1f, SimHashes.DirtyWater, 0f, true, 0f, 0f)
+			new ElementConverter.OutputElement(1f, SimHashes.DirtyWater, 0f, true, 0f, 0f, true)
 		};
 		elementConverter.conversionInterval = 1f;
 		Storage storage = go.AddOrGet<Storage>();
@@ -44,8 +48,10 @@ public class ShowerConfig : IBuildingConfig
 		storage.disableOnStore = true;
 	}
 
-	public override void DoPostConfigure(GameObject go)
+	public override void DoPostConfigureComplete(GameObject go)
 	{
 		BuildingTemplates.DoPostConfigure(go);
 	}
+
+	public static string ID = "Shower";
 }

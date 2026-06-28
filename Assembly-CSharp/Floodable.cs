@@ -1,5 +1,6 @@
 ﻿using System;
 
+[SkipSaveFileSerialization]
 public class Floodable : KMonoBehaviour
 {
 	public bool IsFlooded
@@ -47,7 +48,11 @@ public class Floodable : KMonoBehaviour
 
 	protected override void OnCleanUp()
 	{
-		this.partitionerEntry.Release();
+		if (this.partitionerEntry != null)
+		{
+			this.partitionerEntry.Release();
+			this.partitionerEntry = null;
+		}
 	}
 
 	[MyCmpReq]

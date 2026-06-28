@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using UnityEngine;
 
 public class TelepadSideScreen : SideScreenContent
@@ -23,6 +24,14 @@ public class TelepadSideScreen : SideScreenContent
 			return;
 		}
 		this.targetTelepad = component;
+		if (this.targetTelepad != null)
+		{
+			base.gameObject.SetActive(false);
+		}
+		else
+		{
+			base.gameObject.SetActive(true);
+		}
 	}
 
 	private void Update()
@@ -31,12 +40,20 @@ public class TelepadSideScreen : SideScreenContent
 		{
 			if (GameFlowManager.Instance != null && GameFlowManager.Instance.IsGameOver())
 			{
-				this.timeLabel.text = Strings.Get("STRINGS.UI.UISIDESCREENS.TELEPADSIDESCREEN.GAMEOVER");
+				base.gameObject.SetActive(false);
+				this.timeLabel.text = UI.UISIDESCREENS.TELEPADSIDESCREEN.GAMEOVER;
 				this.SetContentState(true);
 			}
 			else
 			{
-				this.timeLabel.text = string.Format(Strings.Get("STRINGS.UI.UISIDESCREENS.TELEPADSIDESCREEN.NEXTPRODUCTION"), GameUtil.GetFormattedCycles(this.targetTelepad.GetTimeRemaining()));
+				if (this.targetTelepad.GetComponent<Operational>().IsOperational)
+				{
+					this.timeLabel.text = string.Format(UI.UISIDESCREENS.TELEPADSIDESCREEN.NEXTPRODUCTION, GameUtil.GetFormattedCycles(this.targetTelepad.GetTimeRemaining(), "F1"));
+				}
+				else
+				{
+					base.gameObject.SetActive(false);
+				}
 				this.SetContentState(!Immigration.Instance.ImmigrantsAvailable);
 			}
 		}

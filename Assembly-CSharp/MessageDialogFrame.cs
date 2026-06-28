@@ -12,18 +12,17 @@ public class MessageDialogFrame : KScreen
 	{
 		this.closeButton.onClick += this.OnClickClose;
 		this.nextMessageButton.onClick += this.OnClickNextMessage;
-		base.Subscribe(Messenger.Instance.gameObject, -599791736, new EventSystem.EventHandler(this.OnMessagesChanged));
+		base.Subscribe(Messenger.Instance.gameObject, -599791736, new Action<object>(this.OnMessagesChanged));
 		this.OnMessagesChanged(null);
 	}
 
 	protected override void OnDeactivate()
 	{
-		base.Unsubscribe(Messenger.Instance.gameObject, -599791736, new EventSystem.EventHandler(this.OnMessagesChanged));
+		base.Unsubscribe(Messenger.Instance.gameObject, -599791736, new Action<object>(this.OnMessagesChanged));
 	}
 
 	private void OnClickClose()
 	{
-		base.PlaySound3D(GlobalAssets.GetSound("HUD_Click_Close", false));
 		global::UnityEngine.Object.Destroy(base.gameObject);
 	}
 

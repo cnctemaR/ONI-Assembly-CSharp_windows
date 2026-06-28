@@ -1,30 +1,100 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
-public class ResearchCenter : Fabricator
+public class ResearchCenter : BuildingWorkable, IEffectDescriptor
 {
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.choreType = Db.Get().ChoreTypes.Research;
-		this.inStorage.choreType = Db.Get().ChoreTypes.FabricateFetch;
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Researching;
 		this.attributeConverter = Db.Get().AttributeConverters.ResearchPoints;
+		ElementConverter elementConverter = this.elementConverter;
+		elementConverter.onConvertMass = (Action<float>)Delegate.Combine(elementConverter.onConvertMass, new Action<float>(this.ConvertMassToResearchPoints));
+		this.storage.choreType = Db.Get().ChoreTypes.ResearchFetch;
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.Subscribe(493375141, new EventSystem.EventHandler(this.OnRefreshUserMenu));
-		this.Subscribe(-1503271301, new EventSystem.EventHandler(this.OnSelectObject));
-		Research.Instance.Subscribe(-1914338957, new EventSystem.EventHandler(this.CheckValidResearchSelected));
-		Research.Instance.Subscribe(-125623018, new EventSystem.EventHandler(this.CheckValidResearchSelected));
-		this.Subscribe(187661686, new EventSystem.EventHandler(this.CheckValidResearchSelected));
+		this.Subscribe(-1503271301, new Action<object>(this.OnSelectObject));
+		Research.Instance.Subscribe(-1914338957, new Action<object>(this.CheckValidResearchSelected));
+		Research.Instance.Subscribe(-125623018, new Action<object>(this.CheckValidResearchSelected));
+		this.Subscribe(187661686, new Action<object>(this.CheckValidResearchSelected));
+		this.Subscribe(-1697596308, new Action<object>(this.CheckHasMaterial));
 		this.CheckValidResearchSelected(null);
 		Components.ResearchCenters.Add(this);
 		this.CheckValidResearchSelected(null);
+	}
+
+	private void ConvertMassToResearchPoints(float mass_consumed)
+	{
+		this.remainder_mass_points += mass_consumed / this.mass_per_point - (float)Mathf.FloorToInt(mass_consumed / this.mass_per_point);
+		int num = Mathf.FloorToInt(mass_consumed / this.mass_per_point);
+		num += Mathf.FloorToInt(this.remainder_mass_points);
+		this.remainder_mass_points -= (float)Mathf.FloorToInt(this.remainder_mass_points);
+		if (num > 0)
+		{
+			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Research, Strings.Get("STRINGS.RESEARCH.TYPES." + this.research_point_type_id.ToUpper() + ".NAME"), this.transform, 1.5f, false);
+			for (int i = 0; i < num; i++)
+			{
+				Research.Instance.AddResearchPoints(this.research_point_type_id, 1f);
+			}
+		}
+	}
+
+	private void SimUpdate(float dt)
+	{
+		if (!this.operational.IsActive)
+		{
+			if (this.operational.IsOperational && this.chore == null && this.HasMaterial())
+			{
+				this.chore = new WorkChore<ResearchCenter>(Db.Get().ChoreTypes.Research, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true);
+				base.SetWorkTime(float.PositiveInfinity);
+			}
+		}
+	}
+
+	public override float GetPercentComplete()
+	{
+		if (Research.Instance.GetActiveResearch() == null)
+		{
+			return 0f;
+		}
+		return Research.Instance.GetActiveResearch().progressInventory.PointsByTypeID[this.research_point_type_id] / Research.Instance.GetActiveResearch().tech.costsByResearchTypeID[this.research_point_type_id];
+	}
+
+	protected override void OnStartWork(Worker worker)
+	{
+		base.OnStartWork(worker);
+		this.operational.SetActive(true, false);
+	}
+
+	protected override bool OnWorkTick(Worker worker, float dt)
+	{
+		int num = 0;
+		if (worker != null)
+		{
+			AttributeInstance attributeInstance = Db.Get().Attributes.Learning.Lookup(worker);
+			num = (int)attributeInstance.GetTotalValue();
+		}
+		this.elementConverter.consumedElements[0].massConsumptionRate = 1.16f + (float)num * 0.464f;
+		return base.OnWorkTick(worker, dt);
+	}
+
+	protected override void OnStopWork(Worker worker)
+	{
+		base.OnStopWork(worker);
+		base.ShowProgressBar(false);
+		this.operational.SetActive(false, false);
+	}
+
+	private bool ResearchComponentCompleted()
+	{
+		TechInstance activeResearch = Research.Instance.GetActiveResearch();
+		return activeResearch != null && activeResearch.progressInventory.PointsByTypeID[this.research_point_type_id] >= activeResearch.tech.costsByResearchTypeID[this.research_point_type_id];
 	}
 
 	private void CheckValidResearchSelected(object data)
@@ -35,20 +105,7 @@ public class ResearchCenter : Fabricator
 		if (activeResearch != null)
 		{
 			flag = true;
-			string text = string.Empty;
-			foreach (Recipe recipe in base.GetRecipes())
-			{
-				ResearchPointObject component = recipe.Result.GetComponent<ResearchPointObject>();
-				if (component != null)
-				{
-					if (text != string.Empty)
-					{
-						Debug.LogError("Research station " + base.gameObject.name + " has more than one research point recipe in fabricator recipes. It should be limited to one type at this time.");
-					}
-					text = component.TypeID;
-				}
-			}
-			if (activeResearch.tech.costsByResearchTypeID.ContainsKey(text) && Research.Instance.Get(activeResearch.tech).progressInventory.PointsByTypeID[text] < activeResearch.tech.costsByResearchTypeID[text])
+			if (activeResearch.tech.costsByResearchTypeID.ContainsKey(this.research_point_type_id) && Research.Instance.Get(activeResearch.tech).progressInventory.PointsByTypeID[this.research_point_type_id] < activeResearch.tech.costsByResearchTypeID[this.research_point_type_id])
 			{
 				flag2 = true;
 			}
@@ -57,39 +114,33 @@ public class ResearchCenter : Fabricator
 		{
 			if (flag)
 			{
-				base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.NoResearchSelected);
-				if (!flag2)
+				base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.NoResearchSelected, false);
+				if (!flag2 && !this.ResearchComponentCompleted())
 				{
-					base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.NoResearchSelected);
+					base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.NoResearchSelected, false);
 					base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.NoApplicableResearchSelected, null);
 				}
 				else
 				{
-					base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.NoApplicableResearchSelected);
+					base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.NoApplicableResearchSelected, false);
 				}
 			}
 			else
 			{
 				base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.NoResearchSelected, null);
-				base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.NoApplicableResearchSelected);
+				base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.NoApplicableResearchSelected, false);
 			}
 		}
 		else
 		{
-			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.NoResearchSelected);
-			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.NoApplicableResearchSelected);
+			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.NoResearchSelected, false);
+			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.NoApplicableResearchSelected, false);
 		}
 		this.operational.SetFlag(ResearchCenter.ResearchSelectedFlag, flag && flag2);
 		if ((!flag || !flag2) && base.worker)
 		{
 			base.StopWork(base.worker);
 		}
-	}
-
-	protected override void CompleteOrder(Fabricator.UserOrder completed_order)
-	{
-		base.CompleteOrder(completed_order);
-		this.CheckValidResearchSelected(null);
 	}
 
 	private void ClearResearchScreen()
@@ -119,19 +170,26 @@ public class ResearchCenter : Fabricator
 		this.ClearResearchScreen();
 	}
 
-	private void OnRefreshUserMenu(object data)
+	private void CheckHasMaterial(object o = null)
 	{
-		UserMenu userMenu = this.userMenu;
-		string text = UI.USERMENUACTIONS.SELECTRESEARCH.TOOLTIP;
-		userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_select_research", UI.USERMENUACTIONS.SELECTRESEARCH.NAME, new global::System.Action(this.OnSelectResearchClick), global::Action.NumActions, null, null, null, null, text));
+		if (!this.HasMaterial() && this.chore != null)
+		{
+			this.chore.Cancel("No material remaining");
+			this.chore = null;
+		}
+	}
+
+	private bool HasMaterial()
+	{
+		return this.storage.MassStored() > 0f;
 	}
 
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
-		Research.Instance.Unsubscribe(-1914338957, new EventSystem.EventHandler(this.CheckValidResearchSelected));
-		Research.Instance.Unsubscribe(-125623018, new EventSystem.EventHandler(this.CheckValidResearchSelected));
-		this.Unsubscribe(-1852328367, new EventSystem.EventHandler(this.CheckValidResearchSelected));
+		Research.Instance.Unsubscribe(-1914338957, new Action<object>(this.CheckValidResearchSelected));
+		Research.Instance.Unsubscribe(-125623018, new Action<object>(this.CheckValidResearchSelected));
+		this.Unsubscribe(-1852328367, new Action<object>(this.CheckValidResearchSelected));
 		Components.ResearchCenters.Remove(this);
 		this.ClearResearchScreen();
 	}
@@ -154,14 +212,7 @@ public class ResearchCenter : Fabricator
 			{
 				if (Research.Instance.GetActiveResearch().tech.costsByResearchTypeID[keyValuePair2.Key] != 0f)
 				{
-					bool flag = false;
-					foreach (Recipe recipe in base.GetRecipes())
-					{
-						if (recipe.Result.GetComponent<ResearchPointObject>().TypeID == keyValuePair2.Key)
-						{
-							flag = true;
-						}
-					}
+					bool flag = keyValuePair2.Key == this.research_point_type_id;
 					if (flag)
 					{
 						text = text + "\n   - " + Research.Instance.researchTypes.GetResearchType(keyValuePair2.Key).name;
@@ -181,15 +232,7 @@ public class ResearchCenter : Fabricator
 			{
 				if (Research.Instance.GetActiveResearch().tech.costsByResearchTypeID[keyValuePair3.Key] != 0f)
 				{
-					bool flag2 = false;
-					foreach (Recipe recipe2 in base.GetRecipes())
-					{
-						if (recipe2.Result.GetComponent<ResearchPointObject>().TypeID == keyValuePair3.Key)
-						{
-							flag2 = true;
-						}
-					}
-					if (!flag2)
+					if (!(keyValuePair3.Key == this.research_point_type_id))
 					{
 						if (num > 1)
 						{
@@ -206,6 +249,17 @@ public class ResearchCenter : Fabricator
 		return text;
 	}
 
+	public List<Descriptor> GetDescriptors(BuildingDef def)
+	{
+		List<Descriptor> list = new List<Descriptor>();
+		Descriptor descriptor = default(Descriptor);
+		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.PRODUCES_RESEARCH_POINTS, Research.Instance.researchTypes.GetResearchType(this.research_point_type_id).name), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.PRODUCES_RESEARCH_POINTS, Research.Instance.researchTypes.GetResearchType(this.research_point_type_id).name), Descriptor.DescriptorType.Effect);
+		list.Add(descriptor);
+		return list;
+	}
+
+	private Chore chore;
+
 	private ResearchScreen researchScreen;
 
 	[MyCmpAdd]
@@ -213,6 +267,24 @@ public class ResearchCenter : Fabricator
 
 	[MyCmpAdd]
 	private Notifier notifier;
+
+	[MyCmpAdd]
+	private Operational operational;
+
+	[MyCmpAdd]
+	private Storage storage;
+
+	[MyCmpGet]
+	private ElementConverter elementConverter;
+
+	[SerializeField]
+	public string research_point_type_id;
+
+	[SerializeField]
+	public float mass_per_point;
+
+	[SerializeField]
+	private float remainder_mass_points;
 
 	public static Operational.Flag ResearchSelectedFlag = new Operational.Flag("researchSelected", Operational.Flag.Type.Requirement);
 }

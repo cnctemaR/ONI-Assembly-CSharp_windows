@@ -17,7 +17,7 @@ public class PoweredActiveController : GameStateMachine<PoweredActiveController,
 		{
 			if (smi.ShowWorkingStatus)
 			{
-				smi.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.Working);
+				smi.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.Working, false);
 			}
 		});
 		this.working.pre.PlayAnim("working_pre", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.working.loop);
@@ -25,22 +25,22 @@ public class PoweredActiveController : GameStateMachine<PoweredActiveController,
 		this.working.pst.PlayAnim("working_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.on);
 	}
 
-	public GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget>.State off;
+	public GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget, object>.State off;
 
-	public GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget>.State on;
+	public GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget, object>.State on;
 
 	public PoweredActiveController.WorkingStates working;
 
-	public class WorkingStates : GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget>.State
+	public class WorkingStates : GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget, object>.State
 	{
-		public GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget>.State pre;
+		public GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget, object>.State pre;
 
-		public GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget>.State loop;
+		public GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget, object>.State loop;
 
-		public GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget>.State pst;
+		public GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget, object>.State pst;
 	}
 
-	public new class Instance : GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)

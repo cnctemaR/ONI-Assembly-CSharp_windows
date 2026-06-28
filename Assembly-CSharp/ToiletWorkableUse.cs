@@ -13,7 +13,7 @@ public class ToiletWorkableUse : BuildingWorkable
 	{
 		base.OnStartWork(worker);
 		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
-		component.Play(this.WorkAnims, KAnim.PlayMode.Loop);
+		component.Play(Workable.DefaultWorkAnims, KAnim.PlayMode.Loop);
 	}
 
 	protected override void OnStopWork(Worker worker)

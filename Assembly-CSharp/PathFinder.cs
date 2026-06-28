@@ -6,7 +6,12 @@ public class PathFinder
 {
 	public static void Initialize()
 	{
-		PathFinder.PathGrid = new PathGrid(Grid.CellCount);
+		NavType[] array = new NavType[7];
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i] = (NavType)i;
+		}
+		PathFinder.PathGrid = new PathGrid(Grid.WidthInCells, Grid.HeightInCells, false, array);
 	}
 
 	public static void UpdatePath(NavGrid nav_grid, PathFinderAbilities abilities, int source_cell, NavType nav_type, PathFinderQuery query, ref PathFinder.Path path)
@@ -41,7 +46,7 @@ public class PathFinder
 		}
 		else
 		{
-			path = default(PathFinder.Path);
+			path.Clear();
 		}
 	}
 
@@ -56,7 +61,7 @@ public class PathFinder
 		if (path_cell != PathFinder.InvalidCell)
 		{
 			PathFinder.Cell cell = path_grid.GetCell(path_cell, path_nav_type);
-			path = default(PathFinder.Path);
+			path.Clear();
 			path.cost = cell.cost;
 			while (path_cell != PathFinder.InvalidCell)
 			{
@@ -72,7 +77,15 @@ public class PathFinder
 					cell = path_grid.GetCell(path_cell, cell.parentNavType);
 				}
 			}
-			path.nodes.Reverse();
+			if (path.nodes != null)
+			{
+				for (int i = 0; i < path.nodes.Count / 2; i++)
+				{
+					PathFinder.Path.Node node = path.nodes[i];
+					path.nodes[i] = path.nodes[path.nodes.Count - i - 1];
+					path.nodes[path.nodes.Count - i - 1] = node;
+				}
+			}
 		}
 	}
 
@@ -173,21 +186,24 @@ public class PathFinder
 				if (startNavType == nav_type)
 				{
 					PathFinder.Cell cell2 = path_grid.GetCell(num2, links[num].endNavType);
-					int num3 = cost + links[num].cost;
-					int num4;
-					if (PathFinder.IsSubmerged(num2))
+					if (cell2.cost >= 0)
 					{
-						num4 = underwater_cost + 1;
-					}
-					else
-					{
-						num4 = 0;
-					}
-					bool flag = query_id != cell2.queryId;
-					bool flag2 = num3 < cell2.cost;
-					if ((flag || flag2) && Grid.IsValidCell(num2) && abilities.CanTraverse(num2, num4))
-					{
-						PathFinder.AddPotential(num2, cell, links[num].endNavType, nav_type, num3, num4, links[num].transitionId, ref next_potential_idx, potentials, query_id, path_grid, !flag && flag2, ref cell2);
+						int num3 = cost + links[num].cost;
+						int num4;
+						if (PathFinder.IsSubmerged(num2))
+						{
+							num4 = underwater_cost + 1;
+						}
+						else
+						{
+							num4 = 0;
+						}
+						bool flag = query_id != cell2.queryId;
+						bool flag2 = num3 < cell2.cost;
+						if ((flag || flag2) && Grid.IsValidCell(num2) && abilities.CanTraverse(num2, cell, num4))
+						{
+							PathFinder.AddPotential(num2, cell, links[num].endNavType, nav_type, num3, num4, links[num].transitionId, ref next_potential_idx, potentials, query_id, path_grid, !flag && flag2, ref cell2);
+						}
 					}
 				}
 				num++;
@@ -252,6 +268,11 @@ public class PathFinder
 		public bool IsValid()
 		{
 			return this.nodes != null && this.nodes.Count > 1;
+		}
+
+		public bool HasArrived()
+		{
+			return this.nodes != null && this.nodes.Count > 0;
 		}
 
 		public void Clear()

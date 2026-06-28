@@ -6,10 +6,10 @@ public class CO2ScrubberConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("CO2Scrubber", 2, 2, "co2scrubber_kanim", 200f, 30f, BUILDINGS.CONSTRUCTION_MASS.TIER2, MATERIALS.RAW_METALS, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER1, null);
-		buildingDef.RequiresPower = true;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("CO2Scrubber", 2, 2, "co2scrubber_kanim", 200f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER2, MATERIALS.RAW_METALS, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER1, null);
+		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 120f;
-		buildingDef.OperatingTemperature = 400f;
+		buildingDef.OperatingKilowatts = 1f;
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.OutputConduitType = ConduitType.Liquid;
 		buildingDef.ViewMode = SimViewMode.OxygenMap;
@@ -29,13 +29,14 @@ public class CO2ScrubberConfig : IBuildingConfig
 		go.AddOrGet<AirFilter>();
 		ElementConsumer elementConsumer = go.AddOrGet<ElementConsumer>();
 		elementConsumer.elementToConsume = SimHashes.CarbonDioxide;
-		elementConsumer.consumptionRate = 0.1f;
+		elementConsumer.consumptionRate = 0.3f;
 		elementConsumer.consumptionRadius = 3;
 		elementConsumer.showInStatusPanel = true;
 		elementConsumer.sampleCellOffset = new Vector3(0f, 0f, 0f);
 		elementConsumer.isRequired = false;
 		elementConsumer.storeOnConsume = true;
 		elementConsumer.capacityKG = 5f;
+		elementConsumer.showDescriptor = false;
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
@@ -44,20 +45,22 @@ public class CO2ScrubberConfig : IBuildingConfig
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(null, 1f, SimHashes.DirtyWater, 313.15f, true, 0f, 0f)
+			new ElementConverter.OutputElement(1f, SimHashes.DirtyWater, 313.15f, true, 0f, 0f, false)
 		};
 		elementConverter.conversionInterval = 1f;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
 		conduitConsumer.consumptionRate = 2f;
 		conduitConsumer.capacityKG = 20f;
-		conduitConsumer.capacityElement = SimHashes.Water;
+		conduitConsumer.capacityTag = ElementLoader.FindElementByHash(SimHashes.Water).tag;
+		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Store;
 		ConduitDispenser conduitDispenser = go.AddOrGet<ConduitDispenser>();
 		conduitDispenser.conduitType = ConduitType.Liquid;
-		conduitDispenser.elementFilter = SimHashes.DirtyWater;
+		conduitDispenser.invertElementFilter = true;
+		conduitDispenser.elementFilter = new SimHashes[] { SimHashes.Water };
 	}
 
-	public override void DoPostConfigure(GameObject go)
+	public override void DoPostConfigureComplete(GameObject go)
 	{
 		BuildingTemplates.DoPostConfigure(go);
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
@@ -66,4 +69,6 @@ public class CO2ScrubberConfig : IBuildingConfig
 			instance.StartSM();
 		};
 	}
+
+	private const float CO2_CONSUMPTION_RATE = 0.3f;
 }

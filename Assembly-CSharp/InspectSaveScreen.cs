@@ -112,27 +112,21 @@ public class InspectSaveScreen : KModalScreen
 
 	private void ButtonClicked(KButton btn)
 	{
-		this.Load(this.buttonFileMap[btn]);
+		LoadingOverlay.Load(delegate
+		{
+			this.Load(this.buttonFileMap[btn]);
+		});
 	}
 
 	private void Load(string filename)
 	{
 		if (Game.Instance != null)
 		{
-			InspectSaveScreen.ForceStopGame();
+			LoadScreen.ForceStopGame();
 		}
 		SaveLoader.SetActiveSaveFilePath(filename);
 		App.LoadScene("backend");
 		this.Deactivate();
-	}
-
-	public static void ForceStopGame()
-	{
-		ThreadedHttps<KleiMetrics>.Instance.SendProfileStats();
-		UpdateManager.instance.enabled = false;
-		Game.Instance.SetIsLoading();
-		Grid.CellCount = 0;
-		Sim.Shutdown();
 	}
 
 	public override void OnKeyDown(KButtonEvent e)

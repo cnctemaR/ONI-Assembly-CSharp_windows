@@ -12,7 +12,7 @@ public class KCompBuilder : MonoBehaviour
 		Debug.Assert(frames != null);
 		Debug.Assert(textures != null);
 		KAnim.Build.Symbol symbol = src_build.GetSymbol(src_name);
-		Debug.AssertFormat(symbol != null, "Please check the DB: Couldnt find symbol [{1} {0} ] in Group [{2}] format is eyes_hair_headshape_mouth", new object[]
+		Debug.AssertFormat(symbol != null, "Please check the DB: Couldnt find symbol [{1} {0} ] in Group [{2}] format is eyes_hair_headshape_mouth_torso_arms", new object[]
 		{
 			src_name.ToString(),
 			HashCache.Get().Get(src_name),
@@ -28,7 +28,7 @@ public class KCompBuilder : MonoBehaviour
 		symbols.Add(symbol2);
 		int firstFrameIdx = symbol2.firstFrameIdx;
 		symbol2.firstFrameIdx = batch_group.symbolFrameInstances.Count;
-		KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(src_build.batchTag);
+		KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(src_build.batchTag, false);
 		for (int i = 0; i < symbol2.frameLookup.Length; i++)
 		{
 			symbol2.frameLookup[i] = symbol2.firstFrameIdx + (symbol2.frameLookup[i] - firstFrameIdx);
@@ -51,92 +51,130 @@ public class KCompBuilder : MonoBehaviour
 		batch_group.AddBuildSymbol(symbol2);
 	}
 
-	private KAnim.Build GetBuildForVariation(KBatchGroupData batch_group, KAnimHashedString fileHash, string eyes, string hair, string headshape, string mouth)
+	private KAnim.Build GetBuildForVariation(KBatchGroupData batch_group, KAnimHashedString fileHash, string eyes, string hair, string headshape, string mouth, string body, string arms)
 	{
 		Debug.Assert(this.master_anims != null);
 		KAnimFileData data = this.master_anims.GetData();
 		Debug.Assert(data != null);
 		KAnim.Build build = data.build;
 		Debug.Assert(build != null);
-		Debug.Assert(this.variations != null);
-		KAnimFileData data2 = this.variations.GetData();
+		Debug.Assert(this.face_variations != null);
+		KAnimFileData data2 = this.face_variations.GetData();
 		Debug.Assert(data2 != null);
 		KAnim.Build build2 = data2.build;
 		Debug.Assert(build2 != null);
+		Debug.Assert(this.body_variations != null);
+		KAnimFileData data3 = this.body_variations.GetData();
+		Debug.Assert(data3 != null);
+		KAnim.Build build3 = data3.build;
+		Debug.Assert(build3 != null);
 		List<KAnim.Build.Symbol> list = new List<KAnim.Build.Symbol>();
 		List<KAnim.Build.SymbolFrame> list2 = new List<KAnim.Build.SymbolFrame>();
 		List<Texture2D> list3 = new List<Texture2D>();
-		KAnim.Build build3 = batch_group.GetBuild(fileHash);
-		if (build3 != null)
+		KAnim.Build build4 = batch_group.GetBuild(fileHash);
+		if (build4 != null)
 		{
-			return build3;
+			return build4;
 		}
 		KAnimGroupFile.AddDynamicGroup(batch_group.groupID);
-		build3 = new KAnim.Build();
-		batch_group.AddNewBuildFile(fileHash);
+		build4 = batch_group.AddNewBuildFile(fileHash);
 		if (eyes == KCompBuilder.default_build)
 		{
-			this.GetSymbolsFromBuild(batch_group, build, build3, KCompBuilder.snapTo_eyes, KCompBuilder.snapTo_eyes, list, list2, list3);
+			this.GetSymbolsFromBuild(batch_group, build, build4, KCompBuilder.snapTo_eyes, KCompBuilder.snapTo_eyes, list, list2, list3);
 		}
 		else
 		{
-			this.GetSymbolsFromBuild(batch_group, build2, build3, new HashedString("eyes_" + eyes), KCompBuilder.snapTo_eyes, list, list2, list3);
+			this.GetSymbolsFromBuild(batch_group, build2, build4, new HashedString("eyes_" + eyes), KCompBuilder.snapTo_eyes, list, list2, list3);
 		}
 		if (hair == KCompBuilder.default_build)
 		{
-			this.GetSymbolsFromBuild(batch_group, build, build3, KCompBuilder.snapTo_hair, KCompBuilder.snapTo_hair, list, list2, list3);
+			this.GetSymbolsFromBuild(batch_group, build, build4, KCompBuilder.snapTo_hair, KCompBuilder.snapTo_hair, list, list2, list3);
 		}
 		else
 		{
-			this.GetSymbolsFromBuild(batch_group, build2, build3, new HashedString("hair_" + hair), KCompBuilder.snapTo_hair, list, list2, list3);
+			this.GetSymbolsFromBuild(batch_group, build2, build4, new HashedString("hair_" + hair), KCompBuilder.snapTo_hair, list, list2, list3);
 		}
 		if (headshape == KCompBuilder.default_build)
 		{
-			this.GetSymbolsFromBuild(batch_group, build, build3, KCompBuilder.snapTo_headshape, KCompBuilder.snapTo_headshape, list, list2, list3);
+			this.GetSymbolsFromBuild(batch_group, build, build4, KCompBuilder.snapTo_headshape, KCompBuilder.snapTo_headshape, list, list2, list3);
 		}
 		else
 		{
-			this.GetSymbolsFromBuild(batch_group, build2, build3, new HashedString("headshape_" + headshape), KCompBuilder.snapTo_headshape, list, list2, list3);
+			this.GetSymbolsFromBuild(batch_group, build2, build4, new HashedString("headshape_" + headshape), KCompBuilder.snapTo_headshape, list, list2, list3);
 		}
 		if (mouth == KCompBuilder.default_build)
 		{
-			this.GetSymbolsFromBuild(batch_group, build, build3, KCompBuilder.snapTo_mouth, KCompBuilder.snapTo_mouth, list, list2, list3);
+			this.GetSymbolsFromBuild(batch_group, build, build4, KCompBuilder.snapTo_mouth, KCompBuilder.snapTo_mouth, list, list2, list3);
 		}
 		else
 		{
-			this.GetSymbolsFromBuild(batch_group, build2, build3, new HashedString("mouth_" + mouth), KCompBuilder.snapTo_mouth, list, list2, list3);
+			this.GetSymbolsFromBuild(batch_group, build2, build4, new HashedString("mouth_" + mouth), KCompBuilder.snapTo_mouth, list, list2, list3);
 		}
-		build3.symbols = list.ToArray();
-		build3.frames = list2.ToArray();
-		build3.textures = list3.ToArray();
-		batch_group.textures.AddRange(build3.textures);
-		batch_group.AddBuild(build3);
-		return build3;
+		if (body == KCompBuilder.default_build)
+		{
+			this.GetSymbolsFromBuild(batch_group, build, build4, KCompBuilder.snapTo_body, KCompBuilder.snapTo_body, list, list2, list3);
+		}
+		else
+		{
+			this.GetSymbolsFromBuild(batch_group, build3, build4, new HashedString("body_" + body), KCompBuilder.snapTo_body, list, list2, list3);
+		}
+		if (arms == KCompBuilder.default_build)
+		{
+			this.GetSymbolsFromBuild(batch_group, build, build4, KCompBuilder.snapTo_arm, KCompBuilder.snapTo_arm, list, list2, list3);
+		}
+		else
+		{
+			this.GetSymbolsFromBuild(batch_group, build3, build4, new HashedString("arm_" + arms), KCompBuilder.snapTo_arm, list, list2, list3);
+		}
+		build4.symbols = list.ToArray();
+		build4.frames = list2.ToArray();
+		batch_group.AddTextures(list3);
+		return build4;
 	}
 
-	public KAnimFileData GenerateDefaultPose(int eyes = 0, int hair = 0, int headshape = 0, int mouth = 0)
+	public KAnimFileData GenerateDefaultPose(KCompBuilder.BodyData bodyData)
 	{
-		string text = string.Format("{0:000}", eyes);
-		string text2 = string.Format("{0:000}", hair);
-		string text3 = string.Format("{0:000}", headshape);
-		string text4 = string.Format("{0:000}", mouth);
-		HashedString hashedString = new HashedString(string.Concat(new string[] { text, "_", text2, "_", text3, "_", text4 }));
-		KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(hashedString);
-		KAnimFileData kanimFileData = new KAnimFileData();
-		kanimFileData.name = string.Concat(new string[] { "default_", text, "_", text2, "_", text3, "_", text4 });
-		kanimFileData.batchTag = hashedString;
-		KAnimHashedString kanimHashedString = new KAnimHashedString(kanimFileData.name);
+		string text = string.Format("{0:000}", bodyData.eyes);
+		string text2 = string.Format("{0:000}", bodyData.hair);
+		string text3 = string.Format("{0:000}", bodyData.headShape);
+		string text4 = string.Format("{0:000}", bodyData.mouth);
+		string text5 = string.Format("{0:000}", bodyData.body);
+		string text6 = string.Format("{0:000}", bodyData.arms);
+		string text7 = string.Concat(new string[]
+		{
+			text, "_", text2, "_", text3, "_", text4, "_", text5, "_",
+			text6
+		});
+		HashedString hashedString = new HashedString(text7);
+		KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(hashedString, true);
+		KAnimFileData dynamicFile = KGlobalAnimParser.Get().GetDynamicFile(hashedString, "default_" + text7);
+		if (dynamicFile.buildIndex != -1)
+		{
+			return dynamicFile;
+		}
+		KAnimHashedString kanimHashedString = new KAnimHashedString(dynamicFile.name);
 		KAnim.Build build = batchGroupData.GetBuild(kanimHashedString);
-		KAnimFileData data = this.master_anims.GetData();
-		KBatchGroupData batchGroupData2 = KAnimBatchManager.Instance().GetBatchGroupData(data.batchTag);
 		if (build == null)
 		{
-			build = this.GetBuildForVariation(batchGroupData, kanimHashedString, text, text2, text3, text4);
+			build = this.GetBuildForVariation(batchGroupData, kanimHashedString, text, text2, text3, text4, text5, text6);
+			build.batchTag = hashedString;
+			build.name = dynamicFile.name;
+			build.fileHash = kanimHashedString;
+			dynamicFile.buildIndex = build.index;
+			dynamicFile.animBatchTag = hashedString;
+			KAnimFileData data = this.master_anims.GetData();
+			KBatchGroupData batchGroupData2 = KAnimBatchManager.Instance().GetBatchGroupData(data.batchTag, false);
+			dynamicFile.maxVisSymbolFrames = data.maxVisSymbolFrames;
 			batchGroupData.animIndex.Add(kanimHashedString, batchGroupData.anims.Count);
 			batchGroupData.animFrameIndex.Add(kanimHashedString, batchGroupData.animFrames.Count);
-			for (int i = 0; i < data.anims.Length; i++)
+			dynamicFile.animCount = 0;
+			dynamicFile.frameCount = 0;
+			dynamicFile.elementCount = 0;
+			dynamicFile.firstAnimIndex = batchGroupData.anims.Count;
+			dynamicFile.firstElementIndex = batchGroupData.frameElements.Count;
+			for (int i = 0; i < data.animCount; i++)
 			{
-				KAnim.Anim anim = data.anims[i].Copy();
+				KAnim.Anim anim = data.GetAnim(i).Copy();
 				int firstFrameIdx = anim.firstFrameIdx;
 				anim.firstFrameIdx = batchGroupData.animFrames.Count;
 				for (int j = 0; j < anim.numFrames; j++)
@@ -149,22 +187,18 @@ public class KCompBuilder : MonoBehaviour
 					{
 						KAnim.Anim.FrameElement frameElement = batchGroupData2.frameElements[firstElementIdx + k];
 						batchGroupData.frameElements.Add(frameElement);
+						dynamicFile.elementCount++;
 					}
 					batchGroupData.animFrames.Add(frame);
+					dynamicFile.frameCount++;
 				}
 				batchGroupData.anims.Add(anim);
+				dynamicFile.animCount++;
 			}
+			return dynamicFile;
 		}
-		kanimFileData.build = build;
-		build.batchTag = hashedString;
-		build.name = kanimFileData.name;
-		build.fileHash = kanimHashedString;
-		kanimFileData.maxVisSymbolFrames = data.maxVisSymbolFrames;
-		kanimFileData.animFrameElements = batchGroupData.frameElements.ToArray();
-		kanimFileData.animFrames = batchGroupData.animFrames.ToArray();
-		kanimFileData.anims = batchGroupData.anims.ToArray();
-		kanimFileData.hashTable = data.hashTable;
-		return kanimFileData;
+		dynamicFile.buildIndex = build.index;
+		return dynamicFile;
 	}
 
 	public static KCompBuilder Instance
@@ -201,7 +235,9 @@ public class KCompBuilder : MonoBehaviour
 
 	public KAnimFile master_anims;
 
-	public KAnimFile variations;
+	public KAnimFile face_variations;
+
+	public KAnimFile body_variations;
 
 	private static string default_build = "000";
 
@@ -213,6 +249,10 @@ public class KCompBuilder : MonoBehaviour
 
 	public static HashedString snapTo_mouth = new HashedString("snapTo_mouth");
 
+	public static HashedString snapTo_body = new HashedString("snapTo_body");
+
+	public static HashedString snapTo_arm = new HashedString("snapTo_arm");
+
 	public static HashedString head_comp = new HashedString("head_comp");
 
 	public static HashedString head_comp_side = new HashedString("head_comp_side");
@@ -222,4 +262,22 @@ public class KCompBuilder : MonoBehaviour
 	public static HashedString neutral = new HashedString("neutral");
 
 	private static KCompBuilder instance = null;
+
+	[Serializable]
+	public struct BodyData
+	{
+		public int headShape;
+
+		public int mouth;
+
+		public int neck;
+
+		public int eyes;
+
+		public int hair;
+
+		public int body;
+
+		public int arms;
+	}
 }

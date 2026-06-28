@@ -427,11 +427,10 @@ public class VoronoiTree : VoronoiNode
 			}
 		}
 		List<Vector2> list = new List<Vector2>();
-		tagSet.Add(WorldGenTags.DEBUG_Split);
 		if (tagSet.Contains(WorldGenTags.Feature))
 		{
 			Node node2 = WorldGen.WorldLayout.localGraph.AddNode(node.type);
-			node2.position = ((!tagSet.Contains(WorldGenTags.StartLocation)) ? this.site.position : this.site.poly.Centroid());
+			node2.SetPosition((!tagSet.Contains(WorldGenTags.StartLocation)) ? this.site.position : this.site.poly.Centroid());
 			VoronoiNode voronoiNode = this.AddSite(new VoronoiDiagram.Site((uint)node2.node.Id, node2.position, 1f), VoronoiNode.NodeType.Leaf);
 			if (tagSet != null && tagSet.Count != 0)
 			{
@@ -468,7 +467,7 @@ public class VoronoiTree : VoronoiNode
 		for (int j = 0; j < randomPoints.Count; j++)
 		{
 			Node node3 = WorldGen.WorldLayout.localGraph.AddNode((typeOverride != null) ? typeOverride(randomPoints[j]) : node.type);
-			node3.position = randomPoints[j];
+			node3.SetPosition(randomPoints[j]);
 			VoronoiNode voronoiNode2 = this.AddSite(new VoronoiDiagram.Site((uint)node3.node.Id, node3.position, 1f), VoronoiNode.NodeType.Leaf);
 			if (tagSet != null && tagSet.Count != 0)
 			{
@@ -492,6 +491,7 @@ public class VoronoiTree : VoronoiNode
 			if (this.children[i] == leaf)
 			{
 				this.children[i] = new VoronoiTree(leaf.site, this);
+				this.children[i].log = leaf.log;
 				if (leaf.tags != null)
 				{
 					this.children[i].SetTags(leaf.tags);
@@ -509,6 +509,7 @@ public class VoronoiTree : VoronoiNode
 			if (this.children[i] == tree)
 			{
 				this.children[i] = new VoronoiLeaf(tree.site, this);
+				this.children[i].log = tree.log;
 				if (tree.tags != null)
 				{
 					this.children[i].SetTags(tree.tags);
@@ -547,7 +548,9 @@ public class VoronoiTree : VoronoiNode
 					}
 					else
 					{
+						VoronoiNode voronoiNode = this.children[i];
 						this.children[i] = new VoronoiLeaf(voronoiTree.site, this);
+						this.children[i].log = voronoiNode.log;
 						if (voronoiTree.tags != null)
 						{
 							this.children[i].SetTags(voronoiTree.tags);

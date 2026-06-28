@@ -82,7 +82,7 @@ public class WorldLayout
 			sampleBehaviour = (PointGenerator.SampleBehaviour)((int)obj);
 		}
 		global::Klei.Node node = this.overworldGraph.AddNode(WorldGenTags.StartWorld.Name);
-		node.position = new Vector2((float)(this.mapWidth / 2), (float)(this.mapHeight / 2));
+		node.SetPosition(new Vector2((float)(this.mapWidth / 2), (float)(this.mapHeight / 2)));
 		List<Vector2> list = new List<Vector2>();
 		list.Add(node.position);
 		VoronoiNode voronoiNode = this.voronoiTree.AddSite(new VoronoiDiagram.Site((uint)node.node.Id, node.position, 1f), VoronoiNode.NodeType.Internal);
@@ -96,7 +96,7 @@ public class WorldLayout
 		for (int i = 0; i < randomPoints.Count; i++)
 		{
 			global::Klei.Node node2 = this.overworldGraph.AddNode(WorldGenTags.UnassignedNode.Name);
-			node2.position = randomPoints[i];
+			node2.SetPosition(randomPoints[i]);
 			VoronoiNode voronoiNode2 = this.voronoiTree.AddSite(new VoronoiDiagram.Site((uint)node2.node.Id, node2.position, 1f), VoronoiNode.NodeType.Internal);
 			voronoiNode2.tags.Add(WorldGenTags.UnassignedNode);
 			node2.tags.Add(WorldGenTags.UnassignedNode);
@@ -139,7 +139,7 @@ public class WorldLayout
 		{
 			VoronoiNode child = this.voronoiTree.GetChild(m);
 			global::Klei.Node node3 = this.overworldGraph.FindNodeByID(child.site.id);
-			node3.position = child.site.position;
+			node3.SetPosition(child.site.position);
 		}
 		this.TagTopAndBottomSites(WorldGenTags.NearSurface, WorldGenTags.NearDepths);
 		this.ConvertUnknownCells();
@@ -149,11 +149,21 @@ public class WorldLayout
 		{
 			neighbors3.ShuffleSeeded<VoronoiNode>(WorldGen.RandomSource());
 			global::Klei.Node node4 = this.overworldGraph.FindNodeByID(neighbors3[0].site.id);
-			node4.type = WorldGenTags.StartWorld.Name;
+			node4.SetType(WorldGenTags.StartWorld.Name);
 			neighbors3[0].AddTag(WorldGenTags.FakeStart);
 			global::Klei.Node node5 = this.overworldGraph.FindNodeByID(neighbors3[1].site.id);
-			node5.type = WorldGenTags.StartWorld.Name;
+			node5.SetType(WorldGenTags.StartWorld.Name);
 			neighbors3[1].AddTag(WorldGenTags.FakeStart);
+		}
+		if (WorldGen.Settings.defaults.overworldAddTags != null)
+		{
+			foreach (string text in WorldGen.Settings.defaults.overworldAddTags)
+			{
+				int num2 = WorldGen.RandomSource().Next(this.voronoiTree.ChildCount());
+				VoronoiNode child2 = this.voronoiTree.GetChild(num2);
+				child2.AddTag(new Tag(text));
+				Debug.Log("Applying Overworld Add Tag " + text);
+			}
 		}
 		this.FlatternOverworld();
 		this.AddSubworldChildren();
@@ -218,7 +228,7 @@ public class WorldLayout
 						voronoiTree.GetIntersectingLeafNodes(lineSegment, list);
 						for (int k = 0; k < list.Count; k++)
 						{
-							this.localGraph.FindNodeByID(list[k].site.id).type = newType;
+							this.localGraph.FindNodeByID(list[k].site.id).SetType(newType);
 						}
 						num++;
 					}
@@ -254,13 +264,18 @@ public class WorldLayout
 			HashSet<SubWorld> hashSet = new HashSet<SubWorld>();
 			hashSet.UnionWith(dictionary[Temperature.Range.HumanWarm]);
 			hashSet.UnionWith(dictionary[Temperature.Range.HumanHot]);
-			if (voronoiNode.tags.Contains(WorldGenTags.StartMedium))
+			if (voronoiNode.tags.Contains(WorldGenTags.StartNear))
 			{
 				hashSet.UnionWith(dictionary[Temperature.Range.HumanWarm]);
 				hashSet.UnionWith(dictionary[Temperature.Range.HumanHot]);
+				hashSet.UnionWith(dictionary[Temperature.Range.Cool]);
+				hashSet.UnionWith(dictionary[Temperature.Range.Cold]);
 			}
-			if (voronoiNode.tags.Contains(WorldGenTags.StartNear))
+			if (voronoiNode.tags.Contains(WorldGenTags.StartMedium))
 			{
+				hashSet.UnionWith(dictionary[Temperature.Range.Mild]);
+				hashSet.UnionWith(dictionary[Temperature.Range.Cool]);
+				hashSet.UnionWith(dictionary[Temperature.Range.Cold]);
 				hashSet.UnionWith(dictionary[Temperature.Range.HumanWarm]);
 				hashSet.UnionWith(dictionary[Temperature.Range.HumanHot]);
 			}
@@ -268,16 +283,25 @@ public class WorldLayout
 			{
 				hashSet.UnionWith(dictionary[Temperature.Range.HumanWarm]);
 				hashSet.UnionWith(dictionary[Temperature.Range.HumanHot]);
+				hashSet.UnionWith(dictionary[Temperature.Range.Cool]);
+				hashSet.UnionWith(dictionary[Temperature.Range.Cold]);
+				hashSet.UnionWith(dictionary[Temperature.Range.Hot]);
 			}
 			if (voronoiNode.tags.ContainsAll(tagSet))
 			{
 				hashSet.UnionWith(dictionary[Temperature.Range.HumanWarm]);
 				hashSet.UnionWith(dictionary[Temperature.Range.HumanHot]);
+				hashSet.UnionWith(dictionary[Temperature.Range.VeryHot]);
+				hashSet.UnionWith(dictionary[Temperature.Range.Cool]);
+				hashSet.UnionWith(dictionary[Temperature.Range.Cold]);
 			}
 			else if (voronoiNode.tags.ContainsAll(tagSet2))
 			{
 				hashSet.UnionWith(dictionary[Temperature.Range.HumanWarm]);
 				hashSet.UnionWith(dictionary[Temperature.Range.HumanHot]);
+				hashSet.UnionWith(dictionary[Temperature.Range.VeryCold]);
+				hashSet.UnionWith(dictionary[Temperature.Range.Cool]);
+				hashSet.UnionWith(dictionary[Temperature.Range.Cold]);
 			}
 			if (voronoiNode.tags.Contains(WorldGenTags.NearSurface) || voronoiNode.tags.Contains(WorldGenTags.AtSurface))
 			{
@@ -311,7 +335,7 @@ public class WorldLayout
 				}
 			}
 			Debug.Assert(text != "NONE", "Cant find subworld");
-			node.type = text;
+			node.SetType(text);
 			foreach (string text2 in list3[0].tags)
 			{
 				voronoiNode.AddTag(new Tag(text2));
@@ -324,9 +348,10 @@ public class WorldLayout
 		try
 		{
 			this.SplitTopAndBottomSites();
-			this.SetTemperatureTags();
 			this.SplitLargeStartingSites();
 			this.PropagateStartTag();
+			this.SetTemperatureTags();
+			this.TagTopAndBottomSites(WorldGenTags.AtSurface, WorldGenTags.AtDepths);
 		}
 		catch (Exception ex)
 		{
@@ -447,8 +472,7 @@ public class WorldLayout
 	{
 		TagSet tagSet = new TagSet();
 		tagSet.Add(WorldGenTags.Overworld);
-		TagSet tagSet2 = new TagSet();
-		tagSet2.Add(WorldGenTags.Geode);
+		TagSet tagSet2 = new TagSet(WorldGen.Settings.defaults.defaultMoveTags);
 		for (int i = 0; i < this.voronoiTree.ChildCount(); i++)
 		{
 			VoronoiNode child = this.voronoiTree.GetChild(i);
@@ -473,7 +497,7 @@ public class WorldLayout
 						{
 							WeightedBiome weightedBiome = global::Generated.Util.WeightedRandom.Choose<WeightedBiome>(subWorld.biomes);
 							global::Klei.Node node2 = this.localGraph.FindNodeByID(voronoiTree.GetChild(j).site.id);
-							node2.type = weightedBiome.name;
+							node2.SetType(weightedBiome.name);
 							voronoiTree.GetChild(j).AddTag(new Tag(node2.type));
 						}
 					}
@@ -482,7 +506,7 @@ public class WorldLayout
 						for (int k = num; k < voronoiTree.ChildCount(); k++)
 						{
 							global::Klei.Node node3 = this.localGraph.FindNodeByID(voronoiTree.GetChild(k).site.id);
-							node3.type = WorldLayout.GetNodeTypeFromLayers(voronoiTree.site.position, (float)this.mapHeight);
+							node3.SetType(WorldLayout.GetNodeTypeFromLayers(voronoiTree.site.position, (float)this.mapHeight));
 							voronoiTree.GetChild(k).AddTag(new Tag(node3.type));
 						}
 					}
@@ -505,7 +529,6 @@ public class WorldLayout
 						}
 						if (list[l].tags.Contains(WorldGenTags.SplitTwice))
 						{
-							Debug.Log("split twice!");
 							VoronoiNode voronoiNode2 = list[l];
 							TagSet tagSet3 = tagSet4;
 							VoronoiTree voronoiTree3 = voronoiNode2.Split((VoronoiNode.SplitType)0, tagSet3, tagSet2, null);
@@ -513,10 +536,8 @@ public class WorldLayout
 							{
 								Debug.LogError("split did not work.");
 							}
-							Debug.Log(" Node split into only " + voronoiTree3.ChildCount() + " children.");
 							for (int m = 0; m < voronoiTree3.ChildCount(); m++)
 							{
-								Debug.Log("split grandchild...");
 								VoronoiNode child2 = voronoiTree3.GetChild(m);
 								VoronoiNode voronoiNode3 = child2;
 								tagSet3 = tagSet4;
@@ -528,6 +549,48 @@ public class WorldLayout
 			}
 		}
 		VoronoiNode.maxDepth = this.voronoiTree.MaxDepth(0);
+	}
+
+	private void SplitTopAndBottomSites()
+	{
+		float @float = WorldGen.Settings.defaults.GetFloat("SplitTopAndBottomSitesMaxArea");
+		TagSet tagSet = new TagSet();
+		tagSet.Add(WorldGenTags.Overworld);
+		TagSet tagSet2 = new TagSet(WorldGen.Settings.defaults.defaultMoveTags);
+		List<VoronoiNode> list = new List<VoronoiNode>();
+		this.voronoiTree.GetNodesWithTag(WorldGenTags.NearSurface, list);
+		for (int i = 0; i < list.Count; i++)
+		{
+			VoronoiNode voronoiNode = list[i];
+			if (voronoiNode.site.poly.Area() > @float)
+			{
+				VoronoiNode voronoiNode2 = voronoiNode;
+				TagSet tagSet3 = tagSet;
+				voronoiNode2.Split((VoronoiNode.SplitType)0, tagSet3, tagSet2, null);
+			}
+		}
+		List<VoronoiNode> list2 = new List<VoronoiNode>();
+		this.voronoiTree.GetNodesWithTag(WorldGenTags.NearDepths, list2);
+		for (int j = 0; j < list2.Count; j++)
+		{
+			VoronoiNode voronoiNode3 = list2[j];
+			if (voronoiNode3.site.poly.Area() > @float)
+			{
+				VoronoiNode voronoiNode4 = voronoiNode3;
+				TagSet tagSet3 = tagSet;
+				voronoiNode4.Split((VoronoiNode.SplitType)0, tagSet3, tagSet2, null);
+			}
+		}
+		VoronoiNode.maxDepth = this.voronoiTree.MaxDepth(0);
+		this.voronoiTree.ForceLowestToLeaf();
+		list = new List<VoronoiNode>();
+		this.voronoiTree.GetNodesWithTag(WorldGenTags.AtSurface, list);
+		for (int k = 0; k < list.Count; k++)
+		{
+			VoronoiNode voronoiNode5 = list[k];
+			voronoiNode5.tags.Remove(WorldGenTags.Geode);
+			voronoiNode5.tags.Remove(WorldGenTags.Feature);
+		}
 	}
 
 	private void TagTopAndBottomSites(Tag topTag, Tag bottomTag)
@@ -545,52 +608,6 @@ public class WorldLayout
 		{
 			VoronoiNode nodeForSite2 = this.voronoiTree.GetNodeForSite(list2[j]);
 			nodeForSite2.AddTag(bottomTag);
-		}
-	}
-
-	private void SplitTopAndBottomSites()
-	{
-		float @float = WorldGen.Settings.defaults.GetFloat("SplitTopAndBottomSitesMaxArea");
-		TagSet tagSet = new TagSet();
-		tagSet.Add(WorldGenTags.Overworld);
-		TagSet tagSet2 = new TagSet();
-		tagSet2.Add(WorldGenTags.Geode);
-		List<VoronoiNode> list = new List<VoronoiNode>();
-		this.voronoiTree.GetNodesWithTag(WorldGenTags.NearSurface, list);
-		for (int i = 0; i < list.Count; i++)
-		{
-			VoronoiNode voronoiNode = list[i];
-			if (voronoiNode.site.poly.Area() > @float)
-			{
-				voronoiNode.AddTag(WorldGenTags.DEBUG_SplitTopSite);
-				VoronoiNode voronoiNode2 = voronoiNode;
-				TagSet tagSet3 = tagSet;
-				voronoiNode2.Split((VoronoiNode.SplitType)0, tagSet3, tagSet2, null);
-			}
-		}
-		List<VoronoiNode> list2 = new List<VoronoiNode>();
-		this.voronoiTree.GetNodesWithTag(WorldGenTags.NearDepths, list2);
-		for (int j = 0; j < list2.Count; j++)
-		{
-			VoronoiNode voronoiNode3 = list2[j];
-			if (voronoiNode3.site.poly.Area() > @float)
-			{
-				voronoiNode3.AddTag(WorldGenTags.DEBUG_SplitBottomSite);
-				VoronoiNode voronoiNode4 = voronoiNode3;
-				TagSet tagSet3 = tagSet;
-				voronoiNode4.Split((VoronoiNode.SplitType)0, tagSet3, tagSet2, null);
-			}
-		}
-		VoronoiNode.maxDepth = this.voronoiTree.MaxDepth(0);
-		this.voronoiTree.ForceLowestToLeaf();
-		this.TagTopAndBottomSites(WorldGenTags.AtSurface, WorldGenTags.AtDepths);
-		list = new List<VoronoiNode>();
-		this.voronoiTree.GetNodesWithTag(WorldGenTags.AtSurface, list);
-		for (int k = 0; k < list.Count; k++)
-		{
-			VoronoiNode voronoiNode5 = list[k];
-			voronoiNode5.tags.Remove(WorldGenTags.Geode);
-			voronoiNode5.tags.Remove(WorldGenTags.Feature);
 		}
 	}
 
@@ -636,8 +653,7 @@ public class WorldLayout
 	{
 		TagSet tagSet = new TagSet();
 		tagSet.Add(WorldGenTags.Overworld);
-		TagSet tagSet2 = new TagSet();
-		tagSet2.Add(WorldGenTags.Geode);
+		TagSet tagSet2 = new TagSet(WorldGen.Settings.defaults.defaultMoveTags);
 		List<VoronoiNode> list = new List<VoronoiNode>();
 		this.voronoiTree.GetLeafNodes(list, new VoronoiTree.LeafNodeTest(this.StartAreaTooLarge));
 		while (list.Count > 0)
@@ -770,12 +786,17 @@ public class WorldLayout
 		return list;
 	}
 
+	public void GetTopAndBottomSites(VoronoiTree vt, List<VoronoiDiagram.Site> topSites, List<VoronoiDiagram.Site> bottomSites)
+	{
+		vt.GetIntersectingLeafSites(this.topEdge, topSites);
+		vt.GetIntersectingLeafSites(this.bottomEdge, bottomSites);
+	}
+
 	public void ConvertEdgeCells(VoronoiTree vt)
 	{
 		List<VoronoiDiagram.Site> list = new List<VoronoiDiagram.Site>();
 		List<VoronoiDiagram.Site> list2 = new List<VoronoiDiagram.Site>();
-		vt.GetIntersectingLeafSites(this.topEdge, list);
-		vt.GetIntersectingLeafSites(this.bottomEdge, list2);
+		this.GetTopAndBottomSites(vt, list, list2);
 		for (int i = 0; i < this.localGraph.nodes.Count; i++)
 		{
 			int num = -1;
@@ -789,7 +810,7 @@ public class WorldLayout
 			}
 			if (num != -1)
 			{
-				this.localGraph.nodes[i].type = WorldGenTags.TheVoid.Name;
+				this.localGraph.nodes[i].SetType(WorldGenTags.TheVoid.Name);
 				list.RemoveAt(num);
 			}
 			else
@@ -809,7 +830,7 @@ public class WorldLayout
 			if (num != -1)
 			{
 				float num3 = WorldGen.RandomValue();
-				this.localGraph.nodes[i].type = ((num3 <= 0.33f) ? "MagmaLake" : ((num3 <= 0.66f) ? "MagmaBed" : "MagmaPool"));
+				this.localGraph.nodes[i].SetType((num3 <= 0.33f) ? "MagmaLake" : ((num3 <= 0.66f) ? "MagmaBed" : "MagmaPool"));
 				list2.RemoveAt(num);
 			}
 		}
@@ -905,15 +926,15 @@ public class WorldLayout
 
 	public void Draw()
 	{
-		if ((WorldLayout.drawOptions & WorldLayout.DebugFlags.Base) != (WorldLayout.DebugFlags)0 && this.localGraph != null)
+		if ((WorldLayout.drawOptions & WorldLayout.DebugFlags.LocalGraph) != (WorldLayout.DebugFlags)0 && this.localGraph != null)
 		{
 			this.localGraph.Draw();
 		}
-		if ((WorldLayout.drawOptions & WorldLayout.DebugFlags.Overworld) != (WorldLayout.DebugFlags)0 && this.overworldGraph != null)
+		if ((WorldLayout.drawOptions & WorldLayout.DebugFlags.OverworldGraph) != (WorldLayout.DebugFlags)0 && this.overworldGraph != null)
 		{
 			this.overworldGraph.Draw();
 		}
-		if ((WorldLayout.drawOptions & WorldLayout.DebugFlags.Tree) != (WorldLayout.DebugFlags)0 && this.voronoiTree != null)
+		if ((WorldLayout.drawOptions & WorldLayout.DebugFlags.VoronoiTree) != (WorldLayout.DebugFlags)0 && this.voronoiTree != null)
 		{
 			this.voronoiTree.Draw(0);
 		}
@@ -940,9 +961,9 @@ public class WorldLayout
 	[Flags]
 	public enum DebugFlags
 	{
-		Base = 1,
-		Overworld = 2,
-		Tree = 4
+		LocalGraph = 1,
+		OverworldGraph = 2,
+		VoronoiTree = 4
 	}
 
 	[SerializationConfig(MemberSerialization.OptOut)]

@@ -4015,8 +4015,8 @@ namespace TMPro
 
 		protected bool m_isMaterialDirty;
 
-		[FormerlySerializedAs("m_fontColor")]
 		[SerializeField]
+		[FormerlySerializedAs("m_fontColor")]
 		protected Color32 m_fontColor32 = Color.white;
 
 		[SerializeField]
@@ -4087,8 +4087,8 @@ namespace TMPro
 
 		protected bool m_isUsingBold;
 
-		[SerializeField]
 		[FormerlySerializedAs("m_lineJustification")]
+		[SerializeField]
 		protected TextAlignmentOptions m_textAlignment;
 
 		protected TextAlignmentOptions m_lineJustification;

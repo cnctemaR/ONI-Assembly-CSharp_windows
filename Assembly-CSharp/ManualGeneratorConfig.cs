@@ -6,8 +6,7 @@ public class ManualGeneratorConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("ManualGenerator", 2, 2, "generatormanual_kanim", 200f, 30f, BUILDINGS.CONSTRUCTION_MASS.TIER3, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, null);
-		buildingDef.ExplosionSize = Overheatable.ExplosionSize.Small;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("ManualGenerator", 2, 2, "generatormanual_kanim", 200f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, null);
 		buildingDef.GeneratorWattageRating = 400f;
 		buildingDef.GeneratorBaseCapacity = 10000f;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
@@ -15,9 +14,8 @@ public class ManualGeneratorConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.Upgradeable = true;
 		buildingDef.Breakable = true;
-		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
-		buildingDef.UtilityOutputOffset = new CellOffset(0, 0);
 		buildingDef.ForegroundLayer = Grid.SceneLayer.BuildingFront;
+		buildingDef.OperatingKilowatts = 1f;
 		return buildingDef;
 	}
 
@@ -29,7 +27,7 @@ public class ManualGeneratorConfig : IBuildingConfig
 		Generator generator = go.AddOrGet<Generator>();
 		generator.powerDistributionOrder = 10;
 		ManualGenerator manualGenerator = go.AddOrGet<ManualGenerator>();
-		manualGenerator.batteryRefillPercent = 0.5f;
+		manualGenerator.BatteryRefillPercent = 0.5f;
 		KBatchedAnimController kbatchedAnimController = go.AddOrGet<KBatchedAnimController>();
 		kbatchedAnimController.fgLayer = Grid.SceneLayer.BuildingFront;
 		kbatchedAnimController.initialAnim = "off";
@@ -46,7 +44,7 @@ public class ManualGeneratorConfig : IBuildingConfig
 		Upgradable.AddToUpgradableConfigs(new Upgradable.UpgradableConfig(prefabID, 1, 1, 120f, "Metal", 200f, array));
 	}
 
-	public override void DoPostConfigure(GameObject go)
+	public override void DoPostConfigureComplete(GameObject go)
 	{
 		BuildingTemplates.DoPostConfigure(go);
 	}

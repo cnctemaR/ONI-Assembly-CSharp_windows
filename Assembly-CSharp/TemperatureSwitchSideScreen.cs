@@ -1,40 +1,29 @@
 ﻿using System;
 using STRINGS;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class TemperatureSwitchSideScreen : SideScreenContent
 {
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.increaseButton.onClick += delegate
-		{
-			this.OnTemperatureChangeButtonClicked(false);
-		};
-		this.decreaseButton.onClick += delegate
-		{
-			this.OnTemperatureChangeButtonClicked(true);
-		};
-		this.coolerButton.onClick += delegate
+		this.coolerToggle.onClick += delegate
 		{
 			this.OnConditionButtonClicked(false);
 		};
-		this.warmerButton.onClick += delegate
+		this.warmerToggle.onClick += delegate
 		{
 			this.OnConditionButtonClicked(true);
 		};
-	}
-
-	private void SetValidContentState(bool valid)
-	{
-		if (this.validContent.activeInHierarchy != valid)
-		{
-			this.validContent.SetActive(valid);
-		}
-		if (this.warningLabel.activeInHierarchy == valid)
-		{
-			this.warningLabel.SetActive(!valid);
-		}
+		LocText component = this.coolerToggle.transform.GetChild(0).GetComponent<LocText>();
+		LocText component2 = this.warmerToggle.transform.GetChild(0).GetComponent<LocText>();
+		component.SetText(UI.UISIDESCREENS.TEMPERATURESWITCHSIDESCREEN.COLDER_BUTTON);
+		component2.SetText(UI.UISIDESCREENS.TEMPERATURESWITCHSIDESCREEN.WARMER_BUTTON);
+		Slider.SliderEvent sliderEvent = new Slider.SliderEvent();
+		sliderEvent.AddListener(new UnityAction<float>(this.OnTargetTemperatureChanged));
+		this.targetTemperatureSlider.onValueChanged = sliderEvent;
 	}
 
 	private void SimUpdate(float dt)
@@ -43,12 +32,6 @@ public class TemperatureSwitchSideScreen : SideScreenContent
 		{
 			return;
 		}
-		if (!this.targetTemperatureSwitch.IsConnected())
-		{
-			this.SetValidContentState(false);
-			return;
-		}
-		this.SetValidContentState(true);
 		this.UpdateLabels();
 	}
 
@@ -65,22 +48,14 @@ public class TemperatureSwitchSideScreen : SideScreenContent
 			Debug.LogError("The gameObject received does not contain a TimedSwitch component");
 			return;
 		}
-		if (!this.targetTemperatureSwitch.IsConnected())
-		{
-			this.SetValidContentState(false);
-		}
-		else
-		{
-			this.SetValidContentState(true);
-			this.UpdateLabels();
-		}
+		this.UpdateLabels();
 		this.UpdateTargetTemperatureLabel();
 		this.OnConditionButtonClicked(this.targetTemperatureSwitch.activateOnWarmerThan);
 	}
 
-	private void OnTemperatureChangeButtonClicked(bool increase)
+	private void OnTargetTemperatureChanged(float new_value)
 	{
-		this.targetTemperatureSwitch.thresholdTemperature += ((!increase) ? (-1f) : 1f);
+		this.targetTemperatureSwitch.thresholdTemperature = new_value;
 		this.UpdateTargetTemperatureLabel();
 	}
 
@@ -89,35 +64,31 @@ public class TemperatureSwitchSideScreen : SideScreenContent
 		this.targetTemperatureSwitch.activateOnWarmerThan = isWarmer;
 		if (isWarmer)
 		{
-			this.coolerButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Inactive);
-			this.warmerButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Active);
+			this.coolerToggle.isOn = false;
+			this.warmerToggle.isOn = true;
+			this.coolerToggle.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Inactive);
+			this.warmerToggle.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Active);
 		}
 		else
 		{
-			this.coolerButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Active);
-			this.warmerButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Inactive);
+			this.coolerToggle.isOn = true;
+			this.warmerToggle.isOn = false;
+			this.coolerToggle.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Active);
+			this.warmerToggle.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Inactive);
 		}
 	}
 
 	private void UpdateTargetTemperatureLabel()
 	{
-		this.targetTemperature.text = GameUtil.GetFormattedTemperature(this.targetTemperatureSwitch.thresholdTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute);
+		this.targetTemperature.text = GameUtil.GetFormattedTemperature(this.targetTemperatureSwitch.thresholdTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true);
 	}
 
 	private void UpdateLabels()
 	{
-		this.currentTemperature.text = string.Format(UI.UISIDESCREENS.TEMPERATURESWITCHSIDESCREEN.CURRENTTEMPERATURE, GameUtil.GetFormattedTemperature(this.targetTemperatureSwitch.StructureTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute));
+		this.currentTemperature.text = string.Format(UI.UISIDESCREENS.TEMPERATURESWITCHSIDESCREEN.CURRENT_TEMPERATURE, GameUtil.GetFormattedTemperature(this.targetTemperatureSwitch.GetTemperature(), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
 	}
 
-	private const float MIN_CHANGE = 1f;
-
 	private TemperatureControlledSwitch targetTemperatureSwitch;
-
-	[SerializeField]
-	private GameObject validContent;
-
-	[SerializeField]
-	private GameObject warningLabel;
 
 	[SerializeField]
 	private LocText currentTemperature;
@@ -126,14 +97,11 @@ public class TemperatureSwitchSideScreen : SideScreenContent
 	private LocText targetTemperature;
 
 	[SerializeField]
-	private KButton coolerButton;
+	private KToggle coolerToggle;
 
 	[SerializeField]
-	private KButton warmerButton;
+	private KToggle warmerToggle;
 
 	[SerializeField]
-	private KButton increaseButton;
-
-	[SerializeField]
-	private KButton decreaseButton;
+	private KSlider targetTemperatureSlider;
 }

@@ -5,13 +5,8 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Equippable : Assignable, ISaveLoadableJson, IGameObjectEffectDescriptor
+public class Equippable : Assignable, ISaveLoadable, IQuality, IGameObjectEffectDescriptor
 {
-	public Equippable()
-	{
-		base.SetWorkTime(1f);
-	}
-
 	protected override Assignables GetAssignables()
 	{
 		return this.assignablesRef.Get();
@@ -40,13 +35,26 @@ public class Equippable : Assignable, ISaveLoadableJson, IGameObjectEffectDescri
 		KPrefabID originalPrefab = component.GetOriginalPrefab();
 		Equippable component2 = originalPrefab.GetComponent<Equippable>();
 		this.def = component2.def;
+		Debug.Assert(this.def != null, "Cant continue without a def");
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Equipping;
-		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_equip") };
+		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_equip_clothing_kanim") };
+		this.forcePlayPst = true;
 		base.OnPrefabInit();
+	}
+
+	public global::QualityLevel GetQuality()
+	{
+		return this.quality;
+	}
+
+	public void SetQuality(global::QualityLevel level)
+	{
+		this.quality = level;
 	}
 
 	protected override void OnSpawn()
 	{
+		base.SetWorkTime(1.5f);
 		if (this.equipment != null && !this.equipment.IsEquipped(this))
 		{
 			this.CreateChore();
@@ -55,6 +63,15 @@ public class Equippable : Assignable, ISaveLoadableJson, IGameObjectEffectDescri
 
 	private void CreateChore()
 	{
+		if (this.equipment == null)
+		{
+			Debug.LogFormat("Looks like we already assigned this [{0}/{1}]", new object[]
+			{
+				base.name,
+				base.gameObject.GetInstanceID()
+			});
+			return;
+		}
 		this.chore = new WorkChore<Equippable>(Db.Get().ChoreTypes.Equip, this, this.equipment.GetComponent<ChoreProvider>(), true, null, null, null, true, null, true, default(Tag), null, false, true);
 	}
 
@@ -68,13 +85,12 @@ public class Equippable : Assignable, ISaveLoadableJson, IGameObjectEffectDescri
 		return go.GetComponent<Equipment>();
 	}
 
-	public void ClickAssign(Assignables new_assignables)
-	{
-		this.OnClickAssign(new_assignables);
-	}
-
 	protected override void OnClickAssign(Assignables new_assignables)
 	{
+		if (this.equipment == null)
+		{
+			this.equipment = base.GetComponent<Equipment>();
+		}
 		base.OnClickAssign(new_assignables);
 		if (this.chore != null)
 		{
@@ -96,56 +112,83 @@ public class Equippable : Assignable, ISaveLoadableJson, IGameObjectEffectDescri
 	{
 		if (this.equipment != null)
 		{
+			if (SelectTool.Instance.selected == this.selectable)
+			{
+				SelectTool.Instance.Select(null, false);
+			}
 			this.equipment.Equip(this);
 		}
 	}
 
-	public override string[] GetWorkAnims(Worker worker)
-	{
-		return Equippable.WorkAnims;
-	}
-
 	public void OnEquip(EquipmentSlotInstance slot)
 	{
+		KBatchedAnimController component = slot.gameObject.GetComponent<KBatchedAnimController>();
 		Attributes attributes = slot.gameObject.GetAttributes();
 		string name = base.GetComponent<KSelectable>().GetName();
 		foreach (AttributeModifier attributeModifier in this.def.AttributeModifiers)
 		{
 			attributes.Add(name, attributeModifier);
 		}
-		slot.gameObject.GetComponent<SnapOn>().AttachSnapOnByName(this.def.SnapOn);
+		SnapOn component2 = slot.gameObject.GetComponent<SnapOn>();
+		component2.AttachSnapOnByName(this.def.SnapOn);
+		if (this.def.SnapOn1 != null)
+		{
+			component2.AttachSnapOnByName(this.def.SnapOn1);
+		}
 		slot.gameObject.GetComponent<Navigator>().SetAbilityFlag(this.def.PathFinderFlags);
 		if (this.def.BuildOverride != null)
 		{
-			slot.gameObject.GetComponent<KAnimControllerBase>().AddBuildOverride(this.def.BuildOverride, true);
+			component.AddBuildOverride(this.def.BuildOverride, true, false);
+		}
+		if (this.def.OnEquipCallBack != null)
+		{
+			this.def.OnEquipCallBack(this);
 		}
 	}
 
 	public void OnUnequip(EquipmentSlotInstance slot)
 	{
+		KBatchedAnimController component = slot.gameObject.GetComponent<KBatchedAnimController>();
 		if (this.def.BuildOverride != null)
 		{
-			slot.gameObject.GetComponent<KAnimControllerBase>().ClearBuildOverride(this.def.BuildOverride, true);
+			component.ClearBuildOverride(this.def.BuildOverride, !this.def.IsBody);
 		}
 		Attributes attributes = slot.gameObject.GetAttributes();
 		foreach (AttributeModifier attributeModifier in this.def.AttributeModifiers)
 		{
 			attributes.Remove(attributeModifier);
 		}
-		slot.gameObject.GetComponent<SnapOn>().DetachSnapOnByName(this.def.SnapOn);
+		if (!this.def.IsBody)
+		{
+			SnapOn component2 = slot.gameObject.GetComponent<SnapOn>();
+			component2.DetachSnapOnByName(this.def.SnapOn);
+			if (this.def.SnapOn1 != null)
+			{
+				component2.DetachSnapOnByName(this.def.SnapOn1);
+			}
+		}
 		slot.gameObject.GetComponent<Navigator>().ClearAbilityFlag(this.def.PathFinderFlags);
+		if (this.def.OnUnequipCallBack != null)
+		{
+			this.def.OnUnequipCallBack(this);
+		}
 	}
 
-	public int DescriptionOrder { get; set; }
-
-	public List<Descriptor> GetRequirementDescriptions(GameObject go)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
-		return null;
-	}
-
-	public List<string> GetEffectDescriptions(GameObject go)
-	{
-		return GameUtil.GetEquipmentEffects(this.def);
+		if (this.def != null)
+		{
+			List<Descriptor> equipmentEffects = GameUtil.GetEquipmentEffects(this.def);
+			if (this.def.additionalDescriptors != null)
+			{
+				foreach (Descriptor descriptor in this.def.additionalDescriptors)
+				{
+					equipmentEffects.Add(descriptor);
+				}
+			}
+			return equipmentEffects;
+		}
+		return new List<Descriptor>();
 	}
 
 	public EquipmentDef def;
@@ -158,5 +201,5 @@ public class Equippable : Assignable, ISaveLoadableJson, IGameObjectEffectDescri
 	[Serialize]
 	private Ref<Equipment> assignablesRef = new Ref<Equipment>();
 
-	private static readonly string[] WorkAnims = new string[] { "working_pre", "working_loop" };
+	private global::QualityLevel quality;
 }

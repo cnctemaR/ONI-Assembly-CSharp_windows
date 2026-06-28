@@ -11,47 +11,56 @@ public class ToolParameterMenu : KMonoBehaviour
 		this.ClearMenu();
 	}
 
-	public void PopulateMenu(Dictionary<string, bool> parameters)
+	public void PopulateMenu(Dictionary<string, ToolParameterMenu.ToggleState> parameters)
 	{
 		this.ClearMenu();
-		this.content.SetActive(true);
 		this.currentParameters = parameters;
 		this.radioGroup = this.widgetContainer.GetComponent<ToggleGroup>();
-		foreach (KeyValuePair<string, bool> keyValuePair in parameters)
+		foreach (KeyValuePair<string, ToolParameterMenu.ToggleState> keyValuePair in parameters)
 		{
 			GameObject gameObject = Util.KInstantiateUI(this.widgetPrefab, this.widgetContainer, true);
-			this.widgetMap.Add(keyValuePair.Key, gameObject);
+			gameObject.GetComponentInChildren<LocText>().text = Strings.Get("STRINGS.UI.TOOLS.FILTERLAYERS." + keyValuePair.Key);
+			this.widgets.Add(keyValuePair.Key, gameObject);
 			Toggle componentInChildren = gameObject.GetComponentInChildren<Toggle>();
-			componentInChildren.isOn = keyValuePair.Value;
+			ToolParameterMenu.ToggleState value2 = keyValuePair.Value;
+			if (value2 == ToolParameterMenu.ToggleState.Disabled)
+			{
+				componentInChildren.interactable = false;
+				componentInChildren.isOn = false;
+			}
+			else
+			{
+				componentInChildren.interactable = true;
+				componentInChildren.isOn = value2 == ToolParameterMenu.ToggleState.On;
+			}
 			componentInChildren.group = this.radioGroup;
 			componentInChildren.onValueChanged.AddListener(delegate(bool value)
 			{
 				this.OnChange();
 			});
-			gameObject.GetComponentInChildren<LocText>().text = Strings.Get("STRINGS.UI.TOOLS.FILTERLAYERS." + keyValuePair.Key);
 		}
+		this.content.SetActive(true);
 	}
 
 	public void ClearMenu()
 	{
 		this.content.SetActive(false);
-		if (this.currentParameters == null)
-		{
-			return;
-		}
-		foreach (KeyValuePair<string, GameObject> keyValuePair in this.widgetMap)
+		foreach (KeyValuePair<string, GameObject> keyValuePair in this.widgets)
 		{
 			Util.KDestroyGameObject(keyValuePair.Value);
 		}
-		this.widgetMap.Clear();
+		this.widgets.Clear();
 	}
 
 	private void OnChange()
 	{
-		foreach (KeyValuePair<string, GameObject> keyValuePair in this.widgetMap)
+		foreach (KeyValuePair<string, GameObject> keyValuePair in this.widgets)
 		{
 			Toggle componentInChildren = keyValuePair.Value.GetComponentInChildren<Toggle>();
-			this.currentParameters[keyValuePair.Key] = componentInChildren.isOn;
+			if (componentInChildren.interactable)
+			{
+				this.currentParameters[keyValuePair.Key] = ((!componentInChildren.isOn) ? ToolParameterMenu.ToggleState.Off : ToolParameterMenu.ToggleState.On);
+			}
 		}
 	}
 
@@ -63,7 +72,14 @@ public class ToolParameterMenu : KMonoBehaviour
 
 	private ToggleGroup radioGroup;
 
-	private Dictionary<string, GameObject> widgetMap = new Dictionary<string, GameObject>();
+	private Dictionary<string, GameObject> widgets = new Dictionary<string, GameObject>();
 
-	private Dictionary<string, bool> currentParameters;
+	private Dictionary<string, ToolParameterMenu.ToggleState> currentParameters;
+
+	public enum ToggleState
+	{
+		On,
+		Off,
+		Disabled
+	}
 }

@@ -27,12 +27,12 @@ public class TargetScreen : KScreen
 
 	public virtual void OnSelectTarget(GameObject target)
 	{
-		target.Subscribe(1502190696, new EventSystem.EventHandler(this.OnTargetDestroyed));
+		target.Subscribe(1502190696, new Action<object>(this.OnTargetDestroyed));
 	}
 
 	public virtual void OnDeselectTarget(GameObject target)
 	{
-		target.Unsubscribe(1502190696, new EventSystem.EventHandler(this.OnTargetDestroyed));
+		target.Unsubscribe(1502190696, new Action<object>(this.OnTargetDestroyed));
 	}
 
 	private void OnTargetDestroyed(object data)

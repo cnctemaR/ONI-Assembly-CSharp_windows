@@ -5,7 +5,7 @@ using UnityEngine;
 public class FleeChore : Chore<FleeChore.StatesInstance>
 {
 	public FleeChore(IStateMachineTarget target, GameObject enemy)
-		: base(Db.Get().ChoreTypes.Flee, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true)
+		: base(Db.Get().ChoreTypes.Flee, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true, 0)
 	{
 		this.smi = new FleeChore.StatesInstance(this);
 		this.smi.sm.self.Set(this.gameObject, this.smi);
@@ -41,7 +41,7 @@ public class FleeChore : Chore<FleeChore.StatesInstance>
 
 	private Navigator nav;
 
-	public class StatesInstance : GameStateMachine<FleeChore.States, FleeChore.StatesInstance, FleeChore>.GameInstance
+	public class StatesInstance : GameStateMachine<FleeChore.States, FleeChore.StatesInstance, FleeChore, object>.GameInstance
 	{
 		public StatesInstance(FleeChore master)
 			: base(master)
@@ -97,8 +97,8 @@ public class FleeChore : Chore<FleeChore.StatesInstance>
 					smi.GoTo(this.cower);
 				}
 			});
-			this.flee.InitializeStates(this.self, this.fleeToTarget, this.cower, this.cower, null, NavigationTactics.ReduceTravelDistance).ToggleAnims("anim_loco_run_insane", 2f);
-			this.cower.ToggleAnims("anim_cringe", 4f).PlayAnim("cringe_pre", KAnim.PlayMode.Once, null).QueueAnim("cringe_loop", false, null)
+			this.flee.InitializeStates(this.self, this.fleeToTarget, this.cower, this.cower, null, NavigationTactics.ReduceTravelDistance).ToggleAnims("anim_loco_run_insane_kanim", 2f);
+			this.cower.ToggleAnims("anim_cringe_kanim", 4f).PlayAnim("cringe_pre", KAnim.PlayMode.Once, null).QueueAnim("cringe_loop", false, null)
 				.QueueAnim("cringe_pst", false, null)
 				.OnAnimQueueComplete(this.end);
 			this.end.Enter(delegate(FleeChore.StatesInstance smi)
@@ -107,18 +107,18 @@ public class FleeChore : Chore<FleeChore.StatesInstance>
 			});
 		}
 
-		public StateMachine<FleeChore.States, FleeChore.StatesInstance, FleeChore>.TargetParameter fleeFromTarget;
+		public StateMachine<FleeChore.States, FleeChore.StatesInstance, FleeChore, object>.TargetParameter fleeFromTarget;
 
-		public StateMachine<FleeChore.States, FleeChore.StatesInstance, FleeChore>.TargetParameter fleeToTarget;
+		public StateMachine<FleeChore.States, FleeChore.StatesInstance, FleeChore, object>.TargetParameter fleeToTarget;
 
-		public StateMachine<FleeChore.States, FleeChore.StatesInstance, FleeChore>.TargetParameter self;
+		public StateMachine<FleeChore.States, FleeChore.StatesInstance, FleeChore, object>.TargetParameter self;
 
-		public GameStateMachine<FleeChore.States, FleeChore.StatesInstance, FleeChore>.State planFleeRoute;
+		public GameStateMachine<FleeChore.States, FleeChore.StatesInstance, FleeChore, object>.State planFleeRoute;
 
-		public GameStateMachine<FleeChore.States, FleeChore.StatesInstance, FleeChore>.ApproachSubState<Approachable> flee;
+		public GameStateMachine<FleeChore.States, FleeChore.StatesInstance, FleeChore, object>.ApproachSubState<Approachable> flee;
 
-		public GameStateMachine<FleeChore.States, FleeChore.StatesInstance, FleeChore>.State cower;
+		public GameStateMachine<FleeChore.States, FleeChore.StatesInstance, FleeChore, object>.State cower;
 
-		public GameStateMachine<FleeChore.States, FleeChore.StatesInstance, FleeChore>.State end;
+		public GameStateMachine<FleeChore.States, FleeChore.StatesInstance, FleeChore, object>.State end;
 	}
 }

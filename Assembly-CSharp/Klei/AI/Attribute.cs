@@ -6,7 +6,7 @@ namespace Klei.AI
 {
 	public class Attribute : Resource
 	{
-		public Attribute(string id, bool is_trainable, bool show_in_ui, bool is_profession)
+		public Attribute(string id, bool is_trainable, Attribute.Display show_in_ui, bool is_profession)
 			: base(id, null, null)
 		{
 			string text = "STRINGS.DUPLICANTS.ATTRIBUTES." + id.ToUpper();
@@ -18,7 +18,7 @@ namespace Klei.AI
 			this.ShowInUI = show_in_ui;
 		}
 
-		public Attribute(string id, string name, string profession_name, string attribute_description, float base_value, bool show_in_ui, bool is_trainable)
+		public Attribute(string id, string name, string profession_name, string attribute_description, float base_value, Attribute.Display show_in_ui, bool is_trainable)
 			: base(id, name)
 		{
 			this.Description = attribute_description;
@@ -56,7 +56,7 @@ namespace Klei.AI
 
 		public float BaseValue;
 
-		public bool ShowInUI;
+		public Attribute.Display ShowInUI;
 
 		public bool IsTrainable;
 
@@ -67,5 +67,13 @@ namespace Klei.AI
 		public List<AttributeConverter> converters = new List<AttributeConverter>();
 
 		public IAttributeFormatter formatter;
+
+		public enum Display
+		{
+			Never,
+			Skill,
+			Expectation,
+			General
+		}
 	}
 }

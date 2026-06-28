@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class MedicinalHerb : StateMachineComponent<MedicinalHerb.StatesInstance>, IGameObjectEffectDescriptor
+public class MedicinalHerb : StateMachineComponent<MedicinalHerb.StatesInstance>
 {
 	protected override void OnSpawn()
 	{
@@ -17,28 +16,6 @@ public class MedicinalHerb : StateMachineComponent<MedicinalHerb.StatesInstance>
 		Util.KDestroyGameObject(base.gameObject);
 	}
 
-	public int DescriptionOrder { get; set; }
-
-	public List<Descriptor> GetRequirementDescriptions(GameObject go)
-	{
-		return null;
-	}
-
-	public List<string> GetEffectDescriptions(GameObject go)
-	{
-		List<string> list = new List<string>();
-		Crop component = go.GetComponent<Crop>();
-		List<string> cropHarvestDetails = GameUtil.GetCropHarvestDetails(component);
-		if (cropHarvestDetails.Count > 0)
-		{
-			for (int i = 0; i < cropHarvestDetails.Count; i++)
-			{
-				list.Add(cropHarvestDetails[i]);
-			}
-		}
-		return list;
-	}
-
 	[MyCmpReq]
 	private Crop crop;
 
@@ -51,7 +28,7 @@ public class MedicinalHerb : StateMachineComponent<MedicinalHerb.StatesInstance>
 	[MyCmpReq]
 	private Harvestable harvestable;
 
-	public class StatesInstance : GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb>.GameInstance
+	public class StatesInstance : GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb, object>.GameInstance
 	{
 		public StatesInstance(MedicinalHerb smi)
 			: base(smi)
@@ -73,8 +50,9 @@ public class MedicinalHerb : StateMachineComponent<MedicinalHerb.StatesInstance>
 				global::UnityEngine.Object.Destroy(smi.master.GetComponent<KBatchedAnimController>());
 				smi.Schedule(0.5f, new Action<object>(smi.master.DestroySelf), null);
 			});
-			this.blocked_from_growing.ToggleStatusItem(Db.Get().MiscStatusItems.RegionIsBlocked, null).EventTransition(GameHashes.EntombedChanged, this.alive.seed_grow, (MedicinalHerb.StatesInstance smi) => !smi.master.GetComponent<EntombVulnerable>().GetEntombed).EventTransition(GameHashes.TooColdWarning, this.alive.seed_grow, null)
-				.EventTransition(GameHashes.TooHotWarning, this.alive.seed_grow, null);
+			this.blocked_from_growing.ToggleStatusItem(Db.Get().MiscStatusItems.RegionIsBlocked, null).EventTransition(GameHashes.EntombedChanged, this.alive.seed_grow, (MedicinalHerb.StatesInstance smi) => this.alive.ForceUpdateStatus(smi.master.gameObject)).EventTransition(GameHashes.TooColdWarning, this.alive.seed_grow, (MedicinalHerb.StatesInstance smi) => this.alive.ForceUpdateStatus(smi.master.gameObject))
+				.EventTransition(GameHashes.TooHotWarning, this.alive.seed_grow, (MedicinalHerb.StatesInstance smi) => this.alive.ForceUpdateStatus(smi.master.gameObject))
+				.EventTransition(GameHashes.Uprooted, this.dead, (MedicinalHerb.StatesInstance smi) => UprootedMonitor.IsObjectUprooted(smi.master.gameObject));
 			this.alive.InitializeStates(this.masterTarget, this.dead).DefaultState(this.alive.seed_grow).Enter(delegate(MedicinalHerb.StatesInstance smi)
 			{
 				if (smi.master.growing.Replanted && !this.alive.ForceUpdateStatus(smi.master.gameObject))
@@ -92,7 +70,6 @@ public class MedicinalHerb : StateMachineComponent<MedicinalHerb.StatesInstance>
 			this.alive.fruiting.EventTransition(GameHashes.Harvest, this.alive.fruiting.fruiting_harvest, null).EventHandler(GameHashes.Wilt, delegate(MedicinalHerb.StatesInstance smi)
 			{
 				smi.master.crop.SpawnFruit(null);
-				smi.master.growing.ResetGrowth();
 				smi.master.harvestable.SetCanBeHarvested(false);
 				smi.GoTo(this.alive.wilting.wilting_pre);
 			});
@@ -103,47 +80,49 @@ public class MedicinalHerb : StateMachineComponent<MedicinalHerb.StatesInstance>
 			});
 			this.alive.fruiting.fruiting_harvest.PlayAnim("harvest", KAnim.PlayMode.Once, null).Enter(delegate(MedicinalHerb.StatesInstance smi)
 			{
-				smi.Schedule(0.4f, new Action<object>(smi.master.crop.SpawnFruit), null);
-				smi.master.growing.ResetGrowth();
+				if (GameScheduler.Instance != null && smi.master != null)
+				{
+					GameScheduler.Instance.Schedule("SpawnFruit", 0.4f, new Action<object>(smi.master.crop.SpawnFruit), null, null);
+				}
 				smi.master.harvestable.SetCanBeHarvested(false);
 			}).OnAnimQueueComplete(this.alive.idle);
 		}
 
-		public GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb>.State blocked_from_growing;
+		public GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb, object>.State blocked_from_growing;
 
 		public MedicinalHerb.States.AliveStates alive;
 
-		public GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb>.State dead;
+		public GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb, object>.State dead;
 
-		public class AliveStates : GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb>.PlantAliveSubState
+		public class AliveStates : GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb, object>.PlantAliveSubState
 		{
-			public GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb>.State seed_grow;
+			public GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb, object>.State seed_grow;
 
-			public GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb>.State idle;
+			public GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb, object>.State idle;
 
 			public MedicinalHerb.States.FruitingState fruiting;
 
 			public MedicinalHerb.States.WiltingState wilting;
 
-			public GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb>.State destroy;
+			public GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb, object>.State destroy;
 		}
 
-		public class FruitingState : GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb>.State
+		public class FruitingState : GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb, object>.State
 		{
-			public GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb>.State fruiting_pre;
+			public GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb, object>.State fruiting_pre;
 
-			public GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb>.State fruiting_idle;
+			public GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb, object>.State fruiting_idle;
 
-			public GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb>.State fruiting_harvest;
+			public GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb, object>.State fruiting_harvest;
 		}
 
-		public class WiltingState : GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb>.State
+		public class WiltingState : GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb, object>.State
 		{
-			public GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb>.State wilting_pre;
+			public GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb, object>.State wilting_pre;
 
-			public GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb>.State wilting;
+			public GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb, object>.State wilting;
 
-			public GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb>.State wilting_pst;
+			public GameStateMachine<MedicinalHerb.States, MedicinalHerb.StatesInstance, MedicinalHerb, object>.State wilting_pst;
 		}
 	}
 }

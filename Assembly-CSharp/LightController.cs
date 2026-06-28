@@ -13,11 +13,11 @@ public class LightController : GameStateMachine<LightController, LightController
 			});
 	}
 
-	public GameStateMachine<LightController, LightController.Instance, IStateMachineTarget>.State off;
+	public GameStateMachine<LightController, LightController.Instance, IStateMachineTarget, object>.State off;
 
-	public GameStateMachine<LightController, LightController.Instance, IStateMachineTarget>.State on;
+	public GameStateMachine<LightController, LightController.Instance, IStateMachineTarget, object>.State on;
 
-	public new class Instance : GameStateMachine<LightController, LightController.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<LightController, LightController.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)

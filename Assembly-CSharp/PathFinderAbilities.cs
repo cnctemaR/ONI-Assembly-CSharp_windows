@@ -5,7 +5,7 @@ public struct PathFinderAbilities
 {
 	public void AddMask(NavMask mask)
 	{
-		if (this.masks != null)
+		if (this.masks == null)
 		{
 			this.masks = new List<NavMask>();
 		}
@@ -20,13 +20,13 @@ public struct PathFinderAbilities
 		}
 	}
 
-	public bool CanTraverse(int cell, int underwater_cost)
+	public bool CanTraverse(int cell, int from_cell, int underwater_cost)
 	{
 		if (this.masks != null)
 		{
 			for (int i = 0; i < this.masks.Count; i++)
 			{
-				if (!this.masks[i].IsTraversable(cell))
+				if (!this.masks[i].IsTraversable(cell, from_cell, this))
 				{
 					return false;
 				}
@@ -38,6 +38,8 @@ public struct PathFinderAbilities
 	public PathFinderFlags flags;
 
 	public int maxUnderwaterCost;
+
+	public bool ignoreAccessControl;
 
 	private List<NavMask> masks;
 }

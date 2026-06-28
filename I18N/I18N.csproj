@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{B3F37800-5319-4325-B591-99335A49EBF4}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>I18N</RootNamespace>
+    <AssemblyName>I18N</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net20</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="Common\ByteEncoding.cs" />
+    <Compile Include="Common\Handlers.cs" />
+    <Compile Include="Common\Manager.cs" />
+    <Compile Include="Common\MonoEncoder.cs" />
+    <Compile Include="Common\MonoEncoding.cs" />
+    <Compile Include="Common\Strings.cs" />
+    <Compile Include="Consts.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+</Project>

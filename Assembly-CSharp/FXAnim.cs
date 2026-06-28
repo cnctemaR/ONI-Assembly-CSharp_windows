@@ -16,54 +16,36 @@ public class FXAnim : GameStateMachine<FXAnim, FXAnim.Instance>
 		});
 	}
 
-	public StateMachine<FXAnim, FXAnim.Instance, IStateMachineTarget>.TargetParameter fx;
+	public StateMachine<FXAnim, FXAnim.Instance, IStateMachineTarget, object>.TargetParameter fx;
 
-	public GameStateMachine<FXAnim, FXAnim.Instance, IStateMachineTarget>.State loop;
+	public GameStateMachine<FXAnim, FXAnim.Instance, IStateMachineTarget, object>.State loop;
 
-	public new class Instance : GameStateMachine<FXAnim, FXAnim.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<FXAnim, FXAnim.Instance, IStateMachineTarget, object>.GameInstance
 	{
-		public Instance(IStateMachineTarget master, string kanim_file, string pre, string loop, string post, Vector3 offset)
+		public Instance(IStateMachineTarget master, string kanim_file, string anim, KAnim.PlayMode mode, Vector3 offset, Color32 tint_colour)
 			: base(master)
 		{
-			this.controller = FXHelpers.CreateEffect(kanim_file, null, false, Grid.SceneLayer.Front);
-			this.controller.transform.parent = base.smi.master.transform;
-			this.controller.transform.localPosition = offset;
-			this.controller.gameObject.Subscribe(-1061186183, new EventSystem.EventHandler(this.OnAnimComplete));
+			this.controller = FXHelpers.CreateEffect(kanim_file, base.smi.master.transform.position + offset, base.smi.master.transform, false, Grid.SceneLayer.Front);
+			this.controller.gameObject.Subscribe(-1061186183, new Action<object>(this.OnAnimQueueComplete));
+			this.controller.TintColour = tint_colour;
 			base.sm.fx.Set(this.controller.gameObject, base.smi);
-			this.pre = pre;
-			this.loop = loop;
-			this.post = post;
+			this.anim = anim;
+			this.mode = mode;
 		}
 
 		public void Enter()
 		{
-			this.controller.Play(this.pre, KAnim.PlayMode.Once, 1f, 0f);
-			this.controller.Queue(this.loop, KAnim.PlayMode.Loop, 1f, 0f);
+			this.controller.Play(this.anim, this.mode, 1f, 0f);
 		}
 
 		public void Exit()
 		{
-			if (this.destroyQueued)
-			{
-				return;
-			}
-			if (this.post != null)
-			{
-				this.destroyQueued = true;
-				this.controller.Play(this.post, KAnim.PlayMode.Once, 1f, 0f);
-			}
-			else
-			{
-				this.DestroyFX();
-			}
+			this.DestroyFX();
 		}
 
-		private void OnAnimComplete(object data)
+		private void OnAnimQueueComplete(object data)
 		{
-			if (this.destroyQueued)
-			{
-				this.DestroyFX();
-			}
+			this.DestroyFX();
 		}
 
 		private void DestroyFX()
@@ -73,12 +55,8 @@ public class FXAnim : GameStateMachine<FXAnim, FXAnim.Instance>
 
 		private KAnimControllerBase controller;
 
-		private bool destroyQueued;
+		private string anim;
 
-		private string pre;
-
-		private string loop;
-
-		private string post;
+		private KAnim.PlayMode mode;
 	}
 }

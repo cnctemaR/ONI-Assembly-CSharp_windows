@@ -1,15 +1,13 @@
 ﻿using System;
-using KSerialization;
 using UnityEngine;
 
-[SerializationConfig(MemberSerialization.OptIn)]
-public class StorageLocker : KMonoBehaviour, ISaveLoadableJson
+[SkipSaveFileSerialization]
+public class StorageLocker : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
 		this.log = new LoggerFS("StorageLocker");
-		base.GetComponent<KPrefabID>().AddLog(this.log);
 		TreeFilterable treeFilterable = this.filterable;
 		treeFilterable.OnFilterChanged = (Action<Tag[]>)Delegate.Combine(treeFilterable.OnFilterChanged, new Action<Tag[]>(this.OnFilterChanged));
 	}
@@ -17,7 +15,7 @@ public class StorageLocker : KMonoBehaviour, ISaveLoadableJson
 	protected override void OnSpawn()
 	{
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, new string[] { "meter_frame", "meter_level" });
-		this.Subscribe(-1697596308, new EventSystem.EventHandler(this.OnStorageChange));
+		this.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
 		this.OnStorageChange(null);
 		Storage component = base.GetComponent<Storage>();
 		Storage storage = component;
@@ -26,7 +24,7 @@ public class StorageLocker : KMonoBehaviour, ISaveLoadableJson
 			this.OnFilterChanged(this.filterable.GetTags());
 		}));
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.StorageLocker, this);
-		this.Subscribe(1088293757, new EventSystem.EventHandler(this.OnToggleClosed));
+		this.Subscribe(1088293757, new Action<object>(this.OnToggleClosed));
 	}
 
 	private void OnStorageChange(object data)
@@ -64,7 +62,7 @@ public class StorageLocker : KMonoBehaviour, ISaveLoadableJson
 		{
 			this.fetchList = new FetchList2(component3);
 			this.fetchList.ShowStatusItem = false;
-			this.fetchList.Add(tags, (float)num, false);
+			this.fetchList.Add(tags, (float)num, FetchOrder2.OperationalRequirement.None);
 			this.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
 		}
 		base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.NoStorageFilterSet, !flag, this);

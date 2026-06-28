@@ -19,19 +19,19 @@ public class ThoughtGraph : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance
 		this.cooldown.OnSignal(this.thoughtsChangedImmediate, this.displayingthought, (ThoughtGraph.Instance smi) => smi.HasImmediateThought()).ScheduleGoTo(20f, this.nothoughts);
 	}
 
-	public StateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget>.Signal thoughtsChanged;
+	public StateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.Signal thoughtsChanged;
 
-	public StateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget>.Signal thoughtsChangedImmediate;
+	public StateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.Signal thoughtsChangedImmediate;
 
-	public GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget>.State initialdelay;
+	public GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.State initialdelay;
 
-	public GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget>.State nothoughts;
+	public GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.State nothoughts;
 
-	public GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget>.State displayingthought;
+	public GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.State displayingthought;
 
-	public GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget>.State cooldown;
+	public GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.State cooldown;
 
-	public new class Instance : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)

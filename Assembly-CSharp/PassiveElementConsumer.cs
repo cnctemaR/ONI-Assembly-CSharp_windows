@@ -1,8 +1,6 @@
 ﻿using System;
-using KSerialization;
 
-[SerializationConfig(MemberSerialization.OptIn)]
-public class PassiveElementConsumer : ElementConsumer, ISaveLoadableJson, IEffectDescriptor
+public class PassiveElementConsumer : ElementConsumer, IEffectDescriptor
 {
 	protected override bool IsActive()
 	{

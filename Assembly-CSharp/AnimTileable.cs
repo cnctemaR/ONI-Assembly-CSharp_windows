@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[SkipSaveFileSerialization]
 public class AnimTileable : KMonoBehaviour
 {
 	protected override void OnSpawn()
@@ -8,7 +9,7 @@ public class AnimTileable : KMonoBehaviour
 		Building component = base.GetComponent<Building>();
 		Extents extents = component.GetExtents();
 		extents = new Extents(extents.x - 1, extents.y, extents.width + 2, 1);
-		int mask = GameScenePartitioner.Instance.objectLayerMasks[3].mask;
+		int mask = GameScenePartitioner.Instance.objectLayerMasks[1].mask;
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("AnimTileable.OnSpawn", base.gameObject, extents, mask, new Action<object>(this.OnNeighbourCellsUpdated));
 		this.UpdateEndCaps();
 	}
@@ -52,7 +53,7 @@ public class AnimTileable : KMonoBehaviour
 	private bool HasTileableNeighbour(Tag expected_tag, int neighbour_cell)
 	{
 		bool flag = false;
-		GameObject gameObject = Grid.Objects[neighbour_cell, 3];
+		GameObject gameObject = Grid.Objects[neighbour_cell, 1];
 		if (gameObject != null)
 		{
 			KPrefabID component = gameObject.GetComponent<KPrefabID>();

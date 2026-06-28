@@ -28,6 +28,7 @@ public class MeterScreen : KScreen
 		this.StressTooltip.OnToolTip = new Func<string>(this.OnStressTooltip);
 		this.ToxicityTooltip.OnToolTip = new Func<string>(this.OnToxicityTooltip);
 		this.RationsTooltip.OnToolTip = new Func<string>(this.OnRationsTooltip);
+		this.RedAlertTooltip.OnToolTip = new Func<string>(this.OnRedAlertTooltip);
 		this.RedAlertButton.onClick += delegate
 		{
 			this.OnRedAlertClick();
@@ -40,17 +41,17 @@ public class MeterScreen : KScreen
 		RedAlertManager.Instance.Get().Toggle(flag);
 		if (flag)
 		{
-			this.RedAlertButton.ActivateFlourish(true, ImageToggleState.State.Active);
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Open", false));
+			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("RedAlert_ON", false));
 			if (this.loopInstance == null)
 			{
-				this.loopInstance = LoopingSoundManager.StartSound(GlobalAssets.GetSound("RedAlert_LP", false), Vector3.zero);
+				this.loopInstance = LoopingSoundManager.StartSound(GlobalAssets.GetSound("RedAlert_LP", false), Vector3.zero, true);
 			}
 		}
 		else
 		{
-			this.RedAlertButton.ActivateFlourish(false, ImageToggleState.State.Inactive);
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
+			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("RedAlert_OFF", false));
 			if (this.loopInstance != null)
 			{
 				LoopingSoundManager.StopSound(GlobalAssets.GetSound("RedAlert_LP", false), this.loopInstance);
@@ -91,7 +92,7 @@ public class MeterScreen : KScreen
 		int count = Components.LiveMinionIdentities.Count;
 		this.currentMinions.text = count.ToString("0");
 		this.MinionsTooltip.ClearMultiStringTooltip();
-		this.MinionsTooltip.AddMultiStringTooltip("Population: " + count.ToString("0"), this.ToolTipStyle_Header);
+		this.MinionsTooltip.AddMultiStringTooltip(string.Format(UI.TOOLTIPS.METERSCREEN_POPULATION, count.ToString("0")), this.ToolTipStyle_Header);
 	}
 
 	private void RefreshToxicity()
@@ -104,7 +105,7 @@ public class MeterScreen : KScreen
 	{
 		if (this.RationsText != null && RationTracker.Get() != null)
 		{
-			int num = (int)(RationTracker.Get().CountRations(null, true) * 100000f);
+			int num = (int)RationTracker.Get().CountRations(null, true);
 			this.RationsText.text = GameUtil.GetFormattedCalories((float)num, GameUtil.TimeSlice.None, true);
 		}
 	}
@@ -140,17 +141,24 @@ public class MeterScreen : KScreen
 	private string OnRationsTooltip()
 	{
 		this.rationsDict.Clear();
-		int num = (int)RationTracker.Get().CountRations(this.rationsDict, true);
-		int num2 = (int)((float)num * 100000f);
-		this.RationsText.text = GameUtil.GetFormattedCalories((float)num2, GameUtil.TimeSlice.None, true);
+		float num = RationTracker.Get().CountRations(this.rationsDict, true);
+		this.RationsText.text = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
 		this.RationsTooltip.ClearMultiStringTooltip();
-		this.RationsTooltip.AddMultiStringTooltip(string.Format(UI.TOOLTIPS.METERSCREEN_MEALHISTORY, GameUtil.GetFormattedCalories((float)num2, GameUtil.TimeSlice.None, true)), this.ToolTipStyle_Header);
+		this.RationsTooltip.AddMultiStringTooltip(string.Format(UI.TOOLTIPS.METERSCREEN_MEALHISTORY, GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true)), this.ToolTipStyle_Header);
 		this.RationsTooltip.AddMultiStringTooltip(string.Empty, this.ToolTipStyle_Property);
 		foreach (KeyValuePair<string, float> keyValuePair in this.rationsDict)
 		{
 			EdiblesManager.FoodInfo foodInfo = EdiblesManager.instance.GetFoodInfo(keyValuePair.Key);
 			this.RationsTooltip.AddMultiStringTooltip(string.Format("{0}: {1}", foodInfo.Name, keyValuePair.Value), this.ToolTipStyle_Property);
 		}
+		return string.Empty;
+	}
+
+	private string OnRedAlertTooltip()
+	{
+		this.RedAlertTooltip.ClearMultiStringTooltip();
+		this.RedAlertTooltip.AddMultiStringTooltip(UI.TOOLTIPS.RED_ALERT_TITLE, this.ToolTipStyle_Header);
+		this.RedAlertTooltip.AddMultiStringTooltip(UI.TOOLTIPS.RED_ALERT_CONTENT, this.ToolTipStyle_Property);
 		return string.Empty;
 	}
 
@@ -187,6 +195,8 @@ public class MeterScreen : KScreen
 
 	[SerializeField]
 	private KToggle RedAlertButton;
+
+	public ToolTip RedAlertTooltip;
 
 	private EventInstance loopInstance;
 

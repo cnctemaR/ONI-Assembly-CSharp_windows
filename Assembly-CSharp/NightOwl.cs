@@ -3,27 +3,27 @@ using Klei.AI;
 using STRINGS;
 using TUNING;
 
-[SkipSerialization]
+[SkipSaveFileSerialization]
 public class NightOwl : StateMachineComponent<NightOwl.StatesInstance>
 {
 	protected override void OnPrefabInit()
 	{
-		this.Subscribe(1623392196, new EventSystem.EventHandler(this.OnDeath));
-		this.Subscribe(-1117766961, new EventSystem.EventHandler(this.OnRevived));
+		this.Subscribe(1623392196, new Action<object>(this.OnDeath));
+		this.Subscribe(-1117766961, new Action<object>(this.OnRevived));
 	}
 
 	protected override void OnSpawn()
 	{
 		this.attributeModifiers = new AttributeModifier[]
 		{
-			new AttributeModifier("Construction", TRAITS.NIGHTOWL_MODIFIER, DUPLICANTS.TRAITS.NIGHTOWL.NAME, false),
-			new AttributeModifier("Digging", TRAITS.NIGHTOWL_MODIFIER, DUPLICANTS.TRAITS.NIGHTOWL.NAME, false),
-			new AttributeModifier("Machinery", TRAITS.NIGHTOWL_MODIFIER, DUPLICANTS.TRAITS.NIGHTOWL.NAME, false),
-			new AttributeModifier("Athletics", TRAITS.NIGHTOWL_MODIFIER, DUPLICANTS.TRAITS.NIGHTOWL.NAME, false),
-			new AttributeModifier("Learning", TRAITS.NIGHTOWL_MODIFIER, DUPLICANTS.TRAITS.NIGHTOWL.NAME, false),
-			new AttributeModifier("Cooking", TRAITS.NIGHTOWL_MODIFIER, DUPLICANTS.TRAITS.NIGHTOWL.NAME, false),
-			new AttributeModifier("Medical", TRAITS.NIGHTOWL_MODIFIER, DUPLICANTS.TRAITS.NIGHTOWL.NAME, false),
-			new AttributeModifier("Strength", TRAITS.NIGHTOWL_MODIFIER, DUPLICANTS.TRAITS.NIGHTOWL.NAME, false)
+			new AttributeModifier("Construction", TRAITS.NIGHTOWL_MODIFIER, DUPLICANTS.TRAITS.NIGHTOWL.NAME, false, false),
+			new AttributeModifier("Digging", TRAITS.NIGHTOWL_MODIFIER, DUPLICANTS.TRAITS.NIGHTOWL.NAME, false, false),
+			new AttributeModifier("Machinery", TRAITS.NIGHTOWL_MODIFIER, DUPLICANTS.TRAITS.NIGHTOWL.NAME, false, false),
+			new AttributeModifier("Athletics", TRAITS.NIGHTOWL_MODIFIER, DUPLICANTS.TRAITS.NIGHTOWL.NAME, false, false),
+			new AttributeModifier("Learning", TRAITS.NIGHTOWL_MODIFIER, DUPLICANTS.TRAITS.NIGHTOWL.NAME, false, false),
+			new AttributeModifier("Cooking", TRAITS.NIGHTOWL_MODIFIER, DUPLICANTS.TRAITS.NIGHTOWL.NAME, false, false),
+			new AttributeModifier("Medical", TRAITS.NIGHTOWL_MODIFIER, DUPLICANTS.TRAITS.NIGHTOWL.NAME, false, false),
+			new AttributeModifier("Strength", TRAITS.NIGHTOWL_MODIFIER, DUPLICANTS.TRAITS.NIGHTOWL.NAME, false, false)
 		};
 		base.smi.StartSM();
 	}
@@ -67,7 +67,7 @@ public class NightOwl : StateMachineComponent<NightOwl.StatesInstance>
 
 	private AttributeModifier[] attributeModifiers;
 
-	public class StatesInstance : GameStateMachine<NightOwl.States, NightOwl.StatesInstance, NightOwl>.GameInstance
+	public class StatesInstance : GameStateMachine<NightOwl.States, NightOwl.StatesInstance, NightOwl, object>.GameInstance
 	{
 		public StatesInstance(NightOwl master)
 			: base(master)
@@ -97,8 +97,8 @@ public class NightOwl : StateMachineComponent<NightOwl.StatesInstance>
 				.Transition(this.idle, (NightOwl.StatesInstance smi) => !smi.IsNight());
 		}
 
-		public GameStateMachine<NightOwl.States, NightOwl.StatesInstance, NightOwl>.State idle;
+		public GameStateMachine<NightOwl.States, NightOwl.StatesInstance, NightOwl, object>.State idle;
 
-		public GameStateMachine<NightOwl.States, NightOwl.StatesInstance, NightOwl>.State early;
+		public GameStateMachine<NightOwl.States, NightOwl.StatesInstance, NightOwl, object>.State early;
 	}
 }

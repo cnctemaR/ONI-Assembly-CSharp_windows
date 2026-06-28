@@ -52,29 +52,23 @@ public class SingleEntityReceptacle : KMonoBehaviour
 		}
 	}
 
-	public string stringKey_Place { get; protected set; }
-
-	public string stringKey_CancelPlace { get; protected set; }
-
-	public string stringKey_Remove { get; protected set; }
-
-	public string stringKey_CancelRemove { get; protected set; }
+	public SingleEntityReceptacle.ReceptacleDirection Direction
+	{
+		get
+		{
+			return this.direction;
+		}
+	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
 		this.SubscribeToOccupant();
 		this.UpdateStatusItem(this);
-		if (this.occupyingObject == null && this.requestedEntityTag.IsValid && this.requestedEntityTag != GameTags.Empty)
+		if (this.occupyingObject == null && this.requestedEntityTag.IsValid)
 		{
 			this.CreateOrder(this.requestedEntityTag);
 		}
-	}
-
-	public void AddDespoitTag(string name)
-	{
-		Tag tag = new Tag(name);
-		this.AddDespoitTag(tag);
 	}
 
 	public void AddDespoitTag(Tag t)
@@ -82,10 +76,20 @@ public class SingleEntityReceptacle : KMonoBehaviour
 		this.possibleDepositTagsList.Add(t);
 	}
 
+	public void SetReceptacleDirection(SingleEntityReceptacle.ReceptacleDirection d)
+	{
+		this.direction = d;
+	}
+
+	public virtual void SetPreview(Tag entityTag, bool solid = false)
+	{
+	}
+
 	public void CreateOrder(Tag entityTag)
 	{
 		this.requestedEntityTag = entityTag;
 		this.CreateFetchChore(this.requestedEntityTag);
+		this.SetPreview(entityTag, true);
 		this.UpdateStatusItem(this);
 	}
 
@@ -122,7 +126,7 @@ public class SingleEntityReceptacle : KMonoBehaviour
 
 	protected void CreateFetchChore(Tag entityTag)
 	{
-		if (this.fetchChore == null)
+		if (this.fetchChore == null && entityTag.IsValid)
 		{
 			Action<Chore> action = new Action<Chore>(this.OnFetchComplete);
 			Action<Chore> action2 = delegate(Chore chore)
@@ -132,7 +136,7 @@ public class SingleEntityReceptacle : KMonoBehaviour
 			this.fetchChore = new FetchChore(this.storage, 1f, new Tag[] { entityTag }, null, true, action, action2, delegate(Chore chore)
 			{
 				this.UpdateStatusItem(this);
-			}, true);
+			}, FetchOrder2.OperationalRequirement.Functional, 0);
 			MaterialNeeds.Instance.UpdateNeed(this.requestedEntityTag, 1f);
 			this.updateStatusItemsHandle = UIScheduler.Instance.SchedulePeriodic("SingleEntityReceptacle.StatusUpdate", 1f, new Action<object>(this.UpdateStatusItem), this, null);
 			this.UpdateStatusItem(this);
@@ -165,14 +169,15 @@ public class SingleEntityReceptacle : KMonoBehaviour
 			this.fetchChore.Cancel("User canceled");
 			this.fetchChore = null;
 		}
-		this.requestedEntityTag = GameTags.Empty;
+		this.requestedEntityTag = Tag.Invalid;
 		this.UpdateStatusItem(this);
+		this.SetPreview(Tag.Invalid, false);
 	}
 
 	private void ClearOccupantEventHandler(object data)
 	{
 		this.ClearOccupant();
-		if (this.autoReplaceEntity && this.requestedEntityTag != GameTags.Empty)
+		if (this.autoReplaceEntity && this.requestedEntityTag.IsValid && this.requestedEntityTag != GameTags.Empty)
 		{
 			this.CreateOrder(this.requestedEntityTag);
 		}
@@ -182,7 +187,7 @@ public class SingleEntityReceptacle : KMonoBehaviour
 	{
 		if (this.occupyingObject != null)
 		{
-			base.Subscribe(this.occupyingObject, 1969584890, new EventSystem.EventHandler(this.ClearOccupantEventHandler));
+			base.Subscribe(this.occupyingObject, 1969584890, new Action<object>(this.ClearOccupantEventHandler));
 		}
 	}
 
@@ -190,12 +195,13 @@ public class SingleEntityReceptacle : KMonoBehaviour
 	{
 		if (this.occupyingObject != null)
 		{
-			base.Unsubscribe(this.occupyingObject, 1969584890, new EventSystem.EventHandler(this.ClearOccupantEventHandler));
+			base.Unsubscribe(this.occupyingObject, 1969584890, new Action<object>(this.ClearOccupantEventHandler));
 		}
 	}
 
 	private void OnFetchComplete(Chore chore)
 	{
+		this.SetPreview(Tag.Invalid, false);
 		Pickupable fetchTarget = this.fetchChore.fetchTarget;
 		MaterialNeeds.Instance.UpdateNeed(this.requestedEntityTag, -1f);
 		this.occupyingObject = this.SpawnOccupyingObject(fetchTarget.gameObject);
@@ -212,7 +218,7 @@ public class SingleEntityReceptacle : KMonoBehaviour
 		this.fetchChore = null;
 		if (!this.autoReplaceEntity)
 		{
-			this.requestedEntityTag = GameTags.Empty;
+			this.requestedEntityTag = Tag.Invalid;
 		}
 		this.updateStatusItemsHandle.Clear();
 		this.SetOperation();
@@ -238,7 +244,14 @@ public class SingleEntityReceptacle : KMonoBehaviour
 		this.occupyingObject.transform.position = Vector3.zero;
 		this.occupyingObject.transform.SetParent(base.gameObject.transform, false);
 		this.occupyingObject.transform.localPosition = Vector3.zero;
-		this.occupyingObject.transform.localPosition = this.occupyingObjectRelativePosition;
+		if (this.rotatable != null)
+		{
+			this.occupyingObject.transform.localPosition = this.rotatable.GetRotatedOffset(this.occupyingObjectRelativePosition);
+		}
+		else
+		{
+			this.occupyingObject.transform.localPosition = this.occupyingObjectRelativePosition;
+		}
 	}
 
 	private void SetOperation()
@@ -260,6 +273,7 @@ public class SingleEntityReceptacle : KMonoBehaviour
 
 	protected override void OnCleanUp()
 	{
+		this.CancelActiveRequest();
 		this.UnsubscribeFromOccupant();
 		this.updateStatusItemsHandle.Clear();
 		base.OnCleanUp();
@@ -270,6 +284,9 @@ public class SingleEntityReceptacle : KMonoBehaviour
 
 	[MyCmpReq]
 	protected Storage storage;
+
+	[MyCmpGet]
+	public Rotatable rotatable;
 
 	protected FetchChore fetchChore;
 
@@ -289,5 +306,15 @@ public class SingleEntityReceptacle : KMonoBehaviour
 	[SerializeField]
 	protected bool destroyEntityOnDeposit;
 
-	public Vector3 occupyingObjectRelativePosition = new Vector3(0f, 0.7f, 3f);
+	[SerializeField]
+	protected SingleEntityReceptacle.ReceptacleDirection direction;
+
+	public Vector3 occupyingObjectRelativePosition = new Vector3(0f, 1f, 3f);
+
+	public enum ReceptacleDirection
+	{
+		Top,
+		Side,
+		Bottom
+	}
 }

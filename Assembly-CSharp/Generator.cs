@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
 using KSerialization;
 using UnityEngine;
 
+[DebuggerDisplay("{name}")]
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Generator : KMonoBehaviour, ISaveLoadableJson
+public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 {
 	public int PowerDistributionOrder
 	{
@@ -43,10 +45,6 @@ public class Generator : KMonoBehaviour, ISaveLoadableJson
 		{
 			return this.joulesAvailable;
 		}
-		set
-		{
-			this.joulesAvailable = value;
-		}
 	}
 
 	public float WattageRating
@@ -81,7 +79,7 @@ public class Generator : KMonoBehaviour, ISaveLoadableJson
 	{
 		get
 		{
-			return Grid.Objects[this.PowerCell, 6] != null;
+			return Grid.Objects[this.PowerCell, 19] != null;
 		}
 	}
 
@@ -106,8 +104,9 @@ public class Generator : KMonoBehaviour, ISaveLoadableJson
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		Components.Generators.Add(this);
 		this.capacity = Generator.CalculateCapacity(this.building.Def, null);
-		this.PowerCell = this.building.GetPowerInputCell();
+		this.PowerCell = this.building.GetPowerOutputCell();
 		Game.Instance.circuitManager.Connect(this);
 		this.CheckConnectionStatus();
 	}
@@ -121,11 +120,11 @@ public class Generator : KMonoBehaviour, ISaveLoadableJson
 	{
 		if (status_item != this.currentStatusItem && this.currentStatusItem != null)
 		{
-			this.selectable.RemoveStatusItem(this.currentStatusItem);
+			this.statusItemID = this.selectable.RemoveStatusItem(this.statusItemID, false);
 		}
-		if (status_item != null)
+		if (status_item != null && this.statusItemID == Guid.Empty)
 		{
-			this.selectable.AddStatusItem(status_item, this);
+			this.statusItemID = this.selectable.AddStatusItem(status_item, this);
 		}
 		this.currentStatusItem = status_item;
 	}
@@ -179,6 +178,7 @@ public class Generator : KMonoBehaviour, ISaveLoadableJson
 	protected override void OnCleanUp()
 	{
 		Game.Instance.circuitManager.Disconnect(this);
+		Components.Generators.Remove(this);
 		base.OnCleanUp();
 	}
 
@@ -191,14 +191,19 @@ public class Generator : KMonoBehaviour, ISaveLoadableJson
 		return def.GeneratorBaseCapacity * (1f + ((!element.HasTag(GameTags.RefinedMetal)) ? 0f : 1f));
 	}
 
-	public void ApplyDeltaJoules(float joulesDelta, bool canOverPower = false)
+	public void ResetJoules()
+	{
+		this.joulesAvailable = 0f;
+	}
+
+	public virtual void ApplyDeltaJoules(float joulesDelta, bool canOverPower = false)
 	{
 		this.joulesAvailable = Mathf.Clamp(this.joulesAvailable + joulesDelta, 0f, (!canOverPower) ? this.Capacity : float.MaxValue);
 	}
 
-	public void ApplyImmediateJoulesAvailable(float joulesAvailable, bool canOverPower = false)
+	public void GenerateJoules(float joulesAvailable, bool canOverPower = false)
 	{
-		Debug.Assert(base.GetComponent<Battery>() == null);
+		global::UnityEngine.Debug.Assert(base.GetComponent<Battery>() == null);
 		this.joulesAvailable = Mathf.Clamp(joulesAvailable, 0f, (!canOverPower) ? this.Capacity : float.MaxValue);
 		ReportManager.Instance.ReportValue(ReportManager.ReportType.EnergyCreated, this.joulesAvailable, null);
 	}
@@ -226,4 +231,6 @@ public class Generator : KMonoBehaviour, ISaveLoadableJson
 	private float capacity;
 
 	private StatusItem currentStatusItem;
+
+	private Guid statusItemID;
 }

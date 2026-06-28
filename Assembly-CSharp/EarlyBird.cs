@@ -3,27 +3,27 @@ using Klei.AI;
 using STRINGS;
 using TUNING;
 
-[SkipSerialization]
+[SkipSaveFileSerialization]
 public class EarlyBird : StateMachineComponent<EarlyBird.StatesInstance>
 {
 	protected override void OnPrefabInit()
 	{
-		this.Subscribe(1623392196, new EventSystem.EventHandler(this.OnDeath));
-		this.Subscribe(-1117766961, new EventSystem.EventHandler(this.OnRevived));
+		this.Subscribe(1623392196, new Action<object>(this.OnDeath));
+		this.Subscribe(-1117766961, new Action<object>(this.OnRevived));
 	}
 
 	protected override void OnSpawn()
 	{
 		this.attributeModifiers = new AttributeModifier[]
 		{
-			new AttributeModifier("Construction", TRAITS.EARLYBIRD_MODIFIER, DUPLICANTS.TRAITS.EARLYBIRD.NAME, false),
-			new AttributeModifier("Digging", TRAITS.EARLYBIRD_MODIFIER, DUPLICANTS.TRAITS.EARLYBIRD.NAME, false),
-			new AttributeModifier("Machinery", TRAITS.EARLYBIRD_MODIFIER, DUPLICANTS.TRAITS.EARLYBIRD.NAME, false),
-			new AttributeModifier("Athletics", TRAITS.EARLYBIRD_MODIFIER, DUPLICANTS.TRAITS.EARLYBIRD.NAME, false),
-			new AttributeModifier("Learning", TRAITS.EARLYBIRD_MODIFIER, DUPLICANTS.TRAITS.EARLYBIRD.NAME, false),
-			new AttributeModifier("Cooking", TRAITS.EARLYBIRD_MODIFIER, DUPLICANTS.TRAITS.EARLYBIRD.NAME, false),
-			new AttributeModifier("Medical", TRAITS.EARLYBIRD_MODIFIER, DUPLICANTS.TRAITS.EARLYBIRD.NAME, false),
-			new AttributeModifier("Strength", TRAITS.EARLYBIRD_MODIFIER, DUPLICANTS.TRAITS.EARLYBIRD.NAME, false)
+			new AttributeModifier("Construction", TRAITS.EARLYBIRD_MODIFIER, DUPLICANTS.TRAITS.EARLYBIRD.NAME, false, false),
+			new AttributeModifier("Digging", TRAITS.EARLYBIRD_MODIFIER, DUPLICANTS.TRAITS.EARLYBIRD.NAME, false, false),
+			new AttributeModifier("Machinery", TRAITS.EARLYBIRD_MODIFIER, DUPLICANTS.TRAITS.EARLYBIRD.NAME, false, false),
+			new AttributeModifier("Athletics", TRAITS.EARLYBIRD_MODIFIER, DUPLICANTS.TRAITS.EARLYBIRD.NAME, false, false),
+			new AttributeModifier("Learning", TRAITS.EARLYBIRD_MODIFIER, DUPLICANTS.TRAITS.EARLYBIRD.NAME, false, false),
+			new AttributeModifier("Cooking", TRAITS.EARLYBIRD_MODIFIER, DUPLICANTS.TRAITS.EARLYBIRD.NAME, false, false),
+			new AttributeModifier("Medical", TRAITS.EARLYBIRD_MODIFIER, DUPLICANTS.TRAITS.EARLYBIRD.NAME, false, false),
+			new AttributeModifier("Strength", TRAITS.EARLYBIRD_MODIFIER, DUPLICANTS.TRAITS.EARLYBIRD.NAME, false, false)
 		};
 		base.smi.StartSM();
 	}
@@ -63,7 +63,7 @@ public class EarlyBird : StateMachineComponent<EarlyBird.StatesInstance>
 
 	private AttributeModifier[] attributeModifiers;
 
-	public class StatesInstance : GameStateMachine<EarlyBird.States, EarlyBird.StatesInstance, EarlyBird>.GameInstance
+	public class StatesInstance : GameStateMachine<EarlyBird.States, EarlyBird.StatesInstance, EarlyBird, object>.GameInstance
 	{
 		public StatesInstance(EarlyBird master)
 			: base(master)
@@ -98,8 +98,8 @@ public class EarlyBird : StateMachineComponent<EarlyBird.StatesInstance>
 				.Transition(this.idle, (EarlyBird.StatesInstance smi) => !smi.IsMorning());
 		}
 
-		public GameStateMachine<EarlyBird.States, EarlyBird.StatesInstance, EarlyBird>.State idle;
+		public GameStateMachine<EarlyBird.States, EarlyBird.StatesInstance, EarlyBird, object>.State idle;
 
-		public GameStateMachine<EarlyBird.States, EarlyBird.StatesInstance, EarlyBird>.State early;
+		public GameStateMachine<EarlyBird.States, EarlyBird.StatesInstance, EarlyBird, object>.State early;
 	}
 }

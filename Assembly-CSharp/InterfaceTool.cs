@@ -30,6 +30,17 @@ public class InterfaceTool : KMonoBehaviour
 		return this.castResults.Count == 0;
 	}
 
+	private void OnOverlayChanged(object data)
+	{
+		if (this.viewMode == SimViewMode.None)
+		{
+			return;
+		}
+		if ((int)data == (int)this.viewMode || PlayerController.Instance.ActiveTool == this)
+		{
+		}
+	}
+
 	public void DeactivateTool(InterfaceTool new_tool = null)
 	{
 		this.OnDeactivateTool(new_tool);
@@ -39,15 +50,25 @@ public class InterfaceTool : KMonoBehaviour
 	{
 		if (OverlayScreen.Instance != null && this.viewMode != OverlayScreen.Instance.GetMode() && this.viewMode != SimViewMode.Ignore)
 		{
-			Game.Instance.Trigger(1248612973, this.viewMode);
+			OverlayScreen.Instance.ToggleOverlay(this.viewMode);
 		}
 		this.SetCursor(this.cursor, this.cursorOffset, CursorMode.Auto);
+		Game.Instance.Subscribe(1798162660, new Action<object>(this.OnOverlayChanged));
 	}
 
 	protected virtual void OnDeactivateTool(InterfaceTool new_tool)
 	{
+		Game.Instance.Unsubscribe(1798162660, new Action<object>(this.OnOverlayChanged));
 		if (new_tool == null)
 		{
+			return;
+		}
+		if (new_tool == SelectTool.Instance)
+		{
+			if (this.ViewMode != SimViewMode.None && OverlayScreen.Instance.GetMode() == this.ViewMode)
+			{
+				OverlayScreen.Instance.ToggleOverlay(SimViewMode.None);
+			}
 			return;
 		}
 		if (this.viewMode == SimViewMode.None && new_tool.viewMode == SimViewMode.Ignore)
@@ -56,7 +77,7 @@ public class InterfaceTool : KMonoBehaviour
 		}
 		if (OverlayScreen.Instance != null && this.viewMode != new_tool.viewMode && this.viewMode != SimViewMode.Ignore)
 		{
-			Game.Instance.Trigger(2015652040, this.viewMode);
+			OverlayScreen.Instance.ToggleOverlay(SimViewMode.None);
 		}
 	}
 
@@ -100,16 +121,10 @@ public class InterfaceTool : KMonoBehaviour
 
 	public virtual void OnRightClickDown(Vector3 cursor_pos, KButtonEvent e)
 	{
-		this.viewportDownPos = Camera.main.WorldToViewportPoint(cursor_pos);
 	}
 
 	public virtual void OnRightClickUp(Vector3 cursor_pos)
 	{
-		Vector3 vector = Camera.main.WorldToViewportPoint(cursor_pos);
-		float magnitude = (vector - this.viewportDownPos).magnitude;
-		if (magnitude <= 0.02f)
-		{
-		}
 	}
 
 	public virtual void OnFocus(bool focus)
@@ -152,7 +167,7 @@ public class InterfaceTool : KMonoBehaviour
 	[SerializeField]
 	protected Texture2D cursor;
 
-	protected Vector2 cursorOffset = new Vector2(8f, 8f);
+	public Vector2 cursorOffset = new Vector2(8f, 8f);
 
 	public global::System.Action OnDeactivate;
 
@@ -165,6 +180,4 @@ public class InterfaceTool : KMonoBehaviour
 	private List<RaycastResult> castResults = new List<RaycastResult>();
 
 	private bool isAppFocused = true;
-
-	protected Vector3 viewportDownPos;
 }

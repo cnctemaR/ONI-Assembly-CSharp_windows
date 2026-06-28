@@ -3,13 +3,13 @@ using Klei.AI;
 using TUNING;
 using UnityEngine;
 
-[SkipSerialization]
+[SkipSaveFileSerialization]
 public class Flatulence : StateMachineComponent<Flatulence.StatesInstance>
 {
 	protected override void OnPrefabInit()
 	{
-		this.Subscribe(1623392196, new EventSystem.EventHandler(this.OnDeath));
-		this.Subscribe(-1117766961, new EventSystem.EventHandler(this.OnRevived));
+		this.Subscribe(1623392196, new Action<object>(this.OnDeath));
+		this.Subscribe(-1117766961, new Action<object>(this.OnRevived));
 	}
 
 	protected override void OnSpawn()
@@ -38,10 +38,11 @@ public class Flatulence : StateMachineComponent<Flatulence.StatesInstance>
 		}
 		int num2 = Grid.PosToCell(gameObject.transform.position);
 		float value = Db.Get().Amounts.Temperature.Lookup(this).value;
-		SimMessages.AddRemoveSubstance(num2, SimHashes.ContaminatedOxygen, CellEventLogger.Instance.ElementConsumerSimUpdate, 0.0050000004f, value, -1);
-		KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("odor_fx", gameObject.transform, true, Grid.SceneLayer.Front);
-		kbatchedAnimController.transform.localPosition = Vector3.zero;
-		kbatchedAnimController.Play(new string[] { "working_pre", "working_loop", "working_pst" }, KAnim.PlayMode.Once);
+		SimMessages.AddRemoveSubstance(num2, SimHashes.Methane, CellEventLogger.Instance.ElementConsumerSimUpdate, 0.0050000004f, value, -1);
+		KFMOD.PlayOneShot(GlobalAssets.GetSound("Dupe_Flatulence", false), this.transform.position);
+		ReportManager.Instance.ReportValue(ReportManager.ReportType.ContaminatedOxygenFlatulence, 0.0050000004f, null);
+		KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("odor_fx_kanim", gameObject.transform.position, gameObject.transform, true, Grid.SceneLayer.Front);
+		kbatchedAnimController.Play(Flatulence.WorkLoopAnims, KAnim.PlayMode.Once);
 		kbatchedAnimController.destroyOnAnimComplete = true;
 	}
 
@@ -61,13 +62,15 @@ public class Flatulence : StateMachineComponent<Flatulence.StatesInstance>
 
 	private const float EmitMass = 0.0050000004f;
 
-	private const SimHashes EmitElement = SimHashes.ContaminatedOxygen;
+	private const SimHashes EmitElement = SimHashes.Methane;
 
 	private const float EmissionRadius = 1.5f;
 
 	private const float MaxDistanceSq = 2.25f;
 
-	public class StatesInstance : GameStateMachine<Flatulence.States, Flatulence.StatesInstance, Flatulence>.GameInstance
+	private static readonly HashedString[] WorkLoopAnims = new HashedString[] { "working_pre", "working_loop", "working_pst" };
+
+	public class StatesInstance : GameStateMachine<Flatulence.States, Flatulence.StatesInstance, Flatulence, object>.GameInstance
 	{
 		public StatesInstance(Flatulence master)
 			: base(master)
@@ -98,8 +101,8 @@ public class Flatulence : StateMachineComponent<Flatulence.StatesInstance>
 			return Mathf.Min(num2, TRAITS.FLATULENCE_EMIT_INTERVAL_MAX);
 		}
 
-		public GameStateMachine<Flatulence.States, Flatulence.StatesInstance, Flatulence>.State idle;
+		public GameStateMachine<Flatulence.States, Flatulence.StatesInstance, Flatulence, object>.State idle;
 
-		public GameStateMachine<Flatulence.States, Flatulence.StatesInstance, Flatulence>.State emit;
+		public GameStateMachine<Flatulence.States, Flatulence.StatesInstance, Flatulence, object>.State emit;
 	}
 }

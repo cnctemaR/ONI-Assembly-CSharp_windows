@@ -6,7 +6,7 @@ public class AlgaeHabitatConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("AlgaeHabitat", 1, 2, "algaefarm_kanim", 100f, 30f, BUILDINGS.CONSTRUCTION_MASS.TIER4, MATERIALS.FARMABLE, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER1, null);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("AlgaeHabitat", 1, 2, "algaefarm_kanim", 100f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.FARMABLE, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER1, null);
 		buildingDef.Floodable = false;
 		buildingDef.ViewMode = SimViewMode.OxygenMap;
 		buildingDef.MaterialCategory = MATERIALS.FARMABLE;
@@ -19,14 +19,16 @@ public class AlgaeHabitatConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
 		Storage storage = go.AddOrGet<Storage>();
-		storage.capacityKg = 2000f;
+		storage.capacityKg = 300f;
 		storage.disableOnStore = true;
 		storage.showInUI = true;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
+		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.requestedItemTag = new Tag("Algae");
 		manualDeliveryKG.capacity = 100f;
 		manualDeliveryKG.refillMass = 25f;
 		ManualDeliveryKG manualDeliveryKG2 = go.AddComponent<ManualDeliveryKG>();
+		manualDeliveryKG2.SetStorage(storage);
 		manualDeliveryKG2.requestedItemTag = new Tag("Water");
 		manualDeliveryKG2.capacity = 200f;
 		manualDeliveryKG2.refillMass = 50f;
@@ -40,7 +42,7 @@ public class AlgaeHabitatConfig : IBuildingConfig
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(null, 0.040000003f, SimHashes.Oxygen, 303.15f, false, 0f, 1f)
+			new ElementConverter.OutputElement(0.040000003f, SimHashes.Oxygen, 303.15f, false, 0f, 1f, false)
 		};
 		elementConverter.conversionInterval = 1f;
 		ElementConsumer elementConsumer = go.AddOrGet<ElementConsumer>();
@@ -61,8 +63,12 @@ public class AlgaeHabitatConfig : IBuildingConfig
 		go.AddOrGet<Prioritizable>();
 	}
 
-	public override void DoPostConfigure(GameObject go)
+	public override void DoPostConfigureComplete(GameObject go)
 	{
 		BuildingTemplates.DoPostConfigure(go);
 	}
+
+	private const float ALGAE_CAPACITY = 100f;
+
+	private const float WATER_CAPACITY = 200f;
 }

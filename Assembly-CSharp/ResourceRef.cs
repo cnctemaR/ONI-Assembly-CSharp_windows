@@ -3,7 +3,7 @@ using System.Runtime.Serialization;
 using KSerialization;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class ResourceRef<ResourceType> : ISaveLoadableJson where ResourceType : Resource
+public class ResourceRef<ResourceType> : ISaveLoadable where ResourceType : Resource
 {
 	public ResourceRef(ResourceType resource)
 	{

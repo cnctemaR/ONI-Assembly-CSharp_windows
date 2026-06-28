@@ -10,12 +10,12 @@ public class TemperatureSuitConfig : IEquipmentConfig
 	public EquipmentDef CreateEquipmentDef()
 	{
 		Dictionary<string, float> dictionary = new Dictionary<string, float>();
-		dictionary.Add("Iron", 300f);
+		dictionary.Add(SimHashes.Ice.ToString(), 300f);
 		List<AttributeModifier> list = new List<AttributeModifier>();
-		list.Add(new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTEMOD_IDS.INSULATION, (float)global::TUNING.EQUIPMENT.SUITS.TEMPERATURESUIT_INSULATION, global::STRINGS.EQUIPMENT.PREFABS.TEMPERATURESUIT.NAME, false));
-		list.Add(new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTEMOD_IDS.ATHLETICS, (float)global::TUNING.EQUIPMENT.SUITS.TEMPERATURESUIT_ATHLETICS, global::STRINGS.EQUIPMENT.PREFABS.TEMPERATURESUIT.NAME, false));
-		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef("TemperatureSuit", global::TUNING.EQUIPMENT.SUITS.SUITSLOT, global::TUNING.EQUIPMENT.SUITS.SUITFABRICATOR, global::TUNING.EQUIPMENT.SUITS.TEMPERATURESUIT_FABTIME, "Iron", dictionary, (float)global::TUNING.EQUIPMENT.SUITS.TEMPERATURESUIT_MASS, global::TUNING.EQUIPMENT.SUITS.SUIT_ANIM, global::TUNING.EQUIPMENT.SUITS.SUIT_SNAPON, "body_oxygen", PathFinderFlags.SuitRequired, list);
-		equipmentDef.RecipeDescription = global::STRINGS.EQUIPMENT.PREFABS.TEMPERATURESUIT.RECIPEDESC;
+		list.Add(new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTE_MOD_IDS.INSULATION, (float)global::TUNING.EQUIPMENT.SUITS.TEMPERATURESUIT_INSULATION, global::STRINGS.EQUIPMENT.PREFABS.TEMPERATURE_SUIT.NAME, false, false));
+		list.Add(new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTE_MOD_IDS.ATHLETICS, (float)global::TUNING.EQUIPMENT.SUITS.TEMPERATURESUIT_ATHLETICS, global::STRINGS.EQUIPMENT.PREFABS.TEMPERATURE_SUIT.NAME, false, false));
+		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef("TemperatureSuit", global::TUNING.EQUIPMENT.SUITS.SLOT, global::TUNING.EQUIPMENT.SUITS.FABRICATOR, (float)global::TUNING.EQUIPMENT.SUITS.TEMPERATURESUIT_FABTIME, SimHashes.Water, dictionary, (float)global::TUNING.EQUIPMENT.SUITS.TEMPERATURESUIT_MASS, global::TUNING.EQUIPMENT.SUITS.ANIM, global::TUNING.EQUIPMENT.SUITS.SNAPON, "body_oxygen_kanim", PathFinderFlags.SuitRequired, list, null, false, EntityTemplates.CollisionShape.CIRCLE, 0.325f, 0.325f);
+		equipmentDef.RecipeDescription = global::STRINGS.EQUIPMENT.PREFABS.TEMPERATURE_SUIT.RECIPE_DESC;
 		return equipmentDef;
 	}
 
@@ -25,4 +25,6 @@ public class TemperatureSuitConfig : IEquipmentConfig
 		suitTank.element = "Water";
 		suitTank.amount = 100f;
 	}
+
+	public const string ID = "TemperatureSuit";
 }

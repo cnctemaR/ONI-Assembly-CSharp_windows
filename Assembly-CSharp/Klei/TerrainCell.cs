@@ -13,13 +13,15 @@ namespace Klei
 	{
 		public TerrainCell()
 		{
+			this.log = new LoggerSSF("TerrainCell");
 		}
 
 		public TerrainCell(Node node, VoronoiDiagram.Site site)
 		{
 			this.node = node;
-			this.node.position = site.position;
+			this.node.SetPosition(site.position);
 			this.site = site;
+			this.log = new LoggerSSF("TerrainCell " + node.type);
 		}
 
 		public Polygon poly
@@ -29,6 +31,17 @@ namespace Klei
 				return this.site.poly;
 			}
 		}
+
+		[Serialize]
+		public Node node { get; private set; }
+
+		public void SetNode(Node newNode)
+		{
+			this.node = newNode;
+		}
+
+		[Serialize]
+		public VoronoiDiagram.Site site { get; private set; }
 
 		public bool HasMobs
 		{
@@ -275,13 +288,13 @@ namespace Klei
 				return;
 			}
 			}
-			WeightedSimHash oneWeightedSimHash2 = feature.GetOneWeightedSimHash(group);
-			TerrainCell.ElementOverride elementOverride2 = this.GetElementOverride(oneWeightedSimHash2);
 			for (int j = 0; j < cells.Count; j++)
 			{
 				int num2 = Grid.XYToCell(cells[j].x, cells[j].y);
 				if (Grid.IsValidCell(num2))
 				{
+					WeightedSimHash oneWeightedSimHash2 = feature.GetOneWeightedSimHash(group);
+					TerrainCell.ElementOverride elementOverride2 = this.GetElementOverride(oneWeightedSimHash2);
 					if (!elementOverride2.overrideTemperature)
 					{
 						elementOverride2.pdelement.temperature = temperatureMin + world.heatOffset[num2] * temperatureRange;
@@ -410,23 +423,21 @@ namespace Klei
 			if (this.node.tags != null)
 			{
 				FeatureSettings featureSettings = WorldGen.Settings.GetFeature(this.node.type);
-				if (featureSettings == null)
+				if (featureSettings == null && this.node.tags != null)
 				{
-					if (this.node.tags.Contains(WorldGenTags.Geode))
+					List<Tag> list = new List<Tag>();
+					foreach (Tag tag in this.node.tags)
 					{
-						if (this.debugMode)
+						FeatureSettings feature = WorldGen.Settings.GetFeature(tag.Name);
+						if (feature != null)
 						{
-							Debug.LogWarning("Using default geode feature settings for room in" + this.node.type);
+							list.Add(tag);
 						}
-						featureSettings = WorldGen.Settings.GetFeature("Geode");
 					}
-					else if (this.HasMobs)
+					if (list.Count > 0)
 					{
-						if (this.debugMode)
-						{
-							Debug.LogWarning("Using default mob feature settings for room in" + this.node.type);
-						}
-						featureSettings = WorldGen.Settings.GetFeature("DefaultRoom");
+						Tag tag2 = list[WorldGen.RandomSource().Next(list.Count)];
+						featureSettings = WorldGen.Settings.GetFeature(tag2.Name);
 					}
 				}
 				if (featureSettings != null)
@@ -716,7 +727,7 @@ namespace Klei
 		{
 			TerrainCell.SetValuesFunction setValuesFunction = delegate(int index, Element elem, Sim.PhysicsData pd)
 			{
-				SimMessages.ModifyCell(index, ElementLoader.GetElementIndex(elem.id), pd.temperature, pd.mass, true, -1);
+				SimMessages.ModifyCell(index, ElementLoader.GetElementIndex(elem.id), pd.temperature, pd.mass, SimMessages.ReplaceType.Replace, -1);
 			};
 			this.DoProcess(world, setValuesFunction);
 		}
@@ -732,7 +743,7 @@ namespace Klei
 		{
 			if (this.poly != null)
 			{
-				this.poly.DebugDraw(Color.green, (TerrainCell.drawOptions & TerrainCell.DebugFlags.Centroid) != (TerrainCell.DebugFlags)0, 15f, 1f);
+				this.poly.DebugDraw(Color.green, (TerrainCell.drawOptions & TerrainCell.DebugFlags.Centroid) != (TerrainCell.DebugFlags)0, 15f, 0f);
 			}
 			if (this.node != null)
 			{
@@ -741,15 +752,11 @@ namespace Klei
 
 		public const int DONT_SET_TEMPERATURE_DEFAULTS = -1;
 
-		[Serialize]
-		public Node node;
-
-		[Serialize]
-		public VoronoiDiagram.Site site;
-
 		public List<KeyValuePair<int, Tag>> mobs;
 
 		public List<KeyValuePair<int, Tag>> terrainPositions;
+
+		public LoggerSSF log;
 
 		private List<int> allCells;
 

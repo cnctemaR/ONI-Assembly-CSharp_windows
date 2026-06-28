@@ -3,30 +3,21 @@ using UnityEngine;
 
 public class AssignableSideScreenRow : KMonoBehaviour
 {
-	protected override void OnSpawn()
-	{
-		base.OnSpawn();
-		this.regularColor = new Color32(204, 204, 204, byte.MaxValue);
-	}
-
 	public void SetAssignmentText(string assignmentStr)
 	{
 		this.assignmentText.text = (string.IsNullOrEmpty(assignmentStr) ? "-" : assignmentStr);
 	}
 
-	public bool IsSelected
+	public bool Selected
 	{
 		get
 		{
-			return this.isSelected;
+			return this.toggle.isOn;
 		}
-	}
-
-	public void SetSelected(bool selected)
-	{
-		this.isSelected = selected;
-		this.outline.color = ((!selected) ? this.regularColor : this.outlineHighLightColor);
-		this.BG.color = ((!selected) ? Color.white : this.BGHighLightColor);
+		set
+		{
+			this.toggle.isOn = value;
+		}
 	}
 
 	public void SetContent(MinionIdentity identity, string assignmentStr, Action<MinionIdentity> selectionCallback)
@@ -38,44 +29,24 @@ public class AssignableSideScreenRow : KMonoBehaviour
 		}
 		if (!string.IsNullOrEmpty(assignmentStr))
 		{
-			if (!this.isSelected)
+			if (!this.toggle.isOn)
 			{
 				this.assignmentText.text = assignmentStr;
 			}
 		}
-		else if (!this.isSelected)
+		else if (!this.toggle.isOn)
 		{
 			this.assignmentText.text = "-";
 		}
 		if (this.portraitInstance == null)
 		{
 			this.portraitInstance = Util.KInstantiateUI<CrewPortrait>(this.crewPortraitPrefab.gameObject, base.gameObject, false);
-			this.portraitInstance.transform.SetSiblingIndex(2);
+			this.portraitInstance.transform.SetSiblingIndex(1);
 			this.portraitInstance.SetAlpha(1f);
 		}
-		if (this.button == null)
-		{
-			this.button = base.GetComponent<KButton>();
-			KButton kbutton = this.button;
-			kbutton.onPointerEnter = (global::System.Action)Delegate.Combine(kbutton.onPointerEnter, new global::System.Action(delegate
-			{
-				if (!this.isSelected)
-				{
-					this.outline.color = this.outlineHighLightColor;
-				}
-			}));
-			KButton kbutton2 = this.button;
-			kbutton2.onPointerExit = (global::System.Action)Delegate.Combine(kbutton2.onPointerExit, new global::System.Action(delegate
-			{
-				if (!this.isSelected)
-				{
-					this.outline.color = this.regularColor;
-				}
-			}));
-		}
 		this.targetIdentity = identity;
-		this.button.ClearOnClick();
-		this.button.onClick += delegate
+		this.toggle.ClearOnClick();
+		this.toggle.onClick += delegate
 		{
 			selectionCallback(this.targetIdentity);
 		};
@@ -94,19 +65,10 @@ public class AssignableSideScreenRow : KMonoBehaviour
 	[SerializeField]
 	private KImage outline;
 
-	[SerializeField]
-	private Color outlineHighLightColor = new Color32(168, 74, 121, byte.MaxValue);
-
-	[SerializeField]
-	private Color BGHighLightColor = new Color32(168, 74, 121, 80);
-
-	private Color regularColor;
-
 	private CrewPortrait portraitInstance;
 
-	private KButton button;
+	[MyCmpReq]
+	private KToggle toggle;
 
 	private MinionIdentity targetIdentity;
-
-	private bool isSelected;
 }

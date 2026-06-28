@@ -4,12 +4,12 @@ using UnityEngine;
 public class MoveToSafetyChore : Chore<MoveToSafetyChore.StatesInstance>
 {
 	public MoveToSafetyChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.MoveToSafety, target, target.GetComponent<ChoreProvider>(), false, null, null, null, 0, false, true)
+		: base(Db.Get().ChoreTypes.MoveToSafety, target, target.GetComponent<ChoreProvider>(), false, null, null, null, 0, false, true, 0)
 	{
 		this.smi = new MoveToSafetyChore.StatesInstance(this, target.gameObject);
 	}
 
-	public class StatesInstance : GameStateMachine<MoveToSafetyChore.States, MoveToSafetyChore.StatesInstance, MoveToSafetyChore>.GameInstance
+	public class StatesInstance : GameStateMachine<MoveToSafetyChore.States, MoveToSafetyChore.StatesInstance, MoveToSafetyChore, object>.GameInstance
 	{
 		public StatesInstance(MoveToSafetyChore master, GameObject mover)
 			: base(master)
@@ -41,8 +41,8 @@ public class MoveToSafetyChore : Chore<MoveToSafetyChore.StatesInstance>
 			}).MoveTo((MoveToSafetyChore.StatesInstance smi) => smi.targetCell, null, null, true);
 		}
 
-		public StateMachine<MoveToSafetyChore.States, MoveToSafetyChore.StatesInstance, MoveToSafetyChore>.TargetParameter mover;
+		public StateMachine<MoveToSafetyChore.States, MoveToSafetyChore.StatesInstance, MoveToSafetyChore, object>.TargetParameter mover;
 
-		public GameStateMachine<MoveToSafetyChore.States, MoveToSafetyChore.StatesInstance, MoveToSafetyChore>.State move;
+		public GameStateMachine<MoveToSafetyChore.States, MoveToSafetyChore.StatesInstance, MoveToSafetyChore, object>.State move;
 	}
 }

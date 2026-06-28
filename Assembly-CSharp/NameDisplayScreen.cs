@@ -10,6 +10,30 @@ public class NameDisplayScreen : KScreen
 	{
 		base.OnSpawn();
 		UIRegistry.nameDisplayScreen = this;
+		foreach (Health health2 in Components.Health)
+		{
+			this.RegisterComponent(health2.gameObject, health2);
+		}
+		Components.Health.Register(delegate(Health health)
+		{
+			this.RegisterComponent(health.gameObject, health);
+		}, null);
+		foreach (Equipment equipment2 in Components.Equipment)
+		{
+			this.RegisterComponent(equipment2.gameObject, equipment2);
+		}
+		Components.Equipment.Register(delegate(Equipment equipment)
+		{
+			this.RegisterComponent(equipment.gameObject, equipment);
+		}, null);
+		foreach (SuffocationMonitor.Instance instance in Components.SuffocationMonitorInstance)
+		{
+			this.RegisterComponent(instance.gameObject, instance);
+		}
+		Components.SuffocationMonitorInstance.Register(delegate(SuffocationMonitor.Instance SuffocationMonitorInstance)
+		{
+			this.RegisterComponent(SuffocationMonitorInstance.gameObject, SuffocationMonitorInstance);
+		}, null);
 	}
 
 	protected override void OnPrefabInit()
@@ -64,6 +88,10 @@ public class NameDisplayScreen : KScreen
 			Transform transform2 = entry.display_go.transform.FindChild("Name");
 			transform2.gameObject.SetActive(false);
 		}
+		else
+		{
+			this.UpdateName(representedObject);
+		}
 		if (Component is Health)
 		{
 			Health health = (Health)Component;
@@ -111,7 +139,14 @@ public class NameDisplayScreen : KScreen
 				if (flag && CameraController.Instance.IsVisiblePos(vector))
 				{
 					RectTransform component = this.entries[i].display_go.GetComponent<RectTransform>();
-					vector = this.entries[i].world_go.GetComponent<KAnimControllerBase>().GetWorldPivot();
+					if (CameraController.Instance != null && CameraController.Instance.followTarget == this.entries[i].world_go.transform)
+					{
+						vector = CameraController.Instance.followTargetPos;
+					}
+					else
+					{
+						vector = this.entries[i].world_go.GetComponent<KAnimControllerBase>().GetWorldPivot();
+					}
 					component.anchoredPosition = ((!this.worldSpace) ? base.WorldToScreen(vector) : vector);
 					this.entries[i].display_go.SetActive(true);
 				}

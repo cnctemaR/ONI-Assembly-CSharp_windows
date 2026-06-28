@@ -17,7 +17,7 @@ public class RelocateTool : DragTool
 		this.active = true;
 		this.viewMode = this.def.ViewMode;
 		base.OnActivateTool();
-		this.buildingOrientation = Orientation.None;
+		this.buildingOrientation = Orientation.Neutral;
 		int num = LayerMask.NameToLayer("Place");
 		this.visualizer = GameUtil.KInstantiate(this.def.BuildingPreview, Grid.SceneLayer.Use, Folder.Placers, null, num);
 		KBatchedAnimController component = this.visualizer.GetComponent<KBatchedAnimController>();
@@ -34,7 +34,7 @@ public class RelocateTool : DragTool
 		component2.ConfigureHoverScreen();
 		component2.UpdateHoverElements(null);
 		ResourceRemainingDisplayScreen.instance.ActivateDisplay(this.visualizer);
-		this.buildingOrientation = Orientation.Up;
+		this.buildingOrientation = Orientation.Neutral;
 		if (component == null)
 		{
 			this.visualizer.SetLayerRecursively(LayerMask.NameToLayer("Place"));
@@ -54,7 +54,7 @@ public class RelocateTool : DragTool
 		{
 			EventSystem.Trigger(Game.Instance.gameObject, 2015652040, this.def.ViewMode);
 		}
-		this.buildingOrientation = Orientation.None;
+		this.buildingOrientation = Orientation.Neutral;
 		this.HideToolTip();
 		ResourceRemainingDisplayScreen.instance.DeactivateDisplay();
 		this.ClearTilePreview();
@@ -65,7 +65,7 @@ public class RelocateTool : DragTool
 
 	public void Activate(BuildingDef def, IList<Element> selected_elements, Relocatable source)
 	{
-		this.buildingOrientation = Orientation.None;
+		this.buildingOrientation = Orientation.Neutral;
 		this.selectedElements = selected_elements;
 		this.def = def;
 		this.source = source;
@@ -78,7 +78,7 @@ public class RelocateTool : DragTool
 		SelectTool.Instance.Activate();
 		this.def = null;
 		this.source = null;
-		this.buildingOrientation = Orientation.None;
+		this.buildingOrientation = Orientation.Neutral;
 		ResourceRemainingDisplayScreen.instance.DeactivateDisplay();
 	}
 
@@ -148,7 +148,7 @@ public class RelocateTool : DragTool
 						GameObject gameObject2 = null;
 						if (this.def.ReplacementLayer != ObjectLayer.NumLayers)
 						{
-							gameObject2 = Grid.Objects[num, 18];
+							gameObject2 = Grid.Objects[num, 10];
 						}
 						if (gameObject == null || (gameObject.GetComponent<Constructable>() == null && gameObject2 == null))
 						{
@@ -240,9 +240,10 @@ public class RelocateTool : DragTool
 					BuildingComplete component = gameObject2.GetComponent<BuildingComplete>();
 					if (component != null && component.Def.IsFoundation && component.Def.isKAnimTile && (component.Def != this.def || this.selectedElements[0] != gameObject2.GetComponent<PrimaryElement>().Element))
 					{
-						gameObject = this.def.Instantiate(vector, this.buildingOrientation, this.selectedElements, 0, false);
-						Constructable component2 = gameObject.GetComponent<Constructable>();
+						Constructable component2 = this.def.BuildingUnderConstruction.GetComponent<Constructable>();
 						component2.IsReplacementTile = true;
+						gameObject = this.def.Instantiate(vector, this.buildingOrientation, this.selectedElements, 0, false);
+						component2.IsReplacementTile = false;
 						Grid.Objects[cell, (int)this.def.ReplacementLayer] = gameObject;
 					}
 				}

@@ -6,7 +6,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
+public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 {
 	protected Storage()
 	{
@@ -15,8 +15,6 @@ public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
 	}
 
 	public event global::System.Action OnStorageIncreased;
-
-	public int DescriptionOrder { get; set; }
 
 	public GameObject this[int idx]
 	{
@@ -49,11 +47,12 @@ public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(1623392196, new EventSystem.EventHandler(this.OnDeath));
-		this.Subscribe(1502190696, new EventSystem.EventHandler(this.OnQueueDestroyObject));
+		this.Subscribe(1623392196, new Action<object>(this.OnDeath));
+		this.Subscribe(1502190696, new Action<object>(this.OnQueueDestroyObject));
+		this.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Storing;
 		this.faceTargetWhenWorking = false;
-		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_equip") };
+		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_equip_kanim") };
 		if (this.choreType == null)
 		{
 			this.choreType = Db.Get().ChoreTypes.Fetch;
@@ -63,18 +62,10 @@ public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
 	protected override void OnSpawn()
 	{
 		base.SetWorkTime(0.25f);
-		foreach (Storage.StoredItemModifierInfo storedItemModifierInfo in this.defaultStoredItemModifers)
+		foreach (GameObject gameObject in this.items)
 		{
-			foreach (GameObject gameObject in this.items)
-			{
-				storedItemModifierInfo.initialize(gameObject, true);
-			}
+			this.ApplyStoredItemModifiers(gameObject, true);
 		}
-	}
-
-	public override string[] GetWorkAnims(Worker worker)
-	{
-		return Storage.WorkAnims;
 	}
 
 	public GameObject Store(GameObject go, bool hide_popups = false, bool block_events = false)
@@ -108,9 +99,9 @@ public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
 				transform = go.transform;
 			}
 			string text;
-			if (!component.WholeUnitsOnly)
+			if (!component.CountableUnits)
 			{
-				text = string.Format(locString, GameUtil.GetFormattedMass(component.TotalAmount, GameUtil.TimeSlice.None, true, "F1"), go.GetComponent<KSelectable>().GetName());
+				text = string.Format(locString, GameUtil.GetFormattedMass(component.TotalAmount, GameUtil.TimeSlice.None, true, "{0:0.#}"), go.GetComponent<KSelectable>().GetName());
 			}
 			else
 			{
@@ -124,10 +115,10 @@ public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
 		go.transform.SetPosition(vector);
 		foreach (GameObject gameObject2 in this.items)
 		{
-			if (gameObject2 != null && component != null && gameObject2.GetComponent<Pickupable>().TryAbsorb(go))
+			if (gameObject2 != null && component != null && gameObject2.GetComponent<Pickupable>().TryAbsorb(component, hide_popups))
 			{
 				this.Trigger(-1697596308, go);
-				this.ApplyStoredItemModifiers(go);
+				this.ApplyStoredItemModifiers(go, true);
 				if (this.OnStorageIncreased != null)
 				{
 					this.OnStorageIncreased();
@@ -148,7 +139,7 @@ public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
 			{
 				EventSystem.Trigger(go, 856640610, this);
 				this.Trigger(-1697596308, go);
-				this.ApplyStoredItemModifiers(go);
+				this.ApplyStoredItemModifiers(go, true);
 				if (this.OnStorageIncreased != null)
 				{
 					this.OnStorageIncreased();
@@ -182,11 +173,11 @@ public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
 		return primaryElement;
 	}
 
-	public void AddGasChunk(SimHashes element, float mass, float temperature, bool keep_zero_mass)
+	public PrimaryElement AddGasChunk(SimHashes element, float mass, float temperature, bool keep_zero_mass)
 	{
 		if (mass <= 0f)
 		{
-			return;
+			return null;
 		}
 		PrimaryElement primaryElement = this.FindPrimaryElement(element);
 		if (primaryElement != null)
@@ -203,6 +194,7 @@ public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
 			primaryElement.KeepZeroMassObject = keep_zero_mass;
 			this.Store(substanceChunk.gameObject, true, false);
 		}
+		return primaryElement;
 	}
 
 	public void Transfer(Storage target, bool hide_popups = false)
@@ -246,7 +238,7 @@ public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
 			{
 				this.items.RemoveAt(i);
 				this.Trigger(-1697596308, go);
-				this.ApplyStoredItemModifiers(go);
+				this.ApplyStoredItemModifiers(go, false);
 				target.Store(go, hide_popups, false);
 				return true;
 			}
@@ -301,31 +293,89 @@ public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
 			go.transform.parent = folder.transform;
 			this.Trigger(-1697596308, go);
 			EventSystem.Trigger(go, 856640610, null);
-			this.ApplyStoredItemModifiers(go);
+			this.ApplyStoredItemModifiers(go, false);
+			if (go != null)
+			{
+				PrimaryElement component = go.GetComponent<PrimaryElement>();
+				if (component != null && component.KeepZeroMassObject)
+				{
+					component.KeepZeroMassObject = false;
+					if (component.Mass <= 0f)
+					{
+						global::UnityEngine.Object.Destroy(go);
+					}
+				}
+			}
 		}
 	}
 
-	public List<GameObject> Find(Tag tag)
+	public List<GameObject> Find(Tag tag, List<GameObject> result)
 	{
-		List<GameObject> list = new List<GameObject>();
-		foreach (GameObject gameObject in this.items)
+		for (int i = 0; i < this.items.Count; i++)
 		{
+			GameObject gameObject = this.items[i];
 			if (!(gameObject == null))
 			{
 				if (gameObject.HasTag(tag))
 				{
-					list.Add(gameObject);
+					result.Add(gameObject);
 				}
 			}
 		}
-		return list;
+		return result;
+	}
+
+	public List<GameObject> Find(Tag tag)
+	{
+		return this.Find(tag, new List<GameObject>());
+	}
+
+	public GameObject FindFirst(Tag tag)
+	{
+		GameObject gameObject = null;
+		for (int i = 0; i < this.items.Count; i++)
+		{
+			GameObject gameObject2 = this.items[i];
+			if (!(gameObject2 == null))
+			{
+				if (gameObject2.HasTag(tag))
+				{
+					gameObject = gameObject2;
+					break;
+				}
+			}
+		}
+		return gameObject;
+	}
+
+	public PrimaryElement FindFirstWithMass(Tag tag)
+	{
+		PrimaryElement primaryElement = null;
+		for (int i = 0; i < this.items.Count; i++)
+		{
+			GameObject gameObject = this.items[i];
+			if (!(gameObject == null))
+			{
+				if (gameObject.HasTag(tag))
+				{
+					PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+					if (component.Mass > 0f)
+					{
+						primaryElement = component;
+						break;
+					}
+				}
+			}
+		}
+		return primaryElement;
 	}
 
 	public List<Tag> GetAllTagsInStorage()
 	{
 		List<Tag> list = new List<Tag>();
-		foreach (GameObject gameObject in this.items)
+		for (int i = 0; i < this.items.Count; i++)
 		{
+			GameObject gameObject = this.items[i];
 			if (!list.Contains(gameObject.PrefabID()))
 			{
 				list.Add(gameObject.PrefabID());
@@ -341,8 +391,9 @@ public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
 			return null;
 		}
 		List<GameObject> list = new List<GameObject>();
-		foreach (GameObject gameObject in this.items)
+		for (int i = 0; i < this.items.Count; i++)
 		{
+			GameObject gameObject = this.items[i];
 			if (gameObject.HasTags(tags))
 			{
 				list.Add(gameObject);
@@ -353,8 +404,9 @@ public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
 
 	public GameObject Find(int ID)
 	{
-		foreach (GameObject gameObject in this.items)
+		for (int i = 0; i < this.items.Count; i++)
 		{
+			GameObject gameObject = this.items[i];
 			if (ID == gameObject.PrefabID().GetHashCode())
 			{
 				return gameObject;
@@ -373,9 +425,10 @@ public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
 
 	public void Consume(Tag tag, float amount)
 	{
-		List<Pickupable> list = new List<Pickupable>();
-		foreach (GameObject gameObject in this.items)
+		List<Pickupable> list = null;
+		for (int i = 0; i < this.items.Count; i++)
 		{
+			GameObject gameObject = this.items[i];
 			if (!(gameObject == null))
 			{
 				if (gameObject.HasTag(tag))
@@ -385,7 +438,15 @@ public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
 					component.TotalAmount -= num;
 					if (component.TotalAmount <= 0f)
 					{
-						list.Add(component);
+						PrimaryElement component2 = component.GetComponent<PrimaryElement>();
+						if (!component2.KeepZeroMassObject)
+						{
+							if (list == null)
+							{
+								list = new List<Pickupable>();
+							}
+							list.Add(component);
+						}
 					}
 					amount -= num;
 					this.Trigger(-1697596308, gameObject);
@@ -396,9 +457,13 @@ public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
 				}
 			}
 		}
-		foreach (Pickupable pickupable in list)
+		if (list != null)
 		{
-			global::UnityEngine.Object.DestroyImmediate(pickupable.gameObject);
+			for (int j = 0; j < list.Count; j++)
+			{
+				this.items.Remove(list[j].gameObject);
+				global::UnityEngine.Object.Destroy(list[j].gameObject);
+			}
 		}
 	}
 
@@ -415,6 +480,16 @@ public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
 			this.items.Remove(gameObject);
 			this.Trigger(-1697596308, gameObject);
 			gameObject.DeleteObject();
+		}
+	}
+
+	public void Consume(GameObject item_go)
+	{
+		if (this.items.Contains(item_go))
+		{
+			this.items.Remove(item_go);
+			this.Trigger(-1697596308, item_go);
+			item_go.DeleteObject();
 		}
 	}
 
@@ -517,6 +592,18 @@ public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
 		return list;
 	}
 
+	public PrimaryElement AddToPrimaryElement(SimHashes element, float additional_mass, float temperature)
+	{
+		PrimaryElement primaryElement = this.FindPrimaryElement(element);
+		if (primaryElement != null)
+		{
+			float finalTemperature = GameUtil.GetFinalTemperature(primaryElement.Temperature, primaryElement.Mass, temperature, additional_mass);
+			primaryElement.Mass += additional_mass;
+			primaryElement.Temperature = finalTemperature;
+		}
+		return primaryElement;
+	}
+
 	public PrimaryElement FindPrimaryElement(SimHashes element)
 	{
 		PrimaryElement primaryElement = null;
@@ -563,7 +650,7 @@ public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
 	{
 		if (this.items.Count != 0)
 		{
-			Debug.LogError("Storage for [" + base.gameObject.name + "] is being destroyed but it still contains items!", base.gameObject);
+			Debug.LogWarning("Storage for [" + base.gameObject.name + "] is being destroyed but it still contains items!", base.gameObject);
 		}
 	}
 
@@ -578,7 +665,20 @@ public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
 	{
 		this.items.Remove(go);
 		this.Trigger(-1697596308, go);
-		this.ApplyStoredItemModifiers(go);
+		this.ApplyStoredItemModifiers(go, false);
+	}
+
+	public float GetAmountAvailable(Tag tag)
+	{
+		float num = 0f;
+		foreach (GameObject gameObject in this.items)
+		{
+			if (gameObject != null && gameObject.HasTag(tag))
+			{
+				num += gameObject.GetComponent<PrimaryElement>().Units;
+			}
+		}
+		return num;
 	}
 
 	public float GetMassAvailable(Tag tag)
@@ -632,37 +732,16 @@ public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
 		return false;
 	}
 
-	public List<Descriptor> GetRequirementDescriptions(BuildingDef def)
-	{
-		return null;
-	}
-
-	public List<Descriptor> GetEffectDescriptions(BuildingDef def)
+	public List<Descriptor> GetDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		if (this.showDescriptor)
 		{
 			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, string.Format(UI.BUILDINGEFFECTS.STORAGECAPACITY, GameUtil.GetFormattedMass(this.Capacity(), GameUtil.TimeSlice.None, true, "F1"))), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.STORAGECAPACITY, GameUtil.GetFormattedMass(this.Capacity(), GameUtil.TimeSlice.None, true, "F1")));
+			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.STORAGECAPACITY, GameUtil.GetFormattedMass(this.Capacity(), GameUtil.TimeSlice.None, true, "{0:0.#}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.STORAGECAPACITY, GameUtil.GetFormattedMass(this.Capacity(), GameUtil.TimeSlice.None, true, "{0:0.#}")), Descriptor.DescriptorType.Effect);
 			list.Add(descriptor);
 		}
 		return list;
-	}
-
-	public void DisableDefaultItemModifer(Storage.StoredItemModifier modifier)
-	{
-		this.defaultStoredItemModifers = new List<Storage.StoredItemModifierInfo>(this.defaultStoredItemModifers);
-		this.defaultStoredItemModifers.RemoveAll((Storage.StoredItemModifierInfo x) => x.modifier == modifier);
-	}
-
-	private static void MakeContainedItemTemperatureInsulated(IList<GameObject> items, GameObject go)
-	{
-		if (go == null)
-		{
-			return;
-		}
-		bool flag = items.Contains(go);
-		Storage.MakeItemTemperatureInsulated(go, flag);
 	}
 
 	private static void MakeItemTemperatureInsulated(GameObject go, bool insulate)
@@ -673,16 +752,6 @@ public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
 			return;
 		}
 		component.enabled = !insulate;
-	}
-
-	private static void MakeContainedItemInvisible(IList<GameObject> items, GameObject go)
-	{
-		if (go == null)
-		{
-			return;
-		}
-		bool flag = items.Contains(go);
-		Storage.MakeItemInvisible(go, flag);
 	}
 
 	private static void MakeItemInvisible(GameObject go, bool invisible)
@@ -700,11 +769,43 @@ public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
 		}
 	}
 
-	private void ApplyStoredItemModifiers(GameObject go)
+	private static void MakeItemSealed(GameObject go, bool seal)
 	{
-		foreach (Storage.StoredItemModifierInfo storedItemModifierInfo in this.defaultStoredItemModifers)
+		Sublimates component = go.GetComponent<Sublimates>();
+		if (component == null)
 		{
-			storedItemModifierInfo.callback(this.items, go);
+			return;
+		}
+		component.enabled = !seal;
+	}
+
+	private void ApplyStoredItemModifiers(GameObject go, bool stored)
+	{
+		List<Storage.StoredItemModifier> defaultStoredItemModifiers = this.defaultStoredItemModifers;
+		if (defaultStoredItemModifiers == null)
+		{
+			defaultStoredItemModifiers = Storage.DefaultStoredItemModifiers;
+		}
+		foreach (Storage.StoredItemModifier storedItemModifier in defaultStoredItemModifiers)
+		{
+			foreach (Storage.StoredItemModifierInfo storedItemModifierInfo in Storage.StoredItemModifierHandlers)
+			{
+				if (storedItemModifier == storedItemModifierInfo.modifier)
+				{
+					storedItemModifierInfo.toggleState(go, stored);
+					break;
+				}
+			}
+		}
+	}
+
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = (GameObject)data;
+		Storage component = gameObject.GetComponent<Storage>();
+		if (component != null)
+		{
+			this.SetOnlyFetchMarkedItems(component.onlyFetchMarkedItems);
 		}
 	}
 
@@ -784,7 +885,7 @@ public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
 			}
 			else
 			{
-				Output.LogError(new object[] { "Tried to deserialize", tag, "into storage but failed" });
+				Output.LogWarningWithObj(base.gameObject, new object[] { "Tried to deserialize " + tag.ToString() + " into storage but failed" });
 			}
 		}
 	}
@@ -799,6 +900,8 @@ public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
 	}
 
 	public bool allowItemRemoval;
+
+	public bool countAsAccessible;
 
 	public float capacityKg = 20000f;
 
@@ -818,8 +921,6 @@ public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
 
 	public List<GameObject> items = new List<GameObject>();
 
-	private static readonly string[] WorkAnims = new string[] { "working_pre", "working_loop" };
-
 	[MyCmpAdd]
 	protected UserMenu userMenu;
 
@@ -835,18 +936,23 @@ public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
 	[Serialize]
 	private bool onlyFetchMarkedItems;
 
-	private static readonly List<Storage.StoredItemModifierInfo> DefaultStoredItemModifiers = new List<Storage.StoredItemModifierInfo>
+	private static readonly List<Storage.StoredItemModifier> DefaultStoredItemModifiers = new List<Storage.StoredItemModifier> { Storage.StoredItemModifier.Hide };
+
+	private static readonly List<Storage.StoredItemModifierInfo> StoredItemModifierHandlers = new List<Storage.StoredItemModifierInfo>
 	{
-		new Storage.StoredItemModifierInfo(Storage.StoredItemModifier.Insulate, new Action<GameObject, bool>(Storage.MakeItemTemperatureInsulated), new Action<IList<GameObject>, GameObject>(Storage.MakeContainedItemTemperatureInsulated)),
-		new Storage.StoredItemModifierInfo(Storage.StoredItemModifier.Hide, new Action<GameObject, bool>(Storage.MakeItemInvisible), new Action<IList<GameObject>, GameObject>(Storage.MakeContainedItemInvisible))
+		new Storage.StoredItemModifierInfo(Storage.StoredItemModifier.Insulate, new Action<GameObject, bool>(Storage.MakeItemTemperatureInsulated)),
+		new Storage.StoredItemModifierInfo(Storage.StoredItemModifier.Hide, new Action<GameObject, bool>(Storage.MakeItemInvisible)),
+		new Storage.StoredItemModifierInfo(Storage.StoredItemModifier.Seal, new Action<GameObject, bool>(Storage.MakeItemSealed))
 	};
 
-	private List<Storage.StoredItemModifierInfo> defaultStoredItemModifers = Storage.DefaultStoredItemModifiers;
+	[SerializeField]
+	public List<Storage.StoredItemModifier> defaultStoredItemModifers;
 
 	public enum StoredItemModifier
 	{
 		Insulate,
-		Hide
+		Hide,
+		Seal
 	}
 
 	public enum FXPrefix
@@ -857,17 +963,14 @@ public class Storage : Workable, ISaveLoadableDetailJson, IEffectDescriptor
 
 	private struct StoredItemModifierInfo
 	{
-		public StoredItemModifierInfo(Storage.StoredItemModifier modifier, Action<GameObject, bool> initialize, Action<IList<GameObject>, GameObject> callback)
+		public StoredItemModifierInfo(Storage.StoredItemModifier modifier, Action<GameObject, bool> toggle_state)
 		{
 			this.modifier = modifier;
-			this.initialize = initialize;
-			this.callback = callback;
+			this.toggleState = toggle_state;
 		}
 
 		public Storage.StoredItemModifier modifier;
 
-		public Action<GameObject, bool> initialize;
-
-		public Action<IList<GameObject>, GameObject> callback;
+		public Action<GameObject, bool> toggleState;
 	}
 }

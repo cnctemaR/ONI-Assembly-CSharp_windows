@@ -14,9 +14,9 @@ public class GameScheduler : KMonoBehaviour, IScheduler
 		return this.scheduler.Schedule(name, time, callback, callback_data, group);
 	}
 
-	public SchedulerHandle SchedulePeriodic(string name, float interval, Action<object> callback, object callback_data = null, SchedulerGroup group = null, float time_offset = 0f)
+	public SchedulerHandle SchedulePeriodic(string name, float interval, Action<object> callback, object callback_data = null, SchedulerGroup group = null, float time_offset = 0f, GameObject profiler_obj = null)
 	{
-		return this.scheduler.SchedulePeriodic(name, interval, callback, callback_data, group, time_offset);
+		return this.scheduler.SchedulePeriodic(name, interval, callback, callback_data, group, time_offset, profiler_obj);
 	}
 
 	private void Update()

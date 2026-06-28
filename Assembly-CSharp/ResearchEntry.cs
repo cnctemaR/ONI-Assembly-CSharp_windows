@@ -13,25 +13,23 @@ public class ResearchEntry : KMonoBehaviour
 		base.OnSpawn();
 		this.techLineMap = new Dictionary<Tech, UILineRenderer>();
 		this.BG.color = this.defaultColor;
-		List<Image> list = new List<Image>(base.GetComponentsInChildren<Image>());
-		this.originalImgColors.Clear();
-		list.ForEach(delegate(Image img)
+		foreach (Tech tech in this.targetTech.requiredTech)
 		{
-			this.originalImgColors.Add(img, img.color);
-		});
-		foreach (Tech tech in this.targetTech.unlockedTech)
-		{
+			float num = this.targetTech.width / 2f;
 			GameObject gameObject = Util.KInstantiateUI(this.linePrefab, this.lineContainer.gameObject, true);
 			UILineRenderer component = gameObject.GetComponent<UILineRenderer>();
 			component.Points = new Vector2[]
 			{
 				new Vector2(0f, 0f),
-				new Vector2((tech.center.x - this.targetTech.center.x - this.targetTech.width) / 2f, 0f),
-				new Vector2((tech.center.x - this.targetTech.center.x - this.targetTech.width) / 2f, tech.center.y - this.targetTech.center.y),
-				new Vector2(tech.center.x - this.targetTech.center.x - this.targetTech.width, tech.center.y - this.targetTech.center.y)
+				new Vector2(-((this.targetTech.center.x - num - (tech.center.x + num)) / 2f), 0f),
+				new Vector2(-((this.targetTech.center.x - num - (tech.center.x + num)) / 2f), tech.center.y - this.targetTech.center.y),
+				new Vector2(-(this.targetTech.center.x - num - (tech.center.x + num)) + 2f, tech.center.y - this.targetTech.center.y)
 			};
+			component.LineThickness = (float)this.lineThickness_inactive;
+			component.color = this.inactiveLineColor;
 			this.techLineMap.Add(tech, component);
 		}
+		this.QueueStateChanged(false);
 		if (this.targetTech != null)
 		{
 			foreach (TechInstance techInstance in Research.Instance.GetResearchQueue())
@@ -64,10 +62,10 @@ public class ResearchEntry : KMonoBehaviour
 			if (newTech.costsByResearchTypeID.ContainsKey(researchType.id) && newTech.costsByResearchTypeID[researchType.id] > 0f)
 			{
 				GameObject gameObject = Util.KInstantiateUI(this.progressBarPrefab, this.progressBarContainer.gameObject, true);
-				Image image = gameObject.GetComponentsInChildren<Image>()[1];
-				Image image2 = gameObject.GetComponentsInChildren<Image>()[2];
+				Image image = gameObject.GetComponentsInChildren<Image>()[2];
+				Image component = gameObject.transform.FindChild("Icon").GetComponent<Image>();
 				image.color = researchType.color;
-				image2.color = researchType.color;
+				component.color = researchType.color;
 				this.progressBarsByResearchTypeID[researchType.id] = gameObject;
 			}
 		}
@@ -102,23 +100,22 @@ public class ResearchEntry : KMonoBehaviour
 		}
 		text = string.Format(UI.RESEARCHSCREEN_UNLOCKSTOOLTIP, text);
 		this.researchName.GetComponent<ToolTip>().toolTip = string.Format("{0}\n{1}\n\n{2}", this.targetTech.Name, this.targetTech.desc, text);
-		this.button.ClearOnClick();
-		this.button.onClick += this.OnResearchClicked;
-		KButton kbutton = this.button;
-		kbutton.onPointerEnter = (global::System.Action)Delegate.Combine(kbutton.onPointerEnter, new global::System.Action(delegate
+		this.toggle.ClearOnClick();
+		this.toggle.onClick += this.OnResearchClicked;
+		this.toggle.onPointerEnter += delegate
 		{
 			this.researchScreen.TurnEverythingOff();
 			this.OnHover(true, this.targetTech);
-		}));
-		KButton kbutton2 = this.button;
-		kbutton2.onPointerExit = (global::System.Action)Delegate.Combine(kbutton2.onPointerExit, new global::System.Action(delegate
+		};
+		this.toggle.soundPlayer.AcceptClickCondition = () => !this.targetTech.IsComplete();
+		this.toggle.onPointerExit += delegate
 		{
 			if (this.turnEverythingOn != null)
 			{
 				base.StopCoroutine(this.turnEverythingOn);
 			}
-			this.turnEverythingOn = base.StartCoroutine(this.TurnEverythingOnWithDelay(0.15f));
-		}));
+			this.researchScreen.TurnEverythingOff();
+		};
 	}
 
 	private IEnumerator TurnEverythingOnWithDelay(float delay)
@@ -134,23 +131,6 @@ public class ResearchEntry : KMonoBehaviour
 		yield break;
 	}
 
-	public void SetGeneralAlpha(float alpha, Tech tech = null)
-	{
-		List<Image> list = new List<Image>(base.GetComponentsInChildren<Image>());
-		list.ForEach(delegate(Image img)
-		{
-			if (tech == null)
-			{
-				img.SetAlpha(alpha);
-			}
-		});
-		List<Text> list2 = new List<Text>(base.GetComponentsInChildren<Text>());
-		list2.ForEach(delegate(Text txt)
-		{
-			txt.SetAlpha(alpha);
-		});
-	}
-
 	public void SetEverythingOff()
 	{
 		if (this.turnEverythingOn != null)
@@ -162,107 +142,34 @@ public class ResearchEntry : KMonoBehaviour
 		{
 			return;
 		}
-		List<Image> list = new List<Image>(base.GetComponentsInChildren<Image>());
-		List<Text> list2 = new List<Text>(base.GetComponentsInChildren<Text>());
-		if (this.fadeRoutine != null)
+		this.borderHighlight.gameObject.SetActive(false);
+		foreach (KeyValuePair<Tech, UILineRenderer> keyValuePair in this.techLineMap)
 		{
-			base.StopCoroutine(this.fadeRoutine);
-		}
-		this.fadeRoutine = base.StartCoroutine(this.tintColors(list));
-		list2.ForEach(delegate(Text txt)
-		{
-			txt.color = Color.white - this.tintColor;
-		});
-		if (!this.targetTech.IsComplete())
-		{
-			foreach (KeyValuePair<string, GameObject> keyValuePair in this.progressBarsByResearchTypeID)
-			{
-				keyValuePair.Value.GetComponentsInChildren<Image>()[1].fillAmount = 0f;
-			}
+			keyValuePair.Value.LineThickness = (float)this.lineThickness_inactive;
+			keyValuePair.Value.color = this.inactiveLineColor;
 		}
 		this.isOn = false;
-	}
-
-	private IEnumerator tintColors(List<Image> imgs)
-	{
-		imgs.ForEach(delegate(Image img)
-		{
-			if (this.originalImgColors.ContainsKey(img))
-			{
-				img.color = this.originalImgColors[img];
-			}
-		});
-		int steps = 6;
-		for (int i = 0; i < steps; i++)
-		{
-			imgs.ForEach(delegate(Image img)
-			{
-				if (this.originalImgColors.ContainsKey(img))
-				{
-					img.color -= this.tintColor / (float)steps;
-				}
-			});
-			yield return 0;
-		}
-		yield break;
 	}
 
 	public void SetEverythingOn()
 	{
 		if (this.turnEverythingOn != null)
 		{
-			base.StopCoroutine(this.turnEverythingOn);
 			this.turnEverythingOn = null;
 		}
 		if (this.isOn)
 		{
 			return;
 		}
-		if (this.fadeRoutine != null)
-		{
-			base.StopCoroutine(this.fadeRoutine);
-		}
-		List<Image> list = new List<Image>(base.GetComponentsInChildren<Image>());
-		List<Text> list2 = new List<Text>(base.GetComponentsInChildren<Text>());
-		list.ForEach(delegate(Image img)
-		{
-			if (this.originalImgColors.ContainsKey(img))
-			{
-				img.color = this.originalImgColors[img];
-			}
-		});
 		this.UpdateProgressBars();
-		list2.ForEach(delegate(Text txt)
+		this.borderHighlight.gameObject.SetActive(true);
+		foreach (KeyValuePair<Tech, UILineRenderer> keyValuePair in this.techLineMap)
 		{
-			txt.color = Color.white;
-		});
+			keyValuePair.Value.LineThickness = (float)this.lineThickness_active;
+			keyValuePair.Value.color = this.activeLineColor;
+		}
+		this.transform.SetAsLastSibling();
 		this.isOn = true;
-	}
-
-	private void SetTints(List<Image> imgs, List<Text> txts, Color tint, bool increment)
-	{
-		imgs.ForEach(delegate(Image img)
-		{
-			if (increment)
-			{
-				img.color += tint;
-			}
-			else
-			{
-				img.color -= tint;
-			}
-		});
-		txts.ForEach(delegate(Text txt)
-		{
-			if (increment)
-			{
-				txt.color += tint;
-			}
-			else
-			{
-				txt.color -= tint;
-			}
-		});
 	}
 
 	private void OnHover(bool entered, Tech hoverSource)
@@ -299,35 +206,71 @@ public class ResearchEntry : KMonoBehaviour
 		{
 			return;
 		}
-		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Deselect", false));
-		this.button.ClearOnClick();
-		this.button.onClick += this.OnResearchClicked;
+		this.toggle.ClearOnClick();
+		this.toggle.onClick += this.OnResearchClicked;
 		this.researchScreen.CancelResearch();
 		Research.Instance.CancelResearch(this.targetTech, true);
 	}
 
 	public void QueueStateChanged(bool isSelected)
 	{
-		if (isSelected && !this.targetTech.IsComplete())
+		if (isSelected)
 		{
-			this.BG.color = this.pendingColor;
-			this.originalImgColors[this.BG] = this.pendingColor;
-			this.button.ClearOnClick();
-			this.button.onClick += this.OnResearchCanceled;
+			if (!this.targetTech.IsComplete())
+			{
+				this.toggle.isOn = true;
+				this.BG.color = this.pendingColor;
+				this.titleBG.color = this.pendingHeaderColor;
+				this.toggle.ClearOnClick();
+				this.toggle.onClick += this.OnResearchCanceled;
+			}
+			else
+			{
+				this.toggle.isOn = false;
+			}
+			foreach (KeyValuePair<string, GameObject> keyValuePair in this.progressBarsByResearchTypeID)
+			{
+				Transform child = keyValuePair.Value.transform.GetChild(0);
+				child.GetComponentsInChildren<Image>()[1].color = Color.white;
+			}
+			foreach (Image image in this.iconPanel.GetComponentsInChildren<Image>())
+			{
+				image.material = this.StandardUIMaterial;
+			}
 		}
 		else if (this.targetTech.IsComplete())
 		{
+			this.toggle.isOn = false;
 			this.BG.color = this.completedColor;
-			this.originalImgColors[this.BG] = this.completedColor;
+			this.titleBG.color = this.completedHeaderColor;
 			this.defaultColor = this.completedColor;
-			this.button.ClearOnClick();
+			this.toggle.ClearOnClick();
+			foreach (KeyValuePair<string, GameObject> keyValuePair2 in this.progressBarsByResearchTypeID)
+			{
+				Transform child2 = keyValuePair2.Value.transform.GetChild(0);
+				child2.GetComponentsInChildren<Image>()[1].color = Color.white;
+			}
+			foreach (Image image2 in this.iconPanel.GetComponentsInChildren<Image>())
+			{
+				image2.material = this.StandardUIMaterial;
+			}
 		}
 		else
 		{
-			this.BG.color = ((!this.isOn) ? (this.defaultColor - this.tintColor) : this.defaultColor);
-			this.originalImgColors[this.BG] = this.defaultColor;
-			this.button.ClearOnClick();
-			this.button.onClick += this.OnResearchClicked;
+			this.toggle.isOn = false;
+			this.BG.color = this.defaultColor;
+			this.titleBG.color = this.incompleteHeaderColor;
+			this.toggle.ClearOnClick();
+			this.toggle.onClick += this.OnResearchClicked;
+			foreach (KeyValuePair<string, GameObject> keyValuePair3 in this.progressBarsByResearchTypeID)
+			{
+				Transform child3 = keyValuePair3.Value.transform.GetChild(0);
+				child3.GetComponentsInChildren<Image>()[1].color = new Color(0.52156866f, 0.52156866f, 0.52156866f);
+			}
+			foreach (Image image3 in this.iconPanel.GetComponentsInChildren<Image>())
+			{
+				image3.material = this.DesaturatedUIMaterial;
+			}
 		}
 	}
 
@@ -356,7 +299,7 @@ public class ResearchEntry : KMonoBehaviour
 				child.GetComponentInChildren<LocText>().text = orAdd.progressInventory.PointsByTypeID[keyValuePair.Key] + "/" + this.targetTech.costsByResearchTypeID[keyValuePair.Key];
 				num = orAdd.progressInventory.PointsByTypeID[keyValuePair.Key] / this.targetTech.costsByResearchTypeID[keyValuePair.Key];
 			}
-			child.GetComponentsInChildren<Image>()[1].fillAmount = num;
+			child.GetComponentsInChildren<Image>()[2].fillAmount = num;
 			child.GetComponent<ToolTip>().SetSimpleTooltip(Research.Instance.researchTypes.GetResearchType(keyValuePair.Key).description);
 		}
 	}
@@ -374,9 +317,9 @@ public class ResearchEntry : KMonoBehaviour
 	public void ResearchCompleted(bool notify = true)
 	{
 		this.BG.color = this.completedColor;
-		this.originalImgColors[this.BG] = this.completedColor;
+		this.titleBG.color = this.completedHeaderColor;
 		this.defaultColor = this.completedColor;
-		this.button.ClearOnClick();
+		this.toggle.ClearOnClick();
 		if (notify)
 		{
 			ResearchCompleteMessage researchCompleteMessage = new ResearchCompleteMessage(this.targetTech);
@@ -389,15 +332,15 @@ public class ResearchEntry : KMonoBehaviour
 	[Header("Labels")]
 	private LocText researchName;
 
-	[SerializeField]
 	[Header("Transforms")]
+	[SerializeField]
 	private Transform progressBarContainer;
 
 	[SerializeField]
 	private Transform lineContainer;
 
-	[Header("Prefabs")]
 	[SerializeField]
+	[Header("Prefabs")]
 	private GameObject iconPanel;
 
 	[SerializeField]
@@ -409,12 +352,15 @@ public class ResearchEntry : KMonoBehaviour
 	[SerializeField]
 	private GameObject progressBarPrefab;
 
-	[Header("Graphics")]
 	[SerializeField]
+	[Header("Graphics")]
 	private Image BG;
 
 	[SerializeField]
 	private Image titleBG;
+
+	[SerializeField]
+	private Image borderHighlight;
 
 	[SerializeField]
 	private Sprite hoverBG;
@@ -432,12 +378,21 @@ public class ResearchEntry : KMonoBehaviour
 	[SerializeField]
 	private Color pendingColor = Color.magenta;
 
+	[SerializeField]
+	private Color completedHeaderColor = Color.grey;
+
+	[SerializeField]
+	private Color incompleteHeaderColor = Color.grey;
+
+	[SerializeField]
+	private Color pendingHeaderColor = Color.grey;
+
 	private Sprite defaultBG;
 
 	private ResearchScreen researchScreen;
 
 	[MyCmpGet]
-	private KButton button;
+	private KToggle toggle;
 
 	private Dictionary<Tech, UILineRenderer> techLineMap;
 
@@ -451,10 +406,13 @@ public class ResearchEntry : KMonoBehaviour
 
 	public Color inactiveLineColor;
 
-	[SerializeField]
-	private Color tintColor = new Color(0.19607843f, 0.19607843f, 0.19607843f, 0.19607843f);
+	public int lineThickness_active = 6;
 
-	private Dictionary<Image, Color> originalImgColors = new Dictionary<Image, Color>();
+	public int lineThickness_inactive = 2;
+
+	public Material StandardUIMaterial;
+
+	public Material DesaturatedUIMaterial;
 
 	private Dictionary<string, GameObject> progressBarsByResearchTypeID = new Dictionary<string, GameObject>();
 

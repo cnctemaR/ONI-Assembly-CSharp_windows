@@ -61,7 +61,7 @@ namespace Klei.AI
 			return num;
 		}
 
-		public float GetTotalValue()
+		public float GetTotalDisplayValue()
 		{
 			float num = this.Attribute.BaseValue;
 			float num2 = 0f;
@@ -77,7 +77,29 @@ namespace Klei.AI
 					num2 += modifier.Value;
 				}
 			}
-			return num + num * num2;
+			return num + Mathf.Abs(num) * num2;
+		}
+
+		public float GetTotalValue()
+		{
+			float num = this.Attribute.BaseValue;
+			float num2 = 0f;
+			for (int i = 0; i < this.Modifiers.Count; i++)
+			{
+				AttributeModifier modifier = this.Modifiers[i].Modifier;
+				if (!modifier.UIOnly)
+				{
+					if (!modifier.IsMultiplier)
+					{
+						num += modifier.Value;
+					}
+					else
+					{
+						num2 += modifier.Value;
+					}
+				}
+			}
+			return num + Mathf.Abs(num) * num2;
 		}
 
 		public float GetModifierContribution(AttributeModifier testModifier)
@@ -143,9 +165,19 @@ namespace Klei.AI
 			}
 		}
 
+		public string GetFormattedValue(bool tooltip = false)
+		{
+			IAttributeFormatter formatter = this.Attribute.formatter;
+			if (formatter != null)
+			{
+				return formatter.GetFormattedAttribute(this, tooltip);
+			}
+			return GameUtil.GetFormattedSimple(this.GetTotalValue(), GameUtil.TimeSlice.None, "F2");
+		}
+
 		public string GetAttributeValueTooltip()
 		{
-			string text = this.Name + " " + this.GetTotalValue();
+			string text = string.Format("{0}: {1}", this.Name, this.GetFormattedValue(true));
 			text += "\n";
 			if (this.GetBaseValue() != 0f)
 			{

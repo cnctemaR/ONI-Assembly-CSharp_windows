@@ -4,7 +4,7 @@ public static class UnitsUtil
 {
 	public static bool IsTimeUnit(Units unit)
 	{
-		return unit == Units.PerDay;
+		return unit == Units.PerDay || unit == Units.PerSecond;
 	}
 
 	public static string GetUnitSuffix(Units unit)

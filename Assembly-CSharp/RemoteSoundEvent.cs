@@ -10,12 +10,16 @@ public class RemoteSoundEvent : SoundEvent
 	{
 	}
 
-	public override void OnPlay(IAnimBehaviour behaviour)
+	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
 	{
-		if (base.IsFilteredOut(behaviour))
+		if (this.ShouldPlaySound(behaviour))
 		{
-			return;
+			this.PlaySound(behaviour);
 		}
+	}
+
+	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
+	{
 		Vector3 position = behaviour.GetComponent<Transform>().position;
 		Workable workable = behaviour.GetComponent<Worker>().workable;
 		if (workable != null)
@@ -29,7 +33,7 @@ public class RemoteSoundEvent : SoundEvent
 				{
 					num = 0f;
 				}
-				EventInstance eventInstance = SoundEvent.BeginOneShot(this.sound, position);
+				EventInstance eventInstance = SoundEvent.BeginOneShot(base.sound, position);
 				eventInstance.setParameterValue("State", num);
 				SoundEvent.EndOneShot(eventInstance);
 			}

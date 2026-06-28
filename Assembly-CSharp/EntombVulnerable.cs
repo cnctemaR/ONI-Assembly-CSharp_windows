@@ -1,9 +1,20 @@
 ﻿using System;
 using KSerialization;
-using UnityEngine;
 
 public class EntombVulnerable : KMonoBehaviour
 {
+	private OccupyArea occupyArea
+	{
+		get
+		{
+			if (this._occupyArea == null)
+			{
+				this._occupyArea = base.GetComponent<OccupyArea>();
+			}
+			return this._occupyArea;
+		}
+	}
+
 	public bool GetEntombed
 	{
 		get
@@ -15,62 +26,57 @@ public class EntombVulnerable : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.handle = GameScheduler.Instance.SchedulePeriodic("CheckEntombed", 0.5f, new Action<object>(this.CheckEntombed), null, null, 0f);
-		this.CheckEntombed(null);
+		this.partitionerEntry = GameScenePartitioner.Instance.Add("EntombVulnerable", base.gameObject, this.occupyArea.GetExtents(), GameScenePartitioner.Instance.solidChangedMask.mask, new Action<object>(this.OnSolidChanged));
+		this.CheckEntombed();
 	}
 
-	public void Configure(bool twoTilesTall)
+	protected override void OnCleanUp()
 	{
-		this.twoTilesTall = twoTilesTall;
+		this.partitionerEntry.Release();
+		base.OnCleanUp();
 	}
 
-	public void CheckEntombed(object param)
+	private void OnSolidChanged(object data)
+	{
+		this.CheckEntombed();
+	}
+
+	private void CheckEntombed()
 	{
 		int num = Grid.PosToCell(base.gameObject.transform.position);
 		if (!Grid.IsValidCell(num))
 		{
 			return;
 		}
-		KSelectable component = base.GetComponent<KSelectable>();
 		if (!this.IsCellSafe(num))
 		{
 			if (!this.isEntombed)
 			{
 				this.isEntombed = true;
-				if (!component.HasStatusItem(Db.Get().CreatureStatusItems.Entombed))
-				{
-					component.AddStatusItem(Db.Get().CreatureStatusItems.Entombed, null);
-				}
+				this.selectable.AddStatusItem(Db.Get().CreatureStatusItems.Entombed, null);
 				this.Trigger(-1089732772, true);
 			}
 		}
 		else if (this.isEntombed)
 		{
 			this.isEntombed = false;
-			if (!component.HasStatusItem(Db.Get().CreatureStatusItems.Entombed))
-			{
-				component.RemoveStatusItem(Db.Get().CreatureStatusItems.Entombed);
-			}
+			this.selectable.RemoveStatusItem(Db.Get().CreatureStatusItems.Entombed, false);
 			this.Trigger(-1089732772, false);
 		}
 	}
 
 	public bool IsCellSafe(int cell)
 	{
-		return !Grid.Solid[cell] && (!this.twoTilesTall || !Grid.Solid[Grid.CellAbove(cell)]);
+		return this.occupyArea.TestArea(cell, (int testCell) => !Grid.Solid[testCell]);
 	}
 
-	protected override void OnCleanUp()
-	{
-		this.handle.Clear();
-		base.OnCleanUp();
-	}
+	[MyCmpReq]
+	private KSelectable selectable;
+
+	private OccupyArea _occupyArea;
 
 	[Serialize]
 	private bool isEntombed;
 
-	[HideInInspector]
-	public bool twoTilesTall;
-
-	private SchedulerHandle handle;
+	private GameScenePartitionerEntry partitionerEntry;
 }

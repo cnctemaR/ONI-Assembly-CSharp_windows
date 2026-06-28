@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -10,9 +9,9 @@ public class KToggle : Toggle
 
 	public event global::System.Action onDoubleClick;
 
-	public event Func<bool> onValidate;
-
 	public event Action<GameObject> onRefresh;
+
+	public new event Action<bool> onValueChanged;
 
 	public event KToggle.PointerEvent onPointerEnter;
 
@@ -26,21 +25,9 @@ public class KToggle : Toggle
 		}
 	}
 
-	private new void Awake()
-	{
-		foreach (KeyValuePair<KToggle.SoundType, string> keyValuePair in KToggle.DefaultSounds)
-		{
-			this.currentSounds[keyValuePair.Key] = keyValuePair.Value;
-		}
-	}
-
 	private new void OnEnable()
 	{
 		base.OnEnable();
-		if (this.artExtension.animator != null && this.artExtension.animator.isInitialized)
-		{
-			this.artExtension.animator.Play("Released", 0, 1f);
-		}
 	}
 
 	public void ClearOnClick()
@@ -59,7 +46,6 @@ public class KToggle : Toggle
 		this.ClearOnClick();
 		this.ClearPointerCallbacks();
 		this.onDoubleClick = null;
-		this.onValidate = null;
 		this.onRefresh = null;
 	}
 
@@ -74,8 +60,43 @@ public class KToggle : Toggle
 			return;
 		}
 		this.Select();
-		global::EventSystem.Trigger(base.gameObject, 2098165161, null);
+		this.isOn = !this.isOn;
+		if (this.soundPlayer.AcceptClickCondition != null && !this.soundPlayer.AcceptClickCondition())
+		{
+			this.soundPlayer.Play(3);
+		}
+		else
+		{
+			this.soundPlayer.Play((!this.isOn) ? 1 : 0);
+		}
 		this.onClick.Signal();
+		global::EventSystem.Trigger(base.gameObject, 2098165161, null);
+	}
+
+	private void OnValueChanged(bool value)
+	{
+		ImageToggleState[] components = base.GetComponents<ImageToggleState>();
+		if (components != null && components.Length > 0)
+		{
+			foreach (ImageToggleState imageToggleState in components)
+			{
+				imageToggleState.SetActiveState(value);
+			}
+		}
+		this.ActivateFlourish(value);
+		this.onValueChanged.Signal(value);
+	}
+
+	public void ForceUpdateVisualState()
+	{
+		ImageToggleState[] components = base.GetComponents<ImageToggleState>();
+		if (components != null && components.Length > 0)
+		{
+			foreach (ImageToggleState imageToggleState in components)
+			{
+				imageToggleState.ResetColor();
+			}
+		}
 	}
 
 	public override void OnPointerClick(PointerEventData eventData)
@@ -84,20 +105,17 @@ public class KToggle : Toggle
 		{
 			return;
 		}
-		if (this.Validate())
+		if (eventData.button == PointerEventData.InputButton.Right)
 		{
-			if (eventData.button == PointerEventData.InputButton.Right)
-			{
-				return;
-			}
-			if (this.onClick != null && (eventData.clickCount == 1 || this.onDoubleClick == null))
-			{
-				this.Click();
-			}
-			else if (eventData.clickCount == 2 && this.onDoubleClick != null)
-			{
-				this.onDoubleClick();
-			}
+			return;
+		}
+		if (eventData.clickCount == 1 || this.onDoubleClick == null)
+		{
+			this.Click();
+		}
+		else if (eventData.clickCount == 2 && this.onDoubleClick != null)
+		{
+			this.onDoubleClick();
 		}
 	}
 
@@ -115,11 +133,6 @@ public class KToggle : Toggle
 		base.OnDeselect(null);
 	}
 
-	private bool Validate()
-	{
-		return this.onValidate == null || this.onValidate();
-	}
-
 	public override void OnSelect(BaseEventData eventData)
 	{
 		if (base.group != null)
@@ -132,10 +145,6 @@ public class KToggle : Toggle
 			base.group.SetAllTogglesOff();
 		}
 		base.OnSelect(eventData);
-	}
-
-	private void OnChanged(bool state)
-	{
 	}
 
 	public void ActivateFlourish(bool state)
@@ -183,15 +192,6 @@ public class KToggle : Toggle
 		return componentInParent.group;
 	}
 
-	private void Update()
-	{
-		bool flag = this.Validate();
-		if (flag != base.interactable)
-		{
-			base.interactable = flag;
-		}
-	}
-
 	public void OnPointerEnter()
 	{
 		if (!KInputManager.isFocused)
@@ -207,7 +207,7 @@ public class KToggle : Toggle
 				imageToggleState.OnHoverIn();
 			}
 		}
-		this.PlaySound(KToggle.SoundType.OnMouseOver);
+		this.soundPlayer.Play(2);
 		this.mouseOver = true;
 		if (this.onPointerEnter != null)
 		{
@@ -257,22 +257,21 @@ public class KToggle : Toggle
 		base.OnPointerExit(eventData);
 	}
 
-	private void PlaySound(KToggle.SoundType soundType)
+	public new bool isOn
 	{
-		if (!KInputManager.isFocused)
+		get
 		{
-			return;
+			return base.isOn;
 		}
-		if (this.currentSounds.ContainsKey(soundType))
+		set
 		{
-			KFMOD.PlayOneShot(this.currentSounds[soundType]);
+			base.isOn = value;
+			this.OnValueChanged(base.isOn);
 		}
 	}
 
-	public void SetSound(KToggle.SoundType soundType, string soundPath)
-	{
-		this.currentSounds[soundType] = soundPath;
-	}
+	[SerializeField]
+	public ToggleSoundPlayer soundPlayer;
 
 	public Image bgImage;
 
@@ -281,15 +280,6 @@ public class KToggle : Toggle
 	public KToggleArtExtensions artExtension;
 
 	protected bool mouseOver;
-
-	public static Dictionary<KToggle.SoundType, string> DefaultSounds = new Dictionary<KToggle.SoundType, string>();
-
-	private Dictionary<KToggle.SoundType, string> currentSounds = new Dictionary<KToggle.SoundType, string>();
-
-	public enum SoundType
-	{
-		OnMouseOver
-	}
 
 	public delegate void PointerEvent();
 }

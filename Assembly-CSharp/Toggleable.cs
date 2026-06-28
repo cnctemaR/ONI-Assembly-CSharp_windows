@@ -15,7 +15,7 @@ public class Toggleable : Workable
 		this.targets = new List<KeyValuePair<IToggleHandler, Chore>>();
 		this.workTime = 1f;
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Toggling;
-		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_use_remote") };
+		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_use_remote_kanim") };
 	}
 
 	public int SetTarget(IToggleHandler handler)
@@ -54,7 +54,7 @@ public class Toggleable : Workable
 			this.targets[targetForWorker].Key.HandleToggle();
 			this.targets[targetForWorker] = new KeyValuePair<IToggleHandler, Chore>(this.targets[targetForWorker].Key, null);
 		}
-		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.PendingSwitchToggle);
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.PendingSwitchToggle, false);
 	}
 
 	private void QueueToggle(int targetIdx)
@@ -95,7 +95,7 @@ public class Toggleable : Workable
 		{
 			this.targets[targetIdx].Value.Cancel("Toggle cancelled");
 			this.targets[targetIdx] = new KeyValuePair<IToggleHandler, Chore>(this.targets[targetIdx].Key, null);
-			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.PendingSwitchToggle);
+			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.PendingSwitchToggle, false);
 		}
 	}
 
@@ -103,13 +103,6 @@ public class Toggleable : Workable
 	{
 		return this.targets[targetIdx].Value != null;
 	}
-
-	public override string[] GetWorkAnims(Worker worker)
-	{
-		return Toggleable.WorkAnims;
-	}
-
-	private static readonly string[] WorkAnims = new string[] { "working_pre", "working_loop" };
 
 	private List<KeyValuePair<IToggleHandler, Chore>> targets;
 }

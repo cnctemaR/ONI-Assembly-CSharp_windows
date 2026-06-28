@@ -5,14 +5,62 @@ using UnityEngine.UI;
 
 public class HoverTextScreen : KScreen
 {
+	public bool LoadPreConfiguredToolFields(HoverTextConfiguration config)
+	{
+		if (this.currentConfiguration != null)
+		{
+			this.SaveCurrentFieldsAs(this.currentConfiguration);
+			this.ClearLabels();
+			this.currentConfiguration.SetNotConfigured();
+			this.ToggleIncubating(true);
+		}
+		if (this.CachedToolFields != null && this.CachedToolFields.ContainsKey(config))
+		{
+			this.ClearLabels();
+			this.MultiLabelDisplays = this.CachedToolFields[config].MultiLabelDisplays;
+			this.ShadowBars = this.CachedToolFields[config].ShadowBars;
+			this.currentConfiguration = config;
+			this.ActivateLabels();
+			return true;
+		}
+		return false;
+	}
+
+	public void SaveCurrentFieldsAs(HoverTextConfiguration config)
+	{
+		if (config == null)
+		{
+			return;
+		}
+		if (this.CachedToolFields.ContainsKey(config))
+		{
+			this.CachedToolFields[config] = this.CurrentFields();
+		}
+		else
+		{
+			this.CachedToolFields.Add(config, this.CurrentFields());
+		}
+	}
+
+	public ToolHoverFields CurrentFields()
+	{
+		return new ToolHoverFields(this.MultiLabelDisplays, this.ShadowBars);
+	}
+
 	protected override void OnActivate()
 	{
 		base.OnActivate();
 		HoverTextScreen.Instance = this;
+		this.ToggleIncubating(true);
 	}
 
 	private void Update()
 	{
+		if (!this.incubating && this.transform.rectTransform().localScale != Vector3.one)
+		{
+			this.transform.rectTransform().localScale = Vector3.one;
+		}
+		this.ToggleIncubating(false);
 		if (this.Container.activeSelf)
 		{
 			this.PositionShadowBars();
@@ -29,7 +77,7 @@ public class HoverTextScreen : KScreen
 				this.ResetHoverDelay();
 			}
 			this.previousHover = hover;
-			bool flag = this.hoverDelay < 0f && hover != null;
+			bool flag = hover != null;
 			this.IsVisible = flag;
 			this.Container.SetActive(flag);
 		}
@@ -76,14 +124,61 @@ public class HoverTextScreen : KScreen
 	{
 		for (int i = this.MultiLabelDisplays.Count - 1; i >= 0; i--)
 		{
-			global::UnityEngine.Object.Destroy(this.MultiLabelDisplays[i]);
+			this.MultiLabelDisplays[i].SetActive(false);
 		}
-		this.MultiLabelDisplays.Clear();
 		for (int j = this.ShadowBars.Count - 1; j >= 0; j--)
 		{
-			global::UnityEngine.Object.Destroy(this.ShadowBars[j].gameObject);
+			this.ShadowBars[j].gameObject.SetActive(false);
 		}
+		this.MultiLabelDisplays.Clear();
 		this.ShadowBars.Clear();
+		this.ToggleIncubating(true);
+	}
+
+	public void ClearConfigurationLabels(HoverTextConfiguration config)
+	{
+		Debug.Log("Clearing configuration for: " + config.ActionName);
+		if (this.CachedToolFields.ContainsKey(config))
+		{
+			string text = string.Empty;
+			for (int i = this.CachedToolFields[config].MultiLabelDisplays.Count - 1; i >= 0; i--)
+			{
+				text = text + "\n" + this.CachedToolFields[config].MultiLabelDisplays[i].name;
+				this.CachedToolFields[config].MultiLabelDisplays[i].SetActive(false);
+			}
+			for (int j = this.CachedToolFields[config].ShadowBars.Count - 1; j >= 0; j--)
+			{
+				text = text + "\n" + this.CachedToolFields[config].ShadowBars[j].gameObject.name;
+				this.CachedToolFields[config].ShadowBars[j].gameObject.SetActive(false);
+			}
+			Debug.Log(text);
+		}
+	}
+
+	public void ActivateLabels()
+	{
+		for (int i = this.MultiLabelDisplays.Count - 1; i >= 0; i--)
+		{
+			this.MultiLabelDisplays[i].SetActive(true);
+		}
+		for (int j = this.ShadowBars.Count - 1; j >= 0; j--)
+		{
+			this.ShadowBars[j].gameObject.SetActive(true);
+		}
+		this.ToggleIncubating(true);
+	}
+
+	public void ToggleIncubating(bool incubating)
+	{
+		if (incubating)
+		{
+			incubating = true;
+			this.transform.rectTransform().localScale = Vector3.zero;
+		}
+		else
+		{
+			incubating = false;
+		}
 	}
 
 	public GameObject NewLine(string optionalDebugName = "NewLine", int height = 24)
@@ -158,7 +253,14 @@ public class HoverTextScreen : KScreen
 				shadowBar.gameObject.SetActive(true);
 			}
 			num -= shadowBar.leftIndent;
-			shadowBar.gameObject.rectTransform().sizeDelta = new Vector2(num, num2) + shadowBar.SizeBleed * 2f;
+			if (num > 0f && num2 > 0f)
+			{
+				shadowBar.gameObject.rectTransform().sizeDelta = new Vector2(num, num2) + shadowBar.SizeBleed * 2f;
+			}
+			else
+			{
+				shadowBar.gameObject.rectTransform().sizeDelta = Vector2.zero;
+			}
 		}
 	}
 
@@ -296,11 +398,17 @@ public class HoverTextScreen : KScreen
 	[SerializeField]
 	private GameObject ShadowBarPrefab;
 
+	private bool incubating;
+
 	public Sprite[] HoverIcons;
 
 	private List<GameObject> MultiLabelDisplays = new List<GameObject>();
 
 	private List<ShadowBar> ShadowBars = new List<ShadowBar>();
+
+	public HoverTextConfiguration currentConfiguration;
+
+	public Dictionary<HoverTextConfiguration, ToolHoverFields> CachedToolFields = new Dictionary<HoverTextConfiguration, ToolHoverFields>();
 
 	private KSelectable previousHover;
 
@@ -317,7 +425,7 @@ public class HoverTextScreen : KScreen
 		public bool tick()
 		{
 			this.timeElapsed += Time.unscaledDeltaTime;
-			if (this.timeElapsed >= 0.5f)
+			if (this.timeElapsed >= this.tickInterval)
 			{
 				this.timeElapsed = 0f;
 				return true;
@@ -327,8 +435,10 @@ public class HoverTextScreen : KScreen
 
 		public void Prime()
 		{
-			this.timeElapsed = 0.5f;
+			this.timeElapsed = this.tickInterval;
 		}
+
+		public float tickInterval;
 
 		private float timeElapsed;
 	}

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using FMOD.Studio;
 using STRINGS;
 using UnityEngine;
@@ -23,20 +24,25 @@ public class SpeedControlScreen : KScreen
 		this.slowButton = this.speedButtonWidget_slow.GetComponent<KToggle>();
 		this.mediumButton = this.speedButtonWidget_medium.GetComponent<KToggle>();
 		this.fastButton = this.speedButtonWidget_fast.GetComponent<KToggle>();
+		KToggle[] array = new KToggle[] { this.pauseButton, this.slowButton, this.mediumButton, this.fastButton };
+		foreach (KToggle ktoggle in array)
+		{
+			ktoggle.soundPlayer.Enabled = false;
+		}
 		this.slowButton.onClick += delegate
 		{
+			this.PlaySpeedChangeSound(1f);
 			this.SetSpeed(0);
-			this.PlaySpeedChangeSound((float)(this.speed + 1));
 		};
 		this.mediumButton.onClick += delegate
 		{
+			this.PlaySpeedChangeSound(2f);
 			this.SetSpeed(1);
-			this.PlaySpeedChangeSound((float)(this.speed + 1));
 		};
 		this.fastButton.onClick += delegate
 		{
+			this.PlaySpeedChangeSound(3f);
 			this.SetSpeed(2);
-			this.PlaySpeedChangeSound((float)(this.speed + 1));
 		};
 		this.pauseButton.onClick += delegate
 		{
@@ -75,19 +81,22 @@ public class SpeedControlScreen : KScreen
 		switch (this.speed)
 		{
 		case 0:
-			this.slowButton.ActivateFlourish(true, ImageToggleState.State.Active);
-			this.mediumButton.ActivateFlourish(false, ImageToggleState.State.Inactive);
-			this.fastButton.ActivateFlourish(false, ImageToggleState.State.Inactive);
+			this.slowButton.Select();
+			this.slowButton.isOn = true;
+			this.mediumButton.isOn = false;
+			this.fastButton.isOn = false;
 			break;
 		case 1:
-			this.slowButton.ActivateFlourish(false, ImageToggleState.State.Inactive);
-			this.mediumButton.ActivateFlourish(true, ImageToggleState.State.Active);
-			this.fastButton.ActivateFlourish(false, ImageToggleState.State.Inactive);
+			this.mediumButton.Select();
+			this.slowButton.isOn = false;
+			this.mediumButton.isOn = true;
+			this.fastButton.isOn = false;
 			break;
 		case 2:
-			this.slowButton.ActivateFlourish(false, ImageToggleState.State.Inactive);
-			this.mediumButton.ActivateFlourish(false, ImageToggleState.State.Inactive);
-			this.fastButton.ActivateFlourish(true, ImageToggleState.State.Active);
+			this.fastButton.Select();
+			this.slowButton.isOn = false;
+			this.mediumButton.isOn = false;
+			this.fastButton.isOn = true;
 			break;
 		}
 		this.OnSpeedChange();
@@ -111,40 +120,17 @@ public class SpeedControlScreen : KScreen
 	{
 		if (this.IsPaused)
 		{
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().SpeedPausedMigrated, STOP_MODE.ALLOWFADEOUT);
-			MusicManager.instance.SetDynamicMusicUnpaused();
 			this.Unpause(true);
 		}
 		else
 		{
-			AudioMixer.instance.Start(AudioMixerSnapshots.Get().SpeedPausedMigrated);
-			MusicManager.instance.SetDynamicMusicPaused();
 			this.Pause(true);
 		}
 	}
 
 	public void Pause(bool playSound = true)
 	{
-		this.pauseButtonWidget.GetComponent<ToolTip>().ClearMultiStringTooltip();
-		this.pauseButtonWidget.GetComponent<ToolTip>().AddMultiStringTooltip(UI.TOOLTIPS.UNPAUSE + " " + GameUtil.GetHotkeyString(global::Action.TogglePause), this.TooltipTextStyle);
-		this.pauseButton.ActivateFlourish(true, ImageToggleState.State.Active);
 		this.pauseCount++;
-		this.OnPause(playSound);
-	}
-
-	public void Unpause(bool playSound = true)
-	{
-		this.pauseButtonWidget.GetComponent<ToolTip>().ClearMultiStringTooltip();
-		this.pauseButtonWidget.GetComponent<ToolTip>().AddMultiStringTooltip(UI.TOOLTIPS.PAUSE + " " + GameUtil.GetHotkeyString(global::Action.TogglePause), this.TooltipTextStyle);
-		this.pauseButton.ActivateFlourish(false, ImageToggleState.State.Inactive);
-		this.pauseCount = Mathf.Max(0, this.pauseCount - 1);
-		this.SetSpeed(this.speed);
-		this.OnPlay(playSound);
-	}
-
-	private void OnPause(bool playSound = true)
-	{
-		this.OnChanged();
 		if (this.pauseCount == 1 && playSound)
 		{
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Speed_Pause", false));
@@ -153,11 +139,17 @@ public class SpeedControlScreen : KScreen
 				SoundListenerController.Instance.SetLoopingVolume(0f);
 			}
 		}
+		AudioMixer.instance.Start(AudioMixerSnapshots.Get().SpeedPausedMigrated);
+		MusicManager.instance.SetDynamicMusicPaused();
+		this.pauseButtonWidget.GetComponent<ToolTip>().ClearMultiStringTooltip();
+		this.pauseButtonWidget.GetComponent<ToolTip>().AddMultiStringTooltip(UI.TOOLTIPS.UNPAUSE + " " + GameUtil.GetHotkeyString(global::Action.TogglePause), this.TooltipTextStyle);
+		this.pauseButton.isOn = true;
+		this.OnPause();
 	}
 
-	private void OnPlay(bool playSound = true)
+	public void Unpause(bool playSound = true)
 	{
-		this.OnChanged();
+		this.pauseCount = Mathf.Max(0, this.pauseCount - 1);
 		if (this.pauseCount == 0 && playSound)
 		{
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Speed_Unpause", false));
@@ -166,6 +158,23 @@ public class SpeedControlScreen : KScreen
 				SoundListenerController.Instance.SetLoopingVolume(1f);
 			}
 		}
+		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().SpeedPausedMigrated, STOP_MODE.ALLOWFADEOUT);
+		MusicManager.instance.SetDynamicMusicUnpaused();
+		this.pauseButtonWidget.GetComponent<ToolTip>().ClearMultiStringTooltip();
+		this.pauseButtonWidget.GetComponent<ToolTip>().AddMultiStringTooltip(UI.TOOLTIPS.PAUSE + " " + GameUtil.GetHotkeyString(global::Action.TogglePause), this.TooltipTextStyle);
+		this.pauseButton.isOn = false;
+		this.SetSpeed(this.speed);
+		this.OnPlay();
+	}
+
+	private void OnPause()
+	{
+		this.OnChanged();
+	}
+
+	private void OnPlay()
+	{
+		this.OnChanged();
 	}
 
 	public void OnSpeedChange()
@@ -207,6 +216,12 @@ public class SpeedControlScreen : KScreen
 		{
 			this.TogglePause();
 		}
+		else if (e.TryConsume(global::Action.CycleSpeed))
+		{
+			this.PlaySpeedChangeSound((float)((this.speed + 1) % 3 + 1));
+			this.SetSpeed(this.speed + 1);
+			this.OnSpeedChange();
+		}
 		else if (e.TryConsume(global::Action.SpeedUp))
 		{
 			this.speed++;
@@ -219,12 +234,6 @@ public class SpeedControlScreen : KScreen
 			this.speed = Math.Max(this.speed, 0);
 			this.SetSpeed(this.speed);
 		}
-		else if (e.TryConsume(global::Action.CycleSpeed))
-		{
-			this.SetSpeed(this.speed + 1);
-			this.OnSpeedChange();
-			this.PlaySpeedChangeSound((float)(this.speed + 1));
-		}
 	}
 
 	private void PlaySpeedChangeSound(float speed)
@@ -236,6 +245,20 @@ public class SpeedControlScreen : KScreen
 			eventInstance.setParameterValue("Speed", speed);
 			SoundEvent.EndOneShot(eventInstance);
 		}
+	}
+
+	public void DebugStepFrame()
+	{
+		Output.Log(new object[] { "Stepping one frame" });
+		this.Unpause(false);
+		base.StartCoroutine(this.DebugStepFrameDelay());
+	}
+
+	private IEnumerator DebugStepFrameDelay()
+	{
+		yield return null;
+		this.Pause(false);
+		yield break;
 	}
 
 	public GameObject playButtonWidget;

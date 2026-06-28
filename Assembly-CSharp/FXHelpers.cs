@@ -3,12 +3,7 @@ using UnityEngine;
 
 public static class FXHelpers
 {
-	public static KBatchedAnimController CreateEffect(string anim_file_name, Transform parent = null, bool update_looping_sounds_position = false, Grid.SceneLayer layer = Grid.SceneLayer.Front)
-	{
-		return FXHelpers.CreateEffect(anim_file_name, Vector3.zero, parent, update_looping_sounds_position, layer);
-	}
-
-	public static KBatchedAnimController CreateEffect(string anim_file_name, Vector3 position, Transform parent, bool update_looping_sounds_position, Grid.SceneLayer layer)
+	public static KBatchedAnimController CreateEffect(string anim_file_name, Vector3 position, Transform parent = null, bool update_looping_sounds_position = false, Grid.SceneLayer layer = Grid.SceneLayer.Front)
 	{
 		KBatchedAnimController component = GameUtil.KInstantiate(EffectPrefabs.Instance.Fx, position, layer, Folder.FX, null, 0).GetComponent<KBatchedAnimController>();
 		KPrefabID component2 = component.GetComponent<KPrefabID>();
@@ -18,6 +13,7 @@ public static class FXHelpers
 		{
 			component.transform.SetParent(parent, false);
 		}
+		component.transform.position = position;
 		if (update_looping_sounds_position)
 		{
 			LoopingSounds loopingSounds = component.FindOrAddComponent<LoopingSounds>();

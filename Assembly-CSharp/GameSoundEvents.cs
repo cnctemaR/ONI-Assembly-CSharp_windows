@@ -15,6 +15,6 @@ public static class GameSoundEvents
 			this.Name = name;
 		}
 
-		public string Name;
+		public HashedString Name;
 	}
 }

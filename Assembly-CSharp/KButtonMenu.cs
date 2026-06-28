@@ -38,44 +38,44 @@ public class KButtonMenu : KScreen
 		this.buttonObjects = new GameObject[this.buttons.Count];
 		for (int j = 0; j < this.buttons.Count; j++)
 		{
-			KButtonMenu.ButtonInfo buttonInfo = this.buttons[j];
+			KButtonMenu.ButtonInfo binfo = this.buttons[j];
 			GameObject gameObject = global::UnityEngine.Object.Instantiate(this.buttonPrefab, Vector3.zero, Quaternion.identity) as GameObject;
 			this.buttonObjects[j] = gameObject;
 			Transform transform = ((!(this.buttonParent != null)) ? this.transform : this.buttonParent);
 			gameObject.transform.SetParent(transform, false);
 			gameObject.SetActive(true);
-			gameObject.name = buttonInfo.text + "Button";
+			gameObject.name = binfo.text + "Button";
 			LocText[] componentsInChildren = gameObject.GetComponentsInChildren<LocText>(true);
 			if (componentsInChildren != null)
 			{
 				foreach (LocText locText in componentsInChildren)
 				{
-					locText.text = ((!(locText.name == "Hotkey")) ? buttonInfo.text : GameUtil.GetActionString(buttonInfo.shortcutKey));
-					locText.color = ((!buttonInfo.isEnabled) ? new Color(0.5f, 0.5f, 0.5f) : new Color(1f, 1f, 1f));
+					locText.text = ((!(locText.name == "Hotkey")) ? binfo.text : GameUtil.GetActionString(binfo.shortcutKey));
+					locText.color = ((!binfo.isEnabled) ? new Color(0.5f, 0.5f, 0.5f) : new Color(1f, 1f, 1f));
 				}
 			}
 			RawImage componentInChildren = gameObject.GetComponentInChildren<RawImage>();
-			if (componentInChildren != null && buttonInfo.visualizer != null)
+			if (componentInChildren != null && binfo.visualizer != null)
 			{
 				Portrait component = Util.KInstantiate(EntityPrefabs.Instance.Portrait, SceneOrganizer.Instance.GetFolder(Folder.Portraits), null).GetComponent<Portrait>();
 				RectTransform component2 = componentInChildren.GetComponent<RectTransform>();
 				componentInChildren.texture = component.CreateTexture((int)component2.rect.width, (int)component2.rect.height);
-				component.SetTarget(buttonInfo.visualizer);
+				component.SetTarget(binfo.visualizer);
 				component.destroyTargetOnCleanup = true;
 				this.buttons[j].portrait = component;
 			}
 			ToolTip componentInChildren2 = gameObject.GetComponentInChildren<ToolTip>();
-			if (buttonInfo.toolTip != null && buttonInfo.toolTip != string.Empty && componentInChildren2 != null)
+			if (binfo.toolTip != null && binfo.toolTip != string.Empty && componentInChildren2 != null)
 			{
-				componentInChildren2.toolTip = buttonInfo.toolTip;
+				componentInChildren2.toolTip = binfo.toolTip;
 			}
 			KButtonMenu screen = this;
-			Button component3 = gameObject.GetComponent<Button>();
-			component3.interactable = buttonInfo.isEnabled;
-			if (buttonInfo.popupOptions == null && buttonInfo.onPopulatePopup == null)
+			KButton button = gameObject.GetComponent<KButton>();
+			button.isInteractable = binfo.isEnabled;
+			if (binfo.popupOptions == null && binfo.onPopulatePopup == null)
 			{
-				UnityAction onClick = buttonInfo.onClick;
-				UnityAction unityAction = delegate
+				UnityAction onClick = binfo.onClick;
+				global::System.Action clickCB = delegate
 				{
 					onClick();
 					if (!this.keepMenuOpen && screen != null)
@@ -83,17 +83,21 @@ public class KButtonMenu : KScreen
 						screen.Deactivate();
 					}
 				};
-				Button.ButtonClickedEvent buttonClickedEvent = new Button.ButtonClickedEvent();
-				buttonClickedEvent.AddListener(unityAction);
-				component3.onClick = buttonClickedEvent;
-				buttonInfo.onClick = unityAction;
+				button.onClick += clickCB;
+				binfo.onClick = delegate
+				{
+					clickCB();
+				};
 			}
 			else
 			{
-				component3.onClick = this.SetupPopupMenu(buttonInfo, component3);
+				button.onClick += delegate
+				{
+					this.SetupPopupMenu(binfo, button);
+				};
 			}
-			buttonInfo.uibutton = component3;
-			if (buttonInfo.onHover != null)
+			binfo.uibutton = button;
+			if (binfo.onHover != null)
 			{
 			}
 		}
@@ -110,7 +114,7 @@ public class KButtonMenu : KScreen
 		}
 	}
 
-	private Button.ButtonClickedEvent SetupPopupMenu(KButtonMenu.ButtonInfo binfo, Button button)
+	private Button.ButtonClickedEvent SetupPopupMenu(KButtonMenu.ButtonInfo binfo, KButton button)
 	{
 		Button.ButtonClickedEvent buttonClickedEvent = new Button.ButtonClickedEvent();
 		UnityAction unityAction = delegate
@@ -173,7 +177,7 @@ public class KButtonMenu : KScreen
 
 	protected override void OnPrefabInit()
 	{
-		this.Subscribe(315865555, new EventSystem.EventHandler(this.OnSetActivator));
+		this.Subscribe(315865555, new Action<object>(this.OnSetActivator));
 	}
 
 	private void OnSetActivator(object data)
@@ -291,7 +295,7 @@ public class KButtonMenu : KScreen
 
 		public FMODAsset clickSound;
 
-		public Button uibutton;
+		public KButton uibutton;
 
 		public string toolTip;
 

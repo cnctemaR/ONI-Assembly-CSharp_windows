@@ -9,16 +9,24 @@ public class HatchChewSoundEvent : SoundEvent
 	{
 	}
 
-	public override void OnPlay(IAnimBehaviour behaviour)
+	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
+	{
+		if (this.ShouldPlaySound(behaviour))
+		{
+			this.PlaySound(behaviour);
+		}
+	}
+
+	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
 	{
 		Vector3 position = behaviour.GetComponent<Transform>().position;
 		int audioCategory = HatchChewSoundEvent.GetAudioCategory(behaviour);
-		EventInstance eventInstance = SoundEvent.BeginOneShot(this.sound, position);
+		EventInstance eventInstance = SoundEvent.BeginOneShot(base.sound, position);
 		eventInstance.setParameterValue("material_ID", (float)audioCategory);
 		SoundEvent.EndOneShot(eventInstance);
 	}
 
-	private static int GetAudioCategory(IAnimBehaviour behaviour)
+	private static int GetAudioCategory(AnimEventManager.EventPlayerData behaviour)
 	{
 		Hatch component = behaviour.GetComponent<Hatch>();
 		Element latestMealElement = component.latestMealElement;

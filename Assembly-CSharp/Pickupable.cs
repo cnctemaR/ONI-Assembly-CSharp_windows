@@ -12,13 +12,21 @@ public class Pickupable : Workable
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
 	}
 
-	public Storage storage { get; set; }
-
-	public bool WholeUnitsOnly
+	public PrimaryElement PrimaryElement
 	{
 		get
 		{
-			return this.primaryElement.WholeUnitsOnly;
+			return this.primaryElement;
+		}
+	}
+
+	public Storage storage { get; set; }
+
+	public bool CountableUnits
+	{
+		get
+		{
+			return this.primaryElement.CountableUnits;
 		}
 	}
 
@@ -26,7 +34,7 @@ public class Pickupable : Workable
 	{
 		get
 		{
-			return (!this.primaryElement.WholeUnitsOnly) ? 0f : this.primaryElement.MassPerUnit;
+			return 0f;
 		}
 	}
 
@@ -97,7 +105,11 @@ public class Pickupable : Workable
 			this.primaryElement.Units = value;
 			if (value <= 0f)
 			{
-				base.gameObject.DeleteObject();
+				PrimaryElement component = base.GetComponent<PrimaryElement>();
+				if (!component.KeepZeroMassObject)
+				{
+					base.gameObject.DeleteObject();
+				}
 			}
 		}
 	}
@@ -151,14 +163,13 @@ public class Pickupable : Workable
 	{
 		base.OnPrefabInit();
 		this.log = new LoggerFSSF("Pickupable");
-		base.GetComponent<KPrefabID>().AddLog(this.log);
 		base.gameObject.layer = Game.PickupableLayer;
 		Vector3 position = this.transform.position;
 		position.z = Grid.GetLayerZ(Grid.SceneLayer.Use);
 		this.transform.SetPosition(position);
-		this.Subscribe(856640610, new EventSystem.EventHandler(this.OnStore));
-		this.Subscribe(1188683690, new EventSystem.EventHandler(this.OnLanded));
-		this.Subscribe(1807976145, new EventSystem.EventHandler(this.OnOreSizeChanged));
+		this.Subscribe(856640610, new Action<object>(this.OnStore));
+		this.Subscribe(1188683690, new Action<object>(this.OnLanded));
+		this.Subscribe(1807976145, new Action<object>(this.OnOreSizeChanged));
 		this.KPrefabID.AddTag(GameTags.Pickupable);
 		Components.Pickupables.Add(this);
 		base.SetWorkTime(1.5f);
@@ -168,7 +179,7 @@ public class Pickupable : Workable
 			component.sharedMaterial = Assets.defaultPhysicsMaterial;
 		}
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.PickingUp;
-		this.Subscribe(-1432940121, new EventSystem.EventHandler(this.OnReachableChanged));
+		this.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
 	}
 
 	protected override void OnSpawn()
@@ -188,40 +199,36 @@ public class Pickupable : Workable
 			base.gameObject.DeleteObject();
 			return;
 		}
-		StateMachineController component = base.GetComponent<StateMachineController>();
-		if (component != null && component.GetSMI<ReachabilityMonitor.Instance>() != null)
-		{
-			return;
-		}
 		ReachabilityMonitor.Instance instance = new ReachabilityMonitor.Instance(this);
 		instance.StartSM();
 		FetchableMonitor.Instance instance2 = new FetchableMonitor.Instance(this);
 		instance2.StartSM();
 		base.SetWorkTime(1.5f);
 		this.faceTargetWhenWorking = true;
-		KSelectable component2 = base.GetComponent<KSelectable>();
-		if (component2 != null)
+		KSelectable component = base.GetComponent<KSelectable>();
+		if (component != null)
 		{
-			component2.SetStatusIndicatorOffset(new Vector3(0f, -0.65f, 0f));
+			component.SetStatusIndicatorOffset(new Vector3(0f, -0.65f, 0f));
 		}
 		if (this.storage == null && base.GetComponent<LiquidSource>() == null)
 		{
 			this.RegisterListeners();
 		}
-		this.HandleSolidCell(num);
 		if (this.OnGetAnim == null)
 		{
-			this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_equip") };
+			this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_equip_kanim") };
 		}
 		if (this.storage == null)
 		{
 			this.AddFaller();
 		}
-		DecorProvider component3 = base.GetComponent<DecorProvider>();
-		if (component3 != null)
+		this.OnSolidChanged(num);
+		DecorProvider component2 = base.GetComponent<DecorProvider>();
+		if (component2 != null && string.IsNullOrEmpty(component2.overrideName))
 		{
-			component3.overrideName = UI.OVERLAYS.DECOR.CLUTTER;
+			component2.overrideName = UI.OVERLAYS.DECOR.CLUTTER;
 		}
+		this.rottable = this.GetSMI<Rottable.Instance>();
 		this.UpdateEntombedVisualizer();
 	}
 
@@ -269,19 +276,27 @@ public class Pickupable : Workable
 		{
 			return;
 		}
-		if (Grid.Solid[num] && Grid.Foundation[num])
+		Health component = base.GetComponent<Health>();
+		bool flag = component == null || component.IsDead();
+		if (flag && Grid.Solid[num] && Grid.Foundation[num])
 		{
-			int num2 = Grid.CellAbove(num);
-			if (!Grid.Solid[num2])
+			for (int i = 0; i < Pickupable.displacementOffsets.Length; i++)
 			{
-				Vector3 vector = Grid.CellToPosCBC(num2, Grid.SceneLayer.Move);
-				Collider2D component = base.GetComponent<Collider2D>();
-				if (component != null)
+				int num2 = Grid.OffsetCell(num, Pickupable.displacementOffsets[i]);
+				if (Grid.IsValidCell(num2) && !Grid.Solid[num2])
 				{
-					vector.y += this.transform.position.y - component.bounds.min.y;
+					Vector3 vector = Grid.CellToPosCBC(num2, Grid.SceneLayer.Move);
+					Collider2D component2 = base.GetComponent<Collider2D>();
+					if (component2 != null)
+					{
+						vector.y += this.transform.position.y - component2.bounds.min.y;
+					}
+					this.transform.SetPosition(vector);
+					num = num2;
+					this.RemoveFaller();
+					this.AddFaller();
+					break;
 				}
-				this.transform.SetPosition(vector);
-				num = num2;
 			}
 		}
 		this.HandleSolidCell(num);
@@ -335,7 +350,7 @@ public class Pickupable : Workable
 					Pickupable component = gameObject.GetComponent<Pickupable>();
 					if (component != null)
 					{
-						component.TryAbsorb(base.gameObject);
+						component.TryAbsorb(this, false);
 					}
 				}
 			}
@@ -344,15 +359,15 @@ public class Pickupable : Workable
 		}
 	}
 
-	public bool TryAbsorb(GameObject other)
+	public bool TryAbsorb(Pickupable other, bool hide_effects)
 	{
 		if (other != null && this.CanAbsorb(other))
 		{
 			Pickupable component = other.GetComponent<Pickupable>();
-			if (component != null && component.CanAbsorb(base.gameObject))
+			if (component != null && component.CanAbsorb(this))
 			{
 				this.Absorb(other);
-				if (EffectPrefabs.Instance != null)
+				if (!hide_effects && EffectPrefabs.Instance != null)
 				{
 					Vector3 position = other.transform.position;
 					position.z = Grid.GetLayerZ(Grid.SceneLayer.Front);
@@ -374,48 +389,46 @@ public class Pickupable : Workable
 		}
 		this.UnregisterListeners();
 		Components.Pickupables.Remove(this);
-		base.GetComponent<KPrefabID>().RemoveLog(this.log);
 		base.OnCleanUp();
 	}
 
 	public Pickupable Take(float amount)
 	{
-		if (this.OnTake != null)
+		if (this.OnTake == null)
 		{
-			if (amount >= this.TotalAmount && this.storage != null)
+			if (this.storage != null)
 			{
 				this.storage.Remove(base.gameObject);
 			}
-			float num = Math.Min(this.TotalAmount, amount);
-			if (num <= 0f)
-			{
-				Debug.Assert(false, "Tried to take 0 mass from an object. This will create a 0 mass object and bad things will happen." + amount.ToString() + ":" + this.TotalAmount.ToString(), base.gameObject);
-			}
-			return this.OnTake(num);
+			return this;
 		}
-		if (this.storage != null)
+		if (amount >= this.TotalAmount && this.storage != null)
 		{
 			this.storage.Remove(base.gameObject);
 		}
-		return this;
+		float num = Math.Min(this.TotalAmount, amount);
+		if (num <= 0f)
+		{
+			return null;
+		}
+		return this.OnTake(num);
 	}
 
-	public void Absorb(GameObject go)
+	public void Absorb(Pickupable pickupable)
 	{
-		Pickupable component = go.GetComponent<Pickupable>();
-		if (component.wasAbsorbed)
+		if (pickupable.wasAbsorbed)
 		{
 			return;
 		}
-		this.Trigger(-2064133523, go);
-		this.TotalAmount += component.TotalAmount;
-		go.Trigger(-1940207677, base.gameObject);
-		component.wasAbsorbed = true;
-		if (SelectTool.Instance != null && SelectTool.Instance.selected != null && SelectTool.Instance.selected == component.selectable)
+		this.Trigger(-2064133523, pickupable);
+		this.TotalAmount += pickupable.TotalAmount;
+		pickupable.Trigger(-1940207677, base.gameObject);
+		pickupable.wasAbsorbed = true;
+		if (SelectTool.Instance != null && SelectTool.Instance.selected != null && SelectTool.Instance.selected == pickupable.selectable)
 		{
 			SelectTool.Instance.Select(this.selectable, false);
 		}
-		go.DeleteObject();
+		pickupable.gameObject.DeleteObject();
 	}
 
 	public void OnStore(object data)
@@ -425,21 +438,31 @@ public class Pickupable : Workable
 		{
 			this.RemoveFaller();
 			this.UnregisterListeners();
+			Collider2D component = base.GetComponent<Collider2D>();
+			if (component != null)
+			{
+				component.enabled = false;
+			}
 		}
 		else
 		{
 			this.AddFaller();
 			base.GetComponent<KAnimControllerBase>().enabled = true;
 			base.gameObject.transform.rotation = Quaternion.identity;
+			Collider2D component2 = base.GetComponent<Collider2D>();
+			if (component2 != null)
+			{
+				component2.enabled = true;
+			}
 			this.RegisterListeners();
 		}
 	}
 
-	public override string[] GetWorkAnims(Worker worker)
+	public override HashedString[] GetWorkAnims(Worker worker)
 	{
 		if (this.OnGetAnim == null)
 		{
-			return Pickupable.WorkAnims;
+			return base.GetWorkAnims(worker);
 		}
 		return null;
 	}
@@ -460,8 +483,11 @@ public class Pickupable : Workable
 		Storage component = worker.GetComponent<Storage>();
 		float amount = worker.amount;
 		Pickupable pickupable = this.Take(amount);
-		component.Store(pickupable.gameObject, false, false);
-		worker.workCompleteData = pickupable;
+		if (pickupable != null)
+		{
+			component.Store(pickupable.gameObject, false, false);
+			worker.workCompleteData = pickupable;
+		}
 	}
 
 	public override Vector3 GetTargetPoint()
@@ -479,7 +505,7 @@ public class Pickupable : Workable
 		this.isReachable = (bool)data;
 		if (this.isReachable)
 		{
-			this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.PickupableUnreachable);
+			this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.PickupableUnreachable, false);
 		}
 		else
 		{
@@ -558,7 +584,14 @@ public class Pickupable : Workable
 					text = "Rock";
 				}
 			}
-			text = "Ore_bump_" + text;
+			if (element.tag.ToString() == "Creature")
+			{
+				text = "Bodyfall_rock";
+			}
+			else
+			{
+				text = "Ore_bump_" + text;
+			}
 			string text2 = GlobalAssets.GetSound(text, false);
 			text2 = ((text2 == null) ? GlobalAssets.GetSound("Ore_bump_rock", false) : text2);
 			if (CameraController.Instance.IsAudibleSound(this.transform.position, text2))
@@ -570,7 +603,7 @@ public class Pickupable : Workable
 				{
 					num2 = SoundUtil.GetLiquidDepth(num);
 				}
-				EventInstance eventInstance = KFMOD.BeginOneShot(text2, this.transform.position);
+				EventInstance eventInstance = KFMOD.BeginOneShot(text2, CameraController.Instance.GetVerticallyScaledPosition(this.transform.position));
 				eventInstance.setParameterValue("velocity", vector.magnitude);
 				eventInstance.setParameterValue("liquidDepth", num2);
 				KFMOD.EndOneShot(eventInstance);
@@ -584,11 +617,11 @@ public class Pickupable : Workable
 		{
 			if (this.entombedCell == -1)
 			{
-				KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-				if (component != null)
+				int num = Grid.PosToCell(this.transform.position);
+				if (Grid.Objects[num, 9] == null && Grid.Element[num].id != SimHashes.SteelDoor)
 				{
-					int num = Grid.PosToCell(this.transform.position);
-					if (Grid.Objects[num, 8] == null && Game.Instance.GetComponent<EntombedItemVisualizer>().AddItem(num))
+					KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+					if (component != null && Game.Instance.GetComponent<EntombedItemVisualizer>().AddItem(num))
 					{
 						this.entombedCell = num;
 						component.enabled = false;
@@ -639,7 +672,7 @@ public class Pickupable : Workable
 	[NonSerialized]
 	public Prioritizable prioritizable;
 
-	public Func<GameObject, bool> CanAbsorb = (GameObject go) => false;
+	public Func<Pickupable, bool> CanAbsorb = (Pickupable other) => false;
 
 	public Func<float, Pickupable> OnTake;
 
@@ -647,7 +680,19 @@ public class Pickupable : Workable
 
 	public ObjectLayerListItem objectLayerListItem;
 
-	private static readonly string[] WorkAnims = new string[] { "working_pre", "working_loop" };
+	private static CellOffset[] displacementOffsets = new CellOffset[]
+	{
+		new CellOffset(0, 1),
+		new CellOffset(0, -1),
+		new CellOffset(1, 0),
+		new CellOffset(-1, 0),
+		new CellOffset(1, 1),
+		new CellOffset(1, -1),
+		new CellOffset(-1, 1),
+		new CellOffset(-1, -1)
+	};
+
+	public Rottable.Instance rottable;
 
 	private bool isReachable;
 

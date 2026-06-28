@@ -5,9 +5,11 @@ namespace FMODUnity
 	public enum LoaderGameEvent
 	{
 		None,
-		LevelStart,
-		LevelEnd,
+		ObjectStart,
+		ObjectDestroy,
 		TriggerEnter,
-		TriggerExit
+		TriggerExit,
+		TriggerEnter2D,
+		TriggerExit2D
 	}
 }

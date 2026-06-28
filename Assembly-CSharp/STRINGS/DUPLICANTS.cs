@@ -21,21 +21,21 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Breath";
 
-				public static LocString TOOLTIP = "Breath\n----------\nA Duplicant will begin suffocating at 0%";
+				public static LocString TOOLTIP = "Breath\n----------\nA Duplicant with zero remaining breath will begin suffocating";
 			}
 
 			public class STAMINA
 			{
 				public static LocString NAME = "Stamina";
 
-				public static LocString TOOLTIP = "Stamina\n----------\nA Duplicant will pass out from fatigue at 0%";
+				public static LocString TOOLTIP = "Stamina\n----------\nDuplicants will pass out from fatigue when stamina reaches zero";
 			}
 
 			public class CALORIES
 			{
 				public static LocString NAME = "Calories";
 
-				public static LocString TOOLTIP = "Calories\n----------\nThis Duplicant has {0} of stored energy they can burn before starving";
+				public static LocString TOOLTIP = "Calories\n----------\nThis Duplicant can burn {0} before starving";
 			}
 
 			public class TEMPERATURE
@@ -49,21 +49,21 @@ namespace STRINGS
 			{
 				public static LocString NAME = "External Temperature";
 
-				public static LocString TOOLTIP = "External Temperature\n----------\nThis Duplicant's immediate environment is {0}";
+				public static LocString TOOLTIP = "External Temperature\n----------\nThis Duplicant's environment is {0}";
 			}
 
 			public class DECOR
 			{
 				public static LocString NAME = "Decor";
 
-				public static LocString TOOLTIP = "Decor\n----------\nA Duplicant will gain <style=\"stress\">Stress</style> while in rooms with lower <style=\"decor\">Decor</style> values than their expectations";
+				public static LocString TOOLTIP = "Decor\n----------\nDuplicants become stressed in areas with decor lower than their expectations\nOpen the Decor Overlay <color=#F44A47>[F8]</color> to view current decor values";
 			}
 
 			public class STRESS
 			{
 				public static LocString NAME = "Stress";
 
-				public static LocString TOOLTIP = "Stress\n----------\nA Duplicant will have a Nervous Breakdown at 100% <style=\"stress\">Stress</style>";
+				public static LocString TOOLTIP = "Stress\n----------\nDuplicants exhibit their Stress Responses at one hundred percent stress";
 			}
 
 			public class TOXICITY
@@ -77,14 +77,78 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Bladder";
 
-				public static LocString TOOLTIP = "Bladder\n----------\nA Duplicant will make a mess at 100% if no bathrooms are available";
+				public static LocString TOOLTIP = "Bladder\n----------\nDuplicants make \"messes\" if no toilets are available at one hundred percent bladder fullness";
 			}
 
 			public class HITPOINTS
 			{
 				public static LocString NAME = "Health";
 
-				public static LocString TOOLTIP = "Health\n----------\nA combatant will become incapacitated at zero <style=\"Health\">Health</style>";
+				public static LocString TOOLTIP = "Health\n----------\nCombatants become incapacitated at zero health";
+			}
+
+			public class SKIN_THICKNESS
+			{
+				public static LocString NAME = "Skin Thickness";
+			}
+		}
+
+		public class DEATHS
+		{
+			public class GENERIC
+			{
+				public static LocString NAME = "Generic";
+
+				public static LocString DESCRIPTION = "{Target} has died.";
+			}
+
+			public class FROZEN
+			{
+				public static LocString NAME = "Frozen";
+
+				public static LocString DESCRIPTION = "{Target} has frozen to death.";
+			}
+
+			public class SUFFOCATION
+			{
+				public static LocString NAME = "Suffocation";
+
+				public static LocString DESCRIPTION = "{Target} has suffocated to death.";
+			}
+
+			public class STARVATION
+			{
+				public static LocString NAME = "Starvation";
+
+				public static LocString DESCRIPTION = "{Target} has starved to death.";
+			}
+
+			public class OVERHEATING
+			{
+				public static LocString NAME = "Starvation";
+
+				public static LocString DESCRIPTION = "{Target} has starved to death.";
+			}
+
+			public class DROWNED
+			{
+				public static LocString NAME = "Drowned";
+
+				public static LocString DESCRIPTION = "{Target} has drowned.";
+			}
+
+			public class EXPLOSION
+			{
+				public static LocString NAME = "Explosion";
+
+				public static LocString DESCRIPTION = "{Target} has died in an explosion.";
+			}
+
+			public class COMBAT
+			{
+				public static LocString NAME = "Slain";
+
+				public static LocString DESCRIPTION = "{Target} was slain in combat.";
 			}
 		}
 
@@ -113,7 +177,7 @@ namespace STRINGS
 
 			public class BEINCAPACITATED
 			{
-				public static LocString NAME = "BeIncapacitated";
+				public static LocString NAME = "Incapacitated";
 
 				public static LocString STATUS = "Dying";
 			}
@@ -125,16 +189,23 @@ namespace STRINGS
 				public static LocString STATUS = "DebugGoTo";
 			}
 
+			public class STRESSIDLE
+			{
+				public static LocString NAME = "Antsy Idle";
+
+				public static LocString STATUS = "This Duplicant needs something to do to take their mind of their stress";
+			}
+
 			public class MOVETO
 			{
-				public static LocString NAME = "Move To";
+				public static LocString NAME = "Move to";
 
 				public static LocString STATUS = "Moving to location";
 			}
 
 			public class DROPUNUSEDINVENTORY
 			{
-				public static LocString NAME = "Drop Unused Inventory";
+				public static LocString NAME = "Drop unused inventory";
 
 				public static LocString STATUS = "Dropping unused inventory";
 			}
@@ -148,37 +219,30 @@ namespace STRINGS
 
 			public class STRESSVOMIT
 			{
-				public static LocString NAME = "StressVomit";
+				public static LocString NAME = "Stress vomit";
 
-				public static LocString STATUS = "Stress Vomiting";
+				public static LocString STATUS = "Stress vomiting";
+			}
+
+			public class UGLY_CRY
+			{
+				public static LocString NAME = "Ugly Cry";
+
+				public static LocString STATUS = "Ugly crying";
+			}
+
+			public class BINGE_EAT
+			{
+				public static LocString NAME = "Binge Eat";
+
+				public static LocString STATUS = "Binge eating";
 			}
 
 			public class EMOTEHIGHPRIORITY
 			{
-				public static LocString NAME = "EmoteHighPriority";
+				public static LocString NAME = "Emoting";
 
-				public static LocString STATUS = "High Priority Emote";
-			}
-
-			public class MANUALCONTROLPRIORITIZECHORE
-			{
-				public static LocString NAME = "ManualControlGoTo";
-
-				public static LocString STATUS = "Moving to position";
-			}
-
-			public class MANUALCONTROLGOTO
-			{
-				public static LocString NAME = "ManualControlGoTo";
-
-				public static LocString STATUS = "Moving to position";
-			}
-
-			public class MANUALCONTROLIDLE
-			{
-				public static LocString NAME = "Manual Idle";
-
-				public static LocString STATUS = "Idle";
+				public static LocString STATUS = "Expressing themself";
 			}
 
 			public class FLEE
@@ -188,32 +252,25 @@ namespace STRINGS
 				public static LocString STATUS = "Fleeing";
 			}
 
-			public class MENTALBREAK
-			{
-				public static LocString NAME = "MentalBreak";
-
-				public static LocString STATUS = "Mental break";
-			}
-
 			public class RECOVERBREATH
 			{
-				public static LocString NAME = "RecoverBreath";
+				public static LocString NAME = "Recover breath";
 
 				public static LocString STATUS = "Recovering breath";
 			}
 
 			public class MOVETOQUARANTINE
 			{
-				public static LocString NAME = "MoveToQuarantine";
+				public static LocString NAME = "Move to quarantine";
 
 				public static LocString STATUS = "Moving to quarantine";
 			}
 
 			public class MOVETOLOCATION
 			{
-				public static LocString NAME = "MoveToLocation";
+				public static LocString NAME = "Move to location";
 
-				public static LocString STATUS = "Move to location";
+				public static LocString STATUS = "Moving to location";
 			}
 
 			public class ATTACK
@@ -225,14 +282,14 @@ namespace STRINGS
 
 			public class USETOILET
 			{
-				public static LocString NAME = "Use Toilet";
+				public static LocString NAME = "Use toilet";
 
 				public static LocString STATUS = "Going to use toilet";
 			}
 
 			public class WASHHANDS
 			{
-				public static LocString NAME = "WashHands";
+				public static LocString NAME = "Wash hands";
 
 				public static LocString STATUS = "Washing hands";
 			}
@@ -246,7 +303,7 @@ namespace STRINGS
 
 			public class PRIORITIZECHORE
 			{
-				public static LocString NAME = "Prioritize Chore";
+				public static LocString NAME = "Prioritize chore";
 
 				public static LocString STATUS = "Prioritize chore";
 			}
@@ -267,14 +324,14 @@ namespace STRINGS
 
 			public class SLEEPONFLOOR
 			{
-				public static LocString NAME = "SleepOnFloor";
+				public static LocString NAME = "Sleep";
 
 				public static LocString STATUS = "Sleeping";
 			}
 
 			public class TAKEMEDICINE
 			{
-				public static LocString NAME = "TakeMedicine";
+				public static LocString NAME = "Take medicine";
 
 				public static LocString STATUS = "Taking medicine";
 			}
@@ -288,7 +345,7 @@ namespace STRINGS
 
 			public class DELIVERFOOD
 			{
-				public static LocString NAME = "DeliverFood";
+				public static LocString NAME = "Deliver food";
 
 				public static LocString STATUS = "Delivering food";
 			}
@@ -316,7 +373,7 @@ namespace STRINGS
 
 			public class RESTDUETODISEASE
 			{
-				public static LocString NAME = "RestDueToDisease";
+				public static LocString NAME = "Rest";
 
 				public static LocString STATUS = "Resting";
 			}
@@ -330,7 +387,7 @@ namespace STRINGS
 
 			public class STRESSACTINGOUT
 			{
-				public static LocString NAME = "StressActingOut";
+				public static LocString NAME = "Lash out";
 
 				public static LocString STATUS = "Lashing out";
 			}
@@ -353,7 +410,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Recharge";
 
-				public static LocString STATUS = "Rechargin equipment";
+				public static LocString STATUS = "Recharging equipment";
 			}
 
 			public class UNEQUIP
@@ -365,14 +422,21 @@ namespace STRINGS
 
 			public class WARMUP
 			{
-				public static LocString NAME = "Warmup";
+				public static LocString NAME = "Warm up";
 
-				public static LocString STATUS = "Going to warmup";
+				public static LocString STATUS = "Going to warm up";
+			}
+
+			public class COOLDOWN
+			{
+				public static LocString NAME = "Cool off";
+
+				public static LocString STATUS = "Going to cool off";
 			}
 
 			public class EMPTYSTORAGE
 			{
-				public static LocString NAME = "Emptying Storage";
+				public static LocString NAME = "Empty storage";
 
 				public static LocString STATUS = "Going to empty storage";
 			}
@@ -386,7 +450,7 @@ namespace STRINGS
 
 			public class ART
 			{
-				public static LocString NAME = "Arting";
+				public static LocString NAME = "Decorate";
 
 				public static LocString STATUS = "Going to decorate";
 			}
@@ -414,7 +478,7 @@ namespace STRINGS
 
 			public class RESCUEINCAPACITATED
 			{
-				public static LocString NAME = "Toggle";
+				public static LocString NAME = "Rescue friend";
 
 				public static LocString STATUS = "Rescuing friend";
 			}
@@ -440,6 +504,13 @@ namespace STRINGS
 				public static LocString STATUS = "Going to research";
 			}
 
+			public class RESEARCHFETCH
+			{
+				public static LocString NAME = "Deliver";
+
+				public static LocString STATUS = "Delivering";
+			}
+
 			public class GENERATEPOWER
 			{
 				public static LocString NAME = "Generate Power";
@@ -456,9 +527,9 @@ namespace STRINGS
 
 			public class UPROOT
 			{
-				public static LocString NAME = "Dig Up";
+				public static LocString NAME = "Uproot";
 
-				public static LocString STATUS = "Going to dig up";
+				public static LocString STATUS = "Going to uproot";
 			}
 
 			public class CLEANTOILET
@@ -477,7 +548,7 @@ namespace STRINGS
 
 			public class COOK
 			{
-				public static LocString NAME = "Cooking";
+				public static LocString NAME = "Cook";
 
 				public static LocString STATUS = "Going to cook";
 			}
@@ -491,7 +562,7 @@ namespace STRINGS
 
 			public class MUSH
 			{
-				public static LocString NAME = "Mushing";
+				public static LocString NAME = "Mush";
 
 				public static LocString STATUS = "Going to mush";
 			}
@@ -575,7 +646,7 @@ namespace STRINGS
 
 			public class MOVETOSAFETY
 			{
-				public static LocString NAME = "MoveToSafety";
+				public static LocString NAME = "Move to safety";
 
 				public static LocString STATUS = "Moving to safety";
 			}
@@ -594,49 +665,63 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Combat";
 
-				public static LocString DESC = "Attack wild creatures.";
+				public static LocString DESC = "Fight wild creatures.";
+			}
+
+			public class MOP
+			{
+				public static LocString NAME = "Mop";
+
+				public static LocString DESC = "Clean up liquid messes.";
 			}
 
 			public class COOK
 			{
 				public static LocString NAME = "Cook";
 
-				public static LocString DESC = "Produce <style=\"food\">Food</style> for Duplicants with food preparation buildings.";
+				public static LocString DESC = "Operate food preparation buildings to produce calories.";
 			}
 
 			public class ART
 			{
 				public static LocString NAME = "Art";
 
-				public static LocString DESC = "Sculpt or paint art pieces to improve colony <style=\"decor\">Decor</style>.";
+				public static LocString DESC = "Sculpt or paint to improve colony decor.";
 			}
 
 			public class COMPOST
 			{
 				public static LocString NAME = "Compost";
 
-				public static LocString DESC = "Deliver <style=\"solid\">Contaminated Dirt</style> to compost to produce <style=\"solid\">Fertilizer</style>.";
+				public static LocString DESC = "Tend composts to produce fertilizer.";
 			}
 
 			public class RESEARCH
 			{
 				public static LocString NAME = "Research";
 
-				public static LocString DESC = "Work <style=\"research\">Research Stations</style> to unlock new technologies.";
+				public static LocString DESC = "Use research stations to unlock new technologies.";
 			}
 
 			public class GENERATEPOWER
 			{
-				public static LocString NAME = "Generate";
+				public static LocString NAME = "Power";
 
-				public static LocString DESC = "Run on manual generators to produce <style=\"power\">Power</style>.";
+				public static LocString DESC = "Produce power by running on manual generators.";
+			}
+
+			public class REPAIR
+			{
+				public static LocString NAME = "Repair";
+
+				public static LocString DESC = "Repair damaged buildings.";
 			}
 
 			public class HARVEST
 			{
 				public static LocString NAME = "Harvest";
 
-				public static LocString DESC = "Pick the <style=\"food\">Food</style> from <style=\"plant\">Plants</style>.";
+				public static LocString DESC = "Gather crops from mature plants.";
 			}
 
 			public class BUILD
@@ -650,21 +735,21 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Deliver";
 
-				public static LocString DESC = "Transport materials to critical utility buildings and high priority storage.";
+				public static LocString DESC = "Run resources to critical buildings and high priority storage.";
 			}
 
 			public class SWEEP
 			{
 				public static LocString NAME = "Sweep";
 
-				public static LocString DESC = "Move materials to noncritical buildings and normal priority storage.";
+				public static LocString DESC = "Run resources to noncritical buildings or storage.";
 			}
 
 			public class DIG
 			{
 				public static LocString NAME = "Dig";
 
-				public static LocString DESC = "Excavate raw materials.";
+				public static LocString DESC = "Mine raw resources.";
 			}
 
 			public class TOGGLE
@@ -672,6 +757,20 @@ namespace STRINGS
 				public static LocString NAME = "Toggle";
 
 				public static LocString DESC = "Manually enable, disable or adjust building switches and filters.";
+			}
+
+			public class LIQUIDCOOLEDFAN
+			{
+				public static LocString NAME = "Hydrofan";
+
+				public static LocString DESC = "Operate hydrofans to cool ambient temperatures.";
+			}
+
+			public class MASSAGE
+			{
+				public static LocString NAME = "Massage";
+
+				public static LocString DESC = "Take breaks for massages.";
 			}
 		}
 
@@ -693,27 +792,20 @@ namespace STRINGS
 
 			public class REDALERT
 			{
-				public static LocString NAME = "Red Alert";
+				public static LocString NAME = "Red Alert!";
 
-				public static LocString TOOLTIP = "Your Duplicants will not eat, sleep, or take leisure time during a state of Red Alert";
+				public static LocString TOOLTIP = "The colony is in a state of Red Alert. Duplicants will not eat, sleep, use the bathroom or engage in leisure activities while the Red Alert is active";
 			}
 
 			public class LOWOXYGEN
 			{
 				public static LocString NAME = "Oxygen low";
 
-				public static LocString TOOLTIP = "This Duplicant is working in a dangerously low <style=\"oxygen\">Oxygen</style> area";
+				public static LocString TOOLTIP = "This Duplicant is working in a low breathability area";
 
 				public static LocString NOTIFICATION_NAME = "Low <style=\"oxygen\">Oxygen</style> area entered";
 
 				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants are working in areas with low <style=\"oxygen\">Oxygen</style>:";
-			}
-
-			public class MENTALBREAK
-			{
-				public static LocString NAME = "Nervous breakdown";
-
-				public static LocString TOOLTIP = "<style=\"stress\">Stress</style> has completely eroded this Duplicant's ability to function";
 			}
 
 			public class SEVEREWOUNDS
@@ -729,13 +821,13 @@ namespace STRINGS
 
 			public class INCAPACITATED
 			{
-				public static LocString NAME = "Incapacitated. Time until death: {TimeUntilDeath}";
+				public static LocString NAME = "Incapacitated\nTime until death: {TimeUntilDeath}";
 
-				public static LocString TOOLTIP = "This Duplicant is near death! They need to be rescued quickly";
+				public static LocString TOOLTIP = "This Duplicant is near death! They need to be rescued quickly\n----------\nDuplicants must have an assigned Medical Cot or Rejuvenator to be rescued";
 
 				public static LocString NOTIFICATION_NAME = "Incapacitated";
 
-				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants need to be rescued before they kick the bucket";
+				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants need to be rescued before they kick the bucket\n----------\nDuplicants must have an assigned Medical Cot or Rejuvenator to be rescued";
 			}
 
 			public class BEDUNREACHABLE
@@ -751,20 +843,16 @@ namespace STRINGS
 
 			public class COLD
 			{
-				public static LocString NAME = "Too cold";
+				public static LocString NAME = "Chilly surroundings";
 
-				public static LocString TOOLTIP = "This Duplicant is about to freeze to death";
-
-				public static LocString NOTIFICATION_NAME = "Too cold";
-
-				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants are about to freeze to death:";
+				public static LocString TOOLTIP = "This Duplicant cannot retain enough heat to stay warm and may be under insulated for this area\nStress Modification: {StressModification}\n\nCurrent Environmental Exchange: {currentTransferWattage}\n\nInsulation Thickness: {conductivityBarrier}";
 			}
 
 			public class DAILYRATIONLIMITREACHED
 			{
 				public static LocString NAME = "Daily calorie limit reached";
 
-				public static LocString TOOLTIP = "This Duplicant has consumed their allotted <style=\"food\">Rations</style> for the day";
+				public static LocString TOOLTIP = "This Duplicant has consumed their allotted rations for the day";
 
 				public static LocString NOTIFICATION_NAME = "Daily calorie limit reached";
 
@@ -782,67 +870,49 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Recovering breath";
 
-				public static LocString TOOLTIP = "This Duplicant had to hold their breath for too long and needs a breather";
+				public static LocString TOOLTIP = "This Duplicant held their breath too long and needs a breather";
 			}
 
 			public class HOT
 			{
-				public static LocString NAME = "Too hot";
+				public static LocString NAME = "Toasty surroundings";
 
-				public static LocString TOOLTIP = "This Duplicant is overheating";
-
-				public static LocString NOTIFICATION_NAME = "Too hot";
-
-				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants are overheating:";
+				public static LocString TOOLTIP = "This Duplicant cannot let off enough heat to stay cool and may be over insulated for this area\nStress Modification: {StressModification}\n\nCurrent Environmental Exchange: {currentTransferWattage}\n\nInsulation Thickness: {conductivityBarrier}";
 			}
 
 			public class HUNGRY
 			{
 				public static LocString NAME = "Hungry";
 
-				public static LocString TOOLTIP = "This Duplicant would love a snack";
+				public static LocString TOOLTIP = "This Duplicant is low on calories and would love a snack";
 			}
 
 			public class POORDECOR
 			{
 				public static LocString NAME = "Drab decor";
 
-				public static LocString TOOLTIP = "This Duplicant finds this room's lack of <style=\"decor\">Decor</style> depressing";
+				public static LocString TOOLTIP = "This Duplicant finds the lack of Decor in this area depressing";
 			}
 
-			public class MANUALLYCONTROLLED
+			public class POOR_FOOD_QUALITY
 			{
-				public static LocString NAME = "Manual control";
+				public static LocString NAME = "Lousy Meal";
 
-				public static LocString TOOLTIP = "This Duplicant is under manual control and cannot act independently";
+				public static LocString TOOLTIP = "This Duplicant's last meal didn't meet their expectations";
 			}
 
-			public class MANUALCONTROLIDLE
+			public class GOOD_FOOD_QUALITY
 			{
-				public static LocString NAME = "Manual idle";
+				public static LocString NAME = "Decadent Meal";
 
-				public static LocString TOOLTIP = "This Duplicant is manually controlled and will be idle until given a task";
-			}
-
-			public class MANUALCONTROLGOTO
-			{
-				public static LocString NAME = "Manual movement";
-
-				public static LocString TOOLTIP = "This Duplicant is manually controlled and has been ordered to a specific location";
-			}
-
-			public class MANUALCONTROLCHORE
-			{
-				public static LocString NAME = "Manually task";
-
-				public static LocString TOOLTIP = "This Duplicant is manually controlled and has been ordered to perform a specific task";
+				public static LocString TOOLTIP = "This Duplicant's last meal exceeded their expectations";
 			}
 
 			public class NERVOUSBREAKDOWN
 			{
 				public static LocString NAME = "Nervous breakdown";
 
-				public static LocString TOOLTIP = "<style=\"stress\">Stress</style> has completely eroded this Duplicant's ability to function";
+				public static LocString TOOLTIP = "Stress has completely eroded this Duplicant's ability to function";
 
 				public static LocString NOTIFICATION_NAME = "Nervous breakdown";
 
@@ -853,7 +923,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Stressed";
 
-				public static LocString TOOLTIP = "This Duplicant is feeling the <style=\"stress\">Stress</style>";
+				public static LocString TOOLTIP = "This Duplicant is feeling the pressure";
 
 				public static LocString NOTIFICATION_NAME = "Stressed";
 
@@ -904,7 +974,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Cannot reach food";
 
-				public static LocString TOOLTIP = "There is <style=\"food\">Food</style> in the colony but this Duplicant cannot reach it";
+				public static LocString TOOLTIP = "There is food in the colony that this Duplicant cannot reach";
 
 				public static LocString NOTIFICATION_NAME = "Food beyond reach";
 
@@ -922,14 +992,42 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Starving";
 
-				public static LocString TOOLTIP = "This Duplicant needs <style=\"food\">Food</style>!";
+				public static LocString TOOLTIP = "This Duplicant needs food!";
 
 				public static LocString NOTIFICATION_NAME = "Starvation";
 
 				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants are starving and need <style=\"food\">Food</style>:";
 			}
 
-			public class ENTOMBED
+			public class STRESS_SIGNAL_AGGRESIVE
+			{
+				public static LocString NAME = "Frustrated";
+
+				public static LocString TOOLTIP = "This Duplicant is trying to keep their cool";
+			}
+
+			public class STRESS_SIGNAL_BINGE_EAT
+			{
+				public static LocString NAME = "Stress Cravings";
+
+				public static LocString TOOLTIP = "This Duplicant is consumed by hunger";
+			}
+
+			public class STRESS_SIGNAL_UGLY_CRIER
+			{
+				public static LocString NAME = "Tearing up";
+
+				public static LocString TOOLTIP = "This Duplicant is trying and failing to suppress their emotions";
+			}
+
+			public class STRESS_SIGNAL_VOMITER
+			{
+				public static LocString NAME = "Stress Burp";
+
+				public static LocString TOOLTIP = "Kind of like having butterflies in your stomach, except they're burps";
+			}
+
+			public class ENTOMBEDCHORE
 			{
 				public static LocString NAME = "Entombed";
 
@@ -944,7 +1042,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Jazzed to start the day";
 
-				public static LocString TOOLTIP = "This Duplicant is an Early Bird and gets a burst of energy in the morning";
+				public static LocString TOOLTIP = "This Duplicant gets a burst of energy in the morning from their Early Bird trait";
 			}
 
 			public class NIGHTTIME
@@ -962,7 +1060,7 @@ namespace STRINGS
 
 				public static LocString NOTIFICATION_NAME = "Suffocating";
 
-				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants cannot find <style=\"oxygen\">Oxygen</style>:";
+				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants cannot reach breathable <style=\"oxygen\">Oxygen</style>:";
 			}
 
 			public class TIRED
@@ -985,9 +1083,9 @@ namespace STRINGS
 
 			public class FIGHTING
 			{
-				public static LocString NAME = "In Combat";
+				public static LocString NAME = "In combat";
 
-				public static LocString TOOLTIP = "This Duplicant is attacking a creature";
+				public static LocString TOOLTIP = "This Duplicant is attacking a creature!";
 
 				public static LocString NOTIFICATION_NAME = "Combat!";
 
@@ -998,7 +1096,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Fleeing";
 
-				public static LocString TOOLTIP = "This Duplicant is trying to escape combat";
+				public static LocString TOOLTIP = "This Duplicant is trying to escape combat!";
 
 				public static LocString NOTIFICATION_NAME = "Fleeing!";
 
@@ -1016,7 +1114,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Lashing out";
 
-				public static LocString TOOLTIP = "This Duplicant is breaking stuff to relieve <style=\"stress\">Stress</style>";
+				public static LocString TOOLTIP = "This Duplicant is breaking stuff to relieve stress";
 
 				public static LocString NOTIFICATION_NAME = "Lashing out";
 
@@ -1027,7 +1125,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Exiting <style=\"equipment\">Exosuit</style> area";
 
-				public static LocString TOOLTIP = "This Duplicant is leaving an area where an <style=\"equipment\">Exosuit</style> was required";
+				public static LocString TOOLTIP = "This Duplicant is leaving an area where an exosuit was required";
 			}
 
 			public class DROPPINGUNUSEDINVENTORY
@@ -1061,7 +1159,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "The only toilets in this Duplicant's reach are out of order";
 
-				public static LocString NOTIFICATION_NAME = "Restrooms out of order";
+				public static LocString NOTIFICATION_NAME = "Restroom out of order";
 
 				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants want to use a toilet that is out of order:";
 			}
@@ -1074,7 +1172,7 @@ namespace STRINGS
 
 				public static LocString NOTIFICATION_NAME = "No restrooms built";
 
-				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants are distressed by the lack of toilets:";
+				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants are distressed by the colony's lack of toilets:";
 			}
 
 			public class FULLBLADDER
@@ -1092,21 +1190,21 @@ namespace STRINGS
 
 				public static LocString NOTIFICATION_NAME = "Made a mess";
 
-				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants could not find a toilet in time.\n\nUse the <color=#833A5FFF>MOP TOOL</color> [K] to clean up their mess:";
+				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants could not find a toilet in time.\nUse the <color=#833A5FFF>MOP TOOL</color> [K] to clean up their mess:\n";
 			}
 
 			public class WASHINGHANDS
 			{
 				public static LocString NAME = "Washing hands";
 
-				public static LocString TOOLTIP = "This Duplicant is <style=\"hygiene\">Cleaning</style> their hands";
+				public static LocString TOOLTIP = "This Duplicant is washing their hands";
 			}
 
 			public class SHOWERING
 			{
 				public static LocString NAME = "Showering";
 
-				public static LocString TOOLTIP = "This Duplicant is getting squeaky <style=\"hygiene\">Clean</style>";
+				public static LocString TOOLTIP = "This Duplicant is gonna be squeaky clean";
 			}
 
 			public class RELAXING
@@ -1120,7 +1218,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Throwing up";
 
-				public static LocString TOOLTIP = "This Duplicant has unceremoniously hurled as a result of a <style=\"disease\">Disease</style>";
+				public static LocString TOOLTIP = "This Duplicant has unceremoniously hurled as the result of a disease";
 
 				public static LocString NOTIFICATION_NAME = "Throwing up";
 
@@ -1131,18 +1229,18 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Stress vomiting";
 
-				public static LocString TOOLTIP = "This Duplicant is releasing their <style=\"stress\">Stress</style> all over the floor";
+				public static LocString TOOLTIP = "This Duplicant is relieving their stress all over the floor";
 
 				public static LocString NOTIFICATION_NAME = "Stress vomiting";
 
-				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants became too <style=\"stress\">Stress</style> and it caused them to throw up:";
+				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants became too <style=\"stress\">Stressed</style> and it caused them to throw up:";
 			}
 
 			public class HASDISEASE
 			{
 				public static LocString NAME = "Feeling ill";
 
-				public static LocString TOOLTIP = "This Duplicant has contracted a <style=\"disease\">Disease</style>";
+				public static LocString TOOLTIP = "This Duplicant has contracted a Disease";
 
 				public static LocString NOTIFICATION_NAME = "Illness";
 
@@ -1151,30 +1249,30 @@ namespace STRINGS
 
 			public class BODYREGULATINGHEATING
 			{
-				public static LocString NAME = "Heating up at: {TempDelta}";
+				public static LocString NAME = "Regulating temperature at: {TempDelta}";
 
-				public static LocString TOOLTIP = "This Duplicant is regulating their <style=\"heat\">Temperature</style>";
+				public static LocString TOOLTIP = "This Duplicant is regulating their internal temperature";
 			}
 
 			public class BODYREGULATINGCOOLING
 			{
-				public static LocString NAME = "Cooling down at: {TempDelta}";
+				public static LocString NAME = "Regulating temperature at: {TempDelta}";
 
-				public static LocString TOOLTIP = "This Duplicant is regulating their <style=\"heat\">Temperature</style>";
+				public static LocString TOOLTIP = "This Duplicant is regulating their internal temperature";
 			}
 
 			public class BREATHINGO2
 			{
 				public static LocString NAME = "Inhaling {ConsumptionRate} O2";
 
-				public static LocString TOOLTIP = "Duplicants require <style=\"oxygen\">Oxygen</style> to live";
+				public static LocString TOOLTIP = "All Duplicants require oxygen to live";
 			}
 
 			public class EMITTINGCO2
 			{
 				public static LocString NAME = "Exhaling {EmittingRate} CO2";
 
-				public static LocString TOOLTIP = "Duplicants breathe out <style=\"gas\">Carbon Dioxide</style>";
+				public static LocString TOOLTIP = "All Duplicants breathe out carbon dioxide";
 			}
 
 			public class PICKUPDELIVERSTATUS
@@ -1398,14 +1496,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Eating {Target}";
 
-				public static LocString TOOLTIP = "This Duplicant is replenishing their <style=\"food\">Calorie</style> stores";
+				public static LocString TOOLTIP = "This Duplicant is replenishing their calorie stores";
 			}
 
 			public class CLEANING
 			{
 				public static LocString NAME = "Cleaning {Target}";
 
-				public static LocString TOOLTIP = "This Duplicant is <style=\"hygiene\">Cleaning Up</style> {Target}";
+				public static LocString TOOLTIP = "This Duplicant is cleaning the {Target}";
 			}
 
 			public class PICKINGUP
@@ -1419,7 +1517,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Mopping";
 
-				public static LocString TOOLTIP = "This Duplicant is <style=\"hygiene\">Cleaning</style> up a nasty spill";
+				public static LocString TOOLTIP = "This Duplicant is cleaning up a nasty spill";
 			}
 
 			public class ARTING
@@ -1447,7 +1545,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Researching <style=\"research\">{Tech}</style>";
 
-				public static LocString TOOLTIP = "This Duplicant is intently researching <style=\"research\">{Tech}</style> technology";
+				public static LocString TOOLTIP = "This Duplicant is intently researching {Tech} technology";
 			}
 
 			public class STORING
@@ -1468,21 +1566,21 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Equipping <style=\"equipment\">{Item}</style>";
 
-				public static LocString TOOLTIP = "This Duplicant is equipping a <style=\"equipment\">{Item}</style>";
+				public static LocString TOOLTIP = "This Duplicant is equipping a {Item}";
 			}
 
 			public class WARMINGUP
 			{
 				public static LocString NAME = "Warming up";
 
-				public static LocString TOOLTIP = "This Duplicant got too <style=\"heat\">Cold</style> and is trying to warm up";
+				public static LocString TOOLTIP = "This Duplicant got too cold and is trying to warm up";
 			}
 
 			public class GENERATINGPOWER
 			{
 				public static LocString NAME = "Generating power";
 
-				public static LocString TOOLTIP = "This Duplicant is using the {Target} to produce electrical <style=\"power\">Power</style>";
+				public static LocString TOOLTIP = "This Duplicant is using the {Target} to produce electrical power";
 			}
 
 			public class HARVESTING
@@ -1537,13 +1635,13 @@ namespace STRINGS
 
 		public class DISEASES
 		{
-			public static LocString CURED_POPUP = "Cured of <style=\"disease\">{0}</style>";
+			public static LocString CURED_POPUP = "Cured of {0}";
 
-			public static LocString INFECTED_POPUP = "Became infected by <style=\"disease\">{0}</style>";
+			public static LocString INFECTED_POPUP = "Became infected by {0}";
 
-			public static LocString NOTIFICATION_TOOLTIP = "{0} was infected with <style=\"disease\">{1}</style> by {2}";
+			public static LocString NOTIFICATION_TOOLTIP = "{0} contracted <style=\"disease\">{1}</style> by {2}";
 
-			public static LocString STATUS_ITEM_TOOLTIP = "{Symptoms}\n\nInfected by {InfectionSource}\nDuration remaining: {Duration}\nRemedies: <style=\"medicine\">{Cures}</style>";
+			public static LocString STATUS_ITEM_TOOLTIP = "{Symptoms}\n\nContracted by {InfectionSource}\nDuration remaining: {Duration}\nRemedies: {Cures}";
 
 			public static LocString NOMEDICINETAKEN = "None";
 
@@ -1553,12 +1651,22 @@ namespace STRINGS
 
 			public static LocString REDUCECURESPEED = "Heal speed (<style=\"disease\">{0}</style>): <style=\"consumed\">{1}</style>";
 
-			public static LocString RECUPERATING = "Sleeping it off";
+			public static LocString RECUPERATING = "Resting up";
 
-			public static LocString DISEASE_TRIGGER_EAT = "May cause <style=\"disease\">{Diseases}</style>";
+			public class TRIGGERS
+			{
+				public static LocString EATCOMPLETEEDIBLE = "May cause <style=\"disease\">{Diseases}</style>";
+
+				public class TOOLTIPS
+				{
+					public static LocString EATCOMPLETEEDIBLE = "May cause {Diseases}";
+				}
+			}
 
 			public class INFECTIONSOURCES
 			{
+				public static LocString INTERNAL_TEMPERATURE = "extreme internal temperature";
+
 				public static LocString TOXIC_AREA = "standing in a toxic area";
 
 				public static LocString FOOD = "eating a {0}";
@@ -1590,18 +1698,32 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "This Duplicant's gut is giving them some trouble";
 			}
 
+			public class COLDBRAIN
+			{
+				public static LocString NAME = "Hypothermia";
+
+				public static LocString DESCRIPTION = "This Duplicant's thought processes have been slowed to a crawl as a result of extreme cold exposure";
+			}
+
+			public class HEATRASH
+			{
+				public static LocString NAME = "Heat Stroke";
+
+				public static LocString DESCRIPTION = "This Duplicant's thought processes have short circuited as a result of extreme heat exposure";
+			}
+
 			public class SPORES
 			{
 				public static LocString NAME = "The Spores";
 
-				public static LocString DESCRIPTION = "This Duplicant is a walking fungal pod";
+				public static LocString DESCRIPTION = "This Duplicant has become a walking fungal pod as a result of illness";
 			}
 
 			public class DWEEBCEPHALY
 			{
 				public static LocString NAME = "Brain Fog";
 
-				public static LocString DESCRIPTION = "This Duplicant is experiencing some cognitive impairment";
+				public static LocString DESCRIPTION = "This Duplicant is experiencing cognitive impairment as a result of illness";
 			}
 
 			public class LAZIBONITIS
@@ -1615,7 +1737,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Trench Stench";
 
-				public static LocString DESCRIPTION = "The pungent odor wafting off this Duplicant is nauseating their peers";
+				public static LocString DESCRIPTION = "The pungent odor wafting off this Duplicant is nauseating to their peers";
 
 				public static LocString CRINGE_EFFECT = "Smelled a putrid odor";
 			}
@@ -1632,7 +1754,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Entitlement";
 
-				public static LocString TOOLTIP = "Duplicants will demand better <style=\"decor\">Decor</style> and accommodations with each skill level they gain";
+				public static LocString TOOLTIP = "Duplicants will demand better decor and accommodations with each Profession level they gain";
 			}
 
 			public class BASEDUPLICANT
@@ -1645,9 +1767,73 @@ namespace STRINGS
 				public static LocString NAME = "Homeostasis";
 			}
 
+			public class WARMAIR
+			{
+				public static LocString NAME = "Warm Air";
+			}
+
+			public class COLDAIR
+			{
+				public static LocString NAME = "Cold Air";
+			}
+
+			public class CLAUSTROPHOBIC
+			{
+				public static LocString NAME = "Claustrophobic";
+
+				public static LocString TOOLTIP = "This Duplicant recently found themselves in an upsettingly cramped space";
+
+				public static LocString CAUSE = "This Duplicant got so good at their job that they became claustrophobic";
+			}
+
+			public class VERTIGO
+			{
+				public static LocString NAME = "Vertigo";
+
+				public static LocString TOOLTIP = "This Duplicant had to climb a tall ladder that left them dizzy and unsettled";
+
+				public static LocString CAUSE = "This Duplicant got so good at their job that they became bad at ladders";
+			}
+
+			public class UNCOMFORTABLEFEET
+			{
+				public static LocString NAME = "Aching Feet";
+
+				public static LocString TOOLTIP = "This Duplicant recently walked across untiled floor, much to their chagrin";
+
+				public static LocString CAUSE = "This Duplicant got so good at their job that their feet became sensitive";
+			}
+
+			public class PEOPLETOOCLOSEWHILESLEEPING
+			{
+				public static LocString NAME = "Personal Bubble Burst";
+
+				public static LocString TOOLTIP = "This Duplicant had to sleep too close to others and it was awkward for them";
+
+				public static LocString CAUSE = "This Duplicant got so good at their job that they stopped being comfortable sleeping near other people";
+			}
+
+			public class RESTLESS
+			{
+				public static LocString NAME = "Restless";
+
+				public static LocString TOOLTIP = "This Duplicant went a few minutes without working and is now completely awash with guilt";
+
+				public static LocString CAUSE = "This Duplicant got so good at their job that they forgot how to be comfortable doing anything else";
+			}
+
+			public class UNFASHIONABLECLOTHING
+			{
+				public static LocString NAME = "Fashion Crime";
+
+				public static LocString TOOLTIP = "This Duplicant had to wear something that was an affront to fashion";
+
+				public static LocString CAUSE = "This Duplicant got so good at their job that they became incapable of tolerating unfashionable clothing";
+			}
+
 			public class BURNINGCALORIES
 			{
-				public static LocString NAME = "Burning calories";
+				public static LocString NAME = "Burning Calories";
 			}
 
 			public class EATINGCALORIES
@@ -1657,34 +1843,91 @@ namespace STRINGS
 
 			public class TEMPEXCHANGE
 			{
-				public static LocString NAME = "Environmental exchange";
+				public static LocString NAME = "Environmental Exchange";
+			}
+
+			public class CLOTHING
+			{
+				public static LocString NAME = "Clothing";
 			}
 
 			public class DIRTYHANDS
 			{
 				public static LocString NAME = "Dirty Hands";
 
-				public static LocString TOOLTIP = "This Duplicant needs to <style=\"hygiene\">Wash</style> their hands";
+				public static LocString TOOLTIP = "This Duplicant needs to wash their hands";
 
 				public static LocString CAUSE = "Obtained through prolonged digging or construction";
+			}
+
+			public class CRYFACE
+			{
+				public static LocString NAME = "Cry Face";
+
+				public static LocString TOOLTIP = "This Duplicant recently had a crying fit and it shows";
+
+				public static LocString CAUSE = "Obtained through the Ugly Crier stress response";
 			}
 
 			public class UNCLEAN
 			{
 				public static LocString NAME = "Grimy";
 
-				public static LocString TOOLTIP = "This Duplicant would appreciate a <style=\"hygiene\">Shower</style>";
+				public static LocString TOOLTIP = "This Duplicant is dirty and needs a shower";
 
-				public static LocString CAUSE = "Obtained by coming into contact with contaminated material";
+				public static LocString CAUSE = "Obtained by coming into contact with polluted substances";
 			}
 
 			public class SOREBACK
 			{
 				public static LocString NAME = "Sore Back";
 
-				public static LocString TOOLTIP = "This Duplicant was forced to sleep on the floor and would appreciate their own bed";
+				public static LocString TOOLTIP = "This Duplicant feels achey from sleeping on the floor last night and would like a bed";
 
 				public static LocString CAUSE = "Obtained by sleeping on the ground";
+			}
+
+			public class GOODEATS
+			{
+				public static LocString NAME = "Soul Food";
+
+				public static LocString TOOLTIP = "This Duplicant had a yummy homecooked meal and is totally stuffed";
+
+				public static LocString CAUSE = "Obtained by eating a hearty meal";
+			}
+
+			public class FRESH_AND_CLEAN
+			{
+				public static LocString NAME = "Refreshingly Clean";
+
+				public static LocString TOOLTIP = "This Duplicant took a warm shower and it was great!";
+
+				public static LocString CAUSE = "Obtained by taking a comfortably heated shower";
+			}
+
+			public class BURNED_BY_SCALDING_WATER
+			{
+				public static LocString NAME = "Scalded";
+
+				public static LocString TOOLTIP = "Ouch! This Duplicant showered or was doused in water that was much too hot";
+
+				public static LocString CAUSE = "Obtained by exposure to hot water";
+			}
+
+			public class STRESSED_BY_COLD_WATER
+			{
+				public static LocString NAME = "Numb";
+
+				public static LocString TOOLTIP = "Brr! This Duplicant showered or was doused in water that was much too cold";
+
+				public static LocString CAUSE = "Obtained by exposure to icy water";
+			}
+
+			public class SMELLEDSTINKY
+			{
+				public static LocString NAME = "Smelled Stinky";
+
+				public static LocString TOOLTIP = "This Duplicant got a whiff of a certain somebody";
 			}
 
 			public class NOSTRESSCREATOR
@@ -1694,7 +1937,29 @@ namespace STRINGS
 
 			public class STRESSREDUCTION
 			{
-				public static LocString TOOLTIP = "This Duplicant's <style=\"stress\">Stress</style> is just melting away";
+				public static LocString TOOLTIP = "This Duplicant's stress is just melting away";
+			}
+
+			public class UGLY_CRYING
+			{
+				public static LocString NAME = "Ugly Crying";
+
+				public static LocString TOOLTIP = "This Duplicant is having a cathartic ugly cry as a result of stress";
+
+				public static LocString NOTIFICATION_NAME = "Ugly Crying";
+
+				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants became too <style=\"stress\">Stressed</style> and it caused them to cry:";
+			}
+
+			public class BINGE_EATING
+			{
+				public static LocString NAME = "Insatiable Hunger";
+
+				public static LocString TOOLTIP = "This Duplicant is stuffing their face a result of stress";
+
+				public static LocString NOTIFICATION_NAME = "Binge Eating";
+
+				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants became too <style=\"stress\">Stressed</style> and started eating everything in sight:";
 			}
 
 			public class WORKING
@@ -1706,7 +1971,7 @@ namespace STRINGS
 
 			public class UNCOMFORTABLESLEEP
 			{
-				public static LocString NAME = "Uncomfortable Sleep";
+				public static LocString NAME = "Sleeping Uncomfortably";
 
 				public static LocString TOOLTIP = "This Duplicant collapsed from sheer exhaustion";
 			}
@@ -1720,9 +1985,9 @@ namespace STRINGS
 
 			public class RESTFULSLEEP
 			{
-				public static LocString NAME = "Restful Sleep";
+				public static LocString NAME = "Sleeping Peacefully";
 
-				public static LocString TOOLTIP = "This Duplicant is sleeping peacefully";
+				public static LocString TOOLTIP = "This Duplicant is getting a good night's rest";
 			}
 
 			public class SLEEPY
@@ -1760,11 +2025,39 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This Duplicant is uncomfortably cold";
 			}
 
+			public class WETFEET
+			{
+				public static LocString NAME = "Soggy Feet";
+
+				public static LocString TOOLTIP = "This Duplicant recently stepped in liquid";
+			}
+
+			public class SOAKINGWET
+			{
+				public static LocString NAME = "Sopping Wet";
+
+				public static LocString TOOLTIP = "This Duplicant was recently submerged in liquid";
+			}
+
 			public class ANEWHOPE
 			{
 				public static LocString NAME = "New Hope";
 
 				public static LocString TOOLTIP = "This Duplicant feels pretty optimistic about their new home";
+			}
+
+			public class NOOXYGEN
+			{
+				public static LocString NAME = "No Oxygen";
+
+				public static LocString TOOLTIP = "There is no breathable air in this area";
+			}
+
+			public class LOWOXYGEN
+			{
+				public static LocString NAME = "Low Oxygen";
+
+				public static LocString TOOLTIP = "The air in this area is unpleasantly thin";
 			}
 
 			public class MOURNING
@@ -1776,7 +2069,7 @@ namespace STRINGS
 
 			public class NARCOLEPTICSLEEP
 			{
-				public static LocString NAME = "Narcoleptic Sleep";
+				public static LocString NAME = "Narcoleptic Nap";
 
 				public static LocString TOOLTIP = "This Duplicant just needs to rest their eyes for a second";
 			}
@@ -1792,7 +2085,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Interrupted Sleep";
 
-				public static LocString TOOLTIP = "This Duplicant was rudely awoken";
+				public static LocString TOOLTIP = "This Duplicant was rudely awoken while they slept";
+			}
+
+			public class CENTEROFATTENTION
+			{
+				public static LocString NAME = "Center of Attention";
+
+				public static LocString TOOLTIP = "This Duplicant feels like someone is watching them...";
 			}
 
 			public class INSPIRED
@@ -1806,7 +2106,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "New Friend";
 
-				public static LocString TOOLTIP = "This Duplicant is happy to see a new face in the colony!";
+				public static LocString TOOLTIP = "This Duplicant is happy to see a new face in the colony";
 			}
 
 			public class UNDERWATER
@@ -1825,30 +2125,45 @@ namespace STRINGS
 
 			public class WASATTACKED
 			{
-				public static LocString NAME = "Was attacked";
+				public static LocString NAME = "Recently assailed";
 
-				public static LocString TOOLTIP = "This Duplicant was recently attacked by something and it <style=\"stress\">Stressed</style> them out";
+				public static LocString TOOLTIP = "This Duplicant is stressed out after having been attacked";
 			}
 
 			public class LIGHTWOUNDS
 			{
-				public static LocString NAME = "Light wounds";
+				public static LocString NAME = "Light Wounds";
 
-				public static LocString TOOLTIP = "This Duplicant's injuries are a bit uncomfortable";
+				public static LocString TOOLTIP = "This Duplicant sustained injuries that are a bit uncomfortable";
 			}
 
 			public class MODERATEWOUNDS
 			{
-				public static LocString NAME = "Moderate wounds";
+				public static LocString NAME = "Moderate Wounds";
 
-				public static LocString TOOLTIP = "This Duplicants' injuries are affecting their ability to work";
+				public static LocString TOOLTIP = "This Duplicant sustained injuries that are affecting their ability to work";
 			}
 
 			public class SEVEREWOUNDS
 			{
-				public static LocString NAME = "Severe wounds";
+				public static LocString NAME = "Severe Wounds";
 
-				public static LocString TOOLTIP = "This Duplicant's injuries are severely affecting their work and well-being";
+				public static LocString TOOLTIP = "This Duplicant sustained serious injuries that are impacting their work and well-being";
+			}
+
+			public class ROTTEMPERATURE
+			{
+				public static LocString NAME = "Unrefrigerated";
+			}
+
+			public class ROTATMOSPHERE
+			{
+				public static LocString NAME = "Contaminated Air";
+			}
+
+			public class BASEROT
+			{
+				public static LocString NAME = "Base Decay Rate";
 			}
 
 			public class FULLBLADDER
@@ -1860,16 +2175,16 @@ namespace STRINGS
 
 			public class STRESSFULYEMPTYINGBLADDER
 			{
-				public static LocString NAME = "Making a Mess";
+				public static LocString NAME = "Making a mess";
 
 				public static LocString TOOLTIP = "This Duplicant had no choice but to to empty their bladder";
 			}
 
 			public class REDALERT
 			{
-				public static LocString NAME = "Red Alert";
+				public static LocString NAME = "Red Alert!";
 
-				public static LocString TOOLTIP = "This Duplicant is <style=\"stress\">Stressed</style> out by the current Red Alert";
+				public static LocString TOOLTIP = "The Red Alert is stressing this Duplicant out";
 			}
 
 			public class FUSSY
@@ -1879,13 +2194,6 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This Duplicant is hard to please";
 			}
 
-			public class MENTALBREAK
-			{
-				public static LocString NAME = "Nervous Breakdown";
-
-				public static LocString TOOLTIP = "<style=\"stress\">Stress</style> has completely eroded this Duplicant's ability to function";
-			}
-
 			public class WARMINGUP
 			{
 				public static LocString NAME = "Warming Up";
@@ -1893,39 +2201,46 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This Duplicant is trying to warm back up";
 			}
 
+			public class COOLINGDOWN
+			{
+				public static LocString NAME = "Cooling Down";
+
+				public static LocString TOOLTIP = "This Duplicant is trying to cool back down";
+			}
+
 			public class DARKNESS
 			{
 				public static LocString NAME = "Darkness";
 
-				public static LocString TOOLTIP = "This Duplicant doesn't like being in the dark!";
+				public static LocString TOOLTIP = "Eep! This Duplicant doesn't like being in the dark!";
 			}
 
 			public class STEPPEDINCONTAMINATEDWATER
 			{
-				public static LocString NAME = "Stepped In Contaminated Water";
+				public static LocString NAME = "Stepped in polluted water";
 
-				public static LocString TOOLTIP = "This Duplicant stepped in dirty water and was super grossed out";
+				public static LocString TOOLTIP = "Gross! This Duplicant stepped in something yucky";
 			}
 
 			public class WELLFED
 			{
-				public static LocString NAME = "Well Fed";
+				public static LocString NAME = "Well fed";
 
 				public static LocString TOOLTIP = "This Duplicant feels satisfied after having a big meal";
 			}
 
 			public class STALEFOOD
 			{
-				public static LocString NAME = "Stale Food";
+				public static LocString NAME = "Bad leftovers";
 
-				public static LocString TOOLTIP = "This Duplicant is in a bad mood from having to eat stale <style=\"food\">Food</style>";
+				public static LocString TOOLTIP = "This Duplicant is in a bad mood from having to eat stale food";
 			}
 
 			public class SMELLEDPUTRIDODOUR
 			{
-				public static LocString NAME = "Smelled Putrid Odor";
+				public static LocString NAME = "Smelled a putrid odor";
 
-				public static LocString TOOLTIP = "This Duplicant smelled something unspeakably foul";
+				public static LocString TOOLTIP = "This Duplicant got a whiff of something unspeakably foul";
 			}
 
 			public class VOMITING
@@ -1942,12 +2257,12 @@ namespace STRINGS
 
 			public class HOLDINGBREATH
 			{
-				public static LocString NAME = "Holding Breath";
+				public static LocString NAME = "Holding breath";
 			}
 
 			public class RECOVERINGBREATH
 			{
-				public static LocString NAME = "Recovering Breath";
+				public static LocString NAME = "Recovering breath";
 			}
 
 			public class ROTTING
@@ -1962,12 +2277,69 @@ namespace STRINGS
 
 			public class TOXICENVIRONMENT
 			{
-				public static LocString NAME = "Toxic Environment";
+				public static LocString NAME = "Toxic environment";
 			}
 
 			public class RESTING
 			{
 				public static LocString NAME = "Resting";
+			}
+
+			public class INTRAVENOUS_NUTRITION
+			{
+				public static LocString NAME = "Intravenous Feeding";
+			}
+		}
+
+		public class CONGENITALTRAITS
+		{
+			public class NONE
+			{
+				public static LocString NAME = "None";
+
+				public static LocString DESC = "This Duplicant seems pretty average overall";
+			}
+
+			public class JOSHUA
+			{
+				public static LocString NAME = "Cheery Disposition";
+
+				public static LocString DESC = "This Duplicant brightens others' days wherever he goes";
+			}
+
+			public class ELLIE
+			{
+				public static LocString NAME = "Fastidious";
+
+				public static LocString DESC = "This Duplicant needs things done in a very particular way";
+			}
+
+			public class LEIRA
+			{
+				public static LocString NAME = "Starving Artist";
+
+				public static LocString DESC = "This Duplicant's two loves in life are art and food";
+			}
+
+			public class STINKY
+			{
+				public static LocString NAME = "Stinkiness";
+
+				public static LocString DESC = "This Duplicant is genetically cursed by a pungent bodily odor";
+			}
+
+			public class CATALINA
+			{
+				public static LocString NAME = "Atlas";
+
+				public static LocString DESC = "This Duplicant feels the weight of the world on her shoulders";
+			}
+
+			public class ABE
+			{
+				public static LocString NAME = "Doting";
+
+				public static LocString DESC = "This Duplicant just wants to make sure everyone's eating right";
 			}
 		}
 
@@ -1977,11 +2349,70 @@ namespace STRINGS
 
 			public static LocString REFUSES_TO_DO_TASK = "Refuses to do job";
 
+			public class NEEDS
+			{
+				public class CLAUSTROPHOBIC
+				{
+					public static LocString NAME = "Claustrophobe";
+
+					public static LocString DESC = "This Duplicant feels suffocated in spaces less than four tiles high or three tiles wide";
+				}
+
+				public class FASHIONABLE
+				{
+					public static LocString NAME = "Fashionista";
+
+					public static LocString DESC = "This Duplicant dies a bit inside when forced to wear unstylish clothing";
+				}
+
+				public class CLIMACOPHOBIC
+				{
+					public static LocString NAME = "Vertigo Prone";
+
+					public static LocString DESC = "Climbing ladders more than four tiles tall makes this Duplicant's stomach do flips";
+				}
+
+				public class SOLITARYSLEEPER
+				{
+					public static LocString NAME = "Solitary Sleeper";
+
+					public static LocString DESC = "This Duplicant prefers to sleep alone";
+				}
+
+				public class PREFERSWARMER
+				{
+					public static LocString NAME = "Skinny";
+
+					public static LocString DESC = "This Duplicant doesn't have much insulation, so they are more temperature sensitive than others";
+				}
+
+				public class PREFERSCOOLER
+				{
+					public static LocString NAME = "Pudgy";
+
+					public static LocString DESC = "This Duplicant has some extra insulation, so the room temperature affects them a little less";
+				}
+
+				public class SENSITIVEFEET
+				{
+					public static LocString NAME = "Delicate Feetsies";
+
+					public static LocString DESC = "This Duplicant is a sensitive sole and would rather walk on tile floorings than bedrock";
+				}
+
+				public class WORKAHOLIC
+				{
+					public static LocString NAME = "Workaholic";
+
+					public static LocString DESC = "This Duplicant gets antsy when left idle";
+				}
+			}
+
 			public class CANTRESEARCH
 			{
 				public static LocString NAME = "Yokel";
 
-				public static LocString DESC = "This Duplicant isn't the brightest star in the sky";
+				public static LocString DESC = "This Duplicant isn't the brightest star in the solar system";
 			}
 
 			public class CANTBUILD
@@ -2002,7 +2433,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Can't Dig It";
 
-				public static LocString DESC = "This Duplicant just can't operate a dig tool for the life of them";
+				public static LocString DESC = "This Duplicant can't operate a dig tool for the life of them";
 			}
 
 			public class MOUTHBREATHER
@@ -2026,11 +2457,39 @@ namespace STRINGS
 				public static LocString DESC = "This Duplicant is light as a feather on their feet";
 			}
 
+			public class STRONGARM
+			{
+				public static LocString NAME = "Buff";
+
+				public static LocString DESC = "This Duplicant is very strong and cool";
+			}
+
+			public class NOODLEARMS
+			{
+				public static LocString NAME = "Noodle Arms";
+
+				public static LocString DESC = "This Duplicant's arms have all the tensile strength of an overcooked linguine";
+			}
+
 			public class AGGRESSIVE
 			{
 				public static LocString NAME = "Destructive";
 
 				public static LocString DESC = "This Duplicant will take out their frustrations on defenseless machines when stressed";
+			}
+
+			public class UGLYCRIER
+			{
+				public static LocString NAME = "Ugly Crier";
+
+				public static LocString DESC = "Things won't be pretty if this Duplicant gets too stressed";
+			}
+
+			public class BINGEEATER
+			{
+				public static LocString NAME = "Binge Eater";
+
+				public static LocString DESC = "This Duplicant will dangerously overeat when stressed";
 			}
 
 			public class ANXIOUS
@@ -2186,7 +2645,7 @@ namespace STRINGS
 
 				public static LocString DESC = "This Duplicant wakes up feeling fresh and efficient!";
 
-				public static LocString EXTENDED_DESC = "In the first part of the day, adds <style=\"produced\">{0}</style> to all skills.";
+				public static LocString EXTENDED_DESC = "Adds <style=\"produced\">{0}</style> to all skills at morning, removes them at night";
 			}
 
 			public class NIGHTOWL
@@ -2199,39 +2658,18 @@ namespace STRINGS
 
 		public class PERSONALITIES
 		{
-			public class ELEANOR
+			public class CATALINA
 			{
-				public static LocString NAME = "Eleanor";
+				public static LocString NAME = "Catalina";
 
-				public static LocString DESC = "A severe climate requires a severe woman. This {0} is that woman.";
-			}
-
-			public class BEA
-			{
-				public static LocString NAME = "Bea";
-
-				public static LocString DESC = "A little ray of sunshine in a bleak world, {0}s loves people and they love her right back.";
+				public static LocString DESC = "A {0} is admired by all for her seemingly tireless work ethic. Little do people know, she's dying on the inside.";
 			}
 
 			public class NISBET
 			{
 				public static LocString NAME = "Nisbet";
 
-				public static LocString DESC = "{0}s like to punch people to show their affection. Everyone's too afraid to tell them it sort of hurts.";
-			}
-
-			public class MILDRED
-			{
-				public static LocString NAME = "Mildred";
-
-				public static LocString DESC = "The world's a tad too complex for this here {0}, but good golly gosh if she doesn't try her darnedest.";
-			}
-
-			public class ELVIRA
-			{
-				public static LocString NAME = "Elvira";
-
-				public static LocString DESC = "This {0} can't remember a time when she wasn't blanketed in the cold embrace of darkness.";
+				public static LocString DESC = "This {0} likes to punch people to show her affection. Everyone's too afraid of her to tell her it hurts.";
 			}
 
 			public class ELLIE
@@ -2241,34 +2679,6 @@ namespace STRINGS
 				public static LocString DESC = "Nothing makes an {0} happier than a big tin of glitter and a pack of unicorn stickers.";
 			}
 
-			public class DORRIS
-			{
-				public static LocString NAME = "Dorris";
-
-				public static LocString DESC = "This {0} wakes up every day of her life with an urge to clip coupons for stores that don't exist.";
-			}
-
-			public class MYSTIQUE
-			{
-				public static LocString NAME = "Mystique";
-
-				public static LocString DESC = "{0}s defy all labels.";
-			}
-
-			public class YVETTE
-			{
-				public static LocString NAME = "Yvette";
-
-				public static LocString DESC = "A {0}'s every waking moment is plagued by her terrible genetic curse... a horrifyingly acute sense of smell.";
-			}
-
-			public class SHANNON
-			{
-				public static LocString NAME = "Shannon";
-
-				public static LocString DESC = "Some have described {0}s as \"paranoid\". They prefer the term \"prepared\".";
-			}
-
 			public class RUBY
 			{
 				public static LocString NAME = "Ruby";
@@ -2276,67 +2686,11 @@ namespace STRINGS
 				public static LocString DESC = "This {0} asks the pressing questions, like \"Where can I get a leather jacket in space?\"";
 			}
 
-			public class CASS
+			public class LEIRA
 			{
-				public static LocString NAME = "Cass";
+				public static LocString NAME = "Leira";
 
-				public static LocString DESC = "This {0} is painfully aware that she spits when she talks. She avoids joining in on most conversations because of it.";
-			}
-
-			public class ROSALIND
-			{
-				public static LocString NAME = "Rosalind";
-
-				public static LocString DESC = "Sometimes this {0} feels like she'd have to keel over to get people to notice her.";
-			}
-
-			public class STACY
-			{
-				public static LocString NAME = "Stacy";
-
-				public static LocString DESC = "A {0} can somehow talk for hours and say absolutely nothing. It's a feat to behold!";
-			}
-
-			public class ERNESTINE
-			{
-				public static LocString NAME = "Ernestine";
-
-				public static LocString DESC = "This {0} has one stubborn hair on her chin that plucking never seems to deter. It's okay though, she's growing attached to it.";
-			}
-
-			public class NADIA
-			{
-				public static LocString NAME = "Nadia";
-
-				public static LocString DESC = "The burden of living is just too much for some people. Like this {0}, for instance.";
-			}
-
-			public class VIOLA
-			{
-				public static LocString NAME = "Viola";
-
-				public static LocString DESC = "Small, gentle, quiet. {0}s always look as if the slightest breeze might shatter them.";
-			}
-
-			public class METRODORA
-			{
-				public static LocString NAME = "Metrodora";
-
-				public static LocString DESC = "{0}s love watching old black and white films, especially if they have robots in them.";
-			}
-
-			public class TILLY
-			{
-				public static LocString NAME = "Tilly";
-
-				public static LocString DESC = "{0}s like to frequently and loudly remind everyone of the pointlessness of existence.";
-			}
-
-			public class BLANCHE
-			{
-				public static LocString NAME = "Blanche";
-
-				public static LocString DESC = "{0}s have zero redeeming qualities. People only ever keep them around because they make genius puns.";
+				public static LocString DESC = "{0}s just want everyone to be happy.";
 			}
 
 			public class BUBBLES
@@ -2346,13 +2700,6 @@ namespace STRINGS
 				public static LocString DESC = "This {0} is constantly challenging others to fight her, regardless of whether or not she can actually take them.";
 			}
 
-			public class SYBIL
-			{
-				public static LocString NAME = "Sybil";
-
-				public static LocString DESC = "{0}s always get what they want... Even when they shouldn't.";
-			}
-
 			public class MIMA
 			{
 				public static LocString NAME = "Mi-Ma";
@@ -2360,32 +2707,11 @@ namespace STRINGS
 				public static LocString DESC = "Ol' {0} here can't stand lookin' at people's knees.";
 			}
 
-			public class SUKI
-			{
-				public static LocString NAME = "Suki";
-
-				public static LocString DESC = "{0}s have grins like sharks and stares to pierce through your soul.";
-			}
-
 			public class NAILS
 			{
 				public static LocString NAME = "Nails";
 
-				public static LocString DESC = "People usually expect a Duplicant named \"{0}\" to be tough, but they're all pretty huge wimps.";
-			}
-
-			public class PAM
-			{
-				public static LocString NAME = "Pam";
-
-				public static LocString DESC = "No one ever asks for a {0}'s bad opinions, but she's always happy to offer them anyway.";
-			}
-
-			public class OLIVE
-			{
-				public static LocString NAME = "Olive";
-
-				public static LocString DESC = "This {0} feels like there's an emotional wall between themself and the world that their multitool just can't penetrate.";
+				public static LocString DESC = "People often expect a Duplicant named \"{0}\" to be tough, but they're all pretty huge wimps.";
 			}
 
 			public class MAE
@@ -2395,25 +2721,11 @@ namespace STRINGS
 				public static LocString DESC = "There's nothing a {0} can't do if she sets her mind to it.";
 			}
 
-			public class KATRIN
+			public class GOSSMANN
 			{
-				public static LocString NAME = "Katrin";
+				public static LocString NAME = "Gossmann";
 
-				public static LocString DESC = "{0}s have trouble making eye contact in conversation, but no one really minds. They know she's listening.";
-			}
-
-			public class JOSIE
-			{
-				public static LocString NAME = "Josie";
-
-				public static LocString DESC = "A {0} is admired by all for her seemingly tireless work ethic. Little do people know, she's dying on the inside.";
-			}
-
-			public class GOSSMAN
-			{
-				public static LocString NAME = "Gossman";
-
-				public static LocString DESC = "{0}s love baseball and dogs, neither of which exist in space. It's been a bit of an ordeal for her.";
+				public static LocString DESC = "{0}s are big goofballs who can make anyone laugh.";
 			}
 
 			public class MARIE
@@ -2423,123 +2735,39 @@ namespace STRINGS
 				public static LocString DESC = "This {0} is positively glowing! What's her secret? Radioactive isotopes, of course.";
 			}
 
-			public class BRAYNEN
+			public class LINDSAY
 			{
-				public static LocString NAME = "Braynen";
+				public static LocString NAME = "Lindsay";
 
-				public static LocString DESC = "This {0} is severely disappointed by the colony's lack of cute, pudgy birds.";
+				public static LocString DESC = "A {0} is a charming, delightful woman, unless you make the mistake of messing with one of her friends.";
 			}
 
-			public class MOZZARELLA
+			public class DEVON
 			{
-				public static LocString NAME = "Mozzarella";
-
-				public static LocString DESC = "World... too... bright....";
-			}
-
-			public class FRAN
-			{
-				public static LocString NAME = "Fran";
+				public static LocString NAME = "Devon";
 
 				public static LocString DESC = "This {0} dreams of owning their own personal computer so they can start a blog full of pictures of toast.";
 			}
 
-			public class SADIE
+			public class REN
 			{
-				public static LocString NAME = "Sadie";
+				public static LocString NAME = "Ren";
 
-				public static LocString DESC = "This {0} never clips her fingernails. The unchecked growth is starting to get a little unsettling.";
+				public static LocString DESC = "Every {0} has this unshakable feeling that his life's already happened and he's just watching it unfold from a memory.";
 			}
 
-			public class MINGMEI
+			public class FRANKIE
 			{
-				public static LocString NAME = "Ming-Mei";
-
-				public static LocString DESC = "One time a {0} declared herself mayor of the colony for a whole week and no one even questioned it.";
-			}
-
-			public class RED
-			{
-				public static LocString NAME = "Red";
-
-				public static LocString DESC = "{0}s are completely incapable of distinguishing between positive and negative attention, much to the colony's dismay.";
-			}
-
-			public class MAHA
-			{
-				public static LocString NAME = "Maha";
-
-				public static LocString DESC = "{0}s always snort when they laugh. It's the worst.";
-			}
-
-			public class CELESTE
-			{
-				public static LocString NAME = "Celeste";
-
-				public static LocString DESC = "This {0} is paralyzed by the knowledge that others have memories and perceptions of her she can't control.";
-			}
-
-			public class MELODY
-			{
-				public static LocString NAME = "Melody";
-
-				public static LocString DESC = "Who wants to hear the song this {0} wrote about her last breakup? ...Anyone?";
-			}
-
-			public class CAMILLA
-			{
-				public static LocString NAME = "Camilla";
-
-				public static LocString DESC = "This {0} has a dark, terrible secret... She LOVES scrapbooking.";
-			}
-
-			public class NORI
-			{
-				public static LocString NAME = "Nori";
-
-				public static LocString DESC = "Get a bunch of {0}s together in a room and you'll have... a bunch of {0}s together in a room.";
-			}
-
-			public class PEIJING
-			{
-				public static LocString NAME = "Peijing";
-
-				public static LocString DESC = "Everyone who meets a {0} has to admit that they are, in fact, extremely cool.";
-			}
-
-			public class ISAMU
-			{
-				public static LocString NAME = "Isamu";
-
-				public static LocString DESC = "This {0} traps people in long conversations about her \"novel\", but she's never once sat down to actually write it.";
-			}
-
-			public class LEAH
-			{
-				public static LocString NAME = "Leah";
+				public static LocString NAME = "Frankie";
 
 				public static LocString DESC = "There's nothing {0}s are more proud of than their thick, dignified eyebrows.";
 			}
 
-			public class MOON
+			public class BANHI
 			{
-				public static LocString NAME = "Moon";
+				public static LocString NAME = "Banhi";
 
-				public static LocString DESC = "A {0}'s monotonous voice and lack of facial expression make it impossible for others to tell when she's messing with them.";
-			}
-
-			public class BERTIE
-			{
-				public static LocString NAME = "Bertie";
-
-				public static LocString DESC = "This {0} is convinced she can remember bits of her past prints. Everyone else is convinced she's making it up.";
-			}
-
-			public class GRUNGY
-			{
-				public static LocString NAME = "Grungy";
-
-				public static LocString DESC = "A {0} deeply relishes the feeling of dirt beneath her nails.";
+				public static LocString DESC = "The \"cool loner\" vibes that radiate off a {0} never fail to make the colony swoon.";
 			}
 
 			public class ADA
@@ -2547,27 +2775,6 @@ namespace STRINGS
 				public static LocString NAME = "Ada";
 
 				public static LocString DESC = "{0}s enjoy writing poetry in their downtime. Dark poetry.";
-			}
-
-			public class NEIL
-			{
-				public static LocString NAME = "Neil";
-
-				public static LocString DESC = "{0}s generally like to wear strange and unusual hats to compensate for their total lack of personality.";
-			}
-
-			public class DAN
-			{
-				public static LocString NAME = "Dan";
-
-				public static LocString DESC = "Every {0} has this unshakable feeling that his life has already happened and he's just watching it as if in a movie.";
-			}
-
-			public class GABRIEL
-			{
-				public static LocString NAME = "Gabriel";
-
-				public static LocString DESC = "{0}s are spoiled rotten, but at least they have great hair.";
 			}
 
 			public class HASSAN
@@ -2581,14 +2788,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Stinky";
 
-				public static LocString DESC = "This {0} has never been invited to a party, which is a shame... his dance moves are incredible.";
-			}
-
-			public class FERGUS
-			{
-				public static LocString NAME = "Fergus";
-
-				public static LocString DESC = "{0}es are well known for being wholly incorrigible pranksters.";
+				public static LocString DESC = "This {0} has never been invited to a party, which is a shame. His dance moves are incredible.";
 			}
 
 			public class JOSHUA
@@ -2598,109 +2798,25 @@ namespace STRINGS
 				public static LocString DESC = "{0}s are precious goobers. Other Duplicants are strangely incapable of cursing in a {0}'s presence.";
 			}
 
-			public class HORATIO
-			{
-				public static LocString NAME = "Horatio";
-
-				public static LocString DESC = "{0}s always feel as if someone is staring at them, although people rarely are.";
-			}
-
-			public class LENNY
-			{
-				public static LocString NAME = "Lenny";
-
-				public static LocString DESC = "Dirt's great. Space's great. Everything's great, according to {0}s.";
-			}
-
-			public class KARL
-			{
-				public static LocString NAME = "Karl";
-
-				public static LocString DESC = "Every single {0} has perpetually damp hands. It must be genetic.";
-			}
-
-			public class JASPER
-			{
-				public static LocString NAME = "Jasper";
-
-				public static LocString DESC = "{0}s just want to dance!";
-			}
-
 			public class ABE
 			{
 				public static LocString NAME = "Abe";
 
-				public static LocString DESC = "{0}s are sweet, delicate flowers. They need to be treated gingerly, and with great consideration for their feelings.";
-			}
-
-			public class HUGH
-			{
-				public static LocString NAME = "Hugh";
-
-				public static LocString DESC = "A {0} is truly a man stuck in the past. And in a space colony.";
-			}
-
-			public class ZEKE
-			{
-				public static LocString NAME = "Zeke";
-
-				public static LocString DESC = "A {0}'s snobby exterior is a defense to protect the kind, mushy heart that lurks within.";
-			}
-
-			public class JACK
-			{
-				public static LocString NAME = "Jack";
-
-				public static LocString DESC = "A lifetime of running from his responsibilities has made this {0} emotionally impenetrable.";
-			}
-
-			public class RALPH
-			{
-				public static LocString NAME = "Ralph";
-
-				public static LocString DESC = "Everyone feels slightly more irritable after having spent time with a {0}.";
+				public static LocString DESC = "{0}s are sweet, delicate flowers. They need to be treated gingerly, with great consideration for their feelings.";
 			}
 
 			public class BURT
 			{
 				public static LocString NAME = "Burt";
 
-				public static LocString DESC = "Only the bleak void of space could understand the depths of a {0}'s tortured soul.";
+				public static LocString DESC = "Every single {0} has perpetually damp hands. It must be genetic.";
 			}
 
-			public class HOWARD
+			public class TRAVALDO
 			{
-				public static LocString NAME = "Howard";
+				public static LocString NAME = "Travaldo";
 
-				public static LocString DESC = "This {0} can control a room with his exceptionally loud sneezes.";
-			}
-
-			public class VIRGIL
-			{
-				public static LocString NAME = "Virgil";
-
-				public static LocString DESC = "{0}s are overcome with childlike wonder at the infinite nature of the universe.";
-			}
-
-			public class PRICE
-			{
-				public static LocString NAME = "Price";
-
-				public static LocString DESC = "This {0} once had dreams of becoming a doctor, but sadly he's averse to the sight of blood.";
-			}
-
-			public class WOODROW
-			{
-				public static LocString NAME = "Woodrow";
-
-				public static LocString DESC = "{0}s are exceptionally bad at reading social cues and never know when to stop talking.";
-			}
-
-			public class GUS
-			{
-				public static LocString NAME = "Gus";
-
-				public static LocString DESC = "This {0} just wants everyone to be happy.";
+				public static LocString DESC = "A {0}'s monotonous voice and lack of facial expression makes it impossible for others to tell when he's messing with them.";
 			}
 
 			public class HAROLD
@@ -2710,30 +2826,9 @@ namespace STRINGS
 				public static LocString DESC = "This {0} is cripplingly self-conscious of his long middle toes.";
 			}
 
-			public class VERNON
+			public class MAX
 			{
-				public static LocString NAME = "Vernon";
-
-				public static LocString DESC = "The colony's managed to convince this {0} he's totally and completely unique. It's hilarious!";
-			}
-
-			public class FLOYD
-			{
-				public static LocString NAME = "Floyd";
-
-				public static LocString DESC = "{0}s have a theory that no matter what time it is, it's always actually 3AM.";
-			}
-
-			public class MAMORU
-			{
-				public static LocString NAME = "Mamoru";
-
-				public static LocString DESC = "The \"cool loner\" vibes that radiate off a {0} never fail to make the colony swoon.";
-			}
-
-			public class QUINCY
-			{
-				public static LocString NAME = "Quincy";
+				public static LocString NAME = "Max";
 
 				public static LocString DESC = "At any given moment a {0} is viscerally reliving ten different humiliating memories.";
 			}
@@ -2742,28 +2837,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Rowan";
 
-				public static LocString DESC = "{0}s have good hearts and express their emotions most efficiently by yelling.";
-			}
-
-			public class ARCHIBALD
-			{
-				public static LocString NAME = "Archibald";
-
-				public static LocString DESC = "The colony is convinced that this {0} was some sort of fancy monarch in a past life.";
-			}
-
-			public class MAX
-			{
-				public static LocString NAME = "Max";
-
-				public static LocString DESC = "{0}es are painfully gullible, and other Duplicants like to take advantage of it every chance they get.";
-			}
-
-			public class SPIKE
-			{
-				public static LocString NAME = "Spike";
-
-				public static LocString DESC = "{0}s detest small spaces. You can imagine how they feel about the colony.";
+				public static LocString DESC = "{0}s have exceptionally large hearts and express their emotions most efficiently by yelling.";
 			}
 
 			public class OTTO
@@ -2773,130 +2847,39 @@ namespace STRINGS
 				public static LocString DESC = "{0}s always insult people by accident and exist in a perpetual state of deep regret.";
 			}
 
-			public class EUGENE
-			{
-				public static LocString NAME = "Eugene";
-
-				public static LocString DESC = "Once you get a {0} talking it's impossible to get them to stop. Chitchat at your own risk.";
-			}
-
 			public class TURNER
 			{
 				public static LocString NAME = "Turner";
 
-				public static LocString DESC = "{0}s alway packs a juice box on their way to political protests.";
-			}
-
-			public class LONGWEI
-			{
-				public static LocString NAME = "Longwei";
-
-				public static LocString DESC = "This {0} picks his nose when he thinks no one's watching. Thankfully, he never eats it.";
-			}
-
-			public class HIDEKI
-			{
-				public static LocString NAME = "Hideki";
-
-				public static LocString DESC = "This {0} is consumed by a deep, soulful weariness that no amount of sleep could possibly vanquish.";
-			}
-
-			public class SETH
-			{
-				public static LocString NAME = "Seth";
-
-				public static LocString DESC = "Sometimes the colony sends {0}s on fake \"spelunking missions\" to get some peace and quiet.";
-			}
-
-			public class SAUL
-			{
-				public static LocString NAME = "Saul";
-
-				public static LocString DESC = "This {0}'s the kind of guy who'd pull the legs off a Hatch for fun.";
-			}
-
-			public class WILL
-			{
-				public static LocString NAME = "Will";
-
-				public static LocString DESC = "{0}s have great hair and are always about ten seconds away from starving to death.";
-			}
-
-			public class BRADY
-			{
-				public static LocString NAME = "Brady";
-
-				public static LocString DESC = "{0}s are pretty cool when they can manage to suppress their natural narcissism.";
-			}
-
-			public class CECIL
-			{
-				public static LocString NAME = "Cecil";
-
-				public static LocString DESC = "There's a technical term for a {0}'s personality... \"Dweeb\".";
+				public static LocString DESC = "This {0} is paralyzed by the knowledge that others have memories and perceptions of them they can't control.";
 			}
 
 			public class NIKOLA
 			{
 				public static LocString NAME = "Nikola";
 
-				public static LocString DESC = "This {0} once claimed he could build a laser so powerful it would rip the colony in half. No one dared him to prove it.";
-			}
-
-			public class ELVIS
-			{
-				public static LocString NAME = "Elvis";
-
-				public static LocString DESC = "Every {0} is convinced he was printed in the wrong generation... And on the wrong celestial body.";
-			}
-
-			public class PIERRE
-			{
-				public static LocString NAME = "Pierre";
-
-				public static LocString DESC = "Big softies with a tendency to nag, {0}s sometimes feel like the mothers the other Duplicants never had.";
-			}
-
-			public class CHUANLI
-			{
-				public static LocString NAME = "Chuanli";
-
-				public static LocString DESC = "A {0}'s one dream is to shed their mortal coil and converge with all of time and space. It shouldn't be too much to ask.";
-			}
-
-			public class BERTRAND
-			{
-				public static LocString NAME = "Bertrand";
-
-				public static LocString DESC = "This {0} always feels great after a bubble bath and a good long cry.";
-			}
-
-			public class CASPER
-			{
-				public static LocString NAME = "Casper";
-
-				public static LocString DESC = "This {0} can't wait to die so their poetry can be appreciated posthumously.";
+				public static LocString DESC = "This {0} once claimed he could build a laser so powerful it would rip the colony in half. No one asked him to prove it.";
 			}
 
 			public class MEEP
 			{
 				public static LocString NAME = "Meep";
 
-				public static LocString DESC = "{0}s have a face only a twelve tonne DNA Replicator could love.";
+				public static LocString DESC = "{0}s have a face only a twelve tonne Printing Pod could love.";
 			}
 
-			public class MCNAIR
+			public class J
 			{
-				public static LocString NAME = "McNair";
+				public static LocString NAME = "Berkeley";
 
-				public static LocString DESC = "All of space is brightened by a {0}'s dazzling smile.";
+				public static LocString DESC = "0100111001001111010101000101001001001001010001110100100001010100010011100100111101010100010010000100010101010010";
 			}
 
-			public class GRUB
+			public class A
 			{
-				public static LocString NAME = "Grub";
+				public static LocString NAME = "Yates";
 
-				public static LocString DESC = "{0}s think plants are neat.";
+				public static LocString DESC = "010011100100111101010100010011010100010101001110010011110101010001001101010001010100111001001111010101000100110101000101";
 			}
 		}
 
@@ -2906,11 +2889,57 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Decor Expectation";
 
-				public static LocString PROFESSION_NAME = string.Empty;
+				public static LocString PROFESSION_NAME = "Critic";
 
 				public static LocString OBSERVED_DECOR = "Surroundings";
 
-				public static LocString EXPECTATION_TOOLTIP = "Areas with <style=\"decor\">Decor</style> values lower than a Duplicant's <style=\"decor\">Decor Expectations</style> will cause their <style=\"stress\">Stress</style>\nto rise, while high decor values will cause their stress to fall.\n\nA Duplicant's expectations will increase as they level up and become better at their jobs.";
+				public static LocString EXPECTATION_TOOLTIP = "Most objects have <style=\"decor\">Decor</style> values that can increase or decrease a Duplicant's opinion of their surroundings.\n\nThis Duplicant requires {0} or higher decor values, and will become <style=\"stress\">Stressed</style> in areas with lower decor.";
+			}
+
+			public class FOOD_QUALITY
+			{
+				public static LocString NAME = "Food Quality";
+
+				public static LocString PROFESSION_NAME = "Gourmet";
+
+				public static LocString EXPECTATION_TOOLTIP = "Food Quality Expectation is the minimum quality of <style=\"food\">Food</style> a Duplicant can tolerate eating.\n\nThis Duplicant requires {0} or higher food, and will become <style=\"stress\">Stressed</style> if to forced to eat lower quality foods.";
+
+				public static LocString BAD_FOOD_MOD = "Food Quality";
+
+				public static LocString NORMAL_FOOD_MOD = "Food Quality";
+
+				public static LocString GOOD_FOOD_MOD = "Food Quality";
+
+				public static LocString ADJECTIVE_FORMAT_POSITIVE = "{0} (<style=\"produced\">{1}</style>)";
+
+				public static LocString ADJECTIVE_FORMAT_NEGATIVE = "{0} (<style=\"consumed\">{1}</style>)";
+
+				public static LocString TOOLTIP = "{0}";
+
+				public static LocString FOODQUALITY = "\nFood Quality Score of {0}";
+
+				public static LocString FOODQUALITY_EXPECTATION = "\nThis Duplicant is content to eat food with a Quality Score of {0} or higher";
+
+				public static int ADJECTIVE_INDEX_OFFSET = -3;
+
+				public class ADJECTIVES
+				{
+					public static LocString MINUS_3 = "Grisly";
+
+					public static LocString MINUS_2 = "Terrible";
+
+					public static LocString MINUS_1 = "Poor";
+
+					public static LocString ZERO = "Standard";
+
+					public static LocString PLUS_1 = "Good";
+
+					public static LocString PLUS_2 = "Great";
+
+					public static LocString PLUS_3 = "Superb";
+
+					public static LocString PLUS_4 = "Ambrosial";
+				}
 			}
 		}
 
@@ -2918,9 +2947,9 @@ namespace STRINGS
 		{
 			public static LocString UNPROFESSIONAL_NAME = "Lump";
 
-			public static LocString UNPROFESSIONAL_DESC = "This Duplicant has no discernible skills to speak of";
+			public static LocString UNPROFESSIONAL_DESC = "This Duplicant has no discernible skills";
 
-			public static LocString PROFESSION_DESC = "This Duplicant is most proficient at {0}";
+			public static LocString PROFESSION_DESC = "This Duplicant's highest attribute is {0}\n----------\nDuplicants develop higher expectations as their profession level increases";
 
 			public class CONSTRUCTION
 			{
@@ -2966,13 +2995,20 @@ namespace STRINGS
 				public static LocString SPEEDMODIFIER = "$value% Movement Speed";
 			}
 
+			public class SNEEZYNESS
+			{
+				public static LocString NAME = "Sneeziness";
+
+				public static LocString DESC = "The Sneeziness attribute determines how frequently a Duplicant sneezes.";
+			}
+
 			public class LEARNING
 			{
 				public static LocString NAME = "Learning";
 
 				public static LocString PROFESSION_NAME = "Scientist";
 
-				public static LocString DESC = "The Learning attribute determines a Duplicant's skill training and <style=\"research\">Research</style> effectiveness.";
+				public static LocString DESC = "The Learning attribute determines a Duplicant's <style=\"research\">Research</style> effectiveness and rate of skill level gain.";
 
 				public static LocString SPEEDMODIFIER = "$value% Skill Leveling";
 
@@ -2985,7 +3021,7 @@ namespace STRINGS
 
 				public static LocString PROFESSION_NAME = "Chef";
 
-				public static LocString DESC = "The Cooking attribute determines a Duplicant's <style=\"food\">Food</style> production speed.";
+				public static LocString DESC = "The Cooking attribute determines a Duplicant's speed when preparing <style=\"food\">Food</style>.";
 
 				public static LocString SPEEDMODIFIER = "$value% Cooking Speed";
 			}
@@ -2996,7 +3032,7 @@ namespace STRINGS
 
 				public static LocString PROFESSION_NAME = string.Empty;
 
-				public static LocString DESC = "The Insulation attribute determines how much a Duplicant's temperature fluctuates with their environment's.";
+				public static LocString DESC = "The Insulation attribute determines a Duplicant's innate ability to retain or lose body heat in any given environment.";
 
 				public static LocString SPEEDMODIFIER = "$value% Temperature Retention";
 			}
@@ -3020,28 +3056,42 @@ namespace STRINGS
 
 				public static LocString DESC = "The Strength attribute determines a Duplicant's carrying capacity and combat effectiveness.";
 
-				public static LocString SPEEDMODIFIER = "$value% Carrying Weight";
+				public static LocString SPEEDMODIFIER = "$value Carrying Weight";
 			}
 
 			public class DECOR
 			{
 				public static LocString NAME = "Decor";
 
-				public static LocString DESC = "<style=\"decor\">Decor</style> affects a Duplicant's Room Opinion.";
+				public static LocString DESC = "<style=\"decor\">Decor</style> affects a Duplicant's <style=\"decor\">Stress</style> and their opinion of their surroundings.";
+			}
+
+			public class THERMALCONDUCTIVITYBARRIER
+			{
+				public static LocString NAME = "Insulation Thickness";
+
+				public static LocString TOOLTIP = "Insulation Thickness determines how quickly a Duplicant retains or loses body <style=\"heat\">Heat</style> in any given area.\n\nIt is the sum of a Duplicant's equipment and their natural Insulation values.";
 			}
 
 			public class DECORRADIUS
 			{
 				public static LocString NAME = "Decor Radius";
 
-				public static LocString DESC = "Distance of the <style=\"decor\">Decor</style> effect.";
+				public static LocString DESC = "Distance of a item's <style=\"decor\">Decor</style> effect.";
 			}
 
 			public class DECOREXPECTATION
 			{
 				public static LocString NAME = "Decor Expectation";
 
-				public static LocString DESC = "Not meeting a Duplicant's expectations increases their <style=\"stress\">Stress</style>.";
+				public static LocString DESC = "Not meeting a Duplicant's <style=\"decor\">Decor</style> expectations will increase their <style=\"stress\">Stress</style>.";
+			}
+
+			public class FOODEXPECTATION
+			{
+				public static LocString NAME = "Food Quality Expectation";
+
+				public static LocString DESC = "Not meeting a Duplicant's <style=\"food\">Food</style> expectations will increase their <style=\"stress\">Stress</style>.";
 			}
 
 			public class HYGIENE
@@ -3070,14 +3120,14 @@ namespace STRINGS
 
 				public static LocString PROFESSION_NAME = string.Empty;
 
-				public static LocString DESC = "The Air Consumption attribute determines how much <style=\"oxygen\">Oxygen</style> per minute a Duplicant requires to live.";
+				public static LocString DESC = "Air Consumption determines how much <style=\"oxygen\">Oxygen</style> a Duplicant requires per minute to live.";
 			}
 
 			public class STRESSDELTA
 			{
 				public static LocString NAME = "Stress Change";
 
-				public static LocString DESC = "Modifies the rate at which a Duplicant's <style=\"stress\">Stress</style> changes.";
+				public static LocString DESC = "Determines how quickly a Duplicant gains or reduces <style=\"stress\">Stress</style>.";
 			}
 
 			public class BLADDERDELTA
@@ -3089,7 +3139,7 @@ namespace STRINGS
 
 			public class CALORIESDELTA
 			{
-				public static LocString NAME = "Calories Burn Rate";
+				public static LocString NAME = "Calories Change Rate";
 
 				public static LocString DESC = string.Empty;
 			}
@@ -3114,7 +3164,16 @@ namespace STRINGS
 
 				public static LocString PROFESSION_NAME = string.Empty;
 
-				public static LocString DESC = "Modifies the speed with which a Duplicant completes their \"personal business\".";
+				public static LocString DESC = "Determines how long a Duplicant needs to do their \"business\".";
+			}
+
+			public class ROOMTEMPERATUREPREFERENCE
+			{
+				public static LocString NAME = "Temperature Preference";
+
+				public static LocString PROFESSION_NAME = string.Empty;
+
+				public static LocString DESC = "Determines the minimum body heat a Duplicant prefers to maintain.";
 			}
 
 			public class MAXUNDERWATERTRAVELCOST
@@ -3124,6 +3183,20 @@ namespace STRINGS
 				public static LocString PROFESSION_NAME = string.Empty;
 
 				public static LocString DESC = string.Empty;
+			}
+
+			public class OVERHEATTEMPERATURE
+			{
+				public static LocString NAME = "Overheat Temperature";
+
+				public static LocString DESC = "A building at Overheat <style=\"heat\">Temperature</style> will take damage and melt down if not cooled";
+			}
+
+			public class FATALTEMPERATURE
+			{
+				public static LocString NAME = "Meltdown Temperature";
+
+				public static LocString DESC = "A building at Meltdown <style=\"heat\">Temperature</style> will lose functionality and take damage";
 			}
 		}
 
@@ -3187,6 +3260,16 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Poor Decor";
 			}
 
+			public class POOR_FOOD_QUALITY
+			{
+				public static LocString TOOLTIP = "Lousy Meal";
+			}
+
+			public class GOOD_FOOD_QUALITY
+			{
+				public static LocString TOOLTIP = "Delicious Meal";
+			}
+
 			public class SLEEPY
 			{
 				public static LocString TOOLTIP = "Sleepy";
@@ -3224,7 +3307,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Relaxing";
 
-				public static LocString DESCRIPTION = "Reduces <style=\"stress\">Stress</style> by {0}/day";
+				public static LocString DESCRIPTION = "Reduces <style=\"stress\">Stress</style> by {0}/cycle";
 			}
 		}
 	}

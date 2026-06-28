@@ -12,9 +12,4 @@ public static class TagExtensions
 	{
 		return TagManager.GetProperName(tag);
 	}
-
-	public static string UnitOfMeasurement(this Tag tag)
-	{
-		return TagManager.GetUnitOfMeasurement(tag);
-	}
 }

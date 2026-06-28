@@ -1,18 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class KButton : Button
+public class KButton : KMonoBehaviour, IPointerClickHandler, IEventSystemHandler, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
 {
-	public new event global::System.Action onClick;
-
-	public event global::System.Action onClickUp;
-
-	public event global::System.Action onClickDown;
+	public event global::System.Action onClick;
 
 	public event global::System.Action onDoubleClick;
+
+	public bool isInteractable
+	{
+		get
+		{
+			return this.interactable;
+		}
+		set
+		{
+			this.interactable = value;
+			this.UpdateColor(this.interactable, this.mouseOver, false);
+		}
+	}
 
 	public bool GetMouseOver
 	{
@@ -22,43 +30,16 @@ public class KButton : Button
 		}
 	}
 
-	[ContextMenu("Initialize Colors")]
-	private void InitializeColors()
+	protected override void OnPrefabInit()
 	{
-		if (this.colorStyleSetting != null)
-		{
-			if (base.targetGraphic == null)
-			{
-				Debug.LogError("The KButton needs a target graphic in order to use a colorStyleSetting, please add one in the inspector.");
-				return;
-			}
-			base.targetGraphic.color = Color.white;
-			ColorBlock colors = base.colors;
-			colors.normalColor = this.colorStyleSetting.inactiveColor;
-			colors.highlightedColor = this.colorStyleSetting.hoverColor;
-			colors.disabledColor = this.colorStyleSetting.disabledColor;
-			colors.pressedColor = this.colorStyleSetting.activeColor;
-			base.colors = colors;
-		}
-	}
-
-	private new void Awake()
-	{
-		this.InitializeColors();
-		foreach (KeyValuePair<KButton.SoundType, string> keyValuePair in KButton.DefaultSounds)
-		{
-			this.currentSounds[keyValuePair.Key] = keyValuePair.Value;
-		}
+		base.OnPrefabInit();
+		this.UpdateColor(this.interactable, false, false);
 	}
 
 	public void ClearOnClick()
 	{
 		this.onClick = null;
-	}
-
-	public void ClearOnClickDown()
-	{
-		this.onClickDown = null;
+		this.onDoubleClick = null;
 	}
 
 	public void ClearOnPointerEnter()
@@ -66,43 +47,35 @@ public class KButton : Button
 		this.onPointerEnter = null;
 	}
 
-	public override void OnPointerUp(PointerEventData eventData)
+	public void OnPointerUp(PointerEventData eventData)
 	{
 		if (!KInputManager.isFocused)
 		{
 			return;
 		}
 		KInputManager.SetUserActive();
-		base.OnPointerUp(eventData);
-		if (base.interactable && this.onClickUp != null)
-		{
-			this.onClickUp();
-		}
+		this.UpdateColor(this.interactable, false, false);
 	}
 
-	public override void OnPointerDown(PointerEventData eventData)
+	public void OnPointerDown(PointerEventData eventData)
 	{
 		if (!KInputManager.isFocused)
 		{
 			return;
 		}
 		KInputManager.SetUserActive();
-		base.OnPointerUp(eventData);
-		if (base.interactable && this.onClickDown != null)
-		{
-			this.onClickDown();
-		}
+		this.UpdateColor(this.interactable, true, true);
+		this.PlayPointerDownSound();
 	}
 
-	public override void OnPointerClick(PointerEventData eventData)
+	public void OnPointerClick(PointerEventData eventData)
 	{
 		if (!KInputManager.isFocused)
 		{
 			return;
 		}
 		KInputManager.SetUserActive();
-		base.OnPointerClick(eventData);
-		if (base.interactable)
+		if (this.interactable)
 		{
 			if ((eventData.clickCount == 1 || this.onDoubleClick == null) && this.onClick != null)
 			{
@@ -112,20 +85,10 @@ public class KButton : Button
 			{
 				this.onDoubleClick();
 			}
-			this.PlaySound(KButton.SoundType.OnMouseClick);
-		}
-		else
-		{
-			this.PlaySound(KButton.SoundType.OnMouseClickNegative);
 		}
 	}
 
-	public void Deselect()
-	{
-		this.OnDeselect(null);
-	}
-
-	public void OnPointerEnter()
+	public void OnPointerEnter(PointerEventData eventData)
 	{
 		if (!KInputManager.isFocused)
 		{
@@ -140,12 +103,16 @@ public class KButton : Button
 				imageToggleState.OnHoverIn();
 			}
 		}
-		this.PlaySound(KButton.SoundType.OnMouseOver);
+		this.UpdateColor(this.interactable, true, false);
+		this.soundPlayer.Play(1);
 		this.mouseOver = true;
-		this.onPointerEnter.Signal();
+		if (this.onPointerEnter != null)
+		{
+			this.onPointerEnter();
+		}
 	}
 
-	public void OnPointerExit()
+	public void OnPointerExit(PointerEventData eventData)
 	{
 		if (!KInputManager.isFocused)
 		{
@@ -160,73 +127,79 @@ public class KButton : Button
 				imageToggleState.OnHoverOut();
 			}
 		}
+		this.UpdateColor(this.interactable, false, false);
 		this.mouseOver = false;
 		this.onPointerExit.Signal();
 	}
 
-	public override void OnPointerEnter(PointerEventData eventData)
+	private void UpdateColor(bool interactable, bool hover, bool press)
 	{
-		if (!KInputManager.isFocused)
+		if (this.bgImage == null)
 		{
-			return;
+			this.bgImage = base.GetComponent<KImage>();
+			string text = string.Empty;
+			Transform transform = this.transform;
+			for (int i = 0; i < 5; i++)
+			{
+				if (!(transform.parent != null))
+				{
+					break;
+				}
+				transform = transform.parent;
+				string name = transform.name;
+				text = string.Format("{0}/{1}", name, text);
+			}
+			if (this.bgImage == null)
+			{
+				return;
+			}
 		}
-		this.OnPointerEnter();
-		base.OnPointerEnter(eventData);
+		if (this.bgImage != null)
+		{
+			if (interactable)
+			{
+				if (press)
+				{
+					this.bgImage.ColorState = KImage.ColorSelector.Active;
+				}
+				else
+				{
+					this.bgImage.ColorState = ((!hover) ? KImage.ColorSelector.Inactive : KImage.ColorSelector.Hover);
+				}
+			}
+			else
+			{
+				this.bgImage.ColorState = ((!hover) ? KImage.ColorSelector.Disabled : KImage.ColorSelector.Disabled);
+			}
+		}
 	}
 
-	public override void OnPointerExit(PointerEventData eventData)
+	private void PlayPointerDownSound()
 	{
-		if (!KInputManager.isFocused)
+		if (!this.interactable || (this.soundPlayer.AcceptClickCondition != null && !this.soundPlayer.AcceptClickCondition()))
 		{
-			return;
+			this.soundPlayer.Play(2);
 		}
-		this.OnPointerExit();
-		base.OnPointerExit(eventData);
-	}
-
-	private void PlaySound(KButton.SoundType soundType)
-	{
-		if (!KInputManager.isFocused)
+		else
 		{
-			return;
-		}
-		if (!this.playSounds)
-		{
-			return;
-		}
-		if (this.currentSounds.ContainsKey(soundType))
-		{
-			KFMOD.PlayOneShot(this.currentSounds[soundType]);
+			this.soundPlayer.Play(0);
 		}
 	}
 
-	public void SetSound(KButton.SoundType soundType, string soundPath)
-	{
-		this.currentSounds[soundType] = soundPath;
-	}
+	[SerializeField]
+	public ButtonSoundPlayer soundPlayer;
 
-	public static Dictionary<KButton.SoundType, string> DefaultSounds = new Dictionary<KButton.SoundType, string>();
+	public ColorStyleSetting colorStyleSetting;
 
-	private Dictionary<KButton.SoundType, string> currentSounds = new Dictionary<KButton.SoundType, string>();
+	public KImage bgImage;
+
+	public Image fgImage;
 
 	public global::System.Action onPointerEnter;
 
 	public global::System.Action onPointerExit;
 
-	public Image bgImage;
-
-	public Image fgImage;
-
-	public ColorStyleSetting colorStyleSetting;
+	private bool interactable = true;
 
 	private bool mouseOver;
-
-	public bool playSounds = true;
-
-	public enum SoundType
-	{
-		OnMouseOver,
-		OnMouseClick,
-		OnMouseClickNegative
-	}
 }

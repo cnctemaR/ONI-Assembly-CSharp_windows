@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class ResearchType
 {
-	public ResearchType(string id, string name, string description, Color color, Recipe.Ingredient[] fabricationIngredients, float fabricationTime, string kAnim_ID, string[] fabricators, string recipeDescription)
+	public ResearchType(string id, string name, string description, Color color, Recipe.Ingredient[] fabricationIngredients, float fabricationTime, HashedString kAnim_ID, string[] fabricators, string recipeDescription)
 	{
 		this._id = id;
 		this._name = name;
@@ -12,22 +12,19 @@ public class ResearchType
 		this.CreatePrefab(fabricationIngredients, fabricationTime, kAnim_ID, fabricators, recipeDescription, color);
 	}
 
-	public GameObject CreatePrefab(Recipe.Ingredient[] fabricationIngredients, float fabricationTime, string kAnim_ID, string[] fabricators, string recipeDescription, Color color)
+	public GameObject CreatePrefab(Recipe.Ingredient[] fabricationIngredients, float fabricationTime, HashedString kAnim_ID, string[] fabricators, string recipeDescription, Color color)
 	{
-		GameObject gameObject = EntityTemplates.CreateBasicEntity(this.id, this.name, this.description, 1f, kAnim_ID, "ui", Grid.SceneLayer.BuildingFront);
+		GameObject gameObject = EntityTemplates.CreateBasicEntity(this.id, this.name, this.description, 1f, true, Assets.GetAnim(kAnim_ID), "ui", Grid.SceneLayer.BuildingFront, SimHashes.Creature, null);
 		ResearchPointObject researchPointObject = gameObject.UpdateComponentRequirement<ResearchPointObject>(true);
 		researchPointObject.TypeID = this.id;
 		string name = this.name;
-		this._recipe = new Recipe(gameObject, fabricators, 1f, 1f, (SimHashes)0, name, null);
-		this._recipe.recipeDescription = recipeDescription;
-		this._recipe.Icon = Assets.GetSprite("research_type_icon");
-		this._recipe.IconColor = color;
+		this._recipe = new Recipe(this.id, 1f, (SimHashes)0, name, recipeDescription, 0);
+		this._recipe.SetFabricators(fabricators, fabricationTime);
+		this._recipe.SetIcon(Assets.GetSprite("research_type_icon"), color);
 		foreach (Recipe.Ingredient ingredient in fabricationIngredients)
 		{
 			this._recipe.AddIngredient(ingredient);
 		}
-		this._recipe.FabricationTime = fabricationTime;
-		RecipeManager.Get().Add(this._recipe);
 		return gameObject;
 	}
 

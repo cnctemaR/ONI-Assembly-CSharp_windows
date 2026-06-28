@@ -6,7 +6,7 @@ public class HeadquartersConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Headquarters", 4, 4, "hqbase_kanim", 200f, 30f, BUILDINGS.CONSTRUCTION_MASS.TIER7, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER5, null);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Headquarters", 4, 4, "hqbase_kanim", 200f, 250, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER7, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER5, null);
 		buildingDef.Floodable = false;
 		buildingDef.Relocatable = false;
 		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
@@ -19,7 +19,6 @@ public class HeadquartersConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
-		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		go.AddOrGet<Telepad>();
 		Light2D light2D = go.AddOrGet<Light2D>();
 		light2D.Color = LIGHT2D.HEADQUARTERS_COLOR;
@@ -31,7 +30,7 @@ public class HeadquartersConfig : IBuildingConfig
 		light2D.drawOverlay = true;
 	}
 
-	public override void DoPostConfigure(GameObject go)
+	public override void DoPostConfigureComplete(GameObject go)
 	{
 		BuildingTemplates.DoPostConfigure(go);
 	}

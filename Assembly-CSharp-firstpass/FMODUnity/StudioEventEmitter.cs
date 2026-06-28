@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using FMOD.Studio;
 using UnityEngine;
 
@@ -10,7 +11,20 @@ namespace FMODUnity
 		private void Start()
 		{
 			RuntimeUtils.EnforceLibraryOrder();
-			this.HandleGameEvent(EmitterGameEvent.LevelStart);
+			if (this.Preload)
+			{
+				this.Lookup();
+				this.eventDescription.loadSampleData();
+				RuntimeManager.StudioSystem.update();
+				LOADING_STATE loading_STATE;
+				this.eventDescription.getSampleLoadingState(out loading_STATE);
+				while (loading_STATE == LOADING_STATE.LOADING)
+				{
+					Thread.Sleep(1);
+					this.eventDescription.getSampleLoadingState(out loading_STATE);
+				}
+			}
+			this.HandleGameEvent(EmitterGameEvent.ObjectStart);
 		}
 
 		private void OnApplicationQuit()
@@ -22,12 +36,26 @@ namespace FMODUnity
 		{
 			if (!this.isQuitting)
 			{
-				this.HandleGameEvent(EmitterGameEvent.LevelEnd);
+				this.HandleGameEvent(EmitterGameEvent.ObjectDestroy);
 				if (this.instance != null && this.instance.isValid())
 				{
 					RuntimeManager.DetachInstanceFromGameObject(this.instance);
 				}
+				if (this.Preload)
+				{
+					this.eventDescription.unloadSampleData();
+				}
 			}
+		}
+
+		private void OnEnable()
+		{
+			this.HandleGameEvent(EmitterGameEvent.ObjectEnable);
+		}
+
+		private void OnDisable()
+		{
+			this.HandleGameEvent(EmitterGameEvent.ObjectDisable);
 		}
 
 		private void OnTriggerEnter(Collider other)
@@ -46,6 +74,22 @@ namespace FMODUnity
 			}
 		}
 
+		private void OnTriggerEnter2D(Collider2D other)
+		{
+			if (string.IsNullOrEmpty(this.CollisionTag) || other.CompareTag(this.CollisionTag))
+			{
+				this.HandleGameEvent(EmitterGameEvent.TriggerEnter2D);
+			}
+		}
+
+		private void OnTriggerExit2D(Collider2D other)
+		{
+			if (string.IsNullOrEmpty(this.CollisionTag) || other.CompareTag(this.CollisionTag))
+			{
+				this.HandleGameEvent(EmitterGameEvent.TriggerExit2D);
+			}
+		}
+
 		private void OnCollisionEnter()
 		{
 			this.HandleGameEvent(EmitterGameEvent.CollisionEnter);
@@ -54,6 +98,16 @@ namespace FMODUnity
 		private void OnCollisionExit()
 		{
 			this.HandleGameEvent(EmitterGameEvent.CollisionExit);
+		}
+
+		private void OnCollisionEnter2D()
+		{
+			this.HandleGameEvent(EmitterGameEvent.CollisionEnter2D);
+		}
+
+		private void OnCollisionExit2D()
+		{
+			this.HandleGameEvent(EmitterGameEvent.CollisionExit2D);
 		}
 
 		private void HandleGameEvent(EmitterGameEvent gameEvent)
@@ -109,14 +163,28 @@ namespace FMODUnity
 				if (flag2)
 				{
 					Rigidbody component = base.GetComponent<Rigidbody>();
-					Transform component2 = base.GetComponent<Transform>();
-					this.instance.set3DAttributes(RuntimeUtils.To3DAttributes(base.gameObject, component));
-					RuntimeManager.AttachInstanceToGameObject(this.instance, component2, component);
+					Rigidbody2D component2 = base.GetComponent<Rigidbody2D>();
+					Transform component3 = base.GetComponent<Transform>();
+					if (component)
+					{
+						this.instance.set3DAttributes(RuntimeUtils.To3DAttributes(base.gameObject, component));
+						RuntimeManager.AttachInstanceToGameObject(this.instance, component3, component);
+					}
+					else
+					{
+						this.instance.set3DAttributes(RuntimeUtils.To3DAttributes(base.gameObject, component2));
+						RuntimeManager.AttachInstanceToGameObject(this.instance, component3, component2);
+					}
 				}
 			}
 			foreach (ParamRef paramRef in this.Params)
 			{
 				this.instance.setParameterValue(paramRef.Name, paramRef.Value);
+			}
+			if (flag2 && this.OverrideAttenuation)
+			{
+				this.instance.setProperty(EVENT_PROPERTY.MINIMUM_DISTANCE, this.OverrideMinDistance);
+				this.instance.setProperty(EVENT_PROPERTY.MAXIMUM_DISTANCE, this.OverrideMaxDistance);
 			}
 			this.instance.start();
 			this.hasTriggered = true;
@@ -152,19 +220,27 @@ namespace FMODUnity
 		}
 
 		[EventRef]
-		public string Event;
+		public string Event = string.Empty;
 
 		public EmitterGameEvent PlayEvent;
 
 		public EmitterGameEvent StopEvent;
 
-		public string CollisionTag;
+		public string CollisionTag = string.Empty;
 
 		public bool AllowFadeout = true;
 
 		public bool TriggerOnce;
 
-		public ParamRef[] Params;
+		public bool Preload;
+
+		public ParamRef[] Params = new ParamRef[0];
+
+		public bool OverrideAttenuation;
+
+		public float OverrideMinDistance = -1f;
+
+		public float OverrideMaxDistance = -1f;
 
 		private EventDescription eventDescription;
 

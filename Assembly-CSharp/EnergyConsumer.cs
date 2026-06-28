@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using FMOD.Studio;
 using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class EnergyConsumer : KMonoBehaviour, ISaveLoadableJson, IEnergyConsumer, IEffectDescriptor
+[DebuggerDisplay("{name}")]
+public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IEffectDescriptor
 {
 	public int PowerSortOrder
 	{
@@ -14,15 +17,13 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadableJson, IEnergyConsumer
 		}
 	}
 
-	public int DescriptionOrder { get; set; }
-
 	public int PowerCell { get; private set; }
 
 	public bool HasWire
 	{
 		get
 		{
-			return Grid.Objects[this.PowerCell, 6] != null;
+			return Grid.Objects[this.PowerCell, 19] != null;
 		}
 	}
 
@@ -38,13 +39,19 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadableJson, IEnergyConsumer
 		}
 	}
 
-	public bool IsConnected { get; private set; }
+	public bool IsConnected
+	{
+		get
+		{
+			return this.CircuitID != ushort.MaxValue;
+		}
+	}
 
 	public string Name
 	{
 		get
 		{
-			return base.GetComponent<KSelectable>().GetName();
+			return this.selectable.GetName();
 		}
 	}
 
@@ -58,10 +65,7 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadableJson, IEnergyConsumer
 		}
 		set
 		{
-			if (value != this._BaseWattageRating)
-			{
-				this._BaseWattageRating = value;
-			}
+			this._BaseWattageRating = value;
 		}
 	}
 
@@ -123,6 +127,7 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadableJson, IEnergyConsumer
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		Components.EnergyConsumers.Add(this);
 		Building component = base.GetComponent<Building>();
 		this.PowerCell = component.GetPowerInputCell();
 		Game.Instance.circuitManager.Connect(this);
@@ -131,6 +136,7 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadableJson, IEnergyConsumer
 	protected override void OnCleanUp()
 	{
 		Game.Instance.circuitManager.Disconnect(this);
+		Components.EnergyConsumers.Remove(this);
 		base.OnCleanUp();
 	}
 
@@ -150,41 +156,54 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadableJson, IEnergyConsumer
 		{
 		case CircuitManager.ConnectionStatus.NotConnected:
 			this.IsPowered = false;
-			this.IsConnected = false;
+			break;
+		case CircuitManager.ConnectionStatus.Unpowered:
+		case CircuitManager.ConnectionStatus.OverDraw:
+			if (this.IsPowered && base.GetComponent<Battery>() == null)
+			{
+				this.IsPowered = false;
+				this.circuitOverloadTime = 6f;
+				this.PlayCircuitSound("overdraw");
+			}
 			break;
 		case CircuitManager.ConnectionStatus.Powered:
 			if (!this.IsPowered && this.circuitOverloadTime <= 0f)
 			{
 				this.IsPowered = true;
-				base.PlaySound3D(Sounds.Instance.BuildingPowerOnMigrated);
-			}
-			if (!this.IsConnected)
-			{
-				this.IsConnected = true;
-			}
-			break;
-		case CircuitManager.ConnectionStatus.OverDraw:
-		case CircuitManager.ConnectionStatus.Unpowered:
-			if (this.IsPowered && base.GetComponent<Battery>() == null)
-			{
-				this.IsPowered = false;
-				this.circuitOverloadTime = 6f;
-				base.PlaySound3D(Sounds.Instance.ElectricGridOverloadMigrated);
-			}
-			if (!this.IsConnected)
-			{
-				this.IsConnected = true;
+				this.PlayCircuitSound("powered");
 			}
 			break;
 		}
 	}
 
-	public List<Descriptor> GetRequirementDescriptions(BuildingDef def)
+	private void PlayCircuitSound(string state)
 	{
-		return null;
+		string text = null;
+		if (state == "powered")
+		{
+			text = Sounds.Instance.BuildingPowerOnMigrated;
+		}
+		else if (state == "overdraw")
+		{
+			text = Sounds.Instance.ElectricGridOverloadMigrated;
+		}
+		else
+		{
+			global::UnityEngine.Debug.Log("Invalid state for sound in EnergyConsumer.");
+		}
+		float num;
+		if (!this.lastTimeSoundPlayed.TryGetValue(state, out num))
+		{
+			num = 0f;
+		}
+		float num2 = (Time.time - num) / this.soundDecayTime;
+		FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(text, CameraController.Instance.GetVerticallyScaledPosition(this.transform.position));
+		eventInstance.setParameterValue("timeSinceLast", num2);
+		KFMOD.EndOneShot(eventInstance);
+		this.lastTimeSoundPlayed[state] = Time.time;
 	}
 
-	public List<Descriptor> GetEffectDescriptions(BuildingDef def)
+	public List<Descriptor> GetDescriptors(BuildingDef def)
 	{
 		return null;
 	}
@@ -200,6 +219,9 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadableJson, IEnergyConsumer
 	[MyCmpGet]
 	private Upgradable upgradable;
 
+	[MyCmpGet]
+	private KSelectable selectable;
+
 	[SerializeField]
 	public int powerSortOrder;
 
@@ -207,6 +229,10 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadableJson, IEnergyConsumer
 	private float circuitOverloadTime;
 
 	public static Operational.Flag PoweredFlag = new Operational.Flag("powered", Operational.Flag.Type.Requirement);
+
+	private Dictionary<string, float> lastTimeSoundPlayed = new Dictionary<string, float>();
+
+	private float soundDecayTime = 10f;
 
 	private float _BaseWattageRating;
 }

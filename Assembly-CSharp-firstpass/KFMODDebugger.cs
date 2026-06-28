@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 public class KFMODDebugger : KMonoBehaviour
 {
@@ -24,6 +25,7 @@ public class KFMODDebugger : KMonoBehaviour
 		KFMODDebugger.instance = null;
 	}
 
+	[Conditional("UNITY_EDITOR")]
 	public void Log(string s)
 	{
 	}

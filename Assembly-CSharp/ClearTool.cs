@@ -16,8 +16,8 @@ public class ClearTool : DragTool
 
 	protected override void OnDragTool(int cell, int distFromOrigin)
 	{
-		GameObject gameObject = Grid.Objects[cell, 17];
-		if (gameObject == null || gameObject.GetComponent<MinionIdentity>() != null)
+		GameObject gameObject = Grid.Objects[cell, 3];
+		if (gameObject == null)
 		{
 			return;
 		}
@@ -28,11 +28,14 @@ public class ClearTool : DragTool
 			objectLayerListItem = objectLayerListItem.nextItem;
 			if (!(gameObject2 == null))
 			{
-				gameObject2.GetComponent<Clearable>().MarkForClear(false);
-				Prioritizable component = gameObject2.GetComponent<Prioritizable>();
-				if (component != null)
+				if (!(gameObject2.GetComponent<MinionIdentity>() != null))
 				{
-					component.SetMasterPriority(ToolMenuPriorityScreen.Instance.GetScreenPriority());
+					gameObject2.GetComponent<Clearable>().MarkForClear(false);
+					Prioritizable component = gameObject2.GetComponent<Prioritizable>();
+					if (component != null)
+					{
+						component.SetMasterPriority(ToolMenuPriorityScreen.Instance.GetScreenPriority());
+					}
 				}
 			}
 		}

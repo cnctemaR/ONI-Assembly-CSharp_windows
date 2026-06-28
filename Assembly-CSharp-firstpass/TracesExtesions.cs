@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Diagnostics;
 using UnityEngine;
 
 public static class TracesExtesions
 {
 	public static void DeleteObject(this GameObject go)
 	{
-		Traces.Instance.TraceDestroy(go, new StackTrace(true));
 		KMonoBehaviour component = go.GetComponent<KMonoBehaviour>();
 		if (component != null)
 		{

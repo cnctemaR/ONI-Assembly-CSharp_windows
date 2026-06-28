@@ -8,11 +8,8 @@ public class ValveSideScreen : SideScreenContent
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.flowSlider.maxValue = 10f;
 		this.flowSlider.onReleaseHandle += this.OnReleaseHandle;
 		this.flowSlider.onValueChanged.AddListener(new UnityAction<float>(this.UpdateFlowValue));
-		this.minFlowLabel.SetText(GameUtil.GetFormattedMass(0f, GameUtil.TimeSlice.PerSecond, true, "F1"));
-		this.maxFlowLabel.SetText(GameUtil.GetFormattedMass(10f, GameUtil.TimeSlice.PerSecond, true, "F1"));
 	}
 
 	public void OnReleaseHandle()
@@ -28,11 +25,11 @@ public class ValveSideScreen : SideScreenContent
 			Debug.LogError("The target object does not have a Valve component.");
 			return;
 		}
-		this.flowSlider.minValue = this.targetValve.minFlow;
+		this.flowSlider.minValue = 0f;
 		this.flowSlider.maxValue = this.targetValve.maxFlow;
-		this.minFlowLabel.SetText(GameUtil.GetFormattedMass(this.targetValve.minFlow, GameUtil.TimeSlice.PerSecond, true, "F1"));
-		this.maxFlowLabel.SetText(GameUtil.GetFormattedMass(this.targetValve.maxFlow, GameUtil.TimeSlice.PerSecond, true, "F1"));
-		this.currentFlowLabel.text = GameUtil.GetFormattedMass(Mathf.Max(0f, this.targetValve.DesiredFlow), GameUtil.TimeSlice.PerSecond, true, "F1");
+		this.minFlowLabel.text = GameUtil.GetFormattedMass(0f, GameUtil.TimeSlice.PerSecond, true, "{0:0.#}");
+		this.maxFlowLabel.text = GameUtil.GetFormattedMass(this.targetValve.maxFlow, GameUtil.TimeSlice.PerSecond, true, "{0:0.#}");
+		this.currentFlowLabel.text = GameUtil.GetFormattedMass(Mathf.Max(0f, this.targetValve.DesiredFlow), GameUtil.TimeSlice.PerSecond, true, "{0:0.#}");
 		this.flowSlider.value = this.targetValve.DesiredFlow;
 	}
 
@@ -43,7 +40,7 @@ public class ValveSideScreen : SideScreenContent
 			return;
 		}
 		this.targetFlow = newValue;
-		this.currentFlowLabel.text = GameUtil.GetFormattedMass(newValue, GameUtil.TimeSlice.PerSecond, true, "F1");
+		this.currentFlowLabel.text = GameUtil.GetFormattedMass(newValue, GameUtil.TimeSlice.PerSecond, true, "{0:0.#}");
 	}
 
 	private IEnumerator SettingDelay(float delay)
@@ -65,8 +62,8 @@ public class ValveSideScreen : SideScreenContent
 	[Header("Slider")]
 	private KSlider flowSlider;
 
-	[SerializeField]
 	[Header("Labels")]
+	[SerializeField]
 	private LocText currentFlowLabel;
 
 	[SerializeField]

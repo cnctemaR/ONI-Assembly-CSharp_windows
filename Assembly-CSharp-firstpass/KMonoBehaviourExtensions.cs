@@ -5,25 +5,19 @@ using UnityEngine.UI;
 
 public static class KMonoBehaviourExtensions
 {
-	public static void Subscribe(this GameObject go, int hash, EventSystem.EventHandler handler)
+	public static int Subscribe(this GameObject go, int hash, Action<object> handler)
 	{
 		KMonoBehaviour component = go.GetComponent<KMonoBehaviour>();
-		if (component != null)
-		{
-			component.Subscribe(hash, handler);
-		}
+		return component.Subscribe(hash, handler);
 	}
 
-	public static void Subscribe(this GameObject go, GameObject target, int hash, EventSystem.EventHandler handler)
+	public static void Subscribe(this GameObject go, GameObject target, int hash, Action<object> handler)
 	{
 		KMonoBehaviour component = go.GetComponent<KMonoBehaviour>();
-		if (component != null)
-		{
-			component.Subscribe(target, hash, handler);
-		}
+		component.Subscribe(target, hash, handler);
 	}
 
-	public static void Unsubscribe(this GameObject go, int hash, EventSystem.EventHandler handler)
+	public static void Unsubscribe(this GameObject go, int hash, Action<object> handler)
 	{
 		KMonoBehaviour component = go.GetComponent<KMonoBehaviour>();
 		if (component != null)
@@ -32,7 +26,16 @@ public static class KMonoBehaviourExtensions
 		}
 	}
 
-	public static void Unsubscribe(this GameObject go, GameObject target, int hash, EventSystem.EventHandler handler)
+	public static void Unsubscribe(this GameObject go, int id)
+	{
+		KMonoBehaviour component = go.GetComponent<KMonoBehaviour>();
+		if (component != null)
+		{
+			component.Unsubscribe(id);
+		}
+	}
+
+	public static void Unsubscribe(this GameObject go, GameObject target, int hash, Action<object> handler)
 	{
 		KMonoBehaviour component = go.GetComponent<KMonoBehaviour>();
 		if (component != null)

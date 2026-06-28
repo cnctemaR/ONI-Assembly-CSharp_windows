@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using UnityEngine;
 
 public class SystemScheduler
 {
@@ -68,7 +69,7 @@ public class SystemScheduler
 		this.RebuildIndices();
 	}
 
-	public Guid AddTask(Guid guid, SystemScheduler.Priority priority, Action<object> callback, object data, string name)
+	public Guid AddTask(Guid guid, SystemScheduler.Priority priority, Action<object> callback, object data, string name, GameObject profiler_obj)
 	{
 		List<SystemScheduler.Entry> list = this.prioritizedEntries[(int)priority];
 		this.indices[guid] = new Pair<SystemScheduler.Priority, int>(priority, list.Count);
@@ -76,8 +77,7 @@ public class SystemScheduler
 		{
 			guid = guid,
 			callback = callback,
-			data = data,
-			name = name
+			data = data
 		});
 		return guid;
 	}
@@ -158,7 +158,5 @@ public class SystemScheduler
 		public Action<object> callback;
 
 		public object data;
-
-		public string name;
 	}
 }

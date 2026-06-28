@@ -95,7 +95,7 @@ public class SubworldZoneRenderData : KMonoBehaviour
 
 	private Texture2D regionTex;
 
-	private SubWorld.ZoneType[] worldZoneTypes;
+	public SubWorld.ZoneType[] worldZoneTypes;
 
 	[SerializeField]
 	private Color32[] zoneColours = new Color32[]

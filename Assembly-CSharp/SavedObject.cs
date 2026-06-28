@@ -6,7 +6,7 @@ public class SavedObject : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(856640610, new EventSystem.EventHandler(this.OnStore));
+		this.Subscribe(856640610, new Action<object>(this.OnStore));
 	}
 
 	protected override void OnSpawn()

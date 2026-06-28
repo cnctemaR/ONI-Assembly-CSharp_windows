@@ -9,11 +9,15 @@ public class CrewRationsScreen : CrewListScreen<CrewRationsEntry>
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.closebutton.onClick += delegate
+		{
+			ManagementMenu.Instance.CloseAll();
+		};
 	}
 
-	private void OnEnable()
+	protected override void OnCmpEnable()
 	{
-		base.Reconstruct();
+		base.OnCmpEnable();
 		base.RefreshCrewPortraitContent();
 		this.SortByPreviousSelected();
 	}
@@ -37,6 +41,10 @@ public class CrewRationsScreen : CrewListScreen<CrewRationsEntry>
 				if (component.columnID == "name")
 				{
 					base.SortByName(this.lastSortReversed);
+				}
+				if (component.columnID == "health")
+				{
+					this.SortByAmount("HitPoints", this.lastSortReversed);
 				}
 				if (component.columnID == "stress")
 				{
@@ -66,6 +74,24 @@ public class CrewRationsScreen : CrewListScreen<CrewRationsEntry>
 					toggle.onValueChanged.AddListener(delegate(bool value)
 					{
 						this.SortByName(!toggle.isOn);
+						this.lastSortToggle = toggle;
+						this.lastSortReversed = !toggle.isOn;
+						this.ResetSortToggles(toggle);
+						if (toggle.isOn)
+						{
+							toggleImage.SetActive();
+						}
+						else
+						{
+							toggleImage.SetInactive();
+						}
+					});
+				}
+				if (component.columnID == "health")
+				{
+					toggle.onValueChanged.AddListener(delegate(bool value)
+					{
+						this.SortByAmount("HitPoints", !toggle.isOn);
 						this.lastSortToggle = toggle;
 						this.lastSortReversed = !toggle.isOn;
 						this.ResetSortToggles(toggle);
@@ -143,7 +169,6 @@ public class CrewRationsScreen : CrewListScreen<CrewRationsEntry>
 
 	private void SortByAmount(string amount_id, bool reverse)
 	{
-		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
 		List<CrewRationsEntry> list = new List<CrewRationsEntry>(this.EntryObjects);
 		list.Sort(delegate(CrewRationsEntry a, CrewRationsEntry b)
 		{
@@ -166,4 +191,7 @@ public class CrewRationsScreen : CrewListScreen<CrewRationsEntry>
 			}
 		}
 	}
+
+	[SerializeField]
+	private KButton closebutton;
 }

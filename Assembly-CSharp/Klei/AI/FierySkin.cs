@@ -6,7 +6,7 @@ namespace Klei.AI
 	public class FierySkin : AnimatedDisease
 	{
 		public FierySkin()
-			: base("FierySkin", 0.1f, 900f, "anim_idle_fiery", "SickFierySkin")
+			: base("FierySkin", 0.1f, 900f, "anim_idle_fiery_kanim", "SickFierySkin")
 		{
 		}
 
@@ -14,11 +14,10 @@ namespace Klei.AI
 		{
 			base.OnInfect(go);
 			FierySkin.InstanceData instanceData = default(FierySkin.InstanceData);
-			instanceData.schedulerHandle = GameScheduler.Instance.SchedulePeriodic("EmitHeat", 3f, new Action<object>(this.Emit), go, null, 0f);
+			instanceData.schedulerHandle = GameScheduler.Instance.SchedulePeriodic("EmitHeat", 3f, new Action<object>(this.Emit), go, null, 0f, null);
 			this.Emit(go);
-			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("fiery_fx", go.transform, true, Grid.SceneLayer.Front);
-			kbatchedAnimController.transform.localPosition = Vector3.zero;
-			kbatchedAnimController.Play(new string[] { "working_pre", "working_loop" }, KAnim.PlayMode.Loop);
+			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("fiery_fx_kanim", go.transform.position, go.transform, true, Grid.SceneLayer.Front);
+			kbatchedAnimController.Play(FierySkin.WorkLoopAnims, KAnim.PlayMode.Loop);
 			instanceData.controller = kbatchedAnimController;
 			return instanceData;
 		}
@@ -45,6 +44,8 @@ namespace Klei.AI
 		private const float EmitInterval = 3f;
 
 		private const float EmitEnergy = 10f;
+
+		private static readonly HashedString[] WorkLoopAnims = new HashedString[] { "working_pre", "working_loop" };
 
 		private struct InstanceData
 		{

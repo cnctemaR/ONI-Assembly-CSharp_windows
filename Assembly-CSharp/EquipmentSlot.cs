@@ -2,8 +2,8 @@
 
 public class EquipmentSlot : AssignableSlot
 {
-	public EquipmentSlot(string id, string name)
-		: base(id, name)
+	public EquipmentSlot(string id, string name, bool showInUI = true)
+		: base(id, name, showInUI)
 	{
 	}
 }

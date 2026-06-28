@@ -2,13 +2,19 @@
 using STRINGS;
 using UnityEngine;
 
-public class BuildWatermark : KMonoBehaviour
+public class BuildWatermark : KScreen
 {
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		BuildWatermark.Instance = this;
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		string text = ((!Application.isEditor) ? 208689U.ToString() : "<EDITOR>");
-		this.textDisplay.SetText(string.Format(UI.DEVELOPMENTBUILDS.BUILDWATERMARK, text));
+		string text = ((!Application.isEditor) ? ("AU-" + 217311U.ToString()) : "<EDITOR>");
+		this.textDisplay.SetText(string.Format(UI.DEVELOPMENTBUILDS.WATERMARK, text));
 	}
 
 	private void Update()
@@ -20,4 +26,6 @@ public class BuildWatermark : KMonoBehaviour
 	}
 
 	public LocText textDisplay;
+
+	public static BuildWatermark Instance;
 }

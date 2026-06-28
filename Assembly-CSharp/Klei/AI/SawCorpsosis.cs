@@ -8,7 +8,7 @@ namespace Klei.AI
 		public SawCorpsosis()
 			: base("SawCorpsosis", false, new AttributeModifier[]
 			{
-				new AttributeModifier("StressDelta", 3f, DUPLICANTS.DISEASES.SAWCORPSOSIS.NAME, false)
+				new AttributeModifier("StressDelta", 3f, DUPLICANTS.DISEASES.SAWCORPSOSIS.NAME, false, false)
 			}, 0.1f, 1200f, null)
 		{
 		}

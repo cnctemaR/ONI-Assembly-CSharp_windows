@@ -42,8 +42,13 @@ public class FallingWater : KMonoBehaviour
 		return Time.time % 360f;
 	}
 
-	public void AddParticle(int cell, byte elementIdx, float base_mass, float temperature, bool skip_sound = false, bool skip_decor = false)
+	public void AddParticle(int cell, byte elementIdx, float base_mass, float temperature, bool skip_sound = false, bool skip_decor = false, bool debug_track = false)
 	{
+		if (!Grid.IsValidCell(cell))
+		{
+			KCrashReporter.Assert(false, "Trying to add falling water outside of the scene");
+			return;
+		}
 		if (temperature <= 0f || base_mass <= 0f)
 		{
 			Output.LogError(new object[] { "Unexpected water mass/temperature values added to the falling water manager" });
@@ -56,7 +61,7 @@ public class FallingWater : KMonoBehaviour
 			if (!this.topSounds.TryGetValue(cell, out soundInfo))
 			{
 				soundInfo = default(FallingWater.SoundInfo);
-				soundInfo.eventInstance = LoopingSoundManager.StartSound(this.liquid_top_loop, vector);
+				soundInfo.eventInstance = LoopingSoundManager.StartSound(this.liquid_top_loop, vector, true);
 			}
 			soundInfo.startTime = time;
 			soundInfo.eventInstance.setParameterValue("liquidVolume", SoundUtil.GetLiquidVolume(base_mass));
@@ -74,30 +79,38 @@ public class FallingWater : KMonoBehaviour
 			Vector2 vector4 = vector;
 			bool flag = !skip_decor && this.SpawnLiquidTopDecor(time, Grid.CellLeft(cell), false, element, num2);
 			bool flag2 = !skip_decor && this.SpawnLiquidTopDecor(time, Grid.CellRight(cell), true, element, num2);
+			Vector2 vector5 = Vector2.ClampMagnitude(this.initialOffset + vector2 + vector3, 1f);
 			if (flag || flag2)
 			{
 				if (flag && flag2)
 				{
-					vector4 += this.initialOffset + vector2 + vector3;
+					vector4 += vector5;
 					vector4.x += 0.5f;
 				}
 				else if (flag)
 				{
-					vector4 += this.initialOffset + vector2 + vector3;
+					vector4 += vector5;
 				}
 				else
 				{
-					vector4.x += 1f - (vector2.x + this.initialOffset.x + vector3.x);
-					vector4.y += this.initialOffset.y + vector2.y + vector3.y;
+					vector4.x += 1f - vector5.x;
+					vector4.y += vector5.y;
 				}
 			}
 			else
 			{
-				vector4 += this.initialOffset + vector2 + vector3;
+				vector4 += vector5;
 				vector4.x += 0.5f;
 			}
+			int num4 = Grid.PosToCell(vector4);
+			Element element2 = Grid.Element[num4];
+			Element.State state = element2.state & Element.State.Solid;
+			if (state == Element.State.Solid || (Grid.Cell[num4].properties & 2) != 0)
+			{
+				vector4.y = Mathf.Floor(vector4.y + 1f);
+			}
 			this.physics.Add(new FallingWater.ParticlePhysics(vector4, Vector2.zero, num3, elementIdx));
-			this.properties.Add(new FallingWater.ParticleProperties(elementIdx, num2, temperature));
+			this.properties.Add(new FallingWater.ParticleProperties(elementIdx, num2, temperature, debug_track));
 		}
 	}
 
@@ -117,7 +130,7 @@ public class FallingWater : KMonoBehaviour
 					mistInfo.fx.TintColour = element.substance.colour;
 					Vector3 vector2 = vector + ((!flip) ? Vector3.right : (-Vector3.right)) * 0.5f;
 					mistInfo.fx.transform.SetPosition(vector2);
-					mistInfo.fx.Flip = flip;
+					mistInfo.fx.FlipX = flip;
 				}
 				mistInfo.deathTime = Time.time + this.mistEffectMinAliveTime;
 				this.mistAlive[pair] = mistInfo;
@@ -144,7 +157,7 @@ public class FallingWater : KMonoBehaviour
 
 	public void UpdateParticles(float dt)
 	{
-		if (dt <= 0f)
+		if (dt <= 0f || this.simUpdateDelay >= 0)
 		{
 			return;
 		}
@@ -154,11 +167,14 @@ public class FallingWater : KMonoBehaviour
 		for (int i = 0; i < count; i++)
 		{
 			FallingWater.ParticlePhysics particlePhysics = this.physics[i];
+			Vector3 vector2 = particlePhysics.position;
 			int num;
 			int num2;
-			Grid.PosToXY(particlePhysics.position, out num, out num2);
+			Grid.PosToXY(vector2, out num, out num2);
 			particlePhysics.velocity += vector;
-			particlePhysics.position += particlePhysics.velocity * dt;
+			Vector3 vector3 = particlePhysics.velocity * dt;
+			Vector3 vector4 = vector2 + vector3;
+			particlePhysics.position = vector4;
 			this.physics[i] = particlePhysics;
 			int num3;
 			int num4;
@@ -175,7 +191,7 @@ public class FallingWater : KMonoBehaviour
 					{
 						FallingWater.ParticleProperties particleProperties = this.properties[i];
 						this.SpawnLiquidSplash(particlePhysics.position.x, num8, particleProperties.elementIdx, false);
-						this.AddToSim(i, num8, ref count);
+						this.AddToSim(num8, i, ref count);
 					}
 					else
 					{
@@ -223,6 +239,10 @@ public class FallingWater : KMonoBehaviour
 								this.SpawnLiquidSplash(particlePhysics.position.x, num8, particleProperties2.elementIdx, false);
 								this.AddToSim(num7, i, ref count);
 							}
+						}
+						else if (element2.molarMass > element.molarMass)
+						{
+							flag = true;
 						}
 						else
 						{
@@ -335,7 +355,7 @@ public class FallingWater : KMonoBehaviour
 		{
 			this.lastSpawnTime[cell] = time;
 			Vector3 vector = Grid.CellToPosCCC(cell, Grid.SceneLayer.TileMain);
-			if (CameraController.Instance.IsAudibleSound(vector))
+			if (CameraController.Instance.IsAudibleSound(vector, 0f))
 			{
 				bool flag = true;
 				FallingWater.SoundInfo soundInfo;
@@ -346,7 +366,7 @@ public class FallingWater : KMonoBehaviour
 					{
 						if (soundInfo.eventInstance == null)
 						{
-							soundInfo.eventInstance = LoopingSoundManager.StartSound(this.liquid_splash_loop, vector);
+							soundInfo.eventInstance = LoopingSoundManager.StartSound(this.liquid_splash_loop, vector, true);
 						}
 						soundInfo.eventInstance.setParameterValue("liquidDepth", SoundUtil.GetLiquidDepth(cell));
 						soundInfo.eventInstance.setParameterValue("liquidVolume", this.GetParticleVolume(particleProperties.mass));
@@ -397,41 +417,51 @@ public class FallingWater : KMonoBehaviour
 		Vector2 vector4 = new Vector2(-num, num2);
 		float num3 = 1f;
 		float num4 = 0f;
-		for (int i = 0; i < this.physics.Count; i++)
+		int num5 = Mathf.Min(this.physics.Count, 16249);
+		if (num5 < this.physics.Count)
+		{
+			Output.LogWarning(new object[]
+			{
+				"Too many water particles to render. Wanted",
+				this.physics.Count,
+				"but truncating to limit"
+			});
+		}
+		for (int i = 0; i < num5; i++)
 		{
 			Vector2 position = this.physics[i].position;
-			float num5 = Mathf.Lerp(0.25f, 1f, Mathf.Clamp01(this.properties[i].mass / this.particleMassToSplit));
-			vertices.Add(position + vector * num5);
-			vertices.Add(position + vector2 * num5);
-			vertices.Add(position + vector3 * num5);
-			vertices.Add(position + vector4 * num5);
+			float num6 = Mathf.Lerp(0.25f, 1f, Mathf.Clamp01(this.properties[i].mass / this.particleMassToSplit));
+			vertices.Add(position + vector * num6);
+			vertices.Add(position + vector2 * num6);
+			vertices.Add(position + vector3 * num6);
+			vertices.Add(position + vector4 * num6);
 			int frame = this.physics[i].frame;
-			float num6 = (float)frame * this.uvFrameSize.x;
-			float num7 = (float)(frame + 1) * this.uvFrameSize.x;
-			uvs.Add(new Vector2(num6, num4));
+			float num7 = (float)frame * this.uvFrameSize.x;
+			float num8 = (float)(frame + 1) * this.uvFrameSize.x;
 			uvs.Add(new Vector2(num7, num4));
+			uvs.Add(new Vector2(num8, num4));
+			uvs.Add(new Vector2(num8, num3));
 			uvs.Add(new Vector2(num7, num3));
-			uvs.Add(new Vector2(num6, num3));
-			Color color = this.physics[i].colour;
-			colours.Add(color);
-			colours.Add(color);
-			colours.Add(color);
-			colours.Add(color);
-			int num8 = i * 4;
-			indices.Add(num8);
-			indices.Add(num8 + 1);
-			indices.Add(num8 + 2);
-			indices.Add(num8);
-			indices.Add(num8 + 2);
-			indices.Add(num8 + 3);
+			Color32 colour = this.physics[i].colour;
+			colours.Add(colour);
+			colours.Add(colour);
+			colours.Add(colour);
+			colours.Add(colour);
+			int num9 = i * 4;
+			indices.Add(num9);
+			indices.Add(num9 + 1);
+			indices.Add(num9 + 2);
+			indices.Add(num9);
+			indices.Add(num9 + 2);
+			indices.Add(num9 + 3);
 		}
 		this.mesh.Clear();
 		this.mesh.SetVertices(vertices);
 		this.mesh.SetUVs(0, uvs);
 		this.mesh.SetColors(colours);
 		this.mesh.SetTriangles(indices, 0);
-		int num9 = LayerMask.NameToLayer("Water");
-		Graphics.DrawMesh(this.mesh, this.renderOffset, Quaternion.identity, this.material, num9, null, 0, this.propertyBlock);
+		int num10 = LayerMask.NameToLayer("Water");
+		Graphics.DrawMesh(this.mesh, this.renderOffset, Quaternion.identity, this.material, num10, null, 0, this.propertyBlock);
 	}
 
 	private KBatchedAnimController SpawnMist()
@@ -458,9 +488,19 @@ public class FallingWater : KMonoBehaviour
 		this.mistPool.ReleaseInstance(go);
 	}
 
+	private void SimUpdate(float dt)
+	{
+		if (this.simUpdateDelay >= 0)
+		{
+			this.simUpdateDelay--;
+		}
+	}
+
 	private const float STATE_TRANSITION_TEMPERATURE_BUFER = 3f;
 
 	private const byte FORCED_ALPHA = 191;
+
+	private int simUpdateDelay = 2;
 
 	[SerializeField]
 	private Vector2 particleSize;
@@ -507,19 +547,17 @@ public class FallingWater : KMonoBehaviour
 	[SerializeField]
 	private FallingWater.DecorInfo liquid_splash;
 
-	[EventRef]
 	[SerializeField]
+	[EventRef]
 	private string liquid_top_loop;
 
-	[EventRef]
 	[SerializeField]
+	[EventRef]
 	private string liquid_splash_initial;
 
-	[SerializeField]
 	[EventRef]
+	[SerializeField]
 	private string liquid_splash_loop;
-
-	private float liquid_splash_initial_max_distance;
 
 	[SerializeField]
 	private float stopTopLoopDelay = 0.2f;
@@ -608,7 +646,7 @@ public class FallingWater : KMonoBehaviour
 
 	private struct ParticleProperties
 	{
-		public ParticleProperties(byte elementIdx, float mass, float temperature)
+		public ParticleProperties(byte elementIdx, float mass, float temperature, bool debug_track)
 		{
 			this.elementIdx = elementIdx;
 			this.mass = mass;

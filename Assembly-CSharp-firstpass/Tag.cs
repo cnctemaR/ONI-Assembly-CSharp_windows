@@ -105,8 +105,10 @@ public struct Tag : ISerializationCallbackReceiver, IEquatable<Tag>, IComparable
 		return a.hash != b.hash;
 	}
 
-	[SerializeField]
+	public static readonly Tag Invalid = default(Tag);
+
 	[Serialize]
+	[SerializeField]
 	private string name;
 
 	[Serialize]

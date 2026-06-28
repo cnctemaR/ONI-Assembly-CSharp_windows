@@ -5,11 +5,11 @@ using UnityEngine.UI;
 
 namespace TMPro
 {
+	[SelectionBase]
+	[DisallowMultipleComponent]
 	[RequireComponent(typeof(RectTransform))]
 	[RequireComponent(typeof(CanvasRenderer))]
 	[AddComponentMenu("UI/TextMeshPro - Text (UI)", 11)]
-	[SelectionBase]
-	[DisallowMultipleComponent]
 	[ExecuteInEditMode]
 	public class TextMeshProUGUI : TMP_Text, ILayoutElement
 	{
@@ -31,6 +31,7 @@ namespace TMPro
 			{
 				this.m_mesh = new Mesh();
 				this.m_mesh.hideFlags = HideFlags.HideAndDontSave;
+				this.m_mesh.name = "TMPro";
 			}
 			if (this.m_text == null)
 			{
@@ -484,6 +485,7 @@ namespace TMPro
 				this.m_textInfo = new TMP_TextInfo();
 			}
 			this.m_textElementType = TMP_TextElementType.Character;
+			HashSet<int> hashSet = new HashSet<int>();
 			int num3 = 0;
 			while (chars[num3] != 0)
 			{
@@ -494,12 +496,12 @@ namespace TMPro
 				int num4 = chars[num3];
 				if (!this.m_isRichText || num4 != 60)
 				{
-					goto IL_0233;
+					goto IL_023B;
 				}
 				int currentMaterialIndex = this.m_currentMaterialIndex;
 				if (!base.ValidateHtmlTag(chars, num3 + 1, out num))
 				{
-					goto IL_0233;
+					goto IL_023B;
 				}
 				num3 = num;
 				if ((this.m_style & FontStyles.Bold) == FontStyles.Bold)
@@ -519,10 +521,10 @@ namespace TMPro
 					num2++;
 					this.m_totalCharacterCount++;
 				}
-				IL_0931:
+				IL_08C8:
 				num3++;
 				continue;
-				IL_0233:
+				IL_023B:
 				bool flag = false;
 				bool flag2 = false;
 				TMP_FontAsset currentFontAsset = this.m_currentFontAsset;
@@ -613,10 +615,7 @@ namespace TMPro
 						int num5 = ((TMP_Settings.missingGlyphCharacter != 0) ? TMP_Settings.missingGlyphCharacter : 9633);
 						if (this.m_currentFontAsset.characterDictionary.TryGetValue(num5, out tmp_Glyph))
 						{
-							if (!TMP_Settings.warningsDisabled)
-							{
-								Debug.LogWarning("Character with ASCII value of " + num4 + " was not found in the Font Asset Glyph Table.", this);
-							}
+							hashSet.Add(num4);
 							num4 = (chars[num3] = num5);
 						}
 						else
@@ -630,10 +629,7 @@ namespace TMPro
 									{
 										if (tmp_FontAsset.characterDictionary.TryGetValue(num5, out tmp_Glyph))
 										{
-											if (!TMP_Settings.warningsDisabled)
-											{
-												Debug.LogWarning("Character with ASCII value of " + num4 + " was not found in the Font Asset Glyph Table.", this);
-											}
+											hashSet.Add(num4);
 											num4 = (chars[num3] = num5);
 											flag = true;
 											this.m_currentFontAsset = tmp_FontAsset;
@@ -648,10 +644,7 @@ namespace TMPro
 								tmp_FontAsset = TMP_Settings.GetFontAsset();
 								if (tmp_FontAsset != null && tmp_FontAsset.characterDictionary.TryGetValue(num5, out tmp_Glyph))
 								{
-									if (!TMP_Settings.warningsDisabled)
-									{
-										Debug.LogWarning("Character with ASCII value of " + num4 + " was not found in the Font Asset Glyph Table.", this);
-									}
+									hashSet.Add(num4);
 									num4 = (chars[num3] = num5);
 									flag = true;
 									this.m_currentFontAsset = tmp_FontAsset;
@@ -662,10 +655,7 @@ namespace TMPro
 									tmp_FontAsset = TMP_FontAsset.defaultFontAsset;
 									if (tmp_FontAsset != null && tmp_FontAsset.characterDictionary.TryGetValue(num5, out tmp_Glyph))
 									{
-										if (!TMP_Settings.warningsDisabled)
-										{
-											Debug.LogWarning("Character with ASCII value of " + num4 + " was not found in the Font Asset Glyph Table.", this);
-										}
+										hashSet.Add(num4);
 										num4 = (chars[num3] = num5);
 										flag = true;
 										this.m_currentFontAsset = tmp_FontAsset;
@@ -673,10 +663,7 @@ namespace TMPro
 									}
 									else if (this.m_currentFontAsset.characterDictionary.TryGetValue(32, out tmp_Glyph))
 									{
-										if (!TMP_Settings.warningsDisabled)
-										{
-											Debug.LogWarning("Character with ASCII value of " + num4 + " was not found in the Font Asset Glyph Table. It was replaced by a space.", this);
-										}
+										hashSet.Add(num4);
 										num4 = (chars[num3] = 32);
 									}
 								}
@@ -708,7 +695,7 @@ namespace TMPro
 					this.m_currentMaterialIndex = currentMaterialIndex3;
 				}
 				this.m_totalCharacterCount++;
-				goto IL_0931;
+				goto IL_08C8;
 			}
 			this.m_textInfo.spriteCount = num2;
 			int num6 = (this.m_textInfo.materialCount = this.m_materialReferenceIndexLookup.Count);
@@ -789,6 +776,15 @@ namespace TMPro
 					this.m_subTextObjects[num7].canvasRenderer.SetMesh(null);
 				}
 				num7++;
+			}
+			if (!TMP_Settings.warningsDisabled && hashSet.Count > 0)
+			{
+				string text = string.Empty;
+				foreach (int num8 in hashSet)
+				{
+					text = text + num8.ToString() + " ";
+				}
+				Debug.LogWarning("Characters with ASCII values were not found in the Font Asset Glyph Table: " + text, this);
 			}
 			return this.m_totalCharacterCount;
 		}

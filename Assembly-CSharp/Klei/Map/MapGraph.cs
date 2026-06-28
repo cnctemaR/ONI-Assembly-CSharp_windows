@@ -73,7 +73,7 @@ namespace Klei.Map
 				}
 				corner = new Corner(base.baseGraph.AddNode());
 				this.nodeList.Add(corner);
-				corner.position = position;
+				corner.SetPosition(position);
 				this.cornerList.Add(corner);
 			}
 			return corner;
@@ -115,7 +115,7 @@ namespace Klei.Map
 				if (cell == null)
 				{
 					cell = new Cell(node);
-					cell.position = position;
+					cell.SetPosition(position);
 					this.cellList.Add(cell);
 				}
 				else

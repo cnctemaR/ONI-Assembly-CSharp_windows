@@ -8,18 +8,13 @@ public class HatchConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		DecorValues tier = DECOR.BONUS.TIER0;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("Hatch", global::STRINGS.CREATURES.SPECIES.HATCH.NAME, global::STRINGS.CREATURES.SPECIES.HATCH.DESC, 400f, "hatch", "idle_loop", Grid.SceneLayer.Creatures, 1, 1, tier);
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, false, FactionManager.FactionID.Pest, 25f, "HatchNavGrid", NavType.Floor, 2f, "Meat", 2, true, false, 30f, 283f, 294f, 273f, 315f);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity("Hatch", global::STRINGS.CREATURES.SPECIES.HATCH.NAME, global::STRINGS.CREATURES.SPECIES.HATCH.DESC, 400f, Assets.GetAnim("hatch_kanim"), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, tier, SimHashes.Creature, null);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, 25f, "HatchNavGrid", NavType.Floor, 2f, "Meat", 2, true, false, 30f, 283f, 294f, 243f, 343f);
 		gameObject.UpdateComponentRequirement<Hatch>(true);
 		gameObject.AddWeapon(1f, 1f, AttackProperties.DamageType.Standard, AttackProperties.TargetType.Single, 1, 0f);
 		gameObject.UpdateComponentRequirement<SimpleMover>(true);
-		gameObject.AddElementEmitter(SimHashes.Carbon, 0f, 0f);
-		KPrefabID component = gameObject.GetComponent<KPrefabID>();
-		component.prefabSpawnFn += delegate(GameObject go)
-		{
-			Navigator component2 = go.GetComponent<Navigator>();
-			component2.transitionDriver.overrideLayers.Add(new DoorTransitionLayer(component2));
-		};
+		ElementEmitter elementEmitter = gameObject.AddElementEmitter(SimHashes.Carbon, 0f, 0f);
+		elementEmitter.showDescriptor = false;
 		return gameObject;
 	}
 
@@ -31,9 +26,9 @@ public class HatchConfig : IEntityConfig
 	{
 	}
 
-	public const int unitsPerFeeding = 50;
+	public const float unitsPerFeeding = 50f;
 
-	public const int rationsPerFeeding = 5;
+	public const float foodUnitsPerFeeding = 0.5f;
 
 	public const float maxHunger = 900f;
 

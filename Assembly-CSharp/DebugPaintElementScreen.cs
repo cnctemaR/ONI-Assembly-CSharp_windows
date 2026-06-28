@@ -52,17 +52,17 @@ public class DebugPaintElementScreen : KScreen
 		List<string> list = new List<string>();
 		foreach (Element element in ElementLoader.elements)
 		{
-			if (element.name != "Element Not Loaded")
+			if (element.name != "Element Not Loaded" && element.substance != null && element.substance.showInEditor)
 			{
 				list.Add(element.id.ToString());
 			}
 		}
 		list.Sort();
-		list.Insert(0, ElementLoader.FindElementByHash(SimHashes.Vacuum).id.ToString());
-		list.Insert(0, ElementLoader.FindElementByHash(SimHashes.Dirt).id.ToString());
-		list.Insert(0, ElementLoader.FindElementByHash(SimHashes.CarbonDioxide).id.ToString());
-		list.Insert(0, ElementLoader.FindElementByHash(SimHashes.Water).id.ToString());
-		list.Insert(0, ElementLoader.FindElementByHash(SimHashes.Oxygen).id.ToString());
+		list.Insert(0, SimHashes.Vacuum.ToString());
+		list.Insert(0, SimHashes.Dirt.ToString());
+		list.Insert(0, SimHashes.CarbonDioxide.ToString());
+		list.Insert(0, SimHashes.Water.ToString());
+		list.Insert(0, SimHashes.Oxygen.ToString());
 		this.menu = base.GetComponentInChildren<KPopupMenu>(true);
 		this.menu.SetOptions(list.ToArray());
 		KPopupMenu kpopupMenu = this.menu;

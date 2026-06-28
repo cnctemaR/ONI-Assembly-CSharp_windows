@@ -14,11 +14,11 @@ public class EmoteMonitor : GameStateMachine<EmoteMonitor, EmoteMonitor.Instance
 		});
 	}
 
-	public GameStateMachine<EmoteMonitor, EmoteMonitor.Instance, IStateMachineTarget>.State satisfied;
+	public GameStateMachine<EmoteMonitor, EmoteMonitor.Instance, IStateMachineTarget, object>.State satisfied;
 
-	public GameStateMachine<EmoteMonitor, EmoteMonitor.Instance, IStateMachineTarget>.State ready;
+	public GameStateMachine<EmoteMonitor, EmoteMonitor.Instance, IStateMachineTarget, object>.State ready;
 
-	public new class Instance : GameStateMachine<EmoteMonitor, EmoteMonitor.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<EmoteMonitor, EmoteMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)

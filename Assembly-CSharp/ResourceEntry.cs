@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using STRINGS;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -58,44 +59,24 @@ public class ResourceEntry : MonoBehaviour, IPointerEnterHandler, IEventSystemHa
 		}
 	}
 
-	public void UpdateValue(bool isPickupableCategory = false, ResourceCategoryHeader.MeasureUnit measure = ResourceCategoryHeader.MeasureUnit.mass)
+	public void UpdateValue(ResourceCategoryHeader.MeasureUnit measure = ResourceCategoryHeader.MeasureUnit.mass)
 	{
 		this.SetName(this.Resource.ProperName());
-		float num = 0f;
-		if (!isPickupableCategory)
+		float num;
+		if (measure == ResourceCategoryHeader.MeasureUnit.kcal)
 		{
-			num = WorldInventory.Instance.GetAmount(this.Resource);
+			EdiblesManager.FoodInfo foodInfo = EdiblesManager.instance.GetFoodInfo(this.Resource.Name);
+			num = WorldInventory.Instance.GetAmount(this.Resource) * foodInfo.CaloriesPerUnit;
 		}
 		else
 		{
-			List<Pickupable> pickupables = WorldInventory.Instance.GetPickupables(this.Resource);
-			if (pickupables != null)
-			{
-				foreach (Pickupable pickupable in pickupables)
-				{
-					if (!(pickupable == null))
-					{
-						if (measure == ResourceCategoryHeader.MeasureUnit.kcal)
-						{
-							Edible component = pickupable.GetComponent<Edible>();
-							if (component != null)
-							{
-								num += component.rations * 100000f;
-							}
-						}
-						else if (pickupable != null)
-						{
-							num += pickupable.TotalAmount;
-						}
-					}
-				}
-			}
+			num = WorldInventory.Instance.GetAmount(this.Resource);
 		}
 		string text = string.Empty;
 		switch (measure)
 		{
 		case ResourceCategoryHeader.MeasureUnit.mass:
-			text = GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, true, "F1");
+			text = GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, true, "{0:0.#}");
 			break;
 		case ResourceCategoryHeader.MeasureUnit.kcal:
 			text = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
@@ -125,7 +106,7 @@ public class ResourceEntry : MonoBehaviour, IPointerEnterHandler, IEventSystemHa
 		{
 			this.tooltip.ClearMultiStringTooltip();
 			this.tooltip.AddMultiStringTooltip(this.NameLabel.text, this.tooltipStyle_Header);
-			this.tooltip.AddMultiStringTooltip("Available: " + this.QuantityLabel.text, this.tooltipStyle_body);
+			this.tooltip.AddMultiStringTooltip(string.Format(UI.RESOURCESCREEN.AVAILABLE_TOOLTIP, this.QuantityLabel.text), this.tooltipStyle_body);
 		}
 	}
 

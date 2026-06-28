@@ -1,13 +1,29 @@
 ﻿using System;
+using System.Collections.Generic;
+using Klei.AI;
+using STRINGS;
 using UnityEngine;
 
-public class PressureVulnerable : KMonoBehaviour
+[SkipSaveFileSerialization]
+public class PressureVulnerable : StateMachineComponent<PressureVulnerable.StatesInstance>, IGameObjectEffectDescriptor
 {
-	public float MassLowWarning
+	private OccupyArea occupyArea
 	{
 		get
 		{
-			return this.mass_low_warning;
+			if (this._occupyArea == null)
+			{
+				this._occupyArea = base.GetComponent<OccupyArea>();
+			}
+			return this._occupyArea;
+		}
+	}
+
+	public PressureVulnerable.PressureState GetExternalState
+	{
+		get
+		{
+			return this.pressureState;
 		}
 	}
 
@@ -15,34 +31,32 @@ public class PressureVulnerable : KMonoBehaviour
 	{
 		get
 		{
-			return this.pressureState == PressureVulnerable.AtmosphericPressureState.LethalHigh || this.pressureState == PressureVulnerable.AtmosphericPressureState.LethalLow;
+			return this.GetExternalState == PressureVulnerable.PressureState.LethalHigh || this.GetExternalState == PressureVulnerable.PressureState.LethalLow;
 		}
 	}
 
-	public bool IsNotNormal
+	public bool IsNormal
 	{
 		get
 		{
-			return this.pressureState != PressureVulnerable.AtmosphericPressureState.Normal;
+			return this.GetExternalState == PressureVulnerable.PressureState.Normal || this.GetExternalState == PressureVulnerable.PressureState.Perfect;
 		}
 	}
 
-	public void Configure(float mass_lethal_low, float mass_warning_low)
+	public bool IsPerfect
 	{
-		this.mass_low_lethal = mass_lethal_low;
-		this.mass_low_warning = mass_warning_low;
-	}
-
-	protected override void OnPrefabInit()
-	{
-		base.OnPrefabInit();
+		get
+		{
+			return this.GetExternalState == PressureVulnerable.PressureState.Perfect;
+		}
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.handle = GameScheduler.Instance.SchedulePeriodic(base.name, 1f, new Action<object>(this.CheckPressure), null, null, 0f);
-		this.CheckPressure(null);
+		base.smi.sm.pressure.Set(1f, base.smi);
+		this.handle = GameScheduler.Instance.SchedulePeriodic(base.name, 1f, new Action<object>(this.UpdatePressure), null, null, 0f, null);
+		base.smi.StartSM();
 	}
 
 	protected override void OnCleanUp()
@@ -51,80 +65,168 @@ public class PressureVulnerable : KMonoBehaviour
 		base.OnCleanUp();
 	}
 
-	private void CheckPressure(object data)
+	public void Configure(float pressureWarningLow = 0.25f, float pressureLethalLow = 0.01f, float pressureWarningHigh = 10f, float pressureLethalHigh = 30f, float pressurePerfectLow = 0.75f, float pressurePerfectHigh = 5f)
 	{
-		int num = Grid.PosToCell(base.gameObject);
-		if (!Grid.IsValidCell(num))
-		{
-			return;
-		}
-		if (!this.IsCellSafe(num))
-		{
-			float cellMass = this.GetCellMass(num);
-			if (cellMass < this.mass_low_lethal)
-			{
-				this.SetPressureState(PressureVulnerable.AtmosphericPressureState.LethalLow);
-			}
-			else
-			{
-				this.SetPressureState(PressureVulnerable.AtmosphericPressureState.WarningLow);
-			}
-		}
-		else
-		{
-			this.SetPressureState(PressureVulnerable.AtmosphericPressureState.Normal);
-		}
+		this.pressureWarning_Low = pressureWarningLow;
+		this.pressureLethal_Low = pressureLethalLow;
+		this.pressureLethal_High = pressureLethalHigh;
+		this.pressureWarning_High = pressureWarningHigh;
+		this.pressurePerfect_Low = pressurePerfectLow;
+		this.pressurePerfect_High = pressurePerfectHigh;
 	}
 
 	public bool IsCellSafe(int cell)
 	{
-		return this.GetCellMass(cell) >= this.mass_low_warning;
+		float pressureOverArea = this.GetPressureOverArea(cell);
+		return pressureOverArea > this.pressureLethal_Low && pressureOverArea < this.pressureLethal_High;
 	}
 
-	private float GetCellMass(int cell)
+	public void UpdatePressure(object data)
 	{
-		return Mathf.Max(Grid.Cell[cell].mass, Grid.Cell[Grid.CellAbove(cell)].mass);
+		int num = Grid.PosToCell(base.gameObject);
+		base.smi.sm.pressure.Set(this.GetPressureOverArea(num), base.smi);
 	}
 
-	private void SetPressureState(PressureVulnerable.AtmosphericPressureState newState)
+	private float GetPressureOverArea(int cell)
 	{
-		if (this.pressureState == newState)
+		float pressure = 0f;
+		int count = 0;
+		this.occupyArea.TestArea(cell, delegate(int testCell)
 		{
-			return;
-		}
-		this.pressureState = newState;
-		KSelectable component = base.GetComponent<KSelectable>();
-		switch (newState)
+			if (Grid.IsGas(testCell))
+			{
+				pressure += Grid.Cell[testCell].mass;
+				count++;
+			}
+			return true;
+		});
+		this.occupyArea.TestAreaAbove(cell, delegate(int testCell)
 		{
-		case PressureVulnerable.AtmosphericPressureState.LethalLow:
-			this.Trigger(-593125877, null);
-			break;
-		case PressureVulnerable.AtmosphericPressureState.WarningLow:
-			component.AddStatusItem(Db.Get().CreatureStatusItems.AtmosphericPressureTooLow, this);
-			this.Trigger(-1175525437, null);
-			break;
-		case PressureVulnerable.AtmosphericPressureState.Normal:
-			component.RemoveStatusItem(Db.Get().CreatureStatusItems.AtmosphericPressureTooLow);
-			this.Trigger(-907106982, null);
-			break;
-		}
+			if (Grid.IsGas(testCell))
+			{
+				pressure += Grid.Cell[testCell].mass;
+				count++;
+			}
+			return true;
+		});
+		pressure = ((count <= 0) ? 0f : (pressure / (float)count));
+		return pressure;
 	}
 
-	[SerializeField]
-	private float mass_low_lethal;
+	public List<Descriptor> GetDescriptors(GameObject go)
+	{
+		return new List<Descriptor>
+		{
+			new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.REQUIRES_PRESSURE, GameUtil.GetFormattedMass(this.pressureWarning_Low, GameUtil.TimeSlice.None, true, "{0:0.#}")), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.REQUIRES_PRESSURE, GameUtil.GetFormattedMass(this.pressureWarning_Low, GameUtil.TimeSlice.None, true, "{0:0.#}")), Descriptor.DescriptorType.Requirement, false),
+			new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.IDEAL_PRESSURE, GameUtil.GetFormattedMass(this.pressurePerfect_Low, GameUtil.TimeSlice.None, true, "{0:0.#}"), GameUtil.GetFormattedMass(this.pressurePerfect_High, GameUtil.TimeSlice.None, true, "{0:0.#}")), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.IDEAL_PRESSURE, GameUtil.GetFormattedMass(this.pressurePerfect_Low, GameUtil.TimeSlice.None, true, "{0:0.#}"), GameUtil.GetFormattedMass(this.pressurePerfect_High, GameUtil.TimeSlice.None, true, "{0:0.#}")), Descriptor.DescriptorType.CropOptimumCondition, false)
+		};
+	}
 
-	[SerializeField]
-	private float mass_low_warning = 0.15f;
+	private OccupyArea _occupyArea;
 
-	private PressureVulnerable.AtmosphericPressureState pressureState = PressureVulnerable.AtmosphericPressureState.Normal;
+	public float pressureLethal_Low;
+
+	public float pressureWarning_Low;
+
+	public float pressurePerfect_Low;
+
+	public float pressurePerfect_High;
+
+	public float pressureWarning_High;
+
+	public float pressureLethal_High;
+
+	private PressureVulnerable.PressureState pressureState = PressureVulnerable.PressureState.Normal;
 
 	private SchedulerHandle handle;
 
-	public enum AtmosphericPressureState
+	public class StatesInstance : GameStateMachine<PressureVulnerable.States, PressureVulnerable.StatesInstance, PressureVulnerable, object>.GameInstance
+	{
+		public StatesInstance(PressureVulnerable master)
+			: base(master)
+		{
+			AmountInstance amountInstance = Db.Get().Amounts.Maturity.Lookup(base.gameObject);
+			if (amountInstance != null)
+			{
+				this.hasMaturity = true;
+				this.badConditionModifier = new AttributeModifier(Db.Get().Amounts.YieldBonus.deltaAttribute.Id, 0f / amountInstance.GetMax(), CREATURES.STATS.YIELDBONUS.MODIFIERS.NOT_PERFECT_PRESSURE, false, false);
+				this.goodConditionModifier = new AttributeModifier(Db.Get().Amounts.YieldBonus.deltaAttribute.Id, 0.00041666668f / amountInstance.GetMax(), CREATURES.STATS.YIELDBONUS.MODIFIERS.PERFECT_PRESSURE, false, false);
+			}
+		}
+
+		public AttributeModifier badConditionModifier;
+
+		public AttributeModifier goodConditionModifier;
+
+		public bool hasMaturity;
+	}
+
+	public class States : GameStateMachine<PressureVulnerable.States, PressureVulnerable.StatesInstance, PressureVulnerable>
+	{
+		public override void InitializeStates(out StateMachine.BaseState default_state)
+		{
+			default_state = this.normal;
+			this.lethalLow.ToggleStatusItem(Db.Get().CreatureStatusItems.AtmosphericPressureTooLow, (PressureVulnerable.StatesInstance smi) => smi.master).TriggerOnEnter(GameHashes.LowPressureFatal, null).ParamTransition<float>(this.pressure, this.warningLow, (PressureVulnerable.StatesInstance smi, float p) => p > smi.master.pressureLethal_Low)
+				.Enter(delegate(PressureVulnerable.StatesInstance smi)
+				{
+					smi.master.pressureState = PressureVulnerable.PressureState.LethalLow;
+				});
+			this.lethalHigh.ToggleStatusItem(Db.Get().CreatureStatusItems.AtmosphericPressureTooHigh, (PressureVulnerable.StatesInstance smi) => smi.master).TriggerOnEnter(GameHashes.HighPressureFatal, null).ParamTransition<float>(this.pressure, this.warningHigh, (PressureVulnerable.StatesInstance smi, float p) => p < smi.master.pressureLethal_High)
+				.Enter(delegate(PressureVulnerable.StatesInstance smi)
+				{
+					smi.master.pressureState = PressureVulnerable.PressureState.LethalHigh;
+				});
+			this.warningLow.ToggleStatusItem(Db.Get().CreatureStatusItems.AtmosphericPressureTooLow, (PressureVulnerable.StatesInstance smi) => smi.master).TriggerOnEnter(GameHashes.LowPressureWarning, null).ParamTransition<float>(this.pressure, this.lethalLow, (PressureVulnerable.StatesInstance smi, float p) => p < smi.master.pressureLethal_Low)
+				.ParamTransition<float>(this.pressure, this.normal, (PressureVulnerable.StatesInstance smi, float p) => p > smi.master.pressureWarning_Low)
+				.Enter(delegate(PressureVulnerable.StatesInstance smi)
+				{
+					smi.master.pressureState = PressureVulnerable.PressureState.WarningLow;
+				});
+			this.warningHigh.ToggleStatusItem(Db.Get().CreatureStatusItems.AtmosphericPressureTooHigh, (PressureVulnerable.StatesInstance smi) => smi.master).TriggerOnEnter(GameHashes.HighPressureWarning, null).ParamTransition<float>(this.pressure, this.lethalHigh, (PressureVulnerable.StatesInstance smi, float p) => p > smi.master.pressureLethal_High)
+				.ParamTransition<float>(this.pressure, this.normal, (PressureVulnerable.StatesInstance smi, float p) => p < smi.master.pressureWarning_High)
+				.Enter(delegate(PressureVulnerable.StatesInstance smi)
+				{
+					smi.master.pressureState = PressureVulnerable.PressureState.WarningHigh;
+				});
+			this.normal.DefaultState(this.normal.okay).TriggerOnEnter(GameHashes.OptimalPressureAchieved, null).ParamTransition<float>(this.pressure, this.warningHigh, (PressureVulnerable.StatesInstance smi, float p) => p > smi.master.pressureWarning_High)
+				.ParamTransition<float>(this.pressure, this.warningLow, (PressureVulnerable.StatesInstance smi, float p) => p < smi.master.pressureWarning_Low);
+			this.normal.okay.ToggleAttributeModifier("Bad pressure", (PressureVulnerable.StatesInstance smi) => smi.badConditionModifier, (PressureVulnerable.StatesInstance smi) => smi.hasMaturity).ParamTransition<float>(this.pressure, this.normal.perfect, (PressureVulnerable.StatesInstance smi, float p) => p > smi.master.pressurePerfect_Low && p < smi.master.pressurePerfect_High).Enter(delegate(PressureVulnerable.StatesInstance smi)
+			{
+				smi.master.pressureState = PressureVulnerable.PressureState.Normal;
+			});
+			this.normal.perfect.ToggleStatusItem(Db.Get().CreatureStatusItems.PerfectAtmosphericPressure, (PressureVulnerable.StatesInstance smi) => smi.master).ToggleAttributeModifier("Good pressure", (PressureVulnerable.StatesInstance smi) => smi.goodConditionModifier, (PressureVulnerable.StatesInstance smi) => smi.hasMaturity).ParamTransition<float>(this.pressure, this.normal.okay, (PressureVulnerable.StatesInstance smi, float p) => p < smi.master.pressurePerfect_Low || p > smi.master.pressurePerfect_High)
+				.Enter(delegate(PressureVulnerable.StatesInstance smi)
+				{
+					smi.master.pressureState = PressureVulnerable.PressureState.Perfect;
+				});
+		}
+
+		public StateMachine<PressureVulnerable.States, PressureVulnerable.StatesInstance, PressureVulnerable, object>.FloatParameter pressure;
+
+		public GameStateMachine<PressureVulnerable.States, PressureVulnerable.StatesInstance, PressureVulnerable, object>.State lethalLow;
+
+		public GameStateMachine<PressureVulnerable.States, PressureVulnerable.StatesInstance, PressureVulnerable, object>.State lethalHigh;
+
+		public GameStateMachine<PressureVulnerable.States, PressureVulnerable.StatesInstance, PressureVulnerable, object>.State warningLow;
+
+		public GameStateMachine<PressureVulnerable.States, PressureVulnerable.StatesInstance, PressureVulnerable, object>.State warningHigh;
+
+		public PressureVulnerable.States.NormalStates normal;
+
+		public class NormalStates : GameStateMachine<PressureVulnerable.States, PressureVulnerable.StatesInstance, PressureVulnerable, object>.State
+		{
+			public GameStateMachine<PressureVulnerable.States, PressureVulnerable.StatesInstance, PressureVulnerable, object>.State okay;
+
+			public GameStateMachine<PressureVulnerable.States, PressureVulnerable.StatesInstance, PressureVulnerable, object>.State perfect;
+		}
+	}
+
+	public enum PressureState
 	{
 		LethalLow,
 		WarningLow,
 		Normal,
+		Perfect,
 		WarningHigh,
 		LethalHigh
 	}

@@ -19,29 +19,39 @@ public class Scheduler : IScheduler
 		}
 	}
 
-	private SchedulerHandle Schedule(string name, float time, float time_interval, Action<object> callback, object callback_data, Guid id)
+	public float GetTime()
 	{
-		SchedulerEntry schedulerEntry = new SchedulerEntry(id, name, time + this.clock.GetTime(), time_interval, callback, callback_data);
+		return this.clock.GetTime();
+	}
+
+	private SchedulerHandle Schedule(SchedulerEntry entry)
+	{
 		if (this.entryCount == this.entries.Length)
 		{
 			SchedulerEntry[] array = new SchedulerEntry[this.entries.Length * 2];
 			Array.Copy(this.entries, array, this.entryCount);
 			this.entries = array;
 		}
-		this.entries[this.entryCount++] = schedulerEntry;
+		this.entries[this.entryCount++] = entry;
 		this.dirty = true;
-		SchedulerHandle schedulerHandle = new SchedulerHandle(this, schedulerEntry);
+		SchedulerHandle schedulerHandle = new SchedulerHandle(this, entry);
 		return schedulerHandle;
 	}
 
-	public SchedulerHandle SchedulePeriodic(string name, float interval, Action<object> callback, object callback_data = null, SchedulerGroup group = null, float time_offset = 0f)
+	private SchedulerHandle Schedule(string name, float time, float time_interval, Action<object> callback, object callback_data, Guid id, GameObject profiler_obj)
+	{
+		SchedulerEntry schedulerEntry = new SchedulerEntry(id, name, time + this.clock.GetTime(), time_interval, callback, callback_data, profiler_obj);
+		return this.Schedule(schedulerEntry);
+	}
+
+	public SchedulerHandle SchedulePeriodic(string name, float interval, Action<object> callback, object callback_data = null, SchedulerGroup group = null, float time_offset = 0f, GameObject profiler_obj = null)
 	{
 		if (group != null && group.scheduler != this)
 		{
 			Debug.LogError("Scheduler group mismatch!");
 		}
 		Guid nextId = this.GetNextId();
-		SchedulerHandle schedulerHandle = this.Schedule(name, interval + time_offset, interval, callback, callback_data, nextId);
+		SchedulerHandle schedulerHandle = this.Schedule(name, interval + time_offset, interval, callback, callback_data, nextId, profiler_obj);
 		if (group != null)
 		{
 			group.Add(nextId);
@@ -56,7 +66,7 @@ public class Scheduler : IScheduler
 			Debug.LogError("Scheduler group mismatch!");
 		}
 		Guid nextId = this.GetNextId();
-		SchedulerHandle schedulerHandle = this.Schedule(name, time, -1f, callback, callback_data, nextId);
+		SchedulerHandle schedulerHandle = this.Schedule(name, time, -1f, callback, callback_data, nextId, null);
 		if (group != null)
 		{
 			group.Add(nextId);
@@ -79,7 +89,9 @@ public class Scheduler : IScheduler
 		{
 			if (this.entries[i].id == id)
 			{
-				this.entries[i] = new SchedulerEntry(this.entries[i].id, this.entries[i].name, 0f, -1f, null, null);
+				string text = null;
+				GameObject gameObject = null;
+				this.entries[i] = new SchedulerEntry(this.entries[i].id, text, 0f, -1f, null, null, gameObject);
 			}
 		}
 		SystemScheduler.instance.RemoveTask(id);
@@ -101,23 +113,36 @@ public class Scheduler : IScheduler
 			this.dirty = false;
 			Array.Sort<SchedulerEntry>(this.entries, 0, this.entryCount, Scheduler.comparer);
 		}
-		float time = this.clock.GetTime();
 		int entryCount = this.entryCount;
-		int i;
-		for (i = 0; i < entryCount; i++)
+		int i = 0;
+		using (new KProfiler.Region("Scheduler.Update", null))
 		{
-			SchedulerEntry schedulerEntry = this.entries[i];
-			if (time < schedulerEntry.time)
+			float time = this.clock.GetTime();
+			if (this.previousTime == time)
 			{
-				break;
+				return;
 			}
-			if (schedulerEntry.callback != null)
+			this.previousTime = time;
+			while (i < entryCount)
 			{
-				SystemScheduler.instance.AddTask(schedulerEntry.id, SystemScheduler.Priority.Default, schedulerEntry.callback, schedulerEntry.callbackData, schedulerEntry.name);
-				if (this.entries[i].timeInterval >= 0f)
+				SchedulerEntry schedulerEntry = this.entries[i];
+				if (time < schedulerEntry.time)
 				{
-					this.Schedule(schedulerEntry.name, schedulerEntry.timeInterval, schedulerEntry.timeInterval, schedulerEntry.callback, schedulerEntry.callbackData, schedulerEntry.id);
+					break;
 				}
+				if (schedulerEntry.callback != null)
+				{
+					string text = null;
+					GameObject gameObject = null;
+					SystemScheduler.instance.AddTask(schedulerEntry.id, SystemScheduler.Priority.Default, schedulerEntry.callback, schedulerEntry.callbackData, text, gameObject);
+					if (this.entries[i].timeInterval >= 0f)
+					{
+						SchedulerEntry schedulerEntry2 = this.entries[i];
+						schedulerEntry2.time = this.clock.GetTime() + schedulerEntry2.timeInterval;
+						this.Schedule(schedulerEntry2);
+					}
+				}
+				i++;
 			}
 		}
 		this.entryCount -= i;
@@ -141,6 +166,8 @@ public class Scheduler : IScheduler
 	private LoggerFSSF addRemovelog = new LoggerFSSF("Scheduler");
 
 	private SchedulerClock clock;
+
+	private float previousTime = float.NegativeInfinity;
 
 	private bool dirty;
 

@@ -1,23 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization;
+using Klei.AI;
+using KSerialization;
+using STRINGS;
+using UnityEngine;
 
+[SerializationConfig(MemberSerialization.OptIn)]
 public class Repairable : BuildingWorkable
 {
-	protected override void OnPrefabInit()
-	{
-		base.OnPrefabInit();
-		base.SetWorkTime(80f);
-		this.Subscribe(493375141, new EventSystem.EventHandler(this.OnRefreshUserMenu));
-	}
-
-	protected override void OnCompleteWork(Worker worker)
-	{
-		this.broken = false;
-		this.breakable.Repair();
-		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.PendingRepair);
-		this.chore = null;
-		this.userMenu.Refresh();
-	}
-
 	public override Workable.AnimInfo GetAnim(Worker worker)
 	{
 		Workable.AnimInfo anim = base.GetAnim(worker);
@@ -25,56 +17,326 @@ public class Repairable : BuildingWorkable
 		return anim;
 	}
 
-	public void Break()
+	protected override void OnPrefabInit()
 	{
-		this.broken = true;
+		base.OnPrefabInit();
+		base.SetOffsetTable(OffsetGroups.InvertedStandardTableWithCorners);
+		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		this.showProgressBar = false;
+		this.faceTargetWhenWorking = true;
+	}
+
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		this.smi = new Repairable.SMInstance(this);
+		this.smi.StartSM();
+		this.workTime = float.PositiveInfinity;
+		this.workTimeRemaining = float.PositiveInfinity;
+	}
+
+	private void OnProxyStorageChanged(object data)
+	{
+		this.Trigger(-1697596308, data);
+	}
+
+	protected override void OnCleanUp()
+	{
+		if (this.smi != null)
+		{
+			this.smi.StopSM("Destroy Repairable");
+		}
+		base.OnCleanUp();
 	}
 
 	private void OnRefreshUserMenu(object data)
 	{
-		if (this.broken)
+		if (base.gameObject != null && this.smi != null)
 		{
-			if (this.chore == null)
+			StateMachine.BaseState currentState = this.smi.GetCurrentState();
+			if (currentState == this.smi.sm.forbidden)
 			{
-				this.userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_repair", "Repair", new global::System.Action(this.OnRepair), global::Action.NumActions, null, null, null, null, string.Empty));
+				UserMenu userMenu = this.userMenu;
+				string text = BUILDINGS.REPAIRABLE.ENABLE_AUTOREPAIR.TOOLTIP;
+				userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_repair", BUILDINGS.REPAIRABLE.ENABLE_AUTOREPAIR.NAME, new global::System.Action(this.AllowRepair), global::Action.NumActions, null, null, null, text, true), 1f);
 			}
 			else
 			{
-				this.userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_repair", "Cancel Repair", new global::System.Action(this.OnCancelRepair), global::Action.NumActions, null, null, null, null, string.Empty));
+				UserMenu userMenu2 = this.userMenu;
+				string text = BUILDINGS.REPAIRABLE.DISABLE_AUTOREPAIR.TOOLTIP;
+				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_repair", BUILDINGS.REPAIRABLE.DISABLE_AUTOREPAIR.NAME, new global::System.Action(this.CancelRepair), global::Action.NumActions, null, null, null, text, true), 1f);
 			}
 		}
 	}
 
-	private void OnRepair()
+	private void AllowRepair()
 	{
 		if (DebugHandler.InstantBuildMode)
 		{
 			this.OnCompleteWork(null);
 		}
-		else
-		{
-			this.chore = new WorkChore<Repairable>(Db.Get().ChoreTypes.Repair, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true);
-			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.PendingRepair, this);
-		}
+		this.smi.sm.allow.Trigger(this.smi);
+		this.OnRefreshUserMenu(null);
 	}
 
-	private void OnCancelRepair()
+	public void CancelRepair()
 	{
-		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.PendingRepair);
-		if (this.chore != null)
+		if (this.smi != null)
 		{
-			this.chore.Cancel("Repair cancelled");
+			this.smi.sm.forbid.Trigger(this.smi);
 		}
-		this.chore = null;
+		this.OnRefreshUserMenu(null);
 	}
 
-	[MyCmpReq]
-	private Breakable breakable;
+	protected override void OnStartWork(Worker worker)
+	{
+		base.OnStartWork(worker);
+		Operational component = base.GetComponent<Operational>();
+		if (component != null)
+		{
+			component.SetFlag(Repairable.repairedFlag, false);
+		}
+		this.timeSpentRepairing = 0f;
+	}
+
+	protected override bool OnWorkTick(Worker worker, float dt)
+	{
+		PrimaryElement component = base.GetComponent<PrimaryElement>();
+		float num = Mathf.Sqrt(component.Mass);
+		float num2 = num;
+		float num3 = num2 * 0.1f;
+		if (this.timeSpentRepairing >= num3)
+		{
+			this.timeSpentRepairing -= num3;
+			int num4 = 0;
+			if (worker != null)
+			{
+				AttributeInstance attributeInstance = Db.Get().Attributes.Machinery.Lookup(worker);
+				num4 = (int)attributeInstance.GetTotalValue();
+			}
+			int num5 = 10 + Math.Max(0, num4 * 10);
+			int num6 = Mathf.CeilToInt((float)num5 * 0.1f);
+			this.hp.Repair(num6);
+			if (this.hp.HitPoints >= this.hp.MaxHitPoints)
+			{
+				return true;
+			}
+		}
+		this.timeSpentRepairing += dt;
+		return false;
+	}
+
+	protected override void OnStopWork(Worker worker)
+	{
+		base.OnStopWork(worker);
+		Operational component = base.GetComponent<Operational>();
+		if (component != null)
+		{
+			component.SetFlag(Repairable.repairedFlag, true);
+		}
+	}
+
+	protected override void OnCompleteWork(Worker worker)
+	{
+		Operational component = base.GetComponent<Operational>();
+		if (component != null)
+		{
+			component.SetFlag(Repairable.repairedFlag, true);
+		}
+	}
+
+	public void CreateStorageProxy()
+	{
+		if (this.storageProxy == null)
+		{
+			GameObject gameObject = new GameObject();
+			gameObject.SetActive(false);
+			gameObject.name = "RepairableStorageProxy";
+			gameObject.transform.parent = this.transform;
+			gameObject.transform.localPosition = Vector3.zero;
+			this.storageProxy = gameObject.AddComponent<Storage>();
+			gameObject.SetActive(true);
+		}
+	}
+
+	[OnSerializing]
+	private void OnSerializing()
+	{
+		this.storedData = null;
+		if (this.storageProxy != null && !this.storageProxy.IsEmpty())
+		{
+			using (MemoryStream memoryStream = new MemoryStream())
+			{
+				using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
+				{
+					this.storageProxy.Serialize(binaryWriter);
+				}
+				this.storedData = memoryStream.ToArray();
+			}
+		}
+	}
+
+	[OnSerialized]
+	private void OnSerialized()
+	{
+		this.storedData = null;
+	}
+
+	[OnDeserialized]
+	private void OnDeserialized()
+	{
+		if (this.storedData != null)
+		{
+			FastReader fastReader = new FastReader(this.storedData);
+			this.CreateStorageProxy();
+			this.storageProxy.Deserialize(fastReader);
+			this.storedData = null;
+		}
+	}
 
 	[MyCmpReq]
 	private UserMenu userMenu;
 
-	private Chore chore;
+	[MyCmpGet]
+	private BuildingHP hp;
 
-	private bool broken;
+	private Repairable.SMInstance smi;
+
+	private Storage storageProxy;
+
+	[Serialize]
+	private byte[] storedData;
+
+	private float timeSpentRepairing;
+
+	private static Operational.Flag repairedFlag = new Operational.Flag("repaired", Operational.Flag.Type.Functional);
+
+	public class SMInstance : GameStateMachine<Repairable.States, Repairable.SMInstance, Repairable, object>.GameInstance
+	{
+		public SMInstance(Repairable smi)
+			: base(smi)
+		{
+		}
+
+		public bool HasRequiredMass()
+		{
+			PrimaryElement component = base.GetComponent<PrimaryElement>();
+			float num = component.Mass * 0.1f;
+			Storage storageProxy = base.smi.master.storageProxy;
+			PrimaryElement primaryElement = storageProxy.FindPrimaryElement(component.ElementID);
+			return primaryElement != null && primaryElement.Mass >= num;
+		}
+
+		public KeyValuePair<Tag, float> GetRequiredMass()
+		{
+			PrimaryElement component = base.GetComponent<PrimaryElement>();
+			float num = component.Mass * 0.1f;
+			Storage storageProxy = base.smi.master.storageProxy;
+			PrimaryElement primaryElement = storageProxy.FindPrimaryElement(component.ElementID);
+			float num2 = ((!(primaryElement != null)) ? num : Math.Max(0f, num - primaryElement.Mass));
+			KeyValuePair<Tag, float> keyValuePair = new KeyValuePair<Tag, float>(component.Element.tag, num2);
+			return keyValuePair;
+		}
+
+		public void ConsumeRepairMaterials()
+		{
+			base.smi.master.storageProxy.ConsumeAll();
+		}
+
+		public void DestroyStorageProxy()
+		{
+			if (base.smi.master.storageProxy != null)
+			{
+				base.smi.master.storageProxy.DropAll();
+				Util.KDestroyGameObject(base.smi.master.storageProxy.gameObject);
+			}
+		}
+
+		public bool NeedsRepairs()
+		{
+			return base.smi.master.GetComponent<BuildingHP>().NeedsRepairs;
+		}
+
+		private const float REQUIRED_MASS_SCALE = 0.1f;
+	}
+
+	public class States : GameStateMachine<Repairable.States, Repairable.SMInstance, Repairable>
+	{
+		// Note: this type is marked as 'beforefieldinit'.
+		static States()
+		{
+			Chore.Precondition precondition = default(Chore.Precondition);
+			precondition.id = "IsNotBeingAttacked";
+			precondition.fn = delegate(ref Chore.Precondition.Context context, object data)
+			{
+				bool flag = true;
+				if (data != null)
+				{
+					Breakable breakable = (Breakable)data;
+					flag = breakable.worker == null;
+				}
+				return flag;
+			};
+			Repairable.States.IsNotBeingAttacked = precondition;
+		}
+
+		public override void InitializeStates(out StateMachine.BaseState default_state)
+		{
+			default_state = this.repaired;
+			base.serializable = true;
+			this.forbidden.OnSignal(this.allow, this.allowed);
+			this.allowed.Enter(delegate(Repairable.SMInstance smi)
+			{
+				smi.master.CreateStorageProxy();
+			}).DefaultState(this.allowed.needMass).EventHandler(GameHashes.BuildingFullyRepaired, delegate(Repairable.SMInstance smi)
+			{
+				smi.ConsumeRepairMaterials();
+			})
+				.EventTransition(GameHashes.BuildingFullyRepaired, this.repaired, null)
+				.OnSignal(this.forbid, this.forbidden)
+				.Exit(delegate(Repairable.SMInstance smi)
+				{
+					smi.DestroyStorageProxy();
+				});
+			this.allowed.needMass.EventTransition(GameHashes.OnStorageChange, this.allowed.repairable, (Repairable.SMInstance smi) => smi.HasRequiredMass()).ToggleChore(new Func<Repairable.SMInstance, Chore>(this.CreateFetchChore), this.allowed.repairable, false).ToggleStatusItem(Db.Get().BuildingStatusItems.WaitingForRepairMaterials, (Repairable.SMInstance smi) => smi.GetRequiredMass());
+			this.allowed.repairable.ToggleChore(new Func<Repairable.SMInstance, Chore>(this.CreateRepairChore), this.allowed.repairable, true).ToggleStatusItem(Db.Get().BuildingStatusItems.PendingRepair, null);
+			this.repaired.EventTransition(GameHashes.BuildingReceivedDamage, this.allowed, (Repairable.SMInstance smi) => smi.NeedsRepairs()).OnSignal(this.allow, this.allowed).OnSignal(this.forbid, this.forbidden);
+		}
+
+		private Chore CreateFetchChore(Repairable.SMInstance smi)
+		{
+			PrimaryElement component = smi.master.GetComponent<PrimaryElement>();
+			Storage storageProxy = smi.master.storageProxy;
+			PrimaryElement primaryElement = storageProxy.FindPrimaryElement(component.ElementID);
+			float num = component.Mass * 0.1f - ((!(primaryElement != null)) ? 0f : primaryElement.Mass);
+			Tag[] array = new Tag[] { TagManager.Create(component.ElementID) };
+			return new FetchChore(smi.master.storageProxy, num, array, null, true, null, null, null, FetchOrder2.OperationalRequirement.None, 0);
+		}
+
+		private Chore CreateRepairChore(Repairable.SMInstance smi)
+		{
+			WorkChore<Repairable> workChore = new WorkChore<Repairable>(Db.Get().ChoreTypes.Repair, smi.master, null, true, null, null, null, true, null, false, default(Tag), null, false, true);
+			workChore.AddPrecondition(Repairable.States.IsNotBeingAttacked, smi.master.GetComponent<Breakable>());
+			return workChore;
+		}
+
+		public StateMachine<Repairable.States, Repairable.SMInstance, Repairable, object>.Signal allow;
+
+		public StateMachine<Repairable.States, Repairable.SMInstance, Repairable, object>.Signal forbid;
+
+		public GameStateMachine<Repairable.States, Repairable.SMInstance, Repairable, object>.State forbidden;
+
+		public Repairable.States.AllowedState allowed;
+
+		public GameStateMachine<Repairable.States, Repairable.SMInstance, Repairable, object>.State repaired;
+
+		public static Chore.Precondition IsNotBeingAttacked;
+
+		public class AllowedState : GameStateMachine<Repairable.States, Repairable.SMInstance, Repairable, object>.State
+		{
+			public GameStateMachine<Repairable.States, Repairable.SMInstance, Repairable, object>.State needMass;
+
+			public GameStateMachine<Repairable.States, Repairable.SMInstance, Repairable, object>.State repairable;
+		}
+	}
 }

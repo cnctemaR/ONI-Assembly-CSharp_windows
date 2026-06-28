@@ -36,7 +36,7 @@ public class Glom : StateMachineComponent<Glom.StatesInstance>
 
 	private Vector2 Heading;
 
-	public class StatesInstance : GameStateMachine<Glom.States, Glom.StatesInstance, Glom>.GameInstance
+	public class StatesInstance : GameStateMachine<Glom.States, Glom.StatesInstance, Glom, object>.GameInstance
 	{
 		public StatesInstance(Glom smi)
 			: base(smi)
@@ -56,8 +56,8 @@ public class Glom : StateMachineComponent<Glom.StatesInstance>
 					smi.GoTo(this.fall);
 				}
 			});
-			this.alive.EventTransition(GameHashes.Died, this.alive.grounded.death, null).EventTransition(GameHashes.TooColdFatal, this.alive.grounded.death, null).EventTransition(GameHashes.TooHotFatal, this.alive.grounded.death, null)
-				.EventTransition(GameHashes.EntombedChanged, this.alive.grounded.death, null)
+			this.alive.EventTransition(GameHashes.Died, this.death, null).EventTransition(GameHashes.TooColdFatal, this.death, null).EventTransition(GameHashes.TooHotFatal, this.death, null)
+				.EventTransition(GameHashes.EntombedChanged, this.death, null)
 				.ToggleStateMachine((Glom.StatesInstance smi) => new ThreatMonitor.Instance(smi.master))
 				.Enter(delegate(Glom.StatesInstance smi)
 				{
@@ -90,7 +90,7 @@ public class Glom : StateMachineComponent<Glom.StatesInstance>
 				smi.master.DropDirty(0.2f);
 				smi.ScheduleGoTo(1f, this.alive.grounded.idling.idle);
 			});
-			this.alive.grounded.death.Enter(delegate(Glom.StatesInstance smi)
+			this.death.Enter(delegate(Glom.StatesInstance smi)
 			{
 				smi.master.DropDirty(3f);
 				smi.Play("death", KAnim.PlayMode.Once);
@@ -105,32 +105,32 @@ public class Glom : StateMachineComponent<Glom.StatesInstance>
 
 		public Glom.States.AliveStates alive;
 
-		public GameStateMachine<Glom.States, Glom.StatesInstance, Glom>.State embedded;
+		public GameStateMachine<Glom.States, Glom.StatesInstance, Glom, object>.State death;
 
-		public StateMachine<Glom.States, Glom.StatesInstance, Glom>.TargetParameter mover;
+		public GameStateMachine<Glom.States, Glom.StatesInstance, Glom, object>.State embedded;
 
-		public GameStateMachine<Glom.States, Glom.StatesInstance, Glom>.State fall;
+		public StateMachine<Glom.States, Glom.StatesInstance, Glom, object>.TargetParameter mover;
 
-		public class AliveStates : GameStateMachine<Glom.States, Glom.StatesInstance, Glom>.State
+		public GameStateMachine<Glom.States, Glom.StatesInstance, Glom, object>.State fall;
+
+		public class AliveStates : GameStateMachine<Glom.States, Glom.StatesInstance, Glom, object>.State
 		{
 			public Glom.States.GroundedState grounded = new Glom.States.GroundedState();
 		}
 
-		public class GroundedState : GameStateMachine<Glom.States, Glom.StatesInstance, Glom>.State
+		public class GroundedState : GameStateMachine<Glom.States, Glom.StatesInstance, Glom, object>.State
 		{
 			public Glom.States.GroundedState.IdleStates idling;
 
-			public GameStateMachine<Glom.States, Glom.StatesInstance, Glom>.CreatureFleeSubState<Approachable> flee;
+			public GameStateMachine<Glom.States, Glom.StatesInstance, Glom, object>.CreatureFleeSubState<Approachable> flee;
 
-			public GameStateMachine<Glom.States, Glom.StatesInstance, Glom>.State dirty;
+			public GameStateMachine<Glom.States, Glom.StatesInstance, Glom, object>.State dirty;
 
-			public GameStateMachine<Glom.States, Glom.StatesInstance, Glom>.State death;
-
-			public class IdleStates : GameStateMachine<Glom.States, Glom.StatesInstance, Glom>.State
+			public class IdleStates : GameStateMachine<Glom.States, Glom.StatesInstance, Glom, object>.State
 			{
-				public GameStateMachine<Glom.States, Glom.StatesInstance, Glom>.State idle;
+				public GameStateMachine<Glom.States, Glom.StatesInstance, Glom, object>.State idle;
 
-				public GameStateMachine<Glom.States, Glom.StatesInstance, Glom>.IdleMoveSubState move;
+				public GameStateMachine<Glom.States, Glom.StatesInstance, Glom, object>.IdleMoveSubState move;
 			}
 		}
 	}

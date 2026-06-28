@@ -1,13 +1,13 @@
 ﻿using System;
 using UnityEngine;
 
+[SkipSaveFileSerialization]
 public class Facing : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
 		this.log = new LoggerFS("Facing");
-		base.GetComponent<KPrefabID>().AddLog(this.log);
 	}
 
 	public void Face(float target_x)
@@ -50,9 +50,9 @@ public class Facing : KMonoBehaviour
 
 	private void UpdateMirror()
 	{
-		if (this.kanimController != null && this.kanimController.Flip != this.facingLeft)
+		if (this.kanimController != null && this.kanimController.FlipX != this.facingLeft)
 		{
-			this.kanimController.Flip = this.facingLeft;
+			this.kanimController.FlipX = this.facingLeft;
 			if (this.facingLeft)
 			{
 			}

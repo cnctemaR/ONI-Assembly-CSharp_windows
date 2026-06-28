@@ -89,7 +89,7 @@ public class ReportErrorDialog : MonoBehaviour
 	public void OnSelect_SUBMIT()
 	{
 		this.submitButton.GetComponentInChildren<LocText>().text = UI.CRASHSCREEN.REPORTING;
-		this.submitButton.GetComponent<Button>().interactable = false;
+		this.submitButton.GetComponent<KButton>().isInteractable = false;
 		base.StartCoroutine(this.WaitForUIUpdateBeforeReporting());
 	}
 

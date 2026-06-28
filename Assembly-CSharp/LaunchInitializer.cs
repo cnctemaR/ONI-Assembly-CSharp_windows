@@ -7,10 +7,18 @@ public class LaunchInitializer : MonoBehaviour
 {
 	private void Awake()
 	{
-		string localizationFilePath = Localization.GetLocalizationFilePath();
-		if (File.Exists(localizationFilePath))
+		if (SteamManager.Initialized && SteamUGCService.HasInstalledLanguage())
 		{
-			Localization.LoadTranslation(localizationFilePath);
+			base.gameObject.AddComponent<SteamUGCService>();
+			SteamUGCService.LoadTranslation();
+		}
+		else
+		{
+			string localizationFilePath = Localization.GetLocalizationFilePath();
+			if (File.Exists(localizationFilePath))
+			{
+				Localization.LoadTranslation(localizationFilePath);
+			}
 		}
 		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		for (int i = 0; i < this.SpawnPrefabs.Length; i++)

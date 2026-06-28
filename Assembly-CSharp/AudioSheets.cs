@@ -61,7 +61,7 @@ public class AudioSheets : ScriptableObject
 		return null;
 	}
 
-	public List<AnimEvent> GetEvents(string anim_id)
+	public List<AnimEvent> GetEvents(HashedString anim_id)
 	{
 		List<AnimEvent> list = null;
 		this.events.TryGetValue(anim_id, out list);
@@ -70,5 +70,5 @@ public class AudioSheets : ScriptableObject
 
 	public List<AudioSheet> sheets = new List<AudioSheet>();
 
-	public Dictionary<string, List<AnimEvent>> events = new Dictionary<string, List<AnimEvent>>();
+	public Dictionary<HashedString, List<AnimEvent>> events = new Dictionary<HashedString, List<AnimEvent>>();
 }

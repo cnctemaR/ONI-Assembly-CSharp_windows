@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 
 public class ChoreType : Resource
 {
-	public ChoreType(string id, ResourceSet parent, string[] chore_groups, string urge, string name, string status_message, int priority)
+	public ChoreType(string id, ResourceSet parent, string[] chore_groups, string urge, string name, string status_message, Tag[] interrupt_exclusion, int priority)
 		: base(id, parent, name)
 	{
-		this.statusItem = new StatusItem(id, status_message, string.Empty, status_message, false, StatusItem.IconType.Info, NotificationType.Neutral, SimViewMode.None, SimViewMode.None);
+		this.statusItem = new StatusItem(id, status_message, status_message, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
 		this.statusItem.resolveStringCallback = new Func<string, object, string>(this.ResolveStringCallback);
+		this.tags.Add(TagManager.Create(id, null));
+		this.interruptExclusion = new List<Tag>(interrupt_exclusion);
 		Db.Get().DuplicantStatusItems.Add(this.statusItem);
 		this.groups = new ChoreGroup[chore_groups.Length];
 		for (int i = 0; i < this.groups.Length; i++)
@@ -35,4 +38,8 @@ public class ChoreType : Resource
 	}
 
 	public StatusItem statusItem;
+
+	public List<Tag> tags = new List<Tag>();
+
+	public List<Tag> interruptExclusion;
 }

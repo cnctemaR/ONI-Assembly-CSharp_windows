@@ -7,7 +7,7 @@ public class EnvironmentGenerator : Generator
 		base.SimUpdate(dt);
 		if (this.operational.IsOperational)
 		{
-			base.ApplyDeltaJoules(base.WattageRating * dt, false);
+			this.ApplyDeltaJoules(base.WattageRating * dt, false);
 			this.operational.SetActive(this.operational.IsOperational, false);
 		}
 	}

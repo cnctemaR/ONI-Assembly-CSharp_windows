@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using Klei.AI;
+using STRINGS;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 public class ProductInfoScreen : KScreen
 {
-	public void ForceClose()
+	public void ForceClose(bool playSound = true)
 	{
 		this.ClearProduct(true);
-		PlanScreen.Instance.CloseRecipe();
+		PlanScreen.Instance.CloseRecipe(playSound);
 	}
 
 	private void RefreshScreen()
@@ -90,11 +90,11 @@ public class ProductInfoScreen : KScreen
 		}
 		if (this.ProductRequirementsPane != null)
 		{
-			this.ProductRequirementsPane.SetActive(this.expandedInfo);
+			this.ProductRequirementsPane.gameObject.SetActive(this.expandedInfo);
 		}
 		if (this.ProductEffectsPane != null)
 		{
-			this.ProductEffectsPane.SetActive(this.expandedInfo);
+			this.ProductEffectsPane.gameObject.SetActive(this.expandedInfo);
 		}
 		if (this.ProductFlavourPane != null)
 		{
@@ -118,36 +118,17 @@ public class ProductInfoScreen : KScreen
 	{
 		if (PlayerController.Instance.ActiveTool != PrebuildTool.Instance && PlayerController.Instance.ActiveTool != BuildTool.Instance && PlayerController.Instance.ActiveTool != UtilityBuildTool.Instance && PlayerController.Instance.ActiveTool != WireBuildTool.Instance)
 		{
-			if (this.materialSelectionPanel.CurrentSelectedElement == null)
+			bool flag = false;
+			if (PlayerController.Instance.ActiveTool == SelectTool.Instance)
 			{
-				KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Deselect", false));
+				flag = true;
 			}
-			this.ForceClose();
+			this.ForceClose(flag);
 			return;
 		}
 		if (!DebugHandler.InstantBuildMode && this.currentDef != null && this.materialSelectionPanel.CurrentSelectedElement != null && this.currentDef.Mass[0] > WorldInventory.Instance.GetAmount(this.materialSelectionPanel.CurrentSelectedElement.tag))
 		{
 			this.materialSelectionPanel.AutoSelectAvailableMaterial();
-		}
-		if (this.textLayoutDirty)
-		{
-			if (this.productFlavourText != null)
-			{
-				LayoutElement component = this.productFlavourText.GetComponent<LayoutElement>();
-				LayoutElement layoutElement = component;
-				float num = this.productFlavourText.preferredHeight;
-				component.preferredHeight = num;
-				layoutElement.minHeight = num;
-			}
-			if (this.productDescriptionText != null)
-			{
-				LayoutElement component2 = this.productDescriptionText.GetComponent<LayoutElement>();
-				LayoutElement layoutElement2 = component2;
-				float num = this.productDescriptionText.preferredHeight;
-				component2.preferredHeight = num;
-				layoutElement2.minHeight = num;
-			}
-			this.textLayoutDirty = false;
 		}
 	}
 
@@ -155,7 +136,7 @@ public class ProductInfoScreen : KScreen
 	{
 		this.titleBar.SetTitle(def.Name);
 		bool flag = PlanScreen.Instance.BuildableState(this.currentDef) == PlanScreen.RequirementsState.Complete;
-		this.titleBar.GetComponentInChildren<Image>().color = ((!flag) ? this.titleBarColors.inactiveColor : this.titleBarColors.activeColor);
+		this.titleBar.GetComponentInChildren<KImage>().ColorState = ((!flag) ? KImage.ColorSelector.Disabled : KImage.ColorSelector.Active);
 	}
 
 	private void SetDescription(BuildingDef def)
@@ -218,7 +199,6 @@ public class ProductInfoScreen : KScreen
 				}
 			}
 			this.productFlavourText.text = text;
-			this.textLayoutDirty = true;
 		}
 	}
 
@@ -228,36 +208,23 @@ public class ProductInfoScreen : KScreen
 		{
 			this.productDescriptionText.text = string.Format("{0}", def.Effect);
 		}
-		List<Descriptor> buildingRequirementDescriptors = GameUtil.GetBuildingRequirementDescriptors(def);
-		List<Descriptor> buildingEffectsDescriptors = GameUtil.GetBuildingEffectsDescriptors(def);
-		foreach (Descriptor descriptor in buildingRequirementDescriptors)
+		List<Descriptor> allDescriptors = GameUtil.GetAllDescriptors(def);
+		List<Descriptor> requirementDescriptors = GameUtil.GetRequirementDescriptors(allDescriptors);
+		if (requirementDescriptors.Count > 0)
 		{
-			this.AddOrGetLabel(this.descLabels, descriptor, this.ProductRequirementsPane, descriptor.text);
+			Descriptor descriptor = default(Descriptor);
+			descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.OPERATIONREQUIREMENTS, UI.BUILDINGEFFECTS.TOOLTIPS.OPERATIONREQUIREMENTS, Descriptor.DescriptorType.Effect);
+			requirementDescriptors.Insert(0, descriptor);
 		}
-		foreach (Descriptor descriptor2 in buildingEffectsDescriptors)
+		this.ProductRequirementsPane.SetDescriptors(requirementDescriptors);
+		List<Descriptor> effectDescriptors = GameUtil.GetEffectDescriptors(allDescriptors);
+		if (effectDescriptors.Count > 0)
 		{
-			this.AddOrGetLabel(this.descLabels, descriptor2, this.ProductEffectsPane, descriptor2.text);
+			Descriptor descriptor2 = default(Descriptor);
+			descriptor2.SetupDescriptor(UI.BUILDINGEFFECTS.OPERATIONEFFECTS, UI.BUILDINGEFFECTS.TOOLTIPS.OPERATIONEFFECTS, Descriptor.DescriptorType.Effect);
+			effectDescriptors.Insert(0, descriptor2);
 		}
-		this.textLayoutDirty = true;
-	}
-
-	private GameObject AddOrGetLabel(Dictionary<string, GameObject> labels, Descriptor descriptor, GameObject panel, string id)
-	{
-		GameObject gameObject;
-		if (labels.ContainsKey(id))
-		{
-			gameObject = labels[id];
-		}
-		else
-		{
-			gameObject = Util.KInstantiate(ScreenPrefabs.Instance.DescriptionLabel, panel, null);
-			gameObject.GetComponent<LocText>().text = descriptor.text;
-			gameObject.GetComponent<ToolTip>().toolTip = descriptor.tooltipText;
-			gameObject.transform.localScale = new Vector3(1f, 1f, 1f);
-			labels[id] = gameObject;
-		}
-		gameObject.SetActive(true);
-		return gameObject;
+		this.ProductEffectsPane.SetDescriptors(effectDescriptors);
 	}
 
 	public void ClearLabels()
@@ -353,9 +320,9 @@ public class ProductInfoScreen : KScreen
 
 	public LocText productDescriptionText;
 
-	public GameObject ProductRequirementsPane;
+	public DescriptorPanel ProductRequirementsPane;
 
-	public GameObject ProductEffectsPane;
+	public DescriptorPanel ProductEffectsPane;
 
 	public GameObject ProductFlavourPane;
 
@@ -367,8 +334,6 @@ public class ProductInfoScreen : KScreen
 
 	private Dictionary<string, GameObject> descLabels = new Dictionary<string, GameObject>();
 
-	public ColorStyleSetting titleBarColors;
-
 	[NonSerialized]
 	public MaterialSelectionPanel materialSelectionPanel;
 
@@ -378,6 +343,4 @@ public class ProductInfoScreen : KScreen
 	public global::System.Action onElementsFullySelected;
 
 	private bool expandedInfo = true;
-
-	private bool textLayoutDirty;
 }

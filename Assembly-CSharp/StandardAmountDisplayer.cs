@@ -4,37 +4,44 @@ using STRINGS;
 
 public class StandardAmountDisplayer : IAmountDisplayer, IAttributeFormatter
 {
-	public StandardAmountDisplayer(GameUtil.UnitClass unitClass, GameUtil.TimeSlice deltaTimeSlice)
+	public StandardAmountDisplayer(GameUtil.UnitClass unitClass, GameUtil.TimeSlice deltaTimeSlice, StandardAttributeFormatter formatter = null)
 	{
-		this.formatter = new StandardAttributeFormatter(unitClass, deltaTimeSlice);
+		if (formatter != null)
+		{
+			this.formatter = formatter;
+		}
+		else
+		{
+			this.formatter = new StandardAttributeFormatter(unitClass, deltaTimeSlice);
+		}
 	}
 
-	public string GetValueString(Amount master, AmountInstance instance)
+	public virtual string GetValueString(Amount master, AmountInstance instance)
 	{
-		return this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None);
+		return this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None, "F2");
 	}
 
-	public string GetDescription(Amount master, AmountInstance instance)
+	public virtual string GetDescription(Amount master, AmountInstance instance)
 	{
-		return string.Format("{0}: {1}", master.Name, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None));
+		return string.Format("{0}: {1}", master.Name, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None, "F2"));
 	}
 
 	public virtual string GetTooltipDescription(Amount master, AmountInstance instance)
 	{
-		return string.Format(master.description, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None), this.formatter.GetFormattedValue(master.startingMin, GameUtil.TimeSlice.None));
+		return string.Format(master.description, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None, "F2"), this.formatter.GetFormattedValue(master.startingMin, GameUtil.TimeSlice.None, "F2"));
 	}
 
-	public string GetTooltip(Amount master, AmountInstance instance)
+	public virtual string GetTooltip(Amount master, AmountInstance instance)
 	{
 		string text = this.GetTooltipDescription(master, instance);
 		text += "\n\n";
 		if (this.formatter.deltaTimeSlice == GameUtil.TimeSlice.PerCycle)
 		{
-			text += string.Format(UI.CHANGEPERCYCLE, this.formatter.GetFormattedAttribute(instance.deltaAttribute));
+			text += string.Format(UI.CHANGEPERCYCLE, this.formatter.GetFormattedValue(instance.deltaAttribute.GetTotalDisplayValue(), GameUtil.TimeSlice.PerCycle, "F2"));
 		}
 		else
 		{
-			text += string.Format(UI.CHANGEPERSECOND, this.formatter.GetFormattedAttribute(instance.deltaAttribute));
+			text += string.Format(UI.CHANGEPERSECOND, this.formatter.GetFormattedValue(instance.deltaAttribute.GetTotalDisplayValue(), GameUtil.TimeSlice.PerSecond, "F2"));
 		}
 		text += "\n";
 		foreach (AttributeInstance.AttributeModifierEntry attributeModifierEntry in instance.deltaAttribute)
@@ -44,9 +51,9 @@ public class StandardAmountDisplayer : IAmountDisplayer, IAttributeFormatter
 		return text;
 	}
 
-	public string GetFormattedAttribute(AttributeInstance instance)
+	public string GetFormattedAttribute(AttributeInstance instance, bool tooltip = false)
 	{
-		return this.formatter.GetFormattedAttribute(instance);
+		return this.formatter.GetFormattedAttribute(instance, tooltip);
 	}
 
 	public string GetFormattedModifier(AttributeModifier modifier)
@@ -54,5 +61,5 @@ public class StandardAmountDisplayer : IAmountDisplayer, IAttributeFormatter
 		return this.formatter.GetFormattedModifier(modifier);
 	}
 
-	private StandardAttributeFormatter formatter;
+	protected StandardAttributeFormatter formatter;
 }

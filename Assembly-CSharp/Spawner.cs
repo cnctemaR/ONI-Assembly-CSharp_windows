@@ -3,7 +3,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Spawner : KMonoBehaviour, ISaveLoadableJson
+public class Spawner : KMonoBehaviour, ISaveLoadable
 {
 	protected override void OnSpawn()
 	{
@@ -18,9 +18,9 @@ public class Spawner : KMonoBehaviour, ISaveLoadableJson
 	public void SetPrefabTag(Tag prefabTag)
 	{
 		this.prefabTag = prefabTag;
-		KPrefabID kprefabID = base.gameObject.AddComponent<KPrefabID>();
-		kprefabID.PrefabTag = GameTags.Spawner;
-		kprefabID.SaveLoadTag = GameTags.Spawner;
+		KPrefabID component = base.gameObject.GetComponent<KPrefabID>();
+		component.PrefabTag = GameTags.Spawner;
+		component.SaveLoadTag = GameTags.Spawner;
 	}
 
 	public void DoSpawn()

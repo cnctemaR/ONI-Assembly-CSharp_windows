@@ -6,7 +6,6 @@ using FMOD.Studio;
 using Klei;
 using Klei.AI;
 using KSerialization;
-using STRINGS;
 using TUNING;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -27,7 +26,8 @@ public class Game : KMonoBehaviour
 
 	protected override void OnPrefabInit()
 	{
-		this.comps = new GameComps();
+		SimTemperatureTransfer.ClearInstanceMap();
+		StructureTemperatureComponents.ClearInstanceMap();
 		App.OnPreLoadScene = (global::System.Action)Delegate.Combine(App.OnPreLoadScene, new global::System.Action(this.StopBE));
 		Game.Instance = this;
 		this.statusItemRenderer = new StatusItemRenderer();
@@ -35,7 +35,6 @@ public class Game : KMonoBehaviour
 		this.LoadEventHashes();
 		this.gasFlowPos = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.GasConduits) - 0.4f);
 		this.liquidFlowPos = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.LiquidConduits) - 0.4f);
-		Profiler.maxNumberOfSamplesPerFrame = 2097152;
 		Shader.WarmupAllShaders();
 		Db.Get();
 		Game.quitting = false;
@@ -48,16 +47,15 @@ public class Game : KMonoBehaviour
 		KPrefabID.NextUniqueID = PlayerPrefs.GetInt(Game.NextUniqueIDKey, 0);
 		this.roomProber = new RoomProber(Grid.CellCount);
 		this.circuitManager = new CircuitManager();
-		this.RegionManager = new RegionManager(Grid.CellCount, global::TUNING.REGIONS.REGIONS_TYPES);
+		this.RegionManager = new RegionManager(Grid.CellCount, REGIONS.REGIONS_TYPES);
 		this.elementInteractions = new ElementInteractions(this.elementInteractionsData);
-		this.gasConduitSystem = new UtilityNetworkManager<FlowUtilityNetwork, Vent>(Grid.WidthInCells, Grid.HeightInCells, 11, 3, Vent.Transfer.Gas, false);
-		this.liquidConduitSystem = new UtilityNetworkManager<FlowUtilityNetwork, Vent>(Grid.WidthInCells, Grid.HeightInCells, 13, 3, Vent.Transfer.Liquid, false);
-		this.electricalConduitSystem = new UtilityNetworkManager<ElectricalUtilityNetwork, Wire>(Grid.WidthInCells, Grid.HeightInCells, 9, 6, Vent.Transfer.NumTypes, true);
-		this.gasConduitFlow = new ConduitFlow(Grid.CellCount, this.gasConduitSystem, 0);
-		this.liquidConduitFlow = new ConduitFlow(Grid.CellCount, this.liquidConduitSystem, 1);
-		this.gasFlowVisualizer = new ConduitFlowVisualizer(this.gasConduitFlow, this.gasConduitVisInfo.prefab, this.gasConduitVisInfo.tint, this.gasConduitVisInfo.insulatedTint, GlobalResources.Instance().ConduitOverlaySoundGas);
-		this.liquidFlowVisualizer = new ConduitFlowVisualizer(this.liquidConduitFlow, this.liquidConduitVisInfo.prefab, this.liquidConduitVisInfo.tint, this.liquidConduitVisInfo.insulatedTint, GlobalResources.Instance().ConduitOverlaySoundLiquid);
-		this.buildingTemperatureManager = new BuildingTemperatureManager();
+		this.gasConduitSystem = new UtilityNetworkManager<FlowUtilityNetwork, Vent>(Grid.WidthInCells, Grid.HeightInCells, 12, 1, false);
+		this.liquidConduitSystem = new UtilityNetworkManager<FlowUtilityNetwork, Vent>(Grid.WidthInCells, Grid.HeightInCells, 16, 1, false);
+		this.electricalConduitSystem = new UtilityNetworkManager<ElectricalUtilityNetwork, Wire>(Grid.WidthInCells, Grid.HeightInCells, 20, 19, true);
+		this.gasConduitFlow = new ConduitFlow(ConduitType.Gas, Grid.CellCount, this.gasConduitSystem, 1f);
+		this.liquidConduitFlow = new ConduitFlow(ConduitType.Liquid, Grid.CellCount, this.liquidConduitSystem, 10f);
+		this.gasFlowVisualizer = new ConduitFlowVisualizer(this.gasConduitFlow, this.gasConduitVisInfo, GlobalResources.Instance().ConduitOverlaySoundGas);
+		this.liquidFlowVisualizer = new ConduitFlowVisualizer(this.liquidConduitFlow, this.liquidConduitVisInfo, GlobalResources.Instance().ConduitOverlaySoundLiquid);
 		this.activeFX = new ushort[Grid.CellCount];
 		this.simActiveRegionMax = new Vector2I(0, 0);
 		this.simActiveRegionMin = new Vector2I(Grid.WidthInCells - 1, Grid.HeightInCells - 1);
@@ -89,6 +87,7 @@ public class Game : KMonoBehaviour
 
 	protected override void OnForcedCleanUp()
 	{
+		LightGridManager.Shutdown();
 		App.OnPreLoadScene = (global::System.Action)Delegate.Remove(App.OnPreLoadScene, new global::System.Action(this.StopBE));
 		base.OnForcedCleanUp();
 	}
@@ -111,7 +110,7 @@ public class Game : KMonoBehaviour
 			this.Reset(SaveLoader.Instance.cachedGSD);
 			NewBaseScreen.SetInitialCamera();
 		}
-		this.SetupTagNames();
+		TagManager.FillMissingProperNames();
 		CameraController.Instance.SetOrthographicsSize(20f);
 		if (PlayerPrefs.HasKey(Game.BaseAlreadyCreatedKey))
 		{
@@ -150,7 +149,7 @@ public class Game : KMonoBehaviour
 		}
 		else
 		{
-			MusicManager.instance.StopSong("Music_FrontEnd", true);
+			MusicManager.instance.StopSong("Music_FrontEnd", true, STOP_MODE.ALLOWFADEOUT);
 		}
 	}
 
@@ -177,64 +176,19 @@ public class Game : KMonoBehaviour
 		this.gameSolidInfo.Add(new SolidInfo(cell, solid));
 	}
 
-	private void SetupTagNames()
-	{
-		foreach (KPrefabID kprefabID in Assets.Prefabs)
-		{
-			if (!(kprefabID == null))
-			{
-				KSelectable component = kprefabID.GetComponent<KSelectable>();
-				if (component != null)
-				{
-					string text = component.entityName;
-					if (component.entityName != null && component.entityName != string.Empty)
-					{
-						text = component.entityName;
-					}
-					if (component.EntityNameLocString != null && component.EntityNameLocString.Length > 0)
-					{
-						text = Strings.Get(component.EntityNameLocString);
-					}
-					if (text != null && text.Length > 0)
-					{
-						TagManager.SetProperName(kprefabID.PrefabTag.Name, text);
-					}
-				}
-			}
-		}
-		foreach (Element element in ElementLoader.elements)
-		{
-			string text2 = element.id.ToString();
-			TagManager.SetProperName(text2, element.name);
-			TagManager.SetUnitOfMeasurement(text2, "kg");
-			foreach (Tag tag in element.oreTags)
-			{
-				TagManager.SetProperName(tag, TagDescriptions.GetDescription(tag.Name));
-			}
-		}
-		foreach (Tag tag2 in Element.GetMaterialCategoryTags())
-		{
-			TagManager.SetProperName(tag2.Name, TagDescriptions.GetDescription(tag2.Name));
-		}
-		TagManager.SetProperName("solid", TAGS.SOLID);
-		TagManager.SetUnitOfMeasurement("solid", "kg");
-	}
-
 	private void SimUpdateFirst(float dt)
 	{
 		Sim.DebugProperties debugProperties;
-		debugProperties.buildingTemperatureScale = 0.001f;
+		debugProperties.buildingTemperatureScale = 100f;
 		debugProperties.contaminatedOxygenEmitProbability = 0.001f;
 		debugProperties.contaminatedOxygenConversionPercent = 0.001f;
 		debugProperties.biomeTemperatureLerpRate = 0.001f;
-		SimMessages.NewGameFrame(this.simActiveRegionMin, this.simActiveRegionMax);
+		SimMessages.NewGameFrame(dt, this.simActiveRegionMin, this.simActiveRegionMax);
 		SimMessages.SetDebugProperties(debugProperties);
 		if (this.circuitManager != null)
 		{
 			this.circuitManager.Update();
 		}
-		this.gasConduitFlow.SubmitPipeChanges();
-		this.liquidConduitFlow.SubmitPipeChanges();
 	}
 
 	private void SimUpdateLast(float dt)
@@ -254,120 +208,147 @@ public class Game : KMonoBehaviour
 			return null;
 		}
 		this.simElapsedTime -= 0.25f;
-		IntPtr intPtr = Sim.HandleMessage(SimMessageHashes.PrepareGameData, 0, Grid.Visible);
-		if (intPtr == IntPtr.Zero)
+		Sim.GameDataUpdate* ptr;
+		using (new KProfiler.Region("StepTheSim", null))
 		{
-			return null;
-		}
-		Sim.GameDataUpdate* ptr = (Sim.GameDataUpdate*)(void*)intPtr;
-		Grid.CellValues = ptr->cells;
-		List<Element> elements = ElementLoader.elements;
-		this.buildingTemperatureManager.UpdateTemperatures(ptr->numBuildingTemperatures, ptr->buildingTemperatures);
-		this.gasConduitFlow.UpdateTemperatures(ptr->numGasPipeTemperatureChanges, ptr->gasPipeTemperatureChanges);
-		this.liquidConduitFlow.UpdateTemperatures(ptr->numLiquidPipeTemperatureChanges, ptr->liquidPipeTemperatureChanges);
-		this.simData.removedMassEntries = ptr->removedMassEntries;
-		this.simData.emittedMassEntries = ptr->emittedMassEntries;
-		this.simData.elementChunks = ptr->elementChunkInfos;
-		for (int i = 0; i < ptr->numSubstanceChangeInfo; i++)
-		{
-			Sim.SubstanceChangeInfo substanceChangeInfo = ptr->substanceChangeInfo[i];
-			Element element = elements[(int)substanceChangeInfo.newElemIdx];
-			Grid.Element[substanceChangeInfo.cellIdx] = element;
-		}
-		for (int j = 0; j < ptr->numSolidInfo; j++)
-		{
-			Sim.SolidInfo solidInfo = ptr->solidInfo[j];
-			if (this.solidChangedFilter.Contains(solidInfo.cellIdx))
+			IntPtr intPtr = IntPtr.Zero;
+			using (new KProfiler.Region("Step", null))
 			{
-				CellEventLogger.Instance.SolidFilterEvent.Log(solidInfo.cellIdx, solidInfo.isSolid != 0);
+				if (Grid.Visible == null || Grid.Visible.Length == 0)
+				{
+					Output.LogError(new object[] { "Invalid Grid.Visible, what have you done?!" });
+					return null;
+				}
+				intPtr = Sim.HandleMessage(SimMessageHashes.PrepareGameData, Grid.Visible.Length, Grid.Visible);
+			}
+			if (intPtr == IntPtr.Zero)
+			{
+				ptr = null;
 			}
 			else
 			{
-				this.solidInfo.Add(new SolidInfo(solidInfo.cellIdx, solidInfo.isSolid != 0));
-				Grid.PreviousSolid[solidInfo.cellIdx] = Grid.Solid[solidInfo.cellIdx];
-				bool flag = solidInfo.isSolid != 0;
-				Grid.SetSolid(solidInfo.cellIdx, flag, CellEventLogger.Instance.SimMessagesSolid);
+				Sim.GameDataUpdate* ptr2 = (Sim.GameDataUpdate*)(void*)intPtr;
+				Grid.CellValues = ptr2->cells;
+				List<Element> elements = ElementLoader.elements;
+				this.simData.emittedMassEntries = ptr2->emittedMassEntries;
+				this.simData.elementChunks = ptr2->elementChunkInfos;
+				this.simData.buildingTemperatures = ptr2->buildingTemperatures;
+				for (int i = 0; i < ptr2->numSubstanceChangeInfo; i++)
+				{
+					Sim.SubstanceChangeInfo substanceChangeInfo = ptr2->substanceChangeInfo[i];
+					Element element = elements[(int)substanceChangeInfo.newElemIdx];
+					Grid.Element[substanceChangeInfo.cellIdx] = element;
+				}
+				for (int j = 0; j < ptr2->numSolidInfo; j++)
+				{
+					Sim.SolidInfo solidInfo = ptr2->solidInfo[j];
+					if (!this.solidChangedFilter.Contains(solidInfo.cellIdx))
+					{
+						this.solidInfo.Add(new SolidInfo(solidInfo.cellIdx, solidInfo.isSolid != 0));
+						Grid.PreviousSolid[solidInfo.cellIdx] = Grid.Solid[solidInfo.cellIdx];
+						bool flag = solidInfo.isSolid != 0;
+						Grid.SetSolid(solidInfo.cellIdx, flag, CellEventLogger.Instance.SimMessagesSolid);
+					}
+				}
+				for (int k = 0; k < ptr2->numCallbackInfo; k++)
+				{
+					Sim.CallbackInfo callbackInfo = ptr2->callbackInfo[k];
+					this.callbackInfo.Add(new CallbackInfo(new HandleVector<global::System.Action>.Handle
+					{
+						index = callbackInfo.callbackIdx
+					}));
+				}
+				int numSpawnFallingLiquidInfo = ptr2->numSpawnFallingLiquidInfo;
+				for (int l = 0; l < numSpawnFallingLiquidInfo; l++)
+				{
+					Sim.SpawnFallingLiquidInfo spawnFallingLiquidInfo = ptr2->spawnFallingLiquidInfo[l];
+					FallingWater.instance.AddParticle(spawnFallingLiquidInfo.cellIdx, spawnFallingLiquidInfo.elemIdx, spawnFallingLiquidInfo.mass, spawnFallingLiquidInfo.temperature, false, false, false);
+				}
+				int numSpawnOreInfo = ptr2->numSpawnOreInfo;
+				for (int m = 0; m < numSpawnOreInfo; m++)
+				{
+					Sim.SpawnOreInfo spawnOreInfo = ptr2->spawnOreInfo[m];
+					Vector3 vector = Grid.CellToPosCCC(spawnOreInfo.cellIdx, Grid.SceneLayer.Use);
+					Element element2 = ElementLoader.elements[(int)spawnOreInfo.elemIdx];
+					if (spawnOreInfo.temperature <= 0f && spawnOreInfo.mass > 0f)
+					{
+						Output.LogError(new object[] { "Sim is telling us to spawn a zero temperature object. This shouldn't be possible because I have asserts in the dll about this...." });
+					}
+					element2.substance.SpawnResource(vector, spawnOreInfo.mass, spawnOreInfo.temperature, false, false);
+				}
+				int numSpawnFXInfo = ptr2->numSpawnFXInfo;
+				for (int n = 0; n < numSpawnFXInfo; n++)
+				{
+					Sim.SpawnFXInfo spawnFXInfo = ptr2->spawnFXInfo[n];
+					this.SpawnFX((SpawnFXHashes)spawnFXInfo.fxHash, spawnFXInfo.cellIdx, spawnFXInfo.rotation);
+				}
+				UnstableGroundManager component = this.world.GetComponent<UnstableGroundManager>();
+				int numUnstableCellInfo = ptr2->numUnstableCellInfo;
+				for (int num = 0; num < numUnstableCellInfo; num++)
+				{
+					Sim.UnstableCellInfo unstableCellInfo = ptr2->unstableCellInfo[num];
+					Sim.UnstableCellInfo.FallingInfo fallingInfo = (Sim.UnstableCellInfo.FallingInfo)unstableCellInfo.fallingInfo;
+					Sim.UnstableCellInfo.FallingInfo fallingInfo2 = fallingInfo;
+					if (fallingInfo2 == Sim.UnstableCellInfo.FallingInfo.StartedFalling)
+					{
+						component.Spawn(unstableCellInfo.cellIdx, ElementLoader.elements[(int)unstableCellInfo.elemIdx], unstableCellInfo.mass, unstableCellInfo.temperature);
+					}
+				}
+				int numWorldDamageInfo = ptr2->numWorldDamageInfo;
+				for (int num2 = 0; num2 < numWorldDamageInfo; num2++)
+				{
+					Sim.WorldDamageInfo worldDamageInfo = ptr2->worldDamageInfo[num2];
+					WorldDamage.Instance.ApplyDamage(worldDamageInfo);
+				}
+				for (int num3 = 0; num3 < ptr2->numConsumedMassEntries; num3++)
+				{
+					Sim.ConsumedMassInfo consumedMassInfo = ptr2->consumedMassEntries[num3];
+					ElementConsumer.AddMass(consumedMassInfo);
+				}
+				int numMassConsumptionCallbacks = ptr2->numMassConsumptionCallbacks;
+				HandleVector<Action<object>>.Handle handle = default(HandleVector<Action<object>>.Handle);
+				for (int num4 = 0; num4 < numMassConsumptionCallbacks; num4++)
+				{
+					Sim.MassConsumptionCallback massConsumptionCallback = ptr2->massConsumptionCallbacks[num4];
+					handle.index = massConsumptionCallback.callbackIdx;
+					Action<object> action = this.complexCallbackManager.Release(handle);
+					action(massConsumptionCallback);
+				}
+				int numComponentStateChangedMessages = ptr2->numComponentStateChangedMessages;
+				HandleVector<Action<object>>.Handle handle2 = default(HandleVector<Action<object>>.Handle);
+				for (int num5 = 0; num5 < numComponentStateChangedMessages; num5++)
+				{
+					Sim.ComponentStateChangedMessage componentStateChangedMessage = ptr2->componentStateChangedMessages[num5];
+					handle2.index = componentStateChangedMessage.callbackIdx;
+					Action<object> action2 = this.complexCallbackManager.Release(handle2);
+					if (action2 != null)
+					{
+						action2(componentStateChangedMessage.simHandle);
+					}
+					else
+					{
+						Output.LogError(new object[] { "Null callback with handle", componentStateChangedMessage.callbackIdx });
+					}
+				}
+				int numElementChunkMeltedInfos = ptr2->numElementChunkMeltedInfos;
+				for (int num6 = 0; num6 < numElementChunkMeltedInfos; num6++)
+				{
+					Sim.MeltedInfo meltedInfo = ptr2->elementChunkMeltedInfos[num6];
+					SimTemperatureTransfer.DoStateTransition(meltedInfo.handle);
+				}
+				int numBuildingMeltedInfos = ptr2->numBuildingMeltedInfos;
+				for (int num7 = 0; num7 < numBuildingMeltedInfos; num7++)
+				{
+					Sim.MeltedInfo meltedInfo2 = ptr2->buildingMeltedInfos[num7];
+					StructureTemperatureComponents.DoStateTransition(meltedInfo2.handle);
+				}
+				this.gasConduitFlow.Update(this.simDT);
+				this.liquidConduitFlow.Update(this.simDT);
+				UpdateManager.instance.Step(this.simDT);
+				this.simDT = 0f;
+				ptr = ptr2;
 			}
 		}
-		for (int k = 0; k < ptr->numCallbackInfo; k++)
-		{
-			Sim.CallbackInfo callbackInfo = ptr->callbackInfo[k];
-			this.callbackInfo.Add(new CallbackInfo(new HandleVector<global::System.Action>.Handle
-			{
-				index = callbackInfo.callbackIdx
-			}));
-		}
-		int numSpawnFallingLiquidInfo = ptr->numSpawnFallingLiquidInfo;
-		for (int l = 0; l < numSpawnFallingLiquidInfo; l++)
-		{
-			Sim.SpawnFallingLiquidInfo spawnFallingLiquidInfo = ptr->spawnFallingLiquidInfo[l];
-			FallingWater.instance.AddParticle(spawnFallingLiquidInfo.cellIdx, spawnFallingLiquidInfo.elemIdx, spawnFallingLiquidInfo.mass, spawnFallingLiquidInfo.temperature, false, false);
-		}
-		int numSpawnOreInfo = ptr->numSpawnOreInfo;
-		for (int m = 0; m < numSpawnOreInfo; m++)
-		{
-			Sim.SpawnOreInfo spawnOreInfo = ptr->spawnOreInfo[m];
-			Vector3 vector = Grid.CellToPosCCC(spawnOreInfo.cellIdx, Grid.SceneLayer.Use);
-			Element element2 = ElementLoader.elements[(int)spawnOreInfo.elemIdx];
-			if (spawnOreInfo.temperature <= 0f && spawnOreInfo.mass > 0f)
-			{
-				Output.LogError(new object[] { "Sim is telling us to spawn a zero temperature object. This shouldn't be possible because I have asserts in the dll about this...." });
-			}
-			element2.substance.SpawnResource(vector, spawnOreInfo.mass, spawnOreInfo.temperature, false, false);
-		}
-		int numSpawnFXInfo = ptr->numSpawnFXInfo;
-		for (int n = 0; n < numSpawnFXInfo; n++)
-		{
-			Sim.SpawnFXInfo spawnFXInfo = ptr->spawnFXInfo[n];
-			this.SpawnFX((SpawnFXHashes)spawnFXInfo.fxHash, spawnFXInfo.cellIdx, spawnFXInfo.rotation);
-		}
-		UnstableGroundManager component = this.world.GetComponent<UnstableGroundManager>();
-		int numUnstableCellInfo = ptr->numUnstableCellInfo;
-		for (int num = 0; num < numUnstableCellInfo; num++)
-		{
-			Sim.UnstableCellInfo unstableCellInfo = ptr->unstableCellInfo[num];
-			Sim.UnstableCellInfo.FallingInfo fallingInfo = (Sim.UnstableCellInfo.FallingInfo)unstableCellInfo.fallingInfo;
-			Sim.UnstableCellInfo.FallingInfo fallingInfo2 = fallingInfo;
-			if (fallingInfo2 == Sim.UnstableCellInfo.FallingInfo.StartedFalling)
-			{
-				component.Spawn(unstableCellInfo.cellIdx, ElementLoader.elements[(int)unstableCellInfo.elemIdx], unstableCellInfo.mass, unstableCellInfo.temperature);
-			}
-		}
-		int numWorldDamageInfo = ptr->numWorldDamageInfo;
-		for (int num2 = 0; num2 < numWorldDamageInfo; num2++)
-		{
-			Sim.WorldDamageInfo worldDamageInfo = ptr->worldDamageInfo[num2];
-			WorldDamage.Instance.ApplyDamage(worldDamageInfo);
-		}
-		int numMassConsumptionCallbacks = ptr->numMassConsumptionCallbacks;
-		HandleVector<Action<object>>.Handle handle = default(HandleVector<Action<object>>.Handle);
-		for (int num3 = 0; num3 < numMassConsumptionCallbacks; num3++)
-		{
-			Sim.MassConsumptionCallback massConsumptionCallback = ptr->massConsumptionCallbacks[num3];
-			handle.index = massConsumptionCallback.callbackIdx;
-			Action<object> action = this.complexCallbackManager.Release(handle);
-			action(massConsumptionCallback);
-		}
-		int numComponentStateChangedMessages = ptr->numComponentStateChangedMessages;
-		HandleVector<Action<object>>.Handle handle2 = default(HandleVector<Action<object>>.Handle);
-		for (int num4 = 0; num4 < numComponentStateChangedMessages; num4++)
-		{
-			Sim.ComponentStateChangedMessage componentStateChangedMessage = ptr->componentStateChangedMessages[num4];
-			handle2.index = componentStateChangedMessage.callbackIdx;
-			Action<object> action2 = this.complexCallbackManager.Release(handle2);
-			if (action2 != null)
-			{
-				action2(componentStateChangedMessage.simHandle);
-			}
-			else
-			{
-				Output.LogError(new object[] { "Null callback with handle", componentStateChangedMessage.callbackIdx });
-			}
-		}
-		this.gasConduitFlow.Update(this.simDT);
-		this.liquidConduitFlow.Update(this.simDT);
-		UpdateManager.instance.Step(this.simDT);
-		this.simDT = 0f;
 		return ptr;
 	}
 
@@ -413,9 +394,12 @@ public class Game : KMonoBehaviour
 		DebugText.Instance.Draw(text, Grid.CellToPosCCC(mouseCell, Grid.SceneLayer.Move), Color.white);
 	}
 
-	private void FixedUpdate()
+	public void ForceSimStep()
 	{
-		this.comps.FixedUpdate(Time.fixedDeltaTime);
+		Output.Log(new object[] { "Force-stepping the sim" });
+		this.forceSimStep = true;
+		this.simElapsedTime = 0.25f;
+		this.simDT = 0.25f;
 	}
 
 	private void Update()
@@ -424,38 +408,40 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		if (Debug.developerConsoleVisible)
+		using (new KProfiler.Region("Game.Update", null))
 		{
-			Debug.developerConsoleVisible = false;
+			if (Debug.developerConsoleVisible)
+			{
+				Debug.developerConsoleVisible = false;
+			}
+			if (Time.frameCount == 5)
+			{
+				Output.LogWarning(new object[] { "Load time: " + Time.realtimeSinceStartup });
+			}
+			if (DebugHandler.DebugCellInfo)
+			{
+				this.ShowDebugCellInfo();
+			}
+			this.gasConduitSystem.Update();
+			this.liquidConduitSystem.Update();
+			this.circuitManager.Update();
+			if (this.forceActiveArea)
+			{
+				this.simActiveRegionMin = new Vector2I((int)Mathf.Max(0f, this.minForcedActiveArea.x), (int)Mathf.Max(0f, this.minForcedActiveArea.y));
+				this.simActiveRegionMax = new Vector2I((int)Mathf.Min((float)(Grid.WidthInCells - 1), this.maxForcedActiveArea.x), (int)Mathf.Min((float)(Grid.HeightInCells - 1), this.maxForcedActiveArea.y));
+			}
+			this.simActiveRegionMin = new Vector2I(0, 0);
+			this.simActiveRegionMax = new Vector2I(Grid.WidthInCells, Grid.HeightInCells);
+			LightGridManager.SetActiveWindow(this.simActiveRegionMin, this.simActiveRegionMax);
+			Pathfinding.Instance.DebugUpdate();
+			if (this.forceSimStep || Mathf.CeilToInt(Time.timeScale) != 0)
+			{
+				this.UpdateModifiers();
+				CellChangeMonitor.Instance.Update();
+				this.UnsafeUpdate();
+				this.forceSimStep = false;
+			}
 		}
-		if (Time.frameCount == 5)
-		{
-			Output.LogWarning(new object[] { "Load time: " + Time.realtimeSinceStartup });
-		}
-		if (DebugHandler.DebugCellInfo)
-		{
-			this.ShowDebugCellInfo();
-		}
-		this.gasConduitSystem.Update();
-		this.liquidConduitSystem.Update();
-		this.circuitManager.Update();
-		if (this.forceActiveArea)
-		{
-			this.simActiveRegionMin = new Vector2I((int)Mathf.Max(0f, this.minForcedActiveArea.x), (int)Mathf.Max(0f, this.minForcedActiveArea.y));
-			this.simActiveRegionMax = new Vector2I((int)Mathf.Min((float)(Grid.WidthInCells - 1), this.maxForcedActiveArea.x), (int)Mathf.Min((float)(Grid.HeightInCells - 1), this.maxForcedActiveArea.y));
-		}
-		this.simActiveRegionMin = new Vector2I(0, 0);
-		this.simActiveRegionMax = new Vector2I(Grid.WidthInCells, Grid.HeightInCells);
-		LightGridManager.SetActiveWindow(this.simActiveRegionMin, this.simActiveRegionMax);
-		Pathfinding.Instance.DebugUpdate();
-		if (Mathf.CeilToInt(Time.timeScale) == 0)
-		{
-			return;
-		}
-		this.comps.Update(Time.deltaTime);
-		this.UpdateModifiers();
-		CellChangeMonitor.Instance.Update();
-		this.UnsafeUpdate();
 	}
 
 	private unsafe void UnsafeUpdate()
@@ -465,7 +451,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		this.UpdateSpawners();
+		this.UpdateSpawners(true);
 		this.gameSolidInfo.AddRange(this.solidInfo);
 		this.world.UpdateCellInfo(this.gameSolidInfo, this.callbackInfo, ptr->numSolidSubstanceChangeInfo, ptr->solidSubstanceChangeInfo, ptr->numLiquidChangeInfo, ptr->liquidChangeInfo);
 		this.gameSolidInfo.Clear();
@@ -536,45 +522,49 @@ public class Game : KMonoBehaviour
 
 	public void Reset(WorldGen.GameSpawnData gsd)
 	{
-		if (gsd == null)
+		using (new KProfiler.Region("World.Reset", null))
 		{
-			return;
-		}
-		if (gsd.clouds != null)
-		{
-			this.worldGapManager.SetGasClouds(gsd.clouds);
-		}
-		List<KeyValuePair<int, Tag>> drops = gsd.GetDrops();
-		if (drops != null)
-		{
-			for (int i = 0; i < drops.Count; i++)
+			if (gsd != null)
 			{
-				Debug.Assert(Grid.IsValidCell(drops[i].Key));
-				GameObject gameObject = new GameObject();
-				gameObject.name = "Spawner:" + drops[i].Value.Name;
-				gameObject.transform.SetParent(SceneOrganizer.Instance.GetFolder(Folder.Misc).transform);
-				gameObject.transform.localPosition = Grid.CellToPosCCC(drops[i].Key, Grid.SceneLayer.Move);
-				Spawner spawner = gameObject.AddComponent<Spawner>();
-				spawner.SetPrefabTag(drops[i].Value);
-				Mob mob;
-				if (WorldGen.Settings.mobs.MobLookupTable.TryGetValue(drops[i].Value.Name, out mob))
+				if (gsd.clouds != null)
 				{
-					int num = Mathf.Max(1, Mathf.RoundToInt(mob.units.GetValue()));
-					if (num > 1)
+					this.worldGapManager.SetGasClouds(gsd.clouds);
+				}
+				List<KeyValuePair<int, Tag>> drops = gsd.GetDrops();
+				if (drops != null)
+				{
+					for (int i = 0; i < drops.Count; i++)
 					{
-						spawner.SetUnits(num);
+						Debug.Assert(Grid.IsValidCell(drops[i].Key));
+						GameObject gameObject = GameUtil.KInstantiate(EntityPrefabs.Instance.Spawner, Grid.SceneLayer.Move, Folder.Misc, null, 0);
+						gameObject.name = "Spawner:" + drops[i].Value.Name;
+						gameObject.transform.localPosition = Grid.CellToPosCCC(drops[i].Key, Grid.SceneLayer.Move);
+						Spawner component = gameObject.GetComponent<Spawner>();
+						component.SetPrefabTag(drops[i].Value);
+						Mob mob;
+						if (WorldGen.Settings.mobs.MobLookupTable.TryGetValue(drops[i].Value.Name, out mob))
+						{
+							int num = Mathf.Max(1, Mathf.RoundToInt(mob.units.GetValue()));
+							if (num > 1)
+							{
+								component.SetUnits(num);
+							}
+							if (mob.prefabName != null)
+							{
+								component.SetPrefabTag(new Tag(mob.prefabName));
+							}
+						}
 					}
 				}
 			}
 		}
 	}
 
-	private void UpdateSpawners()
+	public void UpdateSpawners(bool delaySpawnsUntilRegionActive = true)
 	{
-		bool flag = false;
 		for (int i = Components.Spawners.Count - 1; i >= 0; i--)
 		{
-			if (flag)
+			if (delaySpawnsUntilRegionActive)
 			{
 				Vector2 vector = Components.Spawners[i].gameObject.transform.position;
 				if (vector.x > (float)this.gameActiveRegionMin.x && vector.y > (float)this.gameActiveRegionMin.y && vector.x < (float)this.gameActiveRegionMax.x && vector.y < (float)this.gameActiveRegionMax.y)
@@ -643,40 +633,6 @@ public class Game : KMonoBehaviour
 		component.Play("gas_Puff", KAnim.PlayMode.Once, 1f, 0f);
 		component.PlaySpeedMultiplier = 0.6666667f;
 		component.enabled = true;
-	}
-
-	public ConduitFlow GetConduitFlowManager(Vent.Transfer type)
-	{
-		ConduitFlow conduitFlow = null;
-		if (type != Vent.Transfer.Gas)
-		{
-			if (type == Vent.Transfer.Liquid)
-			{
-				conduitFlow = this.liquidConduitFlow;
-			}
-		}
-		else
-		{
-			conduitFlow = this.gasConduitFlow;
-		}
-		return conduitFlow;
-	}
-
-	public IUtilityNetworkMgr GetNetworkManager(Vent.Transfer type)
-	{
-		IUtilityNetworkMgr utilityNetworkMgr = null;
-		if (type != Vent.Transfer.Gas)
-		{
-			if (type == Vent.Transfer.Liquid)
-			{
-				utilityNetworkMgr = this.liquidConduitSystem;
-			}
-		}
-		else
-		{
-			utilityNetworkMgr = this.gasConduitSystem;
-		}
-		return utilityNetworkMgr;
 	}
 
 	private void InitializeFXSpawners()
@@ -756,7 +712,7 @@ public class Game : KMonoBehaviour
 						instance.transform.SetPosition(pos);
 						instance.transform.rotation = quaternion;
 						KBatchedAnimController component2 = instance.GetComponent<KBatchedAnimController>();
-						component2.Flip = flag;
+						component2.FlipX = flag;
 						component2.enabled = true;
 						component2.TintColour = spawnPoolData.colour;
 						component2.Play(text, KAnim.PlayMode.Once, 1f, 0f);
@@ -805,6 +761,7 @@ public class Game : KMonoBehaviour
 		gameSaveData.fallingWater = this.world.GetComponent<FallingWater>();
 		gameSaveData.unstableGround = this.world.GetComponent<UnstableGroundManager>();
 		gameSaveData.worldDetail = SaveLoader.Instance.worldDetailSave;
+		gameSaveData.debugWasUsed = this.debugWasUsed;
 		Debug.Assert(gameSaveData.worldDetail != null, "World detail null");
 		byte[] array = new byte[Grid.CellCount];
 		for (int i = 0; i < Grid.CellCount; i++)
@@ -839,6 +796,8 @@ public class Game : KMonoBehaviour
 		this.simActiveRegionMax = gameSaveData.simActiveRegionMax;
 		this.gameActiveRegionMin = gameSaveData.gameActiveRegionMin;
 		this.gameActiveRegionMax = gameSaveData.gameActiveRegionMax;
+		this.debugWasUsed = gameSaveData.debugWasUsed;
+		KCrashReporter.debugWasUsed = this.debugWasUsed;
 		for (int i = 0; i < gameSaveData.suitRequired.Length; i++)
 		{
 			Grid.SuitRequired[i] = gameSaveData.suitRequired[i] != 0;
@@ -955,11 +914,11 @@ public class Game : KMonoBehaviour
 		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndSnapshot, STOP_MODE.ALLOWFADEOUT);
 		if (MusicManager.instance.SongIsPlaying("Music_FrontEnd"))
 		{
-			MusicManager.instance.StopSong("Music_FrontEnd", true);
+			MusicManager.instance.StopSong("Music_FrontEnd", true, STOP_MODE.ALLOWFADEOUT);
 		}
 		if (MusicManager.instance.SongIsPlaying("Music_TitleTheme"))
 		{
-			MusicManager.instance.StopSong("Music_TitleTheme", true);
+			MusicManager.instance.StopSong("Music_TitleTheme", true, STOP_MODE.ALLOWFADEOUT);
 		}
 		SystemScheduler.instance.Clear();
 	}
@@ -992,8 +951,8 @@ public class Game : KMonoBehaviour
 		}
 		MusicManager.instance.KillAllSongs(STOP_MODE.ALLOWFADEOUT);
 		AudioMixer.instance.StopPersistentSnapshots();
-		this.comps.Shutdown();
 		KBatchedAnimUpdater.instance.DestroyGrid();
+		KComponentSpawn.instance.comps.Clear();
 		KInputHandler.Remove(Global.Instance.GetInputManager().GetDefaultController(), this.cameraController);
 		KInputHandler.Remove(Global.Instance.GetInputManager().GetDefaultController(), this.playerController);
 		SystemScheduler.instance.Clear();
@@ -1031,6 +990,13 @@ public class Game : KMonoBehaviour
 
 	private void SpawnOxygenBubbles(Vector3 position, float angle)
 	{
+	}
+
+	[ContextMenu("Print")]
+	private void Print()
+	{
+		Console.WriteLine("This is a console writeline test");
+		Debug.Log("This is a debug log test");
 	}
 
 	private bool startPaused = true;
@@ -1127,10 +1093,10 @@ public class Game : KMonoBehaviour
 	public ConduitFlowVisualizer liquidFlowVisualizer;
 
 	[SerializeField]
-	private Game.ConduitVisInfo liquidConduitVisInfo;
+	public Game.ConduitVisInfo liquidConduitVisInfo;
 
 	[SerializeField]
-	private Game.ConduitVisInfo gasConduitVisInfo;
+	public Game.ConduitVisInfo gasConduitVisInfo;
 
 	[SerializeField]
 	private Material liquidFlowMaterial;
@@ -1146,8 +1112,6 @@ public class Game : KMonoBehaviour
 	private Vector3 liquidFlowPos;
 
 	private MaterialPropertyBlock flowBlock;
-
-	public BuildingTemperatureManager buildingTemperatureManager;
 
 	public bool drawStatusItems = true;
 
@@ -1178,8 +1142,6 @@ public class Game : KMonoBehaviour
 
 	public SimData simData = new SimData();
 
-	private GameComps comps;
-
 	private bool gameStarted;
 
 	private PlayerController playerController;
@@ -1202,6 +1164,8 @@ public class Game : KMonoBehaviour
 
 	private Vector2I gameActiveRegionMax;
 
+	public bool debugWasUsed;
+
 	[SerializeField]
 	private bool forceActiveArea;
 
@@ -1212,6 +1176,8 @@ public class Game : KMonoBehaviour
 	private Vector2 maxForcedActiveArea = new Vector2(128f, 128f);
 
 	private bool isLoading;
+
+	private bool forceSimStep;
 
 	private SimViewMode previousOverlayMode;
 
@@ -1240,13 +1206,19 @@ public class Game : KMonoBehaviour
 	private float lastTimeWorkStarted = float.NegativeInfinity;
 
 	[Serializable]
-	private struct ConduitVisInfo
+	public class ConduitVisInfo
 	{
 		public GameObject prefab;
 
+		[Header("Main View")]
 		public Color32 tint;
 
 		public Color32 insulatedTint;
+
+		[Header("Overlay")]
+		public Color32 overlayTint;
+
+		public Color32 overlayInsulatedTint;
 	}
 
 	private enum SpawnRotationConfig
@@ -1330,6 +1302,8 @@ public class Game : KMonoBehaviour
 		public UnstableGroundManager unstableGround;
 
 		public WorldDetailSave worldDetail;
+
+		public bool debugWasUsed;
 	}
 
 	[Serializable]

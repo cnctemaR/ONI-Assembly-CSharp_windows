@@ -5,7 +5,7 @@ public class LightColorMenu : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
 	{
-		this.Subscribe(493375141, new EventSystem.EventHandler(this.OnRefreshUserMenu));
+		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		this.SetColor(0);
 	}
 
@@ -22,7 +22,7 @@ public class LightColorMenu : KMonoBehaviour
 					this.userMenu.AddButton(new KIconButtonMenu.ButtonInfo(this.lightColors[i].name, this.lightColors[i].name, delegate
 					{
 						this.SetColor(new_color);
-					}, global::Action.NumActions, null, null, null, null, string.Empty));
+					}, global::Action.NumActions, null, null, null, string.Empty, true), 1f);
 				}
 			}
 		}

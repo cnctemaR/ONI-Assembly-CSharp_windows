@@ -145,65 +145,106 @@ public static class ChorePreconditions
 		};
 		ChorePreconditions.CanPickup = precondition13;
 		Chore.Precondition precondition14 = default(Chore.Precondition);
-		precondition14.id = "ConsumerHasTrait";
+		precondition14.id = "IsAwake";
 		precondition14.fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			if (context.consumer == null)
+			{
+				return false;
+			}
+			StaminaMonitor.Instance smi = context.consumer.GetSMI<StaminaMonitor.Instance>();
+			return !context.consumer.GetSMI<StaminaMonitor.Instance>().IsInsideState(smi.sm.sleepy.sleeping);
+		};
+		ChorePreconditions.IsAwake = precondition14;
+		Chore.Precondition precondition15 = default(Chore.Precondition);
+		precondition15.id = "IsStanding";
+		precondition15.fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			return !(context.consumer == null) && context.consumer.GetComponent<Navigator>().CurrentNavType == NavType.Floor;
+		};
+		ChorePreconditions.IsStanding = precondition15;
+		Chore.Precondition precondition16 = default(Chore.Precondition);
+		precondition16.id = "IsMoving";
+		precondition16.fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			return !(context.consumer == null) && context.consumer.GetComponent<Navigator>().IsMoving();
+		};
+		ChorePreconditions.IsMoving = precondition16;
+		Chore.Precondition precondition17 = default(Chore.Precondition);
+		precondition17.id = "IsOffLadder";
+		precondition17.fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			return !(context.consumer == null) && context.consumer.GetComponent<Navigator>().CurrentNavType != NavType.Ladder;
+		};
+		ChorePreconditions.IsOffLadder = precondition17;
+		Chore.Precondition precondition18 = default(Chore.Precondition);
+		precondition18.id = "ConsumerHasTrait";
+		precondition18.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			string text = (string)data;
 			Traits component3 = context.consumer.GetComponent<Traits>();
 			return !(component3 == null) && component3.HasTrait(text);
 		};
-		ChorePreconditions.ConsumerHasTrait = precondition14;
-		Chore.Precondition precondition15 = default(Chore.Precondition);
-		precondition15.id = "IsOperational";
-		precondition15.fn = delegate(ref Chore.Precondition.Context context, object data)
+		ChorePreconditions.ConsumerHasTrait = precondition18;
+		Chore.Precondition precondition19 = default(Chore.Precondition);
+		precondition19.id = "IsOperational";
+		precondition19.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			GameObject gameObject = (GameObject)data;
 			Operational component4 = gameObject.GetComponent<Operational>();
 			return component4.IsOperational;
 		};
-		ChorePreconditions.IsOperational = precondition15;
-		Chore.Precondition precondition16 = default(Chore.Precondition);
-		precondition16.id = "IsMarkedForDeconstruction";
-		precondition16.fn = delegate(ref Chore.Precondition.Context context, object data)
+		ChorePreconditions.IsOperational = precondition19;
+		Chore.Precondition precondition20 = default(Chore.Precondition);
+		precondition20.id = "IsMarkedForDeconstruction";
+		precondition20.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			GameObject gameObject2 = (GameObject)data;
 			Deconstructable component5 = gameObject2.GetComponent<Deconstructable>();
 			return component5 == null || !component5.IsMarkedForDeconstruction();
 		};
-		ChorePreconditions.IsMarkedForDeconstruction = precondition16;
-		Chore.Precondition precondition17 = default(Chore.Precondition);
-		precondition17.id = "IsMarkedForDisable";
-		precondition17.fn = delegate(ref Chore.Precondition.Context context, object data)
+		ChorePreconditions.IsMarkedForDeconstruction = precondition20;
+		Chore.Precondition precondition21 = default(Chore.Precondition);
+		precondition21.id = "IsMarkedForDisable";
+		precondition21.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			GameObject gameObject3 = (GameObject)data;
 			BuildingEnabledButton component6 = gameObject3.GetComponent<BuildingEnabledButton>();
 			return component6 == null || (component6.IsEnabled && !component6.WaitingForDisable);
 		};
-		ChorePreconditions.IsMarkedForDisable = precondition17;
-		Chore.Precondition precondition18 = default(Chore.Precondition);
-		precondition18.id = "IsFunctional";
-		precondition18.fn = delegate(ref Chore.Precondition.Context context, object data)
+		ChorePreconditions.IsMarkedForDisable = precondition21;
+		Chore.Precondition precondition22 = default(Chore.Precondition);
+		precondition22.id = "IsFunctional";
+		precondition22.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			GameObject gameObject4 = (GameObject)data;
 			Operational component7 = gameObject4.GetComponent<Operational>();
 			return component7.IsFunctional;
 		};
-		ChorePreconditions.IsFunctional = precondition18;
-		Chore.Precondition precondition19 = default(Chore.Precondition);
-		precondition19.id = "IsOverrideTargetNullOrMe";
-		precondition19.fn = delegate(ref Chore.Precondition.Context context, object data)
+		ChorePreconditions.IsFunctional = precondition22;
+		Chore.Precondition precondition23 = default(Chore.Precondition);
+		precondition23.id = "IsOverrideTargetNullOrMe";
+		precondition23.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			return context.isAttemptingOverride || context.chore.overrideTarget == null || context.chore.overrideTarget == context.consumer;
 		};
-		ChorePreconditions.IsOverrideTargetNullOrMe = precondition19;
-		Chore.Precondition precondition20 = default(Chore.Precondition);
-		precondition20.id = "NotChoreCreator";
-		precondition20.fn = delegate(ref Chore.Precondition.Context context, object data)
+		ChorePreconditions.IsOverrideTargetNullOrMe = precondition23;
+		Chore.Precondition precondition24 = default(Chore.Precondition);
+		precondition24.id = "NotChoreCreator";
+		precondition24.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			GameObject gameObject5 = (GameObject)data;
 			return !(context.consumer == null) && !(context.consumer.gameObject == gameObject5);
 		};
-		ChorePreconditions.NotChoreCreator = precondition20;
+		ChorePreconditions.NotChoreCreator = precondition24;
+		Chore.Precondition precondition25 = default(Chore.Precondition);
+		precondition25.id = "IsGettingMoreStressed";
+		precondition25.fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			AmountInstance amountInstance = Db.Get().Amounts.Stress.Lookup(context.consumer.gameObject);
+			return amountInstance.GetDelta() > 0f;
+		};
+		ChorePreconditions.IsGettingMoreStressed = precondition25;
 	}
 
 	public static Chore.Precondition ChoreDriverIsNull;
@@ -232,6 +273,14 @@ public static class ChorePreconditions
 
 	public static Chore.Precondition CanPickup;
 
+	public static Chore.Precondition IsAwake;
+
+	public static Chore.Precondition IsStanding;
+
+	public static Chore.Precondition IsMoving;
+
+	public static Chore.Precondition IsOffLadder;
+
 	public static Chore.Precondition ConsumerHasTrait;
 
 	public static Chore.Precondition IsOperational;
@@ -245,4 +294,6 @@ public static class ChorePreconditions
 	public static Chore.Precondition IsOverrideTargetNullOrMe;
 
 	public static Chore.Precondition NotChoreCreator;
+
+	public static Chore.Precondition IsGettingMoreStressed;
 }

@@ -9,8 +9,7 @@ namespace Klei.AI
 	{
 		public AttributeLevel(AttributeInstance attribute)
 		{
-			Func<List<Notification>, object, string> func = new Func<List<Notification>, object, string>(AttributeLevel.OnLevelUpTooltip);
-			this.notification = new Notification(MISC.NOTIFICATIONS.LEVELUP.NAME, NotificationType.Good, null, func, null, true, 0f, null, null, null);
+			this.notification = new Notification(MISC.NOTIFICATIONS.LEVELUP.NAME, NotificationType.Good, HashedString.Invalid, new Func<List<Notification>, object, string>(AttributeLevel.OnLevelUpTooltip), null, true, 0f, null, null, null);
 			this.attribute = attribute;
 		}
 
@@ -27,7 +26,7 @@ namespace Klei.AI
 				attributes.Remove(this.modifier);
 				this.modifier = null;
 			}
-			this.modifier = new AttributeModifier(this.attribute.Id, (float)this.GetLevel(), DUPLICANTS.MODIFIERS.SKILLLEVEL.NAME, false);
+			this.modifier = new AttributeModifier(this.attribute.Id, (float)this.GetLevel(), DUPLICANTS.MODIFIERS.SKILLLEVEL.NAME, false, false);
 			attributes.Add("Skill Level", this.modifier);
 		}
 
@@ -65,11 +64,15 @@ namespace Klei.AI
 			StateMachine.Instance instance = new UpgradeFX.Instance(levels.GetComponent<KMonoBehaviour>(), new Vector3(0f, 0f, -0.1f));
 			ReportManager.Instance.ReportValue(ReportManager.ReportType.LevelUp, 1f, null);
 			instance.StartSM();
-			levels.Trigger(-110704193, null);
+			levels.Trigger(-110704193, this.attribute.Id);
 		}
 
 		public bool AddExperience(AttributeLevels levels, float experience)
 		{
+			if (this.level > 25)
+			{
+				return false;
+			}
 			this.experience += experience;
 			this.experience = Mathf.Max(0f, this.experience);
 			if (this.experience >= this.GetExperienceForNextLevel())
@@ -82,7 +85,7 @@ namespace Klei.AI
 
 		private static string OnLevelUpTooltip(List<Notification> notifications, object data)
 		{
-			return MISC.NOTIFICATIONS.LEVELUP.TOOLTIP + notifications.ReduceMessages(false);
+			return MISC.NOTIFICATIONS.LEVELUP.TOOLTIP + notifications.ReduceMessages(false) + MISC.NOTIFICATIONS.LEVELUP.TOOLTIP_PST;
 		}
 
 		public float experience;

@@ -5,6 +5,7 @@ public class KInputManager
 {
 	public KInputManager()
 	{
+		KInputManager.isFocused = true;
 		KInput.Log("KinputManager initialized.");
 	}
 
@@ -41,8 +42,6 @@ public class KInputManager
 		return this.GetController(0);
 	}
 
-	public float timeOfLastUserAction { get; private set; }
-
 	public virtual void Update()
 	{
 		if (KInputManager.isFocused)
@@ -57,9 +56,12 @@ public class KInputManager
 
 	public virtual void Dispatch()
 	{
-		for (int i = 0; i < this.mControllers.Count; i++)
+		if (KInputManager.isFocused)
 		{
-			this.mControllers[i].Dispatch();
+			for (int i = 0; i < this.mControllers.Count; i++)
+			{
+				this.mControllers[i].Dispatch();
+			}
 		}
 	}
 

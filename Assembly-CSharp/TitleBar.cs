@@ -9,22 +9,6 @@ public class TitleBar : KMonoBehaviour
 		this.titleText.text = Name;
 	}
 
-	public void SetBackgroundState(bool warning)
-	{
-		if (this.backgroundImageToggle == null)
-		{
-			return;
-		}
-		if (warning)
-		{
-			this.backgroundImageToggle.SetInactive();
-		}
-		else
-		{
-			this.backgroundImageToggle.SetActive();
-		}
-	}
-
 	public void SetSubText(string subtext, string tooltip = "")
 	{
 		this.subtextText.text = subtext;
@@ -63,8 +47,6 @@ public class TitleBar : KMonoBehaviour
 	public Sprite materialIcon;
 
 	public TitleBarPortrait portrait;
-
-	public ImageToggleState backgroundImageToggle;
 
 	public bool userEditable;
 

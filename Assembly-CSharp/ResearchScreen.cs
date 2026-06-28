@@ -20,8 +20,8 @@ public class ResearchScreen : KModalScreen
 
 	protected override void OnSpawn()
 	{
-		base.Subscribe(Research.Instance.gameObject, -1914338957, new EventSystem.EventHandler(this.OnActiveResearchChanged));
-		base.Subscribe(Game.Instance.gameObject, -107300940, new EventSystem.EventHandler(this.OnResearchComplete));
+		base.Subscribe(Research.Instance.gameObject, -1914338957, new Action<object>(this.OnActiveResearchChanged));
+		base.Subscribe(Game.Instance.gameObject, -107300940, new Action<object>(this.OnResearchComplete));
 		this.pointDisplayMap = new Dictionary<string, LocText>();
 		foreach (ResearchType researchType in Research.Instance.researchTypes.Types)
 		{
@@ -91,6 +91,7 @@ public class ResearchScreen : KModalScreen
 		{
 			keyValuePair.Value.SetTech(keyValuePair.Key);
 		}
+		this.CloseButton.soundPlayer.Enabled = false;
 		this.CloseButton.onClick += delegate
 		{
 			ManagementMenu.Instance.CloseAll();

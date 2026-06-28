@@ -28,13 +28,9 @@ public class CellSelectionObject : KMonoBehaviour
 		this.mSelectable = base.GetComponent<KSelectable>();
 		this.SelectedDisplaySprite.transform.localScale = Vector3.one * 0.390625f;
 		this.SelectedDisplaySprite.GetComponent<SpriteRenderer>().sprite = this.Sprite_Hover;
-		this.Subscribe(493375141, new EventSystem.EventHandler(this.OnRefreshUserMenu));
-		base.Subscribe(Game.Instance.gameObject, 493375141, new EventSystem.EventHandler(this.ForceRefreshUserMenu));
-		base.Subscribe(WaterBodyProbe.Instance.gameObject, -263784810, new EventSystem.EventHandler(this.ForceRefreshUserMenu));
-		Func<Element> func = () => this.element;
-		this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.ElementalCategory, func);
-		this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.ElementalTemperature, this);
-		this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.ElementalMass, this);
+		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(Game.Instance.gameObject, 493375141, new Action<object>(this.ForceRefreshUserMenu));
+		base.Subscribe(WaterBodyProbe.Instance.gameObject, -263784810, new Action<object>(this.ForceRefreshUserMenu));
 		this.overlayFilterMap.Add(SimViewMode.OxygenMap, () => Grid.Element[this.mouseCell].IsGas);
 		this.overlayFilterMap.Add(SimViewMode.GasVentMap, () => Grid.Element[this.mouseCell].IsGas);
 		this.overlayFilterMap.Add(SimViewMode.LiquidVentMap, () => Grid.Element[this.mouseCell].IsLiquid);
@@ -134,6 +130,9 @@ public class CellSelectionObject : KMonoBehaviour
 		{
 			SimpleInfoScreen.Instance.Refresh(true);
 		}
+		this.UpdateMassStatusItem();
+		this.UpdateTemperatureStatusItem();
+		this.UpdateCategoryStatusItem();
 		if (this.element.id == SimHashes.OxyRock)
 		{
 			this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.OxyRockEmitting, this);
@@ -143,13 +142,13 @@ public class CellSelectionObject : KMonoBehaviour
 			}
 			else
 			{
-				this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.OxyRockBlocked);
+				this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.OxyRockBlocked, false);
 			}
 		}
 		else
 		{
-			this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.OxyRockEmitting);
-			this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.OxyRockBlocked);
+			this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.OxyRockEmitting, false);
+			this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.OxyRockBlocked, false);
 		}
 		if (Game.Instance.GetComponent<EntombedItemVisualizer>().IsEntombedItem(this.selectedCell))
 		{
@@ -157,16 +156,56 @@ public class CellSelectionObject : KMonoBehaviour
 		}
 		else
 		{
-			this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.BuriedItem);
+			this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.BuriedItem, true);
+		}
+	}
+
+	private void UpdateCategoryStatusItem()
+	{
+		if (this.element.id == SimHashes.Vacuum || this.element.id == SimHashes.Void)
+		{
+			this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.ElementalCategory, true);
+		}
+		else if (!this.mSelectable.HasStatusItem(Db.Get().MiscStatusItems.ElementalCategory))
+		{
+			Func<Element> func = () => this.element;
+			this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.ElementalCategory, func);
+		}
+	}
+
+	private void UpdateTemperatureStatusItem()
+	{
+		if (this.element.id == SimHashes.Vacuum || this.element.id == SimHashes.Void)
+		{
+			this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.ElementalTemperature, true);
+		}
+		else if (!this.mSelectable.HasStatusItem(Db.Get().MiscStatusItems.ElementalTemperature))
+		{
+			this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.ElementalTemperature, this);
+		}
+	}
+
+	private void UpdateMassStatusItem()
+	{
+		if (this.element.id == SimHashes.Vacuum || this.element.id == SimHashes.Void)
+		{
+			this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.ElementalMass, true);
+		}
+		else if (!this.mSelectable.HasStatusItem(Db.Get().MiscStatusItems.ElementalMass))
+		{
+			this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.ElementalMass, this);
 		}
 	}
 
 	public void OnObjectSelected(object o)
 	{
 		this.SelectedDisplaySprite.GetComponent<SpriteRenderer>().sprite = this.Sprite_Hover;
+		this.UpdateMassStatusItem();
+		this.UpdateCategoryStatusItem();
+		this.UpdateTemperatureStatusItem();
 		if (SelectTool.Instance.selected == this.mSelectable)
 		{
-			this.selectedCell = Grid.PosToCell(CameraController.Instance.baseCamera.ScreenToWorldPoint(Input.mousePosition));
+			this.selectedCell = Grid.PosToCell(base.gameObject);
 			this.UpdateValues();
 			Vector3 vector = Grid.CellToPos(this.selectedCell, 0f, 0f, 0f) + this.offset;
 			vector.z = this.zDepthSelected;
@@ -197,7 +236,7 @@ public class CellSelectionObject : KMonoBehaviour
 		}
 		foreach (KIconButtonMenu.ButtonInfo buttonInfo in this.cellButtons)
 		{
-			this.userMenu.AddButton(buttonInfo);
+			this.userMenu.AddButton(buttonInfo, 1f);
 		}
 	}
 

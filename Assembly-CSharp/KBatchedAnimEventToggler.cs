@@ -16,14 +16,13 @@ public class KBatchedAnimEventToggler : KMonoBehaviour
 		}
 		int num2 = Hash.SDBMLower(this.enableEvent);
 		int num3 = Hash.SDBMLower(this.disableEvent);
-		base.Subscribe(this.eventSource, num2, new EventSystem.EventHandler(this.Enable));
-		base.Subscribe(this.eventSource, num3, new EventSystem.EventHandler(this.Disable));
+		base.Subscribe(this.eventSource, num2, new Action<object>(this.Enable));
+		base.Subscribe(this.eventSource, num3, new Action<object>(this.Disable));
 	}
 
 	protected override void OnSpawn()
 	{
 		this.animEventHandler = base.GetComponentInParent<AnimEventHandler>();
-		this.StopAll();
 	}
 
 	private void Enable(object data)

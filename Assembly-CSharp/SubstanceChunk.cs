@@ -5,12 +5,21 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class SubstanceChunk : KMonoBehaviour, ISaveLoadableJson
+[SkipSaveFileSerialization]
+public class SubstanceChunk : KMonoBehaviour, ISaveLoadable
 {
 	protected override void OnPrefabInit()
 	{
-		this.Subscribe(-2064133523, new EventSystem.EventHandler(this.OnAbsorb));
-		this.Subscribe(493375141, new EventSystem.EventHandler(this.OnRefreshUserMenu));
+		base.OnPrefabInit();
+		GameComps.ElementSplitters.Add(base.gameObject);
+		this.Subscribe(-2064133523, new Action<object>(this.OnAbsorb));
+		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+	}
+
+	protected override void OnCleanUp()
+	{
+		GameComps.ElementSplitters.Remove(base.gameObject);
+		base.OnCleanUp();
 	}
 
 	private void OnAbsorb(object data)
@@ -22,12 +31,12 @@ public class SubstanceChunk : KMonoBehaviour, ISaveLoadableJson
 			if (component != null)
 			{
 				PrimaryElement component2 = base.GetComponent<PrimaryElement>();
-				if (component2.Mass > 0f)
+				if (component2.Mass > 0f && component.Mass > 0f)
 				{
 					float num = SimUtil.CalculateFinalTemperature(component2.Mass, component2.Temperature, component.Mass, component.Temperature);
 					component2.Temperature = num;
 				}
-				else
+				else if (component.Mass > 0f)
 				{
 					component2.Temperature = component.Temperature;
 				}
@@ -39,7 +48,7 @@ public class SubstanceChunk : KMonoBehaviour, ISaveLoadableJson
 	{
 		UserMenu userMenu = this.userMenu;
 		string text = UI.USERMENUACTIONS.RELEASEELEMENT.TOOLTIP;
-		userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_deconstruct", UI.USERMENUACTIONS.RELEASEELEMENT.NAME, new global::System.Action(this.OnRelease), global::Action.NumActions, null, null, null, null, text));
+		userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_deconstruct", UI.USERMENUACTIONS.RELEASEELEMENT.NAME, new global::System.Action(this.OnRelease), global::Action.NumActions, null, null, null, text, true), 1f);
 	}
 
 	private void OnRelease()
@@ -49,8 +58,8 @@ public class SubstanceChunk : KMonoBehaviour, ISaveLoadableJson
 		if (component.Mass > 0f)
 		{
 			SimMessages.AddRemoveSubstance(num, component.ElementID, CellEventLogger.Instance.ExhaustSimUpdate, component.Mass, component.Temperature, -1);
-			component.gameObject.DeleteObject();
 		}
+		base.gameObject.DeleteObject();
 	}
 
 	[MyCmpAdd]

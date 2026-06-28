@@ -5,7 +5,7 @@ using KSerialization;
 namespace Klei.AI
 {
 	[SerializationConfig(MemberSerialization.OptIn)]
-	public class Traits : KMonoBehaviour, ISaveLoadableJson
+	public class Traits : KMonoBehaviour, ISaveLoadable
 	{
 		public IEnumerator<Trait> GetEnumerator()
 		{

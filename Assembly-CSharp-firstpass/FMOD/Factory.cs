@@ -18,7 +18,7 @@ namespace FMOD
 			return result;
 		}
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_System_Create(out IntPtr system);
 	}
 }

@@ -4,12 +4,12 @@ using UnityEngine;
 public class SighChore : Chore<SighChore.StatesInstance>
 {
 	public SighChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.Sigh, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true)
+		: base(Db.Get().ChoreTypes.Sigh, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true, 0)
 	{
 		this.smi = new SighChore.StatesInstance(this, target.gameObject);
 	}
 
-	public class StatesInstance : GameStateMachine<SighChore.States, SighChore.StatesInstance, SighChore>.GameInstance
+	public class StatesInstance : GameStateMachine<SighChore.States, SighChore.StatesInstance, SighChore, object>.GameInstance
 	{
 		public StatesInstance(SighChore master, GameObject sigher)
 			: base(master)
@@ -27,6 +27,6 @@ public class SighChore : Chore<SighChore.StatesInstance>
 			this.root.PlayAnim("emote_depressed", KAnim.PlayMode.Once, null).OnAnimQueueComplete(null);
 		}
 
-		public StateMachine<SighChore.States, SighChore.StatesInstance, SighChore>.TargetParameter sigher;
+		public StateMachine<SighChore.States, SighChore.StatesInstance, SighChore, object>.TargetParameter sigher;
 	}
 }

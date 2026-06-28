@@ -9,13 +9,21 @@ public class HatchDrillSoundEvent : SoundEvent
 	{
 	}
 
-	public override void OnPlay(IAnimBehaviour behaviour)
+	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
+	{
+		if (this.ShouldPlaySound(behaviour))
+		{
+			this.PlaySound(behaviour);
+		}
+	}
+
+	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
 	{
 		Vector3 position = behaviour.GetComponent<Transform>().position;
 		int num = Grid.PosToCell(position);
 		int num2 = Grid.CellBelow(num);
 		float num3 = (float)HatchDrillSoundEvent.GetAudioCategory(num2);
-		EventInstance eventInstance = SoundEvent.BeginOneShot(this.sound, position);
+		EventInstance eventInstance = SoundEvent.BeginOneShot(base.sound, position);
 		eventInstance.setParameterValue("material_ID", num3);
 		SoundEvent.EndOneShot(eventInstance);
 	}
@@ -31,13 +39,17 @@ public class HatchDrillSoundEvent : SoundEvent
 		{
 			return 0;
 		}
-		if (element.id == SimHashes.CrushedIce)
-		{
-			return 1;
-		}
 		if (element.HasTag(GameTags.IceOre))
 		{
 			return 1;
+		}
+		if (element.id == SimHashes.CrushedIce)
+		{
+			return 12;
+		}
+		if (element.id == SimHashes.DirtyIce)
+		{
+			return 13;
 		}
 		if (Grid.Foundation[cell])
 		{

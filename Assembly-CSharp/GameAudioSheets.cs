@@ -43,6 +43,10 @@ public class GameAudioSheets : AudioSheets
 		{
 			return new BuildingDamageSoundEvent(file_name, sound_name, frame);
 		}
+		if (type == "WallDamageSoundEvent")
+		{
+			return new WallDamageSoundEvent(file_name, sound_name, frame, min_interval);
+		}
 		if (type == "RemoteSoundEvent")
 		{
 			return new RemoteSoundEvent(file_name, sound_name, frame, min_interval);

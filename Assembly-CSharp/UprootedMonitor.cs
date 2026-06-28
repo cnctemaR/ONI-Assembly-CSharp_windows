@@ -1,5 +1,6 @@
 ﻿using System;
 using KSerialization;
+using UnityEngine;
 
 public class UprootedMonitor : KMonoBehaviour
 {
@@ -23,7 +24,7 @@ public class UprootedMonitor : KMonoBehaviour
 			}
 		});
 		this.position = Grid.PosToCell(base.gameObject);
-		this.ground = Grid.CellBelow(this.position);
+		this.ground = Grid.OffsetCell(this.position, this.monitorCell);
 		if (Grid.IsValidCell(this.position) && Grid.IsValidCell(this.ground))
 		{
 			this.partitionerEntry = GameScenePartitioner.Instance.Add("UprootedMonitor.OnSpawn", base.gameObject, this.ground, GameScenePartitioner.Instance.solidChangedMask.mask, new Action<object>(this.OnGroundChanged));
@@ -44,7 +45,7 @@ public class UprootedMonitor : KMonoBehaviour
 
 	public bool IsCellSafe(int cell)
 	{
-		return CreatureHelpers.isSolidGround(Grid.CellBelow(cell));
+		return CreatureHelpers.isSolidGround(this.ground);
 	}
 
 	public void OnGroundChanged(object callbackData)
@@ -56,6 +57,12 @@ public class UprootedMonitor : KMonoBehaviour
 		}
 	}
 
+	public static bool IsObjectUprooted(GameObject plant)
+	{
+		UprootedMonitor component = plant.GetComponent<UprootedMonitor>();
+		return !(component == null) && component.IsUprooted;
+	}
+
 	private int position;
 
 	private int ground;
@@ -65,6 +72,8 @@ public class UprootedMonitor : KMonoBehaviour
 
 	[Serialize]
 	private bool uprooted;
+
+	public CellOffset monitorCell = new CellOffset(0, -1);
 
 	private GameScenePartitionerEntry partitionerEntry;
 }

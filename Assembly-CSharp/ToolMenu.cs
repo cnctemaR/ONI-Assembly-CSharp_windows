@@ -73,7 +73,9 @@ public class ToolMenu : KScreen
 		{
 			ToolMenu.ToolCollection tc = this.toolCollections[i];
 			tc.toggle = Util.KInstantiateUI((this.toolCollections[i].tools.Count <= 1) ? this.toolIconPrefab : this.collectionIconPrefab, base.gameObject, true);
-			tc.toggle.GetComponent<KToggle>().onClick += delegate
+			KToggle component = tc.toggle.GetComponent<KToggle>();
+			component.soundPlayer.Enabled = false;
+			component.onClick += delegate
 			{
 				if (this.currentlySelectedCollection == tc && tc.tools.Count >= 1)
 				{
@@ -299,26 +301,15 @@ public class ToolMenu : KScreen
 
 	private void SetToggleState(KToggle toggle, bool state)
 	{
-		ImageToggleState component = toggle.GetComponent<ImageToggleState>();
 		if (state)
 		{
 			toggle.Select();
 			toggle.isOn = true;
-			toggle.ActivateFlourish(true);
-			if (component)
-			{
-				component.SetActive();
-			}
 		}
 		else
 		{
 			toggle.Deselect();
 			toggle.isOn = false;
-			toggle.ActivateFlourish(false);
-			if (component)
-			{
-				component.SetInactive();
-			}
 		}
 	}
 
@@ -386,7 +377,7 @@ public class ToolMenu : KScreen
 			}
 			if ((this.currentlySelectedTool != null || this.currentlySelectedCollection != null) && !e.Consumed)
 			{
-				if (e.TryConsume(global::Action.MouseRight) || e.TryConsume(global::Action.Escape))
+				if (e.TryConsume(global::Action.Escape))
 				{
 					string sound2 = GlobalAssets.GetSound(PlayerController.Instance.ActiveTool.GetDeactivateSound(), false);
 					if (sound2 != null)
@@ -404,12 +395,44 @@ public class ToolMenu : KScreen
 					SelectTool.Instance.Activate();
 				}
 			}
-			else if (!PlayerController.Instance.IsUsingDefaultTool() && !e.Consumed && (e.TryConsume(global::Action.MouseRight) || e.TryConsume(global::Action.Escape)))
+			else if (!PlayerController.Instance.IsUsingDefaultTool() && !e.Consumed && e.TryConsume(global::Action.Escape))
 			{
 				SelectTool.Instance.Activate();
 			}
 		}
 		base.OnKeyDown(e);
+	}
+
+	public override void OnKeyUp(KButtonEvent e)
+	{
+		if (!e.Consumed)
+		{
+			if ((this.currentlySelectedTool != null || this.currentlySelectedCollection != null) && !e.Consumed)
+			{
+				if (PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight))
+				{
+					string sound = GlobalAssets.GetSound(PlayerController.Instance.ActiveTool.GetDeactivateSound(), false);
+					if (sound != null)
+					{
+						KMonoBehaviour.PlaySound(sound);
+					}
+					if (this.currentlySelectedCollection != null)
+					{
+						this.ChooseCollection(null, true);
+					}
+					if (this.currentlySelectedTool != null)
+					{
+						this.ChooseTool(null);
+					}
+					SelectTool.Instance.Activate();
+				}
+			}
+			else if (!PlayerController.Instance.IsUsingDefaultTool() && !e.Consumed && PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight))
+			{
+				SelectTool.Instance.Activate();
+			}
+		}
+		base.OnKeyUp(e);
 	}
 
 	protected void BuildCollectionToggles()

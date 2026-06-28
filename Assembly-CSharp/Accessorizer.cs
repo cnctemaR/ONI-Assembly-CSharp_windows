@@ -12,7 +12,7 @@ public class Accessorizer : KMonoBehaviour
 
 	public void AddAccessory(Accessory accessory)
 	{
-		this.animController.AddSymbolOverride(accessory.slot.targetSymbolId, accessory.batchSource, accessory.symbol);
+		this.animController.AddSymbolOverride(accessory.slot.targetSymbolId, accessory.batchSource, accessory.symbol, false);
 		this.animController.ShowSymbol(accessory.slot.targetSymbolId);
 		if (!this.HasAccessory(accessory))
 		{
@@ -35,13 +35,15 @@ public class Accessorizer : KMonoBehaviour
 		return this.accessories.Exists((ResourceRef<Accessory> x) => x.Get() == accessory);
 	}
 
-	public void GetFaceSlots(ref Accessorizer.FaceData fd)
+	public void GetBodySlots(ref KCompBuilder.BodyData fd)
 	{
 		fd.eyes = 0;
 		fd.hair = 0;
 		fd.headShape = 0;
 		fd.mouth = 0;
 		fd.neck = 0;
+		fd.body = 0;
+		fd.arms = 0;
 		for (int i = 0; i < this.accessories.Count; i++)
 		{
 			Accessory accessory = this.accessories[i].Get();
@@ -67,6 +69,10 @@ public class Accessorizer : KMonoBehaviour
 				{
 					fd.neck = accessory.subtype;
 				}
+				else if (accessory.slot.Id == "Body")
+				{
+					fd.arms = (fd.body = accessory.subtype);
+				}
 			}
 		}
 	}
@@ -86,18 +92,4 @@ public class Accessorizer : KMonoBehaviour
 
 	[MyCmpReq]
 	private KAnimControllerBase animController;
-
-	[Serializable]
-	public struct FaceData
-	{
-		public int headShape;
-
-		public int mouth;
-
-		public int neck;
-
-		public int eyes;
-
-		public int hair;
-	}
 }

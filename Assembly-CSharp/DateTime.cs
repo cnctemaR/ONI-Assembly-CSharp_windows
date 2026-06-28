@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using UnityEngine;
 
 public class DateTime : KScreen
@@ -12,7 +13,6 @@ public class DateTime : KScreen
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.day.text = "Cycle";
 		this.tooltip.OnToolTip = new Func<string>(this.OnToolTip);
 	}
 
@@ -34,8 +34,8 @@ public class DateTime : KScreen
 		if (GameClock.Instance != null)
 		{
 			this.tooltip.ClearMultiStringTooltip();
-			this.tooltip.AddMultiStringTooltip("This Colony is " + this.Days() + " Cycles Old", this.tooltipstyle_Days);
-			this.tooltip.AddMultiStringTooltip("Time Played: " + (GameClock.Instance.GetTimePlayedInSeconds() / 3600f).ToString("0.00") + " hours", this.tooltipstyle_Playtime);
+			this.tooltip.AddMultiStringTooltip(string.Format(UI.ASTEROIDCLOCK.CYCLES_OLD, this.Days()), this.tooltipstyle_Days);
+			this.tooltip.AddMultiStringTooltip(string.Format(UI.ASTEROIDCLOCK.TIME_PLAYED, (GameClock.Instance.GetTimePlayedInSeconds() / 3600f).ToString("0.00")), this.tooltipstyle_Playtime);
 		}
 		return string.Empty;
 	}

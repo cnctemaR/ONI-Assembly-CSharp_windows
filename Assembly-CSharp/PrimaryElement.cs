@@ -6,7 +6,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class PrimaryElement : KMonoBehaviour, ISaveLoadableJson
+public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 {
 	[Serialize]
 	public float Units
@@ -54,20 +54,17 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadableJson
 	private void OnSerializing()
 	{
 		this._Temperature = this.Temperature;
-		if (this._Temperature <= 0f)
-		{
-			Output.LogErrorWithObj(base.gameObject, new object[] { base.gameObject.name + " is serializing a temperature of <= 0K" });
-		}
-		if (this.Mass > 100000f)
-		{
-			Output.LogWarningWithObj(base.gameObject, new object[] { "serializing very large ore mass... error?" });
-		}
+		this.SanitizeMassAndTemperature();
 	}
 
 	[OnDeserialized]
 	private void OnDeserialized()
 	{
-		this.UpdateTags();
+		if (this.ElementID == (SimHashes)351109216)
+		{
+			this.ElementID = SimHashes.Creature;
+		}
+		this.SanitizeMassAndTemperature();
 		this.Temperature = this._Temperature;
 		if (float.IsNaN(this.Temperature))
 		{
@@ -98,6 +95,20 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadableJson
 		if (this.onDataChanged != null)
 		{
 			this.onDataChanged(this);
+		}
+	}
+
+	private void SanitizeMassAndTemperature()
+	{
+		if (this._Temperature <= 0f)
+		{
+			KCrashReporter.Assert(false, base.gameObject.name + " is attempting serializing a temperature of <= 0K. Resetting to default.");
+			this._Temperature = this.Element.defaultValues.temperature;
+		}
+		if (this.Mass > 100000f)
+		{
+			KCrashReporter.Assert(false, base.gameObject.name + " is attempting to serialize a very large mass. Resetting to default.");
+			this.Mass = this.Element.defaultValues.mass;
 		}
 	}
 
@@ -141,9 +152,14 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadableJson
 		}
 	}
 
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		GameComps.InfraredVisualizers.Add(base.gameObject);
+	}
+
 	protected override void OnSpawn()
 	{
-		this.UpdateTags();
 		Attributes attributes = this.GetAttributes();
 		if (attributes != null)
 		{
@@ -155,6 +171,12 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadableJson
 		}
 	}
 
+	protected override void OnCleanUp()
+	{
+		GameComps.InfraredVisualizers.Remove(base.gameObject);
+		base.OnCleanUp();
+	}
+
 	public void SetElement(SimHashes element_id)
 	{
 		this.ElementID = element_id;
@@ -163,34 +185,26 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadableJson
 
 	public void UpdateTags()
 	{
-		if (this.UpdateElementTags)
+		if (this.ElementID == (SimHashes)0)
 		{
-			if (this.ElementID == (SimHashes)0)
+			Output.LogWithObj(base.gameObject, new object[] { "UpdateTags() Primary element 0" });
+			return;
+		}
+		KPrefabID component = base.GetComponent<KPrefabID>();
+		if (component != null)
+		{
+			List<Tag> list = new List<Tag>();
+			Element element = this.Element;
+			list.Add(TagManager.Create(element.id));
+			foreach (Tag tag in element.oreTags)
 			{
-				Output.LogWithObj(base.gameObject, new object[] { "UpdateTags() Primary element 0" });
-				return;
+				list.Add(tag);
 			}
-			KPrefabID component = base.GetComponent<KPrefabID>();
-			if (component != null)
+			if (component.HasAnyTags(PrimaryElement.metalTags))
 			{
-				List<Tag> list = new List<Tag>();
-				Element element = this.Element;
-				if (base.GetComponent<ElementChunk>() != null)
-				{
-					component.PrefabTag = TagManager.Create(element.id.ToString(), null);
-					base.gameObject.name = element.id.ToString();
-				}
-				list.Add(TagManager.Create(element.id));
-				foreach (Tag tag in element.oreTags)
-				{
-					list.Add(tag);
-				}
-				if (component.HasAnyTags(PrimaryElement.metalTags))
-				{
-					list.Add(GameTags.StoredMetal);
-				}
-				component.AddTags(list);
+				list.Add(GameTags.StoredMetal);
 			}
+			component.AddPrefabTags(list);
 		}
 	}
 
@@ -232,13 +246,10 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadableJson
 	private float _Temperature;
 
 	[Serialize]
-	public bool UpdateElementTags;
-
-	[Serialize]
 	[NonSerialized]
 	public bool KeepZeroMassObject;
 
-	public bool WholeUnitsOnly;
+	public bool CountableUnits;
 
 	public float MassPerUnit = 1f;
 

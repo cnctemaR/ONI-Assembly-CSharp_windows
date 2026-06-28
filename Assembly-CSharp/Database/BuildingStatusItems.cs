@@ -15,7 +15,8 @@ namespace Database
 
 		private void CreateStatusItems()
 		{
-			this.AssignedTo = new StatusItem("AssignedTo", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
+			this.AngerDamage = new StatusItem("AngerDamage", "BUILDING", string.Empty, StatusItem.IconType.Exclamation, NotificationType.Bad, false, SimViewMode.None, SimViewMode.None, true);
+			this.AssignedTo = new StatusItem("AssignedTo", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
 			this.AssignedTo.resolveStringCallback = delegate(string str, object data)
 			{
 				Assignable assignable = (Assignable)data;
@@ -27,32 +28,63 @@ namespace Database
 				}
 				return str;
 			};
-			this.Broken = new StatusItem("Broken", "BUILDING", "status_item_broken", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None);
-			this.ChangeDoorControlState = new StatusItem("ChangeDoorControlState", "BUILDING", "status_item_pending_switch_toggle", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
+			this.Broken = new StatusItem("Broken", "BUILDING", "status_item_broken", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
+			this.Broken.resolveStringCallback = delegate(string str, object data)
+			{
+				BuildingHP.SMInstance sminstance = (BuildingHP.SMInstance)data;
+				return str.Replace("{DamageInfo}", sminstance.master.GetDamageSourceInfo().ToString());
+			};
+			this.Broken.conditionalOverlayCallback = delegate(SimViewMode mode, object data)
+			{
+				Transform transform = (Transform)data;
+				bool flag = false;
+				if (mode != SimViewMode.LiquidVentMap)
+				{
+					if (mode != SimViewMode.PowerMap)
+					{
+						if (mode == SimViewMode.GasVentMap)
+						{
+							Conduit component = transform.GetComponent<Conduit>();
+							flag = component != null && component.type == ConduitType.Gas;
+						}
+					}
+					else
+					{
+						flag = transform.GetComponent<Wire>() != null;
+					}
+				}
+				else
+				{
+					Conduit component2 = transform.GetComponent<Conduit>();
+					flag = component2 != null && component2.type == ConduitType.Liquid;
+				}
+				return flag;
+			};
+			this.ChangeDoorControlState = new StatusItem("ChangeDoorControlState", "BUILDING", "status_item_pending_switch_toggle", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
 			this.ChangeDoorControlState.resolveStringCallback = delegate(string str, object data)
 			{
 				Door door = (Door)data;
 				return str.Replace("{ControlState}", door.RequestedState.ToString());
 			};
-			this.CurrentDoorControlState = new StatusItem("CurrentDoorControlState", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
+			this.CurrentDoorControlState = new StatusItem("CurrentDoorControlState", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
 			this.CurrentDoorControlState.resolveStringCallback = delegate(string str, object data)
 			{
 				Door door2 = (Door)data;
 				string text = Strings.Get("STRINGS.BUILDING.STATUSITEMS.CURRENTDOORCONTROLSTATE." + door2.CurrentState.ToString().ToUpper());
 				return str.Replace("{ControlState}", text);
 			};
-			this.ConduitBlocked = new StatusItem("ConduitBlocked", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None);
-			this.ConstructionUnreachable = new StatusItem("ConstructionUnreachable", "BUILDING", string.Empty, StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None);
-			this.DigUnreachable = new StatusItem("DigUnreachable", "BUILDING", string.Empty, StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None);
-			this.Entombed = new StatusItem("Entombed", "BUILDING", "status_item_entombed", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None);
+			this.ConduitBlocked = new StatusItem("ConduitBlocked", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
+			this.ConstructionUnreachable = new StatusItem("ConstructionUnreachable", "BUILDING", string.Empty, StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
+			this.DigUnreachable = new StatusItem("DigUnreachable", "BUILDING", string.Empty, StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
+			this.Entombed = new StatusItem("Entombed", "BUILDING", "status_item_entombed", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
 			this.Entombed.AddNotification(null, null, null, 0f);
-			this.Flooded = new StatusItem("Flooded", "BUILDING", "status_item_flooded", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None);
+			this.Flooded = new StatusItem("Flooded", "BUILDING", "status_item_flooded", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
 			this.Flooded.AddNotification(null, null, null, 0f);
-			this.GasVentObstructed = new StatusItem("GasVentObstructed", "BUILDING", "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.GasVentMap, SimViewMode.None);
-			this.GasVentOverPressure = new StatusItem("GasVentOverPressure", "BUILDING", "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.GasVentMap, SimViewMode.None);
-			this.InvalidBuildingLocation = new StatusItem("InvalidBuildingLocation", "BUILDING", "status_item_missing_foundation", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None);
-			this.LiquidVentObstructed = new StatusItem("LiquidVentObstructed", "BUILDING", "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.LiquidVentMap, SimViewMode.None);
-			this.LiquidVentOverPressure = new StatusItem("LiquidVentOverPressure", "BUILDING", "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.LiquidVentMap, SimViewMode.None);
+			this.GasVentObstructed = new StatusItem("GasVentObstructed", "BUILDING", "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.GasVentMap, SimViewMode.None, true);
+			this.GasVentOverPressure = new StatusItem("GasVentOverPressure", "BUILDING", "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.GasVentMap, SimViewMode.None, true);
+			this.InvalidBuildingLocation = new StatusItem("InvalidBuildingLocation", "BUILDING", "status_item_missing_foundation", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
+			this.LiquidVentObstructed = new StatusItem("LiquidVentObstructed", "BUILDING", "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.LiquidVentMap, SimViewMode.None, true);
+			this.LiquidVentOverPressure = new StatusItem("LiquidVentOverPressure", "BUILDING", "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.LiquidVentMap, SimViewMode.None, true);
 			this.MaterialsUnavailable = new MaterialsUnavailableStatusItem("MaterialsUnavailable", "BUILDING", "status_item_resource_unavailable", StatusItem.IconType.Custom, NotificationType.BadMinor, true, SimViewMode.None, SimViewMode.None);
 			this.MaterialsUnavailable.AddNotification(null, null, null, 0f);
 			this.MaterialsUnavailable.resolveStringCallback = delegate(string str, object data)
@@ -62,17 +94,24 @@ namespace Database
 				Dictionary<Tag, float> remainingMinimum = fetchList.GetRemainingMinimum();
 				if (remainingMinimum.Count > 0)
 				{
-					bool flag = true;
+					bool flag2 = true;
 					foreach (KeyValuePair<Tag, float> keyValuePair in remainingMinimum)
 					{
 						if (keyValuePair.Value != 0f)
 						{
-							if (!flag)
+							if (!flag2)
 							{
 								text2 += "\n";
 							}
-							text2 += string.Format("{0} {1} {2}", "• ", keyValuePair.Key.ProperName(), GameUtil.GetFormattedMass(keyValuePair.Value, GameUtil.TimeSlice.None, true, "F1"));
-							flag = false;
+							if (Assets.IsTagCountable(keyValuePair.Key))
+							{
+								text2 += string.Format(BUILDING.STATUSITEMS.MATERIALSUNAVAILABLE.LINE_ITEM_UNITS, GameUtil.GetUnitFormattedName(keyValuePair.Key.ProperName(), keyValuePair.Value, false));
+							}
+							else
+							{
+								text2 += string.Format(BUILDING.STATUSITEMS.MATERIALSUNAVAILABLE.LINE_ITEM_MASS, keyValuePair.Key.ProperName(), GameUtil.GetFormattedMass(keyValuePair.Value, GameUtil.TimeSlice.None, true, "{0:0.#}"));
+							}
+							flag2 = false;
 						}
 					}
 				}
@@ -87,144 +126,170 @@ namespace Database
 				Dictionary<Tag, float> remaining = fetchList2.GetRemaining();
 				if (remaining.Count > 0)
 				{
-					bool flag2 = true;
+					bool flag3 = true;
 					foreach (KeyValuePair<Tag, float> keyValuePair2 in remaining)
 					{
 						if (keyValuePair2.Value != 0f)
 						{
-							if (!flag2)
+							if (!flag3)
 							{
 								text3 += "\n";
 							}
-							text3 += string.Format("{0} {1}", "• ", keyValuePair2.Key.ProperName());
-							flag2 = false;
+							text3 += string.Format(BUILDING.STATUSITEMS.MATERIALSUNAVAILABLEFORREFILL.LINE_ITEM, keyValuePair2.Key.ProperName());
+							flag3 = false;
 						}
 					}
 				}
 				str = str.Replace("{ItemsRemaining}", text3);
 				return str;
 			};
+			this.WaitingForRepairMaterials = new StatusItem("WaitingForRepairMaterials", "BUILDING", "status_item_resource_unavailable", StatusItem.IconType.Exclamation, NotificationType.Neutral, true, SimViewMode.None, SimViewMode.None, false);
+			this.WaitingForRepairMaterials.resolveStringCallback = delegate(string str, object data)
+			{
+				KeyValuePair<Tag, float> keyValuePair3 = (KeyValuePair<Tag, float>)data;
+				if (keyValuePair3.Value != 0f)
+				{
+					string text4 = string.Format(BUILDING.STATUSITEMS.WAITINGFORMATERIALS.LINE_ITEM_MASS, keyValuePair3.Key.ProperName(), GameUtil.GetFormattedMass(keyValuePair3.Value, GameUtil.TimeSlice.None, true, "{0:0.#}"));
+					str = str.Replace("{ItemsRemaining}", text4);
+				}
+				return str;
+			};
 			this.WaitingForMaterials = new WaitingForMaterialsStatusItem("WaitingForMaterials", "BUILDING", string.Empty, StatusItem.IconType.Exclamation, NotificationType.Neutral, true, SimViewMode.None, SimViewMode.None);
 			this.WaitingForMaterials.resolveStringCallback = delegate(string str, object data)
 			{
 				IFetchList fetchList3 = (IFetchList)data;
-				string text4 = string.Empty;
+				string text5 = string.Empty;
 				Dictionary<Tag, float> remaining2 = fetchList3.GetRemaining();
 				if (remaining2.Count > 0)
 				{
-					bool flag3 = true;
-					foreach (KeyValuePair<Tag, float> keyValuePair3 in remaining2)
+					bool flag4 = true;
+					foreach (KeyValuePair<Tag, float> keyValuePair4 in remaining2)
 					{
-						if (keyValuePair3.Value != 0f)
+						if (keyValuePair4.Value != 0f)
 						{
-							if (!flag3)
+							if (!flag4)
 							{
-								text4 += "\n";
+								text5 += "\n";
 							}
-							text4 += string.Format("{0} {1} {2}", "• ", keyValuePair3.Key.ProperName(), GameUtil.GetFormattedMass(keyValuePair3.Value, GameUtil.TimeSlice.None, true, "F1"));
-							flag3 = false;
+							if (Assets.IsTagCountable(keyValuePair4.Key))
+							{
+								text5 += string.Format(BUILDING.STATUSITEMS.WAITINGFORMATERIALS.LINE_ITEM_UNITS, GameUtil.GetUnitFormattedName(keyValuePair4.Key.ProperName(), keyValuePair4.Value, false));
+							}
+							else
+							{
+								text5 += string.Format(BUILDING.STATUSITEMS.WAITINGFORMATERIALS.LINE_ITEM_MASS, keyValuePair4.Key.ProperName(), GameUtil.GetFormattedMass(keyValuePair4.Value, GameUtil.TimeSlice.None, true, "{0:0.#}"));
+							}
+							flag4 = false;
 						}
 					}
 				}
-				str = str.Replace("{ItemsRemaining}", text4);
+				str = str.Replace("{ItemsRemaining}", text5);
 				return str;
 			};
-			this.MeltingDown = new StatusItem("MeltingDown", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None);
-			this.MissingFoundation = new StatusItem("MissingFoundation", "BUILDING", "status_item_missing_foundation", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None);
-			this.NeedBoringMachine = new StatusItem("NeedBoringMachine", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None);
-			this.NeutroniumUnminable = new StatusItem("NeutroniumUnminable", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None);
-			this.NeedGasIn = new StatusItem("NeedGasIn", "BUILDING", "status_item_need_supply_in", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.GasVentMap, SimViewMode.None);
-			this.NeedGasOut = new StatusItem("NeedGasOut", "BUILDING", "status_item_need_supply_out", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.GasVentMap, SimViewMode.None);
-			this.NeedLiquidIn = new StatusItem("NeedLiquidIn", "BUILDING", "status_item_need_supply_in", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.LiquidVentMap, SimViewMode.None);
-			this.NeedLiquidOut = new StatusItem("NeedLiquidOut", "BUILDING", "status_item_need_supply_out", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.LiquidVentMap, SimViewMode.None);
-			this.LiquidPipeEmpty = new StatusItem("LiquidPipeEmpty", "BUILDING", "status_item_no_liquid_to_pump", StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.LiquidVentMap, SimViewMode.None);
-			this.LiquidPipeObstructed = new StatusItem("LiquidPipeObstructed", "BUILDING", "status_item_wrong_resource_in_pipe", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.LiquidVentMap, SimViewMode.None);
-			this.GasPipeEmpty = new StatusItem("GasPipeEmpty", "BUILDING", "status_item_no_gas_to_pump", StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.GasVentMap, SimViewMode.None);
-			this.GasPipeObstructed = new StatusItem("GasPipeObstructed", "BUILDING", "status_item_wrong_resource_in_pipe", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.GasVentMap, SimViewMode.None);
-			this.NeedPlant = new StatusItem("NeedPlant", "BUILDING", "status_item_need_plant", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None);
-			this.NeedPower = new StatusItem("NeedPower", "BUILDING", "status_item_need_power", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.PowerMap, SimViewMode.None);
-			this.NewDuplicantsAvailable = new StatusItem("NewDuplicantsAvailable", "BUILDING", "status_item_new_duplicants_available", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None);
+			this.MeltingDown = new StatusItem("MeltingDown", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
+			this.MissingFoundation = new StatusItem("MissingFoundation", "BUILDING", "status_item_missing_foundation", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
+			this.NeedBoringMachine = new StatusItem("NeedBoringMachine", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
+			this.NeutroniumUnminable = new StatusItem("NeutroniumUnminable", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
+			this.NeedGasIn = new StatusItem("NeedGasIn", "BUILDING", "status_item_need_supply_in", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.GasVentMap, SimViewMode.None, true);
+			this.NeedGasOut = new StatusItem("NeedGasOut", "BUILDING", "status_item_need_supply_out", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.GasVentMap, SimViewMode.None, true);
+			this.NeedLiquidIn = new StatusItem("NeedLiquidIn", "BUILDING", "status_item_need_supply_in", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.LiquidVentMap, SimViewMode.None, true);
+			this.NeedLiquidOut = new StatusItem("NeedLiquidOut", "BUILDING", "status_item_need_supply_out", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.LiquidVentMap, SimViewMode.None, true);
+			this.LiquidPipeEmpty = new StatusItem("LiquidPipeEmpty", "BUILDING", "status_item_no_liquid_to_pump", StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.LiquidVentMap, SimViewMode.None, true);
+			this.LiquidPipeObstructed = new StatusItem("LiquidPipeObstructed", "BUILDING", "status_item_wrong_resource_in_pipe", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.LiquidVentMap, SimViewMode.None, true);
+			this.GasPipeEmpty = new StatusItem("GasPipeEmpty", "BUILDING", "status_item_no_gas_to_pump", StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.GasVentMap, SimViewMode.None, true);
+			this.GasPipeObstructed = new StatusItem("GasPipeObstructed", "BUILDING", "status_item_wrong_resource_in_pipe", StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.GasVentMap, SimViewMode.None, true);
+			this.NeedPlant = new StatusItem("NeedPlant", "BUILDING", "status_item_need_plant", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
+			this.NeedPower = new StatusItem("NeedPower", "BUILDING", "status_item_need_power", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.PowerMap, SimViewMode.None, true);
+			this.NewDuplicantsAvailable = new StatusItem("NewDuplicantsAvailable", "BUILDING", "status_item_new_duplicants_available", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
 			this.NewDuplicantsAvailable.AddNotification(null, null, null, 0f);
 			this.NewDuplicantsAvailable.notificationClickCallback = delegate(object data)
 			{
 				Telepad telepad = (Telepad)data;
 				ImmigrantScreen.InitializeImmigrantScreen(telepad);
 			};
-			this.NoStorageFilterSet = new StatusItem("NoStorageFilterSet", "BUILDING", "status_item_no_filter_set", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.Regions, SimViewMode.None);
-			this.NoFishableWaterBelow = new StatusItem("NoFishableWaterBelow", "BUILDING", "status_item_no_fishable_water_below", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None);
-			this.NoPowerConsumers = new StatusItem("NoPowerConsumers", "BUILDING", "status_item_no_power_consumers", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.PowerMap, SimViewMode.None);
-			this.NoPowerSource = new StatusItem("NoPowerSource", "BUILDING", "status_item_no_power_source", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.PowerMap, SimViewMode.None);
-			this.NoWireConnected = new StatusItem("NoWireConnected", "BUILDING", "status_item_no_wire_connected", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.PowerMap, SimViewMode.None);
-			this.PendingDeconstruction = new StatusItem("PendingDeconstruction", "BUILDING", "status_item_pending_deconstruction", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
+			this.NoStorageFilterSet = new StatusItem("NoStorageFilterSet", "BUILDING", "status_item_no_filter_set", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.Regions, SimViewMode.None, true);
+			this.NoFishableWaterBelow = new StatusItem("NoFishableWaterBelow", "BUILDING", "status_item_no_fishable_water_below", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
+			this.NoPowerConsumers = new StatusItem("NoPowerConsumers", "BUILDING", "status_item_no_power_consumers", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.PowerMap, SimViewMode.None, true);
+			this.NoPowerSource = new StatusItem("NoPowerSource", "BUILDING", "status_item_no_power_source", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.PowerMap, SimViewMode.None, true);
+			this.NoWireConnected = new StatusItem("NoWireConnected", "BUILDING", "status_item_no_wire_connected", StatusItem.IconType.Custom, NotificationType.BadMinor, true, SimViewMode.PowerMap, SimViewMode.None, true);
+			this.PendingDeconstruction = new StatusItem("PendingDeconstruction", "BUILDING", "status_item_pending_deconstruction", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
 			this.PendingDeconstruction.conditionalOverlayCallback = delegate(SimViewMode mode, object data)
 			{
-				BuildingComplete component = ((Transform)data).GetComponent<BuildingComplete>();
-				if (component.Def.isGraphTile)
+				Transform transform2 = (Transform)data;
+				bool flag5 = false;
+				if (mode != SimViewMode.LiquidVentMap)
 				{
-					Vent component2 = component.GetComponent<Vent>();
-					if (!(component2 != null))
+					if (mode != SimViewMode.PowerMap)
 					{
-						return mode == SimViewMode.PowerMap;
+						if (mode == SimViewMode.GasVentMap)
+						{
+							Conduit component3 = transform2.GetComponent<Conduit>();
+							flag5 = component3 != null && component3.type == ConduitType.Gas;
+						}
 					}
-					if ((mode == SimViewMode.GasVentMap || mode == SimViewMode.OxygenMap) && component2.transferType == Vent.Transfer.Gas)
+					else
 					{
-						return true;
-					}
-					if (mode == SimViewMode.LiquidVentMap && component2.transferType == Vent.Transfer.Liquid)
-					{
-						return true;
+						flag5 = transform2.GetComponent<Wire>() != null;
 					}
 				}
-				return false;
+				else
+				{
+					Conduit component4 = transform2.GetComponent<Conduit>();
+					flag5 = component4 != null && component4.type == ConduitType.Liquid;
+				}
+				return flag5;
 			};
-			this.PendingFish = new StatusItem("PendingFish", "BUILDING", "status_item_pending_fish", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
-			this.PendingRepair = new StatusItem("PendingRepair", "BUILDING", "status_item_pending_repair", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None);
-			this.PendingSwitchToggle = new StatusItem("PendingSwitchToggle", "BUILDING", "status_item_pending_switch_toggle", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
-			this.PendingUpgrade = new StatusItem("PendingUpgrade", "BUILDING", "status_item_pending_upgrade", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
-			this.PendingWork = new StatusItem("PendingWork", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None);
-			this.PowerButtonOff = new StatusItem("PowerButtonOff", "BUILDING", "status_item_power_button_off", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None);
-			this.PressureOk = new StatusItem("PressureOk", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.OxygenMap, SimViewMode.None);
-			this.StorageLocker = new StatusItem("StorageLocker", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.Regions, SimViewMode.None);
+			this.PendingRepair = new StatusItem("PendingRepair", "BUILDING", "status_item_pending_repair", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
+			this.PendingRepair.conditionalOverlayCallback = (SimViewMode mode, object data) => true;
+			this.SwitchStatusActive = new StatusItem("SwitchStatusActive", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
+			this.SwitchStatusInactive = new StatusItem("SwitchStatusInactive", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
+			this.PendingFish = new StatusItem("PendingFish", "BUILDING", "status_item_pending_fish", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
+			this.PendingSwitchToggle = new StatusItem("PendingSwitchToggle", "BUILDING", "status_item_pending_switch_toggle", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
+			this.PendingUpgrade = new StatusItem("PendingUpgrade", "BUILDING", "status_item_pending_upgrade", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
+			this.PendingWork = new StatusItem("PendingWork", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
+			this.PowerButtonOff = new StatusItem("PowerButtonOff", "BUILDING", "status_item_power_button_off", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
+			this.PressureOk = new StatusItem("PressureOk", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.OxygenMap, SimViewMode.None, true);
+			this.UnderPressure = new StatusItem("UnderPressure", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.OxygenMap, SimViewMode.None, true);
+			this.StorageLocker = new StatusItem("StorageLocker", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.Regions, SimViewMode.None, true);
 			this.StorageLocker.resolveStringCallback = delegate(string str, object data)
 			{
 				KMonoBehaviour kmonoBehaviour = (KMonoBehaviour)data;
-				Storage component3 = kmonoBehaviour.GetComponent<Storage>();
-				string text5 = Util.FormatWholeNumber(component3.MassStored());
-				string text6 = Util.FormatWholeNumber(component3.capacityKg);
-				str = str.Replace("{Stored}", text5);
-				str = str.Replace("{Capacity}", text6);
+				Storage component5 = kmonoBehaviour.GetComponent<Storage>();
+				string text6 = Util.FormatWholeNumber(component5.MassStored());
+				string text7 = Util.FormatWholeNumber(component5.capacityKg);
+				str = str.Replace("{Stored}", text6);
+				str = str.Replace("{Capacity}", text7);
 				return str;
 			};
-			this.Unassigned = new StatusItem("Unassigned", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.Rooms, SimViewMode.None);
-			this.UnderConstruction = new StatusItem("UnderConstruction", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
-			this.UnderConstructionNoWorker = new StatusItem("UnderConstructionNoWorker", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
-			this.Normal = new StatusItem("Normal", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
-			this.ManualGeneratorChargingUp = new StatusItem("ManualGeneratorChargingUp", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.PowerMap, SimViewMode.None);
-			this.ManualGeneratorReleasingEnergy = new StatusItem("ManualGeneratorReleasingEnergy", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.PowerMap, SimViewMode.None);
-			this.GeneratorOffline = new StatusItem("GeneratorOffline", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.PowerMap, SimViewMode.None);
-			this.Pipe = new StatusItem("Pipe", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.LiquidVentMap, SimViewMode.GasVentMap);
+			this.Unassigned = new StatusItem("Unassigned", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.Rooms, SimViewMode.None, true);
+			this.UnderConstruction = new StatusItem("UnderConstruction", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
+			this.UnderConstructionNoWorker = new StatusItem("UnderConstructionNoWorker", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
+			this.Normal = new StatusItem("Normal", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
+			this.ManualGeneratorChargingUp = new StatusItem("ManualGeneratorChargingUp", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.PowerMap, SimViewMode.None, true);
+			this.ManualGeneratorReleasingEnergy = new StatusItem("ManualGeneratorReleasingEnergy", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.PowerMap, SimViewMode.None, true);
+			this.GeneratorOffline = new StatusItem("GeneratorOffline", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.PowerMap, SimViewMode.None, true);
+			this.Pipe = new StatusItem("Pipe", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.LiquidVentMap, SimViewMode.GasVentMap, true);
 			this.Pipe.resolveStringCallback = delegate(string str, object data)
 			{
 				Conduit conduit = (Conduit)data;
-				Vent component4 = conduit.GetComponent<Vent>();
 				int num = Grid.PosToCell(conduit);
-				ConduitFlow conduitFlowManager = component4.GetConduitFlowManager();
-				ConduitFlow.ConduitContents contents = conduitFlowManager.GetContents(num);
-				string text7 = "Empty";
+				ConduitFlow flowManager = conduit.GetFlowManager();
+				ConduitFlow.ConduitContents contents = flowManager.GetContents(num);
+				string text8 = BUILDING.STATUSITEMS.PIPECONTENTS.EMPTY;
 				Element element = ElementLoader.FindElementByHash(contents.element);
 				if (element != null && !element.IsVacuum)
 				{
-					text7 = element.name;
+					text8 = element.name;
 				}
 				if (contents.mass != 0f)
 				{
-					text7 = string.Format(Strings.Get("STRINGS.BUILDING.STATUSITEMS.PIPECONTENTS.NAME"), GameUtil.GetFormattedMass(contents.mass, GameUtil.TimeSlice.None, true, "F1"), text7, GameUtil.GetFormattedTemperature(contents.temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute));
+					text8 = string.Format(BUILDING.STATUSITEMS.PIPECONTENTS.NAME, GameUtil.GetFormattedMass(contents.mass, GameUtil.TimeSlice.None, true, "{0:0.#}"), text8, GameUtil.GetFormattedTemperature(contents.temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
 				}
-				str = str.Replace("{Contents}", text7);
+				str = str.Replace("{Contents}", text8);
 				return str;
 			};
-			this.FabricatorEmpty = new StatusItem("FabricatorEmpty", "BUILDING", "status_item_fabricator_empty", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.Regions, SimViewMode.None);
-			this.Toilet = new StatusItem("Toilet", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
+			this.FabricatorEmpty = new StatusItem("FabricatorEmpty", "BUILDING", "status_item_fabricator_empty", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.Regions, SimViewMode.None, true);
+			this.Toilet = new StatusItem("Toilet", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
 			this.Toilet.resolveStringCallback = delegate(string str, object data)
 			{
 				Toilet.StatesInstance statesInstance = (Toilet.StatesInstance)data;
@@ -234,34 +299,27 @@ namespace Database
 				}
 				return str;
 			};
-			this.ToiletNeedsEmptying = new StatusItem("ToiletNeedsEmptying", "BUILDING", "status_item_toilet_needs_emptying", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None);
-			this.Unusable = new StatusItem("Unusable", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None);
-			this.NoResearchSelected = new StatusItem("NoResearchSelected", "BUILDING", "status_item_no_research_selected", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None);
+			this.ToiletNeedsEmptying = new StatusItem("ToiletNeedsEmptying", "BUILDING", "status_item_toilet_needs_emptying", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
+			this.Unusable = new StatusItem("Unusable", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
+			this.NoResearchSelected = new StatusItem("NoResearchSelected", "BUILDING", "status_item_no_research_selected", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
 			this.NoResearchSelected.AddNotification(null, null, null, 0f);
-			this.NoApplicableResearchSelected = new StatusItem("NoApplicableResearchSelected", "BUILDING", "status_item_no_research_selected", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None);
+			this.NoApplicableResearchSelected = new StatusItem("NoApplicableResearchSelected", "BUILDING", "status_item_no_research_selected", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
 			this.NoApplicableResearchSelected.AddNotification(null, null, null, 0f);
-			this.Valve = new StatusItem("Valve", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
-			this.Valve.resolveStringCallback = delegate(string str, object data)
-			{
-				Valve valve = (Valve)data;
-				str = str.Replace("{MaxFlow}", GameUtil.GetFormattedMass(valve.MaxFlow, GameUtil.TimeSlice.PerSecond, true, "F1"));
-				return str;
-			};
-			this.ValveRequest = new StatusItem("ValveRequest", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
+			this.ValveRequest = new StatusItem("ValveRequest", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
 			this.ValveRequest.resolveStringCallback = delegate(string str, object data)
 			{
-				Valve valve2 = (Valve)data;
-				str = str.Replace("{QueuedMaxFlow}", GameUtil.GetFormattedMass(valve2.QueuedMaxFlow, GameUtil.TimeSlice.PerSecond, true, "F1"));
+				Valve valve = (Valve)data;
+				str = str.Replace("{QueuedMaxFlow}", GameUtil.GetFormattedMass(valve.QueuedMaxFlow, GameUtil.TimeSlice.PerSecond, true, "{0:0.#}"));
 				return str;
 			};
-			this.EmittingLight = new StatusItem("EmittingLight", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
+			this.EmittingLight = new StatusItem("EmittingLight", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
 			this.EmittingLight.resolveStringCallback = delegate(string str, object data)
 			{
-				string text8 = GameInputMapping.FindEntry(global::Action.Overlay5).mKeyCode.ToString();
-				str = str.Replace("{LightGridOverlay}", text8);
+				string text9 = GameInputMapping.FindEntry(global::Action.Overlay5).mKeyCode.ToString();
+				str = str.Replace("{LightGridOverlay}", text9);
 				return str;
 			};
-			this.RationBoxContents = new StatusItem("RationBoxContents", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
+			this.RationBoxContents = new StatusItem("RationBoxContents", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
 			this.RationBoxContents.resolveStringCallback = delegate(string str, object data)
 			{
 				RationBox rationBox = (RationBox)data;
@@ -269,160 +327,164 @@ namespace Database
 				{
 					return str;
 				}
-				Storage component5 = rationBox.GetComponent<Storage>();
-				if (component5 == null)
+				Storage component6 = rationBox.GetComponent<Storage>();
+				if (component6 == null)
 				{
 					return str;
 				}
 				float num2 = 0f;
-				foreach (GameObject gameObject in component5)
+				foreach (GameObject gameObject in component6)
 				{
-					Edible component6 = gameObject.GetComponent<Edible>();
-					if (component6)
+					Edible component7 = gameObject.GetComponent<Edible>();
+					if (component7)
 					{
-						num2 += component6.rations * 100000f;
+						num2 += component7.Calories;
 					}
 				}
 				str = str.Replace("{Stored}", GameUtil.GetFormattedCalories(num2, GameUtil.TimeSlice.None, true));
 				return str;
 			};
-			this.EmittingElement = new StatusItem("EmittingElement", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
+			this.EmittingElement = new StatusItem("EmittingElement", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
 			this.EmittingElement.resolveStringCallback = delegate(string str, object data)
 			{
 				BuildingElementEmitter buildingElementEmitter = (BuildingElementEmitter)data;
-				string text9 = ElementLoader.FindElementByHash(buildingElementEmitter.element).tag.ProperName();
-				str = str.Replace("{ElementType}", text9);
-				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(buildingElementEmitter.AverageEmitRate, GameUtil.TimeSlice.PerSecond, true, "F1"));
+				string text10 = ElementLoader.FindElementByHash(buildingElementEmitter.element).tag.ProperName();
+				str = str.Replace("{ElementType}", text10);
+				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(buildingElementEmitter.AverageEmitRate, GameUtil.TimeSlice.PerSecond, true, "{0:0.#}"));
 				return str;
 			};
-			this.EmittingOxygenAvg = new StatusItem("EmittingOxygenAvg", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
+			this.EmittingOxygenAvg = new StatusItem("EmittingOxygenAvg", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
 			this.EmittingOxygenAvg.resolveStringCallback = delegate(string str, object data)
 			{
 				Sublimates sublimates = (Sublimates)data;
-				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(sublimates.AvgFlowRate(), GameUtil.TimeSlice.PerSecond, true, "F1"));
+				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(sublimates.AvgFlowRate(), GameUtil.TimeSlice.PerSecond, true, "{0:0.#}"));
 				return str;
 			};
-			this.EmittingGasAvg = new StatusItem("EmittingGasAvg", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
+			this.EmittingGasAvg = new StatusItem("EmittingGasAvg", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
 			this.EmittingGasAvg.resolveStringCallback = delegate(string str, object data)
 			{
 				Sublimates sublimates2 = (Sublimates)data;
 				str = str.Replace("{Element}", ElementLoader.FindElementByHash(sublimates2.info.sublimatedElement).name);
-				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(sublimates2.AvgFlowRate(), GameUtil.TimeSlice.PerSecond, true, "F1"));
+				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(sublimates2.AvgFlowRate(), GameUtil.TimeSlice.PerSecond, true, "{0:0.#}"));
 				return str;
 			};
-			this.PumpingLiquidOrGas = new StatusItem("PumpingLiquidOrGas", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.LiquidVentMap, SimViewMode.GasVentMap);
+			this.PumpingLiquidOrGas = new StatusItem("PumpingLiquidOrGas", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.LiquidVentMap, SimViewMode.GasVentMap, true);
 			this.PumpingLiquidOrGas.resolveStringCallback = delegate(string str, object data)
 			{
 				Accumulator accumulator = (Accumulator)data;
-				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(accumulator.AvgFlowRate, GameUtil.TimeSlice.PerSecond, true, "F1"));
+				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(accumulator.AvgRate, GameUtil.TimeSlice.PerSecond, true, "{0:0.#}"));
 				return str;
 			};
-			this.NoLiquidElementToPump = new StatusItem("NoLiquidElementToPump", "BUILDING", "status_item_no_liquid_to_pump", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.LiquidVentMap, SimViewMode.None);
-			this.NoGasElementToPump = new StatusItem("NoGasElementToPump", "BUILDING", "status_item_no_gas_to_pump", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.GasVentMap, SimViewMode.None);
-			this.NoFilterElementSelected = new StatusItem("NoFilterElementSelected", "BUILDING", "status_item_need_supply_out", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None);
-			this.ElementConsumer = new StatusItem("ElementConsumer", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, SimViewMode.None, SimViewMode.None);
+			this.NoLiquidElementToPump = new StatusItem("NoLiquidElementToPump", "BUILDING", "status_item_no_liquid_to_pump", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.LiquidVentMap, SimViewMode.None, true);
+			this.NoGasElementToPump = new StatusItem("NoGasElementToPump", "BUILDING", "status_item_no_gas_to_pump", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.GasVentMap, SimViewMode.None, true);
+			this.NoFilterElementSelected = new StatusItem("NoFilterElementSelected", "BUILDING", "status_item_need_supply_out", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
+			this.ElementConsumer = new StatusItem("ElementConsumer", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, SimViewMode.None, SimViewMode.None, true);
 			this.ElementConsumer.resolveStringCallback = delegate(string str, object data)
 			{
 				ElementConsumer elementConsumer = (ElementConsumer)data;
-				string text10 = ElementLoader.FindElementByHash(elementConsumer.elementToConsume).tag.ProperName();
-				str = str.Replace("{ElementTypes}", text10);
-				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(elementConsumer.AverageConsumeRate, GameUtil.TimeSlice.PerSecond, true, "F1"));
+				string text11 = ElementLoader.FindElementByHash(elementConsumer.elementToConsume).tag.ProperName();
+				str = str.Replace("{ElementTypes}", text11);
+				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(elementConsumer.AverageConsumeRate, GameUtil.TimeSlice.PerSecond, true, "{0:0.#}"));
 				return str;
 			};
-			this.ElementEmitterOutput = new StatusItem("ElementEmitterOutput", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, SimViewMode.None, SimViewMode.None);
+			this.ElementEmitterOutput = new StatusItem("ElementEmitterOutput", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, SimViewMode.None, SimViewMode.None, true);
 			this.ElementEmitterOutput.resolveStringCallback = delegate(string str, object data)
 			{
 				ElementEmitter elementEmitter = (ElementEmitter)data;
 				str = str.Replace("{ElementTypes}", elementEmitter.outputElement.Name);
-				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(elementEmitter.outputElement.outputMass / elementEmitter.emissionFrequency, GameUtil.TimeSlice.PerSecond, true, "F1"));
+				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(elementEmitter.outputElement.massGenerationRate / elementEmitter.emissionFrequency, GameUtil.TimeSlice.PerSecond, true, "{0:0.#}"));
 				return str;
 			};
-			this.ElementConverterOutput = new StatusItem("ElementConverterOutput", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, SimViewMode.None, SimViewMode.None);
-			this.ElementConverterOutput.resolveStringCallback = delegate(string str, object data)
-			{
-				ElementConverter.OutputElement outputElement = (ElementConverter.OutputElement)data;
-				str = str.Replace("{ElementTypes}", outputElement.Name);
-				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(outputElement.Rate, GameUtil.TimeSlice.PerSecond, true, "F1"));
-				return str;
-			};
-			this.ElementConverterInput = new StatusItem("ElementConverterInput", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, SimViewMode.None, SimViewMode.None);
-			this.ElementConverterInput.resolveStringCallback = delegate(string str, object data)
-			{
-				ElementConverter.ConsumedElement consumedElement = (ElementConverter.ConsumedElement)data;
-				str = str.Replace("{ElementTypes}", consumedElement.Name);
-				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(consumedElement.Rate, GameUtil.TimeSlice.PerSecond, true, "F1"));
-				return str;
-			};
-			this.AwaitingWaste = new StatusItem("AwaitingWaste", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, SimViewMode.None, SimViewMode.None);
-			this.AwaitingCompostFlip = new StatusItem("AwaitingCompostFlip", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, SimViewMode.None, SimViewMode.None);
-			this.JoulesAvailable = new StatusItem("JoulesAvailable", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.PowerMap, SimViewMode.None);
+			this.AwaitingWaste = new StatusItem("AwaitingWaste", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, SimViewMode.None, SimViewMode.None, true);
+			this.AwaitingCompostFlip = new StatusItem("AwaitingCompostFlip", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, SimViewMode.None, SimViewMode.None, true);
+			this.JoulesAvailable = new StatusItem("JoulesAvailable", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.PowerMap, SimViewMode.None, true);
 			this.JoulesAvailable.resolveStringCallback = delegate(string str, object data)
 			{
-				Generator generator = (Generator)data;
-				str = str.Replace("{JoulesAvailable}", GameUtil.GetFormattedJoules(generator.JoulesAvailable));
+				IEnergyProducer energyProducer = (IEnergyProducer)data;
+				str = str.Replace("{JoulesAvailable}", GameUtil.GetFormattedJoules(energyProducer.JoulesAvailable, "F1"));
 				return str;
 			};
-			this.Wattage = new StatusItem("Wattage", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.PowerMap, SimViewMode.None);
+			this.Wattage = new StatusItem("Wattage", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.PowerMap, SimViewMode.None, true);
 			this.Wattage.resolveStringCallback = delegate(string str, object data)
 			{
-				Generator generator2 = (Generator)data;
-				str = str.Replace("{Wattage}", GameUtil.GetFormattedWattage(generator2.WattageRating));
+				Generator generator = (Generator)data;
+				str = str.Replace("{Wattage}", GameUtil.GetFormattedWattage(generator.WattageRating, "F1"));
 				return str;
 			};
-			this.Wattson = new StatusItem("Wattson", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
+			this.Wattson = new StatusItem("Wattson", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
 			this.Wattson.resolveStringCallback = delegate(string str, object data)
 			{
 				Telepad telepad2 = (Telepad)data;
 				if (GameFlowManager.Instance != null && GameFlowManager.Instance.IsGameOver())
 				{
-					str = Strings.Get("STRINGS.BUILDING.STATUSITEMS.WATTSONGAMEOVER.NAME");
+					str = BUILDING.STATUSITEMS.WATTSONGAMEOVER.NAME;
+				}
+				else if (telepad2.GetComponent<Operational>().IsOperational)
+				{
+					str = str.Replace("{TimeRemaining}", GameUtil.GetFormattedCycles(telepad2.GetTimeRemaining(), "F1"));
 				}
 				else
 				{
-					str = str.Replace("{TimeRemaining}", Math.Max(telepad2.GetTimeRemaining(), 0f).ToString("F2"));
+					str = str.Replace("{TimeRemaining}", BUILDING.STATUSITEMS.WATTSON.UNAVAILABLE);
 				}
 				return str;
 			};
-			this.FlushToilet = new StatusItem("FlushToilet", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
-			this.FlushToiletInUse = new StatusItem("FlushToiletInUse", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
-			this.WireNominal = new StatusItem("WireNominal", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.PowerMap, SimViewMode.None);
-			this.WireConnected = new StatusItem("WireConnected", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.PowerMap, SimViewMode.None);
-			this.WireDisconnected = new StatusItem("WireDisconnected", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.PowerMap, SimViewMode.None);
-			this.Cooling = new StatusItem("Cooling", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
-			this.Working = new StatusItem("Working", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
-			this.NeedsRegion = new StatusItem("NeedsRegion", "BUILDING", "status_item_exclamation", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.Regions, SimViewMode.None);
+			this.FlushToilet = new StatusItem("FlushToilet", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
+			this.FlushToiletInUse = new StatusItem("FlushToiletInUse", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
+			this.WireNominal = new StatusItem("WireNominal", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.PowerMap, SimViewMode.None, true);
+			this.WireConnected = new StatusItem("WireConnected", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.PowerMap, SimViewMode.None, true);
+			this.WireDisconnected = new StatusItem("WireDisconnected", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.PowerMap, SimViewMode.None, true);
+			this.Overheated = new StatusItem("Overheated", "BUILDING", string.Empty, StatusItem.IconType.Exclamation, NotificationType.Bad, false, SimViewMode.None, SimViewMode.None, true);
+			this.Cooling = new StatusItem("Cooling", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
+			this.CoolingStalledColdGas = new StatusItem("CoolingStalledColdGas", "BUILDING", "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
+			this.CoolingStalledColdGas.resolveStringCallback = delegate(string str, object data)
+			{
+				AirConditioner airConditioner = (AirConditioner)data;
+				return string.Format(str, GameUtil.GetFormattedTemperature(airConditioner.lastGasTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
+			};
+			this.CoolingStalledHotEnv = new StatusItem("CoolingStalledHotEnv", "BUILDING", "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
+			this.CoolingStalledHotEnv.resolveStringCallback = delegate(string str, object data)
+			{
+				AirConditioner airConditioner2 = (AirConditioner)data;
+				return string.Format(str, GameUtil.GetFormattedTemperature(airConditioner2.lastEnvTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true), GameUtil.GetFormattedTemperature(airConditioner2.lastGasTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true), GameUtil.GetFormattedTemperature(airConditioner2.maxEnvironmentDelta, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Relative, true));
+			};
+			this.Working = new StatusItem("Working", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
+			this.NeedsRegion = new StatusItem("NeedsRegion", "BUILDING", "status_item_exclamation", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.Regions, SimViewMode.None, true);
 			this.NeedsRegion.resolveStringCallback = delegate(string str, object data)
 			{
 				RequiresRegion requiresRegion = (RequiresRegion)data;
-				KPrefabID component7 = requiresRegion.GetComponent<KPrefabID>();
-				if (component7 == null)
+				KPrefabID component8 = requiresRegion.GetComponent<KPrefabID>();
+				if (component8 == null)
 				{
 					Debug.LogError("The object provided does not have a prefabID.");
 					return string.Empty;
 				}
-				string text11 = requiresRegion.RequiredRegions.ToString();
-				str = string.Format(str, text11);
+				string text12 = requiresRegion.RequiredRegions.ToString();
+				str = string.Format(str, text12);
 				return str;
 			};
-			this.NeedsValidRegion = new StatusItem("NeedsValidRegion", "BUILDING", "status_item_exclamation", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.Regions, SimViewMode.None);
-			this.NeedSeed = new StatusItem("NeedSeed", "BUILDING", "status_item_fabricator_empty", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None);
-			this.AwaitingSeedDelivery = new StatusItem("AwaitingSeedDelivery", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
-			this.NoAvailableSeed = new StatusItem("NoAvailableSeed", "BUILDING", "status_item_resource_unavailable", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None);
-			this.Grave = new StatusItem("Grave", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
+			this.NeedsValidRegion = new StatusItem("NeedsValidRegion", "BUILDING", "status_item_exclamation", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.Regions, SimViewMode.None, true);
+			this.NeedSeed = new StatusItem("NeedSeed", "BUILDING", "status_item_fabricator_empty", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
+			this.AwaitingSeedDelivery = new StatusItem("AwaitingSeedDelivery", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
+			this.NoAvailableSeed = new StatusItem("NoAvailableSeed", "BUILDING", "status_item_resource_unavailable", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, true);
+			this.Grave = new StatusItem("Grave", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
 			this.Grave.resolveStringCallback = delegate(string str, object data)
 			{
 				Grave.StatesInstance statesInstance2 = (Grave.StatesInstance)data;
-				string text12 = str.Replace("{DeadDupe}", statesInstance2.master.graveName);
-				return text12.Replace("{Epitaph}", NAMEGEN.GRAVE.EPITAPHS.GetRandom<string>());
+				string text13 = str.Replace("{DeadDupe}", statesInstance2.master.graveName);
+				return text13.Replace("{Epitaph}", LocString.GetStrings(typeof(NAMEGEN.GRAVE.EPITAPHS)).GetRandom<string>());
 			};
-			this.GraveEmpty = new StatusItem("GraveEmpty", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
-			this.CannotCoolFurther = new StatusItem("CannotCoolFurther", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
-			this.BuildingDisabled = new StatusItem("BuildingDisabled", "BUILDING", "status_item_building_disabled", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
+			this.GraveEmpty = new StatusItem("GraveEmpty", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
+			this.CannotCoolFurther = new StatusItem("CannotCoolFurther", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
+			this.BuildingDisabled = new StatusItem("BuildingDisabled", "BUILDING", "status_item_building_disabled", StatusItem.IconType.Custom, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
+			this.Expired = new StatusItem("Expired", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
 		}
 
 		public MaterialsStatusItem MaterialsUnavailable;
 
 		public MaterialsStatusItem MaterialsUnavailableForRefill;
+
+		public StatusItem AngerDamage;
 
 		public StatusItem DigUnreachable;
 
@@ -472,6 +534,10 @@ namespace Database
 
 		public StatusItem PowerButtonOff;
 
+		public StatusItem SwitchStatusActive;
+
+		public StatusItem SwitchStatusInactive;
+
 		public StatusItem ChangeDoorControlState;
 
 		public StatusItem CurrentDoorControlState;
@@ -479,6 +545,8 @@ namespace Database
 		public StatusItem Entombed;
 
 		public WaitingForMaterialsStatusItem WaitingForMaterials;
+
+		public StatusItem WaitingForRepairMaterials;
 
 		public StatusItem MissingFoundation;
 
@@ -503,6 +571,8 @@ namespace Database
 		public StatusItem NoPowerSource;
 
 		public StatusItem PressureOk;
+
+		public StatusItem UnderPressure;
 
 		public StatusItem AssignedTo;
 
@@ -548,8 +618,6 @@ namespace Database
 
 		public StatusItem Researching;
 
-		public StatusItem Valve;
-
 		public StatusItem ValveRequest;
 
 		public StatusItem EmittingLight;
@@ -572,10 +640,6 @@ namespace Database
 
 		public StatusItem ElementEmitterOutput;
 
-		public StatusItem ElementConverterInput;
-
-		public StatusItem ElementConverterOutput;
-
 		public StatusItem AwaitingWaste;
 
 		public StatusItem AwaitingCompostFlip;
@@ -593,6 +657,10 @@ namespace Database
 		public StatusItem WireDisconnected;
 
 		public StatusItem Cooling;
+
+		public StatusItem CoolingStalledHotEnv;
+
+		public StatusItem CoolingStalledColdGas;
 
 		public StatusItem Working;
 
@@ -615,5 +683,9 @@ namespace Database
 		public StatusItem NoFilterElementSelected;
 
 		public StatusItem BuildingDisabled;
+
+		public StatusItem Overheated;
+
+		public StatusItem Expired;
 	}
 }

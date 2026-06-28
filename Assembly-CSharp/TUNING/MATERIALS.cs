@@ -17,5 +17,9 @@ namespace TUNING
 		public static string[] REFINED_MINERALS = new string[] { "BuildableProcessed" };
 
 		public static string[] FARMABLE = new string[] { "Farmable" };
+
+		public static string[] EXTRUDABLE = new string[] { "Extrudable" };
+
+		public static string[] PLUMBABLE = new string[] { "Plumbable" };
 	}
 }

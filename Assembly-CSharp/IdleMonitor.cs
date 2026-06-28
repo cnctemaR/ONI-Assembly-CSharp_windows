@@ -14,9 +14,9 @@ public class IdleMonitor : GameStateMachine<IdleMonitor, IdleMonitor.Instance>
 		return new IdleChore(smi.master);
 	}
 
-	public GameStateMachine<IdleMonitor, IdleMonitor.Instance, IStateMachineTarget>.State idle;
+	public GameStateMachine<IdleMonitor, IdleMonitor.Instance, IStateMachineTarget, object>.State idle;
 
-	public new class Instance : GameStateMachine<IdleMonitor, IdleMonitor.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<IdleMonitor, IdleMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)

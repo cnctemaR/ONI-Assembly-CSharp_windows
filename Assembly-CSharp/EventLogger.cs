@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 using KSerialization;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class EventLogger<EventInstanceType, EventType> : KMonoBehaviour, ISaveLoadableJson where EventInstanceType : EventInstanceBase where EventType : EventBase
+public class EventLogger<EventInstanceType, EventType> : KMonoBehaviour, ISaveLoadable where EventInstanceType : EventInstanceBase where EventType : EventBase
 {
 	public IEnumerator<EventInstanceType> GetEnumerator()
 	{

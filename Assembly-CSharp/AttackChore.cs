@@ -4,7 +4,7 @@ using UnityEngine;
 public class AttackChore : Chore<AttackChore.StatesInstance>
 {
 	public AttackChore(IStateMachineTarget target, GameObject enemy)
-		: base(Db.Get().ChoreTypes.Attack, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true)
+		: base(Db.Get().ChoreTypes.Attack, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true, 0)
 	{
 		this.smi = new AttackChore.StatesInstance(this);
 		this.smi.sm.attackTarget.Set(enemy, this.smi);
@@ -112,7 +112,7 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 
 	private MultitoolController.Instance multiTool;
 
-	public class StatesInstance : GameStateMachine<AttackChore.States, AttackChore.StatesInstance, AttackChore>.GameInstance
+	public class StatesInstance : GameStateMachine<AttackChore.States, AttackChore.StatesInstance, AttackChore, object>.GameInstance
 	{
 		public StatesInstance(AttackChore master)
 			: base(master)
@@ -125,12 +125,11 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.approachtarget;
-			this.root.ToggleStatusItem(Db.Get().DuplicantStatusItems.Fighting, (AttackChore.StatesInstance smi) => smi.master.gameObject).Enter(delegate(AttackChore.StatesInstance smi)
+			this.root.ToggleStatusItem(Db.Get().DuplicantStatusItems.Fighting, (AttackChore.StatesInstance smi) => smi.master.gameObject).EventHandler(GameHashes.TargetLost, delegate(AttackChore.StatesInstance smi)
 			{
-				smi.master.Subscribe(2144432245, delegate(object d)
-				{
-					smi.master.Fail("target lost");
-				});
+				smi.master.Fail("target lost");
+			}).Enter(delegate(AttackChore.StatesInstance smi)
+			{
 				smi.master.GetComponent<Weapon>().Configure(1f, 1f, AttackProperties.DamageType.Standard, AttackProperties.TargetType.Single, 1, 0f);
 			});
 			this.approachtarget.InitializeStates(this.attacker, this.attackTarget, this.attack, null, null, NavigationTactics.Range_3_ProhibitOverlap).Enter(delegate(AttackChore.StatesInstance smi)
@@ -145,13 +144,13 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 			});
 			this.attack.Target(this.attacker).Enter(delegate(AttackChore.StatesInstance smi)
 			{
-				this.attackTarget.Get(smi).Subscribe(1088554450, new EventSystem.EventHandler(smi.master.OnTargetMoved));
+				this.attackTarget.Get(smi).Subscribe(1088554450, new Action<object>(smi.master.OnTargetMoved));
 				if (this.attackTarget != null && smi.master.multiTool == null)
 				{
 					smi.master.multiTool = new MultitoolController.Instance(this.attackTarget.Get(smi).GetComponent<Workable>(), smi.master.GetComponent<Worker>(), "attack", EffectPrefabs.Instance.AttackEffect);
 					smi.master.multiTool.StartSM();
 				}
-				this.attackTarget.Get(smi).Subscribe(1969584890, new EventSystem.EventHandler(smi.master.OnTargetDestroyed));
+				this.attackTarget.Get(smi).Subscribe(1969584890, new Action<object>(smi.master.OnTargetDestroyed));
 				smi.ScheduleGoTo(0.5f, this.success);
 			}).Update(delegate(AttackChore.StatesInstance smi)
 			{
@@ -164,7 +163,7 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 				{
 					if (this.attackTarget.Get(smi) != null)
 					{
-						this.attackTarget.Get(smi).Unsubscribe(1088554450, new EventSystem.EventHandler(smi.master.OnTargetMoved));
+						this.attackTarget.Get(smi).Unsubscribe(1088554450, new Action<object>(smi.master.OnTargetMoved));
 					}
 				});
 			this.success.Enter("finishAttack", delegate(AttackChore.StatesInstance smi)
@@ -204,14 +203,14 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 			}).ReturnSuccess();
 		}
 
-		public StateMachine<AttackChore.States, AttackChore.StatesInstance, AttackChore>.TargetParameter attackTarget;
+		public StateMachine<AttackChore.States, AttackChore.StatesInstance, AttackChore, object>.TargetParameter attackTarget;
 
-		public StateMachine<AttackChore.States, AttackChore.StatesInstance, AttackChore>.TargetParameter attacker;
+		public StateMachine<AttackChore.States, AttackChore.StatesInstance, AttackChore, object>.TargetParameter attacker;
 
-		public GameStateMachine<AttackChore.States, AttackChore.StatesInstance, AttackChore>.ApproachSubState<RangedAttackable> approachtarget;
+		public GameStateMachine<AttackChore.States, AttackChore.StatesInstance, AttackChore, object>.ApproachSubState<RangedAttackable> approachtarget;
 
-		public GameStateMachine<AttackChore.States, AttackChore.StatesInstance, AttackChore>.State attack;
+		public GameStateMachine<AttackChore.States, AttackChore.StatesInstance, AttackChore, object>.State attack;
 
-		public GameStateMachine<AttackChore.States, AttackChore.StatesInstance, AttackChore>.State success;
+		public GameStateMachine<AttackChore.States, AttackChore.StatesInstance, AttackChore, object>.State success;
 	}
 }

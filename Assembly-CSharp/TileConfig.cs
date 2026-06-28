@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -8,17 +6,18 @@ public class TileConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Tile", 1, 1, "floor_basic_kanim", 400f, 3f, global::TUNING.BUILDINGS.CONSTRUCTION_MASS.TIER3, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.Tile, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, null);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Tile", 1, 1, "floor_basic_kanim", 400f, 100, 3f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.Tile, BUILDINGS.DECOR.BONUS.TIER0, null);
 		buildingDef.Floodable = false;
+		buildingDef.Overheatable = false;
 		buildingDef.Entombable = false;
 		buildingDef.Relocatable = false;
+		buildingDef.UseStructureTemperature = false;
 		buildingDef.IsFoundation = true;
 		buildingDef.TileLayer = ObjectLayer.FoundationTile;
 		buildingDef.ReplacementLayer = ObjectLayer.ReplacementTile;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "small";
 		buildingDef.BaseTimeUntilRepair = -1f;
-		buildingDef.DisableWhenInactive = true;
 		buildingDef.SceneLayer = Grid.SceneLayer.TileMain;
 		buildingDef.isKAnimTile = true;
 		buildingDef.isSolidTile = true;
@@ -31,13 +30,6 @@ public class TileConfig : IBuildingConfig
 		{
 			new CellOffset(0, -1)
 		};
-		if (buildingDef.EffectDescription == null)
-		{
-			buildingDef.EffectDescription = new List<Descriptor>();
-		}
-		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, string.Format(UI.BUILDINGEFFECTS.DUPLICANTMOVEMENTBOOST, GameUtil.GetFormattedPercent((DUPLICANTSTATS.FOUNDATION_MOVEMENT_BOOST - 1f) * 100f, GameUtil.TimeSlice.None))), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.DUPLICANTMOVEMENTBOOST, GameUtil.GetFormattedPercent((DUPLICANTSTATS.FOUNDATION_MOVEMENT_BOOST - 1f) * 100f, GameUtil.TimeSlice.None)));
-		buildingDef.EffectDescription.Add(descriptor);
 		buildingDef.DragBuild = true;
 		return buildingDef;
 	}
@@ -45,13 +37,24 @@ public class TileConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
+		GeneratedBuildings.MakeBuildableAnywhere(go);
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.doReplaceElement = true;
-		go.AddOrGet<Insulator>();
+		go.AddOrGet<TileTemperature>();
+		go.AddOrGet<KAnimGridTileVisualizer>();
+		BuildingHP buildingHP = go.AddOrGet<BuildingHP>();
+		buildingHP.destroyOnDamaged = true;
 	}
 
-	public override void DoPostConfigure(GameObject go)
+	public override void DoPostConfigureComplete(GameObject go)
 	{
 		BuildingTemplates.DoPostConfigure(go);
+		GeneratedBuildings.RemoveLoopingSounds(go);
+	}
+
+	public override void DoPostConfigureUnderConstruction(GameObject go)
+	{
+		base.DoPostConfigureUnderConstruction(go);
+		go.AddOrGet<KAnimGridTileVisualizer>();
 	}
 }

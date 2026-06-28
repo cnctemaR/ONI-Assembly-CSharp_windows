@@ -36,8 +36,6 @@ public class ScreenPrefabs : KMonoBehaviour
 
 	public ManagementMenu ManagementMenu;
 
-	public ContextMenuScreen ContextMenuScreen;
-
 	public ToolTipScreen ToolTipScreen;
 
 	public DebugPaintElementScreen DebugPaintElementScreen;
@@ -71,6 +69,8 @@ public class ScreenPrefabs : KMonoBehaviour
 	public GameObject CollapsableContentPanel;
 
 	public GameObject DescriptionLabel;
+
+	public LoadingOverlay loadingOverlay;
 
 	public LoadScreen LoadScreen;
 

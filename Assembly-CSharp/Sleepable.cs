@@ -12,7 +12,7 @@ public class Sleepable : BuildingWorkable
 	{
 		base.OnPrefabInit();
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Sleeping;
-		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_sleep_bed") };
+		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_sleep_bed_kanim") };
 	}
 
 	protected override void OnSpawn()

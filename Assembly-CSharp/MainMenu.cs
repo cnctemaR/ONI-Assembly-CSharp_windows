@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using FMOD.Studio;
 using Klei;
 using STRINGS;
 using UnityEngine;
@@ -16,12 +17,14 @@ public class MainMenu : KMonoBehaviour
 		this.Button_LoadGame.onClick += this.LoadGame;
 		this.Button_Options.onClick += this.Options;
 		this.Button_QuitGame.onClick += this.QuitGame;
+		this.Button_Translations.onClick += this.Translations;
+		this.Button_Translations.gameObject.SetActive(false);
 		if (SaveLoader.GetSaveFileCount() == 0)
 		{
-			this.Button_LoadGame.interactable = false;
+			this.Button_LoadGame.isInteractable = false;
 		}
 		LoadScreen.OnFileDeleted += this.RefreshMainMenu;
-		if ((long)PlayerPrefs.GetInt("BuildVersion") < 208689L)
+		if (PatchNotesScreen.ShouldShowScreen())
 		{
 			this.patchNotesScreen.SetActive(true);
 		}
@@ -43,7 +46,7 @@ public class MainMenu : KMonoBehaviour
 		this.RefreshResumeButton();
 		if (SaveLoader.GetSaveFileCount() == 0)
 		{
-			this.Button_LoadGame.interactable = false;
+			this.Button_LoadGame.isInteractable = false;
 		}
 	}
 
@@ -59,14 +62,21 @@ public class MainMenu : KMonoBehaviour
 
 	protected override void OnSpawn()
 	{
+		if (SteamManager.Initialized && SteamUGCService.HasInstalledLanguage())
+		{
+			SteamUGCService.SetFontForLocalization();
+		}
 		base.OnSpawn();
 		Canvas.ForceUpdateCanvases();
 	}
 
 	private void ResumeGame()
 	{
-		this.ClearFileDeletedCallback();
-		App.LoadScene("backend");
+		LoadingOverlay.Load(delegate
+		{
+			this.ClearFileDeletedCallback();
+			App.LoadScene("backend");
+		});
 	}
 
 	private void NewGame()
@@ -83,7 +93,7 @@ public class MainMenu : KMonoBehaviour
 		{
 			Output.LogWarning(new object[] { ex.ToString() });
 		}
-		Util.KInstantiateUI(ScreenPrefabs.Instance.WorldGenScreen.gameObject, base.gameObject, true);
+		global::Util.KInstantiateUI(ScreenPrefabs.Instance.WorldGenScreen.gameObject, base.gameObject, true);
 		global::UnityEngine.Object.FindObjectOfType<FrontEndBackground>().gameObject.SetActive(false);
 	}
 
@@ -91,7 +101,7 @@ public class MainMenu : KMonoBehaviour
 	{
 		if (LoadScreen.Instance == null)
 		{
-			GameObject gameObject = Util.KInstantiateUI(ScreenPrefabs.Instance.LoadScreen.gameObject, base.gameObject, true);
+			GameObject gameObject = global::Util.KInstantiateUI(ScreenPrefabs.Instance.LoadScreen.gameObject, base.gameObject, true);
 			LoadScreen component = gameObject.GetComponent<LoadScreen>();
 			component.requireConfirmation = false;
 			component.SetBackgroundActive(true);
@@ -108,11 +118,15 @@ public class MainMenu : KMonoBehaviour
 			try
 			{
 				SaveGame.Header header;
-				SaveGame.HeaderData headerData = SaveLoader.LoadHeader(latestSaveFile, out header);
-				string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(latestSaveFile);
-				if (!string.IsNullOrEmpty(headerData.baseName))
+				SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(latestSaveFile, out header);
+				if (header.buildVersion > 217311U || gameInfo.saveMajorVersion < 7)
 				{
-					this.Button_ResumeGame.GetComponentsInChildren<LocText>()[1].text = string.Format(UI.FRONTEND.MAINMENU.RESUMEBUTTON_BASENAME, headerData.baseName, headerData.numberOfCycles);
+					flag = false;
+				}
+				string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(latestSaveFile);
+				if (!string.IsNullOrEmpty(gameInfo.baseName))
+				{
+					this.Button_ResumeGame.GetComponentsInChildren<LocText>()[1].text = string.Format(UI.FRONTEND.MAINMENU.RESUMEBUTTON_BASENAME, gameInfo.baseName, gameInfo.numberOfCycles);
 				}
 				else
 				{
@@ -121,7 +135,7 @@ public class MainMenu : KMonoBehaviour
 				this.Button_ResumeGame.GetComponent<ToolTip>().toolTip = fileNameWithoutExtension;
 				SaveLoader.SetActiveSaveFilePath(latestSaveFile);
 			}
-			catch (Exception ex)
+			catch
 			{
 				flag = false;
 			}
@@ -129,9 +143,14 @@ public class MainMenu : KMonoBehaviour
 		this.Button_ResumeGame.gameObject.SetActive(flag);
 	}
 
+	private void Translations()
+	{
+		Application.OpenURL("http://forums.kleientertainment.com/topic/74765-creatingusing-translation-files/");
+	}
+
 	private void Options()
 	{
-		OptionsMenuScreen optionsMenuScreen = Util.KInstantiateUI<OptionsMenuScreen>(ScreenPrefabs.Instance.OptionsScreen.gameObject, base.gameObject, true);
+		OptionsMenuScreen optionsMenuScreen = global::Util.KInstantiateUI<OptionsMenuScreen>(ScreenPrefabs.Instance.OptionsScreen.gameObject, base.gameObject, true);
 		optionsMenuScreen.SetBackgroundActive(true);
 	}
 
@@ -161,7 +180,9 @@ public class MainMenu : KMonoBehaviour
 	{
 		if (AudioDebug.Get().musicEnabled && !MusicManager.instance.SongIsPlaying("Music_FrontEnd"))
 		{
-			MusicManager.instance.StopSong("Music_TitleTheme", true);
+			MusicManager.instance.StopSong("Music_TitleTheme", true, STOP_MODE.ALLOWFADEOUT);
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndSnapshot, STOP_MODE.ALLOWFADEOUT);
+			AudioMixer.instance.Start(AudioMixerSnapshots.Get().FrontEndWorldGenerationSnapshot);
 			MusicManager.instance.PlaySong("Music_FrontEnd", false);
 			MusicManager.instance.SetSongParameter("Music_FrontEnd", "songSection", 1f, true);
 		}
@@ -175,9 +196,13 @@ public class MainMenu : KMonoBehaviour
 
 	public KButton Button_LoadGame;
 
+	public KButton Button_Translations;
+
 	public KButton Button_Options;
 
 	public KButton Button_QuitGame;
 
 	public GameObject patchNotesScreen;
+
+	public GameObject topLeftAlphaMessage;
 }

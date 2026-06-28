@@ -3,6 +3,7 @@ using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
+[SkipSaveFileSerialization]
 public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 {
 	public KMonoBehaviour target { get; set; }
@@ -18,25 +19,21 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 		this.targetLocator.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.Misc).transform;
 		this.targetLocator.PrefabTag = new Tag("TargetLocator");
 		this.log = new LoggerFS("Navigator");
-		base.GetComponent<KPrefabID>().AddLog(this.log);
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
 		this.NavGrid = Pathfinding.Instance.GetNavGrid(this.NavGridName);
-		base.GetComponent<PathProber>().SetValidNavTypes(this.NavGrid.ValidNavTypes);
-		this.Subscribe(1623392196, new EventSystem.EventHandler(this.OnDefeated));
-		this.Subscribe(-1506500077, new EventSystem.EventHandler(this.OnDefeated));
-		this.Subscribe(493375141, new EventSystem.EventHandler(this.OnRefreshUserMenu));
-		this.Subscribe(-1503271301, new EventSystem.EventHandler(this.OnSelectObject));
+		base.GetComponent<PathProber>().SetValidNavTypes(this.NavGrid.ValidNavTypes, this.maxProbingRadius);
+		this.Subscribe(1623392196, new Action<object>(this.OnDefeated));
+		this.Subscribe(-1506500077, new Action<object>(this.OnDefeated));
+		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		this.Subscribe(-1503271301, new Action<object>(this.OnSelectObject));
 		this.maxUnderwaterTravelCost = Db.Get().Attributes.MaxUnderwaterTravelCost.Lookup(this);
 		if (this.updateProber)
 		{
-			this.proberSchedulerEntry = GameScheduler.Instance.SchedulePeriodic("UpdateProber", 0.2f, delegate(object data)
-			{
-				this.UpdateProbe();
-			}, null, null, 0f);
+			PathProberScheduler.Instance.Add(this);
 		}
 	}
 
@@ -156,7 +153,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 			{
 				this.BeginTransition(this.NavGrid.transitions[this.path.nodes[1].transitionId]);
 			}
-			else if (this.path.nodes != null)
+			else if (this.path.HasArrived())
 			{
 				this.Stop(true);
 			}
@@ -286,30 +283,37 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 		{
 			return;
 		}
+		string text;
 		if (NavPathDrawer.Instance.GetNavigator() != this)
 		{
 			UserMenu userMenu = this.userMenu;
-			string text = UI.USERMENUACTIONS.DRAWPATHS.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_navigable_regions", UI.USERMENUACTIONS.DRAWPATHS.NAME, new global::System.Action(this.OnDrawPaths), global::Action.NumActions, null, null, null, null, text));
+			text = UI.USERMENUACTIONS.DRAWPATHS.TOOLTIP;
+			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_navigable_regions", UI.USERMENUACTIONS.DRAWPATHS.NAME, new global::System.Action(this.OnDrawPaths), global::Action.NumActions, null, null, null, text, true), 0.1f);
 		}
 		else
 		{
 			UserMenu userMenu2 = this.userMenu;
-			string text = UI.USERMENUACTIONS.DRAWPATHS.TOOLTIP_OFF;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_navigable_regions", UI.USERMENUACTIONS.DRAWPATHS.NAME_OFF, new global::System.Action(this.OnDrawPaths), global::Action.NumActions, null, null, null, null, text));
+			text = UI.USERMENUACTIONS.DRAWPATHS.TOOLTIP_OFF;
+			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_navigable_regions", UI.USERMENUACTIONS.DRAWPATHS.NAME_OFF, new global::System.Action(this.OnDrawPaths), global::Action.NumActions, null, null, null, text, true), 0.1f);
 		}
+		UserMenu userMenu3 = this.userMenu;
+		text = UI.USERMENUACTIONS.FOLLOWCAM.TOOLTIP;
+		userMenu3.AddButton(new KIconButtonMenu.ButtonInfo("action_follow_cam", UI.USERMENUACTIONS.FOLLOWCAM.NAME, new global::System.Action(this.OnFollowCam), global::Action.NumActions, null, null, null, text, true), 0.3f);
+	}
+
+	private void OnFollowCam()
+	{
+		CameraController.Instance.SetFollowTarget(this.transform);
 	}
 
 	private void OnDrawPaths()
 	{
 		if (NavPathDrawer.Instance.GetNavigator() != this)
 		{
-			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Open", false));
 			NavPathDrawer.Instance.SetNavigator(this);
 		}
 		else
 		{
-			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
 			NavPathDrawer.Instance.ClearNavigator();
 		}
 	}
@@ -417,7 +421,10 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
-		this.proberSchedulerEntry.Clear();
+		if (this.updateProber)
+		{
+			PathProberScheduler.Instance.Remove(this);
+		}
 	}
 
 	public bool DebugDrawPath;
@@ -438,6 +445,8 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 	public string NavGridName;
 
 	public bool updateProber;
+
+	public int maxProbingRadius;
 
 	private AttributeInstance maxUnderwaterTravelCost;
 
@@ -460,8 +469,6 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 	private int reservedCell = NavigationReservations.InvalidReservation;
 
 	private NavTactic tactic;
-
-	private SchedulerHandle proberSchedulerEntry;
 
 	private int[] checkCellArray = new int[1];
 
@@ -500,7 +507,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 		public Func<bool> isCompleteCB;
 	}
 
-	public class StatesInstance : GameStateMachine<Navigator.States, Navigator.StatesInstance, Navigator>.GameInstance
+	public class StatesInstance : GameStateMachine<Navigator.States, Navigator.StatesInstance, Navigator, object>.GameInstance
 	{
 		public StatesInstance(Navigator master)
 			: base(master)
@@ -519,7 +526,10 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 				smi.Trigger(1027377649, GameHashes.ObjectMovementWakeUp);
 			}).ToggleSchedulePeriodic("Log travel time", 1f, delegate(Navigator.StatesInstance smi)
 			{
-				ReportManager.Instance.ReportValue(ReportManager.ReportType.TravelTime, 1f, null);
+				if (smi.GetComponent<MinionIdentity>() != null)
+				{
+					ReportManager.Instance.ReportValue(ReportManager.ReportType.TravelTime, 1f, null);
+				}
 			}).Enter(delegate(Navigator.StatesInstance smi)
 			{
 				smi.Trigger(1027377649, GameHashes.ObjectMovementSleep);
@@ -529,14 +539,14 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 			this.stopped.DoNothing();
 		}
 
-		public StateMachine<Navigator.States, Navigator.StatesInstance, Navigator>.TargetParameter moveTarget;
+		public StateMachine<Navigator.States, Navigator.StatesInstance, Navigator, object>.TargetParameter moveTarget;
 
-		public GameStateMachine<Navigator.States, Navigator.StatesInstance, Navigator>.State moving;
+		public GameStateMachine<Navigator.States, Navigator.StatesInstance, Navigator, object>.State moving;
 
-		public GameStateMachine<Navigator.States, Navigator.StatesInstance, Navigator>.State arrived;
+		public GameStateMachine<Navigator.States, Navigator.StatesInstance, Navigator, object>.State arrived;
 
-		public GameStateMachine<Navigator.States, Navigator.StatesInstance, Navigator>.State failed;
+		public GameStateMachine<Navigator.States, Navigator.StatesInstance, Navigator, object>.State failed;
 
-		public GameStateMachine<Navigator.States, Navigator.StatesInstance, Navigator>.State stopped;
+		public GameStateMachine<Navigator.States, Navigator.StatesInstance, Navigator, object>.State stopped;
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 public class LocString
@@ -34,17 +35,32 @@ public class LocString
 		text = text + type.Name + ".";
 		foreach (FieldInfo fieldInfo in fields)
 		{
-			string text2 = text + fieldInfo.Name;
-			LocString locString = (LocString)fieldInfo.GetValue(null);
-			locString.SetKey(text2);
-			string text3 = locString.text;
-			Strings.Add(new string[] { text2, text3 });
-			fieldInfo.SetValue(null, locString);
+			if (fieldInfo.FieldType == typeof(LocString))
+			{
+				string text2 = text + fieldInfo.Name;
+				LocString locString = (LocString)fieldInfo.GetValue(null);
+				locString.SetKey(text2);
+				string text3 = locString.text;
+				Strings.Add(new string[] { text2, text3 });
+				fieldInfo.SetValue(null, locString);
+			}
 		}
 		foreach (Type type2 in type.GetNestedTypes(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy))
 		{
 			LocString.CreateLocStringKeys(type2, text);
 		}
+	}
+
+	public static string[] GetStrings(Type type)
+	{
+		List<string> list = new List<string>();
+		FieldInfo[] fields = type.GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+		foreach (FieldInfo fieldInfo in fields)
+		{
+			LocString locString = (LocString)fieldInfo.GetValue(null);
+			list.Add(locString.text);
+		}
+		return list.ToArray();
 	}
 
 	public static implicit operator LocString(string text)

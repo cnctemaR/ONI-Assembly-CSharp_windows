@@ -2,10 +2,11 @@
 using System.IO;
 using Klei.AI;
 using KSerialization;
+using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class MinionModifiers : Modifiers, ISaveLoadableJson
+public class MinionModifiers : Modifiers, ISaveLoadable
 {
 	protected override void OnPrefabInit()
 	{
@@ -30,11 +31,11 @@ public class MinionModifiers : Modifiers, ISaveLoadableJson
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.Subscribe(-1901442097, new EventSystem.EventHandler(this.OnEffectAdded));
-		this.Subscribe(1623392196, new EventSystem.EventHandler(this.OnDeath));
-		Worker component = base.GetComponent<Worker>();
-		Worker worker = component;
-		worker.OnWorkCompleteCallback = (global::System.Action)Delegate.Combine(worker.OnWorkCompleteCallback, new global::System.Action(this.OnWorkComplete));
+		this.Subscribe(-1901442097, new Action<object>(this.OnEffectAdded));
+		this.Subscribe(1623392196, new Action<object>(this.OnDeath));
+		this.Subscribe(-1506069671, new Action<object>(this.OnAttachFollowCam));
+		this.Subscribe(-485480405, new Action<object>(this.OnDetachFollowCam));
+		this.Subscribe(-1988963660, new Action<object>(this.OnBeginChore));
 		AmountInstance amountInstance = this.GetAmounts().Get("Stress");
 		amountInstance.OnDelta = (Action<float>)Delegate.Combine(amountInstance.OnDelta, new Action<float>(delegate(float delta)
 		{
@@ -48,6 +49,7 @@ public class MinionModifiers : Modifiers, ISaveLoadableJson
 		position.z = Grid.GetLayerZ(Grid.SceneLayer.Move);
 		this.transform.SetPosition(position);
 		base.gameObject.AddComponent<DecorNeed>();
+		base.gameObject.AddComponent<FoodQualityNeed>();
 		base.gameObject.layer = LayerMask.NameToLayer("Default");
 	}
 
@@ -58,14 +60,6 @@ public class MinionModifiers : Modifiers, ISaveLoadableJson
 			return;
 		}
 		this.nextNeedDay = GameClock.Instance.GetDay() + 3;
-	}
-
-	private void OnWorkComplete()
-	{
-		if (base.GetComponent<Worker>().GetWorkable() as Breakable != null)
-		{
-			base.GetComponent<Effects>().Remove("MentalBreak");
-		}
 	}
 
 	private void OnDeath(object data)
@@ -94,7 +88,16 @@ public class MinionModifiers : Modifiers, ISaveLoadableJson
 	{
 		if (delta < 0f)
 		{
-			ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, delta, "UsedCalories " + base.gameObject.name);
+			ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, delta, string.Format(UI.ENDOFDAYREPORT.NOTES.ATE, base.gameObject.name));
+		}
+	}
+
+	private void OnBeginChore(object data)
+	{
+		Storage component = base.GetComponent<Storage>();
+		if (component != null)
+		{
+			component.DropAll();
 		}
 	}
 
@@ -108,10 +111,20 @@ public class MinionModifiers : Modifiers, ISaveLoadableJson
 		base.OnDeserialize(reader);
 	}
 
+	private void OnAttachFollowCam(object data)
+	{
+		base.GetComponent<Effects>().Add("CenterOfAttention", false);
+	}
+
+	private void OnDetachFollowCam(object data)
+	{
+		base.GetComponent<Effects>().Remove("CenterOfAttention");
+	}
+
 	[MyCmpAdd]
 	private ChoreConsumer choreConsumer;
 
-	[ReadOnly]
 	[Serialize]
+	[ReadOnly]
 	public int nextNeedDay;
 }

@@ -21,9 +21,11 @@ public class GridSettings : KMonoBehaviour
 		Grid.LightCount = new byte[Grid.CellCount];
 		Grid.Damage = new float[Grid.CellCount];
 		Grid.HasDoor = new bool[Grid.CellCount];
+		Grid.HasAccessDoor = new bool[Grid.CellCount];
 		Grid.HasLadder = new bool[Grid.CellCount];
 		Grid.Decor = new int[Grid.CellCount];
-		Grid.ObjectLayers = new Dictionary<int, GameObject>[25];
+		Grid.IsTileUnderConstruction = new bool[Grid.CellCount];
+		Grid.ObjectLayers = new Dictionary<int, GameObject>[23];
 		for (int i = 0; i < Grid.ObjectLayers.Length; i++)
 		{
 			Grid.ObjectLayers[i] = new Dictionary<int, GameObject>();

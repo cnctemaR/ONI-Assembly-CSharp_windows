@@ -62,7 +62,7 @@ public class Electrolyzer : StateMachineComponent<Electrolyzer.StatesInstance>
 
 	private MeterController meter;
 
-	public class StatesInstance : GameStateMachine<Electrolyzer.States, Electrolyzer.StatesInstance, Electrolyzer>.GameInstance
+	public class StatesInstance : GameStateMachine<Electrolyzer.States, Electrolyzer.StatesInstance, Electrolyzer, object>.GameInstance
 	{
 		public StatesInstance(Electrolyzer smi)
 			: base(smi)
@@ -80,23 +80,23 @@ public class Electrolyzer : StateMachineComponent<Electrolyzer.StatesInstance>
 			this.waiting.Enter("Waiting", delegate(Electrolyzer.StatesInstance smi)
 			{
 				smi.master.operational.SetActive(false, false);
-			}).EventTransition(GameHashes.OnStorageChange, this.converting, (Electrolyzer.StatesInstance smi) => smi.master.GetComponent<ElementConverter>().HasEnoughMass());
+			}).EventTransition(GameHashes.OnStorageChange, this.converting, (Electrolyzer.StatesInstance smi) => smi.master.GetComponent<ElementConverter>().HasEnoughMassToStartConverting());
 			this.converting.Enter("Ready", delegate(Electrolyzer.StatesInstance smi)
 			{
 				smi.master.operational.SetActive(true, false);
-			}).Transition(this.waiting, (Electrolyzer.StatesInstance smi) => !smi.master.GetComponent<ElementConverter>().HasEnoughMass()).Transition(this.overpressure, (Electrolyzer.StatesInstance smi) => !smi.master.RoomForPressure);
+			}).Transition(this.waiting, (Electrolyzer.StatesInstance smi) => !smi.master.GetComponent<ElementConverter>().CanConvertAtAll()).Transition(this.overpressure, (Electrolyzer.StatesInstance smi) => !smi.master.RoomForPressure);
 			this.overpressure.Enter("OverPressure", delegate(Electrolyzer.StatesInstance smi)
 			{
 				smi.master.operational.SetActive(false, false);
 			}).ToggleStatusItem(Db.Get().BuildingStatusItems.PressureOk, null).Transition(this.converting, (Electrolyzer.StatesInstance smi) => smi.master.RoomForPressure);
 		}
 
-		public GameStateMachine<Electrolyzer.States, Electrolyzer.StatesInstance, Electrolyzer>.State disabled;
+		public GameStateMachine<Electrolyzer.States, Electrolyzer.StatesInstance, Electrolyzer, object>.State disabled;
 
-		public GameStateMachine<Electrolyzer.States, Electrolyzer.StatesInstance, Electrolyzer>.State waiting;
+		public GameStateMachine<Electrolyzer.States, Electrolyzer.StatesInstance, Electrolyzer, object>.State waiting;
 
-		public GameStateMachine<Electrolyzer.States, Electrolyzer.StatesInstance, Electrolyzer>.State converting;
+		public GameStateMachine<Electrolyzer.States, Electrolyzer.StatesInstance, Electrolyzer, object>.State converting;
 
-		public GameStateMachine<Electrolyzer.States, Electrolyzer.StatesInstance, Electrolyzer>.State overpressure;
+		public GameStateMachine<Electrolyzer.States, Electrolyzer.StatesInstance, Electrolyzer, object>.State overpressure;
 	}
 }

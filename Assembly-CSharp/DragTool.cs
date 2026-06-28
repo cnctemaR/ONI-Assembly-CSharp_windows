@@ -14,6 +14,7 @@ public class DragTool : InterfaceTool
 
 	private void OnEnable()
 	{
+		this.hoverScreenUpdate.tickInterval = 0.5f;
 		this.hoverScreenUpdate.Prime();
 	}
 
@@ -52,7 +53,7 @@ public class DragTool : InterfaceTool
 
 	protected override void OnPrefabInit()
 	{
-		Game.Instance.Subscribe(1634669191, new EventSystem.EventHandler(this.OnTutorialOpened));
+		Game.Instance.Subscribe(1634669191, new Action<object>(this.OnTutorialOpened));
 		DragTool.defaultLayerMask = 1 | LayerMask.GetMask(new string[] { "World", "Pickupable", "Place", "PlaceWithDepth", "BlockSelection", "Construction" });
 		DragTool.layerMask = DragTool.defaultLayerMask;
 		base.OnPrefabInit();
@@ -126,6 +127,20 @@ public class DragTool : InterfaceTool
 			return;
 		}
 		this.dragging = false;
+		DragTool.DragAxis dragAxis = this.dragAxis;
+		if (dragAxis != DragTool.DragAxis.Horizontal)
+		{
+			if (dragAxis == DragTool.DragAxis.Vertical)
+			{
+				cursor_pos.x = this.downPos.x;
+				this.dragAxis = DragTool.DragAxis.None;
+			}
+		}
+		else
+		{
+			cursor_pos.y = this.downPos.y;
+			this.dragAxis = DragTool.DragAxis.None;
+		}
 		DragTool.Mode mode = this.GetMode();
 		if (mode == DragTool.Mode.Box && this.areaVisualizer != null)
 		{
@@ -285,12 +300,22 @@ public class DragTool : InterfaceTool
 		}
 	}
 
+	public override void OnKeyDown(KButtonEvent e)
+	{
+		if (e.TryConsume(global::Action.DragStraight))
+		{
+			this.dragAxis = DragTool.DragAxis.None;
+		}
+		base.OnKeyDown(e);
+	}
+
 	public override void OnKeyUp(KButtonEvent e)
 	{
 		if (e.TryConsume(global::Action.DragStraight))
 		{
 			this.dragAxis = DragTool.DragAxis.Invalid;
 		}
+		base.OnKeyUp(e);
 	}
 
 	protected void SetMode(DragTool.Mode newMode)
@@ -368,7 +393,7 @@ public class DragTool : InterfaceTool
 			}
 			if (this.hoverText != null)
 			{
-				this.hoverText.UpdateHoverElements(null);
+				this.hoverText.UpdateHoverElements(SelectTool.Instance.GetSelectablesUnderCursor(false));
 			}
 			else
 			{

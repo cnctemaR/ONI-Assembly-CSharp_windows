@@ -57,6 +57,34 @@ namespace FMODUnity
 			return attributes_3D;
 		}
 
+		public static ATTRIBUTES_3D To3DAttributes(Transform transform, Rigidbody2D rigidbody)
+		{
+			ATTRIBUTES_3D attributes_3D = transform.To3DAttributes();
+			if (rigidbody)
+			{
+				VECTOR vector;
+				vector.x = rigidbody.velocity.x;
+				vector.y = rigidbody.velocity.y;
+				vector.z = 0f;
+				attributes_3D.velocity = vector;
+			}
+			return attributes_3D;
+		}
+
+		public static ATTRIBUTES_3D To3DAttributes(GameObject go, Rigidbody2D rigidbody)
+		{
+			ATTRIBUTES_3D attributes_3D = go.transform.To3DAttributes();
+			if (rigidbody)
+			{
+				VECTOR vector;
+				vector.x = rigidbody.velocity.x;
+				vector.y = rigidbody.velocity.y;
+				vector.z = 0f;
+				attributes_3D.velocity = vector;
+			}
+			return attributes_3D;
+		}
+
 		internal static FMODPlatform GetCurrentPlatform()
 		{
 			return FMODPlatform.Windows;

@@ -24,18 +24,11 @@ public class CookingStation : Fabricator
 		return false;
 	}
 
-	protected override void CompleteOrder(Fabricator.UserOrder completed_order)
+	protected override GameObject CompleteOrder(Fabricator.UserOrder completed_order)
 	{
-		base.CompleteOrder(completed_order);
-		int num = Grid.PosToCell(this);
-		for (int i = 0; i < 1; i++)
-		{
-			int num2 = Grid.OffsetCell(num, new CellOffset(0, i));
-			GameObject gameObject = completed_order.recipe.Craft(this.inStorage, completed_order.orderTags);
-			gameObject.transform.SetPosition(Grid.CellToPosCCC(num2, Grid.SceneLayer.Move));
-			gameObject.SetActive(true);
-			gameObject.GetComponent<KMonoBehaviour>().Trigger(748399584, null);
-		}
+		GameObject gameObject = base.CompleteOrder(completed_order);
+		gameObject.SetActive(true);
 		base.GetComponent<Operational>().SetActive(false, false);
+		return gameObject;
 	}
 }

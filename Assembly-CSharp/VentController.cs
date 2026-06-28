@@ -11,17 +11,17 @@ public class VentController : GameStateMachine<VentController, VentController.In
 		this.working_pst.PlayAnim("working_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.off);
 	}
 
-	public GameStateMachine<VentController, VentController.Instance, IStateMachineTarget>.State off;
+	public GameStateMachine<VentController, VentController.Instance, IStateMachineTarget, object>.State off;
 
-	public GameStateMachine<VentController, VentController.Instance, IStateMachineTarget>.State working_pre;
+	public GameStateMachine<VentController, VentController.Instance, IStateMachineTarget, object>.State working_pre;
 
-	public GameStateMachine<VentController, VentController.Instance, IStateMachineTarget>.State working_loop;
+	public GameStateMachine<VentController, VentController.Instance, IStateMachineTarget, object>.State working_loop;
 
-	public GameStateMachine<VentController, VentController.Instance, IStateMachineTarget>.State working_pst;
+	public GameStateMachine<VentController, VentController.Instance, IStateMachineTarget, object>.State working_pst;
 
-	public StateMachine<VentController, VentController.Instance, IStateMachineTarget>.BoolParameter isAnimating;
+	public StateMachine<VentController, VentController.Instance, IStateMachineTarget, object>.BoolParameter isAnimating;
 
-	public new class Instance : GameStateMachine<VentController, VentController.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<VentController, VentController.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)

@@ -1,20 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using KSerialization;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
-[SerializationConfig(MemberSerialization.OptIn)]
-public class Building : KMonoBehaviour, ISaveLoadableJson, IEffectDescriptor
+public class Building : KMonoBehaviour, IEffectDescriptor
 {
-	public int DescriptionOrder { get; set; }
-
 	public Orientation Orientation
 	{
 		get
 		{
-			return (!(this.rotatable != null)) ? Orientation.None : this.rotatable.GetOrientation();
+			return (!(this.rotatable != null)) ? Orientation.Neutral : this.rotatable.GetOrientation();
 		}
 	}
 
@@ -116,6 +113,7 @@ public class Building : KMonoBehaviour, ISaveLoadableJson, IEffectDescriptor
 		if (component != null)
 		{
 			component.SetName(this.Def.Name);
+			component.SetStatusIndicatorOffset(new Vector3(0f, -0.35f, 0f));
 		}
 	}
 
@@ -150,7 +148,7 @@ public class Building : KMonoBehaviour, ISaveLoadableJson, IEffectDescriptor
 					reason = "Foundation is not too near edge of world";
 					return false;
 				}
-				if (Grid.Objects[num, 22] != null)
+				if (Grid.Objects[num, 5] != null)
 				{
 					reason = "Location occupied by plant";
 					return false;
@@ -207,7 +205,7 @@ public class Building : KMonoBehaviour, ISaveLoadableJson, IEffectDescriptor
 					flag = false;
 					break;
 				}
-				if (Grid.Objects[num4, 3] != null)
+				if (Grid.Objects[num4, 1] != null)
 				{
 					flag = false;
 					break;
@@ -239,6 +237,12 @@ public class Building : KMonoBehaviour, ISaveLoadableJson, IEffectDescriptor
 	public int GetPowerInputCell()
 	{
 		CellOffset rotatedOffset = this.GetRotatedOffset(this.Def.PowerInputOffset);
+		return Grid.OffsetCell(this.GetBottomLeftCell(), rotatedOffset);
+	}
+
+	public int GetPowerOutputCell()
+	{
+		CellOffset rotatedOffset = this.GetRotatedOffset(this.Def.PowerOutputOffset);
 		return Grid.OffsetCell(this.GetBottomLeftCell(), rotatedOffset);
 	}
 
@@ -289,62 +293,90 @@ public class Building : KMonoBehaviour, ISaveLoadableJson, IEffectDescriptor
 		this.Def.RunOnArea(Grid.PosToCell(this), this.Orientation, callback);
 	}
 
-	public List<Descriptor> GetRequirementDescriptions(BuildingDef def)
+	public List<Descriptor> RequirementDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		BuildingComplete component = base.GetComponent<BuildingComplete>();
-		if (def.RequiresPower)
+		if (def.RequiresPowerInput)
 		{
-			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, string.Format(UI.BUILDINGEFFECTS.REQUIRESPOWER, GameUtil.GetFormattedWattage(base.GetComponent<EnergyConsumer>().WattsNeededWhenActive))), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESPOWER, GameUtil.GetFormattedWattage(base.GetComponent<EnergyConsumer>().WattsNeededWhenActive)));
-			list.Add(descriptor);
+			float wattsNeededWhenActive = base.GetComponent<IEnergyConsumer>().WattsNeededWhenActive;
+			if (wattsNeededWhenActive > 0f)
+			{
+				string formattedWattage = GameUtil.GetFormattedWattage(wattsNeededWhenActive, string.Empty);
+				Descriptor descriptor = new Descriptor(string.Format(UI.BUILDINGEFFECTS.REQUIRESPOWER, formattedWattage), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESPOWER, formattedWattage), Descriptor.DescriptorType.Requirement, false);
+				list.Add(descriptor);
+			}
 		}
 		if (def.InputConduitType == ConduitType.Liquid)
 		{
 			Descriptor descriptor2 = default(Descriptor);
-			descriptor2.SetupDescriptor(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, UI.BUILDINGEFFECTS.REQUIRESLIQUIDINPUT), UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESLIQUIDINPUT);
+			descriptor2.SetupDescriptor(UI.BUILDINGEFFECTS.REQUIRESLIQUIDINPUT, UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESLIQUIDINPUT, Descriptor.DescriptorType.Requirement);
 			list.Add(descriptor2);
 		}
-		if (def.InputConduitType == ConduitType.Gas)
+		else if (def.InputConduitType == ConduitType.Gas)
 		{
 			Descriptor descriptor3 = default(Descriptor);
-			descriptor3.SetupDescriptor(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, UI.BUILDINGEFFECTS.REQUIRESGASINPUT), UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESGASINPUT);
+			descriptor3.SetupDescriptor(UI.BUILDINGEFFECTS.REQUIRESGASINPUT, UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESGASINPUT, Descriptor.DescriptorType.Requirement);
 			list.Add(descriptor3);
 		}
 		if (def.OutputConduitType == ConduitType.Liquid)
 		{
 			Descriptor descriptor4 = default(Descriptor);
-			descriptor4.SetupDescriptor(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, UI.BUILDINGEFFECTS.REQUIRESLIQUIDOUTPUT), UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESLIQUIDOUTPUT);
+			descriptor4.SetupDescriptor(UI.BUILDINGEFFECTS.REQUIRESLIQUIDOUTPUT, UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESLIQUIDOUTPUT, Descriptor.DescriptorType.Requirement);
 			list.Add(descriptor4);
 		}
-		if (def.OutputConduitType == ConduitType.Gas)
+		else if (def.OutputConduitType == ConduitType.Gas)
 		{
 			Descriptor descriptor5 = default(Descriptor);
-			descriptor5.SetupDescriptor(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, UI.BUILDINGEFFECTS.REQUIRESGASOUTPUT), UI.BUILDINGEFFECTS.REQUIRESGASOUTPUT);
+			descriptor5.SetupDescriptor(UI.BUILDINGEFFECTS.REQUIRESGASOUTPUT, UI.BUILDINGEFFECTS.REQUIRESGASOUTPUT, Descriptor.DescriptorType.Requirement);
 			list.Add(descriptor5);
 		}
 		if (component.isManuallyOperated)
 		{
 			Descriptor descriptor6 = default(Descriptor);
-			descriptor6.SetupDescriptor(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, UI.BUILDINGEFFECTS.REQUIRESMANUALOPERATION), UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESMANUALOPERATION);
+			descriptor6.SetupDescriptor(UI.BUILDINGEFFECTS.REQUIRESMANUALOPERATION, UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESMANUALOPERATION, Descriptor.DescriptorType.Requirement);
 			list.Add(descriptor6);
 		}
 		return list;
 	}
 
-	public List<Descriptor> GetEffectDescriptions(BuildingDef def)
+	public List<Descriptor> EffectDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
+		if (def.EffectDescription != null)
+		{
+			list.AddRange(def.EffectDescription);
+		}
 		if (def.GeneratorWattageRating > 0f && base.GetComponent<Battery>() == null)
 		{
 			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, string.Format(UI.BUILDINGEFFECTS.ENERGYGENERATED, GameUtil.GetFormattedWattage(def.GeneratorWattageRating))), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ENERGYGENERATED, GameUtil.GetFormattedWattage(def.GeneratorWattageRating)));
+			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ENERGYGENERATED, GameUtil.GetFormattedWattage(def.GeneratorWattageRating, string.Empty)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ENERGYGENERATED, GameUtil.GetFormattedWattage(def.GeneratorWattageRating, string.Empty)), Descriptor.DescriptorType.Effect);
 			list.Add(descriptor);
 		}
-		if (def.TemperatureModificationWhenActive > 0f)
+		if (def.ExhaustKilowattsWhenActive > 0f || def.OperatingKilowatts > 0f)
 		{
 			Descriptor descriptor2 = default(Descriptor);
-			descriptor2.SetupDescriptor(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, string.Format(UI.BUILDINGEFFECTS.HEATGENERATED, GameUtil.GetFormattedWattage(def.TemperatureModificationWhenActive))), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.HEATGENERATED, GameUtil.GetFormattedWattage(def.TemperatureModificationWhenActive)));
+			descriptor2.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.HEATGENERATED, GameUtil.GetFormattedWattage(5f * (def.ExhaustKilowattsWhenActive + def.OperatingKilowatts), string.Empty)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.HEATGENERATED, GameUtil.GetFormattedWattage(5f * (def.ExhaustKilowattsWhenActive + def.OperatingKilowatts), string.Empty)), Descriptor.DescriptorType.Effect);
+			list.Add(descriptor2);
+		}
+		if (def.IsFoundation)
+		{
+			Descriptor descriptor3 = default(Descriptor);
+			descriptor3.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.DUPLICANTMOVEMENTBOOST, GameUtil.GetFormattedPercent((DUPLICANTSTATS.FOUNDATION_MOVEMENT_BOOST - 1f) * 100f, GameUtil.TimeSlice.None)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.DUPLICANTMOVEMENTBOOST, GameUtil.GetFormattedPercent((DUPLICANTSTATS.FOUNDATION_MOVEMENT_BOOST - 1f) * 100f, GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Effect);
+			list.Add(descriptor3);
+		}
+		return list;
+	}
+
+	public List<Descriptor> GetDescriptors(BuildingDef def)
+	{
+		List<Descriptor> list = new List<Descriptor>();
+		foreach (Descriptor descriptor in this.RequirementDescriptors(def))
+		{
+			list.Add(descriptor);
+		}
+		foreach (Descriptor descriptor2 in this.EffectDescriptors(def))
+		{
 			list.Add(descriptor2);
 		}
 		return list;

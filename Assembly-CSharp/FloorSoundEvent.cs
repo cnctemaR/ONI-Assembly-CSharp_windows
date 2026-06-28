@@ -13,80 +13,77 @@ public class FloorSoundEvent : AnimEvent
 
 	private bool IsLowPrioritySound(string sound)
 	{
-		if (sound != null && Camera.main.orthographicSize > AudioMixer.LOW_PRIORITY_CUTOFF_DISTANCE && !AudioMixer.instance.activeNIS)
+		using (new KProfiler.Region("IsLowPrioritySound", null))
 		{
-			string text = sound.ToLower();
-			if (text.Contains("lowpriority"))
+			if (sound != null && Camera.main.orthographicSize > AudioMixer.LOW_PRIORITY_CUTOFF_DISTANCE && !AudioMixer.instance.activeNIS && GlobalAssets.IsLowPriority(sound))
 			{
-				KFMODDebugger.instance.Log("Low priority sound culled:" + sound);
 				return true;
 			}
 		}
 		return false;
 	}
 
-	public override void OnPlay(IAnimBehaviour behaviour)
+	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
 	{
-		if (CameraController.Instance == null || base.IsFilteredOut(behaviour))
+		if (this.ShouldPlaySound(behaviour))
 		{
-			return;
+			this.PlaySound(behaviour);
 		}
-		Vector3 position = behaviour.GetComponent<Transform>().position;
-		int num = Grid.PosToCell(position);
+	}
+
+	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
+	{
+		Vector3 vector = behaviour.GetComponent<Transform>().position;
+		int num = Grid.PosToCell(vector);
 		int num2 = Grid.CellBelow(num);
-		Navigator component = behaviour.GetComponent<Navigator>();
-		bool flag = component != null && component.CurrentNavType == NavType.Ladder;
-		string audioCategory = FloorSoundEvent.GetAudioCategory(num2, flag);
+		string audioCategory = FloorSoundEvent.GetAudioCategory(num2);
 		string text = audioCategory + "_" + this.Name;
 		string text2 = GlobalAssets.GetSound(text, true);
 		if (text2 == null)
 		{
 			text = "Rock_" + this.Name;
-			text2 = GlobalAssets.GetSound(text, true);
+			text2 = GlobalAssets.GetSound("Rock_" + this.Name, true);
 			if (text2 == null)
 			{
 				text = this.Name;
 				text2 = GlobalAssets.GetSound(text, true);
 			}
 		}
-		if (!CameraController.Instance.IsAudibleSound(position, text2) || this.IsLowPrioritySound(text2))
+		if (this.IsLowPrioritySound(text2))
 		{
 			return;
 		}
-		string text3 = null;
-		string text4 = "Liquid_footstep";
+		vector = CameraController.Instance.GetVerticallyScaledPosition(vector);
 		bool isLiquid = Grid.Element[num].IsLiquid;
 		float num3 = 0f;
-		if (isLiquid && (this.Name.Contains("footstep") || this.Name.Contains("jump") || this.Name.Contains("land") || this.Name.Contains("bodyfall")))
+		if (isLiquid)
 		{
 			num3 = SoundUtil.GetLiquidDepth(num);
-			text3 = GlobalAssets.GetSound(text4, true);
-			if (text3 != null && !SpeedControlScreen.Instance.IsPaused)
+			string sound = GlobalAssets.GetSound("Liquid_footstep", true);
+			if (sound != null)
 			{
-				FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(text3, position);
-				eventInstance.setParameterValue("liquidDepth", num3);
+				FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(sound, vector);
+				if (num3 > 0f)
+				{
+					eventInstance.setParameterValue("liquidDepth", num3);
+				}
 				SoundEvent.EndOneShot(eventInstance);
 			}
 		}
-		if (text2 != null && !SpeedControlScreen.Instance.IsPaused)
+		if (text2 != null)
 		{
-			FMOD.Studio.EventInstance eventInstance2 = SoundEvent.BeginOneShot(text2, position);
+			FMOD.Studio.EventInstance eventInstance2 = SoundEvent.BeginOneShot(text2, vector);
 			if (eventInstance2 != null)
 			{
-				eventInstance2.setParameterValue("liquidDepth", num3);
-				if (behaviour.currentAnimFile.Contains("anim_loco_walk"))
+				if (num3 > 0f)
+				{
+					eventInstance2.setParameterValue("liquidDepth", num3);
+				}
+				if (behaviour.currentAnimFile != null && behaviour.currentAnimFile.Contains("anim_loco_walk"))
 				{
 					eventInstance2.setVolume(FloorSoundEvent.IDLE_WALKING_VOLUME_REDUCTION);
 				}
 				SoundEvent.EndOneShot(eventInstance2);
-			}
-		}
-		if (AudioDebug.Get().debugFloorSounds)
-		{
-			this.PrintSoundDebug(behaviour.currentAnim, text2, text, position);
-			if (isLiquid)
-			{
-				this.PrintSoundDebug(behaviour.currentAnim, text3, text4, position);
 			}
 		}
 	}
@@ -103,12 +100,8 @@ public class FloorSoundEvent : AnimEvent
 		}
 	}
 
-	private static string GetAudioCategory(int cell, bool is_on_ladder)
+	private static string GetAudioCategory(int cell)
 	{
-		if (is_on_ladder)
-		{
-			return "Ladder";
-		}
 		if (!Grid.IsValidCell(cell))
 		{
 			return "Rock";

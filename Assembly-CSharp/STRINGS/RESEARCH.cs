@@ -26,9 +26,9 @@ namespace STRINGS
 
 			public class BETA
 			{
-				public static LocString NAME = "Intermediary Research";
+				public static LocString NAME = "Intermediate Research";
 
-				public static LocString DESC = "<style=\"research\">Intermediary Research</style> is required to unlock intermediate technologies.\nIt can be conducted at an <style=\"research\">Super Computer</style>.";
+				public static LocString DESC = "<style=\"research\">Intermediate Research</style> is required to unlock improved technologies.\nIt can be conducted at a <style=\"research\">Super Computer</style>.";
 
 				public static LocString RECIPEDESC = "Unlocks improved technologies.";
 			}
@@ -36,7 +36,7 @@ namespace STRINGS
 
 		public class FARMINGTECH
 		{
-			public static LocString NAME = "Farming Tech";
+			public static LocString NAME = "Farming";
 
 			public static LocString DESC = "Produce <style=\"food\">Food</style> by mastering the peaceful art of agriculture.";
 		}
@@ -85,7 +85,7 @@ namespace STRINGS
 
 		public class SANITATIONSCIENCES
 		{
-			public static LocString NAME = "Sanitation Sciences";
+			public static LocString NAME = "Sanitation";
 
 			public static LocString DESC = "Make daily ablutions less of a hassle.";
 		}
@@ -106,7 +106,7 @@ namespace STRINGS
 
 		public class ADVANCEDFILTRATION
 		{
-			public static LocString NAME = "Advanced Filtration";
+			public static LocString NAME = "Filtration";
 
 			public static LocString DESC = "Cutting-edge technologies to get the most out of your recycled materials.";
 		}
@@ -118,6 +118,13 @@ namespace STRINGS
 			public static LocString DESC = "Gain better control over your circuits to prevent wasted <style=\"power\">Power</style>.";
 		}
 
+		public class PYROTECHNICS
+		{
+			public static LocString NAME = "Pyrotechnics";
+
+			public static LocString DESC = "Unlock <style=\"heat\">Temperature</style> technologies that make heating resources a cup of tea.";
+		}
+
 		public class COMBUSTION
 		{
 			public static LocString NAME = "Combustion";
@@ -125,11 +132,25 @@ namespace STRINGS
 			public static LocString DESC = "Crude fuel-powered generators for automatic <style=\"power\">Power</style> production.";
 		}
 
+		public class IMPROVEDCOMBUSTION
+		{
+			public static LocString NAME = "Performance Combustion";
+
+			public static LocString DESC = "Unlock more advanced fuel-powered generators for <style=\"power\">Power</style> production.";
+		}
+
 		public class INTERIORDECOR
 		{
 			public static LocString NAME = "Interior Decor";
 
 			public static LocString DESC = "<style=\"decor\">Decor</style> boosting items to counteract the gloom of underground living.";
+		}
+
+		public class ADVANCEDPOWERREGULATION
+		{
+			public static LocString NAME = "Advanced Power Regulation";
+
+			public static LocString DESC = "Circuit components required for large scale <style=\"power\">Power</style> management.";
 		}
 	}
 }

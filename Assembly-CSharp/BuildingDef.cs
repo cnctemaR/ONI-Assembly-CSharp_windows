@@ -7,7 +7,15 @@ using UnityEngine;
 [Serializable]
 public class BuildingDef : Def
 {
-	public string Name
+	public bool IsInsulated
+	{
+		get
+		{
+			return this.Insulation < 1f;
+		}
+	}
+
+	public override string Name
 	{
 		get
 		{
@@ -110,8 +118,13 @@ public class BuildingDef : Def
 		{
 			gameObject = this.Create(vector, resource_storage, this.CraftRecipe.GetAllIngredients(selected_elements), this.BuildingComplete);
 		}
-		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-		component.ElementID = selected_elements[0].id;
+		Rotatable component = gameObject.GetComponent<Rotatable>();
+		if (component != null)
+		{
+			component.SetOrientation(orientation);
+		}
+		PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
+		component2.ElementID = selected_elements[0].id;
 		this.MarkArea(cell, orientation, this.ObjectLayer, gameObject);
 		if (this.IsTilePiece)
 		{
@@ -153,25 +166,46 @@ public class BuildingDef : Def
 
 	private bool IsAreaClear(int cell, Orientation orientation, ObjectLayer layer, ObjectLayer tile_layer)
 	{
-		for (int i = 0; i < this.PlacementOffsets.Length; i++)
+		BuildLocationRule buildLocationRule = this.BuildLocationRule;
+		if (buildLocationRule == BuildLocationRule.Conduit)
 		{
-			CellOffset cellOffset = this.PlacementOffsets[i];
-			CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(cellOffset, orientation);
-			int num = Grid.OffsetCell(cell, rotatedCellOffset);
-			if (Grid.Element[num].id == SimHashes.Unobtanium)
-			{
-				return false;
-			}
-			if (!Grid.IsValidCell(num) || Grid.Objects[num, (int)layer] != null)
-			{
-				return false;
-			}
-			if (tile_layer != ObjectLayer.NumLayers && Grid.Objects[num, (int)tile_layer] != null && Grid.Objects[num, (int)tile_layer].GetComponent<BuildingPreview>() == null)
-			{
-				return false;
-			}
+			return this.IsValidConduitLocation(cell, orientation);
 		}
-		return true;
+		if (buildLocationRule != BuildLocationRule.NotInTiles)
+		{
+			for (int i = 0; i < this.PlacementOffsets.Length; i++)
+			{
+				CellOffset cellOffset = this.PlacementOffsets[i];
+				CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(cellOffset, orientation);
+				int num = Grid.OffsetCell(cell, rotatedCellOffset);
+				if (Grid.Element[num].id == SimHashes.Unobtanium)
+				{
+					return false;
+				}
+				if (!Grid.IsValidCell(num) || Grid.Objects[num, (int)layer] != null)
+				{
+					return false;
+				}
+				if (tile_layer != ObjectLayer.NumLayers && Grid.Objects[num, (int)tile_layer] != null && Grid.Objects[num, (int)tile_layer].GetComponent<BuildingPreview>() == null)
+				{
+					return false;
+				}
+			}
+			if (this.BuildLocationRule == BuildLocationRule.Tile)
+			{
+				GameObject gameObject = Grid.Objects[cell, 20];
+				if (gameObject != null)
+				{
+					Building component = gameObject.GetComponent<Building>();
+					if (component.Def.BuildLocationRule == BuildLocationRule.NotInTiles)
+					{
+						return false;
+					}
+				}
+			}
+			return this.IsValidConduitLocation(cell, orientation);
+		}
+		return Grid.Objects[cell, 9] == null;
 	}
 
 	public void RunOnArea(int cell, Orientation orientation, Action<int> callback)
@@ -187,12 +221,49 @@ public class BuildingDef : Def
 
 	public void MarkArea(int cell, Orientation orientation, ObjectLayer layer, GameObject go)
 	{
-		for (int i = 0; i < this.PlacementOffsets.Length; i++)
+		if (this.BuildLocationRule != BuildLocationRule.Conduit)
 		{
-			CellOffset cellOffset = this.PlacementOffsets[i];
-			CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(cellOffset, orientation);
-			int num = Grid.OffsetCell(cell, rotatedCellOffset);
-			Grid.Objects[num, (int)layer] = go;
+			for (int i = 0; i < this.PlacementOffsets.Length; i++)
+			{
+				CellOffset cellOffset = this.PlacementOffsets[i];
+				CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(cellOffset, orientation);
+				int num = Grid.OffsetCell(cell, rotatedCellOffset);
+				Grid.Objects[num, (int)layer] = go;
+			}
+		}
+		if (this.InputConduitType != ConduitType.None)
+		{
+			CellOffset rotatedCellOffset2 = Rotatable.GetRotatedCellOffset(this.UtilityInputOffset, orientation);
+			int num2 = Grid.OffsetCell(cell, rotatedCellOffset2);
+			ConduitType conduitType = this.InputConduitType;
+			if (conduitType != ConduitType.Gas)
+			{
+				if (conduitType == ConduitType.Liquid)
+				{
+					Grid.Objects[num2, 18] = go;
+				}
+			}
+			else
+			{
+				Grid.Objects[num2, 14] = go;
+			}
+		}
+		if (this.OutputConduitType != ConduitType.None)
+		{
+			CellOffset rotatedCellOffset3 = Rotatable.GetRotatedCellOffset(this.UtilityOutputOffset, orientation);
+			int num3 = Grid.OffsetCell(cell, rotatedCellOffset3);
+			ConduitType conduitType = this.OutputConduitType;
+			if (conduitType != ConduitType.Gas)
+			{
+				if (conduitType == ConduitType.Liquid)
+				{
+					Grid.Objects[num3, 18] = go;
+				}
+			}
+			else
+			{
+				Grid.Objects[num3, 14] = go;
+			}
 		}
 	}
 
@@ -206,6 +277,40 @@ public class BuildingDef : Def
 			if (Grid.Objects[num, (int)layer] == go)
 			{
 				Grid.Objects[num, (int)layer] = null;
+			}
+		}
+		if (this.InputConduitType != ConduitType.None)
+		{
+			CellOffset rotatedCellOffset2 = Rotatable.GetRotatedCellOffset(this.UtilityInputOffset, orientation);
+			int num2 = Grid.OffsetCell(cell, rotatedCellOffset2);
+			ConduitType conduitType = this.InputConduitType;
+			if (conduitType != ConduitType.Gas)
+			{
+				if (conduitType == ConduitType.Liquid)
+				{
+					Grid.Objects[num2, 18] = null;
+				}
+			}
+			else
+			{
+				Grid.Objects[num2, 14] = null;
+			}
+		}
+		if (this.OutputConduitType != ConduitType.None)
+		{
+			CellOffset rotatedCellOffset3 = Rotatable.GetRotatedCellOffset(this.UtilityOutputOffset, orientation);
+			int num3 = Grid.OffsetCell(cell, rotatedCellOffset3);
+			ConduitType conduitType = this.OutputConduitType;
+			if (conduitType != ConduitType.Gas)
+			{
+				if (conduitType == ConduitType.Liquid)
+				{
+					Grid.Objects[num3, 18] = null;
+				}
+			}
+			else
+			{
+				Grid.Objects[num3, 14] = null;
 			}
 		}
 	}
@@ -250,12 +355,15 @@ public class BuildingDef : Def
 			reason = "Invalid cell";
 			return false;
 		}
-		if (this.BuildLocationRule == BuildLocationRule.OnFloor)
+		reason = string.Empty;
+		bool flag = false;
+		switch (this.BuildLocationRule)
 		{
-			Debug.Assert(orientation == Orientation.None || orientation == Orientation.Up, "Orientation is [" + orientation + "]");
+		case BuildLocationRule.OnFloor:
+		{
 			int num = -(this.WidthInCells - 1) / 2;
 			int num2 = this.WidthInCells / 2;
-			bool flag = true;
+			flag = true;
 			reason = string.Empty;
 			for (int i = num; i <= num2; i++)
 			{
@@ -266,33 +374,87 @@ public class BuildingDef : Def
 					flag = false;
 				}
 			}
-			return flag;
+			break;
 		}
-		if (this.BuildLocationRule == BuildLocationRule.Anywhere || this.BuildLocationRule == BuildLocationRule.Tile)
+		case BuildLocationRule.Anywhere:
+		case BuildLocationRule.Conduit:
+			flag = true;
+			break;
+		case BuildLocationRule.OnCeiling:
 		{
-			reason = string.Empty;
-			return true;
-		}
-		if (this.BuildLocationRule == BuildLocationRule.OnCeiling)
-		{
-			Debug.Assert(orientation == Orientation.None || orientation == Orientation.Up);
 			int num4 = -(this.WidthInCells - 1) / 2;
 			int num5 = this.WidthInCells / 2;
-			bool flag2 = true;
-			reason = string.Empty;
+			flag = true;
 			for (int j = num4; j <= num5; j++)
 			{
 				int num6 = Grid.OffsetCell(cell, j, 1 * this.HeightInCells);
 				if (!Grid.IsValidCell(num6) || !Grid.Solid[num6])
 				{
 					reason = UI.TOOLTIPS.HELP_BUILDLOCATION_CEILING;
-					flag2 = false;
+					flag = false;
 				}
 			}
-			return flag2;
+			break;
 		}
-		reason = string.Empty;
-		return false;
+		case BuildLocationRule.Tile:
+		{
+			flag = true;
+			GameObject gameObject = Grid.Objects[cell, 20];
+			if (gameObject != null)
+			{
+				Building component = gameObject.GetComponent<Building>();
+				if (component.Def.BuildLocationRule == BuildLocationRule.NotInTiles)
+				{
+					flag = false;
+				}
+			}
+			break;
+		}
+		case BuildLocationRule.NotInTiles:
+			flag = Grid.Objects[cell, 9] == null;
+			break;
+		}
+		return flag;
+	}
+
+	private bool IsValidConduitLocation(int cell, Orientation orientation)
+	{
+		bool flag = true;
+		if (this.InputConduitType != ConduitType.None)
+		{
+			CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(this.UtilityInputOffset, orientation);
+			int num = Grid.OffsetCell(cell, rotatedCellOffset);
+			ConduitType conduitType = this.InputConduitType;
+			if (conduitType != ConduitType.Gas)
+			{
+				if (conduitType == ConduitType.Liquid)
+				{
+					flag = flag && Grid.Objects[num, 18] == null;
+				}
+			}
+			else
+			{
+				flag = flag && Grid.Objects[num, 14] == null;
+			}
+		}
+		if (this.OutputConduitType != ConduitType.None)
+		{
+			CellOffset rotatedCellOffset2 = Rotatable.GetRotatedCellOffset(this.UtilityOutputOffset, orientation);
+			int num2 = Grid.OffsetCell(cell, rotatedCellOffset2);
+			ConduitType conduitType = this.OutputConduitType;
+			if (conduitType != ConduitType.Gas)
+			{
+				if (conduitType == ConduitType.Liquid)
+				{
+					flag = flag && Grid.Objects[num2, 18] == null;
+				}
+			}
+			else
+			{
+				flag = flag && Grid.Objects[num2, 14] == null;
+			}
+		}
+		return flag;
 	}
 
 	public Sprite GetUISprite(string animName = "ui")
@@ -320,14 +482,12 @@ public class BuildingDef : Def
 			return this.UISprite;
 		}
 		KAnim.Anim.Frame frame = KAnim.Anim.Frame.InvalidFrame;
-		if (data != null && data.anims != null)
+		for (int i = 0; i < data.animCount; i++)
 		{
-			for (int i = 0; i < data.anims.Length; i++)
+			KAnim.Anim anim = data.GetAnim(i);
+			if (anim.name == animName)
 			{
-				if (data.anims[i].name == animName)
-				{
-					frame = data.anims[i].GetFrame(kanimFile.GetData().batchTag, 0);
-				}
+				frame = anim.GetFrame(data.batchTag, 0);
 			}
 		}
 		if (!frame.IsValid())
@@ -340,13 +500,12 @@ public class BuildingDef : Def
 			});
 			return this.UISprite;
 		}
-		KAnim.Anim.FrameElement frameElement = kanimFile.GetData().animFrameElements[kanimFile.GetData().animFrameElements.Length - 1];
+		KAnim.Anim.FrameElement frameElement = data.GetAnimFrameElement(data.elementCount - 1);
 		KAnimHashedString kanimHashedString = new KAnimHashedString(animName);
-		int num = kanimFile.GetData().animFrameElements.Length;
-		KAnimFileData data2 = kanimFile.GetData();
-		for (int j = 0; j < num; j++)
+		int elementCount = data.elementCount;
+		for (int j = 0; j < elementCount; j++)
 		{
-			frameElement = data2.animFrameElements[j];
+			frameElement = data.GetAnimFrameElement(j);
 			if (frameElement.symbol == kanimHashedString)
 			{
 				break;
@@ -364,25 +523,25 @@ public class BuildingDef : Def
 			return this.UISprite;
 		}
 		KAnim.Build.SymbolFrame symbolFrame = symbol.GetFrame(frameElement.frame).symbolFrame;
-		Texture2D texture2D = build.textures[0];
+		Texture2D texture = build.GetTexture(0);
 		float x = symbolFrame.uv0.x;
 		float x2 = symbolFrame.uv1.x;
 		float y = symbolFrame.uv2.y;
 		float y2 = symbolFrame.uv0.y;
-		int num2 = (int)((float)texture2D.width * Mathf.Abs(x2 - x));
-		int num3 = (int)((float)texture2D.height * Mathf.Abs(y2 - y));
-		float num4 = Mathf.Abs(symbolFrame.bboxMax.x - symbolFrame.bboxMin.x);
+		int num = (int)((float)texture.width * Mathf.Abs(x2 - x));
+		int num2 = (int)((float)texture.height * Mathf.Abs(y2 - y));
+		float num3 = Mathf.Abs(symbolFrame.bboxMax.x - symbolFrame.bboxMin.x);
 		Rect rect = default(Rect);
-		rect.width = (float)num2;
-		rect.height = (float)num3;
-		rect.x = (float)((int)((float)texture2D.width * x));
-		rect.y = (float)((int)((float)texture2D.height * y));
-		float num5 = 100f;
-		if (num2 != 0)
+		rect.width = (float)num;
+		rect.height = (float)num2;
+		rect.x = (float)((int)((float)texture.width * x));
+		rect.y = (float)((int)((float)texture.height * y));
+		float num4 = 100f;
+		if (num != 0)
 		{
-			num5 = 100f / (num4 / (float)num2);
+			num4 = 100f / (num3 / (float)num);
 		}
-		Sprite sprite = Sprite.Create(texture2D, rect, new Vector2(0f, 0f), num5, 0U, SpriteMeshType.FullRect);
+		Sprite sprite = Sprite.Create(texture, rect, new Vector2(0f, 0f), num4, 0U, SpriteMeshType.FullRect);
 		sprite.name = base.name + ":" + frameElement.frame.ToString();
 		return sprite;
 	}
@@ -407,8 +566,8 @@ public class BuildingDef : Def
 		int num3 = num2 - this.WidthInCells + 1;
 		List<CellOffset> list = new List<CellOffset>();
 		int num4 = 0;
-		int num5 = this.HeightInCells;
-		for (int i = num4; i < num5; i++)
+		int heightInCells = this.HeightInCells;
+		for (int i = num4; i < heightInCells; i++)
 		{
 			for (int j = num3; j <= num2; j++)
 			{
@@ -419,44 +578,23 @@ public class BuildingDef : Def
 				});
 			}
 		}
-		num3--;
-		num2++;
-		if (this.BuildLocationRule != BuildLocationRule.OnFloor)
-		{
-			num4 -= 3;
-			num5++;
-		}
 		this.PlacementOffsets = list.ToArray();
 	}
 
 	public void PostProcess()
 	{
-		bool flag = false;
 		this.RelocateRecipe = new Recipe();
 		this.RelocateRecipe.Ingredients = new List<Recipe.Ingredient>
 		{
 			new Recipe.Ingredient(this.PrefabID + "Package", 1f)
 		};
-		this.CraftRecipe = new Recipe();
-		flag = CSVUtil.SetValue<string>(this.Name, ref this.CraftRecipe.Name) || flag;
-		bool flag2 = CSVUtil.SetValue<float>(this.PlanOrder, ref this.CraftRecipe.PlanOrder) || flag;
-		if (this.CraftRecipe.Ingredients == null || this.CraftRecipe.Ingredients.Count != this.MaterialCategory.Length)
-		{
-			this.CraftRecipe.Ingredients = new List<Recipe.Ingredient>();
-		}
-		this.CraftRecipe.Ingredients.Clear();
+		string name = this.Name;
+		this.CraftRecipe = new Recipe(this.BuildingComplete.PrefabID().Name, 1f, (SimHashes)0, name, null, 0);
+		this.CraftRecipe.Icon = this.UISprite;
 		for (int i = 0; i < this.MaterialCategory.Length; i++)
 		{
 			Recipe.Ingredient ingredient = new Recipe.Ingredient(this.MaterialCategory[i], (float)((int)this.Mass[i]));
 			this.CraftRecipe.Ingredients.Add(ingredient);
-		}
-		if (this.UISprite != this.CraftRecipe.Icon)
-		{
-			this.CraftRecipe.Icon = this.UISprite;
-		}
-		if (this.BuildingComplete != this.CraftRecipe.Result)
-		{
-			this.CraftRecipe.Result = this.BuildingComplete;
 		}
 		if (this.DecorBlockTileInfo != null)
 		{
@@ -469,7 +607,7 @@ public class BuildingDef : Def
 		if (!string.IsNullOrEmpty(this.RequiredTechName))
 		{
 			Tech tech = Db.Get().Techs.Get(this.RequiredTechName);
-			if (tech != null)
+			if (tech != null && !this.Deprecated)
 			{
 				BuildingDef buildingDef = tech.unlockedBuildings.Find((BuildingDef ub) => ub.PrefabID == this.PrefabID);
 				if (buildingDef != null)
@@ -482,8 +620,6 @@ public class BuildingDef : Def
 		}
 	}
 
-	public Overheatable.ExplosionSize ExplosionSize;
-
 	public float EnergyConsumptionWhenActive;
 
 	public float GeneratorWattageRating;
@@ -492,9 +628,9 @@ public class BuildingDef : Def
 
 	public float MassForTemperatureModification;
 
-	public float TemperatureModificationWhenActive;
+	public float ExhaustKilowattsWhenActive;
 
-	public float OperatingTemperature;
+	public float OperatingKilowatts;
 
 	public float BaseMeltingPoint;
 
@@ -508,7 +644,15 @@ public class BuildingDef : Def
 
 	public int HeightInCells;
 
-	public bool RequiresPower;
+	public int HitPoints;
+
+	public bool RequiresPowerInput;
+
+	public bool RequiresPowerOutput;
+
+	public bool UseWhitePowerOutputConnectorColour;
+
+	public CellOffset ElectricalArrowOffset;
 
 	public ConduitType InputConduitType;
 
@@ -522,6 +666,12 @@ public class BuildingDef : Def
 
 	public bool Relocatable = true;
 
+	public bool Overheatable = true;
+
+	public float OverheatTemperature = 348.15f;
+
+	public float FatalHot = 533.15f;
+
 	public bool Breakable;
 
 	public bool ContinuouslyCheckFoundation;
@@ -529,6 +679,8 @@ public class BuildingDef : Def
 	public bool IsFoundation;
 
 	public bool DragBuild;
+
+	public bool UseStructureTemperature = true;
 
 	[HashedEnum]
 	[NonSerialized]
@@ -564,13 +716,13 @@ public class BuildingDef : Def
 
 	public bool ShowInBuildMenu = true;
 
-	public Rotatable.PermittedRotations PermittedRotations;
+	public PermittedRotations PermittedRotations;
 
 	public bool Deprecated;
 
-	public bool DisableWhenInactive;
-
 	public CellOffset PowerInputOffset;
+
+	public CellOffset PowerOutputOffset;
 
 	public CellOffset UtilityInputOffset = new CellOffset(0, 1);
 
@@ -600,8 +752,6 @@ public class BuildingDef : Def
 
 	public float ConstructionTimeTier;
 
-	public float OperatingTempTier;
-
 	public string PrimaryUse;
 
 	public string SecondaryUse;
@@ -619,8 +769,6 @@ public class BuildingDef : Def
 	public Sprite UISprite;
 
 	public bool isKAnimTile;
-
-	public bool isGraphTile;
 
 	public bool isUtility;
 

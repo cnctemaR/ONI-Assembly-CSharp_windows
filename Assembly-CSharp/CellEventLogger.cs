@@ -1,25 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using KSerialization;
+using System.Diagnostics;
 
-[SerializationConfig(MemberSerialization.OptIn)]
-public class CellEventLogger : EventLogger<CellEventInstance, CellEvent>, ISaveLoadableJson
+public class CellEventLogger : EventLogger<CellEventInstance, CellEvent>
 {
+	[Conditional("UNITY_EDITOR")]
 	public void LogCallbackSend(int cell, int callback_id)
 	{
 		if (callback_id != -1)
 		{
-			this.SendCallback.Log(cell, callback_id);
 			this.CallbackToCellMap[callback_id] = cell;
 		}
 	}
 
+	[Conditional("UNITY_EDITOR")]
 	public void LogCallbackReceive(int callback_id)
 	{
 		int invalidCell = Grid.InvalidCell;
 		if (this.CallbackToCellMap.TryGetValue(callback_id, out invalidCell))
 		{
-			this.ReceiveCallback.Log(invalidCell, callback_id);
 		}
 	}
 
@@ -56,20 +55,25 @@ public class CellEventLogger : EventLogger<CellEventInstance, CellEvent>, ISaveL
 		this.ElementConsumerSimUpdate = base.AddEvent(new CellAddRemoveSubstanceEvent("ElementConsumerSimUpdate", "Element Consumer SimUpdate", false)) as CellAddRemoveSubstanceEvent;
 		this.SublimatesEmit = base.AddEvent(new CellAddRemoveSubstanceEvent("SublimatesEmit", "Sublimates Emit", false)) as CellAddRemoveSubstanceEvent;
 		this.Mop = base.AddEvent(new CellAddRemoveSubstanceEvent("Mop", "Mop", false)) as CellAddRemoveSubstanceEvent;
+		this.OreMelted = base.AddEvent(new CellAddRemoveSubstanceEvent("OreMelted", "Ore Melted", false)) as CellAddRemoveSubstanceEvent;
+		this.ConstructTile = base.AddEvent(new CellAddRemoveSubstanceEvent("ConstructTile", "ConstructTile", false)) as CellAddRemoveSubstanceEvent;
 		this.ElementChunkTransition = base.AddEvent(new CellAddRemoveSubstanceEvent("ElementChunkTransition", "Element Chunk Transition", false)) as CellAddRemoveSubstanceEvent;
 		this.OxyrockEmit = base.AddEvent(new CellAddRemoveSubstanceEvent("OxyrockEmit", "Oxyrock Emit", false)) as CellAddRemoveSubstanceEvent;
 		this.BleachstoneEmit = base.AddEvent(new CellAddRemoveSubstanceEvent("BleachstoneEmit", "Bleachstone Emit", false)) as CellAddRemoveSubstanceEvent;
 		this.UnstableGround = base.AddEvent(new CellAddRemoveSubstanceEvent("UnstableGround", "Unstable Ground", false)) as CellAddRemoveSubstanceEvent;
 		this.ConduitFlowEmptyConduit = base.AddEvent(new CellAddRemoveSubstanceEvent("ConduitFlowEmptyConduit", "Conduit Flow Empty Conduit", false)) as CellAddRemoveSubstanceEvent;
+		this.ConduitConsumerWrongElement = base.AddEvent(new CellAddRemoveSubstanceEvent("ConduitConsumerWrongElement", "Conduit Consumer Wrong Element", false)) as CellAddRemoveSubstanceEvent;
 		this.OverheatableMeltingDown = base.AddEvent(new CellAddRemoveSubstanceEvent("OverheatableMeltingDown", "Overheatable MeltingDown", false)) as CellAddRemoveSubstanceEvent;
 		this.FabricatorProduceMelted = base.AddEvent(new CellAddRemoveSubstanceEvent("FabricatorProduceMelted", "Fabricator Produce Melted", false)) as CellAddRemoveSubstanceEvent;
 		this.PumpSimUpdate = base.AddEvent(new CellAddRemoveSubstanceEvent("PumpSimUpdate", "Pump SimUpdate", false)) as CellAddRemoveSubstanceEvent;
 		this.WallPumpSimUpdate = base.AddEvent(new CellAddRemoveSubstanceEvent("WallPumpSimUpdate", "Wall Pump SimUpdate", false)) as CellAddRemoveSubstanceEvent;
 		this.Vomit = base.AddEvent(new CellAddRemoveSubstanceEvent("Vomit", "Vomit", false)) as CellAddRemoveSubstanceEvent;
+		this.Tears = base.AddEvent(new CellAddRemoveSubstanceEvent("Tears", "Tears", false)) as CellAddRemoveSubstanceEvent;
 		this.Pee = base.AddEvent(new CellAddRemoveSubstanceEvent("Pee", "Pee", false)) as CellAddRemoveSubstanceEvent;
 		this.AlgaeHabitat = base.AddEvent(new CellAddRemoveSubstanceEvent("AlgaeHabitat", "AlgaeHabitat", false)) as CellAddRemoveSubstanceEvent;
 		this.CO2FilterOxygen = base.AddEvent(new CellAddRemoveSubstanceEvent("CO2FilterOxygen", "CO2FilterOxygen", false)) as CellAddRemoveSubstanceEvent;
 		this.ToiletEmit = base.AddEvent(new CellAddRemoveSubstanceEvent("ToiletEmit", "ToiletEmit", false)) as CellAddRemoveSubstanceEvent;
+		this.ElementEmitted = base.AddEvent(new CellAddRemoveSubstanceEvent("ElementEmitted", "Element Emitted", false)) as CellAddRemoveSubstanceEvent;
 		this.LiquidSourceOnTake = base.AddEvent(new CellModifyMassEvent("WallPumpSimUpdate", "Wall Pump SimUpdate", false)) as CellModifyMassEvent;
 		this.CO2ManagerFixedUpdate = base.AddEvent(new CellModifyMassEvent("CO2ManagerFixedUpdate", "CO2Manager FixedUpdate", false)) as CellModifyMassEvent;
 		this.EnvironmentConsumerFixedUpdate = base.AddEvent(new CellModifyMassEvent("EnvironmentConsumerFixedUpdate", "EnvironmentConsumer FixedUpdate", false)) as CellModifyMassEvent;
@@ -79,6 +83,7 @@ public class CellEventLogger : EventLogger<CellEventInstance, CellEvent>, ISaveL
 		this.RiverSourceSimUpdate = base.AddEvent(new CellModifyMassEvent("RiverSourceSimUpdate", "RiverSource SimUpdate", false)) as CellModifyMassEvent;
 		this.RiverTerminusSimUpdate = base.AddEvent(new CellModifyMassEvent("RiverTerminusSimUpdate", "RiverTerminus SimUpdate", false)) as CellModifyMassEvent;
 		this.DebugToolModifyMass = base.AddEvent(new CellModifyMassEvent("DebugToolModifyMass", "DebugTool ModifyMass", false)) as CellModifyMassEvent;
+		this.EnergyGeneratorModifyMass = base.AddEvent(new CellModifyMassEvent("EnergyGeneratorModifyMass", "EnergyGenerator ModifyMass", false)) as CellModifyMassEvent;
 		this.SolidFilterEvent = base.AddEvent(new CellSolidFilterEvent("SolidFilterEvent", true)) as CellSolidFilterEvent;
 	}
 
@@ -150,6 +155,8 @@ public class CellEventLogger : EventLogger<CellEventInstance, CellEvent>, ISaveL
 
 	public CellAddRemoveSubstanceEvent ConduitFlowEmptyConduit;
 
+	public CellAddRemoveSubstanceEvent ConduitConsumerWrongElement;
+
 	public CellAddRemoveSubstanceEvent OverheatableMeltingDown;
 
 	public CellAddRemoveSubstanceEvent FabricatorProduceMelted;
@@ -160,6 +167,8 @@ public class CellEventLogger : EventLogger<CellEventInstance, CellEvent>, ISaveL
 
 	public CellAddRemoveSubstanceEvent Vomit;
 
+	public CellAddRemoveSubstanceEvent Tears;
+
 	public CellAddRemoveSubstanceEvent Pee;
 
 	public CellAddRemoveSubstanceEvent AlgaeHabitat;
@@ -168,7 +177,13 @@ public class CellEventLogger : EventLogger<CellEventInstance, CellEvent>, ISaveL
 
 	public CellAddRemoveSubstanceEvent ToiletEmit;
 
+	public CellAddRemoveSubstanceEvent ElementEmitted;
+
 	public CellAddRemoveSubstanceEvent Mop;
+
+	public CellAddRemoveSubstanceEvent OreMelted;
+
+	public CellAddRemoveSubstanceEvent ConstructTile;
 
 	public CellModifyMassEvent LiquidSourceOnTake;
 
@@ -187,6 +202,8 @@ public class CellEventLogger : EventLogger<CellEventInstance, CellEvent>, ISaveL
 	public CellModifyMassEvent RiverTerminusSimUpdate;
 
 	public CellModifyMassEvent DebugToolModifyMass;
+
+	public CellModifyMassEvent EnergyGeneratorModifyMass;
 
 	public CellSolidFilterEvent SolidFilterEvent;
 

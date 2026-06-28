@@ -18,13 +18,13 @@ public class GasSourceManager : KMonoBehaviour, IChunkManager
 				component.name = "GasSource " + element.id.ToString();
 				this.sourcePrefabs[element.id] = component;
 				SubstanceChunk component2 = GameUtil.KInstantiate(EntityPrefabs.Instance.GasChunk, Grid.SceneLayer.Use, Folder.GasChunkPrefabs, null, 0).GetComponent<SubstanceChunk>();
-				component2.GetComponent<PrimaryElement>().SetElement(element.id);
-				component2.GetComponent<KSelectable>().SetName("Bottled " + element.name);
-				component2.name = element.id.ToString();
 				Tag tag = TagManager.Create(element.id);
 				KPrefabID component3 = component2.GetComponent<KPrefabID>();
 				component3.PrefabTag = tag;
 				component3.InitializeTags();
+				component2.GetComponent<PrimaryElement>().SetElement(element.id);
+				component2.GetComponent<KSelectable>().SetName(element.name);
+				component2.name = element.id.ToString();
 				this.chunkPrefabs[element.id] = component2;
 				Assets.AddPrefab(component2.gameObject.GetComponent<KPrefabID>());
 			}

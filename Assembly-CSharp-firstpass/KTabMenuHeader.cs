@@ -23,11 +23,11 @@ public class KTabMenuHeader : KMonoBehaviour
 			componentInChildren.text = name.ToUpper();
 		}
 		this.ActivateTabArtwork(id);
-		Button component2 = gameObject.GetComponent<Button>();
-		component2.onClick.AddListener(delegate
+		KButton component2 = gameObject.GetComponent<KButton>();
+		component2.onClick += delegate
 		{
 			onClick(id);
-		});
+		};
 	}
 
 	public void Add(Sprite icon, string name, KTabMenuHeader.OnClick onClick, int id, string tooltip = "")
@@ -74,7 +74,7 @@ public class KTabMenuHeader : KMonoBehaviour
 			Transform child = this.transform.GetChild(i);
 			if (child.gameObject.activeSelf)
 			{
-				Button componentInChildren = child.GetComponentInChildren<Button>();
+				KButton componentInChildren = child.GetComponentInChildren<KButton>();
 				if (componentInChildren != null)
 				{
 					Text componentInChildren2 = componentInChildren.GetComponentInChildren<Text>();

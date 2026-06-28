@@ -24,7 +24,7 @@ public class DeserializeWarnings : KMonoBehaviour
 		{
 			if (!this.isSet)
 			{
-				Output.LogCriticalWarning(new object[] { message, obj });
+				Debug.LogError(message, obj);
 				this.isSet = true;
 			}
 		}

@@ -14,6 +14,8 @@ namespace Klei
 
 		public List<WorldDetailSave.OverworldCell> overworldCells;
 
+		public int globalWorldSeed;
+
 		[SerializationConfig(MemberSerialization.OptOut)]
 		public class OverworldCell
 		{

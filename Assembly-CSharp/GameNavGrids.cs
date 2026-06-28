@@ -54,13 +54,13 @@ public class GameNavGrids
 				new NavOffset(NavType.Floor, 1, 0),
 				new NavOffset(NavType.Ladder, 1, 0)
 			}),
-			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, -2, false, false, 1, string.Empty, new CellOffset[]
+			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, -2, false, false, 2, string.Empty, new CellOffset[]
 			{
 				new CellOffset(1, 0),
 				new CellOffset(1, -1)
 			}, new CellOffset[0], new NavOffset[0], new NavOffset[0]),
 			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, -1, false, false, 1, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, 2, false, true, 1, string.Empty, new CellOffset[]
+			new NavGrid.Transition(NavType.Floor, NavType.Floor, 1, 2, false, true, 2, string.Empty, new CellOffset[]
 			{
 				new CellOffset(0, 1),
 				new CellOffset(0, 2)
@@ -117,7 +117,12 @@ public class GameNavGrids
 			}),
 			new NavGrid.Transition(NavType.Ladder, NavType.Ladder, 1, 0, false, true, 1, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
 			new NavGrid.Transition(NavType.Ladder, NavType.Ladder, 0, 1, true, true, 1, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
-			new NavGrid.Transition(NavType.Ladder, NavType.Ladder, 0, -1, true, false, 1, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0])
+			new NavGrid.Transition(NavType.Ladder, NavType.Ladder, 0, -1, true, false, 1, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
+			new NavGrid.Transition(NavType.Ladder, NavType.Ladder, 2, 0, false, true, 1, string.Empty, new CellOffset[]
+			{
+				new CellOffset(1, 0),
+				new CellOffset(1, 1)
+			}, new CellOffset[0], new NavOffset[0], new NavOffset[0])
 		};
 		NavGrid.Transition[] array3 = this.MirrorTransitions(array2);
 		Dictionary<NavType, string> dictionary = new Dictionary<NavType, string>();
@@ -125,7 +130,7 @@ public class GameNavGrids
 		dictionary[NavType.Ladder] = "ladder_idle";
 		this.DuplicantGrid = new NavGrid("MinionNavGrid", array3, dictionary, array, new NavTableValidator[]
 		{
-			new GameNavGrids.FloorValidator(true),
+			new GameNavGrids.FloorValidator(true, true),
 			new GameNavGrids.LadderValidator()
 		});
 		pathfinding.AddNavGrid(this.DuplicantGrid);
@@ -175,7 +180,7 @@ public class GameNavGrids
 		dictionary[NavType.Floor] = "idle_default";
 		this.HatchGrid = new NavGrid("HatchNavGrid", array3, dictionary, array, new NavTableValidator[]
 		{
-			new GameNavGrids.FloorValidator(false)
+			new GameNavGrids.FloorValidator(false, false)
 		});
 		pathfinding.AddNavGrid(this.HatchGrid);
 	}
@@ -313,28 +318,29 @@ public class GameNavGrids
 
 	public class FloorValidator : NavTableValidator
 	{
-		public FloorValidator(bool allowLadders = true)
+		public FloorValidator(bool allowLadders = true, bool allow_forcefield_traversal = false)
 		{
 			World instance = World.Instance;
 			instance.OnSolidChanged = (Action<int>)Delegate.Combine(instance.OnSolidChanged, new Action<int>(this.OnSolidChanged));
 			Components.Ladders.Register(new Action<Ladder>(this.OnAddLadder), new Action<Ladder>(this.OnRemoveLadder));
 			this.allowLadders = allowLadders;
+			this.allowForcefieldTraversal = allow_forcefield_traversal;
 		}
 
 		public override void UpdateCell(int cell, NavTable nav_table, CellOffset[] bounding_offsets)
 		{
-			bool flag = GameNavGrids.FloorValidator.IsWalkableCell(cell, Grid.CellBelow(cell), Grid.BitFields, this.allowLadders);
-			nav_table.SetValid(cell, NavType.Floor, base.IsClear(cell, bounding_offsets, Grid.BitFields) && flag);
+			bool flag = GameNavGrids.FloorValidator.IsWalkableCell(cell, Grid.CellBelow(cell), Grid.BitFields, this.allowLadders, this.allowForcefieldTraversal);
+			nav_table.SetValid(cell, NavType.Floor, base.IsClear(cell, bounding_offsets, Grid.BitFields, this.allowForcefieldTraversal) && flag);
 		}
 
-		private static bool IsWalkableCell(int cell, int anchor_cell, ushort[] grid_bit_fields, bool allowLadders = true)
+		private static bool IsWalkableCell(int cell, int anchor_cell, ushort[] grid_bit_fields, bool allowLadders, bool allow_forcefield_traversal)
 		{
 			int num = Grid.CellAbove(cell);
 			int num2 = Grid.CellAbove(num);
 			if (Grid.IsValidCell(cell) && Grid.IsValidCell(num2) && Grid.IsValidCell(anchor_cell))
 			{
-				bool flag = !NavTableValidator.IsCellSolid(grid_bit_fields, cell);
-				bool flag2 = NavTableValidator.IsCellSolid(grid_bit_fields, anchor_cell) || (grid_bit_fields[anchor_cell] & 2) != 0 || (!Grid.HasLadder[cell] && allowLadders && Grid.HasLadder[anchor_cell]);
+				bool flag = !NavTableValidator.IsCellSolid(grid_bit_fields, cell, allow_forcefield_traversal);
+				bool flag2 = NavTableValidator.IsCellSolid(grid_bit_fields, anchor_cell, allow_forcefield_traversal) || (grid_bit_fields[anchor_cell] & 2) != 0 || (!Grid.HasLadder[cell] && allowLadders && Grid.HasLadder[anchor_cell]);
 				bool flag3 = !Grid.IsValidCell(num2) || !Grid.Element[num2].IsUnstable;
 				return flag && flag2 && flag3;
 			}
@@ -375,6 +381,8 @@ public class GameNavGrids
 		}
 
 		private bool allowLadders = true;
+
+		private bool allowForcefieldTraversal;
 	}
 
 	public class LadderValidator : NavTableValidator
@@ -404,7 +412,7 @@ public class GameNavGrids
 
 		public override void UpdateCell(int cell, NavTable nav_table, CellOffset[] bounding_offsets)
 		{
-			nav_table.SetValid(cell, NavType.Ladder, base.IsClear(cell, bounding_offsets, Grid.BitFields) && Grid.HasLadder[cell]);
+			nav_table.SetValid(cell, NavType.Ladder, base.IsClear(cell, bounding_offsets, Grid.BitFields, true) && Grid.HasLadder[cell]);
 		}
 
 		public override void Clear()
@@ -428,7 +436,7 @@ public class GameNavGrids
 			int num = Grid.CellAbove(cell);
 			if (Grid.IsValidCell(num))
 			{
-				nav_table.SetValid(cell, NavType.Hover, !Grid.IsSubstantialLiquid(cell, 0.35f) && base.IsClear(cell, bounding_offsets, Grid.BitFields));
+				nav_table.SetValid(cell, NavType.Hover, !Grid.IsSubstantialLiquid(cell, 0.35f) && base.IsClear(cell, bounding_offsets, Grid.BitFields, false));
 			}
 		}
 

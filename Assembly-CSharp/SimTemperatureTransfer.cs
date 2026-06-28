@@ -1,10 +1,64 @@
 ﻿using System;
-using KSerialization;
+using System.Collections.Generic;
 using UnityEngine;
 
-[SerializationConfig(MemberSerialization.OptIn)]
-public class SimTemperatureTransfer : KMonoBehaviour, ISaveLoadableJson
+[SkipSaveFileSerialization]
+public class SimTemperatureTransfer : KMonoBehaviour
 {
+	public static void ClearInstanceMap()
+	{
+		SimTemperatureTransfer.handleInstanceMap.Clear();
+	}
+
+	public static void DoStateTransition(int sim_handle)
+	{
+		SimTemperatureTransfer simTemperatureTransfer = null;
+		if (SimTemperatureTransfer.handleInstanceMap.TryGetValue(sim_handle, out simTemperatureTransfer))
+		{
+			SimTemperatureTransfer simTemperatureTransfer2 = SimTemperatureTransfer.handleInstanceMap[sim_handle];
+			PrimaryElement component = simTemperatureTransfer2.GetComponent<PrimaryElement>();
+			Element element = component.Element;
+			if (element.highTempTransitionTarget != SimHashes.Unobtanium)
+			{
+				int num = Grid.PosToCell(simTemperatureTransfer2.transform.position);
+				SimMessages.AddRemoveSubstance(num, element.highTempTransitionTarget, CellEventLogger.Instance.OreMelted, component.Mass, component.Temperature, -1);
+				Util.KDestroyGameObject(simTemperatureTransfer2.gameObject);
+			}
+		}
+	}
+
+	public float SurfaceArea
+	{
+		get
+		{
+			return this.surfaceArea;
+		}
+		set
+		{
+			this.surfaceArea = value;
+		}
+	}
+
+	public float Thickness
+	{
+		get
+		{
+			return this.thickness;
+		}
+		set
+		{
+			this.thickness = value;
+		}
+	}
+
+	public int SimHandle
+	{
+		get
+		{
+			return this.simHandle;
+		}
+	}
+
 	protected override void OnPrefabInit()
 	{
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
@@ -27,6 +81,28 @@ public class SimTemperatureTransfer : KMonoBehaviour, ISaveLoadableJson
 		this.SimRegister();
 	}
 
+	protected override void OnCmpEnable()
+	{
+		base.OnCmpEnable();
+		if (Sim.IsValidHandle(this.simHandle))
+		{
+			PrimaryElement component = base.GetComponent<PrimaryElement>();
+			SimTemperatureTransfer.OnSetTemperature(component, component.Temperature);
+		}
+	}
+
+	protected override void OnCmpDisable()
+	{
+		if (Sim.IsValidHandle(this.simHandle))
+		{
+			PrimaryElement component = base.GetComponent<PrimaryElement>();
+			float temperature = component.Temperature;
+			component.InternalTemperature = component.Temperature;
+			SimMessages.SetElementChunkData(this.simHandle, temperature, 0f);
+		}
+		base.OnCmpDisable();
+	}
+
 	private void OnCellChanged(int previous_cell, int cell)
 	{
 		if (cell == previous_cell)
@@ -39,23 +115,23 @@ public class SimTemperatureTransfer : KMonoBehaviour, ISaveLoadableJson
 		}
 	}
 
-	protected override void OnCmpEnable()
-	{
-		base.OnCmpEnable();
-		this.SimRegister();
-	}
-
-	protected override void OnCmpDisable()
-	{
-		this.SimUnregister();
-		base.OnCmpDisable();
-	}
-
 	protected override void OnCleanUp()
 	{
 		CellChangeMonitor.Instance.Remove(this, new Action<int, int>(this.OnCellChanged), false);
 		this.SimUnregister();
 		base.OnForcedCleanUp();
+	}
+
+	public void ModifyEnergy(float delta_kilojoules)
+	{
+		if (Sim.IsValidHandle(this.simHandle))
+		{
+			SimMessages.ModifyElementChunkEnergy(this.simHandle, delta_kilojoules);
+		}
+		else
+		{
+			this.pendingEnergyModifications += delta_kilojoules;
+		}
 	}
 
 	private unsafe static float OnGetTemperature(PrimaryElement primary_element)
@@ -65,6 +141,7 @@ public class SimTemperatureTransfer : KMonoBehaviour, ISaveLoadableJson
 		if (Sim.IsValidHandle(component.simHandle))
 		{
 			num = Game.Instance.simData.elementChunks[component.simHandle].temperature;
+			component.deltaKJ = Game.Instance.simData.elementChunks[component.simHandle].deltaKJ;
 		}
 		else
 		{
@@ -75,11 +152,20 @@ public class SimTemperatureTransfer : KMonoBehaviour, ISaveLoadableJson
 
 	private static void OnSetTemperature(PrimaryElement primary_element, float temperature)
 	{
+		if (temperature <= 0f)
+		{
+			KCrashReporter.Assert(false, "Invalid temperature");
+			temperature = 293f;
+		}
 		SimTemperatureTransfer component = primary_element.GetComponent<SimTemperatureTransfer>();
 		if (Sim.IsValidHandle(component.simHandle))
 		{
 			float num = primary_element.Mass * primary_element.Element.specificHeatCapacity;
 			SimMessages.SetElementChunkData(component.simHandle, temperature, num);
+		}
+		else
+		{
+			primary_element.InternalTemperature = temperature;
 		}
 	}
 
@@ -92,9 +178,9 @@ public class SimTemperatureTransfer : KMonoBehaviour, ISaveLoadableJson
 		}
 	}
 
-	private void SimRegister()
+	protected void SimRegister()
 	{
-		if (base.isSpawned && this.simHandle == -1 && base.isSpawned && base.enabled)
+		if (base.isSpawned && this.simHandle == -1 && base.enabled)
 		{
 			PrimaryElement component = base.GetComponent<PrimaryElement>();
 			if (component.Mass > 0f)
@@ -108,24 +194,30 @@ public class SimTemperatureTransfer : KMonoBehaviour, ISaveLoadableJson
 					{
 						SimTemperatureTransfer.OnSimRegistered(this, data);
 					}, "SimTempTransfer");
-					float temperature = component.Temperature;
-					Debug.Assert(temperature > 0f, "Invalid temperature");
-					Debug.Assert(component.Mass > 0f);
-					SimMessages.AddElementChunk(num, component.ElementID, component.Mass, temperature, handle.index);
+					float num2 = component.InternalTemperature;
+					KCrashReporter.Assert(num2 > 0f, "Invalid temperature");
+					KCrashReporter.Assert(component.Mass > 0f);
+					if (num2 <= 0f)
+					{
+						component.InternalTemperature = 293f;
+						num2 = 293f;
+					}
+					SimMessages.AddElementChunk(num, component.ElementID, component.Mass, num2, this.surfaceArea, this.thickness, handle.index);
 				}
 			}
 		}
 	}
 
-	private unsafe void SimUnregister()
+	protected unsafe void SimUnregister()
 	{
-		if (base.isSpawned && this.simHandle != -1 && !KMonoBehaviour.isLoadingScene)
+		if (this.simHandle != -1 && !KMonoBehaviour.isLoadingScene)
 		{
+			PrimaryElement component = base.GetComponent<PrimaryElement>();
 			if (Sim.IsValidHandle(this.simHandle))
 			{
-				PrimaryElement component = base.GetComponent<PrimaryElement>();
 				component.InternalTemperature = Game.Instance.simData.elementChunks[this.simHandle].temperature;
-				SimMessages.RemoveElementChunk(-1, this.simHandle);
+				SimMessages.RemoveElementChunk(this.simHandle, -1);
+				SimTemperatureTransfer.handleInstanceMap.Remove(this.simHandle);
 			}
 			this.simHandle = -1;
 		}
@@ -138,16 +230,35 @@ public class SimTemperatureTransfer : KMonoBehaviour, ISaveLoadableJson
 		{
 			instance.simHandle = num;
 			float temperature = Game.Instance.simData.elementChunks[instance.simHandle].temperature;
+			PrimaryElement component = instance.GetComponent<PrimaryElement>();
 			if (temperature <= 0f)
 			{
-				Debug.Assert(false, "Bad temperature");
+				KCrashReporter.Assert(false, "Bad temperature");
+			}
+			SimTemperatureTransfer.handleInstanceMap[instance.simHandle] = instance;
+			if (instance.pendingEnergyModifications > 0f)
+			{
+				instance.ModifyEnergy(instance.pendingEnergyModifications);
+				instance.pendingEnergyModifications = 0f;
 			}
 		}
 		else
 		{
-			SimMessages.RemoveElementChunk(-1, num);
+			SimMessages.RemoveElementChunk(num, -1);
 		}
 	}
 
-	private int simHandle = -1;
+	protected int simHandle = -1;
+
+	private static Dictionary<int, SimTemperatureTransfer> handleInstanceMap = new Dictionary<int, SimTemperatureTransfer>();
+
+	[SerializeField]
+	protected float surfaceArea = 10f;
+
+	[SerializeField]
+	protected float thickness = 0.01f;
+
+	private float pendingEnergyModifications;
+
+	public float deltaKJ;
 }

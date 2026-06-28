@@ -10,7 +10,7 @@ namespace FMOD
 			return Debug.FMOD5_Debug_Initialize(flags, mode, callback, filename);
 		}
 
-		[DllImport("fmodstudiol")]
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_Debug_Initialize(DEBUG_FLAGS flags, DEBUG_MODE mode, DEBUG_CALLBACK callback, string filename);
 	}
 }

@@ -6,8 +6,10 @@ public class KCompSymbol
 	public KCompSymbol(KAnimHashedString name, KAnimFile file)
 	{
 		this.name = name;
-		foreach (KAnim.Anim anim in file.GetData().anims)
+		KAnimFileData data = file.GetData();
+		for (int i = 0; i < data.animCount; i++)
 		{
+			KAnim.Anim anim = data.GetAnim(i);
 			if (anim.rootSymbol == name)
 			{
 				this.anims.Add(anim);

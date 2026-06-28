@@ -19,11 +19,12 @@ public class OxyRockConfig : IOreConfig
 		}
 	}
 
-	public void ConfigurePrefab(GameObject go)
+	public GameObject CreatePrefab()
 	{
-		GeneratedOre.ConfigureAnims(go, "oxyrock_kanim");
-		Sublimates sublimates = go.AddOrGet<Sublimates>();
+		GameObject gameObject = EntityTemplates.CreateOreEntity(this.ElementID, null);
+		Sublimates sublimates = gameObject.AddOrGet<Sublimates>();
 		sublimates.spawnFXHash = SpawnFXHashes.OxygenEmissionBubbles;
 		sublimates.info = new Sublimates.Info(0.4f, 0f, 1.8f, 1f, this.SublimeElementID);
+		return gameObject;
 	}
 }

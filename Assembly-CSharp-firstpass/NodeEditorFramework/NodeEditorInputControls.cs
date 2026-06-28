@@ -70,10 +70,10 @@ namespace NodeEditorFramework
 			}
 		}
 
-		[Hotkey(KeyCode.DownArrow, EventType.KeyDown)]
 		[Hotkey(KeyCode.RightArrow, EventType.KeyDown)]
-		[Hotkey(KeyCode.UpArrow, EventType.KeyDown)]
 		[Hotkey(KeyCode.LeftArrow, EventType.KeyDown)]
+		[Hotkey(KeyCode.UpArrow, EventType.KeyDown)]
+		[Hotkey(KeyCode.DownArrow, EventType.KeyDown)]
 		private static void KB_MoveNode(NodeEditorInputInfo inputInfo)
 		{
 			NodeEditorState editorState = inputInfo.editorState;
@@ -149,8 +149,8 @@ namespace NodeEditorFramework
 			}
 		}
 
-		[EventHandler(EventType.MouseUp)]
 		[EventHandler(EventType.MouseDown)]
+		[EventHandler(EventType.MouseUp)]
 		private static void HandleNodeDraggingEnd(NodeEditorInputInfo inputInfo)
 		{
 			inputInfo.editorState.dragNode = false;

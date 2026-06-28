@@ -9,6 +9,11 @@ public class ElementSpout : StateMachineComponent<ElementSpout.StatesInstance>
 		base.smi.StartSM();
 	}
 
+	public void SetEmitter(ElementEmitter emitter)
+	{
+		this.emitter = emitter;
+	}
+
 	public void ConfigureEmissionSettings(float emissionPollFrequency = 3f, float emissionIrregularity = 1.5f, float maxPressure = 1.5f, float perEmitAmount = 0.5f)
 	{
 		this.maxPressure = maxPressure;
@@ -17,7 +22,7 @@ public class ElementSpout : StateMachineComponent<ElementSpout.StatesInstance>
 		this.perEmitAmount = perEmitAmount;
 	}
 
-	[MyCmpAdd]
+	[SerializeField]
 	private ElementEmitter emitter;
 
 	[MyCmpAdd]
@@ -33,7 +38,7 @@ public class ElementSpout : StateMachineComponent<ElementSpout.StatesInstance>
 
 	private Vector2 emitPoint = Vector2.zero;
 
-	public class StatesInstance : GameStateMachine<ElementSpout.States, ElementSpout.StatesInstance, ElementSpout>.GameInstance
+	public class StatesInstance : GameStateMachine<ElementSpout.States, ElementSpout.StatesInstance, ElementSpout, object>.GameInstance
 	{
 		public StatesInstance(ElementSpout smi)
 			: base(smi)
@@ -49,7 +54,7 @@ public class ElementSpout : StateMachineComponent<ElementSpout.StatesInstance>
 			this.idle.Enter(delegate(ElementSpout.StatesInstance smi)
 			{
 				smi.Play("idle", KAnim.PlayMode.Once);
-				Grid.Objects[Grid.PosToCell(smi.gameObject.transform.position), 7] = smi.gameObject;
+				Grid.Objects[Grid.PosToCell(smi.gameObject.transform.position), 2] = smi.gameObject;
 				bool flag = Grid.Cell[Grid.CellLeft(Grid.PosToCell(smi.transform.position))].mass < smi.master.maxPressure;
 				bool flag2 = Grid.Cell[Grid.CellRight(Grid.PosToCell(smi.transform.position))].mass < smi.master.maxPressure;
 				bool flag3 = Grid.Cell[Grid.CellAbove(Grid.PosToCell(smi.transform.position))].mass < smi.master.maxPressure;
@@ -93,17 +98,16 @@ public class ElementSpout : StateMachineComponent<ElementSpout.StatesInstance>
 			});
 			this.emit.Enter(delegate(ElementSpout.StatesInstance smi)
 			{
-				smi.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.SpoutPressureBuilding);
-				smi.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.SpoutOverPressure);
+				smi.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.SpoutPressureBuilding, false);
+				smi.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.SpoutOverPressure, false);
 				smi.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.SpoutEmitting, this);
 				smi.Play("emit", KAnim.PlayMode.Once);
-				ElementEmitter component = smi.GetComponent<ElementEmitter>();
-				component.outputElement.outputElementOffset = smi.master.emitPoint;
-				component.ForceEmit(smi.master.perEmitAmount, -1f);
+				smi.master.emitter.outputElement.outputElementOffset = smi.master.emitPoint;
+				smi.master.emitter.ForceEmit(smi.master.perEmitAmount, -1f);
 				smi.ScheduleGoTo(1f + global::UnityEngine.Random.Range(0f, smi.master.emissionIrregularity), this.idle);
 			}).Exit(delegate(ElementSpout.StatesInstance smi)
 			{
-				smi.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.SpoutEmitting);
+				smi.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.SpoutEmitting, false);
 			});
 			this.overPressure.Enter(delegate(ElementSpout.StatesInstance smi)
 			{
@@ -113,10 +117,10 @@ public class ElementSpout : StateMachineComponent<ElementSpout.StatesInstance>
 			});
 		}
 
-		public GameStateMachine<ElementSpout.States, ElementSpout.StatesInstance, ElementSpout>.State idle;
+		public GameStateMachine<ElementSpout.States, ElementSpout.StatesInstance, ElementSpout, object>.State idle;
 
-		public GameStateMachine<ElementSpout.States, ElementSpout.StatesInstance, ElementSpout>.State emit;
+		public GameStateMachine<ElementSpout.States, ElementSpout.StatesInstance, ElementSpout, object>.State emit;
 
-		public GameStateMachine<ElementSpout.States, ElementSpout.StatesInstance, ElementSpout>.State overPressure;
+		public GameStateMachine<ElementSpout.States, ElementSpout.StatesInstance, ElementSpout, object>.State overPressure;
 	}
 }

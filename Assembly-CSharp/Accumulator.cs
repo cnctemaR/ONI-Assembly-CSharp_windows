@@ -6,12 +6,12 @@ public class Accumulator
 	{
 		this.name = name;
 		this.owner = owner;
-		owner.Subscribe(1969584890, new EventSystem.EventHandler(this.OnCleanUp));
+		owner.Subscribe(1969584890, new Action<object>(this.OnCleanUp));
 		this.timeWindow = _timeWindow;
 		this.handle = GameScheduler.Instance.SchedulePeriodic(this.GetDebugName() + ".Accumulator", this.timeWindow, delegate(object obj)
 		{
 			((Accumulator)obj).CalculateAverage();
-		}, this, null, 0f);
+		}, this, null, 0f, null);
 		if (AccumulatorManager.Instance != null)
 		{
 			AccumulatorManager.Instance.Add(this);
@@ -22,30 +22,45 @@ public class Accumulator
 	{
 		get
 		{
-			return this.accumulatedMass;
+			return this.accumulated;
 		}
 	}
 
-	public float AvgFlowRate
+	public float AvgRate
 	{
 		get
 		{
-			return this.avgFlowRate;
+			return this.avgRate;
 		}
 	}
 
-	public void Accumulate(float mass)
+	public void Accumulate(float amount)
 	{
-		this.accumulatedMass += mass;
+		this.accumulated += amount;
 	}
 
 	private void CalculateAverage()
 	{
 		if (this.timeWindow > 0f)
 		{
-			this.avgFlowRate = this.accumulatedMass / this.timeWindow;
-			this.accumulatedMass = 0f;
+			this.avgRate = this.accumulated / this.timeWindow;
+			this.accumulated = 0f;
 		}
+	}
+
+	public void RestartTimeWindow()
+	{
+		float num = this.timeWindow - this.handle.TimeRemaining;
+		if (num > 0f)
+		{
+			this.avgRate = this.accumulated / num;
+			this.accumulated = 0f;
+		}
+		this.handle.Clear();
+		this.handle = GameScheduler.Instance.SchedulePeriodic(this.GetDebugName() + ".Accumulator", this.timeWindow, delegate(object obj)
+		{
+			((Accumulator)obj).CalculateAverage();
+		}, this, null, 0f, null);
 	}
 
 	private void OnCleanUp(object data)
@@ -71,9 +86,9 @@ public class Accumulator
 
 	private float timeWindow;
 
-	private float avgFlowRate;
+	private float avgRate;
 
-	private float accumulatedMass;
+	private float accumulated;
 
 	private SchedulerHandle handle;
 

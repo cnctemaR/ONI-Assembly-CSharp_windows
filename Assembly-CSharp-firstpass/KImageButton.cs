@@ -30,9 +30,9 @@ public class KImageButton : KButton
 		}
 	}
 
-	protected override void Awake()
+	protected override void OnPrefabInit()
 	{
-		base.Awake();
+		base.OnPrefabInit();
 		this.fgImage.enabled = false;
 	}
 

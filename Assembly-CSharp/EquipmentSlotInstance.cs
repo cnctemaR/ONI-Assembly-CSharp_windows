@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 public class EquipmentSlotInstance : AssignableSlotInstance
 {
@@ -10,8 +11,8 @@ public class EquipmentSlotInstance : AssignableSlotInstance
 	public override AssignableSlotInstance.AssignableSaveData Save()
 	{
 		EquipmentSlotInstance.SaveData saveData = new EquipmentSlotInstance.SaveData();
-		base.Save(saveData);
 		saveData.isEquipped = this.isEquipped;
+		base.Save(saveData);
 		return saveData;
 	}
 
@@ -21,7 +22,22 @@ public class EquipmentSlotInstance : AssignableSlotInstance
 		EquipmentSlotInstance.SaveData saveData = assignable_save_data as EquipmentSlotInstance.SaveData;
 		if (saveData.isEquipped)
 		{
-			this.Equip(saveData.assignable.Get<Equippable>());
+			if (saveData.assignable == null || saveData.assignable.Get<Equippable>() == null)
+			{
+				Debug.LogWarning("Equippable was not loaded because it was not saved properly. This is expected for save games prior to March 8 2017");
+			}
+			else
+			{
+				Equippable equippable = saveData.assignable.Get<Equippable>();
+				if (equippable != null)
+				{
+					this.Equip(equippable);
+				}
+				else
+				{
+					Debug.LogWarning("Equippable was not loaded because it was null");
+				}
+			}
 		}
 	}
 
@@ -39,6 +55,8 @@ public class EquipmentSlotInstance : AssignableSlotInstance
 
 	public void Equip(Equippable equippable)
 	{
+		Debug.Assert(equippable != null);
+		Debug.Assert(equippable.gameObject != null);
 		base.Assign(equippable);
 		this.isEquipped = true;
 		equippable.gameObject.SetActive(false);
@@ -51,7 +69,7 @@ public class EquipmentSlotInstance : AssignableSlotInstance
 		{
 			Equippable equippable = this.assignable as Equippable;
 			this.assignable.gameObject.SetActive(true);
-			this.assignable.gameObject.transform.SetPosition(base.assignables.gameObject.transform.position);
+			this.assignable.gameObject.transform.SetPosition(base.assignables.gameObject.transform.position + Vector3.up / 2f);
 			equippable.OnUnequip(this);
 			this.isEquipped = false;
 			this.Unassign(true);

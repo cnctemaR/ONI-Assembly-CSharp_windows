@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using Klei;
 using UnityEngine;
 
 public class KAnimFile : ScriptableObject
@@ -16,7 +18,16 @@ public class KAnimFile : ScriptableObject
 			{
 				return KAnimBatchManager.NO_BATCH;
 			}
-			this._batchTag = KAnimGroupFile.GetGroupFile().GetGroupForHomeDirectory(new HashedString(this.homedirectory));
+			string text = this.homedirectory + "/mygroup.yaml";
+			if (File.Exists(text))
+			{
+				KAnimGroupFile.GroupFile groupFile = YamlIO<KAnimGroupFile.GroupFile>.LoadFile(text);
+				this._batchTag = new HashedString(groupFile.groupID);
+			}
+			else
+			{
+				this._batchTag = KAnimGroupFile.GetGroupFile().GetGroupForHomeDirectory(new HashedString(this.homedirectory));
+			}
 			return this._batchTag;
 		}
 	}
@@ -25,12 +36,7 @@ public class KAnimFile : ScriptableObject
 	{
 		if (this.data == null)
 		{
-			this.data = KAnimFileManager.Get().Load(this);
-			if (this.data == null)
-			{
-				Debug.LogError("Could not load data for anim " + base.name);
-				return null;
-			}
+			this.data = KGlobalAnimParser.Get().Load(this);
 		}
 		return this.data;
 	}

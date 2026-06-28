@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public class ClearChore : Chore<ClearChore.StatesInstance>
 {
 	public ClearChore(ChoreType chore_type, Pickupable clearable, ChoreProvider chore_provider = null, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null)
-		: base(chore_type, clearable, chore_provider, run_until_complete, on_complete, on_begin, on_end, int.MaxValue, false, true)
+		: base(chore_type, clearable, chore_provider, run_until_complete, on_complete, on_begin, on_end, int.MaxValue, false, true, 0)
 	{
 		this.smi = new ClearChore.StatesInstance(this);
 		this.smi.sm.clearable.Set(clearable, this.smi);
@@ -15,18 +15,17 @@ public class ClearChore : Chore<ClearChore.StatesInstance>
 	{
 		Pickupable pickupable = this.smi.sm.clearable.Get<Pickupable>(this.smi);
 		int count = GlobalChoreProvider.Instance.fetchChores.Count;
-		int num = int.MinValue;
-		GlobalChoreProvider.Instance.fetchChores.Sort((FetchChore x, FetchChore y) => y.masterPriority - x.masterPriority);
+		Chore.Precondition.Context context = default(Chore.Precondition.Context);
 		for (int i = 0; i < count; i++)
 		{
 			FetchChore fetchChore = GlobalChoreProvider.Instance.fetchChores[i];
-			if (fetchChore.masterPriority > num)
+			bool flag = pickupable.KPrefabID.HasAnyTags(fetchChore.tags);
+			if (flag)
 			{
-				Chore.Precondition.Context context = new Chore.Precondition.Context(fetchChore, consumer, is_attempting_override, pickupable);
+				context.Set(fetchChore, consumer, is_attempting_override, pickupable);
 				context.RunPreconditions();
 				if (context.IsSuccess())
 				{
-					num = fetchChore.masterPriority;
 					context.masterPriority = base.masterPriority;
 					context.SetPriority(this);
 					contexts.Add(context);
@@ -36,7 +35,16 @@ public class ClearChore : Chore<ClearChore.StatesInstance>
 		}
 	}
 
-	public class StatesInstance : GameStateMachine<ClearChore.States, ClearChore.StatesInstance, ClearChore>.GameInstance
+	public override void Cleanup()
+	{
+		base.Cleanup();
+		if (this.gameObject != null)
+		{
+			this.gameObject.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.NoClearLocationsAvailable, false);
+		}
+	}
+
+	public class StatesInstance : GameStateMachine<ClearChore.States, ClearChore.StatesInstance, ClearChore, object>.GameInstance
 	{
 		public StatesInstance(ClearChore master)
 			: base(master)
@@ -51,6 +59,6 @@ public class ClearChore : Chore<ClearChore.StatesInstance>
 			default_state = this.root;
 		}
 
-		public StateMachine<ClearChore.States, ClearChore.StatesInstance, ClearChore>.TargetParameter clearable;
+		public StateMachine<ClearChore.States, ClearChore.StatesInstance, ClearChore, object>.TargetParameter clearable;
 	}
 }

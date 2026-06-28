@@ -4,20 +4,20 @@ using UnityEngine;
 
 public class BatchSet
 {
-	public BatchSet(KAnimBatchGroup group, BatchKey key, Vector2I spacialIdx)
+	public BatchSet(KAnimBatchGroup batchGroup, BatchKey batchKey, Vector2I spacialIdx)
 	{
 		this.idx = spacialIdx;
-		this.key = key;
+		this.key = batchKey;
 		this.dirty = true;
 		this.active = true;
-		this.group = group;
-		this.bounds = new Bounds(new Vector2((float)this.idx.x + 0.5f, (float)this.idx.y + 0.5f), new Vector2(1f, 1f));
+		this.group = batchGroup;
+		this.bounds = new Bounds(new Vector2((float)this.idx.x + 0.5f, (float)this.idx.y + 0.5f), Vector2.one);
 		this.batches = new List<KAnimBatch>();
 	}
 
 	public KAnimBatchGroup group { get; private set; }
 
-	public List<KAnimBatch> batches { get; private set; }
+	private protected List<KAnimBatch> batches { protected get; private set; }
 
 	public Bounds bounds { get; private set; }
 
@@ -29,7 +29,20 @@ public class BatchSet
 
 	public bool active { get; private set; }
 
+	public int batchCount
+	{
+		get
+		{
+			return this.batches.Count;
+		}
+	}
+
 	public int dirtyBatchLastFrame { get; private set; }
+
+	public KAnimBatch GetBatch(int idx)
+	{
+		return this.batches[idx];
+	}
 
 	public void Add(KAnimConverter.IAnimConverter controller)
 	{
@@ -67,23 +80,42 @@ public class BatchSet
 				return;
 			}
 		}
-		KAnimBatch kanimBatch = new KAnimBatch(this.group, this, layer, controller.GetPosition().z, this.idx, materialType);
+		KAnimBatch kanimBatch = new KAnimBatch(this.group, layer, controller.GetZ(), materialType);
 		kanimBatch.Init();
-		this.group.batchCount++;
-		this.batches.Add(kanimBatch);
-		this.batches.Sort((KAnimBatch b0, KAnimBatch b1) => b0.position.z.CompareTo(b1.position.z));
+		this.AddBatch(kanimBatch);
 		kanimBatch.Register(controller);
-		this.SetDirty();
 	}
 
 	public void RemoveBatch(KAnimBatch batch)
 	{
-		if (this.group == batch.group && batch.size == 0 && this.group.batchCount > 1)
+		Debug.Assert(batch.batchset == this);
+		if (this.batches.Contains(batch))
 		{
 			this.group.batchCount--;
 			this.batches.Remove(batch);
-			batch.DestroyTex();
+			batch.SetBatchSet(null);
 		}
+	}
+
+	public void AddBatch(KAnimBatch batch)
+	{
+		if (batch.batchset != this)
+		{
+			if (batch.batchset != null)
+			{
+				batch.batchset.RemoveBatch(batch);
+			}
+			batch.SetBatchSet(this);
+			if (!this.batches.Contains(batch))
+			{
+				this.group.batchCount++;
+				this.batches.Add(batch);
+				this.batches.Sort((KAnimBatch b0, KAnimBatch b1) => b0.position.z.CompareTo(b1.position.z));
+			}
+		}
+		Debug.Assert(batch.position.x == (float)(this.idx.x * 16));
+		Debug.Assert(batch.position.y == (float)(this.idx.y * 16));
+		this.SetDirty();
 	}
 
 	public void SetDirty()
@@ -95,18 +127,25 @@ public class BatchSet
 	{
 		if (isActive != this.active)
 		{
-			if (this.active)
+			this.batches.RemoveAll((KAnimBatch b) => b == null);
+			if (!isActive)
 			{
 				for (int i = 0; i < this.batches.Count; i++)
 				{
-					this.batches[i].Deactivate();
+					if (this.batches[i] != null)
+					{
+						this.batches[i].Deactivate();
+					}
 				}
 			}
 			else
 			{
 				for (int j = 0; j < this.batches.Count; j++)
 				{
-					this.batches[j].Activate();
+					if (this.batches[j] != null)
+					{
+						this.batches[j].Activate();
+					}
 				}
 				this.SetDirty();
 			}
@@ -114,15 +153,25 @@ public class BatchSet
 		this.active = isActive;
 	}
 
-	public int UpdateDirty()
+	public int lastDirtyFrame { get; private set; }
+
+	public int UpdateDirty(int frame)
 	{
 		this.dirtyBatchLastFrame = 0;
 		if (this.dirty)
 		{
 			for (int i = 0; i < this.batches.Count; i++)
 			{
-				this.dirtyBatchLastFrame += this.batches[i].UpdateDirty();
+				try
+				{
+					this.dirtyBatchLastFrame += this.batches[i].UpdateDirty(frame);
+				}
+				catch (Exception ex)
+				{
+					Debug.LogError("BatchSet.UpdateDirty: " + ex.Message + "\n" + ex.StackTrace);
+				}
 			}
+			this.lastDirtyFrame = frame;
 			this.dirty = false;
 		}
 		return this.dirtyBatchLastFrame;

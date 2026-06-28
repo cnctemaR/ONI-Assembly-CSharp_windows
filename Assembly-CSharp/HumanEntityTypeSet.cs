@@ -23,8 +23,11 @@ public class HumanEntityTypeSet : EntityTypeSet
 		entityType.amounts.Add(Db.Get().Amounts.Bladder);
 		entityType.amounts.Add(Db.Get().Amounts.Decor);
 		Trait trait = GameEntityTypeSet.CreateLivingEntityBaseTrait(id, name, -100f, -1000000f, 0.1f, 0f, 100f, 8f, modifier_set);
-		trait.Add(new AttributeModifier(Db.Get().Attributes.DecorExpectation.Id, -25f, name, false));
-		trait.Add(new AttributeModifier(Db.Get().Attributes.ToiletEfficiency.Id, 1f, name, false));
+		trait.Add(new AttributeModifier(Db.Get().Attributes.DecorExpectation.Id, -25f, name, false, false));
+		trait.Add(new AttributeModifier(Db.Get().Attributes.FoodExpectation.Id, -3f, name, false, false));
+		trait.Add(new AttributeModifier(Db.Get().Attributes.ToiletEfficiency.Id, 1f, name, false, false));
+		trait.Add(new AttributeModifier(Db.Get().Attributes.RoomTemperaturePreference.Id, 0f, name, false, false));
+		trait.Add(new AttributeModifier(Db.Get().Attributes.Sneezyness.Id, 0f, name, false, false));
 		entityType.baseTraits.Add(trait);
 		EntityPrefabs.Instance.MinionPrefab.GetComponent<Health>().SetMaxHitPoints(100f);
 		if (!HumanEntityTypeSet.dupeInitHackHasRun)

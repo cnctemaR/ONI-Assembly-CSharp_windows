@@ -16,7 +16,7 @@ public class LoopingSoundManager : KMonoBehaviour
 	{
 		SpeedControlScreen speedControlScreen = SpeedControlScreen.Instance;
 		speedControlScreen.OnGameSpeedChanged = (global::System.Action)Delegate.Combine(speedControlScreen.OnGameSpeedChanged, new global::System.Action(LoopingSoundManager.instance.OnGameSpeedChanged));
-		Game.Instance.Subscribe(-1788536802, new EventSystem.EventHandler(LoopingSoundManager.instance.OnPauseChanged));
+		Game.Instance.Subscribe(-1788536802, new Action<object>(LoopingSoundManager.instance.OnPauseChanged));
 	}
 
 	protected override void OnCleanUp()
@@ -54,12 +54,12 @@ public class LoopingSoundManager : KMonoBehaviour
 		}
 	}
 
-	public void Add(string path, EventInstance ev)
+	public void Add(string path, EventInstance ev, bool pauseOnGamePause = true)
 	{
 		LoopingSoundManager.Entry entry = null;
 		if (!this.entries.TryGetValue(path, out entry))
 		{
-			entry = new LoopingSoundManager.Entry(path, ev);
+			entry = new LoopingSoundManager.Entry(path, ev, pauseOnGamePause);
 			this.entries[path] = entry;
 		}
 		entry.Add(ev);
@@ -73,7 +73,7 @@ public class LoopingSoundManager : KMonoBehaviour
 		}
 	}
 
-	public static EventInstance PrepareSound(string path, Vector3 pos)
+	public static EventInstance PrepareSound(string path, Vector3 pos, bool pauseOnGamePause = true)
 	{
 		if (path == null)
 		{
@@ -86,8 +86,9 @@ public class LoopingSoundManager : KMonoBehaviour
 			Output.LogError(new object[] { "StartSound() Couldnt Get FMOD event for asset [" + path + "]" });
 			return null;
 		}
-		LoopingSoundManager.Get().Add(path, eventInstance);
-		eventInstance.set3DAttributes(pos.To3DAttributes());
+		LoopingSoundManager.Get().Add(path, eventInstance, pauseOnGamePause);
+		Vector3 vector = new Vector3(pos.x, pos.y, 0f);
+		eventInstance.set3DAttributes(CameraController.Instance.GetVerticallyScaledPosition(vector).To3DAttributes());
 		LoopingSoundManager.UpdateSpeed(eventInstance);
 		if (Time.timeScale == 0f)
 		{
@@ -96,7 +97,7 @@ public class LoopingSoundManager : KMonoBehaviour
 		return eventInstance;
 	}
 
-	public static EventInstance StartSound(string path, Vector3 pos)
+	public static EventInstance StartSound(string path, Vector3 pos, bool pauseOnGamePause = true)
 	{
 		if (path == null)
 		{
@@ -109,11 +110,12 @@ public class LoopingSoundManager : KMonoBehaviour
 			Output.LogError(new object[] { "StartSound() Couldnt Get FMOD event for asset [" + path + "]" });
 			return null;
 		}
-		LoopingSoundManager.Get().Add(path, eventInstance);
-		eventInstance.set3DAttributes(pos.To3DAttributes());
+		LoopingSoundManager.Get().Add(path, eventInstance, pauseOnGamePause);
+		Vector3 vector = new Vector3(pos.x, pos.y, 0f);
+		eventInstance.set3DAttributes(CameraController.Instance.GetVerticallyScaledPosition(vector).To3DAttributes());
 		LoopingSoundManager.UpdateSpeed(eventInstance);
 		eventInstance.start();
-		if (Time.timeScale == 0f)
+		if (Time.timeScale == 0f && pauseOnGamePause)
 		{
 			eventInstance.setPaused(true);
 		}
@@ -131,7 +133,7 @@ public class LoopingSoundManager : KMonoBehaviour
 	private void OnGameSpeedChanged()
 	{
 		float num = Time.timeScale * 1f;
-		foreach (KeyValuePair<string, LoopingSoundManager.Entry> keyValuePair in this.entries)
+		foreach (KeyValuePair<HashedString, LoopingSoundManager.Entry> keyValuePair in this.entries)
 		{
 			keyValuePair.Value.UpdateSpeed(num);
 		}
@@ -148,20 +150,24 @@ public class LoopingSoundManager : KMonoBehaviour
 	private void OnPauseChanged(object data)
 	{
 		bool flag = (bool)data;
-		foreach (KeyValuePair<string, LoopingSoundManager.Entry> keyValuePair in this.entries)
+		foreach (KeyValuePair<HashedString, LoopingSoundManager.Entry> keyValuePair in this.entries)
 		{
-			keyValuePair.Value.SetPaused(flag);
+			if (keyValuePair.Value.pauseOnGamePaused)
+			{
+				keyValuePair.Value.SetPaused(flag);
+			}
 		}
 	}
 
 	private static LoopingSoundManager instance;
 
-	private Dictionary<string, LoopingSoundManager.Entry> entries = new Dictionary<string, LoopingSoundManager.Entry>();
+	private Dictionary<HashedString, LoopingSoundManager.Entry> entries = new Dictionary<HashedString, LoopingSoundManager.Entry>();
 
 	private class Entry
 	{
-		public Entry(string path, EventInstance ev)
+		public Entry(string path, EventInstance ev, bool pauseOnGamePaused = true)
 		{
+			this.pauseOnGamePaused = pauseOnGamePaused;
 			EventDescription eventDescription;
 			ev.getDescription(out eventDescription);
 			USER_PROPERTY user_PROPERTY;
@@ -208,7 +214,7 @@ public class LoopingSoundManager : KMonoBehaviour
 			float num = 0f;
 			foreach (EventInstance eventInstance in this.events)
 			{
-				if (CameraController.Instance.IsAudibleSound(KFMOD.GetInstancePosition(eventInstance)))
+				if (CameraController.Instance.IsAudibleSound(KFMOD.GetInstancePosition(eventInstance), 0f))
 				{
 					num += 1f;
 				}
@@ -277,5 +283,7 @@ public class LoopingSoundManager : KMonoBehaviour
 		private float maxObjects;
 
 		private string curveType;
+
+		public bool pauseOnGamePaused;
 	}
 }

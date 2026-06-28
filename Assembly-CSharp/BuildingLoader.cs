@@ -17,8 +17,10 @@ public class BuildingLoader : DefLoader
 		gameObject.SetActive(false);
 		gameObject.AddComponent<KPrefabID>();
 		gameObject.AddComponent<KSelectable>();
-		gameObject.AddComponent<PrimaryElement>();
 		gameObject.AddComponent<StateMachineController>();
+		PrimaryElement primaryElement = gameObject.AddComponent<PrimaryElement>();
+		primaryElement.Mass = 1f;
+		primaryElement.Temperature = 293f;
 		return gameObject;
 	}
 
@@ -101,27 +103,6 @@ public class BuildingLoader : DefLoader
 				kbatchedAnimController.materialType = KAnimBatchGroup.MaterialType.Default;
 			}
 		}
-		BuildingLoader.UpdateComponentRequirement<KAnimGridTileVisualizer>(go, flag && def.isKAnimTile && !def.isGraphTile);
-		KAnimGraphTileVisualizer kanimGraphTileVisualizer = BuildingLoader.UpdateComponentRequirement<KAnimGraphTileVisualizer>(go, flag && def.isKAnimTile && def.isGraphTile);
-		if (kanimGraphTileVisualizer != null)
-		{
-			Wire component = def.BuildingTemplate.GetComponent<Wire>();
-			if (component != null)
-			{
-				kanimGraphTileVisualizer.connectionSource = KAnimGraphTileVisualizer.ConnectionSource.Electrical;
-			}
-			else
-			{
-				Vent vent = go.GetComponent<Vent>();
-				if (vent == null)
-				{
-					vent = def.BuildingComplete.GetComponent<Vent>();
-				}
-				kanimGraphTileVisualizer.connectionSource = ((vent.transferType != Vent.Transfer.Gas) ? KAnimGraphTileVisualizer.ConnectionSource.Liquid : KAnimGraphTileVisualizer.ConnectionSource.Gas);
-			}
-			BuildingComplete component2 = go.GetComponent<BuildingComplete>();
-			kanimGraphTileVisualizer.isPhysicalBuilding = component2 != null;
-		}
 		BoxCollider2D boxCollider2D = BuildingLoader.UpdateComponentRequirement<BoxCollider2D>(go, flag && !no_collider);
 		if (boxCollider2D != null)
 		{
@@ -155,7 +136,6 @@ public class BuildingLoader : DefLoader
 	{
 		BuildingCellVisualizer component = src.GetComponent<BuildingCellVisualizer>();
 		target.secondOutputOffset = component.secondOutputOffset;
-		target.secondOutputColour = component.secondOutputColour;
 	}
 
 	public GameObject CreateBuildingUnderConstruction(BuildingDef def, bool isRelocating)
@@ -173,7 +153,7 @@ public class BuildingLoader : DefLoader
 		Constructable component2 = gameObject.GetComponent<Constructable>();
 		component2.isRelocating = isRelocating;
 		component2.SetWorkTime((!isRelocating) ? def.ConstructionTime : 4f);
-		Rotatable rotatable = BuildingLoader.UpdateComponentRequirement<Rotatable>(gameObject, def.PermittedRotations != Rotatable.PermittedRotations.Unrotatable);
+		Rotatable rotatable = BuildingLoader.UpdateComponentRequirement<Rotatable>(gameObject, def.PermittedRotations != PermittedRotations.Unrotatable);
 		if (rotatable)
 		{
 			rotatable.permittedRotations = def.PermittedRotations;
@@ -201,17 +181,23 @@ public class BuildingLoader : DefLoader
 			gameObject.transform.position = new Vector3(0f, 0f, Grid.GetLayerZ(def.SceneLayer));
 			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 			component.MassPerUnit = def.Mass[0];
+			BuildingHP buildingHP = BuildingLoader.UpdateComponentRequirement<BuildingHP>(gameObject, true);
+			buildingHP.SetHitPoints(def.HitPoints);
+			BuildingLoader.UpdateComponentRequirement<Repairable>(gameObject, true);
 			int num = LayerMask.NameToLayer("Default");
 			gameObject.layer = num;
 			Building component2 = gameObject.GetComponent<BuildingComplete>();
 			component2.Def = def;
-			BuildingLoader.AddVentComponents(def, gameObject);
+			if (def.InputConduitType != ConduitType.None || def.OutputConduitType != ConduitType.None)
+			{
+				gameObject.AddComponent<BuildingConduitEndpoints>();
+			}
 			if (!BuildingLoader.Add2DComponents(def, gameObject, null, false, -1))
 			{
 				Debug.Log(def.Name + " is not yet a 2d building!");
 			}
-			BuildingLoader.UpdateComponentRequirement<EnergyConsumer>(gameObject, def.RequiresPower);
-			Rotatable rotatable = BuildingLoader.UpdateComponentRequirement<Rotatable>(gameObject, def.PermittedRotations != Rotatable.PermittedRotations.Unrotatable);
+			BuildingLoader.UpdateComponentRequirement<EnergyConsumer>(gameObject, def.RequiresPowerInput);
+			Rotatable rotatable = BuildingLoader.UpdateComponentRequirement<Rotatable>(gameObject, def.PermittedRotations != PermittedRotations.Unrotatable);
 			if (rotatable)
 			{
 				rotatable.permittedRotations = def.PermittedRotations;
@@ -219,25 +205,29 @@ public class BuildingLoader : DefLoader
 			if (def.Breakable)
 			{
 				gameObject.AddComponent<Breakable>();
-				gameObject.AddComponent<Repairable>();
 			}
 			ConduitConsumer conduitConsumer = BuildingLoader.UpdateComponentRequirement<ConduitConsumer>(gameObject, def.InputConduitType == ConduitType.Gas || def.InputConduitType == ConduitType.Liquid);
 			if (conduitConsumer != null)
 			{
 				conduitConsumer.SetConduitData(def.InputConduitType);
 			}
-			bool flag = def.RequiresPower || def.InputConduitType == ConduitType.Gas || def.InputConduitType == ConduitType.Liquid;
+			bool flag = def.RequiresPowerInput || def.InputConduitType == ConduitType.Gas || def.InputConduitType == ConduitType.Liquid;
 			RequireInputs requireInputs = BuildingLoader.UpdateComponentRequirement<RequireInputs>(gameObject, flag);
 			if (requireInputs != null)
 			{
-				requireInputs.SetRequirements(def.RequiresPower, def.InputConduitType == ConduitType.Gas || def.InputConduitType == ConduitType.Liquid);
+				requireInputs.SetRequirements(def.RequiresPowerInput, def.InputConduitType == ConduitType.Gas || def.InputConduitType == ConduitType.Liquid);
 			}
 			BuildingLoader.UpdateComponentRequirement<RequireOutputs>(gameObject, def.OutputConduitType != ConduitType.None);
-			bool flag2 = gameObject.GetComponent<SimCellOccupier>();
-			BuildingLoader.UpdateComponentRequirement<Operational>(gameObject, !def.isUtility && !flag2);
+			BuildingLoader.UpdateComponentRequirement<Operational>(gameObject, !def.isUtility);
 			if (def.Floodable)
 			{
 				gameObject.AddComponent<Floodable>();
+			}
+			if (def.Overheatable)
+			{
+				Overheatable overheatable = gameObject.AddComponent<Overheatable>();
+				overheatable.baseOverheatTemp = def.OverheatTemperature;
+				overheatable.baseFatalTemp = def.FatalHot;
 			}
 			if (def.Entombable)
 			{
@@ -254,19 +244,10 @@ public class BuildingLoader : DefLoader
 			}
 			BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(gameObject, BuildingCellVisualizer.CheckRequiresComponent(def));
 			LoopingSounds component3 = gameObject.GetComponent<LoopingSounds>();
-			if (def.IsTilePiece && def.isKAnimTile)
-			{
-				if (component3 != null)
-				{
-					global::UnityEngine.Object.DestroyImmediate(component3);
-				}
-			}
-			else if (component3 == null)
+			if (component3 == null)
 			{
 				gameObject.AddComponent<LoopingSounds>();
 			}
-			BuildingLoader.UpdateComponentRequirement<StructureTemperature>(gameObject, !def.isSolidTile && gameObject.GetComponent<Door>() == null);
-			BuildingLoader.UpdateComponentRequirement<InfraredVisualizer>(gameObject, !def.isSolidTile);
 			BuildingLoader.UpdateComponentRequirement<Upgradable>(gameObject, def.Upgradeable);
 			DecorProvider decorProvider = BuildingLoader.UpdateComponentRequirement<DecorProvider>(gameObject, true);
 			decorProvider.baseDecor = def.BaseDecor;
@@ -279,100 +260,18 @@ public class BuildingLoader : DefLoader
 		return gameObject;
 	}
 
-	private static void AddVentComponents(BuildingDef def, GameObject go)
-	{
-		Vent[] array = go.GetComponents<Vent>();
-		bool flag = def.InputConduitType != ConduitType.None;
-		bool flag2 = def.OutputConduitType == ConduitType.Gas || def.OutputConduitType == ConduitType.Liquid;
-		int num = 0;
-		num += ((!flag) ? 0 : 1);
-		num += ((!flag2) ? 0 : 1);
-		if (array == null || array.Length == 0)
-		{
-			for (int i = 0; i < num; i++)
-			{
-				go.AddComponent<Vent>();
-			}
-		}
-		else if (array != null)
-		{
-			if (array.Length < num)
-			{
-				for (int j = array.Length; j < num; j++)
-				{
-					go.AddComponent<Vent>();
-				}
-			}
-			else
-			{
-				for (int k = num; k < array.Length; k++)
-				{
-					global::UnityEngine.Object.DestroyImmediate(array[k]);
-				}
-			}
-		}
-		array = go.GetComponents<Vent>();
-		int num2 = 0;
-		Vent vent = null;
-		if (flag)
-		{
-			vent = array[num2];
-			num2++;
-		}
-		Vent vent2 = null;
-		if (flag2)
-		{
-			vent2 = array[num2];
-			num2++;
-		}
-		if (vent != null)
-		{
-			switch (def.InputConduitType)
-			{
-			case ConduitType.Gas:
-				vent.transferType = Vent.Transfer.Gas;
-				vent.endpointType = Vent.Endpoint.Sink;
-				break;
-			case ConduitType.Liquid:
-				vent.transferType = Vent.Transfer.Liquid;
-				vent.endpointType = Vent.Endpoint.Sink;
-				break;
-			case ConduitType.GasConduit:
-				vent.transferType = Vent.Transfer.Gas;
-				vent.endpointType = Vent.Endpoint.Conduit;
-				break;
-			case ConduitType.LiquidConduit:
-				vent.transferType = Vent.Transfer.Liquid;
-				vent.endpointType = Vent.Endpoint.Conduit;
-				break;
-			}
-		}
-		if (vent2 != null)
-		{
-			ConduitType outputConduitType = def.OutputConduitType;
-			if (outputConduitType != ConduitType.Gas)
-			{
-				if (outputConduitType == ConduitType.Liquid)
-				{
-					vent2.transferType = Vent.Transfer.Liquid;
-					vent2.endpointType = Vent.Endpoint.Source;
-				}
-			}
-			else
-			{
-				vent2.transferType = Vent.Transfer.Gas;
-				vent2.endpointType = Vent.Endpoint.Source;
-			}
-		}
-	}
-
 	public GameObject CreateBuildingPreview(BuildingDef def)
 	{
 		GameObject gameObject = this.CreateBuilding(def, this.previewTemplate, SceneOrganizer.Instance.GetFolder(Folder.BuildingPreviews));
 		int num = LayerMask.NameToLayer("Place");
 		gameObject.transform.position = new Vector3(0f, 0f, Grid.GetLayerZ(def.SceneLayer));
 		BuildingLoader.Add2DComponents(def, gameObject, "place", true, num);
-		Rotatable rotatable = BuildingLoader.UpdateComponentRequirement<Rotatable>(gameObject, def.PermittedRotations != Rotatable.PermittedRotations.Unrotatable);
+		KAnimControllerBase component = gameObject.GetComponent<KAnimControllerBase>();
+		if (component != null)
+		{
+			component.fgLayer = Grid.SceneLayer.NoLayer;
+		}
+		Rotatable rotatable = BuildingLoader.UpdateComponentRequirement<Rotatable>(gameObject, def.PermittedRotations != PermittedRotations.Unrotatable);
 		if (rotatable)
 		{
 			rotatable.permittedRotations = def.PermittedRotations;
@@ -384,10 +283,10 @@ public class BuildingLoader : DefLoader
 		{
 			BuildingLoader.CopyBuildingCellVisualizer(def.BuildingComplete, buildingCellVisualizer);
 		}
-		KAnimGraphTileVisualizer component = gameObject.GetComponent<KAnimGraphTileVisualizer>();
-		if (component != null)
+		KAnimGraphTileVisualizer component2 = gameObject.GetComponent<KAnimGraphTileVisualizer>();
+		if (component2 != null)
 		{
-			global::UnityEngine.Object.DestroyImmediate(component);
+			global::UnityEngine.Object.DestroyImmediate(component2);
 		}
 		gameObject.PreInit();
 		return gameObject;

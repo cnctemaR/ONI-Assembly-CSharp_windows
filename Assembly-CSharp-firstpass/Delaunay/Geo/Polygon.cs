@@ -505,20 +505,18 @@ namespace Delaunay.Geo
 			return true;
 		}
 
-		public void DebugDraw(Color colour, bool drawCentroid = false, float duration = 1f, float scale = 1f)
+		public void DebugDraw(Color colour, bool drawCentroid = false, float duration = 1f, float inset = 0f)
 		{
 			Vector2 vector = this.Centroid();
-			float num = scale + (1f - scale) / 2f;
 			for (int i = 0; i < this.vertices.Count; i++)
 			{
 				Vector2 vector2 = this.vertices[i];
 				Vector2 vector3 = this.vertices[(i >= this.vertices.Count - 1) ? 0 : (i + 1)];
-				if (scale != 1f)
+				if (inset != 0f)
 				{
-					Vector2 vector4 = (vector3 - vector2) * 0.5f;
-					Vector2 vector5 = vector4 + vector2;
-					Vector2 vector6 = (vector - vector5).normalized * scale;
-					Debug.DrawLine(vector5 - vector4 * num + vector6, vector5 + vector4 * num + vector6, colour, duration);
+					Vector2 vector4 = (vector2 - vector).normalized * -inset;
+					Vector2 vector5 = (vector3 - vector).normalized * -inset;
+					Debug.DrawLine(vector2 + vector4, vector3 + vector5, colour, duration);
 				}
 				else
 				{

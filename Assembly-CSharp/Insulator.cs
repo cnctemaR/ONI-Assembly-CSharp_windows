@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[SkipSaveFileSerialization]
 public class Insulator : KMonoBehaviour
 {
 	protected override void OnSpawn()

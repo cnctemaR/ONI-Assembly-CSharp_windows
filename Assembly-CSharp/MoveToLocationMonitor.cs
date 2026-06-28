@@ -10,23 +10,23 @@ public class MoveToLocationMonitor : GameStateMachine<MoveToLocationMonitor, Mov
 		this.moving.ToggleChore((MoveToLocationMonitor.Instance smi) => new MoveChore(smi.master, Db.Get().ChoreTypes.MoveTo, (MoveChore.StatesInstance smii) => smi.targetCell, false), this.satisfied, false);
 	}
 
-	public GameStateMachine<MoveToLocationMonitor, MoveToLocationMonitor.Instance, IStateMachineTarget>.State satisfied;
+	public GameStateMachine<MoveToLocationMonitor, MoveToLocationMonitor.Instance, IStateMachineTarget, object>.State satisfied;
 
-	public GameStateMachine<MoveToLocationMonitor, MoveToLocationMonitor.Instance, IStateMachineTarget>.State moving;
+	public GameStateMachine<MoveToLocationMonitor, MoveToLocationMonitor.Instance, IStateMachineTarget, object>.State moving;
 
-	public new class Instance : GameStateMachine<MoveToLocationMonitor, MoveToLocationMonitor.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<MoveToLocationMonitor, MoveToLocationMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)
 		{
-			master.Subscribe(493375141, new EventSystem.EventHandler(this.OnRefreshUserMenu));
+			master.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		}
 
 		private void OnRefreshUserMenu(object data)
 		{
 			UserMenu component = base.master.GetComponent<UserMenu>();
 			string text = UI.USERMENUACTIONS.MOVETOLOCATION.TOOLTIP;
-			component.AddButton(new KIconButtonMenu.ButtonInfo("action_control", UI.USERMENUACTIONS.MOVETOLOCATION.NAME, new global::System.Action(this.OnClickMoveToLocation), global::Action.NumActions, null, null, null, null, text));
+			component.AddButton(new KIconButtonMenu.ButtonInfo("action_control", UI.USERMENUACTIONS.MOVETOLOCATION.NAME, new global::System.Action(this.OnClickMoveToLocation), global::Action.NumActions, null, null, null, text, true), 0.2f);
 		}
 
 		private void OnClickMoveToLocation()
@@ -43,7 +43,7 @@ public class MoveToLocationMonitor : GameStateMachine<MoveToLocationMonitor, Mov
 
 		public override void StopSM(string reason)
 		{
-			base.master.Unsubscribe(493375141, new EventSystem.EventHandler(this.OnRefreshUserMenu));
+			base.master.Unsubscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 			base.StopSM(reason);
 		}
 

@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Klei.AI
 {
 	[SerializationConfig(MemberSerialization.OptIn)]
-	public class AmountInstance : ModifierInstance<Amount>, ISaveLoadableJson
+	public class AmountInstance : ModifierInstance<Amount>, ISaveLoadable
 	{
 		public AmountInstance(Amount amount, GameObject game_object)
 			: base(game_object, amount)
@@ -89,5 +89,7 @@ namespace Klei.AI
 		public Action<float> OnDelta;
 
 		public global::System.Action OnMaxValueReached;
+
+		public bool paused;
 	}
 }

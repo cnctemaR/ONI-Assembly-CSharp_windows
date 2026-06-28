@@ -11,7 +11,6 @@ public class UpdateManager : MonoBehaviour
 		UpdateManager.TypeInfos.Clear();
 		UpdateManager.UpdateGroups = new SimUpdateGroup[3];
 		UpdateManager.instance = this;
-		this.elapsedTime = 0f;
 		for (int i = 0; i < UpdateManager.UpdateGroups.Length; i++)
 		{
 			UpdateManager.UpdateGroups[i] = new SimUpdateGroup(((UpdateManager.ListType)i).ToString());
@@ -53,18 +52,13 @@ public class UpdateManager : MonoBehaviour
 			queuedData2.typeInfo.Remove(queuedData2.behaviour);
 		}
 		this.queuedRemoved.Clear();
-		this.elapsedTime += dt;
-		this.ticks = (int)(this.elapsedTime / 0.25f);
-		this.ticks = Mathf.Min(3, this.ticks);
-		this.elapsedTime -= (float)this.ticks * 0.25f;
-		int num = 0;
-		while (!this.skipAllUpdates && num < this.ticks)
+		if (!this.skipAllUpdates)
 		{
 			foreach (SimUpdateGroup simUpdateGroup in UpdateManager.UpdateGroups)
 			{
-				simUpdateGroup.Update(0.25f);
+				simUpdateGroup.Update(dt);
 			}
-			num++;
+			KComponentSpawn.instance.comps.SimUpdate(dt);
 		}
 	}
 
@@ -110,10 +104,6 @@ public class UpdateManager : MonoBehaviour
 	public const float SecondsPerTick = 0.25f;
 
 	private bool skipNextUpdate;
-
-	private float elapsedTime;
-
-	private int ticks;
 
 	private static Dictionary<Type, SimUpdateTypeInfo> TypeInfos = new Dictionary<Type, SimUpdateTypeInfo>();
 

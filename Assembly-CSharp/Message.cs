@@ -2,7 +2,7 @@
 using KSerialization;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public abstract class Message : ISaveLoadableJson
+public abstract class Message : ISaveLoadable
 {
 	public abstract string GetTitle();
 

@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using Klei.AI;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class PlantablePlot : SingleEntityReceptacle, ISaveLoadableJson, IEffectDescriptor
+public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IGameObjectEffectDescriptor, IEffectDescriptor
 {
-	public Crop crop
+	public Growing crop
 	{
 		get
 		{
@@ -20,15 +19,47 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadableJson, IEffectD
 		}
 	}
 
+	public bool ValidPlant
+	{
+		get
+		{
+			return this.plantPreview == null || this.plantPreview.Valid;
+		}
+	}
+
+	public bool AcceptsFertilizer
+	{
+		get
+		{
+			return this.accepts_fertilizer;
+		}
+	}
+
+	public bool AcceptsIrrigation
+	{
+		get
+		{
+			return this.accepts_irrigation;
+		}
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.cropRef = new Ref<Crop>();
+		this.cropRef = new Ref<Growing>();
 		this.destroyEntityOnDeposit = true;
-		base.stringKey_Place = "STRINGS.UI.PLACEINRECEPTACLE";
-		base.stringKey_CancelPlace = "STRINGS.UI.CANCELPLACEINRECEPTACLE";
-		base.stringKey_Remove = "STRINGS.UI.USERMENUACTIONS.UPROOT.NAME";
-		base.stringKey_CancelRemove = "STRINGS.UI.CANCELREMOVALFROMRECEPTACLE";
+		this.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
+	}
+
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = (GameObject)data;
+		PlantablePlot component = gameObject.GetComponent<PlantablePlot>();
+		if (component != null && base.occupyingObject == null && this.requestedEntityTag != component.requestedEntityTag)
+		{
+			base.CancelActiveRequest();
+			base.CreateOrder(component.requestedEntityTag);
+		}
 	}
 
 	protected override void OnSpawn()
@@ -46,14 +77,19 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadableJson, IEffectD
 		Components.PlantablePlots.Add(this);
 	}
 
-	public void SetPlantedModifier(AttributeModifier modifier)
+	public void SetFertilizationFlags(bool fertilizer, bool irrigation)
 	{
-		this.plantedModifier = modifier;
+		this.accepts_fertilizer = fertilizer;
+		this.accepts_irrigation = irrigation;
 	}
 
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
+		if (this.plantPreview != null)
+		{
+			global::UnityEngine.Object.Destroy(this.plantPreview.gameObject);
+		}
 		if (base.occupyingObject)
 		{
 			base.occupyingObject.Trigger(-216549700, null);
@@ -72,22 +108,23 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadableJson, IEffectD
 		Vector3 vector = Grid.CellToPosCBC(Grid.PosToCell(this), Grid.SceneLayer.BuildingBack);
 		GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(component.PlantID), vector, Grid.SceneLayer.BuildingBack, SceneOrganizer.Instance.GetFolder(Folder.Entities), null, 0);
 		gameObject.SetActive(true);
-		Crop component2 = gameObject.GetComponent<Crop>();
+		Growing component2 = gameObject.GetComponent<Growing>();
 		if (component2)
 		{
-			this.crop = component2;
-			Growing component3 = component2.GetComponent<Growing>();
-			component3.OnReplant();
+			component2.OnReplant();
 		}
-		else if (this.cropRef != null)
+		this.cropRef.Set(component2);
+		Crop component3 = gameObject.GetComponent<Crop>();
+		if (component3 != null)
 		{
-			this.cropRef.Set(null);
+			PlantableSeed component4 = component.GetComponent<PlantableSeed>();
+			component3.SetTimesHarvested(component4.timesHarvested);
 		}
 		this.RegisterWithPlant(gameObject);
-		UprootedMonitor component4 = gameObject.GetComponent<UprootedMonitor>();
-		if (component4)
+		UprootedMonitor component5 = gameObject.GetComponent<UprootedMonitor>();
+		if (component5)
 		{
-			component4.canBeUprooted = false;
+			component5.canBeUprooted = false;
 		}
 		this.autoReplaceEntity = true;
 		return gameObject;
@@ -95,24 +132,7 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadableJson, IEffectD
 
 	private void RegisterWithPlant(GameObject plant)
 	{
-		if (this.plantedModifier != null)
-		{
-			Attributes attributes = plant.GetAttributes();
-			if (attributes != null)
-			{
-				attributes.Add("PlanterEffect", this.plantedModifier);
-			}
-		}
-		Crop component = plant.GetComponent<Crop>();
-		if (component != null)
-		{
-			component.PlanterStorage = this.storage;
-		}
-		FertilizationMonitor.Instance smi = plant.GetSMI<FertilizationMonitor.Instance>();
-		if (smi != null)
-		{
-			smi.SetStorage(this.storage);
-		}
+		plant.Trigger(1309017699, this.storage);
 	}
 
 	protected override void SubscribeToOccupant()
@@ -120,7 +140,7 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadableJson, IEffectD
 		base.SubscribeToOccupant();
 		if (base.occupyingObject != null)
 		{
-			base.Subscribe(base.occupyingObject, -216549700, new EventSystem.EventHandler(this.OnOccupantUprooted));
+			base.Subscribe(base.occupyingObject, -216549700, new Action<object>(this.OnOccupantUprooted));
 		}
 	}
 
@@ -129,14 +149,14 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadableJson, IEffectD
 		base.UnsubscribeFromOccupant();
 		if (base.occupyingObject != null)
 		{
-			base.Unsubscribe(base.occupyingObject, -216549700, new EventSystem.EventHandler(this.OnOccupantUprooted));
+			base.Unsubscribe(base.occupyingObject, -216549700, new Action<object>(this.OnOccupantUprooted));
 		}
 	}
 
 	private void OnOccupantUprooted(object data)
 	{
 		this.autoReplaceEntity = false;
-		this.requestedEntityTag = GameTags.Empty;
+		this.requestedEntityTag = Tag.Invalid;
 	}
 
 	public override void OrderRemoveOccupant()
@@ -149,24 +169,103 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadableJson, IEffectD
 		component.MarkForUproot();
 	}
 
-	public int DescriptionOrder { get; set; }
+	public override void SetPreview(Tag entityTag, bool solid = false)
+	{
+		PlantableSeed plantableSeed = null;
+		if (entityTag.IsValid)
+		{
+			GameObject prefab = Assets.GetPrefab(entityTag);
+			if (prefab == null)
+			{
+				Output.LogWarningWithObj(base.gameObject, new object[] { "Planter tried previewing a tag with no asset! If this was the 'Empty' tag, ignore it, that will go away in new save games. Otherwise... Eh? Tag was: ", entityTag });
+				return;
+			}
+			plantableSeed = prefab.GetComponent<PlantableSeed>();
+		}
+		if (this.plantPreview != null)
+		{
+			KPrefabID component = this.plantPreview.GetComponent<KPrefabID>();
+			if (plantableSeed != null && component != null && component.PrefabTag == plantableSeed.PreviewID)
+			{
+				return;
+			}
+			this.plantPreview.gameObject.Unsubscribe(-1820564715, new Action<object>(this.OnValidChanged));
+			global::UnityEngine.Object.Destroy(this.plantPreview.gameObject);
+		}
+		if (plantableSeed != null)
+		{
+			GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(plantableSeed.PreviewID), Grid.SceneLayer.Front, Folder.BuildingPreviews, null, 0);
+			this.plantPreview = gameObject.GetComponent<PlantPreview>();
+			gameObject.transform.position = Vector3.zero;
+			gameObject.transform.SetParent(base.gameObject.transform, false);
+			gameObject.transform.localPosition = Vector3.zero;
+			if (this.rotatable != null)
+			{
+				if (plantableSeed.direction == SingleEntityReceptacle.ReceptacleDirection.Top)
+				{
+					gameObject.transform.localPosition = this.occupyingObjectRelativePosition;
+				}
+				else if (plantableSeed.direction == SingleEntityReceptacle.ReceptacleDirection.Side)
+				{
+					gameObject.transform.localPosition = Rotatable.GetRotatedOffset(this.occupyingObjectRelativePosition, Orientation.R90);
+				}
+				else
+				{
+					gameObject.transform.localPosition = Rotatable.GetRotatedOffset(this.occupyingObjectRelativePosition, Orientation.R180);
+				}
+			}
+			else
+			{
+				gameObject.transform.localPosition = this.occupyingObjectRelativePosition;
+			}
+			gameObject.SetActive(true);
+			gameObject.Subscribe(-1820564715, new Action<object>(this.OnValidChanged));
+			if (solid)
+			{
+				this.plantPreview.SetSolid();
+			}
+		}
+	}
 
-	public List<Descriptor> GetRequirementDescriptions(BuildingDef def)
+	private void OnValidChanged(object obj)
+	{
+		this.Trigger(-1820564715, obj);
+	}
+
+	public List<Descriptor> GetDescriptors(BuildingDef def)
+	{
+		return this.GetDescriptors(def.BuildingComplete);
+	}
+
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, UI.BUILDINGEFFECTS.REQUIRESSEED), UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESSEED);
-		list.Add(descriptor);
+		if (this.accepts_fertilizer)
+		{
+			Descriptor descriptor = default(Descriptor);
+			descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.ALLOWS_FERTILIZER, UI.BUILDINGEFFECTS.TOOLTIPS.ALLOWS_FERTILIZER, Descriptor.DescriptorType.Effect);
+			list.Add(descriptor);
+		}
+		if (this.accepts_irrigation)
+		{
+			Descriptor descriptor2 = default(Descriptor);
+			descriptor2.SetupDescriptor(UI.BUILDINGEFFECTS.ALLOWS_IRRIGATION, UI.BUILDINGEFFECTS.TOOLTIPS.ALLOWS_IRRIGATION, Descriptor.DescriptorType.Effect);
+			list.Add(descriptor2);
+		}
 		return list;
 	}
 
-	public List<Descriptor> GetEffectDescriptions(BuildingDef def)
-	{
-		return null;
-	}
+	[MyCmpAdd]
+	private CopyBuildingSettings copyBuildingSettings;
 
 	[Serialize]
-	private Ref<Crop> cropRef;
+	private Ref<Growing> cropRef;
 
-	private AttributeModifier plantedModifier;
+	private PlantPreview plantPreview;
+
+	[SerializeField]
+	private bool accepts_fertilizer;
+
+	[SerializeField]
+	private bool accepts_irrigation;
 }

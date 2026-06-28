@@ -25,15 +25,15 @@ public class Moppable : Workable
 			base.gameObject.DeleteObject();
 			return;
 		}
-		Grid.Objects[Grid.PosToCell(base.gameObject), 5] = base.gameObject;
+		Grid.Objects[Grid.PosToCell(base.gameObject), 8] = base.gameObject;
 		new WorkChore<Moppable>(Db.Get().ChoreTypes.Mop, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true);
 		base.SetWorkTime(float.PositiveInfinity);
 		this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().MiscStatusItems.WaitingForMop, null);
-		this.Subscribe(493375141, new EventSystem.EventHandler(this.OnRefreshUserMenu));
-		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_mop_dirtywater") };
+		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_mop_dirtywater_kanim") };
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("Moppable.OnSpawn", base.gameObject, new Extents(Grid.PosToCell(this), this.offsets), GameScenePartitioner.Instance.liquidChangedMask.mask, new Action<object>(this.OnLiquidChanged));
 		this.Refresh();
-		this.Subscribe(-1432940121, new EventSystem.EventHandler(this.OnReachableChanged));
+		this.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
 		ReachabilityMonitor.Instance instance = new ReachabilityMonitor.Instance(this);
 		instance.StartSM();
 	}
@@ -42,7 +42,7 @@ public class Moppable : Workable
 	{
 		UserMenu userMenu = this.userMenu;
 		string text = UI.USERMENUACTIONS.CANCELMOP.TOOLTIP;
-		userMenu.AddButton(new KIconButtonMenu.ButtonInfo("icon_cancel", UI.USERMENUACTIONS.CANCELMOP.NAME, new global::System.Action(this.OnCancel), global::Action.NumActions, null, null, null, null, text));
+		userMenu.AddButton(new KIconButtonMenu.ButtonInfo("icon_cancel", UI.USERMENUACTIONS.CANCELMOP.NAME, new global::System.Action(this.OnCancel), global::Action.NumActions, null, null, null, text, true), 1f);
 	}
 
 	private void OnCancel()
@@ -53,7 +53,7 @@ public class Moppable : Workable
 
 	protected override void OnStartWork(Worker worker)
 	{
-		this.popfxHandle = GameScheduler.Instance.SchedulePeriodic("MoppablePopFX", 1f, new Action<object>(this.OnPopFX), null, null, 0f);
+		this.popfxHandle = GameScheduler.Instance.SchedulePeriodic("MoppablePopFX", 1f, new Action<object>(this.OnPopFX), null, null, 0f, null);
 	}
 
 	protected override void OnStopWork(Worker worker)
@@ -70,7 +70,7 @@ public class Moppable : Workable
 	{
 		if (this.amountMopped > 0f)
 		{
-			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, GameUtil.GetFormattedMass(-this.amountMopped, GameUtil.TimeSlice.None, true, "F1"), this.transform, 1.5f, false);
+			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, GameUtil.GetFormattedMass(-this.amountMopped, GameUtil.TimeSlice.None, true, "{0:0.#}"), this.transform, 1.5f, false);
 			this.amountMopped = 0f;
 		}
 	}
@@ -136,11 +136,6 @@ public class Moppable : Workable
 		}
 	}
 
-	public override string[] GetWorkAnims(Worker worker)
-	{
-		return Moppable.WorkAnims;
-	}
-
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
@@ -172,7 +167,7 @@ public class Moppable : Workable
 			if (flag)
 			{
 				material.color = Game.Instance.uiColours.Dig.validLocation;
-				this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.DigUnreachable);
+				this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.DigUnreachable, false);
 			}
 			else
 			{
@@ -204,8 +199,6 @@ public class Moppable : Workable
 	private SchedulerHandle popfxHandle;
 
 	private MeshRenderer childRenderer;
-
-	private static readonly string[] WorkAnims = new string[] { "working_pre", "working_loop" };
 
 	private CellOffset[] offsets = new CellOffset[]
 	{

@@ -13,16 +13,14 @@ public class FliesFX : GameStateMachine<FliesFX, FliesFX.Instance>
 		});
 	}
 
-	public StateMachine<FliesFX, FliesFX.Instance, IStateMachineTarget>.TargetParameter fx;
+	public StateMachine<FliesFX, FliesFX.Instance, IStateMachineTarget, object>.TargetParameter fx;
 
-	public new class Instance : GameStateMachine<FliesFX, FliesFX.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<FliesFX, FliesFX.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master, Vector3 offset)
 			: base(master)
 		{
-			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("fly_swarm", null, false, Grid.SceneLayer.Front);
-			kbatchedAnimController.transform.parent = base.smi.master.transform;
-			kbatchedAnimController.transform.localPosition = offset;
+			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("fly_swarm_kanim", base.smi.master.transform.position + offset, base.smi.master.transform, false, Grid.SceneLayer.Front);
 			base.sm.fx.Set(kbatchedAnimController.gameObject, base.smi);
 		}
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 
 namespace Database
 {
@@ -6,10 +7,10 @@ namespace Database
 	{
 		public OwnableSlots()
 		{
-			this.Bed = base.Add(new OwnableSlot("Bed", "Bed"));
-			this.MessStation = base.Add(new OwnableSlot("MessStation", "Dining Area"));
-			this.Clinic = base.Add(new OwnableSlot("Clinic", "Clinic"));
-			this.RelaxationPoint = base.Add(new OwnableSlot("RelaxationPoint", "Relaxation Point"));
+			this.Bed = base.Add(new OwnableSlot("Bed", MISC.TAGS.BED));
+			this.MessStation = base.Add(new OwnableSlot("MessStation", MISC.TAGS.MESSSTATION));
+			this.Clinic = base.Add(new OwnableSlot("Clinic", MISC.TAGS.CLINIC));
+			this.RelaxationPoint = base.Add(new OwnableSlot("RelaxationPoint", MISC.TAGS.RELAXATION_POINT));
 		}
 
 		public OwnableSlot Bed;

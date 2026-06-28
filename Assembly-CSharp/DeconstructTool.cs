@@ -31,15 +31,14 @@ public class DeconstructTool : FilteredDragTool
 
 	public void DeconstructCell(int cell)
 	{
-		for (int i = 0; i < 25; i++)
+		for (int i = 0; i < 23; i++)
 		{
 			GameObject gameObject = Grid.Objects[cell, i];
 			if (gameObject != null)
 			{
 				string filterLayerFromGameObject = base.GetFilterLayerFromGameObject(gameObject);
-				if (this.filterTargets[FilteredDragTool.FILTERLAYERS.ALL] || (this.filterTargets.ContainsKey(filterLayerFromGameObject.ToUpper()) && this.filterTargets[filterLayerFromGameObject.ToUpper()]))
+				if (base.IsActiveLayer(filterLayerFromGameObject))
 				{
-					gameObject.Trigger(2127324410, null);
 					gameObject.Trigger(-790448070, null);
 				}
 				Prioritizable component = gameObject.GetComponent<Prioritizable>();

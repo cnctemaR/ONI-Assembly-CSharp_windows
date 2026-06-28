@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{83FC4951-282C-4D85-AE87-9CE89EFCF188}</ProjectGuid>
+    <ProjectGuid>{B3F37800-5319-4325-B591-99335A49EBF1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp-firstpass</RootNamespace>
     <AssemblyName>Assembly-CSharp-firstpass</AssemblyName>
@@ -28,6 +28,7 @@
     <Compile Include="BindingEntry.cs" />
     <Compile Include="BoundsCheck.cs" />
     <Compile Include="ButtonLock.cs" />
+    <Compile Include="ButtonSoundPlayer.cs" />
     <Compile Include="CellAlignment.cs" />
     <Compile Include="CellOffset.cs" />
     <Compile Include="ClipperLib\Clipper.cs" />
@@ -88,6 +89,7 @@
     <Compile Include="Delaunay\Vertex.cs" />
     <Compile Include="Delaunay\VertexOrSite.cs" />
     <Compile Include="Delaunay\Voronoi.cs" />
+    <Compile Include="Descriptor.cs" />
     <Compile Include="DetailScreenTabHeader.cs" />
     <Compile Include="DrawUtil.cs" />
     <Compile Include="EnumFlagsAttribute.cs" />
@@ -106,6 +108,7 @@
     <Compile Include="FMODUnity\EventNotFoundException.cs" />
     <Compile Include="FMODUnity\EventRefAttribute.cs" />
     <Compile Include="FMODUnity\FMODPlatform.cs" />
+    <Compile Include="FMODUnity\ImportType.cs" />
     <Compile Include="FMODUnity\LoaderGameEvent.cs" />
     <Compile Include="FMODUnity\OneshotList.cs" />
     <Compile Include="FMODUnity\ParamRef.cs" />
@@ -122,6 +125,7 @@
     <Compile Include="FMODUnity\StudioListener.cs" />
     <Compile Include="FMODUnity\StudioParameterTrigger.cs" />
     <Compile Include="FMODUnity\SystemNotInitializedException.cs" />
+    <Compile Include="FMODUnity\TriStateBool.cs" />
     <Compile Include="FMODUnity\VCANotFoundException.cs" />
     <Compile Include="FMOD\ADVANCEDSETTINGS.cs" />
     <Compile Include="FMOD\ASYNCREADINFO.cs" />
@@ -228,6 +232,8 @@
     <Compile Include="FMOD\DSP_SHOULDIPROCESS_CALLBACK.cs" />
     <Compile Include="FMOD\DSP_STATE.cs" />
     <Compile Include="FMOD\DSP_STATE_DFTCALLBACKS.cs" />
+    <Compile Include="FMOD\DSP_STATE_GETCLOCK.cs" />
+    <Compile Include="FMOD\DSP_STATE_GETLISTENERATTRIBUTES.cs" />
     <Compile Include="FMOD\DSP_STATE_PAN_CALLBACKS.cs" />
     <Compile Include="FMOD\DSP_STATE_SYSTEMCALLBACKS.cs" />
     <Compile Include="FMOD\DSP_SYSTEM_DEREGISTER_CALLBACK.cs" />
@@ -252,7 +258,6 @@
     <Compile Include="FMOD\FILE_OPENCALLBACK.cs" />
     <Compile Include="FMOD\FILE_READCALLBACK.cs" />
     <Compile Include="FMOD\FILE_SEEKCALLBACK.cs" />
-    <Compile Include="FMOD\FMOD_DSP_STATE_GETCLOCK.cs" />
     <Compile Include="FMOD\Geometry.cs" />
     <Compile Include="FMOD\HandleBase.cs" />
     <Compile Include="FMOD\INITFLAGS.cs" />
@@ -361,15 +366,20 @@
     <Compile Include="HashCache.cs" />
     <Compile Include="HashedEnumAttribute.cs" />
     <Compile Include="HashedString.cs" />
+    <Compile Include="HighlightOnHover.cs" />
     <Compile Include="HoverCallback.cs" />
     <Compile Include="HUSL\ColorConverter.cs" />
+    <Compile Include="IComponentManager.cs" />
     <Compile Include="IInputHandler.cs" />
     <Compile Include="ImageToggleState.cs" />
+    <Compile Include="ImageToggleStateThrobber.cs" />
     <Compile Include="InputEventType.cs" />
     <Compile Include="IPreUpdater.cs" />
     <Compile Include="IReader.cs" />
-    <Compile Include="ISaveLoadableDetailJson.cs" />
-    <Compile Include="ISaveLoadableJson.cs" />
+    <Compile Include="ISaveLoadable.cs" />
+    <Compile Include="ISaveLoadableDetails.cs" />
+    <Compile Include="ISerializableComponentManager.cs" />
+    <Compile Include="IStateMachineControllerHack.cs" />
     <Compile Include="IStateMachineTarget.cs" />
     <Compile Include="IUniformGridObject.cs" />
     <Compile Include="JobBatch.cs" />
@@ -377,30 +387,35 @@
     <Compile Include="KAnim.cs" />
     <Compile Include="KAnimBatch.cs" />
     <Compile Include="KAnimBatchGroup.cs" />
-    <Compile Include="KAnimBatchInstanceData.cs" />
     <Compile Include="KAnimBatchManager.cs" />
     <Compile Include="KAnimBatchRenderGroup.cs" />
     <Compile Include="KAnimCanvasRenderer.cs" />
     <Compile Include="KAnimConverter.cs" />
     <Compile Include="KAnimFile.cs" />
     <Compile Include="KAnimFileData.cs" />
-    <Compile Include="KAnimFileManager.cs" />
     <Compile Include="KAnimGroupFile.cs" />
     <Compile Include="KAnimHashedString.cs" />
     <Compile Include="KAnimMeshRenderer.cs" />
-    <Compile Include="KAnimParser.cs" />
     <Compile Include="KAnimRenderer.cs" />
     <Compile Include="KBasicToggle.cs" />
     <Compile Include="KBatchedAnimCanvasRenderer.cs" />
+    <Compile Include="KBatchedAnimInstanceData.cs" />
     <Compile Include="KBatchGroupData.cs" />
     <Compile Include="KBinaryReader.cs" />
     <Compile Include="KButton.cs" />
     <Compile Include="KButtonEvent.cs" />
     <Compile Include="KChildFitter.cs" />
+    <Compile Include="KCompactedVector.cs" />
     <Compile Include="KCompBuilder.cs" />
+    <Compile Include="KComponentCleanUp.cs" />
+    <Compile Include="KComponentManager.cs" />
+    <Compile Include="KComponents.cs" />
+    <Compile Include="KComponentSpawn.cs" />
     <Compile Include="KDebug.cs" />
     <Compile Include="KFMOD.cs" />
     <Compile Include="KFMODDebugger.cs" />
+    <Compile Include="KGameObjectComponentManager.cs" />
+    <Compile Include="KGameObjectComponentManagerUtil.cs" />
     <Compile Include="KGlobalAnimParser.cs" />
     <Compile Include="KImage.cs" />
     <Compile Include="KImageButton.cs" />
@@ -461,6 +476,8 @@
     <Compile Include="LoggerFSS.cs" />
     <Compile Include="LoggerFSSF.cs" />
     <Compile Include="LoggerFSSS.cs" />
+    <Compile Include="LoggerFSSSS.cs" />
+    <Compile Include="LoggerSSF.cs" />
     <Compile Include="MarkovNameGenerator.cs" />
     <Compile Include="MathUtil.cs" />
     <Compile Include="Matrix2x3.cs" />
@@ -917,27 +934,6 @@
     <Compile Include="TMPro\CaretPosition.cs" />
     <Compile Include="TMPro\Compute_DistanceTransform_EventTypes.cs" />
     <Compile Include="TMPro\Compute_DT_EventArgs.cs" />
-    <Compile Include="TMPro\Examples\Benchmark01.cs" />
-    <Compile Include="TMPro\Examples\Benchmark01_UGUI.cs" />
-    <Compile Include="TMPro\Examples\Benchmark02.cs" />
-    <Compile Include="TMPro\Examples\Benchmark03.cs" />
-    <Compile Include="TMPro\Examples\Benchmark04.cs" />
-    <Compile Include="TMPro\Examples\CameraController.cs" />
-    <Compile Include="TMPro\Examples\FloatingText.cs" />
-    <Compile Include="TMPro\Examples\ObjectSpin.cs" />
-    <Compile Include="TMPro\Examples\ShaderPropAnimator.cs" />
-    <Compile Include="TMPro\Examples\SimpleScript.cs" />
-    <Compile Include="TMPro\Examples\TeleType.cs" />
-    <Compile Include="TMPro\Examples\TextConsoleSimulator.cs" />
-    <Compile Include="TMPro\Examples\TextMeshProFloatingText.cs" />
-    <Compile Include="TMPro\Examples\TextMeshSpawner.cs" />
-    <Compile Include="TMPro\Examples\TMPro_InstructionOverlay.cs" />
-    <Compile Include="TMPro\Examples\TMP_ExampleScript_01.cs" />
-    <Compile Include="TMPro\Examples\TMP_FrameRateCounter.cs" />
-    <Compile Include="TMPro\Examples\TMP_TextSelector.cs" />
-    <Compile Include="TMPro\Examples\TMP_UiFrameRateCounter.cs" />
-    <Compile Include="TMPro\Examples\VertexColorCycler.cs" />
-    <Compile Include="TMPro\Examples\VertexJitter.cs" />
     <Compile Include="TMPro\Extents.cs" />
     <Compile Include="TMPro\FaceInfo.cs" />
     <Compile Include="TMPro\FastAction.2.cs" />
@@ -1012,6 +1008,7 @@
     <Compile Include="TMPro\VertexGradient.cs" />
     <Compile Include="TMPro\WordWrapState.cs" />
     <Compile Include="TMPro\XML_TagAttribute.cs" />
+    <Compile Include="ToggleSoundPlayer.cs" />
     <Compile Include="ToolTip.cs" />
     <Compile Include="ToolTipScreen.cs" />
     <Compile Include="Traces.cs" />
@@ -1040,43 +1037,44 @@
     <Compile Include="Vector3F.cs" />
     <Compile Include="Vector3I.cs" />
     <Compile Include="VectorUtil.cs" />
+    <Compile Include="WidgetSoundPlayer.cs" />
     <Compile Include="WidgetTransition.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FileHelpers\FileHelpers.csproj">
-      <Project>{83FC4951-282C-4D85-AE87-9CE89EFCF18A}</Project>
+      <Project>{B3F37800-5319-4325-B591-99335A49EBF3}</Project>
       <Name>FileHelpers</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{83FC4951-282C-4D85-AE87-9CE89EFCF190}</Project>
+      <Project>{B3F37800-5319-4325-B591-99335A49EBFC}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\Newtonsoft.Json\Newtonsoft.Json.csproj">
-      <Project>{83FC4951-282C-4D85-AE87-9CE89EFCF191}</Project>
+      <Project>{B3F37800-5319-4325-B591-99335A49EBFD}</Project>
       <Name>Newtonsoft.Json</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{83FC4951-282C-4D85-AE87-9CE89EFCF195}</Project>
+      <Project>{B3F37800-5319-4325-B591-99335A49EC01}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{83FC4951-282C-4D85-AE87-9CE89EFCF19D}</Project>
+      <Project>{B3F37800-5319-4325-B591-99335A49EC09}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{83FC4951-282C-4D85-AE87-9CE89EFCF197}</Project>
+      <Project>{B3F37800-5319-4325-B591-99335A49EC03}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{83FC4951-282C-4D85-AE87-9CE89EFCF1A2}</Project>
+      <Project>{B3F37800-5319-4325-B591-99335A49EC0D}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine\UnityEngine.csproj">
-      <Project>{83FC4951-282C-4D85-AE87-9CE89EFCF1A0}</Project>
+      <Project>{B3F37800-5319-4325-B591-99335A49EC0B}</Project>
       <Name>UnityEngine</Name>
     </ProjectReference>
     <ProjectReference Include="..\YamlDotNet\YamlDotNet.csproj">
-      <Project>{83FC4951-282C-4D85-AE87-9CE89EFCF1A3}</Project>
+      <Project>{B3F37800-5319-4325-B591-99335A49EC0E}</Project>
       <Name>YamlDotNet</Name>
     </ProjectReference>
   </ItemGroup>

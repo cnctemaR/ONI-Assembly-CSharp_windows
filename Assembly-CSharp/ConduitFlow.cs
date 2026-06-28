@@ -10,10 +10,13 @@ using UnityEngine.Assertions;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class ConduitFlow
 {
-	public ConduitFlow(int num_cells, IUtilityNetworkMgr network_mgr, byte layer)
+	public ConduitFlow(ConduitType conduit_type, int num_cells, IUtilityNetworkMgr network_mgr, float max_conduit_mass)
 	{
+		this.conduitType = conduit_type;
 		this.networkMgr = network_mgr;
-		this.simLayer = layer;
+		this.MaxMass = max_conduit_mass;
+		float num = 1f;
+		this.temperatureManager = new ConduitTemperatureManager(num);
 		network_mgr.ConduitFlowManager = this;
 		this.Initialize(num_cells);
 	}
@@ -63,26 +66,34 @@ public class ConduitFlow
 		for (int i = 0; i < this.conduits.Count; i++)
 		{
 			ConduitFlow.Conduit conduit = this.conduits[i];
+			HandleVector<int>.Handle temperatureHandle = conduit.temperatureHandle;
+			if (temperatureHandle.IsValid())
+			{
+				ConduitTemperatureManager.Data data = this.temperatureManager.GetData(temperatureHandle);
+				ConduitFlow.ConduitContents contents = conduit.GetContents();
+				contents.temperature = data.temperature;
+				conduit.SetContents(contents);
+				conduit.temperatureHandle.Clear();
+				this.temperatureManager.Free(temperatureHandle);
+			}
 			this.grid[conduit.cell].frontIdx = -1;
-		}
-		foreach (ConduitFlow.Conduit conduit2 in this.conduits)
-		{
-			this.temperatureManager.Free(conduit2.temperatureHandle);
 		}
 		this.conduits.Clear();
 		this.pathList.Clear();
 		this.temperatureManager.Clear();
+		ObjectLayer objectLayer = ((this.conduitType != ConduitType.Gas) ? ObjectLayer.LiquidConduit : ObjectLayer.GasConduit);
 		foreach (int num in root_nodes)
 		{
 			if (this.replacements.Contains(num))
 			{
 				this.replacements.Remove(num);
 			}
-			if (!(Grid.Objects[num, (this.simLayer != 0) ? 12 : 10] == null))
+			GameObject gameObject = Grid.Objects[num, (int)objectLayer];
+			if (!(gameObject == null))
 			{
-				ConduitFlow.Conduit conduit3 = new ConduitFlow.Conduit(this, num, this.conduits.Count, false);
-				this.conduits.Add(conduit3);
-				this.grid[num].frontIdx = conduit3.idx;
+				ConduitFlow.Conduit conduit2 = new ConduitFlow.Conduit(this, gameObject, num, this.conduits.Count);
+				this.conduits.Add(conduit2);
+				this.grid[num].frontIdx = conduit2.idx;
 			}
 		}
 		foreach (int num2 in root_nodes)
@@ -92,40 +103,27 @@ public class ConduitFlow
 			{
 				if (this.grid[num2].frontIdx != -1)
 				{
-					ConduitFlow.Conduit conduit4 = this.conduits[this.grid[num2].frontIdx];
+					ConduitFlow.Conduit conduit3 = this.conduits[this.grid[num2].frontIdx];
 					int num3 = num2 - 1;
 					if (Grid.IsValidCell(num3) && (connections & UtilityConnections.Left) != (UtilityConnections)0)
 					{
-						conduit4.left = this.grid[num3].frontIdx;
+						conduit3.left = this.grid[num3].frontIdx;
 					}
 					num3 = num2 + 1;
 					if (Grid.IsValidCell(num3) && (connections & UtilityConnections.Right) != (UtilityConnections)0)
 					{
-						conduit4.right = this.grid[num3].frontIdx;
+						conduit3.right = this.grid[num3].frontIdx;
 					}
 					num3 = num2 - Grid.WidthInCells;
 					if (Grid.IsValidCell(num3) && (connections & UtilityConnections.Down) != (UtilityConnections)0)
 					{
-						conduit4.down = this.grid[num3].frontIdx;
+						conduit3.down = this.grid[num3].frontIdx;
 					}
 					num3 = num2 + Grid.WidthInCells;
 					if (Grid.IsValidCell(num3) && (connections & UtilityConnections.Up) != (UtilityConnections)0)
 					{
-						conduit4.up = this.grid[num3].frontIdx;
+						conduit3.up = this.grid[num3].frontIdx;
 					}
-				}
-			}
-		}
-		for (int j = 0; j < this.buildingConduits.Items.Count; j++)
-		{
-			ConduitFlow.BuildingConduit buildingConduit = this.buildingConduits.Items[j];
-			if (buildingConduit != null)
-			{
-				ConduitFlow.Conduit conduit5 = this.GetConduit(buildingConduit.cell);
-				if (conduit5 != null)
-				{
-					conduit5.building = j;
-					conduit5.permittedFlowDirections |= ConduitFlow.FlowBit(ConduitFlow.FlowDirection.Building);
 				}
 			}
 		}
@@ -133,23 +131,6 @@ public class ConduitFlow
 		{
 			this.onConduitsRebuilt();
 		}
-	}
-
-	public HandleVector<ConduitFlow.BuildingConduit>.Handle AddBuildingConduit(ConduitFlow.BuildingConduit c)
-	{
-		HandleVector<ConduitFlow.BuildingConduit>.Handle handle = this.buildingConduits.Add(c);
-		this.networkMgr.ForceRebuildNetworks();
-		return handle;
-	}
-
-	public void RemoveBuildingConduit(HandleVector<ConduitFlow.BuildingConduit>.Handle h)
-	{
-		if (h.index == -1)
-		{
-			return;
-		}
-		this.buildingConduits.Release(h);
-		this.networkMgr.ForceRebuildNetworks();
 	}
 
 	public void ScanNetworkSources(FlowUtilityNetwork network)
@@ -228,8 +209,8 @@ public class ConduitFlow
 			return;
 		}
 		this.path.Add(conduit);
-		FlowUtilityNetwork.IItem endpoint = this.networkMgr.GetEndpoint(conduit.cell);
-		if (endpoint != null && (endpoint.EndpointType == Vent.Endpoint.Sink || endpoint.EndpointType == Vent.Endpoint.Consumer))
+		FlowUtilityNetwork.IItem item = (FlowUtilityNetwork.IItem)this.networkMgr.GetEndpoint(conduit.cell);
+		if (item != null && item.EndpointType == Endpoint.Sink)
 		{
 			this.FoundSink(source_idx, sort_key);
 		}
@@ -293,20 +274,22 @@ public class ConduitFlow
 		}
 		if (frontContents.mass > 0f && frontContents.temperature <= 0f)
 		{
-			Output.LogWarning(new object[] { "unexpected temperature" });
-			frontContents.temperature = Math.Max(frontContents.temperature, 5f);
+			Output.LogError(new object[] { "unexpected temperature" });
 		}
 		return frontContents;
 	}
 
 	public void SetContents(int cell, ConduitFlow.ConduitContents contents)
 	{
-		this.grid[cell].frontContents = contents;
 		ConduitFlow.GridNode gridNode = this.grid[cell];
 		if (gridNode.frontIdx != -1)
 		{
 			ConduitFlow.Conduit conduit = this.conduits[gridNode.frontIdx];
-			this.temperatureManager.SetData(conduit.temperatureHandle, cell, ref contents);
+			conduit.SetContents(contents);
+		}
+		else
+		{
+			this.grid[cell].frontContents = contents;
 		}
 	}
 
@@ -339,8 +322,6 @@ public class ConduitFlow
 			return ConduitFlow.FlowDirection.Down;
 		case ConduitFlow.FlowDirection.Down:
 			return ConduitFlow.FlowDirection.Up;
-		case ConduitFlow.FlowDirection.Building:
-			return ConduitFlow.FlowDirection.Building;
 		default:
 			return ConduitFlow.FlowDirection.None;
 		}
@@ -354,7 +335,7 @@ public class ConduitFlow
 		{
 			return;
 		}
-		float num = this.elapsedTime;
+		float num = 1f;
 		this.elapsedTime -= 1f;
 		this.lastUpdateTime = Time.time;
 		foreach (ConduitFlow.Conduit conduit in this.conduits)
@@ -364,26 +345,12 @@ public class ConduitFlow
 			conduit.lastFlowDirection = ConduitFlow.FlowDirection.None;
 			conduit.initialElement = conduit.GetContents().element;
 		}
-		foreach (ConduitFlow.BuildingConduit buildingConduit in this.buildingConduits.Items)
-		{
-			if (buildingConduit != null)
-			{
-				buildingConduit.updated = false;
-			}
-		}
 		foreach (ConduitFlow.PathInfo pathInfo in this.pathList)
 		{
 			List<ConduitFlow.Conduit> list = pathInfo.path;
 			foreach (ConduitFlow.Conduit conduit2 in list)
 			{
 				this.UpdateConduit(conduit2);
-			}
-		}
-		foreach (ConduitFlow.BuildingConduit buildingConduit2 in this.buildingConduits.Items)
-		{
-			if (buildingConduit2 != null)
-			{
-				this.UpdateConduit(buildingConduit2);
 			}
 		}
 		foreach (ConduitFlow.Conduit conduit3 in this.conduits)
@@ -446,7 +413,7 @@ public class ConduitFlow
 		}
 		if ((conduit.PermittedFlowDirections & ConduitFlow.FlowBit(conduit.TargetDirection)) != 0 && conduitFromDirection.GetConduitFromDirection(conduitFromDirection.SrcDirection) == conduit)
 		{
-			float num = Mathf.Max(0f, 10f - contents2.mass);
+			float num = Mathf.Max(0f, this.MaxMass - contents2.mass);
 			float num2 = Mathf.Min(contents.mass, num);
 			if (num2 > 0f)
 			{
@@ -504,12 +471,11 @@ public class ConduitFlow
 		{
 			return 0f;
 		}
-		float num = Mathf.Min(mass, 10f - frontContents.mass);
+		float num = Mathf.Min(mass, this.MaxMass - frontContents.mass);
 		frontContents.temperature = GameUtil.GetFinalTemperature(temperature, mass, frontContents.temperature, frontContents.mass);
 		frontContents.mass += num;
 		frontContents.element = element;
 		this.SetContents(cell_idx, frontContents);
-		this.UpdateSimPipes(cell_idx, frontContents);
 		return num;
 	}
 
@@ -541,12 +507,7 @@ public class ConduitFlow
 			contents.mass = num;
 		}
 		conduit.SetContents(contents);
-		this.UpdateSimPipes(conduit.Cell, contents);
 		return contents;
-	}
-
-	private void UpdateSimPipes(int cell, ConduitFlow.ConduitContents contents)
-	{
 	}
 
 	public int GetPermittedFlow(int cell)
@@ -599,7 +560,7 @@ public class ConduitFlow
 	}
 
 	[Conditional("CHECK_NAN")]
-	private void Validate(ref ConduitFlow.ConduitContents contents)
+	private void Validate(ConduitFlow.ConduitContents contents)
 	{
 		Assert.IsTrue(!float.IsNaN(contents.temperature));
 		Assert.IsTrue(!float.IsPositiveInfinity(contents.temperature));
@@ -607,8 +568,7 @@ public class ConduitFlow
 		Assert.IsTrue(contents.mass == 0f || contents.temperature > 0f);
 		if (contents.mass > 0f && contents.temperature <= 0f)
 		{
-			Output.LogCriticalWarning(new object[] { "zero degree pipe contents" });
-			contents.temperature = Math.Max(contents.temperature, 5f);
+			Output.LogError(new object[] { "zero degree pipe contents" });
 		}
 	}
 
@@ -624,7 +584,7 @@ public class ConduitFlow
 			{
 				ConduitFlow.Conduit conduit = this.conduits[i];
 				ConduitFlow.ConduitContents contents = conduit.GetContents();
-				this.Validate(ref contents);
+				this.Validate(contents);
 				this.serializedIdx[i] = conduit.cell;
 				this.serializedContents[i] = contents;
 			}
@@ -666,20 +626,11 @@ public class ConduitFlow
 				DeserializeWarnings.Instance.PipeContentsTemperatureIsNan.Warn(string.Format("NaN pipe content temperature detected. Resetting temperature. (x={0}, y={1}, cell={2})", vector2I.x, vector2I.y, num), null);
 				conduitContents.temperature = ElementLoader.FindElementByHash(conduitContents.element).defaultValues.temperature;
 			}
-			conduitContents.mass = Math.Min(10f, conduitContents.mass);
+			conduitContents.mass = Math.Min(this.MaxMass, conduitContents.mass);
 			this.SetContents(num, conduitContents);
-			this.UpdateSimPipes(num, conduitContents);
 		}
 		this.serializedContents = null;
 		this.serializedIdx = null;
-	}
-
-	public void SubmitPipeChanges()
-	{
-	}
-
-	public unsafe void UpdateTemperatures(int num_changes, Sim.PipeTemperatureChange* changes)
-	{
 	}
 
 	public UtilityNetwork GetNetwork(ConduitFlow.Conduit conduit)
@@ -720,14 +671,16 @@ public class ConduitFlow
 	public bool IsConduitFull(int cell_idx)
 	{
 		ConduitFlow.ConduitContents frontContents = this.grid[cell_idx].frontContents;
-		return 10f - frontContents.mass <= 0f;
+		return this.MaxMass - frontContents.mass <= 0f;
 	}
-
-	public const float DefaultMaxMass = 10f;
 
 	public const float TickRate = 1f;
 
 	public const float WaitTime = 1f;
+
+	private ConduitType conduitType;
+
+	private float MaxMass = 10f;
 
 	private float elapsedTime;
 
@@ -735,13 +688,11 @@ public class ConduitFlow
 
 	private List<ConduitFlow.Conduit> conduits = new List<ConduitFlow.Conduit>();
 
-	private HandleVector<ConduitFlow.BuildingConduit> buildingConduits = new HandleVector<ConduitFlow.BuildingConduit>(64);
-
 	private bool dirtyConduitUpdaters;
 
 	private List<ConduitFlow.ConduitUpdater> conduitUpdaters = new List<ConduitFlow.ConduitUpdater>();
 
-	private ConduitTemperatureManager temperatureManager = new ConduitTemperatureManager();
+	private ConduitTemperatureManager temperatureManager;
 
 	private ConduitFlow.GridNode[] grid;
 
@@ -767,8 +718,6 @@ public class ConduitFlow
 		mass = 0f,
 		temperature = 0f
 	};
-
-	private byte simLayer;
 
 	private Dictionary<int, List<GameObject>> conduitContentListeners = new Dictionary<int, List<GameObject>>();
 
@@ -801,8 +750,7 @@ public class ConduitFlow
 		Right,
 		Up,
 		Down,
-		Building,
-		Num = 5
+		Num
 	}
 
 	public interface IConduit
@@ -836,17 +784,25 @@ public class ConduitFlow
 	[Serializable]
 	public class Conduit : ConduitFlow.IConduit
 	{
-		public Conduit(ConduitFlow manager, int cell, int idx, bool is_building)
+		public Conduit(ConduitFlow manager, GameObject conduit_go, int cell, int idx)
 		{
 			this.manager = manager;
 			this.cell = cell;
 			this.idx = idx;
-			this.left = (this.right = (this.up = (this.down = (this.building = -1))));
+			this.left = (this.right = (this.up = (this.down = -1)));
 			this.updated = false;
 			this.permittedFlowDirections = 0;
 			this.sourceIdx = -1;
 			ConduitFlow.ConduitContents contents = this.GetContents();
-			this.temperatureHandle = manager.temperatureManager.Allocate(cell, ref contents);
+			HandleVector<int>.Handle handle = GameComps.StructureTemperatures.GetHandle(conduit_go);
+			this.temperatureHandle = manager.temperatureManager.Allocate(handle, ref contents);
+		}
+
+		private HandleVector<int>.Handle GetConduitTemperatureHandle()
+		{
+			ObjectLayer objectLayer = ((this.manager.conduitType != ConduitType.Gas) ? ObjectLayer.LiquidConduit : ObjectLayer.GasConduit);
+			GameObject gameObject = Grid.Objects[this.cell, (int)objectLayer];
+			return (!(gameObject != null)) ? HandleVector<int>.InvalidHandle : GameComps.StructureTemperatures.GetHandle(gameObject);
 		}
 
 		public int Cell
@@ -937,7 +893,11 @@ public class ConduitFlow
 		public void SetContents(ConduitFlow.ConduitContents contents)
 		{
 			this.manager.grid[this.cell].frontContents = contents;
-			this.manager.temperatureManager.SetData(this.temperatureHandle, this.cell, ref contents);
+			HandleVector<int>.Handle conduitTemperatureHandle = this.GetConduitTemperatureHandle();
+			if (conduitTemperatureHandle.IsValid())
+			{
+				this.manager.temperatureManager.SetData(this.temperatureHandle, conduitTemperatureHandle, ref contents);
+			}
 		}
 
 		public ConduitFlow.FlowDirection GetNextFlowSource()
@@ -1024,10 +984,16 @@ public class ConduitFlow
 				return (this.up == -1) ? null : this.manager.conduits[this.up];
 			case ConduitFlow.FlowDirection.Down:
 				return (this.down == -1) ? null : this.manager.conduits[this.down];
-			case ConduitFlow.FlowDirection.Building:
-				return (this.building == -1) ? null : this.manager.buildingConduits.GetItem(this.building);
 			default:
 				return null;
+			}
+		}
+
+		public float Capacity
+		{
+			get
+			{
+				return this.manager.MaxMass;
 			}
 		}
 
@@ -1044,8 +1010,6 @@ public class ConduitFlow
 		public int up;
 
 		public int down;
-
-		public int building;
 
 		public int permittedFlowDirections;
 
@@ -1064,131 +1028,6 @@ public class ConduitFlow
 		public SimHashes initialElement;
 
 		public HandleVector<int>.Handle temperatureHandle = HandleVector<int>.InvalidHandle;
-	}
-
-	[DebuggerDisplay("{cell}")]
-	[Serializable]
-	public class BuildingConduit : ConduitFlow.IConduit
-	{
-		public BuildingConduit(ConduitFlow manager)
-		{
-			this.manager = manager;
-			this.updated = false;
-			this.contents = ConduitFlow.emptyContents;
-		}
-
-		public ConduitFlow.ConduitContents GetContents()
-		{
-			return this.contents;
-		}
-
-		public void SetContents(ConduitFlow.ConduitContents contents)
-		{
-			this.contents = contents;
-		}
-
-		public ConduitFlow.FlowDirection GetNextFlowSource()
-		{
-			return ConduitFlow.FlowDirection.Building;
-		}
-
-		public ConduitFlow.FlowDirection GetNextFlowTarget()
-		{
-			return ConduitFlow.FlowDirection.Building;
-		}
-
-		public ConduitFlow.IConduit GetConduitFromDirection(ConduitFlow.FlowDirection direction)
-		{
-			if (direction != ConduitFlow.FlowDirection.Building)
-			{
-				throw new ArgumentOutOfRangeException("Invalid direction query for BuildingConduit");
-			}
-			return this.manager.GetConduit(this.cell);
-		}
-
-		public int Cell
-		{
-			get
-			{
-				return this.cell;
-			}
-		}
-
-		public bool Updated
-		{
-			get
-			{
-				return this.updated;
-			}
-			set
-			{
-				this.updated = value;
-			}
-		}
-
-		public int PermittedFlowDirections
-		{
-			get
-			{
-				return ConduitFlow.FlowBit(ConduitFlow.FlowDirection.Building);
-			}
-			set
-			{
-			}
-		}
-
-		public ConduitFlow.FlowDirection SrcDirection
-		{
-			get
-			{
-				return ConduitFlow.FlowDirection.Building;
-			}
-			set
-			{
-			}
-		}
-
-		public ConduitFlow.FlowDirection TargetDirection
-		{
-			get
-			{
-				return ConduitFlow.FlowDirection.Building;
-			}
-			set
-			{
-			}
-		}
-
-		public ConduitFlow.FlowDirection LastFlowDirection
-		{
-			get
-			{
-				return ConduitFlow.FlowDirection.Building;
-			}
-			set
-			{
-			}
-		}
-
-		public SimHashes LastFlowElement
-		{
-			get
-			{
-				return SimHashes.Void;
-			}
-			set
-			{
-			}
-		}
-
-		private ConduitFlow manager;
-
-		public int cell;
-
-		public bool updated;
-
-		[Serialize]
-		private ConduitFlow.ConduitContents contents;
 	}
 
 	[DebuggerDisplay("{element},{mass}")]

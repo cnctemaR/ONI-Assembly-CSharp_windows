@@ -19,7 +19,20 @@ public class MinionVitalsPanel : KMonoBehaviour
 		this.AddLine(Db.Get().Amounts.Decor, this.icon_decor, (AmountInstance ainstance) => this.GetDecorTooltip(ainstance));
 		this.AddLine(Db.Get().Amounts.Maturity, this.icon_maturity, null);
 		this.AddLine(Db.Get().Amounts.Fertilization, this.icon_calories, null);
-		this.schedulerHandle = GameScheduler.Instance.SchedulePeriodic("Refresh Vitals Screen", 0.25f, new Action<object>(this.Refresh), null, null, 0f);
+		this.AddLine(Db.Get().Amounts.Irrigation, this.icon_calories, null);
+		this.AddLine(Db.Get().Amounts.YieldBonus, this.icon_hitpoints, null);
+	}
+
+	protected override void OnCmpEnable()
+	{
+		base.OnCmpEnable();
+		this.schedulerHandle = GameScheduler.Instance.SchedulePeriodic("Refresh Vitals Screen", 0.25f, new Action<object>(this.Refresh), null, null, 0f, null);
+	}
+
+	protected override void OnCmpDisable()
+	{
+		base.OnCmpDisable();
+		this.schedulerHandle.Clear();
 	}
 
 	private string GetDecorTooltip(AmountInstance amount_instance)
@@ -41,10 +54,13 @@ public class MinionVitalsPanel : KMonoBehaviour
 	{
 		GameObject gameObject = Util.KInstantiateUI(this.LineItemPrefab, base.gameObject, false);
 		gameObject.GetComponentInChildren<Image>().sprite = icon;
+		gameObject.GetComponent<ToolTip>().refreshWhileHovering = true;
 		gameObject.SetActive(true);
 		MinionVitalsPanel.VitalLine vitalLine = default(MinionVitalsPanel.VitalLine);
 		vitalLine.amount = amount;
 		vitalLine.go = gameObject;
+		vitalLine.locText = gameObject.GetComponentInChildren<LocText>();
+		vitalLine.imageToggle = gameObject.GetComponentInChildren<ValueTrendImageToggle>();
 		if (tooltip_func != null)
 		{
 			vitalLine.tooltip = tooltip_func;
@@ -69,22 +85,17 @@ public class MinionVitalsPanel : KMonoBehaviour
 			return;
 		}
 		Amounts amounts = this.selectedEntity.GetAmounts();
-		foreach (MinionVitalsPanel.VitalLine vitalLine in this.vitalsLines)
+		for (int i = 0; i < this.vitalsLines.Count; i++)
 		{
+			MinionVitalsPanel.VitalLine vitalLine = this.vitalsLines[i];
 			bool flag = false;
-			foreach (AmountInstance amountInstance in amounts)
+			for (int j = 0; j < amounts.Count; j++)
 			{
+				AmountInstance amountInstance = amounts[j];
 				if (vitalLine.amount == amountInstance.amount)
 				{
-					try
-					{
-						vitalLine.go.GetComponentInChildren<Text>().text = vitalLine.amount.GetDescription(amountInstance);
-					}
-					catch
-					{
-						vitalLine.go.GetComponentInChildren<LocText>().SetText(vitalLine.amount.GetDescription(amountInstance));
-					}
-					vitalLine.go.GetComponentInChildren<ValueTrendImageToggle>().SetValue(amountInstance, vitalLine.tooltip);
+					vitalLine.locText.SetText(vitalLine.amount.GetDescription(amountInstance));
+					vitalLine.imageToggle.SetValue(amountInstance, vitalLine.tooltip);
 					flag = true;
 					if (!vitalLine.go.activeSelf)
 					{
@@ -131,6 +142,10 @@ public class MinionVitalsPanel : KMonoBehaviour
 		public Amount amount;
 
 		public GameObject go;
+
+		public ValueTrendImageToggle imageToggle;
+
+		public LocText locText;
 
 		public Func<AmountInstance, string> tooltip;
 	}

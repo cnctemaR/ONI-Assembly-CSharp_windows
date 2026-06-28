@@ -1,7 +1,9 @@
 ﻿using System;
 using KSerialization;
 using STRINGS;
+using UnityEngine;
 
+[SerializationConfig(MemberSerialization.OptIn)]
 public class Harvestable : Workable
 {
 	protected Harvestable()
@@ -9,18 +11,119 @@ public class Harvestable : Workable
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
 	}
 
+	private void OnEnableOverlay(object data)
+	{
+		if ((int)data == 954055328)
+		{
+			this.CreateOverlayIcon();
+		}
+		else
+		{
+			this.DestroyOverlayIcon();
+		}
+	}
+
+	private void DestroyOverlayIcon()
+	{
+		if (this.HarvestWhenReadyOverlayIcon != null)
+		{
+			global::UnityEngine.Object.Destroy(this.HarvestWhenReadyOverlayIcon.gameObject);
+			this.HarvestWhenReadyOverlayIcon = null;
+		}
+	}
+
+	private void CreateOverlayIcon()
+	{
+		if (this.HarvestWhenReadyOverlayIcon != null)
+		{
+			return;
+		}
+		if (base.GetComponent<Harvestable>() != null && base.GetComponent<AttackableBase>() == null)
+		{
+			this.HarvestWhenReadyOverlayIcon = Util.KInstantiate(Assets.UIPrefabs.HarvestWhenReadyOverlayIcon, GameScreenManager.Instance.worldSpaceCanvas, null).GetComponent<RectTransform>();
+			OccupyArea component = base.GetComponent<OccupyArea>();
+			Extents extents = component.GetExtents();
+			KPrefabID component2 = base.GetComponent<KPrefabID>();
+			Vector3 vector;
+			if (component2.HasTag(GameTags.Hanging))
+			{
+				vector = new Vector3((float)(extents.x + extents.width / 2) + 0.5f, (float)(extents.y + extents.height));
+			}
+			else
+			{
+				vector = new Vector3((float)(extents.x + extents.width / 2) + 0.5f, (float)extents.y);
+			}
+			this.HarvestWhenReadyOverlayIcon.transform.position = vector;
+			this.RefreshOverlayIcon(null);
+		}
+	}
+
+	private void RefreshOverlayIcon(object data = null)
+	{
+		if (this.HarvestWhenReadyOverlayIcon != null)
+		{
+			if (Grid.Visible[Grid.PosToCell(base.gameObject)] > 0 || DebugHandler.FreeCameraMode)
+			{
+				if (!this.HarvestWhenReadyOverlayIcon.gameObject.activeSelf)
+				{
+					this.HarvestWhenReadyOverlayIcon.gameObject.SetActive(true);
+				}
+			}
+			else if (this.HarvestWhenReadyOverlayIcon.gameObject.activeSelf)
+			{
+				this.HarvestWhenReadyOverlayIcon.gameObject.SetActive(false);
+			}
+			HierarchyReferences component = this.HarvestWhenReadyOverlayIcon.GetComponent<HierarchyReferences>();
+			if (this.harvestWhenReady)
+			{
+				component.GetReference("On").gameObject.SetActive(true);
+				component.GetReference("Off").gameObject.SetActive(false);
+			}
+			else
+			{
+				component.GetReference("On").gameObject.SetActive(false);
+				component.GetReference("Off").gameObject.SetActive(true);
+			}
+		}
+	}
+
+	private void OnDisableOverlay(object data)
+	{
+		this.DestroyOverlayIcon();
+	}
+
+	public void SetInPlanterBox(bool state)
+	{
+		if (state)
+		{
+			if (!this.isInPlanterBox)
+			{
+				this.isInPlanterBox = true;
+				this.SetHarvestWhenReady(true);
+			}
+		}
+		else
+		{
+			this.isInPlanterBox = false;
+		}
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Harvesting;
+		this.Subscribe(1309017699, delegate(object o)
+		{
+			this.SetInPlanterBox(true);
+		});
 	}
 
 	protected override void OnSpawn()
 	{
-		this.Subscribe(2127324410, new EventSystem.EventHandler(this.ForceCancelHarvest));
+		this.Subscribe(2127324410, new Action<object>(this.ForceCancelHarvest));
 		base.SetWorkTime(10f);
-		this.Subscribe(2127324410, new EventSystem.EventHandler(this.OnCancel));
-		this.Subscribe(493375141, new EventSystem.EventHandler(this.OnRefreshUserMenu));
+		this.Subscribe(2127324410, new Action<object>(this.OnCancel));
+		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		this.faceTargetWhenWorking = true;
 		Components.Harvestables.Add(this);
 		this.area = base.GetComponent<OccupyArea>();
@@ -28,6 +131,10 @@ public class Harvestable : Workable
 		{
 			this.MarkForHarvest();
 		}
+		Game.Instance.Subscribe(1248612973, new Action<object>(this.OnEnableOverlay));
+		Game.Instance.Subscribe(1798162660, new Action<object>(this.OnEnableOverlay));
+		Game.Instance.Subscribe(2015652040, new Action<object>(this.OnDisableOverlay));
+		this.iconRefreshHandle = UIScheduler.Instance.SchedulePeriodic("RefreshHarvestIcon", 1f, new Action<object>(this.RefreshOverlayIcon), null, null);
 	}
 
 	public void Harvest()
@@ -35,13 +142,27 @@ public class Harvestable : Workable
 		this.isMarkedForHarvest = false;
 		this.chore = null;
 		this.Trigger(1272413801, this);
-		this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest);
-		this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.Operating);
-		if (this.deselectOnHarvest && SelectTool.Instance.selected == this.selectable)
-		{
-			SelectTool.Instance.Select(null, false);
-		}
+		this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
+		this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.Operating, false);
 		this.userMenu.Refresh();
+	}
+
+	public void SetHarvestWhenReady(bool state)
+	{
+		this.harvestWhenReady = state;
+		if (this.harvestWhenReady && this.canBeHarvested && !this.isMarkedForHarvest)
+		{
+			this.MarkForHarvest();
+		}
+		if (this.isMarkedForHarvest && !this.harvestWhenReady)
+		{
+			this.OnCancel(null);
+			if (this.canBeHarvested && this.isInPlanterBox)
+			{
+				this.selectable.AddStatusItem(Db.Get().MiscStatusItems.NotMarkedForHarvest, this);
+			}
+		}
+		this.RefreshOverlayIcon(null);
 	}
 
 	public void SetCanBeHarvested(bool state)
@@ -50,10 +171,18 @@ public class Harvestable : Workable
 		if (this.canBeHarvested)
 		{
 			this.selectable.AddStatusItem(Db.Get().CreatureStatusItems.ReadyForHarvest, null);
+			if (this.harvestWhenReady)
+			{
+				this.MarkForHarvest();
+			}
+			else if (this.isInPlanterBox)
+			{
+				this.selectable.AddStatusItem(Db.Get().MiscStatusItems.NotMarkedForHarvest, this);
+			}
 		}
 		else
 		{
-			this.selectable.RemoveStatusItem(Db.Get().CreatureStatusItems.ReadyForHarvest);
+			this.selectable.RemoveStatusItem(Db.Get().CreatureStatusItems.ReadyForHarvest, false);
 		}
 		this.userMenu.Refresh();
 	}
@@ -70,6 +199,7 @@ public class Harvestable : Workable
 			this.selectable.AddStatusItem(Db.Get().MiscStatusItems.PendingHarvest, this);
 		}
 		this.isMarkedForHarvest = true;
+		this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.NotMarkedForHarvest, false);
 	}
 
 	protected override void OnCompleteWork(Worker worker)
@@ -83,7 +213,7 @@ public class Harvestable : Workable
 		{
 			this.chore.Cancel("Cancel harvest");
 			this.chore = null;
-			this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest);
+			this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
 		}
 		this.isMarkedForHarvest = false;
 	}
@@ -93,42 +223,55 @@ public class Harvestable : Workable
 		return this.chore != null;
 	}
 
-	protected virtual void OnClickHarvest()
+	protected virtual void OnClickHarvestWhenReady()
 	{
-		this.MarkForHarvest();
+		this.SetHarvestWhenReady(true);
 	}
 
-	protected void OnClickCancelHarvest()
+	protected virtual void OnClickCancelHarvestWhenReady()
 	{
-		this.OnCancel(null);
+		this.SetHarvestWhenReady(false);
 	}
 
 	public virtual void ForceCancelHarvest(object data = null)
 	{
 		this.OnCancel(null);
-		this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest);
+		this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
 		this.userMenu.Refresh();
 	}
 
 	public virtual void OnRefreshUserMenu(object data)
 	{
-		if (this.chore != null)
+		if (this.harvestWhenReady)
 		{
 			UserMenu userMenu = this.userMenu;
-			string text = UI.USERMENUACTIONS.CANCELHARVEST.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_harvest", UI.USERMENUACTIONS.CANCELHARVEST.NAME, new global::System.Action(this.OnClickCancelHarvest), global::Action.NumActions, null, null, null, null, text));
+			string text = UI.USERMENUACTIONS.CANCEL_HARVEST_WHEN_READY.TOOLTIP;
+			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_harvest", UI.USERMENUACTIONS.CANCEL_HARVEST_WHEN_READY.NAME, delegate
+			{
+				this.OnClickCancelHarvestWhenReady();
+				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, UI.GAMEOBJECTEFFECTS.PLANT_DO_NOT_HARVEST, this.transform, 1.5f, false);
+			}, global::Action.NumActions, null, null, null, text, true), 1f);
 		}
 		else
 		{
 			UserMenu userMenu2 = this.userMenu;
-			Func<bool> func = () => this.canBeHarvested;
-			string text = ((!this.canBeHarvested) ? UI.USERMENUACTIONS.HARVEST.TOOLTIP_DISABLED : UI.USERMENUACTIONS.HARVEST.TOOLTIP);
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_harvest", UI.USERMENUACTIONS.HARVEST.NAME, new global::System.Action(this.OnClickHarvest), global::Action.NumActions, null, func, null, null, text));
+			string text = UI.USERMENUACTIONS.HARVEST_WHEN_READY.TOOLTIP;
+			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_harvest", UI.USERMENUACTIONS.HARVEST_WHEN_READY.NAME, delegate
+			{
+				this.OnClickHarvestWhenReady();
+				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, UI.GAMEOBJECTEFFECTS.PLANT_MARK_FOR_HARVEST, this.transform, 1.5f, false);
+			}, global::Action.NumActions, null, null, null, text, true), 1f);
 		}
 	}
 
 	protected override void OnCleanUp()
 	{
+		base.OnCleanUp();
+		this.DestroyOverlayIcon();
+		Game.Instance.Unsubscribe(1248612973, new Action<object>(this.OnEnableOverlay));
+		Game.Instance.Unsubscribe(2015652040, new Action<object>(this.OnDisableOverlay));
+		Game.Instance.Unsubscribe(1798162660, new Action<object>(this.OnEnableOverlay));
+		this.iconRefreshHandle.Clear();
 		Components.Harvestables.Remove(this);
 	}
 
@@ -136,7 +279,7 @@ public class Harvestable : Workable
 	{
 		base.OnStartWork(worker);
 		this.Trigger(-1358696400, worker);
-		this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest);
+		this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
 	}
 
 	protected override void OnStopWork(Worker worker)
@@ -161,9 +304,17 @@ public class Harvestable : Workable
 	[Serialize]
 	protected bool canBeHarvested;
 
-	public bool deselectOnHarvest = true;
+	[Serialize]
+	protected bool harvestWhenReady;
+
+	public RectTransform HarvestWhenReadyOverlayIcon;
+
+	[Serialize]
+	private bool isInPlanterBox;
 
 	protected Chore chore;
 
 	public OccupyArea area;
+
+	private SchedulerHandle iconRefreshHandle;
 }

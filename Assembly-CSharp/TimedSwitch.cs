@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using KSerialization;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class TimedSwitch : Switch, ISaveLoadableJson
+public class TimedSwitch : CircuitSwitch, ISaveLoadable
 {
 	private void SimUpdate(float dt)
 	{
@@ -27,11 +26,6 @@ public class TimedSwitch : Switch, ISaveLoadableJson
 			return;
 		}
 		this.TimedToggle();
-	}
-
-	public override List<Descriptor> GetRequirementDescriptions(BuildingDef def)
-	{
-		return null;
 	}
 
 	[Serialize]

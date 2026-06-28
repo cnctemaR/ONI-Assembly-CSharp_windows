@@ -9,7 +9,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Region : KMonoBehaviour, ISaveLoadableJson
+public class Region : KMonoBehaviour, ISaveLoadable
 {
 	public event Action<BuildingComplete> OnBuildingAdded;
 
@@ -134,7 +134,7 @@ public class Region : KMonoBehaviour, ISaveLoadableJson
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(-1503271301, new EventSystem.EventHandler(this.OnSelectObject));
+		this.Subscribe(-1503271301, new Action<object>(this.OnSelectObject));
 	}
 
 	protected override void OnSpawn()
@@ -148,7 +148,7 @@ public class Region : KMonoBehaviour, ISaveLoadableJson
 				attributes.Add(Db.Get().BuildingAttributes.Get(text));
 			}
 		}
-		base.Subscribe(Game.Instance.gameObject, 1798162660, new EventSystem.EventHandler(this.OnOverlayChanged));
+		base.Subscribe(Game.Instance.gameObject, 1798162660, new Action<object>(this.OnOverlayChanged));
 		this.RegionChanged();
 	}
 
@@ -173,8 +173,8 @@ public class Region : KMonoBehaviour, ISaveLoadableJson
 	protected override void OnCleanUp()
 	{
 		Game.Instance.RegionManager.RemoveRegion(this, true);
-		base.Unsubscribe(Game.Instance.gameObject, 1798162660, new EventSystem.EventHandler(this.OnOverlayChanged));
-		this.Unsubscribe(-1503271301, new EventSystem.EventHandler(this.OnSelectObject));
+		base.Unsubscribe(Game.Instance.gameObject, 1798162660, new Action<object>(this.OnOverlayChanged));
+		this.Unsubscribe(-1503271301, new Action<object>(this.OnSelectObject));
 		SaveLoadRoot component = base.GetComponent<SaveLoadRoot>();
 		SaveLoader.Instance.saveManager.Unregister(component);
 		if (this.solidChangedEntry != null)
@@ -229,7 +229,7 @@ public class Region : KMonoBehaviour, ISaveLoadableJson
 		extents.width = this.GetWidth() + 1;
 		extents.height = this.GetHeight() + 1;
 		this.solidChangedEntry = GameScenePartitioner.Instance.Add("Region.RegionChanged", base.gameObject, extents, GameScenePartitioner.Instance.solidChangedMask.mask, new Action<object>(this.OnSolidChanged));
-		this.foundationTileChangedEntry = GameScenePartitioner.Instance.Add("Region.TileChanged", base.gameObject, extents, GameScenePartitioner.Instance.objectLayerMasks[8].mask, new Action<object>(this.TileChanged));
+		this.foundationTileChangedEntry = GameScenePartitioner.Instance.Add("Region.TileChanged", base.gameObject, extents, GameScenePartitioner.Instance.objectLayerMasks[9].mask, new Action<object>(this.TileChanged));
 		if (this.OnRegionChanged != null)
 		{
 			this.OnRegionChanged();
@@ -642,7 +642,7 @@ public class Region : KMonoBehaviour, ISaveLoadableJson
 
 	private void AddEdgeComponentToList<T>(int cell, ref List<T> list) where T : Component
 	{
-		GameObject gameObject = Grid.Objects[cell, 3];
+		GameObject gameObject = Grid.Objects[cell, 1];
 		if (gameObject != null)
 		{
 			T component = gameObject.GetComponent<T>();
@@ -849,7 +849,7 @@ public class Region : KMonoBehaviour, ISaveLoadableJson
 		List<BuildingComplete> list = new List<BuildingComplete>();
 		foreach (int num in this.cells)
 		{
-			GameObject gameObject = Grid.Objects[num, 3];
+			GameObject gameObject = Grid.Objects[num, 1];
 			if (!(gameObject == null))
 			{
 				BuildingComplete component = gameObject.GetComponent<BuildingComplete>();
@@ -926,7 +926,7 @@ public class Region : KMonoBehaviour, ISaveLoadableJson
 		this.missingRequirements = new List<Region.BuildingRequirement>(this.buildingRequirements);
 		foreach (int num in this.cells)
 		{
-			GameObject gameObject = Grid.Objects[num, 3];
+			GameObject gameObject = Grid.Objects[num, 1];
 			if (!(gameObject == null))
 			{
 				KPrefabID prefabID = gameObject.GetComponent<KPrefabID>();

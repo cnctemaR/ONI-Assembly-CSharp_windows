@@ -15,14 +15,14 @@ public class WattsonMessage : KScreen
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		Game.Instance.Subscribe(-122303817, new EventSystem.EventHandler(this.OnNewBaseCreated));
+		Game.Instance.Subscribe(-122303817, new Action<object>(this.OnNewBaseCreated));
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
 		this.hideScreensWhileActive.Add(NotificationScreen.Instance);
-		this.hideScreensWhileActive.Add(OverlayScreen.Instance);
+		this.hideScreensWhileActive.Add(OverlayMenu.Instance);
 		this.hideScreensWhileActive.Add(PlanScreen.Instance);
 		this.hideScreensWhileActive.Add(ManagementMenu.Instance);
 		this.hideScreensWhileActive.Add(ToolMenu.Instance);
@@ -30,6 +30,7 @@ public class WattsonMessage : KScreen
 		this.hideScreensWhileActive.Add(ResourceCategoryScreen.Instance);
 		this.hideScreensWhileActive.Add(TopLeftControlScreen.Instance);
 		this.hideScreensWhileActive.Add(global::DateTime.Instance);
+		this.hideScreensWhileActive.Add(BuildWatermark.Instance);
 		foreach (KScreen kscreen in this.hideScreensWhileActive)
 		{
 			kscreen.Show(false);
@@ -65,7 +66,7 @@ public class WattsonMessage : KScreen
 		this.startFade = false;
 		GameObject telepad = GameUtil.GetTelepad();
 		KAnimControllerBase kac = telepad.GetComponent<KAnimControllerBase>();
-		kac.Play(new string[] { "working_pre", "working_loop" }, KAnim.PlayMode.Loop);
+		kac.Play(WattsonMessage.WorkLoopAnims, KAnim.PlayMode.Loop);
 		for (int i = 0; i < Components.LiveMinionIdentities.Count; i++)
 		{
 			int idx = i + 1;
@@ -73,11 +74,11 @@ public class WattsonMessage : KScreen
 			minionIdentity.gameObject.transform.position = new Vector3(telepad.transform.position.x + (float)idx - 1.5f, telepad.transform.position.y, minionIdentity.gameObject.transform.position.z);
 			GameObject gameObject = minionIdentity.gameObject;
 			ChoreProvider chore_provider = gameObject.GetComponent<ChoreProvider>();
-			EmoteChore chorePre = new EmoteChore(chore_provider, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", new string[] { "portalbirth_pre_" + idx }, KAnim.PlayMode.Loop);
+			EmoteChore chorePre = new EmoteChore(chore_provider, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", new HashedString[] { "portalbirth_pre_" + idx }, KAnim.PlayMode.Loop);
 			UIScheduler.Instance.Schedule("DupeBirth", (float)idx * 0.5f, delegate(object data)
 			{
 				chorePre.Cancel("Done looping");
-				new EmoteChore(chore_provider, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", new string[] { "portalbirth_" + idx }, null);
+				new EmoteChore(chore_provider, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", new HashedString[] { "portalbirth_" + idx }, null);
 			}, null, null);
 		}
 		CameraController.Instance.DisableUserCameraControl = true;
@@ -89,7 +90,7 @@ public class WattsonMessage : KScreen
 		}, null, null));
 		UIScheduler.Instance.Schedule("Welcome", 4.6f, delegate(object data)
 		{
-			kac.Play(new string[] { "working_pst", "idle" }, KAnim.PlayMode.Once);
+			kac.Play(new HashedString[] { "working_pst", "idle" }, KAnim.PlayMode.Once);
 		}, null, null);
 		this.scheduleHandles.Add(UIScheduler.Instance.Schedule("WelcomeDialog", 5.6f, delegate(object d)
 		{
@@ -106,7 +107,7 @@ public class WattsonMessage : KScreen
 		base.OnDeactivate();
 		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().IntroNIS, STOP_MODE.ALLOWFADEOUT);
 		AudioMixer.instance.StartPersistentSnapshots();
-		MusicManager.instance.StopSong("Music_WattsonMessage", true);
+		MusicManager.instance.StopSong("Music_WattsonMessage", true, STOP_MODE.ALLOWFADEOUT);
 		MusicManager.instance.PlayDynamicMusic();
 		AudioMixer.instance.activeNIS = false;
 		DemoTimer.Instance.CountdownActive = true;
@@ -184,4 +185,6 @@ public class WattsonMessage : KScreen
 	private bool startFade;
 
 	private List<SchedulerHandle> scheduleHandles = new List<SchedulerHandle>();
+
+	private static readonly HashedString[] WorkLoopAnims = new HashedString[] { "working_pre", "working_loop" };
 }

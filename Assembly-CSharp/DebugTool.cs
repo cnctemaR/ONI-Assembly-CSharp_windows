@@ -64,13 +64,13 @@ public class DebugTool : DragTool
 				{
 					foreach (GameObject gameObject in new List<GameObject>
 					{
-						Grid.Objects[cell, 3],
-						Grid.Objects[cell, 7],
-						Grid.Objects[cell, 8],
-						Grid.Objects[cell, 12],
-						Grid.Objects[cell, 10],
-						Grid.Objects[cell, 12],
-						Grid.Objects[cell, 6]
+						Grid.Objects[cell, 1],
+						Grid.Objects[cell, 2],
+						Grid.Objects[cell, 9],
+						Grid.Objects[cell, 15],
+						Grid.Objects[cell, 11],
+						Grid.Objects[cell, 15],
+						Grid.Objects[cell, 19]
 					})
 					{
 						if (gameObject != null)
@@ -121,12 +121,12 @@ public class DebugTool : DragTool
 	{
 		foreach (GameObject gameObject in new List<GameObject>
 		{
-			Grid.Objects[cell, 7],
-			Grid.Objects[cell, 3],
-			Grid.Objects[cell, 10],
-			Grid.Objects[cell, 12],
+			Grid.Objects[cell, 2],
 			Grid.Objects[cell, 1],
-			Grid.Objects[cell, 6]
+			Grid.Objects[cell, 11],
+			Grid.Objects[cell, 15],
+			Grid.Objects[cell, 0],
+			Grid.Objects[cell, 19]
 		})
 		{
 			if (gameObject != null)

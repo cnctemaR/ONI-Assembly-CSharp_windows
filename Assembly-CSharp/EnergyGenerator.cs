@@ -1,37 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class EnergyGenerator : Generator, IEffectDescriptor
+public class EnergyGenerator : Generator, IBatteryRefillControl, IEffectDescriptor
 {
-	public float MassBurnRate
+	public float BatteryRefillPercent
 	{
 		get
 		{
-			return this.massBurnRate;
+			return this.batteryRefillPercent;
+		}
+		set
+		{
+			this.batteryRefillPercent = value;
 		}
 	}
 
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.Subscribe(824508782, new EventSystem.EventHandler(this.OnActiveChanged));
+		this.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
 	}
 
-	protected void OnActiveChanged(object is_active)
+	protected void OnActiveChanged(object data)
 	{
-		if ((bool)is_active)
-		{
-			base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.Wattage, this);
-		}
-		else
-		{
-			base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.GeneratorOffline, this);
-		}
+		bool flag = (bool)data;
+		StatusItem statusItem = ((!flag) ? Db.Get().BuildingStatusItems.GeneratorOffline : Db.Get().BuildingStatusItems.Wattage);
+		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, statusItem, this);
 	}
 
 	protected override void OnSpawn()
@@ -40,55 +40,88 @@ public class EnergyGenerator : Generator, IEffectDescriptor
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Behind, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
 	}
 
+	private bool IsConvertible(float dt)
+	{
+		bool flag = true;
+		foreach (EnergyGenerator.InputItem inputItem in this.formula.inputs)
+		{
+			GameObject gameObject = this.storage.FindFirst(inputItem.tag);
+			if (gameObject != null)
+			{
+				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+				float num = inputItem.consumptionRate * dt;
+				flag = flag && component.Mass >= num;
+			}
+			else
+			{
+				flag = false;
+			}
+			if (!flag)
+			{
+				break;
+			}
+		}
+		return flag;
+	}
+
 	protected override void SimUpdate(float dt)
 	{
 		base.SimUpdate(dt);
-		Element element = ElementLoader.FindElementByHash(this.energySourceElement);
-		List<GameObject> list = this.storage.Find(element.tag);
+		EnergyGenerator.InputItem inputItem = this.formula.inputs[0];
 		float num = 0f;
-		foreach (GameObject gameObject in list)
+		GameObject gameObject = this.storage.FindFirst(inputItem.tag);
+		if (gameObject != null)
 		{
 			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-			num += component.Mass;
+			num = component.Mass / inputItem.maxStoredMass;
 		}
-		float num2 = num / this.storage.Capacity();
-		this.meter.SetPositionPercent(num2);
+		this.meter.SetPositionPercent(num);
+		ushort circuitID = base.CircuitID;
+		this.operational.SetFlag(EnergyGenerator.wireConnectedFlag, circuitID != ushort.MaxValue);
 		if (this.operational.IsOperational)
 		{
 			bool flag = false;
-			ushort circuitID = base.CircuitID;
-			if (circuitID != 65535)
+			ReadOnlyCollection<Battery> batteriesOnCircuit = Game.Instance.circuitManager.GetBatteriesOnCircuit(circuitID);
+			if (batteriesOnCircuit.Count > 0)
 			{
-				ReadOnlyCollection<Battery> batteriesOnCircuit = Game.Instance.circuitManager.GetBatteriesOnCircuit(circuitID);
-				if (batteriesOnCircuit.Count > 0)
+				foreach (Battery battery in batteriesOnCircuit)
 				{
-					foreach (Battery battery in batteriesOnCircuit)
+					if (battery.PercentFull < this.batteryRefillPercent)
 					{
-						if (battery.PercentFull < this.batteryRefillPercent)
-						{
-							flag = true;
-							break;
-						}
+						flag = true;
+						break;
 					}
 				}
-				else
-				{
-					flag = true;
-				}
 			}
+			else
+			{
+				flag = true;
+			}
+			base.GetComponent<KSelectable>().ToggleStatusItem(EnergyGenerator.BatteriesSufficientlyFull, !flag, null);
 			if (this.delivery != null)
 			{
 				this.delivery.Pause(!flag, "Circuit has sufficient energy");
 			}
-			float num3 = this.massBurnRate * dt;
-			num = Mathf.Max(0f, num - num3);
-			if (num > 0f)
+			if (this.formula.inputs != null && this.IsConvertible(dt))
 			{
-				base.ApplyImmediateJoulesAvailable(base.WattageRating * dt, false);
+				foreach (EnergyGenerator.InputItem inputItem2 in this.formula.inputs)
+				{
+					float num2 = inputItem2.consumptionRate * dt;
+					this.storage.Consume(inputItem2.tag, num2);
+				}
+				PrimaryElement component2 = base.GetComponent<PrimaryElement>();
+				foreach (EnergyGenerator.OutputItem outputItem in this.formula.outputs)
+				{
+					this.Emit(outputItem, dt, component2);
+				}
+				base.GenerateJoules(base.WattageRating * dt, false);
 				base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, Db.Get().BuildingStatusItems.Wattage, this);
-				this.storage.Consume(element.tag, num3);
+				this.operational.SetActive(true, false);
 			}
-			this.operational.SetActive(num > 0f, false);
+			else
+			{
+				this.operational.SetActive(false, false);
+			}
 		}
 		else
 		{
@@ -96,28 +129,119 @@ public class EnergyGenerator : Generator, IEffectDescriptor
 		}
 	}
 
-	public int DescriptionOrder { get; set; }
-
-	public List<Descriptor> GetRequirementDescriptions(BuildingDef def)
+	public List<Descriptor> RequirementDescriptors(BuildingDef def)
 	{
-		List<Descriptor> list = new List<Descriptor>();
-		Element element = ElementLoader.FindElementByHash(this.energySourceElement);
-		string text = element.tag.ProperName();
-		string text2 = GameUtil.GetKeywordStyle(this.energySourceElement);
-		if (element.IsVacuum)
+		if (this.formula.inputs == null || this.formula.inputs.Length == 0)
 		{
-			text2 = GameUtil.GetKeywordStyle(SimHashes.Oxygen);
-			text = ELEMENTS.STATEGAS;
+			return null;
 		}
-		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMED, text2, text, GameUtil.GetFormattedMass(this.massBurnRate, GameUtil.TimeSlice.PerSecond, true, "F1"))), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMED, text2, text, GameUtil.GetFormattedMass(this.massBurnRate, GameUtil.TimeSlice.PerSecond, true, "F1")));
-		list.Add(descriptor);
+		List<Descriptor> list = new List<Descriptor>();
+		for (int i = 0; i < this.formula.inputs.Length; i++)
+		{
+			EnergyGenerator.InputItem inputItem = this.formula.inputs[i];
+			Element element = ElementLoader.GetElement(inputItem.tag);
+			string text = element.tag.ProperName();
+			string keywordStyle = GameUtil.GetKeywordStyle(element);
+			Descriptor descriptor = default(Descriptor);
+			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMED, keywordStyle, text, GameUtil.GetFormattedMass(inputItem.consumptionRate, GameUtil.TimeSlice.PerSecond, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMED, keywordStyle, text, GameUtil.GetFormattedMass(inputItem.consumptionRate, GameUtil.TimeSlice.PerSecond, true, "{0:0.##}")), Descriptor.DescriptorType.Requirement);
+			list.Add(descriptor);
+		}
 		return list;
 	}
 
-	public List<Descriptor> GetEffectDescriptions(BuildingDef def)
+	public List<Descriptor> EffectDescriptors(BuildingDef def)
 	{
-		return null;
+		List<Descriptor> list = new List<Descriptor>();
+		if (this.formula.outputs == null || this.formula.outputs.Length == 0)
+		{
+			return list;
+		}
+		for (int i = 0; i < this.formula.outputs.Length; i++)
+		{
+			EnergyGenerator.OutputItem outputItem = this.formula.outputs[i];
+			Element element = ElementLoader.FindElementByHash(outputItem.element);
+			string text = element.tag.ProperName();
+			string keywordStyle = GameUtil.GetKeywordStyle(element);
+			Descriptor descriptor = default(Descriptor);
+			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTED, keywordStyle, text, GameUtil.GetFormattedMass(outputItem.creationRate, GameUtil.TimeSlice.PerSecond, true, "{0:0.#}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTED, keywordStyle, text, GameUtil.GetFormattedMass(outputItem.creationRate, GameUtil.TimeSlice.PerSecond, true, "{0:0.#}")), Descriptor.DescriptorType.Effect);
+			list.Add(descriptor);
+		}
+		return list;
+	}
+
+	public List<Descriptor> GetDescriptors(BuildingDef def)
+	{
+		List<Descriptor> list = new List<Descriptor>();
+		foreach (Descriptor descriptor in this.RequirementDescriptors(def))
+		{
+			list.Add(descriptor);
+		}
+		foreach (Descriptor descriptor2 in this.EffectDescriptors(def))
+		{
+			list.Add(descriptor2);
+		}
+		return list;
+	}
+
+	public static EnergyGenerator.Formula CreateSimpleFormula(SimHashes input_element, float input_mass_rate, float max_stored_input_mass, SimHashes output_element = SimHashes.Void, float output_mass_rate = 0f, bool store_output_mass = true)
+	{
+		EnergyGenerator.Formula formula = default(EnergyGenerator.Formula);
+		formula.inputs = new EnergyGenerator.InputItem[]
+		{
+			new EnergyGenerator.InputItem(TagManager.Create(input_element), input_mass_rate, max_stored_input_mass)
+		};
+		if (output_element != SimHashes.Void)
+		{
+			formula.outputs = new EnergyGenerator.OutputItem[]
+			{
+				new EnergyGenerator.OutputItem(output_element, output_mass_rate, store_output_mass)
+			};
+		}
+		else
+		{
+			formula.outputs = null;
+		}
+		return formula;
+	}
+
+	private void Emit(EnergyGenerator.OutputItem output, float dt, PrimaryElement root_pe)
+	{
+		Element element = ElementLoader.FindElementByHash(output.element);
+		float num = output.creationRate * dt;
+		if (output.store)
+		{
+			if (element.IsGas)
+			{
+				this.storage.AddGasChunk(output.element, num, root_pe.Temperature, true);
+			}
+			else if (element.IsLiquid)
+			{
+				this.storage.AddLiquid(output.element, num, root_pe.Temperature, true);
+			}
+			else
+			{
+				GameObject gameObject = element.substance.SpawnResource(this.transform.position, num, root_pe.Temperature, false, false);
+				this.storage.Store(gameObject, true, false);
+			}
+		}
+		else
+		{
+			int num2 = Grid.PosToCell(this.transform.position);
+			int num3 = Grid.OffsetCell(num2, output.emitOffset);
+			if (element.IsGas)
+			{
+				SimMessages.ModifyMass(num3, num, CellEventLogger.Instance.EnergyGeneratorModifyMass, root_pe.Temperature, output.element);
+			}
+			else if (element.IsLiquid)
+			{
+				int elementIndex = ElementLoader.GetElementIndex(output.element);
+				FallingWater.instance.AddParticle(num3, (byte)elementIndex, num, root_pe.Temperature, false, false, false);
+			}
+			else
+			{
+				element.substance.SpawnResource(Grid.CellToPosCCC(num3, Grid.SceneLayer.Front), num, root_pe.Temperature, true, false);
+			}
+		}
 	}
 
 	[MyCmpAdd]
@@ -126,17 +250,70 @@ public class EnergyGenerator : Generator, IEffectDescriptor
 	[MyCmpGet]
 	private ManualDeliveryKG delivery;
 
-	[HashedEnum]
-	[SerializeField]
-	public SimHashes energySourceElement;
-
-	[SerializeField]
-	[Tooltip("kg/s")]
-	public float massBurnRate;
-
 	[Serialize]
 	[SerializeField]
-	public float batteryRefillPercent = 0.5f;
+	private float batteryRefillPercent = 0.5f;
+
+	[SerializeField]
+	public EnergyGenerator.Formula formula;
 
 	private MeterController meter;
+
+	private static Operational.Flag wireConnectedFlag = new Operational.Flag("generatorWireConnected", Operational.Flag.Type.Requirement);
+
+	public static StatusItem BatteriesSufficientlyFull = new StatusItem("BatteriesSufficientlyFull", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
+
+	[DebuggerDisplay("{tag} -{consumptionRate} kg/s")]
+	[Serializable]
+	public struct InputItem
+	{
+		public InputItem(Tag tag, float consumption_rate, float max_stored_mass)
+		{
+			this.tag = tag;
+			this.consumptionRate = consumption_rate;
+			this.maxStoredMass = max_stored_mass;
+		}
+
+		public Tag tag;
+
+		public float consumptionRate;
+
+		public float maxStoredMass;
+	}
+
+	[DebuggerDisplay("{element} {creationRate} kg/s")]
+	[Serializable]
+	public struct OutputItem
+	{
+		public OutputItem(SimHashes element, float creation_rate, bool store)
+		{
+			this = new EnergyGenerator.OutputItem(element, creation_rate, store, CellOffset.none);
+		}
+
+		public OutputItem(SimHashes element, float creation_rate, bool store, CellOffset emit_offset)
+		{
+			this.element = element;
+			this.creationRate = creation_rate;
+			this.store = store;
+			this.emitOffset = emit_offset;
+		}
+
+		public SimHashes element;
+
+		public float creationRate;
+
+		public bool store;
+
+		public CellOffset emitOffset;
+	}
+
+	[Serializable]
+	public struct Formula
+	{
+		public EnergyGenerator.InputItem[] inputs;
+
+		public EnergyGenerator.OutputItem[] outputs;
+
+		public Tag meterTag;
+	}
 }

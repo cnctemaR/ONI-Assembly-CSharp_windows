@@ -17,8 +17,8 @@ public class Sublimates : KMonoBehaviour
 	{
 		base.OnPrefabInit();
 		this.flowAccumulator = new Accumulator("EmittedMass", this, 3f);
-		this.Subscribe(-2064133523, new EventSystem.EventHandler(this.OnAbsorb));
-		this.Subscribe(1335436905, new EventSystem.EventHandler(this.OnSplitFromChunk));
+		this.Subscribe(-2064133523, new Action<object>(this.OnAbsorb));
+		this.Subscribe(1335436905, new Action<object>(this.OnSplitFromChunk));
 	}
 
 	protected override void OnSpawn()
@@ -36,10 +36,10 @@ public class Sublimates : KMonoBehaviour
 
 	private void OnAbsorb(object data)
 	{
-		GameObject gameObject = data as GameObject;
-		if (gameObject != null)
+		Pickupable pickupable = (Pickupable)data;
+		if (pickupable != null)
 		{
-			Sublimates component = gameObject.GetComponent<Sublimates>();
+			Sublimates component = pickupable.GetComponent<Sublimates>();
 			if (component != null)
 			{
 				this.sublimatedMass += component.sublimatedMass;
@@ -110,6 +110,10 @@ public class Sublimates : KMonoBehaviour
 	{
 		SimMessages.AddRemoveSubstance(cell, this.info.sublimatedElement, CellEventLogger.Instance.SublimatesEmit, mass, temperature, -1);
 		this.flowAccumulator.Accumulate(mass);
+		if (this.info.sublimatedElement == SimHashes.ContaminatedOxygen && BaseArea.Instance.IsInsideBase(cell))
+		{
+			ReportManager.Instance.ReportValue(ReportManager.ReportType.ContaminatedOxygenSublimation, mass, null);
+		}
 		if (this.spawnFXHash != SpawnFXHashes.None)
 		{
 			this.transform.position.z = Grid.GetLayerZ(Grid.SceneLayer.Front);
@@ -119,7 +123,7 @@ public class Sublimates : KMonoBehaviour
 
 	public float AvgFlowRate()
 	{
-		return this.flowAccumulator.AvgFlowRate;
+		return this.flowAccumulator.AvgRate;
 	}
 
 	[MyCmpReq]

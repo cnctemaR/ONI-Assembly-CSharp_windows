@@ -6,11 +6,11 @@ public class MicrobeMusherConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("MicrobeMusher", 2, 3, "microbemusher_kanim", 1200f, 30f, BUILDINGS.CONSTRUCTION_MASS.TIER4, MATERIALS.ALL_METALS, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, null);
-		buildingDef.RequiresPower = true;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("MicrobeMusher", 2, 3, "microbemusher_kanim", 1200f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.ALL_METALS, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, null);
+		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 240f;
-		buildingDef.TemperatureModificationWhenActive = 8f;
-		buildingDef.OperatingTemperature = 350f;
+		buildingDef.ExhaustKilowattsWhenActive = 0.5f;
+		buildingDef.OperatingKilowatts = 2f;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
 		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "Glass";
@@ -31,7 +31,7 @@ public class MicrobeMusherConfig : IBuildingConfig
 		BuildingTemplates.CreateFabricatorStorage(go, microbeMusher);
 	}
 
-	public override void DoPostConfigure(GameObject go)
+	public override void DoPostConfigureComplete(GameObject go)
 	{
 		BuildingTemplates.DoPostConfigure(go);
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
@@ -40,4 +40,6 @@ public class MicrobeMusherConfig : IBuildingConfig
 			instance.StartSM();
 		};
 	}
+
+	public const string ID = "MicrobeMusher";
 }

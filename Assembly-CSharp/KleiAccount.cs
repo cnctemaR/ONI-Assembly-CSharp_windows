@@ -4,16 +4,29 @@ using System.IO;
 using System.Net;
 using System.Text;
 using Newtonsoft.Json;
-using Steamworks;
+using UnityEngine;
 
 public class KleiAccount : ThreadedHttps<KleiAccount>
 {
 	public KleiAccount()
 	{
 		this.CLIENT_KEY = "ONI";
-		this.LIVE_ENDPOINT = "login.kleientertainment.com/login/LoginViaSteam";
+		this.LIVE_ENDPOINT = "login.kleientertainment.com" + DistributionPlatform.Inst.AccountLoginEndpoint;
 		this.serviceName = "KleiAccount";
-		this.ClearSteamTicket();
+		this.ClearAuthTicket();
+	}
+
+	private Dictionary<string, object> BuildLoginRequest(byte[] ticket)
+	{
+		return new Dictionary<string, object>
+		{
+			{
+				"SteamTicket",
+				this.EncodeToAsciiHEX(ticket)
+			},
+			{ "Game", this.CLIENT_KEY },
+			{ "NoEmail", true }
+		};
 	}
 
 	protected override void OnReplyRecieved(WebResponse response)
@@ -32,11 +45,13 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 		KleiAccount.AccountReply accountReply = JsonConvert.DeserializeObject<KleiAccount.AccountReply>(text);
 		if (!accountReply.Error)
 		{
+			Debug.Log("[Account] Got login for user " + accountReply.UserID);
 			KleiAccount.KleiUserID = ((!(accountReply.UserID == string.Empty)) ? accountReply.UserID : null);
 			this.gotUserID();
 		}
 		else
 		{
+			Debug.Log("[Account] Error logging in: " + text);
 			this.gotUserID();
 		}
 		base.End();
@@ -60,17 +75,24 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 		return "OK";
 	}
 
-	public void SendSteamTicket(KleiAccount.GetUserIDdelegate cb)
+	public void AuthenticateUser(KleiAccount.GetUserIDdelegate cb)
 	{
 		if (KleiAccount.KleiUserID == null)
 		{
+			Debug.Log("[Account] Requesting auth ticket from " + DistributionPlatform.Inst.Name);
 			this.gotUserID = cb;
-			Dictionary<string, object> dictionary = new Dictionary<string, object>();
-			dictionary.Add("SteamTicket", this.EncodeToAsciiHEX(this.GetEncryptedTicket()));
-			dictionary.Add("Game", this.CLIENT_KEY);
-			dictionary.Add("NoEmail", true);
-			base.Start();
-			this.PostRawData(dictionary);
+			byte[] array = this.AuthTicket();
+			if (array == null || array.Length == 0)
+			{
+				if (DistributionPlatform.Initialized)
+				{
+					DistributionPlatform.Inst.GetAuthTicket(new DistributionPlatform.AuthTicketHandler(this.OnAuthTicketObtained));
+				}
+			}
+			else
+			{
+				this.OnAuthTicketObtained(array);
+			}
 		}
 		else
 		{
@@ -78,44 +100,41 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 		}
 	}
 
-	public byte[] GetEncryptedTicket()
+	public void OnAuthTicketObtained(byte[] ticket)
 	{
-		byte[] array = this.SteamTicket();
-		if (array == null || array.Length == 0)
+		if (0 < ticket.Length)
 		{
-			if (SteamManager.Initialized)
-			{
-				uint num = 0U;
-				SteamUser.GetAuthSessionTicket(this.authSessionTicket, this.authSessionTicket.Length, out num);
-				if (num > 0U)
-				{
-					array = new byte[num];
-					Array.Copy(this.authSessionTicket, array, (long)((ulong)num));
-					this.SetSteamTicket(array);
-				}
-			}
+			byte[] array = new byte[ticket.Length];
+			Array.Copy(ticket, array, ticket.Length);
+			this.SetAuthTicket(array);
+			base.Start();
+			Dictionary<string, object> dictionary = this.BuildLoginRequest(array);
+			this.PostRawData(dictionary);
 		}
-		return array;
+		else
+		{
+			this.gotUserID();
+		}
 	}
 
-	public byte[] SteamTicket()
+	public byte[] AuthTicket()
 	{
-		return this.steamTicket;
+		return this.authTicket;
 	}
 
-	public void SetSteamTicket(byte[] ticket)
+	public void SetAuthTicket(byte[] ticket)
 	{
-		this.steamTicket = ticket;
+		this.authTicket = ticket;
 	}
 
-	public void ClearSteamTicket()
+	public void ClearAuthTicket()
 	{
-		this.steamTicket = null;
+		this.authTicket = null;
 	}
+
+	private const string TicketFieldName = "SteamTicket";
 
 	public const string KleiAccountKey = "KleiAccount";
-
-	private const string SteamTicketFieldName = "SteamTicket";
 
 	private const string GameIDFieldName = "Game";
 
@@ -125,15 +144,13 @@ public class KleiAccount : ThreadedHttps<KleiAccount>
 
 	private const string UserIDFieldName = "UserID";
 
-	private const string SteamTicketKey = "STEAM_TICKET";
+	private const string AuthTicketKey = "AUTH_TICKET";
 
 	public static string KleiUserID;
 
 	private KleiAccount.GetUserIDdelegate gotUserID;
 
-	private byte[] authSessionTicket = new byte[2048];
-
-	private byte[] steamTicket;
+	private byte[] authTicket;
 
 	private struct AccountReply
 	{

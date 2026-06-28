@@ -6,13 +6,13 @@ using UnityEngine;
 public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 {
 	public RecoverBreathChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.RecoverBreath, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true)
+		: base(Db.Get().ChoreTypes.RecoverBreath, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true, 0)
 	{
 		this.smi = new RecoverBreathChore.StatesInstance(this, target.gameObject);
 		base.AddPrecondition(ChorePreconditions.IsNotRedAlert, null);
 	}
 
-	public class StatesInstance : GameStateMachine<RecoverBreathChore.States, RecoverBreathChore.StatesInstance, RecoverBreathChore>.GameInstance
+	public class StatesInstance : GameStateMachine<RecoverBreathChore.States, RecoverBreathChore.StatesInstance, RecoverBreathChore, object>.GameInstance
 	{
 		public StatesInstance(RecoverBreathChore master, GameObject recoverer)
 			: base(master)
@@ -20,7 +20,7 @@ public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 			base.sm.recoverer.Set(recoverer, base.smi);
 			Klei.AI.Attribute deltaAttribute = Db.Get().Amounts.Breath.deltaAttribute;
 			float num = 3f;
-			this.recoveringbreath = new AttributeModifier(deltaAttribute.Id, num, DUPLICANTS.MODIFIERS.RECOVERINGBREATH.NAME, false);
+			this.recoveringbreath = new AttributeModifier(deltaAttribute.Id, num, DUPLICANTS.MODIFIERS.RECOVERINGBREATH.NAME, false, false);
 		}
 
 		public void CreateLocator()
@@ -67,18 +67,18 @@ public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 				smi.UpdateLocator();
 			});
 			this.approach.InitializeStates(this.recoverer, this.locator, this.recover, null, null, null);
-			this.recover.DefaultState(this.recover.pre).ToggleAttributeModifier("Recovering Breath", (RecoverBreathChore.StatesInstance smi) => smi.recoveringbreath);
+			this.recover.DefaultState(this.recover.pre).ToggleAttributeModifier("Recovering Breath", (RecoverBreathChore.StatesInstance smi) => smi.recoveringbreath, null);
 			this.recover.pre.PlayAnim("breathe_pre", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.recover.loop);
 			this.recover.loop.PlayAnim("breathe_loop", KAnim.PlayMode.Loop, null);
 			this.recover.pst.QueueAnim("breathe_pst", false, null).OnAnimQueueComplete(null);
 		}
 
-		public GameStateMachine<RecoverBreathChore.States, RecoverBreathChore.StatesInstance, RecoverBreathChore>.ApproachSubState<Approachable> approach;
+		public GameStateMachine<RecoverBreathChore.States, RecoverBreathChore.StatesInstance, RecoverBreathChore, object>.ApproachSubState<Approachable> approach;
 
-		public GameStateMachine<RecoverBreathChore.States, RecoverBreathChore.StatesInstance, RecoverBreathChore>.PLPState recover;
+		public GameStateMachine<RecoverBreathChore.States, RecoverBreathChore.StatesInstance, RecoverBreathChore, object>.PLPState recover;
 
-		public StateMachine<RecoverBreathChore.States, RecoverBreathChore.StatesInstance, RecoverBreathChore>.TargetParameter recoverer;
+		public StateMachine<RecoverBreathChore.States, RecoverBreathChore.StatesInstance, RecoverBreathChore, object>.TargetParameter recoverer;
 
-		public StateMachine<RecoverBreathChore.States, RecoverBreathChore.StatesInstance, RecoverBreathChore>.TargetParameter locator;
+		public StateMachine<RecoverBreathChore.States, RecoverBreathChore.StatesInstance, RecoverBreathChore, object>.TargetParameter locator;
 	}
 }

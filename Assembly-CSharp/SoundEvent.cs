@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using FMOD.Studio;
-using FMODUnity;
 using UnityEngine;
 
 [DebuggerDisplay("{Name}")]
@@ -15,6 +14,7 @@ public class SoundEvent : AnimEvent
 		: base(file_name, sound_name, frame)
 	{
 		this.sound = GlobalAssets.GetSound(sound_name, false);
+		this.soundHash = new HashedString(this.sound);
 		if (this.sound == null || this.sound == string.Empty)
 		{
 		}
@@ -22,65 +22,86 @@ public class SoundEvent : AnimEvent
 		this.looping = is_looping;
 	}
 
-	public void Play(IAnimBehaviour behaviour, string sound)
+	public string sound { get; private set; }
+
+	public HashedString soundHash { get; private set; }
+
+	public override bool ShouldPlaySound(AnimEventManager.EventPlayerData behaviour)
 	{
-		if (base.IsFilteredOut(behaviour) || this.IsLowPrioritySound(sound))
+		if (this.sound == null || this.IsLowPrioritySound(this.sound))
 		{
-			return;
+			return false;
 		}
+		CameraController instance = CameraController.Instance;
+		SpeedControlScreen instance2 = SpeedControlScreen.Instance;
+		if (instance != null && !instance.IsAudibleSound(behaviour.position, this.sound))
+		{
+			if (!this.looping && !GlobalAssets.IsHighPriority(this.sound))
+			{
+				return false;
+			}
+		}
+		else if (instance2 != null && instance2.IsPaused)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
+	{
+		if (this.ShouldPlaySound(behaviour))
+		{
+			this.PlaySound(behaviour);
+		}
+	}
+
+	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
+	{
 		Vector3 position = behaviour.GetComponent<Transform>().position;
 		Vector3 position2 = behaviour.position;
-		LoopingSounds component = behaviour.GetComponent<LoopingSounds>();
-		Vector3 vector = position;
-		if (this.playAtTarget)
-		{
-			vector = position2;
-		}
+		Vector3 vector = ((!this.playAtTarget) ? position : position2);
 		if (AudioDebug.Get().debugSoundEvents)
 		{
-			global::UnityEngine.Debug.Log(string.Concat(new object[] { behaviour.name, ", ", sound, ", ", this.Frame, ", ", vector }));
+			global::UnityEngine.Debug.Log(string.Concat(new object[] { behaviour.name, ", ", this.sound, ", ", this.Frame, ", ", vector }));
 		}
 		try
 		{
 			if (this.looping)
 			{
+				LoopingSounds component = behaviour.GetComponent<LoopingSounds>();
 				if (component == null)
 				{
 					global::UnityEngine.Debug.Log(behaviour.name + " is missing LoopingSounds component. ");
 				}
-				else if (!component.StartSound(sound, vector))
+				else if (!component.StartSound(this.sound, vector))
 				{
-					Output.LogWarning(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", sound, behaviour.name) });
+					Output.LogWarning(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", this.sound, behaviour.name) });
 				}
 			}
-			else if (!SoundEvent.PlayOneShot(sound, vector))
+			else if (!SoundEvent.PlayOneShot(this.sound, vector))
 			{
-				Output.LogWarning(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", sound, behaviour.name) });
+				Output.LogWarning(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", this.sound, behaviour.name) });
 			}
 		}
 		catch (Exception ex)
 		{
-			string text = string.Format(("Error trying to trigger sound [{0}] in behaviour [{1}]" + sound == null) ? "null" : sound.ToString(), behaviour.GetType().ToString());
+			string text = string.Format(("Error trying to trigger sound [{0}] in behaviour [{1}]" + this.sound == null) ? "null" : this.sound.ToString(), behaviour.GetType().ToString());
 			Output.LogError(new object[] { text });
 			throw new ArgumentException(text, ex);
 		}
 	}
 
-	public override void OnPlay(IAnimBehaviour behaviour)
-	{
-		this.Play(behaviour, this.sound);
-	}
-
 	public static FMOD.Studio.EventInstance BeginOneShot(string ev, Vector3 pos)
 	{
-		FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(ev, pos);
+		FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(ev, CameraController.Instance.GetVerticallyScaledPosition(pos));
 		LoopingSoundManager.UpdateSpeed(eventInstance);
 		return eventInstance;
 	}
 
 	public static FMOD.Studio.EventInstance BeginOneShot(FMOD.Studio.EventInstance instance, Vector3 pos)
 	{
-		FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(instance, pos);
+		FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(instance, CameraController.Instance.GetVerticallyScaledPosition(pos));
 		LoopingSoundManager.UpdateSpeed(eventInstance);
 		return eventInstance;
 	}
@@ -104,7 +125,7 @@ public class SoundEvent : AnimEvent
 		return flag;
 	}
 
-	public override void Stop(IAnimBehaviour behaviour)
+	public override void Stop(AnimEventManager.EventPlayerData behaviour)
 	{
 		if (this.looping)
 		{
@@ -118,20 +139,8 @@ public class SoundEvent : AnimEvent
 
 	private bool IsLowPrioritySound(string sound)
 	{
-		if (sound != null && Camera.main.orthographicSize > AudioMixer.LOW_PRIORITY_CUTOFF_DISTANCE && !AudioMixer.instance.activeNIS)
-		{
-			string text = sound.ToLower();
-			if (text.Contains("lowpriority"))
-			{
-				KFMODDebugger.instance.Log("Low priority sound culled:" + sound);
-				return true;
-			}
-		}
-		return false;
+		return sound != null && Camera.main.orthographicSize > AudioMixer.LOW_PRIORITY_CUTOFF_DISTANCE && !AudioMixer.instance.activeNIS && GlobalAssets.IsLowPriority(sound);
 	}
-
-	[EventRef]
-	public string sound;
 
 	public bool looping;
 

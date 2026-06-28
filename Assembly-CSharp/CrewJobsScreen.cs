@@ -18,9 +18,9 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 		base.OnActivate();
 	}
 
-	private void OnEnable()
+	protected override void OnCmpEnable()
 	{
-		base.Reconstruct();
+		base.OnCmpEnable();
 		base.RefreshCrewPortraitContent();
 		this.SortByPreviousSelected();
 	}
@@ -51,7 +51,6 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 			{
 				toggleImage.SetInactive();
 			}
-			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
 		});
 		this.SortByPreviousSelected();
 		this.dirty = true;
@@ -71,7 +70,7 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 				Toggle componentInChildren = this.ColumnTitlesContainer.GetChild(i).FindChild("Title").GetComponentInChildren<Toggle>();
 				if (componentInChildren == this.lastSortToggle)
 				{
-					this.SortByEffectiveness(this.choreGroups[i], this.lastSortReversed);
+					this.SortByEffectiveness(this.choreGroups[i], this.lastSortReversed, false);
 					return;
 				}
 			}
@@ -97,7 +96,12 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 				sortToggle.group = this.sortToggleGroup;
 				sortToggle.onValueChanged.AddListener(delegate(bool value)
 				{
-					this.SortByEffectiveness(chore_group2, !sortToggle.isOn);
+					bool flag = false;
+					if (this.lastSortToggle == sortToggle)
+					{
+						flag = true;
+					}
+					this.SortByEffectiveness(chore_group2, !sortToggle.isOn, flag);
 					this.lastSortToggle = sortToggle;
 					this.lastSortReversed = !sortToggle.isOn;
 					this.ResetSortToggles(sortToggle);
@@ -154,7 +158,12 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 
 	private void ToggleAllTasksEveryone()
 	{
-		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
+		string text = "HUD_Click_Deselect";
+		if (this.EveryoneAllTaskToggle.Value != CrewJobsScreen.everyoneToggleState.on)
+		{
+			text = "HUD_Click";
+		}
+		KMonoBehaviour.PlaySound(GlobalAssets.GetSound(text, false));
 		for (int i = 0; i < this.choreGroups.Count; i++)
 		{
 			this.SetJobEveryone(this.EveryoneAllTaskToggle.Value != CrewJobsScreen.everyoneToggleState.on, this.choreGroups[i]);
@@ -176,16 +185,24 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 
 	private void ToggleJobEveryone(Button button, ChoreGroup chore_group)
 	{
-		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
+		string text = "HUD_Click_Deselect";
+		if (this.EveryoneToggles[button] != CrewJobsScreen.everyoneToggleState.on)
+		{
+			text = "HUD_Click";
+		}
+		KMonoBehaviour.PlaySound(GlobalAssets.GetSound(text, false));
 		foreach (CrewJobsEntry crewJobsEntry in this.EntryObjects)
 		{
 			crewJobsEntry.consumer.SetPermitted(chore_group, this.EveryoneToggles[button] != CrewJobsScreen.everyoneToggleState.on);
 		}
 	}
 
-	private void SortByEffectiveness(ChoreGroup chore_group, bool reverse)
+	private void SortByEffectiveness(ChoreGroup chore_group, bool reverse, bool playSound)
 	{
-		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
+		if (playSound)
+		{
+			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
+		}
 		List<CrewJobsEntry> list = new List<CrewJobsEntry>(this.EntryObjects);
 		list.Sort(delegate(CrewJobsEntry a, CrewJobsEntry b)
 		{

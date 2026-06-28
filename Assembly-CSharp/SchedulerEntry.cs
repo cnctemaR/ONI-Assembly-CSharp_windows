@@ -1,11 +1,12 @@
 ﻿using System;
+using UnityEngine;
 
 public struct SchedulerEntry
 {
-	public SchedulerEntry(Guid id, string name, float time, float time_interval, Action<object> callback, object callback_data)
+	public SchedulerEntry(Guid id, string name, float time, float time_interval, Action<object> callback, object callback_data, GameObject profiler_obj)
 	{
 		this.time = time;
-		this.details = new SchedulerEntry.Details(id, name, callback, callback_data, time_interval);
+		this.details = new SchedulerEntry.Details(id, name, callback, callback_data, time_interval, profiler_obj);
 	}
 
 	public Guid id
@@ -17,14 +18,6 @@ public struct SchedulerEntry
 		set
 		{
 			this.details.id = value;
-		}
-	}
-
-	public string name
-	{
-		get
-		{
-			return this.details.name;
 		}
 	}
 
@@ -54,15 +47,7 @@ public struct SchedulerEntry
 
 	public override string ToString()
 	{
-		return string.Concat(new object[]
-		{
-			this.time,
-			": ",
-			this.details.name,
-			"(id = ",
-			this.details.id.ToString(),
-			")"
-		});
+		return this.time + ": id = " + this.details.id.ToString();
 	}
 
 	public float time;
@@ -71,9 +56,8 @@ public struct SchedulerEntry
 
 	private class Details
 	{
-		public Details(Guid id, string name, Action<object> callback, object callback_data, float time_interval)
+		public Details(Guid id, string name, Action<object> callback, object callback_data, float time_interval, GameObject profiler_obj)
 		{
-			this.name = name;
 			this.id = id;
 			this.timeInterval = time_interval;
 			this.callback = callback;
@@ -81,8 +65,6 @@ public struct SchedulerEntry
 		}
 
 		public Guid id;
-
-		public string name;
 
 		public Action<object> callback;
 

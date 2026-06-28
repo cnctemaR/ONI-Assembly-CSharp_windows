@@ -15,6 +15,8 @@ namespace Database
 			this.PutridOdour = base.Add(new PutridOdour());
 			this.Spores = base.Add(new Spores());
 			this.FierySkin = base.Add(new FierySkin());
+			this.ColdBrain = base.Add(new ColdBrain());
+			this.HeatRash = base.Add(new HeatRash());
 		}
 
 		public static bool IsValidDiseaseID(string id)
@@ -45,5 +47,9 @@ namespace Database
 		public Disease Spores;
 
 		public Disease FierySkin;
+
+		public Disease ColdBrain;
+
+		public Disease HeatRash;
 	}
 }

@@ -7,13 +7,13 @@ namespace Klei
 {
 	public static class SimUtil
 	{
-		public static float CalculateEnergyFlow(float source_temp, float source_mass, float source_thermal_conductivity, float dest_temp, float dest_mass, float dest_thermal_conductivity, float surface_area = 1f, float thickness = 1f)
+		public static float CalculateEnergyFlow(float source_temp, float source_thermal_conductivity, float dest_temp, float dest_thermal_conductivity, float surface_area = 1f, float thickness = 1f)
 		{
 			float num = source_temp - dest_temp;
-			return surface_area * Math.Min(source_thermal_conductivity, dest_thermal_conductivity) * num / thickness;
+			return num * Math.Min(source_thermal_conductivity, dest_thermal_conductivity) * (surface_area / thickness);
 		}
 
-		public static float CalculateEnergyFlow(float dt, int cell, float dest_temp, float dest_mass, float dest_specific_heat_capacity, float dest_thermal_conductivity, float surface_area = 1f, float thickness = 1f)
+		public static float CalculateEnergyFlow(int cell, float dest_temp, float dest_specific_heat_capacity, float dest_thermal_conductivity, float surface_area = 1f, float thickness = 1f)
 		{
 			float mass = Grid.Cell[cell].mass;
 			if (mass <= 0f)
@@ -26,12 +26,9 @@ namespace Klei
 				return 0f;
 			}
 			float num = Grid.Temperature[cell];
-			float specificHeatCapacity = element.specificHeatCapacity;
 			float thermalConductivity = element.thermalConductivity;
-			float num2 = SimUtil.GetMassAreaScale(element) * mass;
-			float num3 = Math.Min(surface_area, num2);
-			float num4 = SimUtil.CalculateEnergyFlow(num, mass, thermalConductivity, dest_temp, dest_mass, dest_thermal_conductivity, num3, thickness);
-			return SimUtil.ClampEnergyTransfer(dt, num, mass, specificHeatCapacity, dest_temp, dest_mass, dest_specific_heat_capacity, num4);
+			float num2 = SimUtil.CalculateEnergyFlow(num, thermalConductivity, dest_temp, dest_thermal_conductivity, surface_area, thickness);
+			return num2 * 0.001f;
 		}
 
 		public static float ClampEnergyTransfer(float dt, float source_temp, float source_mass, float source_specific_heat_capacity, float dest_temp, float dest_mass, float dest_specific_heat_capacity, float max_watts_transferred)
@@ -63,12 +60,12 @@ namespace Klei
 
 		private static float GetMassAreaScale(Element element)
 		{
-			return (!element.IsGas) ? 0.001f : 1f;
+			return (!element.IsGas) ? 0.01f : 10f;
 		}
 
-		public static float CalculateEnergyFlowCreatures(float dt, int cell, float creature_temperature, float creature_mass, float creature_shc, float creature_thermal_conductivity, float creature_surface_area = 1f, float creature_surface_thickness = 1f)
+		public static float CalculateEnergyFlowCreatures(int cell, float creature_temperature, float creature_shc, float creature_thermal_conductivity, float creature_surface_area = 1f, float creature_surface_thickness = 1f)
 		{
-			return SimUtil.CalculateEnergyFlow(dt, cell, creature_temperature, creature_mass, creature_shc, creature_thermal_conductivity, creature_surface_area, creature_surface_thickness);
+			return SimUtil.CalculateEnergyFlow(cell, creature_temperature, creature_shc, creature_thermal_conductivity, creature_surface_area, creature_surface_thickness);
 		}
 
 		public static float EnergyFlowToTemperatureDelta(float kilojoules, float specific_heat_capacity, float mass)

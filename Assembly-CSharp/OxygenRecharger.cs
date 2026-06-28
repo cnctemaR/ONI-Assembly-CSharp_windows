@@ -36,15 +36,14 @@ public class OxygenRecharger : BuildingWorkable, IEffectDescriptor
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_suitrecharger") };
-		this.WorkAnims = OxygenRecharger.OxygenRechargerAnims;
+		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_suitrecharger_kanim") };
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
 		this.animController = base.GetComponent<KAnimControllerBase>();
-		base.Subscribe(this.storage.gameObject, -1697596308, new EventSystem.EventHandler(this.OnStorageChange));
+		base.Subscribe(this.storage.gameObject, -1697596308, new Action<object>(this.OnStorageChange));
 		this.CreateChore();
 		foreach (Tag tag in this.requiredMaterials)
 		{
@@ -58,7 +57,7 @@ public class OxygenRecharger : BuildingWorkable, IEffectDescriptor
 
 	protected override void OnCleanUp()
 	{
-		base.Unsubscribe(this.storage.gameObject, -1697596308, new EventSystem.EventHandler(this.OnStorageChange));
+		base.Unsubscribe(this.storage.gameObject, -1697596308, new Action<object>(this.OnStorageChange));
 		base.OnCleanUp();
 	}
 
@@ -92,7 +91,7 @@ public class OxygenRecharger : BuildingWorkable, IEffectDescriptor
 			return;
 		}
 		FetchList2 fetchList = new FetchList2(this.storage);
-		fetchList.Add(mat, OxygenRecharger.requiredMass + 1f, false);
+		fetchList.Add(mat, OxygenRecharger.requiredMass + 1f, FetchOrder2.OperationalRequirement.None);
 		fetchList.Submit(new global::System.Action(this.OnFetchComplete), true);
 		if (!this.pendingMaterials.Contains(mat))
 		{
@@ -162,9 +161,7 @@ public class OxygenRecharger : BuildingWorkable, IEffectDescriptor
 		return null;
 	}
 
-	public int DescriptionOrder { get; set; }
-
-	public List<Descriptor> GetRequirementDescriptions(BuildingDef def)
+	public List<Descriptor> RequirementDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		foreach (Tag tag in this.requiredMaterials)
@@ -172,24 +169,36 @@ public class OxygenRecharger : BuildingWorkable, IEffectDescriptor
 			string text = tag.ProperName();
 			string keywordStyle = GameUtil.GetKeywordStyle(tag);
 			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMEDPERUSE, keywordStyle, text, GameUtil.GetFormattedMass(OxygenRecharger.requiredMass, GameUtil.TimeSlice.None, true, "F1"))), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMEDPERUSE, keywordStyle, text, GameUtil.GetFormattedMass(OxygenRecharger.requiredMass, GameUtil.TimeSlice.None, true, "F1")));
+			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMEDPERUSE, keywordStyle, text, GameUtil.GetFormattedMass(OxygenRecharger.requiredMass, GameUtil.TimeSlice.None, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMEDPERUSE, keywordStyle, text, GameUtil.GetFormattedMass(OxygenRecharger.requiredMass, GameUtil.TimeSlice.None, true, "{0:0.##}")), Descriptor.DescriptorType.Requirement);
 			list.Add(descriptor);
 		}
 		return list;
 	}
 
-	public List<Descriptor> GetEffectDescriptions(BuildingDef def)
+	public List<Descriptor> EffectDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, UI.BUILDINGEFFECTS.REFILLOXYGENTANK), UI.BUILDINGEFFECTS.TOOLTIPS.REFILLOXYGENTANK);
+		descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.REFILLOXYGENTANK, UI.BUILDINGEFFECTS.TOOLTIPS.REFILLOXYGENTANK, Descriptor.DescriptorType.Effect);
 		list.Add(descriptor);
 		return list;
 	}
 
-	private Chore chore;
+	public List<Descriptor> GetDescriptors(BuildingDef def)
+	{
+		List<Descriptor> list = new List<Descriptor>();
+		foreach (Descriptor descriptor in this.RequirementDescriptors(def))
+		{
+			list.Add(descriptor);
+		}
+		foreach (Descriptor descriptor2 in this.EffectDescriptors(def))
+		{
+			list.Add(descriptor2);
+		}
+		return list;
+	}
 
-	private static readonly string[] OxygenRechargerAnims = new string[] { "working_pre", "loop", "working_pst" };
+	private Chore chore;
 
 	private float fullTankRechargeTime = 40f;
 

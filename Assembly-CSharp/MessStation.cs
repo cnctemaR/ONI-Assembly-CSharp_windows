@@ -5,7 +5,7 @@ public class MessStation : BuildingWorkable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_use_machine") };
+		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_use_machine_kanim") };
 		Components.MessStations.Add(this);
 	}
 

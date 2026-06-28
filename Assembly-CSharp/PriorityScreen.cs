@@ -1,19 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using FMOD.Studio;
 using UnityEngine;
 
 public class PriorityScreen : KScreen
 {
-	public List<PriorityButton> InstantiateButtons(Action<int> on_click, string tooltip_str)
+	public List<PriorityButton> InstantiateButtons(Action<int> on_click, string tooltip_str, bool playSelectionSound = true)
 	{
 		List<PriorityButton> list = new List<PriorityButton>();
 		for (int i = 1; i <= 9; i++)
 		{
 			int idx = i;
-			PriorityButton priorityButton = Util.KInstantiateUI<PriorityButton>(this.buttonPrefab.gameObject, base.gameObject, false);
+			PriorityButton priorityButton = global::Util.KInstantiateUI<PriorityButton>(this.buttonPrefab.gameObject, base.gameObject, false);
 			list.Add(priorityButton);
 			priorityButton.toggle.onClick += delegate
 			{
+				if (playSelectionSound)
+				{
+					this.PlayPriorityConfirmSound(idx);
+				}
 				on_click(idx);
 			};
 			priorityButton.text.text = i.ToString();
@@ -30,22 +35,23 @@ public class PriorityScreen : KScreen
 		this.priority = priority;
 		foreach (PriorityButton priorityButton in this.buttons)
 		{
-			bool flag = priority == priorityButton.priority;
-			priorityButton.toggle.isOn = flag;
-			if (flag)
-			{
-				priorityButton.GetComponent<ImageToggleState>().SetActive();
-			}
-			else
-			{
-				priorityButton.GetComponent<ImageToggleState>().SetInactive();
-			}
+			priorityButton.toggle.isOn = priority == priorityButton.priority;
 		}
 	}
 
 	public int GetScreenPriority()
 	{
 		return this.priority;
+	}
+
+	public void PlayPriorityConfirmSound(int priority)
+	{
+		EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound("Priority_Tool_Confirm", false), Vector3.zero);
+		if (eventInstance != null)
+		{
+			eventInstance.setParameterValue("priority", (float)priority);
+			KFMOD.EndOneShot(eventInstance);
+		}
 	}
 
 	[SerializeField]

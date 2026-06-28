@@ -22,6 +22,14 @@ public class BatteryUI : KMonoBehaviour
 
 	public void SetContent(Battery bat)
 	{
+		if (bat == null)
+		{
+			if (base.gameObject.activeSelf)
+			{
+				base.gameObject.SetActive(false);
+			}
+			return;
+		}
 		this.Initialize();
 		RectTransform component = this.batteryBG.GetComponent<RectTransform>();
 		float num = 0f;
@@ -36,16 +44,25 @@ public class BatteryUI : KMonoBehaviour
 		this.batteryBG.sprite = ((bat.Capacity < 40000f) ? this.regularBatteryBG : this.bigBatteryBG);
 		float num2 = 25f;
 		component.sizeDelta = new Vector2(num, num2);
-		Color color = ((bat.PercentFull < bat.PreviousPercentFull) ? this.energyDecreaseColor : this.energyIncreaseColor);
+		BuildingEnabledButton component2 = bat.GetComponent<BuildingEnabledButton>();
+		Color color;
+		if (component2 != null && !component2.IsEnabled)
+		{
+			color = Color.gray;
+		}
+		else
+		{
+			color = ((bat.PercentFull < bat.PreviousPercentFull) ? this.energyDecreaseColor : this.energyIncreaseColor);
+		}
 		this.batteryMeter.color = color;
+		this.batteryBG.color = color;
 		float num3 = this.batteryBG.GetComponent<RectTransform>().rect.height * bat.PercentFull;
 		this.batteryMeter.GetComponent<RectTransform>().sizeDelta = new Vector2(num - 5.5f, num3 - 5.5f);
-		Color color2 = color;
-		color2.a = 1f;
-		if (this.currentKJLabel.color != color2)
+		color.a = 1f;
+		if (this.currentKJLabel.color != color)
 		{
-			this.currentKJLabel.color = color2;
-			this.unitLabel.color = color2;
+			this.currentKJLabel.color = color;
+			this.unitLabel.color = color;
 		}
 		this.currentKJLabel.text = bat.JoulesAvailable.ToString("F0");
 	}
@@ -54,8 +71,6 @@ public class BatteryUI : KMonoBehaviour
 
 	[SerializeField]
 	private LocText currentKJLabel;
-
-	private LocText unitLabel;
 
 	[SerializeField]
 	private Image batteryBG;
@@ -74,6 +89,8 @@ public class BatteryUI : KMonoBehaviour
 
 	[SerializeField]
 	private Color energyDecreaseColor = Color.red;
+
+	private LocText unitLabel;
 
 	private Dictionary<float, float> sizeMap;
 }

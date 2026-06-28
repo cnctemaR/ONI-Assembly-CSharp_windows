@@ -89,7 +89,7 @@ public class TileScreen : KScreen
 				this.temperatureSlider.SetMinMaxValue(0f, Mathf.Max(element.lowTemp - 100f, 0f), 0f, element.lowTemp + 100f);
 			}
 			this.temperatureSlider.SetExtraValue(num3);
-			this.temperatureSliderText.text = GameUtil.GetFormattedTemperature((float)((int)num3), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute);
+			this.temperatureSliderText.text = GameUtil.GetFormattedTemperature((float)((int)num3), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true);
 			Dictionary<int, float> info = FallingWater.instance.GetInfo(num);
 			if (info.Count > 0)
 			{
@@ -161,7 +161,7 @@ public class TileScreen : KScreen
 				this.temperatureSlider.SetMinMaxValue(0f, Mathf.Max(element2.lowTemp - 100f, 0f), 0f, element2.lowTemp + 100f);
 			}
 			this.temperatureSlider.SetExtraValue(temperature);
-			this.temperatureSliderText.text = GameUtil.GetFormattedTemperature((float)((int)temperature), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute);
+			this.temperatureSliderText.text = GameUtil.GetFormattedTemperature((float)((int)temperature), GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true);
 		}
 		else
 		{

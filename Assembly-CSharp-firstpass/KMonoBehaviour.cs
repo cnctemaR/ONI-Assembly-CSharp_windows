@@ -3,7 +3,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class KMonoBehaviour : MonoBehaviour, ISaveLoadableJson, IStateMachineTarget
+public class KMonoBehaviour : MonoBehaviour, ISaveLoadable, IStateMachineTarget
 {
 	public bool isSpawned { get; private set; }
 
@@ -41,7 +41,7 @@ public class KMonoBehaviour : MonoBehaviour, ISaveLoadableJson, IStateMachineTar
 		if (Application.isPlaying && KMonoBehaviour.lastGameObject != base.gameObject)
 		{
 			KMonoBehaviour.lastGameObject = base.gameObject;
-			KMonoBehaviour.lastObj = KObjectManager.Instance.CreateObject(base.gameObject);
+			KMonoBehaviour.lastObj = KObjectManager.Instance.GetOrCreateObject(base.gameObject);
 		}
 		this.obj = KMonoBehaviour.lastObj;
 		this.isInitialized = true;
@@ -125,12 +125,26 @@ public class KMonoBehaviour : MonoBehaviour, ISaveLoadableJson, IStateMachineTar
 
 	public void Spawn()
 	{
-		if (!this.isInitialized)
-		{
-			Debug.LogError(base.name + "." + base.GetType().Name + " is not initialized.");
-		}
 		if (this.isSpawned)
 		{
+			return;
+		}
+		string text = base.GetType().Name;
+		if (text == "LoopingSounds")
+		{
+			text = "LS";
+		}
+		if (text == "Sequenceable")
+		{
+			text = "S";
+		}
+		if (text == "StructureTemperature")
+		{
+			text = "ST";
+		}
+		if (!this.isInitialized)
+		{
+			Debug.LogError(base.name + "." + text + " is not initialized.");
 			return;
 		}
 		this.isSpawned = true;
@@ -146,7 +160,7 @@ public class KMonoBehaviour : MonoBehaviour, ISaveLoadableJson, IStateMachineTar
 				"Error in: ",
 				base.name,
 				".",
-				base.GetType().Name,
+				text,
 				".OnSpawn\n",
 				ex.ToString()
 			}) });
@@ -202,22 +216,27 @@ public class KMonoBehaviour : MonoBehaviour, ISaveLoadableJson, IStateMachineTar
 		return this.obj.GetEventSystem().GetLog();
 	}
 
-	public void Subscribe(int hash, EventSystem.EventHandler handler)
+	public int Subscribe(int hash, Action<object> handler)
 	{
-		this.obj.GetEventSystem().Subscribe(hash, handler);
+		return this.obj.GetEventSystem().Subscribe(hash, handler);
 	}
 
-	public void Subscribe(GameObject target, int hash, EventSystem.EventHandler handler)
+	public void Subscribe(GameObject target, int hash, Action<object> handler)
 	{
 		this.obj.GetEventSystem().Subscribe(target, hash, handler);
 	}
 
-	public void Unsubscribe(int hash, EventSystem.EventHandler handler)
+	public void Unsubscribe(int hash, Action<object> handler)
 	{
 		this.obj.GetEventSystem().Unsubscribe(hash, handler);
 	}
 
-	public void Unsubscribe(GameObject target, int hash, EventSystem.EventHandler handler)
+	public void Unsubscribe(int id)
+	{
+		this.obj.GetEventSystem().Unsubscribe(id);
+	}
+
+	public void Unsubscribe(GameObject target, int hash, Action<object> handler)
 	{
 		this.obj.GetEventSystem().Unsubscribe(target, hash, handler);
 	}

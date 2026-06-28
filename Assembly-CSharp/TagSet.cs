@@ -33,6 +33,15 @@ public class TagSet : IEnumerable, ICollection<Tag>, IEnumerable<Tag>
 		}
 	}
 
+	public TagSet(params TagSet[] others)
+	{
+		this.tags = new List<Tag>();
+		for (int i = 0; i < others.Length; i++)
+		{
+			this.tags.AddRange(others[i]);
+		}
+	}
+
 	IEnumerator IEnumerable.GetEnumerator()
 	{
 		return this.GetEnumerator();
@@ -173,7 +182,7 @@ public class TagSet : IEnumerable, ICollection<Tag>, IEnumerable<Tag>
 		return string.Empty;
 	}
 
-	[SerializeField]
 	[Serialize]
+	[SerializeField]
 	private List<Tag> tags = new List<Tag>();
 }

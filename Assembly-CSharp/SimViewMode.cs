@@ -5,6 +5,7 @@ public enum SimViewMode
 	None,
 	TemperatureMap = -872593752,
 	TemperatureMapOld = 1583680319,
+	HeatFlow = -1419704802,
 	DangerMap = -328708039,
 	TriplePointMap = 450629706,
 	PressureMap = -1918293641,
@@ -34,5 +35,8 @@ public enum SimViewMode
 	Decor = 347378277,
 	Priorities = 1529952898,
 	Reserved = -779379096,
-	Ignore = -1588157518
+	Ignore = -1588157518,
+	InsideBase = -6399571,
+	MinionOccupied = -1457374668,
+	HarvestWhenReady = 954055328
 }

@@ -1,10 +1,11 @@
 ﻿using System;
+using UnityEngine;
 
 public class KCompBuildInstance
 {
-	public KCompBuildInstance(int eyes, int hair, int headshape, int mouth, KBatchedAnimController controller)
+	public KCompBuildInstance(KCompBuilder.BodyData data, KBatchedAnimController controller)
 	{
-		this.buildData = KCompBuilder.Instance.GenerateDefaultPose(eyes, hair, headshape, mouth);
+		this.buildData = KCompBuilder.Instance.GenerateDefaultPose(data);
 		this.controller = controller;
 	}
 
@@ -35,32 +36,49 @@ public class KCompBuildInstance
 		neutral_anim = null;
 		override_anim = null;
 		int num = 0;
-		while (num < this.buildData.anims.Length && (neutral_anim == null || override_anim == null))
+		while (num < this.buildData.animCount && (neutral_anim == null || override_anim == null))
 		{
-			if (this.buildData.anims[num].rootSymbol == rootSymbol)
+			KAnim.Anim anim = this.buildData.GetAnim(num);
+			if (anim.rootSymbol == rootSymbol)
 			{
-				if (this.buildData.anims[num].hash == this.animOverride)
+				if (anim.hash == this.animOverride)
 				{
-					override_anim = this.buildData.anims[num];
+					override_anim = anim;
 				}
-				else if (this.buildData.anims[num].hash == KCompBuilder.neutral)
+				else if (anim.hash == KCompBuilder.neutral)
 				{
-					neutral_anim = this.buildData.anims[num];
+					neutral_anim = anim;
 				}
 			}
 			num++;
 		}
 	}
 
-	public void Refresh(KBatchedAnimController controller)
+	public void Refresh(KBatchedAnimController target_controller = null)
 	{
-		if (this.buildData.anims == null)
+		if (target_controller == null)
+		{
+			target_controller = this.controller;
+		}
+		if (this.buildData.animCount == 0)
 		{
 			return;
 		}
+		try
+		{
+			this.ApplyNeutralAndOverride(target_controller, KCompBuilder.head_comp);
+		}
+		catch (Exception ex)
+		{
+			Debug.LogError("Exception while applying override " + ex.Message + "\n" + ex.StackTrace);
+		}
+	}
+
+	private void ApplyNeutralAndOverride(KBatchedAnimController target_controller, HashedString root)
+	{
 		KAnim.Anim anim = null;
 		KAnim.Anim anim2 = null;
-		this.GetNeutralAndOverride(this.root, ref anim, ref anim2);
+		this.GetNeutralAndOverride(root, ref anim, ref anim2);
 		if (anim == null)
 		{
 			anim = anim2;
@@ -79,25 +97,25 @@ public class KCompBuildInstance
 			}
 			for (int i = 0; i < frame.numElements; i++)
 			{
-				KAnim.Anim.FrameElement frameElement = this.buildData.animFrameElements[frame.firstElementIdx + i];
-				KAnim.Build.Symbol symbol = this.buildData.build.GetSymbol(frameElement.symbol);
+				KAnim.Anim.FrameElement animFrameElement = this.buildData.GetAnimFrameElement(frame.firstElementIdx + i);
+				KAnim.Build.Symbol symbol = this.buildData.build.GetSymbol(animFrameElement.symbol);
 				if (symbol != null)
 				{
-					controller.RemoveSingleFrameOverride(frameElement.symbol);
-					controller.AddSymbolOverride(frameElement.symbol, this.buildData.build.batchTag, symbol);
+					target_controller.RemoveSingleFrameOverride(animFrameElement.symbol);
+					target_controller.AddSymbolOverride(animFrameElement.symbol, this.buildData.build.batchTag, symbol, false);
 					for (int j = 0; j < num; j++)
 					{
-						KAnim.Anim.FrameElement frameElement2 = this.buildData.animFrameElements[num2 + j];
-						if (frameElement2.symbol == frameElement.symbol)
+						KAnim.Anim.FrameElement animFrameElement2 = this.buildData.GetAnimFrameElement(num2 + j);
+						if (animFrameElement2.symbol == animFrameElement.symbol)
 						{
-							if (frameElement.frame != frameElement2.frame)
+							if (animFrameElement.frame != animFrameElement2.frame)
 							{
-								controller.ApplySingleFrameOverride(frameElement.symbol, frameElement.frame, frameElement2.frame);
+								target_controller.ApplySingleFrameOverride(animFrameElement.symbol, animFrameElement.frame, animFrameElement2.frame);
 							}
 							break;
 						}
 					}
-					controller.ShowSymbol(frameElement.symbol);
+					target_controller.ShowSymbol(animFrameElement.symbol);
 				}
 			}
 		}
@@ -108,6 +126,4 @@ public class KCompBuildInstance
 	private KBatchedAnimController controller;
 
 	private KAnimFileData buildData;
-
-	public HashedString root = KCompBuilder.head_comp;
 }

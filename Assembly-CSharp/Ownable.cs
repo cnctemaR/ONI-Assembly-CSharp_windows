@@ -5,7 +5,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Ownable : Assignable, ISaveLoadableJson, IEffectDescriptor
+public class Ownable : Assignable, ISaveLoadable, IEffectDescriptor
 {
 	protected override Assignables GetAssignables()
 	{
@@ -68,20 +68,13 @@ public class Ownable : Assignable, ISaveLoadableJson, IEffectDescriptor
 		component.SetStatusItem(Db.Get().StatusItemCategories.Main, statusItem, this);
 	}
 
-	public int DescriptionOrder { get; set; }
-
-	public List<Descriptor> GetRequirementDescriptions(BuildingDef def)
+	public List<Descriptor> GetDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(string.Format(string.Format(UI.LISTENTRYSTRINGNOLINEBREAK, UI.BUILDINGEFFECTS.ASSIGNEDDUPLICANT), new object[0]), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ASSIGNEDDUPLICANT, new object[0]));
+		descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.ASSIGNEDDUPLICANT, UI.BUILDINGEFFECTS.TOOLTIPS.ASSIGNEDDUPLICANT, Descriptor.DescriptorType.Requirement);
 		list.Add(descriptor);
 		return list;
-	}
-
-	public List<Descriptor> GetEffectDescriptions(BuildingDef def)
-	{
-		return null;
 	}
 
 	[MyCmpAdd]

@@ -7,9 +7,16 @@ public class LaserSoundEvent : SoundEvent
 	{
 	}
 
-	public override void OnPlay(IAnimBehaviour behaviour)
+	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
 	{
-		string sound = this.sound;
-		base.Play(behaviour, sound);
+		if (this.ShouldPlaySound(behaviour))
+		{
+			this.PlaySound(behaviour);
+		}
+	}
+
+	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
+	{
+		base.PlaySound(behaviour);
 	}
 }

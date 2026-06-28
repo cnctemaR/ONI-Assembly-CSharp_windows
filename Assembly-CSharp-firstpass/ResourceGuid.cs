@@ -2,7 +2,7 @@
 using KSerialization;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class ResourceGuid : ISaveLoadableJson, IEquatable<ResourceGuid>
+public class ResourceGuid : ISaveLoadable, IEquatable<ResourceGuid>
 {
 	public ResourceGuid(string id, Resource parent = null)
 	{

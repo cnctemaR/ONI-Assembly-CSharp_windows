@@ -5,11 +5,11 @@ namespace BaseTemplateClasses
 	[Serializable]
 	public class BaseTemplateStorageItem
 	{
-		public BaseTemplateStorageItem(string _id, float _mass, float _temp, SimHashes _element, bool _isOre)
+		public BaseTemplateStorageItem(string _id, float _units, float _temp, SimHashes _element, bool _isOre)
 		{
 			this.id = _id;
 			this.element = _element;
-			this.mass = _mass;
+			this.units = _units;
 			this.isOre = _isOre;
 			this.temperature = _temp;
 		}
@@ -18,21 +18,13 @@ namespace BaseTemplateClasses
 
 		public SimHashes element;
 
-		public float mass;
+		public float units;
 
 		public bool isOre;
 
 		public float temperature;
 
-		public BaseTemplateStorageItem.Ration rations;
-
 		public BaseTemplateStorageItem.Rottable rottable;
-
-		[Serializable]
-		public struct Ration
-		{
-			public int rations;
-		}
 
 		[Serializable]
 		public struct Rottable

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class StatusItem : Resource
 {
-	public StatusItem(string id, string prefix, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, SimViewMode overlay, SimViewMode second_overlay)
+	public StatusItem(string id, string prefix, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, SimViewMode overlay, SimViewMode second_overlay, bool showShowWorldIcon = true)
 		: base(id, Strings.Get(string.Concat(new string[]
 		{
 			"STRINGS.",
@@ -40,13 +40,14 @@ public class StatusItem : Resource
 		this.iconType = icon_type;
 		this.allowMultiples = allow_multiples;
 		this.overlay = overlay;
+		this.showShowWorldIcon = showShowWorldIcon;
 		if (this.sprite == null)
 		{
 			Debug.LogWarning("Status item '" + id + "' references a missing icon: " + icon);
 		}
 	}
 
-	public StatusItem(string id, string name, string icon, string tooltip, bool allow_multiples, StatusItem.IconType icon_type, NotificationType notification_type, SimViewMode overlay, SimViewMode second_overlay)
+	public StatusItem(string id, string name, string tooltip, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, SimViewMode overlay, SimViewMode second_overlay)
 		: base(id, name)
 	{
 		switch (icon_type)
@@ -154,7 +155,7 @@ public class StatusItem : Resource
 
 	public bool ShouldShowIcon()
 	{
-		return this.iconType == StatusItem.IconType.Custom;
+		return this.iconType == StatusItem.IconType.Custom && this.showShowWorldIcon;
 	}
 
 	public virtual void ShowToolTip(ToolTip tooltip_widget, object data, TextStyleSetting property_style)
@@ -172,6 +173,17 @@ public class StatusItem : Resource
 		}
 		image.color = this.sprite.color;
 		image.sprite = this.sprite.sprite;
+	}
+
+	public bool UseConditionalCallback(SimViewMode overlay, Transform transform)
+	{
+		return overlay != SimViewMode.None && this.conditionalOverlayCallback != null && this.conditionalOverlayCallback(overlay, transform);
+	}
+
+	public StatusItem SetResolveStringCallback(Func<string, object, string> cb)
+	{
+		this.resolveStringCallback = cb;
+		return this;
 	}
 
 	public string tooltipText;
@@ -207,6 +219,8 @@ public class StatusItem : Resource
 	public SimViewMode overlay;
 
 	private string prefix;
+
+	private bool showShowWorldIcon = true;
 
 	public enum IconType
 	{

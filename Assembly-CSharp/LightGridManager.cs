@@ -15,22 +15,20 @@ public static class LightGridManager
 		return 0;
 	}
 
-	public static int GetRecomputeCount()
-	{
-		return LightGridManager.recomputedLastFrame;
-	}
-
-	public static int GetRecomputeNearCount()
-	{
-		return LightGridManager.recomputedNearCellLastFrame;
-	}
-
 	public static void Initialise()
 	{
 		LightGridManager.activeLightEffectedCells = new List<int>[Grid.CellCount];
-		LightGridManager.activeLights = new LightGridManager.LightGridEmitter[Grid.CellCount];
+		LightGridManager.activeLights = new Dictionary<int, LightGridManager.LightGridEmitter>();
+		LightGridManager.lightColour = new Color32[Grid.CellCount];
 		LightGridManager.cellsEffectedByLights = new HashSet<int>();
-		LightGridManager.recomputeNearCell = new HashSet<int>();
+	}
+
+	public static void Shutdown()
+	{
+		LightGridManager.activeLightEffectedCells = null;
+		LightGridManager.activeLights = null;
+		LightGridManager.lightColour = null;
+		LightGridManager.cellsEffectedByLights = null;
 	}
 
 	public static void GetEmitForTemperature(float temperature, ref int emitIntensity, ref float emitDistance, ref Color emitColour)
@@ -100,19 +98,6 @@ public static class LightGridManager
 	{
 		LightGridManager.activeRegionStart = Grid.Constrain(arStart);
 		LightGridManager.activeRegionEnd = Grid.Constrain(arEnd);
-		List<int> list = new List<int>();
-		for (int i = LightGridManager.activeRegionStart.x; i < LightGridManager.activeRegionEnd.x; i++)
-		{
-			for (int j = LightGridManager.activeRegionStart.y; j < LightGridManager.activeRegionEnd.y; j++)
-			{
-				int num = Grid.XYToCell(i, j);
-				if (Grid.Element[num].id == SimHashes.Void)
-				{
-					list.Add(num);
-				}
-			}
-		}
-		WorldGapManager.Instance.SetVoidCells(list);
 	}
 
 	public static void SetActiveWindow(Vector2I arStart, Vector2I arEnd)
@@ -154,7 +139,7 @@ public static class LightGridManager
 					Color color = Grid.Element[num2].substance.colour;
 					if (flag2)
 					{
-						LightGridManager.AddToLightGrid(num2, emitIntensity, emitDistance, color, LightShape.Circle, false);
+						LightGridManager.AddToLightGrid(num2, emitIntensity, emitDistance, color, LightShape.Circle);
 					}
 				}
 			}
@@ -165,49 +150,17 @@ public static class LightGridManager
 	{
 	}
 
-	public static Color GetColorForCell(int cell)
-	{
-		Color color = Color.black;
-		if (LightGridManager.activeLightEffectedCells[cell] != null && LightGridManager.activeLightEffectedCells[cell].Count > 0)
-		{
-			int count = LightGridManager.activeLightEffectedCells[cell].Count;
-			Vector3F vector3F = default(Vector3F);
-			for (int i = 0; i < count; i++)
-			{
-				LightGridManager.LightGridEmitter lightGridEmitter = LightGridManager.activeLights[LightGridManager.activeLightEffectedCells[cell][i]];
-				Vector3F vector3F2 = new Vector3F(lightGridEmitter.colour.r, lightGridEmitter.colour.g, lightGridEmitter.colour.b);
-				if (lightGridEmitter.isBlackBody)
-				{
-					int num = 0;
-					float num2 = 0f;
-					Color black = Color.black;
-					LightGridManager.GetEmitForTemperature(Grid.Temperature[cell], ref num, ref num2, ref black);
-					vector3F2.x = black.r;
-					vector3F2.y = black.g;
-					vector3F2.z = black.b;
-				}
-				vector3F += vector3F2;
-			}
-			float num3 = (float)Grid.LightCount[cell] / 14f;
-			color = new Color(vector3F.x / (float)count, vector3F.y / (float)count, vector3F.z / (float)count, num3);
-		}
-		else if (LightGridManager.previewLightCells.Contains(cell))
-		{
-			color = LIGHT2D.LIGHT_PREVIEW_COLOR;
-		}
-		return color;
-	}
-
-	public static void AddToLightGrid(int cell, int intensity, float radius, Color colour, LightShape shape, bool isBlackBody = false)
+	public static void AddToLightGrid(int cell, int intensity, float radius, Color colour, LightShape shape)
 	{
 		if (!Grid.IsValidCell(cell))
 		{
 			return;
 		}
-		LightGridManager.LightGridEmitter lightGridEmitter = new LightGridManager.LightGridEmitter(cell, intensity, radius, colour, shape, isBlackBody);
-		if (LightGridManager.activeLights[cell] != null)
+		LightGridManager.LightGridEmitter lightGridEmitter = new LightGridManager.LightGridEmitter(cell, intensity, radius, colour, shape);
+		LightGridManager.LightGridEmitter lightGridEmitter2 = null;
+		if (LightGridManager.activeLights.TryGetValue(cell, out lightGridEmitter2))
 		{
-			LightGridManager.activeLights[cell].Remove(LightGridManager.activeLightEffectedCells, LightGridManager.cellsEffectedByLights);
+			lightGridEmitter2.Remove(LightGridManager.activeLightEffectedCells, LightGridManager.cellsEffectedByLights);
 		}
 		LightGridManager.activeLights[cell] = lightGridEmitter;
 		lightGridEmitter.Recompute(LightGridManager.activeLightEffectedCells, LightGridManager.cellsEffectedByLights);
@@ -219,75 +172,24 @@ public static class LightGridManager
 		{
 			return;
 		}
-		if (LightGridManager.activeLights[cell] == null)
+		LightGridManager.LightGridEmitter lightGridEmitter = null;
+		if (LightGridManager.activeLights.TryGetValue(cell, out lightGridEmitter))
 		{
-			return;
-		}
-		LightGridManager.activeLights[cell].Remove(LightGridManager.activeLightEffectedCells, LightGridManager.cellsEffectedByLights);
-		LightGridManager.activeLights[cell] = null;
-	}
-
-	public static void UpdateLightingAroundCell(int cell)
-	{
-		for (int i = -1; i <= 1; i++)
-		{
-			for (int j = -1; j <= 1; j++)
-			{
-				int num = Grid.OffsetCell(cell, j, i);
-				if (Grid.IsValidCell(num) && LightGridManager.cellsEffectedByLights.Contains(num))
-				{
-					LightGridManager.recomputeNearCell.Add(num);
-				}
-			}
-		}
-	}
-
-	public static void UpdateLightGrid()
-	{
-		LightGridManager.recomputedLastFrame = 0;
-		LightGridManager.recomputedNearCellLastFrame = LightGridManager.recomputeNearCell.Count;
-		if (LightGridManager.recomputeNearCell.Count > 0)
-		{
-			HashSet<int> hashSet = new HashSet<int>();
-			HashSet<int>.Enumerator enumerator = LightGridManager.recomputeNearCell.GetEnumerator();
-			List<int> list = new List<int>(500);
-			int num = 0;
-			while (num < 500 && enumerator.MoveNext())
-			{
-				int num2 = enumerator.Current;
-				if (LightGridManager.activeLightEffectedCells[num2] != null)
-				{
-					for (int i = 0; i < LightGridManager.activeLightEffectedCells[num2].Count; i++)
-					{
-						hashSet.Add(LightGridManager.activeLightEffectedCells[num2][i]);
-					}
-				}
-				else if (LightGridManager.activeLights[num2] != null)
-				{
-					hashSet.Add(num2);
-				}
-				list.Add(num2);
-				num++;
-			}
-			for (int j = 0; j < list.Count; j++)
-			{
-				LightGridManager.recomputeNearCell.Remove(list[j]);
-			}
-			HashSet<int>.Enumerator enumerator2 = hashSet.GetEnumerator();
-			int num3 = 0;
-			while (num3 < 500 && enumerator2.MoveNext())
-			{
-				LightGridManager.LightGridEmitter lightGridEmitter = LightGridManager.activeLights[enumerator2.Current];
-				LightGridManager.recomputedLastFrame++;
-				lightGridEmitter.Recompute(LightGridManager.activeLightEffectedCells, LightGridManager.cellsEffectedByLights);
-				num3++;
-			}
+			lightGridEmitter.Remove(LightGridManager.activeLightEffectedCells, LightGridManager.cellsEffectedByLights);
+			LightGridManager.activeLights.Remove(cell);
 		}
 	}
 
 	public static void DestroyPreview()
 	{
+		List<int> list = LightGridManager.clearingPreviewLightCells;
+		LightGridManager.clearingPreviewLightCells = LightGridManager.previewLightCells;
+		LightGridManager.previewLightCells = list;
 		LightGridManager.previewLightCells.Clear();
+		foreach (int num in LightGridManager.clearingPreviewLightCells)
+		{
+			LightGridManager.lightColour[num] = LightGridManager.CalculateColorForCell(num);
+		}
 	}
 
 	public static void CreatePreview(int origin_cell, float radius, LightShape shape)
@@ -295,6 +197,39 @@ public static class LightGridManager
 		LightGridManager.previewLightCells.Clear();
 		LightGridManager.previewLightCells.Add(origin_cell);
 		DiscreteShadowCaster.GetVisibleCells(origin_cell, LightGridManager.previewLightCells, (int)radius, shape);
+		foreach (int num in LightGridManager.previewLightCells)
+		{
+			LightGridManager.lightColour[num] = LightGridManager.CalculateColorForCell(num);
+		}
+	}
+
+	public static Color32 CalculateColorForCell(int cell)
+	{
+		Color32 color = new Color32(0, 0, 0, 0);
+		if (LightGridManager.activeLightEffectedCells[cell] != null && LightGridManager.activeLightEffectedCells[cell].Count > 0)
+		{
+			int count = LightGridManager.activeLightEffectedCells[cell].Count;
+			Vector3F vector3F = default(Vector3F);
+			for (int i = 0; i < count; i++)
+			{
+				int num = LightGridManager.activeLightEffectedCells[cell][i];
+				LightGridManager.LightGridEmitter lightGridEmitter = LightGridManager.activeLights[num];
+				Vector3F vector3F2 = new Vector3F(lightGridEmitter.colour.r, lightGridEmitter.colour.g, lightGridEmitter.colour.b);
+				vector3F += vector3F2;
+			}
+			float num2 = (float)Grid.LightCount[cell] / 14f;
+			color = new Color(vector3F.x / (float)count, vector3F.y / (float)count, vector3F.z / (float)count, num2);
+		}
+		else if (LightGridManager.previewLightCells.Contains(cell))
+		{
+			color = LIGHT2D.LIGHT_PREVIEW_COLOR;
+		}
+		return color;
+	}
+
+	public static Color32 GetColorForCell(int cell)
+	{
+		return LightGridManager.lightColour[cell];
 	}
 
 	public const float minTemperatureVisible = 1000f;
@@ -305,17 +240,15 @@ public static class LightGridManager
 
 	private static List<int> previewLightCells = new List<int>();
 
+	private static List<int> clearingPreviewLightCells = new List<int>();
+
 	private static List<int>[] activeLightEffectedCells;
 
-	private static LightGridManager.LightGridEmitter[] activeLights;
+	private static Dictionary<int, LightGridManager.LightGridEmitter> activeLights;
+
+	private static Color32[] lightColour;
 
 	private static HashSet<int> cellsEffectedByLights = new HashSet<int>();
-
-	private static HashSet<int> recomputeNearCell = new HashSet<int>();
-
-	private static int recomputedLastFrame = 0;
-
-	private static int recomputedNearCellLastFrame = 0;
 
 	private static Vector2I activeRegionStart = new Vector2I(0, 0);
 
@@ -323,14 +256,13 @@ public static class LightGridManager
 
 	public class LightGridEmitter
 	{
-		public LightGridEmitter(int cell, int intensity, float radius, Color colour, LightShape shape, bool isBlackBody = false)
+		public LightGridEmitter(int cell, int intensity, float radius, Color colour, LightShape shape)
 		{
 			this.cell = cell;
 			this.radius = radius;
 			this.intensity = intensity;
 			this.colour = colour;
 			this.shape = shape;
-			this.isBlackBody = isBlackBody;
 			this.cellsEffected = new List<int>();
 		}
 
@@ -353,6 +285,7 @@ public static class LightGridManager
 				}
 				activeLightEffectedCells[num].Add(this.cell);
 				cellsEffectedByLights.Add(num);
+				LightGridManager.lightColour[num] = LightGridManager.CalculateColorForCell(num);
 			}
 		}
 
@@ -366,6 +299,7 @@ public static class LightGridManager
 				if (Grid.LightCount[num] == 0)
 				{
 					cellsEffectedByLights.Remove(num);
+					LightGridManager.lightColour[num] = LightGridManager.CalculateColorForCell(num);
 				}
 			}
 			this.cellsEffected.Clear();
@@ -379,10 +313,8 @@ public static class LightGridManager
 
 		public Color colour = Color.white;
 
-		public LightShape shape;
-
 		public List<int> cellsEffected;
 
-		public bool isBlackBody;
+		public LightShape shape;
 	}
 }

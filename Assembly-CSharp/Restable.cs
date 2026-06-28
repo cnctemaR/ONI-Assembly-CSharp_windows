@@ -9,7 +9,7 @@ public class Restable : Usable
 		base.StartUsing(statesInstance, user);
 	}
 
-	public class StatesInstance : GameStateMachine<Restable.States, Restable.StatesInstance, Restable>.GameInstance
+	public class StatesInstance : GameStateMachine<Restable.States, Restable.StatesInstance, Restable, object>.GameInstance
 	{
 		public StatesInstance(Restable master, GameObject sleeper)
 			: base(master)
@@ -31,7 +31,7 @@ public class Restable : Usable
 
 		public string GetAnims()
 		{
-			return (base.sm.sleeper.Get<Navigator>(base.smi).CurrentNavType != NavType.Ladder) ? "anim_sleep_floor" : "anim_sleep_ladder";
+			return (base.sm.sleeper.Get<Navigator>(base.smi).CurrentNavType != NavType.Ladder) ? "anim_sleep_floor_kanim" : "anim_sleep_ladder_kanim";
 		}
 
 		public StaminaMonitor.Instance staminaMonitor;
@@ -45,8 +45,19 @@ public class Restable : Usable
 			base.Target(this.sleeper);
 			this.working.ToggleAnims((Restable.StatesInstance smi) => smi.GetAnims());
 			this.working.pre.PlayAnim("working_pre", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.working.loop);
-			this.working.loop.PlayAnim("working_loop", KAnim.PlayMode.Loop, null).ToggleEffect((Restable.StatesInstance smi) => (!smi.IsNarcolepsing()) ? "Sleep" : "NarcolepticSleep").EventTransition(GameHashes.SleepFail, this.working.interrupt, null)
-				.Transition(this.working.pst, (Restable.StatesInstance smi) => smi.ShouldExitSleep());
+			this.working.loop.Enter(delegate(Restable.StatesInstance smi)
+			{
+				if (smi.IsNarcolepsing())
+				{
+					smi.GoTo(this.working.loop.narcoleptic);
+				}
+				else
+				{
+					smi.GoTo(this.working.loop.normal);
+				}
+			}).EventTransition(GameHashes.SleepFail, this.working.interrupt, null).Transition(this.working.pst, (Restable.StatesInstance smi) => smi.ShouldExitSleep());
+			this.working.loop.normal.ToggleEffect("Sleep").PlayAnim("working_loop", KAnim.PlayMode.Loop, null);
+			this.working.loop.narcoleptic.ToggleEffect("NarcolepticSleep").PlayAnim("working_loop", KAnim.PlayMode.Loop, null);
 			this.working.interrupt.Enter(delegate(Restable.StatesInstance smi)
 			{
 				this.sleeper.Get<KBatchedAnimController>(smi).Play("interrupt", KAnim.PlayMode.Once, 1f, 0f);
@@ -54,19 +65,26 @@ public class Restable : Usable
 			this.working.pst.PlayAnim("working_pst", KAnim.PlayMode.Once, null).AddEffect("SoreBack").OnAnimQueueComplete(null);
 		}
 
-		public StateMachine<Restable.States, Restable.StatesInstance, Restable>.TargetParameter sleeper;
+		public StateMachine<Restable.States, Restable.StatesInstance, Restable, object>.TargetParameter sleeper;
 
 		public Restable.States.WorkingState working;
 
-		public class WorkingState : GameStateMachine<Restable.States, Restable.StatesInstance, Restable>.State
+		public class SleepState : GameStateMachine<Restable.States, Restable.StatesInstance, Restable, object>.State
 		{
-			public GameStateMachine<Restable.States, Restable.StatesInstance, Restable>.State pre;
+			public GameStateMachine<Restable.States, Restable.StatesInstance, Restable, object>.State normal;
 
-			public GameStateMachine<Restable.States, Restable.StatesInstance, Restable>.State loop;
+			public GameStateMachine<Restable.States, Restable.StatesInstance, Restable, object>.State narcoleptic;
+		}
 
-			public GameStateMachine<Restable.States, Restable.StatesInstance, Restable>.State pst;
+		public class WorkingState : GameStateMachine<Restable.States, Restable.StatesInstance, Restable, object>.State
+		{
+			public GameStateMachine<Restable.States, Restable.StatesInstance, Restable, object>.State pre;
 
-			public GameStateMachine<Restable.States, Restable.StatesInstance, Restable>.State interrupt;
+			public Restable.States.SleepState loop;
+
+			public GameStateMachine<Restable.States, Restable.StatesInstance, Restable, object>.State pst;
+
+			public GameStateMachine<Restable.States, Restable.StatesInstance, Restable, object>.State interrupt;
 		}
 	}
 }

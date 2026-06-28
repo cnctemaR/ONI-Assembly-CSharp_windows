@@ -25,18 +25,25 @@ public class MopTool : DragTool
 					Moppable.MopCell(cell, null);
 				}
 			}
-			else if (!Grid.Solid[cell] && Grid.Objects[cell, 5] == null)
+			else
 			{
-				GameObject gameObject = Util.KInstantiate(this.Placer, SceneOrganizer.Instance.GetFolder(Folder.Placers), null);
-				Grid.Objects[cell, 5] = gameObject;
-				Vector3 vector = Grid.CellToPosCBC(cell, this.visualizerLayer);
-				float depthBias = InterfaceTool.DepthBias;
-				vector.z += depthBias;
-				gameObject.transform.position = vector;
-				Prioritizable component = gameObject.GetComponent<Prioritizable>();
-				if (component != null)
+				GameObject gameObject = Grid.Objects[cell, 8];
+				if (!Grid.Solid[cell] && gameObject == null && Grid.Solid[Grid.CellBelow(cell)])
 				{
-					component.SetMasterPriority(ToolMenuPriorityScreen.Instance.GetScreenPriority());
+					gameObject = Util.KInstantiate(this.Placer, SceneOrganizer.Instance.GetFolder(Folder.Placers), null);
+					Grid.Objects[cell, 8] = gameObject;
+					Vector3 vector = Grid.CellToPosCBC(cell, this.visualizerLayer);
+					float depthBias = InterfaceTool.DepthBias;
+					vector.z += depthBias;
+					gameObject.transform.position = vector;
+				}
+				if (gameObject != null)
+				{
+					Prioritizable component = gameObject.GetComponent<Prioritizable>();
+					if (component != null)
+					{
+						component.SetMasterPriority(ToolMenuPriorityScreen.Instance.GetScreenPriority());
+					}
 				}
 			}
 		}

@@ -5,21 +5,21 @@ using FMOD.Studio;
 using FMODUnity;
 using UnityEngine;
 
+[SkipSaveFileSerialization]
 public class LoopingSounds : KMonoBehaviour
 {
-	protected override void OnSpawn()
-	{
-		base.OnSpawn();
-		base.enabled = this.updatePosition;
-	}
-
 	private void Update()
 	{
+		if (!this.updatePosition)
+		{
+			return;
+		}
 		Vector3 position = this.transform.position;
 		for (int i = 0; i < this.loopingSounds.Count; i++)
 		{
 			EventInstance ev = this.loopingSounds[i].ev;
-			ev.set3DAttributes(position.To3DAttributes());
+			Vector3 vector = new Vector3(position.x, position.y, 0f);
+			ev.set3DAttributes(CameraController.Instance.GetVerticallyScaledPosition(vector).To3DAttributes());
 			this.UpdateProgressParameter(this.loopingSounds[i]);
 		}
 	}
@@ -102,13 +102,14 @@ public class LoopingSounds : KMonoBehaviour
 				progressParameterName = null
 			};
 			soundEvent.SetupProgressParameter();
-			if (!base.enabled && soundEvent.progressParameter != null)
+			if (!this.updatePosition && soundEvent.progressParameter != null)
 			{
-				base.enabled = true;
+				this.updatePosition = true;
 			}
 			this.loopingSounds.Add(soundEvent);
-			LoopingSoundManager.Get().Add(asset, eventInstance);
-			eventInstance.set3DAttributes(pos.To3DAttributes());
+			LoopingSoundManager.Get().Add(asset, eventInstance, true);
+			Vector3 vector = new Vector3(pos.x, pos.y, 0f);
+			eventInstance.set3DAttributes(CameraController.Instance.GetVerticallyScaledPosition(vector).To3DAttributes());
 			LoopingSoundManager.UpdateSpeed(eventInstance);
 			eventInstance.start();
 			if (Time.timeScale == 0f)
@@ -184,19 +185,20 @@ public class LoopingSounds : KMonoBehaviour
 		{
 			return;
 		}
-		foreach (AnimEvent animEvent in events)
+		for (int i = 0; i < events.Count; i++)
 		{
+			AnimEvent animEvent = events[i];
 			global::SoundEvent soundEvent = animEvent as global::SoundEvent;
 			if (soundEvent == null || soundEvent.sound == null)
 			{
-				break;
+				return;
 			}
 			if (AudioDebug.Get().debugGameEventSounds)
 			{
 				global::UnityEngine.Debug.Log("GameSound: " + soundEvent.sound);
 			}
 			float num = 0f;
-			if (this.lastTimePlayed.TryGetValue(soundEvent.sound, out num))
+			if (this.lastTimePlayed.TryGetValue(soundEvent.soundHash, out num))
 			{
 				if (Time.time - num > soundEvent.minInterval)
 				{
@@ -207,13 +209,13 @@ public class LoopingSounds : KMonoBehaviour
 			{
 				global::SoundEvent.PlayOneShot(soundEvent.sound, this.transform.position);
 			}
-			this.lastTimePlayed[soundEvent.sound] = Time.time;
+			this.lastTimePlayed[soundEvent.soundHash] = Time.time;
 		}
 	}
 
 	private List<LoopingSounds.SoundEvent> loopingSounds = new List<LoopingSounds.SoundEvent>();
 
-	private Dictionary<string, float> lastTimePlayed = new Dictionary<string, float>();
+	private Dictionary<HashedString, float> lastTimePlayed = new Dictionary<HashedString, float>();
 
 	[SerializeField]
 	public bool updatePosition;

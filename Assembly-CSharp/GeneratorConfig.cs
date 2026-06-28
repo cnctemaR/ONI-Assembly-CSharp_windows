@@ -6,12 +6,11 @@ public class GeneratorConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Generator", 3, 3, "generatorphos_kanim", 400f, 120f, BUILDINGS.CONSTRUCTION_MASS.TIER5, MATERIALS.ALL_METALS, 2400f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, null);
-		buildingDef.ExplosionSize = Overheatable.ExplosionSize.Large;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Generator", 3, 3, "generatorphos_kanim", 400f, 100, 120f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER5, MATERIALS.ALL_METALS, 2400f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, null);
 		buildingDef.GeneratorWattageRating = 600f;
 		buildingDef.GeneratorBaseCapacity = 20000f;
-		buildingDef.TemperatureModificationWhenActive = 16f;
-		buildingDef.OperatingTemperature = 1200f;
+		buildingDef.ExhaustKilowattsWhenActive = 8f;
+		buildingDef.OperatingKilowatts = 1f;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
 		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "HollowMetal";
@@ -23,9 +22,8 @@ public class GeneratorConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
 		EnergyGenerator energyGenerator = go.AddOrGet<EnergyGenerator>();
-		energyGenerator.energySourceElement = SimHashes.Carbon;
-		energyGenerator.massBurnRate = 1f;
-		energyGenerator.batteryRefillPercent = 0.5f;
+		energyGenerator.formula = EnergyGenerator.CreateSimpleFormula(SimHashes.Carbon, 1f, 500f, SimHashes.Void, 0f, true);
+		energyGenerator.BatteryRefillPercent = 0.5f;
 		energyGenerator.powerDistributionOrder = 9;
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 500f;
@@ -33,17 +31,18 @@ public class GeneratorConfig : IBuildingConfig
 		go.AddOrGet<LoopingSounds>();
 		go.AddOrGet<Prioritizable>();
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
+		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.requestedItemTag = new Tag("Coal");
 		manualDeliveryKG.capacity = storage.capacityKg;
 		manualDeliveryKG.refillMass = 100f;
 		BuildingElementEmitter buildingElementEmitter = go.AddOrGet<BuildingElementEmitter>();
-		buildingElementEmitter.massChangeRate = 0.02f;
+		buildingElementEmitter.emitRate = 0.02f;
 		buildingElementEmitter.temperature = 310f;
 		buildingElementEmitter.element = SimHashes.CarbonDioxide;
-		buildingElementEmitter.modifierOffset = new Vector2(2f, 2f);
+		buildingElementEmitter.modifierOffset = new Vector2(1f, 2f);
 	}
 
-	public override void DoPostConfigure(GameObject go)
+	public override void DoPostConfigureComplete(GameObject go)
 	{
 		BuildingTemplates.DoPostConfigure(go);
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)

@@ -11,12 +11,23 @@ public class Equipment : Assignables
 		base.Save<EquipmentSlotInstance.SaveData>(ref this.saveData);
 	}
 
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		Components.Equipment.Add(this);
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
 		base.Load(this.saveData);
-		this.Subscribe(493375141, new EventSystem.EventHandler(this.OnRefreshUserMenu));
-		NameDisplayScreen.Instance.RegisterComponent(base.gameObject, this);
+		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+	}
+
+	protected override void OnCleanUp()
+	{
+		base.OnCleanUp();
+		Components.Equipment.Remove(this);
 	}
 
 	public void Equip(Equippable equippable)
@@ -58,11 +69,11 @@ public class Equipment : Assignables
 			if (equipmentSlotInstance.assignable != null)
 			{
 				EquipmentSlotInstance slot_iter = equipmentSlotInstance;
-				string text = "Unequip " + equipmentSlotInstance.assignable.GetComponent<KSelectable>().GetName();
+				string text = "Unequip " + equipmentSlotInstance.assignable.GetComponent<Equippable>().def.GenericName;
 				this.userMenu.AddButton(new KIconButtonMenu.ButtonInfo("iconDown", text, delegate
 				{
 					this.Unequip((Equippable)slot_iter.assignable);
-				}, global::Action.NumActions, null, null, null, null, string.Empty));
+				}, global::Action.NumActions, null, null, null, string.Empty, true), 2f);
 			}
 		}
 	}

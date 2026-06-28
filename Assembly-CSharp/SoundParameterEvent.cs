@@ -5,7 +5,7 @@ using UnityEngine;
 [Serializable]
 public class SoundParameterEvent : AnimEvent, ISerializationCallbackReceiver
 {
-	public override void OnPlay(IAnimBehaviour behaviour)
+	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
 	{
 		LoopingSounds component = behaviour.GetComponent<LoopingSounds>();
 		component.SetParameter(this.soundMigrated, this.parameter, this.startValue);
@@ -15,13 +15,13 @@ public class SoundParameterEvent : AnimEvent, ISerializationCallbackReceiver
 		}
 	}
 
-	public override void OnUpdate(IAnimBehaviour behaviour)
+	public override void OnUpdate(AnimEventManager.EventPlayerData behaviour)
 	{
 		LoopingSounds component = behaviour.GetComponent<LoopingSounds>();
 		component.SetParameter(this.soundMigrated, this.parameter, this.startValue + (this.endValue - this.startValue) * behaviour.normalizedTime);
 	}
 
-	public override void Stop(IAnimBehaviour behaviour)
+	public override void Stop(AnimEventManager.EventPlayerData behaviour)
 	{
 	}
 

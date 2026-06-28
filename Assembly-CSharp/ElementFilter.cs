@@ -4,7 +4,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class ElementFilter : KMonoBehaviour, ISaveLoadableJson
+public class ElementFilter : KMonoBehaviour, ISaveLoadable
 {
 	public SimHashes FilteredElement
 	{
@@ -14,26 +14,13 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadableJson
 		}
 	}
 
-	public Vent.Transfer TransferType
-	{
-		get
-		{
-			return this.transferType;
-		}
-	}
-
-	public Vent.Transfer GetTransferType()
-	{
-		return this.transferType;
-	}
-
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		Vent.Transfer transfer = this.transferType;
-		if (transfer != Vent.Transfer.Gas)
+		ConduitType conduitType = this.conduitType;
+		if (conduitType != ConduitType.Gas)
 		{
-			if (transfer == Vent.Transfer.Liquid)
+			if (conduitType == ConduitType.Liquid)
 			{
 				this.filterable = base.GetComponent<LiquidFilterable>();
 			}
@@ -46,104 +33,32 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadableJson
 				this.filteredTag = GameTags.Oxygen;
 			}
 		}
-		this.filteredVent = base.gameObject.AddComponent<Vent>();
-		this.filteredVent.transferType = this.transferType;
-		this.filteredVent.endpointType = Vent.Endpoint.Source;
-		this.filteredVent.DynamicOffset = new CellOffset(-1, 0);
-		this.handleOutput = HandleVector<ConduitFlow.BuildingConduit>.InvalidHandle;
-		this.handleFilter = HandleVector<ConduitFlow.BuildingConduit>.InvalidHandle;
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.inputCell = this.building.GetUtilityInputCell();
+		this.outputCell = this.building.GetUtilityOutputCell();
+		CellOffset rotatedOffset = this.building.GetRotatedOffset(this.filterOffset);
+		this.filteredCell = Grid.OffsetCell(this.inputCell, rotatedOffset);
+		IUtilityNetworkMgr networkManager = Conduit.GetNetworkManager(this.conduitType);
+		this.itemFilter = new FlowUtilityNetwork.NetworkItem(this.conduitType, Endpoint.Source, this.filteredCell, 0);
+		networkManager.AddToNetworks(this.filteredCell, this.itemFilter, true);
 		base.GetComponent<ConduitConsumer>().isConsuming = false;
 		this.OnFilterChanged(ElementLoader.FindElementByHash(this.filteredElem).tag);
 		this.filterable.onFilterChanged += this.OnFilterChanged;
-		ConduitFlow conduitFlowManager = Game.Instance.GetConduitFlowManager(this.transferType);
-		conduitFlowManager.AddConduitUpdater(new Action<float>(this.OnConduitTick), 0);
-		this.conduitOutput = new ConduitFlow.BuildingConduit(conduitFlowManager);
-		this.conduitFilter = new ConduitFlow.BuildingConduit(conduitFlowManager);
-		this.Subscribe(-1305509372, new EventSystem.EventHandler(this.OnVentCellUpdated));
+		ConduitFlow flowManager = Conduit.GetFlowManager(this.conduitType);
+		flowManager.AddConduitUpdater(new Action<float>(this.OnConduitTick), 0);
 	}
 
 	protected override void OnCleanUp()
 	{
-		ConduitFlow conduitFlowManager = Game.Instance.GetConduitFlowManager(this.transferType);
-		conduitFlowManager.RemoveBuildingConduit(this.handleOutput);
-		conduitFlowManager.RemoveBuildingConduit(this.handleFilter);
-		IUtilityNetworkMgr networkManager = Game.Instance.GetNetworkManager(this.transferType);
-		networkManager.RemoveFromNetworks(this.outputCell, this.itemOutput);
-		networkManager.RemoveFromNetworks(this.filteredCell, this.itemFilter);
-		conduitFlowManager.RemoveConduitUpdater(new Action<float>(this.OnConduitTick));
+		IUtilityNetworkMgr networkManager = Conduit.GetNetworkManager(this.conduitType);
+		networkManager.RemoveFromNetworks(this.filteredCell, this.itemFilter, true);
+		ConduitFlow flowManager = Conduit.GetFlowManager(this.conduitType);
+		flowManager.RemoveConduitUpdater(new Action<float>(this.OnConduitTick));
 		base.OnCleanUp();
-	}
-
-	private void OnVentCellUpdated(object data)
-	{
-		this.UpdateVentCells();
-	}
-
-	private void UpdateVentCells()
-	{
-		this.inputCell = this.building.GetUtilityInputCell();
-		this.outputCell = this.building.GetUtilityOutputCell();
-		this.filteredCell = this.filteredVent.Cell;
-		this.conduitOutput.cell = this.outputCell;
-		this.conduitFilter.cell = this.filteredCell;
-		IUtilityNetworkMgr networkManager = Game.Instance.GetNetworkManager(this.transferType);
-		if (this.itemInput != null)
-		{
-			networkManager.RemoveFromNetworks(this.itemInput.Cell, this.itemInput);
-		}
-		if (this.itemOutput != null)
-		{
-			networkManager.RemoveFromNetworks(this.itemOutput.Cell, this.itemOutput);
-		}
-		if (this.itemFilter != null)
-		{
-			networkManager.RemoveFromNetworks(this.itemFilter.Cell, this.itemFilter);
-		}
-		Vent[] components = base.GetComponents<Vent>();
-		Vent input_vent = null;
-		Vent output_vent = null;
-		foreach (Vent vent in components)
-		{
-			if (vent.endpointType == Vent.Endpoint.Sink)
-			{
-				input_vent = vent;
-			}
-			else if (vent != this.filteredVent)
-			{
-				output_vent = vent;
-			}
-		}
-		Action<FlowUtilityNetwork> action = delegate(FlowUtilityNetwork network)
-		{
-			input_vent.network = network;
-		};
-		this.itemInput = new FlowUtilityNetwork.NetworkItem(this.transferType, Vent.Endpoint.Sink, this.inputCell, 1000, action);
-		this.itemOutput = new FlowUtilityNetwork.NetworkItem(this.transferType, Vent.Endpoint.Source, this.outputCell, 0, delegate(FlowUtilityNetwork network)
-		{
-			output_vent.network = network;
-		});
-		this.itemFilter = new FlowUtilityNetwork.NetworkItem(this.transferType, Vent.Endpoint.Source, this.filteredCell, 0, delegate(FlowUtilityNetwork network)
-		{
-			this.filteredVent.network = network;
-		});
-		networkManager.AddToNetworks(this.inputCell, this.itemInput);
-		networkManager.AddToNetworks(this.outputCell, this.itemOutput);
-		networkManager.AddToNetworks(this.filteredCell, this.itemFilter);
-		ConduitFlow conduitFlowManager = Game.Instance.GetConduitFlowManager(this.transferType);
-		if (!this.handleOutput.IsValid())
-		{
-			this.handleOutput = conduitFlowManager.AddBuildingConduit(this.conduitOutput);
-		}
-		if (!this.handleFilter.IsValid())
-		{
-			this.handleFilter = conduitFlowManager.AddBuildingConduit(this.conduitFilter);
-		}
-		conduitFlowManager.ForceRebuildNetworks();
 	}
 
 	private void OnConduitTick(float dt)
@@ -151,16 +66,17 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadableJson
 		bool flag = false;
 		if (this.operational.IsOperational)
 		{
-			ConduitFlow conduitFlowManager = Game.Instance.GetConduitFlowManager(this.transferType);
-			ConduitFlow.ConduitContents contents = conduitFlowManager.GetContents(this.inputCell);
-			if (contents.mass > 0f)
+			ConduitFlow flowManager = Conduit.GetFlowManager(this.conduitType);
+			ConduitFlow.ConduitContents contents = flowManager.GetContents(this.inputCell);
+			int num = ((contents.element != this.filteredElem) ? this.outputCell : this.filteredCell);
+			ConduitFlow.ConduitContents contents2 = flowManager.GetContents(num);
+			if (contents.mass > 0f && contents2.mass <= 0f)
 			{
 				flag = true;
-				ConduitFlow.BuildingConduit buildingConduit = ((contents.element == this.filteredElem) ? this.conduitFilter : this.conduitOutput);
-				if (buildingConduit.GetContents().element == SimHashes.Vacuum)
+				float num2 = flowManager.AddElement(num, contents.element, contents.mass, contents.temperature);
+				if (num2 > 0f)
 				{
-					buildingConduit.SetContents(contents);
-					conduitFlowManager.RemoveElement(this.inputCell, contents.mass);
+					flowManager.RemoveElement(this.inputCell, num2);
 				}
 			}
 		}
@@ -174,14 +90,8 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadableJson
 		if (element != null)
 		{
 			this.filteredElem = element.id;
-			if (this.filteredElem == SimHashes.Void || this.filteredElem == SimHashes.Vacuum)
-			{
-				base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.NoFilterElementSelected, null);
-			}
-			else
-			{
-				base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.NoFilterElementSelected);
-			}
+			bool flag = this.filteredElem == SimHashes.Void || this.filteredElem == SimHashes.Vacuum;
+			base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.NoFilterElementSelected, flag, null);
 			return;
 		}
 		throw new ArgumentException("Invalid element to filter by");
@@ -198,7 +108,10 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadableJson
 	}
 
 	[SerializeField]
-	public Vent.Transfer transferType = Vent.Transfer.Liquid;
+	public ConduitType conduitType = ConduitType.Liquid;
+
+	[SerializeField]
+	public CellOffset filterOffset;
 
 	[Serialize]
 	private Tag filteredTag = GameTags.Water;
@@ -213,23 +126,11 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadableJson
 
 	public Filterable filterable;
 
-	private Vent filteredVent;
-
 	private int inputCell = -1;
 
 	private int outputCell = -1;
 
 	private int filteredCell = -1;
-
-	[Serialize]
-	private ConduitFlow.BuildingConduit conduitOutput;
-
-	[Serialize]
-	private ConduitFlow.BuildingConduit conduitFilter;
-
-	private HandleVector<ConduitFlow.BuildingConduit>.Handle handleOutput;
-
-	private HandleVector<ConduitFlow.BuildingConduit>.Handle handleFilter;
 
 	private FlowUtilityNetwork.NetworkItem itemInput;
 

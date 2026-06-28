@@ -1,15 +1,15 @@
 ﻿using System;
-using KSerialization;
+using STRINGS;
 using UnityEngine;
 
-[SerializationConfig(MemberSerialization.OptIn)]
-public class ConduitConsumer : KMonoBehaviour, ISaveLoadableJson
+[SkipSaveFileSerialization]
+public class ConduitConsumer : KMonoBehaviour
 {
 	public bool IsConnected
 	{
 		get
 		{
-			GameObject gameObject = Grid.Objects[this.utilityCell, (this.conduitType != ConduitType.Gas) ? 12 : 10];
+			GameObject gameObject = Grid.Objects[this.utilityCell, (this.conduitType != ConduitType.Gas) ? 15 : 11];
 			return gameObject != null && gameObject.GetComponent<BuildingComplete>() != null;
 		}
 	}
@@ -73,7 +73,7 @@ public class ConduitConsumer : KMonoBehaviour, ISaveLoadableJson
 		}
 		set
 		{
-			this.satisfied = value;
+			this.satisfied = value || this.forceAlwaysSatisfied;
 		}
 	}
 
@@ -105,7 +105,7 @@ public class ConduitConsumer : KMonoBehaviour, ISaveLoadableJson
 	{
 		base.OnSpawn();
 		this.utilityCell = this.building.GetUtilityInputCell();
-		int mask = GameScenePartitioner.Instance.objectLayerMasks[(this.conduitType != ConduitType.Gas) ? 12 : 10].mask;
+		int mask = GameScenePartitioner.Instance.objectLayerMasks[(this.conduitType != ConduitType.Gas) ? 15 : 11].mask;
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("ConduitConsumer.OnSpawn", base.gameObject, this.utilityCell, mask, new Action<object>(this.OnConduitConnectionChanged));
 		this.GetConduitManager().AddConduitUpdater(new Action<float>(this.ConduitUpdate), 0);
 		this.OnConduitConnectionChanged(null);
@@ -145,40 +145,56 @@ public class ConduitConsumer : KMonoBehaviour, ISaveLoadableJson
 				this.IsSatisfied = true;
 				if (this.operational.IsOperational)
 				{
-					float num = ((this.capacityElement == SimHashes.Void) ? this.storage.MassStored() : this.storage.GetMassAvailable(this.capacityElement));
+					float num = ((!(this.capacityTag != GameTags.Any)) ? this.storage.MassStored() : this.storage.GetMassAvailable(this.capacityTag));
 					float num2 = Mathf.Min(this.storage.RemainingCapacity(), this.capacityKG - num);
 					float num3 = this.ConsumptionRate * dt;
 					num3 = Mathf.Min(num3, num2);
 					float num4 = ((num3 <= 0f) ? 0f : conduit_mgr.RemoveElement(this.utilityCell, num3));
-					if (contents.element == this.capacityElement || contents.element == SimHashes.Vacuum || this.capacityElement == SimHashes.Void)
+					Element element = ElementLoader.FindElementByHash(contents.element);
+					bool flag = element.HasTag(this.capacityTag);
+					if (num4 > 0f && this.capacityTag != GameTags.Any && !flag)
+					{
+						this.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+						{
+							damage = 1,
+							source = BUILDINGS.DAMAGESOURCES.BAD_INPUT_ELEMENT,
+							popString = UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.WRONG_ELEMENT
+						});
+					}
+					if (flag || this.wrongElementResult == ConduitConsumer.WrongElementResult.Store || contents.element == SimHashes.Vacuum || this.capacityTag == GameTags.Any)
 					{
 						if (num4 > 0f)
 						{
-							Element element = ElementLoader.FindElementByHash(contents.element);
+							Element element2 = ElementLoader.FindElementByHash(contents.element);
 							ConduitType conduitType = this.conduitType;
 							if (conduitType != ConduitType.Gas)
 							{
 								if (conduitType == ConduitType.Liquid)
 								{
-									if (element.IsLiquid)
+									if (element2.IsLiquid)
 									{
 										this.storage.AddLiquid(contents.element, num4, contents.temperature, true);
 									}
 									else
 									{
-										Debug.LogWarning("Liquid conduit consumer consuming non liquid: " + element.id.ToString());
+										Debug.LogWarning("Liquid conduit consumer consuming non liquid: " + element2.id.ToString());
 									}
 								}
 							}
-							else if (element.IsGas)
+							else if (element2.IsGas)
 							{
 								this.storage.AddGasChunk(contents.element, num4, contents.temperature, true);
 							}
 							else
 							{
-								Debug.LogWarning("Gas conduit consumer consuming non gas: " + element.id.ToString());
+								Debug.LogWarning("Gas conduit consumer consuming non gas: " + element2.id.ToString());
 							}
 						}
+					}
+					else if (num4 > 0f && this.wrongElementResult == ConduitConsumer.WrongElementResult.Dump)
+					{
+						int num5 = Grid.PosToCell(this.transform.position);
+						SimMessages.AddRemoveSubstance(num5, contents.element, CellEventLogger.Instance.ConduitConsumerWrongElement, num4, contents.temperature, -1);
 					}
 				}
 			}
@@ -200,10 +216,13 @@ public class ConduitConsumer : KMonoBehaviour, ISaveLoadableJson
 	public bool ignoreMinMassCheck;
 
 	[SerializeField]
-	public SimHashes capacityElement = SimHashes.Void;
+	public Tag capacityTag = GameTags.Any;
 
 	[SerializeField]
 	public float capacityKG = float.PositiveInfinity;
+
+	[SerializeField]
+	public bool forceAlwaysSatisfied;
 
 	[NonSerialized]
 	public bool isConsuming = true;
@@ -229,4 +248,13 @@ public class ConduitConsumer : KMonoBehaviour, ISaveLoadableJson
 	private GameScenePartitionerEntry partitionerEntry;
 
 	private bool satisfied;
+
+	public ConduitConsumer.WrongElementResult wrongElementResult;
+
+	public enum WrongElementResult
+	{
+		Destroy,
+		Dump,
+		Store
+	}
 }

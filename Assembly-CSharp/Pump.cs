@@ -2,6 +2,12 @@
 
 public class Pump : KMonoBehaviour
 {
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		this.consumer.EnableConsumption(false);
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -23,32 +29,49 @@ public class Pump : KMonoBehaviour
 		}
 		else
 		{
-			this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.PumpingLiquidOrGas);
+			this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.PumpingLiquidOrGas, false);
 			this.operational.SetActive(false, false);
 		}
 	}
 
 	private bool UpdateOperational()
 	{
-		bool flag = false;
-		int num = Grid.PosToCell(this.transform.position);
+		Element.State state = Element.State.Vacuum;
 		ConduitType conduitType = this.dispenser.conduitType;
 		if (conduitType != ConduitType.Gas)
 		{
 			if (conduitType == ConduitType.Liquid)
 			{
-				flag = Grid.Element[num].IsLiquid;
-				this.operational.SetFlag(Pump.PumpableFlag, flag);
-				this.selectable.ToggleStatusItem(Db.Get().BuildingStatusItems.NoLiquidElementToPump, !flag, null);
+				state = Element.State.Liquid;
 			}
 		}
 		else
 		{
-			flag = Grid.Element[num].IsGas;
-			this.operational.SetFlag(Pump.PumpableFlag, flag);
-			this.selectable.ToggleStatusItem(Db.Get().BuildingStatusItems.NoGasElementToPump, !flag, null);
+			state = Element.State.Gas;
 		}
+		bool flag = !this.storage.IsFull() && this.IsPumpable(state, (int)this.consumer.consumptionRadius);
+		this.operational.SetFlag(Pump.PumpableFlag, flag);
+		StatusItem statusItem = ((state != Element.State.Gas) ? Db.Get().BuildingStatusItems.NoLiquidElementToPump : Db.Get().BuildingStatusItems.NoGasElementToPump);
+		this.selectable.ToggleStatusItem(statusItem, !flag, null);
 		return flag;
+	}
+
+	private bool IsPumpable(Element.State expected_state, int radius)
+	{
+		int num = Grid.PosToCell(this.transform.position);
+		for (int i = 0; i < (int)this.consumer.consumptionRadius; i++)
+		{
+			for (int j = 0; j < (int)this.consumer.consumptionRadius; j++)
+			{
+				int num2 = num + j + Grid.WidthInCells * i;
+				bool flag = Grid.Element[num2].IsState(expected_state);
+				if (flag)
+				{
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	private const float OperationalUpdateInterval = 1f;
@@ -66,6 +89,9 @@ public class Pump : KMonoBehaviour
 
 	[MyCmpGet]
 	private ConduitDispenser dispenser;
+
+	[MyCmpGet]
+	private Storage storage;
 
 	private float elapsedTime;
 

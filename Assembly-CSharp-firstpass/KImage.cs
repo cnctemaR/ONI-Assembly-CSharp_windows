@@ -4,13 +4,22 @@ using UnityEngine.UI;
 
 public class KImage : Image
 {
+	public KImage.ColorSelector ColorState
+	{
+		set
+		{
+			this.colorSelector = value;
+			this.ApplyColorStyleSetting();
+		}
+	}
+
 	protected override void Awake()
 	{
 		base.Awake();
-		this.ApplyColorStyleSetting();
+		this.ColorState = this.defaultState;
 	}
 
-	[ContextMenu("Apply Settings")]
+	[ContextMenu("Apply Color Style Settings")]
 	private void ApplyColorStyleSetting()
 	{
 		if (this.colorStyleSetting != null)
@@ -33,7 +42,9 @@ public class KImage : Image
 		}
 	}
 
-	public KImage.ColorSelector colorSelector;
+	public KImage.ColorSelector defaultState = KImage.ColorSelector.Inactive;
+
+	private KImage.ColorSelector colorSelector = KImage.ColorSelector.Inactive;
 
 	public ColorStyleSetting colorStyleSetting;
 

@@ -2,7 +2,7 @@
 using KSerialization;
 using UnityEngine;
 
-public class Immigration : KMonoBehaviour, ISaveLoadableJson
+public class Immigration : KMonoBehaviour, ISaveLoadable
 {
 	public MinionStartingStats MinionStats
 	{
@@ -51,7 +51,12 @@ public class Immigration : KMonoBehaviour, ISaveLoadableJson
 
 	private void Update()
 	{
+		if (this.stopped)
+		{
+			return;
+		}
 		this.timeBeforeSpawn -= Time.deltaTime;
+		this.timeBeforeSpawn = Math.Max(this.timeBeforeSpawn, 0f);
 		if (this.timeBeforeSpawn <= 0f)
 		{
 			this.bImmigrantAvailable = true;
@@ -60,6 +65,18 @@ public class Immigration : KMonoBehaviour, ISaveLoadableJson
 			int num = Math.Min(this.spawnIdx, this.spawnInterval.Length - 1);
 			this.timeBeforeSpawn = this.spawnInterval[num];
 		}
+	}
+
+	public void Stop()
+	{
+		this.stopped = true;
+		this.bImmigrantAvailable = false;
+		this.timeBeforeSpawn = this.spawnInterval[Math.Min(this.spawnIdx, this.spawnInterval.Length - 1)];
+	}
+
+	public void Restart()
+	{
+		this.stopped = false;
 	}
 
 	public float[] spawnInterval;
@@ -76,6 +93,9 @@ public class Immigration : KMonoBehaviour, ISaveLoadableJson
 
 	[Serialize]
 	private int spawnIdx;
+
+	[Serialize]
+	private bool stopped;
 
 	public static Immigration Instance;
 }

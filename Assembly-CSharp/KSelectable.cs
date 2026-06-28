@@ -1,9 +1,8 @@
 ﻿using System;
-using KSerialization;
 using UnityEngine;
 
-[SerializationConfig(MemberSerialization.OptIn)]
-public class KSelectable : KMonoBehaviour, ISaveLoadableJson
+[SkipSaveFileSerialization]
+public class KSelectable : KMonoBehaviour
 {
 	public bool IsSelected
 	{
@@ -44,6 +43,10 @@ public class KSelectable : KMonoBehaviour, ISaveLoadableJson
 	protected override void OnPrefabInit()
 	{
 		this.statusItemGroup = new StatusItemGroup(base.gameObject);
+		KPrefabID component = base.GetComponent<KPrefabID>();
+		if (component != null)
+		{
+		}
 		if (this.entityNameLocString != null && this.entityNameLocString.Length > 0)
 		{
 			string text = Strings.Get(this.entityNameLocString);
@@ -55,20 +58,6 @@ public class KSelectable : KMonoBehaviour, ISaveLoadableJson
 		if (this.entityName == null || this.entityName.Length <= 0)
 		{
 			this.SetName(base.name);
-		}
-	}
-
-	protected override void OnSpawn()
-	{
-		KPrefabID component = base.GetComponent<KPrefabID>();
-		if (component != null)
-		{
-			component.AddLog(this.log);
-			component.AddLog(this.statusItemGroup.GetLog());
-		}
-		if (this.initialOffset != Vector3.zero)
-		{
-			this.SetStatusIndicatorOffset(this.initialOffset);
 		}
 	}
 
@@ -84,6 +73,10 @@ public class KSelectable : KMonoBehaviour, ISaveLoadableJson
 
 	public void SetStatusIndicatorOffset(Vector3 offset)
 	{
+		if (this.statusItemGroup == null)
+		{
+			return;
+		}
 		this.statusItemGroup.SetOffset(offset);
 	}
 
@@ -174,50 +167,69 @@ public class KSelectable : KMonoBehaviour, ISaveLoadableJson
 		}
 	}
 
-	public void ToggleStatusItem(StatusItem status_item, bool on, object data = null)
+	public Guid ToggleStatusItem(StatusItem status_item, bool on, object data = null)
 	{
 		if (on)
 		{
-			this.AddStatusItem(status_item, data);
+			return this.AddStatusItem(status_item, data);
 		}
-		else
-		{
-			this.RemoveStatusItem(status_item);
-		}
+		return this.RemoveStatusItem(status_item, false);
 	}
 
-	public void SetStatusItem(StatusItemCategory category, StatusItem status_item, object data = null)
+	public Guid SetStatusItem(StatusItemCategory category, StatusItem status_item, object data = null)
 	{
-		this.statusItemGroup.SetStatusItem(category, status_item, data);
+		if (this.statusItemGroup == null)
+		{
+			return Guid.Empty;
+		}
+		return this.statusItemGroup.SetStatusItem(category, status_item, data);
 	}
 
 	public Guid ReplaceStatusItem(Guid guid, StatusItem status_item, object data = null)
 	{
+		if (this.statusItemGroup == null)
+		{
+			return Guid.Empty;
+		}
 		if (guid != Guid.Empty)
 		{
-			this.statusItemGroup.RemoveStatusItem(guid);
+			this.statusItemGroup.RemoveStatusItem(guid, false);
 		}
 		return this.AddStatusItem(status_item, data);
 	}
 
 	public Guid AddStatusItem(StatusItem status_item, object data = null)
 	{
+		if (this.statusItemGroup == null)
+		{
+			return Guid.Empty;
+		}
 		return this.statusItemGroup.AddStatusItem(status_item, data, null);
 	}
 
-	public Guid RemoveStatusItem(StatusItem status_item)
+	public Guid RemoveStatusItem(StatusItem status_item, bool immediate = false)
 	{
-		return this.statusItemGroup.RemoveStatusItem(status_item);
+		if (this.statusItemGroup == null)
+		{
+			return Guid.Empty;
+		}
+		this.statusItemGroup.RemoveStatusItem(status_item, immediate);
+		return Guid.Empty;
 	}
 
-	public Guid RemoveStatusItem(Guid guid)
+	public Guid RemoveStatusItem(Guid guid, bool immediate = false)
 	{
-		return this.statusItemGroup.RemoveStatusItem(guid);
+		if (this.statusItemGroup == null)
+		{
+			return Guid.Empty;
+		}
+		this.statusItemGroup.RemoveStatusItem(guid, immediate);
+		return Guid.Empty;
 	}
 
 	public bool HasStatusItem(StatusItem status_item)
 	{
-		return this.statusItemGroup.HasStatusItem(status_item);
+		return this.statusItemGroup != null && this.statusItemGroup.HasStatusItem(status_item);
 	}
 
 	public StatusItemGroup.Entry GetStatusItem(StatusItemCategory category)
@@ -233,6 +245,7 @@ public class KSelectable : KMonoBehaviour, ISaveLoadableJson
 	protected override void OnCleanUp()
 	{
 		this.statusItemGroup.Destroy();
+		this.statusItemGroup = null;
 		if (this.selected)
 		{
 			if (SelectTool.Instance.selected == this)
@@ -261,12 +274,7 @@ public class KSelectable : KMonoBehaviour, ISaveLoadableJson
 	private bool disableSelectMarker;
 
 	[SerializeField]
-	private Vector3 initialOffset;
-
-	[SerializeField]
 	private string entityNameLocString;
 
 	private StatusItemGroup statusItemGroup;
-
-	private LoggerFSS log = new LoggerFSS("KSelectable");
 }

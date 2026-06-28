@@ -8,15 +8,29 @@ public class KObjectManager : MonoBehaviour
 
 	private void Awake()
 	{
+		Debug.Assert(KObjectManager.Instance == null);
 		KObjectManager.Instance = this;
 	}
 
 	private void OnDestroy()
 	{
+		Debug.Assert(KObjectManager.Instance != null);
+		Debug.Assert(KObjectManager.Instance == this);
+		this.Cleanup();
 		KObjectManager.Instance = null;
 	}
 
-	public KObject CreateObject(GameObject go)
+	public void Cleanup()
+	{
+		foreach (KeyValuePair<int, KObject> keyValuePair in this.objects)
+		{
+			keyValuePair.Value.OnCleanUp();
+		}
+		this.objects.Clear();
+		this.pendingDestroys.Clear();
+	}
+
+	public KObject GetOrCreateObject(GameObject go)
 	{
 		int instanceID = go.GetInstanceID();
 		KObject kobject = null;
@@ -50,6 +64,10 @@ public class KObjectManager : MonoBehaviour
 			}
 		}
 		this.pendingDestroys.Clear();
+	}
+
+	public void DumpEventData()
+	{
 	}
 
 	private Dictionary<int, KObject> objects = new Dictionary<int, KObject>();

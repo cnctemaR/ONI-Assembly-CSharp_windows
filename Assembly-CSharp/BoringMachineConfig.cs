@@ -12,9 +12,9 @@ public class BoringMachineConfig : IEquipmentConfig
 		Dictionary<string, float> dictionary = new Dictionary<string, float>();
 		dictionary.Add("Iron", 50f);
 		List<AttributeModifier> list = new List<AttributeModifier>();
-		list.Add(new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTEMOD_IDS.DIGGING, (float)global::TUNING.EQUIPMENT.TOOLS.BORINGMACHINE_DIG, global::STRINGS.EQUIPMENT.PREFABS.BORINGMACHINE.NAME, false));
-		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef("BoringMachine", global::TUNING.EQUIPMENT.TOOLS.TOOLSLOT, global::TUNING.EQUIPMENT.TOOLS.TOOLFABRICATOR, global::TUNING.EQUIPMENT.TOOLS.BORINGMACHINE_FABTIME, "Iron", dictionary, (float)global::TUNING.EQUIPMENT.TOOLS.BORINGMACHINE_MASS, global::TUNING.EQUIPMENT.TOOLS.TOOL_ANIM, string.Empty, string.Empty, PathFinderFlags.None, list);
-		equipmentDef.RecipeDescription = global::STRINGS.EQUIPMENT.PREFABS.BORINGMACHINE.RECIPEDESC;
+		list.Add(new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTE_MOD_IDS.DIGGING, (float)global::TUNING.EQUIPMENT.TOOLS.BORINGMACHINE_DIG, global::STRINGS.EQUIPMENT.PREFABS.BORING_MACHINE.NAME, false, false));
+		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef("BoringMachine", global::TUNING.EQUIPMENT.TOOLS.TOOLSLOT, global::TUNING.EQUIPMENT.TOOLS.TOOLFABRICATOR, (float)global::TUNING.EQUIPMENT.TOOLS.BORINGMACHINE_FABTIME, SimHashes.Iron, dictionary, (float)global::TUNING.EQUIPMENT.TOOLS.BORINGMACHINE_MASS, global::TUNING.EQUIPMENT.TOOLS.TOOL_ANIM, string.Empty, string.Empty, PathFinderFlags.None, list, null, false, EntityTemplates.CollisionShape.CIRCLE, 0.325f, 0.325f);
+		equipmentDef.RecipeDescription = global::STRINGS.EQUIPMENT.PREFABS.BORING_MACHINE.RECIPE_DESC;
 		return equipmentDef;
 	}
 

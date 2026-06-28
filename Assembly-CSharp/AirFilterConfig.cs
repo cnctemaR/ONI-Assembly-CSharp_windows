@@ -6,7 +6,8 @@ public class AirFilterConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("AirFilter", 1, 1, "co2filter_kanim", 200f, 30f, BUILDINGS.CONSTRUCTION_MASS.TIER2, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, null);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("AirFilter", 1, 1, "co2filter_kanim", 200f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER2, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, null);
+		buildingDef.Overheatable = false;
 		buildingDef.ViewMode = SimViewMode.OxygenMap;
 		buildingDef.MaterialCategory = MATERIALS.RAW_MINERALS;
 		buildingDef.AudioCategory = "Metal";
@@ -37,18 +38,19 @@ public class AirFilterConfig : IBuildingConfig
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(null, 0.5f, SimHashes.Clay, 0f, false, 0f, 0f),
-			new ElementConverter.OutputElement(null, 0.05f, SimHashes.Oxygen, 0f, false, 0f, 1f)
+			new ElementConverter.OutputElement(0.5f, SimHashes.Clay, 0f, false, 0f, 0f, false),
+			new ElementConverter.OutputElement(0.05f, SimHashes.Oxygen, 0f, false, 0f, 1f, false)
 		};
 		elementConverter.conversionInterval = 1f;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
+		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.requestedItemTag = new Tag("Filter");
 		manualDeliveryKG.capacity = 100f;
 		manualDeliveryKG.refillMass = 25f;
 		go.AddOrGet<AirFilter>();
 	}
 
-	public override void DoPostConfigure(GameObject go)
+	public override void DoPostConfigureComplete(GameObject go)
 	{
 		BuildingTemplates.DoPostConfigure(go);
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
@@ -57,4 +59,8 @@ public class AirFilterConfig : IBuildingConfig
 			instance.StartSM();
 		};
 	}
+
+	public const float CO2_CONSUMPTION_RATE = 0.1f;
+
+	private const float SAND_CONSUMPTION_RATE = 1f;
 }

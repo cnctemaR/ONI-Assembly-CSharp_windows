@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using FMOD.Studio;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -59,6 +60,7 @@ public class NotificationScreen : KScreen
 		}
 		this.MessagesPrefab.gameObject.SetActive(false);
 		this.LabelPrefab.gameObject.SetActive(false);
+		this.InitNotificationSounds();
 	}
 
 	private void OnNewMessage(object data)
@@ -84,11 +86,10 @@ public class NotificationScreen : KScreen
 						global::UnityEngine.Object.Destroy(this.messageDialog.gameObject);
 						this.messageDialog = null;
 					}
-					this.messageDialog = Util.KInstantiateUI<MessageDialogFrame>(ScreenPrefabs.Instance.MessageDialogFrame.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, false);
-					MessageDialog messageDialog = Util.KInstantiateUI<MessageDialog>(this.dialogPrefabs[i].gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, false);
+					this.messageDialog = global::Util.KInstantiateUI<MessageDialogFrame>(ScreenPrefabs.Instance.MessageDialogFrame.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, false);
+					MessageDialog messageDialog = global::Util.KInstantiateUI<MessageDialog>(this.dialogPrefabs[i].gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, false);
 					this.messageDialog.SetMessage(messageDialog, mn.message);
 					this.messageDialog.Show(true);
-					base.PlaySound3D(GlobalAssets.GetSound("HUD_Click_Open", false));
 					break;
 				}
 			}
@@ -125,7 +126,7 @@ public class NotificationScreen : KScreen
 		{
 			locText2.color = this.normalColor;
 		}
-		base.Subscribe(Messenger.Instance.gameObject, 1558809273, new EventSystem.EventHandler(this.OnNewMessage));
+		base.Subscribe(Messenger.Instance.gameObject, 1558809273, new Action<object>(this.OnNewMessage));
 		foreach (Message message in Messenger.Instance.Messages)
 		{
 			Notification notification = new MessageNotification(message);
@@ -151,11 +152,11 @@ public class NotificationScreen : KScreen
 			GameObject label;
 			if (notification.Type == NotificationType.Messages)
 			{
-				label = Util.KInstantiateUI(this.MessagesPrefab, this.MessagesFolder, false);
+				label = global::Util.KInstantiateUI(this.MessagesPrefab, this.MessagesFolder, false);
 			}
 			else
 			{
-				label = Util.KInstantiateUI(this.LabelPrefab, this.LabelsFolder, false);
+				label = global::Util.KInstantiateUI(this.LabelPrefab, this.LabelsFolder, false);
 			}
 			label.GetComponentInChildren<NotificationAnimator>().Init();
 			label.gameObject.SetActive(true);
@@ -172,7 +173,6 @@ public class NotificationScreen : KScreen
 				Debug.Assert(notification.GetType() == typeof(MessageNotification), string.Format("Notification: \"{0}\" is not of type MessageNotification", notification.titleText));
 				componentsInChildren[1].onClick.AddListener(delegate
 				{
-					KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
 					List<Notification> list = this.notifications.FindAll((Notification n) => n.titleText == notification.titleText);
 					foreach (Notification notification2 in list)
 					{
@@ -237,6 +237,19 @@ public class NotificationScreen : KScreen
 				}
 				IL_034E:
 				componentInChildren.color = locText.color;
+				string text = string.Empty;
+				if (KTime.Instance.UnscaledGameTime - this.initTime > 5f && notification.playSound)
+				{
+					this.PlayDingSound(notification);
+				}
+				else
+				{
+					text = "too early";
+				}
+				if (AudioDebug.Get().debugNotificationSounds)
+				{
+					Debug.Log("Notification(" + notification.titleText + "):" + text);
+				}
 				i++;
 				continue;
 				IL_0330:
@@ -244,26 +257,9 @@ public class NotificationScreen : KScreen
 				componentInChildren.sprite = this.icon_normal;
 				goto IL_034E;
 			}
-			if (!string.IsNullOrEmpty(notification.soundPath) && notification.playSound)
-			{
-				KMonoBehaviour.PlaySound(notification.soundPath);
-			}
 		}
 		entry.Add(notification);
 		entry.UpdateMessage(notification.titleText);
-		string text = string.Empty;
-		if (KTime.Instance.UnscaledGameTime - this.initTime > 5f)
-		{
-			this.PlayDingSound(notification);
-		}
-		else
-		{
-			text = "too early";
-		}
-		if (AudioDebug.Get().debugNotificationSounds)
-		{
-			Debug.Log("Notification(" + notification.titleText + "):" + text);
-		}
 		this.dirty = true;
 		this.SortNotifications();
 	}
@@ -306,14 +302,21 @@ public class NotificationScreen : KScreen
 
 	private void PlayDingSound(Notification notification)
 	{
-		if (notification.Type == NotificationType.Good || notification.Type == NotificationType.Messages)
+		string text;
+		if (!this.notificationSounds.TryGetValue(notification.Type, out text))
 		{
-			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Notification", false));
+			text = "Notification";
 		}
-		else if (notification.Type == NotificationType.Bad || notification.Type == NotificationType.Tutorial)
+		float num;
+		if (!this.timeOfLastNotification.TryGetValue(text, out num))
 		{
-			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Notification", false));
+			num = 0f;
 		}
+		float num2 = (Time.time - num) / this.soundDecayTime;
+		EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound(this.notificationSounds[notification.Type], false), Vector3.zero);
+		eventInstance.setParameterValue("timeSinceLast", num2);
+		KFMOD.EndOneShot(eventInstance);
+		this.timeOfLastNotification[text] = Time.time;
 	}
 
 	private void Update()
@@ -367,10 +370,7 @@ public class NotificationScreen : KScreen
 	{
 		Notification nextClickedNotification = entry.NextClickedNotification;
 		Notifier notifier = nextClickedNotification.Notifier;
-		if (nextClickedNotification.Type != NotificationType.Messages)
-		{
-			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Click_Notification", false));
-		}
+		base.PlaySound3D(GlobalAssets.GetSound("HUD_Click_Open", false));
 		if (nextClickedNotification.customClickCallback != null)
 		{
 			nextClickedNotification.customClickCallback(nextClickedNotification.customClickData);
@@ -389,13 +389,23 @@ public class NotificationScreen : KScreen
 			{
 				Vector3 position = nextClickedNotification.Position;
 				position.z = -40f;
-				CameraController.Instance.SetTargetPos(position, 8f);
+				CameraController.Instance.SetTargetPos(position, 8f, true);
 			}
 		}
 	}
 
 	private void PositionLocatorIcon()
 	{
+	}
+
+	private void InitNotificationSounds()
+	{
+		this.notificationSounds[NotificationType.Good] = "Notification";
+		this.notificationSounds[NotificationType.BadMinor] = "Notification";
+		this.notificationSounds[NotificationType.Bad] = "Warning";
+		this.notificationSounds[NotificationType.Neutral] = "Notification";
+		this.notificationSounds[NotificationType.Tutorial] = "Notification";
+		this.notificationSounds[NotificationType.Messages] = "Message";
 	}
 
 	public float lifetime;
@@ -459,6 +469,12 @@ public class NotificationScreen : KScreen
 	private List<Notification> notifications = new List<Notification>();
 
 	public TextStyleSetting TooltipTextStyle;
+
+	private Dictionary<NotificationType, string> notificationSounds = new Dictionary<NotificationType, string>();
+
+	private Dictionary<string, float> timeOfLastNotification = new Dictionary<string, float>();
+
+	private float soundDecayTime = 10f;
 
 	private List<NotificationScreen.Entry> entries = new List<NotificationScreen.Entry>();
 

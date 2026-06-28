@@ -4,12 +4,12 @@ using UnityEngine;
 public class EntombedChore : Chore<EntombedChore.StatesInstance>
 {
 	public EntombedChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.Entombed, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true)
+		: base(Db.Get().ChoreTypes.Entombed, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true, 0)
 	{
 		this.smi = new EntombedChore.StatesInstance(this, target.gameObject);
 	}
 
-	public class StatesInstance : GameStateMachine<EntombedChore.States, EntombedChore.StatesInstance, EntombedChore>.GameInstance
+	public class StatesInstance : GameStateMachine<EntombedChore.States, EntombedChore.StatesInstance, EntombedChore, object>.GameInstance
 	{
 		public StatesInstance(EntombedChore master, GameObject entombable)
 			: base(master)
@@ -34,17 +34,17 @@ public class EntombedChore : Chore<EntombedChore.StatesInstance>
 			this.root.Update("IsFaceEntombed", delegate(EntombedChore.StatesInstance smi)
 			{
 				smi.UpdateFaceEntombed();
-			});
+			}).ToggleStatusItem(Db.Get().DuplicantStatusItems.EntombedChore, null);
 			this.entombedface.PlayAnim("entombed_ceiling", KAnim.PlayMode.Loop, null).ParamTransition<bool>(this.isFaceEntombed, this.entombedbody, (EntombedChore.StatesInstance smi, bool p) => !p);
 			this.entombedbody.PlayAnim("entombed_floor", KAnim.PlayMode.Loop, null).StopMoving().ParamTransition<bool>(this.isFaceEntombed, this.entombedface, (EntombedChore.StatesInstance smi, bool p) => p);
 		}
 
-		public StateMachine<EntombedChore.States, EntombedChore.StatesInstance, EntombedChore>.BoolParameter isFaceEntombed;
+		public StateMachine<EntombedChore.States, EntombedChore.StatesInstance, EntombedChore, object>.BoolParameter isFaceEntombed;
 
-		public StateMachine<EntombedChore.States, EntombedChore.StatesInstance, EntombedChore>.TargetParameter entombable;
+		public StateMachine<EntombedChore.States, EntombedChore.StatesInstance, EntombedChore, object>.TargetParameter entombable;
 
-		public GameStateMachine<EntombedChore.States, EntombedChore.StatesInstance, EntombedChore>.State entombedface;
+		public GameStateMachine<EntombedChore.States, EntombedChore.StatesInstance, EntombedChore, object>.State entombedface;
 
-		public GameStateMachine<EntombedChore.States, EntombedChore.StatesInstance, EntombedChore>.State entombedbody;
+		public GameStateMachine<EntombedChore.States, EntombedChore.StatesInstance, EntombedChore, object>.State entombedbody;
 	}
 }

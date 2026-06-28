@@ -26,13 +26,23 @@ public class FetchManagerUpdater
 					pickup.PrefabID = pickupable.KPrefabID;
 					pickup.PathCost = (ushort)navigationCost;
 					pickup.masterPriority = 0;
+					pickup.freshness = 0;
 					if (pickupable.storage != null)
 					{
-						Prioritizable component2 = pickupable.storage.GetComponent<Prioritizable>();
-						if (component2 != null)
+						Prioritizable prioritizable = pickupable.storage.prioritizable;
+						if (prioritizable != null)
 						{
-							pickup.masterPriority = component2.GetMasterPriority();
+							pickup.masterPriority = prioritizable.GetMasterPriority();
 						}
+					}
+					Rottable.Instance rottable = pickupable.rottable;
+					if (rottable != null)
+					{
+						pickup.freshness = (int)rottable.RotValue;
+					}
+					else
+					{
+						pickup.freshness = int.MaxValue;
 					}
 					FetchManagerUpdater.Pickups[FetchManagerUpdater.PickupCount++] = pickup;
 				}
@@ -64,16 +74,13 @@ public class FetchManagerUpdater
 		bool flag = a.PathCost <= b.PathCost;
 		bool flag2 = a.PrefabID.HasSameTags(b.PrefabID);
 		bool flag3 = a.masterPriority == b.masterPriority;
-		return flag && flag2 && flag3;
+		bool flag4 = a.freshness == b.freshness;
+		return flag && flag2 && flag3 && flag4;
 	}
 
-	public static bool IsFetchablePickup(KPrefabID pickup_id, Storage source, float pickup_unreserved_amount, float pickup_min_unit, float maximum_requested, Tag[] tags, Tag[] required_tags, Storage destination)
+	public static bool IsFetchablePickup(KPrefabID pickup_id, Storage source, float pickup_unreserved_amount, float pickup_min_unit, float maximum_requested, Tag[] tags, Tag[] required_tags, Tag[] forbid_tags, Storage destination)
 	{
 		if (pickup_id == null)
-		{
-			return false;
-		}
-		if (pickup_min_unit > maximum_requested)
 		{
 			return false;
 		}
@@ -82,6 +89,16 @@ public class FetchManagerUpdater
 			foreach (Tag tag in required_tags)
 			{
 				if (!pickup_id.HasTag(tag))
+				{
+					return false;
+				}
+			}
+		}
+		if (forbid_tags != null)
+		{
+			foreach (Tag tag2 in forbid_tags)
+			{
+				if (pickup_id.HasTag(tag2))
 				{
 					return false;
 				}
@@ -107,7 +124,7 @@ public class FetchManagerUpdater
 		return pickup_id.HasAnyTags(tags) && pickup_unreserved_amount > 0f;
 	}
 
-	public static PathFinderFlags FindFetchTarget(Worker worker, Storage destination, List<Pickupable> pickupables, Tag[] tags, Tag[] required_tags, float required_amount, ref Pickupable workable)
+	public static PathFinderFlags FindFetchTarget(Worker worker, Storage destination, List<Pickupable> pickupables, Tag[] tags, Tag[] required_tags, Tag[] forbid_tags, float required_amount, ref Pickupable workable)
 	{
 		workable = null;
 		int num = int.MaxValue;
@@ -115,7 +132,7 @@ public class FetchManagerUpdater
 		for (int i = 0; i < FetchManagerUpdater.PickupCount; i++)
 		{
 			FetchManagerUpdater.Pickup pickup = FetchManagerUpdater.Pickups[i];
-			bool flag = FetchManagerUpdater.IsFetchablePickup(pickup.PrefabID, pickup.Pickupable.storage, pickup.Pickupable.UnreservedAmount, pickup.Pickupable.MinTakeAmount, required_amount, tags, required_tags, destination);
+			bool flag = FetchManagerUpdater.IsFetchablePickup(pickup.PrefabID, pickup.Pickupable.storage, pickup.Pickupable.UnreservedAmount, pickup.Pickupable.MinTakeAmount, required_amount, tags, required_tags, forbid_tags, destination);
 			if (flag && (int)pickup.PathCost < num)
 			{
 				workable = pickup.Pickupable;
@@ -145,6 +162,8 @@ public class FetchManagerUpdater
 		public ushort PathCost;
 
 		public int masterPriority;
+
+		public int freshness;
 	}
 
 	private class PickupComparer : IComparer<FetchManagerUpdater.Pickup>
@@ -156,23 +175,15 @@ public class FetchManagerUpdater
 			{
 				return num;
 			}
-			if (a.masterPriority < b.masterPriority)
+			if (a.masterPriority != b.masterPriority)
 			{
-				return -1;
+				return a.masterPriority - b.masterPriority;
 			}
-			if (a.masterPriority > b.masterPriority)
+			if (a.PathCost != b.PathCost)
 			{
-				return 1;
+				return (int)(a.PathCost - b.PathCost);
 			}
-			if (a.PathCost < b.PathCost)
-			{
-				return -1;
-			}
-			if (a.PathCost > b.PathCost)
-			{
-				return 1;
-			}
-			return 0;
+			return a.freshness - b.freshness;
 		}
 	}
 }

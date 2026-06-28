@@ -8,7 +8,7 @@ public class DeepProfiler
 		this.enableProfiling = enable_profiling;
 	}
 
-	[Conditional("UNITY_EDITOR")]
+	[Conditional("DEEP_PROFILE")]
 	public void BeginSample(string message)
 	{
 		if (this.enableProfiling)
@@ -16,7 +16,7 @@ public class DeepProfiler
 		}
 	}
 
-	[Conditional("UNITY_EDITOR")]
+	[Conditional("DEEP_PROFILE")]
 	public void EndSample()
 	{
 		if (this.enableProfiling)

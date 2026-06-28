@@ -224,8 +224,14 @@ public class ThreadedHttps<T> where T : class, new()
 				if (this.certFail)
 				{
 					Debug.LogWarning(this.serviceName + ": Cert fail, quitting");
-					this.OnReplyRecieved(null);
-					this.Quit();
+					try
+					{
+						this.OnReplyRecieved(null);
+					}
+					catch
+					{
+					}
+					this.QuitOnError();
 					break;
 				}
 				num++;
@@ -243,8 +249,14 @@ public class ThreadedHttps<T> where T : class, new()
 						"..."
 					});
 					Debug.LogWarning(text);
-					this.OnReplyRecieved(null);
-					this.Quit();
+					try
+					{
+						this.OnReplyRecieved(null);
+					}
+					catch
+					{
+					}
+					this.QuitOnError();
 					break;
 				}
 				string message4 = ex4.Message;
@@ -278,9 +290,19 @@ public class ThreadedHttps<T> where T : class, new()
 		object quitLock = this._quitLock;
 		lock (quitLock)
 		{
-			flag = this.shouldQuit && this.packets.Count == 0;
+			flag = (this.shouldQuit && this.packets.Count == 0) || this.quitOnError;
 		}
 		return flag;
+	}
+
+	protected void QuitOnError()
+	{
+		object quitLock = this._quitLock;
+		lock (quitLock)
+		{
+			this.quitOnError = true;
+			this.shouldQuit = true;
+		}
 	}
 
 	protected void Quit()
@@ -376,6 +398,8 @@ public class ThreadedHttps<T> where T : class, new()
 	private EventWaitHandle _waitHandle = new AutoResetEvent(false);
 
 	protected bool shouldQuit;
+
+	protected bool quitOnError;
 
 	private object _quitLock = new object();
 

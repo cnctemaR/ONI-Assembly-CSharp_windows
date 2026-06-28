@@ -34,22 +34,22 @@ public class SleepChoreMonitor : GameStateMachine<SleepChoreMonitor, SleepChoreM
 		return new SleepChore(smi.master, this.bed.Get(smi));
 	}
 
-	public GameStateMachine<SleepChoreMonitor, SleepChoreMonitor.Instance, IStateMachineTarget>.State nobedassigned;
+	public GameStateMachine<SleepChoreMonitor, SleepChoreMonitor.Instance, IStateMachineTarget, object>.State nobedassigned;
 
-	public GameStateMachine<SleepChoreMonitor, SleepChoreMonitor.Instance, IStateMachineTarget>.State satisfied;
+	public GameStateMachine<SleepChoreMonitor, SleepChoreMonitor.Instance, IStateMachineTarget, object>.State satisfied;
 
 	public SleepChoreMonitor.BedAssignedState bedassigned;
 
-	public StateMachine<SleepChoreMonitor, SleepChoreMonitor.Instance, IStateMachineTarget>.TargetParameter bed;
+	public StateMachine<SleepChoreMonitor, SleepChoreMonitor.Instance, IStateMachineTarget, object>.TargetParameter bed;
 
-	public class BedAssignedState : GameStateMachine<SleepChoreMonitor, SleepChoreMonitor.Instance, IStateMachineTarget>.State
+	public class BedAssignedState : GameStateMachine<SleepChoreMonitor, SleepChoreMonitor.Instance, IStateMachineTarget, object>.State
 	{
-		public GameStateMachine<SleepChoreMonitor, SleepChoreMonitor.Instance, IStateMachineTarget>.State bedunreachable;
+		public GameStateMachine<SleepChoreMonitor, SleepChoreMonitor.Instance, IStateMachineTarget, object>.State bedunreachable;
 
-		public GameStateMachine<SleepChoreMonitor, SleepChoreMonitor.Instance, IStateMachineTarget>.State bedreachable;
+		public GameStateMachine<SleepChoreMonitor, SleepChoreMonitor.Instance, IStateMachineTarget, object>.State bedreachable;
 	}
 
-	public new class Instance : GameStateMachine<SleepChoreMonitor, SleepChoreMonitor.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<SleepChoreMonitor, SleepChoreMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)

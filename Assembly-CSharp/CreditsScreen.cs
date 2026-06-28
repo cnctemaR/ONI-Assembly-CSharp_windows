@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Klei;
+using STRINGS;
 using UnityEngine;
 
 public class CreditsScreen : KScreen
@@ -8,11 +9,13 @@ public class CreditsScreen : KScreen
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.AddCredits(this.TeamCreditsFile, true);
-		foreach (TextAsset textAsset in this.AdditionalCreditsFiles)
+		this.AddCredits(this.TeamCreditsFile);
+		foreach (string text in LocString.GetStrings(typeof(UI.CREDITSSCREEN.THIRD_PARTY)))
 		{
-			this.AddCredits(textAsset, false);
+			GameObject gameObject = Util.KInstantiateUI(this.entryPrefab, this.entryContainer.gameObject, true);
+			gameObject.GetComponent<LocText>().text = text;
 		}
+		this.CloseButton.onClick += this.Close;
 	}
 
 	public void Close()
@@ -20,7 +23,7 @@ public class CreditsScreen : KScreen
 		this.Deactivate();
 	}
 
-	private void AddCredits(TextAsset csv, bool randomizeOrder)
+	private void AddCredits(TextAsset csv)
 	{
 		string[,] array = CSVReader.SplitCsvGrid(csv.text, csv.name);
 		List<string> list = new List<string>();
@@ -32,15 +35,11 @@ public class CreditsScreen : KScreen
 				list.Add(text);
 			}
 		}
-		if (randomizeOrder)
-		{
-			list.Shuffle<string>();
-		}
+		list.Shuffle<string>();
 		foreach (string text2 in list)
 		{
-			string text3 = text2.Replace("|", "\n");
 			GameObject gameObject = Util.KInstantiateUI(this.entryPrefab, this.entryContainer.gameObject, true);
-			gameObject.GetComponent<LocText>().text = text3;
+			gameObject.GetComponent<LocText>().text = text2;
 		}
 	}
 
@@ -48,7 +47,7 @@ public class CreditsScreen : KScreen
 
 	public Transform entryContainer;
 
-	public TextAsset TeamCreditsFile;
+	public KButton CloseButton;
 
-	public TextAsset[] AdditionalCreditsFiles;
+	public TextAsset TeamCreditsFile;
 }

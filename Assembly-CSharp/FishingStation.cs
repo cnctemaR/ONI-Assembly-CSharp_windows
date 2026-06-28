@@ -8,8 +8,8 @@ public class FishingStation : Harvestable
 		base.OnSpawn();
 		this.showProgressBar = false;
 		base.SetWorkTime(float.PositiveInfinity);
-		this.Subscribe(-1358696400, new EventSystem.EventHandler(this.DropLine));
-		this.Subscribe(-942831938, new EventSystem.EventHandler(this.StopWork));
+		this.Subscribe(-1358696400, new Action<object>(this.DropLine));
+		this.Subscribe(-942831938, new Action<object>(this.StopWork));
 		int num = Grid.PosToCell(this.transform.position);
 		int num2 = Grid.CellLeft(num);
 		int num3 = Grid.CellRight(num);
@@ -120,7 +120,6 @@ public class FishingStation : Harvestable
 		else
 		{
 			this.Trigger(-942831938, null);
-			base.OnClickCancelHarvest();
 		}
 	}
 
@@ -146,17 +145,7 @@ public class FishingStation : Harvestable
 		}
 		if (this.isMarkedForHarvest)
 		{
-			this.userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_fish", "Stop Fishing", new global::System.Action(base.OnClickCancelHarvest), global::Action.NumActions, null, null, null, null, string.Empty));
 		}
-		else
-		{
-			this.userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_fish", "Start Fishing", new global::System.Action(this.OnClickHarvest), global::Action.NumActions, null, null, null, null, string.Empty));
-		}
-	}
-
-	protected override void OnClickHarvest()
-	{
-		this.MarkForHarvest();
 	}
 
 	public override void MarkForHarvest()
@@ -172,7 +161,7 @@ public class FishingStation : Harvestable
 	public override void ForceCancelHarvest(object data = null)
 	{
 		this.OnCancel(null);
-		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.PendingFish);
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.PendingFish, false);
 		this.userMenu.Refresh();
 	}
 
@@ -182,7 +171,7 @@ public class FishingStation : Harvestable
 		{
 			this.chore.Cancel("Cancel fishing");
 			this.chore = null;
-			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.PendingFish);
+			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.PendingFish, false);
 		}
 		this.isMarkedForHarvest = false;
 	}
@@ -226,7 +215,7 @@ public class FishingStation : Harvestable
 		{
 			return 0;
 		}
-		if (!Grid.Objects[num, 22])
+		if (!Grid.Objects[num, 5])
 		{
 			return 2;
 		}
@@ -247,7 +236,6 @@ public class FishingStation : Harvestable
 	public void EmptyWater()
 	{
 		this.Trigger(-942831938, null);
-		base.OnClickCancelHarvest();
 	}
 
 	private int LineRange = 7;

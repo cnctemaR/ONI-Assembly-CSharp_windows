@@ -18,7 +18,7 @@ public class CreatureEntityTypeSet : CommonEntityTypeSet
 		EntityType entityType = this.CreateCommon("GroneHog", CREATURES.SPECIES.GRONEHOG.NAME, true);
 		BoxCollider2D boxCollider2D = entityType.prefab.UpdateComponentRequirement<BoxCollider2D>(true);
 		boxCollider2D.size = new Vector2(2f, 1f);
-		KBatchedAnimController kbatchedAnimController = entityType.prefab.AddAnimController("gronehog", Grid.SceneLayer.Front);
+		KBatchedAnimController kbatchedAnimController = entityType.prefab.AddAnimController("gronehog_kanim", Grid.SceneLayer.Front);
 		kbatchedAnimController.isMovable = true;
 		entityType.prefab.UpdateComponentRequirement<GroneHog>(true);
 		entityType.prefab.AddElementConsumer(SimHashes.Oxygen, 0.005f, 0f, 1);
@@ -34,7 +34,7 @@ public class CreatureEntityTypeSet : CommonEntityTypeSet
 		BoxCollider2D boxCollider2D = entityType.prefab.UpdateComponentRequirement<BoxCollider2D>(true);
 		boxCollider2D.size = new Vector2(3f, 3.5f);
 		boxCollider2D.offset = new Vector2(0f, 1.75f);
-		entityType.prefab.AddAnimController("gronehogmound", Grid.SceneLayer.Front);
+		entityType.prefab.AddAnimController("gronehogmound_kanim", Grid.SceneLayer.Front);
 		entityType.prefab.UpdateComponentRequirement<GroneHogMound>(true);
 		entityType.prefab.UpdateComponentRequirement<Harvestable>(true);
 	}
@@ -60,7 +60,7 @@ public class CreatureEntityTypeSet : CommonEntityTypeSet
 		entityType.prefab.UpdateComponentRequirement<Health>(true);
 		entityType.prefab.UpdateComponentRequirement<FactionAlignment>(true).Alignment = FactionManager.FactionID.Prey;
 		entityType.prefab.UpdateComponentRequirement<RangedAttackable>(true);
-		entityType.prefab.UpdateComponentRequirement<TemperatureVulnerable>(true).Configure(302f, 295f, 318f, 325f, 0.3f);
+		entityType.prefab.UpdateComponentRequirement<TemperatureVulnerable>(true).Configure(302f, 295f, 318f, 325f, 0f, 0f);
 		entityType.prefab.UpdateComponentRequirement<DrowningMonitor>(true).Configure(30f, 10f, 0.5f);
 		entityType.prefab.UpdateComponentRequirement<EntombVulnerable>(true);
 		entityType.prefab.UpdateComponentRequirement<LoopingSounds>(true);
@@ -71,7 +71,7 @@ public class CreatureEntityTypeSet : CommonEntityTypeSet
 		navigator.CurrentNavType = NavType.Hover;
 		navigator.defaultSpeed = 1f;
 		navigator.updateProber = true;
-		KBatchedAnimController kbatchedAnimController = entityType.prefab.AddAnimController("puft", Grid.SceneLayer.Front);
+		KBatchedAnimController kbatchedAnimController = entityType.prefab.AddAnimController("puft_kanim", Grid.SceneLayer.Front);
 		kbatchedAnimController.isMovable = true;
 	}
 
@@ -92,18 +92,12 @@ public class CreatureEntityTypeSet : CommonEntityTypeSet
 		navigator.CurrentNavType = NavType.Hover;
 		navigator.defaultSpeed = 2f;
 		navigator.updateProber = true;
-		entityType.prefab.UpdateComponentRequirement<TemperatureVulnerable>(true).Configure(TemperatureTuning.Freezing_1, TemperatureTuning.Freezing_2, TemperatureTuning.Hot_1, TemperatureTuning.Hot_2, 0.3f);
+		entityType.prefab.UpdateComponentRequirement<TemperatureVulnerable>(true).Configure(TemperatureTuning.Freezing_1, TemperatureTuning.Freezing_2, TemperatureTuning.Hot_1, TemperatureTuning.Hot_2, 0f, 0f);
 		entityType.prefab.UpdateComponentRequirement<DrowningMonitor>(true).Configure(30f, 10f, 0.5f);
 		entityType.prefab.UpdateComponentRequirement<EntombVulnerable>(true);
 		entityType.prefab.AddButcherable(new string[] { "Meat", "Meat", "Meat" });
-		KBatchedAnimController kbatchedAnimController = entityType.prefab.AddAnimController("shockworm", Grid.SceneLayer.Front);
+		KBatchedAnimController kbatchedAnimController = entityType.prefab.AddAnimController("shockworm_kanim", Grid.SceneLayer.Front);
 		kbatchedAnimController.isMovable = true;
-		KPrefabID component = entityType.prefab.GetComponent<KPrefabID>();
-		component.prefabSpawnFn += delegate(GameObject go)
-		{
-			Navigator component2 = go.GetComponent<Navigator>();
-			component2.transitionDriver.overrideLayers.Add(new DoorTransitionLayer(component2));
-		};
 	}
 
 	private void CreateHaunt(Db modifier_set)
@@ -112,7 +106,7 @@ public class CreatureEntityTypeSet : CommonEntityTypeSet
 		entityType.prefab.UpdateComponentRequirement<SimpleMover>(true);
 		entityType.prefab.GetComponent<BoxCollider2D>().size = new Vector2(2f, 3f);
 		entityType.prefab.GetComponent<BoxCollider2D>().offset = new Vector2(1f, 2f);
-		KBatchedAnimController kbatchedAnimController = entityType.prefab.AddAnimController("haunt", Grid.SceneLayer.Front);
+		KBatchedAnimController kbatchedAnimController = entityType.prefab.AddAnimController("haunt_kanim", Grid.SceneLayer.Front);
 		kbatchedAnimController.Offset = new Vector3(0.5f, 0f, 0f);
 		kbatchedAnimController.isMovable = true;
 	}
@@ -126,11 +120,10 @@ public class CreatureEntityTypeSet : CommonEntityTypeSet
 		circleCollider2D.radius = 0.33f;
 		PrimaryElement primaryElement = entityType.prefab.UpdateComponentRequirement<PrimaryElement>(true);
 		primaryElement.SetElement(SimHashes.Carbon);
-		primaryElement.UpdateElementTags = true;
-		entityType.prefab.UpdateComponentRequirement<TemperatureVulnerable>(true).Configure(302f, 295f, 318f, 325f, 0.3f);
+		entityType.prefab.UpdateComponentRequirement<TemperatureVulnerable>(true).Configure(302f, 295f, 318f, 325f, 0f, 0f);
 		entityType.prefab.UpdateComponentRequirement<Pickupable>(true);
 		entityType.prefab.UpdateComponentRequirement<Clearable>(true);
-		KBatchedAnimController kbatchedAnimController = entityType.prefab.AddAnimController("egg", Grid.SceneLayer.Front);
+		KBatchedAnimController kbatchedAnimController = entityType.prefab.AddAnimController("egg_kanim", Grid.SceneLayer.Front);
 		kbatchedAnimController.isMovable = true;
 	}
 
@@ -142,8 +135,8 @@ public class CreatureEntityTypeSet : CommonEntityTypeSet
 		entityType.prefab.UpdateComponentRequirement<FactionAlignment>(true).Alignment = FactionManager.FactionID.Prey;
 		entityType.prefab.UpdateComponentRequirement<Health>(true);
 		entityType.prefab.UpdateComponentRequirement<PrimaryElement>(true).SetElement(SimHashes.Carbon);
-		entityType.prefab.UpdateComponentRequirement<TemperatureVulnerable>(true).Configure(283f, 273f, 294f, 315f, 0.3f);
-		KBatchedAnimController kbatchedAnimController = entityType.prefab.AddAnimController("flut_egg", Grid.SceneLayer.Front);
+		entityType.prefab.UpdateComponentRequirement<TemperatureVulnerable>(true).Configure(283f, 263f, 294f, 343f, 0f, 0f);
+		KBatchedAnimController kbatchedAnimController = entityType.prefab.AddAnimController("flut_egg_kanim", Grid.SceneLayer.Front);
 		kbatchedAnimController.isMovable = true;
 	}
 
@@ -161,7 +154,7 @@ public class CreatureEntityTypeSet : CommonEntityTypeSet
 		navigator.updateProber = true;
 		entityType.prefab.UpdateComponentRequirement<EntombVulnerable>(true);
 		entityType.prefab.UpdateComponentRequirement<Catchable>(true);
-		entityType.prefab.UpdateComponentRequirement<TemperatureVulnerable>(true).Configure(283f, 273f, 294f, 315f, 0.3f);
+		entityType.prefab.UpdateComponentRequirement<TemperatureVulnerable>(true).Configure(283f, 263f, 294f, 343f, 0f, 0f);
 		entityType.prefab.AddButcherable(new string[] { "Meat" });
 		AquaticReproducer aquaticReproducer = entityType.prefab.UpdateComponentRequirement<AquaticReproducer>(true);
 		aquaticReproducer.EggPrefabTag = new Tag("FlutEgg");
@@ -169,19 +162,19 @@ public class CreatureEntityTypeSet : CommonEntityTypeSet
 		entityType.prefab.UpdateComponentRequirement<Storage>(true);
 		entityType.prefab.UpdateComponentRequirement<Operational>(true);
 		ElementConverter elementConverter = entityType.prefab.UpdateComponentRequirement<ElementConverter>(true);
+		elementConverter.conversionInterval = 150f;
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(null, 0.25f, SimHashes.Fertilizer, 0f, false, 0f, 0f)
+			new ElementConverter.OutputElement(0.25f / elementConverter.conversionInterval, SimHashes.Fertilizer, 0f, false, 0f, 0f, false)
 		};
-		elementConverter.conversionInterval = 150f;
-		KBatchedAnimController kbatchedAnimController = entityType.prefab.AddAnimController("flut_single", Grid.SceneLayer.Front);
+		KBatchedAnimController kbatchedAnimController = entityType.prefab.AddAnimController("flut_single_kanim", Grid.SceneLayer.Front);
 		kbatchedAnimController.isMovable = true;
 	}
 
 	private void CreateGlom(Db modifier_set)
 	{
 		EntityType entityType = this.CreateCommon("Glom", CREATURES.SPECIES.GLOM.NAME, true);
-		KBatchedAnimController kbatchedAnimController = entityType.prefab.AddAnimController("glom", Grid.SceneLayer.Front);
+		KBatchedAnimController kbatchedAnimController = entityType.prefab.AddAnimController("glom_kanim", Grid.SceneLayer.Front);
 		kbatchedAnimController.isMovable = true;
 		entityType.prefab.UpdateComponentRequirement<Glom>(true);
 		entityType.prefab.UpdateComponentRequirement<Health>(true);
@@ -194,8 +187,8 @@ public class CreatureEntityTypeSet : CommonEntityTypeSet
 		navigator.updateProber = true;
 		entityType.prefab.UpdateComponentRequirement<EntombVulnerable>(true);
 		ElementEmitter elementEmitter = entityType.prefab.UpdateComponentRequirement<ElementEmitter>(true);
-		entityType.prefab.UpdateComponentRequirement<TemperatureVulnerable>(true).Configure(293f, 283f, 310f, 330f, 0.3f);
-		elementEmitter.outputElement = new ElementConverter.OutputElement(null, 0f, SimHashes.ContaminatedOxygen, 0f, false, 0f, 0f);
+		entityType.prefab.UpdateComponentRequirement<TemperatureVulnerable>(true).Configure(293f, 283f, 310f, 330f, 0f, 0f);
+		elementEmitter.outputElement = new ElementConverter.OutputElement(0f, SimHashes.ContaminatedOxygen, 0f, false, 0f, 0f, false);
 		elementEmitter.emissionFrequency = 0f;
 		elementEmitter.SetEmitting(false);
 	}
@@ -218,7 +211,6 @@ public class CreatureEntityTypeSet : CommonEntityTypeSet
 		primaryElement.Temperature = 293f;
 		entityType.prefab.UpdateComponentRequirement<OccupyArea>(true);
 		entityType.prefab.UpdateComponentRequirement<Modifiers>(true);
-		entityType.prefab.UpdateComponentRequirement<InfraredVisualizer>(true);
 		entityType.prefab.UpdateComponentRequirement<SaveLoadRoot>(true);
 		entityType.prefab.UpdateComponentRequirement<SavedObject>(true);
 		entityType.prefab.UpdateComponentRequirement<StateMachineController>(true);

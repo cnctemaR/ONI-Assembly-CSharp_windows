@@ -4,7 +4,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Flut : StateMachineComponent<Flut.StatesInstance>, ISaveLoadableJson
+public class Flut : StateMachineComponent<Flut.StatesInstance>, ISaveLoadable
 {
 	protected override void OnPrefabInit()
 	{
@@ -35,16 +35,16 @@ public class Flut : StateMachineComponent<Flut.StatesInstance>, ISaveLoadableJso
 	{
 		if (mark)
 		{
-			if (Grid.IsValidCell(this.markedCell) && Grid.Objects[this.markedCell, 22] == base.gameObject)
+			if (Grid.IsValidCell(this.markedCell) && Grid.Objects[this.markedCell, 5] == base.gameObject)
 			{
-				Grid.Objects[this.markedCell, 22] = null;
+				Grid.Objects[this.markedCell, 5] = null;
 			}
 			this.markedCell = Grid.PosToCell(base.gameObject);
-			Grid.Objects[this.markedCell, 22] = base.gameObject;
+			Grid.Objects[this.markedCell, 5] = base.gameObject;
 		}
-		else if (Grid.Objects[this.markedCell, 22] == base.gameObject)
+		else if (Grid.Objects[this.markedCell, 5] == base.gameObject)
 		{
-			Grid.Objects[this.markedCell, 22] = null;
+			Grid.Objects[this.markedCell, 5] = null;
 		}
 	}
 
@@ -134,7 +134,7 @@ public class Flut : StateMachineComponent<Flut.StatesInstance>, ISaveLoadableJso
 
 	private int markedCell = -1;
 
-	public class StatesInstance : GameStateMachine<Flut.States, Flut.StatesInstance, Flut>.GameInstance
+	public class StatesInstance : GameStateMachine<Flut.States, Flut.StatesInstance, Flut, object>.GameInstance
 	{
 		public StatesInstance(Flut smi)
 			: base(smi)
@@ -294,7 +294,7 @@ public class Flut : StateMachineComponent<Flut.StatesInstance>, ISaveLoadableJso
 			{
 				if (smi.GetComponent<KSelectable>().HasStatusItem(Db.Get().CreatureStatusItems.ConsideringLure))
 				{
-					smi.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().CreatureStatusItems.ConsideringLure);
+					smi.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().CreatureStatusItems.ConsideringLure, false);
 				}
 				smi.Play("caught_loop", KAnim.PlayMode.Loop);
 				smi.master.nav.Stop(false);
@@ -326,55 +326,55 @@ public class Flut : StateMachineComponent<Flut.StatesInstance>, ISaveLoadableJso
 			this.dead.falling.ToggleGravity(this.dead.idle).PlayAnim("death", KAnim.PlayMode.Loop, null);
 		}
 
-		public StateMachine<Flut.States, Flut.StatesInstance, Flut>.TargetParameter lureMoveTarget;
+		public StateMachine<Flut.States, Flut.StatesInstance, Flut, object>.TargetParameter lureMoveTarget;
 
-		public StateMachine<Flut.States, Flut.StatesInstance, Flut>.TargetParameter mover;
+		public StateMachine<Flut.States, Flut.StatesInstance, Flut, object>.TargetParameter mover;
 
 		public Flut.States.AliveStates alive;
 
 		public Flut.States.DeadStates dead;
 
-		public class AliveStates : GameStateMachine<Flut.States, Flut.StatesInstance, Flut>.State
+		public class AliveStates : GameStateMachine<Flut.States, Flut.StatesInstance, Flut, object>.State
 		{
 			public Flut.States.SwimmingState swimming;
 
-			public GameStateMachine<Flut.States, Flut.StatesInstance, Flut>.State falling;
+			public GameStateMachine<Flut.States, Flut.StatesInstance, Flut, object>.State falling;
 
-			public GameStateMachine<Flut.States, Flut.StatesInstance, Flut>.State grounded;
+			public GameStateMachine<Flut.States, Flut.StatesInstance, Flut, object>.State grounded;
 
-			public GameStateMachine<Flut.States, Flut.StatesInstance, Flut>.State hooked;
+			public GameStateMachine<Flut.States, Flut.StatesInstance, Flut, object>.State hooked;
 		}
 
-		public class SwimmingState : GameStateMachine<Flut.States, Flut.StatesInstance, Flut>.State
+		public class SwimmingState : GameStateMachine<Flut.States, Flut.StatesInstance, Flut, object>.State
 		{
 			public Flut.States.Peacefull peacefully;
 
-			public GameStateMachine<Flut.States, Flut.StatesInstance, Flut>.CreatureFleeSubState<Approachable> flee;
+			public GameStateMachine<Flut.States, Flut.StatesInstance, Flut, object>.CreatureFleeSubState<Approachable> flee;
 		}
 
-		public class Peacefull : GameStateMachine<Flut.States, Flut.StatesInstance, Flut>.State
+		public class Peacefull : GameStateMachine<Flut.States, Flut.StatesInstance, Flut, object>.State
 		{
 			public Flut.States.IdleStates idling;
 
-			public GameStateMachine<Flut.States, Flut.StatesInstance, Flut>.ApproachSubState<Approachable> moveToLure;
+			public GameStateMachine<Flut.States, Flut.StatesInstance, Flut, object>.ApproachSubState<Approachable> moveToLure;
 
-			public GameStateMachine<Flut.States, Flut.StatesInstance, Flut>.State lay;
+			public GameStateMachine<Flut.States, Flut.StatesInstance, Flut, object>.State lay;
 		}
 
-		public class IdleStates : GameStateMachine<Flut.States, Flut.StatesInstance, Flut>.State
+		public class IdleStates : GameStateMachine<Flut.States, Flut.StatesInstance, Flut, object>.State
 		{
-			public GameStateMachine<Flut.States, Flut.StatesInstance, Flut>.State idle;
+			public GameStateMachine<Flut.States, Flut.StatesInstance, Flut, object>.State idle;
 
-			public GameStateMachine<Flut.States, Flut.StatesInstance, Flut>.IdleMoveSubState move;
+			public GameStateMachine<Flut.States, Flut.StatesInstance, Flut, object>.IdleMoveSubState move;
 
-			public GameStateMachine<Flut.States, Flut.StatesInstance, Flut>.DebugGoToSubState debug_go_to;
+			public GameStateMachine<Flut.States, Flut.StatesInstance, Flut, object>.DebugGoToSubState debug_go_to;
 		}
 
-		public class DeadStates : GameStateMachine<Flut.States, Flut.StatesInstance, Flut>.State
+		public class DeadStates : GameStateMachine<Flut.States, Flut.StatesInstance, Flut, object>.State
 		{
-			public GameStateMachine<Flut.States, Flut.StatesInstance, Flut>.State idle;
+			public GameStateMachine<Flut.States, Flut.StatesInstance, Flut, object>.State idle;
 
-			public GameStateMachine<Flut.States, Flut.StatesInstance, Flut>.State falling;
+			public GameStateMachine<Flut.States, Flut.StatesInstance, Flut, object>.State falling;
 		}
 	}
 }

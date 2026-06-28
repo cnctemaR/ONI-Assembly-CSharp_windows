@@ -62,8 +62,9 @@ public static class Sim
 		}
 		Sim.GameDataUpdate* ptr2 = (Sim.GameDataUpdate*)(void*)intPtr;
 		Grid.CellValues = ptr2->cells;
-		Grid.PropertyTextureFlowValues = ptr2->propertyTextureFlow;
 		Grid.AccumulatedFlowValues = ptr2->accumulatedFlow;
+		PropertyTextures.externalFlowTex = ptr2->propertyTextureFlow;
+		PropertyTextures.externalLiquidTex = ptr2->propertyTextureLiquid;
 		Grid.InitializeCells(ptr2->cells);
 		return 0;
 	}
@@ -193,6 +194,9 @@ public static class Sim
 			this.elementsTableIdx = (byte)elements.IndexOf(e);
 			this.specificHeatCapacity = e.specificHeatCapacity;
 			this.thermalConductivity = e.thermalConductivity;
+			this.solidSurfaceAreaMultiplier = e.solidSurfaceAreaMultiplier;
+			this.liquidSurfaceAreaMultiplier = e.liquidSurfaceAreaMultiplier;
+			this.gasSurfaceAreaMultiplier = e.gasSurfaceAreaMultiplier;
 			this.molarMass = e.molarMass;
 			this.strength = e.strength;
 			this.flow = e.flow;
@@ -204,6 +208,15 @@ public static class Sim
 			this.highTemp = e.highTemp;
 			this.highTempTransitionOreID = e.highTempTransitionOreID;
 			this.highTempTransitionOreMassConversion = e.highTempTransitionOreMassConversion;
+			if (e.substance == null)
+			{
+				this.colour = 0U;
+			}
+			else
+			{
+				Color32 color = e.substance.colour;
+				this.colour = (uint)(((int)color.a << 24) | ((int)color.b << 16) | ((int)color.g << 8) | (int)color.r);
+			}
 			this.defaultValues = e.defaultValues;
 		}
 
@@ -217,6 +230,9 @@ public static class Sim
 			writer.Write(this.specificHeatCapacity);
 			writer.Write(this.thermalConductivity);
 			writer.Write(this.molarMass);
+			writer.Write(this.solidSurfaceAreaMultiplier);
+			writer.Write(this.liquidSurfaceAreaMultiplier);
+			writer.Write(this.gasSurfaceAreaMultiplier);
 			writer.Write(this.flow);
 			writer.Write(this.viscosity);
 			writer.Write(this.minHorizontalLiquidFlow);
@@ -227,6 +243,7 @@ public static class Sim
 			writer.Write(this.strength);
 			writer.Write((int)this.highTempTransitionOreID);
 			writer.Write(this.highTempTransitionOreMassConversion);
+			writer.Write(this.colour);
 			this.defaultValues.Write(writer);
 		}
 
@@ -245,6 +262,12 @@ public static class Sim
 		public float thermalConductivity;
 
 		public float molarMass;
+
+		public float solidSurfaceAreaMultiplier;
+
+		public float liquidSurfaceAreaMultiplier;
+
+		public float gasSurfaceAreaMultiplier;
 
 		public float flow;
 
@@ -265,6 +288,8 @@ public static class Sim
 		public SimHashes highTempTransitionOreID;
 
 		public float highTempTransitionOreMassConversion;
+
+		public uint colour;
 
 		public Sim.PhysicsData defaultValues;
 	}
@@ -358,14 +383,6 @@ public static class Sim
 
 		public unsafe Sim.BuildingTemperatureInfo* buildingTemperatures;
 
-		public int numGasPipeTemperatureChanges;
-
-		public unsafe Sim.PipeTemperatureChange* gasPipeTemperatureChanges;
-
-		public int numLiquidPipeTemperatureChanges;
-
-		public unsafe Sim.PipeTemperatureChange* liquidPipeTemperatureChanges;
-
 		public int numMassConsumptionCallbacks;
 
 		public unsafe Sim.MassConsumptionCallback* massConsumptionCallbacks;
@@ -374,21 +391,31 @@ public static class Sim
 
 		public unsafe Sim.ComponentStateChangedMessage* componentStateChangedMessages;
 
-		public int numRemovedMassEntries;
+		public int numConsumedMassEntries;
 
-		public unsafe Sim.MassChangeInfo* removedMassEntries;
+		public unsafe Sim.ConsumedMassInfo* consumedMassEntries;
 
 		public int numEmittedMassEntries;
 
-		public unsafe Sim.MassChangeInfo* emittedMassEntries;
+		public unsafe Sim.EmittedMassInfo* emittedMassEntries;
 
 		public int numElementChunkInfos;
 
 		public unsafe Sim.ElementChunkInfo* elementChunkInfos;
 
+		public int numElementChunkMeltedInfos;
+
+		public unsafe Sim.MeltedInfo* elementChunkMeltedInfos;
+
+		public int numBuildingMeltedInfos;
+
+		public unsafe Sim.MeltedInfo* buildingMeltedInfos;
+
 		public unsafe float* accumulatedFlow;
 
-		public unsafe Vector2* propertyTextureFlow;
+		public IntPtr propertyTextureFlow;
+
+		public IntPtr propertyTextureLiquid;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -462,8 +489,10 @@ public static class Sim
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
-	public struct ActiveRegion
+	public struct NewGameFrame
 	{
+		public float elapsedSeconds;
+
 		public int minX;
 
 		public int minY;
@@ -479,44 +508,6 @@ public static class Sim
 		public int gameCell;
 
 		public int damageSourceOffset;
-	}
-
-	[StructLayout(LayoutKind.Sequential, Pack = 4)]
-	public struct BuildingHeatExchangeMessage
-	{
-		public int buildingID;
-
-		public int callbackIdx;
-
-		public byte add;
-
-		public byte elemIdx;
-
-		public byte pipeLayer;
-
-		private byte pad0;
-
-		public float mass;
-
-		public float temperature;
-
-		public float minTemperature;
-
-		public int minX;
-
-		public int minY;
-
-		public int maxX;
-
-		public int maxY;
-	}
-
-	[StructLayout(LayoutKind.Sequential, Pack = 4)]
-	public struct BuildingTemperatureInfo
-	{
-		public int id;
-
-		public float temperature;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -558,8 +549,20 @@ public static class Sim
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
-	public struct MassChangeInfo
+	public struct EmittedMassInfo
 	{
+		public byte elemIdx;
+
+		public float mass;
+
+		public float temperature;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct ConsumedMassInfo
+	{
+		public int simHandle;
+
 		public byte removedElemIdx;
 
 		public float mass;
@@ -569,6 +572,20 @@ public static class Sim
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
 	public struct ElementChunkInfo
+	{
+		public float temperature;
+
+		public float deltaKJ;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct MeltedInfo
+	{
+		public int handle;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct BuildingTemperatureInfo
 	{
 		public float temperature;
 	}

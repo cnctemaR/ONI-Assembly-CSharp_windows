@@ -1,10 +1,14 @@
 ﻿using System;
+using STRINGS;
 
+[SkipSaveFileSerialization]
 public class Conduit : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
 	{
-		this.Subscribe(-1201923725, new EventSystem.EventHandler(this.OnHighlighted));
+		this.Subscribe(-1201923725, new Action<object>(this.OnHighlighted));
+		this.Subscribe(-700727624, new Action<object>(this.OnConduitFrozen));
+		this.Subscribe(-1152799878, new Action<object>(this.OnConduitBoiling));
 	}
 
 	protected override void OnSpawn()
@@ -24,6 +28,14 @@ public class Conduit : KMonoBehaviour
 			ConduitFlowVisualizer flowVisualizer = this.GetFlowVisualizer();
 			flowVisualizer.SetInsulated(Grid.PosToCell(this.transform.position), false);
 		}
+		int num = Grid.PosToCell(this.transform.position);
+		BuildingComplete component = base.GetComponent<BuildingComplete>();
+		if (component.Def.ReplacementLayer == ObjectLayer.NumLayers || Grid.Objects[num, (int)component.Def.ReplacementLayer] == null)
+		{
+			IUtilityNetworkMgr networkManager = this.GetNetworkManager();
+			networkManager.RemoveFromNetworks(num, this, false);
+			networkManager.ConduitFlowManager.EmptyConduit(Grid.PosToCell(this.transform.position));
+		}
 		base.OnCleanUp();
 	}
 
@@ -37,8 +49,27 @@ public class Conduit : KMonoBehaviour
 
 	private ConduitFlowVisualizer GetFlowVisualizer()
 	{
-		Vent component = base.GetComponent<Vent>();
-		return (component.TransferType != Vent.Transfer.Gas) ? Game.Instance.liquidFlowVisualizer : Game.Instance.gasFlowVisualizer;
+		return (this.type != ConduitType.Gas) ? Game.Instance.liquidFlowVisualizer : Game.Instance.gasFlowVisualizer;
+	}
+
+	public IUtilityNetworkMgr GetNetworkManager()
+	{
+		return (this.type != ConduitType.Gas) ? Game.Instance.liquidConduitSystem : Game.Instance.gasConduitSystem;
+	}
+
+	public ConduitFlow GetFlowManager()
+	{
+		return (this.type != ConduitType.Gas) ? Game.Instance.liquidConduitFlow : Game.Instance.gasConduitFlow;
+	}
+
+	public static ConduitFlow GetFlowManager(ConduitType type)
+	{
+		return (type != ConduitType.Gas) ? Game.Instance.liquidConduitFlow : Game.Instance.gasConduitFlow;
+	}
+
+	public static IUtilityNetworkMgr GetNetworkManager(ConduitType type)
+	{
+		return (type != ConduitType.Gas) ? Game.Instance.liquidConduitSystem : Game.Instance.gasConduitSystem;
 	}
 
 	private void OnHighlighted(object data)
@@ -48,4 +79,31 @@ public class Conduit : KMonoBehaviour
 		ConduitFlowVisualizer flowVisualizer = this.GetFlowVisualizer();
 		flowVisualizer.SetHighlightedCell(num);
 	}
+
+	private void OnConduitFrozen(object data)
+	{
+		this.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+		{
+			damage = int.MaxValue,
+			source = BUILDINGS.DAMAGESOURCES.CONDUIT_CONTENTS_FROZE,
+			popString = UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.CONDUIT_CONTENTS_FROZE
+		});
+		this.GetFlowManager().EmptyConduit(Grid.PosToCell(this.transform.position));
+	}
+
+	private void OnConduitBoiling(object data)
+	{
+		this.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+		{
+			damage = int.MaxValue,
+			source = BUILDINGS.DAMAGESOURCES.CONDUIT_CONTENTS_BOILED,
+			popString = UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.CONDUIT_CONTENTS_BOILED
+		});
+		this.GetFlowManager().EmptyConduit(Grid.PosToCell(this.transform.position));
+	}
+
+	[MyCmpReq]
+	private KAnimGraphTileVisualizer graphTileDependency;
+
+	public ConduitType type;
 }

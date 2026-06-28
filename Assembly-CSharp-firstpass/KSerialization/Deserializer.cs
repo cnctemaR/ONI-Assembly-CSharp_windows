@@ -57,6 +57,25 @@ namespace KSerialization
 			return flag;
 		}
 
+		public static bool Deserialize(Type type, IReader reader, out object result)
+		{
+			DeserializationMapping deserializationMapping = Manager.GetDeserializationMapping(type);
+			bool flag;
+			try
+			{
+				object obj = Activator.CreateInstance(type);
+				flag = deserializationMapping.Deserialize(obj, reader);
+				result = obj;
+			}
+			catch (Exception ex)
+			{
+				string text = string.Format("Exception occurred while attempting to deserialize into object of type {0}.\n{1}", type.ToString(), ex.ToString());
+				DebugLog.Output(DebugLog.Level.Error, text);
+				throw new Exception(text, ex);
+			}
+			return flag;
+		}
+
 		public IReader reader;
 	}
 }

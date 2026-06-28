@@ -16,11 +16,15 @@ public class EffectPrefabs : MonoBehaviour
 
 	public GameObject BurnerFlame;
 
+	public GameObject BurnerFlameContact;
+
 	public GameObject BuildEffect;
 
 	public GameObject PaintEffect;
 
 	public GameObject HarvestEffect;
+
+	public GameObject HarvestGlow;
 
 	public GameObject AttackEffect;
 

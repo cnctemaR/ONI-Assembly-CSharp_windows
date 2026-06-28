@@ -25,6 +25,7 @@ public class CrewListScreen<EntryType> : KScreen where EntryType : CrewListEntry
 		{
 			this.UpdateColumnTitles();
 		}
+		this.Reconstruct();
 	}
 
 	private void ClearEntries()
@@ -151,7 +152,6 @@ public class CrewListScreen<EntryType> : KScreen where EntryType : CrewListEntry
 
 	protected void SortByName(bool reverse)
 	{
-		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
 		List<EntryType> list = new List<EntryType>(this.EntryObjects);
 		list.Sort(delegate(EntryType a, EntryType b)
 		{

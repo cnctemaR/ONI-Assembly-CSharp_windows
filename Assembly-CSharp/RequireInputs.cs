@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[SkipSaveFileSerialization]
 public class RequireInputs : KMonoBehaviour
 {
 	public bool RequiresPower
@@ -49,7 +50,7 @@ public class RequireInputs : KMonoBehaviour
 	{
 		if (this.requirePower)
 		{
-			this.energy = base.GetComponent<EnergyConsumer>();
+			this.energy = base.GetComponent<IEnergyConsumer>();
 			this.button = base.GetComponent<BuildingEnabledButton>();
 		}
 		if (this.requireConduit)
@@ -74,8 +75,7 @@ public class RequireInputs : KMonoBehaviour
 			{
 				if (isConnected != this.wasConnected)
 				{
-					this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.NoWireConnected);
-					this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.NoPowerSource);
+					this.wireConnectedStatusItem = this.selectable.RemoveStatusItem(this.wireConnectedStatusItem, false);
 				}
 				if (this.visualizeRequirements)
 				{
@@ -88,10 +88,12 @@ public class RequireInputs : KMonoBehaviour
 			{
 				if (isConnected != this.wasConnected)
 				{
-					this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.NeedPower);
+					this.selectable.RemoveStatusItem(Db.Get().BuildingStatusItems.NeedPower, false);
 				}
-				this.selectable.ToggleStatusItem(Db.Get().BuildingStatusItems.NoWireConnected, !this.energy.HasWire, this);
-				this.selectable.ToggleStatusItem(Db.Get().BuildingStatusItems.NoPowerSource, this.energy.HasWire, this);
+				if (this.wireConnectedStatusItem == Guid.Empty)
+				{
+					this.wireConnectedStatusItem = this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.NoWireConnected, null);
+				}
 				flag = flag && isConnected;
 			}
 			this.wasConnected = isConnected;
@@ -164,11 +166,13 @@ public class RequireInputs : KMonoBehaviour
 
 	private static Operational.Flag pipesHaveMass = new Operational.Flag("pipesHaveMass", Operational.Flag.Type.Requirement);
 
+	private Guid wireConnectedStatusItem;
+
 	private bool requirementsMet;
 
 	private BuildingEnabledButton button;
 
-	private EnergyConsumer energy;
+	private IEnergyConsumer energy;
 
 	private ConduitConsumer conduitConsumer;
 

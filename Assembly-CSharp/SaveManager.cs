@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using KSerialization;
 using UnityEngine;
 
@@ -84,8 +85,8 @@ public class SaveManager : KMonoBehaviour
 	public void Save(BinaryWriter writer)
 	{
 		writer.Write(SaveManager.SAVE_HEADER);
-		writer.Write(6);
-		writer.Write(0);
+		writer.Write(7);
+		writer.Write(1);
 		int num = 0;
 		foreach (KeyValuePair<Tag, List<SaveLoadRoot>> keyValuePair in this.sceneObjects)
 		{
@@ -95,36 +96,41 @@ public class SaveManager : KMonoBehaviour
 			}
 		}
 		writer.Write(num);
-		foreach (KeyValuePair<Tag, List<SaveLoadRoot>> keyValuePair2 in this.sceneObjects)
+		this.orderedKeys.Clear();
+		this.orderedKeys.AddRange(this.sceneObjects.Keys);
+		this.orderedKeys = this.orderedKeys.OrderBy<Tag, bool>((Tag a) => a.Name.Contains("UnderConstruction")).ToList<Tag>();
+		foreach (Tag tag in this.orderedKeys)
 		{
-			int count = keyValuePair2.Value.Count;
+			List<SaveLoadRoot> list = this.sceneObjects[tag];
+			int count = list.Count;
 			if (count > 0)
 			{
-				foreach (SaveLoadRoot saveLoadRoot in keyValuePair2.Value)
+				foreach (SaveLoadRoot saveLoadRoot in list)
 				{
 					if (!(saveLoadRoot == null))
 					{
 						if (saveLoadRoot.GetComponent<SimCellOccupier>() != null)
 						{
-							this.Write(keyValuePair2, writer);
+							this.Write(tag, list, writer);
 							break;
 						}
 					}
 				}
 			}
 		}
-		foreach (KeyValuePair<Tag, List<SaveLoadRoot>> keyValuePair3 in this.sceneObjects)
+		foreach (Tag tag2 in this.orderedKeys)
 		{
-			int count2 = keyValuePair3.Value.Count;
+			List<SaveLoadRoot> list2 = this.sceneObjects[tag2];
+			int count2 = list2.Count;
 			if (count2 > 0)
 			{
-				foreach (SaveLoadRoot saveLoadRoot2 in keyValuePair3.Value)
+				foreach (SaveLoadRoot saveLoadRoot2 in list2)
 				{
 					if (!(saveLoadRoot2 == null))
 					{
 						if (saveLoadRoot2.GetComponent<SimCellOccupier>() == null)
 						{
-							this.Write(keyValuePair3, writer);
+							this.Write(tag2, list2, writer);
 							break;
 						}
 					}
@@ -133,16 +139,17 @@ public class SaveManager : KMonoBehaviour
 		}
 	}
 
-	private void Write(KeyValuePair<Tag, List<SaveLoadRoot>> kvp, BinaryWriter writer)
+	private void Write(Tag key, List<SaveLoadRoot> value, BinaryWriter writer)
 	{
-		int count = kvp.Value.Count;
-		writer.WriteKleiString(kvp.Key.Name);
+		int count = value.Count;
+		Tag tag = key;
+		writer.WriteKleiString(tag.Name);
 		writer.Write(count);
 		long position = writer.BaseStream.Position;
 		int num = -1;
 		writer.Write(num);
 		long position2 = writer.BaseStream.Position;
-		foreach (SaveLoadRoot saveLoadRoot in kvp.Value)
+		foreach (SaveLoadRoot saveLoadRoot in value)
 		{
 			if (saveLoadRoot != null)
 			{
@@ -176,9 +183,9 @@ public class SaveManager : KMonoBehaviour
 		}
 		int num = reader.ReadInt32();
 		int num2 = reader.ReadInt32();
-		if (num != 6 || num2 > 0)
+		if (num != 7 || num2 > 1)
 		{
-			Output.LogWarning(new object[] { string.Format("SAVE FILE VERSION MISMATCH! Expected {0}.{1} but got {2}.{3}", new object[] { 6, 0, num, num2 }) });
+			Output.LogWarning(new object[] { string.Format("SAVE FILE VERSION MISMATCH! Expected {0}.{1} but got {2}.{3}", new object[] { 7, 1, num, num2 }) });
 			return false;
 		}
 		this.ClearScene();
@@ -237,15 +244,17 @@ public class SaveManager : KMonoBehaviour
 		this.sceneObjects.Clear();
 	}
 
-	public const int SAVE_MAJOR_VERSION = 6;
+	public const int SAVE_MAJOR_VERSION = 7;
 
-	public const int SAVE_MINOR_VERSION = 0;
+	public const int SAVE_MINOR_VERSION = 1;
 
 	private Dictionary<Tag, GameObject> prefabMap = new Dictionary<Tag, GameObject>();
 
 	private Dictionary<Tag, List<SaveLoadRoot>> sceneObjects = new Dictionary<Tag, List<SaveLoadRoot>>();
 
 	private static readonly char[] SAVE_HEADER = new char[] { 'K', 'S', 'A', 'V' };
+
+	private List<Tag> orderedKeys = new List<Tag>();
 
 	private enum BoundaryTag : uint
 	{

@@ -1,5 +1,6 @@
 ﻿using System;
 
+[SkipSaveFileSerialization]
 public class Structure : KMonoBehaviour
 {
 	public bool IsEntombed()

@@ -20,7 +20,7 @@ public class FarmTile : StateMachineComponent<FarmTile.SMInstance>
 	[MyCmpReq]
 	private Storage storage;
 
-	public class SMInstance : GameStateMachine<FarmTile.States, FarmTile.SMInstance, FarmTile>.GameInstance
+	public class SMInstance : GameStateMachine<FarmTile.States, FarmTile.SMInstance, FarmTile, object>.GameInstance
 	{
 		public SMInstance(FarmTile master)
 			: base(master)
@@ -51,11 +51,11 @@ public class FarmTile : StateMachineComponent<FarmTile.SMInstance>
 
 		public FarmTile.States.FarmStates full;
 
-		public class FarmStates : GameStateMachine<FarmTile.States, FarmTile.SMInstance, FarmTile>.State
+		public class FarmStates : GameStateMachine<FarmTile.States, FarmTile.SMInstance, FarmTile, object>.State
 		{
-			public GameStateMachine<FarmTile.States, FarmTile.SMInstance, FarmTile>.State wet;
+			public GameStateMachine<FarmTile.States, FarmTile.SMInstance, FarmTile, object>.State wet;
 
-			public GameStateMachine<FarmTile.States, FarmTile.SMInstance, FarmTile>.State dry;
+			public GameStateMachine<FarmTile.States, FarmTile.SMInstance, FarmTile, object>.State dry;
 		}
 	}
 }

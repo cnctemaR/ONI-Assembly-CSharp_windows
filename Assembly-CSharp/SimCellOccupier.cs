@@ -1,9 +1,8 @@
 ﻿using System;
-using KSerialization;
 using UnityEngine;
 
-[SerializationConfig(MemberSerialization.OptIn)]
-public class SimCellOccupier : KMonoBehaviour, ISaveLoadableJson
+[SkipSaveFileSerialization]
+public class SimCellOccupier : KMonoBehaviour
 {
 	public bool IsVisuallySolid
 	{
@@ -27,7 +26,7 @@ public class SimCellOccupier : KMonoBehaviour, ISaveLoadableJson
 		{
 			if (this.doReplaceElement)
 			{
-				SimMessages.ReplaceElement(offset_cell, this.primaryElement.ElementID, CellEventLogger.Instance.SimCellOccupierOnSpawn, mass_per_cell, this.primaryElement.Temperature, this.callbackHandle.index);
+				SimMessages.ReplaceAndDisplaceElement(offset_cell, this.primaryElement.ElementID, CellEventLogger.Instance.SimCellOccupierOnSpawn, mass_per_cell, this.primaryElement.Temperature, this.callbackHandle.index);
 				SimMessages.SetStrength(offset_cell, 0, 1f);
 				Game.Instance.RemoveSolidChangedFilter(offset_cell);
 			}
@@ -48,7 +47,7 @@ public class SimCellOccupier : KMonoBehaviour, ISaveLoadableJson
 	{
 		if (this.callDestroy)
 		{
-			this.DestroySelf(null, false);
+			this.DestroySelf(null);
 		}
 	}
 
@@ -66,27 +65,26 @@ public class SimCellOccupier : KMonoBehaviour, ISaveLoadableJson
 		return properties;
 	}
 
-	public void DestroySelf(global::System.Action onComplete, bool is_replacement)
+	public void DestroySelf(global::System.Action onComplete)
 	{
 		this.callDestroy = false;
+		Debug.Assert(this.building.PlacementCells.Length == 1);
 		for (int i = 0; i < this.building.PlacementCells.Length; i++)
 		{
 			int num = this.building.PlacementCells[i];
+			Game.Instance.RemoveSolidChangedFilter(num);
 			Sim.Cell.Properties simCellProperties = this.GetSimCellProperties();
 			SimMessages.ClearCellProperties(num, (byte)simCellProperties);
-			if (this.doReplaceElement)
+			if (this.doReplaceElement && Grid.Element[num].id == this.primaryElement.ElementID)
 			{
-				if (Grid.Element[num].id == this.primaryElement.ElementID)
+				if (onComplete != null)
 				{
-					if (onComplete != null)
-					{
-						HandleVector<global::System.Action>.Handle handle = Game.Instance.callbackManager.Add(onComplete, "SimCellOccupier");
-						SimMessages.ReplaceElement(num, SimHashes.Vacuum, CellEventLogger.Instance.SimCellOccupierDestroySelf, 0f, -1f, handle.index);
-					}
-					else
-					{
-						SimMessages.ReplaceElement(num, SimHashes.Vacuum, CellEventLogger.Instance.SimCellOccupierDestroySelf, 0f, -1f, -1);
-					}
+					HandleVector<global::System.Action>.Handle handle = Game.Instance.callbackManager.Add(onComplete, "SimCellOccupier");
+					SimMessages.ReplaceElement(num, SimHashes.Vacuum, CellEventLogger.Instance.SimCellOccupierDestroySelf, 0f, -1f, handle.index);
+				}
+				else
+				{
+					SimMessages.ReplaceElement(num, SimHashes.Vacuum, CellEventLogger.Instance.SimCellOccupierDestroySelf, 0f, -1f, -1);
 				}
 				SimMessages.SetStrength(num, 1, 1f);
 			}
@@ -96,14 +94,6 @@ public class SimCellOccupier : KMonoBehaviour, ISaveLoadableJson
 				onComplete.Signal();
 				World.Instance.OnSolidChanged(num);
 				GameScenePartitioner.Instance.TriggerEvent(num, GameScenePartitioner.Instance.solidChangedMask.mask, null);
-			}
-			if (is_replacement)
-			{
-				Game.Instance.AddSolidChangedFilter(num);
-			}
-			else
-			{
-				Game.Instance.RemoveSolidChangedFilter(num);
 			}
 		}
 	}
@@ -128,9 +118,6 @@ public class SimCellOccupier : KMonoBehaviour, ISaveLoadableJson
 		Grid.Damage[cell] = 0f;
 		Grid.SuitRequired[cell] = false;
 	}
-
-	[MyCmpAdd]
-	private StructuralDamage structuralDamage;
 
 	[MyCmpReq]
 	private Building building;

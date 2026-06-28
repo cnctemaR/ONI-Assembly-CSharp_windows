@@ -13,29 +13,29 @@ public class CalorieMonitor : GameStateMachine<CalorieMonitor, CalorieMonitor.In
 			.ToggleUrge(Db.Get().Urges.Eat);
 		this.hungry.dirtyHands.ToggleUrge(Db.Get().Urges.WashHands).Transition(this.hungry.starving, (CalorieMonitor.Instance smi) => smi.IsStarving()).EventTransition(GameHashes.WorkCompleted, this.hungry.normal, (CalorieMonitor.Instance smi) => !smi.master.GetComponent<Effects>().HasEffect("DirtyHands"));
 		this.hungry.normal.Transition(this.hungry.starving, (CalorieMonitor.Instance smi) => smi.IsStarving()).ToggleStatusItem(Db.Get().DuplicantStatusItems.Hungry, null);
-		this.hungry.starving.Transition(this.hungry.normal, (CalorieMonitor.Instance smi) => !smi.IsStarving()).Transition(this.dead, (CalorieMonitor.Instance smi) => smi.IsDead()).ToggleStatusItem(Db.Get().DuplicantStatusItems.Starving, null);
-		this.dead.Enter("Kill", delegate(CalorieMonitor.Instance smi)
+		this.hungry.starving.Transition(this.hungry.normal, (CalorieMonitor.Instance smi) => !smi.IsStarving()).Transition(this.incapacitated, (CalorieMonitor.Instance smi) => smi.IsIncapacitated()).ToggleStatusItem(Db.Get().DuplicantStatusItems.Starving, null);
+		this.incapacitated.Enter("Incapacitate", delegate(CalorieMonitor.Instance smi)
 		{
-			smi.Kill();
-		});
+			smi.Incapacitate();
+		}).EventTransition(GameHashes.Healed, this.satisfied, null);
 	}
 
-	public GameStateMachine<CalorieMonitor, CalorieMonitor.Instance, IStateMachineTarget>.State satisfied;
+	public GameStateMachine<CalorieMonitor, CalorieMonitor.Instance, IStateMachineTarget, object>.State satisfied;
 
 	public CalorieMonitor.HungryState hungry;
 
-	public GameStateMachine<CalorieMonitor, CalorieMonitor.Instance, IStateMachineTarget>.State dead;
+	public GameStateMachine<CalorieMonitor, CalorieMonitor.Instance, IStateMachineTarget, object>.State incapacitated;
 
-	public class HungryState : GameStateMachine<CalorieMonitor, CalorieMonitor.Instance, IStateMachineTarget>.State
+	public class HungryState : GameStateMachine<CalorieMonitor, CalorieMonitor.Instance, IStateMachineTarget, object>.State
 	{
-		public GameStateMachine<CalorieMonitor, CalorieMonitor.Instance, IStateMachineTarget>.State dirtyHands;
+		public GameStateMachine<CalorieMonitor, CalorieMonitor.Instance, IStateMachineTarget, object>.State dirtyHands;
 
-		public GameStateMachine<CalorieMonitor, CalorieMonitor.Instance, IStateMachineTarget>.State normal;
+		public GameStateMachine<CalorieMonitor, CalorieMonitor.Instance, IStateMachineTarget, object>.State normal;
 
-		public GameStateMachine<CalorieMonitor, CalorieMonitor.Instance, IStateMachineTarget>.State starving;
+		public GameStateMachine<CalorieMonitor, CalorieMonitor.Instance, IStateMachineTarget, object>.State starving;
 	}
 
-	public new class Instance : GameStateMachine<CalorieMonitor, CalorieMonitor.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<CalorieMonitor, CalorieMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)
@@ -63,14 +63,19 @@ public class CalorieMonitor : GameStateMachine<CalorieMonitor, CalorieMonitor.In
 			return this.GetCalories0to1() > 0.6f;
 		}
 
-		public bool IsDead()
+		public bool IsIncapacitated()
 		{
 			return this.calories.value <= 0f;
 		}
 
-		public void Kill()
+		public void Incapacitate()
 		{
-			base.GetComponent<Health>().Kill(Db.Get().Deaths.Starvation);
+			base.GetComponent<Health>().Incapacitate(Db.Get().Deaths.Starvation);
+		}
+
+		public bool ShouldExitClinic()
+		{
+			return !this.IsStarving();
 		}
 
 		public AmountInstance calories;

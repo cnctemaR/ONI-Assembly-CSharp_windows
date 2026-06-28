@@ -4,7 +4,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class FlutEgg : StateMachineComponent<FlutEgg.StatesInstance>, ISaveLoadableJson
+public class FlutEgg : StateMachineComponent<FlutEgg.StatesInstance>, ISaveLoadable
 {
 	protected override void OnSpawn()
 	{
@@ -61,7 +61,7 @@ public class FlutEgg : StateMachineComponent<FlutEgg.StatesInstance>, ISaveLoada
 
 	private Dictionary<string, int> HatchPossibilities = new Dictionary<string, int>();
 
-	public class StatesInstance : GameStateMachine<FlutEgg.States, FlutEgg.StatesInstance, FlutEgg>.GameInstance
+	public class StatesInstance : GameStateMachine<FlutEgg.States, FlutEgg.StatesInstance, FlutEgg, object>.GameInstance
 	{
 		public StatesInstance(FlutEgg smi)
 			: base(smi)
@@ -131,19 +131,19 @@ public class FlutEgg : StateMachineComponent<FlutEgg.StatesInstance>, ISaveLoada
 
 		public FlutEgg.States.GroundedState grounded;
 
-		public GameStateMachine<FlutEgg.States, FlutEgg.StatesInstance, FlutEgg>.State lay;
+		public GameStateMachine<FlutEgg.States, FlutEgg.StatesInstance, FlutEgg, object>.State lay;
 
-		public GameStateMachine<FlutEgg.States, FlutEgg.StatesInstance, FlutEgg>.State dead;
+		public GameStateMachine<FlutEgg.States, FlutEgg.StatesInstance, FlutEgg, object>.State dead;
 
-		public GameStateMachine<FlutEgg.States, FlutEgg.StatesInstance, FlutEgg>.State fall;
+		public GameStateMachine<FlutEgg.States, FlutEgg.StatesInstance, FlutEgg, object>.State fall;
 
-		public class GroundedState : GameStateMachine<FlutEgg.States, FlutEgg.StatesInstance, FlutEgg>.State
+		public class GroundedState : GameStateMachine<FlutEgg.States, FlutEgg.StatesInstance, FlutEgg, object>.State
 		{
-			public GameStateMachine<FlutEgg.States, FlutEgg.StatesInstance, FlutEgg>.State idle;
+			public GameStateMachine<FlutEgg.States, FlutEgg.StatesInstance, FlutEgg, object>.State idle;
 
-			public GameStateMachine<FlutEgg.States, FlutEgg.StatesInstance, FlutEgg>.State idle_alt;
+			public GameStateMachine<FlutEgg.States, FlutEgg.StatesInstance, FlutEgg, object>.State idle_alt;
 
-			public GameStateMachine<FlutEgg.States, FlutEgg.StatesInstance, FlutEgg>.State wiggle_hatch;
+			public GameStateMachine<FlutEgg.States, FlutEgg.StatesInstance, FlutEgg, object>.State wiggle_hatch;
 		}
 	}
 }

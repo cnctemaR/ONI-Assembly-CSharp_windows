@@ -50,34 +50,34 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 		}).ToggleChore((FallMonitor.Instance smi) => new EntombedChore(smi.master), this.standing, false).ParamTransition<bool>(this.isEntombed, this.standing, (FallMonitor.Instance smi, bool p) => !p);
 	}
 
-	public GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget>.State standing;
+	public GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget, object>.State standing;
 
-	public GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget>.State falling_pre;
+	public GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget, object>.State falling_pre;
 
-	public GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget>.State falling;
+	public GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget, object>.State falling;
 
 	public FallMonitor.EntombedStates entombed;
 
-	public GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget>.State recoverladder;
+	public GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget, object>.State recoverladder;
 
-	public GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget>.State recoverinitialfall;
+	public GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget, object>.State recoverinitialfall;
 
-	public GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget>.State landfloor;
+	public GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget, object>.State landfloor;
 
-	public GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget>.State instorage;
+	public GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget, object>.State instorage;
 
-	public StateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget>.BoolParameter isEntombed;
+	public StateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget, object>.BoolParameter isEntombed;
 
-	public StateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget>.BoolParameter isFalling;
+	public StateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget, object>.BoolParameter isFalling;
 
-	public class EntombedStates : GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget>.State
+	public class EntombedStates : GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget, object>.State
 	{
-		public GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget>.State recovering;
+		public GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget, object>.State recovering;
 
-		public GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget>.State stuck;
+		public GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget, object>.State stuck;
 	}
 
-	public new class Instance : GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)
@@ -159,11 +159,8 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 			{
 				return false;
 			}
-			bool flag = Grid.Solid[num2];
-			bool flag2 = this.navigator.NavGrid.NavTable.IsValid(num, NavType.Floor);
-			bool flag3 = this.navigator.NavGrid.NavTable.IsValid(num, NavType.Ladder);
-			bool flag4 = this.navigator.CurrentNavType == NavType.Ladder;
-			return !flag && !flag2 && (!flag3 || !flag4);
+			bool flag = this.navigator.NavGrid.NavTable.IsValid(num, this.navigator.CurrentNavType);
+			return !flag;
 		}
 
 		public void UpdateEntombed()

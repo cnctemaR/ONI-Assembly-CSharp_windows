@@ -13,10 +13,9 @@ namespace Klei.AI
 		protected override object OnInfect(GameObject go)
 		{
 			PutridOdour.InstanceData instanceData = default(PutridOdour.InstanceData);
-			instanceData.schedulerHandle = GameScheduler.Instance.SchedulePeriodic("PutridOdourEmit", 5f, new Action<object>(this.Emit), go, null, 0f);
-			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("odor_fx", go.transform, true, Grid.SceneLayer.Front);
-			kbatchedAnimController.transform.localPosition = Vector3.zero;
-			kbatchedAnimController.Play(new string[] { "working_pre", "working_loop" }, KAnim.PlayMode.Loop);
+			instanceData.schedulerHandle = GameScheduler.Instance.SchedulePeriodic("PutridOdourEmit", 5f, new Action<object>(this.Emit), go, null, 0f, null);
+			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("odor_fx_kanim", go.transform.position, go.transform, true, Grid.SceneLayer.Front);
+			kbatchedAnimController.Play(PutridOdour.WorkLoopAnims, KAnim.PlayMode.Loop);
 			instanceData.controller = kbatchedAnimController;
 			this.Emit(go);
 			return instanceData;
@@ -58,6 +57,8 @@ namespace Klei.AI
 		private const float EmissionRadius = 1.5f;
 
 		private const float MaxDistanceSq = 2.25f;
+
+		private static readonly HashedString[] WorkLoopAnims = new HashedString[] { "working_pre", "working_loop" };
 
 		private struct InstanceData
 		{

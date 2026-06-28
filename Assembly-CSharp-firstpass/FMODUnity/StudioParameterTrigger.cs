@@ -6,13 +6,24 @@ namespace FMODUnity
 	[AddComponentMenu("FMOD Studio/FMOD Studio Parameter Trigger")]
 	public class StudioParameterTrigger : MonoBehaviour
 	{
-		private void OnEnable()
+		private void Start()
 		{
+			this.HandleGameEvent(EmitterGameEvent.ObjectStart);
 		}
 
 		private void OnDestroy()
 		{
-			this.HandleGameEvent(EmitterGameEvent.LevelEnd);
+			this.HandleGameEvent(EmitterGameEvent.ObjectDestroy);
+		}
+
+		private void OnEnable()
+		{
+			this.HandleGameEvent(EmitterGameEvent.ObjectEnable);
+		}
+
+		private void OnDisable()
+		{
+			this.HandleGameEvent(EmitterGameEvent.ObjectDisable);
 		}
 
 		private void OnTriggerEnter(Collider other)
@@ -31,6 +42,22 @@ namespace FMODUnity
 			}
 		}
 
+		private void OnTriggerEnter2D(Collider2D other)
+		{
+			if (string.IsNullOrEmpty(this.CollisionTag) || other.CompareTag(this.CollisionTag))
+			{
+				this.HandleGameEvent(EmitterGameEvent.TriggerEnter2D);
+			}
+		}
+
+		private void OnTriggerExit2D(Collider2D other)
+		{
+			if (string.IsNullOrEmpty(this.CollisionTag) || other.CompareTag(this.CollisionTag))
+			{
+				this.HandleGameEvent(EmitterGameEvent.TriggerExit2D);
+			}
+		}
+
 		private void OnCollisionEnter()
 		{
 			this.HandleGameEvent(EmitterGameEvent.CollisionEnter);
@@ -41,21 +68,21 @@ namespace FMODUnity
 			this.HandleGameEvent(EmitterGameEvent.CollisionExit);
 		}
 
+		private void OnCollisionEnter2D()
+		{
+			this.HandleGameEvent(EmitterGameEvent.CollisionEnter2D);
+		}
+
+		private void OnCollisionExit2D()
+		{
+			this.HandleGameEvent(EmitterGameEvent.CollisionExit2D);
+		}
+
 		private void HandleGameEvent(EmitterGameEvent gameEvent)
 		{
 			if (this.TriggerEvent == gameEvent)
 			{
 				this.TriggerParameters();
-			}
-		}
-
-		private void Update()
-		{
-			if (this.firstUpdate)
-			{
-				this.HandleGameEvent(EmitterGameEvent.LevelStart);
-				this.firstUpdate = false;
-				base.enabled = false;
 			}
 		}
 
@@ -79,7 +106,5 @@ namespace FMODUnity
 		public EmitterGameEvent TriggerEvent;
 
 		public string CollisionTag;
-
-		private bool firstUpdate = true;
 	}
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using KSerialization;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class RationTracker : KMonoBehaviour, ISaveLoadableJson
+public class RationTracker : KMonoBehaviour, ISaveLoadable
 {
 	public static RationTracker Get()
 	{
@@ -17,7 +17,7 @@ public class RationTracker : KMonoBehaviour, ISaveLoadableJson
 
 	protected override void OnSpawn()
 	{
-		GameClock.Instance.Subscribe(631075836, new EventSystem.EventHandler(this.OnNewDay));
+		GameClock.Instance.Subscribe(631075836, new Action<object>(this.OnNewDay));
 	}
 
 	private void OnNewDay(object data)
@@ -37,17 +37,21 @@ public class RationTracker : KMonoBehaviour, ISaveLoadableJson
 				Edible component = pickupables[i].GetComponent<Edible>();
 				if (!(component == null))
 				{
-					num += component.rations;
-					if (unitCountByFoodType != null)
+					Pickupable component2 = component.GetComponent<Pickupable>();
+					if (component2 != null && (component2.storage == null || component2.storage.allowItemRemoval || component2.storage.countAsAccessible))
 					{
-						if (!unitCountByFoodType.ContainsKey(component.FoodID))
+						num += component.Calories;
+						if (unitCountByFoodType != null)
 						{
-							unitCountByFoodType[component.FoodID] = 0f;
+							if (!unitCountByFoodType.ContainsKey(component.FoodID))
+							{
+								unitCountByFoodType[component.FoodID] = 0f;
+							}
+							string foodID;
+							string text = (foodID = component.FoodID);
+							float num2 = unitCountByFoodType[foodID];
+							unitCountByFoodType[text] = num2 + component.Units;
 						}
-						string foodID;
-						string text = (foodID = component.FoodID);
-						float num2 = unitCountByFoodType[foodID];
-						unitCountByFoodType[text] = num2 + component.GetComponent<PrimaryElement>().Units;
 					}
 				}
 			}
@@ -55,14 +59,14 @@ public class RationTracker : KMonoBehaviour, ISaveLoadableJson
 		return num;
 	}
 
-	public void RegisterRationsProduced(int rations)
+	public void RegisterCaloriesProduced(float calories)
 	{
-		this.currentFrame.rationsProduced = this.currentFrame.rationsProduced + rations;
+		this.currentFrame.caloriesProduced = this.currentFrame.caloriesProduced + calories;
 	}
 
-	public void RegisterRationsConsumed(float rations)
+	public void RegisterRationsConsumed(float calories)
 	{
-		this.currentFrame.rationsConsumed = this.currentFrame.rationsConsumed + rations;
+		this.currentFrame.caloriesConsumed = this.currentFrame.caloriesConsumed + calories;
 	}
 
 	private static RationTracker instance;
@@ -75,8 +79,8 @@ public class RationTracker : KMonoBehaviour, ISaveLoadableJson
 
 	public struct Frame
 	{
-		public int rationsProduced;
+		public float caloriesProduced;
 
-		public float rationsConsumed;
+		public float caloriesConsumed;
 	}
 }

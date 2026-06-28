@@ -5,11 +5,33 @@ public class TreeFilterableSideScreenElement : KMonoBehaviour
 {
 	public event Action<Tag, bool> OnSelectionChanged;
 
+	public Tag GetElementTag()
+	{
+		return this.elementTag;
+	}
+
 	public bool IsSelected
 	{
 		get
 		{
 			return this.checkBox.isOn;
+		}
+	}
+
+	public KToggle GetCheckboxToggle()
+	{
+		return this.checkBox;
+	}
+
+	public TreeFilterableSideScreen Parent
+	{
+		get
+		{
+			return this.parent;
+		}
+		set
+		{
+			this.parent = value;
 		}
 	}
 
@@ -58,17 +80,16 @@ public class TreeFilterableSideScreenElement : KMonoBehaviour
 		this.Initialize();
 		this.elementTag = newTag;
 		string text = this.elementTag.ProperName();
-		if (TreeFilterableSideScreen.Instance.IsStorage)
+		if (this.parent.IsStorage)
 		{
-			float amountInStorage = TreeFilterableSideScreen.Instance.GetAmountInStorage(this.elementTag);
-			text = text + ": " + GameUtil.GetFormattedMass(amountInStorage, GameUtil.TimeSlice.None, true, "F1");
+			float amountInStorage = this.parent.GetAmountInStorage(this.elementTag);
+			text = text + ": " + GameUtil.GetFormattedMass(amountInStorage, GameUtil.TimeSlice.None, true, "{0:0.#}");
 		}
 		this.elementName.text = text;
 	}
 
 	private void CheckBoxClicked()
 	{
-		this.checkBox.isOn = !this.checkBox.isOn;
 		this.checkBoxImg.enabled = this.checkBox.isOn;
 		if (this.OnSelectionChanged != null)
 		{
@@ -88,14 +109,14 @@ public class TreeFilterableSideScreenElement : KMonoBehaviour
 	[SerializeField]
 	private KToggle checkBox;
 
-	private KImage checkBoxImg;
-
 	[SerializeField]
 	private KImage elementImg;
 
-	private TreeFilterableSideScreenRow parentRow;
+	private KImage checkBoxImg;
 
 	private Tag elementTag;
+
+	private TreeFilterableSideScreen parent;
 
 	private bool initialized;
 }

@@ -8,13 +8,13 @@ namespace Klei.AI
 		public Dweebcephaly()
 			: base("Dweebcephaly", false, new AttributeModifier[]
 			{
-				new AttributeModifier("Learning", -2f, DUPLICANTS.DISEASES.DWEEBCEPHALY.NAME, false)
-			}, 0.005f, 900f, new Disease.EffectProbabilityDelta[]
+				new AttributeModifier("Learning", -2f, DUPLICANTS.DISEASES.DWEEBCEPHALY.NAME, false, false)
+			}, 5E-08f, 900f, new Disease.EffectProbabilityDelta[]
 			{
 				new Disease.EffectProbabilityDelta
 				{
 					effectID = "DirtyHands",
-					probabilityDelta = 0.005f
+					probabilityDelta = 5E-08f
 				}
 			})
 		{

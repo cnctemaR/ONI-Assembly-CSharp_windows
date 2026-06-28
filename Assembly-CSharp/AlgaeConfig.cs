@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class AlgaeConfig : IOreConfig
@@ -11,18 +12,8 @@ public class AlgaeConfig : IOreConfig
 		}
 	}
 
-	public SimHashes SublimeElementID
+	public GameObject CreatePrefab()
 	{
-		get
-		{
-			return SimHashes.Vacuum;
-		}
-	}
-
-	public void ConfigurePrefab(GameObject go)
-	{
-		GeneratedOre.ConfigureAnims(go, "algae_kanim");
-		KPrefabID kprefabID = go.AddOrGet<KPrefabID>();
-		kprefabID.AddTag(GameTags.Life);
+		return EntityTemplates.CreateOreEntity(this.ElementID, new List<Tag> { GameTags.Life });
 	}
 }

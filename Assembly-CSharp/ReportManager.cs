@@ -10,9 +10,9 @@ public class ReportManager : KMonoBehaviour
 	public ReportManager()
 	{
 		Dictionary<ReportManager.ReportType, ReportManager.ReportGroup> dictionary = new Dictionary<ReportManager.ReportType, ReportManager.ReportGroup>();
-		dictionary.Add(ReportManager.ReportType.OxygenCreated, new ReportManager.ReportGroup((float v) => GameUtil.GetFormattedMass(v, GameUtil.TimeSlice.None, true, "F1"), true, 1, UI.ENDOFDAYREPORT.OXYGEN_CREATED.NAME, UI.ENDOFDAYREPORT.OXYGEN_CREATED.POSITIVE_TOOLTIP, UI.ENDOFDAYREPORT.OXYGEN_CREATED.NEGATIVE_TOOLTIP));
-		dictionary.Add(ReportManager.ReportType.EnergyCreated, new ReportManager.ReportGroup(new ReportManager.FormattingFn(GameUtil.GetFormattedJoules), true, 1, UI.ENDOFDAYREPORT.ENERGY_USAGE.NAME, UI.ENDOFDAYREPORT.ENERGY_USAGE.POSITIVE_TOOLTIP, UI.ENDOFDAYREPORT.ENERGY_USAGE.NEGATIVE_TOOLTIP));
-		dictionary.Add(ReportManager.ReportType.EnergyWasted, new ReportManager.ReportGroup(new ReportManager.FormattingFn(GameUtil.GetFormattedJoules), true, 1, UI.ENDOFDAYREPORT.ENERGY_WASTED.NAME, UI.ENDOFDAYREPORT.ENERGY_WASTED.POSITIVE_TOOLTIP, string.Empty));
+		dictionary.Add(ReportManager.ReportType.OxygenCreated, new ReportManager.ReportGroup((float v) => GameUtil.GetFormattedMass(v, GameUtil.TimeSlice.None, true, "{0:0.#}"), true, 1, UI.ENDOFDAYREPORT.OXYGEN_CREATED.NAME, UI.ENDOFDAYREPORT.OXYGEN_CREATED.POSITIVE_TOOLTIP, UI.ENDOFDAYREPORT.OXYGEN_CREATED.NEGATIVE_TOOLTIP));
+		dictionary.Add(ReportManager.ReportType.EnergyCreated, new ReportManager.ReportGroup(new ReportManager.FormattingFn(GameUtil.GetFormattedRoundedJoules), true, 1, UI.ENDOFDAYREPORT.ENERGY_USAGE.NAME, UI.ENDOFDAYREPORT.ENERGY_USAGE.POSITIVE_TOOLTIP, UI.ENDOFDAYREPORT.ENERGY_USAGE.NEGATIVE_TOOLTIP));
+		dictionary.Add(ReportManager.ReportType.EnergyWasted, new ReportManager.ReportGroup(new ReportManager.FormattingFn(GameUtil.GetFormattedRoundedJoules), true, 1, UI.ENDOFDAYREPORT.ENERGY_WASTED.NAME, UI.ENDOFDAYREPORT.ENERGY_WASTED.POSITIVE_TOOLTIP, string.Empty));
 		dictionary.Add(ReportManager.ReportType.CaloriesCreated, new ReportManager.ReportGroup((float v) => GameUtil.GetFormattedCalories(v, GameUtil.TimeSlice.None, true), true, 2, UI.ENDOFDAYREPORT.CALORIES_CREATED.NAME, UI.ENDOFDAYREPORT.CALORIES_CREATED.POSITIVE_TOOLTIP, UI.ENDOFDAYREPORT.CALORIES_CREATED.NEGATIVE_TOOLTIP));
 		dictionary.Add(ReportManager.ReportType.StressDelta, new ReportManager.ReportGroup((float v) => GameUtil.GetFormattedPercent(v, GameUtil.TimeSlice.None), true, 2, UI.ENDOFDAYREPORT.STRESS_DELTA.NAME, UI.ENDOFDAYREPORT.STRESS_DELTA.POSITIVE_TOOLTIP, UI.ENDOFDAYREPORT.STRESS_DELTA.NEGATIVE_TOOLTIP));
 		dictionary.Add(ReportManager.ReportType.TravelTime, new ReportManager.ReportGroup((float v) => GameUtil.GetFormattedTime(v), true, 2, UI.ENDOFDAYREPORT.TRAVEL_TIME.NAME, UI.ENDOFDAYREPORT.TRAVEL_TIME.POSITIVE_TOOLTIP, string.Empty));
@@ -20,6 +20,9 @@ public class ReportManager : KMonoBehaviour
 		dictionary.Add(ReportManager.ReportType.LevelUp, new ReportManager.ReportGroup(null, false, 3, UI.ENDOFDAYREPORT.LEVEL_UP.NAME, UI.ENDOFDAYREPORT.LEVEL_UP.TOOLTIP, string.Empty));
 		dictionary.Add(ReportManager.ReportType.ToiletIncident, new ReportManager.ReportGroup(null, false, 3, UI.ENDOFDAYREPORT.TOILET_INCIDENT.NAME, UI.ENDOFDAYREPORT.TOILET_INCIDENT.TOOLTIP, string.Empty));
 		dictionary.Add(ReportManager.ReportType.DiseaseAdded, new ReportManager.ReportGroup(null, false, 3, UI.ENDOFDAYREPORT.DISEASE_ADDED.NAME, UI.ENDOFDAYREPORT.DISEASE_ADDED.POSITIVE_TOOLTIP, UI.ENDOFDAYREPORT.DISEASE_ADDED.NEGATIVE_TOOLTIP));
+		dictionary.Add(ReportManager.ReportType.ContaminatedOxygenFlatulence, new ReportManager.ReportGroup((float v) => GameUtil.GetFormattedMass(v, GameUtil.TimeSlice.None, true, "{0:0.#}"), false, 4, UI.ENDOFDAYREPORT.CONTAMINATED_OXYGEN_FLATULENCE.NAME, UI.ENDOFDAYREPORT.CONTAMINATED_OXYGEN_FLATULENCE.POSITIVE_TOOLTIP, UI.ENDOFDAYREPORT.CONTAMINATED_OXYGEN_FLATULENCE.NEGATIVE_TOOLTIP));
+		dictionary.Add(ReportManager.ReportType.ContaminatedOxygenToilet, new ReportManager.ReportGroup((float v) => GameUtil.GetFormattedMass(v, GameUtil.TimeSlice.None, true, "{0:0.#}"), false, 4, UI.ENDOFDAYREPORT.CONTAMINATED_OXYGEN_TOILET.NAME, UI.ENDOFDAYREPORT.CONTAMINATED_OXYGEN_TOILET.POSITIVE_TOOLTIP, UI.ENDOFDAYREPORT.CONTAMINATED_OXYGEN_TOILET.NEGATIVE_TOOLTIP));
+		dictionary.Add(ReportManager.ReportType.ContaminatedOxygenSublimation, new ReportManager.ReportGroup((float v) => GameUtil.GetFormattedMass(v, GameUtil.TimeSlice.None, true, "{0:0.#}"), false, 4, UI.ENDOFDAYREPORT.CONTAMINATED_OXYGEN_SUBLIMATION.NAME, UI.ENDOFDAYREPORT.CONTAMINATED_OXYGEN_SUBLIMATION.POSITIVE_TOOLTIP, UI.ENDOFDAYREPORT.CONTAMINATED_OXYGEN_SUBLIMATION.NEGATIVE_TOOLTIP));
 		this.ReportGroups = dictionary;
 		this.dailyReports = new List<ReportManager.DailyReport>();
 		base..ctor();
@@ -38,7 +41,7 @@ public class ReportManager : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		ReportManager.Instance = this;
-		base.Subscribe(Game.Instance.gameObject, -1917495436, new EventSystem.EventHandler(this.OnSaveGameReady));
+		base.Subscribe(Game.Instance.gameObject, -1917495436, new Action<object>(this.OnSaveGameReady));
 	}
 
 	protected override void OnCleanUp()
@@ -48,7 +51,7 @@ public class ReportManager : KMonoBehaviour
 
 	private void OnSaveGameReady(object data)
 	{
-		base.Subscribe(GameClock.Instance.gameObject, -722330267, new EventSystem.EventHandler(this.OnNightTime));
+		base.Subscribe(GameClock.Instance.gameObject, -722330267, new Action<object>(this.OnNightTime));
 		if (this.todaysReport == null)
 		{
 			this.todaysReport = new ReportManager.DailyReport(this);
@@ -59,7 +62,10 @@ public class ReportManager : KMonoBehaviour
 	public void ReportValue(ReportManager.ReportType gameHash, float value, string note = null)
 	{
 		ReportManager.ReportEntry entry = this.TodaysReport.GetEntry(gameHash);
-		Debug.Assert(entry != null);
+		if (entry == null)
+		{
+			return;
+		}
 		entry.accumulate += value;
 		if (value > 0f)
 		{
@@ -101,7 +107,7 @@ public class ReportManager : KMonoBehaviour
 		{
 			ManagementMenu.Instance.OpenReports(day);
 		};
-		Notification notification = new Notification(string.Format(UI.ENDOFDAYREPORT.NOTIFICATION_TITLE, day), NotificationType.Good, null, (List<Notification> n, object d) => string.Format(UI.ENDOFDAYREPORT.NOTIFICATION_TOOLTIP, day), null, true, 0f, clickCallback, null, null);
+		Notification notification = new Notification(string.Format(UI.ENDOFDAYREPORT.NOTIFICATION_TITLE, day), NotificationType.Good, HashedString.Invalid, (List<Notification> n, object d) => string.Format(UI.ENDOFDAYREPORT.NOTIFICATION_TOOLTIP, day), null, true, 0f, clickCallback, null, null);
 		if (this.notifier == null)
 		{
 			Debug.LogError("Cant notify, null notifier");
@@ -152,7 +158,10 @@ public class ReportManager : KMonoBehaviour
 		TravelTime,
 		IdleTime,
 		DiseaseAdded,
-		ToiletIncident
+		ToiletIncident,
+		ContaminatedOxygenFlatulence,
+		ContaminatedOxygenToilet,
+		ContaminatedOxygenSublimation
 	}
 
 	public struct ReportGroup
@@ -189,6 +198,7 @@ public class ReportManager : KMonoBehaviour
 		public int group;
 	}
 
+	[SerializationConfig(MemberSerialization.OptIn)]
 	public class ReportEntry
 	{
 		public ReportEntry(ReportManager.ReportEntry entry)
@@ -242,16 +252,22 @@ public class ReportManager : KMonoBehaviour
 			this.negNotes = new Dictionary<string, float>();
 		}
 
+		[Serialize]
 		public int gameHash;
 
+		[Serialize]
 		public float accumulate;
 
+		[Serialize]
 		public float accPositive;
 
+		[Serialize]
 		public float accNegative;
 
+		[Serialize]
 		public Dictionary<string, float> posNotes = new Dictionary<string, float>();
 
+		[Serialize]
 		public Dictionary<string, float> negNotes = new Dictionary<string, float>();
 	}
 

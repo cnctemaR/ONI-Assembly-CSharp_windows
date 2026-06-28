@@ -7,7 +7,7 @@ public class Light2D : KMonoBehaviour
 
 	protected override void OnPrefabInit()
 	{
-		this.Subscribe(-592767678, new EventSystem.EventHandler(this.OnOperationalChanged));
+		this.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 		this.IntensityAnimation = 1f;
 	}
 
@@ -56,7 +56,8 @@ public class Light2D : KMonoBehaviour
 	public void Refresh()
 	{
 		this.UnregisterLight();
-		if ((this.operational != null && !this.operational.IsOperational) || !base.isActiveAndEnabled)
+		Operational component = base.GetComponent<Operational>();
+		if ((component != null && !component.IsOperational) || !base.isActiveAndEnabled)
 		{
 			return;
 		}
@@ -68,10 +69,22 @@ public class Light2D : KMonoBehaviour
 			Vector2I vector2I = Grid.CellToXY(num);
 			int num2 = (int)this.Range;
 			int num3 = num2 / 2;
-			Vector2I vector2I2 = new Vector2I(vector2I.x - num3, vector2I.y - num3);
-			this.partitionerEntry = GameScenePartitioner.Instance.Add("Light2D", base.gameObject, vector2I2.x, vector2I2.y, num2, num2, GameScenePartitioner.Instance.solidChangedMask.mask, new Action<object>(this.TriggerRefresh));
+			if (this.shape == LightShape.Circle)
+			{
+				Vector2I vector2I2 = new Vector2I(vector2I.x - num3, vector2I.y - num3);
+				this.partitionerEntry = GameScenePartitioner.Instance.Add("Light2D", base.gameObject, vector2I2.x, vector2I2.y, num2, num2, GameScenePartitioner.Instance.solidChangedMask.mask | GameScenePartitioner.Instance.liquidChangedMask.mask, new Action<object>(this.TriggerRefresh));
+			}
+			else if (this.shape == LightShape.Cone)
+			{
+				Vector2I vector2I3 = new Vector2I(vector2I.x - num2, vector2I.y - num2);
+				this.partitionerEntry = GameScenePartitioner.Instance.Add("Light2D", base.gameObject, vector2I3.x, vector2I3.y, 2 * num2, num2, GameScenePartitioner.Instance.solidChangedMask.mask | GameScenePartitioner.Instance.liquidChangedMask.mask, new Action<object>(this.TriggerRefresh));
+			}
+			else
+			{
+				Debug.Assert(false);
+			}
 			this.cell = num;
-			LightGridManager.AddToLightGrid(this.cell, num2, this.Range, this.Color, this.shape, false);
+			LightGridManager.AddToLightGrid(this.cell, num2, this.Range, this.Color, this.shape);
 			this.isRegistered = true;
 		}
 	}
@@ -83,6 +96,7 @@ public class Light2D : KMonoBehaviour
 
 	private void OnOperationalChanged(object data)
 	{
+		base.enabled = base.GetComponent<Operational>().IsOperational;
 		this.Refresh();
 	}
 
@@ -109,7 +123,4 @@ public class Light2D : KMonoBehaviour
 	private bool isRegistered;
 
 	private GameScenePartitionerEntry partitionerEntry;
-
-	[MyCmpGet]
-	private Operational operational;
 }

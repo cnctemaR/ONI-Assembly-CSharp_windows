@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
@@ -27,13 +28,13 @@ public class RedAlertManager : GameStateMachine<RedAlertManager, RedAlertManager
 			.ParamTransition<bool>(this.isOn, this.off, (RedAlertManager.Instance smi, bool p) => !p);
 	}
 
-	public GameStateMachine<RedAlertManager, RedAlertManager.Instance, IStateMachineTarget>.State off;
+	public GameStateMachine<RedAlertManager, RedAlertManager.Instance, IStateMachineTarget, object>.State off;
 
-	public GameStateMachine<RedAlertManager, RedAlertManager.Instance, IStateMachineTarget>.State on;
+	public GameStateMachine<RedAlertManager, RedAlertManager.Instance, IStateMachineTarget, object>.State on;
 
-	public StateMachine<RedAlertManager, RedAlertManager.Instance, IStateMachineTarget>.BoolParameter isOn = new StateMachine<RedAlertManager, RedAlertManager.Instance, IStateMachineTarget>.BoolParameter();
+	public StateMachine<RedAlertManager, RedAlertManager.Instance, IStateMachineTarget, object>.BoolParameter isOn = new StateMachine<RedAlertManager, RedAlertManager.Instance, IStateMachineTarget, object>.BoolParameter();
 
-	public new class Instance : GameStateMachine<RedAlertManager, RedAlertManager.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<RedAlertManager, RedAlertManager.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)
@@ -58,6 +59,6 @@ public class RedAlertManager : GameStateMachine<RedAlertManager, RedAlertManager
 
 		private static RedAlertManager.Instance instance;
 
-		public Notification notification = new Notification(MISC.NOTIFICATIONS.REDALERT.NAME, NotificationType.Bad, null, null, null, false, 0f, null, null, null);
+		public Notification notification = new Notification(MISC.NOTIFICATIONS.REDALERT.NAME, NotificationType.Bad, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.REDALERT.TOOLTIP, null, false, 0f, null, null, null);
 	}
 }

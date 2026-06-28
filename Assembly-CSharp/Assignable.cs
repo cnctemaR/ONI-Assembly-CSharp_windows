@@ -1,9 +1,7 @@
 ﻿using System;
-using KSerialization;
 using UnityEngine;
 
-[SerializationConfig(MemberSerialization.OptIn)]
-public abstract class Assignable : Workable, ISaveLoadableJson
+public abstract class Assignable : Workable
 {
 	public event Action<Assignables> OnAssign;
 
@@ -56,7 +54,13 @@ public abstract class Assignable : Workable, ISaveLoadableJson
 
 	protected override void OnCleanUp()
 	{
+		this.Unassign();
 		AssignmentManager.Instance.Remove(this);
+	}
+
+	public void ClickAssign(Assignables new_assignables)
+	{
+		this.OnClickAssign(new_assignables);
 	}
 
 	public bool IsAssigned()

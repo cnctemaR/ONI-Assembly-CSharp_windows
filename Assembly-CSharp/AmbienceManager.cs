@@ -71,6 +71,7 @@ public class AmbienceManager : KMonoBehaviour
 		public void Reset()
 		{
 			this.tileCount = 0;
+			this.averageTemperature = 0f;
 		}
 
 		public void UpdatePercentage(int cell_count)
@@ -78,12 +79,19 @@ public class AmbienceManager : KMonoBehaviour
 			this.tilePercentage = (float)this.tileCount / (float)cell_count;
 		}
 
+		public void UpdateAverageTemperature()
+		{
+			this.averageTemperature /= (float)this.tileCount;
+		}
+
 		public void UpdateParameters(Vector3 emitter_position)
 		{
 			if (this.soundEvent != null)
 			{
-				this.soundEvent.set3DAttributes(emitter_position.To3DAttributes());
+				Vector3 vector = new Vector3(emitter_position.x, emitter_position.y, 0f);
+				this.soundEvent.set3DAttributes(vector.To3DAttributes());
 				this.soundEvent.setParameterValue("tilePercentage", this.tilePercentage);
+				this.soundEvent.setParameterValue("averageTemperature", this.averageTemperature);
 			}
 		}
 
@@ -117,7 +125,8 @@ public class AmbienceManager : KMonoBehaviour
 						global::UnityEngine.Debug.LogWarning("Could not find event: " + this.oneShotSound);
 						return;
 					}
-					ATTRIBUTES_3D attributes_3D = emitter_position.To3DAttributes();
+					Vector3 vector = new Vector3(emitter_position.x, emitter_position.y, 0f);
+					ATTRIBUTES_3D attributes_3D = vector.To3DAttributes();
 					eventInstance.set3DAttributes(attributes_3D);
 					eventInstance.setVolume(this.tilePercentage * 2f);
 					eventInstance.start();
@@ -148,6 +157,8 @@ public class AmbienceManager : KMonoBehaviour
 		public bool isRunning;
 
 		private EventInstance soundEvent;
+
+		public float averageTemperature;
 	}
 
 	[Serializable]
@@ -205,19 +216,20 @@ public class AmbienceManager : KMonoBehaviour
 		public void Update(Vector2I min, Vector2I max, Vector3 emitter_position)
 		{
 			this.emitterPosition = emitter_position;
-			foreach (AmbienceManager.Layer layer in this.allLayers)
+			for (int i = 0; i < this.allLayers.Count; i++)
 			{
+				AmbienceManager.Layer layer = this.allLayers[i];
 				layer.Reset();
 			}
-			for (int i = min.y; i < max.y; i++)
+			for (int j = min.y; j < max.y; j++)
 			{
-				if (i % 2 != 1)
+				if (j % 2 != 1)
 				{
-					for (int j = min.x; j < max.x; j++)
+					for (int k = min.x; k < max.x; k++)
 					{
-						if (j % 2 != 0)
+						if (k % 2 != 0)
 						{
-							int num = Grid.XYToCell(j, i);
+							int num = Grid.XYToCell(k, j);
 							if (Grid.IsValidCell(num))
 							{
 								if (Grid.Visible[num] > 0)
@@ -229,6 +241,7 @@ public class AmbienceManager : KMonoBehaviour
 										if (ambience != AmbienceType.None)
 										{
 											this.liquidLayers[(int)ambience].tileCount++;
+											this.liquidLayers[(int)ambience].averageTemperature += Grid.Temperature[num];
 										}
 									}
 									else if (element.IsGas)
@@ -237,6 +250,7 @@ public class AmbienceManager : KMonoBehaviour
 										if (ambience2 != AmbienceType.None)
 										{
 											this.gasLayers[(int)ambience2].tileCount++;
+											this.gasLayers[(int)ambience2].averageTemperature += Grid.Temperature[num];
 										}
 									}
 									else if (element.IsSolid)
@@ -267,18 +281,20 @@ public class AmbienceManager : KMonoBehaviour
 			}
 			Vector2I vector2I = max - min;
 			int num2 = vector2I.x * vector2I.y;
-			foreach (AmbienceManager.Layer layer2 in this.allLayers)
+			for (int l = 0; l < this.allLayers.Count; l++)
 			{
+				AmbienceManager.Layer layer2 = this.allLayers[l];
 				layer2.UpdatePercentage(num2);
 			}
 			this.loopingLayers.Sort();
 			this.topLayers.Clear();
-			for (int k = 0; k < this.loopingLayers.Count; k++)
+			for (int m = 0; m < this.loopingLayers.Count; m++)
 			{
-				AmbienceManager.Layer layer3 = this.loopingLayers[k];
-				if (k < 3 && layer3.tilePercentage > 0f)
+				AmbienceManager.Layer layer3 = this.loopingLayers[m];
+				if (m < 3 && layer3.tilePercentage > 0f)
 				{
 					layer3.Start(emitter_position);
+					layer3.UpdateAverageTemperature();
 					layer3.UpdateParameters(emitter_position);
 					this.topLayers.Add(layer3);
 				}
@@ -288,11 +304,11 @@ public class AmbienceManager : KMonoBehaviour
 				}
 			}
 			this.oneShotLayers.Sort();
-			for (int l = 0; l < AmbienceManager.Quadrant.activeSolidLayerCount; l++)
+			for (int n = 0; n < AmbienceManager.Quadrant.activeSolidLayerCount; n++)
 			{
-				if (this.solidTimers[l].ShouldPlay() && this.oneShotLayers[l].tilePercentage > 0f)
+				if (this.solidTimers[n].ShouldPlay() && this.oneShotLayers[n].tilePercentage > 0f)
 				{
-					this.oneShotLayers[l].Start(emitter_position);
+					this.oneShotLayers[n].Start(emitter_position);
 				}
 			}
 		}
@@ -307,7 +323,7 @@ public class AmbienceManager : KMonoBehaviour
 
 		public AmbienceManager.Layer fogLayer;
 
-		public AmbienceManager.Layer[] solidLayers = new AmbienceManager.Layer[10];
+		public AmbienceManager.Layer[] solidLayers = new AmbienceManager.Layer[11];
 
 		private List<AmbienceManager.Layer> allLayers = new List<AmbienceManager.Layer>();
 

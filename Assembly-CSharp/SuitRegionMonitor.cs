@@ -13,13 +13,13 @@ public class SuitRegionMonitor : GameStateMachine<SuitRegionMonitor, SuitRegionM
 		this.needstoexitregion.DoNothing();
 	}
 
-	public GameStateMachine<SuitRegionMonitor, SuitRegionMonitor.Instance, IStateMachineTarget>.State satisfied;
+	public GameStateMachine<SuitRegionMonitor, SuitRegionMonitor.Instance, IStateMachineTarget, object>.State satisfied;
 
-	public GameStateMachine<SuitRegionMonitor, SuitRegionMonitor.Instance, IStateMachineTarget>.State needstoexitregion;
+	public GameStateMachine<SuitRegionMonitor, SuitRegionMonitor.Instance, IStateMachineTarget, object>.State needstoexitregion;
 
-	public StateMachine<SuitRegionMonitor, SuitRegionMonitor.Instance, IStateMachineTarget>.BoolParameter isInSuitRegion;
+	public StateMachine<SuitRegionMonitor, SuitRegionMonitor.Instance, IStateMachineTarget, object>.BoolParameter isInSuitRegion;
 
-	public new class Instance : GameStateMachine<SuitRegionMonitor, SuitRegionMonitor.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<SuitRegionMonitor, SuitRegionMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)

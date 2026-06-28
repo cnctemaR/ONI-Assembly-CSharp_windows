@@ -29,7 +29,6 @@ public class BuildQueue : KButtonMenu
 				return;
 			}
 			this.fabricator.CancelOrder(order_idx);
-			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Deselect", false));
 		}
 	}
 

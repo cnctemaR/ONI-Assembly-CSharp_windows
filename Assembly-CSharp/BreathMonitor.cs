@@ -18,31 +18,33 @@ public class BreathMonitor : GameStateMachine<BreathMonitor, BreathMonitor.Insta
 		this.lowbreath.recoveryavailable.ParamTransition<int>(this.recoverBreathCell, this.lowbreath.nowheretorecover, (BreathMonitor.Instance smi, int p) => p == Grid.InvalidCell).ToggleChore((BreathMonitor.Instance smi) => new RecoverBreathChore(smi.master), this.lowbreath.nowheretorecover, false);
 	}
 
-	public GameStateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget>.State satisfied;
+	public GameStateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.State satisfied;
 
 	public BreathMonitor.LowBreathState lowbreath;
 
-	public StateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget>.IntParameter recoverBreathCell;
+	public StateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.IntParameter recoverBreathCell;
 
-	public class LowBreathState : GameStateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget>.State
+	public class LowBreathState : GameStateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.State
 	{
-		public GameStateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget>.State nowheretorecover;
+		public GameStateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.State nowheretorecover;
 
-		public GameStateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget>.State recoveryavailable;
+		public GameStateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.State recoveryavailable;
 	}
 
-	public new class Instance : GameStateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)
 		{
 			this.breath = Db.Get().Amounts.Breath.Lookup(master.gameObject);
-			this.query = new SafetyQuery(Game.Instance.safetyConditions.RecoverBreathChecker, base.GetComponent<KMonoBehaviour>());
+			this.query = new SafetyQuery(Game.Instance.safetyConditions.RecoverBreathChecker, base.GetComponent<KMonoBehaviour>(), int.MaxValue);
+			this.navigator = base.GetComponent<Navigator>();
+			this.breather = base.GetComponent<OxygenBreather>();
 		}
 
 		public bool IsInBreathableArea()
 		{
-			return base.GetComponent<OxygenBreather>().IsBreathableElementAtCell(Grid.PosToCell(base.transform.position), null);
+			return this.breather.IsBreathableElementAtCell(Grid.PosToCell(base.transform.position), null);
 		}
 
 		public bool HasRecoveredBreath()
@@ -63,9 +65,9 @@ public class BreathMonitor : GameStateMachine<BreathMonitor, BreathMonitor.Insta
 		public void UpdateRecoverBreathCell()
 		{
 			this.query.Reset();
-			base.GetComponent<Navigator>().RunQuery(this.query);
+			this.navigator.RunQuery(this.query);
 			int num = this.query.GetResultCell();
-			if (!base.smi.GetComponent<OxygenBreather>().IsBreathableElementAtCell(num, null))
+			if (!this.breather.IsBreathableElementAtCell(num, null))
 			{
 				num = PathFinder.InvalidCell;
 			}
@@ -75,5 +77,9 @@ public class BreathMonitor : GameStateMachine<BreathMonitor, BreathMonitor.Insta
 		private AmountInstance breath;
 
 		private SafetyQuery query;
+
+		private Navigator navigator;
+
+		private OxygenBreather breather;
 	}
 }

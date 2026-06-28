@@ -4,7 +4,7 @@ using Klei.AI;
 public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 {
 	public TakeMedicineChore(MedicinalPill master)
-		: base(Db.Get().ChoreTypes.TakeMedicine, master, null, false, null, null, null, int.MaxValue, false, true)
+		: base(Db.Get().ChoreTypes.TakeMedicine, master, null, false, null, null, null, int.MaxValue, false, true, 0)
 	{
 		this.medicine = master;
 		this.pickupable = this.medicine.GetComponent<Pickupable>();
@@ -51,7 +51,7 @@ public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 
 	public static Chore.Precondition CanCure;
 
-	public class StatesInstance : GameStateMachine<TakeMedicineChore.States, TakeMedicineChore.StatesInstance, TakeMedicineChore>.GameInstance
+	public class StatesInstance : GameStateMachine<TakeMedicineChore.States, TakeMedicineChore.StatesInstance, TakeMedicineChore, object>.GameInstance
 	{
 		public StatesInstance(TakeMedicineChore master)
 			: base(master)
@@ -77,18 +77,18 @@ public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 			}, null, null);
 		}
 
-		public StateMachine<TakeMedicineChore.States, TakeMedicineChore.StatesInstance, TakeMedicineChore>.TargetParameter eater;
+		public StateMachine<TakeMedicineChore.States, TakeMedicineChore.StatesInstance, TakeMedicineChore, object>.TargetParameter eater;
 
-		public StateMachine<TakeMedicineChore.States, TakeMedicineChore.StatesInstance, TakeMedicineChore>.TargetParameter source;
+		public StateMachine<TakeMedicineChore.States, TakeMedicineChore.StatesInstance, TakeMedicineChore, object>.TargetParameter source;
 
-		public StateMachine<TakeMedicineChore.States, TakeMedicineChore.StatesInstance, TakeMedicineChore>.TargetParameter chunk;
+		public StateMachine<TakeMedicineChore.States, TakeMedicineChore.StatesInstance, TakeMedicineChore, object>.TargetParameter chunk;
 
-		public StateMachine<TakeMedicineChore.States, TakeMedicineChore.StatesInstance, TakeMedicineChore>.FloatParameter requestedpillcount;
+		public StateMachine<TakeMedicineChore.States, TakeMedicineChore.StatesInstance, TakeMedicineChore, object>.FloatParameter requestedpillcount;
 
-		public StateMachine<TakeMedicineChore.States, TakeMedicineChore.StatesInstance, TakeMedicineChore>.FloatParameter actualpillcount;
+		public StateMachine<TakeMedicineChore.States, TakeMedicineChore.StatesInstance, TakeMedicineChore, object>.FloatParameter actualpillcount;
 
-		public GameStateMachine<TakeMedicineChore.States, TakeMedicineChore.StatesInstance, TakeMedicineChore>.FetchSubState fetch;
+		public GameStateMachine<TakeMedicineChore.States, TakeMedicineChore.StatesInstance, TakeMedicineChore, object>.FetchSubState fetch;
 
-		public GameStateMachine<TakeMedicineChore.States, TakeMedicineChore.StatesInstance, TakeMedicineChore>.State takemedicine;
+		public GameStateMachine<TakeMedicineChore.States, TakeMedicineChore.StatesInstance, TakeMedicineChore, object>.State takemedicine;
 	}
 }

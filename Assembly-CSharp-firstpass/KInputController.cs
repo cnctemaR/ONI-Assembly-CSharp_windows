@@ -12,7 +12,7 @@ public class KInputController : IInputHandler
 		this.IsGamepad = is_gamepad;
 		this.mAxis = new float[4];
 		this.mActiveModifiers = Modifier.None;
-		this.mActionState = new bool[122];
+		this.mActionState = new bool[133];
 		this.mScrollState = new bool[2];
 		this.inputHandler = new KInputHandler(this, this);
 	}
@@ -97,22 +97,17 @@ public class KInputController : IInputHandler
 		return key_code < KKeyCode.KleiKeys && Input.GetKeyUp((KeyCode)key_code);
 	}
 
-	public void CheckModifier(KeyCode[] key_codes, Modifier modifier)
+	public void CheckModifier(KKeyCode[] key_codes, Modifier modifier)
 	{
 		this.mActiveModifiers &= ~modifier;
-		foreach (KeyCode keyCode in key_codes)
+		foreach (KKeyCode kkeyCode in key_codes)
 		{
-			if (Input.GetKeyDown(keyCode) || Input.GetKey(keyCode))
+			if (this.GetKeyDown(kkeyCode) || Input.GetKey((KeyCode)kkeyCode))
 			{
 				this.mActiveModifiers |= modifier;
 				break;
 			}
 		}
-	}
-
-	public void UpdateAxis(Axis axis, float value)
-	{
-		this.mAxis[(int)axis] = value;
 	}
 
 	private void UpdateAxis()
@@ -256,25 +251,25 @@ public class KInputController : IInputHandler
 
 	private Dictionary<KInputController.KeyDefEntry, KInputController.KeyDef> mKeyDefLookup = new Dictionary<KInputController.KeyDefEntry, KInputController.KeyDef>();
 
-	private static readonly KeyCode[] altCodes = new KeyCode[]
+	private static readonly KKeyCode[] altCodes = new KKeyCode[]
 	{
-		KeyCode.LeftAlt,
-		KeyCode.RightAlt
+		KKeyCode.LeftAlt,
+		KKeyCode.RightAlt
 	};
 
-	private static readonly KeyCode[] ctrlCodes = new KeyCode[]
+	private static readonly KKeyCode[] ctrlCodes = new KKeyCode[]
 	{
-		KeyCode.LeftControl,
-		KeyCode.RightControl
+		KKeyCode.LeftControl,
+		KKeyCode.RightControl
 	};
 
-	private static readonly KeyCode[] shiftCodes = new KeyCode[]
+	private static readonly KKeyCode[] shiftCodes = new KKeyCode[]
 	{
-		KeyCode.LeftShift,
-		KeyCode.RightShift
+		KKeyCode.LeftShift,
+		KKeyCode.RightShift
 	};
 
-	private static readonly KeyCode[] capsCodes = new KeyCode[] { KeyCode.CapsLock };
+	private static readonly KKeyCode[] capsCodes = new KKeyCode[] { KKeyCode.CapsLock };
 
 	private enum Scroll
 	{
@@ -307,7 +302,7 @@ public class KInputController : IInputHandler
 		{
 			this.mKeyCode = key_code;
 			this.mModifier = modifier;
-			this.mActionFlags = new bool[122];
+			this.mActionFlags = new bool[133];
 		}
 
 		public KKeyCode mKeyCode;

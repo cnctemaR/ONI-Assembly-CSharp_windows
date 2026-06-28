@@ -3,7 +3,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class MessageTarget : ISaveLoadableJson
+public class MessageTarget : ISaveLoadable
 {
 	public MessageTarget(KPrefabID prefab_id)
 	{
@@ -15,7 +15,7 @@ public class MessageTarget : ISaveLoadableJson
 		{
 			this.name = component.GetName();
 		}
-		prefab_id.Subscribe(-1940207677, new EventSystem.EventHandler(this.OnAbsorbedBy));
+		prefab_id.Subscribe(-1940207677, new Action<object>(this.OnAbsorbedBy));
 	}
 
 	public Vector3 GetPosition()
@@ -45,11 +45,11 @@ public class MessageTarget : ISaveLoadableJson
 	{
 		if (this.prefabId.Get() != null)
 		{
-			this.prefabId.Get().Unsubscribe(-1940207677, new EventSystem.EventHandler(this.OnAbsorbedBy));
+			this.prefabId.Get().Unsubscribe(-1940207677, new Action<object>(this.OnAbsorbedBy));
 		}
 		GameObject gameObject = (GameObject)data;
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
-		component.Subscribe(-1940207677, new EventSystem.EventHandler(this.OnAbsorbedBy));
+		component.Subscribe(-1940207677, new Action<object>(this.OnAbsorbedBy));
 		this.prefabId.Set(component);
 	}
 
@@ -57,7 +57,7 @@ public class MessageTarget : ISaveLoadableJson
 	{
 		if (this.prefabId.Get() != null)
 		{
-			this.prefabId.Get().Unsubscribe(-1940207677, new EventSystem.EventHandler(this.OnAbsorbedBy));
+			this.prefabId.Get().Unsubscribe(-1940207677, new Action<object>(this.OnAbsorbedBy));
 			this.prefabId.Set(null);
 		}
 	}

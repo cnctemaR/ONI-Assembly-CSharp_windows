@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 using KSerialization;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Schedule : ISaveLoadableJson
+public class Schedule : ISaveLoadable
 {
 	public Schedule(int time_slots)
 	{

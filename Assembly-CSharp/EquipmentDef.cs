@@ -4,11 +4,19 @@ using Klei.AI;
 
 public class EquipmentDef : Def
 {
-	public string Name
+	public override string Name
 	{
 		get
 		{
 			return Strings.Get("STRINGS.EQUIPMENT.PREFABS." + this.Id.ToUpper() + ".NAME");
+		}
+	}
+
+	public string GenericName
+	{
+		get
+		{
+			return Strings.Get("STRINGS.EQUIPMENT.PREFABS." + this.Id.ToUpper() + ".GENERICNAME");
 		}
 	}
 
@@ -18,9 +26,9 @@ public class EquipmentDef : Def
 
 	public string FabricatorId;
 
-	public int FabricationTime;
+	public float FabricationTime;
 
-	public string OutputElement;
+	public SimHashes OutputElement;
 
 	public Dictionary<string, float> InputElementMassMap;
 
@@ -30,11 +38,27 @@ public class EquipmentDef : Def
 
 	public string SnapOn;
 
+	public string SnapOn1;
+
 	public KAnimFile BuildOverride;
+
+	public bool IsBody;
 
 	public List<AttributeModifier> AttributeModifiers;
 
 	public PathFinderFlags PathFinderFlags;
 
 	public string RecipeDescription;
+
+	public Action<Equippable> OnEquipCallBack;
+
+	public Action<Equippable> OnUnequipCallBack;
+
+	public EntityTemplates.CollisionShape CollisionShape;
+
+	public float width;
+
+	public float height = 0.325f;
+
+	public List<Descriptor> additionalDescriptors = new List<Descriptor>();
 }

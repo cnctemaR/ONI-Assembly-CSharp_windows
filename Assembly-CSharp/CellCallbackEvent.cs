@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 public class CellCallbackEvent : CellEvent
 {
@@ -7,6 +8,7 @@ public class CellCallbackEvent : CellEvent
 	{
 	}
 
+	[Conditional("UNITY_EDITOR")]
 	public void Log(int cell, int callback_id)
 	{
 		if (!this.enableLogging)

@@ -20,9 +20,9 @@ public class FetchManager : KMonoBehaviour
 		FetchManager.Instance = this;
 	}
 
-	public PathFinderFlags FindFetchTarget(Worker worker, Storage destination, Tag[] tags, Tag[] required_tags, float required_amount, ref Pickupable target)
+	public PathFinderFlags FindFetchTarget(Worker worker, Storage destination, Tag[] tags, Tag[] required_tags, Tag[] forbid_tags, float required_amount, ref Pickupable target)
 	{
-		return FetchManagerUpdater.FindFetchTarget(worker, destination, this.pickupables, tags, required_tags, required_amount, ref target);
+		return FetchManagerUpdater.FindFetchTarget(worker, destination, this.pickupables, tags, required_tags, forbid_tags, required_amount, ref target);
 	}
 
 	public void Clear()

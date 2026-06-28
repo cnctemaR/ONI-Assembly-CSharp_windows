@@ -43,7 +43,7 @@ public class ToolTip : KMonoBehaviour, IEventSystemHandler, IPointerEnterHandler
 		{
 			this.OnToolTip = () => string.Empty;
 		}
-		this.Subscribe(2098165161, new global::EventSystem.EventHandler(this.OnClick));
+		this.Subscribe(2098165161, new Action<object>(this.OnClick));
 		if (this.UseFixedStringKey)
 		{
 			string text = Strings.Get(new StringKey(this.FixedStringKey));
@@ -134,22 +134,36 @@ public class ToolTip : KMonoBehaviour, IEventSystemHandler, IPointerEnterHandler
 
 	public string GetToolTip()
 	{
-		return this.OnToolTip();
+		if (this.OnToolTip != null)
+		{
+			return this.OnToolTip();
+		}
+		return string.Empty;
 	}
 
 	public void OnPointerEnter(PointerEventData data)
 	{
 		this.OnHover(true);
+		this.isHovering = true;
 	}
 
 	public void OnPointerExit(PointerEventData data)
 	{
 		this.OnHover(false);
+		this.isHovering = false;
 	}
 
 	private void OnClick(object data)
 	{
 		ToolTipScreen.Instance.ClearToolTip(this);
+	}
+
+	private void OnDisable()
+	{
+		if (ToolTipScreen.Instance)
+		{
+			ToolTipScreen.Instance.MarkTooltipDirty(this);
+		}
 	}
 
 	protected override void OnCmpDisable()
@@ -194,6 +208,26 @@ public class ToolTip : KMonoBehaviour, IEventSystemHandler, IPointerEnterHandler
 		}
 	}
 
+	private void Update()
+	{
+		if (!this.refreshWhileHovering)
+		{
+			return;
+		}
+		if (Time.unscaledTime - this.lastUpdateTime > 0.2f)
+		{
+			this.lastUpdateTime = Time.unscaledTime;
+			if (this.isHovering)
+			{
+				this.GetToolTip();
+				for (int i = 0; i < this.multiStringToolTips.Count; i++)
+				{
+					ToolTipScreen.Instance.HotSwapTooltipString(this.multiStringToolTips[i], i);
+				}
+			}
+		}
+	}
+
 	public bool UseFixedStringKey;
 
 	public string FixedStringKey = string.Empty;
@@ -203,6 +237,12 @@ public class ToolTip : KMonoBehaviour, IEventSystemHandler, IPointerEnterHandler
 	private List<ScriptableObject> styleSettings = new List<ScriptableObject>();
 
 	public bool worldSpace;
+
+	public bool refreshWhileHovering;
+
+	private bool isHovering;
+
+	private float lastUpdateTime;
 
 	public ToolTip.TooltipPosition toolTipPosition = ToolTip.TooltipPosition.BottomCenter;
 

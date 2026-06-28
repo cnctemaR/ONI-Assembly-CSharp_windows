@@ -6,9 +6,10 @@ public class LiquidVentConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("LiquidVent", 1, 1, "ventliquid_kanim", 2000f, 30f, BUILDINGS.CONSTRUCTION_MASS.TIER4, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.PENALTY.TIER1, null);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("LiquidVent", 1, 1, "ventliquid_kanim", 2000f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.PENALTY.TIER1, null);
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.Floodable = false;
+		buildingDef.Overheatable = false;
 		buildingDef.ViewMode = SimViewMode.LiquidVentMap;
 		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "Metal";
@@ -19,8 +20,12 @@ public class LiquidVentConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
+		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		go.AddOrGet<LoopingSounds>();
 		go.AddOrGet<Exhaust>();
+		Vent vent = go.AddOrGet<Vent>();
+		vent.conduitType = ConduitType.Liquid;
+		vent.endpointType = Endpoint.Sink;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
 		conduitConsumer.ignoreMinMassCheck = true;
@@ -29,7 +34,7 @@ public class LiquidVentConfig : IBuildingConfig
 		go.AddOrGet<SimpleVent>();
 	}
 
-	public override void DoPostConfigure(GameObject go)
+	public override void DoPostConfigureComplete(GameObject go)
 	{
 		BuildingTemplates.DoPostConfigure(go);
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
@@ -38,4 +43,6 @@ public class LiquidVentConfig : IBuildingConfig
 			instance.StartSM();
 		};
 	}
+
+	private const ConduitType CONDUIT_TYPE = ConduitType.Liquid;
 }

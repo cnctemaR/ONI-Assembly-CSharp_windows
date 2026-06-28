@@ -28,14 +28,15 @@ public class Uprootable : Workable
 		base.OnPrefabInit();
 		this.pendingStatusItem = Db.Get().MiscStatusItems.PendingUproot;
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Uprooting;
+		this.Subscribe(1309017699, new Action<object>(this.OnPlanterStorage));
 	}
 
 	protected override void OnSpawn()
 	{
-		this.Subscribe(2127324410, new EventSystem.EventHandler(this.ForceCancelUproot));
+		this.Subscribe(2127324410, new Action<object>(this.ForceCancelUproot));
 		base.SetWorkTime(12.5f);
-		this.Subscribe(2127324410, new EventSystem.EventHandler(this.OnCancel));
-		this.Subscribe(493375141, new EventSystem.EventHandler(this.OnRefreshUserMenu));
+		this.Subscribe(2127324410, new Action<object>(this.OnCancel));
+		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		this.faceTargetWhenWorking = true;
 		Components.Uprootables.Add(this);
 		this.area = base.GetComponent<OccupyArea>();
@@ -45,14 +46,24 @@ public class Uprootable : Workable
 		}
 	}
 
+	private void OnPlanterStorage(object data)
+	{
+		this.planterStorage = (Storage)data;
+	}
+
+	public bool IsInPlanterBox()
+	{
+		return this.planterStorage != null;
+	}
+
 	public void Uproot()
 	{
 		this.isMarkedForUproot = false;
 		this.chore = null;
 		this.uprootComplete = true;
 		this.Trigger(-216549700, this);
-		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingUproot);
-		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.Operating);
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingUproot, false);
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.Operating, false);
 		this.userMenu.Refresh();
 	}
 
@@ -77,7 +88,11 @@ public class Uprootable : Workable
 		{
 			return;
 		}
-		if (this.chore == null)
+		if (DebugHandler.InstantBuildMode)
+		{
+			this.Uproot();
+		}
+		else if (this.chore == null)
 		{
 			this.chore = new WorkChore<Uprootable>(Db.Get().ChoreTypes.Uproot, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true);
 			base.GetComponent<KSelectable>().AddStatusItem(this.pendingStatusItem, this);
@@ -96,7 +111,7 @@ public class Uprootable : Workable
 		{
 			this.chore.Cancel("Cancel uproot");
 			this.chore = null;
-			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingUproot);
+			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingUproot, false);
 		}
 		this.isMarkedForUproot = false;
 		this.userMenu.Refresh();
@@ -144,13 +159,13 @@ public class Uprootable : Workable
 		{
 			UserMenu userMenu = this.userMenu;
 			string text = this.cancelButtonTooltip;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_uproot", this.cancelButtonLabel, new global::System.Action(this.OnClickCancelUproot), global::Action.NumActions, null, null, null, null, text));
+			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_uproot", this.cancelButtonLabel, new global::System.Action(this.OnClickCancelUproot), global::Action.NumActions, null, null, null, text, true), 1f);
 		}
 		else
 		{
 			UserMenu userMenu2 = this.userMenu;
 			string text = this.buttonTooltip;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_uproot", this.buttonLabel, new global::System.Action(this.OnClickUproot), global::Action.NumActions, null, null, null, null, text));
+			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_uproot", this.buttonLabel, new global::System.Action(this.OnClickUproot), global::Action.NumActions, null, null, null, text, true), 1f);
 		}
 	}
 
@@ -164,7 +179,7 @@ public class Uprootable : Workable
 	{
 		base.OnStartWork(worker);
 		this.Trigger(-1358696400, worker);
-		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingUproot);
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingUproot, false);
 	}
 
 	protected override void OnStopWork(Worker worker)
@@ -206,4 +221,6 @@ public class Uprootable : Workable
 	private StatusItem pendingStatusItem;
 
 	public OccupyArea area;
+
+	private Storage planterStorage;
 }

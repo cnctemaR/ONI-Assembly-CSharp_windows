@@ -102,7 +102,7 @@ public class TitleBarPortrait : KMonoBehaviour
 			KBatchedAnimController component = this.AnimControllerObject.GetComponent<KBatchedAnimController>();
 			CrewPortrait.SetPortraitData(base.gameObject, component, true);
 			component.ClearAnims();
-			component.Flip = false;
+			component.FlipX = false;
 			component.SetAnims(animFiles, true);
 			component.Play(animName, KAnim.PlayMode.Once, 1f, 0f);
 		}

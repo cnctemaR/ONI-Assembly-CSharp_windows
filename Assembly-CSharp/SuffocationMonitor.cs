@@ -7,7 +7,7 @@ public class SuffocationMonitor : GameStateMachine<SuffocationMonitor, Suffocati
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.satisfied;
-		this.satisfied.EventTransition(GameHashes.ExitedBreathableArea, this.nooxygen, (SuffocationMonitor.Instance smi) => !smi.IsInBreathableArea() && !smi.IsUsingTank()).Transition(this.satisfied.fullbreath, (SuffocationMonitor.Instance smi) => smi.IsFullBreath()).ToggleAttributeModifier("Breathing", (SuffocationMonitor.Instance smi) => smi.breathing);
+		this.satisfied.EventTransition(GameHashes.ExitedBreathableArea, this.nooxygen, (SuffocationMonitor.Instance smi) => !smi.IsInBreathableArea() && !smi.IsUsingTank()).Transition(this.satisfied.fullbreath, (SuffocationMonitor.Instance smi) => smi.IsFullBreath()).ToggleAttributeModifier("Breathing", (SuffocationMonitor.Instance smi) => smi.breathing, null);
 		this.satisfied.fullbreath.EventTransition(GameHashes.ExitedBreathableArea, this.onTank, (SuffocationMonitor.Instance smi) => !smi.IsInBreathableArea() && smi.IsUsingTank()).EventTransition(GameHashes.ExitedBreathableArea, this.nooxygen, (SuffocationMonitor.Instance smi) => !smi.IsInBreathableArea() && !smi.IsUsingTank()).Enter("OxygenProgressBar", delegate(SuffocationMonitor.Instance smi)
 		{
 			if (NameDisplayScreen.Instance != null)
@@ -23,7 +23,7 @@ public class SuffocationMonitor : GameStateMachine<SuffocationMonitor, Suffocati
 				NameDisplayScreen.Instance.SetBreathDisplay(smi.master.gameObject, new Func<float>(smi.GetBreath), true);
 			}
 		});
-		this.nooxygen.EventTransition(GameHashes.EnteredBreathableArea, this.satisfied, (SuffocationMonitor.Instance smi) => smi.IsInBreathableArea() || (smi.IsUsingTank() && !smi.IsUnderwater()) || (smi.IsUsingUnderwaterTank() && smi.IsUnderwater() && !smi.IsTankEmpty())).ToggleExpression(Db.Get().Expressions.Suffocate, null).ToggleAttributeModifier("Holding Breath", (SuffocationMonitor.Instance smi) => smi.holdingbreath)
+		this.nooxygen.EventTransition(GameHashes.EnteredBreathableArea, this.satisfied, (SuffocationMonitor.Instance smi) => smi.IsInBreathableArea() || (smi.IsUsingTank() && !smi.IsUnderwater()) || (smi.IsUsingUnderwaterTank() && smi.IsUnderwater() && !smi.IsTankEmpty())).ToggleExpression(Db.Get().Expressions.Suffocate, null).ToggleAttributeModifier("Holding Breath", (SuffocationMonitor.Instance smi) => smi.holdingbreath, null)
 			.Enter("OxygenProgressBar", delegate(SuffocationMonitor.Instance smi)
 			{
 				NameDisplayScreen.Instance.SetBreathDisplay(smi.master.gameObject, new Func<float>(smi.GetBreath), true);
@@ -39,25 +39,25 @@ public class SuffocationMonitor : GameStateMachine<SuffocationMonitor, Suffocati
 
 	public SuffocationMonitor.Statisfied satisfied;
 
-	public GameStateMachine<SuffocationMonitor, SuffocationMonitor.Instance, IStateMachineTarget>.State onTank;
+	public GameStateMachine<SuffocationMonitor, SuffocationMonitor.Instance, IStateMachineTarget, object>.State onTank;
 
 	public SuffocationMonitor.NoOxygenState nooxygen;
 
-	public GameStateMachine<SuffocationMonitor, SuffocationMonitor.Instance, IStateMachineTarget>.State death;
+	public GameStateMachine<SuffocationMonitor, SuffocationMonitor.Instance, IStateMachineTarget, object>.State death;
 
-	public class NoOxygenState : GameStateMachine<SuffocationMonitor, SuffocationMonitor.Instance, IStateMachineTarget>.State
+	public class NoOxygenState : GameStateMachine<SuffocationMonitor, SuffocationMonitor.Instance, IStateMachineTarget, object>.State
 	{
-		public GameStateMachine<SuffocationMonitor, SuffocationMonitor.Instance, IStateMachineTarget>.State holdingbreath;
+		public GameStateMachine<SuffocationMonitor, SuffocationMonitor.Instance, IStateMachineTarget, object>.State holdingbreath;
 
-		public GameStateMachine<SuffocationMonitor, SuffocationMonitor.Instance, IStateMachineTarget>.State suffocating;
+		public GameStateMachine<SuffocationMonitor, SuffocationMonitor.Instance, IStateMachineTarget, object>.State suffocating;
 	}
 
-	public class Statisfied : GameStateMachine<SuffocationMonitor, SuffocationMonitor.Instance, IStateMachineTarget>.State
+	public class Statisfied : GameStateMachine<SuffocationMonitor, SuffocationMonitor.Instance, IStateMachineTarget, object>.State
 	{
-		public GameStateMachine<SuffocationMonitor, SuffocationMonitor.Instance, IStateMachineTarget>.State fullbreath;
+		public GameStateMachine<SuffocationMonitor, SuffocationMonitor.Instance, IStateMachineTarget, object>.State fullbreath;
 	}
 
-	public new class Instance : GameStateMachine<SuffocationMonitor, SuffocationMonitor.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<SuffocationMonitor, SuffocationMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)
@@ -65,9 +65,15 @@ public class SuffocationMonitor : GameStateMachine<SuffocationMonitor, Suffocati
 			this.breath = Db.Get().Amounts.Breath.Lookup(master.gameObject);
 			Klei.AI.Attribute deltaAttribute = Db.Get().Amounts.Breath.deltaAttribute;
 			float num = 0.90909094f;
-			this.breathing = new AttributeModifier(deltaAttribute.Id, num, DUPLICANTS.MODIFIERS.BREATHING.NAME, false);
-			this.holdingbreath = new AttributeModifier(deltaAttribute.Id, -num, DUPLICANTS.MODIFIERS.HOLDINGBREATH.NAME, false);
-			NameDisplayScreen.Instance.RegisterComponent(base.gameObject, this);
+			this.breathing = new AttributeModifier(deltaAttribute.Id, num, DUPLICANTS.MODIFIERS.BREATHING.NAME, false, false);
+			this.holdingbreath = new AttributeModifier(deltaAttribute.Id, -num, DUPLICANTS.MODIFIERS.HOLDINGBREATH.NAME, false, false);
+			Components.SuffocationMonitorInstance.Add(this);
+		}
+
+		public override void StopSM(string reason)
+		{
+			Components.SuffocationMonitorInstance.Remove(this);
+			base.StopSM(reason);
 		}
 
 		public float GetBreath()

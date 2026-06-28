@@ -4,15 +4,31 @@ using UnityEngine;
 
 public class Prioritizable : KMonoBehaviour
 {
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		this.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
+	}
+
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = (GameObject)data;
+		Prioritizable component = gameObject.GetComponent<Prioritizable>();
+		if (component != null)
+		{
+			this.SetMasterPriority(component.GetMasterPriority());
+		}
+	}
+
 	protected override void OnSpawn()
 	{
 		if (this.onPriorityChanged != null)
 		{
 			this.onPriorityChanged(this.masterPriority);
 		}
-		Game.Instance.Subscribe(1248612973, new EventSystem.EventHandler(this.OnEnableOverlay));
-		Game.Instance.Subscribe(1798162660, new EventSystem.EventHandler(this.OnEnableOverlay));
-		Game.Instance.Subscribe(2015652040, new EventSystem.EventHandler(this.OnDisableOverlay));
+		Game.Instance.Subscribe(1248612973, new Action<object>(this.OnEnableOverlay));
+		Game.Instance.Subscribe(1798162660, new Action<object>(this.OnEnableOverlay));
+		Game.Instance.Subscribe(2015652040, new Action<object>(this.OnDisableOverlay));
 		this.OnEnableOverlay(SimDebugView.Instance.GetMode());
 	}
 
@@ -49,7 +65,7 @@ public class Prioritizable : KMonoBehaviour
 		{
 			return;
 		}
-		if (base.GetComponent<Clearable>() == null && base.GetComponent<MinionIdentity>() == null && base.GetComponent<Harvestable>() == null && base.GetComponent<AttackableBase>() == null)
+		if (base.GetComponent<Clearable>() == null && base.GetComponent<MinionIdentity>() == null && (base.GetComponent<Uprootable>() == null || !base.GetComponent<Uprootable>().IsInPlanterBox()) && base.GetComponent<AttackableBase>() == null)
 		{
 			this.priorityOverlayIcon = Util.KInstantiate(Assets.UIPrefabs.PriorityOverlayIcon, GameScreenManager.Instance.worldSpaceCanvas, null).GetComponent<RectTransform>();
 			KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
@@ -74,7 +90,14 @@ public class Prioritizable : KMonoBehaviour
 			componentInChildren.text = this.masterPriority.ToString();
 			componentInChildren.color = overlayInfo.infoUnits[this.masterPriority - 1].color;
 			componentInChildren.outlineColor = Color.white;
-			componentInChildren.outlineWidth = 0.3f;
+			if (Localization.isLocalized)
+			{
+				componentInChildren.outlineWidth = 0.08f;
+			}
+			else
+			{
+				componentInChildren.outlineWidth = 0.3f;
+			}
 		}
 	}
 
@@ -99,16 +122,16 @@ public class Prioritizable : KMonoBehaviour
 	{
 		base.OnCleanUp();
 		this.DestroyOverlayIcon();
-		Game.Instance.Unsubscribe(1248612973, new EventSystem.EventHandler(this.OnEnableOverlay));
-		Game.Instance.Unsubscribe(2015652040, new EventSystem.EventHandler(this.OnDisableOverlay));
-		Game.Instance.Unsubscribe(1798162660, new EventSystem.EventHandler(this.OnEnableOverlay));
+		Game.Instance.Unsubscribe(1248612973, new Action<object>(this.OnEnableOverlay));
+		Game.Instance.Unsubscribe(2015652040, new Action<object>(this.OnDisableOverlay));
+		Game.Instance.Unsubscribe(1798162660, new Action<object>(this.OnEnableOverlay));
 	}
 
-	[Serialize]
 	[SerializeField]
+	[Serialize]
 	private int masterPriority = 5;
 
 	public Action<int> onPriorityChanged;
 
-	private RectTransform priorityOverlayIcon;
+	public RectTransform priorityOverlayIcon;
 }

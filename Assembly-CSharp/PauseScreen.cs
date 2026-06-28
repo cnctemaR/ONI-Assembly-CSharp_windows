@@ -5,7 +5,6 @@ using Klei;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.UI;
 
 public class PauseScreen : KModalButtonMenu
 {
@@ -25,12 +24,8 @@ public class PauseScreen : KModalButtonMenu
 	protected override void OnPrefabInit()
 	{
 		this.keepMenuOpen = true;
-		this.versionText.text = "Game Version: " + 208689U;
-		if (Debug.isDebugBuild)
-		{
-			Text text = this.versionText;
-			text.text += "(debug)";
-		}
+		this.versionText.text = UI.FRONTEND.GAME_VERSION + 217311U;
+		this.versionText.transform.parent.gameObject.SetActive(false);
 		base.OnPrefabInit();
 		this.buttons = new KButtonMenu.ButtonInfo[]
 		{
@@ -58,7 +53,7 @@ public class PauseScreen : KModalButtonMenu
 		base.Show(false);
 		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().ESCPauseSnapshot, STOP_MODE.ALLOWFADEOUT);
 		MusicManager.instance.OnEscapeMenu(false);
-		MusicManager.instance.StopSong("Music_ESC_Menu", true);
+		MusicManager.instance.StopSong("Music_ESC_Menu", true, STOP_MODE.ALLOWFADEOUT);
 	}
 
 	private void OnOptions()
@@ -119,16 +114,22 @@ public class PauseScreen : KModalButtonMenu
 
 	private void OnLoadConfirm()
 	{
-		LoadScreen.ForceStopGame();
-		this.Deactivate();
-		App.LoadScene("frontend");
+		LoadingOverlay.Load(delegate
+		{
+			LoadScreen.ForceStopGame();
+			this.Deactivate();
+			App.LoadScene("frontend");
+		});
 	}
 
 	private void OnQuitConfirm()
 	{
-		this.Deactivate();
-		MusicManager.instance.StopDynamicMusic();
-		PauseScreen.TriggerQuitGame();
+		LoadingOverlay.Load(delegate
+		{
+			this.Deactivate();
+			MusicManager.instance.StopDynamicMusic(false);
+			PauseScreen.TriggerQuitGame();
+		});
 	}
 
 	public override void OnKeyDown(KButtonEvent e)
@@ -138,7 +139,7 @@ public class PauseScreen : KModalButtonMenu
 			base.Show(false);
 			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().ESCPauseSnapshot, STOP_MODE.ALLOWFADEOUT);
 			MusicManager.instance.OnEscapeMenu(false);
-			MusicManager.instance.StopSong("Music_ESC_Menu", true);
+			MusicManager.instance.StopSong("Music_ESC_Menu", true, STOP_MODE.ALLOWFADEOUT);
 		}
 		else
 		{
@@ -164,7 +165,7 @@ public class PauseScreen : KModalButtonMenu
 	private LoadScreen loadScreenPrefab;
 
 	[SerializeField]
-	private Text versionText;
+	private LocText versionText;
 
 	[SerializeField]
 	private KButton closeButton;

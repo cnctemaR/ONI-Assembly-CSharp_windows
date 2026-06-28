@@ -13,13 +13,14 @@ internal class GraphicsOptionsScreen : KModalScreen
 		base.OnSpawn();
 		this.title.SetText(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.TITLE);
 		this.originalSettings = this.CaptureSettings();
-		this.applyButton.interactable = false;
+		this.applyButton.isInteractable = false;
 		this.applyButton.onClick += this.OnApply;
 		this.applyButton.GetComponentInChildren<LocText>().SetText(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.APPLYBUTTON);
-		this.revertButton.interactable = false;
+		this.revertButton.isInteractable = false;
 		this.revertButton.onClick += this.OnRevert;
 		this.revertButton.GetComponentInChildren<LocText>().SetText(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.REVERTBUTTON);
 		this.doneButton.onClick += this.OnDone;
+		this.closeButton.onClick += this.OnDone;
 		this.doneButton.GetComponentInChildren<LocText>().SetText(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.DONE_BUTTON);
 		this.resolutionDropdown.ClearOptions();
 		this.BuildOptions();
@@ -133,8 +134,8 @@ internal class GraphicsOptionsScreen : KModalScreen
 			fullscreen = this.fullscreenToggle.isOn
 		}, delegate
 		{
-			this.applyButton.interactable = false;
-			this.revertButton.interactable = true;
+			this.applyButton.isInteractable = false;
+			this.revertButton.isInteractable = true;
 		});
 	}
 
@@ -142,8 +143,8 @@ internal class GraphicsOptionsScreen : KModalScreen
 	{
 		this.ApplyConfirmSettings(this.originalSettings, delegate
 		{
-			this.applyButton.interactable = false;
-			this.revertButton.interactable = false;
+			this.applyButton.isInteractable = false;
+			this.revertButton.isInteractable = false;
 		});
 	}
 
@@ -157,16 +158,16 @@ internal class GraphicsOptionsScreen : KModalScreen
 		GraphicsOptionsScreen.Settings settings = this.CaptureSettings();
 		if (this.fullscreenToggle.isOn != settings.fullscreen)
 		{
-			this.applyButton.interactable = true;
+			this.applyButton.isInteractable = true;
 		}
 		else if (this.fullscreenToggle.isOn)
 		{
 			int resolutionIndex = this.GetResolutionIndex(settings.resolution);
-			this.applyButton.interactable = this.resolutionDropdown.value != resolutionIndex;
+			this.applyButton.isInteractable = this.resolutionDropdown.value != resolutionIndex;
 		}
 		else
 		{
-			this.applyButton.interactable = false;
+			this.applyButton.isInteractable = false;
 		}
 	}
 
@@ -241,6 +242,9 @@ internal class GraphicsOptionsScreen : KModalScreen
 
 	[SerializeField]
 	private KButton doneButton;
+
+	[SerializeField]
+	private KButton closeButton;
 
 	[SerializeField]
 	private ConfirmDialogScreen confirmPrefab;

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using STRINGS;
+using TMPro;
 using UnityEngine;
 
 public class EnergyInfoScreen : TargetScreen
@@ -101,40 +102,61 @@ public class EnergyInfoScreen : TargetScreen
 			this.batteriesPanel.SetActive(true);
 			float joulesAvailableOnCircuit = circuitManager.GetJoulesAvailableOnCircuit(num);
 			GameObject gameObject = this.AddOrGetLabel(this.overviewLabels, this.overviewPanel, "joulesAvailable");
-			gameObject.GetComponent<LocText>().text = string.Format(UI.DETAILTABS.ENERGYGENERATOR.AVAILABLE_JOULES, GameUtil.GetFormattedJoules(joulesAvailableOnCircuit));
+			gameObject.GetComponent<LocText>().text = string.Format(UI.DETAILTABS.ENERGYGENERATOR.AVAILABLE_JOULES, GameUtil.GetFormattedJoules(joulesAvailableOnCircuit, "F1"));
 			gameObject.GetComponent<ToolTip>().toolTip = UI.DETAILTABS.ENERGYGENERATOR.AVAILABLE_JOULES_TOOLTIP;
 			gameObject.SetActive(true);
+			float wattsGeneratedByCircuit = circuitManager.GetWattsGeneratedByCircuit(num);
+			float potentialWattsGeneratedByCircuit = circuitManager.GetPotentialWattsGeneratedByCircuit(num);
 			gameObject = this.AddOrGetLabel(this.overviewLabels, this.overviewPanel, "wattageGenerated");
-			gameObject.GetComponent<LocText>().text = string.Format(UI.DETAILTABS.ENERGYGENERATOR.WATTAGE_GENERATED, GameUtil.GetFormattedWattage(circuitManager.GetWattsGeneratedByCircuit(num)));
+			string text;
+			if (wattsGeneratedByCircuit == potentialWattsGeneratedByCircuit)
+			{
+				text = GameUtil.GetFormattedWattage(wattsGeneratedByCircuit, "F1");
+			}
+			else
+			{
+				text = string.Format("{0} / {1}", GameUtil.GetFormattedWattage(wattsGeneratedByCircuit, "F1"), GameUtil.GetFormattedWattage(potentialWattsGeneratedByCircuit, "F1"));
+			}
+			gameObject.GetComponent<LocText>().text = string.Format(UI.DETAILTABS.ENERGYGENERATOR.WATTAGE_GENERATED, text);
 			gameObject.GetComponent<ToolTip>().toolTip = UI.DETAILTABS.ENERGYGENERATOR.WATTAGE_GENERATED_TOOLTIP;
 			gameObject.SetActive(true);
 			gameObject = this.AddOrGetLabel(this.overviewLabels, this.overviewPanel, "wattageConsumed");
-			gameObject.GetComponent<LocText>().text = string.Format(UI.DETAILTABS.ENERGYGENERATOR.WATTAGE_CONSUMED, GameUtil.GetFormattedWattage(circuitManager.GetWattsUsedByCircuit(num)));
+			gameObject.GetComponent<LocText>().text = string.Format(UI.DETAILTABS.ENERGYGENERATOR.WATTAGE_CONSUMED, GameUtil.GetFormattedWattage(circuitManager.GetWattsUsedByCircuit(num), "F1"));
 			gameObject.GetComponent<ToolTip>().toolTip = UI.DETAILTABS.ENERGYGENERATOR.WATTAGE_CONSUMED_TOOLTIP;
 			gameObject.SetActive(true);
 			gameObject = this.AddOrGetLabel(this.overviewLabels, this.overviewPanel, "potentialWattageConsumed");
-			gameObject.GetComponent<LocText>().text = string.Format(UI.DETAILTABS.ENERGYGENERATOR.POTENTIAL_WATTAGE_CONSUMED, GameUtil.GetFormattedWattage(circuitManager.GetWattsNeededWhenActive(num)));
+			gameObject.GetComponent<LocText>().text = string.Format(UI.DETAILTABS.ENERGYGENERATOR.POTENTIAL_WATTAGE_CONSUMED, GameUtil.GetFormattedWattage(circuitManager.GetWattsNeededWhenActive(num), "F1"));
 			gameObject.GetComponent<ToolTip>().toolTip = UI.DETAILTABS.ENERGYGENERATOR.POTENTIAL_WATTAGE_CONSUMED_TOOLTIP;
+			gameObject.SetActive(true);
+			gameObject = this.AddOrGetLabel(this.overviewLabels, this.overviewPanel, "maxSafeWattage");
+			gameObject.GetComponent<LocText>().text = string.Format(UI.DETAILTABS.ENERGYGENERATOR.MAX_SAFE_WATTAGE, GameUtil.GetFormattedWattage(circuitManager.GetMaxSafeWattageForCircuit(num), "F1"));
+			gameObject.GetComponent<ToolTip>().toolTip = UI.DETAILTABS.ENERGYGENERATOR.MAX_SAFE_WATTAGE_TOOLTIP;
 			gameObject.SetActive(true);
 			ReadOnlyCollection<Generator> generatorsOnCircuit = circuitManager.GetGeneratorsOnCircuit(num);
 			ReadOnlyCollection<IEnergyConsumer> consumersOnCircuit = circuitManager.GetConsumersOnCircuit(num);
 			ReadOnlyCollection<Battery> batteriesOnCircuit = circuitManager.GetBatteriesOnCircuit(num);
+			ReadOnlyCollection<Battery> transformersOnCircuit = circuitManager.GetTransformersOnCircuit(num);
 			if (generatorsOnCircuit.Count > 0)
 			{
 				foreach (Generator generator in generatorsOnCircuit)
 				{
-					if (generator != null && generator.GetComponent<Battery>() == null)
+					if (generator != null)
 					{
-						gameObject = this.AddOrGetLabel(this.generatorsLabels, this.generatorsPanel, generator.gameObject.GetInstanceID().ToString());
-						gameObject.GetComponent<LocText>().text = string.Format("{0}: {1}", generator.GetComponent<KSelectable>().entityName, GameUtil.GetFormattedWattage(generator.WattageRating));
-						gameObject.SetActive(true);
-						if (generator.gameObject == this.target)
+						bool flag = generator.GetComponent<Battery>() == null;
+						if (flag)
 						{
-							gameObject.GetComponent<LocText>().color = Constants.POSITIVE_COLOR;
-						}
-						else
-						{
-							gameObject.GetComponent<LocText>().color = Color.black;
+							gameObject = this.AddOrGetLabel(this.generatorsLabels, this.generatorsPanel, generator.gameObject.GetInstanceID().ToString());
+							Operational component3 = generator.GetComponent<Operational>();
+							if (component3.IsActive)
+							{
+								gameObject.GetComponent<LocText>().text = string.Format("{0}: {1}", generator.GetComponent<KSelectable>().entityName, GameUtil.GetFormattedWattage(generator.WattageRating, "F1"));
+							}
+							else
+							{
+								gameObject.GetComponent<LocText>().text = string.Format("{0}: {1} / {2}", generator.GetComponent<KSelectable>().entityName, GameUtil.GetFormattedWattage(0f, "F1"), GameUtil.GetFormattedWattage(generator.WattageRating, "F1"));
+							}
+							gameObject.SetActive(true);
+							gameObject.GetComponent<LocText>().fontStyle = ((!(generator.gameObject == this.target)) ? FontStyles.Normal : FontStyles.Bold);
 						}
 					}
 				}
@@ -145,25 +167,15 @@ public class EnergyInfoScreen : TargetScreen
 				gameObject.GetComponent<LocText>().text = UI.DETAILTABS.ENERGYGENERATOR.NOGENERATORS;
 				gameObject.SetActive(true);
 			}
-			if (consumersOnCircuit.Count > 0)
+			if (consumersOnCircuit.Count > 0 || transformersOnCircuit.Count > 0)
 			{
 				foreach (IEnergyConsumer energyConsumer in consumersOnCircuit)
 				{
-					KMonoBehaviour kmonoBehaviour = energyConsumer as KMonoBehaviour;
-					if (kmonoBehaviour != null)
-					{
-						gameObject = this.AddOrGetLabel(this.consumersLabels, this.consumersPanel, kmonoBehaviour.gameObject.GetInstanceID().ToString());
-						gameObject.GetComponent<LocText>().text = string.Format("{0}: {1}", energyConsumer.Name, GameUtil.GetFormattedWattage(energyConsumer.WattsUsed));
-						gameObject.SetActive(true);
-						if (kmonoBehaviour.gameObject == this.target)
-						{
-							gameObject.GetComponent<LocText>().color = Constants.POSITIVE_COLOR;
-						}
-						else
-						{
-							gameObject.GetComponent<LocText>().color = Color.black;
-						}
-					}
+					this.AddConsumerInfo(energyConsumer, gameObject);
+				}
+				foreach (IEnergyConsumer energyConsumer2 in transformersOnCircuit)
+				{
+					this.AddConsumerInfo(energyConsumer2, gameObject);
 				}
 			}
 			else
@@ -179,16 +191,9 @@ public class EnergyInfoScreen : TargetScreen
 					if (battery != null)
 					{
 						gameObject = this.AddOrGetLabel(this.batteriesLabels, this.batteriesPanel, battery.gameObject.GetInstanceID().ToString());
-						gameObject.GetComponent<LocText>().text = string.Format("{0}: {1}", battery.GetComponent<KSelectable>().entityName, GameUtil.GetFormattedJoules(battery.JoulesAvailable));
+						gameObject.GetComponent<LocText>().text = string.Format("{0}: {1}", battery.GetComponent<KSelectable>().entityName, GameUtil.GetFormattedJoules(battery.JoulesAvailable, "F1"));
 						gameObject.SetActive(true);
-						if (battery.gameObject == this.target)
-						{
-							gameObject.GetComponent<LocText>().color = Constants.POSITIVE_COLOR;
-						}
-						else
-						{
-							gameObject.GetComponent<LocText>().color = Color.black;
-						}
+						gameObject.GetComponent<LocText>().fontStyle = ((!(battery.gameObject == this.target)) ? FontStyles.Normal : FontStyles.Bold);
 					}
 				}
 			}
@@ -208,6 +213,29 @@ public class EnergyInfoScreen : TargetScreen
 			GameObject gameObject2 = this.AddOrGetLabel(this.overviewLabels, this.overviewPanel, "nocircuit");
 			gameObject2.GetComponent<LocText>().text = UI.DETAILTABS.ENERGYGENERATOR.DISCONNECTED;
 			gameObject2.SetActive(true);
+		}
+	}
+
+	private void AddConsumerInfo(IEnergyConsumer consumer, GameObject label)
+	{
+		KMonoBehaviour kmonoBehaviour = consumer as KMonoBehaviour;
+		if (kmonoBehaviour != null)
+		{
+			label = this.AddOrGetLabel(this.consumersLabels, this.consumersPanel, kmonoBehaviour.gameObject.GetInstanceID().ToString());
+			float wattsUsed = consumer.WattsUsed;
+			float wattsNeededWhenActive = consumer.WattsNeededWhenActive;
+			string text;
+			if (wattsUsed == wattsNeededWhenActive)
+			{
+				text = GameUtil.GetFormattedWattage(wattsUsed, "F1");
+			}
+			else
+			{
+				text = string.Format("{0} / {1}", GameUtil.GetFormattedWattage(wattsUsed, "F1"), GameUtil.GetFormattedWattage(wattsNeededWhenActive, "F1"));
+			}
+			label.GetComponent<LocText>().text = string.Format("{0}: {1}", consumer.Name, text);
+			label.SetActive(true);
+			label.GetComponent<LocText>().fontStyle = ((!(kmonoBehaviour.gameObject == this.target)) ? FontStyles.Normal : FontStyles.Bold);
 		}
 	}
 

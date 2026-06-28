@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Database;
 using Klei.AI;
-using STRINGS;
 using UnityEngine;
 
 public class DiseaseTrigger : KMonoBehaviour, IGameObjectEffectDescriptor
@@ -37,18 +36,18 @@ public class DiseaseTrigger : KMonoBehaviour, IGameObjectEffectDescriptor
 				}
 				if (disease != null)
 				{
-					string infectionSourceInfo = this.GetInfectionSourceInfo();
+					string infectionSourceInfo = this.GetInfectionSourceInfo(disease);
 					DiseaseExposureInfo diseaseExposureInfo = new DiseaseExposureInfo(disease.Id, 1f, infectionSourceInfo);
 					bool flag = true;
 					Edible component = this.gameObject.GetComponent<Edible>();
 					if (component != null)
 					{
 						Traits component2 = gameObject.GetComponent<Traits>();
-						if (!component2.HasTrait("IronGut"))
+						if (component2.HasTrait("IronGut"))
 						{
 							flag = false;
 						}
-						diseaseExposureInfo.exposureCount = component.rationsConsumed;
+						diseaseExposureInfo.exposureCount = component.unitsConsumed;
 					}
 					if (flag)
 					{
@@ -63,20 +62,13 @@ public class DiseaseTrigger : KMonoBehaviour, IGameObjectEffectDescriptor
 		}
 	}
 
-	private string GetInfectionSourceInfo()
+	private string GetInfectionSourceInfo(Disease disease)
 	{
 		string properName = base.GetComponent<KSelectable>().GetProperName();
-		return string.Format(DUPLICANTS.DISEASES.INFECTIONSOURCES.FOOD, properName);
+		return string.Format(disease.InfectionSourceString(), properName);
 	}
 
-	public int DescriptionOrder { get; set; }
-
-	public List<Descriptor> GetRequirementDescriptions(GameObject go)
-	{
-		return null;
-	}
-
-	public List<string> GetEffectDescriptions(GameObject go)
+	public List<Descriptor> EffectDescriptors(GameObject go)
 	{
 		Dictionary<GameHashes, HashSet<string>> dictionary = new Dictionary<GameHashes, HashSet<string>>();
 		foreach (DiseaseTrigger.TriggerInfo triggerInfo in this.triggers)
@@ -92,9 +84,8 @@ public class DiseaseTrigger : KMonoBehaviour, IGameObjectEffectDescriptor
 				hashSet.Add(text);
 			}
 		}
-		List<string> list = new List<string>();
+		List<Descriptor> list = new List<Descriptor>();
 		List<string> list2 = new List<string>();
-		global::Database.Diseases diseases = Db.Get().Diseases;
 		string properName = base.GetComponent<KSelectable>().GetProperName();
 		foreach (KeyValuePair<GameHashes, HashSet<string>> keyValuePair in dictionary)
 		{
@@ -102,31 +93,22 @@ public class DiseaseTrigger : KMonoBehaviour, IGameObjectEffectDescriptor
 			list2.Clear();
 			foreach (string text2 in value)
 			{
-				foreach (Disease disease in diseases)
-				{
-					if (text2 == disease.Id)
-					{
-						list2.Add(disease.Name);
-						break;
-					}
-				}
+				Disease disease = Db.Get().Diseases.Get(text2);
+				list2.Add(disease.Name);
 			}
 			string text3 = string.Join(", ", list2.ToArray());
-			string rootString = this.GetRootString(keyValuePair.Key);
-			string text4 = rootString.Replace("{ItemName}", properName);
-			text4 = text4.Replace("{Diseases}", text3);
-			list.Add(text4);
+			string text4 = Strings.Get("STRINGS.DUPLICANTS.DISEASES.TRIGGERS." + Enum.GetName(typeof(GameHashes), keyValuePair.Key).ToUpper()).String;
+			string text5 = Strings.Get("STRINGS.DUPLICANTS.DISEASES.TRIGGERS.TOOLTIPS." + Enum.GetName(typeof(GameHashes), keyValuePair.Key).ToUpper()).String;
+			text4 = text4.Replace("{ItemName}", properName).Replace("{Diseases}", text3);
+			text5 = text5.Replace("{ItemName}", properName).Replace("{Diseases}", text3);
+			list.Add(new Descriptor(text4, text5, Descriptor.DescriptorType.Effect, false));
 		}
 		return list;
 	}
 
-	private string GetRootString(GameHashes trigger_hash)
+	public List<Descriptor> GetDescriptors(GameObject go)
 	{
-		if (trigger_hash != GameHashes.EatCompleteEdible)
-		{
-			throw new ArgumentOutOfRangeException();
-		}
-		return DUPLICANTS.DISEASES.DISEASE_TRIGGER_EAT;
+		return this.EffectDescriptors(go);
 	}
 
 	public List<DiseaseTrigger.TriggerInfo> triggers = new List<DiseaseTrigger.TriggerInfo>();

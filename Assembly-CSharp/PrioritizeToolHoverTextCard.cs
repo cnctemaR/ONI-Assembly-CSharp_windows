@@ -6,6 +6,13 @@ public class PrioritizeToolHoverTextCard : HoverTextConfiguration
 	public override void ConfigureHoverScreen()
 	{
 		HoverTextScreen instance = HoverTextScreen.Instance;
+		if (instance.LoadPreConfiguredToolFields(this))
+		{
+			this.isConfigured = true;
+			return;
+		}
+		instance.currentConfiguration = this;
+		instance.ToggleIncubating(true);
 		if (!string.IsNullOrEmpty(this.ActionStringKey))
 		{
 			this.ActionName = Strings.Get(this.ActionStringKey);
@@ -21,6 +28,7 @@ public class PrioritizeToolHoverTextCard : HoverTextConfiguration
 		instance.NewLine("PriorityText", 24);
 		this.priorityLine = instance.AddText(string.Empty, this.Styles_Title.Standard, true);
 		instance.EndShadowBar();
+		this.isConfigured = true;
 	}
 
 	public override void UpdateHoverElements(KSelectable[] selected)
@@ -29,7 +37,7 @@ public class PrioritizeToolHoverTextCard : HoverTextConfiguration
 		{
 			return;
 		}
-		if (this.priorityLine == null)
+		if (!this.isConfigured || this.priorityLine == null)
 		{
 			this.ConfigureHoverScreen();
 		}

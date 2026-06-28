@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
 
@@ -411,11 +412,19 @@ public static class Util
 	{
 		for (int i = inputField.text.Length - 1; i >= 0; i--)
 		{
-			if (!Util.IsInputCharacterValid(inputField.text[i]))
+			if (i < inputField.text.Length)
 			{
-				inputField.text = inputField.text.Remove(i, 1);
+				if (!Util.IsInputCharacterValid(inputField.text[i]))
+				{
+					inputField.text = inputField.text.Remove(i, 1);
+				}
 			}
 		}
+	}
+
+	public static string StripTextFormatting(string original)
+	{
+		return Regex.Replace(original, "<[^>]*>([^<]*)<[^>]*>", "$1");
 	}
 
 	public static bool Contains(this Bounds parentBounds, Bounds queryBounds)

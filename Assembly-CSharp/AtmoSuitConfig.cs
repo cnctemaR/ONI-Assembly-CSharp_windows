@@ -10,12 +10,12 @@ public class AtmoSuitConfig : IEquipmentConfig
 	public EquipmentDef CreateEquipmentDef()
 	{
 		Dictionary<string, float> dictionary = new Dictionary<string, float>();
-		dictionary.Add("Iron", 300f);
+		dictionary.Add(SimHashes.Dirt.ToString(), 300f);
 		List<AttributeModifier> list = new List<AttributeModifier>();
-		list.Add(new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTEMOD_IDS.INSULATION, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_INSULATION, global::STRINGS.EQUIPMENT.PREFABS.ATMOSUIT.NAME, false));
-		list.Add(new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTEMOD_IDS.ATHLETICS, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_ATHLETICS, global::STRINGS.EQUIPMENT.PREFABS.ATMOSUIT.NAME, false));
-		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef("AtmoSuit", global::TUNING.EQUIPMENT.SUITS.SUITSLOT, global::TUNING.EQUIPMENT.SUITS.SUITFABRICATOR, global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_FABTIME, "Iron", dictionary, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_MASS, "suit_oxygen", global::TUNING.EQUIPMENT.SUITS.SUIT_SNAPON, "body_oxygen", PathFinderFlags.SuitRequired, list);
-		equipmentDef.RecipeDescription = global::STRINGS.EQUIPMENT.PREFABS.ATMOSUIT.RECIPEDESC;
+		list.Add(new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTE_MOD_IDS.INSULATION, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_INSULATION, global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.NAME, false, false));
+		list.Add(new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTE_MOD_IDS.ATHLETICS, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_ATHLETICS, global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.NAME, false, false));
+		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef("AtmoSuit", global::TUNING.EQUIPMENT.SUITS.SLOT, global::TUNING.EQUIPMENT.SUITS.FABRICATOR, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_FABTIME, SimHashes.Dirt, dictionary, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_MASS, "suit_oxygen_kanim", global::TUNING.EQUIPMENT.SUITS.SNAPON, "body_oxygen_kanim", PathFinderFlags.SuitRequired, list, null, false, EntityTemplates.CollisionShape.CIRCLE, 0.325f, 0.325f);
+		equipmentDef.RecipeDescription = global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.RECIPE_DESC;
 		return equipmentDef;
 	}
 
@@ -25,4 +25,6 @@ public class AtmoSuitConfig : IEquipmentConfig
 		suitTank.element = "Oxygen";
 		suitTank.amount = 11f;
 	}
+
+	public const string ID = "AtmoSuit";
 }

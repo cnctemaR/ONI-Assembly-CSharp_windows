@@ -3,12 +3,12 @@
 public class DropUnusedInventoryChore : Chore<DropUnusedInventoryChore.StatesInstance>
 {
 	public DropUnusedInventoryChore(ChoreType chore_type, IStateMachineTarget target)
-		: base(chore_type, target, target.GetComponent<ChoreProvider>(), true, null, null, null, int.MaxValue, false, true)
+		: base(chore_type, target, target.GetComponent<ChoreProvider>(), true, null, null, null, int.MaxValue, false, true, 0)
 	{
 		this.smi = new DropUnusedInventoryChore.StatesInstance(this);
 	}
 
-	public class StatesInstance : GameStateMachine<DropUnusedInventoryChore.States, DropUnusedInventoryChore.StatesInstance, DropUnusedInventoryChore>.GameInstance
+	public class StatesInstance : GameStateMachine<DropUnusedInventoryChore.States, DropUnusedInventoryChore.StatesInstance, DropUnusedInventoryChore, object>.GameInstance
 	{
 		public StatesInstance(DropUnusedInventoryChore master)
 			: base(master)
@@ -28,8 +28,8 @@ public class DropUnusedInventoryChore : Chore<DropUnusedInventoryChore.StatesIns
 			this.success.ReturnSuccess();
 		}
 
-		public GameStateMachine<DropUnusedInventoryChore.States, DropUnusedInventoryChore.StatesInstance, DropUnusedInventoryChore>.State dropping;
+		public GameStateMachine<DropUnusedInventoryChore.States, DropUnusedInventoryChore.StatesInstance, DropUnusedInventoryChore, object>.State dropping;
 
-		public GameStateMachine<DropUnusedInventoryChore.States, DropUnusedInventoryChore.StatesInstance, DropUnusedInventoryChore>.State success;
+		public GameStateMachine<DropUnusedInventoryChore.States, DropUnusedInventoryChore.StatesInstance, DropUnusedInventoryChore, object>.State success;
 	}
 }

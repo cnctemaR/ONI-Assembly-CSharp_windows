@@ -10,17 +10,20 @@ public class SafetyChecker
 
 	public SafetyChecker.Condition[] conditions { get; private set; }
 
-	public int GetSafetyConditions(int cell, KMonoBehaviour cmp)
+	public int GetSafetyConditions(int cell, int cost, SafetyChecker.Context context, out bool all_conditions_met)
 	{
-		SafetyChecker.Context context = new SafetyChecker.Context(cmp);
 		int num = 0;
-		foreach (SafetyChecker.Condition condition in this.conditions)
+		int num2 = 0;
+		for (int i = 0; i < this.conditions.Length; i++)
 		{
-			if (condition.callback(cell, context))
+			SafetyChecker.Condition condition = this.conditions[i];
+			if (condition.callback(cell, cost, context))
 			{
 				num |= condition.mask;
+				num2++;
 			}
 		}
+		all_conditions_met = num2 == this.conditions.Length;
 		return num;
 	}
 
@@ -37,7 +40,7 @@ public class SafetyChecker
 
 		public int mask { get; private set; }
 
-		public delegate bool Callback(int cell, SafetyChecker.Context context);
+		public delegate bool Callback(int cell, int cost, SafetyChecker.Context context);
 	}
 
 	public struct Context
@@ -48,11 +51,17 @@ public class SafetyChecker
 			this.navigator = cmp.GetComponent<Navigator>();
 			this.oxygenBreather = cmp.GetComponent<OxygenBreather>();
 			this.minionBrain = cmp.GetComponent<MinionBrain>();
+			this.temperatureTransferer = cmp.GetComponent<SimTemperatureTransfer>();
+			this.primaryElement = cmp.GetComponent<PrimaryElement>();
 		}
 
 		public Navigator navigator;
 
 		public OxygenBreather oxygenBreather;
+
+		public SimTemperatureTransfer temperatureTransferer;
+
+		public PrimaryElement primaryElement;
 
 		public MinionBrain minionBrain;
 

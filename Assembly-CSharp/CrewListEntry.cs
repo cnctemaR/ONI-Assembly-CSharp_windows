@@ -31,7 +31,6 @@ public class CrewListEntry : KMonoBehaviour, IPointerEnterHandler, IEventSystemH
 	public void OnPointerClick(PointerEventData eventData)
 	{
 		bool flag = Time.unscaledTime - this.lastClickTime < 0.3f;
-		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
 		this.SelectCrewMember(flag);
 		this.lastClickTime = Time.unscaledTime;
 	}

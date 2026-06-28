@@ -4,6 +4,18 @@ using UnityEngine;
 
 public class DrowningMonitor : KMonoBehaviour
 {
+	private OccupyArea occupyArea
+	{
+		get
+		{
+			if (this._occupyArea == null)
+			{
+				this._occupyArea = base.GetComponent<OccupyArea>();
+			}
+			return this._occupyArea;
+		}
+	}
+
 	public bool Drowning
 	{
 		get
@@ -21,41 +33,25 @@ public class DrowningMonitor : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.staminaHandle = GameScheduler.Instance.SchedulePeriodic(base.name, this.staminaUpdateFrequency, new Action<object>(this.UpdateStamina), null, null, 0f);
-		this.checkDrowningHandle = GameScheduler.Instance.SchedulePeriodic(base.name, this.staminaUpdateFrequency, new Action<object>(this.CheckDrowning), null, null, 0f);
-		this.selectable = base.GetComponent<KSelectable>();
+		this.staminaHandle = GameScheduler.Instance.SchedulePeriodic(base.name, this.staminaUpdateFrequency, new Action<object>(this.UpdateStamina), null, null, 0f, null);
+		this.checkDrowningHandle = GameScheduler.Instance.SchedulePeriodic(base.name, this.staminaUpdateFrequency, new Action<object>(this.CheckDrowning), null, null, 0f, null);
 		this.OnMove(null);
 		this.CheckDrowning(null);
-		this.Subscribe(1088554450, new EventSystem.EventHandler(this.OnMove));
+		this.Subscribe(1088554450, new Action<object>(this.OnMove));
 	}
 
 	private void OnMove(object data = null)
 	{
-		this.position = Grid.PosToCell(base.gameObject);
 		if (this.partitionerEntry != null)
 		{
-			this.partitionerEntry.UpdatePosition(this.position);
+			Extents extents = this.occupyArea.GetExtents();
+			this.partitionerEntry.UpdatePosition(extents.x, extents.y);
 		}
 		else
 		{
-			Vector2I vector2I = Grid.PosToXY(this.transform.position);
-			Extents extents = new Extents(vector2I.x, vector2I.y, 1, 2);
-			this.partitionerEntry = GameScenePartitioner.Instance.Add("DrowningMonitor.OnSpawn", base.gameObject, extents, GameScenePartitioner.Instance.liquidChangedMask.mask, new Action<object>(this.OnLiquidChanged));
+			this.partitionerEntry = GameScenePartitioner.Instance.Add("DrowningMonitor.OnSpawn", base.gameObject, this.occupyArea.GetExtents(), GameScenePartitioner.Instance.liquidChangedMask.mask, new Action<object>(this.OnLiquidChanged));
 		}
 		this.CheckDrowning(null);
-	}
-
-	private void OnDrawGizmosSelected()
-	{
-		Gizmos.color = Color.green;
-		for (int i = 0; i < this.partitionerEntry.height; i++)
-		{
-			for (int j = 0; j < this.partitionerEntry.width; j++)
-			{
-				int num = Grid.PosToCell(new Vector2((float)(this.partitionerEntry.x + j) + 0.5f, (float)(this.partitionerEntry.y + i) + 1f));
-				Gizmos.DrawCube(Grid.CellToPos(num) + Vector3.up / 2f + Vector3.right / 2f, Vector3.one);
-			}
-		}
 	}
 
 	protected override void OnCleanUp()
@@ -83,22 +79,14 @@ public class DrowningMonitor : KMonoBehaviour
 		{
 			return;
 		}
-		bool flag = true;
-		for (int i = 0; i < this.partitionerEntry.height; i++)
-		{
-			for (int j = 0; j < this.partitionerEntry.width; j++)
-			{
-				int num = Grid.PosToCell(new Vector2((float)(this.partitionerEntry.x + j) + 0.5f, (float)(this.partitionerEntry.y + i) + 1f));
-				flag = flag && this.IsCellSafe(num);
-			}
-		}
-		if (!flag)
+		int num = Grid.PosToCell(base.gameObject.transform.position);
+		if (!this.IsCellSafe(num))
 		{
 			if (!this.drowning)
 			{
 				this.drowning = true;
-				this.Trigger(1949704522, null);
 				this.selectable.AddStatusItem(Db.Get().CreatureStatusItems.Drowning, null);
+				this.Trigger(1949704522, null);
 			}
 			if (this.stamina <= 0f)
 			{
@@ -106,51 +94,21 @@ public class DrowningMonitor : KMonoBehaviour
 				this.SetIncapacitated(true);
 			}
 		}
-		else
+		else if (this.drowning)
 		{
-			if (this.drowning)
-			{
-				this.drowning = false;
-				this.Trigger(99949694, null);
-			}
-			this.selectable.RemoveStatusItem(Db.Get().CreatureStatusItems.Drowning);
+			this.drowning = false;
+			this.selectable.RemoveStatusItem(Db.Get().CreatureStatusItems.Drowning, false);
+			this.Trigger(99949694, null);
 		}
 	}
 
 	public bool IsCellSafe(int cell)
 	{
-		int num;
-		int num2;
-		Vector2 vector;
-		if (this.partitionerEntry == null)
+		return this.occupyArea.TestArea(cell, delegate(int testCell)
 		{
-			num = this.extents.width;
-			num2 = this.extents.height;
-			vector = new Vector2((float)this.extents.x, (float)this.extents.y);
-		}
-		else
-		{
-			num = this.partitionerEntry.width;
-			num2 = this.partitionerEntry.height;
-			vector = new Vector2((float)this.partitionerEntry.x, (float)this.partitionerEntry.y);
-		}
-		for (int i = 0; i < num2; i++)
-		{
-			for (int j = 0; j < num; j++)
-			{
-				int num3 = Grid.PosToCell(new Vector2(vector.x + (float)j + 0.5f, vector.y + (float)i + 1f));
-				int num4 = Grid.CellAbove(num3);
-				if (!Grid.IsValidCell(num3) || !Grid.IsValidCell(num4))
-				{
-					return false;
-				}
-				if ((Grid.IsSubstantialLiquid(num4, 0.2f) && Grid.IsLiquid(num3)) || Grid.IsSubstantialLiquid(num3, this.cellLiquidThreshold))
-				{
-					return false;
-				}
-			}
-		}
-		return true;
+			int num = Grid.CellAbove(testCell);
+			return Grid.IsValidCell(testCell) && Grid.IsValidCell(num) && (!Grid.IsLiquid(num) || !Grid.IsLiquid(testCell)) && !Grid.IsSubstantialLiquid(testCell, this.cellLiquidThreshold);
+		});
 	}
 
 	private void OnLiquidChanged(object data)
@@ -182,6 +140,11 @@ public class DrowningMonitor : KMonoBehaviour
 		this.incapacitated = state;
 	}
 
+	[MyCmpReq]
+	private KSelectable selectable;
+
+	private OccupyArea _occupyArea;
+
 	private int position;
 
 	[Serialize]
@@ -201,8 +164,6 @@ public class DrowningMonitor : KMonoBehaviour
 	private float staminaUpdateFrequency = 1f;
 
 	private Extents extents;
-
-	private KSelectable selectable;
 
 	private GameScenePartitionerEntry partitionerEntry;
 

@@ -16,7 +16,7 @@ public class BuildTool : DragTool
 	{
 		this.active = true;
 		base.OnActivateTool();
-		this.buildingOrientation = Orientation.None;
+		this.buildingOrientation = Orientation.Neutral;
 		int num = LayerMask.NameToLayer("Place");
 		this.visualizer = GameUtil.KInstantiate(this.def.BuildingPreview, Grid.SceneLayer.Use, Folder.Placers, null, num);
 		KBatchedAnimController component = this.visualizer.GetComponent<KBatchedAnimController>();
@@ -25,6 +25,7 @@ public class BuildTool : DragTool
 			component.visibilityType = KAnimControllerBase.VisibilityType.Always;
 			component.isMovable = true;
 			component.Offset = this.def.GetVisualizerOffset();
+			component.name = component.GetComponent<KPrefabID>().GetDebugName() + "_visualizer";
 		}
 		this.visualizer.SetActive(true);
 		this.visualizer.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.Placers).transform;
@@ -33,7 +34,7 @@ public class BuildTool : DragTool
 		component2.ConfigureHoverScreen();
 		component2.UpdateHoverElements(null);
 		ResourceRemainingDisplayScreen.instance.ActivateDisplay(this.visualizer);
-		this.buildingOrientation = Orientation.Up;
+		this.buildingOrientation = Orientation.Neutral;
 		if (component == null)
 		{
 			this.visualizer.SetLayerRecursively(LayerMask.NameToLayer("Place"));
@@ -49,21 +50,17 @@ public class BuildTool : DragTool
 	{
 		this.active = false;
 		GridCompositor.Instance.ToggleMajor(false);
-		this.buildingOrientation = Orientation.None;
+		this.buildingOrientation = Orientation.Neutral;
 		this.HideToolTip();
 		ResourceRemainingDisplayScreen.instance.DeactivateDisplay();
 		this.ClearTilePreview();
 		global::UnityEngine.Object.Destroy(this.visualizer);
-		if (new_tool != PrebuildTool.Instance)
-		{
-			KMonoBehaviour.PlaySound(GlobalAssets.GetSound(this.GetDeactivateSound(), false));
-		}
 		base.OnDeactivateTool(new_tool);
 	}
 
 	public void Activate(BuildingDef def, IList<Element> selected_elements)
 	{
-		this.buildingOrientation = Orientation.None;
+		this.buildingOrientation = Orientation.Neutral;
 		this.selectedElements = selected_elements;
 		this.def = def;
 		if (def.ViewMode != SimViewMode.None)
@@ -83,7 +80,7 @@ public class BuildTool : DragTool
 		this.selectedElements = null;
 		SelectTool.Instance.Activate();
 		this.def = null;
-		this.buildingOrientation = Orientation.None;
+		this.buildingOrientation = Orientation.Neutral;
 		ResourceRemainingDisplayScreen.instance.DeactivateDisplay();
 	}
 
@@ -153,7 +150,7 @@ public class BuildTool : DragTool
 						GameObject gameObject2 = null;
 						if (this.def.ReplacementLayer != ObjectLayer.NumLayers)
 						{
-							gameObject2 = Grid.Objects[num, 18];
+							gameObject2 = Grid.Objects[num, 10];
 						}
 						if (gameObject == null || (gameObject.GetComponent<Constructable>() == null && gameObject2 == null))
 						{
@@ -229,7 +226,7 @@ public class BuildTool : DragTool
 			{
 				gameObject = this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, false);
 				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-				component.Temperature = component.Element.defaultValues.temperature;
+				component.Temperature = 293.15f;
 			}
 		}
 		else
@@ -247,9 +244,10 @@ public class BuildTool : DragTool
 					BuildingComplete component2 = gameObject2.GetComponent<BuildingComplete>();
 					if (component2 != null && component2.Def.IsFoundation && component2.Def.isKAnimTile && (component2.Def != this.def || this.selectedElements[0] != gameObject2.GetComponent<PrimaryElement>().Element))
 					{
-						gameObject = this.def.Instantiate(vector, this.buildingOrientation, this.selectedElements, 0, false);
-						Constructable component3 = gameObject.GetComponent<Constructable>();
+						Constructable component3 = this.def.BuildingUnderConstruction.GetComponent<Constructable>();
 						component3.IsReplacementTile = true;
+						gameObject = this.def.Instantiate(vector, this.buildingOrientation, this.selectedElements, 0, false);
+						component3.IsReplacementTile = false;
 						Grid.Objects[cell, (int)this.def.ReplacementLayer] = gameObject;
 					}
 				}

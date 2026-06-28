@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 
 namespace Database
 {
@@ -7,17 +8,21 @@ namespace Database
 		public ChoreGroups(ResourceSet parent)
 			: base("ChoreGroups", parent)
 		{
-			this.Combat = this.Add("Combat", "Combat", "Digging");
-			this.Cook = this.Add("Cook", "Cook", "Cooking");
-			this.Art = this.Add("Art", "Art", "Art");
-			this.Compost = this.Add("Compost", "Compost", "Machinery");
-			this.Research = this.Add("Research", "Research", "Learning");
-			this.GeneratePower = this.Add("GeneratePower", "Generate Power", "Athletics");
-			this.Harvest = this.Add("Harvest", "Harvest", "Digging");
-			this.Transport = this.Add("Sweep", "Sweep", "Athletics");
-			this.Build = this.Add("Build", "Build", "Construction");
-			this.Deliver = this.Add("Deliver", "Deliver", "Athletics");
-			this.Dig = this.Add("Dig", "Dig", "Digging");
+			this.Combat = this.Add("Combat", DUPLICANTS.CHOREGROUPS.COMBAT.NAME, "Digging");
+			this.Massage = this.Add("Massage", DUPLICANTS.CHOREGROUPS.MASSAGE.NAME, "Machinery");
+			this.Cook = this.Add("Cook", DUPLICANTS.CHOREGROUPS.COOK.NAME, "Cooking");
+			this.Art = this.Add("Art", DUPLICANTS.CHOREGROUPS.ART.NAME, "Art");
+			this.Compost = this.Add("Compost", DUPLICANTS.CHOREGROUPS.COMPOST.NAME, "Machinery");
+			this.Research = this.Add("Research", DUPLICANTS.CHOREGROUPS.RESEARCH.NAME, "Learning");
+			this.LiquidCooledFan = this.Add("LiquidCooledFan", DUPLICANTS.CHOREGROUPS.LIQUIDCOOLEDFAN.NAME, "Machinery");
+			this.GeneratePower = this.Add("GeneratePower", DUPLICANTS.CHOREGROUPS.GENERATEPOWER.NAME, "Athletics");
+			this.Repair = this.Add("Repair", DUPLICANTS.CHOREGROUPS.REPAIR.NAME, "Machinery");
+			this.Mop = this.Add("Mop", DUPLICANTS.CHOREGROUPS.MOP.NAME, "Digging");
+			this.Harvest = this.Add("Harvest", DUPLICANTS.CHOREGROUPS.HARVEST.NAME, "Digging");
+			this.Transport = this.Add("Sweep", DUPLICANTS.CHOREGROUPS.SWEEP.NAME, "Athletics");
+			this.Build = this.Add("Build", DUPLICANTS.CHOREGROUPS.BUILD.NAME, "Construction");
+			this.Deliver = this.Add("Deliver", DUPLICANTS.CHOREGROUPS.DELIVER.NAME, "Athletics");
+			this.Dig = this.Add("Dig", DUPLICANTS.CHOREGROUPS.DIG.NAME, "Digging");
 		}
 
 		private ChoreGroup Add(string id, string name, string attribute)
@@ -41,6 +46,8 @@ namespace Database
 
 		public ChoreGroup Combat;
 
+		public ChoreGroup LiquidCooledFan;
+
 		public ChoreGroup GeneratePower;
 
 		public ChoreGroup Harvest;
@@ -50,5 +57,11 @@ namespace Database
 		public ChoreGroup Transport;
 
 		public ChoreGroup Deliver;
+
+		public ChoreGroup Repair;
+
+		public ChoreGroup Mop;
+
+		public ChoreGroup Massage;
 	}
 }

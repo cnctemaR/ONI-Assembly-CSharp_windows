@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[SkipSaveFileSerialization]
 public class Notifier : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
@@ -36,8 +37,12 @@ public class Notifier : KMonoBehaviour
 			}
 			notification.Notifier = this;
 			notification.Position = this.transform.position;
-			if (notification.Group != null && notification.Group != string.Empty)
+			if (notification.Group.IsValid() && notification.Group != string.Empty)
 			{
+				if (this.NotificationGroups == null)
+				{
+					this.NotificationGroups = new Dictionary<HashedString, Notification>();
+				}
 				Notification notification2;
 				this.NotificationGroups.TryGetValue(notification.Group, out notification2);
 				if (notification2 != null)
@@ -64,14 +69,22 @@ public class Notifier : KMonoBehaviour
 		if (notification.Notifier != null)
 		{
 			notification.Notifier = null;
-			if (notification.Group != null && notification.Group != string.Empty)
+			if (this.NotificationGroups != null && notification.Group.IsValid() && notification.Group != string.Empty)
 			{
-				this.NotificationGroups[notification.Group] = null;
+				this.NotificationGroups.Remove(notification.Group);
 			}
 			if (this.OnRemove != null)
 			{
 				this.OnRemove(notification);
 			}
+		}
+	}
+
+	public void ClearNotifications()
+	{
+		foreach (KeyValuePair<HashedString, Notification> keyValuePair in this.NotificationGroups)
+		{
+			this.Remove(keyValuePair.Value);
 		}
 	}
 
@@ -84,5 +97,5 @@ public class Notifier : KMonoBehaviour
 
 	public bool DisableNotifications;
 
-	private Dictionary<string, Notification> NotificationGroups = new Dictionary<string, Notification>();
+	private Dictionary<HashedString, Notification> NotificationGroups;
 }

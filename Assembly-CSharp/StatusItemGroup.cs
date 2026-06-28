@@ -38,10 +38,13 @@ public class StatusItemGroup
 
 	public Guid SetStatusItem(StatusItemCategory category, StatusItem item, object data = null)
 	{
-		this.Log("Set", item);
 		if (item != null && item.allowMultiples)
 		{
 			throw new ArgumentException(item.Name + " allows multiple instances of itself to be active so you must access it via its handle");
+		}
+		if (category == null)
+		{
+			throw new ArgumentException("SetStatusItem requires a category.");
 		}
 		for (int i = 0; i < this.items.Count; i++)
 		{
@@ -49,22 +52,27 @@ public class StatusItemGroup
 			{
 				if (this.items[i].item == item)
 				{
+					this.Log("Set (exists in category)", item, this.items[i].id, category);
 					return this.items[i].id;
 				}
-				this.RemoveStatusItem(this.items[i].id);
+				this.Log("Set->Remove existing in category", item, this.items[i].id, category);
+				this.RemoveStatusItem(this.items[i].id, false);
 			}
 		}
 		if (item != null)
 		{
-			return this.AddStatusItem(item, data, category);
+			Guid guid = this.AddStatusItem(item, data, category);
+			this.Log("Set (new)", item, guid, category);
+			return guid;
 		}
+		this.Log("Set (failed)", item, Guid.Empty, category);
 		return Guid.Empty;
 	}
 
 	public void SetStatusItem(Guid guid, StatusItemCategory category, StatusItem new_item, object data = null)
 	{
-		this.Log("Set", new_item);
-		this.RemoveStatusItem(guid);
+		this.Log("SetByGUID", new_item, guid);
+		this.RemoveStatusItem(guid, false);
 		if (new_item != null)
 		{
 			this.AddStatusItem(new_item, data, category);
@@ -97,9 +105,9 @@ public class StatusItemGroup
 
 	public Guid AddStatusItem(StatusItem item, object data = null, StatusItemCategory category = null)
 	{
-		this.Log("Add", item);
 		if (this.gameObject == null || (!item.allowMultiples && this.HasStatusItem(item)))
 		{
+			this.Log("Add (failed)", item, Guid.Empty);
 			return Guid.Empty;
 		}
 		if (!item.allowMultiples)
@@ -115,7 +123,8 @@ public class StatusItemGroup
 		StatusItemGroup.Entry entry2 = new StatusItemGroup.Entry(item, category, data);
 		if (item.shouldNotify)
 		{
-			entry2.notification = new Notification(item.notificationText, item.notificationType, null, new Func<List<Notification>, object, string>(StatusItemGroup.OnToolTip), item, false, item.notificationDelay, item.notificationClickCallback, data, item.soundPath);
+			Notification.ClickCallback notificationClickCallback = item.notificationClickCallback;
+			entry2.notification = new Notification(item.notificationText, item.notificationType, HashedString.Invalid, new Func<List<Notification>, object, string>(StatusItemGroup.OnToolTip), item, false, item.notificationDelay, notificationClickCallback, data, item.soundPath);
 			this.gameObject.GetComponent<Notifier>().Add(entry2.notification, string.Empty);
 		}
 		if (item.ShouldShowIcon())
@@ -124,6 +133,7 @@ public class StatusItemGroup
 			Game.Instance.SetStatusItemOffset(this.gameObject.transform, this.offset);
 		}
 		this.items.Add(entry2);
+		this.Log("Add (new)", item, entry2.id);
 		if (item.effect != null)
 		{
 			Effects component = this.gameObject.GetComponent<Effects>();
@@ -136,9 +146,8 @@ public class StatusItemGroup
 		return entry2.id;
 	}
 
-	public Guid RemoveStatusItem(StatusItem status_item)
+	public Guid RemoveStatusItem(StatusItem status_item, bool immediate = false)
 	{
-		this.Log("Remove", status_item);
 		if (status_item.allowMultiples)
 		{
 			throw new ArgumentException(status_item.Name + " allows multiple instances of itself to be active so it must be released via an instance handle");
@@ -147,17 +156,20 @@ public class StatusItemGroup
 		{
 			if (this.items[i].item.Id == status_item.Id)
 			{
-				this.RemoveStatusItem(this.items[i].id);
-				break;
+				Guid guid = this.RemoveStatusItem(this.items[i].id, immediate);
+				this.Log("Remove (found)", status_item, guid);
+				return guid;
 			}
 		}
+		this.Log("Remove (not found)", status_item, Guid.Empty);
 		return Guid.Empty;
 	}
 
-	public Guid RemoveStatusItem(Guid guid)
+	public Guid RemoveStatusItem(Guid guid, bool immediate = false)
 	{
 		if (guid == Guid.Empty)
 		{
+			this.Log("RemoveByGUID (bad)", null, guid);
 			return guid;
 		}
 		for (int i = 0; i < this.items.Count; i++)
@@ -167,6 +179,7 @@ public class StatusItemGroup
 			{
 				StatusItemGroup.Entry entry2 = this.items[i];
 				this.items.RemoveAt(i);
+				this.Log("RemoveByGUID (found)", entry2.item, guid);
 				if (entry2.notification != null)
 				{
 					this.gameObject.GetComponent<Notifier>().Remove(entry2.notification);
@@ -182,11 +195,12 @@ public class StatusItemGroup
 				}
 				if (this.OnRemoveStatusItem != null)
 				{
-					this.OnRemoveStatusItem(entry2);
+					this.OnRemoveStatusItem(entry2, immediate);
 				}
-				break;
+				return guid;
 			}
 		}
+		this.Log("RemoveByGUID (not found)", null, guid);
 		return Guid.Empty;
 	}
 
@@ -196,7 +210,14 @@ public class StatusItemGroup
 		string text = statusItem.notificationTooltipText + "\n";
 		foreach (Notification notification in notifications)
 		{
-			text = text + "\n" + notification.Notifier.GetComponent<KSelectable>().GetName();
+			if (notification != null && notification.Notifier != null)
+			{
+				KSelectable component = notification.Notifier.GetComponent<KSelectable>();
+				if (component != null)
+				{
+					text = text + "\n" + component.GetName();
+				}
+			}
 		}
 		return text;
 	}
@@ -209,32 +230,25 @@ public class StatusItemGroup
 		}
 		while (this.items.Count > 0)
 		{
-			this.RemoveStatusItem(this.items[0].id);
+			this.RemoveStatusItem(this.items[0].id, false);
 		}
 	}
 
-	private void Log(string action, StatusItem item)
+	private void Log(string action, StatusItem item, Guid guid)
 	{
-		if (item != null)
-		{
-			string id = item.Id;
-		}
 	}
 
-	public global::Logger GetLog()
+	private void Log(string action, StatusItem item, Guid guid, StatusItemCategory category)
 	{
-		return this.log;
 	}
 
 	private List<StatusItemGroup.Entry> items = new List<StatusItemGroup.Entry>();
 
 	public Action<StatusItemGroup.Entry, StatusItemCategory> OnAddStatusItem;
 
-	public Action<StatusItemGroup.Entry> OnRemoveStatusItem;
+	public Action<StatusItemGroup.Entry, bool> OnRemoveStatusItem;
 
 	private Vector3 offset = new Vector3(0f, 0f, 0f);
-
-	private LoggerFSS log = new LoggerFSS("StatusItemGroup");
 
 	public struct Entry : IComparable<StatusItemGroup.Entry>, IEquatable<StatusItemGroup.Entry>
 	{

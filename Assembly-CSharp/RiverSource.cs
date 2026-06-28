@@ -32,17 +32,17 @@ public class RiverSource : KMonoBehaviour
 			}
 			if ((double)(this.maxMass - mass) < 5.0 && Grid.Temperature[num] < this.temperature)
 			{
-				SimMessages.ModifyCell(num, this.elementIdx, this.temperature, this.maxMass, true, -1);
+				SimMessages.ModifyCell(num, this.elementIdx, this.temperature, this.maxMass, SimMessages.ReplaceType.ReplaceAndDisplace, -1);
 			}
 		}
 		else
 		{
-			SimMessages.ModifyCell(num, this.elementIdx, this.temperature, this.maxMass, true, -1);
+			SimMessages.ModifyCell(num, this.elementIdx, this.temperature, this.maxMass, SimMessages.ReplaceType.ReplaceAndDisplace, -1);
 		}
 	}
 
-	[HashedEnum]
 	[SerializeField]
+	[HashedEnum]
 	public SimHashes elementID;
 
 	[SerializeField]

@@ -27,6 +27,8 @@ public class Components
 
 	public static Components.Cmps<OxygenBreather> OxygenBreathers = new Components.Cmps<OxygenBreather>();
 
+	public static Components.Cmps<SuffocationMonitor.Instance> SuffocationMonitorInstance = new Components.Cmps<SuffocationMonitor.Instance>();
+
 	public static Components.Cmps<Fabricator> Fabricators = new Components.Cmps<Fabricator>();
 
 	public static Components.Cmps<PlantablePlot> PlantablePlots = new Components.Cmps<PlantablePlot>();
@@ -38,8 +40,6 @@ public class Components
 	public static Components.Cmps<Door> Doors = new Components.Cmps<Door>();
 
 	public static Components.Cmps<Light2D> Light2Ds = new Components.Cmps<Light2D>();
-
-	public static Components.Cmps<InfraredVisualizer> InfraredVisualizers = new Components.Cmps<InfraredVisualizer>();
 
 	public static Components.Cmps<Attackable> Attackables = new Components.Cmps<Attackable>();
 
@@ -69,9 +69,21 @@ public class Components
 
 	public static Components.Cmps<Health> Health = new Components.Cmps<Health>();
 
+	public static Components.Cmps<Equipment> Equipment = new Components.Cmps<Equipment>();
+
 	public static Components.Cmps<FactionAlignment> FactionAlignments = new Components.Cmps<FactionAlignment>();
 
 	public static Components.Cmps<Clinic> Clinics = new Components.Cmps<Clinic>();
+
+	public static Components.Cmps<Telepad> Telepads = new Components.Cmps<Telepad>();
+
+	public static Components.Cmps<Generator> Generators = new Components.Cmps<Generator>();
+
+	public static Components.Cmps<EnergyConsumer> EnergyConsumers = new Components.Cmps<EnergyConsumer>();
+
+	public static Components.Cmps<Battery> Batteries = new Components.Cmps<Battery>();
+
+	public static Components.Cmps<Breakable> Breakables = new Components.Cmps<Breakable>();
 
 	public class Cmps<T> : IEnumerable, IEnumerable<T>
 	{

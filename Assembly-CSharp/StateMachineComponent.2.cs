@@ -2,7 +2,7 @@
 using KSerialization;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class StateMachineComponent<StateMachineInstanceType> : StateMachineComponent, ISaveLoadableJson where StateMachineInstanceType : StateMachine.Instance
+public class StateMachineComponent<StateMachineInstanceType> : StateMachineComponent, ISaveLoadable where StateMachineInstanceType : StateMachine.Instance
 {
 	public StateMachineInstanceType smi
 	{

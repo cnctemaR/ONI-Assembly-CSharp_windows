@@ -24,29 +24,29 @@ public class QuarantineMonitor : GameStateMachine<QuarantineMonitor, QuarantineM
 			});
 	}
 
-	private StateMachine<QuarantineMonitor, QuarantineMonitor.Instance, IStateMachineTarget>.BoolParameter isQuarantined = new StateMachine<QuarantineMonitor, QuarantineMonitor.Instance, IStateMachineTarget>.BoolParameter();
+	private StateMachine<QuarantineMonitor, QuarantineMonitor.Instance, IStateMachineTarget, object>.BoolParameter isQuarantined = new StateMachine<QuarantineMonitor, QuarantineMonitor.Instance, IStateMachineTarget, object>.BoolParameter();
 
-	public GameStateMachine<QuarantineMonitor, QuarantineMonitor.Instance, IStateMachineTarget>.State satisfied;
+	public GameStateMachine<QuarantineMonitor, QuarantineMonitor.Instance, IStateMachineTarget, object>.State satisfied;
 
 	public QuarantineMonitor.QuarantinedState quarantined;
 
-	public class QuarantinedState : GameStateMachine<QuarantineMonitor, QuarantineMonitor.Instance, IStateMachineTarget>.State
+	public class QuarantinedState : GameStateMachine<QuarantineMonitor, QuarantineMonitor.Instance, IStateMachineTarget, object>.State
 	{
-		public GameStateMachine<QuarantineMonitor, QuarantineMonitor.Instance, IStateMachineTarget>.State bedunassigned;
+		public GameStateMachine<QuarantineMonitor, QuarantineMonitor.Instance, IStateMachineTarget, object>.State bedunassigned;
 
-		public GameStateMachine<QuarantineMonitor, QuarantineMonitor.Instance, IStateMachineTarget>.State bedunreachable;
+		public GameStateMachine<QuarantineMonitor, QuarantineMonitor.Instance, IStateMachineTarget, object>.State bedunreachable;
 
-		public GameStateMachine<QuarantineMonitor, QuarantineMonitor.Instance, IStateMachineTarget>.State outside;
+		public GameStateMachine<QuarantineMonitor, QuarantineMonitor.Instance, IStateMachineTarget, object>.State outside;
 
-		public GameStateMachine<QuarantineMonitor, QuarantineMonitor.Instance, IStateMachineTarget>.State inside;
+		public GameStateMachine<QuarantineMonitor, QuarantineMonitor.Instance, IStateMachineTarget, object>.State inside;
 	}
 
-	public new class Instance : GameStateMachine<QuarantineMonitor, QuarantineMonitor.Instance, IStateMachineTarget>.GameInstance
+	public new class Instance : GameStateMachine<QuarantineMonitor, QuarantineMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)
 		{
-			base.Subscribe(493375141, new EventSystem.EventHandler(this.OnRefreshUserMenu));
+			base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		}
 
 		public KMonoBehaviour GetQuarantineArea()
@@ -112,9 +112,8 @@ public class QuarantineMonitor : GameStateMachine<QuarantineMonitor, QuarantineM
 			}
 			UserMenu component = base.GetComponent<UserMenu>();
 			UserMenu userMenu = component;
-			Func<bool> func = new Func<bool>(this.HasBedRoom);
 			string text3 = text2;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_quarantine", text, action, global::Action.NumActions, null, func, null, null, text3));
+			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_quarantine", text, action, global::Action.NumActions, null, null, null, text3, true), 1f);
 		}
 
 		private bool HasBedRoom()
@@ -125,7 +124,7 @@ public class QuarantineMonitor : GameStateMachine<QuarantineMonitor, QuarantineM
 
 		public override void StopSM(string reason)
 		{
-			base.master.Unsubscribe(493375141, new EventSystem.EventHandler(this.OnRefreshUserMenu));
+			base.master.Unsubscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 			base.StopSM(reason);
 		}
 

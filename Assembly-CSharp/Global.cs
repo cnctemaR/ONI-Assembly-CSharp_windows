@@ -1,23 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using Newtonsoft.Json;
-using Steamworks;
 using UnityEngine;
 
 public class Global : MonoBehaviour
 {
 	public static Global Instance { get; private set; }
 
-	public Dictionary<string, Dictionary<string, object>> SystemInfo
-	{
-		get
-		{
-			return this.sysInfo;
-		}
-	}
-
-	private unsafe void Awake()
+	private void Awake()
 	{
 		Global.Instance = this;
 		this.mInputManager = new GameInputManager();
@@ -25,23 +13,22 @@ public class Global : MonoBehaviour
 		this.mAnimEventManager = new AnimEventManager();
 		KBatchedAnimUpdater.CreateInstance();
 		SystemScheduler.Initialize();
-		char* ptr = Sim.SYSINFO_Acquire();
-		if (ptr != null)
+		if (DistributionPlatform.Initialized)
 		{
-			string text = Marshal.PtrToStringAnsi((IntPtr)((void*)ptr));
-			Console.WriteLine(text);
-			this.sysInfo = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, object>>>(text);
-		}
-		Sim.SYSINFO_Release();
-		if (SteamManager.Initialized)
-		{
-			CSteamID steamID = SteamUser.GetSteamID();
-			Debug.Log("Logged into steam with ID: " + steamID);
-			ThreadedHttps<KleiAccount>.Instance.SendSteamTicket(new KleiAccount.GetUserIDdelegate(this.OnGetUserIdKey));
+			Debug.Log(string.Concat(new object[]
+			{
+				"Logged into ",
+				DistributionPlatform.Inst.Name,
+				" with ID:",
+				DistributionPlatform.Inst.LocalUser.Id,
+				", NAME:",
+				DistributionPlatform.Inst.LocalUser.Name
+			}));
+			ThreadedHttps<KleiAccount>.Instance.AuthenticateUser(new KleiAccount.GetUserIDdelegate(this.OnGetUserIdKey));
 		}
 		else
 		{
-			Debug.LogWarning("Cant init steam...");
+			Debug.LogWarning("Can't init " + DistributionPlatform.Inst.Name + " distribution platform...");
 			this.OnGetUserIdKey();
 		}
 	}
@@ -78,6 +65,7 @@ public class Global : MonoBehaviour
 
 	private void Update()
 	{
+		int num = KProfiler.BeginSampleI("Global.Update");
 		this.mInputManager.Update();
 		SystemScheduler.instance.Update();
 		this.mAnimEventManager.Update();
@@ -87,6 +75,7 @@ public class Global : MonoBehaviour
 			ThreadedHttps<KleiMetrics>.Instance.StartSession();
 		}
 		ThreadedHttps<KleiMetrics>.Instance.SetLastUserAction(KInputManager.lastUserActionTick);
+		int num2 = KProfiler.EndSampleI();
 	}
 
 	private void LateUpdate()
@@ -104,6 +93,7 @@ public class Global : MonoBehaviour
 
 	private void OnApplicationQuit()
 	{
+		KGlobalAnimParser.Destroy();
 		ThreadedHttps<KleiMetrics>.Instance.EndSession(false);
 	}
 
@@ -112,8 +102,6 @@ public class Global : MonoBehaviour
 	private CoroutineManager mCoroutineManager;
 
 	private AnimEventManager mAnimEventManager;
-
-	private Dictionary<string, Dictionary<string, object>> sysInfo;
 
 	private bool gotKleiUserID;
 }

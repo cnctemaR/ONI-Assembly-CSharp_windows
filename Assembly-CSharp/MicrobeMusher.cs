@@ -10,9 +10,11 @@ public class MicrobeMusher : Fabricator
 		this.choreType = Db.Get().ChoreTypes.Mush;
 		this.inStorage.choreType = Db.Get().ChoreTypes.MushFetch;
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Mushing;
-		this.attributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
+		this.attributeConverter = Db.Get().AttributeConverters.CookingSpeed;
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Behind, new string[] { "meter_target", "meter_ration" });
-		this.meter.meterController.HideSymbol(new KAnimHashedString("can"), true);
+		this.meter.meterController.HideSymbol(MicrobeMusher.canHash, true);
+		this.meter.meterController.HideSymbol(MicrobeMusher.meterRationHash, true);
+		this.meter.meterController.GetComponent<KBatchedAnimTracker>().skipInitialDisable = true;
 	}
 
 	protected override void OnSpawn()
@@ -24,9 +26,10 @@ public class MicrobeMusher : Fabricator
 		}, null, null);
 	}
 
-	protected override void OnBuildQueued()
+	protected override void OnBuildQueued(Fabricator.MachineOrder order)
 	{
-		base.OnBuildQueued();
+		base.OnBuildQueued(order);
+		this.InstantiateVisualizer(order);
 		this.UpdateMeter();
 	}
 
@@ -43,29 +46,62 @@ public class MicrobeMusher : Fabricator
 		this.meter.SetPositionPercent(num);
 	}
 
-	protected override void CompleteOrder(Fabricator.UserOrder completed_order)
+	protected override GameObject CompleteOrder(Fabricator.UserOrder completed_order)
 	{
+		GameObject gameObject = base.CompleteOrder(completed_order);
+		gameObject.transform.Translate(this.mushbarSpawnOffset);
+		gameObject.SetActive(true);
 		this.workTimeRemaining = this.GetWorkTime();
 		this.UpdateMeter();
-		int num = Grid.PosToCell(this);
-		for (int i = 0; i < 1; i++)
-		{
-			int num2 = Grid.OffsetCell(num, new CellOffset(0, i));
-			GameObject gameObject = completed_order.recipe.Craft(this.buildStorage, completed_order.orderTags);
-			gameObject.transform.SetPosition(Grid.CellToPosCCC(num2, Grid.SceneLayer.Move) + this.mushbarSpawnOffset);
-			gameObject.SetActive(true);
-			gameObject.GetComponent<KMonoBehaviour>().Trigger(748399584, null);
-		}
+		return gameObject;
 	}
 
 	protected override void OnCompleteWork(Worker worker)
 	{
-		base.OnCompleteWork(worker);
+		this.DestroyVisualizer();
 		worker.GetComponent<Effects>().Add("DirtyHands", true);
+		base.OnCompleteWork(worker);
+	}
+
+	public override void CancelOrder(int idx)
+	{
+		if (idx == 0)
+		{
+			this.DestroyVisualizer();
+		}
+		base.CancelOrder(idx);
+		this.UpdateMeter();
+	}
+
+	private void InstantiateVisualizer(Fabricator.MachineOrder order)
+	{
+		if (this.visualizer != null)
+		{
+			this.DestroyVisualizer();
+		}
+		this.visualizer = Util.KInstantiate(order.parentOrder.recipe.FabricationVisualizer, null, null);
+		this.visualizer.transform.parent = this.meter.meterController.transform;
+		this.visualizer.transform.localPosition = new Vector3(0f, 0f, 1f);
+		this.visualizer.SetActive(true);
+	}
+
+	private void DestroyVisualizer()
+	{
+		if (this.visualizer != null)
+		{
+			Util.KDestroyGameObject(this.visualizer);
+			this.visualizer = null;
+		}
 	}
 
 	[SerializeField]
 	public Vector3 mushbarSpawnOffset = Vector3.right;
 
 	private MeterController meter;
+
+	private GameObject visualizer;
+
+	private static readonly KAnimHashedString meterRationHash = new KAnimHashedString("meter_ration");
+
+	private static readonly KAnimHashedString canHash = new KAnimHashedString("can");
 }

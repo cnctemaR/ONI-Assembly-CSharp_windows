@@ -167,32 +167,31 @@ public class ScenePartitioner
 
 	public void TriggerEvent(List<int> cells, int masks, object event_data)
 	{
-		HashSet<ScenePartitionerEntry> hashSet = null;
+		List<ScenePartitionerEntry> list = this.ReserveList();
 		for (int i = 0; i < cells.Count; i++)
 		{
 			int num = 0;
 			int num2 = 0;
 			Grid.CellToXY(cells[i], out num, out num2);
-			this.GatherEntries(num, num2, 1, 1, masks, event_data, ref hashSet);
+			this.GatherEntries(num, num2, 1, 1, masks, event_data, list);
 		}
-		this.RunEntries(hashSet, event_data);
+		this.RunEntries(list, event_data);
+		this.ReleaseList(list);
 	}
 
 	public void TriggerEvent(int x, int y, int width, int height, int masks, object event_data)
 	{
-		HashSet<ScenePartitionerEntry> hashSet = null;
-		this.GatherEntries(x, y, width, height, masks, event_data, ref hashSet);
-		this.RunEntries(hashSet, event_data);
+		List<ScenePartitionerEntry> list = this.ReserveList();
+		this.GatherEntries(x, y, width, height, masks, event_data, list);
+		this.RunEntries(list, event_data);
+		this.ReleaseList(list);
 	}
 
-	private void RunEntries(HashSet<ScenePartitionerEntry> entries, object event_data)
+	private void RunEntries(List<ScenePartitionerEntry> gathered_entries, object event_data)
 	{
-		if (entries == null)
+		for (int i = 0; i < gathered_entries.Count; i++)
 		{
-			return;
-		}
-		foreach (ScenePartitionerEntry scenePartitionerEntry in entries)
-		{
+			ScenePartitionerEntry scenePartitionerEntry = gathered_entries[i];
 			if (scenePartitionerEntry.eventCallback != null)
 			{
 				scenePartitionerEntry.eventCallback(event_data);
@@ -200,8 +199,9 @@ public class ScenePartitioner
 		}
 	}
 
-	public void GatherEntries(int x, int y, int width, int height, int masks, object event_data, ref HashSet<ScenePartitionerEntry> duplicate_check)
+	public void GatherEntries(int x, int y, int width, int height, int masks, object event_data, List<ScenePartitionerEntry> gathered_entries)
 	{
+		this.queryId++;
 		Extents nodeExtents = this.GetNodeExtents(x, y, width, height);
 		int num = Math.Min(nodeExtents.y + nodeExtents.height, this.nodes.GetLength(0));
 		int num2 = Math.Max(nodeExtents.y, 0);
@@ -219,19 +219,19 @@ public class ScenePartitioner
 					ScenePartitionerEntry scenePartitionerEntry = entries[k];
 					if (scenePartitionerEntry != null)
 					{
-						if (scenePartitionerEntry.obj == null)
+						if (scenePartitionerEntry.queryId != this.queryId)
 						{
-							entries[k] = null;
-						}
-						else if ((scenePartitionerEntry.masks & masks) != 0)
-						{
-							if (scenePartitionerEntry.x < x + width && scenePartitionerEntry.x + scenePartitionerEntry.width >= x && scenePartitionerEntry.y < y + height && scenePartitionerEntry.y + scenePartitionerEntry.height >= y)
+							if ((scenePartitionerEntry.masks & masks) != 0)
 							{
-								if (duplicate_check == null)
+								scenePartitionerEntry.queryId = this.queryId;
+								if (scenePartitionerEntry.obj == null)
 								{
-									duplicate_check = new HashSet<ScenePartitionerEntry>();
+									entries[k] = null;
 								}
-								duplicate_check.Add(scenePartitionerEntry);
+								else if (scenePartitionerEntry.x < x + width && scenePartitionerEntry.x + scenePartitionerEntry.width >= x && scenePartitionerEntry.y < y + height && scenePartitionerEntry.y + scenePartitionerEntry.height >= y)
+								{
+									gathered_entries.Add(scenePartitionerEntry);
+								}
 							}
 						}
 					}
@@ -240,11 +240,36 @@ public class ScenePartitioner
 		}
 	}
 
+	public List<ScenePartitionerEntry> ReserveList()
+	{
+		List<ScenePartitionerEntry> list;
+		if (this.freeLists.Count == 0)
+		{
+			list = new List<ScenePartitionerEntry>();
+		}
+		else
+		{
+			list = this.freeLists[this.freeLists.Count - 1];
+			this.freeLists.RemoveAt(this.freeLists.Count - 1);
+		}
+		return list;
+	}
+
+	public void ReleaseList(List<ScenePartitionerEntry> list)
+	{
+		list.Clear();
+		this.freeLists.Add(list);
+	}
+
 	private List<ScenePartitionerMask> masks = new List<ScenePartitionerMask>();
 
 	private int nodeSize;
 
 	private ScenePartitionerNode[,] nodes;
+
+	private int queryId;
+
+	private List<List<ScenePartitionerEntry>> freeLists = new List<List<ScenePartitionerEntry>>();
 
 	private static Predicate<ScenePartitionerEntry> removeCallback = (ScenePartitionerEntry entry) => entry == null;
 }

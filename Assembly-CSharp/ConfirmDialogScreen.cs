@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class ConfirmDialogScreen : KScreen
+public class ConfirmDialogScreen : KModalScreen
 {
 	protected override void OnPrefabInit()
 	{
@@ -44,6 +44,9 @@ public class ConfirmDialogScreen : KScreen
 		{
 			num++;
 		}
+		this.confirmButton.GetComponent<KButton>().onClick += this.OnSelect_OK;
+		this.cancelButton.GetComponent<KButton>().onClick += this.OnSelect_CANCEL;
+		this.thirdButton.GetComponent<KButton>().onClick += this.OnSelect_third;
 		this.cancelButton.SetActive(onCancel != null);
 		if (this.thirdButton != null)
 		{
@@ -102,6 +105,9 @@ public class ConfirmDialogScreen : KScreen
 	public LocText popupMessage;
 
 	public global::System.Action onDeactivateCB;
+
+	[SerializeField]
+	private GameObject confirmButton;
 
 	[SerializeField]
 	private GameObject cancelButton;

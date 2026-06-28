@@ -22,13 +22,13 @@ public interface IUtilityNetworkMgr
 
 	void ForceRebuildNetworks();
 
-	void AddToNetworks(int cell, FlowUtilityNetwork.IItem item);
+	void AddToNetworks(int cell, object item, bool is_endpoint);
 
-	void RemoveFromNetworks(int cell, FlowUtilityNetwork.IItem vent);
+	void RemoveFromNetworks(int cell, object vent, bool is_endpoint);
 
-	FlowUtilityNetwork.IItem GetEndpoint(int cell);
+	object GetEndpoint(int cell);
 
-	UtilityNetwork GetNetworkForOrientation(int cell, Orientation orientation);
+	UtilityNetwork GetNetworkForDirection(int cell, Direction direction);
 
 	UtilityNetwork GetNetworkForCell(int cell);
 

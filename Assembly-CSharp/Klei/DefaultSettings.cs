@@ -15,6 +15,10 @@ namespace Klei
 
 		public Dictionary<string, object> data { get; private set; }
 
+		public List<string> defaultMoveTags { get; private set; }
+
+		public List<string> overworldAddTags { get; private set; }
+
 		public float GetFloat(string target)
 		{
 			object obj = WorldGen.Settings.defaults.data[target];

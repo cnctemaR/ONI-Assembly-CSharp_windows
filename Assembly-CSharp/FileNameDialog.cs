@@ -47,12 +47,16 @@ public class FileNameDialog : KScreen
 				text += ".sav";
 			}
 			this.onConfirm(text);
+			this.Deactivate();
 		}
-		this.Deactivate();
 	}
 
 	private void OnEndEdit(string str)
 	{
+		if (Localization.HasDirtyWords(str))
+		{
+			this.inputField.text = string.Empty;
+		}
 		this.OnConfirm();
 	}
 

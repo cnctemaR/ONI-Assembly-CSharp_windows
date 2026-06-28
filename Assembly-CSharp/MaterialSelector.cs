@@ -11,6 +11,7 @@ public class MaterialSelector : KScreen
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		this.toggleGroup = base.GetComponent<ToggleGroup>();
 	}
 
 	public override void OnKeyDown(KButtonEvent e)
@@ -76,6 +77,7 @@ public class MaterialSelector : KScreen
 				gameObject.SetActive(true);
 				KToggle component = gameObject.GetComponent<KToggle>();
 				this.ElementToggles.Add(component, element2);
+				component.group = this.toggleGroup;
 				ToolTip component2 = gameObject.gameObject.GetComponent<ToolTip>();
 				component2.toolTip = element2.name;
 			}
@@ -139,33 +141,24 @@ public class MaterialSelector : KScreen
 			image.sprite = Def.GetUISpriteFromMultiObjectAnim(keyValuePair.Value.substance.anim, "ui");
 			gameObject.SetActive(WorldInventory.Instance.IsDiscovered(keyValuePair.Value.tag) || DebugHandler.InstantBuildMode);
 			this.SetToggleBGImage(keyValuePair.Key);
+			Tag tag = keyValuePair.Value.tag;
+			toggle.soundPlayer.AcceptClickCondition = () => this.IsEnoughMass(tag);
 			toggle.ClearOnClick();
-			if (WorldInventory.Instance.GetAmount(keyValuePair.Value.tag) >= this.activeMass || DebugHandler.InstantBuildMode)
+			if (this.IsEnoughMass(keyValuePair.Value.tag))
 			{
 				toggle.onClick += delegate
 				{
 					this.OnSelectMaterial(toggle, this.activeRecipe);
-					string text = GlobalAssets.GetSound("HUD_Click", false);
-					if (toggle != this.selectedToggle)
-					{
-						text = GlobalAssets.GetSound("HUD_Click_Deselect", false);
-					}
-					if (text != null && toggle == this.selectedToggle)
-					{
-						KMonoBehaviour.PlaySound(text);
-					}
-				};
-			}
-			else
-			{
-				toggle.onClick += delegate
-				{
-					UISounds.PlaySound(UISounds.Sound.Negative);
 				};
 			}
 		}
 		this.SortElementToggles();
 		this.UpdateHeader();
+	}
+
+	private bool IsEnoughMass(Tag t)
+	{
+		return WorldInventory.Instance.GetAmount(t) >= this.activeMass || DebugHandler.InstantBuildMode;
 	}
 
 	public bool AutoSelectAvailableMaterial()
@@ -181,14 +174,26 @@ public class MaterialSelector : KScreen
 				}
 			}
 		}
+		float num = -1f;
+		KToggle ktoggle = null;
 		foreach (KeyValuePair<KToggle, Element> keyValuePair2 in this.ElementToggles)
 		{
-			if (WorldInventory.Instance.GetAmount(keyValuePair2.Value.tag) >= this.activeMass || DebugHandler.InstantBuildMode)
+			float amount = WorldInventory.Instance.GetAmount(keyValuePair2.Value.tag);
+			if (DebugHandler.InstantBuildMode)
 			{
-				KToggle key = keyValuePair2.Key;
-				this.OnSelectMaterial(key, this.activeRecipe);
+				this.OnSelectMaterial(keyValuePair2.Key, this.activeRecipe);
 				return true;
 			}
+			if (amount >= this.activeMass && amount > num)
+			{
+				num = amount;
+				ktoggle = keyValuePair2.Key;
+			}
+		}
+		if (ktoggle != null)
+		{
+			this.OnSelectMaterial(ktoggle, this.activeRecipe);
+			return true;
 		}
 		return false;
 	}
@@ -210,10 +215,11 @@ public class MaterialSelector : KScreen
 			string text = keyValuePair2.Value.tag.ProperName();
 			if (keyValuePair2.Value.attributeModifiers.Count > 0)
 			{
-				text += "\n\n";
+				text += "\n";
 				foreach (AttributeModifier attributeModifier in keyValuePair2.Value.attributeModifiers)
 				{
-					text = text + attributeModifier.AttributeId + ": " + attributeModifier.GetFormattedString();
+					string name = Db.Get().BuildingAttributes.Get(attributeModifier.AttributeId).Name;
+					text += string.Format("\n{0}: {1}", name, attributeModifier.GetFormattedString());
 				}
 			}
 			component.toolTip = text;
@@ -254,7 +260,7 @@ public class MaterialSelector : KScreen
 		LocText componentInChildren = this.Headerbar.GetComponentInChildren<LocText>();
 		if (num == 0)
 		{
-			componentInChildren.text = string.Format(UI.PRODUCTINFO_MISSINGRESOURCES_TITLE, this.activeIngredient.tag.ProperName(), GameUtil.GetFormattedMass(this.activeIngredient.amount, GameUtil.TimeSlice.None, true, "F1"));
+			componentInChildren.text = string.Format(UI.PRODUCTINFO_MISSINGRESOURCES_TITLE, this.activeIngredient.tag.ProperName(), GameUtil.GetFormattedMass(this.activeIngredient.amount, GameUtil.TimeSlice.None, true, "{0:0.#}"));
 			string text = string.Format(UI.PRODUCTINFO_MISSINGRESOURCES_DESC, this.activeIngredient.tag.ProperName());
 			this.NoMaterialDiscovered.text = text;
 			this.NoMaterialDiscovered.gameObject.SetActive(true);
@@ -282,6 +288,8 @@ public class MaterialSelector : KScreen
 	public MaterialSelector.SelectMaterialActions selectMaterialActions;
 
 	public MaterialSelector.SelectMaterialActions deselectMaterialActions;
+
+	private ToggleGroup toggleGroup;
 
 	public GameObject TogglePrefab;
 

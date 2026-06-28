@@ -8,6 +8,7 @@ public class LightShapePreview : KMonoBehaviour
 		if (num != this.previousCell)
 		{
 			this.previousCell = num;
+			LightGridManager.DestroyPreview();
 			LightGridManager.CreatePreview(Grid.OffsetCell(num, this.offset), this.radius, this.shape);
 		}
 	}

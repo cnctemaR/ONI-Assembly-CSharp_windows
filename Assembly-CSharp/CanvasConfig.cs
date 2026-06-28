@@ -7,16 +7,17 @@ public class CanvasConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Canvas", 2, 2, "painting_kanim", 100f, 120f, global::TUNING.BUILDINGS.CONSTRUCTION_MASS.TIER4, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.Anywhere, new DecorValues
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Canvas", 2, 2, "painting_kanim", 100f, 30, 120f, global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.Anywhere, new DecorValues
 		{
 			decor = 5,
 			radius = 6
 		}, null);
 		buildingDef.Floodable = false;
+		buildingDef.SceneLayer = Grid.SceneLayer.BuildingBack;
+		buildingDef.Overheatable = false;
 		buildingDef.MaterialCategory = MATERIALS.RAW_MINERALS;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.BaseTimeUntilRepair = -1f;
-		buildingDef.DisableWhenInactive = true;
 		buildingDef.ViewMode = SimViewMode.Decor;
 		buildingDef.DefaultAnimState = "off";
 		return buildingDef;
@@ -27,7 +28,7 @@ public class CanvasConfig : IBuildingConfig
 		go.AddOrGet<Prioritizable>();
 	}
 
-	public override void DoPostConfigure(GameObject go)
+	public override void DoPostConfigureComplete(GameObject go)
 	{
 		BuildingTemplates.DoPostConfigure(go);
 		Artable artable = go.AddComponent<Painting>();

@@ -17,21 +17,22 @@ namespace FMODUnity
 			this.SampleRateSettings = new List<PlatformIntSetting>();
 			this.SpeakerModeSettings = new List<PlatformIntSetting>();
 			this.BankDirectorySettings = new List<PlatformStringSetting>();
-			Settings.SetSetting<PlatformBoolSetting, bool>(this.LoggingSettings, FMODPlatform.PlayInEditor, true);
-			Settings.SetSetting<PlatformBoolSetting, bool>(this.LiveUpdateSettings, FMODPlatform.PlayInEditor, true);
-			Settings.SetSetting<PlatformBoolSetting, bool>(this.OverlaySettings, FMODPlatform.PlayInEditor, true);
-			Settings.SetSetting<PlatformIntSetting, int>(this.SpeakerModeSettings, FMODPlatform.PlayInEditor, 3);
+			Settings.SetSetting<PlatformBoolSetting, TriStateBool>(this.LoggingSettings, FMODPlatform.PlayInEditor, TriStateBool.Enabled);
+			Settings.SetSetting<PlatformBoolSetting, TriStateBool>(this.LiveUpdateSettings, FMODPlatform.PlayInEditor, TriStateBool.Enabled);
+			Settings.SetSetting<PlatformBoolSetting, TriStateBool>(this.OverlaySettings, FMODPlatform.PlayInEditor, TriStateBool.Enabled);
 			Settings.SetSetting<PlatformIntSetting, int>(this.RealChannelSettings, FMODPlatform.PlayInEditor, 256);
 			Settings.SetSetting<PlatformIntSetting, int>(this.VirtualChannelSettings, FMODPlatform.PlayInEditor, 1024);
-			Settings.SetSetting<PlatformBoolSetting, bool>(this.LoggingSettings, FMODPlatform.Default, false);
-			Settings.SetSetting<PlatformBoolSetting, bool>(this.LiveUpdateSettings, FMODPlatform.Default, false);
-			Settings.SetSetting<PlatformBoolSetting, bool>(this.OverlaySettings, FMODPlatform.Default, false);
+			Settings.SetSetting<PlatformBoolSetting, TriStateBool>(this.LoggingSettings, FMODPlatform.Default, TriStateBool.Disabled);
+			Settings.SetSetting<PlatformBoolSetting, TriStateBool>(this.LiveUpdateSettings, FMODPlatform.Default, TriStateBool.Disabled);
+			Settings.SetSetting<PlatformBoolSetting, TriStateBool>(this.OverlaySettings, FMODPlatform.Default, TriStateBool.Disabled);
 			Settings.SetSetting<PlatformIntSetting, int>(this.RealChannelSettings, FMODPlatform.Default, 32);
 			Settings.SetSetting<PlatformIntSetting, int>(this.VirtualChannelSettings, FMODPlatform.Default, 128);
 			Settings.SetSetting<PlatformIntSetting, int>(this.SampleRateSettings, FMODPlatform.Default, 0);
 			Settings.SetSetting<PlatformIntSetting, int>(this.SpeakerModeSettings, FMODPlatform.Default, 3);
+			this.ImportType = ImportType.StreamingAssets;
 			this.AutomaticEventLoading = true;
 			this.AutomaticSampleLoading = false;
+			this.TargetAssetPath = string.Empty;
 		}
 
 		public static Settings Instance
@@ -56,8 +57,6 @@ namespace FMODUnity
 		{
 			switch (platform)
 			{
-			case FMODPlatform.PlayInEditor:
-				return FMODPlatform.Default;
 			case FMODPlatform.Desktop:
 			case FMODPlatform.Mobile:
 			case FMODPlatform.Console:
@@ -122,17 +121,12 @@ namespace FMODUnity
 
 		public bool IsLiveUpdateEnabled(FMODPlatform platform)
 		{
-			return Settings.GetSetting<PlatformBoolSetting, bool>(this.LiveUpdateSettings, platform, false);
+			return Settings.GetSetting<PlatformBoolSetting, TriStateBool>(this.LiveUpdateSettings, platform, TriStateBool.Disabled) != TriStateBool.Disabled;
 		}
 
 		public bool IsOverlayEnabled(FMODPlatform platform)
 		{
-			return Settings.GetSetting<PlatformBoolSetting, bool>(this.OverlaySettings, platform, false);
-		}
-
-		public bool IsLoggingEnabled(FMODPlatform platform)
-		{
-			return Settings.GetSetting<PlatformBoolSetting, bool>(this.LoggingSettings, platform, false);
+			return Settings.GetSetting<PlatformBoolSetting, TriStateBool>(this.OverlaySettings, platform, TriStateBool.Disabled) != TriStateBool.Disabled;
 		}
 
 		public int GetRealChannels(FMODPlatform platform)
@@ -157,7 +151,11 @@ namespace FMODUnity
 
 		public string GetBankPlatform(FMODPlatform platform)
 		{
-			return (!this.HasPlatforms) ? string.Empty : Settings.GetSetting<PlatformStringSetting, string>(this.BankDirectorySettings, platform, "Desktop");
+			if (!this.HasPlatforms)
+			{
+				return string.Empty;
+			}
+			return Settings.GetSetting<PlatformStringSetting, string>(this.BankDirectorySettings, platform, "Desktop");
 		}
 
 		private const string SettingsAssetName = "FMODStudioSettings";
@@ -181,6 +179,12 @@ namespace FMODUnity
 
 		[SerializeField]
 		public bool AutomaticSampleLoading;
+
+		[SerializeField]
+		public ImportType ImportType;
+
+		[SerializeField]
+		public string TargetAssetPath;
 
 		[SerializeField]
 		public List<PlatformIntSetting> SpeakerModeSettings;

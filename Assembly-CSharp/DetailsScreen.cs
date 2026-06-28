@@ -96,10 +96,25 @@ public class DetailsScreen : KTabMenu
 
 	public override void OnKeyUp(KButtonEvent e)
 	{
-		if (!this.isEditing && this.target != null && e.IsAction(global::Action.MouseRight))
+		if (!this.isEditing && this.target != null && PlayerController.Instance.ConsumeIfNotDragging(e, global::Action.MouseRight))
 		{
 			this.DeselectAndClose();
 		}
+	}
+
+	private static Component GetComponent(GameObject go, string name)
+	{
+		Type type = Type.GetType(name);
+		Component component;
+		if (type != null)
+		{
+			component = go.GetComponent(type);
+		}
+		else
+		{
+			component = go.GetComponent(name);
+		}
+		return component;
 	}
 
 	public void Refresh(GameObject go)
@@ -129,7 +144,7 @@ public class DetailsScreen : KTabMenu
 		for (int j = 0; j < this.screens.Length; j++)
 		{
 			string requiredComponentType = this.screens[j].requiredComponentType;
-			bool flag2 = requiredComponentType == null || requiredComponentType == string.Empty || go.GetComponent(requiredComponentType) != null;
+			bool flag2 = requiredComponentType == null || requiredComponentType == string.Empty || DetailsScreen.GetComponent(go, requiredComponentType) != null;
 			if (flag2 && requiredComponentType == "Storage")
 			{
 				flag2 = go.GetComponent<Storage>().showInUI;
@@ -138,7 +153,7 @@ public class DetailsScreen : KTabMenu
 			for (int k = 0; k < this.screens[j].excludeComponentType.Length; k++)
 			{
 				string text = this.screens[j].excludeComponentType[k];
-				if (text != null && go.GetComponent(text) != null)
+				if (text != null && DetailsScreen.GetComponent(go, text) != null)
 				{
 					flag3 = true;
 					break;
@@ -171,12 +186,12 @@ public class DetailsScreen : KTabMenu
 		{
 			this.sideScreens.ForEach(delegate(DetailsScreen.SideScreenRef scn)
 			{
-				if (!string.IsNullOrEmpty(scn.componentRequired) && this.target.GetComponent(scn.componentRequired) != null)
+				if (!string.IsNullOrEmpty(scn.componentRequired) && DetailsScreen.GetComponent(this.target, scn.componentRequired) != null)
 				{
 					bool flag5 = true;
 					for (int l = 0; l < scn.componentsExcluded.Length; l++)
 					{
-						if (this.target.GetComponent(scn.componentsExcluded[l]) != null)
+						if (DetailsScreen.GetComponent(this.target, scn.componentsExcluded[l]) != null)
 						{
 							flag5 = false;
 							break;
@@ -214,11 +229,6 @@ public class DetailsScreen : KTabMenu
 
 	private void OnTabActivated(int newTab, int oldTab)
 	{
-		if (this.lastTab != newTab)
-		{
-			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click", false));
-		}
-		this.lastTab = newTab;
 		this.SetTitle(newTab);
 		if (oldTab != -1)
 		{
@@ -242,6 +252,7 @@ public class DetailsScreen : KTabMenu
 			{
 				if (scn.screenInstance != null)
 				{
+					scn.screenInstance.ClearTarget();
 					scn.screenInstance.Show(false);
 				}
 			});
@@ -263,6 +274,7 @@ public class DetailsScreen : KTabMenu
 
 	public void DeselectAndClose()
 	{
+		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Back", false));
 		SelectTool.Instance.Select(null, false);
 		if (this.target == null)
 		{
@@ -270,7 +282,6 @@ public class DetailsScreen : KTabMenu
 		}
 		this.target = null;
 		this.DeactivateSideContent();
-		KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Back", false));
 		base.Show(false);
 	}
 
@@ -366,8 +377,8 @@ public class DetailsScreen : KTabMenu
 	[Header("Panels")]
 	public Transform UserMenuPanel;
 
-	[SerializeField]
 	[Header("Name Editing (disabled)")]
+	[SerializeField]
 	private KButton CloseButton;
 
 	[SerializeField]
@@ -380,8 +391,8 @@ public class DetailsScreen : KTabMenu
 	[SerializeField]
 	private GameObject tabHeaderContainer;
 
-	[Header("Side Screens")]
 	[SerializeField]
+	[Header("Side Screens")]
 	private GameObject sideScreenContentBody;
 
 	[SerializeField]
@@ -394,8 +405,6 @@ public class DetailsScreen : KTabMenu
 	private List<DetailsScreen.SideScreenRef> sideScreens;
 
 	private bool HasActivated;
-
-	private int lastTab;
 
 	private string selectedObjectName = string.Empty;
 

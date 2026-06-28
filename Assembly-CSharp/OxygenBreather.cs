@@ -27,7 +27,7 @@ public class OxygenBreather : KMonoBehaviour
 	{
 		get
 		{
-			return this.o2Accumulator.AvgFlowRate;
+			return this.o2Accumulator.AvgRate;
 		}
 	}
 
@@ -35,22 +35,27 @@ public class OxygenBreather : KMonoBehaviour
 	{
 		get
 		{
-			return this.CO2Accumulator.AvgFlowRate;
+			return this.CO2Accumulator.AvgRate;
 		}
 	}
 
 	protected override void OnPrefabInit()
 	{
 		Components.OxygenBreathers.Add(this);
-		this.Subscribe(1623392196, new EventSystem.EventHandler(this.OnDeath));
-		this.Subscribe(-1117766961, new EventSystem.EventHandler(this.OnRevived));
-		this.Subscribe(-1195989806, new EventSystem.EventHandler(this.OnEquippedItem));
-		this.Subscribe(-272419061, new EventSystem.EventHandler(this.OnUnequippedItem));
+		this.Subscribe(1623392196, new Action<object>(this.OnDeath));
+		this.Subscribe(-1117766961, new Action<object>(this.OnRevived));
+		this.Subscribe(-1195989806, new Action<object>(this.OnEquippedItem));
+		this.Subscribe(-272419061, new Action<object>(this.OnUnequippedItem));
 	}
 
-	public bool IsLowPressure()
+	public bool isLowOxygen()
 	{
 		return this.GetOxygenPressure(this.mouthCell) < this.lowOxygenThreshold;
+	}
+
+	public bool isNoOxygen()
+	{
+		return this.GetOxygenPressure(this.mouthCell) < this.noOxygenThreshold;
 	}
 
 	protected override void OnSpawn()
@@ -93,6 +98,14 @@ public class OxygenBreather : KMonoBehaviour
 					CO2Manager.instance.SpawnBreath(position, this.minCO2ToEmit, this.temperature.value);
 				}
 				flag = true;
+				if (this.isLowOxygen())
+				{
+					base.gameObject.GetComponent<Effects>().Add("LowOxygen", false);
+				}
+				else
+				{
+					base.gameObject.GetComponent<Effects>().Remove("LowOxygen");
+				}
 			}
 			else if (isUsingOxygenTank)
 			{
@@ -103,7 +116,7 @@ public class OxygenBreather : KMonoBehaviour
 			}
 			else
 			{
-				base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().DuplicantStatusItems.LowOxygen);
+				base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().DuplicantStatusItems.LowOxygen, false);
 				flag = false;
 			}
 			if (flag != this.hasAir && !isUsingOxygenTank)
@@ -124,8 +137,8 @@ public class OxygenBreather : KMonoBehaviour
 	private void OnDeath(object data)
 	{
 		base.enabled = false;
-		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().DuplicantStatusItems.BreathingO2);
-		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().DuplicantStatusItems.EmittingCO2);
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().DuplicantStatusItems.BreathingO2, false);
+		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().DuplicantStatusItems.EmittingCO2, false);
 	}
 
 	private void OnRevived(object data)

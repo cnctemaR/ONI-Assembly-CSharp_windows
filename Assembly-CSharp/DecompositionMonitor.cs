@@ -35,7 +35,7 @@ public class DecompositionMonitor : GameStateMachine<DecompositionMonitor, Decom
 			if (this.remainingRotMonsters > 0)
 			{
 				this.remainingRotMonsters--;
-				GameObject gameObject = (GameObject)global::UnityEngine.Object.Instantiate(Assets.GetPrefab(new Tag("Glom")), smi.transform.position, Quaternion.identity);
+				GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(new Tag("Glom")), smi.transform.position, Grid.SceneLayer.Creatures, SceneOrganizer.Instance.GetFolder(Folder.Creatures), null, 0);
 				gameObject.SetActive(true);
 			}
 			smi.GoTo(this.rotten.exposed);

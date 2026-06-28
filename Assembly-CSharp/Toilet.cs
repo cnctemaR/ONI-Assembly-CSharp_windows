@@ -73,7 +73,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IGa
 
 	private void SpawnMonster()
 	{
-		GameObject gameObject = (GameObject)global::UnityEngine.Object.Instantiate(Assets.GetPrefab(new Tag("Glom")), base.smi.transform.position, Quaternion.identity);
+		GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(new Tag("Glom")), base.smi.transform.position, Grid.SceneLayer.Creatures, SceneOrganizer.Instance.GetFolder(Folder.Creatures), null, 0);
 		gameObject.SetActive(true);
 	}
 

@@ -22,6 +22,11 @@ public struct GravityComponent
 		get
 		{
 			Vector2 vector = new Vector2(this.initialVelocity.x, this.initialVelocity.y + -9.8f * Mathf.Max(0f, this.elapsedTime));
+			float sqrMagnitude = vector.sqrMagnitude;
+			if (sqrMagnitude > 784f)
+			{
+				vector *= 28f / Mathf.Sqrt(sqrMagnitude);
+			}
 			return vector;
 		}
 	}
@@ -52,4 +57,6 @@ public struct GravityComponent
 	public float elapsedTime;
 
 	public global::System.Action onLanded;
+
+	private const float MAX_VELOCITY = 28f;
 }

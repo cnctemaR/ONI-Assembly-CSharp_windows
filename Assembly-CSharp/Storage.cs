@@ -310,6 +310,9 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 				}
 				if (!flag)
 				{
+					Vector3 vector = Grid.CellToPosCCC(Grid.PosToCell(this), Grid.SceneLayer.Ore);
+					vector.z = gameObject.transform.position.z;
+					gameObject.transform.SetPosition(vector);
 					this.MakeWorldActive(gameObject);
 				}
 			}

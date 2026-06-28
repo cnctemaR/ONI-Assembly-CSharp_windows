@@ -72,6 +72,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 				this.AddAptitude(roleConfig.roleGroup, 0f);
 			}
 		}
+		this.UpgradeExperienceAndMastery();
 		foreach (KeyValuePair<string, bool> keyValuePair in this.MasteryByRoleID)
 		{
 			if (!(keyValuePair.Key == this.currentRole))
@@ -92,7 +93,6 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 				}
 			}
 		}
-		this.UpgradeExperienceAndMastery();
 		if (!string.IsNullOrEmpty(this.currentRole))
 		{
 			Game.Instance.roleManager.RestoreRole(this, this.currentRole);
@@ -199,7 +199,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		{
 			return;
 		}
-		if (this.ExperienceByRoleID[roleConfig.id] < roleConfig.experienceRequired)
+		if (!this.MasteryByRoleID[roleConfig.id])
 		{
 			foreach (RolePerk rolePerk in roleConfig.perks)
 			{

@@ -372,7 +372,7 @@ public class Pickupable : Workable
 						GameObject gameObject = objectLayerListItem.gameObject;
 						objectLayerListItem = objectLayerListItem.nextItem;
 						Pickupable component = gameObject.GetComponent<Pickupable>();
-						if (component != null)
+						if (component != null && !flag)
 						{
 							flag = component.TryAbsorb(this, false);
 						}

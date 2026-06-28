@@ -103,7 +103,11 @@ public class ChorePreconditions
 				}
 				if (context.chore is WorkChore<Tinkerable>)
 				{
-					room2 = Game.Instance.roomProber.GetCavityForCell(Grid.PosToCell((context.chore as WorkChore<Tinkerable>).gameObject)).room;
+					CavityInfo cavityForCell2 = Game.Instance.roomProber.GetCavityForCell(Grid.PosToCell((context.chore as WorkChore<Tinkerable>).gameObject));
+					if (cavityForCell2 != null)
+					{
+						room2 = cavityForCell2.room;
+					}
 					return room2 != null && room2 == room;
 				}
 				return false;

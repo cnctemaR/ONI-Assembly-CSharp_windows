@@ -122,14 +122,7 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEnergyProducer, IEffect
 	{
 		this.dt = dt;
 		this.joulesConsumed = 0f;
-		if (this.connectionStatus != CircuitManager.ConnectionStatus.NotConnected && this.JoulesAvailable < this.capacity)
-		{
-			this.WattsUsed = Mathf.Max(0f, Mathf.Ceil(this.capacity - this.JoulesAvailable));
-		}
-		else
-		{
-			this.WattsUsed = 0f;
-		}
+		this.WattsUsed = 0f;
 		float percentFull = this.PercentFull;
 		this.meter.SetPositionPercent(percentFull);
 		this.UpdateSounds();

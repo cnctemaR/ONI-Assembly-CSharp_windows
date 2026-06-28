@@ -333,12 +333,12 @@ public class ResearchEntry : KMonoBehaviour
 		}
 	}
 
-	[Header("Labels")]
 	[SerializeField]
+	[Header("Labels")]
 	private LocText researchName;
 
-	[Header("Transforms")]
 	[SerializeField]
+	[Header("Transforms")]
 	private Transform progressBarContainer;
 
 	[SerializeField]
@@ -357,8 +357,8 @@ public class ResearchEntry : KMonoBehaviour
 	[SerializeField]
 	private GameObject progressBarPrefab;
 
-	[Header("Graphics")]
 	[SerializeField]
+	[Header("Graphics")]
 	private Image BG;
 
 	[SerializeField]

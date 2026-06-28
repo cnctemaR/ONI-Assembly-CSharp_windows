@@ -560,13 +560,13 @@ public class Pickupable : Workable
 
 	private void OnLanded(object data)
 	{
-		Vector2 vector = (Vector2)data;
-		float sqrMagnitude = vector.sqrMagnitude;
-		if (sqrMagnitude <= 0f || SpeedControlScreen.Instance.IsPaused)
+		if (CameraController.Instance == null)
 		{
 			return;
 		}
-		if (CameraController.Instance == null)
+		Vector2 vector = (Vector2)data;
+		float sqrMagnitude = vector.sqrMagnitude;
+		if (sqrMagnitude <= 0.2f || SpeedControlScreen.Instance.IsPaused)
 		{
 			return;
 		}

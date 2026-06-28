@@ -100,9 +100,9 @@ public class Game : KMonoBehaviour
 		SpeedControlScreen.Instance.Pause(false);
 		LightGridManager.Initialise();
 		this.UnsafeOnSpawn();
-		if (this.startPaused && this.tempIntroScreenPrefab != null)
+		Time.timeScale = 0f;
+		if (this.tempIntroScreenPrefab != null)
 		{
-			Time.timeScale = 0f;
 			global::Util.KInstantiate(this.tempIntroScreenPrefab, null, null);
 		}
 		if (SaveLoader.Instance.cachedGSD != null)
@@ -988,8 +988,6 @@ public class Game : KMonoBehaviour
 		Console.WriteLine("This is a console writeline test");
 		global::Debug.Log("This is a debug log test", null);
 	}
-
-	private bool startPaused = true;
 
 	private static readonly string BaseAlreadyCreatedKey = "BaseAlreadyCreated";
 

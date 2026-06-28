@@ -172,8 +172,8 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 
 	public bool showUserMenu = true;
 
-	[SerializeField]
 	[Serialize]
+	[SerializeField]
 	private List<Tag> acceptedTags = new List<Tag>();
 
 	public Action<Tag[]> OnFilterChanged;

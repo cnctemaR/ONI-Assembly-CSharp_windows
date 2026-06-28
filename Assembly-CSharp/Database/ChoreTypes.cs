@@ -22,6 +22,7 @@ namespace Database
 			this.MoveToQuarantine = this.Add("MoveToQuarantine", new string[0], "MoveToQuarantine", new string[0], DUPLICANTS.CHORES.MOVETOQUARANTINE.NAME, DUPLICANTS.CHORES.MOVETOQUARANTINE.STATUS);
 			this.Attack = this.Add("Attack", new string[] { "Combat" }, string.Empty, new string[0], DUPLICANTS.CHORES.ATTACK.NAME, DUPLICANTS.CHORES.ATTACK.STATUS);
 			this.EmoteHighPriority = this.Add("EmoteHighPriority", new string[0], "EmoteHighPriority", new string[0], DUPLICANTS.CHORES.EMOTEHIGHPRIORITY.NAME, DUPLICANTS.CHORES.EMOTEHIGHPRIORITY.STATUS);
+			this.StressEmote = this.Add("StressEmote", new string[0], "EmoteHighPriority", new string[0], DUPLICANTS.CHORES.EMOTEHIGHPRIORITY.NAME, DUPLICANTS.CHORES.EMOTEHIGHPRIORITY.STATUS);
 			this.StressVomit = this.Add("StressVomit", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.STRESSVOMIT.NAME, DUPLICANTS.CHORES.STRESSVOMIT.STATUS);
 			this.UglyCry = this.Add("UglyCry", new string[0], string.Empty, new string[] { "MoveTo" }, DUPLICANTS.CHORES.UGLY_CRY.NAME, DUPLICANTS.CHORES.UGLY_CRY.STATUS);
 			this.BingeEat = this.Add("BingeEat", new string[0], string.Empty, new string[] { "MoveTo" }, DUPLICANTS.CHORES.BINGE_EAT.NAME, DUPLICANTS.CHORES.BINGE_EAT.STATUS);
@@ -104,7 +105,8 @@ namespace Database
 					this.DeliverFood, this.Sigh, this.EmptyStorage, this.Upgrade, this.RescueIncapacitated, this.Repair, this.Shower, this.CleanToilet, this.LiquidCooledFan, this.WashHands,
 					this.TakeMedicine, this.Doctor, this.Recharge, this.FetchCritical, this.MoveToSafety, this.Relocate, this.Research, this.ResearchFetch, this.Mop, this.Toggle,
 					this.Deconstruct, this.Fetch, this.Transport, this.Art, this.GeneratePower, this.CompostWorkable, this.DropUnusedInventory, this.Harvest, this.Uproot, this.Fabricate,
-					this.Mush, this.Cook, this.Build, this.Dig, this.BuildDig, this.FlipCompost, this.BuildFetch, this.CookFetch, this.MushFetch, this.FabricateFetch
+					this.Mush, this.Cook, this.Build, this.Dig, this.BuildDig, this.FlipCompost, this.BuildFetch, this.CookFetch, this.MushFetch, this.FabricateFetch,
+					this.StressEmote
 				},
 				new ChoreType[] { this.Idle }
 			};
@@ -201,6 +203,8 @@ namespace Database
 		public ChoreType HealCritical;
 
 		public ChoreType EmoteHighPriority;
+
+		public ChoreType StressEmote;
 
 		public ChoreType StressActingOut;
 

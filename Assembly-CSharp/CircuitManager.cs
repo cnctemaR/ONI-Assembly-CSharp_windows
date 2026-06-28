@@ -295,14 +295,14 @@ public class CircuitManager
 		for (int j = 0; j < this.circuitInfo.Count; j++)
 		{
 			CircuitManager.CircuitInfo circuitInfo2 = this.circuitInfo[j];
-			List<Battery> batteries2 = circuitInfo2.batteries;
-			batteries2.Sort((Battery a, Battery b) => (a.Capacity - a.JoulesAvailable).CompareTo(b.Capacity - b.JoulesAvailable));
+			circuitInfo2.batteries.Sort((Battery a, Battery b) => (a.Capacity - a.JoulesAvailable).CompareTo(b.Capacity - b.JoulesAvailable));
+			circuitInfo2.inputTransformers.Sort((Battery a, Battery b) => (a.Capacity - a.JoulesAvailable).CompareTo(b.Capacity - b.JoulesAvailable));
 			this.ChargeBatteries(j, circuitInfo2.generators, circuitInfo2.inputTransformers);
 			this.ChargeBatteries(j, circuitInfo2.outputTransformers, circuitInfo2.inputTransformers);
 			this.ChargeBatteries(j, circuitInfo2.generators, circuitInfo2.batteries);
 			this.ChargeBatteries(j, circuitInfo2.outputTransformers, circuitInfo2.batteries);
 			circuitInfo2.minBatteryPercentFull = 1f;
-			foreach (Battery battery3 in batteries2)
+			foreach (Battery battery3 in circuitInfo2.batteries)
 			{
 				float percentFull = battery3.PercentFull;
 				if (percentFull < circuitInfo2.minBatteryPercentFull)
@@ -310,14 +310,22 @@ public class CircuitManager
 					circuitInfo2.minBatteryPercentFull = percentFull;
 				}
 			}
+			foreach (Battery battery4 in circuitInfo2.inputTransformers)
+			{
+				float percentFull2 = battery4.PercentFull;
+				if (percentFull2 < circuitInfo2.minBatteryPercentFull)
+				{
+					circuitInfo2.minBatteryPercentFull = percentFull2;
+				}
+			}
 			this.circuitInfo[j] = circuitInfo2;
 		}
 		for (int k = 0; k < this.circuitInfo.Count; k++)
 		{
 			CircuitManager.CircuitInfo circuitInfo3 = this.circuitInfo[k];
-			foreach (Battery battery4 in circuitInfo3.inputTransformers)
+			foreach (Battery battery5 in circuitInfo3.inputTransformers)
 			{
-				this.ChargeTransformer(battery4, circuitInfo3.batteries);
+				this.ChargeTransformer(battery5, circuitInfo3.batteries);
 			}
 		}
 		for (int l = 0; l < this.circuitInfo.Count; l++)
@@ -377,22 +385,25 @@ public class CircuitManager
 
 	private void ChargeBatteries(int circuit_id, IList<Generator> generators, IList<Battery> batteries)
 	{
+		if (batteries.Count == 0)
+		{
+			return;
+		}
 		foreach (Generator generator in generators)
 		{
-			if (generator.JoulesAvailable > 0f)
+			for (bool flag = true; flag && generator.JoulesAvailable > 0f; flag = this.ChargeBattery(generator, batteries))
 			{
-				this.ChargeBattery(generator, batteries);
 			}
 		}
 	}
 
-	private void ChargeBattery(Generator g, IList<Battery> batteries)
+	private bool ChargeBattery(Generator g, IList<Battery> batteries)
 	{
 		int num;
 		float batteryChargeCapacity = this.GetBatteryChargeCapacity(batteries, out num);
 		if (batteryChargeCapacity <= 0f)
 		{
-			return;
+			return false;
 		}
 		float num2 = Mathf.Min(batteryChargeCapacity, g.JoulesAvailable / (float)num);
 		g.ApplyDeltaJoules(-num2 * (float)num, false);
@@ -401,6 +412,7 @@ public class CircuitManager
 			Battery battery = batteries[i];
 			battery.AddEnergy(num2);
 		}
+		return true;
 	}
 
 	private void UpdateBatteryConnectionStatus(IList<Battery> batteries, bool is_connected_to_something_useful, int circuit_id)
@@ -518,9 +530,12 @@ public class CircuitManager
 		List<Generator> list = this.circuitInfo[(int)circuitID].generators;
 		foreach (Generator generator in list)
 		{
-			if (generator.GetComponent<Operational>().IsActive)
+			if (!(generator == null))
 			{
-				num += generator.WattageRating;
+				if (generator.GetComponent<Operational>().IsActive)
+				{
+					num += generator.WattageRating;
+				}
 			}
 		}
 		return num;

@@ -14,14 +14,19 @@ public struct GravityComponent
 		this.elapsedTime = 0f;
 		this.initialVelocity = initial_velocity;
 		this.onLanded = on_landed;
-		Collider2D component = transform.GetComponent<Collider2D>();
+		this.offset = 0f;
+		CircleCollider2D component = transform.GetComponent<CircleCollider2D>();
 		if (component != null)
 		{
-			this.offset = transform.position.y - component.bounds.min.y;
+			this.offset = component.radius;
 		}
 		else
 		{
-			this.offset = 0f;
+			Collider2D component2 = transform.GetComponent<Collider2D>();
+			if (component2 != null)
+			{
+				this.offset = transform.position.y - component2.bounds.min.y;
+			}
 		}
 	}
 
@@ -29,7 +34,7 @@ public struct GravityComponent
 	{
 		get
 		{
-			Vector2 vector = new Vector2(this.initialVelocity.x, this.initialVelocity.y + -9.8f * this.elapsedTime);
+			Vector2 vector = new Vector2(this.initialVelocity.x, this.initialVelocity.y + -9.8f * Mathf.Max(0f, this.elapsedTime));
 			return vector;
 		}
 	}

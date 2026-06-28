@@ -283,8 +283,8 @@ public class FabricatorSideScreen : SideScreenContent
 
 	public DescriptorPanel EffectsDescriptorPanel;
 
-	[SerializeField]
 	[Header("Recipe List")]
+	[SerializeField]
 	private GameObject recipeGrid;
 
 	[SerializeField]

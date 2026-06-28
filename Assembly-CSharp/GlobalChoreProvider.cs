@@ -110,6 +110,10 @@ public class GlobalChoreProvider : ChoreProvider
 					}
 				}
 			}
+			else
+			{
+				flag3 = false;
+			}
 			return flag && flag2 && flag3;
 		}
 

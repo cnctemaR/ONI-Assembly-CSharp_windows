@@ -14,6 +14,8 @@ public class Bed : Workable, IEffectDescriptor
 	{
 		base.OnSpawn();
 		this.sleepable = base.GetComponent<Sleepable>();
+		Sleepable sleepable = this.sleepable;
+		sleepable.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Combine(sleepable.OnWorkableEventCB, new Action<Workable.WorkableEvent>(this.OnWorkableEvent));
 	}
 
 	private void OnWorkableEvent(Workable.WorkableEvent workable_event)
@@ -96,6 +98,16 @@ public class Bed : Workable, IEffectDescriptor
 			}
 		}
 		return list;
+	}
+
+	protected override void OnCleanUp()
+	{
+		base.OnCleanUp();
+		if (this.sleepable != null)
+		{
+			Sleepable sleepable = this.sleepable;
+			sleepable.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Remove(sleepable.OnWorkableEventCB, new Action<Workable.WorkableEvent>(this.OnWorkableEvent));
+		}
 	}
 
 	[MyCmpReq]

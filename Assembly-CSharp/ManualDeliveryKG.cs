@@ -4,7 +4,6 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-[SkipSaveFileSerialization]
 [SerializationConfig(MemberSerialization.OptIn)]
 public class ManualDeliveryKG : KMonoBehaviour, ISim200ms
 {
@@ -44,6 +43,10 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim200ms
 		}
 		this.UpdateFilteredItems();
 		Prioritizable.AddRef(base.gameObject);
+		if (this.userPaused && this.allowPause)
+		{
+			this.OnPause();
+		}
 	}
 
 	protected override void OnCleanUp()
@@ -168,11 +171,13 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim200ms
 
 	private void OnPause()
 	{
+		this.userPaused = true;
 		this.Pause(true, "Forbid manual delivery");
 	}
 
 	private void OnResume()
 	{
+		this.userPaused = false;
 		this.Pause(false, "Allow manual delivery");
 	}
 
@@ -234,6 +239,9 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim200ms
 
 	[SerializeField]
 	public Tag[] choreTags;
+
+	[Serialize]
+	private bool userPaused;
 
 	[NonSerialized]
 	public bool ShowStatusItem = true;

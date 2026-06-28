@@ -33,13 +33,13 @@ public class AlgaeHabitatConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		Storage storage = go.AddOrGet<Storage>();
-		storage.capacityKg = 396f;
+		storage.capacityKg = 450f;
 		storage.showInUI = true;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.requestedItemTag = new Tag("Algae");
-		manualDeliveryKG.capacity = 36f;
-		manualDeliveryKG.refillMass = 7.2f;
+		manualDeliveryKG.capacity = 90f;
+		manualDeliveryKG.refillMass = 18f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
 		ManualDeliveryKG manualDeliveryKG2 = go.AddComponent<ManualDeliveryKG>();
 		manualDeliveryKG2.SetStorage(storage);
@@ -90,7 +90,7 @@ public class AlgaeHabitatConfig : IBuildingConfig
 
 	private const float WATER_RATE = 0.3f;
 
-	private const float ALGAE_CAPACITY = 36f;
+	private const float ALGAE_CAPACITY = 90f;
 
 	private const float WATER_CAPACITY = 360f;
 }

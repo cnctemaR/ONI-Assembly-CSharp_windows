@@ -277,7 +277,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 
 	public void Sim200ms(float dt)
 	{
-		if (!string.IsNullOrEmpty(this.CurrentRole) && this.CurrentRole != "NoRole")
+		if (!string.IsNullOrEmpty(this.CurrentRole) && this.CurrentRole != "NoRole" && !base.GetComponent<KPrefabID>().HasTag(GameTags.Dead))
 		{
 			this.AddExperience(this.CurrentRole, dt * ROLES.PASSIVE_EXPERIENCE_SCALE, false);
 		}

@@ -159,15 +159,22 @@ public class Tinkerable : Workable
 		{
 			return false;
 		}
+		if (this.roomTracker.room == null)
+		{
+			return false;
+		}
 		foreach (KPrefabID kprefabID in this.roomTracker.room.buildings)
 		{
-			TinkerStation component = kprefabID.GetComponent<TinkerStation>();
-			if (component != null && component.outputPrefab == this.tinkerMaterialTag)
+			if (!(kprefabID == null))
 			{
-				Operational component2 = kprefabID.GetComponent<Operational>();
-				if (component2.IsOperational)
+				TinkerStation component = kprefabID.GetComponent<TinkerStation>();
+				if (component != null && component.outputPrefab == this.tinkerMaterialTag)
 				{
-					return true;
+					Operational component2 = kprefabID.GetComponent<Operational>();
+					if (component2.IsOperational)
+					{
+						return true;
+					}
 				}
 			}
 		}

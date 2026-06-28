@@ -207,7 +207,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 				this.cleanChore.Cancel("dupe");
 			}
 			ToiletWorkableClean component = base.master.GetComponent<ToiletWorkableClean>();
-			this.cleanChore = new WorkChore<ToiletWorkableClean>(Db.Get().ChoreTypes.CleanToilet, component, null, null, true, new Action<Chore>(this.OnCleanComplete), null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+			this.cleanChore = new WorkChore<ToiletWorkableClean>(Db.Get().ChoreTypes.CleanToilet, component, null, null, true, new Action<Chore>(this.OnCleanComplete), null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, true);
 		}
 
 		public void CancelCleanChore()

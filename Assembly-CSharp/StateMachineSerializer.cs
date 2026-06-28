@@ -13,7 +13,20 @@ public class StateMachineSerializer
 		long num = this.WriteHeader(writer);
 		long position = writer.BaseStream.Position;
 		this.WriteEntries(list, writer);
-		this.WriteEntryData(memoryStream, writer);
+		try
+		{
+			this.WriteEntryData(memoryStream, writer);
+		}
+		catch (Exception ex)
+		{
+			Debug.Log("Stream size: " + memoryStream.Length, null);
+			Debug.Log("StateMachines: ", null);
+			foreach (StateMachine.Instance instance in state_machines)
+			{
+				Debug.Log(instance.ToString(), null);
+			}
+			Debug.LogError(ex, null);
+		}
 		this.WriteDataSize(position, num, writer);
 	}
 

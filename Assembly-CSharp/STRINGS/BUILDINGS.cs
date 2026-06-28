@@ -470,6 +470,8 @@ namespace STRINGS
 				public static LocString DESC = "Coal generators produce more energy than manual generators, but emit heat and exhaust.";
 
 				public static LocString EFFECT = "Converts <style=\"RawMineral\">Coal</style> into electrical <style=\"power\">Power</style>.\n\nProduces <style=\"gas\">Carbon Dioxide</style>.";
+
+				public static LocString OVERPRODUCTION = "{Generator} overproduction";
 			}
 
 			public class GENERICFABRICATOR

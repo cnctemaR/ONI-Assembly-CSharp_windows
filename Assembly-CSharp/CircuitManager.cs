@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using STRINGS;
 using UnityEngine;
 
 public class CircuitManager
@@ -303,7 +304,7 @@ public class CircuitManager
 						}
 						if (!flag3)
 						{
-							num2 = this.PowerFromBatteries(num2, batteries);
+							num2 = this.PowerFromBatteries(num2, batteries, energyConsumer);
 							flag3 = Mathf.Abs(num2) <= 0.01f;
 						}
 						energyConsumer.SetConnectionStatus((!flag3) ? CircuitManager.ConnectionStatus.Unpowered : CircuitManager.ConnectionStatus.Powered);
@@ -387,7 +388,7 @@ public class CircuitManager
 			for (int num16 = 0; num16 < circuitInfo4.generators.Count; num16++)
 			{
 				Generator generator5 = circuitInfo4.generators[num16];
-				ReportManager.Instance.ReportValue(ReportManager.ReportType.EnergyWasted, generator5.JoulesAvailable, generator5.gameObject.GetProperName(), null);
+				ReportManager.Instance.ReportValue(ReportManager.ReportType.EnergyWasted, -generator5.JoulesAvailable, BUILDINGS.PREFABS.GENERATOR.OVERPRODUCTION.ToString().Replace("{Generator}", generator5.gameObject.GetProperName()), null);
 			}
 		}
 		for (int num17 = 0; num17 < this.circuitInfo.Count; num17++)
@@ -396,7 +397,7 @@ public class CircuitManager
 		}
 	}
 
-	private float PowerFromBatteries(float joules_needed, IList<Battery> batteries)
+	private float PowerFromBatteries(float joules_needed, IList<Battery> batteries, IEnergyConsumer c)
 	{
 		int num;
 		do
@@ -405,11 +406,12 @@ public class CircuitManager
 			float num2 = batteryJoulesAvailable * (float)num;
 			float num3 = ((num2 >= joules_needed) ? joules_needed : num2);
 			joules_needed -= num3;
+			ReportManager.Instance.ReportValue(ReportManager.ReportType.EnergyCreated, -num3, c.Name, null);
 			float num4 = num3 / (float)num;
 			for (int i = batteries.Count - num; i < batteries.Count; i++)
 			{
 				Battery battery = batteries[i];
-				battery.ConsumeEnergy(num4);
+				battery.ConsumeEnergy(num4, false);
 			}
 		}
 		while (joules_needed >= 0.01f && num > 0);
@@ -533,7 +535,7 @@ public class CircuitManager
 		for (int j = batteries.Count - num3; j < batteries.Count; j++)
 		{
 			Battery battery2 = batteries[j];
-			battery2.ConsumeEnergy(num4);
+			battery2.ConsumeEnergy(num4, false);
 		}
 	}
 

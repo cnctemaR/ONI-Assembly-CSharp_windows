@@ -328,7 +328,7 @@ public class Repairable : Workable
 
 		private Chore CreateRepairChore(Repairable.SMInstance smi)
 		{
-			WorkChore<Repairable> workChore = new WorkChore<Repairable>(Db.Get().ChoreTypes.Repair, smi.master, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, false);
+			WorkChore<Repairable> workChore = new WorkChore<Repairable>(Db.Get().ChoreTypes.Repair, smi.master, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, int.MaxValue, true);
 			workChore.AddPrecondition(ChorePreconditions.instance.IsMarkedForDeconstruction, smi.master.gameObject);
 			workChore.AddPrecondition(Repairable.States.IsNotBeingAttacked, smi.master.GetComponent<Breakable>());
 			workChore.AddPrecondition(Repairable.States.IsNotAngry, null);

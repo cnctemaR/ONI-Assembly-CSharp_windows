@@ -44,8 +44,10 @@ public class StateMachineComponent<StateMachineInstanceType> : StateMachineCompo
 	protected override void OnCmpDisable()
 	{
 		base.OnCmpDisable();
-		StateMachineInstanceType smi = this.smi;
-		smi.StopSM("StateMachineComponent.OnDisable");
+		if (this._smi != null)
+		{
+			this._smi.StopSM("StateMachineComponent.OnDisable");
+		}
 	}
 
 	private StateMachineInstanceType _smi;

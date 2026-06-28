@@ -13,7 +13,7 @@ public class PowerTransformer : Generator
 
 	public override void ApplyDeltaJoules(float joules_delta, bool can_over_power = false)
 	{
-		this.battery.ConsumeEnergy(-joules_delta);
+		this.battery.ConsumeEnergy(-joules_delta, false);
 		base.ApplyDeltaJoules(joules_delta, can_over_power);
 	}
 
@@ -29,7 +29,7 @@ public class PowerTransformer : Generator
 	{
 		if (!(bool)data)
 		{
-			this.battery.ConsumeEnergy(float.MaxValue);
+			this.battery.ConsumeEnergy(float.MaxValue, false);
 			base.ResetJoules();
 		}
 	}

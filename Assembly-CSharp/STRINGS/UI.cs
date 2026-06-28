@@ -4589,7 +4589,9 @@ namespace STRINGS
 			{
 				public static LocString NAME = "<style=\"power\">Power</style> Wasted:";
 
-				public static LocString POSITIVE_TOOLTIP = "Your colony created {0} of <style=\"power\">Power</style> today that was not used or stored in a battery";
+				public static LocString POSITIVE_TOOLTIP = string.Empty;
+
+				public static LocString NEGATIVE_TOOLTIP = "Your colony lost {0} of <style=\"power\">Power</style> today due to overproduction and battery loss";
 			}
 
 			public class LEVEL_UP

@@ -37,7 +37,7 @@ public class TemperatureControlledSwitchConfig : IBuildingConfig
 		temperatureControlledSwitch.objectLayer = ObjectLayer.Wire;
 		temperatureControlledSwitch.manuallyControlled = false;
 		temperatureControlledSwitch.minTemp = 0f;
-		temperatureControlledSwitch.maxTemp = 473.15f;
+		temperatureControlledSwitch.maxTemp = 573.15f;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

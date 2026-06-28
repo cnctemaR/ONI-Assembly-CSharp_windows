@@ -168,7 +168,7 @@ public class Worker : KMonoBehaviour
 		Game.Instance.StartedWork();
 		if (this.state != Worker.State.Idle)
 		{
-			global::Debug.LogError("State should be idle but instead it's:" + this.state.ToString(), null);
+			global::Debug.LogError(base.name + ".state should be idle but instead it's:" + this.state.ToString(), null);
 		}
 		string name = this.workable.GetType().Name;
 		try

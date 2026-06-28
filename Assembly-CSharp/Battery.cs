@@ -130,7 +130,7 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 		this.meter.SetPositionPercent(percentFull);
 		this.UpdateSounds();
 		this.PreviousJoulesAvailable = this.JoulesAvailable;
-		this.ConsumeEnergy(this.joulesLostPerSecond * dt);
+		this.ConsumeEnergy(this.joulesLostPerSecond * dt, true);
 	}
 
 	private void UpdateSounds()
@@ -171,10 +171,13 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 		this.WattsUsed = this.joulesConsumed / this.dt;
 	}
 
-	public void ConsumeEnergy(float joules)
+	public void ConsumeEnergy(float joules, bool report = false)
 	{
-		float num = Mathf.Min(this.JoulesAvailable, joules);
-		ReportManager.Instance.ReportValue(ReportManager.ReportType.EnergyWasted, num, BUILDINGS.PREFABS.BATTERY.CHARGE_LOSS.ToString().Replace("{Battery}", this.GetProperName()), null);
+		if (report)
+		{
+			float num = Mathf.Min(this.JoulesAvailable, joules);
+			ReportManager.Instance.ReportValue(ReportManager.ReportType.EnergyWasted, -num, BUILDINGS.PREFABS.BATTERY.CHARGE_LOSS.ToString().Replace("{Battery}", this.GetProperName()), null);
+		}
 		this.joulesAvailable = Mathf.Max(0f, this.JoulesAvailable - joules);
 	}
 

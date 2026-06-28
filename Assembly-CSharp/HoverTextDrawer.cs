@@ -70,8 +70,9 @@ public class HoverTextDrawer
 		}
 		if (override_color)
 		{
+			color2 = color;
 		}
-		widget.color = color;
+		widget.color = color2;
 		if (widget.text != text)
 		{
 			widget.text = text;

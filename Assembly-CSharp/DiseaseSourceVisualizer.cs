@@ -18,6 +18,11 @@ public class DiseaseSourceVisualizer : KMonoBehaviour
 		OverlayScreen instance = OverlayScreen.Instance;
 		instance.OnOverlayChanged = (Action<SimViewMode>)Delegate.Remove(instance.OnOverlayChanged, new Action<SimViewMode>(this.OnViewModeChanged));
 		base.OnCleanUp();
+		if (this.visualizer != null)
+		{
+			global::UnityEngine.Object.Destroy(this.visualizer);
+			this.visualizer = null;
+		}
 	}
 
 	private void CreateVisualizer()

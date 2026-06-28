@@ -10,6 +10,7 @@ public class RationBox : KMonoBehaviour, IUserControlledCapacity
 		this.filteredStorage = new FilteredStorage(this, new Tag[] { GameTags.MarkedForCompost }, this.filterTint, this.noFilterTint, this);
 		this.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 		this.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
+		WorldInventory.Instance.Discover("FieldRation".ToTag(), GameTags.Edible);
 	}
 
 	protected override void OnSpawn()

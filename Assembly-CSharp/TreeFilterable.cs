@@ -23,11 +23,36 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 			Tag materialCategoryTag = element.GetMaterialCategoryTag();
 			if (this.storage.storageFilters.Contains(materialCategoryTag))
 			{
-				foreach (Tag tag2 in WorldInventory.Instance.GetDiscoveredResourcesFromTag(materialCategoryTag))
+				bool flag = false;
+				if (WorldInventory.Instance.GetDiscoveredResourcesFromTag(materialCategoryTag).Count <= 1)
 				{
-					if (!(tag2 == tag))
+					foreach (Tag tag2 in this.storage.storageFilters)
 					{
-						if (!this.acceptedTags.Contains(tag2))
+						if (!(tag2 == materialCategoryTag))
+						{
+							if (WorldInventory.Instance.IsDiscovered(tag2))
+							{
+								flag = true;
+								foreach (Tag tag3 in WorldInventory.Instance.GetDiscoveredResourcesFromTag(tag2))
+								{
+									if (!this.acceptedTags.Contains(tag3))
+									{
+										return;
+									}
+								}
+							}
+						}
+					}
+					if (!flag)
+					{
+						return;
+					}
+				}
+				foreach (Tag tag4 in WorldInventory.Instance.GetDiscoveredResourcesFromTag(materialCategoryTag))
+				{
+					if (!(tag4 == tag))
+					{
+						if (!this.acceptedTags.Contains(tag4))
 						{
 							return;
 						}
@@ -57,6 +82,33 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 		if (this.OnFilterChanged != null)
 		{
 			this.OnFilterChanged(this.acceptedTags.ToArray());
+		}
+		this.RemoveIncorrectAcceptedTags();
+	}
+
+	private void RemoveIncorrectAcceptedTags()
+	{
+		List<Tag> list = new List<Tag>();
+		foreach (Tag tag in this.acceptedTags)
+		{
+			bool flag = false;
+			foreach (Tag tag2 in this.storage.storageFilters)
+			{
+				if (WorldInventory.Instance.GetDiscoveredResourcesFromTag(tag2).Contains(tag))
+				{
+					flag = true;
+					break;
+				}
+			}
+			if (!flag)
+			{
+				list.Add(tag);
+			}
+		}
+		foreach (Tag tag3 in list)
+		{
+			global::Debug.Log("Removing tag: " + tag3.ToString() + " from TreeFilterable", null);
+			this.RemoveTagFromFilter(tag3);
 		}
 	}
 

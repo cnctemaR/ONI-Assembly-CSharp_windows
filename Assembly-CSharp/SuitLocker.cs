@@ -357,10 +357,19 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 
 		protected override void OnCompleteWork(Worker worker)
 		{
+			Equipment component = worker.GetComponent<Equipment>();
 			if (worker.GetComponent<Equipment>().IsSlotOccupied(global::TUNING.EQUIPMENT.SUIT_SLOT))
 			{
-				Assignable assignable = worker.GetComponent<Equipment>().GetAssignable(global::TUNING.EQUIPMENT.SUIT_SLOT);
-				assignable.Unassign();
+				SuitLocker component2 = base.GetComponent<SuitLocker>();
+				if (component2.CanDropOffSuit())
+				{
+					base.GetComponent<SuitLocker>().UnequipFrom(component);
+				}
+				else
+				{
+					Assignable assignable = worker.GetComponent<Equipment>().GetAssignable(global::TUNING.EQUIPMENT.SUIT_SLOT);
+					assignable.Unassign();
+				}
 			}
 			if (this.urgentChore != null)
 			{

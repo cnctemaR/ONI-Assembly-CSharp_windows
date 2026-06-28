@@ -55,6 +55,10 @@ public class BladderMonitor : GameStateMachine<BladderMonitor, BladderMonitor.In
 
 		public bool NeedsToPee()
 		{
+			if (base.smi.isMasterNull)
+			{
+				return false;
+			}
 			StaminaMonitor.Instance smi = base.smi.master.gameObject.GetSMI<StaminaMonitor.Instance>();
 			return (smi == null || !smi.IsSleeping()) && this.bladder.value >= 100f;
 		}

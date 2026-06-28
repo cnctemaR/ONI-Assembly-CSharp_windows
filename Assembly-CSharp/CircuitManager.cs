@@ -364,7 +364,7 @@ public class CircuitManager
 				Battery battery5 = circuitInfo3.inputTransformers[num14];
 				this.ChargeTransformer(battery5, circuitInfo3.batteries, ref num13);
 			}
-			circuitInfo3.wattsUsed = num13 / 0.25f;
+			circuitInfo3.wattsUsed += num13 / 0.25f;
 			this.circuitInfo[num12] = circuitInfo3;
 		}
 		for (int num15 = 0; num15 < this.circuitInfo.Count; num15++)

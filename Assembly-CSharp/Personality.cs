@@ -30,10 +30,7 @@ public class Personality : Resource
 
 	public string GetDescription()
 	{
-		if (this.unformattedDescription.Contains("{0}"))
-		{
-			return string.Format(this.unformattedDescription, this.Name);
-		}
+		this.unformattedDescription = this.unformattedDescription.Replace("{0}", this.Name);
 		return this.unformattedDescription;
 	}
 

@@ -30,8 +30,6 @@ public class RefrigeratorConfig : IBuildingConfig
 		storage.capacityKg = 100f;
 		Prioritizable.AddRef(go);
 		TreeFilterable treeFilterable = go.AddOrGet<TreeFilterable>();
-		treeFilterable.AddTagToFilter(GameTags.Edible);
-		treeFilterable.AddTagToFilter(GameTags.CookingIngredient);
 		Refrigerator refrigerator = go.AddOrGet<Refrigerator>();
 		refrigerator.noFilterTint = new Color(0.5019608f, 0.5019608f, 0.5019608f, 1f);
 		refrigerator.filterTint = new Color(1f, 1f, 1f, 1f);

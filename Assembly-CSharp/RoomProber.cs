@@ -32,11 +32,6 @@ public class RoomProber
 		instance.OnSolidChanged = (Action<int>)Delegate.Combine(instance.OnSolidChanged, new Action<int>(this.SolidChangedEvent));
 	}
 
-	private static bool IsWall(int cell)
-	{
-		return Grid.Solid[cell] || Grid.HasDoor[cell] || Grid.Foundation[cell];
-	}
-
 	private void SolidChangedEvent(int cell)
 	{
 		this.SolidChangedEvent(cell, true);
@@ -61,71 +56,63 @@ public class RoomProber
 
 	private unsafe void ProcessSolidChanges()
 	{
-		int* ptr = stackalloc int[checked(4 * 4)];
-		HashSet<HandleVector<int>.Handle> hashSet = new HashSet<HandleVector<int>.Handle>();
+		int* ptr = stackalloc int[checked(5 * 4)];
+		*ptr = 0;
+		ptr[1] = -Grid.WidthInCells;
+		ptr[2] = -1;
+		ptr[3] = 1;
+		ptr[4] = Grid.WidthInCells;
 		foreach (int num in this.solidChanges)
 		{
-			if (!this.visitedCells.Contains(num))
+			for (int i = 0; i < 5; i++)
 			{
-				HandleVector<int>.Handle handle = this.CellCavityID[num];
-				if (handle.IsValid() && !hashSet.Contains(handle))
+				int num2 = num + ptr[i];
+				if (Grid.IsValidCell(num2))
 				{
-					hashSet.Add(handle);
-				}
-				this.CellCavityID[num] = HandleVector<int>.InvalidHandle;
-				if (!RoomProber.IsWall(num))
-				{
-					CavityInfo cavityInfo = this.CreateNewCavity();
-					this.floodFiller.Reset(cavityInfo.handle);
-					GameUtil.FloodFillConditional(num, new Func<int, bool>(this.floodFiller.ShouldContinue), this.visitedCells);
-					cavityInfo.numCells = this.floodFiller.NumCells;
-				}
-				else
-				{
-					*ptr = Grid.CellAbove(num);
-					ptr[1] = Grid.CellLeft(num);
-					ptr[2] = Grid.CellRight(num);
-					ptr[3] = Grid.CellAbove(num);
-					int num2 = 0;
-					for (int i = 0; i < 4; i++)
+					this.floodFillSet.Add(num2);
+					HandleVector<int>.Handle handle = this.CellCavityID[num2];
+					if (handle.IsValid())
 					{
-						int num3 = ptr[i];
-						if (Grid.IsValidCell(num3))
-						{
-							handle = this.CellCavityID[num3];
-							this.CellCavityID[num3] = HandleVector<int>.InvalidHandle;
-							ptr[num2] = num3;
-							num2++;
-							if (handle.IsValid() && !hashSet.Contains(handle))
-							{
-								hashSet.Add(handle);
-							}
-						}
-					}
-					for (int j = 0; j < num2; j++)
-					{
-						int num4 = ptr[j];
-						HandleVector<int>.Handle handle2 = this.CellCavityID[num4];
-						if (!handle2.IsValid())
-						{
-							CavityInfo cavityInfo2 = this.CreateNewCavity();
-							this.floodFiller.Reset(cavityInfo2.handle);
-							GameUtil.FloodFillConditional(num4, new Func<int, bool>(this.floodFiller.ShouldContinue), this.visitedCells);
-							cavityInfo2.numCells = this.floodFiller.NumCells;
-						}
+						this.CellCavityID[num2] = HandleVector<int>.InvalidHandle;
+						this.releasedIDs.Add(handle);
 					}
 				}
 			}
 		}
-		foreach (HandleVector<int>.Handle handle3 in hashSet)
+		CavityInfo cavityInfo = this.CreateNewCavity();
+		foreach (int num3 in this.floodFillSet)
+		{
+			if (!this.visitedCells.Contains(num3))
+			{
+				HandleVector<int>.Handle handle2 = this.CellCavityID[num3];
+				if (!handle2.IsValid())
+				{
+					CavityInfo cavityInfo2 = cavityInfo;
+					this.floodFiller.Reset(cavityInfo2.handle);
+					GameUtil.FloodFillConditional(num3, new Func<int, bool>(this.floodFiller.ShouldContinue), this.visitedCells);
+					if (this.floodFiller.NumCells > 0)
+					{
+						cavityInfo2.numCells = this.floodFiller.NumCells;
+						cavityInfo = this.CreateNewCavity();
+					}
+				}
+			}
+		}
+		if (cavityInfo.numCells == 0)
+		{
+			this.releasedIDs.Add(cavityInfo.handle);
+		}
+		foreach (HandleVector<int>.Handle handle3 in this.releasedIDs)
 		{
 			CavityInfo data = this.cavityInfos.GetData(handle3);
 			data.ReleaseResources();
 			this.cavityInfos.Free(handle3);
 		}
 		this.RebuildDirtyCavities(this.visitedCells);
+		this.releasedIDs.Clear();
 		this.visitedCells.Clear();
 		this.solidChanges.Clear();
+		this.floodFillSet.Clear();
 	}
 
 	private void RebuildDirtyCavities(ICollection<int> visited_cells)
@@ -409,6 +396,10 @@ public class RoomProber
 
 	private HashSet<int> visitedCells = new HashSet<int>();
 
+	private HashSet<int> floodFillSet = new HashSet<int>();
+
+	private HashSet<HandleVector<int>.Handle> releasedIDs = new HashSet<HandleVector<int>.Handle>();
+
 	private RoomProber.CavityFloodFiller floodFiller;
 
 	private class CavityFloodFiller
@@ -424,14 +415,23 @@ public class RoomProber
 			this.numCells = 0;
 		}
 
+		private static bool IsWall(int cell)
+		{
+			return Grid.Solid[cell] || Grid.HasDoor[cell] || Grid.Foundation[cell];
+		}
+
 		public bool ShouldContinue(int flood_cell)
 		{
 			bool flag = false;
-			if (!RoomProber.IsWall(flood_cell))
+			if (!RoomProber.CavityFloodFiller.IsWall(flood_cell))
 			{
 				flag = true;
 				this.grid[flood_cell] = this.cavityID;
 				this.numCells++;
+			}
+			else
+			{
+				this.grid[flood_cell] = HandleVector<int>.InvalidHandle;
 			}
 			return flag;
 		}

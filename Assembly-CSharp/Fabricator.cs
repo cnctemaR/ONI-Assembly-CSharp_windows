@@ -475,6 +475,11 @@ public class Fabricator : Workable, IEffectDescriptor
 	protected override void OnCompleteWork(Worker worker)
 	{
 		base.OnCompleteWork(worker);
+		if (this.machineOrders.Count <= 0)
+		{
+			global::Debug.LogWarning("Somehow we tried to complete an order when there was no orders to complete. Need more info on how to reproduce this for a proper fix.", null);
+			return;
+		}
 		Fabricator.MachineOrder machineOrder = this.machineOrders[0];
 		machineOrder.Complete();
 		if (!machineOrder.parentOrder.infinite)

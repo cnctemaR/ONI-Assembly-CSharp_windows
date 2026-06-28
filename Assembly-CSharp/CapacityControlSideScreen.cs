@@ -75,12 +75,12 @@ public class CapacityControlSideScreen : SideScreenContent
 
 	private IUserControlledCapacity target;
 
-	[Header("Slider")]
 	[SerializeField]
+	[Header("Slider")]
 	private KSlider slider;
 
-	[Header("Number Input")]
 	[SerializeField]
+	[Header("Number Input")]
 	private KNumberInputField numberInput;
 
 	[SerializeField]

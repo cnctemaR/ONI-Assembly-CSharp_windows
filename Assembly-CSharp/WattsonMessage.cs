@@ -177,8 +177,8 @@ public class WattsonMessage : KScreen
 	[SerializeField]
 	private KButton button;
 
-	[SerializeField]
 	[EventRef]
+	[SerializeField]
 	private string dialogSound;
 
 	private List<KScreen> hideScreensWhileActive = new List<KScreen>();

@@ -117,8 +117,7 @@ public class TreeFilterableSideScreen : SideScreenContent
 		{
 			return TreeFilterableSideScreenRow.State.Mixed;
 		}
-		global::Debug.LogWarning("TreeFilterableSideScreen shouldn't hit this", null);
-		return TreeFilterableSideScreenRow.State.On;
+		return TreeFilterableSideScreenRow.State.Off;
 	}
 
 	private void SetAllCheckboxState(TreeFilterableSideScreenRow.State newState)

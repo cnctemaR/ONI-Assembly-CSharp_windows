@@ -71,6 +71,7 @@ public class BuildingComplete : Building
 			foreach (int num2 in base.PlacementCells)
 			{
 				Grid.Foundation[num2] = true;
+				Game.Instance.roomProber.SolidChangedEvent(num2, false);
 			}
 		}
 		else
@@ -156,13 +157,10 @@ public class BuildingComplete : Building
 			{
 				int num2 = Grid.OffsetCell(num, cellOffset);
 				Grid.Foundation[num2] = false;
+				Game.Instance.roomProber.SolidChangedEvent(num2, false);
 			}
 		}
 		Game.Instance.roomProber.RemoveBuilding(this);
-		if (base.GetComponent<Door>() != null)
-		{
-			Game.Instance.roomProber.SolidChangedEvent(Grid.PosToCell(base.gameObject), false);
-		}
 		for (int j = 0; j < base.PlacementCells.Length; j++)
 		{
 			Region intersectionRegion = Game.Instance.RegionManager.GetIntersectionRegion(base.PlacementCells[j]);

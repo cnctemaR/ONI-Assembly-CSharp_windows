@@ -26,6 +26,8 @@ public class GameComps : KComponents
 
 	public static GravityComponents Gravities;
 
+	public static LoopingSoundUpdaterComponents LoopingSoundUpdaterComponents;
+
 	public static FallerComponents Fallers;
 
 	public static InfraredVisualizerComponents InfraredVisualizers;

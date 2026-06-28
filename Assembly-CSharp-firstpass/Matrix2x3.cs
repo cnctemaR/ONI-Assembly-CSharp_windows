@@ -28,6 +28,16 @@ public struct Matrix2x3
 		return new Matrix2x3(m.m00 * n.m00 + m.m01 * n.m10, m.m00 * n.m01 + m.m01 * n.m11, m.m00 * n.m02 + m.m01 * n.m12 + m.m02 * 1f, m.m10 * n.m00 + m.m11 * n.m10, m.m10 * n.m01 + m.m11 * n.m11, m.m10 * n.m02 + m.m11 * n.m12 + m.m12 * 1f);
 	}
 
+	public static bool operator ==(Matrix2x3 m, Matrix2x3 n)
+	{
+		return m.m00 == n.m00 && m.m01 == n.m01 && m.m02 == n.m02 && m.m10 == n.m10 && m.m11 == n.m11 && m.m11 == n.m12;
+	}
+
+	public static bool operator !=(Matrix2x3 m, Matrix2x3 n)
+	{
+		return !(m == n);
+	}
+
 	public static implicit operator Matrix4x4(Matrix2x3 m)
 	{
 		Matrix4x4 matrix4x = Matrix4x4.identity;

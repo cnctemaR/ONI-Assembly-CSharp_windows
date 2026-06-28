@@ -99,6 +99,10 @@ public class SteamUGCService : MonoBehaviour
 
 	private void Update()
 	{
+		if (!SteamManager.Initialized)
+		{
+			return;
+		}
 		if (!this.setupComplete && Global.Instance != null && DistributionPlatform.Initialized)
 		{
 			this.Setup();

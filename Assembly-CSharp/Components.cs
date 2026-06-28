@@ -85,6 +85,8 @@ public class Components
 
 	public static Components.Cmps<Breakable> Breakables = new Components.Cmps<Breakable>();
 
+	public static Components.Cmps<Prioritizable> Prioritizables = new Components.Cmps<Prioritizable>();
+
 	public class Cmps<T> : IEnumerable, IEnumerable<T>
 	{
 		public Cmps()

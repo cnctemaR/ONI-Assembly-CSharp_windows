@@ -182,7 +182,7 @@ public class TagSet : IEnumerable, ICollection<Tag>, IEnumerable<Tag>
 		return string.Empty;
 	}
 
-	[SerializeField]
 	[Serialize]
+	[SerializeField]
 	private List<Tag> tags = new List<Tag>();
 }

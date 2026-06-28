@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using KSerialization;
 using UnityEngine;
 
-[SkipSaveFileSerialization]
 [SerializationConfig(MemberSerialization.OptIn)]
+[SkipSaveFileSerialization]
 public class ManualDeliveryKG : KMonoBehaviour
 {
 	public float Capacity

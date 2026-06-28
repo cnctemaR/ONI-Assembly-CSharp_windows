@@ -78,7 +78,7 @@ public static class ChorePreconditions
 			{
 				return true;
 			}
-			Chore currentChore = context.consumer.GetComponent<ChoreDriver>().GetCurrentChore();
+			Chore currentChore = context.consumer.choreDriver.GetCurrentChore();
 			if (currentChore == null)
 			{
 				return true;
@@ -95,7 +95,7 @@ public static class ChorePreconditions
 		precondition9.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			KMonoBehaviour kmonoBehaviour = (KMonoBehaviour)data;
-			return !(context.consumer == null) && !(kmonoBehaviour == null) && context.consumer.GetComponent<Navigator>().CanReach(kmonoBehaviour.GetComponent<Chattable>());
+			return !(context.consumer == null) && !(kmonoBehaviour == null) && context.consumer.navigator.CanReach(kmonoBehaviour.GetComponent<Chattable>());
 		};
 		ChorePreconditions.IsChattable = precondition9;
 		Chore.Precondition precondition10 = default(Chore.Precondition);
@@ -127,7 +127,7 @@ public static class ChorePreconditions
 			{
 				return false;
 			}
-			int navigationCost = context.consumer.GetComponent<Navigator>().GetNavigationCost(workable);
+			int navigationCost = context.consumer.navigator.GetNavigationCost(workable);
 			if (navigationCost != PathProber.InvalidCost)
 			{
 				context.cost += navigationCost;
@@ -141,7 +141,7 @@ public static class ChorePreconditions
 		precondition13.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			Pickupable pickupable = (Pickupable)data;
-			return !(pickupable == null) && !(context.consumer == null) && pickupable.CouldBePickedUp(context.consumer.gameObject) && context.consumer.GetComponent<Navigator>().CanReach(pickupable);
+			return !(pickupable == null) && !(context.consumer == null) && pickupable.CouldBePickedUp(context.consumer.gameObject) && context.consumer.navigator.CanReach(pickupable);
 		};
 		ChorePreconditions.CanPickup = precondition13;
 		Chore.Precondition precondition14 = default(Chore.Precondition);
@@ -160,21 +160,21 @@ public static class ChorePreconditions
 		precondition15.id = "IsStanding";
 		precondition15.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			return !(context.consumer == null) && context.consumer.GetComponent<Navigator>().CurrentNavType == NavType.Floor;
+			return !(context.consumer == null) && context.consumer.navigator.CurrentNavType == NavType.Floor;
 		};
 		ChorePreconditions.IsStanding = precondition15;
 		Chore.Precondition precondition16 = default(Chore.Precondition);
 		precondition16.id = "IsMoving";
 		precondition16.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			return !(context.consumer == null) && context.consumer.GetComponent<Navigator>().IsMoving();
+			return !(context.consumer == null) && context.consumer.navigator.IsMoving();
 		};
 		ChorePreconditions.IsMoving = precondition16;
 		Chore.Precondition precondition17 = default(Chore.Precondition);
 		precondition17.id = "IsOffLadder";
 		precondition17.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			return !(context.consumer == null) && context.consumer.GetComponent<Navigator>().CurrentNavType != NavType.Ladder;
+			return !(context.consumer == null) && context.consumer.navigator.CurrentNavType != NavType.Ladder;
 		};
 		ChorePreconditions.IsOffLadder = precondition17;
 		Chore.Precondition precondition18 = default(Chore.Precondition);

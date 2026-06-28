@@ -59,6 +59,14 @@ public class MultipleRenderTargetProxy : MonoBehaviour
 		this.CreateRenderTarget();
 	}
 
+	private void Update()
+	{
+		if (!this.Textures[0].IsCreated())
+		{
+			this.CreateRenderTarget();
+		}
+	}
+
 	private void OnShadersReloaded()
 	{
 		Shader.SetGlobalTexture("_MRT0", this.Textures[0]);

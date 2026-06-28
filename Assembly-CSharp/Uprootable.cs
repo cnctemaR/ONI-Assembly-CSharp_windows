@@ -49,6 +49,11 @@ public class Uprootable : Workable
 	private void OnPlanterStorage(object data)
 	{
 		this.planterStorage = (Storage)data;
+		Prioritizable component = base.GetComponent<Prioritizable>();
+		if (component != null)
+		{
+			component.showIcon = this.planterStorage != null;
+		}
 	}
 
 	public bool IsInPlanterBox()

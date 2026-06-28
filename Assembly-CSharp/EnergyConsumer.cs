@@ -5,8 +5,8 @@ using FMOD.Studio;
 using KSerialization;
 using UnityEngine;
 
-[DebuggerDisplay("{name}")]
 [SerializationConfig(MemberSerialization.OptIn)]
+[DebuggerDisplay("{name}")]
 public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IEffectDescriptor
 {
 	public int PowerSortOrder

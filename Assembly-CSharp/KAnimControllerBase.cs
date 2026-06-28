@@ -239,8 +239,11 @@ public abstract class KAnimControllerBase : MonoBehaviour
 	{
 		Vector3 position = base.transform.position;
 		BoxCollider2D component = base.GetComponent<BoxCollider2D>();
-		position.x += component.offset.x;
-		position.y += component.offset.y - component.size.y / 2f;
+		if (component != null)
+		{
+			position.x += component.offset.x;
+			position.y += component.offset.y - component.size.y / 2f;
+		}
 		return position;
 	}
 
@@ -370,6 +373,10 @@ public abstract class KAnimControllerBase : MonoBehaviour
 	protected abstract void ApplyClearOverrides();
 
 	protected abstract void UpdateFrame(float t);
+
+	public abstract Matrix4x4 GetTransformMatrix();
+
+	public abstract Matrix2x3 GetSymbolLocalTransform(HashedString symbol, out bool symbolVisible);
 
 	public abstract void UpdateHidden(bool reset = true);
 

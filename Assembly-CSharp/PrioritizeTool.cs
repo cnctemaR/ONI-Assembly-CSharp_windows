@@ -20,7 +20,7 @@ public class PrioritizeTool : DragTool
 			if (gameObject != null)
 			{
 				Prioritizable component = gameObject.GetComponent<Prioritizable>();
-				if (component != null && component.priorityOverlayIcon != null)
+				if (component != null && component.showIcon)
 				{
 					component.SetMasterPriority(screenPriority);
 					num++;

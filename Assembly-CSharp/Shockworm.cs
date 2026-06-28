@@ -71,15 +71,14 @@ public class Shockworm : StateMachineComponent<Shockworm.StatesInstance>, ISaveL
 					this.mover.Set(smi.master, smi);
 					if (smi.master.loopingSounds != null)
 					{
-						smi.master.loopingSounds.updatePosition = true;
-						smi.master.loopingSounds.enabled = true;
+						smi.master.loopingSounds.AddLoopingSoundUpdater();
 						smi.master.loopingSounds.StartSound(GlobalAssets.GetSound(smi.master.wingSound, false), smi.master.transform.position);
 					}
 				})
 				.Exit(delegate(Shockworm.StatesInstance smi)
 				{
 					smi.master.loopingSounds.StopSound(GlobalAssets.GetSound(smi.master.wingSound, false));
-					smi.master.loopingSounds.enabled = false;
+					smi.master.loopingSounds.RemoveLoopingSoundUpdater();
 				});
 			this.alive.idleStates.EventTransition(GameHashes.Threatned, this.alive.attackStates.plan_attack, null);
 			this.alive.attackStates.EventTransition(GameHashes.SafeFromThreats, this.alive.idleStates.idle, null);

@@ -337,15 +337,15 @@ public class ResearchEntry : KMonoBehaviour
 	[Header("Labels")]
 	private LocText researchName;
 
-	[SerializeField]
 	[Header("Transforms")]
+	[SerializeField]
 	private Transform progressBarContainer;
 
 	[SerializeField]
 	private Transform lineContainer;
 
-	[SerializeField]
 	[Header("Prefabs")]
+	[SerializeField]
 	private GameObject iconPanel;
 
 	[SerializeField]
@@ -357,8 +357,8 @@ public class ResearchEntry : KMonoBehaviour
 	[SerializeField]
 	private GameObject progressBarPrefab;
 
-	[SerializeField]
 	[Header("Graphics")]
+	[SerializeField]
 	private Image BG;
 
 	[SerializeField]
@@ -373,8 +373,8 @@ public class ResearchEntry : KMonoBehaviour
 	[SerializeField]
 	private Sprite completedBG;
 
-	[SerializeField]
 	[Header("Colors")]
+	[SerializeField]
 	private Color defaultColor = Color.blue;
 
 	[SerializeField]

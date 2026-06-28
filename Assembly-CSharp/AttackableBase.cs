@@ -16,6 +16,11 @@ public class AttackableBase : Workable, IApproachable
 		this.Subscribe(-1506500077, new Action<object>(this.OnDefeated));
 		this.Subscribe(-1256572400, new Action<object>(this.SetupScenePartitioner));
 		this.Subscribe(1623392196, new Action<object>(this.OnDefeated));
+		Prioritizable component = base.GetComponent<Prioritizable>();
+		if (component != null)
+		{
+			component.showIcon = false;
+		}
 	}
 
 	private void SetupScenePartitioner(object data = null)

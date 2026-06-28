@@ -11,6 +11,7 @@ public class Resource
 	public Resource(string id, ResourceSet parent = null, string name = null)
 	{
 		this.Id = id;
+		this.IdHash = new HashedString(this.Id);
 		this.Guid = new ResourceGuid(id, parent);
 		if (parent != null)
 		{
@@ -30,6 +31,7 @@ public class Resource
 	{
 		this.Guid = new ResourceGuid(id, null);
 		this.Id = id;
+		this.IdHash = new HashedString(this.Id);
 		this.Name = name;
 	}
 
@@ -42,6 +44,8 @@ public class Resource
 	public string Name;
 
 	public string Id;
+
+	public HashedString IdHash;
 
 	public bool Disabled;
 }

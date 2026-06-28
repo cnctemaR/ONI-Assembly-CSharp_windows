@@ -16,6 +16,16 @@ public class Clearable : Workable, ISaveLoadable
 		Components.Clearables.Add(this);
 	}
 
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		Prioritizable component = base.GetComponent<Prioritizable>();
+		if (component != null)
+		{
+			component.showIcon = false;
+		}
+	}
+
 	[OnDeserialized]
 	private void OnDeserialized()
 	{

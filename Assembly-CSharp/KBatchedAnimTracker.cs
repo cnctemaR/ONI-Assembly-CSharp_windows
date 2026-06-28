@@ -59,10 +59,14 @@ public class KBatchedAnimTracker : MonoBehaviour
 			KAnim.Anim currentAnim = this.controller.CurrentAnim;
 			if (currentAnim != null)
 			{
-				Matrix4x4 matrix4x = this.controller.GetSymbolTransform(this.symbol, out flag);
-				matrix4x *= Matrix4x4.Scale(this.matrixScale);
-				if (flag)
+				Matrix2x3 symbolLocalTransform = this.controller.GetSymbolLocalTransform(this.symbol, out flag);
+				Vector3 position = this.controller.transform.position;
+				if (flag && (this.previousMatrix != symbolLocalTransform || position != this.previousPosition || this.useTargetPoint))
 				{
+					this.previousMatrix = symbolLocalTransform;
+					this.previousPosition = position;
+					Matrix4x4 matrix4x = this.controller.GetTransformMatrix() * symbolLocalTransform;
+					matrix4x *= Matrix4x4.Scale(this.matrixScale);
 					float z = base.transform.position.z;
 					if (this.controller is KBatchedAnimController)
 					{
@@ -79,16 +83,16 @@ public class KBatchedAnimTracker : MonoBehaviour
 					}
 					if (this.useTargetPoint)
 					{
-						Vector3 position = base.transform.position;
-						position.z = 0f;
-						Vector3 vector = this.targetPoint - position;
+						Vector3 position2 = base.transform.position;
+						position2.z = 0f;
+						Vector3 vector = this.targetPoint - position2;
 						float num = Vector3.Angle(vector, Vector3.right);
 						if (vector.y < 0f)
 						{
 							num = 360f - num;
 						}
 						base.transform.localRotation = Quaternion.identity;
-						base.transform.RotateAround(position, new Vector3(0f, 0f, 1f), num);
+						base.transform.RotateAround(position2, new Vector3(0f, 0f, 1f), num);
 						float sqrMagnitude = vector.sqrMagnitude;
 						this.myAnim.GetBatchInstanceData().SetClipRadius(base.transform.position.x, base.transform.position.y, sqrMagnitude, true);
 					}
@@ -176,6 +180,10 @@ public class KBatchedAnimTracker : MonoBehaviour
 	public bool skipInitialDisable;
 
 	private bool wasVisible;
+
+	private Matrix2x3 previousMatrix;
+
+	private Vector3 previousPosition;
 
 	private KBatchedAnimController myAnim;
 

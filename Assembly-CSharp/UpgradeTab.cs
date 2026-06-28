@@ -169,8 +169,8 @@ public class UpgradeTab : TargetScreen
 	[SerializeField]
 	private ProgressBar progressBar;
 
-	[Header("References")]
 	[SerializeField]
+	[Header("References")]
 	private List<UpgradeTab.UpgradeIconData> icons;
 
 	private Upgradable upgradeTarget;

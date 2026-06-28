@@ -24,6 +24,8 @@ public class Game : KMonoBehaviour
 
 	public StatusItemRenderer statusItemRenderer { get; private set; }
 
+	public PrioritizableRenderer prioritizableRenderer { get; private set; }
+
 	protected override void OnPrefabInit()
 	{
 		SimTemperatureTransfer.ClearInstanceMap();
@@ -31,6 +33,7 @@ public class Game : KMonoBehaviour
 		App.OnPreLoadScene = (global::System.Action)Delegate.Combine(App.OnPreLoadScene, new global::System.Action(this.StopBE));
 		Game.Instance = this;
 		this.statusItemRenderer = new StatusItemRenderer();
+		this.prioritizableRenderer = new PrioritizableRenderer();
 		CellChangeMonitor.Destroy();
 		this.LoadEventHashes();
 		this.gasFlowPos = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.GasConduits) - 0.4f);
@@ -87,6 +90,11 @@ public class Game : KMonoBehaviour
 
 	protected override void OnForcedCleanUp()
 	{
+		if (this.prioritizableRenderer != null)
+		{
+			this.prioritizableRenderer.Cleanup();
+			this.prioritizableRenderer = null;
+		}
 		LightGridManager.Shutdown();
 		App.OnPreLoadScene = (global::System.Action)Delegate.Remove(App.OnPreLoadScene, new global::System.Action(this.StopBE));
 		base.OnForcedCleanUp();
@@ -509,6 +517,7 @@ public class Game : KMonoBehaviour
 		if (this.drawStatusItems)
 		{
 			this.statusItemRenderer.Render();
+			this.prioritizableRenderer.Render();
 		}
 	}
 

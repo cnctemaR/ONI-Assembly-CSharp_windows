@@ -14,15 +14,15 @@ public class ClearChore : Chore<ClearChore.StatesInstance>
 	public override void CollectChores(ChoreConsumer consumer, List<Chore.Precondition.Context> contexts, bool is_attempting_override)
 	{
 		Pickupable pickupable = this.smi.sm.clearable.Get<Pickupable>(this.smi);
-		int count = GlobalChoreProvider.Instance.fetchChores.Count;
+		int fetchCount = GlobalChoreProvider.Instance.fetchCount;
 		Chore.Precondition.Context context = default(Chore.Precondition.Context);
-		for (int i = 0; i < count; i++)
+		for (int i = 0; i < GlobalChoreProvider.Instance.fetchCount; i++)
 		{
-			FetchChore fetchChore = GlobalChoreProvider.Instance.fetchChores[i];
-			bool flag = pickupable.KPrefabID.HasAnyTags(fetchChore.tags);
+			GlobalChoreProvider.Fetch fetch = GlobalChoreProvider.Instance.fetches[i];
+			bool flag = pickupable.KPrefabID.HasAnyTags(fetch.tags);
 			if (flag)
 			{
-				context.Set(fetchChore, consumer, is_attempting_override, pickupable);
+				context.Set(fetch.chore, consumer, is_attempting_override, pickupable);
 				context.RunPreconditions();
 				if (context.IsSuccess())
 				{

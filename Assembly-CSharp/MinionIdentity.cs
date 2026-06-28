@@ -43,6 +43,11 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable
 		base.GetComponent<KBatchedAnimController>().AddBuildOverride(this.headComp.GetData(), true, true);
 		this.voiceId = "0";
 		this.voiceId += (this.voiceIdx + 1).ToString();
+		Prioritizable component3 = base.GetComponent<Prioritizable>();
+		if (component3 != null)
+		{
+			component3.showIcon = false;
+		}
 	}
 
 	public string GetVoiceId()

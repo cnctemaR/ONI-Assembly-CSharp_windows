@@ -84,7 +84,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 219784U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 220294U);
 		if (PlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{
 			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(UnitConfigurationScreen.MassUnitKey, ((GameUtil.MassUnit)PlayerPrefs.GetInt(UnitConfigurationScreen.MassUnitKey)).ToString());
@@ -93,15 +93,18 @@ public class Global : MonoBehaviour
 		{
 			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(UnitConfigurationScreen.TemperatureUnitKey, ((GameUtil.TemperatureUnit)PlayerPrefs.GetInt(UnitConfigurationScreen.TemperatureUnitKey)).ToString());
 		}
-		PublishedFileId_t publishedFileId_t;
-		string installedLanguageCode = SteamUGCService.Instance.GetInstalledLanguageCode(out publishedFileId_t);
-		if (publishedFileId_t != PublishedFileId_t.Invalid)
+		if (SteamManager.Initialized)
 		{
-			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(Global.LanguagePackKey, publishedFileId_t.m_PublishedFileId);
-		}
-		if (installedLanguageCode != null && installedLanguageCode != string.Empty)
-		{
-			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(Global.LanguageCodeKey, installedLanguageCode);
+			PublishedFileId_t publishedFileId_t;
+			string installedLanguageCode = SteamUGCService.Instance.GetInstalledLanguageCode(out publishedFileId_t);
+			if (publishedFileId_t != PublishedFileId_t.Invalid)
+			{
+				ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(Global.LanguagePackKey, publishedFileId_t.m_PublishedFileId);
+			}
+			if (installedLanguageCode != null && installedLanguageCode != string.Empty)
+			{
+				ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(Global.LanguageCodeKey, installedLanguageCode);
+			}
 		}
 	}
 

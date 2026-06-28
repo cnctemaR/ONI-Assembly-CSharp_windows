@@ -478,7 +478,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		return null;
 	}
 
-	public Matrix4x4 GetTransformMatrix()
+	public override Matrix4x4 GetTransformMatrix()
 	{
 		Vector3 vector = base.transform.position + this.offset;
 		vector.z = 0f;
@@ -557,6 +557,21 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 	{
 		if (this.curAnimFrameIdx != -1 && this.batch != null)
 		{
+			Matrix2x3 symbolLocalTransform = this.GetSymbolLocalTransform(symbol, out symbolVisible);
+			if (symbolVisible)
+			{
+				Matrix4x4 rootMatrix = this.GetRootMatrix();
+				return rootMatrix * symbolLocalTransform;
+			}
+		}
+		symbolVisible = false;
+		return default(Matrix4x4);
+	}
+
+	public override Matrix2x3 GetSymbolLocalTransform(HashedString symbol, out bool symbolVisible)
+	{
+		if (this.curAnimFrameIdx != -1 && this.batch != null)
+		{
 			KAnim.Anim.Frame frame = this.batch.group.data.GetFrame(this.curAnimFrameIdx);
 			if (frame != KAnim.Anim.Frame.InvalidFrame)
 			{
@@ -568,17 +583,15 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 						KAnim.Anim.FrameElement frameElement = this.batch.group.data.frameElements[num];
 						if (frameElement.symbol == symbol)
 						{
-							Matrix4x4 rootMatrix = this.GetRootMatrix();
-							Matrix4x4 matrix4x = rootMatrix * frameElement.transform;
 							symbolVisible = true;
-							return matrix4x;
+							return frameElement.transform;
 						}
 					}
 				}
 			}
 		}
 		symbolVisible = false;
-		return default(Matrix4x4);
+		return Matrix2x3.identity;
 	}
 
 	public void SetBuild(string build, KAnimHashedString symbolName)
@@ -615,15 +628,13 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	public override void SetLayer(int layer)
 	{
-		if (this.batch != null && layer != this.batch.layer)
+		if (this.batch != null && this.batch.layer == layer)
 		{
-			this.DeRegister();
+			return;
 		}
+		this.DeRegister();
 		base.gameObject.layer = layer;
-		if (this.batch == null)
-		{
-			this.Register();
-		}
+		this.Register();
 	}
 
 	public override void SetDirty()

@@ -122,22 +122,28 @@ public class FetchList2 : IFetchList
 		this.updateStatusItemsHandle.Clear();
 	}
 
-	public Dictionary<Tag, float> GetRemaining()
+	private void UpdateRemaining()
 	{
-		Dictionary<Tag, float> dictionary = new Dictionary<Tag, float>();
-		foreach (FetchOrder2 fetchOrder in this.FetchOrders)
+		this.Remaining.Clear();
+		for (int i = 0; i < this.FetchOrders.Count; i++)
 		{
-			foreach (Tag tag in fetchOrder.Tags)
+			FetchOrder2 fetchOrder = this.FetchOrders[i];
+			for (int j = 0; j < fetchOrder.Tags.Length; j++)
 			{
+				Tag tag = fetchOrder.Tags[j];
 				float num = 0f;
-				if (!dictionary.TryGetValue(tag, out num))
+				if (!this.Remaining.TryGetValue(tag, out num))
 				{
-					dictionary[tag] = 0f;
+					this.Remaining[tag] = 0f;
 				}
-				dictionary[tag] = num + fetchOrder.AmountWaitingToFetch();
+				this.Remaining[tag] = num + fetchOrder.AmountWaitingToFetch();
 			}
 		}
-		return dictionary;
+	}
+
+	public Dictionary<Tag, float> GetRemaining()
+	{
+		return this.Remaining;
 	}
 
 	public Dictionary<Tag, float> GetRemainingMinimum()
@@ -258,6 +264,7 @@ public class FetchList2 : IFetchList
 		FetchList2 fetchList = (FetchList2)data;
 		if (fetchList.Destination != null)
 		{
+			fetchList.UpdateRemaining();
 			Dictionary<Tag, float> remaining = fetchList.GetRemaining();
 			fetchList.UpdateStatusItem(Db.Get().BuildingStatusItems.WaitingForMaterials, ref fetchList.waitingForMaterialsHandle, remaining);
 			fetchList.UpdateStatusItem(Db.Get().BuildingStatusItems.MaterialsUnavailable, ref fetchList.materialsUnavailableHandle, remaining);
@@ -278,6 +285,8 @@ public class FetchList2 : IFetchList
 	public Dictionary<Tag, float> MinimumAmount = new Dictionary<Tag, float>();
 
 	public List<FetchOrder2> FetchOrders = new List<FetchOrder2>();
+
+	private Dictionary<Tag, float> Remaining = new Dictionary<Tag, float>();
 
 	private bool bShowStatusItem = true;
 }

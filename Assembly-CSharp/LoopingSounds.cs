@@ -8,12 +8,33 @@ using UnityEngine;
 [SkipSaveFileSerialization]
 public class LoopingSounds : KMonoBehaviour
 {
-	private void Update()
+	protected override void OnSpawn()
 	{
-		if (!this.updatePosition)
+		base.OnSpawn();
+		if (this.updatePosition)
 		{
-			return;
+			this.AddLoopingSoundUpdater();
 		}
+	}
+
+	public void AddLoopingSoundUpdater()
+	{
+		if (!GameComps.LoopingSoundUpdaterComponents.Has(base.gameObject))
+		{
+			GameComps.LoopingSoundUpdaterComponents.Add(this);
+		}
+	}
+
+	public void RemoveLoopingSoundUpdater()
+	{
+		if (GameComps.LoopingSoundUpdaterComponents.Has(base.gameObject))
+		{
+			GameComps.LoopingSoundUpdaterComponents.Remove(base.gameObject);
+		}
+	}
+
+	public void DoUpdate()
+	{
 		Vector3 position = this.transform.position;
 		for (int i = 0; i < this.loopingSounds.Count; i++)
 		{
@@ -102,9 +123,9 @@ public class LoopingSounds : KMonoBehaviour
 				progressParameterName = null
 			};
 			soundEvent.SetupProgressParameter();
-			if (!this.updatePosition && soundEvent.progressParameter != null)
+			if (soundEvent.progressParameter != null)
 			{
-				this.updatePosition = true;
+				this.AddLoopingSoundUpdater();
 			}
 			this.loopingSounds.Add(soundEvent);
 			LoopingSoundManager.Get().Add(asset, eventInstance, true);
@@ -160,6 +181,8 @@ public class LoopingSounds : KMonoBehaviour
 
 	protected override void OnCleanUp()
 	{
+		base.OnCleanUp();
+		this.RemoveLoopingSoundUpdater();
 		this.StopAllSounds();
 	}
 

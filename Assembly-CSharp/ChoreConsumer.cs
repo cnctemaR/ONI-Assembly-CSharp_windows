@@ -30,42 +30,42 @@ public class ChoreConsumer : KMonoBehaviour
 
 	public bool IsPermitted(ChoreGroup chore_group)
 	{
-		return chore_group == null || !this.forbiddenChoreGroups.Contains(chore_group.Id);
+		return chore_group == null || !this.forbiddenChoreGroups.Contains(chore_group.IdHash);
 	}
 
 	public void SetPermitted(ChoreGroup chore_group, bool is_allowed)
 	{
 		if (is_allowed)
 		{
-			if (this.forbiddenChoreGroups.Remove(chore_group.Id))
+			if (this.forbiddenChoreGroups.Remove(chore_group.IdHash))
 			{
 				this.choreRulesChanged.Signal();
 			}
 		}
-		else if (!this.forbiddenChoreGroups.Contains(chore_group.Id))
+		else if (!this.forbiddenChoreGroups.Contains(chore_group.IdHash))
 		{
-			this.forbiddenChoreGroups.Add(chore_group.Id);
+			this.forbiddenChoreGroups.Add(chore_group.IdHash);
 			this.choreRulesChanged.Signal();
 		}
 	}
 
 	public bool IsEnabled(ChoreGroup chore_group)
 	{
-		return chore_group == null || !this.disabledChoreGroups.Contains(chore_group.Id);
+		return chore_group == null || !this.disabledChoreGroups.Contains(chore_group.IdHash);
 	}
 
 	public void SetEnabled(ChoreGroup chore_group, bool is_enabled)
 	{
 		if (is_enabled)
 		{
-			if (this.disabledChoreGroups.Remove(chore_group.Id))
+			if (this.disabledChoreGroups.Remove(chore_group.IdHash))
 			{
 				this.choreRulesChanged.Signal();
 			}
 		}
-		else if (!this.disabledChoreGroups.Contains(chore_group.Id))
+		else if (!this.disabledChoreGroups.Contains(chore_group.IdHash))
 		{
-			this.disabledChoreGroups.Add(chore_group.Id);
+			this.disabledChoreGroups.Add(chore_group.IdHash);
 			this.choreRulesChanged.Signal();
 		}
 	}
@@ -82,7 +82,7 @@ public class ChoreConsumer : KMonoBehaviour
 		bool flag = false;
 		if (this.contexts.Count > 0)
 		{
-			Chore currentChore = base.GetComponent<ChoreDriver>().GetCurrentChore();
+			Chore currentChore = this.choreDriver.GetCurrentChore();
 			for (int j = this.contexts.Count - 1; j >= 0; j--)
 			{
 				Chore.Precondition.Context context = this.contexts[j];
@@ -171,7 +171,10 @@ public class ChoreConsumer : KMonoBehaviour
 	}
 
 	[MyCmpAdd]
-	private ChoreDriver choreDriver;
+	public ChoreDriver choreDriver;
+
+	[MyCmpReq]
+	public Navigator navigator;
 
 	[MyCmpAdd]
 	private User user;

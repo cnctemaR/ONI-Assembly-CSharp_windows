@@ -391,7 +391,7 @@ public class CircuitManager
 		}
 		foreach (Generator generator in generators)
 		{
-			for (bool flag = true; flag && generator.JoulesAvailable > 0f; flag = this.ChargeBattery(generator, batteries))
+			for (bool flag = true; flag && generator.JoulesAvailable >= 1f; flag = this.ChargeBattery(generator, batteries))
 			{
 			}
 		}

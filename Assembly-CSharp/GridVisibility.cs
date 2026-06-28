@@ -10,7 +10,7 @@ public class GridVisibility : KMonoBehaviour
 
 	private void OnCellChange(int previous_cell, int new_cell)
 	{
-		if (base.GetComponent<Health>().IsDead())
+		if (base.gameObject.HasTag(GameTags.Dead))
 		{
 			return;
 		}
@@ -22,6 +22,11 @@ public class GridVisibility : KMonoBehaviour
 			GridVisibility.Reveal(num, num2, this.radius, this.innerRadius);
 			Grid.Revealed[new_cell] = true;
 		}
+	}
+
+	private void Update()
+	{
+		FogOfWarMask.ClearMask(Grid.PosToCell(this));
 	}
 
 	public static void Reveal(int baseX, int baseY, float radius, float innerRadius)

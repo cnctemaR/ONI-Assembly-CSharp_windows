@@ -4,9 +4,9 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-[SerializationConfig(MemberSerialization.OptIn)]
 [SkipSaveFileSerialization]
-public class ElementConsumer : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
+[SerializationConfig(MemberSerialization.OptIn)]
+public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 {
 	public float AverageConsumeRate
 	{
@@ -29,19 +29,12 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 		{
 			throw new ArgumentException("No consumable elements specified");
 		}
-		this.SimRegister();
 		this.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
 		if (this.capacityKG != float.PositiveInfinity)
 		{
 			this.hasAvailableCapacity = !this.IsStorageFull();
 			this.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
 		}
-	}
-
-	protected override void OnCleanUp()
-	{
-		this.SimUnregister();
-		base.OnForcedCleanUp();
 	}
 
 	protected virtual bool IsActive()
@@ -81,7 +74,8 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 
 	private void UpdateSimData()
 	{
-		SimMessages.SetElementConsumerData(this.simHandle, (!this.consumptionEnabled || !this.hasAvailableCapacity) ? 0f : this.consumptionRate);
+		float num = ((!this.consumptionEnabled || !this.hasAvailableCapacity) ? 0f : this.consumptionRate);
+		SimMessages.SetElementConsumerData(this.simHandle, num);
 	}
 
 	public static void AddMass(Sim.ConsumedMassInfo consumed_info)
@@ -90,7 +84,7 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 		{
 			return;
 		}
-		ElementConsumer elementConsumer = null;
+		ElementConsumer elementConsumer;
 		if (ElementConsumer.handleInstanceMap.TryGetValue(consumed_info.simHandle, out elementConsumer))
 		{
 			elementConsumer.AddMassInternal(consumed_info);
@@ -108,11 +102,11 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 				{
 					if (element.IsLiquid)
 					{
-						this.storage.AddLiquid(element.id, consumed_info.mass, consumed_info.temperature, true);
+						this.storage.AddLiquid(element.id, consumed_info.mass, consumed_info.temperature, consumed_info.diseaseIdx, consumed_info.diseaseCount, true, true);
 					}
 					else if (element.IsGas)
 					{
-						this.storage.AddGasChunk(element.id, consumed_info.mass, consumed_info.temperature, true);
+						this.storage.AddGasChunk(element.id, consumed_info.mass, consumed_info.temperature, consumed_info.diseaseIdx, consumed_info.diseaseCount, true, true);
 					}
 				}
 			}
@@ -191,12 +185,12 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 				if (this.configuration == ElementConsumer.Configuration.AllGas)
 				{
 					text2 = "gas";
-					text = ELEMENTS.STATEGAS;
+					text = ELEMENTS.STATE.GAS;
 				}
 				else if (this.configuration == ElementConsumer.Configuration.AllLiquid)
 				{
 					text2 = "liquid";
-					text = ELEMENTS.STATELIQUID;
+					text = ELEMENTS.STATE.LIQUID;
 				}
 				else
 				{
@@ -224,12 +218,12 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 				if (this.configuration == ElementConsumer.Configuration.AllGas)
 				{
 					text2 = "gas";
-					text = ELEMENTS.STATEGAS;
+					text = ELEMENTS.STATE.GAS;
 				}
 				else if (this.configuration == ElementConsumer.Configuration.AllLiquid)
 				{
 					text2 = "liquid";
-					text = ELEMENTS.STATELIQUID;
+					text = ELEMENTS.STATE.LIQUID;
 				}
 				else
 				{
@@ -238,7 +232,7 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 				}
 			}
 			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMED, text2, text, GameUtil.GetFormattedMass(this.consumptionRate / 100f * 100f, GameUtil.TimeSlice.PerSecond, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMED, text2, text, GameUtil.GetFormattedMass(this.consumptionRate / 100f * 100f, GameUtil.TimeSlice.PerSecond, true, "{0:0.##}")), Descriptor.DescriptorType.Effect);
+			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMED, text2, text, GameUtil.GetFormattedMass(this.consumptionRate / 100f * 100f, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMED, text2, text, GameUtil.GetFormattedMass(this.consumptionRate / 100f * 100f, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Effect);
 			list.Add(descriptor);
 		}
 		return list;
@@ -264,49 +258,35 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 		this.EnableConsumption(isActive);
 	}
 
-	private void SimRegister()
+	protected override void OnSimUnregister()
 	{
-		if (base.isSpawned && this.simHandle == -1)
-		{
-			int num = Grid.PosToCell(this.transform.position + this.sampleCellOffset);
-			this.simHandle = -2;
-			HandleVector<Game.ComplexCallbackInfo>.Handle handle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(delegate(object data)
-			{
-				ElementConsumer.OnSimRegistered(this, data);
-			}), "ElementConsumer");
-			SimMessages.AddElementConsumer(num, this.configuration, this.elementToConsume, this.consumptionRadius, handle.index);
-		}
+		ElementConsumer.handleInstanceMap.Remove(this.simHandle);
+		ElementConsumer.StaticUnregister(this.simHandle);
 	}
 
-	private void SimUnregister()
+	protected override void OnSimRegister(HandleVector<Game.ComplexCallbackInfo>.Handle cb_handle)
 	{
-		if (this.simHandle != -1)
-		{
-			if (Sim.IsValidHandle(this.simHandle))
-			{
-				ElementConsumer.handleInstanceMap.Remove(this.simHandle);
-				SimMessages.RemoveElementConsumer(-1, this.simHandle);
-			}
-			this.simHandle = -1;
-		}
+		int num = Grid.PosToCell(this.transform.position + this.sampleCellOffset);
+		SimMessages.AddElementConsumer(num, this.configuration, this.elementToConsume, this.consumptionRadius, cb_handle.index);
 	}
 
-	private static void OnSimRegistered(ElementConsumer instance, object data)
+	protected override Action<int> GetStaticUnregister()
 	{
-		int num = (int)data;
-		if (instance != null && instance.simHandle == -2)
+		return new Action<int>(ElementConsumer.StaticUnregister);
+	}
+
+	private static void StaticUnregister(int sim_handle)
+	{
+		SimMessages.RemoveElementConsumer(-1, sim_handle);
+	}
+
+	protected override void OnSimRegistered()
+	{
+		if (this.consumptionEnabled)
 		{
-			instance.simHandle = num;
-			if (instance.consumptionEnabled)
-			{
-				instance.UpdateSimData();
-			}
-			ElementConsumer.handleInstanceMap[num] = instance;
+			this.UpdateSimData();
 		}
-		else
-		{
-			SimMessages.RemoveElementConsumer(-1, num);
-		}
+		ElementConsumer.handleInstanceMap[this.simHandle] = this;
 	}
 
 	[HashedEnum]
@@ -365,9 +345,6 @@ public class ElementConsumer : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 	private bool consumptionEnabled;
 
 	private bool hasAvailableCapacity = true;
-
-	[SerializeField]
-	private int simHandle = -1;
 
 	private static Dictionary<int, ElementConsumer> handleInstanceMap = new Dictionary<int, ElementConsumer>();
 

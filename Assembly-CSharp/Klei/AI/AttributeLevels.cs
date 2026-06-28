@@ -68,6 +68,12 @@ namespace Klei.AI
 				Debug.LogWarning(attribute_id + " has no level.", null);
 				return false;
 			}
+			AttributeConverterInstance attributeConverterInstance = Db.Get().AttributeConverters.TrainingSpeed.Lookup(this);
+			if (attributeConverterInstance != null)
+			{
+				float num = attributeConverterInstance.Evaluate();
+				experience += experience * num;
+			}
 			bool flag = attributeLevel.AddExperience(this, experience);
 			attributeLevel.Apply(this);
 			return flag;

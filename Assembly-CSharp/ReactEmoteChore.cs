@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class ReactEmoteChore : Chore<ReactEmoteChore.StatesInstance>
 {
-	public ReactEmoteChore(IStateMachineTarget target, ChoreType chore_type, Reactable reactable, HashedString emote_kanim, HashedString[] emote_anims, KAnim.PlayMode play_mode, Func<StatusItem> get_status_item)
+	public ReactEmoteChore(IStateMachineTarget target, ChoreType chore_type, EmoteReactable reactable, HashedString emote_kanim, HashedString[] emote_anims, KAnim.PlayMode play_mode, Func<StatusItem> get_status_item)
 		: base(chore_type, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true, 0)
 	{
 		base.AddPrecondition(ChorePreconditions.IsMoving, null);
@@ -31,7 +31,7 @@ public class ReactEmoteChore : Chore<ReactEmoteChore.StatesInstance>
 
 	public class StatesInstance : GameStateMachine<ReactEmoteChore.States, ReactEmoteChore.StatesInstance, ReactEmoteChore, object>.GameInstance
 	{
-		public StatesInstance(ReactEmoteChore master, GameObject emoter, Reactable reactable, HashedString emote_kanim, HashedString[] emote_anims, KAnim.PlayMode mode)
+		public StatesInstance(ReactEmoteChore master, GameObject emoter, EmoteReactable reactable, HashedString emote_kanim, HashedString[] emote_anims, KAnim.PlayMode mode)
 			: base(master)
 		{
 			this.emoteKAnim = emote_kanim;
@@ -60,12 +60,12 @@ public class ReactEmoteChore : Chore<ReactEmoteChore.StatesInstance>
 				.OnAnimQueueComplete(null)
 				.Enter(delegate(ReactEmoteChore.StatesInstance smi)
 				{
-					smi.master.GetComponent<Facing>().Face(Grid.CellToPos(this.reactable.Get(smi).CellPosition));
+					smi.master.GetComponent<Facing>().Face(Grid.CellToPos(this.reactable.Get(smi).sourceCell));
 				});
 		}
 
 		public StateMachine<ReactEmoteChore.States, ReactEmoteChore.StatesInstance, ReactEmoteChore, object>.TargetParameter emoter;
 
-		public StateMachine<ReactEmoteChore.States, ReactEmoteChore.StatesInstance, ReactEmoteChore, object>.ObjectParameter<Reactable> reactable;
+		public StateMachine<ReactEmoteChore.States, ReactEmoteChore.StatesInstance, ReactEmoteChore, object>.ObjectParameter<EmoteReactable> reactable;
 	}
 }

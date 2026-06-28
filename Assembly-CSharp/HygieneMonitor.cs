@@ -10,7 +10,10 @@ public class HygieneMonitor : GameStateMachine<HygieneMonitor, HygieneMonitor.In
 		{
 			smi.AddUncleanEffect();
 		});
-		this.clean.EventTransition(GameHashes.EffectAdded, this.needsshower, (HygieneMonitor.Instance smi) => smi.NeedsShower());
+		this.clean.EventTransition(GameHashes.EffectAdded, this.needsshower, (HygieneMonitor.Instance smi) => smi.NeedsShower()).Update(delegate(HygieneMonitor.Instance smi)
+		{
+			smi.UpdateDirtiness();
+		});
 		this.needsshower.EventTransition(GameHashes.EffectRemoved, this.clean, (HygieneMonitor.Instance smi) => !smi.NeedsShower()).ToggleUrge(Db.Get().Urges.Shower);
 	}
 
@@ -44,6 +47,22 @@ public class HygieneMonitor : GameStateMachine<HygieneMonitor, HygieneMonitor.In
 				}
 			}
 			return flag;
+		}
+
+		public void UpdateDirtiness()
+		{
+			int num = Grid.PosToCell(base.master.transform.position);
+			int num2 = Grid.CellAbove(num);
+			Element element = Grid.Element[num];
+			Element element2 = Grid.Element[num2];
+			if ((element.IsLiquid && element.id != SimHashes.Water) || (element2.IsLiquid && element2.id != SimHashes.Water))
+			{
+				base.master.GetComponent<Effects>().Add("Unclean", true);
+			}
+			if (element2.id == SimHashes.DirtyWater)
+			{
+				base.master.GetComponent<Effects>().Add("Unclean", true);
+			}
 		}
 
 		private Effects effects;

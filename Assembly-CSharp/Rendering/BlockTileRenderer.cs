@@ -19,6 +19,18 @@ namespace Rendering
 			}
 		}
 
+		public void FreeResources()
+		{
+			foreach (KeyValuePair<KeyValuePair<BuildingDef, bool>, BlockTileRenderer.RenderInfo> keyValuePair in this.renderInfo)
+			{
+				if (keyValuePair.Value != null)
+				{
+					keyValuePair.Value.FreeResources();
+				}
+			}
+			this.renderInfo.Clear();
+		}
+
 		private static bool MatchesDef(GameObject go, BuildingDef def)
 		{
 			return go != null && go.GetComponent<Building>().Def == def;
@@ -73,9 +85,24 @@ namespace Rendering
 			return bits;
 		}
 
+		private bool IsDecorConnectable(GameObject src, GameObject target)
+		{
+			if (src != null && target != null)
+			{
+				BuildingDef def = src.GetComponent<Building>().Def;
+				BuildingDef def2 = target.GetComponent<Building>().Def;
+				if (def != null && def2 != null)
+				{
+					return def.SceneLayer == def2.SceneLayer;
+				}
+			}
+			return false;
+		}
+
 		public virtual BlockTileRenderer.Bits GetDecorConnectionBits(int x, int y, int query_layer)
 		{
 			BlockTileRenderer.Bits bits = (BlockTileRenderer.Bits)0;
+			GameObject gameObject = Grid.Objects[y * Grid.WidthInCells + x, query_layer];
 			if (y > 0)
 			{
 				int num = (y - 1) * Grid.WidthInCells + x;
@@ -93,11 +120,11 @@ namespace Rendering
 				}
 			}
 			int num2 = y * Grid.WidthInCells + x;
-			if (x > 0 && Grid.Objects[num2 - 1, query_layer] != null)
+			if (x > 0 && this.IsDecorConnectable(gameObject, Grid.Objects[num2 - 1, query_layer]))
 			{
 				bits |= BlockTileRenderer.Bits.Left;
 			}
-			if (x < Grid.WidthInCells - 1 && Grid.Objects[num2 + 1, query_layer] != null)
+			if (x < Grid.WidthInCells - 1 && this.IsDecorConnectable(gameObject, Grid.Objects[num2 + 1, query_layer]))
 			{
 				bits |= BlockTileRenderer.Bits.Right;
 			}
@@ -337,6 +364,27 @@ namespace Rendering
 				this.trimUVSize = new Vector2(64f / (float)def.BlockTileAtlas.texture.width, 64f / (float)def.BlockTileAtlas.texture.height);
 			}
 
+			public void FreeResources()
+			{
+				global::UnityEngine.Object.DestroyImmediate(this.material);
+				this.material = null;
+				this.atlasInfo = null;
+				for (int i = 0; i < this.meshChunks.GetLength(0); i++)
+				{
+					for (int j = 0; j < this.meshChunks.GetLength(1); j++)
+					{
+						if (this.meshChunks[i, j] != null)
+						{
+							global::UnityEngine.Object.DestroyImmediate(this.meshChunks[i, j]);
+							this.meshChunks[i, j] = null;
+						}
+					}
+				}
+				this.meshChunks = null;
+				this.decorRenderInfo = null;
+				this.occupiedCells.Clear();
+			}
+
 			public void AddCell(int cell)
 			{
 				int num = 0;
@@ -557,6 +605,26 @@ namespace Rendering
 				this.material.SetTexture("_MainTex", decorInfo.atlas.texture);
 				this.material.SetFloat("_DarkenTintScale", tint_scale);
 				this.meshChunks = new Mesh[num_x_chunks, num_y_chunks];
+			}
+
+			public void FreeResources()
+			{
+				this.decorInfo = null;
+				global::UnityEngine.Object.DestroyImmediate(this.material);
+				this.material = null;
+				for (int i = 0; i < this.meshChunks.GetLength(0); i++)
+				{
+					for (int j = 0; j < this.meshChunks.GetLength(1); j++)
+					{
+						if (this.meshChunks[i, j] != null)
+						{
+							global::UnityEngine.Object.DestroyImmediate(this.meshChunks[i, j]);
+							this.meshChunks[i, j] = null;
+						}
+					}
+				}
+				this.meshChunks = null;
+				this.triangles.Clear();
 			}
 
 			public void Render(int x, int y, Vector3 position, int renderLayer)

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using BaseTemplateClasses;
+using Klei.AI;
+using STRINGS;
+using TemplateClasses;
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class DebugBaseTemplateButton : KScreen
 {
@@ -13,6 +15,37 @@ public class DebugBaseTemplateButton : KScreen
 		base.OnPrefabInit();
 		DebugBaseTemplateButton.Instance = this;
 		base.gameObject.SetActive(false);
+		this.SetupLocText();
+		TMP_InputField tmp_InputField = this.nameField;
+		tmp_InputField.onFocus = (global::System.Action)Delegate.Combine(tmp_InputField.onFocus, new global::System.Action(delegate
+		{
+			this.editing = true;
+		}));
+		this.nameField.onEndEdit.AddListener(delegate
+		{
+			this.editing = false;
+		});
+		this.nameField.onValueChanged.AddListener(delegate
+		{
+			Util.ScrubInputField(this.nameField, true);
+		});
+	}
+
+	public override float GetSortKey()
+	{
+		return 10f;
+	}
+
+	public override void OnKeyDown(KButtonEvent e)
+	{
+		if (this.editing)
+		{
+			e.Consumed = true;
+		}
+		else
+		{
+			base.OnKeyDown(e);
+		}
 	}
 
 	protected override void OnSpawn()
@@ -22,96 +55,67 @@ public class DebugBaseTemplateButton : KScreen
 		{
 			this.saveBaseButton.onClick -= this.OnClickSaveBase;
 			this.saveBaseButton.onClick += this.OnClickSaveBase;
-			if (!Application.isEditor)
-			{
-				this.saveBaseButton.gameObject.SetActive(false);
-			}
 		}
 		if (this.clearButton != null)
 		{
 			this.clearButton.onClick -= this.OnClickClear;
 			this.clearButton.onClick += this.OnClickClear;
-			if (!Application.isEditor)
-			{
-				this.clearButton.gameObject.SetActive(false);
-			}
 		}
 		if (this.AddSelectionButton != null)
 		{
 			this.AddSelectionButton.onClick -= this.OnClickAddSelection;
 			this.AddSelectionButton.onClick += this.OnClickAddSelection;
-			if (!Application.isEditor)
-			{
-				this.AddSelectionButton.gameObject.SetActive(false);
-			}
 		}
 		if (this.RemoveSelectionButton != null)
 		{
 			this.RemoveSelectionButton.onClick -= this.OnClickRemoveSelection;
 			this.RemoveSelectionButton.onClick += this.OnClickRemoveSelection;
-			if (!Application.isEditor)
-			{
-				this.RemoveSelectionButton.gameObject.SetActive(false);
-			}
 		}
 		if (this.clearSelectionButton != null)
 		{
 			this.clearSelectionButton.onClick -= this.OnClickClearSelection;
 			this.clearSelectionButton.onClick += this.OnClickClearSelection;
-			if (!Application.isEditor)
-			{
-				this.clearSelectionButton.gameObject.SetActive(false);
-			}
 		}
 		if (this.MoveButton != null)
 		{
 			this.MoveButton.onClick -= this.OnClickMove;
 			this.MoveButton.onClick += this.OnClickMove;
-			if (!Application.isEditor)
-			{
-				this.RemoveSelectionButton.gameObject.SetActive(false);
-			}
-		}
-		if (this.pasteStartingBaseButton != null)
-		{
-			this.pasteStartingBaseButton.onClick -= this.OnClickPasteStartingBase;
-			this.pasteStartingBaseButton.onClick += this.OnClickPasteStartingBase;
-			if (!Application.isEditor)
-			{
-				this.pasteStartingBaseButton.gameObject.SetActive(false);
-			}
 		}
 		if (this.DestroyButton != null)
 		{
 			this.DestroyButton.onClick -= this.OnClickDestroySelection;
 			this.DestroyButton.onClick += this.OnClickDestroySelection;
-			if (!Application.isEditor)
-			{
-				this.DestroyButton.gameObject.SetActive(false);
-			}
 		}
 		if (this.DeconstructButton != null)
 		{
 			this.DeconstructButton.onClick -= this.OnClickDeconstructSelection;
 			this.DeconstructButton.onClick += this.OnClickDeconstructSelection;
-			if (!Application.isEditor)
-			{
-				this.DeconstructButton.gameObject.SetActive(false);
-			}
 		}
+	}
+
+	private void SetupLocText()
+	{
+		this.transform.GetChild(2).GetComponent<LocText>().text = UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.TITLE;
+		this.transform.GetChild(9).GetComponent<LocText>().text = UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.SAVE_TITLE;
+		this.clearButton.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.CLEAR_BUTTON;
+		this.DestroyButton.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.DESTROY_BUTTON;
+		this.DeconstructButton.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.DECONSTRUCT_BUTTON;
+		this.clearSelectionButton.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.CLEAR_SELECTION_BUTTON;
+		this.nameField.GetComponentsInChildren<LocText>()[0].text = UI.DEBUG_TOOLS.SAVE_BASE_TEMPLATE.DEFAULT_SAVE_NAME;
 	}
 
 	private void OnClickPasteStartingBase()
 	{
 		DebugTool.Instance.DeactivateTool(null);
 		this.pasteAndSelectAsset = null;
-		this.pasteAndSelectAsset = Assets.GetBaseTemplate();
+		this.pasteAndSelectAsset = TemplateCache.GetBaseStartingTemplate();
 		if (this.pasteAndSelectAsset == null)
 		{
 			return;
 		}
 		this.ClearSelection();
 		StampTool.Instance.Activate(this.pasteAndSelectAsset, true, false);
+		this.nameField.text = this.pasteAndSelectAsset.name;
 	}
 
 	private void OnClickDestroySelection()
@@ -144,6 +148,7 @@ public class DebugBaseTemplateButton : KScreen
 	private void OnClickClearSelection()
 	{
 		this.ClearSelection();
+		this.nameField.text = string.Empty;
 	}
 
 	private void OnClickClear()
@@ -168,12 +173,14 @@ public class DebugBaseTemplateButton : KScreen
 		}
 	}
 
-	private BaseTemplate GetSelectionAsAsset()
+	private TemplateContainer GetSelectionAsAsset()
 	{
-		List<BaseTemplateCellInfo> list = new List<BaseTemplateCellInfo>();
-		List<BaseTemplatePrefabInfo> list2 = new List<BaseTemplatePrefabInfo>();
-		List<BaseTemplatePrefabInfo> list3 = new List<BaseTemplatePrefabInfo>();
-		List<BaseTemplatePrefabInfo> list4 = new List<BaseTemplatePrefabInfo>();
+		List<Cell> list = new List<Cell>();
+		List<Prefab> list2 = new List<Prefab>();
+		List<Prefab> list3 = new List<Prefab>();
+		List<Prefab> list4 = new List<Prefab>();
+		List<Prefab> list5 = new List<Prefab>();
+		HashSet<GameObject> hashSet = new HashSet<GameObject>();
 		float num = 0f;
 		float num2 = 0f;
 		foreach (int num3 in this.SelectedCells)
@@ -188,198 +195,329 @@ public class DebugBaseTemplateButton : KScreen
 		int num7;
 		int num8;
 		Grid.CellToXY(num6, out num7, out num8);
-		if (this.AutoSaveRoomContents)
+		for (int i = 0; i < this.SelectedCells.Count; i++)
 		{
-			for (int i = 0; i < Game.Instance.roomProber.rooms.Count; i++)
+			Sim.Cell cell = Grid.Cell[this.SelectedCells[i]];
+			Sim.DiseaseCell diseaseCell = Grid.Disease[this.SelectedCells[i]];
+			int num9;
+			int num10;
+			Grid.CellToXY(this.SelectedCells[i], out num9, out num10);
+			Element element = ElementLoader.elements[(int)Grid.Cell[this.SelectedCells[i]].elementIdx];
+			string text = ((diseaseCell.diseaseIdx == byte.MaxValue) ? null : Db.Get().Diseases[(int)diseaseCell.diseaseIdx].Id);
+			list.Add(new Cell(num9 - num7, num10 - num8, element.id, cell.temperature, cell.mass, text, diseaseCell.elementCount, Grid.PreventFogOfWarReveal[this.SelectedCells[i]]));
+		}
+		for (int j = 0; j < Components.BuildingCompletes.Count; j++)
+		{
+			BuildingComplete buildingComplete = Components.BuildingCompletes[j];
+			if (!hashSet.Contains(buildingComplete.gameObject))
 			{
-				foreach (int num9 in Game.Instance.roomProber.rooms[i].cells)
+				int num11;
+				int num12;
+				Grid.CellToXY(Grid.PosToCell(buildingComplete), out num11, out num12);
+				if (this.SaveAllBuildings || this.SelectedCells.Contains(Grid.PosToCell(buildingComplete)))
 				{
-					Sim.Cell cell = Grid.Cell[num9];
-					int num10;
-					int num11;
-					Grid.CellToXY(num9, out num10, out num11);
-					Element element = ElementLoader.elements[(int)Grid.Cell[num9].elementIdx];
-					list.Add(new BaseTemplateCellInfo(num10 - num7, num11 - num8, element.id, cell.temperature, cell.mass));
+					string text2;
+					foreach (int num13 in buildingComplete.PlacementCells)
+					{
+						Sim.Cell cell2 = Grid.Cell[num13];
+						Sim.DiseaseCell diseaseCell2 = Grid.Disease[num13];
+						int num14;
+						int num15;
+						Grid.CellToXY(num13, out num14, out num15);
+						text2 = ((diseaseCell2.diseaseIdx == byte.MaxValue) ? null : Db.Get().Diseases[(int)diseaseCell2.diseaseIdx].Id);
+						list.Add(new Cell(num14 - num7, num15 - num8, Grid.Element[num13].id, cell2.temperature, cell2.mass, text2, diseaseCell2.elementCount, false));
+					}
+					Orientation orientation = Orientation.Neutral;
+					Rotatable component = buildingComplete.gameObject.GetComponent<Rotatable>();
+					if (component != null)
+					{
+						orientation = component.GetOrientation();
+					}
+					SimHashes simHashes = SimHashes.Void;
+					float num16 = 280f;
+					text2 = null;
+					int num17 = 0;
+					PrimaryElement component2 = buildingComplete.GetComponent<PrimaryElement>();
+					if (component2 != null)
+					{
+						simHashes = component2.ElementID;
+						num16 = component2.Temperature;
+						text2 = ((component2.DiseaseIdx == byte.MaxValue) ? null : Db.Get().Diseases[(int)component2.DiseaseIdx].Id);
+						num17 = component2.DiseaseCount;
+					}
+					List<Prefab.template_amount_value> list6 = new List<Prefab.template_amount_value>();
+					List<Prefab.template_amount_value> list7 = new List<Prefab.template_amount_value>();
+					foreach (AmountInstance amountInstance in buildingComplete.gameObject.GetAmounts())
+					{
+						list6.Add(new Prefab.template_amount_value(amountInstance.amount.Id, amountInstance.value));
+					}
+					Battery component3 = buildingComplete.GetComponent<Battery>();
+					if (component3 != null)
+					{
+						float joulesAvailable = component3.JoulesAvailable;
+						list7.Add(new Prefab.template_amount_value("joulesAvailable", joulesAvailable));
+					}
+					Unsealable component4 = buildingComplete.GetComponent<Unsealable>();
+					if (component4 != null)
+					{
+						float num18 = (float)((!component4.facingRight) ? 0 : 1);
+						list7.Add(new Prefab.template_amount_value("sealedDoorDirection", num18));
+					}
+					num11 -= num7;
+					num12 -= num8;
+					num16 = Mathf.Clamp(num16, 1f, 99999f);
+					Prefab prefab = new Prefab(buildingComplete.PrefabID().Name, Prefab.Type.Building, num11, num12, simHashes, num16, 0f, text2, num17, orientation, list6.ToArray(), list7.ToArray(), 0);
+					Storage component5 = buildingComplete.gameObject.GetComponent<Storage>();
+					if (component5 != null)
+					{
+						foreach (GameObject gameObject in component5.items)
+						{
+							float num19 = 0f;
+							SimHashes simHashes2 = SimHashes.Vacuum;
+							float num20 = 280f;
+							string text3 = null;
+							int num21 = 0;
+							bool flag = false;
+							PrimaryElement component6 = gameObject.GetComponent<PrimaryElement>();
+							if (component6 != null)
+							{
+								num19 = component6.Units;
+								simHashes2 = component6.ElementID;
+								num20 = component6.Temperature;
+								text3 = ((component6.DiseaseIdx == byte.MaxValue) ? null : Db.Get().Diseases[(int)component6.DiseaseIdx].Id);
+								num21 = component6.DiseaseCount;
+							}
+							float num22 = 0f;
+							global::Rottable.Instance smi = gameObject.gameObject.GetSMI<global::Rottable.Instance>();
+							if (smi != null)
+							{
+								num22 = smi.RotValue;
+							}
+							ElementChunk component7 = gameObject.GetComponent<ElementChunk>();
+							if (component7 != null)
+							{
+								flag = true;
+							}
+							StorageItem storageItem = new StorageItem(gameObject.PrefabID().Name, num19, num20, simHashes2, text3, num21, flag);
+							if (smi != null)
+							{
+								storageItem.rottable.rotAmount = num22;
+							}
+							prefab.AssignStorage(storageItem);
+							hashSet.Add(gameObject);
+						}
+					}
+					list2.Add(prefab);
+					hashSet.Add(buildingComplete.gameObject);
 				}
 			}
 		}
-		for (int j = 0; j < this.SelectedCells.Count; j++)
+		int l = 0;
+		while (l < list2.Count)
 		{
-			Sim.Cell cell2 = Grid.Cell[this.SelectedCells[j]];
-			int num12;
-			int num13;
-			Grid.CellToXY(this.SelectedCells[j], out num12, out num13);
-			Element element2 = ElementLoader.elements[(int)Grid.Cell[this.SelectedCells[j]].elementIdx];
-			list.Add(new BaseTemplateCellInfo(num12 - num7, num13 - num8, element2.id, cell2.temperature, cell2.mass));
-		}
-		BaseTemplateConduitConnection[] array = new BaseTemplateConduitConnection[Components.BuildingCompletes.Count];
-		for (int k = 0; k < Components.BuildingCompletes.Count; k++)
-		{
-			BuildingComplete buildingComplete = Components.BuildingCompletes[k];
-			int num14;
-			int num15;
-			Grid.CellToXY(Grid.PosToCell(buildingComplete), out num14, out num15);
-			if (this.SaveAllBuildings || this.SelectedCells.Contains(Grid.PosToCell(buildingComplete)))
+			Prefab prefab2 = list2[l];
+			int num23 = prefab2.location_x + num7;
+			int num24 = prefab2.location_y + num8;
+			int num25 = Grid.XYToCell(num23, num24);
+			string id = prefab2.id;
+			if (id == null)
 			{
-				foreach (int num16 in buildingComplete.PlacementCells)
-				{
-					Sim.Cell cell3 = Grid.Cell[num16];
-					int num17;
-					int num18;
-					Grid.CellToXY(num16, out num17, out num18);
-					Element element3 = ElementLoader.elements[(int)Grid.Cell[num16].elementIdx];
-					list.Add(new BaseTemplateCellInfo(num17 - num7, num18 - num8, element3.id, cell3.temperature, cell3.mass));
-				}
-				Orientation orientation = Orientation.Neutral;
-				Rotatable component = buildingComplete.gameObject.GetComponent<Rotatable>();
-				if (component != null)
-				{
-					orientation = component.GetOrientation();
-				}
-				float num19 = 280f;
-				HandleVector<int>.Handle handle = GameComps.StructureTemperatures.GetHandle(buildingComplete.gameObject);
-				if (handle.IsValid())
-				{
-					num19 = GameComps.StructureTemperatures.GetData(handle).Temperature;
-				}
-				string name = buildingComplete.PrefabID().Name;
-				if (name == null)
-				{
-					goto IL_043F;
-				}
-				if (DebugBaseTemplateButton.<>f__switch$map1 == null)
-				{
-					DebugBaseTemplateButton.<>f__switch$map1 = new Dictionary<string, int>(4)
-					{
-						{ "Wire", 0 },
-						{ "InsulatedWire", 1 },
-						{ "GasConduit", 2 },
-						{ "LiquidConduit", 3 }
-					};
-				}
-				int num20;
-				if (DebugBaseTemplateButton.<>f__switch$map1.TryGetValue(name, out num20))
-				{
-					switch (num20)
-					{
-					case 0:
-						array[k] = new BaseTemplateConduitConnection(BaseTemplateConduitConnection.BaseTemplateConduitSystemType.Electrical, Game.Instance.electricalConduitSystem.GetConnections(Grid.PosToCell(buildingComplete), true));
-						goto IL_04EC;
-					case 1:
-						array[k] = new BaseTemplateConduitConnection(BaseTemplateConduitConnection.BaseTemplateConduitSystemType.Electrical, Game.Instance.electricalConduitSystem.GetConnections(Grid.PosToCell(buildingComplete), true));
-						goto IL_04EC;
-					case 2:
-						array[k] = new BaseTemplateConduitConnection(BaseTemplateConduitConnection.BaseTemplateConduitSystemType.Gas, Game.Instance.gasConduitSystem.GetConnections(Grid.PosToCell(buildingComplete), true));
-						goto IL_04EC;
-					case 3:
-						array[k] = new BaseTemplateConduitConnection(BaseTemplateConduitConnection.BaseTemplateConduitSystemType.Liquid, Game.Instance.liquidConduitSystem.GetConnections(Grid.PosToCell(buildingComplete), true));
-						goto IL_04EC;
-					}
-					goto IL_043F;
-				}
-				goto IL_043F;
-				IL_04EC:
-				num14 -= num7;
-				num15 -= num8;
-				num19 = Mathf.Clamp(num19, 1f, 99999f);
-				BaseTemplatePrefabInfo baseTemplatePrefabInfo = new BaseTemplatePrefabInfo(buildingComplete.PrefabID().Name, num14, num15, buildingComplete.GetComponent<PrimaryElement>().ElementID, num19, 0f, orientation);
-				Storage component2 = buildingComplete.gameObject.GetComponent<Storage>();
-				if (component2 != null)
-				{
-					foreach (GameObject gameObject in component2.items)
-					{
-						float num21 = 0f;
-						SimHashes simHashes = SimHashes.Vacuum;
-						float num22 = 280f;
-						bool flag = false;
-						PrimaryElement component3 = gameObject.GetComponent<PrimaryElement>();
-						if (component3 != null)
-						{
-							num21 = component3.Units;
-							simHashes = component3.ElementID;
-							num22 = component3.Temperature;
-						}
-						float num23 = 0f;
-						Rottable.Instance smi = gameObject.gameObject.GetSMI<Rottable.Instance>();
-						if (smi != null)
-						{
-							num23 = smi.RotValue;
-						}
-						ElementChunk component4 = gameObject.GetComponent<ElementChunk>();
-						if (component4 != null)
-						{
-							flag = true;
-						}
-						BaseTemplateStorageItem baseTemplateStorageItem = new BaseTemplateStorageItem(gameObject.PrefabID().Name, num21, num22, simHashes, flag);
-						if (smi != null)
-						{
-							baseTemplateStorageItem.rottable.rotAmount = num23;
-						}
-						baseTemplatePrefabInfo.AssignStorage(baseTemplateStorageItem);
-					}
-				}
-				list2.Add(baseTemplatePrefabInfo);
-				goto IL_065E;
-				IL_043F:
-				array[k] = new BaseTemplateConduitConnection(BaseTemplateConduitConnection.BaseTemplateConduitSystemType.None, (UtilityConnections)0);
-				goto IL_04EC;
+				goto IL_0771;
 			}
-			IL_065E:;
+			if (DebugBaseTemplateButton.<>f__switch$map3 == null)
+			{
+				DebugBaseTemplateButton.<>f__switch$map3 = new Dictionary<string, int>(7)
+				{
+					{ "Wire", 0 },
+					{ "InsulatedWire", 0 },
+					{ "HighWattageWire", 0 },
+					{ "GasConduit", 1 },
+					{ "InsulatedGasConduit", 1 },
+					{ "LiquidConduit", 2 },
+					{ "InsulatedLiquidConduit", 2 }
+				};
+			}
+			int num26;
+			if (DebugBaseTemplateButton.<>f__switch$map3.TryGetValue(id, out num26))
+			{
+				switch (num26)
+				{
+				case 0:
+					prefab2.connections = (int)Game.Instance.electricalConduitSystem.GetConnections(num25, true);
+					goto IL_07D8;
+				case 1:
+					prefab2.connections = (int)Game.Instance.gasConduitSystem.GetConnections(num25, true);
+					goto IL_07D8;
+				case 2:
+					prefab2.connections = (int)Game.Instance.liquidConduitSystem.GetConnections(num25, true);
+					goto IL_07D8;
+				}
+				goto IL_0771;
+			}
+			goto IL_0771;
+			IL_07D8:
+			l++;
+			continue;
+			IL_0771:
+			prefab2.connections = 0;
+			goto IL_07D8;
 		}
 		for (int m = 0; m < Components.Pickupables.Count; m++)
 		{
 			if (Components.Pickupables[m].gameObject.activeSelf)
 			{
 				Pickupable pickupable = Components.Pickupables[m];
-				int num24 = Grid.PosToCell(pickupable);
-				if (this.SaveAllPickups || this.SelectedCells.Contains(num24))
+				if (!hashSet.Contains(pickupable.gameObject))
 				{
-					if (!Components.Pickupables[m].gameObject.GetComponent<MinionBrain>())
+					int num27 = Grid.PosToCell(pickupable);
+					if (this.SaveAllPickups || this.SelectedCells.Contains(num27))
 					{
-						int num25;
-						int num26;
-						Grid.CellToXY(num24, out num25, out num26);
-						num25 -= num7;
-						num26 -= num8;
-						float num27 = 280f;
-						float num28 = 1f;
-						float num29 = 0f;
-						Rottable.Instance smi2 = pickupable.gameObject.GetSMI<Rottable.Instance>();
-						if (smi2 != null)
+						if (!Components.Pickupables[m].gameObject.GetComponent<MinionBrain>())
 						{
-							num29 = smi2.RotValue;
-						}
-						PrimaryElement component5 = pickupable.gameObject.GetComponent<PrimaryElement>();
-						if (component5 != null)
-						{
-							num28 = component5.Units;
-							num27 = component5.Temperature;
-						}
-						ElementChunk component6 = pickupable.gameObject.GetComponent<ElementChunk>();
-						if (component6 != null)
-						{
-							BaseTemplatePrefabInfo baseTemplatePrefabInfo2 = new BaseTemplatePrefabInfo(pickupable.PrefabID().Name, num25, num26, component5.ElementID, num27, num28, Orientation.Neutral);
-							list4.Add(baseTemplatePrefabInfo2);
-						}
-						else
-						{
-							BaseTemplatePrefabInfo baseTemplatePrefabInfo2 = new BaseTemplatePrefabInfo(pickupable.PrefabID().Name, num25, num26);
-							baseTemplatePrefabInfo2.units = num28;
-							baseTemplatePrefabInfo2.rottable.rotAmount = num29;
-							list3.Add(baseTemplatePrefabInfo2);
+							int num28;
+							int num29;
+							Grid.CellToXY(num27, out num28, out num29);
+							num28 -= num7;
+							num29 -= num8;
+							SimHashes simHashes3 = SimHashes.Void;
+							float num30 = 280f;
+							float num31 = 1f;
+							string text4 = null;
+							int num32 = 0;
+							float num33 = 0f;
+							global::Rottable.Instance smi2 = pickupable.gameObject.GetSMI<global::Rottable.Instance>();
+							if (smi2 != null)
+							{
+								num33 = smi2.RotValue;
+							}
+							PrimaryElement component8 = pickupable.gameObject.GetComponent<PrimaryElement>();
+							if (component8 != null)
+							{
+								simHashes3 = component8.ElementID;
+								num31 = component8.Units;
+								num30 = component8.Temperature;
+								text4 = ((component8.DiseaseIdx == byte.MaxValue) ? null : Db.Get().Diseases[(int)component8.DiseaseIdx].Id);
+								num32 = component8.DiseaseCount;
+							}
+							ElementChunk component9 = pickupable.gameObject.GetComponent<ElementChunk>();
+							if (component9 != null)
+							{
+								Prefab prefab3 = new Prefab(pickupable.PrefabID().Name, Prefab.Type.Ore, num28, num29, simHashes3, num30, num31, text4, num32, Orientation.Neutral, null, null, 0);
+								list4.Add(prefab3);
+							}
+							else
+							{
+								list3.Add(new Prefab(pickupable.PrefabID().Name, Prefab.Type.Pickupable, num28, num29, simHashes3, num30, num31, text4, num32, Orientation.Neutral, null, null, 0)
+								{
+									rottable = new global::TemplateClasses.Rottable(),
+									rottable = 
+									{
+										rotAmount = num33
+									}
+								});
+							}
+							hashSet.Add(pickupable.gameObject);
 						}
 					}
 				}
 			}
 		}
-		BaseTemplate baseTemplate = ScriptableObject.CreateInstance<BaseTemplate>();
-		baseTemplate.Init(list, list2, list3, list4, array);
-		return baseTemplate;
+		this.GetEntities<Crop>(Components.Crops, num7, num8, ref list4, ref list5, ref hashSet);
+		this.GetEntities<Health>(Components.Health, num7, num8, ref list4, ref list5, ref hashSet);
+		this.GetEntities<Harvestable>(Components.Harvestables, num7, num8, ref list4, ref list5, ref hashSet);
+		this.GetEntities<Edible>(Components.Edibles, num7, num8, ref list4, ref list5, ref hashSet);
+		this.GetEntities<Geyser>(num7, num8, ref list4, ref list5, ref hashSet);
+		this.GetEntities<OccupyArea>(num7, num8, ref list4, ref list5, ref hashSet);
+		this.GetEntities<FogOfWarMask>(num7, num8, ref list4, ref list5, ref hashSet);
+		TemplateContainer templateContainer = new TemplateContainer();
+		templateContainer.Init(list, list2, list3, list4, list5);
+		return templateContainer;
+	}
+
+	private void GetEntities<T>(int rootX, int rootY, ref List<Prefab> _primaryElementOres, ref List<Prefab> _otherEntities, ref HashSet<GameObject> _excludeEntities)
+	{
+		object[] array = global::UnityEngine.Object.FindObjectsOfType(typeof(T));
+		this.GetEntities<object>(array, rootX, rootY, ref _primaryElementOres, ref _otherEntities, ref _excludeEntities);
+	}
+
+	private void GetEntities<T>(IEnumerable<T> component_collection, int rootX, int rootY, ref List<Prefab> _primaryElementOres, ref List<Prefab> _otherEntities, ref HashSet<GameObject> _excludeEntities)
+	{
+		foreach (T t in component_collection)
+		{
+			if (!_excludeEntities.Contains((t as KMonoBehaviour).gameObject))
+			{
+				if ((t as KMonoBehaviour).gameObject.activeSelf)
+				{
+					int num = Grid.PosToCell(t as KMonoBehaviour);
+					if (this.SelectedCells.Contains(num))
+					{
+						if (!(t as KMonoBehaviour).gameObject.GetComponent<MinionBrain>())
+						{
+							int num2;
+							int num3;
+							Grid.CellToXY(num, out num2, out num3);
+							num2 -= rootX;
+							num3 -= rootY;
+							SimHashes simHashes = SimHashes.Void;
+							float num4 = 280f;
+							float num5 = 1f;
+							string text = null;
+							int num6 = 0;
+							PrimaryElement component = (t as KMonoBehaviour).gameObject.GetComponent<PrimaryElement>();
+							if (component != null)
+							{
+								simHashes = component.ElementID;
+								num5 = component.Units;
+								num4 = component.Temperature;
+								text = ((component.DiseaseIdx == byte.MaxValue) ? null : Db.Get().Diseases[(int)component.DiseaseIdx].Id);
+								num6 = component.DiseaseCount;
+							}
+							List<Prefab.template_amount_value> list = new List<Prefab.template_amount_value>();
+							if ((t as KMonoBehaviour).gameObject.GetAmounts() != null)
+							{
+								foreach (AmountInstance amountInstance in (t as KMonoBehaviour).gameObject.GetAmounts())
+								{
+									list.Add(new Prefab.template_amount_value(amountInstance.amount.Id, amountInstance.value));
+								}
+							}
+							ElementChunk component2 = (t as KMonoBehaviour).gameObject.GetComponent<ElementChunk>();
+							if (component2 != null)
+							{
+								Prefab.template_amount_value[] array = list.ToArray();
+								Prefab prefab = new Prefab((t as KMonoBehaviour).PrefabID().Name, Prefab.Type.Ore, num2, num3, simHashes, num4, num5, text, num6, Orientation.Neutral, array, null, 0);
+								_primaryElementOres.Add(prefab);
+								_excludeEntities.Add((t as KMonoBehaviour).gameObject);
+							}
+							else
+							{
+								Prefab.template_amount_value[] array = list.ToArray();
+								Prefab prefab = new Prefab((t as KMonoBehaviour).PrefabID().Name, Prefab.Type.Other, num2, num3, simHashes, num4, num5, text, num6, Orientation.Neutral, array, null, 0);
+								_otherEntities.Add(prefab);
+								_excludeEntities.Add((t as KMonoBehaviour).gameObject);
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	private void OnClickSaveBase()
 	{
-		BaseTemplate selectionAsAsset = this.GetSelectionAsAsset();
+		TemplateContainer selectionAsAsset = this.GetSelectionAsAsset();
+		if (this.SelectedCells.Count <= 0)
+		{
+			global::Debug.LogWarning("No cells selected. Use buttons above to select the area you want to save.", null);
+			return;
+		}
+		this.SaveName = this.nameField.text;
+		if (this.SaveName == null || this.SaveName == string.Empty)
+		{
+			global::Debug.LogWarning("Invalid save name. Please enter a name in the input field.", null);
+			return;
+		}
+		selectionAsAsset.SaveToYaml(this.SaveName);
+		PasteBaseTemplateScreen.Instance.RefreshStampButtons();
 	}
 
 	public void ClearSelection()
@@ -425,8 +563,6 @@ public class DebugBaseTemplateButton : KScreen
 		}
 	}
 
-	private bool AutoSaveRoomContents;
-
 	private bool SaveAllBuildings;
 
 	private bool SaveAllPickups;
@@ -435,9 +571,7 @@ public class DebugBaseTemplateButton : KScreen
 
 	public KButton clearButton;
 
-	public KButton pasteStartingBaseButton;
-
-	private BaseTemplate pasteAndSelectAsset;
+	private TemplateContainer pasteAndSelectAsset;
 
 	public KButton AddSelectionButton;
 
@@ -451,13 +585,13 @@ public class DebugBaseTemplateButton : KScreen
 
 	public KButton MoveButton;
 
-	public BaseTemplate moveAsset;
+	public TemplateContainer moveAsset;
 
-	public InputField nameField;
+	public TMP_InputField nameField;
 
-	public string SaveLocation = "Assets/tuning/Bases";
+	private bool editing;
 
-	private string SaveName = "startingBase";
+	private string SaveName = "enter_template_name";
 
 	public GameObject Placer;
 

@@ -19,7 +19,7 @@ public class SplashTransitionLayer : TransitionDriver.OverrideLayer
 		if (this.lastSplashTime + 1f < Time.time && Grid.Element[Grid.PosToCell(navigator.transform.position)].IsLiquid)
 		{
 			this.lastSplashTime = Time.time;
-			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("splash_step_kanim", navigator.transform.position + new Vector3(0f, 0.75f, -0.1f), null, false, Grid.SceneLayer.Front);
+			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("splash_step_kanim", navigator.transform.position + new Vector3(0f, 0.75f, -0.1f), null, false, Grid.SceneLayer.Front, false);
 			kbatchedAnimController.Play("fx1", KAnim.PlayMode.Once, 1f, 0f);
 			kbatchedAnimController.destroyOnAnimComplete = true;
 		}

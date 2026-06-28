@@ -5,14 +5,14 @@ namespace Klei.AI
 {
 	public class AttributeConverter : Resource
 	{
-		public AttributeConverter(string id, string name, string description, float multiplier, float base_value, Attribute attribute, bool is_percent)
+		public AttributeConverter(string id, string name, string description, float multiplier, float base_value, Attribute attribute, IAttributeFormatter formatter = null)
 			: base(id, name)
 		{
 			this.description = description;
 			this.multiplier = multiplier;
 			this.baseValue = base_value;
 			this.attribute = attribute;
-			this.isPercent = is_percent;
+			this.formatter = formatter;
 		}
 
 		public AttributeConverterInstance Lookup(Component cmp)
@@ -38,6 +38,6 @@ namespace Klei.AI
 
 		public Attribute attribute;
 
-		public bool isPercent;
+		public IAttributeFormatter formatter;
 	}
 }

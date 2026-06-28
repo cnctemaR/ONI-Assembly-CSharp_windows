@@ -50,9 +50,17 @@ public class Health : KMonoBehaviour, ISaveLoadable
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		if (this.IsDead())
+		if (this.State == Health.HealthState.Incapacitated || this.hitPoints == 0f)
 		{
-			this.ApplyDeath();
+			if (this.CanBeIncapacitated)
+			{
+				this.Incapacitate(Db.Get().Deaths.Slain);
+			}
+			else
+			{
+				global::Debug.Log("death " + base.gameObject.name, null);
+				this.Kill();
+			}
 		}
 		if (this.State != Health.HealthState.Incapacitated && this.State != Health.HealthState.Dead)
 		{
@@ -65,14 +73,6 @@ public class Health : KMonoBehaviour, ISaveLoadable
 	{
 		base.OnCleanUp();
 		Components.Health.Remove(this);
-	}
-
-	protected override void OnCmpEnable()
-	{
-		if (this.IsDead())
-		{
-			this.ApplyDeath();
-		}
 	}
 
 	public void UpdateHealthBar()
@@ -91,48 +91,40 @@ public class Health : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
-	public bool Bleed(float dt)
-	{
-		if (this.State == Health.HealthState.Incapacitated)
-		{
-			this.bleedOutStamina -= dt * Health.baseBleedOutSpeed;
-			if (this.bleedOutStamina <= 0f)
-			{
-				this.State = Health.HealthState.Dead;
-				this.Kill((this.incapacitatedLoomingDeath != null) ? this.incapacitatedLoomingDeath : Db.Get().Deaths.Generic);
-				return true;
-			}
-		}
-		return false;
-	}
-
 	private void Recover()
 	{
-		this.Trigger(-1256572400, null);
-		this.bleedOutStamina = this.maxBleedOutStamina;
-	}
-
-	public float GetBleedLifeTime()
-	{
-		return Mathf.Floor(this.bleedOutStamina / Health.baseBleedOutSpeed);
+		base.GetComponent<KPrefabID>().RemoveTag(GameTags.HitPointsDepleted);
 	}
 
 	public void OnHealthChanged(float delta)
 	{
-		if (this.State != Health.HealthState.Invincible && this.hitPoints == 0f && !this.IsDefeated())
+		if (this.State != Health.HealthState.Invincible)
 		{
-			if (this.CanBeIncapacitated)
+			if (this.hitPoints == 0f && !this.IsDefeated())
 			{
-				this.Incapacitate(Db.Get().Deaths.Slain);
+				if (this.CanBeIncapacitated)
+				{
+					this.Incapacitate(Db.Get().Deaths.Slain);
+				}
+				else
+				{
+					this.Kill();
+				}
 			}
 			else
 			{
-				this.Kill(Db.Get().Deaths.Slain);
+				base.GetComponent<KPrefabID>().RemoveTag(GameTags.HitPointsDepleted);
 			}
 		}
 		this.UpdateStatus();
 		this.UpdateWoundEffects();
 		this.UpdateHealthBar();
+	}
+
+	[ContextMenu("DoDamage")]
+	public void DoDamage()
+	{
+		this.Damage(1f);
 	}
 
 	public void Damage(float amount)
@@ -254,11 +246,6 @@ public class Health : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
-	public bool IsDead()
-	{
-		return this.death.Get() != null;
-	}
-
 	public bool IsIncapacitated()
 	{
 		return this.State == Health.HealthState.Incapacitated;
@@ -269,61 +256,23 @@ public class Health : KMonoBehaviour, ISaveLoadable
 		return this.State == Health.HealthState.Incapacitated || this.State == Health.HealthState.Dead;
 	}
 
-	private void ApplyDeath()
-	{
-		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().DuplicantStatusItems.Dead, this.death.Get());
-		Pickupable component = base.GetComponent<Pickupable>();
-		if (component != null)
-		{
-			component.RegisterListeners();
-		}
-		base.GetComponent<KPrefabID>().AddTag(GameTags.Corpse);
-	}
-
 	public void Incapacitate(Death source_of_death)
 	{
-		this.incapacitatedLoomingDeath = source_of_death;
 		this.State = Health.HealthState.Incapacitated;
-		IncapacitationMonitor.Instance smi = base.gameObject.GetSMI<IncapacitationMonitor.Instance>();
+		base.GetComponent<KPrefabID>().AddTag(GameTags.HitPointsDepleted);
+	}
+
+	private void Kill()
+	{
+		DeathMonitor.Instance smi = base.gameObject.GetSMI<DeathMonitor.Instance>();
 		if (smi != null)
 		{
-			smi.Incapacitate();
+			base.gameObject.GetSMI<DeathMonitor.Instance>().Kill(Db.Get().Deaths.Slain);
 		}
 	}
 
-	public void Kill(Death death)
-	{
-		DeathMonitor.Instance smi = this.GetSMI<DeathMonitor.Instance>();
-		if (smi != null)
-		{
-			smi.Kill(death);
-		}
-		else
-		{
-			this.KillImmediate(death);
-		}
-		this.hitPoints = 0f;
-	}
-
-	public void KillImmediate(Death death)
-	{
-		Game.Instance.Trigger(1623392196, base.gameObject);
-		this.death.Set(death);
-		this.ApplyDeath();
-		this.Trigger(1623392196, base.gameObject);
-	}
-
+	[Serialize]
 	public bool CanBeIncapacitated;
-
-	[Serialize]
-	private ResourceRef<Death> death = new ResourceRef<Death>();
-
-	[Serialize]
-	public float bleedOutStamina = 60f;
-
-	private static float baseBleedOutSpeed = 0.5f;
-
-	private float maxBleedOutStamina = 60f;
 
 	[Serialize]
 	public float maxHitPoints = 100f;
@@ -336,9 +285,6 @@ public class Health : KMonoBehaviour, ISaveLoadable
 	private Effects effects;
 
 	private AmountInstance amountInstance;
-
-	[Serialize]
-	private Death incapacitatedLoomingDeath;
 
 	public enum HealthState
 	{

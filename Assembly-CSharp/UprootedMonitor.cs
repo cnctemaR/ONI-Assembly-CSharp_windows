@@ -27,7 +27,7 @@ public class UprootedMonitor : KMonoBehaviour
 		this.ground = Grid.OffsetCell(this.position, this.monitorCell);
 		if (Grid.IsValidCell(this.position) && Grid.IsValidCell(this.ground))
 		{
-			this.partitionerEntry = GameScenePartitioner.Instance.Add("UprootedMonitor.OnSpawn", base.gameObject, this.ground, GameScenePartitioner.Instance.solidChangedMask.mask, new Action<object>(this.OnGroundChanged));
+			this.partitionerEntry = GameScenePartitioner.Instance.Add("UprootedMonitor.OnSpawn", base.gameObject, this.ground, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnGroundChanged));
 		}
 		this.OnGroundChanged(null);
 	}

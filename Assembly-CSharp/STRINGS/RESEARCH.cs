@@ -36,14 +36,21 @@ namespace STRINGS
 
 		public class FARMINGTECH
 		{
-			public static LocString NAME = "Farming";
+			public static LocString NAME = "Basic Farming";
 
-			public static LocString DESC = "Produce <style=\"food\">Food</style> by mastering the peaceful art of agriculture.";
+			public static LocString DESC = "Learn the introductory principles of <style=\"plant\">Plant</style> domestication.";
+		}
+
+		public class AGRICULTURE
+		{
+			public static LocString NAME = "Agriculture";
+
+			public static LocString DESC = "Master the agricultural art of crop irrigation.";
 		}
 
 		public class FINEDINING
 		{
-			public static LocString NAME = "Fine Dining";
+			public static LocString NAME = "Meal Prep";
 
 			public static LocString DESC = "Prepare more nutritious <style=\"food\">Food</style> and store it longer before spoiling.";
 		}
@@ -74,6 +81,13 @@ namespace STRINGS
 			public static LocString NAME = "Pressure Management";
 
 			public static LocString DESC = "Unlock technologies to manage colony pressure and atmosphere.";
+		}
+
+		public class DIRECTEDAIRSTREAMS
+		{
+			public static LocString NAME = "Decontamination";
+
+			public static LocString DESC = "Harness dangerous gases in totally safe ways.";
 		}
 
 		public class LIQUIDPIPING

@@ -2,42 +2,43 @@
 using System.Collections.Generic;
 using FMOD.Studio;
 using FMODUnity;
+using Klei.AI;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class OverlayScreen : KMonoBehaviour
 {
-	protected override void OnPrefabInit()
+	public OverlayScreen()
 	{
-		OverlayScreen.Instance = this;
-		this.powerLabelParent = GameObject.Find("WorldSpaceCanvas").GetComponent<Canvas>();
-		List<Tag> list = new List<Tag>(OverlayScreen.WireIDs);
-		List<Tag> list2 = new List<Tag>();
-		List<Tag> list3 = new List<Tag>(OverlayScreen.OxygenBreatherIDs);
-		List<Tag> list4 = new List<Tag>(OverlayScreen.LiquidVentIDs);
-		List<Tag> list5 = new List<Tag>(OverlayScreen.GasVentIDs);
-		List<Tag> list6 = new List<Tag>(OverlayScreen.HarvestableIDs);
-		List<Tag> list7 = new List<Tag>();
-		this.itemOverlays = new OverlayScreen.LayerInfo[]
+		OverlayScreen.ColorHighlightCondition[] array = new OverlayScreen.ColorHighlightCondition[3];
+		array[0] = new OverlayScreen.ColorHighlightCondition(new Color(0.95686275f, 0.2509804f, 0.2784314f, 0.75f), delegate(GameObject go)
 		{
-			new OverlayScreen.LayerInfo(SimViewMode.OxygenMap, new string[] { "MaskedOverlay", "MaskedOverlayBG" }, list3.ToArray(), null, null),
-			new OverlayScreen.LayerInfo(SimViewMode.PowerMap, new string[] { "MaskedOverlay", "MaskedOverlayBG" }, list.ToArray(), null, null),
-			new OverlayScreen.LayerInfo(SimViewMode.Rooms, new string[] { "Regions" }, OverlayScreen.RoomBuildingsIDs, null, null),
-			new OverlayScreen.LayerInfo(SimViewMode.Light, new string[] { "MaskedOverlay", "MaskedOverlayBG" }, list2.ToArray(), null, null),
-			new OverlayScreen.LayerInfo(SimViewMode.Regions, new string[] { "Regions" }, list7.ToArray(), null, null),
-			new OverlayScreen.LayerInfo(SimViewMode.LiquidVentMap, new string[] { "MaskedOverlay", "MaskedOverlayBG" }, list4.ToArray(), null, null),
-			new OverlayScreen.LayerInfo(SimViewMode.GasVentMap, new string[] { "MaskedOverlay", "MaskedOverlayBG" }, list5.ToArray(), null, null),
-			new OverlayScreen.LayerInfo(SimViewMode.HarvestWhenReady, new string[] { "MaskedOverlay", "MaskedOverlayBG" }, list6.ToArray(), null, null)
-		};
-	}
-
-	protected override void OnSpawn()
-	{
-		base.OnSpawn();
-		this.techViewSound = KFMOD.CreateInstance(this.techViewSoundPath);
-		this.techViewSoundPlaying = false;
-		Shader.SetGlobalVector("_OverlayParams", Vector4.zero);
+			WiltCondition component = go.GetComponent<WiltCondition>();
+			return component != null && component.IsWilting();
+		});
+		array[1] = new OverlayScreen.ColorHighlightCondition(new Color(0.9843137f, 0.6901961f, 0.23137255f, 0.75f), (GameObject go) => !go.GetComponent<Harvestable>().CanBeHavested);
+		array[2] = new OverlayScreen.ColorHighlightCondition(new Color(0.41960785f, 0.827451f, 0.5176471f, 0.75f), (GameObject go) => go.GetComponent<Harvestable>().CanBeHavested);
+		this.cropHighlightConditions = array;
+		OverlayScreen.ColorHighlightCondition[] array2 = new OverlayScreen.ColorHighlightCondition[1];
+		array2[0] = new OverlayScreen.ColorHighlightCondition(new Color(0.65f, 0.65f, 0.65f, 0.65f), (GameObject go) => true);
+		this.harvestHighlightConditions = array2;
+		OverlayScreen.ColorHighlightCondition[] array3 = new OverlayScreen.ColorHighlightCondition[1];
+		array3[0] = new OverlayScreen.ColorHighlightCondition(new Color(0.65f, 0f, 0f, 0.65f), (GameObject go) => go.GetSMI<ImmuneSystemMonitor.Instance>().IsSick());
+		this.diseaseHighlightConditions = array3;
+		this.buildingDisabledColour = Color.gray;
+		this.powerLabels = new List<LocText>();
+		this.batteryUIList = new List<BatteryUI>();
+		this.harvestableNotificationList = new List<GameObject>();
+		this.diseaseUIList = new List<GameObject>();
+		this.nonVisibleTargets = new List<GameObject>();
+		this.updatePowerInfo = new List<OverlayScreen.UpdatePowerInfo>();
+		this.updateBatteryInfo = new List<OverlayScreen.UpdateBatteryInfo>();
+		this.updateCropInfo = new List<OverlayScreen.UpdateCropInfo>();
+		this.updateDiseaseInfo = new List<OverlayScreen.UpdateDiseaseInfo>();
+		this.queuedAdds = new List<GameObject>();
+		this.outsideViewObjects = new List<GameObject>();
+		base..ctor();
 	}
 
 	public SimViewMode mode
@@ -48,132 +49,136 @@ public class OverlayScreen : KMonoBehaviour
 		}
 	}
 
-	public void ToggleOverlay(SimViewMode mode)
+	protected override void OnPrefabInit()
 	{
-		string text = string.Empty;
-		SimViewMode simViewMode;
-		if (mode != this.currentMode && mode != SimViewMode.None)
+		OverlayScreen.Instance = this;
+		this.powerLabelParent = GameObject.Find("WorldSpaceCanvas").GetComponent<Canvas>();
+		this.harvestableUIParent = this.powerLabelParent;
+		this.diseaseUIParent = this.powerLabelParent;
+		this.itemOverlays = new OverlayScreen.LayerInfo[]
 		{
-			simViewMode = mode;
-			if (simViewMode != SimViewMode.HeatFlow && simViewMode != SimViewMode.ThermalConductivity)
+			new OverlayScreen.LayerInfo(SimViewMode.OxygenMap, new string[] { "MaskedOverlay", "MaskedOverlayBG" }, OverlayScreen.OxygenBreatherIDs, null, null),
+			new OverlayScreen.LayerInfo(SimViewMode.PowerMap, new string[] { "MaskedOverlay", "MaskedOverlayBG" }, OverlayScreen.WireIDs, null, null),
+			new OverlayScreen.LayerInfo(SimViewMode.Light, new string[] { "MaskedOverlay", "MaskedOverlayBG" }, new Tag[0], null, null),
+			new OverlayScreen.LayerInfo(SimViewMode.Regions, new string[] { "Regions" }, new Tag[0], null, null),
+			new OverlayScreen.LayerInfo(SimViewMode.LiquidVentMap, new string[] { "MaskedOverlay", "MaskedOverlayBG" }, OverlayScreen.LiquidVentIDs, null, null),
+			new OverlayScreen.LayerInfo(SimViewMode.GasVentMap, new string[] { "MaskedOverlay", "MaskedOverlayBG" }, OverlayScreen.GasVentIDs, null, null),
+			new OverlayScreen.LayerInfo(SimViewMode.HarvestWhenReady, new string[] { "MaskedOverlay", "MaskedOverlayBG" }, OverlayScreen.HarvestableIDs, null, null),
+			new OverlayScreen.LayerInfo(SimViewMode.Disease, new string[] { "MaskedOverlay", "MaskedOverlayBG" }, -1, OverlayScreen.DiseaseIDs, null, null),
+			new OverlayScreen.LayerInfo(SimViewMode.Crop, new string[] { "MaskedOverlay", "MaskedOverlayBG" }, OverlayScreen.HarvestableIDs, null, null)
+		};
+	}
+
+	protected override void OnLoadLevel()
+	{
+		this.itemOverlays = null;
+		this.harvestableNotificationPrefab = null;
+		this.powerLabels = null;
+		this.batteryUIList = null;
+		this.harvestableNotificationList = null;
+		this.targetViewData = null;
+		this.nonVisibleTargets = null;
+		this.updatePowerInfo = null;
+		this.updateBatteryInfo = null;
+		this.updateCropInfo = null;
+		this.updateDiseaseInfo = null;
+		this.queuedAdds = null;
+		this.powerLabelParent = null;
+		this.harvestableUIParent = null;
+		OverlayScreen.Instance = null;
+		base.OnLoadLevel();
+	}
+
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		this.techViewSound = KFMOD.CreateInstance(this.techViewSoundPath);
+		this.techViewSoundPlaying = false;
+		Shader.SetGlobalVector("_OverlayParams", Vector4.zero);
+	}
+
+	private void Update()
+	{
+		OverlayScreen.LayerInfo currentLayerInfo = this.GetCurrentLayerInfo();
+		if (currentLayerInfo.IsValid())
+		{
+			this.UpdateOverlayView(currentLayerInfo);
+		}
+	}
+
+	private static bool HasHarvestableComponent(GameObject go)
+	{
+		return go.GetComponent<Harvestable>() != null;
+	}
+
+	public void ToggleOverlay(SimViewMode newMode)
+	{
+		this.UpdateOverlaySounds(newMode);
+		if (newMode != SimViewMode.None)
+		{
+			ManagementMenu.Instance.CloseAll();
+		}
+		SimViewMode simViewMode = this.currentMode;
+		if (simViewMode != SimViewMode.TemperatureMap)
+		{
+			if (simViewMode != SimViewMode.Disease)
 			{
-				if (simViewMode != SimViewMode.TemperatureMap)
+				if (simViewMode != SimViewMode.Crop)
 				{
-					if (simViewMode != SimViewMode.Light)
+					if (simViewMode != SimViewMode.HarvestWhenReady)
 					{
-						if (simViewMode != SimViewMode.Decor)
+						if (simViewMode == SimViewMode.PowerMap)
 						{
-							if (simViewMode != SimViewMode.OxygenMap)
-							{
-								if (simViewMode != SimViewMode.HarvestWhenReady)
-								{
-									if (simViewMode != SimViewMode.LiquidVentMap)
-									{
-										if (simViewMode != SimViewMode.PowerMap)
-										{
-											if (simViewMode != SimViewMode.Priorities)
-											{
-												if (simViewMode == SimViewMode.GasVentMap)
-												{
-													text = "GasVent";
-												}
-											}
-											else
-											{
-												text = "Priorities";
-											}
-										}
-										else
-										{
-											text = "Power";
-										}
-									}
-									else
-									{
-										text = "LiquidVent";
-									}
-								}
-								else
-								{
-									text = "Harvest";
-								}
-							}
-							else
-							{
-								text = "Oxygen";
-							}
-						}
-						else
-						{
-							text = "Decor";
+							this.DisablePowerLabels();
+							this.DisableBatteryUIs();
 						}
 					}
 					else
 					{
-						text = "Lights";
+						this.DisableHighlightTypeOverlay(new Func<GameObject, bool>(OverlayScreen.HasHarvestableComponent), this.GetCurrentLayerInfo(), SaveLoader.Instance.saveManager.GetLists());
 					}
 				}
 				else
 				{
-					text = "Temperature";
+					this.DisableHarvestableUINotifications();
+					this.DisableHighlightTypeOverlay(new Func<GameObject, bool>(OverlayScreen.HasHarvestableComponent), this.GetCurrentLayerInfo(), SaveLoader.Instance.saveManager.GetLists());
 				}
 			}
 			else
 			{
-				text = "HeatFlow";
-			}
-			text = GlobalAssets.GetSound(text, false);
-		}
-		else
-		{
-			text = GlobalAssets.GetSound("Off", false);
-		}
-		KMonoBehaviour.PlaySound(text);
-		OverlayScreen.LayerInfo currentLayerInfo = this.GetCurrentLayerInfo();
-		simViewMode = this.currentMode;
-		if (simViewMode != SimViewMode.TemperatureMap)
-		{
-			if (simViewMode != SimViewMode.HarvestWhenReady)
-			{
-				if (simViewMode == SimViewMode.PowerMap)
-				{
-					this.DisablePowerLabels();
-					this.DisableBatteryUIs();
-				}
-			}
-			else
-			{
-				this.DisableHarvestWhenReady(this.GetCurrentLayerInfo(), SaveLoader.Instance.saveManager.GetLists());
+				this.DisableDiseaseOverlay();
 			}
 		}
 		else
 		{
-			Infrared.Instance.Toggle(false);
-			CameraController.Instance.ToggleTemperatureView(false);
+			Infrared.Instance.SetMode(Infrared.Mode.Disabled);
+			CameraController.Instance.ToggleColouredOverlayView(false);
 		}
-		if (currentLayerInfo.IsValid())
+		if (this.GetCurrentLayerInfo().IsValid())
 		{
 			this.ToggleOverlayView();
 		}
-		if (mode == this.currentMode || mode == SimViewMode.None)
+		if (newMode != this.currentMode && newMode == SimViewMode.None)
 		{
-			mode = SimViewMode.None;
-			ResourceCategoryScreen.Instance.Show(true);
+			ManagementMenu.Instance.CloseAll();
+		}
+		ResourceCategoryScreen.Instance.Show(newMode == SimViewMode.None);
+		SimDebugView.Instance.SetMode(newMode);
+		this.currentMode = newMode;
+		simViewMode = this.currentMode;
+		if (simViewMode != SimViewMode.TemperatureMap)
+		{
+			if (simViewMode == SimViewMode.Disease)
+			{
+				this.EnableDiseaseOverlay();
+			}
 		}
 		else
 		{
-			ManagementMenu.Instance.CloseAll();
-			ResourceCategoryScreen.Instance.Show(false);
+			Infrared.Instance.SetMode(Infrared.Mode.Infrared);
+			CameraController.Instance.ToggleColouredOverlayView(true);
 		}
-		SimDebugView.Instance.SetMode(mode);
-		this.currentMode = mode;
-		simViewMode = this.currentMode;
-		if (simViewMode == SimViewMode.TemperatureMap)
-		{
-			Infrared.Instance.Toggle(true);
-			CameraController.Instance.ToggleTemperatureView(true);
-		}
-		GridCompositor.Instance.ToggleMinor(mode == SimViewMode.PowerMap || mode == SimViewMode.GasVentMap || mode == SimViewMode.LiquidVentMap);
+		GridCompositor.Instance.ToggleMinor(newMode == SimViewMode.PowerMap || newMode == SimViewMode.GasVentMap || newMode == SimViewMode.LiquidVentMap);
 		if (this.GetCurrentLayerInfo().IsValid())
 		{
 			this.ToggleOverlayView();
@@ -193,9 +198,9 @@ public class OverlayScreen : KMonoBehaviour
 			this.techViewSound.setParameterValue("View", (float)this.currentMode);
 			this.techViewSoundPlaying = true;
 		}
-		if (OverlayScreen.OnOverlayChanged != null)
+		if (this.OnOverlayChanged != null)
 		{
-			OverlayScreen.OnOverlayChanged(this.currentMode);
+			this.OnOverlayChanged(this.currentMode);
 		}
 		this.ActivateLegend();
 	}
@@ -212,15 +217,6 @@ public class OverlayScreen : KMonoBehaviour
 	public void Refresh()
 	{
 		this.Update();
-	}
-
-	private void Update()
-	{
-		OverlayScreen.LayerInfo currentLayerInfo = this.GetCurrentLayerInfo();
-		if (currentLayerInfo.IsValid())
-		{
-			this.UpdateOverlayView(currentLayerInfo);
-		}
 	}
 
 	private OverlayScreen.LayerInfo GetCurrentLayerInfo()
@@ -253,7 +249,7 @@ public class OverlayScreen : KMonoBehaviour
 			if (currentLayerInfo.IsValid())
 			{
 				Camera.main.cullingMask |= currentLayerInfo.mask;
-				SelectTool.Instance.SetLayerMask(currentLayerInfo.mask);
+				SelectTool.Instance.SetLayerMask(currentLayerInfo.selectionMask);
 				DragTool.SetLayerMask(currentLayerInfo.mask);
 				if (currentLayerInfo.onEnable != null)
 				{
@@ -306,25 +302,40 @@ public class OverlayScreen : KMonoBehaviour
 			{
 				Dictionary<Tag, List<SaveLoadRoot>> lists = saveManager.GetLists();
 				SimViewMode simViewMode = this.currentMode;
-				if (simViewMode != SimViewMode.HarvestWhenReady)
+				if (simViewMode != SimViewMode.Disease)
 				{
-					if (simViewMode != SimViewMode.LiquidVentMap)
+					if (simViewMode != SimViewMode.Crop)
 					{
-						if (simViewMode == SimViewMode.PowerMap)
+						if (simViewMode != SimViewMode.HarvestWhenReady)
 						{
-							this.UpdatePowerOverlayView(layer_info, lists);
-							return;
+							if (simViewMode != SimViewMode.LiquidVentMap)
+							{
+								if (simViewMode == SimViewMode.PowerMap)
+								{
+									this.UpdatePowerOverlayView(layer_info, lists);
+									return;
+								}
+								if (simViewMode != SimViewMode.GasVentMap)
+								{
+									return;
+								}
+							}
+							this.UpdateConduitOverlayView(layer_info, lists);
 						}
-						if (simViewMode != SimViewMode.GasVentMap)
+						else
 						{
-							return;
+							this.UpdateHighlightTypeOverlay(new Func<GameObject, bool>(OverlayScreen.HasHarvestableComponent), layer_info, lists, this.harvestHighlightConditions);
 						}
 					}
-					this.UpdateConduitOverlayView(layer_info, lists);
+					else
+					{
+						this.UpdateHighlightTypeOverlay(new Func<GameObject, bool>(OverlayScreen.HasHarvestableComponent), layer_info, lists, this.cropHighlightConditions);
+						this.UpdateCropOverlayView(layer_info, lists);
+					}
 				}
 				else
 				{
-					this.UpdateHarvestWhenReadyOverlayView(layer_info, lists);
+					this.UpdateDiseaseOverlayView(layer_info, lists);
 				}
 			}
 		}
@@ -435,19 +446,54 @@ public class OverlayScreen : KMonoBehaviour
 		return batteryUI;
 	}
 
-	private void DisableHarvestWhenReady(OverlayScreen.LayerInfo layer_info, Dictionary<Tag, List<SaveLoadRoot>> registered_buildings)
+	public GameObject GetFreeCropUI()
+	{
+		GameObject gameObject;
+		if (this.freeHarvestableNotificationIdx < this.harvestableNotificationList.Count)
+		{
+			gameObject = this.harvestableNotificationList[this.freeHarvestableNotificationIdx];
+			gameObject.gameObject.SetActive(true);
+			this.freeHarvestableNotificationIdx++;
+		}
+		else
+		{
+			gameObject = global::Util.KInstantiateUI(this.harvestableNotificationPrefab.gameObject, this.harvestableUIParent.transform.gameObject, false);
+			this.harvestableNotificationList.Add(gameObject);
+			this.freeHarvestableNotificationIdx++;
+		}
+		return gameObject;
+	}
+
+	public GameObject GetFreeDiseaseUI()
+	{
+		GameObject gameObject;
+		if (this.freeDiseaseUI < this.diseaseUIList.Count)
+		{
+			gameObject = this.diseaseUIList[this.freeDiseaseUI];
+			gameObject.gameObject.SetActive(true);
+			this.freeDiseaseUI++;
+		}
+		else
+		{
+			gameObject = global::Util.KInstantiateUI(this.diseaseOverlayPrefab, this.diseaseUIParent.transform.gameObject, false);
+			this.diseaseUIList.Add(gameObject);
+			this.freeDiseaseUI++;
+		}
+		return gameObject;
+	}
+
+	private void DisableHighlightTypeOverlay(Func<GameObject, bool> set_layer_fn, OverlayScreen.LayerInfo layer_info, Dictionary<Tag, List<SaveLoadRoot>> registered_objects)
 	{
 		Vector2I vector2I;
 		Vector2I vector2I2;
 		Grid.GetVisibleExtents(out vector2I, out vector2I2);
 		int num = LayerMask.NameToLayer("MaskedOverlayBG");
-		foreach (KeyValuePair<Tag, List<SaveLoadRoot>> keyValuePair in registered_buildings)
+		foreach (Tag tag in layer_info.itemIDs)
 		{
-			bool flag = Array.IndexOf<Tag>(layer_info.itemIDs, keyValuePair.Key) != -1;
-			if (flag)
+			List<SaveLoadRoot> list;
+			if (registered_objects.TryGetValue(tag, out list))
 			{
-				List<SaveLoadRoot> value = keyValuePair.Value;
-				foreach (SaveLoadRoot saveLoadRoot in value)
+				foreach (SaveLoadRoot saveLoadRoot in list)
 				{
 					GameObject gameObject = saveLoadRoot.gameObject;
 					Vector2I vector2I3 = Grid.PosToXY(gameObject.transform.position);
@@ -456,15 +502,8 @@ public class OverlayScreen : KMonoBehaviour
 						KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
 						if (component != null)
 						{
-							Harvestable component2 = gameObject.GetComponent<Harvestable>();
-							if (component2 != null)
-							{
-								component.SetLayer(layer_info.layer);
-							}
-							else
-							{
-								component.SetLayer(num);
-							}
+							int num2 = ((!set_layer_fn(gameObject)) ? num : layer_info.layer);
+							component.SetLayer(num2);
 							this.targetViewData.layerTargets.Add(gameObject);
 						}
 					}
@@ -476,10 +515,10 @@ public class OverlayScreen : KMonoBehaviour
 		{
 			if (!(gameObject2 == null))
 			{
-				KBatchedAnimController component3 = gameObject2.GetComponent<KBatchedAnimController>();
-				if (component3 != null)
+				KBatchedAnimController component2 = gameObject2.GetComponent<KBatchedAnimController>();
+				if (component2 != null)
 				{
-					component3.HighlightColour = color;
+					component2.HighlightColour = color;
 				}
 			}
 		}
@@ -503,6 +542,16 @@ public class OverlayScreen : KMonoBehaviour
 			batteryUI.gameObject.SetActive(false);
 		}
 		this.updateBatteryInfo.Clear();
+	}
+
+	private void DisableHarvestableUINotifications()
+	{
+		this.freeHarvestableNotificationIdx = 0;
+		foreach (GameObject gameObject in this.harvestableNotificationList)
+		{
+			gameObject.SetActive(false);
+		}
+		this.updateCropInfo.Clear();
 	}
 
 	private void UpdatePowerLabels()
@@ -619,12 +668,65 @@ public class OverlayScreen : KMonoBehaviour
 		this.updateBatteryInfo.Add(new OverlayScreen.UpdateBatteryInfo(bat, freeBatteryUI));
 	}
 
+	private void AddCropUI(Harvestable harvestable)
+	{
+		GameObject freeCropUI = this.GetFreeCropUI();
+		OverlayScreen.UpdateCropInfo updateCropInfo = new OverlayScreen.UpdateCropInfo(harvestable, freeCropUI);
+		Vector3 vector = Grid.CellToPos(Grid.PosToCell(harvestable), 0.5f, -1.25f, 0f);
+		freeCropUI.GetComponent<RectTransform>().position = Vector3.up + vector;
+		this.updateCropInfo.Add(updateCropInfo);
+	}
+
+	private void AddDiseaseUI(GameObject target)
+	{
+		GameObject gameObject = this.GetFreeDiseaseUI();
+		DiseaseOverlayWidget component = gameObject.GetComponent<DiseaseOverlayWidget>();
+		AmountInstance amountInstance = target.GetComponent<Modifiers>().amounts.Get(Db.Get().Amounts.ImmuneLevel);
+		OverlayScreen.UpdateDiseaseInfo updateDiseaseInfo = new OverlayScreen.UpdateDiseaseInfo(amountInstance, component);
+		Vector3 vector = new Vector3(0f, -1f, 0f);
+		gameObject.GetComponent<RectTransform>().position = target.transform.position + vector;
+		this.updateDiseaseInfo.Add(updateDiseaseInfo);
+	}
+
 	private void SetToolTip(LocText label, string text)
 	{
 		ToolTip component = label.GetComponent<ToolTip>();
 		if (component != null)
 		{
 			component.toolTip = text;
+		}
+	}
+
+	private void UpdateCropOverlayView(OverlayScreen.LayerInfo layer_info, Dictionary<Tag, List<SaveLoadRoot>> registered_buildings)
+	{
+		using (new KProfiler.Region("UpdateCropOverlay", null))
+		{
+			this.queuedAdds.Clear();
+			Vector2I vector2I;
+			Vector2I vector2I2;
+			Grid.GetVisibleExtents(out vector2I, out vector2I2);
+			using (new KProfiler.Region("CropUI", null))
+			{
+				foreach (Harvestable harvestable in Components.Harvestables)
+				{
+					GameObject gameObject = harvestable.gameObject;
+					Vector2I vector2I3 = Grid.PosToXY(gameObject.transform.position);
+					if (vector2I <= vector2I3 && vector2I3 <= vector2I2 && !this.targetViewData.privateTargets.Contains(gameObject))
+					{
+						this.AddCropUI(harvestable);
+						this.queuedAdds.Add(gameObject);
+					}
+				}
+				foreach (GameObject gameObject2 in this.queuedAdds)
+				{
+					this.targetViewData.privateTargets.Add(gameObject2);
+				}
+				this.queuedAdds.Clear();
+			}
+		}
+		foreach (OverlayScreen.UpdateCropInfo updateCropInfo in this.updateCropInfo)
+		{
+			updateCropInfo.harvestableUI.GetComponent<HarvestableOverlayWidget>().Refresh(updateCropInfo.harvestable);
 		}
 	}
 
@@ -639,7 +741,7 @@ public class OverlayScreen : KMonoBehaviour
 			{
 				foreach (KeyValuePair<Tag, List<SaveLoadRoot>> keyValuePair in registered_buildings)
 				{
-					bool flag = Array.IndexOf<Tag>(layer_info.itemIDs, keyValuePair.Key) != -1;
+					bool flag = layer_info.itemIDs.Contains(keyValuePair.Key);
 					if (flag)
 					{
 						List<SaveLoadRoot> value = keyValuePair.Value;
@@ -739,7 +841,7 @@ public class OverlayScreen : KMonoBehaviour
 		int num = LayerMask.NameToLayer("MaskedOverlayBG");
 		foreach (KeyValuePair<Tag, List<SaveLoadRoot>> keyValuePair in registered_buildings)
 		{
-			bool flag = Array.IndexOf<Tag>(layer_info.itemIDs, keyValuePair.Key) != -1;
+			bool flag = layer_info.itemIDs.Contains(keyValuePair.Key);
 			if (flag)
 			{
 				List<SaveLoadRoot> value = keyValuePair.Value;
@@ -779,103 +881,239 @@ public class OverlayScreen : KMonoBehaviour
 		}
 	}
 
-	private void UpdateHarvestWhenReadyOverlayView(OverlayScreen.LayerInfo layer_info, Dictionary<Tag, List<SaveLoadRoot>> registered_buildings)
+	private void UpdateHighlightTypeOverlay(Func<GameObject, bool> should_highlight, OverlayScreen.LayerInfo layer_info, Dictionary<Tag, List<SaveLoadRoot>> registered_buildings, OverlayScreen.ColorHighlightCondition[] highlights)
 	{
 		Vector2I vector2I;
 		Vector2I vector2I2;
 		Grid.GetVisibleExtents(out vector2I, out vector2I2);
-		int num = LayerMask.NameToLayer("MaskedOverlayBG");
-		foreach (KeyValuePair<Tag, List<SaveLoadRoot>> keyValuePair in registered_buildings)
+		this.outsideViewObjects.Clear();
+		foreach (GameObject gameObject in this.targetViewData.layerTargets)
 		{
-			bool flag = Array.IndexOf<Tag>(layer_info.itemIDs, keyValuePair.Key) != -1;
-			if (flag)
+			if (!(gameObject == null))
 			{
-				List<SaveLoadRoot> value = keyValuePair.Value;
-				foreach (SaveLoadRoot saveLoadRoot in value)
+				Vector2I vector2I3 = Grid.PosToXY(gameObject.transform.position);
+				if (!(vector2I <= vector2I3) || !(vector2I3 <= vector2I2))
 				{
-					if (Grid.Visible[Grid.PosToCell(saveLoadRoot.gameObject)] > 0 || DebugHandler.FreeCameraMode)
+					this.outsideViewObjects.Add(gameObject);
+				}
+			}
+		}
+		foreach (GameObject gameObject2 in this.outsideViewObjects)
+		{
+			if (!(gameObject2 == null))
+			{
+				KBatchedAnimController component = gameObject2.GetComponent<KBatchedAnimController>();
+				component.HighlightColour = Color.clear;
+				this.targetViewData.layerTargets.Remove(gameObject2);
+			}
+		}
+		this.outsideViewObjects.Clear();
+		foreach (Tag tag in layer_info.itemIDs)
+		{
+			List<SaveLoadRoot> list;
+			if (registered_buildings.TryGetValue(tag, out list))
+			{
+				foreach (SaveLoadRoot saveLoadRoot in list)
+				{
+					if (!(saveLoadRoot == null))
 					{
-						GameObject gameObject = saveLoadRoot.gameObject;
-						Vector2I vector2I3 = Grid.PosToXY(gameObject.transform.position);
-						if (vector2I <= vector2I3 && vector2I3 <= vector2I2 && !this.targetViewData.layerTargets.Contains(gameObject))
+						if (Grid.Visible[Grid.PosToCell(saveLoadRoot.gameObject)] > 0 || DebugHandler.FreeCameraMode)
 						{
-							KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
-							if (component != null)
+							GameObject gameObject3 = saveLoadRoot.gameObject;
+							KBatchedAnimController component2 = gameObject3.GetComponent<KBatchedAnimController>();
+							if (!(component2 == null))
 							{
-								Harvestable component2 = gameObject.GetComponent<Harvestable>();
-								if (component2 != null)
+								if (!this.targetViewData.layerTargets.Contains(gameObject3))
 								{
-									component.SetLayer(layer_info.layer);
+									this.targetViewData.layerTargets.Add(gameObject3);
 								}
-								else
+								component2.SetLayer(layer_info.layer);
+								Color32 color = Color.clear;
+								if (should_highlight(gameObject3) && highlights != null)
 								{
-									component.SetLayer(num);
+									foreach (OverlayScreen.ColorHighlightCondition colorHighlightCondition in highlights)
+									{
+										if (colorHighlightCondition.highlight_condition(gameObject3))
+										{
+											color = colorHighlightCondition.highlight_color;
+										}
+									}
 								}
-								this.targetViewData.layerTargets.Add(gameObject);
+								component2.HighlightColour = color;
 							}
 						}
 					}
 				}
 			}
 		}
-		Color32 color = new Color32(128, 128, 128, 64);
-		foreach (GameObject gameObject2 in this.targetViewData.layerTargets)
+	}
+
+	private void EnableDiseaseOverlay()
+	{
+		Infrared.Instance.SetMode(Infrared.Mode.Disease);
+		CameraController.Instance.ToggleColouredOverlayView(true);
+	}
+
+	private void DisableDiseaseOverlay()
+	{
+		CameraController.Instance.ToggleColouredOverlayView(false);
+		Infrared.Instance.SetMode(Infrared.Mode.Disabled);
+		OverlayLegend.Instance.DisableDiseaseOverlay();
+		Game.Instance.showGasConduitDisease = false;
+		Game.Instance.showLiquidConduitDisease = false;
+		this.freeDiseaseUI = 0;
+		foreach (OverlayScreen.UpdateDiseaseInfo updateDiseaseInfo in this.updateDiseaseInfo)
 		{
-			if (!(gameObject2 == null))
+			updateDiseaseInfo.ui.gameObject.SetActive(false);
+		}
+		this.updateDiseaseInfo.Clear();
+	}
+
+	private void UpdateOverlaySounds(SimViewMode mode)
+	{
+		string text = string.Empty;
+		if (mode != this.currentMode && mode != SimViewMode.None)
+		{
+			if (mode != SimViewMode.HeatFlow && mode != SimViewMode.ThermalConductivity)
 			{
-				KBatchedAnimController component3 = gameObject2.GetComponent<KBatchedAnimController>();
-				if (component3 != null)
+				if (mode != SimViewMode.TemperatureMap)
 				{
-					component3.HighlightColour = color;
+					if (mode != SimViewMode.Disease)
+					{
+						if (mode != SimViewMode.Light)
+						{
+							if (mode != SimViewMode.Decor)
+							{
+								if (mode != SimViewMode.OxygenMap)
+								{
+									if (mode != SimViewMode.Crop && mode != SimViewMode.HarvestWhenReady)
+									{
+										if (mode != SimViewMode.LiquidVentMap)
+										{
+											if (mode != SimViewMode.PowerMap)
+											{
+												if (mode != SimViewMode.Priorities)
+												{
+													if (mode == SimViewMode.GasVentMap)
+													{
+														text = "GasVent";
+													}
+												}
+												else
+												{
+													text = "Priorities";
+												}
+											}
+											else
+											{
+												text = "Power";
+											}
+										}
+										else
+										{
+											text = "LiquidVent";
+										}
+									}
+									else
+									{
+										text = "Harvest";
+									}
+								}
+								else
+								{
+									text = "Oxygen";
+								}
+							}
+							else
+							{
+								text = "Decor";
+							}
+						}
+						else
+						{
+							text = "Lights";
+						}
+					}
+					else
+					{
+						text = "Disease";
+					}
+				}
+				else
+				{
+					text = "Temperature";
 				}
 			}
+			else
+			{
+				text = "HeatFlow";
+			}
+		}
+		else if (this.currentMode != SimViewMode.None)
+		{
+			text = "Off";
+		}
+		if (text != string.Empty)
+		{
+			text = GlobalAssets.GetSound(text, false);
+			KMonoBehaviour.PlaySound(text);
 		}
 	}
 
-	private static readonly Tag[] WireIDs = new Tag[]
+	private void UpdateDiseaseOverlayView(OverlayScreen.LayerInfo layer_info, Dictionary<Tag, List<SaveLoadRoot>> registered_buildings)
 	{
-		TagManager.Create("Wire", null),
-		TagManager.Create("WireUnderConstruction", null),
-		TagManager.Create("HighWattageWire", null),
-		TagManager.Create("HighWattageWireUnderConstruction", null)
-	};
+		using (new KProfiler.Region("UpdateDiseaseCarriers", null))
+		{
+			this.queuedAdds.Clear();
+			Vector2I vector2I;
+			Vector2I vector2I2;
+			Grid.GetVisibleExtents(out vector2I, out vector2I2);
+			foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities)
+			{
+				GameObject gameObject = minionIdentity.gameObject;
+				Vector2I vector2I3 = Grid.PosToXY(gameObject.transform.position);
+				if (vector2I <= vector2I3 && vector2I3 <= vector2I2 && !this.targetViewData.privateTargets.Contains(gameObject))
+				{
+					this.AddDiseaseUI(gameObject);
+					this.queuedAdds.Add(gameObject);
+				}
+			}
+			foreach (GameObject gameObject2 in this.queuedAdds)
+			{
+				this.targetViewData.privateTargets.Add(gameObject2);
+			}
+			this.queuedAdds.Clear();
+		}
+		foreach (OverlayScreen.UpdateDiseaseInfo updateDiseaseInfo in this.updateDiseaseInfo)
+		{
+			updateDiseaseInfo.ui.Refresh(updateDiseaseInfo.valueSrc);
+		}
+	}
 
-	private static readonly Tag[] GasVentIDs = new Tag[]
-	{
-		TagManager.Create("GasConduit", null),
-		TagManager.Create("InsulatedGasConduit", null),
-		TagManager.Create("GasConduitUnderConstruction", null),
-		TagManager.Create("InsulatedGasConduitUnderConstruction", null)
-	};
+	public static HashSet<Tag> WireIDs = new HashSet<Tag>();
 
-	private static readonly Tag[] LiquidVentIDs = new Tag[]
-	{
-		TagManager.Create("LiquidConduit", null),
-		TagManager.Create("InsulatedLiquidConduit", null),
-		TagManager.Create("LiquidConduitUnderConstruction", null),
-		TagManager.Create("InsulatedLiquidConduitUnderConstruction", null)
-	};
+	public static HashSet<Tag> GasVentIDs = new HashSet<Tag>();
+
+	public static HashSet<Tag> LiquidVentIDs = new HashSet<Tag>();
+
+	public static HashSet<Tag> HarvestableIDs = new HashSet<Tag>();
+
+	private static readonly Tag[] DiseaseIDs = new Tag[] { GameTags.Minion };
 
 	private static readonly Tag[] OxygenBreatherIDs = new Tag[]
 	{
-		TagManager.Create("Minion", null),
-		TagManager.Create("OxyRock", null)
+		GameTags.Minion,
+		GameTags.OxyRock
 	};
 
-	private static readonly Tag[] HarvestableIDs = new Tag[]
-	{
-		TagManager.Create("BasicSingleHarvestPlant", null),
-		TagManager.Create("BasicFabricPlant", null),
-		TagManager.Create("PrickleFlower", null),
-		TagManager.Create("BasicForagePlantPlanted", null),
-		TagManager.Create("ColdWheat", null),
-		TagManager.Create("SpiceVine", null)
-	};
+	private OverlayScreen.ColorHighlightCondition[] cropHighlightConditions;
 
-	private static readonly Tag[] RoomBuildingsIDs = new Tag[] { TagManager.Create("Bed", null) };
+	private OverlayScreen.ColorHighlightCondition[] harvestHighlightConditions;
 
-	[EventRef]
+	private OverlayScreen.ColorHighlightCondition[] diseaseHighlightConditions;
+
 	[SerializeField]
+	[EventRef]
 	private string techViewSoundPath;
 
 	private EventInstance techViewSound;
@@ -886,6 +1124,7 @@ public class OverlayScreen : KMonoBehaviour
 
 	public static OverlayScreen Instance;
 
+	[Header("Power")]
 	[SerializeField]
 	private Canvas powerLabelParent;
 
@@ -911,23 +1150,18 @@ public class OverlayScreen : KMonoBehaviour
 	private Color generatorColour;
 
 	[SerializeField]
-	private Color buildingDisabledColour = Color.gray;
+	private Color buildingDisabledColour;
 
 	private int freePowerLabelIdx;
 
-	private List<LocText> powerLabels = new List<LocText>();
+	private List<LocText> powerLabels;
 
 	private int freeBatUIIdx;
 
-	private List<BatteryUI> batteryUIList = new List<BatteryUI>();
+	private List<BatteryUI> batteryUIList;
 
 	[SerializeField]
-	private TextStyleSetting TooltipHeader;
-
-	[SerializeField]
-	private TextStyleSetting TooltipDescription;
-
-	[SerializeField]
+	[Header("Circuits")]
 	private Color32 circuitUnpoweredColour;
 
 	[SerializeField]
@@ -936,26 +1170,73 @@ public class OverlayScreen : KMonoBehaviour
 	[SerializeField]
 	private Color32 circuitStrainingColour;
 
-	public static Action<SimViewMode> OnOverlayChanged;
+	[SerializeField]
+	[Header("Crops")]
+	private Canvas harvestableUIParent;
+
+	[SerializeField]
+	private GameObject harvestableNotificationPrefab;
+
+	private int freeHarvestableNotificationIdx;
+
+	private List<GameObject> harvestableNotificationList;
+
+	[SerializeField]
+	[Header("Disease")]
+	private Canvas diseaseUIParent;
+
+	[SerializeField]
+	private GameObject diseaseOverlayPrefab;
+
+	private int freeDiseaseUI;
+
+	private List<GameObject> diseaseUIList;
+
+	[Header("ToolTip")]
+	[SerializeField]
+	private TextStyleSetting TooltipHeader;
+
+	[SerializeField]
+	private TextStyleSetting TooltipDescription;
+
+	public Action<SimViewMode> OnOverlayChanged;
 
 	private SimViewMode currentMode;
 
 	private OverlayScreen.TargetViewData targetViewData;
 
-	private List<GameObject> nonVisibleTargets = new List<GameObject>();
+	private List<GameObject> nonVisibleTargets;
 
-	private List<OverlayScreen.UpdatePowerInfo> updatePowerInfo = new List<OverlayScreen.UpdatePowerInfo>();
+	private List<OverlayScreen.UpdatePowerInfo> updatePowerInfo;
 
-	private List<OverlayScreen.UpdateBatteryInfo> updateBatteryInfo = new List<OverlayScreen.UpdateBatteryInfo>();
+	private List<OverlayScreen.UpdateBatteryInfo> updateBatteryInfo;
 
-	private List<GameObject> queuedAdds = new List<GameObject>();
+	private List<OverlayScreen.UpdateCropInfo> updateCropInfo;
+
+	private List<OverlayScreen.UpdateDiseaseInfo> updateDiseaseInfo;
+
+	private List<GameObject> queuedAdds;
+
+	private List<GameObject> outsideViewObjects;
 
 	private struct LayerInfo
 	{
-		public LayerInfo(SimViewMode viewMode, string[] layerNames, Tag[] itemIDs, global::System.Action onEnable = null, global::System.Action onDisable = null)
+		public LayerInfo(SimViewMode viewMode, string[] layerNames, ICollection<Tag> itemIDs, global::System.Action onEnable = null, global::System.Action onDisable = null)
 		{
 			this.viewMode = viewMode;
 			this.mask = LayerMask.GetMask(layerNames);
+			this.selectionMask = this.mask;
+			this.layer = LayerMask.NameToLayer(layerNames[0]);
+			this.itemIDs = itemIDs;
+			this.onEnable = onEnable;
+			this.onDisable = onDisable;
+		}
+
+		public LayerInfo(SimViewMode viewMode, string[] layerNames, int selectionMask, ICollection<Tag> itemIDs, global::System.Action onEnable = null, global::System.Action onDisable = null)
+		{
+			this.viewMode = viewMode;
+			this.mask = LayerMask.GetMask(layerNames);
+			this.selectionMask = selectionMask;
 			this.layer = LayerMask.NameToLayer(layerNames[0]);
 			this.itemIDs = itemIDs;
 			this.onEnable = onEnable;
@@ -973,7 +1254,9 @@ public class OverlayScreen : KMonoBehaviour
 
 		public int layer;
 
-		public Tag[] itemIDs;
+		public int selectionMask;
+
+		public ICollection<Tag> itemIDs;
 
 		public global::System.Action onEnable;
 
@@ -1009,6 +1292,32 @@ public class OverlayScreen : KMonoBehaviour
 		public IEnergyConsumer consumer;
 	}
 
+	private struct UpdateCropInfo
+	{
+		public UpdateCropInfo(Harvestable harvestable, GameObject harvestableUI)
+		{
+			this.harvestable = harvestable;
+			this.harvestableUI = harvestableUI;
+		}
+
+		public Harvestable harvestable;
+
+		public GameObject harvestableUI;
+	}
+
+	private struct UpdateDiseaseInfo
+	{
+		public UpdateDiseaseInfo(AmountInstance amount_inst, DiseaseOverlayWidget ui)
+		{
+			this.ui = ui;
+			this.valueSrc = amount_inst;
+		}
+
+		public DiseaseOverlayWidget ui;
+
+		public AmountInstance valueSrc;
+	}
+
 	private struct UpdateBatteryInfo
 	{
 		public UpdateBatteryInfo(Battery battery, BatteryUI ui)
@@ -1020,5 +1329,18 @@ public class OverlayScreen : KMonoBehaviour
 		public Battery battery;
 
 		public BatteryUI ui;
+	}
+
+	private struct ColorHighlightCondition
+	{
+		public ColorHighlightCondition(Color highlight_color, Func<GameObject, bool> highlight_condition)
+		{
+			this.highlight_color = highlight_color;
+			this.highlight_condition = highlight_condition;
+		}
+
+		public Color32 highlight_color;
+
+		public Func<GameObject, bool> highlight_condition;
 	}
 }

@@ -170,7 +170,7 @@ public class WaterBodyProbe : KMonoBehaviour
 		{
 			this.knownBodies.Remove(body);
 		}
-		global::UnityEngine.Object.Destroy(body.gameObject);
+		Util.KDestroyGameObject(body.gameObject);
 	}
 
 	public int[] GetBodyOfWaterWorkCells(GameObject objectInBody)

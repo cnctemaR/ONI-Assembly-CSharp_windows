@@ -6,6 +6,8 @@ namespace TUNING
 	{
 		public class HITPOINTS
 		{
+			public const float TIER0 = 5f;
+
 			public const float TIER1 = 25f;
 
 			public const float TIER2 = 50f;

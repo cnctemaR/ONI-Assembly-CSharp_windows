@@ -77,7 +77,7 @@ public class CO2Manager : KMonoBehaviour
 					co.TriggerDestroy();
 					if (flag2)
 					{
-						SimMessages.ModifyMass(num3, co.mass, CellEventLogger.Instance.CO2ManagerFixedUpdate, co.temperature, SimHashes.CarbonDioxide);
+						SimMessages.ModifyMass(num3, co.mass, byte.MaxValue, 0, CellEventLogger.Instance.CO2ManagerFixedUpdate, co.temperature, SimHashes.CarbonDioxide);
 						num--;
 						this.co2Items[i] = this.co2Items[num];
 						this.co2Items.RemoveAt(num);

@@ -7,17 +7,18 @@ public class EntitySplitter : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		Pickupable pickupable = this.pickupable;
-		pickupable.OnTake = (Func<float, Pickupable>)Delegate.Combine(pickupable.OnTake, new Func<float, Pickupable>(this.OnTake));
-		this.pickupable.CanAbsorb = delegate(Pickupable other)
+		Pickupable pickupable = base.GetComponent<Pickupable>();
+		Pickupable pickupable2 = pickupable;
+		pickupable2.OnTake = (Func<float, Pickupable>)Delegate.Combine(pickupable2.OnTake, new Func<float, Pickupable>((float amount) => EntitySplitter.Split(pickupable, amount, null)));
+		pickupable.CanAbsorb = delegate(Pickupable other)
 		{
 			if (other == null)
 			{
 				return false;
 			}
-			KPrefabID component = base.GetComponent<KPrefabID>();
+			KPrefabID component = pickupable.GetComponent<KPrefabID>();
 			KPrefabID component2 = other.GetComponent<KPrefabID>();
-			Edible component3 = base.GetComponent<Edible>();
+			Edible component3 = this.GetComponent<Edible>();
 			if (component3 != null)
 			{
 				Edible component4 = other.GetComponent<Edible>();
@@ -30,31 +31,31 @@ public class EntitySplitter : KMonoBehaviour
 		};
 	}
 
-	private Pickupable OnTake(float amount)
+	public static Pickupable Split(Pickupable pickupable, float amount, GameObject prefab = null)
 	{
-		if (amount >= this.pickupable.TotalAmount)
+		if (amount >= pickupable.TotalAmount && prefab == null)
 		{
-			return this.pickupable;
+			return pickupable;
 		}
-		Storage storage = base.GetComponent<Pickupable>().storage;
-		GameObject prefab = Assets.GetPrefab(base.GetComponent<KPrefabID>().PrefabTag);
-		GameObject gameObject = GameUtil.KInstantiate(prefab, this.transform.position, Grid.SceneLayer.Use, this.transform.parent.gameObject, null, 0);
+		Storage storage = pickupable.storage;
+		if (prefab == null)
+		{
+			prefab = Assets.GetPrefab(pickupable.GetComponent<KPrefabID>().PrefabTag);
+		}
+		GameObject gameObject = GameUtil.KInstantiate(prefab, pickupable.transform.position, Grid.SceneLayer.Use, pickupable.transform.parent.gameObject, null, 0);
 		Pickupable component = gameObject.GetComponent<Pickupable>();
 		if (component == null)
 		{
 			global::Debug.LogError("Edible::OnTake() No Pickupable component for " + gameObject.name, gameObject);
 		}
 		gameObject.SetActive(true);
-		component.TotalAmount = Mathf.Min(amount, this.pickupable.TotalAmount);
-		this.pickupable.TotalAmount = this.pickupable.TotalAmount - amount;
-		component.Trigger(1335436905, this.pickupable);
+		component.TotalAmount = Mathf.Min(amount, pickupable.TotalAmount);
+		pickupable.TotalAmount -= amount;
+		component.Trigger(1335436905, pickupable);
 		if (storage != null)
 		{
-			storage.Trigger(-1697596308, base.gameObject);
+			storage.Trigger(-1697596308, pickupable.gameObject);
 		}
 		return component;
 	}
-
-	[MyCmpReq]
-	private Pickupable pickupable;
 }

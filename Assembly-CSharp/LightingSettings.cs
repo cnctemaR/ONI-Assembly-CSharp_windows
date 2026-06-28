@@ -1,12 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class LightingSettings : ScriptableObject
 {
-	public List<LightSettings> LightSettings;
-
+	[Header("Global")]
 	public bool UpdateLightSettings;
+
+	public float BloomScale;
+
+	public Color32 LightColour = Color.white;
 
 	[Header("Digging")]
 	public float DigMapScale;
@@ -75,8 +77,6 @@ public class LightingSettings : ScriptableObject
 	public float WaterDepthColorOpacityStart;
 
 	public float WaterDepthColorOpacityEnd;
-
-	public float BloomScale;
 
 	[Header("Liquid")]
 	public float LiquidMin;
@@ -204,6 +204,11 @@ public class LightingSettings : ScriptableObject
 	public Vector4 BuildingDamagedUVParameters;
 
 	public Color32 BuildingDamagedTint;
+
+	[Header("Disease")]
+	public Texture2D DiseaseOverlayTex;
+
+	public Vector4 DiseaseOverlayTexInfo;
 
 	[Serializable]
 	public struct EdgeLighting

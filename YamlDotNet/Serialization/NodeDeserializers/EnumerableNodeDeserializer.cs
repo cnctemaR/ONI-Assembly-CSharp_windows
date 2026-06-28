@@ -8,7 +8,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 {
 	public sealed class EnumerableNodeDeserializer : INodeDeserializer
 	{
-		bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
+		bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
 		{
 			Type type;
 			if (expectedType == typeof(IEnumerable))
@@ -26,7 +26,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 				type = implementedGenericInterface.GetGenericArguments()[0];
 			}
 			Type type2 = typeof(List<>).MakeGenericType(new Type[] { type });
-			value = nestedObjectDeserializer(reader, type2);
+			value = nestedObjectDeserializer(parser, type2);
 			return true;
 		}
 	}

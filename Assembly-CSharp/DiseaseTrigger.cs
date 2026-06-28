@@ -6,12 +6,13 @@ using UnityEngine;
 
 public class DiseaseTrigger : KMonoBehaviour, IGameObjectEffectDescriptor
 {
-	public void AddTrigger(GameHashes src_event, string[] disease_ids)
+	public void AddTrigger(GameHashes src_event, string[] disease_ids, DiseaseTrigger.SourceCallback source_callback)
 	{
 		this.triggers.Add(new DiseaseTrigger.TriggerInfo
 		{
 			srcEvent = src_event,
-			diseaseIDs = disease_ids
+			diseaseIDs = disease_ids,
+			sourceCallback = source_callback
 		});
 	}
 
@@ -36,8 +37,8 @@ public class DiseaseTrigger : KMonoBehaviour, IGameObjectEffectDescriptor
 				}
 				if (disease != null)
 				{
-					string infectionSourceInfo = this.GetInfectionSourceInfo(disease);
-					DiseaseExposureInfo diseaseExposureInfo = new DiseaseExposureInfo(disease.Id, 1f, infectionSourceInfo);
+					string text = trigger.sourceCallback(this.gameObject, gameObject.gameObject);
+					DiseaseExposureInfo diseaseExposureInfo = new DiseaseExposureInfo(disease.Id, text);
 					bool flag = true;
 					Edible component = this.gameObject.GetComponent<Edible>();
 					if (component != null)
@@ -47,11 +48,11 @@ public class DiseaseTrigger : KMonoBehaviour, IGameObjectEffectDescriptor
 						{
 							flag = false;
 						}
-						diseaseExposureInfo.exposureCount = component.unitsConsumed;
 					}
 					if (flag)
 					{
-						gameObject.Trigger(-283306403, diseaseExposureInfo);
+						Klei.AI.Diseases diseases2 = gameObject.GetComponent<MinionModifiers>().diseases;
+						diseases2.Infect(diseaseExposureInfo);
 					}
 				}
 				else
@@ -60,12 +61,6 @@ public class DiseaseTrigger : KMonoBehaviour, IGameObjectEffectDescriptor
 				}
 			});
 		}
-	}
-
-	private string GetInfectionSourceInfo(Disease disease)
-	{
-		string properName = base.GetComponent<KSelectable>().GetProperName();
-		return string.Format(disease.InfectionSourceString(), properName);
 	}
 
 	public List<Descriptor> EffectDescriptors(GameObject go)
@@ -120,5 +115,9 @@ public class DiseaseTrigger : KMonoBehaviour, IGameObjectEffectDescriptor
 		public GameHashes srcEvent;
 
 		public string[] diseaseIDs;
+
+		public DiseaseTrigger.SourceCallback sourceCallback;
 	}
+
+	public delegate string SourceCallback(GameObject source, GameObject target);
 }

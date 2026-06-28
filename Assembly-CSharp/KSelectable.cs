@@ -242,6 +242,12 @@ public class KSelectable : KMonoBehaviour
 		return this.statusItemGroup;
 	}
 
+	protected override void OnLoadLevel()
+	{
+		this.OnCleanUp();
+		base.OnLoadLevel();
+	}
+
 	protected override void OnCleanUp()
 	{
 		this.statusItemGroup.Destroy();

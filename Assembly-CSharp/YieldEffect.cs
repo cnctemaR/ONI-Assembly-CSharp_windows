@@ -35,7 +35,7 @@ public class YieldEffect
 			int num = Mathf.CeilToInt((float)component.cropVal.numProduced * this.modifier) + component.cropVal.numProduced;
 			return new Descriptor[]
 			{
-				new Descriptor(string.Format(CREATURES.CROP_EFFECTS.MODIFY_HARVEST_UNITS.DESC, num, prefab.GetProperName()), string.Format(CREATURES.CROP_EFFECTS.MODIFY_HARVEST_UNITS.TOOLTIP, num, prefab.GetProperName()), Descriptor.DescriptorType.CropHarvest, false)
+				new Descriptor(string.Format(CREATURES.CROP_EFFECTS.MODIFY_HARVEST_UNITS.DESC, num, prefab.GetProperName()), string.Format(CREATURES.CROP_EFFECTS.MODIFY_HARVEST_UNITS.TOOLTIP, num, prefab.GetProperName()), Descriptor.DescriptorType.Lifecycle, false)
 			};
 		}
 
@@ -93,10 +93,9 @@ public class YieldEffect
 		public Descriptor[] GetDescription(GameObject plant)
 		{
 			SeedProducer component = plant.GetComponent<SeedProducer>();
-			SeedProducer.ProductionType productionType = component.seedInfo.productionType;
 			string text = "Seed";
-			string text2 = string.Empty;
-			string text3 = CREATURES.CROP_EFFECTS.ADD_SEEDS.TOOLTIP;
+			string empty = string.Empty;
+			string text2 = CREATURES.CROP_EFFECTS.ADD_SEEDS.TOOLTIP;
 			if (component != null)
 			{
 				GameObject prefab = Assets.GetPrefab(new Tag(component.seedInfo.seedId));
@@ -105,14 +104,9 @@ public class YieldEffect
 					text = prefab.GetProperName();
 				}
 			}
-			if (productionType == SeedProducer.ProductionType.FinalHarvest)
-			{
-				text2 = CREATURES.CROP_EFFECTS.ADD_SEEDS.FINAL_HARVEST_ONLY;
-				text3 = CREATURES.CROP_EFFECTS.ADD_SEEDS.TOOLTIP_FINAL_HARVEST_ONLY;
-			}
 			return new Descriptor[]
 			{
-				new Descriptor(string.Format(CREATURES.CROP_EFFECTS.ADD_SEEDS.DESC, this.numSeeds + component.seedInfo.newSeedsProduced, text, text2), string.Format(text3, this.numSeeds), Descriptor.DescriptorType.CropHarvest, false)
+				new Descriptor(string.Format(CREATURES.CROP_EFFECTS.ADD_SEEDS.DESC, this.numSeeds + component.seedInfo.newSeedsProduced, text, empty), string.Format(text2, this.numSeeds), Descriptor.DescriptorType.Lifecycle, false)
 			};
 		}
 

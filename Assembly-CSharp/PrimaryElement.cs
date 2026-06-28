@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Klei;
 using Klei.AI;
 using KSerialization;
 using UnityEngine;
@@ -55,6 +56,27 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 	{
 		this._Temperature = this.Temperature;
 		this.SanitizeMassAndTemperature();
+		this.diseaseID.HashValue = 0;
+		this.diseaseCount = 0;
+		if (this.useSimDiseaseInfo)
+		{
+			int num = Grid.PosToCell(this.transform.position);
+			Sim.DiseaseCell diseaseCell = Grid.Disease[num];
+			if (diseaseCell.diseaseIdx != 255)
+			{
+				this.diseaseID = Db.Get().Diseases[(int)diseaseCell.diseaseIdx].id;
+				this.diseaseCount = diseaseCell.elementCount;
+			}
+		}
+		else if (this.diseaseHandle.IsValid())
+		{
+			DiseaseContainer data = GameComps.DiseaseContainers.GetData(this.diseaseHandle);
+			if (data.diseaseIdx != 255)
+			{
+				this.diseaseID = Db.Get().Diseases[(int)data.diseaseIdx].id;
+				this.diseaseCount = data.diseaseCount;
+			}
+		}
 	}
 
 	[OnDeserialized]
@@ -96,6 +118,31 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		{
 			this.onDataChanged(this);
 		}
+		byte index = Db.Get().Diseases.GetIndex(this.diseaseID);
+		if (index == 255 || this.diseaseCount <= 0)
+		{
+			if (this.diseaseHandle.IsValid())
+			{
+				GameComps.DiseaseContainers.Remove(base.gameObject);
+				this.diseaseHandle.Clear();
+			}
+		}
+		else if (this.diseaseHandle.IsValid())
+		{
+			DiseaseContainer data = GameComps.DiseaseContainers.GetData(this.diseaseHandle);
+			data.diseaseIdx = index;
+			data.diseaseCount = this.diseaseCount;
+			GameComps.DiseaseContainers.SetData(this.diseaseHandle, data);
+		}
+		else
+		{
+			this.diseaseHandle = GameComps.DiseaseContainers.Add(base.gameObject, index, this.diseaseCount);
+		}
+	}
+
+	protected override void OnLoadLevel()
+	{
+		base.OnLoadLevel();
 	}
 
 	private void SanitizeMassAndTemperature()
@@ -152,10 +199,48 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
+	public byte DiseaseIdx
+	{
+		get
+		{
+			byte b = byte.MaxValue;
+			if (this.useSimDiseaseInfo)
+			{
+				int num = Grid.PosToCell(this.transform.position);
+				b = Grid.Disease[num].diseaseIdx;
+			}
+			else if (this.diseaseHandle.IsValid())
+			{
+				b = GameComps.DiseaseContainers.GetData(this.diseaseHandle).diseaseIdx;
+			}
+			return b;
+		}
+	}
+
+	public int DiseaseCount
+	{
+		get
+		{
+			int num = 0;
+			if (this.useSimDiseaseInfo)
+			{
+				int num2 = Grid.PosToCell(this.transform.position);
+				num = Grid.Disease[num2].elementCount;
+			}
+			else if (this.diseaseHandle.IsValid())
+			{
+				num = GameComps.DiseaseContainers.GetData(this.diseaseHandle).diseaseCount;
+			}
+			return num;
+		}
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
 		GameComps.InfraredVisualizers.Add(base.gameObject);
+		this.Subscribe(1335436905, new Action<object>(this.OnSplitFromChunk));
+		this.Subscribe(-2064133523, new Action<object>(this.OnAbsorb));
 	}
 
 	protected override void OnSpawn()
@@ -171,9 +256,23 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
+	public void ForcePermanentDiseaseContainer()
+	{
+		this.forcePermanentDiseaseContainer = true;
+		if (!this.diseaseHandle.IsValid())
+		{
+			this.diseaseHandle = GameComps.DiseaseContainers.Add(base.gameObject, byte.MaxValue, 0);
+		}
+	}
+
 	protected override void OnCleanUp()
 	{
 		GameComps.InfraredVisualizers.Remove(base.gameObject);
+		if (this.diseaseHandle.IsValid())
+		{
+			GameComps.DiseaseContainers.Remove(base.gameObject);
+			this.diseaseHandle.Clear();
+		}
 		base.OnCleanUp();
 	}
 
@@ -195,7 +294,7 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		{
 			List<Tag> list = new List<Tag>();
 			Element element = this.Element;
-			list.Add(TagManager.Create(element.id));
+			list.Add(GameTagExtensions.Create(element.id));
 			foreach (Tag tag in element.oreTags)
 			{
 				list.Add(tag);
@@ -205,6 +304,53 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 				list.Add(GameTags.StoredMetal);
 			}
 			component.AddPrefabTags(list);
+		}
+	}
+
+	public void ModifyDiseaseCount(int delta, string reason)
+	{
+		if (this.useSimDiseaseInfo)
+		{
+			int num = Grid.PosToCell(this);
+			SimMessages.ModifyDiseaseOnCell(num, byte.MaxValue, delta);
+		}
+		else if (delta != 0 && this.diseaseHandle.IsValid())
+		{
+			int num2 = GameComps.DiseaseContainers.ModifyDiseaseCount(this.diseaseHandle, delta);
+			if (num2 <= 0 && !this.forcePermanentDiseaseContainer)
+			{
+				this.Trigger(-1689370368, false);
+				GameComps.DiseaseContainers.Remove(base.gameObject);
+				this.diseaseHandle.Clear();
+			}
+		}
+	}
+
+	public void AddDisease(byte disease_idx, int delta, string reason)
+	{
+		if (delta == 0)
+		{
+			return;
+		}
+		if (this.useSimDiseaseInfo)
+		{
+			int num = Grid.PosToCell(this);
+			SimMessages.ModifyDiseaseOnCell(num, disease_idx, delta);
+		}
+		else if (this.diseaseHandle.IsValid())
+		{
+			int num2 = GameComps.DiseaseContainers.AddDisease(this.diseaseHandle, disease_idx, delta);
+			if (num2 <= 0)
+			{
+				GameComps.DiseaseContainers.Remove(base.gameObject);
+				this.diseaseHandle.Clear();
+			}
+		}
+		else if (delta > 0)
+		{
+			this.diseaseHandle = GameComps.DiseaseContainers.Add(base.gameObject, disease_idx, delta);
+			this.Trigger(-1689370368, true);
+			this.Trigger(-283306403, null);
 		}
 	}
 
@@ -222,11 +368,36 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 		primary_element._Temperature = temperature;
 	}
 
+	private void OnSplitFromChunk(object data)
+	{
+		Pickupable pickupable = (Pickupable)data;
+		if (pickupable == null)
+		{
+			return;
+		}
+		float num = this.Units / (this.Units + pickupable.PrimaryElement.Units);
+		SimUtil.DiseaseInfo percentOfDisease = SimUtil.GetPercentOfDisease(pickupable.PrimaryElement, num);
+		this.AddDisease(percentOfDisease.idx, percentOfDisease.count, "PrimaryElement.SplitFromChunk");
+		pickupable.PrimaryElement.ModifyDiseaseCount(-percentOfDisease.count, "PrimaryElement.SplitFromChunk");
+	}
+
+	private void OnAbsorb(object data)
+	{
+		Pickupable pickupable = (Pickupable)data;
+		if (pickupable == null)
+		{
+			return;
+		}
+		this.AddDisease(pickupable.PrimaryElement.DiseaseIdx, pickupable.PrimaryElement.DiseaseCount, "PrimaryElement.OnAbsorb");
+	}
+
 	public const float DefaultChunkMass = 400f;
 
 	public PrimaryElement.GetTemperatureCallback getTemperatureCallback = new PrimaryElement.GetTemperatureCallback(PrimaryElement.OnGetTemperature);
 
 	public PrimaryElement.SetTemperatureCallback setTemperatureCallback = new PrimaryElement.SetTemperatureCallback(PrimaryElement.OnSetTemperature);
+
+	public bool useSimDiseaseInfo;
 
 	private static readonly Tag[] metalTags = new Tag[]
 	{
@@ -240,13 +411,21 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 
 	private float _units = 1f;
 
-	[SerializeField]
 	[Serialize]
+	[SerializeField]
 	private float _Temperature;
 
 	[Serialize]
 	[NonSerialized]
 	public bool KeepZeroMassObject;
+
+	[Serialize]
+	private HashedString diseaseID;
+
+	[Serialize]
+	private int diseaseCount;
+
+	private HandleVector<int>.Handle diseaseHandle = HandleVector<int>.InvalidHandle;
 
 	public bool CountableUnits;
 
@@ -257,6 +436,9 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 
 	[NonSerialized]
 	public Action<PrimaryElement> onDataChanged;
+
+	[NonSerialized]
+	private bool forcePermanentDiseaseContainer;
 
 	public delegate float GetTemperatureCallback(PrimaryElement primary_element);
 

@@ -40,9 +40,9 @@ public class ElementsAudio
 
 	private ElementsAudio.ElementAudioConfig[] elementAudioConfigs;
 
+	[IgnoreEmptyLines]
 	[IgnoreFirst(1)]
 	[DelimitedRecord(",")]
-	[IgnoreEmptyLines]
 	public class ElementAudioConfig
 	{
 		[FieldOrder(1)]
@@ -53,29 +53,29 @@ public class ElementsAudio
 		[FieldOptional]
 		public AmbienceType ambienceType;
 
-		[FieldOptional]
 		[FieldNullValue(SolidAmbienceType.None)]
+		[FieldOptional]
 		[FieldOrder(3)]
 		public SolidAmbienceType solidAmbienceType;
 
+		[FieldOptional]
 		[FieldNullValue("")]
 		[FieldOrder(4)]
-		[FieldOptional]
 		public string miningSound;
 
-		[FieldOrder(5)]
-		[FieldNullValue("")]
 		[FieldOptional]
+		[FieldNullValue("")]
+		[FieldOrder(5)]
 		public string miningBreakSound;
 
-		[FieldOptional]
 		[FieldNullValue("")]
+		[FieldOptional]
 		[FieldOrder(6)]
 		public string oreBumpSound;
 
-		[FieldOptional]
-		[FieldOrder(7)]
 		[FieldNullValue("")]
+		[FieldOrder(7)]
+		[FieldOptional]
 		public string floorEventAudioCategory;
 	}
 }

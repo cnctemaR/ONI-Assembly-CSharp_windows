@@ -26,6 +26,8 @@ public class SelectTool : InterfaceTool
 	public void SetLayerMask(int mask)
 	{
 		this.layerMask = mask;
+		this.ClearHover();
+		this.LateUpdate();
 	}
 
 	public void ClearLayerMask()
@@ -123,6 +125,7 @@ public class SelectTool : InterfaceTool
 		Vector3 vector = new Vector3(Input.mousePosition.x, Input.mousePosition.y, -main.transform.position.z);
 		Vector3 vector2 = main.ScreenToWorldPoint(vector);
 		Vector2 vector3 = new Vector2(vector2.x, vector2.y);
+		int num = 0;
 		if (this.hoverOverride != null)
 		{
 			intersections.Add(new SelectTool.Intersection
@@ -131,8 +134,11 @@ public class SelectTool : InterfaceTool
 				distance = -100f
 			});
 		}
-		Game.Instance.statusItemRenderer.GetIntersections(vector3, intersections);
-		int num = Physics2D.OverlapPointNonAlloc(vector3, this.overlaps, layer_mask);
+		if (Grid.Visible[Grid.PosToCell(vector2)] != 0 || DebugPaintElementScreen.Instance.gameObject.activeSelf)
+		{
+			num = Physics2D.OverlapPointNonAlloc(vector3, this.overlaps, layer_mask);
+			Game.Instance.statusItemRenderer.GetIntersections(vector3, intersections);
+		}
 		for (int i = 0; i < num; i++)
 		{
 			GameObject gameObject = this.overlaps[i].gameObject;
@@ -179,6 +185,10 @@ public class SelectTool : InterfaceTool
 		Vector3 vector = new Vector3(Input.mousePosition.x, Input.mousePosition.y, -main.transform.position.z);
 		Vector3 vector2 = main.ScreenToWorldPoint(vector);
 		Vector2 vector3 = new Vector2(vector2.x, vector2.y);
+		if (Grid.Visible[Grid.PosToCell(vector2)] == 0 && !DebugPaintElementScreen.Instance.gameObject.activeSelf)
+		{
+			return this.hits.ToArray();
+		}
 		int num = Physics2D.OverlapPointNonAlloc(vector3, this.allSelectableOverlaps);
 		Game.Instance.statusItemRenderer.GetIntersections(vector3, this.hits);
 		for (int i = 0; i < num; i++)

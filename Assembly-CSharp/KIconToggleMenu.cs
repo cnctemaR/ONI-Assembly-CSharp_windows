@@ -59,6 +59,14 @@ public class KIconToggleMenu : KScreen
 			if (component2)
 			{
 				string hotkeyString = GameUtil.GetHotkeyString(toggleInfo.hotKey);
+				if (toggleInfo.tooltipHeader != string.Empty)
+				{
+					component2.AddMultiStringTooltip(toggleInfo.tooltipHeader, (!(this.ToggleToolTipHeaderTextStyleSetting != null)) ? this.ToggleToolTipTextStyleSetting : this.ToggleToolTipHeaderTextStyleSetting);
+					if (this.ToggleToolTipHeaderTextStyleSetting == null)
+					{
+						global::Debug.Log("!", null);
+					}
+				}
 				component2.AddMultiStringTooltip(toggleInfo.tooltip + " " + hotkeyString, this.ToggleToolTipTextStyleSetting);
 			}
 			foreach (Sprite sprite in this.icons)
@@ -191,6 +199,9 @@ public class KIconToggleMenu : KScreen
 	public TextStyleSetting ToggleToolTipTextStyleSetting;
 
 	[SerializeField]
+	public TextStyleSetting ToggleToolTipHeaderTextStyleSetting;
+
+	[SerializeField]
 	protected bool repeatKeyDownToggles = true;
 
 	protected KToggle currentlySelectedToggle;
@@ -203,13 +214,14 @@ public class KIconToggleMenu : KScreen
 
 	public class ToggleInfo
 	{
-		public ToggleInfo(string text, string icon_name, object user_data = null, global::Action hotKey = global::Action.NumActions, string tooltip = "")
+		public ToggleInfo(string text, string icon_name, object user_data = null, global::Action hotKey = global::Action.NumActions, string tooltip = "", string tooltip_header = "")
 		{
 			this.text = text;
 			this.userData = user_data;
 			this.icon = icon_name;
 			this.hotKey = hotKey;
 			this.tooltip = tooltip;
+			this.tooltipHeader = tooltip_header;
 		}
 
 		public string text;
@@ -219,6 +231,8 @@ public class KIconToggleMenu : KScreen
 		public string icon;
 
 		public string tooltip;
+
+		public string tooltipHeader;
 
 		public KToggle toggle;
 

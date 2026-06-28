@@ -8,7 +8,6 @@ public class ImageToggleStateThrobber : KMonoBehaviour
 	{
 		base.OnPrefabInit();
 		List<ImageToggleState> list = new List<ImageToggleState>(this.targetImageToggleStates);
-		list.AddRange(base.GetComponents<ImageToggleState>());
 		this.targetImageToggleStates = list.ToArray();
 	}
 
@@ -55,8 +54,6 @@ public class ImageToggleStateThrobber : KMonoBehaviour
 	}
 
 	public ImageToggleState[] targetImageToggleStates;
-
-	public bool includeStatesOnThisGO = true;
 
 	public ImageToggleState.State state1;
 

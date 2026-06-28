@@ -16,7 +16,8 @@ public class PopFX : KMonoBehaviour
 		this.TextDisplay.color = Color.white;
 		PopFXManager.Instance.RecycleFX(this);
 		this.canvasGroup.alpha = 0f;
-		base.enabled = false;
+		base.gameObject.SetActive(false);
+		this.isLive = false;
 	}
 
 	public void Spawn(Sprite Icon, string Text, Transform TargetTransform, Vector3 Offset, float LifeTime = 1.5f, bool TrackTarget = false)
@@ -41,11 +42,16 @@ public class PopFX : KMonoBehaviour
 		this.TextDisplay.text = this.text;
 		this.IconDisplay.sprite = this.icon;
 		this.canvasGroup.alpha = 1f;
-		base.enabled = true;
+		this.isLive = true;
+		this.Update();
 	}
 
 	private void Update()
 	{
+		if (!this.isLive)
+		{
+			return;
+		}
 		if (!PopFXManager.Instance.Ready())
 		{
 			return;
@@ -95,4 +101,6 @@ public class PopFX : KMonoBehaviour
 	private bool trackTarget;
 
 	private Vector3 startPos;
+
+	private bool isLive;
 }

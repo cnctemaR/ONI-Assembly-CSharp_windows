@@ -8,78 +8,78 @@ namespace TUNING
 
 		public class BONUS
 		{
-			public static DecorValues TIER0 = new DecorValues
+			public static EffectorValues TIER0 = new EffectorValues
 			{
-				decor = 10,
+				amount = 10,
 				radius = 1
 			};
 
-			public static DecorValues TIER1 = new DecorValues
+			public static EffectorValues TIER1 = new EffectorValues
 			{
-				decor = 15,
+				amount = 15,
 				radius = 2
 			};
 
-			public static DecorValues TIER2 = new DecorValues
+			public static EffectorValues TIER2 = new EffectorValues
 			{
-				decor = 20,
+				amount = 20,
 				radius = 3
 			};
 
-			public static DecorValues TIER3 = new DecorValues
+			public static EffectorValues TIER3 = new EffectorValues
 			{
-				decor = 25,
+				amount = 25,
 				radius = 4
 			};
 
-			public static DecorValues TIER4 = new DecorValues
+			public static EffectorValues TIER4 = new EffectorValues
 			{
-				decor = 30,
+				amount = 30,
 				radius = 5
 			};
 
-			public static DecorValues TIER5 = new DecorValues
+			public static EffectorValues TIER5 = new EffectorValues
 			{
-				decor = 35,
+				amount = 35,
 				radius = 6
 			};
 		}
 
 		public class PENALTY
 		{
-			public static DecorValues TIER0 = new DecorValues
+			public static EffectorValues TIER0 = new EffectorValues
 			{
-				decor = -5,
+				amount = -5,
 				radius = 1
 			};
 
-			public static DecorValues TIER1 = new DecorValues
+			public static EffectorValues TIER1 = new EffectorValues
 			{
-				decor = -10,
+				amount = -10,
 				radius = 2
 			};
 
-			public static DecorValues TIER2 = new DecorValues
+			public static EffectorValues TIER2 = new EffectorValues
 			{
-				decor = -15,
+				amount = -15,
 				radius = 3
 			};
 
-			public static DecorValues TIER3 = new DecorValues
+			public static EffectorValues TIER3 = new EffectorValues
 			{
-				decor = -20,
+				amount = -20,
 				radius = 4
 			};
 
-			public static DecorValues TIER4 = new DecorValues
+			public static EffectorValues TIER4 = new EffectorValues
 			{
-				decor = -20,
+				amount = -20,
 				radius = 5
 			};
 
-			public static DecorValues TIER5 = new DecorValues
+			public static EffectorValues TIER5 = new EffectorValues
 			{
-				decor = -25,
+				amount = -25,
 				radius = 6
 			};
 		}

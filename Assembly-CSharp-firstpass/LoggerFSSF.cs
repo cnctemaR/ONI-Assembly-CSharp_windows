@@ -4,7 +4,7 @@ using System.Diagnostics;
 public class LoggerFSSF : Logger<LoggerFSSF.Entry>
 {
 	public LoggerFSSF(string name)
-		: base(name)
+		: base(name, 35)
 	{
 	}
 

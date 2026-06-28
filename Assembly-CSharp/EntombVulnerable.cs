@@ -26,7 +26,7 @@ public class EntombVulnerable : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.partitionerEntry = GameScenePartitioner.Instance.Add("EntombVulnerable", base.gameObject, this.occupyArea.GetExtents(), GameScenePartitioner.Instance.solidChangedMask.mask, new Action<object>(this.OnSolidChanged));
+		this.partitionerEntry = GameScenePartitioner.Instance.Add("EntombVulnerable", base.gameObject, this.occupyArea.GetExtents(), GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
 		this.CheckEntombed();
 	}
 
@@ -54,6 +54,7 @@ public class EntombVulnerable : KMonoBehaviour
 			{
 				this.isEntombed = true;
 				this.selectable.AddStatusItem(Db.Get().CreatureStatusItems.Entombed, null);
+				base.GetComponent<KPrefabID>().AddTag(GameTags.Entombed);
 				this.Trigger(-1089732772, true);
 			}
 		}
@@ -61,13 +62,14 @@ public class EntombVulnerable : KMonoBehaviour
 		{
 			this.isEntombed = false;
 			this.selectable.RemoveStatusItem(Db.Get().CreatureStatusItems.Entombed, false);
+			base.GetComponent<KPrefabID>().RemoveTag(GameTags.Entombed);
 			this.Trigger(-1089732772, false);
 		}
 	}
 
 	public bool IsCellSafe(int cell)
 	{
-		return this.occupyArea.TestArea(cell, (int testCell) => Grid.IsValidCell(testCell) && !Grid.Solid[testCell]);
+		return this.occupyArea.TestArea(cell, null, (int testCell, object data) => Grid.IsValidCell(testCell) && !Grid.Solid[testCell]);
 	}
 
 	[MyCmpReq]

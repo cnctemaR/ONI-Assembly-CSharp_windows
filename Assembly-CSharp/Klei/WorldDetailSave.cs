@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using Delaunay.Geo;
 using KSerialization;
+using ProcGen;
+using ProcGenGame;
 
 namespace Klei
 {
@@ -15,6 +17,12 @@ namespace Klei
 		public List<WorldDetailSave.OverworldCell> overworldCells;
 
 		public int globalWorldSeed;
+
+		public int globalWorldLayoutSeed;
+
+		public int globalTerrainSeed;
+
+		public int globalNoiseSeed;
 
 		[SerializationConfig(MemberSerialization.OptOut)]
 		public class OverworldCell

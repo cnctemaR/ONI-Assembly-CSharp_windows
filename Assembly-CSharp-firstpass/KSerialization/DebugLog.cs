@@ -15,13 +15,13 @@ namespace KSerialization
 			switch (msg_level)
 			{
 			case DebugLog.Level.Error:
-				global::Output.LogError(new object[] { msg });
+				global::Debug.LogError(msg, null);
 				break;
 			case DebugLog.Level.Warning:
-				global::Output.LogWarning(new object[] { msg });
+				global::Debug.LogWarning(msg, null);
 				break;
 			case DebugLog.Level.Info:
-				global::Output.Log(new object[] { msg });
+				global::Debug.Log(msg, null);
 				break;
 			}
 		}

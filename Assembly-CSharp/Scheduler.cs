@@ -44,6 +44,21 @@ public class Scheduler : IScheduler
 		return this.Schedule(schedulerEntry);
 	}
 
+	public void FreeResources()
+	{
+		this.log = null;
+		this.addRemovelog = null;
+		this.clock = null;
+		if (this.entries != null)
+		{
+			for (int i = 0; i < this.entries.Length; i++)
+			{
+				this.entries[i].FreeResources();
+			}
+		}
+		this.entries = null;
+	}
+
 	public SchedulerHandle SchedulePeriodic(string name, float interval, Action<object> callback, object callback_data = null, SchedulerGroup group = null, float time_offset = 0f, GameObject profiler_obj = null)
 	{
 		if (group != null && group.scheduler != this)
@@ -54,7 +69,7 @@ public class Scheduler : IScheduler
 		SchedulerHandle schedulerHandle = this.Schedule(name, interval + time_offset, interval, callback, callback_data, nextId, profiler_obj);
 		if (group != null)
 		{
-			group.Add(nextId);
+			group.Add(schedulerHandle);
 		}
 		return schedulerHandle;
 	}
@@ -69,7 +84,7 @@ public class Scheduler : IScheduler
 		SchedulerHandle schedulerHandle = this.Schedule(name, time, -1f, callback, callback_data, nextId, null);
 		if (group != null)
 		{
-			group.Add(nextId);
+			group.Add(schedulerHandle);
 		}
 		return schedulerHandle;
 	}
@@ -79,27 +94,9 @@ public class Scheduler : IScheduler
 		return Guid.NewGuid();
 	}
 
-	public void Clear(Guid id)
-	{
-		if (id == Guid.Empty)
-		{
-			return;
-		}
-		for (int i = 0; i < this.entryCount; i++)
-		{
-			if (this.entries[i].id == id)
-			{
-				string text = null;
-				GameObject gameObject = null;
-				this.entries[i] = new SchedulerEntry(this.entries[i].id, text, 0f, -1f, null, null, gameObject);
-			}
-		}
-		SystemScheduler.instance.RemoveTask(id);
-	}
-
 	public void Clear(SchedulerHandle handle)
 	{
-		this.Clear(handle.entry.id);
+		handle.entry.Clear();
 	}
 
 	public void Update()
@@ -132,9 +129,7 @@ public class Scheduler : IScheduler
 				}
 				if (schedulerEntry.callback != null)
 				{
-					string text = null;
-					GameObject gameObject = null;
-					SystemScheduler.instance.AddTask(schedulerEntry.id, SystemScheduler.Priority.Default, schedulerEntry.callback, schedulerEntry.callbackData, text, gameObject);
+					SystemScheduler.instance.AddTask(SystemScheduler.Priority.Default, schedulerEntry.details);
 					if (this.entries[i].timeInterval >= 0f)
 					{
 						SchedulerEntry schedulerEntry2 = this.entries[i];

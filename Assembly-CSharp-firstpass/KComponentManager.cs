@@ -40,6 +40,7 @@ public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentMana
 		{
 			base.SetData(handle, cmp_values);
 		}
+		this.spawnList.Remove(handle);
 		this.OnPrefabInit(handle);
 		this.spawnList.Add(handle);
 		Assert.IsTrue(handle.IsValid());
@@ -63,6 +64,7 @@ public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentMana
 		HandleVector<int>.Handle handle = this.instanceHandleMap[instance];
 		base.Free(handle);
 		this.instanceHandleMap.Remove(instance);
+		this.spawnList.Remove(handle);
 	}
 
 	public HandleVector<int>.Handle GetHandle(object instance)
@@ -136,6 +138,7 @@ public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentMana
 		this.shadowSpawnList.Clear();
 		this.cleanupList.Clear();
 		this.shadowCleanupList.Clear();
+		this.instanceHandleMap.Clear();
 	}
 
 	protected virtual void OnPrefabInit(HandleVector<int>.Handle h)

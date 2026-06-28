@@ -55,12 +55,11 @@ public struct Descriptor
 	{
 		Requirement,
 		Effect,
-		HarvestLowYield,
-		HarvestMedYield,
-		HarvestHighYield,
-		CropHarvest,
-		CropLifecycle,
-		CropOptimumCondition,
-		CropHarvestBonus
+		Lifecycle,
+		Information,
+		DiseaseSource,
+		Detail,
+		Symptom,
+		SymptomAidable
 	}
 }

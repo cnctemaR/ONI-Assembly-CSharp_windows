@@ -10,17 +10,21 @@ public struct StringKey
 
 	public override string ToString()
 	{
-		return Strings.Get(this);
+		return string.Concat(new object[]
+		{
+			"S: [",
+			this.String,
+			"] H: [",
+			this.Hash,
+			"] Value: [",
+			Strings.Get(this),
+			"]"
+		});
 	}
 
 	public bool IsValid()
 	{
 		return this.Hash != 0;
-	}
-
-	public static implicit operator string(StringKey key)
-	{
-		return Strings.Get(key);
 	}
 
 	public string String;

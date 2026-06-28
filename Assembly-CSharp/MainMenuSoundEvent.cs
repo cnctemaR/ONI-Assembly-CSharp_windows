@@ -1,37 +1,21 @@
 ﻿using System;
 using FMOD.Studio;
-using FMODUnity;
 using UnityEngine;
 
-public class MainMenuSoundEvent : AnimEvent
+public class MainMenuSoundEvent : SoundEvent
 {
 	public MainMenuSoundEvent(string file_name, string sound_name, int frame)
-		: base(file_name, sound_name, frame)
+		: base(file_name, sound_name, frame, true, false, (float)SoundEvent.IGNORE_INTERVAL, false)
 	{
-		this.sound = GlobalAssets.GetSound(sound_name, false);
-		if (this.sound == null || this.sound == string.Empty)
-		{
-		}
-		this.frameNumber = frame;
-	}
-
-	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
-	{
-		this.PlaySound(behaviour);
 	}
 
 	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
 	{
-		EventInstance eventInstance = KFMOD.BeginOneShot(this.sound, Vector3.zero);
+		EventInstance eventInstance = KFMOD.BeginOneShot(base.sound, Vector3.zero);
 		if (eventInstance != null)
 		{
-			eventInstance.setParameterValue("frame", (float)this.frameNumber);
+			eventInstance.setParameterValue("frame", (float)base.frame);
 			KFMOD.EndOneShot(eventInstance);
 		}
 	}
-
-	[EventRef]
-	public string sound;
-
-	public int frameNumber;
 }

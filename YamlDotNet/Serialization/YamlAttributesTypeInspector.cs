@@ -19,27 +19,18 @@ namespace YamlDotNet.Serialization
 					select p).Select<IPropertyDescriptor, IPropertyDescriptor>(delegate(IPropertyDescriptor p)
 				{
 					PropertyDescriptor propertyDescriptor = new PropertyDescriptor(p);
-					YamlAliasAttribute customAttribute = p.GetCustomAttribute<YamlAliasAttribute>();
+					YamlMemberAttribute customAttribute = p.GetCustomAttribute<YamlMemberAttribute>();
 					if (customAttribute != null)
 					{
-						propertyDescriptor.Name = customAttribute.Alias;
-					}
-					YamlMemberAttribute customAttribute2 = p.GetCustomAttribute<YamlMemberAttribute>();
-					if (customAttribute2 != null)
-					{
-						if (customAttribute2.SerializeAs != null)
+						if (customAttribute.SerializeAs != null)
 						{
-							propertyDescriptor.TypeOverride = customAttribute2.SerializeAs;
+							propertyDescriptor.TypeOverride = customAttribute.SerializeAs;
 						}
-						propertyDescriptor.Order = customAttribute2.Order;
-						propertyDescriptor.ScalarStyle = customAttribute2.ScalarStyle;
-						if (customAttribute2.Alias != null)
+						propertyDescriptor.Order = customAttribute.Order;
+						propertyDescriptor.ScalarStyle = customAttribute.ScalarStyle;
+						if (customAttribute.Alias != null)
 						{
-							if (customAttribute != null)
-							{
-								throw new InvalidOperationException("Mixing YamlAlias(...) with YamlMember(Alias = ...) is an error. The YamlAlias attribute is obsolete and should be removed.");
-							}
-							propertyDescriptor.Name = customAttribute2.Alias;
+							propertyDescriptor.Name = customAttribute.Alias;
 						}
 					}
 					return propertyDescriptor;

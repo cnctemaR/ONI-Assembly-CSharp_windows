@@ -6,7 +6,7 @@ public class PeeChoreMonitor : GameStateMachine<PeeChoreMonitor, PeeChoreMonitor
 	{
 		default_state = this.satisfied;
 		this.satisfied.ScheduleGoTo(120f, this.urgent);
-		this.urgent.ToggleChore(new Func<PeeChoreMonitor.Instance, Chore>(this.CreatePeeChore), this.satisfied, false);
+		this.urgent.ToggleChore(new Func<PeeChoreMonitor.Instance, Chore>(this.CreatePeeChore), this.satisfied);
 	}
 
 	private Chore CreatePeeChore(PeeChoreMonitor.Instance smi)

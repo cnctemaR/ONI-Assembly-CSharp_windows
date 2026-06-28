@@ -6,7 +6,8 @@ public class GasConduitConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("GasConduit", 1, 1, "utilities_gas_kanim", 50f, 10, 3f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER0, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.NONE, null);
+		EffectorValues none = NOISE_POLLUTION.NONE;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("GasConduit", 1, 1, "utilities_gas_kanim", 50f, 10, 3f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER0, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.NONE, none);
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
 		buildingDef.Entombable = false;
@@ -25,6 +26,7 @@ public class GasConduitConfig : IBuildingConfig
 		buildingDef.isUtility = true;
 		buildingDef.OverlayAnim = Assets.GetAnim("utilities_gas_kanim");
 		buildingDef.DragBuild = true;
+		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.GasVentIDs, "GasConduit");
 		return buildingDef;
 	}
 
@@ -52,4 +54,6 @@ public class GasConduitConfig : IBuildingConfig
 		kanimGraphTileVisualizer.connectionSource = KAnimGraphTileVisualizer.ConnectionSource.Gas;
 		kanimGraphTileVisualizer.isPhysicalBuilding = false;
 	}
+
+	public const string ID = "GasConduit";
 }

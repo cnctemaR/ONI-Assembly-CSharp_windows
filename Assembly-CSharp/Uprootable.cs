@@ -23,6 +23,14 @@ public class Uprootable : Workable
 		}
 	}
 
+	public Storage GetPlanterStorage
+	{
+		get
+		{
+			return this.planterStorage;
+		}
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -40,6 +48,7 @@ public class Uprootable : Workable
 		this.faceTargetWhenWorking = true;
 		Components.Uprootables.Add(this);
 		this.area = base.GetComponent<OccupyArea>();
+		Prioritizable.AddRef(base.gameObject);
 		if (this.isMarkedForUproot)
 		{
 			this.MarkForUproot();
@@ -52,7 +61,7 @@ public class Uprootable : Workable
 		Prioritizable component = base.GetComponent<Prioritizable>();
 		if (component != null)
 		{
-			component.showIcon = this.planterStorage != null;
+			component.showIcon = this.planterStorage == null;
 		}
 	}
 
@@ -99,7 +108,7 @@ public class Uprootable : Workable
 		}
 		else if (this.chore == null)
 		{
-			this.chore = new WorkChore<Uprootable>(Db.Get().ChoreTypes.Uproot, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true);
+			this.chore = new WorkChore<Uprootable>(Db.Get().ChoreTypes.Uproot, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true);
 			base.GetComponent<KSelectable>().AddStatusItem(this.pendingStatusItem, this);
 		}
 		this.isMarkedForUproot = true;
@@ -183,14 +192,7 @@ public class Uprootable : Workable
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
-		this.Trigger(-1358696400, worker);
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingUproot, false);
-	}
-
-	protected override void OnStopWork(Worker worker)
-	{
-		base.OnStopWork(worker);
-		this.Trigger(-942831938, worker);
 	}
 
 	public override Workable.AnimInfo GetAnim(Worker worker)
@@ -207,6 +209,9 @@ public class Uprootable : Workable
 	protected bool isMarkedForUproot;
 
 	protected bool uprootComplete;
+
+	[MyCmpAdd]
+	private Prioritizable prioritizable;
 
 	[Serialize]
 	protected bool canBeUprooted = true;

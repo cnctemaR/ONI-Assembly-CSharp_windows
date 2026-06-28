@@ -63,7 +63,7 @@ public class KIconButtonMenu : KScreen
 					image.gameObject.SetActive(false);
 					foreach (Sprite sprite in this.icons)
 					{
-						if (sprite.name == buttonInfo.iconName)
+						if (sprite != null && sprite.name == buttonInfo.iconName)
 						{
 							image.sprite = sprite;
 							image.gameObject.SetActive(true);

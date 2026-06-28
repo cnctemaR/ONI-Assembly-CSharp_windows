@@ -6,7 +6,8 @@ public class MethaneGeneratorConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("MethaneGenerator", 4, 3, "generatormethane_kanim", 400f, 100, 120f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER5, MATERIALS.RAW_METALS, 2400f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, null);
+		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER5;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("MethaneGenerator", 4, 3, "generatormethane_kanim", 400f, 100, 120f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER5, MATERIALS.RAW_METALS, 2400f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, tier);
 		buildingDef.GeneratorWattageRating = 800f;
 		buildingDef.GeneratorBaseCapacity = 1000f;
 		buildingDef.ExhaustKilowattsWhenActive = 2f;
@@ -29,17 +30,18 @@ public class MethaneGeneratorConfig : IBuildingConfig
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Gas;
 		conduitConsumer.consumptionRate = 0.59999996f;
-		conduitConsumer.capacityTag = TagManager.Create(SimHashes.Methane);
+		conduitConsumer.capacityTag = GameTagExtensions.Create(SimHashes.Methane);
 		conduitConsumer.capacityKG = 0.59999996f;
 		conduitConsumer.forceAlwaysSatisfied = true;
 		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Dump;
 		float num = 0.00375f;
 		EnergyGenerator energyGenerator = go.AddOrGet<EnergyGenerator>();
 		energyGenerator.powerDistributionOrder = 8;
+		energyGenerator.ignoreBatteryRefillPercent = true;
 		EnergyGenerator.Formula formula = default(EnergyGenerator.Formula);
 		formula.inputs = new EnergyGenerator.InputItem[]
 		{
-			new EnergyGenerator.InputItem(TagManager.Create(SimHashes.Methane), 0.06f, 0.59999996f)
+			new EnergyGenerator.InputItem(GameTagExtensions.Create(SimHashes.Methane), 0.06f, 0.59999996f)
 		};
 		float num2 = num * 2f * 18f;
 		float num3 = num * 44f;

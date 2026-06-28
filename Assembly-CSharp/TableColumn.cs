@@ -4,12 +4,28 @@ using UnityEngine;
 
 public class TableColumn
 {
-	public TableColumn(Action<MinionIdentity, GameObject> on_load_action, Comparison<MinionIdentity> sort_comparison, Action<MinionIdentity, GameObject, ToolTip> on_tooltip = null, Action<MinionIdentity, GameObject, ToolTip> on_sort_tooltip = null)
+	public TableColumn(Action<MinionIdentity, GameObject> on_load_action, Comparison<MinionIdentity> sort_comparison, Action<MinionIdentity, GameObject, ToolTip> on_tooltip = null, Action<MinionIdentity, GameObject, ToolTip> on_sort_tooltip = null, Func<bool> revealed = null, float refresh_frequency = 0f)
 	{
 		this.on_load_action = on_load_action;
 		this.sort_comparer = sort_comparison;
 		this.on_tooltip = on_tooltip;
 		this.on_sort_tooltip = on_sort_tooltip;
+		this.revealed = revealed;
+		if (refresh_frequency != 0f)
+		{
+			UIScheduler.Instance.SchedulePeriodic("RefreshTableColumn", refresh_frequency, delegate(object o)
+			{
+				this.MarkDirty(null, false);
+			}, null, null);
+		}
+	}
+
+	public bool isRevealed
+	{
+		get
+		{
+			return this.revealed == null || this.revealed();
+		}
 	}
 
 	protected string GetTooltip(ToolTip tool_tip_instance)
@@ -109,6 +125,8 @@ public class TableColumn
 	public TableScreen screen;
 
 	public MultiToggle column_sort_toggle;
+
+	private Func<bool> revealed;
 
 	protected bool dirty;
 }

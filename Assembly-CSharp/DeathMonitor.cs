@@ -4,50 +4,115 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
-		default_state = this.satisfied;
+		default_state = this.alive;
 		base.serializable = true;
-		this.satisfied.ParamTransition<Death>(this.death, this.dying, (DeathMonitor.Instance smi, Death p) => p != null);
-		this.dying.ToggleChore((DeathMonitor.Instance smi) => new DieChore(smi.master, this.death.Get(smi)), this.die, false);
+		this.alive.ParamTransition<Death>(this.death, this.dying_duplicant, (DeathMonitor.Instance smi, Death p) => p != null && smi.IsDuplicant).ParamTransition<Death>(this.death, this.die, (DeathMonitor.Instance smi, Death p) => p != null && !smi.IsDuplicant);
+		this.dying_duplicant.ToggleTag(GameTags.Dying).ToggleChore((DeathMonitor.Instance smi) => new DieChore(smi.master, this.death.Get(smi)), this.die);
 		this.die.Enter("Die", delegate(DeathMonitor.Instance smi)
 		{
 			Death death = this.death.Get(smi);
-			smi.GetComponent<Health>().KillImmediate(death);
-			DeathMessage deathMessage = new DeathMessage(smi.gameObject, death);
-			KFMOD.PlayOneShot(GlobalAssets.GetSound("Death_Notification_localized", false), smi.master.transform.position);
-			KFMOD.PlayOneShot(GlobalAssets.GetSound("Death_Notification_ST", false));
-			Messenger.Instance.QueueMessage(deathMessage);
+			if (smi.IsDuplicant)
+			{
+				DeathMessage deathMessage = new DeathMessage(smi.gameObject, death);
+				KFMOD.PlayOneShot(GlobalAssets.GetSound("Death_Notification_localized", false), smi.master.transform.position);
+				KFMOD.PlayOneShot(GlobalAssets.GetSound("Death_Notification_ST", false));
+				Messenger.Instance.QueueMessage(deathMessage);
+			}
 		}).GoTo(this.dead);
-		this.dead.Enter("ApplyDeath", delegate(DeathMonitor.Instance smi)
+		this.dead.defaultState = this.dead.ground.TriggerOnEnter(GameHashes.Died, null).ToggleTag(GameTags.Dead).Enter(delegate(DeathMonitor.Instance smi)
+		{
+			smi.ApplyDeath();
+		});
+		this.dead.ground.Enter(delegate(DeathMonitor.Instance smi)
 		{
 			Death death2 = this.death.Get(smi);
 			if (death2 == null)
 			{
 				death2 = Db.Get().Deaths.Generic;
 			}
-			smi.GetComponent<KAnimControllerBase>().Play(death2.loopAnim, KAnim.PlayMode.Once, 1f, 0f);
+			if (smi.IsDuplicant)
+			{
+				smi.GetComponent<KAnimControllerBase>().Play(death2.loopAnim, KAnim.PlayMode.Once, 1f, 0f);
+			}
+		}).Exit(delegate(DeathMonitor.Instance smi)
+		{
+			smi.Unsubscribe(856640610, new Action<object>(smi.PickedUp));
 		});
+		this.dead.carried.ToggleAnims("anim_dead_carried_kanim", 0f).Enter("ApplyDeath", delegate(DeathMonitor.Instance smi)
+		{
+			smi.animController.Queue("idle_default", KAnim.PlayMode.Loop, 1f, 0f);
+		}).Exit(delegate(DeathMonitor.Instance smi)
+		{
+			smi.animController.ClearQueue();
+		})
+			.EventTransition(GameHashes.OnUnstored, this.dead.ground, null);
 	}
 
-	public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, object>.State satisfied;
+	public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, object>.State alive;
 
-	public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, object>.State dying;
+	public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, object>.State dying_duplicant;
 
 	public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, object>.State die;
 
-	public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, object>.State dead;
+	public DeathMonitor.Dead dead;
 
 	public StateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, object>.ResourceParameter<Death> death;
+
+	public class Dead : GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, object>.State
+	{
+		public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, object>.State ground;
+
+		public GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, object>.State carried;
+	}
 
 	public new class Instance : GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
 			: base(master)
 		{
+			this.isDuplicant = base.GetComponent<MinionIdentity>();
+		}
+
+		public bool IsDuplicant
+		{
+			get
+			{
+				return this.isDuplicant;
+			}
 		}
 
 		public void Kill(Death death)
 		{
 			base.sm.death.Set(death, base.smi);
 		}
+
+		public void PickedUp(object data = null)
+		{
+			if (data != null)
+			{
+				base.smi.GoTo(base.sm.dead.carried);
+			}
+		}
+
+		public bool IsDead()
+		{
+			return base.smi.IsInsideState(base.smi.sm.dead);
+		}
+
+		public void ApplyDeath()
+		{
+			if (this.isDuplicant)
+			{
+				base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().DuplicantStatusItems.Dead, base.smi.sm.death.Get(base.smi));
+				Pickupable component = base.GetComponent<Pickupable>();
+				if (component != null)
+				{
+					component.RegisterListeners();
+				}
+			}
+			base.GetComponent<KPrefabID>().AddTag(GameTags.Corpse);
+		}
+
+		private bool isDuplicant;
 	}
 }

@@ -19,10 +19,13 @@ public class PrioritizableRenderer
 
 	public void Cleanup()
 	{
+		this.material = null;
 		this.vertices = null;
 		this.uvs = null;
 		this.prioritizables = null;
+		this.triangles = null;
 		global::UnityEngine.Object.DestroyImmediate(this.mesh);
+		this.mesh = null;
 	}
 
 	public void Render()
@@ -37,9 +40,13 @@ public class PrioritizableRenderer
 					for (int i = 0; i < Components.Prioritizables.Count; i++)
 					{
 						Prioritizable prioritizable = Components.Prioritizables[i];
-						if (prioritizable != null && prioritizable.showIcon)
+						if (prioritizable != null && prioritizable.showIcon && prioritizable.IsPrioritizable())
 						{
-							this.prioritizables.Add(prioritizable);
+							int num = Grid.PosToCell(prioritizable);
+							if (Grid.Visible[num] > 0)
+							{
+								this.prioritizables.Add(prioritizable);
+							}
 						}
 					}
 					if (this.prioritizableCount != this.prioritizables.Count)
@@ -64,30 +71,32 @@ public class PrioritizableRenderer
 							{
 								vector = prioritizable2.transform.position;
 							}
-							Vector2 vector2 = new Vector2(0.2f, 0.3f);
-							float num = -5f;
-							int num2 = 4 * j;
-							this.vertices[0 + num2] = new Vector3(vector.x - vector2.x, vector.y - vector2.y, num);
-							this.vertices[1 + num2] = new Vector3(vector.x - vector2.x, vector.y + vector2.y, num);
-							this.vertices[2 + num2] = new Vector3(vector.x + vector2.x, vector.y - vector2.y, num);
-							this.vertices[3 + num2] = new Vector3(vector.x + vector2.x, vector.y + vector2.y, num);
-							float num3 = 0.11111111f;
-							float num4 = (float)(prioritizable2.GetMasterPriority() - 1);
-							float num5 = num3 * num4;
-							float num6 = 0f;
-							float num7 = num3;
-							float num8 = 1f;
-							this.uvs[0 + num2] = new Vector2(num5, num6);
-							this.uvs[1 + num2] = new Vector2(num5, num6 + num8);
-							this.uvs[2 + num2] = new Vector2(num5 + num7, num6);
-							this.uvs[3 + num2] = new Vector2(num5 + num7, num6 + num8);
-							int num9 = 6 * j;
-							this.triangles[0 + num9] = num2;
-							this.triangles[1 + num9] = num2 + 1;
-							this.triangles[2 + num9] = num2 + 2;
-							this.triangles[3 + num9] = num2 + 2;
-							this.triangles[4 + num9] = num2 + 1;
-							this.triangles[5 + num9] = num2 + 3;
+							vector.x += prioritizable2.iconOffset.x;
+							vector.y += prioritizable2.iconOffset.y;
+							Vector2 vector2 = new Vector2(0.2f, 0.3f) * prioritizable2.iconScale;
+							float num2 = -5f;
+							int num3 = 4 * j;
+							this.vertices[0 + num3] = new Vector3(vector.x - vector2.x, vector.y - vector2.y, num2);
+							this.vertices[1 + num3] = new Vector3(vector.x - vector2.x, vector.y + vector2.y, num2);
+							this.vertices[2 + num3] = new Vector3(vector.x + vector2.x, vector.y - vector2.y, num2);
+							this.vertices[3 + num3] = new Vector3(vector.x + vector2.x, vector.y + vector2.y, num2);
+							float num4 = 0.11111111f;
+							float num5 = (float)(prioritizable2.GetMasterPriority() - 1);
+							float num6 = num4 * num5;
+							float num7 = 0f;
+							float num8 = num4;
+							float num9 = 1f;
+							this.uvs[0 + num3] = new Vector2(num6, num7);
+							this.uvs[1 + num3] = new Vector2(num6, num7 + num9);
+							this.uvs[2 + num3] = new Vector2(num6 + num8, num7);
+							this.uvs[3 + num3] = new Vector2(num6 + num8, num7 + num9);
+							int num10 = 6 * j;
+							this.triangles[0 + num10] = num3;
+							this.triangles[1 + num10] = num3 + 1;
+							this.triangles[2 + num10] = num3 + 2;
+							this.triangles[3 + num10] = num3 + 2;
+							this.triangles[4 + num10] = num3 + 1;
+							this.triangles[5 + num10] = num3 + 3;
 						}
 						this.mesh.Clear();
 						this.mesh.vertices = this.vertices;

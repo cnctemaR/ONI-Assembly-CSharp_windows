@@ -4,31 +4,12 @@ using FMOD.Studio;
 using UnityEngine;
 
 [DebuggerDisplay("{Name}")]
-public class FloorSoundEvent : AnimEvent
+public class FloorSoundEvent : SoundEvent
 {
 	public FloorSoundEvent(string file_name, string sound_name, int frame)
-		: base(file_name, sound_name, frame)
+		: base(file_name, sound_name, frame, false, false, (float)SoundEvent.IGNORE_INTERVAL, true)
 	{
-	}
-
-	private bool IsLowPrioritySound(string sound)
-	{
-		using (new KProfiler.Region("IsLowPrioritySound", null))
-		{
-			if (sound != null && Camera.main.orthographicSize > AudioMixer.LOW_PRIORITY_CUTOFF_DISTANCE && !AudioMixer.instance.activeNIS && GlobalAssets.IsLowPriority(sound))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
-	{
-		if (this.ShouldPlaySound(behaviour))
-		{
-			this.PlaySound(behaviour);
-		}
+		base.noiseValues = SoundEventVolumeCache.instance.GetVolume("FloorSoundEvent", sound_name);
 	}
 
 	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
@@ -37,19 +18,19 @@ public class FloorSoundEvent : AnimEvent
 		int num = Grid.PosToCell(vector);
 		int num2 = Grid.CellBelow(num);
 		string audioCategory = FloorSoundEvent.GetAudioCategory(num2);
-		string text = audioCategory + "_" + this.Name;
+		string text = audioCategory + "_" + base.name;
 		string text2 = GlobalAssets.GetSound(text, true);
 		if (text2 == null)
 		{
-			text = "Rock_" + this.Name;
-			text2 = GlobalAssets.GetSound("Rock_" + this.Name, true);
+			text = "Rock_" + base.name;
+			text2 = GlobalAssets.GetSound("Rock_" + base.name, true);
 			if (text2 == null)
 			{
-				text = this.Name;
+				text = base.name;
 				text2 = GlobalAssets.GetSound(text, true);
 			}
 		}
-		if (this.IsLowPrioritySound(text2))
+		if (base.IsLowPrioritySound(text2))
 		{
 			return;
 		}
@@ -66,6 +47,11 @@ public class FloorSoundEvent : AnimEvent
 				if (num3 > 0f)
 				{
 					eventInstance.setParameterValue("liquidDepth", num3);
+					if (base.noiseValues.amount > 0)
+					{
+						EffectorValues volume = SoundEventVolumeCache.instance.GetVolume("FloorSoundEvent", "Liquid_footstep");
+						AudioEventManager.Get().PlayTimedOnceOff(vector, volume.amount, volume.radius, behaviour.GetComponent<KSelectable>().GetName(), 1f);
+					}
 				}
 				SoundEvent.EndOneShot(eventInstance);
 			}
@@ -83,20 +69,12 @@ public class FloorSoundEvent : AnimEvent
 				{
 					eventInstance2.setVolume(FloorSoundEvent.IDLE_WALKING_VOLUME_REDUCTION);
 				}
+				if (base.noiseValues.amount > 0)
+				{
+					AudioEventManager.Get().PlayTimedOnceOff(vector, base.noiseValues.amount, base.noiseValues.radius, behaviour.GetComponent<KSelectable>().GetName(), 1f);
+				}
 				SoundEvent.EndOneShot(eventInstance2);
 			}
-		}
-	}
-
-	private void PrintSoundDebug(string anim_name, string sound, string sound_name, Vector3 sound_pos)
-	{
-		if (sound != null)
-		{
-			global::Debug.Log(string.Concat(new object[] { anim_name, ", ", sound_name, ", ", this.Frame, ", ", sound_pos }), null);
-		}
-		else
-		{
-			global::Debug.Log("Missing sound: " + anim_name + ", " + sound_name, null);
 		}
 	}
 

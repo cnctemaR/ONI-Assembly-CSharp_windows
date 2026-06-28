@@ -12,13 +12,23 @@ public interface IThresholdSwitch
 
 	float RangeMax { get; }
 
+	float GetRangeMinInputField();
+
+	float GetRangeMaxInputField();
+
 	LocString ThresholdValueName { get; }
 
-	string Format(float value);
+	LocString ThresholdValueUnits();
+
+	string Format(float value, bool units);
 
 	string AboveToolTip { get; }
 
 	string BelowToolTip { get; }
 
 	bool IsConnected();
+
+	float ProcessedSliderValue(float input);
+
+	float ProcessedInputValue(float input);
 }

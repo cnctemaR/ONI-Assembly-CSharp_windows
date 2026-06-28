@@ -50,7 +50,7 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 		float envTemp = 0f;
 		if (this.occupyArea != null)
 		{
-			this.occupyArea.TestArea(Grid.PosToCell(base.gameObject), delegate(int cell)
+			this.occupyArea.TestArea(Grid.PosToCell(base.gameObject), null, delegate(int cell, object data)
 			{
 				cells++;
 				envTemp += Grid.Temperature[cell];
@@ -63,29 +63,43 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 		for (int i = 0; i < items.Count; i++)
 		{
 			PrimaryElement component = items[i].GetComponent<PrimaryElement>();
-			if (component.Mass > 0f && component.Element.IsGas)
+			if (component.Mass > 0f)
 			{
-				flag = true;
-				this.lastGasTemp = component.Temperature;
-				float num = component.Temperature + this.temperatureDelta;
-				if (num < 5f)
+				if (!this.isLiquidConditioner || !component.Element.IsGas)
 				{
-					num = 5f;
-					this.lowTempLag = Mathf.Min(this.lowTempLag + dt / 5f, 1f);
+					if (this.isLiquidConditioner || !component.Element.IsLiquid)
+					{
+						flag = true;
+						this.lastGasTemp = component.Temperature;
+						float num = component.Temperature + this.temperatureDelta;
+						if (num < 5f)
+						{
+							num = 5f;
+							this.lowTempLag = Mathf.Min(this.lowTempLag + dt / 5f, 1f);
+						}
+						else
+						{
+							this.lowTempLag = Mathf.Min(this.lowTempLag - dt / 5f, 0f);
+						}
+						ConduitFlow conduitFlow = Game.Instance.gasConduitFlow;
+						if (this.isLiquidConditioner)
+						{
+							conduitFlow = Game.Instance.liquidConduitFlow;
+						}
+						float num2 = conduitFlow.AddElement(this.cooledAirOutputCell, component.ElementID, component.Mass, num, component.DiseaseIdx, component.DiseaseCount);
+						component.KeepZeroMassObject = true;
+						float num3 = num2 / component.Mass;
+						int num4 = (int)((float)component.DiseaseCount * num3);
+						component.Mass -= num2;
+						component.ModifyDiseaseCount(-num4, "AirConditioner.UpdateState");
+						float num5 = num - component.Temperature;
+						float num6 = num5 * component.Element.specificHeatCapacity * num2;
+						float num7 = ((this.lastSampleTime <= 0f) ? 1f : (Time.time - this.lastSampleTime));
+						this.lastSampleTime = Time.time;
+						GameComps.StructureTemperatures.ProduceEnergy(this.structureTemperature, -num6, BUILDING.STATUSITEMS.OPERATINGENERGY.PIPECONTENTS_TRANSFER, num7);
+						break;
+					}
 				}
-				else
-				{
-					this.lowTempLag = Mathf.Min(this.lowTempLag - dt / 5f, 0f);
-				}
-				float num2 = Game.Instance.gasConduitFlow.AddElement(this.cooledAirOutputCell, component.ElementID, component.Mass, num);
-				component.KeepZeroMassObject = true;
-				component.Mass -= num2;
-				float num3 = num - component.Temperature;
-				float num4 = num3 * component.Element.specificHeatCapacity * num2;
-				float num5 = ((this.lastSampleTime <= 0f) ? 1f : (Time.time - this.lastSampleTime));
-				this.lastSampleTime = Time.time;
-				GameComps.StructureTemperatures.ProduceEnergy(this.structureTemperature, -num4, BUILDING.STATUSITEMS.OPERATINGENERGY.PIPECONTENTS_TRANSFER, num5);
-				break;
 			}
 		}
 		if (Time.time - this.lastSampleTime > 2f)
@@ -176,6 +190,8 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 	private float lowTempLag;
 
 	private bool showingLowTemp;
+
+	public bool isLiquidConditioner;
 
 	private bool showingHotEnv;
 

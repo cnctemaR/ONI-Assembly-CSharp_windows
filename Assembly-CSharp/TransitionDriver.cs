@@ -26,17 +26,19 @@ public class TransitionDriver
 			KAnimControllerBase component = navigator.GetComponent<KAnimControllerBase>();
 			if (component.CurrentAnim == null || component.CurrentAnim.name != transition.anim)
 			{
+				component.PlaySpeedMultiplier = transition.animSpeed;
 				component.Play(transition.preAnim, KAnim.PlayMode.Once, 1f, 0f);
 				component.Queue(transition.anim, KAnim.PlayMode.Loop, 1f, 0f);
 			}
 		}
-		else
+		else if (transition.anim != null)
 		{
-			navigator.GetComponent<KAnimControllerBase>().Play(transition.anim, KAnim.PlayMode.Once, 1f, 0f);
+			KAnimControllerBase component2 = navigator.GetComponent<KAnimControllerBase>();
+			component2.PlaySpeedMultiplier = transition.animSpeed;
+			component2.Play(transition.anim, KAnim.PlayMode.Once, 1f, 0f);
 			navigator.Subscribe(-1061186183, new Action<object>(this.OnAnimComplete));
 		}
 		navigator.GetComponent<Facing>().Face(this.targetPos.x);
-		navigator.GetComponent<KAnimControllerBase>().MovementSpeedMultiplier = transition.animSpeed;
 		this.brain = navigator.GetComponent<Brain>();
 	}
 
@@ -141,7 +143,7 @@ public class TransitionDriver
 				overrideLayer.EndTransition(this.navigator, this.transition);
 			}
 			this.navigator = null;
-			navigator.GetComponent<KAnimControllerBase>().MovementSpeedMultiplier = 1f;
+			navigator.GetComponent<KAnimControllerBase>().PlaySpeedMultiplier = 1f;
 			navigator.Unsubscribe(-1061186183, new Action<object>(this.OnAnimComplete));
 			Brain component = navigator.GetComponent<Brain>();
 			if (component != null)

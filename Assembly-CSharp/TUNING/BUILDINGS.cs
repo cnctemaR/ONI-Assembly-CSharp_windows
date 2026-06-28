@@ -7,6 +7,8 @@ namespace TUNING
 	{
 		public const float DEFAULT_STORAGE_CAPACITY = 2000f;
 
+		public const float STANDARD_MANUAL_REFILL_LEVEL = 0.2f;
+
 		public const float MASS_TEMPERATURE_SCALE = 0.2f;
 
 		public const float AIRCONDITIONER_TEMPDELTA = -14f;
@@ -42,6 +44,8 @@ namespace TUNING
 		public const float MASS_BURN_RATE_COALGENERATOR = 1f;
 
 		public const float MASS_BURN_RATE_HYDROGENGENERATOR = 0.1f;
+
+		public const float COOKER_FOOD_TEMPERATURE = 368.15f;
 
 		public const float OVERHEAT_DAMAGE_INTERVAL = 7.5f;
 
@@ -87,32 +91,42 @@ namespace TUNING
 			},
 			{
 				PlanCategory.Food,
-				new string[] { "RationBox", "Refrigerator", "MicrobeMusher", "CookingStation", "PlanterBox", "Aquafarm", "FarmTile", "HydroponicFarm" }
+				new string[] { "RationBox", "Refrigerator", "MicrobeMusher", "CookingStation", "PlanterBox", "FarmTile", "HydroponicFarm" }
 			},
 			{
 				PlanCategory.Plumbing,
 				new string[]
 				{
-					"Outhouse", "FlushToilet", "Shower", "LiquidConduit", "InsulatedLiquidConduit", "LiquidConduitBridge", "LiquidConduitSplitter", "LiquidConduitBridge", "LiquidPump", "LiquidValve",
-					"LiquidVent", "LiquidReservoir", "LiquidFilter", "Liquifier", "GasConduit", "InsulatedGasConduit", "GasConduitBridge", "GasConduitSplitter", "GasConduitBridge", "GasPump",
-					"GasValve", "GasVent", "GasFilter"
+					"Outhouse", "FlushToilet", "Shower", "LiquidPumpingStation", "BottleEmptier", "LiquidConduit", "InsulatedLiquidConduit", "LiquidConduitBridge", "LiquidConduitSplitter", "LiquidConduitBridge",
+					"LiquidPump", "LiquidValve", "LiquidVent", "LiquidReservoir", "LiquidFilter", "Liquifier"
 				}
 			},
 			{
+				PlanCategory.HVAC,
+				new string[] { "GasConduit", "InsulatedGasConduit", "GasConduitBridge", "GasConduitSplitter", "GasConduitBridge", "GasPump", "GasValve", "GasVent", "GasFilter" }
+			},
+			{
 				PlanCategory.Utilities,
-				new string[] { "LiquidCooledFan", "AirConditioner", "SpaceHeater", "LiquidHeater" }
+				new string[] { "LiquidCooledFan", "AirConditioner", "LiquidConditioner", "SpaceHeater", "LiquidHeater", "OreScrubber" }
 			},
 			{
 				PlanCategory.Refining,
-				new string[] { "WaterPurifier", "AlgaeDistillery", "Compost", "FertilizerMaker" }
+				new string[] { "GenericFabricator", "Compost", "WaterPurifier", "AlgaeDistillery", "FertilizerMaker", "SeedSplicer" }
 			},
 			{
 				PlanCategory.Medical,
-				new string[] { "HandSanitizer", "Apothecary", "MedicalCot", "MedicalBed" }
+				new string[] { "WashBasin", "HandSanitizer", "MedicalCot", "MedicalBed" }
 			},
 			{
 				PlanCategory.Furniture,
-				new string[] { "Bed", "MassageTable", "DiningTable", "FloorLamp", "CeilingLight" }
+				new string[]
+				{
+					BedConfig.ID,
+					"MassageTable",
+					"DiningTable",
+					"FloorLamp",
+					"CeilingLight"
+				}
 			},
 			{
 				PlanCategory.Equipment,
@@ -132,7 +146,11 @@ namespace TUNING
 			},
 			{
 				"FineDining",
-				new string[] { "CookingStation", "Refrigerator", "FarmTile", "FertilizerMaker", "Aquafarm", "HydroponicFarm" }
+				new string[] { "FarmTile", "Refrigerator", "CookingStation" }
+			},
+			{
+				"Agriculture",
+				new string[] { "FertilizerMaker", "HydroponicFarm", "SeedSplicer" }
 			},
 			{
 				"GasPiping",
@@ -158,16 +176,20 @@ namespace TUNING
 				}
 			},
 			{
+				"DirectedAirStreams",
+				new string[] { "OreScrubber", "MeshTile" }
+			},
+			{
 				"LiquidPiping",
 				new string[] { "LiquidConduit", "LiquidPump", "LiquidConduitBridge", "LiquidVent" }
 			},
 			{
 				"SanitationSciences",
-				new string[] { "HandSanitizer", "FlushToilet", "Shower", "AirFilter" }
+				new string[] { "FlushToilet", "Shower", "AirFilter" }
 			},
 			{
 				"Medbay",
-				new string[] { "MedicalBed", "Apothecary", "MeshTile" }
+				new string[] { "HandSanitizer", "MedicalBed" }
 			},
 			{
 				"Percolation",
@@ -201,13 +223,81 @@ namespace TUNING
 
 		public static List<string> COMPONENT_DESCRIPTION_ORDER = new List<string>
 		{
-			"AlgaeHabitat", "Fabricator", "MicrobeMusher", "CookingStation", "ResearchCenter", "LiquidCooledFan", "OxygenRecharger", "HandSanitizer", "PlantAirConditioner", "BuildingElementEmitter",
-			"ElementConverter", "ElementConsumer", "PassiveElementConsumer", "EnergyConsumer", "AirConditioner", "Storage", "Battery", "Switch", "CircuitSwitch", "ManualDelivery",
-			"ManualDeliveryKG", "AirFilter", "FlushToilet", "Toilet", "EnergyGenerator", "MassageTable", "Shower", "LiquidHeater", "Ownable", "PlantablePlot",
-			"RelaxationPoint", "BuildingComplete", "Building", "BuildingPreview", "BuildingUnderConstruction", "TemperatureControlledSwitch", "TimedSwitch", "Crop", "Instance", "Growing",
-			"Equippable", "ColdBreather", "ResearchPointObject", "SuitTank", "TemperatureVulnerable", "PressureVulnerable", "SubmersionMonitor", "PressureSwitch", "FertilizationMonitor", "RestRestoreHealth",
-			"Edible", "PlantableSeed", "FriedMushBar", "BasicSingleHarvestPlant", "PrickleFlower", "DiseaseTrigger", "MedicinalHerb", "MedicinalPill", "SeedProducer", "Def",
-			"DecorProvider", "Overheatable"
+			"AlgaeHabitat",
+			"BottleEmptier",
+			"Fabricator",
+			"MicrobeMusher",
+			"CookingStation",
+			"ResearchCenter",
+			"LiquidCooledFan",
+			"OxygenRecharger",
+			"HandSanitizer",
+			"PlantAirConditioner",
+			"Clinic",
+			"BuildingElementEmitter",
+			"ElementConverter",
+			"ElementConsumer",
+			"PassiveElementConsumer",
+			"EnergyConsumer",
+			"AirConditioner",
+			"Storage",
+			"Battery",
+			"Switch",
+			"CircuitSwitch",
+			"ManualDelivery",
+			"ManualDeliveryKG",
+			"AirFilter",
+			"FlushToilet",
+			"Toilet",
+			"EnergyGenerator",
+			"MassageTable",
+			"Shower",
+			"LiquidHeater",
+			"Ownable",
+			"PlantablePlot",
+			"RelaxationPoint",
+			"BuildingComplete",
+			"Building",
+			"BuildingPreview",
+			"BuildingUnderConstruction",
+			"TemperatureControlledSwitch",
+			"TimedSwitch",
+			"Crop",
+			"Instance",
+			"Growing",
+			"Equippable",
+			"ColdBreather",
+			"SeedSplicer",
+			"ResearchPointObject",
+			"SuitTank",
+			"IlluminationVulnerable",
+			"TemperatureVulnerable",
+			"PressureVulnerable",
+			"SubmersionMonitor",
+			"PressureSwitch",
+			"FertilizationMonitor",
+			"RestRestoreHealth",
+			"GeneShuffler",
+			"Compost",
+			"Refrigerator",
+			BedConfig.ID,
+			"OreScrubber",
+			"Edible",
+			"PlantableSeed",
+			"FriedMushBar",
+			"BasicSingleHarvestPlant",
+			"PrickleFlower",
+			"DiseaseTrigger",
+			"MedicinalHerb",
+			"MedicinalPill",
+			"SeedProducer",
+			"Def",
+			"DecorProvider",
+			"NoisePolluter",
+			"Overheatable",
+			"Work",
+			"ToiletWorkableUse",
+			"ReceptacleMonitor"
 		};
 
 		public class OVERHEAT_TEMPERATURES
@@ -279,7 +369,7 @@ namespace TUNING
 
 			public const float TIER6 = 960f;
 
-			public const float TIER7 = 2000f;
+			public const float TIER7 = 1200f;
 		}
 
 		public class EXHAUST_ENERGY_ACTIVE
@@ -417,86 +507,86 @@ namespace TUNING
 
 		public class DECOR
 		{
-			public static DecorValues NONE = new DecorValues
+			public static EffectorValues NONE = new EffectorValues
 			{
-				decor = 0,
+				amount = 0,
 				radius = 1
 			};
 
 			public class BONUS
 			{
-				public static DecorValues TIER0 = new DecorValues
+				public static EffectorValues TIER0 = new EffectorValues
 				{
-					decor = 5,
+					amount = 5,
 					radius = 1
 				};
 
-				public static DecorValues TIER1 = new DecorValues
+				public static EffectorValues TIER1 = new EffectorValues
 				{
-					decor = 10,
+					amount = 10,
 					radius = 2
 				};
 
-				public static DecorValues TIER2 = new DecorValues
+				public static EffectorValues TIER2 = new EffectorValues
 				{
-					decor = 15,
+					amount = 15,
 					radius = 3
 				};
 
-				public static DecorValues TIER3 = new DecorValues
+				public static EffectorValues TIER3 = new EffectorValues
 				{
-					decor = 20,
+					amount = 20,
 					radius = 4
 				};
 
-				public static DecorValues TIER4 = new DecorValues
+				public static EffectorValues TIER4 = new EffectorValues
 				{
-					decor = 25,
+					amount = 25,
 					radius = 5
 				};
 
-				public static DecorValues TIER5 = new DecorValues
+				public static EffectorValues TIER5 = new EffectorValues
 				{
-					decor = 30,
+					amount = 30,
 					radius = 6
 				};
 			}
 
 			public class PENALTY
 			{
-				public static DecorValues TIER0 = new DecorValues
+				public static EffectorValues TIER0 = new EffectorValues
 				{
-					decor = -5,
+					amount = -5,
 					radius = 1
 				};
 
-				public static DecorValues TIER1 = new DecorValues
+				public static EffectorValues TIER1 = new EffectorValues
 				{
-					decor = -10,
+					amount = -10,
 					radius = 2
 				};
 
-				public static DecorValues TIER2 = new DecorValues
+				public static EffectorValues TIER2 = new EffectorValues
 				{
-					decor = -15,
+					amount = -15,
 					radius = 3
 				};
 
-				public static DecorValues TIER3 = new DecorValues
+				public static EffectorValues TIER3 = new EffectorValues
 				{
-					decor = -20,
+					amount = -20,
 					radius = 4
 				};
 
-				public static DecorValues TIER4 = new DecorValues
+				public static EffectorValues TIER4 = new EffectorValues
 				{
-					decor = -20,
+					amount = -20,
 					radius = 5
 				};
 
-				public static DecorValues TIER5 = new DecorValues
+				public static EffectorValues TIER5 = new EffectorValues
 				{
-					decor = -25,
+					amount = -25,
 					radius = 6
 				};
 			}

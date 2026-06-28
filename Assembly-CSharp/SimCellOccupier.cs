@@ -1,4 +1,5 @@
 ﻿using System;
+using KSerialization;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
@@ -19,14 +20,14 @@ public class SimCellOccupier : KMonoBehaviour
 
 	protected override void OnSpawn()
 	{
-		HandleVector<Game.CallbackInfo>.Handle callbackHandle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnModifyComplete), false), "SimCellOccupier");
+		HandleVector<Game.CallbackInfo>.Handle callbackHandle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnModifyComplete), false));
 		int num = this.building.Def.PlacementOffsets.Length;
 		float mass_per_cell = this.primaryElement.Mass / (float)num;
 		this.building.RunOnArea(delegate(int offset_cell)
 		{
 			if (this.doReplaceElement)
 			{
-				SimMessages.ReplaceAndDisplaceElement(offset_cell, this.primaryElement.ElementID, CellEventLogger.Instance.SimCellOccupierOnSpawn, mass_per_cell, this.primaryElement.Temperature, callbackHandle.index);
+				SimMessages.ReplaceAndDisplaceElement(offset_cell, this.primaryElement.ElementID, CellEventLogger.Instance.SimCellOccupierOnSpawn, mass_per_cell, this.primaryElement.Temperature, this.primaryElement.DiseaseIdx, this.primaryElement.DiseaseCount, callbackHandle.index);
 				SimMessages.SetStrength(offset_cell, 0, 1f);
 				Game.Instance.RemoveSolidChangedFilter(offset_cell);
 			}
@@ -77,14 +78,23 @@ public class SimCellOccupier : KMonoBehaviour
 			SimMessages.ClearCellProperties(num, (byte)simCellProperties);
 			if (this.doReplaceElement && Grid.Element[num].id == this.primaryElement.ElementID)
 			{
+				HandleVector<int>.Handle handle = GameComps.DiseaseContainers.GetHandle(base.gameObject);
+				if (handle.IsValid())
+				{
+					Sim.DiseaseCell diseaseCell = Grid.Disease[num];
+					DiseaseContainer data = GameComps.DiseaseContainers.GetData(handle);
+					data.diseaseIdx = diseaseCell.diseaseIdx;
+					data.diseaseCount = diseaseCell.elementCount;
+					GameComps.DiseaseContainers.SetData(handle, data);
+				}
 				if (onComplete != null)
 				{
-					HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(onComplete, false), "SimCellOccupier");
-					SimMessages.ReplaceElement(num, SimHashes.Vacuum, CellEventLogger.Instance.SimCellOccupierDestroySelf, 0f, -1f, handle.index);
+					int index = Game.Instance.callbackManager.Add(new Game.CallbackInfo(onComplete, false)).index;
+					SimMessages.ReplaceElement(num, SimHashes.Vacuum, CellEventLogger.Instance.SimCellOccupierDestroySelf, 0f, -1f, byte.MaxValue, 0, index);
 				}
 				else
 				{
-					SimMessages.ReplaceElement(num, SimHashes.Vacuum, CellEventLogger.Instance.SimCellOccupierDestroySelf, 0f, -1f, -1);
+					SimMessages.ReplaceElement(num, SimHashes.Vacuum, CellEventLogger.Instance.SimCellOccupierDestroySelf, 0f, -1f, byte.MaxValue, 0, -1);
 				}
 				SimMessages.SetStrength(num, 1, 1f);
 			}
@@ -93,7 +103,7 @@ public class SimCellOccupier : KMonoBehaviour
 				Grid.SetSolid(num, false, CellEventLogger.Instance.SimCellOccupierDestroy);
 				onComplete.Signal();
 				World.Instance.OnSolidChanged(num);
-				GameScenePartitioner.Instance.TriggerEvent(num, GameScenePartitioner.Instance.solidChangedMask.mask, null);
+				GameScenePartitioner.Instance.TriggerEvent(num, GameScenePartitioner.Instance.solidChangedLayer, null);
 			}
 		}
 	}
@@ -114,7 +124,7 @@ public class SimCellOccupier : KMonoBehaviour
 		bool flag = !Grid.ForceField[cell];
 		Grid.SetSolid(cell, flag, CellEventLogger.Instance.SimCellOccupierForceSolid);
 		Pathfinding.Instance.AddDirtyNavGridCell(cell);
-		GameScenePartitioner.Instance.TriggerEvent(cell, GameScenePartitioner.Instance.solidChangedMask.mask, null);
+		GameScenePartitioner.Instance.TriggerEvent(cell, GameScenePartitioner.Instance.solidChangedLayer, null);
 		Grid.Damage[cell] = 0f;
 		Grid.SuitRequired[cell] = false;
 	}
@@ -137,4 +147,10 @@ public class SimCellOccupier : KMonoBehaviour
 	private bool isReady;
 
 	private bool callDestroy = true;
+
+	[Serialize]
+	private HashedString diseaseID;
+
+	[Serialize]
+	private int diseaseCount;
 }

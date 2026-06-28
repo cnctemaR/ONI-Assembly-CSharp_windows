@@ -23,7 +23,7 @@ namespace YamlDotNet.RepresentationModel
 		}
 
 		public YamlStream(params YamlDocument[] documents)
-			: this((IEnumerable<YamlDocument>)documents)
+			: this(documents)
 		{
 		}
 
@@ -42,16 +42,19 @@ namespace YamlDotNet.RepresentationModel
 
 		public void Load(TextReader input)
 		{
+			this.Load(new Parser(input));
+		}
+
+		public void Load(IParser parser)
+		{
 			this.documents.Clear();
-			Parser parser = new Parser(input);
-			EventReader eventReader = new EventReader(parser);
-			eventReader.Expect<StreamStart>();
-			while (!eventReader.Accept<StreamEnd>())
+			parser.Expect<StreamStart>();
+			while (!parser.Accept<StreamEnd>())
 			{
-				YamlDocument yamlDocument = new YamlDocument(eventReader);
+				YamlDocument yamlDocument = new YamlDocument(parser);
 				this.documents.Add(yamlDocument);
 			}
-			eventReader.Expect<StreamEnd>();
+			parser.Expect<StreamEnd>();
 		}
 
 		public void Save(TextWriter output)

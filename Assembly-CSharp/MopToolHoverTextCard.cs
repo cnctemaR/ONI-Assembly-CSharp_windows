@@ -32,11 +32,11 @@ public class MopToolHoverTextCard : HoverTextConfiguration
 				instance.NewLine("Line_ElementName", 24);
 				this.hoverScreenElements.ElementName = instance.AddText(string.Empty, this.Styles_Title.Standard, true);
 				instance.NewLine("Line_Category", 24);
-				instance.AddIcon(instance.GetSprite("iconHex01"), this.iconColor_basic, 18f);
+				instance.AddIcon(instance.GetSprite("dash"), this.iconColor_basic, 18f);
 				instance.AddIndent(4f, 18f);
 				this.hoverScreenElements.ElementCategory = instance.AddText(string.Empty, this.Styles_Title.Standard, false);
 				instance.NewLine("Mass", 24);
-				instance.AddIcon(instance.GetSprite("inspectorUI_mass_icon_orange"), this.iconColor_basic, 18f);
+				instance.AddIcon(instance.GetSprite("dash"), this.iconColor_basic, 18f);
 				instance.AddIndent(4f, 18f);
 				this.hoverScreenElements.ElementMass = new LocText[4];
 				this.hoverScreenElements.ElementMass[0] = instance.AddText(string.Empty, this.Styles_Values.Property.Standard, true);

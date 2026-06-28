@@ -93,6 +93,14 @@ public class Operational : KMonoBehaviour
 			{
 				this.SetActive(false, false);
 			}
+			if (this.IsOperational)
+			{
+				base.GetComponent<KPrefabID>().AddTag(GameTags.Operational);
+			}
+			else
+			{
+				base.GetComponent<KPrefabID>().RemoveTag(GameTags.Operational);
+			}
 			this.Trigger(-592767678, this.IsOperational);
 			Game.Instance.Trigger(-809948329, base.gameObject);
 		}

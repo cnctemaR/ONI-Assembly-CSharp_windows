@@ -14,6 +14,17 @@ public abstract class StateMachine
 		this.debugSettings = StateMachineDebuggerSettings.Get().CreateEntry(base.GetType());
 	}
 
+	public virtual void FreeResources()
+	{
+		this.name = null;
+		if (this.defaultState != null)
+		{
+			this.defaultState.FreeResources();
+		}
+		this.defaultState = null;
+		this.parameters = null;
+	}
+
 	public abstract string[] GetStateNames();
 
 	public abstract StateMachine.BaseState GetState(string name);
@@ -158,6 +169,18 @@ public abstract class StateMachine
 
 		public abstract SchedulerHandle Schedule(float time, Action<object> callback, object callback_data = null);
 
+		public virtual void FreeResources()
+		{
+			this.stateMachine = null;
+			if (this.subscribedEvents != null)
+			{
+				this.subscribedEvents.Clear();
+			}
+			this.subscribedEvents = null;
+			this.parameterContexts = null;
+			this.dataTable = null;
+		}
+
 		public bool IsRunning()
 		{
 			return this.GetCurrentState() != null;
@@ -180,7 +203,7 @@ public abstract class StateMachine
 		}
 
 		[Conditional("UNITY_EDITOR")]
-		public void Log(string message)
+		public void Log(string a, string b = "", string c = "", string d = "")
 		{
 		}
 
@@ -194,7 +217,7 @@ public abstract class StateMachine
 			return this.breakOnGoTo || this.stateMachine.debugSettings.breakOnGoTo;
 		}
 
-		public LoggerFS GetLog()
+		public LoggerFSSSS GetLog()
 		{
 			return null;
 		}
@@ -249,14 +272,7 @@ public abstract class StateMachine
 			{
 				StateMachine.BaseState defaultState = this.stateMachine.GetDefaultState();
 				DebugUtil.Assert(defaultState != null, "Assert!");
-				if (this.GetStateMachine().serializable)
-				{
-					if (!this.GetComponent<StateMachineController>().Restore(this))
-					{
-						this.GoTo(defaultState);
-					}
-				}
-				else
+				if (!this.GetComponent<StateMachineController>().Restore(this))
 				{
 					this.GoTo(defaultState);
 				}
@@ -404,6 +420,64 @@ public abstract class StateMachine
 			this.branch[0] = this;
 		}
 
+		public void FreeResources()
+		{
+			if (this.name == null)
+			{
+				return;
+			}
+			this.name = null;
+			if (this.defaultState != null)
+			{
+				this.defaultState.FreeResources();
+			}
+			this.defaultState = null;
+			this.events = null;
+			if (this.transitions != null)
+			{
+				for (int i = 0; i < this.transitions.Length; i++)
+				{
+					this.transitions[i].Clear();
+				}
+			}
+			this.transitions = null;
+			this.parameterTransitions = null;
+			if (this.enterActions != null)
+			{
+				for (int j = 0; j < this.enterActions.Length; j++)
+				{
+					this.enterActions[j].Clear();
+				}
+			}
+			this.enterActions = null;
+			if (this.exitActions != null)
+			{
+				for (int k = 0; k < this.exitActions.Length; k++)
+				{
+					this.exitActions[k].Clear();
+				}
+			}
+			this.exitActions = null;
+			if (this.updateActions != null)
+			{
+				for (int l = 0; l < this.updateActions.Length; l++)
+				{
+					this.updateActions[l].Clear();
+				}
+			}
+			this.updateActions = null;
+			if (this.branch != null)
+			{
+				for (int m = 0; m < this.branch.Length; m++)
+				{
+					this.branch[m].FreeResources();
+				}
+			}
+			this.branch = null;
+			this.parent = null;
+			this.tags = null;
+		}
+
 		public int GetStateCount()
 		{
 			return this.branch.Length;
@@ -469,6 +543,21 @@ public abstract class StateMachine
 			this.targetState = target_state;
 		}
 
+		public void Clear()
+		{
+			this.name = null;
+			if (this.sourceState != null)
+			{
+				this.sourceState.FreeResources();
+			}
+			this.sourceState = null;
+			if (this.targetState != null)
+			{
+				this.targetState.FreeResources();
+			}
+			this.targetState = null;
+		}
+
 		public string name;
 
 		public StateMachine.BaseState sourceState;
@@ -484,6 +573,14 @@ public abstract class StateMachine
 			this.logName = log_name;
 			this.prefixedLogName = "." + log_name;
 			this.callback = callback;
+		}
+
+		public void Clear()
+		{
+			this.name = null;
+			this.logName = null;
+			this.callback = null;
+			this.prefixedLogName = null;
 		}
 
 		public string name;

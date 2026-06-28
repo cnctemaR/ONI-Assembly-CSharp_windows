@@ -10,14 +10,13 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 
 	public override void Remove(GameObject go)
 	{
+		this.OnCleanUpImmediate(base.GetHandle(go));
 		if (!KComponentCleanUp.InCleanUpPhase)
 		{
 			this.cleanupList.Add(go);
 		}
 		else
 		{
-			HandleVector<int>.Handle handle = base.GetHandle(go);
-			FallerComponents.RemoveGravity(base.GetData(handle).transform);
 			base.InternalRemoveComponent(go);
 		}
 	}
@@ -32,7 +31,19 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 			{
 				FallerComponents.OnSolidChanged(h, ev_data);
 			};
-			data.partitionerEntry = GameScenePartitioner.Instance.Add("Faller", data.transform.gameObject, num, GameScenePartitioner.Instance.solidChangedMask.mask, data.solidChangedCB);
+			int num2 = 2;
+			Vector2I vector2I = Grid.CellToXY(num);
+			vector2I.y--;
+			if (vector2I.y < 0)
+			{
+				vector2I.y = 0;
+				num2 = 1;
+			}
+			else if (vector2I.y == Grid.HeightInCells - 1)
+			{
+				num2 = 1;
+			}
+			data.partitionerEntry = GameScenePartitioner.Instance.Add("Faller", data.transform.gameObject, vector2I.x, vector2I.y, 1, num2, GameScenePartitioner.Instance.solidChangedLayer, data.solidChangedCB);
 			GameComps.Fallers.SetData(h, data);
 		}
 		else
@@ -48,7 +59,7 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 		data.transform.gameObject.Subscribe(1088554450, data.solidChangedCB);
 	}
 
-	protected override void OnCleanUp(HandleVector<int>.Handle h)
+	private void OnCleanUpImmediate(HandleVector<int>.Handle h)
 	{
 		FallerComponent data = base.GetData(h);
 		if (data.partitionerEntry != null)
@@ -62,7 +73,10 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 			data.transform.gameObject.Unsubscribe(1088554450, data.solidChangedCB);
 			data.solidChangedCB = null;
 		}
-		FallerComponents.RemoveGravity(data.transform);
+		if (GameComps.Gravities.Has(data.transform.gameObject))
+		{
+			GameComps.Gravities.Remove(data.transform.gameObject);
+		}
 		base.SetData(h, data);
 	}
 
@@ -102,7 +116,7 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 			{
 				data.partitionerEntry.Release();
 			}
-			data.partitionerEntry = GameScenePartitioner.Instance.Add("Faller", transform.gameObject, num2, GameScenePartitioner.Instance.solidChangedMask.mask, action);
+			data.partitionerEntry = GameScenePartitioner.Instance.Add("Faller", transform.gameObject, num2, GameScenePartitioner.Instance.solidChangedLayer, action);
 			GameComps.Fallers.SetData(h, data);
 		}
 	}

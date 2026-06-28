@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.Serialization;
 
 namespace YamlDotNet.RepresentationModel
 {
 	[Serializable]
-	public class YamlMappingNode : YamlNode, IEnumerable<KeyValuePair<YamlNode, YamlNode>>, IEnumerable
+	public sealed class YamlMappingNode : YamlNode, IEnumerable<KeyValuePair<YamlNode, YamlNode>>, IEnumerable, IYamlConvertible
 	{
 		public IDictionary<YamlNode, YamlNode> Children
 		{
@@ -20,15 +22,21 @@ namespace YamlDotNet.RepresentationModel
 
 		public MappingStyle Style { get; set; }
 
-		internal YamlMappingNode(EventReader events, DocumentLoadingState state)
+		internal YamlMappingNode(IParser parser, DocumentLoadingState state)
 		{
-			MappingStart mappingStart = events.Expect<MappingStart>();
+			this.Load(parser, state);
+		}
+
+		private void Load(IParser parser, DocumentLoadingState state)
+		{
+			MappingStart mappingStart = parser.Expect<MappingStart>();
 			base.Load(mappingStart, state);
+			this.Style = mappingStart.Style;
 			bool flag = false;
-			while (!events.Accept<MappingEnd>())
+			while (!parser.Accept<MappingEnd>())
 			{
-				YamlNode yamlNode = YamlNode.ParseNode(events, state);
-				YamlNode yamlNode2 = YamlNode.ParseNode(events, state);
+				YamlNode yamlNode = YamlNode.ParseNode(parser, state);
+				YamlNode yamlNode2 = YamlNode.ParseNode(parser, state);
 				try
 				{
 					this.children.Add(yamlNode, yamlNode2);
@@ -43,7 +51,7 @@ namespace YamlDotNet.RepresentationModel
 			{
 				state.AddNodeWithUnresolvedAliases(this);
 			}
-			events.Expect<MappingEnd>();
+			parser.Expect<MappingEnd>();
 		}
 
 		public YamlMappingNode()
@@ -51,7 +59,7 @@ namespace YamlDotNet.RepresentationModel
 		}
 
 		public YamlMappingNode(params KeyValuePair<YamlNode, YamlNode>[] children)
-			: this((IEnumerable<KeyValuePair<YamlNode, YamlNode>>)children)
+			: this(children)
 		{
 		}
 
@@ -64,7 +72,7 @@ namespace YamlDotNet.RepresentationModel
 		}
 
 		public YamlMappingNode(params YamlNode[] children)
-			: this((IEnumerable<YamlNode>)children)
+			: this(children)
 		{
 		}
 
@@ -161,9 +169,9 @@ namespace YamlDotNet.RepresentationModel
 			visitor.Visit(this);
 		}
 
-		public override bool Equals(object other)
+		public override bool Equals(object obj)
 		{
-			YamlMappingNode yamlMappingNode = other as YamlMappingNode;
+			YamlMappingNode yamlMappingNode = obj as YamlMappingNode;
 			if (yamlMappingNode == null || !base.Equals(yamlMappingNode) || this.children.Count != yamlMappingNode.children.Count)
 			{
 				return false;
@@ -190,30 +198,44 @@ namespace YamlDotNet.RepresentationModel
 			return num;
 		}
 
-		public override IEnumerable<YamlNode> AllNodes
+		internal override IEnumerable<YamlNode> SafeAllNodes(RecursionLevel level)
+		{
+			level.Increment();
+			yield return this;
+			foreach (KeyValuePair<YamlNode, YamlNode> child in this.children)
+			{
+				foreach (YamlNode yamlNode in child.Key.SafeAllNodes(level))
+				{
+					yield return yamlNode;
+				}
+				IEnumerator<YamlNode> enumerator2 = null;
+				foreach (YamlNode yamlNode2 in child.Value.SafeAllNodes(level))
+				{
+					yield return yamlNode2;
+				}
+				enumerator2 = null;
+				child = default(KeyValuePair<YamlNode, YamlNode>);
+			}
+			IEnumerator<KeyValuePair<YamlNode, YamlNode>> enumerator = null;
+			level.Decrement();
+			yield break;
+			yield break;
+		}
+
+		public override YamlNodeType NodeType
 		{
 			get
 			{
-				yield return this;
-				foreach (KeyValuePair<YamlNode, YamlNode> child in this.children)
-				{
-					KeyValuePair<YamlNode, YamlNode> keyValuePair = child;
-					foreach (YamlNode node in keyValuePair.Key.AllNodes)
-					{
-						yield return node;
-					}
-					KeyValuePair<YamlNode, YamlNode> keyValuePair2 = child;
-					foreach (YamlNode node2 in keyValuePair2.Value.AllNodes)
-					{
-						yield return node2;
-					}
-				}
-				yield break;
+				return YamlNodeType.Mapping;
 			}
 		}
 
-		public override string ToString()
+		internal override string ToString(RecursionLevel level)
 		{
+			if (!level.TryIncrement())
+			{
+				return "WARNING! INFINITE RECURSION!";
+			}
 			StringBuilder stringBuilder = new StringBuilder("{ ");
 			foreach (KeyValuePair<YamlNode, YamlNode> keyValuePair in this.children)
 			{
@@ -221,11 +243,12 @@ namespace YamlDotNet.RepresentationModel
 				{
 					stringBuilder.Append(", ");
 				}
-				stringBuilder.Append("{ ").Append(keyValuePair.Key).Append(", ")
-					.Append(keyValuePair.Value)
+				stringBuilder.Append("{ ").Append(keyValuePair.Key.ToString(level)).Append(", ")
+					.Append(keyValuePair.Value.ToString(level))
 					.Append(" }");
 			}
 			stringBuilder.Append(" }");
+			level.Decrement();
 			return stringBuilder.ToString();
 		}
 
@@ -237,6 +260,35 @@ namespace YamlDotNet.RepresentationModel
 		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return this.GetEnumerator();
+		}
+
+		void IYamlConvertible.Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
+		{
+			this.Load(parser, new DocumentLoadingState());
+		}
+
+		void IYamlConvertible.Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
+		{
+			this.Emit(emitter, new EmitterState());
+		}
+
+		public static YamlMappingNode FromObject(object mapping)
+		{
+			if (mapping == null)
+			{
+				throw new ArgumentNullException("mapping");
+			}
+			YamlMappingNode yamlMappingNode = new YamlMappingNode();
+			foreach (PropertyInfo propertyInfo in mapping.GetType().GetPublicProperties())
+			{
+				if (propertyInfo.CanRead && propertyInfo.GetGetMethod().GetParameters().Length == 0)
+				{
+					object value = propertyInfo.GetValue(mapping, null);
+					YamlNode yamlNode = (value as YamlNode) ?? Convert.ToString(value);
+					yamlMappingNode.Add(propertyInfo.Name, yamlNode);
+				}
+			}
+			return yamlMappingNode;
 		}
 
 		private readonly IDictionary<YamlNode, YamlNode> children = new Dictionary<YamlNode, YamlNode>();

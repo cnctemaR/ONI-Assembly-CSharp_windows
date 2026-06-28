@@ -81,4 +81,23 @@ public class KFMOD : KMonoBehaviour
 		Vector3 vector = new Vector3(pos.x, pos.y, 0f);
 		return vector;
 	}
+
+	public static KFMOD.AudioDevice currentDevice;
+
+	public struct AudioDevice
+	{
+		public int fmod_id;
+
+		public string name;
+
+		public Guid guid;
+
+		public int systemRate;
+
+		public SPEAKERMODE speakerMode;
+
+		public int speakerModeChannels;
+
+		public bool selected;
+	}
 }

@@ -27,7 +27,7 @@ public class HandleVector<T>
 		}
 	}
 
-	public void Clear()
+	public virtual void Clear()
 	{
 		this.items.Clear();
 		this.freeHandles.Clear();
@@ -64,7 +64,7 @@ public class HandleVector<T>
 		return handle;
 	}
 
-	public T Release(HandleVector<T>.Handle handle)
+	public virtual T Release(HandleVector<T>.Handle handle)
 	{
 		if (!handle.IsValid())
 		{
@@ -79,11 +79,6 @@ public class HandleVector<T>
 	public T GetItem(HandleVector<T>.Handle handle)
 	{
 		return this.items[handle.index];
-	}
-
-	public T GetItem(int handle)
-	{
-		return this.items[handle];
 	}
 
 	public static readonly HandleVector<T>.Handle InvalidHandle = new HandleVector<T>.Handle

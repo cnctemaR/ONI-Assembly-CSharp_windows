@@ -11,7 +11,7 @@ public class StressBehaviourMonitor : GameStateMachine<StressBehaviourMonitor, S
 		this.stressed.DefaultState(this.stressed.tierOne).ToggleExpression(Db.Get().Expressions.Unhappy, null).ToggleAnims((StressBehaviourMonitor.Instance smi) => smi.tierOneLocoAnim)
 			.Transition(this.satisfied, (StressBehaviourMonitor.Instance smi) => smi.gameObject.GetSMI<StressMonitor.Instance>() != null && !smi.gameObject.GetSMI<StressMonitor.Instance>().IsStressed());
 		this.stressed.tierOne.DefaultState(this.stressed.tierOne.actingOut).EventTransition(GameHashes.StressedHadEnough, this.stressed.tierTwo, null);
-		this.stressed.tierOne.actingOut.ToggleChore((StressBehaviourMonitor.Instance smi) => smi.CreateTierOneStressChore(), this.stressed.tierOne.reprieve, false);
+		this.stressed.tierOne.actingOut.ToggleChore((StressBehaviourMonitor.Instance smi) => smi.CreateTierOneStressChore(), this.stressed.tierOne.reprieve);
 		this.stressed.tierOne.reprieve.ScheduleGoTo(30f, this.stressed.tierOne.actingOut);
 		this.stressed.tierTwo.DefaultState(this.stressed.tierTwo.actingOut).Update(delegate(StressBehaviourMonitor.Instance smi)
 		{
@@ -20,8 +20,8 @@ public class StressBehaviourMonitor : GameStateMachine<StressBehaviourMonitor, S
 		{
 			Db.Get().Amounts.Stress.Lookup(smi.gameObject).SetValue(STRESS.ACTING_OUT_RESET);
 		});
-		this.stressed.tierTwo.actingOut.ToggleChore((StressBehaviourMonitor.Instance smi) => smi.CreateTierTwoStressChore(), this.stressed.tierTwo.reprieve, false).ToggleReactable((StressBehaviourMonitor.Instance smi) => smi.CreateReactable());
-		this.stressed.tierTwo.reprieve.ToggleChore((StressBehaviourMonitor.Instance smi) => new StressIdleChore(smi.master), null, false).Enter(delegate(StressBehaviourMonitor.Instance smi)
+		this.stressed.tierTwo.actingOut.ToggleChore((StressBehaviourMonitor.Instance smi) => smi.CreateTierTwoStressChore(), this.stressed.tierTwo.reprieve);
+		this.stressed.tierTwo.reprieve.ToggleChore((StressBehaviourMonitor.Instance smi) => new StressIdleChore(smi.master), null).Enter(delegate(StressBehaviourMonitor.Instance smi)
 		{
 			if (smi.sm.timeInTierTwoStressResponse.Get(smi) >= 150f)
 			{
@@ -77,11 +77,6 @@ public class StressBehaviourMonitor : GameStateMachine<StressBehaviourMonitor, S
 		public Chore CreateTierTwoStressChore()
 		{
 			return this.tierTwoStressChoreCreator(base.GetComponent<ChoreProvider>());
-		}
-
-		public Reactable CreateReactable()
-		{
-			return new Reactable(base.smi.gameObject, 15, 8);
 		}
 
 		public Func<ChoreProvider, Chore> tierOneStressChoreCreator;

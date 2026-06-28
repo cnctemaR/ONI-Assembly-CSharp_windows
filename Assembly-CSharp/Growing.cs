@@ -31,13 +31,13 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 	{
 		Amounts amounts = base.gameObject.GetAmounts();
 		this.maturity = amounts.Add(new AmountInstance(Db.Get().Amounts.Maturity, base.gameObject));
-		this.baseMaturityMax = new AttributeModifier(this.maturity.maxAttribute.Id, this.GetTotalGrowthTime() / 600f, null, false, false);
+		this.baseMaturityMax = new AttributeModifier(this.maturity.maxAttribute.Id, this.growthTime / 600f, null, false, false);
 		this.maturity.maxAttribute.Add("Base", this.baseMaturityMax);
 		this.oldAge = amounts.Add(new AmountInstance(Db.Get().Amounts.OldAge, base.gameObject));
-		this.yieldBonus = amounts.Add(new AmountInstance(Db.Get().Amounts.YieldBonus, base.gameObject));
 		base.OnPrefabInit();
 		this.Subscribe(1119167081, new Action<object>(this.OnNewGameSpawn));
 		this.Subscribe(1309017699, new Action<object>(this.OnReplant));
+		this.Subscribe(1272413801, new Action<object>(this.ResetGrowth));
 	}
 
 	protected override void OnSpawn()
@@ -51,10 +51,9 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 		this.maturity.SetValue(this.maturity.maxAttribute.GetTotalValue() * global::UnityEngine.Random.Range(0f, 1f));
 	}
 
-	public void Configure(float baseGrowthTime, float reGrowthTime)
+	public void Configure(float baseGrowthTime)
 	{
-		this.baseGrowthTime = baseGrowthTime;
-		this.reGrowthTime = reGrowthTime;
+		this.growthTime = baseGrowthTime;
 	}
 
 	public bool ReachedNextHarvest()
@@ -79,37 +78,28 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 
 	public void ClampGrowthToHarvest()
 	{
-		if (this.crop == null)
-		{
-			this.maturity.value = this.maturity.GetMax();
-		}
-		else
-		{
-			this.maturity.value = this.GetTotalGrowthForHarvest(this.crop.GetTimesHarvested() + 1) / 600f;
-		}
+		this.maturity.value = this.maturity.GetMax();
 	}
 
 	public float PercentOfCurrentHarvest()
 	{
-		if (this.crop == null)
-		{
-			return this.maturity.value / this.maturity.GetMax();
-		}
-		float totalGrowthForHarvest = this.GetTotalGrowthForHarvest(this.crop.GetTimesHarvested());
-		float totalGrowthForHarvest2 = this.GetTotalGrowthForHarvest(this.crop.GetTimesHarvested() + 1);
-		float num = this.maturity.value * 600f;
-		return (num - totalGrowthForHarvest) / (totalGrowthForHarvest2 - totalGrowthForHarvest);
+		return this.maturity.value / this.maturity.GetMax();
 	}
 
 	public float TimeUntilNextHarvest()
 	{
-		if (this.crop == null)
-		{
-			float num = this.maturity.GetMax() - this.maturity.value;
-			return num / this.maturity.GetDelta();
-		}
-		float num2 = this.GetTotalGrowthForHarvest(this.crop.GetTimesHarvested() + 1) / 600f - this.maturity.value;
-		return num2 / this.maturity.GetDelta();
+		float num = this.maturity.GetMax() - this.maturity.value;
+		return num / this.maturity.GetDelta();
+	}
+
+	public float DomesticGrowthTime()
+	{
+		return this.maturity.GetMax() / base.smi.baseGrowingRate.Value;
+	}
+
+	public float WildGrowthTime()
+	{
+		return this.maturity.GetMax() / base.smi.wildGrowingRate.Value;
 	}
 
 	public float PercentGrown()
@@ -122,9 +112,9 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 		this.replanted = true;
 	}
 
-	public void ResetGrowth()
+	public void ResetGrowth(object data = null)
 	{
-		this.maturity.value = (this.baseGrowthTime - this.reGrowthTime) / 600f;
+		this.maturity.value = 0f;
 	}
 
 	public float PercentOldAge()
@@ -132,53 +122,21 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 		return this.oldAge.value / this.oldAge.GetMax();
 	}
 
-	public float GetTotalGrowthTime()
-	{
-		if (this.crop == null)
-		{
-			return this.baseGrowthTime;
-		}
-		return this.baseGrowthTime + this.reGrowthTime * (float)(this.crop.GetTotalHarvests() - 1);
-	}
-
-	private float GetTotalGrowthForHarvest(int harvest)
-	{
-		if (harvest <= 0)
-		{
-			return 0f;
-		}
-		if (this.crop == null)
-		{
-			return this.baseGrowthTime;
-		}
-		return this.baseGrowthTime + this.reGrowthTime * (float)(harvest - 1);
-	}
-
 	public List<Descriptor> GetDescriptors(GameObject go)
 	{
-		List<Descriptor> list = new List<Descriptor>();
-		if (this.baseGrowthTime != this.reGrowthTime && this.reGrowthTime != 0f)
+		return new List<Descriptor>
 		{
-			list.Add(new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.GROWTHTIME_REGROWTH, GameUtil.GetFormattedCycles(this.baseGrowthTime, string.Empty), GameUtil.GetFormattedCycles(this.reGrowthTime, string.Empty)), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.GROWTHTIME_REGROWTH, GameUtil.GetFormattedCycles(this.baseGrowthTime, string.Empty), GameUtil.GetFormattedCycles(this.reGrowthTime, string.Empty)), Descriptor.DescriptorType.Requirement, false));
-		}
-		else
-		{
-			list.Add(new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.GROWTHTIME_SIMPLE, GameUtil.GetFormattedCycles(this.baseGrowthTime, string.Empty)), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.GROWTHTIME_SIMPLE, GameUtil.GetFormattedCycles(this.baseGrowthTime, string.Empty)), Descriptor.DescriptorType.Requirement, false));
-		}
-		return list;
+			new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.GROWTHTIME_SIMPLE, GameUtil.GetFormattedCycles(this.growthTime, string.Empty)), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.GROWTHTIME_SIMPLE, GameUtil.GetFormattedCycles(this.growthTime, string.Empty)), Descriptor.DescriptorType.Requirement, false)
+		};
 	}
 
-	public float baseGrowthTime;
-
-	public float reGrowthTime;
+	public float growthTime;
 
 	private AmountInstance maturity;
 
 	private AmountInstance oldAge;
 
 	private AttributeModifier baseMaturityMax;
-
-	private AmountInstance yieldBonus;
 
 	[Serialize]
 	private bool replanted;
@@ -219,11 +177,6 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 			base.master.ClampGrowthToHarvest();
 		}
 
-		public void PauseYieldBonus(bool pause)
-		{
-			base.master.yieldBonus.paused = pause;
-		}
-
 		public bool IsWilting()
 		{
 			return base.master.wiltCondition != null && base.master.wiltCondition.IsWilting();
@@ -242,7 +195,7 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 		{
 			default_state = this.growing;
 			base.serializable = true;
-			this.root.EventTransition(GameHashes.Wilt, this.stalled, (Growing.StatesInstance smi) => smi.IsWilting());
+			this.root.EventTransition(GameHashes.Wilt, this.stalled, (Growing.StatesInstance smi) => smi.IsWilting()).Transition(this.stalled, (Growing.StatesInstance smi) => smi.IsWilting());
 			this.growing.Transition(this.grown, (Growing.StatesInstance smi) => smi.ReachedNextHarvest()).ToggleStatusItem(Db.Get().CreatureStatusItems.Growing, (Growing.StatesInstance smi) => smi.master.GetComponent<Growing>()).Enter(delegate(Growing.StatesInstance smi)
 			{
 				if (smi.master.replanted)
@@ -261,12 +214,10 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 				.Enter(delegate(Growing.StatesInstance smi)
 				{
 					smi.ClampGrowthToHarvest();
-					smi.PauseYieldBonus(true);
 				})
 				.Exit(delegate(Growing.StatesInstance smi)
 				{
 					smi.master.oldAge.SetValue(0f);
-					smi.PauseYieldBonus(false);
 				});
 			this.grown.idle.Transition(this.grown.try_self_harvest, (Growing.StatesInstance smi) => smi.master.oldAge.value >= smi.master.oldAge.GetMax());
 			this.grown.try_self_harvest.Enter(delegate(Growing.StatesInstance smi)
@@ -274,17 +225,13 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 				Harvestable component = smi.master.GetComponent<Harvestable>();
 				if (component)
 				{
+					component.ForceCancelHarvest(null);
 					component.Harvest();
 				}
+				smi.master.maturity.SetValue(0f);
 				smi.master.oldAge.SetValue(0f);
 			}).GoTo(this.grown.idle);
-			this.stalled.EventTransition(GameHashes.WiltRecover, this.growing, (Growing.StatesInstance smi) => !smi.IsWilting()).Enter(delegate(Growing.StatesInstance smi)
-			{
-				smi.PauseYieldBonus(true);
-			}).Exit(delegate(Growing.StatesInstance smi)
-			{
-				smi.PauseYieldBonus(false);
-			});
+			this.stalled.EventTransition(GameHashes.WiltRecover, this.growing, (Growing.StatesInstance smi) => !smi.IsWilting() && !smi.IsGrown()).Transition(this.grown.try_self_harvest, (Growing.StatesInstance smi) => smi.master.oldAge.value >= smi.master.oldAge.GetMax());
 		}
 
 		public Growing.States.GrowingStates growing;

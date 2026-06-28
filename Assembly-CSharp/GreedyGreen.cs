@@ -37,7 +37,7 @@ public class GreedyGreen : StateMachineComponent<GreedyGreen.StatesInstance>
 		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, "Stored CO2 Released", base.gameObject.transform, 1.5f, false);
 		float num = Mathf.Max(1f, base.smi.master.consumer.consumedMass);
 		base.smi.master.consumer.consumedMass = 0f;
-		this.emitter.ForceEmit(num, -1f);
+		this.emitter.ForceEmit(num, byte.MaxValue, 0, -1f);
 	}
 
 	private void Mature()
@@ -227,13 +227,13 @@ public class GreedyGreen : StateMachineComponent<GreedyGreen.StatesInstance>
 				{
 					int num2 = num;
 					smi.master.rootCell = num2;
-					smi.master.partitionerEntry = GameScenePartitioner.Instance.Add("GreedyGreens.Harvestable", smi.gameObject, num, GameScenePartitioner.Instance.solidChangedMask.mask, new Action<object>(smi.master.OnDugOut));
+					smi.master.partitionerEntry = GameScenePartitioner.Instance.Add("GreedyGreens.Harvestable", smi.gameObject, num, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(smi.master.OnDugOut));
 				}
 				else if (Grid.Solid[Grid.CellBelow(num)])
 				{
 					smi.master.rootCell = Grid.CellBelow(num);
 					smi.transform.SetPosition(smi.transform.position + Vector3.down);
-					smi.master.partitionerEntry = GameScenePartitioner.Instance.Add("GreedyGreens.Harvestable", smi.gameObject, Grid.PosToCell(smi.gameObject), GameScenePartitioner.Instance.solidChangedMask.mask, new Action<object>(smi.master.OnDugOut));
+					smi.master.partitionerEntry = GameScenePartitioner.Instance.Add("GreedyGreens.Harvestable", smi.gameObject, Grid.PosToCell(smi.gameObject), GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(smi.master.OnDugOut));
 				}
 				else
 				{

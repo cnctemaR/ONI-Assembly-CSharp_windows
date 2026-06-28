@@ -18,8 +18,9 @@ public class MysteryEgg : StateMachineComponent<MysteryEgg.StatesInstance>
 			{
 				base.smi.StartSM();
 				base.smi.master.initialized = true;
-			}, false), "MysteryEgg");
-			SimMessages.ReplaceElement(Grid.PosToCell(base.gameObject), SimHashes.Dirt, CellEventLogger.Instance.ObjectSetSimOnSpawn, global::UnityEngine.Random.Range(1000f, 3000f), -1f, handle.index);
+			}, false));
+			int index = handle.index;
+			SimMessages.ReplaceElement(Grid.PosToCell(base.gameObject), SimHashes.Dirt, CellEventLogger.Instance.ObjectSetSimOnSpawn, global::UnityEngine.Random.Range(1000f, 3000f), -1f, byte.MaxValue, 0, index);
 			handle.index = -1;
 		}
 		else

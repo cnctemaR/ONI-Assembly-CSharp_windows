@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei.AI;
 using STRINGS;
 using TUNING;
 using UnityEngine;
@@ -19,8 +20,8 @@ public class ConsumablesTableScreen : TableScreen
 		{
 			base.GetWidgetRow(widget_go).SelectAndFocusMinion();
 		}, new Comparison<MinionIdentity>(base.compare_rows_alphabetical), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_name), new Action<MinionIdentity, GameObject, ToolTip>(base.on_tooltip_sort_alphabetically));
-		base.AddLabelColumn("Expectations", new Action<MinionIdentity, GameObject>(this.on_load_expectations), new Func<MinionIdentity, GameObject, string>(this.get_value_expectations_label), new Comparison<MinionIdentity>(this.compare_rows_expectations), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_expectations), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_sort_expectations), 128);
-		base.AddLabelColumn("Stress", new Action<MinionIdentity, GameObject>(this.on_load_stress), new Func<MinionIdentity, GameObject, string>(this.get_value_stress_label), new Comparison<MinionIdentity>(this.compare_rows_stress), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_stress), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_sort_stress), 64);
+		base.AddLabelColumn("Expectations", new Action<MinionIdentity, GameObject>(this.on_load_expectations), new Func<MinionIdentity, GameObject, string>(this.get_value_expectations_label), new Comparison<MinionIdentity>(this.compare_rows_expectations), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_expectations), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_sort_expectations), 128, 0f);
+		base.AddLabelColumn("Stress", new Action<MinionIdentity, GameObject>(this.on_load_stress), new Func<MinionIdentity, GameObject, string>(this.get_value_stress_label), new Comparison<MinionIdentity>(this.compare_rows_stress), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_stress), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_sort_stress), 64, 1f);
 		List<EdiblesManager.FoodInfo> list = new List<EdiblesManager.FoodInfo>();
 		for (int i = 0; i < FOOD.FOOD_TYPES_LIST.Count; i++)
 		{
@@ -46,7 +47,10 @@ public class ConsumablesTableScreen : TableScreen
 			}
 			return 0;
 		});
+		ConsumerManager.instance.OnDiscover += this.OnConsumableDiscovered;
 		List<FoodInfoTableColumn> list2 = new List<FoodInfoTableColumn>();
+		List<DividerColumn> list3 = new List<DividerColumn>();
+		List<FoodInfoTableColumn> list4 = new List<FoodInfoTableColumn>();
 		int num = 0;
 		for (int j = 0; j < list.Count; j++)
 		{
@@ -55,16 +59,32 @@ public class ConsumablesTableScreen : TableScreen
 				if (list[j].Quality != num && j != 0)
 				{
 					string text = "QualityDivider_" + list[j].Quality;
-					DividerColumn dividerColumn = new DividerColumn();
+					FoodInfoTableColumn[] quality_group_columns = list4.ToArray();
+					DividerColumn dividerColumn = new DividerColumn(delegate
+					{
+						if (quality_group_columns == null || quality_group_columns.Length == 0)
+						{
+							return true;
+						}
+						foreach (FoodInfoTableColumn foodInfoTableColumn2 in quality_group_columns)
+						{
+							if (foodInfoTableColumn2.isRevealed)
+							{
+								return true;
+							}
+						}
+						return false;
+					});
+					list3.Add(dividerColumn);
 					base.RegisterColumn(text, dividerColumn);
+					list4.Clear();
 				}
-				list2.Add(this.AddFoodInfoColumn(list[j].Id, list[j], new Action<MinionIdentity, GameObject>(this.on_load_food_info), new Func<MinionIdentity, GameObject, TableScreen.ResultValues>(this.get_value_food_info), new Action<GameObject>(this.on_click_food_info), new Action<GameObject, bool>(this.set_value_food_info), new Comparison<MinionIdentity>(this.compare_food_info), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_food_info), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_sort_food_info)));
+				FoodInfoTableColumn foodInfoTableColumn = this.AddFoodInfoColumn(list[j].Id, list[j], new Action<MinionIdentity, GameObject>(this.on_load_food_info), new Func<MinionIdentity, GameObject, TableScreen.ResultValues>(this.get_value_food_info), new Action<GameObject>(this.on_click_food_info), new Action<GameObject, bool>(this.set_value_food_info), new Comparison<MinionIdentity>(this.compare_food_info), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_food_info), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_sort_food_info));
+				list2.Add(foodInfoTableColumn);
 				num = list[j].Quality;
+				list4.Add(foodInfoTableColumn);
 			}
 		}
-		string text2 = "QualityDivider_Final";
-		DividerColumn dividerColumn2 = new DividerColumn();
-		base.RegisterColumn(text2, dividerColumn2);
 		base.AddSuperCheckboxColumn("SuperCheckFood", list2.ToArray(), new Action<MinionIdentity, GameObject>(base.on_load_value_checkbox_column_super), new Func<MinionIdentity, GameObject, TableScreen.ResultValues>(this.get_value_checkbox_column_super), new Action<GameObject>(base.on_press_checkbox_column_super), new Action<GameObject, bool>(base.set_value_checkbox_column_super), null, new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_food_info_super));
 	}
 
@@ -115,7 +135,8 @@ public class ConsumablesTableScreen : TableScreen
 		case TableRow.RowType.Minion:
 			if (minion != null)
 			{
-				tooltip.AddMultiStringTooltip(Db.Get().Amounts.Stress.Lookup(minion).GetValueString(), null);
+				tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.DUPLICANT_PROPERNAME, minion.GetProperName()), null);
+				tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.STRESS_TOOLTIP, Db.Get().Amounts.Stress.Lookup(minion).GetValueString()), null);
 			}
 			break;
 		}
@@ -153,7 +174,7 @@ public class ConsumablesTableScreen : TableScreen
 
 	private string get_value_expectations_label(MinionIdentity minion, GameObject widget_go)
 	{
-		return Db.Get().Attributes.FoodExpectation.Lookup(minion).GetFormattedValue(false);
+		return Db.Get().Attributes.FoodExpectation.Lookup(minion).GetFormattedValue();
 	}
 
 	private int compare_rows_expectations(MinionIdentity a, MinionIdentity b)
@@ -180,7 +201,8 @@ public class ConsumablesTableScreen : TableScreen
 		case TableRow.RowType.Minion:
 			if (minion != null)
 			{
-				tooltip.AddMultiStringTooltip(Db.Get().Attributes.FoodExpectation.Lookup(minion).GetFormattedValue(false), null);
+				tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.DUPLICANT_PROPERNAME, minion.GetProperName()), null);
+				tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_EXPECTATIONS_TOOLTIP, Db.Get().Attributes.FoodExpectation.Lookup(minion).GetFormattedValue()), null);
 			}
 			break;
 		}
@@ -379,6 +401,26 @@ public class ConsumablesTableScreen : TableScreen
 				{
 					tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_PERMISSION_OFF, minion.GetProperName(), foodInfoTableColumn.food_info.Name), null);
 				}
+				if (minion.GetAttributes().Get(Db.Get().Attributes.FoodExpectation).GetTotalValue() > (float)foodInfoTableColumn.food_info.Quality)
+				{
+					tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_QUALITY_VS_EXPECTATION, new object[]
+					{
+						UI.CONSUMABLESSCREEN.EXPECTATIONS_BELOW,
+						minion.GetProperName(),
+						foodInfoTableColumn.food_info.Quality,
+						minion.GetAttributes().Get(Db.Get().Attributes.FoodExpectation).GetTotalValue()
+					}), null);
+				}
+				else
+				{
+					tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_QUALITY_VS_EXPECTATION, new object[]
+					{
+						UI.CONSUMABLESSCREEN.EXPECTATIONS_ABOVE,
+						minion.GetProperName(),
+						foodInfoTableColumn.food_info.Quality,
+						minion.GetAttributes().Get(Db.Get().Attributes.FoodExpectation).GetTotalValue()
+					}), null);
+				}
 			}
 			break;
 		}
@@ -415,6 +457,15 @@ public class ConsumablesTableScreen : TableScreen
 		TableColumn widgetColumn = base.GetWidgetColumn(widget_go);
 		EdiblesManager.FoodInfo food_info = (widgetColumn as FoodInfoTableColumn).food_info;
 		KToggle component = widget_go.GetComponent<KToggle>();
+		if (!widgetColumn.isRevealed)
+		{
+			widget_go.SetActive(false);
+			return;
+		}
+		if (!widget_go.activeSelf)
+		{
+			widget_go.SetActive(true);
+		}
 		switch (widgetRow.rowType)
 		{
 		case TableRow.RowType.Header:
@@ -549,7 +600,7 @@ public class ConsumablesTableScreen : TableScreen
 		case TableRow.RowType.Minion:
 			if (minion != null)
 			{
-				tooltip.AddMultiStringTooltip(minion.GetProperName(), null);
+				tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.GOTO_DUPLICANT_BUTTON, minion.GetProperName()), null);
 			}
 			break;
 		}
@@ -563,5 +614,10 @@ public class ConsumablesTableScreen : TableScreen
 			return foodInfoTableColumn;
 		}
 		return null;
+	}
+
+	private void OnConsumableDiscovered(Tag tag)
+	{
+		base.MarkRowsDirty();
 	}
 }

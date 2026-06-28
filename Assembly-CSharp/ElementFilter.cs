@@ -49,7 +49,7 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable
 		this.OnFilterChanged(ElementLoader.FindElementByHash(this.filteredElem).tag);
 		this.filterable.onFilterChanged += this.OnFilterChanged;
 		ConduitFlow flowManager = Conduit.GetFlowManager(this.conduitType);
-		flowManager.AddConduitUpdater(new Action<float>(this.OnConduitTick), 0);
+		flowManager.AddConduitUpdater(new Action<float>(this.OnConduitTick), ConduitFlow.Priority.Default);
 	}
 
 	protected override void OnCleanUp()
@@ -73,7 +73,7 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable
 			if (contents.mass > 0f && contents2.mass <= 0f)
 			{
 				flag = true;
-				float num2 = flowManager.AddElement(num, contents.element, contents.mass, contents.temperature);
+				float num2 = flowManager.AddElement(num, contents.element, contents.mass, contents.temperature, contents.diseaseIdx, contents.diseaseCount);
 				if (num2 > 0f)
 				{
 					flowManager.RemoveElement(this.inputCell, num2);

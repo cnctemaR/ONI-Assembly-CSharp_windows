@@ -70,14 +70,6 @@ public class StaminaMonitor : GameStateMachine<StaminaMonitor, StaminaMonitor.In
 				{
 					flag = true;
 				}
-				else
-				{
-					Chore currentChore = this.choreDriver.GetCurrentChore();
-					if (currentChore != null && currentChore.GetType() == typeof(SleepOnFloorChore))
-					{
-						flag = true;
-					}
-				}
 			}
 			return flag;
 		}
@@ -89,7 +81,12 @@ public class StaminaMonitor : GameStateMachine<StaminaMonitor, StaminaMonitor.In
 
 		public bool ShouldExitSleep()
 		{
-			return !this.schedulable.IsAllowed(Db.Get().ScheduleBlockTypes.Sleep);
+			if (this.schedulable.IsAllowed(Db.Get().ScheduleBlockTypes.Sleep))
+			{
+				return false;
+			}
+			Narcolepsy component = base.GetComponent<Narcolepsy>();
+			return (!(component != null) || !component.IsNarcolepsing()) && this.stamina.value >= this.stamina.GetMax() && TimeOfDay.Instance.GetCurrentTimeRegion() != TimeOfDay.TimeRegion.Night;
 		}
 
 		private ChoreDriver choreDriver;

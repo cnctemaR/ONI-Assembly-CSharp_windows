@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
@@ -33,5 +34,11 @@ public class GeneratedBuildings
 	public static void MakeBuildableAnywhere(GameObject go)
 	{
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<RequiresFoundation>());
+	}
+
+	public static void RegisterWithOverlay(HashSet<Tag> overlay_tags, string id)
+	{
+		overlay_tags.Add(new Tag(id));
+		overlay_tags.Add(new Tag(id + "UnderConstruction"));
 	}
 }

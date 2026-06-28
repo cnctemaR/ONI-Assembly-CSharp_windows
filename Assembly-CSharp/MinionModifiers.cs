@@ -88,7 +88,7 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 	{
 		if (delta < 0f)
 		{
-			ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, delta, string.Format(UI.ENDOFDAYREPORT.NOTES.ATE, base.gameObject.name));
+			ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, delta, string.Format(UI.ENDOFDAYREPORT.NOTES.BURNED, base.gameObject.name));
 		}
 	}
 

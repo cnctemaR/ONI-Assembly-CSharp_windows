@@ -2,7 +2,7 @@
 using KSerialization;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class WarmingPoint : BuildingWorkable
+public class WarmingPoint : Workable
 {
 	protected override void OnPrefabInit()
 	{
@@ -35,7 +35,7 @@ public class WarmingPoint : BuildingWorkable
 
 	private void CreateTask()
 	{
-		this.chore = new WorkChore<WarmingPoint>(Db.Get().ChoreTypes.Warmup, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true);
+		this.chore = new WorkChore<WarmingPoint>(Db.Get().ChoreTypes.Warmup, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true);
 	}
 
 	public override CellOffset[] GetOffsets()

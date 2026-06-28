@@ -1,6 +1,6 @@
 ﻿using System;
-using Klei.Noise;
 using NodeEditorFramework;
+using ProcGen.Noise;
 using UnityEngine;
 
 public class FloatListType : IConnectionTypeDeclaration

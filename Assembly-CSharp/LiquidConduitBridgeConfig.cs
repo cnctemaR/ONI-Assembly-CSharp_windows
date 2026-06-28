@@ -6,7 +6,8 @@ public class LiquidConduitBridgeConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("LiquidConduitBridge", 3, 1, "utilityliquidbridge_kanim", 100f, 10, 3f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER2, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.Conduit, BUILDINGS.DECOR.NONE, null);
+		EffectorValues none = NOISE_POLLUTION.NONE;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("LiquidConduitBridge", 3, 1, "utilityliquidbridge_kanim", 100f, 10, 3f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER2, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.Conduit, BUILDINGS.DECOR.NONE, none);
 		buildingDef.ObjectLayer = ObjectLayer.LiquidConduitConnection;
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.OutputConduitType = ConduitType.Liquid;

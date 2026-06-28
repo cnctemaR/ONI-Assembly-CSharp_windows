@@ -24,4 +24,22 @@ public class InfraredVisualizerComponents : KGameObjectComponentManager<Infrared
 			}
 		}
 	}
+
+	public void ClearOverlayColour()
+	{
+		GridArea visibleArea = GridVisibleArea.GetVisibleArea();
+		Color32 color = Color.black;
+		for (int i = 0; i < this.data.Count; i++)
+		{
+			KAnimControllerBase controller = this.data[i].controller;
+			if (controller != null)
+			{
+				Vector3 position = controller.transform.position;
+				if (visibleArea.Min <= position && position <= visibleArea.Max)
+				{
+					controller.OverlayColour = color;
+				}
+			}
+		}
+	}
 }

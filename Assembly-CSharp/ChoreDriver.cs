@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 
 public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 {
@@ -51,6 +52,10 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 		{
 			Chore nextChore = this.GetNextChore();
 			Chore chore = base.smi.sm.currentChore.Set(nextChore, base.smi);
+			if (chore != null && chore.IsPreemptable && chore.driver != null)
+			{
+				chore.Fail("Preemption!");
+			}
 			base.smi.sm.nextChore.Set(null, base.smi);
 			Chore chore2 = chore;
 			chore2.onExit = (Action<Chore>)Delegate.Combine(chore2.onExit, new Action<Chore>(this.OnChoreExit));
@@ -113,7 +118,15 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 			}).Exit("EndChore", delegate(ChoreDriver.StatesInstance smi)
 			{
 				smi.EndChore("ChoreDriver.SignalStop");
-			}).OnSignal(this.stop, this.nochore);
+			}).OnSignal(this.stop, this.nochore)
+				.Update(delegate(ChoreDriver.StatesInstance smi)
+				{
+					Chore chore = this.currentChore.Get(smi);
+					if (chore != null)
+					{
+						ReportManager.Instance.ReportValue(ReportManager.ReportType.TimeSpent, smi.deltatime, string.Format(UI.ENDOFDAYREPORT.NOTES.TIME_SPENT, chore.choreType.Name));
+					}
+				});
 		}
 
 		public StateMachine<ChoreDriver.States, ChoreDriver.StatesInstance, ChoreDriver, object>.ObjectParameter<Chore> currentChore;

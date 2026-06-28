@@ -10,6 +10,8 @@ namespace Database
 		{
 			this.Decor = base.Add(new Klei.AI.Attribute("Decor", true, Klei.AI.Attribute.Display.General, false));
 			this.DecorRadius = base.Add(new Klei.AI.Attribute("DecorRadius", true, Klei.AI.Attribute.Display.General, false));
+			this.NoisePollution = base.Add(new Klei.AI.Attribute("NoisePollution", true, Klei.AI.Attribute.Display.General, false));
+			this.NoisePollutionRadius = base.Add(new Klei.AI.Attribute("NoisePollutionRadius", true, Klei.AI.Attribute.Display.General, false));
 			this.Hygiene = base.Add(new Klei.AI.Attribute("Hygiene", true, Klei.AI.Attribute.Display.General, false));
 			this.Comfort = base.Add(new Klei.AI.Attribute("Comfort", true, Klei.AI.Attribute.Display.General, false));
 			this.OverheatTemperature = base.Add(new Klei.AI.Attribute("OverheatTemperature", true, Klei.AI.Attribute.Display.General, false));
@@ -21,6 +23,10 @@ namespace Database
 		public Klei.AI.Attribute Decor;
 
 		public Klei.AI.Attribute DecorRadius;
+
+		public Klei.AI.Attribute NoisePollution;
+
+		public Klei.AI.Attribute NoisePollutionRadius;
 
 		public Klei.AI.Attribute Hygiene;
 

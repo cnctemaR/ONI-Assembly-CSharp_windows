@@ -8,40 +8,33 @@ public class SpiceVineConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		DecorValues tier = DECOR.BONUS.TIER1;
+		EffectorValues tier = DECOR.BONUS.TIER1;
 		List<Tag> list = new List<Tag> { GameTags.Hanging };
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("SpiceVine", global::STRINGS.CREATURES.SPECIES.SPICE_VINE.NAME, global::STRINGS.CREATURES.SPECIES.SPICE_VINE.DESC, 400f, Assets.GetAnim("vinespicenut_kanim"), "idle_empty", Grid.SceneLayer.BuildingFront, 1, 3, tier, SimHashes.Creature, list);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity("SpiceVine", global::STRINGS.CREATURES.SPECIES.SPICE_VINE.NAME, global::STRINGS.CREATURES.SPECIES.SPICE_VINE.DESC, 2f, Assets.GetAnim("vinespicenut_kanim"), "idle_empty", Grid.SceneLayer.BuildingFront, 1, 3, tier, default(EffectorValues), SimHashes.Creature, list, 320f);
 		EntityTemplates.MakeHangingOffsets(gameObject, 1, 3);
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 15f, 5f, 258.15f, 308.15f, 328.15f, 333.15f, 358.15f, 448.15f, 0f, 0.15f, 1f, SpiceNutConfig.ID);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 15f, 5f, 258.15f, 308.15f, 328.15f, 333.15f, 358.15f, 448.15f, null, true, 0f, 0.15f, 1f, SpiceNutConfig.ID, true);
 		Tag tag = ElementLoader.FindElementByHash(SimHashes.DirtyWater).tag;
-		EntityTemplates.ExtendPlantToFertilizable(gameObject, new FertilizationMonitor.FertilizerInfo[]
+		EntityTemplates.ExtendPlantToIrrigated(gameObject, new IrrigationMonitor.LiquidResourceInfo[]
 		{
-			new FertilizationMonitor.FertilizerInfo
-			{
-				tag = GameTags.Phosphorus,
-				massConsumptionRate = 0.0016666667f
-			}
-		});
-		EntityTemplates.ExtendPlantToIrrigated(gameObject, new FertilizationMonitor.FertilizerInfo[]
-		{
-			new FertilizationMonitor.FertilizerInfo
+			new IrrigationMonitor.LiquidResourceInfo
 			{
 				tag = tag,
 				massConsumptionRate = 0.058333334f
 			}
 		});
-		EntityTemplates.ExtendPlantWithYield(gameObject, new IYieldEffect[]
+		EntityTemplates.ExtendPlantToFertilizable(gameObject, new FertilizationMonitor.FertilizerInfo[]
 		{
-			new YieldEffect.AddSeeds(1)
-		}, new IYieldEffect[]
-		{
-			new YieldEffect.AddHarvestUnitsMultiple(1f)
+			new FertilizationMonitor.FertilizerInfo
+			{
+				tag = GameTags.Phosphorite,
+				massConsumptionRate = 0.0016666667f
+			}
 		});
 		UprootedMonitor component = gameObject.GetComponent<UprootedMonitor>();
 		component.monitorCell = new CellOffset(0, 1);
 		gameObject.UpdateComponentRequirement<StandardCropPlant>(true);
 		list = new List<Tag> { GameTags.CropSeed };
-		GameObject gameObject2 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Harvest, "SpiceVineSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.SPICE_VINE.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.SPICE_VINE.DESC, Assets.GetAnim("seed_spicenut_kanim"), "object", 1, list, SingleEntityReceptacle.ReceptacleDirection.Bottom, default(Tag), 4, global::STRINGS.CREATURES.SPECIES.SPICE_VINE.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f);
+		GameObject gameObject2 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Harvest, "SpiceVineSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.SPICE_VINE.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.SPICE_VINE.DESC, Assets.GetAnim("seed_spicenut_kanim"), "object", 1, list, SingleEntityReceptacle.ReceptacleDirection.Bottom, default(Tag), 4, global::STRINGS.CREATURES.SPECIES.SPICE_VINE.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, string.Empty);
 		GameObject gameObject3 = EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject, gameObject2, "SpiceVine_preview", Assets.GetAnim("vinespicenut_kanim"), "place", 1, 3);
 		EntityTemplates.MakeHangingOffsets(gameObject3, 1, 3);
 		return gameObject;

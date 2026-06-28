@@ -196,8 +196,8 @@ public class TimedSwitchSideScreen : SideScreenContent
 
 	private TimedSwitch targetTimedSwitch;
 
-	[SerializeField]
 	[Header("Header")]
+	[SerializeField]
 	private GameObject validContent;
 
 	[SerializeField]
@@ -212,8 +212,8 @@ public class TimedSwitchSideScreen : SideScreenContent
 	[SerializeField]
 	private KButton offButton;
 
-	[SerializeField]
 	[Header("On Time")]
+	[SerializeField]
 	private KButton onTimeIncreaseButton;
 
 	[SerializeField]

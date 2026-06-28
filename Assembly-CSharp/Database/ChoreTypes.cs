@@ -11,8 +11,10 @@ namespace Database
 		{
 			this.Die = this.Add("Die", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.DIE.NAME, DUPLICANTS.CHORES.DIE.STATUS);
 			this.Entombed = this.Add("Entombed", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.ENTOMBED.NAME, DUPLICANTS.CHORES.ENTOMBED.STATUS);
-			this.HealCritical = this.Add("HealCritical", new string[0], "HealCritical", new string[0], DUPLICANTS.CHORES.HEALCRITICAL.NAME, DUPLICANTS.CHORES.HEALCRITICAL.STATUS);
+			this.WashHands = this.Add("WashHands", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.WASHHANDS.NAME, DUPLICANTS.CHORES.WASHHANDS.STATUS);
+			this.HealCritical = this.Add("HealCritical", new string[0], "HealCritical", new string[] { "Vomit", "Cough" }, DUPLICANTS.CHORES.HEALCRITICAL.NAME, DUPLICANTS.CHORES.HEALCRITICAL.STATUS);
 			this.BeIncapacitated = this.Add("BeIncapacitated", new string[0], "BeIncapacitated", new string[0], DUPLICANTS.CHORES.BEINCAPACITATED.NAME, DUPLICANTS.CHORES.BEINCAPACITATED.STATUS);
+			this.GeneShuffle = this.Add("GeneShuffle", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.GENESHUFFLE.NAME, DUPLICANTS.CHORES.GENESHUFFLE.STATUS);
 			this.DebugGoTo = this.Add("DebugGoTo", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.DEBUGGOTO.NAME, DUPLICANTS.CHORES.DEBUGGOTO.STATUS);
 			this.MoveTo = this.Add("MoveTo", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.MOVETO.NAME, DUPLICANTS.CHORES.MOVETO.STATUS);
 			this.DropUnusedInventory = this.Add("DropUnusedInventory", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.DROPUNUSEDINVENTORY.NAME, DUPLICANTS.CHORES.DROPUNUSEDINVENTORY.STATUS);
@@ -21,6 +23,7 @@ namespace Database
 			this.Flee = this.Add("Flee", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.FLEE.NAME, DUPLICANTS.CHORES.FLEE.STATUS);
 			this.MoveToQuarantine = this.Add("MoveToQuarantine", new string[0], "MoveToQuarantine", new string[0], DUPLICANTS.CHORES.MOVETOQUARANTINE.NAME, DUPLICANTS.CHORES.MOVETOQUARANTINE.STATUS);
 			this.Attack = this.Add("Attack", new string[] { "Combat" }, string.Empty, new string[0], DUPLICANTS.CHORES.ATTACK.NAME, DUPLICANTS.CHORES.ATTACK.STATUS);
+			this.Emote = this.Add("Emote", new string[0], "Emote", new string[0], DUPLICANTS.CHORES.EMOTEHIGHPRIORITY.NAME, DUPLICANTS.CHORES.EMOTEHIGHPRIORITY.STATUS);
 			this.EmoteHighPriority = this.Add("EmoteHighPriority", new string[0], "EmoteHighPriority", new string[0], DUPLICANTS.CHORES.EMOTEHIGHPRIORITY.NAME, DUPLICANTS.CHORES.EMOTEHIGHPRIORITY.STATUS);
 			this.StressEmote = this.Add("StressEmote", new string[0], "EmoteHighPriority", new string[0], DUPLICANTS.CHORES.EMOTEHIGHPRIORITY.NAME, DUPLICANTS.CHORES.EMOTEHIGHPRIORITY.STATUS);
 			this.StressVomit = this.Add("StressVomit", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.STRESSVOMIT.NAME, DUPLICANTS.CHORES.STRESSVOMIT.STATUS);
@@ -28,20 +31,23 @@ namespace Database
 			this.BingeEat = this.Add("BingeEat", new string[0], string.Empty, new string[] { "MoveTo" }, DUPLICANTS.CHORES.BINGE_EAT.NAME, DUPLICANTS.CHORES.BINGE_EAT.STATUS);
 			this.StressActingOut = this.Add("StressActingOut", new string[0], string.Empty, new string[] { "MoveTo" }, DUPLICANTS.CHORES.STRESSACTINGOUT.NAME, DUPLICANTS.CHORES.STRESSACTINGOUT.STATUS);
 			this.Vomit = this.Add("Vomit", new string[0], "EmoteHighPriority", new string[0], DUPLICANTS.CHORES.VOMIT.NAME, DUPLICANTS.CHORES.VOMIT.STATUS);
+			this.Cough = this.Add("Cough", new string[0], "EmoteHighPriority", new string[0], DUPLICANTS.CHORES.COUGH.NAME, DUPLICANTS.CHORES.VOMIT.STATUS);
 			this.StressIdle = this.Add("StressIdle", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.STRESSIDLE.NAME, DUPLICANTS.CHORES.STRESSIDLE.STATUS);
+			this.RescueIncapacitated = this.Add("RescueIncapacitated", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.RESCUEINCAPACITATED.NAME, DUPLICANTS.CHORES.RESCUEINCAPACITATED.STATUS);
 			this.UseToilet = this.Add("UseToilet", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.USETOILET.NAME, DUPLICANTS.CHORES.USETOILET.STATUS);
-			this.WashHands = this.Add("WashHands", new string[0], "WashHands", new string[0], DUPLICANTS.CHORES.WASHHANDS.NAME, DUPLICANTS.CHORES.WASHHANDS.STATUS);
 			this.Eat = this.Add("Eat", new string[0], "Eat", new string[0], DUPLICANTS.CHORES.EAT.NAME, DUPLICANTS.CHORES.EAT.STATUS);
+			this.Narcolepsy = this.Add("Narcolepsy", new string[0], "Narcolepsy", new string[0], DUPLICANTS.CHORES.NARCOLEPSY.NAME, DUPLICANTS.CHORES.NARCOLEPSY.STATUS);
+			this.SleepDueToDisease = this.Add("SleepDueToDisease", new string[0], "Sleep", new string[0], DUPLICANTS.CHORES.RESTDUETODISEASE.NAME, DUPLICANTS.CHORES.RESTDUETODISEASE.STATUS);
 			this.Sleep = this.Add("Sleep", new string[0], "Sleep", new string[0], DUPLICANTS.CHORES.SLEEP.NAME, DUPLICANTS.CHORES.SLEEP.STATUS);
-			this.SleepOnFloor = this.Add("Sleep", new string[0], "Sleep", new string[0], DUPLICANTS.CHORES.SLEEPONFLOOR.NAME, DUPLICANTS.CHORES.SLEEPONFLOOR.STATUS);
+			this.RestDueToDisease = this.Add("RestDueToDisease", new string[0], "RestDueToDisease", new string[0], DUPLICANTS.CHORES.RESTDUETODISEASE.NAME, DUPLICANTS.CHORES.RESTDUETODISEASE.STATUS);
 			this.TakeMedicine = this.Add("TakeMedicine", new string[0], "TakeMedicine", new string[0], DUPLICANTS.CHORES.TAKEMEDICINE.NAME, DUPLICANTS.CHORES.TAKEMEDICINE.STATUS);
-			this.Doctor = this.Add("DoctorChore", new string[0], "Doctor", new string[0], DUPLICANTS.CHORES.DOCTOR.NAME, DUPLICANTS.CHORES.DOCTOR.STATUS);
+			this.ScrubOre = this.Add("ScrubOre", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.SCRUBORE.NAME, DUPLICANTS.CHORES.SCRUBORE.STATUS);
 			this.DeliverFood = this.Add("DeliverFood", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.DELIVERFOOD.NAME, DUPLICANTS.CHORES.DELIVERFOOD.STATUS);
 			this.FetchCritical = this.Add("FetchCritical", new string[] { "Deliver" }, string.Empty, new string[0], DUPLICANTS.CHORES.FETCHCRITICAL.NAME, DUPLICANTS.CHORES.FETCHCRITICAL.STATUS);
-			this.Shower = this.Add("Shower", new string[0], "Shower", new string[0], DUPLICANTS.CHORES.SHOWER.NAME, DUPLICANTS.CHORES.SHOWER.STATUS);
 			this.Sigh = this.Add("Sigh", new string[0], "Emote", new string[0], DUPLICANTS.CHORES.SIGH.NAME, DUPLICANTS.CHORES.SIGH.STATUS);
-			this.RestDueToDisease = this.Add("RestDueToDisease", new string[0], "RestDueToDisease", new string[0], DUPLICANTS.CHORES.RESTDUETODISEASE.NAME, DUPLICANTS.CHORES.RESTDUETODISEASE.STATUS);
-			this.Heal = this.Add("Heal", new string[0], "Heal", new string[0], DUPLICANTS.CHORES.HEAL.NAME, DUPLICANTS.CHORES.HEAL.STATUS);
+			this.Heal = this.Add("Heal", new string[0], "Heal", new string[] { "Vomit" }, DUPLICANTS.CHORES.HEAL.NAME, DUPLICANTS.CHORES.HEAL.STATUS);
+			this.Doctor = this.Add("DoctorChore", new string[] { "MedicalAid" }, "Doctor", new string[0], DUPLICANTS.CHORES.DOCTOR.NAME, DUPLICANTS.CHORES.DOCTOR.STATUS);
+			this.Shower = this.Add("Shower", new string[0], "Shower", new string[0], DUPLICANTS.CHORES.SHOWER.NAME, DUPLICANTS.CHORES.SHOWER.STATUS);
 			this.Relax = this.Add("Relax", new string[] { "Massage" }, "Relax", new string[0], DUPLICANTS.CHORES.RELAX.NAME, DUPLICANTS.CHORES.RELAX.STATUS);
 			this.Equip = this.Add("Equip", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.EQUIP.NAME, DUPLICANTS.CHORES.EQUIP.STATUS);
 			this.Recharge = this.Add("Recharge", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.RECHARGE.NAME, DUPLICANTS.CHORES.RECHARGE.STATUS);
@@ -54,7 +60,7 @@ namespace Database
 			this.Mop = this.Add("Mop", new string[] { "Mop" }, string.Empty, new string[0], DUPLICANTS.CHORES.MOP.NAME, DUPLICANTS.CHORES.MOP.STATUS);
 			this.Relocate = this.Add("Relocate", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.RELOCATE.NAME, DUPLICANTS.CHORES.RELOCATE.STATUS);
 			this.Toggle = this.Add("Toggle", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.TOGGLE.NAME, DUPLICANTS.CHORES.TOGGLE.STATUS);
-			this.RescueIncapacitated = this.Add("RescueIncapacitated", new string[0], string.Empty, new string[0], DUPLICANTS.CHORES.RESCUEINCAPACITATED.NAME, DUPLICANTS.CHORES.RESCUEINCAPACITATED.STATUS);
+			this.Disinfect = this.Add("Disinfect", new string[] { "Disinfect" }, string.Empty, new string[0], DUPLICANTS.CHORES.DISINFECT.NAME, DUPLICANTS.CHORES.DISINFECT.STATUS);
 			this.Repair = this.Add("Repair", new string[] { "Repair" }, string.Empty, new string[0], DUPLICANTS.CHORES.REPAIR.NAME, DUPLICANTS.CHORES.REPAIR.STATUS);
 			this.Deconstruct = this.Add("Deconstruct", new string[] { "Build" }, string.Empty, new string[0], DUPLICANTS.CHORES.DECONSTRUCT.NAME, DUPLICANTS.CHORES.DECONSTRUCT.STATUS);
 			this.Research = this.Add("Research", new string[] { "Research" }, string.Empty, new string[0], DUPLICANTS.CHORES.RESEARCH.NAME, DUPLICANTS.CHORES.RESEARCH.STATUS);
@@ -85,28 +91,30 @@ namespace Database
 				new ChoreType[] { this.Die },
 				new ChoreType[] { this.Entombed },
 				new ChoreType[] { this.HealCritical },
-				new ChoreType[] { this.BeIncapacitated },
+				new ChoreType[] { this.BeIncapacitated, this.GeneShuffle },
 				new ChoreType[] { this.DebugGoTo },
 				new ChoreType[] { this.StressVomit },
 				new ChoreType[] { this.MoveTo },
 				new ChoreType[] { this.RecoverBreath },
 				new ChoreType[] { this.UglyCry },
 				new ChoreType[] { this.BingeEat },
-				new ChoreType[] { this.EmoteHighPriority, this.StressActingOut, this.Vomit, this.Pee, this.StressIdle },
+				new ChoreType[] { this.EmoteHighPriority, this.StressActingOut, this.Vomit, this.Cough, this.Pee, this.StressIdle, this.RescueIncapacitated },
 				new ChoreType[] { this.MoveToQuarantine },
 				new ChoreType[] { this.Attack },
 				new ChoreType[] { this.Flee },
 				new ChoreType[] { this.UseToilet, this.Eat },
-				new ChoreType[] { this.Heal, this.RestDueToDisease, this.Sleep, this.SleepOnFloor, this.Warmup, this.Cooldown },
+				new ChoreType[] { this.Heal, this.SleepDueToDisease, this.RestDueToDisease },
+				new ChoreType[] { this.Sleep, this.Narcolepsy, this.Warmup, this.Cooldown },
+				new ChoreType[] { this.Emote },
 				new ChoreType[] { this.Relax },
 				new ChoreType[] { this.Equip, this.Unequip },
 				new ChoreType[]
 				{
-					this.DeliverFood, this.Sigh, this.EmptyStorage, this.Upgrade, this.RescueIncapacitated, this.Repair, this.Shower, this.CleanToilet, this.LiquidCooledFan, this.WashHands,
-					this.TakeMedicine, this.Doctor, this.Recharge, this.FetchCritical, this.MoveToSafety, this.Relocate, this.Research, this.ResearchFetch, this.Mop, this.Toggle,
-					this.Deconstruct, this.Fetch, this.Transport, this.Art, this.GeneratePower, this.CompostWorkable, this.DropUnusedInventory, this.Harvest, this.Uproot, this.Fabricate,
-					this.Mush, this.Cook, this.Build, this.Dig, this.BuildDig, this.FlipCompost, this.BuildFetch, this.CookFetch, this.MushFetch, this.FabricateFetch,
-					this.StressEmote
+					this.DeliverFood, this.Sigh, this.EmptyStorage, this.Upgrade, this.Repair, this.Disinfect, this.Shower, this.CleanToilet, this.LiquidCooledFan, this.WashHands,
+					this.TakeMedicine, this.Doctor, this.Recharge, this.FetchCritical, this.ScrubOre, this.MoveToSafety, this.Relocate, this.Research, this.ResearchFetch, this.Mop,
+					this.Toggle, this.Deconstruct, this.Fetch, this.Transport, this.Art, this.GeneratePower, this.CompostWorkable, this.DropUnusedInventory, this.Harvest, this.Uproot,
+					this.Fabricate, this.Mush, this.Cook, this.Build, this.Dig, this.BuildDig, this.FlipCompost, this.BuildFetch, this.CookFetch, this.MushFetch,
+					this.FabricateFetch, this.StressEmote
 				},
 				new ChoreType[] { this.Idle }
 			};
@@ -166,6 +174,8 @@ namespace Database
 
 		public ChoreType Die;
 
+		public ChoreType GeneShuffle;
+
 		public ChoreType Doctor;
 
 		public ChoreType WashHands;
@@ -188,9 +198,11 @@ namespace Database
 
 		public ChoreType Sleep;
 
-		public ChoreType SleepOnFloor;
+		public ChoreType Narcolepsy;
 
 		public ChoreType Vomit;
+
+		public ChoreType Cough;
 
 		public ChoreType Pee;
 
@@ -198,9 +210,13 @@ namespace Database
 
 		public ChoreType RestDueToDisease;
 
+		public ChoreType SleepDueToDisease;
+
 		public ChoreType Heal;
 
 		public ChoreType HealCritical;
+
+		public ChoreType Emote;
 
 		public ChoreType EmoteHighPriority;
 
@@ -231,6 +247,8 @@ namespace Database
 		public ChoreType Fetch;
 
 		public ChoreType Upgrade;
+
+		public ChoreType Disinfect;
 
 		public ChoreType Repair;
 
@@ -295,6 +313,8 @@ namespace Database
 		public ChoreType BingeEat;
 
 		public ChoreType StressIdle;
+
+		public ChoreType ScrubOre;
 
 		private int nextPriority = 10000;
 	}

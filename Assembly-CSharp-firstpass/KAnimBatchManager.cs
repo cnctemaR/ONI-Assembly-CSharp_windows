@@ -6,11 +6,24 @@ public class KAnimBatchManager
 {
 	public int dirtyBatchLastFrame { get; private set; }
 
+	public Bounds GetCurrentActiveArea()
+	{
+		return this.currentActiveArea;
+	}
+
+	public static KAnimBatchManager instance
+	{
+		get
+		{
+			return Singleton<KAnimBatchManager>.Instance;
+		}
+	}
+
 	public static KAnimBatchManager Instance()
 	{
-		if (KAnimBatchManager.instance == null)
+		if (!KAnimBatchManager.created)
 		{
-			KAnimBatchManager.instance = new KAnimBatchManager();
+			KAnimBatchManager.created = true;
 			if (!SystemInfo.SupportsTextureFormat(TextureFormat.RGBAFloat))
 			{
 				global::Debug.LogError("Machine does not support RGBAFloat32", null);
@@ -26,17 +39,31 @@ public class KAnimBatchManager
 			KAnimBatchManager.instance.ready = false;
 			foreach (KeyValuePair<BatchGroupKey, KAnimBatchGroup> keyValuePair in KAnimBatchManager.instance.batchGroups)
 			{
-				keyValuePair.Value.Finalise();
+				keyValuePair.Value.FreeResources();
 			}
 			KAnimBatchManager.instance.batchGroups.Clear();
+			foreach (KeyValuePair<HashedString, KBatchGroupData> keyValuePair2 in KAnimBatchManager.instance.batchGroupData)
+			{
+				if (keyValuePair2.Value != null)
+				{
+					keyValuePair2.Value.FreeResources();
+				}
+			}
 			KAnimBatchManager.instance.batchGroupData.Clear();
-			KAnimBatchManager.instance.activeBatchSets.Clear();
+			foreach (KeyValuePair<BatchKey, BatchSet> keyValuePair3 in KAnimBatchManager.instance.batchSets)
+			{
+				if (keyValuePair3.Value != null)
+				{
+					keyValuePair3.Value.Clear();
+				}
+			}
 			KAnimBatchManager.instance.batchSets.Clear();
+			KAnimBatchManager.instance.activeBatchSets.Clear();
 			KAnimBatchManager.instance.inactiveBatchSets.Clear();
 			KAnimBatchManager.instance.dirtyBatchLastFrame = 0;
-			KAnimBatchManager.instance = null;
 			KAnimBatchGroup.FinalizeTextureCache();
 		}
+		Singleton<KAnimBatchManager>.Destroy();
 	}
 
 	public void ClearMultiInstances()
@@ -56,7 +83,7 @@ public class KAnimBatchManager
 			{
 				this.batchGroupData.Remove(batchGroupKey.groupID);
 			}
-			this.batchGroups[batchGroupKey].Finalise();
+			this.batchGroups[batchGroupKey].FreeResources();
 			this.batchGroups.Remove(batchGroupKey);
 		}
 	}
@@ -89,7 +116,7 @@ public class KAnimBatchManager
 
 	public KAnimBatchGroup GetBatchGroup(KAnimConverter.IAnimConverter controller)
 	{
-		BatchKey batchKey = new BatchKey(controller);
+		BatchKey batchKey = BatchKey.Create(controller);
 		return this.GetBatchGroup(batchKey);
 	}
 
@@ -112,7 +139,7 @@ public class KAnimBatchManager
 
 	public void MoveChunk(KAnimConverter.IAnimConverter controller, Vector2I lastChunkXY, Vector2I newChunkXY)
 	{
-		BatchKey batchKey = new BatchKey(controller, newChunkXY);
+		BatchKey batchKey = BatchKey.Create(controller, newChunkXY);
 		KAnimBatch batch = controller.GetBatch();
 		BatchSet batchSet;
 		if (!this.batchSets.TryGetValue(batchKey, out batchSet))
@@ -125,7 +152,11 @@ public class KAnimBatchManager
 
 	public void Register(KAnimConverter.IAnimConverter controller)
 	{
-		BatchKey batchKey = new BatchKey(controller);
+		if (!this.isReady)
+		{
+			global::Debug.LogError(string.Format("Batcher isnt finished setting up, controller [{0}] is registering too early.", controller.GetName()), null);
+		}
+		BatchKey batchKey = BatchKey.Create(controller);
 		Vector2I cellXY = controller.GetCellXY();
 		Vector2I vector2I = KAnimBatchManager.CellXYToChunkXY(cellXY);
 		BatchSet batchSet;
@@ -251,5 +282,5 @@ public class KAnimBatchManager
 
 	private HashSet<BatchSet> inactiveBatchSets = new HashSet<BatchSet>();
 
-	private static KAnimBatchManager instance;
+	private static bool created = false;
 }

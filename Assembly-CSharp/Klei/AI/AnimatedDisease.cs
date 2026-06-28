@@ -3,18 +3,24 @@ using UnityEngine;
 
 namespace Klei.AI
 {
-	public abstract class AnimatedDisease : Disease
+	public class AnimatedDisease : Disease.DiseaseComponent
 	{
-		public AnimatedDisease(string disease_id, float infection_probability, float sickness_duration, string kanim_filename, string expression_id)
-			: base(disease_id, infection_probability, sickness_duration, null)
+		public AnimatedDisease(HashedString[] kanim_filenames, string expression_id)
 		{
-			this.kanim = Assets.GetAnim(kanim_filename);
+			this.kanims = new KAnimFile[kanim_filenames.Length];
+			for (int i = 0; i < kanim_filenames.Length; i++)
+			{
+				this.kanims[i] = Assets.GetAnim(kanim_filenames[i]);
+			}
 			this.expressionID = expression_id;
 		}
 
-		protected override object OnInfect(GameObject go)
+		public override object OnInfect(GameObject go, DiseaseInstance diseaseInstance)
 		{
-			go.GetComponent<KAnimControllerBase>().AddAnimOverrides(this.kanim, 10f);
+			for (int i = 0; i < this.kanims.Length; i++)
+			{
+				go.GetComponent<KAnimControllerBase>().AddAnimOverrides(this.kanims[i], 10f);
+			}
 			if (this.expressionID != null)
 			{
 				Expression expression = Db.Get().Expressions.TryGet(this.expressionID);
@@ -23,17 +29,20 @@ namespace Klei.AI
 			return null;
 		}
 
-		protected override void OnCure(GameObject go, object instace_data)
+		public override void OnCure(GameObject go, object instace_data)
 		{
 			if (this.expressionID != null)
 			{
 				Expression expression = Db.Get().Expressions.TryGet(this.expressionID);
 				go.GetComponent<FaceGraph>().RemoveExpression(expression);
 			}
-			go.GetComponent<KAnimControllerBase>().RemoveAnimOverrides(this.kanim);
+			for (int i = 0; i < this.kanims.Length; i++)
+			{
+				go.GetComponent<KAnimControllerBase>().RemoveAnimOverrides(this.kanims[i]);
+			}
 		}
 
-		private KAnimFile kanim;
+		private KAnimFile[] kanims;
 
 		private string expressionID;
 	}

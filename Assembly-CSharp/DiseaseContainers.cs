@@ -1,0 +1,198 @@
+﻿using System;
+using System.Collections.Generic;
+using Database;
+using Klei;
+using Klei.AI;
+using UnityEngine;
+
+public class DiseaseContainers : KGameObjectComponentManager<DiseaseContainer>
+{
+	public HandleVector<int>.Handle Add(GameObject go, byte disease_idx, int disease_count)
+	{
+		DiseaseContainer diseaseContainer = new DiseaseContainer(go, disease_idx, disease_count);
+		if (disease_idx != 255)
+		{
+			diseaseContainer = this.EvaluateGrowthConstants(diseaseContainer);
+		}
+		return base.Add(go, diseaseContainer);
+	}
+
+	protected override void OnCleanUp(HandleVector<int>.Handle h)
+	{
+		base.OnCleanUp(h);
+		DiseaseContainer data = base.GetData(h);
+	}
+
+	public override void SimUpdate(float dt)
+	{
+		using (new KProfiler.Region("DiseaseContainers.SimUpdate", null))
+		{
+			for (int i = 0; i < this.data.Count; i++)
+			{
+				DiseaseContainer diseaseContainer = this.data[i];
+				if (diseaseContainer.diseaseIdx != 255 && !(diseaseContainer.primaryElement == null))
+				{
+					Disease disease = Db.Get().Diseases[(int)diseaseContainer.diseaseIdx];
+					float num = DiseaseContainers.CalculateDelta(diseaseContainer, disease, dt);
+					num += diseaseContainer.accumulatedError;
+					int num2 = (int)num;
+					diseaseContainer.accumulatedError = num - (float)num2;
+					bool flag = diseaseContainer.diseaseCount > diseaseContainer.overpopulationCount;
+					bool flag2 = diseaseContainer.diseaseCount + num2 > diseaseContainer.overpopulationCount;
+					if (flag != flag2)
+					{
+						diseaseContainer = this.EvaluateGrowthConstants(diseaseContainer);
+					}
+					diseaseContainer.diseaseCount += num2;
+					if (diseaseContainer.diseaseCount <= 0)
+					{
+						diseaseContainer.diseaseCount = 0;
+						diseaseContainer.diseaseIdx = byte.MaxValue;
+						diseaseContainer.accumulatedError = 0f;
+					}
+					this.data[i] = diseaseContainer;
+				}
+			}
+		}
+	}
+
+	public static float CalculateDelta(DiseaseContainer container, Disease disease, float dt)
+	{
+		int num = Grid.PosToCell(container.primaryElement.transform.position);
+		return DiseaseContainers.CalculateDelta(container.diseaseCount, (int)container.elemIdx, num, container.primaryElement.Temperature, container.instanceGrowthRate, disease, dt);
+	}
+
+	public static float CalculateDelta(int disease_count, int element_idx, int environment_cell, float temperature, float tags_multiplier_base, Disease disease, float dt)
+	{
+		float num = 0f;
+		Disease.ElemGrowthInfo elemGrowthInfo = disease.elemGrowthInfo[element_idx];
+		num += elemGrowthInfo.CalculateDiseaseCountDelta(disease_count, dt);
+		float num2 = Disease.CalculateRangeHalfLife(temperature, ref disease.temperatureRange, ref disease.temperatureHalfLives);
+		float num3 = Disease.HalfLifeToGrowthRate(num2, dt);
+		num += (float)disease_count * num3 - (float)disease_count;
+		float num4 = Mathf.Pow(tags_multiplier_base, dt);
+		num += (float)disease_count * num4 - (float)disease_count;
+		if (Grid.IsValidCell(environment_cell))
+		{
+			byte elementIdx = Grid.Cell[environment_cell].elementIdx;
+			Disease.ElemGrowthInfo elemGrowthInfo2 = disease.elemExposureInfo[(int)elementIdx];
+			num += elemGrowthInfo2.CalculateDiseaseCountDelta(disease_count, dt);
+		}
+		return num;
+	}
+
+	public int ModifyDiseaseCount(HandleVector<int>.Handle h, int disease_count_delta)
+	{
+		DiseaseContainer data = base.GetData(h);
+		data.diseaseCount = Math.Max(0, data.diseaseCount + disease_count_delta);
+		if (data.diseaseCount == 0)
+		{
+			data.diseaseIdx = byte.MaxValue;
+			data.accumulatedError = 0f;
+		}
+		base.SetData(h, data);
+		return data.diseaseCount;
+	}
+
+	public int AddDisease(HandleVector<int>.Handle h, byte disease_idx, int disease_count)
+	{
+		DiseaseContainer diseaseContainer = base.GetData(h);
+		SimUtil.DiseaseInfo diseaseInfo = SimUtil.CalculateFinalDiseaseInfo(disease_idx, disease_count, diseaseContainer.diseaseIdx, diseaseContainer.diseaseCount);
+		bool flag = diseaseContainer.diseaseIdx != diseaseInfo.idx;
+		diseaseContainer.diseaseIdx = diseaseInfo.idx;
+		diseaseContainer.diseaseCount = diseaseInfo.count;
+		if (flag && diseaseInfo.idx != 255)
+		{
+			diseaseContainer = this.EvaluateGrowthConstants(diseaseContainer);
+		}
+		base.SetData(h, diseaseContainer);
+		if (flag)
+		{
+			diseaseContainer.primaryElement.Trigger(-283306403, null);
+		}
+		return diseaseContainer.diseaseCount;
+	}
+
+	public void UpdateOverlayColours()
+	{
+		GridArea visibleArea = GridVisibleArea.GetVisibleArea();
+		global::Database.Diseases diseases = Db.Get().Diseases;
+		Color32 color = new Color32(0, 0, 0, byte.MaxValue);
+		for (int i = 0; i < this.data.Count; i++)
+		{
+			DiseaseContainer diseaseContainer = this.data[i];
+			KBatchedAnimController controller = diseaseContainer.controller;
+			if (controller != null)
+			{
+				Vector3 position = controller.transform.position;
+				if (visibleArea.Min <= position && position <= visibleArea.Max)
+				{
+					Color32 color2 = color;
+					int num = 0;
+					if (diseaseContainer.diseaseIdx != 255)
+					{
+						color2 = diseases[(int)diseaseContainer.diseaseIdx].overlayColour;
+						num = diseaseContainer.diseaseCount;
+					}
+					if (diseaseContainer.isContainer)
+					{
+						Storage component = diseaseContainer.primaryElement.GetComponent<Storage>();
+						List<GameObject> items = component.items;
+						for (int j = 0; j < items.Count; j++)
+						{
+							GameObject gameObject = items[j];
+							if (gameObject != null)
+							{
+								HandleVector<int>.Handle handle = base.GetHandle(gameObject);
+								if (handle.IsValid())
+								{
+									DiseaseContainer data = base.GetData(handle);
+									if (data.diseaseCount > num && data.diseaseIdx != 255)
+									{
+										num = data.diseaseCount;
+										color2 = diseases[(int)data.diseaseIdx].overlayColour;
+									}
+								}
+							}
+						}
+					}
+					color2.a = SimUtil.DiseaseCountToAlpha254(num);
+					if (diseaseContainer.conduitType != ConduitType.None)
+					{
+						ConduitFlow flowManager = Conduit.GetFlowManager(diseaseContainer.conduitType);
+						int num2 = Grid.PosToCell(position);
+						ConduitFlow.ConduitContents contents = flowManager.GetContents(num2);
+						if (contents.diseaseIdx != 255 && contents.diseaseCount > num)
+						{
+							num = contents.diseaseCount;
+							color2 = diseases[(int)contents.diseaseIdx].overlayColour;
+							color2.a = byte.MaxValue;
+						}
+					}
+					diseaseContainer.controller.OverlayColour = color2;
+				}
+			}
+		}
+	}
+
+	private DiseaseContainer EvaluateGrowthConstants(DiseaseContainer container)
+	{
+		Disease disease = Db.Get().Diseases[(int)container.diseaseIdx];
+		KPrefabID component = container.primaryElement.GetComponent<KPrefabID>();
+		Disease.ElemGrowthInfo elemGrowthInfo = disease.elemGrowthInfo[(int)container.diseaseIdx];
+		container.overpopulationCount = elemGrowthInfo.maxCount;
+		container.instanceGrowthRate = disease.GetGrowthRateForTags(component.Tags, container.diseaseCount > elemGrowthInfo.maxCount);
+		return container;
+	}
+
+	public override void Clear()
+	{
+		base.Clear();
+		for (int i = 0; i < this.data.Count; i++)
+		{
+			this.data[i].Clear();
+		}
+		this.data.Clear();
+		this.handles.Clear();
+	}
+}

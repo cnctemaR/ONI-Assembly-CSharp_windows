@@ -2,20 +2,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using YamlDotNet.Serialization.NamingConventions;
+using YamlDotNet.Helpers;
 using YamlDotNet.Serialization.Utilities;
 
 namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 {
 	public class FullObjectGraphTraversalStrategy : IObjectGraphTraversalStrategy
 	{
-		public FullObjectGraphTraversalStrategy(Serializer serializer, ITypeInspector typeDescriptor, ITypeResolver typeResolver, int maxRecursion, INamingConvention namingConvention)
+		public FullObjectGraphTraversalStrategy(ITypeInspector typeDescriptor, ITypeResolver typeResolver, int maxRecursion, INamingConvention namingConvention)
 		{
 			if (maxRecursion <= 0)
 			{
 				throw new ArgumentOutOfRangeException("maxRecursion", maxRecursion, "maxRecursion must be greater than 1");
 			}
-			this.serializer = serializer;
 			if (typeDescriptor == null)
 			{
 				throw new ArgumentNullException("typeDescriptor");
@@ -30,18 +29,18 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 			this.namingConvention = namingConvention;
 		}
 
-		void IObjectGraphTraversalStrategy.Traverse(IObjectDescriptor graph, IObjectGraphVisitor visitor)
+		void IObjectGraphTraversalStrategy.Traverse<TContext>(IObjectDescriptor graph, IObjectGraphVisitor<TContext> visitor, TContext context)
 		{
-			this.Traverse(graph, visitor, 0);
+			this.Traverse<TContext>(graph, visitor, 0, context);
 		}
 
-		protected virtual void Traverse(IObjectDescriptor value, IObjectGraphVisitor visitor, int currentDepth)
+		protected virtual void Traverse<TContext>(IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, int currentDepth, TContext context)
 		{
 			if (++currentDepth > this.maxRecursion)
 			{
 				throw new InvalidOperationException("Too much recursion when traversing the object graph");
 			}
-			if (!visitor.Enter(value))
+			if (!visitor.Enter(value, context))
 			{
 				return;
 			}
@@ -51,7 +50,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 			case TypeCode.Empty:
 				throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", new object[] { typeCode }));
 			case TypeCode.DBNull:
-				visitor.VisitScalar(new ObjectDescriptor(null, typeof(object), typeof(object)));
+				visitor.VisitScalar(new ObjectDescriptor(null, typeof(object), typeof(object)), context);
 				return;
 			case TypeCode.Boolean:
 			case TypeCode.Char:
@@ -68,135 +67,96 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 			case TypeCode.Decimal:
 			case TypeCode.DateTime:
 			case TypeCode.String:
-				visitor.VisitScalar(value);
+				visitor.VisitScalar(value, context);
 				return;
 			}
 			if (value.Value == null || value.Type == typeof(TimeSpan))
 			{
-				visitor.VisitScalar(value);
+				visitor.VisitScalar(value, context);
 				return;
 			}
 			Type underlyingType = Nullable.GetUnderlyingType(value.Type);
 			if (underlyingType != null)
 			{
-				this.Traverse(new ObjectDescriptor(value.Value, underlyingType, value.Type, value.ScalarStyle), visitor, currentDepth);
+				this.Traverse<TContext>(new ObjectDescriptor(value.Value, underlyingType, value.Type, value.ScalarStyle), visitor, currentDepth, context);
 				return;
 			}
-			this.TraverseObject(value, visitor, currentDepth);
+			this.TraverseObject<TContext>(value, visitor, currentDepth, context);
 		}
 
-		protected virtual void TraverseObject(IObjectDescriptor value, IObjectGraphVisitor visitor, int currentDepth)
+		protected virtual void TraverseObject<TContext>(IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, int currentDepth, TContext context)
 		{
 			if (typeof(IDictionary).IsAssignableFrom(value.Type))
 			{
-				this.TraverseDictionary(value, visitor, currentDepth);
+				this.TraverseDictionary<TContext>(value, visitor, currentDepth, typeof(object), typeof(object), context);
 				return;
 			}
 			Type implementedGenericInterface = ReflectionUtility.GetImplementedGenericInterface(value.Type, typeof(IDictionary<, >));
 			if (implementedGenericInterface != null)
 			{
-				this.TraverseGenericDictionary(value, implementedGenericInterface, visitor, currentDepth);
+				GenericDictionaryToNonGenericAdapter genericDictionaryToNonGenericAdapter = new GenericDictionaryToNonGenericAdapter(value.Value, implementedGenericInterface);
+				Type[] genericArguments = implementedGenericInterface.GetGenericArguments();
+				this.TraverseDictionary<TContext>(new ObjectDescriptor(genericDictionaryToNonGenericAdapter, value.Type, value.StaticType, value.ScalarStyle), visitor, currentDepth, genericArguments[0], genericArguments[1], context);
 				return;
 			}
 			if (typeof(IEnumerable).IsAssignableFrom(value.Type))
 			{
-				this.TraverseList(value, visitor, currentDepth);
+				this.TraverseList<TContext>(value, visitor, currentDepth, context);
 				return;
 			}
-			this.TraverseProperties(value, visitor, currentDepth);
+			this.TraverseProperties<TContext>(value, visitor, currentDepth, context);
 		}
 
-		protected virtual void TraverseDictionary(IObjectDescriptor dictionary, IObjectGraphVisitor visitor, int currentDepth)
+		protected virtual void TraverseDictionary<TContext>(IObjectDescriptor dictionary, IObjectGraphVisitor<TContext> visitor, int currentDepth, Type keyType, Type valueType, TContext context)
 		{
-			visitor.VisitMappingStart(dictionary, typeof(object), typeof(object));
+			visitor.VisitMappingStart(dictionary, keyType, valueType, context);
+			bool flag = dictionary.Type.FullName.Equals("System.Dynamic.ExpandoObject");
 			foreach (object obj in ((IDictionary)dictionary.Value))
 			{
 				DictionaryEntry dictionaryEntry = (DictionaryEntry)obj;
-				IObjectDescriptor objectDescriptor = this.GetObjectDescriptor(dictionaryEntry.Key, typeof(object));
-				IObjectDescriptor objectDescriptor2 = this.GetObjectDescriptor(dictionaryEntry.Value, typeof(object));
-				if (visitor.EnterMapping(objectDescriptor, objectDescriptor2))
+				string text = (flag ? this.namingConvention.Apply(dictionaryEntry.Key.ToString()) : dictionaryEntry.Key.ToString());
+				IObjectDescriptor objectDescriptor = this.GetObjectDescriptor(text, keyType);
+				IObjectDescriptor objectDescriptor2 = this.GetObjectDescriptor(dictionaryEntry.Value, valueType);
+				if (visitor.EnterMapping(objectDescriptor, objectDescriptor2, context))
 				{
-					this.Traverse(objectDescriptor, visitor, currentDepth);
-					this.Traverse(objectDescriptor2, visitor, currentDepth);
+					this.Traverse<TContext>(objectDescriptor, visitor, currentDepth, context);
+					this.Traverse<TContext>(objectDescriptor2, visitor, currentDepth, context);
 				}
 			}
-			visitor.VisitMappingEnd(dictionary);
+			visitor.VisitMappingEnd(dictionary, context);
 		}
 
-		private void TraverseGenericDictionary(IObjectDescriptor dictionary, Type dictionaryType, IObjectGraphVisitor visitor, int currentDepth)
-		{
-			Type[] genericArguments = dictionaryType.GetGenericArguments();
-			visitor.VisitMappingStart(dictionary, genericArguments[0], genericArguments[1]);
-			FullObjectGraphTraversalStrategy.traverseGenericDictionaryHelper.Invoke(genericArguments, this, new object[]
-			{
-				dictionary.Value,
-				visitor,
-				currentDepth,
-				this.namingConvention ?? new NullNamingConvention()
-			});
-			visitor.VisitMappingEnd(dictionary);
-		}
-
-		private void TraverseGenericDictionaryHelper<TKey, TValue>(IDictionary<TKey, TValue> dictionary, IObjectGraphVisitor visitor, int currentDepth, INamingConvention namingConvention)
-		{
-			bool flag = dictionary.GetType().FullName.Equals("System.Dynamic.ExpandoObject");
-			foreach (KeyValuePair<TKey, TValue> keyValuePair in dictionary)
-			{
-				string text;
-				if (!flag)
-				{
-					TKey key = keyValuePair.Key;
-					text = key.ToString();
-				}
-				else
-				{
-					TKey key2 = keyValuePair.Key;
-					text = namingConvention.Apply(key2.ToString());
-				}
-				string text2 = text;
-				IObjectDescriptor objectDescriptor = this.GetObjectDescriptor(text2, typeof(TKey));
-				IObjectDescriptor objectDescriptor2 = this.GetObjectDescriptor(keyValuePair.Value, typeof(TValue));
-				if (visitor.EnterMapping(objectDescriptor, objectDescriptor2))
-				{
-					this.Traverse(objectDescriptor, visitor, currentDepth);
-					this.Traverse(objectDescriptor2, visitor, currentDepth);
-				}
-			}
-		}
-
-		private void TraverseList(IObjectDescriptor value, IObjectGraphVisitor visitor, int currentDepth)
+		private void TraverseList<TContext>(IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, int currentDepth, TContext context)
 		{
 			Type implementedGenericInterface = ReflectionUtility.GetImplementedGenericInterface(value.Type, typeof(IEnumerable<>));
 			Type type = ((implementedGenericInterface != null) ? implementedGenericInterface.GetGenericArguments()[0] : typeof(object));
-			visitor.VisitSequenceStart(value, type);
+			visitor.VisitSequenceStart(value, type, context);
 			foreach (object obj in ((IEnumerable)value.Value))
 			{
-				this.Traverse(this.GetObjectDescriptor(obj, type), visitor, currentDepth);
+				this.Traverse<TContext>(this.GetObjectDescriptor(obj, type), visitor, currentDepth, context);
 			}
-			visitor.VisitSequenceEnd(value);
+			visitor.VisitSequenceEnd(value, context);
 		}
 
-		protected virtual void TraverseProperties(IObjectDescriptor value, IObjectGraphVisitor visitor, int currentDepth)
+		protected virtual void TraverseProperties<TContext>(IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, int currentDepth, TContext context)
 		{
-			visitor.VisitMappingStart(value, typeof(string), typeof(object));
+			visitor.VisitMappingStart(value, typeof(string), typeof(object), context);
 			foreach (IPropertyDescriptor propertyDescriptor in this.typeDescriptor.GetProperties(value.Type, value.Value))
 			{
 				IObjectDescriptor objectDescriptor = propertyDescriptor.Read(value.Value);
-				if (visitor.EnterMapping(propertyDescriptor, objectDescriptor))
+				if (visitor.EnterMapping(propertyDescriptor, objectDescriptor, context))
 				{
-					this.Traverse(new ObjectDescriptor(propertyDescriptor.Name, typeof(string), typeof(string)), visitor, currentDepth);
-					this.Traverse(objectDescriptor, visitor, currentDepth);
+					this.Traverse<TContext>(new ObjectDescriptor(propertyDescriptor.Name, typeof(string), typeof(string)), visitor, currentDepth, context);
+					this.Traverse<TContext>(objectDescriptor, visitor, currentDepth, context);
 				}
 			}
-			visitor.VisitMappingEnd(value);
+			visitor.VisitMappingEnd(value, context);
 		}
 
 		private IObjectDescriptor GetObjectDescriptor(object value, Type staticType)
 		{
 			return new ObjectDescriptor(value, this.typeResolver.Resolve(staticType, value), staticType);
 		}
-
-		protected readonly Serializer serializer;
 
 		private readonly int maxRecursion;
 
@@ -205,7 +165,5 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 		private readonly ITypeResolver typeResolver;
 
 		private INamingConvention namingConvention;
-
-		private static readonly GenericInstanceMethod<FullObjectGraphTraversalStrategy> traverseGenericDictionaryHelper = new GenericInstanceMethod<FullObjectGraphTraversalStrategy>((FullObjectGraphTraversalStrategy s) => s.TraverseGenericDictionaryHelper<int, int>(null, null, 0, null));
 	}
 }

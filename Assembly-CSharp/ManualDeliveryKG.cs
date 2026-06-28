@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using KSerialization;
+using STRINGS;
 using UnityEngine;
 
-[SerializationConfig(MemberSerialization.OptIn)]
 [SkipSaveFileSerialization]
+[SerializationConfig(MemberSerialization.OptIn)]
 public class ManualDeliveryKG : KMonoBehaviour
 {
 	public float Capacity
@@ -37,17 +38,21 @@ public class ManualDeliveryKG : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		this.Subscribe(-111137758, new Action<object>(this.OnRefreshUserMenu));
 		if (this.storage != null)
 		{
 			this.SetStorage(this.storage);
 		}
 		this.UpdateFilteredItems();
+		Prioritizable.AddRef(base.gameObject);
 	}
 
 	protected override void OnCleanUp()
 	{
-		base.OnCleanUp();
 		this.AbortDelivery("ManualDeliverKG destroyed");
+		Prioritizable.RemoveRef(base.gameObject);
+		base.OnCleanUp();
 	}
 
 	public void SetStorage(Storage storage)
@@ -111,7 +116,7 @@ public class ManualDeliveryKG : KMonoBehaviour
 			this.fetchList = new FetchList2(this.storage);
 			this.fetchList.ShowStatusItem = this.ShowStatusItem;
 			this.fetchList.MinimumAmount[this.requestedItemTag] = this.minimumMass;
-			this.fetchList.Add(new Tag[] { this.requestedItemTag }, num, this.operationalRequirement);
+			this.fetchList.Add(new Tag[] { this.requestedItemTag }, null, num, this.operationalRequirement);
 			this.fetchList.Submit(null, false);
 		}
 	}
@@ -162,6 +167,39 @@ public class ManualDeliveryKG : KMonoBehaviour
 		}
 	}
 
+	private void OnPause()
+	{
+		this.Pause(true, "Forbid manual delivery");
+	}
+
+	private void OnResume()
+	{
+		this.Pause(false, "Allow manual delivery");
+	}
+
+	private void OnRefreshUserMenu(object data)
+	{
+		if (!this.allowPause)
+		{
+			return;
+		}
+		if (!this.paused)
+		{
+			UserMenu userMenu = this.userMenu;
+			string text = UI.USERMENUACTIONS.MANUAL_DELIVERY.TOOLTIP;
+			userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_move_to_storage", UI.USERMENUACTIONS.MANUAL_DELIVERY.NAME, new global::System.Action(this.OnPause), global::Action.NumActions, null, null, null, text, true), 1f);
+		}
+		else
+		{
+			UserMenu userMenu2 = this.userMenu;
+			string text = UI.USERMENUACTIONS.MANUAL_DELIVERY.TOOLTIP_OFF;
+			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_move_to_storage", UI.USERMENUACTIONS.MANUAL_DELIVERY.NAME_OFF, new global::System.Action(this.OnResume), global::Action.NumActions, null, null, null, text, true), 1f);
+		}
+	}
+
+	[MyCmpAdd]
+	private UserMenu userMenu;
+
 	[SerializeField]
 	private Storage storage;
 
@@ -180,14 +218,18 @@ public class ManualDeliveryKG : KMonoBehaviour
 	[SerializeField]
 	public FetchOrder2.OperationalRequirement operationalRequirement;
 
+	[SerializeField]
+	public bool allowPause;
+
+	[SerializeField]
+	private bool paused;
+
 	[NonSerialized]
 	public bool ShowStatusItem = true;
 
 	private FetchList2 fetchList;
 
 	private List<PrimaryElement> filteredStoredItems = new List<PrimaryElement>();
-
-	private bool paused;
 
 	public Func<float> getFetchAmount;
 }

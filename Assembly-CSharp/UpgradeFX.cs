@@ -20,13 +20,13 @@ public class UpgradeFX : GameStateMachine<UpgradeFX, UpgradeFX.Instance>
 		public Instance(IStateMachineTarget master, Vector3 offset)
 			: base(master)
 		{
-			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("upgrade_fx_kanim", master.gameObject.transform.position + offset, master.gameObject.transform, true, Grid.SceneLayer.Front);
+			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("upgrade_fx_kanim", master.gameObject.transform.position + offset, master.gameObject.transform, true, Grid.SceneLayer.Front, false);
 			base.sm.fx.Set(kbatchedAnimController.gameObject, base.smi);
 		}
 
 		public void DestroyFX()
 		{
-			global::UnityEngine.Object.Destroy(base.sm.fx.Get(base.smi));
+			Util.KDestroyGameObject(base.sm.fx.Get(base.smi));
 		}
 	}
 }

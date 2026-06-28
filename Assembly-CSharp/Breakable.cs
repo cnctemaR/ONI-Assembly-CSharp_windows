@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
-public class Breakable : BuildingWorkable
+public class Breakable : Workable
 {
 	protected override void OnPrefabInit()
 	{
@@ -26,7 +26,7 @@ public class Breakable : BuildingWorkable
 
 	public Notification CreateDamageNotification()
 	{
-		return new Notification(BUILDING.STATUSITEMS.ANGERDAMAGE.NOTIFICATION, NotificationType.BadMinor, HashedString.Invalid, new Func<List<Notification>, object, string>(Breakable.ToolTipResolver), this.selectable.GetProperName(), false, 0f, null, null, null);
+		return new Notification(BUILDING.STATUSITEMS.ANGERDAMAGE.NOTIFICATION, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notificationList, object data) => BUILDING.STATUSITEMS.ANGERDAMAGE.NOTIFICATION_TOOLTIP + notificationList.ReduceMessages(false), this.selectable.GetProperName(), false, 0f, null, null, null);
 	}
 
 	private static string ToolTipResolver(List<Notification> notificationList, object data)

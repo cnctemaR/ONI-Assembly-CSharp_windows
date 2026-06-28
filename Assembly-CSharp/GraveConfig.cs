@@ -6,7 +6,8 @@ public class GraveConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Grave", 1, 2, "gravestone_kanim", 100f, 30, 120f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER5, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, null);
+		EffectorValues none = NOISE_POLLUTION.NONE;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Grave", 1, 2, "gravestone_kanim", 100f, 30, 120f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER5, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, none);
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.Relocatable = false;
@@ -22,7 +23,7 @@ public class GraveConfig : IBuildingConfig
 		storage.disableOnStore = true;
 		storage.showInUI = true;
 		go.AddOrGet<Grave>();
-		go.AddOrGet<Prioritizable>();
+		Prioritizable.AddRef(go);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

@@ -13,11 +13,6 @@ public class CookedMeatConfig : IEntityConfig
 		Recipe recipe = new Recipe("CookedMeat", 1f, (SimHashes)0, null, text, 21).SetFabricator("CookingStation", FOOD.RECIPES.STANDARD_COOK_TIME);
 		recipe.AddIngredient(new Recipe.Ingredient("Meat", 1f));
 		recipe.AddIngredient(new Recipe.Ingredient(SpiceNutConfig.ID, 1f));
-		Edible component = gameObject.GetComponent<Edible>();
-		if (component != null)
-		{
-			component.consumptionEffects.Add(new Descriptor(UI.GAMEOBJECTEFFECTS.COOKEDMEATTEMPORARYTRAIT, UI.GAMEOBJECTEFFECTS.TOOLTIPS.COOKEDMEATTEMPORARYTRAIT, Descriptor.DescriptorType.Effect, false));
-		}
 		return gameObject;
 	}
 

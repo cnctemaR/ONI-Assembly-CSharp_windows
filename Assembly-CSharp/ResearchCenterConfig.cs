@@ -6,7 +6,8 @@ public class ResearchCenterConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("ResearchCenter", 2, 2, "research_center_kanim", 200f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, null);
+		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER0;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("ResearchCenter", 2, 2, "research_center_kanim", 200f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, tier);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 60f;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
@@ -21,7 +22,7 @@ public class ResearchCenterConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
-		go.AddOrGet<Prioritizable>();
+		Prioritizable.AddRef(go);
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 1000f;
 		storage.disableOnStore = true;
@@ -55,7 +56,9 @@ public class ResearchCenterConfig : IBuildingConfig
 
 	public const float BASE_RESEARCH_SPEED = 1.16f;
 
-	public const float SKILL_EFFICACY = 0.464f;
+	public const float MIN_RESEARCH_SPEED = 0.2f;
 
 	public const float MASS_PER_POINT = 50f;
+
+	public const string ID = "ResearchCenter";
 }

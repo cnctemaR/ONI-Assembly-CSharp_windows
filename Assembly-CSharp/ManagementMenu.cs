@@ -14,14 +14,14 @@ public class ManagementMenu : KIconToggleMenu
 		this.jobsScreen.gameObject.SetActive(false);
 		this.consumablesScreen = this.instantiator.GetComponentInChildren<ConsumablesTableScreen>();
 		this.consumablesScreen.gameObject.SetActive(false);
-		this.vitalsScreen = this.instantiator.GetComponentInChildren<CrewRationsScreen>();
+		this.vitalsScreen = this.instantiator.GetComponentInChildren<VitalsTableScreen>();
 		this.vitalsScreen.gameObject.SetActive(false);
 		base.Subscribe(Game.Instance.gameObject, 288942073, new Action<object>(this.OnUIClear));
-		this.jobsInfo = new KIconToggleMenu.ToggleInfo(UI.JOBS, "OverviewUI_jobs_icon", null, global::Action.ManagePeople, UI.TOOLTIPS.MANAGEMENTMENU_JOBS);
-		this.consumablesInfo = new KIconToggleMenu.ToggleInfo(UI.CONSUMABLES, "OverviewUI_consumables_icon", null, global::Action.ManageConsumables, UI.TOOLTIPS.MANAGEMENTMENU_CONSUMABLES);
-		this.vitalsInfo = new KIconToggleMenu.ToggleInfo(UI.VITALS, "OverviewUI_vitals_icon", null, global::Action.ManageVitals, UI.TOOLTIPS.MANAGEMENTMENU_VITALS);
-		this.reportsInfo = new KIconToggleMenu.ToggleInfo(UI.REPORT, "OverviewUI_reports_icon", null, global::Action.ManageReport, UI.TOOLTIPS.MANAGEMENTMENU_DAILYREPORT);
-		this.ResearchInfo = new KIconToggleMenu.ToggleInfo(UI.RESEARCH, "OverviewUI_research_nav_icon", null, global::Action.ManageResearch, UI.TOOLTIPS.MANAGEMENTMENU_RESEARCH);
+		this.jobsInfo = new KIconToggleMenu.ToggleInfo(UI.JOBS, "OverviewUI_jobs_icon", null, global::Action.ManagePeople, UI.TOOLTIPS.MANAGEMENTMENU_JOBS, string.Empty);
+		this.consumablesInfo = new KIconToggleMenu.ToggleInfo(UI.CONSUMABLES, "OverviewUI_consumables_icon", null, global::Action.ManageConsumables, UI.TOOLTIPS.MANAGEMENTMENU_CONSUMABLES, string.Empty);
+		this.vitalsInfo = new KIconToggleMenu.ToggleInfo(UI.VITALS, "OverviewUI_vitals_icon", null, global::Action.ManageVitals, UI.TOOLTIPS.MANAGEMENTMENU_VITALS, string.Empty);
+		this.reportsInfo = new KIconToggleMenu.ToggleInfo(UI.REPORT, "OverviewUI_reports_icon", null, global::Action.ManageReport, UI.TOOLTIPS.MANAGEMENTMENU_DAILYREPORT, string.Empty);
+		this.ResearchInfo = new KIconToggleMenu.ToggleInfo(UI.RESEARCH, "OverviewUI_research_nav_icon", null, global::Action.ManageResearch, UI.TOOLTIPS.MANAGEMENTMENU_RESEARCH, string.Empty);
 		this.ScreenInfoMatch.Add(this.jobsInfo, new ManagementMenu.ScreenData
 		{
 			screen = this.jobsScreen,
@@ -183,6 +183,7 @@ public class ManagementMenu : KIconToggleMenu
 		}
 		if (this.activeScreen != screenData)
 		{
+			OverlayScreen.Instance.ToggleOverlay(SimViewMode.None);
 			if (this.activeScreen != null)
 			{
 				this.activeScreen.toggleInfo.toggle.ActivateFlourish(false);
@@ -194,12 +195,6 @@ public class ManagementMenu : KIconToggleMenu
 			this.CloseActive();
 			this.activeScreen = screenData;
 			this.activeScreen.screen.Show(true);
-			OverlayScreen.Instance.ToggleOverlay(SimViewMode.None);
-			KTabMenu componentInChildren = this.activeScreen.screen.GetComponentInChildren<KTabMenu>();
-			if (componentInChildren != null)
-			{
-				componentInChildren.ActivateTab(screenData.tabIdx);
-			}
 		}
 		else
 		{

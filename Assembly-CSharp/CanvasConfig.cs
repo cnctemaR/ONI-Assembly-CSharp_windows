@@ -7,11 +7,12 @@ public class CanvasConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Canvas", 2, 2, "painting_kanim", 100f, 30, 120f, global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.Anywhere, new DecorValues
+		EffectorValues none = NOISE_POLLUTION.NONE;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Canvas", 2, 2, "painting_kanim", 100f, 30, 120f, global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.Anywhere, new EffectorValues
 		{
-			decor = 5,
+			amount = 5,
 			radius = 6
-		}, null);
+		}, none);
 		buildingDef.Floodable = false;
 		buildingDef.SceneLayer = Grid.SceneLayer.BuildingBack;
 		buildingDef.Overheatable = false;
@@ -25,7 +26,7 @@ public class CanvasConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
-		go.AddOrGet<Prioritizable>();
+		go.AddOrGet<BuildingComplete>().isArtable = true;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -36,5 +37,7 @@ public class CanvasConfig : IBuildingConfig
 		artable.stages.Add(new Artable.Stage("Bad", global::STRINGS.BUILDINGS.PREFABS.CANVAS.POORQUALITYNAME, "art_a", 0, 5, false, Artable.Status.Ugly));
 		artable.stages.Add(new Artable.Stage("Average", global::STRINGS.BUILDINGS.PREFABS.CANVAS.AVERAGEQUALITYNAME, "art_b", 2, 10, false, Artable.Status.Okay));
 		artable.stages.Add(new Artable.Stage("Good", global::STRINGS.BUILDINGS.PREFABS.CANVAS.EXCELLENTQUALITYNAME, "art_c", 4, 15, true, Artable.Status.Great));
+		artable.stages.Add(new Artable.Stage("Good2", global::STRINGS.BUILDINGS.PREFABS.CANVAS.EXCELLENTQUALITYNAME, "art_d", 4, 15, true, Artable.Status.Great));
+		artable.stages.Add(new Artable.Stage("Good3", global::STRINGS.BUILDINGS.PREFABS.CANVAS.EXCELLENTQUALITYNAME, "art_e", 4, 15, true, Artable.Status.Great));
 	}
 }

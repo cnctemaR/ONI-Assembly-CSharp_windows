@@ -16,7 +16,7 @@ public class ClearChore : Chore<ClearChore.StatesInstance>
 		Pickupable pickupable = this.smi.sm.clearable.Get<Pickupable>(this.smi);
 		int fetchCount = GlobalChoreProvider.Instance.fetchCount;
 		Chore.Precondition.Context context = default(Chore.Precondition.Context);
-		for (int i = 0; i < GlobalChoreProvider.Instance.fetchCount; i++)
+		for (int i = 0; i < fetchCount; i++)
 		{
 			GlobalChoreProvider.Fetch fetch = GlobalChoreProvider.Instance.fetches[i];
 			bool flag = pickupable.KPrefabID.HasAnyTags(fetch.tags);

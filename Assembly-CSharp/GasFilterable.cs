@@ -12,7 +12,7 @@ public class GasFilterable : Filterable
 		{
 			if (element.IsGas)
 			{
-				Tag tag = TagManager.Create(element.id);
+				Tag tag = GameTagExtensions.Create(element.id);
 				list.Add(tag);
 			}
 		}

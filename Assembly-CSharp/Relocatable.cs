@@ -80,7 +80,7 @@ public class Relocatable : Workable, ISaveLoadable
 		{
 			if (this.deconstruct && this.chore == null)
 			{
-				this.chore = new WorkChore<Relocatable>(Db.Get().ChoreTypes.Relocate, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true);
+				this.chore = new WorkChore<Relocatable>(Db.Get().ChoreTypes.Relocate, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true);
 				base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.PendingDeconstruction, this);
 			}
 			this.Target = target;

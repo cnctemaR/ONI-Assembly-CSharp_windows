@@ -10,10 +10,6 @@ public class Artable : Workable
 	{
 		this.faceTargetWhenWorking = true;
 		this.statuses = new Dictionary<Artable.Status, StatusItem>();
-		this.statuses[Artable.Status.Ready] = new StatusItem("AwaitingArting", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
-		this.statuses[Artable.Status.Ugly] = new StatusItem("LookingUgly", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
-		this.statuses[Artable.Status.Okay] = new StatusItem("LookingOkay", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
-		this.statuses[Artable.Status.Great] = new StatusItem("LookingGreat", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true);
 	}
 
 	protected string CurrentStage
@@ -27,6 +23,10 @@ public class Artable : Workable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		this.statuses[Artable.Status.Ready] = new StatusItem("AwaitingArting", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true, 2046);
+		this.statuses[Artable.Status.Ugly] = new StatusItem("LookingUgly", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true, 2046);
+		this.statuses[Artable.Status.Okay] = new StatusItem("LookingOkay", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true, 2046);
+		this.statuses[Artable.Status.Great] = new StatusItem("LookingGreat", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true, 2046);
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Arting;
 		this.attributeConverter = Db.Get().AttributeConverters.ArtSpeed;
 		base.SetWorkTime(80f);
@@ -41,7 +41,8 @@ public class Artable : Workable
 		this.SetStage(this.currentStage, true);
 		if (this.currentStage == "Default")
 		{
-			new WorkChore<Artable>(Db.Get().ChoreTypes.Art, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true);
+			Prioritizable.AddRef(base.gameObject);
+			new WorkChore<Artable>(Db.Get().ChoreTypes.Art, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true);
 		}
 	}
 
@@ -56,6 +57,9 @@ public class Artable : Workable
 		});
 		potential_stages.RemoveAll((Artable.Stage x) => x.minimumSkill > art_skill || x.id == "Default");
 		potential_stages.Sort((Artable.Stage x, Artable.Stage y) => y.minimumSkill.CompareTo(x.minimumSkill));
+		int highest_skill = potential_stages[0].minimumSkill;
+		potential_stages.RemoveAll((Artable.Stage x) => x.minimumSkill < highest_skill);
+		potential_stages.Shuffle<Artable.Stage>();
 		this.SetStage(potential_stages[0].id, false);
 		if (potential_stages[0].cheerOnComplete)
 		{
@@ -65,6 +69,7 @@ public class Artable : Workable
 		{
 			new EmoteChore(worker.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteHighPriority, "anim_disappointed_kanim", new HashedString[] { "disappointed_pre", "disappointed_loop", "disappointed_pst" }, null);
 		}
+		Prioritizable.RemoveRef(base.gameObject);
 	}
 
 	public virtual void SetStage(string stage_id, bool skip_effect)

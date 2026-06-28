@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using STRINGS;
 using UnityEngine;
 
 namespace Klei.AI
 {
+	[DebuggerDisplay("{Attribute.Id}")]
 	public class AttributeInstance : ModifierInstance<Attribute>
 	{
 		public AttributeInstance(GameObject game_object, Attribute attribute)
@@ -165,46 +168,50 @@ namespace Klei.AI
 			}
 		}
 
-		public string GetFormattedValue(bool tooltip = false)
+		public string GetFormattedValue()
 		{
 			IAttributeFormatter formatter = this.Attribute.formatter;
 			if (formatter != null)
 			{
-				return formatter.GetFormattedAttribute(this, tooltip);
+				return formatter.GetFormattedAttribute(this);
 			}
-			return GameUtil.GetFormattedSimple(this.GetTotalValue(), GameUtil.TimeSlice.None, "F2");
+			return GameUtil.GetFormattedSimple(this.GetTotalValue(), GameUtil.TimeSlice.None, null);
 		}
 
 		public string GetAttributeValueTooltip()
 		{
-			string text = string.Format("{0}: {1}", this.Name, this.GetFormattedValue(true));
-			text += "\n";
+			string text = string.Format(DUPLICANTS.ATTRIBUTES.VALUE, this.Name, this.GetFormattedValue());
 			if (this.GetBaseValue() != 0f)
 			{
-				text = text + "\nBase " + this.GetBaseValue();
+				text += string.Format(DUPLICANTS.ATTRIBUTES.BASE_VALUE, this.GetBaseValue());
 			}
 			foreach (AttributeInstance.AttributeModifierEntry attributeModifierEntry in this.Modifiers)
 			{
-				text = text + "\n" + string.Format("{0}: {1}", attributeModifierEntry.Modifier.Description, attributeModifierEntry.Modifier.GetFormattedString());
+				string formattedString = attributeModifierEntry.Modifier.GetFormattedString(this.gameObject);
+				if (formattedString != null)
+				{
+					text += string.Format(DUPLICANTS.ATTRIBUTES.MODIFIER_ENTRY, attributeModifierEntry.Modifier.Description, formattedString);
+				}
 			}
+			string text2 = string.Empty;
 			AttributeConverters component = this.gameObject.GetComponent<AttributeConverters>();
 			if (component != null && this.Attribute.converters.Count > 0)
 			{
-				text += "\n";
 				foreach (AttributeConverterInstance attributeConverterInstance in this.gameObject.GetComponent<AttributeConverters>())
 				{
 					if (attributeConverterInstance.converter.attribute == this.Attribute)
 					{
-						float num = attributeConverterInstance.Evaluate();
-						if (attributeConverterInstance.converter.isPercent)
+						string text3 = attributeConverterInstance.ToString();
+						if (text3 != null)
 						{
-							num *= 100f;
+							text2 = text2 + "\n" + text3;
 						}
-						string text2 = attributeConverterInstance.converter.description.Replace("$value", num.ToString());
-						text2 = GameUtil.AddPositiveSign(text2, num > 0f);
-						text = text + "\n" + text2;
 					}
 				}
+			}
+			if (text2.Length > 0)
+			{
+				text = text + "\n" + text2;
 			}
 			return text;
 		}

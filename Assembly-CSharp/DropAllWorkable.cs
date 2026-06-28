@@ -16,6 +16,8 @@ public class DropAllWorkable : Workable
 		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		this.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Emptying;
+		this.synchronizeAnims = false;
+		base.SetWorkTime(0.1f);
 	}
 
 	private Storage[] GetStorages()
@@ -41,7 +43,7 @@ public class DropAllWorkable : Workable
 		}
 		else if (this.chore == null)
 		{
-			this.chore = new WorkChore<DropAllWorkable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true);
+			this.chore = new WorkChore<DropAllWorkable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true);
 		}
 		else
 		{
@@ -83,13 +85,13 @@ public class DropAllWorkable : Workable
 			{
 				UserMenu userMenu = this.userMenu;
 				string text = UI.USERMENUACTIONS.EMPTYSTORAGE.TOOLTIP;
-				userMenu.AddButton(new KIconButtonMenu.ButtonInfo("iconEmptyOut", UI.USERMENUACTIONS.EMPTYSTORAGE.NAME, new global::System.Action(this.DropAll), global::Action.DropAll, null, null, null, text, true), 1f);
+				userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.EMPTYSTORAGE.NAME, new global::System.Action(this.DropAll), global::Action.DropAll, null, null, null, text, true), 1f);
 			}
 			else
 			{
 				UserMenu userMenu2 = this.userMenu;
 				string text = UI.USERMENUACTIONS.EMPTYSTORAGE.TOOLTIP_OFF;
-				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("iconEmptyOut", UI.USERMENUACTIONS.EMPTYSTORAGE.NAME_OFF, new global::System.Action(this.DropAll), global::Action.DropAll, null, null, null, text, true), 1f);
+				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo("action_empty_contents", UI.USERMENUACTIONS.EMPTYSTORAGE.NAME_OFF, new global::System.Action(this.DropAll), global::Action.DropAll, null, null, null, text, true), 1f);
 			}
 		}
 	}

@@ -6,7 +6,8 @@ public class LiquidCooledFanConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("LiquidCooledFan", 2, 2, "fanliquid_kanim", 100f, 30, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER2, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, null);
+		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER2;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("LiquidCooledFan", 2, 2, "fanliquid_kanim", 100f, 30, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER2, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, tier);
 		buildingDef.ExhaustKilowattsWhenActive = 0f;
 		buildingDef.OperatingKilowatts = 0f;
 		buildingDef.Overheatable = false;
@@ -25,7 +26,7 @@ public class LiquidCooledFanConfig : IBuildingConfig
 		storage2.capacityKg = 100f;
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		go.AddOrGet<LoopingSounds>();
-		go.AddOrGet<Prioritizable>();
+		Prioritizable.AddRef(go);
 		float num = 2426.72f;
 		float num2 = 0.01f;
 		LiquidCooledFan liquidCooledFan = go.AddOrGet<LiquidCooledFan>();

@@ -6,7 +6,8 @@ public class HeadquartersConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Headquarters", 4, 4, "hqbase_kanim", 200f, 250, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER7, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER5, null);
+		EffectorValues none = NOISE_POLLUTION.NONE;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Headquarters", 4, 4, "hqbase_kanim", 200f, 250, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER7, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER5, none);
 		buildingDef.Floodable = false;
 		buildingDef.Relocatable = false;
 		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
@@ -14,6 +15,9 @@ public class HeadquartersConfig : IBuildingConfig
 		buildingDef.BaseTimeUntilRepair = 400f;
 		buildingDef.ShowInBuildMenu = false;
 		buildingDef.DefaultAnimState = "idle";
+		SoundEventVolumeCache.instance.AddVolume("hqbase_kanim", "Portal_LP", NOISE_POLLUTION.NOISY.TIER3);
+		SoundEventVolumeCache.instance.AddVolume("hqbase_kanim", "Portal_open", NOISE_POLLUTION.NOISY.TIER4);
+		SoundEventVolumeCache.instance.AddVolume("hqbase_kanim", "Portal_close", NOISE_POLLUTION.NOISY.TIER4);
 		return buildingDef;
 	}
 
@@ -34,4 +38,6 @@ public class HeadquartersConfig : IBuildingConfig
 	{
 		BuildingTemplates.DoPostConfigure(go);
 	}
+
+	public const string ID = "Headquarters";
 }

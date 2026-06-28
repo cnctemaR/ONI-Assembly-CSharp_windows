@@ -8,9 +8,15 @@ namespace TUNING
 	{
 		public const float DEFAULT_MASS = 30f;
 
-		public const float PEE_PER_FLOOR_PEE = 0.05f;
+		public const float PEE_PER_FLOOR_PEE = 2f;
 
 		public const float PEE_PER_TOILET_PEE = 6.7f;
+
+		public const string PEE_DISEASE = "FoodPoisoning";
+
+		public const int DISEASE_PER_PEE = 100000;
+
+		public const int DISEASE_PER_VOMIT = 100000;
 
 		public const float KCAL2JOULES = 4184f;
 
@@ -30,9 +36,13 @@ namespace TUNING
 
 		public const float STANDARD_STRESS_BONUS = -0.033333335f;
 
+		public const float RECOVER_BREATH_DELTA = 3f;
+
 		public static float FOUNDATION_MOVEMENT_BOOST = 1.5f;
 
-		public static string[] ATTRIBUTES = new string[] { "Strength", "Construction", "Digging", "Machinery", "Athletics", "Learning", "Cooking", "Medical", "Art" };
+		public static string[] DISTRIBUTED_ATTRIBUTES = new string[] { "Strength", "Construction", "Digging", "Machinery", "Athletics", "Learning", "Cooking", "Medical", "Art" };
+
+		public static string[] ROLLED_ATTRIBUTES = new string[] { "Immunity" };
 
 		public static float PROBABILITY_MINISCULE = 2f;
 
@@ -119,6 +129,12 @@ namespace TUNING
 			new DUPLICANTSTATS.TraitVal
 			{
 				id = "CantBuild",
+				statBonus = DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
+				probability = DUPLICANTSTATS.PROBABILITY_LOW
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "Hemophobia",
 				statBonus = DUPLICANTSTATS.MEDIUM_STATPOINT_BONUS,
 				probability = DUPLICANTSTATS.PROBABILITY_LOW
 			},
@@ -216,6 +232,26 @@ namespace TUNING
 			}
 		};
 
+		public static List<DUPLICANTSTATS.TraitVal> GENESHUFFLERTRAITS = new List<DUPLICANTSTATS.TraitVal>
+		{
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "Regeneration"
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "DeeperDiversLungs"
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "SunnyDisposition"
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "RockCrusher"
+			}
+		};
+
 		public static List<DUPLICANTSTATS.TraitVal> GOODTRAITS = new List<DUPLICANTSTATS.TraitVal>
 		{
 			new DUPLICANTSTATS.TraitVal
@@ -298,6 +334,13 @@ namespace TUNING
 				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
 				probability = DUPLICANTSTATS.PROBABILITY_MED,
 				mutuallyExclusiveTraits = new List<string> { "InteriorDecorator" }
+			},
+			new DUPLICANTSTATS.TraitVal
+			{
+				id = "BedsideManner",
+				statBonus = -DUPLICANTSTATS.SMALL_STATPOINT_BONUS,
+				probability = DUPLICANTSTATS.PROBABILITY_MED,
+				mutuallyExclusiveTraits = new List<string> { "Hemophobia" }
 			}
 		};
 
@@ -349,7 +392,7 @@ namespace TUNING
 
 		public class BASESTATS
 		{
-			public const float STAMINA_USED_PER_DAY = -100f;
+			public const float STAMINA_USED_PER_SECOND = -0.16666667f;
 
 			public const float CALORIES_BURNED_PER_CYCLE = -1000000f;
 
@@ -361,7 +404,7 @@ namespace TUNING
 
 			public const float OXYGEN_USED_PER_SECOND = 0.1f;
 
-			public const float BLADDER_INCREASE_PER_DAY = 100f;
+			public const float BLADDER_INCREASE_PER_SECOND = 0.16666667f;
 
 			public const float DECOR_EXPECTATION = -25f;
 
@@ -378,6 +421,10 @@ namespace TUNING
 			public const float ROOM_TEMPERATURE_PREFERENCE = 0f;
 
 			public const int BUILDING_DAMAGE_ACTING_OUT = 100;
+
+			public const float IMMUNE_LEVEL_MAX = 100f;
+
+			public const float IMMUNE_LEVEL_RECOVERY = 0.025f;
 		}
 
 		public class TEMPERATURE
@@ -416,13 +463,38 @@ namespace TUNING
 			}
 		}
 
+		public class NOISE
+		{
+			public const int THRESHOLD_PEACEFUL = 0;
+
+			public const int THRESHOLD_QUIET = 36;
+
+			public const int THRESHOLD_TOSS_AND_TURN = 45;
+
+			public const int THRESHOLD_WAKE_UP = 60;
+
+			public const int THRESHOLD_MINOR_REACTION = 80;
+
+			public const int THRESHOLD_MAJOR_REACTION = 106;
+
+			public const int THRESHOLD_EXTREME_REACTION = 125;
+		}
+
 		public class BREATH
 		{
-			public const float BREATH_BAR_TOTAL_SECONDS = 110f;
+			private const float BREATH_BAR_TOTAL_SECONDS = 110f;
 
-			public const float RETREAT_AT_SECONDS = 80f;
+			private const float RETREAT_AT_SECONDS = 80f;
 
-			public const float SUFFOCATION_WARN_AT_SECONDS = 50f;
+			private const float SUFFOCATION_WARN_AT_SECONDS = 50f;
+
+			public const float BREATH_BAR_TOTAL_AMOUNT = 100f;
+
+			public const float RETREAT_AMOUNT = 72.72727f;
+
+			public const float SUFFOCATE_AMOUNT = 45.454548f;
+
+			public const float BREATH_RATE = 0.90909094f;
 		}
 
 		public class COMBAT

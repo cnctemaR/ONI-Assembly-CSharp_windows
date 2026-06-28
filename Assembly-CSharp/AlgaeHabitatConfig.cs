@@ -6,13 +6,17 @@ public class AlgaeHabitatConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("AlgaeHabitat", 1, 2, "algaefarm_kanim", 100f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.FARMABLE, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER1, null);
+		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER0;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("AlgaeHabitat", 1, 2, "algaefarm_kanim", 100f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.FARMABLE, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER1, tier);
 		buildingDef.Floodable = false;
 		buildingDef.ViewMode = SimViewMode.OxygenMap;
 		buildingDef.MaterialCategory = MATERIALS.FARMABLE;
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 0);
+		SoundEventVolumeCache.instance.AddVolume("algaefarm_kanim", "AlgaeHabitat_bubbles", NOISE_POLLUTION.NOISY.TIER0);
+		SoundEventVolumeCache.instance.AddVolume("algaefarm_kanim", "AlgaeHabitat_algae_in", NOISE_POLLUTION.NOISY.TIER0);
+		SoundEventVolumeCache.instance.AddVolume("algaefarm_kanim", "AlgaeHabitat_algae_out", NOISE_POLLUTION.NOISY.TIER0);
 		return buildingDef;
 	}
 
@@ -32,6 +36,7 @@ public class AlgaeHabitatConfig : IBuildingConfig
 		manualDeliveryKG2.requestedItemTag = new Tag("Water");
 		manualDeliveryKG2.capacity = 200f;
 		manualDeliveryKG2.refillMass = 50f;
+		manualDeliveryKG2.allowPause = true;
 		AlgaeHabitat algaeHabitat = go.AddOrGet<AlgaeHabitat>();
 		algaeHabitat.lightBonusMultiplier = 1.1f;
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
@@ -42,7 +47,7 @@ public class AlgaeHabitatConfig : IBuildingConfig
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(0.040000003f, SimHashes.Oxygen, 303.15f, false, 0f, 1f, false)
+			new ElementConverter.OutputElement(0.040000003f, SimHashes.Oxygen, 303.15f, false, 0f, 1f, false, 1f, byte.MaxValue, 0)
 		};
 		elementConverter.conversionInterval = 1f;
 		ElementConsumer elementConsumer = go.AddOrGet<ElementConsumer>();
@@ -60,7 +65,7 @@ public class AlgaeHabitatConfig : IBuildingConfig
 		elementConsumer2.storeOnConsume = true;
 		elementConsumer2.capacityKG = 200f;
 		go.AddOrGet<AnimTileable>();
-		go.AddOrGet<Prioritizable>();
+		Prioritizable.AddRef(go);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

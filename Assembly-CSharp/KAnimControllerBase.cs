@@ -10,7 +10,6 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		this.previousFrame = -1;
 		this.currentFrame = -1;
 		this.PlaySpeedMultiplier = 1f;
-		this.MovementSpeedMultiplier = 1f;
 		this.synchronizer = new KAnimSynchronizer(this);
 		this.layering = new KAnimLayering(this, this.fgLayer);
 		this.visible = true;
@@ -20,9 +19,13 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public event KAnimControllerBase.KAnimEvent onAnimComplete;
 
-	public event Action<Color32> onTemperatureColorChanged;
+	public event Action<Color32> onOverlayColourChanged;
+
+	public event Action<int> onLayerChanged;
 
 	public abstract KAnim.Anim GetAnim(int index);
+
+	public string debugName { get; private set; }
 
 	public Color32 TintColour
 	{
@@ -70,24 +73,24 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		}
 	}
 
-	public Color32 TemperatureColour
+	public Color32 OverlayColour
 	{
 		get
 		{
-			return this.temperatureColour;
+			return this.overlayColour;
 		}
 		set
 		{
-			int num = ((int)this.TemperatureColour.r << 24) | ((int)this.TemperatureColour.g << 16) | ((int)this.TemperatureColour.b << 8) | (int)this.TemperatureColour.a;
+			int num = ((int)this.OverlayColour.r << 24) | ((int)this.OverlayColour.g << 16) | ((int)this.OverlayColour.b << 8) | (int)this.OverlayColour.a;
 			int num2 = ((int)value.r << 24) | ((int)value.g << 16) | ((int)value.b << 8) | (int)value.a;
 			if (num != num2)
 			{
-				this.temperatureColour = value;
+				this.overlayColour = value;
 				this.SetDirty();
 				this.SuspendUpdates(false);
-				if (this.onTemperatureColorChanged != null)
+				if (this.onOverlayColourChanged != null)
 				{
-					this.onTemperatureColorChanged(value);
+					this.onOverlayColourChanged(value);
 				}
 			}
 		}
@@ -112,18 +115,6 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		if (this.layering != null)
 		{
 			this.layering.SetLayer(this.fgLayer);
-		}
-	}
-
-	public float MovementSpeedMultiplier
-	{
-		get
-		{
-			return this.movementSpeedMultiplier;
-		}
-		set
-		{
-			this.movementSpeedMultiplier = value / 1f;
 		}
 	}
 
@@ -384,12 +375,16 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public virtual void SetLayer(int layer)
 	{
+		if (this.onLayerChanged != null)
+		{
+			this.onLayerChanged(layer);
+		}
 	}
 
 	public Vector3 GetPivotSymbolPosition()
 	{
 		bool flag = false;
-		Matrix4x4 symbolTransform = base.GetComponent<KBatchedAnimController>().GetSymbolTransform(KAnimControllerBase.snaptoPivot, out flag);
+		Matrix4x4 symbolTransform = this.GetSymbolTransform(KAnimControllerBase.snaptoPivot, out flag);
 		Vector3 position = base.transform.position;
 		if (flag)
 		{
@@ -411,9 +406,14 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	private void Awake()
 	{
+		if (Global.Instance != null)
+		{
+			this.aem = Global.Instance.GetAnimEventManager();
+		}
+		this.debugName = base.name;
 		this.SetFGLayer(this.fgLayer);
 		this.OnAwake();
-		if (this.initialAnim != null && this.initialAnim != string.Empty)
+		if (!string.IsNullOrEmpty(this.initialAnim))
 		{
 			this.SetDirty();
 			this.Play(this.initialAnim, this.initialMode, 1f, 0f);
@@ -423,6 +423,25 @@ public abstract class KAnimControllerBase : MonoBehaviour
 	private void Start()
 	{
 		this.OnStart();
+	}
+
+	protected virtual void OnDestroy()
+	{
+		this.animFiles = null;
+		this.curAnim = null;
+		this.curBuild = null;
+		this.synchronizer = null;
+		this.layering = null;
+		this.curAnimFile = null;
+		this.animQueue = null;
+		this.overrideAnims = null;
+		this.anims = null;
+		this.baseHiddenSymbols = null;
+		this.hiddenSymbols = null;
+		this.visibleSymbols = null;
+		this.synchronizer = null;
+		this.layering = null;
+		this.overrideAnimFiles = null;
 	}
 
 	protected void AnimEnter(HashedString hashed_name)
@@ -564,7 +583,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 			if (!this.anims.TryGetValue(animData.anim, out animLookupData))
 			{
 				bool flag = true;
-				if (this.missingAnim != null && this.missingAnim != string.Empty)
+				if (!string.IsNullOrEmpty(this.missingAnim))
 				{
 					animData.anim = new HashedString(this.missingAnim);
 					flag = !this.anims.TryGetValue(animData.anim, out animLookupData);
@@ -594,7 +613,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		this.curAnimFrameIdx = this.GetFrameIdxFromOffset(num);
 		this.currentFrame = this.curAnimFrameIdx;
 		this.mode = animData.mode;
-		this.playSpeed = animData.speed * this.PlaySpeedMultiplier * this.MovementSpeedMultiplier;
+		this.playSpeed = animData.speed * this.PlaySpeedMultiplier;
 		this.elapsedTime = (float)num / this.curAnim.frameRate + animData.timeOffset;
 		this.synchronizer.Sync();
 		this.StartAnimEventSequence();
@@ -984,29 +1003,29 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	protected void StartAnimEventSequence()
 	{
-		if (Global.Instance != null && Global.Instance.GetAnimEventManager() != null && !this.layering.GetIsForeground())
+		if (!this.layering.GetIsForeground() && this.aem != null)
 		{
-			this.eventManagerHandle = Global.Instance.GetAnimEventManager().PlayAnim(this, this.curAnim, this.mode, this.elapsedTime, this.visibilityType == KAnimControllerBase.VisibilityType.Always);
+			this.eventManagerHandle = this.aem.PlayAnim(this, this.curAnim, this.mode, this.elapsedTime, this.visibilityType == KAnimControllerBase.VisibilityType.Always);
 		}
 	}
 
 	protected void UpdateAnimEventSequenceTime()
 	{
-		if (this.eventManagerHandle != -1)
+		if (this.eventManagerHandle != -1 && this.aem != null)
 		{
-			Global.Instance.GetAnimEventManager().SetElapsedTime(this.eventManagerHandle, this.elapsedTime);
+			this.aem.SetElapsedTime(this.eventManagerHandle, this.elapsedTime);
 		}
 	}
 
 	protected void StopAnimEventSequence()
 	{
-		if (this.eventManagerHandle != -1 && Global.Instance != null && Global.Instance.GetAnimEventManager() != null)
+		if (this.eventManagerHandle != -1 && this.aem != null)
 		{
 			if (!this.stopped && this.mode != KAnim.PlayMode.Paused)
 			{
-				this.elapsedTime = Global.Instance.GetAnimEventManager().GetElapsedTime(this.eventManagerHandle);
+				this.elapsedTime = this.aem.GetElapsedTime(this.eventManagerHandle);
 			}
-			this.eventManagerHandle = Global.Instance.GetAnimEventManager().StopAnim(this.eventManagerHandle);
+			this.eventManagerHandle = this.aem.StopAnim(this.eventManagerHandle);
 		}
 	}
 
@@ -1115,7 +1134,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	protected Color32 highlightColour = Color.black;
 
-	protected Color32 temperatureColour = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
+	protected Color32 overlayColour = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
 
 	[NonSerialized]
 	public KAnimControllerBase.VisibilityType visibilityType;
@@ -1138,7 +1157,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	public Grid.SceneLayer fgLayer = Grid.SceneLayer.NoLayer;
 
-	private float movementSpeedMultiplier = 1f;
+	protected AnimEventManager aem;
 
 	private static HashedString snaptoPivot = new HashedString("snapTo_pivot");
 

@@ -3,8 +3,16 @@ using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
-public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor
+public class SubmersionMonitor : KMonoBehaviour, IWiltCause, IGameObjectEffectDescriptor
 {
+	WiltCondition.Condition[] IWiltCause.Conditions
+	{
+		get
+		{
+			return new WiltCondition.Condition[] { WiltCondition.Condition.DryingOut };
+		}
+	}
+
 	public bool Dry
 	{
 		get
@@ -21,8 +29,7 @@ public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.checkDrynessHandle = GameScheduler.Instance.SchedulePeriodic(base.name, this.pollFrequency, new Action<object>(this.CheckDry), null, null, 0f, null);
-		this.selectable = base.GetComponent<KSelectable>();
+		this.checkDrynessHandle = GameScheduler.Instance.SchedulePeriodic("SubmersionMonitor", this.pollFrequency, new Action<object>(this.CheckDry), null, null, 0f, null);
 		this.OnMove(null);
 		this.CheckDry(null);
 		this.Subscribe(1088554450, new Action<object>(this.OnMove));
@@ -39,7 +46,7 @@ public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor
 		{
 			Vector2I vector2I = Grid.PosToXY(this.transform.position);
 			Extents extents = new Extents(vector2I.x, vector2I.y, 1, 2);
-			this.partitionerEntry = GameScenePartitioner.Instance.Add("DrowningMonitor.OnSpawn", base.gameObject, extents, GameScenePartitioner.Instance.liquidChangedMask.mask, new Action<object>(this.OnLiquidChanged));
+			this.partitionerEntry = GameScenePartitioner.Instance.Add("DrowningMonitor.OnSpawn", base.gameObject, extents, GameScenePartitioner.Instance.liquidChangedLayer, new Action<object>(this.OnLiquidChanged));
 		}
 		this.CheckDry(null);
 	}
@@ -64,7 +71,7 @@ public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor
 			this.partitionerEntry.Release();
 		}
 		base.OnCleanUp();
-		this.checkDrynessHandle.Clear();
+		this.checkDrynessHandle.ClearScheduler();
 	}
 
 	public void Configure(float _maxStamina, float _staminaRegenRate, float _cellLiquidThreshold = 0.95f)
@@ -80,17 +87,12 @@ public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor
 			{
 				this.dry = true;
 				this.Trigger(-2057657673, null);
-				this.selectable.AddStatusItem(Db.Get().CreatureStatusItems.DryingOut, null);
 			}
 		}
-		else
+		else if (this.dry)
 		{
-			if (this.dry)
-			{
-				this.dry = false;
-				this.Trigger(1555379996, null);
-			}
-			this.selectable.RemoveStatusItem(Db.Get().CreatureStatusItems.DryingOut, false);
+			this.dry = false;
+			this.Trigger(1555379996, null);
 		}
 	}
 
@@ -103,6 +105,18 @@ public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor
 	private void OnLiquidChanged(object data)
 	{
 		this.CheckDry(null);
+	}
+
+	public string WiltStateString
+	{
+		get
+		{
+			if (this.Dry)
+			{
+				return Db.Get().CreatureStatusItems.DryingOut.resolveStringCallback(CREATURES.STATUSITEMS.DRYINGOUT.NAME, this);
+			}
+			return string.Empty;
+		}
 	}
 
 	public void SetIncapacitated(bool state)
@@ -126,8 +140,6 @@ public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor
 	private float pollFrequency = 1f;
 
 	private Extents extents;
-
-	private KSelectable selectable;
 
 	private GameScenePartitionerEntry partitionerEntry;
 

@@ -12,7 +12,6 @@ public class Fishable : Harvestable
 	{
 		base.OnSpawn();
 		base.SetWorkTime(60f);
-		base.gameObject.Subscribe(-1358696400, new Action<object>(this.PositionProgressBar));
 		base.gameObject.Subscribe(1272413801, new Action<object>(this.OnCatchComplete));
 		base.Subscribe(WaterBodyProbe.Instance.gameObject, -263784810, new Action<object>(this.RefreshBodyOfWater));
 	}
@@ -26,7 +25,7 @@ public class Fishable : Harvestable
 		}
 	}
 
-	private void PositionProgressBar(object data)
+	private void PositionProgressBar()
 	{
 		if (this.progressBar == null)
 		{
@@ -172,7 +171,7 @@ public class Fishable : Harvestable
 	{
 		if (this.chore == null)
 		{
-			this.chore = new WorkChore<Fishable>(Db.Get().ChoreTypes.Harvest, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true);
+			this.chore = new WorkChore<Fishable>(Db.Get().ChoreTypes.Harvest, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true);
 		}
 		this.isMarkedForHarvest = true;
 	}
@@ -183,11 +182,15 @@ public class Fishable : Harvestable
 		this.userMenu.Refresh();
 	}
 
+	protected override void OnStartWork(Worker worker)
+	{
+		base.OnStartWork(worker);
+		this.PositionProgressBar();
+	}
+
 	public bool AutoRestartWorkTask = true;
 
 	public BodyOfWater bodyOfWater;
 
 	public bool positionToWorker;
-
-	private int[] worldWorkCells;
 }

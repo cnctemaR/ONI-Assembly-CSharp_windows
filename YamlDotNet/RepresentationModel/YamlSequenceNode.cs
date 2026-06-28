@@ -5,12 +5,13 @@ using System.Diagnostics;
 using System.Text;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.Serialization;
 
 namespace YamlDotNet.RepresentationModel
 {
 	[DebuggerDisplay("Count = {children.Count}")]
 	[Serializable]
-	public class YamlSequenceNode : YamlNode, IEnumerable<YamlNode>, IEnumerable
+	public sealed class YamlSequenceNode : YamlNode, IEnumerable<YamlNode>, IEnumerable, IYamlConvertible
 	{
 		public IList<YamlNode> Children
 		{
@@ -22,14 +23,20 @@ namespace YamlDotNet.RepresentationModel
 
 		public SequenceStyle Style { get; set; }
 
-		internal YamlSequenceNode(EventReader events, DocumentLoadingState state)
+		internal YamlSequenceNode(IParser parser, DocumentLoadingState state)
 		{
-			SequenceStart sequenceStart = events.Expect<SequenceStart>();
+			this.Load(parser, state);
+		}
+
+		private void Load(IParser parser, DocumentLoadingState state)
+		{
+			SequenceStart sequenceStart = parser.Expect<SequenceStart>();
 			base.Load(sequenceStart, state);
+			this.Style = sequenceStart.Style;
 			bool flag = false;
-			while (!events.Accept<SequenceEnd>())
+			while (!parser.Accept<SequenceEnd>())
 			{
-				YamlNode yamlNode = YamlNode.ParseNode(events, state);
+				YamlNode yamlNode = YamlNode.ParseNode(parser, state);
 				this.children.Add(yamlNode);
 				flag |= yamlNode is YamlAliasNode;
 			}
@@ -37,7 +44,7 @@ namespace YamlDotNet.RepresentationModel
 			{
 				state.AddNodeWithUnresolvedAliases(this);
 			}
-			events.Expect<SequenceEnd>();
+			parser.Expect<SequenceEnd>();
 		}
 
 		public YamlSequenceNode()
@@ -45,7 +52,7 @@ namespace YamlDotNet.RepresentationModel
 		}
 
 		public YamlSequenceNode(params YamlNode[] children)
-			: this((IEnumerable<YamlNode>)children)
+			: this(children)
 		{
 		}
 
@@ -93,9 +100,9 @@ namespace YamlDotNet.RepresentationModel
 			visitor.Visit(this);
 		}
 
-		public override bool Equals(object other)
+		public override bool Equals(object obj)
 		{
-			YamlSequenceNode yamlSequenceNode = other as YamlSequenceNode;
+			YamlSequenceNode yamlSequenceNode = obj as YamlSequenceNode;
 			if (yamlSequenceNode == null || !base.Equals(yamlSequenceNode) || this.children.Count != yamlSequenceNode.children.Count)
 			{
 				return false;
@@ -120,24 +127,38 @@ namespace YamlDotNet.RepresentationModel
 			return num;
 		}
 
-		public override IEnumerable<YamlNode> AllNodes
+		internal override IEnumerable<YamlNode> SafeAllNodes(RecursionLevel level)
+		{
+			level.Increment();
+			yield return this;
+			foreach (YamlNode yamlNode in this.children)
+			{
+				foreach (YamlNode yamlNode2 in yamlNode.SafeAllNodes(level))
+				{
+					yield return yamlNode2;
+				}
+				IEnumerator<YamlNode> enumerator2 = null;
+			}
+			IEnumerator<YamlNode> enumerator = null;
+			level.Decrement();
+			yield break;
+			yield break;
+		}
+
+		public override YamlNodeType NodeType
 		{
 			get
 			{
-				yield return this;
-				foreach (YamlNode child in this.children)
-				{
-					foreach (YamlNode node in child.AllNodes)
-					{
-						yield return node;
-					}
-				}
-				yield break;
+				return YamlNodeType.Sequence;
 			}
 		}
 
-		public override string ToString()
+		internal override string ToString(RecursionLevel level)
 		{
+			if (!level.TryIncrement())
+			{
+				return "WARNING! INFINITE RECURSION!";
+			}
 			StringBuilder stringBuilder = new StringBuilder("[ ");
 			foreach (YamlNode yamlNode in this.children)
 			{
@@ -145,9 +166,10 @@ namespace YamlDotNet.RepresentationModel
 				{
 					stringBuilder.Append(", ");
 				}
-				stringBuilder.Append(yamlNode);
+				stringBuilder.Append(yamlNode.ToString(level));
 			}
 			stringBuilder.Append(" ]");
+			level.Decrement();
 			return stringBuilder.ToString();
 		}
 
@@ -159,6 +181,16 @@ namespace YamlDotNet.RepresentationModel
 		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return this.GetEnumerator();
+		}
+
+		void IYamlConvertible.Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
+		{
+			this.Load(parser, new DocumentLoadingState());
+		}
+
+		void IYamlConvertible.Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
+		{
+			this.Emit(emitter, new EmitterState());
 		}
 
 		private readonly IList<YamlNode> children = new List<YamlNode>();

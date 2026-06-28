@@ -1,4 +1,5 @@
 ﻿using System;
+using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization.EventEmitters
 {
@@ -13,34 +14,34 @@ namespace YamlDotNet.Serialization.EventEmitters
 			this.nextEmitter = nextEmitter;
 		}
 
-		public virtual void Emit(AliasEventInfo eventInfo)
+		public virtual void Emit(AliasEventInfo eventInfo, IEmitter emitter)
 		{
-			this.nextEmitter.Emit(eventInfo);
+			this.nextEmitter.Emit(eventInfo, emitter);
 		}
 
-		public virtual void Emit(ScalarEventInfo eventInfo)
+		public virtual void Emit(ScalarEventInfo eventInfo, IEmitter emitter)
 		{
-			this.nextEmitter.Emit(eventInfo);
+			this.nextEmitter.Emit(eventInfo, emitter);
 		}
 
-		public virtual void Emit(MappingStartEventInfo eventInfo)
+		public virtual void Emit(MappingStartEventInfo eventInfo, IEmitter emitter)
 		{
-			this.nextEmitter.Emit(eventInfo);
+			this.nextEmitter.Emit(eventInfo, emitter);
 		}
 
-		public virtual void Emit(MappingEndEventInfo eventInfo)
+		public virtual void Emit(MappingEndEventInfo eventInfo, IEmitter emitter)
 		{
-			this.nextEmitter.Emit(eventInfo);
+			this.nextEmitter.Emit(eventInfo, emitter);
 		}
 
-		public virtual void Emit(SequenceStartEventInfo eventInfo)
+		public virtual void Emit(SequenceStartEventInfo eventInfo, IEmitter emitter)
 		{
-			this.nextEmitter.Emit(eventInfo);
+			this.nextEmitter.Emit(eventInfo, emitter);
 		}
 
-		public virtual void Emit(SequenceEndEventInfo eventInfo)
+		public virtual void Emit(SequenceEndEventInfo eventInfo, IEmitter emitter)
 		{
-			this.nextEmitter.Emit(eventInfo);
+			this.nextEmitter.Emit(eventInfo, emitter);
 		}
 
 		protected readonly IEventEmitter nextEmitter;

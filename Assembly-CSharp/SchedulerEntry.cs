@@ -9,6 +9,13 @@ public struct SchedulerEntry
 		this.details = new SchedulerEntry.Details(id, name, callback, callback_data, time_interval, profiler_obj);
 	}
 
+	public SchedulerEntry.Details details { get; private set; }
+
+	public void FreeResources()
+	{
+		this.details = null;
+	}
+
 	public Guid id
 	{
 		get
@@ -50,11 +57,14 @@ public struct SchedulerEntry
 		return this.time + ": id = " + this.details.id.ToString();
 	}
 
+	public void Clear()
+	{
+		this.details.callback = null;
+	}
+
 	public float time;
 
-	private SchedulerEntry.Details details;
-
-	private class Details
+	public class Details
 	{
 		public Details(Guid id, string name, Action<object> callback, object callback_data, float time_interval, GameObject profiler_obj)
 		{

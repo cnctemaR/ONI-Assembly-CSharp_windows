@@ -7,6 +7,11 @@ namespace YamlDotNet
 {
 	internal static class ReflectionExtensions
 	{
+		public static Type BaseType(this Type type)
+		{
+			return type.BaseType;
+		}
+
 		public static bool IsValueType(this Type type)
 		{
 			return type.IsValueType;
@@ -37,6 +42,11 @@ namespace YamlDotNet
 			return Type.GetTypeCode(type);
 		}
 
+		public static PropertyInfo GetPublicProperty(this Type type, string name)
+		{
+			return type.GetProperty(name);
+		}
+
 		public static IEnumerable<PropertyInfo> GetPublicProperties(this Type type)
 		{
 			BindingFlags instancePublic = BindingFlags.Instance | BindingFlags.Public;
@@ -47,7 +57,7 @@ namespace YamlDotNet
 			return new Type[] { type }.Concat<Type>(type.GetInterfaces()).SelectMany<Type, PropertyInfo>((Type i) => i.GetProperties(instancePublic));
 		}
 
-		public static IEnumerable<MethodInfo> GetPublicMethods(this Type type)
+		public static IEnumerable<MethodInfo> GetPublicStaticMethods(this Type type)
 		{
 			return type.GetMethods(BindingFlags.Static | BindingFlags.Public);
 		}
@@ -55,6 +65,11 @@ namespace YamlDotNet
 		public static MethodInfo GetPublicStaticMethod(this Type type, string name, params Type[] parameterTypes)
 		{
 			return type.GetMethod(name, BindingFlags.Static | BindingFlags.Public, null, parameterTypes, null);
+		}
+
+		public static MethodInfo GetPublicInstanceMethod(this Type type, string name)
+		{
+			return type.GetMethod(name, BindingFlags.Instance | BindingFlags.Public);
 		}
 
 		public static Exception Unwrap(this TargetInvocationException ex)
@@ -65,6 +80,11 @@ namespace YamlDotNet
 				ReflectionExtensions.remoteStackTraceField.SetValue(ex.InnerException, ex.InnerException.StackTrace + "\r\n");
 			}
 			return innerException;
+		}
+
+		public static bool IsInstanceOf(this Type type, object o)
+		{
+			return type.IsInstanceOfType(o);
 		}
 
 		private static readonly FieldInfo remoteStackTraceField = typeof(Exception).GetField("_remoteStackTraceString", BindingFlags.Instance | BindingFlags.NonPublic);

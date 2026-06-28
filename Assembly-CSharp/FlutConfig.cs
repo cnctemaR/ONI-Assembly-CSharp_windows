@@ -7,8 +7,8 @@ public class FlutConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		DecorValues tier = DECOR.BONUS.TIER0;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("Flut", global::STRINGS.CREATURES.SPECIES.FLUT.NAME, global::STRINGS.CREATURES.SPECIES.FLUT.DESC, 25f, Assets.GetAnim("flut_single_kanim"), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, tier, SimHashes.Creature, null);
+		EffectorValues tier = DECOR.BONUS.TIER0;
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity("Flut", global::STRINGS.CREATURES.SPECIES.FLUT.NAME, global::STRINGS.CREATURES.SPECIES.FLUT.DESC, 25f, Assets.GetAnim("flut_single_kanim"), "idle_loop", Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
 		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, 25f, "SwimmerNavGrid", NavType.Swim, 2f, "Meat", 2, false, true, 30f, 283f, 294f, 243f, 343f);
 		gameObject.UpdateComponentRequirement<Flut>(true);
 		gameObject.UpdateComponentRequirement<Catchable>(true);
@@ -18,7 +18,7 @@ public class FlutConfig : IEntityConfig
 		elementConverter.conversionInterval = 150f;
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(0.25f / elementConverter.conversionInterval, SimHashes.Fertilizer, 0f, false, 0f, 0.5f, false)
+			new ElementConverter.OutputElement(0.25f / elementConverter.conversionInterval, SimHashes.Fertilizer, 0f, false, 0f, 0.5f, false, 1f, byte.MaxValue, 0)
 		};
 		KBatchedAnimController kbatchedAnimController = gameObject.AddAnimController("flut_single_kanim", Grid.SceneLayer.Front);
 		kbatchedAnimController.isMovable = true;

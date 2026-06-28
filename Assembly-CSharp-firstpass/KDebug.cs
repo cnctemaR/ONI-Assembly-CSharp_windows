@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using UnityEngine;
 
 public class KDebug
 {
@@ -60,5 +61,12 @@ public class KDebug
 	[Conditional("CHECK_ASSERTS")]
 	public static void DebugBreak()
 	{
+		StackTrace stackTrace = new StackTrace(true);
+		Output.LogError(new object[]
+		{
+			"Assert failed at:\n",
+			stackTrace.ToString()
+		});
+		global::UnityEngine.Debug.Break();
 	}
 }

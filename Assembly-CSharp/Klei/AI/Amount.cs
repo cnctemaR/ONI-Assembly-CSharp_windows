@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using UnityEngine;
 
 namespace Klei.AI
 {
+	[DebuggerDisplay("{Id}")]
 	public class Amount : Resource
 	{
 		public Amount(string id, string name, string description, float starting_min, float starting_max, Attribute min_attribute, Attribute max_attribute, Attribute delta_attribute, bool show_max, Units units, float visual_delta_threshold, bool show_in_ui)

@@ -55,6 +55,12 @@ public class MassageTable : RelaxationPoint, IEffectDescriptor, IActivationRange
 		}
 	}
 
+	protected override void OnStartWork(Worker worker)
+	{
+		base.OnStartWork(worker);
+		worker.GetComponent<Effects>().Add("Sleep", false);
+	}
+
 	protected override void OnCompleteWork(Worker worker)
 	{
 		base.OnCompleteWork(worker);
@@ -93,7 +99,7 @@ public class MassageTable : RelaxationPoint, IEffectDescriptor, IActivationRange
 
 	protected override WorkChore<RelaxationPoint> CreateWorkChore()
 	{
-		WorkChore<RelaxationPoint> workChore = new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, true, null, null, null, false, null, true, default(Tag), null, false, true);
+		WorkChore<RelaxationPoint> workChore = new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, true, null, null, null, false, null, true, default(Tag), null, false, true, true);
 		workChore.AddPrecondition(MassageTable.IsStressAboveActivationRange, this);
 		return workChore;
 	}

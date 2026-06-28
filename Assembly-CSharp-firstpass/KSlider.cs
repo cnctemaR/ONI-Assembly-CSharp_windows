@@ -8,10 +8,21 @@ public class KSlider : Slider
 {
 	public event global::System.Action onReleaseHandle;
 
+	public event global::System.Action onDrag;
+
+	public event global::System.Action onPointerDown;
+
+	public event global::System.Action onMove;
+
 	public override void OnPointerUp(PointerEventData eventData)
 	{
 		base.OnPointerUp(eventData);
 		this.PlayEndSound();
+		if (this.tooltip != null)
+		{
+			this.tooltip.enabled = true;
+			this.tooltip.OnPointerEnter(eventData);
+		}
 		if (this.onReleaseHandle != null)
 		{
 			this.onReleaseHandle();
@@ -26,18 +37,34 @@ public class KSlider : Slider
 		{
 			this.PlayMoveSound(KSlider.MoveSource.MouseClick);
 		}
+		if (this.tooltip != null)
+		{
+			this.tooltip.enabled = false;
+		}
+		if (this.onPointerDown != null)
+		{
+			this.onPointerDown();
+		}
 	}
 
 	public override void OnDrag(PointerEventData eventData)
 	{
 		base.OnDrag(eventData);
 		this.PlayMoveSound(KSlider.MoveSource.MouseDrag);
+		if (this.onDrag != null)
+		{
+			this.onDrag();
+		}
 	}
 
 	public override void OnMove(AxisEventData eventData)
 	{
 		base.OnMove(eventData);
 		this.PlayMoveSound(KSlider.MoveSource.Keyboard);
+		if (this.onMove != null)
+		{
+			this.onMove();
+		}
 	}
 
 	public void ClearReleaseHandleEvent()
@@ -54,6 +81,7 @@ public class KSlider : Slider
 		}
 		this.lastMoveTime = Time.unscaledTime;
 		this.lastMoveValue = -1f;
+		this.tooltip = base.handleRect.gameObject.GetComponent<ToolTip>();
 	}
 
 	public void PlayStartSound()
@@ -158,6 +186,8 @@ public class KSlider : Slider
 	private float lastMoveValue;
 
 	public bool playedBoundaryBump;
+
+	private ToolTip tooltip;
 
 	public enum SoundType
 	{

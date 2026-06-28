@@ -28,6 +28,21 @@ public class HealthBar : ProgressBar
 		}
 	}
 
+	public override void OnOverlayChanged(object data = null)
+	{
+		if ((int)data == 0)
+		{
+			if (!base.gameObject.activeSelf && this.showTimer != 0f)
+			{
+				base.gameObject.SetActive(true);
+			}
+		}
+		else if (base.gameObject.activeSelf)
+		{
+			base.gameObject.SetActive(false);
+		}
+	}
+
 	private float showTimer;
 
 	private float maxShowTime = 3f;

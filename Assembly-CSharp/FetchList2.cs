@@ -65,7 +65,7 @@ public class FetchList2 : IFetchList
 		}
 	}
 
-	public void Add(Tag[] tags, float amount = 1f, FetchOrder2.OperationalRequirement operationalRequirement = FetchOrder2.OperationalRequirement.None)
+	public void Add(Tag[] tags, Tag[] forbidden_tags = null, float amount = 1f, FetchOrder2.OperationalRequirement operationalRequirement = FetchOrder2.OperationalRequirement.None)
 	{
 		if (amount <= 0f)
 		{
@@ -78,13 +78,13 @@ public class FetchList2 : IFetchList
 				this.MinimumAmount[tag] = amount;
 			}
 		}
-		FetchOrder2 fetchOrder = new FetchOrder2(tags, this.Destination, amount, operationalRequirement, this.PriorityMod);
+		FetchOrder2 fetchOrder = new FetchOrder2(tags, forbidden_tags, this.Destination, amount, operationalRequirement, this.PriorityMod);
 		this.FetchOrders.Add(fetchOrder);
 	}
 
-	public void Add(Tag tag, float amount = 1f, FetchOrder2.OperationalRequirement operationalRequirement = FetchOrder2.OperationalRequirement.None)
+	public void Add(Tag tag, Tag[] forbidden_tags = null, float amount = 1f, FetchOrder2.OperationalRequirement operationalRequirement = FetchOrder2.OperationalRequirement.None)
 	{
-		this.Add(new Tag[] { tag }, amount, operationalRequirement);
+		this.Add(new Tag[] { tag }, forbidden_tags, amount, operationalRequirement);
 	}
 
 	public float GetMinimumAmount(Tag tag)
@@ -103,7 +103,7 @@ public class FetchList2 : IFetchList
 			{
 				this.OnComplete();
 			}
-			this.updateStatusItemsHandle.Clear();
+			this.updateStatusItemsHandle.ClearScheduler();
 			this.ClearStatus();
 		}
 		else
@@ -119,7 +119,7 @@ public class FetchList2 : IFetchList
 			fetchOrder.Cancel(reason);
 		}
 		this.ClearStatus();
-		this.updateStatusItemsHandle.Clear();
+		this.updateStatusItemsHandle.ClearScheduler();
 	}
 
 	private void UpdateRemaining()
@@ -132,10 +132,7 @@ public class FetchList2 : IFetchList
 			{
 				Tag tag = fetchOrder.Tags[j];
 				float num = 0f;
-				if (!this.Remaining.TryGetValue(tag, out num))
-				{
-					this.Remaining[tag] = 0f;
-				}
+				this.Remaining.TryGetValue(tag, out num);
 				this.Remaining[tag] = num + fetchOrder.AmountWaitingToFetch();
 			}
 		}

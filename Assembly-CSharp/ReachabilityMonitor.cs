@@ -10,7 +10,7 @@ public class ReachabilityMonitor : GameStateMachine<ReachabilityMonitor, Reachab
 		{
 			smi.UpdateReachability();
 		});
-		this.reachable.Enter("TriggerEvent", delegate(ReachabilityMonitor.Instance smi)
+		this.reachable.ToggleTag(GameTags.Reachable).Enter("TriggerEvent", delegate(ReachabilityMonitor.Instance smi)
 		{
 			smi.TriggerEvent();
 		}).ParamTransition<bool>(this.isReachable, this.unreachable, (ReachabilityMonitor.Instance smi, bool p) => !p);

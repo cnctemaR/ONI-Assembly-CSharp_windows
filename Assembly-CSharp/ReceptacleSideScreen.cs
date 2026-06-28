@@ -102,7 +102,7 @@ public class ReceptacleSideScreen : SideScreenContent
 		this.onStorageChangedHandle = this.targetReceptacle.gameObject.Subscribe(-1697596308, new Action<object>(this.CheckAmountsAndUpdate));
 		this.onOccupantValidChangedHandle = this.targetReceptacle.gameObject.Subscribe(-1820564715, new Action<object>(this.OnOccupantValidChanged));
 		this.UpdateState(null);
-		this.handle = GameScheduler.Instance.SchedulePeriodic(base.name, 1f, new Action<object>(this.CheckAmountsAndUpdate), null, null, 0f, null);
+		this.handle = GameScheduler.Instance.SchedulePeriodic("CheckAmountsUpdate", 1f, new Action<object>(this.CheckAmountsAndUpdate), null, null, 0f, null);
 	}
 
 	private void UpdateState(object data)
@@ -242,7 +242,7 @@ public class ReceptacleSideScreen : SideScreenContent
 
 	protected override void OnCleanUp()
 	{
-		this.handle.Clear();
+		this.handle.ClearScheduler();
 		base.OnCleanUp();
 	}
 
@@ -290,7 +290,7 @@ public class ReceptacleSideScreen : SideScreenContent
 			{
 				this.targetReceptacle.SetPreview(Tag.Invalid, false);
 			}
-			this.handle.Clear();
+			this.handle.ClearScheduler();
 			this.targetReceptacle = null;
 		}
 	}
@@ -382,6 +382,12 @@ public class ReceptacleSideScreen : SideScreenContent
 		{
 			global::Debug.LogError("Recipe not found on recipe list.", null);
 			return;
+		}
+		if (this.selectedEntityToggle != null)
+		{
+			bool flag = this.ValidRotationForDeposit(this.depositObjectMap[this.selectedEntityToggle].direction) && this.GetAvailableAmount(this.depositObjectMap[this.selectedEntityToggle].tag) > 0f && this.AdditionalCanDepositTest();
+			this.requestSelectedEntityBtn.isInteractable = flag;
+			this.SetImageToggleState(this.selectedEntityToggle.toggle, (!flag) ? ImageToggleState.State.Disabled : ImageToggleState.State.Inactive);
 		}
 		this.selectedEntityToggle = toggle;
 		this.entityPreviousSelectionMap[this.targetReceptacle] = this.entityToggles.IndexOf(toggle);

@@ -46,7 +46,7 @@ public class SpeedControlScreen : KScreen
 		};
 		this.pauseButton.onClick += delegate
 		{
-			this.TogglePause();
+			this.TogglePause(true);
 		};
 		this.playButtonWidget.GetComponent<ToolTip>().AddMultiStringTooltip("Play " + GameUtil.GetHotkeyString(global::Action.TogglePause), this.TooltipTextStyle);
 		this.pauseButtonWidget.GetComponent<ToolTip>().AddMultiStringTooltip("Pause " + GameUtil.GetHotkeyString(global::Action.TogglePause), this.TooltipTextStyle);
@@ -55,7 +55,7 @@ public class SpeedControlScreen : KScreen
 		this.speedButtonWidget_fast.GetComponent<ToolTip>().AddMultiStringTooltip(string.Format(UI.TOOLTIPS.SPEEDBUTTON_FAST, GameUtil.GetHotkeyString(global::Action.CycleSpeed)), this.TooltipTextStyle);
 		this.playButtonWidget.GetComponent<KButton>().onClick += delegate
 		{
-			this.TogglePause();
+			this.TogglePause(true);
 		};
 	}
 
@@ -116,15 +116,15 @@ public class SpeedControlScreen : KScreen
 		this.OnChanged();
 	}
 
-	public void TogglePause()
+	public void TogglePause(bool playsound = true)
 	{
 		if (this.IsPaused)
 		{
-			this.Unpause(true);
+			this.Unpause(playsound);
 		}
 		else
 		{
-			this.Pause(true);
+			this.Pause(playsound);
 		}
 	}
 
@@ -214,7 +214,7 @@ public class SpeedControlScreen : KScreen
 	{
 		if (e.TryConsume(global::Action.TogglePause))
 		{
-			this.TogglePause();
+			this.TogglePause(true);
 		}
 		else if (e.TryConsume(global::Action.CycleSpeed))
 		{

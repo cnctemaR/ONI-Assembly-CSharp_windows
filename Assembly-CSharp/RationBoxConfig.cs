@@ -6,16 +6,19 @@ public class RationBoxConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("RationBox", 2, 2, "rationbox_kanim", 100f, 10, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER0, null);
+		EffectorValues none = NOISE_POLLUTION.NONE;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("RationBox", 2, 2, "rationbox_kanim", 100f, 10, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER0, none);
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.AudioCategory = "Metal";
+		SoundEventVolumeCache.instance.AddVolume("rationbox_kanim", "RationBox_open", NOISE_POLLUTION.NOISY.TIER1);
+		SoundEventVolumeCache.instance.AddVolume("rationbox_kanim", "RationBox_close", NOISE_POLLUTION.NOISY.TIER1);
 		return buildingDef;
 	}
 
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
-		go.AddOrGet<Prioritizable>();
+		Prioritizable.AddRef(go);
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 150f;
 		storage.disableOnStore = true;
@@ -25,6 +28,7 @@ public class RationBoxConfig : IBuildingConfig
 		storage.allowItemRemoval = true;
 		TreeFilterable treeFilterable = go.AddOrGet<TreeFilterable>();
 		treeFilterable.AddTagToFilter(GameTags.Edible);
+		treeFilterable.AddTagToFilter(GameTags.CookingIngredient);
 		go.AddOrGet<UserMenu>();
 		RationBox rationBox = go.AddOrGet<RationBox>();
 		rationBox.noFilterTint = new Color(0.5147059f, 0.5147059f, 0.5147059f, 1f);
@@ -40,4 +44,6 @@ public class RationBoxConfig : IBuildingConfig
 			instance.StartSM();
 		};
 	}
+
+	public const string ID = "RationBox";
 }

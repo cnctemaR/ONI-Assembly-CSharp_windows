@@ -20,12 +20,25 @@ namespace Klei.AI
 		public override string ToString()
 		{
 			float num = this.Evaluate();
-			if (this.converter.isPercent)
+			string text;
+			if (this.converter.formatter != null)
 			{
-				num *= 100f;
+				text = this.converter.formatter.GetFormattedValue(num, this.converter.formatter.DeltaTimeSlice, this.gameObject);
 			}
-			string text = this.converter.description.Replace("$value", num.ToString("0.0"));
-			return GameUtil.AddPositiveSign(text, num > 0f);
+			else if (this.attributeInstance.Attribute.formatter != null)
+			{
+				text = this.attributeInstance.Attribute.formatter.GetFormattedValue(num, this.attributeInstance.Attribute.formatter.DeltaTimeSlice, this.gameObject);
+			}
+			else
+			{
+				text = GameUtil.GetFormattedSimple(num, GameUtil.TimeSlice.None, null);
+			}
+			if (text != null)
+			{
+				text = GameUtil.AddPositiveSign(text, num > 0f);
+				return string.Format(this.converter.description, text);
+			}
+			return null;
 		}
 
 		public AttributeConverter converter;

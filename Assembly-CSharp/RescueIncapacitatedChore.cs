@@ -7,6 +7,7 @@ public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesIns
 		: base(Db.Get().ChoreTypes.RescueIncapacitated, master, null, false, null, null, null, int.MaxValue, false, true, 0)
 	{
 		this.smi = new RescueIncapacitatedChore.StatesInstance(this);
+		base.runUntilComplete = true;
 		base.AddPrecondition(ChorePreconditions.NotChoreCreator, incapacitatedDuplicant.gameObject);
 		base.AddPrecondition(ChorePreconditions.CanMoveTo, incapacitatedDuplicant.GetComponent<Workable>());
 	}
@@ -48,18 +49,25 @@ public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesIns
 			default_state = this.approachIncapacitated;
 			this.approachIncapacitated.InitializeStates(this.rescuer, this.rescueTarget, this.holding.pickup, this.failure, null, null).Enter(delegate(RescueIncapacitatedChore.StatesInstance smi)
 			{
-				Health health = this.rescueTarget.Get<Health>(smi);
-				if (health == null || health.IsDead())
+				DeathMonitor.Instance smi2 = this.rescueTarget.GetSMI<DeathMonitor.Instance>(smi);
+				if (smi2 == null || smi2.IsDead())
 				{
 					smi.StopSM("target died");
 				}
 			});
-			this.holding.Target(this.rescuer).ToggleAnims("anim_incapacitated_carrier_kanim", 0f).Enter(delegate(RescueIncapacitatedChore.StatesInstance smi)
+			this.holding.Target(this.rescuer).Enter(delegate(RescueIncapacitatedChore.StatesInstance smi)
 			{
 				smi.sm.rescueTarget.Get(smi).Subscribe(1623392196, delegate(object d)
 				{
 					smi.GoTo(this.holding.ditch);
 				});
+				KAnimFile anim = Assets.GetAnim("anim_incapacitated_carrier_kanim");
+				smi.master.GetComponent<KAnimControllerBase>().RemoveAnimOverrides(anim);
+				smi.master.GetComponent<KAnimControllerBase>().AddAnimOverrides(anim, 0f);
+			}).Exit(delegate(RescueIncapacitatedChore.StatesInstance smi)
+			{
+				KAnimFile anim2 = Assets.GetAnim("anim_incapacitated_carrier_kanim");
+				smi.master.GetComponent<KAnimControllerBase>().RemoveAnimOverrides(anim2);
 			});
 			this.holding.pickup.Target(this.rescuer).PlayAnim("pickup", KAnim.PlayMode.Once, null).Enter(delegate(RescueIncapacitatedChore.StatesInstance smi)
 			{
@@ -67,25 +75,31 @@ public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesIns
 			})
 				.Exit(delegate(RescueIncapacitatedChore.StatesInstance smi)
 				{
-					this.rescuer.Get(smi).GetComponent<Storage>().Store(this.rescueTarget.Get(smi), false, false);
+					this.rescuer.Get(smi).GetComponent<Storage>().Store(this.rescueTarget.Get(smi), false, false, true);
 					this.rescueTarget.Get(smi).transform.SetLocalPosition(Vector3.zero);
 					KBatchedAnimTracker component = this.rescueTarget.Get(smi).GetComponent<KBatchedAnimTracker>();
-					component.ignoreRotation = true;
 					component.symbol = new HashedString("snapTo_pivot");
 					component.offset = new Vector3(0f, 0f, 1f);
 				})
 				.EventTransition(GameHashes.AnimQueueComplete, this.holding.delivering, null);
 			this.holding.delivering.InitializeStates(this.rescuer, this.deliverTarget, this.holding.deposit, this.holding.ditch, null, null).Enter(delegate(RescueIncapacitatedChore.StatesInstance smi)
 			{
-				Health health2 = this.rescueTarget.Get<Health>(smi);
-				if (health2 == null || health2.IsDead())
+				DeathMonitor.Instance smi3 = this.rescueTarget.GetSMI<DeathMonitor.Instance>(smi);
+				if (smi3 == null || smi3.IsDead())
 				{
 					smi.StopSM("target died");
+				}
+			}).Update(delegate(RescueIncapacitatedChore.StatesInstance smi)
+			{
+				if (this.deliverTarget.Get(smi) == null)
+				{
+					smi.GoTo(this.holding.ditch);
 				}
 			});
 			this.holding.deposit.PlayAnim("place", KAnim.PlayMode.Once, null).EventHandler(GameHashes.AnimQueueComplete, delegate(RescueIncapacitatedChore.StatesInstance smi)
 			{
 				smi.master.DropIncapacitatedDuplicant();
+				smi.SetStatus(StateMachine.Status.Success);
 				smi.StopSM("complete");
 			});
 			this.holding.ditch.PlayAnim("place", KAnim.PlayMode.Once, null).ScheduleGoTo(0.5f, this.failure).Exit(delegate(RescueIncapacitatedChore.StatesInstance smi)
@@ -94,6 +108,7 @@ public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesIns
 			});
 			this.failure.Enter(delegate(RescueIncapacitatedChore.StatesInstance smi)
 			{
+				smi.SetStatus(StateMachine.Status.Failed);
 				smi.StopSM("failed");
 			});
 		}

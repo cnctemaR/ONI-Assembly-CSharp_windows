@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Klei;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -68,7 +69,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		}
 	}
 
-	public GameObject Store(GameObject go, bool hide_popups = false, bool block_events = false)
+	public GameObject Store(GameObject go, bool hide_popups = false, bool block_events = false, bool do_disease_transfer = true)
 	{
 		GameObject gameObject = go;
 		if (go == null)
@@ -93,7 +94,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			string text;
 			if (!component.CountableUnits)
 			{
-				text = string.Format(locString, GameUtil.GetFormattedMass(component.TotalAmount, GameUtil.TimeSlice.None, true, "{0:0.#}"), go.GetComponent<KSelectable>().GetName());
+				text = string.Format(locString, GameUtil.GetFormattedMass(component.TotalAmount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), go.GetComponent<KSelectable>().GetName());
 			}
 			else
 			{
@@ -105,6 +106,10 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		Vector3 vector = Grid.CellToPosCCC(Grid.PosToCell(this), Grid.SceneLayer.Move);
 		vector.z = go.transform.position.z;
 		go.transform.SetPosition(vector);
+		if (!block_events && do_disease_transfer)
+		{
+			this.TransferDiseaseWithObject(go);
+		}
 		foreach (GameObject gameObject2 in this.items)
 		{
 			if (gameObject2 != null && component != null && gameObject2.GetComponent<Pickupable>().TryAbsorb(component, hide_popups))
@@ -141,7 +146,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		return gameObject;
 	}
 
-	public PrimaryElement AddLiquid(SimHashes element, float mass, float temperature, bool keep_zero_mass = false)
+	public PrimaryElement AddLiquid(SimHashes element, float mass, float temperature, byte disease_idx, int disease_count, bool keep_zero_mass = false, bool do_disease_transfer = true)
 	{
 		if (mass <= 0f)
 		{
@@ -153,19 +158,20 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			primaryElement.Temperature = GameUtil.GetFinalTemperature(primaryElement.Temperature, primaryElement.Mass, temperature, mass);
 			primaryElement.KeepZeroMassObject = keep_zero_mass;
 			primaryElement.Mass += mass;
+			primaryElement.AddDisease(disease_idx, disease_count, "Storage.AddLiquid");
 			this.Trigger(-1697596308, primaryElement.gameObject);
 		}
 		else
 		{
-			SubstanceChunk substanceChunk = LiquidSourceManager.Instance.CreateChunk(element, mass, temperature, this.transform.position);
+			SubstanceChunk substanceChunk = LiquidSourceManager.Instance.CreateChunk(element, mass, temperature, disease_idx, disease_count, this.transform.position);
 			primaryElement = substanceChunk.GetComponent<PrimaryElement>();
 			primaryElement.KeepZeroMassObject = keep_zero_mass;
-			this.Store(substanceChunk.gameObject, true, false);
+			this.Store(substanceChunk.gameObject, true, false, do_disease_transfer);
 		}
 		return primaryElement;
 	}
 
-	public PrimaryElement AddGasChunk(SimHashes element, float mass, float temperature, bool keep_zero_mass)
+	public PrimaryElement AddGasChunk(SimHashes element, float mass, float temperature, byte disease_idx, int disease_count, bool keep_zero_mass, bool do_disease_transfer = true)
 	{
 		if (mass <= 0f)
 		{
@@ -177,14 +183,15 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			primaryElement.Temperature = GameUtil.GetFinalTemperature(primaryElement.Temperature, primaryElement.Mass, temperature, mass);
 			primaryElement.KeepZeroMassObject = true;
 			primaryElement.Mass += mass;
+			primaryElement.AddDisease(disease_idx, disease_count, "Storage.AddGasChunk");
 			this.Trigger(-1697596308, primaryElement.gameObject);
 		}
 		else
 		{
-			SubstanceChunk substanceChunk = GasSourceManager.Instance.CreateChunk(element, mass, temperature, this.transform.position);
+			SubstanceChunk substanceChunk = GasSourceManager.Instance.CreateChunk(element, mass, temperature, disease_idx, disease_count, this.transform.position);
 			primaryElement = substanceChunk.GetComponent<PrimaryElement>();
 			primaryElement.KeepZeroMassObject = keep_zero_mass;
-			this.Store(substanceChunk.gameObject, true, false);
+			this.Store(substanceChunk.gameObject, true, false, do_disease_transfer);
 		}
 		return primaryElement;
 	}
@@ -208,7 +215,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			{
 				Pickupable component2 = gameObject.GetComponent<Pickupable>();
 				Pickupable pickupable = component2.Take(amount);
-				dest_storage.Store(pickupable.gameObject, hide_popups, block_events);
+				dest_storage.Store(pickupable.gameObject, hide_popups, block_events, true);
 				this.Trigger(-1697596308, component2.gameObject);
 			}
 			else
@@ -231,7 +238,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 				this.items.RemoveAt(i);
 				this.Trigger(-1697596308, go);
 				this.ApplyStoredItemModifiers(go, false);
-				target.Store(go, hide_popups, false);
+				target.Store(go, hide_popups, false, true);
 				return true;
 			}
 		}
@@ -243,8 +250,13 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		while (this.items.Count > 0)
 		{
 			GameObject gameObject = this.items[0];
+			this.TransferDiseaseWithObject(gameObject);
 			this.items.RemoveAt(0);
-			this.MakeWorldActive(gameObject);
+			if (gameObject != null)
+			{
+				gameObject.Trigger(1228788923, null);
+				this.MakeWorldActive(gameObject);
+			}
 		}
 	}
 
@@ -269,12 +281,43 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 				{
 					this.items[i] = this.items[count - 1];
 					this.items.RemoveAt(count - 1);
+					this.TransferDiseaseWithObject(go);
+					go.Trigger(1228788923, null);
 					this.MakeWorldActive(go);
 					break;
 				}
 			}
 		}
 		return go;
+	}
+
+	private void TransferDiseaseWithObject(GameObject obj)
+	{
+		if (obj == null || !this.doDiseaseTransfer || this.primaryElement == null)
+		{
+			return;
+		}
+		PrimaryElement component = obj.GetComponent<PrimaryElement>();
+		if (component == null)
+		{
+			return;
+		}
+		SimUtil.DiseaseInfo invalid = SimUtil.DiseaseInfo.Invalid;
+		invalid.idx = component.DiseaseIdx;
+		invalid.count = (int)((float)component.DiseaseCount * 0.05f);
+		SimUtil.DiseaseInfo invalid2 = SimUtil.DiseaseInfo.Invalid;
+		invalid2.idx = this.primaryElement.DiseaseIdx;
+		invalid2.count = (int)((float)this.primaryElement.DiseaseCount * 0.05f);
+		component.ModifyDiseaseCount(-invalid.count, "Storage.TransferDiseaseWithObject");
+		this.primaryElement.ModifyDiseaseCount(-invalid2.count, "Storage.TransferDiseaseWithObject");
+		if (invalid.count > 0)
+		{
+			this.primaryElement.AddDisease(invalid.idx, invalid.count, "Storage.TransferDiseaseWithObject");
+		}
+		if (invalid2.count > 0)
+		{
+			component.AddDisease(invalid2.idx, invalid2.count, "Storage.TransferDiseaseWithObject");
+		}
 	}
 
 	private void MakeWorldActive(GameObject go)
@@ -294,7 +337,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 					component.KeepZeroMassObject = false;
 					if (component.Mass <= 0f)
 					{
-						global::UnityEngine.Object.Destroy(go);
+						Util.KDestroyGameObject(go);
 					}
 				}
 			}
@@ -415,9 +458,13 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		}
 	}
 
-	public void Consume(Tag tag, float amount)
+	public void ConsumeAndGetDisease(Tag tag, float amount, out SimUtil.DiseaseInfo disease_info, out float aggregate_temperature)
 	{
-		List<Pickupable> list = null;
+		disease_info = SimUtil.DiseaseInfo.Invalid;
+		List<GameObject> list = null;
+		aggregate_temperature = 0f;
+		float num = 0f;
+		bool flag = false;
 		for (int i = 0; i < this.items.Count; i++)
 		{
 			GameObject gameObject = this.items[i];
@@ -425,22 +472,24 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			{
 				if (gameObject.HasTag(tag))
 				{
-					Pickupable component = gameObject.GetComponent<Pickupable>();
-					float num = Math.Min(component.TotalAmount, amount);
-					component.TotalAmount -= num;
-					if (component.TotalAmount <= 0f)
+					flag = true;
+					PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+					float num2 = Math.Min(component.Units, amount);
+					aggregate_temperature = SimUtil.CalculateFinalTemperature(num, aggregate_temperature, num2, component.Temperature);
+					SimUtil.DiseaseInfo percentOfDisease = SimUtil.GetPercentOfDisease(component, num2 / component.Units);
+					disease_info = SimUtil.CalculateFinalDiseaseInfo(disease_info, percentOfDisease);
+					component.Units -= num2;
+					component.ModifyDiseaseCount(-percentOfDisease.count, "Storage.ConsumeAndGetDisease");
+					if (component.Units <= 0f && !component.KeepZeroMassObject)
 					{
-						PrimaryElement component2 = component.GetComponent<PrimaryElement>();
-						if (!component2.KeepZeroMassObject)
+						if (list == null)
 						{
-							if (list == null)
-							{
-								list = new List<Pickupable>();
-							}
-							list.Add(component);
+							list = new List<GameObject>();
 						}
+						list.Add(gameObject);
 					}
-					amount -= num;
+					amount -= num2;
+					num += num2;
 					this.Trigger(-1697596308, gameObject);
 					if (amount <= 0f)
 					{
@@ -449,19 +498,31 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 				}
 			}
 		}
+		if (!flag)
+		{
+			global::Debug.LogWarning("TODO(YOG): Why are the ingredients not in storage?", null);
+			aggregate_temperature = base.GetComponent<PrimaryElement>().Temperature;
+		}
 		if (list != null)
 		{
 			for (int j = 0; j < list.Count; j++)
 			{
-				this.items.Remove(list[j].gameObject);
-				global::UnityEngine.Object.Destroy(list[j].gameObject);
+				this.items.Remove(list[j]);
+				Util.KDestroyGameObject(list[j]);
 			}
 		}
 	}
 
-	public void Consume(Recipe.Ingredient ingredient)
+	public void ConsumeAndGetDisease(Recipe.Ingredient ingredient, out SimUtil.DiseaseInfo disease_info, out float temperature)
 	{
-		this.Consume(ingredient.tag, ingredient.amount);
+		this.ConsumeAndGetDisease(ingredient.tag, ingredient.amount, out disease_info, out temperature);
+	}
+
+	public void Consume(Tag tag, float amount)
+	{
+		SimUtil.DiseaseInfo diseaseInfo;
+		float num;
+		this.ConsumeAndGetDisease(tag, amount, out diseaseInfo, out num);
 	}
 
 	public void Consume(Tag tag)
@@ -656,6 +717,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 	public void Remove(GameObject go)
 	{
 		this.items.Remove(go);
+		this.TransferDiseaseWithObject(go);
 		this.Trigger(-1697596308, go);
 		this.ApplyStoredItemModifiers(go, false);
 	}
@@ -730,7 +792,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		if (this.showDescriptor)
 		{
 			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.STORAGECAPACITY, GameUtil.GetFormattedMass(this.Capacity(), GameUtil.TimeSlice.None, true, "{0:0.#}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.STORAGECAPACITY, GameUtil.GetFormattedMass(this.Capacity(), GameUtil.TimeSlice.None, true, "{0:0.#}")), Descriptor.DescriptorType.Effect);
+			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.STORAGECAPACITY, GameUtil.GetFormattedMass(this.Capacity(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.STORAGECAPACITY, GameUtil.GetFormattedMass(this.Capacity(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Effect);
 			list.Add(descriptor);
 		}
 		return list;
@@ -769,6 +831,21 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			return;
 		}
 		component.enabled = !seal;
+	}
+
+	private static void MakeItemPreserved(GameObject go, bool preserve)
+	{
+		if (go != null)
+		{
+			if (preserve)
+			{
+				go.GetComponent<KPrefabID>().AddTag(GameTags.Preserved);
+			}
+			else
+			{
+				go.GetComponent<KPrefabID>().RemoveTag(GameTags.Preserved);
+			}
+		}
 	}
 
 	private void ApplyStoredItemModifiers(GameObject go, bool stored)
@@ -865,7 +942,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			SaveLoadRoot saveLoadRoot = SaveLoadRoot.Load(tag, reader);
 			if (saveLoadRoot != null)
 			{
-				GameObject gameObject = this.Store(saveLoadRoot.gameObject, true, true);
+				GameObject gameObject = this.Store(saveLoadRoot.gameObject, true, true, true);
 				if (gameObject != null)
 				{
 					gameObject.GetComponent<Pickupable>().OnStore(this);
@@ -895,6 +972,8 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 
 	public bool countAsAccessible;
 
+	public bool allowSublimation = true;
+
 	public float capacityKg = 20000f;
 
 	public bool disableOnStore = true;
@@ -903,7 +982,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 
 	public bool showDescriptor;
 
-	public bool allowSublimation = true;
+	public bool doDiseaseTransfer = true;
 
 	public List<Tag> storageFilters;
 
@@ -918,6 +997,9 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 
 	[MyCmpGet]
 	public Prioritizable prioritizable;
+
+	[MyCmpGet]
+	protected PrimaryElement primaryElement;
 
 	public bool dropOnLoad;
 
@@ -934,7 +1016,8 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 	{
 		new Storage.StoredItemModifierInfo(Storage.StoredItemModifier.Insulate, new Action<GameObject, bool>(Storage.MakeItemTemperatureInsulated)),
 		new Storage.StoredItemModifierInfo(Storage.StoredItemModifier.Hide, new Action<GameObject, bool>(Storage.MakeItemInvisible)),
-		new Storage.StoredItemModifierInfo(Storage.StoredItemModifier.Seal, new Action<GameObject, bool>(Storage.MakeItemSealed))
+		new Storage.StoredItemModifierInfo(Storage.StoredItemModifier.Seal, new Action<GameObject, bool>(Storage.MakeItemSealed)),
+		new Storage.StoredItemModifierInfo(Storage.StoredItemModifier.Preserve, new Action<GameObject, bool>(Storage.MakeItemPreserved))
 	};
 
 	[SerializeField]
@@ -944,7 +1027,8 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 	{
 		Insulate,
 		Hide,
-		Seal
+		Seal,
+		Preserve
 	}
 
 	public enum FXPrefix

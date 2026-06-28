@@ -104,20 +104,39 @@ public class ThoughtGraph : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance
 			this.bubble.transform.localRotation = EffectPrefabs.Instance.ThoughtBubble.transform.localRotation;
 			this.bubble.GetComponent<KSelectable>().entityName = thought.hoverText;
 			VoiceSoundEvent voiceSoundEvent = new VoiceSoundEvent("ThoughtGraph", thought.texture.name, 0, false);
-			voiceSoundEvent.Play(base.transform);
+			AnimEventManager.EventPlayerData eventPlayerData = new AnimEventManager.EventPlayerData();
+			eventPlayerData.controller = base.transform.GetComponent<KBatchedAnimController>();
+			voiceSoundEvent.Play(eventPlayerData);
+			this.schedulerHandle.ClearScheduler();
+			this.schedulerHandle = GameScheduler.Instance.SchedulePeriodic("ThoughtGraph", 0f, new Action<object>(this.UpdatePosition), eventPlayerData.controller, null, 0f, null);
 			if (thought.showImmediately)
 			{
 				this.thoughts.RemoveAt(0);
 			}
 		}
 
+		private void UpdatePosition(object data)
+		{
+			KBatchedAnimController kbatchedAnimController = data as KBatchedAnimController;
+			bool flag;
+			Matrix2x3 symbolLocalTransform = kbatchedAnimController.GetSymbolLocalTransform(this.symbol, out flag);
+			Matrix4x4 matrix4x = kbatchedAnimController.GetTransformMatrix() * symbolLocalTransform;
+			Vector3 vector = new Vector3(matrix4x.m03, matrix4x.m13, 0f);
+			this.bubble.transform.position = vector + EffectPrefabs.Instance.ThoughtBubble.transform.localPosition;
+		}
+
 		public void DestroyBubble()
 		{
+			this.schedulerHandle.ClearScheduler();
 			this.bubble.SetActive(false);
 		}
 
 		private List<Thought> thoughts = new List<Thought>();
 
 		private GameObject bubble;
+
+		private SchedulerHandle schedulerHandle;
+
+		public HashedString symbol = new HashedString("snapTo_pivot");
 	}
 }

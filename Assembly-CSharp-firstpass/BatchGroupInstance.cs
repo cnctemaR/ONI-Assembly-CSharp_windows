@@ -26,6 +26,19 @@ public class BatchGroupInstance
 
 	public List<Texture2D> textures { get; private set; }
 
+	public void FreeResources()
+	{
+		this.DestroyTex();
+		this.group = null;
+		this.overriddenSymbols.Clear();
+		this.overrideSourceFile.Clear();
+		this.symbolFrameInstances.Clear();
+		this.textures.Clear();
+		this.swaps.Clear();
+		this.texUse.Clear();
+		this.texIndexes.Clear();
+	}
+
 	public void DestroyTex()
 	{
 		if (this.buildTex != null)
@@ -38,7 +51,7 @@ public class BatchGroupInstance
 	public void Rebuild(MaterialPropertyBlock matProperties)
 	{
 		this.group.InitBuild(this);
-		matProperties.SetTexture("buildTex", this.buildTex);
+		matProperties.SetTexture("buildTex", this.buildTex.texture);
 		this.requiresRebuild = false;
 	}
 
@@ -243,7 +256,7 @@ public class BatchGroupInstance
 		this.swaps.Add(singleFrameSwap);
 	}
 
-	public Texture2D buildTex;
+	public KAnimBatchGroup.KAnimBatchTextureCache.Entry buildTex;
 
 	private List<BatchGroupInstance.SingleFrameSwap> swaps = new List<BatchGroupInstance.SingleFrameSwap>();
 

@@ -1,11 +1,10 @@
 ﻿using System;
-using Klei.AI;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class StatusItem : Resource
 {
-	public StatusItem(string id, string prefix, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, SimViewMode overlay, SimViewMode second_overlay, bool showShowWorldIcon = true)
+	public StatusItem(string id, string prefix, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, SimViewMode render_overlay_a, SimViewMode render_overlay_b, bool showShowWorldIcon = true, int status_overlays = 2046)
 		: base(id, Strings.Get(string.Concat(new string[]
 		{
 			"STRINGS.",
@@ -39,15 +38,16 @@ public class StatusItem : Resource
 		this.tooltipText = text;
 		this.iconType = icon_type;
 		this.allowMultiples = allow_multiples;
-		this.overlay = overlay;
+		this.render_overlay = render_overlay_a;
 		this.showShowWorldIcon = showShowWorldIcon;
+		this.status_overlays = status_overlays;
 		if (this.sprite == null)
 		{
 			global::Debug.LogWarning("Status item '" + id + "' references a missing icon: " + icon, null);
 		}
 	}
 
-	public StatusItem(string id, string name, string tooltip, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, SimViewMode overlay, SimViewMode second_overlay)
+	public StatusItem(string id, string name, string tooltip, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, SimViewMode render_overlay_a, SimViewMode render_overlay_b, int status_overlays = 2046)
 		: base(id, name)
 	{
 		switch (icon_type)
@@ -65,7 +65,8 @@ public class StatusItem : Resource
 		this.tooltipText = tooltip;
 		this.iconType = icon_type;
 		this.allowMultiples = allow_multiples;
-		this.overlay = overlay;
+		this.render_overlay = render_overlay_a;
+		this.status_overlays = status_overlays;
 		if (this.sprite == null)
 		{
 			global::Debug.LogWarning("Status item '" + id + "' references a missing icon: " + icon, null);
@@ -126,29 +127,37 @@ public class StatusItem : Resource
 		}
 	}
 
-	public void AddEffect(string effect_name)
-	{
-		if (!string.IsNullOrEmpty(effect_name))
-		{
-			this.effect = Db.Get().effects.Get(effect_name);
-		}
-	}
-
-	public void AddEffect(Effect effect)
-	{
-		this.effect = effect;
-	}
-
 	public virtual string GetName(object data)
 	{
 		return this.ResolveString(this.Name, data);
 	}
 
-	public string ResolveString(string str, object data)
+	public virtual string GetTooltip(object data)
+	{
+		return this.ResolveTooltip(this.tooltipText, data);
+	}
+
+	private string ResolveString(string str, object data)
 	{
 		if (this.resolveStringCallback != null && data != null)
 		{
 			return this.resolveStringCallback(str, data);
+		}
+		return str;
+	}
+
+	private string ResolveTooltip(string str, object data)
+	{
+		if (data != null)
+		{
+			if (this.resolveTooltipCallback != null)
+			{
+				return this.resolveTooltipCallback(str, data);
+			}
+			if (this.resolveStringCallback != null)
+			{
+				return this.resolveStringCallback(str, data);
+			}
 		}
 		return str;
 	}
@@ -161,8 +170,8 @@ public class StatusItem : Resource
 	public virtual void ShowToolTip(ToolTip tooltip_widget, object data, TextStyleSetting property_style)
 	{
 		tooltip_widget.ClearMultiStringTooltip();
-		string text = this.ResolveString(this.tooltipText, data);
-		tooltip_widget.AddMultiStringTooltip(text, property_style);
+		string tooltip = this.GetTooltip(data);
+		tooltip_widget.AddMultiStringTooltip(tooltip, property_style);
 	}
 
 	public void SetIcon(Image image, object data)
@@ -186,7 +195,86 @@ public class StatusItem : Resource
 		return this;
 	}
 
-	public string tooltipText;
+	public static StatusItem.StatusItemOverlays GetStatusItemOverlayBySimViewMode(SimViewMode mode)
+	{
+		StatusItem.StatusItemOverlays statusItemOverlays = StatusItem.StatusItemOverlays.None;
+		if (mode != SimViewMode.GasVentMap)
+		{
+			if (mode != SimViewMode.HeatFlow && mode != SimViewMode.ThermalConductivity)
+			{
+				if (mode != SimViewMode.TemperatureMap)
+				{
+					if (mode != SimViewMode.Disease)
+					{
+						if (mode != SimViewMode.Light)
+						{
+							if (mode != SimViewMode.None)
+							{
+								if (mode != SimViewMode.Decor)
+								{
+									if (mode != SimViewMode.Crop)
+									{
+										if (mode != SimViewMode.LiquidVentMap)
+										{
+											if (mode != SimViewMode.PowerMap)
+											{
+												global::Debug.LogWarning("ViewMode " + mode + " has no StatusItemOverlay value", null);
+											}
+											else
+											{
+												statusItemOverlays = StatusItem.StatusItemOverlays.PowerMap;
+											}
+										}
+										else
+										{
+											statusItemOverlays = StatusItem.StatusItemOverlays.LiquidPlumbing;
+										}
+									}
+									else
+									{
+										statusItemOverlays = StatusItem.StatusItemOverlays.Farming;
+									}
+								}
+								else
+								{
+									statusItemOverlays = StatusItem.StatusItemOverlays.Decor;
+								}
+							}
+							else
+							{
+								statusItemOverlays = StatusItem.StatusItemOverlays.None;
+							}
+						}
+						else
+						{
+							statusItemOverlays = StatusItem.StatusItemOverlays.Light;
+						}
+					}
+					else
+					{
+						statusItemOverlays = StatusItem.StatusItemOverlays.Pathogens;
+					}
+				}
+				else
+				{
+					statusItemOverlays = StatusItem.StatusItemOverlays.Temperature;
+				}
+			}
+			else
+			{
+				statusItemOverlays = StatusItem.StatusItemOverlays.ThermalComfort;
+			}
+		}
+		else
+		{
+			statusItemOverlays = StatusItem.StatusItemOverlays.GasPlunbing;
+		}
+		return statusItemOverlays;
+	}
+
+	private const int ALL_OVERLAYS = 2046;
+
+	private string tooltipText;
 
 	public string notificationText;
 
@@ -210,13 +298,15 @@ public class StatusItem : Resource
 
 	public Func<string, object, string> resolveStringCallback;
 
-	public bool allowMultiples;
+	public Func<string, object, string> resolveTooltipCallback;
 
-	public Effect effect;
+	public bool allowMultiples;
 
 	public Func<SimViewMode, object, bool> conditionalOverlayCallback;
 
-	public SimViewMode overlay;
+	public SimViewMode render_overlay;
+
+	public int status_overlays;
 
 	private string prefix;
 
@@ -227,5 +317,20 @@ public class StatusItem : Resource
 		Info,
 		Exclamation,
 		Custom
+	}
+
+	[Flags]
+	public enum StatusItemOverlays
+	{
+		None = 2,
+		PowerMap = 4,
+		Temperature = 8,
+		ThermalComfort = 16,
+		Light = 32,
+		LiquidPlumbing = 64,
+		GasPlunbing = 128,
+		Decor = 256,
+		Pathogens = 512,
+		Farming = 1024
 	}
 }

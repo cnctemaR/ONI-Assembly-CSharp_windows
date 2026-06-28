@@ -18,7 +18,7 @@ public class FileNameDialog : KScreen
 		this.closeButton.onClick += this.OnCancel;
 		this.inputField.onValueChanged.AddListener(delegate
 		{
-			Util.ScrubInputField(this.inputField);
+			Util.ScrubInputField(this.inputField, false);
 		});
 		this.inputField.onEndEdit.AddListener(new UnityAction<string>(this.OnEndEdit));
 	}
@@ -57,7 +57,6 @@ public class FileNameDialog : KScreen
 		{
 			this.inputField.text = string.Empty;
 		}
-		this.OnConfirm();
 	}
 
 	public void OnCancel()

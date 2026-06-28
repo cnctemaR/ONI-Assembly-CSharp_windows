@@ -45,18 +45,6 @@ public class LoopingSounds : KMonoBehaviour
 		}
 	}
 
-	private void OnStartLoopingSound(object data)
-	{
-		if (data is FMODAsset)
-		{
-			this.StartSound(GameUtil.MigrateFMOD(data as FMODAsset), this.transform.position);
-		}
-		else
-		{
-			this.StartSound(data as string, this.transform.position);
-		}
-	}
-
 	public bool IsSoundPlaying(string path)
 	{
 		for (int i = 0; i < this.loopingSounds.Count; i++)
@@ -69,7 +57,7 @@ public class LoopingSounds : KMonoBehaviour
 		return false;
 	}
 
-	private void UpdateProgressParameter(LoopingSounds.SoundEvent sound)
+	private void UpdateProgressParameter(LoopingSounds.LoopingSoundEvent sound)
 	{
 		string progressParameterName = sound.progressParameterName;
 		if (progressParameterName == null)
@@ -100,7 +88,7 @@ public class LoopingSounds : KMonoBehaviour
 		}
 	}
 
-	public bool StartSound(string asset, Vector3 pos)
+	public bool StartSound(string asset, AnimEventManager.EventPlayerData behaviour, bool playAtTarget, EffectorValues noiseValues)
 	{
 		if (asset == null || asset == string.Empty)
 		{
@@ -115,21 +103,80 @@ public class LoopingSounds : KMonoBehaviour
 				Output.LogError(new object[] { "StartSound() Couldnt Get FMOD event for asset [" + asset + "]" });
 				return false;
 			}
-			LoopingSounds.SoundEvent soundEvent = new LoopingSounds.SoundEvent
+			LoopingSounds.LoopingSoundEvent loopingSoundEvent = default(LoopingSounds.LoopingSoundEvent);
+			LoopingSounds.LoopingSoundEvent loopingSoundEvent2 = loopingSoundEvent;
+			loopingSoundEvent2.asset = asset;
+			loopingSoundEvent2.ev = eventInstance;
+			loopingSoundEvent2.progressParameter = null;
+			loopingSoundEvent2.progressParameterName = null;
+			loopingSoundEvent2.id = -1L;
+			loopingSoundEvent = loopingSoundEvent2;
+			loopingSoundEvent.SetupProgressParameter();
+			if (loopingSoundEvent.progressParameter != null)
+			{
+				this.AddLoopingSoundUpdater();
+			}
+			LoopingSoundManager.Get().Add(asset, eventInstance, true);
+			Vector3 position = behaviour.GetComponent<Transform>().position;
+			Vector3 position2 = behaviour.position;
+			Vector3 vector = ((!playAtTarget) ? position : position2);
+			Vector3 vector2 = new Vector3(vector.x, vector.y, 0f);
+			eventInstance.set3DAttributes(CameraController.Instance.GetVerticallyScaledPosition(vector2).To3DAttributes());
+			LoopingSoundManager.UpdateSpeed(eventInstance);
+			eventInstance.start();
+			if (noiseValues.amount != 0)
+			{
+				string text;
+				if (behaviour.GetComponent<KSelectable>() != null)
+				{
+					text = behaviour.GetComponent<KSelectable>().GetName();
+				}
+				else
+				{
+					text = behaviour.name;
+				}
+				loopingSoundEvent.id = AudioEventManager.Get().UpdateNoiseSplat(vector2, noiseValues.amount, noiseValues.radius, text, loopingSoundEvent.id);
+			}
+			if (Time.timeScale == 0f)
+			{
+				eventInstance.setPaused(true);
+			}
+			this.loopingSounds.Add(loopingSoundEvent);
+		}
+		return true;
+	}
+
+	public bool StartSound(string asset, Vector3 sound_pos)
+	{
+		if (asset == null || asset == string.Empty)
+		{
+			global::Debug.LogWarning("Missing sound", null);
+			return false;
+		}
+		if (!this.IsSoundPlaying(asset))
+		{
+			EventInstance eventInstance = KFMOD.CreateInstance(asset);
+			if (eventInstance == null)
+			{
+				Output.LogError(new object[] { "StartSound() Couldnt Get FMOD event for asset [" + asset + "]" });
+				return false;
+			}
+			LoopingSounds.LoopingSoundEvent loopingSoundEvent = new LoopingSounds.LoopingSoundEvent
 			{
 				asset = asset,
 				ev = eventInstance,
 				progressParameter = null,
-				progressParameterName = null
+				progressParameterName = null,
+				id = -1L
 			};
-			soundEvent.SetupProgressParameter();
-			if (soundEvent.progressParameter != null)
+			loopingSoundEvent.SetupProgressParameter();
+			if (!this.updatePosition && loopingSoundEvent.progressParameter != null)
 			{
-				this.AddLoopingSoundUpdater();
+				this.updatePosition = true;
 			}
-			this.loopingSounds.Add(soundEvent);
+			this.loopingSounds.Add(loopingSoundEvent);
 			LoopingSoundManager.Get().Add(asset, eventInstance, true);
-			Vector3 vector = new Vector3(pos.x, pos.y, 0f);
+			Vector3 vector = new Vector3(sound_pos.x, sound_pos.y, 0f);
 			eventInstance.set3DAttributes(CameraController.Instance.GetVerticallyScaledPosition(vector).To3DAttributes());
 			LoopingSoundManager.UpdateSpeed(eventInstance);
 			eventInstance.start();
@@ -141,20 +188,38 @@ public class LoopingSounds : KMonoBehaviour
 		return true;
 	}
 
+	private void StopSoundAtIndex(int i)
+	{
+		EventInstance ev = this.loopingSounds[i].ev;
+		ev.stop(STOP_MODE.ALLOWFADEOUT);
+		ev.release();
+		if (this.loopingSounds[i].id != -1L && !App.IsExiting)
+		{
+			AudioEventManager.Get().ClearNoiseSplat(this.loopingSounds[i].id);
+		}
+		LoopingSoundManager.Get().Remove(this.loopingSounds[i].asset, ev);
+	}
+
 	public void StopSound(string asset)
 	{
 		for (int i = 0; i < this.loopingSounds.Count; i++)
 		{
 			if (this.loopingSounds[i].asset == asset)
 			{
-				EventInstance ev = this.loopingSounds[i].ev;
-				ev.stop(STOP_MODE.ALLOWFADEOUT);
-				ev.release();
+				this.StopSoundAtIndex(i);
 				this.loopingSounds.RemoveAt(i);
-				LoopingSoundManager.Get().Remove(asset, ev);
 				break;
 			}
 		}
+	}
+
+	public void StopAllSounds()
+	{
+		for (int i = 0; i < this.loopingSounds.Count; i++)
+		{
+			this.StopSoundAtIndex(i);
+		}
+		this.loopingSounds.Clear();
 	}
 
 	private void OnStopLoopingSound(object data)
@@ -171,14 +236,6 @@ public class LoopingSounds : KMonoBehaviour
 		this.StopSound(text);
 	}
 
-	public void StopAllSounds()
-	{
-		while (this.loopingSounds.Count > 0)
-		{
-			this.StopSound(this.loopingSounds[0].asset);
-		}
-	}
-
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
@@ -188,11 +245,11 @@ public class LoopingSounds : KMonoBehaviour
 
 	public void SetParameter(string path, string parameter, float value)
 	{
-		foreach (LoopingSounds.SoundEvent soundEvent in this.loopingSounds)
+		foreach (LoopingSounds.LoopingSoundEvent loopingSoundEvent in this.loopingSounds)
 		{
-			if (soundEvent.asset == path)
+			if (loopingSoundEvent.asset == path)
 			{
-				soundEvent.ev.setParameterValue(parameter, value);
+				loopingSoundEvent.ev.setParameterValue(parameter, value);
 			}
 		}
 	}
@@ -211,7 +268,7 @@ public class LoopingSounds : KMonoBehaviour
 		for (int i = 0; i < events.Count; i++)
 		{
 			AnimEvent animEvent = events[i];
-			global::SoundEvent soundEvent = animEvent as global::SoundEvent;
+			SoundEvent soundEvent = animEvent as SoundEvent;
 			if (soundEvent == null || soundEvent.sound == null)
 			{
 				return;
@@ -225,25 +282,25 @@ public class LoopingSounds : KMonoBehaviour
 			{
 				if (Time.time - num > soundEvent.minInterval)
 				{
-					global::SoundEvent.PlayOneShot(soundEvent.sound, this.transform.position);
+					SoundEvent.PlayOneShot(soundEvent.sound, this.transform.position);
 				}
 			}
 			else
 			{
-				global::SoundEvent.PlayOneShot(soundEvent.sound, this.transform.position);
+				SoundEvent.PlayOneShot(soundEvent.sound, this.transform.position);
 			}
 			this.lastTimePlayed[soundEvent.soundHash] = Time.time;
 		}
 	}
 
-	private List<LoopingSounds.SoundEvent> loopingSounds = new List<LoopingSounds.SoundEvent>();
+	private List<LoopingSounds.LoopingSoundEvent> loopingSounds = new List<LoopingSounds.LoopingSoundEvent>();
 
 	private Dictionary<HashedString, float> lastTimePlayed = new Dictionary<HashedString, float>();
 
 	[SerializeField]
 	public bool updatePosition;
 
-	private struct SoundEvent
+	private struct LoopingSoundEvent
 	{
 		public void SetupProgressParameter()
 		{
@@ -265,6 +322,8 @@ public class LoopingSounds : KMonoBehaviour
 		public string asset;
 
 		public EventInstance ev;
+
+		public long id;
 
 		public ParameterInstance progressParameter;
 

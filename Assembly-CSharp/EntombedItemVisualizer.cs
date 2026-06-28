@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class EntombedItemVisualizer : KMonoBehaviour
 {
+	public void Clear()
+	{
+		this.cellEntombedCounts.Clear();
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -65,9 +70,11 @@ public class EntombedItemVisualizer : KMonoBehaviour
 
 	private void ReleaseVisualizer(int cell, EntombedItemVisualizer.Data data)
 	{
-		GameObject gameObject = data.controller.gameObject;
-		gameObject.SetActive(false);
-		this.entombedItemPool.ReleaseInstance(gameObject);
+		if (data.controller != null)
+		{
+			data.controller.gameObject.SetActive(false);
+			this.entombedItemPool.ReleaseInstance(data.controller.gameObject);
+		}
 		this.cellEntombedCounts.Remove(cell);
 	}
 

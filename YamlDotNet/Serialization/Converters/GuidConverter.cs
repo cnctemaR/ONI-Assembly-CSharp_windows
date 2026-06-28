@@ -6,6 +6,11 @@ namespace YamlDotNet.Serialization.Converters
 {
 	public class GuidConverter : IYamlTypeConverter
 	{
+		public GuidConverter(bool jsonCompatible)
+		{
+			this.jsonCompatible = jsonCompatible;
+		}
+
 		public bool Accepts(Type type)
 		{
 			return type == typeof(Guid);
@@ -20,7 +25,9 @@ namespace YamlDotNet.Serialization.Converters
 
 		public void WriteYaml(IEmitter emitter, object value, Type type)
 		{
-			emitter.Emit(new Scalar(((Guid)value).ToString("D")));
+			emitter.Emit(new Scalar(null, null, ((Guid)value).ToString("D"), this.jsonCompatible ? ScalarStyle.DoubleQuoted : ScalarStyle.Any, true, false));
 		}
+
+		private readonly bool jsonCompatible;
 	}
 }

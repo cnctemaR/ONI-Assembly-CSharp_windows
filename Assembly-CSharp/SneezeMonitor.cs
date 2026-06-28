@@ -11,7 +11,7 @@ public class SneezeMonitor : GameStateMachine<SneezeMonitor, SneezeMonitor.Insta
 		this.Sneezy.sneeze_pre.ToggleScheduleCallback("Sneeze", 2f, delegate(SneezeMonitor.Instance instanceObject)
 		{
 			AcousticDisturbance.Emit(instanceObject.master.gameObject, 3);
-		}).ToggleChore((SneezeMonitor.Instance smi) => new EmoteChore(smi.master, Db.Get().ChoreTypes.EmoteHighPriority, "anim_sneeze_kanim", SneezeMonitor.SneezeAnims, null), this.Sneezy.sneeze_pst, false).ScheduleGoTo(5f, this.Sneezy.sneeze_pst);
+		}).ToggleChore((SneezeMonitor.Instance smi) => new EmoteChore(smi.master, Db.Get().ChoreTypes.EmoteHighPriority, "anim_sneeze_kanim", SneezeMonitor.SneezeAnims, null), this.Sneezy.sneeze_pst).ScheduleGoTo(5f, this.Sneezy.sneeze_pst);
 		this.Sneezy.sneeze_pst.Enter(delegate(SneezeMonitor.Instance smi)
 		{
 			smi.GoTo(this.Sneezy.idle);

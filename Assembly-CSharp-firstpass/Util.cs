@@ -19,14 +19,6 @@ public static class Util
 		return o.transform.position;
 	}
 
-	public static void Assert(bool condition)
-	{
-		if (!condition)
-		{
-			throw new Exception();
-		}
-	}
-
 	public static void InitializeComponent(Component cmp)
 	{
 		if (cmp != null)
@@ -403,18 +395,18 @@ public static class Util
 		return string.Format("{0:0}", value);
 	}
 
-	public static bool IsInputCharacterValid(char _char)
+	public static bool IsInputCharacterValid(char _char, bool isPath = false)
 	{
-		return !Util.defaultInvalidUserInputChars.Contains(_char) && !Util.additionalInvalidUserInputChars.Contains(_char);
+		return !Util.defaultInvalidUserInputChars.Contains(_char) && (isPath || !Util.additionalInvalidUserInputChars.Contains(_char));
 	}
 
-	public static void ScrubInputField(TMP_InputField inputField)
+	public static void ScrubInputField(TMP_InputField inputField, bool isPath = false)
 	{
 		for (int i = inputField.text.Length - 1; i >= 0; i--)
 		{
 			if (i < inputField.text.Length)
 			{
-				if (!Util.IsInputCharacterValid(inputField.text[i]))
+				if (!Util.IsInputCharacterValid(inputField.text[i], isPath))
 				{
 					inputField.text = inputField.text.Remove(i, 1);
 				}
@@ -564,6 +556,11 @@ public static class Util
 		return (float)num4;
 	}
 
+	public static void Shuffle<T>(this IList<T> list)
+	{
+		list.ShuffleSeeded<T>(Util.random);
+	}
+
 	public static void CopyTransform(Transform source, Transform dest)
 	{
 		dest.localPosition = source.localPosition;
@@ -667,24 +664,6 @@ public static class Util
 		};
 	}
 
-	public static void Shuffle<T>(this IList<T> list)
-	{
-		list.ShuffleSeeded<T>(Util.random);
-	}
-
-	public static void ShuffleSeeded<T>(this IList<T> list, global::System.Random rng)
-	{
-		int i = list.Count;
-		while (i > 1)
-		{
-			i--;
-			int num = rng.Next(i + 1);
-			T t = list[num];
-			list[num] = list[i];
-			list[i] = t;
-		}
-	}
-
 	public static string ToHexString(this Color c)
 	{
 		return string.Format("{0:X2}{1:X2}{2:X2}{3:X2}", new object[]
@@ -735,8 +714,12 @@ public static class Util
 
 	public static string RootFolder()
 	{
-		string folderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-		return Path.Combine(folderPath, "Klei/OxygenNotIncluded");
+		if (Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsEditor)
+		{
+			string folderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+			return Path.Combine(folderPath, "Klei/OxygenNotIncluded");
+		}
+		return Util.defaultRootFolder;
 	}
 
 	public static T GetComponentInChildren<T>(this GameObject go, bool include_inactive) where T : Component
@@ -832,6 +815,8 @@ public static class Util
 	private static HashSet<char> additionalInvalidUserInputChars = new HashSet<char>(new char[] { '<', '>', ':', '"', '/', '?', '*', '\\', '!' });
 
 	private static global::System.Random random = new global::System.Random();
+
+	private static string defaultRootFolder = Application.persistentDataPath;
 
 	private static char[] chars = new char[128];
 }

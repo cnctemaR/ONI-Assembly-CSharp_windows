@@ -84,6 +84,16 @@ public class PressureSwitch : CircuitSwitch, ISaveLoadable, IThresholdSwitch
 		}
 	}
 
+	public float GetRangeMinInputField()
+	{
+		return (this.desiredState != Element.State.Gas) ? this.rangeMin : (this.rangeMin * 1000f);
+	}
+
+	public float GetRangeMaxInputField()
+	{
+		return (this.desiredState != Element.State.Gas) ? this.rangeMax : (this.rangeMax * 1000f);
+	}
+
 	public LocString ThresholdValueName
 	{
 		get
@@ -108,9 +118,62 @@ public class PressureSwitch : CircuitSwitch, ISaveLoadable, IThresholdSwitch
 		}
 	}
 
-	public string Format(float value)
+	public string Format(float value, bool units)
 	{
-		return GameUtil.GetFormattedMass(value, GameUtil.TimeSlice.None, true, "{0:0.#}");
+		GameUtil.MetricMassFormat metricMassFormat;
+		if (this.desiredState == Element.State.Gas)
+		{
+			metricMassFormat = GameUtil.MetricMassFormat.Gram;
+		}
+		else
+		{
+			metricMassFormat = GameUtil.MetricMassFormat.Kilogram;
+		}
+		return GameUtil.GetFormattedMass(value, GameUtil.TimeSlice.None, metricMassFormat, units, "{0:0.#}");
+	}
+
+	public float ProcessedSliderValue(float input)
+	{
+		if (this.desiredState == Element.State.Gas)
+		{
+			input = Mathf.Round(input * 1000f) / 1000f;
+		}
+		else
+		{
+			input = Mathf.Round(input);
+		}
+		return input;
+	}
+
+	public float ProcessedInputValue(float input)
+	{
+		if (this.desiredState == Element.State.Gas)
+		{
+			input /= 1000f;
+		}
+		return input;
+	}
+
+	public LocString ThresholdValueUnits()
+	{
+		LocString locString = null;
+		GameUtil.MassUnit massUnit = GameUtil.massUnit;
+		if (massUnit != GameUtil.MassUnit.Kilograms)
+		{
+			if (massUnit == GameUtil.MassUnit.Pounds)
+			{
+				locString = UI.UNITSUFFIXES.MASS.POUND;
+			}
+		}
+		else if (this.desiredState == Element.State.Gas)
+		{
+			locString = UI.UNITSUFFIXES.MASS.GRAM;
+		}
+		else
+		{
+			locString = UI.UNITSUFFIXES.MASS.KILOGRAM;
+		}
+		return locString;
 	}
 
 	virtual bool IThresholdSwitch.IsConnected()
@@ -120,12 +183,12 @@ public class PressureSwitch : CircuitSwitch, ISaveLoadable, IThresholdSwitch
 
 	private const int WINDOW_SIZE = 8;
 
-	[SerializeField]
 	[Serialize]
+	[SerializeField]
 	private float threshold;
 
-	[Serialize]
 	[SerializeField]
+	[Serialize]
 	private bool activateAboveThreshold = true;
 
 	public float rangeMin;

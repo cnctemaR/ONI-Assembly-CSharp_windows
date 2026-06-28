@@ -37,16 +37,6 @@ public class EnergyInfoScreen : TargetScreen
 		return gameObject;
 	}
 
-	public override void OnSelectTarget(GameObject target)
-	{
-		this.target = target;
-	}
-
-	public override void OnDeselectTarget(GameObject target)
-	{
-		this.target = null;
-	}
-
 	private void LateUpdate()
 	{
 		this.Refresh();
@@ -54,7 +44,7 @@ public class EnergyInfoScreen : TargetScreen
 
 	private void Refresh()
 	{
-		if (this.target == null)
+		if (this.selectedTarget == null)
 		{
 			return;
 		}
@@ -76,14 +66,14 @@ public class EnergyInfoScreen : TargetScreen
 		}
 		CircuitManager circuitManager = Game.Instance.circuitManager;
 		ushort num = ushort.MaxValue;
-		EnergyConsumer component = this.target.GetComponent<EnergyConsumer>();
+		EnergyConsumer component = this.selectedTarget.GetComponent<EnergyConsumer>();
 		if (component != null)
 		{
 			num = component.CircuitID;
 		}
 		else
 		{
-			Generator component2 = this.target.GetComponent<Generator>();
+			Generator component2 = this.selectedTarget.GetComponent<Generator>();
 			if (component2 != null)
 			{
 				num = component2.CircuitID;
@@ -91,7 +81,7 @@ public class EnergyInfoScreen : TargetScreen
 		}
 		if (num == 65535)
 		{
-			int num2 = Grid.PosToCell(this.target.transform.position);
+			int num2 = Grid.PosToCell(this.selectedTarget.transform.position);
 			num = circuitManager.GetCircuitID(num2);
 		}
 		if (num != 65535)
@@ -156,7 +146,7 @@ public class EnergyInfoScreen : TargetScreen
 								gameObject.GetComponent<LocText>().text = string.Format("{0}: {1} / {2}", generator.GetComponent<KSelectable>().entityName, GameUtil.GetFormattedWattage(0f, "F1"), GameUtil.GetFormattedWattage(generator.WattageRating, "F1"));
 							}
 							gameObject.SetActive(true);
-							gameObject.GetComponent<LocText>().fontStyle = ((!(generator.gameObject == this.target)) ? FontStyles.Normal : FontStyles.Bold);
+							gameObject.GetComponent<LocText>().fontStyle = ((!(generator.gameObject == this.selectedTarget)) ? FontStyles.Normal : FontStyles.Bold);
 						}
 					}
 				}
@@ -193,7 +183,7 @@ public class EnergyInfoScreen : TargetScreen
 						gameObject = this.AddOrGetLabel(this.batteriesLabels, this.batteriesPanel, battery.gameObject.GetInstanceID().ToString());
 						gameObject.GetComponent<LocText>().text = string.Format("{0}: {1}", battery.GetComponent<KSelectable>().entityName, GameUtil.GetFormattedJoules(battery.JoulesAvailable, "F1"));
 						gameObject.SetActive(true);
-						gameObject.GetComponent<LocText>().fontStyle = ((!(battery.gameObject == this.target)) ? FontStyles.Normal : FontStyles.Bold);
+						gameObject.GetComponent<LocText>().fontStyle = ((!(battery.gameObject == this.selectedTarget)) ? FontStyles.Normal : FontStyles.Bold);
 					}
 				}
 			}
@@ -235,13 +225,11 @@ public class EnergyInfoScreen : TargetScreen
 			}
 			label.GetComponent<LocText>().text = string.Format("{0}: {1}", consumer.Name, text);
 			label.SetActive(true);
-			label.GetComponent<LocText>().fontStyle = ((!(kmonoBehaviour.gameObject == this.target)) ? FontStyles.Normal : FontStyles.Bold);
+			label.GetComponent<LocText>().fontStyle = ((!(kmonoBehaviour.gameObject == this.selectedTarget)) ? FontStyles.Normal : FontStyles.Bold);
 		}
 	}
 
 	public GameObject labelTemplate;
-
-	private GameObject target;
 
 	private GameObject overviewPanel;
 

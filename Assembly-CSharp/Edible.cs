@@ -10,6 +10,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 	{
 		this.showProgressBar = false;
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
+		this.shouldTransferDiseaseWithWorker = false;
 	}
 
 	public float Units
@@ -64,6 +65,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 		base.GetComponent<KPrefabID>().AddTag(GameTags.Edible);
 		this.Subscribe(748399584, new Action<object>(this.OnCraft));
 		this.Subscribe(1272413801, new Action<object>(this.OnCraft));
+		this.Subscribe(-1689370368, new Action<object>(this.OnGermPresenceChanged));
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Eating;
 		Components.Edibles.Add(this);
 	}
@@ -77,6 +79,15 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 	private void OnCraft(object data)
 	{
 		RationTracker.Get().RegisterCaloriesProduced(this.Calories);
+	}
+
+	private void OnGermPresenceChanged(object data)
+	{
+		bool flag = (bool)data;
+		if (flag)
+		{
+			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_InfectedFood);
+		}
 	}
 
 	public float GetFeedingTime(Worker worker)
@@ -98,10 +109,6 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 		base.SetWorkTime(this.GetFeedingTime(worker));
 		worker.GetAttributes().Add("Eating", this.caloriesModifier);
 		this.StartConsuming();
-		if (this.FoodID == "CookedMeat")
-		{
-			worker.GetComponent<Effects>().Add("GoodEats", true);
-		}
 	}
 
 	protected override void OnStopWork(Worker worker)
@@ -123,6 +130,10 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 		this.unitsConsumed = this.Units * num2;
 		this.caloriesConsumed = this.unitsConsumed * this.foodInfo.CaloriesPerUnit;
 		this.Units -= this.unitsConsumed;
+		for (int i = 0; i < this.foodInfo.Effects.Count; i++)
+		{
+			worker.GetComponent<Effects>().Add(this.foodInfo.Effects[i], true);
+		}
 		worker.Trigger(1121894420, this);
 		this.Trigger(-10536414, worker.gameObject);
 		this.unitsConsumed = float.NaN;
@@ -145,17 +156,14 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 		return this.foodInfo.Quality;
 	}
 
-	public List<Descriptor> GetDescriptors(GameObject go)
+	public override List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		list.Add(new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.CALORIES, GameUtil.GetFormattedCalories(this.foodInfo.CaloriesPerUnit, GameUtil.TimeSlice.None, true)), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.CALORIES, GameUtil.GetFormattedCalories(this.foodInfo.CaloriesPerUnit, GameUtil.TimeSlice.None, true)), Descriptor.DescriptorType.Effect, false));
-		list.Add(new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.FOOD_QUALITY, GameUtil.GetFormattedFoodQuality(this.foodInfo.Quality, false)), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.FOOD_QUALITY, GameUtil.GetFormattedFoodQuality(this.foodInfo.Quality, true)), Descriptor.DescriptorType.Effect, false));
-		if (this.consumptionEffects.Count > 0)
+		list.Add(new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.FOOD_QUALITY, GameUtil.GetFormattedFoodQuality(this.foodInfo.Quality)), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.FOOD_QUALITY, GameUtil.GetFormattedFoodQuality(this.foodInfo.Quality)), Descriptor.DescriptorType.Effect, false));
+		foreach (string text in this.foodInfo.Effects)
 		{
-			for (int i = 0; i < this.consumptionEffects.Count; i++)
-			{
-				list.Add(this.consumptionEffects[i]);
-			}
+			list.Add(new Descriptor(Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + text.ToUpper() + ".NAME"), Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + text.ToUpper() + ".DESCRIPTION"), Descriptor.DescriptorType.Effect, false));
 		}
 		return list;
 	}
@@ -172,8 +180,6 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 
 	private AttributeModifier caloriesModifier = new AttributeModifier("CaloriesDelta", 50000f, DUPLICANTS.MODIFIERS.EATINGCALORIES.NAME, false, false);
 
-	public List<Descriptor> consumptionEffects = new List<Descriptor>();
-
 	public enum Quality
 	{
 		Awful = -3,
@@ -183,5 +189,16 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 		Good,
 		Great,
 		Amazing
+	}
+
+	public class EdibleStartWorkInfo : Worker.StartWorkInfo
+	{
+		public EdibleStartWorkInfo(Workable workable, float amount)
+			: base(workable)
+		{
+			this.amount = amount;
+		}
+
+		public float amount { get; private set; }
 	}
 }

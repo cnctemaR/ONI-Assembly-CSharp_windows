@@ -25,7 +25,7 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 	{
 		get
 		{
-			return this.cached_powered;
+			return true;
 		}
 	}
 
@@ -34,12 +34,7 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 		base.OnPrefabInit();
 		if (AccessControl.accessControlActive == null)
 		{
-			AccessControl.accessControlActive = new StatusItem("accessControlActive", BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.NAME, BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
-			AccessControl.accessControlOffline = new StatusItem("accessControlOffline", BUILDING.STATUSITEMS.ACCESS_CONTROL.OFFLINE.NAME, BUILDING.STATUSITEMS.ACCESS_CONTROL.OFFLINE.TOOLTIP, string.Empty, StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None);
-		}
-		if (this.operational != null)
-		{
-			this.Subscribe(187661686, new Action<object>(this.OnOperationalFlagChanged));
+			AccessControl.accessControlActive = new StatusItem("accessControlActive", BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.NAME, BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, 2046);
 		}
 	}
 
@@ -73,34 +68,17 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		if (this.operational != null)
-		{
-			this.cached_powered = this.operational.GetFlag(EnergyConsumer.PoweredFlag);
-			this.Trigger(-1525636549, this);
-		}
 		this.SetStatusItem();
-	}
-
-	protected override void OnCleanUp()
-	{
-		base.OnCleanUp();
-		if (this.operational != null)
-		{
-			this.Unsubscribe(187661686, new Action<object>(this.OnOperationalFlagChanged));
-		}
 	}
 
 	public void SetPermission(GameObject key, AccessControl.Permission permission)
 	{
 		this.permissions[key] = permission;
+		this.SetStatusItem();
 	}
 
 	public AccessControl.Permission GetPermission(GameObject key)
 	{
-		if (!this.cached_powered)
-		{
-			return AccessControl.Permission.Both;
-		}
 		return this.GetSetPermission(key);
 	}
 
@@ -117,6 +95,7 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 	public void ClearPermission(GameObject key)
 	{
 		this.permissions.Remove(key);
+		this.SetStatusItem();
 	}
 
 	public bool IsDefaultPermission(GameObject key)
@@ -124,24 +103,9 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 		return !this.permissions.ContainsKey(key);
 	}
 
-	private void OnOperationalFlagChanged(object obj)
-	{
-		Operational.Flag flag = (Operational.Flag)obj;
-		if (flag == EnergyConsumer.PoweredFlag)
-		{
-			this.cached_powered = this.operational.GetFlag(EnergyConsumer.PoweredFlag);
-			this.Trigger(-1525636549, this);
-			this.SetStatusItem();
-		}
-	}
-
 	private void SetStatusItem()
 	{
-		if (!this.cached_powered)
-		{
-			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.AccessControl, AccessControl.accessControlOffline, null);
-		}
-		else if (this._defaultPermission != AccessControl.Permission.Both || this.permissions.Count > 0)
+		if (this._defaultPermission != AccessControl.Permission.Both || this.permissions.Count > 0)
 		{
 			this.selectable.SetStatusItem(Db.Get().StatusItemCategories.AccessControl, AccessControl.accessControlActive, null);
 		}
@@ -165,11 +129,10 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 	[Serialize]
 	private AccessControl.Permission _defaultPermission;
 
-	private bool cached_powered = true;
+	[Serialize]
+	public bool controlEnabled;
 
 	private static StatusItem accessControlActive;
-
-	private static StatusItem accessControlOffline;
 
 	public enum Permission
 	{

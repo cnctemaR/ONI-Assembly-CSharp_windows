@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using FMOD.Studio;
 using FMODUnity;
 using Klei;
 using STRINGS;
@@ -20,23 +19,23 @@ public class MainMenu : KMonoBehaviour
 		this.Button_LoadGame.onClick += this.LoadGame;
 		this.Button_Options.onClick += this.Options;
 		this.Button_QuitGame.onClick += this.QuitGame;
+		if (GenericGameSettings.instance != null && GenericGameSettings.instance.demoMode)
+		{
+			this.Button_ResumeGame.gameObject.SetActive(false);
+			this.Button_LoadGame.gameObject.SetActive(false);
+		}
 		this.Button_Translations.onClick += this.Translations;
-		this.Button_Translations.gameObject.SetActive(false);
 		if (SaveLoader.GetSaveFileCount() == 0)
 		{
 			this.Button_LoadGame.isInteractable = false;
 		}
-		if (RuntimeManager.Instance != null && !RuntimeManager.Instance.initializedSuccessfully)
-		{
-			ConfirmDialogScreen confirmDialogScreen = global::Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
-			confirmDialogScreen.imageGO.GetComponent<Image>().sprite = GlobalResources.Instance().sadDupe;
-			confirmDialogScreen.PopupConfirmDialog(UI.FRONTEND.AUDIODRIVERSCREEN.WARNING, null, null, null, null);
-		}
+		this.CheckForCommonIssues();
 		if (PatchNotesScreen.ShouldShowScreen())
 		{
 			this.patchNotesScreen.SetActive(true);
 		}
 		this.lastUpdateTime = Time.unscaledTime;
+		KPlayerPrefs.DeleteKey(Game.BaseAlreadyCreatedKey);
 	}
 
 	public void RefreshMainMenu()
@@ -45,6 +44,10 @@ public class MainMenu : KMonoBehaviour
 		if (SaveLoader.GetSaveFileCount() == 0)
 		{
 			this.Button_LoadGame.isInteractable = false;
+		}
+		else
+		{
+			this.Button_LoadGame.isInteractable = true;
 		}
 	}
 
@@ -60,11 +63,6 @@ public class MainMenu : KMonoBehaviour
 
 	protected override void OnSpawn()
 	{
-		if (SteamManager.Initialized && SteamUGCService.HasInstalledLanguage())
-		{
-			Output.Log(new object[] { "Installing language pack " + SteamUGCService.Instance.GetInstalledLanguageData() });
-			SteamUGCService.SetFontForLocalization();
-		}
 		base.OnSpawn();
 		Canvas.ForceUpdateCanvases();
 	}
@@ -74,6 +72,7 @@ public class MainMenu : KMonoBehaviour
 		string latestSaveFile = SaveLoader.GetLatestSaveFile();
 		if (!string.IsNullOrEmpty(latestSaveFile))
 		{
+			KCrashReporter.MOST_RECENT_SAVEFILE = latestSaveFile;
 			SaveLoader.SetActiveSaveFilePath(latestSaveFile);
 			LoadingOverlay.Load(delegate
 			{
@@ -84,26 +83,21 @@ public class MainMenu : KMonoBehaviour
 
 	private void NewGame()
 	{
-		this.TriggerLoadingMusic();
-		WorldGen.Reset();
-		SaveLoader.SetActiveSaveFilePath(null);
-		try
+		if (this.GameSettingsScreen == null)
 		{
-			File.Delete(WorldGen.SIM_SAVE_FILENAME);
+			this.GameSettingsScreen = Util.KInstantiateUI(ScreenPrefabs.Instance.NewGameSettingsScreen.gameObject, base.gameObject, true);
 		}
-		catch (Exception ex)
+		else
 		{
-			Output.LogWarning(new object[] { ex.ToString() });
+			this.GameSettingsScreen.GetComponent<KScreen>().Show(true);
 		}
-		global::Util.KInstantiateUI(ScreenPrefabs.Instance.WorldGenScreen.gameObject, base.gameObject, true);
-		global::UnityEngine.Object.FindObjectOfType<FrontEndBackground>().gameObject.SetActive(false);
 	}
 
 	private void LoadGame()
 	{
 		if (LoadScreen.Instance == null)
 		{
-			GameObject gameObject = global::Util.KInstantiateUI(ScreenPrefabs.Instance.LoadScreen.gameObject, base.gameObject, true);
+			GameObject gameObject = Util.KInstantiateUI(ScreenPrefabs.Instance.LoadScreen.gameObject, base.gameObject, true);
 			LoadScreen component = gameObject.GetComponent<LoadScreen>();
 			component.requireConfirmation = false;
 			component.SetBackgroundActive(true);
@@ -115,7 +109,7 @@ public class MainMenu : KMonoBehaviour
 	{
 		if (Time.unscaledTime - this.lastUpdateTime > 1f)
 		{
-			this.RefreshResumeButton();
+			this.RefreshMainMenu();
 			this.lastUpdateTime = Time.unscaledTime;
 		}
 	}
@@ -128,9 +122,13 @@ public class MainMenu : KMonoBehaviour
 		{
 			try
 			{
+				if (GenericGameSettings.instance.demoMode)
+				{
+					flag = false;
+				}
 				SaveGame.Header header;
 				SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(latestSaveFile, out header);
-				if (header.buildVersion > 221865U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 229531U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}
@@ -143,7 +141,6 @@ public class MainMenu : KMonoBehaviour
 				{
 					this.Button_ResumeGame.GetComponentsInChildren<LocText>()[1].text = fileNameWithoutExtension;
 				}
-				this.Button_ResumeGame.GetComponent<ToolTip>().toolTip = fileNameWithoutExtension;
 			}
 			catch (Exception ex)
 			{
@@ -163,12 +160,20 @@ public class MainMenu : KMonoBehaviour
 
 	private void Translations()
 	{
-		Application.OpenURL("http://forums.kleientertainment.com/topic/74765-creatingusing-translation-files/");
+		if (SteamManager.Initialized)
+		{
+			Util.KInstantiateUI(ScreenPrefabs.Instance.languageOptionsScreen.gameObject, this.transform.parent.gameObject, false);
+		}
+		else
+		{
+			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
+			confirmDialogScreen.PopupConfirmDialog(UI.FRONTEND.TRANSLATIONS_SCREEN.NO_STEAM, null, null, null, null);
+		}
 	}
 
 	private void Options()
 	{
-		OptionsMenuScreen optionsMenuScreen = global::Util.KInstantiateUI<OptionsMenuScreen>(ScreenPrefabs.Instance.OptionsScreen.gameObject, base.gameObject, true);
+		OptionsMenuScreen optionsMenuScreen = Util.KInstantiateUI<OptionsMenuScreen>(ScreenPrefabs.Instance.OptionsScreen.gameObject, base.gameObject, true);
 		optionsMenuScreen.SetBackgroundActive(true);
 	}
 
@@ -194,15 +199,66 @@ public class MainMenu : KMonoBehaviour
 		}
 	}
 
-	private void TriggerLoadingMusic()
+	private void CheckForCommonIssues()
 	{
-		if (AudioDebug.Get().musicEnabled && !MusicManager.instance.SongIsPlaying("Music_FrontEnd"))
+		this.CheckForAudioDriverIssue();
+		this.CheckForSavePathIssue();
+	}
+
+	private void CheckForAudioDriverIssue()
+	{
+		if (RuntimeManager.Instance != null && !RuntimeManager.Instance.initializedSuccessfully)
 		{
-			MusicManager.instance.StopSong("Music_TitleTheme", true, STOP_MODE.ALLOWFADEOUT);
-			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndSnapshot, STOP_MODE.ALLOWFADEOUT);
-			AudioMixer.instance.Start(AudioMixerSnapshots.Get().FrontEndWorldGenerationSnapshot);
-			MusicManager.instance.PlaySong("Music_FrontEnd", false);
-			MusicManager.instance.SetSongParameter("Music_FrontEnd", "songSection", 1f, true);
+			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
+			confirmDialogScreen.imageGO.GetComponent<Image>().sprite = GlobalResources.Instance().sadDupeAudio;
+			confirmDialogScreen.PopupConfirmDialog(UI.FRONTEND.SUPPORTWARNINGS.AUDIO_DRIVERS, null, null, null, null);
+		}
+	}
+
+	private void CheckForSavePathIssue()
+	{
+		string savePrefix = SaveLoader.GetSavePrefix();
+		string text = "testfile";
+		string text2 = "testsavefile";
+		bool flag;
+		try
+		{
+			FileStream fileStream = File.Open(savePrefix + text, FileMode.Create, FileAccess.Write);
+			new BinaryWriter(fileStream);
+			fileStream.Close();
+			flag = false;
+		}
+		catch
+		{
+			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
+			confirmDialogScreen.imageGO.GetComponent<Image>().sprite = GlobalResources.Instance().sadDupe;
+			confirmDialogScreen.PopupConfirmDialog(string.Format(UI.FRONTEND.SUPPORTWARNINGS.SAVE_DIRECTORY_READ_ONLY, savePrefix), null, null, null, null);
+			flag = true;
+		}
+		if (!flag)
+		{
+			FileStream fileStream2 = File.Open(savePrefix + text2, FileMode.Create, FileAccess.Write);
+			try
+			{
+				fileStream2.SetLength(15000000L);
+				new BinaryWriter(fileStream2);
+				fileStream2.Close();
+			}
+			catch
+			{
+				fileStream2.Close();
+				ConfirmDialogScreen confirmDialogScreen2 = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
+				confirmDialogScreen2.imageGO.GetComponent<Image>().sprite = GlobalResources.Instance().sadDupe;
+				confirmDialogScreen2.PopupConfirmDialog(string.Format(UI.FRONTEND.SUPPORTWARNINGS.SAVE_DIRECTORY_INSUFFICIENT_SPACE, savePrefix), null, null, null, null);
+			}
+		}
+		if (File.Exists(savePrefix + text))
+		{
+			File.Delete(savePrefix + text);
+		}
+		if (File.Exists(savePrefix + text2))
+		{
+			File.Delete(savePrefix + text2);
 		}
 	}
 
@@ -225,4 +281,6 @@ public class MainMenu : KMonoBehaviour
 	public GameObject topLeftAlphaMessage;
 
 	private float lastUpdateTime;
+
+	private GameObject GameSettingsScreen;
 }

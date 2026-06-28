@@ -159,7 +159,9 @@ public class CircuitManager
 		}
 		foreach (UtilityNetworkLink utilityNetworkLink in this.bridges)
 		{
-			int num = Grid.PosToCell(utilityNetworkLink.transform.position);
+			int num;
+			int num2;
+			utilityNetworkLink.GetCells(out num, out num2);
 			ushort circuitID3 = this.GetCircuitID(num);
 			if (circuitID3 != 65535)
 			{
@@ -185,8 +187,14 @@ public class CircuitManager
 		return num;
 	}
 
-	public void SimUpdateLast(float dt)
+	public void UpdateLast(float dt)
 	{
+		this.elapsedTime += dt;
+		if (this.elapsedTime < 0.25f)
+		{
+			return;
+		}
+		this.elapsedTime -= 0.25f;
 		for (int i = 0; i < this.circuitInfo.Count; i++)
 		{
 			CircuitManager.CircuitInfo circuitInfo = this.circuitInfo[i];
@@ -236,7 +244,7 @@ public class CircuitManager
 			{
 				foreach (IEnergyConsumer energyConsumer in list2)
 				{
-					float num3 = energyConsumer.WattsUsed * dt;
+					float num3 = energyConsumer.WattsUsed * 0.25f;
 					if (num3 > 0f)
 					{
 						num2 += energyConsumer.WattsUsed;
@@ -289,7 +297,7 @@ public class CircuitManager
 					energyConsumer3.SetConnectionStatus(CircuitManager.ConnectionStatus.NotConnected);
 				}
 			}
-			this.CheckCircuitOverloaded(dt, i, num2);
+			this.CheckCircuitOverloaded(0.25f, i, num2);
 			this.circuitInfo[i] = circuitInfo;
 		}
 		for (int j = 0; j < this.circuitInfo.Count; j++)
@@ -373,7 +381,7 @@ public class CircuitManager
 		for (int i = 0; i < batteries.Count; i++)
 		{
 			Battery battery = batteries[i];
-			if (battery.gameObject != g.gameObject && battery.Capacity > battery.JoulesAvailable)
+			if (battery != null && g != null && battery.gameObject != g.gameObject && battery.Capacity > battery.JoulesAvailable)
 			{
 				num = battery.Capacity - battery.JoulesAvailable;
 				num_to_charge = batteries.Count - i;
@@ -410,7 +418,7 @@ public class CircuitManager
 		for (int i = batteries.Count - num; i < batteries.Count; i++)
 		{
 			Battery battery = batteries[i];
-			if (g.gameObject != battery.gameObject)
+			if (g != null && battery != null && g.gameObject != battery.gameObject)
 			{
 				battery.AddEnergy(num2);
 			}
@@ -680,6 +688,8 @@ public class CircuitManager
 
 	private HashSet<UtilityNetworkLink> bridges = new HashSet<UtilityNetworkLink>();
 
+	private float elapsedTime;
+
 	private List<CircuitManager.CircuitInfo> circuitInfo = new List<CircuitManager.CircuitInfo>();
 
 	private List<IEnergyConsumer> consumersShadow = new List<IEnergyConsumer>();
@@ -707,7 +717,6 @@ public class CircuitManager
 	{
 		NotConnected,
 		Unpowered,
-		Powered,
-		OverDraw
+		Powered
 	}
 }

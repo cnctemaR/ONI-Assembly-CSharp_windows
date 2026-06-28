@@ -6,7 +6,8 @@ public class ClothingFabricatorConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("ClothingFabricator", 4, 3, "clothingfactory_kanim", 800f, 100, 240f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, null);
+		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER5;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("ClothingFabricator", 4, 3, "clothingfactory_kanim", 800f, 100, 240f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, tier);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 240f;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
@@ -18,8 +19,9 @@ public class ClothingFabricatorConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
+		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		go.AddOrGet<DropAllWorkable>();
-		go.AddOrGet<Prioritizable>();
+		Prioritizable.AddRef(go);
 		Fabricator fabricator = go.AddOrGet<Fabricator>();
 		fabricator.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_clothingfactory_kanim") };
 		fabricator.AnimOffset = new Vector3(-1f, 0f, 0f);

@@ -67,7 +67,7 @@ public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 				smi.UpdateLocator();
 			});
 			this.approach.InitializeStates(this.recoverer, this.locator, this.recover, null, null, null);
-			this.recover.DefaultState(this.recover.pre).ToggleAttributeModifier("Recovering Breath", (RecoverBreathChore.StatesInstance smi) => smi.recoveringbreath, null);
+			this.recover.DefaultState(this.recover.pre).ToggleAttributeModifier("Recovering Breath", (RecoverBreathChore.StatesInstance smi) => smi.recoveringbreath, null).ToggleTag(GameTags.RecoveringBreath);
 			this.recover.pre.PlayAnim("breathe_pre", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.recover.loop);
 			this.recover.loop.PlayAnim("breathe_loop", KAnim.PlayMode.Loop, null);
 			this.recover.pst.QueueAnim("breathe_pst", false, null).OnAnimQueueComplete(null);

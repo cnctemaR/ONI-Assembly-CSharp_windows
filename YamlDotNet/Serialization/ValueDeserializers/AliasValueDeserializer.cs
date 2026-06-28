@@ -17,18 +17,18 @@ namespace YamlDotNet.Serialization.ValueDeserializers
 			this.innerDeserializer = innerDeserializer;
 		}
 
-		public object DeserializeValue(EventReader reader, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
+		public object DeserializeValue(IParser parser, Type expectedType, SerializerState state, IValueDeserializer nestedObjectDeserializer)
 		{
-			AnchorAlias anchorAlias = reader.Allow<AnchorAlias>();
+			AnchorAlias anchorAlias = parser.Allow<AnchorAlias>();
 			if (anchorAlias == null)
 			{
 				string text = null;
-				NodeEvent nodeEvent = reader.Peek<NodeEvent>();
+				NodeEvent nodeEvent = parser.Peek<NodeEvent>();
 				if (nodeEvent != null && !string.IsNullOrEmpty(nodeEvent.Anchor))
 				{
 					text = nodeEvent.Anchor;
 				}
-				object obj = this.innerDeserializer.DeserializeValue(reader, expectedType, state, nestedObjectDeserializer);
+				object obj = this.innerDeserializer.DeserializeValue(parser, expectedType, state, nestedObjectDeserializer);
 				if (text != null)
 				{
 					AliasValueDeserializer.AliasState aliasState = state.Get<AliasValueDeserializer.AliasState>();
@@ -37,13 +37,13 @@ namespace YamlDotNet.Serialization.ValueDeserializers
 					{
 						aliasState.Add(text, new AliasValueDeserializer.ValuePromise(obj));
 					}
+					else if (!valuePromise.HasValue)
+					{
+						valuePromise.Value = obj;
+					}
 					else
 					{
-						if (valuePromise.HasValue)
-						{
-							throw new DuplicateAnchorException(nodeEvent.Start, nodeEvent.End, string.Format("Anchor '{0}' already defined", text));
-						}
-						valuePromise.Value = obj;
+						aliasState[text] = new AliasValueDeserializer.ValuePromise(obj);
 					}
 				}
 				return obj;

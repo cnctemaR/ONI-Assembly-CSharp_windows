@@ -19,7 +19,6 @@ public class TrashRegion : KMonoBehaviour
 	{
 		base.OnSpawn();
 		this.OnFilterChanged(this.filterable.GetTags());
-		Components.TrashRegions.Add(this);
 		base.GetComponent<Region>().OnRegionChanged += this.Refresh;
 		this.Refresh();
 	}
@@ -58,7 +57,7 @@ public class TrashRegion : KMonoBehaviour
 			extents.y--;
 			extents.width += 2;
 			extents.height += 2;
-			this.solidChangedEntry = GameScenePartitioner.Instance.Add("Region.RegionChanged", base.gameObject, extents, GameScenePartitioner.Instance.solidChangedMask.mask, delegate(object obj)
+			this.solidChangedEntry = GameScenePartitioner.Instance.Add("Region.RegionChanged", base.gameObject, extents, GameScenePartitioner.Instance.solidChangedLayer, delegate(object obj)
 			{
 				this.Refresh();
 			});
@@ -118,7 +117,8 @@ public class TrashRegion : KMonoBehaviour
 		Tag[] tags = this.filterable.GetTags();
 		Action<Chore> action = new Action<Chore>(this.OnFetchComplete);
 		Action<Chore> action2 = new Action<Chore>(this.OnFetchStart);
-		FetchChore fetchChore = new FetchChore(this.storage, 2.1474836E+09f, tags, null, true, action, action2, new Action<Chore>(this.OnFetchEnd), FetchOrder2.OperationalRequirement.Operational, 0);
+		Action<Chore> action3 = new Action<Chore>(this.OnFetchEnd);
+		FetchChore fetchChore = new FetchChore(this.storage, 2.1474836E+09f, tags, null, null, true, action, action2, action3, FetchOrder2.OperationalRequirement.Operational, 0);
 		this.fetchChores.Add(fetchChore);
 	}
 
@@ -212,7 +212,6 @@ public class TrashRegion : KMonoBehaviour
 		{
 			this.solidChangedEntry.Release();
 		}
-		Components.TrashRegions.Remove(this);
 	}
 
 	private void SetStatus()

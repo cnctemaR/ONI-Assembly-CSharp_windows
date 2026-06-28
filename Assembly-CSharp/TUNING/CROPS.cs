@@ -11,6 +11,8 @@ namespace TUNING
 
 		public const float PLANTERPLOT_GROWTH_PENTALY = -0.5f;
 
+		public const float BONUS_SEED_PROBABILITY = 0.33f;
+
 		public const float YIELD_DISPLAY_TOTAL = 100f;
 
 		public const float MED_YIELD_THRESHOLD = 0.4f;
@@ -27,12 +29,13 @@ namespace TUNING
 
 		public static List<Crop.CropVal> CROP_TYPES = new List<Crop.CropVal>
 		{
-			new Crop.CropVal("BasicPlantFood", 3000f, 1500f, 8, false, 3),
-			new Crop.CropVal("SwampLilyFlower", 1200f, 1200f, 1, false, 1),
-			new Crop.CropVal(PrickleFruitConfig.ID, 6000f, 1200f, 1, false, 5),
-			new Crop.CropVal("ColdWheatSeed", 12000f, 0f, 25, false, 1),
-			new Crop.CropVal(SpiceNutConfig.ID, 15000f, 12000f, 4, false, 3),
-			new Crop.CropVal(BasicFabricConfig.ID, 1800f, 1200f, 1, false, 5)
+			new Crop.CropVal("BasicPlantFood", 1800f, 8, true),
+			new Crop.CropVal("SwampLilyFlower", 1200f, 1, true),
+			new Crop.CropVal(PrickleFruitConfig.ID, 2400f, 1, true),
+			new Crop.CropVal("ColdWheatSeed", 12000f, 25, true),
+			new Crop.CropVal(SpiceNutConfig.ID, 13200f, 4, true),
+			new Crop.CropVal(BasicFabricConfig.ID, 1200f, 1, true),
+			new Crop.CropVal(MushroomConfig.ID, 6000f, 2, true)
 		};
 	}
 }

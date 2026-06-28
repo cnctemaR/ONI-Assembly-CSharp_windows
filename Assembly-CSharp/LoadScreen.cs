@@ -10,6 +10,7 @@ public class LoadScreen : KModalScreen
 
 	protected override void OnPrefabInit()
 	{
+		LoadScreen.Instance = this;
 		base.OnPrefabInit();
 		this.saveButtonPool = new UIPool<KButton>(this.saveButtonPrefab);
 		if (SpeedControlScreen.Instance != null)
@@ -39,7 +40,6 @@ public class LoadScreen : KModalScreen
 		{
 			this.moreInfoButton.onClick += this.MoreInfo;
 		}
-		LoadScreen.Instance = this;
 	}
 
 	protected override void OnActivate()
@@ -59,16 +59,27 @@ public class LoadScreen : KModalScreen
 			this.fileButtonMap.Clear();
 		}
 		List<string> allFiles = SaveLoader.GetAllFiles();
-		if (allFiles.Count == 0)
+		if (allFiles.Count > 0)
 		{
-			base.Show(false);
-			return;
+			for (int i = 0; i < allFiles.Count; i++)
+			{
+				this.AddExistingSaveFile(allFiles[i]);
+			}
+			this.SetSelectedGame(allFiles[0]);
+			this.deleteButton.isInteractable = true;
 		}
-		for (int i = 0; i < allFiles.Count; i++)
+		else
 		{
-			this.AddExistingSaveFile(allFiles[i]);
+			this.saveDetails.text = string.Empty;
+			this.deleteButton.isInteractable = false;
+			this.loadButton.isInteractable = false;
 		}
-		this.SetSelectedGame(allFiles[0]);
+	}
+
+	protected override void OnShow(bool show)
+	{
+		base.OnShow(show);
+		this.RefreshFiles();
 	}
 
 	protected override void OnDeactivate()
@@ -130,7 +141,7 @@ public class LoadScreen : KModalScreen
 
 	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header)
 	{
-		return header.buildVersion > 221865U;
+		return header.buildVersion > 229531U;
 	}
 
 	private void SetSelectedGame(string filename)
@@ -171,7 +182,7 @@ public class LoadScreen : KModalScreen
 			this.saveDetails.text = text4;
 			if (LoadScreen.IsSaveFileFromUnsupportedFutureBuild(header))
 			{
-				this.saveDetails.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_TOO_NEW, filename, header.buildVersion, 221865U);
+				this.saveDetails.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_TOO_NEW, filename, header.buildVersion, 229531U);
 				this.loadButton.isInteractable = false;
 				this.loadButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Disabled);
 			}
@@ -213,10 +224,10 @@ public class LoadScreen : KModalScreen
 		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(this.selectedFileName, out header);
 		string text = null;
 		string text2 = null;
-		if (header.buildVersion > 221865U)
+		if (header.buildVersion > 229531U)
 		{
 			text = header.buildVersion.ToString();
-			text2 = 221865U.ToString();
+			text2 = 229531U.ToString();
 		}
 		else if (gameInfo.saveMajorVersion < 7)
 		{

@@ -18,6 +18,7 @@ public class MedicinalPill : Workable, IGameObjectEffectDescriptor
 	{
 		Klei.AI.Diseases diseases = worker.GetComponent<MinionModifiers>().diseases;
 		global::Database.Diseases diseases2 = Db.Get().Diseases;
+		ResourceSet<Effect> effects = Db.Get().effects;
 		for (int i = 0; i < this.curedDiseases.Length; i++)
 		{
 			string text = this.curedDiseases[i];
@@ -29,6 +30,10 @@ public class MedicinalPill : Workable, IGameObjectEffectDescriptor
 					if (this.medicineType == MedicinalPill.MedicineType.InstantCure)
 					{
 						diseases.Cure(disease);
+					}
+					if (this.medicineType == MedicinalPill.MedicineType.BoostImmunity)
+					{
+						effects.Add(Db.Get().effects.Get("VitaminSupplement"));
 					}
 					else
 					{
@@ -66,6 +71,10 @@ public class MedicinalPill : Workable, IGameObjectEffectDescriptor
 			}
 			list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.CURES, text2), string.Format(DUPLICANTS.DISEASES.CURES, text2), Descriptor.DescriptorType.Effect, false));
 		}
+		if (this.medicineType == MedicinalPill.MedicineType.BoostImmunity)
+		{
+			list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.BOOSTSIMMUNITY, new object[0]), string.Format(DUPLICANTS.DISEASES.BOOSTSIMMUNITY, new object[0]), Descriptor.DescriptorType.Effect, false));
+		}
 		else
 		{
 			for (int k = 0; k < this.curedDiseases.Length; k++)
@@ -84,7 +93,7 @@ public class MedicinalPill : Workable, IGameObjectEffectDescriptor
 		return list;
 	}
 
-	public List<Descriptor> GetDescriptors(GameObject go)
+	public new List<Descriptor> GetDescriptors(GameObject go)
 	{
 		return this.EffectDescriptors(go);
 	}
@@ -98,6 +107,7 @@ public class MedicinalPill : Workable, IGameObjectEffectDescriptor
 	public enum MedicineType
 	{
 		InstantCure,
-		BoostCureSpeed
+		BoostCureSpeed,
+		BoostImmunity
 	}
 }

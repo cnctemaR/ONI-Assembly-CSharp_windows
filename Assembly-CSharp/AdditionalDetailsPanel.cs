@@ -62,12 +62,16 @@ public class AdditionalDetailsPanel : TargetScreen
 		float num3;
 		float num4;
 		Element element;
+		byte b;
+		int num5;
 		if (component != null)
 		{
 			num2 = component.Mass;
 			num3 = component.Units;
 			num4 = component.Temperature;
 			element = component.Element;
+			b = component.DiseaseIdx;
+			num5 = component.DiseaseCount;
 			Attributes attributes = this.selectedTarget.GetAttributes();
 			if (attributes != null)
 			{
@@ -89,6 +93,8 @@ public class AdditionalDetailsPanel : TargetScreen
 			num3 = 1f;
 			num4 = component2.temperature;
 			element = component2.element;
+			b = component2.diseaseIdx;
+			num5 = component2.diseaseCount;
 		}
 		bool flag2 = element.id == SimHashes.Vacuum || element.id == SimHashes.Void;
 		float specificHeatCapacity = element.specificHeatCapacity;
@@ -111,12 +117,16 @@ public class AdditionalDetailsPanel : TargetScreen
 		gameObject.GetComponent<LocText>().text = string.Format(UI.ELEMENTAL.PRIMARYELEMENT.NAME, element.name);
 		gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.ELEMENTAL.PRIMARYELEMENT.TOOLTIP, element.name);
 		gameObject = this.AddOrGetLabel(this.detailLabels, this.detailsPanel, "Mass");
-		gameObject.GetComponent<LocText>().text = string.Format(UI.ELEMENTAL.MASS.NAME, GameUtil.GetFormattedMass(num2, GameUtil.TimeSlice.None, true, "{0:0.#}"));
-		gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.ELEMENTAL.MASS.TOOLTIP, GameUtil.GetFormattedMass(num2, GameUtil.TimeSlice.None, true, "{0:0.#}"));
+		gameObject.GetComponent<LocText>().text = string.Format(UI.ELEMENTAL.MASS.NAME, GameUtil.GetFormattedMass(num2, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+		gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.ELEMENTAL.MASS.TOOLTIP, GameUtil.GetFormattedMass(num2, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 		gameObject = this.AddOrGetLabel(this.detailLabels, this.detailsPanel, "Temperature");
 		gameObject.SetActive(!flag2);
 		gameObject.GetComponent<LocText>().text = string.Format(UI.ELEMENTAL.TEMPERATURE.NAME, GameUtil.GetFormattedTemperature(num4, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
 		gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.ELEMENTAL.TEMPERATURE.TOOLTIP, GameUtil.GetFormattedTemperature(num4, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
+		gameObject = this.AddOrGetLabel(this.detailLabels, this.detailsPanel, "Disease");
+		gameObject.SetActive(!flag2);
+		gameObject.GetComponent<LocText>().text = string.Format(UI.ELEMENTAL.DISEASE.NAME, GameUtil.GetFormattedDisease(b, num5, false));
+		gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.ELEMENTAL.DISEASE.TOOLTIP, GameUtil.GetFormattedDisease(b, num5, true));
 		gameObject = this.AddOrGetLabel(this.detailLabels, this.detailsPanel, "SHC");
 		gameObject.SetActive(!flag2);
 		gameObject.GetComponent<LocText>().text = string.Concat(new string[]
@@ -148,12 +158,11 @@ public class AdditionalDetailsPanel : TargetScreen
 		Func<string> func = delegate
 		{
 			AttributeInstance attributeInstance3 = this.selectedTarget.GetAttributes().Get("ThermalConductivityBarrier");
-			string text = string.Format(UI.ELEMENTAL.CONDUCTIVITYBARRIER.NAME, attributeInstance3.GetFormattedValue(true));
-			text += "\n----------\n";
+			string text = string.Format(UI.ELEMENTAL.CONDUCTIVITYBARRIER.NAME, attributeInstance3.GetFormattedValue());
+			text += UI.HORIZONTAL_BR_RULE;
 			foreach (AttributeInstance.AttributeModifierEntry attributeModifierEntry in attributeInstance3.Modifiers)
 			{
-				text = text + attributeModifierEntry.Name + " " + attributeModifierEntry.Modifier.GetFormattedString();
-				text += "\n";
+				text += string.Format(DUPLICANTS.ATTRIBUTES.MODIFIER_ENTRY, attributeModifierEntry.Modifier.Description, attributeModifierEntry.Modifier.GetFormattedString(attributeInstance3.gameObject));
 			}
 			return text;
 		};
@@ -178,8 +187,8 @@ public class AdditionalDetailsPanel : TargetScreen
 				AttributeModifier attributeModifier = component.Element.attributeModifiers.Find((AttributeModifier m) => m.AttributeId == Db.Get().BuildingAttributes.OverheatTemperature.Id);
 				if (attributeModifier != null)
 				{
-					gameObject.GetComponent<LocText>().text = string.Format(UI.ELEMENTAL.OVERHEATPOINT.NAME, attributeModifier.GetFormattedString());
-					gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.ELEMENTAL.OVERHEATPOINT.TOOLTIP, attributeModifier.GetFormattedString());
+					gameObject.GetComponent<LocText>().text = string.Format(UI.ELEMENTAL.OVERHEATPOINT.NAME, attributeModifier.GetFormattedString(this.selectedTarget.gameObject));
+					gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.ELEMENTAL.OVERHEATPOINT.TOOLTIP, attributeModifier.GetFormattedString(this.selectedTarget.gameObject));
 					gameObject.SetActive(true);
 				}
 				else
@@ -223,30 +232,29 @@ public class AdditionalDetailsPanel : TargetScreen
 			gameObject.GetComponent<LocText>().text = string.Format(UI.ELEMENTAL.DEWPOINT.NAME, GameUtil.GetFormattedTemperature(lowTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
 			gameObject.GetComponent<ToolTip>().toolTip = string.Format(UI.ELEMENTAL.DEWPOINT.TOOLTIP, GameUtil.GetFormattedTemperature(lowTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
 		}
-		Klei.AI.Attribute[] array = new Klei.AI.Attribute[]
-		{
-			Db.Get().Attributes.ToiletEfficiency,
-			Db.Get().Attributes.Sneezyness
-		};
 		Attributes attributes2 = this.selectedTarget.GetAttributes();
-		for (int i = 0; i < array.Length; i++)
+		if (attributes2 != null)
 		{
-			AttributeInstance attributeInstance2 = null;
-			if (attributes2 != null)
+			for (int i = 0; i < attributes2.Count; i++)
 			{
-				attributeInstance2 = attributes2.Get(array[i]);
+				AttributeInstance attributeInstance2 = attributes2.AttributeTable[i];
+				if (attributeInstance2.Attribute.ShowInUI == Klei.AI.Attribute.Display.Details)
+				{
+					gameObject = this.AddOrGetLabel(this.detailLabels, this.detailsPanel, attributeInstance2.Id);
+					gameObject.GetComponent<LocText>().text = attributeInstance2.modifier.Name + ": " + attributeInstance2.GetFormattedValue();
+					gameObject.GetComponent<ToolTip>().toolTip = attributeInstance2.GetAttributeValueTooltip();
+					gameObject.SetActive(true);
+				}
 			}
-			gameObject = this.AddOrGetLabel(this.detailLabels, this.detailsPanel, array[i].Id);
-			if (attributeInstance2 == null)
-			{
-				gameObject.SetActive(false);
-			}
-			else
-			{
-				gameObject.GetComponent<LocText>().text = attributeInstance2.modifier.Name + ": " + attributeInstance2.GetFormattedValue(false);
-				gameObject.GetComponent<ToolTip>().toolTip = attributeInstance2.GetAttributeValueTooltip();
-				gameObject.SetActive(true);
-			}
+		}
+		List<Descriptor> detailDescriptors = GameUtil.GetDetailDescriptors(GameUtil.GetAllDescriptors(this.selectedTarget, false));
+		for (int j = 0; j < detailDescriptors.Count; j++)
+		{
+			Descriptor descriptor = detailDescriptors[j];
+			gameObject = this.AddOrGetLabel(this.detailLabels, this.detailsPanel, "Descriptor" + j.ToString());
+			gameObject.GetComponent<LocText>().text = descriptor.text;
+			gameObject.GetComponent<ToolTip>().toolTip = descriptor.tooltipText;
+			gameObject.SetActive(true);
 		}
 	}
 

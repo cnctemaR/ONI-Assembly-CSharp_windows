@@ -100,7 +100,7 @@ public class BuildingElementEmitter : KMonoBehaviour, IEffectDescriptor
 			SimMessages.AddElementEmitter(float.MaxValue, Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(delegate(object data)
 			{
 				BuildingElementEmitter.OnSimRegistered(this, data);
-			}), "BuildingElementEmitter").index, -1, -1);
+			})).index, -1, -1);
 		}
 	}
 
@@ -136,7 +136,7 @@ public class BuildingElementEmitter : KMonoBehaviour, IEffectDescriptor
 		string text = element.tag.ProperName();
 		string keywordStyle = GameUtil.GetKeywordStyle(this.element);
 		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTED, keywordStyle, text, GameUtil.GetFormattedMass(this.EmitRate, GameUtil.TimeSlice.PerSecond, true, "{0:0.#}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTED, keywordStyle, text, GameUtil.GetFormattedMass(this.EmitRate, GameUtil.TimeSlice.PerSecond, true, "{0:0.#}")), Descriptor.DescriptorType.Effect);
+		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTED, keywordStyle, text, GameUtil.GetFormattedMass(this.EmitRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTED, keywordStyle, text, GameUtil.GetFormattedMass(this.EmitRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Effect);
 		list.Add(descriptor);
 		return list;
 	}
@@ -144,12 +144,12 @@ public class BuildingElementEmitter : KMonoBehaviour, IEffectDescriptor
 	[SerializeField]
 	public float emitRate = 0.3f;
 
-	[Serialize]
 	[SerializeField]
+	[Serialize]
 	public float temperature = 293f;
 
-	[SerializeField]
 	[HashedEnum]
+	[SerializeField]
 	public SimHashes element = SimHashes.Oxygen;
 
 	[SerializeField]

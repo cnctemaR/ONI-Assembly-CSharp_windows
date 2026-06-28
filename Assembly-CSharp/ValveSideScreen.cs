@@ -1,15 +1,33 @@
 ﻿using System;
 using System.Collections;
+using STRINGS;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class ValveSideScreen : SideScreenContent
 {
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.unitsLabel.text = GameUtil.AddTimeSliceText(UI.UNITSUFFIXES.MASS.GRAM, GameUtil.TimeSlice.PerSecond);
 		this.flowSlider.onReleaseHandle += this.OnReleaseHandle;
-		this.flowSlider.onValueChanged.AddListener(new UnityAction<float>(this.UpdateFlowValue));
+		this.flowSlider.onDrag += delegate
+		{
+			this.ReceiveValueFromSlider(this.flowSlider.value);
+		};
+		this.flowSlider.onPointerDown += delegate
+		{
+			this.ReceiveValueFromSlider(this.flowSlider.value);
+		};
+		this.flowSlider.onMove += delegate
+		{
+			this.ReceiveValueFromSlider(this.flowSlider.value);
+			this.OnReleaseHandle();
+		};
+		this.numberInput.onEndEdit += delegate
+		{
+			this.ReceiveValueFromInput(this.numberInput.currentValue);
+		};
+		this.numberInput.decimalPlaces = 1;
 	}
 
 	public void OnReleaseHandle()
@@ -27,20 +45,33 @@ public class ValveSideScreen : SideScreenContent
 		}
 		this.flowSlider.minValue = 0f;
 		this.flowSlider.maxValue = this.targetValve.maxFlow;
-		this.minFlowLabel.text = GameUtil.GetFormattedMass(0f, GameUtil.TimeSlice.PerSecond, true, "{0:0.#}");
-		this.maxFlowLabel.text = GameUtil.GetFormattedMass(this.targetValve.maxFlow, GameUtil.TimeSlice.PerSecond, true, "{0:0.#}");
-		this.currentFlowLabel.text = GameUtil.GetFormattedMass(Mathf.Max(0f, this.targetValve.DesiredFlow), GameUtil.TimeSlice.PerSecond, true, "{0:0.#}");
 		this.flowSlider.value = this.targetValve.DesiredFlow;
+		this.minFlowLabel.text = GameUtil.GetFormattedMass(0f, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.Gram, true, "{0:0.#}");
+		this.maxFlowLabel.text = GameUtil.GetFormattedMass(this.targetValve.maxFlow, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.Gram, true, "{0:0.#}");
+		this.numberInput.minValue = 0f;
+		this.numberInput.maxValue = this.targetValve.maxFlow * 1000f;
+		this.numberInput.SetDisplayValue(GameUtil.GetFormattedMass(Mathf.Max(0f, this.targetValve.DesiredFlow), GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.Gram, false, "{0:0.#####}"));
+		this.numberInput.Activate();
+	}
+
+	private void ReceiveValueFromSlider(float newValue)
+	{
+		newValue = Mathf.Round(newValue * 1000f) / 1000f;
+		this.UpdateFlowValue(newValue);
+	}
+
+	private void ReceiveValueFromInput(float input)
+	{
+		float num = input / 1000f;
+		this.UpdateFlowValue(num);
+		this.targetValve.ChangeFlow(this.targetFlow);
 	}
 
 	private void UpdateFlowValue(float newValue)
 	{
-		if (this.targetValve == null)
-		{
-			return;
-		}
 		this.targetFlow = newValue;
-		this.currentFlowLabel.text = GameUtil.GetFormattedMass(newValue, GameUtil.TimeSlice.PerSecond, true, "{0:0.#}");
+		this.flowSlider.value = newValue;
+		this.numberInput.SetDisplayValue(GameUtil.GetFormattedMass(newValue, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.Gram, false, "{0:0.#####}"));
 	}
 
 	private IEnumerator SettingDelay(float delay)
@@ -56,6 +87,19 @@ public class ValveSideScreen : SideScreenContent
 		yield break;
 	}
 
+	public override void OnKeyDown(KButtonEvent e)
+	{
+		global::Debug.Log("ValveSideScreen OnKeyDown", null);
+		if (this.isEditing)
+		{
+			e.Consumed = true;
+		}
+		else
+		{
+			base.OnKeyDown(e);
+		}
+	}
+
 	private Valve targetValve;
 
 	[Header("Slider")]
@@ -63,14 +107,19 @@ public class ValveSideScreen : SideScreenContent
 	private KSlider flowSlider;
 
 	[SerializeField]
-	[Header("Labels")]
-	private LocText currentFlowLabel;
-
-	[SerializeField]
 	private LocText minFlowLabel;
 
 	[SerializeField]
 	private LocText maxFlowLabel;
+
+	[SerializeField]
+	[Header("Input Field")]
+	private KNumberInputField numberInput;
+
+	[SerializeField]
+	private LocText unitsLabel;
+
+	private bool isEditing;
 
 	private float targetFlow;
 }

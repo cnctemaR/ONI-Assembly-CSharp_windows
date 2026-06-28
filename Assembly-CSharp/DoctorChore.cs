@@ -1,58 +1,15 @@
 ﻿using System;
-using Klei.AI;
-using UnityEngine;
 
-public class DoctorChore : Chore<DoctorChore.StatesInstance>
+public class DoctorChore : Workable
 {
-	public DoctorChore(IStateMachineTarget target, GameObject patient)
-		: base(Db.Get().ChoreTypes.Doctor, target, target.GetComponent<ChoreProvider>(), false, null, null, null, int.MaxValue, false, true, 0)
+	private DoctorChore()
 	{
-		this.smi = new DoctorChore.StatesInstance(this);
-		this.smi.sm.patient.Set(patient, this.smi);
-		base.AddPrecondition(ChorePreconditions.IsChattable, target);
+		this.synchronizeAnims = false;
 	}
 
-	public override void Begin(Chore.Precondition.Context context)
+	protected override void OnPrefabInit()
 	{
-		this.smi.sm.doctor.Set(context.consumer.gameObject, this.smi);
-		base.Begin(context);
-	}
-
-	public class StatesInstance : GameStateMachine<DoctorChore.States, DoctorChore.StatesInstance, DoctorChore, object>.GameInstance
-	{
-		public StatesInstance(DoctorChore master)
-			: base(master)
-		{
-		}
-	}
-
-	public class States : GameStateMachine<DoctorChore.States, DoctorChore.StatesInstance, DoctorChore>
-	{
-		public override void InitializeStates(out StateMachine.BaseState default_state)
-		{
-			default_state = this.approachpatient;
-			this.approachpatient.InitializeStates(this.doctor, this.patient, this.heal, null, null, null);
-			this.heal.Target(this.doctor).PlayAnim("dig_up_pst", KAnim.PlayMode.Loop, null).ScheduleGoTo(2.5f, this.success);
-			this.success.Enter("HealEffect", delegate(DoctorChore.StatesInstance smi)
-			{
-				Transform transform = this.patient.Get(smi).transform;
-				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, "Cured", transform, new Vector3(0f, 0.5f, 0f), 1.5f, false, false);
-				Diseases diseases = this.patient.Get(smi).GetDiseases();
-				foreach (DiseaseInstance diseaseInstance in diseases)
-				{
-					diseaseInstance.Cure();
-				}
-			}).ReturnSuccess();
-		}
-
-		public StateMachine<DoctorChore.States, DoctorChore.StatesInstance, DoctorChore, object>.TargetParameter patient;
-
-		public StateMachine<DoctorChore.States, DoctorChore.StatesInstance, DoctorChore, object>.TargetParameter doctor;
-
-		public GameStateMachine<DoctorChore.States, DoctorChore.StatesInstance, DoctorChore, object>.ApproachSubState<Chattable> approachpatient;
-
-		public GameStateMachine<DoctorChore.States, DoctorChore.StatesInstance, DoctorChore, object>.State heal;
-
-		public GameStateMachine<DoctorChore.States, DoctorChore.StatesInstance, DoctorChore, object>.State success;
+		base.OnPrefabInit();
+		this.attributeConverter = Db.Get().AttributeConverters.HealingSpeed;
 	}
 }

@@ -25,7 +25,10 @@ namespace Klei.AI
 					{
 						Effect effect = component.modifierSet.effects.Get(saveLoadEffect.id);
 						EffectInstance effectInstance = this.Add(effect, true);
-						effectInstance.startTime = Time.time - (effect.duration - saveLoadEffect.timeRemaining);
+						if (effectInstance != null)
+						{
+							effectInstance.startTime = Time.time - (effect.duration - saveLoadEffect.timeRemaining);
+						}
 					}
 				}
 			}
@@ -73,17 +76,30 @@ namespace Klei.AI
 
 		public EffectInstance Add(Effect effect, bool should_save)
 		{
-			Attributes attributes = this.GetAttributes();
-			EffectInstance effectInstance = this.Get(effect);
-			if (effectInstance == null)
+			bool flag = true;
+			foreach (Trait trait in base.GetComponent<Traits>())
 			{
-				effectInstance = new EffectInstance(base.gameObject, effect, should_save);
-				effect.AddTo(attributes);
-				this.effects.Add(effectInstance);
-				this.Trigger(-1901442097, effect);
+				if (trait.ignoredEffects != null && Array.IndexOf<string>(trait.ignoredEffects, effect.Id) != -1)
+				{
+					flag = false;
+					break;
+				}
 			}
-			effectInstance.startTime = Time.time;
-			return effectInstance;
+			if (flag)
+			{
+				Attributes attributes = this.GetAttributes();
+				EffectInstance effectInstance = this.Get(effect);
+				if (effectInstance == null)
+				{
+					effectInstance = new EffectInstance(base.gameObject, effect, should_save);
+					effect.AddTo(attributes);
+					this.effects.Add(effectInstance);
+					this.Trigger(-1901442097, effect);
+				}
+				effectInstance.startTime = Time.time;
+				return effectInstance;
+			}
+			return null;
 		}
 
 		public void Remove(Effect effect)

@@ -107,6 +107,11 @@ public class Chore<StateMachineInstanceType> : Chore, IStateMachineTarget where 
 		base.Cancel("Target Destroyed");
 	}
 
+	public override bool CanPreempt(Chore.Precondition.Context context)
+	{
+		return base.CanPreempt(context);
+	}
+
 	protected IStateMachineTarget target;
 
 	protected StateMachineInstanceType smi;

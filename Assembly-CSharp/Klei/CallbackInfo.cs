@@ -13,9 +13,9 @@ namespace Klei
 		{
 			if (this.handle.IsValid())
 			{
-				Game.CallbackInfo callbackInfo = Game.Instance.callbackManager.Get(this.handle);
-				global::System.Action cb = callbackInfo.cb;
-				if (!callbackInfo.manuallyRelease)
+				Game.CallbackInfo item = Game.Instance.callbackManager.GetItem(this.handle);
+				global::System.Action cb = item.cb;
+				if (!item.manuallyRelease)
 				{
 					Game.Instance.callbackManager.Release(this.handle);
 				}

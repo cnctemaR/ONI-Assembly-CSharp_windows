@@ -7,6 +7,7 @@ using Delaunay.Geo;
 using Ionic.Zlib;
 using Klei;
 using KSerialization;
+using ProcGenGame;
 using STRINGS;
 using UnityEngine;
 
@@ -50,6 +51,7 @@ public class SaveLoader : KMonoBehaviour
 		{
 			Sim.SIM_Initialize(null);
 			SimMessages.CreateSimElementsTable(ElementLoader.elements);
+			SimMessages.CreateDiseaseTable();
 			this.loadedFromSave = this.Load(activeSaveFilePath);
 			this.saveFileCorrupt = !this.loadedFromSave;
 			if (!this.loadedFromSave)
@@ -67,7 +69,7 @@ public class SaveLoader : KMonoBehaviour
 		if (!this.loadedFromSave)
 		{
 			Sim.Shutdown();
-			if (activeSaveFilePath != null && activeSaveFilePath != string.Empty)
+			if (!string.IsNullOrEmpty(activeSaveFilePath))
 			{
 				Output.Log(new object[] { "Couldn't load [" + activeSaveFilePath + "]" });
 			}
@@ -153,11 +155,13 @@ public class SaveLoader : KMonoBehaviour
 		if (this.zipStreams)
 		{
 			saveFileRoot.streamed["GridVisibleBZ"] = SaveLoader.CompressContents(Grid.Visible);
+			saveFileRoot.streamed["GridSpawnableBZ"] = SaveLoader.CompressContents(Grid.Spawnable);
 			saveFileRoot.streamed["GridDamageBZ"] = SaveLoader.CompressContents(this.FloatToBytes(Grid.Damage));
 		}
 		else
 		{
 			saveFileRoot.streamed["GridVisible"] = Grid.Visible;
+			saveFileRoot.streamed["GridSpawnable"] = Grid.Spawnable;
 			saveFileRoot.streamed["GridDamage"] = this.FloatToBytes(Grid.Damage);
 		}
 		using (MemoryStream memoryStream2 = new MemoryStream())
@@ -191,6 +195,7 @@ public class SaveLoader : KMonoBehaviour
 		GridSettings.Reset(saveFileRoot.WidthInCells, saveFileRoot.HeightInCells);
 		Sim.SIM_Initialize(null);
 		SimMessages.CreateSimElementsTable(ElementLoader.elements);
+		SimMessages.CreateDiseaseTable();
 		byte[] array = saveFileRoot.streamed["Sim"];
 		FastReader fastReader = new FastReader(array);
 		if (Sim.Load(fastReader) != 0)
@@ -199,13 +204,13 @@ public class SaveLoader : KMonoBehaviour
 			Sim.Shutdown();
 			return false;
 		}
-		if (PlayerPrefs.HasKey("TemperatureUnit"))
+		if (KPlayerPrefs.HasKey("TemperatureUnit"))
 		{
-			GameUtil.temperatureUnit = (GameUtil.TemperatureUnit)PlayerPrefs.GetInt("TemperatureUnit");
+			GameUtil.temperatureUnit = (GameUtil.TemperatureUnit)KPlayerPrefs.GetInt("TemperatureUnit");
 		}
-		if (PlayerPrefs.HasKey("MassUnit"))
+		if (KPlayerPrefs.HasKey("MassUnit"))
 		{
-			GameUtil.massUnit = (GameUtil.MassUnit)PlayerPrefs.GetInt("MassUnit");
+			GameUtil.massUnit = (GameUtil.MassUnit)KPlayerPrefs.GetInt("MassUnit");
 		}
 		SceneInitializer.Instance.PostLoadPrefabs();
 		this.mustRestartOnFail = true;
@@ -217,6 +222,10 @@ public class SaveLoader : KMonoBehaviour
 			return false;
 		}
 		Grid.Visible = saveFileRoot.streamed["GridVisible"];
+		if (saveFileRoot.streamed.ContainsKey("GridSpawnable"))
+		{
+			Grid.Spawnable = saveFileRoot.streamed["GridSpawnable"];
+		}
 		Grid.Damage = this.BytesToFloat(saveFileRoot.streamed["GridDamage"]);
 		Game.Instance.Load(deserializer);
 		FastReader fastReader2 = new FastReader(saveFileRoot.streamed["Camera"]);
@@ -227,7 +236,7 @@ public class SaveLoader : KMonoBehaviour
 	public static string GetSavePrefix()
 	{
 		string text = Util.RootFolder();
-		string text2 = Path.Combine(text, "save_files/");
+		string text2 = global::System.IO.Path.Combine(text, "save_files/");
 		if (!Directory.Exists(text2))
 		{
 			Directory.CreateDirectory(text2);
@@ -237,7 +246,7 @@ public class SaveLoader : KMonoBehaviour
 
 	public static string GetAutoSavePrefix()
 	{
-		string text = Path.Combine(SaveLoader.GetSavePrefix(), "auto_save/");
+		string text = global::System.IO.Path.Combine(SaveLoader.GetSavePrefix(), "auto_save/");
 		if (!Directory.Exists(text))
 		{
 			Directory.CreateDirectory(text);
@@ -247,12 +256,12 @@ public class SaveLoader : KMonoBehaviour
 
 	public static void SetActiveSaveFilePath(string path)
 	{
-		PlayerPrefs.SetString("SaveFilenameKey/", path);
+		KPlayerPrefs.SetString("SaveFilenameKey/", path);
 	}
 
 	public static string GetActiveSaveFilePath()
 	{
-		return PlayerPrefs.GetString("SaveFilenameKey/");
+		return KPlayerPrefs.GetString("SaveFilenameKey/");
 	}
 
 	public static string GetAutosaveFilePath()
@@ -265,7 +274,7 @@ public class SaveLoader : KMonoBehaviour
 		string activeSaveFilePath = SaveLoader.GetActiveSaveFilePath();
 		if (!string.IsNullOrEmpty(activeSaveFilePath))
 		{
-			return Path.GetDirectoryName(activeSaveFilePath);
+			return global::System.IO.Path.GetDirectoryName(activeSaveFilePath);
 		}
 		return null;
 	}
@@ -276,21 +285,18 @@ public class SaveLoader : KMonoBehaviour
 		{
 			Directory.CreateDirectory(save_dir);
 		}
-		List<string> list = new List<string>(Directory.GetFiles(save_dir));
+		List<string> list = new List<string>(Directory.GetFiles(save_dir, "*.sav", SearchOption.AllDirectories));
 		List<string> list2 = new List<string>();
 		foreach (string text in list)
 		{
-			if (Path.GetExtension(text) == ".sav")
+			try
 			{
-				try
-				{
-					File.GetLastWriteTime(text);
-					list2.Add(text);
-				}
-				catch (Exception ex)
-				{
-					global::Debug.LogWarning("Problem reading file: " + text + "\n" + ex.ToString(), null);
-				}
+				File.GetLastWriteTime(text);
+				list2.Add(text);
+			}
+			catch (Exception ex)
+			{
+				global::Debug.LogWarning("Problem reading file: " + text + "\n" + ex.ToString(), null);
 			}
 		}
 		return list2;
@@ -304,7 +310,6 @@ public class SaveLoader : KMonoBehaviour
 	public static List<string> GetAllFiles()
 	{
 		List<string> list = SaveLoader.GetSaveFiles(SaveLoader.GetSavePrefix()).ToList<string>();
-		list.AddRange(SaveLoader.GetSaveFiles(SaveLoader.GetAutoSavePrefix()));
 		return list.OrderByDescending<string, global::System.DateTime>((string file) => File.GetLastWriteTime(file)).ToList<string>();
 	}
 
@@ -334,10 +339,9 @@ public class SaveLoader : KMonoBehaviour
 
 	public string Save(string filename, bool isAutoSave = false, bool updateSavePointer = true)
 	{
-		Manager.Clear();
 		if (isAutoSave)
 		{
-			List<string> list = SaveLoader.GetSaveFiles(SaveLoader.GetAutoSavePrefix());
+			List<string> list = SaveLoader.GetSaveFiles(global::System.IO.Path.GetDirectoryName(filename));
 			list = list.OrderBy<string, global::System.DateTime>((string file) => File.GetLastWriteTime(file)).ToList<string>();
 			while (list.Count >= 10)
 			{
@@ -375,7 +379,6 @@ public class SaveLoader : KMonoBehaviour
 				Manager.SerializeDirectory(binaryWriter2);
 				binaryWriter2.Write(array);
 				Stats.Print();
-				Manager.Clear();
 			}
 		}
 		catch (Exception ex)
@@ -461,6 +464,22 @@ public class SaveLoader : KMonoBehaviour
 			"Loaded",
 			"[" + filename + "]"
 		});
+		Output.Log(new object[]
+		{
+			"World Seeds",
+			string.Concat(new object[]
+			{
+				"[",
+				this.worldDetailSave.globalWorldSeed,
+				"/",
+				this.worldDetailSave.globalWorldLayoutSeed,
+				"/",
+				this.worldDetailSave.globalTerrainSeed,
+				"/",
+				this.worldDetailSave.globalNoiseSeed,
+				"]"
+			})
+		});
 		return true;
 	}
 
@@ -481,6 +500,7 @@ public class SaveLoader : KMonoBehaviour
 		GridSettings.Reset(simSaveFileStructure.WidthInCells, simSaveFileStructure.HeightInCells);
 		Sim.SIM_Initialize(null);
 		SimMessages.CreateSimElementsTable(ElementLoader.elements);
+		SimMessages.CreateDiseaseTable();
 		try
 		{
 			FastReader fastReader = new FastReader(simSaveFileStructure.Sim);
@@ -508,7 +528,7 @@ public class SaveLoader : KMonoBehaviour
 		return true;
 	}
 
-	public WorldGen.GameSpawnData cachedGSD { get; private set; }
+	public GameSpawnData cachedGSD { get; private set; }
 
 	public WorldDetailSave worldDetailSave { get; private set; }
 
@@ -517,7 +537,7 @@ public class SaveLoader : KMonoBehaviour
 		this.worldDetailSave = worldDetail;
 	}
 
-	private void Reset(WorldGen.GameSpawnData gsd)
+	private void Reset(GameSpawnData gsd)
 	{
 		this.cachedGSD = gsd;
 	}

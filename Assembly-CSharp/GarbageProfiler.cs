@@ -15,30 +15,50 @@ public static class GarbageProfiler
 		GC.Collect();
 	}
 
+	private static void ClearFileName()
+	{
+		GarbageProfiler.filename_suffix = null;
+	}
+
+	public static string GetFileName(string name)
+	{
+		string fullPath = Path.GetFullPath(GarbageProfiler.ROOT_MEMORY_DUMP_PATH);
+		if (GarbageProfiler.filename_suffix == null)
+		{
+			if (!Directory.Exists(fullPath))
+			{
+				Directory.CreateDirectory(fullPath);
+			}
+			global::System.DateTime now = global::System.DateTime.Now;
+			GarbageProfiler.filename_suffix = string.Concat(new string[]
+			{
+				"_",
+				now.Year.ToString(),
+				"-",
+				now.Month.ToString(),
+				"-",
+				now.Day.ToString(),
+				"_",
+				now.Hour.ToString(),
+				"-",
+				now.Minute.ToString(),
+				"-",
+				now.Second.ToString(),
+				".csv"
+			});
+		}
+		return Path.Combine(fullPath, name + GarbageProfiler.filename_suffix);
+	}
+
 	private static void Dump()
 	{
+		global::Debug.Log("Writing snapshot...", null);
 		MemorySnapshot memorySnapshot = new MemorySnapshot();
+		GarbageProfiler.ClearFileName();
 		MemorySnapshot.TypeData[] array = new MemorySnapshot.TypeData[memorySnapshot.types.Count];
 		memorySnapshot.types.Values.CopyTo(array, 0);
 		Array.Sort<MemorySnapshot.TypeData>(array, 0, array.Length, new GarbageProfiler.InstanceCountComparer());
-		global::System.DateTime now = global::System.DateTime.Now;
-		string text = string.Concat(new string[]
-		{
-			now.Year.ToString(),
-			"-",
-			now.Month.ToString(),
-			"-",
-			now.Day.ToString(),
-			"-",
-			now.Hour.ToString(),
-			"h-",
-			now.Minute.ToString(),
-			"m-",
-			now.Second.ToString(),
-			"s.csv"
-		});
-		string text2 = "memory_instances-" + text;
-		using (StreamWriter streamWriter = new StreamWriter(text2))
+		using (StreamWriter streamWriter = new StreamWriter(GarbageProfiler.GetFileName("memory_instances")))
 		{
 			foreach (MemorySnapshot.TypeData typeData in array)
 			{
@@ -52,18 +72,17 @@ public static class GarbageProfiler
 					}
 					streamWriter.WriteLine(string.Concat(new object[]
 					{
-						"\"",
-						typeData.type.FullName,
-						"\",",
+						num,
+						",",
 						typeData.instanceCount,
-						", ",
-						num
+						", \"",
+						typeData.type.FullName,
+						"\""
 					}));
 				}
 			}
 		}
-		string text3 = "memory_hierarchies-" + text;
-		using (StreamWriter streamWriter2 = new StreamWriter(text3))
+		using (StreamWriter streamWriter2 = new StreamWriter(GarbageProfiler.GetFileName("memory_hierarchies")))
 		{
 			foreach (MemorySnapshot.TypeData typeData3 in array)
 			{
@@ -83,14 +102,14 @@ public static class GarbageProfiler
 						}
 						streamWriter2.WriteLine(string.Concat(new object[]
 						{
-							"\"",
+							num2,
+							",",
+							keyValuePair.Value,
+							", \"",
 							typeData3.type.FullName,
 							": ",
 							keyValuePair.Key.ToString(),
-							"\",",
-							keyValuePair.Value,
-							", ",
-							num2
+							"\""
 						}));
 					}
 				}
@@ -102,18 +121,28 @@ public static class GarbageProfiler
 
 	public static void DebugDumpGarbageStats()
 	{
+		global::Debug.Log("Writing reference stats...", null);
 		MemorySnapshot memorySnapshot = new MemorySnapshot();
+		GarbageProfiler.ClearFileName();
 		MemorySnapshot.TypeData[] array = new MemorySnapshot.TypeData[memorySnapshot.types.Count];
 		memorySnapshot.types.Values.CopyTo(array, 0);
 		Array.Sort<MemorySnapshot.TypeData>(array, 0, array.Length, new GarbageProfiler.InstanceCountComparer());
-		using (StreamWriter streamWriter = new StreamWriter("garbage_instances.csv"))
+		using (StreamWriter streamWriter = new StreamWriter(GarbageProfiler.GetFileName("garbage_instances")))
 		{
 			foreach (MemorySnapshot.TypeData typeData in array)
 			{
 				if (typeData.instanceCount != 0)
 				{
+					int num = typeData.instanceCount;
+					if (GarbageProfiler.previousSnapshot != null)
+					{
+						MemorySnapshot.TypeData typeData2 = MemorySnapshot.GetTypeData(typeData.type, GarbageProfiler.previousSnapshot.types);
+						num = typeData.instanceCount - typeData2.instanceCount;
+					}
 					streamWriter.WriteLine(string.Concat(new object[]
 					{
+						num,
+						", ",
 						typeData.instanceCount,
 						", \"",
 						typeData.type.FullName,
@@ -123,17 +152,25 @@ public static class GarbageProfiler
 			}
 		}
 		Array.Sort<MemorySnapshot.TypeData>(array, 0, array.Length, new GarbageProfiler.RefCountComparer());
-		using (StreamWriter streamWriter2 = new StreamWriter("garbage_refs.csv"))
+		using (StreamWriter streamWriter2 = new StreamWriter(GarbageProfiler.GetFileName("garbage_refs")))
 		{
-			foreach (MemorySnapshot.TypeData typeData2 in array)
+			foreach (MemorySnapshot.TypeData typeData3 in array)
 			{
-				if (typeData2.refCount != 0)
+				if (typeData3.refCount != 0)
 				{
+					int num2 = typeData3.refCount;
+					if (GarbageProfiler.previousSnapshot != null)
+					{
+						MemorySnapshot.TypeData typeData4 = MemorySnapshot.GetTypeData(typeData3.type, GarbageProfiler.previousSnapshot.types);
+						num2 = typeData3.refCount - typeData4.refCount;
+					}
 					streamWriter2.WriteLine(string.Concat(new object[]
 					{
-						typeData2.refCount,
+						num2,
+						", ",
+						typeData3.refCount,
 						", \"",
-						typeData2.type.FullName,
+						typeData3.type.FullName,
 						"\""
 					}));
 				}
@@ -142,18 +179,35 @@ public static class GarbageProfiler
 		MemorySnapshot.FieldCount[] array4 = new MemorySnapshot.FieldCount[memorySnapshot.fieldCounts.Count];
 		memorySnapshot.fieldCounts.Values.CopyTo(array4, 0);
 		Array.Sort<MemorySnapshot.FieldCount>(array4, 0, array4.Length, new GarbageProfiler.FieldCountComparer());
-		using (StreamWriter streamWriter3 = new StreamWriter("garbage_fields.csv"))
+		using (StreamWriter streamWriter3 = new StreamWriter(GarbageProfiler.GetFileName("garbage_fields")))
 		{
 			foreach (MemorySnapshot.FieldCount fieldCount in array4)
 			{
-				streamWriter3.WriteLine(string.Concat(new object[] { fieldCount.count, ", \"", fieldCount.name, "\"" }));
+				int num3 = fieldCount.count;
+				if (GarbageProfiler.previousSnapshot != null)
+				{
+					foreach (KeyValuePair<int, MemorySnapshot.FieldCount> keyValuePair in GarbageProfiler.previousSnapshot.fieldCounts)
+					{
+						if (keyValuePair.Value.name == fieldCount.name)
+						{
+							num3 = fieldCount.count - keyValuePair.Value.count;
+							break;
+						}
+					}
+				}
+				streamWriter3.WriteLine(string.Concat(new object[] { num3, ", ", fieldCount.count, ", \"", fieldCount.name, "\"" }));
 			}
 		}
+		memorySnapshot.WriteTypeDetails(GarbageProfiler.previousSnapshot);
 		GarbageProfiler.previousSnapshot = memorySnapshot;
 		global::Debug.Log("Done writing reference stats!", null);
 	}
 
 	private static MemorySnapshot previousSnapshot;
+
+	private static string ROOT_MEMORY_DUMP_PATH = "./memory/";
+
+	private static string filename_suffix;
 
 	private class InstanceCountComparer : IComparer<MemorySnapshot.TypeData>
 	{

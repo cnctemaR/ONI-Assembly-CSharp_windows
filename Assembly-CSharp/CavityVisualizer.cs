@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using Klei;
+using ProcGenGame;
 using UnityEngine;
 
 public class CavityVisualizer : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
 	{
-		base.OnPrefabInit();
 		CavityVisualizer.Instance = this;
-		foreach (TerrainCell terrainCell in WorldGen.NaturalCavities.Keys)
+		base.OnPrefabInit();
+		foreach (TerrainCell terrainCell in MobSpawning.NaturalCavities.Keys)
 		{
-			foreach (HashSet<int> hashSet in WorldGen.NaturalCavities[terrainCell])
+			foreach (HashSet<int> hashSet in MobSpawning.NaturalCavities[terrainCell])
 			{
 				foreach (int num in hashSet)
 				{
-					this.CavityCells.Add(num);
+					this.cavityCells.Add(num);
 				}
 			}
 		}
@@ -31,12 +31,12 @@ public class CavityVisualizer : KMonoBehaviour
 				Color.yellow
 			};
 			int num = 0;
-			foreach (TerrainCell terrainCell in WorldGen.NaturalCavities.Keys)
+			foreach (TerrainCell terrainCell in MobSpawning.NaturalCavities.Keys)
 			{
 				Gizmos.color = array[num % array.Length];
 				Gizmos.color = new Color(Gizmos.color.r, Gizmos.color.g, Gizmos.color.b, 0.125f);
 				num++;
-				foreach (HashSet<int> hashSet in WorldGen.NaturalCavities[terrainCell])
+				foreach (HashSet<int> hashSet in MobSpawning.NaturalCavities[terrainCell])
 				{
 					foreach (int num2 in hashSet)
 					{
@@ -47,10 +47,10 @@ public class CavityVisualizer : KMonoBehaviour
 				}
 			}
 		}
-		if (this.SpawnCells != null && this.drawSpawnCells)
+		if (this.spawnCells != null && this.drawSpawnCells)
 		{
 			Gizmos.color = new Color(0f, 1f, 0f, 0.15f);
-			foreach (int num3 in this.SpawnCells)
+			foreach (int num3 in this.spawnCells)
 			{
 				Vector3 vector2 = Grid.CellToPos(num3);
 				vector2 += Vector3.right / 2f + Vector3.up / 2f;
@@ -61,9 +61,9 @@ public class CavityVisualizer : KMonoBehaviour
 
 	public static CavityVisualizer Instance;
 
-	public List<int> CavityCells = new List<int>();
+	public List<int> cavityCells = new List<int>();
 
-	public List<int> SpawnCells = new List<int>();
+	public List<int> spawnCells = new List<int>();
 
 	public bool drawCavity = true;
 

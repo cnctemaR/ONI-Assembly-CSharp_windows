@@ -1,79 +1,50 @@
 ﻿using System;
+using KSerialization;
+using STRINGS;
 using UnityEngine;
 
-public class RationBox : KMonoBehaviour
+public class RationBox : KMonoBehaviour, IUserControlledCapacity
 {
 	protected override void OnPrefabInit()
 	{
-		this.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
-		TreeFilterable treeFilterable = this.filterable;
-		treeFilterable.OnFilterChanged = (Action<Tag[]>)Delegate.Combine(treeFilterable.OnFilterChanged, new Action<Tag[]>(this.OnFilterChanged));
+		this.filteredStorage = new FilteredStorage(this, new Tag[] { GameTags.MarkedForCompost }, this.filterTint, this.noFilterTint, this);
 		this.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		this.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
 	}
 
 	protected override void OnSpawn()
 	{
-		this.OnStorageChange(null);
-		this.operational.SetActive(this.operational.IsOperational, false);
+		Operational component = base.GetComponent<Operational>();
+		component.SetActive(component.IsOperational, false);
 		this.handle = GameScheduler.Instance.SchedulePeriodic(base.name, 0.5f, new Action<object>(this.UpdatePreservationStatusItems), null, null, 0f, null);
-		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, new string[] { "meter_frame", "meter_level" });
-		this.meter.SetPositionPercent(Mathf.Clamp01(this.storage.MassStored() / this.storage.capacityKg));
-	}
-
-	private void OnStorageChange(object data)
-	{
-		if (this.fetchList == null)
-		{
-			this.OnFilterChanged(this.filterable.GetTags());
-		}
-		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.StorageLocker, this);
-		if (this.meter != null)
-		{
-			this.meter.SetPositionPercent(Mathf.Clamp01(this.storage.MassStored() / this.storage.capacityKg));
-		}
-	}
-
-	private void OnFetchComplete()
-	{
-		this.OnFilterChanged(this.filterable.GetTags());
-	}
-
-	private void OnFilterChanged(Tag[] tags)
-	{
-		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		bool flag = tags != null && tags.Length != 0;
-		component.TintColour = ((!flag) ? this.noFilterTint : this.filterTint);
-		if (this.fetchList != null)
-		{
-			this.fetchList.Cancel(string.Empty);
-			this.fetchList = null;
-		}
-		int num = (int)this.storage.RemainingCapacity();
-		if (num <= 0)
-		{
-			return;
-		}
-		if (flag)
-		{
-			this.fetchList = new FetchList2(this.storage);
-			this.fetchList.ShowStatusItem = false;
-			this.fetchList.Add(tags, (float)num, FetchOrder2.OperationalRequirement.None);
-			this.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
-		}
+		this.filteredStorage.FilterChanged();
 	}
 
 	protected override void OnCleanUp()
 	{
-		if (this.fetchList != null)
-		{
-			this.fetchList.Cancel("Refrigerator destroyed.");
-		}
-		this.handle.Clear();
+		this.filteredStorage.CleanUp();
+		this.handle.ClearScheduler();
 	}
 
 	private void OnOperationalChanged(object data)
 	{
-		this.operational.SetActive(this.operational.IsOperational, false);
+		Operational component = base.GetComponent<Operational>();
+		component.SetActive(component.IsOperational, false);
+	}
+
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = (GameObject)data;
+		if (gameObject == null)
+		{
+			return;
+		}
+		RationBox component = gameObject.GetComponent<RationBox>();
+		if (component == null)
+		{
+			return;
+		}
+		this.UserMaxCapacity = component.UserMaxCapacity;
 	}
 
 	private void UpdatePreservationStatusItems(object data)
@@ -81,21 +52,53 @@ public class RationBox : KMonoBehaviour
 		Rottable.SetStatusItems(base.GetComponent<KSelectable>(), Rottable.IsRefrigerated(base.gameObject), Rottable.AtmosphereQuality(base.gameObject));
 	}
 
+	public float UserMaxCapacity
+	{
+		get
+		{
+			return Mathf.Min(this.userMaxCapacity, this.storage.capacityKg);
+		}
+		set
+		{
+			this.userMaxCapacity = value;
+			this.filteredStorage.FilterChanged();
+		}
+	}
+
+	public float MinCapacity
+	{
+		get
+		{
+			return 0f;
+		}
+	}
+
+	public float MaxCapacity
+	{
+		get
+		{
+			return this.storage.capacityKg;
+		}
+	}
+
+	public LocString CapacityUnits
+	{
+		get
+		{
+			GameUtil.MassUnit massUnit = GameUtil.massUnit;
+			if (massUnit != GameUtil.MassUnit.Kilograms)
+			{
+				if (massUnit == GameUtil.MassUnit.Pounds)
+				{
+					return UI.UNITSUFFIXES.MASS.POUND;
+				}
+			}
+			return UI.UNITSUFFIXES.MASS.KILOGRAM;
+		}
+	}
+
 	[MyCmpReq]
 	private Storage storage;
-
-	[MyCmpReq]
-	private TreeFilterable filterable;
-
-	[MyCmpReq]
-	private Operational operational;
-
-	[MyCmpReq]
-	private KBatchedAnimController kanim;
-
-	private MeterController meter;
-
-	private FetchList2 fetchList;
 
 	[SerializeField]
 	public Color noFilterTint = Color.white;
@@ -103,5 +106,10 @@ public class RationBox : KMonoBehaviour
 	[SerializeField]
 	public Color filterTint = Color.white;
 
+	[Serialize]
+	private float userMaxCapacity = float.PositiveInfinity;
+
 	private SchedulerHandle handle;
+
+	private FilteredStorage filteredStorage;
 }

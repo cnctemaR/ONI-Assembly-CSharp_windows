@@ -1,17 +1,22 @@
 ﻿using System;
-using BaseTemplateClasses;
+using System.Collections.Generic;
+using Klei.AI;
+using TemplateClasses;
 using UnityEngine;
 
 public static class TemplateLoader
 {
-	public static void Stamp(BaseTemplate template, Vector2 rootLocation, global::System.Action callback)
+	public static void Stamp(TemplateContainer template, Vector2 rootLocation, global::System.Action on_complete_callback)
 	{
-		TemplateLoader.Template = template;
+		TemplateLoader.template = template;
 		TemplateLoader.BuildPhase1((int)rootLocation.x, (int)rootLocation.y, delegate
 		{
 			TemplateLoader.BuildPhase2((int)rootLocation.x, (int)rootLocation.y, delegate
 			{
-				TemplateLoader.BuildPhase3((int)rootLocation.x, (int)rootLocation.y, callback);
+				TemplateLoader.BuildPhase3((int)rootLocation.x, (int)rootLocation.y, delegate
+				{
+					TemplateLoader.BuildPhase4((int)rootLocation.x, (int)rootLocation.y, on_complete_callback);
+				});
 			});
 		});
 	}
@@ -22,159 +27,417 @@ public static class TemplateLoader
 		{
 			return;
 		}
-		TemplateLoader.AddStartLocation(baseX, baseY, TemplateLoader.Template, callback);
+		CellOffset[] array = new CellOffset[TemplateLoader.template.cells.Count];
+		for (int i = 0; i < TemplateLoader.template.cells.Count; i++)
+		{
+			array[i] = new CellOffset(TemplateLoader.template.cells[i].location_x, TemplateLoader.template.cells[i].location_y);
+		}
+		TemplateLoader.ClearPickups(baseX, baseY, array);
+		if (TemplateLoader.template.cells.Count > 0)
+		{
+			TemplateLoader.ApplyGridProperties(baseX, baseY, TemplateLoader.template);
+			TemplateLoader.PlaceCells(baseX, baseY, TemplateLoader.template, callback);
+			TemplateLoader.ClearEntities<Crop>(baseX, baseY, array);
+			TemplateLoader.ClearEntities<Health>(baseX, baseY, array);
+			TemplateLoader.ClearEntities<Geyser>(baseX, baseY, array);
+		}
+		else
+		{
+			callback();
+		}
 	}
 
 	private static void BuildPhase2(int baseX, int baseY, global::System.Action callback)
 	{
 		int num = Grid.OffsetCell(0, baseX, baseY);
-		if (TemplateLoader.Template == null)
+		if (TemplateLoader.template == null)
 		{
 			global::Debug.LogError("No stamp template", null);
 		}
-		if (TemplateLoader.Template.buildings != null)
+		if (TemplateLoader.template.buildings != null)
 		{
-			for (int i = 0; i < TemplateLoader.Template.buildings.Count; i++)
+			for (int i = 0; i < TemplateLoader.template.buildings.Count; i++)
 			{
-				BaseTemplatePrefabInfo baseTemplatePrefabInfo = TemplateLoader.Template.buildings[i];
-				if (baseTemplatePrefabInfo != null && !(baseTemplatePrefabInfo.id == string.Empty))
+				TemplateLoader.PlaceBuiling(TemplateLoader.template.buildings[i], num);
+			}
+		}
+		HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(callback, false));
+		Sim.Cell cell = Grid.Cell[num];
+		Sim.DiseaseCell diseaseCell = Grid.Disease[num];
+		SimMessages.ReplaceElement(num, ElementLoader.elements[(int)Grid.Cell[num].elementIdx].id, CellEventLogger.Instance.TemplateLoader, cell.mass, cell.temperature, diseaseCell.diseaseIdx, diseaseCell.elementCount, handle.index);
+		handle.index = -1;
+	}
+
+	public static GameObject PlaceBuiling(Prefab prefab, int root_cell)
+	{
+		if (prefab == null || prefab.id == string.Empty)
+		{
+			return null;
+		}
+		BuildingDef buildingDef = Assets.GetBuildingDef(prefab.id);
+		if (buildingDef == null)
+		{
+			return null;
+		}
+		int num = prefab.location_x;
+		int location_y = prefab.location_y;
+		if (!Grid.IsValidCell(Grid.OffsetCell(root_cell, num, location_y)))
+		{
+			return null;
+		}
+		int widthInCells = Assets.GetBuildingDef(prefab.id).WidthInCells;
+		if (widthInCells >= 3)
+		{
+			num--;
+		}
+		GameObject gameObject = Scenario.PlaceBuilding(root_cell, num, location_y, prefab.id, prefab.element);
+		if (gameObject == null)
+		{
+			global::Debug.LogWarning("Null prefab for " + prefab.id, null);
+			return gameObject;
+		}
+		BuildingComplete component = gameObject.GetComponent<BuildingComplete>();
+		Rotatable component2 = gameObject.GetComponent<Rotatable>();
+		if (component2 != null)
+		{
+			component2.SetOrientation(prefab.rotationOrientation);
+		}
+		PrimaryElement component3 = component.GetComponent<PrimaryElement>();
+		component3.Temperature = prefab.temperature;
+		component3.AddDisease(Db.Get().Diseases.GetIndex(prefab.diseaseName), prefab.diseaseCount, "TemplateLoader.PlaceBuilding");
+		if (prefab.id == "Door")
+		{
+			for (int i = 0; i < component.PlacementCells.Length; i++)
+			{
+				SimMessages.ReplaceElement(component.PlacementCells[i], SimHashes.Vacuum, CellEventLogger.Instance.TemplateLoader, 0f, 0f, byte.MaxValue, 0, -1);
+			}
+		}
+		if (prefab.amounts != null)
+		{
+			foreach (Prefab.template_amount_value template_amount_value in prefab.amounts)
+			{
+				try
 				{
-					int num2 = baseTemplatePrefabInfo.location_x;
-					int location_y = baseTemplatePrefabInfo.location_y;
-					int widthInCells = Assets.GetBuildingDef(baseTemplatePrefabInfo.id).WidthInCells;
-					if (widthInCells % 2 != 0 && widthInCells >= 3)
+					if (Db.Get().Amounts.Get(template_amount_value.id) != null)
 					{
-						num2--;
+						gameObject.GetAmounts().SetValue(template_amount_value.id, template_amount_value.value);
 					}
-					if (baseTemplatePrefabInfo.id == "Headquarters")
+				}
+				catch
+				{
+					global::Debug.LogWarning(string.Format("Building does not have amount with ID {0}", template_amount_value.id), null);
+				}
+			}
+		}
+		if (prefab.other_values != null)
+		{
+			foreach (Prefab.template_amount_value template_amount_value2 in prefab.other_values)
+			{
+				string id = template_amount_value2.id;
+				if (id != null)
+				{
+					if (TemplateLoader.<>f__switch$map0 == null)
 					{
-						num2--;
-					}
-					GameObject gameObject = Scenario.PlaceBuilding(num, num2, location_y, baseTemplatePrefabInfo.id, baseTemplatePrefabInfo.element);
-					BuildingComplete component = gameObject.GetComponent<BuildingComplete>();
-					Rotatable component2 = gameObject.GetComponent<Rotatable>();
-					if (component2 != null)
-					{
-						component2.SetOrientation(baseTemplatePrefabInfo.rotationOrientation);
-					}
-					component.GetComponent<PrimaryElement>().Temperature = baseTemplatePrefabInfo.temperature;
-					if (baseTemplatePrefabInfo.id == "Door")
-					{
-						for (int j = 0; j < component.PlacementCells.Length; j++)
+						TemplateLoader.<>f__switch$map0 = new Dictionary<string, int>(2)
 						{
-							SimMessages.ReplaceElement(component.PlacementCells[j], SimHashes.Vacuum, CellEventLogger.Instance.TemplateLoader, 0f, 0f, -1);
-						}
+							{ "joulesAvailable", 0 },
+							{ "sealedDoorDirection", 1 }
+						};
 					}
-					if (baseTemplatePrefabInfo.storage != null && baseTemplatePrefabInfo.storage.Count > 0)
+					int num2;
+					if (TemplateLoader.<>f__switch$map0.TryGetValue(id, out num2))
 					{
-						Storage component3 = component.gameObject.GetComponent<Storage>();
-						if (component3 == null)
+						if (num2 != 0)
 						{
-							global::Debug.LogWarning("No storage component on stampTemplate building " + baseTemplatePrefabInfo.id + ". Saved storage contents will be ignored.", null);
-						}
-						for (int k = 0; k < baseTemplatePrefabInfo.storage.Count; k++)
-						{
-							BaseTemplateStorageItem baseTemplateStorageItem = baseTemplatePrefabInfo.storage[k];
-							string id = baseTemplateStorageItem.id;
-							GameObject gameObject2;
-							if (baseTemplateStorageItem.isOre)
+							if (num2 == 1)
 							{
-								Substance substance = ElementLoader.FindElementByHash(baseTemplateStorageItem.element).substance;
-								gameObject2 = substance.SpawnResource(Vector3.zero, baseTemplateStorageItem.units, baseTemplateStorageItem.temperature, false, false);
-							}
-							else
-							{
-								gameObject2 = Scenario.SpawnPrefab(num, 0, 0, id, Grid.SceneLayer.Use, Folder.Entities);
-								gameObject2.SetActive(true);
-								PrimaryElement component4 = gameObject2.GetComponent<PrimaryElement>();
-								component4.Units = baseTemplateStorageItem.units;
-								Rottable.Instance smi = gameObject2.GetSMI<Rottable.Instance>();
-								if (smi != null)
+								Unsealable component4 = gameObject.GetComponent<Unsealable>();
+								if (component4)
 								{
-									smi.RotValue = baseTemplateStorageItem.rottable.rotAmount;
+									component4.facingRight = template_amount_value2.value != 0f;
 								}
 							}
-							component3.Store(gameObject2, true, false);
-							gameObject2.GetComponent<SavedObject>().inStorage = true;
 						}
-					}
-					if (TemplateLoader.Template.getUtilityConnections != null && i < TemplateLoader.Template.getUtilityConnections.Length && TemplateLoader.Template.getUtilityConnections[i] != null)
-					{
-						BaseTemplateConduitConnection baseTemplateConduitConnection = TemplateLoader.Template.getUtilityConnections[i];
-						int num3 = Grid.OffsetCell(num, num2, location_y);
-						switch (baseTemplateConduitConnection.systemType)
+						else
 						{
-						case BaseTemplateConduitConnection.BaseTemplateConduitSystemType.Electrical:
-							Game.Instance.electricalConduitSystem.SetConnections(baseTemplateConduitConnection.connection, num3, true);
-							break;
-						case BaseTemplateConduitConnection.BaseTemplateConduitSystemType.Liquid:
-							Game.Instance.liquidConduitSystem.SetConnections(baseTemplateConduitConnection.connection, num3, true);
-							break;
-						case BaseTemplateConduitConnection.BaseTemplateConduitSystemType.Gas:
-							Game.Instance.gasConduitSystem.SetConnections(baseTemplateConduitConnection.connection, num3, true);
-							break;
+							Battery component5 = gameObject.GetComponent<Battery>();
+							if (component5)
+							{
+								component5.AddEnergy(template_amount_value2.value);
+							}
 						}
 					}
 				}
 			}
 		}
-		HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(callback, false), "TemplateLoader");
-		Sim.Cell cell = Grid.Cell[num];
-		SimMessages.ReplaceElement(num, ElementLoader.elements[(int)Grid.Cell[num].elementIdx].id, CellEventLogger.Instance.TemplateLoader, cell.mass, cell.temperature, handle.index);
-		handle.index = -1;
+		if (prefab.storage != null && prefab.storage.Count > 0)
+		{
+			Storage component6 = component.gameObject.GetComponent<Storage>();
+			if (component6 == null)
+			{
+				global::Debug.LogWarning("No storage component on stampTemplate building " + prefab.id + ". Saved storage contents will be ignored.", null);
+			}
+			int l = 0;
+			while (l < prefab.storage.Count)
+			{
+				StorageItem storageItem = prefab.storage[l];
+				string id2 = storageItem.id;
+				GameObject gameObject2;
+				if (storageItem.isOre)
+				{
+					Substance substance = ElementLoader.FindElementByHash(storageItem.element).substance;
+					gameObject2 = substance.SpawnResource(Vector3.zero, storageItem.units, storageItem.temperature, Db.Get().Diseases.GetIndex(storageItem.diseaseName), storageItem.diseaseCount, false, false);
+					goto IL_048F;
+				}
+				gameObject2 = Scenario.SpawnPrefab(root_cell, 0, 0, id2, Grid.SceneLayer.Use, Folder.Entities);
+				if (gameObject2 == null)
+				{
+					global::Debug.LogWarning("Null prefab for " + id2, null);
+				}
+				else
+				{
+					gameObject2.SetActive(true);
+					PrimaryElement component7 = gameObject2.GetComponent<PrimaryElement>();
+					component7.Units = storageItem.units;
+					component7.Temperature = storageItem.temperature;
+					component7.AddDisease(Db.Get().Diseases.GetIndex(storageItem.diseaseName), storageItem.diseaseCount, "TemplateLoader.PlaceBuilding");
+					global::Rottable.Instance smi = gameObject2.GetSMI<global::Rottable.Instance>();
+					if (smi != null)
+					{
+						smi.RotValue = storageItem.rottable.rotAmount;
+						goto IL_048F;
+					}
+					goto IL_048F;
+				}
+				IL_04C5:
+				l++;
+				continue;
+				IL_048F:
+				GameObject gameObject3 = component6.Store(gameObject2, true, true, true);
+				if (gameObject3 != null)
+				{
+					gameObject3.GetComponent<Pickupable>().OnStore(component6);
+				}
+				gameObject2.GetComponent<SavedObject>().inStorage = true;
+				goto IL_04C5;
+			}
+		}
+		if (prefab.connections != 0)
+		{
+			TemplateLoader.PlaceUtilityConnection(gameObject, prefab, root_cell);
+		}
+		return gameObject;
+	}
+
+	public static void PlaceUtilityConnection(GameObject spawned, Prefab bc, int root_cell)
+	{
+		int cell = Grid.OffsetCell(root_cell, bc.location_x, bc.location_y);
+		UtilityConnections connection = (UtilityConnections)bc.connections;
+		string id = bc.id;
+		switch (id)
+		{
+		case "Wire":
+		case "InsulatedWire":
+		case "HighWattageWire":
+			spawned.GetComponent<Wire>().SetFirstFrameCallback(delegate
+			{
+				Game.Instance.electricalConduitSystem.SetConnections(connection, cell, true);
+				KAnimGraphTileVisualizer component = spawned.GetComponent<KAnimGraphTileVisualizer>();
+				if (component != null)
+				{
+					component.Refresh();
+				}
+			});
+			break;
+		case "GasConduit":
+		case "InsulatedGasConduit":
+			spawned.GetComponent<Conduit>().SetFirstFrameCallback(delegate
+			{
+				Game.Instance.gasConduitSystem.SetConnections(connection, cell, true);
+				KAnimGraphTileVisualizer component2 = spawned.GetComponent<KAnimGraphTileVisualizer>();
+				if (component2 != null)
+				{
+					component2.Refresh();
+				}
+			});
+			break;
+		case "LiquidConduit":
+		case "InsulatedLiquidConduit":
+			spawned.GetComponent<Conduit>().SetFirstFrameCallback(delegate
+			{
+				Game.Instance.liquidConduitSystem.SetConnections(connection, cell, true);
+				KAnimGraphTileVisualizer component3 = spawned.GetComponent<KAnimGraphTileVisualizer>();
+				if (component3 != null)
+				{
+					component3.Refresh();
+				}
+			});
+			break;
+		}
+	}
+
+	public static GameObject PlacePickupables(Prefab prefab, int root_cell)
+	{
+		int location_x = prefab.location_x;
+		int location_y = prefab.location_y;
+		if (!Grid.IsValidCell(Grid.OffsetCell(root_cell, location_x, location_y)))
+		{
+			return null;
+		}
+		GameObject gameObject = Scenario.SpawnPrefab(root_cell, location_x, location_y, prefab.id, Grid.SceneLayer.Use, Folder.Entities);
+		if (gameObject == null)
+		{
+			global::Debug.LogWarning("Null prefab for " + prefab.id, null);
+			return null;
+		}
+		gameObject.SetActive(true);
+		if (prefab.units != 0f)
+		{
+			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+			component.Units = prefab.units;
+			component.Temperature = ((prefab.temperature <= 0f) ? component.Element.defaultValues.temperature : prefab.temperature);
+			component.AddDisease(Db.Get().Diseases.GetIndex(prefab.diseaseName), prefab.diseaseCount, "TemplateLoader.PlacePickupables");
+		}
+		global::Rottable.Instance smi = gameObject.GetSMI<global::Rottable.Instance>();
+		if (smi != null)
+		{
+			smi.RotValue = prefab.rottable.rotAmount;
+		}
+		return gameObject;
+	}
+
+	public static GameObject PlaceOtherEntities(Prefab prefab, int root_cell)
+	{
+		int location_x = prefab.location_x;
+		int location_y = prefab.location_y;
+		if (!Grid.IsValidCell(Grid.OffsetCell(root_cell, location_x, location_y)))
+		{
+			return null;
+		}
+		KBatchedAnimController kbatchedAnimController = Assets.GetPrefab(new Tag(prefab.id)).AddOrGet<KBatchedAnimController>();
+		GameObject gameObject = Scenario.SpawnPrefab(root_cell, location_x, location_y, prefab.id, kbatchedAnimController.sceneLayer, Folder.Entities);
+		if (gameObject == null)
+		{
+			global::Debug.LogWarning("Null prefab for " + prefab.id, null);
+			return null;
+		}
+		gameObject.SetActive(true);
+		if (prefab.amounts != null)
+		{
+			foreach (Prefab.template_amount_value template_amount_value in prefab.amounts)
+			{
+				try
+				{
+					gameObject.GetAmounts().SetValue(template_amount_value.id, template_amount_value.value);
+				}
+				catch
+				{
+					global::Debug.LogWarning(string.Format("Entity {0} does not have amount with ID {1}", gameObject.GetProperName(), template_amount_value.id), null);
+				}
+			}
+		}
+		return gameObject;
+	}
+
+	public static GameObject PlaceElementalOres(Prefab prefab, int root_cell)
+	{
+		int location_x = prefab.location_x;
+		int location_y = prefab.location_y;
+		if (!Grid.IsValidCell(Grid.OffsetCell(root_cell, location_x, location_y)))
+		{
+			return null;
+		}
+		Substance substance = ElementLoader.FindElementByHash(prefab.element).substance;
+		int num = Grid.OffsetCell(root_cell, location_x, location_y);
+		Vector3 vector = Grid.CellToPosCCC(num, Grid.SceneLayer.Use);
+		byte index = Db.Get().Diseases.GetIndex(prefab.diseaseName);
+		return substance.SpawnResource(vector, prefab.units, prefab.temperature, index, prefab.diseaseCount, false, false);
 	}
 
 	private static void BuildPhase3(int baseX, int baseY, global::System.Action callback)
 	{
-		int num = Grid.OffsetCell(0, baseX, baseY);
-		foreach (BuildingComplete buildingComplete in Components.BuildingCompletes)
+		if (TemplateLoader.template != null)
 		{
-			if (buildingComplete.PrefabID().Name == "Headquarters")
+			int num = Grid.OffsetCell(0, baseX, baseY);
+			foreach (BuildingComplete buildingComplete in Components.BuildingCompletes)
 			{
-				break;
-			}
-		}
-		for (int i = 0; i < TemplateLoader.Template.pickupables.Count; i++)
-		{
-			if (TemplateLoader.Template.pickupables[i] != null && !(TemplateLoader.Template.pickupables[i].id == string.Empty))
-			{
-				int location_x = TemplateLoader.Template.pickupables[i].location_x;
-				int location_y = TemplateLoader.Template.pickupables[i].location_y;
-				GameObject gameObject = Scenario.SpawnPrefab(num, location_x, location_y, TemplateLoader.Template.pickupables[i].id, Grid.SceneLayer.Use, Folder.Entities);
-				if (TemplateLoader.Template.pickupables[i].units != 0f)
+				KAnimGraphTileVisualizer component = buildingComplete.GetComponent<KAnimGraphTileVisualizer>();
+				if (component != null)
 				{
-					PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-					component.Units = TemplateLoader.Template.pickupables[i].units;
-				}
-				Rottable.Instance smi = gameObject.GetSMI<Rottable.Instance>();
-				if (smi != null)
-				{
-					smi.RotValue = TemplateLoader.Template.pickupables[i].rottable.rotAmount;
+					component.Refresh();
 				}
 			}
-		}
-		for (int j = 0; j < TemplateLoader.Template.elementalOres.Count; j++)
-		{
-			if (TemplateLoader.Template.elementalOres[j] != null && !(TemplateLoader.Template.elementalOres[j].id == string.Empty))
+			for (int i = 0; i < TemplateLoader.template.pickupables.Count; i++)
 			{
-				int location_x2 = TemplateLoader.Template.elementalOres[j].location_x;
-				int location_y2 = TemplateLoader.Template.elementalOres[j].location_y;
-				Substance substance = ElementLoader.FindElementByHash(TemplateLoader.Template.elementalOres[j].element).substance;
-				int num2 = Grid.OffsetCell(num, location_x2, location_y2);
-				Vector3 vector = Grid.CellToPosCCC(num2, Grid.SceneLayer.Use);
-				substance.SpawnResource(vector, TemplateLoader.Template.elementalOres[j].units, TemplateLoader.Template.elementalOres[j].temperature, false, false);
+				if (TemplateLoader.template.pickupables[i] != null && !(TemplateLoader.template.pickupables[i].id == string.Empty))
+				{
+					TemplateLoader.PlacePickupables(TemplateLoader.template.pickupables[i], num);
+				}
+			}
+			for (int j = 0; j < TemplateLoader.template.elementalOres.Count; j++)
+			{
+				if (TemplateLoader.template.elementalOres[j] != null && !(TemplateLoader.template.elementalOres[j].id == string.Empty))
+				{
+					TemplateLoader.PlaceElementalOres(TemplateLoader.template.elementalOres[j], num);
+				}
 			}
 		}
-		TemplateLoader.Template = null;
 		if (callback != null)
 		{
 			callback();
 		}
 	}
 
-	private static void AddStartLocation(int baseX, int baseY, BaseTemplate template, global::System.Action callback)
+	private static void BuildPhase4(int baseX, int baseY, global::System.Action callback)
 	{
-		HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(callback, false), "TemplateLoaderAddStartLoc");
+		if (TemplateLoader.template != null)
+		{
+			int num = Grid.OffsetCell(0, baseX, baseY);
+			for (int i = 0; i < TemplateLoader.template.otherEntities.Count; i++)
+			{
+				if (TemplateLoader.template.otherEntities[i] != null && !(TemplateLoader.template.otherEntities[i].id == string.Empty))
+				{
+					TemplateLoader.PlaceOtherEntities(TemplateLoader.template.otherEntities[i], num);
+				}
+			}
+			TemplateLoader.template = null;
+		}
+		if (callback != null)
+		{
+			callback();
+		}
+	}
+
+	private static void ClearPickups(int baseX, int baseY, CellOffset[] template_as_offsets)
+	{
+		if (WorldGenSpawner.Instance != null)
+		{
+			WorldGenSpawner.Instance.ClearSpawnersInArea(new Vector2((float)baseX, (float)baseY), template_as_offsets);
+		}
+		foreach (Pickupable pickupable in Components.Pickupables)
+		{
+			if (Grid.IsCellOffsetOf(Grid.XYToCell(baseX, baseY), pickupable.gameObject, template_as_offsets))
+			{
+				Util.KDestroyGameObject(pickupable.gameObject);
+			}
+		}
+	}
+
+	private static void ClearEntities<T>(int rootX, int rootY, CellOffset[] TemplateOffsets) where T : KMonoBehaviour
+	{
+		T[] array = (T[])global::UnityEngine.Object.FindObjectsOfType(typeof(T));
+		foreach (T t in array)
+		{
+			if (Grid.IsCellOffsetOf(Grid.PosToCell(t.gameObject), Grid.XYToCell(rootX, rootY), TemplateOffsets))
+			{
+				Util.KDestroyGameObject(t.gameObject);
+			}
+		}
+	}
+
+	private static void PlaceCells(int baseX, int baseY, TemplateContainer template, global::System.Action callback)
+	{
+		HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(callback, false));
 		if (template == null)
 		{
 			global::Debug.LogError("Template Loader does not have template.", null);
@@ -182,13 +445,42 @@ public static class TemplateLoader
 		for (int i = 0; i < template.cells.Count; i++)
 		{
 			int num = Grid.XYToCell(template.cells[i].location_x + baseX, template.cells[i].location_y + baseY);
+			if (!Grid.IsValidCell(num))
+			{
+				global::Debug.LogError(string.Format("Trying to replace invalid cells cell{0} root{1}:{2} offset{3}:{4}", new object[]
+				{
+					num,
+					baseX,
+					baseY,
+					template.cells[i].location_x,
+					template.cells[i].location_y
+				}), null);
+			}
 			SimHashes element = template.cells[i].element;
 			float mass = template.cells[i].mass;
 			float temperature = template.cells[i].temperature;
-			SimMessages.ReplaceElement(num, element, CellEventLogger.Instance.TemplateLoader, mass, temperature, handle.index);
+			byte index = Db.Get().Diseases.GetIndex(template.cells[i].diseaseName);
+			int diseaseCount = template.cells[i].diseaseCount;
+			SimMessages.ReplaceElement(num, element, CellEventLogger.Instance.TemplateLoader, mass, temperature, index, diseaseCount, handle.index);
 			handle.index = -1;
 		}
 	}
 
-	private static BaseTemplate Template;
+	public static void ApplyGridProperties(int baseX, int baseY, TemplateContainer template)
+	{
+		for (int i = 0; i < template.cells.Count; i++)
+		{
+			int num = Grid.XYToCell(template.cells[i].location_x + baseX, template.cells[i].location_y + baseY);
+			if (Grid.IsValidCell(num))
+			{
+				if (template.cells[i].preventFoWReveal)
+				{
+					Grid.PreventFogOfWarReveal[num] = true;
+					Grid.Visible[num] = 0;
+				}
+			}
+		}
+	}
+
+	private static TemplateContainer template;
 }

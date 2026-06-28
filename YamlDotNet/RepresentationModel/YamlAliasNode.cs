@@ -27,9 +27,9 @@ namespace YamlDotNet.RepresentationModel
 			throw new NotSupportedException("A YamlAliasNode is an implementation detail and should never be visited.");
 		}
 
-		public override bool Equals(object other)
+		public override bool Equals(object obj)
 		{
-			YamlAliasNode yamlAliasNode = other as YamlAliasNode;
+			YamlAliasNode yamlAliasNode = obj as YamlAliasNode;
 			return yamlAliasNode != null && base.Equals(yamlAliasNode) && YamlNode.SafeEquals(base.Anchor, yamlAliasNode.Anchor);
 		}
 
@@ -38,17 +38,22 @@ namespace YamlDotNet.RepresentationModel
 			return base.GetHashCode();
 		}
 
-		public override string ToString()
+		internal override string ToString(RecursionLevel level)
 		{
 			return "*" + base.Anchor;
 		}
 
-		public override IEnumerable<YamlNode> AllNodes
+		internal override IEnumerable<YamlNode> SafeAllNodes(RecursionLevel level)
+		{
+			yield return this;
+			yield break;
+		}
+
+		public override YamlNodeType NodeType
 		{
 			get
 			{
-				yield return this;
-				yield break;
+				return YamlNodeType.Alias;
 			}
 		}
 	}

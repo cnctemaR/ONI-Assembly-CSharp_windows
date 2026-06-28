@@ -15,7 +15,8 @@ namespace YamlDotNet.RepresentationModel
 			}
 			if (this.anchors.ContainsKey(node.Anchor))
 			{
-				throw new DuplicateAnchorException(node.Start, node.End, string.Format(CultureInfo.InvariantCulture, "The anchor '{0}' already exists", new object[] { node.Anchor }));
+				this.anchors[node.Anchor] = node;
+				return;
 			}
 			this.anchors.Add(node.Anchor, node);
 		}

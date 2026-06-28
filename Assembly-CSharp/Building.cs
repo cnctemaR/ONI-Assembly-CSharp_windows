@@ -29,9 +29,9 @@ public class Building : KMonoBehaviour, IEffectDescriptor
 
 	public Extents GetExtents()
 	{
-		if (this.PlacementCells != null)
+		if (this.extents.width == 0 || this.extents.height == 0)
 		{
-			return this.extents;
+			this.RefreshCells();
 		}
 		return this.extents;
 	}
@@ -114,6 +114,11 @@ public class Building : KMonoBehaviour, IEffectDescriptor
 		{
 			component.SetName(this.Def.Name);
 			component.SetStatusIndicatorOffset(new Vector3(0f, -0.35f, 0f));
+		}
+		Prioritizable component2 = base.GetComponent<Prioritizable>();
+		if (component2 != null)
+		{
+			component2.iconOffset.y = 0.3f;
 		}
 	}
 
@@ -336,6 +341,12 @@ public class Building : KMonoBehaviour, IEffectDescriptor
 			Descriptor descriptor6 = default(Descriptor);
 			descriptor6.SetupDescriptor(UI.BUILDINGEFFECTS.REQUIRESMANUALOPERATION, UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESMANUALOPERATION, Descriptor.DescriptorType.Requirement);
 			list.Add(descriptor6);
+		}
+		if (component.isArtable)
+		{
+			Descriptor descriptor7 = default(Descriptor);
+			descriptor7.SetupDescriptor(UI.BUILDINGEFFECTS.REQUIRESCREATIVITY, UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESCREATIVITY, Descriptor.DescriptorType.Requirement);
+			list.Add(descriptor7);
 		}
 		return list;
 	}

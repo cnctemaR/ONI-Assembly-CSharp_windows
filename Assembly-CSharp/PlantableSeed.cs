@@ -26,20 +26,10 @@ public class PlantableSeed : KMonoBehaviour, IGameObjectEffectDescriptor, IHasSo
 
 	private void OnAbsorb(object data)
 	{
-		Pickupable pickupable = (Pickupable)data;
-		PlantableSeed component = pickupable.GetComponent<PlantableSeed>();
-		this.timesHarvested += component.timesHarvested;
 	}
 
 	private void OnSplit(object data)
 	{
-		Pickupable pickupable = (Pickupable)data;
-		Pickupable component = base.GetComponent<Pickupable>();
-		float num = pickupable.TotalAmount + component.TotalAmount;
-		PlantableSeed component2 = pickupable.GetComponent<PlantableSeed>();
-		int num2 = Mathf.RoundToInt((float)component2.timesHarvested * component.TotalAmount / num);
-		this.timesHarvested = num2;
-		component2.timesHarvested -= num2;
 	}
 
 	private void SimUpdate(float dt)
@@ -67,8 +57,6 @@ public class PlantableSeed : KMonoBehaviour, IGameObjectEffectDescriptor, IHasSo
 				Crop component2 = gameObject.GetComponent<Crop>();
 				if (component2 != null)
 				{
-					PlantableSeed component3 = pickupable.GetComponent<PlantableSeed>();
-					component2.SetTimesHarvested(component3.timesHarvested);
 				}
 				Util.KDestroyGameObject(pickupable.gameObject);
 			}
@@ -149,9 +137,6 @@ public class PlantableSeed : KMonoBehaviour, IGameObjectEffectDescriptor, IHasSo
 
 	[Serialize]
 	public float timeUntilSelfPlant;
-
-	[Serialize]
-	public int timesHarvested;
 
 	public Tag replantGroundTag;
 

@@ -3,8 +3,8 @@ using System.Diagnostics;
 
 public class LoggerSSF : Logger<LoggerSSF.Entry>
 {
-	public LoggerSSF(string name)
-		: base(name)
+	public LoggerSSF(string name, int maxEntries = 35)
+		: base(name, maxEntries)
 	{
 	}
 

@@ -31,6 +31,11 @@ public class ProgressBar : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.overlayUpdateHandle = Game.Instance.Subscribe(1798162660, new Action<object>(this.OnOverlayChanged));
+		if (OverlayScreen.Instance != null && OverlayScreen.Instance.GetMode() != SimViewMode.None)
+		{
+			base.gameObject.SetActive(false);
+		}
 	}
 
 	public void SetUpdateFunc(Func<float> func)
@@ -51,7 +56,33 @@ public class ProgressBar : KMonoBehaviour
 		this.updatePercentFull = null;
 	}
 
+	public virtual void OnOverlayChanged(object data = null)
+	{
+		if ((int)data == 0)
+		{
+			if (!base.gameObject.activeSelf)
+			{
+				base.gameObject.SetActive(true);
+			}
+		}
+		else if (base.gameObject.activeSelf)
+		{
+			base.gameObject.SetActive(false);
+		}
+	}
+
+	protected override void OnCleanUp()
+	{
+		if (this.overlayUpdateHandle != -1)
+		{
+			Game.Instance.Unsubscribe(this.overlayUpdateHandle);
+		}
+		base.OnCleanUp();
+	}
+
 	public Image bar;
 
 	private Func<float> updatePercentFull;
+
+	private int overlayUpdateHandle = -1;
 }

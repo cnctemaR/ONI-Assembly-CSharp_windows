@@ -83,7 +83,7 @@ public class TreeFilterableSideScreenElement : KMonoBehaviour
 		if (this.parent.IsStorage)
 		{
 			float amountInStorage = this.parent.GetAmountInStorage(this.elementTag);
-			text = text + ": " + GameUtil.GetFormattedMass(amountInStorage, GameUtil.TimeSlice.None, true, "{0:0.#}");
+			text = text + ": " + GameUtil.GetFormattedMass(amountInStorage, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
 		}
 		this.elementName.text = text;
 	}

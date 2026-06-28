@@ -81,7 +81,7 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEnergyProducer, IEffect
 	{
 		get
 		{
-			return this.connectionStatus == CircuitManager.ConnectionStatus.Powered || this.connectionStatus == CircuitManager.ConnectionStatus.OverDraw;
+			return this.connectionStatus == CircuitManager.ConnectionStatus.Powered;
 		}
 	}
 

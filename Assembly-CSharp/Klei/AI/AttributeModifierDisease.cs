@@ -1,18 +1,18 @@
 ﻿using System;
+using System.Collections.Generic;
+using STRINGS;
 using UnityEngine;
 
 namespace Klei.AI
 {
-	public abstract class AttributeModifierDisease : Disease
+	public class AttributeModifierDisease : Disease.DiseaseComponent
 	{
-		public AttributeModifierDisease(string id, bool use_custom_effect, AttributeModifier[] attribute_modifiers, float infection_probability, float sickness_duration, Disease.EffectProbabilityDelta[] effect_probability_deltas = null)
-			: base(id, infection_probability, sickness_duration, effect_probability_deltas)
+		public AttributeModifierDisease(AttributeModifier[] attribute_modifiers)
 		{
 			this.attributeModifiers = attribute_modifiers;
-			this.useCustomEffect = use_custom_effect;
 		}
 
-		protected override object OnInfect(GameObject go)
+		public override object OnInfect(GameObject go, DiseaseInstance diseaseInstance)
 		{
 			Attributes attributes = go.GetAttributes();
 			for (int i = 0; i < this.attributeModifiers.Length; i++)
@@ -20,21 +20,11 @@ namespace Klei.AI
 				AttributeModifier attributeModifier = this.attributeModifiers[i];
 				attributes.Add(attributeModifier.AttributeId, attributeModifier);
 			}
-			KAnimControllerBase kanimControllerBase = null;
-			if (!this.useCustomEffect)
-			{
-				kanimControllerBase = base.StartCommonSickEffect(go);
-			}
-			return kanimControllerBase;
+			return null;
 		}
 
-		protected override void OnCure(GameObject go, object instance_data)
+		public override void OnCure(GameObject go, object instance_data)
 		{
-			if (!this.useCustomEffect)
-			{
-				KAnimControllerBase kanimControllerBase = (KAnimControllerBase)instance_data;
-				kanimControllerBase.gameObject.DeleteObject();
-			}
 			Attributes attributes = go.GetAttributes();
 			for (int i = 0; i < this.attributeModifiers.Length; i++)
 			{
@@ -51,21 +41,17 @@ namespace Klei.AI
 			}
 		}
 
-		public override string GetSymptoms()
+		public override List<Descriptor> GetSymptoms()
 		{
-			string text = base.GetSymptoms();
+			List<Descriptor> list = new List<Descriptor>();
 			foreach (AttributeModifier attributeModifier in this.attributeModifiers)
 			{
-				float value = attributeModifier.Value;
-				text += "\n    ";
-				text += Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + attributeModifier.AttributeId.ToUpper() + ".NAME");
-				text = text + " " + ((value <= 0f) ? string.Empty : "+") + value.ToString();
+				Attribute attribute = Db.Get().Attributes.Get(attributeModifier.AttributeId);
+				list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.ATTRIBUTE_MODIFIER_SYMPTOMS, attribute.Name, attributeModifier.GetFormattedString(null)), string.Format(DUPLICANTS.DISEASES.ATTRIBUTE_MODIFIER_SYMPTOMS_TOOLTIP, attribute.Name, attributeModifier.GetFormattedString(null)), Descriptor.DescriptorType.Symptom, false));
 			}
-			return text;
+			return list;
 		}
 
 		private AttributeModifier[] attributeModifiers;
-
-		private bool useCustomEffect;
 	}
 }

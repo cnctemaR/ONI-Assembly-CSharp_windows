@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Klei;
+using ProcGen;
+using ProcGenGame;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,7 +13,7 @@ public class OfflineWorldGen : KMonoBehaviour
 	{
 		if (this.trackProgress)
 		{
-			Output.Log(new object[] { text });
+			global::Debug.Log(text, null);
 		}
 	}
 
@@ -23,7 +24,6 @@ public class OfflineWorldGen : KMonoBehaviour
 		if (!flag)
 		{
 			SaveLoader.SetActiveSaveFilePath(null);
-			NotificationTracker.ClearNotificationTracker();
 			flag = WorldGen.CanLoad(WorldGen.SIM_SAVE_FILENAME);
 		}
 		return flag;
@@ -63,6 +63,11 @@ public class OfflineWorldGen : KMonoBehaviour
 			{
 				this.DoWorldGen(0);
 				this.ToggleGenerationUI();
+			}
+			if (KPlayerPrefs.GetInt(OfflineWorldGen.USE_WORLD_SEED_KEY, 0) != 0)
+			{
+				this.InitSeeds();
+				GameObject.Find("Seed").GetComponent<LocText>().text = UI.WORLDGEN.USING_PLAYER_SEED.ToString() + this.worldSeed.ToString();
 			}
 		}
 		else
@@ -268,7 +273,7 @@ public class OfflineWorldGen : KMonoBehaviour
 			this.percentText.text = this.currentPercent.ToString("N1");
 			if (this.firstPassGeneration)
 			{
-				this.generateThreadComplete = WorldGen.IsGenerateComplete();
+				this.generateThreadComplete = this.world.IsGenerateComplete();
 				if (!this.generateThreadComplete)
 				{
 					this.renderThreadComplete = false;
@@ -276,7 +281,7 @@ public class OfflineWorldGen : KMonoBehaviour
 			}
 			if (this.secondPassGeneration)
 			{
-				this.renderThreadComplete = WorldGen.IsRenderComplete();
+				this.renderThreadComplete = this.world.IsRenderComplete();
 			}
 			if (!this.shownStartingLocations && this.firstPassGeneration && this.generateThreadComplete)
 			{
@@ -312,20 +317,48 @@ public class OfflineWorldGen : KMonoBehaviour
 		this.DoWordGenInitialise();
 	}
 
+	public static void SetSeed(int seed)
+	{
+		KPlayerPrefs.SetInt(OfflineWorldGen.WORLD_SEED_KEY, seed);
+		KPlayerPrefs.SetInt(OfflineWorldGen.LAYOUT_SEED_KEY, seed);
+		KPlayerPrefs.SetInt(OfflineWorldGen.TERRAIN_SEED_KEY, seed);
+		KPlayerPrefs.SetInt(OfflineWorldGen.NOISE_SEED_KEY, seed);
+	}
+
+	public static void RemoveSeeds()
+	{
+		KPlayerPrefs.DeleteKey(OfflineWorldGen.WORLD_SEED_KEY);
+		KPlayerPrefs.DeleteKey(OfflineWorldGen.LAYOUT_SEED_KEY);
+		KPlayerPrefs.DeleteKey(OfflineWorldGen.TERRAIN_SEED_KEY);
+		KPlayerPrefs.DeleteKey(OfflineWorldGen.NOISE_SEED_KEY);
+	}
+
+	private void InitSeeds()
+	{
+		this.worldSeed = KPlayerPrefs.GetInt(OfflineWorldGen.WORLD_SEED_KEY, -1);
+		this.layoutSeed = KPlayerPrefs.GetInt(OfflineWorldGen.LAYOUT_SEED_KEY, -1);
+		this.terrainSeed = KPlayerPrefs.GetInt(OfflineWorldGen.TERRAIN_SEED_KEY, -1);
+		this.noiseSeed = KPlayerPrefs.GetInt(OfflineWorldGen.NOISE_SEED_KEY, -1);
+	}
+
 	private void DoWordGenInitialise()
 	{
 		WorldGen.LoadSettings();
-		int @int = PlayerPrefs.GetInt(OfflineWorldGen.WORLD_GEN_SEED_KEY, -1);
-		WorldGen.Initialise(new WorldGen.OfflineCallbackFunction(this.UpdateProgress), @int);
+		if (KPlayerPrefs.GetInt(OfflineWorldGen.USE_WORLD_SEED_KEY, 0) != 0)
+		{
+			global::Debug.Log("Using player defined seed", null);
+			this.InitSeeds();
+		}
+		this.world.Initialise(new WorldGen.OfflineCallbackFunction(this.UpdateProgress), this.worldSeed, this.layoutSeed, this.terrainSeed, this.noiseSeed);
 		this.firstPassGeneration = true;
-		WorldGen.GenerateOfflineThreaded();
+		this.world.GenerateOfflineThreaded();
 	}
 
 	private void DoRenderWorld()
 	{
 		this.firstPassGeneration = false;
 		this.secondPassGeneration = true;
-		WorldGen.RenderWorldThreaded();
+		this.world.RenderWorldThreaded();
 	}
 
 	public TextAsset simElementsSolidsFile;
@@ -381,6 +414,8 @@ public class OfflineWorldGen : KMonoBehaviour
 	[SerializeField]
 	private Text titleText;
 
+	private WorldGen world = new WorldGen();
+
 	private List<VoronoiNode> startNodes;
 
 	private StringKey currentStringKeyRoot;
@@ -413,7 +448,23 @@ public class OfflineWorldGen : KMonoBehaviour
 
 	private bool secondPassGeneration;
 
-	public static string WORLD_GEN_SEED_KEY = "WorldGenSeedKey";
+	public static string USE_WORLD_SEED_KEY = "UseWorldSeedKey";
+
+	public static string WORLD_SEED_KEY = "WorldSeedKey";
+
+	public static string LAYOUT_SEED_KEY = "LayoutSeedKey";
+
+	public static string TERRAIN_SEED_KEY = "TerrainSeedKey";
+
+	public static string NOISE_SEED_KEY = "NoiseSeedKey";
+
+	private int worldSeed = -1;
+
+	private int layoutSeed = -1;
+
+	private int terrainSeed = -1;
+
+	private int noiseSeed = -1;
 
 	[Serializable]
 	private struct ValidDimensions

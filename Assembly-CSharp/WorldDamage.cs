@@ -88,31 +88,31 @@ public class WorldDamage : KMonoBehaviour
 		KBatchedAnimController kanim = fx.GetComponent<KBatchedAnimController>();
 		kanim.TintColour = elem.substance.colour;
 		kanim.onDestroySelf = new Action<GameObject>(this.ReleaseGO);
-		SimMessages.AddRemoveSubstance(src_cell, idx, CellEventLogger.Instance.WorldDamageDelayedSpawnFX, -1f, temperature, -1);
+		SimMessages.AddRemoveSubstance(src_cell, idx, CellEventLogger.Instance.WorldDamageDelayedSpawnFX, -1f, temperature, byte.MaxValue, 0, -1);
 		if (offset == -1)
 		{
 			kanim.Play("side", KAnim.PlayMode.Once, 1f, 0f);
 			kanim.FlipX = true;
 			fx.transform.position += Vector3.right * 0.5f;
-			FallingWater.instance.AddParticle(dest_cell, (byte)idx, 1f, temperature, true, false, false);
+			FallingWater.instance.AddParticle(dest_cell, (byte)idx, 1f, temperature, byte.MaxValue, 0, true, false, false);
 		}
 		else if (offset == Grid.WidthInCells)
 		{
 			fx.transform.position -= Vector3.up * 0.5f;
 			kanim.Play("floor", KAnim.PlayMode.Once, 1f, 0f);
-			SimMessages.AddRemoveSubstance(dest_cell, idx, CellEventLogger.Instance.WorldDamageDelayedSpawnFX, 1f, temperature, -1);
+			SimMessages.AddRemoveSubstance(dest_cell, idx, CellEventLogger.Instance.WorldDamageDelayedSpawnFX, 1f, temperature, byte.MaxValue, 0, -1);
 		}
 		else if (offset == -Grid.WidthInCells)
 		{
 			kanim.Play("ceiling", KAnim.PlayMode.Once, 1f, 0f);
 			fx.transform.position += Vector3.up * 0.5f;
-			FallingWater.instance.AddParticle(dest_cell, (byte)idx, 1f, temperature, true, false, false);
+			FallingWater.instance.AddParticle(dest_cell, (byte)idx, 1f, temperature, byte.MaxValue, 0, true, false, false);
 		}
 		else
 		{
 			kanim.Play("side", KAnim.PlayMode.Once, 1f, 0f);
 			fx.transform.position -= Vector3.right * 0.5f;
-			FallingWater.instance.AddParticle(dest_cell, (byte)idx, 1f, temperature, true, false, false);
+			FallingWater.instance.AddParticle(dest_cell, (byte)idx, 1f, temperature, byte.MaxValue, 0, true, false, false);
 		}
 		if (CameraController.Instance.IsAudibleSound(fx.transform.position, this.leakSoundMigrated))
 		{
@@ -149,15 +149,7 @@ public class WorldDamage : KMonoBehaviour
 				if (!this.queuedDigCallbackCells.Contains(cell))
 				{
 					this.queuedDigCallbackCells.Add(cell);
-					float mass = Grid.Cell[cell].mass;
-					Element element = Grid.Element[cell];
-					float temperature = Grid.Temperature[cell];
-					global::System.Action action = delegate
-					{
-						WorldDamage.OnDigComplete(this, cell, mass, temperature, element);
-					};
-					HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(action, false), "WorldDamage");
-					SimMessages.Dig(cell, handle.index);
+					SimMessages.Dig(cell, -1);
 				}
 			}
 			else
@@ -172,12 +164,13 @@ public class WorldDamage : KMonoBehaviour
 		Grid.Damage[cell] = 0f;
 	}
 
-	private static void OnDigComplete(WorldDamage t, int cell, float mass, float temperature, Element element)
+	public void OnDigComplete(int cell, float mass, float temperature, byte element_idx, byte disease_idx, int disease_count)
 	{
-		if (t.queuedDigCallbackCells.Contains(cell))
+		if (this.queuedDigCallbackCells.Contains(cell))
 		{
-			t.queuedDigCallbackCells.Remove(cell);
+			this.queuedDigCallbackCells.Remove(cell);
 			Vector3 vector = Grid.CellToPos(cell, CellAlignment.RandomInternal, Grid.SceneLayer.Use);
+			Element element = ElementLoader.elements[(int)element_idx];
 			Grid.Damage[cell] = 0f;
 			WorldDamage.Instance.PlaySoundForSubstance(element, vector);
 			float num = mass * 0.5f;
@@ -185,7 +178,7 @@ public class WorldDamage : KMonoBehaviour
 			{
 				return;
 			}
-			GameObject gameObject = element.substance.SpawnResource(vector, num, temperature, false, false);
+			GameObject gameObject = element.substance.SpawnResource(vector, num, temperature, disease_idx, disease_count, false, false);
 			Pickupable component = gameObject.GetComponent<Pickupable>();
 			if (component != null && WorldInventory.Instance.IsReachable(gameObject.GetComponent<Pickupable>()))
 			{

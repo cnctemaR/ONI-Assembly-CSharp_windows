@@ -6,9 +6,6 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.smi.sm.preType.Set(this.preEmissionElement, base.smi);
-		base.smi.sm.emitType.Set(this.emissionElement, base.smi);
-		base.smi.sm.postType.Set(this.postEmissionElement, base.smi);
 		base.smi.StartSM();
 	}
 
@@ -17,16 +14,21 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>
 		this.emitter = emitter;
 	}
 
+	public void cycleType()
+	{
+		this.current_emissionType = ((this.current_emissionType != this.emission_a) ? ((this.emission_a == null) ? this.emission_b : this.emission_a) : ((this.emission_b == null) ? this.emission_a : this.emission_b));
+	}
+
 	[SerializeField]
 	private ElementEmitter emitter;
 
 	public float idleDuration;
 
-	public Geyser.EmissionType preEmissionElement;
+	public Geyser.EmissionType emission_a;
 
-	public Geyser.EmissionType emissionElement;
+	public Geyser.EmissionType emission_b;
 
-	public Geyser.EmissionType postEmissionElement;
+	public Geyser.EmissionType current_emissionType;
 
 	public class StatesInstance : GameStateMachine<Geyser.States, Geyser.StatesInstance, Geyser, object>.GameInstance
 	{
@@ -50,61 +52,77 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>
 			this.root.Enter(delegate(Geyser.StatesInstance smi)
 			{
 				smi.master.emitter.SetEmitting(false);
+				smi.master.current_emissionType = smi.master.emission_a;
+				smi.SetEmissionElement(smi.master.current_emissionType);
 			});
-			this.idle.PlayAnim("inactive", KAnim.PlayMode.Loop, null).ToggleMainStatusItem(Db.Get().MiscStatusItems.SpoutPressureBuilding).ScheduleGoTo((Geyser.StatesInstance smi) => smi.master.idleDuration, this.pre_erupt);
-			this.pre_erupt.InitializeStates(this, this.preType).PlayAnim("shake", KAnim.PlayMode.Loop, null).ScheduleGoTo((Geyser.StatesInstance smi) => smi.master.preEmissionElement.duration, this.erupt);
-			this.erupt.InitializeStates(this, this.emitType).PlayAnim("erupt", KAnim.PlayMode.Loop, null).ScheduleGoTo((Geyser.StatesInstance smi) => smi.master.emissionElement.duration, this.post_erupt);
-			this.post_erupt.InitializeStates(this, this.postType).PlayAnim("shake", KAnim.PlayMode.Loop, null).ScheduleGoTo((Geyser.StatesInstance smi) => smi.master.postEmissionElement.duration, this.idle);
+			this.idle.PlayAnim("inactive", KAnim.PlayMode.Loop, null).ScheduleGoTo((Geyser.StatesInstance smi) => smi.master.idleDuration, this.pre_erupt);
+			this.pre_erupt.PlayAnim("shake", KAnim.PlayMode.Loop, null).ToggleMainStatusItem(Db.Get().MiscStatusItems.SpoutPressureBuilding).ScheduleGoTo((Geyser.StatesInstance smi) => smi.master.current_emissionType.duration_pre, this.erupt)
+				.Enter("SetEmissionElement", delegate(Geyser.StatesInstance smi)
+				{
+					smi.SetEmissionElement(smi.master.current_emissionType);
+				});
+			this.erupt.DefaultState(this.erupt.erupting).ScheduleGoTo((Geyser.StatesInstance smi) => smi.master.current_emissionType.duration_erupt, this.post_erupt).Enter(delegate(Geyser.StatesInstance smi)
+			{
+				smi.master.emitter.SetEmitting(true);
+			})
+				.Exit(delegate(Geyser.StatesInstance smi)
+				{
+					smi.master.cycleType();
+					smi.master.emitter.SetEmitting(false);
+				});
+			this.erupt.erupting.EventTransition(GameHashes.EmitterBlocked, this.erupt.overpressure, (Geyser.StatesInstance smi) => smi.GetComponent<ElementEmitter>().isEmitterBlocked).Enter(delegate(Geyser.StatesInstance smi)
+			{
+				smi.master.GetComponent<KBatchedAnimController>().Play(smi.master.current_emissionType.animation, KAnim.PlayMode.Loop, 1f, 0f);
+			}).EventTransition(GameHashes.EmitterBlocked, this.erupt.overpressure, null);
+			this.erupt.overpressure.EventTransition(GameHashes.EmitterUnblocked, this.erupt.erupting, (Geyser.StatesInstance smi) => !smi.GetComponent<ElementEmitter>().isEmitterBlocked).ToggleMainStatusItem(Db.Get().MiscStatusItems.SpoutOverPressure).PlayAnim("inactive", KAnim.PlayMode.Loop, null);
+			this.post_erupt.PlayAnim("shake", KAnim.PlayMode.Loop, null).ScheduleGoTo((Geyser.StatesInstance smi) => smi.master.current_emissionType.duration_pst, this.idle);
 		}
 
-		public StateMachine<Geyser.States, Geyser.StatesInstance, Geyser, object>.ObjectParameter<Geyser.EmissionType> preType;
+		public StateMachine<Geyser.States, Geyser.StatesInstance, Geyser, object>.ObjectParameter<Geyser.EmissionType> emitType_a;
 
-		public StateMachine<Geyser.States, Geyser.StatesInstance, Geyser, object>.ObjectParameter<Geyser.EmissionType> emitType;
+		public StateMachine<Geyser.States, Geyser.StatesInstance, Geyser, object>.ObjectParameter<Geyser.EmissionType> emitType_b;
 
-		public StateMachine<Geyser.States, Geyser.StatesInstance, Geyser, object>.ObjectParameter<Geyser.EmissionType> postType;
+		public StateMachine<Geyser.States, Geyser.StatesInstance, Geyser, object>.ObjectParameter<Geyser.EmissionType> current_emissionType;
 
 		public GameStateMachine<Geyser.States, Geyser.StatesInstance, Geyser, object>.State idle;
 
-		public Geyser.States.EmitStates pre_erupt;
+		public GameStateMachine<Geyser.States, Geyser.StatesInstance, Geyser, object>.State pre_erupt;
 
-		public Geyser.States.EmitStates erupt;
+		public Geyser.States.EruptState erupt;
 
-		public Geyser.States.EmitStates post_erupt;
+		public GameStateMachine<Geyser.States, Geyser.StatesInstance, Geyser, object>.State post_erupt;
 
-		public class EmitStates : GameStateMachine<Geyser.States, Geyser.StatesInstance, Geyser, object>.State
+		public class EruptState : GameStateMachine<Geyser.States, Geyser.StatesInstance, Geyser, object>.State
 		{
-			public GameStateMachine<Geyser.States, Geyser.StatesInstance, Geyser, object>.State InitializeStates(Geyser.States parent, StateMachine<Geyser.States, Geyser.StatesInstance, Geyser, object>.ObjectParameter<Geyser.EmissionType> type)
-			{
-				base.root.DefaultState(this.over_pressure).Enter(delegate(Geyser.StatesInstance smi)
-				{
-					smi.SetEmissionElement(type.Get(smi));
-					smi.master.emitter.SetEmitting(true);
-				}).Exit(delegate(Geyser.StatesInstance smi)
-				{
-					smi.master.emitter.SetEmitting(false);
-				});
-				this.emitting.ToggleMainStatusItem(Db.Get().MiscStatusItems.SpoutEmitting).EventTransition(GameHashes.EmitterBlocked, this.over_pressure, null);
-				this.over_pressure.ToggleMainStatusItem(Db.Get().MiscStatusItems.SpoutOverPressure).EventTransition(GameHashes.EmitterUnblocked, this.emitting, null);
-				return this;
-			}
+			public GameStateMachine<Geyser.States, Geyser.StatesInstance, Geyser, object>.State erupting;
 
-			public GameStateMachine<Geyser.States, Geyser.StatesInstance, Geyser, object>.State emitting;
-
-			public GameStateMachine<Geyser.States, Geyser.StatesInstance, Geyser, object>.State over_pressure;
+			public GameStateMachine<Geyser.States, Geyser.StatesInstance, Geyser, object>.State overpressure;
 		}
 	}
 
 	[Serializable]
 	public class EmissionType
 	{
-		public EmissionType(float duration, ElementConverter.OutputElement emissionElement)
+		public EmissionType(float duration_pre, float duration_erupt, float duration_pst, ElementConverter.OutputElement emission_element, string override_animation = "")
 		{
-			this.duration = duration;
-			this.emissionElement = emissionElement;
+			this.duration_pre = duration_pre;
+			this.duration_erupt = duration_erupt;
+			this.duration_pst = duration_pst;
+			this.emissionElement = emission_element;
+			if (override_animation != string.Empty)
+			{
+				this.animation = override_animation;
+			}
 		}
 
-		public float duration;
+		public float duration_pre;
+
+		public float duration_erupt;
+
+		public float duration_pst;
 
 		public ElementConverter.OutputElement emissionElement;
+
+		public string animation = "erupt";
 	}
 }

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Reflection;
 
 namespace YamlDotNet.Serialization.Utilities
 {
@@ -25,31 +23,12 @@ namespace YamlDotNet.Serialization.Utilities
 			{
 				yield return type;
 			}
-			foreach (Type implementedInterface in type.GetInterfaces())
+			foreach (Type type2 in type.GetInterfaces())
 			{
-				yield return implementedInterface;
+				yield return type2;
 			}
+			Type[] array = null;
 			yield break;
-		}
-
-		public static MethodInfo GetMethod(Expression<Action> methodAccess)
-		{
-			MethodInfo methodInfo = ((MethodCallExpression)methodAccess.Body).Method;
-			if (methodInfo.IsGenericMethod)
-			{
-				methodInfo = methodInfo.GetGenericMethodDefinition();
-			}
-			return methodInfo;
-		}
-
-		public static MethodInfo GetMethod<T>(Expression<Action<T>> methodAccess)
-		{
-			MethodInfo methodInfo = ((MethodCallExpression)methodAccess.Body).Method;
-			if (methodInfo.IsGenericMethod)
-			{
-				methodInfo = methodInfo.GetGenericMethodDefinition();
-			}
-			return methodInfo;
 		}
 	}
 }

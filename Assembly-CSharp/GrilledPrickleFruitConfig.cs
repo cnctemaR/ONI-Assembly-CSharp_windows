@@ -12,11 +12,6 @@ public class GrilledPrickleFruitConfig : IEntityConfig
 		string text = ITEMS.FOOD.GRILLEDPRICKLEFRUIT.RECIPEDESC;
 		Recipe recipe = new Recipe("GrilledPrickleFruit", 1f, (SimHashes)0, null, text, 20).SetFabricator("CookingStation", FOOD.RECIPES.STANDARD_COOK_TIME);
 		recipe.AddIngredient(new Recipe.Ingredient(PrickleFruitConfig.ID, 1f));
-		Edible component = gameObject.GetComponent<Edible>();
-		if (component != null)
-		{
-			component.consumptionEffects.Add(new Descriptor(UI.GAMEOBJECTEFFECTS.FRIEDMUSHBARREMOVESDISEASE, UI.GAMEOBJECTEFFECTS.TOOLTIPS.FRIEDMUSHBARREMOVESDISEASE, Descriptor.DescriptorType.Effect, false));
-		}
 		return gameObject;
 	}
 

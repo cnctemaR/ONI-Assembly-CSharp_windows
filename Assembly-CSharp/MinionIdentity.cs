@@ -1,11 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei.AI;
 using KSerialization;
+using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 public class MinionIdentity : KMonoBehaviour, ISaveLoadable
 {
+	[Serialize]
+	public string originalName { get; set; }
+
 	protected override void OnPrefabInit()
 	{
 		if (this.name == null)
@@ -24,13 +29,17 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable
 	protected override void OnSpawn()
 	{
 		this.SetName(this.name);
+		if (this.originalName == null)
+		{
+			this.originalName = this.name;
+		}
 		if (this.addToIdentityList)
 		{
 			Components.MinionIdentities.Add(this);
-		}
-		if (base.GetComponent<Health>() != null && !base.GetComponent<Health>().IsDead())
-		{
-			Components.LiveMinionIdentities.Add(this);
+			if (!base.gameObject.HasTag(GameTags.Dead))
+			{
+				Components.LiveMinionIdentities.Add(this);
+			}
 		}
 		this.raceId = "Human";
 		this.bodyType = BodyType.Human;
@@ -47,6 +56,24 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable
 		if (component3 != null)
 		{
 			component3.showIcon = false;
+		}
+		CustomGameSettings.SettingLevel currentQualitySetting = Game.Instance.customSettings.GetCurrentQualitySetting("ImmuneSystem");
+		if (currentQualitySetting.id == "Weak")
+		{
+			Db.Get().Amounts.ImmuneLevel.deltaAttribute.Lookup(this).Add(UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.IMMUNESYSTEM.LEVELS.WEAK.ATTRIBUTE_MODIFIER_NAME, new AttributeModifier(Db.Get().Amounts.ImmuneLevel.deltaAttribute.Id, -0.008333334f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.IMMUNESYSTEM.LEVELS.WEAK.ATTRIBUTE_MODIFIER_NAME, false, false));
+		}
+		else if (currentQualitySetting.id == "Strong")
+		{
+			Db.Get().Amounts.ImmuneLevel.deltaAttribute.Lookup(this).Add(UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.IMMUNESYSTEM.LEVELS.STRONG.ATTRIBUTE_MODIFIER_NAME, new AttributeModifier(Db.Get().Amounts.ImmuneLevel.deltaAttribute.Id, 0.008333334f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.IMMUNESYSTEM.LEVELS.STRONG.ATTRIBUTE_MODIFIER_NAME, false, false));
+		}
+		CustomGameSettings.SettingLevel currentQualitySetting2 = Game.Instance.customSettings.GetCurrentQualitySetting("Stress");
+		if (currentQualitySetting2.id == "Pessimistic")
+		{
+			Db.Get().Amounts.Stress.deltaAttribute.Lookup(this).Add(UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.STRESS.LEVELS.PESSIMISTIC.ATTRIBUTE_MODIFIER_NAME, new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0.016666668f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.STRESS.LEVELS.PESSIMISTIC.ATTRIBUTE_MODIFIER_NAME, false, false));
+		}
+		else if (currentQualitySetting2.id == "Optimistic")
+		{
+			Db.Get().Amounts.Stress.deltaAttribute.Lookup(this).Add(UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.STRESS.LEVELS.OPTIMISTIC.ATTRIBUTE_MODIFIER_NAME, new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, -0.016666668f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.STRESS.LEVELS.OPTIMISTIC.ATTRIBUTE_MODIFIER_NAME, false, false));
 		}
 	}
 
@@ -131,7 +158,6 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable
 
 	private KAnimHashedString expression;
 
-	[HideInInspector]
 	public bool addToIdentityList = true;
 
 	private static MinionIdentity.NameList maleNameList;

@@ -3,16 +3,22 @@ using UnityEngine;
 
 public class AccessControlNavMask : NavMask
 {
-	public AccessControlNavMask(GameObject agent)
+	public AccessControlNavMask(GameObject agent, int max_path_cost)
 	{
 		this.agent = agent;
+		this.maxPathCost = max_path_cost;
 	}
 
-	public override bool IsTraversable(int cell, int from_cell, PathFinderAbilities abilities)
+	public void SetMaxPathCost(int max_path_cost)
 	{
-		if (abilities.ignoreAccessControl)
+		this.maxPathCost = max_path_cost;
+	}
+
+	public override bool IsTraversable(int cell, int from_cell, int cost, PathFinderAbilities abilities)
+	{
+		if (cost > this.maxPathCost)
 		{
-			return true;
+			return false;
 		}
 		if (!Grid.HasAccessDoor[cell])
 		{
@@ -38,4 +44,6 @@ public class AccessControlNavMask : NavMask
 	}
 
 	private GameObject agent;
+
+	private int maxPathCost = int.MaxValue;
 }

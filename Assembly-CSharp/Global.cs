@@ -15,6 +15,8 @@ public class Global : MonoBehaviour
 		this.mAnimEventManager = new AnimEventManager();
 		KBatchedAnimUpdater.CreateInstance();
 		SystemScheduler.Initialize();
+		DistributionPlatform.Initialize();
+		Localization.Initialize();
 		if (DistributionPlatform.Initialized)
 		{
 			global::Debug.Log(string.Concat(new object[]
@@ -52,6 +54,10 @@ public class Global : MonoBehaviour
 
 	public AnimEventManager GetAnimEventManager()
 	{
+		if (App.IsExiting)
+		{
+			return null;
+		}
 		return this.mAnimEventManager;
 	}
 
@@ -70,10 +76,14 @@ public class Global : MonoBehaviour
 		int num = KProfiler.BeginSampleI("Global.Update");
 		this.mInputManager.Update();
 		SystemScheduler.instance.Update();
-		this.mAnimEventManager.Update();
+		if (this.mAnimEventManager != null)
+		{
+			this.mAnimEventManager.Update();
+		}
 		if (this.gotKleiUserID)
 		{
 			this.gotKleiUserID = false;
+			SteamUGCService.Init();
 			ThreadedHttps<KleiMetrics>.Instance.SetCallBacks(new global::System.Action(this.SetONIStaticSessionVariables), new Action<Dictionary<string, object>>(this.SetONIDynamicSessionVariables));
 			ThreadedHttps<KleiMetrics>.Instance.StartSession();
 		}
@@ -84,14 +94,14 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 221865U);
-		if (PlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 229531U);
+		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{
-			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(UnitConfigurationScreen.MassUnitKey, ((GameUtil.MassUnit)PlayerPrefs.GetInt(UnitConfigurationScreen.MassUnitKey)).ToString());
+			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(UnitConfigurationScreen.MassUnitKey, ((GameUtil.MassUnit)KPlayerPrefs.GetInt(UnitConfigurationScreen.MassUnitKey)).ToString());
 		}
-		if (PlayerPrefs.HasKey(UnitConfigurationScreen.TemperatureUnitKey))
+		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.TemperatureUnitKey))
 		{
-			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(UnitConfigurationScreen.TemperatureUnitKey, ((GameUtil.TemperatureUnit)PlayerPrefs.GetInt(UnitConfigurationScreen.TemperatureUnitKey)).ToString());
+			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(UnitConfigurationScreen.TemperatureUnitKey, ((GameUtil.TemperatureUnit)KPlayerPrefs.GetInt(UnitConfigurationScreen.TemperatureUnitKey)).ToString());
 		}
 		if (SteamManager.Initialized)
 		{
@@ -101,7 +111,7 @@ public class Global : MonoBehaviour
 			{
 				ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(Global.LanguagePackKey, publishedFileId_t.m_PublishedFileId);
 			}
-			if (installedLanguageCode != null && installedLanguageCode != string.Empty)
+			if (!string.IsNullOrEmpty(installedLanguageCode))
 			{
 				ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(Global.LanguageCodeKey, installedLanguageCode);
 			}
@@ -118,15 +128,17 @@ public class Global : MonoBehaviour
 
 	private void LateUpdate()
 	{
-		if (Time.frameCount % 30 == 0)
-		{
-		}
 		KBatchedAnimUpdater.instance.LateUpdate();
 	}
 
 	private void OnDestroy()
 	{
 		Global.Instance = null;
+		if (this.mAnimEventManager != null)
+		{
+			this.mAnimEventManager.FreeResources();
+		}
+		KBatchedAnimUpdater.Destroy();
 	}
 
 	private void OnApplicationQuit()

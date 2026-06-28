@@ -43,49 +43,22 @@ public class DebugTool : DragTool
 				SimMessages.ModifyEnergy(cell, -10000f, SimMessages.EnergySourceID.DebugCool);
 				break;
 			case DebugTool.Type.ReplaceSubstance:
+				this.DoReplaceSubstance(cell);
+				break;
+			case DebugTool.Type.FillReplaceSubstance:
 			{
-				Element element = ((!DebugPaintElementScreen.Instance.paintElement.isOn) ? ElementLoader.elements[(int)Grid.Cell[cell].elementIdx] : ElementLoader.FindElementByHash(DebugPaintElementScreen.Instance.element));
-				if (element == null)
+				HashSet<int> hashSet = GameUtil.FloodCollectCells(cell, (int check_cell) => Grid.Element[check_cell].id == Grid.Element[cell].id, 1000, null);
+				foreach (int num in hashSet)
 				{
-					element = ElementLoader.FindElementByHash(SimHashes.Vacuum);
-				}
-				float num = ((!DebugPaintElementScreen.Instance.paintTemperature.isOn) ? Grid.Cell[cell].temperature : DebugPaintElementScreen.Instance.temperature);
-				float num2 = ((!DebugPaintElementScreen.Instance.paintMass.isOn) ? Grid.Cell[cell].mass : DebugPaintElementScreen.Instance.mass);
-				if (num == -1f)
-				{
-					num = element.defaultValues.temperature;
-				}
-				if (num2 == -1f)
-				{
-					num2 = element.defaultValues.mass;
-				}
-				SimMessages.ReplaceElement(cell, element.id, CellEventLogger.Instance.DebugTool, num2, num, -1);
-				if (DebugPaintElementScreen.Instance.AffectBuildings.isOn && num > 0f)
-				{
-					foreach (GameObject gameObject in new List<GameObject>
-					{
-						Grid.Objects[cell, 1],
-						Grid.Objects[cell, 2],
-						Grid.Objects[cell, 9],
-						Grid.Objects[cell, 15],
-						Grid.Objects[cell, 11],
-						Grid.Objects[cell, 15],
-						Grid.Objects[cell, 19]
-					})
-					{
-						if (gameObject != null)
-						{
-							gameObject.GetComponent<PrimaryElement>().Temperature = num;
-						}
-					}
+					this.DoReplaceSubstance(num);
 				}
 				break;
 			}
 			case DebugTool.Type.AddPressure:
-				SimMessages.ModifyMass(cell, 10000f, CellEventLogger.Instance.DebugToolModifyMass, 293f, SimHashes.Oxygen);
+				SimMessages.ModifyMass(cell, 10000f, byte.MaxValue, 0, CellEventLogger.Instance.DebugToolModifyMass, 293f, SimHashes.Oxygen);
 				break;
 			case DebugTool.Type.RemovePressure:
-				SimMessages.ModifyMass(cell, -10000f, CellEventLogger.Instance.DebugToolModifyMass, 0f, SimHashes.Oxygen);
+				SimMessages.ModifyMass(cell, -10000f, byte.MaxValue, 0, CellEventLogger.Instance.DebugToolModifyMass, 0f, SimHashes.Oxygen);
 				break;
 			case DebugTool.Type.Clear:
 				this.ClearCell(cell);
@@ -102,6 +75,68 @@ public class DebugTool : DragTool
 			case DebugTool.Type.Destroy:
 				this.DestroyCell(cell);
 				break;
+			}
+		}
+	}
+
+	public void DoReplaceSubstance(int cell)
+	{
+		Element element = ((!DebugPaintElementScreen.Instance.paintElement.isOn) ? ElementLoader.elements[(int)Grid.Cell[cell].elementIdx] : ElementLoader.FindElementByHash(DebugPaintElementScreen.Instance.element));
+		if (element == null)
+		{
+			element = ElementLoader.FindElementByHash(SimHashes.Vacuum);
+		}
+		byte b = ((!DebugPaintElementScreen.Instance.paintDisease.isOn) ? Grid.Disease[cell].diseaseIdx : DebugPaintElementScreen.Instance.diseaseIdx);
+		float num = ((!DebugPaintElementScreen.Instance.paintTemperature.isOn) ? Grid.Cell[cell].temperature : DebugPaintElementScreen.Instance.temperature);
+		float num2 = ((!DebugPaintElementScreen.Instance.paintMass.isOn) ? Grid.Cell[cell].mass : DebugPaintElementScreen.Instance.mass);
+		int num3 = ((!DebugPaintElementScreen.Instance.paintDiseaseCount.isOn) ? Grid.Disease[cell].elementCount : DebugPaintElementScreen.Instance.diseaseCount);
+		if (num == -1f)
+		{
+			num = element.defaultValues.temperature;
+		}
+		if (num2 == -1f)
+		{
+			num2 = element.defaultValues.mass;
+		}
+		if (DebugPaintElementScreen.Instance.affectCells.isOn)
+		{
+			SimMessages.ReplaceElement(cell, element.id, CellEventLogger.Instance.DebugTool, num2, num, b, num3, -1);
+			if (DebugPaintElementScreen.Instance.set_prevent_fow_reveal)
+			{
+				Grid.Visible[cell] = 0;
+				Grid.PreventFogOfWarReveal[cell] = true;
+			}
+			else if (DebugPaintElementScreen.Instance.set_allow_fow_reveal && Grid.PreventFogOfWarReveal[cell])
+			{
+				Grid.PreventFogOfWarReveal[cell] = false;
+			}
+		}
+		if (DebugPaintElementScreen.Instance.affectBuildings.isOn)
+		{
+			foreach (GameObject gameObject in new List<GameObject>
+			{
+				Grid.Objects[cell, 1],
+				Grid.Objects[cell, 2],
+				Grid.Objects[cell, 9],
+				Grid.Objects[cell, 15],
+				Grid.Objects[cell, 11],
+				Grid.Objects[cell, 15],
+				Grid.Objects[cell, 19]
+			})
+			{
+				if (gameObject != null)
+				{
+					PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+					if (num > 0f)
+					{
+						component.Temperature = num;
+					}
+					if (num3 > 0 && b != 255)
+					{
+						component.ModifyDiseaseCount(int.MinValue, "DebugTool.DoReplaceSubstance");
+						component.AddDisease(b, num3, "DebugTool.DoReplaceSubstance");
+					}
+				}
 			}
 		}
 	}
@@ -137,11 +172,11 @@ public class DebugTool : DragTool
 		this.ClearCell(cell);
 		if (ElementLoader.elements[(int)Grid.Cell[cell].elementIdx].id == SimHashes.Void)
 		{
-			SimMessages.ReplaceElement(cell, SimHashes.Void, CellEventLogger.Instance.DebugTool, 0f, 0f, -1);
+			SimMessages.ReplaceElement(cell, SimHashes.Void, CellEventLogger.Instance.DebugTool, 0f, 0f, byte.MaxValue, 0, -1);
 		}
 		else
 		{
-			SimMessages.ReplaceElement(cell, SimHashes.Vacuum, CellEventLogger.Instance.DebugTool, 0f, 0f, -1);
+			SimMessages.ReplaceElement(cell, SimHashes.Vacuum, CellEventLogger.Instance.DebugTool, 0f, 0f, byte.MaxValue, 0, -1);
 		}
 	}
 
@@ -168,6 +203,7 @@ public class DebugTool : DragTool
 		Heat,
 		Cool,
 		ReplaceSubstance,
+		FillReplaceSubstance,
 		AddPressure,
 		RemovePressure,
 		PaintPlant,

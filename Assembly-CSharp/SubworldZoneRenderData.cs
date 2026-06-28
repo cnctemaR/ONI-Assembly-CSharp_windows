@@ -1,6 +1,7 @@
 ﻿using System;
 using Delaunay.Geo;
 using Klei;
+using ProcGen;
 using UnityEngine;
 
 public class SubworldZoneRenderData : KMonoBehaviour

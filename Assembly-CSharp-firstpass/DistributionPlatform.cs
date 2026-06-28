@@ -19,14 +19,22 @@ public class DistributionPlatform : MonoBehaviour
 		}
 	}
 
+	public static void Initialize()
+	{
+		if (DistributionPlatform.sImpl == null)
+		{
+			DistributionPlatform.sImpl = new GameObject("DistributionPlatform").AddComponent<SteamDistributionPlatform>();
+			if (!SteamManager.Initialized)
+			{
+				global::Debug.LogError("Steam not initialized in time.", null);
+			}
+		}
+	}
+
 	private static DistributionPlatform.Implementation Impl
 	{
 		get
 		{
-			if (DistributionPlatform.sImpl == null)
-			{
-				DistributionPlatform.sImpl = new GameObject("DistributionPlatform").AddComponent<SteamDistributionPlatform>();
-			}
 			return DistributionPlatform.sImpl;
 		}
 	}

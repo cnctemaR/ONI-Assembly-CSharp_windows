@@ -30,13 +30,28 @@ public class GeneratedOre
 		List<Element> elements = ElementLoader.elements;
 		foreach (Element element in elements)
 		{
-			if (element != null && element.IsSolid && !hashSet.Contains(element.id))
+			if (element != null && !hashSet.Contains(element.id))
 			{
 				if (element.substance != null && element.substance.anim != null)
 				{
-					GameObject prefab = element.substance.GetPrefab();
-					KPrefabID component2 = prefab.GetComponent<KPrefabID>();
-					Assets.AddPrefab(component2);
+					GameObject gameObject2 = null;
+					if (element.IsSolid)
+					{
+						gameObject2 = EntityTemplates.CreateSolidOreEntity(element.id, null);
+					}
+					else if (element.IsLiquid)
+					{
+						gameObject2 = EntityTemplates.CreateLiquidOreEntity(element.id, null);
+					}
+					else if (element.IsGas)
+					{
+						gameObject2 = EntityTemplates.CreateGasOreEntity(element.id, null);
+					}
+					if (gameObject2 != null)
+					{
+						KPrefabID component2 = gameObject2.GetComponent<KPrefabID>();
+						Assets.AddPrefab(component2);
+					}
 				}
 				else
 				{
@@ -54,5 +69,23 @@ public class GeneratedOre
 		{
 			kbatchedAnimController.SetAnims(new KAnimFile[] { anim }, true);
 		}
+	}
+
+	public static SubstanceChunk CreateChunk(Element element, float mass, float temperature, byte diseaseIdx, int diseaseCount, Vector3 position)
+	{
+		if (temperature <= 0f)
+		{
+			Output.LogWarning(new object[] { "GeneratedOre.CreateChunk tried to create a chunk with a temperature <= 0" });
+		}
+		SubstanceChunk component = GameUtil.KInstantiate(Assets.GetPrefab(element.tag), Grid.SceneLayer.Use, Folder.Ore, null, 0).GetComponent<SubstanceChunk>();
+		component.transform.SetPosition(position);
+		component.gameObject.SetActive(true);
+		PrimaryElement component2 = component.GetComponent<PrimaryElement>();
+		component2.Mass = mass;
+		component2.Temperature = temperature;
+		component2.AddDisease(diseaseIdx, diseaseCount, "GeneratedOre.CreateChunk");
+		KPrefabID component3 = component.GetComponent<KPrefabID>();
+		component3.InitializeTags();
+		return component;
 	}
 }

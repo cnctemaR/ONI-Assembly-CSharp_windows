@@ -370,7 +370,7 @@ public class BaseUtilityBuildTool : DragTool
 				utilityConnections = this.conduitMgr.GetConnections(pathNode.cell, false);
 				if (DebugHandler.InstantBuildMode && this.def.IsValidBuildLocation(vector, Orientation.Neutral) && this.def.IsValidPlaceLocation(vector, Orientation.Neutral))
 				{
-					gameObject = this.def.Build(pathNode.cell, Orientation.Neutral, null, this.selectedElements, false);
+					gameObject = this.def.Build(pathNode.cell, Orientation.Neutral, null, this.selectedElements, false, true);
 					PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 					component.Temperature = 293.15f;
 				}

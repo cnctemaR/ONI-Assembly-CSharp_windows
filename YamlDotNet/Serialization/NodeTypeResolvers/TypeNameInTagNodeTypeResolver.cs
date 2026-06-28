@@ -9,8 +9,8 @@ namespace YamlDotNet.Serialization.NodeTypeResolvers
 		{
 			if (!string.IsNullOrEmpty(nodeEvent.Tag))
 			{
-				currentType = Type.GetType(nodeEvent.Tag.Substring(1), true);
-				return true;
+				currentType = Type.GetType(nodeEvent.Tag.Substring(1), false);
+				return currentType != null;
 			}
 			return false;
 		}

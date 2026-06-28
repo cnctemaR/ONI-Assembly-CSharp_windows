@@ -1,6 +1,7 @@
 ﻿using System;
 using STRINGS;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class WorldGenOptionsScreen : KModalScreen
 {
@@ -8,33 +9,57 @@ public class WorldGenOptionsScreen : KModalScreen
 	{
 		base.OnSpawn();
 		this.title.SetText(UI.FRONTEND.WORLD_GEN_OPTIONS_SCREEN.TITLE);
-		GameObject gameObject = this.enableButton.transform.GetChild(0).gameObject;
-		gameObject.GetComponent<ToolTip>().SetSimpleTooltip(UI.FRONTEND.WORLD_GEN_OPTIONS_SCREEN.TOOLTIP);
-		gameObject.transform.GetChild(0).gameObject.SetActive(ThreadedHttps<KleiMetrics>.Instance.enabled);
-		gameObject.GetComponent<KButton>().onClick += delegate
-		{
-			this.Apply();
-		};
-		LocText component = this.enableButton.transform.GetChild(1).GetComponent<LocText>();
-		component.SetText(UI.FRONTEND.WORLD_GEN_OPTIONS_SCREEN.ENABLE_BUTTON);
 		this.dismissButton.onClick += delegate
 		{
 			this.Deactivate();
 		};
-		LocText component2 = this.dismissButton.transform.GetChild(0).GetComponent<LocText>();
-		component2.SetText(UI.FRONTEND.WORLD_GEN_OPTIONS_SCREEN.DONE_BUTTON);
+		LocText component = this.dismissButton.transform.GetChild(0).GetComponent<LocText>();
+		component.SetText(UI.FRONTEND.WORLD_GEN_OPTIONS_SCREEN.DONE_BUTTON);
 		this.closeButton.onClick += delegate
 		{
 			this.Deactivate();
 		};
+		this.useSeedLable.SetText(UI.FRONTEND.WORLD_GEN_OPTIONS_SCREEN.USE_SEED);
+		this.useSeedInput.onValueChanged.AddListener(delegate
+		{
+			this.OnSeedChange();
+		});
+		this.useSeedToggle.onValueChanged.AddListener(delegate(bool b)
+		{
+			KPlayerPrefs.SetInt(OfflineWorldGen.USE_WORLD_SEED_KEY, (!b) ? 0 : 1);
+		});
+		this.useSeedToggle.isOn = KPlayerPrefs.GetInt(OfflineWorldGen.USE_WORLD_SEED_KEY, 0) == 1;
+		int @int = KPlayerPrefs.GetInt(OfflineWorldGen.WORLD_SEED_KEY, -1);
+		this.useSeedInput.text = ((@int != -1) ? @int.ToString() : string.Empty);
+		this.randomiseButton.onClick += delegate
+		{
+			this.GetNewRandom();
+		};
+		LocText component2 = this.randomiseButton.transform.GetChild(0).GetComponent<LocText>();
+		component2.SetText(UI.FRONTEND.WORLD_GEN_OPTIONS_SCREEN.RANDOM_BUTTON);
+		GameObject gameObject = this.randomiseButton.transform.GetChild(0).gameObject;
+		gameObject.GetComponent<ToolTip>().SetSimpleTooltip(UI.FRONTEND.WORLD_GEN_OPTIONS_SCREEN.RANDOM_BUTTON_TOOLTIP);
 	}
 
-	private void Apply()
+	public void OnSeedChange()
 	{
+		int num;
+		try
+		{
+			num = Convert.ToInt32(this.useSeedInput.text);
+		}
+		catch
+		{
+			num = 0;
+		}
+		OfflineWorldGen.SetSeed(num);
 	}
 
 	private void GetNewRandom()
 	{
+		int num = global::UnityEngine.Random.Range(0, int.MaxValue);
+		this.useSeedInput.text = num.ToString();
+		OfflineWorldGen.SetSeed(num);
 	}
 
 	public LocText title;
@@ -43,5 +68,11 @@ public class WorldGenOptionsScreen : KModalScreen
 
 	public KButton closeButton;
 
-	public GameObject enableButton;
+	public LocText useSeedLable;
+
+	public KButton randomiseButton;
+
+	public InputField useSeedInput;
+
+	public Toggle useSeedToggle;
 }

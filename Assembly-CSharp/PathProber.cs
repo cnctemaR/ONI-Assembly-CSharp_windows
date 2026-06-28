@@ -18,6 +18,10 @@ public class PathProber : KMonoBehaviour
 
 	public int GetCost(int cell)
 	{
+		if (this.PathGrid == null)
+		{
+			return PathProber.InvalidCost;
+		}
 		return this.PathGrid.GetCost(cell, this.QueryId);
 	}
 

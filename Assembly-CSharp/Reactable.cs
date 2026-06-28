@@ -1,63 +1,106 @@
 ﻿using System;
 using UnityEngine;
 
-public class Reactable
+public abstract class Reactable
 {
-	public Reactable(GameObject gameObject, int range_width = 15, int range_height = 8)
+	public Reactable(GameObject gameObject, ChoreType chore_type, int range_width = 15, int range_height = 8, bool follow_transform = false)
 	{
-		this.range_height = range_height;
-		this.range_width = range_width;
+		this.rangeHeight = range_height;
+		this.rangeWidth = range_width;
 		this.gameObject = gameObject;
+		this.choreType = chore_type;
 		this.UpdateLocation(null);
-		this.update_locataion_scheduler_handle = GameScheduler.Instance.SchedulePeriodic("UpdateReactableLocation", 1f, new Action<object>(this.UpdateLocation), null, null, 0f, null);
-	}
-
-	public GameObject sourceGameObject
-	{
-		get
+		if (follow_transform)
 		{
-			return this.gameObject;
+			this.updateLocationSchedulerHandle = GameScheduler.Instance.SchedulePeriodic("UpdateReactableLocation", 1f, new Action<object>(this.UpdateLocation), null, null, 0f, null);
 		}
 	}
 
-	public void OnCleanUp()
+	public void Begin(GameObject reactor)
 	{
-		this.update_locataion_scheduler_handle.Clear();
-		if (this.partitioner_entry != null)
+		this.reactor = reactor;
+		this.InternalBegin();
+	}
+
+	public void End()
+	{
+		if (this.reactor != null)
 		{
-			this.partitioner_entry.Release();
-			this.partitioner_entry = null;
+			GameObject gameObject = this.reactor;
+			this.InternalEnd();
+			this.reactor = null;
+			if (gameObject != null)
+			{
+				ReactionMonitor.Instance smi = gameObject.GetSMI<ReactionMonitor.Instance>();
+				if (smi != null)
+				{
+					smi.StopReaction();
+				}
+			}
+		}
+	}
+
+	public bool CanBegin(GameObject reactor)
+	{
+		ChoreConsumer component = reactor.GetComponent<ChoreConsumer>();
+		if (component == null)
+		{
+			return false;
+		}
+		Chore currentChore = component.choreDriver.GetCurrentChore();
+		return currentChore != null && this.choreType.priority > currentChore.choreType.priority && this.InternalCanBegin(reactor);
+	}
+
+	public abstract bool InternalCanBegin(GameObject reactor);
+
+	public abstract void Update(float dt);
+
+	protected abstract void InternalBegin();
+
+	protected abstract void InternalEnd();
+
+	protected abstract void InternalCleanup();
+
+	public void Cleanup()
+	{
+		this.End();
+		this.InternalCleanup();
+		this.updateLocationSchedulerHandle.ClearScheduler();
+		if (this.partitionerEntry != null)
+		{
+			this.partitionerEntry.Release();
+			this.partitionerEntry = null;
 		}
 	}
 
 	public void UpdateLocation(object data = null)
 	{
-		if (this.partitioner_entry != null)
+		if (this.partitionerEntry != null)
 		{
-			this.partitioner_entry.Release();
-			this.partitioner_entry = null;
+			this.partitionerEntry.Release();
+			this.partitionerEntry = null;
 		}
 		if (this.gameObject != null)
 		{
-			this.CellPosition = Grid.PosToCell(this.gameObject);
-			Extents extents = new Extents(Grid.PosToXY(this.gameObject.transform.position).x - this.range_width / 2, Grid.PosToXY(this.gameObject.transform.position).y - this.range_height / 2, this.range_width, this.range_height);
-			this.partitioner_entry = GameScenePartitioner.Instance.Add("Reactable", this, extents, GameScenePartitioner.Instance.objectLayerMasks[0].mask, null);
+			this.sourceCell = Grid.PosToCell(this.gameObject);
+			Extents extents = new Extents(Grid.PosToXY(this.gameObject.transform.position).x - this.rangeWidth / 2, Grid.PosToXY(this.gameObject.transform.position).y - this.rangeHeight / 2, this.rangeWidth, this.rangeHeight);
+			this.partitionerEntry = GameScenePartitioner.Instance.Add("Reactable", this, extents, GameScenePartitioner.Instance.objectLayers[0], null);
 		}
 	}
 
-	public Expression expression = Db.Get().Expressions.Uncomfortable;
-
-	public Thought thought = Db.Get().Thoughts.Unhappy;
-
-	private GameScenePartitionerEntry partitioner_entry;
+	private GameScenePartitionerEntry partitionerEntry;
 
 	private GameObject gameObject;
 
-	public int CellPosition;
+	public int sourceCell;
 
-	private int range_width;
+	private int rangeWidth;
 
-	private int range_height;
+	private int rangeHeight;
 
-	private SchedulerHandle update_locataion_scheduler_handle;
+	private SchedulerHandle updateLocationSchedulerHandle;
+
+	protected GameObject reactor;
+
+	private ChoreType choreType;
 }

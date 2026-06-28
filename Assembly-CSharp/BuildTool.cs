@@ -17,6 +17,7 @@ public class BuildTool : DragTool
 		this.active = true;
 		base.OnActivateTool();
 		this.buildingOrientation = Orientation.Neutral;
+		this.placementPivot = this.def.placementPivot;
 		int num = LayerMask.NameToLayer("Place");
 		this.visualizer = GameUtil.KInstantiate(this.def.BuildingPreview, Grid.SceneLayer.Use, Folder.Placers, null, num);
 		KBatchedAnimController component = this.visualizer.GetComponent<KBatchedAnimController>();
@@ -25,6 +26,7 @@ public class BuildTool : DragTool
 			component.visibilityType = KAnimControllerBase.VisibilityType.Always;
 			component.isMovable = true;
 			component.Offset = this.def.GetVisualizerOffset();
+			component.Offset += this.def.placementPivot;
 			component.name = component.GetComponent<KPrefabID>().GetDebugName() + "_visualizer";
 		}
 		this.visualizer.SetActive(true);
@@ -127,6 +129,7 @@ public class BuildTool : DragTool
 
 	public override void OnMouseMove(Vector3 cursorPos)
 	{
+		cursorPos -= this.placementPivot;
 		base.OnMouseMove(cursorPos);
 		if (this.def != null)
 		{
@@ -224,7 +227,7 @@ public class BuildTool : DragTool
 		{
 			if (this.def.IsValidBuildLocation(vector, this.buildingOrientation) && this.def.IsValidPlaceLocation(vector, this.buildingOrientation))
 			{
-				gameObject = this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, false);
+				gameObject = this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, false, true);
 				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 				component.Temperature = 293.15f;
 			}
@@ -242,7 +245,7 @@ public class BuildTool : DragTool
 				if (gameObject2 != null && Grid.Objects[cell, (int)this.def.ReplacementLayer] == null)
 				{
 					BuildingComplete component2 = gameObject2.GetComponent<BuildingComplete>();
-					if (component2 != null && component2.Def.IsFoundation && component2.Def.isKAnimTile && (component2.Def != this.def || this.selectedElements[0] != gameObject2.GetComponent<PrimaryElement>().Element))
+					if (component2 != null && component2.Def.Replaceable && component2.Def.IsFoundation && component2.Def.isKAnimTile && (component2.Def != this.def || this.selectedElements[0] != gameObject2.GetComponent<PrimaryElement>().Element))
 					{
 						Constructable component3 = this.def.BuildingUnderConstruction.GetComponent<Constructable>();
 						component3.IsReplacementTile = true;

@@ -8,9 +8,7 @@ public class BasicForagePlantConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = EntityTemplates.CreateLooseEntity("BasicForagePlant", ITEMS.FOOD.BASICFORAGEPLANT.NAME, ITEMS.FOOD.BASICFORAGEPLANT.DESC, 1f, false, Assets.GetAnim("muckrootvegetable_kanim"), "object", Grid.SceneLayer.BuildingBack, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, true, SimHashes.Creature, null);
-		gameObject = EntityTemplates.ExtendEntityToFood(gameObject, FOOD.FOOD_TYPES.BASICFORAGEPLANT, false);
-		gameObject.UpdateComponentRequirement<PreserveOnEntomb>(true);
-		return gameObject;
+		return EntityTemplates.ExtendEntityToFood(gameObject, FOOD.FOOD_TYPES.BASICFORAGEPLANT, false);
 	}
 
 	public void OnPrefabInit(GameObject inst)

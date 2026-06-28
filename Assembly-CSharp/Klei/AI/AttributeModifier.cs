@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
+using UnityEngine;
 
 namespace Klei.AI
 {
+	[DebuggerDisplay("{AttributeId}")]
 	public class AttributeModifier
 	{
 		public AttributeModifier(string attribute_id, float value, string description = null, bool is_multiplier = false, bool uiOnly = false)
@@ -18,7 +21,7 @@ namespace Klei.AI
 			this.Value = value;
 		}
 
-		public string GetFormattedString()
+		public string GetFormattedString(GameObject parent_instance)
 		{
 			IAttributeFormatter attributeFormatter = null;
 			Attribute attribute = Db.Get().Attributes.TryGet(this.AttributeId);
@@ -34,11 +37,12 @@ namespace Klei.AI
 					attributeFormatter = attribute.formatter;
 				}
 			}
-			if (attributeFormatter != null)
+			string text = ((attributeFormatter == null) ? GameUtil.GetFormattedSimple(this.Value, GameUtil.TimeSlice.None, null) : attributeFormatter.GetFormattedModifier(this, parent_instance));
+			if (text != null)
 			{
-				return GameUtil.AddPositiveSign(attributeFormatter.GetFormattedModifier(this), this.Value > 0f);
+				GameUtil.AddPositiveSign(text, this.Value > 0f);
 			}
-			return GameUtil.AddPositiveSign(GameUtil.GetFormattedSimple(this.Value, GameUtil.TimeSlice.None, "F2"), this.Value > 0f);
+			return text;
 		}
 
 		public AttributeModifier Clone()

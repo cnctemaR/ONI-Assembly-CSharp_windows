@@ -13,6 +13,7 @@ public class KBatchedAnimEventToggler : KMonoBehaviour
 		{
 			entry.controller.transform.SetPosition(position);
 			entry.controller.SetLayer(num);
+			entry.controller.gameObject.SetActive(false);
 		}
 		int num2 = Hash.SDBMLower(this.enableEvent);
 		int num3 = Hash.SDBMLower(this.disableEvent);
@@ -37,8 +38,8 @@ public class KBatchedAnimEventToggler : KMonoBehaviour
 		{
 			if (entry.context == context)
 			{
-				entry.controller.Play(entry.anim, KAnim.PlayMode.Loop, 1f, 0f);
 				entry.controller.gameObject.SetActive(true);
+				entry.controller.Play(entry.anim, KAnim.PlayMode.Loop, 1f, 0f);
 			}
 		}
 	}
@@ -74,9 +75,9 @@ public class KBatchedAnimEventToggler : KMonoBehaviour
 	[Serializable]
 	public struct Entry
 	{
-		public HashedString context;
-
 		public string anim;
+
+		public HashedString context;
 
 		public KBatchedAnimController controller;
 	}

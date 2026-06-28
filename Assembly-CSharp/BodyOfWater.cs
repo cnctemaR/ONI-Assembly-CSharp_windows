@@ -38,7 +38,7 @@ public class BodyOfWater : KMonoBehaviour
 			}
 		}
 		this.extents = new Extents((int)num - 1, (int)num3 - 1, (int)(num2 - num) + 1, (int)(num4 - num3) + 1);
-		this.partitionerEntry = GameScenePartitioner.Instance.Add("BodyOfWater.Setup", base.gameObject, this.extents, GameScenePartitioner.Instance.liquidChangedMask.mask, new Action<object>(this.ReevaluateBody));
+		this.partitionerEntry = GameScenePartitioner.Instance.Add("BodyOfWater.Setup", base.gameObject, this.extents, GameScenePartitioner.Instance.liquidChangedLayer, new Action<object>(this.ReevaluateBody));
 	}
 
 	public void ToggleFishingTask()

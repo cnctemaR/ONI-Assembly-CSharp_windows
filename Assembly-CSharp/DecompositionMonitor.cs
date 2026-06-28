@@ -122,7 +122,7 @@ public class DecompositionMonitor : GameStateMachine<DecompositionMonitor, Decom
 			int num = Grid.PosToCell(base.master.transform.position);
 			if (Grid.Element[num].id == SimHashes.Water)
 			{
-				SimMessages.ReplaceElement(num, SimHashes.DirtyWater, CellEventLogger.Instance.DecompositionDirtyWater, Grid.Cell[num].mass, Grid.Temperature[num], -1);
+				SimMessages.ReplaceElement(num, SimHashes.DirtyWater, CellEventLogger.Instance.DecompositionDirtyWater, Grid.Cell[num].mass, Grid.Temperature[num], Grid.Disease[num].diseaseIdx, Grid.Disease[num].elementCount, -1);
 			}
 			else if (Grid.Element[num].id == SimHashes.DirtyWater)
 			{
@@ -144,7 +144,7 @@ public class DecompositionMonitor : GameStateMachine<DecompositionMonitor, Decom
 								{
 									if (Grid.Element[num2].id == SimHashes.Water)
 									{
-										SimMessages.ReplaceElement(num2, SimHashes.DirtyWater, CellEventLogger.Instance.DecompositionDirtyWater, Grid.Cell[num2].mass, Grid.Temperature[num2], -1);
+										SimMessages.ReplaceElement(num2, SimHashes.DirtyWater, CellEventLogger.Instance.DecompositionDirtyWater, Grid.Cell[num2].mass, Grid.Temperature[num2], Grid.Disease[num2].diseaseIdx, Grid.Disease[num2].elementCount, -1);
 										return;
 									}
 								}

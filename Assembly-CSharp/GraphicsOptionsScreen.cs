@@ -50,7 +50,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 		{
 			float num = value / 100f;
 			kcanvasScaler.SetUserScale(num);
-			PlayerPrefs.SetFloat(KCanvasScaler.UIScalePrefKey, value);
+			KPlayerPrefs.SetFloat(KCanvasScaler.UIScalePrefKey, value);
 		}
 		this.UpdateSliderLabel();
 	}

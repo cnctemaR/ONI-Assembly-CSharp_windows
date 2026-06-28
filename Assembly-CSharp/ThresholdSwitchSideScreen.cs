@@ -1,13 +1,13 @@
 ﻿using System;
 using STRINGS;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class ThresholdSwitchSideScreen : SideScreenContent
 {
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.unitsLabel.text = this.target.ThresholdValueUnits();
 		this.aboveToggle.onClick += delegate
 		{
 			this.OnConditionButtonClicked(true);
@@ -20,7 +20,23 @@ public class ThresholdSwitchSideScreen : SideScreenContent
 		LocText component2 = this.belowToggle.transform.GetChild(0).GetComponent<LocText>();
 		component.SetText(UI.UISIDESCREENS.THRESHOLD_SWITCH_SIDESCREEN.ABOVE_BUTTON);
 		component2.SetText(UI.UISIDESCREENS.THRESHOLD_SWITCH_SIDESCREEN.BELOW_BUTTON);
-		this.thresholdSlider.onValueChanged.AddListener(new UnityAction<float>(this.OnThresholdValueChanged));
+		this.thresholdSlider.onDrag += delegate
+		{
+			this.ReceiveValueFromSlider(this.thresholdSlider.value);
+		};
+		this.thresholdSlider.onPointerDown += delegate
+		{
+			this.ReceiveValueFromSlider(this.thresholdSlider.value);
+		};
+		this.thresholdSlider.onMove += delegate
+		{
+			this.ReceiveValueFromSlider(this.thresholdSlider.value);
+		};
+		this.numberInput.onEndEdit += delegate
+		{
+			this.ReceiveValueFromInput(this.numberInput.currentValue);
+		};
+		this.numberInput.decimalPlaces = 1;
 	}
 
 	private void SimUpdate(float dt)
@@ -46,12 +62,14 @@ public class ThresholdSwitchSideScreen : SideScreenContent
 			return;
 		}
 		this.UpdateLabels();
-		this.thresholdSlider.onValueChanged.RemoveListener(new UnityAction<float>(this.OnThresholdValueChanged));
 		this.thresholdSlider.minValue = this.target.RangeMin;
 		this.thresholdSlider.maxValue = this.target.RangeMax;
 		this.thresholdSlider.value = this.target.Threshold;
-		this.thresholdSlider.onValueChanged.AddListener(new UnityAction<float>(this.OnThresholdValueChanged));
 		this.thresholdSlider.GetComponentInChildren<ToolTip>();
+		this.unitsLabel.text = this.target.ThresholdValueUnits();
+		this.numberInput.minValue = this.target.GetRangeMinInputField();
+		this.numberInput.maxValue = this.target.GetRangeMaxInputField();
+		this.numberInput.Activate();
 		this.UpdateTargetThresholdLabel();
 		this.OnConditionButtonClicked(this.target.ActivateAboveThreshold);
 	}
@@ -84,20 +102,39 @@ public class ThresholdSwitchSideScreen : SideScreenContent
 
 	private void UpdateTargetThresholdLabel()
 	{
-		this.tresholdValue.text = this.target.Format(this.target.Threshold);
+		this.numberInput.SetDisplayValue(this.target.Format(this.target.Threshold, false));
 		if (this.target.ActivateAboveThreshold)
 		{
-			this.thresholdSlider.GetComponentInChildren<ToolTip>().SetSimpleTooltip(string.Format(this.target.AboveToolTip, this.target.Format(this.target.Threshold)));
+			this.thresholdSlider.GetComponentInChildren<ToolTip>().SetSimpleTooltip(string.Format(this.target.AboveToolTip, this.target.Format(this.target.Threshold, true)));
+			this.thresholdSlider.GetComponentInChildren<ToolTip>().tooltipPositionOffset = new Vector2(0f, 25f);
 		}
 		else
 		{
-			this.thresholdSlider.GetComponentInChildren<ToolTip>().SetSimpleTooltip(string.Format(this.target.BelowToolTip, this.target.Format(this.target.Threshold)));
+			this.thresholdSlider.GetComponentInChildren<ToolTip>().SetSimpleTooltip(string.Format(this.target.BelowToolTip, this.target.Format(this.target.Threshold, true)));
+			this.thresholdSlider.GetComponentInChildren<ToolTip>().tooltipPositionOffset = new Vector2(0f, 25f);
 		}
+	}
+
+	private void ReceiveValueFromSlider(float newValue)
+	{
+		this.UpdateThresholdValue(this.target.ProcessedSliderValue(newValue));
+	}
+
+	private void ReceiveValueFromInput(float newValue)
+	{
+		this.UpdateThresholdValue(this.target.ProcessedInputValue(newValue));
+	}
+
+	private void UpdateThresholdValue(float newValue)
+	{
+		this.target.Threshold = newValue;
+		this.thresholdSlider.value = newValue;
+		this.UpdateTargetThresholdLabel();
 	}
 
 	private void UpdateLabels()
 	{
-		this.currentValue.text = string.Format(UI.UISIDESCREENS.THRESHOLD_SWITCH_SIDESCREEN.CURRENT_VALUE, this.target.ThresholdValueName, this.target.Format(this.target.CurrentValue));
+		this.currentValue.text = string.Format(UI.UISIDESCREENS.THRESHOLD_SWITCH_SIDESCREEN.CURRENT_VALUE, this.target.ThresholdValueName, this.target.Format(this.target.CurrentValue, true));
 	}
 
 	private IThresholdSwitch target;
@@ -115,5 +152,13 @@ public class ThresholdSwitchSideScreen : SideScreenContent
 	private KToggle belowToggle;
 
 	[SerializeField]
+	[Header("Slider")]
 	private KSlider thresholdSlider;
+
+	[Header("Number Input")]
+	[SerializeField]
+	private KNumberInputField numberInput;
+
+	[SerializeField]
+	private LocText unitsLabel;
 }

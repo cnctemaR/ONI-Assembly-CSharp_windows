@@ -42,79 +42,87 @@ public class FallingWater : KMonoBehaviour
 		return Time.time % 360f;
 	}
 
-	public void AddParticle(int cell, byte elementIdx, float base_mass, float temperature, bool skip_sound = false, bool skip_decor = false, bool debug_track = false)
+	public void AddParticle(int cell, byte elementIdx, float base_mass, float temperature, byte disease_idx, int base_disease_count, bool skip_sound = false, bool skip_decor = false, bool debug_track = false)
 	{
-		if (!Grid.IsValidCell(cell))
+		Vector2 vector = Grid.CellToPos2D(cell);
+		this.AddParticle(vector, elementIdx, base_mass, temperature, disease_idx, base_disease_count, skip_sound, skip_decor, debug_track);
+	}
+
+	public void AddParticle(Vector2 root_pos, byte elementIdx, float base_mass, float temperature, byte disease_idx, int base_disease_count, bool skip_sound = false, bool skip_decor = false, bool debug_track = false)
+	{
+		int num = Grid.PosToCell(root_pos);
+		if (!Grid.IsValidCell(num))
 		{
 			KCrashReporter.Assert(false, "Trying to add falling water outside of the scene");
 			return;
 		}
 		if (temperature <= 0f || base_mass <= 0f)
 		{
-			Output.LogError(new object[] { "Unexpected water mass/temperature values added to the falling water manager" });
+			Output.LogError(new object[] { string.Format("Unexpected water mass/temperature values added to the falling water manager T({0}) M({1})", temperature, base_mass) });
 		}
-		Vector2 vector = Grid.CellToPos2D(cell);
 		float time = this.GetTime();
 		if (!skip_sound)
 		{
 			FallingWater.SoundInfo soundInfo;
-			if (!this.topSounds.TryGetValue(cell, out soundInfo))
+			if (!this.topSounds.TryGetValue(num, out soundInfo))
 			{
 				soundInfo = default(FallingWater.SoundInfo);
-				soundInfo.eventInstance = LoopingSoundManager.StartSound(this.liquid_top_loop, vector, true);
+				soundInfo.eventInstance = LoopingSoundManager.StartSound(this.liquid_top_loop, root_pos, true);
 			}
 			soundInfo.startTime = time;
 			soundInfo.eventInstance.setParameterValue("liquidVolume", SoundUtil.GetLiquidVolume(base_mass));
-			this.topSounds[cell] = soundInfo;
+			this.topSounds[num] = soundInfo;
 		}
 		while (base_mass > 0f)
 		{
-			float num = global::UnityEngine.Random.value * 2f * this.particleMassVariation - this.particleMassVariation;
-			float num2 = Mathf.Max(0f, Mathf.Min(base_mass, this.particleMassToSplit + num));
-			base_mass -= num2;
-			int num3 = global::UnityEngine.Random.Range(0, this.numFrames);
-			Vector2 vector2 = new Vector2(this.jitterStep * Mathf.Sin(this.offset), this.jitterStep * Mathf.Sin(this.offset + 17f));
-			Vector2 vector3 = new Vector2(global::UnityEngine.Random.Range(-this.multipleOffsetRange.x, this.multipleOffsetRange.x), global::UnityEngine.Random.Range(-this.multipleOffsetRange.y, this.multipleOffsetRange.y));
+			float num2 = global::UnityEngine.Random.value * 2f * this.particleMassVariation - this.particleMassVariation;
+			float num3 = Mathf.Max(0f, Mathf.Min(base_mass, this.particleMassToSplit + num2));
+			float num4 = num3 / base_mass;
+			base_mass -= num3;
+			int num5 = (int)(num4 * (float)base_disease_count);
+			int num6 = global::UnityEngine.Random.Range(0, this.numFrames);
+			Vector2 vector = new Vector2(this.jitterStep * Mathf.Sin(this.offset), this.jitterStep * Mathf.Sin(this.offset + 17f));
+			Vector2 vector2 = new Vector2(global::UnityEngine.Random.Range(-this.multipleOffsetRange.x, this.multipleOffsetRange.x), global::UnityEngine.Random.Range(-this.multipleOffsetRange.y, this.multipleOffsetRange.y));
 			Element element = ElementLoader.elements[(int)elementIdx];
-			Vector2 vector4 = vector;
-			bool flag = !skip_decor && this.SpawnLiquidTopDecor(time, Grid.CellLeft(cell), false, element, num2);
-			bool flag2 = !skip_decor && this.SpawnLiquidTopDecor(time, Grid.CellRight(cell), true, element, num2);
-			Vector2 vector5 = Vector2.ClampMagnitude(this.initialOffset + vector2 + vector3, 1f);
+			Vector2 vector3 = root_pos;
+			bool flag = !skip_decor && this.SpawnLiquidTopDecor(time, Grid.CellLeft(num), false, element);
+			bool flag2 = !skip_decor && this.SpawnLiquidTopDecor(time, Grid.CellRight(num), true, element);
+			Vector2 vector4 = Vector2.ClampMagnitude(this.initialOffset + vector + vector2, 1f);
 			if (flag || flag2)
 			{
 				if (flag && flag2)
 				{
-					vector4 += vector5;
-					vector4.x += 0.5f;
+					vector3 += vector4;
+					vector3.x += 0.5f;
 				}
 				else if (flag)
 				{
-					vector4 += vector5;
+					vector3 += vector4;
 				}
 				else
 				{
-					vector4.x += 1f - vector5.x;
-					vector4.y += vector5.y;
+					vector3.x += 1f - vector4.x;
+					vector3.y += vector4.y;
 				}
 			}
 			else
 			{
-				vector4 += vector5;
-				vector4.x += 0.5f;
+				vector3 += vector4;
+				vector3.x += 0.5f;
 			}
-			int num4 = Grid.PosToCell(vector4);
-			Element element2 = Grid.Element[num4];
+			int num7 = Grid.PosToCell(vector3);
+			Element element2 = Grid.Element[num7];
 			Element.State state = element2.state & Element.State.Solid;
-			if (state == Element.State.Solid || (Grid.Cell[num4].properties & 2) != 0)
+			if (state == Element.State.Solid || (Grid.Cell[num7].properties & 2) != 0)
 			{
-				vector4.y = Mathf.Floor(vector4.y + 1f);
+				vector3.y = Mathf.Floor(vector3.y + 1f);
 			}
-			this.physics.Add(new FallingWater.ParticlePhysics(vector4, Vector2.zero, num3, elementIdx));
-			this.properties.Add(new FallingWater.ParticleProperties(elementIdx, num2, temperature, debug_track));
+			this.physics.Add(new FallingWater.ParticlePhysics(vector3, Vector2.zero, num6, elementIdx));
+			this.properties.Add(new FallingWater.ParticleProperties(elementIdx, num3, temperature, disease_idx, num5, debug_track));
 		}
 	}
 
-	private bool SpawnLiquidTopDecor(float time, int cell, bool flip, Element element, float mass)
+	private bool SpawnLiquidTopDecor(float time, int cell, bool flip, Element element)
 	{
 		if (Grid.IsValidCell(cell) && Grid.Element[cell] == element)
 		{
@@ -347,7 +355,7 @@ public class FallingWater : KMonoBehaviour
 	private void AddToSim(int cell, int particleIdx, ref int num_particles)
 	{
 		FallingWater.ParticleProperties particleProperties = this.properties[particleIdx];
-		SimMessages.AddRemoveSubstance(cell, (int)particleProperties.elementIdx, CellEventLogger.Instance.FallingWaterAddToSim, particleProperties.mass, particleProperties.temperature, -1);
+		SimMessages.AddRemoveSubstance(cell, (int)particleProperties.elementIdx, CellEventLogger.Instance.FallingWaterAddToSim, particleProperties.mass, particleProperties.temperature, particleProperties.diseaseIdx, particleProperties.diseaseCount, -1);
 		this.RemoveParticle(particleIdx, ref num_particles);
 		float time = this.GetTime();
 		float num = this.lastSpawnTime[cell];
@@ -555,8 +563,8 @@ public class FallingWater : KMonoBehaviour
 	[EventRef]
 	private string liquid_splash_initial;
 
-	[SerializeField]
 	[EventRef]
+	[SerializeField]
 	private string liquid_splash_loop;
 
 	[SerializeField]
@@ -646,17 +654,23 @@ public class FallingWater : KMonoBehaviour
 
 	private struct ParticleProperties
 	{
-		public ParticleProperties(byte elementIdx, float mass, float temperature, bool debug_track)
+		public ParticleProperties(byte elementIdx, float mass, float temperature, byte disease_idx, int disease_count, bool debug_track)
 		{
 			this.elementIdx = elementIdx;
+			this.diseaseIdx = disease_idx;
 			this.mass = mass;
 			this.temperature = temperature;
+			this.diseaseCount = disease_count;
 		}
 
 		public byte elementIdx;
 
+		public byte diseaseIdx;
+
 		public float mass;
 
 		public float temperature;
+
+		public int diseaseCount;
 	}
 }

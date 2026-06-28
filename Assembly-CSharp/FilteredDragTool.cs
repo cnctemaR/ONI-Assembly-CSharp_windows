@@ -6,23 +6,36 @@ public class FilteredDragTool : DragTool
 {
 	public bool IsActiveLayer(string layer)
 	{
-		return this.currentFilterTargets[FilteredDragTool.FILTERLAYERS.ALL] == ToolParameterMenu.ToggleState.On || (this.currentFilterTargets.ContainsKey(layer.ToUpper()) && this.currentFilterTargets[layer.ToUpper()] == ToolParameterMenu.ToggleState.On);
+		return this.currentFilterTargets[ToolParameterMenu.FILTERLAYERS.ALL] == ToolParameterMenu.ToggleState.On || (this.currentFilterTargets.ContainsKey(layer.ToUpper()) && this.currentFilterTargets[layer.ToUpper()] == ToolParameterMenu.ToggleState.On);
 	}
 
 	protected virtual void GetDefaultFilters(Dictionary<string, ToolParameterMenu.ToggleState> filters)
 	{
-		filters.Add(FilteredDragTool.FILTERLAYERS.ALL, ToolParameterMenu.ToggleState.On);
-		filters.Add(FilteredDragTool.FILTERLAYERS.WIRES, ToolParameterMenu.ToggleState.Off);
-		filters.Add(FilteredDragTool.FILTERLAYERS.LIQUIDCONDUIT, ToolParameterMenu.ToggleState.Off);
-		filters.Add(FilteredDragTool.FILTERLAYERS.GASCONDUIT, ToolParameterMenu.ToggleState.Off);
-		filters.Add(FilteredDragTool.FILTERLAYERS.BUILDINGS, ToolParameterMenu.ToggleState.Off);
+		filters.Add(ToolParameterMenu.FILTERLAYERS.ALL, ToolParameterMenu.ToggleState.On);
+		filters.Add(ToolParameterMenu.FILTERLAYERS.WIRES, ToolParameterMenu.ToggleState.Off);
+		filters.Add(ToolParameterMenu.FILTERLAYERS.LIQUIDCONDUIT, ToolParameterMenu.ToggleState.Off);
+		filters.Add(ToolParameterMenu.FILTERLAYERS.GASCONDUIT, ToolParameterMenu.ToggleState.Off);
+		filters.Add(ToolParameterMenu.FILTERLAYERS.BUILDINGS, ToolParameterMenu.ToggleState.Off);
 	}
 
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
 		this.ResetFilter(this.filterTargets);
-		OverlayScreen.OnOverlayChanged = (Action<SimViewMode>)Delegate.Combine(OverlayScreen.OnOverlayChanged, new Action<SimViewMode>(this.OnOverlayChanged));
+	}
+
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		OverlayScreen instance = OverlayScreen.Instance;
+		instance.OnOverlayChanged = (Action<SimViewMode>)Delegate.Combine(instance.OnOverlayChanged, new Action<SimViewMode>(this.OnOverlayChanged));
+	}
+
+	protected override void OnCleanUp()
+	{
+		OverlayScreen instance = OverlayScreen.Instance;
+		instance.OnOverlayChanged = (Action<SimViewMode>)Delegate.Remove(instance.OnOverlayChanged, new Action<SimViewMode>(this.OnOverlayChanged));
+		base.OnCleanUp();
 	}
 
 	public void ResetFilter()
@@ -110,17 +123,17 @@ public class FilteredDragTool : DragTool
 			{
 				if (overlay == SimViewMode.GasVentMap)
 				{
-					text = FilteredDragTool.FILTERLAYERS.GASCONDUIT;
+					text = ToolParameterMenu.FILTERLAYERS.GASCONDUIT;
 				}
 			}
 			else
 			{
-				text = FilteredDragTool.FILTERLAYERS.WIRES;
+				text = ToolParameterMenu.FILTERLAYERS.WIRES;
 			}
 		}
 		else
 		{
-			text = FilteredDragTool.FILTERLAYERS.LIQUIDCONDUIT;
+			text = ToolParameterMenu.FILTERLAYERS.LIQUIDCONDUIT;
 		}
 		this.currentFilterTargets = this.filterTargets;
 		if (text != null)
@@ -153,23 +166,4 @@ public class FilteredDragTool : DragTool
 	private Dictionary<string, ToolParameterMenu.ToggleState> currentFilterTargets;
 
 	private bool active;
-
-	public class FILTERLAYERS
-	{
-		public static string BUILDINGS = "BUILDINGS";
-
-		public static string TILES = "TILES";
-
-		public static string WIRES = "WIRES";
-
-		public static string LIQUIDCONDUIT = "LIQUIDPIPES";
-
-		public static string GASCONDUIT = "GASPIPES";
-
-		public static string CLEANANDCLEAR = "CLEANANDCLEAR";
-
-		public static string DIGPLACER = "DIGPLACER";
-
-		public static string ALL = "ALL";
-	}
 }

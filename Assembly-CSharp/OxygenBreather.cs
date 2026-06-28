@@ -3,8 +3,8 @@ using Klei.AI;
 using KSerialization;
 using UnityEngine;
 
-[RequireComponent(typeof(Health))]
 [SerializationConfig(MemberSerialization.OptIn)]
+[RequireComponent(typeof(Health))]
 public class OxygenBreather : KMonoBehaviour
 {
 	public SuitTank SuitTank
@@ -41,7 +41,6 @@ public class OxygenBreather : KMonoBehaviour
 
 	protected override void OnPrefabInit()
 	{
-		Components.OxygenBreathers.Add(this);
 		this.Subscribe(1623392196, new Action<object>(this.OnDeath));
 		this.Subscribe(-1117766961, new Action<object>(this.OnRevived));
 		this.Subscribe(-1195989806, new Action<object>(this.OnEquippedItem));
@@ -68,23 +67,30 @@ public class OxygenBreather : KMonoBehaviour
 		this.temperature = Db.Get().Amounts.Temperature.Lookup(this);
 	}
 
-	protected override void OnCleanUp()
+	private void OnSimConsume(object obj)
 	{
-		Components.OxygenBreathers.Remove(this);
+		if (!typeof(Sim.MassConsumptionCallback).IsAssignableFrom(obj.GetType()))
+		{
+			global::Debug.LogError("Error converting obj to MassConsumptionCallback: " + obj.GetType(), null);
+		}
+		Sim.MassConsumptionCallback massConsumptionCallback = (Sim.MassConsumptionCallback)obj;
+		this.o2Accumulator.Accumulate(massConsumptionCallback.mass);
+		ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, -massConsumptionCallback.mass, null);
+		this.Trigger(240573938, massConsumptionCallback);
 	}
 
 	private void SimUpdate(float dt)
 	{
-		if (!this.health.IsDead())
+		if (!base.gameObject.HasTag(GameTags.Dead))
 		{
 			float num = this.airConsumptionRate.GetTotalValue() * dt;
 			bool isUsingOxygenTank = this.IsUsingOxygenTank;
+			SimHashes getBreathableElement = this.GetBreathableElement;
 			bool flag;
-			if (!isUsingOxygenTank && this.IsBreathableElement)
+			if (!isUsingOxygenTank && getBreathableElement != SimHashes.Vacuum)
 			{
-				SimMessages.ConsumeMass(this.mouthCell, SimHashes.Oxygen, num, 3, -1);
-				this.o2Accumulator.Accumulate(num);
-				ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, -num, null);
+				HandleVector<Game.ComplexCallbackInfo>.Handle handle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(new Action<object>(this.OnSimConsume)));
+				SimMessages.ConsumeMass(this.mouthCell, getBreathableElement, num, 3, handle.index);
 				float num2 = num * this.O2toCO2conversion;
 				this.CO2Accumulator.Accumulate(num2);
 				this.accumulatedCO2 += num2;
@@ -216,6 +222,11 @@ public class OxygenBreather : KMonoBehaviour
 
 	public bool IsBreathableElementAtCell(int cell, CellOffset[] offsets = null)
 	{
+		return this.GetBreathableElementAtCell(cell, offsets) != SimHashes.Vacuum;
+	}
+
+	public SimHashes GetBreathableElementAtCell(int cell, CellOffset[] offsets = null)
+	{
 		if (offsets == null)
 		{
 			offsets = this.breathableCells;
@@ -223,10 +234,11 @@ public class OxygenBreather : KMonoBehaviour
 		int mouthCellAtCell = this.GetMouthCellAtCell(cell, offsets);
 		if (!Grid.IsValidCell(mouthCellAtCell))
 		{
-			return false;
+			return SimHashes.Vacuum;
 		}
 		Element element = Grid.Element[mouthCellAtCell];
-		return element.IsGas && element.HasTag(GameTags.Breathable) && Grid.Cell[mouthCellAtCell].mass > this.noOxygenThreshold;
+		bool flag = element.IsGas && element.HasTag(GameTags.Breathable) && Grid.Cell[mouthCellAtCell].mass > this.noOxygenThreshold;
+		return (!flag) ? SimHashes.Vacuum : element.id;
 	}
 
 	public bool IsUnderLiquid
@@ -245,11 +257,19 @@ public class OxygenBreather : KMonoBehaviour
 		}
 	}
 
+	public SimHashes GetBreathableElement
+	{
+		get
+		{
+			return this.GetBreathableElementAtCell(Grid.PosToCell(this), null);
+		}
+	}
+
 	public bool IsBreathableElement
 	{
 		get
 		{
-			return this.IsBreathableElementAtCell(this.mouthCell, null);
+			return this.IsBreathableElementAtCell(Grid.PosToCell(this), null);
 		}
 	}
 
@@ -291,9 +311,6 @@ public class OxygenBreather : KMonoBehaviour
 	private bool hasAir = true;
 
 	private Timer hasAirTimer = new Timer();
-
-	[MyCmpReq]
-	private Health health;
 
 	[MyCmpAdd]
 	private Notifier notifier;

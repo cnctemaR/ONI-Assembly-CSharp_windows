@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using STRINGS;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.UI;
 
 public class AssignableSideScreen : SideScreenContent
 {
@@ -20,8 +18,10 @@ public class AssignableSideScreen : SideScreenContent
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.dupeSortingToggle.onValueChanged.AddListener(new UnityAction<bool>(this.SortByName));
-		this.generalSortingToggle.onValueChanged.AddListener(new UnityAction<bool>(this.GeneralSortToggleClicked));
+		MultiToggle multiToggle = this.dupeSortingToggle;
+		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(this.SortByName));
+		MultiToggle multiToggle2 = this.generalSortingToggle;
+		multiToggle2.onClick = (global::System.Action)Delegate.Combine(multiToggle2.onClick, new global::System.Action(this.GeneralSortToggleClicked));
 	}
 
 	public override void SetTarget(GameObject target)
@@ -47,9 +47,19 @@ public class AssignableSideScreen : SideScreenContent
 		base.gameObject.SetActive(true);
 		this.identityList = new List<MinionIdentity>(Components.LiveMinionIdentities);
 		this.currentOwnerStr = UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.GENERAL_CURRENTASSIGNED;
-		this.generalSortingToggle.isOn = true;
+		this.dupeSortingToggle.ChangeState(0);
+		this.generalSortingToggle.ChangeState(0);
+		this.activeSortToggle = null;
 		Func<MinionIdentity, object> func = (MinionIdentity identity) => this.IsIdentityAssigned(identity);
-		this.ExecuteSort(this.generalSortingToggle, true, func, true);
+		this.ExecuteSort(this.generalSortingToggle, func, true);
+		if (!this.targetAssignable.CanBeAssigned)
+		{
+			this.HideScreen(true);
+		}
+		else
+		{
+			this.HideScreen(false);
+		}
 	}
 
 	private void Refresh(bool is_in_valid_region, List<MinionIdentity> identities)
@@ -82,20 +92,32 @@ public class AssignableSideScreen : SideScreenContent
 		}
 	}
 
-	private void GeneralSortToggleClicked(bool state)
+	private void GeneralSortToggleClicked()
 	{
 		Func<MinionIdentity, object> func = (MinionIdentity identity) => this.IsIdentityAssigned(identity);
-		this.ExecuteSort(this.generalSortingToggle, state, func, false);
+		this.ExecuteSort(this.generalSortingToggle, func, false);
+		this.dupeSortingToggle.ChangeState(0);
 	}
 
-	private void ExecuteSort(Toggle toggle, bool state, Func<MinionIdentity, object> sortFunction, bool refresh = false)
+	private void ExecuteSort(MultiToggle toggle, Func<MinionIdentity, object> sortFunction, bool refresh = false)
 	{
-		toggle.GetComponent<ImageToggleState>().SetActiveState(state);
-		if (!state)
+		if (this.activeSortToggle == toggle)
 		{
-			return;
+			if (this.sortReversed)
+			{
+				this.sortReversed = false;
+				toggle.ChangeState(0);
+				this.activeSortToggle = null;
+				return;
+			}
+			this.sortReversed = true;
 		}
-		this.identityList = ((!state) ? this.identityList.OrderByDescending<MinionIdentity, object>(sortFunction).ToList<MinionIdentity>() : this.identityList.OrderBy<MinionIdentity, object>(sortFunction).ToList<MinionIdentity>());
+		else
+		{
+			this.sortReversed = false;
+		}
+		toggle.ChangeState((!this.sortReversed) ? 1 : 2);
+		this.identityList = ((!this.sortReversed) ? this.identityList.OrderByDescending<MinionIdentity, object>(sortFunction).ToList<MinionIdentity>() : this.identityList.OrderBy<MinionIdentity, object>(sortFunction).ToList<MinionIdentity>());
 		bool flag = this.targetAssignable == null || this.targetAssignable.RequiresRegion == null || this.targetAssignable.RequiresRegion.IsRegionValid(false);
 		if (refresh)
 		{
@@ -111,11 +133,13 @@ public class AssignableSideScreen : SideScreenContent
 				}
 			}
 		}
+		this.activeSortToggle = toggle;
 	}
 
-	private void SortByName(bool state)
+	private void SortByName()
 	{
-		this.ExecuteSort(this.dupeSortingToggle, state, (MinionIdentity idt) => idt.GetProperName(), false);
+		this.ExecuteSort(this.dupeSortingToggle, (MinionIdentity idt) => idt.GetProperName(), false);
+		this.generalSortingToggle.ChangeState(0);
 	}
 
 	private bool IsIdentityAssigned(MinionIdentity identity)
@@ -137,6 +161,20 @@ public class AssignableSideScreen : SideScreenContent
 		this.identityRowMap.Clear();
 		this.currentSelectedIdentity = null;
 		this.regionNeededText.SetText(string.Empty);
+	}
+
+	private void HideScreen(bool hide)
+	{
+		if (hide)
+		{
+			this.transform.localScale = Vector3.zero;
+			this.validRegionContent.SetActive(false);
+			this.regionNeededText.gameObject.SetActive(false);
+		}
+		else if (this.transform.localScale != Vector3.one)
+		{
+			this.transform.localScale = Vector3.one;
+		}
 	}
 
 	private void SetRegionNeededUI()
@@ -220,10 +258,14 @@ public class AssignableSideScreen : SideScreenContent
 	private LocText currentOwnerText;
 
 	[SerializeField]
-	private Toggle dupeSortingToggle;
+	private MultiToggle dupeSortingToggle;
 
 	[SerializeField]
-	private Toggle generalSortingToggle;
+	private MultiToggle generalSortingToggle;
+
+	private MultiToggle activeSortToggle;
+
+	private bool sortReversed;
 
 	[SerializeField]
 	private GameObject validRegionContent;

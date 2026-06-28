@@ -22,7 +22,6 @@ public class NotificationScreen : KScreen
 
 	private void OnAddNotification(Notification notification)
 	{
-		this.notificationTracker.OnRecieveNotification(notification);
 		this.pendingNotifications.Add(notification);
 	}
 
@@ -407,6 +406,14 @@ public class NotificationScreen : KScreen
 		this.notificationSounds[NotificationType.Messages] = "Message";
 	}
 
+	public Color32 BadColorBG
+	{
+		get
+		{
+			return this.badColorBG;
+		}
+	}
+
 	public float lifetime;
 
 	public bool dirty;
@@ -478,9 +485,6 @@ public class NotificationScreen : KScreen
 	private List<NotificationScreen.Entry> entries = new List<NotificationScreen.Entry>();
 
 	private Dictionary<string, NotificationScreen.Entry> entriesByMessage = new Dictionary<string, NotificationScreen.Entry>();
-
-	[MyCmpReq]
-	private NotificationTracker notificationTracker;
 
 	private class Entry
 	{

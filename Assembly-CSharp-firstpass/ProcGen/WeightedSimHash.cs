@@ -1,0 +1,24 @@
+﻿using System;
+
+namespace ProcGen
+{
+	public class WeightedSimHash : IWeighted
+	{
+		public WeightedSimHash()
+		{
+		}
+
+		public WeightedSimHash(string elementHash, float weight, SampleDescriber.Override overrides = null)
+		{
+			this.element = elementHash;
+			this.weight = weight;
+			this.overrides = overrides;
+		}
+
+		public string element { get; private set; }
+
+		public float weight { get; set; }
+
+		public SampleDescriber.Override overrides { get; private set; }
+	}
+}

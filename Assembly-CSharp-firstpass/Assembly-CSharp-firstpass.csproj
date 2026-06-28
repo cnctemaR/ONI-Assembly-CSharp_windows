@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{319FC260-3CFA-403E-8E5E-0A639EC94AB3}</ProjectGuid>
+    <ProjectGuid>{1F287E2F-9607-4BB1-B98F-1680F14AB83D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp-firstpass</RootNamespace>
     <AssemblyName>Assembly-CSharp-firstpass</AssemblyName>
@@ -20,17 +20,22 @@
     <Compile Include="App.cs" />
     <Compile Include="Audio.cs" />
     <Compile Include="Axis.cs" />
+    <Compile Include="BaseLocation.cs" />
     <Compile Include="BatchGroupInstance.cs" />
     <Compile Include="BatchGroupKey.cs" />
     <Compile Include="BatchKey.cs" />
     <Compile Include="BatchSet.cs" />
     <Compile Include="BinaryHeap.cs" />
     <Compile Include="BindingEntry.cs" />
+    <Compile Include="Biome.cs" />
     <Compile Include="BoundsCheck.cs" />
     <Compile Include="ButtonLock.cs" />
     <Compile Include="ButtonSoundPlayer.cs" />
     <Compile Include="CellAlignment.cs" />
     <Compile Include="CellOffset.cs" />
+    <Compile Include="Chunk.cs" />
+    <Compile Include="ChunkIndexList.cs" />
+    <Compile Include="ChunkList.cs" />
     <Compile Include="ClipperLib\Clipper.cs" />
     <Compile Include="ClipperLib\ClipperBase.cs" />
     <Compile Include="ClipperLib\ClipperException.cs" />
@@ -94,12 +99,15 @@
     <Compile Include="DetailScreenTabHeader.cs" />
     <Compile Include="DistributionPlatform.cs" />
     <Compile Include="DrawUtil.cs" />
+    <Compile Include="ElementGradient.cs" />
     <Compile Include="EnumFlagsAttribute.cs" />
     <Compile Include="EventExtensions.cs" />
     <Compile Include="EventSystem.cs" />
     <Compile Include="ExactModifier.cs" />
     <Compile Include="FastReader.cs" />
     <Compile Include="FileLog.cs" />
+    <Compile Include="Fix3dTextCS.cs" />
+    <Compile Include="FixGUITextCS.cs" />
     <Compile Include="FMODAsset.cs" />
     <Compile Include="FMODReset.cs" />
     <Compile Include="FMODUnity\BankLoadException.cs" />
@@ -352,6 +360,7 @@
     <Compile Include="FMOD_StudioEventEmitter.cs" />
     <Compile Include="Folder.cs" />
     <Compile Include="FPSCounter.cs" />
+    <Compile Include="FrameDelayedHandleVector.cs" />
     <Compile Include="GameInputManager.cs" />
     <Compile Include="GameInputMapping.cs" />
     <Compile Include="GamepadButton.cs" />
@@ -361,6 +370,7 @@
     <Compile Include="Geometry\RectangleUtil.cs" />
     <Compile Include="Geometry\Strip.cs" />
     <Compile Include="Geometry\VerticalEvent.cs" />
+    <Compile Include="Gradient.cs" />
     <Compile Include="HandleValueArray.cs" />
     <Compile Include="HandleValueArrayBase.cs" />
     <Compile Include="HandleVector.cs" />
@@ -371,6 +381,7 @@
     <Compile Include="HighlightOnHover.cs" />
     <Compile Include="HoverCallback.cs" />
     <Compile Include="HUSL\ColorConverter.cs" />
+    <Compile Include="IComponent.cs" />
     <Compile Include="IComponentManager.cs" />
     <Compile Include="IInputHandler.cs" />
     <Compile Include="ImageToggleState.cs" />
@@ -417,6 +428,7 @@
     <Compile Include="KFMOD.cs" />
     <Compile Include="KFMODDebugger.cs" />
     <Compile Include="KGameObjectComponentManager.cs" />
+    <Compile Include="KGameObjectComponentManager2.cs" />
     <Compile Include="KGameObjectComponentManagerUtil.cs" />
     <Compile Include="KGlobalAnimParser.cs" />
     <Compile Include="KImage.cs" />
@@ -436,9 +448,11 @@
     <Compile Include="Klei\YamlIO.cs" />
     <Compile Include="KMonoBehaviour.cs" />
     <Compile Include="KMonoBehaviourExtensions.cs" />
+    <Compile Include="KNumberInputField.cs" />
     <Compile Include="KObject.cs" />
     <Compile Include="KObjectManager.cs" />
     <Compile Include="KPanel.cs" />
+    <Compile Include="KPlayerPrefs.cs" />
     <Compile Include="KPointerImage.cs" />
     <Compile Include="KPrefabID.cs" />
     <Compile Include="KPrefabIDTracker.cs" />
@@ -472,17 +486,23 @@
     <Compile Include="KToggleArtExtensions.cs" />
     <Compile Include="KTreeControl.cs" />
     <Compile Include="KTreeItem.cs" />
+    <Compile Include="LayerGradient.cs" />
+    <Compile Include="LevelLayer.cs" />
+    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Modifier\Scale2d.cs" />
     <Compile Include="LinearDictionary.cs" />
     <Compile Include="Logger.2.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="LoggerFIO.cs" />
     <Compile Include="LoggerFS.cs" />
+    <Compile Include="LoggerFSFSF.cs" />
     <Compile Include="LoggerFSS.cs" />
     <Compile Include="LoggerFSSF.cs" />
     <Compile Include="LoggerFSSS.cs" />
     <Compile Include="LoggerFSSSS.cs" />
     <Compile Include="LoggerSSF.cs" />
+    <Compile Include="LoggerTimeString.cs" />
     <Compile Include="MarkovNameGenerator.cs" />
+    <Compile Include="MathHelper.cs" />
     <Compile Include="MathUtil.cs" />
     <Compile Include="Matrix2x3.cs" />
     <Compile Include="Modifier.cs" />
@@ -535,7 +555,60 @@
     <Compile Include="Pair.cs" />
     <Compile Include="PerlinNoise.cs" />
     <Compile Include="PerlinSimplexNoise.cs" />
+    <Compile Include="PointGenerator.cs" />
     <Compile Include="PreUpdateScheduler.cs" />
+    <Compile Include="ProcGen\Arc.cs" />
+    <Compile Include="ProcGen\BiomeSettings.cs" />
+    <Compile Include="ProcGen\ChangeFloats.cs" />
+    <Compile Include="ProcGen\CloudSettings.cs" />
+    <Compile Include="ProcGen\DefaultSettings.cs" />
+    <Compile Include="ProcGen\ElementChoiceGroup.cs" />
+    <Compile Include="ProcGen\Feature.cs" />
+    <Compile Include="ProcGen\FeatureConverter.cs" />
+    <Compile Include="ProcGen\FeatureSettings.cs" />
+    <Compile Include="ProcGen\Graph.cs" />
+    <Compile Include="ProcGen\IWeighted.cs" />
+    <Compile Include="ProcGen\LevelLayerSettings.cs" />
+    <Compile Include="ProcGen\Map\Cell.cs" />
+    <Compile Include="ProcGen\Map\Corner.cs" />
+    <Compile Include="ProcGen\Map\Edge.cs" />
+    <Compile Include="ProcGen\Map\MapGraph.cs" />
+    <Compile Include="ProcGen\MinMax.cs" />
+    <Compile Include="ProcGen\Mob.cs" />
+    <Compile Include="ProcGen\MobReference.cs" />
+    <Compile Include="ProcGen\MobSettings.cs" />
+    <Compile Include="ProcGen\Node.cs" />
+    <Compile Include="ProcGen\Noise\Combiner.cs" />
+    <Compile Include="ProcGen\Noise\ControlPointList.cs" />
+    <Compile Include="ProcGen\Noise\Filter.cs" />
+    <Compile Include="ProcGen\Noise\FloatList.cs" />
+    <Compile Include="ProcGen\Noise\Link.cs" />
+    <Compile Include="ProcGen\Noise\Modifier.cs" />
+    <Compile Include="ProcGen\Noise\NodeLink.cs" />
+    <Compile Include="ProcGen\Noise\NoiseBase.cs" />
+    <Compile Include="ProcGen\Noise\NoiseTreeFiles.cs" />
+    <Compile Include="ProcGen\Noise\Primitive.cs" />
+    <Compile Include="ProcGen\Noise\SampleSettings.cs" />
+    <Compile Include="ProcGen\Noise\Selector.cs" />
+    <Compile Include="ProcGen\Noise\Transformer.cs" />
+    <Compile Include="ProcGen\Noise\Tree.cs" />
+    <Compile Include="ProcGen\Room.cs" />
+    <Compile Include="ProcGen\RoomDescriptions.cs" />
+    <Compile Include="ProcGen\SampleDescriber.cs" />
+    <Compile Include="ProcGen\SubWorld.cs" />
+    <Compile Include="ProcGen\SubWorlds.cs" />
+    <Compile Include="ProcGen\Temperature.cs" />
+    <Compile Include="ProcGen\Temperatures.cs" />
+    <Compile Include="ProcGen\TerrainBiomeSettings.cs" />
+    <Compile Include="ProcGen\TerrainFeature.cs" />
+    <Compile Include="ProcGen\TerrainFeatureSettings.cs" />
+    <Compile Include="ProcGen\Util.cs" />
+    <Compile Include="ProcGen\WeightedBiome.cs" />
+    <Compile Include="ProcGen\WeightedMob.cs" />
+    <Compile Include="ProcGen\WeightedRandom.cs" />
+    <Compile Include="ProcGen\WeightedSimHash.cs" />
+    <Compile Include="ProcGen\WorldGenSettings.cs" />
+    <Compile Include="ProcGen\WorldGenTags.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RailAPI.cs" />
     <Compile Include="ReadOnlyAttribute.cs" />
@@ -552,6 +625,8 @@
     <Compile Include="ResourceTreeLoader.cs" />
     <Compile Include="ResourceTreeNode.cs" />
     <Compile Include="SceneOrganizer.cs" />
+    <Compile Include="SeededRandom.cs" />
+    <Compile Include="SetArabicTextExample.cs" />
     <Compile Include="SetTextStyleSetting.cs" />
     <Compile Include="SimpleJSON\JSON.cs" />
     <Compile Include="SimpleJSON\JSONArray.cs" />
@@ -928,7 +1003,10 @@
     <Compile Include="StringTable.cs" />
     <Compile Include="TabHeaderIcon.cs" />
     <Compile Include="Tag.cs" />
+    <Compile Include="TagDescriptions.cs" />
     <Compile Include="TagExtensions.cs" />
+    <Compile Include="TagManager.cs" />
+    <Compile Include="TagSet.cs" />
     <Compile Include="TextStyleSetting.cs" />
     <Compile Include="TextureAtlas.cs" />
     <Compile Include="TextureBuffer.cs" />
@@ -1025,6 +1103,7 @@
     <Compile Include="UIHashes.cs" />
     <Compile Include="UIUtil.cs" />
     <Compile Include="UniformGrid.cs" />
+    <Compile Include="UniformPoissonDiskSampler.cs" />
     <Compile Include="Units.cs" />
     <Compile Include="UnitsUtil.cs" />
     <Compile Include="UnityEngine\UI\Extensions\BezierPath.cs" />
@@ -1045,44 +1124,61 @@
     <Compile Include="Vector3F.cs" />
     <Compile Include="Vector3I.cs" />
     <Compile Include="VectorUtil.cs" />
+    <Compile Include="VoronoiDiagram.cs" />
+    <Compile Include="VoronoiLeaf.cs" />
+    <Compile Include="VoronoiNode.cs" />
+    <Compile Include="VoronoiTree.cs" />
     <Compile Include="WidgetSoundPlayer.cs" />
     <Compile Include="WidgetTransition.cs" />
+    <Compile Include="WorldGenUtil.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ArabicSupport\ArabicSupport.csproj">
+      <Project>{1F287E2F-9607-4BB1-B98F-1680F14AB83C}</Project>
+      <Name>ArabicSupport</Name>
+    </ProjectReference>
     <ProjectReference Include="..\FileHelpers\FileHelpers.csproj">
-      <Project>{319FC260-3CFA-403E-8E5E-0A639EC94AB5}</Project>
+      <Project>{1F287E2F-9607-4BB1-B98F-1680F14AB840}</Project>
       <Name>FileHelpers</Name>
     </ProjectReference>
+    <ProjectReference Include="..\libnoise\libnoise.csproj">
+      <Project>{1F287E2F-9607-4BB1-B98F-1680F14AB845}</Project>
+      <Name>libnoise</Name>
+    </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{319FC260-3CFA-403E-8E5E-0A639EC94ABE}</Project>
+      <Project>{1F287E2F-9607-4BB1-B98F-1680F14AB849}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\Newtonsoft.Json\Newtonsoft.Json.csproj">
-      <Project>{319FC260-3CFA-403E-8E5E-0A639EC94ABF}</Project>
+      <Project>{1F287E2F-9607-4BB1-B98F-1680F14AB84A}</Project>
       <Name>Newtonsoft.Json</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Satsuma\Satsuma.csproj">
+      <Project>{1F287E2F-9607-4BB1-B98F-1680F14AB84C}</Project>
+      <Name>Satsuma</Name>
+    </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{319FC260-3CFA-403E-8E5E-0A639EC94AC3}</Project>
+      <Project>{1F287E2F-9607-4BB1-B98F-1680F14AB84E}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{319FC260-3CFA-403E-8E5E-0A639EC94ACB}</Project>
+      <Project>{1F287E2F-9607-4BB1-B98F-1680F14AB856}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{319FC260-3CFA-403E-8E5E-0A639EC94AC5}</Project>
+      <Project>{1F287E2F-9607-4BB1-B98F-1680F14AB850}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{319FC260-3CFA-403E-8E5E-0A639EC94ACF}</Project>
+      <Project>{1F287E2F-9607-4BB1-B98F-1680F14AB85A}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine\UnityEngine.csproj">
-      <Project>{319FC260-3CFA-403E-8E5E-0A639EC94ACD}</Project>
+      <Project>{1F287E2F-9607-4BB1-B98F-1680F14AB858}</Project>
       <Name>UnityEngine</Name>
     </ProjectReference>
     <ProjectReference Include="..\YamlDotNet\YamlDotNet.csproj">
-      <Project>{319FC260-3CFA-403E-8E5E-0A639EC94AD0}</Project>
+      <Project>{1F287E2F-9607-4BB1-B98F-1680F14AB85B}</Project>
       <Name>YamlDotNet</Name>
     </ProjectReference>
   </ItemGroup>

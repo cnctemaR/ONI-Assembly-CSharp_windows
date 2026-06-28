@@ -4,16 +4,17 @@ using System.Globalization;
 
 namespace YamlDotNet.Serialization.ObjectGraphVisitors
 {
-	public sealed class AnchorAssigner : IObjectGraphVisitor, IAliasProvider
+	public sealed class AnchorAssigner : PreProcessingPhaseObjectGraphVisitorSkeleton, IAliasProvider
 	{
-		bool IObjectGraphVisitor.Enter(IObjectDescriptor value)
+		public AnchorAssigner(IEnumerable<IYamlTypeConverter> typeConverters)
+			: base(typeConverters)
 		{
-			if (value.Value == null || value.Type.GetTypeCode() != TypeCode.Object)
-			{
-				return false;
-			}
+		}
+
+		protected override bool Enter(IObjectDescriptor value)
+		{
 			AnchorAssigner.AnchorAssignment anchorAssignment;
-			if (this.assignments.TryGetValue(value.Value, out anchorAssignment))
+			if (value.Value != null && this.assignments.TryGetValue(value.Value, out anchorAssignment))
 			{
 				if (anchorAssignment.Anchor == null)
 				{
@@ -22,38 +23,47 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
 				}
 				return false;
 			}
-			this.assignments.Add(value.Value, new AnchorAssigner.AnchorAssignment());
 			return true;
 		}
 
-		bool IObjectGraphVisitor.EnterMapping(IObjectDescriptor key, IObjectDescriptor value)
-		{
-			return true;
-		}
-
-		bool IObjectGraphVisitor.EnterMapping(IPropertyDescriptor key, IObjectDescriptor value)
+		protected override bool EnterMapping(IObjectDescriptor key, IObjectDescriptor value)
 		{
 			return true;
 		}
 
-		void IObjectGraphVisitor.VisitScalar(IObjectDescriptor scalar)
+		protected override bool EnterMapping(IPropertyDescriptor key, IObjectDescriptor value)
+		{
+			return true;
+		}
+
+		protected override void VisitScalar(IObjectDescriptor scalar)
 		{
 		}
 
-		void IObjectGraphVisitor.VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType)
+		protected override void VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType)
+		{
+			this.VisitObject(mapping);
+		}
+
+		protected override void VisitMappingEnd(IObjectDescriptor mapping)
 		{
 		}
 
-		void IObjectGraphVisitor.VisitMappingEnd(IObjectDescriptor mapping)
+		protected override void VisitSequenceStart(IObjectDescriptor sequence, Type elementType)
+		{
+			this.VisitObject(sequence);
+		}
+
+		protected override void VisitSequenceEnd(IObjectDescriptor sequence)
 		{
 		}
 
-		void IObjectGraphVisitor.VisitSequenceStart(IObjectDescriptor sequence, Type elementType)
+		private void VisitObject(IObjectDescriptor value)
 		{
-		}
-
-		void IObjectGraphVisitor.VisitSequenceEnd(IObjectDescriptor sequence)
-		{
+			if (value.Value != null)
+			{
+				this.assignments.Add(value.Value, new AnchorAssigner.AnchorAssignment());
+			}
 		}
 
 		string IAliasProvider.GetAlias(object target)

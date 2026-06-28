@@ -6,19 +6,40 @@ public class BreathMonitor : GameStateMachine<BreathMonitor, BreathMonitor.Insta
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.satisfied;
-		this.satisfied.Transition(this.lowbreath, (BreathMonitor.Instance smi) => smi.IsLowBreath());
-		this.lowbreath.DefaultState(this.lowbreath.nowheretorecover).ToggleExpression(Db.Get().Expressions.RecoverBreath, (BreathMonitor.Instance smi) => !smi.IsInBreathableArea()).ToggleUrge(Db.Get().Urges.RecoverBreath)
+		this.satisfied.DefaultState(this.satisfied.full).Transition(this.lowbreath, (BreathMonitor.Instance smi) => smi.IsLowBreath());
+		this.satisfied.full.Transition(this.satisfied.notfull, (BreathMonitor.Instance smi) => !smi.IsFullBreath()).Enter("BreathBar", delegate(BreathMonitor.Instance smi)
+		{
+			if (NameDisplayScreen.Instance != null)
+			{
+				NameDisplayScreen.Instance.SetBreathDisplay(smi.master.gameObject, new Func<float>(smi.GetBreath), false);
+			}
+		});
+		this.satisfied.notfull.Transition(this.satisfied.full, (BreathMonitor.Instance smi) => smi.IsFullBreath()).Enter("BreathBar", delegate(BreathMonitor.Instance smi)
+		{
+			if (NameDisplayScreen.Instance != null)
+			{
+				NameDisplayScreen.Instance.SetBreathDisplay(smi.master.gameObject, new Func<float>(smi.GetBreath), true);
+			}
+		});
+		this.lowbreath.DefaultState(this.lowbreath.nowheretorecover).Transition(this.satisfied, (BreathMonitor.Instance smi) => smi.IsFullBreath()).ToggleExpression(Db.Get().Expressions.RecoverBreath, (BreathMonitor.Instance smi) => !smi.IsInBreathableArea())
+			.ToggleUrge(Db.Get().Urges.RecoverBreath)
+			.ToggleThought(Db.Get().Thoughts.Suffocating, null)
+			.Enter("BreathBar", delegate(BreathMonitor.Instance smi)
+			{
+				if (NameDisplayScreen.Instance != null)
+				{
+					NameDisplayScreen.Instance.SetBreathDisplay(smi.master.gameObject, new Func<float>(smi.GetBreath), true);
+				}
+			})
 			.Update("UpdateRecoverBreathCell", delegate(BreathMonitor.Instance smi)
 			{
 				smi.UpdateRecoverBreathCell();
-			})
-			.ToggleThought(Db.Get().Thoughts.Suffocating, null)
-			.Transition(this.satisfied, (BreathMonitor.Instance smi) => smi.HasRecoveredBreath());
+			});
 		this.lowbreath.nowheretorecover.ParamTransition<int>(this.recoverBreathCell, this.lowbreath.recoveryavailable, (BreathMonitor.Instance smi, int p) => p != Grid.InvalidCell);
-		this.lowbreath.recoveryavailable.ParamTransition<int>(this.recoverBreathCell, this.lowbreath.nowheretorecover, (BreathMonitor.Instance smi, int p) => p == Grid.InvalidCell).ToggleChore((BreathMonitor.Instance smi) => new RecoverBreathChore(smi.master), this.lowbreath.nowheretorecover, false);
+		this.lowbreath.recoveryavailable.ParamTransition<int>(this.recoverBreathCell, this.lowbreath.nowheretorecover, (BreathMonitor.Instance smi, int p) => p == Grid.InvalidCell).ToggleChore((BreathMonitor.Instance smi) => new RecoverBreathChore(smi.master), this.lowbreath.nowheretorecover);
 	}
 
-	public GameStateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.State satisfied;
+	public BreathMonitor.SatisfiedState satisfied;
 
 	public BreathMonitor.LowBreathState lowbreath;
 
@@ -29,6 +50,13 @@ public class BreathMonitor : GameStateMachine<BreathMonitor, BreathMonitor.Insta
 		public GameStateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.State nowheretorecover;
 
 		public GameStateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.State recoveryavailable;
+	}
+
+	public class SatisfiedState : GameStateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.State
+	{
+		public GameStateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.State full;
+
+		public GameStateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.State notfull;
 	}
 
 	public new class Instance : GameStateMachine<BreathMonitor, BreathMonitor.Instance, IStateMachineTarget, object>.GameInstance
@@ -47,9 +75,9 @@ public class BreathMonitor : GameStateMachine<BreathMonitor, BreathMonitor.Insta
 			return this.breather.IsBreathableElementAtCell(Grid.PosToCell(base.transform.position), null);
 		}
 
-		public bool HasRecoveredBreath()
+		public bool IsFullBreath()
 		{
-			return this.breath.value >= this.breath.GetMax() - 1f;
+			return this.breath.value >= this.breath.GetMax();
 		}
 
 		public bool IsLowBreath()
@@ -72,6 +100,11 @@ public class BreathMonitor : GameStateMachine<BreathMonitor, BreathMonitor.Insta
 				num = PathFinder.InvalidCell;
 			}
 			base.sm.recoverBreathCell.Set(num, base.smi);
+		}
+
+		public float GetBreath()
+		{
+			return this.breath.value / this.breath.GetMax();
 		}
 
 		private AmountInstance breath;

@@ -1,4 +1,5 @@
 ﻿using System;
+using Klei;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
@@ -7,36 +8,7 @@ public class CreatureEntityTypeSet : CommonEntityTypeSet
 {
 	public CreatureEntityTypeSet(Db modifier_set)
 	{
-		this.CreateGroneHog(modifier_set);
-		this.CreateGroneHogMound(modifier_set);
 		this.CreateMysteryEgg(modifier_set);
-		this.CreateHaunt(modifier_set);
-	}
-
-	private void CreateGroneHog(Db modifier_set)
-	{
-		EntityType entityType = this.CreateCommon("GroneHog", CREATURES.SPECIES.GRONEHOG.NAME, true);
-		BoxCollider2D boxCollider2D = entityType.prefab.UpdateComponentRequirement<BoxCollider2D>(true);
-		boxCollider2D.size = new Vector2(2f, 1f);
-		KBatchedAnimController kbatchedAnimController = entityType.prefab.AddAnimController("gronehog_kanim", Grid.SceneLayer.Front);
-		kbatchedAnimController.isMovable = true;
-		entityType.prefab.UpdateComponentRequirement<GroneHog>(true);
-		entityType.prefab.AddElementConsumer(SimHashes.Oxygen, 0.005f, 0f, 1);
-		entityType.prefab.AddElementEmitter(SimHashes.CarbonDioxide, 5f, 0.008333334f);
-		entityType.prefab.UpdateComponentRequirement<SimpleMover>(true);
-		entityType.prefab.UpdateComponentRequirement<Harvestable>(true);
-		entityType.prefab.AddButcherable(new string[] { "Meat" });
-	}
-
-	private void CreateGroneHogMound(Db modifier_set)
-	{
-		EntityType entityType = this.CreateCommon("GroneHogMound", CREATURES.SPECIES.GRONEHOGMOUND.NAME, true);
-		BoxCollider2D boxCollider2D = entityType.prefab.UpdateComponentRequirement<BoxCollider2D>(true);
-		boxCollider2D.size = new Vector2(3f, 3.5f);
-		boxCollider2D.offset = new Vector2(0f, 1.75f);
-		entityType.prefab.AddAnimController("gronehogmound_kanim", Grid.SceneLayer.Front);
-		entityType.prefab.UpdateComponentRequirement<GroneHogMound>(true);
-		entityType.prefab.UpdateComponentRequirement<Harvestable>(true);
 	}
 
 	private EntityType CreateCreature(string id, string name, Db modifier_set)
@@ -48,7 +20,7 @@ public class CreatureEntityTypeSet : CommonEntityTypeSet
 		entityType.amounts.Add(Db.Get().Amounts.Temperature);
 		entityType.amounts.Add(Db.Get().Amounts.ExternalTemperature);
 		entityType.amounts.Add(Db.Get().Amounts.Breath);
-		Trait trait = GameEntityTypeSet.CreateLivingEntityBaseTrait(id, name, -100f, -0f, -0f, -25f, 0f, (float)Grid.CellCount, modifier_set);
+		Trait trait = GameEntityTypeSet.CreateLivingEntityBaseTrait(id, name, -0.16666667f, -0f, -0f, -0.041666668f, 0f, (float)Grid.CellCount, modifier_set);
 		entityType.baseTraits.Add(trait);
 		return entityType;
 	}
@@ -64,10 +36,10 @@ public class CreatureEntityTypeSet : CommonEntityTypeSet
 		entityType.prefab.UpdateComponentRequirement<DrowningMonitor>(true).Configure(30f, 10f, 0.5f);
 		entityType.prefab.UpdateComponentRequirement<EntombVulnerable>(true);
 		entityType.prefab.UpdateComponentRequirement<LoopingSounds>(true);
-		entityType.prefab.AddElementEmitter(SimHashes.SlimeMold, 0f, 0f);
+		entityType.prefab.AddElementEmitter(SimHashes.SlimeMold, 0f, 0f, SimUtil.DiseaseInfo.Invalid);
 		entityType.prefab.AddElementConsumer(SimHashes.ContaminatedOxygen, 0.25f, 0.05f, 3);
 		Navigator navigator = entityType.prefab.UpdateComponentRequirement<Navigator>(true);
-		navigator.NavGridName = "FlyerNavGrid";
+		navigator.NavGridName = "FlyerNavGrid1x1";
 		navigator.CurrentNavType = NavType.Hover;
 		navigator.defaultSpeed = 1f;
 		navigator.updateProber = true;
@@ -88,7 +60,7 @@ public class CreatureEntityTypeSet : CommonEntityTypeSet
 		weapon.Configure(3f, 6f, AttackProperties.DamageType.Standard, AttackProperties.TargetType.AreaOfEffect, 10, 4f);
 		weapon.AddEffect("WasAttacked", 1f);
 		Navigator navigator = entityType.prefab.UpdateComponentRequirement<Navigator>(true);
-		navigator.NavGridName = "FlyerNavGrid";
+		navigator.NavGridName = "FlyerNavGrid1x2";
 		navigator.CurrentNavType = NavType.Hover;
 		navigator.defaultSpeed = 2f;
 		navigator.updateProber = true;
@@ -165,7 +137,7 @@ public class CreatureEntityTypeSet : CommonEntityTypeSet
 		elementConverter.conversionInterval = 150f;
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(0.25f / elementConverter.conversionInterval, SimHashes.Fertilizer, 0f, false, 0f, 0.5f, false)
+			new ElementConverter.OutputElement(0.25f / elementConverter.conversionInterval, SimHashes.Fertilizer, 0f, false, 0f, 0.5f, false, 1f, byte.MaxValue, 0)
 		};
 		KBatchedAnimController kbatchedAnimController = entityType.prefab.AddAnimController("flut_single_kanim", Grid.SceneLayer.Front);
 		kbatchedAnimController.isMovable = true;
@@ -188,7 +160,7 @@ public class CreatureEntityTypeSet : CommonEntityTypeSet
 		entityType.prefab.UpdateComponentRequirement<EntombVulnerable>(true);
 		ElementEmitter elementEmitter = entityType.prefab.UpdateComponentRequirement<ElementEmitter>(true);
 		entityType.prefab.UpdateComponentRequirement<TemperatureVulnerable>(true).Configure(293f, 283f, 310f, 330f, 0f, 0f);
-		elementEmitter.outputElement = new ElementConverter.OutputElement(0f, SimHashes.ContaminatedOxygen, 0f, false, 0f, 0.5f, false);
+		elementEmitter.outputElement = new ElementConverter.OutputElement(0f, SimHashes.ContaminatedOxygen, 0f, false, 0f, 0.5f, false, 1f, byte.MaxValue, 0);
 		elementEmitter.emissionFrequency = 0f;
 		elementEmitter.SetEmitting(false);
 	}
@@ -219,15 +191,9 @@ public class CreatureEntityTypeSet : CommonEntityTypeSet
 		return entityType;
 	}
 
-	public EntityType groneHog;
-
-	public EntityType groneHogMound;
-
 	public EntityType Flut;
 
 	public EntityType FlutEgg;
-
-	public EntityType Haunt;
 
 	public EntityType MysteryEgg;
 }

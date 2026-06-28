@@ -24,15 +24,16 @@ public class OverlayMenu : KIconToggleMenu
 	{
 		return new List<KIconToggleMenu.ToggleInfo>
 		{
-			new KIconToggleMenu.ToggleInfo(UI.OVERLAYS.OXYGEN.BUTTON, "overlay_oxygen", SimViewMode.OxygenMap, global::Action.Overlay1, UI.TOOLTIPS.OXYGENOVERLAYSTRING),
-			new KIconToggleMenu.ToggleInfo(UI.OVERLAYS.ELECTRICAL.BUTTON, "overlay_power", SimViewMode.PowerMap, global::Action.Overlay2, UI.TOOLTIPS.POWEROVERLAYSTRING),
-			new KIconToggleMenu.ToggleInfo(UI.OVERLAYS.TEMPERATURE.BUTTON, "overlay_temperature", SimViewMode.TemperatureMap, global::Action.Overlay3, UI.TOOLTIPS.TEMPERATUREOVERLAYSTRING),
-			new KIconToggleMenu.ToggleInfo(UI.OVERLAYS.HEATFLOW.BUTTON, "overlay_heatflow", SimViewMode.HeatFlow, global::Action.Overlay4, UI.TOOLTIPS.HEATFLOWOVERLAYSTRING),
-			new KIconToggleMenu.ToggleInfo(UI.OVERLAYS.LIGHTING.BUTTON, "overlay_lights", SimViewMode.Light, global::Action.Overlay5, UI.TOOLTIPS.LIGHTSOVERLAYSTRING),
-			new KIconToggleMenu.ToggleInfo(UI.OVERLAYS.LIQUIDPLUMBING.BUTTON, "overlay_liquidvent", SimViewMode.LiquidVentMap, global::Action.Overlay6, UI.TOOLTIPS.LIQUIDVENTOVERLAYSTRING),
-			new KIconToggleMenu.ToggleInfo(UI.OVERLAYS.GASPLUMBING.BUTTON, "overlay_gasvent", SimViewMode.GasVentMap, global::Action.Overlay7, UI.TOOLTIPS.GASVENTOVERLAYSTRING),
-			new KIconToggleMenu.ToggleInfo(UI.OVERLAYS.DECOR.BUTTON, "overlay_decor", SimViewMode.Decor, global::Action.Overlay8, UI.TOOLTIPS.DECOROVERLAYSTRING),
-			new KIconToggleMenu.ToggleInfo(UI.OVERLAYS.PRIORITIES.BUTTON, "overlay_priority", SimViewMode.Priorities, global::Action.Overlay9, UI.TOOLTIPS.PRIORITIESOVERLAYSTRING)
+			new KIconToggleMenu.ToggleInfo(UI.OVERLAYS.OXYGEN.BUTTON, "overlay_oxygen", SimViewMode.OxygenMap, global::Action.Overlay1, UI.TOOLTIPS.OXYGENOVERLAYSTRING, UI.OVERLAYS.OXYGEN.BUTTON),
+			new KIconToggleMenu.ToggleInfo(UI.OVERLAYS.ELECTRICAL.BUTTON, "overlay_power", SimViewMode.PowerMap, global::Action.Overlay2, UI.TOOLTIPS.POWEROVERLAYSTRING, UI.OVERLAYS.ELECTRICAL.BUTTON),
+			new KIconToggleMenu.ToggleInfo(UI.OVERLAYS.TEMPERATURE.BUTTON, "overlay_temperature", SimViewMode.TemperatureMap, global::Action.Overlay3, UI.TOOLTIPS.TEMPERATUREOVERLAYSTRING, UI.OVERLAYS.TEMPERATURE.BUTTON),
+			new KIconToggleMenu.ToggleInfo(UI.OVERLAYS.HEATFLOW.BUTTON, "overlay_heatflow", SimViewMode.HeatFlow, global::Action.Overlay4, UI.TOOLTIPS.HEATFLOWOVERLAYSTRING, UI.OVERLAYS.HEATFLOW.BUTTON),
+			new KIconToggleMenu.ToggleInfo(UI.OVERLAYS.LIGHTING.BUTTON, "overlay_lights", SimViewMode.Light, global::Action.Overlay5, UI.TOOLTIPS.LIGHTSOVERLAYSTRING, UI.OVERLAYS.LIGHTING.BUTTON),
+			new KIconToggleMenu.ToggleInfo(UI.OVERLAYS.LIQUIDPLUMBING.BUTTON, "overlay_liquidvent", SimViewMode.LiquidVentMap, global::Action.Overlay6, UI.TOOLTIPS.LIQUIDVENTOVERLAYSTRING, UI.OVERLAYS.LIQUIDPLUMBING.BUTTON),
+			new KIconToggleMenu.ToggleInfo(UI.OVERLAYS.GASPLUMBING.BUTTON, "overlay_gasvent", SimViewMode.GasVentMap, global::Action.Overlay7, UI.TOOLTIPS.GASVENTOVERLAYSTRING, UI.OVERLAYS.GASPLUMBING.BUTTON),
+			new KIconToggleMenu.ToggleInfo(UI.OVERLAYS.DECOR.BUTTON, "overlay_decor", SimViewMode.Decor, global::Action.Overlay8, UI.TOOLTIPS.DECOROVERLAYSTRING, UI.OVERLAYS.DECOR.BUTTON),
+			new KIconToggleMenu.ToggleInfo(UI.OVERLAYS.DISEASE.BUTTON, "overlay_disease", SimViewMode.Disease, global::Action.Overlay9, UI.TOOLTIPS.DISEASEOVERLAYSTRING, UI.OVERLAYS.DISEASE.BUTTON),
+			new KIconToggleMenu.ToggleInfo(UI.OVERLAYS.CROPS.BUTTON, "overlay_farming", SimViewMode.Crop, global::Action.Overlay10, UI.TOOLTIPS.CROPS_OVERLAY_STRING, UI.OVERLAYS.CROPS.BUTTON)
 		};
 	}
 

@@ -5,8 +5,8 @@ using FMOD.Studio;
 using KSerialization;
 using UnityEngine;
 
+[DebuggerDisplay("{name} {WattsUsed}W")]
 [SerializationConfig(MemberSerialization.OptIn)]
-[DebuggerDisplay("{name}")]
 public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IEffectDescriptor
 {
 	public int PowerSortOrder
@@ -158,7 +158,6 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IE
 			this.IsPowered = false;
 			break;
 		case CircuitManager.ConnectionStatus.Unpowered:
-		case CircuitManager.ConnectionStatus.OverDraw:
 			if (this.IsPowered && base.GetComponent<Battery>() == null)
 			{
 				this.IsPowered = false;

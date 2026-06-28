@@ -6,41 +6,34 @@ namespace YamlDotNet.Serialization.EventEmitters
 {
 	public sealed class WriterEventEmitter : IEventEmitter
 	{
-		public WriterEventEmitter(IEmitter emitter)
+		void IEventEmitter.Emit(AliasEventInfo eventInfo, IEmitter emitter)
 		{
-			this.emitter = emitter;
+			emitter.Emit(new AnchorAlias(eventInfo.Alias));
 		}
 
-		void IEventEmitter.Emit(AliasEventInfo eventInfo)
+		void IEventEmitter.Emit(ScalarEventInfo eventInfo, IEmitter emitter)
 		{
-			this.emitter.Emit(new AnchorAlias(eventInfo.Alias));
+			emitter.Emit(new Scalar(eventInfo.Anchor, eventInfo.Tag, eventInfo.RenderedValue, eventInfo.Style, eventInfo.IsPlainImplicit, eventInfo.IsQuotedImplicit));
 		}
 
-		void IEventEmitter.Emit(ScalarEventInfo eventInfo)
+		void IEventEmitter.Emit(MappingStartEventInfo eventInfo, IEmitter emitter)
 		{
-			this.emitter.Emit(new Scalar(eventInfo.Anchor, eventInfo.Tag, eventInfo.RenderedValue, eventInfo.Style, eventInfo.IsPlainImplicit, eventInfo.IsQuotedImplicit));
+			emitter.Emit(new MappingStart(eventInfo.Anchor, eventInfo.Tag, eventInfo.IsImplicit, eventInfo.Style));
 		}
 
-		void IEventEmitter.Emit(MappingStartEventInfo eventInfo)
+		void IEventEmitter.Emit(MappingEndEventInfo eventInfo, IEmitter emitter)
 		{
-			this.emitter.Emit(new MappingStart(eventInfo.Anchor, eventInfo.Tag, eventInfo.IsImplicit, eventInfo.Style));
+			emitter.Emit(new MappingEnd());
 		}
 
-		void IEventEmitter.Emit(MappingEndEventInfo eventInfo)
+		void IEventEmitter.Emit(SequenceStartEventInfo eventInfo, IEmitter emitter)
 		{
-			this.emitter.Emit(new MappingEnd());
+			emitter.Emit(new SequenceStart(eventInfo.Anchor, eventInfo.Tag, eventInfo.IsImplicit, eventInfo.Style));
 		}
 
-		void IEventEmitter.Emit(SequenceStartEventInfo eventInfo)
+		void IEventEmitter.Emit(SequenceEndEventInfo eventInfo, IEmitter emitter)
 		{
-			this.emitter.Emit(new SequenceStart(eventInfo.Anchor, eventInfo.Tag, eventInfo.IsImplicit, eventInfo.Style));
+			emitter.Emit(new SequenceEnd());
 		}
-
-		void IEventEmitter.Emit(SequenceEndEventInfo eventInfo)
-		{
-			this.emitter.Emit(new SequenceEnd());
-		}
-
-		private readonly IEmitter emitter;
 	}
 }

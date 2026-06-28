@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Generated;
+using ProcGen;
+using ProcGenGame;
 
 namespace Klei
 {
@@ -8,17 +9,22 @@ namespace Klei
 	{
 		public Data()
 		{
-			this.worldLayout = new WorldLayout();
+			this.worldLayout = new WorldLayout(0);
 			this.terrainCells = new List<TerrainCell>();
 			this.overworldCells = new List<TerrainCell>();
 			this.rivers = new List<River>();
-			this.clouds = new List<Cloud>();
-			this.gameSpawnData = new WorldGen.GameSpawnData();
+			this.gameSpawnData = new GameSpawnData();
 			this.world = new Chunk();
-			this.voronoiTree = new VoronoiTree();
+			this.voronoiTree = new VoronoiTree(0);
 		}
 
 		public int globalWorldSeed;
+
+		public int globalWorldLayoutSeed;
+
+		public int globalTerrainSeed;
+
+		public int globalNoiseSeed;
 
 		public int chunkEdgeSize = 32;
 
@@ -32,9 +38,7 @@ namespace Klei
 
 		public List<River> rivers;
 
-		public List<Cloud> clouds;
-
-		public WorldGen.GameSpawnData gameSpawnData;
+		public GameSpawnData gameSpawnData;
 
 		public Chunk world;
 

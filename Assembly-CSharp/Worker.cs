@@ -4,29 +4,18 @@ using UnityEngine;
 
 public class Worker : KMonoBehaviour
 {
-	public Workable workable { get; private set; }
+	public Worker.StartWorkInfo startWorkInfo { get; private set; }
 
-	public float amount
+	public Workable workable
 	{
 		get
 		{
-			return this._amount;
+			if (this.startWorkInfo != null)
+			{
+				return this.startWorkInfo.workable;
+			}
+			return null;
 		}
-		private set
-		{
-			this._amount = value;
-		}
-	}
-
-	protected override void OnSpawn()
-	{
-		Components.Workers.Add(this);
-	}
-
-	protected override void OnCleanUp()
-	{
-		base.OnCleanUp();
-		Components.Workers.Remove(this);
 	}
 
 	public bool CompleteWork()
@@ -34,7 +23,7 @@ public class Worker : KMonoBehaviour
 		if (this.workable != null)
 		{
 			Workable workable = this.workable;
-			this.workable = null;
+			this.startWorkInfo.workable = null;
 			workable.CompleteWork(this);
 			KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
 			component.Offset -= this.workAnimOffset;
@@ -79,12 +68,11 @@ public class Worker : KMonoBehaviour
 					this.workCompleteTime = Time.time;
 					KAnimControllerBase component2 = base.GetComponent<KAnimControllerBase>();
 					component2.Stop();
-					if (this.workable != null)
+					if (this.workable != null && this.workable.synchronizeAnims)
 					{
 						KAnimControllerBase component3 = this.workable.GetComponent<KAnimControllerBase>();
 						if (component3 != null && component3.HasAnimation("working_pst"))
 						{
-							component3.Stop();
 							component3.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
 							component2.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
 						}
@@ -112,8 +100,7 @@ public class Worker : KMonoBehaviour
 	{
 		this.workComplete = false;
 		Workable workable = this.workable;
-		this.workable = null;
-		this.navigator.Stop(false);
+		this.startWorkInfo = null;
 		this.DetachAnimOverrides();
 		base.GetComponent<AnimEventHandler>().ClearContext();
 		if (this.previousStatusItem.item != null)
@@ -142,45 +129,56 @@ public class Worker : KMonoBehaviour
 		return this.workable;
 	}
 
-	public void StartWork(Workable workable, float amount)
+	public void StartWork(Worker.StartWorkInfo start_work_info)
 	{
+		this.startWorkInfo = start_work_info;
 		Game.Instance.StartedWork();
-		string name = workable.GetType().Name;
+		string name = this.workable.GetType().Name;
 		try
 		{
-			workable.StartWork(this);
 			this.lastWorkTick = Time.time;
-			this.workable = workable;
-			this.amount = amount;
+			this.workable.StartWork(this);
 			this.workComplete = false;
 			KSelectable component = base.GetComponent<KSelectable>();
 			this.previousStatusItem = component.GetStatusItem(Db.Get().StatusItemCategories.Main);
-			component.SetStatusItem(Db.Get().StatusItemCategories.Main, workable.GetWorkerStatusItem(), workable);
-			this.animInfo = workable.GetAnim(this);
-			this.AttachOverrideAnims();
-			HashedString[] workAnims = workable.GetWorkAnims(this);
-			if (workAnims != null)
-			{
-				KAnimControllerBase component2 = base.GetComponent<KAnimControllerBase>();
-				Vector3 workOffset = workable.GetWorkOffset();
-				this.workAnimOffset = workOffset;
-				component2.Offset += workOffset;
-				component2.Play(workAnims, KAnim.PlayMode.Loop);
-			}
-			if (this.OnWorkStartCallback != null)
-			{
-				this.OnWorkStartCallback();
-			}
+			component.SetStatusItem(Db.Get().StatusItemCategories.Main, this.workable.GetWorkerStatusItem(), this.workable);
+			this.animInfo = this.workable.GetAnim(this);
 			if (this.animInfo.smi != null)
 			{
 				this.smi = this.animInfo.smi;
 				this.smi.StartSM();
 			}
-			if (workable.GetComponent<BuildingComplete>() != null)
+			if (this.OnWorkStartCallback != null)
 			{
-				Vector3 position = this.transform.position;
-				position.z = Grid.GetLayerZ(Grid.SceneLayer.BuildingFront);
-				this.transform.SetPosition(position);
+				this.OnWorkStartCallback();
+			}
+			Vector3 position = this.transform.position;
+			position.z = Grid.GetLayerZ(this.workable.workLayer);
+			this.transform.SetPosition(position);
+			KAnimControllerBase component2 = base.GetComponent<KAnimControllerBase>();
+			if (this.animInfo.smi == null)
+			{
+				this.AttachOverrideAnims(component2);
+			}
+			HashedString[] workAnims = this.workable.GetWorkAnims(this);
+			Vector3 workOffset = this.workable.GetWorkOffset();
+			this.workAnimOffset = workOffset;
+			component2.Offset += workOffset;
+			if (this.animInfo.smi == null && workAnims != null)
+			{
+				if (this.workable.synchronizeAnims)
+				{
+					KAnimControllerBase component3 = this.workable.GetComponent<KAnimControllerBase>();
+					if (component3 != null)
+					{
+						this.kanimSynchronizer = component3.GetSynchronizer();
+						if (this.kanimSynchronizer != null)
+						{
+							this.kanimSynchronizer.Add(component2);
+						}
+					}
+				}
+				component2.Play(workAnims, KAnim.PlayMode.Loop);
 			}
 		}
 		catch (Exception ex)
@@ -191,26 +189,13 @@ public class Worker : KMonoBehaviour
 		}
 	}
 
-	private void AttachOverrideAnims()
+	private void AttachOverrideAnims(KAnimControllerBase worker_controller)
 	{
 		if (this.animInfo.overrideAnims != null && this.animInfo.overrideAnims.Length > 0)
 		{
-			KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
 			for (int i = 0; i < this.animInfo.overrideAnims.Length; i++)
 			{
-				component.AddAnimOverrides(this.animInfo.overrideAnims[i], 0f);
-			}
-			if (this.workable.GetWorkAnims(this) == null)
-			{
-				KAnimControllerBase component2 = this.workable.GetComponent<KAnimControllerBase>();
-				Vector3 workOffset = this.workable.GetWorkOffset();
-				this.workAnimOffset = workOffset;
-				component2.Offset += workOffset;
-				this.kanimSynchronizer = component2.GetSynchronizer();
-				if (this.kanimSynchronizer != null)
-				{
-					this.kanimSynchronizer.Add(component);
-				}
+				worker_controller.AddAnimOverrides(this.animInfo.overrideAnims[i], 0f);
 			}
 		}
 	}
@@ -223,6 +208,7 @@ public class Worker : KMonoBehaviour
 			if (this.kanimSynchronizer != null)
 			{
 				this.kanimSynchronizer.Remove(component);
+				this.kanimSynchronizer = null;
 			}
 			for (int i = 0; i < this.animInfo.overrideAnims.Length; i++)
 			{
@@ -273,8 +259,6 @@ public class Worker : KMonoBehaviour
 
 	public global::System.Action OnWorkStartCallback;
 
-	private float _amount;
-
 	private float workCompleteTime;
 
 	public object workCompleteData;
@@ -288,4 +272,14 @@ public class Worker : KMonoBehaviour
 	private StateMachine.Instance smi;
 
 	private Vector3 workAnimOffset = Vector3.zero;
+
+	public class StartWorkInfo
+	{
+		public StartWorkInfo(Workable workable)
+		{
+			this.workable = workable;
+		}
+
+		public Workable workable { get; set; }
+	}
 }

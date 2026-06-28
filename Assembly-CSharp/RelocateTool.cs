@@ -221,7 +221,7 @@ public class RelocateTool : DragTool
 		{
 			if (this.def.IsValidBuildLocation(vector, this.buildingOrientation) && this.def.IsValidPlaceLocation(vector, this.buildingOrientation))
 			{
-				gameObject = this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, true);
+				gameObject = this.def.Build(cell, this.buildingOrientation, null, this.selectedElements, true, true);
 				this.source.DeleteObject();
 			}
 		}

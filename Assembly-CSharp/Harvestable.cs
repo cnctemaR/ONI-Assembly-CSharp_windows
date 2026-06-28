@@ -11,6 +11,14 @@ public class Harvestable : Workable
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
 	}
 
+	public bool CanBeHavested
+	{
+		get
+		{
+			return this.canBeHarvested;
+		}
+	}
+
 	private void OnEnableOverlay(object data)
 	{
 		if ((int)data == 954055328)
@@ -183,6 +191,7 @@ public class Harvestable : Workable
 		else
 		{
 			this.selectable.RemoveStatusItem(Db.Get().CreatureStatusItems.ReadyForHarvest, false);
+			this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.NotMarkedForHarvest, false);
 		}
 		this.userMenu.Refresh();
 	}
@@ -195,7 +204,7 @@ public class Harvestable : Workable
 		}
 		if (this.chore == null)
 		{
-			this.chore = new WorkChore<Harvestable>(Db.Get().ChoreTypes.Harvest, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true);
+			this.chore = new WorkChore<Harvestable>(Db.Get().ChoreTypes.Harvest, this, null, true, null, null, null, true, null, true, default(Tag), null, true, true, true);
 			this.selectable.AddStatusItem(Db.Get().MiscStatusItems.PendingHarvest, this);
 		}
 		this.isMarkedForHarvest = true;
@@ -214,6 +223,7 @@ public class Harvestable : Workable
 			this.chore.Cancel("Cancel harvest");
 			this.chore = null;
 			this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
+			this.SetHarvestWhenReady(false);
 		}
 		this.isMarkedForHarvest = false;
 	}
@@ -271,21 +281,14 @@ public class Harvestable : Workable
 		Game.Instance.Unsubscribe(1248612973, new Action<object>(this.OnEnableOverlay));
 		Game.Instance.Unsubscribe(2015652040, new Action<object>(this.OnDisableOverlay));
 		Game.Instance.Unsubscribe(1798162660, new Action<object>(this.OnEnableOverlay));
-		this.iconRefreshHandle.Clear();
+		this.iconRefreshHandle.ClearScheduler();
 		Components.Harvestables.Remove(this);
 	}
 
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
-		this.Trigger(-1358696400, worker);
 		this.selectable.RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
-	}
-
-	protected override void OnStopWork(Worker worker)
-	{
-		base.OnStopWork(worker);
-		this.Trigger(-942831938, worker);
 	}
 
 	public override Workable.AnimInfo GetAnim(Worker worker)

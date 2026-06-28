@@ -30,7 +30,7 @@ public static class GameUtil
 		return text + text2;
 	}
 
-	private static float GetConvertedTemperature(float temperature)
+	public static float GetConvertedTemperature(float temperature)
 	{
 		GameUtil.TemperatureUnit temperatureUnit = GameUtil.temperatureUnit;
 		if (temperatureUnit == GameUtil.TemperatureUnit.Celsius)
@@ -42,6 +42,20 @@ public static class GameUtil
 			return temperature;
 		}
 		return temperature * 1.8f - 459.67f;
+	}
+
+	public static float GetTemperatureConvertedToKelvin(float temperature)
+	{
+		GameUtil.TemperatureUnit temperatureUnit = GameUtil.temperatureUnit;
+		if (temperatureUnit == GameUtil.TemperatureUnit.Celsius)
+		{
+			return temperature + 273.15f;
+		}
+		if (temperatureUnit != GameUtil.TemperatureUnit.Fahrenheit)
+		{
+			return temperature;
+		}
+		return (temperature + 459.67f) * 5f / 9f;
 	}
 
 	private static float GetConvertedTemperatureDelta(float kelivnDelta)
@@ -194,11 +208,11 @@ public static class GameUtil
 		string text = string.Empty;
 		if (Mathf.Abs(temp) < 0.1f)
 		{
-			text = temp.ToString("###.####");
+			text = temp.ToString("##0.####");
 		}
 		else
 		{
-			text = temp.ToString("###.#");
+			text = temp.ToString("##0.#");
 		}
 		if (displayUnits)
 		{
@@ -239,21 +253,25 @@ public static class GameUtil
 	public static string GetFormattedPercent(float percent, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
 	{
 		percent = GameUtil.ApplyTimeSlice(percent, timeSlice);
-		percent /= 100f;
 		string text = string.Empty;
-		if (Mathf.Abs(percent) < 0.001f)
+		if (Mathf.Abs(percent) == 0f)
 		{
-			text = percent.ToString("P2");
+			text = "0";
 		}
-		else if (Mathf.Abs(percent) < 0.01f)
+		else if (Mathf.Abs(percent) < 0.1f)
 		{
-			text = percent.ToString("P1");
+			text = "##0.##";
+		}
+		else if (Mathf.Abs(percent) < 1f)
+		{
+			text = "##0.#";
 		}
 		else
 		{
-			text = percent.ToString("P0");
+			text = "##0";
 		}
-		return GameUtil.AddTimeSliceText(text, timeSlice);
+		string text2 = string.Format(UI.UNITSUFFIXES.PERCENT, percent.ToString(text));
+		return GameUtil.AddTimeSliceText(text2, timeSlice);
 	}
 
 	public static string GetFormattedRoundedJoules(float joules)
@@ -289,13 +307,34 @@ public static class GameUtil
 		return GameUtil.AddTimeSliceText(num.ToString("F0"), timeSlice);
 	}
 
-	public static string GetFormattedSimple(float num, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, string formatString = "F2")
+	public static string GetFormattedSimple(float num, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, string formatString = null)
 	{
 		num = GameUtil.ApplyTimeSlice(num, timeSlice);
-		return GameUtil.AddTimeSliceText(num.ToString(formatString), timeSlice);
+		string text = string.Empty;
+		if (formatString != null)
+		{
+			text = num.ToString(formatString);
+		}
+		else if (num == 0f)
+		{
+			text = "0";
+		}
+		else if (Mathf.Abs(num) < 1f)
+		{
+			text = num.ToString("#,##0.#");
+		}
+		else if (Mathf.Abs(num) < 10f)
+		{
+			text = num.ToString("#,###.#");
+		}
+		else
+		{
+			text = num.ToString("#,###");
+		}
+		return GameUtil.AddTimeSliceText(text, timeSlice);
 	}
 
-	public static string GetFormattedFoodQuality(int quality, bool tooltip = false)
+	public static string GetFormattedFoodQuality(int quality)
 	{
 		if (GameUtil.adjectives == null)
 		{
@@ -304,14 +343,10 @@ public static class GameUtil
 		LocString locString = ((quality < 0) ? DUPLICANTS.NEEDS.FOOD_QUALITY.ADJECTIVE_FORMAT_NEGATIVE : DUPLICANTS.NEEDS.FOOD_QUALITY.ADJECTIVE_FORMAT_POSITIVE);
 		int num = quality - DUPLICANTS.NEEDS.FOOD_QUALITY.ADJECTIVE_INDEX_OFFSET;
 		num = Mathf.Clamp(num, 0, GameUtil.adjectives.Length);
-		if (tooltip)
-		{
-			return string.Format(DUPLICANTS.NEEDS.FOOD_QUALITY.TOOLTIP, GameUtil.AddPositiveSign(quality.ToString(), quality > 0));
-		}
 		return string.Format(locString, GameUtil.adjectives[num], GameUtil.AddPositiveSign(quality.ToString(), quality > 0));
 	}
 
-	public static string GetFormattedMass(float mass, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, bool useThreshold = true, string floatFormat = "{0:0.#}")
+	public static string GetFormattedMass(float mass, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, GameUtil.MetricMassFormat massFormat = GameUtil.MetricMassFormat.UseThreshold, bool includeSuffix = true, string floatFormat = "{0:0.#}")
 	{
 		if (mass == -3.4028235E+38f)
 		{
@@ -322,7 +357,7 @@ public static class GameUtil
 		if (GameUtil.massUnit == GameUtil.MassUnit.Kilograms)
 		{
 			text = UI.UNITSUFFIXES.MASS.KILOGRAM;
-			if (useThreshold)
+			if (massFormat == GameUtil.MetricMassFormat.UseThreshold)
 			{
 				float num = Mathf.Abs(mass);
 				if (0f < num)
@@ -344,12 +379,17 @@ public static class GameUtil
 					}
 				}
 			}
+			else if (massFormat == GameUtil.MetricMassFormat.Gram)
+			{
+				mass *= 1000f;
+				text = UI.UNITSUFFIXES.MASS.GRAM;
+			}
 		}
 		else
 		{
 			mass /= 2.2f;
 			text = UI.UNITSUFFIXES.MASS.POUND;
-			if (useThreshold)
+			if (massFormat == GameUtil.MetricMassFormat.UseThreshold)
 			{
 				float num2 = Mathf.Abs(mass);
 				if (num2 < 5f && num2 > 0.001f)
@@ -363,6 +403,11 @@ public static class GameUtil
 					text = UI.UNITSUFFIXES.MASS.GRAIN;
 				}
 			}
+		}
+		if (!includeSuffix)
+		{
+			text = string.Empty;
+			timeSlice = GameUtil.TimeSlice.None;
 		}
 		return GameUtil.AddTimeSliceText(string.Format(floatFormat, mass) + text, timeSlice);
 	}
@@ -389,7 +434,7 @@ public static class GameUtil
 
 	public static string GetFormattedCycles(float seconds, string formatString = "F1")
 	{
-		if (seconds > 100f)
+		if (Mathf.Abs(seconds) > 100f)
 		{
 			return string.Format(UI.FORMATDAY, (seconds / 600f).ToString(formatString));
 		}
@@ -455,93 +500,69 @@ public static class GameUtil
 		GameUtil.probeFromCell(Grid.CellBelow(start_cell), is_valid, cells, invalidCells, maxSize);
 	}
 
-	public static int FloodFillFind(Func<int, bool> fn, int cell, int depth)
+	public static bool FloodFillCheck(Func<int, bool> fn, int start_cell, int max_depth, bool stop_at_solid, bool stop_at_liquid)
 	{
-		List<int> list = new List<int>();
+		int num = GameUtil.FloodFillFind(fn, start_cell, max_depth, stop_at_solid, stop_at_liquid);
+		return num != -1;
+	}
+
+	public static int FloodFillFind(Func<int, bool> fn, int start_cell, int max_depth, bool stop_at_solid, bool stop_at_liquid)
+	{
+		GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
+		{
+			cell = start_cell,
+			depth = 0
+		});
 		int num = -1;
-		GameUtil.FloodFindRecursive(fn, cell, depth, list, false, ref num);
+		while (GameUtil.FloodFillNext.Count > 0)
+		{
+			GameUtil.FloodFillInfo floodFillInfo = GameUtil.FloodFillNext.Dequeue();
+			if (floodFillInfo.depth < max_depth)
+			{
+				if (Grid.IsValidCell(floodFillInfo.cell))
+				{
+					Element element = Grid.Element[floodFillInfo.cell];
+					if (!stop_at_solid || !element.IsSolid)
+					{
+						if (!stop_at_liquid || !element.IsLiquid)
+						{
+							if (!GameUtil.FloodFillVisited.Contains(floodFillInfo.cell))
+							{
+								GameUtil.FloodFillVisited.Add(floodFillInfo.cell);
+								if (fn(floodFillInfo.cell))
+								{
+									num = floodFillInfo.cell;
+									break;
+								}
+								GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
+								{
+									cell = Grid.CellLeft(floodFillInfo.cell),
+									depth = floodFillInfo.depth + 1
+								});
+								GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
+								{
+									cell = Grid.CellRight(floodFillInfo.cell),
+									depth = floodFillInfo.depth + 1
+								});
+								GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
+								{
+									cell = Grid.CellAbove(floodFillInfo.cell),
+									depth = floodFillInfo.depth + 1
+								});
+								GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
+								{
+									cell = Grid.CellBelow(floodFillInfo.cell),
+									depth = floodFillInfo.depth + 1
+								});
+							}
+						}
+					}
+				}
+			}
+		}
+		GameUtil.FloodFillVisited.Clear();
+		GameUtil.FloodFillNext.Clear();
 		return num;
-	}
-
-	private static bool FloodFindRecursive(Func<int, bool> fn, int cell, int max_depth, List<int> visited, bool bCheck, ref int result)
-	{
-		if (max_depth <= 0)
-		{
-			return bCheck;
-		}
-		if (visited.Contains(cell))
-		{
-			return bCheck;
-		}
-		visited.Add(cell);
-		if (!Grid.IsValidCell(cell))
-		{
-			return bCheck;
-		}
-		Element element = Grid.Element[cell];
-		if (element.IsSolid)
-		{
-			return bCheck;
-		}
-		if (element.IsLiquid)
-		{
-			return bCheck;
-		}
-		if (fn(cell))
-		{
-			result = cell;
-			bCheck = true;
-			return bCheck;
-		}
-		int num = max_depth - 1;
-		bCheck = bCheck || GameUtil.FloodFindRecursive(fn, Grid.CellAbove(cell), num, visited, bCheck, ref result);
-		bCheck = bCheck || GameUtil.FloodFindRecursive(fn, Grid.CellBelow(cell), num, visited, bCheck, ref result);
-		bCheck = bCheck || GameUtil.FloodFindRecursive(fn, Grid.CellLeft(cell), num, visited, bCheck, ref result);
-		bCheck = bCheck || GameUtil.FloodFindRecursive(fn, Grid.CellRight(cell), num, visited, bCheck, ref result);
-		return bCheck;
-	}
-
-	public static bool FloodFillCheck(Func<int, bool> fn, int cell, int depth)
-	{
-		List<int> list = new List<int>();
-		return GameUtil.FloodCheckRecursive(fn, cell, depth, list, false);
-	}
-
-	private static bool FloodCheckRecursive(Func<int, bool> fn, int cell, int max_depth, List<int> visited, bool bCheck)
-	{
-		if (max_depth <= 0)
-		{
-			return bCheck;
-		}
-		if (visited.Contains(cell))
-		{
-			return bCheck;
-		}
-		visited.Add(cell);
-		Element element = Grid.Element[cell];
-		if (element.IsSolid)
-		{
-			return bCheck;
-		}
-		if (element.IsLiquid)
-		{
-			return bCheck;
-		}
-		if (!Grid.IsValidCell(cell))
-		{
-			return bCheck;
-		}
-		if (fn(cell))
-		{
-			bCheck = true;
-			return bCheck;
-		}
-		int num = max_depth - 1;
-		bCheck = bCheck || GameUtil.FloodCheckRecursive(fn, Grid.CellAbove(cell), num, visited, bCheck);
-		bCheck = bCheck || GameUtil.FloodCheckRecursive(fn, Grid.CellBelow(cell), num, visited, bCheck);
-		bCheck = bCheck || GameUtil.FloodCheckRecursive(fn, Grid.CellLeft(cell), num, visited, bCheck);
-		bCheck = bCheck || GameUtil.FloodCheckRecursive(fn, Grid.CellRight(cell), num, visited, bCheck);
-		return bCheck;
 	}
 
 	public static string GetHardnessString(Element element, bool addColor = true)
@@ -909,7 +930,7 @@ public static class GameUtil
 			float sqrMagnitude = (vector2 - vector).sqrMagnitude;
 			if (num2 >= sqrMagnitude && health != null)
 			{
-				health.Kill(Db.Get().Deaths.Explosion);
+				health.Damage(health.maxHitPoints);
 			}
 		}
 	}
@@ -959,20 +980,6 @@ public static class GameUtil
 		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities)
 		{
 			num += Db.Get().Amounts.Stress.Lookup(minionIdentity).value;
-		}
-		return num / (float)Components.LiveMinionIdentities.Count;
-	}
-
-	public static float GetAverageToxicity()
-	{
-		if (Components.LiveMinionIdentities.Count <= 0)
-		{
-			return 0f;
-		}
-		float num = 0f;
-		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities)
-		{
-			num += Db.Get().Amounts.Toxicity.Lookup(minionIdentity).value;
 		}
 		return num / (float)Components.LiveMinionIdentities.Count;
 	}
@@ -1084,6 +1091,20 @@ public static class GameUtil
 		return list;
 	}
 
+	public static List<Descriptor> GetDetailDescriptors(List<Descriptor> descriptors)
+	{
+		List<Descriptor> list = new List<Descriptor>();
+		foreach (Descriptor descriptor in descriptors)
+		{
+			if (descriptor.type == Descriptor.DescriptorType.Detail)
+			{
+				list.Add(descriptor);
+			}
+		}
+		GameUtil.IndentListOfDescriptors(list);
+		return list;
+	}
+
 	public static List<Descriptor> GetRequirementDescriptors(List<Descriptor> descriptors)
 	{
 		List<Descriptor> list = new List<Descriptor>();
@@ -1103,7 +1124,7 @@ public static class GameUtil
 		List<Descriptor> list = new List<Descriptor>();
 		foreach (Descriptor descriptor in descriptors)
 		{
-			if (descriptor.type == Descriptor.DescriptorType.Effect)
+			if (descriptor.type == Descriptor.DescriptorType.Effect || descriptor.type == Descriptor.DescriptorType.DiseaseSource)
 			{
 				list.Add(descriptor);
 			}
@@ -1112,55 +1133,12 @@ public static class GameUtil
 		return list;
 	}
 
-	public static List<Descriptor> GetHarvestDescriptors(List<Descriptor> descriptors)
-	{
-		List<Descriptor> list = new List<Descriptor>();
-		List<Descriptor> list2 = new List<Descriptor>();
-		List<Descriptor> list3 = new List<Descriptor>();
-		List<Descriptor> list4 = new List<Descriptor>();
-		foreach (Descriptor descriptor in descriptors)
-		{
-			if (descriptor.type == Descriptor.DescriptorType.HarvestLowYield)
-			{
-				list2.Add(descriptor);
-			}
-			else if (descriptor.type == Descriptor.DescriptorType.HarvestMedYield)
-			{
-				list3.Add(descriptor);
-			}
-			else if (descriptor.type == Descriptor.DescriptorType.HarvestHighYield)
-			{
-				list4.Add(descriptor);
-			}
-		}
-		if (list2.Count > 0)
-		{
-			list.Add(new Descriptor(string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.LOW_YIELD, new object[0]), string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.LOW_YIELD, 40f), Descriptor.DescriptorType.HarvestLowYield, false));
-			GameUtil.IndentListOfDescriptors(list2);
-			list.AddRange(list2);
-		}
-		if (list3.Count > 0)
-		{
-			list.Add(new Descriptor(string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.NORMAL_YIELD, new object[0]), string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.NORMAL_YIELD, 40f), Descriptor.DescriptorType.HarvestMedYield, false));
-			GameUtil.IndentListOfDescriptors(list3);
-			list.AddRange(list3);
-		}
-		if (list4.Count > 0)
-		{
-			list.Add(new Descriptor(string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.HIGH_YIELD, new object[0]), string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.HIGH_YIELD, 80f), Descriptor.DescriptorType.HarvestHighYield, false));
-			GameUtil.IndentListOfDescriptors(list4);
-			list.AddRange(list4);
-		}
-		GameUtil.IndentListOfDescriptors(list);
-		return list;
-	}
-
-	public static List<Descriptor> GetHarvestBonusDescriptors(List<Descriptor> descriptors)
+	public static List<Descriptor> GetInformationDescriptors(List<Descriptor> descriptors)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		foreach (Descriptor descriptor in descriptors)
 		{
-			if (descriptor.type == Descriptor.DescriptorType.CropHarvestBonus)
+			if (descriptor.type == Descriptor.DescriptorType.Lifecycle)
 			{
 				list.Add(descriptor);
 			}
@@ -1174,7 +1152,7 @@ public static class GameUtil
 		List<Descriptor> list = new List<Descriptor>();
 		foreach (Descriptor descriptor in descriptors)
 		{
-			if (descriptor.type == Descriptor.DescriptorType.CropOptimumCondition)
+			if (descriptor.type == Descriptor.DescriptorType.Lifecycle)
 			{
 				Descriptor descriptor2 = descriptor;
 				descriptor2.text = "• " + descriptor2.text;
@@ -1237,7 +1215,7 @@ public static class GameUtil
 				{
 					if (!descriptor.onlyForSimpleInfoScreen || simpleInfoScreen)
 					{
-						if (descriptor.type == Descriptor.DescriptorType.Effect)
+						if (descriptor.type == Descriptor.DescriptorType.Effect || descriptor.type == Descriptor.DescriptorType.DiseaseSource)
 						{
 							list.Add(descriptor);
 						}
@@ -1246,7 +1224,7 @@ public static class GameUtil
 			}
 		}
 		KPrefabID component2 = go.GetComponent<KPrefabID>();
-		if (component2.AdditionalEffects != null)
+		if (component2 != null && component2.AdditionalEffects != null)
 		{
 			foreach (Descriptor descriptor2 in component2.AdditionalEffects)
 			{
@@ -1274,17 +1252,16 @@ public static class GameUtil
 		return list;
 	}
 
-	public static List<Descriptor> GetPlantHarvestDescriptors(GameObject go)
+	public static List<Descriptor> GetPlantLifeCycleDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		List<Descriptor> allDescriptors = GameUtil.GetAllDescriptors(go, false);
-		List<Descriptor> harvestDescriptors = GameUtil.GetHarvestDescriptors(allDescriptors);
-		if (harvestDescriptors.Count > 0)
+		List<Descriptor> informationDescriptors = GameUtil.GetInformationDescriptors(GameUtil.GetAllDescriptors(go, false));
+		if (informationDescriptors.Count > 0)
 		{
 			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(UI.UISIDESCREENS.PLANTERSIDESCREEN.HARVESTDETAILS, UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.HARVESTDETAILS, Descriptor.DescriptorType.CropHarvest);
+			descriptor.SetupDescriptor(UI.UISIDESCREENS.PLANTERSIDESCREEN.LIFECYCLE, UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.PLANTLIFECYCLE, Descriptor.DescriptorType.Lifecycle);
 			list.Add(descriptor);
-			list.AddRange(harvestDescriptors);
+			list.AddRange(informationDescriptors);
 		}
 		return list;
 	}
@@ -1299,70 +1276,12 @@ public static class GameUtil
 		}
 		List<Descriptor> allDescriptors = GameUtil.GetAllDescriptors(go, false);
 		List<Descriptor> list2 = new List<Descriptor>();
-		List<Descriptor> cropOptimumConditionDescriptors = GameUtil.GetCropOptimumConditionDescriptors(allDescriptors);
-		float num = component.GetTotalGrowthTime() / 600f;
-		float num2 = 100f / num;
-		float num3 = num2 / 4f;
-		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.OPTIMUMCONDITIONS, num3.ToString("0.##")), string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.OPTIMUMCONDITIONS, num2.ToString("0.##"), num3.ToString("0.##")), Descriptor.DescriptorType.Effect);
-		descriptor.IncreaseIndent();
-		list2.Add(descriptor);
-		GameUtil.IndentListOfDescriptors(cropOptimumConditionDescriptors);
-		list2.AddRange(cropOptimumConditionDescriptors);
 		list2.AddRange(GameUtil.GetEffectDescriptors(allDescriptors));
 		if (list2.Count > 0)
-		{
-			Descriptor descriptor2 = default(Descriptor);
-			descriptor2.SetupDescriptor(UI.UISIDESCREENS.PLANTERSIDESCREEN.PLANTEFFECTS, UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.PLANTEFFECTS, Descriptor.DescriptorType.Effect);
-			list.Add(descriptor2);
-			list.AddRange(list2);
-		}
-		return list;
-	}
-
-	public static List<Descriptor> GetAllPlantDescriptors(GameObject go)
-	{
-		List<Descriptor> list = new List<Descriptor>();
-		List<Descriptor> allDescriptors = GameUtil.GetAllDescriptors(go, false);
-		List<Descriptor> requirementDescriptors = GameUtil.GetRequirementDescriptors(allDescriptors);
-		if (requirementDescriptors.Count > 0)
 		{
 			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(UI.UISIDESCREENS.PLANTERSIDESCREEN.PLANTREQUIREMENTS, UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.PLANTREQUIREMENTS, Descriptor.DescriptorType.Effect);
+			descriptor.SetupDescriptor(UI.UISIDESCREENS.PLANTERSIDESCREEN.PLANTEFFECTS, UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.PLANTEFFECTS, Descriptor.DescriptorType.Effect);
 			list.Add(descriptor);
-			list.AddRange(requirementDescriptors);
-		}
-		List<Descriptor> harvestDescriptors = GameUtil.GetHarvestDescriptors(allDescriptors);
-		if (harvestDescriptors.Count > 0)
-		{
-			Descriptor descriptor2 = default(Descriptor);
-			descriptor2.SetupDescriptor(UI.UISIDESCREENS.PLANTERSIDESCREEN.HARVESTDETAILS, UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.HARVESTDETAILS, Descriptor.DescriptorType.Effect);
-			list.Add(descriptor2);
-			list.AddRange(harvestDescriptors);
-		}
-		List<Descriptor> list2 = new List<Descriptor>();
-		List<Descriptor> cropOptimumConditionDescriptors = GameUtil.GetCropOptimumConditionDescriptors(allDescriptors);
-		Growing component = go.GetComponent<Growing>();
-		float num = 0f;
-		float num2 = 0f;
-		if (component != null)
-		{
-			float num3 = component.GetTotalGrowthTime() / 600f;
-			num = 100f / num3;
-			num2 = num / 4f;
-		}
-		Descriptor descriptor3 = default(Descriptor);
-		descriptor3.SetupDescriptor(string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.OPTIMUMCONDITIONS, num2.ToString("0.##")), string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.OPTIMUMCONDITIONS, num.ToString("0.##"), num2.ToString("0.##")), Descriptor.DescriptorType.Effect);
-		descriptor3.IncreaseIndent();
-		list2.Add(descriptor3);
-		GameUtil.IndentListOfDescriptors(cropOptimumConditionDescriptors);
-		list2.AddRange(cropOptimumConditionDescriptors);
-		list2.AddRange(GameUtil.GetEffectDescriptors(allDescriptors));
-		if (list2.Count > 0)
-		{
-			Descriptor descriptor4 = default(Descriptor);
-			descriptor4.SetupDescriptor(UI.UISIDESCREENS.PLANTERSIDESCREEN.PLANTEFFECTS, UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.PLANTEFFECTS, Descriptor.DescriptorType.Effect);
-			list.Add(descriptor4);
 			list.AddRange(list2);
 		}
 		return list;
@@ -1393,7 +1312,7 @@ public static class GameUtil
 			{
 				global::Klei.AI.Attribute attribute = Db.Get().Attributes.Get(attributeModifier.AttributeId);
 				string name = attribute.Name;
-				string formattedString = attributeModifier.GetFormattedString();
+				string formattedString = attributeModifier.GetFormattedString(null);
 				string text = ((attributeModifier.Value < 0f) ? "consumed" : "produced");
 				string text2 = UI.GAMEOBJECTEFFECTS.EQUIPMENT_MODS.text.Replace("{Attribute}", name).Replace("{Style}", text).Replace("{Value}", formattedString);
 				list.Add(new Descriptor(text2, text2, Descriptor.DescriptorType.Effect, false));
@@ -1424,16 +1343,11 @@ public static class GameUtil
 
 	public static GameObject GetTelepad()
 	{
-		GameObject gameObject = null;
-		foreach (Notifier notifier in Components.Notifiers)
+		if (Components.Telepads.Count > 0)
 		{
-			if (notifier.GetComponent<Telepad>())
-			{
-				gameObject = notifier.gameObject;
-				break;
-			}
+			return Components.Telepads[0].gameObject;
 		}
-		return gameObject;
+		return null;
 	}
 
 	public static GameObject KInstantiate(GameObject original, Vector3 position, Grid.SceneLayer sceneLayer, Folder folder, string name = null, int gameLayer = 0)
@@ -1487,6 +1401,16 @@ public static class GameUtil
 		}
 	}
 
+	public static float GetNoisePollutionAtCell(int cell)
+	{
+		return AudioEventManager.Get().GetNoisePollutionAtCell(cell);
+	}
+
+	public static string GetLoudestNoisePollutorAtCell(int cell)
+	{
+		return AudioEventManager.GetLoudestNoisePollutorAtCell(cell);
+	}
+
 	public static int GetDecorAtCell(int cell)
 	{
 		int num = 0;
@@ -1496,11 +1420,6 @@ public static class GameUtil
 			num += DecorProvider.GetLightDecorBonus(cell);
 		}
 		return num;
-	}
-
-	public static List<DecorProviderInfo> GetDecorProvidersAtCell(int cell)
-	{
-		return null;
 	}
 
 	public static string GetKeywordStyle(Tag tag)
@@ -1514,7 +1433,12 @@ public static class GameUtil
 		else
 		{
 			string text2 = tag.ToString();
-			if (text2 == "Filter" || text2 == "Coal" || text2 == "BasicFabric")
+			TagSet tagSet = new TagSet(new string[] { "BasicPlantFood", "MushBar", "ColdWheatSeed", "ColdWheatSeed", "SpiceNut", "PrickleFruit", "Meat", "Mushroom" });
+			if (tagSet.Contains(tag))
+			{
+				text = "food";
+			}
+			else if (text2 == "Filter" || text2 == "Coal" || text2 == "BasicFabric")
 			{
 				text = "solid";
 			}
@@ -1612,13 +1536,13 @@ public static class GameUtil
 		string text2 = string.Empty;
 		string text3 = string.Empty;
 		bool flag = global::UnityEngine.Random.Range(0f, 1f) >= 0.5f;
-		List<string> list = new List<string>(LocString.GetStrings(typeof(NAMEGEN.DUPLICANT.NAME.UNISEX)));
+		List<string> list = new List<string>(LocString.GetStrings(typeof(NAMEGEN.DUPLICANT.NAME.NB)));
 		list.AddRange((!flag) ? LocString.GetStrings(typeof(NAMEGEN.DUPLICANT.NAME.FEMALE)) : LocString.GetStrings(typeof(NAMEGEN.DUPLICANT.NAME.MALE)));
 		text3 = list.GetRandom<string>();
 		bool flag2 = global::UnityEngine.Random.Range(0f, 1f) > 0.7f;
 		if (flag2)
 		{
-			List<string> list2 = new List<string>(LocString.GetStrings(typeof(NAMEGEN.DUPLICANT.PREFIX.UNISEX)));
+			List<string> list2 = new List<string>(LocString.GetStrings(typeof(NAMEGEN.DUPLICANT.PREFIX.NB)));
 			list2.AddRange((!flag) ? LocString.GetStrings(typeof(NAMEGEN.DUPLICANT.PREFIX.FEMALE)) : LocString.GetStrings(typeof(NAMEGEN.DUPLICANT.PREFIX.MALE)));
 			text = list2.GetRandom<string>();
 		}
@@ -1629,7 +1553,7 @@ public static class GameUtil
 		bool flag3 = global::UnityEngine.Random.Range(0f, 1f) >= 0.9f;
 		if (flag3)
 		{
-			List<string> list3 = new List<string>(LocString.GetStrings(typeof(NAMEGEN.DUPLICANT.SUFFIX.UNISEX)));
+			List<string> list3 = new List<string>(LocString.GetStrings(typeof(NAMEGEN.DUPLICANT.SUFFIX.NB)));
 			list3.AddRange((!flag) ? LocString.GetStrings(typeof(NAMEGEN.DUPLICANT.SUFFIX.FEMALE)) : LocString.GetStrings(typeof(NAMEGEN.DUPLICANT.SUFFIX.MALE)));
 			text2 = list3.GetRandom<string>();
 		}
@@ -1653,11 +1577,87 @@ public static class GameUtil
 		return num * 1000f;
 	}
 
+	public static string GetFormattedDisease(byte idx, int units, bool color = false)
+	{
+		if (idx == 255 || units <= 0)
+		{
+			return UI.OVERLAYS.DISEASE.NO_DISEASE;
+		}
+		Disease disease = Db.Get().Diseases[(int)idx];
+		if (color)
+		{
+			return string.Format(UI.OVERLAYS.DISEASE.DISEASE_FORMAT, disease.Name, GameUtil.GetFormattedDiseaseAmount(units), GameUtil.ColourToHex(disease.overlayColour));
+		}
+		return string.Format(UI.OVERLAYS.DISEASE.DISEASE_FORMAT_NO_COLOR, disease.Name, GameUtil.GetFormattedDiseaseAmount(units));
+	}
+
+	public static string GetFormattedDiseaseAmount(int units)
+	{
+		return units.ToString("#,##0") + UI.UNITSUFFIXES.DISEASE.UNITS;
+	}
+
+	public static string ColourizeString(Color32 colour, string str)
+	{
+		return string.Format("<color=#{0}>{1}</color>", GameUtil.ColourToHex(colour), str);
+	}
+
+	public static string ColourToHex(Color32 colour)
+	{
+		return string.Format("{0:X2}{1:X2}{2:X2}{3:X2}", new object[] { colour.r, colour.g, colour.b, colour.a });
+	}
+
+	public static string GetFormattedDecibels(float db)
+	{
+		Color noisePollutionCategoryColourFromDecibels = SimDebugView.Instance.GetNoisePollutionCategoryColourFromDecibels(db);
+		return string.Format(string.Format(UI.OVERLAYS.NOISE_POLLUTION.VALUE, noisePollutionCategoryColourFromDecibels.ToHexString(), db.ToString()), new object[0]);
+	}
+
+	public static string GetDecibelLoudnessString(float db)
+	{
+		string text = string.Empty;
+		Color noisePollutionCategoryColourFromDecibels = SimDebugView.Instance.GetNoisePollutionCategoryColourFromDecibels(db);
+		if (db <= 36f)
+		{
+			text = UI.OVERLAYS.NOISE_POLLUTION.NAMES.PEACEFUL;
+		}
+		else if (db >= 36f && db < 45f)
+		{
+			text = UI.OVERLAYS.NOISE_POLLUTION.NAMES.QUIET;
+		}
+		else if (db >= 45f && db < 60f)
+		{
+			text = UI.OVERLAYS.NOISE_POLLUTION.NAMES.TOSSANDTURN;
+		}
+		else if (db >= 60f && db < 80f)
+		{
+			text = UI.OVERLAYS.NOISE_POLLUTION.NAMES.WAKEUP;
+		}
+		else if (db >= 80f && db < 106f)
+		{
+			text = UI.OVERLAYS.NOISE_POLLUTION.NAMES.PASSIVE;
+		}
+		else if (db >= 106f && db < 125f)
+		{
+			text = UI.OVERLAYS.NOISE_POLLUTION.NAMES.ACTIVE;
+		}
+		else
+		{
+			text = UI.OVERLAYS.NOISE_POLLUTION.NAMES.EXTREME;
+		}
+		return string.Format(UI.OVERLAYS.NOISE_POLLUTION.LOUDNESS_STRING, noisePollutionCategoryColourFromDecibels.ToHexString(), text);
+	}
+
 	public static GameUtil.TemperatureUnit temperatureUnit;
 
 	public static GameUtil.MassUnit massUnit;
 
 	private static string[] adjectives;
+
+	[ThreadStatic]
+	private static Queue<GameUtil.FloodFillInfo> FloodFillNext = new Queue<GameUtil.FloodFillInfo>();
+
+	[ThreadStatic]
+	private static List<int> FloodFillVisited = new List<int>();
 
 	public enum UnitClass
 	{
@@ -1667,7 +1667,8 @@ public static class GameUtil
 		Mass,
 		Calories,
 		Percent,
-		Distance
+		Distance,
+		Disease
 	}
 
 	public enum TemperatureUnit
@@ -1683,6 +1684,13 @@ public static class GameUtil
 		Pounds
 	}
 
+	public enum MetricMassFormat
+	{
+		UseThreshold,
+		Kilogram,
+		Gram
+	}
+
 	public enum TemperatureInterpretation
 	{
 		Absolute,
@@ -1695,5 +1703,12 @@ public static class GameUtil
 		ModifyOnly,
 		PerSecond,
 		PerCycle
+	}
+
+	private struct FloodFillInfo
+	{
+		public int cell;
+
+		public int depth;
 	}
 }

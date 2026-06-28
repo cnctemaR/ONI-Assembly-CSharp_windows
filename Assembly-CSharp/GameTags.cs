@@ -41,6 +41,14 @@ public class GameTags
 
 	public static readonly Tag Other = TagManager.Create("Other", null);
 
+	public static readonly Tag Incapacitated = TagManager.Create("Incapacitated", null);
+
+	public static readonly Tag CaloriesDepleted = TagManager.Create("CaloriesDepleted", null);
+
+	public static readonly Tag HitPointsDepleted = TagManager.Create("HitPointsDepleted", null);
+
+	public static readonly Tag Wilting = TagManager.Create("Wilting", null);
+
 	public static readonly Tag Creature = TagManager.Create("Creature", null);
 
 	public static readonly Tag Hexaped = TagManager.Create("Hexaped", null);
@@ -64,6 +72,8 @@ public class GameTags
 	public static readonly Tag Solid = TagManager.Create("Solid", null);
 
 	public static readonly Tag Liquid = TagManager.Create("Liquid", null);
+
+	public static readonly Tag LiquidSource = TagManager.Create("LiquidSource", null);
 
 	public static readonly Tag Water = TagManager.Create("Water", null);
 
@@ -90,6 +100,10 @@ public class GameTags
 	public static readonly Tag BuildableProcessed = TagManager.Create("BuildableProcessed", null);
 
 	public static readonly Tag Phosphorus = TagManager.Create("Phosphorus", null);
+
+	public static readonly Tag Phosphorite = TagManager.Create("Phosphorite", null);
+
+	public static readonly Tag SlimeMold = TagManager.Create("SlimeMold", null);
 
 	public static readonly Tag Building = TagManager.Create("Building", null);
 
@@ -177,6 +191,30 @@ public class GameTags
 		GameTags.FunkyVest
 	};
 
+	public static readonly Tag Entombed = TagManager.Create("Entombed", null);
+
+	public static readonly Tag Preserved = TagManager.Create("Preserved", null);
+
+	public static readonly Tag MarkedForCompost = TagManager.Create("MarkedForCompost", null);
+
+	public static readonly Tag ToxicSand = TagManager.Create("ToxicSand", null);
+
+	public static readonly Tag Pickled = TagManager.Create("Pickled", null);
+
+	public static readonly Tag Dying = TagManager.Create("Dying", null);
+
+	public static readonly Tag Dead = TagManager.Create("Dead", null);
+
+	public static readonly Tag Reachable = TagManager.Create("Reachable", null);
+
+	public static readonly Tag PreventChoreInterruption = TagManager.Create("PreventChoreInterruption", null);
+
+	public static readonly Tag RecoveringBreath = TagManager.Create("RecoveringBreath", null);
+
+	public static readonly Tag NoOxygen = TagManager.Create("NoOxygen", null);
+
+	public static readonly Tag Operational = TagManager.Create("Operational", null);
+
 	public static readonly Tag CropSeed = TagManager.Create("CropSeed", null);
 
 	public static readonly Tag DecorSeed = TagManager.Create("DecorSeed", null);
@@ -201,7 +239,11 @@ public class GameTags
 
 	public static TagSet GasElements = new TagSet();
 
-	public static TagSet CalorieCategories = new TagSet { GameTags.Edible };
+	public static TagSet CalorieCategories = new TagSet
+	{
+		GameTags.Edible,
+		GameTags.MarkedForCompost
+	};
 
 	public static TagSet UnitCategories = new TagSet
 	{

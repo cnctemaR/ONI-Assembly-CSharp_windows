@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using FMOD.Studio;
+using Klei.AI;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,6 +20,16 @@ public class TableScreen : KScreen
 		};
 		this.incubating = true;
 		this.transform.rectTransform().localScale = Vector3.zero;
+		Components.Cmps<MinionIdentity> liveMinionIdentities = Components.LiveMinionIdentities;
+		liveMinionIdentities.OnAdd = (Action<MinionIdentity>)Delegate.Combine(liveMinionIdentities.OnAdd, new Action<MinionIdentity>(delegate(MinionIdentity param)
+		{
+			this.MarkRowsDirty();
+		}));
+		Components.Cmps<MinionIdentity> liveMinionIdentities2 = Components.LiveMinionIdentities;
+		liveMinionIdentities2.OnRemove = (Action<MinionIdentity>)Delegate.Combine(liveMinionIdentities2.OnRemove, new Action<MinionIdentity>(delegate(MinionIdentity param)
+		{
+			this.MarkRowsDirty();
+		}));
 	}
 
 	protected override void OnShow(bool show)
@@ -40,9 +51,8 @@ public class TableScreen : KScreen
 			this.transform.rectTransform().localScale = Vector3.one;
 			this.incubating = false;
 		}
-		if (this.rows_dirty || Components.LiveMinionIdentities.Count != this.last_known_live_identities)
+		if (this.rows_dirty)
 		{
-			this.last_known_live_identities = Components.LiveMinionIdentities.Count;
 			this.RefreshRows();
 		}
 		foreach (TableColumn tableColumn in this.columns.Values)
@@ -63,11 +73,14 @@ public class TableScreen : KScreen
 		this.rows_dirty = true;
 	}
 
-	protected void RefreshRows()
+	protected virtual void RefreshRows()
 	{
 		this.ClearRows();
 		this.AddRow(null);
-		this.AddDefaultRow();
+		if (this.has_default_duplicant_row)
+		{
+			this.AddDefaultRow();
+		}
 		for (int i = 0; i < Components.LiveMinionIdentities.Count; i++)
 		{
 			this.AddRow(Components.LiveMinionIdentities[i]);
@@ -154,7 +167,10 @@ public class TableScreen : KScreen
 		{
 			this.sortable_rows[j].gameObject.transform.SetSiblingIndex(j);
 		}
-		this.default_row.transform.SetAsFirstSibling();
+		if (this.has_default_duplicant_row)
+		{
+			this.default_row.transform.SetAsFirstSibling();
+		}
 	}
 
 	protected int compare_rows_alphabetical(MinionIdentity a, MinionIdentity b)
@@ -264,9 +280,9 @@ public class TableScreen : KScreen
 		return null;
 	}
 
-	protected LabelTableColumn AddLabelColumn(string id, Action<MinionIdentity, GameObject> on_load_action, Func<MinionIdentity, GameObject, string> get_value_action, Comparison<MinionIdentity> sort_comparison, Action<MinionIdentity, GameObject, ToolTip> on_tooltip, Action<MinionIdentity, GameObject, ToolTip> on_sort_tooltip, int widget_width = 128)
+	protected LabelTableColumn AddLabelColumn(string id, Action<MinionIdentity, GameObject> on_load_action, Func<MinionIdentity, GameObject, string> get_value_action, Comparison<MinionIdentity> sort_comparison, Action<MinionIdentity, GameObject, ToolTip> on_tooltip, Action<MinionIdentity, GameObject, ToolTip> on_sort_tooltip, int widget_width = 128, float refresh_frequency = 0f)
 	{
-		LabelTableColumn labelTableColumn = new LabelTableColumn(on_load_action, get_value_action, sort_comparison, on_tooltip, on_sort_tooltip, widget_width);
+		LabelTableColumn labelTableColumn = new LabelTableColumn(on_load_action, get_value_action, sort_comparison, on_tooltip, on_sort_tooltip, widget_width, refresh_frequency);
 		if (this.RegisterColumn(id, labelTableColumn))
 		{
 			return labelTableColumn;
@@ -276,7 +292,7 @@ public class TableScreen : KScreen
 
 	protected CheckboxTableColumn AddCheckboxColumn(string id, Action<MinionIdentity, GameObject> on_load_action, Func<MinionIdentity, GameObject, TableScreen.ResultValues> get_value_action, Action<GameObject> on_press_action, Action<GameObject, bool> set_value_function, Comparison<MinionIdentity> sort_comparison, Action<MinionIdentity, GameObject, ToolTip> on_tooltip, Action<MinionIdentity, GameObject, ToolTip> on_sort_tooltip)
 	{
-		CheckboxTableColumn checkboxTableColumn = new CheckboxTableColumn(on_load_action, get_value_action, on_press_action, set_value_function, sort_comparison, on_tooltip, on_sort_tooltip);
+		CheckboxTableColumn checkboxTableColumn = new CheckboxTableColumn(on_load_action, get_value_action, on_press_action, set_value_function, sort_comparison, on_tooltip, on_sort_tooltip, null);
 		if (this.RegisterColumn(id, checkboxTableColumn))
 		{
 			return checkboxTableColumn;
@@ -353,18 +369,39 @@ public class TableScreen : KScreen
 	protected void on_load_name_label(MinionIdentity minion, GameObject widget_go)
 	{
 		TableRow widgetRow = this.GetWidgetRow(widget_go);
-		LocText componentInChildren = widget_go.GetComponentInChildren<LocText>(true);
+		LocText locText = null;
+		HierarchyReferences component = widget_go.GetComponent<HierarchyReferences>();
+		LocText locText2 = component.GetReference("Label") as LocText;
+		if (component.HasReference("SubLabel"))
+		{
+			locText = component.GetReference("SubLabel") as LocText;
+		}
 		if (minion != null)
 		{
-			componentInChildren.text = (this.GetWidgetColumn(widget_go) as LabelTableColumn).get_value_action(minion, widget_go);
-		}
-		else if (widgetRow.isDefault)
-		{
-			componentInChildren.text = UI.JOBSCREEN_DEFAULT;
+			locText2.text = (this.GetWidgetColumn(widget_go) as LabelTableColumn).get_value_action(minion, widget_go);
+			if (locText != null)
+			{
+				locText.text = minion.gameObject.GetAttributes().GetProfessionString(false);
+			}
 		}
 		else
 		{
-			componentInChildren.text = UI.JOBSCREEN_EVERYONE;
+			if (widgetRow.isDefault)
+			{
+				locText2.text = UI.JOBSCREEN_DEFAULT;
+				if (locText != null)
+				{
+					locText.gameObject.SetActive(false);
+				}
+			}
+			else
+			{
+				locText2.text = UI.JOBSCREEN_EVERYONE;
+			}
+			if (locText != null)
+			{
+				locText.text = string.Empty;
+			}
 		}
 	}
 
@@ -397,30 +434,33 @@ public class TableScreen : KScreen
 		bool flag4 = false;
 		foreach (CheckboxTableColumn checkboxTableColumn in superCheckboxTableColumn.columns_affected)
 		{
-			switch (checkboxTableColumn.get_value_action(widgetRow.GetMinionIdentity(), widgetRow.GetWidget(checkboxTableColumn)))
+			if (checkboxTableColumn.isRevealed)
 			{
-			case TableScreen.ResultValues.False:
-				flag2 = false;
-				if (!flag)
+				switch (checkboxTableColumn.get_value_action(widgetRow.GetMinionIdentity(), widgetRow.GetWidget(checkboxTableColumn)))
 				{
+				case TableScreen.ResultValues.False:
+					flag2 = false;
+					if (!flag)
+					{
+						flag4 = true;
+					}
+					break;
+				case TableScreen.ResultValues.Partial:
+					flag3 = true;
 					flag4 = true;
+					break;
+				case TableScreen.ResultValues.True:
+					flag = false;
+					if (!flag2)
+					{
+						flag4 = true;
+					}
+					break;
 				}
-				break;
-			case TableScreen.ResultValues.Partial:
-				flag3 = true;
-				flag4 = true;
-				break;
-			case TableScreen.ResultValues.True:
-				flag = false;
-				if (!flag2)
+				if (flag4)
 				{
-					flag4 = true;
+					break;
 				}
-				break;
-			}
-			if (flag4)
-			{
-				break;
 			}
 		}
 		if (flag3)
@@ -471,23 +511,26 @@ public class TableScreen : KScreen
 				GameObject widget = checkBoxToggleColumns[i].widgets_by_row[row];
 				if (!(widget == ignore_widget))
 				{
-					bool needsSetting = false;
-					switch ((this.GetWidgetColumn(widget) as CheckboxTableColumn).get_value_action(row.GetMinionIdentity(), widget))
+					if (checkBoxToggleColumns[i].isRevealed)
 					{
-					case TableScreen.ResultValues.False:
-						needsSetting = state;
-						break;
-					case TableScreen.ResultValues.Partial:
-						needsSetting = true;
-						break;
-					case TableScreen.ResultValues.True:
-						needsSetting = !state;
-						break;
-					}
-					if (needsSetting)
-					{
-						(this.GetWidgetColumn(widget) as CheckboxTableColumn).on_set_action(widget, state);
-						yield return null;
+						bool needsSetting = false;
+						switch ((this.GetWidgetColumn(widget) as CheckboxTableColumn).get_value_action(row.GetMinionIdentity(), widget))
+						{
+						case TableScreen.ResultValues.False:
+							needsSetting = state;
+							break;
+						case TableScreen.ResultValues.Partial:
+							needsSetting = true;
+							break;
+						case TableScreen.ResultValues.True:
+							needsSetting = !state;
+							break;
+						}
+						if (needsSetting)
+						{
+							(this.GetWidgetColumn(widget) as CheckboxTableColumn).on_set_action(widget, state);
+							yield return null;
+						}
 					}
 				}
 			}
@@ -576,9 +619,9 @@ public class TableScreen : KScreen
 
 	protected string title;
 
-	private bool rows_dirty;
+	protected bool has_default_duplicant_row = true;
 
-	private int last_known_live_identities;
+	private bool rows_dirty;
 
 	protected Comparison<MinionIdentity> active_sort_method;
 

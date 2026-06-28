@@ -1,25 +1,28 @@
 ﻿using System;
 using Klei.AI;
+using UnityEngine;
 
 public class StandardAttributeFormatter : IAttributeFormatter
 {
 	public StandardAttributeFormatter(GameUtil.UnitClass unitClass, GameUtil.TimeSlice deltaTimeSlice)
 	{
 		this.unitClass = unitClass;
-		this.deltaTimeSlice = deltaTimeSlice;
+		this.DeltaTimeSlice = deltaTimeSlice;
 	}
 
-	public string GetFormattedAttribute(AttributeInstance instance, bool tooltip = false)
+	public GameUtil.TimeSlice DeltaTimeSlice { get; set; }
+
+	public string GetFormattedAttribute(AttributeInstance instance)
 	{
-		return this.GetFormattedValue(instance.GetTotalDisplayValue(), GameUtil.TimeSlice.None, "F2");
+		return this.GetFormattedValue(instance.GetTotalDisplayValue(), GameUtil.TimeSlice.None, null);
 	}
 
-	public string GetFormattedModifier(AttributeModifier modifier)
+	public virtual string GetFormattedModifier(AttributeModifier modifier, GameObject parent_instance)
 	{
-		return this.GetFormattedValue(modifier.Value, this.deltaTimeSlice, "F2");
+		return this.GetFormattedValue(modifier.Value, this.DeltaTimeSlice, null);
 	}
 
-	public virtual string GetFormattedValue(float value, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, string simpleFormatString = "F2")
+	public virtual string GetFormattedValue(float value, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, GameObject parent_instance = null)
 	{
 		switch (this.unitClass)
 		{
@@ -28,18 +31,18 @@ public class StandardAttributeFormatter : IAttributeFormatter
 		case GameUtil.UnitClass.Temperature:
 			return GameUtil.GetFormattedTemperature(value, timeSlice, (timeSlice != GameUtil.TimeSlice.None) ? GameUtil.TemperatureInterpretation.Relative : GameUtil.TemperatureInterpretation.Absolute, true);
 		case GameUtil.UnitClass.Mass:
-			return GameUtil.GetFormattedMass(value, timeSlice, true, "{0:0.#}");
+			return GameUtil.GetFormattedMass(value, timeSlice, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
 		case GameUtil.UnitClass.Calories:
 			return GameUtil.GetFormattedCalories(value, timeSlice, true);
 		case GameUtil.UnitClass.Percent:
 			return GameUtil.GetFormattedPercent(value, timeSlice);
 		case GameUtil.UnitClass.Distance:
 			return GameUtil.GetFormattedDistance(value);
+		case GameUtil.UnitClass.Disease:
+			return GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(value));
 		}
-		return GameUtil.GetFormattedSimple(value, timeSlice, simpleFormatString);
+		return GameUtil.GetFormattedSimple(value, timeSlice, null);
 	}
 
 	public GameUtil.UnitClass unitClass;
-
-	public GameUtil.TimeSlice deltaTimeSlice;
 }

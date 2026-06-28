@@ -32,7 +32,11 @@ namespace STRINGS
 
 			public static LocString CLEAR = "Clear";
 
+			public static LocString DISINFECT = "Disinfect";
+
 			public static LocString ATTACK = "Attack";
+
+			public static LocString HARVEST = "Harvest";
 
 			public static LocString PRIORITIZE = "Prioritize";
 
@@ -94,6 +98,10 @@ namespace STRINGS
 
 			public static LocString OVERLAY9 = "Overlay9";
 
+			public static LocString OVERLAY10 = "Overlay10";
+
+			public static LocString OVERLAY11 = "Overlay11";
+
 			public static LocString SPEEDUP = "SpeedUp";
 
 			public static LocString SLOWDOWN = "SlowDown";
@@ -106,10 +114,6 @@ namespace STRINGS
 		public class TOOL
 		{
 			public static LocString NAME = "Tool";
-
-			public static LocString PAINTBRUSH = "PaintBrush";
-
-			public static LocString PAINTBOX = "PaintBox";
 
 			public static LocString ROTATEBUILDING = "RotateBuilding";
 

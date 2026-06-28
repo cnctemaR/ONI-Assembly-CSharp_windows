@@ -1,13 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
-using UnityEngine;
 
 namespace Klei.AI
 {
-	public class ColdBrain : AnimatedAttributeModifierDisease
+	public class ColdBrain : Disease
 	{
 		public ColdBrain()
-			: base("ColdBrain", new HashedString[] { "anim_idle_cold_kanim", "anim_loco_run_cold_kanim", "anim_loco_walk_cold_kanim" }, "Cold", true, new AttributeModifier[]
+			: base("ColdBrain", Disease.DiseaseType.Ailment, Disease.Severity.Major, 0.005f, new List<Disease.InfectionVector> { Disease.InfectionVector.Inhalation }, 900f, 0, new Disease.RangeInfo(0f, 0f, 1000f, 1000f), new Disease.RangeInfo(1f, 1f, 1f, 1f), new Disease.RangeInfo(0f, 0f, 1000f, 1000f), new Disease.RangeInfo(1f, 1f, 1f, 1f))
+		{
+			base.AddDiseaseComponent(new CommonSickEffectDisease());
+			base.AddDiseaseComponent(new AttributeModifierDisease(new AttributeModifier[]
 			{
 				new AttributeModifier("Learning", -5f, DUPLICANTS.DISEASES.COLDBRAIN.NAME, false, false),
 				new AttributeModifier("Machinery", -5f, DUPLICANTS.DISEASES.COLDBRAIN.NAME, false, false),
@@ -15,33 +18,10 @@ namespace Klei.AI
 				new AttributeModifier("Cooking", -5f, DUPLICANTS.DISEASES.COLDBRAIN.NAME, false, false),
 				new AttributeModifier("Cooking", -5f, DUPLICANTS.DISEASES.COLDBRAIN.NAME, false, false),
 				new AttributeModifier("Sneezyness", 1f, DUPLICANTS.DISEASES.COLDBRAIN.NAME, false, false)
-			}, 1f, 900f, new Disease.EffectProbabilityDelta[]
-			{
-				new Disease.EffectProbabilityDelta
-				{
-					effectID = "Hypothermia",
-					probabilityDelta = 1f
-				}
-			})
-		{
+			}));
+			base.AddDiseaseComponent(new AnimatedDisease(new HashedString[] { "anim_idle_cold_kanim", "anim_loco_run_cold_kanim", "anim_loco_walk_cold_kanim" }, "Cold"));
 		}
 
-		protected override object OnInfect(GameObject go)
-		{
-			base.OnInfect(go);
-			return base.StartCommonSickEffect(go);
-		}
-
-		protected override void OnCure(GameObject go, object instance_data)
-		{
-			base.OnCure(go, instance_data);
-			KAnimControllerBase kanimControllerBase = (KAnimControllerBase)instance_data;
-			kanimControllerBase.gameObject.DeleteObject();
-		}
-
-		public override string InfectionSourceString()
-		{
-			return DUPLICANTS.DISEASES.INFECTIONSOURCES.INTERNAL_TEMPERATURE;
-		}
+		public const string ID = "ColdBrain";
 	}
 }

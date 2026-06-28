@@ -25,9 +25,11 @@ public class FetchManager : KMonoBehaviour
 		return FetchManagerUpdater.FindFetchTarget(worker, destination, this.pickupables, tags, required_tags, forbid_tags, required_amount, ref target);
 	}
 
-	public void Clear()
+	protected override void OnLoadLevel()
 	{
-		this.pickupables.Clear();
+		base.OnLoadLevel();
+		FetchManagerUpdater.FreeResources();
+		FetchManager.Instance = null;
 	}
 
 	public List<Pickupable> pickupables = new List<Pickupable>();

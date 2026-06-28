@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
@@ -14,6 +15,14 @@ namespace Klei.AI
 			this.disabledChoreGroups = disallowed_chore_groups;
 			this.PositiveTrait = positive_trait;
 			this.ValidStarterTrait = is_valid_starter_trait;
+			this.ignoredEffects = new string[0];
+		}
+
+		public void AddIgnoredEffects(string[] effects)
+		{
+			List<string> list = new List<string>(this.ignoredEffects);
+			list.AddRange(effects);
+			this.ignoredEffects = list.ToArray();
 		}
 
 		public string GetTooltip()
@@ -22,7 +31,7 @@ namespace Klei.AI
 			foreach (AttributeModifier attributeModifier in this.SelfModifiers)
 			{
 				Attribute attribute = Db.Get().Attributes.Get(attributeModifier.AttributeId);
-				text += string.Format("\n{0}{1}: {2}", "• ", attribute.Name, attributeModifier.GetFormattedString());
+				text += string.Format(DUPLICANTS.TRAITS.ATTRIBUTE_MODIFIERS, attribute.Name, attributeModifier.GetFormattedString(null));
 			}
 			if (this.disabledChoreGroups != null)
 			{
@@ -33,7 +42,15 @@ namespace Klei.AI
 				}
 				foreach (ChoreGroup choreGroup in this.disabledChoreGroups)
 				{
-					text += string.Format("\n{0}{1}: {2}", "• ", text2, choreGroup.Name);
+					text += string.Format(text2, choreGroup.Name);
+				}
+			}
+			if (this.ignoredEffects != null && this.ignoredEffects.Length > 0)
+			{
+				foreach (string text3 in this.ignoredEffects)
+				{
+					string text4 = Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + text3.ToUpper() + ".NAME");
+					text += string.Format(DUPLICANTS.TRAITS.IGNORED_EFFECTS, text4);
 				}
 			}
 			if (this.ExtendedTooltip != null)
@@ -41,7 +58,7 @@ namespace Klei.AI
 				foreach (Delegate @delegate in this.ExtendedTooltip.GetInvocationList())
 				{
 					Func<string> func = (Func<string>)@delegate;
-					text = text + "\n\n" + func();
+					text = text + "\n" + func();
 				}
 			}
 			return text;
@@ -88,5 +105,7 @@ namespace Klei.AI
 		public ChoreGroup[] disabledChoreGroups;
 
 		public bool isTaskBeingRefused;
+
+		public string[] ignoredEffects;
 	}
 }

@@ -1,26 +1,12 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Globalization;
-using System.Linq;
 using System.Reflection;
-using System.Security.Permissions;
 
 namespace YamlDotNet.Serialization.Utilities
 {
 	public static class TypeConverter
 	{
-		[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
-		public static void RegisterTypeConverter<TConvertible, TConverter>() where TConverter : TypeConverter
-		{
-			if (!TypeDescriptor.GetAttributes(typeof(TConvertible)).OfType<TypeConverterAttribute>().Any<TypeConverterAttribute>((TypeConverterAttribute a) => a.ConverterTypeName == typeof(TConverter).AssemblyQualifiedName))
-			{
-				TypeDescriptor.AddAttributes(typeof(TConvertible), new Attribute[]
-				{
-					new TypeConverterAttribute(typeof(TConverter))
-				});
-			}
-		}
-
 		public static T ChangeType<T>(object value)
 		{
 			return (T)((object)TypeConverter.ChangeType(value, typeof(T)));
@@ -63,15 +49,11 @@ namespace YamlDotNet.Serialization.Utilities
 				{
 					return value;
 				}
-				if (destinationType.IsGenericType())
+				if (destinationType.IsGenericType() && destinationType.GetGenericTypeDefinition() == typeof(Nullable<>))
 				{
-					Type genericTypeDefinition = destinationType.GetGenericTypeDefinition();
-					if (genericTypeDefinition == typeof(Nullable<>))
-					{
-						Type type2 = destinationType.GetGenericArguments()[0];
-						object obj = TypeConverter.ChangeType(value, type2, culture);
-						return Activator.CreateInstance(destinationType, new object[] { obj });
-					}
+					Type type2 = destinationType.GetGenericArguments()[0];
+					object obj = TypeConverter.ChangeType(value, type2, culture);
+					return Activator.CreateInstance(destinationType, new object[] { obj });
 				}
 				if (destinationType.IsEnum())
 				{
@@ -105,16 +87,15 @@ namespace YamlDotNet.Serialization.Utilities
 					{
 						return converter2.ConvertFrom(null, culture, value);
 					}
-					foreach (Type type3 in new Type[] { type, destinationType })
+					Type[] array = new Type[] { type, destinationType };
+					for (int i = 0; i < array.Length; i++)
 					{
-						foreach (MethodInfo methodInfo in type3.GetPublicMethods())
+						foreach (MethodInfo methodInfo in array[i].GetPublicStaticMethods())
 						{
-							bool flag = methodInfo.IsSpecialName && (methodInfo.Name == "op_Implicit" || methodInfo.Name == "op_Explicit") && destinationType.IsAssignableFrom(methodInfo.ReturnParameter.ParameterType);
-							if (flag)
+							if (methodInfo.IsSpecialName && (methodInfo.Name == "op_Implicit" || methodInfo.Name == "op_Explicit") && destinationType.IsAssignableFrom(methodInfo.ReturnParameter.ParameterType))
 							{
 								ParameterInfo[] parameters = methodInfo.GetParameters();
-								bool flag2 = parameters.Length == 1 && parameters[0].ParameterType.IsAssignableFrom(type);
-								if (flag2)
+								if (parameters.Length == 1 && parameters[0].ParameterType.IsAssignableFrom(type))
 								{
 									try
 									{

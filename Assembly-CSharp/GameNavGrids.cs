@@ -7,7 +7,15 @@ public class GameNavGrids
 	{
 		this.CreateDuplicantNavigation(pathfinding);
 		this.CreateHatchNavigation(pathfinding);
-		this.CreateFlyerNavigation(pathfinding);
+		this.FlyerGrid1x1 = this.CreateFlyerNavigation(pathfinding, "FlyerNavGrid1x1", new CellOffset[]
+		{
+			new CellOffset(0, 0)
+		});
+		this.FlyerGrid1x2 = this.CreateFlyerNavigation(pathfinding, "FlyerNavGrid1x2", new CellOffset[]
+		{
+			new CellOffset(0, 0),
+			new CellOffset(0, 1)
+		});
 		this.CreateSwimmerNavigation(pathfinding);
 	}
 
@@ -185,14 +193,9 @@ public class GameNavGrids
 		pathfinding.AddNavGrid(this.HatchGrid);
 	}
 
-	private void CreateFlyerNavigation(Pathfinding pathfinding)
+	private NavGrid CreateFlyerNavigation(Pathfinding pathfinding, string id, CellOffset[] bounding_offsets)
 	{
-		CellOffset[] array = new CellOffset[]
-		{
-			new CellOffset(0, 0),
-			new CellOffset(0, 1)
-		};
-		NavGrid.Transition[] array2 = new NavGrid.Transition[]
+		NavGrid.Transition[] array = new NavGrid.Transition[]
 		{
 			new NavGrid.Transition(NavType.Hover, NavType.Hover, 1, 0, true, true, 2, string.Empty, new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
 			new NavGrid.Transition(NavType.Hover, NavType.Hover, 1, 1, true, true, 2, "hover_hover_1_0", new CellOffset[]
@@ -207,14 +210,15 @@ public class GameNavGrids
 			new NavGrid.Transition(NavType.Hover, NavType.Hover, 0, 1, true, true, 3, "hover_hover_1_0", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0]),
 			new NavGrid.Transition(NavType.Hover, NavType.Hover, 0, -1, true, true, 3, "hover_hover_1_0", new CellOffset[0], new CellOffset[0], new NavOffset[0], new NavOffset[0])
 		};
-		NavGrid.Transition[] array3 = this.MirrorTransitions(array2);
+		NavGrid.Transition[] array2 = this.MirrorTransitions(array);
 		Dictionary<NavType, string> dictionary = new Dictionary<NavType, string>();
 		dictionary[NavType.Hover] = "Idle";
-		this.FlyerGrid = new NavGrid("FlyerNavGrid", array3, dictionary, array, new NavTableValidator[]
+		NavGrid navGrid = new NavGrid(id, array2, dictionary, bounding_offsets, new NavTableValidator[]
 		{
 			new GameNavGrids.HoverValidator()
 		});
-		pathfinding.AddNavGrid(this.FlyerGrid);
+		pathfinding.AddNavGrid(navGrid);
+		return navGrid;
 	}
 
 	private void CreateSwimmerNavigation(Pathfinding pathfinding)
@@ -289,7 +293,9 @@ public class GameNavGrids
 
 	public NavGrid HatchGrid;
 
-	public NavGrid FlyerGrid;
+	public NavGrid FlyerGrid1x2;
+
+	public NavGrid FlyerGrid1x1;
 
 	public NavGrid SwimmerGrid;
 

@@ -41,7 +41,7 @@ namespace KSerialization
 		[Conditional("DEBUG_VALIDATE")]
 		public static void Assert(bool condition)
 		{
-			Util.Assert(condition);
+			DebugUtil.Assert(condition, "Assert!");
 		}
 
 		public static Vector2I ReadVector2I(this IReader reader)

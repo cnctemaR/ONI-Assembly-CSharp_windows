@@ -9,6 +9,7 @@ namespace Database
 			: base("ChoreGroups", parent)
 		{
 			this.Combat = this.Add("Combat", DUPLICANTS.CHOREGROUPS.COMBAT.NAME, "Digging");
+			this.MedicalAid = this.Add("MedicalAid", DUPLICANTS.CHOREGROUPS.MEDICALAID.NAME, "Medical");
 			this.Massage = this.Add("Massage", DUPLICANTS.CHOREGROUPS.MASSAGE.NAME, "Machinery");
 			this.Cook = this.Add("Cook", DUPLICANTS.CHOREGROUPS.COOK.NAME, "Cooking");
 			this.Art = this.Add("Art", DUPLICANTS.CHOREGROUPS.ART.NAME, "Art");
@@ -16,6 +17,7 @@ namespace Database
 			this.Research = this.Add("Research", DUPLICANTS.CHOREGROUPS.RESEARCH.NAME, "Learning");
 			this.LiquidCooledFan = this.Add("LiquidCooledFan", DUPLICANTS.CHOREGROUPS.LIQUIDCOOLEDFAN.NAME, "Machinery");
 			this.GeneratePower = this.Add("GeneratePower", DUPLICANTS.CHOREGROUPS.GENERATEPOWER.NAME, "Athletics");
+			this.Disinfect = this.Add("Disinfect", DUPLICANTS.CHOREGROUPS.DISINFECT.NAME, "Digging");
 			this.Repair = this.Add("Repair", DUPLICANTS.CHOREGROUPS.REPAIR.NAME, "Machinery");
 			this.Mop = this.Add("Mop", DUPLICANTS.CHOREGROUPS.MOP.NAME, "Digging");
 			this.Harvest = this.Add("Harvest", DUPLICANTS.CHOREGROUPS.HARVEST.NAME, "Digging");
@@ -58,10 +60,14 @@ namespace Database
 
 		public ChoreGroup Deliver;
 
+		public ChoreGroup Disinfect;
+
 		public ChoreGroup Repair;
 
 		public ChoreGroup Mop;
 
 		public ChoreGroup Massage;
+
+		public ChoreGroup MedicalAid;
 	}
 }

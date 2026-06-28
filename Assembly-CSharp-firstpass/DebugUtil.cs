@@ -8,7 +8,7 @@ public static class DebugUtil
 	{
 		if (!test)
 		{
-			Output.LogError(new object[] { message });
+			global::Debug.LogError(message, null);
 			global::Debug.Break();
 		}
 	}
@@ -19,12 +19,12 @@ public static class DebugUtil
 		{
 			if (Application.isEditor)
 			{
-				Output.LogError(new object[] { message });
+				global::Debug.LogError(message, null);
 				global::Debug.Break();
 			}
 			else
 			{
-				Output.LogWarning(new object[] { message });
+				global::Debug.LogWarning(message, null);
 			}
 		}
 	}

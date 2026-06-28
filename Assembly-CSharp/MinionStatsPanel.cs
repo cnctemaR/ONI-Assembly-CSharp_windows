@@ -9,7 +9,9 @@ public class MinionStatsPanel : TargetScreen
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		this.bioPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.traitsPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.expectationsPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.attributesPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 	}
 
@@ -39,6 +41,23 @@ public class MinionStatsPanel : TargetScreen
 	{
 		this.RefreshAttributes();
 		this.RefreshTraits();
+		this.RefreshExpectations();
+		this.RefreshBio();
+	}
+
+	private void RefreshBio()
+	{
+		MinionIdentity component = this.selectedTarget.GetComponent<MinionIdentity>();
+		if (!component)
+		{
+			this.bioPanel.SetActive(false);
+			return;
+		}
+		this.bioPanel.SetActive(true);
+		this.bioPanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.STATS.GROUPNAME_BIO;
+		MinionIdentity component2 = this.selectedTarget.GetComponent<MinionIdentity>();
+		GameObject gameObject = this.AddOrGetLabel(this.bioLabels, this.bioPanel, "About");
+		gameObject.GetComponent<LocText>().text = string.Format(Strings.Get(string.Format("STRINGS.DUPLICANTS.PERSONALITIES.{0}.DESC", component2.originalName.ToUpper())), component2.name);
 	}
 
 	private void RefreshAttributes()
@@ -53,27 +72,36 @@ public class MinionStatsPanel : TargetScreen
 		this.attributesPanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.STATS.GROUPNAME_ATTRIBUTES;
 		List<AttributeInstance> list = new List<AttributeInstance>(this.selectedTarget.GetAttributes().AttributeTable);
 		List<AttributeInstance> list2 = list.FindAll((AttributeInstance a) => a.Attribute.ShowInUI == Klei.AI.Attribute.Display.Skill);
-		List<AttributeInstance> list3 = list.FindAll((AttributeInstance a) => a.Attribute.ShowInUI == Klei.AI.Attribute.Display.Expectation);
 		if (list2.Count > 0)
 		{
-			GameObject gameObject = this.AddOrGetLabel(this.attributeLabels, this.attributesPanel, "SkillsTitle");
-			gameObject.GetComponent<LocText>().text = UI.DETAILTABS.STATS.GROUPNAME_ATTRIBUTES_SKILLS;
 			foreach (AttributeInstance attributeInstance in list2)
 			{
-				gameObject = this.AddOrGetLabel(this.attributeLabels, this.attributesPanel, attributeInstance.Id);
-				gameObject.GetComponent<LocText>().text = string.Format("{0}: {1}", attributeInstance.Name, attributeInstance.GetFormattedValue(false));
+				GameObject gameObject = this.AddOrGetLabel(this.attributeLabels, this.attributesPanel, attributeInstance.Id);
+				gameObject.GetComponent<LocText>().text = string.Format("{0}: {1}", attributeInstance.Name, attributeInstance.GetFormattedValue());
 				gameObject.GetComponent<ToolTip>().toolTip = attributeInstance.GetAttributeValueTooltip();
 			}
 		}
-		if (list3.Count > 0)
+	}
+
+	private void RefreshExpectations()
+	{
+		MinionIdentity component = this.selectedTarget.GetComponent<MinionIdentity>();
+		if (!component)
 		{
-			GameObject gameObject2 = this.AddOrGetLabel(this.attributeLabels, this.attributesPanel, "ExpectationsTitle");
-			gameObject2.GetComponent<LocText>().text = UI.DETAILTABS.STATS.GROUPNAME_ATTRIBUTES_EXPECTATIONS;
-			foreach (AttributeInstance attributeInstance2 in list3)
+			this.expectationsPanel.SetActive(false);
+			return;
+		}
+		this.expectationsPanel.SetActive(true);
+		this.expectationsPanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.STATS.GROUPNAME_EXPECTATIONS;
+		List<AttributeInstance> list = new List<AttributeInstance>(this.selectedTarget.GetAttributes().AttributeTable);
+		List<AttributeInstance> list2 = list.FindAll((AttributeInstance a) => a.Attribute.ShowInUI == Klei.AI.Attribute.Display.Expectation);
+		if (list2.Count > 0)
+		{
+			foreach (AttributeInstance attributeInstance in list2)
 			{
-				gameObject2 = this.AddOrGetLabel(this.attributeLabels, this.attributesPanel, attributeInstance2.Id);
-				gameObject2.GetComponent<LocText>().text = string.Format("{0}: {1}", attributeInstance2.Name, attributeInstance2.GetFormattedValue(false));
-				gameObject2.GetComponent<ToolTip>().toolTip = attributeInstance2.GetAttributeValueTooltip();
+				GameObject gameObject = this.AddOrGetLabel(this.expectationsLabels, this.expectationsPanel, attributeInstance.Id);
+				gameObject.GetComponent<LocText>().text = string.Format("{0}: {1}", attributeInstance.Name, attributeInstance.GetFormattedValue());
+				gameObject.GetComponent<ToolTip>().toolTip = attributeInstance.GetAttributeValueTooltip();
 			}
 		}
 	}
@@ -117,9 +145,17 @@ public class MinionStatsPanel : TargetScreen
 
 	private GameObject attributesPanel;
 
+	private GameObject expectationsPanel;
+
 	private GameObject traitsPanel;
+
+	private GameObject bioPanel;
 
 	private Dictionary<string, GameObject> attributeLabels = new Dictionary<string, GameObject>();
 
 	private Dictionary<string, GameObject> traitLabels = new Dictionary<string, GameObject>();
+
+	private Dictionary<string, GameObject> expectationsLabels = new Dictionary<string, GameObject>();
+
+	private Dictionary<string, GameObject> bioLabels = new Dictionary<string, GameObject>();
 }

@@ -6,7 +6,8 @@ public class LiquidHeaterConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(LiquidHeaterConfig.ID, 4, 1, "boiler_kanim", 800f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.ALL_METALS, 3200f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.PENALTY.TIER1, null);
+		EffectorValues none = NOISE_POLLUTION.NONE;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(LiquidHeaterConfig.ID, 4, 1, "boiler_kanim", 800f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.ALL_METALS, 3200f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.PENALTY.TIER1, none);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.Floodable = false;
 		buildingDef.EnergyConsumptionWhenActive = 960f;

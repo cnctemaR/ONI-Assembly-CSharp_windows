@@ -1,9 +1,14 @@
 ﻿using System;
 using Klei.AI;
+using UnityEngine;
 
 public interface IAttributeFormatter
 {
-	string GetFormattedAttribute(AttributeInstance instance, bool tooltip);
+	GameUtil.TimeSlice DeltaTimeSlice { get; set; }
 
-	string GetFormattedModifier(AttributeModifier modifier);
+	string GetFormattedAttribute(AttributeInstance instance);
+
+	string GetFormattedModifier(AttributeModifier modifier, GameObject parent_instance);
+
+	string GetFormattedValue(float value, GameUtil.TimeSlice timeSlice, GameObject parent_instance);
 }

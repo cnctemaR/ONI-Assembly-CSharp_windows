@@ -22,11 +22,18 @@ namespace YamlDotNet.Serialization.TypeInspectors
 
 		public override IEnumerable<IPropertyDescriptor> GetProperties(Type type, object container)
 		{
-			return from p in this.innerTypeDescriptor.GetProperties(type, container)
-				select new PropertyDescriptor(p)
+			return this.innerTypeDescriptor.GetProperties(type, container).Select<IPropertyDescriptor, IPropertyDescriptor>(delegate(IPropertyDescriptor p)
+			{
+				YamlMemberAttribute customAttribute = p.GetCustomAttribute<YamlMemberAttribute>();
+				if (customAttribute != null && !customAttribute.ApplyNamingConventions)
+				{
+					return p;
+				}
+				return new PropertyDescriptor(p)
 				{
 					Name = this.namingConvention.Apply(p.Name)
 				};
+			});
 		}
 
 		private readonly ITypeInspector innerTypeDescriptor;

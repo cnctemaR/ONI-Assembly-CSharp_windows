@@ -8,7 +8,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Repairable : BuildingWorkable
+public class Repairable : Workable
 {
 	public override Workable.AnimInfo GetAnim(Worker worker)
 	{
@@ -38,6 +38,12 @@ public class Repairable : BuildingWorkable
 	private void OnProxyStorageChanged(object data)
 	{
 		this.Trigger(-1697596308, data);
+	}
+
+	protected override void OnLoadLevel()
+	{
+		this.smi = null;
+		base.OnLoadLevel();
 	}
 
 	protected override void OnCleanUp()
@@ -298,8 +304,8 @@ public class Repairable : BuildingWorkable
 				{
 					smi.DestroyStorageProxy();
 				});
-			this.allowed.needMass.EventTransition(GameHashes.OnStorageChange, this.allowed.repairable, (Repairable.SMInstance smi) => smi.HasRequiredMass()).ToggleChore(new Func<Repairable.SMInstance, Chore>(this.CreateFetchChore), this.allowed.repairable, false).ToggleStatusItem(Db.Get().BuildingStatusItems.WaitingForRepairMaterials, (Repairable.SMInstance smi) => smi.GetRequiredMass());
-			this.allowed.repairable.ToggleChore(new Func<Repairable.SMInstance, Chore>(this.CreateRepairChore), this.allowed.repairable, true).ToggleStatusItem(Db.Get().BuildingStatusItems.PendingRepair, null);
+			this.allowed.needMass.EventTransition(GameHashes.OnStorageChange, this.allowed.repairable, (Repairable.SMInstance smi) => smi.HasRequiredMass()).ToggleChore(new Func<Repairable.SMInstance, Chore>(this.CreateFetchChore), this.allowed.repairable, this.allowed.needMass).ToggleStatusItem(Db.Get().BuildingStatusItems.WaitingForRepairMaterials, (Repairable.SMInstance smi) => smi.GetRequiredMass());
+			this.allowed.repairable.ToggleRecurringChore(new Func<Repairable.SMInstance, Chore>(this.CreateRepairChore)).ToggleStatusItem(Db.Get().BuildingStatusItems.PendingRepair, null);
 			this.repaired.EventTransition(GameHashes.BuildingReceivedDamage, this.allowed, (Repairable.SMInstance smi) => smi.NeedsRepairs()).OnSignal(this.allow, this.allowed).OnSignal(this.forbid, this.forbidden);
 		}
 
@@ -309,13 +315,13 @@ public class Repairable : BuildingWorkable
 			Storage storageProxy = smi.master.storageProxy;
 			PrimaryElement primaryElement = storageProxy.FindPrimaryElement(component.ElementID);
 			float num = component.Mass * 0.1f - ((!(primaryElement != null)) ? 0f : primaryElement.Mass);
-			Tag[] array = new Tag[] { TagManager.Create(component.ElementID) };
-			return new FetchChore(smi.master.storageProxy, num, array, null, true, null, null, null, FetchOrder2.OperationalRequirement.None, 0);
+			Tag[] array = new Tag[] { GameTagExtensions.Create(component.ElementID) };
+			return new FetchChore(smi.master.storageProxy, num, array, null, null, true, null, null, null, FetchOrder2.OperationalRequirement.None, 0);
 		}
 
 		private Chore CreateRepairChore(Repairable.SMInstance smi)
 		{
-			WorkChore<Repairable> workChore = new WorkChore<Repairable>(Db.Get().ChoreTypes.Repair, smi.master, null, true, null, null, null, true, null, false, default(Tag), null, false, true);
+			WorkChore<Repairable> workChore = new WorkChore<Repairable>(Db.Get().ChoreTypes.Repair, smi.master, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true);
 			workChore.AddPrecondition(Repairable.States.IsNotBeingAttacked, smi.master.GetComponent<Breakable>());
 			return workChore;
 		}

@@ -145,7 +145,7 @@ namespace Klei.AI
 				InstanceType instanceType = this.Get(text);
 				if (instanceType == null && this.resources != null)
 				{
-					ModifierType modifierType = this.resources.Get(text);
+					ModifierType modifierType = this.resources.TryGet(text);
 					if (modifierType != null)
 					{
 						instanceType = this.CreateInstance(modifierType);
@@ -155,7 +155,11 @@ namespace Klei.AI
 				{
 					if (text != "Condition")
 					{
-						Output.LogWarning(new object[] { "Missing modifier: " + text });
+						Output.LogWarning(new object[]
+						{
+							this.gameObject.name,
+							"Missing modifier: " + text
+						});
 					}
 					reader.SkipBytes(num2);
 				}

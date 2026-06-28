@@ -7,12 +7,12 @@ public class AquaticReproducer : KMonoBehaviour
 	{
 		base.OnPrefabInit();
 		this.timeUntilNextSpawn = this.cycleLength;
-		this.handle = GameScheduler.Instance.SchedulePeriodic(base.name, this.UpdateFrequency, new Action<object>(this.CheckReproduce), null, null, 0f, null);
+		this.handle = GameScheduler.Instance.SchedulePeriodic("AquaticReproducer", this.UpdateFrequency, new Action<object>(this.CheckReproduce), null, null, 0f, null);
 	}
 
 	protected override void OnCleanUp()
 	{
-		this.handle.Clear();
+		this.handle.ClearScheduler();
 		base.OnCleanUp();
 	}
 

@@ -5,7 +5,7 @@ using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.Serialization
 {
-	public sealed class StreamFragment : IYamlSerializable
+	public sealed class StreamFragment : IYamlConvertible
 	{
 		public IList<ParsingEvent> Events
 		{
@@ -15,7 +15,7 @@ namespace YamlDotNet.Serialization
 			}
 		}
 
-		void IYamlSerializable.ReadYaml(IParser parser)
+		void IYamlConvertible.Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
 		{
 			this.events.Clear();
 			int num = 0;
@@ -32,7 +32,7 @@ namespace YamlDotNet.Serialization
 			throw new InvalidOperationException("The parser has reached the end before deserialization completed.");
 		}
 
-		void IYamlSerializable.WriteYaml(IEmitter emitter)
+		void IYamlConvertible.Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
 		{
 			foreach (ParsingEvent parsingEvent in this.events)
 			{

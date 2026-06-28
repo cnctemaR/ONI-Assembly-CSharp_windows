@@ -20,13 +20,13 @@ public class FliesFX : GameStateMachine<FliesFX, FliesFX.Instance>
 		public Instance(IStateMachineTarget master, Vector3 offset)
 			: base(master)
 		{
-			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("fly_swarm_kanim", base.smi.master.transform.position + offset, base.smi.master.transform, false, Grid.SceneLayer.Front);
+			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("fly_swarm_kanim", base.smi.master.transform.position + offset, base.smi.master.transform, false, Grid.SceneLayer.Front, false);
 			base.sm.fx.Set(kbatchedAnimController.gameObject, base.smi);
 		}
 
 		public void DestroyFX()
 		{
-			global::UnityEngine.Object.Destroy(base.sm.fx.Get(base.smi));
+			Util.KDestroyGameObject(base.sm.fx.Get(base.smi));
 		}
 	}
 }

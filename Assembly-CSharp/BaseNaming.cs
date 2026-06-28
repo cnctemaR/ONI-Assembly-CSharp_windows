@@ -12,7 +12,7 @@ public class BaseNaming : KMonoBehaviour
 		this.GenerateBaseName();
 		this.inputField.onValueChanged.AddListener(delegate
 		{
-			Util.ScrubInputField(this.inputField);
+			Util.ScrubInputField(this.inputField, false);
 		});
 		this.shuffleBaseNameButton.onClick += this.GenerateBaseName;
 		this.inputField.onEndEdit.AddListener(new UnityAction<string>(this.OnEndEdit));

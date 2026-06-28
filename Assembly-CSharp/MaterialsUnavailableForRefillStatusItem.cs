@@ -13,18 +13,9 @@ public class MaterialsUnavailableForRefillStatusItem : MaterialsStatusItem
 	{
 		foreach (KeyValuePair<Tag, float> keyValuePair in remaining)
 		{
-			List<GameObject> list = fetch_list.Destination.Find(keyValuePair.Key);
-			float num = 0f;
-			foreach (GameObject gameObject in list)
-			{
-				Pickupable component = gameObject.GetComponent<Pickupable>();
-				if (component != null)
-				{
-					num += component.TotalAmount;
-				}
-			}
+			float amountInStorage = base.GetAmountInStorage(fetch_list.Destination, keyValuePair.Key);
 			float actualAvailable = this.GetActualAvailable(keyValuePair.Key, keyValuePair.Value);
-			if (num + actualAvailable > fetch_list.GetMinimumAmount(keyValuePair.Key) && keyValuePair.Value > actualAvailable)
+			if (amountInStorage + actualAvailable > fetch_list.GetMinimumAmount(keyValuePair.Key) && keyValuePair.Value > actualAvailable)
 			{
 				return true;
 			}

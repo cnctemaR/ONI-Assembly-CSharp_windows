@@ -1,47 +1,18 @@
 ﻿using System;
-using Klei;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-[SerializationConfig(MemberSerialization.OptIn)]
 [SkipSaveFileSerialization]
+[SerializationConfig(MemberSerialization.OptIn)]
 public class SubstanceChunk : KMonoBehaviour, ISaveLoadable
 {
-	protected override void OnPrefabInit()
+	protected override void OnSpawn()
 	{
-		base.OnPrefabInit();
-		GameComps.ElementSplitters.Add(base.gameObject);
-		this.Subscribe(-2064133523, new Action<object>(this.OnAbsorb));
-		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
-	}
-
-	protected override void OnCleanUp()
-	{
-		GameComps.ElementSplitters.Remove(base.gameObject);
-		base.OnCleanUp();
-	}
-
-	private void OnAbsorb(object data)
-	{
-		GameObject gameObject = data as GameObject;
-		if (gameObject != null)
-		{
-			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-			if (component != null)
-			{
-				PrimaryElement component2 = base.GetComponent<PrimaryElement>();
-				if (component2.Mass > 0f && component.Mass > 0f)
-				{
-					float num = SimUtil.CalculateFinalTemperature(component2.Mass, component2.Temperature, component.Mass, component.Temperature);
-					component2.Temperature = num;
-				}
-				else if (component.Mass > 0f)
-				{
-					component2.Temperature = component.Temperature;
-				}
-			}
-		}
+		base.OnSpawn();
+		Color color = base.GetComponent<PrimaryElement>().Element.substance.colour;
+		color.a = 1f;
+		base.GetComponent<KBatchedAnimController>().SetSymbolTint(KBatchedAnimController.SymbolTintIndex.First, SubstanceChunk.symbolToTint, color);
 	}
 
 	private void OnRefreshUserMenu(object data)
@@ -57,11 +28,13 @@ public class SubstanceChunk : KMonoBehaviour, ISaveLoadable
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
 		if (component.Mass > 0f)
 		{
-			SimMessages.AddRemoveSubstance(num, component.ElementID, CellEventLogger.Instance.ExhaustSimUpdate, component.Mass, component.Temperature, -1);
+			SimMessages.AddRemoveSubstance(num, component.ElementID, CellEventLogger.Instance.ExhaustSimUpdate, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, -1);
 		}
 		base.gameObject.DeleteObject();
 	}
 
 	[MyCmpAdd]
 	private UserMenu userMenu;
+
+	private static KAnimHashedString symbolToTint = new KAnimHashedString("substance_tinter");
 }

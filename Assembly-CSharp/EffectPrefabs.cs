@@ -24,6 +24,8 @@ public class EffectPrefabs : MonoBehaviour
 
 	public GameObject HarvestEffect;
 
+	public GameObject DisinfectEffect;
+
 	public GameObject HarvestGlow;
 
 	public GameObject AttackEffect;

@@ -4,6 +4,22 @@ using UnityEngine;
 
 public class AnimEventManager
 {
+	public void FreeResources()
+	{
+		for (int i = 0; i < this.eventData.Count; i++)
+		{
+			this.eventData[i].FreeResources();
+		}
+		this.eventData.Clear();
+		this.eventData = null;
+		AnimEventManager.emptyEventList.Clear();
+		for (int j = 0; j < this.eventPlayerDataPool.Count; j++)
+		{
+			this.eventPlayerDataPool[j].FreeResources();
+		}
+		this.eventPlayerDataPool.Clear();
+	}
+
 	public int PlayAnim(KAnimControllerBase controller, KAnim.Anim anim, KAnim.PlayMode mode, float time, bool use_unscaled_time)
 	{
 		AnimEventManager.AnimData animData = default(AnimEventManager.AnimData);
@@ -11,7 +27,16 @@ public class AnimEventManager
 		animData.totalTime = anim.totalTime;
 		animData.numFrames = anim.numFrames;
 		animData.useUnscaledTime = use_unscaled_time;
-		AnimEventManager.EventPlayerData eventPlayerData = new AnimEventManager.EventPlayerData();
+		AnimEventManager.EventPlayerData eventPlayerData;
+		if (this.eventPlayerDataPool.Count == 0)
+		{
+			eventPlayerData = new AnimEventManager.EventPlayerData();
+		}
+		else
+		{
+			eventPlayerData = this.eventPlayerDataPool[this.eventPlayerDataPool.Count - 1];
+			this.eventPlayerDataPool.RemoveAt(this.eventPlayerDataPool.Count - 1);
+		}
 		eventPlayerData.elapsedTime = time;
 		eventPlayerData.mode = mode;
 		eventPlayerData.controller = controller as KBatchedAnimController;
@@ -19,11 +44,7 @@ public class AnimEventManager
 		eventPlayerData.previousFrame = -1;
 		eventPlayerData.events = null;
 		eventPlayerData.updatingEvents = null;
-		KPrefabID component = controller.GetComponent<KPrefabID>();
-		if (component != null)
-		{
-			eventPlayerData.events = GameAudioSheets.Get().GetEvents(anim.id);
-		}
+		eventPlayerData.events = GameAudioSheets.Get().GetEvents(anim.id);
 		if (eventPlayerData.events == null)
 		{
 			eventPlayerData.events = AnimEventManager.emptyEventList;
@@ -47,7 +68,7 @@ public class AnimEventManager
 
 	public int StopAnim(int handle)
 	{
-		if (handle == -1)
+		if (handle == -1 || this.eventData == null)
 		{
 			return -1;
 		}
@@ -61,6 +82,8 @@ public class AnimEventManager
 		eventPlayerData.events = null;
 		this.eventData[handle] = eventPlayerData;
 		this.freeIndices.Add(handle);
+		eventPlayerData.FreeResources();
+		this.eventPlayerDataPool.Add(eventPlayerData);
 		return -1;
 	}
 
@@ -109,8 +132,7 @@ public class AnimEventManager
 		}
 		for (int k = 0; k < this.finishedCalls.Count; k++)
 		{
-			KBatchedAnimController kbatchedAnimController = this.finishedCalls[k];
-			kbatchedAnimController.TriggerStop();
+			this.finishedCalls[k].TriggerStop();
 		}
 		this.finishedCalls.Clear();
 	}
@@ -136,6 +158,8 @@ public class AnimEventManager
 			data.updatingEvents.Clear();
 		}
 	}
+
+	private List<AnimEventManager.EventPlayerData> eventPlayerDataPool = new List<AnimEventManager.EventPlayerData>();
 
 	private static readonly List<AnimEvent> emptyEventList = new List<AnimEvent>();
 
@@ -229,6 +253,17 @@ public class AnimEventManager
 		public void SetElapsedTime(float elapsedTime)
 		{
 			this.elapsedTime = elapsedTime;
+		}
+
+		public void FreeResources()
+		{
+			this.elapsedTime = 0f;
+			this.mode = KAnim.PlayMode.Once;
+			this.currentFrame = 0;
+			this.previousFrame = 0;
+			this.events = null;
+			this.updatingEvents = null;
+			this.controller = null;
 		}
 
 		public float elapsedTime;

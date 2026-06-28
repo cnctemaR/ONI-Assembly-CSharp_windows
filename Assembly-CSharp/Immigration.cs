@@ -40,7 +40,9 @@ public class Immigration : KMonoBehaviour, ISaveLoadable
 	public int SpawnMinions()
 	{
 		this.bImmigrantAvailable = false;
+		this.spawnIdx++;
 		int num = Math.Min(this.spawnIdx, this.spawnInterval.Length - 1);
+		this.timeBeforeSpawn = this.spawnInterval[num];
 		return this.spawnTable[num];
 	}
 
@@ -49,9 +51,15 @@ public class Immigration : KMonoBehaviour, ISaveLoadable
 		return this.timeBeforeSpawn;
 	}
 
+	public float GetTotalWaitTime()
+	{
+		int num = Math.Min(this.spawnIdx, this.spawnInterval.Length - 1);
+		return this.spawnInterval[num];
+	}
+
 	private void Update()
 	{
-		if (this.stopped)
+		if (this.stopped || this.bImmigrantAvailable)
 		{
 			return;
 		}
@@ -61,9 +69,6 @@ public class Immigration : KMonoBehaviour, ISaveLoadable
 		{
 			this.bImmigrantAvailable = true;
 			this.availableMinionStats = new MinionStartingStats(false);
-			this.spawnIdx++;
-			int num = Math.Min(this.spawnIdx, this.spawnInterval.Length - 1);
-			this.timeBeforeSpawn = this.spawnInterval[num];
 		}
 	}
 

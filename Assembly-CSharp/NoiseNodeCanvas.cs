@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Klei;
-using Klei.Noise;
 using NodeEditorFramework;
 using NodeEditorFramework.Utilities;
+using ProcGen.Noise;
 using UnityEngine;
 
 [NodeCanvasType("Noise Canvas")]
@@ -35,7 +35,7 @@ public class NoiseNodeCanvas : NodeCanvas
 
 	public override void BeforeSavingCanvas()
 	{
-		foreach (global::NodeEditorFramework.Node node in this.nodes)
+		foreach (Node node in this.nodes)
 		{
 			BaseNodeEditor baseNodeEditor = (BaseNodeEditor)node;
 			NoiseBase target = baseNodeEditor.GetTarget();
@@ -56,7 +56,7 @@ public class NoiseNodeCanvas : NodeCanvas
 		if (GUILayout.Button(new GUIContent("Save to Yaml", "Saves the Canvas to a Yaml file"), new GUILayoutOption[] { GUILayout.ExpandWidth(false) }))
 		{
 			this.BeforeSavingCanvas();
-			global::Klei.Noise.Tree tree = this.BuildTreeFromCanvas();
+			ProcGen.Noise.Tree tree = this.BuildTreeFromCanvas();
 			if (tree != null)
 			{
 				tree.ClearEmptyLists();
@@ -92,7 +92,7 @@ public class NoiseNodeCanvas : NodeCanvas
 	{
 		if (this.terminator == null)
 		{
-			foreach (global::NodeEditorFramework.Node node in this.nodes)
+			foreach (Node node in this.nodes)
 			{
 				Type type = node.GetType();
 				if (type == typeof(TerminalNodeEditor))
@@ -109,15 +109,15 @@ public class NoiseNodeCanvas : NodeCanvas
 			}
 			if (this.terminator == null)
 			{
-				this.terminator = (TerminalNodeEditor)global::NodeEditorFramework.Node.Create("terminalNodeEditor", Vector2.zero);
+				this.terminator = (TerminalNodeEditor)Node.Create("terminalNodeEditor", Vector2.zero);
 			}
 		}
 		Vector2 vector = this.terminator.rect.min + new Vector2(0f, -290f);
-		DisplayNodeEditor displayNodeEditor = (DisplayNodeEditor)global::NodeEditorFramework.Node.Create("displayNodeEditor", vector);
+		DisplayNodeEditor displayNodeEditor = (DisplayNodeEditor)Node.Create("displayNodeEditor", vector);
 		displayNodeEditor.Inputs[0].ApplyConnection(this.terminator.Outputs[0]);
 	}
 
-	private Link GetLink(global::NodeEditorFramework.Node node)
+	private Link GetLink(Node node)
 	{
 		Link link = new Link();
 		Type type = node.GetType();
@@ -177,11 +177,11 @@ public class NoiseNodeCanvas : NodeCanvas
 		return link;
 	}
 
-	public global::Klei.Noise.Tree BuildTreeFromCanvas()
+	public ProcGen.Noise.Tree BuildTreeFromCanvas()
 	{
-		global::Klei.Noise.Tree tree = new global::Klei.Noise.Tree();
+		ProcGen.Noise.Tree tree = new ProcGen.Noise.Tree();
 		tree.settings = this.settings;
-		foreach (global::NodeEditorFramework.Node node in this.nodes)
+		foreach (Node node in this.nodes)
 		{
 			Type type = node.GetType();
 			if (type == typeof(PrimitiveNodeEditor))
@@ -261,7 +261,7 @@ public class NoiseNodeCanvas : NodeCanvas
 				this.terminator = node as TerminalNodeEditor;
 			}
 		}
-		foreach (global::NodeEditorFramework.Node node2 in this.nodes)
+		foreach (Node node2 in this.nodes)
 		{
 			Type type2 = node2.GetType();
 			if (type2 == typeof(FilterNodeEditor))
@@ -370,7 +370,7 @@ public class NoiseNodeCanvas : NodeCanvas
 	{
 		NodeCanvas nodeCanvas = null;
 		string treeFilePath = NoiseTreeFiles.GetTreeFilePath(name);
-		global::Klei.Noise.Tree tree = YamlIO<global::Klei.Noise.Tree>.LoadFile(treeFilePath);
+		ProcGen.Noise.Tree tree = YamlIO<ProcGen.Noise.Tree>.LoadFile(treeFilePath);
 		if (tree != null)
 		{
 			if (tree.settings.name == null || tree.settings.name == string.Empty)
@@ -383,7 +383,7 @@ public class NoiseNodeCanvas : NodeCanvas
 		return nodeCanvas;
 	}
 
-	private global::NodeEditorFramework.Node GetNodeFromLink(Link link)
+	private Node GetNodeFromLink(Link link)
 	{
 		if (link == null)
 		{
@@ -450,7 +450,7 @@ public class NoiseNodeCanvas : NodeCanvas
 		case Link.Type.Terminator:
 			if (this.terminator == null)
 			{
-				this.terminator = (TerminalNodeEditor)global::NodeEditorFramework.Node.Create("terminalNodeEditor", Vector2.zero);
+				this.terminator = (TerminalNodeEditor)Node.Create("terminalNodeEditor", Vector2.zero);
 				this.terminator.name = link.name;
 			}
 			return this.terminator;
@@ -466,7 +466,7 @@ public class NoiseNodeCanvas : NodeCanvas
 		return null;
 	}
 
-	private static NoiseNodeCanvas PopulateNoiseNodeEditor(global::Klei.Noise.Tree tree)
+	private static NoiseNodeCanvas PopulateNoiseNodeEditor(ProcGen.Noise.Tree tree)
 	{
 		NoiseNodeCanvas noiseNodeCanvas = NoiseNodeCanvas.CreateInstance();
 		NodeEditor.curNodeCanvas = noiseNodeCanvas;
@@ -474,13 +474,13 @@ public class NoiseNodeCanvas : NodeCanvas
 		return noiseNodeCanvas;
 	}
 
-	private void Populate(global::Klei.Noise.Tree tree)
+	private void Populate(ProcGen.Noise.Tree tree)
 	{
 		this.settings = tree.settings;
 		this.primitiveLookup.Clear();
 		foreach (KeyValuePair<string, Primitive> keyValuePair in tree.primitives)
 		{
-			PrimitiveNodeEditor primitiveNodeEditor = (PrimitiveNodeEditor)global::NodeEditorFramework.Node.Create("primitiveNodeEditor", keyValuePair.Value.pos);
+			PrimitiveNodeEditor primitiveNodeEditor = (PrimitiveNodeEditor)Node.Create("primitiveNodeEditor", keyValuePair.Value.pos);
 			primitiveNodeEditor.name = keyValuePair.Key;
 			primitiveNodeEditor.target = keyValuePair.Value;
 			this.primitiveLookup.Add(keyValuePair.Key, primitiveNodeEditor);
@@ -488,15 +488,15 @@ public class NoiseNodeCanvas : NodeCanvas
 		this.filterLookup.Clear();
 		foreach (KeyValuePair<string, Filter> keyValuePair2 in tree.filters)
 		{
-			FilterNodeEditor filterNodeEditor = (FilterNodeEditor)global::NodeEditorFramework.Node.Create("filterNodeEditor", keyValuePair2.Value.pos);
+			FilterNodeEditor filterNodeEditor = (FilterNodeEditor)Node.Create("filterNodeEditor", keyValuePair2.Value.pos);
 			filterNodeEditor.name = keyValuePair2.Key;
 			filterNodeEditor.target = keyValuePair2.Value;
 			this.filterLookup.Add(keyValuePair2.Key, filterNodeEditor);
 		}
 		this.modifierLookup.Clear();
-		foreach (KeyValuePair<string, global::Klei.Noise.Modifier> keyValuePair3 in tree.modifiers)
+		foreach (KeyValuePair<string, ProcGen.Noise.Modifier> keyValuePair3 in tree.modifiers)
 		{
-			ModifierModuleNodeEditor modifierModuleNodeEditor = (ModifierModuleNodeEditor)global::NodeEditorFramework.Node.Create("modifierModuleNodeEditor", keyValuePair3.Value.pos);
+			ModifierModuleNodeEditor modifierModuleNodeEditor = (ModifierModuleNodeEditor)Node.Create("modifierModuleNodeEditor", keyValuePair3.Value.pos);
 			modifierModuleNodeEditor.name = keyValuePair3.Key;
 			modifierModuleNodeEditor.target = keyValuePair3.Value;
 			this.modifierLookup.Add(keyValuePair3.Key, modifierModuleNodeEditor);
@@ -504,7 +504,7 @@ public class NoiseNodeCanvas : NodeCanvas
 		this.selectorLookup.Clear();
 		foreach (KeyValuePair<string, Selector> keyValuePair4 in tree.selectors)
 		{
-			SelectorModuleNodeEditor selectorModuleNodeEditor = (SelectorModuleNodeEditor)global::NodeEditorFramework.Node.Create("selectorModuleNodeEditor", keyValuePair4.Value.pos);
+			SelectorModuleNodeEditor selectorModuleNodeEditor = (SelectorModuleNodeEditor)Node.Create("selectorModuleNodeEditor", keyValuePair4.Value.pos);
 			selectorModuleNodeEditor.name = keyValuePair4.Key;
 			selectorModuleNodeEditor.target = keyValuePair4.Value;
 			this.selectorLookup.Add(keyValuePair4.Key, selectorModuleNodeEditor);
@@ -512,7 +512,7 @@ public class NoiseNodeCanvas : NodeCanvas
 		this.transformerLookup.Clear();
 		foreach (KeyValuePair<string, Transformer> keyValuePair5 in tree.transformers)
 		{
-			TransformerNodeEditor transformerNodeEditor = (TransformerNodeEditor)global::NodeEditorFramework.Node.Create("transformerNodeEditor", keyValuePair5.Value.pos);
+			TransformerNodeEditor transformerNodeEditor = (TransformerNodeEditor)Node.Create("transformerNodeEditor", keyValuePair5.Value.pos);
 			transformerNodeEditor.name = keyValuePair5.Key;
 			transformerNodeEditor.target = keyValuePair5.Value;
 			this.transformerLookup.Add(keyValuePair5.Key, transformerNodeEditor);
@@ -520,7 +520,7 @@ public class NoiseNodeCanvas : NodeCanvas
 		this.combinerLookup.Clear();
 		foreach (KeyValuePair<string, Combiner> keyValuePair6 in tree.combiners)
 		{
-			CombinerModuleNodeEditor combinerModuleNodeEditor = (CombinerModuleNodeEditor)global::NodeEditorFramework.Node.Create("combinerModuleNodeEditor", keyValuePair6.Value.pos);
+			CombinerModuleNodeEditor combinerModuleNodeEditor = (CombinerModuleNodeEditor)Node.Create("combinerModuleNodeEditor", keyValuePair6.Value.pos);
 			combinerModuleNodeEditor.name = keyValuePair6.Key;
 			combinerModuleNodeEditor.target = keyValuePair6.Value;
 			this.combinerLookup.Add(keyValuePair6.Key, combinerModuleNodeEditor);
@@ -528,7 +528,7 @@ public class NoiseNodeCanvas : NodeCanvas
 		this.floatlistLookup.Clear();
 		foreach (KeyValuePair<string, FloatList> keyValuePair7 in tree.floats)
 		{
-			FloatPointsNodeEditor floatPointsNodeEditor = (FloatPointsNodeEditor)global::NodeEditorFramework.Node.Create("floatPointsNodeEditor", keyValuePair7.Value.pos);
+			FloatPointsNodeEditor floatPointsNodeEditor = (FloatPointsNodeEditor)Node.Create("floatPointsNodeEditor", keyValuePair7.Value.pos);
 			floatPointsNodeEditor.name = keyValuePair7.Key;
 			floatPointsNodeEditor.target = keyValuePair7.Value;
 			this.floatlistLookup.Add(keyValuePair7.Key, floatPointsNodeEditor);
@@ -536,7 +536,7 @@ public class NoiseNodeCanvas : NodeCanvas
 		this.ctrlpointsLookup.Clear();
 		foreach (KeyValuePair<string, ControlPointList> keyValuePair8 in tree.controlpoints)
 		{
-			ControlPointsNodeEditor controlPointsNodeEditor = (ControlPointsNodeEditor)global::NodeEditorFramework.Node.Create("controlPointsNodeEditor", keyValuePair8.Value.pos);
+			ControlPointsNodeEditor controlPointsNodeEditor = (ControlPointsNodeEditor)Node.Create("controlPointsNodeEditor", keyValuePair8.Value.pos);
 			controlPointsNodeEditor.name = keyValuePair8.Key;
 			controlPointsNodeEditor.target = keyValuePair8.Value;
 			this.ctrlpointsLookup.Add(keyValuePair8.Key, controlPointsNodeEditor);
@@ -545,11 +545,11 @@ public class NoiseNodeCanvas : NodeCanvas
 		while (i < tree.links.Count)
 		{
 			NodeLink nodeLink = tree.links[i];
-			global::NodeEditorFramework.Node nodeFromLink = this.GetNodeFromLink(nodeLink.target);
-			global::NodeEditorFramework.Node node = null;
-			global::NodeEditorFramework.Node node2 = null;
-			global::NodeEditorFramework.Node node3 = null;
-			global::NodeEditorFramework.Node node4 = null;
+			Node nodeFromLink = this.GetNodeFromLink(nodeLink.target);
+			Node node = null;
+			Node node2 = null;
+			Node node3 = null;
+			Node node4 = null;
 			switch (nodeLink.target.type)
 			{
 			case Link.Type.Filter:

@@ -1,14 +1,15 @@
 ﻿using System;
 using UnityEngine;
 
-public class ElementEmitter : KMonoBehaviour
+public class ElementEmitter : SimComponent
 {
+	public bool isEmitterBlocked { get; private set; }
+
 	protected override void OnSpawn()
 	{
+		this.onBlockedHandle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnEmitterBlocked), true));
+		this.onUnblockedHandle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnEmitterUnblocked), true));
 		base.OnSpawn();
-		this.onBlockedHandle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnEmitterBlocked), true), "OnEmitterBlocked");
-		this.onUnblockedHandle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnEmitterUnblocked), true), "OnEmitterUnblocked");
-		this.SimRegister();
 	}
 
 	protected override void OnCleanUp()
@@ -21,57 +22,41 @@ public class ElementEmitter : KMonoBehaviour
 		{
 			Game.Instance.callbackManager.Release(this.onUnblockedHandle);
 		}
-		this.SimUnregister();
 		base.OnCleanUp();
 	}
 
 	public void SetEmitting(bool emitting)
 	{
-		this.simActive = emitting;
-		this.dirty = true;
+		base.SetSimActive(emitting);
 	}
 
-	private void SimUpdate(float dt)
+	protected override void OnSimActivate()
 	{
-		if (!Sim.IsValidHandle(this.simHandle))
-		{
-			return;
-		}
-		this.UpdateSimState();
-	}
-
-	private void UpdateSimState()
-	{
-		if (!this.dirty)
-		{
-			return;
-		}
-		this.dirty = false;
 		int num = Grid.PosToCell(this.transform.position);
 		int num2 = Grid.OffsetCell(num, (int)this.outputElement.outputElementOffset.x, (int)this.outputElement.outputElementOffset.y);
-		if (this.simActive)
+		if (this.outputElement.elementHash != (SimHashes)0 && this.outputElement.massGenerationRate > 0f && this.emissionFrequency > 0f)
 		{
-			if (this.outputElement.elementHash != (SimHashes)0 && this.outputElement.massGenerationRate > 0f && this.emissionFrequency > 0f)
-			{
-				float num3 = ((this.outputElement.outputTemperature != 0f) ? this.outputElement.outputTemperature : base.GetComponent<PrimaryElement>().Temperature);
-				SimMessages.ModifyElementEmitter(this.simHandle, num2, (int)this.emitRange, this.outputElement.elementHash, this.emissionFrequency, this.outputElement.massGenerationRate, num3);
-			}
-			if (this.showDescriptor)
-			{
-				this.statusHandle = base.GetComponent<KSelectable>().ReplaceStatusItem(this.statusHandle, Db.Get().BuildingStatusItems.ElementEmitterOutput, this);
-			}
+			float num3 = ((this.outputElement.outputTemperature != 0f) ? this.outputElement.outputTemperature : base.GetComponent<PrimaryElement>().Temperature);
+			SimMessages.ModifyElementEmitter(this.simHandle, num2, (int)this.emitRange, this.outputElement.elementHash, this.emissionFrequency, this.outputElement.massGenerationRate, num3);
 		}
-		else
+		if (this.showDescriptor)
 		{
-			SimMessages.ModifyElementEmitter(this.simHandle, num2, (int)this.emitRange, SimHashes.Vacuum, 0f, 0f, 0f);
-			if (this.showDescriptor)
-			{
-				this.statusHandle = base.GetComponent<KSelectable>().RemoveStatusItem(this.statusHandle, false);
-			}
+			this.statusHandle = base.GetComponent<KSelectable>().ReplaceStatusItem(this.statusHandle, Db.Get().BuildingStatusItems.ElementEmitterOutput, this);
 		}
 	}
 
-	public void ForceEmit(float mass, float temperature = -1f)
+	protected override void OnSimDeactivate()
+	{
+		int num = Grid.PosToCell(this.transform.position);
+		int num2 = Grid.OffsetCell(num, (int)this.outputElement.outputElementOffset.x, (int)this.outputElement.outputElementOffset.y);
+		SimMessages.ModifyElementEmitter(this.simHandle, num2, (int)this.emitRange, SimHashes.Vacuum, 0f, 0f, 0f);
+		if (this.showDescriptor)
+		{
+			this.statusHandle = base.GetComponent<KSelectable>().RemoveStatusItem(this.statusHandle, false);
+		}
+	}
+
+	public void ForceEmit(float mass, byte disease_idx, int disease_count, float temperature = -1f)
 	{
 		if (mass <= 0f)
 		{
@@ -82,61 +67,40 @@ public class ElementEmitter : KMonoBehaviour
 		if (element.IsGas || element.IsLiquid)
 		{
 			int num2 = Grid.PosToCell(this.transform.position);
-			SimMessages.AddRemoveSubstance(num2, this.outputElement.elementHash, CellEventLogger.Instance.ElementConsumerSimUpdate, mass, num, -1);
+			SimMessages.AddRemoveSubstance(num2, this.outputElement.elementHash, CellEventLogger.Instance.ElementConsumerSimUpdate, mass, num, disease_idx, disease_count, -1);
 		}
 		else if (element.IsSolid)
 		{
-			element.substance.SpawnResource(this.transform.position + new Vector3(0f, 0.5f, 0f), mass, num, false, true);
+			element.substance.SpawnResource(this.transform.position + new Vector3(0f, 0.5f, 0f), mass, num, disease_idx, disease_count, false, true);
 		}
 		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, ElementLoader.FindElementByHash(this.outputElement.elementHash).name, base.gameObject.transform, 1.5f, false);
 	}
 
 	private void OnEmitterBlocked()
 	{
+		this.isEmitterBlocked = true;
 		this.Trigger(1615168894, this);
 	}
 
 	private void OnEmitterUnblocked()
 	{
+		this.isEmitterBlocked = false;
 		this.Trigger(-657992955, this);
 	}
 
-	private void SimRegister()
+	protected override void OnSimRegister(HandleVector<Game.ComplexCallbackInfo>.Handle cb_handle)
 	{
-		if (base.isSpawned && this.simHandle == -1)
-		{
-			this.simHandle = -2;
-			HandleVector<Game.ComplexCallbackInfo>.Handle handle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(delegate(object data)
-			{
-				ElementEmitter.OnSimRegistered(this, data);
-			}), "ublementEmitter");
-			SimMessages.AddElementEmitter(this.maxPressure, handle.index, this.onBlockedHandle.index, this.onUnblockedHandle.index);
-		}
+		SimMessages.AddElementEmitter(this.maxPressure, cb_handle.index, this.onBlockedHandle.index, this.onUnblockedHandle.index);
 	}
 
-	private void SimUnregister()
+	protected override void OnSimUnregister()
 	{
-		if (this.simHandle != -1)
-		{
-			if (Sim.IsValidHandle(this.simHandle))
-			{
-				SimMessages.RemoveElementEmitter(-1, this.simHandle);
-			}
-			this.simHandle = -1;
-		}
+		ElementEmitter.StaticUnregister(this.simHandle);
 	}
 
-	private static void OnSimRegistered(ElementEmitter instance, object data)
+	private static void StaticUnregister(int sim_handle)
 	{
-		int num = (int)data;
-		if (instance != null)
-		{
-			instance.simHandle = num;
-		}
-		else
-		{
-			SimMessages.RemoveElementEmitter(-1, num);
-		}
+		SimMessages.RemoveElementEmitter(-1, sim_handle);
 	}
 
 	private void OnDrawGizmosSelected()
@@ -145,6 +109,11 @@ public class ElementEmitter : KMonoBehaviour
 		int num2 = Grid.OffsetCell(num, (int)this.outputElement.outputElementOffset.x, (int)this.outputElement.outputElementOffset.y);
 		Gizmos.color = Color.green;
 		Gizmos.DrawSphere(Grid.CellToPos(num2) + Vector3.right / 2f + Vector3.up / 2f, 0.2f);
+	}
+
+	protected override Action<int> GetStaticUnregister()
+	{
+		return new Action<int>(ElementEmitter.StaticUnregister);
 	}
 
 	[SerializeField]
@@ -159,13 +128,7 @@ public class ElementEmitter : KMonoBehaviour
 	[SerializeField]
 	public float maxPressure = 1f;
 
-	private int simHandle = -1;
-
 	private Guid statusHandle = Guid.Empty;
-
-	private bool simActive = true;
-
-	private bool dirty = true;
 
 	public bool showDescriptor = true;
 

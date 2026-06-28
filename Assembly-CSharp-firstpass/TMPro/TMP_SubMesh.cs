@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace TMPro
 {
+	[RequireComponent(typeof(MeshRenderer))]
 	[RequireComponent(typeof(MeshFilter))]
 	[ExecuteInEditMode]
-	[RequireComponent(typeof(MeshRenderer))]
 	public class TMP_SubMesh : MonoBehaviour
 	{
 		public TMP_FontAsset fontAsset

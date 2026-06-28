@@ -8,50 +8,43 @@ public class PrickleFlowerConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		DecorValues tier = DECOR.BONUS.TIER1;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("PrickleFlower", global::STRINGS.CREATURES.SPECIES.PRICKLEFLOWER.NAME, global::STRINGS.CREATURES.SPECIES.PRICKLEFLOWER.DESC, 400f, Assets.GetAnim("bristleblossom_kanim"), "idle_empty", Grid.SceneLayer.BuildingFront, 1, 2, tier, SimHashes.Creature, null);
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 15f, 5f, 218.15f, 250.15f, 270.15f, 276.15f, 296.15f, 398.15f, 0f, 0.15f, 1f, PrickleFruitConfig.ID);
-		EntityTemplates.ExtendPlantToFertilizable(gameObject, new FertilizationMonitor.FertilizerInfo[]
+		EffectorValues tier = DECOR.BONUS.TIER1;
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity("PrickleFlower", global::STRINGS.CREATURES.SPECIES.PRICKLEFLOWER.NAME, global::STRINGS.CREATURES.SPECIES.PRICKLEFLOWER.DESC, 1f, Assets.GetAnim("bristleblossom_kanim"), "idle_empty", Grid.SceneLayer.BuildingFront, 1, 2, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 15f, 5f, 273.15f, 278.15f, 283.15f, 288.15f, 296.15f, 398.15f, new SimHashes[]
 		{
-			new FertilizationMonitor.FertilizerInfo
-			{
-				tag = GameTags.Fertilizer,
-				massConsumptionRate = 0.006666667f
-			}
-		});
-		EntityTemplates.ExtendPlantToIrrigated(gameObject, new FertilizationMonitor.FertilizerInfo[]
+			SimHashes.Oxygen,
+			SimHashes.ContaminatedOxygen,
+			SimHashes.CarbonDioxide
+		}, true, 0f, 0.15f, 1f, PrickleFruitConfig.ID, true);
+		EntityTemplates.ExtendPlantToIrrigated(gameObject, new IrrigationMonitor.LiquidResourceInfo[]
 		{
-			new FertilizationMonitor.FertilizerInfo
+			new IrrigationMonitor.LiquidResourceInfo
 			{
 				tag = GameTags.Water,
-				massConsumptionRate = 0.033333335f
+				massConsumptionRate = 0.13333334f
 			}
 		});
-		EntityTemplates.ExtendPlantWithYield(gameObject, new IYieldEffect[]
-		{
-			new YieldEffect.AddSeeds(1)
-		}, new IYieldEffect[]
-		{
-			new YieldEffect.AddSeeds(1)
-		});
 		gameObject.AddOrGet<StandardCropPlant>();
+		IlluminationVulnerable illuminationVulnerable = gameObject.UpdateComponentRequirement<IlluminationVulnerable>(true);
+		illuminationVulnerable.Configure(false);
 		string text = global::STRINGS.CREATURES.SPECIES.PRICKLEFLOWER.DOMESTICATEDDESC;
-		GameObject gameObject2 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.FinalHarvest, "PrickleFlowerSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.PRICKLEFLOWER.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.PRICKLEFLOWER.DESC, Assets.GetAnim("seed_bristleblossom_kanim"), "object", 0, new List<Tag> { GameTags.CropSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 2, text, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f);
+		GameObject gameObject2 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject, SeedProducer.ProductionType.Harvest, "PrickleFlowerSeed", global::STRINGS.CREATURES.SPECIES.SEEDS.PRICKLEFLOWER.NAME, global::STRINGS.CREATURES.SPECIES.SEEDS.PRICKLEFLOWER.DESC, Assets.GetAnim("seed_bristleblossom_kanim"), "object", 0, new List<Tag> { GameTags.CropSeed }, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 2, text, EntityTemplates.CollisionShape.CIRCLE, 0.25f, 0.25f, null, string.Empty);
 		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject, gameObject2, "PrickleFlower_preview", Assets.GetAnim("bristleblossom_kanim"), "place", 1, 2);
+		SoundEventVolumeCache.instance.AddVolume("bristleblossom_kanim", "PrickleFlower_harvest", NOISE_POLLUTION.CREATURES.TIER3);
+		SoundEventVolumeCache.instance.AddVolume("bristleblossom_kanim", "PrickleFlower_grow", NOISE_POLLUTION.CREATURES.TIER3);
 		return gameObject;
 	}
 
 	public void OnPrefabInit(GameObject inst)
 	{
+		inst.GetComponent<PrimaryElement>().Temperature = 288.15f;
 	}
 
 	public void OnSpawn(GameObject inst)
 	{
 	}
 
-	public const float FERTILIZATION_RATE = 0.006666667f;
-
-	public const float WATER_RATE = 0.033333335f;
+	public const float WATER_RATE = 0.13333334f;
 
 	public const string ID = "PrickleFlower";
 

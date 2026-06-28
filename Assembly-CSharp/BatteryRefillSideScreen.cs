@@ -1,15 +1,35 @@
 ﻿using System;
-using STRINGS;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class BatteryRefillSideScreen : SideScreenContent
 {
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.percentSlider.onReleaseHandle += this.SetBatteryRefillPercent;
-		this.percentSlider.onValueChanged.AddListener(new UnityAction<float>(this.UpdatePercentLabel));
+		this.percentSlider.onReleaseHandle += delegate
+		{
+			this.percentSlider.value = Mathf.Round(this.percentSlider.value * 100f) / 100f;
+			this.SetBatteryRefillPercent();
+		};
+		this.percentSlider.onDrag += delegate
+		{
+			this.ReceiveValueFromSlider(this.percentSlider.value);
+		};
+		this.percentSlider.onMove += delegate
+		{
+			this.ReceiveValueFromSlider(this.percentSlider.value);
+		};
+		this.percentSlider.onPointerDown += delegate
+		{
+			this.ReceiveValueFromSlider(this.percentSlider.value);
+		};
+		this.numberInput.minValue = 0f;
+		this.numberInput.maxValue = 100f;
+		this.numberInput.onEndEdit += delegate
+		{
+			this.SetBatteryRefillPercent();
+			this.ReceiveValueFromInput(this.numberInput.currentValue);
+		};
 	}
 
 	public override void SetTarget(GameObject new_target)
@@ -26,7 +46,23 @@ public class BatteryRefillSideScreen : SideScreenContent
 			return;
 		}
 		this.percentSlider.value = this.target.BatteryRefillPercent;
+		this.numberInput.Activate();
 		this.UpdatePercentLabel(this.target.BatteryRefillPercent);
+	}
+
+	private void ReceiveValueFromSlider(float input)
+	{
+		input = Mathf.Round(input * 100f) / 100f;
+		this.UpdatePercentLabel(input);
+	}
+
+	private void ReceiveValueFromInput(float input)
+	{
+		input = Mathf.Round(input * 10f) / 10f;
+		input /= 100f;
+		this.percentSlider.value = input;
+		this.SetBatteryRefillPercent();
+		this.UpdatePercentLabel(input);
 	}
 
 	private void SetBatteryRefillPercent()
@@ -45,7 +81,7 @@ public class BatteryRefillSideScreen : SideScreenContent
 
 	private void UpdatePercentLabel(float value)
 	{
-		this.currentPercentLabel.text = string.Format(UI.UISIDESCREENS.MANUALGENERATORSIDESCREEN.CURRENT_THRESHOLD, (value * 100f).ToString("F0"));
+		this.numberInput.SetDisplayValue((value * 100f).ToString("F0"));
 	}
 
 	private IBatteryRefillControl target;
@@ -55,4 +91,11 @@ public class BatteryRefillSideScreen : SideScreenContent
 
 	[SerializeField]
 	private LocText currentPercentLabel;
+
+	[Header("Input Field")]
+	[SerializeField]
+	private KNumberInputField numberInput;
+
+	[SerializeField]
+	private LocText unitsLabel;
 }

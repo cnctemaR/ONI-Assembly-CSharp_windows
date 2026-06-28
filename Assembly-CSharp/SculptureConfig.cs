@@ -7,11 +7,12 @@ public class SculptureConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Sculpture", 1, 3, "sculpture_kanim", 100f, 30, 120f, global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.OnFloor, new DecorValues
+		EffectorValues none = NOISE_POLLUTION.NONE;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Sculpture", 1, 3, "sculpture_kanim", 100f, 30, 120f, global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.OnFloor, new EffectorValues
 		{
-			decor = 5,
+			amount = 5,
 			radius = 8
-		}, null);
+		}, none);
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
 		buildingDef.MaterialCategory = MATERIALS.RAW_MINERALS;
@@ -24,7 +25,7 @@ public class SculptureConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
-		go.AddOrGet<Prioritizable>();
+		go.AddOrGet<BuildingComplete>().isArtable = true;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

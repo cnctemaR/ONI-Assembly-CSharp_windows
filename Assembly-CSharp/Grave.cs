@@ -30,7 +30,7 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 
 	private void OnDestroyObject(object data)
 	{
-		if (this.graveName != null)
+		if (this.graveName != null && base.smi.IsInsideState(base.smi.sm.full))
 		{
 			GameObject gameObject = Util.KInstantiate(EntityPrefabs.Instance.Bones, Folder.Misc);
 			gameObject.transform.position = this.transform.position;
@@ -52,7 +52,7 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 
 		public void CreateFetchTask()
 		{
-			this.chore = new FetchChore(base.GetComponent<Storage>(), 1f, new Tag[] { GameTags.Corpse }, null, true, null, null, null, FetchOrder2.OperationalRequirement.Operational, 0);
+			this.chore = new FetchChore(base.GetComponent<Storage>(), 1f, new Tag[] { GameTags.Corpse }, null, null, true, null, null, null, FetchOrder2.OperationalRequirement.Operational, 0);
 			this.chore.allowMultifetch = false;
 		}
 

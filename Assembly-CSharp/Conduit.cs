@@ -1,9 +1,28 @@
 ﻿using System;
+using System.Collections;
 using STRINGS;
 
 [SkipSaveFileSerialization]
-public class Conduit : KMonoBehaviour
+public class Conduit : KMonoBehaviour, IFirstFrameCallback
 {
+	public void SetFirstFrameCallback(global::System.Action ffCb)
+	{
+		this.firstFrameCallback = ffCb;
+		base.StartCoroutine(this.RunCallback());
+	}
+
+	private IEnumerator RunCallback()
+	{
+		yield return null;
+		if (this.firstFrameCallback != null)
+		{
+			this.firstFrameCallback();
+			this.firstFrameCallback = null;
+		}
+		yield return null;
+		yield break;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		this.Subscribe(-1201923725, new Action<object>(this.OnHighlighted));
@@ -19,6 +38,8 @@ public class Conduit : KMonoBehaviour
 			ConduitFlowVisualizer flowVisualizer = this.GetFlowVisualizer();
 			flowVisualizer.SetInsulated(Grid.PosToCell(this.transform.position), true);
 		}
+		PrimaryElement component = base.GetComponent<PrimaryElement>();
+		component.ForcePermanentDiseaseContainer();
 	}
 
 	protected override void OnCleanUp()
@@ -106,4 +127,6 @@ public class Conduit : KMonoBehaviour
 	private KAnimGraphTileVisualizer graphTileDependency;
 
 	public ConduitType type;
+
+	private global::System.Action firstFrameCallback;
 }

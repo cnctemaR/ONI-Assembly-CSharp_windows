@@ -45,17 +45,17 @@ public class StateMachineController : KMonoBehaviour, ISaveLoadableDetails, ISta
 		this.defs.Add(def);
 	}
 
-	public List<LoggerFS> GetLogs()
+	public List<LoggerFSSSS> GetLogs()
 	{
 		return null;
 	}
 
-	public LoggerFS GetLog()
+	public LoggerFSSSS GetLog()
 	{
 		return null;
 	}
 
-	private void OnLog(LoggerFS.Entry entry)
+	private void OnLog(LoggerFSSSS.Entry entry)
 	{
 	}
 
@@ -63,6 +63,7 @@ public class StateMachineController : KMonoBehaviour, ISaveLoadableDetails, ISta
 	{
 		base.OnPrefabInit();
 		this.Subscribe(1969584890, new Action<object>(this.OnTargetDestroyed));
+		this.Subscribe(1502190696, new Action<object>(this.OnTargetDestroyed));
 	}
 
 	private void OnTargetDestroyed(object data)
@@ -71,6 +72,16 @@ public class StateMachineController : KMonoBehaviour, ISaveLoadableDetails, ISta
 		{
 			StateMachine.Instance instance = this.stateMachines[0];
 			instance.StopSM("StateMachineController.OnCleanUp");
+			this.stateMachines.Remove(instance);
+		}
+	}
+
+	protected override void OnLoadLevel()
+	{
+		while (this.stateMachines.Count > 0)
+		{
+			StateMachine.Instance instance = this.stateMachines[0];
+			instance.FreeResources();
 			this.stateMachines.Remove(instance);
 		}
 	}

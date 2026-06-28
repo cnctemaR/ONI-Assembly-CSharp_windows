@@ -73,7 +73,8 @@ namespace Klei.AI
 			Never,
 			Skill,
 			Expectation,
-			General
+			General,
+			Details
 		}
 	}
 }

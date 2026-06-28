@@ -88,7 +88,7 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 	public void Poop()
 	{
 		float num = Mathf.Min(base.smi.sm.consumedMass.Get(base.smi), this.maxPoopSize);
-		base.smi.master.emitter.ForceEmit(num, base.GetComponent<PrimaryElement>().Temperature);
+		base.smi.master.emitter.ForceEmit(num, byte.MaxValue, 0, base.GetComponent<PrimaryElement>().Temperature);
 		base.smi.sm.consumedMass.Delta(-num, base.smi);
 	}
 
@@ -116,7 +116,7 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 		Grid.CellToXY(Grid.PosToCell(base.gameObject.transform.position), out num2, out num3);
 		int num4 = 8;
 		List<ScenePartitionerEntry> list = GameScenePartitioner.Instance.ReserveList();
-		GameScenePartitioner.Instance.GatherEntries(num2 - num4, num3 - num4, num4 * 2, num4 * 2, GameScenePartitioner.Instance.pickupables.mask, list);
+		GameScenePartitioner.Instance.GatherEntries(num2 - num4, num3 - num4, num4 * 2, num4 * 2, GameScenePartitioner.Instance.pickupablesLayer, list);
 		for (int i = 0; i < list.Count; i++)
 		{
 			ScenePartitionerEntry scenePartitionerEntry = list[i];
@@ -325,7 +325,7 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 	{
 		this.StopListeningForDigPlacerChanged();
 		Vector2 vector = Grid.PosToXY(base.smi.master.transform.position);
-		base.smi.master.digPlacerChangedMonitor = GameScenePartitioner.Instance.Add("DigPlacerChanged", base.smi.master.gameObject, new Extents((int)vector.x, (int)vector.y, 1, 1), GameScenePartitioner.Instance.objectLayerMasks[7].mask, new Action<object>(base.smi.master.DigPlacerChanged));
+		base.smi.master.digPlacerChangedMonitor = GameScenePartitioner.Instance.Add("DigPlacerChanged", base.smi.master.gameObject, new Extents((int)vector.x, (int)vector.y, 1, 1), GameScenePartitioner.Instance.objectLayers[7], new Action<object>(base.smi.master.DigPlacerChanged));
 	}
 
 	private void StopListeningForDigPlacerChanged()
@@ -444,7 +444,8 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 					Util.KDestroyGameObject(smi.master.gameObject);
 				}
 			});
-			this.alive.EventTransition(GameHashes.Died, this.death, null).EventTransition(GameHashes.TooColdFatal, this.death, null).EventTransition(GameHashes.TooHotFatal, this.death, null)
+			this.alive.TagTransition(GameTags.Dead, this.death, false).EventTransition(GameHashes.Died, this.death, null).EventTransition(GameHashes.TooColdFatal, this.death, null)
+				.EventTransition(GameHashes.TooHotFatal, this.death, null)
 				.EventTransition(GameHashes.Drowned, this.death, null)
 				.ToggleStateMachine((Hatch.StatesInstance smi) => new ThreatMonitor.Instance(smi.master))
 				.Enter(delegate(Hatch.StatesInstance smi)
@@ -548,7 +549,7 @@ public class Hatch : StateMachineComponent<Hatch.StatesInstance>
 				int num6 = Grid.PosToCell(smi.master.transform.position);
 				if (Grid.IsValidCell(num6))
 				{
-					smi.master.solidCellMonitor = GameScenePartitioner.Instance.Add("Hatch.Hide", smi.master.gameObject, num6, GameScenePartitioner.Instance.solidChangedMask.mask, delegate(object data)
+					smi.master.solidCellMonitor = GameScenePartitioner.Instance.Add("Hatch.Hide", smi.master.gameObject, num6, GameScenePartitioner.Instance.solidChangedLayer, delegate(object data)
 					{
 						if (!Grid.Solid[Grid.PosToCell(smi.master.transform.position)])
 						{

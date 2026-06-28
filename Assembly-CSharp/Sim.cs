@@ -62,6 +62,7 @@ public static class Sim
 		}
 		Sim.GameDataUpdate* ptr2 = (Sim.GameDataUpdate*)(void*)intPtr;
 		Grid.CellValues = ptr2->cells;
+		Grid.DiseaseCellValues = ptr2->disease;
 		Grid.AccumulatedFlowValues = ptr2->accumulatedFlow;
 		PropertyTextures.externalFlowTex = ptr2->propertyTextureFlow;
 		PropertyTextures.externalLiquidTex = ptr2->propertyTextureLiquid;
@@ -73,6 +74,7 @@ public static class Sim
 	{
 		Sim.SIM_Shutdown();
 		Grid.CellValues = null;
+		Grid.DiseaseCellValues = null;
 	}
 
 	[DllImport("SimDLL")]
@@ -84,6 +86,8 @@ public static class Sim
 	public const int InvalidHandle = -1;
 
 	public const int QueuedRegisterHandle = -2;
+
+	public const byte InvalidDiseaseIdx = 255;
 
 	public const int ChunkEdgeSize = 32;
 
@@ -135,7 +139,7 @@ public static class Sim
 	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct Cell
 	{
-		public void Write(BinaryWriter writer, List<global::Element> elements)
+		public void Write(BinaryWriter writer)
 		{
 			writer.Write(this.elementIdx);
 			writer.Write(0);
@@ -189,8 +193,8 @@ public static class Sim
 			{
 				this.state |= 8;
 			}
-			this.lowTempTransitionIdx = (sbyte)elements.IndexOf(e.lowTempTransition);
-			this.highTempTransitionIdx = (sbyte)elements.IndexOf(e.highTempTransition);
+			this.lowTempTransitionIdx = (sbyte)elements.FindIndex((global::Element ele) => ele.id == e.lowTempTransitionTarget);
+			this.highTempTransitionIdx = (sbyte)elements.FindIndex((global::Element ele) => ele.id == e.highTempTransitionTarget);
 			this.elementsTableIdx = (byte)elements.IndexOf(e);
 			this.specificHeatCapacity = e.specificHeatCapacity;
 			this.thermalConductivity = e.thermalConductivity;
@@ -208,6 +212,10 @@ public static class Sim
 			this.highTemp = e.highTemp;
 			this.highTempTransitionOreID = e.highTempTransitionOreID;
 			this.highTempTransitionOreMassConversion = e.highTempTransitionOreMassConversion;
+			this.sublimateIndex = (sbyte)elements.FindIndex((global::Element ele) => ele.id == e.sublimateId);
+			this.convertIndex = (sbyte)elements.FindIndex((global::Element ele) => ele.id == e.convertId);
+			this.pack0 = 0;
+			this.pack1 = 0;
 			if (e.substance == null)
 			{
 				this.colour = 0U;
@@ -217,6 +225,7 @@ public static class Sim
 				Color32 color = e.substance.colour;
 				this.colour = (uint)(((int)color.a << 24) | ((int)color.b << 16) | ((int)color.g << 8) | (int)color.r);
 			}
+			this.sublimateFX = e.sublimateFX;
 			this.defaultValues = e.defaultValues;
 		}
 
@@ -243,7 +252,12 @@ public static class Sim
 			writer.Write(this.strength);
 			writer.Write((int)this.highTempTransitionOreID);
 			writer.Write(this.highTempTransitionOreMassConversion);
+			writer.Write(this.sublimateIndex);
+			writer.Write(this.convertIndex);
+			writer.Write(this.pack0);
+			writer.Write(this.pack1);
 			writer.Write(this.colour);
+			writer.Write((int)this.sublimateFX);
 			this.defaultValues.Write(writer);
 		}
 
@@ -289,9 +303,51 @@ public static class Sim
 
 		public float highTempTransitionOreMassConversion;
 
+		public sbyte sublimateIndex;
+
+		public sbyte convertIndex;
+
+		public byte pack0;
+
+		public byte pack1;
+
 		public uint colour;
 
+		public SpawnFXHashes sublimateFX;
+
 		public Sim.PhysicsData defaultValues;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct DiseaseCell
+	{
+		public void Write(BinaryWriter writer)
+		{
+			writer.Write(this.diseaseIdx);
+			writer.Write(this.reservedInfestationTickCount);
+			writer.Write(this.pad1);
+			writer.Write(this.pad2);
+			writer.Write(this.elementCount);
+			writer.Write(this.reservedAccumulatedError);
+		}
+
+		public byte diseaseIdx;
+
+		private byte reservedInfestationTickCount;
+
+		private byte pad1;
+
+		private byte pad2;
+
+		public int elementCount;
+
+		private float reservedAccumulatedError;
+
+		public static Sim.DiseaseCell Invalid = new Sim.DiseaseCell
+		{
+			diseaseIdx = byte.MaxValue,
+			elementCount = 0
+		};
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -339,6 +395,8 @@ public static class Sim
 	{
 		public unsafe Sim.Cell* cells;
 
+		public unsafe Sim.DiseaseCell* disease;
+
 		public int numSolidInfo;
 
 		public unsafe Sim.SolidInfo* solidInfo;
@@ -362,6 +420,10 @@ public static class Sim
 		public int numSpawnFallingLiquidInfo;
 
 		public unsafe Sim.SpawnFallingLiquidInfo* spawnFallingLiquidInfo;
+
+		public int numDigInfo;
+
+		public unsafe Sim.SpawnOreInfo* digInfo;
 
 		public int numSpawnOreInfo;
 
@@ -387,13 +449,17 @@ public static class Sim
 
 		public unsafe Sim.MassConsumptionCallback* massConsumptionCallbacks;
 
+		public int numDiseaseConsumptionCallbacks;
+
+		public unsafe Sim.DiseaseConsumptionCallback* diseaseConsumptionCallbacks;
+
 		public int numComponentStateChangedMessages;
 
 		public unsafe Sim.ComponentStateChangedMessage* componentStateChangedMessages;
 
-		public int numConsumedMassEntries;
+		public int numRemovedMassEntries;
 
-		public unsafe Sim.ConsumedMassInfo* consumedMassEntries;
+		public unsafe Sim.ConsumedMassInfo* removedMassEntries;
 
 		public int numEmittedMassEntries;
 
@@ -407,9 +473,25 @@ public static class Sim
 
 		public unsafe Sim.MeltedInfo* elementChunkMeltedInfos;
 
+		public int numBuildingOverheatInfos;
+
+		public unsafe Sim.MeltedInfo* buildingOverheatInfos;
+
+		public int numBuildingNoLongerOverheatedInfos;
+
+		public unsafe Sim.MeltedInfo* buildingNoLongerOverheatedInfos;
+
 		public int numBuildingMeltedInfos;
 
 		public unsafe Sim.MeltedInfo* buildingMeltedInfos;
+
+		public int numDiseaseEmittedInfos;
+
+		public unsafe Sim.DiseaseEmittedInfo* diseaseEmittedInfos;
+
+		public int numDiseaseConsumedInfos;
+
+		public unsafe Sim.DiseaseConsumedInfo* diseaseConsumedInfos;
 
 		public unsafe float* accumulatedFlow;
 
@@ -423,17 +505,19 @@ public static class Sim
 	{
 		public int cellIdx;
 
-		public float mass;
-
-		public float temperature;
-
 		public byte elemIdx;
+
+		public byte diseaseIdx;
 
 		public byte pad0;
 
 		public byte pad1;
 
-		public byte pad2;
+		public float mass;
+
+		public float temperature;
+
+		public int diseaseCount;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -441,17 +525,19 @@ public static class Sim
 	{
 		public int cellIdx;
 
+		public byte elemIdx;
+
+		public byte diseaseIdx;
+
+		private byte pad0;
+
+		private byte pad1;
+
 		public float mass;
 
 		public float temperature;
 
-		public byte elemIdx;
-
-		public byte pad0;
-
-		public byte pad1;
-
-		public byte pad2;
+		public int diseaseCount;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -473,13 +559,15 @@ public static class Sim
 
 		public byte elemIdx;
 
-		private byte pad0;
+		public byte diseaseIdx;
 
-		private byte pad1;
+		private byte pad0;
 
 		public float mass;
 
 		public float temperature;
+
+		public int diseaseCount;
 
 		public enum FallingInfo
 		{
@@ -523,9 +611,35 @@ public static class Sim
 	{
 		public int callbackIdx;
 
+		public byte removedElemIdx;
+
+		public byte diseaseIdx;
+
+		private byte pad0;
+
+		private byte pad1;
+
 		public float mass;
 
 		public float temperature;
+
+		public int diseaseCount;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct DiseaseConsumptionCallback
+	{
+		public int callbackIdx;
+
+		public byte diseaseIdx;
+
+		private byte pad0;
+
+		private byte pad1;
+
+		private byte pad2;
+
+		public int diseaseCount;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -565,9 +679,33 @@ public static class Sim
 
 		public byte removedElemIdx;
 
+		public byte diseaseIdx;
+
+		private byte pad0;
+
+		private byte pad1;
+
 		public float mass;
 
 		public float temperature;
+
+		public int diseaseCount;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct ConsumedDiseaseInfo
+	{
+		public int simHandle;
+
+		public byte diseaseIdx;
+
+		private byte pad0;
+
+		private byte pad1;
+
+		private byte pad2;
+
+		public int diseaseCount;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -588,6 +726,34 @@ public static class Sim
 	public struct BuildingTemperatureInfo
 	{
 		public float temperature;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct DiseaseEmittedInfo
+	{
+		public byte diseaseIdx;
+
+		private byte pad0;
+
+		private byte pad1;
+
+		private byte pad2;
+
+		public int count;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct DiseaseConsumedInfo
+	{
+		public byte diseaseIdx;
+
+		private byte pad0;
+
+		private byte pad1;
+
+		private byte pad2;
+
+		public int count;
 	}
 
 	public delegate int GAME_MessageHandler(int message_id, IntPtr data);

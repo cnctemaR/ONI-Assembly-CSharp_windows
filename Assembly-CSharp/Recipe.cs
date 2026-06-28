@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
+using Klei;
 using STRINGS;
 using UnityEngine;
 
+[DebuggerDisplay("{Name}")]
 public class Recipe : IHasSortOrder
 {
 	public Recipe()
@@ -102,7 +105,7 @@ public class Recipe : IHasSortOrder
 				Element element = selected_elements[i];
 				if (element != null && element.HasTag(this.Ingredients[i].tag))
 				{
-					list.Add(new Recipe.Ingredient(TagManager.Create(element.id), (float)num));
+					list.Add(new Recipe.Ingredient(GameTagExtensions.Create(element.id), (float)num));
 					flag = true;
 				}
 			}
@@ -122,9 +125,17 @@ public class Recipe : IHasSortOrder
 
 	private GameObject CraftRecipe(Storage resource_storage, Recipe.Ingredient[] ingredientTags)
 	{
+		SimUtil.DiseaseInfo diseaseInfo = SimUtil.DiseaseInfo.Invalid;
+		float num = 0f;
+		float num2 = 0f;
 		foreach (Recipe.Ingredient ingredient in ingredientTags)
 		{
-			resource_storage.Consume(ingredient);
+			SimUtil.DiseaseInfo diseaseInfo2;
+			float num3;
+			resource_storage.ConsumeAndGetDisease(ingredient, out diseaseInfo2, out num3);
+			diseaseInfo = SimUtil.CalculateFinalDiseaseInfo(diseaseInfo, diseaseInfo2);
+			num = SimUtil.CalculateFinalTemperature(num2, num, ingredient.amount, num3);
+			num2 += ingredient.amount;
 		}
 		GameObject prefab = Assets.GetPrefab(this.Result);
 		GameObject gameObject = null;
@@ -147,6 +158,7 @@ public class Recipe : IHasSortOrder
 						component.ElementID = this.ResultElementOverride;
 					}
 				}
+				component.Temperature = num;
 				component.Units = this.OutputUnits;
 			}
 			Edible component2 = gameObject.GetComponent<Edible>();
@@ -155,6 +167,10 @@ public class Recipe : IHasSortOrder
 				ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, component2.Calories, string.Format(UI.ENDOFDAYREPORT.NOTES.CRAFTED, component2.name));
 			}
 			gameObject.SetActive(true);
+			if (component != null)
+			{
+				component.AddDisease(diseaseInfo.idx, diseaseInfo.count, "Recipe.CraftRecipe");
+			}
 			gameObject.GetComponent<KMonoBehaviour>().Trigger(748399584, null);
 		}
 		return gameObject;
@@ -228,6 +244,7 @@ public class Recipe : IHasSortOrder
 
 	public float FabricationTime;
 
+	[DebuggerDisplay("{tag} {amount}")]
 	[Serializable]
 	public class Ingredient
 	{

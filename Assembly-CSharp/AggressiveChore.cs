@@ -16,7 +16,7 @@ public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
 
 	public void PunchWallDamage()
 	{
-		if (Grid.Solid[this.smi.sm.wallCellToBreak])
+		if (Grid.Solid[this.smi.sm.wallCellToBreak] && Grid.Cell[this.smi.sm.wallCellToBreak].strengthInfo < 100)
 		{
 			WorldDamage.Instance.ApplyDamage(this.smi.sm.wallCellToBreak, 0.04f, this.smi.sm.wallCellToBreak, -1);
 		}
@@ -58,7 +58,7 @@ public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
 			}
 			if (breakable == null)
 			{
-				int num2 = GameUtil.FloodFillFind((int cell) => !Grid.Solid[cell] && navigator.CanReach(cell) && (Grid.Solid[Grid.CellLeft(cell)] || Grid.Solid[Grid.CellRight(cell)] || Grid.Solid[Grid.OffsetCell(cell, 1, 1)] || Grid.Solid[Grid.OffsetCell(cell, -1, 1)]), Grid.PosToCell(navigator.gameObject), 128);
+				int num2 = GameUtil.FloodFillFind((int cell) => !Grid.Solid[cell] && navigator.CanReach(cell) && (Grid.Solid[Grid.CellLeft(cell)] || Grid.Solid[Grid.CellRight(cell)] || Grid.Solid[Grid.OffsetCell(cell, 1, 1)] || Grid.Solid[Grid.OffsetCell(cell, -1, 1)]), Grid.PosToCell(navigator.gameObject), 128, true, true);
 				base.sm.moveToWallTarget.Set(num2, base.smi);
 				this.GoTo(base.sm.move_notarget);
 			}

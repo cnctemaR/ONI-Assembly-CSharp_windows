@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class BuildingHP : BuildingWorkable
+public class BuildingHP : Workable
 {
 	public int HitPoints
 	{
@@ -33,6 +33,12 @@ public class BuildingHP : BuildingWorkable
 	public BuildingHP.DamageSourceInfo GetDamageSourceInfo()
 	{
 		return this.damageSourceInfo;
+	}
+
+	protected override void OnLoadLevel()
+	{
+		this.smi = null;
+		base.OnLoadLevel();
 	}
 
 	public void DoDamage(int damage)
@@ -133,8 +139,8 @@ public class BuildingHP : BuildingWorkable
 		}
 	}
 
-	[Serialize]
 	[SerializeField]
+	[Serialize]
 	private int hitpoints;
 
 	[Serialize]
@@ -176,7 +182,7 @@ public class BuildingHP : BuildingWorkable
 
 		public Notification CreateBrokenMachineNotification()
 		{
-			return new Notification(MISC.NOTIFICATIONS.BROKENMACHINE.NAME, NotificationType.BadMinor, HashedString.Invalid, new Func<List<Notification>, object, string>(BuildingHP.SMInstance.ToolTipResolver), base.master.damageSourceInfo.source, false, 0f, null, null, null);
+			return new Notification(MISC.NOTIFICATIONS.BROKENMACHINE.NAME, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.BROKENMACHINE.TOOLTIP + notificationList.ReduceMessages(false), "/t• " + base.master.damageSourceInfo.source, false, 0f, null, null, null);
 		}
 
 		public void ShowProgressBar(bool show)
@@ -253,7 +259,8 @@ public class BuildingHP : BuildingWorkable
 
 		public FXAnim.Instance InstantiateSmokeDamageFX()
 		{
-			Vector3 vector = new Vector3((float)(base.master.Def.WidthInCells - 1), (float)(base.master.Def.HeightInCells - 1), 0f);
+			BuildingDef def = base.master.GetComponent<BuildingComplete>().Def;
+			Vector3 vector = new Vector3((float)(def.WidthInCells - 1), (float)(def.HeightInCells - 1), 0f);
 			return new FXAnim.Instance(base.smi.master, "smoke_damage_kanim", "idle", KAnim.PlayMode.Loop, vector, Lighting.Instance.Settings.SmokeDamageTint);
 		}
 
@@ -330,7 +337,7 @@ public class BuildingHP : BuildingWorkable
 
 		private Chore CreateRepairChore(BuildingHP.SMInstance smi)
 		{
-			return new WorkChore<BuildingHP>(Db.Get().ChoreTypes.Repair, smi.master, null, true, null, null, null, true, null, false, default(Tag), null, false, true);
+			return new WorkChore<BuildingHP>(Db.Get().ChoreTypes.Repair, smi.master, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true);
 		}
 
 		private static Operational.Flag healthyFlag = new Operational.Flag("healthy", Operational.Flag.Type.Functional);

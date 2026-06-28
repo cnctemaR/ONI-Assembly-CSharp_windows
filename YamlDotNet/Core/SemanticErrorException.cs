@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
 namespace YamlDotNet.Core
 {
@@ -22,11 +21,6 @@ namespace YamlDotNet.Core
 
 		public SemanticErrorException(string message, Exception inner)
 			: base(message, inner)
-		{
-		}
-
-		protected SemanticErrorException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
 		{
 		}
 	}

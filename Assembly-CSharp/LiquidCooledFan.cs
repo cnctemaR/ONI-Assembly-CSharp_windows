@@ -93,7 +93,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 		}
 		if (primaryElement != null)
 		{
-			SimMessages.AddRemoveSubstance(Grid.CellRight(Grid.CellAbove(Grid.PosToCell(base.gameObject))), ElementLoader.GetElementIndex(primaryElement.ElementID), CellEventLogger.Instance.ExhaustSimUpdate, primaryElement.Mass, primaryElement.Temperature, -1);
+			SimMessages.AddRemoveSubstance(Grid.CellRight(Grid.CellAbove(Grid.PosToCell(base.gameObject))), ElementLoader.GetElementIndex(primaryElement.ElementID), CellEventLogger.Instance.ExhaustSimUpdate, primaryElement.Mass, primaryElement.Temperature, primaryElement.DiseaseIdx, primaryElement.DiseaseCount, -1);
 			this.gasStorage.Consume(primaryElement.gameObject);
 		}
 	}
@@ -118,7 +118,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 		float num4 = Mathf.Min(num3, num);
 		float num5 = 0f;
 		int num6 = 0;
-		while (Mathf.Abs(num5) < Mathf.Abs(num4) && num6 < 100)
+		while (Mathf.Abs(num5) < Mathf.Max(Mathf.Abs(num4) - 1f, 0f) && num6 < 100)
 		{
 			float num7 = float.PositiveInfinity;
 			for (int j = 0; j < this.gasStorage.items.Count; j++)
@@ -152,7 +152,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 		}
 		if (num6 >= 100)
 		{
-			global::Debug.LogWarning("Liquid cooled fan could not cool contents as much as desired. Something is wrong...", null);
+			global::Debug.LogWarning(string.Concat(new object[] { "Liquid cooled fan could not cool contents as much as desired. Something is wrong...\ncooled_amount:", num5, "/", num4 }), null);
 		}
 		float num9 = Mathf.Abs(num5 * this.waterKGConsumedPerKJ);
 		base.smi.master.waterConsumptionAccumulator.Accumulate(num9);
@@ -273,7 +273,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 			{
 				smi.master.workable.SetWorkTime(float.PositiveInfinity);
 			});
-			this.workable.ToggleChore(new Func<LiquidCooledFan.StatesInstance, Chore>(this.CreateUseChore), this.work_pst, false).EventTransition(GameHashes.ActiveChanged, this.workable.consuming, (LiquidCooledFan.StatesInstance smi) => smi.master.workable.worker != null).EventTransition(GameHashes.OperationalChanged, this.workable.consuming, (LiquidCooledFan.StatesInstance smi) => smi.master.workable.worker != null)
+			this.workable.ToggleChore(new Func<LiquidCooledFan.StatesInstance, Chore>(this.CreateUseChore), this.work_pst).EventTransition(GameHashes.ActiveChanged, this.workable.consuming, (LiquidCooledFan.StatesInstance smi) => smi.master.workable.worker != null).EventTransition(GameHashes.OperationalChanged, this.workable.consuming, (LiquidCooledFan.StatesInstance smi) => smi.master.workable.worker != null)
 				.Transition(this.unworkable, (LiquidCooledFan.StatesInstance smi) => !smi.master.HasMaterial())
 				.Transition(this.unworkable, (LiquidCooledFan.StatesInstance smi) => !smi.EnvironmentNeedsCooling());
 			this.work_pst.ToggleSchedulePeriodic("LiquidFanEmitCooledContents", 0.25f, delegate(LiquidCooledFan.StatesInstance smi)
@@ -335,7 +335,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 
 		private Chore CreateUseChore(LiquidCooledFan.StatesInstance smi)
 		{
-			return new WorkChore<LiquidCooledFanWorkable>(Db.Get().ChoreTypes.LiquidCooledFan, smi.master.workable, null, true, null, null, null, true, null, true, default(Tag), null, false, true);
+			return new WorkChore<LiquidCooledFanWorkable>(Db.Get().ChoreTypes.LiquidCooledFan, smi.master.workable, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true);
 		}
 
 		public LiquidCooledFan.States.Workable workable;

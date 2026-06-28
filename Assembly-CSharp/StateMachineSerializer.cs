@@ -32,13 +32,10 @@ public class StateMachineSerializer
 		List<StateMachineSerializer.Entry> list = new List<StateMachineSerializer.Entry>();
 		foreach (StateMachine.Instance instance in state_machines)
 		{
-			if (instance.GetStateMachine().serializable)
+			if (instance.IsRunning())
 			{
-				if (instance.IsRunning())
-				{
-					StateMachineSerializer.Entry entry = new StateMachineSerializer.Entry(instance, entry_writer);
-					list.Add(entry);
-				}
+				StateMachineSerializer.Entry entry = new StateMachineSerializer.Entry(instance, entry_writer);
+				list.Add(entry);
 			}
 		}
 		return list;
@@ -125,17 +122,20 @@ public class StateMachineSerializer
 		{
 			return false;
 		}
+		this.entryData.Position = entry.dataPos;
+		if (Manager.HasDeserializationMapping(smi.GetType()))
+		{
+			Deserializer.DeserializeTypeless(smi, this.entryData);
+		}
+		if (!smi.GetStateMachine().serializable)
+		{
+			return false;
+		}
 		StateMachine.BaseState state = smi.GetStateMachine().GetState(entry.currentState);
 		if (state == null)
 		{
 			return false;
 		}
-		if (!Manager.HasDeserializationMapping(smi.GetType()))
-		{
-			return false;
-		}
-		this.entryData.Position = entry.dataPos;
-		Deserializer.DeserializeTypeless(smi, this.entryData);
 		StateMachine.Parameter.Context[] parameterContexts = smi.GetParameterContexts();
 		int num = this.entryData.ReadInt32();
 		for (int i = 0; i < num; i++)

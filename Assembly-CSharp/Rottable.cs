@@ -10,11 +10,16 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance>
 	{
 		default_state = this.Fresh;
 		base.serializable = true;
+		this.root.TagTransition(GameTags.Preserved, this.Preserved, false).TagTransition(GameTags.Entombed, this.Preserved, false);
 		this.Fresh.ToggleStatusItem(Db.Get().CreatureStatusItems.Fresh, (Rottable.Instance smi) => smi).ParamTransition<float>(this.rotParameter, this.Stale_Pre, (Rottable.Instance smi, float p) => p <= smi.SpoilTime - (smi.SpoilTime - smi.StaleTime)).ToggleSchedulePeriodic("Rot", 1f, delegate(Rottable.Instance smi)
 		{
 			smi.Rot(smi, 1f);
 		});
-		this.Preserved.Enter("RefreshModifiers", delegate(Rottable.Instance smi)
+		this.Preserved.TagTransition(new Tag[]
+		{
+			GameTags.Preserved,
+			GameTags.Entombed
+		}, this.Fresh, true).Enter("RefreshModifiers", delegate(Rottable.Instance smi)
 		{
 			smi.RefreshModifiers(0f);
 		});
@@ -36,6 +41,11 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance>
 			gameObject.GetComponent<PrimaryElement>().Temperature = smi.master.GetComponent<PrimaryElement>().Temperature;
 			gameObject.SetActive(true);
 			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, ITEMS.FOOD.ROTPILE.NAME, gameObject.transform, 1.5f, false);
+			Edible component = smi.GetComponent<Edible>();
+			if (component != null)
+			{
+				ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, -component.Calories, string.Format(UI.ENDOFDAYREPORT.NOTES.ROTTED, smi.gameObject.name));
+			}
 			Util.KDestroyGameObject(smi.gameObject);
 		});
 	}
@@ -99,19 +109,12 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance>
 		int num2 = Grid.CellAbove(num);
 		SimHashes id = Grid.Element[num].id;
 		Rottable.RotAtmosphereQuality rotAtmosphereQuality = Rottable.RotAtmosphereQuality.Normal;
-		if (Rottable.AtmosphereModifier.ContainsKey(id))
-		{
-			rotAtmosphereQuality = Rottable.AtmosphereModifier[id];
-		}
-		Rottable.RotAtmosphereQuality rotAtmosphereQuality2;
+		Rottable.AtmosphereModifier.TryGetValue((int)id, out rotAtmosphereQuality);
+		Rottable.RotAtmosphereQuality rotAtmosphereQuality2 = Rottable.RotAtmosphereQuality.Normal;
 		if (Grid.IsValidCell(num2))
 		{
 			SimHashes id2 = Grid.Element[num2].id;
-			if (Rottable.AtmosphereModifier.ContainsKey(id2))
-			{
-				rotAtmosphereQuality2 = Rottable.AtmosphereModifier[id2];
-			}
-			else
+			if (!Rottable.AtmosphereModifier.TryGetValue((int)id2, out rotAtmosphereQuality2))
 			{
 				rotAtmosphereQuality2 = rotAtmosphereQuality;
 			}
@@ -147,66 +150,66 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance>
 
 	public GameStateMachine<Rottable, Rottable.Instance, IStateMachineTarget, object>.State Spoiled;
 
-	public static Dictionary<SimHashes, Rottable.RotAtmosphereQuality> AtmosphereModifier = new Dictionary<SimHashes, Rottable.RotAtmosphereQuality>
+	public static Dictionary<int, Rottable.RotAtmosphereQuality> AtmosphereModifier = new Dictionary<int, Rottable.RotAtmosphereQuality>
 	{
 		{
-			SimHashes.ContaminatedOxygen,
+			721531317,
 			Rottable.RotAtmosphereQuality.Contaminating
 		},
 		{
-			SimHashes.PhosphorusGas,
+			1887387588,
 			Rottable.RotAtmosphereQuality.Contaminating
 		},
 		{
-			SimHashes.Oxygen,
+			-1528777920,
 			Rottable.RotAtmosphereQuality.Normal
 		},
 		{
-			SimHashes.Water,
+			1836671383,
 			Rottable.RotAtmosphereQuality.Normal
 		},
 		{
-			SimHashes.CarbonDioxide,
+			1960575215,
 			Rottable.RotAtmosphereQuality.Sterilizing
 		},
 		{
-			SimHashes.Steam,
+			-899515856,
 			Rottable.RotAtmosphereQuality.Sterilizing
 		},
 		{
-			SimHashes.Helium,
+			-1554872654,
 			Rottable.RotAtmosphereQuality.Sterilizing
 		},
 		{
-			SimHashes.Propane,
+			-1858722091,
 			Rottable.RotAtmosphereQuality.Sterilizing
 		},
 		{
-			SimHashes.Vacuum,
+			758759285,
 			Rottable.RotAtmosphereQuality.Sterilizing
 		},
 		{
-			SimHashes.Hydrogen,
+			-1046145888,
 			Rottable.RotAtmosphereQuality.Sterilizing
 		},
 		{
-			SimHashes.ChlorineGas,
+			-1324664829,
 			Rottable.RotAtmosphereQuality.Sterilizing
 		},
 		{
-			SimHashes.SteelGas,
+			-1406916018,
 			Rottable.RotAtmosphereQuality.Sterilizing
 		},
 		{
-			SimHashes.RockGas,
+			-432557516,
 			Rottable.RotAtmosphereQuality.Sterilizing
 		},
 		{
-			SimHashes.GoldGas,
+			-805366663,
 			Rottable.RotAtmosphereQuality.Sterilizing
 		},
 		{
-			SimHashes.CopperGas,
+			1966552544,
 			Rottable.RotAtmosphereQuality.Sterilizing
 		}
 	};
@@ -219,7 +222,6 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance>
 			this.pickupable = base.gameObject.RequireComponent<Pickupable>();
 			base.master.Subscribe(-2064133523, new Action<object>(this.OnAbsorb));
 			base.master.Subscribe(1335436905, new Action<object>(this.OnSplitFromChunk));
-			base.master.Subscribe(751746776, new Action<object>(this.OnPreserved));
 			this.primaryElement = base.gameObject.GetComponent<PrimaryElement>();
 			this.SpoilTime = spoilTime;
 			this.StaleTime = staleTime;
@@ -283,6 +285,11 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance>
 
 		public void RefreshModifiers(float dt)
 		{
+			IStateMachineTarget master = this.GetMaster();
+			if (master.isNull)
+			{
+				return;
+			}
 			KSelectable component = base.GetComponent<KSelectable>();
 			if (Grid.Solid[Grid.PosToCell(base.gameObject)])
 			{

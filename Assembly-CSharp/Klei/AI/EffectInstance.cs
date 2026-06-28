@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using STRINGS;
 using UnityEngine;
 
 namespace Klei.AI
@@ -37,29 +38,31 @@ namespace Klei.AI
 
 		private void ConfigureStatusItem()
 		{
-			this.statusItem = new StatusItem(this.effect.Id, this.effect.Name, this.ResolveTooltip(), string.Empty, (!this.effect.isBad) ? StatusItem.IconType.Info : StatusItem.IconType.Exclamation, (!this.effect.isBad) ? NotificationType.Neutral : NotificationType.Bad, false, SimViewMode.None, SimViewMode.None);
+			this.statusItem = new StatusItem(this.effect.Id, this.effect.Name, Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + this.effect.Id.ToUpper() + ".TOOLTIP"), string.Empty, (!this.effect.isBad) ? StatusItem.IconType.Info : StatusItem.IconType.Exclamation, (!this.effect.isBad) ? NotificationType.Neutral : NotificationType.Bad, false, SimViewMode.None, SimViewMode.None, 2046);
 			this.statusItem.resolveStringCallback = new Func<string, object, string>(this.ResolveString);
+			this.statusItem.resolveTooltipCallback = new Func<string, object, string>(this.ResolveTooltip);
 		}
 
-		private string ResolveTooltip()
+		private string ResolveTooltip(string str, object data)
 		{
-			string text = string.Empty;
-			text += Strings.Get("STRINGS.DUPLICANTS.MODIFIERS." + this.effect.Id.ToUpper() + ".TOOLTIP");
-			if (this.effect.SelfModifiers.Count > 0)
+			string text = str;
+			EffectInstance effectInstance = (EffectInstance)data;
+			if (effectInstance.effect.SelfModifiers.Count > 0)
 			{
 				text += "\n";
 			}
-			foreach (AttributeModifier attributeModifier in this.effect.SelfModifiers)
+			foreach (AttributeModifier attributeModifier in effectInstance.effect.SelfModifiers)
 			{
-				string text2 = text;
-				text = string.Concat(new string[]
-				{
-					text2,
-					"\n",
-					Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + attributeModifier.AttributeId.ToUpper() + ".NAME"),
-					" ",
-					attributeModifier.GetFormattedString()
-				});
+				text += string.Format(DUPLICANTS.MODIFIERS.MODIFIER_FORMAT, Db.Get().Attributes.Get(attributeModifier.AttributeId).Name, attributeModifier.GetFormattedString(this.gameObject));
+			}
+			StringEntry stringEntry;
+			if (Strings.TryGet("STRINGS.DUPLICANTS.MODIFIERS." + effectInstance.effect.Id.ToUpper() + ".ADDITIONAL_EFFECTS", out stringEntry))
+			{
+				text = text + "\n" + stringEntry;
+			}
+			if (effectInstance.effect.duration > 0f)
+			{
+				text = text + "\n" + string.Format(DUPLICANTS.MODIFIERS.TIME_REMAINING, GameUtil.GetFormattedCycles(this.GetTimeRemaining(), "F1"));
 			}
 			return text;
 		}
@@ -75,6 +78,6 @@ namespace Klei.AI
 
 		public bool shouldSave;
 
-		private StatusItem statusItem;
+		public StatusItem statusItem;
 	}
 }

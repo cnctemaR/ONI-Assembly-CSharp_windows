@@ -32,7 +32,12 @@ public class PopFXManager : KScreen
 		{
 			return null;
 		}
-		if (!force_spawn && Grid.Visible[Grid.PosToCell(target_transform.position)] == 0)
+		Vector3 vector = offset;
+		if (target_transform != null)
+		{
+			vector += target_transform.position;
+		}
+		if (!force_spawn && Grid.Visible[Grid.PosToCell(vector)] == 0)
 		{
 			return null;
 		}
@@ -40,6 +45,7 @@ public class PopFXManager : KScreen
 		if (this.Pool.Count > 0)
 		{
 			popFX = this.Pool[0];
+			this.Pool[0].gameObject.SetActive(true);
 			this.Pool[0].Spawn(icon, text, target_transform, offset, lifetime, track_target);
 			this.Pool.RemoveAt(0);
 		}

@@ -12,11 +12,14 @@ namespace YamlDotNet.Serialization
 
 		public string Alias { get; set; }
 
+		public bool ApplyNamingConventions { get; set; }
+
 		public ScalarStyle ScalarStyle { get; set; }
 
 		public YamlMemberAttribute()
 		{
 			this.ScalarStyle = ScalarStyle.Any;
+			this.ApplyNamingConventions = true;
 		}
 
 		public YamlMemberAttribute(Type serializeAs)

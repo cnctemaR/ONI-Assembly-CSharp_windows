@@ -88,6 +88,16 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 		return null;
 	}
 
+	public override void FreeResources()
+	{
+		for (int i = 0; i < this.states.Count; i++)
+		{
+			this.states[i].FreeResources();
+		}
+		this.states.Clear();
+		base.FreeResources();
+	}
+
 	private List<StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State> states = new List<StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State>();
 
 	public StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter masterTarget;
@@ -170,6 +180,44 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			{
 				return this.deltatime;
 			}
+		}
+
+		public override void FreeResources()
+		{
+			this.updateHandle.FreeResources();
+			this.updateHandle = default(SchedulerHandle);
+			this.controller = null;
+			if (this.gotoStack != null)
+			{
+				this.gotoStack.Clear();
+			}
+			this.gotoStack = null;
+			if (this.transitionStack != null)
+			{
+				this.transitionStack.Clear();
+			}
+			this.transitionStack = null;
+			if (this.currentSchedulerGroup != null)
+			{
+				this.currentSchedulerGroup.FreeResources();
+			}
+			this.currentSchedulerGroup = null;
+			if (this.stateStack != null)
+			{
+				for (int i = 0; i < this.stateStack.Length; i++)
+				{
+					if (this.stateStack[i].state != null)
+					{
+						this.stateStack[i].state.FreeResources();
+					}
+					if (this.stateStack[i].schedulerGroup != null)
+					{
+						this.stateStack[i].schedulerGroup.FreeResources();
+					}
+				}
+			}
+			this.stateStack = null;
+			base.FreeResources();
 		}
 
 		public override void Update()
@@ -375,7 +423,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 				this.updatingStateCount--;
 				if (this.updatingStateCount == 0)
 				{
-					this.updateHandle.Clear();
+					this.updateHandle.ClearScheduler();
 				}
 			}
 		}
@@ -560,7 +608,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 
 		protected Stack<StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.Context> transitionStack = new Stack<StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.Transition.Context>();
 
-		private StateMachineController controller;
+		protected StateMachineController controller;
 
 		private SchedulerGroup currentSchedulerGroup;
 
@@ -680,10 +728,6 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 				bool flag = this.callback(smi, context.value);
 				if (flag)
 				{
-					if (context.value != null)
-					{
-						string text = context.value.ToString();
-					}
 					smi.GoTo(this.state);
 				}
 			}
@@ -751,10 +795,6 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			{
 				if (!EqualityComparer<ParameterType>.Default.Equals(value, this.value))
 				{
-					if (value != null)
-					{
-						string text = value.ToString();
-					}
 					this.value = value;
 					if (this.onDirty != null)
 					{

@@ -3,8 +3,8 @@ using UnityEngine;
 
 namespace UnityStandardAssets.ImageEffects
 {
-	[ExecuteInEditMode]
 	[RequireComponent(typeof(Camera))]
+	[ExecuteInEditMode]
 	public class PostEffectsBase : MonoBehaviour
 	{
 		protected Material CheckShaderAndCreateMaterial(Shader s, Material m2Create)

@@ -4,12 +4,12 @@ using System.Diagnostics;
 public class LoggerFSSSS : Logger<LoggerFSSSS.Entry>
 {
 	public LoggerFSSSS(string name)
-		: base(name)
+		: base(name, 35)
 	{
 	}
 
 	[Conditional("UNITY_EDITOR")]
-	public void Log(string evt, string param0, string param1, string param2)
+	public void Log(string evt, string param0 = "", string param1 = "", string param2 = "")
 	{
 	}
 

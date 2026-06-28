@@ -106,7 +106,7 @@ public class BuildingDef : Def
 		return gameObject;
 	}
 
-	public GameObject Build(int cell, Orientation orientation, Storage resource_storage, IList<Element> selected_elements, bool relocated)
+	public GameObject Build(int cell, Orientation orientation, Storage resource_storage, IList<Element> selected_elements, bool relocated, bool playsound = true)
 	{
 		Vector3 vector = Grid.CellToPosCBC(cell, this.SceneLayer);
 		GameObject gameObject;
@@ -135,7 +135,7 @@ public class BuildingDef : Def
 			});
 		}
 		string sound = GlobalAssets.GetSound("Finish_Building_" + this.AudioSize, false);
-		if (sound != null)
+		if (playsound && sound != null)
 		{
 			KMonoBehaviour.PlaySound3DAtLocation(sound, gameObject.transform.position);
 		}
@@ -662,11 +662,17 @@ public class BuildingDef : Def
 
 	public bool Floodable = true;
 
+	public bool Disinfectable = true;
+
 	public bool Entombable = true;
 
 	public bool Relocatable = true;
 
+	public bool Replaceable = true;
+
 	public bool Overheatable = true;
+
+	public bool Repairable = true;
 
 	public float OverheatTemperature = 348.15f;
 
@@ -698,6 +704,10 @@ public class BuildingDef : Def
 
 	public ObjectLayer ReplacementLayer = ObjectLayer.NumLayers;
 
+	public Vector3 placementPivot;
+
+	public string DiseaseCellVisName;
+
 	public string[] MaterialCategory;
 
 	public string AudioCategory;
@@ -728,8 +738,6 @@ public class BuildingDef : Def
 
 	public CellOffset UtilityOutputOffset = new CellOffset(1, 0);
 
-	public string MinionEffect = string.Empty;
-
 	public Grid.SceneLayer SceneLayer = Grid.SceneLayer.Building;
 
 	public Grid.SceneLayer ForegroundLayer = Grid.SceneLayer.BuildingFront;
@@ -739,8 +747,6 @@ public class BuildingDef : Def
 	public int RequiredAttributeLevel;
 
 	public string RequiredTechName = string.Empty;
-
-	public string Slot = string.Empty;
 
 	public Tech RequiredTech;
 
@@ -812,6 +818,10 @@ public class BuildingDef : Def
 	public float BaseDecor;
 
 	public float BaseDecorRadius;
+
+	public int BaseNoisePollution;
+
+	public int BaseNoisePollutionRadius;
 
 	public BuildingDef[] Enables;
 }

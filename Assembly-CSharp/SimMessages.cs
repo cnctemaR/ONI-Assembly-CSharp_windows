@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
+using Database;
 using Klei;
+using Klei.AI;
 using UnityEngine;
 
 public static class SimMessages
@@ -174,6 +177,7 @@ public static class SimMessages
 		ptr->callbackIdx = callbackIdx;
 		ptr->elemIdx = element_idx;
 		ptr->temperature = temperature;
+		ptr->overheatTemperature = float.MaxValue;
 		ptr->operatingKilowatts = operating_kw;
 		ptr->mass = mass;
 		ptr->minX = extents.x;
@@ -183,7 +187,7 @@ public static class SimMessages
 		Sim.SIM_HandleMessage(1739021608, sizeof(SimMessages.AddBuildingHeatExchangeMessage), (byte*)ptr);
 	}
 
-	public unsafe static void ModifyBuildingHeatExchange(int sim_handle, Extents extents, float temperature, float operating_kw, byte element_idx, float mass)
+	public unsafe static void ModifyBuildingHeatExchange(int sim_handle, Extents extents, float temperature, float overheat_temperature, float operating_kw, byte element_idx, float mass)
 	{
 		int num = Grid.XYToCell(extents.x, extents.y);
 		if (!Grid.IsValidCell(num))
@@ -199,6 +203,7 @@ public static class SimMessages
 		ptr->handle = sim_handle;
 		ptr->elemIdx = element_idx;
 		ptr->temperature = temperature;
+		ptr->overheatTemperature = overheat_temperature;
 		ptr->operatingKilowatts = operating_kw;
 		ptr->mass = mass;
 		ptr->minX = extents.x;
@@ -225,6 +230,33 @@ public static class SimMessages
 		Sim.SIM_HandleMessage(-1348791658, sizeof(SimMessages.ModifyBuildingEnergyMessage), (byte*)ptr);
 	}
 
+	public unsafe static void AddDiseaseEmitter(int callbackIdx)
+	{
+		SimMessages.AddDiseaseEmitterMessage* ptr = stackalloc SimMessages.AddDiseaseEmitterMessage[checked(1 * sizeof(SimMessages.AddDiseaseEmitterMessage))];
+		ptr->callbackIdx = callbackIdx;
+		Sim.SIM_HandleMessage(1486783027, sizeof(SimMessages.AddDiseaseEmitterMessage), (byte*)ptr);
+	}
+
+	public unsafe static void ModifyDiseaseEmitter(int sim_handle, int cell, byte range, byte disease_idx, float emit_interval, int emit_count)
+	{
+		SimMessages.ModifyDiseaseEmitterMessage* ptr = stackalloc SimMessages.ModifyDiseaseEmitterMessage[checked(1 * sizeof(SimMessages.ModifyDiseaseEmitterMessage))];
+		ptr->handle = sim_handle;
+		ptr->gameCell = cell;
+		ptr->maxDepth = range;
+		ptr->diseaseIdx = disease_idx;
+		ptr->emitInterval = emit_interval;
+		ptr->emitCount = emit_count;
+		Sim.SIM_HandleMessage(-1899123924, sizeof(SimMessages.ModifyDiseaseEmitterMessage), (byte*)ptr);
+	}
+
+	public unsafe static void RemoveDiseaseEmitter(int cb_handle, int sim_handle)
+	{
+		SimMessages.RemoveDiseaseEmitterMessage* ptr = stackalloc SimMessages.RemoveDiseaseEmitterMessage[checked(1 * sizeof(SimMessages.RemoveDiseaseEmitterMessage))];
+		ptr->handle = sim_handle;
+		ptr->callbackIdx = cb_handle;
+		Sim.SIM_HandleMessage(468135926, sizeof(SimMessages.RemoveDiseaseEmitterMessage), (byte*)ptr);
+	}
+
 	public unsafe static void CreateSimElementsTable(List<Element> elements)
 	{
 		MemoryStream memoryStream = new MemoryStream(Marshal.SizeOf(typeof(int)) + Marshal.SizeOf(typeof(Sim.Element)) * elements.Count);
@@ -235,6 +267,12 @@ public static class SimMessages
 			Sim.Element element = new Sim.Element(elements[i], elements);
 			element.Write(binaryWriter);
 		}
+		for (int j = 0; j < elements.Count; j++)
+		{
+			byte[] bytes = Encoding.UTF8.GetBytes(elements[j].name);
+			binaryWriter.Write(bytes.Length);
+			binaryWriter.Write(bytes);
+		}
 		byte[] buffer = memoryStream.GetBuffer();
 		fixed (byte* ptr = (ref buffer != null && buffer.Length != 0 ? ref buffer[0] : ref *null))
 		{
@@ -242,20 +280,93 @@ public static class SimMessages
 		}
 	}
 
-	public static void SimDataInitializeFromCells(int width, int height, Sim.Cell[] cells, float[] bgTemp, List<Element> elements)
+	public unsafe static void CreateWorldGenHACKDiseaseTable(List<string> diseaseIds)
 	{
-		MemoryStream memoryStream = new MemoryStream(Marshal.SizeOf(typeof(int)) + Marshal.SizeOf(typeof(int)) + Marshal.SizeOf(typeof(Sim.Cell)) * width * height + Marshal.SizeOf(typeof(float)) * width * height);
+		MemoryStream memoryStream = new MemoryStream(1024);
+		BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
+		binaryWriter.Write(diseaseIds.Count);
+		List<Element> elements = ElementLoader.elements;
+		binaryWriter.Write(elements.Count);
+		Disease.RangeInfo rangeInfo;
+		rangeInfo.maxGrowth = 350f;
+		rangeInfo.minGrowth = 250f;
+		rangeInfo.minViable = 200f;
+		rangeInfo.maxViable = 400f;
+		Disease.RangeInfo rangeInfo2;
+		rangeInfo2.maxGrowth = float.PositiveInfinity;
+		rangeInfo2.minGrowth = float.PositiveInfinity;
+		rangeInfo2.minViable = float.PositiveInfinity;
+		rangeInfo2.maxViable = float.PositiveInfinity;
+		for (int i = 0; i < diseaseIds.Count; i++)
+		{
+			BinaryWriter binaryWriter2 = binaryWriter;
+			HashedString hashedString = new HashedString(diseaseIds[i]);
+			binaryWriter2.Write(hashedString.GetHashCode());
+			binaryWriter.Write(0f);
+			rangeInfo.Write(binaryWriter);
+			rangeInfo2.Write(binaryWriter);
+			rangeInfo.Write(binaryWriter);
+			rangeInfo2.Write(binaryWriter);
+			for (int j = 0; j < elements.Count; j++)
+			{
+				Disease.DEFAULT_GROWTH_INFO.Write(binaryWriter);
+			}
+		}
+		byte[] buffer = memoryStream.GetBuffer();
+		fixed (byte* ptr = (ref buffer != null && buffer.Length != 0 ? ref buffer[0] : ref *null))
+		{
+			Sim.SIM_HandleMessage(825301935, (int)memoryStream.Length, ptr);
+		}
+	}
+
+	public unsafe static void CreateDiseaseTable()
+	{
+		global::Database.Diseases diseases = Db.Get().Diseases;
+		MemoryStream memoryStream = new MemoryStream(1024);
+		BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
+		binaryWriter.Write(diseases.Count);
+		List<Element> elements = ElementLoader.elements;
+		binaryWriter.Write(elements.Count);
+		for (int i = 0; i < diseases.Count; i++)
+		{
+			Disease disease = diseases[i];
+			binaryWriter.Write(disease.id.GetHashCode());
+			binaryWriter.Write(disease.strength);
+			disease.temperatureRange.Write(binaryWriter);
+			disease.temperatureHalfLives.Write(binaryWriter);
+			disease.pressureRange.Write(binaryWriter);
+			disease.pressureHalfLives.Write(binaryWriter);
+			for (int j = 0; j < elements.Count; j++)
+			{
+				Disease.ElemGrowthInfo elemGrowthInfo = disease.elemGrowthInfo[j];
+				elemGrowthInfo.Write(binaryWriter);
+			}
+		}
+		byte[] buffer = memoryStream.GetBuffer();
+		fixed (byte* ptr = (ref buffer != null && buffer.Length != 0 ? ref buffer[0] : ref *null))
+		{
+			Sim.SIM_HandleMessage(825301935, (int)memoryStream.Length, ptr);
+		}
+	}
+
+	public static void SimDataInitializeFromCells(int width, int height, Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dc)
+	{
+		MemoryStream memoryStream = new MemoryStream(Marshal.SizeOf(typeof(int)) + Marshal.SizeOf(typeof(int)) + Marshal.SizeOf(typeof(Sim.Cell)) * width * height + Marshal.SizeOf(typeof(float)) * width * height + Marshal.SizeOf(typeof(Sim.DiseaseCell)) * width * height);
 		BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
 		binaryWriter.Write(width);
 		binaryWriter.Write(height);
 		int num = width * height;
 		for (int i = 0; i < num; i++)
 		{
-			cells[i].Write(binaryWriter, elements);
+			cells[i].Write(binaryWriter);
 		}
 		for (int j = 0; j < num; j++)
 		{
 			binaryWriter.Write(bgTemp[j]);
+		}
+		for (int k = 0; k < num; k++)
+		{
+			dc[k].Write(binaryWriter);
 		}
 		byte[] buffer = memoryStream.GetBuffer();
 		Sim.HandleMessage(SimMessageHashes.SimData_InitializeFromCells, buffer.Length, buffer);
@@ -325,7 +436,7 @@ public static class SimMessages
 		Sim.SIM_HandleMessage(-469311643, sizeof(SimMessages.CellPropertiesMessage), (byte*)ptr);
 	}
 
-	public unsafe static void ModifyCell(int gameCell, int elementIdx, float temperature, float mass, SimMessages.ReplaceType replace_type = SimMessages.ReplaceType.None, int callbackIdx = -1)
+	public unsafe static void ModifyCell(int gameCell, int elementIdx, float temperature, float mass, byte disease_idx, int disease_count, SimMessages.ReplaceType replace_type = SimMessages.ReplaceType.None, int callbackIdx = -1)
 	{
 		if (!Grid.IsValidCell(gameCell))
 		{
@@ -338,9 +449,20 @@ public static class SimMessages
 		ptr->mass = mass;
 		ptr->elementIdx = (byte)elementIdx;
 		ptr->replaceType = (byte)replace_type;
+		ptr->diseaseIdx = disease_idx;
+		ptr->diseaseCount = disease_count;
 		SimUtil.CheckValidValue(temperature);
 		SimUtil.CheckValidValue(mass);
 		Sim.SIM_HandleMessage(-1252920804, sizeof(SimMessages.ModifyCellMessage), (byte*)ptr);
+	}
+
+	public unsafe static void ModifyDiseaseOnCell(int gameCell, byte disease_idx, int disease_count)
+	{
+		SimMessages.CellDiseaseModification* ptr = stackalloc SimMessages.CellDiseaseModification[checked(1 * sizeof(SimMessages.CellDiseaseModification))];
+		ptr->cellIdx = gameCell;
+		ptr->diseaseIdx = disease_idx;
+		ptr->diseaseCount = disease_count;
+		Sim.SIM_HandleMessage(-1853671274, sizeof(SimMessages.CellDiseaseModification), (byte*)ptr);
 	}
 
 	public static int GetElementIndex(SimHashes element)
@@ -374,42 +496,56 @@ public static class SimMessages
 		Sim.SIM_HandleMessage(1727657959, sizeof(SimMessages.MassConsumptionMessage), (byte*)ptr);
 	}
 
-	public static void AddRemoveSubstance(int gameCell, SimHashes new_element, CellAddRemoveSubstanceEvent ev, float mass, float temperature, int callbackIdx = -1)
+	public unsafe static void ConsumeDisease(int game_cell, float percent_to_consume, int max_to_consume, int callback_idx)
 	{
-		int elementIndex = SimMessages.GetElementIndex(new_element);
-		SimMessages.AddRemoveSubstance(gameCell, elementIndex, ev, mass, temperature, callbackIdx);
+		if (!Grid.IsValidCell(game_cell))
+		{
+			return;
+		}
+		SimMessages.ConsumeDiseaseMessage* ptr = stackalloc SimMessages.ConsumeDiseaseMessage[checked(1 * sizeof(SimMessages.ConsumeDiseaseMessage))];
+		ptr->callbackIdx = callback_idx;
+		ptr->gameCell = game_cell;
+		ptr->percentToConsume = percent_to_consume;
+		ptr->maxToConsume = max_to_consume;
+		Sim.SIM_HandleMessage(-1019841536, sizeof(SimMessages.ConsumeDiseaseMessage), (byte*)ptr);
 	}
 
-	public static void AddRemoveSubstance(int gameCell, int elementIdx, CellAddRemoveSubstanceEvent ev, float mass, float temperature, int callbackIdx = -1)
+	public static void AddRemoveSubstance(int gameCell, SimHashes new_element, CellAddRemoveSubstanceEvent ev, float mass, float temperature, byte disease_idx, int disease_count, int callbackIdx = -1)
+	{
+		int elementIndex = SimMessages.GetElementIndex(new_element);
+		SimMessages.AddRemoveSubstance(gameCell, elementIndex, ev, mass, temperature, disease_idx, disease_count, callbackIdx);
+	}
+
+	public static void AddRemoveSubstance(int gameCell, int elementIdx, CellAddRemoveSubstanceEvent ev, float mass, float temperature, byte disease_idx, int disease_count, int callbackIdx = -1)
 	{
 		if (elementIdx != -1)
 		{
 			Element element = ElementLoader.elements[elementIdx];
 			float num = ((temperature == -1f) ? element.defaultValues.temperature : temperature);
-			SimMessages.ModifyCell(gameCell, elementIdx, num, mass, SimMessages.ReplaceType.None, callbackIdx);
+			SimMessages.ModifyCell(gameCell, elementIdx, num, mass, disease_idx, disease_count, SimMessages.ReplaceType.None, callbackIdx);
 			ev.Log(gameCell, ElementLoader.elements[elementIdx].id, mass, callbackIdx);
 		}
 	}
 
-	public static void ReplaceElement(int gameCell, SimHashes new_element, CellElementEvent ev, float mass, float temperature = -1f, int callbackIdx = -1)
+	public static void ReplaceElement(int gameCell, SimHashes new_element, CellElementEvent ev, float mass, float temperature = -1f, byte diseaseIdx = 255, int diseaseCount = 0, int callbackIdx = -1)
 	{
 		int elementIndex = SimMessages.GetElementIndex(new_element);
 		if (elementIndex != -1)
 		{
 			Element element = ElementLoader.elements[elementIndex];
 			float num = ((temperature == -1f) ? element.defaultValues.temperature : temperature);
-			SimMessages.ModifyCell(gameCell, elementIndex, num, mass, SimMessages.ReplaceType.Replace, callbackIdx);
+			SimMessages.ModifyCell(gameCell, elementIndex, num, mass, diseaseIdx, diseaseCount, SimMessages.ReplaceType.Replace, callbackIdx);
 		}
 	}
 
-	public static void ReplaceAndDisplaceElement(int gameCell, SimHashes new_element, CellElementEvent ev, float mass, float temperature = -1f, int callbackIdx = -1)
+	public static void ReplaceAndDisplaceElement(int gameCell, SimHashes new_element, CellElementEvent ev, float mass, float temperature = -1f, byte disease_idx = 255, int disease_count = 0, int callbackIdx = -1)
 	{
 		int elementIndex = SimMessages.GetElementIndex(new_element);
 		if (elementIndex != -1)
 		{
 			Element element = ElementLoader.elements[elementIndex];
 			float num = ((temperature == -1f) ? element.defaultValues.temperature : temperature);
-			SimMessages.ModifyCell(gameCell, elementIndex, num, mass, SimMessages.ReplaceType.ReplaceAndDisplace, callbackIdx);
+			SimMessages.ModifyCell(gameCell, elementIndex, num, mass, disease_idx, disease_count, SimMessages.ReplaceType.ReplaceAndDisplace, callbackIdx);
 		}
 	}
 
@@ -427,7 +563,7 @@ public static class SimMessages
 		Sim.SIM_HandleMessage(818320644, sizeof(SimMessages.ModifyCellEnergyMessage), (byte*)ptr);
 	}
 
-	public static void ModifyMass(int gameCell, float mass, CellModifyMassEvent ev, float temperature = -1f, SimHashes element = SimHashes.Vacuum)
+	public static void ModifyMass(int gameCell, float mass, byte disease_idx, int disease_count, CellModifyMassEvent ev, float temperature = -1f, SimHashes element = SimHashes.Vacuum)
 	{
 		if (element != SimHashes.Vacuum)
 		{
@@ -438,12 +574,12 @@ public static class SimMessages
 				{
 					temperature = ElementLoader.elements[elementIndex].defaultValues.temperature;
 				}
-				SimMessages.ModifyCell(gameCell, elementIndex, temperature, mass, SimMessages.ReplaceType.None, -1);
+				SimMessages.ModifyCell(gameCell, elementIndex, temperature, mass, disease_idx, disease_count, SimMessages.ReplaceType.None, -1);
 			}
 		}
 		else
 		{
-			SimMessages.ModifyCell(gameCell, 0, temperature, mass, SimMessages.ReplaceType.None, -1);
+			SimMessages.ModifyCell(gameCell, 0, temperature, mass, disease_idx, disease_count, SimMessages.ReplaceType.None, -1);
 		}
 	}
 
@@ -633,6 +769,8 @@ public static class SimMessages
 
 		public float temperature;
 
+		public float overheatTemperature;
+
 		public float operatingKilowatts;
 
 		public int minX;
@@ -661,6 +799,8 @@ public static class SimMessages
 
 		public float temperature;
 
+		public float overheatTemperature;
+
 		public float operatingKilowatts;
 
 		public int minX;
@@ -682,6 +822,40 @@ public static class SimMessages
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
 	public struct RemoveBuildingHeatExchangeMessage
+	{
+		public int handle;
+
+		public int callbackIdx;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct AddDiseaseEmitterMessage
+	{
+		public int callbackIdx;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct ModifyDiseaseEmitterMessage
+	{
+		public int handle;
+
+		public int gameCell;
+
+		public byte diseaseIdx;
+
+		public byte maxDepth;
+
+		private byte pad0;
+
+		private byte pad1;
+
+		public float emitInterval;
+
+		public int emitCount;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct RemoveDiseaseEmitterMessage
 	{
 		public int handle;
 
@@ -737,9 +911,15 @@ public static class SimMessages
 
 		public float mass;
 
+		public int diseaseCount;
+
 		public byte elementIdx;
 
 		public byte replaceType;
+
+		public byte diseaseIdx;
+
+		private byte pad0;
 	}
 
 	public enum ReplaceType
@@ -747,6 +927,16 @@ public static class SimMessages
 		None,
 		Replace,
 		ReplaceAndDisplace
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	private struct CellDiseaseModification
+	{
+		public int cellIdx;
+
+		public byte diseaseIdx;
+
+		public int diseaseCount;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -761,6 +951,18 @@ public static class SimMessages
 		public byte elementIdx;
 
 		public byte radius;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	private struct ConsumeDiseaseMessage
+	{
+		public int gameCell;
+
+		public int callbackIdx;
+
+		public float percentToConsume;
+
+		public int maxToConsume;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]

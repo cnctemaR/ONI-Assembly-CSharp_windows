@@ -30,14 +30,17 @@ namespace YamlDotNet.Core
 
 		public void Skip()
 		{
-			this.Index++;
-			this.LineOffset++;
+			int num = this.Index;
+			this.Index = num + 1;
+			num = this.LineOffset;
+			this.LineOffset = num + 1;
 		}
 
 		public void SkipLineByOffset(int offset)
 		{
 			this.Index += offset;
-			this.Line++;
+			int line = this.Line;
+			this.Line = line + 1;
 			this.LineOffset = 0;
 		}
 
@@ -45,7 +48,8 @@ namespace YamlDotNet.Core
 		{
 			if (this.LineOffset != 0)
 			{
-				this.Line++;
+				int line = this.Line;
+				this.Line = line + 1;
 				this.LineOffset = 0;
 			}
 		}

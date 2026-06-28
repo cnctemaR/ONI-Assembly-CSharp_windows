@@ -10,11 +10,11 @@ public class DebugOverlays : KScreen
 		KPopupMenu componentInChildren = base.GetComponentInChildren<KPopupMenu>();
 		componentInChildren.SetOptions(new string[] { "None", "Rooms", "Lighting", "Style", "Flow" });
 		KPopupMenu kpopupMenu = componentInChildren;
-		kpopupMenu.OnSelect = (Action<string>)Delegate.Combine(kpopupMenu.OnSelect, new Action<string>(this.OnSelect));
+		kpopupMenu.OnSelect = (Action<string, int>)Delegate.Combine(kpopupMenu.OnSelect, new Action<string, int>(this.OnSelect));
 		base.gameObject.SetActive(false);
 	}
 
-	private void OnSelect(string str)
+	private void OnSelect(string str, int index)
 	{
 		switch (str)
 		{

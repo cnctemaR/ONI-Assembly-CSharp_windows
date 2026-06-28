@@ -10,30 +10,47 @@ public class SoundEvent : AnimEvent
 	{
 	}
 
-	public SoundEvent(string file_name, string sound_name, int frame, float min_interval, bool is_looping)
+	public SoundEvent(string file_name, string sound_name, int frame, bool do_load, bool is_looping, float min_interval, bool is_dynamic)
 		: base(file_name, sound_name, frame)
 	{
-		this.sound = GlobalAssets.GetSound(sound_name, false);
-		this.soundHash = new HashedString(this.sound);
-		if (this.sound == null || this.sound == string.Empty)
+		if (do_load)
 		{
+			this.sound = GlobalAssets.GetSound(sound_name, false);
+			this.soundHash = new HashedString(this.sound);
+			if (this.sound == null || this.sound == string.Empty)
+			{
+			}
 		}
 		this.minInterval = min_interval;
 		this.looping = is_looping;
+		this.isDynamic = is_dynamic;
+		this.noiseValues = SoundEventVolumeCache.instance.GetVolume(file_name, sound_name);
 	}
 
 	public string sound { get; private set; }
 
 	public HashedString soundHash { get; private set; }
 
-	public override bool ShouldPlaySound(AnimEventManager.EventPlayerData behaviour)
+	public bool looping { get; private set; }
+
+	public bool playAtTarget { get; private set; }
+
+	public float minInterval { get; private set; }
+
+	public EffectorValues noiseValues { get; set; }
+
+	public bool ShouldPlaySound(AnimEventManager.EventPlayerData behaviour, bool isDynamic = false)
 	{
+		CameraController instance = CameraController.Instance;
+		SpeedControlScreen instance2 = SpeedControlScreen.Instance;
+		if (isDynamic)
+		{
+			return (!(instance2 != null) || !instance2.IsPaused) && (!(instance != null) || instance.IsAudibleSound(behaviour.position, 0f));
+		}
 		if (this.sound == null || this.IsLowPrioritySound(this.sound))
 		{
 			return false;
 		}
-		CameraController instance = CameraController.Instance;
-		SpeedControlScreen instance2 = SpeedControlScreen.Instance;
 		if (instance != null && !instance.IsAudibleSound(behaviour.position, this.sound))
 		{
 			if (!this.looping && !GlobalAssets.IsHighPriority(this.sound))
@@ -50,20 +67,20 @@ public class SoundEvent : AnimEvent
 
 	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
 	{
-		if (this.ShouldPlaySound(behaviour))
+		if (this.ShouldPlaySound(behaviour, this.isDynamic))
 		{
 			this.PlaySound(behaviour);
 		}
 	}
 
-	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
+	public virtual void PlaySound(AnimEventManager.EventPlayerData behaviour)
 	{
 		Vector3 position = behaviour.GetComponent<Transform>().position;
 		Vector3 position2 = behaviour.position;
-		Vector3 vector = ((!this.playAtTarget) ? position : position2);
 		if (AudioDebug.Get().debugSoundEvents)
 		{
-			global::Debug.Log(string.Concat(new object[] { behaviour.name, ", ", this.sound, ", ", this.Frame, ", ", vector }), null);
+			Vector3 vector = ((!this.playAtTarget) ? position : position2);
+			global::Debug.Log(string.Concat(new object[] { behaviour.name, ", ", this.sound, ", ", base.frame, ", ", vector }), null);
 		}
 		try
 		{
@@ -74,12 +91,12 @@ public class SoundEvent : AnimEvent
 				{
 					global::Debug.Log(behaviour.name + " is missing LoopingSounds component. ", null);
 				}
-				else if (!component.StartSound(this.sound, vector))
+				else if (!component.StartSound(this.sound, behaviour, this.playAtTarget, this.noiseValues))
 				{
 					Output.LogWarning(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", this.sound, behaviour.name) });
 				}
 			}
-			else if (!SoundEvent.PlayOneShot(this.sound, vector))
+			else if (!SoundEvent.PlayOneShot(this.sound, behaviour, this.playAtTarget, this.noiseValues))
 			{
 				Output.LogWarning(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", this.sound, behaviour.name) });
 			}
@@ -114,11 +131,32 @@ public class SoundEvent : AnimEvent
 	public static bool PlayOneShot(string sound, Vector3 pos)
 	{
 		bool flag = false;
-		if (sound != null && sound != string.Empty)
+		if (!string.IsNullOrEmpty(sound))
 		{
 			FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(sound, pos);
 			if (eventInstance != null)
 			{
+				flag = SoundEvent.EndOneShot(eventInstance);
+			}
+		}
+		return flag;
+	}
+
+	public static bool PlayOneShot(string sound, AnimEventManager.EventPlayerData behaviour, bool playAtTarget, EffectorValues noiseValues)
+	{
+		bool flag = false;
+		if (!string.IsNullOrEmpty(sound))
+		{
+			Vector3 position = behaviour.GetComponent<Transform>().position;
+			Vector3 position2 = behaviour.position;
+			Vector3 vector = ((!playAtTarget) ? position : position2);
+			FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(sound, vector);
+			if (eventInstance != null)
+			{
+				if (noiseValues.amount != 0)
+				{
+					AudioEventManager.Get().PlayTimedOnceOff(vector, noiseValues.amount, noiseValues.radius, behaviour.GetComponent<KSelectable>().GetName(), 1f);
+				}
 				flag = SoundEvent.EndOneShot(eventInstance);
 			}
 		}
@@ -137,14 +175,24 @@ public class SoundEvent : AnimEvent
 		}
 	}
 
-	private bool IsLowPrioritySound(string sound)
+	protected bool IsLowPrioritySound(string sound)
 	{
 		return sound != null && Camera.main.orthographicSize > AudioMixer.LOW_PRIORITY_CUTOFF_DISTANCE && !AudioMixer.instance.activeNIS && GlobalAssets.IsLowPriority(sound);
 	}
 
-	public bool looping;
+	protected void PrintSoundDebug(string anim_name, string sound, string sound_name, Vector3 sound_pos)
+	{
+		if (sound != null)
+		{
+			global::Debug.Log(string.Concat(new object[] { anim_name, ", ", sound_name, ", ", base.frame, ", ", sound_pos }), null);
+		}
+		else
+		{
+			global::Debug.Log("Missing sound: " + anim_name + ", " + sound_name, null);
+		}
+	}
 
-	public bool playAtTarget;
+	public static int IGNORE_INTERVAL = -1;
 
-	public float minInterval;
+	private bool isDynamic;
 }

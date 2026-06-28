@@ -7,6 +7,7 @@ public enum PlanCategory
 	Power,
 	Food,
 	Plumbing,
+	HVAC,
 	Utilities,
 	Refining,
 	Medical,

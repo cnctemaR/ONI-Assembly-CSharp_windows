@@ -44,7 +44,7 @@ public class OccupyArea : KMonoBehaviour
 		if (!Grid.IsValidCell(num))
 		{
 			global::Debug.LogWarning(base.name + " is outside the grid! DELETING!", null);
-			global::UnityEngine.Object.Destroy(base.gameObject);
+			Util.KDestroyGameObject(base.gameObject);
 		}
 	}
 
@@ -192,13 +192,13 @@ public class OccupyArea : KMonoBehaviour
 		return true;
 	}
 
-	public bool TestArea(int rootCell, Func<int, bool> testDelegate)
+	public bool TestArea(int rootCell, object data, Func<int, object, bool> testDelegate)
 	{
 		for (int i = 0; i < this.OccupiedCellsOffsets.Length; i++)
 		{
 			CellOffset cellOffset = this.OccupiedCellsOffsets[i];
 			int num = Grid.OffsetCell(rootCell, cellOffset);
-			if (!testDelegate(num))
+			if (!testDelegate(num, data))
 			{
 				return false;
 			}
@@ -206,7 +206,7 @@ public class OccupyArea : KMonoBehaviour
 		return true;
 	}
 
-	public bool TestAreaAbove(int rootCell, Func<int, bool> testDelegate)
+	public bool TestAreaAbove(int rootCell, object data, Func<int, object, bool> testDelegate)
 	{
 		if (this.AboveOccupiedCellOffsets == null)
 		{
@@ -224,7 +224,7 @@ public class OccupyArea : KMonoBehaviour
 		for (int j = 0; j < this.AboveOccupiedCellOffsets.Length; j++)
 		{
 			int num = Grid.OffsetCell(rootCell, this.AboveOccupiedCellOffsets[j]);
-			if (!testDelegate(num))
+			if (!testDelegate(num, data))
 			{
 				return false;
 			}

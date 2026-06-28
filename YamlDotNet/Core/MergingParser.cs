@@ -30,8 +30,7 @@ namespace YamlDotNet.Core
 						AnchorAlias anchorAlias = this._allEvents[i + 1] as AnchorAlias;
 						if (anchorAlias == null)
 						{
-							SequenceStart sequenceStart = this._allEvents[i + 1] as SequenceStart;
-							if (sequenceStart != null)
+							if (this._allEvents[i + 1] is SequenceStart)
 							{
 								List<IEnumerable<ParsingEvent>> list = new List<IEnumerable<ParsingEvent>>();
 								bool flag = false;

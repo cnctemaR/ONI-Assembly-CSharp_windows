@@ -23,6 +23,7 @@ namespace Database
 			this.AccessControl = new StatusItemCategory("AccessControl", this, "AccessControl");
 			this.Heat = new StatusItemCategory("Heat", this, "Heat");
 			this.Yield = new StatusItemCategory("Yield", this, "Yield");
+			this.Sleep = new StatusItemCategory("Sleep", this, "Sleep");
 		}
 
 		public StatusItemCategory Main;
@@ -56,5 +57,7 @@ namespace Database
 		public StatusItemCategory Heat;
 
 		public StatusItemCategory Yield;
+
+		public StatusItemCategory Sleep;
 	}
 }

@@ -477,8 +477,8 @@ public class PropertyTextures : KMonoBehaviour
 				int num3 = x0;
 				while (j <= num2)
 				{
-					Color32 colorForCell = LightGridManager.GetColorForCell(j);
-					region.SetBytes(num3, i, colorForCell.r, colorForCell.g, colorForCell.b, (colorForCell.r + colorForCell.g + colorForCell.b <= 0) ? 0 : byte.MaxValue);
+					Color32 color = ((Grid.LightCount[j] <= 0) ? new Color32(0, 0, 0, byte.MaxValue) : Lighting.Instance.Settings.LightColour);
+					region.SetBytes(num3, i, color.r, color.g, color.b, (color.r + color.g + color.b <= 0) ? 0 : byte.MaxValue);
 					j++;
 					num3++;
 				}
@@ -502,8 +502,8 @@ public class PropertyTextures : KMonoBehaviour
 	[SerializeField]
 	private Vector2 PressureRange = new Vector2(15f, 200f);
 
-	[SerializeField]
 	[Range(0f, 1f)]
+	[SerializeField]
 	private float TemperatureStateChangeRange = 0.05f;
 
 	public static PropertyTextures instance;

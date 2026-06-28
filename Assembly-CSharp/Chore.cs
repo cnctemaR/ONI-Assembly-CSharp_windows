@@ -16,6 +16,7 @@ public abstract class Chore
 		if (chore_provider == null)
 		{
 			chore_provider = GlobalChoreProvider.Instance;
+			DebugUtil.Assert(chore_provider != null, "Assert!");
 		}
 		this.choreType = chore_type;
 		this.runUntilComplete = run_until_complete;
@@ -29,10 +30,6 @@ public abstract class Chore
 		this.AddPrecondition(ChorePreconditions.HasUrge, null);
 		this.AddPrecondition(ChorePreconditions.IsMoreSatisfying, null);
 		this.AddPrecondition(ChorePreconditions.IsOverrideTargetNullOrMe, null);
-		if (is_preemptable)
-		{
-			this.AddPrecondition(ChorePreconditions.CanPreempt, null);
-		}
 		chore_provider.AddChore(this);
 	}
 
@@ -49,6 +46,8 @@ public abstract class Chore
 	public ChoreProvider provider { get; set; }
 
 	public ChoreConsumer overrideTarget { get; private set; }
+
+	public bool isComplete { get; protected set; }
 
 	public bool runUntilComplete { get; set; }
 
@@ -84,7 +83,7 @@ public abstract class Chore
 
 	protected void SetPrioritizable(Prioritizable prioritizable)
 	{
-		if (prioritizable != null)
+		if (prioritizable != null && prioritizable.IsPrioritizable())
 		{
 			this.prioritizable = prioritizable;
 			this.masterPriority = prioritizable.GetMasterPriority();
@@ -158,7 +157,16 @@ public abstract class Chore
 	public virtual void Begin(Chore.Precondition.Context context)
 	{
 		DebugUtil.Assert(this.driver == null, "Assert!");
-		DebugUtil.Assert(this.provider != null, "Assert!");
+		if (this.provider == null)
+		{
+			global::Debug.LogError(string.Concat(new object[]
+			{
+				"Chore has null provider: ",
+				base.GetType(),
+				" ",
+				this.choreType.Id
+			}), null);
+		}
 		this.driver = context.consumer.GetComponent<ChoreDriver>();
 		StateMachine.Instance smi = this.GetSMI();
 		StateMachine.Instance instance = smi;
@@ -212,6 +220,7 @@ public abstract class Chore
 		{
 			return;
 		}
+		this.isComplete = true;
 		if (this.onComplete != null)
 		{
 			this.onComplete(this);
@@ -228,6 +237,10 @@ public abstract class Chore
 	public virtual void Fail(string reason)
 	{
 		if (this.provider == null)
+		{
+			return;
+		}
+		if (this.driver == null)
 		{
 			return;
 		}
@@ -272,6 +285,11 @@ public abstract class Chore
 		return false;
 	}
 
+	public virtual bool CanPreempt(Chore.Precondition.Context context)
+	{
+		return this.IsPreemptable;
+	}
+
 	protected virtual void ShowCustomEditor(string filter)
 	{
 	}
@@ -294,7 +312,7 @@ public abstract class Chore
 
 	public Action<Chore> onExit;
 
-	private Action<Chore> onComplete;
+	public Action<Chore> onComplete;
 
 	private Action<Chore> onBegin;
 

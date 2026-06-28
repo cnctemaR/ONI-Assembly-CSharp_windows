@@ -11,30 +11,33 @@ public class SchedulerGroup
 
 	public Scheduler scheduler { get; private set; }
 
-	public void Reset()
+	public void FreeResources()
 	{
 		if (this.scheduler != null)
 		{
-			foreach (Guid guid in this.guids)
-			{
-				if (guid != Guid.Empty)
-				{
-					this.scheduler.Clear(guid);
-				}
-			}
-			this.guids.Clear();
+			this.scheduler.FreeResources();
 		}
+		this.scheduler = null;
+		if (this.handles != null)
+		{
+			this.handles.Clear();
+		}
+		this.handles = null;
 	}
 
-	public void Add(Guid guid)
+	public void Reset()
 	{
-		this.guids.Add(guid);
+		foreach (SchedulerHandle schedulerHandle in this.handles)
+		{
+			schedulerHandle.ClearScheduler();
+		}
+		this.handles.Clear();
 	}
 
-	public void Remove(Guid guid)
+	public void Add(SchedulerHandle handle)
 	{
-		this.guids.Remove(guid);
+		this.handles.Add(handle);
 	}
 
-	private List<Guid> guids = new List<Guid>();
+	private List<SchedulerHandle> handles = new List<SchedulerHandle>();
 }

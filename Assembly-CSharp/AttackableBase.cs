@@ -26,8 +26,7 @@ public class AttackableBase : Workable, IApproachable
 	private void SetupScenePartitioner(object data = null)
 	{
 		Extents extents = new Extents(Grid.PosToXY(this.transform.position).x, Grid.PosToXY(this.transform.position).y, 1, 1);
-		int mask = GameScenePartitioner.Instance.attackableEntities.mask;
-		this.scenePartitionerEntry = GameScenePartitioner.Instance.Add(base.gameObject.name, base.GetComponent<FactionAlignment>(), extents, mask, null);
+		this.scenePartitionerEntry = GameScenePartitioner.Instance.Add(base.gameObject.name, base.GetComponent<FactionAlignment>(), extents, GameScenePartitioner.Instance.attackableEntitiesLayer, null);
 	}
 
 	private void OnDefeated(object data = null)

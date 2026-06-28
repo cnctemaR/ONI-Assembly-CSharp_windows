@@ -42,6 +42,12 @@ public class KBatchedAnimInstanceData
 		}
 	}
 
+	public bool IsSet(int bit)
+	{
+		int num = bit / 30;
+		return num < 4 && (this.hidden[num] & (1U << 2 + bit % 30)) != 0U;
+	}
+
 	public void SetClipRadius(float x, float y, float dist_sq, bool doClip)
 	{
 		this.clipRadius.x = x;
@@ -69,9 +75,11 @@ public class KBatchedAnimInstanceData
 		this.highlightColour = this.target.GetHighlightColour();
 		this.firstTintColour = this.target.GetFirstTintColour();
 		this.secondTintColour = this.target.GetSecondTintColour();
-		this.temperatureColour = this.target.GetTemperatureColour();
+		this.overlayColour = this.target.GetOverlayColour();
 		this.firstTintIndex = this.target.GetFirstTintIndex();
 		this.secondTintIndex = this.target.GetSecondTintIndex();
+		this.symbolScaleIndex = this.target.GetSecondTintIndex();
+		this.symbolScale = this.target.GetSymbolScale();
 		this.transformationMatrix = this.target.GetTransformMatrix();
 		data[startIndex++] = (float)this.curAnimFrameIndex;
 		data[startIndex++] = (float)thisIndex;
@@ -79,7 +87,7 @@ public class KBatchedAnimInstanceData
 		data[startIndex++] = (float)this.currentAnimFirstFrameIdx;
 		for (int i = 0; i < 4; i++)
 		{
-			data[startIndex++] = this.hidden[i];
+			data[startIndex++] = this.hidden[i] & 4294967292U;
 		}
 		for (int j = 0; j < 4; j++)
 		{
@@ -101,10 +109,10 @@ public class KBatchedAnimInstanceData
 		data[startIndex++] = (float)this.secondTintColour.g / 255f;
 		data[startIndex++] = (float)this.secondTintColour.b / 255f;
 		data[startIndex++] = (float)this.secondTintColour.a / 255f;
-		data[startIndex++] = (float)this.temperatureColour.r / 255f;
-		data[startIndex++] = (float)this.temperatureColour.g / 255f;
-		data[startIndex++] = (float)this.temperatureColour.b / 255f;
-		data[startIndex++] = (float)this.temperatureColour.a / 255f;
+		data[startIndex++] = (float)this.overlayColour.r / 255f;
+		data[startIndex++] = (float)this.overlayColour.g / 255f;
+		data[startIndex++] = (float)this.overlayColour.b / 255f;
+		data[startIndex++] = (float)this.overlayColour.a / 255f;
 		data[startIndex++] = this.clipRadius[0];
 		data[startIndex++] = this.clipRadius[1];
 		data[startIndex++] = this.clipRadius[2];
@@ -113,15 +121,17 @@ public class KBatchedAnimInstanceData
 		data[startIndex++] = this.clipParams[1];
 		data[startIndex++] = (float)this.firstTintIndex;
 		data[startIndex++] = (float)this.secondTintIndex;
+		data[startIndex++] = (float)this.symbolScaleIndex;
+		data[startIndex++] = this.symbolScale;
 		data[startIndex++] = this.extra.x;
 		data[startIndex++] = this.extra.y;
-		data[startIndex++] = this.extra.z;
-		data[startIndex++] = this.extra.w;
 	}
 
 	public const int bitsPerSlot = 30;
 
 	public const int bitOffest = 2;
+
+	public const uint bitsMask = 4294967292U;
 
 	private uint[] hidden = new uint[4];
 
@@ -139,17 +149,21 @@ public class KBatchedAnimInstanceData
 
 	private int secondTintIndex = -1;
 
+	private int symbolScaleIndex = -1;
+
 	private Color32 highlightColour = Color.white;
 
 	private Color32 firstTintColour = Color.white;
 
 	private Color32 secondTintColour = Color.white;
 
-	private Color32 temperatureColour = Color.white;
+	private Color32 overlayColour = Color.white;
 
 	private Matrix4x4 transformationMatrix = Matrix4x4.identity;
 
+	private float symbolScale;
+
 	private KAnimConverter.IAnimConverter target;
 
-	private Vector4 extra = Vector4.zero;
+	private Vector2 extra = Vector2.zero;
 }

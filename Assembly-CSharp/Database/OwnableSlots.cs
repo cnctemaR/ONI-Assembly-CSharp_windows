@@ -10,7 +10,10 @@ namespace Database
 			this.Bed = base.Add(new OwnableSlot("Bed", MISC.TAGS.BED));
 			this.MessStation = base.Add(new OwnableSlot("MessStation", MISC.TAGS.MESSSTATION));
 			this.Clinic = base.Add(new OwnableSlot("Clinic", MISC.TAGS.CLINIC));
-			this.RelaxationPoint = base.Add(new OwnableSlot("RelaxationPoint", MISC.TAGS.RELAXATION_POINT));
+			this.MedicalBed = base.Add(new OwnableSlot("MedicalBed", MISC.TAGS.CLINIC));
+			this.MedicalBed.showInUI = false;
+			this.GeneShuffler = base.Add(new OwnableSlot("GeneShuffler", MISC.TAGS.GENE_SHUFFLER));
+			this.GeneShuffler.showInUI = false;
 		}
 
 		public OwnableSlot Bed;
@@ -19,6 +22,8 @@ namespace Database
 
 		public OwnableSlot Clinic;
 
-		public OwnableSlot RelaxationPoint;
+		public OwnableSlot GeneShuffler;
+
+		public OwnableSlot MedicalBed;
 	}
 }

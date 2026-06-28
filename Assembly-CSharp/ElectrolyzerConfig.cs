@@ -6,7 +6,8 @@ public class ElectrolyzerConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Electrolyzer", 2, 2, "electrolyzer_kanim", 100f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.ALL_METALS, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER1, null);
+		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER3;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Electrolyzer", 2, 2, "electrolyzer_kanim", 100f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.ALL_METALS, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER1, tier);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.PowerInputOffset = new CellOffset(1, 0);
 		buildingDef.EnergyConsumptionWhenActive = 120f;
@@ -42,11 +43,11 @@ public class ElectrolyzerConfig : IBuildingConfig
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(0.888f, SimHashes.Oxygen, 343.15f, false, 0f, 1f, false),
-			new ElementConverter.OutputElement(0.11199999f, SimHashes.Hydrogen, 343.15f, false, 0f, 1f, false)
+			new ElementConverter.OutputElement(0.888f, SimHashes.Oxygen, 343.15f, false, 0f, 1f, false, 1f, byte.MaxValue, 0),
+			new ElementConverter.OutputElement(0.11199999f, SimHashes.Hydrogen, 343.15f, false, 0f, 1f, false, 1f, byte.MaxValue, 0)
 		};
 		elementConverter.conversionInterval = 1f;
-		go.AddOrGet<Prioritizable>();
+		Prioritizable.AddRef(go);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -58,6 +59,8 @@ public class ElectrolyzerConfig : IBuildingConfig
 			instance.StartSM();
 		};
 	}
+
+	public const string ID = "Electrolyzer";
 
 	public const float WATER2OXYGEN_RATIO = 0.888f;
 

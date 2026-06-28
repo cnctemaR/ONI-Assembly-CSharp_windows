@@ -66,6 +66,80 @@ public class KBatchGroupData
 		this.firstSymbolIndex = new Dictionary<KAnimHashedString, int>();
 	}
 
+	public void FreeResources()
+	{
+		if (this.anims != null)
+		{
+			this.anims.Clear();
+			this.anims = null;
+		}
+		if (this.animIndex != null)
+		{
+			this.animIndex.Clear();
+			this.animIndex = null;
+		}
+		if (this.animCount != null)
+		{
+			this.animCount.Clear();
+			this.animCount = null;
+		}
+		if (this.animFrameIndex != null)
+		{
+			this.animFrameIndex.Clear();
+			this.animFrameIndex = null;
+		}
+		if (this.animFrames != null)
+		{
+			this.animFrames.Clear();
+			this.animFrames = null;
+		}
+		if (this.frameElements != null)
+		{
+			this.frameElements.Clear();
+			this.frameElements = null;
+		}
+		if (this.builds != null)
+		{
+			this.builds.Clear();
+			this.builds = null;
+		}
+		if (this.buildIndex != null)
+		{
+			this.buildIndex.Clear();
+			this.buildIndex = null;
+		}
+		if (this.frameElementSymbols != null)
+		{
+			this.frameElementSymbols.Clear();
+			this.frameElementSymbols = null;
+		}
+		if (this.symbolFrameInstances != null)
+		{
+			this.symbolFrameInstances.Clear();
+			this.symbolFrameInstances = null;
+		}
+		if (this.symbolColourOveride != null)
+		{
+			this.symbolColourOveride.Clear();
+			this.symbolColourOveride = null;
+		}
+		if (this.textures != null)
+		{
+			this.textures.Clear();
+			this.textures = null;
+		}
+		if (this.textureStartIndex != null)
+		{
+			this.textureStartIndex.Clear();
+			this.textureStartIndex = null;
+		}
+		if (this.firstSymbolIndex != null)
+		{
+			this.firstSymbolIndex.Clear();
+			this.firstSymbolIndex = null;
+		}
+	}
+
 	public KAnim.Build AddNewBuildFile(KAnimHashedString fileHash)
 	{
 		this.textureStartIndex.Add(fileHash, this.textures.Count);
@@ -91,6 +165,10 @@ public class KBatchGroupData
 
 	public KAnim.Anim GetAnim(int anim)
 	{
+		if (anim < 0 || anim >= this.anims.Count)
+		{
+			global::Debug.LogError(string.Format("Anim [{0}] out of range [{1}] in batch [{2}]", anim, this.anims.Count, this.groupID), null);
+		}
 		return this.anims[anim];
 	}
 
@@ -231,9 +309,9 @@ public class KBatchGroupData
 		return this.frameElements;
 	}
 
-	public List<KAnim.Build.SymbolFrameInstance> GetBuildSymbolFrameInstances()
+	public int GetBuildSymbolFrameCount()
 	{
-		return this.symbolFrameInstances;
+		return this.symbolFrameInstances.Count;
 	}
 
 	public void WriteAnimData(float[] data)
@@ -326,11 +404,13 @@ public class KBatchGroupData
 
 	public int GetSymbolIndex(KAnimHashedString symbol, KAnimHashedString fileNameHash)
 	{
+		KBatchGroupData.getSymbolIndexSymbolSymbol = symbol;
+		KBatchGroupData.getSymbolIndexFileNameHash = fileNameHash;
 		if (!this.lookupUnderGroupName)
 		{
-			return this.frameElementSymbols.FindIndex((KAnim.Build.Symbol fes) => fes.hash == symbol && fes.build.fileHash == fileNameHash);
+			return this.frameElementSymbols.FindIndex(KBatchGroupData.getSymbolIndexPredicateSymbolAndFile);
 		}
-		return this.frameElementSymbols.FindIndex((KAnim.Build.Symbol fes) => fes.hash == symbol);
+		return this.frameElementSymbols.FindIndex(KBatchGroupData.getSymbolIndexPredicateSymbol);
 	}
 
 	public void WriteBuildData(BatchGroupInstance instance, float[] data)
@@ -438,4 +518,12 @@ public class KBatchGroupData
 	private const int NULL_DATA_FRAME_ID = -1010;
 
 	public bool lookupUnderGroupName = true;
+
+	private static KAnimHashedString getSymbolIndexSymbolSymbol;
+
+	private static KAnimHashedString getSymbolIndexFileNameHash;
+
+	private static Predicate<KAnim.Build.Symbol> getSymbolIndexPredicateSymbolAndFile = (KAnim.Build.Symbol fes) => fes.hash == KBatchGroupData.getSymbolIndexSymbolSymbol && fes.build.fileHash == KBatchGroupData.getSymbolIndexFileNameHash;
+
+	private static Predicate<KAnim.Build.Symbol> getSymbolIndexPredicateSymbol = (KAnim.Build.Symbol fes) => fes.hash == KBatchGroupData.getSymbolIndexSymbolSymbol;
 }

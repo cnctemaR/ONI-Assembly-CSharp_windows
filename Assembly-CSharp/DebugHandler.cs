@@ -104,6 +104,7 @@ public class DebugHandler : IInputHandler
 			{
 				PlanScreen.Instance.Refresh();
 			}
+			ConsumerManager.instance.RefreshDiscovered(null);
 			if (ManagementMenu.Instance != null)
 			{
 				ManagementMenu.Instance.CheckResearch(null);
@@ -138,7 +139,7 @@ public class DebugHandler : IInputHandler
 			if (Game.Instance != null)
 			{
 				Game.Instance.UpdateGameActiveRegion(0, 0, Grid.WidthInCells, Grid.HeightInCells);
-				Game.Instance.UpdateSpawners(true);
+				WorldGenSpawner.Instance.SpawnEverything();
 			}
 			if (DebugPaintElementScreen.Instance != null)
 			{
@@ -148,10 +149,7 @@ public class DebugHandler : IInputHandler
 				{
 					DebugElementMenu.Instance.root.SetActive(false);
 				}
-				if (Application.isEditor)
-				{
-					DebugBaseTemplateButton.Instance.gameObject.SetActive(!activeSelf);
-				}
+				DebugBaseTemplateButton.Instance.gameObject.SetActive(!activeSelf);
 			}
 		}
 		else if (e.TryConsume(global::Action.DebugCollectGarbage))

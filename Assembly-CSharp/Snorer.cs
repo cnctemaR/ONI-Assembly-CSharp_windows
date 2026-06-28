@@ -52,7 +52,7 @@ public class Snorer : StateMachineComponent<Snorer.StatesInstance>
 
 		private void StartSmallSnoreInternal(object data)
 		{
-			this.snoreHandle.Clear();
+			this.snoreHandle.ClearScheduler();
 			KBatchedAnimController component = base.smi.master.GetComponent<KBatchedAnimController>();
 			bool flag;
 			Matrix4x4 symbolTransform = component.GetSymbolTransform(Snorer.HeadHash, out flag);
@@ -61,7 +61,7 @@ public class Snorer : StateMachineComponent<Snorer.StatesInstance>
 				Vector4 column = symbolTransform.GetColumn(3);
 				Vector3 vector = column;
 				vector.z = Grid.GetLayerZ(Grid.SceneLayer.FXFront);
-				this.snoreEffect = FXHelpers.CreateEffect("snore_fx_kanim", vector, SceneOrganizer.Instance.GetFolder(Folder.FX).transform, false, Grid.SceneLayer.Front);
+				this.snoreEffect = FXHelpers.CreateEffect("snore_fx_kanim", vector, SceneOrganizer.Instance.GetFolder(Folder.FX).transform, false, Grid.SceneLayer.Front, false);
 				this.snoreEffect.destroyOnAnimComplete = true;
 				this.snoreEffect.Play("snore", KAnim.PlayMode.Loop, 1f, 0f);
 			}
@@ -69,7 +69,7 @@ public class Snorer : StateMachineComponent<Snorer.StatesInstance>
 
 		public void StopSmallSnore()
 		{
-			this.snoreHandle.Clear();
+			this.snoreHandle.ClearScheduler();
 			if (this.snoreEffect != null)
 			{
 				this.snoreEffect.PlayMode = KAnim.PlayMode.Once;

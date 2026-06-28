@@ -133,10 +133,11 @@ public class SingleEntityReceptacle : KMonoBehaviour
 			{
 				this.UpdateStatusItem(this);
 			};
-			this.fetchChore = new FetchChore(this.storage, 1f, new Tag[] { entityTag }, null, true, action, action2, delegate(Chore chore)
+			Action<Chore> action3 = delegate(Chore chore)
 			{
 				this.UpdateStatusItem(this);
-			}, FetchOrder2.OperationalRequirement.Functional, 0);
+			};
+			this.fetchChore = new FetchChore(this.storage, 1f, new Tag[] { entityTag }, null, null, true, action, action2, action3, FetchOrder2.OperationalRequirement.Functional, 0);
 			MaterialNeeds.Instance.UpdateNeed(this.requestedEntityTag, 1f);
 			this.updateStatusItemsHandle = UIScheduler.Instance.SchedulePeriodic("SingleEntityReceptacle.StatusUpdate", 1f, new Action<object>(this.UpdateStatusItem), this, null);
 			this.UpdateStatusItem(this);
@@ -164,7 +165,7 @@ public class SingleEntityReceptacle : KMonoBehaviour
 	{
 		if (this.fetchChore != null)
 		{
-			this.updateStatusItemsHandle.Clear();
+			this.updateStatusItemsHandle.ClearScheduler();
 			MaterialNeeds.Instance.UpdateNeed(this.requestedEntityTag, -1f);
 			this.fetchChore.Cancel("User canceled");
 			this.fetchChore = null;
@@ -220,7 +221,7 @@ public class SingleEntityReceptacle : KMonoBehaviour
 		{
 			this.requestedEntityTag = Tag.Invalid;
 		}
-		this.updateStatusItemsHandle.Clear();
+		this.updateStatusItemsHandle.ClearScheduler();
 		this.SetOperation();
 		this.UpdateStatusItem(this);
 		this.Subscribe(-592767678, delegate
@@ -275,7 +276,7 @@ public class SingleEntityReceptacle : KMonoBehaviour
 	{
 		this.CancelActiveRequest();
 		this.UnsubscribeFromOccupant();
-		this.updateStatusItemsHandle.Clear();
+		this.updateStatusItemsHandle.ClearScheduler();
 		base.OnCleanUp();
 	}
 

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Klei;
 using Klei.AI;
+using ProcGen;
 using TUNING;
 using UnityEngine;
 
@@ -38,57 +38,35 @@ public class EconomyDetails
 			Crop component = kprefabID.GetComponent<Crop>();
 			if (component != null)
 			{
-				if (component.medYieldEffects != null && component.medYieldEffects.Length > 0)
-				{
-					Tag tag = new Tag(kprefabID.PrefabTag.Name + EconomyDetails.GOOD_YIELD_SUFFIX);
-					EconomyDetails.Transformation transformation = this.CreateTransformation(kprefabID, tag);
-					foreach (IYieldEffect yieldEffect in component.medYieldEffects)
-					{
-						yieldEffect.ApplyToTransformation(component, this, transformation);
-					}
-				}
-				if (component.highYieldEffects != null && component.highYieldEffects.Length > 0)
-				{
-					Tag tag2 = new Tag(kprefabID.PrefabTag.Name + EconomyDetails.GREAT_YIELD_SUFFIX);
-					EconomyDetails.Transformation transformation2 = this.CreateTransformation(kprefabID, tag2);
-					foreach (IYieldEffect yieldEffect2 in component.medYieldEffects)
-					{
-						yieldEffect2.ApplyToTransformation(component, this, transformation2);
-					}
-					foreach (IYieldEffect yieldEffect3 in component.highYieldEffects)
-					{
-						yieldEffect3.ApplyToTransformation(component, this, transformation2);
-					}
-				}
 			}
 		}
 		foreach (Effect effect in Db.Get().effects)
 		{
 			this.CreateTransformation(effect);
 		}
-		EconomyDetails.Transformation transformation3 = new EconomyDetails.Transformation(TagManager.Create("Duplicant", null), this.dupeTransformationType, 1f);
-		transformation3.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.Oxygen), -0.1f));
-		transformation3.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.CarbonDioxide), 0.1f * EntityPrefabs.Instance.MinionPrefab.GetComponent<OxygenBreather>().O2toCO2conversion));
-		transformation3.AddDelta(new EconomyDetails.Transformation.Delta(this.duplicantTimeResource, 0.875f));
-		transformation3.AddDelta(new EconomyDetails.Transformation.Delta(this.caloriesResource, -1666.6666f));
-		transformation3.AddDelta(new EconomyDetails.Transformation.Delta(this.CreateResource(new Tag(Db.Get().Amounts.Bladder.deltaAttribute.Id), this.amountResourceType), 100f));
+		EconomyDetails.Transformation transformation = new EconomyDetails.Transformation(TagManager.Create("Duplicant", null), this.dupeTransformationType, 1f);
+		transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.Oxygen), -0.1f));
+		transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.CarbonDioxide), 0.1f * EntityPrefabs.Instance.MinionPrefab.GetComponent<OxygenBreather>().O2toCO2conversion));
+		transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.duplicantTimeResource, 0.875f));
+		transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.caloriesResource, -1666.6666f));
+		transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.CreateResource(new Tag(Db.Get().Amounts.Bladder.deltaAttribute.Id), this.amountResourceType), 0.16666667f));
+		this.transformations.Add(transformation);
+		EconomyDetails.Transformation transformation2 = new EconomyDetails.Transformation(TagManager.Create("Electrolysis", null), this.referenceTransformationType, 1f);
+		transformation2.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.Oxygen), 1.7777778f));
+		transformation2.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.Hydrogen), 0.22222222f));
+		transformation2.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.Water), -2f));
+		this.transformations.Add(transformation2);
+		EconomyDetails.Transformation transformation3 = new EconomyDetails.Transformation(TagManager.Create("MethaneCombustion", null), this.referenceTransformationType, 1f);
+		transformation3.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.Methane), -1f));
+		transformation3.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.Oxygen), -4f));
+		transformation3.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.CarbonDioxide), 2.75f));
+		transformation3.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.Water), 2.25f));
 		this.transformations.Add(transformation3);
-		EconomyDetails.Transformation transformation4 = new EconomyDetails.Transformation(TagManager.Create("Electrolysis", null), this.referenceTransformationType, 1f);
-		transformation4.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.Oxygen), 1.7777778f));
-		transformation4.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.Hydrogen), 0.22222222f));
-		transformation4.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.Water), -2f));
+		EconomyDetails.Transformation transformation4 = new EconomyDetails.Transformation(TagManager.Create("CoalCombustion", null), this.referenceTransformationType, 1f);
+		transformation4.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.Carbon), -1f));
+		transformation4.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.Oxygen), -2.6666667f));
+		transformation4.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.CarbonDioxide), 3.6666667f));
 		this.transformations.Add(transformation4);
-		EconomyDetails.Transformation transformation5 = new EconomyDetails.Transformation(TagManager.Create("MethaneCombustion", null), this.referenceTransformationType, 1f);
-		transformation5.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.Methane), -1f));
-		transformation5.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.Oxygen), -4f));
-		transformation5.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.CarbonDioxide), 2.75f));
-		transformation5.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.Water), 2.25f));
-		this.transformations.Add(transformation5);
-		EconomyDetails.Transformation transformation6 = new EconomyDetails.Transformation(TagManager.Create("CoalCombustion", null), this.referenceTransformationType, 1f);
-		transformation6.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.Carbon), -1f));
-		transformation6.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.Oxygen), -2.6666667f));
-		transformation6.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(GameTags.CarbonDioxide), 3.6666667f));
-		this.transformations.Add(transformation6);
 	}
 
 	private static void WriteProduct(StreamWriter o, string a, string b, string c)
@@ -340,13 +318,13 @@ public class EconomyDetails
 			{
 				if (component10 != null)
 				{
-					num2 = component10.cropVal.cropDuration + component10.cropVal.regrowDuration * (float)(component10.cropVal.harvests - 1);
+					num2 = component10.cropVal.cropDuration;
 				}
 				transformation = new EconomyDetails.Transformation(tag, this.plantTransformationType, num2);
 			}
 			else if (component12 != null)
 			{
-				transformation = new EconomyDetails.Transformation(tag, this.geyserTransformationType, component12.idleDuration + component12.preEmissionElement.duration + component12.emissionElement.duration + component12.postEmissionElement.duration);
+				transformation = new EconomyDetails.Transformation(tag, this.geyserTransformationType, component12.idleDuration + component12.emission_a.duration_erupt + component12.emission_a.duration_pst);
 			}
 			else
 			{
@@ -423,7 +401,7 @@ public class EconomyDetails
 			if (component10 != null)
 			{
 				EconomyDetails.Resource resource4 = this.CreateResource(TagManager.Create(component10.cropVal.cropId, null), this.amountResourceType);
-				float num3 = (float)(component10.cropVal.numProduced * component10.cropVal.harvests);
+				float num3 = (float)component10.cropVal.numProduced;
 				transformation.AddDelta(new EconomyDetails.Transformation.Delta(resource4, num3));
 				GameObject prefab = Assets.GetPrefab(new Tag(component10.cropVal.cropId));
 				if (prefab != null)
@@ -465,19 +443,17 @@ public class EconomyDetails
 			}
 			if (component12 != null)
 			{
-				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.CreateResource(component12.preEmissionElement.emissionElement.element.tag, this.massResourceType), component12.preEmissionElement.emissionElement.massGenerationRate * component12.preEmissionElement.duration));
-				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.CreateResource(component12.emissionElement.emissionElement.element.tag, this.massResourceType), component12.emissionElement.emissionElement.massGenerationRate * component12.emissionElement.duration));
-				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.CreateResource(component12.postEmissionElement.emissionElement.element.tag, this.massResourceType), component12.postEmissionElement.emissionElement.massGenerationRate * component12.postEmissionElement.duration));
+				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.CreateResource(component12.emission_a.emissionElement.element.tag, this.massResourceType), component12.emission_a.emissionElement.massGenerationRate * component12.emission_a.duration_erupt));
 			}
 			if (component13 != null)
 			{
-				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.CreateResource(new Tag(Db.Get().Amounts.Bladder.deltaAttribute.Id), this.amountResourceType), -100f));
+				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.CreateResource(new Tag(Db.Get().Amounts.Bladder.deltaAttribute.Id), this.amountResourceType), -0.16666667f));
 				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(SimHashes.Dirt), -component13.solidWastePerUse.mass));
 				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(component13.solidWastePerUse.elementID), component13.solidWastePerUse.mass));
 			}
 			if (component14 != null)
 			{
-				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.CreateResource(new Tag(Db.Get().Amounts.Bladder.deltaAttribute.Id), this.amountResourceType), -100f));
+				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.CreateResource(new Tag(Db.Get().Amounts.Bladder.deltaAttribute.Id), this.amountResourceType), -0.16666667f));
 				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(SimHashes.Water), -component14.massConsumedPerUse));
 				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.GetResource(SimHashes.DirtyWater), component14.massEmittedPerUse));
 			}
@@ -637,14 +613,6 @@ public class EconomyDetails
 					if (component != null && component.cropVal.cropId == tag.Name)
 					{
 						scenario15.AddEntry(new EconomyDetails.Scenario.Entry(kprefabID.PrefabTag, 1));
-						if (component.medYieldEffects != null && component.medYieldEffects.Length != 0)
-						{
-							scenario15.AddEntry(new EconomyDetails.Scenario.Entry(new Tag(kprefabID.PrefabTag.Name + EconomyDetails.GOOD_YIELD_SUFFIX), 1));
-						}
-						if (component.highYieldEffects != null && component.highYieldEffects.Length != 0)
-						{
-							scenario15.AddEntry(new EconomyDetails.Scenario.Entry(new Tag(kprefabID.PrefabTag.Name + EconomyDetails.GREAT_YIELD_SUFFIX), 1));
-						}
 						list2.Add(kprefabID.PrefabTag);
 					}
 				}
@@ -733,10 +701,6 @@ public class EconomyDetails
 	public EconomyDetails.Transformation.Type effectTransformationType;
 
 	public EconomyDetails.Transformation.Type geyserTransformationType;
-
-	private static string GOOD_YIELD_SUFFIX = "(Good)";
-
-	private static string GREAT_YIELD_SUFFIX = "(Great)";
 
 	private static string debugTag = "CO2Scrubber";
 

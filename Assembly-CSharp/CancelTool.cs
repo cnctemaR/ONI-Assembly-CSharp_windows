@@ -14,8 +14,8 @@ public class CancelTool : FilteredDragTool
 	protected override void GetDefaultFilters(Dictionary<string, ToolParameterMenu.ToggleState> filters)
 	{
 		base.GetDefaultFilters(filters);
-		filters.Add(FilteredDragTool.FILTERLAYERS.CLEANANDCLEAR, ToolParameterMenu.ToggleState.Off);
-		filters.Add(FilteredDragTool.FILTERLAYERS.DIGPLACER, ToolParameterMenu.ToggleState.Off);
+		filters.Add(ToolParameterMenu.FILTERLAYERS.CLEANANDCLEAR, ToolParameterMenu.ToggleState.Off);
+		filters.Add(ToolParameterMenu.FILTERLAYERS.DIGPLACER, ToolParameterMenu.ToggleState.Off);
 	}
 
 	protected override string GetConfirmSound()

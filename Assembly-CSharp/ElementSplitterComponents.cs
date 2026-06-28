@@ -55,7 +55,7 @@ public class ElementSplitterComponents : KGameObjectComponentManager<ElementSpli
 		}
 		ElementSplitter data = GameComps.ElementSplitters.GetData(first);
 		ElementSplitter data2 = GameComps.ElementSplitters.GetData(second);
-		return data.primaryElement.ElementID == data2.primaryElement.ElementID;
+		return data.primaryElement.ElementID == data2.primaryElement.ElementID && data.primaryElement.Units + data2.primaryElement.Units < 25000f;
 	}
 
 	private static Pickupable OnTake(HandleVector<int>.Handle handle, float amount)
@@ -64,7 +64,7 @@ public class ElementSplitterComponents : KGameObjectComponentManager<ElementSpli
 		Pickupable component = data.primaryElement.GetComponent<Pickupable>();
 		Storage storage = component.storage;
 		PrimaryElement component2 = component.GetComponent<PrimaryElement>();
-		Pickupable component3 = component2.Element.substance.SpawnResource(component.transform.position, amount, component2.Temperature, true, false).GetComponent<Pickupable>();
+		Pickupable component3 = component2.Element.substance.SpawnResource(component.transform.position, amount, component2.Temperature, byte.MaxValue, 0, true, false).GetComponent<Pickupable>();
 		component.TotalAmount -= amount;
 		component3.Trigger(1335436905, component);
 		if (storage != null)
@@ -73,4 +73,6 @@ public class ElementSplitterComponents : KGameObjectComponentManager<ElementSpli
 		}
 		return component3;
 	}
+
+	private const float MAX_STACK_SIZE = 25000f;
 }

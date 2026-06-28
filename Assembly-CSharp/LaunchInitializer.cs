@@ -1,25 +1,12 @@
 ﻿using System;
-using System.IO;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class LaunchInitializer : MonoBehaviour
 {
 	private void Awake()
 	{
-		if (SteamManager.Initialized && SteamUGCService.HasInstalledLanguage())
-		{
-			base.gameObject.AddComponent<SteamUGCService>();
-			SteamUGCService.LoadTranslation();
-		}
-		else
-		{
-			string localizationFilePath = Localization.GetLocalizationFilePath();
-			if (File.Exists(localizationFilePath))
-			{
-				Localization.LoadTranslation(localizationFilePath);
-			}
-		}
+		global::Debug.Log("Development Build: OU-" + 229531U.ToString(), null);
+		KPlayerPrefs.instance.Load();
 		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		for (int i = 0; i < this.SpawnPrefabs.Length; i++)
 		{
@@ -29,8 +16,10 @@ public class LaunchInitializer : MonoBehaviour
 			}
 		}
 		AudioMixer.Create();
-		SceneManager.LoadScene("frontend");
+		App.LoadScene("frontend");
 	}
+
+	public const string BUILD_PREFIX = "OU";
 
 	public GameObject[] SpawnPrefabs;
 }

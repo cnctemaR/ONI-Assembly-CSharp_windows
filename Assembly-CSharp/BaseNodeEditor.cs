@@ -1,6 +1,6 @@
 ﻿using System;
-using Klei.Noise;
 using NodeEditorFramework;
+using ProcGen.Noise;
 using UnityEngine;
 
 [Node(true, "Noise/Base Noise Node", new Type[] { typeof(NoiseNodeCanvas) })]

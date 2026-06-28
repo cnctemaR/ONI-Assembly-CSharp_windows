@@ -14,13 +14,26 @@ public class DoorTransitionLayer : TransitionDriver.OverrideLayer
 		base.Destroy();
 	}
 
+	private bool AreAllDoorsOpen()
+	{
+		foreach (Door door in this.doors)
+		{
+			if (door != null && !door.IsOpen())
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
 	public override void BeginTransition(Navigator navigator, Navigator.ActiveTransition transition)
 	{
 		base.BeginTransition(navigator, transition);
 		int num = Grid.PosToCell(navigator);
 		int num2 = Grid.OffsetCell(num, transition.x, transition.y);
-		this.targetDoor = this.GetDoor(num2);
-		if (this.targetDoor != null && !this.targetDoor.IsOpen())
+		this.AddDoor(num2);
+		this.AddDoor(Grid.CellAbove(num2));
+		if (this.doors.Count > 0 && !this.AreAllDoorsOpen())
 		{
 			transition.anim = navigator.NavGrid.GetIdleAnim(navigator.CurrentNavType);
 			transition.isLooping = false;
@@ -29,13 +42,10 @@ public class DoorTransitionLayer : TransitionDriver.OverrideLayer
 			transition.animSpeed = 1f;
 			transition.x = 0;
 			transition.y = 0;
-			transition.isCompleteCB = () => this.targetDoor == null || this.targetDoor.IsOpen();
+			transition.isCompleteCB = () => this.AreAllDoorsOpen();
 		}
 		this.AddDoor(num);
-		if (this.targetDoor != null)
-		{
-			this.doors.Add(this.targetDoor);
-		}
+		this.AddDoor(Grid.CellAbove(num));
 		foreach (Door door in this.doors)
 		{
 			door.Open();

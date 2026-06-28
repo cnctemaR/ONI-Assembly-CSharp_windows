@@ -25,7 +25,7 @@ public class Structure : KMonoBehaviour
 	{
 		base.OnSpawn();
 		Extents extents = this.building.GetExtents();
-		this.partitionerEntry = GameScenePartitioner.Instance.Add("Structure.OnSpawn", base.gameObject, extents, GameScenePartitioner.Instance.solidChangedMask.mask, new Action<object>(this.OnSolidChanged));
+		this.partitionerEntry = GameScenePartitioner.Instance.Add("Structure.OnSpawn", base.gameObject, extents, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
 		this.OnSolidChanged(null);
 	}
 
@@ -37,8 +37,6 @@ public class Structure : KMonoBehaviour
 			this.isEntombed = flag;
 			this.operational.SetFlag(Structure.notEntombedFlag, !this.isEntombed);
 			base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.Entombed, this.isEntombed, this);
-			GameHashes gameHashes = ((!this.isEntombed) ? GameHashes.EntombedExited : GameHashes.EntombedEntered);
-			this.Trigger((int)gameHashes, null);
 		}
 	}
 

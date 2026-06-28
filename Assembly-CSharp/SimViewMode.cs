@@ -31,12 +31,16 @@ public enum SimViewMode
 	PathProber = -940323225,
 	MinionGroupProber = 574162731,
 	Reachability = -1194209097,
-	LiquidSource = -822796105,
 	Decor = 347378277,
 	Priorities = 1529952898,
 	Reserved = -779379096,
 	Ignore = -1588157518,
 	InsideBase = -6399571,
 	MinionOccupied = -1457374668,
-	HarvestWhenReady = 954055328
+	HarvestWhenReady = 954055328,
+	Attack = 1932096648,
+	Forcefield = -1202046481,
+	NoisePollution = 1766337936,
+	Disease = -812707172,
+	Crop = 917814544
 }

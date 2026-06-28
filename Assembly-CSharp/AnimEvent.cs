@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 [Serializable]
 public class AnimEvent
@@ -9,16 +10,23 @@ public class AnimEvent
 
 	public AnimEvent(string file, string name, int frame)
 	{
-		this.File = ((!(file == string.Empty)) ? file : null);
-		if (this.File != null)
+		this.file = ((!(file == string.Empty)) ? file : null);
+		if (this.file != null)
 		{
-			this.FileHash = new KAnimHashedString(this.File);
+			this.fileHash = new KAnimHashedString(this.file);
 		}
-		this.Name = name;
-		this.Frame = frame;
+		this.name = name;
+		this.frame = frame;
 	}
 
-	public string File { get; private set; }
+	[SerializeField]
+	public string name { get; private set; }
+
+	[SerializeField]
+	public string file { get; private set; }
+
+	[SerializeField]
+	public int frame { get; private set; }
 
 	public void Play(AnimEventManager.EventPlayerData behaviour)
 	{
@@ -28,12 +36,12 @@ public class AnimEvent
 		}
 		if (behaviour.previousFrame < behaviour.currentFrame)
 		{
-			if (behaviour.previousFrame < this.Frame && behaviour.currentFrame >= this.Frame)
+			if (behaviour.previousFrame < this.frame && behaviour.currentFrame >= this.frame)
 			{
 				this.OnPlay(behaviour);
 			}
 		}
-		else if (behaviour.previousFrame > behaviour.currentFrame && (behaviour.previousFrame < this.Frame || this.Frame <= behaviour.currentFrame))
+		else if (behaviour.previousFrame > behaviour.currentFrame && (behaviour.previousFrame < this.frame || this.frame <= behaviour.currentFrame))
 		{
 			this.OnPlay(behaviour);
 		}
@@ -57,25 +65,11 @@ public class AnimEvent
 
 	protected bool IsFilteredOut(AnimEventManager.EventPlayerData behaviour)
 	{
-		return this.File != null && behaviour.currentAnimFile != null && this.FileHash != behaviour.currentAnimFileHash;
+		return this.file != null && behaviour.currentAnimFile != null && this.fileHash != behaviour.currentAnimFileHash;
 	}
 
-	public virtual bool ShouldPlaySound(AnimEventManager.EventPlayerData behaviour)
-	{
-		CameraController instance = CameraController.Instance;
-		SpeedControlScreen instance2 = SpeedControlScreen.Instance;
-		return (!(instance2 != null) || !instance2.IsPaused) && (!(instance != null) || instance.IsAudibleSound(behaviour.position, 0f));
-	}
-
-	public virtual void PlaySound(AnimEventManager.EventPlayerData behaviour)
-	{
-	}
-
-	public string Name;
-
-	private KAnimHashedString FileHash;
-
-	public int Frame;
+	[SerializeField]
+	private KAnimHashedString fileHash;
 
 	public bool OnExit;
 }

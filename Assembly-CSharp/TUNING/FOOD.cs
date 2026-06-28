@@ -52,7 +52,9 @@ namespace TUNING
 		{
 			public static EdiblesManager.FoodInfo FIELDRATION = new EdiblesManager.FoodInfo("FieldRation", 1000000f, -3, 255.15f, 277.15f, 9600f);
 
-			public static EdiblesManager.FoodInfo MUSHBAR = new EdiblesManager.FoodInfo("MushBar", 1000000f, -3, 255.15f, 277.15f, 2400f);
+			public static EdiblesManager.FoodInfo MUSHBAR = new EdiblesManager.FoodInfo("MushBar", 1000000f, -3, 255.15f, 277.15f, 2400f).AddEffects(new List<string> { "Diarrhea" });
+
+			public static EdiblesManager.FoodInfo MUSHROOM = new EdiblesManager.FoodInfo(MushroomConfig.ID, 1600000f, 0, 255.15f, 277.15f, 2400f);
 
 			public static EdiblesManager.FoodInfo MEAT = new EdiblesManager.FoodInfo("Meat", 1000000f, -2, 255.15f, 277.15f, 2400f);
 
@@ -70,13 +72,15 @@ namespace TUNING
 
 			public static EdiblesManager.FoodInfo GRILLED_PRICKLEFRUIT = new EdiblesManager.FoodInfo("GrilledPrickleFruit", 1000000f, 0, 255.15f, 277.15f, 2400f);
 
+			public static EdiblesManager.FoodInfo FRIED_MUSHROOM = new EdiblesManager.FoodInfo("FriedMushroom", 1000000f, 1, 255.15f, 277.15f, 2400f);
+
 			public static EdiblesManager.FoodInfo COLD_WHEAT_BREAD = new EdiblesManager.FoodInfo("ColdWheatBread", 1000000f, -1, 255.15f, 277.15f, 2400f);
 
 			public static EdiblesManager.FoodInfo SALSA = new EdiblesManager.FoodInfo("Salsa", 1000000f, 2, 255.15f, 277.15f, 1200f);
 
 			public static EdiblesManager.FoodInfo SPICEBREAD = new EdiblesManager.FoodInfo("SpiceBread", 1000000f, 1, 255.15f, 277.15f, 2400f);
 
-			public static EdiblesManager.FoodInfo COOKEDMEAT = new EdiblesManager.FoodInfo("CookedMeat", 1600000f, 1, 255.15f, 277.15f, 1200f);
+			public static EdiblesManager.FoodInfo COOKEDMEAT = new EdiblesManager.FoodInfo("CookedMeat", 1600000f, 1, 255.15f, 277.15f, 1200f).AddEffects(new List<string> { "GoodEats" });
 
 			public static EdiblesManager.FoodInfo SPICENUT = new EdiblesManager.FoodInfo(SpiceNutConfig.ID, 0f, 0, 255.15f, 277.15f, 1200f);
 

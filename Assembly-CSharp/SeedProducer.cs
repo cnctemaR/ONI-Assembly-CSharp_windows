@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using KSerialization;
 using STRINGS;
 using UnityEngine;
 
@@ -18,7 +17,6 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 		base.OnSpawn();
 		this.Subscribe(-216549700, new Action<object>(this.DropSeed));
 		this.Subscribe(1623392196, new Action<object>(this.DropSeed));
-		this.Subscribe(591871899, new Action<object>(this.CropDepleted));
 		this.Subscribe(-1072826864, new Action<object>(this.CropPicked));
 	}
 
@@ -34,12 +32,13 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 			component2.Units = (float)units;
 			this.Trigger(472291861, gameObject.GetComponent<PlantableSeed>());
 			gameObject.SetActive(true);
+			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, gameObject.GetProperName(), gameObject.transform, 1.5f, false);
 			return gameObject;
 		}
 		return null;
 	}
 
-	public void DropSeed(object data)
+	public void DropSeed(object data = null)
 	{
 		if (this.droppedSeedAlready)
 		{
@@ -52,80 +51,25 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	public void CropDepleted(object data)
 	{
-		this.droppedSeedAlready = true;
-		List<IYieldEffect> list = (List<IYieldEffect>)data;
-		SeedProducer.SeedInfo seedInfo = this.seedInfo;
-		if (list != null)
-		{
-			foreach (IYieldEffect yieldEffect in list)
-			{
-				seedInfo = yieldEffect.ApplyToSeed(base.gameObject, seedInfo, this.seedInfo);
-			}
-		}
-		if (seedInfo.productionType == SeedProducer.ProductionType.FinalHarvest)
-		{
-			this.ProduceSeed(seedInfo.seedId, seedInfo.newSeedsProduced);
-		}
+		this.DropSeed(null);
 	}
 
 	public void CropPicked(object data)
 	{
-		List<IYieldEffect> list = (List<IYieldEffect>)data;
-		SeedProducer.SeedInfo seedInfo = this.seedInfo;
-		if (list != null)
+		if (this.seedInfo.productionType == SeedProducer.ProductionType.Harvest)
 		{
-			foreach (IYieldEffect yieldEffect in list)
-			{
-				seedInfo = yieldEffect.ApplyToSeed(base.gameObject, seedInfo, this.seedInfo);
-			}
-		}
-		if (seedInfo.productionType == SeedProducer.ProductionType.Harvest)
-		{
-			this.ProduceSeed(seedInfo.seedId, seedInfo.newSeedsProduced);
+			int num = (((float)global::UnityEngine.Random.Range(0, 100) > 33f) ? 0 : 1);
+			this.ProduceSeed(this.seedInfo.seedId, num);
 		}
 	}
 
 	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		string text = "Seed";
-		string text2 = string.Empty;
 		GameObject prefab = Assets.GetPrefab(new Tag(this.seedInfo.seedId));
 		if (prefab != null)
 		{
-			text = prefab.GetProperName();
-			InfoDescription component = prefab.GetComponent<InfoDescription>();
-			if (component)
-			{
-				text2 = component.description;
-			}
 		}
-		SeedProducer.SeedInfo seedInfo = this.seedInfo;
-		SeedProducer.SeedInfo seedInfo2 = this.seedInfo;
-		Crop component2 = go.GetComponent<Crop>();
-		IYieldEffect[] array = new IYieldEffect[0];
-		IYieldEffect[] array2 = new IYieldEffect[0];
-		if (component2 != null)
-		{
-			array = component2.medYieldEffects;
-			array2 = component2.highYieldEffects;
-		}
-		if (array != null)
-		{
-			foreach (IYieldEffect yieldEffect in array)
-			{
-				seedInfo = yieldEffect.ApplyToSeed(go, seedInfo, this.seedInfo);
-				seedInfo2 = yieldEffect.ApplyToSeed(go, seedInfo2, this.seedInfo);
-			}
-		}
-		if (array2 != null)
-		{
-			foreach (IYieldEffect yieldEffect2 in array2)
-			{
-				seedInfo2 = yieldEffect2.ApplyToSeed(go, seedInfo2, this.seedInfo);
-			}
-		}
-		LocString locString = UI.UISIDESCREENS.PLANTERSIDESCREEN.YIELD_SEED;
 		switch (this.seedInfo.productionType)
 		{
 		default:
@@ -133,43 +77,10 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 		case SeedProducer.ProductionType.DigOnly:
 			return null;
 		case SeedProducer.ProductionType.Harvest:
-			if (this.seedInfo.newSeedsProduced > 0)
-			{
-				locString = ((this.seedInfo.newSeedsProduced != 1) ? UI.UISIDESCREENS.PLANTERSIDESCREEN.YIELD_SEED : UI.UISIDESCREENS.PLANTERSIDESCREEN.YIELD_SEED_SINGLE);
-				list.Add(new Descriptor(string.Format(locString, text, this.seedInfo.newSeedsProduced), string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.YIELD_SEED, text2), Descriptor.DescriptorType.HarvestLowYield, false));
-			}
-			if (seedInfo.newSeedsProduced > 0)
-			{
-				locString = ((seedInfo.newSeedsProduced != 1) ? UI.UISIDESCREENS.PLANTERSIDESCREEN.YIELD_SEED : UI.UISIDESCREENS.PLANTERSIDESCREEN.YIELD_SEED_SINGLE);
-				list.Add(new Descriptor(string.Format(locString, text, seedInfo.newSeedsProduced), string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.YIELD_SEED, text2), Descriptor.DescriptorType.HarvestMedYield, false));
-			}
-			if (seedInfo2.newSeedsProduced > 0)
-			{
-				locString = ((seedInfo2.newSeedsProduced != 1) ? UI.UISIDESCREENS.PLANTERSIDESCREEN.YIELD_SEED : UI.UISIDESCREENS.PLANTERSIDESCREEN.YIELD_SEED_SINGLE);
-				list.Add(new Descriptor(string.Format(locString, text, seedInfo2.newSeedsProduced), string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.YIELD_SEED, text2), Descriptor.DescriptorType.HarvestHighYield, false));
-			}
-			list.Add(new Descriptor(UI.GAMEOBJECTEFFECTS.SEED_PRODUCTION_HARVEST, UI.GAMEOBJECTEFFECTS.TOOLTIPS.SEED_PRODUCTION_HARVEST, Descriptor.DescriptorType.CropHarvest, true));
-			break;
-		case SeedProducer.ProductionType.FinalHarvest:
-			if (this.seedInfo.newSeedsProduced > 0)
-			{
-				locString = ((this.seedInfo.newSeedsProduced != 1) ? UI.UISIDESCREENS.PLANTERSIDESCREEN.YIELD_SEED_FINAL_HARVEST : UI.UISIDESCREENS.PLANTERSIDESCREEN.YIELD_SEED_SINGLE_FINAL_HARVEST);
-				list.Add(new Descriptor(string.Format(locString, text, this.seedInfo.newSeedsProduced), string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.YIELD_SEED_FINAL_HARVEST, text2), Descriptor.DescriptorType.HarvestLowYield, false));
-			}
-			if (seedInfo.newSeedsProduced > 0)
-			{
-				locString = ((seedInfo.newSeedsProduced != 1) ? UI.UISIDESCREENS.PLANTERSIDESCREEN.YIELD_SEED_FINAL_HARVEST : UI.UISIDESCREENS.PLANTERSIDESCREEN.YIELD_SEED_SINGLE_FINAL_HARVEST);
-				list.Add(new Descriptor(string.Format(locString, text, seedInfo.newSeedsProduced), string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.YIELD_SEED_FINAL_HARVEST, text2), Descriptor.DescriptorType.HarvestMedYield, false));
-			}
-			if (seedInfo2.newSeedsProduced > 0)
-			{
-				locString = ((seedInfo2.newSeedsProduced != 1) ? UI.UISIDESCREENS.PLANTERSIDESCREEN.YIELD_SEED_FINAL_HARVEST : UI.UISIDESCREENS.PLANTERSIDESCREEN.YIELD_SEED_SINGLE_FINAL_HARVEST);
-				list.Add(new Descriptor(string.Format(locString, text, seedInfo2.newSeedsProduced), string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.YIELD_SEED_FINAL_HARVEST, text2), Descriptor.DescriptorType.HarvestHighYield, false));
-			}
-			list.Add(new Descriptor(UI.GAMEOBJECTEFFECTS.SEED_PRODUCTION_FINAL_HARVEST, UI.GAMEOBJECTEFFECTS.TOOLTIPS.SEED_PRODUCTION_FINAL_HARVEST, Descriptor.DescriptorType.CropHarvest, true));
+			list.Add(new Descriptor(UI.GAMEOBJECTEFFECTS.SEED_PRODUCTION_HARVEST, UI.GAMEOBJECTEFFECTS.TOOLTIPS.SEED_PRODUCTION_HARVEST, Descriptor.DescriptorType.Lifecycle, true));
 			break;
 		case SeedProducer.ProductionType.Fruit:
-			list.Add(new Descriptor(UI.GAMEOBJECTEFFECTS.SEED_PRODUCTION_FRUIT, UI.GAMEOBJECTEFFECTS.TOOLTIPS.SEED_PRODUCTION_DIG_ONLY, Descriptor.DescriptorType.CropHarvest, true));
+			list.Add(new Descriptor(UI.GAMEOBJECTEFFECTS.SEED_PRODUCTION_FRUIT, UI.GAMEOBJECTEFFECTS.TOOLTIPS.SEED_PRODUCTION_DIG_ONLY, Descriptor.DescriptorType.Lifecycle, true));
 			break;
 		}
 		return list;
@@ -177,7 +88,6 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	public SeedProducer.SeedInfo seedInfo;
 
-	[Serialize]
 	private bool droppedSeedAlready;
 
 	[Serializable]
@@ -195,7 +105,6 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 		Hidden,
 		DigOnly,
 		Harvest,
-		FinalHarvest,
 		Fruit
 	}
 }

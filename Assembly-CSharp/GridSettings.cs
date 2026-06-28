@@ -17,6 +17,7 @@ public class GridSettings : KMonoBehaviour
 		Grid.Revealed = new bool[Grid.CellCount];
 		Grid.Reserved = new bool[Grid.CellCount];
 		Grid.Visible = new byte[Grid.CellCount];
+		Grid.Spawnable = new byte[Grid.CellCount];
 		Grid.BitFields = new ushort[Grid.CellCount];
 		Grid.LightCount = new byte[Grid.CellCount];
 		Grid.Damage = new float[Grid.CellCount];
@@ -24,6 +25,8 @@ public class GridSettings : KMonoBehaviour
 		Grid.HasAccessDoor = new bool[Grid.CellCount];
 		Grid.HasLadder = new bool[Grid.CellCount];
 		Grid.Decor = new int[Grid.CellCount];
+		Grid.NoisePollution = new int[Grid.CellCount];
+		Grid.PreventFogOfWarReveal = new bool[Grid.CellCount];
 		Grid.IsTileUnderConstruction = new bool[Grid.CellCount];
 		Grid.ObjectLayers = new Dictionary<int, GameObject>[23];
 		for (int i = 0; i < Grid.ObjectLayers.Length; i++)
@@ -35,6 +38,7 @@ public class GridSettings : KMonoBehaviour
 		{
 			Grid.Room[j] = ushort.MaxValue;
 			Grid.SuitRequired[j] = false;
+			Grid.NoisePollution[j] = -1;
 		}
 		if (Game.Instance != null)
 		{
@@ -48,6 +52,7 @@ public class GridSettings : KMonoBehaviour
 		{
 			KBatchedAnimUpdater.instance.InitializeGrid();
 		}
+		Grid.OnReveal = null;
 	}
 
 	public const float CellSizeInMeters = 1f;

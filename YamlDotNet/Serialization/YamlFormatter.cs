@@ -7,7 +7,17 @@ namespace YamlDotNet.Serialization
 	{
 		public static string FormatNumber(object number)
 		{
-			return Convert.ToString(number, YamlFormatter.numberFormat);
+			return Convert.ToString(number, YamlFormatter.NumberFormat);
+		}
+
+		public static string FormatNumber(double number)
+		{
+			return number.ToString("G17", YamlFormatter.NumberFormat);
+		}
+
+		public static string FormatNumber(float number)
+		{
+			return number.ToString("G17", YamlFormatter.NumberFormat);
 		}
 
 		public static string FormatBoolean(object boolean)
@@ -29,7 +39,7 @@ namespace YamlDotNet.Serialization
 			return ((TimeSpan)timeSpan).ToString();
 		}
 
-		private static readonly NumberFormatInfo numberFormat = new NumberFormatInfo
+		public static readonly NumberFormatInfo NumberFormat = new NumberFormatInfo
 		{
 			CurrencyDecimalSeparator = ".",
 			CurrencyGroupSeparator = "_",
@@ -39,7 +49,10 @@ namespace YamlDotNet.Serialization
 			NumberDecimalSeparator = ".",
 			NumberGroupSeparator = "_",
 			NumberGroupSizes = new int[] { 3 },
-			NumberDecimalDigits = 99
+			NumberDecimalDigits = 99,
+			NaNSymbol = ".nan",
+			PositiveInfinitySymbol = ".inf",
+			NegativeInfinitySymbol = "-.inf"
 		};
 	}
 }

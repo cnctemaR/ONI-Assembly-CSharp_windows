@@ -17,18 +17,13 @@ public class RecipeManager
 		RecipeManager._Instance = null;
 	}
 
-	protected virtual void Initialize()
-	{
-	}
-
-	private void LoadRecipes()
-	{
-		this.recipes = new List<Recipe>();
-	}
-
 	public void Add(Recipe recipe)
 	{
 		this.recipes.Add(recipe);
+		if (recipe.FabricationVisualizer != null)
+		{
+			recipe.FabricationVisualizer.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.GlobalDoNotDestroy).transform;
+		}
 	}
 
 	private static RecipeManager _Instance;

@@ -72,7 +72,7 @@ public class BuildToolHoverTextCard : HoverTextConfiguration
 					base.SetLineActive(this.BuildWarningText.transform.parent.gameObject, false);
 				}
 			}
-			else if (UtilityBuildTool.Instance.isActiveAndEnabled)
+			else if (UtilityBuildTool.Instance.isActiveAndEnabled || WireBuildTool.Instance.isActiveAndEnabled)
 			{
 				if (this.BuildWarningText.transform.parent.gameObject.activeSelf)
 				{

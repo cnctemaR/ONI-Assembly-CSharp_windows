@@ -12,11 +12,6 @@ public class FriedMushBarConfig : IEntityConfig
 		string text = ITEMS.FOOD.FRIEDMUSHBAR.RECIPEDESC;
 		Recipe recipe = new Recipe("FriedMushBar", 1f, (SimHashes)0, null, text, 1).SetFabricator("CookingStation", FOOD.RECIPES.STANDARD_COOK_TIME);
 		recipe.AddIngredient(new Recipe.Ingredient("MushBar", 2f));
-		Edible component = gameObject.GetComponent<Edible>();
-		if (component != null)
-		{
-			component.consumptionEffects.Add(new Descriptor(UI.GAMEOBJECTEFFECTS.FRIEDMUSHBARREMOVESDISEASE, UI.GAMEOBJECTEFFECTS.TOOLTIPS.FRIEDMUSHBARREMOVESDISEASE, Descriptor.DescriptorType.Effect, false));
-		}
 		return gameObject;
 	}
 

@@ -29,13 +29,13 @@ namespace Klei
 			List<string> list = new List<string>();
 			foreach (string text in array)
 			{
-				if (text.Length == 0 || !text.StartsWith("#"))
+				if (text.Length != 0 && !text.StartsWith("#"))
 				{
 					list.Add(text);
 				}
 			}
 			List<string> list2 = new List<string>();
-			for (int j = 0; j < list.Count - 1; j++)
+			for (int j = 0; j < list.Count; j++)
 			{
 				string text2 = list[j];
 				int num = 0;

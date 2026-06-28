@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using FileHelpers;
+using Klei;
 using KSerialization;
 using UnityEngine;
 
@@ -238,7 +239,7 @@ public class Upgradable : Workable, ISaveLoadable
 			base.SetWorkTime(upgrade.buildTime);
 			this.operational.SetFlag(Upgradable.notUpgradingFlag, false);
 			upgrade.fetchList = new FetchList2(this.storage);
-			upgrade.fetchList.Add(ingredient.tag, ingredient.amount, FetchOrder2.OperationalRequirement.None);
+			upgrade.fetchList.Add(ingredient.tag, null, ingredient.amount, FetchOrder2.OperationalRequirement.None);
 			this.userMenu.Refresh();
 			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.PendingUpgrade, this);
 			upgrade.fetchList.Submit(delegate
@@ -308,21 +309,21 @@ public class Upgradable : Workable, ISaveLoadable
 
 	private void DoGenerateBuildChores(Upgradable.Upgrade upgrade)
 	{
-		Upgradable.<DoGenerateBuildChores>c__AnonStorey91 <DoGenerateBuildChores>c__AnonStorey = new Upgradable.<DoGenerateBuildChores>c__AnonStorey91();
-		<DoGenerateBuildChores>c__AnonStorey.upgrade = upgrade;
-		<DoGenerateBuildChores>c__AnonStorey.<>f__this = this;
-		<DoGenerateBuildChores>c__AnonStorey.upgrade.buildChoresRemain = <DoGenerateBuildChores>c__AnonStorey.upgrade.builderCount;
-		<DoGenerateBuildChores>c__AnonStorey.upgrade.buildChores = new WorkChore<Upgradable>[<DoGenerateBuildChores>c__AnonStorey.upgrade.buildChoresRemain];
+		Upgradable.<DoGenerateBuildChores>c__AnonStorey9C <DoGenerateBuildChores>c__AnonStorey9C = new Upgradable.<DoGenerateBuildChores>c__AnonStorey9C();
+		<DoGenerateBuildChores>c__AnonStorey9C.upgrade = upgrade;
+		<DoGenerateBuildChores>c__AnonStorey9C.<>f__this = this;
+		<DoGenerateBuildChores>c__AnonStorey9C.upgrade.buildChoresRemain = <DoGenerateBuildChores>c__AnonStorey9C.upgrade.builderCount;
+		<DoGenerateBuildChores>c__AnonStorey9C.upgrade.buildChores = new WorkChore<Upgradable>[<DoGenerateBuildChores>c__AnonStorey9C.upgrade.buildChoresRemain];
 		int i;
-		for (i = 0; i < <DoGenerateBuildChores>c__AnonStorey.upgrade.buildChoresRemain; i++)
+		for (i = 0; i < <DoGenerateBuildChores>c__AnonStorey9C.upgrade.buildChoresRemain; i++)
 		{
-			WorkChore<Upgradable>[] buildChores = <DoGenerateBuildChores>c__AnonStorey.upgrade.buildChores;
+			WorkChore<Upgradable>[] buildChores = <DoGenerateBuildChores>c__AnonStorey9C.upgrade.buildChores;
 			int j = i;
 			Action<Chore> action = delegate
 			{
-				this.DoBuildChoreComplete(<DoGenerateBuildChores>c__AnonStorey.upgrade, i);
+				this.DoBuildChoreComplete(<DoGenerateBuildChores>c__AnonStorey9C.upgrade, i);
 			};
-			buildChores[j] = new WorkChore<Upgradable>(Db.Get().ChoreTypes.Upgrade, this, null, true, action, null, null, true, null, false, default(Tag), null, false, true);
+			buildChores[j] = new WorkChore<Upgradable>(Db.Get().ChoreTypes.Upgrade, this, null, true, action, null, null, true, null, false, default(Tag), null, false, true, true);
 		}
 	}
 
@@ -331,10 +332,16 @@ public class Upgradable : Workable, ISaveLoadable
 		upgrade.buildChoresRemain--;
 		if (upgrade.buildChoresRemain <= 0)
 		{
+			SimUtil.DiseaseInfo diseaseInfo = SimUtil.DiseaseInfo.Invalid;
 			for (int i = 0; i < upgrade.ingredients.Count; i++)
 			{
-				this.storage.Consume(upgrade.ingredients[i]);
+				SimUtil.DiseaseInfo diseaseInfo2;
+				float num;
+				this.storage.ConsumeAndGetDisease(upgrade.ingredients[i], out diseaseInfo2, out num);
+				diseaseInfo = SimUtil.CalculateFinalDiseaseInfo(diseaseInfo, diseaseInfo2);
 			}
+			PrimaryElement component = base.GetComponent<PrimaryElement>();
+			component.AddDisease(diseaseInfo.idx, diseaseInfo.count, "Upgradable.DoBuildChoreComplete");
 			this.DoUpgradeComplete(upgrade);
 			upgrade.buildChores = null;
 		}

@@ -26,9 +26,9 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor, IEffec
 		return 0;
 	}
 
-	public void SetValues(DecorValues values)
+	public void SetValues(EffectorValues values)
 	{
-		this.baseDecor = (float)values.decor;
+		this.baseDecor = (float)values.amount;
 		this.baseRadius = (float)values.radius;
 	}
 
@@ -149,6 +149,8 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor, IEffec
 		return this.GetEffectDescriptions();
 	}
 
+	public const string ID = "DecorProvider";
+
 	private int width;
 
 	private int height;
@@ -240,8 +242,8 @@ public class DecorProvider : KMonoBehaviour, IGameObjectEffectDescriptor, IEffec
 			vector2I = Vector2I.Max(vector2I, Vector2I.zero);
 			vector2I2 = Vector2I.Min(vector2I2, new Vector2I(Grid.WidthInCells - 1, Grid.HeightInCells - 1));
 			this.extents = new Extents(vector2I.x, vector2I.y, vector2I2.x - vector2I.x, vector2I2.y - vector2I.y);
-			this.partitionerEntry = GameScenePartitioner.Instance.Add("DecorProvider.SplatCollectDecorProviders", provider.gameObject, this.extents, GameScenePartitioner.Instance.decorProviders.mask, provider.onCollectDecorProvidersCallback);
-			this.solidChangedPartitionerEntry = GameScenePartitioner.Instance.Add("DecorProvider.SplatSolidCheck", provider.gameObject, this.extents, GameScenePartitioner.Instance.solidChangedMask.mask, provider.refreshPartionerCallback);
+			this.partitionerEntry = GameScenePartitioner.Instance.Add("DecorProvider.SplatCollectDecorProviders", provider.gameObject, this.extents, GameScenePartitioner.Instance.decorProviderLayer, provider.onCollectDecorProvidersCallback);
+			this.solidChangedPartitionerEntry = GameScenePartitioner.Instance.Add("DecorProvider.SplatSolidCheck", provider.gameObject, this.extents, GameScenePartitioner.Instance.solidChangedLayer, provider.refreshPartionerCallback);
 			this.AddDecor();
 		}
 

@@ -7,32 +7,48 @@ namespace YamlDotNet.Serialization.ObjectGraphVisitors
 {
 	public sealed class CustomSerializationObjectGraphVisitor : ChainedObjectGraphVisitor
 	{
-		public CustomSerializationObjectGraphVisitor(IEmitter emitter, IObjectGraphVisitor nextVisitor, IEnumerable<IYamlTypeConverter> typeConverters)
+		public CustomSerializationObjectGraphVisitor(IObjectGraphVisitor<IEmitter> nextVisitor, IEnumerable<IYamlTypeConverter> typeConverters, ObjectSerializer nestedObjectSerializer)
 			: base(nextVisitor)
 		{
-			this.emitter = emitter;
-			this.typeConverters = ((typeConverters != null) ? typeConverters.ToList<IYamlTypeConverter>() : Enumerable.Empty<IYamlTypeConverter>());
+			IEnumerable<IYamlTypeConverter> enumerable;
+			if (typeConverters == null)
+			{
+				enumerable = Enumerable.Empty<IYamlTypeConverter>();
+			}
+			else
+			{
+				IEnumerable<IYamlTypeConverter> enumerable2 = typeConverters.ToList<IYamlTypeConverter>();
+				enumerable = enumerable2;
+			}
+			this.typeConverters = enumerable;
+			this.nestedObjectSerializer = nestedObjectSerializer;
 		}
 
-		public override bool Enter(IObjectDescriptor value)
+		public override bool Enter(IObjectDescriptor value, IEmitter context)
 		{
 			IYamlTypeConverter yamlTypeConverter = this.typeConverters.FirstOrDefault<IYamlTypeConverter>((IYamlTypeConverter t) => t.Accepts(value.Type));
 			if (yamlTypeConverter != null)
 			{
-				yamlTypeConverter.WriteYaml(this.emitter, value.Value, value.Type);
+				yamlTypeConverter.WriteYaml(context, value.Value, value.Type);
 				return false;
 			}
-			IYamlSerializable yamlSerializable = value as IYamlSerializable;
+			IYamlConvertible yamlConvertible = value.Value as IYamlConvertible;
+			if (yamlConvertible != null)
+			{
+				yamlConvertible.Write(context, this.nestedObjectSerializer);
+				return false;
+			}
+			IYamlSerializable yamlSerializable = value.Value as IYamlSerializable;
 			if (yamlSerializable != null)
 			{
-				yamlSerializable.WriteYaml(this.emitter);
+				yamlSerializable.WriteYaml(context);
 				return false;
 			}
-			return base.Enter(value);
+			return base.Enter(value, context);
 		}
 
-		private readonly IEmitter emitter;
-
 		private readonly IEnumerable<IYamlTypeConverter> typeConverters;
+
+		private readonly ObjectSerializer nestedObjectSerializer;
 	}
 }

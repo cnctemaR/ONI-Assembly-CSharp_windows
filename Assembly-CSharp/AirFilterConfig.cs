@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -6,7 +7,8 @@ public class AirFilterConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("AirFilter", 1, 1, "co2filter_kanim", 200f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER2, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, null);
+		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER0;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("AirFilter", 1, 1, "co2filter_kanim", 200f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER2, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, tier);
 		buildingDef.Overheatable = false;
 		buildingDef.ViewMode = SimViewMode.OxygenMap;
 		buildingDef.MaterialCategory = MATERIALS.RAW_MINERALS;
@@ -19,10 +21,11 @@ public class AirFilterConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
 		go.AddOrGet<LoopingSounds>();
-		go.AddOrGet<Prioritizable>();
+		Prioritizable.AddRef(go);
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
 		storage.showInUI = true;
 		storage.capacityKg = 200f;
+		storage.defaultStoredItemModifers = AirFilterConfig.StoredItemModifiers;
 		ElementConsumer elementConsumer = go.AddOrGet<ElementConsumer>();
 		elementConsumer.elementToConsume = SimHashes.ContaminatedOxygen;
 		elementConsumer.consumptionRate = 0.1f;
@@ -38,20 +41,20 @@ public class AirFilterConfig : IBuildingConfig
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
-			new ElementConverter.ConsumedElement(new Tag("Filter"), 1f),
+			new ElementConverter.ConsumedElement(new Tag("Filter"), 0.13333334f),
 			new ElementConverter.ConsumedElement(new Tag("ContaminatedOxygen"), 0.1f)
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(0.5f, SimHashes.Clay, 0f, true, 0f, 0.5f, false),
-			new ElementConverter.OutputElement(0.05f, SimHashes.Oxygen, 0f, false, 0f, 1f, false)
+			new ElementConverter.OutputElement(0.14333335f, SimHashes.Clay, 0f, true, 0f, 0.5f, false, 0.25f, byte.MaxValue, 0),
+			new ElementConverter.OutputElement(0.089999996f, SimHashes.Oxygen, 0f, false, 0f, 1f, false, 0.75f, byte.MaxValue, 0)
 		};
 		elementConverter.conversionInterval = 1f;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.requestedItemTag = new Tag("Filter");
-		manualDeliveryKG.capacity = 100f;
-		manualDeliveryKG.refillMass = 25f;
+		manualDeliveryKG.capacity = 80.00001f;
+		manualDeliveryKG.refillMass = 8.000001f;
 		AirFilter airFilter = go.AddOrGet<AirFilter>();
 		airFilter.filterTag = new Tag("Filter");
 	}
@@ -66,9 +69,21 @@ public class AirFilterConfig : IBuildingConfig
 		};
 	}
 
-	public const float CO2_CONSUMPTION_RATE = 0.1f;
+	public const string ID = "AirFilter";
 
-	private const float SAND_CONSUMPTION_RATE = 1f;
+	public const float DIRTY_AIR_CONSUMPTION_RATE = 0.1f;
+
+	private const float SAND_CONSUMPTION_RATE = 0.13333334f;
+
+	private const float REFILL_RATE = 600f;
+
+	private const float SAND_STORAGE_AMOUNT = 80.00001f;
 
 	private const float CLAY_PER_LOAD = 10f;
+
+	private static readonly List<Storage.StoredItemModifier> StoredItemModifiers = new List<Storage.StoredItemModifier>
+	{
+		Storage.StoredItemModifier.Hide,
+		Storage.StoredItemModifier.Seal
+	};
 }

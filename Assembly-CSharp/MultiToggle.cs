@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class MultiToggle : KMonoBehaviour, IEventSystemHandler, IPointerClickHandler
+public class MultiToggle : KMonoBehaviour, IPointerEnterHandler, IEventSystemHandler, IPointerExitHandler, IPointerClickHandler
 {
 	protected void NextState()
 	{
@@ -15,6 +15,14 @@ public class MultiToggle : KMonoBehaviour, IEventSystemHandler, IPointerClickHan
 		this.state = new_state_index;
 		this.toggle_image.sprite = this.states[new_state_index].sprite;
 		this.toggle_image.color = this.states[new_state_index].color;
+		foreach (StatePresentationSetting statePresentationSetting in this.states[this.state].additional_display_settings)
+		{
+			if (!(statePresentationSetting.image_target == null))
+			{
+				statePresentationSetting.image_target.sprite = statePresentationSetting.sprite;
+				statePresentationSetting.image_target.color = statePresentationSetting.color;
+			}
+		}
 	}
 
 	public void OnPointerClick(PointerEventData eventData)
@@ -36,14 +44,61 @@ public class MultiToggle : KMonoBehaviour, IEventSystemHandler, IPointerClickHan
 		}
 	}
 
+	public void OnPointerEnter(PointerEventData eventData)
+	{
+		if (!KInputManager.isFocused)
+		{
+			return;
+		}
+		KInputManager.SetUserActive();
+		if (this.states[this.state].use_color_on_hover && this.states[this.state].color_on_hover != this.states[this.state].color)
+		{
+			this.toggle_image.color = this.states[this.state].color_on_hover;
+		}
+		foreach (StatePresentationSetting statePresentationSetting in this.states[this.state].additional_display_settings)
+		{
+			if (!(statePresentationSetting.image_target == null))
+			{
+				if (statePresentationSetting.use_color_on_hover)
+				{
+					statePresentationSetting.image_target.color = statePresentationSetting.color_on_hover;
+				}
+			}
+		}
+	}
+
+	public void OnPointerExit(PointerEventData eventData)
+	{
+		if (!KInputManager.isFocused)
+		{
+			return;
+		}
+		KInputManager.SetUserActive();
+		if (this.states[this.state].use_color_on_hover && this.states[this.state].color_on_hover != this.states[this.state].color)
+		{
+			this.toggle_image.color = this.states[this.state].color;
+		}
+		foreach (StatePresentationSetting statePresentationSetting in this.states[this.state].additional_display_settings)
+		{
+			if (!(statePresentationSetting.image_target == null))
+			{
+				if (statePresentationSetting.use_color_on_hover)
+				{
+					statePresentationSetting.image_target.color = statePresentationSetting.color;
+				}
+			}
+		}
+	}
+
+	[Header("Settings")]
+	[SerializeField]
+	public ToggleState[] states;
+
 	public bool play_sound_on_click = true;
+
+	public Image toggle_image;
 
 	protected int state;
 
 	public global::System.Action onClick;
-
-	[SerializeField]
-	public ToggleState[] states;
-
-	public Image toggle_image;
 }

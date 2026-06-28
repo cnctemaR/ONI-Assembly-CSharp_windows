@@ -228,8 +228,8 @@ public class Region : KMonoBehaviour, ISaveLoadable
 		extents.y--;
 		extents.width = this.GetWidth() + 1;
 		extents.height = this.GetHeight() + 1;
-		this.solidChangedEntry = GameScenePartitioner.Instance.Add("Region.RegionChanged", base.gameObject, extents, GameScenePartitioner.Instance.solidChangedMask.mask, new Action<object>(this.OnSolidChanged));
-		this.foundationTileChangedEntry = GameScenePartitioner.Instance.Add("Region.TileChanged", base.gameObject, extents, GameScenePartitioner.Instance.objectLayerMasks[9].mask, new Action<object>(this.TileChanged));
+		this.solidChangedEntry = GameScenePartitioner.Instance.Add("Region.RegionChanged", base.gameObject, extents, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
+		this.foundationTileChangedEntry = GameScenePartitioner.Instance.Add("Region.TileChanged", base.gameObject, extents, GameScenePartitioner.Instance.objectLayers[9], new Action<object>(this.TileChanged));
 		if (this.OnRegionChanged != null)
 		{
 			this.OnRegionChanged();

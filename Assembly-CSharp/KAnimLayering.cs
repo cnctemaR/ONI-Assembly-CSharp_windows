@@ -67,7 +67,10 @@ public class KAnimLayering
 						bool flag = (symbols[j].flags & 8) != 0;
 						if (flag != this.isForeground)
 						{
-							this.controller.HideSymbol(symbols[j].hash, true);
+							if (!(symbols[j].hash == KAnimLayering.UI))
+							{
+								this.controller.HideSymbol(symbols[j].hash, true);
+							}
 						}
 					}
 				}
@@ -90,6 +93,7 @@ public class KAnimLayering
 		if (flag && this.foregroundController == null && this.layer != Grid.SceneLayer.NoLayer)
 		{
 			GameObject gameObject = Util.KInstantiate(EntityPrefabs.Instance.ForegroundLayer, this.controller.gameObject, null);
+			gameObject.name = this.controller.name + "_fg";
 			this.foregroundController = gameObject.GetComponent<KAnimControllerBase>();
 			this.foregroundController.GetLayering().SetIsForeground(true);
 			this.foregroundController.SetAnims(anims, true);
@@ -100,7 +104,6 @@ public class KAnimLayering
 			Vector3 vector = new Vector3(0f, 0f, Grid.GetLayerZ(this.layer) - this.controller.gameObject.transform.position.z - 0.1f);
 			gameObject.transform.SetLocalPosition(vector);
 			gameObject.SetActive(true);
-			gameObject.name = this.controller.name + "_fg";
 		}
 		else if (!flag && this.foregroundController != null)
 		{
@@ -137,4 +140,6 @@ public class KAnimLayering
 	private KAnimLink link;
 
 	private Grid.SceneLayer layer = Grid.SceneLayer.BuildingFront;
+
+	public static readonly KAnimHashedString UI = new KAnimHashedString("ui");
 }

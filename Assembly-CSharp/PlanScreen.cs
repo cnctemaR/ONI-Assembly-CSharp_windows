@@ -31,7 +31,7 @@ public class PlanScreen : KIconToggleMenu
 		FileHelperEngine fileHelperEngine = new FileHelperEngine(typeof(PlanScreen.FabricatorConfig));
 		this.fabricatorConfigs = (PlanScreen.FabricatorConfig[])fileHelperEngine.ReadString(this.fabricatorConfigAsset.text);
 		this.productInfoScreen = global::Util.KInstantiateUI<ProductInfoScreen>(this.productInfoScreenPrefab, this.recipeInfoScreenParent, true);
-		this.productInfoScreen.rectTransform().localPosition = new Vector3(280f, 0f, 0f);
+		this.productInfoScreen.rectTransform().localPosition = new Vector3(285f, 0f, 0f);
 		this.productInfoScreen.onElementsFullySelected = new global::System.Action(this.OnRecipeElementsFullySelected);
 		Game.Instance.Subscribe(-107300940, new Action<object>(this.OnResearchComplete));
 		this.buildingGroupsRoot.gameObject.SetActive(false);
@@ -110,7 +110,7 @@ public class PlanScreen : KIconToggleMenu
 					throw new ArgumentOutOfRangeException();
 				}
 				global::Action action = global::Action.Plan1 + num;
-				KIconToggleMenu.ToggleInfo toggleInfo = new KIconToggleMenu.ToggleInfo(Strings.Get("STRINGS.UI.BUILDCATEGORIES." + text.ToUpper() + ".NAME"), fabricatorConfig.iconName, text, action, Strings.Get("STRINGS.UI.BUILDCATEGORIES." + text.ToUpper() + ".TOOLTIP"));
+				KIconToggleMenu.ToggleInfo toggleInfo = new KIconToggleMenu.ToggleInfo(Strings.Get("STRINGS.UI.BUILDCATEGORIES." + text.ToUpper() + ".NAME"), fabricatorConfig.iconName, text, action, Strings.Get("STRINGS.UI.BUILDCATEGORIES." + text.ToUpper() + ".TOOLTIP"), string.Empty);
 				list3.Add(toggleInfo);
 				num++;
 			}
@@ -627,7 +627,7 @@ public class PlanScreen : KIconToggleMenu
 			component.AddMultiStringTooltip(text2, this.buildingToolTipSettings.ResearchRequirement);
 			foreach (Recipe.Ingredient ingredient in def.CraftRecipe.Ingredients)
 			{
-				string text3 = string.Format("{0}{1}: {2}", "• ", ingredient.tag.ProperName(), GameUtil.GetFormattedMass(ingredient.amount, GameUtil.TimeSlice.None, true, "{0:0.#}"));
+				string text3 = string.Format("{0}{1}: {2}", "• ", ingredient.tag.ProperName(), GameUtil.GetFormattedMass(ingredient.amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 				component.AddMultiStringTooltip(text3, this.buildingToolTipSettings.ResearchRequirement);
 			}
 			component.AddMultiStringTooltip(string.Empty, this.buildingToolTipSettings.ResearchRequirement);
@@ -873,10 +873,10 @@ public class PlanScreen : KIconToggleMenu
 		public TextStyleSetting InactiveDeselected;
 	}
 
-	[DelimitedRecord(",")]
+	[IgnoreCommentedLines("#")]
 	[IgnoreEmptyLines]
 	[IgnoreFirst(1)]
-	[IgnoreCommentedLines("#")]
+	[DelimitedRecord(",")]
 	private class FabricatorConfig
 	{
 		public string planCategory;

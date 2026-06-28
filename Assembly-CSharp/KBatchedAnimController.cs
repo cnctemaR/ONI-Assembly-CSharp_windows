@@ -27,9 +27,9 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		return this.secondTintColour;
 	}
 
-	public Color32 GetTemperatureColour()
+	public Color32 GetOverlayColour()
 	{
-		return this.temperatureColour;
+		return this.overlayColour;
 	}
 
 	public int GetFirstTintIndex()
@@ -40,6 +40,16 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 	public int GetSecondTintIndex()
 	{
 		return this.secondTintIndex;
+	}
+
+	public int GetSymbolScaleIndex()
+	{
+		return this.symbolScaleIndex;
+	}
+
+	public float GetSymbolScale()
+	{
+		return this.symbolScale;
 	}
 
 	public KBatchedAnimInstanceData GetBatchInstanceData()
@@ -59,6 +69,16 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		}
 	}
 
+	public void SetRenderQueueOverride(int value)
+	{
+		this.renderQueueOverride = value;
+	}
+
+	public void UnsetRenderQueueOverride()
+	{
+		this.renderQueueOverride = this.originalRenderQueue;
+	}
+
 	public bool hasLoadedAnims { get; private set; }
 
 	public bool IsActive()
@@ -71,13 +91,23 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		return this.visible;
 	}
 
-	public void SetSymbolTint(KBatchedAnimController.SymbolTintIndex stIdx, KAnimHashedString name, Color32 colour)
+	private int GetSymbolIndex(KAnimHashedString name)
 	{
 		KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.GetBatchGroupID(false), false);
-		int symbolIndex = batchGroupData.GetSymbolIndex(name, new KAnimHashedString(this.curAnimFile.name));
+		int symbolIndex = batchGroupData.GetSymbolIndex(name, this.curAnimFile.hashName);
 		if (symbolIndex == -1)
 		{
 			global::Debug.LogWarning("Couldn't set tint for [" + name + "] - not found", null);
+			return -1;
+		}
+		return symbolIndex;
+	}
+
+	public void SetSymbolTint(KBatchedAnimController.SymbolTintIndex stIdx, KAnimHashedString name, Color32 colour)
+	{
+		int symbolIndex = this.GetSymbolIndex(name);
+		if (symbolIndex < 0)
+		{
 			return;
 		}
 		if (stIdx == KBatchedAnimController.SymbolTintIndex.First)
@@ -110,6 +140,32 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		this.SetDirty();
 	}
 
+	public void SetSymbolScale(KAnimHashedString name, float scale)
+	{
+		this.symbolScale = 1f;
+		this.symbolScaleIndex = -1;
+		int symbolIndex = this.GetSymbolIndex(name);
+		if (symbolIndex < 0)
+		{
+			return;
+		}
+		this.symbolScaleIndex = symbolIndex;
+		this.symbolScale = scale;
+		this.SuspendUpdates(false);
+		this.SetDirty();
+	}
+
+	public void UnsetSymbolScale()
+	{
+		if (this.symbolScaleIndex >= 0)
+		{
+			this.symbolScale = 1f;
+			this.symbolScaleIndex = -1;
+			this.SuspendUpdates(false);
+			this.SetDirty();
+		}
+	}
+
 	public Vector2I GetCellXY()
 	{
 		if (Grid.CellSizeInMeters == 0f)
@@ -131,6 +187,10 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	public override KAnim.Anim GetAnim(int index)
 	{
+		if (!this.batchGroupID.isValid || !(this.batchGroupID != KAnimBatchManager.NO_BATCH))
+		{
+			global::Debug.LogError(base.name + " batch not ready", null);
+		}
 		KBatchGroupData batchGroupData = KAnimBatchManager.Instance().GetBatchGroupData(this.batchGroupID, false);
 		return batchGroupData.GetAnim(index);
 	}
@@ -281,9 +341,9 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 			this.SuspendUpdates(true);
 		}
 		this.curAnimFrameIdx = base.GetFrameIdx(this.elapsedTime, true);
-		if (this.eventManagerHandle != -1)
+		if (this.eventManagerHandle != -1 && this.aem != null)
 		{
-			float elapsedTime = Global.Instance.GetAnimEventManager().GetElapsedTime(this.eventManagerHandle);
+			float elapsedTime = this.aem.GetElapsedTime(this.eventManagerHandle);
 			if ((int)((this.elapsedTime - elapsedTime) * 100f) != 0)
 			{
 				base.UpdateAnimEventSequenceTime();
@@ -369,20 +429,23 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 			return;
 		}
 		int num = batchGroupData.firstSymbolIndex[buildHash];
-		int symbolCount = batchGroupData.GetSymbolCount();
-		int num2 = num;
-		while (num2 < symbolCount && num2 / 30 < 4)
+		int num2 = num + this.curBuild.symbols.Length;
+		for (int i = num; i < num2; i++)
 		{
-			KAnim.Build.Symbol symbol = batchGroupData.GetSymbol(num2);
+			int num3 = i / 30;
+			if (num3 >= 4)
+			{
+				break;
+			}
+			KAnim.Build.Symbol symbol = batchGroupData.GetSymbol(i);
 			if (this.visibleSymbols.Contains(symbol.hash))
 			{
-				this.batchInstanceData.UnsetHiddenBit(num2);
+				this.batchInstanceData.UnsetHiddenBit(i);
 			}
 			else if ((this.hiddenSymbols != null && this.hiddenSymbols.Contains(symbol.hash)) || (this.baseHiddenSymbols != null && this.baseHiddenSymbols.Contains(symbol.hash)))
 			{
-				this.batchInstanceData.SetHiddenBit(num2);
+				this.batchInstanceData.SetHiddenBit(i);
 			}
-			num2++;
 		}
 		this.SetDirty();
 	}
@@ -438,10 +501,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 				kbatchedAnimCanvasRenderer.SetBatch(this);
 			}
 		}
-		if (this.setRenderQueueOverride)
-		{
-			this.SetBatchGroupRenderQueueOverride();
-		}
+		this.SetBatchGroupRenderQueueOverride();
 	}
 
 	public int GetCurrentNumFrames()
@@ -622,7 +682,11 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 	{
 		if (this.batch != null)
 		{
-			this.batch.group.material.renderQueue = 3800;
+			if (this.originalRenderQueue < 0)
+			{
+				this.originalRenderQueue = this.batch.group.material.renderQueue;
+			}
+			this.batch.group.material.renderQueue = this.renderQueueOverride;
 		}
 	}
 
@@ -632,6 +696,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		{
 			return;
 		}
+		base.SetLayer(layer);
 		this.DeRegister();
 		base.gameObject.layer = layer;
 		this.Register();
@@ -700,6 +765,10 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	private void OnDisable()
 	{
+		if (App.IsExiting || KMonoBehaviour.isLoadingScene)
+		{
+			return;
+		}
 		this.SuspendUpdates(true);
 		if (this.batch != null)
 		{
@@ -709,7 +778,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		base.StopAnimEventSequence();
 	}
 
-	private void OnDestroy()
+	protected override void OnDestroy()
 	{
 		if (this.isMovable)
 		{
@@ -727,7 +796,14 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		}
 		this.visible = false;
 		this.DeRegister();
+		this.stopped = true;
 		base.StopAnimEventSequence();
+		this.batchInstanceData = null;
+		this.batch = null;
+		this.pendingSymbolOverrides = null;
+		this.appliedSymbolOverrides = null;
+		this.substituteFrames = null;
+		base.OnDestroy();
 	}
 
 	public void SetBlendValue(float value)
@@ -1135,7 +1211,10 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	private bool moving;
 
-	public bool setRenderQueueOverride;
+	public int renderQueueOverride = -1;
+
+	[NonSerialized]
+	public int originalRenderQueue = -1;
 
 	public Grid.SceneLayer sceneLayer;
 
@@ -1164,6 +1243,10 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 	private int firstTintIndex = -1;
 
 	private int secondTintIndex = -1;
+
+	private int symbolScaleIndex = -1;
+
+	private float symbolScale = 1f;
 
 	private static List<int> skipList = new List<int>(new int[]
 	{

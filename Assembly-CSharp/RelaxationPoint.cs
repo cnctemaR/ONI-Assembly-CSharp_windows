@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using Klei.AI;
 using KSerialization;
 using STRINGS;
-using TUNING;
 
-public class RelaxationPoint : BuildingWorkable, IEffectDescriptor
+public class RelaxationPoint : Workable, IEffectDescriptor
 {
 	public RelaxationPoint()
 	{
@@ -33,11 +32,6 @@ public class RelaxationPoint : BuildingWorkable, IEffectDescriptor
 		this.smi = new RelaxationPoint.RelaxationPointSM.Instance(this);
 		this.smi.StartSM();
 		base.SetWorkTime(float.PositiveInfinity);
-	}
-
-	protected override void OnCleanUp()
-	{
-		base.OnCleanUp();
 	}
 
 	protected override void OnStartWork(Worker worker)
@@ -70,12 +64,7 @@ public class RelaxationPoint : BuildingWorkable, IEffectDescriptor
 
 	protected virtual WorkChore<RelaxationPoint> CreateWorkChore()
 	{
-		return new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, false, null, null, null, false, null, true, default(Tag), null, false, true);
-	}
-
-	private void OnRegionChanged(Region new_region)
-	{
-		GameUtil.UpdateRegion(new_region, this, Db.Get().OwnableSlots.RelaxationPoint, global::TUNING.REGIONS.RecreationRegionTag);
+		return new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, false, null, null, null, false, null, true, default(Tag), null, false, true, true);
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)
@@ -101,10 +90,10 @@ public class RelaxationPoint : BuildingWorkable, IEffectDescriptor
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.unoperational;
-			this.unoperational.EventTransition(GameHashes.OperationalChanged, this.operational, (RelaxationPoint.RelaxationPointSM.Instance smi) => smi.GetComponent<Operational>().IsOperational);
-			this.operational.DefaultState(this.operational.idle).ToggleChore((RelaxationPoint.RelaxationPointSM.Instance smi) => smi.master.CreateWorkChore(), this.unoperational, false);
-			this.operational.idle.EventTransition(GameHashes.WorkStarted, this.operational.healing, null);
-			this.operational.healing.EventTransition(GameHashes.WorkStopped, this.operational.exiting, null).EventTransition(GameHashes.OperationalChanged, this.operational.exiting, (RelaxationPoint.RelaxationPointSM.Instance smi) => !smi.GetComponent<Operational>().IsOperational).Enter(delegate(RelaxationPoint.RelaxationPointSM.Instance smi)
+			this.unoperational.EventTransition(GameHashes.OperationalChanged, this.operational, (RelaxationPoint.RelaxationPointSM.Instance smi) => smi.GetComponent<Operational>().IsOperational).PlayAnim("off", KAnim.PlayMode.Once, null);
+			this.operational.DefaultState(this.operational.idle).ToggleChore((RelaxationPoint.RelaxationPointSM.Instance smi) => smi.master.CreateWorkChore(), this.unoperational);
+			this.operational.idle.WorkableStartTransition((RelaxationPoint.RelaxationPointSM.Instance smi) => smi.master, this.operational.healing);
+			this.operational.healing.WorkableStopTransition((RelaxationPoint.RelaxationPointSM.Instance smi) => smi.master, this.operational.exiting).EventTransition(GameHashes.OperationalChanged, this.operational.exiting, (RelaxationPoint.RelaxationPointSM.Instance smi) => !smi.GetComponent<Operational>().IsOperational).Enter(delegate(RelaxationPoint.RelaxationPointSM.Instance smi)
 			{
 				if (!smi.master.GetComponent<Operational>().IsOperational)
 				{

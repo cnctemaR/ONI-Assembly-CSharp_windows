@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace YamlDotNet.RepresentationModel
 {
+	[Obsolete("Use YamlVisitorBase")]
 	public abstract class YamlVisitor : IYamlVisitor
 	{
 		protected virtual void Visit(YamlStream stream)

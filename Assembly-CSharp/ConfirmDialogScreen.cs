@@ -27,11 +27,11 @@ public class ConfirmDialogScreen : KModalScreen
 		}
 	}
 
-	public void PopupConfirmDialog(string text, global::System.Action onConfirm, global::System.Action onCancel, string third_text = null, global::System.Action onThird = null)
+	public void PopupConfirmDialog(string text, global::System.Action on_confirm, global::System.Action on_cancel, string configurable_text = null, global::System.Action on_configurable_clicked = null)
 	{
-		this.confirmAction = onConfirm;
-		this.cancelAction = onCancel;
-		this.thirdAction = onThird;
+		this.confirmAction = on_confirm;
+		this.cancelAction = on_cancel;
+		this.configurableAction = on_configurable_clicked;
 		int num = 0;
 		if (this.confirmAction != null)
 		{
@@ -41,21 +41,21 @@ public class ConfirmDialogScreen : KModalScreen
 		{
 			num++;
 		}
-		if (this.thirdAction != null)
+		if (this.configurableAction != null)
 		{
 			num++;
 		}
 		this.confirmButton.GetComponent<KButton>().onClick += this.OnSelect_OK;
 		this.cancelButton.GetComponent<KButton>().onClick += this.OnSelect_CANCEL;
-		this.thirdButton.GetComponent<KButton>().onClick += this.OnSelect_third;
-		this.cancelButton.SetActive(onCancel != null);
-		if (this.thirdButton != null)
+		this.configurableButton.GetComponent<KButton>().onClick += this.OnSelect_third;
+		this.cancelButton.SetActive(on_cancel != null);
+		if (this.configurableButton != null)
 		{
-			this.thirdButton.SetActive(this.thirdAction != null);
-			if (third_text != null)
+			this.configurableButton.SetActive(this.configurableAction != null);
+			if (configurable_text != null)
 			{
-				LocText componentInChildren = this.thirdButton.GetComponentInChildren<LocText>();
-				componentInChildren.text = third_text;
+				LocText componentInChildren = this.configurableButton.GetComponentInChildren<LocText>();
+				componentInChildren.text = configurable_text;
 			}
 		}
 		Image component = this.imageGO.GetComponent<Image>();
@@ -87,9 +87,9 @@ public class ConfirmDialogScreen : KModalScreen
 	public void OnSelect_third()
 	{
 		this.Deactivate();
-		if (this.thirdAction != null)
+		if (this.configurableAction != null)
 		{
-			this.thirdAction();
+			this.configurableAction();
 		}
 	}
 
@@ -106,7 +106,7 @@ public class ConfirmDialogScreen : KModalScreen
 
 	private global::System.Action cancelAction;
 
-	private global::System.Action thirdAction;
+	private global::System.Action configurableAction;
 
 	public LocText popupMessage;
 
@@ -121,5 +121,5 @@ public class ConfirmDialogScreen : KModalScreen
 	private GameObject cancelButton;
 
 	[SerializeField]
-	private GameObject thirdButton;
+	private GameObject configurableButton;
 }

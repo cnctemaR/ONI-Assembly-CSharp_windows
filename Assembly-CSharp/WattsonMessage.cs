@@ -54,6 +54,7 @@ public class WattsonMessage : KScreen
 
 	protected override void OnActivate()
 	{
+		global::Debug.Log("WattsonMessage OnActivate", null);
 		base.OnActivate();
 		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().NewBaseSetupSnapshot, STOP_MODE.ALLOWFADEOUT);
 		AudioMixer.instance.Start(AudioMixerSnapshots.Get().IntroNIS);
@@ -115,7 +116,7 @@ public class WattsonMessage : KScreen
 		CameraController.Instance.DisableUserCameraControl = false;
 		foreach (SchedulerHandle schedulerHandle in this.scheduleHandles)
 		{
-			schedulerHandle.Clear();
+			schedulerHandle.ClearScheduler();
 		}
 		UIScheduler.Instance.Schedule("fadeInUI", 0.5f, delegate(object d)
 		{
@@ -176,8 +177,8 @@ public class WattsonMessage : KScreen
 	[SerializeField]
 	private KButton button;
 
-	[EventRef]
 	[SerializeField]
+	[EventRef]
 	private string dialogSound;
 
 	private List<KScreen> hideScreensWhileActive = new List<KScreen>();

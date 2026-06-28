@@ -34,10 +34,10 @@ namespace YamlDotNet.Core
 			{
 				this.ConsumeCurrent();
 			}
-			return this.InternalMoveNext();
+			return this.MoveNextWithoutConsuming();
 		}
 
-		internal bool InternalMoveNext()
+		public bool MoveNextWithoutConsuming()
 		{
 			if (!this.tokenAvailable && !this.streamEndProduced)
 			{
@@ -53,7 +53,7 @@ namespace YamlDotNet.Core
 			return false;
 		}
 
-		internal void ConsumeCurrent()
+		public void ConsumeCurrent()
 		{
 			this.tokensParsed++;
 			this.tokenAvailable = false;
@@ -152,14 +152,12 @@ namespace YamlDotNet.Core
 				this.FetchDirective();
 				return;
 			}
-			bool flag = this.cursor.LineOffset == 0 && this.analyzer.Check('-', 0) && this.analyzer.Check('-', 1) && this.analyzer.Check('-', 2) && this.analyzer.IsWhiteBreakOrZero(3);
-			if (flag)
+			if (this.cursor.LineOffset == 0 && this.analyzer.Check('-', 0) && this.analyzer.Check('-', 1) && this.analyzer.Check('-', 2) && this.analyzer.IsWhiteBreakOrZero(3))
 			{
 				this.FetchDocumentIndicator(true);
 				return;
 			}
-			bool flag2 = this.cursor.LineOffset == 0 && this.analyzer.Check('.', 0) && this.analyzer.Check('.', 1) && this.analyzer.Check('.', 2) && this.analyzer.IsWhiteBreakOrZero(3);
-			if (flag2)
+			if (this.cursor.LineOffset == 0 && this.analyzer.Check('.', 0) && this.analyzer.Check('.', 1) && this.analyzer.Check('.', 2) && this.analyzer.IsWhiteBreakOrZero(3))
 			{
 				this.FetchDocumentIndicator(false);
 				return;
@@ -239,9 +237,7 @@ namespace YamlDotNet.Core
 				this.FetchFlowScalar(false);
 				return;
 			}
-			bool flag3 = this.analyzer.IsWhiteBreakOrZero(0) || this.analyzer.Check("-?:,[]{}#&*!|>'\"%@`", 0);
-			bool flag4 = !flag3 || (this.analyzer.Check('-', 0) && !this.analyzer.IsWhite(1)) || (this.flowLevel == 0 && this.analyzer.Check("?:", 0) && !this.analyzer.IsWhiteBreakOrZero(1));
-			if (flag4)
+			if ((!this.analyzer.IsWhiteBreakOrZero(0) && !this.analyzer.Check("-?:,[]{}#&*!|>'\"%@`", 0)) || (this.analyzer.Check('-', 0) && !this.analyzer.IsWhite(1)) || (this.flowLevel == 0 && this.analyzer.Check("?:", 0) && !this.analyzer.IsWhiteBreakOrZero(1)))
 			{
 				this.FetchPlainScalar();
 				return;
@@ -389,39 +385,33 @@ namespace YamlDotNet.Core
 			Mark mark = this.cursor.Mark();
 			this.Skip();
 			string text = this.ScanDirectiveName(mark);
-			string text2;
-			if ((text2 = text) != null)
+			Token token;
+			if (!(text == "YAML"))
 			{
-				Token token;
-				if (!(text2 == "YAML"))
+				if (!(text == "TAG"))
 				{
-					if (!(text2 == "TAG"))
-					{
-						goto IL_004F;
-					}
-					token = this.ScanTagDirectiveValue(mark);
+					throw new SyntaxErrorException(mark, this.cursor.Mark(), "While scanning a directive, find uknown directive name.");
 				}
-				else
-				{
-					token = this.ScanVersionDirectiveValue(mark);
-				}
-				while (this.analyzer.IsWhite(0))
-				{
-					this.Skip();
-				}
-				this.ProcessComment();
-				if (!this.analyzer.IsBreakOrZero(0))
-				{
-					throw new SyntaxErrorException(mark, this.cursor.Mark(), "While scanning a directive, did not find expected comment or line break.");
-				}
-				if (this.analyzer.IsBreak(0))
-				{
-					this.SkipLine();
-				}
-				return token;
+				token = this.ScanTagDirectiveValue(mark);
 			}
-			IL_004F:
-			throw new SyntaxErrorException(mark, this.cursor.Mark(), "While scanning a directive, find uknown directive name.");
+			else
+			{
+				token = this.ScanVersionDirectiveValue(mark);
+			}
+			while (this.analyzer.IsWhite(0))
+			{
+				this.Skip();
+			}
+			this.ProcessComment();
+			if (!this.analyzer.IsBreakOrZero(0))
+			{
+				throw new SyntaxErrorException(mark, this.cursor.Mark(), "While scanning a directive, did not find expected comment or line break.");
+			}
+			if (this.analyzer.IsBreak(0))
+			{
+				this.SkipLine();
+			}
+			return token;
 		}
 
 		private void FetchDocumentIndicator(bool isStartToken)
@@ -756,7 +746,11 @@ namespace YamlDotNet.Core
 				{
 					stringBuilder.Append(this.ReadCurrentCharacter());
 				}
-				stringBuilder2.Append(this.ReadLine());
+				char c = this.ReadLine();
+				if (c != '\0')
+				{
+					stringBuilder2.Append(c);
+				}
 				num3 = this.ScanBlockScalarBreaks(num3, stringBuilder3, mark, ref mark2);
 			}
 			if (num != -1)
@@ -855,23 +849,22 @@ namespace YamlDotNet.Core
 						{
 							int num = 0;
 							char c = this.analyzer.Peek(1);
-							char c2 = c;
-							if (c2 != 'U')
+							if (c != 'U')
 							{
-								if (c2 != 'u')
+								if (c != 'u')
 								{
-									if (c2 == 'x')
+									if (c == 'x')
 									{
 										num = 2;
 									}
 									else
 									{
-										char c3;
-										if (!Scanner.simpleEscapeCodes.TryGetValue(c, out c3))
+										char c2;
+										if (!Scanner.simpleEscapeCodes.TryGetValue(c, out c2))
 										{
 											throw new SyntaxErrorException(mark, this.cursor.Mark(), "While parsing a quoted scalar, find unknown escape character.");
 										}
-										stringBuilder.Append(c3);
+										stringBuilder.Append(c2);
 									}
 								}
 								else
@@ -887,20 +880,20 @@ namespace YamlDotNet.Core
 							this.Skip();
 							if (num > 0)
 							{
-								uint num2 = 0U;
+								int num2 = 0;
 								for (int i = 0; i < num; i++)
 								{
 									if (!this.analyzer.IsHex(i))
 									{
 										throw new SyntaxErrorException(mark, this.cursor.Mark(), "While parsing a quoted scalar, did not find expected hexdecimal number.");
 									}
-									num2 = (uint)((ulong)((ulong)num2 << 4) + (ulong)((long)this.analyzer.AsHex(i)));
+									num2 = (num2 << 4) + this.analyzer.AsHex(i);
 								}
-								if ((num2 >= 55296U && num2 <= 57343U) || num2 > 1114111U)
+								if ((num2 >= 55296 && num2 <= 57343) || num2 > 1114111)
 								{
 									throw new SyntaxErrorException(mark, this.cursor.Mark(), "While parsing a quoted scalar, find invalid Unicode character escape code.");
 								}
-								stringBuilder.Append((char)num2);
+								stringBuilder.Append(char.ConvertFromUtf32(num2));
 								for (int j = 0; j < num; j++)
 								{
 									this.Skip();
@@ -1161,6 +1154,11 @@ namespace YamlDotNet.Core
 				{
 					stringBuilder.Append(this.ScanUriEscapes(start));
 				}
+				else if (this.analyzer.Check('+', 0))
+				{
+					stringBuilder.Append(' ');
+					this.Skip();
+				}
 				else
 				{
 					stringBuilder.Append(this.ReadCurrentCharacter());
@@ -1173,37 +1171,39 @@ namespace YamlDotNet.Core
 			return stringBuilder.ToString();
 		}
 
-		private char ScanUriEscapes(Mark start)
+		private string ScanUriEscapes(Mark start)
 		{
-			List<byte> list = new List<byte>();
+			byte[] array = null;
 			int num = 0;
+			int num2 = 0;
 			while (this.analyzer.Check('%', 0) && this.analyzer.IsHex(1) && this.analyzer.IsHex(2))
 			{
-				int num2 = (this.analyzer.AsHex(1) << 4) + this.analyzer.AsHex(2);
-				if (num == 0)
+				int num3 = (this.analyzer.AsHex(1) << 4) + this.analyzer.AsHex(2);
+				if (num2 == 0)
 				{
-					num = (((num2 & 128) == 0) ? 1 : (((num2 & 224) == 192) ? 2 : (((num2 & 240) == 224) ? 3 : (((num2 & 248) == 240) ? 4 : 0))));
-					if (num == 0)
+					num2 = (((num3 & 128) == 0) ? 1 : (((num3 & 224) == 192) ? 2 : (((num3 & 240) == 224) ? 3 : (((num3 & 248) == 240) ? 4 : 0))));
+					if (num2 == 0)
 					{
 						throw new SyntaxErrorException(start, this.cursor.Mark(), "While parsing a tag, find an incorrect leading UTF-8 octet.");
 					}
+					array = new byte[num2];
 				}
-				else if ((num2 & 192) != 128)
+				else if ((num3 & 192) != 128)
 				{
 					throw new SyntaxErrorException(start, this.cursor.Mark(), "While parsing a tag, find an incorrect trailing UTF-8 octet.");
 				}
-				list.Add((byte)num2);
+				array[num++] = (byte)num3;
 				this.Skip();
 				this.Skip();
 				this.Skip();
-				if (--num <= 0)
+				if (--num2 <= 0)
 				{
-					char[] chars = Encoding.UTF8.GetChars(list.ToArray());
-					if (chars.Length != 1)
+					string @string = Encoding.UTF8.GetString(array, 0, num);
+					if (@string.Length == 0 || @string.Length > 2)
 					{
 						throw new SyntaxErrorException(start, this.cursor.Mark(), "While parsing a tag, find an incorrect UTF-8 sequence.");
 					}
-					return chars[0];
+					return @string;
 				}
 			}
 			throw new SyntaxErrorException(start, this.cursor.Mark(), "While parsing a tag, did not find URI escaped octet.");
@@ -1298,7 +1298,7 @@ namespace YamlDotNet.Core
 
 		private readonly CharacterAnalyzer<LookAheadBuffer> analyzer;
 
-		private Cursor cursor;
+		private readonly Cursor cursor;
 
 		private bool streamStartProduced;
 

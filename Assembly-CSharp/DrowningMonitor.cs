@@ -1,9 +1,18 @@
 ﻿using System;
 using KSerialization;
+using STRINGS;
 using UnityEngine;
 
-public class DrowningMonitor : KMonoBehaviour
+public class DrowningMonitor : KMonoBehaviour, IWiltCause
 {
+	WiltCondition.Condition[] IWiltCause.Conditions
+	{
+		get
+		{
+			return new WiltCondition.Condition[] { WiltCondition.Condition.Drowning };
+		}
+	}
+
 	private OccupyArea occupyArea
 	{
 		get
@@ -33,8 +42,8 @@ public class DrowningMonitor : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.staminaHandle = GameScheduler.Instance.SchedulePeriodic(base.name, this.staminaUpdateFrequency, new Action<object>(this.UpdateStamina), null, null, 0f, null);
-		this.checkDrowningHandle = GameScheduler.Instance.SchedulePeriodic(base.name, this.staminaUpdateFrequency, new Action<object>(this.CheckDrowning), null, null, 0f, null);
+		this.staminaHandle = GameScheduler.Instance.SchedulePeriodic("UpdateStamina", this.staminaUpdateFrequency, new Action<object>(this.UpdateStamina), null, null, 0f, null);
+		this.checkDrowningHandle = GameScheduler.Instance.SchedulePeriodic("CheckDrowning", this.staminaUpdateFrequency, new Action<object>(this.CheckDrowning), null, null, 0f, null);
 		this.OnMove(null);
 		this.CheckDrowning(null);
 		this.Subscribe(1088554450, new Action<object>(this.OnMove));
@@ -49,7 +58,7 @@ public class DrowningMonitor : KMonoBehaviour
 		}
 		else
 		{
-			this.partitionerEntry = GameScenePartitioner.Instance.Add("DrowningMonitor.OnSpawn", base.gameObject, this.occupyArea.GetExtents(), GameScenePartitioner.Instance.liquidChangedMask.mask, new Action<object>(this.OnLiquidChanged));
+			this.partitionerEntry = GameScenePartitioner.Instance.Add("DrowningMonitor.OnSpawn", base.gameObject, this.occupyArea.GetExtents(), GameScenePartitioner.Instance.liquidChangedLayer, new Action<object>(this.OnLiquidChanged));
 		}
 		this.CheckDrowning(null);
 	}
@@ -61,8 +70,8 @@ public class DrowningMonitor : KMonoBehaviour
 			this.partitionerEntry.Release();
 		}
 		base.OnCleanUp();
-		this.staminaHandle.Clear();
-		this.checkDrowningHandle.Clear();
+		this.staminaHandle.ClearScheduler();
+		this.checkDrowningHandle.ClearScheduler();
 	}
 
 	public void Configure(float _maxStamina, float _staminaRegenRate, float _cellLiquidThreshold = 0.95f)
@@ -85,7 +94,6 @@ public class DrowningMonitor : KMonoBehaviour
 			if (!this.drowning)
 			{
 				this.drowning = true;
-				this.selectable.AddStatusItem(Db.Get().CreatureStatusItems.Drowning, null);
 				this.Trigger(1949704522, null);
 			}
 			if (this.stamina <= 0f)
@@ -97,18 +105,30 @@ public class DrowningMonitor : KMonoBehaviour
 		else if (this.drowning)
 		{
 			this.drowning = false;
-			this.selectable.RemoveStatusItem(Db.Get().CreatureStatusItems.Drowning, false);
 			this.Trigger(99949694, null);
 		}
 	}
 
 	public bool IsCellSafe(int cell)
 	{
-		return this.occupyArea.TestArea(cell, delegate(int testCell)
+		return this.occupyArea.TestArea(cell, this, delegate(int testCell, object data)
 		{
+			DrowningMonitor drowningMonitor = (DrowningMonitor)data;
 			int num = Grid.CellAbove(testCell);
-			return Grid.IsValidCell(testCell) && Grid.IsValidCell(num) && (!Grid.IsLiquid(num) || !Grid.IsLiquid(testCell)) && !Grid.IsSubstantialLiquid(testCell, this.cellLiquidThreshold);
+			return Grid.IsValidCell(testCell) && Grid.IsValidCell(num) && (!Grid.IsLiquid(num) || !Grid.IsLiquid(testCell)) && !Grid.IsSubstantialLiquid(testCell, drowningMonitor.cellLiquidThreshold);
 		});
+	}
+
+	public string WiltStateString
+	{
+		get
+		{
+			if (this.drowning)
+			{
+				return Db.Get().CreatureStatusItems.Drowning.resolveStringCallback(CREATURES.STATUSITEMS.DROWNING.NAME, this);
+			}
+			return string.Empty;
+		}
 	}
 
 	private void OnLiquidChanged(object data)

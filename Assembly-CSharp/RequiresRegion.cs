@@ -27,7 +27,7 @@ public class RequiresRegion : KMonoBehaviour
 		RegionManager regionManager = Game.Instance.RegionManager;
 		regionManager.OnRegionChanged = (global::System.Action)Delegate.Remove(regionManager.OnRegionChanged, new global::System.Action(this.OnRegionChanged));
 		base.OnCleanUp();
-		this.schedulerHandle.Clear();
+		this.schedulerHandle.ClearScheduler();
 	}
 
 	private void CheckOwnerRegion(object data)

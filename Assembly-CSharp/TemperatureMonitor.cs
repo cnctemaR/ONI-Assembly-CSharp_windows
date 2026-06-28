@@ -1,5 +1,7 @@
 ﻿using System;
 using Klei.AI;
+using STRINGS;
+using UnityEngine;
 
 public class TemperatureMonitor : GameStateMachine<TemperatureMonitor, TemperatureMonitor.Instance>
 {
@@ -12,14 +14,11 @@ public class TemperatureMonitor : GameStateMachine<TemperatureMonitor, Temperatu
 			DiseaseTrigger component = smi.master.GetComponent<DiseaseTrigger>();
 			if (component != null)
 			{
-				component.AddTrigger(GameHashes.TooHotDisease, new string[] { "HeatRash" });
-				component.AddTrigger(GameHashes.TooColdDisease, new string[] { "ColdBrain" });
+				component.AddTrigger(GameHashes.TooHotDisease, new string[] { "HeatRash" }, (GameObject s, GameObject t) => DUPLICANTS.DISEASES.INFECTIONSOURCES.INTERNAL_TEMPERATURE);
+				component.AddTrigger(GameHashes.TooColdDisease, new string[] { "ColdBrain" }, (GameObject s, GameObject t) => DUPLICANTS.DISEASES.INFECTIONSOURCES.INTERNAL_TEMPERATURE);
 			}
 		}).Update(delegate(TemperatureMonitor.Instance smi)
 		{
-			smi.averageTemperature *= 1f - smi.dt / 4f;
-			smi.averageTemperature += smi.primaryElement.Temperature * (smi.dt / 4f);
-			smi.temperature.SetValue(smi.averageTemperature);
 		});
 		this.homeostatic.Transition(this.hyperthermic_pre, (TemperatureMonitor.Instance smi) => smi.IsHyperthermic()).Transition(this.hypothermic_pre, (TemperatureMonitor.Instance smi) => smi.IsHypothermic()).TriggerOnEnter(GameHashes.OptimalTemperatureAchieved, null);
 		this.hyperthermic_pre.Enter(delegate(TemperatureMonitor.Instance smi)
@@ -76,6 +75,13 @@ public class TemperatureMonitor : GameStateMachine<TemperatureMonitor, Temperatu
 			this.navigator = base.GetComponent<Navigator>();
 		}
 
+		public void UpdateTemperatureOnSimUpdate(float dt)
+		{
+			base.smi.averageTemperature *= 1f - dt / 4f;
+			base.smi.averageTemperature += base.smi.primaryElement.Temperature * (dt / 4f);
+			base.smi.temperature.SetValue(base.smi.averageTemperature);
+		}
+
 		public bool IsHyperthermic()
 		{
 			return this.temperature.value > this.HyperthermiaThreshold;
@@ -98,12 +104,12 @@ public class TemperatureMonitor : GameStateMachine<TemperatureMonitor, Temperatu
 
 		public void KillHot()
 		{
-			base.GetComponent<Health>().Kill(Db.Get().Deaths.Overheating);
+			base.gameObject.GetSMI<DeathMonitor.Instance>().Kill(Db.Get().Deaths.Overheating);
 		}
 
 		public void KillCold()
 		{
-			base.GetComponent<Health>().Kill(Db.Get().Deaths.Frozen);
+			base.gameObject.GetSMI<DeathMonitor.Instance>().Kill(Db.Get().Deaths.Frozen);
 		}
 
 		public float ExtremeTemperatureDelta()

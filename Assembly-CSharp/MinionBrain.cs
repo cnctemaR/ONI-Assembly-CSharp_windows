@@ -21,9 +21,14 @@ public class MinionBrain : Brain
 		base.OnPrefabInit();
 		Storage component = base.GetComponent<Storage>();
 		component.defaultStoredItemModifers = MinionBrain.MinionStoredItemModifiers;
-		AccessControlNavMask accessControlNavMask = new AccessControlNavMask(base.gameObject);
-		this.Navigator.AddMask(accessControlNavMask);
+		this.accessControlNavMask = new AccessControlNavMask(base.gameObject, int.MaxValue);
+		this.Navigator.AddMask(this.accessControlNavMask);
 		this.Subscribe(-1697596308, new Action<object>(this.AnimTrackStoredItem));
+	}
+
+	public void SetMaxNavCost(int max_path_cost)
+	{
+		this.accessControlNavMask.SetMaxPathCost(max_path_cost);
 	}
 
 	protected override void OnSpawn()
@@ -58,10 +63,10 @@ public class MinionBrain : Brain
 		{
 			KBatchedAnimTracker kbatchedAnimTracker = go.AddComponent<KBatchedAnimTracker>();
 			kbatchedAnimTracker.useTargetPoint = false;
-			kbatchedAnimTracker.useFrameRange = false;
 			kbatchedAnimTracker.filterByAnim = false;
 			kbatchedAnimTracker.fadeOut = false;
 			kbatchedAnimTracker.symbol = new HashedString("snapTo_chest");
+			kbatchedAnimTracker.forceAlwaysVisible = true;
 		}
 	}
 
@@ -88,6 +93,8 @@ public class MinionBrain : Brain
 
 	[MyCmpGet]
 	public OxygenBreather OxygenBreather;
+
+	private AccessControlNavMask accessControlNavMask;
 
 	private static readonly List<Storage.StoredItemModifier> MinionStoredItemModifiers = new List<Storage.StoredItemModifier>();
 }

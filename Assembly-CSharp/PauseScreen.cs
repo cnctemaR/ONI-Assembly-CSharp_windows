@@ -2,6 +2,7 @@
 using System.IO;
 using FMOD.Studio;
 using Klei;
+using ProcGenGame;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.Events;
@@ -24,18 +25,30 @@ public class PauseScreen : KModalButtonMenu
 	protected override void OnPrefabInit()
 	{
 		this.keepMenuOpen = true;
-		this.versionText.text = UI.FRONTEND.GAME_VERSION + 221865U;
+		this.versionText.text = UI.FRONTEND.GAME_VERSION + 229531U;
 		this.versionText.transform.parent.gameObject.SetActive(false);
 		base.OnPrefabInit();
-		this.buttons = new KButtonMenu.ButtonInfo[]
+		if (!GenericGameSettings.instance.demoMode)
 		{
-			new KButtonMenu.ButtonInfo(UI.FRONTEND.PAUSE_SCREEN.RESUME, global::Action.NumActions, new UnityAction(this.OnResume), null, null),
-			new KButtonMenu.ButtonInfo(UI.FRONTEND.PAUSE_SCREEN.OPTIONS, global::Action.NumActions, new UnityAction(this.OnOptions), null, null),
-			new KButtonMenu.ButtonInfo(UI.FRONTEND.PAUSE_SCREEN.SAVE, global::Action.NumActions, new UnityAction(this.OnSave), null, null),
-			new KButtonMenu.ButtonInfo(UI.FRONTEND.PAUSE_SCREEN.SAVEAS, global::Action.NumActions, new UnityAction(this.OnSaveAs), null, null),
-			new KButtonMenu.ButtonInfo(UI.FRONTEND.PAUSE_SCREEN.LOAD, global::Action.NumActions, new UnityAction(this.OnLoad), null, null),
-			new KButtonMenu.ButtonInfo(UI.FRONTEND.PAUSE_SCREEN.QUIT, global::Action.NumActions, new UnityAction(this.OnQuit), null, null)
-		};
+			this.buttons = new KButtonMenu.ButtonInfo[]
+			{
+				new KButtonMenu.ButtonInfo(UI.FRONTEND.PAUSE_SCREEN.RESUME, global::Action.NumActions, new UnityAction(this.OnResume), null, null),
+				new KButtonMenu.ButtonInfo(UI.FRONTEND.PAUSE_SCREEN.OPTIONS, global::Action.NumActions, new UnityAction(this.OnOptions), null, null),
+				new KButtonMenu.ButtonInfo(UI.FRONTEND.PAUSE_SCREEN.SAVE, global::Action.NumActions, new UnityAction(this.OnSave), null, null),
+				new KButtonMenu.ButtonInfo(UI.FRONTEND.PAUSE_SCREEN.SAVEAS, global::Action.NumActions, new UnityAction(this.OnSaveAs), null, null),
+				new KButtonMenu.ButtonInfo(UI.FRONTEND.PAUSE_SCREEN.LOAD, global::Action.NumActions, new UnityAction(this.OnLoad), null, null),
+				new KButtonMenu.ButtonInfo(UI.FRONTEND.PAUSE_SCREEN.QUIT, global::Action.NumActions, new UnityAction(this.OnQuit), null, null)
+			};
+		}
+		else
+		{
+			this.buttons = new KButtonMenu.ButtonInfo[]
+			{
+				new KButtonMenu.ButtonInfo(UI.FRONTEND.PAUSE_SCREEN.RESUME, global::Action.NumActions, new UnityAction(this.OnResume), null, null),
+				new KButtonMenu.ButtonInfo(UI.FRONTEND.PAUSE_SCREEN.OPTIONS, global::Action.NumActions, new UnityAction(this.OnOptions), null, null),
+				new KButtonMenu.ButtonInfo(UI.FRONTEND.PAUSE_SCREEN.QUIT, global::Action.NumActions, new UnityAction(this.OnQuit), null, null)
+			};
+		}
 		this.closeButton.onClick += this.OnResume;
 		PauseScreen.instance = this;
 		base.Show(false);
@@ -73,7 +86,7 @@ public class PauseScreen : KModalButtonMenu
 		{
 			base.gameObject.SetActive(false);
 			ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, this.transform.parent.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
-			confirmDialogScreen.PopupConfirmDialog(string.Format(UI.FRONTEND.SAVESCREEN.OVERWRITEMESSAGE, Path.GetFileNameWithoutExtension(filename)), delegate
+			confirmDialogScreen.PopupConfirmDialog(string.Format(UI.FRONTEND.SAVESCREEN.OVERWRITEMESSAGE, global::System.IO.Path.GetFileNameWithoutExtension(filename)), delegate
 			{
 				this.DoSave(filename);
 				this.gameObject.SetActive(true);
@@ -87,7 +100,24 @@ public class PauseScreen : KModalButtonMenu
 
 	private void DoSave(string filename)
 	{
-		SaveLoader.Instance.Save(filename, false, true);
+		try
+		{
+			SaveLoader.Instance.Save(filename, false, true);
+			ReportErrorDialog.MOST_RECENT_SAVEFILE = filename;
+		}
+		catch (IOException ex)
+		{
+			IOException ex2 = ex;
+			IOException e = ex2;
+			ConfirmDialogScreen component = global::Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, this.transform.parent.gameObject, true).GetComponent<ConfirmDialogScreen>();
+			component.PopupConfirmDialog(string.Format(UI.FRONTEND.SAVESCREEN.IO_ERROR, e.ToString()), delegate
+			{
+				this.Deactivate();
+			}, null, UI.FRONTEND.SAVESCREEN.REPORT_BUG, delegate
+			{
+				KCrashReporter.ReportError(e.Message, e.StackTrace.ToString(), null, null, string.Empty);
+			});
+		}
 	}
 
 	private void ConfirmDecision(string text, global::System.Action onConfirm)

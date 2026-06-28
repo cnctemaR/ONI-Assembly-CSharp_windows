@@ -4,6 +4,11 @@ using UnityEngine.SceneManagement;
 
 public class App : MonoBehaviour
 {
+	public static string GetCurrentSceneName()
+	{
+		return App.currentSceneName;
+	}
+
 	private void OnApplicationQuit()
 	{
 		App.IsExiting = true;
@@ -13,7 +18,7 @@ public class App : MonoBehaviour
 	{
 		KMonoBehaviour.isLoadingScene = true;
 		App.isLoading = true;
-		App.sceneName = scene_name;
+		App.loadingSceneName = scene_name;
 	}
 
 	public void LateUpdate()
@@ -27,13 +32,14 @@ public class App : MonoBehaviour
 			{
 				App.OnPreLoadScene();
 			}
-			SceneManager.LoadScene(App.sceneName);
+			SceneManager.LoadScene(App.loadingSceneName);
 			if (App.OnPostLoadScene != null)
 			{
 				App.OnPostLoadScene();
 			}
 			App.isLoading = false;
-			App.sceneName = null;
+			App.currentSceneName = App.loadingSceneName;
+			App.loadingSceneName = null;
 		}
 	}
 
@@ -45,5 +51,7 @@ public class App : MonoBehaviour
 
 	public static bool isLoading;
 
-	public static string sceneName;
+	public static string loadingSceneName;
+
+	private static string currentSceneName;
 }

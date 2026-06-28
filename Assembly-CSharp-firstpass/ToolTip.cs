@@ -210,7 +210,7 @@ public class ToolTip : KMonoBehaviour, IEventSystemHandler, IPointerEnterHandler
 
 	private void Update()
 	{
-		if (!this.refreshWhileHovering)
+		if (!this.forceRefresh && !this.refreshWhileHovering)
 		{
 			return;
 		}
@@ -237,6 +237,8 @@ public class ToolTip : KMonoBehaviour, IEventSystemHandler, IPointerEnterHandler
 	private List<ScriptableObject> styleSettings = new List<ScriptableObject>();
 
 	public bool worldSpace;
+
+	public bool forceRefresh;
 
 	public bool refreshWhileHovering;
 

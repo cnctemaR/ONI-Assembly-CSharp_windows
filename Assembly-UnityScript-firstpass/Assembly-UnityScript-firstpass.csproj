@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{1F287E2F-9607-4BB1-B98F-1680F14AB83F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Assembly-UnityScript-firstpass</RootNamespace>
+    <AssemblyName>Assembly-UnityScript-firstpass</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net35</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="Fix3dTextJS.cs" />
+    <Compile Include="FixGUITextJS.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ArabicSupport\ArabicSupport.csproj">
+      <Project>{1F287E2F-9607-4BB1-B98F-1680F14AB83C}</Project>
+      <Name>ArabicSupport</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\mscorlib\mscorlib.csproj">
+      <Project>{1F287E2F-9607-4BB1-B98F-1680F14AB849}</Project>
+      <Name>mscorlib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine\UnityEngine.csproj">
+      <Project>{1F287E2F-9607-4BB1-B98F-1680F14AB858}</Project>
+      <Name>UnityEngine</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

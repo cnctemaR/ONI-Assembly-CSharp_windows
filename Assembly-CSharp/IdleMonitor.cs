@@ -6,7 +6,7 @@ public class IdleMonitor : GameStateMachine<IdleMonitor, IdleMonitor.Instance>
 	{
 		default_state = this.idle;
 		base.serializable = false;
-		this.idle.ToggleChore(new Func<IdleMonitor.Instance, Chore>(this.CreateIdleChore), this.idle, true);
+		this.idle.ToggleRecurringChore(new Func<IdleMonitor.Instance, Chore>(this.CreateIdleChore));
 	}
 
 	private Chore CreateIdleChore(IdleMonitor.Instance smi)

@@ -12,7 +12,7 @@ public class FoodQualityNeed : Need
 		Attributes attributes = base.gameObject.GetAttributes();
 		attributes.Add(Db.Get().Attributes.FoodExpectation);
 		base.Name = DUPLICANTS.NEEDS.FOOD_QUALITY.NAME;
-		this.expectationModifier = new AttributeModifier(Db.Get().Attributes.FoodExpectation.Id, 0f, attributes.GetProfessionString(), false, false);
+		this.expectationModifier = new AttributeModifier(Db.Get().Attributes.FoodExpectation.Id, 0f, attributes.GetProfessionString(true), false, false);
 		this.foodQualitStressBonus = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, -0.033333335f, DUPLICANTS.NEEDS.FOOD_QUALITY.GOOD_FOOD_MOD, false, false);
 		this.foodQualityStressNeutral = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0f, DUPLICANTS.NEEDS.FOOD_QUALITY.NORMAL_FOOD_MOD, false, false);
 		this.foodQualityStressPenalty = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0.016666668f, DUPLICANTS.NEEDS.FOOD_QUALITY.BAD_FOOD_MOD, false, false);

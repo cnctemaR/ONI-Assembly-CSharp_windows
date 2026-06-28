@@ -1,12 +1,14 @@
 ﻿using System;
 using Klei.AI;
+using KSerialization;
 
-public class ToiletWorkableUse : BuildingWorkable
+public class ToiletWorkableUse : Workable, IGameObjectEffectDescriptor
 {
-	protected override void OnSpawn()
+	protected override void OnPrefabInit()
 	{
+		base.OnPrefabInit();
 		this.attributeConverter = Db.Get().AttributeConverters.ToiletSpeed;
-		base.SetWorkTime(this.attributeConverter.multiplier * 8.5f);
+		base.SetWorkTime(8.5f);
 	}
 
 	protected override void OnStartWork(Worker worker)
@@ -26,10 +28,14 @@ public class ToiletWorkableUse : BuildingWorkable
 	{
 		AmountInstance amountInstance = Db.Get().Amounts.Bladder.Lookup(worker);
 		amountInstance.SetValue(0f);
+		this.timesUsed++;
 		base.OnCompleteWork(worker);
 	}
 
 	public Action<Worker> onComplete;
 
 	public Action<Worker> onAbort;
+
+	[Serialize]
+	public int timesUsed;
 }

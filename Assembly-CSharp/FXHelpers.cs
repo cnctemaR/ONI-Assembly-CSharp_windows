@@ -3,7 +3,7 @@ using UnityEngine;
 
 public static class FXHelpers
 {
-	public static KBatchedAnimController CreateEffect(string anim_file_name, Vector3 position, Transform parent = null, bool update_looping_sounds_position = false, Grid.SceneLayer layer = Grid.SceneLayer.Front)
+	public static KBatchedAnimController CreateEffect(string anim_file_name, Vector3 position, Transform parent = null, bool update_looping_sounds_position = false, Grid.SceneLayer layer = Grid.SceneLayer.Front, bool set_inactive = false)
 	{
 		KBatchedAnimController component = GameUtil.KInstantiate(EffectPrefabs.Instance.Fx, position, layer, Folder.FX, null, 0).GetComponent<KBatchedAnimController>();
 		KPrefabID component2 = component.GetComponent<KPrefabID>();
@@ -28,7 +28,10 @@ public static class FXHelpers
 		{
 			component.AddAnims(new KAnimFile[] { anim });
 		}
-		component.gameObject.SetActive(true);
+		if (!set_inactive)
+		{
+			component.gameObject.SetActive(true);
+		}
 		return component;
 	}
 }

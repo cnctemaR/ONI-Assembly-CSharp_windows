@@ -14,25 +14,25 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 			this._ignoreUnmatched = ignoreUnmatched;
 		}
 
-		bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
+		bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
 		{
-			if (reader.Allow<MappingStart>() == null)
+			if (parser.Allow<MappingStart>() == null)
 			{
 				value = null;
 				return false;
 			}
 			value = this._objectFactory.Create(expectedType);
-			while (!reader.Accept<MappingEnd>())
+			while (!parser.Accept<MappingEnd>())
 			{
-				Scalar scalar = reader.Expect<Scalar>();
+				Scalar scalar = parser.Expect<Scalar>();
 				IPropertyDescriptor property = this._typeDescriptor.GetProperty(expectedType, null, scalar.Value, this._ignoreUnmatched);
 				if (property == null)
 				{
-					reader.SkipThisAndNestedEvents();
+					parser.SkipThisAndNestedEvents();
 				}
 				else
 				{
-					object obj = nestedObjectDeserializer(reader, property.Type);
+					object obj = nestedObjectDeserializer(parser, property.Type);
 					IValuePromise valuePromise = obj as IValuePromise;
 					if (valuePromise == null)
 					{
@@ -50,7 +50,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 					}
 				}
 			}
-			reader.Expect<MappingEnd>();
+			parser.Expect<MappingEnd>();
 			return true;
 		}
 

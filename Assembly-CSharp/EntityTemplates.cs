@@ -2,17 +2,18 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Klei.AI;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
 public class EntityTemplates
 {
-	public static GameObject CreateBasicEntity(string id, string name, string desc, float mass, bool unitMass, KAnimFile anim, string initialAnim, Grid.SceneLayer sceneLayer, SimHashes element = SimHashes.Creature, List<Tag> additionalTags = null)
+	public static GameObject CreateBasicEntity(string id, string name, string desc, float mass, bool unitMass, KAnimFile anim, string initialAnim, Grid.SceneLayer sceneLayer, [Optional] EffectorValues noise, SimHashes element = SimHashes.Creature, List<Tag> additionalTags = null, float default_temperature = 293f)
 	{
 		GameObject gameObject = new GameObject("EntityTemplate");
 		gameObject.SetActive(false);
 		gameObject.name = id;
-		gameObject.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.EntityPrefabs).transform;
+		gameObject.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.GlobalDoNotDestroy).transform;
 		KPrefabID kprefabID = gameObject.UpdateComponentRequirement<KPrefabID>(true);
 		kprefabID.PrefabTag = TagManager.Create(id, name);
 		if (additionalTags != null)
@@ -30,7 +31,7 @@ public class EntityTemplates
 		kbatchedAnimController.initialAnim = initialAnim;
 		PrimaryElement primaryElement = gameObject.UpdateComponentRequirement<PrimaryElement>(true);
 		primaryElement.ElementID = element;
-		primaryElement.Temperature = 293f;
+		primaryElement.Temperature = default_temperature;
 		if (unitMass)
 		{
 			primaryElement.MassPerUnit = mass;
@@ -45,12 +46,17 @@ public class EntityTemplates
 		InfoDescription infoDescription = gameObject.UpdateComponentRequirement<InfoDescription>(true);
 		infoDescription.description = desc;
 		gameObject.UpdateComponentRequirement<Notifier>(true);
+		if (noise != default(EffectorValues))
+		{
+			NoisePolluter noisePolluter = gameObject.UpdateComponentRequirement<NoisePolluter>(true);
+			noisePolluter.SetValues(noise);
+		}
 		return gameObject;
 	}
 
-	public static GameObject CreatePlacedEntity(string id, string name, string desc, float mass, KAnimFile anim, string initialAnim, Grid.SceneLayer sceneLayer, int width, int height, DecorValues decor, SimHashes element = SimHashes.Creature, List<Tag> additionalTags = null)
+	public static GameObject CreatePlacedEntity(string id, string name, string desc, float mass, KAnimFile anim, string initialAnim, Grid.SceneLayer sceneLayer, int width, int height, EffectorValues decor, [Optional] EffectorValues noise, SimHashes element = SimHashes.Creature, List<Tag> additionalTags = null, float default_temperature = 293f)
 	{
-		GameObject gameObject = EntityTemplates.CreateBasicEntity(id, name, desc, mass, true, anim, initialAnim, sceneLayer, element, additionalTags);
+		GameObject gameObject = EntityTemplates.CreateBasicEntity(id, name, desc, mass, true, anim, initialAnim, sceneLayer, noise, element, additionalTags, default_temperature);
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
 		component.defaultSpawnOffset = CellAlignment.Bottom;
 		BoxCollider2D boxCollider2D = gameObject.UpdateComponentRequirement<BoxCollider2D>(true);
@@ -86,29 +92,55 @@ public class EntityTemplates
 		return template;
 	}
 
-	public static GameObject ExtendEntityToBasicPlant(GameObject template, float drowning_stamina = 15f, float drowning_regen = 5f, float temperature_lethal_low = 218.15f, float temperature_warning_low = 283.15f, float temperature_perfect_low = 291.15f, float temperature_perfect_high = 295.15f, float temperature_warning_high = 303.15f, float temperature_lethal_high = 398.15f, float pressure_lethal_low = 0f, float pressure_warning_low = 0.15f, float grow_time = 1f, string crop_id = null)
+	public static GameObject ExtendEntityToBasicPlant(GameObject template, float drowning_stamina = 15f, float drowning_regen = 5f, float temperature_lethal_low = 218.15f, float temperature_warning_low = 283.15f, float temperature_perfect_low = 291.15f, float temperature_perfect_high = 295.15f, float temperature_warning_high = 303.15f, float temperature_lethal_high = 398.15f, SimHashes[] safe_elements = null, bool pressure_sensitive = true, float pressure_lethal_low = 0f, float pressure_warning_low = 0.15f, float grow_time = 1f, string crop_id = null, bool can_drown = true)
 	{
 		template.UpdateComponentRequirement<EntombVulnerable>(true);
 		PressureVulnerable pressureVulnerable = template.UpdateComponentRequirement<PressureVulnerable>(true);
-		pressureVulnerable.Configure(pressure_warning_low, pressure_lethal_low, 10f, 30f, 0.75f, 5f);
+		if (pressure_sensitive)
+		{
+			PressureVulnerable pressureVulnerable2 = pressureVulnerable;
+			SimHashes[] safe_elements2 = safe_elements;
+			pressureVulnerable2.Configure(pressure_warning_low, pressure_lethal_low, 10f, 30f, 0.75f, 5f, safe_elements2);
+		}
+		else
+		{
+			pressureVulnerable.Configure(safe_elements);
+		}
 		template.UpdateComponentRequirement<WiltCondition>(true);
 		template.UpdateComponentRequirement<Uprootable>(true);
 		template.UpdateComponentRequirement<UprootedMonitor>(true);
-		DrowningMonitor drowningMonitor = template.UpdateComponentRequirement<DrowningMonitor>(true);
-		drowningMonitor.Configure(drowning_stamina, drowning_regen, 0.95f);
+		template.UpdateComponentRequirement<ReceptacleMonitor>(true);
+		template.UpdateComponentRequirement<Notifier>(true);
+		if (can_drown)
+		{
+			DrowningMonitor drowningMonitor = template.UpdateComponentRequirement<DrowningMonitor>(true);
+			drowningMonitor.Configure(drowning_stamina, drowning_regen, 0.95f);
+		}
 		TemperatureVulnerable temperatureVulnerable = template.UpdateComponentRequirement<TemperatureVulnerable>(true);
 		temperatureVulnerable.Configure(temperature_warning_low, temperature_lethal_low, temperature_warning_high, temperature_lethal_high, temperature_perfect_low, temperature_perfect_high);
 		template.UpdateComponentRequirement<OccupyArea>(true).objectLayer = ObjectLayer.Building;
+		KPrefabID component = template.GetComponent<KPrefabID>();
 		if (crop_id != null)
 		{
+			GeneratedBuildings.RegisterWithOverlay(OverlayScreen.HarvestableIDs, component.PrefabID().ToString());
 			Crop.CropVal cropVal = CROPS.CROP_TYPES.Find((Crop.CropVal m) => m.cropId == crop_id);
 			Crop crop = template.UpdateComponentRequirement<Crop>(true);
 			crop.Configure(cropVal);
 			Growing growing = template.UpdateComponentRequirement<Growing>(true);
-			growing.Configure(cropVal.cropDuration, cropVal.regrowDuration);
+			growing.Configure(cropVal.cropDuration);
 			template.UpdateComponentRequirement<Harvestable>(true);
 		}
-		template.UpdateComponentRequirement<Prioritizable>(true);
+		component.prefabInitFn += delegate(GameObject inst)
+		{
+			PressureVulnerable component2 = inst.GetComponent<PressureVulnerable>();
+			if (safe_elements != null)
+			{
+				foreach (SimHashes simHashes in safe_elements)
+				{
+					component2.safe_atmospheres.Add(ElementLoader.FindElementByHash(simHashes));
+				}
+			}
+		};
 		return template;
 	}
 
@@ -143,32 +175,27 @@ public class EntityTemplates
 		navigator.CurrentNavType = navType;
 		navigator.defaultSpeed = moveSpeed;
 		navigator.updateProber = true;
-		navigator.maxProbingRadius = 100;
+		navigator.maxProbingRadius = 50;
+		KPrefabID component = template.GetComponent<KPrefabID>();
+		component.prefabInitFn += delegate(GameObject inst)
+		{
+			KPrefabID component2 = inst.GetComponent<KPrefabID>();
+			new DeathMonitor.Instance(component2);
+		};
+		component.prefabSpawnFn += delegate(GameObject inst)
+		{
+			DeathMonitor.Instance smi = inst.GetSMI<DeathMonitor.Instance>();
+			smi.StartSM();
+		};
 		return template;
 	}
 
 	public static GameObject CreateLooseEntity(string id, string name, string desc, float mass, bool unitMass, KAnimFile anim, string initialAnim, Grid.SceneLayer sceneLayer, EntityTemplates.CollisionShape collisionShape, float width = 1f, float height = 1f, bool isPickupable = false, SimHashes element = SimHashes.Creature, List<Tag> additionalTags = null)
 	{
-		GameObject gameObject = EntityTemplates.CreateBasicEntity(id, name, desc, mass, unitMass, anim, initialAnim, sceneLayer, element, additionalTags);
+		GameObject gameObject = EntityTemplates.CreateBasicEntity(id, name, desc, mass, unitMass, anim, initialAnim, sceneLayer, default(EffectorValues), element, additionalTags, 293f);
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
 		component.defaultSpawnOffset = CellAlignment.RandomInternal;
-		if (collisionShape != EntityTemplates.CollisionShape.RECTANGLE)
-		{
-			if (collisionShape != EntityTemplates.CollisionShape.POLYGONAL)
-			{
-				CircleCollider2D circleCollider2D = gameObject.UpdateComponentRequirement<CircleCollider2D>(true);
-				circleCollider2D.radius = Mathf.Max(width, height);
-			}
-			else
-			{
-				gameObject.UpdateComponentRequirement<PolygonCollider2D>(true);
-			}
-		}
-		else
-		{
-			BoxCollider2D boxCollider2D = gameObject.UpdateComponentRequirement<BoxCollider2D>(true);
-			boxCollider2D.size = new Vector2f(width, height);
-		}
+		gameObject = EntityTemplates.AddCollision(gameObject, collisionShape, width, height);
 		KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
 		component2.isMovable = true;
 		gameObject.UpdateComponentRequirement<Modifiers>(true);
@@ -180,15 +207,15 @@ public class EntityTemplates
 		return gameObject;
 	}
 
-	public static GameObject CreateOreEntity(SimHashes elementID, List<Tag> additionalTags = null)
+	public static GameObject CreateOreEntity(SimHashes elementID, EntityTemplates.CollisionShape shape, float width, float height, List<Tag> additionalTags = null, float default_temperature = 293f)
 	{
-		Element element = ElementLoader.elementTable[elementID];
+		Element element = ElementLoader.FindElementByHash(elementID);
 		string text = element.id.ToString();
 		GameObject gameObject = new GameObject(text);
 		gameObject.SetActive(false);
-		gameObject.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.EntityPrefabs).transform;
+		gameObject.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.GlobalDoNotDestroy).transform;
 		KPrefabID kprefabID = gameObject.UpdateComponentRequirement<KPrefabID>(true);
-		kprefabID.PrefabTag = TagManager.Create(text, element.name);
+		kprefabID.PrefabTag = element.tag;
 		kprefabID.defaultSpawnOffset = CellAlignment.RandomInternal;
 		if (additionalTags != null)
 		{
@@ -198,7 +225,7 @@ public class EntityTemplates
 		PrimaryElement primaryElement = gameObject.UpdateComponentRequirement<PrimaryElement>(true);
 		primaryElement.SetElement(elementID);
 		primaryElement.Mass = 1f;
-		primaryElement.Temperature = 293f;
+		primaryElement.Temperature = default_temperature;
 		Pickupable pickupable = gameObject.UpdateComponentRequirement<Pickupable>(true);
 		pickupable.SetWorkTime(5f);
 		KSelectable kselectable = gameObject.UpdateComponentRequirement<KSelectable>(true);
@@ -219,8 +246,29 @@ public class EntityTemplates
 		decorProvider.baseDecor = -10f;
 		decorProvider.baseRadius = 1f;
 		gameObject.UpdateComponentRequirement<ElementChunk>(true);
-		CircleCollider2D circleCollider2D = gameObject.UpdateComponentRequirement<CircleCollider2D>(true);
-		circleCollider2D.radius = 0.25f;
+		return EntityTemplates.AddCollision(gameObject, shape, width, height);
+	}
+
+	public static GameObject CreateSolidOreEntity(SimHashes elementId, List<Tag> additionalTags = null)
+	{
+		return EntityTemplates.CreateOreEntity(elementId, EntityTemplates.CollisionShape.CIRCLE, 0.5f, 0.5f, additionalTags, 293f);
+	}
+
+	public static GameObject CreateLiquidOreEntity(SimHashes elementId, List<Tag> additionalTags = null)
+	{
+		GameObject gameObject = EntityTemplates.CreateOreEntity(elementId, EntityTemplates.CollisionShape.RECTANGLE, 0.5f, 0.6f, additionalTags, 293f);
+		Dumpable dumpable = gameObject.UpdateComponentRequirement<Dumpable>(true);
+		dumpable.SetWorkTime(5f);
+		gameObject.UpdateComponentRequirement<SubstanceChunk>(true);
+		return gameObject;
+	}
+
+	public static GameObject CreateGasOreEntity(SimHashes elementId, List<Tag> additionalTags = null)
+	{
+		GameObject gameObject = EntityTemplates.CreateOreEntity(elementId, EntityTemplates.CollisionShape.RECTANGLE, 0.5f, 0.6f, additionalTags, 293f);
+		Dumpable dumpable = gameObject.UpdateComponentRequirement<Dumpable>(true);
+		dumpable.SetWorkTime(5f);
+		gameObject.UpdateComponentRequirement<SubstanceChunk>(true);
 		return gameObject;
 	}
 
@@ -239,6 +287,7 @@ public class EntityTemplates
 				go.GetComponent<Edible>().FoodInfo = foodInfo;
 			};
 			GameTags.DisplayAsCalories.Add(component2.PrefabTag);
+			EntityTemplates.CreateAndRegisterCompostableFromEdible(template);
 		}
 		else
 		{
@@ -299,11 +348,20 @@ public class EntityTemplates
 		return template;
 	}
 
-	public static GameObject ExtendPlantToIrrigated(GameObject template, FertilizationMonitor.FertilizerInfo[] fertilizers)
+	public static GameObject ExtendPlantToIrrigated(GameObject template, IrrigationMonitor.LiquidResourceInfo[] liquids)
 	{
-		IrrigationMonitorInstance.Def def = new IrrigationMonitorInstance.Def();
-		def.wrongFertilizerTestTag = GameTags.Liquid;
-		def.consumedElements = fertilizers;
+		foreach (IrrigationMonitor.LiquidResourceInfo liquidResourceInfo in liquids)
+		{
+			ManualDeliveryKG manualDeliveryKG = template.AddComponent<ManualDeliveryKG>();
+			manualDeliveryKG.RequestedItemTag = liquidResourceInfo.tag;
+			manualDeliveryKG.capacity = liquidResourceInfo.massConsumptionRate * 600f * 3f;
+			manualDeliveryKG.refillMass = liquidResourceInfo.massConsumptionRate * 600f * 0.5f;
+			manualDeliveryKG.minimumMass = liquidResourceInfo.massConsumptionRate * 600f * 0.5f;
+			manualDeliveryKG.operationalRequirement = FetchOrder2.OperationalRequirement.Functional;
+		}
+		IrrigationMonitor.Instance.Def def = new IrrigationMonitor.Instance.Def();
+		def.wrongIrrigationTestTag = GameTags.Liquid;
+		def.consumedElements = liquids;
 		template.GetComponent<StateMachineController>().AddDef(def);
 		return template;
 	}
@@ -311,17 +369,31 @@ public class EntityTemplates
 	public static GameObject ExtendPlantWithYield(GameObject template, IYieldEffect[] midYieldEffects, IYieldEffect[] highYieldEffects)
 	{
 		KPrefabID component = template.GetComponent<KPrefabID>();
-		Crop component2 = template.GetComponent<Crop>();
-		component2.SetYieldModifiers(midYieldEffects, highYieldEffects);
 		component.prefabInitFn += delegate(GameObject inst)
 		{
-			Crop component3 = inst.GetComponent<Crop>();
-			component3.SetYieldModifiers(midYieldEffects, highYieldEffects);
 		};
 		return template;
 	}
 
-	public static GameObject CreateAndRegisterSeedForPlant(GameObject plant, SeedProducer.ProductionType productionType, string id, string name, string desc, KAnimFile anim, string initialAnim = "object", int numberOfSeeds = 1, List<Tag> additionalTags = null, SingleEntityReceptacle.ReceptacleDirection planterDirection = SingleEntityReceptacle.ReceptacleDirection.Top, [Optional] Tag replantGroundTag, int sortOrder = 0, string domesticatedDescription = "", EntityTemplates.CollisionShape collisionShape = EntityTemplates.CollisionShape.CIRCLE, float width = 0.25f, float height = 0.25f)
+	public static GameObject CreateAndRegisterCompostableFromEdible(GameObject edible)
+	{
+		edible.AddComponent<Compostable>();
+		GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(edible);
+		string text = "Compost" + gameObject.GetComponent<KPrefabID>().PrefabTag.Name;
+		gameObject.GetComponent<KPrefabID>().PrefabTag = new Tag(text);
+		gameObject.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.GlobalDoNotDestroy).transform;
+		global::UnityEngine.Object.DestroyImmediate(gameObject.GetComponent<Edible>());
+		gameObject.name = text;
+		gameObject.GetComponent<KSelectable>().SetName(ITEMS.FOOD.COMPOST + " " + gameObject.GetComponent<KSelectable>().GetName());
+		gameObject.GetComponent<Compostable>().originalPrefab = edible;
+		gameObject.GetComponent<Compostable>().compostPrefab = gameObject;
+		edible.GetComponent<Compostable>().originalPrefab = edible;
+		edible.GetComponent<Compostable>().compostPrefab = gameObject;
+		Assets.AddPrefab(gameObject.GetComponent<KPrefabID>());
+		return gameObject;
+	}
+
+	public static GameObject CreateAndRegisterSeedForPlant(GameObject plant, SeedProducer.ProductionType productionType, string id, string name, string desc, KAnimFile anim, string initialAnim = "object", int numberOfSeeds = 1, List<Tag> additionalTags = null, SingleEntityReceptacle.ReceptacleDirection planterDirection = SingleEntityReceptacle.ReceptacleDirection.Top, [Optional] Tag replantGroundTag, int sortOrder = 0, string domesticatedDescription = "", EntityTemplates.CollisionShape collisionShape = EntityTemplates.CollisionShape.CIRCLE, float width = 0.25f, float height = 0.25f, Recipe.Ingredient[] recipe_ingredients = null, string recipe_description = "")
 	{
 		GameObject gameObject = EntityTemplates.CreateLooseEntity(id, name, desc, 1f, true, anim, initialAnim, Grid.SceneLayer.Front, collisionShape, width, height, true, SimHashes.Creature, null);
 		gameObject.UpdateComponentRequirement<EntitySplitter>(true);
@@ -343,12 +415,20 @@ public class EntityTemplates
 		Assets.AddPrefab(component3);
 		SeedProducer seedProducer = plant.UpdateComponentRequirement<SeedProducer>(true);
 		seedProducer.Configure(gameObject.name, productionType, numberOfSeeds);
+		if (recipe_ingredients != null)
+		{
+			Recipe recipe = new Recipe(id, 1f, (SimHashes)0, null, recipe_description, 1).SetFabricator("SeedSplicer", FOOD.RECIPES.STANDARD_COOK_TIME);
+			foreach (Recipe.Ingredient ingredient in recipe_ingredients)
+			{
+				recipe.AddIngredient(ingredient);
+			}
+		}
 		return gameObject;
 	}
 
 	public static GameObject CreateAndRegisterPreviewForPlant(GameObject plant, GameObject seed, string id, KAnimFile anim, string initialAnim, int width, int height)
 	{
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, id, id, 1f, anim, initialAnim, Grid.SceneLayer.Front, width, height, BUILDINGS.DECOR.NONE, SimHashes.Creature, null);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, id, id, 1f, anim, initialAnim, Grid.SceneLayer.Front, width, height, global::TUNING.BUILDINGS.DECOR.NONE, default(EffectorValues), SimHashes.Creature, null, 293f);
 		gameObject.UpdateComponentRequirement<KSelectable>(false);
 		gameObject.UpdateComponentRequirement<SaveLoadRoot>(false);
 		gameObject.UpdateComponentRequirement<SavedObject>(false);
@@ -398,6 +478,28 @@ public class EntityTemplates
 		int num4 = -height + 1;
 		int num5 = 0;
 		return EntityTemplates.GenerateOffsets(num3, num4, num2, num5);
+	}
+
+	public static GameObject AddCollision(GameObject template, EntityTemplates.CollisionShape shape, float width, float height)
+	{
+		if (shape != EntityTemplates.CollisionShape.RECTANGLE)
+		{
+			if (shape != EntityTemplates.CollisionShape.POLYGONAL)
+			{
+				CircleCollider2D circleCollider2D = template.UpdateComponentRequirement<CircleCollider2D>(true);
+				circleCollider2D.radius = Mathf.Max(width, height);
+			}
+			else
+			{
+				template.UpdateComponentRequirement<PolygonCollider2D>(true);
+			}
+		}
+		else
+		{
+			BoxCollider2D boxCollider2D = template.UpdateComponentRequirement<BoxCollider2D>(true);
+			boxCollider2D.size = new Vector2f(width, height);
+		}
+		return template;
 	}
 
 	public enum CollisionShape

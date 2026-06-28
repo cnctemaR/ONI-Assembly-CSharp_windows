@@ -13,6 +13,17 @@ public struct Matrix2x3
 		this.m12 = e12;
 	}
 
+	public override bool Equals(object obj)
+	{
+		Matrix2x3 matrix2x = (Matrix2x3)obj;
+		return this == matrix2x;
+	}
+
+	public override int GetHashCode()
+	{
+		return base.GetHashCode();
+	}
+
 	public Vector3 MultiplyPoint(Vector3 v)
 	{
 		return new Vector3(v.x * this.m00 + v.y * this.m01 + this.m02, v.x * this.m10 + v.y * this.m11 + this.m12, v.z);

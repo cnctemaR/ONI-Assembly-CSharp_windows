@@ -14,13 +14,13 @@ public class DuplicantTemperatureDeltaAsEnergyAmountDisplayer : StandardAmountDi
 		string text = this.GetTooltipDescription(master, instance);
 		float num = ElementLoader.FindElementByHash(SimHashes.Creature).specificHeatCapacity * 30f * 1000f;
 		text += "\n\n";
-		if (this.formatter.deltaTimeSlice == GameUtil.TimeSlice.PerCycle)
+		if (this.formatter.DeltaTimeSlice == GameUtil.TimeSlice.PerCycle)
 		{
-			text += string.Format(UI.CHANGEPERCYCLE, this.formatter.GetFormattedValue(instance.deltaAttribute.GetTotalDisplayValue(), GameUtil.TimeSlice.PerCycle, "F2"));
+			text += string.Format(UI.CHANGEPERCYCLE, this.formatter.GetFormattedValue(instance.deltaAttribute.GetTotalDisplayValue(), GameUtil.TimeSlice.PerCycle, null));
 		}
 		else
 		{
-			text += string.Format(UI.CHANGEPERSECOND, this.formatter.GetFormattedValue(instance.deltaAttribute.GetTotalDisplayValue(), GameUtil.TimeSlice.PerSecond, "F2"));
+			text += string.Format(UI.CHANGEPERSECOND, this.formatter.GetFormattedValue(instance.deltaAttribute.GetTotalDisplayValue(), GameUtil.TimeSlice.PerSecond, null));
 			text = text + "\n" + string.Format(UI.CHANGEPERSECOND, GameUtil.GetFormattedJoules(instance.deltaAttribute.GetTotalDisplayValue() * num, "F1"));
 		}
 		text += "\n";

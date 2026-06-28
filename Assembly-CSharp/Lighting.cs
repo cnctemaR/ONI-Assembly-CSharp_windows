@@ -51,13 +51,15 @@ public class Lighting : MonoBehaviour
 			Shader.SetGlobalVector("_SubstanceParameters", new Vector4(this.Settings.substanceEdgeParameters.intensity, this.Settings.substanceEdgeParameters.edgeIntensity, this.Settings.substanceEdgeParameters.diffuseIntensity, this.Settings.substanceEdgeParameters.power));
 			Shader.SetGlobalVector("_TileEdgeParameters", new Vector4(this.Settings.tileEdgeParameters.intensity, this.Settings.tileEdgeParameters.edgeIntensity, this.Settings.tileEdgeParameters.diffuseIntensity, this.Settings.tileEdgeParameters.power));
 		}
+		bool flag = SimDebugView.Instance != null && SimDebugView.Instance.GetMode() == SimViewMode.Disease;
+		float num = ((!flag) ? 0f : 1f);
 		if (this.disableLighting)
 		{
-			Shader.SetGlobalVector("_AnimParameters", new Vector4(1f, 0f, 0f, 0f));
+			Shader.SetGlobalVector("_AnimParameters", new Vector4(1f, 0f, 0f, num));
 		}
 		else
 		{
-			Shader.SetGlobalVector("_AnimParameters", new Vector4(this.Settings.AnimIntensity, 0f, 0f, 0f));
+			Shader.SetGlobalVector("_AnimParameters", new Vector4(this.Settings.AnimIntensity, 0f, 0f, num));
 		}
 		Shader.SetGlobalVector("_GasOpacity", new Vector4(this.Settings.GasMinOpacity, this.Settings.GasMaxOpacity, 0f, 0f));
 		Shader.SetGlobalColor("_DarkenTintBackground", this.Settings.DarkenTints[0]);
@@ -94,22 +96,12 @@ public class Lighting : MonoBehaviour
 		Shader.SetGlobalVector("_BuildingDamagedUVParameters", this.Settings.BuildingDamagedUVParameters);
 		Shader.SetGlobalVector("_BuildingDamagedUVParameters", this.Settings.BuildingDamagedUVParameters);
 		Shader.SetGlobalColor("_BuildingDamagedTint", this.Settings.BuildingDamagedTint);
+		Shader.SetGlobalTexture("_DiseaseOverlayTex", this.Settings.DiseaseOverlayTex);
+		Shader.SetGlobalVector("_DiseaseOverlayTexInfo", this.Settings.DiseaseOverlayTexInfo);
 		if (LightBuffer.Instance != null && LightBuffer.Instance.Texture != null)
 		{
 			Shader.SetGlobalTexture("_LightBufferTex", LightBuffer.Instance.Texture);
 		}
-	}
-
-	public LightSettings GetLightSettings(string name)
-	{
-		foreach (LightSettings lightSettings in this.Settings.LightSettings)
-		{
-			if (lightSettings.Name == name)
-			{
-				return lightSettings;
-			}
-		}
-		return null;
 	}
 
 	public LightingSettings Settings;

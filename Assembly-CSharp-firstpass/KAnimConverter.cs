@@ -44,11 +44,15 @@ public class KAnimConverter
 
 		Color32 GetSecondTintColour();
 
-		Color32 GetTemperatureColour();
+		Color32 GetOverlayColour();
 
 		int GetFirstTintIndex();
 
 		int GetSecondTintIndex();
+
+		int GetSymbolScaleIndex();
+
+		float GetSymbolScale();
 
 		KBatchedAnimInstanceData GetBatchInstanceData();
 

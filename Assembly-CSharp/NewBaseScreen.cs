@@ -1,7 +1,7 @@
 ﻿using System;
 using FMODUnity;
-using Klei;
 using Klei.AI;
+using ProcGenGame;
 using UnityEngine;
 
 public class NewBaseScreen : KScreen
@@ -15,10 +15,6 @@ public class NewBaseScreen : KScreen
 	{
 		NewBaseScreen.Instance = this;
 		base.OnPrefabInit();
-		if (this.baseTemplate == null)
-		{
-			this.baseTemplate = Assets.GetBaseTemplate();
-		}
 		TimeOfDay.Instance.SetScale(0f);
 	}
 
@@ -36,13 +32,6 @@ public class NewBaseScreen : KScreen
 		return baseStartPos;
 	}
 
-	private void DoReveal(Vector2I finalPos)
-	{
-		float num = float.Parse(WorldGen.Settings.defaults.data["NewBaseVisibiltyInnerRadius"] as string);
-		float num2 = float.Parse(WorldGen.Settings.defaults.data["NewBaseVisibiltyRadius"] as string);
-		GridVisibility.Reveal(finalPos.x, finalPos.y, num2, num);
-	}
-
 	protected override void OnActivate()
 	{
 		if (this.disabledUIElements != null)
@@ -55,14 +44,13 @@ public class NewBaseScreen : KScreen
 				}
 			}
 		}
-		Vector2I vector2I = NewBaseScreen.SetInitialCamera();
-		this.DoReveal(new Vector2I(vector2I.x, vector2I.y));
-		this.Build(vector2I);
+		NewBaseScreen.SetInitialCamera();
 		if (SpeedControlScreen.Instance.IsPaused)
 		{
 			SpeedControlScreen.Instance.Unpause(false);
 		}
 		Game.Instance.ResetTime();
+		this.Final();
 	}
 
 	public void SetStartingMinionStats(MinionStartingStats[] stats)
@@ -106,25 +94,9 @@ public class NewBaseScreen : KScreen
 		}
 	}
 
-	private void Build(Vector2 pos)
-	{
-		if (this.baseTemplate == null)
-		{
-			global::Debug.LogError("NewBaseScreen lacks a reference to a BaseTemplate Object. Ensure that Assets/tuning/Bases/startingBase.asset exists and that Assets prefab has a reference to it.", null);
-		}
-		TemplateLoader.Stamp(this.baseTemplate, pos, new global::System.Action(this.Final));
-		for (int i = 0; i < Grid.CellCount; i++)
-		{
-			Grid.Revealed[i] = false;
-			Grid.Visible[i] = 0;
-		}
-		WorldGen.GameSpawnData gameSpawnData = new WorldGen.GameSpawnData();
-		Game.Instance.Reset(gameSpawnData);
-		SpeedControlScreen.Instance.Unpause(false);
-	}
-
 	private void Final()
 	{
+		SpeedControlScreen.Instance.Unpause(false);
 		Telepad telepad = global::UnityEngine.Object.FindObjectOfType<Telepad>();
 		if (telepad)
 		{
@@ -168,9 +140,6 @@ public class NewBaseScreen : KScreen
 	}
 
 	public static NewBaseScreen Instance;
-
-	[SerializeField]
-	private BaseTemplate baseTemplate;
 
 	[SerializeField]
 	private CanvasGroup[] disabledUIElements;

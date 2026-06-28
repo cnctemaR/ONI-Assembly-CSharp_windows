@@ -82,7 +82,7 @@ public class TagFilterScreen : SideScreenContent
 			KTreeControl.UserItem userItem2 = new KTreeControl.UserItem
 			{
 				text = element.name,
-				userData = TagManager.Create(element.id)
+				userData = GameTagExtensions.Create(element.id)
 			};
 			userItem.children.Add(userItem2);
 		}

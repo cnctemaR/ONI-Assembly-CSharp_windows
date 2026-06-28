@@ -15,19 +15,23 @@ public class RequiresFoundation : KMonoBehaviour
 		if (this.building.Def.ContinuouslyCheckFoundation)
 		{
 			Extents validPlacementExtents = this.building.GetValidPlacementExtents();
-			int num = 0;
-			num |= GameScenePartitioner.Instance.solidChangedMask.mask;
-			num |= GameScenePartitioner.Instance.objectLayerMasks[1].mask;
-			this.partitionerEntry = GameScenePartitioner.Instance.Add("Overheatable.OnSpawn", base.gameObject, validPlacementExtents, num, new Action<object>(this.OnSolidChanged));
+			this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Overheatable.OnSpawn", base.gameObject, validPlacementExtents, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
+			this.buildingPartitionerEntry = GameScenePartitioner.Instance.Add("Overheatable.OnSpawn", base.gameObject, validPlacementExtents, GameScenePartitioner.Instance.objectLayers[1], new Action<object>(this.OnSolidChanged));
 			this.OnSolidChanged(null);
 		}
 	}
 
 	protected override void OnCleanUp()
 	{
-		if (this.partitionerEntry != null)
+		if (this.solidPartitionerEntry != null)
 		{
-			this.partitionerEntry.Release();
+			this.solidPartitionerEntry.Release();
+			this.solidPartitionerEntry = null;
+		}
+		if (this.buildingPartitionerEntry != null)
+		{
+			this.buildingPartitionerEntry.Release();
+			this.buildingPartitionerEntry = null;
 		}
 		base.OnCleanUp();
 	}
@@ -65,7 +69,9 @@ public class RequiresFoundation : KMonoBehaviour
 
 	private Building building;
 
-	private GameScenePartitionerEntry partitionerEntry;
+	private GameScenePartitionerEntry solidPartitionerEntry;
+
+	private GameScenePartitionerEntry buildingPartitionerEntry;
 
 	private bool solid = true;
 

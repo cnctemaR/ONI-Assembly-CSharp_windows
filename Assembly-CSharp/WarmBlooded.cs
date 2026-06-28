@@ -20,6 +20,18 @@ public class WarmBlooded : StateMachineComponent<WarmBlooded.StatesInstance>
 		this.Subscribe(-1195989806, new Action<object>(this.OnEquippedItem));
 	}
 
+	private void SimUpdate(float dt)
+	{
+		if (this.monitorInstance != null)
+		{
+			this.monitorInstance.UpdateTemperatureOnSimUpdate(dt);
+		}
+		else
+		{
+			this.monitorInstance = base.gameObject.GetSMI<TemperatureMonitor.Instance>();
+		}
+	}
+
 	private void OnEquippedItem(object data)
 	{
 		KPrefabID kprefabID = (KPrefabID)data;
@@ -92,6 +104,8 @@ public class WarmBlooded : StateMachineComponent<WarmBlooded.StatesInstance>
 	public AmountInstance temperature;
 
 	private PrimaryElement primaryElement;
+
+	private TemperatureMonitor.Instance monitorInstance;
 
 	private SuitTank suitTank;
 

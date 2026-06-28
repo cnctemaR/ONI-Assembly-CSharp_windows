@@ -22,12 +22,19 @@ public class HumanEntityTypeSet : EntityTypeSet
 		entityType.amounts.Add(Db.Get().Amounts.Toxicity);
 		entityType.amounts.Add(Db.Get().Amounts.Bladder);
 		entityType.amounts.Add(Db.Get().Amounts.Decor);
-		Trait trait = GameEntityTypeSet.CreateLivingEntityBaseTrait(id, name, -100f, -1000000f, 0.1f, 0f, 100f, 8f, modifier_set);
+		entityType.amounts.Add(Db.Get().Amounts.ImmuneLevel);
+		Trait trait = GameEntityTypeSet.CreateLivingEntityBaseTrait(id, name, -0.16666667f, -1666.6666f, 0.1f, 0f, 0.16666667f, 8f, modifier_set);
 		trait.Add(new AttributeModifier(Db.Get().Attributes.DecorExpectation.Id, -25f, name, false, false));
 		trait.Add(new AttributeModifier(Db.Get().Attributes.FoodExpectation.Id, -3f, name, false, false));
 		trait.Add(new AttributeModifier(Db.Get().Attributes.ToiletEfficiency.Id, 1f, name, false, false));
 		trait.Add(new AttributeModifier(Db.Get().Attributes.RoomTemperaturePreference.Id, 0f, name, false, false));
 		trait.Add(new AttributeModifier(Db.Get().Attributes.Sneezyness.Id, 0f, name, false, false));
+		trait.Add(new AttributeModifier(Db.Get().Amounts.ImmuneLevel.deltaAttribute.Id, 0.025f, name, false, false));
+		foreach (Disease disease in Db.Get().Diseases)
+		{
+			entityType.amounts.Add(disease.amount);
+		}
+		DuplicantNoiseLevels.SetupNoiseLevels();
 		entityType.baseTraits.Add(trait);
 		EntityPrefabs.Instance.MinionPrefab.GetComponent<Health>().SetMaxHitPoints(100f);
 		if (!HumanEntityTypeSet.dupeInitHackHasRun)
@@ -51,6 +58,8 @@ public class HumanEntityTypeSet : EntityTypeSet
 				Navigator component3 = go.GetComponent<Navigator>();
 				component3.transitionDriver.overrideLayers.Add(new BipedTransitionLayer(component3, 3.325f, 2.5f));
 				component3.transitionDriver.overrideLayers.Add(new DoorTransitionLayer(component3));
+				component3.transitionDriver.overrideLayers.Add(new LadderDiseaseTransitionLayer(component3));
+				component3.transitionDriver.overrideLayers.Add(new ReactableTransitionLayer(component3));
 				component3.transitionDriver.overrideLayers.Add(new SplashTransitionLayer(component3));
 				ThreatMonitor.Instance smi = go.GetSMI<ThreatMonitor.Instance>();
 				if (smi != null)

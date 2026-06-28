@@ -6,7 +6,8 @@ public class TileConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Tile", 1, 1, "floor_basic_kanim", 400f, 100, 3f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.Tile, BUILDINGS.DECOR.BONUS.TIER0, null);
+		EffectorValues none = NOISE_POLLUTION.NONE;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Tile", 1, 1, "floor_basic_kanim", 400f, 100, 3f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.Tile, BUILDINGS.DECOR.BONUS.TIER0, none);
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
 		buildingDef.Entombable = false;
@@ -38,6 +39,8 @@ public class TileConfig : IBuildingConfig
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		GeneratedBuildings.MakeBuildableAnywhere(go);
+		PrimaryElement primaryElement = go.AddOrGet<PrimaryElement>();
+		primaryElement.useSimDiseaseInfo = true;
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.doReplaceElement = true;
 		go.AddOrGet<TileTemperature>();

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Klei;
 using Rendering;
+using Rendering.World;
 using UnityEngine;
 
 public class World : KMonoBehaviour
@@ -22,15 +23,34 @@ public class World : KMonoBehaviour
 		base.GetComponent<SimDebugView>().OnReset();
 		base.GetComponent<PropertyTextures>().OnReset(null);
 		this.zoneRenderData = base.GetComponent<SubworldZoneRenderData>();
+		Grid.OnReveal = (Action<int>)Delegate.Combine(Grid.OnReveal, new Action<int>(this.OnReveal));
 	}
 
-	protected new void OnDestroy()
+	protected override void OnLoadLevel()
 	{
+		World.Instance = null;
+		if (this.blockTileRenderer != null)
+		{
+			this.blockTileRenderer.FreeResources();
+		}
+		this.blockTileRenderer = null;
+		if (this.regionTileRenderer != null)
+		{
+			this.regionTileRenderer.FreeResources();
+		}
+		this.regionTileRenderer = null;
+		if (SpaceBorderTileRenderer.Instance != null)
+		{
+			SpaceBorderTileRenderer.Instance.FreeResources();
+		}
 		if (this.groundRenderer != null)
 		{
 			this.groundRenderer.FreeResources();
 		}
-		base.OnDestroy();
+		this.groundRenderer = null;
+		this.revealedCells.Clear();
+		this.revealedCells = null;
+		base.OnLoadLevel();
 	}
 
 	public unsafe void UpdateCellInfo(List<SolidInfo> solidInfo, List<CallbackInfo> callbackInfo, int num_solid_substance_change_info, Sim.SolidSubstanceChangeInfo* solid_substance_change_info, int num_liquid_change_info, Sim.LiquidChangeInfo* liquid_change_info)
@@ -57,7 +77,7 @@ public class World : KMonoBehaviour
 				Grid.SuitRequired[cellIdx] = false;
 			}
 		}
-		GameScenePartitioner.Instance.TriggerEvent(this.changedCells, GameScenePartitioner.Instance.solidChangedMask.mask, null);
+		GameScenePartitioner.Instance.TriggerEvent(this.changedCells, GameScenePartitioner.Instance.solidChangedLayer, null);
 		int count2 = callbackInfo.Count;
 		for (int j = 0; j < count2; j++)
 		{
@@ -88,7 +108,12 @@ public class World : KMonoBehaviour
 				this.OnLiquidChanged(cellIdx3);
 			}
 		}
-		instance.TriggerEvent(this.changedCells, GameScenePartitioner.Instance.liquidChangedMask.mask, null);
+		instance.TriggerEvent(this.changedCells, GameScenePartitioner.Instance.liquidChangedLayer, null);
+	}
+
+	private void OnReveal(int cell)
+	{
+		this.revealedCells.Add(cell);
 	}
 
 	private void LateUpdate()
@@ -114,6 +139,11 @@ public class World : KMonoBehaviour
 		FallingWater.instance.Render();
 		SpriteSheetAnimManager.instance.UpdateAnims(Time.deltaTime);
 		SpriteSheetAnimManager.instance.Render();
+		if (this.revealedCells.Count > 0)
+		{
+			GameScenePartitioner.Instance.TriggerEvent(this.revealedCells, GameScenePartitioner.Instance.fogOfWarChangedLayer, null);
+			this.revealedCells.Clear();
+		}
 	}
 
 	public Action<int> OnSolidChanged;
@@ -127,6 +157,8 @@ public class World : KMonoBehaviour
 	[MyCmpGet]
 	[NonSerialized]
 	public GroundRenderer groundRenderer;
+
+	private List<int> revealedCells = new List<int>();
 
 	public static int DebugCellID = -1;
 

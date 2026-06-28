@@ -8,15 +8,18 @@ public class PowerTransformer : Generator
 	{
 		base.OnSpawn();
 		Building component = base.GetComponent<Building>();
-		int num = 0;
 		int powerOutputCell = component.GetPowerOutputCell();
-		this.partitionerEntry = GameScenePartitioner.Instance.Add("PowerTransformer", base.gameObject, powerOutputCell, num, new Action<object>(this.OnConnectionChanged));
+		this.partitionerEntry = GameScenePartitioner.Instance.Add("PowerTransformer", base.gameObject, powerOutputCell, GameScenePartitioner.Instance.wiresLayer, new Action<object>(this.OnConnectionChanged));
 		this.battery = base.GetComponent<Battery>();
 	}
 
 	protected override void OnCleanUp()
 	{
-		this.partitionerEntry.Release();
+		if (this.partitionerEntry != null)
+		{
+			this.partitionerEntry.Release();
+			this.partitionerEntry = null;
+		}
 		base.OnCleanUp();
 	}
 

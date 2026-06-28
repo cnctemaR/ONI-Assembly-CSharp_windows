@@ -23,12 +23,12 @@ public class PatchNotesScreen : KModalScreen
 
 	public static bool ShouldShowScreen()
 	{
-		return PlayerPrefs.GetInt("PatchNotesVersion") < PatchNotesScreen.PatchNotesVersion;
+		return KPlayerPrefs.GetInt("PatchNotesVersion") < PatchNotesScreen.PatchNotesVersion;
 	}
 
 	private void MarkAsReadAndClose()
 	{
-		PlayerPrefs.SetInt("PatchNotesVersion", PatchNotesScreen.PatchNotesVersion);
+		KPlayerPrefs.SetInt("PatchNotesVersion", PatchNotesScreen.PatchNotesVersion);
 		base.gameObject.SetActive(false);
 	}
 

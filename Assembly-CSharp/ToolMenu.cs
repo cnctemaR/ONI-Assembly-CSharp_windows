@@ -43,9 +43,13 @@ public class ToolMenu : KScreen
 		new ToolMenu.ToolInfo(UI.TOOLS.MARKFORSTORAGE.NAME, "icon_action_store", global::Action.Clear, "ClearTool", toolCollection5, UI.TOOLTIPS.CLEARBUTTON, SimViewMode.None, false, null, null);
 		ToolMenu.ToolCollection toolCollection6 = new ToolMenu.ToolCollection(UI.TOOLS.MOP.NAME, "icon_action_mop", UI.TOOLTIPS.MOPBUTTON, false, global::Action.NumActions);
 		new ToolMenu.ToolInfo(UI.TOOLS.MOP.NAME, "icon_action_mop", global::Action.Mop, "MopTool", toolCollection6, UI.TOOLTIPS.MOPBUTTON, SimViewMode.None, false, null, null);
-		ToolMenu.ToolCollection toolCollection7 = new ToolMenu.ToolCollection(UI.TOOLS.ATTACK.NAME, "icon_action_attack", string.Empty, false, global::Action.Attack);
-		new ToolMenu.ToolInfo(UI.TOOLS.ATTACK.NAME, "icon_action_attack", global::Action.Attack, "AttackTool", toolCollection7, UI.TOOLTIPS.ATTACKBUTTON, SimViewMode.None, false, null, null);
-		this.toolCollections = new ToolMenu.ToolCollection[] { toolCollection3, toolCollection7, toolCollection4, toolCollection5, toolCollection6, toolCollection, toolCollection2 };
+		ToolMenu.ToolCollection toolCollection7 = new ToolMenu.ToolCollection(UI.TOOLS.DISINFECT.NAME, "icon_action_disinfect", UI.TOOLTIPS.DISINFECTBUTTON, false, global::Action.NumActions);
+		new ToolMenu.ToolInfo(UI.TOOLS.DISINFECT.NAME, "icon_action_disinfect", global::Action.Disinfect, "DisinfectTool", toolCollection7, UI.TOOLTIPS.DISINFECTBUTTON, SimViewMode.None, false, null, null);
+		ToolMenu.ToolCollection toolCollection8 = new ToolMenu.ToolCollection(UI.TOOLS.ATTACK.NAME, "icon_action_attack", string.Empty, false, global::Action.Attack);
+		new ToolMenu.ToolInfo(UI.TOOLS.ATTACK.NAME, "icon_action_attack", global::Action.Attack, "AttackTool", toolCollection8, UI.TOOLTIPS.ATTACKBUTTON, SimViewMode.None, false, null, null);
+		ToolMenu.ToolCollection toolCollection9 = new ToolMenu.ToolCollection(UI.TOOLS.HARVEST.NAME, "icon_action_harvest", string.Empty, false, global::Action.Harvest);
+		new ToolMenu.ToolInfo(UI.TOOLS.HARVEST.NAME, "icon_action_harvest", global::Action.Harvest, "HarvestTool", toolCollection9, UI.TOOLTIPS.HARVESTBUTTON, SimViewMode.None, false, null, null);
+		this.toolCollections = new ToolMenu.ToolCollection[] { toolCollection3, toolCollection8, toolCollection9, toolCollection4, toolCollection5, toolCollection6, toolCollection7, toolCollection, toolCollection2 };
 	}
 
 	private void SetupRegionTools(ToolMenu.ToolCollection Collection_StorageRegions)
@@ -93,6 +97,7 @@ public class ToolMenu : KScreen
 					gameObject.transform.localScale = Vector3.one;
 					gameObject.rectTransform().sizeDelta = new Vector2((float)(tc.tools.Count * 75), 50f);
 					tc.MaskContainer = gameObject.GetComponentInChildren<Mask>().gameObject;
+					gameObject.SetActive(false);
 				}
 				else
 				{
@@ -100,6 +105,7 @@ public class ToolMenu : KScreen
 					gameObject.transform.localScale = Vector3.one;
 					gameObject.GetComponentInChildren<LocText>().SetText(tc.text.ToUpper());
 					tc.MaskContainer = gameObject.GetComponentInChildren<GridLayoutGroup>().gameObject;
+					gameObject.SetActive(false);
 				}
 				tc.UIMenuDisplay = gameObject;
 				for (int j = 0; j < tc.tools.Count; j++)

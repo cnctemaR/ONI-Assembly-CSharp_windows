@@ -2,19 +2,11 @@
 using UnityEngine;
 
 [Serializable]
-public class BuildingDamageSoundEvent : AnimEvent
+public class BuildingDamageSoundEvent : SoundEvent
 {
 	public BuildingDamageSoundEvent(string file_name, string sound_name, int frame)
-		: base(file_name, sound_name, frame)
+		: base(file_name, sound_name, frame, false, false, (float)SoundEvent.IGNORE_INTERVAL, false)
 	{
-	}
-
-	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
-	{
-		if (this.ShouldPlaySound(behaviour))
-		{
-			this.PlaySound(behaviour);
-		}
 	}
 
 	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
@@ -27,7 +19,7 @@ public class BuildingDamageSoundEvent : AnimEvent
 			if (component != null)
 			{
 				BuildingDef def = component.Def;
-				string text = this.Name + "_" + def.AudioCategory;
+				string text = base.name + "_" + def.AudioCategory;
 				string text2 = GlobalAssets.GetSound(text, false);
 				if (text2 == null)
 				{

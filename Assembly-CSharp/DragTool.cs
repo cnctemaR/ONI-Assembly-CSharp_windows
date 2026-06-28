@@ -90,11 +90,11 @@ public class DragTool : InterfaceTool
 
 	public override void OnLeftClickDown(Vector3 cursor_pos)
 	{
+		cursor_pos -= this.placementPivot;
 		this.dragging = true;
 		this.downPos = cursor_pos;
 		this.previousCursorPos = cursor_pos;
 		KScreenManager.Instance.SetEventSystemEnabled(false);
-		KScreenManager.Instance.SetNavigationEventsEnabled(false);
 		DragTool.Mode mode = this.GetMode();
 		if (mode == DragTool.Mode.Brush)
 		{
@@ -120,8 +120,8 @@ public class DragTool : InterfaceTool
 
 	public override void OnLeftClickUp(Vector3 cursor_pos)
 	{
+		cursor_pos -= this.placementPivot;
 		KScreenManager.Instance.SetEventSystemEnabled(true);
-		KScreenManager.Instance.SetNavigationEventsEnabled(true);
 		if (!this.dragging)
 		{
 			return;
@@ -306,7 +306,14 @@ public class DragTool : InterfaceTool
 		{
 			this.dragAxis = DragTool.DragAxis.None;
 		}
-		base.OnKeyDown(e);
+		else if (this.interceptNumberKeysForPriority)
+		{
+			this.HandlePriortyKeysDown(e);
+		}
+		if (!e.Consumed)
+		{
+			base.OnKeyDown(e);
+		}
 	}
 
 	public override void OnKeyUp(KButtonEvent e)
@@ -315,7 +322,37 @@ public class DragTool : InterfaceTool
 		{
 			this.dragAxis = DragTool.DragAxis.Invalid;
 		}
-		base.OnKeyUp(e);
+		else if (this.interceptNumberKeysForPriority)
+		{
+			this.HandlePriorityKeysUp(e);
+		}
+		if (!e.Consumed)
+		{
+			base.OnKeyUp(e);
+		}
+	}
+
+	private void HandlePriortyKeysDown(KButtonEvent e)
+	{
+		global::Action action = e.GetAction();
+		if (global::Action.Plan1 <= action && action <= global::Action.Plan9 && e.TryConsume(action))
+		{
+			int num = action - global::Action.Plan1 + 1;
+			ToolMenuPriorityScreen.Instance.SetScreenPriority(num, true);
+		}
+		if (!e.Consumed)
+		{
+			e.TryConsume(global::Action.Plan10);
+		}
+	}
+
+	private void HandlePriorityKeysUp(KButtonEvent e)
+	{
+		global::Action action = e.GetAction();
+		if (global::Action.Plan1 <= action && action <= global::Action.Plan10)
+		{
+			e.TryConsume(action);
+		}
 	}
 
 	protected void SetMode(DragTool.Mode newMode)
@@ -415,6 +452,10 @@ public class DragTool : InterfaceTool
 
 	[SerializeField]
 	private Color32 areaColour = new Color(1f, 1f, 1f, 0.5f);
+
+	protected Vector3 placementPivot;
+
+	protected bool interceptNumberKeysForPriority;
 
 	private static int defaultLayerMask;
 

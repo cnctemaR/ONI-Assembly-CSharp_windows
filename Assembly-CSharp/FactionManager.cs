@@ -2,10 +2,15 @@
 
 public class FactionManager : KMonoBehaviour
 {
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		FactionManager.Instance = this;
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		FactionManager.Instance = this;
 	}
 
 	public Faction GetFaction(FactionManager.FactionID faction)

@@ -1,4 +1,5 @@
 ﻿using System;
+using Klei;
 using STRINGS;
 using TUNING;
 using UnityEngine;
@@ -7,14 +8,28 @@ public class GlomConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		DecorValues tier = DECOR.BONUS.TIER0;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("Glom", global::STRINGS.CREATURES.SPECIES.GLOM.NAME, global::STRINGS.CREATURES.SPECIES.GLOM.DESC, 25f, Assets.GetAnim("glom_kanim"), "idle", Grid.SceneLayer.Creatures, 1, 1, tier, SimHashes.Creature, null);
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, 25f, "HatchNavGrid", NavType.Floor, 2f, string.Empty, 0, true, true, 30f, 293f, 310f, 283f, 330f);
-		gameObject.UpdateComponentRequirement<Glom>(true);
+		EffectorValues tier = DECOR.BONUS.TIER0;
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity("Glom", global::STRINGS.CREATURES.SPECIES.GLOM.NAME, global::STRINGS.CREATURES.SPECIES.GLOM.DESC, 25f, Assets.GetAnim("glom_kanim"), "idle", Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, 25f, "HatchNavGrid", NavType.Floor, 2f, string.Empty, 0, true, true, 30f, 293.15f, 393.15f, 273.15f, 423.15f);
+		Glom glom = gameObject.UpdateComponentRequirement<Glom>(true);
+		glom.dirtyEmitElement = SimHashes.ContaminatedOxygen;
+		glom.dirtyProbabilityPercent = 25f;
+		glom.dirtyCellToTargetMass = 1f;
+		glom.dirtyMassPerDirty = 0.2f;
+		glom.dirtyMassReleaseOnDeath = 3f;
+		glom.emitDiseaseIdx = Db.Get().Diseases.GetIndex("SlimeLung");
+		glom.emitDiseasePerKg = 1000;
 		gameObject.UpdateComponentRequirement<LoopingSounds>(true);
 		LoopingSounds component = gameObject.GetComponent<LoopingSounds>();
 		component.updatePosition = true;
-		gameObject.AddElementEmitter(SimHashes.ContaminatedOxygen, 0f, 0f);
+		ElementEmitter elementEmitter = gameObject.AddElementEmitter(SimHashes.ContaminatedOxygen, 0f, 0f, SimUtil.DiseaseInfo.Invalid);
+		elementEmitter.showDescriptor = false;
+		DiseaseSourceVisualizer diseaseSourceVisualizer = gameObject.UpdateComponentRequirement<DiseaseSourceVisualizer>(true);
+		diseaseSourceVisualizer.alwaysShowDisease = "SlimeLung";
+		SoundEventVolumeCache.instance.AddVolume("glom_kanim", "Morb_movement_short", NOISE_POLLUTION.CREATURES.TIER2);
+		SoundEventVolumeCache.instance.AddVolume("glom_kanim", "Morb_jump", NOISE_POLLUTION.CREATURES.TIER3);
+		SoundEventVolumeCache.instance.AddVolume("glom_kanim", "Morb_land", NOISE_POLLUTION.CREATURES.TIER3);
+		SoundEventVolumeCache.instance.AddVolume("glom_kanim", "Morb_expel", NOISE_POLLUTION.CREATURES.TIER4);
 		return gameObject;
 	}
 
@@ -26,6 +41,8 @@ public class GlomConfig : IEntityConfig
 	{
 	}
 
+	public const string ID = "Glom";
+
 	public const SimHashes dirtyEmitElement = SimHashes.ContaminatedOxygen;
 
 	public const float dirtyProbabilityPercent = 25f;
@@ -35,4 +52,8 @@ public class GlomConfig : IEntityConfig
 	public const float dirtyMassPerDirty = 0.2f;
 
 	public const float dirtyMassReleaseOnDeath = 3f;
+
+	public const string emitDisease = "SlimeLung";
+
+	public const int emitDiseasePerKg = 1000;
 }

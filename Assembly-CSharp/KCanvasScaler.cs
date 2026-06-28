@@ -7,9 +7,9 @@ public class KCanvasScaler : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		if (PlayerPrefs.HasKey(KCanvasScaler.UIScalePrefKey))
+		if (KPlayerPrefs.HasKey(KCanvasScaler.UIScalePrefKey))
 		{
-			this.SetUserScale(PlayerPrefs.GetFloat(KCanvasScaler.UIScalePrefKey) / 100f);
+			this.SetUserScale(KPlayerPrefs.GetFloat(KCanvasScaler.UIScalePrefKey) / 100f);
 		}
 		else
 		{
@@ -42,7 +42,7 @@ public class KCanvasScaler : KMonoBehaviour
 
 	private float ScreenRelativeScale()
 	{
-		if ((float)Screen.height <= this.scaleSteps[0].maxRes_y)
+		if ((float)Screen.height <= this.scaleSteps[0].maxRes_y || (float)Screen.width / (float)Screen.height < 1.6777778f)
 		{
 			return this.scaleSteps[0].scale;
 		}
@@ -71,7 +71,7 @@ public class KCanvasScaler : KMonoBehaviour
 	[Range(0.75f, 2f)]
 	private KCanvasScaler.ScaleStep[] scaleSteps = new KCanvasScaler.ScaleStep[]
 	{
-		new KCanvasScaler.ScaleStep(720f, 0.88f),
+		new KCanvasScaler.ScaleStep(720f, 0.86f),
 		new KCanvasScaler.ScaleStep(1080f, 1f),
 		new KCanvasScaler.ScaleStep(2160f, 1.33f)
 	};

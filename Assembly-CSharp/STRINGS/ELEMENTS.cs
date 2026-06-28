@@ -4,14 +4,6 @@ namespace STRINGS
 {
 	public class ELEMENTS
 	{
-		public static LocString STATESOLID = "Solid";
-
-		public static LocString STATELIQUID = "Liquid";
-
-		public static LocString STATEGAS = "Gas";
-
-		public static LocString STATEVACUUM = "None";
-
 		public static LocString ELEMENTDESCSOLID = "Resource Type: {0}\nMelting point: {1}\nHardness: {2}";
 
 		public static LocString ELEMENTDESCLIQUID = "Resource Type: {0}\nFreezing point: {1}\nEvaporation point: {2}";
@@ -23,6 +15,17 @@ namespace STRINGS
 		public static LocString BREATHABLEDESC = "<color=#{0}>({1})</color>";
 
 		public static LocString ELEMENTPROPERTIES = "Properties: {0}";
+
+		public class STATE
+		{
+			public static LocString SOLID = "Solid";
+
+			public static LocString LIQUID = "Liquid";
+
+			public static LocString GAS = "Gas";
+
+			public static LocString VACUUM = "None";
+		}
 
 		public class HARDNESS
 		{
@@ -45,7 +48,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Algae";
 
-			public static LocString DESC = "Algae is a cluster of non-motile, single-celled lifeforms.\n\nIt can be used as a renewable source of <style=\"oxygen\">Oxygen</style> when grown domestically in Algae Terrariums.";
+			public static LocString DESC = "Algae is a cluster of non-motile, single-celled lifeforms.\n\nIt can be used to produce <style=\"oxygen\">Oxygen</style> when grown in Algae Terrariums.";
 		}
 
 		public class BLEACHSTONE
@@ -59,21 +62,21 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Water";
 
-			public static LocString DESC = "Clean <style=\"liquid\">Water</style>, prepped for transport.";
+			public static LocString DESC = "(H<sub>2</sub>O) Clean <style=\"liquid\">Water</style>, prepped for transport.";
 		}
 
 		public class CARBON
 		{
 			public static LocString NAME = "Coal";
 
-			public static LocString DESC = "Coal is a combustible fossil fuel composed of carbon.\n\nIt is useful in <style=\"power\">Power</style> production.";
+			public static LocString DESC = "(C) Coal is a combustible fossil fuel composed of carbon.\n\nIt is useful in <style=\"power\">Power</style> production.";
 		}
 
 		public class CARBONDIOXIDE
 		{
 			public static LocString NAME = "Carbon Dioxide";
 
-			public static LocString DESC = "(CO2) Carbon Dioxide toxic, atomically heavy chemical compound in a <style=\"gas\">Gaseous</style> state.\n\nIt tends to sink below other gases.";
+			public static LocString DESC = "(CO<sub>2</sub>) Carbon Dioxide toxic, atomically heavy chemical compound in a <style=\"gas\">Gaseous</style> state.\n\nIt tends to sink below other gases.";
 		}
 
 		public class CARBONFIBRE
@@ -111,11 +114,18 @@ namespace STRINGS
 			public static LocString DESC = "Clay is a soft, naturally occurring composite of stone and soil that hardens at high <style=\"heat\">Temperatures</style>.\n\nIt is a reliable <style=\"RawMineral\">Construction Material</style>.";
 		}
 
+		public class BRICK
+		{
+			public static LocString NAME = "Ceramic";
+
+			public static LocString DESC = "Ceramic is a hard, brittle material formed from heated <style=\"RawMineral\">Clay</style>.\n\nIt is a reliable <style=\"RawMineral\">Construction Material</style>.";
+		}
+
 		public class CONTAMINATEDOXYGEN
 		{
 			public static LocString NAME = "Polluted Oxygen";
 
-			public static LocString DESC = "(O2) Polluted Oxygen vehicle of airborne <style=\"disease\">Disease</style>.\n\nIt is breathable.";
+			public static LocString DESC = "(O<sub>2</sub>) Polluted Oxygen is dirty, unfiltered air.\n\nIt is breathable.";
 		}
 
 		public class COPPER
@@ -150,7 +160,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Crushed Ice";
 
-			public static LocString DESC = "(H20) A slush of crushed, semi-solid ice.";
+			public static LocString DESC = "(H<sub>2</sub>0) A slush of crushed, semi-solid ice.";
 		}
 
 		public class CRUSHEDROCK
@@ -164,7 +174,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Copper Ore";
 
-			public static LocString DESC = "(Cu20) Copper Ore is a conductive <style=\"RawMetal\">Metal</style>.\n\nIt is suitable for building <style=\"power\">Power</style> systems.";
+			public static LocString DESC = "(Cu<sub>2</sub>0) Copper Ore is a conductive <style=\"RawMetal\">Metal</style>.\n\nIt is suitable for building <style=\"power\">Power</style> systems.";
 		}
 
 		public class DIAMOND
@@ -185,14 +195,14 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Polluted Ice";
 
-			public static LocString DESC = "Polluted Ice is <style=\"disease\">Disease</style> infested water frozen into a <style=\"solid\">Solid</style> state.";
+			public static LocString DESC = "Polluted Ice is dirty, unfiltered water frozen into a <style=\"solid\">Solid</style> state.";
 		}
 
 		public class DIRTYWATER
 		{
 			public static LocString NAME = "Polluted Water";
 
-			public static LocString DESC = "Polluted Water is <style=\"disease\">Disease</style> infested <style=\"liquid\">Water</style>.\n\nIt is not fit for consumption.";
+			public static LocString DESC = "Polluted Water is dirty, unfiltered <style=\"liquid\">Water</style>.\n\nIt is not fit for consumption.";
 		}
 
 		public class ELECTRUM
@@ -220,7 +230,14 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Pyrite";
 
-			public static LocString DESC = "(FeS2) Pyrite is a conductive <style=\"RawMetal\">Metal</style>.\n\nAlso known as \"Fool's Gold\", is suitable for building <style=\"power\">Power</style> systems.";
+			public static LocString DESC = "(FeS<sub>2</sub>) Pyrite is a conductive <style=\"RawMetal\">Metal</style>.\n\nAlso known as \"Fool's Gold\", is suitable for building <style=\"power\">Power</style> systems.";
+		}
+
+		public class GLASS
+		{
+			public static LocString NAME = "Glass";
+
+			public static LocString DESC = string.Empty;
 		}
 
 		public class GOLD
@@ -269,14 +286,14 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Natural Gas";
 
-			public static LocString DESC = "Natural Gas is a mixture of various alkanes in a <style=\"gas\">Gaseous</style> state.\n\nIt is useful in <style=\"power\">Power</style> production.";
+			public static LocString DESC = "(CH<sub>4</sub>) Natural Gas is a mixture of various alkanes in a <style=\"gas\">Gaseous</style> state.\n\nIt is useful in <style=\"power\">Power</style> production.";
 		}
 
 		public class ICE
 		{
 			public static LocString NAME = "Ice";
 
-			public static LocString DESC = "(H20) Ice is clean water frozen into a <style=\"solid\">Solid</style> state.";
+			public static LocString DESC = "(H<sub>2</sub>0) Ice is clean water frozen into a <style=\"solid\">Solid</style> state.";
 		}
 
 		public class IGNEOUSROCK
@@ -297,7 +314,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Iron";
 
-			public static LocString DESC = "Iron is refined <style=\"RawMetal\">Iron Ore</style>.";
+			public static LocString DESC = "(Fe) Iron is refined <style=\"RawMetal\">Iron Ore</style>.";
 		}
 
 		public class IRONGAS
@@ -311,7 +328,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Iron Ore";
 
-			public static LocString DESC = "(Fe) Iron Ore is a soft <style=\"RawMetal\">Metal</style> that can be strengthened for industrial purposes via smelting.\n\nIt is suitable for building <style=\"power\">Power</style> systems.";
+			public static LocString DESC = "(Fe) Iron Ore is a soft <style=\"RawMetal\">Metal</style>.\n\nIt is suitable for building <style=\"power\">Power</style> systems.";
 		}
 
 		public class KATAIRITE
@@ -325,7 +342,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Carbon Dioxide";
 
-			public static LocString DESC = "(CO2) Carbon Dioxide is a toxic chemical compound. This selection is currently in a <style=\"liquid\">Liquid</style> state.";
+			public static LocString DESC = "(CO<sub>2</sub>) Carbon Dioxide is a toxic chemical compound. This selection is currently in a <style=\"liquid\">Liquid</style> state.";
 		}
 
 		public class LIQUIDHELIUM
@@ -346,14 +363,14 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Oxygen";
 
-			public static LocString DESC = "(O2) Oxygen is a breathable chemical.\n\nThis selection is in a <style=\"liquid\">Liquid</style> state.";
+			public static LocString DESC = "(O<sub>2</sub>) Oxygen is a breathable chemical.\n\nThis selection is in a <style=\"liquid\">Liquid</style> state.";
 		}
 
 		public class LIQUIDMETHANE
 		{
 			public static LocString NAME = "Methane";
 
-			public static LocString DESC = "(CH4) Methane is an alkane.\n\nThis selection is in a <style=\"liquid\">Liquid</style> state.";
+			public static LocString DESC = "(CH<sub>4</sub>) Methane is an alkane.\n\nThis selection is in a <style=\"liquid\">Liquid</style> state.";
 		}
 
 		public class LIQUIDPHOSPHORUS
@@ -367,7 +384,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Propane";
 
-			public static LocString DESC = "(C3H8) Propane is an alkane in a <style=\"liquid\">Liquid</style> state.\n\nIt is useful in <style=\"power\">Power</style> production.";
+			public static LocString DESC = "(C<sub>3</sub>H<sub>8</sub>) Propane is an alkane in a <style=\"liquid\">Liquid</style> state.\n\nIt is useful in <style=\"power\">Power</style> production.";
 		}
 
 		public class MAGMA
@@ -437,7 +454,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Tungsten Diselenide";
 
-			public static LocString DESC = "(WSe2) Tungsten Diselenide is an inorganic <style=\"RawMetal\">Metal</style> compound heated into a <style=\"liquid\">Liquid</style> state.";
+			public static LocString DESC = "(WSe<sub>2</sub>) Tungsten Diselenide is an inorganic <style=\"RawMetal\">Metal</style> compound heated into a <style=\"liquid\">Liquid</style> state.";
 		}
 
 		public class MOLTENSTEEL
@@ -458,21 +475,21 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Oxygen";
 
-			public static LocString DESC = "(O2) Oxygen is an atomically lightweight and breathable <style=\"gas\">Gas</style>, necessary for sustaining life.\n\nIt tends to rise above other gases.";
+			public static LocString DESC = "(O<sub>2</sub>) Oxygen is an atomically lightweight and breathable <style=\"gas\">Gas</style>, necessary for sustaining life.\n\nIt tends to rise above other gases.";
 		}
 
 		public class OXYROCK
 		{
 			public static LocString NAME = "Oxylite";
 
-			public static LocString DESC = "(Ir3O2) Oxylite is a chemical compound that slowly emits breathable <style=\"oxygen\">Oxygen</style>.\n\nThe rate of oxygen emission will increase when excavated, but it will lose mass and deplete more rapidly.";
+			public static LocString DESC = "(Ir<sub>3</sub>O<sub>2</sub>) Oxylite is a chemical compound that slowly emits breathable <style=\"oxygen\">Oxygen</style>.\n\nExcavating Oxylite increases its emission rate, but depletes the ore more rapidly.";
 		}
 
 		public class PHOSPHATENODULES
 		{
 			public static LocString NAME = "Phosphate Nodules";
 
-			public static LocString DESC = "(PO3-4) Nodules of sedimentary rock containing high concentrations of phosphate.";
+			public static LocString DESC = "(PO<sup>3-</sup><sub>4</sub>) Nodules of sedimentary rock containing high concentrations of phosphate.";
 		}
 
 		public class PHOSPHORITE
@@ -500,7 +517,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Propane";
 
-			public static LocString DESC = "(C3H8) Propane is a natural alkane <style=\"gas\">Gas</style>.\n\nIt is useful in <style=\"power\">Power</style> production.";
+			public static LocString DESC = "(C<sub>3</sub>H<sub>8</sub>) Propane is a natural alkane <style=\"gas\">Gas</style>.\n\nIt is useful in <style=\"power\">Power</style> production.";
 		}
 
 		public class RADIUM
@@ -522,6 +539,13 @@ namespace STRINGS
 			public static LocString NAME = "Sand";
 
 			public static LocString DESC = "Sand is a composite of granular rock.\n\nIt is useful as a <style=\"misc\">Filtration Medium</style>.";
+		}
+
+		public class SANDCEMENT
+		{
+			public static LocString NAME = "Sand Cement";
+
+			public static LocString DESC = string.Empty;
 		}
 
 		public class SANDSTONE
@@ -549,14 +573,14 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Snow";
 
-			public static LocString DESC = "(H20) Snow is a mass of loose, crystalline ice particles.\n\nIt becomes <style=\"liquid\">Water</style> when melted.";
+			public static LocString DESC = "(H<sub>2</sub>0) Snow is a mass of loose, crystalline ice particles.\n\nIt becomes <style=\"liquid\">Water</style> when melted.";
 		}
 
 		public class SOLIDCARBONDIOXIDE
 		{
 			public static LocString NAME = "Carbon Dioxide";
 
-			public static LocString DESC = "(CO2) Carbon Dioxide is a toxic compound in a <style=\"solid\">Solid</style> state.";
+			public static LocString DESC = "(CO<sub>2</sub>) Carbon Dioxide is a toxic compound in a <style=\"solid\">Solid</style> state.";
 		}
 
 		public class SOLIDCHLORINE
@@ -584,28 +608,28 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Oxygen";
 
-			public static LocString DESC = "(O2) Oxygen is a breathable element in a <style=\"solid\">Solid</style> state.";
+			public static LocString DESC = "(O<sub>2</sub>) Oxygen is a breathable element in a <style=\"solid\">Solid</style> state.";
 		}
 
 		public class SOLIDMETHANE
 		{
 			public static LocString NAME = "Methane";
 
-			public static LocString DESC = "(CH4) Methane is an alkane in a <style=\"solid\">Solid</style> state.";
+			public static LocString DESC = "(CH<sub>4</sub>) Methane is an alkane in a <style=\"solid\">Solid</style> state.";
 		}
 
 		public class SOLIDPROPANE
 		{
 			public static LocString NAME = "Propane";
 
-			public static LocString DESC = "(C3H8) Propane is a natural gas in a <style=\"solid\">Solid</style> state.";
+			public static LocString DESC = "(C<sub>3</sub>H<sub>8</sub>) Propane is a natural gas in a <style=\"solid\">Solid</style> state.";
 		}
 
 		public class STEAM
 		{
 			public static LocString NAME = "Steam";
 
-			public static LocString DESC = "(H20) Steam is water that has been heated into a scalding <style=\"gas\">Gas</style>.";
+			public static LocString DESC = "(H<sub>2</sub>0) Steam is water that has been heated into a scalding <style=\"gas\">Gas</style>.";
 		}
 
 		public class STEEL
@@ -640,21 +664,21 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Tungsten Diselenide";
 
-			public static LocString DESC = "(WSe2) Tungsten Diselenide is an inorganic <style=\"RawMetal\">Metal</style> compound with a crystalline structure.\n\nIt is suitable for building <style=\"power\">Power</style> systems.";
+			public static LocString DESC = "(WSe<sub>2</sub>) Tungsten Diselenide is an inorganic <style=\"RawMetal\">Metal</style> compound with a crystalline structure.\n\nIt is suitable for building <style=\"power\">Power</style> systems.";
 		}
 
 		public class TUNGSTENDISELENIDEGAS
 		{
 			public static LocString NAME = "Tungsten Diselenide";
 
-			public static LocString DESC = "(WSe2) Tungsten Diselenide is a superheated <style=\"RawMetal\">Metal</style> compound in a <style=\"gas\">Gaseous</style> state.";
+			public static LocString DESC = "(WSe<sub>2</sub>) Tungsten Diselenide is a superheated <style=\"RawMetal\">Metal</style> compound in a <style=\"gas\">Gaseous</style> state.";
 		}
 
 		public class TOXICSAND
 		{
 			public static LocString NAME = "Polluted Dirt";
 
-			public static LocString DESC = "Polluted Dirt is a <style=\"disease\">Disease</style>-infested amalgam of toxic waste.\n\nIt emits <style=\"disease\">Polluted Oxygen</style> over time.";
+			public static LocString DESC = "Polluted Dirt is toxic biological waste.\n\nIt emits <style=\"disease\">Polluted Oxygen</style> over time.";
 		}
 
 		public class UNOBTANIUM
@@ -682,14 +706,14 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Water";
 
-			public static LocString DESC = "(H20) Clean <style=\"liquid\">Water</style>, suitable for consumption.";
+			public static LocString DESC = "(H<sub>2</sub>0) Clean <style=\"liquid\">Water</style>, suitable for consumption.";
 		}
 
 		public class WOLFRAMITE
 		{
 			public static LocString NAME = "Wolframite";
 
-			public static LocString DESC = "((Fe,Mn)WO4) Wolframite is a dense <style=\"RawMetal\">Metallic</style> element in a <style=\"solid\">Solid</style> state.\n\nIt is a source of <style=\"RawMetal\">Tungsten</style> and is suitable for building <style=\"power\">Power</style> systems.";
+			public static LocString DESC = "((Fe,Mn)WO<sub>4</sub>) Wolframite is a dense <style=\"RawMetal\">Metallic</style> element in a <style=\"solid\">Solid</style> state.\n\nIt is a source of <style=\"RawMetal\">Tungsten</style> and is suitable for building <style=\"power\">Power</style> systems.";
 		}
 
 		public class STEELDOOR

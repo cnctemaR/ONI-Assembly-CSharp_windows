@@ -6,7 +6,8 @@ public class GeneratorConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Generator", 3, 3, "generatorphos_kanim", 400f, 100, 120f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER5, MATERIALS.ALL_METALS, 2400f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, null);
+		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER5;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("Generator", 3, 3, "generatorphos_kanim", 400f, 100, 120f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER5, MATERIALS.ALL_METALS, 2400f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, tier);
 		buildingDef.GeneratorWattageRating = 600f;
 		buildingDef.GeneratorBaseCapacity = 20000f;
 		buildingDef.ExhaustKilowattsWhenActive = 8f;
@@ -29,7 +30,7 @@ public class GeneratorConfig : IBuildingConfig
 		storage.capacityKg = 500f;
 		storage.disableOnStore = true;
 		go.AddOrGet<LoopingSounds>();
-		go.AddOrGet<Prioritizable>();
+		Prioritizable.AddRef(go);
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.requestedItemTag = new Tag("Coal");
@@ -51,4 +52,6 @@ public class GeneratorConfig : IBuildingConfig
 			instance.StartSM();
 		};
 	}
+
+	public const string ID = "Generator";
 }

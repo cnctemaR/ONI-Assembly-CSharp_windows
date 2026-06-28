@@ -127,6 +127,7 @@ public class FabricatorSideScreen : SideScreenContent
 			return;
 		}
 		this.selectedToggle = toggle;
+		this.selectedToggle.isOn = true;
 		this.selectedToggle.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Active);
 		this.buildBtn.isInteractable = true;
 		this.infiniteBuildBtn.isInteractable = true;
@@ -139,7 +140,6 @@ public class FabricatorSideScreen : SideScreenContent
 		});
 		this.selectedRecipe = this.recipeMap[toggle];
 		this.selectedRecipeFabricatorMap[this.targetFab] = this.recipeToggles.IndexOf(toggle);
-		Element[] recipeElements = this.GetRecipeElements(this.selectedRecipe);
 		this.buildBtn.GetComponent<ToolTip>().toolTip = string.Format(UI.TOOLTIPS.RECIPE_QUEUE, this.selectedRecipe.Name);
 		this.infiniteBuildBtn.GetComponent<ToolTip>().toolTip = string.Format(UI.TOOLTIPS.RECIPE_QUEUE_INFINITE, this.selectedRecipe.Name);
 		this.buildBtn.ClearOnClick();
@@ -230,8 +230,8 @@ public class FabricatorSideScreen : SideScreenContent
 			}
 			else
 			{
-				text2 = GameUtil.GetFormattedMass(this.selectedRecipe.Ingredients[i].amount, GameUtil.TimeSlice.None, true, "{0:0.#}");
-				text3 = GameUtil.GetFormattedMass(WorldInventory.Instance.GetAmount(tag), GameUtil.TimeSlice.None, true, "{0:0.#}");
+				text2 = GameUtil.GetFormattedMass(this.selectedRecipe.Ingredients[i].amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
+				text3 = GameUtil.GetFormattedMass(WorldInventory.Instance.GetAmount(tag), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
 			}
 			Descriptor descriptor = new Descriptor(string.Format(reciperquirement, new object[]
 			{
@@ -268,7 +268,7 @@ public class FabricatorSideScreen : SideScreenContent
 			Tag tag = recipe.Ingredients[i].tag;
 			foreach (Element element in ElementLoader.elements)
 			{
-				Tag tag2 = TagManager.Create(element.id);
+				Tag tag2 = GameTagExtensions.Create(element.id);
 				if (tag2 == tag)
 				{
 					array[i] = element;
@@ -283,8 +283,8 @@ public class FabricatorSideScreen : SideScreenContent
 
 	public DescriptorPanel EffectsDescriptorPanel;
 
-	[Header("Recipe List")]
 	[SerializeField]
+	[Header("Recipe List")]
 	private GameObject recipeGrid;
 
 	[SerializeField]

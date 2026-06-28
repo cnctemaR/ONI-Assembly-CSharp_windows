@@ -263,22 +263,27 @@ public class StatusItemRenderer
 			{
 				return;
 			}
+			int num = Grid.PosToCell(vector);
+			if (Grid.IsValidCell(num) && Grid.Visible[num] == 0)
+			{
+				return;
+			}
 			if (this.dirty)
 			{
-				int num = 0;
+				int num2 = 0;
 				foreach (StatusItem statusItem2 in this.statusItems)
 				{
-					if (statusItem2.UseConditionalCallback(overlay, this.transform) || overlay == SimViewMode.None || statusItem2.overlay == overlay)
+					if (statusItem2.UseConditionalCallback(overlay, this.transform) || overlay == SimViewMode.None || statusItem2.render_overlay == overlay)
 					{
-						num++;
+						num2++;
 					}
 				}
-				this.hasVisibleStatusItems = num != 0;
-				StatusItemRenderer.Entry.MeshBuilder meshBuilder = new StatusItemRenderer.Entry.MeshBuilder(num + 6, this.material);
-				float num2 = 0.25f;
-				float num3 = -5f;
+				this.hasVisibleStatusItems = num2 != 0;
+				StatusItemRenderer.Entry.MeshBuilder meshBuilder = new StatusItemRenderer.Entry.MeshBuilder(num2 + 6, this.material);
+				float num3 = 0.25f;
+				float num4 = -5f;
 				Vector2 vector2 = new Vector2(0.05f, -0.05f);
-				float num4 = 0.02f;
+				float num5 = 0.02f;
 				Color32 color = new Color32(0, 0, 0, byte.MaxValue);
 				Color32 color2 = new Color32(0, 0, 0, 75);
 				Color32 color3 = renderer.backgroundColor;
@@ -286,24 +291,24 @@ public class StatusItemRenderer
 				{
 					color3 = renderer.selectedColor;
 				}
-				meshBuilder.AddQuad(new Vector2(0f, 0.29f) + vector2, new Vector2(0.05f, 0.05f), num3, renderer.arrowSprite, color2);
-				meshBuilder.AddQuad(new Vector2(0f, 0f) + vector2, new Vector2(num2 * (float)num, num2), num3, renderer.backgroundSprite, color2);
-				meshBuilder.AddQuad(new Vector2(0f, 0f), new Vector2(num2 * (float)num + num4, num2 + num4), num3, renderer.backgroundSprite, color);
-				meshBuilder.AddQuad(new Vector2(0f, 0f), new Vector2(num2 * (float)num, num2), num3, renderer.backgroundSprite, color3);
-				int num5 = 0;
+				meshBuilder.AddQuad(new Vector2(0f, 0.29f) + vector2, new Vector2(0.05f, 0.05f), num4, renderer.arrowSprite, color2);
+				meshBuilder.AddQuad(new Vector2(0f, 0f) + vector2, new Vector2(num3 * (float)num2, num3), num4, renderer.backgroundSprite, color2);
+				meshBuilder.AddQuad(new Vector2(0f, 0f), new Vector2(num3 * (float)num2 + num5, num3 + num5), num4, renderer.backgroundSprite, color);
+				meshBuilder.AddQuad(new Vector2(0f, 0f), new Vector2(num3 * (float)num2, num3), num4, renderer.backgroundSprite, color3);
+				int num6 = 0;
 				for (int i = 0; i < this.statusItems.Count; i++)
 				{
 					StatusItem statusItem3 = this.statusItems[i];
-					if (statusItem3.UseConditionalCallback(overlay, this.transform) || overlay == SimViewMode.None || statusItem3.overlay == overlay)
+					if (statusItem3.UseConditionalCallback(overlay, this.transform) || overlay == SimViewMode.None || statusItem3.render_overlay == overlay)
 					{
-						float num6 = (float)num5 * num2 * 2f - num2 * (float)(num - 1);
+						float num7 = (float)num6 * num3 * 2f - num3 * (float)(num2 - 1);
 						Sprite sprite = this.statusItems[i].sprite.sprite;
-						meshBuilder.AddQuad(new Vector2(num6, 0f), new Vector2(num2, num2), num3, sprite, color);
-						num5++;
+						meshBuilder.AddQuad(new Vector2(num7, 0f), new Vector2(num3, num3), num4, sprite, color);
+						num6++;
 					}
 				}
-				meshBuilder.AddQuad(new Vector2(0f, 0.29f + num4), new Vector2(0.05f + num4, 0.05f + num4), num3, renderer.arrowSprite, color);
-				meshBuilder.AddQuad(new Vector2(0f, 0.29f), new Vector2(0.05f, 0.05f), num3, renderer.arrowSprite, color3);
+				meshBuilder.AddQuad(new Vector2(0f, 0.29f + num5), new Vector2(0.05f + num5, 0.05f + num5), num4, renderer.arrowSprite, color);
+				meshBuilder.AddQuad(new Vector2(0f, 0.29f), new Vector2(0.05f, 0.05f), num4, renderer.arrowSprite, color3);
 				meshBuilder.End(this.mesh);
 				this.dirty = false;
 			}
@@ -387,6 +392,10 @@ public class StatusItemRenderer
 			{
 				global::UnityEngine.Object.DestroyImmediate(this.mesh);
 				this.mesh = null;
+			}
+			if (this.material != null)
+			{
+				global::UnityEngine.Object.DestroyImmediate(this.material);
 			}
 		}
 

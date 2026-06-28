@@ -32,6 +32,7 @@ public class DetailsScreen : KTabMenu
 		this.CloseButton.onClick += this.DeselectAndClose;
 		this.TabTitle.OnNameChanged += this.OnNameChanged;
 		this.TabTitle.OnStartedEditing += this.OnStartedEditing;
+		this.Subscribe(-1514841199, new Action<object>(this.OnRefreshData));
 		this.DeactivateSideContent();
 		base.Show(false);
 	}
@@ -117,6 +118,37 @@ public class DetailsScreen : KTabMenu
 		return component;
 	}
 
+	private static bool IsExcludedPrefabTag(GameObject go, Tag[] excluded_tags)
+	{
+		if (excluded_tags == null || excluded_tags.Length == 0)
+		{
+			return false;
+		}
+		bool flag = false;
+		KPrefabID component = go.GetComponent<KPrefabID>();
+		foreach (Tag tag in excluded_tags)
+		{
+			if (component.PrefabTag == tag)
+			{
+				flag = true;
+				break;
+			}
+		}
+		return flag;
+	}
+
+	public void OnRefreshData(object obj)
+	{
+		this.SetTitle(base.PreviousActiveTab);
+		for (int i = 0; i < this.tabs.Count; i++)
+		{
+			if (this.tabs[i].gameObject.activeInHierarchy)
+			{
+				this.tabs[i].Trigger(-1514841199, obj);
+			}
+		}
+	}
+
 	public void Refresh(GameObject go)
 	{
 		if (this.screens == null)
@@ -124,6 +156,11 @@ public class DetailsScreen : KTabMenu
 			return;
 		}
 		this.target = go;
+		CellSelectionObject component = this.target.GetComponent<CellSelectionObject>();
+		if (component)
+		{
+			component.OnObjectSelected(null);
+		}
 		if (!this.HasActivated)
 		{
 			if (this.screens != null)
@@ -138,48 +175,54 @@ public class DetailsScreen : KTabMenu
 			base.onTabActivated += this.OnTabActivated;
 			this.HasActivated = true;
 		}
-		bool flag = false;
 		int num = -1;
 		int num2 = 0;
 		for (int j = 0; j < this.screens.Length; j++)
 		{
 			string requiredComponentType = this.screens[j].requiredComponentType;
-			bool flag2 = requiredComponentType == null || requiredComponentType == string.Empty || DetailsScreen.GetComponent(go, requiredComponentType) != null;
-			if (flag2 && requiredComponentType == "Storage")
+			bool flag = requiredComponentType == null || requiredComponentType == string.Empty || DetailsScreen.GetComponent(go, requiredComponentType) != null;
+			if (flag && requiredComponentType == "Storage")
 			{
-				flag2 = go.GetComponent<Storage>().showInUI;
+				flag = go.GetComponent<Storage>().showInUI;
 			}
-			bool flag3 = false;
+			bool flag2 = false;
 			for (int k = 0; k < this.screens[j].excludeComponentType.Length; k++)
 			{
 				string text = this.screens[j].excludeComponentType[k];
 				if (text != null && DetailsScreen.GetComponent(go, text) != null)
 				{
-					flag3 = true;
+					flag2 = true;
 					break;
 				}
 			}
-			Health component = go.GetComponent<Health>();
-			bool flag4 = this.screens[j].hideWhenDead && component != null && component.IsDead();
-			base.SetTabEnabled(this.screens[j].tabIdx, flag2 && !flag3 && !flag4);
-			if (flag2)
+			bool flag3 = this.screens[j].hideWhenDead && base.gameObject.HasTag(GameTags.Dead);
+			base.SetTabEnabled(this.screens[j].tabIdx, flag && !flag2 && !flag3);
+			if (flag)
 			{
 				num2++;
 				if (num == -1)
 				{
-					num = j;
-				}
-				this.selectedObjectName = go.GetProperName();
-				if (j == 0)
-				{
-					this.ActivateTab(j);
-					flag = true;
+					if (SimDebugView.Instance.GetMode() != SimViewMode.None)
+					{
+						if (SimDebugView.Instance.GetMode() == this.screens[j].focusInViewMode)
+						{
+							num = j;
+						}
+					}
+					else
+					{
+						num = j;
+					}
 				}
 			}
 		}
-		if (num != -1 && !flag)
+		if (num != -1)
 		{
 			this.ActivateTab(num);
+		}
+		else
+		{
+			this.ActivateTab(0);
 		}
 		this.tabHeaderContainer.gameObject.SetActive(base.CountTabs() > 1);
 		if (this.sideScreens != null && this.sideScreens.Count > 0)
@@ -188,16 +231,16 @@ public class DetailsScreen : KTabMenu
 			{
 				if (!string.IsNullOrEmpty(scn.componentRequired) && DetailsScreen.GetComponent(this.target, scn.componentRequired) != null)
 				{
-					bool flag5 = true;
+					bool flag4 = true;
 					for (int l = 0; l < scn.componentsExcluded.Length; l++)
 					{
 						if (DetailsScreen.GetComponent(this.target, scn.componentsExcluded[l]) != null)
 						{
-							flag5 = false;
+							flag4 = false;
 							break;
 						}
 					}
-					if (flag5)
+					if (flag4 && !DetailsScreen.IsExcludedPrefabTag(this.target, scn.excludedPrefabTags))
 					{
 						if (!this.sideScreen.activeInHierarchy)
 						{
@@ -345,18 +388,17 @@ public class DetailsScreen : KTabMenu
 
 	public void SetTitle(int selectedTabIndex)
 	{
-		KSelectable kselectable = ((!(PlayerController.Instance.ActiveTool == SelectTool.Instance)) ? RegionSelectTool.Instance.selected : SelectTool.Instance.selected);
 		if (this.TabTitle != null)
 		{
-			this.TabTitle.SetTitle(this.selectedObjectName);
+			this.TabTitle.SetTitle(this.target.GetProperName());
 			MinionIdentity minionIdentity = null;
-			if (kselectable != null)
+			if (this.target != null)
 			{
-				minionIdentity = kselectable.gameObject.GetComponent<MinionIdentity>();
+				minionIdentity = this.target.gameObject.GetComponent<MinionIdentity>();
 			}
 			if (minionIdentity != null)
 			{
-				this.TabTitle.SetSubText(minionIdentity.gameObject.GetAttributes().GetProfessionString(), minionIdentity.gameObject.GetAttributes().GetProfessionDescriptionString());
+				this.TabTitle.SetSubText(minionIdentity.gameObject.GetAttributes().GetProfessionString(true), minionIdentity.gameObject.GetAttributes().GetProfessionDescriptionString());
 				this.TabTitle.SetUserEditable(true);
 			}
 			else
@@ -381,8 +423,8 @@ public class DetailsScreen : KTabMenu
 	[Header("Name Editing (disabled)")]
 	private KButton CloseButton;
 
-	[SerializeField]
 	[Header("Tabs")]
+	[SerializeField]
 	private EditableTitleBar TabTitle;
 
 	[SerializeField]
@@ -406,8 +448,6 @@ public class DetailsScreen : KTabMenu
 
 	private bool HasActivated;
 
-	private string selectedObjectName = string.Empty;
-
 	private bool isEditing;
 
 	private SideScreenContent currentSideScreen;
@@ -429,9 +469,13 @@ public class DetailsScreen : KTabMenu
 
 		public string[] excludeComponentType;
 
+		public Tag[] excludedPrefabTags;
+
 		public int displayOrderPriority;
 
 		public bool hideWhenDead;
+
+		public SimViewMode focusInViewMode;
 
 		[HideInInspector]
 		public int tabIdx;
@@ -447,6 +491,8 @@ public class DetailsScreen : KTabMenu
 		public string componentRequired;
 
 		public string[] componentsExcluded;
+
+		public Tag[] excludedPrefabTags;
 
 		public Vector2 offset;
 

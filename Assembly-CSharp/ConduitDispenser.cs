@@ -50,9 +50,9 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
 	{
 		base.OnSpawn();
 		this.utilityCell = base.GetComponent<Building>().GetUtilityOutputCell();
-		int mask = GameScenePartitioner.Instance.objectLayerMasks[(this.conduitType != ConduitType.Gas) ? 15 : 11].mask;
-		this.partitionerEntry = GameScenePartitioner.Instance.Add("ConduitConsumer.OnSpawn", base.gameObject, this.utilityCell, mask, new Action<object>(this.OnConduitConnectionChanged));
-		this.GetConduitManager().AddConduitUpdater(new Action<float>(this.ConduitUpdate), 0);
+		ScenePartitionerLayer scenePartitionerLayer = GameScenePartitioner.Instance.objectLayers[(this.conduitType != ConduitType.Gas) ? 15 : 11];
+		this.partitionerEntry = GameScenePartitioner.Instance.Add("ConduitConsumer.OnSpawn", base.gameObject, this.utilityCell, scenePartitionerLayer, new Action<object>(this.OnConduitConnectionChanged));
+		this.GetConduitManager().AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlow.Priority.Last);
 		this.OnConduitConnectionChanged(null);
 	}
 
@@ -76,7 +76,10 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
 			{
 				primaryElement.KeepZeroMassObject = true;
 				ConduitFlow conduitManager = this.GetConduitManager();
-				float num = conduitManager.AddElement(this.utilityCell, primaryElement.ElementID, primaryElement.Mass, primaryElement.Temperature);
+				float num = conduitManager.AddElement(this.utilityCell, primaryElement.ElementID, primaryElement.Mass, primaryElement.Temperature, primaryElement.DiseaseIdx, primaryElement.DiseaseCount);
+				float num2 = num / primaryElement.Mass;
+				int num3 = (int)(num2 * (float)primaryElement.DiseaseCount);
+				primaryElement.ModifyDiseaseCount(-num3, "ConduitDispenser.ConduitUpdate");
 				primaryElement.Mass -= num;
 				this.Trigger(-1697596308, primaryElement.gameObject);
 			}

@@ -53,7 +53,7 @@ namespace STRINGS
 
 				public static LocString NEEDY = "Needy";
 
-				public static LocString STARCROSSED = "Starcrossed";
+				public static LocString STARCROSSED = "Star-crossed";
 
 				public static LocString RAMSHACKLE = "Ramshackle";
 
@@ -176,6 +176,32 @@ namespace STRINGS
 				public static LocString SCIENTIFIC = "Scientific";
 
 				public static LocString BESIEGED = "Besieged";
+
+				public static LocString PLAGUED = "Plagued";
+
+				public static LocString FESTERING = "Festering";
+
+				public static LocString CONTAGIOUS = "Contagious";
+
+				public static LocString VIRAL = "Viral";
+
+				public static LocString ILL = "Ill";
+
+				public static LocString DISEASED = "Diseased";
+
+				public static LocString STICKY = "Sticky";
+
+				public static LocString PHELGM_COATED = "Phlegm-Coated";
+
+				public static LocString COUGHING = "Coughing";
+
+				public static LocString SNEEZING = "Sneezing";
+
+				public static LocString QUARANTINED = "Quarantined";
+
+				public static LocString HARDY = "Hardy";
+
+				public static LocString IMMUNE = "Immune";
 			}
 
 			public class NOUN
@@ -297,6 +323,12 @@ namespace STRINGS
 				public static LocString CANTALOUPE = "Cantaloupe";
 
 				public static LocString FACTORY = "Factory";
+
+				public static LocString CESSPOOL = "Cesspool";
+
+				public static LocString SEWER = "Sewer";
+
+				public static LocString HOSPITAL = "Hospital";
 			}
 		}
 
@@ -326,7 +358,7 @@ namespace STRINGS
 					public static LocString OL_WOMAN = "Ol' Woman";
 				}
 
-				public class UNISEX
+				public class NB
 				{
 					public static LocString MX = "Mx.";
 
@@ -368,7 +400,7 @@ namespace STRINGS
 					public static LocString THE_DUDETTE = "\"The Dudette\"";
 				}
 
-				public class UNISEX
+				public class NB
 				{
 					public static LocString JR = "Jr.";
 
@@ -436,8 +468,6 @@ namespace STRINGS
 
 					public static LocString CHARLIE = "Charlie";
 
-					public static LocString SLOTH = "Sloth";
-
 					public static LocString PETER = "Peter";
 
 					public static LocString JASON = "Jason";
@@ -445,6 +475,10 @@ namespace STRINGS
 					public static LocString DANY = "Dany";
 
 					public static LocString SCOTT = "Scott";
+
+					public static LocString SLOTH = "Sloth";
+
+					public static LocString EUGENE = "Eugene";
 
 					public static LocString MAY = "May";
 
@@ -477,6 +511,8 @@ namespace STRINGS
 					public static LocString HINK = "Hink";
 
 					public static LocString KERNLE = "Kernle";
+
+					public static LocString REDWARD = "Redward";
 				}
 
 				public class FEMALE
@@ -566,7 +602,7 @@ namespace STRINGS
 					public static LocString MAHA = "Maha";
 				}
 
-				public class UNISEX
+				public class NB
 				{
 					public static LocString KRIS = "Kris";
 

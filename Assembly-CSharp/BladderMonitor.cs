@@ -12,13 +12,13 @@ public class BladderMonitor : GameStateMachine<BladderMonitor, BladderMonitor.In
 			.ToggleExpression(Db.Get().Expressions.FullBladder, null)
 			.ToggleStateMachine((BladderMonitor.Instance smi) => new ToiletMonitor.Instance(smi.master))
 			.ToggleStateMachine((BladderMonitor.Instance smi) => new PeeChoreMonitor.Instance(smi.master));
-		this.needstopee.holdingitin.ToggleStatusItem(Db.Get().DuplicantStatusItems.FullBladder, null).DefaultState(this.needstopee.holdingitin.nobathrooms).ToggleSchedulePeriodic("check bathrooms", 1f, delegate(BladderMonitor.Instance smi)
+		this.needstopee.holdingitin.ToggleEffect("FullBladder").DefaultState(this.needstopee.holdingitin.nobathrooms).ToggleSchedulePeriodic("check bathrooms", 1f, delegate(BladderMonitor.Instance smi)
 		{
 			smi.CheckBathrooms();
 		})
 			.OnSignal(this.noBathrooms, this.needstopee.holdingitin.nobathrooms)
 			.OnSignal(this.hasBathrooms, this.needstopee.holdingitin.hasbathrooms);
-		this.needstopee.urgent.ToggleChore(new Func<BladderMonitor.Instance, Chore>(this.CreatePeeChore), this.satisfied, false);
+		this.needstopee.urgent.ToggleChore(new Func<BladderMonitor.Instance, Chore>(this.CreatePeeChore), this.satisfied);
 		this.needstopee.peeing.EventTransition(GameHashes.EndChore, this.satisfied, (BladderMonitor.Instance smi) => !smi.IsPeeing());
 		this.needstopee.holdingitin.nobathrooms.ToggleStatusItem(Db.Get().DuplicantStatusItems.NoToilets, null);
 	}

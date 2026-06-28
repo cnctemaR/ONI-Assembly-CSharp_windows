@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using BaseTemplateClasses;
+using TemplateClasses;
 using UnityEngine;
 
 public class StampTool : InterfaceTool
@@ -11,7 +11,7 @@ public class StampTool : InterfaceTool
 		StampTool.Instance = this;
 	}
 
-	public void Activate(BaseTemplate template, bool SelectAffected = false, bool DeactivateOnStamp = false)
+	public void Activate(TemplateContainer template, bool SelectAffected = false, bool DeactivateOnStamp = false)
 	{
 		this.stampTemplate = template;
 		PlayerController.Instance.ActivateTool(this);
@@ -47,16 +47,28 @@ public class StampTool : InterfaceTool
 		{
 			SpeedControlScreen.Instance.Unpause(true);
 		}
+		List<GameObject> objects_to_destroy = new List<GameObject>();
+		for (int i = 0; i < this.stampTemplate.cells.Count; i++)
+		{
+			for (int j = 0; j < 17; j++)
+			{
+				GameObject gameObject = Grid.Objects[Grid.XYToCell((int)(pos.x + (float)this.stampTemplate.cells[i].location_x), (int)(pos.y + (float)this.stampTemplate.cells[i].location_y)), j];
+				if (gameObject != null && !objects_to_destroy.Contains(gameObject))
+				{
+					objects_to_destroy.Add(gameObject);
+				}
+			}
+		}
 		TemplateLoader.Stamp(this.stampTemplate, pos, delegate
 		{
-			this.CompleteStamp(pauseOnComplete);
+			this.CompleteStamp(pauseOnComplete, objects_to_destroy);
 		});
 		if (this.selectAffected)
 		{
 			DebugBaseTemplateButton.Instance.ClearSelection();
-			for (int i = 0; i < this.stampTemplate.cells.Count; i++)
+			for (int k = 0; k < this.stampTemplate.cells.Count; k++)
 			{
-				DebugBaseTemplateButton.Instance.AddToSelection(Grid.XYToCell((int)(pos.x + (float)this.stampTemplate.cells[i].location_x), (int)(pos.y + (float)this.stampTemplate.cells[i].location_y)));
+				DebugBaseTemplateButton.Instance.AddToSelection(Grid.XYToCell((int)(pos.x + (float)this.stampTemplate.cells[k].location_x), (int)(pos.y + (float)this.stampTemplate.cells[k].location_y)));
 			}
 		}
 		if (this.deactivateOnStamp)
@@ -65,8 +77,18 @@ public class StampTool : InterfaceTool
 		}
 	}
 
-	private void CompleteStamp(bool pause)
+	private void CompleteStamp(bool pause, List<GameObject> objects_to_destroy = null)
 	{
+		if (objects_to_destroy != null)
+		{
+			foreach (GameObject gameObject in objects_to_destroy)
+			{
+				if (gameObject != null)
+				{
+					Util.KDestroyGameObject(gameObject);
+				}
+			}
+		}
 		if (pause)
 		{
 			SpeedControlScreen.Instance.Pause(true);
@@ -85,15 +107,15 @@ public class StampTool : InterfaceTool
 	{
 		List<int> list = new List<int>();
 		List<int> list2 = new List<int>();
-		foreach (BaseTemplateCellInfo baseTemplateCellInfo in this.stampTemplate.cells)
+		foreach (Cell cell in this.stampTemplate.cells)
 		{
 			if (this.placementCell != Grid.InvalidCell)
 			{
-				list.Add(Grid.OffsetCell(this.placementCell, new CellOffset(baseTemplateCellInfo.location_x, baseTemplateCellInfo.location_y)));
+				list.Add(Grid.OffsetCell(this.placementCell, new CellOffset(cell.location_x, cell.location_y)));
 			}
 			if (new_placement_cell != Grid.InvalidCell)
 			{
-				list2.Add(Grid.OffsetCell(new_placement_cell, new CellOffset(baseTemplateCellInfo.location_x, baseTemplateCellInfo.location_y)));
+				list2.Add(Grid.OffsetCell(new_placement_cell, new CellOffset(cell.location_x, cell.location_y)));
 			}
 		}
 		this.placementCell = new_placement_cell;
@@ -124,7 +146,7 @@ public class StampTool : InterfaceTool
 
 	public static StampTool Instance;
 
-	public BaseTemplate stampTemplate;
+	public TemplateContainer stampTemplate;
 
 	public GameObject PlacerPrefab;
 

@@ -211,7 +211,7 @@ public class ResourceCategoryHeader : MonoBehaviour, IPointerEnterHandler, IEven
 		switch (this.measure)
 		{
 		case ResourceCategoryHeader.MeasureUnit.mass:
-			text = GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, true, "{0:0.#}");
+			text = GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
 			break;
 		case ResourceCategoryHeader.MeasureUnit.kcal:
 			text = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);

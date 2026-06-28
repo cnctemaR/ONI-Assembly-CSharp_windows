@@ -5,8 +5,16 @@ using STRINGS;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable.StatesInstance>, IGameObjectEffectDescriptor
+public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable.StatesInstance>, IWiltCause, IGameObjectEffectDescriptor
 {
+	WiltCondition.Condition[] IWiltCause.Conditions
+	{
+		get
+		{
+			return new WiltCondition.Condition[1];
+		}
+	}
+
 	private OccupyArea occupyArea
 	{
 		get
@@ -27,11 +35,11 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 		}
 	}
 
-	public TemperatureVulnerable.TemperatureState GetExternalState
+	public TemperatureVulnerable.TemperatureState GetInternalTemperatureState
 	{
 		get
 		{
-			return this.externalTemperatureState;
+			return this.internalTemperatureState;
 		}
 	}
 
@@ -39,7 +47,7 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 	{
 		get
 		{
-			return this.GetExternalState == TemperatureVulnerable.TemperatureState.LethalHot || this.GetExternalState == TemperatureVulnerable.TemperatureState.LethalCold;
+			return this.GetInternalTemperatureState == TemperatureVulnerable.TemperatureState.LethalHot || this.GetInternalTemperatureState == TemperatureVulnerable.TemperatureState.LethalCold;
 		}
 	}
 
@@ -47,7 +55,7 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 	{
 		get
 		{
-			return this.GetExternalState == TemperatureVulnerable.TemperatureState.Normal || this.GetExternalState == TemperatureVulnerable.TemperatureState.Perfect;
+			return this.GetInternalTemperatureState == TemperatureVulnerable.TemperatureState.Normal || this.GetInternalTemperatureState == TemperatureVulnerable.TemperatureState.Perfect;
 		}
 	}
 
@@ -55,7 +63,23 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 	{
 		get
 		{
-			return this.GetExternalState == TemperatureVulnerable.TemperatureState.Perfect;
+			return this.GetInternalTemperatureState == TemperatureVulnerable.TemperatureState.Perfect;
+		}
+	}
+
+	public string WiltStateString
+	{
+		get
+		{
+			if (base.smi.IsInsideState(base.smi.sm.warningCold))
+			{
+				return Db.Get().CreatureStatusItems.Cold_Crop.resolveStringCallback(CREATURES.STATUSITEMS.COLD_CROP.NAME, this);
+			}
+			if (base.smi.IsInsideState(base.smi.sm.warningHot))
+			{
+				return Db.Get().CreatureStatusItems.Hot_Crop.resolveStringCallback(CREATURES.STATUSITEMS.HOT_CROP.NAME, this);
+			}
+			return string.Empty;
 		}
 	}
 
@@ -63,39 +87,38 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 	{
 		base.OnPrefabInit();
 		Amounts amounts = base.gameObject.GetAmounts();
-		this.displayTemperatureAmount = amounts.Add(new AmountInstance(Db.Get().Amounts.ExternalTemperature, base.gameObject));
+		this.displayTemperatureAmount = amounts.Add(new AmountInstance(Db.Get().Amounts.Temperature, base.gameObject));
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		float num = this.externalTemperatureWarning_Low + 0.5f * (this.externalTemperatureWarning_High - this.externalTemperatureWarning_Low);
-		this.primaryElement.Temperature = num;
-		base.smi.sm.externalTemp.Set(num, base.smi);
-		this.handle = GameScheduler.Instance.SchedulePeriodic(base.name, 1f, new Action<object>(this.UpdateTemperature), null, null, 0f, null);
+		float num = this.internalTemperatureWarning_Low + 0.5f * (this.internalTemperatureWarning_High - this.internalTemperatureWarning_Low);
+		base.smi.sm.internalTemp.Set(this.primaryElement.Temperature, base.smi);
+		this.handle = GameScheduler.Instance.SchedulePeriodic("TemperatureVulnerable", 1f, new Action<object>(this.UpdateTemperature), null, null, 0f, null);
 		base.smi.StartSM();
 	}
 
 	protected override void OnCleanUp()
 	{
-		this.handle.Clear();
+		this.handle.ClearScheduler();
 		base.OnCleanUp();
 	}
 
 	public void Configure(float tempWarningLow = 283f, float tempLethalLow = 263f, float tempWarningHigh = 294f, float tempLethalHigh = 343f, float tempPerfectLow = 0f, float tempPerfectHigh = 0f)
 	{
-		this.externalTemperatureWarning_Low = tempWarningLow;
-		this.externalTemperatureLethal_Low = tempLethalLow;
-		this.externalTemperatureLethal_High = tempLethalHigh;
-		this.externalTemperatureWarning_High = tempWarningHigh;
-		this.externalTemperaturePerfect_Low = tempPerfectLow;
-		this.externalTemperaturePerfect_High = tempPerfectHigh;
+		this.internalTemperatureWarning_Low = tempWarningLow;
+		this.internalTemperatureLethal_Low = tempLethalLow;
+		this.internalTemperatureLethal_High = tempLethalHigh;
+		this.internalTemperatureWarning_High = tempWarningHigh;
+		this.internalTemperaturePerfect_Low = tempPerfectLow;
+		this.internalTemperaturePerfect_High = tempPerfectHigh;
 	}
 
 	public bool IsCellSafe(int cell)
 	{
 		float averageTemperature = this.GetAverageTemperature(cell);
-		return averageTemperature > -1f && averageTemperature > this.externalTemperatureLethal_Low && averageTemperature < this.externalTemperatureLethal_High;
+		return averageTemperature > -1f && averageTemperature > this.internalTemperatureLethal_Low && averageTemperature < this.internalTemperatureLethal_High;
 	}
 
 	public void UpdateTemperature(object data)
@@ -105,19 +128,15 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 		{
 			return;
 		}
-		float averageTemperature = this.GetAverageTemperature(num);
-		if (averageTemperature > -1f)
-		{
-			base.smi.sm.externalTemp.Set(averageTemperature, base.smi);
-			this.displayTemperatureAmount.value = averageTemperature;
-		}
+		base.smi.sm.internalTemp.Set(this.InternalTemperature, base.smi);
+		this.displayTemperatureAmount.value = this.InternalTemperature;
 	}
 
 	private float GetAverageTemperature(int cell)
 	{
 		float temperature = 0f;
 		int count = 0;
-		this.occupyArea.TestArea(cell, delegate(int testCell)
+		this.occupyArea.TestArea(cell, null, delegate(int testCell, object data)
 		{
 			if (Grid.Cell[testCell].mass > 0.1f)
 			{
@@ -137,8 +156,7 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 	{
 		return new List<Descriptor>
 		{
-			new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.REQUIRES_TEMPERATURE, GameUtil.GetFormattedTemperature(this.externalTemperatureWarning_Low, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, false), GameUtil.GetFormattedTemperature(this.externalTemperatureWarning_High, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true)), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.REQUIRES_TEMPERATURE, GameUtil.GetFormattedTemperature(this.externalTemperatureWarning_Low, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, false), GameUtil.GetFormattedTemperature(this.externalTemperatureWarning_High, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true)), Descriptor.DescriptorType.Requirement, false),
-			new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.IDEAL_TEMPERATURE, GameUtil.GetFormattedTemperature(this.externalTemperaturePerfect_Low, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, false), GameUtil.GetFormattedTemperature(this.externalTemperaturePerfect_High, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true)), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.IDEAL_TEMPERATURE, GameUtil.GetFormattedTemperature(this.externalTemperaturePerfect_Low, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, false), GameUtil.GetFormattedTemperature(this.externalTemperaturePerfect_High, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true)), Descriptor.DescriptorType.CropOptimumCondition, false)
+			new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.REQUIRES_TEMPERATURE, GameUtil.GetFormattedTemperature(this.internalTemperatureWarning_Low, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, false), GameUtil.GetFormattedTemperature(this.internalTemperatureWarning_High, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true)), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.REQUIRES_TEMPERATURE, GameUtil.GetFormattedTemperature(this.internalTemperatureWarning_Low, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, false), GameUtil.GetFormattedTemperature(this.internalTemperatureWarning_High, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true)), Descriptor.DescriptorType.Requirement, false)
 		};
 	}
 
@@ -146,17 +164,17 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 
 	private OccupyArea _occupyArea;
 
-	public float externalTemperatureLethal_Low;
+	public float internalTemperatureLethal_Low;
 
-	public float externalTemperatureWarning_Low;
+	public float internalTemperatureWarning_Low;
 
-	public float externalTemperaturePerfect_Low;
+	public float internalTemperaturePerfect_Low;
 
-	public float externalTemperaturePerfect_High;
+	public float internalTemperaturePerfect_High;
 
-	public float externalTemperatureWarning_High;
+	public float internalTemperatureWarning_High;
 
-	public float externalTemperatureLethal_High;
+	public float internalTemperatureLethal_High;
 
 	[MyCmpReq]
 	private PrimaryElement primaryElement;
@@ -166,7 +184,7 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 
 	private AmountInstance displayTemperatureAmount;
 
-	private TemperatureVulnerable.TemperatureState externalTemperatureState = TemperatureVulnerable.TemperatureState.Normal;
+	private TemperatureVulnerable.TemperatureState internalTemperatureState = TemperatureVulnerable.TemperatureState.Normal;
 
 	private SchedulerHandle handle;
 
@@ -179,14 +197,8 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 			if (amountInstance != null)
 			{
 				this.hasMaturity = true;
-				this.badConditionModifier = new AttributeModifier(Db.Get().Amounts.YieldBonus.deltaAttribute.Id, 0f / amountInstance.GetMax(), CREATURES.STATS.YIELDBONUS.MODIFIERS.NOT_PERFECT_TEMPERATURE, false, false);
-				this.goodConditionModifier = new AttributeModifier(Db.Get().Amounts.YieldBonus.deltaAttribute.Id, 0.00041666668f / amountInstance.GetMax(), CREATURES.STATS.YIELDBONUS.MODIFIERS.PERFECT_TEMPERATURE, false, false);
 			}
 		}
-
-		public AttributeModifier badConditionModifier;
-
-		public AttributeModifier goodConditionModifier;
 
 		public bool hasMaturity;
 	}
@@ -196,42 +208,43 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.normal;
-			this.lethalCold.ToggleStatusItem(Db.Get().CreatureStatusItems.Cold, (TemperatureVulnerable.StatesInstance smi) => smi.master).TriggerOnEnter(GameHashes.TooColdFatal, null).ParamTransition<float>(this.externalTemp, this.warningCold, (TemperatureVulnerable.StatesInstance smi, float p) => p > smi.master.externalTemperatureLethal_Low)
-				.Enter(delegate(TemperatureVulnerable.StatesInstance smi)
-				{
-					smi.master.externalTemperatureState = TemperatureVulnerable.TemperatureState.LethalCold;
-				});
-			this.lethalHot.ToggleStatusItem(Db.Get().CreatureStatusItems.Hot, (TemperatureVulnerable.StatesInstance smi) => smi.master).TriggerOnEnter(GameHashes.TooHotFatal, null).ParamTransition<float>(this.externalTemp, this.warningHot, (TemperatureVulnerable.StatesInstance smi, float p) => p < smi.master.externalTemperatureLethal_High)
-				.Enter(delegate(TemperatureVulnerable.StatesInstance smi)
-				{
-					smi.master.externalTemperatureState = TemperatureVulnerable.TemperatureState.LethalHot;
-				});
-			this.warningCold.ToggleStatusItem(Db.Get().CreatureStatusItems.Cold, (TemperatureVulnerable.StatesInstance smi) => smi.master).TriggerOnEnter(GameHashes.TooColdWarning, null).ParamTransition<float>(this.externalTemp, this.lethalCold, (TemperatureVulnerable.StatesInstance smi, float p) => p < smi.master.externalTemperatureLethal_Low)
-				.ParamTransition<float>(this.externalTemp, this.normal, (TemperatureVulnerable.StatesInstance smi, float p) => p > smi.master.externalTemperatureWarning_Low)
-				.Enter(delegate(TemperatureVulnerable.StatesInstance smi)
-				{
-					smi.master.externalTemperatureState = TemperatureVulnerable.TemperatureState.WarningCold;
-				});
-			this.warningHot.ToggleStatusItem(Db.Get().CreatureStatusItems.Hot, (TemperatureVulnerable.StatesInstance smi) => smi.master).TriggerOnEnter(GameHashes.TooHotWarning, null).ParamTransition<float>(this.externalTemp, this.lethalHot, (TemperatureVulnerable.StatesInstance smi, float p) => p > smi.master.externalTemperatureLethal_High)
-				.ParamTransition<float>(this.externalTemp, this.normal, (TemperatureVulnerable.StatesInstance smi, float p) => p < smi.master.externalTemperatureWarning_High)
-				.Enter(delegate(TemperatureVulnerable.StatesInstance smi)
-				{
-					smi.master.externalTemperatureState = TemperatureVulnerable.TemperatureState.WarningHot;
-				});
-			this.normal.DefaultState(this.normal.okay).TriggerOnEnter(GameHashes.OptimalTemperatureAchieved, null).ParamTransition<float>(this.externalTemp, this.warningHot, (TemperatureVulnerable.StatesInstance smi, float p) => p > smi.master.externalTemperatureWarning_High)
-				.ParamTransition<float>(this.externalTemp, this.warningCold, (TemperatureVulnerable.StatesInstance smi, float p) => p < smi.master.externalTemperatureWarning_Low);
-			this.normal.okay.ToggleAttributeModifier("Bad temperature", (TemperatureVulnerable.StatesInstance smi) => smi.badConditionModifier, (TemperatureVulnerable.StatesInstance smi) => smi.hasMaturity).ParamTransition<float>(this.externalTemp, this.normal.perfect, (TemperatureVulnerable.StatesInstance smi, float p) => p > smi.master.externalTemperaturePerfect_Low && p < smi.master.externalTemperaturePerfect_High).Enter(delegate(TemperatureVulnerable.StatesInstance smi)
+			this.lethalCold.TriggerOnEnter(GameHashes.TooColdFatal, null).ParamTransition<float>(this.internalTemp, this.warningCold, (TemperatureVulnerable.StatesInstance smi, float p) => p > smi.master.internalTemperatureLethal_Low).Enter(delegate(TemperatureVulnerable.StatesInstance smi)
 			{
-				smi.master.externalTemperatureState = TemperatureVulnerable.TemperatureState.Normal;
+				smi.master.internalTemperatureState = TemperatureVulnerable.TemperatureState.LethalCold;
 			});
-			this.normal.perfect.ToggleStatusItem(Db.Get().CreatureStatusItems.PerfectTemperature, (TemperatureVulnerable.StatesInstance smi) => smi.master).ToggleAttributeModifier("Good temperature", (TemperatureVulnerable.StatesInstance smi) => smi.goodConditionModifier, (TemperatureVulnerable.StatesInstance smi) => smi.hasMaturity).ParamTransition<float>(this.externalTemp, this.normal.okay, (TemperatureVulnerable.StatesInstance smi, float p) => p < smi.master.externalTemperaturePerfect_Low || p > smi.master.externalTemperaturePerfect_High)
+			this.lethalHot.TriggerOnEnter(GameHashes.TooHotFatal, null).ParamTransition<float>(this.internalTemp, this.warningHot, (TemperatureVulnerable.StatesInstance smi, float p) => p < smi.master.internalTemperatureLethal_High).Enter(delegate(TemperatureVulnerable.StatesInstance smi)
+			{
+				smi.master.internalTemperatureState = TemperatureVulnerable.TemperatureState.LethalHot;
+			});
+			this.warningCold.TriggerOnEnter(GameHashes.TooColdWarning, null).ParamTransition<float>(this.internalTemp, this.lethalCold, (TemperatureVulnerable.StatesInstance smi, float p) => p < smi.master.internalTemperatureLethal_Low).ParamTransition<float>(this.internalTemp, this.normal, (TemperatureVulnerable.StatesInstance smi, float p) => p > smi.master.internalTemperatureWarning_Low)
 				.Enter(delegate(TemperatureVulnerable.StatesInstance smi)
 				{
-					smi.master.externalTemperatureState = TemperatureVulnerable.TemperatureState.Perfect;
+					smi.master.internalTemperatureState = TemperatureVulnerable.TemperatureState.WarningCold;
+				})
+				.Exit(delegate(TemperatureVulnerable.StatesInstance smi)
+				{
 				});
+			this.warningHot.TriggerOnEnter(GameHashes.TooHotWarning, null).ParamTransition<float>(this.internalTemp, this.lethalHot, (TemperatureVulnerable.StatesInstance smi, float p) => p > smi.master.internalTemperatureLethal_High).ParamTransition<float>(this.internalTemp, this.normal, (TemperatureVulnerable.StatesInstance smi, float p) => p < smi.master.internalTemperatureWarning_High)
+				.Enter(delegate(TemperatureVulnerable.StatesInstance smi)
+				{
+					smi.master.internalTemperatureState = TemperatureVulnerable.TemperatureState.WarningHot;
+				})
+				.Exit(delegate(TemperatureVulnerable.StatesInstance smi)
+				{
+				});
+			this.normal.DefaultState(this.normal.okay).TriggerOnEnter(GameHashes.OptimalTemperatureAchieved, null).ParamTransition<float>(this.internalTemp, this.warningHot, (TemperatureVulnerable.StatesInstance smi, float p) => p > smi.master.internalTemperatureWarning_High)
+				.ParamTransition<float>(this.internalTemp, this.warningCold, (TemperatureVulnerable.StatesInstance smi, float p) => p < smi.master.internalTemperatureWarning_Low);
+			this.normal.okay.ParamTransition<float>(this.internalTemp, this.normal.perfect, (TemperatureVulnerable.StatesInstance smi, float p) => p > smi.master.internalTemperaturePerfect_Low && p < smi.master.internalTemperaturePerfect_High).Enter(delegate(TemperatureVulnerable.StatesInstance smi)
+			{
+				smi.master.internalTemperatureState = TemperatureVulnerable.TemperatureState.Normal;
+			});
+			this.normal.perfect.ParamTransition<float>(this.internalTemp, this.normal.okay, (TemperatureVulnerable.StatesInstance smi, float p) => p < smi.master.internalTemperaturePerfect_Low || p > smi.master.internalTemperaturePerfect_High).Enter(delegate(TemperatureVulnerable.StatesInstance smi)
+			{
+				smi.master.internalTemperatureState = TemperatureVulnerable.TemperatureState.Perfect;
+			});
 		}
 
-		public StateMachine<TemperatureVulnerable.States, TemperatureVulnerable.StatesInstance, TemperatureVulnerable, object>.FloatParameter externalTemp;
+		public StateMachine<TemperatureVulnerable.States, TemperatureVulnerable.StatesInstance, TemperatureVulnerable, object>.FloatParameter internalTemp;
 
 		public GameStateMachine<TemperatureVulnerable.States, TemperatureVulnerable.StatesInstance, TemperatureVulnerable, object>.State lethalCold;
 

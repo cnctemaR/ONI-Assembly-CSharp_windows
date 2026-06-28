@@ -225,7 +225,7 @@ public class BatchedAnimBulkDisplayer : MonoBehaviour
 		this.didGenerate = true;
 		GameObject gameObject = new GameObject();
 		gameObject.transform.parent = parent;
-		gameObject.transform.SetPosition(new Vector3((float)this.offsetx, (float)this.offsety, 0f));
+		gameObject.transform.SetPosition(new Vector3((float)this.offsetx + this.globalOffset.x, (float)this.offsety + this.globalOffset.y, 0f));
 		gameObject.SetActive(false);
 		gameObject.name = file.name;
 		gameObject.AddComponent<KPrefabID>().PrefabTag = new Tag(file.name);
@@ -258,6 +258,8 @@ public class BatchedAnimBulkDisplayer : MonoBehaviour
 	public KAnimFile body_swap_anim;
 
 	public static bool RunCycler = true;
+
+	public Vector2 globalOffset = Vector2.left * 20f;
 
 	public int offsetx;
 

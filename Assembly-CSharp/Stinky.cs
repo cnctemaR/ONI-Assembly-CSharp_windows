@@ -39,7 +39,7 @@ public class Stinky : StateMachineComponent<Stinky.StatesInstance>
 		}
 		int num2 = Grid.PosToCell(gameObject.transform.position);
 		float value = Db.Get().Amounts.Temperature.Lookup(this).value;
-		SimMessages.AddRemoveSubstance(num2, SimHashes.ContaminatedOxygen, CellEventLogger.Instance.ElementConsumerSimUpdate, 0.0025000002f, value, -1);
+		SimMessages.AddRemoveSubstance(num2, SimHashes.ContaminatedOxygen, CellEventLogger.Instance.ElementConsumerSimUpdate, 0.0025000002f, value, byte.MaxValue, 0, -1);
 		KFMOD.PlayOneShot(GlobalAssets.GetSound("Dupe_Flatulence", false), this.transform.position);
 		ReportManager.Instance.ReportValue(ReportManager.ReportType.ContaminatedOxygenFlatulence, 0.0025000002f, null);
 	}
@@ -85,7 +85,7 @@ public class Stinky : StateMachineComponent<Stinky.StatesInstance>
 			default_state = this.idle;
 			this.root.Enter(delegate(Stinky.StatesInstance smi)
 			{
-				KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("odor_fx_kanim", smi.master.gameObject.transform.position, smi.master.gameObject.transform, true, Grid.SceneLayer.Front);
+				KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("odor_fx_kanim", smi.master.gameObject.transform.position, smi.master.gameObject.transform, true, Grid.SceneLayer.Front, false);
 				kbatchedAnimController.Play(Stinky.WorkLoopAnims, KAnim.PlayMode.Once);
 				smi.master.stinkyController = kbatchedAnimController;
 			}).ToggleSchedulePeriodic("StinkyFX", 5f, delegate(Stinky.StatesInstance smi)

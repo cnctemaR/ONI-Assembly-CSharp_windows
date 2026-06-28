@@ -28,8 +28,11 @@ public class LocText : TextMeshProUGUI
 		if (this.key != string.Empty)
 		{
 			StringKey stringKey = new StringKey(this.key);
-			base.text = Strings.Get(stringKey);
+			StringEntry stringEntry = Strings.Get(stringKey);
+			base.text = stringEntry.String;
 		}
+		base.text = Localization.Fixup(base.text);
+		base.isRightToLeftText = Localization.IsRightToLeft;
 		SetTextStyleSetting setTextStyleSetting = base.gameObject.GetComponent<SetTextStyleSetting>();
 		if (setTextStyleSetting == null)
 		{
@@ -48,6 +51,19 @@ public class LocText : TextMeshProUGUI
 			return;
 		}
 		base.SetLayoutDirty();
+	}
+
+	internal void SwapFont(TMP_FontAsset font, bool isRightToLeft)
+	{
+		base.font = font;
+		if (this.key != string.Empty)
+		{
+			StringKey stringKey = new StringKey(this.key);
+			StringEntry stringEntry = Strings.Get(stringKey);
+			base.text = stringEntry.String;
+		}
+		base.text = Localization.Fixup(base.text);
+		base.isRightToLeftText = isRightToLeft;
 	}
 
 	public string key;

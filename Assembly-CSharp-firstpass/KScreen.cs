@@ -82,7 +82,7 @@ public class KScreen : KMonoBehaviour, IInputHandler, IEventSystemHandler, IPoin
 
 	public virtual void OnKeyDown(KButtonEvent e)
 	{
-		if (this.mouseOver && this.ConsumeMouseScroll)
+		if (this.mouseOver && this.ConsumeMouseScroll && !e.Consumed)
 		{
 			if (!e.TryConsume(global::Action.ZoomIn))
 			{

@@ -89,27 +89,36 @@ public class ToolTipScreen : KScreen
 				this.anchorRoot.anchoredPosition -= Vector2.right * (rectTransform.rectTransform().pivot.x * rectTransform.rectTransform().sizeDelta.x);
 				this.anchorRoot.anchoredPosition += Vector2.right * (rectTransform.sizeDelta.x * this.tooltipSetting.parentPositionAnchor.x);
 				this.anchorRoot.anchoredPosition += Vector2.up * (rectTransform.sizeDelta.y * this.tooltipSetting.parentPositionAnchor.y);
-				float scaleFactor = this.transform.parent.GetComponent<CanvasScaler>().scaleFactor;
-				this.anchorRoot.anchoredPosition = new Vector2(this.anchorRoot.anchoredPosition.x / scaleFactor, this.anchorRoot.anchoredPosition.y / scaleFactor);
+				float num = 1f;
+				CanvasScaler canvasScaler = this.transform.parent.GetComponent<CanvasScaler>();
+				if (canvasScaler == null)
+				{
+					canvasScaler = this.transform.parent.parent.GetComponent<CanvasScaler>();
+				}
+				if (canvasScaler != null)
+				{
+					num = canvasScaler.scaleFactor;
+				}
+				this.anchorRoot.anchoredPosition = new Vector2(this.anchorRoot.anchoredPosition.x / num, this.anchorRoot.anchoredPosition.y / num);
 				component.pivot = this.tooltipSetting.tooltipPivot;
 				RectTransform rectTransform2 = component;
 				Vector2 vector = new Vector2(0f, 0f);
 				component.anchorMax = vector;
 				rectTransform2.anchorMin = vector;
-				component.anchoredPosition = this.tooltipSetting.tooltipPositionOffset * scaleFactor;
+				component.anchoredPosition = this.tooltipSetting.tooltipPositionOffset * num;
 				if (!this.tooltipSetting.worldSpace)
 				{
 					Rect rect = ((RectTransform)this.transform).rect;
 					Vector2 vector2 = new Vector2(this.transform.position.x, this.transform.position.y) + this.ScreenEdgePadding;
-					Vector2 vector3 = new Vector2(this.transform.position.x, this.transform.position.y) + rect.width * Vector2.right + rect.height * Vector2.up - this.ScreenEdgePadding * Mathf.Max(1f, scaleFactor);
-					vector3.x *= scaleFactor;
-					vector3.y *= scaleFactor;
+					Vector2 vector3 = new Vector2(this.transform.position.x, this.transform.position.y) + rect.width * Vector2.right + rect.height * Vector2.up - this.ScreenEdgePadding * Mathf.Max(1f, num);
+					vector3.x *= num;
+					vector3.y *= num;
 					Vector2 vector4;
-					vector4.x = component.position.x - component.pivot.x * (component.sizeDelta.x * scaleFactor);
-					vector4.y = component.position.y - component.pivot.y * (component.sizeDelta.y * scaleFactor);
+					vector4.x = component.position.x - component.pivot.x * (component.sizeDelta.x * num);
+					vector4.y = component.position.y - component.pivot.y * (component.sizeDelta.y * num);
 					Vector2 vector5;
-					vector5.x = component.position.x + (1f - component.pivot.x) * (component.sizeDelta.x * scaleFactor);
-					vector5.y = component.position.y + (1f - component.pivot.y) * (component.sizeDelta.y * scaleFactor);
+					vector5.x = component.position.x + (1f - component.pivot.x) * (component.sizeDelta.x * num);
+					vector5.y = component.position.y + (1f - component.pivot.y) * (component.sizeDelta.y * num);
 					Vector2 vector6 = Vector2.zero;
 					if (vector4.x < vector2.x)
 					{
@@ -127,7 +136,7 @@ public class ToolTipScreen : KScreen
 					{
 						vector6.y = vector3.y - vector5.y;
 					}
-					vector6 /= scaleFactor;
+					vector6 /= num;
 					component.anchoredPosition += vector6;
 				}
 			}

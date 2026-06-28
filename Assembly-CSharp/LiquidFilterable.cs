@@ -12,7 +12,7 @@ public class LiquidFilterable : Filterable
 		{
 			if (element.IsLiquid)
 			{
-				Tag tag = TagManager.Create(element.id);
+				Tag tag = GameTagExtensions.Create(element.id);
 				list.Add(tag);
 			}
 		}

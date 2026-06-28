@@ -81,6 +81,14 @@ public class RootMenu : KScreen
 	private void OnSelectObject(object data)
 	{
 		GameObject gameObject = (GameObject)data;
+		if (gameObject != null)
+		{
+			KPrefabID component = gameObject.GetComponent<KPrefabID>();
+			if (component != null && !component.IsInitialized())
+			{
+				return;
+			}
+		}
 		if (gameObject != this.selectedGO)
 		{
 			this.selectedGO = gameObject;

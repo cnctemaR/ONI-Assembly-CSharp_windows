@@ -58,7 +58,7 @@ public class JungleGasPlant : StateMachineComponent<JungleGasPlant.StatesInstanc
 				global::UnityEngine.Object.Destroy(smi.master.GetComponent<KBatchedAnimController>());
 				smi.Schedule(0.5f, new Action<object>(smi.master.DestroySelf), null);
 			});
-			this.blocked_from_growing.ToggleStatusItem(Db.Get().MiscStatusItems.RegionIsBlocked, null).EventTransition(GameHashes.EntombedChanged, this.alive.seed_grow, (JungleGasPlant.StatesInstance smi) => !smi.master.GetComponent<EntombVulnerable>().GetEntombed).EventTransition(GameHashes.TooColdWarning, this.alive.seed_grow, null)
+			this.blocked_from_growing.ToggleStatusItem(Db.Get().MiscStatusItems.RegionIsBlocked, null).TagTransition(GameTags.Entombed, this.alive.seed_grow, true).EventTransition(GameHashes.TooColdWarning, this.alive.seed_grow, null)
 				.EventTransition(GameHashes.TooHotWarning, this.alive.seed_grow, null)
 				.EventTransition(GameHashes.Uprooted, this.dead, (JungleGasPlant.StatesInstance smi) => UprootedMonitor.IsObjectUprooted(smi.master.gameObject));
 			this.alive.InitializeStates(this.masterTarget, this.dead);

@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class ToolParameterMenu : KMonoBehaviour
 {
+	public event global::System.Action onParametersChanged;
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -62,6 +64,10 @@ public class ToolParameterMenu : KMonoBehaviour
 				this.currentParameters[keyValuePair.Key] = ((!componentInChildren.isOn) ? ToolParameterMenu.ToggleState.Off : ToolParameterMenu.ToggleState.On);
 			}
 		}
+		if (this.onParametersChanged != null)
+		{
+			this.onParametersChanged();
+		}
 	}
 
 	public GameObject content;
@@ -75,6 +81,25 @@ public class ToolParameterMenu : KMonoBehaviour
 	private Dictionary<string, GameObject> widgets = new Dictionary<string, GameObject>();
 
 	private Dictionary<string, ToolParameterMenu.ToggleState> currentParameters;
+
+	public class FILTERLAYERS
+	{
+		public static string BUILDINGS = "BUILDINGS";
+
+		public static string TILES = "TILES";
+
+		public static string WIRES = "WIRES";
+
+		public static string LIQUIDCONDUIT = "LIQUIDPIPES";
+
+		public static string GASCONDUIT = "GASPIPES";
+
+		public static string CLEANANDCLEAR = "CLEANANDCLEAR";
+
+		public static string DIGPLACER = "DIGPLACER";
+
+		public static string ALL = "ALL";
+	}
 
 	public enum ToggleState
 	{

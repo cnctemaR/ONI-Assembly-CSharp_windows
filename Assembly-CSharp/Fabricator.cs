@@ -7,7 +7,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Fabricator : BuildingWorkable, IEffectDescriptor
+public class Fabricator : Workable, IEffectDescriptor
 {
 	public string FabricationMachine
 	{
@@ -216,7 +216,7 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 		{
 			int outputCell = this.outputPoint.GetOutputCell();
 			PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
-			SimMessages.AddRemoveSubstance(outputCell, component.Element.highTempTransition.id, CellEventLogger.Instance.FabricatorProduceMelted, component2.Mass, component.Element.highTempTransition.defaultValues.temperature + 10f, -1);
+			SimMessages.AddRemoveSubstance(outputCell, component.Element.highTempTransition.id, CellEventLogger.Instance.FabricatorProduceMelted, component2.Mass, component.Element.highTempTransition.defaultValues.temperature + 10f, byte.MaxValue, 0, -1);
 			component.gameObject.DeleteObject();
 			break;
 		}
@@ -297,7 +297,7 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 				}
 				if (flag)
 				{
-					machineOrder2.chore = new WorkChore<Fabricator>(this.choreType, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true);
+					machineOrder2.chore = new WorkChore<Fabricator>(this.choreType, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true);
 					if (this.workTimeRemaining <= 0f)
 					{
 						this.workTimeRemaining = this.GetWorkTime();
@@ -402,7 +402,7 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 		{
 			if (ingredient.amount > 0f)
 			{
-				fetchList.Add(ingredient.tag, ingredient.amount, FetchOrder2.OperationalRequirement.None);
+				fetchList.Add(ingredient.tag, null, ingredient.amount, FetchOrder2.OperationalRequirement.None);
 			}
 		}
 	}
@@ -450,7 +450,7 @@ public class Fabricator : BuildingWorkable, IEffectDescriptor
 		return this.CanFabricate(order, this.inStorage);
 	}
 
-	public List<Descriptor> GetDescriptors(BuildingDef def)
+	public virtual List<Descriptor> GetDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		Recipe[] recipes = this.GetRecipes();

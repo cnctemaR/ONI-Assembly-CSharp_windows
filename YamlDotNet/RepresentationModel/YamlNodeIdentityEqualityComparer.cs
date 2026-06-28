@@ -7,7 +7,7 @@ namespace YamlDotNet.RepresentationModel
 	{
 		public bool Equals(YamlNode x, YamlNode y)
 		{
-			return object.ReferenceEquals(x, y);
+			return x == y;
 		}
 
 		public int GetHashCode(YamlNode obj)

@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
-public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEffectDescriptor
+public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IGameObjectEffectDescriptor, IEffectDescriptor
 {
 	protected override void OnSpawn()
 	{
@@ -13,6 +14,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 		ToiletWorkableUse component = base.GetComponent<ToiletWorkableUse>();
 		component.onComplete = new Action<Worker>(this.Flush);
 		component.onAbort = new Action<Worker>(this.Flush);
+		component.trackUses = true;
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Behind, new string[] { "meter_target", "meter_arrow", "meter_scale" });
 		this.meter.SetPositionPercent((float)base.smi.sm.flushes.Get(base.smi) / (float)base.smi.master.maxFlushes);
 		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
@@ -40,10 +42,15 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 	{
 		float temperature = base.GetComponent<PrimaryElement>().Temperature;
 		Element element = ElementLoader.FindElementByHash(this.solidWastePerUse.elementID);
-		GameObject gameObject = element.substance.SpawnResource(this.transform.position, base.smi.MassPerFlush(), temperature, true, false);
-		this.storage.Store(gameObject, false, false);
+		byte index = Db.Get().Diseases.GetIndex(this.diseaseId);
+		GameObject gameObject = element.substance.SpawnResource(this.transform.position, base.smi.MassPerFlush(), temperature, index, this.diseasePerFlush, true, false);
+		this.storage.Store(gameObject, false, false, true);
+		PrimaryElement component = worker.GetComponent<PrimaryElement>();
+		component.AddDisease(index, this.diseaseOnDupePerFlush, "Toilet.Flush");
+		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, string.Format(DUPLICANTS.DISEASES.ADDED_POPFX, Db.Get().Diseases[(int)index].Name, this.diseasePerFlush + this.diseaseOnDupePerFlush), this.transform, Vector3.up, 1.5f, false, false);
 		base.smi.sm.flushes.Delta(1, base.smi);
 		this.meter.SetPositionPercent((float)base.smi.sm.flushes.Get(base.smi) / (float)base.smi.master.maxFlushes);
+		Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_LotsOfGerms);
 	}
 
 	private void OnEmitGas()
@@ -97,38 +104,47 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 		}
 	}
 
-	public List<Descriptor> RequirementDescriptors(BuildingDef def)
+	public List<Descriptor> RequirementDescriptors()
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		ManualDeliveryKG component = base.GetComponent<ManualDeliveryKG>();
 		Tag requestedItemTag = component.requestedItemTag;
 		string keywordStyle = GameUtil.GetKeywordStyle(requestedItemTag);
 		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMEDPERUSE, keywordStyle, requestedItemTag, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMEDPERUSE, keywordStyle, requestedItemTag, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, true, "{0:0.##}")), Descriptor.DescriptorType.Requirement);
+		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMEDPERUSE, keywordStyle, requestedItemTag, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMEDPERUSE, keywordStyle, requestedItemTag, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Requirement);
 		list.Add(descriptor);
 		return list;
 	}
 
-	public List<Descriptor> EffectDescriptors(BuildingDef def)
+	public List<Descriptor> EffectDescriptors()
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		Element element = ElementLoader.FindElementByHash(this.solidWastePerUse.elementID);
 		string text = element.tag.ProperName();
 		string keywordStyle = GameUtil.GetKeywordStyle(element);
-		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTEDPERUSE, keywordStyle, text, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTEDPERUSE, keywordStyle, text, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, true, "{0:0.##}")), Descriptor.DescriptorType.Effect);
-		list.Add(descriptor);
+		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTEDPERUSE, keywordStyle, text, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTEDPERUSE, keywordStyle, text, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Effect, false));
+		Disease disease = Db.Get().Diseases.Get(this.diseaseId);
+		int num = this.diseasePerFlush + this.diseaseOnDupePerFlush;
+		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.DISEASEEMITTEDPERUSE, disease.Name, GameUtil.GetFormattedDiseaseAmount(num)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.DISEASEEMITTEDPERUSE, disease.Name, GameUtil.GetFormattedDiseaseAmount(num)), Descriptor.DescriptorType.DiseaseSource, false));
 		return list;
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		foreach (Descriptor descriptor in this.RequirementDescriptors(def))
+		list.AddRange(this.RequirementDescriptors());
+		list.AddRange(this.EffectDescriptors());
+		return list;
+	}
+
+	public List<Descriptor> GetDescriptors(GameObject go)
+	{
+		List<Descriptor> list = new List<Descriptor>();
+		foreach (Descriptor descriptor in this.RequirementDescriptors())
 		{
 			list.Add(descriptor);
 		}
-		foreach (Descriptor descriptor2 in this.EffectDescriptors(def))
+		foreach (Descriptor descriptor2 in this.EffectDescriptors())
 		{
 			list.Add(descriptor2);
 		}
@@ -143,6 +159,15 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 
 	[SerializeField]
 	public int maxFlushes = 15;
+
+	[SerializeField]
+	public string diseaseId;
+
+	[SerializeField]
+	public int diseasePerFlush;
+
+	[SerializeField]
+	public int diseaseOnDupePerFlush;
 
 	private MeterController meter;
 
@@ -202,7 +227,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 
 		public bool IsToxicSandRemoved()
 		{
-			Tag tag = TagManager.Create(base.master.solidWastePerUse.elementID);
+			Tag tag = GameTagExtensions.Create(base.master.solidWastePerUse.elementID);
 			return base.master.storage.Find(tag).Count == 0;
 		}
 
@@ -214,7 +239,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 			}
 			ToiletWorkableClean component = base.master.GetComponent<ToiletWorkableClean>();
 			Action<Chore> action = new Action<Chore>(this.OnCleanComplete);
-			this.cleanChore = new WorkChore<ToiletWorkableClean>(Db.Get().ChoreTypes.CleanToilet, component, null, true, action, null, null, true, null, true, default(Tag), null, false, true);
+			this.cleanChore = new WorkChore<ToiletWorkableClean>(Db.Get().ChoreTypes.CleanToilet, component, null, true, action, null, null, true, null, true, default(Tag), null, false, true, true);
 		}
 
 		public void CancelCleanChore()
@@ -229,7 +254,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 		private void OnCleanComplete(Chore chore)
 		{
 			this.cleanChore = null;
-			Tag tag = TagManager.Create(base.master.solidWastePerUse.elementID);
+			Tag tag = GameTagExtensions.Create(base.master.solidWastePerUse.elementID);
 			List<GameObject> list = base.master.storage.Find(tag);
 			foreach (GameObject gameObject in list)
 			{
@@ -250,7 +275,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 			base.serializable = true;
 			this.root.PlayAnim("off", KAnim.PlayMode.Once, null).EventTransition(GameHashes.OnStorageChange, this.needsdirt, (Toilet.StatesInstance smi) => !smi.HasDirt()).EventTransition(GameHashes.OperationalChanged, this.notoperational, (Toilet.StatesInstance smi) => !smi.Get<Operational>().IsOperational);
 			this.needsdirt.ToggleMainStatusItem(Db.Get().BuildingStatusItems.Unusable).EventTransition(GameHashes.OnStorageChange, this.ready, (Toilet.StatesInstance smi) => smi.HasDirt());
-			this.ready.ParamTransition<int>(this.flushes, this.full, (Toilet.StatesInstance smi, int p) => smi.GetFlushesRemaining() <= 0).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Toilet).ToggleChore(new Func<Toilet.StatesInstance, Chore>(this.CreateUseChore), this.ready, true)
+			this.ready.ParamTransition<int>(this.flushes, this.full, (Toilet.StatesInstance smi, int p) => smi.GetFlushesRemaining() <= 0).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Toilet).ToggleRecurringChore(new Func<Toilet.StatesInstance, Chore>(this.CreateUseChore))
 				.Tag(new Tag[] { GameTags.Usable });
 			this.earlyclean.Enter(delegate(Toilet.StatesInstance smi)
 			{
@@ -298,7 +323,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, IUsable, IEf
 
 		private Chore CreateUseChore(Toilet.StatesInstance smi)
 		{
-			return new WorkChore<ToiletWorkableUse>(Db.Get().ChoreTypes.Pee, smi.master, null, true, null, null, null, false, null, true, default(Tag), null, false, true);
+			return new WorkChore<ToiletWorkableUse>(Db.Get().ChoreTypes.Pee, smi.master, null, true, null, null, null, false, null, true, default(Tag), null, false, true, false);
 		}
 
 		public GameStateMachine<Toilet.States, Toilet.StatesInstance, Toilet, object>.State needsdirt;

@@ -20,13 +20,13 @@ public struct PathFinderAbilities
 		}
 	}
 
-	public bool CanTraverse(int cell, int from_cell, int underwater_cost)
+	public bool CanTraverse(int cell, int from_cell, int cost, int underwater_cost)
 	{
-		if (this.masks != null)
+		if (this.masks != null && !this.ignoreNavigationMasks)
 		{
 			for (int i = 0; i < this.masks.Count; i++)
 			{
-				if (!this.masks[i].IsTraversable(cell, from_cell, this))
+				if (!this.masks[i].IsTraversable(cell, from_cell, cost, this))
 				{
 					return false;
 				}
@@ -39,7 +39,7 @@ public struct PathFinderAbilities
 
 	public int maxUnderwaterCost;
 
-	public bool ignoreAccessControl;
+	public bool ignoreNavigationMasks;
 
 	private List<NavMask> masks;
 }

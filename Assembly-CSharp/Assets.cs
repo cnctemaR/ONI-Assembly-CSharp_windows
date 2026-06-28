@@ -9,7 +9,10 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 {
 	protected override void OnPrefabInit()
 	{
+		Assets.instance = this;
+		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		RecipeManager.Destroy();
+		RecipeManager.Get();
 		Assets.AnimMaterial = this.AnimMaterialAsset;
 		Assets.Prefabs = new List<KPrefabID>(this.PrefabAssets.Where<KPrefabID>((KPrefabID x) => x != null));
 		Assets.RegionPrefabs.Clear();
@@ -28,7 +31,6 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		Assets.defaultPhysicsMaterial = this.defaultPhysicsMaterialAsset;
 		Assets.DebugFont = this.DebugFontAsset;
 		this.SubstanceListHookup();
-		Assets.BaseTemplate = this.BaseTemplateAsset;
 		Assets.BuildingDefs = new BuildingDef[0];
 		foreach (KPrefabID kprefabID in this.PrefabAssets)
 		{
@@ -49,6 +51,12 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		GameEntityTypeSet.Destroy();
 		this.entityTypeSet = GameEntityTypeSet.Instance;
 		LegacyModMain.Load();
+	}
+
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		Db.Get();
 	}
 
 	private static void TryAddCountableTag(KPrefabID prefab)
@@ -100,11 +108,6 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 	public static BuildingDef GetBuildingDef(string prefab_id)
 	{
 		return (BuildingDef)Assets.GetDef(Assets.BuildingDefs, prefab_id);
-	}
-
-	public static BaseTemplate GetBaseTemplate()
-	{
-		return Assets.BaseTemplate;
 	}
 
 	public static TintedSprite GetTintedSprite(string name)
@@ -229,6 +232,32 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		return list;
 	}
 
+	public static List<GameObject> GetPrefabsWithComponent<Type>()
+	{
+		List<GameObject> list = new List<GameObject>();
+		for (int i = 0; i < Assets.Prefabs.Count; i++)
+		{
+			if (Assets.Prefabs[i].GetComponent<Type>() != null)
+			{
+				list.Add(Assets.Prefabs[i].gameObject);
+			}
+		}
+		return list;
+	}
+
+	public static List<Tag> GetPrefabTagsWithComponent<Type>()
+	{
+		List<Tag> list = new List<Tag>();
+		for (int i = 0; i < Assets.Prefabs.Count; i++)
+		{
+			if (Assets.Prefabs[i].GetComponent<Type>() != null)
+			{
+				list.Add(Assets.Prefabs[i].PrefabID());
+			}
+		}
+		return list;
+	}
+
 	public static Assets GetInstanceEditorOnly()
 	{
 		Assets[] array = (Assets[])Resources.FindObjectsOfTypeAll(typeof(Assets));
@@ -326,10 +355,6 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public static BuildingDef[] BuildingDefs;
 
-	public BaseTemplate BaseTemplateAsset;
-
-	public static BaseTemplate BaseTemplate;
-
 	public List<KPrefabID> PrefabAssets = new List<KPrefabID>();
 
 	public static List<KPrefabID> Prefabs = new List<KPrefabID>();
@@ -374,6 +399,10 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public static Material AnimMaterial;
 
+	public DiseaseVisualization DiseaseVisualization;
+
+	public Sprite LegendColourBox;
+
 	public Assets.UIPrefabData UIPrefabAssets;
 
 	public static Assets.UIPrefabData UIPrefabs;
@@ -413,6 +442,8 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 
 	[SerializeField]
 	private TextAsset elementAudio;
+
+	public static Assets instance;
 
 	public Assets.PlacementOverrideData[] PlacementOverrides;
 

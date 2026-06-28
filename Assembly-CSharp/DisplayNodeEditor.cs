@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections;
-using Klei;
-using Klei.Noise;
 using LibNoiseDotNet.Graphics.Tools.Noise;
 using LibNoiseDotNet.Graphics.Tools.Noise.Builder;
 using NodeEditorFramework;
+using ProcGen.Noise;
+using ProcGenGame;
 using UnityEngine;
 
 [Node(false, "Noise/Display", new Type[] { typeof(NoiseNodeCanvas) })]
@@ -31,7 +31,7 @@ public class DisplayNodeEditor : BaseNodeEditor
 		return null;
 	}
 
-	public override global::NodeEditorFramework.Node Create(Vector2 pos)
+	public override Node Create(Vector2 pos)
 	{
 		DisplayNodeEditor displayNodeEditor = ScriptableObject.CreateInstance<DisplayNodeEditor>();
 		displayNodeEditor.rect = new Rect(pos.x, pos.y, 266f, 301f);
@@ -78,12 +78,12 @@ public class DisplayNodeEditor : BaseNodeEditor
 					return Color.black;
 				}
 				float num = noise[cell];
-				Element element = ElementLoader.FindElementByHash(this.biome[this.biome.Count - 1].content);
+				Element element = ElementLoader.FindElementByName(this.biome[this.biome.Count - 1].content);
 				for (int i = 0; i < this.biome.Count; i++)
 				{
 					if (num < this.biome[i].maxValue)
 					{
-						element = ElementLoader.FindElementByHash(this.biome[i].content);
+						element = ElementLoader.FindElementByName(this.biome[i].content);
 						break;
 					}
 				}

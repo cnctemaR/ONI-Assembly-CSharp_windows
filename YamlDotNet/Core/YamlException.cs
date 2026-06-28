@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Runtime.Serialization;
-using System.Security.Permissions;
 
 namespace YamlDotNet.Core
 {
@@ -35,21 +33,6 @@ namespace YamlDotNet.Core
 		public YamlException(string message, Exception inner)
 			: base(message, inner)
 		{
-		}
-
-		protected YamlException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{
-			this.Start = (Mark)info.GetValue("Start", typeof(Mark));
-			this.End = (Mark)info.GetValue("End", typeof(Mark));
-		}
-
-		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
-		public override void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			base.GetObjectData(info, context);
-			info.AddValue("Start", this.Start);
-			info.AddValue("End", this.End);
 		}
 	}
 }

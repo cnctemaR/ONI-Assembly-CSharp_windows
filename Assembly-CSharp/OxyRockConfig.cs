@@ -21,10 +21,10 @@ public class OxyRockConfig : IOreConfig
 
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = EntityTemplates.CreateOreEntity(this.ElementID, null);
+		GameObject gameObject = EntityTemplates.CreateSolidOreEntity(this.ElementID, null);
 		Sublimates sublimates = gameObject.AddOrGet<Sublimates>();
 		sublimates.spawnFXHash = SpawnFXHashes.OxygenEmissionBubbles;
-		sublimates.info = new Sublimates.Info(0.4f, 0f, 1.8f, 1f, this.SublimeElementID);
+		sublimates.info = new Sublimates.Info(0.4f, 0f, 1.8f, 1f, this.SublimeElementID, byte.MaxValue, 0);
 		return gameObject;
 	}
 }

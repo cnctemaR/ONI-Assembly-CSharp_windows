@@ -73,7 +73,7 @@ public class NavPathDrawer : KMonoBehaviour
 			this.material.SetPass(0);
 			GL.Begin(1);
 			PathFinderQuery pathFinderQuery = PathFinderQueries.drawNavGridQuery.Reset(null);
-			PathFinder.Run(this.navigator.NavGrid, this.navigator.GetCurrentAbilities(), Grid.PosToCell(this.navigator), NavType.Floor, pathFinderQuery);
+			PathFinder.Run(this.navigator.NavGrid, this.navigator.GetCurrentAbilities(), Grid.PosToCell(this.navigator), this.navigator.CurrentNavType, pathFinderQuery);
 			GL.End();
 			GL.PopMatrix();
 		}

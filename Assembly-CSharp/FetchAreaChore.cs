@@ -45,14 +45,14 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			int num = 0;
 			int num2 = 0;
 			Grid.CellToXY(Grid.PosToCell(this.rootChore.destination.transform.position), out num, out num2);
-			int num3 = 4;
+			int num3 = 6;
 			num -= num3 / 2;
 			num2 -= num3 / 2;
 			List<ScenePartitionerEntry> list = GameScenePartitioner.Instance.ReserveList();
 			List<Chore.Precondition.Context> list2 = new List<Chore.Precondition.Context>();
 			if (this.rootChore.allowMultifetch)
 			{
-				GameScenePartitioner.Instance.GatherEntries(num, num2, num3, num3, GameScenePartitioner.Instance.fetchChores.mask, list);
+				GameScenePartitioner.Instance.GatherEntries(num, num2, num3, num3, GameScenePartitioner.Instance.fetchChoreLayer, list);
 				for (int i = 0; i < list.Count; i++)
 				{
 					ScenePartitionerEntry scenePartitionerEntry = list[i];
@@ -72,11 +72,11 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			int num6 = 0;
 			int num7 = 0;
 			Grid.CellToXY(Grid.PosToCell(pickupable.transform.position), out num6, out num7);
-			int num8 = 4;
+			int num8 = 6;
 			num6 -= num8 / 2;
 			num7 -= num8 / 2;
 			List<ScenePartitionerEntry> list4 = GameScenePartitioner.Instance.ReserveList();
-			GameScenePartitioner.Instance.GatherEntries(num6, num7, num8, num8, GameScenePartitioner.Instance.pickupables.mask, list4);
+			GameScenePartitioner.Instance.GatherEntries(num6, num7, num8, num8, GameScenePartitioner.Instance.pickupablesLayer, list4);
 			Tag prefabTag = pickupable.GetComponent<KPrefabID>().PrefabTag;
 			this.rootTag = prefabTag;
 			for (int j = 0; j < list4.Count; j++)
@@ -256,13 +256,10 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 					KPrefabID component = gameObject.GetComponent<KPrefabID>();
 					if (!(component == null))
 					{
-						if (component.PrefabTag == this.rootTag)
+						Pickupable component2 = component.GetComponent<Pickupable>();
+						if (component2 != null)
 						{
-							Pickupable component2 = component.GetComponent<Pickupable>();
-							if (component2 != null)
-							{
-								this.deliverables.Add(component2);
-							}
+							this.deliverables.Add(component2);
 						}
 					}
 				}
@@ -378,7 +375,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 							if (pickupable2 != null && pickupable2.TotalAmount > 0f)
 							{
 								num -= pickupable2.TotalAmount;
-								this.destination.Store(pickupable2.gameObject, false, false);
+								this.destination.Store(pickupable2.gameObject, false, false, true);
 								pickupable = pickupable2;
 								if (pickupable2 == deliverables[i])
 								{
@@ -486,7 +483,23 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			});
 			GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.ApproachSubState<Storage> movetostorage = this.delivering.movetostorage;
 			navTactic = NavigationTactics.ReduceTravelDistance;
-			movetostorage.InitializeStates(this.fetcher, this.deliveryDestination, this.delivering.storing, this.delivering.deliverfail, null, navTactic);
+			movetostorage.InitializeStates(this.fetcher, this.deliveryDestination, this.delivering.storing, this.delivering.deliverfail, null, navTactic).Enter(delegate(FetchAreaChore.StatesInstance smi)
+			{
+				if (this.deliveryObject.Get(smi) != null && this.deliveryObject.Get(smi).GetComponent<MinionIdentity>() != null)
+				{
+					KAnimFile anim = Assets.GetAnim("anim_incapacitated_carrier_kanim");
+					smi.master.GetComponent<KAnimControllerBase>().RemoveAnimOverrides(anim);
+					smi.master.GetComponent<KAnimControllerBase>().AddAnimOverrides(anim, 0f);
+					this.deliveryObject.Get(smi).transform.SetLocalPosition(Vector3.zero);
+					KBatchedAnimTracker component = this.deliveryObject.Get(smi).GetComponent<KBatchedAnimTracker>();
+					component.symbol = new HashedString("snapTo_pivot");
+					component.offset = new Vector3(0f, 0f, 1f);
+				}
+			}).Exit(delegate(FetchAreaChore.StatesInstance smi)
+			{
+				KAnimFile anim2 = Assets.GetAnim("anim_incapacitated_carrier_kanim");
+				smi.master.GetComponent<KAnimControllerBase>().RemoveAnimOverrides(anim2);
+			});
 			this.delivering.storing.ToggleStateMachine((FetchAreaChore.StatesInstance smi) => new MultitoolController.Instance(this.deliveryDestination.Get<Storage>(smi), this.fetcher.Get<Worker>(smi), "store", EffectPrefabs.Instance.PickupEffect)).ScheduleGoTo(1.5f, this.delivering.delivercomplete);
 			this.delivering.deliverfail.Enter(delegate(FetchAreaChore.StatesInstance smi)
 			{

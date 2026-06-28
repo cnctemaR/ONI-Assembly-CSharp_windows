@@ -21,7 +21,7 @@ public class SimTemperatureTransfer : KMonoBehaviour
 			if (element.highTempTransitionTarget != SimHashes.Unobtanium)
 			{
 				int num = Grid.PosToCell(simTemperatureTransfer2.transform.position);
-				SimMessages.AddRemoveSubstance(num, element.highTempTransitionTarget, CellEventLogger.Instance.OreMelted, component.Mass, component.Temperature, -1);
+				SimMessages.AddRemoveSubstance(num, element.highTempTransitionTarget, CellEventLogger.Instance.OreMelted, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, -1);
 				Util.KDestroyGameObject(simTemperatureTransfer2.gameObject);
 			}
 		}
@@ -193,7 +193,7 @@ public class SimTemperatureTransfer : KMonoBehaviour
 					HandleVector<Game.ComplexCallbackInfo>.Handle handle = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(delegate(object data)
 					{
 						SimTemperatureTransfer.OnSimRegistered(this, data);
-					}), "SimTempTransfer");
+					}));
 					float num2 = component.InternalTemperature;
 					KCrashReporter.Assert(num2 > 0f, "Invalid temperature");
 					KCrashReporter.Assert(component.Mass > 0f);
@@ -230,7 +230,6 @@ public class SimTemperatureTransfer : KMonoBehaviour
 		{
 			instance.simHandle = num;
 			float temperature = Game.Instance.simData.elementChunks[instance.simHandle].temperature;
-			PrimaryElement component = instance.GetComponent<PrimaryElement>();
 			if (temperature <= 0f)
 			{
 				KCrashReporter.Assert(false, "Bad temperature");

@@ -109,7 +109,7 @@ public class KAnimGroupFile : ScriptableObject
 			{
 				if (flag)
 				{
-					if (akf.TargetBuild != null && akf.TargetBuild != string.Empty)
+					if (!string.IsNullOrEmpty(akf.TargetBuild))
 					{
 						group.target = new HashedString(akf.TargetBuild);
 					}
@@ -314,6 +314,7 @@ public class KAnimGroupFile : ScriptableObject
 			}
 			KGlobalAnimParser.PostParse(kbatchGroupData3);
 		}
+		KAnimGroupFile.hasCompletedLoadAll = true;
 	}
 
 	private void Sort()
@@ -352,6 +353,8 @@ public class KAnimGroupFile : ScriptableObject
 
 	[SerializeField]
 	private List<Pair<HashedString, HashedString>> currentGroup = new List<Pair<HashedString, HashedString>>();
+
+	private static bool hasCompletedLoadAll;
 
 	[Serializable]
 	public class Group

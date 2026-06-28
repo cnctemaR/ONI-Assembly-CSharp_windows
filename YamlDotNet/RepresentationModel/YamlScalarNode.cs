@@ -3,20 +3,26 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
+using YamlDotNet.Serialization;
 
 namespace YamlDotNet.RepresentationModel
 {
 	[DebuggerDisplay("{Value}")]
 	[Serializable]
-	public class YamlScalarNode : YamlNode
+	public sealed class YamlScalarNode : YamlNode, IYamlConvertible
 	{
 		public string Value { get; set; }
 
 		public ScalarStyle Style { get; set; }
 
-		internal YamlScalarNode(EventReader events, DocumentLoadingState state)
+		internal YamlScalarNode(IParser parser, DocumentLoadingState state)
 		{
-			Scalar scalar = events.Expect<Scalar>();
+			this.Load(parser, state);
+		}
+
+		private void Load(IParser parser, DocumentLoadingState state)
+		{
+			Scalar scalar = parser.Expect<Scalar>();
 			base.Load(scalar, state);
 			this.Value = scalar.Value;
 			this.Style = scalar.Style;
@@ -38,7 +44,7 @@ namespace YamlDotNet.RepresentationModel
 
 		internal override void Emit(IEmitter emitter, EmitterState state)
 		{
-			emitter.Emit(new Scalar(base.Anchor, base.Tag, this.Value, this.Style, true, false));
+			emitter.Emit(new Scalar(base.Anchor, base.Tag, this.Value, this.Style, base.Tag == null, false));
 		}
 
 		public override void Accept(IYamlVisitor visitor)
@@ -46,9 +52,9 @@ namespace YamlDotNet.RepresentationModel
 			visitor.Visit(this);
 		}
 
-		public override bool Equals(object other)
+		public override bool Equals(object obj)
 		{
-			YamlScalarNode yamlScalarNode = other as YamlScalarNode;
+			YamlScalarNode yamlScalarNode = obj as YamlScalarNode;
 			return yamlScalarNode != null && base.Equals(yamlScalarNode) && YamlNode.SafeEquals(this.Value, yamlScalarNode.Value);
 		}
 
@@ -57,28 +63,38 @@ namespace YamlDotNet.RepresentationModel
 			return YamlNode.CombineHashCodes(base.GetHashCode(), YamlNode.GetHashCode(this.Value));
 		}
 
-		public static implicit operator YamlScalarNode(string value)
-		{
-			return new YamlScalarNode(value);
-		}
-
 		public static explicit operator string(YamlScalarNode value)
 		{
 			return value.Value;
 		}
 
-		public override string ToString()
+		internal override string ToString(RecursionLevel level)
 		{
 			return this.Value;
 		}
 
-		public override IEnumerable<YamlNode> AllNodes
+		internal override IEnumerable<YamlNode> SafeAllNodes(RecursionLevel level)
+		{
+			yield return this;
+			yield break;
+		}
+
+		public override YamlNodeType NodeType
 		{
 			get
 			{
-				yield return this;
-				yield break;
+				return YamlNodeType.Scalar;
 			}
+		}
+
+		void IYamlConvertible.Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
+		{
+			this.Load(parser, new DocumentLoadingState());
+		}
+
+		void IYamlConvertible.Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
+		{
+			this.Emit(emitter, new EmitterState());
 		}
 	}
 }

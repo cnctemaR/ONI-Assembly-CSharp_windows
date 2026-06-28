@@ -2,13 +2,13 @@
 
 public class ScenePartitionerEntry
 {
-	public ScenePartitionerEntry(string name, object obj, int x, int y, int width, int height, int masks, ScenePartitioner partitioner, Action<object> event_callback)
+	public ScenePartitionerEntry(string name, object obj, int x, int y, int width, int height, ScenePartitionerLayer layer, ScenePartitioner partitioner, Action<object> event_callback)
 	{
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
-		this.masks = masks;
+		this.layer = layer.layer;
 		this.partitioner = partitioner;
 		this.eventCallback = event_callback;
 		this.obj = obj;
@@ -21,7 +21,10 @@ public class ScenePartitionerEntry
 
 	public void Release()
 	{
-		this.partitioner.Remove(this);
+		if (this.partitioner != null)
+		{
+			this.partitioner.Remove(this);
+		}
 	}
 
 	public int x;
@@ -32,7 +35,7 @@ public class ScenePartitionerEntry
 
 	public int height;
 
-	public int masks;
+	public int layer;
 
 	public int queryId;
 

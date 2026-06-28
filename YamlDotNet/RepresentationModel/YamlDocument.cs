@@ -21,26 +21,25 @@ namespace YamlDotNet.RepresentationModel
 			this.RootNode = new YamlScalarNode(rootNode);
 		}
 
-		internal YamlDocument(EventReader events)
+		internal YamlDocument(IParser parser)
 		{
 			DocumentLoadingState documentLoadingState = new DocumentLoadingState();
-			events.Expect<DocumentStart>();
-			while (!events.Accept<DocumentEnd>())
+			parser.Expect<DocumentStart>();
+			while (!parser.Accept<DocumentEnd>())
 			{
-				this.RootNode = YamlNode.ParseNode(events, documentLoadingState);
+				this.RootNode = YamlNode.ParseNode(parser, documentLoadingState);
 				if (this.RootNode is YamlAliasNode)
 				{
 					throw new YamlException();
 				}
 			}
 			documentLoadingState.ResolveAliases();
-			events.Expect<DocumentEnd>();
+			parser.Expect<DocumentEnd>();
 		}
 
 		private void AssignAnchors()
 		{
-			YamlDocument.AnchorAssigningVisitor anchorAssigningVisitor = new YamlDocument.AnchorAssigningVisitor();
-			anchorAssigningVisitor.AssignAnchors(this);
+			new YamlDocument.AnchorAssigningVisitor().AssignAnchors(this);
 		}
 
 		internal void Save(IEmitter emitter, bool assignAnchors = true)
@@ -67,7 +66,7 @@ namespace YamlDotNet.RepresentationModel
 			}
 		}
 
-		private class AnchorAssigningVisitor : YamlVisitor
+		private class AnchorAssigningVisitor : YamlVisitorBase
 		{
 			public void AssignAnchors(YamlDocument document)
 			{
@@ -80,52 +79,58 @@ namespace YamlDotNet.RepresentationModel
 					if (keyValuePair.Value)
 					{
 						string text;
-						do
+						if (!string.IsNullOrEmpty(keyValuePair.Key.Anchor) && !this.existingAnchors.Contains(keyValuePair.Key.Anchor))
 						{
-							text = random.Next().ToString(CultureInfo.InvariantCulture);
+							text = keyValuePair.Key.Anchor;
 						}
-						while (this.existingAnchors.Contains(text));
+						else
+						{
+							do
+							{
+								text = random.Next().ToString(CultureInfo.InvariantCulture);
+							}
+							while (this.existingAnchors.Contains(text));
+						}
 						this.existingAnchors.Add(text);
 						keyValuePair.Key.Anchor = text;
 					}
 				}
 			}
 
-			private void VisitNode(YamlNode node)
+			private bool VisitNodeAndFindDuplicates(YamlNode node)
 			{
-				if (string.IsNullOrEmpty(node.Anchor))
+				bool flag;
+				if (this.visitedNodes.TryGetValue(node, out flag))
 				{
-					bool flag;
-					if (!this.visitedNodes.TryGetValue(node, out flag))
-					{
-						this.visitedNodes.Add(node, false);
-						return;
-					}
 					if (!flag)
 					{
 						this.visitedNodes[node] = true;
-						return;
 					}
+					return !flag;
 				}
-				else
+				this.visitedNodes.Add(node, false);
+				return false;
+			}
+
+			public override void Visit(YamlScalarNode scalar)
+			{
+				this.VisitNodeAndFindDuplicates(scalar);
+			}
+
+			public override void Visit(YamlMappingNode mapping)
+			{
+				if (!this.VisitNodeAndFindDuplicates(mapping))
 				{
-					this.existingAnchors.Add(node.Anchor);
+					base.Visit(mapping);
 				}
 			}
 
-			protected override void Visit(YamlScalarNode scalar)
+			public override void Visit(YamlSequenceNode sequence)
 			{
-				this.VisitNode(scalar);
-			}
-
-			protected override void Visit(YamlMappingNode mapping)
-			{
-				this.VisitNode(mapping);
-			}
-
-			protected override void Visit(YamlSequenceNode sequence)
-			{
-				this.VisitNode(sequence);
+				if (!this.VisitNodeAndFindDuplicates(sequence))
+				{
+					base.Visit(sequence);
+				}
 			}
 
 			private readonly HashSet<string> existingAnchors = new HashSet<string>();

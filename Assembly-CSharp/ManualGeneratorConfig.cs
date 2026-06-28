@@ -6,7 +6,8 @@ public class ManualGeneratorConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("ManualGenerator", 2, 2, "generatormanual_kanim", 200f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, null);
+		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER4;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("ManualGenerator", 2, 2, "generatormanual_kanim", 200f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, tier);
 		buildingDef.GeneratorWattageRating = 400f;
 		buildingDef.GeneratorBaseCapacity = 10000f;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
@@ -23,11 +24,12 @@ public class ManualGeneratorConfig : IBuildingConfig
 	{
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		go.AddOrGet<LoopingSounds>();
-		go.AddOrGet<Prioritizable>();
+		Prioritizable.AddRef(go);
 		Generator generator = go.AddOrGet<Generator>();
 		generator.powerDistributionOrder = 10;
 		ManualGenerator manualGenerator = go.AddOrGet<ManualGenerator>();
 		manualGenerator.BatteryRefillPercent = 0.5f;
+		manualGenerator.workLayer = Grid.SceneLayer.BuildingFront;
 		KBatchedAnimController kbatchedAnimController = go.AddOrGet<KBatchedAnimController>();
 		kbatchedAnimController.fgLayer = Grid.SceneLayer.BuildingFront;
 		kbatchedAnimController.initialAnim = "off";
@@ -48,4 +50,6 @@ public class ManualGeneratorConfig : IBuildingConfig
 	{
 		BuildingTemplates.DoPostConfigure(go);
 	}
+
+	public const string ID = "ManualGenerator";
 }

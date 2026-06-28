@@ -36,11 +36,13 @@ public class BuildingLoader : DefLoader
 		GameObject gameObject = this.CreateTemplate();
 		gameObject.AddComponent<BuildingUnderConstruction>();
 		gameObject.AddComponent<Constructable>();
-		gameObject.AddComponent<Storage>();
+		Storage storage = gameObject.AddComponent<Storage>();
+		storage.doDiseaseTransfer = false;
 		gameObject.AddComponent<Cancellable>();
 		gameObject.AddComponent<Approachable>();
 		gameObject.AddComponent<UserMenu>();
 		gameObject.AddComponent<Notifier>();
+		gameObject.AddComponent<Prioritizable>();
 		return gameObject;
 	}
 
@@ -140,7 +142,7 @@ public class BuildingLoader : DefLoader
 
 	public GameObject CreateBuildingUnderConstruction(BuildingDef def, bool isRelocating)
 	{
-		GameObject gameObject = this.CreateBuilding(def, this.constructionTemplate, SceneOrganizer.Instance.GetFolder(Folder.BuildingUnderConstructions));
+		GameObject gameObject = this.CreateBuilding(def, this.constructionTemplate, SceneOrganizer.Instance.GetFolder(Folder.GlobalDoNotDestroy));
 		KSelectable component = gameObject.GetComponent<KSelectable>();
 		component.SetName(def.Name);
 		gameObject.GetComponent<PrimaryElement>().MassPerUnit = def.Mass[0];
@@ -177,13 +179,16 @@ public class BuildingLoader : DefLoader
 		{
 			gameObject = global::UnityEngine.Object.Instantiate<GameObject>(gameObject);
 			gameObject.name = def.PrefabID + "Complete";
-			gameObject.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.BuildingCompletes).transform;
+			gameObject.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.GlobalDoNotDestroy).transform;
 			gameObject.transform.position = new Vector3(0f, 0f, Grid.GetLayerZ(def.SceneLayer));
 			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 			component.MassPerUnit = def.Mass[0];
 			BuildingHP buildingHP = BuildingLoader.UpdateComponentRequirement<BuildingHP>(gameObject, true);
 			buildingHP.SetHitPoints(def.HitPoints);
-			BuildingLoader.UpdateComponentRequirement<Repairable>(gameObject, true);
+			if (def.Repairable)
+			{
+				BuildingLoader.UpdateComponentRequirement<Repairable>(gameObject, true);
+			}
 			int num = LayerMask.NameToLayer("Default");
 			gameObject.layer = num;
 			Building component2 = gameObject.GetComponent<BuildingComplete>();
@@ -223,6 +228,10 @@ public class BuildingLoader : DefLoader
 			{
 				gameObject.AddComponent<Floodable>();
 			}
+			if (def.Disinfectable)
+			{
+				gameObject.AddOrGet<Disinfectable>();
+			}
 			if (def.Overheatable)
 			{
 				Overheatable overheatable = gameObject.AddComponent<Overheatable>();
@@ -237,11 +246,6 @@ public class BuildingLoader : DefLoader
 			{
 				gameObject.AddComponent<Relocatable>();
 			}
-			if (def.Slot != null && def.Slot != string.Empty)
-			{
-				Ownable ownable = gameObject.AddComponent<Ownable>();
-				ownable.slot = Db.Get().OwnableSlots.Get(def.Slot);
-			}
 			BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(gameObject, BuildingCellVisualizer.CheckRequiresComponent(def));
 			LoopingSounds component3 = gameObject.GetComponent<LoopingSounds>();
 			if (component3 == null)
@@ -252,6 +256,11 @@ public class BuildingLoader : DefLoader
 			DecorProvider decorProvider = BuildingLoader.UpdateComponentRequirement<DecorProvider>(gameObject, true);
 			decorProvider.baseDecor = def.BaseDecor;
 			decorProvider.baseRadius = def.BaseDecorRadius;
+			NoisePolluter noisePolluter = BuildingLoader.UpdateComponentRequirement<NoisePolluter>(gameObject, def.BaseNoisePollution > 0 && def.BaseNoisePollutionRadius > 0);
+			if (noisePolluter != null)
+			{
+				noisePolluter.SetValues(new EffectorValues(def.BaseNoisePollution, def.BaseNoisePollutionRadius));
+			}
 			KPrefabID kprefabID = DefLoader.AddID(gameObject, def.PrefabID);
 			kprefabID.defaultLayer = num;
 			Assets.AddPrefab(kprefabID);
@@ -262,7 +271,7 @@ public class BuildingLoader : DefLoader
 
 	public GameObject CreateBuildingPreview(BuildingDef def)
 	{
-		GameObject gameObject = this.CreateBuilding(def, this.previewTemplate, SceneOrganizer.Instance.GetFolder(Folder.BuildingPreviews));
+		GameObject gameObject = this.CreateBuilding(def, this.previewTemplate, SceneOrganizer.Instance.GetFolder(Folder.GlobalDoNotDestroy));
 		int num = LayerMask.NameToLayer("Place");
 		gameObject.transform.position = new Vector3(0f, 0f, Grid.GetLayerZ(def.SceneLayer));
 		BuildingLoader.Add2DComponents(def, gameObject, "place", true, num);
@@ -278,15 +287,17 @@ public class BuildingLoader : DefLoader
 		}
 		KPrefabID kprefabID = DefLoader.AddID(gameObject, def.PrefabID + "Preview");
 		kprefabID.defaultLayer = num;
+		KSelectable component2 = gameObject.GetComponent<KSelectable>();
+		component2.SetName(def.Name);
 		BuildingCellVisualizer buildingCellVisualizer = BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(gameObject, BuildingCellVisualizer.CheckRequiresComponent(def));
 		if (buildingCellVisualizer != null)
 		{
 			BuildingLoader.CopyBuildingCellVisualizer(def.BuildingComplete, buildingCellVisualizer);
 		}
-		KAnimGraphTileVisualizer component2 = gameObject.GetComponent<KAnimGraphTileVisualizer>();
-		if (component2 != null)
+		KAnimGraphTileVisualizer component3 = gameObject.GetComponent<KAnimGraphTileVisualizer>();
+		if (component3 != null)
 		{
-			global::UnityEngine.Object.DestroyImmediate(component2);
+			global::UnityEngine.Object.DestroyImmediate(component3);
 		}
 		gameObject.PreInit();
 		return gameObject;
@@ -294,13 +305,15 @@ public class BuildingLoader : DefLoader
 
 	public GameObject CreateBuildingPackage(BuildingDef def)
 	{
-		GameObject gameObject = this.CreateBuilding(def, this.packageTemplate, SceneOrganizer.Instance.GetFolder(Folder.Loot));
+		GameObject gameObject = this.CreateBuilding(def, this.packageTemplate, SceneOrganizer.Instance.GetFolder(Folder.GlobalDoNotDestroy));
 		int num = LayerMask.NameToLayer("Loot");
 		gameObject.transform.position = new Vector3(0f, 0f, Grid.GetLayerZ(def.SceneLayer));
 		Relocatable relocatable = BuildingLoader.UpdateComponentRequirement<Relocatable>(gameObject, true);
 		relocatable.deconstruct = false;
 		KPrefabID kprefabID = DefLoader.AddID(gameObject, def.PrefabID + "Package");
 		kprefabID.defaultLayer = num;
+		KSelectable component = gameObject.GetComponent<KSelectable>();
+		component.SetName(def.Name);
 		Assets.AddPrefab(kprefabID);
 		gameObject.PreInit();
 		return gameObject;

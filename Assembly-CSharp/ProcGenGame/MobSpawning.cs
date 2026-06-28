@@ -1,0 +1,182 @@
+﻿using System;
+using System.Collections.Generic;
+using ProcGen;
+using STRINGS;
+using UnityEngine;
+
+namespace ProcGenGame
+{
+	public static class MobSpawning
+	{
+		public static Dictionary<int, string> PlaceAmbientMobs(TerrainCell tc, SeededRandom rnd, Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dc)
+		{
+			Dictionary<int, string> dictionary = new Dictionary<int, string>();
+			Node node = tc.node;
+			List<Tag> list = new List<Tag>();
+			bool flag = false;
+			int num = 0;
+			if (node.tags == null || node.biomeSpecificTags == null)
+			{
+				tc.LogInfo("PlaceAmbientMobs", "No tags", (float)node.node.Id);
+				return null;
+			}
+			foreach (Tag tag in node.biomeSpecificTags)
+			{
+				if (WorldGen.Settings.mobs.MobLookupTable.ContainsKey(tag.Name) && WorldGen.Settings.mobs.MobLookupTable[tag.Name] != null)
+				{
+					list.Add(tag);
+					num++;
+					flag = true;
+				}
+			}
+			if (!flag)
+			{
+				tc.LogInfo("PlaceAmbientMobs", "No biome MOBS", (float)node.node.Id);
+				return null;
+			}
+			List<int> availableCells = tc.GetAvailableCells();
+			tc.LogInfo("PlaceAmbientMobs", "possibleSpawnPoints", (float)availableCells.Count);
+			for (int i = availableCells.Count - 1; i > 0; i--)
+			{
+				int num2 = availableCells[i];
+				if (ElementLoader.elements[(int)cells[num2].elementIdx].id == SimHashes.Katairite || ElementLoader.elements[(int)cells[num2].elementIdx].id == SimHashes.Unobtanium)
+				{
+					availableCells.RemoveAt(i);
+				}
+			}
+			tc.LogInfo("mob spawns", "Id:" + node.node.Id + " possible cells", (float)availableCells.Count);
+			if (availableCells.Count == 0)
+			{
+				if (WorldGen.isRunningDebugGen)
+				{
+					global::Debug.LogWarning("No where to put mobs possibleSpawnPoints [" + tc.node.node.Id + "]", null);
+				}
+				return null;
+			}
+			int num3 = 0;
+			while (num3 < MobSettings.AmbientMobDensity && availableCells.Count > 0)
+			{
+				list.ShuffleSeeded<Tag>(rnd.RandomSource());
+				for (int j = 0; j < list.Count; j++)
+				{
+					if (!WorldGen.Settings.mobs.GetMobTags().Contains(list[j]))
+					{
+						global::Debug.LogError("Missing sample description for tag [" + list[j].Name + "]", null);
+					}
+					else
+					{
+						Mob mob = WorldGen.Settings.mobs.MobLookupTable[list[j].Name];
+						List<int> list2 = availableCells.FindAll((int cell) => MobSpawning.isSuitableMobSpawnPoint(cell, mob, cells, bgTemp, dc));
+						if (list2.Count == 0)
+						{
+							if (WorldGen.isRunningDebugGen)
+							{
+								global::Debug.LogWarning(string.Concat(new object[]
+								{
+									"No SuitableMobSpawnPoint to put mobs mobPossibleSpawnPoints [",
+									list[j].Name,
+									"] [",
+									tc.node.node.Id,
+									"]"
+								}), null);
+							}
+						}
+						else
+						{
+							list2.ShuffleSeeded<int>(rnd.RandomSource());
+							tc.LogInfo("\t\tpossible", string.Concat(new object[]
+							{
+								list[j].ToString(),
+								" mps: ",
+								list2.Count,
+								" ps:"
+							}), (float)availableCells.Count);
+							float num4 = mob.density.GetRandomValueWithinRange(rnd);
+							if (num4 > 1f)
+							{
+								if (WorldGen.isRunningDebugGen)
+								{
+									global::Debug.LogWarning("Got a mob density greater than 1.0 for " + list[j].Name + ". Probably using density as spacing!", null);
+								}
+								num4 = 1f;
+							}
+							int num5 = Mathf.RoundToInt((float)list2.Count * num4);
+							tc.LogInfo("\t\tcount", list[j].ToString(), (float)num5);
+							Tag tag2 = ((mob.prefabName != null) ? new Tag(mob.prefabName) : list[j]);
+							int num6 = 0;
+							while (num6 < num5 && list2.Count != 0)
+							{
+								int num7 = list2[0];
+								list2.Remove(num7);
+								availableCells.Remove(num7);
+								tc.AddMob(new KeyValuePair<int, Tag>(num7, tag2));
+								dictionary.Add(num7, tag2.Name);
+								num6++;
+							}
+						}
+					}
+				}
+				num3++;
+			}
+			return dictionary;
+		}
+
+		private static bool isSuitableMobSpawnPoint(int cell, Mob mob, Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dc)
+		{
+			if (!Grid.IsValidCell(cell) || !Grid.IsValidCell(Grid.CellAbove(cell)) || !Grid.IsValidCell(Grid.CellBelow(cell)))
+			{
+				return false;
+			}
+			switch (mob.location)
+			{
+			case Mob.Location.Floor:
+				return MobSpawning.isNaturalCavity(cell) && !Grid.Solid[cell] && !Grid.Solid[Grid.CellAbove(cell)] && Grid.Solid[Grid.CellBelow(cell)];
+			case Mob.Location.Ceiling:
+				return MobSpawning.isNaturalCavity(cell) && !Grid.Solid[cell] && Grid.Solid[Grid.CellAbove(cell)] && !Grid.Solid[Grid.CellBelow(cell)];
+			case Mob.Location.Air:
+				return !Grid.Solid[cell] && !Grid.Solid[Grid.CellAbove(cell)];
+			case Mob.Location.Solid:
+				return !MobSpawning.isNaturalCavity(cell) && Grid.Solid[cell];
+			}
+			return MobSpawning.isNaturalCavity(cell) && !Grid.Solid[cell];
+		}
+
+		public static bool isNaturalCavity(int cell)
+		{
+			return MobSpawning.NaturalCavities != null && MobSpawning.allNaturalCavityCells.Contains(cell);
+		}
+
+		public static void DetectNaturalCavities(WorldGen.OfflineCallbackFunction updateProgressFn)
+		{
+			updateProgressFn(UI.WORLDGEN.ANALYZINGWORLD.key, 0.8f, WorldGenProgressStages.Stages.DetectNaturalCavities);
+			HashSet<int> invalidCells = new HashSet<int>();
+			for (int i = 0; i < WorldGen.TerrainCells.Count; i++)
+			{
+				TerrainCell terrainCell = WorldGen.TerrainCells[i];
+				float num = (float)i / (float)WorldGen.TerrainCells.Count * 100f;
+				updateProgressFn(UI.WORLDGEN.ANALYZINGWORLDCOMPLETE.key, num, WorldGenProgressStages.Stages.DetectNaturalCavities);
+				MobSpawning.NaturalCavities.Add(terrainCell, new List<HashSet<int>>());
+				invalidCells.Clear();
+				List<int> allCells = terrainCell.GetAllCells();
+				for (int j = 0; j < allCells.Count; j++)
+				{
+					int num2 = allCells[j];
+					if (!Grid.Solid[num2] && !invalidCells.Contains(num2))
+					{
+						HashSet<int> hashSet = GameUtil.FloodCollectCells(num2, (int checkCell) => !invalidCells.Contains(checkCell) && !Grid.Solid[checkCell], 300, invalidCells);
+						if (hashSet != null && hashSet.Count > 0)
+						{
+							MobSpawning.NaturalCavities[terrainCell].Add(hashSet);
+							MobSpawning.allNaturalCavityCells.UnionWith(hashSet);
+						}
+					}
+				}
+			}
+			updateProgressFn(UI.WORLDGEN.ANALYZINGWORLDCOMPLETE.key, 100f, WorldGenProgressStages.Stages.DetectNaturalCavities);
+		}
+
+		public static Dictionary<TerrainCell, List<HashSet<int>>> NaturalCavities = new Dictionary<TerrainCell, List<HashSet<int>>>();
+
+		public static HashSet<int> allNaturalCavityCells = new HashSet<int>();
+	}
+}

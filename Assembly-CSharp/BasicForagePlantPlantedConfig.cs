@@ -7,10 +7,9 @@ public class BasicForagePlantPlantedConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		DecorValues tier = DECOR.BONUS.TIER1;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("BasicForagePlantPlanted", global::STRINGS.CREATURES.SPECIES.BASICFORAGEPLANTPLANTED.NAME, global::STRINGS.CREATURES.SPECIES.BASICFORAGEPLANTPLANTED.DESC, 100f, Assets.GetAnim("muckroot_kanim"), "idle", Grid.SceneLayer.BuildingBack, 1, 1, tier, SimHashes.Creature, null);
+		EffectorValues tier = DECOR.BONUS.TIER1;
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity("BasicForagePlantPlanted", global::STRINGS.CREATURES.SPECIES.BASICFORAGEPLANTPLANTED.NAME, global::STRINGS.CREATURES.SPECIES.BASICFORAGEPLANTPLANTED.DESC, 100f, Assets.GetAnim("muckroot_kanim"), "idle", Grid.SceneLayer.BuildingBack, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
 		gameObject.UpdateComponentRequirement<SimTemperatureTransfer>(true);
-		gameObject.UpdateComponentRequirement<PreserveOnEntomb>(true);
 		OccupyArea occupyArea = gameObject.UpdateComponentRequirement<OccupyArea>(true);
 		occupyArea.objectLayer = ObjectLayer.Building;
 		gameObject.UpdateComponentRequirement<EntombVulnerable>(true);

@@ -4,9 +4,10 @@ using System.Diagnostics;
 
 public class Logger<EntryType> : Logger
 {
-	public Logger(string name)
+	public Logger(string name, int new_max = 35)
 		: base(name)
 	{
+		this.SetMaxEntries(new_max);
 	}
 
 	public IEnumerator<EntryType> GetEnumerator()

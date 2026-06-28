@@ -24,6 +24,12 @@ public class GameScheduler : KMonoBehaviour, IScheduler
 		this.scheduler.Update();
 	}
 
+	protected override void OnLoadLevel()
+	{
+		this.scheduler.FreeResources();
+		this.scheduler = null;
+	}
+
 	public SchedulerGroup CreateGroup()
 	{
 		return new SchedulerGroup(this.scheduler);

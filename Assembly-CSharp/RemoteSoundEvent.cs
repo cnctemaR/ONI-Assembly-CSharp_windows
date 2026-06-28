@@ -6,16 +6,8 @@ using UnityEngine;
 public class RemoteSoundEvent : SoundEvent
 {
 	public RemoteSoundEvent(string file_name, string sound_name, int frame, float min_interval)
-		: base(file_name, sound_name, frame, min_interval, false)
+		: base(file_name, sound_name, frame, true, false, min_interval, false)
 	{
-	}
-
-	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
-	{
-		if (this.ShouldPlaySound(behaviour))
-		{
-			this.PlaySound(behaviour);
-		}
 	}
 
 	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)

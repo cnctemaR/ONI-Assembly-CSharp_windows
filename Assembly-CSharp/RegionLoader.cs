@@ -13,7 +13,7 @@ public class RegionLoader : KMonoBehaviour
 			regionInfo.queryLayer = i;
 			GameObject gameObject = new GameObject(regionInfo.name);
 			gameObject.SetActive(false);
-			gameObject.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.Regions).transform;
+			gameObject.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.GlobalDoNotDestroy).transform;
 			Region region = gameObject.AddComponent<Region>();
 			gameObject.AddComponent<Modifiers>();
 			region.SetInfo(regionInfo);

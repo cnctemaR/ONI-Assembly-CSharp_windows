@@ -12,6 +12,10 @@ public class AnimCycler : Cycler
 		else
 		{
 			this.Next();
+			BoxCollider2D boxCollider2D = base.gameObject.AddComponent<BoxCollider2D>();
+			boxCollider2D.size = Vector2.one * 3f;
+			boxCollider2D.offset = Vector2.up * 1.5f;
+			BatchAnimCamera.bounds.Encapsulate(boxCollider2D.bounds);
 		}
 	}
 
@@ -27,6 +31,10 @@ public class AnimCycler : Cycler
 			this.controller.UpdateSymbolLookups();
 			this.index %= this.file.animCount;
 		}
+	}
+
+	private void OnMouseDown()
+	{
 	}
 
 	public KAnimFileData file;

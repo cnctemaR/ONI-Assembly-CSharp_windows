@@ -57,15 +57,16 @@ public class Exhaust : KMonoBehaviour
 								if (flag)
 								{
 									byte b = (byte)ElementLoader.elements.IndexOf(component.Element);
-									FallingWater.instance.AddParticle(num, b, component.Mass, component.Temperature, true, false, true);
+									FallingWater.instance.AddParticle(num, b, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, true, false, true);
 								}
 								else
 								{
-									SimMessages.AddRemoveSubstance(num, component.ElementID, CellEventLogger.Instance.ExhaustSimUpdate, component.Mass, component.Temperature, -1);
+									SimMessages.AddRemoveSubstance(num, component.ElementID, CellEventLogger.Instance.ExhaustSimUpdate, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, -1);
 								}
-								this.recentlyExhausted = true;
 								component.KeepZeroMassObject = true;
 								component.Mass = 0f;
+								component.ModifyDiseaseCount(int.MinValue, "Exhaust.SimUpdate");
+								this.recentlyExhausted = true;
 								break;
 							}
 						}
@@ -78,9 +79,10 @@ public class Exhaust : KMonoBehaviour
 						PrimaryElement component2 = items[j].GetComponent<PrimaryElement>();
 						if (component2.Mass > 0f && component2.Element.IsGas)
 						{
-							SimMessages.AddRemoveSubstance(num, component2.ElementID, CellEventLogger.Instance.ExhaustSimUpdate, component2.Mass, component2.Temperature, -1);
+							SimMessages.AddRemoveSubstance(num, component2.ElementID, CellEventLogger.Instance.ExhaustSimUpdate, component2.Mass, component2.Temperature, component2.DiseaseIdx, component2.DiseaseCount, -1);
 							component2.KeepZeroMassObject = true;
 							component2.Mass = 0f;
+							component2.ModifyDiseaseCount(int.MinValue, "Exhaust.SimUpdate");
 							this.recentlyExhausted = true;
 							break;
 						}

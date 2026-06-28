@@ -6,46 +6,39 @@ namespace STRINGS
 	{
 		public class SPECIES
 		{
+			public class CHLORINEGEYSER
+			{
+				public static LocString NAME = "Chlorine Geyser";
+
+				public static LocString DESC = "A highly pressurized geyser that periodically erupts with <style=\"gas\">Chlorine Gas</style>.";
+			}
+
 			public class FLUT
 			{
 				public static LocString NAME = "Pacu";
 
-				public static LocString DESC = "A naturally friendly and easily outsmarted aquatic prey species.\n\nEvery organism in the known universe finds the Pacu extremely delicious.";
+				public static LocString DESC = "Every organism in the known universe finds the Pacu extremely delicious.";
 			}
 
 			public class GLOM
 			{
 				public static LocString NAME = "Morb";
 
-				public static LocString DESC = "An agile, <style=\"disease\">Disease</style>-ridden invertebrate.\n\nIt is attracted to the decomposing carcasses of deceased organisms and frequently emits small bursts of <style=\"gas\">Polluted Oxygen</style>.";
-			}
-
-			public class GRONEHOG
-			{
-				public static LocString NAME = "Volgus";
-
-				public static LocString DESC = "A skittish mammalian creature.\n\nIt moves in herds for safety.";
-			}
-
-			public class GRONEHOGMOUND
-			{
-				public static LocString NAME = "Volgus Den";
-
-				public static LocString DESC = "The communal nesting ground of a Volgus herd.";
+				public static LocString DESC = "Morbs are attracted to decomposing corpses and frequently excrete bursts of <style=\"gas\">Polluted Oxygen</style>.";
 			}
 
 			public class HATCH
 			{
 				public static LocString NAME = "Hatch";
 
-				public static LocString DESC = "A nocturnal scavenger that will consume anything within reach that fits into its large mouth.\n\nThe waste excretions of a Hatch can be used as <style=\"solid\">Fuel</style>.\n\nDigging up Buried Objects may release a Hatch.";
+				public static LocString DESC = "Hatches excrete solid <style=\"solid\">Coal</style> as waste and may be uncovered by digging up Buried Objects.";
 			}
 
 			public class PUFT
 			{
 				public static LocString NAME = "Puft";
 
-				public static LocString DESC = "An extremely buoyant, non-aggressive species.\n\nThe Puft rids itself of excess pathogens by excreting lumps of <style=\"solid\">Slime</style> with each breath.";
+				public static LocString DESC = "Pufts are non-aggressive creatures that excrete lumps of <style=\"solid\">Slime</style> with each breath.";
 			}
 
 			public class GREEDYGREEN
@@ -59,7 +52,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Shockworm";
 
-				public static LocString DESC = "An exceptionally aggressive, insectoid species.\n\nIt has three specialized organs which discharge electrical shocks to stun prey.";
+				public static LocString DESC = "Shockworms are exceptionally aggressive and discharge electrical shocks to stun their prey.";
+			}
+
+			public class LIGHTBUG
+			{
+				public static LocString NAME = "Shine Bug";
+
+				public static LocString DESC = "Shine Bugs emit a soft <style=\"light\">Light</style> in hopes of attracting more of their kind for company.";
 			}
 
 			public class GEYSER
@@ -74,6 +74,15 @@ namespace STRINGS
 				public static LocString NAME = "Natural Gas Geyser";
 
 				public static LocString DESC = "A highly pressurized geyser that periodically erupts with <style=\"gas\">Natural Gas</style>.";
+			}
+
+			public class MUSHROOMPLANT
+			{
+				public static LocString NAME = "Dusk Cap";
+
+				public static LocString DESC = "Dusk Caps produce <style=\"plant\">Mushrooms</style>, fungal growths that can be harvested for <style=\"food\">Food</style>.";
+
+				public static LocString DOMESTICATEDDESC = "This plant produces edible <style=\"food\">Mushrooms</style>.";
 			}
 
 			public class STEAMSPOUT
@@ -134,18 +143,18 @@ namespace STRINGS
 
 			public class SWAMPLILY
 			{
-				public static LocString NAME = "Swamp Lily";
+				public static LocString NAME = "Balm Lily";
 
-				public static LocString DESC = "An elegant, warm climate <style=\"plant\">Plant</style> that can be domestically grown with Planter Boxes.\n\nSwamp Lilies produce long, fragrant leaves with medicinal properties.";
+				public static LocString DESC = "Balm Lilies produce <style=\"medicine\">Balm Lily Flowers</style>, a lovely bloom with medicinal properties.";
 
-				public static LocString DOMESTICATEDDESC = "An elegant, warm climate <style=\"plant\">Plant</style> that produces long, fragrant leaves with medicinal properties.";
+				public static LocString DOMESTICATEDDESC = "This plant produces medicinal <style=\"medicine\">Balm Lily Flowers</style>.";
 			}
 
 			public class JUNGLEGASPLANT
 			{
 				public static LocString NAME = "Palmera Tree";
 
-				public static LocString DESC = "A large, chlorine-dwelling <style=\"plant\">Plant</style> that can be domestically grown with Planter Boxes.\n\nPalmeras grow inedible buds that emit toxic hydrogen gas.";
+				public static LocString DESC = "A large, chlorine-dwelling <style=\"plant\">Plant</style> that can be grown in farm buildings.\n\nPalmeras grow inedible buds that emit toxic hydrogen gas.";
 
 				public static LocString DOMESTICATEDDESC = "A large, chlorine-dwelling <style=\"plant\">Plant</style> that grows inedible buds which emit toxic hydrogen gas.";
 			}
@@ -154,7 +163,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Bristle Blossom";
 
-				public static LocString DESC = "A barbed <style=\"plant\">Plant</style> that can be domestically grown with Planter Boxes.\n\nWhen a Bristle Blossom flowers it produces an edible bud that can be harvested for <style=\"food\">Food</style>.";
+				public static LocString DESC = "Bristle Blossoms produce <style=\"food\">Bristle Berries</style>, a prickly edible bud.";
 
 				public static LocString DOMESTICATEDDESC = "This plant produces edible <style=\"food\">Bristle Berries</style>.";
 			}
@@ -163,7 +172,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Sleet Wheat";
 
-				public static LocString DESC = "A cold-dwelling grass <style=\"plant\">Plant</style> that can be domestically grown with Planter Boxes.\n\nIt produces an edible grain that can be processed into <style=\"food\">Food</style>.";
+				public static LocString DESC = "Sleet Wheat produces <style=\"food\">Sleet Wheat Grain</style>, a chilly grain that can be processed into <style=\"food\">Food</style>.";
 
 				public static LocString DOMESTICATEDDESC = "This plant produces edible <style=\"food\">Sleet Wheat Grain</style>.";
 			}
@@ -172,7 +181,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Bristle Briar";
 
-				public static LocString DESC = "A prickly, invasive weed that can be domestically grown with Flower Vases.\n\nBristle Briars exude a mind-altering pheromone that causes them to be perceived as exceptionally beautiful.";
+				public static LocString DESC = "Bristle Briars exude pheromones that make creatures view them as especially beautiful.";
 
 				public static LocString DOMESTICATEDDESC = "This plant improves <style=\"decor\">Decor</style>.";
 			}
@@ -181,7 +190,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Mealwood";
 
-				public static LocString DESC = "A hardy <style=\"plant\">Plant</style> that can be domestically grown with Planter Boxes.\n\nMealwoods produce a suspiciously wriggly yet edible grain that can be harvested for <style=\"food\">Food</style>.";
+				public static LocString DESC = "Mealwoods produce <style=\"food\">Meal Lice</style>, an oddly wriggly grain that can be harvested for <style=\"food\">Food</style>.";
 
 				public static LocString DOMESTICATEDDESC = "This plant produces edible <style=\"food\">Meal Lice</style>.";
 			}
@@ -190,7 +199,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Thimble Reed";
 
-				public static LocString DESC = "An aquatic <style=\"plant\">Plant</style> that can be domestically grown in Aquatic Farm Tiles.\n\nThimble Reeds produce indescribably soft cellulose fiber that can be used for <style=\"equipment\">Clothing</style> production.";
+				public static LocString DESC = "Thimble Reeds produce indescribably soft <style=\"solid\">Reed Fiber</style> for <style=\"equipment\">Clothing</style> production.";
 
 				public static LocString DOMESTICATEDDESC = "This plant produces <style=\"solid\">Reed Fiber</style>.";
 			}
@@ -199,14 +208,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Buried Muckroot";
 
-				public static LocString DESC = "A seedless, edible fruit that cannot reproduce.\n\nMuckroots can be harvested for a single, nonrenewable serving of <style=\"food\">Food</style>.";
+				public static LocString DESC = "Muckroots are incapable of propagating but can be harvested for a single <style=\"food\">Food</style> serving.";
 			}
 
 			public class COLDBREATHER
 			{
 				public static LocString NAME = "Wheezewort";
 
-				public static LocString DESC = "A fleshy, <style=\"heat\">Cold</style>-dwelling plant.\n\nWheezeworts remove ambient <style=\"heat\">Heat</style> from the air by respiring through their porous outer membranes.";
+				public static LocString DESC = "Wheezeworts can be grown in flower vases and absorb <style=\"heat\">Heat</style> by respiring through their porous outer membranes.";
 
 				public static LocString DOMESTICATEDDESC = "This plant absorbs <style=\"heat\">Heat</style>.";
 			}
@@ -215,7 +224,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Pincha Pepperplant";
 
-				public static LocString DESC = "A climbing <style=\"plant\">Vine</style> that can be domestically grown with Planter Boxes.\n\nWhen a Pincha Pepperplant matures it produces a flavorful <style=\"food\">Peppernut</style> that can be used to spice <style=\"food\">Food</style>.";
+				public static LocString DESC = "Pincha Pepperplants produce flavorful <style=\"food\">Peppernuts</style> for spicing <style=\"food\">Food</style>.";
 
 				public static LocString DOMESTICATEDDESC = "This plant produces <style=\"food\">Pincha Peppernut</style> spices.";
 			}
@@ -236,6 +245,13 @@ namespace STRINGS
 					public static LocString DESC = "The <style=\"seed\">Seed</style> of a <style=\"plant\">Bristle Blossom</style>.\n\nDigging up Buried Objects may uncover a Blossom Seed.";
 				}
 
+				public class MUSHROOMPLANT
+				{
+					public static LocString NAME = "Fungal Spore";
+
+					public static LocString DESC = "The <style=\"seed\">Seed</style> of a <style=\"plant\">Dusk Cap</style>.\n\nDigging up Buried Objects may uncover a Fungal Spore.";
+				}
+
 				public class COLDWHEAT
 				{
 					public static LocString NAME = "Sleet Wheat Grain";
@@ -252,9 +268,9 @@ namespace STRINGS
 
 				public class SWAMPLILY
 				{
-					public static LocString NAME = "Swamp Lily Seed";
+					public static LocString NAME = "Balm Lily Seed";
 
-					public static LocString DESC = "The <style=\"seed\">Seed</style> of a <style=\"plant\">Swamp Lily</style>.\n\nDigging up Buried Objects may uncover a Swamp Lily Seed.";
+					public static LocString DESC = "The <style=\"seed\">Seed</style> of a <style=\"plant\">Balm Lily</style>.\n\nDigging up Buried Objects may uncover a Balm Lily Seed.";
 				}
 
 				public class BASICSINGLEHARVESTPLANT
@@ -289,6 +305,8 @@ namespace STRINGS
 
 		public class STATUSITEMS
 		{
+			public static LocString NAME_NON_GROWING_PLANT = "Wilted";
+
 			public class SLEEPING
 			{
 				public static LocString NAME = "Sleeping";
@@ -310,11 +328,39 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This creature cannot retain enough heat to stay warm in this environment\n\nIt prefers temperatures between {0} and {1}";
 			}
 
+			public class CROP_TOO_DARK
+			{
+				public static LocString NAME = "    • " + CREATURES.STATS.ILLUMINATION.NAME;
+
+				public static LocString TOOLTIP = "Growth will resume when light requirements are met";
+			}
+
+			public class CROP_TOO_BRIGHT
+			{
+				public static LocString NAME = "    • " + CREATURES.STATS.ILLUMINATION.NAME;
+
+				public static LocString TOOLTIP = "Growth will resume when darkness requirements are met";
+			}
+
+			public class HOT_CROP
+			{
+				public static LocString NAME = "    • " + DUPLICANTS.STATS.TEMPERATURE.NAME;
+
+				public static LocString TOOLTIP = "Growth will resume when ambient temperature is between {low_temperature} and {high_temperature}";
+			}
+
+			public class COLD_CROP
+			{
+				public static LocString NAME = "    • " + DUPLICANTS.STATS.TEMPERATURE.NAME;
+
+				public static LocString TOOLTIP = "Growth will resume when ambient temperature is between {low_temperature} and {high_temperature}";
+			}
+
 			public class PERFECTTEMPERATURE
 			{
 				public static LocString NAME = "Ideal Temperature";
 
-				public static LocString TOOLTIP = "This creature is comfortable with the current ambient temperature\n\nIdeal Range: {0} - {1}";
+				public static LocString TOOLTIP = "This creature finds the current ambient temperature comfortable\n\nIdeal Range: {0} - {1}";
 			}
 
 			public class EATING
@@ -335,7 +381,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Chilly Breath";
 
-				public static LocString TOOLTIP = "This creature's respiration has a cooling effect on the surrounding area";
+				public static LocString TOOLTIP = "This creature's respiration is having a cooling effect on the area";
 			}
 
 			public class LOOKINGFORFOOD
@@ -363,7 +409,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Scalding";
 
-				public static LocString TOOLTIP = "Current external temperature is perilously high ({ExternalTemperature} / {TargetTemperature})";
+				public static LocString TOOLTIP = "Current external temperature is perilously high [{ExternalTemperature} / {TargetTemperature}]";
 
 				public static LocString NOTIFICATION_NAME = "Scalding";
 
@@ -374,7 +420,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Overheating";
 
-				public static LocString TOOLTIP = "Internal temperature is dangerously high ({InternalTemperature} / {TargetTemperature})";
+				public static LocString TOOLTIP = "Internal temperature is dangerously high [{InternalTemperature} / {TargetTemperature}]";
 			}
 
 			public class TIRED
@@ -396,6 +442,17 @@ namespace STRINGS
 				public static LocString NAME = "Dead";
 
 				public static LocString TOOLTIP = "This creature isn't getting back up";
+			}
+
+			public class PLANTDEATH
+			{
+				public static LocString NAME = "Dead";
+
+				public static LocString TOOLTIP = "This plant will produce no more harvests";
+
+				public static LocString NOTIFICATION = "Plants have died";
+
+				public static LocString NOTIFICATION_TOOLTIP = "These plants have died and will produce no more harvests:\n";
 			}
 
 			public class STRUGGLING
@@ -430,7 +487,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Laying an egg";
 
-				public static LocString TOOLTIP = "This creature is participating in the miracle of life";
+				public static LocString TOOLTIP = "This creature is performing in the miracle of life";
 			}
 
 			public class SUFFOCATING
@@ -465,7 +522,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Falling";
 
-				public static LocString TOOLTIP = "This creature is in freefall!";
+				public static LocString TOOLTIP = "AHHHH!";
 			}
 
 			public class DROWNING
@@ -477,91 +534,84 @@ namespace STRINGS
 
 			public class DRYINGOUT
 			{
-				public static LocString NAME = "Beached";
+				public static LocString NAME = "    • Beached";
 
 				public static LocString TOOLTIP = "This plant must be submerged in liquid to grow";
 			}
 
 			public class GROWING
 			{
-				public static LocString NAME = "Growing ({PercentGrow}%)";
+				public static LocString NAME = "Growing [{PercentGrow}%]";
 
-				public static LocString TOOLTIP = "This plant is growing because all of its basic requirements are being met";
-			}
-
-			public class HARVESTSREMAINING
-			{
-				public static LocString NAME = "Harvests Remaining: {HarvestsRemaining}";
-
-				public static LocString TOOLTIP = "This plant will yield {HarvestsRemaining} more harvests before it dies";
+				public static LocString TOOLTIP = "Next harvest: {TimeUntilNextHarvest}";
 			}
 
 			public class NEEDSFERTILIZER
 			{
-				public static LocString NAME = "Awaiting Fertilizer";
+				public static LocString NAME = "    • " + CREATURES.STATS.FERTILIZATION.NAME;
 
-				public static LocString TOOLTIP = "This plant requires additional nutrients to improve growth:\n{Required}";
+				public static LocString TOOLTIP = "Growth will resume when fertilization requirements are met";
 
-				public static LocString LINE_ITEM = "    • {0}: {1}\n";
+				public static LocString LINE_ITEM = "\n            • {Resource}: {Amount}";
 			}
 
 			public class NEEDSIRRIGATION
 			{
-				public static LocString NAME = "Awaiting Irrigation";
+				public static LocString NAME = "    • " + CREATURES.STATS.IRRIGATION.NAME;
 
-				public static LocString TOOLTIP = "This plant requires additional liquid to improve growth:\n{Required}";
+				public static LocString TOOLTIP = "Growth will resume when liquid requirements are met";
 
-				public static LocString LINE_ITEM = "    • {0}: {1}\n";
+				public static LocString LINE_ITEM = "\n            • {Resource}: {Amount}";
 			}
 
 			public class WRONGFERTILIZER
 			{
-				public static LocString NAME = "Wrong Fertilizer";
+				public static LocString NAME = "    • " + CREATURES.STATS.FERTILIZATION.NAME;
 
-				public static LocString TOOLTIP = "This plant is being fed the wrong nutrients. It requires:\n{Required}\nA dupe should be sent to empty the storage.";
+				public static LocString TOOLTIP = "This farm is storing materials that are not suitable for this plant" + UI.HORIZONTAL_BR_RULE + "Empty this building's storage to remove the unusable materials";
 
-				public static LocString LINE_ITEM = "    • {0}: {1}\n";
+				public static LocString LINE_ITEM = "            • {0}: {1}\n";
 			}
 
 			public class WRONGIRRIGATION
 			{
-				public static LocString NAME = "Wrong Irrigation";
+				public static LocString NAME = "    • " + CREATURES.STATS.FERTILIZATION.NAME;
 
-				public static LocString TOOLTIP = "This plant is being fed the wrong nutrients. It requires:\n{Required}\nA dupe should be sent to empty the storage.";
+				public static LocString TOOLTIP = "This farm is storing materials that are not suitable for this plant" + UI.HORIZONTAL_BR_RULE + "Empty this building's storage to remove the unusable materials";
 
-				public static LocString LINE_ITEM = "    • {0}: {1}\n";
+				public static LocString LINE_ITEM = "            • {0}: {1}\n";
 			}
 
 			public class WRONGFERTILIZERMAJOR
 			{
-				public static LocString NAME = CREATURES.STATUSITEMS.WRONGFERTILIZER.NAME;
+				public static LocString NAME = "    • " + CREATURES.STATS.FERTILIZATION.NAME;
 
-				public static LocString TOOLTIP = CREATURES.STATUSITEMS.WRONGFERTILIZER.TOOLTIP;
+				public static LocString TOOLTIP = "This farm is storing materials that are not suitable for this plant" + UI.HORIZONTAL_BR_RULE + "Empty this building's storage to remove the unusable materials";
 
-				public static LocString LINE_ITEM = CREATURES.STATUSITEMS.WRONGFERTILIZER.LINE_ITEM;
+				public static LocString LINE_ITEM = "        " + CREATURES.STATUSITEMS.WRONGFERTILIZER.LINE_ITEM;
 			}
 
 			public class WRONGIRRIGATIONMAJOR
 			{
-				public static LocString NAME = CREATURES.STATUSITEMS.WRONGIRRIGATION.NAME;
+				public static LocString NAME = "    • " + CREATURES.STATS.IRRIGATION.NAME;
 
-				public static LocString TOOLTIP = CREATURES.STATUSITEMS.WRONGIRRIGATION.TOOLTIP;
+				public static LocString TOOLTIP = "This farm is storing materials that are not suitable for this plant" + UI.HORIZONTAL_BR_RULE + "Empty this building's storage to remove the incorrect materials";
 
-				public static LocString LINE_ITEM = CREATURES.STATUSITEMS.WRONGIRRIGATION.LINE_ITEM;
+				public static LocString LINE_ITEM = "        " + CREATURES.STATUSITEMS.WRONGIRRIGATION.LINE_ITEM;
 			}
 
 			public class CANTACCEPTFERTILIZER
 			{
-				public static LocString NAME = "Cannot Fertilize";
+				public static LocString NAME = "    • " + CREATURES.STATS.FERTILIZATION.NAME;
 
-				public static LocString TOOLTIP = "This farm plot does not accept fertilizer\n\nMove the selected plant to a fertilizable plot for optimal growth";
+				public static LocString TOOLTIP = "This farm plot does not accept fertilizer\n\nMove the selected plant to a fertilization capable plot for optimal growth";
 			}
 
 			public class CANTACCEPTIRRIGATION
 			{
-				public static LocString NAME = "Cannot Irrigate";
+				public static LocString NAME = "    • " + CREATURES.STATS.IRRIGATION.NAME;
 
-				public static LocString TOOLTIP = "This farm plot does not accept irrigation\n\nMove the selected plant to an irrigatable plot for optimal growth";
+				public static LocString TOOLTIP = "This farm plot does not accept irrigation\n\nMove the selected plant to an irrigation capable plot for optimal growth";
 			}
 
 			public class READYFORHARVEST
@@ -605,9 +655,11 @@ namespace STRINGS
 
 			public class WILTING
 			{
-				public static LocString NAME = "Stifled";
+				public static LocString NAME = "Growth Halted{Reasons}";
 
-				public static LocString TOOLTIP = "This plant has stopped growing because one of its basic requirements has not been met";
+				public static LocString NAME_NON_GROWING_PLANT = "Wilting";
+
+				public static LocString TOOLTIP = "Growth will resume when conditions improve";
 			}
 
 			public class BARREN
@@ -619,16 +671,23 @@ namespace STRINGS
 
 			public class ATMOSPHERICPRESSURETOOLOW
 			{
-				public static LocString NAME = "Low Air Pressure";
+				public static LocString NAME = "    • Pressure";
 
-				public static LocString TOOLTIP = "This plant requires a minimum atmospheric pressure of {TargetPressure}\n\nCurrent Pressure: {CurrentPressure}";
+				public static LocString TOOLTIP = "Growth will resume when air pressure is between {low_mass} and {high_mass}";
+			}
+
+			public class WRONGATMOSPHERE
+			{
+				public static LocString NAME = "    • Atmosphere";
+
+				public static LocString TOOLTIP = "Growth will resume when submersed in one of the following gases: {elements}";
 			}
 
 			public class ATMOSPHERICPRESSURETOOHIGH
 			{
-				public static LocString NAME = "High Air Pressure";
+				public static LocString NAME = "    • Pressure";
 
-				public static LocString TOOLTIP = "This plant can only withstand a maximum pressure of {TargetPressure}\n\nCurrent Pressure: {CurrentPressure}";
+				public static LocString TOOLTIP = "Growth will resume when air pressure is between {low_mass} and {high_mass}";
 			}
 
 			public class PERFECTATMOSPHERICPRESSURE
@@ -642,7 +701,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Injuries: {healthState}";
 
-				public static LocString TOOLTIP = "Current physical status: {healthStateTooltip}";
+				public static LocString TOOLTIP = "Current physical status: {healthState}";
 			}
 
 			public class FLEEING
@@ -677,21 +736,21 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Fresh {RotPercentage}";
 
-				public static LocString TOOLTIP = "Get'em while they're hot!";
+				public static LocString TOOLTIP = "Get'em while they're hot!\n\n{RotTooltip}";
 			}
 
 			public class STALE
 			{
 				public static LocString NAME = "Stale {RotPercentage}";
 
-				public static LocString TOOLTIP = "This food is still edible but will soon expire";
+				public static LocString TOOLTIP = "This food is still edible but will soon expire\n{RotTooltip}";
 			}
 
 			public class SPOILED
 			{
 				public static LocString NAME = "Rotten";
 
-				public static LocString TOOLTIP = "This food has putrified and should not be consumed";
+				public static LocString TOOLTIP = "This food has putrefied and should not be consumed";
 			}
 
 			public class REFRIGERATED
@@ -699,6 +758,13 @@ namespace STRINGS
 				public static LocString NAME = "Refrigerated";
 
 				public static LocString TOOLTIP = "Ideal temperature storage is slowing this food's decay rate";
+			}
+
+			public class RECEPTACLEINOPERATIONAL
+			{
+				public static LocString NAME = "    • Farm plot inoperable";
+
+				public static LocString TOOLTIP = "This farm plot cannot grow plants in its current state";
 			}
 
 			public class EXHALING
@@ -712,7 +778,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "External Temperature";
 
-				public static LocString TOOLTIP = "External Temperature\n----------\nThis creature's environment is {0}";
+				public static LocString TOOLTIP = "External Temperature" + UI.HORIZONTAL_BR_RULE + "This creature's environment is {0}";
+			}
+
+			public class RECEPTACLEOPERATIONAL
+			{
+				public static LocString NAME = "Farm plot operational";
+
+				public static LocString TOOLTIP = "This plant's farm plot is operational";
 			}
 		}
 
@@ -727,15 +800,15 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Growth Progress";
 
-				public static LocString TOOLTIP = "Growth Progress\n----------\n";
+				public static LocString TOOLTIP = "Growth Progress" + UI.HORIZONTAL_BR_RULE + string.Empty;
 
 				public static LocString TOOLTIP_GROWING = "Predicted Maturation: {0}";
 
-				public static LocString TOOLTIP_GROWING_CROP = "Predicted Maturation Time: {0}\nNext harvest occurs in approximately {1}.";
+				public static LocString TOOLTIP_GROWING_CROP = "Predicted Maturation Time: {0}\nNext harvest occurs in approximately {1}";
 
-				public static LocString TOOLTIP_GROWN = "This plant is awaiting harvest and is not currently growing";
+				public static LocString TOOLTIP_GROWN = "Growth paused while plant awaits harvest";
 
-				public static LocString TOOLTIP_STALLED = "This plant's growth has halted due to poor conditions";
+				public static LocString TOOLTIP_STALLED = "Poor conditions have halted this plant's growth";
 
 				public static LocString AMOUNT_DESC_FMT = "{0}: {1}\nNext harvest in {2}";
 
@@ -748,8 +821,6 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Fertilization";
 
-				public static LocString TOOLTIP = "Plants gain Harvest Rating Points over time when fertilized";
-
 				public static LocString CONSUME_MODIFIER = "Consuming";
 
 				public static LocString ABSORBING_MODIFIER = "Absorbing";
@@ -759,49 +830,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Irrigation";
 
-				public static LocString TOOLTIP = "Plants gain Harvest Rating Points over time when irrigated";
-
 				public static LocString CONSUME_MODIFIER = "Consuming";
 
 				public static LocString ABSORBING_MODIFIER = "Absorbing";
 			}
 
-			public class YIELDBONUS
+			public class ILLUMINATION
 			{
-				public static LocString NAME = "Harvest Rating";
-
-				public static LocString TOOLTIP = "Plants will gain Harvest Rating Points while kept in ideal conditions\nA high Harvest Rating will improve the crop yield of a mature plant";
-
-				public static LocString AMOUNT_FMT = "{0} / {1}";
-
-				public static LocString AMOUNT_DESC_FMT = "{0}: {1} / {2}\nPredicted: <style=\"harvestQuality\">{3}</style> ({4})";
-
-				public static LocString CYCLES_REMAINING = "Predicted Time Remaining: {0}";
-
-				public static LocString CURRENT = "Current Harvest Rating: {0} / {1}";
-
-				public static LocString PREDICTION = "Predicted Harvest Rating: {0} ({1} / {2})";
-
-				public static LocString PAUSED = "Harvest Rating change has halted because the plant is not growing.";
-
-				public class MODIFIERS
-				{
-					public static LocString PERFECT_TEMPERATURE = "Ideal Temperature";
-
-					public static LocString NOT_PERFECT_TEMPERATURE = "Standard Temperature";
-
-					public static LocString PERFECT_PRESSURE = "Ideal Pressure";
-
-					public static LocString NOT_PERFECT_PRESSURE = "Standard Pressure";
-
-					public static LocString FERTILIZED = "Fertilized";
-
-					public static LocString NOT_FERTILIZED = "Unfertilized";
-
-					public static LocString IRRIGATED = "Irrigated";
-
-					public static LocString NOT_IRRIGATED = "Not Irrigated";
-				}
+				public static LocString NAME = "Illumination";
 			}
 
 			public class THERMALCONDUCTIVITY
@@ -815,14 +851,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Thermal Conductivity Barrier";
 
-				public static LocString TOOLTIP = "Thicker conductivity barriers will reduce an object's rate of heat transfer";
+				public static LocString TOOLTIP = "Thick conductivity barriers increase the time it takes an object to heat up or cool down";
 			}
 
 			public class ROT
 			{
 				public static LocString NAME = "Freshness Percent";
 
-				public static LocString TOOLTIP = "Freshness\n----------\nFood items will become stale at fifty percent freshness, and will rot at zero percent";
+				public static LocString TOOLTIP = "Freshness" + UI.HORIZONTAL_BR_RULE + "Food items become stale at fifty percent freshness, and rot at zero percent";
 			}
 
 			public class AIRPRESSURE

@@ -68,11 +68,11 @@ public class FactionAlignment : KMonoBehaviour
 		this.targeted = state && this.targetable;
 		if (this.targeted)
 		{
-			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.PendingHarvest, this);
+			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.OrderAttack, this);
 		}
 		else
 		{
-			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
+			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.OrderAttack, false);
 		}
 	}
 
@@ -103,14 +103,14 @@ public class FactionAlignment : KMonoBehaviour
 		KIconButtonMenu.ButtonInfo buttonInfo;
 		if (!this.targeted)
 		{
-			buttonInfo = new KIconButtonMenu.ButtonInfo("action_deconstruct", UI.USERMENUACTIONS.ATTACK.NAME, delegate
+			buttonInfo = new KIconButtonMenu.ButtonInfo("action_attack", UI.USERMENUACTIONS.ATTACK.NAME, delegate
 			{
 				this.SetPlayerTargeted(true);
 			}, global::Action.NumActions, null, null, null, string.Empty, true);
 		}
 		else
 		{
-			buttonInfo = new KIconButtonMenu.ButtonInfo("action_deconstruct", UI.USERMENUACTIONS.CANCELATTACK.NAME, delegate
+			buttonInfo = new KIconButtonMenu.ButtonInfo("action_attack", UI.USERMENUACTIONS.CANCELATTACK.NAME, delegate
 			{
 				this.SetPlayerTargeted(false);
 			}, global::Action.NumActions, null, null, null, string.Empty, true);

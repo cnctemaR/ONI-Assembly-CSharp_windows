@@ -30,6 +30,89 @@ public class JobsTableScreen : TableScreen
 			array[i] = this.AddChoreGroupColumn(Db.Get().ChoreGroups[i].Id, Db.Get().ChoreGroups[i], new Action<MinionIdentity, GameObject>(this.on_load_value_choregroup), new Func<MinionIdentity, GameObject, TableScreen.ResultValues>(this.get_value_choregroup), new Action<GameObject>(this.on_press_choregroup), new Action<GameObject, bool>(this.set_value_choregroup), new Comparison<MinionIdentity>(this.compare_chore_group), new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_chore_group), new Action<MinionIdentity, GameObject, ToolTip>(this.on_sort_tooltip_chore_group));
 		}
 		base.AddSuperCheckboxColumn("SuperCheckJobs", array, new Action<MinionIdentity, GameObject>(base.on_load_value_checkbox_column_super), new Func<MinionIdentity, GameObject, TableScreen.ResultValues>(this.get_value_checkbox_column_super), new Action<GameObject>(base.on_press_checkbox_column_super), new Action<GameObject, bool>(base.set_value_checkbox_column_super), null, new Action<MinionIdentity, GameObject, ToolTip>(this.on_tooltip_chore_group_super));
+		this.RefreshEffectListeners();
+	}
+
+	protected override void RefreshRows()
+	{
+		base.RefreshRows();
+		this.RefreshEffectListeners();
+	}
+
+	private void RefreshEffectListeners()
+	{
+		for (int i = 0; i < this.EffectListeners.Count; i++)
+		{
+			this.EffectListeners[i].Key.Unsubscribe(this.EffectListeners[i].Value.level_up);
+			this.EffectListeners[i].Key.Unsubscribe(this.EffectListeners[i].Value.effect_added);
+			this.EffectListeners[i].Key.Unsubscribe(this.EffectListeners[i].Value.effect_removed);
+			this.EffectListeners[i].Key.Unsubscribe(this.EffectListeners[i].Value.disease_added);
+			this.EffectListeners[i].Key.Unsubscribe(this.EffectListeners[i].Value.effect_added);
+		}
+		this.EffectListeners.Clear();
+		for (int j = 0; j < Components.LiveMinionIdentities.Count; j++)
+		{
+			JobsTableScreen.SkillEventHandlerID skillEventHandlerID = default(JobsTableScreen.SkillEventHandlerID);
+			MinionIdentity id = Components.LiveMinionIdentities[j];
+			skillEventHandlerID.level_up = Components.LiveMinionIdentities[j].gameObject.Subscribe(-110704193, delegate(object o)
+			{
+				this.MarkSingleMinionRowDirty(id);
+			});
+			skillEventHandlerID.effect_added = Components.LiveMinionIdentities[j].gameObject.Subscribe(-1901442097, delegate(object o)
+			{
+				this.MarkSingleMinionRowDirty(id);
+			});
+			skillEventHandlerID.effect_removed = Components.LiveMinionIdentities[j].gameObject.Subscribe(-1157678353, delegate(object o)
+			{
+				this.MarkSingleMinionRowDirty(id);
+			});
+			skillEventHandlerID.disease_added = Components.LiveMinionIdentities[j].gameObject.Subscribe(-1089020, delegate(object o)
+			{
+				this.MarkSingleMinionRowDirty(id);
+			});
+			skillEventHandlerID.disease_cured = Components.LiveMinionIdentities[j].gameObject.Subscribe(-1516186173, delegate(object o)
+			{
+				this.MarkSingleMinionRowDirty(id);
+			});
+		}
+	}
+
+	public override void ScreenUpdate(bool topLevel)
+	{
+		base.ScreenUpdate(topLevel);
+		if (this.dirty_single_minion_rows.Count != 0)
+		{
+			foreach (MinionIdentity minionIdentity in this.dirty_single_minion_rows)
+			{
+				if (!(minionIdentity == null))
+				{
+					this.RefreshSingleMinionRow(minionIdentity);
+				}
+			}
+			this.dirty_single_minion_rows.Clear();
+		}
+	}
+
+	protected void MarkSingleMinionRowDirty(MinionIdentity id)
+	{
+		this.dirty_single_minion_rows.Add(id);
+	}
+
+	private void RefreshSingleMinionRow(MinionIdentity id)
+	{
+		foreach (KeyValuePair<string, TableColumn> keyValuePair in this.columns)
+		{
+			foreach (KeyValuePair<TableRow, GameObject> keyValuePair2 in keyValuePair.Value.widgets_by_row)
+			{
+				if (!(keyValuePair2.Value == null))
+				{
+					if (!(keyValuePair2.Key.GetMinionIdentity() != id))
+					{
+						keyValuePair.Value.on_load_action(id, keyValuePair2.Value);
+					}
+				}
+			}
+		}
 	}
 
 	private void set_value_choregroup(GameObject widget_go, bool new_value)
@@ -174,7 +257,7 @@ public class JobsTableScreen : TableScreen
 		case TableRow.RowType.Minion:
 			if (minion != null)
 			{
-				tooltip.AddMultiStringTooltip(minion.GetProperName(), null);
+				tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.GOTO_DUPLICANT_BUTTON, minion.GetProperName()), null);
 			}
 			break;
 		}
@@ -259,6 +342,10 @@ public class JobsTableScreen : TableScreen
 				ChoreConsumer component = minion.GetComponent<ChoreConsumer>();
 				resultValues = ((!component.IsPermitted(chore_group)) ? TableScreen.ResultValues.False : TableScreen.ResultValues.True);
 			}
+			else
+			{
+				global::Debug.Log("Minion is null :( ", null);
+			}
 			break;
 		}
 		return resultValues;
@@ -286,6 +373,7 @@ public class JobsTableScreen : TableScreen
 		{
 		case TableRow.RowType.Header:
 			tooltip.AddMultiStringTooltip(string.Format(UI.JOBSSCREEN.TOOLTIP_TOGGLE_COLUMN, choreGroupTableColumn.chore_group.Name), null);
+			tooltip.AddMultiStringTooltip("\n" + Strings.Get("STRINGS.DUPLICANTS.CHOREGROUPS." + choreGroupTableColumn.chore_group.Id.ToUpper() + ".DESC"), null);
 			break;
 		case TableRow.RowType.Default:
 			if (choreGroupTableColumn.get_value_action(minion, widget_go) == TableScreen.ResultValues.True)
@@ -309,7 +397,7 @@ public class JobsTableScreen : TableScreen
 					tooltip.AddMultiStringTooltip(string.Format(UI.JOBSSCREEN.JOB_PERMISSION_OFF, minion.GetProperName(), choreGroupTableColumn.chore_group.Name), null);
 				}
 				Klei.AI.Attribute attribute = choreGroupTableColumn.chore_group.attribute;
-				AttributeInstance attributeInstance = minion.GetAttributes().Get(attribute);
+				AttributeInstance attributeInstance = minion.GetAttributes().Get((base.GetWidgetColumn(widget_go) as ChoreGroupTableColumn).chore_group.attribute);
 				float totalValue = attributeInstance.GetTotalValue();
 				TextStyleSetting textStyleSetting = this.TooltipTextStyle_Ability;
 				if (totalValue > 0f)
@@ -445,5 +533,22 @@ public class JobsTableScreen : TableScreen
 
 	public TextStyleSetting TooltipTextStyle_AbilityNegativeModifier;
 
+	private List<MinionIdentity> dirty_single_minion_rows = new List<MinionIdentity>();
+
 	private ChoreGroup current_sort_choregroup;
+
+	private List<KeyValuePair<GameObject, JobsTableScreen.SkillEventHandlerID>> EffectListeners = new List<KeyValuePair<GameObject, JobsTableScreen.SkillEventHandlerID>>();
+
+	private struct SkillEventHandlerID
+	{
+		public int level_up;
+
+		public int effect_added;
+
+		public int effect_removed;
+
+		public int disease_added;
+
+		public int disease_cured;
+	}
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine;
 
 public abstract class Brain : KMonoBehaviour
 {
@@ -43,6 +42,10 @@ public abstract class Brain : KMonoBehaviour
 
 	private void UpdateChores()
 	{
+		if (base.GetComponent<KPrefabID>().HasTag(GameTags.PreventChoreInterruption))
+		{
+			return;
+		}
 		Chore.Precondition.Context context = default(Chore.Precondition.Context);
 		if (this.FindBetterChore(ref context))
 		{
@@ -70,13 +73,11 @@ public abstract class Brain : KMonoBehaviour
 	public void Resume(string caller)
 	{
 		this.suspend = false;
-		this.lastResumer = caller + "@" + Time.realtimeSinceStartup.ToString();
 	}
 
 	public void Suspend(string caller)
 	{
 		this.suspend = true;
-		this.lastSuspender = caller + "@" + Time.realtimeSinceStartup.ToString();
 	}
 
 	protected override void OnCleanUp()
@@ -88,10 +89,6 @@ public abstract class Brain : KMonoBehaviour
 	private bool running;
 
 	private bool suspend;
-
-	public string lastSuspender = "Nothing";
-
-	public string lastResumer = "Nothing";
 
 	private static int stopID = -1;
 

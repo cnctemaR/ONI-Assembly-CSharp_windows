@@ -118,7 +118,7 @@ public class KAnim
 
 		public string name;
 
-		public string id;
+		public HashedString id;
 
 		public float frameRate;
 

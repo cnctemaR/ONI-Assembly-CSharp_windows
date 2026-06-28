@@ -25,7 +25,7 @@ public class Filterable : KMonoBehaviour
 		foreach (object obj in Enum.GetValues(typeof(SimHashes)))
 		{
 			SimHashes simHashes = (SimHashes)((int)obj);
-			Tag tag = TagManager.Create(simHashes);
+			Tag tag = GameTagExtensions.Create(simHashes);
 			list.Add(tag);
 		}
 		return list;

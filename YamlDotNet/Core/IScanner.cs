@@ -10,5 +10,9 @@ namespace YamlDotNet.Core
 		Token Current { get; }
 
 		bool MoveNext();
+
+		bool MoveNextWithoutConsuming();
+
+		void ConsumeCurrent();
 	}
 }

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using STRINGS;
 using UnityEngine;
 
 public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesInstance>
@@ -15,6 +17,26 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 	{
 		CreatureHelpers.DeselectCreature(base.gameObject);
 		Util.KDestroyGameObject(base.gameObject);
+	}
+
+	public Notification CreateDeathNotification()
+	{
+		return new Notification(CREATURES.STATUSITEMS.PLANTDEATH.NOTIFICATION, NotificationType.Bad, HashedString.Invalid, (List<Notification> notificationList, object data) => CREATURES.STATUSITEMS.PLANTDEATH.NOTIFICATION_TOOLTIP + notificationList.ReduceMessages(false), "/t• " + base.gameObject.GetProperName(), true, 0f, null, null, null);
+	}
+
+	private static string ToolTipResolver(List<Notification> notificationList, object data)
+	{
+		string text = string.Empty;
+		for (int i = 0; i < notificationList.Count; i++)
+		{
+			Notification notification = notificationList[i];
+			text += (string)notification.tooltipData;
+			if (i < notificationList.Count - 1)
+			{
+				text += "\n";
+			}
+		}
+		return string.Format(CREATURES.STATUSITEMS.PLANTDEATH.NOTIFICATION_TOOLTIP, text);
 	}
 
 	[MyCmpReq]
@@ -44,11 +66,6 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 			return base.master.growing.PercentOldAge() > 0.5f;
 		}
 
-		public bool HasBeenHarvested()
-		{
-			return base.master.crop != null && base.master.crop.GetTimesHarvested() > 0;
-		}
-
 		public int WiltStage()
 		{
 			float num = base.master.growing.PercentOfCurrentHarvest();
@@ -72,25 +89,20 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 			default_state = this.alive;
 			this.dead.ToggleMainStatusItem(Db.Get().CreatureStatusItems.Dead).Enter(delegate(StandardCropPlant.StatesInstance smi)
 			{
+				if (smi.master.growing.Replanted)
+				{
+					Notifier component = smi.master.GetComponent<Notifier>();
+					Notification notification = smi.master.CreateDeathNotification();
+					component.Add(notification, string.Empty);
+				}
 				GameUtil.KInstantiate(EffectPrefabs.Instance.PlantDeath, smi.master.transform.position, Grid.SceneLayer.FXFront, SceneOrganizer.Instance.GetFolder(Folder.FX), null, 0);
 				smi.master.Trigger(1623392196, null);
 				smi.master.GetComponent<KBatchedAnimController>().StopAndClear();
 				global::UnityEngine.Object.Destroy(smi.master.GetComponent<KBatchedAnimController>());
 				smi.Schedule(0.5f, new Action<object>(smi.master.DestroySelf), null);
 			});
-			this.blocked_from_growing.ToggleStatusItem(Db.Get().MiscStatusItems.RegionIsBlocked, null).EventTransition(GameHashes.EntombedChanged, this.alive.idle, (StandardCropPlant.StatesInstance smi) => this.alive.ForceUpdateStatus(smi.master.gameObject)).EventTransition(GameHashes.TooColdWarning, this.alive.idle, (StandardCropPlant.StatesInstance smi) => this.alive.ForceUpdateStatus(smi.master.gameObject))
-				.EventTransition(GameHashes.TooHotWarning, this.alive.idle, (StandardCropPlant.StatesInstance smi) => this.alive.ForceUpdateStatus(smi.master.gameObject))
-				.EventTransition(GameHashes.Uprooted, this.dead, (StandardCropPlant.StatesInstance smi) => UprootedMonitor.IsObjectUprooted(smi.master.gameObject));
-			this.alive.InitializeStates(this.masterTarget, this.dead).DefaultState(this.alive.idle).Enter(delegate(StandardCropPlant.StatesInstance smi)
-			{
-				if (smi.master.growing.Replanted && !this.alive.ForceUpdateStatus(smi.master.gameObject))
-				{
-					smi.GoTo(this.blocked_from_growing);
-				}
-			})
-				.ToggleComponent<Growing>();
-			this.alive.idle.EventTransition(GameHashes.Wilt, this.alive.wilting, (StandardCropPlant.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).EventTransition(GameHashes.CropDepleted, this.dead, (StandardCropPlant.StatesInstance smi) => !smi.master.crop.CanGrow()).EventTransition(GameHashes.Grow, this.alive.pre_fruiting, (StandardCropPlant.StatesInstance smi) => smi.master.growing.ReachedNextHarvest())
-				.PlayAnim("grow", KAnim.PlayMode.Paused, (StandardCropPlant.StatesInstance smi) => (!smi.HasBeenHarvested()) ? string.Empty : "_harvest")
+			this.alive.InitializeStates(this.masterTarget, this.dead).DefaultState(this.alive.idle).ToggleComponent<Growing>();
+			this.alive.idle.EventTransition(GameHashes.Wilt, this.alive.wilting, (StandardCropPlant.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).EventTransition(GameHashes.Grow, this.alive.pre_fruiting, (StandardCropPlant.StatesInstance smi) => smi.master.growing.ReachedNextHarvest()).PlayAnim("grow", KAnim.PlayMode.Paused, null)
 				.Enter(delegate(StandardCropPlant.StatesInstance smi)
 				{
 					smi.master.animController.SetPositionPercent(smi.master.growing.PercentOfCurrentHarvest());
@@ -103,11 +115,9 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 			{
 				smi.GoTo(this.alive.fruiting);
 			});
-			this.alive.wilting.PlayAnim("wilt", KAnim.PlayMode.Loop, (StandardCropPlant.StatesInstance smi) => smi.WiltStage().ToString()).EventTransition(GameHashes.WiltRecover, this.alive.idle, (StandardCropPlant.StatesInstance smi) => !smi.master.wiltCondition.IsWilting());
+			this.alive.wilting.PlayAnim("wilt", KAnim.PlayMode.Loop, (StandardCropPlant.StatesInstance smi) => smi.WiltStage().ToString()).EventTransition(GameHashes.WiltRecover, this.alive.idle, (StandardCropPlant.StatesInstance smi) => !smi.master.wiltCondition.IsWilting()).EventTransition(GameHashes.Harvest, this.alive.fruiting.fruiting_harvest, null);
 			this.alive.fruiting.DefaultState(this.alive.fruiting.fruiting_idle).EventHandler(GameHashes.Wilt, delegate(StandardCropPlant.StatesInstance smi)
 			{
-				smi.master.crop.SpawnFruit(null);
-				smi.master.harvestable.SetCanBeHarvested(false);
 				smi.GoTo(this.alive.wilting);
 			}).EventTransition(GameHashes.Harvest, this.alive.fruiting.fruiting_harvest, null);
 			this.alive.fruiting.fruiting_idle.PlayAnim("idle_full", KAnim.PlayMode.Loop, null).Enter(delegate(StandardCropPlant.StatesInstance smi)
@@ -127,8 +137,6 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 				smi.master.harvestable.SetCanBeHarvested(false);
 			}).OnAnimQueueComplete(this.alive.idle);
 		}
-
-		public GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State blocked_from_growing;
 
 		public StandardCropPlant.States.AliveStates alive;
 

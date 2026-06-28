@@ -13,7 +13,7 @@ public class Pump : KMonoBehaviour
 		base.OnSpawn();
 		this.elapsedTime = 0f;
 		this.pumpable = this.UpdateOperational();
-		this.dispenser.GetConduitManager().AddConduitUpdater(new Action<float>(this.OnConduitUpdate), 10);
+		this.dispenser.GetConduitManager().AddConduitUpdater(new Action<float>(this.OnConduitUpdate), ConduitFlow.Priority.Last);
 	}
 
 	protected override void OnCleanUp()

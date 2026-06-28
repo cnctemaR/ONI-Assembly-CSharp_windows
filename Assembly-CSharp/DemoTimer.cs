@@ -1,4 +1,5 @@
 ﻿using System;
+using Klei;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,17 +9,37 @@ public class DemoTimer : MonoBehaviour
 	private void Start()
 	{
 		DemoTimer.Instance = this;
+		if (GenericGameSettings.instance != null)
+		{
+			if (GenericGameSettings.instance.demoMode)
+			{
+				this.duration = (float)GenericGameSettings.instance.demoTime;
+			}
+			else
+			{
+				base.gameObject.SetActive(false);
+			}
+		}
+		else
+		{
+			base.gameObject.SetActive(false);
+		}
+		this.duration = (float)GenericGameSettings.instance.demoTime;
 		this.fadeOutScreen = Util.KInstantiateUI(this.Prefab_FadeOutScreen, GameScreenManager.Instance.ssOverlayCanvas.gameObject, false);
 		Image component = this.fadeOutScreen.GetComponent<Image>();
 		component.raycastTarget = false;
 		this.fadeOutColor = component.color;
 		this.fadeOutColor.a = 0f;
 		this.fadeOutScreen.GetComponent<Image>().color = this.fadeOutColor;
-		base.gameObject.SetActive(false);
 	}
 
 	private void Update()
 	{
+		if ((Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt)) && Input.GetKeyDown(KeyCode.BackQuote))
+		{
+			this.CountdownActive = !this.CountdownActive;
+			this.UpdateLabel();
+		}
 		if (this.demoOver || !this.CountdownActive)
 		{
 			return;
@@ -54,10 +75,18 @@ public class DemoTimer : MonoBehaviour
 			":",
 			num3.ToString("00")
 		});
+		if (!this.CountdownActive)
+		{
+			this.labelText.text = UI.DEMOOVERSCREEN.TIMERINACTIVE.key.ToString();
+		}
 	}
 
-	private void EndDemo()
+	public void EndDemo()
 	{
+		if (this.demoOver)
+		{
+			return;
+		}
 		this.demoOver = true;
 		GameObject gameObject = Util.KInstantiateUI(this.Prefab_DemoOverScreen, GameScreenManager.Instance.ssOverlayCanvas.gameObject, false);
 		gameObject.GetComponent<DemoOverScreen>().Show(true);
@@ -71,7 +100,7 @@ public class DemoTimer : MonoBehaviour
 
 	public GameObject Prefab_FadeOutScreen;
 
-	private float duration = 900f;
+	private float duration;
 
 	private float elapsed;
 

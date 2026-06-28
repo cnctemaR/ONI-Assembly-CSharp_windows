@@ -7,8 +7,7 @@ public class MethaneGeyserConfig : IEntityConfig
 {
 	public GameObject CreatePrefab()
 	{
-		DecorValues tier = global::TUNING.BUILDINGS.DECOR.BONUS.TIER1;
-		GameObject gameObject = EntityTemplates.CreatePlacedEntity("MethaneGeyser", global::STRINGS.CREATURES.SPECIES.METHANEGEYSER.NAME, global::STRINGS.CREATURES.SPECIES.METHANEGEYSER.DESC, 2000f, Assets.GetAnim("geyser_methane_kanim"), "inactive", Grid.SceneLayer.BuildingBack, 3, 3, tier, SimHashes.Creature, null);
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity("MethaneGeyser", global::STRINGS.CREATURES.SPECIES.METHANEGEYSER.NAME, global::STRINGS.CREATURES.SPECIES.METHANEGEYSER.DESC, 2000f, Assets.GetAnim("geyser_side_methane_kanim"), "inactive", Grid.SceneLayer.BuildingBack, 4, 2, global::TUNING.BUILDINGS.DECOR.BONUS.TIER1, NOISE_POLLUTION.NOISY.TIER5, SimHashes.Creature, null, 293f);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.SetElement(SimHashes.IgneousRock);
 		component.Temperature = 372.15f;
@@ -19,9 +18,10 @@ public class MethaneGeyserConfig : IEntityConfig
 		elementEmitter.maxPressure = 5f;
 		geyser.SetEmitter(elementEmitter);
 		gameObject.UpdateComponentRequirement<LoopingSounds>(true);
-		geyser.preEmissionElement = new Geyser.EmissionType(100f, new ElementConverter.OutputElement(0.06f, SimHashes.Methane, 423.15f, false, 1f, 1f, false));
-		geyser.emissionElement = new Geyser.EmissionType(370f, new ElementConverter.OutputElement(0.12162162f, SimHashes.Methane, 368.15f, false, 1f, 1f, false));
-		geyser.postEmissionElement = new Geyser.EmissionType(30f, new ElementConverter.OutputElement(0.3f, SimHashes.Methane, 368.15f, false, 1f, 1f, false));
+		geyser.emission_a = new Geyser.EmissionType(60f, 60f, 60f, new ElementConverter.OutputElement(0.75f, SimHashes.Methane, 423.15f, false, 1f, 1f, false, 1f, byte.MaxValue, 0), string.Empty);
+		geyser.emission_b = geyser.emission_a;
+		SoundEventVolumeCache.instance.AddVolume("geyser_side_methane_kanim", "GeyserMethane_shake_LP", NOISE_POLLUTION.NOISY.TIER5);
+		SoundEventVolumeCache.instance.AddVolume("geyser_side_methane_kanim", "GeyserMethane_erupt_LP", NOISE_POLLUTION.NOISY.TIER6);
 		return gameObject;
 	}
 
@@ -37,15 +37,11 @@ public class MethaneGeyserConfig : IEntityConfig
 
 	private const float PRE_DURATION = 100f;
 
-	private const float EMIT_DURATION = 370f;
+	private const float ERUPT_DURATION = 60f;
 
-	private const float POST_DURATION = 30f;
-
-	private const float PRE_METHANE_MASS = 6f;
+	private const float PST_DURATION = 10f;
 
 	private const float EMIT_METHANE_MASS = 45f;
-
-	private const float POST_METHANE_MASS = 9f;
 
 	public const string ID = "MethaneGeyser";
 }

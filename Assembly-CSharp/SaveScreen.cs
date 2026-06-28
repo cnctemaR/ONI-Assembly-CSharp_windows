@@ -72,8 +72,24 @@ public class SaveScreen : KScreen
 	private void DoSave(string filename)
 	{
 		ReportErrorDialog.MOST_RECENT_SAVEFILE = filename;
-		SaveLoader.Instance.Save(filename, false, true);
-		this.Deactivate();
+		try
+		{
+			SaveLoader.Instance.Save(filename, false, true);
+			this.Deactivate();
+		}
+		catch (IOException ex)
+		{
+			IOException ex2 = ex;
+			IOException e = ex2;
+			ConfirmDialogScreen component = Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, this.transform.parent.gameObject, true).GetComponent<ConfirmDialogScreen>();
+			component.PopupConfirmDialog(string.Format(UI.FRONTEND.SAVESCREEN.IO_ERROR, e.ToString()), delegate
+			{
+				this.Deactivate();
+			}, null, UI.FRONTEND.SAVESCREEN.REPORT_BUG, delegate
+			{
+				KCrashReporter.ReportError(e.Message, e.StackTrace.ToString(), null, null, string.Empty);
+			});
+		}
 	}
 
 	public void OnClickNewSave()

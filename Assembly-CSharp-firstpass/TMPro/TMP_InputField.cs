@@ -588,6 +588,10 @@ namespace TMPro
 		protected void OnFocus()
 		{
 			this.SelectAll();
+			if (this.onFocus != null)
+			{
+				this.onFocus();
+			}
 		}
 
 		protected void SelectAll()
@@ -2126,6 +2130,8 @@ namespace TMPro
 
 		private const string kEmailSpecialCharacters = "!#$%&'*+-/=?^_`{|}~";
 
+		public global::System.Action onFocus;
+
 		protected TouchScreenKeyboard m_Keyboard;
 
 		private static readonly char[] kSeparators = new char[] { ' ', '.', ',' };
@@ -2190,8 +2196,8 @@ namespace TMPro
 		[Range(0f, 4f)]
 		private float m_CaretBlinkRate = 0.85f;
 
-		[SerializeField]
 		[Range(1f, 5f)]
+		[SerializeField]
 		private int m_CaretWidth = 1;
 
 		[SerializeField]

@@ -1,104 +1,39 @@
 ﻿using System;
+using System.Collections.Generic;
+using KSerialization;
+using STRINGS;
 using UnityEngine;
 
-public class Refrigerator : KMonoBehaviour
+public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IGameObjectEffectDescriptor, IEffectDescriptor
 {
 	protected override void OnPrefabInit()
 	{
-		TreeFilterable treeFilterable = this.filterable;
-		treeFilterable.OnFilterChanged = (Action<Tag[]>)Delegate.Combine(treeFilterable.OnFilterChanged, new Action<Tag[]>(this.OnFilterChanged));
+		this.filteredStorage = new FilteredStorage(this, new Tag[] { GameTags.MarkedForCompost }, this.filterTint, this.noFilterTint, this);
 		this.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		this.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
 	}
 
 	protected override void OnSpawn()
 	{
 		this.operational.SetActive(this.operational.IsOperational, false);
 		base.GetComponent<KAnimControllerBase>().Play("off", KAnim.PlayMode.Once, 1f, 0f);
-		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, new string[] { "meter_frame", "meter_level" });
-		this.meter.SetFilterByAnim(false);
-		foreach (GameObject gameObject in this.storage.items)
-		{
-			this.SetItemRefrigerated(gameObject, false);
-		}
-		this.selectable.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.StorageLocker, this);
-		this.OnStorageChange(null);
-		this.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
-	}
-
-	private void PreventStoredItemRotting(object data)
-	{
-		Storage component = base.GetComponent<Storage>();
-		GameObject gameObject = (GameObject)data;
-		bool flag = component.items.Contains(gameObject);
-		this.SetItemRefrigerated(gameObject, flag);
-	}
-
-	private void SetItemRefrigerated(GameObject go, bool enabled)
-	{
-		if (go == null)
-		{
-			return;
-		}
-		if (enabled)
-		{
-			go.Trigger(-511823844, null);
-		}
-		else
-		{
-			go.Trigger(411746901, null);
-		}
-	}
-
-	private void OnStorageChange(object data)
-	{
-		if (this.fetchList == null)
-		{
-			this.OnFilterChanged(this.filterable.GetTags());
-		}
-		this.PreventStoredItemRotting(data);
-		this.meter.SetPositionPercent(Mathf.Clamp01(this.storage.MassStored() / this.storage.capacityKg));
-	}
-
-	private void OnFetchComplete()
-	{
-		this.OnFilterChanged(this.filterable.GetTags());
-	}
-
-	private void OnFilterChanged(Tag[] tags)
-	{
-		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		bool flag = tags != null && tags.Length != 0;
-		component.TintColour = ((!flag) ? this.noFilterTint : this.filterTint);
-		if (this.fetchList != null)
-		{
-			this.fetchList.Cancel(string.Empty);
-			this.fetchList = null;
-		}
-		int num = (int)this.storage.RemainingCapacity();
-		if (num <= 0)
-		{
-			return;
-		}
-		if (flag)
-		{
-			this.fetchList = new FetchList2(this.storage);
-			this.fetchList.ShowStatusItem = false;
-			this.fetchList.Add(tags, (float)num, FetchOrder2.OperationalRequirement.None);
-			this.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
-		}
+		this.temperatureAdjuster = new SimulatedTemperatureAdjuster(this.simulatedInternalTemperature, this.simulatedInternalHeatCapacity, this.simulatedThermalConductivity, base.GetComponent<Storage>());
+		this.filteredStorage.FilterChanged();
 	}
 
 	protected override void OnCleanUp()
 	{
-		if (this.fetchList != null)
-		{
-			this.fetchList.Cancel("Refrigerator destroyed.");
-		}
+		this.filteredStorage.CleanUp();
 	}
 
 	private void OnOperationalChanged(object data)
 	{
-		this.operational.SetActive(this.operational.IsOperational, false);
+		bool isOperational = this.operational.IsOperational;
+		this.operational.SetActive(isOperational, false);
+		if (isOperational != base.enabled)
+		{
+			base.enabled = isOperational;
+		}
 	}
 
 	public bool IsActive()
@@ -106,28 +41,109 @@ public class Refrigerator : KMonoBehaviour
 		return this.operational.IsActive;
 	}
 
+	private void SimUpdate(float dt)
+	{
+		this.temperatureAdjuster.Update(dt);
+	}
+
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = (GameObject)data;
+		if (gameObject == null)
+		{
+			return;
+		}
+		Refrigerator component = gameObject.GetComponent<Refrigerator>();
+		if (component == null)
+		{
+			return;
+		}
+		this.UserMaxCapacity = component.UserMaxCapacity;
+	}
+
+	public List<Descriptor> GetDescriptors(BuildingDef def)
+	{
+		return this.GetDescriptors(def.BuildingComplete);
+	}
+
+	public List<Descriptor> GetDescriptors(GameObject go)
+	{
+		return SimulatedTemperatureAdjuster.GetDescriptors(this.simulatedInternalTemperature);
+	}
+
+	public float UserMaxCapacity
+	{
+		get
+		{
+			return Mathf.Min(this.userMaxCapacity, this.storage.capacityKg);
+		}
+		set
+		{
+			this.userMaxCapacity = value;
+			this.filteredStorage.FilterChanged();
+		}
+	}
+
+	public float MinCapacity
+	{
+		get
+		{
+			return 0f;
+		}
+	}
+
+	public float MaxCapacity
+	{
+		get
+		{
+			return this.storage.capacityKg;
+		}
+	}
+
+	public LocString CapacityUnits
+	{
+		get
+		{
+			GameUtil.MassUnit massUnit = GameUtil.massUnit;
+			if (massUnit != GameUtil.MassUnit.Kilograms)
+			{
+				if (massUnit == GameUtil.MassUnit.Pounds)
+				{
+					return UI.UNITSUFFIXES.MASS.POUND;
+				}
+			}
+			return UI.UNITSUFFIXES.MASS.KILOGRAM;
+		}
+	}
+
+	[MyCmpReq]
+	private PrimaryElement primaryElement;
+
 	[MyCmpReq]
 	private Storage storage;
 
 	[MyCmpReq]
-	private TreeFilterable filterable;
-
-	[MyCmpReq]
 	private Operational operational;
-
-	[MyCmpReq]
-	private KBatchedAnimController kanim;
-
-	[MyCmpReq]
-	private KSelectable selectable;
-
-	private FetchList2 fetchList;
-
-	private MeterController meter;
 
 	[SerializeField]
 	public Color noFilterTint = Color.white;
 
 	[SerializeField]
 	public Color filterTint = Color.white;
+
+	[SerializeField]
+	public float simulatedInternalTemperature = 277.15f;
+
+	[SerializeField]
+	public float simulatedInternalHeatCapacity = 400f;
+
+	[SerializeField]
+	public float simulatedThermalConductivity = 1000f;
+
+	[Serialize]
+	private float userMaxCapacity = float.PositiveInfinity;
+
+	private FilteredStorage filteredStorage;
+
+	private SimulatedTemperatureAdjuster temperatureAdjuster;
 }

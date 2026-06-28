@@ -61,6 +61,17 @@ public static class Strings
 		return stringEntry;
 	}
 
+	public static bool TryGet(StringKey key, out StringEntry result)
+	{
+		result = Strings.RootTable.Get(key);
+		return result != null;
+	}
+
+	public static bool TryGet(string key, out StringEntry result)
+	{
+		return Strings.TryGet(new StringKey(key), out result);
+	}
+
 	public static StringTable GetTable(StringKey key0)
 	{
 		return Strings.RootTable.GetTable(key0);
@@ -162,8 +173,8 @@ public static class Strings
 
 	private static HashSet<string> invalidKeys = new HashSet<string>();
 
-	[IgnoreEmptyLines]
 	[DelimitedRecord(",")]
+	[IgnoreEmptyLines]
 	public class StringKeyConfig
 	{
 		[FieldOptional]
@@ -172,8 +183,8 @@ public static class Strings
 
 		[FieldOptional]
 		[FieldNullValue(typeof(string), "")]
-		[FieldQuoted(QuoteMode.OptionalForRead, MultilineMode.AllowForRead)]
 		[FieldOrder(2)]
+		[FieldQuoted(QuoteMode.OptionalForRead, MultilineMode.AllowForRead)]
 		public string[] values;
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using KSerialization;
 using UnityEngine;
 
 public abstract class Assignable : Workable
@@ -24,6 +25,14 @@ public abstract class Assignable : Workable
 		get
 		{
 			return this.requiresRegion;
+		}
+	}
+
+	public bool CanBeAssigned
+	{
+		get
+		{
+			return this.canBeAssigned;
 		}
 	}
 
@@ -56,6 +65,12 @@ public abstract class Assignable : Workable
 	{
 		this.Unassign();
 		AssignmentManager.Instance.Remove(this);
+		base.OnCleanUp();
+	}
+
+	public virtual bool CanAutoAssignTo(KMonoBehaviour worker)
+	{
+		return true;
 	}
 
 	public void ClickAssign(Assignables new_assignables)
@@ -109,6 +124,16 @@ public abstract class Assignable : Workable
 		}
 	}
 
+	public void SetCanBeAssigned(bool state)
+	{
+		this.canBeAssigned = state;
+	}
+
 	[MyCmpGet]
 	private RequiresRegion requiresRegion;
+
+	public AssignableSlot[] subSlots;
+
+	[Serialize]
+	private bool canBeAssigned = true;
 }

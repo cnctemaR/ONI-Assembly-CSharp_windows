@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using Klei.Noise;
 using LibNoiseDotNet.Graphics.Tools.Noise;
 using LibNoiseDotNet.Graphics.Tools.Noise.Modifier;
 using NodeEditorFramework;
+using ProcGen.Noise;
 using UnityEngine;
 
 [Node(false, "Noise/Modify", new Type[] { typeof(NoiseNodeCanvas) })]
@@ -50,12 +50,12 @@ public class ModifierModuleNodeEditor : BaseNodeEditor
 			return false;
 		}
 		ControlPointList value2 = this.Inputs[1].GetValue<ControlPointList>();
-		if (this.target.modifyType == Klei.Noise.Modifier.ModifyType.Curve && (value2 == null || value2.points.Count == 0))
+		if (this.target.modifyType == ProcGen.Noise.Modifier.ModifyType.Curve && (value2 == null || value2.points.Count == 0))
 		{
 			return false;
 		}
 		FloatList value3 = this.Inputs[2].GetValue<FloatList>();
-		if (this.target.modifyType == Klei.Noise.Modifier.ModifyType.Terrace && (value3 == null || value3.points.Count == 0))
+		if (this.target.modifyType == ProcGen.Noise.Modifier.ModifyType.Terrace && (value3 == null || value3.points.Count == 0))
 		{
 			return false;
 		}
@@ -64,7 +64,7 @@ public class ModifierModuleNodeEditor : BaseNodeEditor
 		{
 			return false;
 		}
-		if (this.target.modifyType == Klei.Noise.Modifier.ModifyType.Curve)
+		if (this.target.modifyType == ProcGen.Noise.Modifier.ModifyType.Curve)
 		{
 			Curve curve = module3D as Curve;
 			curve.ClearControlPoints();
@@ -74,7 +74,7 @@ public class ModifierModuleNodeEditor : BaseNodeEditor
 				curve.AddControlPoint(controlPoint);
 			}
 		}
-		else if (this.target.modifyType == Klei.Noise.Modifier.ModifyType.Terrace)
+		else if (this.target.modifyType == ProcGen.Noise.Modifier.ModifyType.Terrace)
 		{
 			Terrace terrace = module3D as Terrace;
 			terrace.ClearControlPoints();
@@ -96,5 +96,5 @@ public class ModifierModuleNodeEditor : BaseNodeEditor
 	private const string Id = "modifierModuleNodeEditor";
 
 	[SerializeField]
-	public Klei.Noise.Modifier target = new Klei.Noise.Modifier();
+	public ProcGen.Noise.Modifier target = new ProcGen.Noise.Modifier();
 }

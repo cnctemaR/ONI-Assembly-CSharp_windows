@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Klei.AI;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -34,6 +33,7 @@ public class Diggable : Workable
 		this.faceTargetWhenWorking = true;
 		this.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
 		this.attributeConverter = Db.Get().AttributeConverters.DiggingSpeed;
+		Prioritizable.AddRef(base.gameObject);
 	}
 
 	protected override void OnSpawn()
@@ -47,9 +47,9 @@ public class Diggable : Workable
 			this.childRenderer.material.color = Game.Instance.uiColours.Dig.invalidLocation;
 		}
 		Grid.Objects[num, 7] = base.gameObject;
-		this.chore = new WorkChore<Diggable>(this.choreType, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true);
+		this.chore = new WorkChore<Diggable>(this.choreType, this, null, true, null, null, null, true, null, true, default(Tag), null, true, true, true);
 		base.SetWorkTime(float.PositiveInfinity);
-		this.partitionerEntry = GameScenePartitioner.Instance.Add("Diggable.OnSpawn", base.gameObject, Grid.PosToCell(this), GameScenePartitioner.Instance.solidChangedMask.mask, new Action<object>(this.OnSolidChanged));
+		this.partitionerEntry = GameScenePartitioner.Instance.Add("Diggable.OnSpawn", base.gameObject, Grid.PosToCell(this), GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
 		this.OnSolidChanged(null);
 		ReachabilityMonitor.Instance instance = new ReachabilityMonitor.Instance(this);
 		instance.StartSM();
@@ -99,7 +99,7 @@ public class Diggable : Workable
 			{
 				this.Trigger(963113026, base.worker.gameObject);
 			}
-			global::UnityEngine.Object.Destroy(base.gameObject);
+			Util.KDestroyGameObject(base.gameObject);
 		}
 		else if (num2 != -1)
 		{
@@ -107,14 +107,14 @@ public class Diggable : Workable
 			Grid.CellToXY(num, out extents.x, out extents.y);
 			extents.width = 1;
 			extents.height = (num2 - num + Grid.WidthInCells - 1) / Grid.WidthInCells + 1;
-			this.unstableEntry = GameScenePartitioner.Instance.Add("Diggable.OnSolidChanged", base.gameObject, extents, GameScenePartitioner.Instance.solidChangedMask.mask, new Action<object>(this.OnSolidChanged));
+			this.unstableEntry = GameScenePartitioner.Instance.Add("Diggable.OnSolidChanged", base.gameObject, extents, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
 		}
 	}
 
 	private IEnumerator DestroyWithDelay(float delay)
 	{
 		yield return new WaitForSeconds(delay);
-		global::UnityEngine.Object.Destroy(base.gameObject);
+		Util.KDestroyGameObject(base.gameObject);
 		yield break;
 	}
 
@@ -138,10 +138,7 @@ public class Diggable : Workable
 		float num5 = 4f * num4;
 		float num6 = num5 + num3 * num5;
 		float num7 = dt / num6;
-		if (WorldDamage.Instance.ApplyDamage(num, num7, -1, -1))
-		{
-			worker.GetComponent<Effects>().Add("DirtyHands", true);
-		}
+		WorldDamage.Instance.ApplyDamage(num, num7, -1, -1);
 		return false;
 	}
 
@@ -260,7 +257,7 @@ public class Diggable : Workable
 		{
 			this.unstableEntry.Release();
 		}
-		GameScenePartitioner.Instance.TriggerEvent(Grid.PosToCell(this), GameScenePartitioner.Instance.digDestroyedMask.mask, null);
+		GameScenePartitioner.Instance.TriggerEvent(Grid.PosToCell(this), GameScenePartitioner.Instance.digDestroyedLayer, null);
 		Components.Diggables.Remove(this);
 	}
 

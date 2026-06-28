@@ -72,51 +72,47 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 
 		private void PlayHitAnimation()
 		{
-			string currentAnim = this.animController.currentAnim;
+			string name = this.animController.CurrentAnim.name;
 			KAnim.PlayMode playMode = this.animController.PlayMode;
-			if (currentAnim != null)
+			if (name != null)
 			{
-				if (currentAnim.Contains("hit"))
+				if (name.Contains("hit"))
 				{
 					return;
 				}
-				if (currentAnim.Contains("2_0"))
+				if (name.Contains("2_0"))
 				{
 					return;
 				}
-				if (currentAnim.Contains("2_1"))
+				if (name.Contains("2_1"))
 				{
 					return;
 				}
-				if (currentAnim.Contains("2_-1"))
+				if (name.Contains("2_-1"))
 				{
 					return;
 				}
-				if (currentAnim.Contains("2_-2"))
+				if (name.Contains("2_-2"))
 				{
 					return;
 				}
-				if (currentAnim.Contains("1_-1"))
+				if (name.Contains("1_-1"))
 				{
 					return;
 				}
-				if (currentAnim.Contains("1_-2"))
+				if (name.Contains("1_-2"))
 				{
 					return;
 				}
-				if (currentAnim.Contains("1_1"))
+				if (name.Contains("1_1"))
 				{
 					return;
 				}
-				if (currentAnim.Contains("1_2"))
+				if (name.Contains("1_2"))
 				{
 					return;
 				}
-				if (currentAnim.Contains("1_2"))
-				{
-					return;
-				}
-				if (currentAnim.Contains("breathe_"))
+				if (name.Contains("breathe_"))
 				{
 					return;
 				}
@@ -132,9 +128,9 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 				text = "hit_ladder";
 			}
 			this.animController.Play(text, KAnim.PlayMode.Once, 1f, 0f);
-			if (currentAnim != null)
+			if (name != null)
 			{
-				this.animController.Queue(currentAnim, playMode, 1f, 0f);
+				this.animController.Queue(name, playMode, 1f, 0f);
 			}
 		}
 
@@ -157,7 +153,7 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 			}
 		}
 
-		public bool ShouldExitClinic()
+		public bool ShouldExitInfirmary()
 		{
 			return this.health.State == Health.HealthState.Perfect;
 		}

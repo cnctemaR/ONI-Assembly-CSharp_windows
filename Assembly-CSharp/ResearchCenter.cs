@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
-public class ResearchCenter : BuildingWorkable, IEffectDescriptor
+public class ResearchCenter : Workable, IEffectDescriptor
 {
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Researching;
-		this.attributeConverter = Db.Get().AttributeConverters.ResearchPoints;
+		this.attributeConverter = Db.Get().AttributeConverters.ResearchSpeed;
 		ElementConverter elementConverter = this.elementConverter;
 		elementConverter.onConvertMass = (Action<float>)Delegate.Combine(elementConverter.onConvertMass, new Action<float>(this.ConvertMassToResearchPoints));
 		this.storage.choreType = Db.Get().ChoreTypes.ResearchFetch;
@@ -51,7 +50,7 @@ public class ResearchCenter : BuildingWorkable, IEffectDescriptor
 		{
 			if (this.operational.IsOperational && this.chore == null && this.HasMaterial())
 			{
-				this.chore = new WorkChore<ResearchCenter>(Db.Get().ChoreTypes.Research, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true);
+				this.chore = new WorkChore<ResearchCenter>(Db.Get().ChoreTypes.Research, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true);
 				base.SetWorkTime(float.PositiveInfinity);
 			}
 		}
@@ -74,13 +73,8 @@ public class ResearchCenter : BuildingWorkable, IEffectDescriptor
 
 	protected override bool OnWorkTick(Worker worker, float dt)
 	{
-		int num = 0;
-		if (worker != null)
-		{
-			AttributeInstance attributeInstance = Db.Get().Attributes.Learning.Lookup(worker);
-			num = (int)attributeInstance.GetTotalValue();
-		}
-		this.elementConverter.consumedElements[0].massConsumptionRate = 1.16f + (float)num * 0.464f;
+		float num = Db.Get().AttributeConverters.ResearchSpeed.Lookup(worker).Evaluate();
+		this.elementConverter.consumedElements[0].massConsumptionRate = Mathf.Max(0.2f, 1.16f + num * 1.16f);
 		return base.OnWorkTick(worker, dt);
 	}
 

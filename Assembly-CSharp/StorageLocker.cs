@@ -1,112 +1,100 @@
 ﻿using System;
+using KSerialization;
+using STRINGS;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class StorageLocker : KMonoBehaviour
+public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 {
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
 		this.log = new LoggerFS("StorageLocker");
-		TreeFilterable treeFilterable = this.filterable;
-		treeFilterable.OnFilterChanged = (Action<Tag[]>)Delegate.Combine(treeFilterable.OnFilterChanged, new Action<Tag[]>(this.OnFilterChanged));
+		this.filteredStorage = new FilteredStorage(this, null, this.filterTint, this.noFilterTint, this);
+		this.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
 	}
 
 	protected override void OnSpawn()
 	{
-		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, new string[] { "meter_frame", "meter_level" });
-		this.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
-		this.OnStorageChange(null);
-		Storage component = base.GetComponent<Storage>();
-		Storage storage = component;
-		storage.onPriorityChanged = (global::System.Action)Delegate.Combine(storage.onPriorityChanged, new global::System.Action(delegate
-		{
-			this.OnFilterChanged(this.filterable.GetTags());
-		}));
-		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().BuildingStatusItems.StorageLocker, this);
 		this.Subscribe(1088293757, new Action<object>(this.OnToggleClosed));
-	}
-
-	private void OnStorageChange(object data)
-	{
-		Storage component = base.GetComponent<Storage>();
-		if (this.fetchList == null)
-		{
-			this.OnFilterChanged(this.filterable.GetTags());
-		}
-		this.meter.SetPositionPercent(Mathf.Clamp01(component.MassStored() / component.capacityKg));
-	}
-
-	private void OnFilterChanged(Tag[] tags)
-	{
-		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		bool flag = tags != null && tags.Length != 0;
-		component.TintColour = ((!flag) ? this.noFilterTint : this.filterTint);
-		if (this.fetchList != null)
-		{
-			this.fetchList.Cancel("Filter changed");
-			this.fetchList = null;
-		}
-		BuildingEnabledButton component2 = base.GetComponent<BuildingEnabledButton>();
-		if (component2 != null && !component2.IsEnabled)
-		{
-			return;
-		}
-		Storage component3 = base.GetComponent<Storage>();
-		int num = (int)component3.RemainingCapacity();
-		if (num <= 0)
-		{
-			return;
-		}
-		if (flag)
-		{
-			this.fetchList = new FetchList2(component3);
-			this.fetchList.ShowStatusItem = false;
-			this.fetchList.Add(tags, (float)num, FetchOrder2.OperationalRequirement.None);
-			this.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
-		}
-		base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.NoStorageFilterSet, !flag, this);
-	}
-
-	private void OnFetchComplete()
-	{
-		this.OnFilterChanged(this.filterable.GetTags());
+		this.filteredStorage.FilterChanged();
 	}
 
 	protected override void OnCleanUp()
 	{
-		if (this.fetchList != null)
-		{
-			this.fetchList.Cancel("OnCleanUp");
-		}
+		this.filteredStorage.CleanUp();
 	}
 
 	private void OnToggleClosed(object data)
 	{
 		BuildingEnabledButton component = base.GetComponent<BuildingEnabledButton>();
 		bool flag = component != null && !component.IsEnabled;
-		if (flag)
-		{
-			if (this.fetchList != null)
-			{
-				this.fetchList.Cancel("Toggle closed");
-				this.fetchList = null;
-			}
-		}
-		else if (this.fetchList == null)
-		{
-			this.OnFilterChanged(this.filterable.GetTags());
-		}
+		this.filteredStorage.SetEnabled(!flag);
 		this.userMenu.Refresh();
 	}
 
-	[MyCmpAdd]
-	private TreeFilterable filterable;
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = (GameObject)data;
+		if (gameObject == null)
+		{
+			return;
+		}
+		StorageLocker component = gameObject.GetComponent<StorageLocker>();
+		if (component == null)
+		{
+			return;
+		}
+		this.UserMaxCapacity = component.UserMaxCapacity;
+	}
+
+	public float UserMaxCapacity
+	{
+		get
+		{
+			return Mathf.Min(this.userMaxCapacity, base.GetComponent<Storage>().capacityKg);
+		}
+		set
+		{
+			this.userMaxCapacity = value;
+			this.filteredStorage.FilterChanged();
+		}
+	}
+
+	public float MinCapacity
+	{
+		get
+		{
+			return 0f;
+		}
+	}
+
+	public float MaxCapacity
+	{
+		get
+		{
+			return base.GetComponent<Storage>().capacityKg;
+		}
+	}
+
+	public LocString CapacityUnits
+	{
+		get
+		{
+			GameUtil.MassUnit massUnit = GameUtil.massUnit;
+			if (massUnit != GameUtil.MassUnit.Kilograms)
+			{
+				if (massUnit == GameUtil.MassUnit.Pounds)
+				{
+					return UI.UNITSUFFIXES.MASS.POUND;
+				}
+			}
+			return UI.UNITSUFFIXES.MASS.KILOGRAM;
+		}
+	}
 
 	[MyCmpReq]
 	private UserMenu userMenu;
-
-	private FetchList2 fetchList;
 
 	[SerializeField]
 	public Color noFilterTint = Color.white;
@@ -114,7 +102,10 @@ public class StorageLocker : KMonoBehaviour
 	[SerializeField]
 	public Color filterTint = Color.white;
 
-	private MeterController meter;
-
 	private LoggerFS log;
+
+	[Serialize]
+	private float userMaxCapacity = float.PositiveInfinity;
+
+	private FilteredStorage filteredStorage;
 }

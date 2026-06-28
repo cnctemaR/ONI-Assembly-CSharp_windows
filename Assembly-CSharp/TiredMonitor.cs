@@ -8,11 +8,10 @@ public class TiredMonitor : GameStateMachine<TiredMonitor, TiredMonitor.Instance
 		this.root.EventTransition(GameHashes.SleepFail, this.tired, null);
 		this.tired.Enter(delegate(TiredMonitor.Instance smi)
 		{
-			smi.SetInterruptedDay();
+			smi.SetInterruptDay();
 		}).EventTransition(GameHashes.NewDay, (TiredMonitor.Instance smi) => GameClock.Instance, this.root, (TiredMonitor.Instance smi) => smi.AllowInterruptClear()).ToggleExpression(Db.Get().Expressions.Tired, null)
 			.ToggleAnims("anim_loco_walk_slouch_kanim", 0f)
-			.ToggleAnims("anim_idle_slouch_kanim", 0f)
-			.ToggleEffect("InterruptedSleep");
+			.ToggleAnims("anim_idle_slouch_kanim", 0f);
 	}
 
 	public GameStateMachine<TiredMonitor, TiredMonitor.Instance, IStateMachineTarget, object>.State tired;
@@ -24,7 +23,7 @@ public class TiredMonitor : GameStateMachine<TiredMonitor, TiredMonitor.Instance
 		{
 		}
 
-		public void SetInterruptedDay()
+		public void SetInterruptDay()
 		{
 			this.interruptedDay = GameClock.Instance.GetDay();
 		}
@@ -38,6 +37,8 @@ public class TiredMonitor : GameStateMachine<TiredMonitor, TiredMonitor.Instance
 			}
 			return flag;
 		}
+
+		public int disturbedDay = -1;
 
 		public int interruptedDay = -1;
 	}

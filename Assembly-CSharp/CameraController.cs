@@ -21,9 +21,9 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	public static CameraController Instance { get; private set; }
 
-	public void ToggleTemperatureView(bool enabled)
+	public void ToggleColouredOverlayView(bool enabled)
 	{
-		this.mrt.ToggleTemperatureView(enabled);
+		this.mrt.ToggleColouredOverlayView(enabled);
 	}
 
 	protected override void OnPrefabInit()
@@ -140,6 +140,10 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	public void OnKeyDown(KButtonEvent e)
 	{
+		if (e.Consumed)
+		{
+			return;
+		}
 		if (this.DisableUserCameraControl)
 		{
 			return;
@@ -187,8 +191,18 @@ public class CameraController : KMonoBehaviour, IInputHandler
 	public void CameraGoHome(float speed = 2f)
 	{
 		GameObject telepad = GameUtil.GetTelepad();
-		Vector3 vector = new Vector3(telepad.transform.position.x, telepad.transform.position.y + 1f, this.transform.position.z);
-		this.SetTargetPos(vector, 10f, true);
+		if (telepad != null)
+		{
+			Vector3 vector = new Vector3(telepad.transform.position.x, telepad.transform.position.y + 1f, this.transform.position.z);
+			this.SetTargetPos(vector, 10f, true);
+			this.SetOverrideZoomSpeed(speed);
+		}
+	}
+
+	public void CameraGoTo(Vector3 pos, float speed = 2f, bool playSound = true)
+	{
+		pos.z = this.transform.position.z;
+		this.SetTargetPos(pos, 10f, playSound);
 		this.SetOverrideZoomSpeed(speed);
 	}
 
@@ -583,7 +597,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	private float maxOrthographicSize = 20f;
 
-	private float maxOrthographicSizeDebug = 100f;
+	private float maxOrthographicSizeDebug = 200f;
 
 	private float overrideZoomSpeed;
 

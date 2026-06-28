@@ -8,20 +8,20 @@ namespace STRINGS
 		{
 			public class HERBALREMEDY
 			{
-				public static LocString NAME = "Herbal Gut Remedy";
+				public static LocString NAME = "Digestive Tonic";
 
-				public static LocString DESC = "Stops horrible accidents from happening.";
+				public static LocString DESC = "<style=\"medicine\">Medicine</style> for <style=\"disease\">Diarrhea</style>.";
 
-				public static LocString RECIPEDESC = "Stops horrible accidents from happening.";
+				public static LocString RECIPEDESC = "Cures <style=\"disease\">Diarrhea</style>.";
 			}
 
 			public class PLACEBO
 			{
-				public static LocString NAME = "Placebo Pill";
+				public static LocString NAME = "Placebo";
 
-				public static LocString DESC = "Somehow, it seems to fix everything.";
+				public static LocString DESC = "A general, all-purpose <style=\"medicine\">Medicine</style>.\n\nThe less you know about it, the better it works.";
 
-				public static LocString RECIPEDESC = "Somehow, it seems to fix everything.";
+				public static LocString RECIPEDESC = "All-purpose <style=\"medicine\">Medicine</style>.";
 			}
 
 			public class GINKONUT
@@ -46,22 +46,33 @@ namespace STRINGS
 
 				public static LocString RECIPEDESC = "A medical-grade destinkifier.";
 			}
+
+			public class VITAMINSUPPLEMENT
+			{
+				public static LocString NAME = "Vitamin Chews";
+
+				public static LocString DESC = "A health <style=\"medicine\">Supplement</style> for improving <style=\"disease\">Immune System</style> strength.";
+
+				public static LocString RECIPEDESC = "Improves <style=\"disease\">Immune System</style> strength.";
+			}
 		}
 
 		public class FOOD
 		{
+			public static LocString COMPOST = "Compost";
+
 			public class FIELDRATION
 			{
-				public static LocString NAME = "Field Ration";
+				public static LocString NAME = "Nutrient Bar";
 
-				public static LocString DESC = "Provides the most essential nutrients and nothing more.\n\nTastes like chalk.";
+				public static LocString DESC = "A nourishing nutrient paste, sandwiched between thin wafer layers.";
 			}
 
 			public class MUSHBAR
 			{
 				public static LocString NAME = "Mush Bar";
 
-				public static LocString DESC = "An edible, putrefied mudslop that may cause <style=\"disease\">Diarrhea</style>.\n\nMush Bars are preferable to starvation, but only just barely.";
+				public static LocString DESC = "An edible, putrefied mudslop.\n\nMush Bars are preferable to starvation, but only just barely.";
 
 				public static LocString RECIPEDESC = "An edible, putrefied mudslop.\n\nMush Bars are preferable to starvation, but only just barely.";
 			}
@@ -73,11 +84,18 @@ namespace STRINGS
 				public static LocString DESC = "Uncooked meat from a very dead creature. Yum!";
 			}
 
+			public class MUSHROOM
+			{
+				public static LocString NAME = "Mushroom";
+
+				public static LocString DESC = "An edible, flavorless fungus that grew in the dark.";
+			}
+
 			public class COOKEDMEAT
 			{
-				public static LocString NAME = "BBQ";
+				public static LocString NAME = "Barbeque";
 
-				public static LocString DESC = "The cooked meat of a defeated creature.\n\nIt has a delightful smokey aftertaste.";
+				public static LocString DESC = "The cooked meat of a defeated creature.\n\nIt has a delightful smoky aftertaste.";
 
 				public static LocString RECIPEDESC = "The cooked meat of a defeated creature.";
 			}
@@ -98,6 +116,15 @@ namespace STRINGS
 				public static LocString DESC = "Deep fried, solidified mudslop.\n\nThe inside is almost completely uncooked, despite the crunch on the outside.";
 
 				public static LocString RECIPEDESC = "Deep fried, solidified mudslop.";
+			}
+
+			public class FRIEDMUSHROOM
+			{
+				public static LocString NAME = "Fried Mushroom";
+
+				public static LocString DESC = "A fried dish made with a fruiting <style=\"plant\">Dusk Cap</style>.\n\nIt has a thick, savory flavor with subtle earthy undertones.";
+
+				public static LocString RECIPEDESC = "A fried dish made with a fruiting <style=\"plant\">Dusk Cap</style>.";
 			}
 
 			public class PRICKLEFRUIT
@@ -184,7 +211,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Sleet Wheat Grain";
 
-				public static LocString DESC = "Sleet Wheat Grain";
+				public static LocString DESC = "An edible grain that leaves a cool taste on the tongue.";
 			}
 		}
 
@@ -192,7 +219,9 @@ namespace STRINGS
 		{
 			public class SWAMPLILYFLOWER
 			{
-				public static LocString NAME = "Swamp Lily Flower";
+				public static LocString NAME = "Balm Lily Flower";
+
+				public static LocString DESC = "A medicinal flower that soothes most minor maladies.\n\nIt is exceptionally fragrant.";
 			}
 		}
 

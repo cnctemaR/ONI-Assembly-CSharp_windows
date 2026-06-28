@@ -2,43 +2,15 @@
 using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
-using TUNING;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
 public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, IGameObjectEffectDescriptor, IEffectDescriptor
 {
-	public float temperature
-	{
-		get
-		{
-			return this.primaryElement.Temperature;
-		}
-	}
-
 	public void ResetTemperature()
 	{
-		this.primaryElement.Temperature = 293.15f;
-	}
-
-	public bool IsOverheated()
-	{
-		return this.temperature > this.overheatTemp.GetTotalValue();
-	}
-
-	public bool IsFatalHot()
-	{
-		return this.temperature > this.fatalTemp.GetTotalValue();
-	}
-
-	public void OverheatDamage()
-	{
-		base.smi.master.Trigger(-794517298, new BuildingHP.DamageSourceInfo
-		{
-			damage = 1,
-			source = global::STRINGS.BUILDINGS.DAMAGESOURCES.BUILDING_OVERHEATED,
-			popString = UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.OVERHEAT
-		});
+		PrimaryElement component = base.GetComponent<PrimaryElement>();
+		component.Temperature = 293.15f;
 	}
 
 	protected override void OnPrefabInit()
@@ -55,12 +27,31 @@ public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, 
 		AttributeModifier attributeModifier2 = new AttributeModifier(this.fatalTemp.Id, this.baseFatalTemp, UI.TOOLTIPS.BASE_VALUE, false, false);
 		this.GetAttributes().Add("Base", attributeModifier);
 		this.GetAttributes().Add("Base", attributeModifier2);
+		HandleVector<int>.Handle handle = GameComps.StructureTemperatures.GetHandle(base.gameObject);
+		if (handle.IsValid())
+		{
+			bool flag = GameComps.StructureTemperatures.IsEnabled(handle);
+			if (flag)
+			{
+				GameComps.StructureTemperatures.Disable(handle);
+				GameComps.StructureTemperatures.Enable(handle);
+			}
+		}
 		base.smi.StartSM();
+	}
+
+	public float OverheatTemperature
+	{
+		get
+		{
+			return (this.overheatTemp == null) ? 10000f : this.overheatTemp.GetTotalValue();
+		}
 	}
 
 	public Notification CreateOverheatedNotification()
 	{
-		return new Notification(MISC.NOTIFICATIONS.BUILDINGOVERHEATED.NAME, NotificationType.BadMinor, HashedString.Invalid, new Func<List<Notification>, object, string>(Overheatable.ToolTipResolver), this.selectable.GetProperName(), false, 0f, null, null, null);
+		KSelectable component = base.GetComponent<KSelectable>();
+		return new Notification(MISC.NOTIFICATIONS.BUILDINGOVERHEATED.NAME, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.BUILDINGOVERHEATED.TOOLTIP + notificationList.ReduceMessages(false), "/t• " + component.GetProperName(), false, 0f, null, null, null);
 	}
 
 	private static string ToolTipResolver(List<Notification> notificationList, object data)
@@ -83,22 +74,13 @@ public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, 
 		return this.GetDescriptors(def.BuildingComplete);
 	}
 
-	public static int GetLightDecorBonus(int cell)
-	{
-		if (Grid.LightCount[cell] > 0)
-		{
-			return DECOR.LIT_BONUS;
-		}
-		return 0;
-	}
-
 	public List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		if (this.overheatTemp != null && this.fatalTemp != null)
 		{
-			string formattedValue = this.overheatTemp.GetFormattedValue(false);
-			string formattedValue2 = this.fatalTemp.GetFormattedValue(false);
+			string formattedValue = this.overheatTemp.GetFormattedValue();
+			string formattedValue2 = this.fatalTemp.GetFormattedValue();
 			string text = UI.BUILDINGEFFECTS.TOOLTIPS.OVERHEAT_TEMP;
 			text = text + "\n\n" + this.overheatTemp.GetAttributeValueTooltip();
 			Descriptor descriptor = new Descriptor(string.Format(UI.BUILDINGEFFECTS.OVERHEAT_TEMP, formattedValue, formattedValue2), string.Format(text, formattedValue, formattedValue2), Descriptor.DescriptorType.Effect, false);
@@ -115,18 +97,6 @@ public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, 
 		return list;
 	}
 
-	[MyCmpReq]
-	private PrimaryElement primaryElement;
-
-	[MyCmpReq]
-	private KSelectable selectable;
-
-	[MyCmpReq]
-	private Building building;
-
-	[MyCmpReq]
-	private OccupyArea occupyArea;
-
 	private AttributeInstance overheatTemp;
 
 	private AttributeInstance fatalTemp;
@@ -141,6 +111,16 @@ public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, 
 			: base(smi)
 		{
 		}
+
+		public void DoOverheatDamage()
+		{
+			base.master.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+			{
+				damage = 1,
+				source = BUILDINGS.DAMAGESOURCES.BUILDING_OVERHEATED,
+				popString = UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.OVERHEAT
+			});
+		}
 	}
 
 	public class States : GameStateMachine<Overheatable.States, Overheatable.StatesInstance, Overheatable>
@@ -153,16 +133,16 @@ public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, 
 			{
 				smi.master.ResetTemperature();
 			}).EventTransition(GameHashes.BuildingPartiallyRepaired, this.safeTemperature, null);
-			this.safeTemperature.Transition(this.overheated, (Overheatable.StatesInstance smi) => smi.master.IsOverheated()).TriggerOnEnter(GameHashes.OptimalTemperatureAchieved, null);
+			this.safeTemperature.TriggerOnEnter(GameHashes.OptimalTemperatureAchieved, null).EventTransition(GameHashes.BuildingOverheated, this.overheated, null);
 			this.overheated.Enter(delegate(Overheatable.StatesInstance smi)
 			{
 				Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_OverheatingBuildings);
-			}).Transition(this.safeTemperature, (Overheatable.StatesInstance smi) => !smi.master.IsOverheated()).ToggleStatusItem(Db.Get().BuildingStatusItems.Overheated, null)
+			}).EventTransition(GameHashes.BuildingNoLongerOverheated, this.safeTemperature, null).ToggleStatusItem(Db.Get().BuildingStatusItems.Overheated, null)
 				.ToggleNotification((Overheatable.StatesInstance smi) => smi.master.CreateOverheatedNotification())
 				.TriggerOnEnter(GameHashes.TooHotWarning, null)
 				.ToggleSchedulePeriodic("OverheatDamage", 7.5f, delegate(Overheatable.StatesInstance smi)
 				{
-					smi.master.OverheatDamage();
+					smi.DoOverheatDamage();
 				});
 		}
 

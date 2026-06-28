@@ -16,16 +16,18 @@ public class OffsetTableTracker : OffsetTracker
 			return;
 		}
 		base.UpdateCell(previous_cell, current_cell);
-		if (this.partitionerEntry == null)
+		if (this.solidPartitionerEntry == null)
 		{
 			Extents extents = new Extents(current_cell, this.table);
 			extents.height += 2;
 			extents.y--;
-			this.partitionerEntry = GameScenePartitioner.Instance.Add("OffsetTableTracker.UpdateCell", this.cmp.gameObject, extents, GameScenePartitioner.Instance.navCellChangedMask.mask | GameScenePartitioner.Instance.solidChangedMask.mask, new Action<object>(this.OnCellChanged));
+			this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("OffsetTableTracker.UpdateCell", this.cmp.gameObject, extents, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnCellChanged));
+			this.validNavCellChangedPartitionerEntry = GameScenePartitioner.Instance.Add("OffsetTableTracker.UpdateCell", this.cmp.gameObject, extents, GameScenePartitioner.Instance.validNavCellChangedLayer, new Action<object>(this.OnCellChanged));
 		}
 		else
 		{
-			this.partitionerEntry.UpdatePosition(current_cell);
+			this.solidPartitionerEntry.UpdatePosition(current_cell);
+			this.validNavCellChangedPartitionerEntry.UpdatePosition(current_cell);
 		}
 		this.offsets = null;
 	}
@@ -83,16 +85,23 @@ public class OffsetTableTracker : OffsetTracker
 
 	public override void Clear()
 	{
-		if (this.partitionerEntry != null)
+		if (this.solidPartitionerEntry != null)
 		{
-			this.partitionerEntry.Release();
-			this.partitionerEntry = null;
+			this.solidPartitionerEntry.Release();
+			this.solidPartitionerEntry = null;
+		}
+		if (this.validNavCellChangedPartitionerEntry != null)
+		{
+			this.validNavCellChangedPartitionerEntry.Release();
+			this.validNavCellChangedPartitionerEntry = null;
 		}
 	}
 
 	private CellOffset[][] table;
 
-	public GameScenePartitionerEntry partitionerEntry;
+	public GameScenePartitionerEntry solidPartitionerEntry;
+
+	public GameScenePartitionerEntry validNavCellChangedPartitionerEntry;
 
 	private NavGrid navGrid;
 

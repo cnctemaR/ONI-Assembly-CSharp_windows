@@ -27,6 +27,14 @@ namespace Klei.AI
 				this.amounts = this.GetAmounts();
 				this.entityType.Apply(this, base.gameObject);
 			}
+			foreach (Disease disease in Db.Get().Diseases)
+			{
+				AmountInstance amountInstance = this.amounts.Get(disease.amount);
+				if (amountInstance != null)
+				{
+					amountInstance.SetValue(0f);
+				}
+			}
 		}
 
 		protected override void OnSpawn()

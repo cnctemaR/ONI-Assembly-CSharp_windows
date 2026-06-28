@@ -114,6 +114,9 @@ namespace KSerialization
 
 		public static void DeserializeDirectory(IReader reader)
 		{
+			Manager.deserializationTemplatesByTypeName.Clear();
+			Manager.deserializationTemplatesByType.Clear();
+			Manager.deserializationMappings.Clear();
 			int num = reader.ReadInt32();
 			for (int i = 0; i < num; i++)
 			{
@@ -130,7 +133,7 @@ namespace KSerialization
 				}
 				catch (Exception ex)
 				{
-					string text2 = "Error deserializing template " + text + "\n";
+					string text2 = string.Concat(new string[] { "Error deserializing template ", text, "\n", ex.Message, "\n", ex.StackTrace });
 					Output.LogError(new object[] { text2 });
 					throw new Exception(text2, ex);
 				}

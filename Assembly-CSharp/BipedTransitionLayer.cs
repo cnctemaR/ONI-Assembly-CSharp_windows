@@ -28,14 +28,17 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 			return;
 		}
 		int num = Grid.PosToCell(navigator);
+		float movementSpeedMultiplier = this.GetMovementSpeedMultiplier(navigator);
 		if (transition.start == NavType.Ladder && transition.end == NavType.Ladder)
 		{
-			transition.speed = this.ladderSpeed * this.GetMovementSpeedMultiplier(navigator);
+			transition.speed = this.ladderSpeed * movementSpeedMultiplier;
 		}
 		else
 		{
-			transition.speed = this.floorSpeed * this.GetMovementSpeedMultiplier(navigator);
+			transition.speed = this.floorSpeed * movementSpeedMultiplier;
 		}
+		float num2 = movementSpeedMultiplier - 1f;
+		transition.animSpeed += transition.animSpeed * num2 / 2f;
 		if (transition.start == NavType.Floor && transition.end == NavType.Floor && Grid.Foundation[Grid.CellBelow(num)])
 		{
 			transition.speed *= DUPLICANTSTATS.FOUNDATION_MOVEMENT_BOOST;

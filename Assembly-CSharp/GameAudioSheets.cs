@@ -19,9 +19,10 @@ public class GameAudioSheets : AudioSheets
 		{
 			return new FloorSoundEvent(file_name, sound_name, frame);
 		}
-		if (type == "SoundEvent")
+		if (type == "SoundEvent" || type == "LoopingSoundEvent")
 		{
-			return new SoundEvent(file_name, sound_name, frame, min_interval, false);
+			bool flag = type == "LoopingSoundEvent";
+			return new SoundEvent(file_name, sound_name, frame, true, flag, min_interval, false);
 		}
 		if (type == "LaserSoundEvent")
 		{
@@ -35,10 +36,6 @@ public class GameAudioSheets : AudioSheets
 		{
 			return new HatchChewSoundEvent(file_name, sound_name, frame, min_interval);
 		}
-		if (type == "LoopingSoundEvent")
-		{
-			return new SoundEvent(file_name, sound_name, frame, min_interval, true);
-		}
 		if (type == "BuildingDamageSoundEvent")
 		{
 			return new BuildingDamageSoundEvent(file_name, sound_name, frame);
@@ -51,13 +48,9 @@ public class GameAudioSheets : AudioSheets
 		{
 			return new RemoteSoundEvent(file_name, sound_name, frame, min_interval);
 		}
-		if (type == "VoiceSoundEvent")
+		if (type == "VoiceSoundEvent" || type == "LoopingVoiceSoundEvent")
 		{
-			return new VoiceSoundEvent(file_name, sound_name, frame, false);
-		}
-		if (type == "LoopingVoiceSoundEvent")
-		{
-			return new VoiceSoundEvent(file_name, sound_name, frame, true);
+			return new VoiceSoundEvent(file_name, sound_name, frame, type == "LoopingVoiceSoundEvent");
 		}
 		if (type == "MainMenuSoundEvent")
 		{

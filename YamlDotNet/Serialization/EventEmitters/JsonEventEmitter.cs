@@ -12,12 +12,12 @@ namespace YamlDotNet.Serialization.EventEmitters
 		{
 		}
 
-		public override void Emit(AliasEventInfo eventInfo)
+		public override void Emit(AliasEventInfo eventInfo, IEmitter emitter)
 		{
 			throw new NotSupportedException("Aliases are not supported in JSON");
 		}
 
-		public override void Emit(ScalarEventInfo eventInfo)
+		public override void Emit(ScalarEventInfo eventInfo, IEmitter emitter)
 		{
 			eventInfo.IsPlainImplicit = true;
 			eventInfo.Style = ScalarStyle.Plain;
@@ -26,15 +26,15 @@ namespace YamlDotNet.Serialization.EventEmitters
 			{
 			case TypeCode.Empty:
 				eventInfo.RenderedValue = "null";
-				goto IL_0154;
+				goto IL_0150;
 			case TypeCode.Boolean:
 				eventInfo.RenderedValue = YamlFormatter.FormatBoolean(eventInfo.Source.Value);
-				goto IL_0154;
+				goto IL_0150;
 			case TypeCode.Char:
 			case TypeCode.String:
 				eventInfo.RenderedValue = eventInfo.Source.Value.ToString();
 				eventInfo.Style = ScalarStyle.DoubleQuoted;
-				goto IL_0154;
+				goto IL_0150;
 			case TypeCode.SByte:
 			case TypeCode.Byte:
 			case TypeCode.Int16:
@@ -47,30 +47,30 @@ namespace YamlDotNet.Serialization.EventEmitters
 			case TypeCode.Double:
 			case TypeCode.Decimal:
 				eventInfo.RenderedValue = YamlFormatter.FormatNumber(eventInfo.Source.Value);
-				goto IL_0154;
+				goto IL_0150;
 			case TypeCode.DateTime:
 				eventInfo.RenderedValue = YamlFormatter.FormatDateTime(eventInfo.Source.Value);
-				goto IL_0154;
+				goto IL_0150;
 			}
 			if (eventInfo.Source.Type != typeof(TimeSpan))
 			{
 				throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", new object[] { typeCode }));
 			}
 			eventInfo.RenderedValue = YamlFormatter.FormatTimeSpan(eventInfo.Source.Value);
-			IL_0154:
-			base.Emit(eventInfo);
+			IL_0150:
+			base.Emit(eventInfo, emitter);
 		}
 
-		public override void Emit(MappingStartEventInfo eventInfo)
+		public override void Emit(MappingStartEventInfo eventInfo, IEmitter emitter)
 		{
 			eventInfo.Style = MappingStyle.Flow;
-			base.Emit(eventInfo);
+			base.Emit(eventInfo, emitter);
 		}
 
-		public override void Emit(SequenceStartEventInfo eventInfo)
+		public override void Emit(SequenceStartEventInfo eventInfo, IEmitter emitter)
 		{
 			eventInfo.Style = SequenceStyle.Flow;
-			base.Emit(eventInfo);
+			base.Emit(eventInfo, emitter);
 		}
 	}
 }

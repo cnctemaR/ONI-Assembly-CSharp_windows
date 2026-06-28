@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class FetchChore : Chore<FetchChore.StatesInstance>
 {
-	public FetchChore(Storage destination, float amount, Tag[] tags, ChoreProvider chore_provider = null, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, FetchOrder2.OperationalRequirement operational_requirement = FetchOrder2.OperationalRequirement.Operational, int priority_mod = 0)
+	public FetchChore(Storage destination, float amount, Tag[] tags, Tag[] forbidden_tags = null, ChoreProvider chore_provider = null, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, FetchOrder2.OperationalRequirement operational_requirement = FetchOrder2.OperationalRequirement.Operational, int priority_mod = 0)
 		: base(destination.choreType, destination, chore_provider, run_until_complete, on_complete, on_begin, on_end, int.MaxValue, false, true, priority_mod)
 	{
 		if (amount <= 0f)
@@ -15,6 +15,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		this.smi.sm.requestedamount.Set(amount, this.smi);
 		this.smi.sm.destination.Set(destination, this.smi);
 		this.tags = tags;
+		this.forbiddenTags = forbidden_tags;
 		if (destination.GetOnlyFetchMarkedItems())
 		{
 			this.requiredTags = new Tag[] { GameTags.Garbage };
@@ -34,7 +35,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 				base.AddPrecondition(ChorePreconditions.IsFunctional, destination.gameObject);
 			}
 		}
-		this.partitionerEntry = GameScenePartitioner.Instance.Add(destination.name, this, Grid.PosToCell(destination), GameScenePartitioner.Instance.fetchChores.mask, null);
+		this.partitionerEntry = GameScenePartitioner.Instance.Add(destination.name, this, Grid.PosToCell(destination), GameScenePartitioner.Instance.fetchChoreLayer, null);
 		destination.onPriorityChanged = (global::System.Action)Delegate.Combine(destination.onPriorityChanged, new global::System.Action(this.OnPriorityChanged));
 	}
 
@@ -55,7 +56,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 			}
 			else
 			{
-				flag = FetchManagerUpdater.IsFetchablePickup(pickupable.GetComponent<KPrefabID>(), pickupable.storage, pickupable.UnreservedAmount, pickupable.MinTakeAmount, fetchChore.originalAmount, fetchChore.tags, fetchChore.requiredTags, null, context.consumer.GetComponent<Storage>());
+				flag = FetchManagerUpdater.IsFetchablePickup(pickupable.GetComponent<KPrefabID>(), pickupable.storage, pickupable.UnreservedAmount, pickupable.MinTakeAmount, fetchChore.originalAmount, fetchChore.tags, fetchChore.requiredTags, fetchChore.forbiddenTags, context.consumer.GetComponent<Storage>());
 			}
 			if (flag)
 			{
@@ -128,6 +129,8 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 
 	public Tag[] requiredTags { get; private set; }
 
+	public Tag[] forbiddenTags { get; private set; }
+
 	public void FetchAreaBegin(Chore.Precondition.Context context, float amount_to_be_fetched)
 	{
 		this.amount = amount_to_be_fetched;
@@ -156,7 +159,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		Pickupable pickupable = null;
 		if (this.destination != null)
 		{
-			FetchManager.Instance.FindFetchTarget(consumer.GetComponent<Worker>(), this.destination, this.tags, this.requiredTags, null, this.originalAmount, ref pickupable);
+			FetchManager.Instance.FindFetchTarget(consumer.GetComponent<Worker>(), this.destination, this.tags, this.requiredTags, this.forbiddenTags, this.originalAmount, ref pickupable);
 		}
 		return pickupable;
 	}
@@ -169,8 +172,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 			pickupable = this.FindFetchTarget(context.consumer);
 		}
 		this.smi.sm.source.Set(pickupable.gameObject, this.smi);
-		KPrefabID component = pickupable.GetComponent<KPrefabID>();
-		component.onTagsChanged = (global::System.Action)Delegate.Combine(component.onTagsChanged, new global::System.Action(this.OnTagsChanged));
+		pickupable.Subscribe(-1582839653, new Action<object>(this.OnTagsChanged));
 		base.Begin(context);
 	}
 
@@ -179,13 +181,12 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		Pickupable pickupable = this.smi.sm.source.Get<Pickupable>(this.smi);
 		if (pickupable != null)
 		{
-			KPrefabID component = pickupable.GetComponent<KPrefabID>();
-			component.onTagsChanged = (global::System.Action)Delegate.Remove(component.onTagsChanged, new global::System.Action(this.OnTagsChanged));
+			pickupable.Unsubscribe(-1582839653, new Action<object>(this.OnTagsChanged));
 		}
 		base.End(reason);
 	}
 
-	private void OnTagsChanged()
+	private void OnTagsChanged(object data)
 	{
 		if (this.smi.sm.chunk.Get(this.smi) != null)
 		{

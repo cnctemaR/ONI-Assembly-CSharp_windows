@@ -1,7 +1,7 @@
 ﻿using System;
-using Klei.Noise;
 using LibNoiseDotNet.Graphics.Tools.Noise;
 using NodeEditorFramework;
+using ProcGen.Noise;
 using UnityEngine;
 
 [Node(false, "Noise/Primitive", new Type[] { typeof(NoiseNodeCanvas) })]
@@ -40,7 +40,7 @@ public class PrimitiveNodeEditor : BaseNodeEditor
 
 	public override bool Calculate()
 	{
-		this.Outputs[0].SetValue<IModule3D>(this.target.CreateModule());
+		this.Outputs[0].SetValue<IModule3D>(this.target.CreateModule(0));
 		return true;
 	}
 

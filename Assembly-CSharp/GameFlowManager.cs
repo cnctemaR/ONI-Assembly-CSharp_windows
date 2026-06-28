@@ -1,4 +1,5 @@
 ﻿using System;
+using Klei;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -88,9 +89,16 @@ public class GameFlowManager : StateMachineComponent<GameFlowManager.StatesInsta
 					smi.GoTo(this.gameover.active);
 				}, null, null);
 			});
-			this.gameover.active.Enter("StartGameOverScreen", delegate(GameFlowManager.StatesInstance smi)
+			this.gameover.active.Enter(delegate(GameFlowManager.StatesInstance smi)
 			{
-				GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.GameOverScreen, null, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay).GetComponent<KScreen>().Show(true);
+				if (GenericGameSettings.instance.demoMode)
+				{
+					DemoTimer.Instance.EndDemo();
+				}
+				else
+				{
+					GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.GameOverScreen, null, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay).GetComponent<KScreen>().Show(true);
+				}
 			});
 		}
 

@@ -63,7 +63,7 @@ public class Shockworm : StateMachineComponent<Shockworm.StatesInstance>, ISaveL
 			this.alive.EventTransition(GameHashes.Died, this.death, null).EventTransition(GameHashes.TooColdFatal, this.death, null).EventTransition(GameHashes.TooHotFatal, this.death, null)
 				.EventTransition(GameHashes.Drowned, this.death, null)
 				.EventTransition(GameHashes.Drowning, this.alive.distressed.Drowning, null)
-				.EventTransition(GameHashes.EntombedChanged, this.death, null)
+				.TagTransition(GameTags.Entombed, this.death, false)
 				.EventTransition(GameHashes.DebugGoTo, (Shockworm.StatesInstance smi) => Game.Instance, this.alive.idleStates.debug_go_to, null)
 				.ToggleStateMachine((Shockworm.StatesInstance smi) => new ThreatMonitor.Instance(smi.master))
 				.Enter(delegate(Shockworm.StatesInstance smi)

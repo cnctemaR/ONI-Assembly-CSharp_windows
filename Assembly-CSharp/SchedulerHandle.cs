@@ -20,7 +20,13 @@ public struct SchedulerHandle
 		}
 	}
 
-	public void Clear()
+	public void FreeResources()
+	{
+		this.entry.FreeResources();
+		this.scheduler = null;
+	}
+
+	public void ClearScheduler()
 	{
 		if (this.scheduler == null)
 		{

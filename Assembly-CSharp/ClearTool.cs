@@ -7,6 +7,7 @@ public class ClearTool : DragTool
 	{
 		base.OnPrefabInit();
 		ClearTool.Instance = this;
+		this.interceptNumberKeysForPriority = true;
 	}
 
 	public void Activate()

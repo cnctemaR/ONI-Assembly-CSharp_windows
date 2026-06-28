@@ -39,6 +39,19 @@ public class BatchSet
 
 	public int dirtyBatchLastFrame { get; private set; }
 
+	public void Clear()
+	{
+		this.group = null;
+		for (int i = 0; i < this.batches.Count; i++)
+		{
+			if (this.batches[i] != null)
+			{
+				this.batches[i].Clear();
+			}
+		}
+		this.batches.Clear();
+	}
+
 	public KAnimBatch GetBatch(int idx)
 	{
 		return this.batches[idx];

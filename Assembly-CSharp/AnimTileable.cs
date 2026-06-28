@@ -6,35 +6,58 @@ public class AnimTileable : KMonoBehaviour
 {
 	protected override void OnSpawn()
 	{
-		Building component = base.GetComponent<Building>();
-		Extents extents = component.GetExtents();
+		OccupyArea component = base.GetComponent<OccupyArea>();
+		Extents extents;
+		if (component != null)
+		{
+			extents = component.GetExtents();
+		}
+		else
+		{
+			Building component2 = base.GetComponent<Building>();
+			extents = component2.GetExtents();
+		}
 		extents = new Extents(extents.x - 1, extents.y, extents.width + 2, 1);
-		int mask = GameScenePartitioner.Instance.objectLayerMasks[1].mask;
-		this.partitionerEntry = GameScenePartitioner.Instance.Add("AnimTileable.OnSpawn", base.gameObject, extents, mask, new Action<object>(this.OnNeighbourCellsUpdated));
+		this.partitionerEntry = GameScenePartitioner.Instance.Add("AnimTileable.OnSpawn", base.gameObject, extents, GameScenePartitioner.Instance.objectLayers[1], new Action<object>(this.OnNeighbourCellsUpdated));
 		this.UpdateEndCaps();
 	}
 
 	protected override void OnCleanUp()
 	{
-		this.partitionerEntry.Release();
+		if (this.partitionerEntry != null)
+		{
+			this.partitionerEntry.Release();
+			this.partitionerEntry = null;
+		}
 	}
 
 	private void UpdateEndCaps()
 	{
-		Vector2I vector2I;
-		Grid.PosToXY(this.transform.position, out vector2I);
+		int num = Grid.PosToCell(this);
 		KPrefabID component = base.GetComponent<KPrefabID>();
 		bool flag = true;
 		bool flag2 = true;
-		if (vector2I.x > 0)
+		bool flag3 = true;
+		bool flag4 = true;
+		int num2 = Grid.CellLeft(num);
+		int num3 = Grid.CellRight(num);
+		int num4 = Grid.CellAbove(num);
+		int num5 = Grid.CellBelow(num);
+		if (Grid.IsValidCell(num2))
 		{
-			int num = vector2I.y * Grid.WidthInCells + vector2I.x - 1;
-			flag = !this.HasTileableNeighbour(component.PrefabTag, num);
+			flag = !this.HasTileableNeighbour(component.PrefabTag, num2);
 		}
-		if (vector2I.x < Grid.WidthInCells - 1)
+		if (Grid.IsValidCell(num3))
 		{
-			int num2 = vector2I.y * Grid.WidthInCells + vector2I.x + 1;
-			flag2 = !this.HasTileableNeighbour(component.PrefabTag, num2);
+			flag2 = !this.HasTileableNeighbour(component.PrefabTag, num3);
+		}
+		if (Grid.IsValidCell(num4))
+		{
+			flag3 = !this.HasTileableNeighbour(component.PrefabTag, num4);
+		}
+		if (Grid.IsValidCell(num5))
+		{
+			flag4 = !this.HasTileableNeighbour(component.PrefabTag, num5);
 		}
 		KBatchedAnimController[] componentsInChildren = base.GetComponentsInChildren<KBatchedAnimController>();
 		foreach (KBatchedAnimController kbatchedAnimController in componentsInChildren)
@@ -46,6 +69,14 @@ public class AnimTileable : KMonoBehaviour
 			foreach (KAnimHashedString kanimHashedString2 in AnimTileable.rightSymbols)
 			{
 				kbatchedAnimController.HideSymbol(!flag2, kanimHashedString2);
+			}
+			foreach (KAnimHashedString kanimHashedString3 in AnimTileable.topSymbols)
+			{
+				kbatchedAnimController.HideSymbol(!flag3, kanimHashedString3);
+			}
+			foreach (KAnimHashedString kanimHashedString4 in AnimTileable.bottomSymbols)
+			{
+				kbatchedAnimController.HideSymbol(!flag4, kanimHashedString4);
 			}
 		}
 	}
@@ -84,5 +115,19 @@ public class AnimTileable : KMonoBehaviour
 		new KAnimHashedString("cap_right"),
 		new KAnimHashedString("cap_right_fg"),
 		new KAnimHashedString("cap_right_place")
+	};
+
+	private static readonly KAnimHashedString[] topSymbols = new KAnimHashedString[]
+	{
+		new KAnimHashedString("cap_top"),
+		new KAnimHashedString("cap_top_fg"),
+		new KAnimHashedString("cap_top_place")
+	};
+
+	private static readonly KAnimHashedString[] bottomSymbols = new KAnimHashedString[]
+	{
+		new KAnimHashedString("cap_bottom"),
+		new KAnimHashedString("cap_bottom_fg"),
+		new KAnimHashedString("cap_bottom_place")
 	};
 }

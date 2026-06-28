@@ -4,7 +4,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class ManualGenerator : BuildingWorkable, IBatteryRefillControl
+public class ManualGenerator : Workable, IBatteryRefillControl
 {
 	private ManualGenerator()
 	{
@@ -38,6 +38,7 @@ public class ManualGenerator : BuildingWorkable, IBatteryRefillControl
 		this.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.GeneratingPower;
 		this.attributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
+		EnergyGenerator.EnsureStatusItemAvailable();
 	}
 
 	protected void OnActiveChanged(object is_active)
@@ -93,7 +94,7 @@ public class ManualGenerator : BuildingWorkable, IBatteryRefillControl
 				{
 					if (this.chore == null && this.smi.GetCurrentState() == this.smi.sm.on)
 					{
-						this.chore = new WorkChore<ManualGenerator>(Db.Get().ChoreTypes.GeneratePower, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true);
+						this.chore = new WorkChore<ManualGenerator>(Db.Get().ChoreTypes.GeneratePower, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true);
 					}
 				}
 				else if (this.chore != null)
@@ -101,7 +102,7 @@ public class ManualGenerator : BuildingWorkable, IBatteryRefillControl
 					this.chore.Cancel("No refill needed");
 					this.chore = null;
 				}
-				base.GetComponent<KSelectable>().ToggleStatusItem(EnergyGenerator.BatteriesSufficientlyFull, !flag2, null);
+				this.selectable.ToggleStatusItem(EnergyGenerator.BatteriesSufficientlyFull, !flag2, null);
 			}
 		}
 	}

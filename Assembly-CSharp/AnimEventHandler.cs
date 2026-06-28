@@ -16,7 +16,9 @@ public class AnimEventHandler : KMonoBehaviour
 				this.onWorkTargetSet = (AnimEventHandler.SetPos)Delegate.Combine(this.onWorkTargetSet, new AnimEventHandler.SetPos(kbatchedAnimTracker.SetTarget));
 			}
 		}
-		this.baseOffset = base.GetComponent<BoxCollider2D>().offset;
+		this.controller = base.GetComponent<KBatchedAnimController>();
+		this.animCollider = base.GetComponent<BoxCollider2D>();
+		this.baseOffset = this.animCollider.offset;
 	}
 
 	public HashedString GetContext()
@@ -54,10 +56,13 @@ public class AnimEventHandler : KMonoBehaviour
 
 	public void LateUpdate()
 	{
-		Vector3 pivotSymbolPosition = base.GetComponent<KBatchedAnimController>().GetPivotSymbolPosition();
-		BoxCollider2D component = base.GetComponent<BoxCollider2D>();
-		component.offset = new Vector2(this.baseOffset.x + pivotSymbolPosition.x - this.transform.position.x, this.baseOffset.y + pivotSymbolPosition.y - this.transform.position.y);
+		Vector3 pivotSymbolPosition = this.controller.GetPivotSymbolPosition();
+		this.animCollider.offset = new Vector2(this.baseOffset.x + pivotSymbolPosition.x - this.transform.position.x, this.baseOffset.y + pivotSymbolPosition.y - this.transform.position.y);
 	}
+
+	private KBatchedAnimController controller;
+
+	private BoxCollider2D animCollider;
 
 	private Vector3 targetPos;
 

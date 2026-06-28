@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
@@ -6,18 +7,21 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 {
 	public class RoundtripObjectGraphTraversalStrategy : FullObjectGraphTraversalStrategy
 	{
-		public RoundtripObjectGraphTraversalStrategy(Serializer serializer, ITypeInspector typeDescriptor, ITypeResolver typeResolver, int maxRecursion)
-			: base(serializer, typeDescriptor, typeResolver, maxRecursion, null)
+		public RoundtripObjectGraphTraversalStrategy(IEnumerable<IYamlTypeConverter> converters, ITypeInspector typeDescriptor, ITypeResolver typeResolver, int maxRecursion)
+			: base(typeDescriptor, typeResolver, maxRecursion, null)
 		{
+			this.converters = converters;
 		}
 
-		protected override void TraverseProperties(IObjectDescriptor value, IObjectGraphVisitor visitor, int currentDepth)
+		protected override void TraverseProperties<TContext>(IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, int currentDepth, TContext context)
 		{
-			if (!value.Type.HasDefaultConstructor() && !this.serializer.Converters.Any<IYamlTypeConverter>((IYamlTypeConverter c) => c.Accepts(value.Type)))
+			if (!value.Type.HasDefaultConstructor() && !this.converters.Any<IYamlTypeConverter>((IYamlTypeConverter c) => c.Accepts(value.Type)))
 			{
 				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Type '{0}' cannot be deserialized because it does not have a default constructor or a type converter.", new object[] { value.Type }));
 			}
-			base.TraverseProperties(value, visitor, currentDepth);
+			base.TraverseProperties<TContext>(value, visitor, currentDepth, context);
 		}
+
+		private readonly IEnumerable<IYamlTypeConverter> converters;
 	}
 }

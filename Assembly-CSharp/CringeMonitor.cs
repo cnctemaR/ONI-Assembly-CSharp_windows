@@ -6,7 +6,7 @@ public class CringeMonitor : GameStateMachine<CringeMonitor, CringeMonitor.Insta
 	{
 		default_state = this.idle;
 		this.idle.EventHandler(GameHashes.Cringe, new GameStateMachine<CringeMonitor, CringeMonitor.Instance, IStateMachineTarget, object>.GameEvent.Callback(this.TriggerCringe));
-		this.cringe.ToggleChore((CringeMonitor.Instance smi) => new EmoteChore(smi.master, Db.Get().ChoreTypes.EmoteHighPriority, "anim_cringe_kanim", CringeMonitor.CringeAnims, new Func<StatusItem>(smi.GetStatusItem)), this.idle, false).ScheduleGoTo(3f, this.idle);
+		this.cringe.ToggleChore((CringeMonitor.Instance smi) => new EmoteChore(smi.master, Db.Get().ChoreTypes.EmoteHighPriority, "anim_cringe_kanim", CringeMonitor.CringeAnims, new Func<StatusItem>(smi.GetStatusItem)), this.idle).ScheduleGoTo(3f, this.idle);
 	}
 
 	private void TriggerCringe(CringeMonitor.Instance smi, object data)
@@ -31,7 +31,7 @@ public class CringeMonitor : GameStateMachine<CringeMonitor, CringeMonitor.Insta
 		public void SetCringeSourceData(object data)
 		{
 			string text = (string)data;
-			this.statusItem = new StatusItem("CringeSource", text, null, string.Empty, StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None);
+			this.statusItem = new StatusItem("CringeSource", text, null, string.Empty, StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, SimViewMode.None, SimViewMode.None, 2046);
 		}
 
 		public StatusItem GetStatusItem()

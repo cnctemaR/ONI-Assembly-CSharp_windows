@@ -8,12 +8,7 @@ public class SceneOrganizer : MonoBehaviour
 	private void Awake()
 	{
 		SceneOrganizer.Instance = this;
-		this.mFolders = new GameObject[32];
-		for (int i = 0; i < 32; i++)
-		{
-			this.mFolders[i] = Util.NewGameObject(base.gameObject, ((Folder)i).ToString());
-			this.mFolders[i].isStatic = true;
-		}
+		this.mFolders = new GameObject[34];
 	}
 
 	private void OnDestroy()
@@ -23,8 +18,25 @@ public class SceneOrganizer : MonoBehaviour
 
 	public GameObject GetFolder(Folder folder)
 	{
-		return this.mFolders[(int)folder];
+		GameObject gameObject = this.mFolders[(int)folder];
+		if (gameObject == null)
+		{
+			GameObject gameObject2 = base.gameObject;
+			if (folder != Folder.GlobalDoNotDestroy)
+			{
+				if (this.dynamicRoot == null)
+				{
+					this.dynamicRoot = Util.NewGameObject(null, "SceneOrganizerDynamic");
+				}
+				gameObject2 = this.dynamicRoot;
+			}
+			gameObject = Util.NewGameObject(gameObject2, folder.ToString());
+			this.mFolders[(int)folder] = gameObject;
+		}
+		return gameObject;
 	}
 
 	private GameObject[] mFolders;
+
+	private GameObject dynamicRoot;
 }

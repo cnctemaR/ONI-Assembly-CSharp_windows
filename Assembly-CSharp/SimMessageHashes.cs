@@ -4,6 +4,7 @@ public enum SimMessageHashes
 {
 	Elements_CreateTable = 1108437482,
 	Elements_CreateInteractions = -930289787,
+	Disease_CreateTable = 825301935,
 	Load = -672538170,
 	PrepareGameData = 1078620451,
 	SimData_InitializeFromCells = 2062421945,
@@ -31,5 +32,13 @@ public enum SimMessageHashes
 	RemoveElementChunk = -912908555,
 	SetElementChunkData = -435115907,
 	MoveElementChunk = -374911358,
-	ModifyElementChunkEnergy = 1020555667
+	ModifyElementChunkEnergy = 1020555667,
+	AddDiseaseEmitter = 1486783027,
+	ModifyDiseaseEmitter = -1899123924,
+	RemoveDiseaseEmitter = 468135926,
+	AddDiseaseConsumer = 348345681,
+	ModifyDiseaseConsumer = -1822987624,
+	RemoveDiseaseConsumer = -781641650,
+	ConsumeDisease = -1019841536,
+	CellDiseaseModification = -1853671274
 }

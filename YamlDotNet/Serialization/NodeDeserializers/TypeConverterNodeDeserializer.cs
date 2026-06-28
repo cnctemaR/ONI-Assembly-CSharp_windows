@@ -16,7 +16,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 			this.converters = converters;
 		}
 
-		bool INodeDeserializer.Deserialize(EventReader reader, Type expectedType, Func<EventReader, Type, object> nestedObjectDeserializer, out object value)
+		bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
 		{
 			IYamlTypeConverter yamlTypeConverter = this.converters.FirstOrDefault<IYamlTypeConverter>((IYamlTypeConverter c) => c.Accepts(expectedType));
 			if (yamlTypeConverter == null)
@@ -24,7 +24,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 				value = null;
 				return false;
 			}
-			value = yamlTypeConverter.ReadYaml(reader.Parser, expectedType);
+			value = yamlTypeConverter.ReadYaml(parser, expectedType);
 			return true;
 		}
 

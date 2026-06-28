@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
@@ -10,7 +11,6 @@ public class SimpleInfoScreen : TargetScreen
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		SimpleInfoScreen.Instance = this;
 		this.statusItemPanel = Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.statusItemPanel.Content.GetComponent<VerticalLayoutGroup>().padding.bottom = 10;
 		this.statusItemPanel.HeaderLabel.text = UI.DETAILTABS.SIMPLEINFO.GROUPNAME_STATUS;
@@ -23,8 +23,11 @@ public class SimpleInfoScreen : TargetScreen
 		this.infoPanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.SIMPLEINFO.GROUPNAME_DESCRIPTION;
 		GameObject gameObject = this.infoPanel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject;
 		this.descriptionContainer = Util.KInstantiateUI<DescriptionContainer>(this.DescriptionContainerTemplate, gameObject, false);
+		this.lorePanel = Util.KInstantiateUI<CollapsibleDetailContentPanel>(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
+		this.loreContent = Util.KInstantiateUI(this.TextContainerPrefab, this.lorePanel.Content.gameObject, true);
 		this.storagePanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.stampContainer = Util.KInstantiateUI(this.StampContainerTemplate, gameObject, false);
+		this.Subscribe(-1514841199, new Action<object>(this.OnRefreshData));
 	}
 
 	public override void OnSelectTarget(GameObject target)
@@ -33,7 +36,7 @@ public class SimpleInfoScreen : TargetScreen
 		base.Subscribe(target, -1697596308, new Action<object>(this.OnStorageChange));
 		base.Subscribe(target, -1197125120, new Action<object>(this.OnStorageChange));
 		this.RefreshStorage();
-		this.mTarget = target;
+		this.vitalsPanel.HeaderLabel.text = ((!(target.GetComponent<WiltCondition>() == null)) ? UI.DETAILTABS.SIMPLEINFO.GROUPNAME_REQUIREMENTS : UI.DETAILTABS.SIMPLEINFO.GROUPNAME_CONDITION);
 		KSelectable component = target.GetComponent<KSelectable>();
 		if (component != null)
 		{
@@ -59,11 +62,6 @@ public class SimpleInfoScreen : TargetScreen
 					}
 				}
 			}
-		}
-		CellSelectionObject component2 = target.GetComponent<CellSelectionObject>();
-		if (component2)
-		{
-			component2.OnObjectSelected(null);
 		}
 		this.statusItemPanel.gameObject.SetActive(true);
 		this.statusItemPanel.scalerMask.UpdateSize();
@@ -116,7 +114,16 @@ public class SimpleInfoScreen : TargetScreen
 	private void DoAddStatusItem(StatusItemGroup.Entry status_item, StatusItemCategory category, bool show_immediate = false)
 	{
 		GameObject gameObject = this.statusItemsFolder;
-		SimpleInfoScreen.StatusItemEntry statusItemEntry = new SimpleInfoScreen.StatusItemEntry(status_item, category, this.StatusItemPrefab, gameObject.transform, this.ToolTipStyle_Property, show_immediate, new Action<SimpleInfoScreen.StatusItemEntry>(this.OnStatusItemDestroy));
+		Color color;
+		if (status_item.item.notificationType == NotificationType.BadMinor || status_item.item.notificationType == NotificationType.Bad)
+		{
+			color = this.statusItemTextColor_bad;
+		}
+		else
+		{
+			color = this.statusItemTextColor_regular;
+		}
+		SimpleInfoScreen.StatusItemEntry statusItemEntry = new SimpleInfoScreen.StatusItemEntry(status_item, category, this.StatusItemPrefab, gameObject.transform, this.ToolTipStyle_Property, color, show_immediate, new Action<SimpleInfoScreen.StatusItemEntry>(this.OnStatusItemDestroy));
 		statusItemEntry.SetSprite(status_item.item.sprite);
 		if (category != null)
 		{
@@ -166,16 +173,20 @@ public class SimpleInfoScreen : TargetScreen
 		this.Refresh(false);
 	}
 
+	private void OnRefreshData(object obj)
+	{
+		this.Refresh(false);
+	}
+
 	public void Refresh(bool force = false)
 	{
-		if (this.mTarget != this.lastTarget || force)
+		if (this.selectedTarget != this.lastTarget || force)
 		{
-			this.lastTarget = this.mTarget;
-			if (this.mTarget != null)
+			this.lastTarget = this.selectedTarget;
+			if (this.selectedTarget != null)
 			{
-				this.SetTitle(this.mTarget);
-				this.SetPanels(this.mTarget);
-				this.SetStamps(this.mTarget);
+				this.SetPanels(this.selectedTarget);
+				this.SetStamps(this.selectedTarget);
 			}
 		}
 		int count = this.statusItems.Count;
@@ -189,22 +200,6 @@ public class SimpleInfoScreen : TargetScreen
 			this.vitalsContainer.Refresh(null);
 		}
 		this.RefreshStorage();
-	}
-
-	private void SetTitle(GameObject target)
-	{
-		if (DetailsScreen.Instance != null)
-		{
-			DetailsScreen.Instance.SetTitle(GameUtil.GetUnitFormattedName(this.mTarget, false));
-		}
-	}
-
-	private void SetPortrait(GameObject target)
-	{
-		if (DetailsScreen.Instance != null)
-		{
-			DetailsScreen.Instance.UpdatePortrait(this.mTarget);
-		}
 	}
 
 	private void SetPanels(GameObject target)
@@ -231,7 +226,17 @@ public class SimpleInfoScreen : TargetScreen
 		if (amounts != null)
 		{
 			this.vitalsPanel.gameObject.SetActive(true);
-			this.vitalsContainer.selectedEntity = this.mTarget;
+			this.vitalsContainer.selectedEntity = this.selectedTarget;
+			Uprootable component8 = this.selectedTarget.gameObject.GetComponent<Uprootable>();
+			if (component8 != null)
+			{
+				this.vitalsPanel.gameObject.SetActive(component8.GetPlanterStorage != null);
+			}
+			Growing component9 = this.selectedTarget.gameObject.GetComponent<Growing>();
+			if (component9 != null)
+			{
+				this.vitalsPanel.gameObject.SetActive(true);
+			}
 		}
 		if (component)
 		{
@@ -340,49 +345,52 @@ public class SimpleInfoScreen : TargetScreen
 			return;
 		}
 		this.storagePanel.gameObject.SetActive(true);
-		if (this.selectedTarget.GetComponent<MinionIdentity>())
-		{
-			this.storagePanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.DETAILS.GROUPNAME_MINION_CONTENTS;
-		}
-		else
-		{
-			this.storagePanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = UI.DETAILTABS.DETAILS.GROUPNAME_CONTENTS;
-		}
-		Dictionary<string, SimpleInfoScreen.StorageEntry> dictionary = new Dictionary<string, SimpleInfoScreen.StorageEntry>();
-		foreach (Storage storage in array)
-		{
-			this.CollectStorageItems(storage, ref dictionary);
-		}
+		string text = ((!(this.selectedTarget.GetComponent<MinionIdentity>() != null)) ? UI.DETAILTABS.DETAILS.GROUPNAME_CONTENTS : UI.DETAILTABS.DETAILS.GROUPNAME_MINION_CONTENTS);
+		this.storagePanel.GetComponent<CollapsibleDetailContentPanel>().HeaderLabel.text = text;
 		foreach (KeyValuePair<string, GameObject> keyValuePair in this.storageLabels)
 		{
 			keyValuePair.Value.SetActive(false);
 		}
-		if (dictionary.Count > 0)
+		int num = 0;
+		foreach (Storage storage in array)
 		{
-			foreach (KeyValuePair<string, SimpleInfoScreen.StorageEntry> keyValuePair2 in dictionary)
+			foreach (GameObject gameObject in storage.items)
 			{
-				GameObject gameObject = this.AddOrGetStorageLabel(this.storageLabels, this.storagePanel, keyValuePair2.Key);
-				PrimaryElement component = keyValuePair2.Value.gameObject.GetComponent<PrimaryElement>();
-				Rottable.Instance smi = keyValuePair2.Value.gameObject.GetSMI<Rottable.Instance>();
-				string text = GameUtil.GetUnitFormattedName(keyValuePair2.Value.gameObject, false);
-				text = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_MASS, text, GameUtil.GetFormattedMass(keyValuePair2.Value.Amount * component.MassPerUnit, GameUtil.TimeSlice.None, true, "{0:0.#}"));
-				text = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_TEMPERATURE, text, GameUtil.GetFormattedTemperature(component.Temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
-				if (smi != null)
+				if (!(gameObject == null))
 				{
-					text += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_ROTTABLE, smi.StateString());
-					gameObject.GetComponent<ToolTip>().SetSimpleTooltip(smi.GetToolTip());
+					GameObject gameObject2 = this.AddOrGetStorageLabel(this.storageLabels, this.storagePanel, "storage_" + num.ToString());
+					num++;
+					PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+					Rottable.Instance smi = gameObject.GetSMI<Rottable.Instance>();
+					gameObject2.GetComponentInChildren<ToolTip>().ClearMultiStringTooltip();
+					string text2 = GameUtil.GetUnitFormattedName(gameObject, false);
+					text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_MASS, text2, GameUtil.GetFormattedMass(component.Mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+					text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_TEMPERATURE, text2, GameUtil.GetFormattedTemperature(component.Temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
+					if (smi != null)
+					{
+						text2 += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_ROTTABLE, smi.StateString());
+						gameObject2.GetComponentInChildren<ToolTip>().AddMultiStringTooltip(smi.GetToolTip(), ToolTipScreen.Instance.defaultTextStyleSetting);
+					}
+					if (component.DiseaseIdx != 255)
+					{
+						text2 += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_DISEASED, GameUtil.GetFormattedDisease(component.DiseaseIdx, component.DiseaseCount, false));
+						string formattedDisease = GameUtil.GetFormattedDisease(component.DiseaseIdx, component.DiseaseCount, true);
+						gameObject2.GetComponentInChildren<ToolTip>().AddMultiStringTooltip(formattedDisease, ToolTipScreen.Instance.defaultTextStyleSetting);
+					}
+					gameObject2.GetComponentInChildren<LocText>().text = text2;
+					KButton component2 = gameObject2.GetComponent<KButton>();
+					GameObject select_target = gameObject;
+					component2.onClick += delegate
+					{
+						SelectTool.Instance.Select(select_target.GetComponent<KSelectable>(), false);
+					};
 				}
-				else
-				{
-					gameObject.GetComponent<ToolTip>().SetSimpleTooltip(string.Empty);
-				}
-				gameObject.GetComponent<LocText>().text = text;
 			}
 		}
-		else
+		if (num == 0)
 		{
-			GameObject gameObject2 = this.AddOrGetStorageLabel(this.storageLabels, this.storagePanel, "empty");
-			gameObject2.GetComponent<LocText>().text = UI.DETAILTABS.DETAILS.STORAGE_EMPTY;
+			GameObject gameObject3 = this.AddOrGetStorageLabel(this.storageLabels, this.storagePanel, "empty");
+			gameObject3.GetComponentInChildren<LocText>().text = UI.DETAILTABS.DETAILS.STORAGE_EMPTY;
 		}
 	}
 
@@ -392,10 +400,12 @@ public class SimpleInfoScreen : TargetScreen
 		if (labels.ContainsKey(id))
 		{
 			gameObject = labels[id];
+			KButton component = gameObject.GetComponent<KButton>();
+			component.ClearOnClick();
 		}
 		else
 		{
-			gameObject = Util.KInstantiate(this.attributesLabelTemplate, panel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject, null);
+			gameObject = Util.KInstantiate(this.attributesLabelButtonTemplate, panel.GetComponent<CollapsibleDetailContentPanel>().Content.gameObject, null);
 			gameObject.transform.localScale = new Vector3(1f, 1f, 1f);
 			labels[id] = gameObject;
 		}
@@ -417,7 +427,7 @@ public class SimpleInfoScreen : TargetScreen
 			List<Descriptor> list2 = new List<Descriptor>();
 			foreach (AttributeInstance attributeInstance in list)
 			{
-				Descriptor descriptor = new Descriptor(string.Format("{0}: {1}", attributeInstance.Name, attributeInstance.GetFormattedValue(false)), attributeInstance.GetAttributeValueTooltip(), Descriptor.DescriptorType.Effect, false);
+				Descriptor descriptor = new Descriptor(string.Format("{0}: {1}", attributeInstance.Name, attributeInstance.GetFormattedValue()), attributeInstance.GetAttributeValueTooltip(), Descriptor.DescriptorType.Effect, false);
 				descriptor.IncreaseIndent();
 				list2.Add(descriptor);
 			}
@@ -437,9 +447,9 @@ public class SimpleInfoScreen : TargetScreen
 		}
 	}
 
-	public static SimpleInfoScreen Instance;
-
 	public GameObject attributesLabelTemplate;
+
+	public GameObject attributesLabelButtonTemplate;
 
 	public GameObject DescriptionContainerTemplate;
 
@@ -462,6 +472,10 @@ public class SimpleInfoScreen : TargetScreen
 	private CollapsibleDetailContentPanel statusItemPanel;
 
 	private CollapsibleDetailContentPanel vitalsPanel;
+
+	private CollapsibleDetailContentPanel lorePanel;
+
+	private GameObject loreContent;
 
 	private GameObject storagePanel;
 
@@ -489,8 +503,6 @@ public class SimpleInfoScreen : TargetScreen
 
 	private GameObject lastTarget;
 
-	private GameObject mTarget;
-
 	private bool TargetIsMinion;
 
 	private List<SimpleInfoScreen.StatusItemEntry> statusItems = new List<SimpleInfoScreen.StatusItemEntry>();
@@ -506,29 +518,25 @@ public class SimpleInfoScreen : TargetScreen
 		public GameObject gameObject;
 	}
 
+	[DebuggerDisplay("{item.item.Name}")]
 	public class StatusItemEntry
 	{
-		public StatusItemEntry(StatusItemGroup.Entry item, StatusItemCategory category, GameObject status_item_prefab, Transform parent, TextStyleSetting tooltip_style, bool skip_fade, Action<SimpleInfoScreen.StatusItemEntry> onDestroy)
+		public StatusItemEntry(StatusItemGroup.Entry item, StatusItemCategory category, GameObject status_item_prefab, Transform parent, TextStyleSetting tooltip_style, Color color, bool skip_fade, Action<SimpleInfoScreen.StatusItemEntry> onDestroy)
 		{
 			this.item = item;
 			this.category = category;
 			this.tooltipStyle = tooltip_style;
 			this.onDestroy = onDestroy;
-			this.spacer = new GameObject("Spacer");
-			this.spacer.transform.SetParent(parent, false);
-			this.spacerLayout = this.spacer.AddComponent<LayoutElement>();
-			this.widget = Util.KInstantiateUI(status_item_prefab, this.spacer, false);
+			this.color = color;
+			this.widget = Util.KInstantiateUI(status_item_prefab, parent.gameObject, false);
 			this.text = this.widget.GetComponentInChildren<LocText>(true);
 			this.toolTip = this.widget.GetComponentInChildren<ToolTip>(true);
 			this.image = this.widget.GetComponentInChildren<Image>(true);
-			this.widgetRect = this.widget.GetComponent<RectTransform>();
 			item.SetIcon(this.image);
 			this.widget.SetActive(true);
 			this.toolTip.OnToolTip = new Func<string>(this.OnToolTip);
 			this.fadeStage = ((!skip_fade) ? SimpleInfoScreen.StatusItemEntry.FadeStage.IN : SimpleInfoScreen.StatusItemEntry.FadeStage.WAIT);
 			this.schedulerHandle = GameScheduler.Instance.SchedulePeriodic("StatusFader", 0f, new Action<object>(this.UpdateRoutine), null, null, 0f, null);
-			LayoutRebuilder.ForceRebuildLayoutImmediate(this.widgetRect);
-			this.SetSize(this.widgetRect.rect.width, this.widgetRect.rect.height);
 			this.Refresh();
 			this.SetColor(1f);
 		}
@@ -551,12 +559,12 @@ public class SimpleInfoScreen : TargetScreen
 
 		public int GetIndex()
 		{
-			return this.spacer.transform.GetSiblingIndex();
+			return this.widget.transform.GetSiblingIndex();
 		}
 
 		public void SetIndex(int index)
 		{
-			this.spacer.transform.SetSiblingIndex(index);
+			this.widget.transform.SetSiblingIndex(index);
 		}
 
 		private void UpdateRoutine(object data)
@@ -568,21 +576,16 @@ public class SimpleInfoScreen : TargetScreen
 				this.fade = Mathf.Min(this.fade + Time.deltaTime / this.fadeInTime, 1f);
 				float num = this.fade;
 				this.SetColor(num);
-				this.SetSize(this.widgetRect.rect.width, this.widgetRect.rect.height);
 				if (this.fade >= 1f)
 				{
 					this.fadeStage = SimpleInfoScreen.StatusItemEntry.FadeStage.WAIT;
 				}
 				break;
 			}
-			case SimpleInfoScreen.StatusItemEntry.FadeStage.WAIT:
-				this.SetSize(this.widgetRect.rect.width, this.widgetRect.rect.height);
-				break;
 			case SimpleInfoScreen.StatusItemEntry.FadeStage.OUT:
 			{
 				float num2 = this.fade;
 				this.SetColor(num2);
-				this.SetSize(this.widgetRect.rect.width, this.widgetRect.rect.height);
 				this.fade = Mathf.Max(this.fade - Time.deltaTime / this.fadeOutTime, 0f);
 				if (this.fade <= 0f)
 				{
@@ -611,24 +614,9 @@ public class SimpleInfoScreen : TargetScreen
 
 		private void SetColor(float alpha = 1f)
 		{
-			if (this.item.item.notificationType == NotificationType.BadMinor || this.item.item.notificationType == NotificationType.Bad)
-			{
-				Color color = new Color(SimpleInfoScreen.Instance.statusItemTextColor_bad.r, SimpleInfoScreen.Instance.statusItemTextColor_bad.g, SimpleInfoScreen.Instance.statusItemTextColor_bad.b, alpha);
-				this.image.color = color;
-				this.text.color = color;
-			}
-			else
-			{
-				Color color2 = new Color(SimpleInfoScreen.Instance.statusItemTextColor_regular.r, SimpleInfoScreen.Instance.statusItemTextColor_regular.g, SimpleInfoScreen.Instance.statusItemTextColor_regular.b, alpha);
-				this.image.color = color2;
-				this.text.color = color2;
-			}
-		}
-
-		private void SetSize(float width, float height)
-		{
-			this.spacerLayout.minWidth = width;
-			this.spacerLayout.minHeight = height;
+			Color color = new Color(this.color.r, this.color.g, this.color.b, alpha);
+			this.image.color = color;
+			this.text.color = color;
 		}
 
 		public void Destroy(bool immediate)
@@ -639,9 +627,9 @@ public class SimpleInfoScreen : TargetScreen
 				{
 					this.onDestroy(this);
 				}
-				this.schedulerHandle.Clear();
+				this.schedulerHandle.ClearScheduler();
 				this.toolTip.OnToolTip = null;
-				global::UnityEngine.Object.Destroy(this.spacer);
+				global::UnityEngine.Object.Destroy(this.widget);
 			}
 			else
 			{
@@ -654,13 +642,9 @@ public class SimpleInfoScreen : TargetScreen
 
 		public StatusItemCategory category;
 
-		private GameObject spacer;
-
 		private LayoutElement spacerLayout;
 
 		private GameObject widget;
-
-		private RectTransform widgetRect;
 
 		private ToolTip toolTip;
 
@@ -671,6 +655,8 @@ public class SimpleInfoScreen : TargetScreen
 		private Image image;
 
 		private LocText text;
+
+		public Color color;
 
 		private SimpleInfoScreen.StatusItemEntry.FadeStage fadeStage;
 

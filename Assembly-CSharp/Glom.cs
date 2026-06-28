@@ -15,7 +15,7 @@ public class Glom : StateMachineComponent<Glom.StatesInstance>
 
 	private bool CellIsClean(int cell)
 	{
-		int elementIndex = ElementLoader.GetElementIndex(SimHashes.ContaminatedOxygen);
+		int elementIndex = ElementLoader.GetElementIndex(this.dirtyEmitElement);
 		int elementIdx = (int)Grid.Cell[cell].elementIdx;
 		return elementIdx != elementIndex || Grid.Cell[cell].mass < 1f;
 	}
@@ -30,11 +30,25 @@ public class Glom : StateMachineComponent<Glom.StatesInstance>
 		ElementEmitter component = base.GetComponent<ElementEmitter>();
 		if (component != null)
 		{
-			component.ForceEmit(amount, -1f);
+			component.ForceEmit(amount, this.emitDiseaseIdx, Mathf.RoundToInt((float)this.emitDiseasePerKg * amount), -1f);
 		}
 	}
 
 	private Vector2 Heading;
+
+	public SimHashes dirtyEmitElement;
+
+	public float dirtyProbabilityPercent;
+
+	public float dirtyCellToTargetMass;
+
+	public float dirtyMassPerDirty;
+
+	public float dirtyMassReleaseOnDeath;
+
+	public byte emitDiseaseIdx = byte.MaxValue;
+
+	public int emitDiseasePerKg;
 
 	public class StatesInstance : GameStateMachine<Glom.States, Glom.StatesInstance, Glom, object>.GameInstance
 	{
@@ -57,7 +71,8 @@ public class Glom : StateMachineComponent<Glom.StatesInstance>
 				}
 			});
 			this.alive.EventTransition(GameHashes.Died, this.death, null).EventTransition(GameHashes.TooColdFatal, this.death, null).EventTransition(GameHashes.TooHotFatal, this.death, null)
-				.EventTransition(GameHashes.EntombedChanged, this.death, null)
+				.TagTransition(GameTags.Entombed, this.death, false)
+				.TagTransition(GameTags.Dead, this.death, false)
 				.ToggleStateMachine((Glom.StatesInstance smi) => new ThreatMonitor.Instance(smi.master))
 				.Enter(delegate(Glom.StatesInstance smi)
 				{
@@ -74,7 +89,7 @@ public class Glom : StateMachineComponent<Glom.StatesInstance>
 			this.alive.grounded.flee.InitializeStates(this.mover, this.alive.grounded.idling.idle);
 			this.alive.grounded.idling.idle.PlayAnim("idle", KAnim.PlayMode.Loop, null).Enter(delegate(Glom.StatesInstance smi)
 			{
-				if (smi.master.CellIsClean(Grid.PosToCell(smi.master)) && global::UnityEngine.Random.Range(0f, 100f) < 25f)
+				if (smi.master.CellIsClean(Grid.PosToCell(smi.master)) && global::UnityEngine.Random.Range(0f, 100f) < smi.master.dirtyProbabilityPercent)
 				{
 					smi.ScheduleGoTo(1f, this.alive.grounded.dirty);
 				}
@@ -87,12 +102,12 @@ public class Glom : StateMachineComponent<Glom.StatesInstance>
 			this.alive.grounded.dirty.Enter(delegate(Glom.StatesInstance smi)
 			{
 				smi.Play("dirty", KAnim.PlayMode.Once);
-				smi.master.DropDirty(0.2f);
+				smi.master.DropDirty(smi.master.dirtyMassPerDirty);
 				smi.ScheduleGoTo(1f, this.alive.grounded.idling.idle);
 			});
 			this.death.Enter(delegate(Glom.StatesInstance smi)
 			{
-				smi.master.DropDirty(3f);
+				smi.master.DropDirty(smi.master.dirtyMassReleaseOnDeath);
 				smi.Play("death", KAnim.PlayMode.Once);
 				CreatureHelpers.DeselectCreature(smi.gameObject);
 				smi.Schedule(2f, delegate(object d)

@@ -1,9 +1,28 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class Wire : KMonoBehaviour, IDisconnectable
+public class Wire : KMonoBehaviour, IFirstFrameCallback, IDisconnectable
 {
+	public void SetFirstFrameCallback(global::System.Action ffCb)
+	{
+		this.firstFrameCallback = ffCb;
+		base.StartCoroutine(this.RunCallback());
+	}
+
+	private IEnumerator RunCallback()
+	{
+		yield return null;
+		if (this.firstFrameCallback != null)
+		{
+			this.firstFrameCallback();
+			this.firstFrameCallback = null;
+		}
+		yield return null;
+		yield break;
+	}
+
 	public static float GetMaxWattageAsFloat(Wire.WattageRating rating)
 	{
 		switch (rating)
@@ -143,6 +162,35 @@ public class Wire : KMonoBehaviour, IDisconnectable
 		}
 	}
 
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		if (Wire.WireCircuitStatus == null)
+		{
+			Wire.WireCircuitStatus = new StatusItem("WireCircuitStatus", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true, 2046).SetResolveStringCallback(delegate(string str, object data)
+			{
+				Wire wire = (Wire)data;
+				int num = Grid.PosToCell(wire.transform.position);
+				CircuitManager circuitManager = Game.Instance.circuitManager;
+				ushort circuitID = circuitManager.GetCircuitID(num);
+				float wattsUsedByCircuit = circuitManager.GetWattsUsedByCircuit(circuitID);
+				float wattsNeededWhenActive = circuitManager.GetWattsNeededWhenActive(circuitID);
+				str = str.Replace("{CurrentLoad}", GameUtil.GetFormattedWattage(wattsUsedByCircuit, "F1"));
+				str = str.Replace("{MaxLoad}", GameUtil.GetFormattedWattage(wattsNeededWhenActive, "F1"));
+				return str;
+			});
+		}
+		if (Wire.WireMaxWattageStatus == null)
+		{
+			Wire.WireMaxWattageStatus = new StatusItem("WireMaxWattageStatus", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true, 2046).SetResolveStringCallback(delegate(string str, object data)
+			{
+				Wire wire2 = (Wire)data;
+				str = str.Replace("{WireMaxWattage}", GameUtil.GetFormattedWattage(Wire.GetMaxWattageAsFloat(wire2.MaxWattageRating), "F1"));
+				return str;
+			});
+		}
+	}
+
 	[SerializeField]
 	public Wire.WattageRating MaxWattageRating;
 
@@ -157,25 +205,11 @@ public class Wire : KMonoBehaviour, IDisconnectable
 
 	public static readonly KAnimHashedString OutlineSymbol = new KAnimHashedString("outline");
 
-	private static StatusItem WireCircuitStatus = new StatusItem("WireCircuitStatus", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true).SetResolveStringCallback(delegate(string str, object data)
-	{
-		Wire wire = (Wire)data;
-		int num = Grid.PosToCell(wire.transform.position);
-		CircuitManager circuitManager = Game.Instance.circuitManager;
-		ushort circuitID = circuitManager.GetCircuitID(num);
-		float wattsUsedByCircuit = circuitManager.GetWattsUsedByCircuit(circuitID);
-		float wattsNeededWhenActive = circuitManager.GetWattsNeededWhenActive(circuitID);
-		str = str.Replace("{CurrentLoad}", GameUtil.GetFormattedWattage(wattsUsedByCircuit, "F1"));
-		str = str.Replace("{MaxLoad}", GameUtil.GetFormattedWattage(wattsNeededWhenActive, "F1"));
-		return str;
-	});
+	private global::System.Action firstFrameCallback;
 
-	private static StatusItem WireMaxWattageStatus = new StatusItem("WireMaxWattageStatus", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, true).SetResolveStringCallback(delegate(string str, object data)
-	{
-		Wire wire2 = (Wire)data;
-		str = str.Replace("{WireMaxWattage}", GameUtil.GetFormattedWattage(Wire.GetMaxWattageAsFloat(wire2.MaxWattageRating), "F1"));
-		return str;
-	});
+	private static StatusItem WireCircuitStatus = null;
+
+	private static StatusItem WireMaxWattageStatus = null;
 
 	public enum WattageRating
 	{

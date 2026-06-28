@@ -25,7 +25,7 @@ public class FXAnim : GameStateMachine<FXAnim, FXAnim.Instance>
 		public Instance(IStateMachineTarget master, string kanim_file, string anim, KAnim.PlayMode mode, Vector3 offset, Color32 tint_colour)
 			: base(master)
 		{
-			this.controller = FXHelpers.CreateEffect(kanim_file, base.smi.master.transform.position + offset, base.smi.master.transform, false, Grid.SceneLayer.Front);
+			this.controller = FXHelpers.CreateEffect(kanim_file, base.smi.master.transform.position + offset, base.smi.master.transform, false, Grid.SceneLayer.Front, false);
 			this.controller.gameObject.Subscribe(-1061186183, new Action<object>(this.OnAnimQueueComplete));
 			this.controller.TintColour = tint_colour;
 			base.sm.fx.Set(this.controller.gameObject, base.smi);
@@ -50,10 +50,10 @@ public class FXAnim : GameStateMachine<FXAnim, FXAnim.Instance>
 
 		private void DestroyFX()
 		{
-			global::UnityEngine.Object.Destroy(base.sm.fx.Get(base.smi));
+			Util.KDestroyGameObject(base.sm.fx.Get(base.smi));
 		}
 
-		private KAnimControllerBase controller;
+		private new KAnimControllerBase controller;
 
 		private string anim;
 

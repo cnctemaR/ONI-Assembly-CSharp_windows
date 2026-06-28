@@ -1,0 +1,36 @@
+﻿using System;
+using STRINGS;
+using TUNING;
+using UnityEngine;
+
+public class GeneShufflerConfig : IEntityConfig
+{
+	public GameObject CreatePrefab()
+	{
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity("GeneShuffler", SETITEMS.GENESHUFFLER.NAME, SETITEMS.GENESHUFFLER.DESC, 2000f, Assets.GetAnim("geneshuffler_kanim"), "on", Grid.SceneLayer.Building, 4, 3, global::TUNING.BUILDINGS.DECOR.BONUS.TIER0, NOISE_POLLUTION.NOISY.TIER0, SimHashes.Creature, null, 293f);
+		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+		component.SetElement(SimHashes.Unobtanium);
+		component.Temperature = 294.15f;
+		gameObject.UpdateComponentRequirement<Operational>(true);
+		gameObject.UpdateComponentRequirement<Notifier>(true);
+		gameObject.UpdateComponentRequirement<GeneShuffler>(true);
+		gameObject.UpdateComponentRequirement<LoreBearer>(true);
+		gameObject.UpdateComponentRequirement<LoopingSounds>(true);
+		KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
+		kbatchedAnimController.fgLayer = Grid.SceneLayer.BuildingFront;
+		return gameObject;
+	}
+
+	public void OnPrefabInit(GameObject inst)
+	{
+		GeneShuffler component = inst.GetComponent<GeneShuffler>();
+		component.slot = Db.Get().OwnableSlots.GeneShuffler;
+		component.workLayer = Grid.SceneLayer.Building;
+		OccupyArea component2 = inst.GetComponent<OccupyArea>();
+		component2.objectLayer = ObjectLayer.Building;
+	}
+
+	public void OnSpawn(GameObject inst)
+	{
+	}
+}

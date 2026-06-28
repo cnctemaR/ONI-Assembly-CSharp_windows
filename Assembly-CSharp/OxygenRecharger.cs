@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using STRINGS;
 
-public class OxygenRecharger : BuildingWorkable, IEffectDescriptor
+public class OxygenRecharger : Workable, IEffectDescriptor
 {
 	private OxygenRecharger()
 	{
@@ -90,7 +90,7 @@ public class OxygenRecharger : BuildingWorkable, IEffectDescriptor
 			return;
 		}
 		FetchList2 fetchList = new FetchList2(this.storage);
-		fetchList.Add(mat, OxygenRecharger.requiredMass + 1f, FetchOrder2.OperationalRequirement.None);
+		fetchList.Add(mat, null, OxygenRecharger.requiredMass + 1f, FetchOrder2.OperationalRequirement.None);
 		fetchList.Submit(new global::System.Action(this.OnFetchComplete), true);
 		if (!this.pendingMaterials.Contains(mat))
 		{
@@ -145,7 +145,7 @@ public class OxygenRecharger : BuildingWorkable, IEffectDescriptor
 
 	private void CreateChore()
 	{
-		this.chore = new WorkChore<OxygenRecharger>(Db.Get().ChoreTypes.Recharge, this, null, true, null, null, null, false, null, true, default(Tag), null, false, true);
+		this.chore = new WorkChore<OxygenRecharger>(Db.Get().ChoreTypes.Recharge, this, null, true, null, null, null, false, null, true, default(Tag), null, false, true, true);
 		this.chore.AddPrecondition(this.IsTankLow, null);
 		this.chore.AddPrecondition(this.OwnsMaterials, this);
 	}
@@ -168,7 +168,7 @@ public class OxygenRecharger : BuildingWorkable, IEffectDescriptor
 			string text = tag.ProperName();
 			string keywordStyle = GameUtil.GetKeywordStyle(tag);
 			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMEDPERUSE, keywordStyle, text, GameUtil.GetFormattedMass(OxygenRecharger.requiredMass, GameUtil.TimeSlice.None, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMEDPERUSE, keywordStyle, text, GameUtil.GetFormattedMass(OxygenRecharger.requiredMass, GameUtil.TimeSlice.None, true, "{0:0.##}")), Descriptor.DescriptorType.Requirement);
+			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMEDPERUSE, keywordStyle, text, GameUtil.GetFormattedMass(OxygenRecharger.requiredMass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMEDPERUSE, keywordStyle, text, GameUtil.GetFormattedMass(OxygenRecharger.requiredMass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Requirement);
 			list.Add(descriptor);
 		}
 		return list;

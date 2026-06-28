@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using Generated;
 using KSerialization;
+using ProcGen;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -14,12 +14,17 @@ public class WorldGaps
 		this.voidCells = new HashSet<int>();
 	}
 
+	[SerializeField]
+	public Cloud[] clouds { get; private set; }
+
 	public Cloud currentCloud { get; private set; }
 
 	public Cloud Next()
 	{
 		if (this.clouds == null || this.clouds.Length == 0)
 		{
+			this.currentCloudIndex = -1;
+			this.currentCloud = null;
 			return null;
 		}
 		this.currentCloudIndex++;
@@ -28,13 +33,10 @@ public class WorldGaps
 		return this.currentCloud;
 	}
 
-	[SerializeField]
-	public Cloud[] clouds { get; private set; }
-
 	public void SetGasClouds(List<Cloud> newClouds)
 	{
 		this.clouds = newClouds.ToArray();
-		if (this.currentCloudIndex != -1)
+		if (this.currentCloudIndex != -1 && this.currentCloudIndex < this.clouds.Length)
 		{
 			this.currentCloud = this.clouds[this.currentCloudIndex];
 		}
@@ -50,12 +52,12 @@ public class WorldGaps
 	[Serialize]
 	public WorldGaps.State state = WorldGaps.State.EnabledOff;
 
-	[SerializeField]
 	[Serialize]
+	[SerializeField]
 	public HashSet<int> voidCells;
 
-	[Serialize]
 	[SerializeField]
+	[Serialize]
 	public float currentTime;
 
 	[SerializeField]
@@ -64,8 +66,8 @@ public class WorldGaps
 	[SerializeField]
 	public float notifyTimeApproaching;
 
-	[Serialize]
 	[SerializeField]
+	[Serialize]
 	public int currentCloudIndex = -1;
 
 	public enum State

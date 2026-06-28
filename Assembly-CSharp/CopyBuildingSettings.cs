@@ -27,14 +27,14 @@ public class CopyBuildingSettings : KMonoBehaviour
 	{
 		if (this.leftHandle.IsValid)
 		{
-			this.leftHandle.Clear();
+			this.leftHandle.ClearScheduler();
 		}
 		this.leftOffset = -1;
 		this.leftHandle = UIScheduler.Instance.SchedulePeriodic("CopyLeft", 0.2f, new Action<object>(this.DoCopyLeft), null, null);
 		this.DoCopyLeft(null);
 		if (this.rightHandle.IsValid)
 		{
-			this.rightHandle.Clear();
+			this.rightHandle.ClearScheduler();
 		}
 		this.rightOffset = 1;
 		this.rightHandle = UIScheduler.Instance.SchedulePeriodic("CopyRight", 0.2f, new Action<object>(this.DoCopyRight), null, null);
@@ -50,7 +50,7 @@ public class CopyBuildingSettings : KMonoBehaviour
 		}
 		else
 		{
-			this.leftHandle.Clear();
+			this.leftHandle.ClearScheduler();
 		}
 	}
 
@@ -63,7 +63,7 @@ public class CopyBuildingSettings : KMonoBehaviour
 		}
 		else
 		{
-			this.rightHandle.Clear();
+			this.rightHandle.ClearScheduler();
 		}
 	}
 

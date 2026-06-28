@@ -17,9 +17,19 @@ public abstract class KGameObjectComponentManager<T> : KComponentManager<T> wher
 		else
 		{
 			base.RemoveFromCleanupList(go);
-			HandleVector<int>.Handle handle = base.GetHandle(go);
+			HandleVector<int>.Handle handle = this.GetHandle(go);
 			this.OnCleanUp(handle);
 			base.InternalRemoveComponent(go);
 		}
+	}
+
+	public HandleVector<int>.Handle GetHandle(GameObject obj)
+	{
+		return base.GetHandle(obj);
+	}
+
+	public HandleVector<int>.Handle GetHandle(MonoBehaviour obj)
+	{
+		return base.GetHandle(obj.gameObject);
 	}
 }

@@ -107,7 +107,7 @@ public class ThreadedHttps<T> where T : class, new()
 	{
 	}
 
-	private string Send(byte[] byteArray, bool isForce = false)
+	protected string Send(byte[] byteArray, bool isForce = false)
 	{
 		ServicePointManager.ServerCertificateValidationCallback = (RemoteCertificateValidationCallback)Delegate.Combine(ServicePointManager.ServerCertificateValidationCallback, new RemoteCertificateValidationCallback(this.RemoteCertificateValidationCallback));
 		string text = string.Empty;
@@ -220,63 +220,69 @@ public class ThreadedHttps<T> where T : class, new()
 			}
 			catch (Exception ex4)
 			{
-				if (this.certFail)
+				if (!this.shouldQuit)
 				{
-					Debug.LogWarning(this.serviceName + ": Cert fail, quitting", null);
-					try
+					if (this.certFail)
 					{
-						this.OnReplyRecieved(null);
+						Debug.LogWarning(this.serviceName + ": Cert fail, quitting", null);
+						try
+						{
+							this.OnReplyRecieved(null);
+						}
+						catch
+						{
+						}
+						this.QuitOnError();
+						break;
 					}
-					catch
+					num++;
+					if (num > 3)
 					{
+						text = string.Concat(new object[]
+						{
+							DateTime.Now.ToLongTimeString(),
+							" ",
+							this.serviceName,
+							": Max Retries (",
+							3,
+							") reached. Disabling ",
+							this.serviceName,
+							"..."
+						});
+						Debug.LogWarning(text, null);
+						try
+						{
+							this.OnReplyRecieved(null);
+						}
+						catch
+						{
+						}
+						this.QuitOnError();
+						break;
 					}
-					this.QuitOnError();
-					break;
-				}
-				num++;
-				if (num > 3)
-				{
+					string message4 = ex4.Message;
+					string stackTrace = ex4.StackTrace;
+					TimeSpan timeSpan = TimeSpan.FromSeconds(Math.Pow(2.0, (double)(num + 3)));
 					text = string.Concat(new object[]
 					{
 						DateTime.Now.ToLongTimeString(),
 						" ",
 						this.serviceName,
-						": Max Retries (",
-						3,
-						") reached. Disabling ",
-						this.serviceName,
-						"..."
+						": Exception (retrying in ",
+						timeSpan.TotalSeconds,
+						" seconds): ",
+						message4,
+						"\n",
+						stackTrace
 					});
 					Debug.LogWarning(text, null);
-					try
+					if (isForce)
 					{
-						this.OnReplyRecieved(null);
+						Debug.LogWarning(ex4.StackTrace, null);
+						break;
 					}
-					catch
-					{
-					}
-					this.QuitOnError();
-					break;
+					Thread.Sleep(timeSpan);
 				}
-				string message4 = ex4.Message;
-				TimeSpan timeSpan = TimeSpan.FromSeconds(Math.Pow(2.0, (double)(num + 3)));
-				text = string.Concat(new object[]
-				{
-					DateTime.Now.ToLongTimeString(),
-					" ",
-					this.serviceName,
-					": Exception (retrying in ",
-					timeSpan.TotalSeconds,
-					" seconds): ",
-					message4
-				});
-				Debug.LogWarning(text, null);
-				if (isForce)
-				{
-					Debug.LogWarning(ex4.StackTrace, null);
-					break;
-				}
-				Thread.Sleep(timeSpan);
 			}
 		}
 		ServicePointManager.ServerCertificateValidationCallback = (RemoteCertificateValidationCallback)Delegate.Remove(ServicePointManager.ServerCertificateValidationCallback, new RemoteCertificateValidationCallback(this.RemoteCertificateValidationCallback));

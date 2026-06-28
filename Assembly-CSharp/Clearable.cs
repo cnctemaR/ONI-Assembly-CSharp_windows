@@ -13,7 +13,6 @@ public class Clearable : Workable, ISaveLoadable
 		this.Subscribe(-2064133523, new Action<object>(this.OnAbsorb));
 		this.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Clearing;
-		Components.Clearables.Add(this);
 	}
 
 	protected override void OnSpawn()
@@ -70,6 +69,7 @@ public class Clearable : Workable, ISaveLoadable
 				this.chore.Cancel("Clearing canceled");
 				this.chore = null;
 			}
+			Prioritizable.RemoveRef(base.gameObject);
 		}
 	}
 
@@ -82,6 +82,7 @@ public class Clearable : Workable, ISaveLoadable
 		if ((!this.isMarkedForClear || force) && !this.pickupable.IsEntombed && this.chore == null && this.pickupable.storage == null)
 		{
 			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.PendingClear, this);
+			Prioritizable.AddRef(base.gameObject);
 			this.chore = new ClearChore(Db.Get().ChoreTypes.Transport, base.GetComponent<Pickupable>(), null, true, null, null, null);
 			base.GetComponent<KPrefabID>().AddTag(GameTags.Garbage);
 			this.isMarkedForClear = true;
@@ -100,7 +101,7 @@ public class Clearable : Workable, ISaveLoadable
 
 	private void OnRefreshUserMenu(object data)
 	{
-		if (!this.isClearable || base.GetComponent<Health>() != null)
+		if (!this.isClearable || base.GetComponent<Health>() != null || (base.GetComponent<Pickupable>() != null && base.GetComponent<Pickupable>().storage != null))
 		{
 			return;
 		}
@@ -134,12 +135,6 @@ public class Clearable : Workable, ISaveLoadable
 	public bool IsMarkedForClear()
 	{
 		return this.isMarkedForClear;
-	}
-
-	protected override void OnCleanUp()
-	{
-		base.OnCleanUp();
-		Components.Clearables.Remove(this);
 	}
 
 	public void SetIsClearable(bool is_clearable)

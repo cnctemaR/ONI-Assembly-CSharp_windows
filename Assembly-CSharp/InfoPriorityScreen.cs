@@ -24,19 +24,12 @@ public class InfoPriorityScreen : PriorityScreen
 		else
 		{
 			this.prioritizable = target.GetComponent<Prioritizable>();
-			if (this.prioritizable != null)
+			if (this.prioritizable != null && this.prioritizable.IsPrioritizable())
 			{
-				if (this.prioritizable.GetComponent<MinionIdentity>() == null || this.prioritizable.GetComponent<Health>().IsDead())
-				{
-					Prioritizable prioritizable2 = this.prioritizable;
-					prioritizable2.onPriorityChanged = (Action<int>)Delegate.Combine(prioritizable2.onPriorityChanged, new Action<int>(this.OnPriorityChanged));
-					base.gameObject.SetActive(true);
-					base.SetScreenPriority(this.prioritizable.GetMasterPriority());
-				}
-				else
-				{
-					base.gameObject.SetActive(false);
-				}
+				Prioritizable prioritizable2 = this.prioritizable;
+				prioritizable2.onPriorityChanged = (Action<int>)Delegate.Combine(prioritizable2.onPriorityChanged, new Action<int>(this.OnPriorityChanged));
+				base.gameObject.SetActive(true);
+				base.SetScreenPriority(this.prioritizable.GetMasterPriority(), false);
 			}
 			else
 			{
@@ -59,7 +52,7 @@ public class InfoPriorityScreen : PriorityScreen
 
 	private void OnPriorityChanged(int priority)
 	{
-		base.SetScreenPriority(priority);
+		base.SetScreenPriority(priority, false);
 	}
 
 	private Prioritizable prioritizable;

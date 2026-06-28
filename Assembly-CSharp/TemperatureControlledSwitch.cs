@@ -1,6 +1,7 @@
 ﻿using System;
 using KSerialization;
 using STRINGS;
+using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 public class TemperatureControlledSwitch : CircuitSwitch, ISaveLoadable, IThresholdSwitch
@@ -100,6 +101,16 @@ public class TemperatureControlledSwitch : CircuitSwitch, ISaveLoadable, IThresh
 		}
 	}
 
+	public float GetRangeMinInputField()
+	{
+		return GameUtil.GetConvertedTemperature(this.RangeMin);
+	}
+
+	public float GetRangeMaxInputField()
+	{
+		return GameUtil.GetConvertedTemperature(this.RangeMax);
+	}
+
 	public LocString ThresholdValueName
 	{
 		get
@@ -124,9 +135,37 @@ public class TemperatureControlledSwitch : CircuitSwitch, ISaveLoadable, IThresh
 		}
 	}
 
-	public string Format(float value)
+	public string Format(float value, bool units)
 	{
-		return GameUtil.GetFormattedTemperature(value, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true);
+		return GameUtil.GetFormattedTemperature(value, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, units);
+	}
+
+	public float ProcessedSliderValue(float input)
+	{
+		return Mathf.Round(input);
+	}
+
+	public float ProcessedInputValue(float input)
+	{
+		return GameUtil.GetTemperatureConvertedToKelvin(input);
+	}
+
+	public LocString ThresholdValueUnits()
+	{
+		LocString locString = null;
+		switch (GameUtil.temperatureUnit)
+		{
+		case GameUtil.TemperatureUnit.Celsius:
+			locString = UI.UNITSUFFIXES.TEMPERATURE.CELSIUS;
+			break;
+		case GameUtil.TemperatureUnit.Fahrenheit:
+			locString = UI.UNITSUFFIXES.TEMPERATURE.FAHRENHEIT;
+			break;
+		case GameUtil.TemperatureUnit.Kelvin:
+			locString = UI.UNITSUFFIXES.TEMPERATURE.KELVIN;
+			break;
+		}
+		return locString;
 	}
 
 	virtual bool IThresholdSwitch.IsConnected()

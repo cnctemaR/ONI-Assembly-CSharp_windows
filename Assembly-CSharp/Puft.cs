@@ -25,12 +25,12 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 
 	private int FindTargetGasCell()
 	{
-		return GameUtil.FloodFillFind(new Func<int, bool>(this.isTargetElement), Grid.PosToCell(base.gameObject), 8);
+		return GameUtil.FloodFillFind(new Func<int, bool>(this.isTargetElement), Grid.PosToCell(base.gameObject), 8, true, true);
 	}
 
 	private bool isTargetElement(int cell)
 	{
-		return ElementLoader.elements[(int)Grid.Cell[cell].elementIdx] == ElementLoader.FindElementByHash(SimHashes.ContaminatedOxygen) && Grid.Cell[cell].mass > 0.1f && this.nav.CanReach(cell);
+		return ElementLoader.elements[(int)Grid.Cell[cell].elementIdx] == ElementLoader.FindElementByHash(this.consumedElement) && Grid.Cell[cell].mass > this.minimumApproachMass && !Grid.Solid[Grid.CellAbove(cell)] && this.nav.CanReach(cell);
 	}
 
 	public void OnAttacked(object data)
@@ -55,6 +55,14 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 
 	private int breathTargetCell = -1;
 
+	public SimHashes consumedElement;
+
+	public float minimumApproachMass;
+
+	public byte emitDiseaseIdx = byte.MaxValue;
+
+	public int emitDiseasePerKg;
+
 	public class StatesInstance : GameStateMachine<Puft.States, Puft.StatesInstance, Puft, object>.GameInstance
 	{
 		public StatesInstance(Puft smi)
@@ -75,7 +83,8 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 			this.alive.ToggleStateMachine((Puft.StatesInstance smi) => new ThreatMonitor.Instance(smi.master)).EventTransition(GameHashes.TooColdFatal, this.death, null).EventTransition(GameHashes.TooHotFatal, this.death, null)
 				.EventTransition(GameHashes.Drowning, this.alive.distressed.Drowning, null)
 				.EventTransition(GameHashes.Drowned, this.death, null)
-				.EventTransition(GameHashes.EntombedChanged, this.death, null)
+				.TagTransition(GameTags.Entombed, this.death, false)
+				.TagTransition(GameTags.Dead, this.death, false)
 				.EventTransition(GameHashes.Died, this.death, null)
 				.Enter(delegate(Puft.StatesInstance smi)
 				{
@@ -115,7 +124,7 @@ public class Puft : StateMachineComponent<Puft.StatesInstance>
 			{
 				smi.Schedule(1f, delegate
 				{
-					smi.master.emitter.ForceEmit(smi.master.consumer.consumedMass, ElementLoader.elementTable[smi.master.emitter.outputElement.elementHash].defaultValues.temperature);
+					smi.master.emitter.ForceEmit(smi.master.consumer.consumedMass, smi.master.emitDiseaseIdx, Mathf.FloorToInt((float)smi.master.emitDiseasePerKg * smi.master.consumer.consumedMass), ElementLoader.FindElementByHash(smi.master.emitter.outputElement.elementHash).defaultValues.temperature);
 					smi.master.consumer.consumedMass = 0f;
 				}, null);
 			}).OnAnimQueueComplete(this.alive.idle.idle);

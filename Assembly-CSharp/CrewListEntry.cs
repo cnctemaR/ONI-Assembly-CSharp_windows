@@ -65,7 +65,7 @@ public class CrewListEntry : KMonoBehaviour, IPointerEnterHandler, IEventSystemH
 	private string seniorityString()
 	{
 		Attributes attributes = this.identity.GetAttributes();
-		return attributes.GetProfessionString();
+		return attributes.GetProfessionString(true);
 	}
 
 	public void SelectCrewMember(bool focus)

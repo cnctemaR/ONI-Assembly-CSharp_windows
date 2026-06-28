@@ -9,54 +9,121 @@ public class WiltCondition : KMonoBehaviour
 		return this.wilting;
 	}
 
+	public List<WiltCondition.Condition> CurrentWiltSources()
+	{
+		List<WiltCondition.Condition> list = new List<WiltCondition.Condition>();
+		foreach (KeyValuePair<WiltCondition.Condition, bool> keyValuePair in this.WiltConditions)
+		{
+			if (!keyValuePair.Value)
+			{
+				list.Add(keyValuePair.Key);
+			}
+		}
+		return list;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.WiltConditions.Add("Temperature", true);
-		this.WiltConditions.Add("Pressure", true);
-		this.WiltConditions.Add("Drowning", true);
-		this.WiltConditions.Add("DryingOut", true);
+		this.WiltConditions.Add(WiltCondition.Condition.Temperature, true);
+		this.WiltConditions.Add(WiltCondition.Condition.Pressure, true);
+		this.WiltConditions.Add(WiltCondition.Condition.AtmosphereElement, true);
+		this.WiltConditions.Add(WiltCondition.Condition.Drowning, true);
+		this.WiltConditions.Add(WiltCondition.Condition.Fertilized, true);
+		this.WiltConditions.Add(WiltCondition.Condition.DryingOut, true);
+		this.WiltConditions.Add(WiltCondition.Condition.Irrigation, true);
+		this.WiltConditions.Add(WiltCondition.Condition.IlluminationComfort, true);
+		this.WiltConditions.Add(WiltCondition.Condition.Receptacle, true);
 		this.Subscribe(-107174716, delegate(object data)
 		{
-			this.SetCondition("Temperature", false);
+			this.SetCondition(WiltCondition.Condition.Temperature, false);
 		});
 		this.Subscribe(-1234705021, delegate(object data)
 		{
-			this.SetCondition("Temperature", false);
+			this.SetCondition(WiltCondition.Condition.Temperature, false);
 		});
 		this.Subscribe(115888613, delegate(object data)
 		{
-			this.SetCondition("Temperature", true);
+			this.SetCondition(WiltCondition.Condition.Temperature, true);
 		});
 		this.Subscribe(-1175525437, delegate(object data)
 		{
-			this.SetCondition("Pressure", false);
+			this.SetCondition(WiltCondition.Condition.Pressure, false);
 		});
 		this.Subscribe(-907106982, delegate(object data)
 		{
-			this.SetCondition("Pressure", true);
+			this.SetCondition(WiltCondition.Condition.Pressure, true);
+		});
+		this.Subscribe(221594799, delegate(object data)
+		{
+			this.SetCondition(WiltCondition.Condition.AtmosphereElement, false);
+		});
+		this.Subscribe(777259436, delegate(object data)
+		{
+			this.SetCondition(WiltCondition.Condition.AtmosphereElement, true);
 		});
 		this.Subscribe(1949704522, delegate(object data)
 		{
-			this.SetCondition("Drowning", false);
+			this.SetCondition(WiltCondition.Condition.Drowning, false);
 		});
 		this.Subscribe(99949694, delegate(object data)
 		{
-			this.SetCondition("Drowning", true);
+			this.SetCondition(WiltCondition.Condition.Drowning, true);
 		});
 		this.Subscribe(-2057657673, delegate(object data)
 		{
-			this.SetCondition("DryingOut", false);
+			this.SetCondition(WiltCondition.Condition.DryingOut, false);
 		});
 		this.Subscribe(1555379996, delegate(object data)
 		{
-			this.SetCondition("DryingOut", true);
+			this.SetCondition(WiltCondition.Condition.DryingOut, true);
 		});
+		this.Subscribe(-370379773, delegate(object data)
+		{
+			this.SetCondition(WiltCondition.Condition.Irrigation, false);
+		});
+		this.Subscribe(207387507, delegate(object data)
+		{
+			this.SetCondition(WiltCondition.Condition.Irrigation, true);
+		});
+		this.Subscribe(-1073674739, delegate(object data)
+		{
+			this.SetCondition(WiltCondition.Condition.Fertilized, false);
+		});
+		this.Subscribe(-1396791468, delegate(object data)
+		{
+			this.SetCondition(WiltCondition.Condition.Fertilized, true);
+		});
+		this.Subscribe(1113102781, delegate(object data)
+		{
+			this.SetCondition(WiltCondition.Condition.IlluminationComfort, true);
+		});
+		this.Subscribe(1387626797, delegate(object data)
+		{
+			this.SetCondition(WiltCondition.Condition.IlluminationComfort, false);
+		});
+		this.Subscribe(1628751838, delegate(object data)
+		{
+			this.SetCondition(WiltCondition.Condition.Receptacle, true);
+		});
+		this.Subscribe(960378201, delegate(object data)
+		{
+			this.SetCondition(WiltCondition.Condition.Receptacle, false);
+		});
+	}
+
+	private void Update()
+	{
+		if (this.wilt_condition_dirty)
+		{
+			this.CheckShouldWilt();
+		}
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.CheckShouldWilt();
 		if (this.wilting)
 		{
 			this.DoWilt(null);
@@ -79,25 +146,26 @@ public class WiltCondition : KMonoBehaviour
 
 	protected override void OnCleanUp()
 	{
-		this.wiltSchedulerHandler.Clear();
-		this.recoverSchedulerHandler.Clear();
+		this.wiltSchedulerHandler.ClearScheduler();
+		this.recoverSchedulerHandler.ClearScheduler();
 		base.OnCleanUp();
 	}
 
-	private void SetCondition(string condition, bool satisfiedState)
+	private void SetCondition(WiltCondition.Condition condition, bool satisfiedState)
 	{
 		if (!this.WiltConditions.ContainsKey(condition))
 		{
 			return;
 		}
 		this.WiltConditions[condition] = satisfiedState;
-		this.CheckShouldWilt();
+		this.wilt_condition_dirty = true;
 	}
 
 	private void CheckShouldWilt()
 	{
+		this.wilt_condition_dirty = false;
 		bool flag = false;
-		foreach (KeyValuePair<string, bool> keyValuePair in this.WiltConditions)
+		foreach (KeyValuePair<WiltCondition.Condition, bool> keyValuePair in this.WiltConditions)
 		{
 			if (!keyValuePair.Value)
 			{
@@ -123,7 +191,7 @@ public class WiltCondition : KMonoBehaviour
 		if (!this.goingToWilt)
 		{
 			this.goingToWilt = true;
-			this.recoverSchedulerHandler.Clear();
+			this.recoverSchedulerHandler.ClearScheduler();
 			if (!this.wiltSchedulerHandler.IsValid)
 			{
 				this.wiltSchedulerHandler = GameScheduler.Instance.Schedule("Wilt", this.WiltDelay, new Action<object>(this.DoWilt), null, null);
@@ -136,7 +204,7 @@ public class WiltCondition : KMonoBehaviour
 		if (this.goingToWilt)
 		{
 			this.goingToWilt = false;
-			this.wiltSchedulerHandler.Clear();
+			this.wiltSchedulerHandler.ClearScheduler();
 			if (!this.recoverSchedulerHandler.IsValid)
 			{
 				this.recoverSchedulerHandler = GameScheduler.Instance.Schedule("Recover", this.RecoveryDelay, new Action<object>(this.DoRecover), null, null);
@@ -146,23 +214,50 @@ public class WiltCondition : KMonoBehaviour
 
 	private void DoWilt(object obj)
 	{
-		this.wiltSchedulerHandler.Clear();
+		this.wiltSchedulerHandler.ClearScheduler();
 		KSelectable component = base.GetComponent<KSelectable>();
-		this.wilting = true;
-		this.Trigger(-724860998, null);
+		if (!this.wilting)
+		{
+			this.wilting = true;
+			this.Trigger(-724860998, null);
+		}
 		if (this.growing != null && this.growing.Replanted)
 		{
-			component.AddStatusItem(Db.Get().CreatureStatusItems.WiltingDomestic, null);
+			component.AddStatusItem(Db.Get().CreatureStatusItems.WiltingDomestic, base.GetComponent<Growing>());
 		}
 		else
 		{
-			component.AddStatusItem(Db.Get().CreatureStatusItems.Wilting, null);
+			component.AddStatusItem(Db.Get().CreatureStatusItems.Wilting, base.GetComponent<Growing>());
 		}
+		component.GetComponent<KPrefabID>().AddTag(GameTags.Wilting);
+	}
+
+	public string WiltCausesString()
+	{
+		string text = string.Empty;
+		List<IWiltCause> allSMI = this.GetAllSMI<IWiltCause>();
+		allSMI.AddRange(base.GetComponents<IWiltCause>());
+		foreach (IWiltCause wiltCause in allSMI)
+		{
+			foreach (WiltCondition.Condition condition in wiltCause.Conditions)
+			{
+				if (this.WiltConditions.ContainsKey(condition))
+				{
+					if (!this.WiltConditions[condition])
+					{
+						text += "\n";
+						text += wiltCause.WiltStateString;
+						break;
+					}
+				}
+			}
+		}
+		return text;
 	}
 
 	private void DoRecover(object obj)
 	{
-		this.recoverSchedulerHandler.Clear();
+		this.recoverSchedulerHandler.ClearScheduler();
 		KSelectable component = base.GetComponent<KSelectable>();
 		this.wilting = false;
 		this.Trigger(712767498, null);
@@ -174,6 +269,7 @@ public class WiltCondition : KMonoBehaviour
 		{
 			component.RemoveStatusItem(Db.Get().CreatureStatusItems.Wilting, false);
 		}
+		component.GetComponent<KPrefabID>().RemoveTag(GameTags.Wilting);
 	}
 
 	[MyCmpGet]
@@ -185,13 +281,30 @@ public class WiltCondition : KMonoBehaviour
 	[Serialize]
 	private bool wilting;
 
-	private Dictionary<string, bool> WiltConditions = new Dictionary<string, bool>();
+	private bool wilt_condition_dirty;
 
-	public float WiltDelay = 5f;
+	private Dictionary<WiltCondition.Condition, bool> WiltConditions = new Dictionary<WiltCondition.Condition, bool>();
+
+	public float WiltDelay = 1f;
 
 	public float RecoveryDelay = 1f;
 
 	private SchedulerHandle wiltSchedulerHandler;
 
 	private SchedulerHandle recoverSchedulerHandler;
+
+	public enum Condition
+	{
+		Temperature,
+		Pressure,
+		AtmosphereElement,
+		Drowning,
+		Fertilized,
+		DryingOut,
+		Irrigation,
+		IlluminationComfort,
+		Darkness,
+		Receptacle,
+		Count
+	}
 }

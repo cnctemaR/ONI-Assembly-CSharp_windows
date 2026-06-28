@@ -4,13 +4,14 @@ using UnityEngine;
 
 public class FetchOrder2
 {
-	public FetchOrder2(Tag[] tags, Storage destination, float amount, FetchOrder2.OperationalRequirement operationalRequirement = FetchOrder2.OperationalRequirement.None, int priorityMod = 0)
+	public FetchOrder2(Tag[] tags, Tag[] forbidden_tags, Storage destination, float amount, FetchOrder2.OperationalRequirement operationalRequirement = FetchOrder2.OperationalRequirement.None, int priorityMod = 0)
 	{
 		if (amount <= 0f)
 		{
 			Output.LogError(new object[] { "Requesting an invalid FetchOrder2 amount" });
 		}
 		this.Tags = tags;
+		this.ForbiddenTags = forbidden_tags;
 		this.Destination = destination;
 		this.TotalAmount = amount;
 		this.UnfetchedAmount = amount;
@@ -23,6 +24,8 @@ public class FetchOrder2
 	public int PriorityMod { get; set; }
 
 	public Tag[] Tags { get; protected set; }
+
+	public Tag[] ForbiddenTags { get; protected set; }
 
 	public Storage Destination { get; set; }
 
@@ -77,7 +80,7 @@ public class FetchOrder2
 
 	private void SetFetchTask(float amount)
 	{
-		FetchChore fetchChore = new FetchChore(this.Destination, amount, this.Tags, null, true, new Action<Chore>(this.OnFetchChoreComplete), new Action<Chore>(this.OnFetchChoreBegin), new Action<Chore>(this.OnFetchChoreEnd), this.operationalRequirement, this.PriorityMod);
+		FetchChore fetchChore = new FetchChore(this.Destination, amount, this.Tags, this.ForbiddenTags, null, true, new Action<Chore>(this.OnFetchChoreComplete), new Action<Chore>(this.OnFetchChoreBegin), new Action<Chore>(this.OnFetchChoreEnd), this.operationalRequirement, this.PriorityMod);
 		this.Chores.Add(fetchChore);
 	}
 

@@ -6,7 +6,8 @@ public class AirConditionerConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("AirConditioner", 2, 2, "airconditioner_kanim", 200f, 100, 120f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, null);
+		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER2;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("AirConditioner", 2, 2, "airconditioner_kanim", 200f, 100, 120f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, tier);
 		BuildingTemplates.CreateElectricalBuildingDef(buildingDef);
 		buildingDef.ViewMode = SimViewMode.PowerMap;
 		buildingDef.EnergyConsumptionWhenActive = 240f;
@@ -39,4 +40,6 @@ public class AirConditionerConfig : IBuildingConfig
 			instance.StartSM();
 		};
 	}
+
+	public const string ID = "AirConditioner";
 }

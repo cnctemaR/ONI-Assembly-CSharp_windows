@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using UnityEngine;
 
 public class AssignableSideScreenRow : KMonoBehaviour
@@ -17,6 +18,14 @@ public class AssignableSideScreenRow : KMonoBehaviour
 		set
 		{
 			this.toggle.isOn = value;
+			if (value)
+			{
+				this.BG.SetActive();
+			}
+			else
+			{
+				this.BG.SetInactive();
+			}
 		}
 	}
 
@@ -51,6 +60,22 @@ public class AssignableSideScreenRow : KMonoBehaviour
 			selectionCallback(this.targetIdentity);
 		};
 		this.portraitInstance.SetCrewMember(identity, false);
+		base.GetComponent<ToolTip>().OnToolTip = new Func<string>(this.GetTooltip);
+	}
+
+	private string GetTooltip()
+	{
+		ToolTip component = base.GetComponent<ToolTip>();
+		component.ClearMultiStringTooltip();
+		if (!this.toggle.isOn)
+		{
+			component.AddMultiStringTooltip(string.Format(UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.ASSIGN_TO_TOOLTIP, this.targetIdentity.GetProperName()), null);
+		}
+		else
+		{
+			component.AddMultiStringTooltip(string.Format(UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.UNASSIGN_TOOLTIP, this.targetIdentity.GetProperName()), null);
+		}
+		return string.Empty;
 	}
 
 	[SerializeField]
@@ -60,7 +85,7 @@ public class AssignableSideScreenRow : KMonoBehaviour
 	private LocText assignmentText;
 
 	[SerializeField]
-	private KImage BG;
+	private ImageToggleState BG;
 
 	[SerializeField]
 	private KImage outline;

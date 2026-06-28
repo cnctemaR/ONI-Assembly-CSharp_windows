@@ -14,6 +14,10 @@ public class SafeCellQuery : PathFinderQuery
 	public static SafeCellQuery.SafeFlags GetFlags(int cell, MinionBrain brain)
 	{
 		int num = Grid.CellAbove(cell);
+		if (!Grid.IsValidCell(num))
+		{
+			return (SafeCellQuery.SafeFlags)0;
+		}
 		bool flag = brain.IsCellClear(cell);
 		bool flag2 = !Grid.Element[cell].IsLiquid;
 		bool flag3 = !Grid.Element[num].IsLiquid;

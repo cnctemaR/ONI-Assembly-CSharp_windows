@@ -27,10 +27,15 @@ public class PeeChore : Chore<PeeChore.StatesInstance>
 			return this.bladder.value <= 0f;
 		}
 
-		public void SpawnDirtyWater()
+		public void SpawnDirtyWater(float dt)
 		{
 			int num = Grid.PosToCell(base.sm.worker.Get<KMonoBehaviour>(base.smi));
-			SimMessages.AddRemoveSubstance(num, SimHashes.DirtyWater, CellEventLogger.Instance.Vomit, 0.05f, this.bodyTemperature.value, -1);
+			byte index = Db.Get().Diseases.GetIndex("FoodPoisoning");
+			float num2 = dt * -this.bladder.GetDelta() / this.bladder.GetMax();
+			if (num2 > 0f)
+			{
+				SimMessages.AddRemoveSubstance(num, SimHashes.DirtyWater, CellEventLogger.Instance.Vomit, 2f * num2, this.bodyTemperature.value, index, Mathf.CeilToInt(100000f * num2), -1);
+			}
 		}
 
 		public Notification stressfullyEmptyingBladder = new Notification(DUPLICANTS.STATUSITEMS.STRESSFULLYEMPTYINGBLADDER.NOTIFICATION_NAME, NotificationType.Bad, HashedString.Invalid, (List<Notification> notificationList, object data) => DUPLICANTS.STATUSITEMS.STRESSFULLYEMPTYINGBLADDER.NOTIFICATION_TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null);
@@ -46,13 +51,13 @@ public class PeeChore : Chore<PeeChore.StatesInstance>
 		{
 			default_state = this.running;
 			base.Target(this.worker);
-			this.running.ToggleAnims("anim_expel_kanim", 0f).ToggleStatusItem(Db.Get().DuplicantStatusItems.StressfullyEmptyingBladder, null).DoNotification((PeeChore.StatesInstance smi) => smi.stressfullyEmptyingBladder)
+			this.running.ToggleAnims("anim_expel_kanim", 0f).ToggleEffect("StressfulyEmptyingBladder").DoNotification((PeeChore.StatesInstance smi) => smi.stressfullyEmptyingBladder)
 				.DoReport(ReportManager.ReportType.ToiletIncident, (PeeChore.StatesInstance smi) => 1f)
 				.DoTutorial(Tutorial.TutorialMessages.TM_Mopping)
 				.Transition(null, (PeeChore.StatesInstance smi) => smi.IsDonePeeing())
 				.Update("SpawnDirtyWater", delegate(PeeChore.StatesInstance smi)
 				{
-					smi.SpawnDirtyWater();
+					smi.SpawnDirtyWater(smi.deltatime);
 				})
 				.PlayAnim("working_loop", KAnim.PlayMode.Loop, null);
 		}

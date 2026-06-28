@@ -206,9 +206,9 @@ public class AudioMixer
 			{
 				float num = 1f;
 				string text = "Volume_" + array[i];
-				if (PlayerPrefs.HasKey(text))
+				if (KPlayerPrefs.HasKey(text))
 				{
-					num = PlayerPrefs.GetFloat(text);
+					num = KPlayerPrefs.GetFloat(text);
 				}
 				AudioMixer.UserVolumeBus userVolumeBus = new AudioMixer.UserVolumeBus();
 				userVolumeBus.busLevel = num;
@@ -235,7 +235,7 @@ public class AudioMixer
 			value = 0f;
 		}
 		this.userVolumeSettings[bus].busLevel = value;
-		PlayerPrefs.SetFloat("Volume_" + bus, value);
+		KPlayerPrefs.SetFloat("Volume_" + bus, value);
 		EventInstance eventInstance = null;
 		if (this.activeSnapshots.TryGetValue(AudioMixerSnapshots.Get().UserVolumeSettingsSnapshot, out eventInstance))
 		{

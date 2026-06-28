@@ -76,6 +76,16 @@ public static class OffsetGroups
 		new CellOffset(-1, -1)
 	};
 
+	public static CellOffset[] LeftOnly = new CellOffset[]
+	{
+		new CellOffset(-1, 0)
+	};
+
+	public static CellOffset[] RightOnly = new CellOffset[]
+	{
+		new CellOffset(1, 0)
+	};
+
 	public static CellOffset[] Standard = OffsetGroups.InitGrid(-2, 2, -3, 3);
 
 	public static CellOffset[] LiquidSource = new CellOffset[]

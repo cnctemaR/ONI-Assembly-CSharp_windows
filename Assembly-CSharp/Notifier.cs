@@ -29,11 +29,11 @@ public class Notifier : KMonoBehaviour
 		{
 			if (this.Selectable != null)
 			{
-				notification.NotifierName = this.Selectable.GetName() + suffix;
+				notification.NotifierName = "• " + this.Selectable.GetName() + suffix;
 			}
 			else
 			{
-				notification.NotifierName = base.name + suffix;
+				notification.NotifierName = "• " + base.name + suffix;
 			}
 			notification.Notifier = this;
 			notification.Position = this.transform.position;

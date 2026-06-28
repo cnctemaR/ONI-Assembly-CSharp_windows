@@ -6,28 +6,28 @@ using UnityEngine;
 
 public class KGlobalAnimParser
 {
+	private static KGlobalAnimParser instance
+	{
+		get
+		{
+			return Singleton<KGlobalAnimParser>.Instance;
+		}
+	}
+
 	public static KGlobalAnimParser Get()
 	{
-		if (KGlobalAnimParser.instance == null)
-		{
-			KGlobalAnimParser.instance = new KGlobalAnimParser();
-		}
 		return KGlobalAnimParser.instance;
 	}
 
 	public static void Destroy()
 	{
-		if (KGlobalAnimParser.instance != null)
-		{
-			global::Debug.Log("Destroying KGlobalAnimParser", null);
-			KGlobalAnimParser.instance.commandFiles.Clear();
-			KGlobalAnimParser.instance.commandFiles = null;
-			KGlobalAnimParser.instance.files.Clear();
-			KGlobalAnimParser.instance.files = null;
-			KGlobalAnimParser.instance.dynamicFiles.Clear();
-			KGlobalAnimParser.instance.dynamicFiles = null;
-			KGlobalAnimParser.instance = null;
-		}
+		KGlobalAnimParser.instance.commandFiles.Clear();
+		KGlobalAnimParser.instance.commandFiles = null;
+		KGlobalAnimParser.instance.files.Clear();
+		KGlobalAnimParser.instance.files = null;
+		KGlobalAnimParser.instance.dynamicFiles.Clear();
+		KGlobalAnimParser.instance.dynamicFiles = null;
+		Singleton<KGlobalAnimParser>.Destroy();
 	}
 
 	public void ClearDynamic()
@@ -103,7 +103,7 @@ public class KGlobalAnimParser
 		HashedString ignore = KAnimBatchManager.IGNORE;
 		if (file.animFile != null || file.buildFile != null)
 		{
-			if (file.homedirectory != null && file.homedirectory != string.Empty)
+			if (!string.IsNullOrEmpty(file.homedirectory))
 			{
 				ignore = new HashedString(KGlobalAnimParser.GetTagGroup(file.homedirectory));
 			}
@@ -208,7 +208,7 @@ public class KGlobalAnimParser
 		{
 			KAnim.Anim anim = new KAnim.Anim(animFile, data.anims.Count);
 			anim.name = reader.ReadKleiString();
-			anim.id = animFile.name + "." + anim.name;
+			anim.id = new HashedString(animFile.name + "." + anim.name);
 			anim.hash = new HashedString(anim.name);
 			anim.rootSymbol.HashValue = reader.ReadInt32();
 			anim.frameRate = reader.ReadSingle();
@@ -506,6 +506,4 @@ public class KGlobalAnimParser
 	private Dictionary<HashedString, KAnimFileData> dynamicFiles = new Dictionary<HashedString, KAnimFileData>();
 
 	private Dictionary<int, KAnimFileData> files = new Dictionary<int, KAnimFileData>();
-
-	private static KGlobalAnimParser instance = null;
 }

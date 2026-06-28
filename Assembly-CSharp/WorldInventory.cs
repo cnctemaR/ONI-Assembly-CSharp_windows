@@ -14,7 +14,6 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 	protected override void OnPrefabInit()
 	{
 		WorldInventory.Instance = this;
-		Components.LiquidSources.Register(new Action<LiquidSource>(this.OnAddLiquidSource), new Action<LiquidSource>(this.OnRemoveLiquidSource));
 		base.Subscribe(Game.Instance.gameObject, -1588644844, new Action<object>(this.OnAddedFetchable));
 		base.Subscribe(Game.Instance.gameObject, -1491270284, new Action<object>(this.OnRemovedFetchable));
 	}
@@ -44,24 +43,6 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 			}
 		}
 		yield break;
-	}
-
-	public void OnAddLiquidSource(LiquidSource source)
-	{
-		this.PendingLiquidAdds.Add(source);
-	}
-
-	public void OnRemoveLiquidSource(LiquidSource source)
-	{
-		if (this.PendingLiquidAdds.Contains(source))
-		{
-			this.PendingLiquidAdds.Remove(source);
-		}
-		List<LiquidSource> list;
-		if (this.LiquidSources.TryGetValue(source.GetElementTag(), out list))
-		{
-			list.Remove(source);
-		}
 	}
 
 	public bool IsReachable(Pickupable pickupable)
@@ -190,41 +171,22 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 			}
 			num++;
 		}
-		for (int j = this.PendingLiquidAdds.Count - 1; j >= 0; j--)
-		{
-			Tag elementTag = this.PendingLiquidAdds[j].GetElementTag();
-			List<LiquidSource> list;
-			if (!this.LiquidSources.TryGetValue(elementTag, out list))
-			{
-				this.Discover(elementTag, this.PendingLiquidAdds[j].GetMaterialCategoryTag());
-				list = new List<LiquidSource>();
-				this.LiquidSources[elementTag] = list;
-			}
-			list.Add(this.PendingLiquidAdds[j]);
-			this.PendingLiquidAdds.RemoveAt(j);
-		}
-		foreach (KeyValuePair<Tag, List<LiquidSource>> keyValuePair2 in this.LiquidSources)
-		{
-			List<LiquidSource> value2 = keyValuePair2.Value;
-			for (int k = value2.Count - 1; k >= 0; k--)
-			{
-				if (value2[k] == null)
-				{
-					value2.RemoveAt(k);
-				}
-			}
-		}
 		this.firstUpdate = false;
 	}
 
-	protected override void OnCleanUp()
+	protected override void OnLoadLevel()
 	{
-		Components.LiquidSources.Unregister(new Action<LiquidSource>(this.OnAddLiquidSource), new Action<LiquidSource>(this.OnRemoveLiquidSource));
+		base.OnLoadLevel();
+		WorldInventory.Instance = null;
 	}
 
 	private void OnAddedFetchable(object data)
 	{
 		GameObject gameObject = (GameObject)data;
+		if (gameObject.GetComponent<Health>() != null)
+		{
+			return;
+		}
 		Pickupable component = gameObject.GetComponent<Pickupable>();
 		KPrefabID component2 = component.GetComponent<KPrefabID>();
 		Tag tag = component2.PrefabID();
@@ -277,10 +239,6 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 
 	[Serialize]
 	private Dictionary<Tag, HashSet<Tag>> DiscoveredCategories = new Dictionary<Tag, HashSet<Tag>>();
-
-	private Dictionary<Tag, List<LiquidSource>> LiquidSources = new Dictionary<Tag, List<LiquidSource>>();
-
-	private List<LiquidSource> PendingLiquidAdds = new List<LiquidSource>();
 
 	private Dictionary<Tag, List<Pickupable>> Inventory = new Dictionary<Tag, List<Pickupable>>();
 

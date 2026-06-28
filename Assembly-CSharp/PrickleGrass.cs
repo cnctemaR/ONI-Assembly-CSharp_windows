@@ -1,4 +1,6 @@
 ﻿using System;
+using Klei.AI;
+using TUNING;
 using UnityEngine;
 
 public class PrickleGrass : StateMachineComponent<PrickleGrass.StatesInstance>
@@ -10,6 +12,8 @@ public class PrickleGrass : StateMachineComponent<PrickleGrass.StatesInstance>
 		{
 			this.replanted = true;
 		});
+		this.growth_bonus.Description = "Growth Bonus";
+		this.wilt_penalty.Description = "Wilt Penalty";
 	}
 
 	protected override void OnSpawn()
@@ -32,6 +36,10 @@ public class PrickleGrass : StateMachineComponent<PrickleGrass.StatesInstance>
 	private EntombVulnerable entombVulnerable;
 
 	public bool replanted;
+
+	private AttributeModifier growth_bonus = new AttributeModifier("Effect", (float)DECOR.BONUS.TIER3.amount, null, false, false);
+
+	private AttributeModifier wilt_penalty = new AttributeModifier("Effect", (float)DECOR.PENALTY.TIER1.amount, null, false, false);
 
 	public class StatesInstance : GameStateMachine<PrickleGrass.States, PrickleGrass.StatesInstance, PrickleGrass, object>.GameInstance
 	{
@@ -66,8 +74,21 @@ public class PrickleGrass : StateMachineComponent<PrickleGrass.StatesInstance>
 				}
 			}).PlayAnim("grow_seed", KAnim.PlayMode.Once, null).EventTransition(GameHashes.AnimQueueComplete, this.alive, null);
 			this.alive.InitializeStates(this.masterTarget, this.dead).DefaultState(this.alive.idle).ToggleStatusItem(Db.Get().CreatureStatusItems.Idle, null);
-			this.alive.idle.EventTransition(GameHashes.Wilt, this.alive.wilting, (PrickleGrass.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).PlayAnim("idle", KAnim.PlayMode.Loop, null);
-			this.alive.wilting.PlayAnim("wilt1", KAnim.PlayMode.Loop, null).EventTransition(GameHashes.WiltRecover, this.alive.idle, null);
+			this.alive.idle.EventTransition(GameHashes.Wilt, this.alive.wilting, (PrickleGrass.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).PlayAnim("idle", KAnim.PlayMode.Loop, null).Enter(delegate(PrickleGrass.StatesInstance smi)
+			{
+				smi.master.growth_bonus.Description = "Growth Bonus";
+				smi.master.GetAttributes().Get(Db.Get().Attributes.Decor).Remove(smi.master.wilt_penalty);
+				smi.master.GetAttributes().Get(Db.Get().Attributes.Decor).Add("growth_bonus", smi.master.growth_bonus);
+				smi.master.GetComponent<DecorProvider>().Refresh();
+			});
+			this.alive.wilting.PlayAnim("wilt1", KAnim.PlayMode.Loop, null).EventTransition(GameHashes.WiltRecover, this.alive.idle, null).Enter(delegate(PrickleGrass.StatesInstance smi)
+			{
+				smi.master.growth_bonus.Description = "Wilt Penalty";
+				smi.master.GetAttributes().Get(Db.Get().Attributes.Decor).Remove(smi.master.growth_bonus);
+				smi.master.GetAttributes().Get(Db.Get().Attributes.Decor).Add("wilt_penalty", smi.master.wilt_penalty);
+				smi.master.GetComponent<DecorProvider>().SetValues(DECOR.PENALTY.TIER1);
+				smi.master.GetComponent<DecorProvider>().Refresh();
+			});
 		}
 
 		public GameStateMachine<PrickleGrass.States, PrickleGrass.StatesInstance, PrickleGrass, object>.State grow;

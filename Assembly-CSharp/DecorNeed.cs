@@ -16,7 +16,7 @@ public class DecorNeed : Need
 		this.amount = Db.Get().Amounts.Decor.Lookup(this);
 		base.Name = DUPLICANTS.NEEDS.DECOR.NAME;
 		base.ExpectationTooltip = DUPLICANTS.NEEDS.DECOR.EXPECTATION_TOOLTIP;
-		this.expectationModifier = new AttributeModifier(Db.Get().Attributes.DecorExpectation.Id, 0f, attributes.GetProfessionString(), false, false);
+		this.expectationModifier = new AttributeModifier(Db.Get().Attributes.DecorExpectation.Id, 0f, attributes.GetProfessionString(true), false, false);
 		this.decorStressBonus = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, -0.033333335f, DUPLICANTS.NEEDS.DECOR.NAME, false, false);
 		this.decorStressNeutral = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0f, DUPLICANTS.NEEDS.DECOR.NAME, false, false);
 		this.decorStressPenalty = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0.016666668f, DUPLICANTS.NEEDS.DECOR.NAME, false, false);

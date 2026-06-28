@@ -37,4 +37,6 @@ public class GameComps : KComponents
 	public static OreSizeVisualizerComponents OreSizeVisualizers;
 
 	public static StructureTemperatureComponents StructureTemperatures;
+
+	public static DiseaseContainers DiseaseContainers;
 }

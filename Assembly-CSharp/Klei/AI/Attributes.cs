@@ -130,14 +130,14 @@ namespace Klei.AI
 			return attributeInstance;
 		}
 
-		public string GetProfessionString()
+		public string GetProfessionString(bool longform = true)
 		{
 			AttributeInstance profession = this.GetProfession();
 			if ((int)profession.GetTotalValue() == 0)
 			{
-				return string.Format(UI.ATTRIBUTELEVEL, 0, DUPLICANTS.ATTRIBUTES.UNPROFESSIONAL_NAME);
+				return string.Format((!longform) ? UI.ATTRIBUTELEVEL_SHORT : UI.ATTRIBUTELEVEL, 0, DUPLICANTS.ATTRIBUTES.UNPROFESSIONAL_NAME);
 			}
-			return string.Format(UI.ATTRIBUTELEVEL, (int)profession.GetTotalValue(), profession.modifier.ProfessionName);
+			return string.Format((!longform) ? UI.ATTRIBUTELEVEL_SHORT : UI.ATTRIBUTELEVEL, (int)profession.GetTotalValue(), profession.modifier.ProfessionName);
 		}
 
 		public string GetProfessionDescriptionString()

@@ -44,7 +44,7 @@ public class UnstableGroundManager : KMonoBehaviour
 		return gameObject;
 	}
 
-	public void Spawn(int cell, Element element, float mass, float temperature)
+	public void Spawn(int cell, Element element, float mass, float temperature, byte disease_idx, int disease_count)
 	{
 		Vector3 vector = Grid.CellToPosCCC(cell, Grid.SceneLayer.TileMain);
 		if (float.IsNaN(temperature) || float.IsInfinity(temperature))
@@ -52,13 +52,13 @@ public class UnstableGroundManager : KMonoBehaviour
 			global::Debug.LogError("Tried to spawn unstable ground with NaN temperature", null);
 			temperature = 293f;
 		}
-		KBatchedAnimController kbatchedAnimController = this.Spawn(vector, element, mass, temperature);
+		KBatchedAnimController kbatchedAnimController = this.Spawn(vector, element, mass, temperature, disease_idx, disease_count);
 		kbatchedAnimController.Play("start", KAnim.PlayMode.Once, 1f, 0f);
 		kbatchedAnimController.Play("loop", KAnim.PlayMode.Loop, 1f, 0f);
 		kbatchedAnimController.gameObject.name = "Falling " + element.name;
 		GameComps.Gravities.Add(kbatchedAnimController.gameObject, Vector2.zero, null);
 		this.fallingObjects.Add(kbatchedAnimController.gameObject);
-		this.SpawnPuff(vector, element, mass, temperature);
+		this.SpawnPuff(vector, element, mass, temperature, disease_idx, disease_count);
 		Substance substance = element.substance;
 		if (substance != null && substance.fallingStartSound != null && CameraController.Instance.IsAudibleSound(vector, substance.fallingStartSound))
 		{
@@ -66,34 +66,38 @@ public class UnstableGroundManager : KMonoBehaviour
 		}
 	}
 
-	private void SpawnOld(Vector3 pos, Element element, float mass, float temperature)
+	private void SpawnOld(Vector3 pos, Element element, float mass, float temperature, byte disease_idx, int disease_count)
 	{
 		if (!element.IsUnstable)
 		{
 			Output.LogError(new object[] { "Spawning falling ground with a stable element" });
 		}
-		KBatchedAnimController kbatchedAnimController = this.Spawn(pos, element, mass, temperature);
+		KBatchedAnimController kbatchedAnimController = this.Spawn(pos, element, mass, temperature, disease_idx, disease_count);
 		GameComps.Gravities.Add(kbatchedAnimController.gameObject, Vector2.zero, null);
 		kbatchedAnimController.Play("loop", KAnim.PlayMode.Loop, 1f, 0f);
 		this.fallingObjects.Add(kbatchedAnimController.gameObject);
 		kbatchedAnimController.gameObject.name = "SpawnOld " + element.name;
 	}
 
-	private void SpawnPuff(Vector3 pos, Element element, float mass, float temperature)
+	private void SpawnPuff(Vector3 pos, Element element, float mass, float temperature, byte disease_idx, int disease_count)
 	{
 		if (!element.IsUnstable)
 		{
 			Output.LogError(new object[] { "Spawning sand puff with a stable element" });
 		}
-		KBatchedAnimController kbatchedAnimController = this.Spawn(pos, element, mass, temperature);
+		KBatchedAnimController kbatchedAnimController = this.Spawn(pos, element, mass, temperature, disease_idx, disease_count);
 		kbatchedAnimController.Play("sandPuff", KAnim.PlayMode.Once, 1f, 0f);
 		kbatchedAnimController.gameObject.name = "Puff " + element.name;
 		kbatchedAnimController.transform.position += this.spawnPuffOffset;
 	}
 
-	private KBatchedAnimController Spawn(Vector3 pos, Element element, float mass, float temperature)
+	private KBatchedAnimController Spawn(Vector3 pos, Element element, float mass, float temperature, byte disease_idx, int disease_count)
 	{
-		UnstableGroundManager.EffectRuntimeInfo effectRuntimeInfo = this.runtimeInfo[element.id];
+		UnstableGroundManager.EffectRuntimeInfo effectRuntimeInfo;
+		if (!this.runtimeInfo.TryGetValue(element.id, out effectRuntimeInfo))
+		{
+			global::Debug.LogError(element.id.ToString() + " needs unstable ground info hookup!", null);
+		}
 		GameObject instance = effectRuntimeInfo.pool.GetInstance();
 		instance.transform.SetPosition(pos);
 		if (float.IsNaN(temperature) || float.IsInfinity(temperature))
@@ -106,6 +110,7 @@ public class UnstableGroundManager : KMonoBehaviour
 		component.Mass = mass;
 		component.Temperature = temperature;
 		instance.SetActive(true);
+		component.AddDisease(disease_idx, disease_count, "UnstableGroundManager.Spawn");
 		KBatchedAnimController component2 = instance.GetComponent<KBatchedAnimController>();
 		component2.onDestroySelf = effectRuntimeInfo.releaseFunc;
 		component2.Stop();
@@ -166,8 +171,8 @@ public class UnstableGroundManager : KMonoBehaviour
 				HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(delegate
 				{
 					this.RemoveFromPending(cell);
-				}, false), "UnstableGroundManager");
-				SimMessages.AddRemoveSubstance(cell, component.ElementID, CellEventLogger.Instance.UnstableGround, component.Mass, component.Temperature, handle.index);
+				}, false));
+				SimMessages.AddRemoveSubstance(cell, component.ElementID, CellEventLogger.Instance.UnstableGround, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, handle.index);
 				if (component.Element.substance != null && component.Element.substance.fallingStopSound != null && CameraController.Instance.IsAudibleSound(position, component.Element.substance.fallingStopSound))
 				{
 					SoundEvent.PlayOneShot(component.Element.substance.fallingStopSound, position);
@@ -194,12 +199,16 @@ public class UnstableGroundManager : KMonoBehaviour
 		foreach (GameObject gameObject in this.fallingObjects)
 		{
 			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+			byte diseaseIdx = component.DiseaseIdx;
+			int num = ((diseaseIdx == byte.MaxValue) ? 0 : Db.Get().Diseases[(int)diseaseIdx].id.HashValue);
 			this.serializedInfo.Add(new UnstableGroundManager.SerializedInfo
 			{
 				position = gameObject.transform.position,
 				element = component.ElementID,
 				mass = component.Mass,
-				temperature = component.Temperature
+				temperature = component.Temperature,
+				diseaseID = num,
+				diseaseCount = component.DiseaseCount
 			});
 		}
 	}
@@ -218,10 +227,18 @@ public class UnstableGroundManager : KMonoBehaviour
 			return;
 		}
 		this.fallingObjects.Clear();
+		HashedString hashedString = default(HashedString);
 		foreach (UnstableGroundManager.SerializedInfo serializedInfo in this.serializedInfo)
 		{
 			Element element = ElementLoader.FindElementByHash(serializedInfo.element);
-			this.SpawnOld(serializedInfo.position, element, serializedInfo.mass, serializedInfo.temperature);
+			hashedString.HashValue = serializedInfo.diseaseID;
+			byte index = Db.Get().Diseases.GetIndex(hashedString);
+			int num = serializedInfo.diseaseCount;
+			if (index == 255)
+			{
+				num = 0;
+			}
+			this.SpawnOld(serializedInfo.position, element, serializedInfo.mass, serializedInfo.temperature, index, num);
 		}
 	}
 
@@ -268,5 +285,9 @@ public class UnstableGroundManager : KMonoBehaviour
 		public float mass;
 
 		public float temperature;
+
+		public int diseaseID;
+
+		public int diseaseCount;
 	}
 }

@@ -10,7 +10,8 @@ namespace Klei
 		{
 			using (StreamWriter streamWriter = new StreamWriter(filename))
 			{
-				Serializer serializer = new Serializer(SerializationOptions.None, null);
+				SerializerBuilder serializerBuilder = new SerializerBuilder();
+				Serializer serializer = serializerBuilder.Build();
 				serializer.Serialize(streamWriter, this);
 			}
 		}
@@ -30,7 +31,9 @@ namespace Klei
 		{
 			try
 			{
-				Deserializer deserializer = new Deserializer(null, null, true);
+				DeserializerBuilder deserializerBuilder = new DeserializerBuilder();
+				deserializerBuilder.IgnoreUnmatchedProperties();
+				Deserializer deserializer = deserializerBuilder.Build();
 				StringReader stringReader = new StringReader(readText);
 				return deserializer.Deserialize<T>(stringReader);
 			}

@@ -125,7 +125,7 @@ public class TextureLerper
 
 	private static int offsetCounter;
 
-	private string name;
+	public string name;
 
 	private RenderTexture[] BlendTextures = new RenderTexture[2];
 

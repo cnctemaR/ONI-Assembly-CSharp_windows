@@ -142,6 +142,11 @@ public class FetchManagerUpdater
 		return pathFinderFlags;
 	}
 
+	public static void FreeResources()
+	{
+		FetchManagerUpdater.Pickups = new FetchManagerUpdater.Pickup[128];
+	}
+
 	public static int InvalidIdx = -1;
 
 	public static int InvalidCell = -1;

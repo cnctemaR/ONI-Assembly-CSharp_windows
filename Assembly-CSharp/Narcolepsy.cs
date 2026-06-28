@@ -60,7 +60,7 @@ public class Narcolepsy : StateMachineComponent<Narcolepsy.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.idle;
-			this.root.EventTransition(GameHashes.Died, this.dead, (Narcolepsy.StatesInstance smi) => smi.Get<Health>() != null && smi.Get<Health>().IsDead());
+			this.root.TagTransition(GameTags.Dead, this.dead, false);
 			this.idle.Enter("ScheduleNextSleep", delegate(Narcolepsy.StatesInstance smi)
 			{
 				smi.ScheduleGoTo(this.GetNewInterval(TRAITS.NARCOLEPSY_INTERVAL_MIN, TRAITS.NARCOLEPSY_INTERVAL_MAX), this.sleepy);
@@ -75,13 +75,13 @@ public class Narcolepsy : StateMachineComponent<Narcolepsy.StatesInstance>
 				{
 					smi.ScheduleGoTo(this.GetNewInterval(TRAITS.NARCOLEPSY_SLEEPDURATION_MIN, TRAITS.NARCOLEPSY_SLEEPDURATION_MAX), this.idle);
 				}
-			}).ToggleUrge(Db.Get().Urges.Sleep).ToggleChore(new Func<Narcolepsy.StatesInstance, Chore>(this.CreateSleepOnFloorChore), this.idle, false);
+			}).ToggleUrge(Db.Get().Urges.Narcolepsy).ToggleChore(new Func<Narcolepsy.StatesInstance, Chore>(this.CreateNarcolepsyChore), this.idle);
 			this.dead.DoNothing();
 		}
 
-		private Chore CreateSleepOnFloorChore(Narcolepsy.StatesInstance smi)
+		private Chore CreateNarcolepsyChore(Narcolepsy.StatesInstance smi)
 		{
-			return new SleepOnFloorChore(smi.master);
+			return new NarcolepsyChore(smi.master);
 		}
 
 		private float GetNewInterval(float min, float max)

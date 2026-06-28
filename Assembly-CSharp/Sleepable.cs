@@ -1,7 +1,8 @@
 ﻿using System;
+using Klei.AI;
 using TUNING;
 
-public class Sleepable : BuildingWorkable
+public class Sleepable : Workable
 {
 	private Sleepable()
 	{
@@ -11,8 +12,7 @@ public class Sleepable : BuildingWorkable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.workerStatusItem = Db.Get().DuplicantStatusItems.Sleeping;
-		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_sleep_bed_kanim") };
+		this.workerStatusItem = null;
 	}
 
 	protected override void OnSpawn()
@@ -24,8 +24,12 @@ public class Sleepable : BuildingWorkable
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
-		this.operational.SetActive(true, false);
+		if (this.operational != null)
+		{
+			this.operational.SetActive(true, false);
+		}
 		worker.Trigger(-1283701846, this);
+		worker.GetComponent<Effects>().Add("Sleep", false);
 	}
 
 	protected override bool OnWorkTick(Worker worker, float dt)
@@ -42,7 +46,11 @@ public class Sleepable : BuildingWorkable
 	protected override void OnStopWork(Worker worker)
 	{
 		base.OnStopWork(worker);
-		this.operational.SetActive(false, false);
+		if (this.operational != null)
+		{
+			this.operational.SetActive(false, false);
+		}
+		worker.GetComponent<Effects>().Remove("Sleep");
 	}
 
 	protected override void OnCleanUp()
@@ -56,6 +64,6 @@ public class Sleepable : BuildingWorkable
 		GameUtil.UpdateRegion(new_region, this, Db.Get().OwnableSlots.Bed, REGIONS.RoomRegionTag);
 	}
 
-	[MyCmpReq]
+	[MyCmpGet]
 	private Operational operational;
 }

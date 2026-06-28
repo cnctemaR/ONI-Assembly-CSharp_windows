@@ -11,4 +11,10 @@ public struct ToggleState
 	public Sprite sprite;
 
 	public Color color;
+
+	public Color color_on_hover;
+
+	public bool use_color_on_hover;
+
+	public StatePresentationSetting[] additional_display_settings;
 }

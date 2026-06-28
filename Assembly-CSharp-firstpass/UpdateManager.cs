@@ -8,20 +8,20 @@ public class UpdateManager : MonoBehaviour
 
 	private void Awake()
 	{
+		UpdateManager.instance = this;
+		UpdateManager.Init();
+	}
+
+	public static void Init()
+	{
 		UpdateManager.TypeInfos.Clear();
 		UpdateManager.UpdateGroups = new SimUpdateGroup[3];
-		UpdateManager.instance = this;
 		for (int i = 0; i < UpdateManager.UpdateGroups.Length; i++)
 		{
 			UpdateManager.UpdateGroups[i] = new SimUpdateGroup(((UpdateManager.ListType)i).ToString());
 		}
-	}
-
-	public static void Destroy()
-	{
-		UpdateManager.instance = null;
-		UpdateManager.TypeInfos.Clear();
-		UpdateManager.UpdateGroups = null;
+		UpdateManager.instance.queuedAdded.Clear();
+		UpdateManager.instance.queuedRemoved.Clear();
 	}
 
 	public void SkipNextUpdate()

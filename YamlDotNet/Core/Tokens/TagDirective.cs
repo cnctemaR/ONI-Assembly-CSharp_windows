@@ -67,6 +67,6 @@ namespace YamlDotNet.Core.Tokens
 
 		private readonly string prefix;
 
-		private static readonly Regex tagHandleValidator = new Regex("^!([0-9A-Za-z_\\-]*!)?$", RegexOptions.Compiled);
+		private static readonly Regex tagHandleValidator = new Regex("^!([0-9A-Za-z_\\-]*!)?$", RegexOptions.None);
 	}
 }

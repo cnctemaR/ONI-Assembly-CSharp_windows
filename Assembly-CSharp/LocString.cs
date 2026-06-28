@@ -10,18 +10,35 @@ public class LocString
 		this.key = default(StringKey);
 	}
 
+	public LocString(string text, string keystring)
+	{
+		this.text = text;
+		this.key = new StringKey(keystring);
+	}
+
+	public LocString(string text, bool isLocalized)
+	{
+		this.text = text;
+		this.key = default(StringKey);
+	}
+
 	public string text { get; private set; }
 
 	public StringKey key { get; private set; }
 
 	public override string ToString()
 	{
-		return Strings.Get(this.key);
+		return Strings.Get(this.key).String;
 	}
 
 	public void SetKey(string key_name)
 	{
 		this.key = new StringKey(key_name);
+	}
+
+	public void SetKey(StringKey key)
+	{
+		this.key = key;
 	}
 
 	public static void CreateLocStringKeys(Type type, string parent_path = "STRINGS.")
@@ -70,6 +87,6 @@ public class LocString
 
 	public static implicit operator string(LocString loc_string)
 	{
-		return loc_string.ToString();
+		return loc_string.text;
 	}
 }

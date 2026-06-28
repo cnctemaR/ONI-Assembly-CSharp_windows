@@ -19,7 +19,7 @@ public class BuildingUnderConstruction : Building
 		Rotatable component2 = base.GetComponent<Rotatable>();
 		if (component != null && component2 == null)
 		{
-			component.Offset = this.Def.GetVisualizerOffset();
+			component.Offset = this.Def.GetVisualizerOffset() + this.Def.placementPivot;
 		}
 		BoxCollider2D component3 = base.GetComponent<BoxCollider2D>();
 		if (component3 != null)

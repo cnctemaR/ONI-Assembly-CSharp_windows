@@ -97,7 +97,7 @@ public class HoverTextScreen : KScreen
 	{
 		foreach (Sprite sprite in this.HoverIcons)
 		{
-			if (sprite.name == byName)
+			if (sprite != null && sprite.name == byName)
 			{
 				return sprite;
 			}

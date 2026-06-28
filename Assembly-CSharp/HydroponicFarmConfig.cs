@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -6,7 +7,8 @@ public class HydroponicFarmConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("HydroponicFarm", 1, 1, "farmtilehydroponicrotating_kanim", 100f, 100, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER2, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.Tile, BUILDINGS.DECOR.PENALTY.TIER0, null);
+		EffectorValues none = NOISE_POLLUTION.NONE;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("HydroponicFarm", 1, 1, "farmtilehydroponicrotating_kanim", 100f, 100, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER2, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.Tile, BUILDINGS.DECOR.PENALTY.TIER0, none);
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
 		buildingDef.Overheatable = false;
@@ -33,6 +35,8 @@ public class HydroponicFarmConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
+		PrimaryElement primaryElement = go.AddOrGet<PrimaryElement>();
+		primaryElement.useSimDiseaseInfo = true;
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.doReplaceElement = true;
 		go.AddOrGet<TileTemperature>();
@@ -45,13 +49,15 @@ public class HydroponicFarmConfig : IBuildingConfig
 		go.AddOrGet<Storage>();
 		PlantablePlot plantablePlot = go.AddOrGet<PlantablePlot>();
 		plantablePlot.AddDespoitTag(GameTags.CropSeed);
+		plantablePlot.AddDespoitTag(GameTags.WaterSeed);
 		plantablePlot.occupyingObjectRelativePosition.y = 1f;
 		plantablePlot.SetFertilizationFlags(true, true);
-		BuildingTemplates.CreateDefaultStorage(go, false);
+		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
+		storage.defaultStoredItemModifers = HydroponicFarmConfig.StoredItemModifiers;
 		go.AddOrGet<PlanterBox>();
 		go.AddOrGet<AnimTileable>();
 		go.AddOrGet<DropAllWorkable>();
-		go.AddOrGet<Prioritizable>();
+		Prioritizable.AddRef(go);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -61,4 +67,6 @@ public class HydroponicFarmConfig : IBuildingConfig
 	}
 
 	public const string ID = "HydroponicFarm";
+
+	private static readonly List<Storage.StoredItemModifier> StoredItemModifiers = new List<Storage.StoredItemModifier> { Storage.StoredItemModifier.Seal };
 }

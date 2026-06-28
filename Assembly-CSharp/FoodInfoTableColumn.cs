@@ -4,7 +4,7 @@ using UnityEngine;
 public class FoodInfoTableColumn : CheckboxTableColumn
 {
 	public FoodInfoTableColumn(EdiblesManager.FoodInfo food_info, Action<MinionIdentity, GameObject> load_value_action, Func<MinionIdentity, GameObject, TableScreen.ResultValues> get_value_action, Action<GameObject> on_press_action, Action<GameObject, bool> set_value_action, Comparison<MinionIdentity> sort_comparison, Action<MinionIdentity, GameObject, ToolTip> on_tooltip, Action<MinionIdentity, GameObject, ToolTip> on_sort_tooltip, Func<GameObject, string> get_header_label)
-		: base(load_value_action, get_value_action, on_press_action, set_value_action, sort_comparison, on_tooltip, on_sort_tooltip)
+		: base(load_value_action, get_value_action, on_press_action, set_value_action, sort_comparison, on_tooltip, on_sort_tooltip, () => ConsumerManager.instance.isDiscovered(food_info.Id.ToTag()))
 	{
 		this.food_info = food_info;
 		this.get_header_label = get_header_label;

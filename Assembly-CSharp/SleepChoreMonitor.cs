@@ -18,15 +18,15 @@ public class SleepChoreMonitor : GameStateMachine<SleepChoreMonitor, SleepChoreM
 			{
 				smi.AutoAssignBed();
 			}
-		}).ToggleChore(new Func<SleepChoreMonitor.Instance, Chore>(this.CreateSleepOnFloorChore), this.satisfied, false).ParamTransition<GameObject>(this.bed, this.bedassigned, (SleepChoreMonitor.Instance smi, GameObject p) => p != null);
+		}).ToggleChore(new Func<SleepChoreMonitor.Instance, Chore>(this.CreateSleepOnFloorChore), this.satisfied).ParamTransition<GameObject>(this.bed, this.bedassigned, (SleepChoreMonitor.Instance smi, GameObject p) => p != null);
 		this.bedassigned.DefaultState(this.bedassigned.bedunreachable).ParamTransition<GameObject>(this.bed, this.nobedassigned, (SleepChoreMonitor.Instance smi, GameObject p) => p == null).EventTransition(GameHashes.AssignablesChanged, this.nobedassigned, null);
-		this.bedassigned.bedunreachable.ToggleChore(new Func<SleepChoreMonitor.Instance, Chore>(this.CreateSleepOnFloorChore), this.bedassigned.bedunreachable, false).EventTransition(GameHashes.AssignableReachabilityChanged, this.bedassigned.bedreachable, (SleepChoreMonitor.Instance smi) => smi.IsBedReachable()).ToggleStatusItem(Db.Get().DuplicantStatusItems.BedUnreachable, null);
-		this.bedassigned.bedreachable.ToggleChore(new Func<SleepChoreMonitor.Instance, Chore>(this.CreateSleepChore), this.satisfied, false).EventTransition(GameHashes.AssignableReachabilityChanged, this.bedassigned.bedunreachable, (SleepChoreMonitor.Instance smi) => !smi.IsBedReachable());
+		this.bedassigned.bedunreachable.ToggleChore(new Func<SleepChoreMonitor.Instance, Chore>(this.CreateSleepOnFloorChore), this.bedassigned.bedunreachable).EventTransition(GameHashes.AssignableReachabilityChanged, this.bedassigned.bedreachable, (SleepChoreMonitor.Instance smi) => smi.IsBedReachable()).ToggleStatusItem(Db.Get().DuplicantStatusItems.BedUnreachable, null);
+		this.bedassigned.bedreachable.ToggleChore(new Func<SleepChoreMonitor.Instance, Chore>(this.CreateSleepChore), this.satisfied).EventTransition(GameHashes.AssignableReachabilityChanged, this.bedassigned.bedunreachable, (SleepChoreMonitor.Instance smi) => !smi.IsBedReachable());
 	}
 
 	private Chore CreateSleepOnFloorChore(SleepChoreMonitor.Instance smi)
 	{
-		return new SleepOnFloorChore(smi.master);
+		return new SleepChore(smi.master, null);
 	}
 
 	private Chore CreateSleepChore(SleepChoreMonitor.Instance smi)
@@ -59,8 +59,17 @@ public class SleepChoreMonitor : GameStateMachine<SleepChoreMonitor, SleepChoreM
 		public void UpdateBed()
 		{
 			Ownables component = base.sm.masterTarget.Get(base.smi).GetComponent<Ownables>();
-			Assignable assignable = component.GetAssignable(Db.Get().OwnableSlots.Bed);
-			base.smi.sm.bed.Set(assignable, base.smi);
+			Assignable assignable = component.GetAssignable(Db.Get().OwnableSlots.MedicalBed);
+			Assignable assignable2;
+			if (assignable != null && assignable.CanAutoAssignTo(base.gameObject.GetComponent<Worker>()))
+			{
+				assignable2 = assignable;
+			}
+			else
+			{
+				assignable2 = component.GetAssignable(Db.Get().OwnableSlots.Bed);
+			}
+			base.smi.sm.bed.Set(assignable2, base.smi);
 		}
 
 		public void AutoAssignBed()
@@ -68,7 +77,17 @@ public class SleepChoreMonitor : GameStateMachine<SleepChoreMonitor, SleepChoreM
 			Ownables component = base.sm.masterTarget.Get(base.smi).GetComponent<Ownables>();
 			Navigator component2 = component.GetComponent<Navigator>();
 			Assignable assignable = component.AutoAssignSlot(component2, Db.Get().OwnableSlots.Bed);
-			base.smi.sm.bed.Set(assignable, base.smi);
+			Assignable assignable2 = component.GetAssignable(Db.Get().OwnableSlots.MedicalBed);
+			Assignable assignable3;
+			if (assignable2 != null && assignable2.CanAutoAssignTo(base.gameObject.GetComponent<Worker>()))
+			{
+				assignable3 = assignable2;
+			}
+			else
+			{
+				assignable3 = assignable;
+			}
+			base.smi.sm.bed.Set(assignable3, base.smi);
 		}
 
 		public bool HasSleepUrge()
@@ -78,7 +97,8 @@ public class SleepChoreMonitor : GameStateMachine<SleepChoreMonitor, SleepChoreM
 
 		public bool IsBedReachable()
 		{
-			return base.GetComponent<Sensors>().GetSensor<AssignableReachabilitySensor>().IsReachable(Db.Get().OwnableSlots.Bed);
+			AssignableReachabilitySensor sensor = base.GetComponent<Sensors>().GetSensor<AssignableReachabilitySensor>();
+			return sensor.IsReachable(Db.Get().OwnableSlots.Bed) || sensor.IsReachable(Db.Get().OwnableSlots.MedicalBed);
 		}
 	}
 }

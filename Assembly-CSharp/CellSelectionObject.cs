@@ -52,6 +52,10 @@ public class CellSelectionObject : KMonoBehaviour
 		{
 			return;
 		}
+		if (Game.Instance == null || !Game.Instance.GameStarted())
+		{
+			return;
+		}
 		this.SelectedDisplaySprite.SetActive(PlayerController.Instance.IsUsingDefaultTool() && !DebugHandler.HideUI);
 		if (SelectTool.Instance.selected != this.mSelectable)
 		{
@@ -133,14 +137,11 @@ public class CellSelectionObject : KMonoBehaviour
 		this.state = this.element.state;
 		this.tags = this.element.GetMaterialCategoryTag();
 		this.temperature = Grid.Cell[this.selectedCell].temperature;
+		this.diseaseIdx = Grid.Disease[this.selectedCell].diseaseIdx;
+		this.diseaseCount = Grid.Disease[this.selectedCell].elementCount;
 		this.mSelectable.SetName(Grid.Element[this.selectedCell].name);
-		if (SimpleInfoScreen.Instance != null)
-		{
-			SimpleInfoScreen.Instance.Refresh(true);
-		}
-		this.UpdateMassStatusItem();
-		this.UpdateTemperatureStatusItem();
-		this.UpdateCategoryStatusItem();
+		DetailsScreen.Instance.Trigger(-1514841199, null);
+		this.UpdateStatusItem();
 		if (this.element.id == SimHashes.OxyRock)
 		{
 			this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.OxyRockEmitting, this);
@@ -168,49 +169,41 @@ public class CellSelectionObject : KMonoBehaviour
 		}
 	}
 
-	private void UpdateCategoryStatusItem()
+	private void UpdateStatusItem()
 	{
 		if (this.element.id == SimHashes.Vacuum || this.element.id == SimHashes.Void)
 		{
 			this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.ElementalCategory, true);
-		}
-		else if (!this.mSelectable.HasStatusItem(Db.Get().MiscStatusItems.ElementalCategory))
-		{
-			Func<Element> func = () => this.element;
-			this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.ElementalCategory, func);
-		}
-	}
-
-	private void UpdateTemperatureStatusItem()
-	{
-		if (this.element.id == SimHashes.Vacuum || this.element.id == SimHashes.Void)
-		{
 			this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.ElementalTemperature, true);
-		}
-		else if (!this.mSelectable.HasStatusItem(Db.Get().MiscStatusItems.ElementalTemperature))
-		{
-			this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.ElementalTemperature, this);
-		}
-	}
-
-	private void UpdateMassStatusItem()
-	{
-		if (this.element.id == SimHashes.Vacuum || this.element.id == SimHashes.Void)
-		{
 			this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.ElementalMass, true);
+			this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.ElementalDisease, true);
 		}
-		else if (!this.mSelectable.HasStatusItem(Db.Get().MiscStatusItems.ElementalMass))
+		else
 		{
-			this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.ElementalMass, this);
+			if (!this.mSelectable.HasStatusItem(Db.Get().MiscStatusItems.ElementalCategory))
+			{
+				Func<Element> func = () => this.element;
+				this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.ElementalCategory, func);
+			}
+			if (!this.mSelectable.HasStatusItem(Db.Get().MiscStatusItems.ElementalTemperature))
+			{
+				this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.ElementalTemperature, this);
+			}
+			if (!this.mSelectable.HasStatusItem(Db.Get().MiscStatusItems.ElementalMass))
+			{
+				this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.ElementalMass, this);
+			}
+			if (!this.mSelectable.HasStatusItem(Db.Get().MiscStatusItems.ElementalDisease))
+			{
+				this.mSelectable.AddStatusItem(Db.Get().MiscStatusItems.ElementalDisease, this);
+			}
 		}
 	}
 
 	public void OnObjectSelected(object o)
 	{
 		this.SelectedDisplaySprite.GetComponent<SpriteRenderer>().sprite = this.Sprite_Hover;
-		this.UpdateMassStatusItem();
-		this.UpdateCategoryStatusItem();
-		this.UpdateTemperatureStatusItem();
+		this.UpdateStatusItem();
 		if (SelectTool.Instance.selected == this.mSelectable)
 		{
 			this.selectedCell = Grid.PosToCell(base.gameObject);
@@ -289,6 +282,10 @@ public class CellSelectionObject : KMonoBehaviour
 	public float temperature;
 
 	public Tag tags;
+
+	public byte diseaseIdx;
+
+	public int diseaseCount;
 
 	private float updateTimer;
 

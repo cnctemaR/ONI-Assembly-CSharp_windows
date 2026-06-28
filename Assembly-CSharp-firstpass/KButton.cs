@@ -154,22 +154,31 @@ public class KButton : KMonoBehaviour, IPointerClickHandler, IEventSystemHandler
 				return;
 			}
 		}
-		if (this.bgImage != null)
+		this.UpdateKImageColor(this.bgImage, interactable, hover, press);
+		for (int j = 0; j < this.additionalKImages.Length; j++)
+		{
+			this.UpdateKImageColor(this.additionalKImages[j], interactable, hover, press);
+		}
+	}
+
+	private void UpdateKImageColor(KImage image, bool interactable, bool hover, bool press)
+	{
+		if (image != null)
 		{
 			if (interactable)
 			{
 				if (press)
 				{
-					this.bgImage.ColorState = KImage.ColorSelector.Active;
+					image.ColorState = KImage.ColorSelector.Active;
 				}
 				else
 				{
-					this.bgImage.ColorState = ((!hover) ? KImage.ColorSelector.Inactive : KImage.ColorSelector.Hover);
+					image.ColorState = ((!hover) ? KImage.ColorSelector.Inactive : KImage.ColorSelector.Hover);
 				}
 			}
 			else
 			{
-				this.bgImage.ColorState = ((!hover) ? KImage.ColorSelector.Disabled : KImage.ColorSelector.Disabled);
+				image.ColorState = ((!hover) ? KImage.ColorSelector.Disabled : KImage.ColorSelector.Disabled);
 			}
 		}
 	}
@@ -194,6 +203,8 @@ public class KButton : KMonoBehaviour, IPointerClickHandler, IEventSystemHandler
 	public KImage bgImage;
 
 	public Image fgImage;
+
+	public KImage[] additionalKImages;
 
 	public global::System.Action onPointerEnter;
 

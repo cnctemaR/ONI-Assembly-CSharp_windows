@@ -3,5 +3,5 @@ using UnityEngine;
 
 public interface IChunkManager
 {
-	SubstanceChunk CreateChunk(Element element, float mass, float temperature, Vector3 position);
+	SubstanceChunk CreateChunk(Element element, float mass, float temperature, byte diseaseIdx, int diseaseCount, Vector3 position);
 }

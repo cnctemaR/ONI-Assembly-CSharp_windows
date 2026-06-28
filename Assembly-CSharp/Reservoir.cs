@@ -62,7 +62,7 @@ public class Reservoir : KMonoBehaviour
 		{
 			this.fetchList = new FetchList2(component3);
 			this.fetchList.ShowStatusItem = false;
-			this.fetchList.Add(tags, (float)num, FetchOrder2.OperationalRequirement.None);
+			this.fetchList.Add(tags, null, (float)num, FetchOrder2.OperationalRequirement.None);
 			this.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
 		}
 		base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.NoStorageFilterSet, !flag, this);

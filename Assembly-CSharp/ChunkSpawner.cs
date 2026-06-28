@@ -49,7 +49,7 @@ public class ChunkSpawner : KMonoBehaviour
 				int num7 = global::UnityEngine.Random.Range(0, list.Count);
 				Vector3 vector = Grid.CellToPos(list[num7]);
 				vector.z = -2.5f;
-				ElementLoader.FindElementByHash(elementSpawn.element).substance.SpawnResource(vector, num6, ElementLoader.FindElementByHash(elementSpawn.element).defaultValues.temperature, false, false);
+				ElementLoader.FindElementByHash(elementSpawn.element).substance.SpawnResource(vector, num6, ElementLoader.FindElementByHash(elementSpawn.element).defaultValues.temperature, byte.MaxValue, 0, false, false);
 			}
 		}
 	}

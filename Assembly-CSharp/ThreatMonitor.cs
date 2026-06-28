@@ -23,8 +23,14 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 				smi.GoTo(this.safe);
 			}
 		});
-		this.threatned.duplicant.ShouldFight.ToggleChore(new Func<ThreatMonitor.Instance, Chore>(this.CreateAttackChore), this.safe, false);
-		this.threatned.duplicant.ShoudFlee.ToggleChore(new Func<ThreatMonitor.Instance, Chore>(this.CreateFleeChore), this.safe, false);
+		this.threatned.duplicant.ShouldFight.ToggleChore(new Func<ThreatMonitor.Instance, Chore>(this.CreateAttackChore), this.safe).Update(delegate(ThreatMonitor.Instance smi)
+		{
+			if (this.GetMainThreat(smi) == null || !this.GetMainThreat(smi).GetComponent<FactionAlignment>().targeted)
+			{
+				smi.Trigger(2144432245, null);
+			}
+		});
+		this.threatned.duplicant.ShoudFlee.ToggleChore(new Func<ThreatMonitor.Instance, Chore>(this.CreateFleeChore), this.safe);
 		this.threatned.creature.Enter(delegate(ThreatMonitor.Instance smi)
 		{
 			this.ReportThreat(smi);
@@ -230,7 +236,7 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 
 		private void GotoThreatResponse()
 		{
-			if (this.WillEngageNonEssentialTargets())
+			if (this.WillEngageNonEssentialTargets() && this.mainThreat.GetComponent<FactionAlignment>().targeted)
 			{
 				base.smi.GoTo(base.smi.sm.threatned.duplicant.ShouldFight);
 			}
@@ -277,7 +283,7 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 		public bool CheckForThreats()
 		{
 			GameObject gameObject;
-			if (this.revengeThreat.target != null && this.revengeThreat.target.GetComponent<FactionAlignment>().CheckAlignmentActive && !this.revengeThreat.target.GetComponent<Health>().IsDefeated())
+			if (this.revengeThreat.target != null && this.revengeThreat.target.GetComponent<FactionAlignment>().CheckAlignmentActive && !this.revengeThreat.target.GetComponent<Health>().IsDefeated() && (this.alignment.Alignment != FactionManager.FactionID.Duplicant || !this.revengeThreat.target.GetComponent<FactionAlignment>().targeted))
 			{
 				gameObject = this.revengeThreat.target;
 			}
@@ -296,11 +302,10 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 			{
 				return null;
 			}
-			int mask = GameScenePartitioner.Instance.attackableEntities.mask;
 			int num = Grid.OffsetCell(Grid.PosToCell(base.gameObject), new CellOffset(-this.maxThreatDistance / 2, -this.maxThreatDistance / 2));
 			bool flag = this.WillEngageNonEssentialTargets();
 			List<ScenePartitionerEntry> list = GameScenePartitioner.Instance.ReserveList();
-			GameScenePartitioner.Instance.GatherEntries(Grid.CellToXY(num).x, Grid.CellToXY(num).y, this.maxThreatDistance, this.maxThreatDistance, mask, list);
+			GameScenePartitioner.Instance.GatherEntries(Grid.CellToXY(num).x, Grid.CellToXY(num).y, this.maxThreatDistance, this.maxThreatDistance, GameScenePartitioner.Instance.attackableEntitiesLayer, list);
 			for (int i = 0; i < list.Count; i++)
 			{
 				ScenePartitionerEntry scenePartitionerEntry = list[i];
@@ -315,13 +320,16 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 							{
 								if (factionAlignment.CheckAlignmentActive)
 								{
-									if (flag && this.alignment.Alignment == FactionManager.FactionID.Duplicant && factionAlignment.targeted)
+									if (this.alignment.Alignment != FactionManager.FactionID.Duplicant || factionAlignment.targeted)
 									{
-										this.threats.Add(factionAlignment);
-									}
-									else if (FactionManager.Instance.GetDisposition(this.alignment.Alignment, factionAlignment.Alignment) == FactionManager.Disposition.Attack)
-									{
-										this.threats.Add(factionAlignment);
+										if (flag && this.alignment.Alignment == FactionManager.FactionID.Duplicant && factionAlignment.targeted)
+										{
+											this.threats.Add(factionAlignment);
+										}
+										else if (FactionManager.Instance.GetDisposition(this.alignment.Alignment, factionAlignment.Alignment) == FactionManager.Disposition.Attack)
+										{
+											this.threats.Add(factionAlignment);
+										}
 									}
 								}
 							}

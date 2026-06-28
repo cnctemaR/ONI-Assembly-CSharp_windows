@@ -42,6 +42,8 @@ public class GlobalResources : ScriptableObject
 	[EventRef]
 	public string WallDamageLayerSound;
 
+	public Sprite sadDupeAudio;
+
 	public Sprite sadDupe;
 
 	private static GlobalResources _Instance;

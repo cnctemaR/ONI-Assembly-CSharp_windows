@@ -28,7 +28,7 @@ public class UglyCryChore : Chore<UglyCryChore.StatesInstance>
 				return;
 			}
 			int num = Grid.PosToCell(base.smi.master.gameObject);
-			SimMessages.AddRemoveSubstance(num, SimHashes.Water, CellEventLogger.Instance.Tears, 1f * STRESS.TEARS_RATE * dt, this.bodyTemperature.value, -1);
+			SimMessages.AddRemoveSubstance(num, SimHashes.Water, CellEventLogger.Instance.Tears, 1f * STRESS.TEARS_RATE * dt, this.bodyTemperature.value, byte.MaxValue, 0, -1);
 		}
 
 		private AmountInstance bodyTemperature;

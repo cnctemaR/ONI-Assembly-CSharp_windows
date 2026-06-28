@@ -16,7 +16,7 @@ public class AlgaeDistillery : StateMachineComponent<AlgaeDistillery.StatesInsta
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		if (this.hasMeter)
 		{
-			this.meter = new MeterController(component, "U2H_meter_target", "meter", Meter.Offset.Behind, new Vector3(-0.4f, 0.5f, -0.1f), new Vector3(0f, 0f, 0f), new string[] { "U2H_meter_target", "U2H_meter_tank", "U2H_meter_waterbody", "U2H_meter_level" });
+			this.meter = new MeterController(component, "U2H_meter_target", "meter", Meter.Offset.Behind, new Vector3(-0.4f, 0.5f, -0.1f), new string[] { "U2H_meter_target", "U2H_meter_tank", "U2H_meter_waterbody", "U2H_meter_level" });
 		}
 		base.smi.StartSM();
 	}

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using Klei.AI;
+using Klei;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -54,6 +54,7 @@ public class Constructable : Workable, ISaveLoadable
 	{
 		float num = 0f;
 		float num2 = 0f;
+		SimUtil.DiseaseInfo accumulatedDisease = SimUtil.DiseaseInfo.Invalid;
 		foreach (GameObject gameObject in this.storage.items)
 		{
 			if (!(gameObject == null))
@@ -63,6 +64,7 @@ public class Constructable : Workable, ISaveLoadable
 				{
 					num += component.Mass;
 					num2 += component.Temperature * component.Mass;
+					accumulatedDisease = SimUtil.CalculateFinalDiseaseInfo(component.DiseaseIdx, component.DiseaseCount, accumulatedDisease.idx, accumulatedDisease.count);
 				}
 			}
 		}
@@ -92,7 +94,7 @@ public class Constructable : Workable, ISaveLoadable
 					{
 						if (this != null && this.gameObject != null)
 						{
-							this.FinishConstruction(connections);
+							this.FinishConstruction(connections, accumulatedDisease);
 						}
 					});
 				}
@@ -109,13 +111,13 @@ public class Constructable : Workable, ISaveLoadable
 					{
 						component5.onCleanUp += delegate
 						{
-							this.FinishConstruction(connections);
+							this.FinishConstruction(connections, accumulatedDisease);
 						};
 					}
 					else
 					{
 						global::Debug.LogWarning("Why am I trying to replace a: " + gameObject2.name, null);
-						this.FinishConstruction(connections);
+						this.FinishConstruction(connections, accumulatedDisease);
 					}
 				}
 				KAnimGraphTileVisualizer component6 = gameObject2.GetComponent<KAnimGraphTileVisualizer>();
@@ -128,36 +130,37 @@ public class Constructable : Workable, ISaveLoadable
 		}
 		else
 		{
-			this.FinishConstruction(connections);
+			this.FinishConstruction(connections, accumulatedDisease);
 		}
 		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Building, base.GetComponent<KSelectable>().GetName(), this.transform, 1.5f, false);
-		worker.GetComponent<Effects>().Add("DirtyHands", true);
 	}
 
-	private void FinishConstruction(UtilityConnections connections)
+	private void FinishConstruction(UtilityConnections connections, SimUtil.DiseaseInfo diseaseInfo)
 	{
 		Rotatable component = base.GetComponent<Rotatable>();
 		Orientation orientation = ((!(component != null)) ? Orientation.Neutral : component.GetOrientation());
 		int num = Grid.PosToCell(this.transform.localPosition);
-		GameObject gameObject = this.building.Def.Build(num, orientation, this.storage, this.selectedElements, this.isRelocating);
-		gameObject.GetComponent<PrimaryElement>().Temperature = this.initialTemperature;
+		GameObject gameObject = this.building.Def.Build(num, orientation, this.storage, this.selectedElements, this.isRelocating, true);
+		PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
+		component2.Temperature = this.initialTemperature;
+		component2.AddDisease(diseaseInfo.idx, diseaseInfo.count, "Constructable.FinishConstruction");
 		gameObject.transform.rotation = this.transform.rotation;
-		Rotatable component2 = gameObject.GetComponent<Rotatable>();
-		if (component2 != null)
-		{
-			component2.SetOrientation(orientation);
-		}
-		KAnimGraphTileVisualizer component3 = base.GetComponent<KAnimGraphTileVisualizer>();
+		Rotatable component3 = gameObject.GetComponent<Rotatable>();
 		if (component3 != null)
 		{
-			KAnimGraphTileVisualizer component4 = gameObject.GetComponent<KAnimGraphTileVisualizer>();
-			component4.Connections = connections;
-			component3.skipCleanup = true;
+			component3.SetOrientation(orientation);
 		}
-		KSelectable component5 = base.GetComponent<KSelectable>();
-		if (component5 != null && component5.IsSelected && gameObject.GetComponent<KSelectable>() != null)
+		KAnimGraphTileVisualizer component4 = base.GetComponent<KAnimGraphTileVisualizer>();
+		if (component4 != null)
 		{
-			component5.Unselect();
+			KAnimGraphTileVisualizer component5 = gameObject.GetComponent<KAnimGraphTileVisualizer>();
+			component5.Connections = connections;
+			component4.skipCleanup = true;
+		}
+		KSelectable component6 = base.GetComponent<KSelectable>();
+		if (component6 != null && component6.IsSelected && gameObject.GetComponent<KSelectable>() != null)
+		{
+			component6.Unselect();
 			if (PlayerController.Instance.ActiveTool.name == "SelectTool")
 			{
 				((SelectTool)PlayerController.Instance.ActiveTool).SelectNextFrame(gameObject.GetComponent<KSelectable>(), false);
@@ -189,6 +192,7 @@ public class Constructable : Workable, ISaveLoadable
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Building;
 		this.workingStatusItem = null;
 		this.attributeConverter = Db.Get().AttributeConverters.ConstructionSpeed;
+		Prioritizable.AddRef(base.gameObject);
 		this.storage.choreType = Db.Get().ChoreTypes.BuildFetch;
 		this.choreType = Db.Get().ChoreTypes.Build;
 	}
@@ -211,7 +215,7 @@ public class Constructable : Workable, ISaveLoadable
 		primaryElement.Temperature = num;
 		foreach (Recipe.Ingredient ingredient in this.Recipe.GetAllIngredients(this.selectedElements))
 		{
-			this.fetchList.Add(ingredient.tag, ingredient.amount, FetchOrder2.OperationalRequirement.None);
+			this.fetchList.Add(ingredient.tag, null, ingredient.amount, FetchOrder2.OperationalRequirement.None);
 			MaterialNeeds.Instance.UpdateNeed(ingredient.tag, ingredient.amount);
 		}
 		if (!this.building.Def.IsTilePiece)
@@ -257,7 +261,6 @@ public class Constructable : Workable, ISaveLoadable
 		Prioritizable prioritizable = component2;
 		prioritizable.onPriorityChanged = (Action<int>)Delegate.Combine(prioritizable.onPriorityChanged, new Action<int>(this.OnPriorityChanged));
 		this.OnPriorityChanged(component2.GetMasterPriority());
-		Components.Constructables.Add(this);
 	}
 
 	private void OnPriorityChanged(int priority)
@@ -350,10 +353,15 @@ public class Constructable : Workable, ISaveLoadable
 				World.Instance.blockTileRenderer.RemoveBlock(this.building.Def, SimHashes.Void, num);
 			}
 		}
-		if (this.partitionerEntry != null)
+		if (this.solidPartitionerEntry != null)
 		{
-			this.partitionerEntry.Release();
-			this.partitionerEntry = null;
+			this.solidPartitionerEntry.Release();
+			this.solidPartitionerEntry = null;
+		}
+		if (this.digPartitionerEntry != null)
+		{
+			this.digPartitionerEntry.Release();
+			this.digPartitionerEntry = null;
 		}
 		SaveLoadRoot component = base.GetComponent<SaveLoadRoot>();
 		if (component != null)
@@ -372,9 +380,42 @@ public class Constructable : Workable, ISaveLoadable
 		{
 			this.fetchList.Cancel("Constructable destroyed");
 		}
-		Components.Constructables.Remove(this);
 		this.UnmarkArea();
 		base.OnCleanUp();
+	}
+
+	private void OnDiggableReachabilityChanged(object data)
+	{
+		if (!this.IsReplacementTile)
+		{
+			int diggable_count = 0;
+			int unreachable_count = 0;
+			this.building.RunOnArea(delegate(int offset_cell)
+			{
+				Diggable diggable = Diggable.GetDiggable(offset_cell);
+				if (diggable != null)
+				{
+					diggable_count++;
+					if (!diggable.GetComponent<KPrefabID>().HasTag(GameTags.Reachable))
+					{
+						unreachable_count++;
+					}
+				}
+			});
+			bool flag = unreachable_count > 0 && unreachable_count == diggable_count;
+			if (flag != this.hasUnreachableDigs)
+			{
+				if (flag)
+				{
+					base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.ConstructableDigUnreachable, null);
+				}
+				else
+				{
+					base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ConstructableDigUnreachable, false);
+				}
+				this.hasUnreachableDigs = flag;
+			}
+		}
 	}
 
 	private void PlaceDiggables()
@@ -393,6 +434,12 @@ public class Constructable : Workable, ISaveLoadable
 					{
 						diggable = GameUtil.KInstantiate(EntityPrefabs.Instance.DigPlacer, Grid.SceneLayer.Move, Folder.Placers, null, 0).GetComponent<Diggable>();
 						diggable.transform.SetPosition(Grid.CellToPosCBC(offset_cell, Grid.SceneLayer.Move));
+						diggable.Subscribe(-1432940121, new Action<object>(this.OnDiggableReachabilityChanged));
+					}
+					else
+					{
+						diggable.Unsubscribe(-1432940121, new Action<object>(this.OnDiggableReachabilityChanged));
+						diggable.Subscribe(-1432940121, new Action<object>(this.OnDiggableReachabilityChanged));
 					}
 					diggable.SetChoreType(Db.Get().ChoreTypes.BuildDig);
 					diggable.GetComponent<Prioritizable>().SetMasterPriority(masterPriority);
@@ -404,6 +451,7 @@ public class Constructable : Workable, ISaveLoadable
 					}
 				}
 			});
+			this.OnDiggableReachabilityChanged(null);
 		}
 		bool flag = this.building.Def.IsValidBuildLocation(this.transform.position, this.building.Orientation);
 		if (flag)
@@ -420,7 +468,7 @@ public class Constructable : Workable, ISaveLoadable
 		{
 			Action<Chore> action = new Action<Chore>(this.UpdateBuildState);
 			Action<Chore> action2 = new Action<Chore>(this.UpdateBuildState);
-			this.buildChore = new WorkChore<Constructable>(this.choreType, this, null, true, action, action2, new Action<Chore>(this.UpdateBuildState), true, null, true, default(Tag), null, false, true);
+			this.buildChore = new WorkChore<Constructable>(this.choreType, this, null, true, action, action2, new Action<Chore>(this.UpdateBuildState), true, null, true, default(Tag), null, true, true, true);
 			this.UpdateBuildState(this.buildChore);
 		}
 		else if (!flag2 && this.buildChore != null)
@@ -434,7 +482,8 @@ public class Constructable : Workable, ISaveLoadable
 	{
 		this.PlaceDiggables();
 		Extents validPlacementExtents = this.building.GetValidPlacementExtents();
-		this.partitionerEntry = GameScenePartitioner.Instance.Add("Constructable.OnFetchListComplete", base.gameObject, validPlacementExtents, GameScenePartitioner.Instance.digDestroyedMask.mask | GameScenePartitioner.Instance.solidChangedMask.mask, new Action<object>(this.OnSolidChangedOrDigDestroyed));
+		this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Constructable.OnFetchListComplete", base.gameObject, validPlacementExtents, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChangedOrDigDestroyed));
+		this.digPartitionerEntry = GameScenePartitioner.Instance.Add("Constructable.OnFetchListComplete", base.gameObject, validPlacementExtents, GameScenePartitioner.Instance.digDestroyedLayer, new Action<object>(this.OnSolidChangedOrDigDestroyed));
 		this.fetchList = null;
 		this.ClearMaterialNeeds();
 	}
@@ -583,6 +632,8 @@ public class Constructable : Workable, ISaveLoadable
 
 	private bool materialNeedsCleared;
 
+	private bool hasUnreachableDigs;
+
 	[Serialize]
 	private Ref<Relocatable> source = new Ref<Relocatable>();
 
@@ -594,7 +645,9 @@ public class Constructable : Workable, ISaveLoadable
 	[Serialize]
 	public bool IsReplacementTile;
 
-	private GameScenePartitionerEntry partitionerEntry;
+	private GameScenePartitionerEntry solidPartitionerEntry;
+
+	private GameScenePartitionerEntry digPartitionerEntry;
 
 	private LoggerFSS log = new LoggerFSS("Constructable");
 

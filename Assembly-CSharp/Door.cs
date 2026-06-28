@@ -4,7 +4,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Door : BuildingWorkable, ISaveLoadable
+public class Door : Workable, ISaveLoadable
 {
 	public Door()
 	{
@@ -56,13 +56,17 @@ public class Door : BuildingWorkable, ISaveLoadable
 		}
 		this.controller = new Door.Controller.Instance(this);
 		this.controller.StartSM();
+		if (this.doorType == Door.DoorType.Sealed && !this.hasBeenUnsealed)
+		{
+			this.Seal();
+		}
 		this.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 		this.Subscribe(824508782, new Action<object>(this.OnOperationalChanged));
 		StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
 		HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
 		structureTemperatures.Disable(handle);
-		Components.Doors.Add(this);
 		Game.Instance.roomProber.AddDoor(this);
+		this.requestedState = this.CurrentState;
 		this.RefreshControlState();
 		this.OnOperationalChanged(null);
 		this.collisionCollider = base.GetComponent<BoxCollider2D>();
@@ -135,7 +139,6 @@ public class Door : BuildingWorkable, ISaveLoadable
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
-		Components.Doors.Remove(this);
 		this.UpdateDoorState(true);
 		List<int> list = new List<int>();
 		foreach (int num in this.building.PlacementCells)
@@ -143,7 +146,7 @@ public class Door : BuildingWorkable, ISaveLoadable
 			SimMessages.ClearCellProperties(num, 4);
 			Grid.RenderedByWorld[num] = Grid.Element[num].substance.renderedByWorld;
 			Grid.FakeFloor[num] = false;
-			SimMessages.ReplaceAndDisplaceElement(num, SimHashes.Vacuum, CellEventLogger.Instance.DoorOpen, 0f, -1f, -1);
+			SimMessages.ReplaceAndDisplaceElement(num, SimHashes.Vacuum, CellEventLogger.Instance.DoorOpen, 0f, -1f, byte.MaxValue, 0, -1);
 			Pathfinding.Instance.AddDirtyNavGridCell(num);
 			if (this.rotatable.IsRotated)
 			{
@@ -177,6 +180,24 @@ public class Door : BuildingWorkable, ISaveLoadable
 			Grid.Impassable[num3] = false;
 			Pathfinding.Instance.AddDirtyNavGridCell(num3);
 		}
+	}
+
+	public bool isSealed
+	{
+		get
+		{
+			return this.controller.sm.isSealed.Get(this.controller);
+		}
+	}
+
+	public void Seal()
+	{
+		this.controller.sm.isSealed.Set(true, this.controller);
+	}
+
+	public void OrderUnseal()
+	{
+		this.controller.GoTo(this.controller.sm.Sealed.awaiting_unlock);
 	}
 
 	private void RefreshControlState()
@@ -235,20 +256,21 @@ public class Door : BuildingWorkable, ISaveLoadable
 			{
 			case Door.DoorType.Pressure:
 			case Door.DoorType.ManualPressure:
+			case Door.DoorType.Sealed:
 			{
 				Game.Instance.SetForceField(num2, flag2, flag3);
 				World.Instance.groundRenderer.MarkDirty(num2);
-				HandleVector<Game.CallbackInfo>.Handle handle = HandleVector<Game.CallbackInfo>.InvalidHandle;
+				HandleVector<Game.CallbackInfo>.Handle invalidHandle = HandleVector<Game.CallbackInfo>.InvalidHandle;
 				if (flag)
 				{
-					handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorOpened), false), "SimDoorOpened");
-					SimMessages.ReplaceElement(num2, SimHashes.Vacuum, CellEventLogger.Instance.DoorOpen, 0f, -1f, handle.index);
+					int num3 = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorOpened), false)).index;
+					SimMessages.ReplaceElement(num2, SimHashes.Vacuum, CellEventLogger.Instance.DoorOpen, 0f, -1f, byte.MaxValue, 0, num3);
 				}
 				else
 				{
 					PrimaryElement component = base.GetComponent<PrimaryElement>();
-					handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorClosed), false), "SimDoorClosed");
-					SimMessages.ReplaceAndDisplaceElement(num2, SimHashes.SteelDoor, CellEventLogger.Instance.DoorClose, 400f, component.Temperature, handle.index);
+					int num3 = Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorClosed), false)).index;
+					SimMessages.ReplaceAndDisplaceElement(num2, SimHashes.SteelDoor, CellEventLogger.Instance.DoorClose, 400f, component.Temperature, byte.MaxValue, 0, num3);
 				}
 				break;
 			}
@@ -307,7 +329,7 @@ public class Door : BuildingWorkable, ISaveLoadable
 				this.changeStateChore.Cancel("Change state");
 			}
 			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.ChangeDoorControlState, this);
-			this.changeStateChore = new WorkChore<Door>(Db.Get().ChoreTypes.Toggle, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true);
+			this.changeStateChore = new WorkChore<Door>(Db.Get().ChoreTypes.Toggle, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true);
 		}
 	}
 
@@ -456,6 +478,9 @@ public class Door : BuildingWorkable, ISaveLoadable
 	public float unpoweredAnimSpeed = 0.25f;
 
 	[Serialize]
+	private bool hasBeenUnsealed;
+
+	[Serialize]
 	private Door.ControlState controlState;
 
 	private Door.ControlState requestedState;
@@ -475,7 +500,8 @@ public class Door : BuildingWorkable, ISaveLoadable
 	{
 		Pressure,
 		ManualPressure,
-		Internal
+		Internal,
+		Sealed
 	}
 
 	public enum ControlState
@@ -490,11 +516,12 @@ public class Door : BuildingWorkable, ISaveLoadable
 	{
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
+			base.serializable = true;
 			default_state = this.closed;
 			this.root.ToggleSchedulePeriodic("RefreshIsBlocked", 0.25f, delegate(Door.Controller.Instance smi)
 			{
 				smi.RefreshIsBlocked();
-			});
+			}).ParamTransition<bool>(this.isSealed, this.Sealed.closed, (Door.Controller.Instance smi, bool p) => p);
 			this.closeblocked.PlayAnim("open", KAnim.PlayMode.Once, null).ParamTransition<bool>(this.isOpen, this.open, (Door.Controller.Instance smi, bool p) => p).ParamTransition<bool>(this.isBlocked, this.closedelay, (Door.Controller.Instance smi, bool p) => !p);
 			this.closedelay.PlayAnim("open", KAnim.PlayMode.Once, null).ScheduleGoTo(0.5f, this.closing).ParamTransition<bool>(this.isOpen, this.open, (Door.Controller.Instance smi, bool p) => p)
 				.ParamTransition<bool>(this.isBlocked, this.closeblocked, (Door.Controller.Instance smi, bool p) => p);
@@ -512,6 +539,53 @@ public class Door : BuildingWorkable, ISaveLoadable
 			this.locked.PlayAnim("locked", KAnim.PlayMode.Once, null).ParamTransition<bool>(this.isLocked, this.unlocking, (Door.Controller.Instance smi, bool p) => !p);
 			this.unlocking.PlayAnim("locked_pst", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.closed);
 			this.opening.PlayAnim("opening", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.open);
+			this.Sealed.Enter(delegate(Door.Controller.Instance smi)
+			{
+				OccupyArea component = smi.master.GetComponent<OccupyArea>();
+				for (int i = 0; i < component.OccupiedCellsOffsets.Length; i++)
+				{
+					Grid.PreventFogOfWarReveal[Grid.OffsetCell(Grid.PosToCell(smi.master.gameObject), component.OccupiedCellsOffsets[i])] = false;
+				}
+				smi.sm.isLocked.Set(true, smi);
+				smi.master.controlState = Door.ControlState.Closed;
+				smi.master.RefreshControlState();
+				if (smi.master.GetComponent<Unsealable>().facingRight)
+				{
+					KBatchedAnimController component2 = smi.master.GetComponent<KBatchedAnimController>();
+					component2.FlipX = true;
+				}
+			}).Enter("SetWorldStateClosed", delegate(Door.Controller.Instance smi)
+			{
+				smi.master.SetWorldState();
+			}).Exit(delegate(Door.Controller.Instance smi)
+			{
+				smi.sm.isLocked.Set(false, smi);
+				smi.master.GetComponent<AccessControl>().controlEnabled = true;
+				smi.master.controlState = Door.ControlState.Opened;
+				smi.master.RefreshControlState();
+				smi.sm.isOpen.Set(true, smi);
+				smi.sm.isLocked.Set(false, smi);
+				smi.sm.isSealed.Set(false, smi);
+			});
+			this.Sealed.closed.PlayAnim("sealed", KAnim.PlayMode.Once, null);
+			this.Sealed.awaiting_unlock.ToggleChore((Door.Controller.Instance smi) => this.CreateUnsealChore(smi, true), this.Sealed.chore_pst);
+			this.Sealed.chore_pst.Enter(delegate(Door.Controller.Instance smi)
+			{
+				smi.master.hasBeenUnsealed = true;
+				if (smi.master.GetComponent<Unsealable>().unsealed)
+				{
+					smi.GoTo(this.opening);
+				}
+				else
+				{
+					smi.GoTo(this.Sealed.closed);
+				}
+			});
+		}
+
+		private Chore CreateUnsealChore(Door.Controller.Instance smi, bool approach_right)
+		{
+			return new WorkChore<Unsealable>(Db.Get().ChoreTypes.Toggle, smi.master, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true);
 		}
 
 		public GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.State open;
@@ -532,11 +606,33 @@ public class Door : BuildingWorkable, ISaveLoadable
 
 		public GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.State unlocking;
 
+		public Door.Controller.SealedStates Sealed;
+
 		public StateMachine<Door.Controller, Door.Controller.Instance, Door, object>.BoolParameter isOpen;
 
 		public StateMachine<Door.Controller, Door.Controller.Instance, Door, object>.BoolParameter isLocked;
 
 		public StateMachine<Door.Controller, Door.Controller.Instance, Door, object>.BoolParameter isBlocked;
+
+		public StateMachine<Door.Controller, Door.Controller.Instance, Door, object>.BoolParameter isSealed;
+
+		public StateMachine<Door.Controller, Door.Controller.Instance, Door, object>.BoolParameter sealDirectionRight;
+
+		public class SealedStates : GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.State
+		{
+			public GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.State closed;
+
+			public Door.Controller.SealedStates.AwaitingUnlock awaiting_unlock;
+
+			public GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.State chore_pst;
+
+			public class AwaitingUnlock : GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.State
+			{
+				public GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.State awaiting_arrival;
+
+				public GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.State unlocking;
+			}
+		}
 
 		public new class Instance : GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.GameInstance
 		{

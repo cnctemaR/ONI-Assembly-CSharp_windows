@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Klei.AI
@@ -6,50 +7,87 @@ namespace Klei.AI
 	public class PutridOdour : Disease
 	{
 		public PutridOdour()
-			: base("PutridOdour", 0.00083333335f, 900f, null)
+			: base("PutridOdour", Disease.DiseaseType.Ailment, Disease.Severity.Minor, 0.005f, new List<Disease.InfectionVector> { Disease.InfectionVector.Inhalation }, 900f, 1, new Disease.RangeInfo(283.15f, 293.15f, 363.15f, 373.15f), new Disease.RangeInfo(10f, 1200f, 1200f, 10f), new Disease.RangeInfo(0f, 0f, 1000f, 1000f), Disease.RangeInfo.Idempotent())
 		{
+			base.AddDiseaseComponent(new CommonSickEffectDisease());
+			base.AddDiseaseComponent(new PutridOdour.PutridOdourComponent());
 		}
 
-		protected override object OnInfect(GameObject go)
+		protected override void PopulateElemGrowthInfo()
 		{
-			PutridOdour.InstanceData instanceData = default(PutridOdour.InstanceData);
-			instanceData.schedulerHandle = GameScheduler.Instance.SchedulePeriodic("PutridOdourEmit", 5f, new Action<object>(this.Emit), go, null, 0f, null);
-			KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("odor_fx_kanim", go.transform.position, go.transform, true, Grid.SceneLayer.Front);
-			kbatchedAnimController.Play(PutridOdour.WorkLoopAnims, KAnim.PlayMode.Loop);
-			instanceData.controller = kbatchedAnimController;
-			this.Emit(go);
-			return instanceData;
-		}
-
-		protected override void OnCure(GameObject go, object instance_data)
-		{
-			PutridOdour.InstanceData instanceData = (PutridOdour.InstanceData)instance_data;
-			KAnimControllerBase controller = instanceData.controller;
-			controller.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
-			controller.destroyOnAnimComplete = true;
-			instanceData.schedulerHandle.Clear();
-		}
-
-		private void Emit(object data)
-		{
-			GameObject gameObject = (GameObject)data;
-			Components.Cmps<MinionIdentity> liveMinionIdentities = Components.LiveMinionIdentities;
-			Vector2 vector = gameObject.transform.position;
-			for (int i = 0; i < liveMinionIdentities.Count; i++)
+			base.InitializeElemGrowthArray(ref this.elemGrowthInfo, Disease.DEFAULT_GROWTH_INFO);
+			base.AddGrowthRule(new Disease.GrowthRule
 			{
-				MinionIdentity minionIdentity = liveMinionIdentities[i];
-				if (minionIdentity.gameObject != gameObject.gameObject)
-				{
-					Vector2 vector2 = minionIdentity.transform.position;
-					float num = Vector2.SqrMagnitude(vector - vector2);
-					if (num <= 2.25f)
-					{
-						minionIdentity.Trigger(508119890, Strings.Get("STRINGS.DUPLICANTS.DISEASES.PUTRIDODOUR.CRINGE_EFFECT").String);
-						minionIdentity.GetComponent<Effects>().Add("SmelledPutridOdour", true);
-						minionIdentity.gameObject.GetSMI<ThoughtGraph.Instance>().AddThought(Db.Get().Thoughts.PutridOdour);
-					}
-				}
-			}
+				underPopulationDeathRate = new float?(2.6666667f),
+				minCount = new int?(100),
+				populationHalfLife = new float?(12000f),
+				maxCount = new int?(1000000),
+				overPopulationHalfLife = new float?(3000f),
+				minDiffusionCount = new int?(1000),
+				diffusionScale = new float?(0.001f),
+				minDiffusionInfestationTickCount = 1
+			});
+			base.AddGrowthRule(new Disease.StateGrowthRule(Element.State.Solid)
+			{
+				populationHalfLife = new float?(12000f),
+				overPopulationHalfLife = new float?(6000f),
+				minDiffusionCount = new int?(1000000)
+			});
+			base.AddGrowthRule(new Disease.ElementGrowthRule(SimHashes.SlimeMold)
+			{
+				populationHalfLife = new float?(float.PositiveInfinity),
+				overPopulationHalfLife = new float?(12000f),
+				maxCount = new int?(10000000),
+				diffusionScale = new float?(0.05f)
+			});
+			base.AddGrowthRule(new Disease.StateGrowthRule(Element.State.Gas)
+			{
+				populationHalfLife = new float?(12000f),
+				overPopulationHalfLife = new float?(6000f),
+				diffusionScale = new float?(0.2f)
+			});
+			base.AddGrowthRule(new Disease.ElementGrowthRule(SimHashes.ContaminatedOxygen)
+			{
+				populationHalfLife = new float?(float.PositiveInfinity),
+				overPopulationHalfLife = new float?(12000f),
+				maxCount = new int?(10000000)
+			});
+			base.AddGrowthRule(new Disease.ElementGrowthRule(SimHashes.ChlorineGas)
+			{
+				populationHalfLife = new float?(10f),
+				overPopulationHalfLife = new float?(10f),
+				minDiffusionCount = new int?(100000),
+				diffusionScale = new float?(0.001f)
+			});
+			base.AddGrowthRule(new Disease.StateGrowthRule(Element.State.Liquid)
+			{
+				populationHalfLife = new float?(1200f),
+				overPopulationHalfLife = new float?(300f),
+				maxCount = new int?(100000),
+				diffusionScale = new float?(0.01f)
+			});
+			base.InitializeElemGrowthArray(ref this.elemExposureInfo, Disease.DEFAULT_GROWTH_INFO);
+			base.AddExposureRule(new Disease.GrowthRule
+			{
+				underPopulationDeathRate = new float?(float.PositiveInfinity),
+				minCount = new int?(100),
+				populationHalfLife = new float?(float.PositiveInfinity),
+				maxCount = new int?(1000000),
+				overPopulationHalfLife = new float?(float.PositiveInfinity)
+			});
+			base.AddExposureRule(new Disease.ElementGrowthRule(SimHashes.DirtyWater)
+			{
+				populationHalfLife = new float?(-12000f)
+			});
+			base.AddExposureRule(new Disease.ElementGrowthRule(SimHashes.ContaminatedOxygen)
+			{
+				populationHalfLife = new float?(-12000f)
+			});
+			base.AddExposureRule(new Disease.ElementGrowthRule(SimHashes.ChlorineGas)
+			{
+				populationHalfLife = new float?(10f),
+				overPopulationHalfLife = new float?(10f)
+			});
 		}
 
 		private const float EmitInterval = 5f;
@@ -58,13 +96,60 @@ namespace Klei.AI
 
 		private const float MaxDistanceSq = 2.25f;
 
-		private static readonly HashedString[] WorkLoopAnims = new HashedString[] { "working_pre", "working_loop" };
+		public const string ID = "PutridOdour";
 
-		private struct InstanceData
+		public class PutridOdourComponent : Disease.DiseaseComponent
 		{
-			public SchedulerHandle schedulerHandle;
+			public override object OnInfect(GameObject go, DiseaseInstance diseaseInstance)
+			{
+				PutridOdour.PutridOdourComponent.InstanceData instanceData = default(PutridOdour.PutridOdourComponent.InstanceData);
+				instanceData.schedulerHandle = GameScheduler.Instance.SchedulePeriodic("PutridOdourEmit", 5f, new Action<object>(this.Emit), go, null, 0f, null);
+				KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("odor_fx_kanim", go.transform.position, go.transform, true, Grid.SceneLayer.Front, false);
+				kbatchedAnimController.Play(PutridOdour.PutridOdourComponent.WorkLoopAnims, KAnim.PlayMode.Loop);
+				instanceData.controller = kbatchedAnimController;
+				this.Emit(go);
+				return instanceData;
+			}
 
-			public KAnimControllerBase controller;
+			public override void OnCure(GameObject go, object instance_data)
+			{
+				PutridOdour.PutridOdourComponent.InstanceData instanceData = (PutridOdour.PutridOdourComponent.InstanceData)instance_data;
+				KAnimControllerBase controller = instanceData.controller;
+				controller.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
+				controller.destroyOnAnimComplete = true;
+				instanceData.schedulerHandle.ClearScheduler();
+			}
+
+			private void Emit(object data)
+			{
+				GameObject gameObject = (GameObject)data;
+				Components.Cmps<MinionIdentity> liveMinionIdentities = Components.LiveMinionIdentities;
+				Vector2 vector = gameObject.transform.position;
+				for (int i = 0; i < liveMinionIdentities.Count; i++)
+				{
+					MinionIdentity minionIdentity = liveMinionIdentities[i];
+					if (minionIdentity.gameObject != gameObject.gameObject)
+					{
+						Vector2 vector2 = minionIdentity.transform.position;
+						float num = Vector2.SqrMagnitude(vector - vector2);
+						if (num <= 2.25f)
+						{
+							minionIdentity.Trigger(508119890, Strings.Get("STRINGS.DUPLICANTS.DISEASES.PUTRIDODOUR.CRINGE_EFFECT").String);
+							minionIdentity.GetComponent<Effects>().Add("SmelledPutridOdour", true);
+							minionIdentity.gameObject.GetSMI<ThoughtGraph.Instance>().AddThought(Db.Get().Thoughts.PutridOdour);
+						}
+					}
+				}
+			}
+
+			private static readonly HashedString[] WorkLoopAnims = new HashedString[] { "working_pre", "working_loop" };
+
+			private struct InstanceData
+			{
+				public SchedulerHandle schedulerHandle;
+
+				public KAnimControllerBase controller;
+			}
 		}
 	}
 }

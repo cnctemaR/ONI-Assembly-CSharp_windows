@@ -76,6 +76,12 @@ public class GlobalChoreProvider : ChoreProvider
 		}
 	}
 
+	protected override void OnLoadLevel()
+	{
+		base.OnLoadLevel();
+		GlobalChoreProvider.Instance = null;
+	}
+
 	public static GlobalChoreProvider Instance;
 
 	public List<FetchChore> fetchChores = new List<FetchChore>();

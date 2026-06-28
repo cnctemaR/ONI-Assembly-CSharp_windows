@@ -21,7 +21,7 @@ public static class NotificationExtensions
 			if (countNames)
 			{
 				string text2 = text;
-				text = string.Concat(new object[] { text2, "\n", keyValuePair.Key, " (", keyValuePair.Value, ")" });
+				text = string.Concat(new object[] { text2, "\n", keyValuePair.Key, "(", keyValuePair.Value, ")" });
 			}
 			else
 			{

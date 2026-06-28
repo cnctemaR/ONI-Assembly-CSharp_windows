@@ -70,7 +70,7 @@ public class ResourceRemainingDisplayScreen : KScreen
 			for (int i = 0; i < this.currentRecipe.Ingredients.Count; i++)
 			{
 				Element element = this.selected_elements[i];
-				Tag tag = TagManager.Create(element.id);
+				Tag tag = GameTagExtensions.Create(element.id);
 				float num = this.currentRecipe.Ingredients[i].amount * (float)this.numberOfPendingConstructions;
 				float num2 = WorldInventory.Instance.GetTotalAmount(tag) - WorldInventory.Instance.GetAmount(tag);
 				float num3 = WorldInventory.Instance.GetTotalAmount(tag) - (num2 + num);
@@ -84,9 +84,9 @@ public class ResourceRemainingDisplayScreen : KScreen
 					text2,
 					tag.ProperName(),
 					": ",
-					GameUtil.GetFormattedMass(num3, GameUtil.TimeSlice.None, true, "{0:0.#}"),
+					GameUtil.GetFormattedMass(num3, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"),
 					" / ",
-					GameUtil.GetFormattedMass(this.currentRecipe.Ingredients[i].amount, GameUtil.TimeSlice.None, true, "{0:0.#}")
+					GameUtil.GetFormattedMass(this.currentRecipe.Ingredients[i].amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")
 				});
 				if (i < this.selected_elements.Count - 1)
 				{

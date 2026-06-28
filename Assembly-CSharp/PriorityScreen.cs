@@ -30,12 +30,29 @@ public class PriorityScreen : KScreen
 		return list;
 	}
 
-	protected void SetScreenPriority(int priority)
+	public void SetScreenPriority(int priority, bool play_sound = false)
 	{
+		if (this.priority == priority)
+		{
+			return;
+		}
 		this.priority = priority;
 		foreach (PriorityButton priorityButton in this.buttons)
 		{
-			priorityButton.toggle.isOn = priority == priorityButton.priority;
+			bool flag = priority == priorityButton.priority;
+			if (flag)
+			{
+				priorityButton.toggle.Select();
+				if (play_sound)
+				{
+					priorityButton.toggle.soundPlayer.Play(0);
+				}
+			}
+		}
+		foreach (PriorityButton priorityButton2 in this.buttons)
+		{
+			bool flag2 = priority == priorityButton2.priority;
+			priorityButton2.toggle.isOn = flag2;
 		}
 	}
 

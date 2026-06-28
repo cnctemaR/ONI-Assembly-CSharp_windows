@@ -103,8 +103,13 @@ public class KMonoBehaviour : MonoBehaviour, ISaveLoadable, IStateMachineTarget
 	public void OnDestroy()
 	{
 		this.OnForcedCleanUp();
-		if (App.IsExiting || KMonoBehaviour.isLoadingScene)
+		if (App.IsExiting)
 		{
+			return;
+		}
+		if (KMonoBehaviour.isLoadingScene)
+		{
+			this.OnLoadLevel();
 			return;
 		}
 		if (KObjectManager.Instance != null)
@@ -193,6 +198,10 @@ public class KMonoBehaviour : MonoBehaviour, ISaveLoadable, IStateMachineTarget
 	}
 
 	protected virtual void OnForcedCleanUp()
+	{
+	}
+
+	protected virtual void OnLoadLevel()
 	{
 	}
 

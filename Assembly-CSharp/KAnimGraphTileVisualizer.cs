@@ -49,18 +49,18 @@ public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadable, IUtilityI
 	{
 		if (this.connectionManager != null && !this.skipCleanup)
 		{
+			this.skipRefresh = true;
 			int num = Grid.PosToCell(this.transform.position);
 			this.connectionManager.ClearCell(num, this.isPhysicalBuilding);
 			Building component = base.GetComponent<Building>();
 			TileVisualizer.RefreshCell(num, component.Def.TileLayer);
-			this.Refresh();
 		}
 	}
 
 	[ContextMenu("Refresh")]
 	public void Refresh()
 	{
-		if (this.connectionManager == null)
+		if (this.connectionManager == null || this.skipRefresh)
 		{
 			return;
 		}
@@ -173,6 +173,8 @@ public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadable, IUtilityI
 	public bool isPhysicalBuilding;
 
 	public bool skipCleanup;
+
+	public bool skipRefresh;
 
 	public KAnimGraphTileVisualizer.ConnectionSource connectionSource;
 

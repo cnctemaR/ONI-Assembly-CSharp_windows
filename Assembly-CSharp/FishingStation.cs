@@ -8,14 +8,12 @@ public class FishingStation : Harvestable
 		base.OnSpawn();
 		this.showProgressBar = false;
 		base.SetWorkTime(float.PositiveInfinity);
-		this.Subscribe(-1358696400, new Action<object>(this.DropLine));
-		this.Subscribe(-942831938, new Action<object>(this.StopWork));
 		int num = Grid.PosToCell(this.transform.position);
 		int num2 = Grid.CellLeft(num);
 		int num3 = Grid.CellRight(num);
 		this.faceTargetWhenWorking = false;
-		SimMessages.ReplaceElement(num2, this.primaryElement.ElementID, CellEventLogger.Instance.SimCellOccupierOnSpawn, this.primaryElement.Mass, Grid.Temperature[num2], -1);
-		SimMessages.ReplaceElement(num3, this.primaryElement.ElementID, CellEventLogger.Instance.SimCellOccupierOnSpawn, this.primaryElement.Mass, Grid.Temperature[num2], -1);
+		SimMessages.ReplaceElement(num2, this.primaryElement.ElementID, CellEventLogger.Instance.SimCellOccupierOnSpawn, this.primaryElement.Mass, Grid.Temperature[num2], Grid.Disease[num2].diseaseIdx, Grid.Disease[num2].elementCount, -1);
+		SimMessages.ReplaceElement(num3, this.primaryElement.ElementID, CellEventLogger.Instance.SimCellOccupierOnSpawn, this.primaryElement.Mass, Grid.Temperature[num3], Grid.Disease[num3].diseaseIdx, Grid.Disease[num3].elementCount, -1);
 		Grid.RenderedByWorld[num2] = false;
 		Grid.RenderedByWorld[num3] = false;
 		SimMessages.SetStrength(num2, 0, 1f);
@@ -117,10 +115,6 @@ public class FishingStation : Harvestable
 			this.workTimeRemaining = float.PositiveInfinity;
 			this.DropLine(null);
 		}
-		else
-		{
-			this.Trigger(-942831938, null);
-		}
 	}
 
 	protected override void OnCleanUp()
@@ -132,8 +126,8 @@ public class FishingStation : Harvestable
 		int num = Grid.PosToCell(this.transform.position);
 		int num2 = Grid.CellLeft(num);
 		int num3 = Grid.CellRight(num);
-		SimMessages.ReplaceElement(num2, SimHashes.Vacuum, CellEventLogger.Instance.SimCellOccupierDestroySelf, 0f, 0f, -1);
-		SimMessages.ReplaceElement(num3, SimHashes.Vacuum, CellEventLogger.Instance.SimCellOccupierDestroySelf, 0f, 0f, -1);
+		SimMessages.ReplaceElement(num2, SimHashes.Vacuum, CellEventLogger.Instance.SimCellOccupierDestroySelf, 0f, 0f, byte.MaxValue, 0, -1);
+		SimMessages.ReplaceElement(num3, SimHashes.Vacuum, CellEventLogger.Instance.SimCellOccupierDestroySelf, 0f, 0f, byte.MaxValue, 0, -1);
 		base.OnCleanUp();
 	}
 
@@ -152,7 +146,7 @@ public class FishingStation : Harvestable
 	{
 		if (this.chore == null)
 		{
-			this.chore = new WorkChore<FishingStation>(Db.Get().ChoreTypes.Harvest, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true);
+			this.chore = new WorkChore<FishingStation>(Db.Get().ChoreTypes.Harvest, this, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true);
 			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.PendingFish, null);
 		}
 		this.isMarkedForHarvest = true;
@@ -235,7 +229,6 @@ public class FishingStation : Harvestable
 
 	public void EmptyWater()
 	{
-		this.Trigger(-942831938, null);
 	}
 
 	private int LineRange = 7;

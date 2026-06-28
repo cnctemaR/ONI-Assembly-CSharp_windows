@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei.AI;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -30,7 +31,7 @@ public class Tutorial : KMonoBehaviour
 	{
 		if (this.tutorialMessagesRemaining.Count == 0)
 		{
-			for (int i = 0; i <= 11; i++)
+			for (int i = 0; i <= 14; i++)
 			{
 				this.tutorialMessagesRemaining.Add((Tutorial.TutorialMessages)i);
 			}
@@ -76,6 +77,13 @@ public class Tutorial : KMonoBehaviour
 			minTimeToNotify = 10f,
 			lastNotifyTime = 0f
 		});
+		List<Tutorial.Item> list7 = this.warningItems;
+		item = new Tutorial.Item();
+		item.notification = new Notification(MISC.NOTIFICATIONS.NO_MEDICAL_COTS.NAME, NotificationType.Bad, HashedString.Invalid, (List<Notification> n, object o) => MISC.NOTIFICATIONS.NO_MEDICAL_COTS.TOOLTIP, null, false, 0f, null, null, null);
+		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.EnoughMedicalCots);
+		item.minTimeToNotify = 10f;
+		item.lastNotifyTime = 0f;
+		list7.Add(item);
 	}
 
 	public void TutorialMessage(Tutorial.TutorialMessages tm)
@@ -120,6 +128,15 @@ public class Tutorial : KMonoBehaviour
 		case Tutorial.TutorialMessages.TM_OverheatingBuildings:
 			message = new GenericMessage(MISC.NOTIFICATIONS.TUTORIAL_OVERHEATING.NAME, MISC.NOTIFICATIONS.TUTORIAL_OVERHEATING.MESSAGEBODY, MISC.NOTIFICATIONS.TUTORIAL_OVERHEATING.TOOLTIP);
 			break;
+		case Tutorial.TutorialMessages.TM_LotsOfGerms:
+			message = new GenericMessage(MISC.NOTIFICATIONS.LOTS_OF_GERMS.NAME, MISC.NOTIFICATIONS.LOTS_OF_GERMS.MESSAGEBODY, MISC.NOTIFICATIONS.LOTS_OF_GERMS.TOOLTIP);
+			break;
+		case Tutorial.TutorialMessages.TM_BeingInfected:
+			message = new GenericMessage(MISC.NOTIFICATIONS.BEING_INFECTED.NAME, MISC.NOTIFICATIONS.BEING_INFECTED.MESSAGEBODY, MISC.NOTIFICATIONS.BEING_INFECTED.TOOLTIP);
+			break;
+		case Tutorial.TutorialMessages.TM_InfectedFood:
+			message = new GenericMessage(MISC.NOTIFICATIONS.INFECTED_FOOD.NAME, MISC.NOTIFICATIONS.INFECTED_FOOD.MESSAGEBODY, MISC.NOTIFICATIONS.INFECTED_FOOD.TOOLTIP);
+			break;
 		}
 		this.tutorialMessagesRemaining.Remove(tm);
 		Messenger.Instance.QueueMessage(message);
@@ -129,8 +146,8 @@ public class Tutorial : KMonoBehaviour
 	{
 		ReportManager.ReportEntry entry = ReportManager.Instance.TodaysReport.GetEntry(ReportManager.ReportType.OxygenCreated);
 		string text = MISC.NOTIFICATIONS.NEEDOXYGENSOURCE.TOOLTIP;
-		text = text.Replace("{EmittingRate}", GameUtil.GetFormattedMass(entry.Positive, GameUtil.TimeSlice.None, true, "{0:0.#}"));
-		return text.Replace("{ConsumptionRate}", GameUtil.GetFormattedMass(Mathf.Abs(entry.Negative), GameUtil.TimeSlice.None, true, "{0:0.#}"));
+		text = text.Replace("{EmittingRate}", GameUtil.GetFormattedMass(entry.Positive, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+		return text.Replace("{ConsumptionRate}", GameUtil.GetFormattedMass(Mathf.Abs(entry.Negative), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 	}
 
 	private string UnrefrigeratedFoodTooltip(List<Notification> notifications, object data)
@@ -262,12 +279,16 @@ public class Tutorial : KMonoBehaviour
 			}
 			for (int i = 0; i < pickupables.Count; i++)
 			{
-				if (pickupables[i].storage != null && (pickupables[i].storage.GetComponent<RationBox>() != null || pickupables[i].storage.GetComponent<Refrigerator>() != null) && !Rottable.IsRefrigerated(pickupables[i].gameObject) && Rottable.AtmosphereQuality(pickupables[i].gameObject) != Rottable.RotAtmosphereQuality.Sterilizing && pickupables[i].GetSMI<Rottable.Instance>() != null)
+				if (pickupables[i].storage != null && (pickupables[i].storage.GetComponent<RationBox>() != null || pickupables[i].storage.GetComponent<Refrigerator>() != null) && !Rottable.IsRefrigerated(pickupables[i].gameObject) && Rottable.AtmosphereQuality(pickupables[i].gameObject) != Rottable.RotAtmosphereQuality.Sterilizing)
 				{
-					num++;
-					if (foods != null)
+					Rottable.Instance smi = pickupables[i].GetSMI<Rottable.Instance>();
+					if (smi != null && smi.RotConstitutionPercentage < 0.8f)
 					{
-						foods.Add(pickupables[i].GetProperName());
+						num++;
+						if (foods != null)
+						{
+							foods.Add(pickupables[i].GetProperName());
+						}
 					}
 				}
 			}
@@ -290,6 +311,21 @@ public class Tutorial : KMonoBehaviour
 		float num = RationTracker.Get().CountRations(null, true);
 		float num2 = (float)Components.LiveMinionIdentities.Count * 1000000f;
 		return num / num2 > 1f;
+	}
+
+	private bool EnoughMedicalCots()
+	{
+		int count = Components.Clinics.Count;
+		int num = 0;
+		for (int i = 0; i < Components.LiveMinionIdentities.Count; i++)
+		{
+			Diseases diseases = Components.LiveMinionIdentities[i].GetDiseases();
+			if (diseases.Count > 0)
+			{
+				num++;
+			}
+		}
+		return count >= num;
 	}
 
 	private bool FoodSourceExists()
@@ -340,6 +376,9 @@ public class Tutorial : KMonoBehaviour
 		TM_FetchingWater,
 		TM_ThermalComfort,
 		TM_OverheatingBuildings,
+		TM_LotsOfGerms,
+		TM_BeingInfected,
+		TM_InfectedFood,
 		TM_COUNT
 	}
 

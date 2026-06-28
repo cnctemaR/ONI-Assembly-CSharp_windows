@@ -1,7 +1,7 @@
 ﻿using System;
-using Klei.Noise;
 using LibNoiseDotNet.Graphics.Tools.Noise;
 using NodeEditorFramework;
+using ProcGen.Noise;
 using UnityEngine;
 
 [Node(false, "Noise/Filter", new Type[] { typeof(NoiseNodeCanvas) })]

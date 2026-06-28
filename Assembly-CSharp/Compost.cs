@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class Compost : StateMachineComponent<Compost.StatesInstance>
+public class Compost : StateMachineComponent<Compost.StatesInstance>, IGameObjectEffectDescriptor, IEffectDescriptor
 {
 	protected override void OnPrefabInit()
 	{
@@ -15,6 +16,7 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>
 		base.OnSpawn();
 		ManualDeliveryKG component = base.GetComponent<ManualDeliveryKG>();
 		component.ShowStatusItem = false;
+		this.temperatureAdjuster = new SimulatedTemperatureAdjuster(this.simulatedInternalTemperature, this.simulatedInternalHeatCapacity, this.simulatedThermalConductivity, base.GetComponent<Storage>());
 		base.smi.StartSM();
 	}
 
@@ -25,6 +27,21 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>
 		{
 			return;
 		}
+	}
+
+	private void SimulateTemperatureAdjustments(float dt)
+	{
+		this.temperatureAdjuster.Update(dt);
+	}
+
+	public List<Descriptor> GetDescriptors(BuildingDef def)
+	{
+		return this.GetDescriptors(def.BuildingComplete);
+	}
+
+	public List<Descriptor> GetDescriptors(GameObject go)
+	{
+		return SimulatedTemperatureAdjuster.GetDescriptors(this.simulatedInternalTemperature);
 	}
 
 	[MyCmpGet]
@@ -41,6 +58,17 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>
 
 	[SerializeField]
 	public float emitMassThreshold = 1f;
+
+	[SerializeField]
+	public float simulatedInternalTemperature = 323.15f;
+
+	[SerializeField]
+	public float simulatedInternalHeatCapacity = 400f;
+
+	[SerializeField]
+	public float simulatedThermalConductivity = 1000f;
+
+	private SimulatedTemperatureAdjuster temperatureAdjuster;
 
 	public class StatesInstance : GameStateMachine<Compost.States, Compost.StatesInstance, Compost, object>.GameInstance
 	{
@@ -101,7 +129,7 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>
 				.ToggleStatusItem(Db.Get().BuildingStatusItems.AwaitingWaste, null)
 				.PlayAnim("idle_half", KAnim.PlayMode.Once, null);
 			this.inert.EventTransition(GameHashes.OperationalChanged, this.disabled, (Compost.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational).PlayAnim("on", KAnim.PlayMode.Once, null).ToggleStatusItem(Db.Get().BuildingStatusItems.AwaitingCompostFlip, null)
-				.ToggleChore(new Func<Compost.StatesInstance, Chore>(this.CreateFlipChore), this.composting, false);
+				.ToggleChore(new Func<Compost.StatesInstance, Chore>(this.CreateFlipChore), this.composting);
 			this.composting.Enter("Composting", delegate(Compost.StatesInstance smi)
 			{
 				smi.master.operational.SetActive(true, false);
@@ -112,6 +140,10 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>
 				})
 				.ScheduleGoTo((Compost.StatesInstance smi) => smi.master.flipInterval, this.inert)
 				.PlayAnims((Compost.StatesInstance smi) => Compost.States.compostingAnims, KAnim.PlayMode.Loop)
+				.Update(delegate(Compost.StatesInstance smi)
+				{
+					smi.master.SimulateTemperatureAdjustments(smi.deltatime);
+				})
 				.Exit(delegate(Compost.StatesInstance smi)
 				{
 					smi.master.operational.SetActive(false, false);
@@ -129,7 +161,7 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>
 
 		private Chore CreateFlipChore(Compost.StatesInstance smi)
 		{
-			return new WorkChore<CompostWorkable>(Db.Get().ChoreTypes.FlipCompost, smi.master, null, true, null, null, null, true, null, true, default(Tag), null, false, true);
+			return new WorkChore<CompostWorkable>(Db.Get().ChoreTypes.FlipCompost, smi.master, null, true, null, null, null, true, null, true, default(Tag), null, false, true, true);
 		}
 
 		public GameStateMachine<Compost.States, Compost.StatesInstance, Compost, object>.State empty;

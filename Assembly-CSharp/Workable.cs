@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using Klei;
 using Klei.AI;
 using KSerialization;
+using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -76,10 +79,10 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		this.workTimeRemaining = Mathf.Min(this.workTimeRemaining, this.workTime);
 	}
 
-	protected override void OnSpawn()
+	protected override void OnLoadLevel()
 	{
-		base.OnSpawn();
-		Components.Workables.Add(this);
+		this.overrideAnims = null;
+		base.OnLoadLevel();
 	}
 
 	public int GetCell()
@@ -106,6 +109,11 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		this.worker = workerToStart;
 		this.ShowProgressBar(true);
 		this.OnStartWork(this.worker);
+		if (this.OnWorkStartedCB != null)
+		{
+			this.OnWorkStartedCB();
+		}
+		this.numberOfUses++;
 	}
 
 	public bool WorkTick(Worker worker, float dt)
@@ -129,7 +137,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		return 1f;
 	}
 
-	public virtual Klei.AI.Attribute GetWorkAttribute()
+	public virtual global::Klei.AI.Attribute GetWorkAttribute()
 	{
 		if (this.attributeConverter != null)
 		{
@@ -158,7 +166,17 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		{
 			this.OnAbortWork(this.worker);
 		}
+		if (this.shouldTransferDiseaseWithWorker)
+		{
+			this.TransferDiseaseWithWorker(this.worker);
+		}
+		this.OnWorkStoppedCB.Signal();
 		this.OnStopWork(this.worker);
+		if (this.resetProgressOnStop)
+		{
+			this.workTimeRemaining = this.GetWorkTime();
+			this.ShowProgressBar(false);
+		}
 		this.worker = null;
 	}
 
@@ -173,7 +191,13 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		{
 			this.selectable.RemoveStatusItem(this.workingStatusItem, false);
 		}
+		if (this.shouldTransferDiseaseWithWorker)
+		{
+			this.TransferDiseaseWithWorker(worker);
+		}
 		this.OnCompleteWork(worker);
+		this.OnWorkCompleteCB.Signal();
+		this.OnWorkStoppedCB.Signal();
 		this.OnStopWork(worker);
 		this.workTimeRemaining = this.GetWorkTime();
 		this.ShowProgressBar(false);
@@ -251,7 +275,7 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		Vector3 vector = base.gameObject.transform.position + Vector3.down * this.progressbar_y_offset;
 		if (component != null)
 		{
-			vector -= Vector3.right * 0.5f * (float)(component.Def.WidthInCells % 2);
+			vector = vector - Vector3.right * 0.5f * (float)(component.Def.WidthInCells % 2) + component.Def.placementPivot;
 		}
 		else
 		{
@@ -276,7 +300,6 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	protected override void OnCleanUp()
 	{
 		this.ShowProgressBar(false);
-		Components.Workables.Remove(this);
 		base.OnCleanUp();
 	}
 
@@ -313,6 +336,51 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		return num;
 	}
 
+	private void TransferDiseaseWithWorker(Worker worker)
+	{
+		if (this == null || worker == null)
+		{
+			return;
+		}
+		PrimaryElement component = base.GetComponent<PrimaryElement>();
+		if (component == null)
+		{
+			return;
+		}
+		PrimaryElement component2 = worker.GetComponent<PrimaryElement>();
+		if (component2 == null)
+		{
+			return;
+		}
+		SimUtil.DiseaseInfo invalid = SimUtil.DiseaseInfo.Invalid;
+		invalid.idx = component2.DiseaseIdx;
+		invalid.count = (int)((float)component2.DiseaseCount * 0.33f);
+		SimUtil.DiseaseInfo invalid2 = SimUtil.DiseaseInfo.Invalid;
+		invalid2.idx = component.DiseaseIdx;
+		invalid2.count = (int)((float)component.DiseaseCount * 0.33f);
+		component2.ModifyDiseaseCount(-invalid.count, "Workable.TransferDiseaseWithWorker");
+		component.ModifyDiseaseCount(-invalid2.count, "Workable.TransferDiseaseWithWorker");
+		if (invalid.count > 0)
+		{
+			component.AddDisease(invalid.idx, invalid.count, "Workable.TransferDiseaseWithWorker");
+		}
+		if (invalid2.count > 0)
+		{
+			component2.AddDisease(invalid2.idx, invalid2.count, "Workable.TransferDiseaseWithWorker");
+		}
+	}
+
+	public virtual List<Descriptor> GetDescriptors(GameObject go)
+	{
+		List<Descriptor> list = new List<Descriptor>();
+		if (this.trackUses)
+		{
+			Descriptor descriptor = new Descriptor(string.Format(BUILDING.DETAILS.USE_COUNT, this.numberOfUses), string.Format(BUILDING.DETAILS.USE_COUNT_TOOLTIP, this.numberOfUses), Descriptor.DescriptorType.Detail, false);
+			list.Add(descriptor);
+		}
+		return list;
+	}
+
 	[ContextMenu("Refresh Reachability")]
 	public void RefreshReachability()
 	{
@@ -323,6 +391,8 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	}
 
 	public float workTime;
+
+	public Vector3 AnimOffset = Vector3.zero;
 
 	protected bool showProgressBar = true;
 
@@ -340,6 +410,14 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	protected bool forcePlayPst;
 
+	public bool resetProgressOnStop;
+
+	protected bool shouldTransferDiseaseWithWorker = true;
+
+	[SerializeField]
+	[Tooltip("What layer does the dupe switch to when interacting with the building")]
+	public Grid.SceneLayer workLayer = Grid.SceneLayer.Move;
+
 	[SerializeField]
 	[Serialize]
 	protected float workTimeRemaining = float.PositiveInfinity;
@@ -347,10 +425,27 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	[SerializeField]
 	public KAnimFile[] overrideAnims;
 
+	[SerializeField]
+	[Tooltip("Whether to user the KAnimSynchronizer or not")]
+	public bool synchronizeAnims = true;
+
+	[SerializeField]
+	[Tooltip("Whether to display number of uses in the details panel")]
+	public bool trackUses;
+
+	[Serialize]
+	protected int numberOfUses;
+
 	[MyCmpGet]
 	protected KSelectable selectable;
 
 	public int masterPriority = int.MaxValue;
+
+	public global::System.Action OnWorkStartedCB;
+
+	public global::System.Action OnWorkCompleteCB;
+
+	public global::System.Action OnWorkStoppedCB;
 
 	protected bool faceTargetWhenWorking;
 

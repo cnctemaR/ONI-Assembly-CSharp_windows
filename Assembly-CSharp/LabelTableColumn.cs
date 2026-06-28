@@ -4,8 +4,8 @@ using UnityEngine.UI;
 
 public class LabelTableColumn : TableColumn
 {
-	public LabelTableColumn(Action<MinionIdentity, GameObject> on_load_action, Func<MinionIdentity, GameObject, string> get_value_action, Comparison<MinionIdentity> sort_comparison, Action<MinionIdentity, GameObject, ToolTip> on_tooltip, Action<MinionIdentity, GameObject, ToolTip> on_sort_tooltip, int widget_width = 128)
-		: base(on_load_action, sort_comparison, on_tooltip, on_sort_tooltip)
+	public LabelTableColumn(Action<MinionIdentity, GameObject> on_load_action, Func<MinionIdentity, GameObject, string> get_value_action, Comparison<MinionIdentity> sort_comparison, Action<MinionIdentity, GameObject, ToolTip> on_tooltip, Action<MinionIdentity, GameObject, ToolTip> on_sort_tooltip, int widget_width = 128, float refresh_frequency = 0f)
+		: base(on_load_action, sort_comparison, on_tooltip, on_sort_tooltip, null, refresh_frequency)
 	{
 		this.get_value_action = get_value_action;
 		this.widget_width = widget_width;

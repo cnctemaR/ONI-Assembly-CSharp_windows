@@ -33,27 +33,26 @@ public class Infrared : MonoBehaviour
 		base.GetComponent<Camera>().targetTexture = this.cameraTexture;
 	}
 
-	public bool IsOn()
+	public void SetMode(Infrared.Mode mode)
 	{
-		return this.isOn;
-	}
-
-	public void Toggle(bool on)
-	{
-		Vector4 vector = new Vector4(0f, 0f, 0f, 0f);
-		if (on)
+		Vector4 zero;
+		if (mode != Infrared.Mode.Disabled)
 		{
-			vector.x = 1f;
+			zero = new Vector4(1f, 0f, 0f, 0f);
 		}
-		this.isOn = on;
-		Shader.SetGlobalVector("_InfraredParameters", vector);
+		else
+		{
+			zero = Vector4.zero;
+		}
+		Shader.SetGlobalVector("_ColouredOverlayParameters", zero);
+		this.mode = mode;
 		this.UpdateState();
 	}
 
 	private void UpdateState()
 	{
-		base.enabled = this.isOn;
-		if (!this.isOn)
+		base.enabled = this.mode != Infrared.Mode.Disabled;
+		if (base.enabled)
 		{
 			this.Update();
 		}
@@ -61,9 +60,15 @@ public class Infrared : MonoBehaviour
 
 	private void Update()
 	{
-		if (this.IsOn())
+		switch (this.mode)
 		{
+		case Infrared.Mode.Infrared:
 			GameComps.InfraredVisualizers.UpdateTemperature();
+			break;
+		case Infrared.Mode.Disease:
+			GameComps.InfraredVisualizers.ClearOverlayColour();
+			GameComps.DiseaseContainers.UpdateOverlayColours();
+			break;
 		}
 	}
 
@@ -71,9 +76,16 @@ public class Infrared : MonoBehaviour
 
 	private RenderTexture cameraTexture;
 
-	private bool isOn;
+	private Infrared.Mode mode;
 
 	public static int temperatureParametersId;
 
 	public static Infrared Instance;
+
+	public enum Mode
+	{
+		Disabled,
+		Infrared,
+		Disease
+	}
 }

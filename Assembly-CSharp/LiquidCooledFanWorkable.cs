@@ -1,6 +1,6 @@
 ﻿using System;
 
-public class LiquidCooledFanWorkable : BuildingWorkable
+public class LiquidCooledFanWorkable : Workable
 {
 	private LiquidCooledFanWorkable()
 	{

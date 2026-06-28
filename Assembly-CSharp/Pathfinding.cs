@@ -34,10 +34,30 @@ public class Pathfinding : KMonoBehaviour
 		}
 	}
 
-	public void UpdateNavGrids()
+	public void FlushNavGridsOnLoad()
 	{
-		this.NavGrids[this.UpdateIdx].UpdateGraph();
-		this.UpdateIdx = (this.UpdateIdx + 1) % this.NavGrids.Count;
+		if (this.navGridsHaveBeenFlushedOnLoad)
+		{
+			return;
+		}
+		this.navGridsHaveBeenFlushedOnLoad = true;
+		this.UpdateNavGrids(true);
+	}
+
+	public void UpdateNavGrids(bool update_all = false)
+	{
+		if (update_all)
+		{
+			for (int i = 0; i < this.NavGrids.Count; i++)
+			{
+				this.NavGrids[i].UpdateGraph();
+			}
+		}
+		else
+		{
+			this.NavGrids[this.UpdateIdx].UpdateGraph();
+			this.UpdateIdx = (this.UpdateIdx + 1) % this.NavGrids.Count;
+		}
 	}
 
 	public void DebugUpdate()
@@ -74,6 +94,8 @@ public class Pathfinding : KMonoBehaviour
 	private List<NavGrid> NavGrids = new List<NavGrid>();
 
 	private int UpdateIdx;
+
+	private bool navGridsHaveBeenFlushedOnLoad;
 
 	public static Pathfinding Instance;
 }

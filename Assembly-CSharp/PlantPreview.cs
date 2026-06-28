@@ -8,17 +8,23 @@ public class PlantPreview : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.partitionerEntry = GameScenePartitioner.Instance.Add("PlantPreview", base.gameObject, this.occupyArea.GetExtents(), GameScenePartitioner.Instance.solidChangedMask.mask | GameScenePartitioner.Instance.objectLayerMasks[1].mask, new Action<object>(this.OnAreaChanged));
+		this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("PlantPreview", base.gameObject, this.occupyArea.GetExtents(), GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnAreaChanged));
+		this.buildingPartitionerEntry = GameScenePartitioner.Instance.Add("PlantPreview", base.gameObject, this.occupyArea.GetExtents(), GameScenePartitioner.Instance.objectLayers[1], new Action<object>(this.OnAreaChanged));
 		this.OnAreaChanged(null);
 	}
 
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
-		if (this.partitionerEntry != null)
+		if (this.solidPartitionerEntry != null)
 		{
-			this.partitionerEntry.Release();
-			this.partitionerEntry = null;
+			this.solidPartitionerEntry.Release();
+			this.solidPartitionerEntry = null;
+		}
+		if (this.buildingPartitionerEntry != null)
+		{
+			this.buildingPartitionerEntry.Release();
+			this.buildingPartitionerEntry = null;
 		}
 	}
 
@@ -30,7 +36,7 @@ public class PlantPreview : KMonoBehaviour
 	private void OnAreaChanged(object obj)
 	{
 		bool valid = this.Valid;
-		this.Valid = this.occupyArea.TestArea(Grid.PosToCell(this), (int cell) => !Grid.Solid[cell] && (Grid.Objects[cell, 1] == base.gameObject || Grid.Objects[cell, 1] == null));
+		this.Valid = this.occupyArea.TestArea(Grid.PosToCell(this), null, (int cell, object data) => !Grid.Solid[cell] && (Grid.Objects[cell, 1] == base.gameObject || Grid.Objects[cell, 1] == null));
 		if (this.Valid)
 		{
 			this.animController.TintColour = Color.white;
@@ -51,5 +57,7 @@ public class PlantPreview : KMonoBehaviour
 	[MyCmpReq]
 	private KBatchedAnimController animController;
 
-	private GameScenePartitionerEntry partitionerEntry;
+	private GameScenePartitionerEntry solidPartitionerEntry;
+
+	private GameScenePartitionerEntry buildingPartitionerEntry;
 }

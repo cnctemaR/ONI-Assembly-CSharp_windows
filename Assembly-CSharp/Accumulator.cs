@@ -12,10 +12,6 @@ public class Accumulator
 		{
 			((Accumulator)obj).CalculateAverage();
 		}, this, null, 0f, null);
-		if (AccumulatorManager.Instance != null)
-		{
-			AccumulatorManager.Instance.Add(this);
-		}
 	}
 
 	public float DebugCurrentAccumulate
@@ -56,7 +52,7 @@ public class Accumulator
 			this.avgRate = this.accumulated / num;
 			this.accumulated = 0f;
 		}
-		this.handle.Clear();
+		this.handle.ClearScheduler();
 		this.handle = GameScheduler.Instance.SchedulePeriodic(this.GetDebugName() + ".Accumulator", this.timeWindow, delegate(object obj)
 		{
 			((Accumulator)obj).CalculateAverage();
@@ -65,11 +61,7 @@ public class Accumulator
 
 	private void OnCleanUp(object data)
 	{
-		this.handle.Clear();
-		if (AccumulatorManager.Instance != null)
-		{
-			AccumulatorManager.Instance.Remove(this);
-		}
+		this.handle.ClearScheduler();
 	}
 
 	public string GetDebugName()

@@ -12,15 +12,15 @@ public class MultipleRenderTargetProxy : MonoBehaviour
 		ShaderReloader.Register(new global::System.Action(this.OnShadersReloaded));
 	}
 
-	public void ToggleTemperatureView(bool enabled)
+	public void ToggleColouredOverlayView(bool enabled)
 	{
-		this.temperatureBufferEnabled = enabled;
+		this.colouredOverlayBufferEnabled = enabled;
 		this.CreateRenderTarget();
 	}
 
 	private void CreateRenderTarget()
 	{
-		RenderBuffer[] array = new RenderBuffer[(!this.temperatureBufferEnabled) ? 2 : 3];
+		RenderBuffer[] array = new RenderBuffer[(!this.colouredOverlayBufferEnabled) ? 2 : 3];
 		this.Textures[0] = this.RecreateRT(this.Textures[0], 24, RenderTextureFormat.ARGB32);
 		this.Textures[0].filterMode = FilterMode.Point;
 		this.Textures[0].name = "MRT0";
@@ -29,7 +29,7 @@ public class MultipleRenderTargetProxy : MonoBehaviour
 		this.Textures[1].name = "MRT1";
 		array[0] = this.Textures[0].colorBuffer;
 		array[1] = this.Textures[1].colorBuffer;
-		if (this.temperatureBufferEnabled)
+		if (this.colouredOverlayBufferEnabled)
 		{
 			this.Textures[2] = this.RecreateRT(this.Textures[2], 0, RenderTextureFormat.ARGB32);
 			this.Textures[2].filterMode = FilterMode.Bilinear;
@@ -71,7 +71,7 @@ public class MultipleRenderTargetProxy : MonoBehaviour
 	{
 		Shader.SetGlobalTexture("_MRT0", this.Textures[0]);
 		Shader.SetGlobalTexture("_MRT1", this.Textures[1]);
-		if (this.temperatureBufferEnabled)
+		if (this.colouredOverlayBufferEnabled)
 		{
 			Shader.SetGlobalTexture("_MRT2", this.Textures[2]);
 		}
@@ -81,5 +81,5 @@ public class MultipleRenderTargetProxy : MonoBehaviour
 
 	private Camera camera;
 
-	private bool temperatureBufferEnabled;
+	private bool colouredOverlayBufferEnabled;
 }

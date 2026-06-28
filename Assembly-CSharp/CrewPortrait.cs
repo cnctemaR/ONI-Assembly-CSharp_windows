@@ -145,7 +145,7 @@ public class CrewPortrait : KMonoBehaviour
 			}
 			if (this.duplicantJob != null)
 			{
-				this.duplicantJob.SetText(this.crewMember.GetAttributes().GetProfessionString());
+				this.duplicantJob.SetText(this.crewMember.GetAttributes().GetProfessionString(true));
 				this.duplicantJob.GetComponent<ToolTip>().toolTip = this.crewMember.GetAttributes().GetProfessionDescriptionString();
 			}
 		}

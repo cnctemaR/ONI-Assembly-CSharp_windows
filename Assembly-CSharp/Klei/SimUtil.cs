@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using Klei.AI;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -105,6 +106,116 @@ namespace Klei
 			{
 				Assert.IsTrue(false);
 			}
+		}
+
+		public static SimUtil.DiseaseInfo CalculateFinalDiseaseInfo(SimUtil.DiseaseInfo a, SimUtil.DiseaseInfo b)
+		{
+			return SimUtil.CalculateFinalDiseaseInfo(a.idx, a.count, b.idx, b.count);
+		}
+
+		public static SimUtil.DiseaseInfo CalculateFinalDiseaseInfo(byte src1_idx, int src1_count, byte src2_idx, int src2_count)
+		{
+			SimUtil.DiseaseInfo diseaseInfo = default(SimUtil.DiseaseInfo);
+			if (src1_idx == src2_idx)
+			{
+				diseaseInfo.idx = src1_idx;
+				diseaseInfo.count = src1_count + src2_count;
+			}
+			else if (src1_idx == 255)
+			{
+				diseaseInfo.idx = src2_idx;
+				diseaseInfo.count = src2_count;
+			}
+			else if (src2_idx == 255)
+			{
+				diseaseInfo.idx = src1_idx;
+				diseaseInfo.count = src1_count;
+			}
+			else
+			{
+				Disease disease = Db.Get().Diseases[(int)src1_idx];
+				Disease disease2 = Db.Get().Diseases[(int)src2_idx];
+				float num = disease.strength * (float)src1_count;
+				float num2 = disease2.strength * (float)src2_count;
+				if (num > num2)
+				{
+					int num3 = (int)((float)src2_count - num / num2 * (float)src1_count);
+					if (num3 < 0)
+					{
+						diseaseInfo.idx = src1_idx;
+						diseaseInfo.count = -num3;
+					}
+					else
+					{
+						diseaseInfo.idx = src2_idx;
+						diseaseInfo.count = num3;
+					}
+				}
+				else
+				{
+					int num4 = (int)((float)src1_count - num2 / num * (float)src2_count);
+					if (num4 < 0)
+					{
+						diseaseInfo.idx = src2_idx;
+						diseaseInfo.count = -num4;
+					}
+					else
+					{
+						diseaseInfo.idx = src1_idx;
+						diseaseInfo.count = num4;
+					}
+				}
+			}
+			if (diseaseInfo.count <= 0)
+			{
+				diseaseInfo.count = 0;
+				diseaseInfo.idx = byte.MaxValue;
+			}
+			return diseaseInfo;
+		}
+
+		public static byte DiseaseCountToAlpha254(int count)
+		{
+			float num = Mathf.Log((float)count, 10f);
+			num /= SimUtil.MAX_DISEASE_LOG_RANGE;
+			num = Math.Max(0f, Math.Min(1f, num));
+			num -= SimUtil.MIN_DISEASE_LOG_SUBTRACTION / SimUtil.MAX_DISEASE_LOG_RANGE;
+			num = Math.Max(0f, num);
+			num /= 1f - SimUtil.MIN_DISEASE_LOG_SUBTRACTION / SimUtil.MAX_DISEASE_LOG_RANGE;
+			return (byte)(num * 254f);
+		}
+
+		public static float DiseaseCountToAlpha(int count)
+		{
+			return (float)SimUtil.DiseaseCountToAlpha254(count) / 255f;
+		}
+
+		public static SimUtil.DiseaseInfo GetPercentOfDisease(PrimaryElement pe, float percent)
+		{
+			return new SimUtil.DiseaseInfo
+			{
+				idx = pe.DiseaseIdx,
+				count = (int)((float)pe.DiseaseCount * percent)
+			};
+		}
+
+		private const int MAX_ALPHA_COUNT = 1000000;
+
+		private static float MIN_DISEASE_LOG_SUBTRACTION = 2f;
+
+		private static float MAX_DISEASE_LOG_RANGE = 6f;
+
+		public struct DiseaseInfo
+		{
+			public byte idx;
+
+			public int count;
+
+			public static readonly SimUtil.DiseaseInfo Invalid = new SimUtil.DiseaseInfo
+			{
+				idx = byte.MaxValue,
+				count = 0
+			};
 		}
 	}
 }

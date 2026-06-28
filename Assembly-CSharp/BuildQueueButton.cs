@@ -102,7 +102,7 @@ public class BuildQueueButton : KMonoBehaviour
 			if (num < amount && GameTags.LiquidElements.Contains(ingredient.tag))
 			{
 				Element element = ElementLoader.GetElement(ingredient.tag);
-				if (element != null && LiquidSourceDetector2.Instance.IsLiquidAccessible(element))
+				if (element != null && LiquidPumpingStation.IsLiquidAccessible(element))
 				{
 					num = amount + 1f;
 				}
@@ -122,7 +122,7 @@ public class BuildQueueButton : KMonoBehaviour
 				}
 				else
 				{
-					text = GameUtil.GetFormattedMass(amount - num, GameUtil.TimeSlice.None, true, "{0:0.#}");
+					text = GameUtil.GetFormattedMass(amount - num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
 				}
 				newTooltip += string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.QUEUED_MISSING_INGREDIENTS_TOOLTIP, text, ingredient.tag.ProperName());
 			}

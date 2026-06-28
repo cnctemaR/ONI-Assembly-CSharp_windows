@@ -110,7 +110,7 @@ public class ManualDeliveryAmount : KMonoBehaviour
 			this.fetchList = new FetchList2(this.storage);
 			this.fetchList.ShowStatusItem = this.ShowStatusItem;
 			this.fetchList.MinimumAmount[this.requestedItemTag] = this.minimumAmount;
-			this.fetchList.Add(new Tag[] { this.requestedItemTag }, num, this.operationalRequirement);
+			this.fetchList.Add(new Tag[] { this.requestedItemTag }, null, num, this.operationalRequirement);
 			this.fetchList.Submit(null, false);
 		}
 	}

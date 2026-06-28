@@ -13,23 +13,26 @@ namespace Database
 			{
 				this.CreateAmount(amountInfo.Id, amountInfo.Min, amountInfo.Max, amountInfo.InitialMin, amountInfo.InitialMax, amountInfo.ShowMax, amountInfo.Units, amountInfo.VisualDeltaThreshold, true, "STRINGS.DUPLICANTS.STATS");
 			}
-			this.Decor = this.CreateAmount("Decor", 0f, 100f, 50f, 50f, true, Units.Flat, 0.1f, true, "STRINGS.DUPLICANTS.STATS");
+			this.Decor = this.CreateAmount("Decor", -1000f, 1000f, 50f, 50f, false, Units.Flat, 0.1f, true, "STRINGS.DUPLICANTS.STATS");
 			this.Decor.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.SimpleFloat, GameUtil.TimeSlice.PerSecond, null));
 			this.Maturity = this.CreateAmount("Maturity", 0f, 0f, 0f, 0f, true, Units.Flat, 0.0009166667f, true, "STRINGS.CREATURES.STATS");
 			this.Maturity.SetDisplayer(new MaturityDisplayer());
-			this.OldAge = this.CreateAmount("OldAge", 0f, 2400f, 0f, 2400f, false, Units.Flat, 0f, false, "STRINGS.CREATURES.STATS");
-			this.Fertilization = this.CreateAmount("Fertilization", 0f, 100f, 0f, 100f, true, Units.Flat, 0.1675f, true, "STRINGS.CREATURES.STATS");
+			this.OldAge = this.CreateAmount("OldAge", 0f, 2400f, 0f, 0f, false, Units.Flat, 0f, false, "STRINGS.CREATURES.STATS");
+			this.Fertilization = this.CreateAmount("Fertilization", 0f, 100f, 0f, 0f, true, Units.Flat, 0.1675f, true, "STRINGS.CREATURES.STATS");
 			this.Fertilization.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Percent, GameUtil.TimeSlice.PerSecond, null));
-			this.Irrigation = this.CreateAmount("Irrigation", 0f, 100f, 0f, 100f, true, Units.Flat, 0.1675f, true, "STRINGS.CREATURES.STATS");
+			this.Irrigation = this.CreateAmount("Irrigation", 0f, 100f, 0f, 0f, true, Units.Flat, 0.1675f, true, "STRINGS.CREATURES.STATS");
 			this.Irrigation.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Percent, GameUtil.TimeSlice.PerSecond, null));
-			this.YieldBonus = this.CreateAmount("YieldBonus", 0f, 1f, 0f, 1f, true, Units.Flat, 0.0017499999f, true, "STRINGS.CREATURES.STATS");
-			this.YieldBonus.SetDisplayer(new YieldBonusAmountDisplayer());
 			this.HitPoints = this.CreateAmount("HitPoints", 0f, 0f, 0f, 0f, true, Units.Flat, 0.1675f, true, "STRINGS.DUPLICANTS.STATS");
 			this.HitPoints.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.SimpleInteger, GameUtil.TimeSlice.PerSecond, null));
+			float num = 100f;
+			this.ImmuneLevel = this.CreateAmount("ImmuneLevel", 0f, num, num * 0.9f, num, true, Units.Flat, 0.1675f, true, "STRINGS.DUPLICANTS.STATS");
+			this.ImmuneLevel.SetDisplayer(new AsPercentAmountDisplayer(GameUtil.TimeSlice.PerCycle));
 			this.Rot = this.CreateAmount("Rot", 0f, 0f, 0f, 0f, false, Units.Flat, 0f, true, "STRINGS.CREATURES.STATS");
 			this.Rot.SetDisplayer(new AsPercentAmountDisplayer(GameUtil.TimeSlice.PerCycle));
-			this.AirPressure = this.CreateAmount("AirPressure", 0f, 1E+09f, 0f, 1E+09f, false, Units.Flat, 0f, true, "STRINGS.CREATURES.STATS");
+			this.AirPressure = this.CreateAmount("AirPressure", 0f, 1E+09f, 0f, 0f, false, Units.Flat, 0f, true, "STRINGS.CREATURES.STATS");
 			this.AirPressure.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Mass, GameUtil.TimeSlice.PerSecond, null));
+			this.Illumination = this.CreateAmount("Illumination", 0f, 1f, 0f, 0f, false, Units.Flat, 0f, true, "STRINGS.CREATURES.STATS");
+			this.Illumination.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.SimpleFloat, GameUtil.TimeSlice.None, null));
 			this.BindAmounts();
 		}
 
@@ -54,6 +57,8 @@ namespace Database
 		{
 			this.Stamina = base.Get("Stamina");
 			this.Stamina.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Percent, GameUtil.TimeSlice.PerCycle, null));
+			this.HitPoints = base.Get("HitPoints");
+			this.HitPoints.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.SimpleFloat, GameUtil.TimeSlice.PerCycle, null));
 			this.Calories = base.Get("Calories");
 			this.Calories.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Calories, GameUtil.TimeSlice.PerCycle, null));
 			this.Temperature = base.Get("Temperature");
@@ -76,6 +81,8 @@ namespace Database
 
 		public Amount HitPoints;
 
+		public Amount ImmuneLevel;
+
 		public Amount Temperature;
 
 		public Amount ExternalTemperature;
@@ -97,6 +104,8 @@ namespace Database
 		public Amount OldAge;
 
 		public Amount Fertilization;
+
+		public Amount Illumination;
 
 		public Amount Irrigation;
 

@@ -47,7 +47,7 @@ public struct InfraredVisualizerData
 			return;
 		}
 		Color32 color = SimDebugView.Instance.NormalizedTemperature(num);
-		this.controller.TemperatureColour = color;
+		this.controller.OverlayColour = color;
 	}
 
 	public KAnimControllerBase controller;

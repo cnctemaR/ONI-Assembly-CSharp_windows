@@ -6,7 +6,8 @@ public class AdvancedResearchCenterConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("AdvancedResearchCenter", 3, 3, "research_center2_kanim", 200f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, null);
+		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER1;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("AdvancedResearchCenter", 3, 3, "research_center2_kanim", 200f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.ALL_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.NONE, tier);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 120f;
 		buildingDef.ExhaustKilowattsWhenActive = 0.5f;
@@ -21,6 +22,7 @@ public class AdvancedResearchCenterConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
+		Prioritizable.AddRef(go);
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 1000f;
 		storage.disableOnStore = true;
@@ -31,10 +33,9 @@ public class AdvancedResearchCenterConfig : IBuildingConfig
 		manualDeliveryKG.refillMass = 250f;
 		manualDeliveryKG.capacity = 500f;
 		ResearchCenter researchCenter = go.AddOrGet<ResearchCenter>();
-		researchCenter.research_point_type_id = ResearchTypes.ID.BETA;
 		researchCenter.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_research2_kanim") };
+		researchCenter.research_point_type_id = ResearchTypes.ID.BETA;
 		researchCenter.mass_per_point = 50f;
-		go.AddOrGet<Prioritizable>();
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
@@ -53,9 +54,9 @@ public class AdvancedResearchCenterConfig : IBuildingConfig
 		BuildingTemplates.DoPostConfigure(go);
 	}
 
-	public const float BASE_RESEARCH_SPEED = 0.83f;
+	public const string ID = "AdvancedResearchCenter";
 
-	public const float SKILL_EFFICACY = 0.27666667f;
+	public const float BASE_RESEARCH_SPEED = 0.83f;
 
 	public const float MASS_PER_POINT = 50f;
 }

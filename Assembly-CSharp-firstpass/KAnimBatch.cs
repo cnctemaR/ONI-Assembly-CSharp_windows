@@ -65,7 +65,7 @@ public class KAnimBatch
 
 	public MaterialPropertyBlock matProperties { get; private set; }
 
-	public Texture2D dataTex { get; private set; }
+	public KAnimBatchGroup.KAnimBatchTextureCache.Entry dataTex { get; private set; }
 
 	public BatchGroupInstance batchGroupInstance { get; private set; }
 
@@ -106,10 +106,9 @@ public class KAnimBatch
 			}), null);
 			return;
 		}
-		this.texBytes = new byte[width * width * 4 * 4];
 		this.byteToFloat = new KAnimConverter.ByteToFloatConverter
 		{
-			bytes = this.texBytes
+			bytes = this.dataTex.bytes
 		};
 		for (int i = 0; i < width * width; i++)
 		{
@@ -119,10 +118,24 @@ public class KAnimBatch
 			this.byteToFloat.floats[i * 4 + 3] = 0f;
 		}
 		this.matProperties = new MaterialPropertyBlock();
-		this.matProperties.SetTexture("instanceTex", this.dataTex);
+		this.matProperties.SetTexture("instanceTex", this.dataTex.texture);
 		this.matProperties.SetVector("INSTANCE_TEXEL_SIZE", this.dataTex.texelSize);
 		this.matProperties.SetVector("INSTANCE_TEXTURE_SIZE", new Vector2((float)this.dataTex.width, (float)this.dataTex.height));
 		this.group.GetDataTextures(this.batchGroupInstance, this.matProperties);
+	}
+
+	public void Clear()
+	{
+		this.DestroyTex();
+		this.controllers.Clear();
+		this.dirtySet.Clear();
+		this.batchset = null;
+		this.group = null;
+		this.batchGroupInstance = null;
+		this.matProperties = null;
+		this.dataTex = null;
+		this.byteToFloat.bytes = null;
+		this.batchGroupInstance = null;
 	}
 
 	public void SetBatchSet(BatchSet newBatchSet)
@@ -213,6 +226,10 @@ public class KAnimBatch
 
 	public void Deregister(KAnimConverter.IAnimConverter controller)
 	{
+		if (App.IsExiting)
+		{
+			return;
+		}
 		int num = this.controllers.IndexOf(controller);
 		if (num >= 0)
 		{
@@ -292,7 +309,7 @@ public class KAnimBatch
 
 	public void UpdateTexture()
 	{
-		this.dataTex.LoadRawTextureData(this.texBytes);
+		this.dataTex.LoadRawTextureData(this.dataTex.bytes);
 		this.dataTex.Apply();
 	}
 
@@ -338,8 +355,6 @@ public class KAnimBatch
 	private List<KAnimConverter.IAnimConverter> controllers = new List<KAnimConverter.IAnimConverter>();
 
 	private HashSet<int> dirtySet = new HashSet<int>();
-
-	private byte[] texBytes;
 
 	private KAnimConverter.ByteToFloatConverter byteToFloat;
 

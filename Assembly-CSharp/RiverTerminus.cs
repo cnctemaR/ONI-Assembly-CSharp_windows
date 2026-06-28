@@ -1,13 +1,12 @@
 ﻿using System;
-using Generated;
-using Klei;
+using ProcGenGame;
 using UnityEngine;
 
 public class RiverTerminus : KMonoBehaviour
 {
 	protected override void OnSpawn()
 	{
-		River riverForCell = WorldGen.GetRiverForCell(Grid.PosToCell(this.transform.position));
+		River riverForCell = Rivers.GetRiverForCell(WorldGen.Rivers, Grid.PosToCell(this.transform.position));
 		if (riverForCell != null)
 		{
 			this.flowRate = riverForCell.flowOut;
@@ -22,7 +21,7 @@ public class RiverTerminus : KMonoBehaviour
 		{
 			float mass = Grid.Cell[num].mass;
 			float num2 = Mathf.Min(this.flowRate * dt, mass);
-			SimMessages.ModifyMass(num, -num2, CellEventLogger.Instance.RiverTerminusSimUpdate, -1f, SimHashes.Water);
+			SimMessages.ModifyMass(num, -num2, byte.MaxValue, 0, CellEventLogger.Instance.RiverTerminusSimUpdate, -1f, SimHashes.Water);
 		}
 	}
 

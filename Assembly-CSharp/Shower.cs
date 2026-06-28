@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei;
 using Klei.AI;
 using STRINGS;
+using UnityEngine;
 
-public class Shower : BuildingWorkable, IEffectDescriptor
+public class Shower : Workable, IGameObjectEffectDescriptor, IEffectDescriptor
 {
 	protected override void OnSpawn()
 	{
@@ -47,7 +49,13 @@ public class Shower : BuildingWorkable, IEffectDescriptor
 
 	private Shower.ShowerSM.Instance smi;
 
-	private static readonly string[] EffectsRemoved = new string[] { "DirtyHands", "Unclean", "SoakingWet", "WetFeet" };
+	public SimHashes outputTargetElement;
+
+	public float fractionalDiseaseRemoval;
+
+	public int absoluteDiseaseRemoval;
+
+	private static readonly string[] EffectsRemoved = new string[] { "Unclean", "SoakingWet", "WetFeet" };
 
 	public class ShowerSM : GameStateMachine<Shower.ShowerSM, Shower.ShowerSM.Instance, Shower>
 	{
@@ -55,13 +63,17 @@ public class Shower : BuildingWorkable, IEffectDescriptor
 		{
 			default_state = this.unoperational;
 			this.unoperational.EventTransition(GameHashes.OperationalChanged, this.operational, (Shower.ShowerSM.Instance smi) => smi.IsOperational).PlayAnim("off", KAnim.PlayMode.Once, null);
-			this.operational.DefaultState(this.operational.idle).EventTransition(GameHashes.OperationalChanged, this.unoperational, (Shower.ShowerSM.Instance smi) => !smi.IsOperational).ToggleChore((Shower.ShowerSM.Instance smi) => new WorkChore<Shower>(Db.Get().ChoreTypes.Shower, smi.master, null, true, null, null, null, false, null, true, default(Tag), null, false, true), this.unoperational, false);
-			this.operational.idle.EventTransition(GameHashes.WorkStarted, this.operational.showering, null);
-			this.operational.showering.EventTransition(GameHashes.WorkStopped, this.operational.exiting, null).Enter(delegate(Shower.ShowerSM.Instance smi)
+			this.operational.DefaultState(this.operational.idle).EventTransition(GameHashes.OperationalChanged, this.unoperational, (Shower.ShowerSM.Instance smi) => !smi.IsOperational).ToggleChore((Shower.ShowerSM.Instance smi) => new WorkChore<Shower>(Db.Get().ChoreTypes.Shower, smi.master, null, true, null, null, null, false, null, true, default(Tag), null, false, true, true), this.unoperational);
+			this.operational.idle.WorkableStartTransition((Shower.ShowerSM.Instance smi) => smi.master, this.operational.showering);
+			this.operational.showering.WorkableStopTransition((Shower.ShowerSM.Instance smi) => smi.master, this.operational.exiting).Enter(delegate(Shower.ShowerSM.Instance smi)
 			{
 				smi.master.GetComponent<Operational>().SetActive(true, false);
 				smi.master.SetWorkTime(smi.master.workTime);
-			}).PlayAnims((Shower.ShowerSM.Instance smi) => Shower.ShowerSM.workingAnims, KAnim.PlayMode.Loop)
+			}).Update(delegate(Shower.ShowerSM.Instance smi)
+			{
+				smi.RemoveDisease(smi.deltatime);
+			})
+				.PlayAnims((Shower.ShowerSM.Instance smi) => Shower.ShowerSM.workingAnims, KAnim.PlayMode.Loop)
 				.Exit(delegate(Shower.ShowerSM.Instance smi)
 				{
 					smi.master.GetComponent<Operational>().SetActive(false, false);
@@ -96,6 +108,7 @@ public class Shower : BuildingWorkable, IEffectDescriptor
 				this.operational = master.GetComponent<Operational>();
 				this.consumer = master.GetComponent<ConduitConsumer>();
 				this.dispenser = master.GetComponent<ConduitDispenser>();
+				this.accumulatedDisease = SimUtil.DiseaseInfo.Invalid;
 			}
 
 			public bool IsOperational
@@ -106,11 +119,36 @@ public class Shower : BuildingWorkable, IEffectDescriptor
 				}
 			}
 
+			public void RemoveDisease(float dt)
+			{
+				PrimaryElement component = base.master.worker.GetComponent<PrimaryElement>();
+				if (component.DiseaseCount > 0)
+				{
+					SimUtil.DiseaseInfo diseaseInfo = new SimUtil.DiseaseInfo
+					{
+						idx = component.DiseaseIdx,
+						count = Mathf.CeilToInt((float)component.DiseaseCount * (1f - Mathf.Pow(base.master.fractionalDiseaseRemoval, dt)) - (float)base.master.absoluteDiseaseRemoval)
+					};
+					component.ModifyDiseaseCount(-diseaseInfo.count, "Shower.RemoveDisease");
+					this.accumulatedDisease = SimUtil.CalculateFinalDiseaseInfo(this.accumulatedDisease, diseaseInfo);
+					Storage component2 = base.master.GetComponent<Storage>();
+					PrimaryElement primaryElement = component2.FindPrimaryElement(base.master.outputTargetElement);
+					if (primaryElement != null)
+					{
+						PrimaryElement component3 = primaryElement.GetComponent<PrimaryElement>();
+						component3.AddDisease(this.accumulatedDisease.idx, this.accumulatedDisease.count, "Shower.RemoveDisease");
+						this.accumulatedDisease = SimUtil.DiseaseInfo.Invalid;
+					}
+				}
+			}
+
 			private Operational operational;
 
 			private ConduitConsumer consumer;
 
 			private ConduitDispenser dispenser;
+
+			private SimUtil.DiseaseInfo accumulatedDisease;
 		}
 	}
 }

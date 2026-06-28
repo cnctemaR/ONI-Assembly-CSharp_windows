@@ -72,7 +72,7 @@ public struct KAnimHashedString : IComparable<KAnimHashedString>, IEquatable<KAn
 
 	public override string ToString()
 	{
-		return (this.DebuggerDisplay == null || !(this.DebuggerDisplay != string.Empty)) ? ("0x" + this.hash.ToString("X")) : this.DebuggerDisplay;
+		return string.IsNullOrEmpty(this.DebuggerDisplay) ? ("0x" + this.hash.ToString("X")) : this.DebuggerDisplay;
 	}
 
 	public static implicit operator KAnimHashedString(HashedString hash)

@@ -6,7 +6,8 @@ public class InsulatedLiquidConduitConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("InsulatedLiquidConduit", 1, 1, "utilities_liquid_insulated_kanim", 400f, 30, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.PLUMBABLE, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.PENALTY.TIER0, null);
+		EffectorValues none = NOISE_POLLUTION.NONE;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("InsulatedLiquidConduit", 1, 1, "utilities_liquid_insulated_kanim", 400f, 30, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.PLUMBABLE, 1600f, BuildLocationRule.Anywhere, BUILDINGS.DECOR.PENALTY.TIER0, none);
 		buildingDef.Insulation = 0.05f;
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
@@ -26,6 +27,7 @@ public class InsulatedLiquidConduitConfig : IBuildingConfig
 		buildingDef.isUtility = true;
 		buildingDef.OverlayAnim = Assets.GetAnim("utilities_liquid_insulated_kanim");
 		buildingDef.DragBuild = true;
+		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.LiquidVentIDs, "InsulatedLiquidConduit");
 		return buildingDef;
 	}
 
@@ -52,4 +54,6 @@ public class InsulatedLiquidConduitConfig : IBuildingConfig
 		kanimGraphTileVisualizer.connectionSource = KAnimGraphTileVisualizer.ConnectionSource.Liquid;
 		kanimGraphTileVisualizer.isPhysicalBuilding = false;
 	}
+
+	public const string ID = "InsulatedLiquidConduit";
 }

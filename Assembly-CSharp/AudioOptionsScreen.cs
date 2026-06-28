@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
+using FMODUnity;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.Events;
@@ -76,12 +78,45 @@ public class AudioOptionsScreen : KModalScreen
 	{
 		MusicManager.instance.alwaysPlayMusic = !MusicManager.instance.alwaysPlayMusic;
 		this.alwaysPlayMusicButton.transform.GetChild(0).GetChild(0).gameObject.SetActive(MusicManager.instance.alwaysPlayMusic);
-		PlayerPrefs.SetInt(AudioOptionsScreen.AlwaysPlayMusicKey, (!MusicManager.instance.alwaysPlayMusic) ? 0 : 1);
+		KPlayerPrefs.SetInt(AudioOptionsScreen.AlwaysPlayMusicKey, (!MusicManager.instance.alwaysPlayMusic) ? 0 : 1);
+	}
+
+	private void BuildAudioDeviceList()
+	{
+		this.audioDevices.Clear();
+		this.audioDeviceOptions.Clear();
+		int num;
+		RuntimeManager.LowlevelSystem.getNumDrivers(out num);
+		for (int i = 0; i < num; i++)
+		{
+			KFMOD.AudioDevice audioDevice = default(KFMOD.AudioDevice);
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.Capacity = 64;
+			RuntimeManager.LowlevelSystem.getDriverInfo(i, stringBuilder, stringBuilder.Capacity, out audioDevice.guid, out audioDevice.systemRate, out audioDevice.speakerMode, out audioDevice.speakerModeChannels);
+			audioDevice.name = stringBuilder.ToString();
+			audioDevice.fmod_id = i;
+			this.audioDevices.Add(audioDevice);
+			this.audioDeviceOptions.Add(new Dropdown.OptionData(audioDevice.name));
+		}
+	}
+
+	private void OnAudioDeviceChanged(int idx)
+	{
+		RuntimeManager.LowlevelSystem.setDriver(idx);
+		for (int i = 0; i < this.audioDevices.Count; i++)
+		{
+			if (idx == this.audioDevices[i].fmod_id)
+			{
+				KFMOD.currentDevice = this.audioDevices[i];
+				KPlayerPrefs.SetString("AudioDeviceGuid", KFMOD.currentDevice.guid.ToString());
+				break;
+			}
+		}
 	}
 
 	private void OnClose(GameObject go)
 	{
-		this.alwaysPlayMusicMetric["AlwaysPlayMusic"] = MusicManager.instance.alwaysPlayMusic;
+		this.alwaysPlayMusicMetric[AudioOptionsScreen.AlwaysPlayMusicKey] = MusicManager.instance.alwaysPlayMusic;
 		ThreadedHttps<KleiMetrics>.Instance.SendEvent(this.alwaysPlayMusicMetric);
 		global::UnityEngine.Object.Destroy(go);
 	}
@@ -104,11 +139,22 @@ public class AudioOptionsScreen : KModalScreen
 	[SerializeField]
 	private GameObject alwaysPlayMusicButton;
 
+	[SerializeField]
+	private Dropdown deviceDropdown;
+
 	private UIPool<SliderContainer> sliderPool;
 
 	private Dictionary<KSlider, string> sliderBusMap = new Dictionary<KSlider, string>();
 
-	private Dictionary<string, object> alwaysPlayMusicMetric = new Dictionary<string, object> { { "AlwaysPlayMusic", null } };
-
 	public static readonly string AlwaysPlayMusicKey = "AlwaysPlayMusic";
+
+	private Dictionary<string, object> alwaysPlayMusicMetric = new Dictionary<string, object> { 
+	{
+		AudioOptionsScreen.AlwaysPlayMusicKey,
+		null
+	} };
+
+	private List<KFMOD.AudioDevice> audioDevices = new List<KFMOD.AudioDevice>();
+
+	private List<Dropdown.OptionData> audioDeviceOptions = new List<Dropdown.OptionData>();
 }

@@ -53,6 +53,11 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 			{
 				Output.LogWarning(new object[] { "Failed to find FMOD event [" + songInfo.fmodEvent + "]" });
 			}
+			int num = ((songInfo.numberOfVariations <= 0) ? (-1) : global::UnityEngine.Random.Range(1, songInfo.numberOfVariations + 1));
+			if (num != -1)
+			{
+				songInfo.ev.setParameterValue("variation", (float)num);
+			}
 			songInfo.ev.start();
 			this.activeSongs[song_name] = songInfo;
 			if (songInfo.dynamic)
@@ -85,16 +90,16 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 			}
 			else
 			{
-				int num = 0;
+				int num2 = 0;
 				foreach (string text in this.activeSongs.Keys)
 				{
 					MusicManager.SongInfo songInfo3 = this.activeSongs[text];
-					if (!songInfo3.stinger && songInfo3.priority > num)
+					if (!songInfo3.stinger && songInfo3.priority > num2)
 					{
-						num = songInfo3.priority;
+						num2 = songInfo3.priority;
 					}
 				}
-				if (songInfo.priority >= num)
+				if (songInfo.priority >= num2)
 				{
 					for (int j = 0; j < list.Count; j++)
 					{
@@ -112,6 +117,11 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 					if (songInfo.ev == null)
 					{
 						Output.LogWarning(new object[] { "Failed to find FMOD event [" + songInfo.fmodEvent + "]" });
+					}
+					int num3 = ((songInfo.numberOfVariations <= 0) ? (-1) : global::UnityEngine.Random.Range(1, songInfo.numberOfVariations + 1));
+					if (num3 != -1)
+					{
+						songInfo.ev.setParameterValue("variation", (float)num3);
 					}
 					songInfo.ev.start();
 					this.activeSongs[song_name] = songInfo;
@@ -218,11 +228,18 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 	private void Update()
 	{
 		this.ClearFinishedSongs();
-		this.SetDynamicMusicZoomLevel();
-		this.SetDynamicMusicTimeSinceLastJob();
-		if (GameClock.Instance != null && GameClock.Instance.GetCurrentDayAsPercentage() >= this.duskTime && this.DynamicMusicIsActive())
+		if (this.DynamicMusicIsActive())
 		{
-			this.StopDynamicMusic(false);
+			this.SetDynamicMusicZoomLevel();
+			this.SetDynamicMusicTimeSinceLastJob();
+			if (this.activeDynamicSong.useTimeOfDay)
+			{
+				this.SetDynamicMusicTimeOfDay();
+			}
+			if (GameClock.Instance != null && GameClock.Instance.GetCurrentDayAsPercentage() >= this.duskTime)
+			{
+				this.StopDynamicMusic(false);
+			}
 		}
 	}
 
@@ -314,9 +331,9 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		if (PlayerPrefs.HasKey(AudioOptionsScreen.AlwaysPlayMusicKey))
+		if (KPlayerPrefs.HasKey(AudioOptionsScreen.AlwaysPlayMusicKey))
 		{
-			this.alwaysPlayMusic = PlayerPrefs.GetInt(AudioOptionsScreen.AlwaysPlayMusicKey) == 1;
+			this.alwaysPlayMusic = KPlayerPrefs.GetInt(AudioOptionsScreen.AlwaysPlayMusicKey) == 1;
 		}
 	}
 
@@ -348,12 +365,14 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		{
 			this.SetDynamicMusicOverlayActive();
 		}
+		this.SetDynamicMusicPlayHook();
 		string text = "Volume_Music";
-		if (PlayerPrefs.HasKey(text))
+		if (KPlayerPrefs.HasKey(text))
 		{
-			float @float = PlayerPrefs.GetFloat(text);
+			float @float = KPlayerPrefs.GetFloat(text);
 			AudioMixer.instance.SetSnapshotParameter(AudioMixerSnapshots.Get().DynamicMusicPlayingSnapshot, "userVolume_Music", @float, true);
 		}
+		AudioMixer.instance.SetSnapshotParameter(AudioMixerSnapshots.Get().DynamicMusicPlayingSnapshot, "intensity", songInfo.sfxAttenuationSnapshotIntensity / 100f, true);
 	}
 
 	public void StopDynamicMusic(bool stopImmediate = false)
@@ -369,13 +388,40 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public string GetNextDynamicSong()
 	{
-		int num = 0;
-		if (this.lastDynamicSongPlayed != -1)
+		int num2;
+		if (this.unplayedIndexes.Count > 0)
 		{
-			num = ((this.lastDynamicSongPlayed + 1 < this.dynamicSongs.Count) ? (this.lastDynamicSongPlayed + 1) : 0);
+			int num = global::UnityEngine.Random.Range(0, this.unplayedIndexes.Count);
+			num2 = this.unplayedIndexes[num];
+			this.unplayedIndexes.RemoveAt(num);
 		}
-		this.lastDynamicSongPlayed = num;
-		return this.dynamicSongs[num];
+		else
+		{
+			this.ResetUnplayedIndexes();
+			for (int i = 0; i < this.unplayedIndexes.Count; i++)
+			{
+				if (this.unplayedIndexes[i] == this.lastDynamicSongPlayed)
+				{
+					this.unplayedIndexes.Remove(this.unplayedIndexes[i]);
+					break;
+				}
+			}
+			int num3 = global::UnityEngine.Random.Range(0, this.unplayedIndexes.Count);
+			num2 = this.unplayedIndexes[num3];
+			this.unplayedIndexes.RemoveAt(num3);
+			this.unplayedIndexes.Add(this.lastDynamicSongPlayed);
+		}
+		this.lastDynamicSongPlayed = num2;
+		return this.dynamicSongs[num2];
+	}
+
+	public void ResetUnplayedIndexes()
+	{
+		this.unplayedIndexes.Clear();
+		for (int i = 0; i < this.dynamicSongs.Count; i++)
+		{
+			this.unplayedIndexes.Add(i);
+		}
 	}
 
 	public bool DynamicMusicIsActive()
@@ -401,7 +447,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public void SetDynamicMusicZoomLevel()
 	{
-		if (this.DynamicMusicIsActive() && CameraController.Instance != null)
+		if (CameraController.Instance != null)
 		{
 			float num = 100f - Camera.main.orthographicSize / 20f * 100f;
 			this.SetSongParameter(Assets.GetSimpleSoundEventName(this.activeDynamicSong.fmodEvent), "zoomPercentage", num, false);
@@ -410,10 +456,17 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public void SetDynamicMusicTimeSinceLastJob()
 	{
-		if (this.DynamicMusicIsActive())
+		this.SetSongParameter(Assets.GetSimpleSoundEventName(this.activeDynamicSong.fmodEvent), "secsSinceNewJob", Time.time - Game.Instance.LastTimeWorkStarted, false);
+	}
+
+	public void SetDynamicMusicTimeOfDay()
+	{
+		if (this.time >= this.timeOfDayUpdateRate)
 		{
-			this.SetSongParameter(Assets.GetSimpleSoundEventName(this.activeDynamicSong.fmodEvent), "secsSinceNewJob", Time.time - Game.Instance.LastTimeWorkStarted, false);
+			this.SetSongParameter(Assets.GetSimpleSoundEventName(this.activeDynamicSong.fmodEvent), "timeOfDay", GameClock.Instance.GetCurrentDayAsPercentage(), false);
+			this.time = 0f;
 		}
+		this.time += Time.deltaTime;
 	}
 
 	public void SetDynamicMusicOverlayActive()
@@ -430,6 +483,12 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		{
 			this.SetSongParameter(Assets.GetSimpleSoundEventName(this.activeDynamicSong.fmodEvent), "overlayActive", 0f, true);
 		}
+	}
+
+	public void SetDynamicMusicPlayHook()
+	{
+		this.SetSongParameter(Assets.GetSimpleSoundEventName(this.activeDynamicSong.fmodEvent), "playHook", (!this.activeDynamicSong.playHook) ? 0f : 1f, true);
+		this.activeDynamicSong.playHook = !this.activeDynamicSong.playHook;
 	}
 
 	public bool ShouldPlayDynamicMusicStartOfDay()
@@ -454,6 +513,8 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 	{
 		MusicManager._instance = this;
 		this.dynamicSongs = new List<string>(this.dynamicSongMap.Keys);
+		this.unplayedIndexes = new List<int>();
+		this.ResetUnplayedIndexes();
 	}
 
 	protected override void OnCleanUp()
@@ -492,26 +553,34 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public Dictionary<string, MusicManager.SongInfo> activeSongs = new Dictionary<string, MusicManager.SongInfo>();
 
+	[NonSerialized]
 	public List<string> MusicDebugLog = new List<string>();
 
 	private Dictionary<string, MusicManager.SongInfo> dynamicSongMap = new Dictionary<string, MusicManager.SongInfo>();
 
 	private List<string> dynamicSongs;
 
+	private List<int> unplayedIndexes;
+
 	private int lastDynamicSongPlayed = -1;
 
 	[NonSerialized]
 	public MusicManager.SongInfo activeDynamicSong;
 
+	[NonSerialized]
 	public int daysSinceDynamicMusic;
 
 	public int daysBetweenDynamicMusic;
 
 	public bool alwaysPlayMusic;
 
-	private float duskTime = 0.75f;
+	private float duskTime = 0.85f;
 
 	private float loadGameCutoffPoint = 0.5f;
+
+	private float time;
+
+	private float timeOfDayUpdateRate = 2f;
 
 	private static MusicManager _instance;
 
@@ -531,6 +600,15 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		[SerializeField]
 		public bool dynamic;
 
+		[SerializeField]
+		public float sfxAttenuationSnapshotIntensity = 70f;
+
+		[SerializeField]
+		public bool useTimeOfDay;
+
+		[SerializeField]
+		public int numberOfVariations;
+
 		[NonSerialized]
 		public FMOD.Studio.EventInstance ev;
 
@@ -539,5 +617,8 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 
 		[NonSerialized]
 		public PLAYBACK_STATE musicPlaybackState;
+
+		[NonSerialized]
+		public bool playHook = true;
 	}
 }

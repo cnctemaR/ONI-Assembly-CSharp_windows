@@ -4,18 +4,28 @@ using UnityEngine;
 
 public class KBatchedAnimUpdater
 {
-	public static void CreateInstance()
+	public static KBatchedAnimUpdater instance
 	{
-		KBatchedAnimUpdater.instance = new KBatchedAnimUpdater();
+		get
+		{
+			return Singleton<KBatchedAnimUpdater>.Instance;
+		}
 	}
 
-	public static void DestroyInstance()
+	public static void Destroy()
 	{
-		KBatchedAnimUpdater.instance = null;
+		KBatchedAnimUpdater.instance.Clear();
+		Singleton<KBatchedAnimUpdater>.Destroy();
+	}
+
+	public static void CreateInstance()
+	{
+		Singleton<KBatchedAnimUpdater>.CreateInstance();
 	}
 
 	public void InitializeGrid()
 	{
+		this.Clear();
 		int num = (Grid.WidthInCells + 16 - 1) / 16;
 		int num2 = (Grid.HeightInCells + 16 - 1) / 16;
 		this.controllerGrid = new List<KBatchedAnimController>[num, num2];
@@ -32,13 +42,31 @@ public class KBatchedAnimUpdater
 		this.visibleChunkGrid = new bool[num, num2];
 	}
 
-	public void DestroyGrid()
+	public void Clear()
 	{
+		for (int i = 0; i < this.updateList.Count; i++)
+		{
+			if (this.updateList[i] != null)
+			{
+				global::UnityEngine.Object.DestroyImmediate(this.updateList[i]);
+			}
+		}
+		this.updateList.Clear();
+		for (int j = 0; j < this.alwaysUpdateList.Count; j++)
+		{
+			if (this.alwaysUpdateList[j] != null)
+			{
+				global::UnityEngine.Object.DestroyImmediate(this.alwaysUpdateList[j]);
+			}
+		}
+		this.alwaysUpdateList.Clear();
+		this.queuedRegistrations.Clear();
+		this.newlyVisible.Clear();
+		this.visibleChunks.Clear();
+		this.previouslyVisibleChunks.Clear();
 		this.controllerGrid = null;
 		this.previouslyVisibleChunkGrid = null;
 		this.visibleChunkGrid = null;
-		this.visibleChunks.Clear();
-		this.previouslyVisibleChunks.Clear();
 	}
 
 	public void UpdateRegister(KBatchedAnimController controller)
@@ -53,6 +81,10 @@ public class KBatchedAnimUpdater
 
 	public void UpdateUnregister(KBatchedAnimController controller)
 	{
+		if (App.IsExiting)
+		{
+			return;
+		}
 		this.queuedRegistrations.Add(new KBatchedAnimUpdater.RegistrationInfo
 		{
 			controller = controller,
@@ -74,6 +106,10 @@ public class KBatchedAnimUpdater
 
 	public void VisibilityUnregister(Vector2I chunk_xy, KBatchedAnimController controller)
 	{
+		if (App.IsExiting)
+		{
+			return;
+		}
 		this.queuedRegistrations.Add(new KBatchedAnimUpdater.RegistrationInfo
 		{
 			chunkXY = chunk_xy,
@@ -85,7 +121,7 @@ public class KBatchedAnimUpdater
 
 	private List<KBatchedAnimController> GetControllerList(Vector2I chunk_xy)
 	{
-		if (chunk_xy.x < 0 || chunk_xy.x >= this.controllerGrid.GetLength(0) || chunk_xy.y < 0 || chunk_xy.y > this.controllerGrid.GetLength(1))
+		if (this.controllerGrid == null || chunk_xy.x < 0 || chunk_xy.x >= this.controllerGrid.GetLength(0) || chunk_xy.y < 0 || chunk_xy.y > this.controllerGrid.GetLength(1))
 		{
 			return null;
 		}
@@ -281,8 +317,6 @@ public class KBatchedAnimUpdater
 
 	private const int CHUNKS_TO_CLEAN_PER_TICK = 16;
 
-	public static KBatchedAnimUpdater instance;
-
 	private List<KBatchedAnimController>[,] controllerGrid;
 
 	private List<KBatchedAnimController> updateList = new List<KBatchedAnimController>();
@@ -303,9 +337,9 @@ public class KBatchedAnimUpdater
 
 	private List<KBatchedAnimUpdater.RegistrationInfo> queuedRegistrations = new List<KBatchedAnimUpdater.RegistrationInfo>();
 
-	private int cleanUpChunkIndex;
-
 	private List<KBatchedAnimController> newlyVisible = new List<KBatchedAnimController>();
+
+	private int cleanUpChunkIndex;
 
 	private struct RegistrationInfo
 	{

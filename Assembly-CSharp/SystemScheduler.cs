@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using UnityEngine;
 
 public class SystemScheduler
 {
@@ -44,14 +43,13 @@ public class SystemScheduler
 			List<SystemScheduler.Entry> list = this.prioritizedEntries[i];
 			if (list.Count > 0)
 			{
-				list.RemoveAll((SystemScheduler.Entry x) => x.callback == null);
 				int j;
 				for (j = 0; j < list.Count; j++)
 				{
 					SystemScheduler.Entry entry = list[j];
-					if (entry.callback != null)
+					if (entry.details.callback != null)
 					{
-						entry.callback(entry.data);
+						entry.details.callback(entry.details.callbackData);
 					}
 					if (this.timer.ElapsedMilliseconds >= num)
 					{
@@ -66,43 +64,16 @@ public class SystemScheduler
 			}
 		}
 		this.timer.Reset();
-		this.RebuildIndices();
 	}
 
-	public Guid AddTask(Guid guid, SystemScheduler.Priority priority, Action<object> callback, object data, string name, GameObject profiler_obj)
+	public Guid AddTask(SystemScheduler.Priority priority, SchedulerEntry.Details details)
 	{
 		List<SystemScheduler.Entry> list = this.prioritizedEntries[(int)priority];
-		this.indices[guid] = new Pair<SystemScheduler.Priority, int>(priority, list.Count);
 		list.Add(new SystemScheduler.Entry
 		{
-			guid = guid,
-			callback = callback,
-			data = data
+			details = details
 		});
-		return guid;
-	}
-
-	public bool RemoveTask(Guid guid)
-	{
-		bool flag = false;
-		Pair<SystemScheduler.Priority, int> pair;
-		if (this.indices.TryGetValue(guid, out pair))
-		{
-			List<SystemScheduler.Entry> list = this.prioritizedEntries[(int)pair.first];
-			for (int i = 0; i < list.Count; i++)
-			{
-				SystemScheduler.Entry entry = list[i];
-				if (entry.guid == guid)
-				{
-					entry.guid = Guid.Empty;
-					entry.callback = null;
-					entry.data = null;
-					list[i] = entry;
-					flag = true;
-				}
-			}
-		}
-		return flag;
+		return details.id;
 	}
 
 	public void Clear()
@@ -113,32 +84,9 @@ public class SystemScheduler
 		}
 	}
 
-	private void RebuildIndices()
-	{
-		this.indices.Clear();
-		Pair<SystemScheduler.Priority, int> pair = default(Pair<SystemScheduler.Priority, int>);
-		for (int i = 0; i < this.prioritizedEntries.Length; i++)
-		{
-			SystemScheduler.Priority priority = (SystemScheduler.Priority)i;
-			pair.first = priority;
-			List<SystemScheduler.Entry> list = this.prioritizedEntries[i];
-			for (int j = 0; j < list.Count; j++)
-			{
-				pair.second = j;
-				SystemScheduler.Entry entry = list[j];
-				if (entry.guid != Guid.Empty)
-				{
-					this.indices[entry.guid] = pair;
-				}
-			}
-		}
-	}
-
 	public static SystemScheduler instance;
 
 	private List<SystemScheduler.Entry>[] prioritizedEntries = new List<SystemScheduler.Entry>[3];
-
-	private Dictionary<Guid, Pair<SystemScheduler.Priority, int>> indices = new Dictionary<Guid, Pair<SystemScheduler.Priority, int>>();
 
 	private Stopwatch timer;
 
@@ -153,10 +101,6 @@ public class SystemScheduler
 	[DebuggerDisplay("{data}, {name}, {guid}")]
 	private struct Entry
 	{
-		public Guid guid;
-
-		public Action<object> callback;
-
-		public object data;
+		public SchedulerEntry.Details details;
 	}
 }

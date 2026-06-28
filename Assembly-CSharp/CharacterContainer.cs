@@ -137,7 +137,6 @@ public class CharacterContainer : KScreen
 		if (this.animController == null)
 		{
 			this.animController = Util.KInstantiateUI(EntityPrefabs.Instance.MinionSelectPreview, this.contentBody.gameObject, false).GetComponent<KBatchedAnimController>();
-			this.animController.GetComponent<MinionIdentity>().addToIdentityList = this.addMinionToIdentityList;
 			KCanvasScaler kcanvasScaler = global::UnityEngine.Object.FindObjectOfType<KCanvasScaler>();
 			this.animController.animScale = this.baseCharacterScale * (1f / kcanvasScaler.GetCanvasScale());
 			ScreenResize instance = ScreenResize.Instance;
@@ -167,7 +166,7 @@ public class CharacterContainer : KScreen
 		});
 		this.traitLabels.Clear();
 		this.characterNameTitle.SetTitle(this.stats.Name);
-		string professionString = this.animController.gameObject.GetAttributes().GetProfessionString();
+		string professionString = this.animController.gameObject.GetAttributes().GetProfessionString(true);
 		this.characterJob.text = professionString;
 		string professionDescriptionString = this.animController.gameObject.GetAttributes().GetProfessionDescriptionString();
 		this.characterJob.GetComponent<ToolTip>().toolTip = professionDescriptionString;
@@ -192,11 +191,11 @@ public class CharacterContainer : KScreen
 			LocText locText3 = Util.KInstantiateUI<LocText>(this.expectation.gameObject, this.expectation.transform.parent.gameObject, false);
 			locText3.gameObject.SetActive(true);
 			AttributeInstance attributeInstance = need.GetExpectationAttribute().Lookup(this.animController);
-			locText3.text = string.Format(UI.CHARACTERCONTAINER_NEED, need.Name, attributeInstance.GetFormattedValue(false));
+			locText3.text = string.Format(UI.CHARACTERCONTAINER_NEED, need.Name, attributeInstance.GetFormattedValue());
 			this.expectationLabels.Add(locText3);
-			string text = attributeInstance.GetAttributeValueTooltip();
-			text += UI.TOOLTIPS.TOOLTIP_SEPERATOR;
-			text += need.ExpectationTooltip;
+			string text = need.ExpectationTooltip;
+			text += UI.HORIZONTAL_BR_RULE;
+			text += attributeInstance.GetAttributeValueTooltip();
 			locText3.GetComponent<ToolTip>().SetSimpleTooltip(text);
 		}
 		if (this.stats.stressTrait != null)
@@ -257,7 +256,11 @@ public class CharacterContainer : KScreen
 				foreach (AttributeConverter converter in attribute.Attribute.converters)
 				{
 					AttributeConverterInstance converter_instance = this.animController.gameObject.GetComponent<AttributeConverters>().GetConverter(converter.Id);
-					tooltip = tooltip + "\n" + converter_instance.ToString();
+					string instance_details = converter_instance.ToString();
+					if (instance_details != null)
+					{
+						tooltip = tooltip + "\n" + instance_details;
+					}
 				}
 			}
 			newIconGroup.GetComponent<ToolTip>().SetSimpleTooltip(tooltip);

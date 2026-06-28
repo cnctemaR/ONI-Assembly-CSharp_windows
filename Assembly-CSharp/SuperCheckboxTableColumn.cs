@@ -4,7 +4,7 @@ using UnityEngine;
 public class SuperCheckboxTableColumn : CheckboxTableColumn
 {
 	public SuperCheckboxTableColumn(CheckboxTableColumn[] columns_affected, Action<MinionIdentity, GameObject> on_load_action, Func<MinionIdentity, GameObject, TableScreen.ResultValues> get_value_action, Action<GameObject> on_press_action, Action<GameObject, bool> set_value_action, Comparison<MinionIdentity> sort_comparison, Action<MinionIdentity, GameObject, ToolTip> on_tooltip)
-		: base(on_load_action, get_value_action, on_press_action, set_value_action, sort_comparison, on_tooltip, null)
+		: base(on_load_action, get_value_action, on_press_action, set_value_action, sort_comparison, on_tooltip, null, null)
 	{
 		this.columns_affected = columns_affected;
 	}

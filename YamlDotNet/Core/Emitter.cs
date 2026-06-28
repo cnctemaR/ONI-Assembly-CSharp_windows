@@ -40,6 +40,7 @@ namespace YamlDotNet.Core
 			this.bestWidth = bestWidth;
 			this.isCanonical = isCanonical;
 			this.output = output;
+			this.outputUsesUnicodeEncoding = this.IsUnicode(output.Encoding);
 		}
 
 		public void Emit(ParsingEvent @event)
@@ -70,42 +71,49 @@ namespace YamlDotNet.Core
 			int num;
 			if (type != EventType.DocumentStart)
 			{
-				switch (type)
+				if (type != EventType.SequenceStart)
 				{
-				case EventType.SequenceStart:
-					num = 2;
-					goto IL_004B;
-				case EventType.MappingStart:
+					if (type != EventType.MappingStart)
+					{
+						return false;
+					}
 					num = 3;
-					goto IL_004B;
 				}
-				return false;
+				else
+				{
+					num = 2;
+				}
 			}
-			num = 1;
-			IL_004B:
+			else
+			{
+				num = 1;
+			}
 			if (this.events.Count > num)
 			{
 				return false;
 			}
 			int num2 = 0;
-			foreach (ParsingEvent parsingEvent in this.events)
+			using (Queue<ParsingEvent>.Enumerator enumerator = this.events.GetEnumerator())
 			{
-				switch (parsingEvent.Type)
+				while (enumerator.MoveNext())
 				{
-				case EventType.DocumentStart:
-				case EventType.SequenceStart:
-				case EventType.MappingStart:
-					num2++;
-					break;
-				case EventType.DocumentEnd:
-				case EventType.SequenceEnd:
-				case EventType.MappingEnd:
-					num2--;
-					break;
-				}
-				if (num2 == 0)
-				{
-					return false;
+					switch (enumerator.Current.Type)
+					{
+					case EventType.DocumentStart:
+					case EventType.SequenceStart:
+					case EventType.MappingStart:
+						num2++;
+						break;
+					case EventType.DocumentEnd:
+					case EventType.SequenceEnd:
+					case EventType.MappingEnd:
+						num2--;
+						break;
+					}
+					if (num2 == 0)
+					{
+						return false;
+					}
 				}
 			}
 			return true;
@@ -128,7 +136,7 @@ namespace YamlDotNet.Core
 				YamlDotNet.Core.Events.Scalar scalar = evt as YamlDotNet.Core.Events.Scalar;
 				if (scalar != null)
 				{
-					this.AnalyzeScalar(scalar.Value);
+					this.AnalyzeScalar(scalar);
 				}
 				this.AnalyzeAnchor(nodeEvent.Anchor, false);
 				if (!string.IsNullOrEmpty(nodeEvent.Tag) && (this.isCanonical || nodeEvent.IsCanonical))
@@ -144,182 +152,221 @@ namespace YamlDotNet.Core
 			this.anchorData.isAlias = isAlias;
 		}
 
-		private void AnalyzeScalar(string value)
+		private void AnalyzeScalar(YamlDotNet.Core.Events.Scalar scalar)
 		{
+			string value = scalar.Value;
 			this.scalarData.value = value;
-			if (value.Length == 0)
+			if (value.Length != 0)
+			{
+				bool flag = false;
+				bool flag2 = false;
+				if (value.StartsWith("---", StringComparison.Ordinal) || value.StartsWith("...", StringComparison.Ordinal))
+				{
+					flag = true;
+					flag2 = true;
+				}
+				CharacterAnalyzer<StringLookAheadBuffer> characterAnalyzer = new CharacterAnalyzer<StringLookAheadBuffer>(new StringLookAheadBuffer(value));
+				bool flag3 = true;
+				bool flag4 = characterAnalyzer.IsWhiteBreakOrZero(1);
+				bool flag5 = false;
+				bool flag6 = false;
+				bool flag7 = false;
+				bool flag8 = false;
+				bool flag9 = false;
+				bool flag10 = false;
+				bool flag11 = false;
+				bool flag12 = false;
+				bool flag13 = false;
+				bool flag14 = false;
+				bool flag15 = !this.ValueIsRepresentableInOutputEncoding(value);
+				bool flag16 = false;
+				bool flag17 = true;
+				while (!characterAnalyzer.EndOfInput)
+				{
+					if (flag17)
+					{
+						if (characterAnalyzer.Check("#,[]{}&*!|>\\\"%@`'", 0))
+						{
+							flag = true;
+							flag2 = true;
+							flag9 = characterAnalyzer.Check('\'', 0);
+							flag16 |= characterAnalyzer.Check('\'', 0);
+						}
+						if (characterAnalyzer.Check("?:", 0))
+						{
+							flag = true;
+							if (flag4)
+							{
+								flag2 = true;
+							}
+						}
+						if (characterAnalyzer.Check('-', 0) && flag4)
+						{
+							flag = true;
+							flag2 = true;
+						}
+					}
+					else
+					{
+						if (characterAnalyzer.Check(",?[]{}", 0))
+						{
+							flag = true;
+						}
+						if (characterAnalyzer.Check(':', 0))
+						{
+							flag = true;
+							if (flag4)
+							{
+								flag2 = true;
+							}
+						}
+						if (characterAnalyzer.Check('#', 0) && flag3)
+						{
+							flag = true;
+							flag2 = true;
+						}
+						flag16 |= characterAnalyzer.Check('\'', 0);
+					}
+					if (!flag15 && !characterAnalyzer.IsPrintable(0))
+					{
+						flag15 = true;
+					}
+					if (characterAnalyzer.IsBreak(0))
+					{
+						flag14 = true;
+					}
+					if (characterAnalyzer.IsSpace(0))
+					{
+						if (flag17)
+						{
+							flag5 = true;
+						}
+						if (characterAnalyzer.Buffer.Position >= characterAnalyzer.Buffer.Length - 1)
+						{
+							flag7 = true;
+						}
+						if (flag13)
+						{
+							flag10 = true;
+						}
+						flag12 = true;
+						flag13 = false;
+					}
+					else if (characterAnalyzer.IsBreak(0))
+					{
+						if (flag17)
+						{
+							flag6 = true;
+						}
+						if (characterAnalyzer.Buffer.Position >= characterAnalyzer.Buffer.Length - 1)
+						{
+							flag8 = true;
+						}
+						if (flag12)
+						{
+							flag11 = true;
+						}
+						flag12 = false;
+						flag13 = true;
+					}
+					else
+					{
+						flag12 = false;
+						flag13 = false;
+					}
+					flag3 = characterAnalyzer.IsWhiteBreakOrZero(0);
+					characterAnalyzer.Skip(1);
+					if (!characterAnalyzer.EndOfInput)
+					{
+						flag4 = characterAnalyzer.IsWhiteBreakOrZero(1);
+					}
+					flag17 = false;
+				}
+				this.scalarData.isFlowPlainAllowed = true;
+				this.scalarData.isBlockPlainAllowed = true;
+				this.scalarData.isSingleQuotedAllowed = true;
+				this.scalarData.isBlockAllowed = true;
+				if (flag5 || flag6 || flag7 || flag8 || flag9)
+				{
+					this.scalarData.isFlowPlainAllowed = false;
+					this.scalarData.isBlockPlainAllowed = false;
+				}
+				if (flag7)
+				{
+					this.scalarData.isBlockAllowed = false;
+				}
+				if (flag10)
+				{
+					this.scalarData.isFlowPlainAllowed = false;
+					this.scalarData.isBlockPlainAllowed = false;
+					this.scalarData.isSingleQuotedAllowed = false;
+				}
+				if (flag11 || flag15)
+				{
+					this.scalarData.isFlowPlainAllowed = false;
+					this.scalarData.isBlockPlainAllowed = false;
+					this.scalarData.isSingleQuotedAllowed = false;
+					this.scalarData.isBlockAllowed = false;
+				}
+				this.scalarData.isMultiline = flag14;
+				if (flag14)
+				{
+					this.scalarData.isFlowPlainAllowed = false;
+					this.scalarData.isBlockPlainAllowed = false;
+				}
+				if (flag)
+				{
+					this.scalarData.isFlowPlainAllowed = false;
+				}
+				if (flag2)
+				{
+					this.scalarData.isBlockPlainAllowed = false;
+				}
+				this.scalarData.hasSingleQuotes = flag16;
+				return;
+			}
+			if (scalar.Tag == "tag:yaml.org,2002:null")
 			{
 				this.scalarData.isMultiline = false;
 				this.scalarData.isFlowPlainAllowed = false;
 				this.scalarData.isBlockPlainAllowed = true;
-				this.scalarData.isSingleQuotedAllowed = true;
+				this.scalarData.isSingleQuotedAllowed = false;
 				this.scalarData.isBlockAllowed = false;
 				return;
 			}
-			bool flag = false;
-			bool flag2 = false;
-			if (value.StartsWith("---", StringComparison.Ordinal) || value.StartsWith("...", StringComparison.Ordinal))
-			{
-				flag = true;
-				flag2 = true;
-			}
-			CharacterAnalyzer<StringLookAheadBuffer> characterAnalyzer = new CharacterAnalyzer<StringLookAheadBuffer>(new StringLookAheadBuffer(value));
-			bool flag3 = true;
-			bool flag4 = characterAnalyzer.IsWhiteBreakOrZero(1);
-			bool flag5 = false;
-			bool flag6 = false;
-			bool flag7 = false;
-			bool flag8 = false;
-			bool flag9 = false;
-			bool flag10 = false;
-			bool flag11 = false;
-			bool flag12 = false;
-			bool flag13 = false;
-			bool flag14 = false;
-			bool flag15 = true;
-			while (!characterAnalyzer.EndOfInput)
-			{
-				if (flag15)
-				{
-					if (characterAnalyzer.Check("#,[]{}&*!|>\\\"%@`", 0))
-					{
-						flag = true;
-						flag2 = true;
-					}
-					if (characterAnalyzer.Check("?:", 0))
-					{
-						flag = true;
-						if (flag4)
-						{
-							flag2 = true;
-						}
-					}
-					if (characterAnalyzer.Check('-', 0) && flag4)
-					{
-						flag = true;
-						flag2 = true;
-					}
-				}
-				else
-				{
-					if (characterAnalyzer.Check(",?[]{}", 0))
-					{
-						flag = true;
-					}
-					if (characterAnalyzer.Check(':', 0))
-					{
-						flag = true;
-						if (flag4)
-						{
-							flag2 = true;
-						}
-					}
-					if (characterAnalyzer.Check('#', 0) && flag3)
-					{
-						flag = true;
-						flag2 = true;
-					}
-				}
-				if (!characterAnalyzer.IsPrintable(0) || (!characterAnalyzer.IsAscii(0) && !this.IsUnicode(this.output.Encoding)))
-				{
-					flag14 = true;
-				}
-				if (characterAnalyzer.IsBreak(0))
-				{
-					flag13 = true;
-				}
-				if (characterAnalyzer.IsSpace(0))
-				{
-					if (flag15)
-					{
-						flag5 = true;
-					}
-					if (characterAnalyzer.Buffer.Position >= characterAnalyzer.Buffer.Length - 1)
-					{
-						flag7 = true;
-					}
-					if (flag12)
-					{
-						flag9 = true;
-					}
-					flag11 = true;
-					flag12 = false;
-				}
-				else if (characterAnalyzer.IsBreak(0))
-				{
-					if (flag15)
-					{
-						flag6 = true;
-					}
-					if (characterAnalyzer.Buffer.Position >= characterAnalyzer.Buffer.Length - 1)
-					{
-						flag8 = true;
-					}
-					if (flag11)
-					{
-						flag10 = true;
-					}
-					flag11 = false;
-					flag12 = true;
-				}
-				else
-				{
-					flag11 = false;
-					flag12 = false;
-				}
-				flag3 = characterAnalyzer.IsWhiteBreakOrZero(0);
-				characterAnalyzer.Skip(1);
-				if (!characterAnalyzer.EndOfInput)
-				{
-					flag4 = characterAnalyzer.IsWhiteBreakOrZero(1);
-				}
-				flag15 = false;
-			}
-			this.scalarData.isFlowPlainAllowed = true;
-			this.scalarData.isBlockPlainAllowed = true;
+			this.scalarData.isMultiline = false;
+			this.scalarData.isFlowPlainAllowed = false;
+			this.scalarData.isBlockPlainAllowed = false;
 			this.scalarData.isSingleQuotedAllowed = true;
-			this.scalarData.isBlockAllowed = true;
-			if (flag5 || flag6 || flag7 || flag8)
+			this.scalarData.isBlockAllowed = false;
+		}
+
+		private bool ValueIsRepresentableInOutputEncoding(string value)
+		{
+			if (this.outputUsesUnicodeEncoding)
 			{
-				this.scalarData.isFlowPlainAllowed = false;
-				this.scalarData.isBlockPlainAllowed = false;
+				return true;
 			}
-			if (flag7)
+			bool flag;
+			try
 			{
-				this.scalarData.isBlockAllowed = false;
+				byte[] bytes = this.output.Encoding.GetBytes(value);
+				flag = this.output.Encoding.GetString(bytes, 0, bytes.Length).Equals(value);
 			}
-			if (flag9)
+			catch (EncoderFallbackException)
 			{
-				this.scalarData.isFlowPlainAllowed = false;
-				this.scalarData.isBlockPlainAllowed = false;
-				this.scalarData.isSingleQuotedAllowed = false;
+				flag = false;
 			}
-			if (flag10 || flag14)
+			catch (ArgumentOutOfRangeException)
 			{
-				this.scalarData.isFlowPlainAllowed = false;
-				this.scalarData.isBlockPlainAllowed = false;
-				this.scalarData.isSingleQuotedAllowed = false;
-				this.scalarData.isBlockAllowed = false;
+				flag = false;
 			}
-			this.scalarData.isMultiline = flag13;
-			if (flag13)
-			{
-				this.scalarData.isFlowPlainAllowed = false;
-				this.scalarData.isBlockPlainAllowed = false;
-			}
-			if (flag)
-			{
-				this.scalarData.isFlowPlainAllowed = false;
-			}
-			if (flag2)
-			{
-				this.scalarData.isBlockPlainAllowed = false;
-			}
+			return flag;
 		}
 
 		private bool IsUnicode(Encoding encoding)
 		{
-			return encoding.Equals(Encoding.UTF8) || encoding.Equals(Encoding.Unicode) || encoding.Equals(Encoding.BigEndianUnicode) || encoding.Equals(Encoding.UTF7) || encoding.Equals(Encoding.UTF32);
+			return encoding is UTF8Encoding || encoding is UnicodeEncoding || encoding is UTF7Encoding || encoding is UTF8Encoding;
 		}
 
 		private void AnalyzeTag(string tag)
@@ -412,10 +459,11 @@ namespace YamlDotNet.Core
 			}
 			else
 			{
-				this.WriteBreak();
+				this.WriteIndent();
 			}
 			this.Write("# ");
 			this.Write(comment.Value);
+			this.WriteBreak('\n');
 			this.isIndentation = true;
 		}
 
@@ -455,24 +503,26 @@ namespace YamlDotNet.Core
 				}
 				foreach (TagDirective tagDirective in tagDirectiveCollection)
 				{
-					this.AppendTagDirectiveTo(tagDirective, false, this.tagDirectives);
+					Emitter.AppendTagDirectiveTo(tagDirective, false, this.tagDirectives);
 				}
-				foreach (TagDirective tagDirective2 in Constants.DefaultTagDirectives)
+				TagDirective[] array = Constants.DefaultTagDirectives;
+				for (int i = 0; i < array.Length; i++)
 				{
-					this.AppendTagDirectiveTo(tagDirective2, true, this.tagDirectives);
+					Emitter.AppendTagDirectiveTo(array[i], true, this.tagDirectives);
 				}
 				if (tagDirectiveCollection.Count > 0)
 				{
 					flag = false;
-					foreach (TagDirective tagDirective3 in Constants.DefaultTagDirectives)
+					array = Constants.DefaultTagDirectives;
+					for (int i = 0; i < array.Length; i++)
 					{
-						this.AppendTagDirectiveTo(tagDirective3, true, tagDirectiveCollection);
+						Emitter.AppendTagDirectiveTo(array[i], true, tagDirectiveCollection);
 					}
-					foreach (TagDirective tagDirective4 in tagDirectiveCollection)
+					foreach (TagDirective tagDirective2 in tagDirectiveCollection)
 					{
 						this.WriteIndicator("%TAG", true, false, false);
-						this.WriteTagHandle(tagDirective4.Handle);
-						this.WriteTagContent(tagDirective4.Prefix, true);
+						this.WriteTagHandle(tagDirective2.Handle);
+						this.WriteTagContent(tagDirective2.Prefix, true);
 						this.WriteIndent();
 					}
 				}
@@ -514,7 +564,7 @@ namespace YamlDotNet.Core
 			}
 			foreach (TagDirective tagDirective in tagCollection)
 			{
-				this.AppendTagDirectiveTo(tagDirective, false, tagDirectiveCollection);
+				Emitter.AppendTagDirectiveTo(tagDirective, false, tagDirectiveCollection);
 			}
 			foreach (TagDirective tagDirective2 in Constants.DefaultTagDirectives)
 			{
@@ -531,7 +581,7 @@ namespace YamlDotNet.Core
 			}
 		}
 
-		private void AppendTagDirectiveTo(TagDirective value, bool allowDuplicates, TagDirectiveCollection tagDirectives)
+		private static void AppendTagDirectiveTo(TagDirective value, bool allowDuplicates, TagDirectiveCollection tagDirectives)
 		{
 			if (tagDirectives.Contains(value))
 			{
@@ -617,7 +667,7 @@ namespace YamlDotNet.Core
 			{
 				if ((this.flowLevel != 0 && !this.scalarData.isFlowPlainAllowed) || (this.flowLevel == 0 && !this.scalarData.isBlockPlainAllowed))
 				{
-					scalarStyle = ScalarStyle.SingleQuoted;
+					scalarStyle = ((this.scalarData.isSingleQuotedAllowed && !this.scalarData.hasSingleQuotes) ? ScalarStyle.SingleQuoted : ScalarStyle.DoubleQuoted);
 				}
 				if (string.IsNullOrEmpty(this.scalarData.value) && (this.flowLevel != 0 || this.isSimpleKeyContext))
 				{
@@ -674,6 +724,7 @@ namespace YamlDotNet.Core
 			for (int i = 0; i < value.Length; i++)
 			{
 				char c = value[i];
+				char c2;
 				if (Emitter.IsSpace(c))
 				{
 					if (allowBreaks && !flag && this.column > this.bestWidth && i + 1 < value.Length && value[i + 1] != ' ')
@@ -686,13 +737,13 @@ namespace YamlDotNet.Core
 					}
 					flag = true;
 				}
-				else if (Emitter.IsBreak(c))
+				else if (Emitter.IsBreak(c, out c2))
 				{
 					if (!flag2 && c == '\n')
 					{
-						this.WriteBreak();
+						this.WriteBreak('\n');
 					}
-					this.WriteBreak();
+					this.WriteBreak(c2);
 					this.isIndentation = true;
 					flag2 = true;
 				}
@@ -724,6 +775,7 @@ namespace YamlDotNet.Core
 			for (int i = 0; i < value.Length; i++)
 			{
 				char c = value[i];
+				char c2;
 				if (c == ' ')
 				{
 					if (allowBreaks && !flag && this.column > this.bestWidth && i != 0 && i + 1 < value.Length && value[i + 1] != ' ')
@@ -736,13 +788,13 @@ namespace YamlDotNet.Core
 					}
 					flag = true;
 				}
-				else if (Emitter.IsBreak(c))
+				else if (Emitter.IsBreak(c, out c2))
 				{
 					if (!flag2 && c == '\n')
 					{
-						this.WriteBreak();
+						this.WriteBreak('\n');
 					}
-					this.WriteBreak();
+					this.WriteBreak(c2);
 					this.isIndentation = true;
 					flag2 = true;
 				}
@@ -774,108 +826,121 @@ namespace YamlDotNet.Core
 			for (int i = 0; i < value.Length; i++)
 			{
 				char c = value[i];
-				if (!Emitter.IsPrintable(c) || Emitter.IsBreak(c) || c == '"' || c == '\\')
+				char c2;
+				if (!Emitter.IsPrintable(c) || Emitter.IsBreak(c, out c2) || c == '"' || c == '\\')
 				{
 					this.Write('\\');
-					char c2 = c;
-					if (c2 <= '"')
+					if (c <= '\\')
 					{
-						switch (c2)
+						if (c <= '\u001b')
 						{
-						case '\0':
-							this.Write('0');
-							break;
-						case '\u0001':
-						case '\u0002':
-						case '\u0003':
-						case '\u0004':
-						case '\u0005':
-						case '\u0006':
-							goto IL_019D;
-						case '\a':
-							this.Write('a');
-							break;
-						case '\b':
-							this.Write('b');
-							break;
-						case '\t':
-							this.Write('t');
-							break;
-						case '\n':
-							this.Write('n');
-							break;
-						case '\v':
-							this.Write('v');
-							break;
-						case '\f':
-							this.Write('f');
-							break;
-						case '\r':
-							this.Write('r');
-							break;
-						default:
-							if (c2 != '\u001b')
+							switch (c)
 							{
-								if (c2 != '"')
+							case '\0':
+								this.Write('0');
+								break;
+							case '\u0001':
+							case '\u0002':
+							case '\u0003':
+							case '\u0004':
+							case '\u0005':
+							case '\u0006':
+								goto IL_01B1;
+							case '\a':
+								this.Write('a');
+								break;
+							case '\b':
+								this.Write('b');
+								break;
+							case '\t':
+								this.Write('t');
+								break;
+							case '\n':
+								this.Write('n');
+								break;
+							case '\v':
+								this.Write('v');
+								break;
+							case '\f':
+								this.Write('f');
+								break;
+							case '\r':
+								this.Write('r');
+								break;
+							default:
+								if (c != '\u001b')
 								{
-									goto IL_019D;
+									goto IL_01B1;
 								}
-								this.Write('"');
-							}
-							else
-							{
 								this.Write('e');
+								break;
 							}
-							break;
 						}
-					}
-					else if (c2 <= '\u0085')
-					{
-						if (c2 != '\\')
+						else if (c != '"')
 						{
-							if (c2 != '\u0085')
+							if (c != '\\')
 							{
-								goto IL_019D;
+								goto IL_01B1;
 							}
-							this.Write('N');
+							this.Write('\\');
 						}
 						else
 						{
-							this.Write('\\');
+							this.Write('"');
 						}
 					}
-					else if (c2 != '\u00a0')
+					else if (c <= '\u00a0')
 					{
-						switch (c2)
+						if (c != '\u0085')
 						{
-						case '\u2028':
-							this.Write('L');
-							break;
-						case '\u2029':
-							this.Write('P');
-							break;
-						default:
-							goto IL_019D;
+							if (c != '\u00a0')
+							{
+								goto IL_01B1;
+							}
+							this.Write('_');
 						}
+						else
+						{
+							this.Write('N');
+						}
+					}
+					else if (c != '\u2028')
+					{
+						if (c != '\u2029')
+						{
+							goto IL_01B1;
+						}
+						this.Write('P');
 					}
 					else
 					{
-						this.Write('_');
+						this.Write('L');
 					}
-					IL_01E8:
+					IL_0264:
 					flag = false;
-					goto IL_0245;
-					IL_019D:
-					short num = (short)c;
+					goto IL_02C1;
+					IL_01B1:
+					ushort num = (ushort)c;
 					if (num <= 255)
 					{
 						this.Write('x');
 						this.Write(num.ToString("X02", CultureInfo.InvariantCulture));
-						goto IL_01E8;
+						goto IL_0264;
 					}
-					this.Write('u');
-					this.Write(num.ToString("X04", CultureInfo.InvariantCulture));
-					goto IL_01E8;
+					if (!Emitter.IsHighSurrogate(c))
+					{
+						this.Write('u');
+						this.Write(num.ToString("X04", CultureInfo.InvariantCulture));
+						goto IL_0264;
+					}
+					if (i + 1 < value.Length && Emitter.IsLowSurrogate(value[i + 1]))
+					{
+						this.Write('U');
+						this.Write(char.ConvertToUtf32(c, value[i + 1]).ToString("X08", CultureInfo.InvariantCulture));
+						i++;
+						goto IL_0264;
+					}
+					throw new SyntaxErrorException("While writing a quoted scalar, found an orphaned high surrogate.");
 				}
 				else if (c == ' ')
 				{
@@ -898,7 +963,7 @@ namespace YamlDotNet.Core
 					this.Write(c);
 					flag = false;
 				}
-				IL_0245:;
+				IL_02C1:;
 			}
 			this.WriteIndicator("\"", false, false, false);
 			this.isWhitespace = false;
@@ -910,26 +975,31 @@ namespace YamlDotNet.Core
 			bool flag = true;
 			this.WriteIndicator("|", true, false, false);
 			this.WriteBlockScalarHints(value);
-			this.WriteBreak();
+			this.WriteBreak('\n');
 			this.isIndentation = true;
 			this.isWhitespace = true;
-			foreach (char c in value)
+			for (int i = 0; i < value.Length; i++)
 			{
-				if (Emitter.IsBreak(c))
+				char c = value[i];
+				if (c != '\r' || i + 1 >= value.Length || value[i + 1] != '\n')
 				{
-					this.WriteBreak();
-					this.isIndentation = true;
-					flag = true;
-				}
-				else
-				{
-					if (flag)
+					char c2;
+					if (Emitter.IsBreak(c, out c2))
 					{
-						this.WriteIndent();
+						this.WriteBreak(c2);
+						this.isIndentation = true;
+						flag = true;
 					}
-					this.Write(c);
-					this.isIndentation = false;
-					flag = false;
+					else
+					{
+						if (flag)
+						{
+							this.WriteIndent();
+						}
+						this.Write(c);
+						this.isIndentation = false;
+						flag = false;
+					}
 				}
 			}
 		}
@@ -940,27 +1010,29 @@ namespace YamlDotNet.Core
 			bool flag2 = true;
 			this.WriteIndicator(">", true, false, false);
 			this.WriteBlockScalarHints(value);
-			this.WriteBreak();
+			this.WriteBreak('\n');
 			this.isIndentation = true;
 			this.isWhitespace = true;
 			for (int i = 0; i < value.Length; i++)
 			{
 				char c = value[i];
-				if (Emitter.IsBreak(c))
+				char c2;
+				if (Emitter.IsBreak(c, out c2))
 				{
 					if (!flag && !flag2 && c == '\n')
 					{
 						int num = 0;
-						while (i + num < value.Length && Emitter.IsBreak(value[i + num]))
+						char c3;
+						while (i + num < value.Length && Emitter.IsBreak(value[i + num], out c3))
 						{
 							num++;
 						}
-						if (i + num < value.Length && !Emitter.IsBlank(value[i + num]) && !Emitter.IsBreak(value[i + num]))
+						if (i + num < value.Length && !Emitter.IsBlank(value[i + num]) && !Emitter.IsBreak(value[i + num], out c3))
 						{
-							this.WriteBreak();
+							this.WriteBreak('\n');
 						}
 					}
-					this.WriteBreak();
+					this.WriteBreak(c2);
 					this.isIndentation = true;
 					flag = true;
 				}
@@ -990,9 +1062,29 @@ namespace YamlDotNet.Core
 			return character == ' ';
 		}
 
-		private static bool IsBreak(char character)
+		private static bool IsBreak(char character, out char breakChar)
 		{
-			return character == '\r' || character == '\n' || character == '\u0085' || character == '\u2028' || character == '\u2029';
+			if (character <= '\r')
+			{
+				if (character != '\n' && character != '\r')
+				{
+					goto IL_0036;
+				}
+			}
+			else if (character != '\u0085')
+			{
+				if (character != '\u2028' && character != '\u2029')
+				{
+					goto IL_0036;
+				}
+				breakChar = character;
+				return true;
+			}
+			breakChar = '\n';
+			return true;
+			IL_0036:
+			breakChar = '\0';
+			return false;
 		}
 
 		private static bool IsBlank(char character)
@@ -1003,6 +1095,16 @@ namespace YamlDotNet.Core
 		private static bool IsPrintable(char character)
 		{
 			return character == '\t' || character == '\n' || character == '\r' || (character >= ' ' && character <= '~') || character == '\u0085' || (character >= '\u00a0' && character <= '\ud7ff') || (character >= '\ue000' && character <= '\ufffd');
+		}
+
+		private static bool IsHighSurrogate(char c)
+		{
+			return '\ud800' <= c && c <= '\udbff';
+		}
+
+		private static bool IsLowSurrogate(char c)
+		{
+			return '\udc00' <= c && c <= '\udfff';
 		}
 
 		private void EmitSequenceStart(ParsingEvent evt)
@@ -1336,7 +1438,7 @@ namespace YamlDotNet.Core
 			CharacterAnalyzer<StringLookAheadBuffer> characterAnalyzer = new CharacterAnalyzer<StringLookAheadBuffer>(new StringLookAheadBuffer(value));
 			if (characterAnalyzer.IsSpace(0) || characterAnalyzer.IsBreak(0))
 			{
-				string text = string.Format(CultureInfo.InvariantCulture, "{0}\0", new object[] { this.bestIndent });
+				string text = string.Format(CultureInfo.InvariantCulture, "{0}", new object[] { this.bestIndent });
 				this.WriteIndicator(text, false, false, false);
 			}
 			this.isOpenEnded = false;
@@ -1373,7 +1475,7 @@ namespace YamlDotNet.Core
 			int num = Math.Max(this.indent, 0);
 			if (!this.isIndentation || this.column > num || (this.column == num && !this.isWhitespace))
 			{
-				this.WriteBreak();
+				this.WriteBreak('\n');
 			}
 			while (this.column < num)
 			{
@@ -1437,9 +1539,16 @@ namespace YamlDotNet.Core
 			this.column += value.Length;
 		}
 
-		private void WriteBreak()
+		private void WriteBreak(char breakCharacter = '\n')
 		{
-			this.output.WriteLine();
+			if (breakCharacter == '\n')
+			{
+				this.output.WriteLine();
+			}
+			else
+			{
+				this.output.Write(breakCharacter);
+			}
 			this.column = 0;
 		}
 
@@ -1449,9 +1558,11 @@ namespace YamlDotNet.Core
 
 		private const int MaxAliasLength = 128;
 
-		private static readonly Regex uriReplacer = new Regex("[^0-9A-Za-z_\\-;?@=$~\\\\\\)\\]/:&+,\\.\\*\\(\\[!]", RegexOptions.Compiled | RegexOptions.Singleline);
+		private static readonly Regex uriReplacer = new Regex("[^0-9A-Za-z_\\-;?@=$~\\\\\\)\\]/:&+,\\.\\*\\(\\[!]", RegexOptions.Singleline);
 
 		private readonly TextWriter output;
+
+		private readonly bool outputUsesUnicodeEncoding;
 
 		private readonly bool isCanonical;
 
@@ -1522,6 +1633,8 @@ namespace YamlDotNet.Core
 			public bool isSingleQuotedAllowed;
 
 			public bool isBlockAllowed;
+
+			public bool hasSingleQuotes;
 
 			public ScalarStyle style;
 		}

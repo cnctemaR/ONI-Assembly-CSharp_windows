@@ -5,7 +5,7 @@ using UnityEngine;
 public class LoggerFIO : Logger<LoggerFIO.Entry>
 {
 	public LoggerFIO(string name)
-		: base(name)
+		: base(name, 35)
 	{
 	}
 

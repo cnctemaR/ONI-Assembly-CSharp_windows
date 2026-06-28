@@ -7,7 +7,7 @@ using UnityEngine.Serialization;
 [Serializable]
 public class Substance
 {
-	public GameObject SpawnResource(Vector3 position, float mass, float temperature, bool prevent_merge = false, bool forceTemperature = false)
+	public GameObject SpawnResource(Vector3 position, float mass, float temperature, byte disease_idx, int disease_count, bool prevent_merge = false, bool forceTemperature = false)
 	{
 		GameObject gameObject = null;
 		PrimaryElement primaryElement = null;
@@ -20,7 +20,7 @@ public class Substance
 				Pickupable component = gameObject2.GetComponent<Pickupable>();
 				if (component != null)
 				{
-					Tag tag = TagManager.Create(this.elementID);
+					Tag tag = GameTagExtensions.Create(this.elementID);
 					for (ObjectLayerListItem objectLayerListItem = component.objectLayerListItem; objectLayerListItem != null; objectLayerListItem = objectLayerListItem.nextItem)
 					{
 						KPrefabID component2 = objectLayerListItem.gameObject.GetComponent<KPrefabID>();
@@ -38,7 +38,7 @@ public class Substance
 		}
 		if (gameObject == null)
 		{
-			gameObject = GameUtil.KInstantiate(Assets.GetPrefab(TagManager.Create(this.elementID)), Grid.SceneLayer.Use, Folder.Loot, null, 0);
+			gameObject = GameUtil.KInstantiate(Assets.GetPrefab(GameTagExtensions.Create(this.elementID)), Grid.SceneLayer.Use, Folder.Loot, null, 0);
 			primaryElement = gameObject.GetComponent<PrimaryElement>();
 			primaryElement.Mass = mass;
 		}
@@ -50,12 +50,8 @@ public class Substance
 		position.z = Grid.GetLayerZ(Grid.SceneLayer.Use);
 		gameObject.transform.SetPosition(position);
 		gameObject.SetActive(true);
+		primaryElement.AddDisease(disease_idx, disease_count, "Substances.SpawnResource");
 		return gameObject;
-	}
-
-	public GameObject GetPrefab()
-	{
-		return EntityTemplates.CreateOreEntity(this.elementID, null);
 	}
 
 	private void SetTexture(MaterialPropertyBlock block, string texture_name)
@@ -156,12 +152,12 @@ public class Substance
 
 	public GameObject hitEffect;
 
-	[FormerlySerializedAs("fallingStartSoundMigrated")]
 	[EventRef]
+	[FormerlySerializedAs("fallingStartSoundMigrated")]
 	public string fallingStartSound;
 
-	[EventRef]
 	[FormerlySerializedAs("fallingStopSoundMigrated")]
+	[EventRef]
 	public string fallingStopSound;
 
 	[NonSerialized]
@@ -192,7 +188,7 @@ public class Substance
 	[Serializable]
 	public struct Loot
 	{
-		public void Clear()
+		public void FreeResources()
 		{
 			this.item = null;
 			this.spawnOnFloor = false;

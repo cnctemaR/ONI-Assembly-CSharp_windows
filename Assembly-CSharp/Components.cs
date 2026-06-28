@@ -13,19 +13,13 @@ public class Components
 
 	public static Components.Cmps<IUsable> Toilets = new Components.Cmps<IUsable>();
 
-	public static Components.Cmps<MessStation> MessStations = new Components.Cmps<MessStation>();
-
 	public static Components.Cmps<Pickupable> Pickupables = new Components.Cmps<Pickupable>();
 
 	public static Components.Cmps<Brain> Brains = new Components.Cmps<Brain>();
 
-	public static Components.Cmps<Meter> Meters = new Components.Cmps<Meter>();
-
 	public static Components.Cmps<BuildingComplete> BuildingCompletes = new Components.Cmps<BuildingComplete>();
 
 	public static Components.Cmps<Notifier> Notifiers = new Components.Cmps<Notifier>();
-
-	public static Components.Cmps<OxygenBreather> OxygenBreathers = new Components.Cmps<OxygenBreather>();
 
 	public static Components.Cmps<SuffocationMonitor.Instance> SuffocationMonitorInstance = new Components.Cmps<SuffocationMonitor.Instance>();
 
@@ -33,23 +27,11 @@ public class Components
 
 	public static Components.Cmps<PlantablePlot> PlantablePlots = new Components.Cmps<PlantablePlot>();
 
-	public static Components.Cmps<Constructable> Constructables = new Components.Cmps<Constructable>();
-
 	public static Components.Cmps<Ladder> Ladders = new Components.Cmps<Ladder>();
-
-	public static Components.Cmps<Door> Doors = new Components.Cmps<Door>();
 
 	public static Components.Cmps<Light2D> Light2Ds = new Components.Cmps<Light2D>();
 
-	public static Components.Cmps<Attackable> Attackables = new Components.Cmps<Attackable>();
-
-	public static Components.Cmps<Workable> Workables = new Components.Cmps<Workable>();
-
-	public static Components.Cmps<Worker> Workers = new Components.Cmps<Worker>();
-
 	public static Components.Cmps<Edible> Edibles = new Components.Cmps<Edible>();
-
-	public static Components.Cmps<Spawner> Spawners = new Components.Cmps<Spawner>();
 
 	public static Components.Cmps<Diggable> Diggables = new Components.Cmps<Diggable>();
 
@@ -59,12 +41,6 @@ public class Components
 
 	public static Components.Cmps<Uprootable> Uprootables = new Components.Cmps<Uprootable>();
 
-	public static Components.Cmps<TrashRegion> TrashRegions = new Components.Cmps<TrashRegion>();
-
-	public static Components.Cmps<Clearable> Clearables = new Components.Cmps<Clearable>();
-
-	public static Components.Cmps<LiquidSource> LiquidSources = new Components.Cmps<LiquidSource>();
-
 	public static Components.Cmps<Modifiers> Modifiers = new Components.Cmps<Modifiers>();
 
 	public static Components.Cmps<Health> Health = new Components.Cmps<Health>();
@@ -72,8 +48,6 @@ public class Components
 	public static Components.Cmps<Equipment> Equipment = new Components.Cmps<Equipment>();
 
 	public static Components.Cmps<FactionAlignment> FactionAlignments = new Components.Cmps<FactionAlignment>();
-
-	public static Components.Cmps<Clinic> Clinics = new Components.Cmps<Clinic>();
 
 	public static Components.Cmps<Telepad> Telepads = new Components.Cmps<Telepad>();
 
@@ -85,7 +59,11 @@ public class Components
 
 	public static Components.Cmps<Breakable> Breakables = new Components.Cmps<Breakable>();
 
+	public static Components.Cmps<Crop> Crops = new Components.Cmps<Crop>();
+
 	public static Components.Cmps<Prioritizable> Prioritizables = new Components.Cmps<Prioritizable>();
+
+	public static Components.Cmps<Clinic> Clinics = new Components.Cmps<Clinic>();
 
 	public class Cmps<T> : IEnumerable, IEnumerable<T>
 	{

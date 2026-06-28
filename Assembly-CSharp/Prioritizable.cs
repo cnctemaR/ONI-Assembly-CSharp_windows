@@ -46,10 +46,43 @@ public class Prioritizable : KMonoBehaviour
 		}
 	}
 
+	public void AddRef()
+	{
+		this.refCount++;
+	}
+
+	public void RemoveRef()
+	{
+		this.refCount--;
+	}
+
+	public bool IsPrioritizable()
+	{
+		return this.refCount > 0;
+	}
+
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
 		Components.Prioritizables.Remove(this);
+	}
+
+	public static void AddRef(GameObject go)
+	{
+		Prioritizable component = go.GetComponent<Prioritizable>();
+		if (component != null)
+		{
+			component.AddRef();
+		}
+	}
+
+	public static void RemoveRef(GameObject go)
+	{
+		Prioritizable component = go.GetComponent<Prioritizable>();
+		if (component != null)
+		{
+			component.RemoveRef();
+		}
 	}
 
 	[Serialize]
@@ -59,4 +92,11 @@ public class Prioritizable : KMonoBehaviour
 	public Action<int> onPriorityChanged;
 
 	public bool showIcon = true;
+
+	public Vector2 iconOffset;
+
+	public float iconScale = 1f;
+
+	[SerializeField]
+	private int refCount;
 }

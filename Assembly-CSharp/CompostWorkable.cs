@@ -1,6 +1,6 @@
 ﻿using System;
 
-public class CompostWorkable : BuildingWorkable
+public class CompostWorkable : Workable
 {
 	protected override void OnStartWork(Worker worker)
 	{

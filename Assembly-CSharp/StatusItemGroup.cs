@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Klei.AI;
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -71,7 +71,6 @@ public class StatusItemGroup
 
 	public void SetStatusItem(Guid guid, StatusItemCategory category, StatusItem new_item, object data = null)
 	{
-		this.Log("SetByGUID", new_item, guid);
 		this.RemoveStatusItem(guid, false);
 		if (new_item != null)
 		{
@@ -107,7 +106,6 @@ public class StatusItemGroup
 	{
 		if (this.gameObject == null || (!item.allowMultiples && this.HasStatusItem(item)))
 		{
-			this.Log("Add (failed)", item, Guid.Empty);
 			return Guid.Empty;
 		}
 		if (!item.allowMultiples)
@@ -133,12 +131,6 @@ public class StatusItemGroup
 			Game.Instance.SetStatusItemOffset(this.gameObject.transform, this.offset);
 		}
 		this.items.Add(entry2);
-		this.Log("Add (new)", item, entry2.id);
-		if (item.effect != null)
-		{
-			Effects component = this.gameObject.GetComponent<Effects>();
-			component.Add(item.effect, false);
-		}
 		if (this.OnAddStatusItem != null)
 		{
 			this.OnAddStatusItem(entry2, category);
@@ -156,12 +148,9 @@ public class StatusItemGroup
 		{
 			if (this.items[i].item.Id == status_item.Id)
 			{
-				Guid guid = this.RemoveStatusItem(this.items[i].id, immediate);
-				this.Log("Remove (found)", status_item, guid);
-				return guid;
+				return this.RemoveStatusItem(this.items[i].id, immediate);
 			}
 		}
-		this.Log("Remove (not found)", status_item, Guid.Empty);
 		return Guid.Empty;
 	}
 
@@ -169,7 +158,6 @@ public class StatusItemGroup
 	{
 		if (guid == Guid.Empty)
 		{
-			this.Log("RemoveByGUID (bad)", null, guid);
 			return guid;
 		}
 		for (int i = 0; i < this.items.Count; i++)
@@ -179,7 +167,6 @@ public class StatusItemGroup
 			{
 				StatusItemGroup.Entry entry2 = this.items[i];
 				this.items.RemoveAt(i);
-				this.Log("RemoveByGUID (found)", entry2.item, guid);
 				if (entry2.notification != null)
 				{
 					this.gameObject.GetComponent<Notifier>().Remove(entry2.notification);
@@ -188,11 +175,6 @@ public class StatusItemGroup
 				{
 					Game.Instance.RemoveStatusItem(this.gameObject.transform, entry2.item);
 				}
-				if (entry2.item.effect != null)
-				{
-					Effects component = this.gameObject.GetComponent<Effects>();
-					component.Remove(entry2.item.effect);
-				}
 				if (this.OnRemoveStatusItem != null)
 				{
 					this.OnRemoveStatusItem(entry2, immediate);
@@ -200,14 +182,13 @@ public class StatusItemGroup
 				return guid;
 			}
 		}
-		this.Log("RemoveByGUID (not found)", null, guid);
 		return Guid.Empty;
 	}
 
 	private static string OnToolTip(List<Notification> notifications, object data)
 	{
 		StatusItem statusItem = (StatusItem)data;
-		string text = statusItem.notificationTooltipText + "\n";
+		string text = statusItem.notificationTooltipText;
 		foreach (Notification notification in notifications)
 		{
 			if (notification != null && notification.Notifier != null)
@@ -215,7 +196,7 @@ public class StatusItemGroup
 				KSelectable component = notification.Notifier.GetComponent<KSelectable>();
 				if (component != null)
 				{
-					text = text + "\n" + component.GetName();
+					text = text + "\n• " + component.GetName();
 				}
 			}
 		}
@@ -234,6 +215,7 @@ public class StatusItemGroup
 		}
 	}
 
+	[Conditional("ENABLE_LOGGER")]
 	private void Log(string action, StatusItem item, Guid guid)
 	{
 	}

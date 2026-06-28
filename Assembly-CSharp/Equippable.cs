@@ -71,7 +71,7 @@ public class Equippable : Assignable, ISaveLoadable, IQuality, IGameObjectEffect
 			});
 			return;
 		}
-		this.chore = new WorkChore<Equippable>(Db.Get().ChoreTypes.Equip, this, this.equipment.GetComponent<ChoreProvider>(), true, null, null, null, true, null, true, default(Tag), null, false, true);
+		this.chore = new WorkChore<Equippable>(Db.Get().ChoreTypes.Equip, this, this.equipment.GetComponent<ChoreProvider>(), true, null, null, null, true, null, true, default(Tag), null, false, true, true);
 	}
 
 	public bool IsEquipped()
@@ -173,7 +173,7 @@ public class Equippable : Assignable, ISaveLoadable, IQuality, IGameObjectEffect
 		}
 	}
 
-	public List<Descriptor> GetDescriptors(GameObject go)
+	public override List<Descriptor> GetDescriptors(GameObject go)
 	{
 		if (this.def != null)
 		{

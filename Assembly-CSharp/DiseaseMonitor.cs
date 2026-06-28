@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Database;
 using Klei.AI;
 using STRINGS;
 
@@ -10,52 +9,49 @@ public class DiseaseMonitor : GameStateMachine<DiseaseMonitor, DiseaseMonitor.In
 	{
 		base.serializable = true;
 		default_state = this.healthy;
-		this.healthy.DefaultState(this.healthy.healthy).EventTransition(GameHashes.DiseaseAdded, this.sick, (DiseaseMonitor.Instance smi) => smi.IsSick());
-		this.healthy.pre.ToggleChore((DiseaseMonitor.Instance smi) => new EmoteChore(smi.master, Db.Get().ChoreTypes.EmoteHighPriority, DiseaseMonitor.HealthyAnims, null), this.healthy.pre, false).GoTo(this.healthy.healthy);
-		this.sick.DefaultState(this.sick.notify).EventTransition(GameHashes.DiseaseCured, this.sick.post, (DiseaseMonitor.Instance smi) => !smi.IsSick()).ToggleAnims("anim_idle_sick_kanim", 0f)
+		this.healthy.EventTransition(GameHashes.DiseaseAdded, this.sick, (DiseaseMonitor.Instance smi) => smi.IsSick());
+		this.sick.DefaultState(this.sick.notify).EventTransition(GameHashes.DiseaseCured, this.post_nocheer, (DiseaseMonitor.Instance smi) => !smi.IsSick()).ToggleAnims("anim_idle_sick_kanim", 0f)
 			.ToggleExpression(Db.Get().Expressions.Sick, null)
 			.ToggleUrge(Db.Get().Urges.TakeMedicine)
-			.ToggleUrge(Db.Get().Urges.RestDueToDisease);
-		this.sick.notify.DefaultState(this.sick.notify.notify);
-		this.sick.notify.notify.ToggleThought(Db.Get().Thoughts.GotInfected, null).ToggleChore((DiseaseMonitor.Instance smi) => new EmoteChore(smi.master, Db.Get().ChoreTypes.EmoteHighPriority, DiseaseMonitor.SickAnims, null), this.sick.notify.cooldown, false);
-		this.sick.notify.cooldown.ScheduleGoTo(60f, this.sick.notify);
-		this.sick.post.ToggleChore((DiseaseMonitor.Instance smi) => new EmoteChore(smi.master, Db.Get().ChoreTypes.EmoteHighPriority, DiseaseMonitor.SickPostAnims, null), this.healthy.pre, false);
-	}
-
-	public static Disease GetDisease(string disease_id)
-	{
-		Disease disease = null;
-		if (disease_id != null)
-		{
-			global::Database.Diseases diseases = Db.Get().Diseases;
-			for (int i = 0; i < diseases.Count; i++)
+			.ToggleUrge(Db.Get().Urges.RestDueToDisease)
+			.ToggleSchedulePeriodic("AutoAssignClinic", 10f, delegate(DiseaseMonitor.Instance smi)
 			{
-				if (diseases[i].Id == disease_id)
-				{
-					disease = diseases[i];
-					break;
-				}
+				smi.AutoAssignClinic();
+			})
+			.Exit(delegate(DiseaseMonitor.Instance smi)
+			{
+				smi.UnassignClinic();
+			});
+		this.sick.notify.DefaultState(this.sick.notify.notify);
+		this.sick.notify.notify.ToggleThought(Db.Get().Thoughts.GotInfected, null).ToggleChore((DiseaseMonitor.Instance smi) => new EmoteChore(smi.master, Db.Get().ChoreTypes.Emote, DiseaseMonitor.SickAnims, null), this.sick.notify.cooldown);
+		this.sick.notify.cooldown.ScheduleGoTo(5f, this.sick.notify);
+		this.post_nocheer.Enter(delegate(DiseaseMonitor.Instance smi)
+		{
+			if (smi.IsNightTime())
+			{
+				smi.GoTo(this.healthy);
 			}
-		}
-		return disease;
+			else
+			{
+				smi.GoTo(this.post);
+			}
+		});
+		this.post.ToggleChore((DiseaseMonitor.Instance smi) => new EmoteChore(smi.master, Db.Get().ChoreTypes.EmoteHighPriority, DiseaseMonitor.SickPostKAnim, DiseaseMonitor.SickPostAnims, KAnim.PlayMode.Once), this.healthy);
 	}
 
-	public DiseaseMonitor.HealthyStates healthy;
+	public GameStateMachine<DiseaseMonitor, DiseaseMonitor.Instance, IStateMachineTarget, object>.State healthy;
 
 	public DiseaseMonitor.SickStates sick;
 
-	private static readonly HashedString[] HealthyAnims = new HashedString[] { "idle_default" };
+	public GameStateMachine<DiseaseMonitor, DiseaseMonitor.Instance, IStateMachineTarget, object>.State post;
+
+	public GameStateMachine<DiseaseMonitor, DiseaseMonitor.Instance, IStateMachineTarget, object>.State post_nocheer;
 
 	private static readonly HashedString[] SickAnims = new HashedString[] { "idle_pre", "idle_default" };
 
-	private static readonly HashedString[] SickPostAnims = new HashedString[] { "idle_pst" };
+	private static readonly HashedString SickPostKAnim = "anim_cheer_kanim";
 
-	public class HealthyStates : GameStateMachine<DiseaseMonitor, DiseaseMonitor.Instance, IStateMachineTarget, object>.State
-	{
-		public GameStateMachine<DiseaseMonitor, DiseaseMonitor.Instance, IStateMachineTarget, object>.State pre;
-
-		public GameStateMachine<DiseaseMonitor, DiseaseMonitor.Instance, IStateMachineTarget, object>.State healthy;
-	}
+	private static readonly HashedString[] SickPostAnims = new HashedString[] { "cheer_pre", "cheer_loop", "cheer_pst" };
 
 	public class NotifyStates : GameStateMachine<DiseaseMonitor, DiseaseMonitor.Instance, IStateMachineTarget, object>.State
 	{
@@ -67,8 +63,6 @@ public class DiseaseMonitor : GameStateMachine<DiseaseMonitor, DiseaseMonitor.In
 	public class SickStates : GameStateMachine<DiseaseMonitor, DiseaseMonitor.Instance, IStateMachineTarget, object>.State
 	{
 		public DiseaseMonitor.NotifyStates notify;
-
-		public GameStateMachine<DiseaseMonitor, DiseaseMonitor.Instance, IStateMachineTarget, object>.State post;
 	}
 
 	public new class Instance : GameStateMachine<DiseaseMonitor, DiseaseMonitor.Instance, IStateMachineTarget, object>.GameInstance
@@ -76,27 +70,7 @@ public class DiseaseMonitor : GameStateMachine<DiseaseMonitor, DiseaseMonitor.In
 		public Instance(IStateMachineTarget master)
 			: base(master)
 		{
-			base.gameObject.Subscribe(-283306403, new Action<object>(this.OnExposedToDisease));
 			this.activeDiseases = master.GetComponent<MinionModifiers>().diseases;
-		}
-
-		public void StopListening()
-		{
-			base.master.Unsubscribe(-283306403, new Action<object>(this.OnExposedToDisease));
-		}
-
-		private void OnExposedToDisease(object data)
-		{
-			DiseaseExposureInfo diseaseExposureInfo = (DiseaseExposureInfo)data;
-			Disease disease = DiseaseMonitor.GetDisease(diseaseExposureInfo.diseaseID);
-			if (disease == null)
-			{
-				return;
-			}
-			if (disease.ShouldInfect(base.gameObject, diseaseExposureInfo.exposureCount))
-			{
-				this.activeDiseases.Infect(disease, diseaseExposureInfo);
-			}
 		}
 
 		private string OnGetToolTip(List<Notification> notifications, object data)
@@ -109,6 +83,39 @@ public class DiseaseMonitor : GameStateMachine<DiseaseMonitor, DiseaseMonitor.In
 			return this.activeDiseases.Count > 0;
 		}
 
-		private Klei.AI.Diseases activeDiseases;
+		public void AutoAssignClinic()
+		{
+			Ownables component = base.sm.masterTarget.Get(base.smi).GetComponent<Ownables>();
+			OwnableSlot clinic = Db.Get().OwnableSlots.Clinic;
+			AssignableSlotInstance slot = component.GetSlot(clinic);
+			if (slot == null)
+			{
+				return;
+			}
+			if (slot.assignable != null)
+			{
+				return;
+			}
+			Navigator component2 = component.GetComponent<Navigator>();
+			component.AutoAssignSlot(component2, clinic);
+		}
+
+		public void UnassignClinic()
+		{
+			Ownables component = base.sm.masterTarget.Get(base.smi).GetComponent<Ownables>();
+			OwnableSlot clinic = Db.Get().OwnableSlots.Clinic;
+			AssignableSlotInstance slot = component.GetSlot(clinic);
+			if (slot != null)
+			{
+				slot.Unassign(true);
+			}
+		}
+
+		public bool IsNightTime()
+		{
+			return TimeOfDay.Instance.GetCurrentTimeRegion() == TimeOfDay.TimeRegion.Night;
+		}
+
+		private Diseases activeDiseases;
 	}
 }

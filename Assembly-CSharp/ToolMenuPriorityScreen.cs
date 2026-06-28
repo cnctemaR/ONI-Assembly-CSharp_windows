@@ -19,12 +19,12 @@ public class ToolMenuPriorityScreen : PriorityScreen
 	protected override void OnCmpEnable()
 	{
 		base.OnCmpEnable();
-		base.SetScreenPriority(5);
+		base.SetScreenPriority(5, false);
 	}
 
 	private void OnClick(int priority)
 	{
-		base.SetScreenPriority(priority);
+		base.SetScreenPriority(priority, false);
 	}
 
 	public static ToolMenuPriorityScreen Instance;

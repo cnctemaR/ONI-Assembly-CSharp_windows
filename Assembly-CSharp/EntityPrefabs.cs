@@ -22,21 +22,11 @@ public class EntityPrefabs : KMonoBehaviour
 
 	public GameObject Exclamation;
 
-	public GameObject LiquidSource;
-
-	public GameObject LiquidChunk;
-
-	public GameObject GasSource;
-
-	public GameObject GasChunk;
-
 	public GameObject SelectMarker;
 
 	public GameObject ForegroundLayer;
 
 	public GameObject Bones;
-
-	public GameObject Spawner;
 
 	public GameObject GenericBuildingPackage;
 }

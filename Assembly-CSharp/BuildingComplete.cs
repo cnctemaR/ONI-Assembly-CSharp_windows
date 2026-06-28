@@ -57,7 +57,7 @@ public class BuildingComplete : Building
 		Rotatable component2 = base.GetComponent<Rotatable>();
 		if (component != null && component2 == null)
 		{
-			component.Offset = this.Def.GetVisualizerOffset();
+			component.Offset = this.Def.GetVisualizerOffset() + this.Def.placementPivot;
 		}
 		BoxCollider2D component3 = base.GetComponent<BoxCollider2D>();
 		if (component3 != null)
@@ -116,6 +116,11 @@ public class BuildingComplete : Building
 				intersectionRegion.AddBuilding(this, true);
 				break;
 			}
+		}
+		KSelectable component6 = base.GetComponent<KSelectable>();
+		if (component6 != null)
+		{
+			component6.SetStatusIndicatorOffset(this.Def.placementPivot);
 		}
 		Components.BuildingCompletes.Add(this);
 	}
@@ -176,6 +181,8 @@ public class BuildingComplete : Building
 	private Modifiers modifiers;
 
 	public bool isManuallyOperated;
+
+	public bool isArtable;
 
 	public List<AttributeModifier> regionModifiers = new List<AttributeModifier>();
 }

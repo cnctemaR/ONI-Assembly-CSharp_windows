@@ -1,11 +1,13 @@
 ﻿using System;
+using TUNING;
 using UnityEngine;
 
 public abstract class BaseBatteryConfig : IBuildingConfig
 {
-	public BuildingDef CreateBuildingDef(string id, int width, int height, int hitpoints, string anim, float mass, float construction_time, float[] construction_mass, string[] construction_materials, float melting_point, float exhaust_temperature_active, float operating_kilowatts, DecorValues decor)
+	public BuildingDef CreateBuildingDef(string id, int width, int height, int hitpoints, string anim, float mass, float construction_time, float[] construction_mass, string[] construction_materials, float melting_point, float exhaust_temperature_active, float operating_kilowatts, EffectorValues decor, EffectorValues noise)
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, width, height, anim, mass, hitpoints, construction_time, construction_mass, construction_materials, melting_point, BuildLocationRule.OnFloor, decor, null);
+		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER0;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(id, width, height, anim, mass, hitpoints, construction_time, construction_mass, construction_materials, melting_point, BuildLocationRule.OnFloor, decor, tier);
 		buildingDef.ExhaustKilowattsWhenActive = exhaust_temperature_active;
 		buildingDef.OperatingKilowatts = operating_kilowatts;
 		buildingDef.Entombable = false;

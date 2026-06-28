@@ -52,6 +52,8 @@ public class ScreenPrefabs : KMonoBehaviour
 
 	public ConfirmDialogScreen ConfirmDialogScreen;
 
+	public LoreDialogScreen LoreDialogScreen;
+
 	public FileNameDialog FileNameDialog;
 
 	public TagFilterScreen TagFilterScreen;
@@ -61,6 +63,8 @@ public class ScreenPrefabs : KMonoBehaviour
 	public MessageDialogFrame MessageDialogFrame;
 
 	public ResourceCategoryScreen ResourceCategoryScreen;
+
+	public LanguageOptionsScreen languageOptionsScreen;
 
 	public GameObject GameOverScreen;
 
@@ -79,4 +83,6 @@ public class ScreenPrefabs : KMonoBehaviour
 	public OptionsMenuScreen OptionsScreen;
 
 	public WorldGenScreen WorldGenScreen;
+
+	public NewGameSettingsScreen NewGameSettingsScreen;
 }

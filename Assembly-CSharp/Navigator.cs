@@ -279,7 +279,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 
 	private void OnRefreshUserMenu(object data)
 	{
-		if (base.GetComponent<Health>().IsDead())
+		if (base.gameObject.HasTag(GameTags.Dead))
 		{
 			return;
 		}
@@ -531,11 +531,15 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>
 			this.moving.Enter(delegate(Navigator.StatesInstance smi)
 			{
 				smi.Trigger(1027377649, GameHashes.ObjectMovementWakeUp);
-			}).ToggleSchedulePeriodic("Log travel time", 1f, delegate(Navigator.StatesInstance smi)
+			}).Update("Log travel time", delegate(Navigator.StatesInstance smi)
 			{
 				if (smi.GetComponent<MinionIdentity>() != null)
 				{
-					ReportManager.Instance.ReportValue(ReportManager.ReportType.TravelTime, 1f, null);
+					Chore currentChore = smi.GetComponent<ChoreDriver>().GetCurrentChore();
+					if (currentChore != null)
+					{
+						ReportManager.Instance.ReportValue(ReportManager.ReportType.TravelTime, smi.dt, currentChore.choreType.Name);
+					}
 				}
 			}).Enter(delegate(Navigator.StatesInstance smi)
 			{

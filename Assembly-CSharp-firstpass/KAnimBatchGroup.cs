@@ -83,7 +83,7 @@ public class KAnimBatchGroup
 
 	public KBatchGroupData data { get; private set; }
 
-	public Texture2D animDataTex { get; private set; }
+	public KAnimBatchGroup.KAnimBatchTextureCache.Entry animDataTex { get; private set; }
 
 	public bool InitOK
 	{
@@ -93,7 +93,7 @@ public class KAnimBatchGroup
 		}
 	}
 
-	public void Finalise()
+	public void FreeResources()
 	{
 		if (this.material != null)
 		{
@@ -115,8 +115,13 @@ public class KAnimBatchGroup
 			foreach (KeyValuePair<int, BatchGroupInstance> keyValuePair in this.instances)
 			{
 				keyValuePair.Value.DestroyTex();
+				keyValuePair.Value.FreeResources();
 			}
 			this.instances.Clear();
+		}
+		if (this.data != null)
+		{
+			this.data.FreeResources();
 		}
 		this.data = null;
 	}
@@ -174,14 +179,14 @@ public class KAnimBatchGroup
 
 	public void ClearMuiltiInstanceData()
 	{
-		if (this.isMultiInstance)
+		if (this.isMultiInstance && this.instances.Count > 1)
 		{
 			BatchGroupInstance batchGroupInstance = null;
 			foreach (KeyValuePair<int, BatchGroupInstance> keyValuePair in this.instances)
 			{
 				if (keyValuePair.Key != -1)
 				{
-					keyValuePair.Value.DestroyTex();
+					keyValuePair.Value.FreeResources();
 				}
 				else
 				{
@@ -242,7 +247,7 @@ public class KAnimBatchGroup
 	public void Rebuild(BatchGroupInstance instance, MaterialPropertyBlock matProperties)
 	{
 		this.InitBuild(instance);
-		matProperties.SetTexture("buildTex", instance.buildTex);
+		matProperties.SetTexture("buildTex", instance.buildTex.texture);
 	}
 
 	public void InitBuild(BatchGroupInstance instance)
@@ -251,23 +256,15 @@ public class KAnimBatchGroup
 		{
 			return;
 		}
-		List<KAnim.Build.SymbolFrameInstance> buildSymbolFrameInstances = this.data.GetBuildSymbolFrameInstances();
-		int num = buildSymbolFrameInstances.Count * 32;
+		int num = this.data.GetBuildSymbolFrameCount() * 32;
 		float num2 = (float)num / 4f;
 		int bestTextureSize = this.GetBestTextureSize(num2);
 		if (instance.buildTex == null || bestTextureSize != instance.buildTex.width)
 		{
+			instance.DestroyTex();
 			instance.buildTex = KAnimBatchGroup.cache.Get(bestTextureSize);
 			instance.buildTex.name = "BuildData:" + this.batchID.ToString();
-			this.buildByteToFloat.bytes = null;
-		}
-		int num3 = instance.buildTex.width * instance.buildTex.height * 4 * 4;
-		if (this.buildByteToFloat.bytes == null)
-		{
-			this.buildByteToFloat = new KAnimConverter.ByteToFloatConverter
-			{
-				bytes = new byte[num3]
-			};
+			this.buildByteToFloat.bytes = instance.buildTex.bytes;
 		}
 		this.data.WriteBuildData(instance, this.buildByteToFloat.floats);
 		instance.buildTex.LoadRawTextureData(this.buildByteToFloat.bytes);
@@ -318,20 +315,20 @@ public class KAnimBatchGroup
 		return mesh;
 	}
 
-	public Texture2D CreateTexture()
+	public KAnimBatchGroup.KAnimBatchTextureCache.Entry CreateTexture()
 	{
 		if (this.dataType == KAnimBatchGroup.DataType.DontRender)
 		{
 			return null;
 		}
-		Texture2D texture2D = KAnimBatchGroup.cache.Get(this.texureSize);
-		texture2D.name = "InstanceData:" + this.batchID.ToString();
-		return texture2D;
+		KAnimBatchGroup.KAnimBatchTextureCache.Entry entry = KAnimBatchGroup.cache.Get(this.texureSize);
+		entry.name = "InstanceData:" + this.batchID.ToString();
+		return entry;
 	}
 
-	public void FreeTexture(Texture2D tex)
+	public void FreeTexture(KAnimBatchGroup.KAnimBatchTextureCache.Entry entry)
 	{
-		KAnimBatchGroup.cache.Free(tex);
+		KAnimBatchGroup.cache.Free(entry);
 	}
 
 	public void GetDataTextures(BatchGroupInstance instance, MaterialPropertyBlock matProperties)
@@ -339,13 +336,13 @@ public class KAnimBatchGroup
 		matProperties.SetFloat("MAX_VISIBLE_SYMBOLS", (float)this.data.maxVisibleSymbols);
 		if (this.animDataTex != null)
 		{
-			matProperties.SetTexture("animTex", this.animDataTex);
+			matProperties.SetTexture("animTex", this.animDataTex.texture);
 			matProperties.SetVector("ANIM_TEXEL_SIZE", this.animDataTex.texelSize);
 			matProperties.SetVector("ANIM_TEXTURE_SIZE", new Vector2((float)this.animDataTex.width, (float)this.animDataTex.height));
 		}
 		if (instance.buildTex != null)
 		{
-			matProperties.SetTexture("buildTex", instance.buildTex);
+			matProperties.SetTexture("buildTex", instance.buildTex.texture);
 			matProperties.SetVector("BUILD_TEXEL_SIZE", instance.buildTex.texelSize);
 			matProperties.SetVector("BUILD_TEXTURE_SIZE", new Vector2((float)instance.buildTex.width, (float)instance.buildTex.height));
 		}
@@ -383,69 +380,128 @@ public class KAnimBatchGroup
 
 	public class KAnimBatchTextureCache
 	{
-		public Texture2D Get(int size)
+		public KAnimBatchGroup.KAnimBatchTextureCache.Entry Get(int size)
 		{
 			if (!this.unused.ContainsKey(size))
 			{
-				this.unused.Add(size, new List<Texture2D>());
+				this.unused.Add(size, new List<KAnimBatchGroup.KAnimBatchTextureCache.Entry>());
 			}
-			Texture2D texture2D;
+			KAnimBatchGroup.KAnimBatchTextureCache.Entry entry;
 			if (this.unused[size].Count > 0)
 			{
-				texture2D = this.unused[size][0];
-				this.unused[size].Remove(texture2D);
+				entry = this.unused[size][0];
+				this.unused[size].RemoveAt(0);
 			}
 			else
 			{
-				texture2D = new Texture2D(size, size, TextureFormat.RGBAFloat, false);
-				texture2D.wrapMode = TextureWrapMode.Clamp;
-				texture2D.filterMode = FilterMode.Point;
-				texture2D.anisoLevel = 0;
+				entry = new KAnimBatchGroup.KAnimBatchTextureCache.Entry(size);
 			}
 			if (!this.inuse.ContainsKey(size))
 			{
-				this.inuse.Add(size, new List<Texture2D>());
+				this.inuse.Add(size, new List<KAnimBatchGroup.KAnimBatchTextureCache.Entry>());
 			}
-			this.inuse[size].Add(texture2D);
-			return texture2D;
+			this.inuse[size].Add(entry);
+			return entry;
 		}
 
-		public void Free(Texture2D tex)
+		public void Free(KAnimBatchGroup.KAnimBatchTextureCache.Entry entry)
 		{
-			int width = tex.width;
+			int width = entry.texture.width;
 			if (this.inuse.ContainsKey(width))
 			{
-				this.inuse[width].Remove(tex);
+				this.inuse[width].Remove(entry);
 			}
 			if (this.unused.ContainsKey(width))
 			{
-				this.unused[width].Add(tex);
+				this.unused[width].Add(entry);
 			}
 		}
 
 		public void Finalise()
 		{
-			foreach (KeyValuePair<int, List<Texture2D>> keyValuePair in this.inuse)
+			foreach (KeyValuePair<int, List<KAnimBatchGroup.KAnimBatchTextureCache.Entry>> keyValuePair in this.inuse)
 			{
 				for (int i = 0; i < keyValuePair.Value.Count; i++)
 				{
-					global::UnityEngine.Object.Destroy(keyValuePair.Value[i]);
+					global::UnityEngine.Object.Destroy(keyValuePair.Value[i].texture);
 				}
 			}
 			this.inuse.Clear();
-			foreach (KeyValuePair<int, List<Texture2D>> keyValuePair2 in this.unused)
+			foreach (KeyValuePair<int, List<KAnimBatchGroup.KAnimBatchTextureCache.Entry>> keyValuePair2 in this.unused)
 			{
 				for (int j = 0; j < keyValuePair2.Value.Count; j++)
 				{
-					global::UnityEngine.Object.Destroy(keyValuePair2.Value[j]);
+					global::UnityEngine.Object.Destroy(keyValuePair2.Value[j].texture);
 				}
 			}
 			this.unused.Clear();
 		}
 
-		private Dictionary<int, List<Texture2D>> unused = new Dictionary<int, List<Texture2D>>();
+		private Dictionary<int, List<KAnimBatchGroup.KAnimBatchTextureCache.Entry>> unused = new Dictionary<int, List<KAnimBatchGroup.KAnimBatchTextureCache.Entry>>();
 
-		private Dictionary<int, List<Texture2D>> inuse = new Dictionary<int, List<Texture2D>>();
+		private Dictionary<int, List<KAnimBatchGroup.KAnimBatchTextureCache.Entry>> inuse = new Dictionary<int, List<KAnimBatchGroup.KAnimBatchTextureCache.Entry>>();
+
+		public class Entry
+		{
+			public Entry(int size)
+			{
+				this.texture = new Texture2D(size, size, TextureFormat.RGBAFloat, false);
+				this.texture.wrapMode = TextureWrapMode.Clamp;
+				this.texture.filterMode = FilterMode.Point;
+				this.texture.anisoLevel = 0;
+				this.bytes = new byte[size * size * 4 * 4];
+			}
+
+			public Texture2D texture { get; private set; }
+
+			public byte[] bytes { get; private set; }
+
+			public void Apply()
+			{
+				this.texture.Apply();
+			}
+
+			public void LoadRawTextureData(byte[] bytes)
+			{
+				this.texture.LoadRawTextureData(bytes);
+			}
+
+			public int width
+			{
+				get
+				{
+					return this.texture.width;
+				}
+			}
+
+			public int height
+			{
+				get
+				{
+					return this.texture.height;
+				}
+			}
+
+			public Vector2 texelSize
+			{
+				get
+				{
+					return this.texture.texelSize;
+				}
+			}
+
+			public string name
+			{
+				get
+				{
+					return this.texture.name;
+				}
+				set
+				{
+					this.texture.name = value;
+				}
+			}
+		}
 	}
 
 	public enum RendererType

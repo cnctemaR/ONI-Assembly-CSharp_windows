@@ -123,6 +123,10 @@ public class NameDisplayScreen : KScreen
 
 	private void LateUpdate()
 	{
+		if (App.isLoading || App.IsExiting)
+		{
+			return;
+		}
 		SimViewMode simViewMode = SimViewMode.None;
 		if (OverlayScreen.Instance != null)
 		{
@@ -145,7 +149,11 @@ public class NameDisplayScreen : KScreen
 					}
 					else
 					{
-						vector = this.entries[i].world_go.GetComponent<KAnimControllerBase>().GetWorldPivot();
+						KAnimControllerBase component2 = this.entries[i].world_go.GetComponent<KAnimControllerBase>();
+						if (component2 != null)
+						{
+							vector = component2.GetWorldPivot();
+						}
 					}
 					component.anchoredPosition = ((!this.worldSpace) ? base.WorldToScreen(vector) : vector);
 					this.entries[i].display_go.SetActive(true);
@@ -154,8 +162,7 @@ public class NameDisplayScreen : KScreen
 				{
 					this.entries[i].display_go.SetActive(false);
 				}
-				Health component2 = this.entries[i].world_go.GetComponent<Health>();
-				if (component2 != null && component2.IsDead())
+				if (this.entries[i].world_go.HasTag(GameTags.Dead))
 				{
 					this.entries[i].bars_go.SetActive(false);
 				}

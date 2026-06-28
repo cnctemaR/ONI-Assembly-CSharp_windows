@@ -39,10 +39,6 @@ public class ImmigrantScreen : CharacterSelectionController
 		this.InitializeContainers();
 		this.containers.ForEach(delegate(CharacterContainer c)
 		{
-			c.addMinionToIdentityList = false;
-		});
-		this.containers.ForEach(delegate(CharacterContainer c)
-		{
 			c.SetReshufflingState(false);
 		});
 		this.telepad = telepad;

@@ -1,0 +1,66 @@
+﻿using System;
+using System.Collections.Generic;
+using TUNING;
+using UnityEngine;
+
+public class LiquidPumpingStationConfig : IBuildingConfig
+{
+	public override BuildingDef CreateBuildingDef()
+	{
+		EffectorValues none = NOISE_POLLUTION.NONE;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("LiquidPumpingStation", 2, 4, "waterpump_kanim", 200f, 100, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER4, MATERIALS.RAW_MINERALS, 1600f, BuildLocationRule.Tile, BUILDINGS.DECOR.NONE, none);
+		buildingDef.Floodable = false;
+		buildingDef.Entombable = true;
+		buildingDef.AudioCategory = "Metal";
+		buildingDef.AudioSize = "large";
+		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
+		buildingDef.UtilityOutputOffset = new CellOffset(0, 0);
+		buildingDef.DefaultAnimState = "on";
+		buildingDef.ShowInBuildMenu = true;
+		return buildingDef;
+	}
+
+	public override void ConfigureBuildingTemplate(GameObject go)
+	{
+		go.AddOrGet<LoopingSounds>();
+		LiquidPumpingStation liquidPumpingStation = go.AddOrGet<LiquidPumpingStation>();
+		liquidPumpingStation.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_waterpump_kanim") };
+		Storage storage = go.AddOrGet<Storage>();
+		storage.disableOnStore = true;
+		storage.showInUI = false;
+		storage.allowItemRemoval = true;
+		storage.showDescriptor = true;
+		storage.defaultStoredItemModifers = LiquidPumpingStationConfig.StoredItemModifiers;
+	}
+
+	private static void AddGuide(GameObject go, bool occupy_tiles)
+	{
+		GameObject gameObject = new GameObject();
+		gameObject.transform.parent = go.transform;
+		gameObject.transform.localPosition = Vector3.zero;
+		KBatchedAnimController kbatchedAnimController = gameObject.AddComponent<KBatchedAnimController>();
+		kbatchedAnimController.Offset = go.GetComponent<Building>().Def.GetVisualizerOffset();
+		kbatchedAnimController.SetAnims(new KAnimFile[] { Assets.GetAnim(new HashedString("waterpump_kanim")) }, true);
+		kbatchedAnimController.initialAnim = "place_guide";
+		kbatchedAnimController.visibilityType = KAnimControllerBase.VisibilityType.Always;
+		kbatchedAnimController.isMovable = true;
+		PumpingStationGuide pumpingStationGuide = gameObject.AddComponent<PumpingStationGuide>();
+		pumpingStationGuide.parent = go;
+		pumpingStationGuide.occupyTiles = occupy_tiles;
+	}
+
+	public override void DoPostConfigureComplete(GameObject go)
+	{
+		BuildingTemplates.DoPostConfigure(go);
+		LiquidPumpingStationConfig.AddGuide(go.GetComponent<Building>().Def.BuildingPreview, false);
+		LiquidPumpingStationConfig.AddGuide(go.GetComponent<Building>().Def.BuildingUnderConstruction, true);
+	}
+
+	public const string ID = "LiquidPumpingStation";
+
+	private static readonly List<Storage.StoredItemModifier> StoredItemModifiers = new List<Storage.StoredItemModifier>
+	{
+		Storage.StoredItemModifier.Hide,
+		Storage.StoredItemModifier.Seal
+	};
+}

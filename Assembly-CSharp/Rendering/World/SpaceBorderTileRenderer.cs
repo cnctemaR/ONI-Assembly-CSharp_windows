@@ -5,6 +5,16 @@ namespace Rendering.World
 {
 	public class SpaceBorderTileRenderer : TileRenderer
 	{
+		public void FreeResources()
+		{
+			if (this.material != null)
+			{
+				global::UnityEngine.Object.DestroyImmediate(this.material);
+			}
+			this.Brushes = null;
+			SpaceBorderTileRenderer.Instance = null;
+		}
+
 		public override void LoadBrushes()
 		{
 			SpaceBorderTileRenderer.Instance = this;

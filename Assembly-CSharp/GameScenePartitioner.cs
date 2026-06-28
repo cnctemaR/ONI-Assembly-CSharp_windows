@@ -3,93 +3,109 @@ using System.Collections.Generic;
 
 public class GameScenePartitioner : KMonoBehaviour
 {
+	public static GameScenePartitioner Instance
+	{
+		get
+		{
+			return GameScenePartitioner.instance;
+		}
+	}
+
 	protected override void OnPrefabInit()
 	{
-		GameScenePartitioner.Instance = this;
-		this.partitioner = new ScenePartitioner(16, Grid.WidthInCells, Grid.HeightInCells);
-		this.solidChangedMask = this.partitioner.CreateMask(new HashedString("SolidChanged"));
-		this.liquidChangedMask = this.partitioner.CreateMask(new HashedString("LiquidChanged"));
-		this.digDestroyedMask = this.partitioner.CreateMask(new HashedString("DigDestroyed"));
-		this.navCellChangedMask = this.partitioner.CreateMask(new HashedString("NavCellChanged"));
-		this.fogOfWarChanged = this.partitioner.CreateMask(new HashedString("FogOfWarChanged"));
-		this.decorProviders = this.partitioner.CreateMask(new HashedString("DecorProviders"));
-		this.attackableEntities = this.partitioner.CreateMask(new HashedString("FactionedEntities"));
-		this.fetchChores = this.partitioner.CreateMask(new HashedString("FetchChores"));
-		this.pickupables = this.partitioner.CreateMask(new HashedString("Pickupables"));
-		this.gasConduits = this.partitioner.CreateMask(new HashedString("GasConduit"));
-		this.liquidConduits = this.partitioner.CreateMask(new HashedString("LiquidConduit"));
-		this.wires = this.partitioner.CreateMask(new HashedString("Wire"));
-		this.objectLayerMasks = new ScenePartitionerMask[23];
+		GameScenePartitioner.instance = this;
+		this.partitioner = new ScenePartitioner(16, 64, Grid.WidthInCells, Grid.HeightInCells);
+		this.solidChangedLayer = this.partitioner.CreateMask(new HashedString("SolidChanged"));
+		this.liquidChangedLayer = this.partitioner.CreateMask(new HashedString("LiquidChanged"));
+		this.digDestroyedLayer = this.partitioner.CreateMask(new HashedString("DigDestroyed"));
+		this.fogOfWarChangedLayer = this.partitioner.CreateMask(new HashedString("FogOfWarChanged"));
+		this.decorProviderLayer = this.partitioner.CreateMask(new HashedString("DecorProviders"));
+		this.attackableEntitiesLayer = this.partitioner.CreateMask(new HashedString("FactionedEntities"));
+		this.fetchChoreLayer = this.partitioner.CreateMask(new HashedString("FetchChores"));
+		this.pickupablesLayer = this.partitioner.CreateMask(new HashedString("Pickupables"));
+		this.gasConduitsLayer = this.partitioner.CreateMask(new HashedString("GasConduit"));
+		this.liquidConduitsLayer = this.partitioner.CreateMask(new HashedString("LiquidConduit"));
+		this.wiresLayer = this.partitioner.CreateMask(new HashedString("Wire"));
+		this.noisePolluterLayer = this.partitioner.CreateMask(new HashedString("NoisePolluters"));
+		this.validNavCellChangedLayer = this.partitioner.CreateMask(new HashedString("validNavCellChangedLayer"));
+		this.objectLayers = new ScenePartitionerLayer[23];
 		for (int i = 0; i < 23; i++)
 		{
 			ObjectLayer objectLayer = (ObjectLayer)i;
-			this.objectLayerMasks[i] = this.partitioner.CreateMask(new HashedString(objectLayer.ToString()));
+			this.objectLayers[i] = this.partitioner.CreateMask(new HashedString(objectLayer.ToString()));
 		}
+	}
+
+	protected override void OnForcedCleanUp()
+	{
+		GameScenePartitioner.instance = null;
+		this.partitioner.FreeResources();
+		this.partitioner = null;
+		this.solidChangedLayer = null;
+		this.liquidChangedLayer = null;
+		this.digDestroyedLayer = null;
+		this.fogOfWarChangedLayer = null;
+		this.decorProviderLayer = null;
+		this.attackableEntitiesLayer = null;
+		this.fetchChoreLayer = null;
+		this.pickupablesLayer = null;
+		this.gasConduitsLayer = null;
+		this.liquidConduitsLayer = null;
+		this.wiresLayer = null;
+		this.noisePolluterLayer = null;
+		this.validNavCellChangedLayer = null;
+		this.objectLayers = null;
 	}
 
 	protected override void OnSpawn()
 	{
+		base.OnSpawn();
 		NavGrid navGrid = Pathfinding.Instance.GetNavGrid("MinionNavGrid");
 		NavTable navTable = navGrid.NavTable;
 		navTable.OnValidCellChanged = (Action<int, NavType>)Delegate.Combine(navTable.OnValidCellChanged, new Action<int, NavType>(this.OnValidNavCellChanged));
 	}
 
-	private void OnValidNavCellChanged(int cell, NavType nav_type)
+	public GameScenePartitionerEntry Add(string name, object obj, int x, int y, int width, int height, ScenePartitionerLayer layer, Action<object> event_callback)
 	{
-		GameScenePartitioner.Instance.TriggerEvent(cell, GameScenePartitioner.Instance.navCellChangedMask.mask, null);
-	}
-
-	public GameScenePartitionerEntry Add(string name, object obj, int x, int y, int width, int height, int masks, Action<object> event_callback)
-	{
-		GameScenePartitionerEntry gameScenePartitionerEntry = new GameScenePartitionerEntry(name, obj, x, y, width, height, masks, this.partitioner, event_callback);
+		GameScenePartitionerEntry gameScenePartitionerEntry = new GameScenePartitionerEntry(name, obj, x, y, width, height, layer, this.partitioner, event_callback);
 		this.partitioner.Add(gameScenePartitionerEntry);
 		return gameScenePartitionerEntry;
 	}
 
-	public GameScenePartitionerEntry Add(string name, object obj, Extents extents, int masks, Action<object> event_callback)
+	public GameScenePartitionerEntry Add(string name, object obj, Extents extents, ScenePartitionerLayer layer, Action<object> event_callback)
 	{
-		return this.Add(name, obj, extents.x, extents.y, extents.width, extents.height, masks, event_callback);
+		return this.Add(name, obj, extents.x, extents.y, extents.width, extents.height, layer, event_callback);
 	}
 
-	public GameScenePartitionerEntry Add(string name, object obj, int cell, int masks, Action<object> event_callback)
+	public GameScenePartitionerEntry Add(string name, object obj, int cell, ScenePartitionerLayer layer, Action<object> event_callback)
 	{
 		int num = 0;
 		int num2 = 0;
 		Grid.CellToXY(cell, out num, out num2);
-		return this.Add(name, obj, num, num2, 1, 1, masks, event_callback);
+		return this.Add(name, obj, num, num2, 1, 1, layer, event_callback);
 	}
 
-	public void TriggerEvent(List<int> cells, int masks, object event_data)
+	public void TriggerEvent(List<int> cells, ScenePartitionerLayer layer, object event_data)
 	{
-		this.partitioner.TriggerEvent(cells, masks, event_data);
+		this.partitioner.TriggerEvent(cells, layer, event_data);
 	}
 
-	public void TriggerEvent(int x, int y, int width, int height, int masks, object event_data)
+	public void TriggerEvent(int x, int y, int width, int height, ScenePartitionerLayer layer, object event_data)
 	{
-		this.partitioner.TriggerEvent(x, y, width, height, masks, event_data);
+		this.partitioner.TriggerEvent(x, y, width, height, layer, event_data);
 	}
 
-	public void TriggerEvent(int cell, int masks, object event_data)
+	public void TriggerEvent(int cell, ScenePartitionerLayer layer, object event_data)
 	{
 		int num = 0;
 		int num2 = 0;
 		Grid.CellToXY(cell, out num, out num2);
-		this.TriggerEvent(num, num2, 1, 1, masks, event_data);
+		this.TriggerEvent(num, num2, 1, 1, layer, event_data);
 	}
 
-	protected override void OnCleanUp()
+	public void GatherEntries(int x_bottomLeft, int y_bottomLeft, int width, int height, ScenePartitionerLayer layer, List<ScenePartitionerEntry> gathered_entries)
 	{
-		NavGrid navGrid = Pathfinding.Instance.GetNavGrid("MinionNavGrid");
-		if (navGrid != null)
-		{
-			NavTable navTable = navGrid.NavTable;
-			navTable.OnValidCellChanged = (Action<int, NavType>)Delegate.Remove(navTable.OnValidCellChanged, new Action<int, NavType>(this.OnValidNavCellChanged));
-		}
-	}
-
-	public void GatherEntries(int x_bottomLeft, int y_bottomLeft, int width, int height, int masks, List<ScenePartitionerEntry> gathered_entries)
-	{
-		this.partitioner.GatherEntries(x_bottomLeft, y_bottomLeft, width, height, masks, null, gathered_entries);
+		this.partitioner.GatherEntries(x_bottomLeft, y_bottomLeft, width, height, layer, null, gathered_entries);
 	}
 
 	public List<ScenePartitionerEntry> ReserveList()
@@ -102,33 +118,45 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.partitioner.ReleaseList(list);
 	}
 
-	public static GameScenePartitioner Instance;
+	private void Update()
+	{
+		this.partitioner.Update();
+	}
 
-	public ScenePartitionerMask solidChangedMask;
+	private void OnValidNavCellChanged(int cell, NavType nav_type)
+	{
+		GameScenePartitioner.Instance.TriggerEvent(cell, GameScenePartitioner.Instance.validNavCellChangedLayer, null);
+	}
 
-	public ScenePartitionerMask liquidChangedMask;
+	public ScenePartitionerLayer solidChangedLayer;
 
-	public ScenePartitionerMask digDestroyedMask;
+	public ScenePartitionerLayer liquidChangedLayer;
 
-	public ScenePartitionerMask navCellChangedMask;
+	public ScenePartitionerLayer digDestroyedLayer;
 
-	public ScenePartitionerMask fogOfWarChanged;
+	public ScenePartitionerLayer fogOfWarChangedLayer;
 
-	public ScenePartitionerMask decorProviders;
+	public ScenePartitionerLayer decorProviderLayer;
 
-	public ScenePartitionerMask attackableEntities;
+	public ScenePartitionerLayer attackableEntitiesLayer;
 
-	public ScenePartitionerMask fetchChores;
+	public ScenePartitionerLayer fetchChoreLayer;
 
-	public ScenePartitionerMask pickupables;
+	public ScenePartitionerLayer pickupablesLayer;
 
-	public ScenePartitionerMask gasConduits;
+	public ScenePartitionerLayer gasConduitsLayer;
 
-	public ScenePartitionerMask liquidConduits;
+	public ScenePartitionerLayer liquidConduitsLayer;
 
-	public ScenePartitionerMask wires;
+	public ScenePartitionerLayer wiresLayer;
 
-	public ScenePartitionerMask[] objectLayerMasks;
+	public ScenePartitionerLayer[] objectLayers;
+
+	public ScenePartitionerLayer noisePolluterLayer;
+
+	public ScenePartitionerLayer validNavCellChangedLayer;
 
 	private ScenePartitioner partitioner;
+
+	private static GameScenePartitioner instance;
 }

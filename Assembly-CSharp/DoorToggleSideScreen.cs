@@ -8,30 +8,32 @@ public class DoorToggleSideScreen : SideScreenContent
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.buttonList = new List<DoorToggleSideScreen.DoorButtonInfo>
+		this.InitButtons();
+	}
+
+	private void InitButtons()
+	{
+		this.buttonList.Add(new DoorToggleSideScreen.DoorButtonInfo
 		{
-			new DoorToggleSideScreen.DoorButtonInfo
-			{
-				button = this.openButton,
-				state = Door.ControlState.Opened,
-				currentString = UI.UISIDESCREENS.DOOR_TOGGLE_SIDE_SCREEN.OPEN,
-				pendingString = UI.UISIDESCREENS.DOOR_TOGGLE_SIDE_SCREEN.OPEN_PENDING
-			},
-			new DoorToggleSideScreen.DoorButtonInfo
-			{
-				button = this.autoButton,
-				state = Door.ControlState.Auto,
-				currentString = UI.UISIDESCREENS.DOOR_TOGGLE_SIDE_SCREEN.AUTO,
-				pendingString = UI.UISIDESCREENS.DOOR_TOGGLE_SIDE_SCREEN.AUTO_PENDING
-			},
-			new DoorToggleSideScreen.DoorButtonInfo
-			{
-				button = this.closeButton,
-				state = Door.ControlState.Closed,
-				currentString = UI.UISIDESCREENS.DOOR_TOGGLE_SIDE_SCREEN.CLOSE,
-				pendingString = UI.UISIDESCREENS.DOOR_TOGGLE_SIDE_SCREEN.CLOSE_PENDING
-			}
-		};
+			button = this.openButton,
+			state = Door.ControlState.Opened,
+			currentString = UI.UISIDESCREENS.DOOR_TOGGLE_SIDE_SCREEN.OPEN,
+			pendingString = UI.UISIDESCREENS.DOOR_TOGGLE_SIDE_SCREEN.OPEN_PENDING
+		});
+		this.buttonList.Add(new DoorToggleSideScreen.DoorButtonInfo
+		{
+			button = this.autoButton,
+			state = Door.ControlState.Auto,
+			currentString = UI.UISIDESCREENS.DOOR_TOGGLE_SIDE_SCREEN.AUTO,
+			pendingString = UI.UISIDESCREENS.DOOR_TOGGLE_SIDE_SCREEN.AUTO_PENDING
+		});
+		this.buttonList.Add(new DoorToggleSideScreen.DoorButtonInfo
+		{
+			button = this.closeButton,
+			state = Door.ControlState.Closed,
+			currentString = UI.UISIDESCREENS.DOOR_TOGGLE_SIDE_SCREEN.CLOSE,
+			pendingString = UI.UISIDESCREENS.DOOR_TOGGLE_SIDE_SCREEN.CLOSE_PENDING
+		});
 		foreach (DoorToggleSideScreen.DoorButtonInfo doorButtonInfo in this.buttonList)
 		{
 			doorButtonInfo.button.onClick += this.CreateCallback(doorButtonInfo.state);
@@ -71,12 +73,25 @@ public class DoorToggleSideScreen : SideScreenContent
 	{
 		string text = null;
 		string text2 = null;
+		if (this.buttonList == null || this.buttonList.Count == 0)
+		{
+			this.InitButtons();
+		}
 		foreach (DoorToggleSideScreen.DoorButtonInfo doorButtonInfo in this.buttonList)
 		{
-			if (this.target.CurrentState == doorButtonInfo.state)
+			if (this.target.CurrentState == doorButtonInfo.state && this.target.RequestedState == doorButtonInfo.state)
 			{
 				doorButtonInfo.button.GetComponent<ImageToggleStateThrobber>().enabled = false;
 				doorButtonInfo.button.isOn = true;
+				foreach (KImage kimage in doorButtonInfo.button.GetComponentsInChildren<KImage>())
+				{
+					kimage.ColorState = KImage.ColorSelector.Active;
+				}
+				foreach (ImageToggleState imageToggleState in doorButtonInfo.button.GetComponentsInChildren<ImageToggleState>())
+				{
+					imageToggleState.SetActive();
+					imageToggleState.SetActive();
+				}
 				text = doorButtonInfo.currentString;
 			}
 			else if (this.target.RequestedState == doorButtonInfo.state)
@@ -84,11 +99,24 @@ public class DoorToggleSideScreen : SideScreenContent
 				doorButtonInfo.button.GetComponent<ImageToggleStateThrobber>().enabled = true;
 				doorButtonInfo.button.isOn = true;
 				text2 = doorButtonInfo.pendingString;
+				foreach (KImage kimage2 in doorButtonInfo.button.GetComponentsInChildren<KImage>())
+				{
+					kimage2.ColorState = KImage.ColorSelector.Active;
+				}
 			}
 			else
 			{
 				doorButtonInfo.button.GetComponent<ImageToggleStateThrobber>().enabled = false;
+				foreach (KImage kimage3 in doorButtonInfo.button.GetComponentsInChildren<KImage>())
+				{
+					kimage3.ColorState = KImage.ColorSelector.Inactive;
+				}
 				doorButtonInfo.button.isOn = false;
+				foreach (ImageToggleState imageToggleState2 in doorButtonInfo.button.GetComponentsInChildren<ImageToggleState>())
+				{
+					imageToggleState2.SetInactive();
+					imageToggleState2.SetInactive();
+				}
 			}
 		}
 		string text3 = text;
@@ -101,6 +129,7 @@ public class DoorToggleSideScreen : SideScreenContent
 			text3 = string.Format(UI.UISIDESCREENS.DOOR_TOGGLE_SIDE_SCREEN.ACCESS_FORMAT, text3, UI.UISIDESCREENS.DOOR_TOGGLE_SIDE_SCREEN.ACCESS_OFFLINE);
 		}
 		this.description.SetText(text3);
+		this.ContentContainer.SetActive(!this.target.isSealed);
 	}
 
 	private global::System.Action CreateCallback(Door.ControlState state)
@@ -138,7 +167,7 @@ public class DoorToggleSideScreen : SideScreenContent
 
 	private AccessControl accessTarget;
 
-	private List<DoorToggleSideScreen.DoorButtonInfo> buttonList;
+	private List<DoorToggleSideScreen.DoorButtonInfo> buttonList = new List<DoorToggleSideScreen.DoorButtonInfo>();
 
 	private struct DoorButtonInfo
 	{

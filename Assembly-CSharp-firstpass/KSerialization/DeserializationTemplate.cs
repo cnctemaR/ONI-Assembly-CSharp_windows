@@ -121,7 +121,7 @@ namespace KSerialization
 				case SerializationTypeInfo.Array:
 					typeInfo.subTypes = new TypeInfo[1];
 					typeInfo.subTypes[0] = this.ReadType(reader);
-					if (typeInfo.subTypes[0] != null)
+					if (typeInfo.subTypes[0].type != null)
 					{
 						typeInfo.type = typeInfo.subTypes[0].type.MakeArrayType();
 					}
@@ -173,6 +173,11 @@ namespace KSerialization
 			}
 			if (type != null)
 			{
+				if (array == null || Array.IndexOf<Type>(array, null) != -1)
+				{
+					typeInfo.type = null;
+					return typeInfo;
+				}
 				typeInfo.type = type.MakeGenericType(array);
 			}
 			else if (typeInfo.type != null)

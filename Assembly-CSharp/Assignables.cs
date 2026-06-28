@@ -81,8 +81,16 @@ public class Assignables : KMonoBehaviour
 	{
 		if (assignable != null)
 		{
-			AssignableSlotInstance slot = this.GetSlot(assignable.slot);
-			slot.Assign(assignable);
+			AssignableSlotInstance assignableSlotInstance = this.GetSlot(assignable.slot);
+			assignableSlotInstance.Assign(assignable);
+			if (assignable.subSlots != null)
+			{
+				foreach (AssignableSlot assignableSlot in assignable.subSlots)
+				{
+					assignableSlotInstance = this.GetSlot(assignableSlot);
+					assignableSlotInstance.Assign(assignable);
+				}
+			}
 		}
 	}
 
@@ -90,10 +98,18 @@ public class Assignables : KMonoBehaviour
 	{
 		if (assignable != null)
 		{
-			AssignableSlotInstance slot = this.GetSlot(assignable.slot);
-			if (slot != null)
+			AssignableSlotInstance assignableSlotInstance = this.GetSlot(assignable.slot);
+			if (assignableSlotInstance != null)
 			{
-				slot.Unassign(true);
+				assignableSlotInstance.Unassign(true);
+				if (assignable.subSlots != null)
+				{
+					foreach (AssignableSlot assignableSlot in assignable.subSlots)
+					{
+						assignableSlotInstance = this.GetSlot(assignableSlot);
+						assignableSlotInstance.Unassign(true);
+					}
+				}
 			}
 		}
 	}
@@ -140,11 +156,14 @@ public class Assignables : KMonoBehaviour
 				{
 					if (assignable2.slot == slot)
 					{
-						int navigationCost = assignable2.GetNavigationCost(navigator);
-						if (navigationCost != PathProber.InvalidCost && navigationCost < num)
+						if (assignable2.CanAutoAssignTo(navigator))
 						{
-							num = navigationCost;
-							assignable = assignable2;
+							int navigationCost = assignable2.GetNavigationCost(navigator);
+							if (navigationCost != PathProber.InvalidCost && navigationCost < num)
+							{
+								num = navigationCost;
+								assignable = assignable2;
+							}
 						}
 					}
 				}

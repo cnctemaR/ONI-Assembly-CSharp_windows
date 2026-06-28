@@ -268,12 +268,13 @@ public class Grid
 
 	public static void Reveal(int cell, byte visibility = 255)
 	{
-		Grid.Visible[cell] = Math.Max(visibility, Grid.Visible[cell]);
-		if (Grid.Visible[cell] != visibility && visibility == 255)
+		bool flag = Grid.Spawnable[cell] == 0 && visibility > 0;
+		Grid.Spawnable[cell] = Math.Max(visibility, Grid.Visible[cell]);
+		if (!Grid.PreventFogOfWarReveal[cell])
 		{
-			GameScenePartitioner.Instance.TriggerEvent(cell, GameScenePartitioner.Instance.fogOfWarChanged.mask, null);
+			Grid.Visible[cell] = Math.Max(visibility, Grid.Visible[cell]);
 		}
-		if (Grid.OnReveal != null)
+		if (flag && Grid.OnReveal != null)
 		{
 			Grid.OnReveal(cell);
 		}
@@ -450,7 +451,7 @@ public class Grid
 		int num11 = num9 >> 1;
 		for (int i = 0; i <= num9; i++)
 		{
-			if ((x != num || y != num2) && Grid.Solid[Grid.XYToCell(x, y)])
+			if ((x != num || y != num2) && Grid.Element[Grid.XYToCell(x, y)].IsSolid)
 			{
 				return false;
 			}
@@ -501,15 +502,21 @@ public class Grid
 
 	public unsafe static Sim.Cell* CellValues = null;
 
+	public unsafe static Sim.DiseaseCell* DiseaseCellValues = null;
+
 	public unsafe static float* AccumulatedFlowValues = null;
 
 	public static Grid.CellIndexer Cell;
+
+	public static Grid.DiseaseCellIndexer Disease;
 
 	public static bool[] Revealed;
 
 	public static bool[] Reserved;
 
 	public static byte[] Visible;
+
+	public static byte[] Spawnable;
 
 	public static float[] Damage;
 
@@ -521,7 +528,11 @@ public class Grid
 
 	public static bool[] IsTileUnderConstruction;
 
+	public static bool[] PreventFogOfWarReveal;
+
 	public static int[] Decor;
+
+	public static int[] NoisePollution;
 
 	public static ushort[] Room;
 
@@ -618,8 +629,7 @@ public class Grid
 				{
 					Grid.ObjectLayers[layer][cell] = value;
 				}
-				ScenePartitionerMask scenePartitionerMask = GameScenePartitioner.Instance.objectLayerMasks[layer];
-				GameScenePartitioner.Instance.TriggerEvent(cell, scenePartitionerMask.mask, value);
+				GameScenePartitioner.Instance.TriggerEvent(cell, GameScenePartitioner.Instance.objectLayers[layer], value);
 			}
 		}
 	}
@@ -631,6 +641,17 @@ public class Grid
 			get
 			{
 				return Grid.CellValues[i];
+			}
+		}
+	}
+
+	public struct DiseaseCellIndexer
+	{
+		public unsafe Sim.DiseaseCell this[int i]
+		{
+			get
+			{
+				return Grid.DiseaseCellValues[i];
 			}
 		}
 	}

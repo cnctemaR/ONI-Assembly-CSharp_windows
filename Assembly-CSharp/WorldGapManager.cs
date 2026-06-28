@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Generated;
-using Klei;
+using ProcGen;
+using ProcGenGame;
 using STRINGS;
 using UnityEngine;
 
@@ -53,6 +53,10 @@ public class WorldGapManager : KMonoBehaviour
 
 	public void SetGasClouds(List<Cloud> clouds)
 	{
+		if (clouds == null || clouds.Count == 0)
+		{
+			return;
+		}
 		this.gaps.SetGasClouds(clouds);
 		if (this.gaps.state != WorldGaps.State.Disabled)
 		{
@@ -60,7 +64,10 @@ public class WorldGapManager : KMonoBehaviour
 			{
 				this.gaps.Next();
 			}
-			this.currentElement = ElementLoader.FindElementByHash(this.gaps.currentCloud.element);
+			if (this.gaps.currentCloud != null)
+			{
+				this.currentElement = ElementLoader.FindElementByHash(this.gaps.currentCloud.element);
+			}
 		}
 	}
 
@@ -96,7 +103,7 @@ public class WorldGapManager : KMonoBehaviour
 				this.currentCell = this.cellUpdateOrder.GetEnumerator();
 			}
 			this.cellsLastTick++;
-			SimMessages.ReplaceElement(this.currentCell.Current, element, CellEventLogger.Instance.WorldGapManager, mass, temperature, -1);
+			SimMessages.ReplaceElement(this.currentCell.Current, element, CellEventLogger.Instance.WorldGapManager, mass, temperature, byte.MaxValue, 0, -1);
 			num++;
 		}
 	}
@@ -112,7 +119,7 @@ public class WorldGapManager : KMonoBehaviour
 		int num = 0;
 		while (this.resetCells < this.cellUpdateOrder.Count && num < this.cellsPerTick)
 		{
-			SimMessages.ReplaceElement(this.cellUpdateOrder[this.resetCells], SimHashes.Void, CellEventLogger.Instance.WorldGapManager, 0f, -1f, -1);
+			SimMessages.ReplaceElement(this.cellUpdateOrder[this.resetCells], SimHashes.Void, CellEventLogger.Instance.WorldGapManager, 0f, -1f, byte.MaxValue, 0, -1);
 			this.resetCells++;
 			num++;
 		}

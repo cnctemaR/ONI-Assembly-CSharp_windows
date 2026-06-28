@@ -82,6 +82,28 @@ public class Element : IComparable<Element>
 		}
 	}
 
+	public string GetStateString()
+	{
+		return Element.GetStateString(this.state);
+	}
+
+	public static string GetStateString(Element.State state)
+	{
+		if ((byte)(state & Element.State.Solid) == 3)
+		{
+			return ELEMENTS.STATE.SOLID;
+		}
+		if ((byte)(state & Element.State.Solid) == 2)
+		{
+			return ELEMENTS.STATE.LIQUID;
+		}
+		if ((byte)(state & Element.State.Solid) == 1)
+		{
+			return ELEMENTS.STATE.GAS;
+		}
+		return ELEMENTS.STATE.VACUUM;
+	}
+
 	public string FullDescription(bool addHardnessColor = true)
 	{
 		string text = this.Description();
@@ -219,6 +241,12 @@ public class Element : IComparable<Element>
 	public SimHashes highTempTransitionOreID = SimHashes.Vacuum;
 
 	public float highTempTransitionOreMassConversion;
+
+	public SimHashes sublimateId;
+
+	public SimHashes convertId;
+
+	public SpawnFXHashes sublimateFX;
 
 	public Sim.PhysicsData defaultValues;
 

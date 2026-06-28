@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace YamlDotNet.Core.Events
 {
@@ -31,6 +32,15 @@ namespace YamlDotNet.Core.Events
 		public override void Accept(IParsingEventVisitor visitor)
 		{
 			visitor.Visit(this);
+		}
+
+		public override string ToString()
+		{
+			return string.Format(CultureInfo.InvariantCulture, "{0} Comment [{1}]", new object[]
+			{
+				this.IsInline ? "Inline" : "Block",
+				this.Value
+			});
 		}
 	}
 }

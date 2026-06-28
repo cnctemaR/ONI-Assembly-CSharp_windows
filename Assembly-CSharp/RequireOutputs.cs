@@ -7,7 +7,7 @@ public class RequireOutputs : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		int num = 0;
+		ScenePartitionerLayer scenePartitionerLayer = null;
 		Building component = base.GetComponent<Building>();
 		this.utilityCell = component.GetUtilityOutputCell();
 		this.conduitType = component.Def.OutputConduitType;
@@ -16,25 +16,32 @@ public class RequireOutputs : KMonoBehaviour
 		{
 			if (outputConduitType == ConduitType.Liquid)
 			{
-				num = GameScenePartitioner.Instance.liquidConduits.mask;
+				scenePartitionerLayer = GameScenePartitioner.Instance.liquidConduitsLayer;
 			}
 		}
 		else
 		{
-			num = GameScenePartitioner.Instance.gasConduits.mask;
+			scenePartitionerLayer = GameScenePartitioner.Instance.gasConduitsLayer;
 		}
 		this.UpdateConnectionState(true);
 		this.UpdatePipeRoomState(true);
-		this.partitionerEntry = GameScenePartitioner.Instance.Add("RequireOutputs", base.gameObject, this.utilityCell, num, delegate(object data)
+		if (scenePartitionerLayer != null)
 		{
-			this.UpdateConnectionState(false);
-		});
-		this.GetConduitManager().AddConduitUpdater(new Action<float>(this.UpdatePipeState), 10);
+			this.partitionerEntry = GameScenePartitioner.Instance.Add("RequireOutputs", base.gameObject, this.utilityCell, scenePartitionerLayer, delegate(object data)
+			{
+				this.UpdateConnectionState(false);
+			});
+		}
+		this.GetConduitManager().AddConduitUpdater(new Action<float>(this.UpdatePipeState), ConduitFlow.Priority.First);
 	}
 
 	protected override void OnCleanUp()
 	{
-		this.partitionerEntry.Release();
+		if (this.partitionerEntry != null)
+		{
+			this.partitionerEntry.Release();
+			this.partitionerEntry = null;
+		}
 		this.GetConduitManager().RemoveConduitUpdater(new Action<float>(this.UpdatePipeState));
 		base.OnCleanUp();
 	}

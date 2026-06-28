@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Klei;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -146,6 +147,9 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 		{
 			return;
 		}
+		SimUtil.DiseaseInfo diseaseInfo = SimUtil.DiseaseInfo.Invalid;
+		diseaseInfo.idx = byte.MaxValue;
+		diseaseInfo.count = 0;
 		float num6 = 0f;
 		for (int k = 0; k < this.consumedElements.Length; k++)
 		{
@@ -160,8 +164,12 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 					PrimaryElement component2 = gameObject2.GetComponent<PrimaryElement>();
 					component2.KeepZeroMassObject = true;
 					float num8 = Mathf.Min(num7, component2.Mass);
+					float num9 = num8 / component2.Mass;
+					int num10 = (int)(num9 * (float)component2.DiseaseCount);
 					component2.Mass -= num8;
+					component2.ModifyDiseaseCount(-num10, "ElementConverter.ConvertMass");
 					num6 += num8;
+					diseaseInfo = SimUtil.CalculateFinalDiseaseInfo(diseaseInfo.idx, diseaseInfo.count, component2.DiseaseIdx, num10);
 					num = component2.Temperature;
 					if (num7 <= 0f)
 					{
@@ -171,60 +179,111 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 				if (num7 <= 0f)
 				{
 				}
-				this.storage.Trigger(-1697596308, base.gameObject);
 			}
 		}
 		if (this.onConvertMass != null && num6 > 0f)
 		{
 			this.onConvertMass(num6);
 		}
-		for (int m = 0; m < this.outputElements.Length; m++)
+		if (this.outputElements != null && this.outputElements.Length > 0)
 		{
-			ElementConverter.OutputElement outputElement = this.outputElements[m];
-			float num9 = outputElement.massGenerationRate * this.OutputMultiplier * dt * num2;
-			outputElement.accumulator.Accumulate(num9);
-			float num10 = ((outputElement.outputTemperature != 0f) ? outputElement.outputTemperature : base.GetComponent<PrimaryElement>().Temperature);
-			if (outputElement.applyInputTemperature)
+			for (int m = 0; m < this.outputElements.Length; m++)
 			{
-				num10 = num;
-			}
-			if (outputElement.storeOutput)
-			{
-				PrimaryElement primaryElement = this.storage.AddToPrimaryElement(outputElement.element.id, num9, num10);
-				if (primaryElement == null)
+				ElementConverter.OutputElement outputElement = this.outputElements[m];
+				SimUtil.DiseaseInfo diseaseInfo2 = diseaseInfo;
+				if (this.totalDiseaseWeight <= 0f)
 				{
-					if (outputElement.element.IsGas)
-					{
-						this.storage.AddGasChunk(outputElement.elementHash, num9, num10, true);
-					}
-					else if (outputElement.element.IsLiquid)
-					{
-						this.storage.AddLiquid(outputElement.elementHash, num9, num10, true);
-					}
-					else
-					{
-						GameObject gameObject3 = outputElement.element.substance.SpawnResource(this.transform.position, num9, num10, true, false);
-						this.storage.Store(gameObject3, true, false);
-					}
-				}
-			}
-			else
-			{
-				Vector3 vector = new Vector3(this.transform.position.x + outputElement.outputElementOffset.x, this.transform.position.y + outputElement.outputElementOffset.y, 0f);
-				int num11 = Grid.PosToCell(vector);
-				if (outputElement.element.IsSolid)
-				{
-					outputElement.element.substance.SpawnResource(vector, num9, num10, false, false);
+					diseaseInfo2.idx = byte.MaxValue;
+					diseaseInfo2.count = 0;
 				}
 				else
 				{
-					SimMessages.AddRemoveSubstance(num11, outputElement.elementHash, CellEventLogger.Instance.OxygenModifierSimUpdate, num9, num10, -1);
+					float num11 = outputElement.diseaseWeight / this.totalDiseaseWeight;
+					diseaseInfo2.count = (int)((float)diseaseInfo2.count * num11);
+				}
+				if (outputElement.addedDiseaseIdx != 255)
+				{
+					diseaseInfo2 = SimUtil.CalculateFinalDiseaseInfo(diseaseInfo2, new SimUtil.DiseaseInfo
+					{
+						idx = outputElement.addedDiseaseIdx,
+						count = outputElement.addedDiseaseCount
+					});
+				}
+				float num12 = outputElement.massGenerationRate * this.OutputMultiplier * dt * num2;
+				outputElement.accumulator.Accumulate(num12);
+				float num13 = ((outputElement.outputTemperature != 0f) ? outputElement.outputTemperature : base.GetComponent<PrimaryElement>().Temperature);
+				if (outputElement.applyInputTemperature)
+				{
+					num13 = num;
+				}
+				if (outputElement.storeOutput)
+				{
+					PrimaryElement primaryElement = this.storage.AddToPrimaryElement(outputElement.element.id, num12, num13);
+					if (primaryElement == null)
+					{
+						if (outputElement.element.IsGas)
+						{
+							this.storage.AddGasChunk(outputElement.elementHash, num12, num13, diseaseInfo2.idx, diseaseInfo2.count, true, true);
+						}
+						else if (outputElement.element.IsLiquid)
+						{
+							this.storage.AddLiquid(outputElement.elementHash, num12, num13, diseaseInfo2.idx, diseaseInfo2.count, true, true);
+						}
+						else
+						{
+							GameObject gameObject3 = outputElement.element.substance.SpawnResource(this.transform.position, num12, num13, diseaseInfo2.idx, diseaseInfo2.count, true, false);
+							this.storage.Store(gameObject3, true, false, true);
+						}
+					}
+					else
+					{
+						primaryElement.AddDisease(diseaseInfo2.idx, diseaseInfo2.count, "ElementCovnerter.ConvertMass");
+					}
+				}
+				else
+				{
+					Vector3 vector = new Vector3(this.transform.position.x + outputElement.outputElementOffset.x, this.transform.position.y + outputElement.outputElementOffset.y, 0f);
+					int num14 = Grid.PosToCell(vector);
+					if (outputElement.element.IsSolid)
+					{
+						outputElement.element.substance.SpawnResource(vector, num12, num13, diseaseInfo2.idx, diseaseInfo2.count, false, false);
+					}
+					else
+					{
+						SimMessages.AddRemoveSubstance(num14, outputElement.elementHash, CellEventLogger.Instance.OxygenModifierSimUpdate, num12, num13, diseaseInfo2.idx, diseaseInfo2.count, -1);
+					}
+				}
+				if (outputElement.elementHash == SimHashes.Oxygen)
+				{
+					ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, num12, null);
 				}
 			}
-			if (outputElement.elementHash == SimHashes.Oxygen)
+		}
+		this.storage.Trigger(-1697596308, base.gameObject);
+	}
+
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		if (ElementConverter.ElementConverterInput == null)
+		{
+			ElementConverter.ElementConverterInput = new StatusItem("ElementConverterInput", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, SimViewMode.None, SimViewMode.None, true, 2046).SetResolveStringCallback(delegate(string str, object data)
 			{
-				ReportManager.Instance.ReportValue(ReportManager.ReportType.OxygenCreated, num9, null);
-			}
+				ElementConverter.ConsumedElement consumedElement = (ElementConverter.ConsumedElement)data;
+				str = str.Replace("{ElementTypes}", consumedElement.Name);
+				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(consumedElement.Rate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+				return str;
+			});
+		}
+		if (ElementConverter.ElementConverterOutput == null)
+		{
+			ElementConverter.ElementConverterOutput = new StatusItem("ElementConverterOutput", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, SimViewMode.None, SimViewMode.None, true, 2046).SetResolveStringCallback(delegate(string str, object data)
+			{
+				ElementConverter.OutputElement outputElement = (ElementConverter.OutputElement)data;
+				str = str.Replace("{ElementTypes}", outputElement.Name);
+				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(outputElement.Rate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+				return str;
+			});
 		}
 	}
 
@@ -235,9 +294,11 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 		{
 			this.consumedElements[i].accumulator = new Accumulator("ElementsConsumed", this, 3f);
 		}
+		this.totalDiseaseWeight = 0f;
 		for (int j = 0; j < this.outputElements.Length; j++)
 		{
 			this.outputElements[j].accumulator = new Accumulator("OutputElements", this, 3f);
+			this.totalDiseaseWeight += this.outputElements[j].diseaseWeight;
 		}
 		base.smi.StartSM();
 	}
@@ -249,14 +310,14 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 		{
 			string keywordStyle = GameUtil.GetKeywordStyle(consumedElement.tag);
 			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMED, keywordStyle, consumedElement.Name, GameUtil.GetFormattedMass(consumedElement.massConsumptionRate, GameUtil.TimeSlice.PerSecond, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMED, keywordStyle, consumedElement.Name, GameUtil.GetFormattedMass(consumedElement.massConsumptionRate, GameUtil.TimeSlice.PerSecond, true, "{0:0.##}")), Descriptor.DescriptorType.Requirement);
+			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMED, keywordStyle, consumedElement.Name, GameUtil.GetFormattedMass(consumedElement.massConsumptionRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMED, keywordStyle, consumedElement.Name, GameUtil.GetFormattedMass(consumedElement.massConsumptionRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Requirement);
 			list.Add(descriptor);
 		}
 		foreach (ElementConverter.OutputElement outputElement in this.outputElements)
 		{
 			string keywordStyle2 = GameUtil.GetKeywordStyle(outputElement.elementHash);
 			Descriptor descriptor2 = default(Descriptor);
-			descriptor2.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTED, keywordStyle2, outputElement.Name, GameUtil.GetFormattedMass(outputElement.massGenerationRate, GameUtil.TimeSlice.PerSecond, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTED, keywordStyle2, outputElement.Name, GameUtil.GetFormattedMass(outputElement.massGenerationRate, GameUtil.TimeSlice.PerSecond, true, "{0:0.##}")), Descriptor.DescriptorType.Effect);
+			descriptor2.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTED, keywordStyle2, outputElement.Name, GameUtil.GetFormattedMass(outputElement.massGenerationRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTED, keywordStyle2, outputElement.Name, GameUtil.GetFormattedMass(outputElement.massGenerationRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Effect);
 			list.Add(descriptor2);
 		}
 		return list;
@@ -270,6 +331,8 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 
 	public Action<float> onConvertMass;
 
+	private float totalDiseaseWeight = float.MaxValue;
+
 	[SerializeField]
 	public ElementConverter.ConsumedElement[] consumedElements;
 
@@ -281,21 +344,9 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 
 	private float outputMultiplier = 1f;
 
-	private static StatusItem ElementConverterInput = new StatusItem("ElementConverterInput", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, SimViewMode.None, SimViewMode.None, true).SetResolveStringCallback(delegate(string str, object data)
-	{
-		ElementConverter.ConsumedElement consumedElement = (ElementConverter.ConsumedElement)data;
-		str = str.Replace("{ElementTypes}", consumedElement.Name);
-		str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(consumedElement.Rate, GameUtil.TimeSlice.PerSecond, true, "{0:0.#}"));
-		return str;
-	});
+	private static StatusItem ElementConverterInput;
 
-	private static StatusItem ElementConverterOutput = new StatusItem("ElementConverterOutput", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, SimViewMode.None, SimViewMode.None, true).SetResolveStringCallback(delegate(string str, object data)
-	{
-		ElementConverter.OutputElement outputElement = (ElementConverter.OutputElement)data;
-		str = str.Replace("{ElementTypes}", outputElement.Name);
-		str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(outputElement.Rate, GameUtil.TimeSlice.PerSecond, true, "{0:0.#}"));
-		return str;
-	});
+	private static StatusItem ElementConverterOutput;
 
 	[DebuggerDisplay("{tag} {massConsumptionRate}")]
 	[Serializable]
@@ -334,7 +385,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 	[Serializable]
 	public struct OutputElement
 	{
-		public OutputElement(float kgPerSecond, SimHashes element, float outputTemperature = 0f, bool storeOutput = false, float outputElementOffsetx = 0f, float outputElementOffsety = 0.5f, bool apply_input_temperature = false)
+		public OutputElement(float kgPerSecond, SimHashes element, float outputTemperature = 0f, bool storeOutput = false, float outputElementOffsetx = 0f, float outputElementOffsety = 0.5f, bool apply_input_temperature = false, float diseaseWeight = 1f, byte addedDiseaseIdx = 255, int addedDiseaseCount = 0)
 		{
 			this.elementHash = element;
 			this.outputTemperature = ((outputTemperature <= 0f) ? ElementLoader.FindElementByHash(element).defaultValues.temperature : outputTemperature);
@@ -344,6 +395,9 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 			this.accumulator = null;
 			this.element = ElementLoader.FindElementByHash(element);
 			this.applyInputTemperature = apply_input_temperature;
+			this.diseaseWeight = diseaseWeight;
+			this.addedDiseaseIdx = addedDiseaseIdx;
+			this.addedDiseaseCount = addedDiseaseCount;
 		}
 
 		public string Name
@@ -377,6 +431,12 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 		public Vector2 outputElementOffset;
 
 		public Accumulator accumulator;
+
+		public float diseaseWeight;
+
+		public byte addedDiseaseIdx;
+
+		public int addedDiseaseCount;
 	}
 
 	public class StatesInstance : GameStateMachine<ElementConverter.States, ElementConverter.StatesInstance, ElementConverter, object>.GameInstance

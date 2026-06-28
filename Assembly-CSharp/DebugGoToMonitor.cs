@@ -27,7 +27,7 @@ public class DebugGoToMonitor : StateMachineComponent<DebugGoToMonitor.StatesIns
 		{
 			default_state = this.satisfied;
 			this.satisfied.DoNothing();
-			this.moving.ToggleChore((DebugGoToMonitor.StatesInstance smi) => new MoveChore(smi.master, Db.Get().ChoreTypes.DebugGoTo, (MoveChore.StatesInstance smii) => DebugHandler.GetMouseCell(), false), this.satisfied, false);
+			this.moving.ToggleChore((DebugGoToMonitor.StatesInstance smi) => new MoveChore(smi.master, Db.Get().ChoreTypes.DebugGoTo, (MoveChore.StatesInstance smii) => DebugHandler.GetMouseCell(), false), this.satisfied);
 		}
 
 		public GameStateMachine<DebugGoToMonitor.States, DebugGoToMonitor.StatesInstance, DebugGoToMonitor, object>.State satisfied;

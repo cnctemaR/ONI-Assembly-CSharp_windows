@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
 using KSerialization;
 using UnityEngine;
 
 namespace Klei.AI
 {
+	[DebuggerDisplay("{amount.Name} {value} ({deltaAttribute.value}/{minAttribute.value}/{maxAttribute.value})")]
 	[SerializationConfig(MemberSerialization.OptIn)]
 	public class AmountInstance : ModifierInstance<Amount>, ISaveLoadable
 	{

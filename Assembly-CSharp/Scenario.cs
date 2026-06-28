@@ -2,8 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Klei;
 using Klei.AI;
+using ProcGenGame;
 using UnityEngine;
 
 public class Scenario : KMonoBehaviour
@@ -37,25 +37,25 @@ public class Scenario : KMonoBehaviour
 			for (int j = 0; j < height; j++)
 			{
 				int num = Grid.OffsetCell(this.RootCell, x + i, y + j);
-				SimMessages.ReplaceElement(num, SimHashes.Oxygen, CellEventLogger.Instance.Scenario, 200f, -1f, -1);
-				SimMessages.ReplaceElement(Grid.OffsetCell(this.RootCell, x, y + j), SimHashes.Ice, CellEventLogger.Instance.Scenario, 1000f, -1f, -1);
-				SimMessages.ReplaceElement(Grid.OffsetCell(this.RootCell, x + width, y + j), SimHashes.Ice, CellEventLogger.Instance.Scenario, 1000f, -1f, -1);
+				SimMessages.ReplaceElement(num, SimHashes.Oxygen, CellEventLogger.Instance.Scenario, 200f, -1f, byte.MaxValue, 0, -1);
+				SimMessages.ReplaceElement(Grid.OffsetCell(this.RootCell, x, y + j), SimHashes.Ice, CellEventLogger.Instance.Scenario, 1000f, -1f, byte.MaxValue, 0, -1);
+				SimMessages.ReplaceElement(Grid.OffsetCell(this.RootCell, x + width, y + j), SimHashes.Ice, CellEventLogger.Instance.Scenario, 1000f, -1f, byte.MaxValue, 0, -1);
 			}
-			SimMessages.ReplaceElement(Grid.OffsetCell(this.RootCell, x + i, y - 1), SimHashes.Ice, CellEventLogger.Instance.Scenario, 1000f, -1f, -1);
-			SimMessages.ReplaceElement(Grid.OffsetCell(this.RootCell, x + i, y + height), SimHashes.Ice, CellEventLogger.Instance.Scenario, 1000f, -1f, -1);
+			SimMessages.ReplaceElement(Grid.OffsetCell(this.RootCell, x + i, y - 1), SimHashes.Ice, CellEventLogger.Instance.Scenario, 1000f, -1f, byte.MaxValue, 0, -1);
+			SimMessages.ReplaceElement(Grid.OffsetCell(this.RootCell, x + i, y + height), SimHashes.Ice, CellEventLogger.Instance.Scenario, 1000f, -1f, byte.MaxValue, 0, -1);
 		}
 	}
 
 	private void Fill(int x, int y, SimHashes id = SimHashes.Ice)
 	{
-		SimMessages.ReplaceElement(Grid.OffsetCell(this.RootCell, x, y), id, CellEventLogger.Instance.Scenario, 10000f, -1f, -1);
+		SimMessages.ReplaceElement(Grid.OffsetCell(this.RootCell, x, y), id, CellEventLogger.Instance.Scenario, 10000f, -1f, byte.MaxValue, 0, -1);
 	}
 
 	private void PlaceColumn(int x, int y, int height)
 	{
 		for (int i = 0; i < height; i++)
 		{
-			SimMessages.ReplaceElement(Grid.OffsetCell(this.RootCell, x, y + i), SimHashes.Ice, CellEventLogger.Instance.Scenario, 10000f, -1f, -1);
+			SimMessages.ReplaceElement(Grid.OffsetCell(this.RootCell, x, y + i), SimHashes.Ice, CellEventLogger.Instance.Scenario, 10000f, -1f, byte.MaxValue, 0, -1);
 		}
 	}
 
@@ -77,7 +77,7 @@ public class Scenario : KMonoBehaviour
 
 	private void Clear(int x, int y)
 	{
-		SimMessages.ReplaceElement(Grid.OffsetCell(this.RootCell, x, y), SimHashes.Oxygen, CellEventLogger.Instance.Scenario, 10000f, -1f, -1);
+		SimMessages.ReplaceElement(Grid.OffsetCell(this.RootCell, x, y), SimHashes.Oxygen, CellEventLogger.Instance.Scenario, 10000f, -1f, byte.MaxValue, 0, -1);
 	}
 
 	private void PlacerLadder(int x, int y, int amount)
@@ -554,7 +554,7 @@ public class Scenario : KMonoBehaviour
 		{
 			ElementLoader.FindElementByHash(element),
 			ElementLoader.FindElementByHash(SimHashes.SedimentaryRock)
-		}, false);
+		}, false, false);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 		component.InternalTemperature = 300f;
 		component.Temperature = 300f;
@@ -568,7 +568,7 @@ public class Scenario : KMonoBehaviour
 			int num = Grid.OffsetCell(this.RootCell, x, y);
 			Vector3 vector = Grid.CellToPosCCC(num, Grid.SceneLayer.Use);
 			vector.x += global::UnityEngine.Random.Range(-0.1f, 0.1f);
-			ElementLoader.FindElementByHash(element).substance.SpawnResource(vector, 4000f, 293f, false, false);
+			ElementLoader.FindElementByHash(element).substance.SpawnResource(vector, 4000f, 293f, byte.MaxValue, 0, false, false);
 		});
 	}
 
@@ -596,8 +596,11 @@ public class Scenario : KMonoBehaviour
 		}
 		GameObject gameObject = GameUtil.KInstantiate(prefab, Grid.CellToPosCBC(num, scene_layer), scene_layer, SceneOrganizer.Instance.GetFolder(folder), null, 0);
 		PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-		component.InternalTemperature = 300f;
-		component.Temperature = 300f;
+		if (component)
+		{
+			component.InternalTemperature = 300f;
+			component.Temperature = 300f;
+		}
 		return gameObject;
 	}
 
@@ -711,7 +714,7 @@ public class Scenario : KMonoBehaviour
 		{
 			for (int j = 0; j < Grid.WidthInCells; j++)
 			{
-				SimMessages.ReplaceElement(Grid.XYToCell(j, i), SimHashes.Oxygen, CellEventLogger.Instance.Scenario, 100f, -1f, -1);
+				SimMessages.ReplaceElement(Grid.XYToCell(j, i), SimHashes.Oxygen, CellEventLogger.Instance.Scenario, 100f, -1f, byte.MaxValue, 0, -1);
 			}
 		}
 		Scenario.RowLayout rowLayout = new Scenario.RowLayout(0, 0);
@@ -748,7 +751,7 @@ public class Scenario : KMonoBehaviour
 			for (int j = 0; j < num; j++)
 			{
 				SimHashes simHashes = ((i != 0) ? SimHashes.Oxygen : SimHashes.Unobtanium);
-				SimMessages.ReplaceElement(Grid.XYToCell(j, i), simHashes, CellEventLogger.Instance.Scenario, 1000f, -1f, -1);
+				SimMessages.ReplaceElement(Grid.XYToCell(j, i), simHashes, CellEventLogger.Instance.Scenario, 1000f, -1f, byte.MaxValue, 0, -1);
 			}
 		}
 		for (int k = 1; k < num - 1; k++)
@@ -1049,7 +1052,7 @@ public class Scenario : KMonoBehaviour
 				{
 					int num = Grid.OffsetCell(this.Scenario.RootCell, this.Left + i, this.Bot + j);
 					this.UpdateMinMax(this.Left + i, this.Bot + j);
-					SimMessages.ReplaceElement(num, SimHashes.Vacuum, CellEventLogger.Instance.Scenario, 0f, -1f, -1);
+					SimMessages.ReplaceElement(num, SimHashes.Vacuum, CellEventLogger.Instance.Scenario, 0f, -1f, byte.MaxValue, 0, -1);
 					this.Scenario.ReplaceElementMask[num] = true;
 				}
 			}
@@ -1075,7 +1078,7 @@ public class Scenario : KMonoBehaviour
 				{
 					int num = Grid.OffsetCell(this.Scenario.RootCell, this.Left + i, this.Bot + j);
 					this.UpdateMinMax(this.Left + i, this.Bot + j);
-					SimMessages.ReplaceElement(num, element, CellEventLogger.Instance.Scenario, 5000f, -1f, -1);
+					SimMessages.ReplaceElement(num, element, CellEventLogger.Instance.Scenario, 5000f, -1f, byte.MaxValue, 0, -1);
 					this.Scenario.ReplaceElementMask[num] = true;
 				}
 			}
@@ -1124,7 +1127,7 @@ public class Scenario : KMonoBehaviour
 						int num2 = Grid.OffsetCell(this.Scenario.RootCell, i, k);
 						if (!this.Scenario.ReplaceElementMask[num2])
 						{
-							SimMessages.ReplaceElement(num2, element, CellEventLogger.Instance.Scenario, (float)num, -1f, -1);
+							SimMessages.ReplaceElement(num2, element, CellEventLogger.Instance.Scenario, (float)num, -1f, byte.MaxValue, 0, -1);
 						}
 					}
 				}

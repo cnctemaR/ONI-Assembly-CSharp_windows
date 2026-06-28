@@ -41,7 +41,6 @@ public class CellEventLogger : EventLogger<CellEventInstance, CellEvent>
 		this.WorldGapManager = base.AddEvent(new CellElementEvent("WorldGapManager", "World Gap Manager", true, true)) as CellElementEvent;
 		this.ReceiveElementChanged = base.AddEvent(new CellElementEvent("ReceiveElementChanged", "Sim Message", false, false)) as CellElementEvent;
 		this.ObjectSetSimOnSpawn = base.AddEvent(new CellElementEvent("ObjectSetSimOnSpawn", "Object set sim on spawn", true, true)) as CellElementEvent;
-		this.LiquidSourceReplace = base.AddEvent(new CellElementEvent("LiquidSourceReplace", "Liquid source replace", true, true)) as CellElementEvent;
 		this.DecompositionDirtyWater = base.AddEvent(new CellElementEvent("DecompositionDirtyWater", "Decomposition dirty water", true, true)) as CellElementEvent;
 		this.SendCallback = base.AddEvent(new CellCallbackEvent("SendCallback", true, true)) as CellCallbackEvent;
 		this.ReceiveCallback = base.AddEvent(new CellCallbackEvent("ReceiveCallback", false, true)) as CellCallbackEvent;
@@ -57,6 +56,8 @@ public class CellEventLogger : EventLogger<CellEventInstance, CellEvent>
 		this.Mop = base.AddEvent(new CellAddRemoveSubstanceEvent("Mop", "Mop", false)) as CellAddRemoveSubstanceEvent;
 		this.OreMelted = base.AddEvent(new CellAddRemoveSubstanceEvent("OreMelted", "Ore Melted", false)) as CellAddRemoveSubstanceEvent;
 		this.ConstructTile = base.AddEvent(new CellAddRemoveSubstanceEvent("ConstructTile", "ConstructTile", false)) as CellAddRemoveSubstanceEvent;
+		this.Dumpable = base.AddEvent(new CellAddRemoveSubstanceEvent("Dympable", "Dumpable", false)) as CellAddRemoveSubstanceEvent;
+		this.Cough = base.AddEvent(new CellAddRemoveSubstanceEvent("Cough", "Cough", false)) as CellAddRemoveSubstanceEvent;
 		this.ElementChunkTransition = base.AddEvent(new CellAddRemoveSubstanceEvent("ElementChunkTransition", "Element Chunk Transition", false)) as CellAddRemoveSubstanceEvent;
 		this.OxyrockEmit = base.AddEvent(new CellAddRemoveSubstanceEvent("OxyrockEmit", "Oxyrock Emit", false)) as CellAddRemoveSubstanceEvent;
 		this.BleachstoneEmit = base.AddEvent(new CellAddRemoveSubstanceEvent("BleachstoneEmit", "Bleachstone Emit", false)) as CellAddRemoveSubstanceEvent;
@@ -74,7 +75,6 @@ public class CellEventLogger : EventLogger<CellEventInstance, CellEvent>
 		this.CO2FilterOxygen = base.AddEvent(new CellAddRemoveSubstanceEvent("CO2FilterOxygen", "CO2FilterOxygen", false)) as CellAddRemoveSubstanceEvent;
 		this.ToiletEmit = base.AddEvent(new CellAddRemoveSubstanceEvent("ToiletEmit", "ToiletEmit", false)) as CellAddRemoveSubstanceEvent;
 		this.ElementEmitted = base.AddEvent(new CellAddRemoveSubstanceEvent("ElementEmitted", "Element Emitted", false)) as CellAddRemoveSubstanceEvent;
-		this.LiquidSourceOnTake = base.AddEvent(new CellModifyMassEvent("WallPumpSimUpdate", "Wall Pump SimUpdate", false)) as CellModifyMassEvent;
 		this.CO2ManagerFixedUpdate = base.AddEvent(new CellModifyMassEvent("CO2ManagerFixedUpdate", "CO2Manager FixedUpdate", false)) as CellModifyMassEvent;
 		this.EnvironmentConsumerFixedUpdate = base.AddEvent(new CellModifyMassEvent("EnvironmentConsumerFixedUpdate", "EnvironmentConsumer FixedUpdate", false)) as CellModifyMassEvent;
 		this.ExcavatorShockwave = base.AddEvent(new CellModifyMassEvent("ExcavatorShockwave", "Excavator Shockwave", false)) as CellModifyMassEvent;
@@ -118,8 +118,6 @@ public class CellEventLogger : EventLogger<CellEventInstance, CellEvent>
 	public CellElementEvent ReceiveElementChanged;
 
 	public CellElementEvent ObjectSetSimOnSpawn;
-
-	public CellElementEvent LiquidSourceReplace;
 
 	public CellElementEvent DecompositionDirtyWater;
 
@@ -185,7 +183,9 @@ public class CellEventLogger : EventLogger<CellEventInstance, CellEvent>
 
 	public CellAddRemoveSubstanceEvent ConstructTile;
 
-	public CellModifyMassEvent LiquidSourceOnTake;
+	public CellAddRemoveSubstanceEvent Dumpable;
+
+	public CellAddRemoveSubstanceEvent Cough;
 
 	public CellModifyMassEvent CO2ManagerFixedUpdate;
 

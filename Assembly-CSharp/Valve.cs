@@ -3,7 +3,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Valve : BuildingWorkable, ISaveLoadable
+public class Valve : Workable, ISaveLoadable
 {
 	public float MaxFlow
 	{
@@ -44,7 +44,7 @@ public class Valve : BuildingWorkable, ISaveLoadable
 		Building component = base.GetComponent<Building>();
 		this.inputCell = component.GetUtilityInputCell();
 		this.outputCell = component.GetUtilityOutputCell();
-		Conduit.GetFlowManager(this.conduitType).AddConduitUpdater(new Action<float>(this.ConduitUpdate), 0);
+		Conduit.GetFlowManager(this.conduitType).AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlow.Priority.Default);
 		this.ChangeFlow(this.desiredFlow);
 		this.UpdateAnim();
 		this.OnCmpEnable();
@@ -70,7 +70,7 @@ public class Valve : BuildingWorkable, ISaveLoadable
 		float num = Mathf.Min(contents.mass, this.currentFlow * dt);
 		if (num > 0f)
 		{
-			float num2 = flowManager.AddElement(this.outputCell, contents.element, num, contents.temperature);
+			float num2 = flowManager.AddElement(this.outputCell, contents.element, num, contents.temperature, contents.diseaseIdx, contents.diseaseCount);
 			this.flowAccumulator.Accumulate(num2);
 			if (num2 > 0f)
 			{
@@ -104,7 +104,7 @@ public class Valve : BuildingWorkable, ISaveLoadable
 			if (this.chore == null)
 			{
 				component.AddStatusItem(Db.Get().BuildingStatusItems.ValveRequest, this);
-				this.chore = new WorkChore<Valve>(Db.Get().ChoreTypes.Toggle, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true);
+				this.chore = new WorkChore<Valve>(Db.Get().ChoreTypes.Toggle, this, null, true, null, null, null, true, null, false, default(Tag), null, false, true, true);
 			}
 		}
 	}

@@ -43,7 +43,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 		this.entombed.stuck.Enter("StopNavigator", delegate(FallMonitor.Instance smi)
 		{
 			smi.GetComponent<Navigator>().Stop(false);
-		}).ToggleChore((FallMonitor.Instance smi) => new EntombedChore(smi.master), this.standing, false).ParamTransition<bool>(this.isEntombed, this.standing, (FallMonitor.Instance smi, bool p) => !p);
+		}).ToggleChore((FallMonitor.Instance smi) => new EntombedChore(smi.master), this.standing).ParamTransition<bool>(this.isEntombed, this.standing, (FallMonitor.Instance smi, bool p) => !p);
 	}
 
 	public GameStateMachine<FallMonitor, FallMonitor.Instance, IStateMachineTarget, object>.State standing;
@@ -79,6 +79,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 			: base(master)
 		{
 			this.navigator = base.GetComponent<Navigator>();
+			Pathfinding.Instance.FlushNavGridsOnLoad();
 		}
 
 		public void Recover()
@@ -109,6 +110,10 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 
 		public void AttemptInitialRecovery()
 		{
+			if (base.gameObject.HasTag(GameTags.Incapacitated))
+			{
+				return;
+			}
 			int num = Grid.PosToCell(this.navigator);
 			foreach (NavGrid.Transition transition in this.navigator.NavGrid.transitions)
 			{
@@ -130,7 +135,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 		public bool CanRecoverToLadder()
 		{
 			int num = Grid.PosToCell(base.master.transform.position);
-			return this.navigator.NavGrid.NavTable.IsValid(num, NavType.Ladder);
+			return this.navigator.NavGrid.NavTable.IsValid(num, NavType.Ladder) && !base.gameObject.HasTag(GameTags.Incapacitated);
 		}
 
 		public void MountLadder()
@@ -167,6 +172,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 			{
 				int num = Grid.PosToCell(base.transform.position);
 				bool flag3 = this.navigator.NavGrid.NavTable.IsValid(num, this.navigator.CurrentNavType);
+				flag3 = flag3 && (!base.gameObject.HasTag(GameTags.Incapacitated) || this.navigator.CurrentNavType != NavType.Ladder);
 				flag2 = !flag3 && (Grid.Solid[num] || Grid.Solid[Grid.CellAbove(num)]);
 				flag = !flag3 && !flag2;
 			}

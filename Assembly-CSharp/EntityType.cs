@@ -17,7 +17,7 @@ public class EntityType : Resource
 		KPrefabID kprefabID = prefab.UpdateComponentRequirement<KPrefabID>(true);
 		kprefabID.PrefabTag = new Tag(this.Id);
 		kprefabID.name = this.Name;
-		prefab.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.EntityPrefabs).transform;
+		prefab.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.GlobalDoNotDestroy).transform;
 		EntityTypeSet.Instance.RegisterPrefab(kprefabID);
 	}
 

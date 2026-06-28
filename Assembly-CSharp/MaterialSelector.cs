@@ -220,7 +220,7 @@ public class MaterialSelector : KScreen
 				foreach (AttributeModifier attributeModifier in keyValuePair2.Value.attributeModifiers)
 				{
 					string name = Db.Get().BuildingAttributes.Get(attributeModifier.AttributeId).Name;
-					text += string.Format("\n{0}: {1}", name, attributeModifier.GetFormattedString());
+					text += string.Format("\n{0}: {1}", name, attributeModifier.GetFormattedString(null));
 				}
 			}
 			component.toolTip = text;
@@ -238,8 +238,6 @@ public class MaterialSelector : KScreen
 				num++;
 			}
 		}
-		Vector2 sizeDelta = this.TogglePrefab.GetComponent<RectTransform>().sizeDelta;
-		this.LayoutContainer.GetComponent<RectTransform>().sizeDelta = new Vector2(sizeDelta.x * (float)num, sizeDelta.y);
 		this.Scrollbar.SetActive(num > 5);
 	}
 
@@ -261,7 +259,7 @@ public class MaterialSelector : KScreen
 		LocText componentInChildren = this.Headerbar.GetComponentInChildren<LocText>();
 		if (num == 0)
 		{
-			componentInChildren.text = string.Format(UI.PRODUCTINFO_MISSINGRESOURCES_TITLE, this.activeIngredient.tag.ProperName(), GameUtil.GetFormattedMass(this.activeIngredient.amount, GameUtil.TimeSlice.None, true, "{0:0.#}"));
+			componentInChildren.text = string.Format(UI.PRODUCTINFO_MISSINGRESOURCES_TITLE, this.activeIngredient.tag.ProperName(), GameUtil.GetFormattedMass(this.activeIngredient.amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 			string text = string.Format(UI.PRODUCTINFO_MISSINGRESOURCES_DESC, this.activeIngredient.tag.ProperName());
 			this.NoMaterialDiscovered.text = text;
 			this.NoMaterialDiscovered.gameObject.SetActive(true);

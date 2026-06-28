@@ -6,8 +6,10 @@ public class PrioritizeTool : DragTool
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		this.interceptNumberKeysForPriority = true;
 		PrioritizeTool.Instance = this;
 		this.visualizer = Util.KInstantiate(this.visualizer, SceneOrganizer.Instance.GetFolder(Folder.Placers), null);
+		this.viewMode = SimViewMode.Priorities;
 	}
 
 	protected override void OnDragTool(int cell, int distFromOrigin)
@@ -20,7 +22,7 @@ public class PrioritizeTool : DragTool
 			if (gameObject != null)
 			{
 				Prioritizable component = gameObject.GetComponent<Prioritizable>();
-				if (component != null && component.showIcon)
+				if (component != null && component.showIcon && component.IsPrioritizable())
 				{
 					component.SetMasterPriority(screenPriority);
 					num++;
@@ -37,21 +39,31 @@ public class PrioritizeTool : DragTool
 	{
 		base.OnActivateTool();
 		ToolMenuPriorityScreen.Instance.Show(true);
-		this.viewMode = SimViewMode.Priorities;
-		SimDebugView.Instance.SetMode(SimViewMode.Priorities);
+		ToolMenuPriorityScreen.Instance.transform.localScale = new Vector3(1.35f, 1.35f, 1.35f);
 	}
 
 	protected override void OnDeactivateTool(InterfaceTool new_tool)
 	{
 		base.OnDeactivateTool(new_tool);
 		ToolMenuPriorityScreen.Instance.Show(false);
-		if (SimDebugView.Instance.GetMode() == SimViewMode.Priorities)
+		ToolMenuPriorityScreen.Instance.transform.localScale = new Vector3(1f, 1f, 1f);
+	}
+
+	public override void Update()
+	{
+		base.Update();
+		int num = ToolMenuPriorityScreen.Instance.GetScreenPriority() - 1;
+		Texture2D texture2D = this.cursors[num];
+		MeshRenderer componentInChildren = this.visualizer.GetComponentInChildren<MeshRenderer>();
+		if (componentInChildren != null)
 		{
-			SimDebugView.Instance.SetMode(SimViewMode.None);
+			componentInChildren.material.mainTexture = texture2D;
 		}
 	}
 
 	public GameObject Placer;
 
 	public static PrioritizeTool Instance;
+
+	public Texture2D[] cursors;
 }

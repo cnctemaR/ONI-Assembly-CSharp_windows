@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Klei;
+using ProcGen;
 using UnityEngine;
 
 public class GroundRenderer : KMonoBehaviour
@@ -71,7 +71,7 @@ public class GroundRenderer : KMonoBehaviour
 			{
 				if (this.dirtyChunks[j, i])
 				{
-					SystemScheduler.instance.AddTask(Guid.NewGuid(), SystemScheduler.Priority.Lowest, new Action<object>(this.RebuildDirtyChunk), new Vector2I(j, i), "DirtyChunk", base.gameObject);
+					SystemScheduler.instance.AddTask(SystemScheduler.Priority.Lowest, new SchedulerEntry.Details(Guid.NewGuid(), "GroundRenderer", new Action<object>(this.RebuildDirtyChunk), new Vector2I(j, i), 0f, base.gameObject));
 				}
 			}
 		}
@@ -220,6 +220,8 @@ public class GroundRenderer : KMonoBehaviour
 	public void FreeResources()
 	{
 		this.FreeMaterials();
+		this.elementMaterials.Clear();
+		this.elementMaterials = null;
 		if (this.worldChunks != null)
 		{
 			GroundRenderer.WorldChunk[,] array = this.worldChunks;
@@ -233,6 +235,7 @@ public class GroundRenderer : KMonoBehaviour
 					worldChunk.FreeResources();
 				}
 			}
+			this.worldChunks = null;
 		}
 	}
 
@@ -243,7 +246,6 @@ public class GroundRenderer : KMonoBehaviour
 			global::UnityEngine.Object.Destroy(materials.opaque);
 			global::UnityEngine.Object.Destroy(materials.alpha);
 		}
-		this.elementMaterials.Clear();
 	}
 
 	private const int ChunkEdgeSize = 16;
@@ -320,8 +322,10 @@ public class GroundRenderer : KMonoBehaviour
 
 		public void FreeResources()
 		{
-			this.alpha.ClearMesh();
-			this.opaque.ClearMesh();
+			this.alpha.FreeResources();
+			this.opaque.FreeResources();
+			this.alpha = null;
+			this.opaque = null;
 		}
 
 		public SimHashes element;
@@ -349,6 +353,7 @@ public class GroundRenderer : KMonoBehaviour
 			{
 				if (this.mesh != null)
 				{
+					this.mesh.Clear();
 					global::UnityEngine.Object.DestroyImmediate(this.mesh);
 					this.mesh = null;
 				}
@@ -356,10 +361,32 @@ public class GroundRenderer : KMonoBehaviour
 
 			public void Clear()
 			{
-				this.mesh.Clear();
-				this.pos.Clear();
-				this.uv.Clear();
-				this.indices.Clear();
+				if (this.mesh != null)
+				{
+					this.mesh.Clear();
+				}
+				if (this.pos != null)
+				{
+					this.pos.Clear();
+				}
+				if (this.uv != null)
+				{
+					this.uv.Clear();
+				}
+				if (this.indices != null)
+				{
+					this.indices.Clear();
+				}
+			}
+
+			public void FreeResources()
+			{
+				this.ClearMesh();
+				this.Clear();
+				this.pos = null;
+				this.uv = null;
+				this.indices = null;
+				this.material = null;
 			}
 
 			public void Build()
@@ -554,6 +581,8 @@ public class GroundRenderer : KMonoBehaviour
 			{
 				elementChunk.FreeResources();
 			}
+			this.elementChunks.Clear();
+			this.elementChunks = null;
 		}
 
 		public readonly int chunkX;

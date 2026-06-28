@@ -14,24 +14,31 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 		this.CLIENT_KEY = DistributionPlatform.Inst.MetricsClientKey;
 		this.PlatformUserIDFieldName = DistributionPlatform.Inst.MetricsUserIDField;
 		KleiMetrics.sessionID = -1;
-		this.enabled = PlayerPrefs.GetInt("ENABLE_METRICS", 1) == 1;
+		this.enabled = KPlayerPrefs.GetInt("ENABLE_METRICS", 1) == 1;
+		this.isMultiThreaded = true;
 	}
+
+	public bool isMultiThreaded { get; protected set; }
 
 	public bool enabled { get; private set; }
 
 	public void SetEnabled(bool enabled)
 	{
-		PlayerPrefs.SetInt("ENABLE_METRICS", (!enabled) ? 0 : 1);
+		KPlayerPrefs.SetInt("ENABLE_METRICS", (!enabled) ? 0 : 1);
 		this.enabled = enabled;
 	}
 
-	private string PostMetricData(Dictionary<string, object> data)
+	protected string PostMetricData(Dictionary<string, object> data)
 	{
 		KleiMetrics.PostData postData = new KleiMetrics.PostData(this.CLIENT_KEY, data);
 		string text = JsonConvert.SerializeObject(postData);
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
-		base.PutPacket(bytes, false);
-		return "OK";
+		if (this.isMultiThreaded)
+		{
+			base.PutPacket(bytes, false);
+			return "OK";
+		}
+		return base.Send(bytes, false);
 	}
 
 	public static string PlatformUserID()
@@ -49,14 +56,14 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 	private void IncrementSessionCount()
 	{
 		KleiMetrics.sessionID = KleiMetrics.SessionID() + 1;
-		PlayerPrefs.SetInt("SESSION_ID", KleiMetrics.sessionID);
+		KPlayerPrefs.SetInt("SESSION_ID", KleiMetrics.sessionID);
 	}
 
 	public static int SessionID()
 	{
 		if (KleiMetrics.sessionID == -1)
 		{
-			KleiMetrics.sessionID = PlayerPrefs.GetInt("SESSION_ID", -1);
+			KleiMetrics.sessionID = KPlayerPrefs.GetInt("SESSION_ID", -1);
 		}
 		return KleiMetrics.sessionID;
 	}
@@ -71,25 +78,25 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 	{
 		if (KleiMetrics.gameID == -1)
 		{
-			KleiMetrics.gameID = PlayerPrefs.GetInt("GAME_ID", -1);
+			KleiMetrics.gameID = KPlayerPrefs.GetInt("GAME_ID", -1);
 		}
 		return KleiMetrics.gameID;
 	}
 
 	public static void SetGameID(int id)
 	{
-		PlayerPrefs.SetInt("GAME_ID", id);
+		KPlayerPrefs.SetInt("GAME_ID", id);
 	}
 
 	public static string GetInstallTimeStamp()
 	{
 		if (KleiMetrics.installTimeStamp == null)
 		{
-			KleiMetrics.installTimeStamp = PlayerPrefs.GetString("INSTALL_TIMESTAMP", null);
+			KleiMetrics.installTimeStamp = KPlayerPrefs.GetString("INSTALL_TIMESTAMP", null);
 			if (KleiMetrics.installTimeStamp == null || KleiMetrics.installTimeStamp == string.Empty)
 			{
 				KleiMetrics.installTimeStamp = DateTime.UtcNow.Ticks.ToString();
-				PlayerPrefs.SetString("INSTALL_TIMESTAMP", KleiMetrics.installTimeStamp);
+				KPlayerPrefs.SetString("INSTALL_TIMESTAMP", KleiMetrics.installTimeStamp);
 			}
 		}
 		return KleiMetrics.installTimeStamp;
@@ -191,7 +198,10 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 	{
 		if (!this.hasStarted)
 		{
-			base.Start();
+			if (this.isMultiThreaded)
+			{
+				base.Start();
+			}
 			this.hasStarted = true;
 		}
 	}
@@ -200,7 +210,10 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 	{
 		if (this.hasStarted)
 		{
-			base.End();
+			if (this.isMultiThreaded)
+			{
+				base.End();
+			}
 			this.hasStarted = false;
 		}
 	}
@@ -629,7 +642,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 
 	private long sessionStartUtcTicks = DateTime.UtcNow.Ticks;
 
-	public struct PostData
+	protected struct PostData
 	{
 		public PostData(string key, Dictionary<string, object> data)
 		{

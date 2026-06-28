@@ -18,4 +18,6 @@ public class SideScreenContent : KScreen
 
 	[SerializeField]
 	protected string titleKey;
+
+	public GameObject ContentContainer;
 }

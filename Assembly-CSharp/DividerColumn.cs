@@ -3,8 +3,28 @@ using UnityEngine;
 
 public class DividerColumn : TableColumn
 {
-	public DividerColumn()
-		: base(null, null, null, null)
+	public DividerColumn(Func<bool> revealed = null)
+		: base(delegate(MinionIdentity minion, GameObject widget_go)
+		{
+			if (revealed != null)
+			{
+				if (revealed())
+				{
+					if (!widget_go.activeSelf)
+					{
+						widget_go.SetActive(true);
+					}
+				}
+				else if (widget_go.activeSelf)
+				{
+					widget_go.SetActive(false);
+				}
+			}
+			else
+			{
+				widget_go.SetActive(true);
+			}
+		}, null, null, null, revealed, 0f)
 	{
 	}
 

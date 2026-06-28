@@ -9,12 +9,29 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 	{
 		base.OnPrefabInit();
 		base.GetComponent<Deconstructable>().allowDeconstruction = false;
+		int num = 0;
+		int num2 = 0;
+		Grid.CellToXY(Grid.PosToCell(this), out num, out num2);
+		if (num == 0)
+		{
+			global::Debug.LogError(string.Concat(new string[]
+			{
+				"Headquarters spawned at: (",
+				num.ToString(),
+				",",
+				num2.ToString(),
+				")"
+			}), null);
+		}
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
 		Components.Telepads.Add(this);
+		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Behind, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
+		this.meter.gameObject.SetActive(false);
+		this.meter.gameObject.SetActive(true);
 		base.smi.StartSM();
 	}
 
@@ -79,8 +96,12 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 
 	private const float MAX_IMMIGRATION_TIME = 120f;
 
+	private const int NUM_METER_NOTCHES = 8;
+
 	[MyCmpReq]
 	private KSelectable selectable;
+
+	private MeterController meter;
 
 	private List<MinionStartingStats> minionStats;
 
@@ -97,6 +118,14 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 		{
 			return GameFlowManager.Instance != null && GameFlowManager.Instance.IsGameOver();
 		}
+
+		public void UpdateMeter()
+		{
+			float timeRemaining = Immigration.Instance.GetTimeRemaining();
+			float totalWaitTime = Immigration.Instance.GetTotalWaitTime();
+			float num = Mathf.Clamp01(1f - timeRemaining / totalWaitTime);
+			base.master.meter.SetPositionPercent(num);
+		}
 	}
 
 	public class States : GameStateMachine<Telepad.States, Telepad.StatesInstance, Telepad>
@@ -105,19 +134,38 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 		{
 			default_state = this.idle;
 			base.serializable = true;
-			this.idle.EventTransition(GameHashes.OperationalChanged, this.unoperational, (Telepad.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational).PlayAnim("idle", KAnim.PlayMode.Once, null).OnSignal(this.openPortal, this.opening);
+			this.idle.Enter(delegate(Telepad.StatesInstance smi)
+			{
+				smi.UpdateMeter();
+			}).ToggleSchedulePeriodic("TelepadMeter", 5f, delegate(Telepad.StatesInstance smi)
+			{
+				smi.UpdateMeter();
+			}).EventTransition(GameHashes.OperationalChanged, this.unoperational, (Telepad.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational)
+				.PlayAnim("idle", KAnim.PlayMode.Once, null)
+				.OnSignal(this.openPortal, this.opening);
 			this.unoperational.PlayAnim("idle", KAnim.PlayMode.Once, null).Enter("StopImmigration", delegate(Telepad.StatesInstance smi)
 			{
 				Immigration.Instance.Stop();
+				smi.master.meter.SetPositionPercent(0f);
 			}).Exit("StartImmigration", delegate(Telepad.StatesInstance smi)
 			{
 				Immigration.Instance.Restart();
 			})
 				.EventTransition(GameHashes.OperationalChanged, this.idle, (Telepad.StatesInstance smi) => smi.GetComponent<Operational>().IsOperational);
-			this.opening.PlayAnim("working_pre", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.open);
-			this.open.OnSignal(this.closePortal, this.close).PlayAnim("working_loop", KAnim.PlayMode.Loop, null).Transition(this.close, (Telepad.StatesInstance smi) => smi.IsColonyLost())
+			this.opening.Enter(delegate(Telepad.StatesInstance smi)
+			{
+				smi.master.meter.SetPositionPercent(1f);
+			}).PlayAnim("working_pre", KAnim.PlayMode.Once, null).OnAnimQueueComplete(this.open);
+			this.open.OnSignal(this.closePortal, this.close).Enter(delegate(Telepad.StatesInstance smi)
+			{
+				smi.master.meter.SetPositionPercent(1f);
+			}).PlayAnim("working_loop", KAnim.PlayMode.Loop, null)
+				.Transition(this.close, (Telepad.StatesInstance smi) => smi.IsColonyLost())
 				.EventTransition(GameHashes.OperationalChanged, this.close, (Telepad.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational);
-			this.close.PlayAnims((Telepad.StatesInstance smi) => Telepad.States.workingAnims, KAnim.PlayMode.Once).OnAnimQueueComplete(this.idle);
+			this.close.Enter(delegate(Telepad.StatesInstance smi)
+			{
+				smi.master.meter.SetPositionPercent(0f);
+			}).PlayAnims((Telepad.StatesInstance smi) => Telepad.States.workingAnims, KAnim.PlayMode.Once).OnAnimQueueComplete(this.idle);
 		}
 
 		public StateMachine<Telepad.States, Telepad.StatesInstance, Telepad, object>.Signal openPortal;

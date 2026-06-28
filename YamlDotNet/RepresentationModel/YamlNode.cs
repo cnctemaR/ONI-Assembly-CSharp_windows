@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 
@@ -28,23 +29,23 @@ namespace YamlDotNet.RepresentationModel
 			this.End = yamlEvent.End;
 		}
 
-		internal static YamlNode ParseNode(EventReader events, DocumentLoadingState state)
+		internal static YamlNode ParseNode(IParser parser, DocumentLoadingState state)
 		{
-			if (events.Accept<Scalar>())
+			if (parser.Accept<Scalar>())
 			{
-				return new YamlScalarNode(events, state);
+				return new YamlScalarNode(parser, state);
 			}
-			if (events.Accept<SequenceStart>())
+			if (parser.Accept<SequenceStart>())
 			{
-				return new YamlSequenceNode(events, state);
+				return new YamlSequenceNode(parser, state);
 			}
-			if (events.Accept<MappingStart>())
+			if (parser.Accept<MappingStart>())
 			{
-				return new YamlMappingNode(events, state);
+				return new YamlMappingNode(parser, state);
 			}
-			if (events.Accept<AnchorAlias>())
+			if (parser.Accept<AnchorAlias>())
 			{
-				AnchorAlias anchorAlias = events.Expect<AnchorAlias>();
+				AnchorAlias anchorAlias = parser.Expect<AnchorAlias>();
 				return state.GetNode(anchorAlias.Value, false, anchorAlias.Start, anchorAlias.End) ?? new YamlAliasNode(anchorAlias.Value);
 			}
 			throw new ArgumentException("The current event is of an unsupported type.", "events");
@@ -99,6 +100,60 @@ namespace YamlDotNet.RepresentationModel
 			return ((h1 << 5) + h1) ^ h2;
 		}
 
-		public abstract IEnumerable<YamlNode> AllNodes { get; }
+		public override string ToString()
+		{
+			RecursionLevel recursionLevel = new RecursionLevel(1000);
+			return this.ToString(recursionLevel);
+		}
+
+		internal abstract string ToString(RecursionLevel level);
+
+		public IEnumerable<YamlNode> AllNodes
+		{
+			get
+			{
+				RecursionLevel recursionLevel = new RecursionLevel(1000);
+				return this.SafeAllNodes(recursionLevel);
+			}
+		}
+
+		internal abstract IEnumerable<YamlNode> SafeAllNodes(RecursionLevel level);
+
+		public abstract YamlNodeType NodeType { get; }
+
+		public static implicit operator YamlNode(string value)
+		{
+			return new YamlScalarNode(value);
+		}
+
+		public static implicit operator YamlNode(string[] sequence)
+		{
+			return new YamlSequenceNode(sequence.Select<string, YamlNode>((string i) => i));
+		}
+
+		public static explicit operator string(YamlNode scalar)
+		{
+			return ((YamlScalarNode)scalar).Value;
+		}
+
+		public YamlNode this[int index]
+		{
+			get
+			{
+				return ((YamlSequenceNode)this).Children[index];
+			}
+		}
+
+		public YamlNode this[YamlNode key]
+		{
+			get
+			{
+				return ((YamlMappingNode)this).Children[key];
+			}
+		}
+
+		private const int MaximumRecursionLevel = 1000;
+
+		internal const string MaximumRecursionLevelReachedToStringValue = "WARNING! INFINITE RECURSION!";
 	}
 }

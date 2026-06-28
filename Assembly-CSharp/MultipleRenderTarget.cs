@@ -41,9 +41,9 @@ public class MultipleRenderTarget : MonoBehaviour
 		}
 	}
 
-	public void ToggleTemperatureView(bool enabled)
+	public void ToggleColouredOverlayView(bool enabled)
 	{
-		this.renderProxy.ToggleTemperatureView(enabled);
+		this.renderProxy.ToggleColouredOverlayView(enabled);
 	}
 
 	private MultipleRenderTargetProxy renderProxy;

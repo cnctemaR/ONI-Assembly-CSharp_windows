@@ -12,12 +12,11 @@ public class QuarantineMonitor : GameStateMachine<QuarantineMonitor, QuarantineM
 			.DefaultState(this.quarantined.bedunassigned);
 		this.quarantined.bedunassigned.ToggleStatusItem(Db.Get().DuplicantStatusItems.QuarantineAreaUnassigned, null).EventTransition(GameHashes.AssignablesChanged, this.quarantined.outside, (QuarantineMonitor.Instance smi) => smi.HasQuarantineArea());
 		this.quarantined.bedunreachable.ToggleStatusItem(Db.Get().DuplicantStatusItems.QuarantineAreaUnreachable, null);
-		this.quarantined.outside.ToggleUrge(Db.Get().Urges.MoveToQuarantine).ToggleChore((QuarantineMonitor.Instance smi) => new MoveToQuarantineChore(smi.master, smi.GetQuarantineArea()), this.quarantined.inside, false);
-		this.quarantined.inside.ToggleStateMachine((QuarantineMonitor.Instance smi) => new QuarantineFeedableMonitor.Instance(smi.master)).ToggleStateMachine((QuarantineMonitor.Instance smi) => new PatientMonitor.Instance(smi.master)).EventTransition(GameHashes.CellChanged, this.quarantined.outside, (QuarantineMonitor.Instance smi) => !smi.IsInsideQuarantine())
-			.Enter("EnableNavMask", delegate(QuarantineMonitor.Instance smi)
-			{
-				smi.EnableNavMask();
-			})
+		this.quarantined.outside.ToggleUrge(Db.Get().Urges.MoveToQuarantine).ToggleChore((QuarantineMonitor.Instance smi) => new MoveToQuarantineChore(smi.master, smi.GetQuarantineArea()), this.quarantined.inside);
+		this.quarantined.inside.ToggleStateMachine((QuarantineMonitor.Instance smi) => new QuarantineFeedableMonitor.Instance(smi.master)).EventTransition(GameHashes.CellChanged, this.quarantined.outside, (QuarantineMonitor.Instance smi) => !smi.IsInsideQuarantine()).Enter("EnableNavMask", delegate(QuarantineMonitor.Instance smi)
+		{
+			smi.EnableNavMask();
+		})
 			.Exit("DisableNavMask", delegate(QuarantineMonitor.Instance smi)
 			{
 				smi.DisableNavMask();

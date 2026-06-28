@@ -50,7 +50,7 @@ namespace YamlDotNet.Core.Events
 		{
 		}
 
-		internal static readonly Regex anchorValidator = new Regex("^[0-9a-zA-Z_\\-]+$", RegexOptions.Compiled);
+		internal static readonly Regex anchorValidator = new Regex("^[0-9a-zA-Z_\\-]+$", RegexOptions.None);
 
 		private readonly string anchor;
 

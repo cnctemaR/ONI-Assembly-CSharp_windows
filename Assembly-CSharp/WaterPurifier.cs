@@ -35,9 +35,6 @@ public class WaterPurifier : StateMachineComponent<WaterPurifier.StatesInstance>
 	[MyCmpGet]
 	private Operational operational;
 
-	[MyCmpGet]
-	private ElementConverter converter;
-
 	private ManualDeliveryKG[] deliveryComponents;
 
 	public class StatesInstance : GameStateMachine<WaterPurifier.States, WaterPurifier.StatesInstance, WaterPurifier, object>.GameInstance

@@ -651,6 +651,33 @@ namespace FMODUnity
 			}
 		}
 
+		public void SetDeviceToPreviouslySelected()
+		{
+			if (KPlayerPrefs.HasKey("AudioDeviceGuid"))
+			{
+				Guid guid = new Guid(KPlayerPrefs.GetString("AudioDeviceGuid"));
+				int num;
+				RuntimeManager.LowlevelSystem.getNumDrivers(out num);
+				for (int i = 0; i < num; i++)
+				{
+					KFMOD.AudioDevice audioDevice = default(KFMOD.AudioDevice);
+					StringBuilder stringBuilder = new StringBuilder();
+					stringBuilder.Capacity = 64;
+					RuntimeManager.LowlevelSystem.getDriverInfo(i, stringBuilder, stringBuilder.Capacity, out audioDevice.guid, out audioDevice.systemRate, out audioDevice.speakerMode, out audioDevice.speakerModeChannels);
+					audioDevice.name = stringBuilder.ToString();
+					audioDevice.fmod_id = i;
+					if (audioDevice.guid == guid)
+					{
+						this.lowlevelSystem.setDriver(i);
+						KFMOD.currentDevice = audioDevice;
+						return;
+					}
+				}
+				global::Debug.Log("The saved driver does not exist, defaulting to Windows default", null);
+				this.lowlevelSystem.setDriver(0);
+			}
+		}
+
 		public bool initializedSuccessfully;
 
 		private static SystemNotInitializedException initException = null;

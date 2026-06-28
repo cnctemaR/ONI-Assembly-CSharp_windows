@@ -56,6 +56,12 @@ public class PlanterSideScreen : ReceptacleSideScreen
 			}
 		}
 		this.descriptionLabel.SetText(text);
+		List<Descriptor> plantLifeCycleDescriptors = GameUtil.GetPlantLifeCycleDescriptors(gameObject);
+		if (plantLifeCycleDescriptors.Count > 0)
+		{
+			this.HarvestDescriptorPanel.SetDescriptors(plantLifeCycleDescriptors);
+			this.HarvestDescriptorPanel.gameObject.SetActive(true);
+		}
 		List<Descriptor> plantRequirementDescriptors = GameUtil.GetPlantRequirementDescriptors(gameObject);
 		if (list.Count > 0)
 		{
@@ -66,12 +72,6 @@ public class PlanterSideScreen : ReceptacleSideScreen
 		{
 			this.RequirementsDescriptorPanel.SetDescriptors(plantRequirementDescriptors);
 			this.RequirementsDescriptorPanel.gameObject.SetActive(true);
-		}
-		List<Descriptor> plantHarvestDescriptors = GameUtil.GetPlantHarvestDescriptors(gameObject);
-		if (plantHarvestDescriptors.Count > 0)
-		{
-			this.HarvestDescriptorPanel.SetDescriptors(plantHarvestDescriptors);
-			this.HarvestDescriptorPanel.gameObject.SetActive(true);
 		}
 		List<Descriptor> plantEffectDescriptors = GameUtil.GetPlantEffectDescriptors(gameObject);
 		if (plantEffectDescriptors.Count > 0)

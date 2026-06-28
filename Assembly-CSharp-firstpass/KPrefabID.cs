@@ -14,6 +14,8 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 
 	public event KPrefabID.PrefabFn prefabSpawnFn;
 
+	public bool pendingDestruction { get; private set; }
+
 	public Tag[] Tags
 	{
 		get
@@ -79,6 +81,8 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 
 	protected override void OnPrefabInit()
 	{
+		base.OnPrefabInit();
+		this.Subscribe(1969584890, new Action<object>(this.OnObjectDestroyed));
 		this.InitializeTags();
 		if (this.prefabInitFn != null)
 		{
@@ -173,7 +177,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 		if (tag.IsValid)
 		{
 			this.tags = new List<Tag>(this.Tags) { tag }.ToArray();
-			this.onTagsChanged.Signal();
+			this.Trigger(-1582839653, null);
 		}
 		else
 		{
@@ -203,7 +207,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 			}
 		}
 		this.tags = list.ToArray();
-		this.onTagsChanged.Signal();
+		this.Trigger(-1582839653, null);
 	}
 
 	public void RemoveTag(Tag tag)
@@ -213,7 +217,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 			List<Tag> list = new List<Tag>(this.Tags);
 			list.Remove(tag);
 			this.tags = list.ToArray();
-			this.onTagsChanged.Signal();
+			this.Trigger(-1582839653, null);
 		}
 	}
 
@@ -306,6 +310,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 
 	protected override void OnCleanUp()
 	{
+		this.pendingDestruction = true;
 		KPrefabIDTracker.Get().Unregister(this);
 		this.Trigger(1969584890, null);
 	}
@@ -359,6 +364,11 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 		this.AdditionalRequirements.AddRange(additional);
 	}
 
+	private void OnObjectDestroyed(object data)
+	{
+		this.pendingDestruction = true;
+	}
+
 	public const int InvalidInstanceID = -1;
 
 	public static int NextUniqueID;
@@ -375,9 +385,9 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 
 	public int defaultLayer;
 
-	public global::System.Action onTagsChanged;
-
 	private List<global::Logger> logs;
+
+	private LoggerFSS tagLog = new LoggerFSS("Tags");
 
 	public List<Descriptor> AdditionalRequirements;
 

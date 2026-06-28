@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -6,7 +7,8 @@ public class FarmTileConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("FarmTile", 1, 1, "farmtilerotating_kanim", 100f, 100, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER2, MATERIALS.FARMABLE, 1600f, BuildLocationRule.Tile, BUILDINGS.DECOR.NONE, null);
+		EffectorValues none = NOISE_POLLUTION.NONE;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("FarmTile", 1, 1, "farmtilerotating_kanim", 100f, 100, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER2, MATERIALS.FARMABLE, 1600f, BuildLocationRule.Tile, BUILDINGS.DECOR.NONE, none);
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
 		buildingDef.Relocatable = false;
@@ -14,11 +16,12 @@ public class FarmTileConfig : IBuildingConfig
 		buildingDef.IsFoundation = true;
 		buildingDef.TileLayer = ObjectLayer.FoundationTile;
 		buildingDef.ReplacementLayer = ObjectLayer.ReplacementTile;
+		buildingDef.ForegroundLayer = Grid.SceneLayer.BuildingBack;
 		buildingDef.MaterialCategory = MATERIALS.FARMABLE;
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.AudioSize = "small";
 		buildingDef.BaseTimeUntilRepair = -1f;
-		buildingDef.SceneLayer = Grid.SceneLayer.TileMain;
+		buildingDef.SceneLayer = Grid.SceneLayer.TileFront;
 		buildingDef.ConstructionOffsetFilter = new CellOffset[]
 		{
 			new CellOffset(0, -1)
@@ -33,16 +36,20 @@ public class FarmTileConfig : IBuildingConfig
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		GeneratedBuildings.MakeBuildableAnywhere(go);
+		PrimaryElement primaryElement = go.AddOrGet<PrimaryElement>();
+		primaryElement.useSimDiseaseInfo = true;
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.doReplaceElement = true;
 		go.AddOrGet<TileTemperature>();
-		BuildingTemplates.CreateDefaultStorage(go, false);
+		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
+		storage.defaultStoredItemModifers = FarmTileConfig.StoredItemModifiers;
 		PlantablePlot plantablePlot = go.AddOrGet<PlantablePlot>();
 		plantablePlot.occupyingObjectRelativePosition = new Vector3(0f, 1f, 0f);
 		plantablePlot.AddDespoitTag(GameTags.CropSeed);
+		plantablePlot.AddDespoitTag(GameTags.WaterSeed);
 		plantablePlot.SetFertilizationFlags(true, false);
 		go.AddOrGet<AnimTileable>();
-		go.AddOrGet<Prioritizable>();
+		Prioritizable.AddRef(go);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -77,4 +84,6 @@ public class FarmTileConfig : IBuildingConfig
 	}
 
 	public const string ID = "FarmTile";
+
+	private static readonly List<Storage.StoredItemModifier> StoredItemModifiers = new List<Storage.StoredItemModifier> { Storage.StoredItemModifier.Seal };
 }

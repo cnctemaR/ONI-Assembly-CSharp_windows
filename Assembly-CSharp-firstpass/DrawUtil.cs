@@ -5,6 +5,12 @@ using UnityEngine;
 public static class DrawUtil
 {
 	[Conditional("ENABLE_DEBUG_OUTPUT")]
+	public static void MultiColourGnomon(Vector2 pos, float size, float time = 0f)
+	{
+		size *= 0.5f;
+	}
+
+	[Conditional("ENABLE_DEBUG_OUTPUT")]
 	public static void Gnomon(Vector3 pos, float size)
 	{
 		size *= 0.5f;

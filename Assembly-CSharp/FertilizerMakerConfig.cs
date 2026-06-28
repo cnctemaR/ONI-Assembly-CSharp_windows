@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -6,7 +7,8 @@ public class FertilizerMakerConfig : IBuildingConfig
 {
 	public override BuildingDef CreateBuildingDef()
 	{
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("FertilizerMaker", 4, 3, "fertilizer_maker_kanim", 100f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.ALL_METALS, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, null);
+		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER5;
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("FertilizerMaker", 4, 3, "fertilizer_maker_kanim", 100f, 30, 30f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.ALL_METALS, 800f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, tier);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 120f;
 		buildingDef.ExhaustKilowattsWhenActive = 0.25f;
@@ -22,7 +24,8 @@ public class FertilizerMakerConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go)
 	{
-		BuildingTemplates.CreateDefaultStorage(go, false);
+		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
+		storage.defaultStoredItemModifers = FertilizerMakerConfig.StoredItemModifiers;
 		go.AddOrGet<WaterPurifier>();
 		ElementDropper elementDropper = go.AddComponent<ElementDropper>();
 		elementDropper.emitMass = FertilizerMakerConfig.FERTILIZER_PER_LOAD;
@@ -36,7 +39,7 @@ public class FertilizerMakerConfig : IBuildingConfig
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(FertilizerMakerConfig.FERTILIZER_PER_CYCLE / 600f, SimHashes.Fertilizer, 323.15f, true, 0f, 0.5f, false)
+			new ElementConverter.OutputElement(FertilizerMakerConfig.FERTILIZER_PER_CYCLE / 600f, SimHashes.Fertilizer, 323.15f, true, 0f, 0.5f, false, 1f, byte.MaxValue, 0)
 		};
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
@@ -50,7 +53,7 @@ public class FertilizerMakerConfig : IBuildingConfig
 		buildingElementEmitter.temperature = 303f;
 		buildingElementEmitter.element = SimHashes.Methane;
 		buildingElementEmitter.modifierOffset = new Vector2(2f, 2f);
-		go.AddOrGet<Prioritizable>();
+		Prioritizable.AddRef(go);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -76,4 +79,10 @@ public class FertilizerMakerConfig : IBuildingConfig
 	private static float FERTILIZER_PER_CYCLE = FertilizerMakerConfig._PLANTS_FED * FertilizerMakerConfig.FERTILIZER_PER_LOAD;
 
 	private static float WATER_PER_CYCLE = FertilizerMakerConfig.FERTILIZER_PER_CYCLE / 0.8f;
+
+	private static readonly List<Storage.StoredItemModifier> StoredItemModifiers = new List<Storage.StoredItemModifier>
+	{
+		Storage.StoredItemModifier.Hide,
+		Storage.StoredItemModifier.Seal
+	};
 }

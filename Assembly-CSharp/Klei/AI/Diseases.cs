@@ -15,8 +15,9 @@ namespace Klei.AI
 			return diseaseCure == diseaseName || diseaseCure == "ALLDISEASES";
 		}
 
-		public void Infect(Disease disease, DiseaseExposureInfo exposure_info)
+		public void Infect(DiseaseExposureInfo exposure_info)
 		{
+			Disease disease = Db.Get().Diseases.Get(exposure_info.diseaseID);
 			if (!base.Has(disease))
 			{
 				DiseaseInstance diseaseInstance = this.CreateInstance(disease);
@@ -64,7 +65,7 @@ namespace Klei.AI
 			}
 		}
 
-		public void RemoveCure(string cure, float multiplier)
+		public void RemoveCure(string cure)
 		{
 			foreach (DiseaseInstance diseaseInstance in this)
 			{

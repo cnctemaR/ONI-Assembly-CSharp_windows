@@ -5,13 +5,13 @@ using UnityEngine;
 public class HatchChewSoundEvent : SoundEvent
 {
 	public HatchChewSoundEvent(string file_name, string sound_name, int frame, float min_interval)
-		: base(file_name, sound_name, frame, min_interval, true)
+		: base(file_name, sound_name, frame, true, true, min_interval, false)
 	{
 	}
 
 	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
 	{
-		if (this.ShouldPlaySound(behaviour))
+		if (base.ShouldPlaySound(behaviour, false))
 		{
 			this.PlaySound(behaviour);
 		}
@@ -23,6 +23,7 @@ public class HatchChewSoundEvent : SoundEvent
 		int audioCategory = HatchChewSoundEvent.GetAudioCategory(behaviour);
 		EventInstance eventInstance = SoundEvent.BeginOneShot(base.sound, position);
 		eventInstance.setParameterValue("material_ID", (float)audioCategory);
+		AudioEventManager.Get().PlayTimedOnceOff(position, base.noiseValues.amount, base.noiseValues.radius, behaviour.GetComponent<KSelectable>().GetName(), 1f);
 		SoundEvent.EndOneShot(eventInstance);
 	}
 

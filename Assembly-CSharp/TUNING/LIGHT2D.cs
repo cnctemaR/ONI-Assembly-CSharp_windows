@@ -35,6 +35,14 @@ namespace TUNING
 
 		public const LightShape WALLLIGHT_SHAPE = LightShape.Circle;
 
+		public const float LIGHTBUG_INTENSITY = 0.5f;
+
+		public const float LIGHTBUG_RANGE = 5f;
+
+		public const float LIGHTBUG_ANGLE = 0f;
+
+		public const LightShape LIGHTBUG_SHAPE = LightShape.Circle;
+
 		private static Color YELLOWLIGHT = new Color(0.57f, 0.55f, 0.44f, 1f);
 
 		private static Color OVERLAYLIGHT = new Color(0.56f, 0.56f, 0.56f, 1f);
@@ -72,5 +80,13 @@ namespace TUNING
 		public static readonly Vector2 WALLLIGHT_OFFSET = new Vector2(0f, 0.5f);
 
 		public static readonly Vector2 WALLLIGHT_DIRECTION = LIGHT2D.DEFAULTDIRECTION;
+
+		public static readonly Color LIGHTBUG_COLOR = LIGHT2D.YELLOWLIGHT;
+
+		public static readonly Color LIGHTBUG_OVERLAYCOLOR = LIGHT2D.OVERLAYLIGHT;
+
+		public static readonly Vector2 LIGHTBUG_OFFSET = new Vector2(0.05f, 0.25f);
+
+		public static readonly Vector2 LIGHTBUG_DIRECTION = LIGHT2D.DEFAULTDIRECTION;
 	}
 }

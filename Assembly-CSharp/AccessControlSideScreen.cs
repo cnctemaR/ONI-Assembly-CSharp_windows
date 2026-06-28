@@ -82,6 +82,7 @@ public class AccessControlSideScreen : SideScreenContent
 			accessControlSideScreenRow.SetMinionContent(minionIdentity, setPermission, flag, new Action<MinionIdentity, AccessControl.Permission>(this.OnPermissionChanged), new Action<MinionIdentity, bool>(this.OnPermissionDefault));
 		}
 		this.RefreshOnline();
+		this.ContentContainer.SetActive(this.target.controlEnabled);
 	}
 
 	private void RefreshOnline()

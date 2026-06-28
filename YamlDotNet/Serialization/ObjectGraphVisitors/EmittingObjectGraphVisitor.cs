@@ -1,52 +1,53 @@
 ﻿using System;
+using YamlDotNet.Core;
 
 namespace YamlDotNet.Serialization.ObjectGraphVisitors
 {
-	public sealed class EmittingObjectGraphVisitor : IObjectGraphVisitor
+	public sealed class EmittingObjectGraphVisitor : IObjectGraphVisitor<IEmitter>
 	{
 		public EmittingObjectGraphVisitor(IEventEmitter eventEmitter)
 		{
 			this.eventEmitter = eventEmitter;
 		}
 
-		bool IObjectGraphVisitor.Enter(IObjectDescriptor value)
+		bool IObjectGraphVisitor<IEmitter>.Enter(IObjectDescriptor value, IEmitter context)
 		{
 			return true;
 		}
 
-		bool IObjectGraphVisitor.EnterMapping(IObjectDescriptor key, IObjectDescriptor value)
+		bool IObjectGraphVisitor<IEmitter>.EnterMapping(IObjectDescriptor key, IObjectDescriptor value, IEmitter context)
 		{
 			return true;
 		}
 
-		bool IObjectGraphVisitor.EnterMapping(IPropertyDescriptor key, IObjectDescriptor value)
+		bool IObjectGraphVisitor<IEmitter>.EnterMapping(IPropertyDescriptor key, IObjectDescriptor value, IEmitter context)
 		{
 			return true;
 		}
 
-		void IObjectGraphVisitor.VisitScalar(IObjectDescriptor scalar)
+		void IObjectGraphVisitor<IEmitter>.VisitScalar(IObjectDescriptor scalar, IEmitter context)
 		{
-			this.eventEmitter.Emit(new ScalarEventInfo(scalar));
+			this.eventEmitter.Emit(new ScalarEventInfo(scalar), context);
 		}
 
-		void IObjectGraphVisitor.VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType)
+		void IObjectGraphVisitor<IEmitter>.VisitMappingStart(IObjectDescriptor mapping, Type keyType, Type valueType, IEmitter context)
 		{
-			this.eventEmitter.Emit(new MappingStartEventInfo(mapping));
+			this.eventEmitter.Emit(new MappingStartEventInfo(mapping), context);
 		}
 
-		void IObjectGraphVisitor.VisitMappingEnd(IObjectDescriptor mapping)
+		void IObjectGraphVisitor<IEmitter>.VisitMappingEnd(IObjectDescriptor mapping, IEmitter context)
 		{
-			this.eventEmitter.Emit(new MappingEndEventInfo(mapping));
+			this.eventEmitter.Emit(new MappingEndEventInfo(mapping), context);
 		}
 
-		void IObjectGraphVisitor.VisitSequenceStart(IObjectDescriptor sequence, Type elementType)
+		void IObjectGraphVisitor<IEmitter>.VisitSequenceStart(IObjectDescriptor sequence, Type elementType, IEmitter context)
 		{
-			this.eventEmitter.Emit(new SequenceStartEventInfo(sequence));
+			this.eventEmitter.Emit(new SequenceStartEventInfo(sequence), context);
 		}
 
-		void IObjectGraphVisitor.VisitSequenceEnd(IObjectDescriptor sequence)
+		void IObjectGraphVisitor<IEmitter>.VisitSequenceEnd(IObjectDescriptor sequence, IEmitter context)
 		{
-			this.eventEmitter.Emit(new SequenceEndEventInfo(sequence));
+			this.eventEmitter.Emit(new SequenceEndEventInfo(sequence), context);
 		}
 
 		private readonly IEventEmitter eventEmitter;

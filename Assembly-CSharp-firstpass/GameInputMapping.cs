@@ -77,7 +77,7 @@ public class GameInputMapping
 	{
 		if (!Directory.Exists(Util.RootFolder()))
 		{
-			Directory.CreateDirectory(Application.persistentDataPath);
+			Directory.CreateDirectory(Util.RootFolder());
 		}
 		List<BindingEntry> list = new List<BindingEntry>();
 		foreach (BindingEntry bindingEntry in GameInputMapping.KeyBindings)
@@ -161,8 +161,6 @@ public class GameInputMapping
 		new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.S, Modifier.None, global::Action.PanDown, true),
 		new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.A, Modifier.None, global::Action.PanLeft, true),
 		new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.D, Modifier.None, global::Action.PanRight, true),
-		new BindingEntry("Tool", GamepadButton.NumButtons, KKeyCode.Alpha1, Modifier.None, global::Action.PaintBrush, true),
-		new BindingEntry("Tool", GamepadButton.NumButtons, KKeyCode.Alpha2, Modifier.None, global::Action.PaintBox, true),
 		new BindingEntry("Tool", GamepadButton.NumButtons, KKeyCode.O, Modifier.None, global::Action.RotateBuilding, true),
 		new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.J, Modifier.None, global::Action.ManagePeople, true),
 		new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.F, Modifier.None, global::Action.ManageConsumables, true),
@@ -172,7 +170,9 @@ public class GameInputMapping
 		new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.G, Modifier.None, global::Action.Dig, true),
 		new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.M, Modifier.None, global::Action.Mop, true),
 		new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.K, Modifier.None, global::Action.Clear, true),
+		new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.I, Modifier.None, global::Action.Disinfect, true),
 		new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.T, Modifier.None, global::Action.Attack, true),
+		new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Y, Modifier.None, global::Action.Harvest, true),
 		new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.P, Modifier.None, global::Action.Prioritize, true),
 		new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.S, Modifier.Alt, global::Action.ToggleScreenshotMode, true),
 		new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.C, Modifier.None, global::Action.BuildingCancel, true),
@@ -207,6 +207,8 @@ public class GameInputMapping
 		new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.F7, Modifier.None, global::Action.Overlay7, true),
 		new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.F8, Modifier.None, global::Action.Overlay8, true),
 		new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.F9, Modifier.None, global::Action.Overlay9, true),
+		new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.F10, Modifier.None, global::Action.Overlay10, true),
+		new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.F11, Modifier.None, global::Action.Overlay11, true),
 		new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.KeypadPlus, Modifier.None, global::Action.SpeedUp, true),
 		new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.KeypadMinus, Modifier.None, global::Action.SlowDown, true),
 		new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Space, Modifier.None, global::Action.TogglePause, true),

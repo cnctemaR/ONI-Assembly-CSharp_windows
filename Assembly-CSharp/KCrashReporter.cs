@@ -132,7 +132,7 @@ public class KCrashReporter : MonoBehaviour
 				string text = null;
 				if (KCrashReporter.MOST_RECENT_SAVEFILE != null)
 				{
-					text = KCrashReporter.UploadSaveFile(KCrashReporter.MOST_RECENT_SAVEFILE, local_stack_trace);
+					text = KCrashReporter.UploadSaveFile(KCrashReporter.MOST_RECENT_SAVEFILE, local_stack_trace, null);
 				}
 				KCrashReporter.ReportError(local_msg, local_stack_trace, text, this.confirmDialogPrefab, this.errorDialog.UserMessage());
 			}, delegate
@@ -160,7 +160,7 @@ public class KCrashReporter : MonoBehaviour
 		Application.Quit();
 	}
 
-	private static string UploadSaveFile(string save_file, string stack_trace)
+	private static string UploadSaveFile(string save_file, string stack_trace, Dictionary<string, string> metadata = null)
 	{
 		global::Debug.Log(string.Format("Save_file: {0}", save_file), null);
 		if (save_file != null && File.Exists(save_file))
@@ -178,6 +178,11 @@ public class KCrashReporter : MonoBehaviour
 					text3 = BitConverter.ToString(sha1CryptoServiceProvider.ComputeHash(array)).Replace("-", string.Empty);
 				}
 				text2 += string.Format("--{0}\r\nContent-Disposition: form-data; name=\"{1}\"\r\n\r\n{2}\r\n", text, "hash", text3);
+				if (metadata != null)
+				{
+					string text4 = JsonConvert.SerializeObject(metadata);
+					text2 += string.Format("--{0}\r\nContent-Disposition: form-data; name=\"{1}\"\r\n\r\n{2}\r\n", text, "metadata", text4);
+				}
 				text2 += string.Format("--{0}\r\nContent-Disposition: form-data; name=\"save\"; filename=\"{1}\"\r\nContent-Type: {2}\r\n\r\n{3}", new object[] { text, save_file, "application/x-spss-sav", @string });
 				text2 += string.Format("\r\n--{0}--\r\n", text);
 				byte[] bytes = webClient.Encoding.GetBytes(text2);
@@ -219,14 +224,30 @@ public class KCrashReporter : MonoBehaviour
 
 	private static string GetLogContents()
 	{
-		string text;
-		if (Application.isEditor)
+		string text = string.Empty;
+		if (Application.platform == RuntimePlatform.WindowsEditor)
 		{
 			text = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Unity/Editor/Editor.log");
 		}
-		else
+		else if (Application.platform == RuntimePlatform.WindowsPlayer)
 		{
 			text = Path.Combine(Application.dataPath, "output_log.txt");
+		}
+		else if (Application.platform == RuntimePlatform.OSXEditor)
+		{
+			text = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Library/Logs/Unity/Editor.log");
+		}
+		else if (Application.platform == RuntimePlatform.OSXPlayer)
+		{
+			text = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Library/Logs/Unity/Player.log");
+		}
+		else
+		{
+			if (Application.platform != RuntimePlatform.LinuxPlayer)
+			{
+				return string.Empty;
+			}
+			text = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "unity3d/Klei/Oxygen Not Included/Player.log");
 		}
 		if (File.Exists(text))
 		{
@@ -243,6 +264,10 @@ public class KCrashReporter : MonoBehaviour
 
 	public static void ReportError(string msg, string stack_trace, string save_file_hash, ConfirmDialogScreen confirm_prefab, string userMessage = "")
 	{
+		if (KCrashReporter.ignoreAll)
+		{
+			return;
+		}
 		if (KCrashReporter.debugWasUsed)
 		{
 			global::Debug.Log("Ignoring crash because debug was used.", null);
@@ -313,7 +338,7 @@ public class KCrashReporter : MonoBehaviour
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
 			error.fullstack = "UNITY_OUTPUT:\n" + msg;
-			error.build = 221865;
+			error.build = 229531;
 			error.log = KCrashReporter.GetLogContents();
 			error.summaryline = text4;
 			error.user_message = userMessage;
@@ -353,7 +378,11 @@ public class KCrashReporter : MonoBehaviour
 	public static void ReportBug(string msg, string save_file)
 	{
 		string text = "Bug Report From: " + KCrashReporter.GetUserID() + " at " + global::System.DateTime.Now.ToString();
-		string text2 = KCrashReporter.UploadSaveFile(save_file, text);
+		string text2 = KCrashReporter.UploadSaveFile(save_file, text, new Dictionary<string, string> { 
+		{
+			"user",
+			KCrashReporter.GetUserID()
+		} });
 		KCrashReporter.ReportError(msg, text, text2, ScreenPrefabs.Instance.ConfirmDialogScreen, string.Empty);
 	}
 

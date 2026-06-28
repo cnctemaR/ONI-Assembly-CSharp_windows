@@ -4,7 +4,7 @@ using UnityEngine;
 public class PortraitTableColumn : TableColumn
 {
 	public PortraitTableColumn(Action<MinionIdentity, GameObject> on_load_action, Comparison<MinionIdentity> sort_comparison)
-		: base(on_load_action, sort_comparison, null, null)
+		: base(on_load_action, sort_comparison, null, null, null, 0f)
 	{
 	}
 

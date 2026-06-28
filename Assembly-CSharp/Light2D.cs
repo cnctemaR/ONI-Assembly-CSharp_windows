@@ -43,12 +43,21 @@ public class Light2D : KMonoBehaviour
 	{
 		if (this.isRegistered && Grid.IsValidCell(this.cell))
 		{
-			if (this.partitionerEntry != null)
+			if (this.solidPartitionerEntry != null)
 			{
-				this.partitionerEntry.Release();
+				this.solidPartitionerEntry.Release();
+				this.solidPartitionerEntry = null;
 			}
-			LightGridManager.RemoveFromLightGrid(this.cell);
+			if (this.liquidPartitionerEntry != null)
+			{
+				this.liquidPartitionerEntry.Release();
+				this.liquidPartitionerEntry = null;
+			}
 			this.isRegistered = false;
+		}
+		if (this.emitter != null)
+		{
+			this.emitter.Remove();
 		}
 	}
 
@@ -72,19 +81,22 @@ public class Light2D : KMonoBehaviour
 			if (this.shape == LightShape.Circle)
 			{
 				Vector2I vector2I2 = new Vector2I(vector2I.x - num3, vector2I.y - num3);
-				this.partitionerEntry = GameScenePartitioner.Instance.Add("Light2D", base.gameObject, vector2I2.x, vector2I2.y, num2, num2, GameScenePartitioner.Instance.solidChangedMask.mask | GameScenePartitioner.Instance.liquidChangedMask.mask, new Action<object>(this.TriggerRefresh));
+				this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Light2D", base.gameObject, vector2I2.x, vector2I2.y, num2, num2, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.TriggerRefresh));
+				this.liquidPartitionerEntry = GameScenePartitioner.Instance.Add("Light2D", base.gameObject, vector2I2.x, vector2I2.y, num2, num2, GameScenePartitioner.Instance.liquidChangedLayer, new Action<object>(this.TriggerRefresh));
 			}
 			else if (this.shape == LightShape.Cone)
 			{
 				Vector2I vector2I3 = new Vector2I(vector2I.x - num2, vector2I.y - num2);
-				this.partitionerEntry = GameScenePartitioner.Instance.Add("Light2D", base.gameObject, vector2I3.x, vector2I3.y, 2 * num2, num2, GameScenePartitioner.Instance.solidChangedMask.mask | GameScenePartitioner.Instance.liquidChangedMask.mask, new Action<object>(this.TriggerRefresh));
+				this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Light2D", base.gameObject, vector2I3.x, vector2I3.y, 2 * num2, num2, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.TriggerRefresh));
+				this.liquidPartitionerEntry = GameScenePartitioner.Instance.Add("Light2D", base.gameObject, vector2I3.x, vector2I3.y, 2 * num2, num2, GameScenePartitioner.Instance.liquidChangedLayer, new Action<object>(this.TriggerRefresh));
 			}
 			else
 			{
 				global::UnityEngine.Debug.Assert(false);
 			}
 			this.cell = num;
-			LightGridManager.AddToLightGrid(this.cell, num2, this.Range, this.Color, this.shape);
+			this.emitter = new LightGridManager.LightGridEmitter(this.cell, 1, this.Range, this.Color, this.shape);
+			this.emitter.Add();
 			this.isRegistered = true;
 		}
 	}
@@ -122,5 +134,9 @@ public class Light2D : KMonoBehaviour
 
 	private bool isRegistered;
 
-	private GameScenePartitionerEntry partitionerEntry;
+	private GameScenePartitionerEntry solidPartitionerEntry;
+
+	private GameScenePartitionerEntry liquidPartitionerEntry;
+
+	private LightGridManager.LightGridEmitter emitter;
 }

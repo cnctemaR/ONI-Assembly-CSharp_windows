@@ -10,6 +10,7 @@ public class Pickupable : Workable
 	{
 		this.showProgressBar = false;
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
+		this.shouldTransferDiseaseWithWorker = false;
 	}
 
 	public PrimaryElement PrimaryElement
@@ -51,6 +52,14 @@ public class Pickupable : Workable
 			if (value != this.isEntombed)
 			{
 				this.isEntombed = value;
+				if (this.isEntombed)
+				{
+					base.GetComponent<KPrefabID>().AddTag(GameTags.Entombed);
+				}
+				else
+				{
+					base.GetComponent<KPrefabID>().RemoveTag(GameTags.Entombed);
+				}
 				this.Trigger(-1089732772, null);
 				this.UpdateEntombedVisualizer();
 			}
@@ -103,7 +112,7 @@ public class Pickupable : Workable
 		{
 			DebugUtil.Assert(this.primaryElement != null, "Assert!");
 			this.primaryElement.Units = value;
-			if (value <= 0f)
+			if (value <= 0.001f)
 			{
 				PrimaryElement component = base.GetComponent<PrimaryElement>();
 				if (!component.KeepZeroMassObject)
@@ -143,6 +152,10 @@ public class Pickupable : Workable
 		Pickupable.Reservation reservation = new Pickupable.Reservation(reserver, amount, num);
 		this.reservations.Add(reservation);
 		this.RefreshReservedAmount();
+		if (this.OnReservationsChanged != null)
+		{
+			this.OnReservationsChanged();
+		}
 		return num;
 	}
 
@@ -153,10 +166,14 @@ public class Pickupable : Workable
 			if (this.reservations[i].ticket == ticket)
 			{
 				this.reservations.RemoveAt(i);
+				this.RefreshReservedAmount();
+				if (this.OnReservationsChanged != null)
+				{
+					this.OnReservationsChanged();
+				}
 				break;
 			}
 		}
-		this.RefreshReservedAmount();
 	}
 
 	protected override void OnPrefabInit()
@@ -180,6 +197,13 @@ public class Pickupable : Workable
 		}
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.PickingUp;
 		this.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
+		this.targetWorkable = this;
+	}
+
+	protected override void OnLoadLevel()
+	{
+		this.log = null;
+		base.OnLoadLevel();
 	}
 
 	protected override void OnSpawn()
@@ -210,7 +234,7 @@ public class Pickupable : Workable
 		{
 			component.SetStatusIndicatorOffset(new Vector3(0f, -0.65f, 0f));
 		}
-		if (this.storage == null && base.GetComponent<LiquidSource>() == null)
+		if (this.storage == null)
 		{
 			this.RegisterListeners();
 		}
@@ -240,8 +264,8 @@ public class Pickupable : Workable
 		}
 		int num = Grid.PosToCell(this);
 		this.objectLayerListItem = new ObjectLayerListItem(base.gameObject, ObjectLayer.Pickupables, num);
-		this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Pickupable.RegisterSolidListener", base.gameObject, num, GameScenePartitioner.Instance.solidChangedMask.mask, new Action<object>(this.OnSolidChanged));
-		this.partitionerEntry = GameScenePartitioner.Instance.Add("Pickupable.RegisterPickupable", this, num, GameScenePartitioner.Instance.pickupables.mask, null);
+		this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Pickupable.RegisterSolidListener", base.gameObject, num, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
+		this.partitionerEntry = GameScenePartitioner.Instance.Add("Pickupable.RegisterPickupable", this, num, GameScenePartitioner.Instance.pickupablesLayer, null);
 		CellChangeMonitor.Instance.Add(this, new Action<int, int>(this.OnCellChange), false);
 	}
 
@@ -281,8 +305,8 @@ public class Pickupable : Workable
 		{
 			return;
 		}
-		Health component = base.GetComponent<Health>();
-		bool flag = component == null || component.IsDead();
+		DeathMonitor.Instance smi = base.gameObject.GetSMI<DeathMonitor.Instance>();
+		bool flag = smi == null || smi.IsDead();
 		if (flag && ((Grid.Solid[num] && Grid.Foundation[num]) || Grid.Cell[num].properties != 0))
 		{
 			for (int i = 0; i < Pickupable.displacementOffsets.Length; i++)
@@ -291,10 +315,10 @@ public class Pickupable : Workable
 				if (Grid.IsValidCell(num2) && !Grid.Solid[num2])
 				{
 					Vector3 vector = Grid.CellToPosCBC(num2, Grid.SceneLayer.Move);
-					Collider2D component2 = base.GetComponent<Collider2D>();
-					if (component2 != null)
+					Collider2D component = base.GetComponent<Collider2D>();
+					if (component != null)
 					{
-						vector.y += this.transform.position.y - component2.bounds.min.y;
+						vector.y += this.transform.position.y - component.bounds.min.y;
 					}
 					this.transform.SetPosition(vector);
 					num = num2;
@@ -313,8 +337,8 @@ public class Pickupable : Workable
 		bool flag2 = false;
 		if (Grid.IsValidCell(cell) && Grid.Solid[cell])
 		{
-			Health component = base.GetComponent<Health>();
-			bool flag3 = component == null || component.IsDead();
+			DeathMonitor.Instance smi = base.gameObject.GetSMI<DeathMonitor.Instance>();
+			bool flag3 = smi == null || smi.IsDead();
 			if (flag3)
 			{
 				this.Clearable.CancelClearing();
@@ -324,8 +348,8 @@ public class Pickupable : Workable
 		if (flag2 != flag && this.storage == null)
 		{
 			this.IsEntombed = flag2;
-			KSelectable component2 = base.GetComponent<KSelectable>();
-			component2.IsSelectable = !this.IsEntombed;
+			KSelectable component = base.GetComponent<KSelectable>();
+			component.IsSelectable = !this.IsEntombed;
 		}
 		this.UpdateEntombedVisualizer();
 		return this.IsEntombed;
@@ -394,6 +418,14 @@ public class Pickupable : Workable
 		}
 		this.UnregisterListeners();
 		Components.Pickupables.Remove(this);
+		if (this.reservations.Count > 0)
+		{
+			this.reservations.Clear();
+			if (this.OnReservationsChanged != null)
+			{
+				this.OnReservationsChanged();
+			}
+		}
 		base.OnCleanUp();
 	}
 
@@ -486,11 +518,12 @@ public class Pickupable : Workable
 	protected override void OnCompleteWork(Worker worker)
 	{
 		Storage component = worker.GetComponent<Storage>();
-		float amount = worker.amount;
+		Pickupable.PickupableStartWorkInfo pickupableStartWorkInfo = (Pickupable.PickupableStartWorkInfo)worker.startWorkInfo;
+		float amount = pickupableStartWorkInfo.amount;
 		Pickupable pickupable = this.Take(amount);
 		if (pickupable != null)
 		{
-			component.Store(pickupable.gameObject, false, false);
+			component.Store(pickupable.gameObject, false, false, true);
 			worker.workCompleteData = pickupable;
 		}
 	}
@@ -589,7 +622,7 @@ public class Pickupable : Workable
 					text = "Rock";
 				}
 			}
-			if (element.tag.ToString() == "Creature")
+			if (element.tag.ToString() == "Creature" && !base.gameObject.HasTag(GameTags.Seed))
 			{
 				text = "Bodyfall_rock";
 			}
@@ -597,7 +630,7 @@ public class Pickupable : Workable
 			{
 				text = "Ore_bump_" + text;
 			}
-			string text2 = GlobalAssets.GetSound(text, false);
+			string text2 = GlobalAssets.GetSound(text, true);
 			text2 = ((text2 == null) ? GlobalAssets.GetSound("Ore_bump_rock", false) : text2);
 			if (CameraController.Instance.IsAudibleSound(this.transform.position, text2))
 			{
@@ -683,7 +716,11 @@ public class Pickupable : Workable
 
 	public Func<Worker, Workable.AnimInfo> OnGetAnim;
 
+	public global::System.Action OnReservationsChanged;
+
 	public ObjectLayerListItem objectLayerListItem;
+
+	public Workable targetWorkable;
 
 	private static CellOffset[] displacementOffsets = new CellOffset[]
 	{
@@ -743,5 +780,19 @@ public class Pickupable : Workable
 		public float amount;
 
 		public int ticket;
+	}
+
+	public class PickupableStartWorkInfo : Worker.StartWorkInfo
+	{
+		public PickupableStartWorkInfo(Pickupable pickupable, float amount)
+			: base(pickupable.targetWorkable)
+		{
+			this.originalPickupable = pickupable;
+			this.amount = amount;
+		}
+
+		public float amount { get; private set; }
+
+		public Pickupable originalPickupable { get; private set; }
 	}
 }

@@ -52,6 +52,10 @@ public class Sublimates : KMonoBehaviour
 		Pickupable pickupable = data as Pickupable;
 		PrimaryElement component = pickupable.GetComponent<PrimaryElement>();
 		Sublimates component2 = pickupable.GetComponent<Sublimates>();
+		if (component2 == null)
+		{
+			return;
+		}
 		float mass = this.primaryElement.Mass;
 		float mass2 = component.Mass;
 		float num = mass / (mass2 + mass);
@@ -62,11 +66,6 @@ public class Sublimates : KMonoBehaviour
 
 	private void SimUpdate(float dt)
 	{
-		Pickupable component = base.GetComponent<Pickupable>();
-		if (component != null && component.storage != null && !component.storage.allowSublimation)
-		{
-			return;
-		}
 		int num = Grid.PosToCell(this.transform.position);
 		if (!Grid.IsValidCell(num))
 		{
@@ -86,12 +85,23 @@ public class Sublimates : KMonoBehaviour
 				num2 -= num4;
 				if (this.sublimatedMass > this.info.minSublimationAmount)
 				{
-					PrimaryElement component2 = base.GetComponent<PrimaryElement>();
-					if (component2 != null)
+					float num5 = this.sublimatedMass / this.primaryElement.Mass;
+					this.primaryElement.Mass = Mathf.Max(0f, this.primaryElement.Mass - this.sublimatedMass);
+					byte b;
+					int num6;
+					if (this.info.diseaseIdx == 255)
 					{
-						component2.Mass = Mathf.Max(0f, component2.Mass - this.sublimatedMass);
+						b = this.primaryElement.DiseaseIdx;
+						num6 = (int)((float)this.primaryElement.DiseaseCount * num5);
+						this.primaryElement.ModifyDiseaseCount(-num6, "Sublimates.SimUpdate");
 					}
-					this.Emit(num, this.sublimatedMass, this.primaryElement.Temperature);
+					else
+					{
+						float num7 = this.sublimatedMass / this.info.sublimationRate;
+						b = this.info.diseaseIdx;
+						num6 = (int)((float)this.info.diseaseCount * num7);
+					}
+					this.Emit(num, this.sublimatedMass, this.primaryElement.Temperature, b, num6);
 					this.sublimatedMass = 0f;
 				}
 			}
@@ -99,16 +109,16 @@ public class Sublimates : KMonoBehaviour
 			{
 				if (this.sublimatedMass > 0f)
 				{
-					this.Emit(num, this.sublimatedMass, this.primaryElement.Temperature);
+					this.Emit(num, this.sublimatedMass, this.primaryElement.Temperature, this.primaryElement.DiseaseIdx, this.primaryElement.DiseaseCount);
 				}
 				Util.KDestroyGameObject(base.gameObject);
 			}
 		}
 	}
 
-	private void Emit(int cell, float mass, float temperature)
+	private void Emit(int cell, float mass, float temperature, byte disease_idx, int disease_count)
 	{
-		SimMessages.AddRemoveSubstance(cell, this.info.sublimatedElement, CellEventLogger.Instance.SublimatesEmit, mass, temperature, -1);
+		SimMessages.AddRemoveSubstance(cell, this.info.sublimatedElement, CellEventLogger.Instance.SublimatesEmit, mass, temperature, disease_idx, disease_count, -1);
 		this.flowAccumulator.Accumulate(mass);
 		if (this.info.sublimatedElement == SimHashes.ContaminatedOxygen && BaseArea.Instance.IsInsideBase(cell))
 		{
@@ -146,13 +156,15 @@ public class Sublimates : KMonoBehaviour
 	[Serializable]
 	public struct Info
 	{
-		public Info(float rate, float min_amount, float max_destination_mass, float mass_power, SimHashes element)
+		public Info(float rate, float min_amount, float max_destination_mass, float mass_power, SimHashes element, byte disease_idx = 255, int disease_count = 0)
 		{
 			this.sublimationRate = rate;
 			this.minSublimationAmount = min_amount;
 			this.maxDestinationMass = max_destination_mass;
 			this.massPower = mass_power;
 			this.sublimatedElement = element;
+			this.diseaseIdx = disease_idx;
+			this.diseaseCount = disease_count;
 		}
 
 		public float sublimationRate;
@@ -162,6 +174,10 @@ public class Sublimates : KMonoBehaviour
 		public float maxDestinationMass;
 
 		public float massPower;
+
+		public byte diseaseIdx;
+
+		public int diseaseCount;
 
 		[HashedEnum]
 		public SimHashes sublimatedElement;

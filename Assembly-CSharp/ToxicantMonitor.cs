@@ -41,19 +41,6 @@ public class ToxicantMonitor : GameStateMachine<ToxicantMonitor, ToxicantMonitor
 		{
 			this.sensor = master.GetComponent<Sensors>().GetSensor<ToxicantSensor>();
 			this.modifier = new AttributeModifier(Db.Get().Amounts.Toxicity.deltaAttribute.Id, 0f, DUPLICANTS.MODIFIERS.TOXICENVIRONMENT.NAME, false, false);
-			if (ToxicantMonitor.Instance.infectiousSubstances.Count == 0)
-			{
-				ToxicantMonitor.Instance.infectiousSubstances[SimHashes.ContaminatedOxygen] = new Disease[]
-				{
-					Db.Get().Diseases.PutridOdour,
-					Db.Get().Diseases.Spores
-				};
-				ToxicantMonitor.Instance.infectiousSubstances[SimHashes.DirtyWater] = new Disease[]
-				{
-					Db.Get().Diseases.PutridOdour,
-					Db.Get().Diseases.Spores
-				};
-			}
 		}
 
 		public void AddToxicityModifier()
@@ -68,7 +55,6 @@ public class ToxicantMonitor : GameStateMachine<ToxicantMonitor, ToxicantMonitor
 
 		public void UpdateInToxicArea()
 		{
-			this.UpdateDirtiness();
 		}
 
 		public bool IsInToxicArea()
@@ -86,7 +72,7 @@ public class ToxicantMonitor : GameStateMachine<ToxicantMonitor, ToxicantMonitor
 				int num2 = global::UnityEngine.Random.Range(0, array.Length);
 				Disease disease = array[num2];
 				string infectionSourceInfo = ToxicantMonitor.Instance.GetInfectionSourceInfo();
-				base.master.Trigger(-283306403, new DiseaseExposureInfo(disease.Id, 1f, infectionSourceInfo));
+				base.master.Trigger(-283306403, new DiseaseExposureInfo(disease.Id, infectionSourceInfo));
 			}
 		}
 
@@ -100,23 +86,6 @@ public class ToxicantMonitor : GameStateMachine<ToxicantMonitor, ToxicantMonitor
 			float toxicity = this.sensor.GetToxicity();
 			float num = toxicity * 20f;
 			this.modifier.Value = num;
-		}
-
-		private void UpdateDirtiness()
-		{
-			int num = Grid.PosToCell(base.master.transform.position);
-			int num2 = Grid.CellAbove(num);
-			Element element = Grid.Element[num];
-			Element element2 = Grid.Element[num2];
-			if ((element.IsLiquid && element.id != SimHashes.Water) || (element2.IsLiquid && element2.id != SimHashes.Water))
-			{
-				base.master.GetComponent<Effects>().Add("Unclean", true);
-			}
-			if (element2.id == SimHashes.DirtyWater)
-			{
-				base.master.GetComponent<Effects>().Add("DirtyHands", true);
-				base.master.GetComponent<Effects>().Add("Unclean", true);
-			}
 		}
 
 		private ToxicantSensor sensor;

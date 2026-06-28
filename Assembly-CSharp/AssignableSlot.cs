@@ -1,5 +1,6 @@
 ﻿using System;
 
+[Serializable]
 public class AssignableSlot : Resource
 {
 	public AssignableSlot(string id, string name, bool showInUI = true)

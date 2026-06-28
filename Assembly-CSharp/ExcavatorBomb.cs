@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Generated;
 using Klei;
+using ProcGen;
 using STRINGS;
 using UnityEngine;
 
@@ -36,7 +36,7 @@ public class ExcavatorBomb : StateMachineComponent<ExcavatorBomb.StatesInstance>
 
 	private List<Vector2> DoCircularExplosion(float x, float y, float radius)
 	{
-		List<Vector2> circle = global::Generated.Util.GetCircle(new Vector2(x, y), (int)Mathf.Floor(radius));
+		List<Vector2> circle = global::ProcGen.Util.GetCircle(new Vector2(x, y), (int)Mathf.Floor(radius));
 		for (int i = 0; i < circle.Count; i++)
 		{
 			Vector3 vector = new Vector3(circle[i].x, circle[i].y, -Grid.CellSizeInMeters * 0.5f);
@@ -54,12 +54,13 @@ public class ExcavatorBomb : StateMachineComponent<ExcavatorBomb.StatesInstance>
 						if (elem.IsSolid)
 						{
 							Substance substance = elem.substance;
-							substance.SpawnResource(Grid.CellToPosCCC(cell, Grid.SceneLayer.Use), mass, 300f, false, false);
+							substance.SpawnResource(Grid.CellToPosCCC(cell, Grid.SceneLayer.Use), mass, 300f, byte.MaxValue, 0, false, false);
 						}
 					};
-					num = Game.Instance.callbackManager.Add(new Game.CallbackInfo(action, false), "ExcavatorBombCircleExplosion").index;
+					num = Game.Instance.callbackManager.Add(new Game.CallbackInfo(action, false)).index;
 				}
-				SimMessages.ReplaceElement(cell, SimHashes.CarbonDioxide, CellEventLogger.Instance.Excavator, 8f, 1000f, num);
+				int num2 = num;
+				SimMessages.ReplaceElement(cell, SimHashes.CarbonDioxide, CellEventLogger.Instance.Excavator, 8f, 1000f, byte.MaxValue, 0, num2);
 			}
 		}
 		return circle;
@@ -164,7 +165,7 @@ public class ExcavatorBomb : StateMachineComponent<ExcavatorBomb.StatesInstance>
 				this.maxEnergy = Mathf.Max(num18, this.maxEnergy);
 				if (num18 > 0f)
 				{
-					KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("snore_fx_kanim", Grid.CellToPosCCC(num3, Grid.SceneLayer.FXFront), SceneOrganizer.Instance.GetFolder(Folder.FX).transform, false, Grid.SceneLayer.FXFront);
+					KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("snore_fx_kanim", Grid.CellToPosCCC(num3, Grid.SceneLayer.FXFront), SceneOrganizer.Instance.GetFolder(Folder.FX).transform, false, Grid.SceneLayer.FXFront, false);
 					kbatchedAnimController.destroyOnAnimComplete = true;
 					kbatchedAnimController.Play("snore", KAnim.PlayMode.Once, 1f, 0f);
 					if (element.IsSolid)
@@ -191,10 +192,10 @@ public class ExcavatorBomb : StateMachineComponent<ExcavatorBomb.StatesInstance>
 							{
 								float num25 = temperature + SimUtil.EnergyFlowToTemperatureDelta(kilojoules, elem.specificHeatCapacity, mass);
 								Substance substance = elem.substance;
-								substance.SpawnResource(Grid.CellToPos(local_cell, CellAlignment.RandomInternal, Grid.SceneLayer.Use), mass * 0.25f, num25, false, false);
+								substance.SpawnResource(Grid.CellToPos(local_cell, CellAlignment.RandomInternal, Grid.SceneLayer.Use), mass * 0.25f, num25, byte.MaxValue, 0, false, false);
 							}
 						};
-						HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(action, false), "ExcavatorBombShockwave");
+						HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(action, false));
 						if (!WorldDamage.Instance.ApplyDamage(num3, num23, -1, handle.index))
 						{
 							SimMessages.ModifyEnergy(num3, kilojoules, SimMessages.EnergySourceID.Excavator);
@@ -256,7 +257,7 @@ public class ExcavatorBomb : StateMachineComponent<ExcavatorBomb.StatesInstance>
 			base.PlaySound3D(Sounds.Instance.BlowUp_GenericMigrated);
 			Vector3 vector2 = Grid.CellToPosCCC(num, Grid.SceneLayer.Move);
 			GameUtil.CreateExplosion(vector2);
-			global::UnityEngine.Object.Destroy(base.gameObject);
+			global::Util.KDestroyGameObject(base.gameObject);
 			return true;
 		}
 		return false;
@@ -325,16 +326,16 @@ public class ExcavatorBomb : StateMachineComponent<ExcavatorBomb.StatesInstance>
 		{
 			base.InitializeStates(out default_state);
 			default_state = this.idle;
-			this.statusItemUnarmed = new StatusItem("Unarmed", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.UNARMED.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.UNARMED.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
-			this.statusItemArmed = new StatusItem("Armed", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.ARMED.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.ARMED.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
-			this.statusItemCountdown = new StatusItem("Countdown", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.COUNTDOWN.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.COUNTDOWN.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
+			this.statusItemUnarmed = new StatusItem("Unarmed", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.UNARMED.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.UNARMED.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, 2046);
+			this.statusItemArmed = new StatusItem("Armed", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.ARMED.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.ARMED.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, 2046);
+			this.statusItemCountdown = new StatusItem("Countdown", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.COUNTDOWN.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.COUNTDOWN.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, 2046);
 			this.statusItemCountdown.resolveStringCallback = delegate(string str, object data)
 			{
 				ExcavatorBomb.StatesInstance statesInstance = (ExcavatorBomb.StatesInstance)data;
 				return string.Format(str, GameUtil.GetFormattedTime(statesInstance.master.CountdownRemaining));
 			};
-			this.statusItemDupeDanger = new StatusItem("DupeDanger", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.DUPE_DANGER.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.DUPE_DANGER.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
-			this.statusItemExpoding = new StatusItem("Exploding", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.EXPLODING.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.EXPLODING.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None);
+			this.statusItemDupeDanger = new StatusItem("DupeDanger", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.DUPE_DANGER.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.DUPE_DANGER.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, 2046);
+			this.statusItemExpoding = new StatusItem("Exploding", BUILDING.STATUSITEMS.EXCAVATOR_BOMB.EXPLODING.NAME, BUILDING.STATUSITEMS.EXCAVATOR_BOMB.EXPLODING.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, SimViewMode.None, 2046);
 			this.idle.PlayAnim("off", KAnim.PlayMode.Loop, null).ToggleMainStatusItem(this.statusItemUnarmed).GoTo(this.armed);
 			this.armed.PlayAnim("on", KAnim.PlayMode.Loop, null).ToggleMainStatusItem(this.statusItemArmed).GoTo(this.dupe_danger);
 			this.dupe_danger.PlayAnim("working_post", KAnim.PlayMode.Loop, null).ToggleMainStatusItem(this.statusItemDupeDanger).Transition(this.countdown, (ExcavatorBomb.StatesInstance smi) => !smi.DupeInDanger());

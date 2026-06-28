@@ -9,12 +9,12 @@ public class MushBarConfig : IEntityConfig
 	{
 		GameObject gameObject = EntityTemplates.CreateLooseEntity("MushBar", ITEMS.FOOD.MUSHBAR.NAME, ITEMS.FOOD.MUSHBAR.DESC, 1f, false, Assets.GetAnim("mushbar_kanim"), "object", Grid.SceneLayer.Front, EntityTemplates.CollisionShape.RECTANGLE, 0.8f, 0.4f, true, SimHashes.Creature, null);
 		gameObject = EntityTemplates.ExtendEntityToFood(gameObject, FOOD.FOOD_TYPES.MUSHBAR, true);
-		gameObject.AddComponent<DiseaseTrigger>().AddTrigger(GameHashes.EatCompleteEdible, new string[] { Db.Get().Diseases.Diarrhea.Id });
 		string text = ITEMS.FOOD.MUSHBAR.RECIPEDESC;
-		Recipe recipe = new Recipe("MushBar", 1f, (SimHashes)0, null, text, 1).SetFabricator("MicrobeMusher", FOOD.RECIPES.STANDARD_COOK_TIME);
+		Recipe recipe = new Recipe("MushBar", 1f, (SimHashes)0, null, text, 1);
 		recipe.AddIngredient(new Recipe.Ingredient("Dirt", 75f));
 		recipe.AddIngredient(new Recipe.Ingredient("Water", 75f));
 		recipe.FabricationVisualizer = MushBarConfig.CreateFabricationVisualizer(gameObject);
+		recipe.SetFabricator("MicrobeMusher", FOOD.RECIPES.STANDARD_COOK_TIME);
 		return gameObject;
 	}
 

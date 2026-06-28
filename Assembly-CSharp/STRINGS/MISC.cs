@@ -101,6 +101,12 @@ namespace STRINGS
 			public static LocString SEED = "Seed";
 
 			public static LocString ANYWATER = "Water Based";
+
+			public static LocString MARKEDFORCOMPOST = "Compost Edibles";
+
+			public static LocString PICKLED = "Pickled";
+
+			public static LocString GENE_SHUFFLER = "Neural Vacillator";
 		}
 
 		public class STATUSITEMS
@@ -188,11 +194,25 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Can provide <style=\"food\">{0}</style> of energy to Duplicants";
 			}
 
+			public class MARKEDFORDISINFECTION
+			{
+				public static LocString NAME = "Disinfection Pending";
+
+				public static LocString TOOLTIP = "Awaiting a Duplicant to disinfect";
+			}
+
 			public class PENDINGCLEAR
 			{
-				public static LocString NAME = "Sweep Pending";
+				public static LocString NAME = "Sweep Task Assigned";
 
 				public static LocString TOOLTIP = "Awaiting a Duplicant to sweep";
+			}
+
+			public class MARKEDFORCOMPOST
+			{
+				public static LocString NAME = "Marked For Compost";
+
+				public static LocString TOOLTIP = "Awaiting a Duplicant to compost";
 			}
 
 			public class NOCLEARLOCATIONSAVAILABLE
@@ -204,28 +224,28 @@ namespace STRINGS
 
 			public class PENDINGHARVEST
 			{
-				public static LocString NAME = "Harvest Pending";
+				public static LocString NAME = "Harvest Task Assigned";
 
 				public static LocString TOOLTIP = "Awaiting a Duplicant to harvest";
 			}
 
 			public class PENDINGUPROOT
 			{
-				public static LocString NAME = "Uproot Pending";
+				public static LocString NAME = "Uproot Task Assigned";
 
 				public static LocString TOOLTIP = "Awaiting a Duplicant to uproot";
 			}
 
 			public class WAITINGFORDIG
 			{
-				public static LocString NAME = "Dig Pending";
+				public static LocString NAME = "Dig Task Assigned";
 
 				public static LocString TOOLTIP = "Awaiting a Duplicant to dig";
 			}
 
 			public class WAITINGFORMOP
 			{
-				public static LocString NAME = "Mop Pending";
+				public static LocString NAME = "Mop Task Assigned";
 
 				public static LocString TOOLTIP = "Awaiting a Duplicant to mop";
 			}
@@ -249,6 +269,13 @@ namespace STRINGS
 				public static LocString NAME = "{Mass}";
 
 				public static LocString TOOLTIP = "The selected item has a mass of {Mass}";
+			}
+
+			public class ELEMENTALDISEASE
+			{
+				public static LocString NAME = "{Disease}";
+
+				public static LocString TOOLTIP = "Current disease: {Disease}";
 			}
 
 			public class ELEMENTALTEMPERATURE
@@ -361,7 +388,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Unreachable";
 
-				public static LocString TOOLTIP = "Duplicants cannot reach this item";
+				public static LocString TOOLTIP = "Duplicants cannot reach this object";
 			}
 
 			public class PRIORITIZED
@@ -376,6 +403,13 @@ namespace STRINGS
 				public static LocString NAME = "Using {Target}";
 
 				public static LocString TOOLTIP = "{Target} is currently in use";
+			}
+
+			public class ORDERATTACK
+			{
+				public static LocString NAME = "Pending Attack";
+
+				public static LocString TOOLTIP = "Waiting for a Duplicant to murderize this defenseless creature";
 			}
 
 			public class OPERATING
@@ -446,7 +480,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "TIP: Basic Controls";
 
-				public static LocString MESSAGEBODY = "- Use the <color=#F44A47>WASD</color> keys to pan your camera and the <color=#F44A47>MOUSE WHEEL</color> to zoom in or out. <color=#F44A47>[H]</color> will return your screen to the Printing Pod.\n\n- Your simulation can be sped up or slowed down by using the speed buttons in the top left, or by pressing <color=#F44A47>[TAB]</color>.\n\n- <color=#F44A47>[SPACE]</color> will pause or resume your game.";
+				public static LocString MESSAGEBODY = "• Use the <style=\"misc\">WASD</style> keys to pan your camera and the <style=\"misc\">MOUSE WHEEL</style> to zoom in or out. <color=#F44A47><b>[H]</b></color> will return your screen to the Printing Pod.\n\n• Your simulation can be sped up or slowed down by using the speed buttons in the top left, or by pressing <color=#F44A47><b>[TAB]</b></color>.\n\n• <color=#F44A47><b>[SPACE]</b></color> will pause or resume your game.";
 
 				public static LocString TOOLTIP = "Helpful tips to get you started";
 			}
@@ -455,7 +489,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "TIP: Colony Management";
 
-				public static LocString MESSAGEBODY = "Duplicants are self-motivated and do not need to be individually managed in order to perform tasks in the colony.\n\nYou can use the <color=#833A5FFF>DIG TOOL</color> <color=#F44A47>[G]</color> and the <color=#833A5FFF>BUILD MENU</color> in the lower left of the screen to begin planning job tasks. Once you have a few placed, your Duplicants will automatically get to work for you.";
+				public static LocString MESSAGEBODY = "Duplicants are self-motivated and require no individual management in order to perform tasks in the colony.\n\nYou can use the <style=\"misc\">DIG TOOL</style> <color=#F44A47><b>[G]</b></color> and the <style=\"misc\">BUILD MENU</style> in the lower left of the screen to begin planning job tasks. Once you've placed a few tasks, your Duplicants will automatically get to work for you.";
 
 				public static LocString TOOLTIP = "Learn how to get Duplicants to do your bidding";
 			}
@@ -464,7 +498,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "TIP: Stress Management";
 
-				public static LocString MESSAGEBODY = "Duplicants are fragile creatures and must be kept mentally healthy in order to function. Subpar conditions will increase Duplicants' <style=\"stress\">Stress</style>, while improved conditions will decrease it. Too much <style=\"stress\">Stress</style> will cause Duplicants to have a nervous breakdown.\n\nSelect a Duplicant and mouse over <style=\"stress\">Stress</style> in their <color=#833A5FFF>INFORMATION TAB</color> to view their individual <style=\"stress\">Stress</style> factors.";
+				public static LocString MESSAGEBODY = "Duplicants are fragile creatures and must be kept mentally healthy in order to function. Subpar conditions will increase Duplicants' <style=\"stress\">Stress</style>, while improved conditions will decrease it. Too much <style=\"stress\">Stress</style> will cause Duplicants to have a nervous breakdown.\n\nSelect a Duplicant and mouse over <style=\"stress\">Stress</style> in their <style=\"misc\">INFORMATION TAB</style> to view their individual <style=\"stress\">Stress</style> factors.";
 
 				public static LocString TOOLTIP = "Learn how to keep Duplicants happy and productive";
 			}
@@ -473,7 +507,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "TIP: Storage Regions";
 
-				public static LocString MESSAGEBODY = "Duplicants are incredibly resourceful and will automatically use any materials in their reach. However, a Duplicant's productivity can be improved by storing resources closer to where they'll need them.\n\nUse the <color=#833A5FFF>STORAGE REGION TOOL</color> <color=#F44A47>[Y + T]</color> to mark an area as storage, and the <color=#833A5FFF>STORAGE OVERLAY</color> <color=#F44A47>[F6]</color> to assign resource types to it.";
+				public static LocString MESSAGEBODY = "Duplicants are incredibly resourceful and will automatically use any materials in their reach. However, a Duplicant's productivity can be improved by storing resources closer to where they'll need them.\n\nUse the <style=\"misc\">STORAGE REGION TOOL</style> <color=#F44A47><b>[Y + T]</b></color> to mark an area as storage, and the <style=\"misc\">STORAGE OVERLAY</style> <color=#F44A47><b>[F6]</b></color> to assign resource types to it.";
 
 				public static LocString TOOLTIP = "Learn how to improve efficiency through organization";
 			}
@@ -482,7 +516,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "TIP: Task Priorities";
 
-				public static LocString MESSAGEBODY = "Duplicants will perform pending job tasks in order of highest priority to lowest. For example, Duplicants will always harvest <style=\"food\">food</style> before they build, and always build new structures before they dig.\n\nOpen the <color=#833A5FFF>JOBS TAB</color> <color=#F44A47>[J]</color> to set which job tasks Duplicants may perform, or specialize skilled Duplicants for specific types of work.";
+				public static LocString MESSAGEBODY = "Duplicants will perform pending job tasks in order of highest priority to lowest. For example, Duplicants will always harvest <style=\"food\">Food</style> before they build, and always build new structures before they dig.\n\nOpen the <style=\"misc\">JOBS TAB</style> <color=#F44A47><b>[J]</b></color> to set which job tasks Duplicants may perform, or specialize skilled Duplicants for specific types of work.";
 
 				public static LocString TOOLTIP = "Learn how to manage Duplicants' priorities";
 			}
@@ -491,16 +525,16 @@ namespace STRINGS
 			{
 				public static LocString NAME = "TIP: Polluted Water";
 
-				public static LocString MESSAGEBODY = "<style=\"liquid\">Polluted Water</style> is a yucky substance that emits <style=\"gas\">Polluted Oxygen</style> and can cause <style=\"disease\">Disease</style> in your Duplicants.\n\nSmall accidents can be cleaned up by clicking and dragging with the <color=#833A5FFF>MOP TOOL</color> <color=#F44A47>[M]</color>, while larger bodies may be worth filtering. Polluted water also <style=\"stress\">Stresses</style> out any Duplicants that come into contact with it, so it is best removed quickly for your colony's safety.";
+				public static LocString MESSAGEBODY = "<style=\"liquid\">Polluted Water</style> emits <style=\"gas\">Polluted Oxygen</style> and can accelerate the spread of <style=\"disease\">Disease</style> through your base.\n\nSmall accidents can be cleaned up by clicking and dragging with the <style=\"misc\">MOP TOOL</style> <color=#F44A47><b>[M]</b></color>, while larger bodies may be worth filtering. Polluted water also <style=\"stress\">Stresses</style> out Duplicants that come into contact with it, so it is best removed quickly for your colony's safety.";
 
-				public static LocString TOOLTIP = "Learn how to prevent disease outbreaks";
+				public static LocString TOOLTIP = "Learn how to hand polluted materials";
 			}
 
 			public class LOCOMOTIONMESSAGE
 			{
 				public static LocString NAME = "TIP: Duplicant Movement";
 
-				public static LocString MESSAGEBODY = "Duplicants must have accessible paths to their job tasks in order to work. When placing tasks, keep in mind that Duplicants can only climb obstacles two tiles high and are themselves two tiles tall.\n\nIf you are unsure if a task you've placed is accessible, select a Duplicant and click <color=#833A5FFF>SHOW NAVIGATION</color> to view all areas within their reach.";
+				public static LocString MESSAGEBODY = "Duplicants must be able to reach their job tasks in order to work. When placing tasks, keep in mind that Duplicants can only climb obstacles two tiles high, and are themselves two tiles tall.\n\nIf you are unsure if a task you've placed is accessible, select a Duplicant and click <style=\"misc\">SHOW NAVIGATION</style> to view all areas within their reach.";
 
 				public static LocString TOOLTIP = "Understanding your Duplicants' maneuverability";
 			}
@@ -518,7 +552,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "TIP: Fetching Water";
 
-				public static LocString MESSAGEBODY = "Duplicants are great at doing chores and can fetch water without direct orders.\n\nIf a building requires <style=\"liquid\">Water</style> or other liquids, Duplicants will seek out and collect it from the nearest pool and deliver it where it needs to go. A Duplicants' multitool can collect water from any pool within two tiles' reach.";
+				public static LocString MESSAGEBODY = "In order to carry <style=\"liquid\">Liquids</style> from place to place, Duplicants must first bottle them for transport.\n\nBuild Liquid Bottlers over pools of liquid from the <style=\"misc\">PLUMBING TAB</style> of the <style=\"misc\">BUILD MENU</style> to pump those liquids into bottles. Duplicants will then automatically deliver the bottled liquids where they need to go.";
 
 				public static LocString TOOLTIP = "How to fetch a pail of water";
 			}
@@ -527,7 +561,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "TIP: Scheduling";
 
-				public static LocString MESSAGEBODY = "Duplicants crave structure and will only eat, sleep, work or bathe during the times you allot for these activities.\n\nTo make the best use of your time, open the <color=#833A5FFF>SCHEDULE TAB</color> <color=#F44A47>[U]</color> to adjust your colony's agenda and plan how your Duplicants should utilize their day.";
+				public static LocString MESSAGEBODY = "Duplicants crave structure and will only eat, sleep, work, or bathe during the times you allot for these activities.\n\nTo make the best use of your time, open the <style=\"misc\">SCHEDULE TAB</style> <color=#F44A47><b>[U]</b></color> to adjust your colony's agenda and plan how your Duplicants should utilize their day.";
 
 				public static LocString TOOLTIP = "Learn how to schedule your Duplicants' time";
 			}
@@ -538,7 +572,43 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Help your Duplicants keep their cool";
 
-				public static LocString MESSAGEBODY = "Environments that are extremely <style=\"heat\">Hot</style> or <style=\"heat\">Cold</style> will affect your Duplicants' internal body temperature and cause <style=\"stress\">Stress</style>.\n\nThe <color=#833A5FFF>THERMAL COMFORT OVERLAY</color> <color=#F44A47>[F4]</color> will allow you to view all areas where Duplicants cannot regulate their temperature and will become uncomfortable.";
+				public static LocString MESSAGEBODY = "Environments that are extremely <style=\"heat\">Hot</style> or <style=\"heat\">Cold</style> will affect your Duplicants' internal body temperature and cause <style=\"stress\">Stress</style>.\n\nThe <style=\"misc\">THERMAL COMFORT OVERLAY</style> <color=#F44A47><b>[F4]</b></color> will allow you to view all areas where Duplicants cannot regulate their temperature and will become uncomfortable.";
+			}
+
+			public class TUTORIAL_OVERHEATING
+			{
+				public static LocString NAME = "TIP: Building Temperature";
+
+				public static LocString TOOLTIP = "Learn how to prevent meltdowns";
+
+				public static LocString MESSAGEBODY = "When constructing buildings, take note of their <style=\"heat\">Overheat Temperature</style> and plan their locations accordingly. Maintaining low ambient temperatures and good ventilation will help keep building temperatures down.\n\nBuildings that exceed their Overheat Temperature will begin to take damage and if left untended, will meltdown and stop functioning until repaired.";
+			}
+
+			public class LOTS_OF_GERMS
+			{
+				public static LocString NAME = "TIP: Germs and Infections";
+
+				public static LocString TOOLTIP = "Learn about disease risks";
+
+				public static LocString MESSAGEBODY = "There are many sources of germs in the world. If your duplicants consume these germs, it can make thems sick. Maintaining good base hygene and cleaning the various substances in your base is essential for controlling the spread of germs. Each disease has different materials it prefers to grow on, and different tools for reducing its spread in your base. The <style=\"misc\">GERM OVERLAY</style> <color=#F44A47><b>[F9]</b></color> will allow you to see germ concentrations and spot new sources of germs.";
+			}
+
+			public class BEING_INFECTED
+			{
+				public static LocString NAME = "TIP: Duplicant Immune Systems";
+
+				public static LocString TOOLTIP = "Learn how Duplicants get sick";
+
+				public static LocString MESSAGEBODY = "One of your duplicants has consumed enough germs that it is beginning to impact their health. The more disease they consume, the harder it is for their immune system to fight off the germs. If their immune system reaches 0%, infection occurs, and medical intervention will be necessary. Use the <style=\"misc\">Vitals Screen</style> to keep an eye on Duplicant immune levels.";
+			}
+
+			public class INFECTED_FOOD
+			{
+				public static LocString NAME = "TIP: Infected Food";
+
+				public static LocString TOOLTIP = "Deal with the spread of filth";
+
+				public static LocString MESSAGEBODY = "A germ has found its way on to one of your rations. Small numbers of germs are not a threat to your colony as Duplicant immune systems can fight off substantial infection. However some diseases like Food Poisoning will grow quickly on food, creating a hazardous situation. Badly contaminated food can be Marked For Compost, and further contamination can be slowed or halted by storing your food in a refrigerated or other germ-hostile environment.";
 			}
 
 			public class NOMESSAGES
@@ -559,14 +629,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "{0} has developed a trait";
 
-				public static LocString TOOLTIP = "{0} has developed the trait(s):\n\n{1}";
+				public static LocString TOOLTIP = "{0} has developed the trait(s):\n\t• {1}";
 			}
 
 			public class RESEARCHCOMPLETE
 			{
 				public static LocString NAME = "Research Complete";
 
-				public static LocString MESSAGEBODY = "Eureka!\n<style=\"research\">{0} Technology</style> has been unlocked through the power of science.\n\nNew buildings have become available:\n<style=\"misc\">{1}</style>";
+				public static LocString MESSAGEBODY = "Eureka! <style=\"research\">{0} Technology</style> has been unlocked.\n\nNew buildings have become available:\n\t• <style=\"misc\">{1}</style>";
 
 				public static LocString TOOLTIP = "<style=\"research\">{0}</style> research complete!";
 			}
@@ -591,7 +661,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Food has decayed";
 
-				public static LocString TOOLTIP = "These <style=\"food\">Food</style> items have rotted and are no longer edible: {0}";
+				public static LocString TOOLTIP = "These <style=\"food\">Food</style> items have rotted and are no longer edible:\n• {0}";
 			}
 
 			public class FOODSTALE
@@ -617,7 +687,7 @@ namespace STRINGS
 
 			public class UNREACHABLEITEM
 			{
-				public static LocString NAME = "Materials are out of reach";
+				public static LocString NAME = "Unreachable resources";
 
 				public static LocString TOOLTIP = "Duplicants cannot retrieve these resources:";
 			}
@@ -640,30 +710,21 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Damage: Overheated";
 
-				public static LocString TOOLTIP = "Excessive heat is damaging these buildings:\n{0}";
-			}
-
-			public class TUTORIAL_OVERHEATING
-			{
-				public static LocString NAME = "TIP: Building Temperature";
-
-				public static LocString TOOLTIP = "Learn how to prevent meltdowns";
-
-				public static LocString MESSAGEBODY = "When constructing buildings, take note of their <style=\"heat\">Overheat Temperature</style> and plan their locations accordingly. Maintaining low ambient temperatures and good ventilation will help keep building temperatures down.\n\nBuildings that exceed their Overheat Temperature will begin to take damage and if left untended, will meltdown and stop functioning until repaired.";
+				public static LocString TOOLTIP = "Excessive heat is damaging these buildings:\n";
 			}
 
 			public class BUILDINGCOLLAPSE
 			{
 				public static LocString NAME = "Building collapsed";
 
-				public static LocString TOOLTIP = "These buildings have collapsed from a lack of foundation:\n{0}";
+				public static LocString TOOLTIP = "These buildings have collapsed from a lack of foundation:\n• {0}";
 			}
 
 			public class NEEDOXYGENSOURCE
 			{
 				public static LocString NAME = "Insufficient oxygen generation";
 
-				public static LocString TOOLTIP = "Your colony has produced {EmittingRate} of <style=\"oxygen\">Oxygen</style> today\nYour Duplicants have consumed {ConsumptionRate} of <style=\"oxygen\">Oxygen</style>";
+				public static LocString TOOLTIP = "• Your colony has produced {EmittingRate} of <style=\"oxygen\">Oxygen</style> this cycle\n• Your Duplicants have consumed {ConsumptionRate}";
 			}
 
 			public class UNREFRIGERATEDFOOD
@@ -677,7 +738,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Food shortage";
 
-				public static LocString TOOLTIP = "Your colony's <style=\"food\">Food</style> reserves are low\n\nYou have {0} of food available\nYour Duplicants are consuming {1} per cycle";
+				public static LocString TOOLTIP = "Your colony's <style=\"food\">Food</style> reserves are low:\n    • You have {0} available\n    • Your Duplicants are consuming {1} per cycle";
+			}
+
+			public class NO_MEDICAL_COTS
+			{
+				public static LocString NAME = "Colony requires Med-Beds";
+
+				public static LocString TOOLTIP = "Your sick Duplicants have no where to rest or receive medical aid";
 			}
 
 			public class NEEDTOILET
@@ -691,7 +759,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Colony requires a food source";
 
-				public static LocString TOOLTIP = "Your colony will exhaust their <style=\"food\">Food</style> supply if they don't find a steady food source";
+				public static LocString TOOLTIP = "Your colony will soon exhaust their supplies without a new <style=\"food\">Food</style> source";
 			}
 
 			public class NEEDSLEEP
@@ -747,7 +815,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "No storage designated";
 
-				public static LocString TOOLTIP = "You have no defined storage regions.\nUse the <color=#833A5FFF>CREATE STORAGE TOOL</color> <color=#F44A47>[Y]</color> to create storage for these items:\n{0}";
+				public static LocString TOOLTIP = "You have no defined storage regions.\nUse the <color=#833A5FFF>CREATE STORAGE TOOL</color> <color=#F44A47>[Y]</color> to create storage for these items:\n• {0}";
 			}
 
 			public class STRUCTURALDAMAGE
@@ -822,7 +890,7 @@ namespace STRINGS
 
 			public class NEARLYDRY
 			{
-				public static LocString NAME = "Duplicants nearly dry";
+				public static LocString NAME = "Nearly dry";
 
 				public static LocString TOOLTIP = "These Duplicants will dry off soon:";
 			}
@@ -838,11 +906,20 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Skill increase";
 
-				public static LocString TOOLTIP = "Hardwork and repetition have improved these Duplicants' skills:";
+				public static LocString TOOLTIP = "These Duplicants' skills have improved:";
 
 				public static LocString TOOLTIP_PST = "\n\nTheir expectations have increased accordingly.";
 
 				public static LocString SUFFIX = " - {0} raised to {1}";
+			}
+
+			public class GENESHUFFLER
+			{
+				public static LocString NAME = "Genes Shuffled";
+
+				public static LocString TOOLTIP = "These Duplicants had their genetic makeup modified:";
+
+				public static LocString SUFFIX = " has developed {0}";
 			}
 
 			public class HEALINGTRAITGAIN

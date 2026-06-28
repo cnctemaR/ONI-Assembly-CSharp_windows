@@ -187,7 +187,7 @@ public class PathFinder
 					PathFinder.Cell cell2 = path_grid.GetCell(num2, links[num].endNavType);
 					if (cell2.cost >= 0)
 					{
-						int num3 = cost + links[num].cost;
+						int num3 = cost + (((byte)(abilities.flags & PathFinderFlags.TransitionsCostOne) != 0) ? 1 : links[num].cost);
 						int num4;
 						if (PathFinder.IsSubmerged(num2))
 						{
@@ -199,7 +199,7 @@ public class PathFinder
 						}
 						bool flag = query_id != cell2.queryId;
 						bool flag2 = num3 < cell2.cost;
-						if ((flag || flag2) && Grid.IsValidCell(num2) && abilities.CanTraverse(num2, cell, num4))
+						if ((flag || flag2) && Grid.IsValidCell(num2) && abilities.CanTraverse(num2, cell, num3, num4))
 						{
 							PathFinder.AddPotential(num2, cell, links[num].endNavType, nav_type, num3, num4, links[num].transitionId, ref next_potential_idx, potentials, query_id, path_grid, !flag && flag2, ref cell2);
 						}

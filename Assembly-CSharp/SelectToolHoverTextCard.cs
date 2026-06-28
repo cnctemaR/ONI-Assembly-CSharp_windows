@@ -632,7 +632,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 
 	private bool ShowStatusItemInCurrentOverlay(StatusItem status)
 	{
-		return (status.status_overlays & (int)StatusItem.GetStatusItemOverlayBySimViewMode(OverlayScreen.Instance.GetMode())) == (int)StatusItem.GetStatusItemOverlayBySimViewMode(OverlayScreen.Instance.GetMode());
+		return !(OverlayScreen.Instance == null) && (status.status_overlays & (int)StatusItem.GetStatusItemOverlayBySimViewMode(OverlayScreen.Instance.GetMode())) == (int)StatusItem.GetStatusItemOverlayBySimViewMode(OverlayScreen.Instance.GetMode());
 	}
 
 	private int maxNumberOfDisplaySelectables = 5;

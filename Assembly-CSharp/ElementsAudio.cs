@@ -49,13 +49,13 @@ public class ElementsAudio
 		public SimHashes elementID;
 
 		[FieldOrder(2)]
-		[FieldNullValue(AmbienceType.None)]
 		[FieldOptional]
+		[FieldNullValue(AmbienceType.None)]
 		public AmbienceType ambienceType;
 
+		[FieldOrder(3)]
 		[FieldNullValue(SolidAmbienceType.None)]
 		[FieldOptional]
-		[FieldOrder(3)]
 		public SolidAmbienceType solidAmbienceType;
 
 		[FieldOptional]
@@ -63,13 +63,13 @@ public class ElementsAudio
 		[FieldOrder(4)]
 		public string miningSound;
 
-		[FieldOptional]
 		[FieldNullValue("")]
 		[FieldOrder(5)]
+		[FieldOptional]
 		public string miningBreakSound;
 
-		[FieldNullValue("")]
 		[FieldOptional]
+		[FieldNullValue("")]
 		[FieldOrder(6)]
 		public string oreBumpSound;
 

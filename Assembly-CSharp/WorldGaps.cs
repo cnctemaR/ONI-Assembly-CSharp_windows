@@ -66,8 +66,8 @@ public class WorldGaps
 	[SerializeField]
 	public float notifyTimeApproaching;
 
-	[Serialize]
 	[SerializeField]
+	[Serialize]
 	public int currentCloudIndex = -1;
 
 	public enum State

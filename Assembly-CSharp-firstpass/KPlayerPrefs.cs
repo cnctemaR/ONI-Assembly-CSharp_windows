@@ -20,6 +20,7 @@ public class KPlayerPrefs : YamlIO<KPlayerPrefs>
 		{
 			if (KPlayerPrefs._instance == null)
 			{
+				KPlayerPrefs._instance = new KPlayerPrefs();
 				KPlayerPrefs.PATH = KPlayerPrefs.GetPath();
 				try
 				{

@@ -304,16 +304,17 @@ namespace Klei.AI
 				})
 					.ToggleStatusItem((DiseaseInstance.StatesInstance smi) => smi.master.GetStatusItem(), (DiseaseInstance.StatesInstance smi) => smi)
 					.ParamTransition<float>(this.percentRecovered, this.cured, (DiseaseInstance.StatesInstance smi, float p) => p > 1f)
-					.ParamTransition<float>(this.percentDied, this.fatality, (DiseaseInstance.StatesInstance smi, float p) => p > 1f);
+					.ParamTransition<float>(this.percentDied, this.fatality_pre, (DiseaseInstance.StatesInstance smi, float p) => p > 1f);
 				this.cured.Enter("Cure", delegate(DiseaseInstance.StatesInstance smi)
 				{
 					smi.master.Cure();
 				});
-				this.fatality.Enter("DeathByDisease", delegate(DiseaseInstance.StatesInstance smi)
+				this.fatality_pre.Enter("DeathByDisease", delegate(DiseaseInstance.StatesInstance smi)
 				{
 					DeathMonitor.Instance smi2 = smi.master.gameObject.GetSMI<DeathMonitor.Instance>();
 					smi2.Kill(Db.Get().Deaths.FatalDisease);
-				});
+				}).GoTo(this.fatality);
+				this.fatality.DoNothing();
 			}
 
 			public StateMachine<DiseaseInstance.States, DiseaseInstance.StatesInstance, DiseaseInstance, object>.FloatParameter percentRecovered;
@@ -323,6 +324,8 @@ namespace Klei.AI
 			public GameStateMachine<DiseaseInstance.States, DiseaseInstance.StatesInstance, DiseaseInstance, object>.State infected;
 
 			public GameStateMachine<DiseaseInstance.States, DiseaseInstance.StatesInstance, DiseaseInstance, object>.State cured;
+
+			public GameStateMachine<DiseaseInstance.States, DiseaseInstance.StatesInstance, DiseaseInstance, object>.State fatality_pre;
 
 			public GameStateMachine<DiseaseInstance.States, DiseaseInstance.StatesInstance, DiseaseInstance, object>.State fatality;
 		}

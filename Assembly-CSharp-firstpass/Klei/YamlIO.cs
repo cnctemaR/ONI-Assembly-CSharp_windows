@@ -22,7 +22,7 @@ namespace Klei
 			T t = YamlIO<T>.Parse(text);
 			if (t == null)
 			{
-				Debug.LogError("Exception while loading yaml file [" + filename + "]", null);
+				Debug.LogWarning("Exception while loading yaml file [" + filename + "]", null);
 			}
 			return t;
 		}
@@ -40,7 +40,7 @@ namespace Klei
 			catch (Exception ex)
 			{
 				string message = ex.Message;
-				Output.LogError(new object[] { "Exception while loading yaml data: " + message });
+				Output.LogWarning(new object[] { "Exception while loading yaml data: " + message });
 			}
 			return default(T);
 		}

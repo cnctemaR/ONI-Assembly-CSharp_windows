@@ -70,28 +70,31 @@ public class LiquidPumpingStation : Workable
 			int num2 = Grid.PosToCell(this);
 			for (int j = 0; j < LiquidPumpingStation.liquidOffsets.Length; j++)
 			{
-				int num3 = Grid.OffsetCell(num2, LiquidPumpingStation.liquidOffsets[j]);
-				bool flag = false;
-				Element element = Grid.Element[num3];
-				if (element.IsLiquid)
+				if (this.depthAvailable >= Math.Abs(LiquidPumpingStation.liquidOffsets[j].y))
 				{
-					float mass = Grid.Cell[num3].mass;
-					for (int k = 0; k < this.infoCount; k++)
+					int num3 = Grid.OffsetCell(num2, LiquidPumpingStation.liquidOffsets[j]);
+					bool flag = false;
+					Element element = Grid.Element[num3];
+					if (element.IsLiquid)
 					{
-						if (this.infos[k].element == element)
+						float mass = Grid.Cell[num3].mass;
+						for (int k = 0; k < this.infoCount; k++)
 						{
-							LiquidPumpingStation.LiquidInfo[] array = this.infos;
-							int num4 = k;
-							array[num4].amount = array[num4].amount + mass;
-							flag = true;
-							break;
+							if (this.infos[k].element == element)
+							{
+								LiquidPumpingStation.LiquidInfo[] array = this.infos;
+								int num4 = k;
+								array[num4].amount = array[num4].amount + mass;
+								flag = true;
+								break;
+							}
 						}
-					}
-					if (!flag)
-					{
-						this.infos[this.infoCount].amount = mass;
-						this.infos[this.infoCount].element = element;
-						this.infoCount++;
+						if (!flag)
+						{
+							this.infos[this.infoCount].amount = mass;
+							this.infos[this.infoCount].element = element;
+							this.infoCount++;
+						}
 					}
 				}
 			}
